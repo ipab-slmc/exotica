@@ -1,0 +1,117 @@
+# Python stuff
+*.py[cod]
+
+# C extensions
+*.o
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+
+# Binary files
+bin/
+build/
+devel/
+install/ 
+lib/
+lib64/
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Emacs
+\#*\#
+.\#*
+*~
+
+# ROS
+**/msg_gen/
+**/srv_gen/
+rosbuild/**/src/**/cfg/
+rosbuild/**/src/**/msg/
+rosbuild/**/src/**/srv/
+catkin/**/manifest.xml
+catkin/**/Makefile
+**/cmake/*-genmsg.cmake
+**/cmake/*-genmsg-context.py
+
+# Doxygen, Sphinx, etc
+**/doc/*
+**/docs/*
+**/**/doc/
+**/doc/**
+
+# Netbeans Files
+nbproject
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles
+CTestTestFile.cmake
+
+# Qt Creator File
+*.pro.user
+
+# Qt Generated
+moc_*.cxx
+
+# Dynamic Reconfigure files
+*.cfgc
+**/cfg/cpp/
+
+# libRVIZ stuff
+Ogre.log
+
+# Actionlib Messages
+**/msg/*Action.msg
+**/msg/*ActionFeedback.msg
+**/msg/*ActionGoal.msg
+**/msg/*ActionResult.msg
+**/msg/*Feedback.msg
+**/msg/*Goal.msg
+**/msg/*Result.msg
+
+# Flymake messages
+*_flymake*
+/robot_code/hmi_code/hmi_control/dist/
+
+# Git Merge Files
+*.orig
+
+#Eclipse Files
+*.cproject
+
+# Moveit
+**/default_warehouse_mongo_db/
+
+# ??
+.merge_file_*
+
+#Documentation from Latex
+**/doc/*.aux
+**/doc/*.dvi
+**/doc/*.log
+**/doc/*.synctex.gz
+**/doc/*.toc

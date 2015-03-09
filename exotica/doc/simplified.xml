@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<Exotica>                   <!--Compulsary-->
+  <OptimisationParameters>  <!--Compulsary-->
+    <Window>1</Window>
+  </OptimisationParameters>
+  
+  <PositionSolver type="ISPosSolver">   <!--PositionSolver-->
+    <VelocitySolver type="ISVelSolver"> <!--VelocitySolver-->
+      <!-- Any parameters -->
+    </VelocitySolver>
+    
+    <OptimisationFunction name="Level_0"> <!--Function Definition -->
+      <ConfigWeights dim="2">0.001 0.0 0.0 0.001</ConfigWeights>
+      
+      <Task type="IKTask" name="left_hand"> <!--TaskDefinition Type -->
+        <TaskParameters> 
+          <TimeElement>
+            <GoalWeights dim="2">1.0 0.0 0.0 1.0</GoalWeights> 
+            <TaskWeight>0.5</TaskWeight>
+            <Goal tolerance="0.2">0.2 0.4 0.6</Goal>
+          </TimeElement>
+        </TaskParameters>
+        <!--Implementation-Specific parameters-->
+      </Task>
+
+      <OptimisationFunction> <!--Nested function cast into null-space -->
+        <ConfigWeights dim="2">0.001 0.0 0.0 0.001</ConfigWeights>
+        
+        <Task type="ExoticaTask_1" name="right_hand">
+          <!-- :: -->  
+        </Task>
+        
+      </OptimisationFunction>
+    </OptimisationFunction>
+  </PositionSolver>
+</Exotica>

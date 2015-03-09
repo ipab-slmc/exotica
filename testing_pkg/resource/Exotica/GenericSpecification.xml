@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<Problem>
+  <KScene name="kscene1">
+    <Kinematica>
+      <Urdf>...</Urdf>
+      <Root segment="...">
+        <vector>...</vector>
+        <quaternion>...</quaternion>
+      </Root>
+      <Configuration zero_unnamed="true">
+        <joint name="..."/>
+      </Configuration>
+      <EndEffector  ignore_unused="true">
+        <limb segment="...">
+          <vector>...</vector>
+          <quaternion>...</quaternion>
+        </limb>
+      </EndEffector>
+    </Kinematica>
+  
+    <ExternalObjects>
+      <object name="box1"/>
+      <object name="box2"/>
+    </ExternalObjects>
+    
+    <EffWorldMap>
+      <EndEffector segment="left_wrist" object="box0"/>
+    </EffWorldMap>
+    
+  </KScene>
+  
+  <Map type="DTaskMap" name="map1">
+    <kscene>"kscene1"</kscene>
+    <!-- Map Parameters -->
+  </Map>
+      
+  <Task type="DTaskDefinition" name="task1">
+    <map>map1</map>
+    <!-- Task Parameters -->
+  </Task>
+  
+  <!-- Problem parameters (structuring etc...) -->
+</Problem>  
+    

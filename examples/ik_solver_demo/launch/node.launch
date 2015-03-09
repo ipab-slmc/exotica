@@ -1,0 +1,11 @@
+<launch>
+
+  <param name="robot_description" textfile="$(find lwr_defs)/robots/lwr_pen.urdf" />
+	
+  <node pkg="ik_solver_demo" type="IKSolverDemoNode" name="IKSolverDemoNode" output="screen">
+    <param name="config" type="string" value="$(find ik_solver_demo)/resources/ik_solver_demo.xml" />
+    <param name="solver" type="string" value="IKSolverDemo" />
+    <param name="problem" type="string" value="IKSolverDemoProblem" />
+  </node>
+  
+</launch>

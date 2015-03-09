@@ -1,0 +1,87 @@
+<?xml version="1.0" ?>
+<Testing>  
+  <!-- Correct initialisation -->
+  <Problem>
+    <KScene name="kscene1">
+      <Kinematica>
+        <Urdf>/home/michael/ROS/core_utilities/src/testing_pkg/resource/Exotica/atlas_sandia_hands_v3.urdf</Urdf> <!--The URDF containing the tree structure-->
+        <Root segment="pelvis"> <!-- Optional: The root segment to use: xyz -->
+          <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
+          <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
+        </Root>
+        <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="back_bkz"/>
+          <joint name="back_bky"/>
+          <joint name="back_bkx"/> 
+          <joint name="neck_ry"/>
+          <joint name="l_leg_hpz"/>
+          <joint name="l_leg_hpx"/>
+          <joint name="l_leg_hpy"/>
+          <joint name="l_leg_kny"/> 
+          <joint name="l_leg_aky"/> 
+          <joint name="l_leg_akx"/> 
+          <joint name="r_leg_hpz"/> 
+          <joint name="r_leg_hpx"/> 
+          <joint name="r_leg_hpy"/> 
+          <joint name="r_leg_kny"/> 
+          <joint name="r_leg_aky"/> 
+          <joint name="r_leg_akx"/> 
+          <joint name="l_arm_shy"/> 
+          <joint name="l_arm_shx"/> 
+          <joint name="l_arm_ely"/> 
+          <joint name="l_arm_elx"/> 
+          <joint name="l_arm_wry"/> 
+          <joint name="l_arm_wrx"/> 
+          <joint name="r_arm_shy"/> 
+          <joint name="r_arm_shx"/> 
+          <joint name="r_arm_ely"/> 
+          <joint name="r_arm_elx"/> 
+          <joint name="r_arm_wry"/> 
+          <joint name="r_arm_wrx"/>
+        </Update>
+        <EndEffector ignore_unused="true">  <!--If not present, defaults to false-->
+          <limb segment="l_hand"> <!--Compulsary-->
+            <vector>0.0 0.0 0.0</vector>  <!-- Optional: Defaults to zero-vector -->
+            <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- Optional: Defaults to identity quaternion -->
+          </limb>
+        </EndEffector>
+      </Kinematica>
+    
+      <ExternalObjects>
+        <object name="box1"/>
+        <object name="box2"/>
+      </ExternalObjects>
+      
+      <EffWorldMap>
+        <EndEffector segment="left_wrist" object="box0"/>
+      </EffWorldMap>
+      
+    </KScene>  
+    
+    <Map type="DTaskMap" name="map1">
+      <kscene name="kscene1"/>
+      <!-- Map Parameters -->
+    </Map>
+    
+    <Map type="DTaskMap" name="map2">
+      <!-- Map Parameters -->
+    </Map>
+    
+    <Task type="DTaskDefinition" name="task1">
+      <map name="map1"/>
+      <!-- Task Parameters -->
+    </Task>
+    
+    <Task type="DTaskDefinition" name="task2">
+      <map name="map2"/>
+      <!-- Task Parameters -->
+    </Task>
+    
+    <Task type="DTaskDefinition" name="task3">
+      <!-- Task Parameters -->
+    </Task>
+    
+    <!-- Problem parameters (structuring etc...) -->
+  </Problem>
+</Testing>
+    

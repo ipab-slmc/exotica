@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<somethingelse>
+  <include file="../second_2.xml"/>
+  <child/>
+  <include file="../../top_2.xml"/>
+</somethingelse>

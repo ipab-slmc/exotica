@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>task_definition</name>
+  <version>0.0.0</version>
+  <description>The TaskDefinition implementations package</description>
+
+  <maintainer email="mcamnadur@gmail.com">michael</maintainer>
+  
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>exotica</build_depend>
+  <run_depend>exotica</run_depend>
+
+  <export>
+  </export>
+</package>

@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<Map type="CoM">  <!-- Defines the Task Map itself -->
+  <KinematicScene name="KS0">
+    <Kinematica name="Kinematica0">
+      <Urdf>/opt/ros/hydro/share/baxter_description/urdf/baxter.urdf</Urdf> <!--The URDF containing the tree structure-->
+      <Root segment="base"> <!-- Optional: The root segment to use: xyz -->
+        <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
+        <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
+      </Root>
+      <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+        <joint name="left_s0"/> 
+        <joint name="left_s1"/> 
+        <joint name="left_e0"/> 
+        <joint name="left_e1"/> 
+        <joint name="left_w0"/> 
+        <joint name="left_w1"/> 
+        <joint name="left_w2"/>
+      </Update>
+      <EndEffector ignore_unused="true">  <!--If not present, defaults to false-->
+        <limb segment="left_wrist"> <!--Compulsary-->
+          <vector>0.0 0.0 0.0</vector>  <!-- Optional: Defaults to zero-vector -->
+          <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- Optional: Defaults to identity quaternion -->
+        </limb>
+      </EndEffector>
+    </Kinematica>
+    
+    <!--EffWorldMap>
+      <EndEffector segment="left_wrist" object="box0"/>
+    </EffWorldMap>
+    
+    <ExternalObjects>
+      <object name="box1"/>
+      <object name="box2"/>
+    </ExternalObjects-->
+  </KinematicScene>  
+  <TestPoint>
+    <ConfSpace>0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0</ConfSpace>
+    <TaskSpace>0.05191 0.89101 0.54045</TaskSpace>
+  </TestPoint>
+  
+  <TestPoint>
+    <ConfSpace>-0.4 0.3 0.0 1.0 0.2 -0.3 -1.2 2.1 -0.8 0.25 -0.6 0.3 -1.6 1.1 -0.3 0.0 0.7 0.4 2.8 0.1 1.5 -0.9 0.6 -1.5 3.0 -1.0 2.1 0.0</ConfSpace>
+    <TaskSpace>0.283962 0.707375 0.815038</TaskSpace>
+  </TestPoint>
+  
+</Map>

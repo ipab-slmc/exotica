@@ -1,0 +1,18 @@
+Root is guaranteed to be the first element stored
+
+Talk about different getPose() functions
+
+Jacobian order same as joints_update
+
+Not entirely fool-proof: especially when computing FK and so I do not yet check the correct setting of initialisation
+
+Not sure about the KDL definition of origin: whether it is the transform from origin to the actual joint or vice versa (need to check this as operations might need to be inverted)
+
+Known Limitations:
+  1) Not sure how it works for linear joints... Need to fix this!!!!!
+  
+  
+First some design decisions
+   Thread Safety
+   Private/Public
+   Memory access vs computation

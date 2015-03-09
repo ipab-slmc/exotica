@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<something>
+  <child>
+    <grandchild>
+      <grandgrandchild>
+        <include file="third_2.xml"/>
+      </grandgrandchild>
+    </grandchild>
+  </child>
+</something>

@@ -1,0 +1,8 @@
+#11/2/2014
+-> Fixed buildTree function to allow keeping the root node
+-> Debugged seg-fault in the addSegment function (was not checking whether parent exists for desired root node)
+-> Removed potential for seg-fault in the setEndEffectors function (was not checking that segments passed actually exist and that seg_offsets was indeed filled before dereferencing)
+-> Added print robot function (recursive): seems to be working ok even when I change root...
+
+#25/2/2014
+-> Adding support for Prismatic joints: doing my own enum type so that I am forced to process joints as they come in...

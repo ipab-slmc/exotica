@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<Exotica>                   
+  <OptimisationParameters>  
+    <Window>1</Window>
+  </OptimisationParameters>
+  
+  <PositionSolver type="ISPosSolver">   
+    <VelocitySolver type="ISVelSolver"> 
+      <PinvMode>IS_PI_AUTO</PinvMode>
+    </VelocitySolver>
+    
+    <OptimisationFunction name="Level_0"> 
+      <ConfigWeights dim="2">0.001 0.0 0.0 0.001</ConfigWeights>
+      
+      <Task type="IKTask" name="left_hand"> 
+        <TaskParameters> 
+          <TimeElement>
+            <GoalWeights dim="3">1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0</GoalWeights> 
+            <TaskWeight>0.5</TaskWeight>
+            <Goal tolerance="0.2">0.2 0.4 0.6</Goal>
+          </TimeElement>
+        </TaskParameters>
+        
+        <Urdf>robot.urdf</Urdf>
+        
+        <Root segment="root">
+          <vector>0.0 0.0 0.0</vector>
+          <quaternion>1.0 0.0 0.0 0.0</quaternion>
+        </Root>
+        
+        <Update zero_unnamed="true">
+          <joint name="joint_1"/>
+          <joint name="joint_2"/>
+        </Update>
+        
+        <EndEffector ignore_unused="true">
+          <limb segment="left_hand">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+        </EndEffector>
+      </Task>
+
+      <OptimisationFunction> 
+        <ConfigWeights dim="2">0.001 0.0 0.0 0.001</ConfigWeights>
+        
+        <Task type="ExoticaTask_1" name="right_hand">
+          <TaskParameters>
+            <TimeElement>
+              <GoalWeights dim="3">1.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.8</GoalWeights>
+              <TaskWeight>1.0</TaskWeight>
+            </TimeElement>
+          </TaskParameters>    
+        </Task>
+      </OptimisationFunction>
+    </OptimisationFunction>
+  </PositionSolver>
+</Exotica>

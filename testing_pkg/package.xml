@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <name>testing_pkg</name>
+  <version>0.0.1</version>
+  <description>Testing Package</description>
+
+  <maintainer email="mcamnadur@gmail.com">michael</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>kinematica</build_depend>
+  <build_depend>exotica</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>roslib</build_depend>
+  <build_depend>task_map</build_depend>
+  <build_depend>task_definition</build_depend>
+  
+  <run_depend>kinematica</run_depend>
+  <run_depend>exotica</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>roslib</run_depend>
+  <run_depend>task_map</run_depend>
+  <run_depend>task_definition</run_depend>
+  
+  <test_depend>rostest</test_depend>
+  
+  
+  <export>
+  </export>
+</package>

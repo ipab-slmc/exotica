@@ -16,7 +16,7 @@
   </IKsolver>
 
   <IKProblem name="IKSolverDemoProblem"> <!-- Problem definition -->
-    <KScene name="IKSolverDemoScene"> <!-- Kinematic scene -->
+    <Scene name="IKSolverDemoScene"> <!-- Kinematic scene -->
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!-- Robot URDF -->
         <Root segment="base"> <!-- Base frame -->
@@ -32,17 +32,17 @@
           <joint name="lwr_arm_5_joint"/>
           <joint name="lwr_arm_6_joint"/>
         </Update>
-        <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+      </Kinematica>
+    </Scene>
+
+    <Map type="EffPosition" name="IKSolverDemoMap"> <!-- The end-effector position task map -->
+      <Scene name="IKSolverDemoScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
           <limb segment="lwr_arm_6_link">
             <vector>0.0 0.0 0.0</vector>
             <quaternion>1.0 0.0 0.0 0.0</quaternion>
           </limb>
-        </EndEffector>
-      </Kinematica>
-    </KScene>
-
-    <Map type="EffPosition" name="IKSolverDemoMap"> <!-- The end-effector position task map -->
-      <kscene name="IKSolverDemoScene"/>
+      </EndEffector>
     </Map>
 
     <Task name="IKSolverDemoTask" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
@@ -52,6 +52,22 @@
       <Goal>-0.05 -0.095 -0.505</Goal>
     </Task>
 
+    <Map type="EffPosition" name="IKSolverDemoMap2"> <!-- The end-effector position task map -->
+      <Scene name="IKSolverDemoScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="lwr_arm_5_link">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+
+    <Task name="IKSolverDemoTask2" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
+      <map name="IKSolverDemoMap2"/>
+      <Rho>1.0e1</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>-0.05 -0.095 -0.405</Goal>
+    </Task>
      
     <!-- Problem parameters: tolerance and per joint weighting -->
     <Tolerance>0.005</Tolerance> 

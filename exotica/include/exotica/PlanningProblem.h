@@ -13,9 +13,9 @@
 #include "exotica/TaskMap.h"
 #include "exotica/TaskDefinition.h"
 #include "exotica/Server.h"
+#include "exotica/Scene.h"
 #include "tinyxml2/tinyxml2.h"
 
-#include <kinematic_scene/kinematic_scene.h>
 #include <vector>
 #include <string>
 #include <map>
@@ -54,7 +54,7 @@ namespace exotica
 			 * @param scene	The planning scene from moveit
 			 */
 			EReturn updateKinematicScene(const planning_scene::PlanningSceneConstPtr & scene);
-			kinematica::KinematicScene_map k_scenes_;  //!< Kinematic scene(s) indexed by name
+			Scene_map scenes_;  //!< Kinematic scene(s) indexed by name
 
 		protected:
 

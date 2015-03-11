@@ -25,12 +25,10 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
             // Assign the problem to the solver
             if(!ok(sol->specifyProblem(prob))) {INDICATE_FAILURE; return;}
             // Create the initial configuration
-            Eigen::VectorXd q=Eigen::VectorXd::Zero(prob->k_scenes_.begin()->second->getNumJoints());
+            Eigen::VectorXd q=Eigen::VectorXd::Zero(prob->scenes_.begin()->second->getNumJoints());
             Eigen::MatrixXd solution;
-
             // Cast the generic solver instance into IK solver
             exotica::IKsolver_ptr solIK=boost::static_pointer_cast<exotica::IKsolver>(sol); 
-
             ROS_INFO_STREAM("Calling solve() in infinite loop");
 
             {
@@ -43,6 +41,7 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
                         double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
                         ROS_INFO_STREAM("Finished solving ("<<time<<"s)");
                         q=solution.row(solution.rows()-1);
+                        ROS_INFO_STREAM("Solution "<<q.transpose());
                     }
                     else
                     {

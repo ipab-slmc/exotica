@@ -75,7 +75,6 @@ namespace exotica
 
 			//	Namespace, i.e. problem/scene/...etc
 			std::string ns_;
-		private:
 			std::string object_name_;
 	};
 }

@@ -5,9 +5,9 @@ exotica::PlanningProblem::PlanningProblem()
 }
 
 exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle,
-        const Server_ptr & server)
+		const Server_ptr & server)
 {
-    Object::initBase(handle,server);
+	Object::initBase(handle, server);
 	if (!server)
 	{
 		INDICATE_FAILURE
@@ -22,44 +22,38 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 	std::string type;
 
 	//!< Refresh
-	k_scenes_.clear();
+	scenes_.clear();
 	task_maps_.clear();
 	task_defs_.clear();
 
 	//!< First create the Kinematic Scenes
-	xml_handle = handle.FirstChildElement("KScene");
+	xml_handle = handle.FirstChildElement("Scene");
 	count = 0;
 	while (xml_handle.ToElement() and ok(ret_value))  //!< While we are still in a valid situation
 	{
 		const char * temp_name = xml_handle.ToElement()->Attribute("name");
 		if (temp_name == nullptr)
 		{
-			INDICATE_FAILURE ret_value = PAR_ERR;
+			INDICATE_FAILURE
+			ret_value = PAR_ERR;
 			break;
 		}
 		name = temp_name;
-		if (k_scenes_.find(name) != k_scenes_.end())
+		if (scenes_.find(name) != scenes_.end())
 		{
-			INDICATE_FAILURE ret_value = PAR_ERR;
+			INDICATE_FAILURE
+			ret_value = PAR_ERR;
 			break;
 		}
-		k_scenes_[name].reset(new kinematica::KinematicScene(name));
-		if (k_scenes_[name] == nullptr)
+		scenes_[name].reset(new Scene(name));
+		if (scenes_[name] == nullptr)
 		{
-			INDICATE_FAILURE ret_value = PAR_ERR;
+			INDICATE_FAILURE
+			ret_value = PAR_ERR;
 			break;
 		}
-		if (!k_scenes_[name]->initialised_)
-		{
-			INDICATE_FAILURE ret_value = FAILURE;
-			break;
-		}
-		if (!k_scenes_[name]->initKinematicScene(xml_handle))
-		{
-			INDICATE_FAILURE ret_value = FAILURE;
-			break;
-		}
-		xml_handle = xml_handle.NextSiblingElement("KScene");
+		scenes_.at(name)->initialisation(xml_handle, server_);
+		xml_handle = xml_handle.NextSiblingElement("Scene");
 	}
 	//!< No maps defined:
 	if (count < 1 and ok(ret_value))
@@ -75,21 +69,24 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 		const char * temp_name = xml_handle.ToElement()->Attribute("name");
 		if (temp_name == nullptr)
 		{
-			INDICATE_FAILURE;
+			INDICATE_FAILURE
+			;
 			ret_value = PAR_ERR;
 			break;
 		}
 		name = temp_name;
 		if (task_maps_.find(name) != task_maps_.end())
 		{
-			INDICATE_FAILURE;
+			INDICATE_FAILURE
+			;
 			ret_value = PAR_ERR;
 			break;
 		}
 		const char * temp_type = xml_handle.ToElement()->Attribute("type");
 		if (temp_type == nullptr)
 		{
-			INDICATE_FAILURE;
+			INDICATE_FAILURE
+			;
 			ret_value = PAR_ERR;
 			break;
 		}
@@ -109,14 +106,15 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 			task_maps_[name] = temp_ptr;  //!< Copy the shared_ptr;
 			task_maps_.at(name)->ns_ = ns_ + "/" + name;
 			count++;
-			aux_rtn = temp_ptr->initBase(xml_handle, server_, k_scenes_);
+			aux_rtn = temp_ptr->initBase(xml_handle, server_, scenes_);
 			if (ok(aux_rtn))
 			{
 				ret_value = aux_rtn;
 			}
 			if (!ok(ret_value))
 			{
-				INDICATE_FAILURE;
+				INDICATE_FAILURE
+				;
 			}
 		}
 		xml_handle = xml_handle.NextSiblingElement("Map");
@@ -125,6 +123,17 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 	if (count < 1 and ok(ret_value))
 	{
 		ret_value = WARNING;
+	}
+
+	//!< NEW------------
+	//!< Now we initialise the scene
+	for (auto & it : scenes_)
+	{
+		if (!ok(it.second->activateTaskMaps()))
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
 	}
 
 	//!< Now the Task Definitions (all)
@@ -136,14 +145,16 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 		const char * temp_name = xml_handle.ToElement()->Attribute("name");
 		if (temp_name == nullptr)
 		{
-			INDICATE_FAILURE;
+			INDICATE_FAILURE
+			;
 			ret_value = PAR_ERR;
 			break;
 		}
 		name = temp_name;
 		if (task_defs_.find(name) != task_defs_.end())
 		{
-			INDICATE_FAILURE;
+			INDICATE_FAILURE
+			;
 			ret_value = PAR_ERR;
 			break;
 		}
@@ -152,7 +163,8 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 		const char * temp_type = xml_handle.ToElement()->Attribute("type");
 		if (temp_type == nullptr)
 		{
-			INDICATE_FAILURE;
+			INDICATE_FAILURE
+			;
 			ret_value = PAR_ERR;
 			break;
 		}
@@ -213,7 +225,7 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 	//!< Resolve if not ok to refresh
 	if (!ok(ret_value))
 	{
-		k_scenes_.clear();
+		scenes_.clear();
 		task_maps_.clear();
 		task_defs_.clear();
 	}
@@ -228,9 +240,9 @@ exotica::EReturn exotica::PlanningProblem::update(const Eigen::VectorXd & x, con
 	EReturn ret_value = SUCCESS;
 
 	//!< Update the KinematicScene(s)...
-	for (auto it = k_scenes_.begin(); it != k_scenes_.end() and ok(ret_value); ++it)
+	for (auto it = scenes_.begin(); it != scenes_.end() and ok(ret_value); ++it)
 	{
-        ret_value = it->second->update(x, t) ? SUCCESS : FAILURE;
+		ret_value = it->second->update(x);
 	}
 
 	//!< Update the Task maps
@@ -243,11 +255,12 @@ exotica::EReturn exotica::PlanningProblem::update(const Eigen::VectorXd & x, con
 		for (TaskMap_map::const_iterator it = task_maps_.begin();
 				it != task_maps_.end() and ok(ret_value); ++it)
 		{
-            EReturn temp_return = it->second->update(x,t);
-			if (temp_return)
+			if (!ok(it->second->update(x, t)))
 			{
-				ret_value = temp_return;
+				INDICATE_FAILURE
+				return FAILURE;
 			}
+
 		}
 	}
 
@@ -257,11 +270,11 @@ exotica::EReturn exotica::PlanningProblem::update(const Eigen::VectorXd & x, con
 exotica::EReturn exotica::PlanningProblem::updateKinematicScene(
 		const planning_scene::PlanningSceneConstPtr & scene)
 {
-	std::map<std::string, kinematica::KinematicScene_ptr>::iterator it;
-	for (it = k_scenes_.begin(); it != k_scenes_.end(); ++it)
-	{
-		if (!it->second->updateScene(scene))
-			return FAILURE;
-	}
+//	std::map<std::string, kinematica::KinematicScene_ptr>::iterator it;
+//	for (it = scenes_.begin(); it != scenes_.end(); ++it)
+//	{
+//		if (!it->second->updateScene(scene))
+//			return FAILURE;
+//	}
 	return SUCCESS;
 }

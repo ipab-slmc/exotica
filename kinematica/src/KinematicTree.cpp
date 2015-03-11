@@ -20,7 +20,7 @@
 
 int kinematica::KinematicTree::getNumJoints()
 {
-    return num_jnts_spec_;
+	return num_jnts_spec_;
 }
 
 kinematica::KinematicTree::KinematicTree()
@@ -270,72 +270,75 @@ bool kinematica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle)
 	}  //!< If no joints specified
 
 	solution.ignore_unused_segs = true;
-	if (handle.FirstChildElement("EndEffector").ToElement()->Attribute("ignore_unused"))
+	if (handle.FirstChildElement("EndEffector").ToElement())
 	{
-		if (handle.FirstChildElement("EndEffector").ToElement()->QueryBoolAttribute("ignore_unused", &solution.ignore_unused_segs)
-				!= tinyxml2::XML_NO_ERROR)
+		if (handle.FirstChildElement("EndEffector").ToElement()->Attribute("ignore_unused"))
 		{
-#ifdef KIN_DEBUG_MODE
-			std::cout<<"Invalid end-effector"<<std::endl;
-#endif
-			return false;
-		}
-	}
-	tinyxml2::XMLHandle segment_handle(handle.FirstChildElement("EndEffector").FirstChildElement("limb"));
-	while (segment_handle.ToElement())
-	{
-		if (!segment_handle.ToElement()->Attribute("segment"))
-		{
-#ifdef KIN_DEBUG_MODE
-			std::cout<<"Invalid end-effector segment"<<std::endl;
-#endif
-			return false;
-		}
-		solution.end_effector_segs.push_back(segment_handle.ToElement()->Attribute("segment"));
-		KDL::Frame temp_frame = KDL::Frame::Identity(); //!< Initialise to identity
-		if (segment_handle.FirstChildElement("vector").ToElement())
-		{
-			Eigen::VectorXd temp_vector;
-			if (!xmlGetVector(*(segment_handle.FirstChildElement("vector").ToElement()), temp_vector))
+			if (handle.FirstChildElement("EndEffector").ToElement()->QueryBoolAttribute("ignore_unused", &solution.ignore_unused_segs)
+					!= tinyxml2::XML_NO_ERROR)
 			{
 #ifdef KIN_DEBUG_MODE
-				std::cout<<"Invalid end-effector offset position vector"<<std::endl;
+				std::cout<<"Invalid end-effector"<<std::endl;
 #endif
 				return false;
 			}
-			if (temp_vector.size() != 3)
-			{
-#ifdef KIN_DEBUG_MODE
-				std::cout<<"Invalid end-effector offset position vector size"<<std::endl;
-#endif
-				return false;
-			}
-			temp_frame.p.x(temp_vector(0));
-			temp_frame.p.y(temp_vector(1));
-			temp_frame.p.z(temp_vector(2));
 		}
-		if (segment_handle.FirstChildElement("quaternion").ToElement())
+		tinyxml2::XMLHandle segment_handle(handle.FirstChildElement("EndEffector").FirstChildElement("limb"));
+		while (segment_handle.ToElement())
 		{
-			Eigen::VectorXd temp_vector;
-			if (!xmlGetVector(*(segment_handle.FirstChildElement("quaternion").ToElement()), temp_vector))
+			if (!segment_handle.ToElement()->Attribute("segment"))
 			{
 #ifdef KIN_DEBUG_MODE
-				std::cout<<"Invalid end-effector offset quaternion vector"<<std::endl;
+				std::cout<<"Invalid end-effector segment"<<std::endl;
 #endif
 				return false;
 			}
-			if (temp_vector.size() != 4)
+			solution.end_effector_segs.push_back(segment_handle.ToElement()->Attribute("segment"));
+			KDL::Frame temp_frame = KDL::Frame::Identity(); //!< Initialise to identity
+			if (segment_handle.FirstChildElement("vector").ToElement())
 			{
+				Eigen::VectorXd temp_vector;
+				if (!xmlGetVector(*(segment_handle.FirstChildElement("vector").ToElement()), temp_vector))
+				{
 #ifdef KIN_DEBUG_MODE
-				std::cout<<"invalid end-effector offset quaternion vector size"<<std::endl;
+					std::cout<<"Invalid end-effector offset position vector"<<std::endl;
 #endif
-				return false;
+					return false;
+				}
+				if (temp_vector.size() != 3)
+				{
+#ifdef KIN_DEBUG_MODE
+					std::cout<<"Invalid end-effector offset position vector size"<<std::endl;
+#endif
+					return false;
+				}
+				temp_frame.p.x(temp_vector(0));
+				temp_frame.p.y(temp_vector(1));
+				temp_frame.p.z(temp_vector(2));
 			}
-			temp_frame.M =
-					KDL::Rotation::Quaternion(temp_vector(1), temp_vector(2), temp_vector(3), temp_vector(0));
+			if (segment_handle.FirstChildElement("quaternion").ToElement())
+			{
+				Eigen::VectorXd temp_vector;
+				if (!xmlGetVector(*(segment_handle.FirstChildElement("quaternion").ToElement()), temp_vector))
+				{
+#ifdef KIN_DEBUG_MODE
+					std::cout<<"Invalid end-effector offset quaternion vector"<<std::endl;
+#endif
+					return false;
+				}
+				if (temp_vector.size() != 4)
+				{
+#ifdef KIN_DEBUG_MODE
+					std::cout<<"invalid end-effector offset quaternion vector size"<<std::endl;
+#endif
+					return false;
+				}
+				temp_frame.M =
+						KDL::Rotation::Quaternion(temp_vector(1), temp_vector(2), temp_vector(3), temp_vector(0));
+			}
+			solution.end_effector_offs.push_back(temp_frame);
+			segment_handle = segment_handle.NextSiblingElement("limb");
 		}
-		solution.end_effector_offs.push_back(temp_frame);
-		segment_handle = segment_handle.NextSiblingElement("limb");
 	}
 	bool success = initKinematics(urdf_file, solution);
 #ifdef KIN_DEBUG_MODE
@@ -475,7 +478,7 @@ bool kinematica::KinematicTree::updateConfiguration(
 	}
 	if (!zero_undef_jnts_ && joint_configuration.size() != num_jnts_spec_)
 	{
-        ERROR("Joint vector size is incorrect!\nExpected "<<joint_configuration.size()<<", found "<<num_jnts_spec_);
+		ERROR("Joint vector size is incorrect!\nExpected "<<joint_configuration.size()<<", found "<<num_jnts_spec_);
 		return false;
 	}
 
@@ -903,8 +906,8 @@ bool kinematica::KinematicTree::setEndEffectors(const SolutionForm_t & optimisat
 	std::cout << "setEndEffectors Function ...  Entered with offsets of size " << optimisation.end_effector_offs.size() << std::endl;
 #endif
 //!< First do some checks
-	if (optimisation.end_effector_offs.size()
-			&& (optimisation.end_effector_segs.size() != optimisation.end_effector_offs.size()))
+	if (optimisation.end_effector_offs.size() < 0 //OK if == 0
+	&& (optimisation.end_effector_segs.size() != optimisation.end_effector_offs.size()))
 	{
 		return false;
 	}
@@ -963,7 +966,7 @@ bool kinematica::KinematicTree::setEndEffectors(const SolutionForm_t & optimisat
 
 std::string kinematica::KinematicTree::getRootName()
 {
-    return robot_tree_[0].segment.getName();
+	return robot_tree_[0].segment.getName();
 }
 
 bool kinematica::KinematicTree::modifyRootOffset(KDL::Frame & offset)

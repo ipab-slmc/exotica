@@ -64,5 +64,14 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/TaskMap.cpp src/tinyxml2.cpp src/Tools.cpp src/TaskDefinition.cpp src/PlanningProblem.cpp src/MotionSolver.cpp src/Initialiser.cpp src/Server.cpp)
+add_library(${PROJECT_NAME}
+  src/TaskMap.cpp
+  src/tinyxml2.cpp
+  src/Tools.cpp 
+  src/TaskDefinition.cpp 
+  src/PlanningProblem.cpp 
+  src/MotionSolver.cpp 
+  src/Initialiser.cpp 
+  src/Server.cpp
+  src/Scene.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES})

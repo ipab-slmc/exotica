@@ -221,7 +221,6 @@ namespace exotica
                 }
                 task_error.segment(cur_rows, dim) = goal - phi;
                 err += task_error.norm();
-
 				cur_rows += dim;
 			}
 		}

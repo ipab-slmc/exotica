@@ -33,7 +33,7 @@ exotica::EReturn exotica::CoM::update(const Eigen::VectorXd & x, const int t)
 	bool success = true;
 	Eigen::Vector3d phi;
 	Eigen::MatrixXd jac;
-    if (!scene_->update(x,t))
+	if (!scene_->update(x, t))
 	{
 		return FAILURE;
 	}
@@ -46,12 +46,12 @@ exotica::EReturn exotica::CoM::update(const Eigen::VectorXd & x, const int t)
 		return FAILURE;
 	}
 
-    if (setPhi(phi,t)  != SUCCESS)
+	if (setPhi(phi, t) != SUCCESS)
 	{
 
 		return FAILURE;
 	}
-    if(setJacobian(jac,t)!=SUCCESS)
+	if (setJacobian(jac, t) != SUCCESS)
 	{
 		return FAILURE;
 	}
@@ -100,8 +100,8 @@ bool exotica::CoM::computeJacobian(Eigen::MatrixXd & jac)
 		return false;
 	}
 
-	Eigen::MatrixXd eff_jac(mass_.size() * 3, scene_->getMapSize());
-	if (!scene_->getJacobian(eff_jac))
+	Eigen::MatrixXd eff_jac(mass_.size() * 3, scene_->getMapSize(object_name_));
+	if (!scene_->getJacobian(object_name_, eff_jac))
 	{
 		return false;
 	}
@@ -147,10 +147,7 @@ bool exotica::CoM::changeEffToCoM()
 	{
 		com_offs[i] = tip_pose_[i].Inverse() * base_pose_[i] * KDL::Frame(cog_[i]);
 	}
-	kinematica::SolutionForm_t new_solution;
-	new_solution.end_effector_segs = names;
-	new_solution.end_effector_offs = com_offs;
-	if (!scene_->updateEndEffectors(new_solution))
+	if (!scene_->updateEndEffectors(object_name_,com_offs))
 	{
 		INDICATE_FAILURE
 		;

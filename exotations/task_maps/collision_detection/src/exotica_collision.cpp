@@ -188,7 +188,7 @@ namespace exotica
 
 	Eigen::MatrixXd CollisionAvoidance::computeJacobian(const int size)
 	{
-		int i = 0, M = useAll_->data ? links_map_.size() : scene_->getMapSize(), N = size;
+		int i = 0, M = useAll_->data ? links_map_.size() : scene_->getMapSize(object_name_), N = size;
 		Eigen::VectorXd d(M);
 		Eigen::MatrixXd jac(1, N);
 		jac.setZero();

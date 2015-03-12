@@ -5,6 +5,10 @@ exotica::TaskDefinition::TaskDefinition()
   //! Empty Constructor...
 }
 
+exotica::TaskMap_ptr exotica::TaskDefinition::getTaskMap()
+{
+    return task_map_;
+}
 
 exotica::EReturn exotica::TaskDefinition::initBase(tinyxml2::XMLHandle & handle, const TaskMap_map & map_list)
 {

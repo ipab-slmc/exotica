@@ -93,6 +93,7 @@ namespace exotica
              * @return Returns success.
              */
             virtual EReturn setTimeSteps(const int T);
+            virtual kinematica::KinematicScene_ptr getScene();
 		protected:
 			/**
 			 * \brief Setter for the Task-space mapping: enforces thread-safety

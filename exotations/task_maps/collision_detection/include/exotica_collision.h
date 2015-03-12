@@ -71,6 +71,8 @@ namespace exotica
 			 */
 			EReturn setObsFrame(const KDL::Frame & tf);
             EReturn setPreUpdateClaaback(boost::function<void(CollisionAvoidance*,int)> pre_update_callback);
+
+            bool publishDebug_;
 		protected:
 			/**
 			 * \brief	Concrete implementation of initialisation from xml

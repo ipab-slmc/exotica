@@ -13,17 +13,19 @@ REGISTER_TASKMAP_TYPE("CollisionAvoidance", exotica::CollisionAvoidance);
 namespace exotica
 {
 	CollisionAvoidance::CollisionAvoidance() :
-			m_(0.05), initialised_(false), nh_("CollisionTask")
+            m_(0.05), initialised_(false), nh_("CollisionTask"), publishDebug_(false)
 	{
 		//TODO
 		wall_pub_ = nh_.advertise<visualization_msgs::Marker>("wall_marker", 1);
 		state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("disp_state", 1);
 		close_pub_ = nh_.advertise<visualization_msgs::Marker>("close_marker", 1);
 		wall_marker_.type = visualization_msgs::Marker::MESH_RESOURCE;
-		wall_marker_.color.a = .5;
-		wall_marker_.color.r = 0.8;
+        wall_marker_.color.a = 0.0;
+        wall_marker_.color.r = 1.0;
+        wall_marker_.color.g = 1.0;
+        wall_marker_.color.b = 1.0;
 		wall_marker_.scale.x = wall_marker_.scale.y = wall_marker_.scale.z = 1.0;
-		wall_marker_.mesh_resource = "package://hrp2_14_description/urdf/wall.obj";
+        wall_marker_.mesh_resource = "package://hrp2_14_description/urdf/wall-extended.obj";
 		wall_marker_.mesh_use_embedded_materials = true;
 
 		close_.type = visualization_msgs::Marker::LINE_LIST;
@@ -275,26 +277,32 @@ namespace exotica
 				fcl::Transform3f orig_transform = world_objs[i]->getTransform();
 				world_objs[i]->setTransform(obs_in_base_tf_); // * orig_transform
 			}
-			moveit_msgs::DisplayRobotState msg;
-			robot_state::robotStateToRobotStateMsg(state, msg.state);
-			state_pub_.publish(msg);
-			geometry_msgs::Pose pa;
-			pa.position.x = obs_in_base_tf_.getTranslation().data.vs[0];
-			pa.position.y = obs_in_base_tf_.getTranslation().data.vs[1];
-			pa.position.z = obs_in_base_tf_.getTranslation().data.vs[2];
-			pa.orientation.w = obs_in_base_tf_.getQuatRotation().getW();
-			pa.orientation.x = obs_in_base_tf_.getQuatRotation().getX();
-			pa.orientation.y = obs_in_base_tf_.getQuatRotation().getY();
-			pa.orientation.z = obs_in_base_tf_.getQuatRotation().getZ();
-			wall_marker_.header.frame_id = "base_link";
-			wall_marker_.pose = pa;
-			wall_pub_.publish(wall_marker_);
+            if(publishDebug_)
+            {
+                moveit_msgs::DisplayRobotState msg;
+                robot_state::robotStateToRobotStateMsg(state, msg.state);
+                state_pub_.publish(msg);
+                geometry_msgs::Pose pa;
+                pa.position.x = obs_in_base_tf_.getTranslation().data.vs[0];
+                pa.position.y = obs_in_base_tf_.getTranslation().data.vs[1];
+                pa.position.z = obs_in_base_tf_.getTranslation().data.vs[2];
+                pa.orientation.w = obs_in_base_tf_.getQuatRotation().getW();
+                pa.orientation.x = obs_in_base_tf_.getQuatRotation().getX();
+                pa.orientation.y = obs_in_base_tf_.getQuatRotation().getY();
+                pa.orientation.z = obs_in_base_tf_.getQuatRotation().getZ();
+                wall_marker_.header.frame_id = "base_link";
+                wall_marker_.pose = pa;
+                wall_pub_.publish(wall_marker_);
+            }
 		}
 
 		fcl::DistanceRequest req(true);
 		fcl::DistanceResult res;
 		Eigen::Vector3d p1, p2;
-		close_.points.clear();
+        if(publishDebug_)
+        {
+            close_.points.clear();
+        }
 		for (int i = 0; i < robot_objs.size(); i++)
 		{
 			collision_detection::CollisionGeometryData* cd1 =
@@ -329,21 +337,27 @@ namespace exotica
 						dist_pair.norm2.normalize();
 						dist_pair.d = dist;
 						dist_info_.setDistance(dist_pair);
-						geometry_msgs::Point p1, p2;
-						p1.x = dist_pair.p1(0);
-						p1.y = dist_pair.p1(1);
-						p1.z = dist_pair.p1(2);
-						p2.x = dist_pair.p2(0);
-						p2.y = dist_pair.p2(1);
-						p2.z = dist_pair.p2(2);
-						close_.points.push_back(p1);
-						close_.points.push_back(p2);
+                        if(publishDebug_)
+                        {
+                            geometry_msgs::Point p1, p2;
+                            p1.x = dist_pair.p1(0);
+                            p1.y = dist_pair.p1(1);
+                            p1.z = dist_pair.p1(2);
+                            p2.x = dist_pair.p2(0);
+                            p2.y = dist_pair.p2(1);
+                            p2.z = dist_pair.p2(2);
+                            close_.points.push_back(p1);
+                            close_.points.push_back(p2);
+                        }
 					}
 					break;
 				}
 		}
-		close_pub_.publish(close_);
-		ros::spinOnce();
+        if(publishDebug_)
+        {
+            close_pub_.publish(close_);
+            ros::spinOnce();
+        }
 
 		//dist_info_.print();
 		//scene_->getPlanningScene()->printKnownObjects(std::cerr);

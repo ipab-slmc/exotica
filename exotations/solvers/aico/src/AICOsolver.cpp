@@ -413,17 +413,20 @@ namespace exotica
 			{
 				if(task_.second->type().compare(std::string("TaskSqrError"))==0) ERROR("Task variable " << task_.first << " is not an squared error!");
 				boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(task_.second);
-				task->taskSpaceDim(dim);
-                task->phi(phiBar[t].segment(offset,dim),t);
-                task->jacobian(JBar[t].middleRows(offset,dim),t);
-				Jt=JBar[t].middleRows(offset,dim).transpose();
                 task->getRho(prec,t);
-                task->getGoal(y_star[t].segment(offset,dim),t);
+                task->taskSpaceDim(dim);
+                if(prec>0)
+                {
+                    task->phi(phiBar[t].segment(offset,dim),t);
+                    task->jacobian(JBar[t].middleRows(offset,dim),t);
+                    Jt=JBar[t].middleRows(offset,dim).transpose();
+                    task->getGoal(y_star[t].segment(offset,dim),t);
 
-				C+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
-				R[t]+=prec*Jt*JBar[t].middleRows(offset,dim);
-				r[t]+=prec*Jt*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]);
-				rhat[t]+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]).squaredNorm();
+                    C+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
+                    R[t]+=prec*Jt*JBar[t].middleRows(offset,dim);
+                    r[t]+=prec*Jt*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]);
+                    rhat[t]+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]).squaredNorm();
+                }
 				i++;
 				offset+=dim;
 			}
@@ -443,31 +446,37 @@ namespace exotica
 				if(task_.second->type().compare(std::string("TaskSqrError"))==0)
 				{
 					boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(task_.second);
-					task->taskSpaceDim(dim);
-                    task->phi(phiBar[t].segment(offset,dim),t);
-                    task->jacobian(JBar[t].middleRows(offset,dim),t); Jt=JBar[t].middleRows(offset,dim).transpose();
                     task->getRho(prec,t);
-                    task->getGoal(y_star[t].segment(offset,dim),t);
+                    task->taskSpaceDim(dim);
+                    if(prec>0)
+                    {
+                        task->phi(phiBar[t].segment(offset,dim),t);
+                        task->jacobian(JBar[t].middleRows(offset,dim),t); Jt=JBar[t].middleRows(offset,dim).transpose();
+                        task->getGoal(y_star[t].segment(offset,dim),t);
 
-					C+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
-					R[t].topLeftCorner(n2,n2)+=prec*Jt*JBar[t].middleRows(offset,dim);
-					r[t].head(n2)+=prec*Jt*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]);
-					rhat[t]+=      prec*   (y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]).squaredNorm();
+                        C+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
+                        R[t].topLeftCorner(n2,n2)+=prec*Jt*JBar[t].middleRows(offset,dim);
+                        r[t].head(n2)+=prec*Jt*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]);
+                        rhat[t]+=      prec*   (y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]).squaredNorm();
+                    }
 				}
 				else if(task_.second->type().compare(std::string("TaskVelocitySqrError"))==0)
 				{
 					boost::shared_ptr<TaskVelocitySqrError> task = boost::static_pointer_cast<TaskVelocitySqrError>(task_.second);
-					task->taskSpaceDim(dim);
-                    task->phi(phiBar[t].segment(offset,dim),t);
-                    task->jacobian(JBar[t].middleRows(offset,dim),t); Jt=JBar[t].middleRows(offset,dim).transpose();
                     task->getRho(prec,t);
-                    task->getGoal(y_star[t].segment(offset,dim),t);
+                    task->taskSpaceDim(dim);
+                    if(prec>0)
+                    {
+                        task->phi(phiBar[t].segment(offset,dim),t);
+                        task->jacobian(JBar[t].middleRows(offset,dim),t); Jt=JBar[t].middleRows(offset,dim).transpose();
+                        task->getGoal(y_star[t].segment(offset,dim),t);
 
-					v=(phiBar[t].segment(offset,dim)-phiBar[t>0?t-1:T+1].segment(offset,dim))/tau; // (phi_t-phi_{t-1})/tau
-					C+=prec*(v-JBar[t].middleRows(offset,dim)*(qhat[t].head(n/2)-qhat[t>0?t-1:T+1].head(n/2))/tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
-					R[t].bottomRightCorner(n2,n2)+=prec*Jt*JBar[t].middleRows(offset,dim);
-					r[t].tail(n2)+=prec*Jt*v;
-					rhat[t]+=prec*(v).squaredNorm();
+                        v=(phiBar[t].segment(offset,dim)-phiBar[t>0?t-1:T+1].segment(offset,dim))/tau; // (phi_t-phi_{t-1})/tau
+                        C+=prec*(v-JBar[t].middleRows(offset,dim)*(qhat[t].head(n/2)-qhat[t>0?t-1:T+1].head(n/2))/tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
+                        R[t].bottomRightCorner(n2,n2)+=prec*Jt*JBar[t].middleRows(offset,dim);
+                        r[t].tail(n2)+=prec*Jt*v;
+                        rhat[t]+=prec*(v).squaredNorm();
+                    }
 				}
 				else
 					ERROR("Task variable " << task_.first << " is not an squared error!");
@@ -593,23 +602,29 @@ namespace exotica
 					// Position cost
 					boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(task_.second);
 					if(!ok(task->taskSpaceDim(dim))) {INDICATE_FAILURE; return -1;}
-                    if(!ok(task->phi(phiBar[t].segment(offset,dim),t))) {INDICATE_FAILURE; return -1;}
                     if(!ok(task->getRho(prec,t))) {INDICATE_FAILURE; return -1;}
-                    if(!ok(task->getGoal(y_star[t].segment(offset,dim),t))) {std::cout<<"CHECK x"<<std::endl;INDICATE_FAILURE; return -1;}
-					costTask(t,i)=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
-					ret+=costTask(t,i);
+                    if(prec>0)
+                    {
+                        if(!ok(task->phi(phiBar[t].segment(offset,dim),t))) {INDICATE_FAILURE; return -1;}
+                        if(!ok(task->getGoal(y_star[t].segment(offset,dim),t))) {std::cout<<"CHECK x"<<std::endl;INDICATE_FAILURE; return -1;}
+                        costTask(t,i)=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
+                        ret+=costTask(t,i);
+                    }
 				}
 				else if (dynamic && task_.second->type().compare(std::string("exotica::TaskVelocitySqrError"))==0)
 				{
 					// Velocity cost
 					boost::shared_ptr<TaskVelocitySqrError> task = boost::static_pointer_cast<TaskVelocitySqrError>(task_.second);
 					if(!ok(task->taskSpaceDim(dim))) {INDICATE_FAILURE; return -1;}
-                    if(!ok(task->phi(phiBar[t].segment(offset,dim),t))) {INDICATE_FAILURE; return -1;}
                     if(!ok(task->getRho(prec,t))) {INDICATE_FAILURE; return -1;}
-                    if(!ok(task->getGoal(y_star[t].segment(offset,dim),t))) {INDICATE_FAILURE; return -1;}
-					vv=(phiBar[t].segment(offset,dim)-phiBar[t>0?t-1:T+1].segment(offset,dim))/tau; // (phi_t-phi_{t-1})/tau
-					costTask(t,i)=prec*(vv-JBar[t].middleRows(offset,dim)*(qhat[t].head(n/2)-qhat[t>0?t-1:T+1].head(n/2))/tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
-					ret+=costTask(t,i);
+                    if(prec>0)
+                    {
+                        if(!ok(task->phi(phiBar[t].segment(offset,dim),t))) {INDICATE_FAILURE; return -1;}
+                        if(!ok(task->getGoal(y_star[t].segment(offset,dim),t))) {INDICATE_FAILURE; return -1;}
+                        vv=(phiBar[t].segment(offset,dim)-phiBar[t>0?t-1:T+1].segment(offset,dim))/tau; // (phi_t-phi_{t-1})/tau
+                        costTask(t,i)=prec*(vv-JBar[t].middleRows(offset,dim)*(qhat[t].head(n/2)-qhat[t>0?t-1:T+1].head(n/2))/tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
+                        ret+=costTask(t,i);
+                    }
 				}
 				else
 				{

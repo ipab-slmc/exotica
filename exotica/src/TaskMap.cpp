@@ -62,6 +62,11 @@ exotica::EReturn exotica::TaskMap::phi(Eigen::Ref<Eigen::VectorXd> y, int t)
 	}
 }
 
+kinematica::KinematicScene_ptr exotica::TaskMap::getScene()
+{
+    return scene_;
+}
+
 exotica::EReturn exotica::TaskMap::jacobian(Eigen::Ref<Eigen::MatrixXd> J, int t)
 {
 	LOCK(jac_lock_);

@@ -11,6 +11,7 @@
 #include <exotica/PlanningProblem.h>
 #include <exotica/MotionSolver.h>
 #include <exotica/Server.h>
+#include <exotica/Initialiser.h>
 //!< The XML Parser
 #include <tinyxml2/tinyxml2.h>
 

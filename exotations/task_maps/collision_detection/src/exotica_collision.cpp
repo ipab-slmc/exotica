@@ -29,7 +29,7 @@ namespace exotica
 		wall_marker_.mesh_use_embedded_materials = true;
 
 		close_.type = visualization_msgs::Marker::LINE_LIST;
-		close_.header.frame_id = "/base_link";
+        close_.header.frame_id = "/BODY";
 		close_.scale.x = 0.004;
 		close_.color.g = 1;
 		close_.color.a = 1;
@@ -290,7 +290,7 @@ namespace exotica
                 pa.orientation.x = obs_in_base_tf_.getQuatRotation().getX();
                 pa.orientation.y = obs_in_base_tf_.getQuatRotation().getY();
                 pa.orientation.z = obs_in_base_tf_.getQuatRotation().getZ();
-                wall_marker_.header.frame_id = "base_link";
+                wall_marker_.header.frame_id = "/BODY";
                 wall_marker_.pose = pa;
                 wall_pub_.publish(wall_marker_);
             }

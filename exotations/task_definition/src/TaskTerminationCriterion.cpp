@@ -2,38 +2,36 @@
 
 exotica::TaskTerminationCriterion::TaskTerminationCriterion()
 {
-  strength_ = CONTINUE;
+	status_ = CONTINUE;
 }
 
-exotica::EReturn exotica::TaskTerminationCriterion::initBase(tinyxml2::XMLHandle & handle)
-{  
-  if (!handle.ToElement()) { return PAR_ERR; }
-  std::string temp_string(handle.ToElement()->Attribute("strength"));
-  if (!temp_string.size()) { return PAR_ERR; }
-  
-  setStrength(temp_string.compare("soft") ? HARD_END : SOFT_END);
-  
-  return initDerived(handle); 
-}
-
-
-exotica::EReturn exotica::TaskTerminationCriterion::getStrength(ETerminate & strength)
+exotica::TaskTerminationCriterion::~TaskTerminationCriterion()
 {
-  LOCK(strength_lock_);
-  
-  if (strength_)  //!< If set to something other than continue which is invalid!
-  {
-    strength = strength_;
-    return SUCCESS;
-  }
-  else
-  {
-    return MMB_NIN;
-  }
+
 }
 
-void exotica::TaskTerminationCriterion::setStrength(const ETerminate & strength)
+exotica::EReturn exotica::TaskTerminationCriterion::initDerived(tinyxml2::XMLHandle & handle)
 {
-  LOCK(strength_lock_);
-  strength_ = strength;
-} 
+
+	if (handle.FirstChildElement("Goal").ToElement())
+	{
+		Eigen::VectorXd goal;
+		if(!ok(getVector(*(handle.FirstChildElement("Goal").ToElement()), goal)))
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+		if (!ok(setGoal(goal)))
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+	}
+	else
+	{
+		INDICATE_FAILURE
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+

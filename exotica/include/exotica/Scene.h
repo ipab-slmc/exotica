@@ -12,11 +12,118 @@
 #include "exotica/Server.h"
 #include "tinyxml2/tinyxml2.h"
 #include <kinematica/KinematicTree.h>
+
+//	For collision
+#include <moveit/collision_detection/world.h>
+#include <moveit/collision_detection/collision_world.h>
+#include <moveit/collision_detection_fcl/collision_common.h>
+#include <fcl/broadphase/broadphase.h>
+#include <fcl/collision.h>
+#include <fcl/distance.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit_msgs/PlanningScene.h>
 #include <moveit/planning_scene/planning_scene.h>
 
 namespace exotica
 {
+	typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
+	typedef std::vector<boost::shared_ptr<fcl::CollisionObject> > fcls_ptr;
+	//	The class of collision scene
+	class CollisionScene
+	{
+		public:
+			/*
+			 * \brief	Default constructor
+			 */
+			CollisionScene();
+
+			/*
+			 * \brief	Destructor
+			 */
+			virtual ~CollisionScene();
+
+			/*
+			 * \brief	Initialisation function
+			 * @param	ps		Moveit planning scene (for model building)
+			 * @param	joints	Joint names
+			 */
+			EReturn initialise(const planning_scene::PlanningSceneConstPtr & ps,
+					const std::vector<std::string> & joints);
+
+			/*
+			 * \brief	Update the robot collision properties
+			 * @param	x		Configuration
+			 */
+			EReturn update(const Eigen::VectorXd x);
+
+			/*
+			 * \brief	Get closest distance between two objects
+			 * @param	o1		Name of object 1
+			 * @param	o2		Name of object 2
+			 * @param	d		Closest distance (-1 if in collision)
+			 * @param	p1		Closest point on o1
+			 * @param	p2		Closest point on o2
+			 */
+			EReturn getDistance(const std::string & o1, const std::string & o2, double d);
+			EReturn getDistance(const std::string & o1, const std::string & o2, double d,
+					Eigen::Vector3d & p1, Eigen::Vector3d & p2);
+
+			/*
+			 * \brief	Check if the whole robot is in collision
+			 * @param	self	Indicate if self collision check is required
+			 */
+			bool getRobotCollision(bool self);
+
+			/*
+			 * \brief	Get closest distance between robot link and anyother objects
+			 * @param	link	Robot link
+			 * @param	self	Indicate if self collision check is required
+			 * @param	d		Closest distance
+			 * @param	p1		Closest distance point on the link
+			 * @param	p2		Closest distance point on the other object
+			 * @param	norm	Normal vector on robot link
+			 */
+			EReturn getRobotDistance(const std::string & link, bool self, double & d,
+					Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm);
+
+			/*
+			 * \brief	Get current robot state
+			 * @return	Current robot state
+			 */
+			const robot_state::RobotState& getCurrentState();
+		private:
+
+			/*
+			 * \brief	Get closest distance between two fcl objects
+			 * @param	fcl1	FCL object 1
+			 * @param	fcl2	FCL object 2
+			 * @param	req		FCL collision request
+			 * @param	res		FCL collision result
+			 */
+			double distance(const fcls_ptr & fcl1, const fcls_ptr & fcl2,
+					const fcl::DistanceRequest & req, fcl::DistanceResult & res);
+			//	FCL collision object for the robot
+			std::map<std::string, fcls_ptr> fcl_robot_;
+
+			//	FCL collision object for the world
+			std::map<std::string, fcls_ptr> fcl_world_;
+
+			//	FCL collision geometry for the robot
+			std::map<std::string, geos_ptr> geo_robot_;
+
+			//	FCL collision geometry for the world
+			std::map<std::string, geos_ptr> geo_world_;
+
+			//	Internal moveit planning scene
+			planning_scene::PlanningScenePtr ps_;
+
+			//	Joint index in robot state
+			std::vector<int> joint_index_;
+	};
+
+	typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
+
+	//	The class of EXOTica Scene
 	class Scene
 	{
 		public:
@@ -49,6 +156,13 @@ namespace exotica
 			 * @param	x	System state
 			 */
 			virtual EReturn update(const Eigen::VectorXd x, const int t = 0);
+
+			/*
+			 * \brief	Set collision scene
+			 * @param	scene	Moveit planning scene
+			 */
+			EReturn setCollisionScene(const planning_scene::PlanningSceneConstPtr & scene);
+			EReturn setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene);
 
 			/*
 			 * \brief	Append new taskmap
@@ -93,6 +207,19 @@ namespace exotica
 			int getNumJoints();
 
 			/*
+			 * \brief	Get end-effector names for a task
+			 * @param	task	Task name
+			 * @param	effs	Endeffector names
+			 */
+			EReturn getEndEffectors(const std::string & task, std::vector<std::string> & effs);
+
+			/*
+			 * \brief	Get exotica collision scene ptr
+			 * @return	CollisionScene pointer
+			 */
+			CollisionScene_ptr & getCollisionScene();
+
+			/*
 			 * \bref	Get map size for particular taskmap
 			 * @param	task	Task name
 			 * @return	Map 	Size
@@ -120,17 +247,29 @@ namespace exotica
 			planning_scene::PlanningScenePtr getPlanningScene();
 			kinematica::KinematicTree & getSolver();
 		private:
+
+			//	ROS node handle
+			ros::NodeHandle nh_;
+
 			//	The name of the scene
 			std::string name_;
 
 			//	The kinematica tree
 			kinematica::KinematicTree kinematica_;
 
+			//	Robot model
+			robot_model::RobotModelPtr model_;
+
 			//	The controlled joint size
 			int N;
 
+			//	Initialisation flag
+			bool initialised_;
+
+			//	The big phi
 			Eigen::VectorXd Phi_;
 
+			//	The big jacobian
 			Eigen::MatrixXd Jac_;
 
 			//	Forwardmaps
@@ -148,10 +287,14 @@ namespace exotica
 			//	End-effector index (in kinematica)
 			std::map<std::string, std::vector<int> > eff_index_;
 
+			//	Mutex locker
 			boost::mutex lock_;
+			CollisionScene_ptr collision_scene_;
+
 	};
 	typedef boost::shared_ptr<Scene> Scene_ptr;
 	typedef std::map<std::string, Scene_ptr> Scene_map;
+
 }	//	namespace exotica
 
 #endif /* EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_ */

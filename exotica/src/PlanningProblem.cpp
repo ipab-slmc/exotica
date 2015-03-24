@@ -252,6 +252,12 @@ exotica::EReturn exotica::PlanningProblem::update(const Eigen::VectorXd & x, con
 	}
 	else
 	{
+		if (!((x - x).array() == (x - x).array()).all())
+		{
+			ROS_ERROR_STREAM("Infinite q= "<<x.transpose());
+			INDICATE_FAILURE
+			return FAILURE;
+		}
 		for (TaskMap_map::const_iterator it = task_maps_.begin();
 				it != task_maps_.end() and ok(ret_value); ++it)
 		{
@@ -267,6 +273,43 @@ exotica::EReturn exotica::PlanningProblem::update(const Eigen::VectorXd & x, con
 	return ret_value;
 }
 
+exotica::TaskDefinition_map& exotica::PlanningProblem::getTaskDefinitions()
+{
+	return task_defs_;
+}
+
+exotica::TaskMap_map& exotica::PlanningProblem::getTaskMaps()
+{
+	return task_maps_;
+}
+
+exotica::EReturn exotica::PlanningProblem::setScene(
+		const planning_scene::PlanningSceneConstPtr & scene)
+{
+	for (auto & it : scenes_)
+	{
+		if (!ok(it.second->setCollisionScene(scene)))
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+	}
+	return SUCCESS;
+}
+exotica::EReturn exotica::PlanningProblem::setScene(
+		const moveit_msgs::PlanningSceneConstPtr & scene)
+{
+	for (auto & it : scenes_)
+	{
+		if (!ok(it.second->setCollisionScene(scene)))
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+	}
+	return SUCCESS;
+}
+
 exotica::EReturn exotica::PlanningProblem::updateKinematicScene(
 		const planning_scene::PlanningSceneConstPtr & scene)
 {
@@ -276,5 +319,6 @@ exotica::EReturn exotica::PlanningProblem::updateKinematicScene(
 //		if (!it->second->updateScene(scene))
 //			return FAILURE;
 //	}
+	INDICATE_FAILURE
 	return SUCCESS;
 }

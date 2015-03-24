@@ -21,18 +21,6 @@ namespace exotica
 			virtual ~IKProblem();
 
 			/**
-			 * \brief	Get task definitions
-			 * @return	Task definitions
-			 */
-			TaskDefinition_map& getTaskDefinitions();
-
-			/**
-			 * \brief	Get task maps
-			 * @return Task maps
-			 */
-			TaskMap_map& getTaskMaps();
-
-			/**
 			 * \brief	Get configuration weight
 			 * @return	configuration weight
 			 */

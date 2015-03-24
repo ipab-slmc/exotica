@@ -27,6 +27,7 @@ set(MSG_FILES
   StringList.msg
   BoolList.msg
   Vector.msg
+  Matrix.msg
 )
 
 add_message_files(

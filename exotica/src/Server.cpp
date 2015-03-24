@@ -10,7 +10,13 @@
 namespace exotica
 {
 	Server::Server() :
-			nh_("/EXOTicaServer"), name_("")
+			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("")
+	{
+		//TODO
+	}
+
+	Server::Server(const boost::shared_ptr<ros::NodeHandle> & node) :
+			nh_(node), name_("")
 	{
 		//TODO
 	}
@@ -102,8 +108,7 @@ namespace exotica
 			boollist.data.resize(vec.size());
 			for (int i = 0; i < vec.size(); i++)
 				boollist.data[i] = vec[i];
-			params_[name] =
-					boost::shared_ptr<exotica::BoolList>(new exotica::BoolList(boollist));
+			params_[name] = boost::shared_ptr<exotica::BoolList>(new exotica::BoolList(boollist));
 		}
 		else if (type.compare("string") == 0)
 		{
@@ -125,8 +130,7 @@ namespace exotica
 				INDICATE_FAILURE
 				return FAILURE;
 			}
-			params_[name] =
-					boost::shared_ptr<exotica::StringList>(new exotica::StringList(list));
+			params_[name] = boost::shared_ptr<exotica::StringList>(new exotica::StringList(list));
 		}
 		else
 		{

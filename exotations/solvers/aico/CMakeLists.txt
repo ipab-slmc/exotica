@@ -19,7 +19,6 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   task_definition
   task_map
-  collision_detection
 )
 
 ## System dependencies are found with CMake's conventions
@@ -41,7 +40,7 @@ find_package(LAPACK REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aico
-  CATKIN_DEPENDS exotica roscpp roslib task_definition kinematic_scene task_map collision_detection
+  CATKIN_DEPENDS exotica roscpp roslib task_definition kinematic_scene task_map
   DEPENDS system_lib
 )
 

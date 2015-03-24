@@ -364,6 +364,28 @@ bool kinematica::KinematicTree::updateEndEffectors(const SolutionForm_t & new_en
 	return setEndEffectors(new_end_effectors);
 }
 
+bool kinematica::KinematicTree::updateEndEffectorOffsets(const std::vector<int> & index,
+		const std::vector<KDL::Frame> & offset)
+{
+	boost::mutex::scoped_lock(member_lock_);
+	if (!isInitialised())
+		return false;
+	if (index.size() > eff_seg_offs_.size() || index.size() != offset.size())
+		return false;
+	for (int i = 0; i < index.size(); i++)
+		eff_seg_offs_[i] = offset[i];
+	return true;
+}
+
+bool kinematica::KinematicTree::getEndEffectorIndex(std::vector<int> & eff_index)
+{
+	boost::mutex::scoped_lock(member_lock_);
+	if (!isInitialised())
+		return false;
+	eff_index = eff_segments_;
+	return true;
+}
+
 bool kinematica::KinematicTree::addEndEffector(const std::string & name, const KDL::Frame & offset)
 {
 	boost::mutex::scoped_lock(member_lock_);

@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package>
-  <name>aico</name>
+  <name>rrts</name>
   <version>0.0.0</version>
-  <description>The aico package</description>
+  <description>The rrts package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="vladimir@todo.todo">vladimir</maintainer>
+  <maintainer email="yiming@todo.todo">yiming</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/aico</url> -->
+  <!-- <url type="website">http://wiki.ros.org/RRTs</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
@@ -41,20 +41,13 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica</build_depend>
-  <build_depend>kinematic_scene</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>roslib</build_depend>
   <build_depend>task_definition</build_depend>
-  <build_depend>task_map</build_depend>
-  <build_depend>liblapack-dev</build_depend>
-  
   <run_depend>exotica</run_depend>
-  <run_depend>kinematic_scene</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>task_definition</run_depend>
-  <run_depend>task_map</run_depend>
-  <run_depend>liblapack-dev</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

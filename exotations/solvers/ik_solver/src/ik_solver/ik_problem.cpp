@@ -41,15 +41,6 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	TaskDefinition_map& IKProblem::getTaskDefinitions()
-	{
-		return task_defs_;
-	}
-
-	TaskMap_map& IKProblem::getTaskMaps()
-	{
-		return task_maps_;
-	}
 	Eigen::MatrixXd IKProblem::getW()
 	{
 		return config_w_;

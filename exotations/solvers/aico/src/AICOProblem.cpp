@@ -57,16 +57,6 @@ namespace exotica
         return setTime(T);
 	}
 
-	TaskDefinition_map& AICOProblem::getTaskDefinitions()
-	{
-		return task_defs_;
-	}
-
-    TaskMap_map& AICOProblem::getTaskMaps()
-    {
-        return task_maps_;
-    }
-
 	int AICOProblem::getT()
 	{
 		return T;

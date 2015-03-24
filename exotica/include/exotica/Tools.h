@@ -64,6 +64,14 @@ namespace exotica
 		FAILURE = 100 //!< Indicates a generic failure
 	};
 
+	/**
+	 * \brief	Enum for termination criterion
+	 */
+	enum ETerminate
+	{
+		TERMINATE = 0, CONTINUE = 1
+	};
+
 	bool ok(const EReturn & value);
 
 	/**
@@ -139,14 +147,13 @@ namespace exotica
 	 */
 	EReturn deepCopy(tinyxml2::XMLHandle & parent, tinyxml2::XMLHandle & child);
 
-    /**
-     * @brief loadOBJ Loads mesh data from an OBJ file
-     * @param file_name File name
-     * @param tri Returned vertex indices of triangles
-     * @param vert Vertex positions
-     * @return Indication of SUCCESS
-     */
-    EReturn loadOBJ(std::string & data,Eigen::VectorXi& tri, Eigen::VectorXd& vert);
-
+	/**
+	 * @brief loadOBJ Loads mesh data from an OBJ file
+	 * @param file_name File name
+	 * @param tri Returned vertex indices of triangles
+	 * @param vert Vertex positions
+	 * @return Indication of SUCCESS
+	 */
+	EReturn loadOBJ(std::string & data, Eigen::VectorXi& tri, Eigen::VectorXd& vert);
 }
 #endif

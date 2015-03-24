@@ -94,6 +94,7 @@ namespace exotica
 				if (it != type_registry_.end())       //!< If exists
 				{
 					const_cast<boost::shared_ptr<BO>&>(object).reset(it->second()); //!< Call the function associated with this entry
+
 					if (object != nullptr)
 					{
 						return SUCCESS;

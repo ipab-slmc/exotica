@@ -253,7 +253,7 @@ exotica::EReturn exotica::Initialiser::initialise(const std::string & file_name,
 				continue;
 			}
 		}
-		aux_rtn = MotionSolver_fac::Instance().createObject(solver, solver_handle,server);
+		aux_rtn = MotionSolver_fac::Instance().createObject(solver, solver_handle, server);
 		if (aux_rtn == WARNING)
 		{
 			solver_handle = solver_handle.NextSibling();

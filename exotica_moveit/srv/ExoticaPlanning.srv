@@ -1,0 +1,7 @@
+exotica/Vector q0
+string xml_file_
+moveit_msgs/PlanningScene scene_
+---
+float32 planning_time_
+exotica/Matrix solution_
+bool succeeded_

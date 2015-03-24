@@ -35,12 +35,12 @@ namespace exotica
 		}
 		catch (int e)
 		{
-			std::cout<<"IK solver initialisation, parameter error\n";
+			std::cout << "IK solver initialisation, parameter error\n";
 			return FAILURE;
 		}
 
-		INFO("IK Solver parameters update [maximum iteration]: " << maxit_);
-		INFO("IK Solver parameters update [maximum step velocity]: " << maxstep_);
+		//INFO("IK Solver parameters update [maximum iteration]: " << maxit_);
+		//INFO("IK Solver parameters update [maximum step velocity]: " << maxstep_);
 		return SUCCESS;
 	}
 
@@ -55,14 +55,14 @@ namespace exotica
 		prob_ = boost::static_pointer_cast<IKProblem>(pointer);
 		size_ = prob_->getW().rows();
 
-        for (auto & it : prob_->getTaskDefinitions())
-        {
-            if (it.second->type().compare(std::string("exotica::TaskSqrError")) != 0)
-            {
-                ERROR("IK Solver currently can only solve exotica::TaskSqrError. Unable to solve Task: "<<it.second->type());
-                return FAILURE;
-            }
-        }
+		for (auto & it : prob_->getTaskDefinitions())
+		{
+			if (it.second->type().compare(std::string("exotica::TaskSqrError")) != 0)
+			{
+				ERROR("IK Solver currently can only solve exotica::TaskSqrError. Unable to solve Task: "<<it.second->type());
+				return FAILURE;
+			}
+		}
 		return SUCCESS;
 	}
 
@@ -124,18 +124,18 @@ namespace exotica
 		double err = 100, ini_err;
 		Eigen::VectorXd q_out = q0;
 		int i = 0;
-        ros::Duration dt_update;
-        ros::Duration dt_vel;
-        double ii=0;
+		ros::Duration dt_update;
+		ros::Duration dt_vel;
+		double ii = 0;
 		for (i = 0; i < maxit_->data; i++)
 		{
-            ii+=1.0;
-            ros::Time t0 = ros::Time::now();
-            prob_->update(solution.row(i),0);
-            dt_update+=ros::Duration(ros::Time::now() - t0);
-            t0 = ros::Time::now();
+			ii += 1.0;
+			ros::Time t0 = ros::Time::now();
+			prob_->update(solution.row(i), 0);
+			dt_update += ros::Duration(ros::Time::now() - t0);
+			t0 = ros::Time::now();
 			vel_solve(err);
-            dt_vel+=ros::Duration(ros::Time::now() - t0);
+			dt_vel += ros::Duration(ros::Time::now() - t0);
 			if (i == 0)
 				ini_err = err;
 			double max_vel = vel_vec_.cwiseAbs().maxCoeff();
@@ -148,13 +148,13 @@ namespace exotica
 
 			if (err <= prob_->getTau())
 			{
-                solution.conservativeResize(i + 1, solution.cols());
+				solution.conservativeResize(i + 1, solution.cols());
 				t = ros::Duration(ros::Time::now() - start);
 				found = true;
 				break;
 			}
-        }
-        //ROS_WARN_STREAM_THROTTLE(0.5,"Update: "<< dt_update <<"s Solve: " << dt_vel<<"s");
+		}
+		//ROS_WARN_STREAM_THROTTLE(0.5,"Update: "<< dt_update <<"s Solve: " << dt_vel<<"s");
 		t = ros::Duration(ros::Time::now() - start);
 		//std::cout << "IK solving time (" << i << " iterations) = " << t.toSec() << " sec\n";
 		return SUCCESS;
@@ -162,12 +162,12 @@ namespace exotica
 
 	EReturn IKsolver::vel_solve(double & err)
 	{
-        vel_vec_.resize(size_);
-        vel_vec_.setZero();
-        null_space_map = Eigen::MatrixXd::Identity(size_, size_);
+		vel_vec_.resize(size_);
+		vel_vec_.setZero();
+		null_space_map = Eigen::MatrixXd::Identity(size_, size_);
 		int dim = 0, big_size = 0, cnt = 0, cur_rows = 0;
 		double rho;
-        rhos.resize(prob_->getTaskDefinitions().size());
+		rhos.resize(prob_->getTaskDefinitions().size());
 // Get big jacobian size and rho
 		for (auto & it : prob_->getTaskDefinitions())
 		{
@@ -184,15 +184,15 @@ namespace exotica
 		}
 		cnt = 0;
 		big_jacobian.resize(big_size, size_);
-        task_weights.resize(big_size, big_size);
-        task_weights.setZero();
-        diag.resize(big_size);
-        err = 0;
-        cur_rows = 0;
+		task_weights.resize(big_size, big_size);
+		task_weights.setZero();
+		diag.resize(big_size);
+		err = 0;
+		cur_rows = 0;
 // Get big task error
-        task_error.resize(big_size, 1);
+		task_error.resize(big_size, 1);
 
-        // Get big jacobian and C
+		// Get big jacobian and C
 		for (auto & it : prob_->getTaskDefinitions())
 		{
 			boost::shared_ptr<TaskSqrError> task =
@@ -200,37 +200,39 @@ namespace exotica
 			task->getRho(rho);
 			if (rho > 0)
 			{
-                task->taskSpaceDim(dim);
-                //Eigen::MatrixXd tmp_jac(dim, size_);
-                task->jacobian(big_jacobian.block(cur_rows, 0, dim, size_));
-                //big_jacobian.block(cur_rows, 0, dim, size_) = tmp_jac;
+				task->taskSpaceDim(dim);
+				//Eigen::MatrixXd tmp_jac(dim, size_);
+				task->jacobian(big_jacobian.block(cur_rows, 0, dim, size_));
+				//big_jacobian.block(cur_rows, 0, dim, size_) = tmp_jac;
 				diag.block(cur_rows, 0, dim, 1) = rhos[cnt];
-                cnt++;
+				cnt++;
 
-                goal.resize(dim);
-                phi.resize(dim);
-                if (!ok(task->getGoal(goal)))
-                {
-                    std::cout << "Velocity solver get goal failed" << std::endl;
-                    return FAILURE;
-                }
-                if (!ok(task->phi(phi)))
-                {
-                    std::cout << "Velocity solver get phi failed" << std::endl;
-                    return FAILURE;
-                }
-                task_error.segment(cur_rows, dim) = goal - phi;
-                err += task_error.norm();
+				goal.resize(dim);
+				phi.resize(dim);
+				if (!ok(task->getGoal(goal)))
+				{
+					std::cout << "Velocity solver get goal failed" << std::endl;
+					return FAILURE;
+				}
+				if (!ok(task->phi(phi)))
+				{
+					std::cout << "Velocity solver get phi failed" << std::endl;
+					return FAILURE;
+				}
+				task_error.segment(cur_rows, dim) = goal - phi;
+				err += task_error.norm();
 				cur_rows += dim;
 			}
 		}
 		task_weights.diagonal() = diag;
-
+		std::cout<<"Big Jac\n"<<big_jacobian<<std::endl;
 // Compute velocity
 
-        inv_jacobian = ((big_jacobian.transpose()*task_weights*big_jacobian+prob_->getW()).inverse()* big_jacobian.transpose() * task_weights); //(Jt*C*J+W)
-        vel_vec_+= null_space_map * inv_jacobian * task_error;
-        null_space_map *= (Eigen::MatrixXd::Identity(size_, size_)- inv_jacobian * big_jacobian);
+		inv_jacobian =
+				((big_jacobian.transpose() * task_weights * big_jacobian + prob_->getW()).inverse()
+						* big_jacobian.transpose() * task_weights); //(Jt*C*J+W)
+		vel_vec_ = inv_jacobian * task_error;
+		//null_space_map *= (Eigen::MatrixXd::Identity(size_, size_)- inv_jacobian * big_jacobian);
 		return SUCCESS;
 	}
 }

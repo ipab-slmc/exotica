@@ -60,6 +60,7 @@ namespace exotica
 		}
 		if (pre_update_callback_)
 			pre_update_callback_(this, t);
+		dist_info_.resetDistance();
 		if (!ok(computeDistace(x)))
 			return FAILURE;
 		if (!ok(setPhi(computeForwardMap(), t)))
@@ -97,6 +98,7 @@ namespace exotica
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, laas_);
 		tmp_handle = handle.FirstChildElement("useAll");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, useAll_);
+
 		if (scene_ == nullptr)
 			return MMB_NIN;
 		solver_.reset(new kinematica::KinematicTree(scene_->getSolver()));
@@ -108,11 +110,17 @@ namespace exotica
 
 		if (useAll_->data)
 		{
+			std::map<std::string, bool> ignore_list_;
+			//ignore_list_["HEAD_LINK1"] = true;
+			ignore_list_["LLEG_LINK0"] = true;
+			ignore_list_["RLEG_LINK0"] = true;
+			ignore_list_["l_ankle"] = true;
+			ignore_list_["r_ankle"] = true;
 			links_.clear();
 			for (KDL::Segment & it : segs)
 			{
-				if(it.getName().compare("HEAD_LINK0")!=0 && it.getName().compare("HEAD_LINK1")!=0)
-				links_.push_back(it.getName());
+				if (ignore_list_.find(it.getName()) == ignore_list_.end())
+					links_.push_back(it.getName());
 			}
 			initial_sol_.end_effector_segs = links_;
 			initial_sol_.end_effector_offs = std::vector<KDL::Frame>(links_.size());
@@ -174,11 +182,14 @@ namespace exotica
 			return phi;
 		for (auto & it : dist_info_.link_dist_map_)
 		{
+//			if(it.first.compare("HEAD_LINK1")==0)
+//				std::cout<<"head dist "<<it.second.d<<std::endl;
 			if (it.second.d > m_)
 				d = 0.0;
-			else if (it.second.d < 0)
+			else if (it.second.d <= 0.005)
 			{
-				std::cout << " Collision detected between [" << it.first << "] and [" << it.second.o2 << "]\n";
+				if (publishDebug_)
+					std::cout << " Collision detected between [" << it.first << "] and [" << it.second.o2 << "] " << it.second.d << "m \n";
 				d = 1.0;
 			}
 			else
@@ -202,7 +213,7 @@ namespace exotica
 		{
 			if (it.second.d > m_)
 				d(links_map_.at(it.first)) = 0.0;
-			else if (it.second.d < 0)
+			else if (it.second.d <= 0.005)
 			{
 				d(links_map_.at(it.first)) = 1.0;
 			}
@@ -218,13 +229,26 @@ namespace exotica
 			i++;
 		}
 
-		Eigen::MatrixXd J(3 * M, N);
+		Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3 * M, N);
 		solver_->generateJacobian(J);
 
 		for (auto & it : dist_info_.link_dist_map_)
 		{
-			jac += ((2.0 * d(links_map_.at(it.first))) / m_)
-					* (it.second.norm1.transpose() * J.block(3 * links_map_.at(it.first), 0, 3, N));
+			if (it.second.d <= m_)
+			{
+				if (it.second.d <= 0.005)
+				{
+					Eigen::Vector3d tmpnorm = it.second.c2 - it.second.c1;
+					tmpnorm.normalize();
+					jac += ((2.0 * 0.005) / m_)
+							* (tmpnorm.transpose() * J.block(3 * links_map_.at(it.first), 0, 3, N));
+				}
+				else
+
+					jac += ((2.0 * d(links_map_.at(it.first))) / m_)
+							* (it.second.norm1.transpose()
+									* J.block(3 * links_map_.at(it.first), 0, 3, N));
+			}
 			i++;
 		}
 		solver_->updateEndEffectors(initial_sol_);
@@ -306,7 +330,7 @@ namespace exotica
 		for (int i = 0; i < robot_objs.size(); i++)
 		{
 			collision_detection::CollisionGeometryData* cd1 =
-					static_cast<collision_detection::CollisionGeometryData*>(robot_objs[i]->getCollisionGeometry()->getUserData());
+					static_cast<collision_detection::CollisionGeometryData*>(robot_objs[i]->collisionGeometry()->getUserData());
 			for (int k = 0; k < links_.size(); k++)
 				if (dist_info_.hasLink(cd1->getID()))
 				{
@@ -314,9 +338,11 @@ namespace exotica
 					{
 						res.clear();
 						collision_detection::CollisionGeometryData* cd2 =
-								static_cast<collision_detection::CollisionGeometryData*>(world_objs[j]->getCollisionGeometry()->getUserData());
+								static_cast<collision_detection::CollisionGeometryData*>(world_objs[j]->collisionGeometry()->getUserData());
 						double dist =
 								fcl::distance(robot_objs[i].get(), world_objs[j].get(), req, res);
+//						if(cd1->getID().compare("HEAD_LINK1")==0)
+//							std::cout<<"dist = "<<dist<<" fcl dist= "<<res.min_distance<<std::endl;
 						DistancePair dist_pair;
 						dist_pair.id1 = res.b1;
 						dist_pair.id2 = res.b2;
@@ -335,7 +361,7 @@ namespace exotica
 						dist_pair.norm1.normalize();
 						dist_pair.norm2 = dist_pair.p2 - dist_pair.c2;
 						dist_pair.norm2.normalize();
-						dist_pair.d = dist;
+						dist_pair.d = res.min_distance;
 						dist_info_.setDistance(dist_pair);
                         if(publishDebug_)
                         {
@@ -374,7 +400,7 @@ namespace exotica
 		std::vector<double> q(4);
 		tf.M.GetQuaternion(q[0], q[1], q[2], q[3]);
 		fcl::Quaternion3f quat(q[3], q[0], q[1], q[2]);
-		fcl::Vec3f vec(tf.p.x(), tf.p.y(), tf.p.z()+0.05);
+		fcl::Vec3f vec(tf.p.x(), tf.p.y(), tf.p.z() + 0.05);
 		obs_in_base_tf_.setTransform(quat, vec);
 		return SUCCESS;
 	}

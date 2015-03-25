@@ -83,6 +83,16 @@ namespace exotica
 				return true;
 			}
 
+			// \Resetall distances
+			bool resetDistance()
+			{
+				if(!initialised_)
+					return false;
+				for (auto & it : link_dist_map_)
+					it.second.d = 100;
+				return true;
+			}
+
 			//	\Get distance of particular link
 			bool getDistance(const std::string & link, DistancePair & dist_pair)
 			{

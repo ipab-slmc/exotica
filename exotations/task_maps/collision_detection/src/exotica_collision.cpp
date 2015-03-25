@@ -32,8 +32,6 @@ namespace exotica
 		close_.type = visualization_msgs::Marker::LINE_LIST;
 		close_.header.frame_id = "/base_link";
 		close_.scale.x = 0.004;
-		close_.color.g = 1;
-		close_.color.a = 1;
 	}
 
 	CollisionAvoidance::~CollisionAvoidance()
@@ -113,10 +111,10 @@ namespace exotica
 		{
 			std::map<std::string, bool> ignore_list_;
 			//ignore_list_["HEAD_LINK1"] = true;
-//			ignore_list_["LLEG_LINK0"] = true;
-//			ignore_list_["RLEG_LINK0"] = true;
-//			ignore_list_["l_ankle"] = true;
-//			ignore_list_["r_ankle"] = true;
+			ignore_list_["LLEG_LINK0"] = true;
+			ignore_list_["RLEG_LINK0"] = true;
+			ignore_list_["l_ankle"] = true;
+			ignore_list_["r_ankle"] = true;
 			links_.clear();
 			for (KDL::Segment & it : segs)
 			{
@@ -183,81 +181,87 @@ namespace exotica
 			return phi;
 		for (auto & it : dist_info_.link_dist_map_)
 		{
-//			if(it.first.compare("HEAD_LINK1")==0)
-//				std::cout<<"head dist "<<it.second.d<<std::endl;
-			if (it.second.d > m_)
-				d = 0.0;
-			else if (it.second.d <= 0.005)
+			for (int i = 0; i < it.second.size(); i++)
 			{
-				if (publishDebug_)
-					std::cout << " Collision detected between [" << it.first << "] and [" << it.second.o2 << "] " << it.second.d << "m \n";
-				d = 1.0;
+				if (it.second[i].d > m_)
+					it.second[i].cost = 0;
+				else if (it.second[i].d <= 0.005)
+				{
+					if (publishDebug_)
+						std::cout << " Collision detected between [" << it.first << "] and [" << it.second[i].o2 << "] " << it.second[i].d << "m \n";
+					it.second[i].cost = 1.0;
+				}
+				else
+					it.second[i].cost = 1.0 - it.second[i].d / m_;
+				phi(0) += (double) it.second[i].cost * it.second[i].cost;
 			}
-			else
-				d = (1.0 - it.second.d / m_);
-			phi(0) += (double) d * d;
 		}
 		return phi;
 	}
 
 	Eigen::MatrixXd CollisionAvoidance::computeJacobian(const int size)
 	{
-		int i = 0, M = useAll_->data ? links_map_.size() : scene_->getMapSize(), N = size;
-		Eigen::VectorXd d(M);
+		int M = useAll_->data ? links_map_.size() : scene_->getMapSize(), N = size, cnt = 0;
+		std::vector<double> cost(0);
 		Eigen::MatrixXd jac(1, N);
 		jac.setZero();
-		KDL::Frame tip_offset, cp_offset, eff_offset;
+		KDL::Frame tip_offset, cp_offset;
 		Eigen::VectorXd phi(3 * M);
-		solver_->generateForwardMap(phi);
+		if (!solver_->generateForwardMap(phi))
+			INDICATE_FAILURE
 
 		kinematica::SolutionForm_t tmp_sol;
 		tmp_sol.end_effector_offs.clear();
 		tmp_sol.end_effector_segs.clear();
-		for (auto & it : dist_info_.link_dist_map_)
-		{
-			if (it.second.d > m_)
-				d(links_map_.at(it.first)) = 0.0;
-			else if (it.second.d <= 0.005)
-			{
-				d(links_map_.at(it.first)) = 1.0;
-			}
-			else
-			{
-				d(links_map_.at(it.first)) = (1.0 - it.second.d / m_);
-			}
-			tip_offset = KDL::Frame(KDL::Vector(phi(3 * links_map_.at(it.first)), phi(3
-					* links_map_.at(it.first) + 1), phi(3 * links_map_.at(it.first) + 2)));
-			cp_offset = KDL::Frame(KDL::Vector(it.second.p1(0), it.second.p1(1), it.second.p1(2)));
-			eff_offset = tip_offset.Inverse() * cp_offset;
-			tmp_sol.end_effector_segs.push_back(it.second.o1);
-			tmp_sol.end_effector_offs.push_back(eff_offset);
-			//solver_->modifyEndEffector(it.second.o1, eff_offset);
-			i++;
-		}
-		solver_->updateEndEffectors(tmp_sol);
-		Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3 * M, N);
-		solver_->generateJacobian(J);
 
+		eff_map_.clear();
 		for (auto & it : dist_info_.link_dist_map_)
 		{
-			if (it.second.d <= m_)
+			for (int i = 0; i < it.second.size(); i++)
 			{
-				if (it.second.d <= 0.005)
+				tip_offset = KDL::Frame(KDL::Vector(phi(3 * links_map_.at(it.first)), phi(3
+						* links_map_.at(it.first) + 1), phi(3 * links_map_.at(it.first) + 2)));
+				cp_offset =
+						KDL::Frame(KDL::Vector(it.second[i].p1(0), it.second[i].p1(1), it.second[i].p1(2)));
+				KDL::Frame eff_offset = tip_offset.Inverse() * cp_offset;
+				tmp_sol.end_effector_segs.push_back(it.first);
+				tmp_sol.end_effector_offs.push_back(eff_offset);
+				cnt++;
+			}
+		}
+		if (!solver_->updateEndEffectors(tmp_sol))
+			INDICATE_FAILURE
+		if (!solver_->generateForwardMap())
+			INDICATE_FAILURE
+		Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3 * cnt, N);
+		if (!solver_->generateJacobian(J))
+			INDICATE_FAILURE
+
+		cnt = 0;
+		for (auto & it : dist_info_.link_dist_map_)
+		{
+			for (int i = 0; i < it.second.size(); i++)
+			{
+				if (it.second[i].d <= m_)
 				{
-					Eigen::Vector3d tmpnorm = it.second.c2 - it.second.c1;
-					tmpnorm.normalize();
-					jac += ((2.0 * 0.005) / m_)
-							* (tmpnorm.transpose() * J.block(3 * links_map_.at(it.first), 0, 3, N));
-				}
-				else
+					if (it.second[i].d <= 0.005)
+					{
+						Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
+						tmpnorm.normalize();
+						jac += ((2.0 * 0.005) / m_)
+								* (tmpnorm.transpose() * J.block(3 * cnt, 0, 3, N));
+					}
+					else
 
-					jac += ((2.0 * d(links_map_.at(it.first))) / m_)
-							* (it.second.norm1.transpose()
-									* J.block(3 * links_map_.at(it.first), 0, 3, N));
+						jac += ((2.0 * it.second[i].cost) / m_)
+								* (it.second[i].norm1.transpose() * J.block(3 * cnt, 0, 3, N));
+				}
+				cnt++;
 			}
-			i++;
+
 		}
-		solver_->updateEndEffectors(initial_sol_);
+		if (!solver_->updateEndEffectors(initial_sol_))
+			INDICATE_FAILURE
 		return jac;
 	}
 
@@ -324,13 +328,13 @@ namespace exotica
 				wall_pub_.publish(wall_marker_);
 			}
 		}
-
 		fcl::DistanceRequest req(true);
 		fcl::DistanceResult res;
 		Eigen::Vector3d p1, p2;
 		if (publishDebug_)
 		{
 			close_.points.clear();
+			close_.colors.clear();
 		}
 		for (int i = 0; i < robot_objs.size(); i++)
 		{
@@ -346,8 +350,6 @@ namespace exotica
 								static_cast<collision_detection::CollisionGeometryData*>(world_objs[j]->collisionGeometry()->getUserData());
 						double dist =
 								fcl::distance(robot_objs[i].get(), world_objs[j].get(), req, res);
-//						if(cd1->getID().compare("HEAD_LINK1")==0)
-//							std::cout<<"dist = "<<dist<<" fcl dist= "<<res.min_distance<<std::endl;
 						DistancePair dist_pair;
 						dist_pair.id1 = res.b1;
 						dist_pair.id2 = res.b2;
@@ -379,6 +381,29 @@ namespace exotica
 							p2.z = dist_pair.p2(2);
 							close_.points.push_back(p1);
 							close_.points.push_back(p2);
+							std_msgs::ColorRGBA c1, c2;
+							if (dist < 0.005)
+							{
+								c1.r = 1;
+								c1.g = 0;
+								c1.b = 0;
+							}
+							else if (dist < m_)
+							{
+								c1.r = dist / m_;
+								c1.g = 1 - c1.r;
+								c1.b = 0;
+							}
+							else
+							{
+								c1.r = 0;
+								c1.g = 1;
+								c1.b = 0;
+							}
+							c1.a = 1;
+							c2 = c1;
+							close_.colors.push_back(c1);
+							close_.colors.push_back(c2);
 						}
 					}
 					break;

@@ -13,7 +13,7 @@ namespace exotica
 	struct DistancePair
 	{
 			DistancePair() :
-					id1(-1), id2(-1), hasNorm(false), d(100), isLink2(false)
+					id1(-1), id2(-1), hasNorm(false), d(100), isLink2(false),cost(0.0)
 			{
 
 			}
@@ -42,6 +42,7 @@ namespace exotica
 			Eigen::Vector3d norm2;
 
 			double d;	// Distance
+			double cost;
 			bool hasNorm;
 	};
 	struct DistanceInfo
@@ -57,14 +58,14 @@ namespace exotica
 			}
 
 			//	\Map between links and distance pairs
-			std::map<std::string, DistancePair> link_dist_map_;
+			std::map<std::string, std::vector<DistancePair> > link_dist_map_;
 
 			//	\Initialise the map
 			bool initialise(const std::vector<std::string> & links)
 			{
 				link_dist_map_.clear();
 				for (int i = 0; i < links.size(); i++)
-					link_dist_map_[links[i]] = DistancePair();
+					link_dist_map_[links[i]].clear();
 				initialised_ = true;
 				return true;
 			}
@@ -76,25 +77,23 @@ namespace exotica
 					return false;
 				if (link_dist_map_.find(dist_pair.o1) == link_dist_map_.end())
 					return false;
-				if (link_dist_map_.at(dist_pair.o1).d > dist_pair.d && dist_pair.d != 0)
-				{
-					link_dist_map_.at(dist_pair.o1) = dist_pair;
-				}
+
+				link_dist_map_.at(dist_pair.o1).push_back(dist_pair);
 				return true;
 			}
 
 			// \Resetall distances
 			bool resetDistance()
 			{
-				if(!initialised_)
+				if (!initialised_)
 					return false;
 				for (auto & it : link_dist_map_)
-					it.second.d = 100;
+					it.second.clear();
 				return true;
 			}
 
 			//	\Get distance of particular link
-			bool getDistance(const std::string & link, DistancePair & dist_pair)
+			bool getDistance(const std::string & link, std::vector<DistancePair> & dist_pair)
 			{
 				boost::mutex::scoped_lock(dist_lock_);
 				if (!initialised_)
@@ -146,8 +145,9 @@ namespace exotica
 					std::cout << "Distance information:" << std::endl;
 					for (auto & it : link_dist_map_)
 					{
-						std::cout << "Distance between [" << it.first << "] and [" << it.second.o2
-								<< "] is " << it.second.d << std::endl;
+						for (int i = 0; i < it.second.size(); i++)
+							std::cout << "Distance between [" << it.first << "] and ["
+									<< it.second[i].o2 << "] is " << it.second[i].d << std::endl;
 					}
 
 				}

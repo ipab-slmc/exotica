@@ -21,7 +21,7 @@ namespace exotica
 		close_pub_ = nh_.advertise<visualization_msgs::Marker>("close_marker", 1);
 		wall_marker_.type = visualization_msgs::Marker::MESH_RESOURCE;
 		wall_marker_.header.frame_id = "/base_link";
-		wall_marker_.color.a = 0.5;
+		wall_marker_.color.a = 0;
 		wall_marker_.color.r = 1.0;
 		wall_marker_.color.g = 1.0;
 		wall_marker_.color.b = 1.0;
@@ -113,10 +113,10 @@ namespace exotica
 		{
 			std::map<std::string, bool> ignore_list_;
 			//ignore_list_["HEAD_LINK1"] = true;
-			ignore_list_["LLEG_LINK0"] = true;
-			ignore_list_["RLEG_LINK0"] = true;
-			ignore_list_["l_ankle"] = true;
-			ignore_list_["r_ankle"] = true;
+//			ignore_list_["LLEG_LINK0"] = true;
+//			ignore_list_["RLEG_LINK0"] = true;
+//			ignore_list_["l_ankle"] = true;
+//			ignore_list_["r_ankle"] = true;
 			links_.clear();
 			for (KDL::Segment & it : segs)
 			{
@@ -210,6 +210,9 @@ namespace exotica
 		Eigen::VectorXd phi(3 * M);
 		solver_->generateForwardMap(phi);
 
+		kinematica::SolutionForm_t tmp_sol;
+		tmp_sol.end_effector_offs.clear();
+		tmp_sol.end_effector_segs.clear();
 		for (auto & it : dist_info_.link_dist_map_)
 		{
 			if (it.second.d > m_)
@@ -226,10 +229,12 @@ namespace exotica
 					* links_map_.at(it.first) + 1), phi(3 * links_map_.at(it.first) + 2)));
 			cp_offset = KDL::Frame(KDL::Vector(it.second.p1(0), it.second.p1(1), it.second.p1(2)));
 			eff_offset = tip_offset.Inverse() * cp_offset;
-			solver_->modifyEndEffector(it.second.o1, eff_offset);
+			tmp_sol.end_effector_segs.push_back(it.second.o1);
+			tmp_sol.end_effector_offs.push_back(eff_offset);
+			//solver_->modifyEndEffector(it.second.o1, eff_offset);
 			i++;
 		}
-
+		solver_->updateEndEffectors(tmp_sol);
 		Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3 * M, N);
 		solver_->generateJacobian(J);
 

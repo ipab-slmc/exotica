@@ -54,7 +54,7 @@ namespace exotica
 			bool multi_objs_;
 		public:
 			DistanceInfo() :
-					overall_closest_(0), initialised_(false), multi_objs_(false)
+					overall_closest_(0), initialised_(false), multi_objs_(true)
 			{
 			}
 

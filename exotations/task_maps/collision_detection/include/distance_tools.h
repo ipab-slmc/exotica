@@ -13,7 +13,7 @@ namespace exotica
 	struct DistancePair
 	{
 			DistancePair() :
-					id1(-1), id2(-1), hasNorm(false), d(100), isLink2(false),cost(0.0)
+					id1(-1), id2(-1), hasNorm(false), d(100), isLink2(false), cost(0.0)
 			{
 
 			}
@@ -51,9 +51,10 @@ namespace exotica
 			double overall_closest_;
 			double initialised_;
 			boost::mutex dist_lock_;
+			bool multi_objs_;
 		public:
 			DistanceInfo() :
-					overall_closest_(0), initialised_(false)
+					overall_closest_(0), initialised_(false), multi_objs_(false)
 			{
 			}
 
@@ -77,8 +78,15 @@ namespace exotica
 					return false;
 				if (link_dist_map_.find(dist_pair.o1) == link_dist_map_.end())
 					return false;
-
-				link_dist_map_.at(dist_pair.o1).push_back(dist_pair);
+				if (!multi_objs_)
+				{
+					if (link_dist_map_.at(dist_pair.o1).size() == 0)
+						link_dist_map_.at(dist_pair.o1).push_back(dist_pair);
+					else if (link_dist_map_.at(dist_pair.o1)[0].d > dist_pair.d)
+						link_dist_map_.at(dist_pair.o1)[0] = dist_pair;
+				}
+				else
+					link_dist_map_.at(dist_pair.o1).push_back(dist_pair);
 				return true;
 			}
 

@@ -27,6 +27,7 @@
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit/robot_state/conversions.h>
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 namespace exotica
 {
 	/**
@@ -70,7 +71,7 @@ namespace exotica
 			 * @param	tf	Transform
 			 */
 			EReturn setObsFrame(const KDL::Frame & tf);
-            EReturn setPreUpdateClaaback(boost::function<void(CollisionAvoidance*,int)> pre_update_callback);
+            EReturn setPreUpdateCallback(boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &,int)> pre_update_callback);
 
             bool publishDebug_;
 		protected:
@@ -125,12 +126,12 @@ namespace exotica
 			EParam<std_msgs::Bool> laas_;
             EParam<std_msgs::Bool> useAll_;
 			fcl::Transform3f obs_in_base_tf_;
-            boost::function<void(CollisionAvoidance*, int)> pre_update_callback_;
+            boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback_;
 
             ros::NodeHandle nh_;
             ros::Publisher state_pub_;
             ros::Publisher wall_pub_;
-            visualization_msgs::Marker wall_marker_;
+            visualization_msgs::MarkerArray wall_marker_;
             ros::Publisher close_pub_;
             visualization_msgs::Marker close_;
 	};

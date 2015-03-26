@@ -28,6 +28,6 @@ exotica::EReturn exotica::Identity::initDerived(tinyxml2::XMLHandle & handle)
 
 exotica::EReturn exotica::Identity::taskSpaceDim(int & task_dim)
 {
-  task_dim = -1;
+  task_dim = scene_->getNumJoints();
   return exotica::SUCCESS;
 }

@@ -13,7 +13,7 @@ REGISTER_TASKMAP_TYPE("CollisionAvoidance", exotica::CollisionAvoidance);
 namespace exotica
 {
 	CollisionAvoidance::CollisionAvoidance() :
-            m_(0.05), initialised_(false), nh_("CollisionTask"), publishDebug_(false)
+			m_(0.05), initialised_(false), nh_("CollisionTask"), publishDebug_(false)
 	{
 		//TODO
         wall_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("wall_marker", 1);
@@ -89,7 +89,7 @@ namespace exotica
 		{
 			XML_CHECK("margin");
 			XML_OK(getDouble(*xmltmp, m_));
-            std::cout << "Collision Detection: New margin = " << m_ << "\n";
+			std::cout << "Collision Detection: New margin = " << m_ << std::endl;
 		}
         else
         {
@@ -135,7 +135,9 @@ namespace exotica
 			for (KDL::Segment & it : segs)
 			{
 				if (ignore_list_.find(it.getName()) == ignore_list_.end())
+				{
 					links_.push_back(it.getName());
+				}
 			}
 			initial_sol_.end_effector_segs = links_;
 			initial_sol_.end_effector_offs = std::vector<KDL::Frame>(links_.size());
@@ -159,7 +161,125 @@ namespace exotica
 				}
 			}
 		}
-		acm_ = scene_->getPlanningScene()->getAllowedCollisionMatrixNonConst();
+
+		//	\Construct the allowed collision matrix
+		if (laas_->data)
+		{
+			for (int i = 1; i <= 11; i++)
+			{
+				std::vector<std::string> tmp(0);
+				switch (i)
+				{
+					case 1:
+						tmp.push_back("RLEG_LINK2");
+						tmp.push_back("RLEG_LINK3");
+						tmp.push_back("LLEG_LINK2");
+						tmp.push_back("LLEG_LINK3");
+						break;
+					case 2:
+						tmp.push_back("r_ankle");
+						tmp.push_back("l_ankle");
+						break;
+					case 3:
+						tmp.push_back("RARM_LINK4");
+						tmp.push_back("RHAND_LINK0");
+						tmp.push_back("RHAND_LINK1");
+						tmp.push_back("RHAND_LINK2");
+						tmp.push_back("RHAND_LINK3");
+						tmp.push_back("RHAND_LINK4");
+						tmp.push_back("r_wrist");
+						tmp.push_back("LARM_LINK4");
+						tmp.push_back("LHAND_LINK0");
+						tmp.push_back("LHAND_LINK1");
+						tmp.push_back("LHAND_LINK2");
+						tmp.push_back("LHAND_LINK3");
+						tmp.push_back("LHAND_LINK4");
+						tmp.push_back("l_wrist");
+						break;
+					case 4:
+						tmp.push_back("RARM_LINK0");
+						tmp.push_back("RARM_LINK2");
+						tmp.push_back("RARM_LINK3");
+						tmp.push_back("RARM_LINK4");
+						tmp.push_back("RHAND_LINK0");
+						tmp.push_back("RHAND_LINK1");
+						tmp.push_back("RHAND_LINK2");
+						tmp.push_back("RHAND_LINK3");
+						tmp.push_back("RHAND_LINK4");
+						tmp.push_back("r_wrist");
+						tmp.push_back("LARM_LINK0");
+						tmp.push_back("LARM_LINK2");
+						tmp.push_back("LARM_LINK3");
+						tmp.push_back("LARM_LINK4");
+						tmp.push_back("LHAND_LINK0");
+						tmp.push_back("LHAND_LINK1");
+						tmp.push_back("LHAND_LINK2");
+						tmp.push_back("LHAND_LINK3");
+						tmp.push_back("LHAND_LINK4");
+						tmp.push_back("l_wrist");
+
+						tmp.push_back("BODY");
+						tmp.push_back("torso");
+						break;
+					case 5:
+						tmp.push_back("HEAD_LINK1");
+						break;
+					case 6:
+						tmp.push_back("HEAD_LINK1");
+						break;
+					case 7:
+						tmp.push_back("HEAD_LINK1");
+						break;
+					case 8:
+						tmp.push_back("HEAD_LINK1");
+						tmp.push_back("torso");
+						break;
+					case 9:
+						break;
+					case 10:
+						tmp.push_back("RARM_LINK4");
+						tmp.push_back("RHAND_LINK0");
+						tmp.push_back("RHAND_LINK1");
+						tmp.push_back("RHAND_LINK2");
+						tmp.push_back("RHAND_LINK3");
+						tmp.push_back("RHAND_LINK4");
+						tmp.push_back("r_wrist");
+						tmp.push_back("LARM_LINK4");
+						tmp.push_back("LHAND_LINK0");
+						tmp.push_back("LHAND_LINK1");
+						tmp.push_back("LHAND_LINK2");
+						tmp.push_back("LHAND_LINK3");
+						tmp.push_back("LHAND_LINK4");
+						tmp.push_back("l_wrist");
+						break;
+					case 11:
+						tmp.push_back("RARM_LINK4");
+						tmp.push_back("RHAND_LINK0");
+						tmp.push_back("RHAND_LINK1");
+						tmp.push_back("RHAND_LINK2");
+						tmp.push_back("RHAND_LINK3");
+						tmp.push_back("RHAND_LINK4");
+						tmp.push_back("r_wrist");
+						tmp.push_back("LARM_LINK4");
+						tmp.push_back("LHAND_LINK0");
+						tmp.push_back("LHAND_LINK1");
+						tmp.push_back("LHAND_LINK2");
+						tmp.push_back("LHAND_LINK3");
+						tmp.push_back("LHAND_LINK4");
+						tmp.push_back("l_wrist");
+						tmp.push_back("BODY");
+						tmp.push_back("torso");
+						tmp.push_back("RLEG_LINK0");
+						tmp.push_back("RLEG_LINK2");
+						tmp.push_back("LLEG_LINK0");
+						tmp.push_back("LLEG_LINK2");
+						break;
+					default:
+						break;
+				}
+				acm_["wall_" + std::to_string(i)] = tmp;
+			}
+		}
 
 		initialised_ = true;
 		return SUCCESS;
@@ -197,76 +317,87 @@ namespace exotica
 			return phi;
 		for (auto & it : dist_info_.link_dist_map_)
 		{
-//			if(it.first.compare("HEAD_LINK1")==0)
-//				std::cout<<"head dist "<<it.second.d<<std::endl;
-			if (it.second.d > m_)
-				d = 0.0;
-			else if (it.second.d <= 0.005)
+			for (int i = 0; i < it.second.size(); i++)
 			{
-				if (publishDebug_)
-					std::cout << " Collision detected between [" << it.first << "] and [" << it.second.o2 << "] " << it.second.d << "m \n";
-				d = 1.0;
+				if (it.second[i].d > m_)
+					it.second[i].cost = 0;
+				else if (it.second[i].d <= 0.005)
+				{
+					if (publishDebug_)
+						std::cout << " Collision detected between [" << it.first << "] and [" << it.second[i].o2 << "] " << it.second[i].d << "m \n";
+					it.second[i].cost = 1.0;
+				}
+				else
+					it.second[i].cost = 1.0 - it.second[i].d / m_;
+				phi(0) += (double) it.second[i].cost * it.second[i].cost;
 			}
-			else
-				d = (1.0 - it.second.d / m_);
-			phi(0) += (double) d * d;
 		}
 		return phi;
 	}
 
 	Eigen::MatrixXd CollisionAvoidance::computeJacobian(const int size)
 	{
-		int i = 0, M = useAll_->data ? links_map_.size() : scene_->getMapSize(), N = size;
-		Eigen::VectorXd d(M);
+		int M = useAll_->data ? links_map_.size() : scene_->getMapSize(), N = size, cnt = 0;
+		std::vector<double> cost(0);
 		Eigen::MatrixXd jac(1, N);
 		jac.setZero();
-		KDL::Frame tip_offset, cp_offset, eff_offset;
+		KDL::Frame tip_offset, cp_offset;
 		Eigen::VectorXd phi(3 * M);
-		solver_->generateForwardMap(phi);
+		if (!solver_->generateForwardMap(phi))
+			INDICATE_FAILURE
 
+		kinematica::SolutionForm_t tmp_sol;
+		tmp_sol.end_effector_offs.clear();
+		tmp_sol.end_effector_segs.clear();
+
+		eff_map_.clear();
 		for (auto & it : dist_info_.link_dist_map_)
 		{
-			if (it.second.d > m_)
-				d(links_map_.at(it.first)) = 0.0;
-			else if (it.second.d <= 0.005)
+			for (int i = 0; i < it.second.size(); i++)
 			{
-				d(links_map_.at(it.first)) = 1.0;
+				tip_offset = KDL::Frame(KDL::Vector(phi(3 * links_map_.at(it.first)), phi(3
+						* links_map_.at(it.first) + 1), phi(3 * links_map_.at(it.first) + 2)));
+				cp_offset =
+						KDL::Frame(KDL::Vector(it.second[i].p1(0), it.second[i].p1(1), it.second[i].p1(2)));
+				KDL::Frame eff_offset = tip_offset.Inverse() * cp_offset;
+				tmp_sol.end_effector_segs.push_back(it.first);
+				tmp_sol.end_effector_offs.push_back(eff_offset);
+				cnt++;
 			}
-			else
-			{
-				d(links_map_.at(it.first)) = (1.0 - it.second.d / m_);
-			}
-			tip_offset = KDL::Frame(KDL::Vector(phi(3 * links_map_.at(it.first)), phi(3
-					* links_map_.at(it.first) + 1), phi(3 * links_map_.at(it.first) + 2)));
-			cp_offset = KDL::Frame(KDL::Vector(it.second.p1(0), it.second.p1(1), it.second.p1(2)));
-			eff_offset = tip_offset.Inverse() * cp_offset;
-			solver_->modifyEndEffector(it.second.o1, eff_offset);
-			i++;
 		}
+		if (!solver_->updateEndEffectors(tmp_sol))
+			INDICATE_FAILURE
+		if (!solver_->generateForwardMap())
+			INDICATE_FAILURE
+		Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3 * cnt, N);
+		if (!solver_->generateJacobian(J))
+			INDICATE_FAILURE
 
-		Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3 * M, N);
-		solver_->generateJacobian(J);
-
+		cnt = 0;
 		for (auto & it : dist_info_.link_dist_map_)
 		{
-			if (it.second.d <= m_)
+			for (int i = 0; i < it.second.size(); i++)
 			{
-				if (it.second.d <= 0.005)
+				if (it.second[i].d <= m_)
 				{
-					Eigen::Vector3d tmpnorm = it.second.c2 - it.second.c1;
-					tmpnorm.normalize();
-					jac += ((2.0 * 0.005) / m_)
-							* (tmpnorm.transpose() * J.block(3 * links_map_.at(it.first), 0, 3, N));
-				}
-				else
+					if (it.second[i].d <= 0.005)
+					{
+						Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
+						tmpnorm.normalize();
+						jac += ((2.0 * 0.005) / m_)
+								* (tmpnorm.transpose() * J.block(3 * cnt, 0, 3, N));
+					}
+					else
 
-					jac += ((2.0 * d(links_map_.at(it.first))) / m_)
-							* (it.second.norm1.transpose()
-									* J.block(3 * links_map_.at(it.first), 0, 3, N));
+						jac += ((2.0 * it.second[i].cost) / m_)
+								* (it.second[i].norm1.transpose() * J.block(3 * cnt, 0, 3, N));
+				}
+				cnt++;
 			}
-			i++;
+
 		}
-		solver_->updateEndEffectors(initial_sol_);
+		if (!solver_->updateEndEffectors(initial_sol_))
+			INDICATE_FAILURE
 		return jac;
 	}
 
@@ -343,10 +474,11 @@ namespace exotica
 		fcl::DistanceRequest req(true);
 		fcl::DistanceResult res;
 		Eigen::Vector3d p1, p2;
-        if(publishDebug_)
-        {
-            close_.points.clear();
-        }
+		if (publishDebug_)
+		{
+			close_.points.clear();
+			close_.colors.clear();
+		}
 		for (int i = 0; i < robot_objs.size(); i++)
 		{
 			collision_detection::CollisionGeometryData* cd1 =
@@ -359,45 +491,85 @@ namespace exotica
 						res.clear();
 						collision_detection::CollisionGeometryData* cd2 =
 								static_cast<collision_detection::CollisionGeometryData*>(world_objs[j]->collisionGeometry()->getUserData());
-						double dist =
-								fcl::distance(robot_objs[i].get(), world_objs[j].get(), req, res);
-//						if(cd1->getID().compare("HEAD_LINK1")==0)
-//							std::cout<<"dist = "<<dist<<" fcl dist= "<<res.min_distance<<std::endl;
-                        //if(res.min_distance<=m_)
-                        {
-                            DistancePair dist_pair;
-                            dist_pair.id1 = res.b1;
-                            dist_pair.id2 = res.b2;
-                            dist_pair.o1 = cd1->getID();
-                            dist_pair.o2 = cd2->getID();
-                            dist_pair.p1 =
-                                    Eigen::Vector3d(res.nearest_points[0].data.vs[0], res.nearest_points[0].data.vs[1], res.nearest_points[0].data.vs[2]);
-                            dist_pair.p2 =
-                                    Eigen::Vector3d(res.nearest_points[1].data.vs[0], res.nearest_points[1].data.vs[1], res.nearest_points[1].data.vs[2]);
+						bool check = true;
+						if (laas_->data)
+						{
+							check = false;
+							std::map<std::string, std::vector<std::string>>::iterator it =
+									acm_.find(cd2->getID());
+							if (it != acm_.end())
+							{
+								for (int j = 0; j < it->second.size(); j++)
+								{
+									if (it->second[j].compare(cd1->getID()) == 0)
+									{
+										//ROS_WARN_STREAM("Check collision between "<<it->first<<" and "<<cd1->getID());
+										check = true;
+										break;
+									}
+								}
+							}
+						}
+						if (check)
+						{
+							double dist =
+									fcl::distance(robot_objs[i].get(), world_objs[j].get(), req, res);
+							DistancePair dist_pair;
+							dist_pair.id1 = res.b1;
+							dist_pair.id2 = res.b2;
+							dist_pair.o1 = cd1->getID();
+							dist_pair.o2 = cd2->getID();
+							dist_pair.p1 =
+									Eigen::Vector3d(res.nearest_points[0].data.vs[0], res.nearest_points[0].data.vs[1], res.nearest_points[0].data.vs[2]);
+							dist_pair.p2 =
+									Eigen::Vector3d(res.nearest_points[1].data.vs[0], res.nearest_points[1].data.vs[1], res.nearest_points[1].data.vs[2]);
 
-                            dist_pair.c1 =
-                                    Eigen::Vector3d(robot_objs[i]->getTranslation().data.vs[0], robot_objs[i]->getTranslation().data.vs[1], robot_objs[i]->getTranslation().data.vs[2]);
-                            dist_pair.c2 =
-                                    Eigen::Vector3d(world_objs[j]->getTranslation().data.vs[0], world_objs[j]->getTranslation().data.vs[1], world_objs[j]->getTranslation().data.vs[2]);
-                            dist_pair.norm1 = dist_pair.p1 - dist_pair.c1;
-                            dist_pair.norm1.normalize();
-                            dist_pair.norm2 = dist_pair.p2 - dist_pair.c2;
-                            dist_pair.norm2.normalize();
-                            dist_pair.d = res.min_distance;
-                            dist_info_.setDistance(dist_pair);
-                            if(publishDebug_ && res.min_distance<=m_)
-                            {
-                                geometry_msgs::Point p1, p2;
-                                p1.x = dist_pair.p1(0);
-                                p1.y = dist_pair.p1(1);
-                                p1.z = dist_pair.p1(2);
-                                p2.x = dist_pair.p2(0);
-                                p2.y = dist_pair.p2(1);
-                                p2.z = dist_pair.p2(2);
-                                close_.points.push_back(p1);
-                                close_.points.push_back(p2);
-                            }
-                        }
+							dist_pair.c1 =
+									Eigen::Vector3d(robot_objs[i]->getTranslation().data.vs[0], robot_objs[i]->getTranslation().data.vs[1], robot_objs[i]->getTranslation().data.vs[2]);
+							dist_pair.c2 =
+									Eigen::Vector3d(world_objs[j]->getTranslation().data.vs[0], world_objs[j]->getTranslation().data.vs[1], world_objs[j]->getTranslation().data.vs[2]);
+							dist_pair.norm1 = dist_pair.p1 - dist_pair.c1;
+							dist_pair.norm1.normalize();
+							dist_pair.norm2 = dist_pair.p2 - dist_pair.c2;
+							dist_pair.norm2.normalize();
+							dist_pair.d = res.min_distance;
+							dist_info_.setDistance(dist_pair);
+							if (publishDebug_ && dist < 2 * m_)
+							{
+								geometry_msgs::Point p1, p2;
+								p1.x = dist_pair.p1(0);
+								p1.y = dist_pair.p1(1);
+								p1.z = dist_pair.p1(2);
+								p2.x = dist_pair.p2(0);
+								p2.y = dist_pair.p2(1);
+								p2.z = dist_pair.p2(2);
+								close_.points.push_back(p1);
+								close_.points.push_back(p2);
+								std_msgs::ColorRGBA c1, c2;
+								if (dist < 0.005)
+								{
+									c1.r = 1;
+									c1.g = 0;
+									c1.b = 0;
+								}
+								else if (dist < m_)
+								{
+									c1.r = dist / m_;
+									c1.g = 1 - c1.r;
+									c1.b = 0;
+								}
+								else
+								{
+									c1.r = 0;
+									c1.g = 1;
+									c1.b = 0;
+								}
+								c1.a = 1;
+								c2 = c1;
+								close_.colors.push_back(c1);
+								close_.colors.push_back(c2);
+							}
+						}
 					}
 					break;
 				}

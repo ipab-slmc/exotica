@@ -113,10 +113,11 @@ namespace exotica
 			double m_;	//!< Safe margin
 			std::vector<std::string> links_, joints_;
 			std::map<std::string, int> links_map_;
+			std::map<std::string, std::vector<int> > eff_map_;
 			kinematica::SolutionForm_t initial_sol_;
 
 			exotica::DistanceInfo dist_info_;	//!< Distance information
-			collision_detection::AllowedCollisionMatrix acm_;
+			std::map<std::string, std::vector<std::string>> acm_;
 			std::vector<boost::shared_ptr<fcl::CollisionObject> > dmesh_objs_;
 
 			EParam<std_msgs::String> world_frame_;

@@ -16,7 +16,7 @@ namespace exotica
 			m_(0.05), initialised_(false), nh_("CollisionTask"), publishDebug_(false)
 	{
 		//TODO
-        wall_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("wall_marker", 1);
+		wall_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("wall_marker", 1);
 		state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("disp_state", 1);
 		close_pub_ = nh_.advertise<visualization_msgs::Marker>("close_marker", 1);
 
@@ -27,8 +27,8 @@ namespace exotica
 		//TODO
 	}
 
-    EReturn CollisionAvoidance::setPreUpdateCallback(
-            boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback)
+	EReturn CollisionAvoidance::setPreUpdateCallback(
+			boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback)
 	{
 		pre_update_callback_ = pre_update_callback;
 	}
@@ -46,7 +46,7 @@ namespace exotica
 			return FAILURE;
 		}
 		if (pre_update_callback_)
-            pre_update_callback_(this, x, t);
+			pre_update_callback_(this, x, t);
 		dist_info_.resetDistance();
 		if (!ok(computeDistace(x)))
 			return FAILURE;
@@ -61,16 +61,16 @@ namespace exotica
 	EReturn CollisionAvoidance::initDerived(tinyxml2::XMLHandle & handle)
 	{
 		tinyxml2::XMLElement* xmltmp;
-        if (handle.FirstChildElement("margin").ToElement())
+		if (handle.FirstChildElement("margin").ToElement())
 		{
 			XML_CHECK("margin");
 			XML_OK(getDouble(*xmltmp, m_));
 			std::cout << "Collision Detection: New margin = " << m_ << std::endl;
 		}
-        else
-        {
-            std::cout << "Collision Detection: Using default margin = " << m_ << "\n";
-        }
+		else
+		{
+			std::cout << "Collision Detection: Using default margin = " << m_ << "\n";
+		}
 
 		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("DynamicFrame");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, dynamic_frame_);
@@ -103,20 +103,20 @@ namespace exotica
 		{
 			std::map<std::string, bool> ignore_list_;
 			//ignore_list_["HEAD_LINK1"] = true;
-            //ignore_list_["LLEG_LINK0"] = true;
-            //ignore_list_["RLEG_LINK0"] = true;
+			//ignore_list_["LLEG_LINK0"] = true;
+			//ignore_list_["RLEG_LINK0"] = true;
 			ignore_list_["l_ankle"] = true;
 			ignore_list_["r_ankle"] = true;
-            ignore_list_["RHAND_LINK0"] = true;
-            ignore_list_["RHAND_LINK1"] = true;
-             ignore_list_["RHAND_LINK2"] = true;
-             ignore_list_["RHAND_LINK3"] = true;
-             ignore_list_["RHAND_LINK4"] = true;
-             ignore_list_["LHAND_LINK0"] = true;
-             ignore_list_["LHAND_LINK1"] = true;
-             ignore_list_["LHAND_LINK2"] = true;
-             ignore_list_["LHAND_LINK3"] = true;
-             ignore_list_["LHAND_LINK4"] = true;
+			ignore_list_["RHAND_LINK0"] = true;
+			ignore_list_["RHAND_LINK1"] = true;
+			ignore_list_["RHAND_LINK2"] = true;
+			ignore_list_["RHAND_LINK3"] = true;
+			ignore_list_["RHAND_LINK4"] = true;
+			ignore_list_["LHAND_LINK0"] = true;
+			ignore_list_["LHAND_LINK1"] = true;
+			ignore_list_["LHAND_LINK2"] = true;
+			ignore_list_["LHAND_LINK3"] = true;
+			ignore_list_["LHAND_LINK4"] = true;
 			links_.clear();
 			for (KDL::Segment & it : segs)
 			{
@@ -162,19 +162,19 @@ namespace exotica
 						tmp.push_back("LLEG_LINK2");
 						tmp.push_back("LLEG_LINK3");
 						break;
-                    case 11:
+					case 11:
 						tmp.push_back("r_ankle");
 						tmp.push_back("l_ankle");
-                        //tmp.push_back("LLEG_LINK0");
-                        //tmp.push_back("RLEG_LINK0");
+						tmp.push_back("LLEG_LINK0");
+						tmp.push_back("RLEG_LINK0");
 						break;
-                    case 2:
-                        tmp.push_back("RARM_LINK4");
+					case 2:
+						tmp.push_back("RARM_LINK4");
 						tmp.push_back("r_wrist");
-                        tmp.push_back("LARM_LINK4");
+						tmp.push_back("LARM_LINK4");
 						tmp.push_back("l_wrist");
 						break;
-                    case 3:
+					case 3:
 						tmp.push_back("RARM_LINK0");
 						tmp.push_back("RARM_LINK2");
 						tmp.push_back("RARM_LINK3");
@@ -183,45 +183,45 @@ namespace exotica
 						tmp.push_back("LARM_LINK0");
 						tmp.push_back("LARM_LINK2");
 						tmp.push_back("LARM_LINK3");
-                        tmp.push_back("LARM_LINK4");
+						tmp.push_back("LARM_LINK4");
 						tmp.push_back("l_wrist");
 
-                        tmp.push_back("BODY");
-                        tmp.push_back("torso");
-						break;
-                    case 4:
-                        tmp.push_back("HEAD_LINK1");
-						break;
-                    case 5:
-                        //tmp.push_back("HEAD_LINK1");
-						break;
-                    case 6:
-                        tmp.push_back("HEAD_LINK1");
-						break;
-                    case 7:
-                        tmp.push_back("HEAD_LINK1");
+						tmp.push_back("BODY");
 						tmp.push_back("torso");
 						break;
-                    case 8:
-                        tmp.push_back("HEAD_LINK1");
+					case 4:
+						tmp.push_back("HEAD_LINK1");
 						break;
-                    case 9:
-                        tmp.push_back("RARM_LINK4");
+					case 5:
+						//tmp.push_back("HEAD_LINK1");
+						break;
+					case 6:
+						//tmp.push_back("HEAD_LINK1");
+						break;
+					case 7:
+						tmp.push_back("HEAD_LINK1");
+						tmp.push_back("torso");
+						break;
+					case 8:
+						tmp.push_back("HEAD_LINK1");
+						break;
+					case 9:
+						tmp.push_back("RARM_LINK4");
 						tmp.push_back("r_wrist");
-                        tmp.push_back("LARM_LINK4");
+						tmp.push_back("LARM_LINK4");
 						tmp.push_back("l_wrist");
 						break;
-                    case 10:
-                        tmp.push_back("RARM_LINK4");
+					case 10:
+						tmp.push_back("RARM_LINK4");
 						tmp.push_back("r_wrist");
-                        tmp.push_back("LARM_LINK4");
+						tmp.push_back("LARM_LINK4");
 						tmp.push_back("l_wrist");
 						tmp.push_back("BODY");
 						tmp.push_back("torso");
-                        //tmp.push_back("RLEG_LINK0");
+						tmp.push_back("RLEG_LINK0");
 						tmp.push_back("RLEG_LINK2");
-                        //tmp.push_back("LLEG_LINK0");
-                        tmp.push_back("LLEG_LINK2");
+						tmp.push_back("LLEG_LINK0");
+						tmp.push_back("LLEG_LINK2");
 						break;
 					default:
 						break;
@@ -229,50 +229,53 @@ namespace exotica
 				acm_["wall_" + std::to_string(i)] = tmp;
 			}
 
-            {
-                wall_marker_.markers.resize(12);
-                for(int i=0;i<11;i++)
-                {
-                    wall_marker_.markers[i].type = visualization_msgs::Marker::MESH_RESOURCE;
-                    wall_marker_.markers[i].color.a = 0.0;
-                    wall_marker_.markers[i].color.r = 1.0;
-                    wall_marker_.markers[i].color.g = 1.0;
-                    wall_marker_.markers[i].color.b = 1.0;
-                    wall_marker_.markers[i].scale.x = wall_marker_.markers[i].scale.y = wall_marker_.markers[i].scale.z = 1.0;
-                    wall_marker_.markers[i].mesh_resource = "package://hrp2_14_description/urdf/wall-extended"+std::to_string(i+1)+".obj";
-                    wall_marker_.markers[i].mesh_use_embedded_materials = true;
-                    wall_marker_.markers[i].header.frame_id = "/BODY";
-                    wall_marker_.markers[i].action = visualization_msgs::Marker::ADD;
-                    wall_marker_.markers[i].id = i+1;
-                    wall_marker_.markers[i].ns = "Collision geometry";
-                }
+			{
+				wall_marker_.markers.resize(12);
+				for (int i = 0; i < 11; i++)
+				{
+					wall_marker_.markers[i].type = visualization_msgs::Marker::MESH_RESOURCE;
+					wall_marker_.markers[i].color.a = 0.0;
+					wall_marker_.markers[i].color.r = 1.0;
+					wall_marker_.markers[i].color.g = 1.0;
+					wall_marker_.markers[i].color.b = 1.0;
+					wall_marker_.markers[i].scale.x = wall_marker_.markers[i].scale.y =
+							wall_marker_.markers[i].scale.z = 1.0;
+					wall_marker_.markers[i].mesh_resource =
+							"package://hrp2_14_description/urdf/wall-extended"
+									+ std::to_string(i + 1) + ".obj";
+					wall_marker_.markers[i].mesh_use_embedded_materials = true;
+					wall_marker_.markers[i].header.frame_id = "/BODY";
+					wall_marker_.markers[i].action = visualization_msgs::Marker::ADD;
+					wall_marker_.markers[i].id = i + 1;
+					wall_marker_.markers[i].ns = "Collision geometry";
+				}
 
-                {
-                    int i=11;
-                    wall_marker_.markers[i].type = visualization_msgs::Marker::SPHERE_LIST;
-                    wall_marker_.markers[i].color.a = 1.0;
-                    wall_marker_.markers[i].color.r = 1.0;
-                    wall_marker_.markers[i].color.g = 1.0;
-                    wall_marker_.markers[i].color.b = 1.0;
-                    wall_marker_.markers[i].scale.x = wall_marker_.markers[i].scale.y = wall_marker_.markers[i].scale.z = 0.1;
-                    wall_marker_.markers[i].header.frame_id = "/BODY";
-                    wall_marker_.markers[i].action = visualization_msgs::Marker::ADD;
-                    wall_marker_.markers[i].id = i+1;
-                    wall_marker_.markers[i].ns = "Collision geometry centres";
-                    wall_marker_.markers[i].points.resize(11+links_.size());
-                }
+				{
+					int i = 11;
+					wall_marker_.markers[i].type = visualization_msgs::Marker::SPHERE_LIST;
+					wall_marker_.markers[i].color.a = 1.0;
+					wall_marker_.markers[i].color.r = 1.0;
+					wall_marker_.markers[i].color.g = 1.0;
+					wall_marker_.markers[i].color.b = 1.0;
+					wall_marker_.markers[i].scale.x = wall_marker_.markers[i].scale.y =
+							wall_marker_.markers[i].scale.z = 0.1;
+					wall_marker_.markers[i].header.frame_id = "/BODY";
+					wall_marker_.markers[i].action = visualization_msgs::Marker::ADD;
+					wall_marker_.markers[i].id = i + 1;
+					wall_marker_.markers[i].ns = "Collision geometry centres";
+					wall_marker_.markers[i].points.resize(11 + links_.size());
+				}
 
-                close_.type = visualization_msgs::Marker::LINE_LIST;
-                close_.action = visualization_msgs::Marker::ADD;
-                close_.header.frame_id = "/BODY";
-                close_.scale.x = 0.004;
-                close_.color.g = 1;
-                close_.color.a = 1;
-                close_.id = 0;
-                close_.ns = "Collision distances";
-            }
+				close_.type = visualization_msgs::Marker::LINE_LIST;
+				close_.action = visualization_msgs::Marker::ADD;
+				close_.header.frame_id = "/BODY";
+				close_.scale.x = 0.004;
+				close_.color.g = 1;
+				close_.color.a = 1;
+				close_.id = 0;
+				close_.ns = "Collision distances";
+			}
 		}
-
 
 		initialised_ = true;
 		return SUCCESS;
@@ -318,8 +321,8 @@ namespace exotica
 				{
 					if (publishDebug_)
 						std::cout << " Collision detected between [" << it.first << "] and [" << it.second[i].o2 << "] " << it.second[i].d << "m \n";
-                    Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
-                    it.second[i].cost = 1.0+1.0/tmpnorm.norm();
+					Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
+					it.second[i].cost = 1.0;// + 1.0 / tmpnorm.norm();
 				}
 				else
 					it.second[i].cost = 1.0 - it.second[i].d / m_;
@@ -367,7 +370,7 @@ namespace exotica
 		if (!solver_->generateJacobian(J))
 			INDICATE_FAILURE
 
-        cnt = 0;
+		cnt = 0;
 		for (auto & it : dist_info_.link_dist_map_)
 		{
 
@@ -379,16 +382,16 @@ namespace exotica
 					{
 						Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
 						tmpnorm.normalize();
-                        jac += ((2.0 * (1.0-0.005)) / m_)
+						jac += ((2.0 * (1.0 - 0.005)) / m_)
 								* (tmpnorm.transpose() * J.block(3 * cnt, 0, 3, N));
 					}
 					else
-                    {
-                        Eigen::Vector3d tmpnorm = it.second[i].p2 - it.second[i].p1;
-                        tmpnorm.normalize();
+					{
+						Eigen::Vector3d tmpnorm = it.second[i].p2 - it.second[i].p1;
+						tmpnorm.normalize();
 						jac += ((2.0 * it.second[i].cost) / m_)
-                                * (tmpnorm.transpose() * J.block(3 * cnt, 0, 3, N));
-                    }
+								* (tmpnorm.transpose() * J.block(3 * cnt, 0, 3, N));
+					}
 				}
 				cnt++;
 			}
@@ -437,73 +440,76 @@ namespace exotica
 			}
 		}
 
-        close_.header.stamp=ros::Time::now();
+		close_.header.stamp = ros::Time::now();
 		if (laas_->data)
 		{
 
 			for (int i = 0; i < world_objs.size(); i++)
 			{
-                //fcl::Transform3f orig_transform = world_objs[i]->getTransform();
+				//fcl::Transform3f orig_transform = world_objs[i]->getTransform();
 				world_objs[i]->setTransform(obs_in_base_tf_); // * orig_transform
 			}
-            if(publishDebug_)
-            {
-                moveit_msgs::DisplayRobotState msg;
-                robot_state::robotStateToRobotStateMsg(state, msg.state);
-                msg.state.joint_state.header.stamp=close_.header.stamp;
-                state_pub_.publish(msg);
-                geometry_msgs::Pose pa;
-                pa.position.x = obs_in_base_tf_.getTranslation().data.vs[0];
-                pa.position.y = obs_in_base_tf_.getTranslation().data.vs[1];
-                pa.position.z = obs_in_base_tf_.getTranslation().data.vs[2];
-                pa.orientation.w = obs_in_base_tf_.getQuatRotation().getW();
-                pa.orientation.x = obs_in_base_tf_.getQuatRotation().getX();
-                pa.orientation.y = obs_in_base_tf_.getQuatRotation().getY();
-                pa.orientation.z = obs_in_base_tf_.getQuatRotation().getZ();
-                for(int i=0;i<11;i++)
-                {
-                    wall_marker_.markers[i].pose = pa;
-                    wall_marker_.markers[i].header.stamp=close_.header.stamp;
-                }
-            }
+			if (publishDebug_)
+			{
+				moveit_msgs::DisplayRobotState msg;
+				robot_state::robotStateToRobotStateMsg(state, msg.state);
+				msg.state.joint_state.header.stamp = close_.header.stamp;
+				state_pub_.publish(msg);
+				geometry_msgs::Pose pa;
+				pa.position.x = obs_in_base_tf_.getTranslation().data.vs[0];
+				pa.position.y = obs_in_base_tf_.getTranslation().data.vs[1];
+				pa.position.z = obs_in_base_tf_.getTranslation().data.vs[2];
+				pa.orientation.w = obs_in_base_tf_.getQuatRotation().getW();
+				pa.orientation.x = obs_in_base_tf_.getQuatRotation().getX();
+				pa.orientation.y = obs_in_base_tf_.getQuatRotation().getY();
+				pa.orientation.z = obs_in_base_tf_.getQuatRotation().getZ();
+				for (int i = 0; i < 11; i++)
+				{
+					wall_marker_.markers[i].pose = pa;
+					wall_marker_.markers[i].header.stamp = close_.header.stamp;
+				}
+			}
 		}
 
 		fcl::DistanceRequest req(true);
 		fcl::DistanceResult res;
-        fcl::Vec3f c1,c2;
+		fcl::Vec3f c1, c2;
 		Eigen::Vector3d p1, p2;
 		if (publishDebug_)
 		{
 			close_.points.clear();
 			close_.colors.clear();
 		}
-        wall_marker_.markers[11].points.resize(robot_objs.size()+11);
+		wall_marker_.markers[11].points.resize(robot_objs.size() + 11);
 		for (int i = 0; i < robot_objs.size(); i++)
 		{
 			collision_detection::CollisionGeometryData* cd1 =
 					static_cast<collision_detection::CollisionGeometryData*>(robot_objs[i]->collisionGeometry()->getUserData());
 			for (int k = 0; k < links_.size(); k++)
-            {
-                {
-                    c1=robot_objs[i]->getTransform().transform(robot_objs[i]->collisionGeometry()->aabb_center);
-                    geometry_msgs::Point p1;
-                    p1.x = c1[0];
-                    p1.y = c1[1];
-                    p1.z = c1[2];
-                    wall_marker_.markers[11].points[11+i]=p1;
-                }
+			{
+				{
+					fcl::Vec3f aabb = robot_objs[i]->collisionGeometry()->aabb_center;
+					c1 = robot_objs[i]->getTransform().transform(aabb);
+
+					geometry_msgs::Point p1;
+					p1.x = c1[0];
+					p1.y = c1[1];
+					p1.z = c1[2];
+					wall_marker_.markers[11].points[11 + i] = p1;
+				}
 				if (dist_info_.hasLink(cd1->getID()))
 				{
 					for (int j = 0; j < world_objs.size(); j++)
 					{
-                        {
-                            c2=obs_in_base_tf_.transform(world_objs[j]->collisionGeometry()->aabb_center);
-                            geometry_msgs::Point p1;
-                            p1.x = c2[0];
-                            p1.y = c2[1];
-                            p1.z = c2[2];
-                            wall_marker_.markers[11].points[j]=p1;
-                        }
+						{
+							c2 =
+									obs_in_base_tf_.transform(world_objs[j]->collisionGeometry()->aabb_center);
+							geometry_msgs::Point p1;
+							p1.x = c2[0];
+							p1.y = c2[1];
+							p1.z = c2[2];
+							wall_marker_.markers[11].points[j] = p1;
+						}
 						res.clear();
 						collision_detection::CollisionGeometryData* cd2 =
 								static_cast<collision_detection::CollisionGeometryData*>(world_objs[j]->collisionGeometry()->getUserData());
@@ -513,11 +519,12 @@ namespace exotica
 							check = false;
 							std::map<std::string, std::vector<std::string>>::iterator it =
 									acm_.find(cd2->getID());
-							if (it != acm_.end())
+							if (!check && it != acm_.end())
 							{
-                                if (std::find(it->second.begin(), it->second.end(), cd1->getID()) != it->second.end())
-                                {
-                                    check = true;
+								if (std::find(it->second.begin(), it->second.end(), cd1->getID())
+										!= it->second.end())
+								{
+									check = true;
 								}
 							}
 						}
@@ -534,12 +541,10 @@ namespace exotica
 									Eigen::Vector3d(res.nearest_points[0].data.vs[0], res.nearest_points[0].data.vs[1], res.nearest_points[0].data.vs[2]);
 							dist_pair.p2 =
 									Eigen::Vector3d(res.nearest_points[1].data.vs[0], res.nearest_points[1].data.vs[1], res.nearest_points[1].data.vs[2]);
-                            c1=robot_objs[i]->getTransform().transform(robot_objs[i]->collisionGeometry()->aabb_center);
-                            c2=obs_in_base_tf_.transform(world_objs[j]->collisionGeometry()->aabb_center);
-							dist_pair.c1 =
-                                    Eigen::Vector3d(c1[0],c1[1],c1[2]);
-							dist_pair.c2 =
-                                    Eigen::Vector3d(c2[0],c2[1],c2[2]);
+							c2 =
+									obs_in_base_tf_.transform(world_objs[j]->collisionGeometry()->aabb_center);
+							dist_pair.c1 = Eigen::Vector3d(c1[0], c1[1], c1[2]);
+							dist_pair.c2 = Eigen::Vector3d(c2[0], c2[1], c2[2]);
 							dist_pair.norm1 = dist_pair.p1 - dist_pair.c1;
 							dist_pair.norm1.normalize();
 							dist_pair.norm2 = dist_pair.p2 - dist_pair.c2;
@@ -547,15 +552,27 @@ namespace exotica
 							dist_pair.d = res.min_distance;
 							dist_info_.setDistance(dist_pair);
 
-                            if (publishDebug_ && dist < 2 * m_)
+							if (publishDebug_ && dist < 2 * m_)
 							{
 								geometry_msgs::Point p1, p2;
-								p1.x = dist_pair.p1(0);
-								p1.y = dist_pair.p1(1);
-								p1.z = dist_pair.p1(2);
-								p2.x = dist_pair.p2(0);
-								p2.y = dist_pair.p2(1);
-								p2.z = dist_pair.p2(2);
+								if (dist < 0.005)
+								{
+									p1.x = dist_pair.p1(0);
+									p1.y = dist_pair.p1(1);
+									p1.z = dist_pair.p1(2);
+									p2.x = dist_pair.c2(0);
+									p2.y = dist_pair.c2(1);
+									p2.z = dist_pair.c2(2);
+								}
+								else
+								{
+									p1.x = dist_pair.p1(0);
+									p1.y = dist_pair.p1(1);
+									p1.z = dist_pair.p1(2);
+									p2.x = dist_pair.p2(0);
+									p2.y = dist_pair.p2(1);
+									p2.z = dist_pair.p2(2);
+								}
 								close_.points.push_back(p1);
 								close_.points.push_back(p2);
 								std_msgs::ColorRGBA c1, c2;
@@ -582,19 +599,19 @@ namespace exotica
 								close_.colors.push_back(c1);
 								close_.colors.push_back(c2);
 							}
-                        }
+						}
 					}
 					break;
 				}
-            }
+			}
 		}
-        if(publishDebug_)
-        {
+		if (publishDebug_)
+		{
 
-            close_pub_.publish(close_);
-            wall_pub_.publish(wall_marker_);
-            ros::spinOnce();
-        }
+			close_pub_.publish(close_);
+			wall_pub_.publish(wall_marker_);
+			ros::spinOnce();
+		}
 
 		//dist_info_.print();
 		//scene_->getPlanningScene()->printKnownObjects(std::cerr);

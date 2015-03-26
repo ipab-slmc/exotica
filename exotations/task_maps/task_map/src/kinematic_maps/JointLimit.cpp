@@ -25,17 +25,24 @@ namespace exotica
 	{
 		tinyxml2::XMLElement* xmltmp;
 
-		XML_CHECK("LowerLimits");
-		XML_OK(getVector(*xmltmp, low_limits_));
+		robot_model::RobotModelConstPtr model = scene_->getPlanningScene()->getRobotModel();
 
-		XML_CHECK("UpperLimits");
-		XML_OK(getVector(*xmltmp, high_limits_));
-
+		std::vector<std::string> segs, jnts;
+		scene_->getSolver().getControlledSegmentsAndJoints(segs, jnts);
+		low_limits_.resize(jnts.size());
+		high_limits_.resize(jnts.size());
+		for (int i = 0; i < jnts.size(); i++)
+		{
+			low_limits_[i] = model->getVariableBounds(jnts[i]).min_position_;
+			high_limits_[i] = model->getVariableBounds(jnts[i]).max_position_;
+		}
 		if (low_limits_.rows() != high_limits_.rows())
 		{
 			ERROR("Joint limits Wrong size");
 			return FAILURE;
 		}
+//		ROS_INFO_STREAM("Joint limit task [Lower limits]: "<<low_limits_.transpose());
+//		ROS_INFO_STREAM("Joint limit task [Upper limits]: "<<high_limits_.transpose());
 		int size = low_limits_.rows();
 		double percent = 0.1;
 		XML_CHECK("SafePercentage");
@@ -48,9 +55,8 @@ namespace exotica
 			center_(i) = (low_limits_(i) + high_limits_(i)) / 2;
 			tau_(i) = percent * (high_limits_(i) - low_limits_(i)) / 2;
 		}
-		ROS_INFO_STREAM("Joint limit task [Lower limits]: "<<low_limits_.transpose());
-		ROS_INFO_STREAM("Joint limit task [Upper limits]: "<<high_limits_.transpose());
-		ROS_INFO_STREAM("Joint limit task [Safe limits ("<<percent<<")]: "<<tau_.transpose());
+
+//		ROS_INFO_STREAM("Joint limit task [Safe limits ("<<percent<<")]: "<<tau_.transpose());
 		initialised_ = true;
 		return SUCCESS;
 	}
@@ -63,7 +69,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn JointLimit::update(const Eigen::VectorXd & x, const int t)
+	EReturn JointLimit::update(const Eigen::VectorXd & x, const int t)
 	{
 		if (!initialised_)
 			return MMB_NIN;
@@ -95,8 +101,8 @@ namespace exotica
 				}
 			}
 		}
-        setPhi(phi,t);
-        setJacobian(jac,t);
+		setPhi(phi, t);
+		setJacobian(jac, t);
 		return SUCCESS;
 	}
 }

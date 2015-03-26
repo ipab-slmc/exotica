@@ -564,7 +564,7 @@ bool kinematica::KinematicTree::generateForwardMap(Eigen::Ref<Eigen::VectorXd> p
 	{
 		if (phi.rows() != forward_map_.rows())
 		{
-			ERROR("Return vector has wrong size!");
+			ERROR("Return vector has wrong size! Has "<<forward_map_.rows()<<", required "<<phi.rows());
 			return false;
 		}
 		phi = forward_map_;

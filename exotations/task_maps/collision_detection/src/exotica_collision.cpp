@@ -119,14 +119,15 @@ namespace exotica
 			for (KDL::Segment & it : segs)
 			{
 				if (ignore_list_.find(it.getName()) == ignore_list_.end())
+				{
 					links_.push_back(it.getName());
+				}
 			}
 			initial_sol_.end_effector_segs = links_;
 			initial_sol_.end_effector_offs = std::vector<KDL::Frame>(links_.size());
 			if (!solver_->updateEndEffectors(initial_sol_))
 			{
 				INDICATE_FAILURE
-				;
 				return FAILURE;
 			}
 		}
@@ -143,7 +144,125 @@ namespace exotica
 				}
 			}
 		}
-		acm_ = scene_->getPlanningScene()->getAllowedCollisionMatrixNonConst();
+
+		//	\Construct the allowed collision matrix
+		if (laas_->data)
+		{
+			for (int i = 1; i <= 11; i++)
+			{
+				std::vector<std::string> tmp(0);
+				switch (i)
+				{
+					case 1:
+						tmp.push_back("RLEG_LINK2");
+						tmp.push_back("RLEG_LINK3");
+						tmp.push_back("LLEG_LINK2");
+						tmp.push_back("LLEG_LINK3");
+						break;
+					case 2:
+						tmp.push_back("r_ankle");
+						tmp.push_back("l_ankle");
+						break;
+					case 3:
+						tmp.push_back("RARM_LINK4");
+						tmp.push_back("RHAND_LINK0");
+						tmp.push_back("RHAND_LINK1");
+						tmp.push_back("RHAND_LINK2");
+						tmp.push_back("RHAND_LINK3");
+						tmp.push_back("RHAND_LINK4");
+						tmp.push_back("r_wrist");
+						tmp.push_back("LARM_LINK4");
+						tmp.push_back("LHAND_LINK0");
+						tmp.push_back("LHAND_LINK1");
+						tmp.push_back("LHAND_LINK2");
+						tmp.push_back("LHAND_LINK3");
+						tmp.push_back("LHAND_LINK4");
+						tmp.push_back("l_wrist");
+						break;
+					case 4:
+						tmp.push_back("RARM_LINK0");
+						tmp.push_back("RARM_LINK2");
+						tmp.push_back("RARM_LINK3");
+						tmp.push_back("RARM_LINK4");
+						tmp.push_back("RHAND_LINK0");
+						tmp.push_back("RHAND_LINK1");
+						tmp.push_back("RHAND_LINK2");
+						tmp.push_back("RHAND_LINK3");
+						tmp.push_back("RHAND_LINK4");
+						tmp.push_back("r_wrist");
+						tmp.push_back("LARM_LINK0");
+						tmp.push_back("LARM_LINK2");
+						tmp.push_back("LARM_LINK3");
+						tmp.push_back("LARM_LINK4");
+						tmp.push_back("LHAND_LINK0");
+						tmp.push_back("LHAND_LINK1");
+						tmp.push_back("LHAND_LINK2");
+						tmp.push_back("LHAND_LINK3");
+						tmp.push_back("LHAND_LINK4");
+						tmp.push_back("l_wrist");
+
+						tmp.push_back("BODY");
+						tmp.push_back("torso");
+						break;
+					case 5:
+						tmp.push_back("HEAD_LINK1");
+						break;
+					case 6:
+						tmp.push_back("HEAD_LINK1");
+						break;
+					case 7:
+						tmp.push_back("HEAD_LINK1");
+						break;
+					case 8:
+						tmp.push_back("HEAD_LINK1");
+						tmp.push_back("torso");
+						break;
+					case 9:
+						break;
+					case 10:
+						tmp.push_back("RARM_LINK4");
+						tmp.push_back("RHAND_LINK0");
+						tmp.push_back("RHAND_LINK1");
+						tmp.push_back("RHAND_LINK2");
+						tmp.push_back("RHAND_LINK3");
+						tmp.push_back("RHAND_LINK4");
+						tmp.push_back("r_wrist");
+						tmp.push_back("LARM_LINK4");
+						tmp.push_back("LHAND_LINK0");
+						tmp.push_back("LHAND_LINK1");
+						tmp.push_back("LHAND_LINK2");
+						tmp.push_back("LHAND_LINK3");
+						tmp.push_back("LHAND_LINK4");
+						tmp.push_back("l_wrist");
+						break;
+					case 11:
+						tmp.push_back("RARM_LINK4");
+						tmp.push_back("RHAND_LINK0");
+						tmp.push_back("RHAND_LINK1");
+						tmp.push_back("RHAND_LINK2");
+						tmp.push_back("RHAND_LINK3");
+						tmp.push_back("RHAND_LINK4");
+						tmp.push_back("r_wrist");
+						tmp.push_back("LARM_LINK4");
+						tmp.push_back("LHAND_LINK0");
+						tmp.push_back("LHAND_LINK1");
+						tmp.push_back("LHAND_LINK2");
+						tmp.push_back("LHAND_LINK3");
+						tmp.push_back("LHAND_LINK4");
+						tmp.push_back("l_wrist");
+						tmp.push_back("BODY");
+						tmp.push_back("torso");
+						tmp.push_back("RLEG_LINK0");
+						tmp.push_back("RLEG_LINK2");
+						tmp.push_back("LLEG_LINK0");
+						tmp.push_back("LLEG_LINK2");
+						break;
+					default:
+						break;
+				}
+				acm_["wall_" + std::to_string(i)] = tmp;
+			}
+		}
 
 		initialised_ = true;
 		return SUCCESS;
@@ -305,7 +424,6 @@ namespace exotica
 
 		if (laas_->data)
 		{
-
 			for (int i = 0; i < world_objs.size(); i++)
 			{
 				fcl::Transform3f orig_transform = world_objs[i]->getTransform();
@@ -348,62 +466,84 @@ namespace exotica
 						res.clear();
 						collision_detection::CollisionGeometryData* cd2 =
 								static_cast<collision_detection::CollisionGeometryData*>(world_objs[j]->collisionGeometry()->getUserData());
-						double dist =
-								fcl::distance(robot_objs[i].get(), world_objs[j].get(), req, res);
-						DistancePair dist_pair;
-						dist_pair.id1 = res.b1;
-						dist_pair.id2 = res.b2;
-						dist_pair.o1 = cd1->getID();
-						dist_pair.o2 = cd2->getID();
-						dist_pair.p1 =
-								Eigen::Vector3d(res.nearest_points[0].data.vs[0], res.nearest_points[0].data.vs[1], res.nearest_points[0].data.vs[2]);
-						dist_pair.p2 =
-								Eigen::Vector3d(res.nearest_points[1].data.vs[0], res.nearest_points[1].data.vs[1], res.nearest_points[1].data.vs[2]);
-
-						dist_pair.c1 =
-								Eigen::Vector3d(robot_objs[i]->getTranslation().data.vs[0], robot_objs[i]->getTranslation().data.vs[1], robot_objs[i]->getTranslation().data.vs[2]);
-						dist_pair.c2 =
-								Eigen::Vector3d(world_objs[j]->getTranslation().data.vs[0], world_objs[j]->getTranslation().data.vs[1], world_objs[j]->getTranslation().data.vs[2]);
-						dist_pair.norm1 = dist_pair.p1 - dist_pair.c1;
-						dist_pair.norm1.normalize();
-						dist_pair.norm2 = dist_pair.p2 - dist_pair.c2;
-						dist_pair.norm2.normalize();
-						dist_pair.d = res.min_distance;
-						dist_info_.setDistance(dist_pair);
-						if (publishDebug_)
+						bool check = true;
+						if (laas_->data)
 						{
-							geometry_msgs::Point p1, p2;
-							p1.x = dist_pair.p1(0);
-							p1.y = dist_pair.p1(1);
-							p1.z = dist_pair.p1(2);
-							p2.x = dist_pair.p2(0);
-							p2.y = dist_pair.p2(1);
-							p2.z = dist_pair.p2(2);
-							close_.points.push_back(p1);
-							close_.points.push_back(p2);
-							std_msgs::ColorRGBA c1, c2;
-							if (dist < 0.005)
+							check = false;
+							std::map<std::string, std::vector<std::string>>::iterator it =
+									acm_.find(cd2->getID());
+							if (it != acm_.end())
 							{
-								c1.r = 1;
-								c1.g = 0;
-								c1.b = 0;
+								for (int j = 0; j < it->second.size(); j++)
+								{
+									if (it->second[j].compare(cd1->getID()) == 0)
+									{
+										//ROS_WARN_STREAM("Check collision between "<<it->first<<" and "<<cd1->getID());
+										check = true;
+										break;
+									}
+								}
 							}
-							else if (dist < m_)
+						}
+						if (check)
+						{
+							double dist =
+									fcl::distance(robot_objs[i].get(), world_objs[j].get(), req, res);
+							DistancePair dist_pair;
+							dist_pair.id1 = res.b1;
+							dist_pair.id2 = res.b2;
+							dist_pair.o1 = cd1->getID();
+							dist_pair.o2 = cd2->getID();
+							dist_pair.p1 =
+									Eigen::Vector3d(res.nearest_points[0].data.vs[0], res.nearest_points[0].data.vs[1], res.nearest_points[0].data.vs[2]);
+							dist_pair.p2 =
+									Eigen::Vector3d(res.nearest_points[1].data.vs[0], res.nearest_points[1].data.vs[1], res.nearest_points[1].data.vs[2]);
+
+							dist_pair.c1 =
+									Eigen::Vector3d(robot_objs[i]->getTranslation().data.vs[0], robot_objs[i]->getTranslation().data.vs[1], robot_objs[i]->getTranslation().data.vs[2]);
+							dist_pair.c2 =
+									Eigen::Vector3d(world_objs[j]->getTranslation().data.vs[0], world_objs[j]->getTranslation().data.vs[1], world_objs[j]->getTranslation().data.vs[2]);
+							dist_pair.norm1 = dist_pair.p1 - dist_pair.c1;
+							dist_pair.norm1.normalize();
+							dist_pair.norm2 = dist_pair.p2 - dist_pair.c2;
+							dist_pair.norm2.normalize();
+							dist_pair.d = res.min_distance;
+							dist_info_.setDistance(dist_pair);
+							if (publishDebug_ && dist < 2 * m_)
 							{
-								c1.r = dist / m_;
-								c1.g = 1 - c1.r;
-								c1.b = 0;
+								geometry_msgs::Point p1, p2;
+								p1.x = dist_pair.p1(0);
+								p1.y = dist_pair.p1(1);
+								p1.z = dist_pair.p1(2);
+								p2.x = dist_pair.p2(0);
+								p2.y = dist_pair.p2(1);
+								p2.z = dist_pair.p2(2);
+								close_.points.push_back(p1);
+								close_.points.push_back(p2);
+								std_msgs::ColorRGBA c1, c2;
+								if (dist < 0.005)
+								{
+									c1.r = 1;
+									c1.g = 0;
+									c1.b = 0;
+								}
+								else if (dist < m_)
+								{
+									c1.r = dist / m_;
+									c1.g = 1 - c1.r;
+									c1.b = 0;
+								}
+								else
+								{
+									c1.r = 0;
+									c1.g = 1;
+									c1.b = 0;
+								}
+								c1.a = 1;
+								c2 = c1;
+								close_.colors.push_back(c1);
+								close_.colors.push_back(c2);
 							}
-							else
-							{
-								c1.r = 0;
-								c1.g = 1;
-								c1.b = 0;
-							}
-							c1.a = 1;
-							c2 = c1;
-							close_.colors.push_back(c1);
-							close_.colors.push_back(c2);
 						}
 					}
 					break;

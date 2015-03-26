@@ -216,8 +216,8 @@ namespace exotica
 						tmp.push_back("r_wrist");
                         tmp.push_back("LARM_LINK4");
 						tmp.push_back("l_wrist");
-						tmp.push_back("BODY");
-						tmp.push_back("torso");
+                        tmp.push_back("BODY");
+                        tmp.push_back("torso");
                         //tmp.push_back("RLEG_LINK0");
 						tmp.push_back("RLEG_LINK2");
                         //tmp.push_back("LLEG_LINK0");
@@ -300,6 +300,12 @@ namespace exotica
 		return SUCCESS;
 	}
 
+    double computeDiscount(Eigen::Vector3d& n1,Eigen::Vector3d& n2,Eigen::Vector3d& dir)
+    {
+        double ret = 0.5*(dir.dot(n1)-1.0)*((-dir).dot(n2)-1.0);
+        return ret*ret;
+    }
+
 	Eigen::VectorXd CollisionAvoidance::computeForwardMap()
 	{
 		Eigen::VectorXd phi(1);
@@ -311,19 +317,23 @@ namespace exotica
 		for (auto & it : dist_info_.link_dist_map_)
 		{
 			for (int i = 0; i < it.second.size(); i++)
-			{
+            {
+                Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
 				if (it.second[i].d > m_)
 					it.second[i].cost = 0;
 				else if (it.second[i].d <= 0.005)
 				{
 					if (publishDebug_)
 						std::cout << " Collision detected between [" << it.first << "] and [" << it.second[i].o2 << "] " << it.second[i].d << "m \n";
-                    Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
+                    tmpnorm = it.second[i].c2 - it.second[i].c1;
                     it.second[i].cost = 1.0+1.0/tmpnorm.norm();
 				}
 				else
+                {
+                    tmpnorm = it.second[i].p2 - it.second[i].p1;
 					it.second[i].cost = 1.0 - it.second[i].d / m_;
-				phi(0) += (double) it.second[i].cost * it.second[i].cost;
+                }
+                phi(0) += (double) it.second[i].cost * it.second[i].cost/* * computeDiscount(it.second[i].norm1,it.second[i].norm2,tmpnorm)*/;
 			}
 		}
 		return phi;
@@ -375,18 +385,21 @@ namespace exotica
 			{
 				if (it.second[i].d <= m_)
 				{
+
 					if (it.second[i].d <= 0.005)
 					{
-						Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
+                        Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
+                        //double discount=computeDiscount(it.second[i].norm1,it.second[i].norm2,tmpnorm);
 						tmpnorm.normalize();
                         jac += ((2.0 * (1.0-0.005)) / m_)
 								* (tmpnorm.transpose() * J.block(3 * cnt, 0, 3, N));
 					}
 					else
                     {
-                        Eigen::Vector3d tmpnorm = it.second[i].p2 - it.second[i].p1;
+                        Eigen::Vector3d tmpnorm = it.second[i].p1 - it.second[i].p2;
+                        //double discount=computeDiscount(it.second[i].norm1,it.second[i].norm2,tmpnorm);
                         tmpnorm.normalize();
-						jac += ((2.0 * it.second[i].cost) / m_)
+                        jac += ((2.0 * it.second[i].cost) / m_)
                                 * (tmpnorm.transpose() * J.block(3 * cnt, 0, 3, N));
                     }
 				}
@@ -540,10 +553,10 @@ namespace exotica
                                     Eigen::Vector3d(c1[0],c1[1],c1[2]);
 							dist_pair.c2 =
                                     Eigen::Vector3d(c2[0],c2[1],c2[2]);
-							dist_pair.norm1 = dist_pair.p1 - dist_pair.c1;
-							dist_pair.norm1.normalize();
-							dist_pair.norm2 = dist_pair.p2 - dist_pair.c2;
-							dist_pair.norm2.normalize();
+                            dist_pair.norm1 = dist_pair.p1 - dist_pair.c1;
+                            dist_pair.norm1.normalize();
+                            dist_pair.norm2 = dist_pair.p2 - dist_pair.c2;
+                            dist_pair.norm2.normalize();
 							dist_pair.d = res.min_distance;
 							dist_info_.setDistance(dist_pair);
 

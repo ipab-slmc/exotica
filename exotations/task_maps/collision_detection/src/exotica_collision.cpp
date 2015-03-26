@@ -85,12 +85,16 @@ namespace exotica
 	EReturn CollisionAvoidance::initDerived(tinyxml2::XMLHandle & handle)
 	{
 		tinyxml2::XMLElement* xmltmp;
-		if (!handle.FirstChildElement("margin").ToElement())
+        if (handle.FirstChildElement("margin").ToElement())
 		{
 			XML_CHECK("margin");
 			XML_OK(getDouble(*xmltmp, m_));
-			std::cout << "Collision Detection: New margin = " << m_ << std::endl;
+            std::cout << "Collision Detection: New margin = " << m_ << "\n";
 		}
+        else
+        {
+            std::cout << "Collision Detection: Using default margin = " << m_ << "\n";
+        }
 
 		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("DynamicFrame");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, dynamic_frame_);
@@ -381,7 +385,7 @@ namespace exotica
                             dist_pair.norm2.normalize();
                             dist_pair.d = res.min_distance;
                             dist_info_.setDistance(dist_pair);
-                            if(publishDebug_)
+                            if(publishDebug_ && res.min_distance<=m_)
                             {
                                 geometry_msgs::Point p1, p2;
                                 p1.x = dist_pair.p1(0);

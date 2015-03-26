@@ -16,22 +16,34 @@ namespace exotica
 			m_(0.05), initialised_(false), nh_("CollisionTask"), publishDebug_(false)
 	{
 		//TODO
-		wall_pub_ = nh_.advertise<visualization_msgs::Marker>("wall_marker", 1);
+        wall_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("wall_marker", 1);
 		state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("disp_state", 1);
 		close_pub_ = nh_.advertise<visualization_msgs::Marker>("close_marker", 1);
-		wall_marker_.type = visualization_msgs::Marker::MESH_RESOURCE;
-		wall_marker_.header.frame_id = "/base_link";
-		wall_marker_.color.a = 0;
-		wall_marker_.color.r = 1.0;
-		wall_marker_.color.g = 1.0;
-		wall_marker_.color.b = 1.0;
-		wall_marker_.scale.x = wall_marker_.scale.y = wall_marker_.scale.z = 1.0;
-		wall_marker_.mesh_resource = "package://hrp2_14_description/urdf/wall-extended.obj";
-		wall_marker_.mesh_use_embedded_materials = true;
+        wall_marker_.markers.resize(11);
+        for(int i=0;i<11;i++)
+        {
+            wall_marker_.markers[i].type = visualization_msgs::Marker::MESH_RESOURCE;
+            wall_marker_.markers[i].color.a = 0.0;
+            wall_marker_.markers[i].color.r = 1.0;
+            wall_marker_.markers[i].color.g = 1.0;
+            wall_marker_.markers[i].color.b = 1.0;
+            wall_marker_.markers[i].scale.x = wall_marker_.markers[i].scale.y = wall_marker_.markers[i].scale.z = 1.0;
+            wall_marker_.markers[i].mesh_resource = "package://hrp2_14_description/urdf/wall-extended"+std::to_string(i+1)+".obj";
+            wall_marker_.markers[i].mesh_use_embedded_materials = true;
+            wall_marker_.markers[i].header.frame_id = "/BODY";
+            wall_marker_.markers[i].action = visualization_msgs::Marker::ADD;
+            wall_marker_.markers[i].id = i+1;
+            wall_marker_.markers[i].ns = "Collision geometry";
+        }
 
 		close_.type = visualization_msgs::Marker::LINE_LIST;
-		close_.header.frame_id = "/base_link";
+        close_.action = visualization_msgs::Marker::ADD;
+        close_.header.frame_id = "/BODY";
 		close_.scale.x = 0.004;
+		close_.color.g = 1;
+		close_.color.a = 1;
+        close_.id = 0;
+        close_.ns = "Collision distances";
 	}
 
 	CollisionAvoidance::~CollisionAvoidance()
@@ -39,8 +51,8 @@ namespace exotica
 		//TODO
 	}
 
-	EReturn CollisionAvoidance::setPreUpdateClaaback(
-			boost::function<void(CollisionAvoidance*, int)> pre_update_callback)
+    EReturn CollisionAvoidance::setPreUpdateCallback(
+            boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback)
 	{
 		pre_update_callback_ = pre_update_callback;
 	}
@@ -58,7 +70,7 @@ namespace exotica
 			return FAILURE;
 		}
 		if (pre_update_callback_)
-			pre_update_callback_(this, t);
+            pre_update_callback_(this, x, t);
 		dist_info_.resetDistance();
 		if (!ok(computeDistace(x)))
 			return FAILURE;
@@ -73,7 +85,7 @@ namespace exotica
 	EReturn CollisionAvoidance::initDerived(tinyxml2::XMLHandle & handle)
 	{
 		tinyxml2::XMLElement* xmltmp;
-		if (!handle.FirstChildElement("margin").ToElement())
+		if (handle.FirstChildElement("margin").ToElement())
 		{
 			XML_CHECK("margin");
 			XML_OK(getDouble(*xmltmp, m_));
@@ -422,29 +434,35 @@ namespace exotica
 			}
 		}
 
+        close_.header.stamp=ros::Time::now();
 		if (laas_->data)
 		{
 			for (int i = 0; i < world_objs.size(); i++)
 			{
-				fcl::Transform3f orig_transform = world_objs[i]->getTransform();
+                //fcl::Transform3f orig_transform = world_objs[i]->getTransform();
 				world_objs[i]->setTransform(obs_in_base_tf_); // * orig_transform
 			}
-			if (publishDebug_)
-			{
-				moveit_msgs::DisplayRobotState msg;
-				robot_state::robotStateToRobotStateMsg(state, msg.state);
-				state_pub_.publish(msg);
-				geometry_msgs::Pose pa;
-				pa.position.x = obs_in_base_tf_.getTranslation().data.vs[0];
-				pa.position.y = obs_in_base_tf_.getTranslation().data.vs[1];
-				pa.position.z = obs_in_base_tf_.getTranslation().data.vs[2];
-				pa.orientation.w = obs_in_base_tf_.getQuatRotation().getW();
-				pa.orientation.x = obs_in_base_tf_.getQuatRotation().getX();
-				pa.orientation.y = obs_in_base_tf_.getQuatRotation().getY();
-				pa.orientation.z = obs_in_base_tf_.getQuatRotation().getZ();
-				wall_marker_.pose = pa;
-				wall_pub_.publish(wall_marker_);
-			}
+            if(publishDebug_)
+            {
+                moveit_msgs::DisplayRobotState msg;
+                robot_state::robotStateToRobotStateMsg(state, msg.state);
+                msg.state.joint_state.header.stamp=close_.header.stamp;
+                state_pub_.publish(msg);
+                geometry_msgs::Pose pa;
+                pa.position.x = obs_in_base_tf_.getTranslation().data.vs[0];
+                pa.position.y = obs_in_base_tf_.getTranslation().data.vs[1];
+                pa.position.z = obs_in_base_tf_.getTranslation().data.vs[2];
+                pa.orientation.w = obs_in_base_tf_.getQuatRotation().getW();
+                pa.orientation.x = obs_in_base_tf_.getQuatRotation().getX();
+                pa.orientation.y = obs_in_base_tf_.getQuatRotation().getY();
+                pa.orientation.z = obs_in_base_tf_.getQuatRotation().getZ();
+                for(int i=0;i<11;i++)
+                {
+                    wall_marker_.markers[i].pose = pa;
+                    wall_marker_.markers[i].header.stamp=close_.header.stamp;
+                }
+                wall_pub_.publish(wall_marker_);
+            }
 		}
 		fcl::DistanceRequest req(true);
 		fcl::DistanceResult res;
@@ -549,11 +567,12 @@ namespace exotica
 					break;
 				}
 		}
-		if (publishDebug_)
-		{
-			close_pub_.publish(close_);
-			ros::spinOnce();
-		}
+        if(publishDebug_)
+        {
+
+            close_pub_.publish(close_);
+            ros::spinOnce();
+        }
 
 		//dist_info_.print();
 		//scene_->getPlanningScene()->printKnownObjects(std::cerr);

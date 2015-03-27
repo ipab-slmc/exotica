@@ -650,9 +650,9 @@ bool kinematica::KinematicTree::generateCoM()
 	}
 
 	com = com / M;
-	com_.x() = com.x();
-	com_.y() = com.y();
-	com_.z() = com.z();
+	com_[0] = com.x();
+	com_[1] = com.y();
+	com_[2] = com.z();
 	return true;
 }
 bool kinematica::KinematicTree::getCoMProperties(std::vector<std::string> & segs,
@@ -668,11 +668,11 @@ bool kinematica::KinematicTree::getCoMProperties(std::vector<std::string> & segs
 		return false;
 	}
 	uint NTotal = robot_tree_.size(), i;
-	mass.resize(num_jnts_spec_);
-	cog.resize(num_jnts_spec_);
-	tip_pose.resize(num_jnts_spec_);
-	base_pose.resize(num_jnts_spec_);
-	segs.resize(num_jnts_spec_);
+	mass.resize(eff_segments_.size());
+	cog.resize(eff_segments_.size());
+	tip_pose.resize(eff_segments_.size());
+	base_pose.resize(eff_segments_.size());
+	segs.resize(eff_segments_.size());
 	for (i = 0; i < eff_segments_.size(); i++)
 	{
 		segs[i] = robot_tree_[eff_segments_[i]].segment.getName();

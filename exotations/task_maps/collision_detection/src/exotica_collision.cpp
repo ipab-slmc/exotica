@@ -308,7 +308,7 @@ namespace exotica
 		Eigen::VectorXd phi(1);
 		phi(0) = 0.0;
 		double d = 0.0;
-
+		bool isCollision = false;
 		if (!dist_info_.isInitialised())
 			return phi;
 		for (auto & it : dist_info_.link_dist_map_)
@@ -319,16 +319,17 @@ namespace exotica
 					it.second[i].cost = 0;
 				else if (it.second[i].d <= 0.005)
 				{
-					if (publishDebug_)
-						std::cout << " Collision detected between [" << it.first << "] and [" << it.second[i].o2 << "] " << it.second[i].d << "m \n";
+					isCollision = true;
 					Eigen::Vector3d tmpnorm = it.second[i].c2 - it.second[i].c1;
-					it.second[i].cost = 1.0;// + 1.0 / tmpnorm.norm();
+					it.second[i].cost = 1.0;			// + 1.0 / tmpnorm.norm();
 				}
 				else
 					it.second[i].cost = 1.0 - it.second[i].d / m_;
 				phi(0) += (double) it.second[i].cost * it.second[i].cost;
 			}
 		}
+		if (publishDebug_ && isCollision)
+			ROS_ERROR_STREAM("Collision detected");
 		return phi;
 	}
 

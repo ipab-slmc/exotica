@@ -94,6 +94,7 @@ namespace exotica
 				collision_detection::CollisionGeometryData* cd =
 						static_cast<collision_detection::CollisionGeometryData*>(it.second[i]->collisionGeometry()->getUserData());
 				it.second[i]->setTransform(collision_detection::transform2fcl(ps_->getCurrentState().getCollisionBodyTransform(cd->ptr.link, cd->shape_index)));
+				it.second[i]->getTransform().transform(it.second[i]->collisionGeometry()->aabb_center);
 			}
 
 		collision_detection::WorldConstPtr tmp_world = ps_->getCollisionWorld()->getWorld();
@@ -111,6 +112,7 @@ namespace exotica
 							collision_detection::createCollisionGeometry(tmp_world->getObject(obj_id_[i])->shapes_[j], tmp_world->getObject(obj_id_[i]).get());
 					boost::shared_ptr<fcl::CollisionObject> obj =
 							boost::shared_ptr<fcl::CollisionObject>(new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
+					obj->getTransform().transform(obj->collisionGeometry()->aabb_center);
 					fcl_world_.at(obj_id_[i])[j] = obj;
 				}
 			}
@@ -188,7 +190,8 @@ namespace exotica
 	}
 
 	EReturn CollisionScene::getRobotDistance(const std::string & link, bool self, double & d,
-			Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm)
+			Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm,
+			Eigen::Vector3d & c1, Eigen::Vector3d & c2)
 	{
 		fcls_ptr fcl_link;
 		if (fcl_robot_.find(link) != fcl_robot_.end())
@@ -201,12 +204,14 @@ namespace exotica
 		d = 9999;
 		fcl::DistanceRequest req(true);
 		fcl::DistanceResult res;
-		Eigen::Vector3d centre;
+		Eigen::Vector3d centre1, centre2;
+		fcl_convert::fcl2Eigen(fcl_link[0]->getTranslation(), centre1);
 		if (self)
 		{
 			for (auto & it : fcl_robot_)
 			{
 				for (std::size_t i = 0; i < it.second.size(); i++)
+				{
 					if (distance(fcl_link, it.second, req, res) < 0)
 					{
 						INDICATE_FAILURE
@@ -216,8 +221,9 @@ namespace exotica
 					else if (res.min_distance < d)
 					{
 						d = res.min_distance;
-						fcl_convert::fcl2Eigen(it.second[i]->getTranslation(), centre);
+						fcl_convert::fcl2Eigen(it.second[i]->getTranslation(), centre2);
 					}
+				}
 			}
 		}
 		for (auto & it : fcl_world_)
@@ -233,14 +239,14 @@ namespace exotica
 				{
 					d = res.min_distance;
 
-					fcl_convert::fcl2Eigen(it.second[i]->getTranslation(), centre);
+					fcl_convert::fcl2Eigen(it.second[i]->getTranslation(), centre1);
 				}
 			}
 		}
 
 		fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
 		fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
-		norm = p1 - centre;
+		norm = p1 - centre1;
 		return SUCCESS;
 	}
 	double CollisionScene::distance(const fcls_ptr & fcl1, const fcls_ptr & fcl2,
@@ -467,7 +473,8 @@ namespace exotica
 	{
 
 		planning_scene::PlanningScenePtr tmp;
-		tmp.reset(new planning_scene::PlanningScene(model_));;
+		tmp.reset(new planning_scene::PlanningScene(model_));
+		;
 		tmp->setPlanningSceneMsg(*scene.get());
 		return collision_scene_->initialise(tmp, kinematica_.getJointNames());
 	}

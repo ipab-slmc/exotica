@@ -84,7 +84,8 @@ namespace exotica
 			 * @param	norm	Normal vector on robot link
 			 */
 			EReturn getRobotDistance(const std::string & link, bool self, double & d,
-					Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm);
+					Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm,
+					Eigen::Vector3d & c1, Eigen::Vector3d & c2);
 
 			/*
 			 * \brief	Get current robot state

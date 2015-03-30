@@ -99,6 +99,7 @@ bool exotica::CoM::computeForwardMap(Eigen::VectorXd & phi)
 		if (debug_->data)
 		{
 			geometry_msgs::Point tmp;
+            tmp_frame=marker_offset_*tmp_frame;
 			tmp.x = tmp_frame.p.data[0];
 			tmp.y = tmp_frame.p.data[1];
 			tmp.z = tmp_frame.p.data[2];
@@ -115,6 +116,7 @@ bool exotica::CoM::computeForwardMap(Eigen::VectorXd & phi)
 		com.data[2] = 0;
 	if (debug_->data)
 	{
+        com=marker_offset_*com;
 		COM_marker_.pose.position.x = com.data[0];
 		COM_marker_.pose.position.y = com.data[1];
 		COM_marker_.pose.position.z = com.data[2];
@@ -253,29 +255,31 @@ exotica::EReturn exotica::CoM::setOffset(bool left, const KDL::Frame & offset)
 			INDICATE_FAILURE
 		if (left)
 		{
-			com_marker_.header.frame_id = "l_sole";
-			COM_marker_.header.frame_id = "l_sole";
-			goal_marker_.header.frame_id = "l_sole";
+            com_marker_.header.frame_id = "base_link";
+            COM_marker_.header.frame_id = "base_link";
+            goal_marker_.header.frame_id = "base_link";
 		}
 		else
 		{
-			com_marker_.header.frame_id = "r_sole";
-			COM_marker_.header.frame_id = "r_sole";
-			goal_marker_.header.frame_id = "l_sole";
-		}
+            com_marker_.header.frame_id = "base_link";
+            COM_marker_.header.frame_id = "base_link";
+            goal_marker_.header.frame_id = "base_link";
+        }
+        marker_offset_=offset.Inverse();
 	}
 	return SUCCESS;
 }
 
-void exotica::CoM::checkGoal(const Eigen::Vector3d & goal)
+void exotica::CoM::checkGoal(const Eigen::Vector3d & goal_)
 {
 	if (debug_->data)
 	{
-		goal_marker_.pose.position.x = goal(0);
-		goal_marker_.pose.position.y = goal(1);
+        KDL::Vector goal = marker_offset_*KDL::Vector(goal_(0),goal_(1),goal_(2));
+        goal_marker_.pose.position.x = goal[0];
+        goal_marker_.pose.position.y = goal[1];
 		if (!enable_z_->data)
 			goal_marker_.pose.position.z = 0;
 		else
-			goal_marker_.pose.position.z = goal(2);
+            goal_marker_.pose.position.z = goal[2];
 	}
 }

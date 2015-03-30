@@ -102,6 +102,7 @@ namespace exotica
 			visualization_msgs::Marker COM_marker_;
 			visualization_msgs::Marker goal_marker_;
 			KDL::Frame base_offset_;
+            KDL::Frame marker_offset_;
 			std::ofstream com_file_;
 			EParam<std_msgs::Bool> debug_;
 			EParam<std_msgs::Bool> enable_z_;

@@ -8,7 +8,7 @@
 #ifndef EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_COLLISIONAVOIDANCE_H_
 #define EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_COLLISIONAVOIDANCE_H_
 
-//#define C_DEBUG
+#define C_DEBUG
 #include <exotica/TaskMap.h>
 #include <exotica/Factory.h>
 #include <exotica/Test.h>
@@ -73,6 +73,7 @@ namespace exotica
 #ifdef C_DEBUG
 			ros::Publisher state_pub_;
 			ros::Publisher close_pub_;
+			ros::NodeHandle nh_;
 			visualization_msgs::Marker close_;
 #endif
 	};

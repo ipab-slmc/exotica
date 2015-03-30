@@ -230,7 +230,7 @@ namespace exotica
 
 		Eigen::MatrixXd solution;
 		bool found_solution = false;
-//
+
 //		if (sol->type().compare("exotica::AICOsolver") == 0)
 //		{
 //			found_solution = ok(boost::static_pointer_cast<AICOsolver>(sol)->Solve(q0, solution));
@@ -268,7 +268,7 @@ namespace exotica
 		}
 		else
 			ROS_ERROR("Calling Exotica Planning service");
-		if(!client_.isValid())
+		if (!client_.isValid())
 			ROS_ERROR("Exotica Planning Client not valid");
 
 		if (client_.call(srv))

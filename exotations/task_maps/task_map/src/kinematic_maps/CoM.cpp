@@ -116,10 +116,10 @@ bool exotica::CoM::computeForwardMap(Eigen::VectorXd & phi)
 		com.data[2] = 0;
 	if (debug_->data)
 	{
-        com=marker_offset_*com;
-		COM_marker_.pose.position.x = com.data[0];
-		COM_marker_.pose.position.y = com.data[1];
-		COM_marker_.pose.position.z = com.data[2];
+        KDL::Vector tmp_frame=marker_offset_*com;
+        COM_marker_.pose.position.x = tmp_frame[0];
+        COM_marker_.pose.position.y = tmp_frame[1];
+        COM_marker_.pose.position.z = tmp_frame[2];
 
 		COM_marker_.header.stamp = com_marker_.header.stamp = goal_marker_.header.stamp =
 				ros::Time::now();

@@ -27,6 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
   exotica
+  ompl_solver
 )
 
 
@@ -61,7 +62,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES exotica_moveit
-  CATKIN_DEPENDS aico ik_solver dynamic_reconfigure eigen_conversions moveit_core moveit_ros_planning_interface pluginlib roscpp tf task_definition task_map rospy std_msgs message_generation exotica
+  CATKIN_DEPENDS aico ik_solver dynamic_reconfigure eigen_conversions moveit_core moveit_ros_planning_interface pluginlib roscpp tf task_definition task_map rospy std_msgs message_generation exotica ompl_solver
   DEPENDS system_lib
 )
 

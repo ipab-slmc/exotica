@@ -29,6 +29,7 @@
 #include "exotica_moveit/ExoticaPlanning.h"
 #include "exotica_moveit/EXOTicaPlannerService.h"
 #include "aico/AICOsolver.h"
+#include <ompl_solver/OMPLsolver.h>
 #include "ik_solver/ik_solver.h"
 #include <exotica/Initialiser.h>
 #include <ros/package.h>

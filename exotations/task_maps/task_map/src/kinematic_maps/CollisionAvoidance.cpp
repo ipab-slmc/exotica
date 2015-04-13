@@ -23,10 +23,16 @@ namespace exotica
 		nh_ = ros::NodeHandle("CollisionAvoidance");
 		state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("disp_state", 100);
 		close_pub_ = nh_.advertise<visualization_msgs::Marker>("close_marker", 100);
+		centre_pub_ = nh_.advertise<visualization_msgs::Marker>("centre_marker", 100);
 		close_.type = visualization_msgs::Marker::LINE_LIST;
 		close_.scale.x = 0.004;
 		close_.color.g = 1;
 		close_.color.a = 1;
+
+		centre_.type = visualization_msgs::Marker::SPHERE_LIST;
+		centre_.scale.x = close_.scale.y = close_.scale.z = 0.05;
+		centre_.color.g = 1;
+		centre_.color.a = 1;
 #endif
 	}
 
@@ -51,8 +57,8 @@ namespace exotica
 		sol.end_effector_offs = std::vector<KDL::Frame>(effs_.size());
 		kin_sol_.updateEndEffectors(sol);
 #ifdef C_DEBUG
-		close_.header.frame_id = "/" + kin_sol_.getRootName();
-		close_pub_ = nh_.advertise<visualization_msgs::Marker>("close_marker", 10);
+		centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
+
 #endif
 		return FAILURE;
 	}
@@ -88,16 +94,18 @@ namespace exotica
 		std::vector<Eigen::Vector3d> norms(M);
 #ifdef C_DEBUG
 		close_.points.clear();
+		centre_.points.clear();
 #endif
 		for (int i = 0; i < M; i++)
 		{
 			Eigen::Vector3d tmp1, tmp2;
-			scene_->getCollisionScene()->getRobotDistance(effs_[i], false, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[2]);
-			std::cout << "Dist = " << dists[i] << " Phi=" << phi(0) << std::endl;
+			scene_->getCollisionScene()->getRobotDistance(effs_[i], false, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i]);
 			//	Compute Phi
 			if (dists[i] <= 0)
 			{
-				std::cerr << "Robot link " << effs_[i] << " is in collision" << std::endl;
+#ifdef C_DEBUG
+				ROS_ERROR_STREAM("Robot link " << effs_[i] << " is in collision");
+#endif
 				costs[i] = 1;
 			}
 			else if (dists[i] > safe_range_->data)
@@ -131,11 +139,16 @@ namespace exotica
 			}
 			close_.points.push_back(p1);
 			close_.points.push_back(p2);
+			eigen2Point(c1s[i], p1);
+			eigen2Point(c2s[i], p2);
+			centre_.points.push_back(p1);
+			centre_.points.push_back(p2);
 #endif
 		}
 
 #ifdef C_DEBUG
 		close_pub_.publish(close_);
+		centre_pub_.publish(centre_);
 		moveit_msgs::DisplayRobotState msg;
 		robot_state::robotStateToRobotStateMsg(scene_->getCollisionScene()->getCurrentState(), msg.state);
 		state_pub_.publish(msg);
@@ -158,11 +171,11 @@ namespace exotica
 				Eigen::Vector3d tmpnorm = c2s[i] - c1s[i];
 				tmpnorm.normalize();
 				jac += ((2.0 * costs[i]) / safe_range_->data)
-				* (tmpnorm.transpose() * eff_jac.block(3 * i, 0, 3, N));
+						* (tmpnorm.transpose() * eff_jac.block(3 * i, 0, 3, N));
 			}
 			else if (dists[i] <= safe_range_->data)
-			jac += ((2.0 * costs[i]) / safe_range_->data)
-					* (norms[i].transpose() * eff_jac.block(3 * i, 0, 3, N));
+				jac += ((2.0 * costs[i]) / safe_range_->data)
+						* (norms[i].transpose() * eff_jac.block(3 * i, 0, 3, N));
 		}
 		if (!ok(setPhi(phi, t)) || !ok(setJacobian(jac, t)))
 		{
@@ -172,7 +185,7 @@ namespace exotica
 
 		//	Reset the initial end-effectors
 
-		ROS_ERROR_STREAM("Jac="<<jac);
+		//ROS_ERROR_STREAM("Jac="<<jac);
 		return SUCCESS;
 	}
 }

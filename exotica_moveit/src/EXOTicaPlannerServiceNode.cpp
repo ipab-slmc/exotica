@@ -18,6 +18,10 @@ class ExoticaService
 		{
 			//TODO
 		}
+		~ExoticaService()
+		{
+			//TODO
+		}
 		bool solve(exotica_moveit::ExoticaPlanning::Request & req,
 				exotica_moveit::ExoticaPlanning::Response & res)
 		{
@@ -26,6 +30,8 @@ class ExoticaService
 			double tau_;
 			bool found_solution = false;
 			Eigen::MatrixXd solution;
+			exotica::Initialiser ini;
+
 			if (exotica::ok(ini.initialise(req.xml_file_, server, solver, problem)))
 			{
 				if (solver->type().compare("exotica::AICOsolver") == 0)
@@ -36,13 +42,11 @@ class ExoticaService
 				{
 					tau_ = boost::static_pointer_cast<exotica::IKProblem>(problem)->getTau();
 				}
-
 				if (!exotica::ok(solver->specifyProblem(problem)))
 				{
 					INDICATE_FAILURE
 					return false;
 				}
-
 				moveit_msgs::PlanningScenePtr scene_ptr;
 				scene_ptr.reset(new moveit_msgs::PlanningScene(req.scene_));
 				if (!exotica::ok(problem->setScene(scene_ptr)))
@@ -81,8 +85,6 @@ class ExoticaService
 			{
 				ROS_ERROR("EXOTica Initialisation Failed");
 			}
-
-
 			if (found_solution)
 				return true;
 			else
@@ -90,7 +92,6 @@ class ExoticaService
 		}
 
 	private:
-		exotica::Initialiser ini;
 		exotica::Server_ptr server;
 		exotica::MotionSolver_ptr solver;
 		exotica::PlanningProblem_ptr problem;

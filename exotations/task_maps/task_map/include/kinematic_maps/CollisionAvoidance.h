@@ -73,8 +73,10 @@ namespace exotica
 #ifdef C_DEBUG
 			ros::Publisher state_pub_;
 			ros::Publisher close_pub_;
+			ros::Publisher centre_pub_;
 			ros::NodeHandle nh_;
 			visualization_msgs::Marker close_;
+			visualization_msgs::Marker centre_;
 #endif
 	};
 }

@@ -15,6 +15,13 @@ namespace fcl_convert
 		eigen(1) = fcl.data.vs[1];
 		eigen(2) = fcl.data.vs[2];
 	}
+
+	void fcl2Eigen(const fcl::Transform3f & fcl, Eigen::Vector3d & eigen)
+	{
+		eigen(0) = fcl.getTranslation().data.vs[0];
+		eigen(1) = fcl.getTranslation().data.vs[1];
+		eigen(2) = fcl.getTranslation().data.vs[2];
+	}
 }
 namespace exotica
 {
@@ -204,8 +211,7 @@ namespace exotica
 		d = 9999;
 		fcl::DistanceRequest req(true);
 		fcl::DistanceResult res;
-		Eigen::Vector3d centre1, centre2;
-		fcl_convert::fcl2Eigen(fcl_link[0]->getTranslation(), centre1);
+		fcl_convert::fcl2Eigen(fcl_link[0]->getTransform().transform(fcl_link[0]->collisionGeometry()->aabb_center), c1);
 		if (self)
 		{
 			for (auto & it : fcl_robot_)
@@ -221,7 +227,7 @@ namespace exotica
 					else if (res.min_distance < d)
 					{
 						d = res.min_distance;
-						fcl_convert::fcl2Eigen(it.second[i]->getTranslation(), centre2);
+						fcl_convert::fcl2Eigen(it.second[i]->getTransform().transform(it.second[i]->collisionGeometry()->aabb_center), c2);
 					}
 				}
 			}
@@ -239,14 +245,27 @@ namespace exotica
 				{
 					d = res.min_distance;
 
-					fcl_convert::fcl2Eigen(it.second[i]->getTranslation(), centre1);
+					fcl_convert::fcl2Eigen(it.second[i]->getTransform().transform(it.second[i]->collisionGeometry()->aabb_center), c2);
 				}
 			}
 		}
 
 		fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
 		fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
-		norm = p1 - centre1;
+
+		//	Bugs for non-mesh obstacles. TODO
+//		KDL::Frame tmp1 = KDL::Frame(KDL::Vector(p1(0), p1(1), p1(2)));
+//		//tmp1 = KDL::Frame(KDL::Vector(c1(0), c1(1), c1(2)))*tmp1.Inverse();
+//		KDL::Frame tmp2 = KDL::Frame(KDL::Vector(p2(0), p2(1), p2(2)));
+//		tmp2 = tmp2 * KDL::Frame(KDL::Vector(c2(0), c2(1), c2(2)));
+//
+//		p1(0)=tmp1.p.data[0];
+//		p1(1)=tmp1.p.data[1];
+//		p1(2)=tmp1.p.data[2];
+//		p2(0)=tmp2.p.data[0];
+//		p2(1)=tmp2.p.data[1];
+//		p2(2)=tmp2.p.data[2];
+		norm = p2 - p1;
 		return SUCCESS;
 	}
 	double CollisionScene::distance(const fcls_ptr & fcl1, const fcls_ptr & fcl2,

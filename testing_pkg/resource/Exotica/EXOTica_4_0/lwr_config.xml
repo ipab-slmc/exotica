@@ -72,11 +72,11 @@
 
     <Task name="CollisionAvoidanceTask" type="TaskSqrError">
       <map name="CollisionAvoidanceMap"/>
-      <Rho>1.0e2</Rho>
+      <Rho>1.0</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0.0</Goal>
     </Task>
-    <T>50</T>
+    <T>100</T>
     <duration>5</duration>
     <Qrate>1e-10</Qrate>
     <Hrate>1.0</Hrate>

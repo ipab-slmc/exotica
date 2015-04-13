@@ -9,6 +9,7 @@
 #define EXOTICA_EXOTICA_MOVEIT_INCLUDE_EXOTICA_MOVEIT_EXOTICAPLANNERSERVICE_H_
 
 #include "aico/AICOsolver.h"
+#include <ompl_solver/OMPLsolver.h>
 #include "ik_solver/ik_solver.h"
 #include <exotica/Initialiser.h>
 #include "exotica_moveit/ExoticaPlanning.h"

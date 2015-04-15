@@ -39,6 +39,7 @@
 #include <kinematic_maps/EffPosition.h>
 #include <iostream>
 #include <fstream>
+#include <aico/incremental_gaussian.h>
 
 #include "lapack/cblas.h"
 #include "f2c.h"
@@ -103,6 +104,8 @@ namespace exotica
 		 */
 		EReturn AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_, const Eigen::Ref<const Eigen::MatrixXd> & A_, const Eigen::Ref<const Eigen::VectorXd> & b_);
 
+        EReturn getStats(std::vector<sp_mean_covariance>& q_stat_);
+
         bool preupdateTrajectory_;
 
 	protected:
@@ -139,6 +142,7 @@ namespace exotica
 		std::vector<Eigen::VectorXd> phiBar; //!< Task cost mappings
 		std::vector<Eigen::MatrixXd> JBar; //!< Task cost Jacobians
 		std::vector<Eigen::VectorXd> y_star; //!< Task cost mappings
+        std::vector<sp_mean_covariance> q_stat; //!< Cost weigthed normal distribution of configurations across sweeps.
 
 		std::vector<Eigen::VectorXd> s; //!< Forward message mean
 		std::vector<Eigen::MatrixXd> Sinv; //!< Forward message covariance inverse

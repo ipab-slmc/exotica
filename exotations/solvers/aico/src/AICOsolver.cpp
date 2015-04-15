@@ -48,10 +48,16 @@ namespace exotica
 			A(),tA(),Ainv(),invtA(),a(),B(),tB(),Winv(),Hinv(),
 			Q(),sweep(0),sweepMode(0),W(),H(),T(0),
             dynamic(false),n(0),updateCount(0),damping_init(0.0),
-            preupdateTrajectory_(false)
+            preupdateTrajectory_(false), q_stat()
 	{
 
 	}
+
+    EReturn AICOsolver::getStats(std::vector<sp_mean_covariance>& q_stat_)
+    {
+        q_stat_=q_stat;
+        return SUCCESS;
+    }
 
 	AICOsolver::~AICOsolver()
 	{
@@ -229,6 +235,12 @@ namespace exotica
     costTask.resize(T+1,taskNames.size());
     y_star.clear(); y_star.resize(TT,Eigen::VectorXd::Zero(m));
 
+    q_stat.resize(T+1);
+    for(int t=0;t<=T;t++)
+    {
+        q_stat[t].resize(n);
+    }
+
     rememberOldState();
 		return SUCCESS;
 	}
@@ -393,7 +405,8 @@ namespace exotica
 		}
         prob_->update(dynamic?qhat[t].head(n/2):qhat[t],t);
 		updateCount++;
-		getTaskCosts(t);
+        double c=getTaskCosts(t);
+        q_stat[t].addw(c>0?1.0/(1.0+c):1.0,qhat_t);
 		// If using fully dynamic system, update Q, Hinv and process variables here.
 	}
 
@@ -667,7 +680,7 @@ namespace exotica
 				break;
 		}
   	b_step=0.0;
-  	for(t=0;t<b.size();t++) {b_step=std::max((b_old[t]-b[t]).array().abs().maxCoeff(),b_step);}
+  	for(t=0;t<b.size();t++) {b_step+=std::max((b_old[t]-b[t]).array().abs().maxCoeff(),b_step);}
   	dampingReference=b;
   	// q is set inside of evaluateTrajectory() function
   	cost = evaluateTrajectory(b);

@@ -148,5 +148,7 @@ namespace exotica
      */
     EReturn loadOBJ(std::string & data,Eigen::VectorXi& tri, Eigen::VectorXd& vert);
 
+    EReturn saveMatrix(std::string file_name, const Eigen::Ref<const Eigen::MatrixXd> mat);
+
 }
 #endif

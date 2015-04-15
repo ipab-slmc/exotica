@@ -1,4 +1,22 @@
 #include "exotica/Tools.h"
+#include <fstream>
+
+exotica::EReturn exotica::saveMatrix(std::string file_name, const Eigen::Ref<const Eigen::MatrixXd> mat)
+{
+    std::ofstream myfile;
+    myfile.open (file_name);
+    if(myfile.good())
+    {
+        myfile << mat;
+        myfile.close();
+        return SUCCESS;
+    }
+    else
+    {
+        myfile.close();
+        return FAILURE;
+    }
+}
 
 bool exotica::ok(const EReturn & value)
 {

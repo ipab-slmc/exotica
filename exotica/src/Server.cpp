@@ -42,6 +42,27 @@ namespace exotica
 			}
 			tmp_handle = tmp_handle.NextSibling();
 		}
+
+		tinyxml2::XMLHandle mode_handle(handle.FirstChildElement("PlanningMode"));
+		if (mode_handle.ToElement())
+		{
+			std::string str =mode_handle.ToElement()->GetText();
+			if (str.compare("Optimization")==0)
+			{
+				ROS_INFO("EXOTica Planning Mode: Optimization Mode");
+			}
+			else if(str.compare("Sampling")==0)
+			{
+				ROS_INFO("EXOTica Planning Mode: Sampling Mode");
+			}
+			else
+			{
+				ROS_INFO("EXOTica Planning Mode Undefined, Using Default Mode: Optimization Mode");
+			}
+			std_msgs::String ros_s;
+			ros_s.data = str;
+			params_["/PlanningMode"] = boost::shared_ptr<std_msgs::String>(new std_msgs::String(ros_s));
+		}
 		INFO("EXOTica Server Initialised")
 		return SUCCESS;
 	}

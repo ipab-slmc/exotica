@@ -17,9 +17,6 @@
 #include <boost/thread/mutex.hpp>
 
 #ifdef C_DEBUG
-#include <moveit_msgs/DisplayRobotState.h>
-#include <moveit_msgs/DisplayTrajectory.h>
-#include <moveit/robot_state/conversions.h>
 #include <visualization_msgs/Marker.h>
 #endif
 
@@ -71,7 +68,6 @@ namespace exotica
 			//	Internal kinematica solver
 			kinematica::KinematicTree kin_sol_;
 #ifdef C_DEBUG
-			ros::Publisher state_pub_;
 			ros::Publisher close_pub_;
 			ros::Publisher centre_pub_;
 			ros::NodeHandle nh_;

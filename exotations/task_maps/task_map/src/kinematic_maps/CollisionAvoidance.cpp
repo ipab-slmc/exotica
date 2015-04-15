@@ -21,7 +21,6 @@ namespace exotica
 #ifdef C_DEBUG
 		ROS_ERROR("Running collision avoidance taskmap in debug mode");
 		nh_ = ros::NodeHandle("CollisionAvoidance");
-		state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("disp_state", 100);
 		close_pub_ = nh_.advertise<visualization_msgs::Marker>("close_marker", 100);
 		centre_pub_ = nh_.advertise<visualization_msgs::Marker>("centre_marker", 100);
 		close_.type = visualization_msgs::Marker::LINE_LIST;
@@ -149,11 +148,7 @@ namespace exotica
 #ifdef C_DEBUG
 		close_pub_.publish(close_);
 		centre_pub_.publish(centre_);
-		moveit_msgs::DisplayRobotState msg;
-		robot_state::robotStateToRobotStateMsg(scene_->getCollisionScene()->getCurrentState(), msg.state);
-		state_pub_.publish(msg);
 		ros::spinOnce();
-		getchar();
 #endif
 
 		if (!kin_sol_.updateConfiguration(x) || !kin_sol_.generateForwardMap()

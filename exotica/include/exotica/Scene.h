@@ -24,6 +24,11 @@
 #include <moveit_msgs/PlanningScene.h>
 #include <moveit/planning_scene/planning_scene.h>
 
+#ifdef EXOTICA_DEBUG_MODE
+#include <moveit_msgs/DisplayRobotState.h>
+#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit/robot_state/conversions.h>
+#endif
 namespace exotica
 {
 	typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
@@ -46,9 +51,10 @@ namespace exotica
 			 * \brief	Initialisation function
 			 * @param	ps		Moveit planning scene (for model building)
 			 * @param	joints	Joint names
+			 * @param	mode	Optimization or sampling
 			 */
 			EReturn initialise(const planning_scene::PlanningSceneConstPtr & ps,
-					const std::vector<std::string> & joints);
+					const std::vector<std::string> & joints, std::string & mode);
 
 			/*
 			 * \brief	Update the robot collision properties
@@ -69,10 +75,10 @@ namespace exotica
 					Eigen::Vector3d & p1, Eigen::Vector3d & p2);
 
 			/*
-			 * \brief	Check if the whole robot is in collision
+			 * \brief	Check if the whole robot is valid (collision and feasibility)
 			 * @param	self	Indicate if self collision check is required
 			 */
-			bool getRobotCollision(bool self);
+			bool isStateValid(bool self = true);
 
 			/*
 			 * \brief	Get closest distance between robot link and anyother objects
@@ -92,6 +98,12 @@ namespace exotica
 			 * @return	Current robot state
 			 */
 			const robot_state::RobotState& getCurrentState();
+
+			/*
+			 * \brief	Get the moveit planning scene
+			 * @return	Moveit planning scene
+			 */
+			const planning_scene::PlanningScenePtr getPlanningScene();
 		private:
 
 			/*
@@ -120,6 +132,9 @@ namespace exotica
 
 			//	Joint index in robot state
 			std::vector<int> joint_index_;
+
+			//	Indicate if distance computation is required
+			bool compute_dist;
 	};
 
 	typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
@@ -188,7 +203,7 @@ namespace exotica
 					const std::vector<KDL::Frame> & offset);
 
 			/*
-			 * \breif	Get forward map
+			 * \brief	Get forward map
 			 * @param	task	Task name
 			 * @param	phi		Forward map
 			 */
@@ -221,7 +236,7 @@ namespace exotica
 			CollisionScene_ptr & getCollisionScene();
 
 			/*
-			 * \bref	Get map size for particular taskmap
+			 * \brief	Get map size for particular taskmap
 			 * @param	task	Task name
 			 * @return	Map 	Size
 			 */
@@ -290,8 +305,17 @@ namespace exotica
 
 			//	Mutex locker
 			boost::mutex lock_;
+
+			//	The collision scene
 			CollisionScene_ptr collision_scene_;
 
+			//	Update mode
+			std::string mode_;
+			bool use_kinematica_;
+
+#ifdef EXOTICA_DEBUG_MODE
+			ros::Publisher state_pub_;
+#endif
 	};
 	typedef boost::shared_ptr<Scene> Scene_ptr;
 	typedef std::map<std::string, Scene_ptr> Scene_map;

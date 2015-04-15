@@ -14,7 +14,8 @@ class ExoticaService
 {
 	public:
 
-		ExoticaService()
+		ExoticaService() :
+				nh_("~")
 		{
 			//TODO
 		}
@@ -25,15 +26,22 @@ class ExoticaService
 		bool solve(exotica_moveit::ExoticaPlanning::Request & req,
 				exotica_moveit::ExoticaPlanning::Response & res)
 		{
-			ROS_INFO("Planning request received");
+			ROS_INFO_STREAM("Planning request received for Planning group "<<req.group_name_);
 
 			double tau_;
 			bool found_solution = false;
 			Eigen::MatrixXd solution;
 			exotica::Initialiser ini;
-
+			CHECK_EXECUTION
 			if (exotica::ok(ini.initialise(req.xml_file_, server, solver, problem)))
 			{
+				moveit_msgs::PlanningScenePtr scene_ptr;
+				scene_ptr.reset(new moveit_msgs::PlanningScene(req.scene_));
+				if (!exotica::ok(problem->setScene(scene_ptr)))
+				{
+					INDICATE_FAILURE
+					return false;
+				}
 				if (solver->type().compare("exotica::AICOsolver") == 0)
 				{
 					tau_ = boost::static_pointer_cast<exotica::AICOProblem>(problem)->getTau();
@@ -44,16 +52,22 @@ class ExoticaService
 				}
 				else if (solver->type().compare("exotica::OMPLsolver") == 0)
 				{
-					1; //
+					const moveit::core::JointModelGroup* model_group =
+							problem->scenes_.begin()->second->getPlanningScene()->getRobotModel()->getJointModelGroup(req.group_name_);
+					moveit::core::JointBoundsVector b = model_group->getActiveJointModelsBounds();
+					exotica::OMPLProblem_ptr tmp =
+							boost::static_pointer_cast<exotica::OMPLProblem>(problem);
+					tmp->getBounds().resize(b.size() * 2);
+					for (int i = 0; i < b.size(); i++)
+					{
+						tmp->getBounds()[i] = (*b[i])[0].min_position_;
+						tmp->getBounds()[i + b.size()] = (*b[i])[0].max_position_;
+					}
+					exotica::OMPLsolver_ptr ss =
+							boost::static_pointer_cast<exotica::OMPLsolver>(solver);
+					ss->setMaxPlanningTime(req.max_time_);
 				}
 				if (!exotica::ok(solver->specifyProblem(problem)))
-				{
-					INDICATE_FAILURE
-					return false;
-				}
-				moveit_msgs::PlanningScenePtr scene_ptr;
-				scene_ptr.reset(new moveit_msgs::PlanningScene(req.scene_));
-				if (!exotica::ok(problem->setScene(scene_ptr)))
 				{
 					INDICATE_FAILURE
 					return false;
@@ -74,19 +88,8 @@ class ExoticaService
 				}
 				else if (solver->type().compare("exotica::OMPLsolver") == 0)
 				{
-					tau_ = 0.0;
-					const moveit::core::JointModelGroup* model_group =
-							planning_scene_->getRobotModel()->getJointModelGroup(request_.group_name);
-					moveit::core::JointBoundsVector b = model_group->getActiveJointModelsBounds();
-					exotica::OMPLProblem_ptr tmp = boost::static_pointer_cast<OMPLProblem>(prob);
-					tmp->getBounds().resize(b.size() * 2);
-					for (int i = 0; i < b.size(); i++)
-					{
-						tmp->getBounds()[i] = (*b[i])[0].min_position_;
-						tmp->getBounds()[i + b.size()] = (*b[i])[0].max_position_;
-					}
-					exotica::OMPLsolver_ptr ss = boost::static_pointer_cast<OMPLsolver>(sol);
-					ss->setMaxPlanningTime(getMotionPlanRequest().allowed_planning_time);
+					found_solution =
+							exotica::ok(boost::static_pointer_cast<exotica::OMPLsolver>(solver)->Solve(q0, solution));
 				}
 				if (found_solution)
 				{
@@ -114,6 +117,7 @@ class ExoticaService
 		exotica::Server_ptr server;
 		exotica::MotionSolver_ptr solver;
 		exotica::PlanningProblem_ptr problem;
+		ros::NodeHandle nh_;
 };
 int main(int argc, char **argv)
 {

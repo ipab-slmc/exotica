@@ -165,8 +165,17 @@ exotica::EReturn exotica::Initialiser::initialise(const std::string & file_name,
 
 	server.reset(new Server);
 	tinyxml2::XMLHandle server_handle(root_handle.FirstChildElement("Server"));
-	if (!ok(server->initialise(server_handle)))
+	if (server_handle.ToElement())
 	{
+		if (!ok(server->initialise(server_handle)))
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+	}
+	else
+	{
+		ERROR("EXOTica Server element is missing in the xml");
 		INDICATE_FAILURE
 		return FAILURE;
 	}
@@ -262,7 +271,7 @@ exotica::EReturn exotica::Initialiser::initialise(const std::string & file_name,
 		}
 		else if (aux_rtn == SUCCESS)
 		{
-			solver->specifyProblem(problem);
+			//solver->specifyProblem(problem);
 			return SUCCESS;
 		}
 		else

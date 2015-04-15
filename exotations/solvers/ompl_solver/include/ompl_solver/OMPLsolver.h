@@ -14,6 +14,7 @@
 #include "ompl_solver/common.h"
 #include "ompl_solver/OMPLStateValidityChecker.h"
 #include "ompl_solver/OMPLGoalSampler.h"
+#include <ompl/geometric/PathSimplifier.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -102,6 +103,7 @@ namespace exotica
 			 */
 			EReturn convertPath(const ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj);
 
+			EReturn getSimplifiedPath(ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj);
 			/**
 			 * \brief Registers trajectory termination condition
 			 * @param ptc Termination criteria

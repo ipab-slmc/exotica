@@ -32,6 +32,6 @@ include_directories(
 
 ## Declare a cpp library
 add_library(${PROJECT_NAME} src/TaskSqrError.cpp
-                            #src/TaskTerminationCriterion.cpp
+                            src/TaskTerminationCriterion.cpp
            )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${EIGEN_LIBRARIES})

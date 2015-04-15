@@ -12,7 +12,6 @@
 #include "ompl_solver/OMPLsolver.h"
 #include "ompl_solver/OMPLProblem.h"
 #include <boost/thread/mutex.hpp>
-
 namespace exotica
 {
 

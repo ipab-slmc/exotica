@@ -172,37 +172,37 @@ namespace exotica
 			return false;
 		}
 		config_file_ = filename;
-		ROS_INFO_STREAM("Loading exotica from: "<<filename);
-		exotica::AICOsolver_ptr tmp_sol;
-		PlanningProblem_ptr prob;
-		if (ok(ini.initialise(filename, ser_, sol, prob, problem_name_, solver_name_)))
-		{
-			if (sol->type().compare("exotica::AICOsolver") == 0)
-			{
-				tau_ = boost::static_pointer_cast<AICOProblem>(prob)->getTau();
-			}
-			else if (sol->type().compare("exotica::IKsolver") == 0)
-			{
-				tau_ = boost::static_pointer_cast<IKProblem>(prob)->getTau();
-			}
-			if (!ok(sol->specifyProblem(prob)))
-			{
-				INDICATE_FAILURE
-				;
-				return false;
-			}
-			if (!ok(prob->setScene(scene)))
-			{
-				INDICATE_FAILURE
-				;
-				return false;
-			}
-		}
-		else
-		{
-			ROS_WARN_STREAM("Could not initialize EXOTica!");
-			return false;
-		}
+//		ROS_INFO_STREAM("Loading exotica from: "<<filename);
+//		exotica::AICOsolver_ptr tmp_sol;
+//		PlanningProblem_ptr prob;
+//		if (ok(ini.initialise(filename, ser_, sol, prob, problem_name_, solver_name_)))
+//		{
+//			if (sol->type().compare("exotica::AICOsolver") == 0)
+//			{
+//				tau_ = boost::static_pointer_cast<AICOProblem>(prob)->getTau();
+//			}
+//			else if (sol->type().compare("exotica::IKsolver") == 0)
+//			{
+//				tau_ = boost::static_pointer_cast<IKProblem>(prob)->getTau();
+//			}
+//			if (!ok(sol->specifyProblem(prob)))
+//			{
+//				INDICATE_FAILURE
+//				;
+//				return false;
+//			}
+//			if (!ok(prob->setScene(scene)))
+//			{
+//				INDICATE_FAILURE
+//				;
+//				return false;
+//			}
+//		}
+//		else
+//		{
+//			ROS_WARN_STREAM("Could not initialize EXOTica!");
+//			return false;
+//		}
 
 		client_ = nh_.serviceClient<exotica_moveit::ExoticaPlanning>("/exotica_planning");
 		return true;
@@ -262,6 +262,8 @@ namespace exotica
 		moveit_msgs::PlanningScene tmp;
 		planning_scene_->getPlanningSceneMsg(tmp);
 		srv.request.scene_ = tmp;
+		srv.request.group_name_ =request_.group_name;
+		srv.request.max_time_ = getMotionPlanRequest().allowed_planning_time;
 		if (!client_.waitForExistence(ros::Duration(5)))
 		{
 			ROS_ERROR("Exotica Planning service does not exist");

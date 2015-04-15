@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
-
+add_definitions(-DEXOTICA_DEBUG_MODE)
 find_package(OMPL REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS

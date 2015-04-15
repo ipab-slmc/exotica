@@ -31,7 +31,11 @@ namespace exotica
 	EReturn TaskTerminationCriterion::terminate(bool & end, double& err)
 	{
 		phi(y_);
-		err=(y_-y_star_).squaredNorm()*rho_;
+		Eigen::VectorXd y_star(y_.rows());
+		getGoal(y_star);
+		double rho;
+		getRho(rho);
+		err=(y_-y_star).squaredNorm()*rho;
 		end = err<threshold_;
 		return SUCCESS;
 	}

@@ -26,6 +26,7 @@ namespace exotica
 
 			EReturn copyToOMPLState(ompl::base::State *state, Eigen::VectorXd q) const;
 			EReturn copyFromOMPLState(const ompl::base::State *state, Eigen::VectorXd& q) const;
+
 	};
 
 } /* namespace exotica */

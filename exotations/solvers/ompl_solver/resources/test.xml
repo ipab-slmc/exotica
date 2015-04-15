@@ -1,7 +1,18 @@
 <?xml version="1.0" ?>
 <ExampleConfiguration>
-  <OMPLsolver name="OMPL Test">
-    <algorithm>LBTRRT</algorithm>
+  <Server name="EXOTicaServer">
+     <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
+     Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
+     <Parameters>  
+
+     </Parameters>
+     
+     <!-- Other server functionalities other than parameters TODO -->
+     <!-- Specify Planning Mode: Optimization or Sampling. Skip unnecessary steps if in sampling mode-->
+     <PlanningMode>Sampling</PlanningMode>
+  </Server>
+  <OMPLsolver name="OMPL Interface">
+    <algorithm>RRT</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
   </OMPLsolver>
 
@@ -26,9 +37,9 @@
     </Scene> 
     
     <Map type="EffPosition" name="LeftHandPositionMap">
-      <Scene name="ExampleScene"/>
+      <Scene name="TestScene"/>
       <EndEffector ignore_unused="true"> <!-- List of end effectors -->
-          <limb segment="lwr_arm_6_link">
+          <limb segment="lwr_arm_7_link">
             <vector>0.0 0.0 0.0</vector>
             <quaternion>1.0 0.0 0.0 0.0</quaternion>
           </limb>
@@ -39,7 +50,7 @@
       <map name="LeftHandPositionMap"/>
       <Rho>1.0</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal>0.2 0.0 0.3</Goal>
+      <Goal>0.56 0.1 0.58</Goal>
       <Threshold>1e-2</Threshold>
       <!-- Task Parameters -->
     </Task>

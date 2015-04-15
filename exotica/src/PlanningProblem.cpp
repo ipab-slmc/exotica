@@ -320,5 +320,6 @@ exotica::EReturn exotica::PlanningProblem::updateKinematicScene(
 //			return FAILURE;
 //	}
 	INDICATE_FAILURE
-	return SUCCESS;
+	ROS_ERROR("Kinematica Scene is duplicated in new EXOTica 3.5, you should not call this function");
+	return FAILURE;
 }

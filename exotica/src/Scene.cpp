@@ -28,7 +28,8 @@ namespace exotica
 	///////////////////////////////////////////////////////////////
 	///////////////////////	Collision Scene	///////////////////////
 	///////////////////////////////////////////////////////////////
-	CollisionScene::CollisionScene()
+	CollisionScene::CollisionScene() :
+			compute_dist(true)
 	{
 		fcl_robot_.clear();
 		fcl_world_.clear();
@@ -42,7 +43,7 @@ namespace exotica
 	}
 
 	EReturn CollisionScene::initialise(const planning_scene::PlanningSceneConstPtr & ps,
-			const std::vector<std::string> & joints)
+			const std::vector<std::string> & joints, std::string & mode)
 	{
 		robot_model::RobotModelConstPtr model = ps->getRobotModel();
 		ps_.reset(new planning_scene::PlanningScene(ps->getRobotModel()));
@@ -86,6 +87,9 @@ namespace exotica
 				}
 			}
 		}
+
+		if (mode.compare("Sampling") == 0)
+			compute_dist = false;
 		return SUCCESS;
 	}
 
@@ -95,36 +99,38 @@ namespace exotica
 			ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i], x(i));
 		ps_->getCurrentStateNonConst().update(true);
 
-		for (auto & it : fcl_robot_)
-			for (std::size_t i = 0; i < it.second.size(); ++i)
-			{
-				collision_detection::CollisionGeometryData* cd =
-						static_cast<collision_detection::CollisionGeometryData*>(it.second[i]->collisionGeometry()->getUserData());
-				it.second[i]->setTransform(collision_detection::transform2fcl(ps_->getCurrentState().getCollisionBodyTransform(cd->ptr.link, cd->shape_index)));
-				it.second[i]->getTransform().transform(it.second[i]->collisionGeometry()->aabb_center);
-			}
-
-		collision_detection::WorldConstPtr tmp_world = ps_->getCollisionWorld()->getWorld();
-		std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
-		fcl_world_.clear();
-		if (obj_id_.size() > 0)
+		if (compute_dist)
 		{
-			for (std::size_t i = 0; i < obj_id_.size(); ++i)
-			{
-				std::size_t index_size = tmp_world->getObject(obj_id_[i])->shapes_.size();
-				fcl_world_[obj_id_[i]] = fcls_ptr(index_size);
-				for (std::size_t j = 0; j < index_size; j++)
+			for (auto & it : fcl_robot_)
+				for (std::size_t i = 0; i < it.second.size(); ++i)
 				{
-					collision_detection::FCLGeometryConstPtr g =
-							collision_detection::createCollisionGeometry(tmp_world->getObject(obj_id_[i])->shapes_[j], tmp_world->getObject(obj_id_[i]).get());
-					boost::shared_ptr<fcl::CollisionObject> obj =
-							boost::shared_ptr<fcl::CollisionObject>(new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
-					obj->getTransform().transform(obj->collisionGeometry()->aabb_center);
-					fcl_world_.at(obj_id_[i])[j] = obj;
+					collision_detection::CollisionGeometryData* cd =
+							static_cast<collision_detection::CollisionGeometryData*>(it.second[i]->collisionGeometry()->getUserData());
+					it.second[i]->setTransform(collision_detection::transform2fcl(ps_->getCurrentState().getCollisionBodyTransform(cd->ptr.link, cd->shape_index)));
+					it.second[i]->getTransform().transform(it.second[i]->collisionGeometry()->aabb_center);
+				}
+
+			collision_detection::WorldConstPtr tmp_world = ps_->getCollisionWorld()->getWorld();
+			std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
+			fcl_world_.clear();
+			if (obj_id_.size() > 0)
+			{
+				for (std::size_t i = 0; i < obj_id_.size(); ++i)
+				{
+					std::size_t index_size = tmp_world->getObject(obj_id_[i])->shapes_.size();
+					fcl_world_[obj_id_[i]] = fcls_ptr(index_size);
+					for (std::size_t j = 0; j < index_size; j++)
+					{
+						collision_detection::FCLGeometryConstPtr g =
+								collision_detection::createCollisionGeometry(tmp_world->getObject(obj_id_[i])->shapes_[j], tmp_world->getObject(obj_id_[i]).get());
+						boost::shared_ptr<fcl::CollisionObject> obj =
+								boost::shared_ptr<fcl::CollisionObject>(new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
+						obj->getTransform().transform(obj->collisionGeometry()->aabb_center);
+						fcl_world_.at(obj_id_[i])[j] = obj;
+					}
 				}
 			}
 		}
-
 		return SUCCESS;
 	}
 
@@ -189,11 +195,10 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	bool CollisionScene::getRobotCollision(bool self)
+	bool CollisionScene::isStateValid(bool self)
 	{
 		//	TODO
-		ERROR("Sampling based collision checking is not implemented")
-		return false;
+		return ps_->isStateValid(ps_->getCurrentState());
 	}
 
 	EReturn CollisionScene::getRobotDistance(const std::string & link, bool self, double & d,
@@ -297,12 +302,17 @@ namespace exotica
 	{
 		return ps_->getCurrentState();
 	}
+
+	const planning_scene::PlanningScenePtr CollisionScene::getPlanningScene()
+	{
+		return ps_;
+	}
 ///////////////////////////////////////////////////////////////
 ///////////////////////	EXOTica Scene	///////////////////////
 ///////////////////////////////////////////////////////////////
 
 	Scene::Scene(const std::string & name) :
-			name_(name), nh_(name + "_node"), N(0), initialised_(false)
+			name_(name), nh_(name + "_node"), N(0), initialised_(false), use_kinematica_(true)
 	{
 		eff_names_.clear();
 		eff_offsets_.clear();
@@ -342,6 +352,16 @@ namespace exotica
 			return FAILURE;
 		}
 		collision_scene_.reset(new CollisionScene());
+
+		EParam<std_msgs::String> tmp;
+		server->getParam("/PlanningMode", tmp);
+		mode_ = tmp->data;
+		if (mode_.compare("Sampling"))
+			use_kinematica_ = false;
+#ifdef EXOTICA_DEBUG_MODE
+		state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("disp_state", 100);
+		ROS_ERROR_STREAM("Running in debug mode, a robot state will be published to '"<<name_<<"_node/disp_state'");
+#endif
 		return SUCCESS;
 	}
 
@@ -477,15 +497,27 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-		if (!kinematica_.getPhi(Phi_) || !kinematica_.getJacobian(Jac_))
+		if (!kinematica_.getPhi(Phi_))
 			return FAILURE;
+		if (use_kinematica_)
+		{
+			if (!kinematica_.getJacobian(Jac_))
+				return FAILURE;
+		}
 
+#ifdef EXOTICA_DEBUG_MODE
+		moveit_msgs::DisplayRobotState msg;
+		robot_state::robotStateToRobotStateMsg(collision_scene_->getCurrentState(), msg.state);
+		state_pub_.publish(msg);
+		ros::spinOnce();
+#endif
 		return SUCCESS;
 	}
 
 	EReturn Scene::setCollisionScene(const planning_scene::PlanningSceneConstPtr & scene)
 	{
-		return collision_scene_->initialise(scene, kinematica_.getJointNames());
+
+		return collision_scene_->initialise(scene, kinematica_.getJointNames(), mode_);
 	}
 
 	EReturn Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene)
@@ -493,9 +525,11 @@ namespace exotica
 
 		planning_scene::PlanningScenePtr tmp;
 		tmp.reset(new planning_scene::PlanningScene(model_));
-		;
 		tmp->setPlanningSceneMsg(*scene.get());
-		return collision_scene_->initialise(tmp, kinematica_.getJointNames());
+
+		EParam<std_msgs::String> mode;
+
+		return collision_scene_->initialise(tmp, kinematica_.getJointNames(), mode_);
 	}
 
 	int Scene::getNumJoints()
@@ -546,8 +580,7 @@ namespace exotica
 
 	planning_scene::PlanningScenePtr Scene::getPlanningScene()
 	{
-		INDICATE_FAILURE
-		return nullptr;
+		return collision_scene_->getPlanningScene();
 	}
 
 	kinematica::KinematicTree & Scene::getSolver()

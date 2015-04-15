@@ -2,22 +2,23 @@
 #define SP_MEAN_COVARIANCE_HPP
  
 #include <vector>
+#include <Eigen/Dense>
  
 struct sp_mean_covariance {
     int     D;
     int     D2;
     double  W;
-    std::vector<double> T;
-    std::vector<double> S;
-    std::vector<double> dX;
+    Eigen::VectorXd T;
+    Eigen::VectorXd dX;
+    Eigen::MatrixXd S;
  
     sp_mean_covariance() 
     {
         D = 0;
         D2 = 0;
-        T.clear();
-        dX.clear();
-        S.clear();
+        T.resize(0);
+        dX.resize(0);
+        S.resize(0,0);
     }
  
     sp_mean_covariance(int D_) 
@@ -32,45 +33,38 @@ struct sp_mean_covariance {
  
         T.resize(D_);
         dX.resize(D_);
-        S.resize( D_*(D_+1)/2 );
+        S.resize( D_,D_);
  
         clear();
     }
  
     void clear()
     {
-        for (int d=0; d<D; ++d) {
-            T[d] = 0.;
-            dX[d] = 0.;
-        }
-        for (int d=0; d<D2; ++d) {
-            S[d] = 0.;
-        }
-        W = 0.;
- 
+        T.setZero();
+        dX.setZero();
+        S.setZero();
+        W = 0.; 
     }
  
  
-    void add(double* x)
+    void add(const Eigen::Ref<const Eigen::VectorXd> & x)
     {
-        if (W == 0.) {
+        if (W == 0.)
+        {
             W = 1.;
-            for (int i=0; i<D ; ++i) T[i] = x[i];
-            for (int i=0; i<D2; ++i) S[i] = 0.;
+            T=x;
+            S.setZero();
             return;
         }
         W += 1.;
-        for (int i=0; i<D; ++i)     
-            T[i] += x[i];
- 
-        double* Si = &S[0];
+        T+=x;
         double  f  = 1. / W / (W-1.);
-        for (int i=0; i<D; ++i) dX[i] = W*x[i]-T[i];
- 
-        for (int r=0; r<D; ++r) {
-            for (int c=0; c<=r; ++c) {
-                *Si += f * dX[r] * dX[c];
-                Si++;
+        dX=W*x-T;
+        for (int r=0; r<D; r++)
+        {
+            for (int c=0; c<D; c++)
+            {
+                S(r,c)+=f*dX(r)*dX(c);
             }
         }
     }
@@ -78,69 +72,63 @@ struct sp_mean_covariance {
  
     inline void add(sp_mean_covariance& M)
     {
-        add(M.W, &M.T[0], &M.S[0]);
+        add(M.W, M.T, M.S);
     }
  
-    void add(double W_, double* T_, double* S_)
+    void add(double& W_, const Eigen::Ref<const Eigen::VectorXd> & T_, const Eigen::Ref<const Eigen::VectorXd> & S_)
     {
- 
-        if (W == 0.) {
+        if (W == 0.)
+        {
             W = W_;
-            for (int i=0; i<D ; ++i) T[i] = T_[i];
-            for (int i=0; i<D2; ++i) S[i] = S_[i];
+            T=T_;
+            S=S_;
             return;
         }
-        for (int i=0; i<D ; ++i) 
-            dX[i] = T_[i]/W_ - T[i]/W;
- 
-        double* Si = &S[0];
-        double* Si_ = &S_[0];
+        dX=T_/W_-T/W;
+
         double  f  = W * W_ / (W + W_);
-        for (int r=0; r<D; ++r) {
-            for (int c=0; c<=r; ++c) {
-                *Si += *Si_ + f * dX[r] * dX[c];
-                Si++;
-                Si_++;
+        for (int r=0; r<D; r++)
+        {
+            for (int c=0; c<D; c++)
+            {
+                S(r,c)+=S_(r,c)+f*dX(r)*dX(c);
             }
         }
- 
-        for (int i=0; i<D ; ++i)
-            T[i] += T_[i];
+        T+=T_;
         W += W_;
     }
  
  
-    inline void addw(double w, double* x)
+    inline void addw(double w, const Eigen::Ref<const Eigen::VectorXd> & x)
     {
         //--------------------------------
         // add( w, w*x, 0. );
         //--------------------------------
         if (W == 0.) {
             W = w;
-            for (int i=0; i<D ; ++i) T[i] = w*x[i];
-            for (int i=0; i<D2; ++i) S[i] = 0.;
+            T = w*x;
+            S.setZero();
             return;
         }
  
-        for (int i=0; i<D ; ++i) 
-            dX[i] = x[i] - T[i]/W;
+        dX = x - T/W;
  
-        double* Si = &S[0];
         double  f  = W * w / (W + w);
-        for (int r=0; r<D; ++r) {
-            for (int c=0; c<=r; ++c) {
-                *Si += f * dX[r] * dX[c];
-                Si++;
+        for (int r=0; r<D; r++)
+        {
+            for (int c=0; c<D; c++)
+            {
+                S(r,c)+= f * dX(r) * dX(c);
             }
         }
  
-        for (int i=0; i<D ; ++i) T[i] += w*x[i];
+        T += w*x;
         W += w;
     }
  
-    double mean(int i) const { return T[i]/W; }
-    double cov(int i) const { return S[i]/W; } 
-    double covp(int i) const { return S[i]/(W-1.); }
+    void mean(Eigen::VectorXd& mu) { mu=T/W; }
+    void cov(Eigen::MatrixXd& sig) { sig=S/W; }
+    void covp(Eigen::MatrixXd& sig) { sig=S/(W-1.); }
 };
  
 #endif

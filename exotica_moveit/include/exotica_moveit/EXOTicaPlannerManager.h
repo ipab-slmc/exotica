@@ -8,6 +8,7 @@
 #ifndef EXOTICAPLANNERMANAGER_H_
 #define EXOTICAPLANNERMANAGER_H_
 
+#include <Eigen/Core>
 //#include <moveit/ompl_interface/ompl_interface.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
@@ -18,7 +19,6 @@
 #include <moveit/profiler/profiler.h>
 #include <class_loader/class_loader.h>
 #include <pluginlib/class_list_macros.h>
-#include <Eigen/Core>
 
 #include <dynamic_reconfigure/server.h>
 //#include "moveit_planners_ompl/OMPLDynamicReconfigureConfig.h"
@@ -26,8 +26,10 @@
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit_msgs/GetMotionPlan.h>
-
+#include "exotica_moveit/ExoticaPlanning.h"
+#include "exotica_moveit/EXOTicaPlannerService.h"
 #include "aico/AICOsolver.h"
+#include <ompl_solver/OMPLsolver.h>
 #include "ik_solver/ik_solver.h"
 #include <exotica/Initialiser.h>
 #include <ros/package.h>
@@ -85,8 +87,11 @@ namespace exotica
 			robot_state::RobotState start_state_;
 			double tau_;
 			ros::NodeHandle nh_;
+			Server_ptr ser_;
 			std::string problem_name_;
 			std::string solver_name_;
+			std::string config_file_;
+			ros::ServiceClient client_;
   };
 
 } /* namespace exotica */

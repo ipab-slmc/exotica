@@ -42,6 +42,7 @@ namespace exotica
 			 * \brief	Default Constructor
 			 */
 			Server();
+			Server(const boost::shared_ptr<ros::NodeHandle> & node);
 
 			/*
 			 * \brief	Destructor
@@ -154,7 +155,7 @@ namespace exotica
 					//	If a topic is specified
 					params_[name] = boost::shared_ptr<T>(new T);
 					subs_[name] =
-							nh_.subscribe<T>(topic, 1, boost::bind(&exotica::Server::paramCallback<T>, this, _1, params_.at(name)));
+							nh_->subscribe<T>(topic, 1, boost::bind(&exotica::Server::paramCallback<T>, this, _1, params_.at(name)));
 				}
                 else if(handle.ToElement()->Attribute("rosparam"))
                 {
@@ -162,19 +163,19 @@ namespace exotica
                     if (typeid(T) == typeid(std::string))
                     {
                         std::string val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<std::string>(new std::string(val));
                     }
                     else if(typeid(T) == typeid(double))
                     {
                         double val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<double>(new double(val));
                     }
                     else if(typeid(T) == typeid(int))
                     {
                         int val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<int>(new int(val));
                     }
                     else
@@ -306,19 +307,19 @@ namespace exotica
                     if (typeid(T) == typeid(std::string))
                     {
                         std::string val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<std::string>(new std::string(val));
                     }
                     else if(typeid(T) == typeid(double))
                     {
                         double val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<double>(new double(val));
                     }
                     else if(typeid(T) == typeid(int))
                     {
                         int val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<int>(new int(val));
                     }
                     else
@@ -359,7 +360,7 @@ namespace exotica
 				{
 					params_[name] = boost::shared_ptr<T>(new T);
 					subs_[name] =
-							nh_.subscribe<T>(topic, 1, boost::bind(&exotica::Server::paramCallback<T>, this, _1, params_.at(name)));
+							nh_->subscribe<T>(topic, 1, boost::bind(&exotica::Server::paramCallback<T>, this, _1, params_.at(name)));
 				}
 				else
 				{
@@ -396,7 +397,7 @@ namespace exotica
 			ros::Publisher advertise(const std::string &topic, uint32_t queue_size, bool latch =
 					false)
 			{
-				return nh_.advertise<T>(topic, queue_size, latch);
+				return nh_->advertise<T>(topic, queue_size, latch);
 			}
 
 		private:
@@ -411,7 +412,7 @@ namespace exotica
 			std::string name_;
 
 			//	ROS node handle
-			ros::NodeHandle nh_;
+			boost::shared_ptr<ros::NodeHandle> nh_;
 
 			std::map<std::string, ros::Subscriber> subs_;
 

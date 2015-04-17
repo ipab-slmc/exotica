@@ -10,7 +10,13 @@
 namespace exotica
 {
 	Server::Server() :
-			nh_("/EXOTicaServer"), name_("")
+			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("")
+	{
+		//TODO
+	}
+
+	Server::Server(const boost::shared_ptr<ros::NodeHandle> & node) :
+			nh_(node), name_("")
 	{
 		//TODO
 	}
@@ -35,6 +41,27 @@ namespace exotica
 				return FAILURE;
 			}
 			tmp_handle = tmp_handle.NextSibling();
+		}
+
+		tinyxml2::XMLHandle mode_handle(handle.FirstChildElement("PlanningMode"));
+		if (mode_handle.ToElement())
+		{
+			std::string str =mode_handle.ToElement()->GetText();
+			if (str.compare("Optimization")==0)
+			{
+				ROS_INFO("EXOTica Planning Mode: Optimization Mode");
+			}
+			else if(str.compare("Sampling")==0)
+			{
+				ROS_INFO("EXOTica Planning Mode: Sampling Mode");
+			}
+			else
+			{
+				ROS_INFO("EXOTica Planning Mode Undefined, Using Default Mode: Optimization Mode");
+			}
+			std_msgs::String ros_s;
+			ros_s.data = str;
+			params_["/PlanningMode"] = boost::shared_ptr<std_msgs::String>(new std_msgs::String(ros_s));
 		}
 		INFO("EXOTica Server Initialised")
 		return SUCCESS;
@@ -102,8 +129,7 @@ namespace exotica
 			boollist.data.resize(vec.size());
 			for (int i = 0; i < vec.size(); i++)
 				boollist.data[i] = vec[i];
-			params_[name] =
-					boost::shared_ptr<exotica::BoolList>(new exotica::BoolList(boollist));
+			params_[name] = boost::shared_ptr<exotica::BoolList>(new exotica::BoolList(boollist));
 		}
 		else if (type.compare("string") == 0)
 		{
@@ -125,8 +151,7 @@ namespace exotica
 				INDICATE_FAILURE
 				return FAILURE;
 			}
-			params_[name] =
-					boost::shared_ptr<exotica::StringList>(new exotica::StringList(list));
+			params_[name] = boost::shared_ptr<exotica::StringList>(new exotica::StringList(list));
 		}
 		else
 		{

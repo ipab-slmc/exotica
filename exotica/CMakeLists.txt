@@ -6,7 +6,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
-add_definitions(-DEXOTICA_DEBUG_MODE)  #Controls whether to compile with certain debug checks included (-DEXOTICA_DEBUG_MODE)
 
 set(MSG_DEPS
   geometry_msgs
@@ -27,6 +26,7 @@ set(MSG_FILES
   StringList.msg
   BoolList.msg
   Vector.msg
+  Matrix.msg
 )
 
 add_message_files(
@@ -64,5 +64,14 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/TaskMap.cpp src/tinyxml2.cpp src/Tools.cpp src/TaskDefinition.cpp src/PlanningProblem.cpp src/MotionSolver.cpp src/Initialiser.cpp src/Server.cpp)
+add_library(${PROJECT_NAME}
+  src/TaskMap.cpp
+  src/tinyxml2.cpp
+  src/Tools.cpp 
+  src/TaskDefinition.cpp 
+  src/PlanningProblem.cpp 
+  src/MotionSolver.cpp 
+  src/Initialiser.cpp 
+  src/Server.cpp
+  src/Scene.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES})

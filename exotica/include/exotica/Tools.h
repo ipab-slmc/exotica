@@ -64,6 +64,14 @@ namespace exotica
 		FAILURE = 100 //!< Indicates a generic failure
 	};
 
+	/**
+	 * \brief	Enum for termination criterion
+	 */
+	enum ETerminate
+	{
+		TERMINATE = 0, CONTINUE = 1
+	};
+
 	bool ok(const EReturn & value);
 
 	/**

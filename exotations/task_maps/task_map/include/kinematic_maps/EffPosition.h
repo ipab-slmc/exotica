@@ -35,7 +35,11 @@ namespace exotica //!< Since this is part of the core library, it will be within
        * \brief Concrete implementation of TaskMap::initDerived()
        * @return  Always returns success
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);   
+      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+
+  private:
+      Eigen::VectorXd phi_tmp;
+      Eigen::MatrixXd jac_tmp;
   };
 }
 

@@ -32,6 +32,7 @@ namespace exotica
 			 * @return	SUCESS if solution has been found, corresponding error code if not.
 			 */
 			EReturn Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution);
+            EReturn Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution, int t);
 
 			/**
 			 * \brief	Binds the solver to a specific problem which must be pre-initalised
@@ -70,20 +71,21 @@ namespace exotica
 			 * \brief	IK velocity solver
 			 * @param	err	Task error
 			 */
-			EReturn vel_solve(double & err);
+            inline EReturn vel_solve(double & err, int t);
 			IKProblem_ptr prob_; // Shared pointer to the planning problem.
 			Eigen::VectorXd vel_vec_;	//Velocity vector
-			Eigen::MatrixXd null_space_map; //!< Stores the Null-Space mapping from one level of optimisation to the next
-			Eigen::MatrixXd config_weights, task_weights; //!< Weight Matrices
+            Eigen::DiagonalMatrix<double, Eigen::Dynamic> task_weights; //!< Weight Matrices
 			Eigen::MatrixXd big_jacobian, inv_jacobian; //!< Jacobian and its pseudo-Inverse
 			Eigen::VectorXd task_error; //!< Task Error vector for the current optimisation level
 			Eigen::VectorXd phi, goal;	// Goal and phi
+            int maxdim_;
 			int size_;	//Configuration size
 			EParam<std_msgs::Int64> maxit_;	// Maximum iteration
 
 			EParam<std_msgs::Float64> maxstep_;	// Maximum step
             std::vector<Eigen::VectorXd> rhos;
             Eigen::VectorXd diag;
+            ros::Duration planning_time_;
 	};
 	typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

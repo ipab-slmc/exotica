@@ -23,7 +23,7 @@ namespace exotica
 		//TODO
 	}
 
-    EReturn DMesh::update(const Eigen::VectorXd & x, const int t)
+	EReturn DMesh::update(const Eigen::VectorXd & x, const int t)
 	{
 		LOCK(scene_lock_);
 		invalidate();
@@ -43,9 +43,9 @@ namespace exotica
 
 		if (ok(computeJacobian(x)))
 		{
-            setPhi(laplace_,t);
-			std::cout<<"Laplace size="<<laplace_.rows()<<std::endl;
-            setJacobian(J,t);
+			setPhi(laplace_, t);
+			std::cout << "Laplace size=" << laplace_.rows() << std::endl;
+			setJacobian(J, t);
 		}
 		else
 		{
@@ -69,7 +69,7 @@ namespace exotica
 		XML_OK(getDouble(*xmltmp, gain_));
 		vertices_.resize(max_size_, 3);
 
-		eff_size_ = scene_->getMapSize();
+		eff_size_ = scene_->getMapSize(object_name_);
 		task_size_ = eff_size_ * (eff_size_ - 1) / 2 + eff_size_ * (max_size_ - eff_size_);
 		std::cout << "Distance Mesh: Robot end-effect size=" << eff_size_ << " Maximum graph size=" << max_size_ << " Task space size=" << task_size_ << std::endl;
 		laplace_.resize(task_size_);
@@ -301,7 +301,7 @@ namespace exotica
 #endif
 		Eigen::MatrixXd _p(3 * eff_size_, N);
 		J.setZero(task_size_, N);
-		scene_->getJacobian(_p);
+		scene_->getJacobian(object_name_, _p);
 #ifdef DEBUG_MODE
 		std::cout << "_p: \n" << _p << std::endl;
 #endif
@@ -370,8 +370,7 @@ namespace exotica
 	EReturn DMesh::updateGraph()
 	{
 		Eigen::VectorXd tmp(eff_size_ * 3);
-		std::vector<std::string> temp_vector;
-		scene_->getForwardMap(tmp, temp_vector);
+		scene_->getForwardMap(object_name_, tmp);
 		vertices_.setZero(max_size_, 3);
 		for (int i = 0; i < eff_size_; i++)
 		{

@@ -86,9 +86,8 @@ bool exotica::CoM::computeForwardMap(Eigen::VectorXd & phi)
 	}
 
 	int N = mass_.rows(), i;
-	Eigen::VectorXd eff_phi(3 * N);
-	std::vector<std::string> tmp_str;
-	scene_->getForwardMap(eff_phi, tmp_str);
+    Eigen::VectorXd eff_phi(3 * N);
+    scene_->getForwardMap(object_name_, eff_phi);
 	KDL::Vector com;
 	double M = mass_.sum();
 
@@ -138,8 +137,8 @@ bool exotica::CoM::computeJacobian(Eigen::MatrixXd & jac)
 		return false;
 	}
 
-	Eigen::MatrixXd eff_jac(mass_.size() * 3, scene_->getNumJoints());
-	if (!scene_->getJacobian(eff_jac))
+	Eigen::MatrixXd eff_jac(mass_.size() * 3, scene_->getMapSize(object_name_));
+	if (!scene_->getJacobian(object_name_, eff_jac))
 	{
 		INDICATE_FAILURE
 		return false;
@@ -228,10 +227,7 @@ bool exotica::CoM::changeEffToCoM()
 	{
 		com_offs[i] = tip_pose_[i].Inverse() * base_pose_[i] * KDL::Frame(cog_[i]);
 	}
-	kinematica::SolutionForm_t new_solution;
-	new_solution.end_effector_segs = names;
-	new_solution.end_effector_offs = com_offs;
-	if (!scene_->updateEndEffectors(new_solution))
+    if (!scene_->updateEndEffectors(object_name_, com_offs))
 	{
 		INDICATE_FAILURE
 		;

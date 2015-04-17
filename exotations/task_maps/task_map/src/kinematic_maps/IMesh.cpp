@@ -40,8 +40,8 @@ exotica::EReturn exotica::IMesh::update(const Eigen::VectorXd & x, const int t)
 
 	if (ok(computeJacobian(x)))
 	{
-        setPhi(getVectorLaplace(),t);
-        setJacobian(J,t);
+		setPhi(getVectorLaplace(), t);
+		setJacobian(J, t);
 	}
 	else
 	{
@@ -66,7 +66,7 @@ exotica::EReturn exotica::IMesh::initDerived(tinyxml2::XMLHandle & handle)
 	original_v_.resize(max_size_, 3);
 	laplace_.resize(max_size_, 3);
 	weights_.setOnes(max_size_, max_size_);
-	eff_size_ = scene_->getMapSize();
+	eff_size_ = scene_->getMapSize(object_name_);
 	ext_.setOnes(3, max_size_ - eff_size_);
 	ext_ = ext_ * 100;
 	ext_old_ = ext_;
@@ -243,7 +243,7 @@ exotica::EReturn exotica::IMesh::computeJacobian(const Eigen::VectorXd & q)
 
 	Eigen::MatrixXd _p(3 * eff_size_, N);
 	J.setZero(3 * M, N);
-	scene_->getJacobian(_p);
+	scene_->getJacobian(object_name_, _p);
 #ifdef DEBUG_MODE
 	std::cout << "_p: \n" << _p << std::endl;
 #endif
@@ -335,8 +335,7 @@ exotica::EReturn exotica::IMesh::updateVertices()
 {
 	ros::Time start = ros::Time::now();
 	Eigen::VectorXd tmp(eff_size_ * 3);
-	std::vector<std::string> temp_vector;
-	scene_->getForwardMap(tmp, temp_vector);
+	scene_->getForwardMap(object_name_, tmp);
 	int Size = eff_size_ + ext_.cols();
 	vertices_.resize(Size, 3);
 	for (int i = 0; i < eff_size_; i++)

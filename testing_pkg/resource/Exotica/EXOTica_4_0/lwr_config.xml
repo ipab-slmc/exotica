@@ -1,0 +1,85 @@
+<?xml version="1.0" ?>
+<TeleopConfig>
+  <Server name="EXOTicaServer">
+     <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
+	  Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
+     <Parameters>  
+     	
+     </Parameters>
+     
+     <!-- Other server functionalities other than parameters TODO -->
+  </Server>
+
+  <AICOsolver name="AICO">
+    <sweepMode>Symmetric</sweepMode>
+    <max_iterations>40</max_iterations>
+    <tolerance>1e-2</tolerance>
+    <damping>0.01</damping>
+    <UseBackwardMessage>0</UseBackwardMessage>
+    <dynamic>0</dynamic>
+  </AICOsolver>
+
+  <AICOProblem name="TestProblem">
+    <Scene name="TestScene">
+      <Kinematica>
+        <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
+        <Root segment="base"> <!-- Optional: The root segment to use: xyz -->
+          <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
+          <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
+        </Root>
+        <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="lwr_arm_0_joint"/> 
+          <joint name="lwr_arm_1_joint"/>
+          <joint name="lwr_arm_2_joint"/> 
+          <joint name="lwr_arm_3_joint"/> 
+          <joint name="lwr_arm_4_joint"/>
+          <joint name="lwr_arm_5_joint"/>
+          <joint name="lwr_arm_6_joint"/>	
+        </Update>
+      </Kinematica>
+    </Scene> 
+
+    <Map type="EffPosition" name="IKSolverDemoMap"> <!-- The end-effector position task map -->
+      <Scene name="TestScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="lwr_arm_6_link">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+
+    <Task name="IKSolverDemoTask" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
+      <map name="IKSolverDemoMap"/>
+      <Rho>1.0e1</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0.5 0 0.2</Goal>
+    </Task>
+
+    <Map type="CollisionAvoidance" name="CollisionAvoidanceMap">
+      <Scene name="TestScene"/>
+      <EndEffector ignore_unused="true">
+	  <limb segment="lwr_arm_0_link"></limb>
+	  <limb segment="lwr_arm_1_link"></limb>
+	  <limb segment="lwr_arm_2_link"></limb>
+	  <limb segment="lwr_arm_3_link"></limb>
+	  <limb segment="lwr_arm_4_link"></limb>
+	  <limb segment="lwr_arm_5_link"></limb>
+	  <limb segment="lwr_arm_6_link"></limb>
+      </EndEffector>
+      <SafetyRange>0.2</SafetyRange>
+    </Map>
+
+    <Task name="CollisionAvoidanceTask" type="TaskSqrError">
+      <map name="CollisionAvoidanceMap"/>
+      <Rho>1.0</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0.0</Goal>
+    </Task>
+    <T>100</T>
+    <duration>5</duration>
+    <Qrate>1e-10</Qrate>
+    <Hrate>1.0</Hrate>
+    <Wrate>20.0e1</Wrate>    <W> 7 6 5 4 3 2 1</W>
+  </AICOProblem>
+</TeleopConfig>

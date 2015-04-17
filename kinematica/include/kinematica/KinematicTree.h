@@ -78,7 +78,10 @@ namespace kinematica
 			KinematicTree(const KinematicTree & rhs);
 			KinematicTree & operator=(const KinematicTree & rhs);
 
-			~KinematicTree(){};
+			~KinematicTree()
+			{
+			}
+			;
 			/**
 			 * \brief Initialise the Kinematics Object. THREAD-SAFE
 			 * @param urdf_param     Name of the urdf ROS parameter
@@ -86,7 +89,8 @@ namespace kinematica
 			 * @param optimisation  Optimisation Parameters
 			 * @return              True if successful, false otherwise
 			 */
-			bool initKinematics(const std::string & urdf_param, const SolutionForm_t & optimisation); //!< Variant taking urdf file
+			bool initKinematics(const std::string & urdf_param,
+					const SolutionForm_t & optimisation); //!< Variant taking urdf file
 			bool initKinematics(const KDL::Tree & temp_tree, const SolutionForm_t & optimisation); //!< Variant taking kdl tree
 			bool initKinematics(tinyxml2::XMLHandle & handle);
 			/**
@@ -95,6 +99,14 @@ namespace kinematica
 			 * @return                  True if successful, false otherwise
 			 */
 			bool updateEndEffectors(const SolutionForm_t & new_end_effectors);
+
+			/**
+			 * \brief	Update end-effector offset
+			 * @param	index	End-effector index
+			 * @param	offset	New offset
+			 */
+			bool updateEndEffectorOffsets(const std::vector<int> & index,
+					const std::vector<KDL::Frame> & offset);
 
 			/**
 			 * \brief	Add new end-effector
@@ -208,8 +220,9 @@ namespace kinematica
 			 * @param	tip_pose	Tip pose of each link
 			 * @param	base_pose	Base pose of each link
 			 */
-			bool getCoMProperties(std::vector<std::string> & segs, Eigen::VectorXd & mass, std::vector<KDL::Vector> & cog,
-					std::vector<KDL::Frame> & tip_pose, std::vector<KDL::Frame> & base_pose);
+			bool getCoMProperties(std::vector<std::string> & segs, Eigen::VectorXd & mass,
+					std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
+					std::vector<KDL::Frame> & base_pose);
 
 			/**
 			 * \brief Allows traversing the tree structure by getting the parent
@@ -233,11 +246,17 @@ namespace kinematica
 			 */
 			int getEffSize();
 
-            int getNumJoints();
-
-			bool getInitialEff(std::vector<std::string> & segs,std::vector<KDL::Frame> & offsets);
+			int getNumJoints();
+			std::vector<std::string> & getJointNames()
+			{
+				return used_joints_;
+			}
+			;
+			bool getInitialEff(std::vector<std::string> & segs, std::vector<KDL::Frame> & offsets);
 			bool modifyRootOffset(KDL::Frame & offset);
-            std::string getRootName();
+			std::string getRootName();
+
+			bool getEndEffectorIndex(std::vector<int> & eff_index);
 		private:
 			/****************** Class members ********************/
 

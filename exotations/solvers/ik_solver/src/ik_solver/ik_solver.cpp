@@ -133,18 +133,25 @@ namespace exotica
         maxdim_=0;
         for (int i = 0; i < maxit_->data; i++)
 		{
-            prob_->update(solution.row(0), t);
-            vel_solve(err,t);
-			double max_vel = vel_vec_.cwiseAbs().maxCoeff();
-            vel_vec_ = max_vel > maxstep_->data?vel_vec_*maxstep_->data / max_vel:vel_vec_;
-
-            solution.row(0) = solution.row(0) + vel_vec_.transpose();
-
-			if (err <= prob_->getTau())
+            if(ok(prob_->update(solution.row(0), t)))
             {
-				found = true;
-				break;
-			}
+                vel_solve(err,t);
+                double max_vel = vel_vec_.cwiseAbs().maxCoeff();
+                vel_vec_ = max_vel > maxstep_->data?vel_vec_*maxstep_->data / max_vel:vel_vec_;
+
+                solution.row(0) = solution.row(0) + vel_vec_.transpose();
+
+                if (err <= prob_->getTau())
+                {
+                    found = true;
+                    break;
+                }
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
 		}
 
         planning_time_ = ros::Duration(ros::Time::now() - start);

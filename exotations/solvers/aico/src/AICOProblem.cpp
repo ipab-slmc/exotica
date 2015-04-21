@@ -34,11 +34,22 @@ namespace exotica
                 task->getRho(rho,t);
                 if(rho>0)
                 {
-                    task->getTaskMap()->getScene()->update(x,t);
-                    EReturn temp_return = task->getTaskMap()->update(x,t);
-                    if (temp_return)
+                    if (ok(task->getTaskMap()->getScene()->update(x,t)))
                     {
-                        ret_value = temp_return;
+                        if(ok(task->getTaskMap()->update(x,t)))
+                        {
+                            // All is fine
+                        }
+                        else
+                        {
+                            ERROR("Failed updateing '" << task->getObjectName() << "'");
+                            return FAILURE;
+                        }
+                    }
+                    else
+                    {
+                        INDICATE_FAILURE;
+                        return FAILURE;
                     }
                 }
             }

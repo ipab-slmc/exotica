@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(orocos_kdl REQUIRED)
-##find_package(EIGEN REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED)
 
 catkin_package(
@@ -32,13 +32,13 @@ include_directories(
   include
   SYSTEM
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
   ${orocos_kdl_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )
 
 add_rostest_gtest(kinematica_test test/rostest/kinematica_test.test test/main/TestKinematica.cpp test/cpp/Kinematica/ComplexityTest.cpp test/cpp/Kinematica/PrismaticTest.cpp)
-target_link_libraries(kinematica_test ${catkin_LIBRARIES} ${EIGEN_LIBRARIES} ${orocos_kdl_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(kinematica_test ${catkin_LIBRARIES} ${orocos_kdl_LIBRARIES} ${Boost_LIBRARIES})
 
 add_rostest_gtest(exotica_test test/rostest/exotica_test.test test/main/TestExotica.cpp
                                                               test/cpp/Exotica/CoreTest.cpp
@@ -47,4 +47,4 @@ add_rostest_gtest(exotica_test test/rostest/exotica_test.test test/main/TestExot
                                                               #test/cpp/Exotica/PlanningProblemTest.cpp
                  )
                  
-target_link_libraries(exotica_test ${catkin_LIBRARIES} ${EIGEN_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(exotica_test ${catkin_LIBRARIES} ${Boost_LIBRARIES})

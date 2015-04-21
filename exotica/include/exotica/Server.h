@@ -26,6 +26,7 @@
 #include <exotica/StringList.h>
 #include <exotica/BoolList.h>
 #include <exotica/Vector.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
 
 namespace exotica
 {
@@ -400,6 +401,8 @@ namespace exotica
 				return nh_->advertise<T>(topic, queue_size, latch);
 			}
 
+            EReturn getModel(std::string path, robot_model::RobotModelPtr& model);
+
 		private:
 			template<typename T>
 			void paramCallback(const boost::shared_ptr<T const> & ptr, boost::any & param)
@@ -408,22 +411,25 @@ namespace exotica
 				*boost::any_cast<boost::shared_ptr<T>>(param) = *ptr;
 			}
 
-			//	The name of this server
+            /// \brief	The name of this server
 			std::string name_;
 
-			//	ROS node handle
+            /// \brief	ROS node handle
 			boost::shared_ptr<ros::NodeHandle> nh_;
 
 			std::map<std::string, ros::Subscriber> subs_;
 
-			//	Parameters map <name, parameter pointer>
+            /// \brief	Parameters map <name, parameter pointer>
 			std::map<std::string, boost::any> params_;
 
-			//	<param_name, param_topic>
+            /// \brief	<param_name, param_topic>
 			std::map<std::string, std::string> topics_;
 
-			//	Mutex locker
+            /// \brief	Mutex locker
 			boost::mutex param_lock_;
+
+            /// \brief Robot model cache
+            std::map<std::string, robot_model::RobotModelPtr> robot_models_;
 	};
 
 	typedef boost::shared_ptr<Server> Server_ptr;

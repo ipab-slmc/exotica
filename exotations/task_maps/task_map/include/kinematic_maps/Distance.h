@@ -5,7 +5,6 @@
 #include <exotica/Factory.h>
 #include <exotica/Test.h>
 #include <tinyxml2/tinyxml2.h>
-#include <kinematic_scene/kinematic_scene.h>
 #include <Eigen/Dense>
 #include <boost/thread/mutex.hpp>
 

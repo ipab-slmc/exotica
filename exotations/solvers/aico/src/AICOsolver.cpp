@@ -124,7 +124,11 @@ namespace exotica
         for(int k=0;k<max_iterations&&ros::ok();k++)
 		{
 			d=step();
-			if(d<0) return FAILURE;
+            if(d<0)
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
 			if(k && d<tolerance) break;
 		}
 		Eigen::MatrixXd sol(T+1,n);
@@ -390,10 +394,10 @@ namespace exotica
 		}
 	}
 
-	void AICOsolver::updateTaskMessage(int t, const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_, double maxStepSize)
+    bool AICOsolver::updateTaskMessage(int t, const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_, double maxStepSize)
 	{
 		Eigen::VectorXd diff= qhat_t-qhat[t];
-		if((diff.array().abs().maxCoeff()<tolerance_)) return;
+        if((diff.array().abs().maxCoeff()<tolerance_)) return true;
 		double nrm=diff.norm();
 		if(maxStepSize>0. && nrm>maxStepSize)
 		{
@@ -403,10 +407,19 @@ namespace exotica
 		{
 			qhat[t]=qhat_t;
 		}
-        prob_->update(dynamic?qhat[t].head(n/2):qhat[t],t);
-		updateCount++;
-        double c=getTaskCosts(t);
-        q_stat[t].addw(c>0?1.0/(1.0+c):1.0,qhat_t);
+
+        if(ok(prob_->update(dynamic?qhat[t].head(n/2):qhat[t],t)))
+        {
+            updateCount++;
+            double c=getTaskCosts(t);
+            q_stat[t].addw(c>0?1.0/(1.0+c):1.0,qhat_t);
+            return true;
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return false;
+        }
 		// If using fully dynamic system, update Q, Hinv and process variables here.
 	}
 
@@ -499,7 +512,7 @@ namespace exotica
 		return C;
 	}
 
-  void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance_, bool forceRelocation, double maxStepSize)
+  bool AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance_, bool forceRelocation, double maxStepSize)
   {
   	if(updateFwd) updateFwdMessage(t);
     if(updateBwd) updateBwdMessage(t);
@@ -520,28 +533,37 @@ namespace exotica
     {
         if(!((!k && forceRelocation) || (b[t]-qhat[t]).array().abs().maxCoeff()>tolerance_)) break;
 
-        updateTaskMessage(t, b[t], 0., maxStepSize);
-
-        //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
-        if(updateFwd) updateFwdMessage(t);
-        if(updateBwd) updateBwdMessage(t);
-
-        if(damping)
+        if(updateTaskMessage(t, b[t], 0., maxStepSize) && ros::ok())
         {
-            Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(n,n)*damping;
-            MAT_OK(AinvBSymPosDef(b[t],Binv[t],Sinv[t]*s[t] + Vinv[t]*v[t] + r[t] + damping*dampingReference[t]));
+
+            //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
+            if(updateFwd) updateFwdMessage(t);
+            if(updateBwd) updateBwdMessage(t);
+
+            if(damping)
+            {
+                Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(n,n)*damping;
+                MAT_OK(AinvBSymPosDef(b[t],Binv[t],Sinv[t]*s[t] + Vinv[t]*v[t] + r[t] + damping*dampingReference[t]));
+            }
+            else
+            {
+                Binv[t] = Sinv[t] + Vinv[t] + R[t];
+                MAT_OK(AinvBSymPosDef(b[t],Binv[t],Sinv[t]*s[t] + Vinv[t]*v[t] + r[t]));
+            }
         }
         else
         {
-            Binv[t] = Sinv[t] + Vinv[t] + R[t];
-            MAT_OK(AinvBSymPosDef(b[t],Binv[t],Sinv[t]*s[t] + Vinv[t]*v[t] + r[t]));
+            INDICATE_FAILURE;
+            return false;
         }
     }
+    return true;
   }
 
-  void AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance, double maxStepSize)
+  bool AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance, double maxStepSize)
   {
   	// TODO: implement updateTimeStepGaussNewton
+      return false;
   }
 
   double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x)
@@ -659,28 +681,84 @@ namespace exotica
   	{
 				//NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
 			case smForwardly:
-				for(t=1; t<=T; t++) updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.); //relocate once on fwd Sweep
-				for(t=T+1; --t;)    updateTimeStep(t, false, true, 0, tolerance, false, 1.); //...not on bwd Sweep
+                for(t=1; t<=T; t++)
+                {
+                    if(!updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.)) //relocate once on fwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
+                for(t=T+1; --t;)
+                {
+                    if(!updateTimeStep(t, false, true, 0, tolerance, false, 1.)) //...not on bwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
 				break;
 			case smSymmetric:
                 ROS_WARN_STREAM("Updating forward, sweep "<<sweep);
-				for(t=1; t<=T; t++) updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.); //relocate once on fwd & bwd Sweep
+                for(t=1; t<=T; t++)
+                {
+                    if(!updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.)) //relocate once on fwd & bwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
                 ROS_WARN_STREAM("Updating backward, sweep "<<sweep);
-				for(t=T+1; --t;)    updateTimeStep(t, false, true, (sweep?1:0), tolerance, false, 1.);
+                for(t=T+1; --t;)
+                {
+                    if(!updateTimeStep(t, false, true, (sweep?1:0), tolerance, false, 1.))
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
 				break;
 			case smLocalGaussNewton:
-			  for(t=1; t<=T; t++) updateTimeStep(t, true, false, (sweep?5:1), tolerance, !sweep, 1.); //relocate iteratively on
-			  for(t=T+1; --t;)    updateTimeStep(t, false, true, (sweep?5:0), tolerance, false, 1.); //...fwd & bwd Sweep
+                for(t=1; t<=T; t++)
+                {
+                    if(!updateTimeStep(t, true, false, (sweep?5:1), tolerance, !sweep, 1.)) //relocate iteratively on
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
+                for(t=T+1; --t;)
+                {
+                    if(!updateTimeStep(t, false, true, (sweep?5:0), tolerance, false, 1.)) //...fwd & bwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
 				break;
 			case smLocalGaussNewtonDamped:
-				for(t=1; t<=T; t++) updateTimeStepGaussNewton(t, true, false, (sweep?5:1), tolerance, 1.); //GaussNewton in fwd & bwd Sweep
-				for(t=T+1; --t;)    updateTimeStep(t, false, true, (sweep?5:0), tolerance, false, 1.);
+                for(t=1; t<=T; t++)
+                {
+                    if(!updateTimeStepGaussNewton(t, true, false, (sweep?5:1), tolerance, 1.)) //GaussNewton in fwd & bwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
+                for(t=T+1; --t;)
+                {
+                    if(!updateTimeStep(t, false, true, (sweep?5:0), tolerance, false, 1.))
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
 				break;
 			default: ERROR("non-existing Sweep mode");
 				break;
 		}
   	b_step=0.0;
-  	for(t=0;t<b.size();t++) {b_step+=std::max((b_old[t]-b[t]).array().abs().maxCoeff(),b_step);}
+    for(t=0;t<b.size();t++) {b_step=std::max((b_old[t]-b[t]).array().abs().maxCoeff(),b_step);}
   	dampingReference=b;
   	// q is set inside of evaluateTrajectory() function
   	cost = evaluateTrajectory(b);

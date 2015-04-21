@@ -274,7 +274,7 @@ namespace exotica
 	   * @param x Trajecotry.
 	   * @return Cost of the trajectory.
 	   */
-	  double evaluateTrajectory(const std::vector<Eigen::VectorXd>& x);
+      double evaluateTrajectory(const std::vector<Eigen::VectorXd>& x, bool skipUpdate=false);
 	  /**
 	   * \brief Stores the previous state.
 	   */

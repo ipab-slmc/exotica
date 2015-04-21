@@ -11,7 +11,7 @@
 #include "exotica/Object.h"
 #include "exotica/Server.h"
 #include "tinyxml2/tinyxml2.h"
-#include <kinematica/KinematicTree.h>
+#include "kinematica/KinematicTree.h"
 
 //	For collision
 #include <moveit/collision_detection/world.h>
@@ -33,54 +33,65 @@ namespace exotica
 {
 	typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
 	typedef std::vector<boost::shared_ptr<fcl::CollisionObject> > fcls_ptr;
-	//	The class of collision scene
+    ///	The class of collision scene
 	class CollisionScene
 	{
 		public:
-			/*
+            /**
 			 * \brief	Default constructor
 			 */
 			CollisionScene();
 
-			/*
+            /**
 			 * \brief	Destructor
 			 */
 			virtual ~CollisionScene();
 
-			/*
+            /**
 			 * \brief	Initialisation function
 			 * @param	ps		Moveit planning scene (for model building)
 			 * @param	joints	Joint names
 			 * @param	mode	Optimization or sampling
+             * @return Indication of success
 			 */
 			EReturn initialise(const planning_scene::PlanningSceneConstPtr & ps,
 					const std::vector<std::string> & joints, std::string & mode);
 
-			/*
+            /**
 			 * \brief	Update the robot collision properties
 			 * @param	x		Configuration
+             * @return Indication of success
 			 */
 			EReturn update(const Eigen::VectorXd x);
 
-			/*
+            /**
 			 * \brief	Get closest distance between two objects
 			 * @param	o1		Name of object 1
 			 * @param	o2		Name of object 2
 			 * @param	d		Closest distance (-1 if in collision)
-			 * @param	p1		Closest point on o1
-			 * @param	p2		Closest point on o2
+             * @return Indication of success
 			 */
 			EReturn getDistance(const std::string & o1, const std::string & o2, double d);
+            /**
+             * @brief Get closest distance between two objects
+             * @param	o1		Name of object 1
+             * @param	o2		Name of object 2
+             * @param	d		Closest distance (-1 if in collision)
+             * @param	p1		Closest point on o1
+             * @param	p2		Closest point on o2
+             * @return Indication of success
+             */
 			EReturn getDistance(const std::string & o1, const std::string & o2, double d,
 					Eigen::Vector3d & p1, Eigen::Vector3d & p2);
 
-			/*
+            /**
 			 * \brief	Check if the whole robot is valid (collision and feasibility)
 			 * @param	self	Indicate if self collision check is required
+             * @return True, if the state is collision free.
 			 */
 			bool isStateValid(bool self = true);
 
-			/*
+            /**
 			 * \brief	Get closest distance between robot link and anyother objects
 			 * @param	link	Robot link
 			 * @param	self	Indicate if self collision check is required
@@ -88,154 +99,182 @@ namespace exotica
 			 * @param	p1		Closest distance point on the link
 			 * @param	p2		Closest distance point on the other object
 			 * @param	norm	Normal vector on robot link
+             * @return Indication of success
 			 */
 			EReturn getRobotDistance(const std::string & link, bool self, double & d,
 					Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm,
 					Eigen::Vector3d & c1, Eigen::Vector3d & c2);
 
-			/*
+            /**
 			 * \brief	Get current robot state
 			 * @return	Current robot state
 			 */
 			const robot_state::RobotState& getCurrentState();
 
-			/*
+            /**
 			 * \brief	Get the moveit planning scene
 			 * @return	Moveit planning scene
 			 */
 			const planning_scene::PlanningScenePtr getPlanningScene();
+
+            inline std::map<std::string, fcls_ptr>& getFCLWorld()
+            {
+                return fcl_world_;
+            }
+
+            inline std::map<std::string, fcls_ptr>& getFCLRobot()
+            {
+                return fcl_robot_;
+            }
+
 		private:
 
-			/*
+            /**
 			 * \brief	Get closest distance between two fcl objects
 			 * @param	fcl1	FCL object 1
 			 * @param	fcl2	FCL object 2
 			 * @param	req		FCL collision request
 			 * @param	res		FCL collision result
+             * @return Distance to collision
 			 */
 			double distance(const fcls_ptr & fcl1, const fcls_ptr & fcl2,
 					const fcl::DistanceRequest & req, fcl::DistanceResult & res);
-			//	FCL collision object for the robot
+            ///	FCL collision object for the robot
 			std::map<std::string, fcls_ptr> fcl_robot_;
 
-			//	FCL collision object for the world
+            ///	FCL collision object for the world
 			std::map<std::string, fcls_ptr> fcl_world_;
 
-			//	FCL collision geometry for the robot
+            ///	FCL collision geometry for the robot
 			std::map<std::string, geos_ptr> geo_robot_;
 
-			//	FCL collision geometry for the world
+            ///	FCL collision geometry for the world
 			std::map<std::string, geos_ptr> geo_world_;
 
-			//	Internal moveit planning scene
+            ///	Internal moveit planning scene
 			planning_scene::PlanningScenePtr ps_;
 
-			//	Joint index in robot state
+            ///	Joint index in robot state
 			std::vector<int> joint_index_;
 
-			//	Indicate if distance computation is required
+            ///	Indicate if distance computation is required
 			bool compute_dist;
 	};
 
 	typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
 
-	//	The class of EXOTica Scene
+    ///	The class of EXOTica Scene
 	class Scene
 	{
 		public:
-			/*
+            /**
 			 * \brief	Default constructor
 			 * @param	name	The scene name
 			 */
 			Scene(const std::string & name);
 
-			/*
+            /**
 			 * \brief	Destructor
 			 */
 			virtual ~Scene();
 
-			/*
+            /**
 			 * \brief	Get scene name
 			 * @return	Name
 			 */
 			std::string getName();
 
-			/*
+            /**
 			 * \brief	Initialisation function
 			 * @param	handle	XML handle
 			 * @param	server	Server pointer
+             * @return Indication of success
 			 */
 			EReturn initialisation(tinyxml2::XMLHandle & handle, const Server_ptr & server);
 
-			/*
+            /**
 			 * \brief	Updator function
 			 * @param	x	System state
+             * @return Indication of success
 			 */
 			virtual EReturn update(const Eigen::VectorXd x, const int t = 0);
 
-			/*
+            /**
 			 * \brief	Set collision scene
 			 * @param	scene	Moveit planning scene
+             * @return Indication of success
 			 */
 			EReturn setCollisionScene(const planning_scene::PlanningSceneConstPtr & scene);
+
+            /**
+             * @brief Set collision scene
+             * @param scene Planning scene message
+             * @return Indication of success
+             */
 			EReturn setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene);
 
-			/*
+            /**
 			 * \brief	Append new taskmap
 			 * @param	name	Taskmap name
 			 * @param	eff		Endeffector names
 			 * @param	offset	Endeffector offsets
+             * @return Indication of success
 			 */
 			EReturn appendTaskMap(const std::string & name, const std::vector<std::string> & eff,
 					const std::vector<KDL::Frame> & offset);
 
-			/*
+            /**
 			 * \brief	Called after appending
+             * @return Indication of success
 			 */
 			EReturn activateTaskMaps();
 
-			/*
+            /**
 			 * \brief	Update task map (eff)
 			 * @param	task	Task name
 			 * @param	offset	Task end-effector offsets
+             * @return Indication of success
 			 */
-			EReturn updateEndEffectors(const std::string & task,
+            EReturn updateEndEffectors(const std::string & task,
 					const std::vector<KDL::Frame> & offset);
 
-			/*
+            /**
 			 * \brief	Get forward map
 			 * @param	task	Task name
 			 * @param	phi		Forward map
+             * @return Indication of success
 			 */
 			EReturn getForwardMap(const std::string & task, Eigen::Ref<Eigen::VectorXd> phi);
 
-			/*
+            /**
 			 * \brief	Get jacobian
 			 * @param	task	Task name
 			 * @param	jac		Jacobian
+             * @return Indication of success
 			 */
 			EReturn getJacobian(const std::string & task, Eigen::Ref<Eigen::MatrixXd> jac);
 
-			/*
+            /**
 			 * \brief	Get joint number N
-			 * @return	N
+             * @return	N
 			 */
 			int getNumJoints();
 
-			/*
+            /**
 			 * \brief	Get end-effector names for a task
 			 * @param	task	Task name
 			 * @param	effs	Endeffector names
+             * @return Indication of success
 			 */
 			EReturn getEndEffectors(const std::string & task, std::vector<std::string> & effs);
 
-			/*
+            /**
 			 * \brief	Get exotica collision scene ptr
 			 * @return	CollisionScene pointer
 			 */
 			CollisionScene_ptr & getCollisionScene();
 
-			/*
+            /**
 			 * \brief	Get map size for particular taskmap
 			 * @param	task	Task name
 			 * @return	Map 	Size
@@ -249,69 +288,89 @@ namespace exotica
 			 * @param	cog		Centre of gravity of each link
 			 * @param	tip_pose	Tip pose of each link
 			 * @param	base_pose	Base pose of each link
+             * @return Indication of success
 			 */
-			EReturn getCoMProperties(std::vector<std::string> & segs, Eigen::VectorXd & mass,
+            EReturn getCoMProperties(std::string& task, std::vector<std::string> & segs, Eigen::VectorXd & mass,
 					std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
 					std::vector<KDL::Frame> & base_pose);
 
-			/*
+            /**
 			 * \brief	Get task root name
 			 * @return	Root name
 			 */
 			std::string getRootName();
 
+            /**
+             * @brief getPlanningScene Returns the MoveIt! planning scene associated with this Scene
+             * @return Planning Scene
+             */
 			planning_scene::PlanningScenePtr getPlanningScene();
+
+            /**
+             * @brief getSolver Returns the instance of Kinematica solver associated with this Scene
+             * @return Kinematic tree solver
+             */
 			kinematica::KinematicTree & getSolver();
+
+            /**
+             * @brief Returns poses ofrequested end-effectors
+             * @param names List of end-effector names
+             * @param poses Returned poses
+             * @return Indication of success
+             */
+            EReturn getPoses(const std::vector<std::string> names, std::vector<KDL::Frame> & poses);
 		private:
 
-			//	ROS node handle
+            ///	ROS node handle
 			ros::NodeHandle nh_;
 
-			//	The name of the scene
+            ///	The name of the scene
 			std::string name_;
 
-			//	The kinematica tree
+            ///	The kinematica tree
 			kinematica::KinematicTree kinematica_;
 
-			//	Robot model
+            ///	Robot model
 			robot_model::RobotModelPtr model_;
 
-			//	The controlled joint size
+            ///	The controlled joint size
 			int N;
 
-			//	Initialisation flag
+            ///	Initialisation flag
 			bool initialised_;
 
-			//	The big phi
+            ///	The big phi
 			Eigen::VectorXd Phi_;
 
-			//	The big jacobian
+            ///	The big jacobian
 			Eigen::MatrixXd Jac_;
 
-			//	Forwardmaps
+            ///	Forwardmaps referring to subvectors of the big phi
             std::map<std::string, boost::shared_ptr< Eigen::Ref< Eigen::VectorXd> > > phis_;
 
-			//	Jacobians
+            ///	Jacobians referring to submatrices of the big jacobian
             std::map<std::string, boost::shared_ptr< Eigen::Ref< Eigen::MatrixXd> > > jacs_;
 
-			//	End-effector names
+            ///	End-effector names
 			std::map<std::string, std::vector<std::string> > eff_names_;
 
-			//	End-effector offsets
+            ///	End-effector offsets
 			std::map<std::string, std::vector<KDL::Frame> > eff_offsets_;
 
-			//	End-effector index (in kinematica)
+            ///	End-effector index (in kinematica)
 			std::map<std::string, std::vector<int> > eff_index_;
 
-			//	Mutex locker
+            ///	Mutex locker
 			boost::mutex lock_;
 
-			//	The collision scene
+            ///	The collision scene
 			CollisionScene_ptr collision_scene_;
 
-			//	Update mode
+            ///	Update mode
 			std::string mode_;
-			bool use_kinematica_;
+
+            /// Indicates whether to update Jacobians during the update call
+            bool update_jacobians_;
 
 #ifdef EXOTICA_DEBUG_MODE
 			ros::Publisher state_pub_;

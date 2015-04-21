@@ -16,7 +16,6 @@
 #include "exotica/Scene.h"
 #include "tinyxml2/tinyxml2.h"
 
-#include <kinematic_scene/kinematic_scene.h>
 #include <vector>
 #include <string>
 #include <map>

@@ -22,7 +22,7 @@ exotica::EReturn exotica::Initialiser::listSolversAndProblems(const std::string 
 		INDICATE_FAILURE
 		;
 		xml_file.Clear();
-		return PAR_ERR;
+        return PAR_ERR;
 	}
 	tinyxml2::XMLHandle root_handle(xml_file.RootElement());
 

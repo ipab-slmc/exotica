@@ -46,6 +46,7 @@ exotica::EReturn exotica::TaskMap::initBase(tinyxml2::XMLHandle & handle, Server
 	else
 	{
 		ERROR("No scene was specified!");
+        return PAR_ERR;
 	}
 
 	std::vector<std::string> tmp_eff(0);
@@ -97,8 +98,16 @@ exotica::EReturn exotica::TaskMap::initBase(tinyxml2::XMLHandle & handle, Server
 		segment_handle = segment_handle.NextSiblingElement("limb");
 	}
 
-	scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
-	return initDerived(handle); //!< Call the derived member
+    scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
+    if(ok(initDerived(handle)))
+    {
+        return exotica::SUCCESS;
+    }
+    else
+    {
+        ERROR("Failed to initialise task '"<<getObjectName() <<"'");
+        return exotica::FAILURE;
+    }
 }
 
 exotica::EReturn exotica::TaskMap::phi(Eigen::Ref<Eigen::VectorXd> y, int t)

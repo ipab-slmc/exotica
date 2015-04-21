@@ -25,63 +25,86 @@ exotica::CoM::~CoM()
 
 exotica::EReturn exotica::CoM::update(const Eigen::VectorXd & x, const int t)
 {
-
+    static bool fistTime=true;
+    if(fistTime)
+    {
+        if (!changeEffToCoM())
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+        fistTime =false;
+    }
 	invalidate();
 	LOCK(lock_);
-	if (!initialised_)
+    if (initialised_)
+    {
+        //!< Temporaries
+        bool success = true;
+        Eigen::VectorXd phi;
+        Eigen::MatrixXd jac;
+
+        if (offset_callback_) offset_callback_(this, x, t);
+
+        if (computeForwardMap(phi))
+        {
+            if (ok(setPhi(phi, t)))
+            {
+                if (computeJacobian(jac))
+                {
+                    if (ok(setJacobian(jac, t)))
+                    {
+                        return SUCCESS;
+                    }
+                    else
+                    {
+                        INDICATE_FAILURE
+                        return FAILURE;
+                    }
+                }
+                else
+                {
+                    INDICATE_FAILURE
+                    return FAILURE;
+                }
+            }
+            else
+            {
+                INDICATE_FAILURE
+                return FAILURE;
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE
+            return FAILURE;
+        }
+    }
+    else
 	{
 		INDICATE_FAILURE
 		return MMB_NIN;
 	}
-
-	//!< Temporaries
-	bool success = true;
-	Eigen::VectorXd phi;
-	Eigen::MatrixXd jac;
-
-	if (offset_callback_)
-		offset_callback_(this, x, t);
-
-	if (!computeForwardMap(phi))
-	{
-		INDICATE_FAILURE
-		return FAILURE;
-	}
-	if (!computeJacobian(jac))
-	{
-		INDICATE_FAILURE
-		return FAILURE;
-	}
-
-	if (setPhi(phi, t) != SUCCESS)
-	{
-		INDICATE_FAILURE
-		return FAILURE;
-	}
-	if (setJacobian(jac, t) != SUCCESS)
-	{
-		INDICATE_FAILURE
-		return FAILURE;
-	}
-
-	return SUCCESS;
 }
 
 exotica::EReturn exotica::CoM::taskSpaceDim(int & task_dim)
 {
-	if (!initialised_)
+    if (initialised_)
 	{
-		INDICATE_FAILURE
-		;
-		return MMB_NIN;
+        task_dim = dim_;
+        return SUCCESS;
 	}
-	task_dim = dim_;
-	return SUCCESS;
+    else
+    {
+        INDICATE_FAILURE		;
+        return MMB_NIN;
+    }
 }
 bool exotica::CoM::computeForwardMap(Eigen::VectorXd & phi)
 {
 	if (!initialised_)
 	{
+        INDICATE_FAILURE;
 		return false;
 	}
 
@@ -134,37 +157,29 @@ bool exotica::CoM::computeJacobian(Eigen::MatrixXd & jac)
 {
 	if (!initialised_)
 	{
+        INDICATE_FAILURE;
 		return false;
 	}
 
-	Eigen::MatrixXd eff_jac(mass_.size() * 3, scene_->getMapSize(object_name_));
-	if (!scene_->getJacobian(object_name_, eff_jac))
+    Eigen::MatrixXd eff_jac(mass_.size() * 3, scene_->getNumJoints());
+    if (ok(scene_->getJacobian(object_name_, eff_jac)))
+    {
+        jac = Eigen::MatrixXd::Zero(dim_, eff_jac.cols());
+        for (int i = 0; i < mass_.size(); i++)
+        {
+            jac += mass_[i] / mass_.sum() * eff_jac.block(3 * i, 0, dim_, eff_jac.cols());
+        }
+        return true;
+    }
+    else
 	{
 		INDICATE_FAILURE
 		return false;
 	}
-	int N = eff_jac.cols(), i, M = eff_jac.rows() / 3;
-	if (mass_.size() != M)
-	{
-		INDICATE_FAILURE
-		return false;
-	}
-	jac = Eigen::MatrixXd::Zero(dim_, N);
-	for (i = 0; i < M; i++)
-	{
-		jac += mass_[i] / mass_.sum() * eff_jac.block(3 * i, 0, dim_, N);
-	}
-	return true;
 }
 
 exotica::EReturn exotica::CoM::initDerived(tinyxml2::XMLHandle & handle)
 {
-	if (!changeEffToCoM())
-	{
-		INDICATE_FAILURE
-		;
-		return FAILURE;
-	}
 	tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("EnableZ");
 	server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, enable_z_);
 
@@ -214,25 +229,28 @@ bool exotica::CoM::changeEffToCoM()
 {
 	std::vector<std::string> names;
 
-	if (!scene_->getCoMProperties(names, mass_, cog_, tip_pose_, base_pose_))
+    if (!ok(scene_->getCoMProperties(object_name_, names, mass_, cog_, tip_pose_, base_pose_)))
 	{
-		INDICATE_FAILURE
-		;
+        INDICATE_FAILURE;
 		return false;
 	}
 	std::vector<KDL::Frame> com_offs;
-	int N = names.size(), i;
+    int N = mass_.size(), i;
 	com_offs.resize(N);
 	for (i = 0; i < N; i++)
 	{
 		com_offs[i] = tip_pose_[i].Inverse() * base_pose_[i] * KDL::Frame(cog_[i]);
 	}
-    if (!scene_->updateEndEffectors(object_name_, com_offs))
-	{
-		INDICATE_FAILURE
-		;
-		return false;
-	}
+
+    if (!ok(scene_->updateEndEffectors(object_name_, com_offs)))
+    {
+        INDICATE_FAILURE;
+        return false;
+    }
+    if (debug_->data)
+    {
+        com_marker_.points.resize(cog_.size());
+    }
 	return true;
 }
 

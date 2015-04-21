@@ -93,6 +93,8 @@ namespace kinematica
 					const SolutionForm_t & optimisation); //!< Variant taking urdf file
 			bool initKinematics(const KDL::Tree & temp_tree, const SolutionForm_t & optimisation); //!< Variant taking kdl tree
 			bool initKinematics(tinyxml2::XMLHandle & handle);
+            bool initKinematics(tinyxml2::XMLHandle & handle, const urdf::ModelInterface* urdf);
+
 			/**
 			 * \brief Provides dynamic updating of the end-effector list
 			 * @param new_end_effectors A solution form type: you only need to set the ignore_unused_segs flag, the end_effector_segs and the end_effector_offs
@@ -220,7 +222,7 @@ namespace kinematica
 			 * @param	tip_pose	Tip pose of each link
 			 * @param	base_pose	Base pose of each link
 			 */
-			bool getCoMProperties(std::vector<std::string> & segs, Eigen::VectorXd & mass,
+            bool getCoMProperties(const std::vector<int>& ids, std::vector<std::string> & segs, Eigen::VectorXd & mass,
 					std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
 					std::vector<KDL::Frame> & base_pose);
 

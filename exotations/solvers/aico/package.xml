@@ -41,22 +41,18 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica</build_depend>
-  <build_depend>kinematic_scene</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>roslib</build_depend>
   <build_depend>task_definition</build_depend>
   <build_depend>task_map</build_depend>
   <build_depend>liblapack-dev</build_depend>
-  <build_depend>collision_detection</build_depend>
   
   <run_depend>exotica</run_depend>
-  <run_depend>kinematic_scene</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>task_definition</run_depend>
   <run_depend>task_map</run_depend>
   <run_depend>liblapack-dev</run_depend>
-  <run_depend>collision_detection</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

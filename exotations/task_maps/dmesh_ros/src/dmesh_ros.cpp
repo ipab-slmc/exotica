@@ -265,7 +265,7 @@ namespace exotica
 	{
 		Eigen::MatrixXd _p(3 * robot_size_, q_size_);
 		jac_.setZero(task_size_, q_size_);
-		scene_->getJacobian(_p);
+		scene_->getJacobian(object_name_, _p);
 		Eigen::MatrixXd vel(gManager_.getGraph()->getVelocity());
 		double d_ = 0;
 		uint i, j, l, cnt;
@@ -345,8 +345,7 @@ namespace exotica
 	EReturn DMeshROS::updateGraphFromKS()
 	{
 		Eigen::VectorXd tmp(robot_size_ * 3);
-		std::vector<std::string> temp_vector;
-		scene_->getForwardMap(tmp, temp_vector);
+		scene_->getForwardMap(object_name_,tmp);
 
 		if (!gManager_.getGraph()->updateLinks(tmp))
 		{

@@ -1,39 +1,55 @@
 #include "task_definition/TaskTerminationCriterion.h"
 
-exotica::TaskTerminationCriterion::TaskTerminationCriterion()
+REGISTER_TASKDEFINITION_TYPE("TaskTerminationCriterion", exotica::TaskTerminationCriterion);
+
+namespace exotica
 {
-  strength_ = CONTINUE;
+
+	TaskTerminationCriterion::TaskTerminationCriterion() :
+			threshold_(0.0),
+			dim_(0)
+	{
+
+	}
+
+	EReturn TaskTerminationCriterion::initDerived(tinyxml2::XMLHandle & handle)
+	{
+		EReturn temp_return = TaskSqrError::initDerived(handle);
+		double thr;
+		if (temp_return) { INDICATE_FAILURE; }
+		else
+											{ if (!handle.FirstChildElement("Threshold").ToElement()) {temp_return = PAR_ERR; } }
+		if (temp_return) { INDICATE_FAILURE; }
+		else             { temp_return = getDouble(*(handle.FirstChildElement("Threshold").ToElement()), thr); }
+		if (temp_return) { INDICATE_FAILURE; }
+		else             { temp_return = setThreshold(thr); }
+		taskSpaceDim(dim_);
+		y_.resize(dim_);
+		return temp_return;
+	}
+
+	EReturn TaskTerminationCriterion::terminate(bool & end, double& err)
+	{
+		phi(y_);
+		Eigen::VectorXd y_star(y_.rows());
+		getGoal(y_star);
+		double rho;
+		getRho(rho);
+		err=(y_-y_star).squaredNorm()*rho;
+		end = err<threshold_;
+		return SUCCESS;
+	}
+
+	EReturn TaskTerminationCriterion::setThreshold(const double & thr)
+	{
+		threshold_=thr;
+		return SUCCESS;
+	}
+
+	EReturn TaskTerminationCriterion::getThreshold(double & thr)
+	{
+		thr=threshold_;
+		return SUCCESS;
+	}
+
 }
-
-exotica::EReturn exotica::TaskTerminationCriterion::initBase(tinyxml2::XMLHandle & handle)
-{  
-  if (!handle.ToElement()) { return PAR_ERR; }
-  std::string temp_string(handle.ToElement()->Attribute("strength"));
-  if (!temp_string.size()) { return PAR_ERR; }
-  
-  setStrength(temp_string.compare("soft") ? HARD_END : SOFT_END);
-  
-  return initDerived(handle); 
-}
-
-
-exotica::EReturn exotica::TaskTerminationCriterion::getStrength(ETerminate & strength)
-{
-  LOCK(strength_lock_);
-  
-  if (strength_)  //!< If set to something other than continue which is invalid!
-  {
-    strength = strength_;
-    return SUCCESS;
-  }
-  else
-  {
-    return MMB_NIN;
-  }
-}
-
-void exotica::TaskTerminationCriterion::setStrength(const ETerminate & strength)
-{
-  LOCK(strength_lock_);
-  strength_ = strength;
-} 

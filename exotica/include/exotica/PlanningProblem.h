@@ -13,9 +13,9 @@
 #include "exotica/TaskMap.h"
 #include "exotica/TaskDefinition.h"
 #include "exotica/Server.h"
+#include "exotica/Scene.h"
 #include "tinyxml2/tinyxml2.h"
 
-#include <kinematic_scene/kinematic_scene.h>
 #include <vector>
 #include <string>
 #include <map>
@@ -50,11 +50,30 @@ namespace exotica
             virtual EReturn update(const Eigen::VectorXd & x, const int t);
 
 			/**
+			 * \brief Returns the reference to the task definition map.
+			 * @return Task definitions
+			 */
+			TaskDefinition_map& getTaskDefinitions();
+
+			/**
+			 * \brief	Get task maps
+			 * @return Task maps
+			 */
+			TaskMap_map& getTaskMaps();
+
+			/**
 			 * \brief Update the kinematic scene
 			 * @param scene	The planning scene from moveit
 			 */
 			EReturn updateKinematicScene(const planning_scene::PlanningSceneConstPtr & scene);
-			kinematica::KinematicScene_map k_scenes_;  //!< Kinematic scene(s) indexed by name
+
+			/*
+			 * \brief	Set EXOTica Scene from a moveit planning scene
+			 * @param	scene	Moveit planning scene
+			 */
+			EReturn setScene(const planning_scene::PlanningSceneConstPtr & scene);
+			EReturn setScene(const moveit_msgs::PlanningSceneConstPtr & scene);
+			Scene_map scenes_;  //!< Kinematic scene(s) indexed by name
 
 		protected:
 

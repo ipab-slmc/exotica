@@ -15,6 +15,49 @@ REGISTER_PROBLEM_TYPE("AICOProblem",exotica::AICOProblem);
 namespace exotica
 {
 
+    exotica::EReturn exotica::AICOProblem::update(const Eigen::VectorXd & x, const int t)
+    {
+        EReturn ret_value = SUCCESS;
+
+        //!< Update the Task maps
+        if (task_maps_.size() == 0 and ok(ret_value))
+        {
+            ret_value = WARNING;
+        }
+        else
+        {
+            double rho;
+            for (TaskDefinition_map::const_iterator it = task_defs_.begin();
+                    it != task_defs_.end() and ok(ret_value); ++it)
+            {
+                boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(it->second);
+                task->getRho(rho,t);
+                if(rho>0)
+                {
+                    if (ok(task->getTaskMap()->getScene()->update(x,t)))
+                    {
+                        if(ok(task->getTaskMap()->update(x,t)))
+                        {
+                            // All is fine
+                        }
+                        else
+                        {
+                            ERROR("Failed updateing '" << task->getObjectName() << "'");
+                            return FAILURE;
+                        }
+                    }
+                    else
+                    {
+                        INDICATE_FAILURE;
+                        return FAILURE;
+                    }
+                }
+            }
+        }
+
+        return ret_value;
+    }
+
 	AICOProblem::AICOProblem(): T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
 	{
 		// TODO Auto-generated constructor stub
@@ -53,6 +96,11 @@ namespace exotica
 			W=Eigen::MatrixXd::Identity(tmp.rows(),tmp.rows());
 			W.diagonal() = tmp;
 		}
+        for (TaskDefinition_map::const_iterator it = task_defs_.begin();
+                it != task_defs_.end() and ok(ret_value); ++it)
+        {
+          if(it->second->type().compare(std::string("TaskSqrError"))==0) ERROR("Task variable " << it->first << " is not an squared error!");
+        }
         // Set number of time steps
         return setTime(T);
 	}

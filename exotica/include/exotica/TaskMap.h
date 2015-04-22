@@ -14,7 +14,8 @@
 #include "exotica/Factory.h"      //!< The Factory template
 #include "exotica/Test.h"         //!< The Test factory template
 #include "exotica/Server.h"
-#include <kinematic_scene/kinematic_scene.h>
+#include "exotica/Scene.h"
+
 #include <Eigen/Dense>            //!< Generally dense manipulations should be enough
 #include <boost/thread/mutex.hpp> //!< The boost thread-library for synchronisation
 #include <string>
@@ -49,8 +50,7 @@ namespace exotica
 			 *                  \n PAR_ERR if could not bind scene information.
 			 */
 			EReturn initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
-					const kinematica::KinematicScene_map & scene_ptr =
-							kinematica::KinematicScene_map());
+					const Scene_map & scene_ptr = Scene_map());
 
 			/**
 			 * \brief Updates the output functions (phi and jacobian): PURE VIRTUAL
@@ -62,7 +62,7 @@ namespace exotica
 			 * @param  x  The State-space vector for the robot
 			 * @return    Should indicate success/otherwise using the Exotica error types
 			 */
-            virtual EReturn update(const Eigen::VectorXd & x, const int t) = 0;
+			virtual EReturn update(const Eigen::VectorXd & x, const int t) = 0;
 
 			/**
 			 * \brief Getter for the task-space vector
@@ -70,7 +70,7 @@ namespace exotica
 			 * @return    Indication of success or otherwise: SUCCESS if ok
 			 *                                                MMB_NIN if the phi-vector is not correctly defined
 			 */
-            EReturn phi(Eigen::Ref<Eigen::VectorXd> y, int t=0);
+			EReturn phi(Eigen::Ref<Eigen::VectorXd> y, int t = 0);
 
 			/**
 			 * \brief Getter for the task-space velocity matrix
@@ -78,7 +78,7 @@ namespace exotica
 			 * @return      Indication of success or otherwise: SUCCESS if ok
 			 *                                                  MMB_NIN if the jacobian is not correctly computed
 			 */
-            EReturn jacobian(Eigen::Ref<Eigen::MatrixXd> J, int t=0);
+			EReturn jacobian(Eigen::Ref<Eigen::MatrixXd> J, int t = 0);
 
 			/**
 			 * \brief Indicator of the Task-Dimension size: PURE VIRTUAL
@@ -87,26 +87,28 @@ namespace exotica
 			 */
 			virtual EReturn taskSpaceDim(int & task_dim) = 0;
 
-            /**
-             * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
-             * @param T Number of time steps (this should be set by the planning problem)
-             * @return Returns success.
-             */
-            virtual EReturn setTimeSteps(const int T);
+			/**
+			 * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
+			 * @param T Number of time steps (this should be set by the planning problem)
+			 * @return Returns success.
+			 */
+			virtual EReturn setTimeSteps(const int T);
+
+            Scene_ptr getScene();
 		protected:
 			/**
 			 * \brief Setter for the Task-space mapping: enforces thread-safety
 			 * @param  y  The task-space vector
 			 * @return    Always returns SUCCESS
 			 */
-            EReturn setPhi(const Eigen::Ref<const Eigen::VectorXd> & y,int t=0);
+			EReturn setPhi(const Eigen::Ref<const Eigen::VectorXd> & y, int t = 0);
 
 			/**
 			 * \brief Setter for the Task-space Velocity (Jacobian): enforces thread-safety
 			 * @param  ydot  The task-space Jacobian
 			 * @return       Always returns SUCCESS
 			 */
-            EReturn setJacobian(const Eigen::Ref<const Eigen::MatrixXd> & J,int t=0);
+			EReturn setJacobian(const Eigen::Ref<const Eigen::MatrixXd> & J, int t = 0);
 
 			/**
 			 * \brief Invalidates the phi and jacobian matrices: does not de-allocate memory!
@@ -123,15 +125,15 @@ namespace exotica
 			/**
 			 * Member Variables
 			 */
-			kinematica::KinematicScene_ptr scene_;  //!< The Kinematic Scene object (smart-pointer):
+			Scene_ptr scene_;  //!< The Scene object (smart-pointer):
 			boost::mutex scene_lock_;  //!< Synchronisation for the scene object
 			Server_ptr server_; //!< Pointer to EXOTica parameter server;
 		private:
 			/**
 			 * \brief Private data members for information hiding and thread-safety
 			 */
-            std::vector<Eigen::VectorXd> phi_;       //!< The Task-space co-ordinates
-            std::vector<Eigen::MatrixXd> jac_;       //!< The Jacobian matrix
+			std::vector<Eigen::VectorXd> phi_;       //!< The Task-space co-ordinates
+			std::vector<Eigen::MatrixXd> jac_;       //!< The Jacobian matrix
 			bool phi_ok_;    //!< Indicates that the phi matrix contains valid data
 			bool jac_ok_;    //!< Indicates that the jacobian contains valid data
 			boost::mutex phi_lock_;  //!< Lock around the Y-Vector

@@ -1,4 +1,22 @@
 #include "exotica/Tools.h"
+#include <fstream>
+
+exotica::EReturn exotica::saveMatrix(std::string file_name, const Eigen::Ref<const Eigen::MatrixXd> mat)
+{
+    std::ofstream myfile;
+    myfile.open (file_name);
+    if(myfile.good())
+    {
+        myfile << mat;
+        myfile.close();
+        return SUCCESS;
+    }
+    else
+    {
+        myfile.close();
+        return FAILURE;
+    }
+}
 
 bool exotica::ok(const EReturn & value)
 {
@@ -379,48 +397,50 @@ exotica::EReturn exotica::parseIncludes(tinyxml2::XMLHandle & handle, std::strin
 	return ret_val;
 }
 
-exotica::EReturn exotica::loadOBJ(std::string & data,Eigen::VectorXi& tri, Eigen::VectorXd& vert)
+exotica::EReturn exotica::loadOBJ(std::string & data, Eigen::VectorXi& tri, Eigen::VectorXd& vert)
 {
-    std::stringstream ss(data);
-    std::string line;
-    tri.resize(0,1);
-    vert.resize(0,1);
-    int vn=0, tn=0;
-    double v[3];
-    int vv[9];
-    while(std::getline(ss,line))
-    {
-        if(line.compare(0,2,"v ")==0)
-        {
+	std::stringstream ss(data);
+	std::string line;
+	tri.resize(0, 1);
+	vert.resize(0, 1);
+	int vn = 0, tn = 0;
+	double v[3];
+	int vv[9];
+	while (std::getline(ss, line))
+	{
+		if (line.compare(0, 2, "v ") == 0)
+		{
 
-            vert.conservativeResize((vn+1)*3);
-            std::stringstream sss(line.substr(2));
-            sss >> v[0] >> v[1] >> v[2];
-            vert(vn*3) = v[0];
-            vert(vn*3+1) = v[1];
-            vert(vn*3+2) = v[2];
-            vn++;
-        }
-        else if (line.compare(0,2,"f ")==0)
-        {
-            std::stringstream sss(line.substr(2));
-            int i;
-            for(i=0;i<9&&sss>>vv[i];i++)
-            {
-                while(sss.peek()=='/'||sss.peek()==' ') sss.ignore();
-            }
-            if(i<8)
-            {
-                INDICATE_FAILURE;
-                return PAR_ERR;
-            }
-            tri.conservativeResize((tn+1)*3);
-            tri(tn*3) = vv[0]-1;
-            tri(tn*3+1) = vv[3]-1;
-            tri(tn*3+2) = vv[6]-1;
-            tn++;
-        }
-    }
+			vert.conservativeResize((vn + 1) * 3);
+			std::stringstream sss(line.substr(2));
+			sss >> v[0] >> v[1] >> v[2];
+			vert(vn * 3) = v[0];
+			vert(vn * 3 + 1) = v[1];
+			vert(vn * 3 + 2) = v[2];
+			vn++;
+		}
+		else if (line.compare(0, 2, "f ") == 0)
+		{
+			std::stringstream sss(line.substr(2));
+			int i;
+			for (i = 0; i < 9 && sss >> vv[i]; i++)
+			{
+				while (sss.peek() == '/' || sss.peek() == ' ')
+					sss.ignore();
+			}
+			if (i < 8)
+			{
+				INDICATE_FAILURE
+				;
+				return PAR_ERR;
+			}
+			tri.conservativeResize((tn + 1) * 3);
+			tri(tn * 3) = vv[0] - 1;
+			tri(tn * 3 + 1) = vv[3] - 1;
+			tri(tn * 3 + 2) = vv[6] - 1;
+			tn++;
+		}
+	}
 
-    return SUCCESS;
+	return SUCCESS;
 }

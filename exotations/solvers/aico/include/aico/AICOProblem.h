@@ -12,6 +12,7 @@
 #define AICOPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
+#include "task_definition/TaskSqrError.h"
 
 namespace exotica
 {
@@ -96,6 +97,14 @@ namespace exotica
 			 * @return Control error covariance multipler
 			 */
 			double getHrate();
+
+            /**
+             * @brief update Updates the AICO problem, adding lazy update of task maps for which the task definition has rho=0.
+             * @param x State
+             * @param t time step
+             * @return  Indication of success TODO
+             */
+            virtual EReturn update(const Eigen::VectorXd & x, const int t);
 
 		protected:
 			/**

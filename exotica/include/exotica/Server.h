@@ -26,6 +26,7 @@
 #include <exotica/StringList.h>
 #include <exotica/BoolList.h>
 #include <exotica/Vector.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
 
 namespace exotica
 {
@@ -42,6 +43,7 @@ namespace exotica
 			 * \brief	Default Constructor
 			 */
 			Server();
+			Server(const boost::shared_ptr<ros::NodeHandle> & node);
 
 			/*
 			 * \brief	Destructor
@@ -154,7 +156,7 @@ namespace exotica
 					//	If a topic is specified
 					params_[name] = boost::shared_ptr<T>(new T);
 					subs_[name] =
-							nh_.subscribe<T>(topic, 1, boost::bind(&exotica::Server::paramCallback<T>, this, _1, params_.at(name)));
+							nh_->subscribe<T>(topic, 1, boost::bind(&exotica::Server::paramCallback<T>, this, _1, params_.at(name)));
 				}
                 else if(handle.ToElement()->Attribute("rosparam"))
                 {
@@ -162,19 +164,19 @@ namespace exotica
                     if (typeid(T) == typeid(std::string))
                     {
                         std::string val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<std::string>(new std::string(val));
                     }
                     else if(typeid(T) == typeid(double))
                     {
                         double val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<double>(new double(val));
                     }
                     else if(typeid(T) == typeid(int))
                     {
                         int val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<int>(new int(val));
                     }
                     else
@@ -306,19 +308,19 @@ namespace exotica
                     if (typeid(T) == typeid(std::string))
                     {
                         std::string val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<std::string>(new std::string(val));
                     }
                     else if(typeid(T) == typeid(double))
                     {
                         double val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<double>(new double(val));
                     }
                     else if(typeid(T) == typeid(int))
                     {
                         int val;
-                        nh_.getParam(rosparam,val);
+                        nh_->getParam(rosparam,val);
                         params_[name] = boost::shared_ptr<int>(new int(val));
                     }
                     else
@@ -359,7 +361,7 @@ namespace exotica
 				{
 					params_[name] = boost::shared_ptr<T>(new T);
 					subs_[name] =
-							nh_.subscribe<T>(topic, 1, boost::bind(&exotica::Server::paramCallback<T>, this, _1, params_.at(name)));
+							nh_->subscribe<T>(topic, 1, boost::bind(&exotica::Server::paramCallback<T>, this, _1, params_.at(name)));
 				}
 				else
 				{
@@ -396,8 +398,10 @@ namespace exotica
 			ros::Publisher advertise(const std::string &topic, uint32_t queue_size, bool latch =
 					false)
 			{
-				return nh_.advertise<T>(topic, queue_size, latch);
+				return nh_->advertise<T>(topic, queue_size, latch);
 			}
+
+            EReturn getModel(std::string path, robot_model::RobotModelPtr& model);
 
 		private:
 			template<typename T>
@@ -407,22 +411,25 @@ namespace exotica
 				*boost::any_cast<boost::shared_ptr<T>>(param) = *ptr;
 			}
 
-			//	The name of this server
+            /// \brief	The name of this server
 			std::string name_;
 
-			//	ROS node handle
-			ros::NodeHandle nh_;
+            /// \brief	ROS node handle
+			boost::shared_ptr<ros::NodeHandle> nh_;
 
 			std::map<std::string, ros::Subscriber> subs_;
 
-			//	Parameters map <name, parameter pointer>
+            /// \brief	Parameters map <name, parameter pointer>
 			std::map<std::string, boost::any> params_;
 
-			//	<param_name, param_topic>
+            /// \brief	<param_name, param_topic>
 			std::map<std::string, std::string> topics_;
 
-			//	Mutex locker
+            /// \brief	Mutex locker
 			boost::mutex param_lock_;
+
+            /// \brief Robot model cache
+            std::map<std::string, robot_model::RobotModelPtr> robot_models_;
 	};
 
 	typedef boost::shared_ptr<Server> Server_ptr;

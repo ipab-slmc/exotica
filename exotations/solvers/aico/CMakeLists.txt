@@ -14,19 +14,17 @@ add_definitions(-DEXOTICA_DEBUG_MODE)  #Controls whether to compile with certain
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  kinematic_scene
   roscpp
   roslib
   task_definition
   task_map
-  collision_detection
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS signals)
 
 ## System dependencies are found with CMake's conventions
-##find_package(EIGEN REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(LAPACK REQUIRED)
 
 ###################################
@@ -41,7 +39,7 @@ find_package(LAPACK REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aico
-  CATKIN_DEPENDS exotica roscpp roslib task_definition kinematic_scene task_map collision_detection
+  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map
   DEPENDS system_lib
 )
 
@@ -56,7 +54,7 @@ include_directories(
   include
   SYSTEM
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
   ${LAPACK_INCLUDE_DIRS}
 )
@@ -73,7 +71,7 @@ add_executable(example
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(aico
-  ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${LAPACK_LIBRARIES}
+  ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${LAPACK_LIBRARIES}
 )
 
 target_link_libraries(example

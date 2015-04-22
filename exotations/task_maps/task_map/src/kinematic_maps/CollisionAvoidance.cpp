@@ -67,9 +67,8 @@ namespace exotica
 		kin_sol_.updateEndEffectors(sol);
 #ifdef C_DEBUG
 		centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
-
 #endif
-		return FAILURE;
+        return SUCCESS;
 	}
 
     EReturn CollisionAvoidance::setPreUpdateCallback(boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback)

@@ -346,10 +346,10 @@ namespace exotica
 			Eigen::MatrixXd Jac_;
 
             ///	Forwardmaps referring to subvectors of the big phi
-            std::map<std::string, boost::shared_ptr< Eigen::Ref< Eigen::VectorXd> > > phis_;
+            std::map<std::string, Eigen::VectorXdRef_ptr > phis_;
 
             ///	Jacobians referring to submatrices of the big jacobian
-            std::map<std::string, boost::shared_ptr< Eigen::Ref< Eigen::MatrixXd> > > jacs_;
+            std::map<std::string, Eigen::MatrixXdRef_ptr > jacs_;
 
             ///	End-effector names
 			std::map<std::string, std::vector<std::string> > eff_names_;

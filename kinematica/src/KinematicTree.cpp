@@ -1089,7 +1089,7 @@ bool kinematica::KinematicTree::computePhi()
 		}
 		forward_map_(i * 3) = end_effector.p.x();
 		forward_map_(i * 3 + 1) = end_effector.p.y();
-		forward_map_(i * 3 + 2) = end_effector.p.z();
+        forward_map_(i * 3 + 2) = end_effector.p.z();
 	}
 	return true;
 }
@@ -1205,8 +1205,8 @@ bool kinematica::KinematicTree::getPose(std::string child, KDL::Frame & pose)
 	}
 
 //!< Computation
-	pose = robot_tree_[segment_map_[child]].tip_pose;
 
+	pose = robot_tree_[segment_map_[child]].tip_pose;
 //!< Return
 	return true;
 }

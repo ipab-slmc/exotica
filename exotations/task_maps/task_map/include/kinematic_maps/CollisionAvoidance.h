@@ -8,7 +8,7 @@
 #ifndef EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_COLLISIONAVOIDANCE_H_
 #define EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_COLLISIONAVOIDANCE_H_
 
-#define C_DEBUG
+//#define C_DEBUG
 #include <exotica/TaskMap.h>
 #include <exotica/Factory.h>
 #include <exotica/Test.h>

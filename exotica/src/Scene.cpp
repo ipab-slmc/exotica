@@ -426,19 +426,15 @@ namespace exotica
     {
         LOCK(lock_);
         poses.resize(names.size());
-        int i=0;
-        for(std::string name : names)
+        for(int i=0;i<names.size();i++)
         {
-            if(kinematica_.getPose(name,poses[i]))
-            {
-                continue;
-            }
-            else
+            if(!kinematica_.getPose(names[i],poses[i]))
             {
                 poses.resize(0);
                 INDICATE_FAILURE;
                 return FAILURE;
             }
+
         }
         return SUCCESS;
     }
@@ -490,22 +486,29 @@ namespace exotica
 		}
 
 		if (!kinematica_.updateEndEffectors(tmp_sol))
+        {
+            INDICATE_FAILURE;
 			return FAILURE;
+        }
 		std::vector<int> tmp_index;
 		if (!kinematica_.getEndEffectorIndex(tmp_index))
+        {
+            INDICATE_FAILURE;
 			return FAILURE;
+        }
         Phi_.setZero(3 * kinematica_.getEffSize());
         Jac_.setZero(3 * kinematica_.getEffSize(), N);
 		int tmp_size = 0, tmp_eff_size = 0;
+        phis_.clear();
+        jacs_.clear();
+        eff_index_.clear();
 		for (auto & it : eff_names_)
 		{
 			eff_index_[it.first] =
 					std::vector<int>(tmp_index.begin() + tmp_eff_size, tmp_index.begin()
 							+ tmp_eff_size + it.second.size());
-            phis_[it.first] = boost::shared_ptr<Eigen::Ref<Eigen::VectorXd> >(new Eigen::Ref<
-                                Eigen::VectorXd>(Phi_.segment(tmp_size, 3 * it.second.size())));
-                        jacs_[it.first] = boost::shared_ptr<Eigen::Ref<Eigen::MatrixXd> >(new Eigen::Ref<
-                                Eigen::MatrixXd>(Jac_.block(tmp_size, 0, 3 * it.second.size(), N)));
+            phis_[it.first] = Eigen::VectorXdRef_ptr(Phi_.segment(tmp_size, 3 * it.second.size()));
+            jacs_[it.first] = Eigen::MatrixXdRef_ptr(Jac_.block(tmp_size, 0, 3 * it.second.size(), N));
 			tmp_size += 3 * it.second.size();
 			tmp_eff_size += it.second.size();
 		}

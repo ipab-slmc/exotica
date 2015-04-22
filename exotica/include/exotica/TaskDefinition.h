@@ -76,6 +76,19 @@ namespace exotica
        */
       virtual EReturn setTimeSteps(const int T);
 
+      /**
+       * \brief Member function for binding the Task definition to a Task-Map
+       * @param task_map  Smart pointer to a task-map
+       * @return          SUCCESS always.
+       */
+      EReturn setTaskMap(const TaskMap_ptr & task_map);
+
+      /**
+       * \brief Member function for getting the Task-Map
+       * @return          Smart pointer to a task-map
+       */
+      TaskMap_ptr getTaskMap();
+
     protected:
       /**
        * \brief Initialises members of the derived type: PURE_VIRTUAL
@@ -88,12 +101,6 @@ namespace exotica
       boost::shared_ptr<TaskMap>  task_map_;  //!< Shared pointer to a Task Map from which it gets its inputs
       boost::mutex                map_lock_;  //!< Mapping Lock for synchronisation
       
-      /**
-       * \brief Private Member function for binding the Task definition to a Task-Map
-       * @param task_map  Smart pointer to a task-map
-       * @return          SUCCESS always.
-       */
-      EReturn setTaskMap(const TaskMap_ptr & task_map);
   };
   
   typedef Factory<std::string, TaskDefinition>      TaskDefinition_fac;

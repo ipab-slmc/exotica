@@ -33,13 +33,14 @@ include_directories(
 ## Declare a cpp library
 add_library(${PROJECT_NAME} src/kinematic_maps/CoM.cpp
                             src/kinematic_maps/IMesh.cpp
-                            #src/kinematic_maps/DMesh.cpp
                             src/kinematic_maps/EffPosition.cpp
                             src/kinematic_maps/JointLimit.cpp
                             src/kinematic_maps/SweepFlux.cpp
                             src/kinematic_maps/Distance.cpp
                             src/kinematic_maps/Orientation.cpp
+                            src/kinematic_maps/CollisionAvoidance.cpp
                             src/generic/Identity.cpp
+                            src/kinematic_maps/JointSpaceSampling.cpp
            )
            
 

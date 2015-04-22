@@ -5,53 +5,69 @@ REGISTER_FOR_XML_TEST("EffPosition", "EffPosition.xml");
 
 exotica::EffPosition::EffPosition()
 {
-  //!< Empty constructor
+	//!< Empty constructor
 }
 
 exotica::EReturn exotica::EffPosition::update(const Eigen::VectorXd & x, const int t)
 {
-  //!< Prepare
-  invalidate();
-  LOCK(scene_lock_);
-  
-  //!< Check
-  if (scene_ == nullptr) { INDICATE_FAILURE; return MMB_NIN; }
-    
-  //!< Temporaries
-  std::vector<std::string> temp_vector;
-  Eigen::VectorXd phi(scene_->getMapSize()*3);
-  Eigen::MatrixXd jac(scene_->getMapSize()*3,x.rows());
-  bool success = true;
-  EReturn tmp_rtn = FAILURE;
-  
-  success = scene_->getForwardMap(phi, temp_vector);
+	//!< Prepare
+	invalidate();
+	LOCK(scene_lock_);
 
-  if(!success) { INDICATE_FAILURE; return FAILURE; }
-  else { success = scene_->getJacobian(jac); }
-  if(!success) { INDICATE_FAILURE; return FAILURE; }
-  else { tmp_rtn = setPhi(phi,t); }
-  if(!success) { INDICATE_FAILURE; return FAILURE; }
-  if (ok(tmp_rtn))  { tmp_rtn = setJacobian(jac,t); }
-  
-  return tmp_rtn;
+	//!< Check
+	if (scene_ == nullptr)
+	{
+        INDICATE_FAILURE;
+		return MMB_NIN;
+	}
+
+    if (ok(scene_->getForwardMap(object_name_, phi_tmp)))
+	{
+        if(ok(scene_->getJacobian(object_name_, jac_tmp)))
+        {
+            if(ok(setPhi(phi_tmp, t)) && ok(setJacobian(jac_tmp, t)))
+            {
+                return SUCCESS;
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+    }
+    else
+    {
+        INDICATE_FAILURE;
+		return FAILURE;
+	}
+
+
 }
 
 exotica::EReturn exotica::EffPosition::initDerived(tinyxml2::XMLHandle & handle)
 {
-  return SUCCESS;
+    phi_tmp.resize(scene_->getMapSize(object_name_) * 3);
+    jac_tmp.resize(scene_->getMapSize(object_name_) * 3, scene_->getNumJoints());
+	return SUCCESS;
 }
 
 exotica::EReturn exotica::EffPosition::taskSpaceDim(int & task_dim)
 {
-  if(!scene_)
-  {
-  	task_dim = -1;
-  	ERROR("Kinematic scene has not been initialized!");
-  	return exotica::MMB_NIN;
-  }
-  else
-  {
-  	task_dim = scene_->getMapSize()*3;
-  }
-  return exotica::SUCCESS;
+	if (!scene_)
+	{
+		task_dim = -1;
+		ERROR("Kinematic scene has not been initialized!");
+		return exotica::MMB_NIN;
+	}
+	else
+	{
+		task_dim = scene_->getMapSize(object_name_) * 3;
+	}
+	return exotica::SUCCESS;
 }

@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   task_definition
   task_map
+  ik_solver
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -22,7 +23,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ompl_solver
-  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map 
+  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map ik_solver
   DEPENDS system_lib ompl
 )
 
@@ -48,7 +49,9 @@ add_library(ompl_solver
    src/OMPLStateSpace.cpp
    src/OMPLStateValidityChecker.cpp
    src/OMPLGoalSampler.cpp
-) 
+   src/frrt/FRRT.cpp
+)
+
 link_directories(${catkin_LIBRARY_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 link_directories(${OMPL_LIBRARY_DIRS})

@@ -32,7 +32,7 @@ class ExoticaService
 			bool found_solution = false;
 			Eigen::MatrixXd solution;
 			exotica::Initialiser ini;
-			CHECK_EXECUTION
+
 			if (exotica::ok(ini.initialise(req.xml_file_, server, solver, problem)))
 			{
 				moveit_msgs::PlanningScenePtr scene_ptr;
@@ -75,6 +75,7 @@ class ExoticaService
 
 				Eigen::VectorXd q0;
 				exotica::vectorExoticaToEigen(req.q0, q0);
+				CHECK_EXECUTION
 				ros::Time start = ros::Time::now();
 				if (solver->type().compare("exotica::AICOsolver") == 0)
 				{

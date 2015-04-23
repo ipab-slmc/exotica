@@ -26,20 +26,11 @@ namespace exotica
 
 	EReturn IKsolver::initDerived(tinyxml2::XMLHandle & handle)
 	{
-		try
-		{
-			tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("MaxIt");
-			server_->registerParam<std_msgs::Int64>(ns_, tmp_handle, maxit_);
-			tmp_handle = handle.FirstChildElement("MaxStep");
-			server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, maxstep_);
-		}
-		catch (int e)
-		{
-			std::cout << "IK solver initialisation, parameter error\n";
-			return FAILURE;
-		}
-
-		//INFO("IK Solver parameters update [maximum iteration]: " << maxit_);
+		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("MaxIt");
+		server_->registerParam<std_msgs::Int64>(ns_, tmp_handle, maxit_);
+		tmp_handle = handle.FirstChildElement("MaxStep");
+		server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, maxstep_);
+		//ERROR("IK Solver parameters update [maximum iteration]: " << maxit_->data);
 		//INFO("IK Solver parameters update [maximum step velocity]: " << maxstep_);
 		return SUCCESS;
 	}
@@ -225,7 +216,7 @@ namespace exotica
 			}
 		}
 		task_weights.diagonal() = diag;
-		std::cout<<"Big Jac\n"<<big_jacobian<<std::endl;
+		std::cout << "Big Jac\n" << big_jacobian << std::endl;
 // Compute velocity
 
 		inv_jacobian =

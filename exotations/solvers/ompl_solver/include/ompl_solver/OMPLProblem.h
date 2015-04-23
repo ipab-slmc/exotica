@@ -32,7 +32,7 @@ namespace exotica
 
 			std::vector<TaskTerminationCriterion_ptr>& getGoals();
 			std::vector<double>& getBounds();
-
+			std::string local_planner_config_;
 		protected:
 			/**
 			 * \brief Derived Initialiser (from XML): PURE VIRTUAL
@@ -44,6 +44,7 @@ namespace exotica
 			boost::mutex update_lock_;
 			std::vector<TaskTerminationCriterion_ptr> goals_;
 			std::vector<double> bounds_;
+
 	};
 
 	typedef boost::shared_ptr<exotica::OMPLProblem> OMPLProblem_ptr;

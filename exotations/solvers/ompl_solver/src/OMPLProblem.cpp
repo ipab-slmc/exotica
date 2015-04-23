@@ -7,7 +7,7 @@
 
 #include "ompl_solver/OMPLProblem.h"
 
-REGISTER_PROBLEM_TYPE("OMPLProblem",exotica::OMPLProblem);
+REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem);
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
 #define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
@@ -15,13 +15,13 @@ REGISTER_PROBLEM_TYPE("OMPLProblem",exotica::OMPLProblem);
 namespace exotica
 {
 
-	OMPLProblem::OMPLProblem ()
+	OMPLProblem::OMPLProblem()
 	{
 		// TODO Auto-generated constructor stub
 
 	}
 
-	OMPLProblem::~OMPLProblem ()
+	OMPLProblem::~OMPLProblem()
 	{
 		// TODO Auto-generated destructor stub
 	}
@@ -35,29 +35,33 @@ namespace exotica
 	{
 		for (auto goal : task_defs_)
 		{
-			if(goal.second->type().compare("exotica::TaskTerminationCriterion")==0)
+			if (goal.second->type().compare("exotica::TaskTerminationCriterion") == 0)
 			{
 				goals_.push_back(boost::static_pointer_cast<exotica::TaskTerminationCriterion>(goal.second));
 			}
 		}
-
+		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("LocalPlannerConfig");
+		if (tmp_handle.ToElement())
+		{
+			local_planner_config_ = tmp_handle.ToElement()->GetText();
+		}
 		return SUCCESS;
 	}
 
 	int OMPLProblem::getSpaceDim()
 	{
-		int n=0;
-		for( auto scene : scenes_)
+		int n = 0;
+		for (auto scene : scenes_)
 		{
-			int nn=scene.second->getNumJoints();
-			if(n==0)
+			int nn = scene.second->getNumJoints();
+			if (n == 0)
 			{
-				n=nn;
+				n = nn;
 				continue;
 			}
 			else
 			{
-				if(n!=nn)
+				if (n != nn)
 				{
 					ERROR("Kinematic scenes have different joint space sizes!");
 					return -1;

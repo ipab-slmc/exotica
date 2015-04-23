@@ -15,6 +15,7 @@
 #include "tinyxml2/tinyxml2.h"
 #include <Eigen/Dense>
 #include <iostream>
+#include <boost/shared_ptr.hpp>
 
 /**
  * \brief A set of debugging tools: basically these provide easy ways of checking code execution through std::cout prints
@@ -30,12 +31,53 @@
 #define ERROR(x)								 std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
 #define INFO(x)									 std::clog << "Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
 #else
-#define CHECK_EXECUTION   //!< No operation
+#define CHECK_EXECUTION         // No operation
 #define INDICATE_FAILURE        std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
-#define WARNING(x)        //!< No operation
-#define ERROR(x)								 std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
-#define INFO(x)
+#define WARNING(x)              // No operation
+#define ERROR(x)                std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
+#define INFO(x)                 // No operation
 #endif
+
+
+namespace Eigen
+{
+
+    /// \brief Convenience wrapper for storing references to sub-matrices/vectors
+    template<typename Derived>
+    class Ref_ptr : public boost::shared_ptr<Ref<Derived> >
+    {
+    public:
+        inline Ref_ptr(): boost::shared_ptr<Ref<Derived> >()
+        {
+
+        }
+
+        inline Ref_ptr(const Eigen::Block<Derived>& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+
+        inline Ref_ptr(Eigen::Block<Derived>& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+
+        inline Ref_ptr(const Eigen::VectorBlock<Derived>& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+
+        inline Ref_ptr(Eigen::VectorBlock<Derived>& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+    };
+
+    /// \brief Reference to sub-vector.
+    typedef Ref_ptr<VectorXd> VectorXdRef_ptr;
+    /// \brief Reference to sub-Matrix.
+    typedef Ref_ptr<MatrixXd> MatrixXdRef_ptr;
+}
 
 /**
  * \brief A convenience macro for the boost scoped lock
@@ -147,13 +189,16 @@ namespace exotica
 	 */
 	EReturn deepCopy(tinyxml2::XMLHandle & parent, tinyxml2::XMLHandle & child);
 
-	/**
-	 * @brief loadOBJ Loads mesh data from an OBJ file
-	 * @param file_name File name
-	 * @param tri Returned vertex indices of triangles
-	 * @param vert Vertex positions
-	 * @return Indication of SUCCESS
-	 */
-	EReturn loadOBJ(std::string & data, Eigen::VectorXi& tri, Eigen::VectorXd& vert);
+    /**
+     * @brief loadOBJ Loads mesh data from an OBJ file
+     * @param file_name File name
+     * @param tri Returned vertex indices of triangles
+     * @param vert Vertex positions
+     * @return Indication of SUCCESS
+     */
+    EReturn loadOBJ(std::string & data,Eigen::VectorXi& tri, Eigen::VectorXd& vert);
+
+    EReturn saveMatrix(std::string file_name, const Eigen::Ref<const Eigen::MatrixXd> mat);
+
 }
 #endif

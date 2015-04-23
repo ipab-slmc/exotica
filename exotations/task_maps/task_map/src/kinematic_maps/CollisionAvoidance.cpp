@@ -35,6 +35,16 @@ namespace exotica
 #endif
 	}
 
+    EReturn CollisionAvoidance::setObsFrame(const KDL::Frame & tf)
+    {
+        std::vector<double> q(4);
+        tf.M.GetQuaternion(q[0], q[1], q[2], q[3]);
+        fcl::Quaternion3f quat(q[3], q[0], q[1], q[2]);
+        fcl::Vec3f vec(tf.p.x(), tf.p.y(), tf.p.z() + 0.05);
+        obs_in_base_tf_.setTransform(quat, vec);
+        return SUCCESS;
+    }
+
 	CollisionAvoidance::~CollisionAvoidance()
 	{
 
@@ -57,10 +67,14 @@ namespace exotica
 		kin_sol_.updateEndEffectors(sol);
 #ifdef C_DEBUG
 		centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
-
 #endif
-		return FAILURE;
+        return SUCCESS;
 	}
+
+    EReturn CollisionAvoidance::setPreUpdateCallback(boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback)
+    {
+        pre_update_callback_ = pre_update_callback;
+    }
 
 	EReturn CollisionAvoidance::taskSpaceDim(int & task_dim)
 	{
@@ -70,6 +84,7 @@ namespace exotica
 	EReturn CollisionAvoidance::update(const Eigen::VectorXd & x, const int t)
 	{
 		invalidate();
+        if (pre_update_callback_) pre_update_callback_(this, x, t);
 		int M = scene_->getMapSize(object_name_), N = x.rows();
 		if (M != effs_.size())
 		{
@@ -95,6 +110,15 @@ namespace exotica
 		close_.points.clear();
 		centre_.points.clear();
 #endif
+
+        for (auto& objvec : scene_->getCollisionScene()->getFCLWorld())
+        {
+            for (boost::shared_ptr<fcl::CollisionObject> obj : objvec.second)
+            {
+                obj->setTransform(obs_in_base_tf_);
+            }
+        }
+
 		for (int i = 0; i < M; i++)
 		{
 			Eigen::Vector3d tmp1, tmp2;

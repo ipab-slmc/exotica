@@ -48,10 +48,16 @@ namespace exotica
 			A(),tA(),Ainv(),invtA(),a(),B(),tB(),Winv(),Hinv(),
 			Q(),sweep(0),sweepMode(0),W(),H(),T(0),
             dynamic(false),n(0),updateCount(0),damping_init(0.0),
-            preupdateTrajectory_(false)
+            preupdateTrajectory_(false), q_stat()
 	{
 
 	}
+
+    EReturn AICOsolver::getStats(std::vector<sp_mean_covariance>& q_stat_)
+    {
+        q_stat_=q_stat;
+        return SUCCESS;
+    }
 
 	AICOsolver::~AICOsolver()
 	{
@@ -108,6 +114,7 @@ namespace exotica
 
 	EReturn AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init, Eigen::MatrixXd & solution)
 	{
+        ROS_WARN_STREAM("AICO: Setting up the solver");
 		updateCount=0;
         sweep=-1;
 		damping=damping_init;
@@ -115,10 +122,15 @@ namespace exotica
 		if(!(T>0)) { ERROR("Problem has not been initialized properly: T=0!"); return FAILURE;}
 		if(!ok(initTrajectory(q_init))) {INDICATE_FAILURE; return FAILURE;}
         sweep=0;
+        ROS_WARN_STREAM("AICO: Solving");
         for(int k=0;k<max_iterations&&ros::ok();k++)
 		{
 			d=step();
-			if(d<0) return FAILURE;
+            if(d<0)
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
 			if(k && d<tolerance) break;
 		}
 		Eigen::MatrixXd sol(T+1,n);
@@ -229,6 +241,12 @@ namespace exotica
     costTask.resize(T+1,taskNames.size());
     y_star.clear(); y_star.resize(TT,Eigen::VectorXd::Zero(m));
 
+    q_stat.resize(T+1);
+    for(int t=0;t<=T;t++)
+    {
+        q_stat[t].resize(n);
+    }
+
     rememberOldState();
 		return SUCCESS;
 	}
@@ -271,8 +289,15 @@ namespace exotica
 		s=b; for(int t=1;t<=T;t++) Sinv.at(t).diagonal().setConstant(damping);
 		v=b; for(int t=0;t<=T;t++) Vinv.at(t).diagonal().setConstant(damping);
 		dampingReference=b;
-        for(int t=0;t<=T;t++) updateTaskMessage(t,b.at(t),1.0); // Compute task message reference
-		cost = evaluateTrajectory(b);
+        for(int t=0;t<=T;t++)
+        {
+            // Compute task message reference
+            if(!updateTaskMessage(t,b.at(t),1.0) || !ros::ok())
+            {
+                return FAILURE;
+            }
+        }
+        cost = evaluateTrajectory(b,true);
 		if(cost<0) return FAILURE;
 		INFO("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost <<", updates: "<<updateCount);
         rememberOldState();
@@ -378,10 +403,10 @@ namespace exotica
 		}
 	}
 
-	void AICOsolver::updateTaskMessage(int t, const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_, double maxStepSize)
+    bool AICOsolver::updateTaskMessage(int t, const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_, double maxStepSize)
 	{
 		Eigen::VectorXd diff= qhat_t-qhat[t];
-		if((diff.array().abs().maxCoeff()<tolerance_)) return;
+        if((diff.array().abs().maxCoeff()<tolerance_)) return true;
 		double nrm=diff.norm();
 		if(maxStepSize>0. && nrm>maxStepSize)
 		{
@@ -391,13 +416,23 @@ namespace exotica
 		{
 			qhat[t]=qhat_t;
 		}
-        prob_->update(dynamic?qhat[t].head(n/2):qhat[t],t);
-		updateCount++;
-		getTaskCosts(t);
+
+        if(ok(prob_->update(dynamic?qhat[t].head(n/2):qhat[t],t)))
+        {
+            updateCount++;
+            double c=getTaskCosts(t);
+            q_stat[t].addw(c>0?1.0/(1.0+c):1.0,qhat_t);
+            return true;
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return false;
+        }
 		// If using fully dynamic system, update Q, Hinv and process variables here.
 	}
 
-	double AICOsolver::getTaskCosts(int t)
+    double AICOsolver::getTaskCosts(int t)
 	{
 		double C=0;
 		int n2=n/2;
@@ -413,17 +448,20 @@ namespace exotica
 			{
 				if(task_.second->type().compare(std::string("TaskSqrError"))==0) ERROR("Task variable " << task_.first << " is not an squared error!");
 				boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(task_.second);
-				task->taskSpaceDim(dim);
-                task->phi(phiBar[t].segment(offset,dim),t);
-                task->jacobian(JBar[t].middleRows(offset,dim),t);
-				Jt=JBar[t].middleRows(offset,dim).transpose();
                 task->getRho(prec,t);
-                task->getGoal(y_star[t].segment(offset,dim),t);
+                task->taskSpaceDim(dim);
+                if(prec>0)
+                {
+                    task->phi(phiBar[t].segment(offset,dim),t);
+                    task->jacobian(JBar[t].middleRows(offset,dim),t);
+                    Jt=JBar[t].middleRows(offset,dim).transpose();
+                    task->getGoal(y_star[t].segment(offset,dim),t);
 
-				C+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
-				R[t]+=prec*Jt*JBar[t].middleRows(offset,dim);
-				r[t]+=prec*Jt*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]);
-				rhat[t]+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]).squaredNorm();
+                    C+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
+                    R[t]+=prec*Jt*JBar[t].middleRows(offset,dim);
+                    r[t]+=prec*Jt*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]);
+                    rhat[t]+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]).squaredNorm();
+                }
 				i++;
 				offset+=dim;
 			}
@@ -443,31 +481,37 @@ namespace exotica
 				if(task_.second->type().compare(std::string("TaskSqrError"))==0)
 				{
 					boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(task_.second);
-					task->taskSpaceDim(dim);
-                    task->phi(phiBar[t].segment(offset,dim),t);
-                    task->jacobian(JBar[t].middleRows(offset,dim),t); Jt=JBar[t].middleRows(offset,dim).transpose();
                     task->getRho(prec,t);
-                    task->getGoal(y_star[t].segment(offset,dim),t);
+                    task->taskSpaceDim(dim);
+                    if(prec>0)
+                    {
+                        task->phi(phiBar[t].segment(offset,dim),t);
+                        task->jacobian(JBar[t].middleRows(offset,dim),t); Jt=JBar[t].middleRows(offset,dim).transpose();
+                        task->getGoal(y_star[t].segment(offset,dim),t);
 
-					C+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
-					R[t].topLeftCorner(n2,n2)+=prec*Jt*JBar[t].middleRows(offset,dim);
-					r[t].head(n2)+=prec*Jt*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]);
-					rhat[t]+=      prec*   (y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]).squaredNorm();
+                        C+=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
+                        R[t].topLeftCorner(n2,n2)+=prec*Jt*JBar[t].middleRows(offset,dim);
+                        r[t].head(n2)+=prec*Jt*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]);
+                        rhat[t]+=      prec*   (y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)+JBar[t].middleRows(offset,dim)*qhat[t]).squaredNorm();
+                    }
 				}
 				else if(task_.second->type().compare(std::string("TaskVelocitySqrError"))==0)
 				{
 					boost::shared_ptr<TaskVelocitySqrError> task = boost::static_pointer_cast<TaskVelocitySqrError>(task_.second);
-					task->taskSpaceDim(dim);
-                    task->phi(phiBar[t].segment(offset,dim),t);
-                    task->jacobian(JBar[t].middleRows(offset,dim),t); Jt=JBar[t].middleRows(offset,dim).transpose();
                     task->getRho(prec,t);
-                    task->getGoal(y_star[t].segment(offset,dim),t);
+                    task->taskSpaceDim(dim);
+                    if(prec>0)
+                    {
+                        task->phi(phiBar[t].segment(offset,dim),t);
+                        task->jacobian(JBar[t].middleRows(offset,dim),t); Jt=JBar[t].middleRows(offset,dim).transpose();
+                        task->getGoal(y_star[t].segment(offset,dim),t);
 
-					v=(phiBar[t].segment(offset,dim)-phiBar[t>0?t-1:T+1].segment(offset,dim))/tau; // (phi_t-phi_{t-1})/tau
-					C+=prec*(v-JBar[t].middleRows(offset,dim)*(qhat[t].head(n/2)-qhat[t>0?t-1:T+1].head(n/2))/tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
-					R[t].bottomRightCorner(n2,n2)+=prec*Jt*JBar[t].middleRows(offset,dim);
-					r[t].tail(n2)+=prec*Jt*v;
-					rhat[t]+=prec*(v).squaredNorm();
+                        v=(phiBar[t].segment(offset,dim)-phiBar[t>0?t-1:T+1].segment(offset,dim))/tau; // (phi_t-phi_{t-1})/tau
+                        C+=prec*(v-JBar[t].middleRows(offset,dim)*(qhat[t].head(n/2)-qhat[t>0?t-1:T+1].head(n/2))/tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
+                        R[t].bottomRightCorner(n2,n2)+=prec*Jt*JBar[t].middleRows(offset,dim);
+                        r[t].tail(n2)+=prec*Jt*v;
+                        rhat[t]+=prec*(v).squaredNorm();
+                    }
 				}
 				else
 					ERROR("Task variable " << task_.first << " is not an squared error!");
@@ -477,7 +521,7 @@ namespace exotica
 		return C;
 	}
 
-  void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance_, bool forceRelocation, double maxStepSize)
+  bool AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance_, bool forceRelocation, double maxStepSize)
   {
   	if(updateFwd) updateFwdMessage(t);
     if(updateBwd) updateBwdMessage(t);
@@ -498,128 +542,162 @@ namespace exotica
     {
         if(!((!k && forceRelocation) || (b[t]-qhat[t]).array().abs().maxCoeff()>tolerance_)) break;
 
-        updateTaskMessage(t, b[t], 0., maxStepSize);
-
-        //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
-        if(updateFwd) updateFwdMessage(t);
-        if(updateBwd) updateBwdMessage(t);
-
-        if(damping)
+        if(updateTaskMessage(t, b[t], 0., maxStepSize) && ros::ok())
         {
-            Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(n,n)*damping;
-            MAT_OK(AinvBSymPosDef(b[t],Binv[t],Sinv[t]*s[t] + Vinv[t]*v[t] + r[t] + damping*dampingReference[t]));
+
+            //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
+            if(updateFwd) updateFwdMessage(t);
+            if(updateBwd) updateBwdMessage(t);
+
+            if(damping)
+            {
+                Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(n,n)*damping;
+                MAT_OK(AinvBSymPosDef(b[t],Binv[t],Sinv[t]*s[t] + Vinv[t]*v[t] + r[t] + damping*dampingReference[t]));
+            }
+            else
+            {
+                Binv[t] = Sinv[t] + Vinv[t] + R[t];
+                MAT_OK(AinvBSymPosDef(b[t],Binv[t],Sinv[t]*s[t] + Vinv[t]*v[t] + r[t]));
+            }
         }
         else
         {
-            Binv[t] = Sinv[t] + Vinv[t] + R[t];
-            MAT_OK(AinvBSymPosDef(b[t],Binv[t],Sinv[t]*s[t] + Vinv[t]*v[t] + r[t]));
+            INDICATE_FAILURE;
+            return false;
         }
     }
+    return true;
   }
 
-  void AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance, double maxStepSize)
+  bool AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance, double maxStepSize)
   {
   	// TODO: implement updateTimeStepGaussNewton
+      return false;
   }
 
-  double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x)
+  double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x, bool skipUpdate)
   {
     ROS_WARN_STREAM("Evaluating, sweep "<<sweep);
+    ros::Time start = ros::Time::now(), tmpTime;
+    ros::Duration dSet, dPre, dUpd, dCtrl, dTask;
   	double ret=0.0;
   	double tau=prob_->getTau();
-		double tau_1 = 1./tau, tau_2 = tau_1*tau_1;
-		int n2=n/2;
-        Eigen::VectorXd vv;
+    double tau_1 = 1./tau, tau_2 = tau_1*tau_1;
+    int n2=n/2;
+    Eigen::VectorXd vv;
 
-		if(dynamic)
-		{
-			for(int i=0;i<q.size();i++)q.at(i)=b.at(i).head(n/2);
-		}
-			else q=b;
-        if(preupdateTrajectory_)
+    if(dynamic)
+    {
+        for(int i=0;i<q.size();i++)q.at(i)=x.at(i).head(n/2);
+    }
+    else
+    {
+        q=x;
+    }
+    dSet=ros::Time::now()-start;
+    if(preupdateTrajectory_)
+    {
+        ROS_WARN_STREAM("Pre-update, sweep "<<sweep);
+        for(int t=0;t<=T;t++)
         {
-            ROS_WARN_STREAM("Pre-update, sweep "<<sweep);
-            for(int t=0;t<=T;t++)
+            if(!ros::ok()) return -1.0;
+            updateCount++;
+            if(!ok(prob_->update(q[t],t))) {INDICATE_FAILURE; return -1;}
+        }
+    }
+    dPre=ros::Time::now()-start-dSet;
+
+    for(int t=0;t<=T;t++)
+    {
+        tmpTime=ros::Time::now();
+        if(!ros::ok()) return -1.0;
+        if(!skipUpdate)
+        {
+            updateCount++;
+            if(!ok(prob_->update(q[t],t))) {INDICATE_FAILURE; return -1;}
+        }
+        dUpd+=ros::Time::now()-tmpTime;
+        tmpTime=ros::Time::now();
+
+        // Control cost
+        if(!dynamic)
+        {
+            if(t==0)
             {
-                updateCount++;
-                if(!ok(prob_->update(q[t],t))) {INDICATE_FAILURE; return -1;}
+                costControl(t)=0.0;
+            }
+            else
+            {
+                vv=q[t]-q[t-1];
+                costControl(t)=vv.transpose()*W[t]*vv;
             }
         }
+        else
+        {
+            if (t < T && t > 0)
+            {
+                // For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t-1]-2.0*q[t])-F;
+                vv=tau_2*(q[t+1]+q[t-1]-2.0*q[t]);
+                costControl(t)=vv.transpose()*H[t]*vv;
+            }
+            else if (t==0)
+            {
+                // For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t])-F;
+                vv=tau_2*(q[t+1]+q[t]);
+                costControl(t)=vv.transpose()*H[t]*vv;
+            }
+            else
+                costControl(t)=0.0;
+        }
 
-		for(int t=0;t<=T;t++)
-		{
-			updateCount++;
-            if(!ok(prob_->update(q[t],t))) {INDICATE_FAILURE; return -1;}
-
-			// Control cost
-			if(!dynamic)
-			{
-				if(t==0)
-				{
-					costControl(t)=0.0;
-				}
-				else
-				{
-					vv=q[t]-q[t-1];
-					costControl(t)=vv.transpose()*W[t]*vv;
-				}
-			}
-			else
-			{
-				if (t < T && t > 0)
-				{
-					// For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t-1]-2.0*q[t])-F;
-					vv=tau_2*(q[t+1]+q[t-1]-2.0*q[t]);
-					costControl(t)=vv.transpose()*H[t]*vv;
-				}
-				else if (t==0)
-				{
-					// For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t])-F;
-					vv=tau_2*(q[t+1]+q[t]);
-					costControl(t)=vv.transpose()*H[t]*vv;
-				}
-				else
-					costControl(t)=0.0;
-			}
-
-			ret+=costControl(t);
-			// Task cost
-			double prec;
-			int i=0, offset=0, dim;
-			for (auto & task_ : prob_->getTaskDefinitions())
-			{
-				if(task_.second->type().compare(std::string("exotica::TaskSqrError"))==0)
-				{
-					// Position cost
-					boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(task_.second);
-					if(!ok(task->taskSpaceDim(dim))) {INDICATE_FAILURE; return -1;}
+        ret+=costControl(t);
+        dCtrl+=ros::Time::now()-tmpTime;
+        tmpTime=ros::Time::now();
+        // Task cost
+        double prec;
+        int i=0, offset=0, dim;
+        for (auto & task_ : prob_->getTaskDefinitions())
+        {
+            if(task_.second->type().compare(std::string("exotica::TaskSqrError"))==0)
+            {
+                // Position cost
+                boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(task_.second);
+                if(!ok(task->taskSpaceDim(dim))) {INDICATE_FAILURE; return -1;}
+                if(!ok(task->getRho(prec,t))) {INDICATE_FAILURE; return -1;}
+                if(prec>0)
+                {
                     if(!ok(task->phi(phiBar[t].segment(offset,dim),t))) {INDICATE_FAILURE; return -1;}
-                    if(!ok(task->getRho(prec,t))) {INDICATE_FAILURE; return -1;}
                     if(!ok(task->getGoal(y_star[t].segment(offset,dim),t))) {std::cout<<"CHECK x"<<std::endl;INDICATE_FAILURE; return -1;}
-					costTask(t,i)=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
-					ret+=costTask(t,i);
-				}
-				else if (dynamic && task_.second->type().compare(std::string("exotica::TaskVelocitySqrError"))==0)
-				{
-					// Velocity cost
-					boost::shared_ptr<TaskVelocitySqrError> task = boost::static_pointer_cast<TaskVelocitySqrError>(task_.second);
-					if(!ok(task->taskSpaceDim(dim))) {INDICATE_FAILURE; return -1;}
+                    costTask(t,i)=prec*(y_star[t].segment(offset,dim)-phiBar[t].segment(offset,dim)).squaredNorm();
+                    ret+=costTask(t,i);
+                }
+            }
+            else if (dynamic && task_.second->type().compare(std::string("exotica::TaskVelocitySqrError"))==0)
+            {
+                // Velocity cost
+                boost::shared_ptr<TaskVelocitySqrError> task = boost::static_pointer_cast<TaskVelocitySqrError>(task_.second);
+                if(!ok(task->taskSpaceDim(dim))) {INDICATE_FAILURE; return -1;}
+                if(!ok(task->getRho(prec,t))) {INDICATE_FAILURE; return -1;}
+                if(prec>0)
+                {
                     if(!ok(task->phi(phiBar[t].segment(offset,dim),t))) {INDICATE_FAILURE; return -1;}
-                    if(!ok(task->getRho(prec,t))) {INDICATE_FAILURE; return -1;}
                     if(!ok(task->getGoal(y_star[t].segment(offset,dim),t))) {INDICATE_FAILURE; return -1;}
-					vv=(phiBar[t].segment(offset,dim)-phiBar[t>0?t-1:T+1].segment(offset,dim))/tau; // (phi_t-phi_{t-1})/tau
-					costTask(t,i)=prec*(vv-JBar[t].middleRows(offset,dim)*(qhat[t].head(n/2)-qhat[t>0?t-1:T+1].head(n/2))/tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
-					ret+=costTask(t,i);
-				}
-				else
-				{
-					ERROR("Task variable " << task_.first << " is not an squared error!");
-					return -1;
-				}
-				i++;
-				offset+=dim;
-			}
-		}
+                    vv=(phiBar[t].segment(offset,dim)-phiBar[t>0?t-1:T+1].segment(offset,dim))/tau; // (phi_t-phi_{t-1})/tau
+                    costTask(t,i)=prec*(vv-JBar[t].middleRows(offset,dim)*(qhat[t].head(n/2)-qhat[t>0?t-1:T+1].head(n/2))/tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
+                    ret+=costTask(t,i);
+                }
+            }
+            else
+            {
+                ERROR("Task variable " << task_.first << " is not an squared error!");
+                return -1;
+            }
+            i++;
+            offset+=dim;
+        }
+        dTask+=ros::Time::now()-tmpTime;
+    }
+    //ROS_WARN_STREAM("Evaluation timing:\nState set: "<<dSet.toSec()<<"s\nPreupdate: "<< dPre.toSec()<<"s\nUpdate: "<< dUpd.toSec()<<"s\nControl: "<< dCtrl.toSec()<<"s\nTask: "<< dTask.toSec()<<"s\nTotal: "<<(dSet+dPre+dUpd+dCtrl+dTask).toSec()<<"s");
   	return ret;
   }
 
@@ -631,31 +709,88 @@ namespace exotica
   	{
 				//NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
 			case smForwardly:
-				for(t=1; t<=T; t++) updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.); //relocate once on fwd Sweep
-				for(t=T+1; --t;)    updateTimeStep(t, false, true, 0, tolerance, false, 1.); //...not on bwd Sweep
+                for(t=1; t<=T; t++)
+                {
+                    if(!updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.)) //relocate once on fwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
+                for(t=T+1; --t;)
+                {
+                    if(!updateTimeStep(t, false, true, 0, tolerance, false, 1.)) //...not on bwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
 				break;
 			case smSymmetric:
                 ROS_WARN_STREAM("Updating forward, sweep "<<sweep);
-				for(t=1; t<=T; t++) updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.); //relocate once on fwd & bwd Sweep
+                for(t=1; t<=T; t++)
+                {
+                    if(!updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.)) //relocate once on fwd & bwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
                 ROS_WARN_STREAM("Updating backward, sweep "<<sweep);
-				for(t=T+1; --t;)    updateTimeStep(t, false, true, (sweep?1:0), tolerance, false, 1.);
+                for(t=T+1; --t;)
+                {
+                    if(!updateTimeStep(t, false, true, (sweep?1:0), tolerance, false, 1.))
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
 				break;
 			case smLocalGaussNewton:
-			  for(t=1; t<=T; t++) updateTimeStep(t, true, false, (sweep?5:1), tolerance, !sweep, 1.); //relocate iteratively on
-			  for(t=T+1; --t;)    updateTimeStep(t, false, true, (sweep?5:0), tolerance, false, 1.); //...fwd & bwd Sweep
+                for(t=1; t<=T; t++)
+                {
+                    if(!updateTimeStep(t, true, false, (sweep?5:1), tolerance, !sweep, 1.)) //relocate iteratively on
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
+                for(t=T+1; --t;)
+                {
+                    if(!updateTimeStep(t, false, true, (sweep?5:0), tolerance, false, 1.)) //...fwd & bwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
 				break;
 			case smLocalGaussNewtonDamped:
-				for(t=1; t<=T; t++) updateTimeStepGaussNewton(t, true, false, (sweep?5:1), tolerance, 1.); //GaussNewton in fwd & bwd Sweep
-				for(t=T+1; --t;)    updateTimeStep(t, false, true, (sweep?5:0), tolerance, false, 1.);
+                for(t=1; t<=T; t++)
+                {
+                    if(!updateTimeStepGaussNewton(t, true, false, (sweep?5:1), tolerance, 1.)) //GaussNewton in fwd & bwd Sweep
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
+                for(t=T+1; --t;)
+                {
+                    if(!updateTimeStep(t, false, true, (sweep?5:0), tolerance, false, 1.))
+                    {
+                        INDICATE_FAILURE;
+                        return -1.0;
+                    }
+                }
 				break;
 			default: ERROR("non-existing Sweep mode");
 				break;
 		}
   	b_step=0.0;
-  	for(t=0;t<b.size();t++) {b_step=std::max((b_old[t]-b[t]).array().abs().maxCoeff(),b_step);}
+    for(t=0;t<b.size();t++) {b_step=std::max((b_old[t]-b[t]).array().abs().maxCoeff(),b_step);}
   	dampingReference=b;
   	// q is set inside of evaluateTrajectory() function
   	cost = evaluateTrajectory(b);
+    if(cost<0) return -1.0;
   	INFO("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq="<<b_step<<", damping="<<damping<<")");
 
   	if(sweep && damping) perhapsUndoStep();

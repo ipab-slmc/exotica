@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS signals)
 find_package(orocos_kdl REQUIRED)
-##find_package(EIGEN REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 catkin_package(
  INCLUDE_DIRS include
@@ -24,10 +24,10 @@ include_directories(
   include
   SYSTEM
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
   ${orocos_kdl_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME} src/KinematicTree.cpp src/tinyxml2.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${orocos_kdl_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${orocos_kdl_LIBRARIES})

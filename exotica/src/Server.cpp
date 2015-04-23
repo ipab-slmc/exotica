@@ -13,20 +13,41 @@ namespace exotica
 			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("")
 	{
 		//TODO
-		ERROR("Server Constructor");
 	}
 
 	Server::Server(const boost::shared_ptr<ros::NodeHandle> & node) :
 			nh_(node), name_("")
 	{
 		//TODO
-		ERROR("Server Constructor");
 	}
 
 	Server::~Server()
 	{
 		//TODO
 	}
+
+    EReturn Server::getModel(std::string path, robot_model::RobotModelPtr & model)
+    {
+        if(robot_models_.find(path)!=robot_models_.end())
+        {
+            model=robot_models_[path];
+            return SUCCESS;
+        }
+        else
+        {
+            model = robot_model_loader::RobotModelLoader(path).getModel();
+            if(model)
+            {
+                robot_models_[path]=model;
+                return SUCCESS;
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+    }
 
 	EReturn Server::initialise(tinyxml2::XMLHandle & handle)
 	{

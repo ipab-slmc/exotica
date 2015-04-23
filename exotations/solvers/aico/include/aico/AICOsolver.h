@@ -39,6 +39,7 @@
 #include <kinematic_maps/EffPosition.h>
 #include <iostream>
 #include <fstream>
+#include <aico/incremental_gaussian.h>
 
 #include "lapack/cblas.h"
 #include "f2c.h"
@@ -103,6 +104,8 @@ namespace exotica
 		 */
 		EReturn AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_, const Eigen::Ref<const Eigen::MatrixXd> & A_, const Eigen::Ref<const Eigen::VectorXd> & b_);
 
+        EReturn getStats(std::vector<sp_mean_covariance>& q_stat_);
+
         bool preupdateTrajectory_;
 
 	protected:
@@ -139,6 +142,7 @@ namespace exotica
 		std::vector<Eigen::VectorXd> phiBar; //!< Task cost mappings
 		std::vector<Eigen::MatrixXd> JBar; //!< Task cost Jacobians
 		std::vector<Eigen::VectorXd> y_star; //!< Task cost mappings
+        std::vector<sp_mean_covariance> q_stat; //!< Cost weigthed normal distribution of configurations across sweeps.
 
 		std::vector<Eigen::VectorXd> s; //!< Forward message mean
 		std::vector<Eigen::MatrixXd> Sinv; //!< Forward message covariance inverse
@@ -235,7 +239,7 @@ namespace exotica
 		 * Updates the mean and covariance of the task message using:
 		 * \f$ \mu_{z_t\rightarrow x_t}(x)=\mathcal{N}[x_t|r_t,R_t] \f$
 		 */
-	  void updateTaskMessage(int t, const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_, double maxStepSize=-1.);
+      bool updateTaskMessage(int t, const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_, double maxStepSize=-1.);
 	  /**
 	   * \brief Update messages for given time step
 	   * @param t Time step.
@@ -246,7 +250,7 @@ namespace exotica
 	   * @param forceRelocation Set to true to force relocation even when the result is within tolerance.
 	   * @param maxStepSize Step size for updateTaskMessage.
 	   */
-	  void updateTimeStep(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance_, bool forceRelocation, double maxStepSize=-1.);
+      bool updateTimeStep(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance_, bool forceRelocation, double maxStepSize=-1.);
 	  /**
 		 * \brief Update messages for given time step using the Gauss Newton method
 		 * @param t Time step.
@@ -264,13 +268,13 @@ namespace exotica
 		 * where the mean and covariance are updated as follows:
 		 * \f$ b_t(X_t)=\mathcal{N}\left(x_t|(S_t^{-1}+V_t^{-1}+R_t)^{-1}(S_t^{-1}s_t+V_t^{-1}v_t+r_t),S_t^{-1}+V_t^{-1}+R_t \right) \f$.
 		 */
-	  void updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance, double maxStepSize=-1.);
+      bool updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd, int maxRelocationIterations, double tolerance, double maxStepSize=-1.);
 	  /**
 	   * \brief Computes the cost of the trajectory
 	   * @param x Trajecotry.
 	   * @return Cost of the trajectory.
 	   */
-	  double evaluateTrajectory(const std::vector<Eigen::VectorXd>& x);
+      double evaluateTrajectory(const std::vector<Eigen::VectorXd>& x, bool skipUpdate=false);
 	  /**
 	   * \brief Stores the previous state.
 	   */

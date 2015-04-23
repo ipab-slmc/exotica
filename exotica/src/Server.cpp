@@ -13,12 +13,14 @@ namespace exotica
 			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("")
 	{
 		//TODO
+		ERROR("Server Constructor");
 	}
 
 	Server::Server(const boost::shared_ptr<ros::NodeHandle> & node) :
 			nh_(node), name_("")
 	{
 		//TODO
+		ERROR("Server Constructor");
 	}
 
 	Server::~Server()

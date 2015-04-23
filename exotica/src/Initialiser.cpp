@@ -16,7 +16,7 @@ exotica::EReturn exotica::Initialiser::listSolversAndProblems(const std::string 
 {
 	EReturn ret_val = SUCCESS;
 	EReturn aux_rtn;
-	xml_file.Clear();
+	tinyxml2::XMLDocument xml_file;
 	if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
 	{
 		INDICATE_FAILURE
@@ -129,7 +129,7 @@ exotica::EReturn exotica::Initialiser::initialise(const std::string & file_name,
 	EReturn aux_rtn;
 
 	//!< Create the document
-	xml_file.Clear();
+	tinyxml2::XMLDocument xml_file;
 	if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
 	{
 		INDICATE_FAILURE
@@ -163,10 +163,12 @@ exotica::EReturn exotica::Initialiser::initialise(const std::string & file_name,
 		return ret_val;
 	}
 
-	server.reset(new Server);
 	tinyxml2::XMLHandle server_handle(root_handle.FirstChildElement("Server"));
 	if (server_handle.ToElement())
 	{
+		ros::NodeHandlePtr nh;
+		nh.reset(new ros::NodeHandle(server_handle.ToElement()->Attribute("name")));
+		server.reset(new Server(nh));
 		if (!ok(server->initialise(server_handle)))
 		{
 			INDICATE_FAILURE
@@ -271,6 +273,8 @@ exotica::EReturn exotica::Initialiser::initialise(const std::string & file_name,
 		}
 		else if (aux_rtn == SUCCESS)
 		{
+			solver_handle = solver_handle.NextSibling();
+			ret_val = SUCCESS;
 			//solver->specifyProblem(problem);
 			return SUCCESS;
 		}

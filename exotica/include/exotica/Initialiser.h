@@ -58,7 +58,7 @@ namespace exotica
     private:
 
       /** Class Parameters **/
-      tinyxml2::XMLDocument xml_file;
+
   };
 }
 #endif

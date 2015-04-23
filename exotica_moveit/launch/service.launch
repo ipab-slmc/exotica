@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="exotica_moveit" type="ExoticaPlanningServer" name="exotica_service" output="screen" launch-prefix="xterm -e gdb --args">
+	
+  </node>
+  
+</launch>

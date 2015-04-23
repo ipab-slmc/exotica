@@ -60,6 +60,11 @@ namespace exotica
 				return ompl_simple_setup_;
 			}
 
+			const std::string getAlgorithm()
+			{
+				return selected_planner_;
+			}
+
 			const OMPLProblem_ptr getProblem() const
 			{
 				return prob_;

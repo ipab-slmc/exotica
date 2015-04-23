@@ -93,6 +93,8 @@ namespace exotica
 			 * @return Returns success.
 			 */
 			virtual EReturn setTimeSteps(const int T);
+
+            Scene_ptr getScene();
 		protected:
 			/**
 			 * \brief Setter for the Task-space mapping: enforces thread-safety

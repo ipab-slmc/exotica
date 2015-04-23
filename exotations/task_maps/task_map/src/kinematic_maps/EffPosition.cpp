@@ -17,54 +17,43 @@ exotica::EReturn exotica::EffPosition::update(const Eigen::VectorXd & x, const i
 	//!< Check
 	if (scene_ == nullptr)
 	{
-		INDICATE_FAILURE
-		;
+        INDICATE_FAILURE;
 		return MMB_NIN;
 	}
 
-	//!< Temporaries
-	Eigen::VectorXd phi(scene_->getMapSize(object_name_) * 3);
-	Eigen::MatrixXd jac(scene_->getMapSize(object_name_) * 3, x.rows());
-	EReturn tmp_rtn = FAILURE;
-
-	tmp_rtn = scene_->getForwardMap(object_name_, phi);
-
-	if (!ok(tmp_rtn))
+    if (ok(scene_->getForwardMap(object_name_, phi_tmp)))
 	{
-		INDICATE_FAILURE
-		;
+        if(ok(scene_->getJacobian(object_name_, jac_tmp)))
+        {
+            if(ok(setPhi(phi_tmp, t)) && ok(setJacobian(jac_tmp, t)))
+            {
+                return SUCCESS;
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+    }
+    else
+    {
+        INDICATE_FAILURE;
 		return FAILURE;
 	}
-	else
-	{
-		tmp_rtn = scene_->getJacobian(object_name_, jac);
-	}
-	if (!ok(tmp_rtn))
-	{
-		INDICATE_FAILURE
-		;
-		return FAILURE;
-	}
-	else
-	{
-		tmp_rtn = setPhi(phi, t);
-	}
-	if (!ok(tmp_rtn))
-	{
-		INDICATE_FAILURE
-		;
-		return FAILURE;
-	}
-	if (ok(tmp_rtn))
-	{
-		tmp_rtn = setJacobian(jac, t);
-	}
 
-	return tmp_rtn;
+
 }
 
 exotica::EReturn exotica::EffPosition::initDerived(tinyxml2::XMLHandle & handle)
 {
+    phi_tmp.resize(scene_->getMapSize(object_name_) * 3);
+    jac_tmp.resize(scene_->getMapSize(object_name_) * 3, scene_->getNumJoints());
 	return SUCCESS;
 }
 

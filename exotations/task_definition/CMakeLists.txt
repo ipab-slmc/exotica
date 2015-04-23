@@ -8,6 +8,8 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
 )
 
+find_package(Eigen3 REQUIRED)
+
 ##find_package(EIGEN REQUIRED)
 
 catkin_package(
@@ -27,11 +29,11 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 ## Declare a cpp library
 add_library(${PROJECT_NAME} src/TaskSqrError.cpp
                             src/TaskTerminationCriterion.cpp
            )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${EIGEN_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})

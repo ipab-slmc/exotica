@@ -15,7 +15,11 @@
 #include <kinematica/KinematicTree.h>
 #include <Eigen/Dense>
 #include <boost/thread/mutex.hpp>
-
+#include <ros/ros.h>
+#include <ros/package.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <iostream>
+#include <fstream>
 namespace exotica
 {
 	/**
@@ -52,6 +56,9 @@ namespace exotica
 			 */
 			virtual EReturn taskSpaceDim(int & task_dim);
 
+			EReturn setOffsetCallback(boost::function<void(CoM*, const Eigen::VectorXd &,int)> offset_callback);
+			EReturn setOffset(bool left, const KDL::Frame & offset);
+			void checkGoal(const Eigen::Vector3d & goal);
 		protected:
 			/**
 			 * @brief	Concrete implementation of the initialisation method
@@ -66,7 +73,7 @@ namespace exotica
 			 * @param	phi	Forward map
 			 * @return	True if succeeded, false otherwise
 			 */
-			bool computeForwardMap(Eigen::Vector3d & phi);
+			bool computeForwardMap(Eigen::VectorXd & phi);
 
 			/**
 			 * @brief	Compute the jacobian
@@ -86,6 +93,20 @@ namespace exotica
 			std::vector<KDL::Frame> base_pose_;	//!< Base poses
 			boost::mutex lock_;	//!< For thread synchronisation
 			bool initialised_;	//!< For Error checking
+			boost::function<void(CoM*, const Eigen::VectorXd &, int)> offset_callback_;
+			ros::NodeHandle nh_;
+			ros::Publisher com_pub_;
+			ros::Publisher COM_pub_;
+			ros::Publisher goal_pub_;
+			visualization_msgs::Marker com_marker_;
+			visualization_msgs::Marker COM_marker_;
+			visualization_msgs::Marker goal_marker_;
+			KDL::Frame base_offset_;
+            KDL::Frame marker_offset_;
+			std::ofstream com_file_;
+			EParam<std_msgs::Bool> debug_;
+			EParam<std_msgs::Bool> enable_z_;
+			int dim_;
 	};
 }
 

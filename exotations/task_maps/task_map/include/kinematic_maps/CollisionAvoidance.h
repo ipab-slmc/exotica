@@ -8,7 +8,7 @@
 #ifndef EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_COLLISIONAVOIDANCE_H_
 #define EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_COLLISIONAVOIDANCE_H_
 
-#define C_DEBUG
+//#define C_DEBUG
 #include <exotica/TaskMap.h>
 #include <exotica/Factory.h>
 #include <exotica/Test.h>
@@ -47,6 +47,9 @@ namespace exotica
 			 */
 			virtual EReturn taskSpaceDim(int & task_dim);
 
+            EReturn setPreUpdateCallback(boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &,int)> pre_update_callback);
+            EReturn setObsFrame(const KDL::Frame & tf);
+
 		protected:
 			/**
 			 * @brief	Concrete implementation of the initialisation method
@@ -67,6 +70,10 @@ namespace exotica
 
 			//	Internal kinematica solver
 			kinematica::KinematicTree kin_sol_;
+
+            boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback_;
+            fcl::Transform3f obs_in_base_tf_;
+
 #ifdef C_DEBUG
 			ros::Publisher close_pub_;
 			ros::Publisher centre_pub_;

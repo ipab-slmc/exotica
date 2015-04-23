@@ -44,43 +44,43 @@ namespace exotica
 
 	EReturn CollisionScene::initialise(const planning_scene::PlanningSceneConstPtr & ps,
 			const std::vector<std::string> & joints, std::string & mode)
-	{
-		robot_model::RobotModelConstPtr model = ps->getRobotModel();
+    {        
 		ps_.reset(new planning_scene::PlanningScene(ps->getRobotModel()));
 		moveit_msgs::PlanningScene msg;
 		ps->getPlanningSceneMsg(msg);
 		ps_->setPlanningSceneMsg(msg);
-		const std::vector<const robot_model::LinkModel*>& links =
-				model->getLinkModelsWithCollisionGeometry();
-		for (std::size_t i = 0; i < links.size(); ++i)
-		{
-			geo_robot_[links[i]->getName()] = geos_ptr(0);
-			fcl_robot_[links[i]->getName()] = fcls_ptr(0);
-			for (std::size_t j = 0; j < links[i]->getShapes().size(); ++j)
-			{
-				collision_detection::FCLGeometryConstPtr g =
-						collision_detection::createCollisionGeometry(links[i]->getShapes()[j], links[i], j);
-				if (g)
-				{
-					geo_robot_.at(links[i]->getName()).push_back(g);
-					fcl::CollisionObject *tmp =
-							new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(ps->getCurrentState().getCollisionBodyTransform(g->collision_geometry_data_->ptr.link, g->collision_geometry_data_->shape_index)));
-					fcl_robot_.at(links[i]->getName()).push_back(boost::shared_ptr<
-							fcl::CollisionObject>(tmp));
+        ps_->getCurrentStateNonConst().update(true);
+        const std::vector<const robot_model::LinkModel*>& links = ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
 
-				}
-				else
-					ERROR("Unable to construct collision geometry for link "<< links[i]->getName().c_str());
-			}
-		}
+        for (std::size_t i = 0; i < links.size(); ++i)
+        {
+            geo_robot_[links[i]->getName()] = geos_ptr(0);
+            fcl_robot_[links[i]->getName()] = fcls_ptr(0);
+            for (std::size_t j = 0; j < links[i]->getShapes().size(); ++j)
+            {
+                collision_detection::FCLGeometryConstPtr g =
+                        collision_detection::createCollisionGeometry(links[i]->getShapes()[j], links[i], j);
+                if (g)
+                {
+                    geo_robot_.at(links[i]->getName()).push_back(g);
+                    fcl::CollisionObject *tmp =
+                            new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(ps_->getCurrentState().getCollisionBodyTransform(g->collision_geometry_data_->ptr.link, g->collision_geometry_data_->shape_index)));
+                    fcl_robot_.at(links[i]->getName()).push_back(boost::shared_ptr<
+                            fcl::CollisionObject>(tmp));
+
+                }
+                else
+                    ERROR("Unable to construct collision geometry for link "<< links[i]->getName().c_str());
+            }
+        }
 
 		joint_index_.resize(joints.size());
 
-		for (std::size_t i = 0; i < ps->getCurrentState().getVariableNames().size(); i++)
+        for (std::size_t i = 0; i < ps_->getCurrentState().getVariableNames().size(); i++)
 		{
 			for (std::size_t j = 0; j < joints.size(); j++)
 			{
-				if (ps->getCurrentState().getVariableNames()[i] == joints[j])
+                if (ps_->getCurrentState().getVariableNames()[i] == joints[j])
 				{
 					joint_index_[j] = i;
 					break;
@@ -312,7 +312,7 @@ namespace exotica
 ///////////////////////////////////////////////////////////////
 
 	Scene::Scene(const std::string & name) :
-			name_(name), nh_(name + "_node"), N(0), initialised_(false), use_kinematica_(true)
+            name_(name), nh_(name + "_node"), N(0), initialised_(false), update_jacobians_(true)
 	{
 		eff_names_.clear();
 		eff_offsets_.clear();
@@ -338,30 +338,41 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
+
+        if (!ok(server->getModel("robot_description",model_)))
+        {
+            ROS_ERROR_STREAM("Could not load robot model from 'robot_description' parameter!");
+            return FAILURE;
+        }
+
 		tinyxml2::XMLHandle kinematica_handle(handle.FirstChildElement("Kinematica"));
-		if (!kinematica_.initKinematics(kinematica_handle))
+        if (!kinematica_.initKinematics(kinematica_handle,model_->getURDF().get()))
 		{
 			INDICATE_FAILURE
 			return FAILURE;
 		}
 		N = kinematica_.getNumJoints();
-		model_ = robot_model_loader::RobotModelLoader("robot_description").getModel();
-		if (!model_)
-		{
-			ROS_ERROR_STREAM("Could not load robot model from 'robot_description' parameter!");
-			return FAILURE;
-		}
 		collision_scene_.reset(new CollisionScene());
 
 		EParam<std_msgs::String> tmp;
 		server->getParam("/PlanningMode", tmp);
 		mode_ = tmp->data;
-		if (mode_.compare("Sampling"))
-			use_kinematica_ = false;
+        if (mode_.compare("Sampling")==0)
+            update_jacobians_ = false;
 #ifdef EXOTICA_DEBUG_MODE
 		state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("disp_state", 100);
 		ROS_ERROR_STREAM("Running in debug mode, a robot state will be published to '"<<name_<<"_node/disp_state'");
 #endif
+        {
+            planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
+
+            if(!ok(collision_scene_->initialise(tmp, kinematica_.getJointNames(), mode_)))
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+
 		return SUCCESS;
 	}
 
@@ -373,7 +384,11 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-		phi = *phis_.at(task);
+        Eigen::Ref<Eigen::VectorXd> y(*(phis_.at(task)));
+        for(int r=0;r<phi.rows();r++)
+        {
+            phi(r) = y(r);
+        }
 		return SUCCESS;
 	}
 
@@ -385,7 +400,14 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-		jac = *jacs_.at(task);
+        Eigen::Ref<Eigen::MatrixXd> J(*(jacs_.at(task)));
+        for(int r=0;r<jac.rows();r++)
+        {
+            for(int c=0;c<jac.cols();c++)
+            {
+                jac(r,c) = J(r,c);
+            }
+        }
 		return SUCCESS;
 	}
 
@@ -399,26 +421,44 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn Scene::updateEndEffectors(const std::string & task,
+    EReturn Scene::getPoses(const std::vector<std::string> names, std::vector<KDL::Frame> & poses)
+    {
+        LOCK(lock_);
+        poses.resize(names.size());
+        for(int i=0;i<names.size();i++)
+        {
+            if(!kinematica_.getPose(names[i],poses[i]))
+            {
+                poses.resize(0);
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+
+        }
+        return SUCCESS;
+    }
+
+    EReturn Scene::updateEndEffectors(const std::string & task,
 			const std::vector<KDL::Frame> & offset)
 	{
-		LOCK(lock_);
-		if (eff_index_.find(task) == eff_index_.end())
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-		if (offset.size() != eff_index_.at(task).size())
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-		if (!kinematica_.updateEndEffectorOffsets(eff_index_.at(task), offset))
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-		return SUCCESS;
+        LOCK(lock_);
+        if (eff_index_.find(task) == eff_index_.end())
+        {
+            INDICATE_FAILURE
+            ROS_ERROR_STREAM("Task name: '"<<task<<"'\n"<<eff_index_.size());
+            return FAILURE;
+        }
+        if (offset.size() != eff_index_.at(task).size())
+        {
+            INDICATE_FAILURE
+            return FAILURE;
+        }
+        if (!kinematica_.updateEndEffectorOffsets(eff_index_.at(task), offset))
+        {
+            INDICATE_FAILURE
+            return FAILURE;
+        }
+        return SUCCESS;
 	}
 
 	EReturn Scene::activateTaskMaps()
@@ -426,6 +466,7 @@ namespace exotica
 
 		LOCK(lock_);
 		kinematica::SolutionForm_t tmp_sol;
+        tmp_sol.end_effector_segs.clear();
 		for (auto & it : eff_names_)
 		{
 			for (int i = 0; i < it.second.size(); i++)
@@ -434,6 +475,7 @@ namespace exotica
 			}
 		}
 
+        tmp_sol.end_effector_offs.clear();
 		for (auto & it : eff_offsets_)
 		{
 			for (int i = 0; i < it.second.size(); i++)
@@ -443,29 +485,33 @@ namespace exotica
 		}
 
 		if (!kinematica_.updateEndEffectors(tmp_sol))
+        {
+            INDICATE_FAILURE;
 			return FAILURE;
+        }
 		std::vector<int> tmp_index;
 		if (!kinematica_.getEndEffectorIndex(tmp_index))
+        {
+            INDICATE_FAILURE;
 			return FAILURE;
-		for (auto & it : eff_names_)
-		{
-
-		}
-		Phi_.setZero(3 * tmp_sol.end_effector_segs.size());
-		Jac_.setZero(3 * tmp_sol.end_effector_segs.size(), N);
+        }
+        Phi_.setZero(3 * kinematica_.getEffSize());
+        Jac_.setZero(3 * kinematica_.getEffSize(), N);
 		int tmp_size = 0, tmp_eff_size = 0;
+        phis_.clear();
+        jacs_.clear();
+        eff_index_.clear();
 		for (auto & it : eff_names_)
 		{
 			eff_index_[it.first] =
 					std::vector<int>(tmp_index.begin() + tmp_eff_size, tmp_index.begin()
 							+ tmp_eff_size + it.second.size());
-			phis_[it.first] = boost::shared_ptr<Eigen::Ref<Eigen::VectorXd> >(new Eigen::Ref<
-					Eigen::VectorXd>(Phi_.segment(tmp_size, 3 * it.second.size())));
-			jacs_[it.first] = boost::shared_ptr<Eigen::Ref<Eigen::MatrixXd> >(new Eigen::Ref<
-					Eigen::MatrixXd>(Jac_.block(tmp_size, 0, 3 * it.second.size(), N)));
+            phis_[it.first] = Eigen::VectorXdRef_ptr(Phi_.segment(tmp_size, 3 * it.second.size()));
+            jacs_[it.first] = Eigen::MatrixXdRef_ptr(Jac_.block(tmp_size, 0, 3 * it.second.size(), N));
 			tmp_size += 3 * it.second.size();
 			tmp_eff_size += it.second.size();
 		}
+
 		initialised_ = true;
 
 		return SUCCESS;
@@ -480,30 +526,46 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-		if (!ok(collision_scene_->update(x)))
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-		if (!kinematica_.updateConfiguration(x))
-			return FAILURE;
-		if (!kinematica_.generateForwardMap())
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-		if (!kinematica_.generateJacobian())
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-		if (!kinematica_.getPhi(Phi_))
-			return FAILURE;
-		if (use_kinematica_)
-		{
-			if (!kinematica_.getJacobian(Jac_))
-				return FAILURE;
-		}
+        else
+        {
+            if (ok(collision_scene_->update(x)))
+            {
+                if (kinematica_.updateConfiguration(x))
+                {
+                    if (kinematica_.generateForwardMap(Phi_))
+                    {
+                        if (update_jacobians_)
+                        {
+                            if (kinematica_.generateJacobian(Jac_))
+                            {
+                                // All is fine
+                            }
+                            else
+                            {
+                                INDICATE_FAILURE;
+                                return FAILURE;
+                            }
+                        }
+                        // else Also fine, just skip computing the Jacobians
+                    }
+                    else
+                    {
+                        INDICATE_FAILURE;
+                        return FAILURE;
+                    }
+                }
+                else
+                {
+                    INDICATE_FAILURE;
+                    return FAILURE;
+                }
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
 
 #ifdef EXOTICA_DEBUG_MODE
 		moveit_msgs::DisplayRobotState msg;
@@ -511,6 +573,7 @@ namespace exotica
 		state_pub_.publish(msg);
 		ros::spinOnce();
 #endif
+
 		return SUCCESS;
 	}
 
@@ -560,16 +623,27 @@ namespace exotica
 		if (eff_names_.find(task) == eff_names_.end())
 			return -1;
 		return eff_names_.at(task).size();
-	}
+    }
 
-	EReturn Scene::getCoMProperties(std::vector<std::string> & segs, Eigen::VectorXd & mass,
+    EReturn Scene::getCoMProperties(std::string& task, std::vector<std::string> & segs, Eigen::VectorXd & mass,
 			std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
 			std::vector<KDL::Frame> & base_pose)
 	{
 		LOCK(lock_);
-		if (!kinematica_.getCoMProperties(segs, mass, cog, tip_pose, base_pose))
-			return FAILURE;
-		return SUCCESS;
+        if (eff_index_.find(task) == eff_index_.end())
+        {
+            INDICATE_FAILURE
+            return FAILURE;
+        }
+        if (kinematica_.getCoMProperties(eff_index_.at(task), segs, mass, cog, tip_pose, base_pose))
+        {
+            return SUCCESS;
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
 	}
 
 	std::string Scene::getRootName()

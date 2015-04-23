@@ -3,11 +3,12 @@
   <Server name="EXOTicaServer">
      <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
      Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
-     <Parameters>  
+     <Parameters>
 
      </Parameters>
      
      <!-- Other server functionalities other than parameters TODO -->
+     <PlanningMode>Optimization</PlanningMode>
   </Server>
 
   <IKsolver name="IKSolverDemo">   <!-- Motion solver definition -->
@@ -52,29 +53,8 @@
       <Goal>-0.05 -0.095 -0.505</Goal>
     </Task>
 
-    <Map type="EffPosition" name="IKSolverDemoMap2"> <!-- The end-effector position task map -->
-      <Scene name="IKSolverDemoScene"/>
-      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
-          <limb segment="lwr_arm_5_link">
-            <vector>0.0 0.0 0.0</vector>
-            <quaternion>1.0 0.0 0.0 0.0</quaternion>
-          </limb>
-	<limb segment="lwr_arm_6_link">
-            <vector>0.0 0.0 0.0</vector>
-            <quaternion>1.0 0.0 0.0 0.0</quaternion>
-          </limb>
-      </EndEffector>
-    </Map>
-
-    <Task name="IKSolverDemoTask2" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
-      <map name="IKSolverDemoMap2"/>
-      <Rho>1.0e1</Rho>
-      <Weights dim="1">1.0</Weights>
-      <Goal>-0.05 -0.095 -0.405 -0.05 -0.095 -0.505</Goal>
-    </Task>
-     
     <!-- Problem parameters: tolerance and per joint weighting -->
-    <Tolerance>0.005</Tolerance> 
+    <Tolerance>0.001</Tolerance>
     <W> 7 6 5 4 3 2 1</W>
   </IKProblem>
 

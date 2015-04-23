@@ -113,8 +113,7 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 			}
 			if (!ok(ret_value))
 			{
-				INDICATE_FAILURE
-				;
+				INDICATE_FAILURE;
 			}
 		}
 		xml_handle = xml_handle.NextSiblingElement("Map");
@@ -145,16 +144,14 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 		const char * temp_name = xml_handle.ToElement()->Attribute("name");
 		if (temp_name == nullptr)
 		{
-			INDICATE_FAILURE
-			;
+			INDICATE_FAILURE;
 			ret_value = PAR_ERR;
 			break;
 		}
 		name = temp_name;
 		if (task_defs_.find(name) != task_defs_.end())
 		{
-			INDICATE_FAILURE
-			;
+			INDICATE_FAILURE;
 			ret_value = PAR_ERR;
 			break;
 		}
@@ -163,8 +160,7 @@ exotica::EReturn exotica::PlanningProblem::initBase(tinyxml2::XMLHandle & handle
 		const char * temp_type = xml_handle.ToElement()->Attribute("type");
 		if (temp_type == nullptr)
 		{
-			INDICATE_FAILURE
-			;
+			INDICATE_FAILURE;
 			ret_value = PAR_ERR;
 			break;
 		}

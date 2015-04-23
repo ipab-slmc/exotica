@@ -2,7 +2,6 @@
 #define TESTING_PLANNING_PROBLEM_TEST_H
 
 #include <exotica/EXOTica.hpp>
-#include <kinematic_scene/kinematic_scene.h>
 #include <tinyxml2/tinyxml2.h>
 #include <gtest/gtest.h>
 #include <Eigen/Eigen>

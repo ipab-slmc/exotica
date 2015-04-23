@@ -39,13 +39,15 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
                     if(ok(solIK->Solve(q,solution)))
                     {
                         double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-                        ROS_INFO_STREAM("Finished solving ("<<time<<"s)");
+                        ROS_INFO_STREAM_THROTTLE(0.5,"Finished solving ("<<time<<"s)");
                         q=solution.row(solution.rows()-1);
-                        ROS_INFO_STREAM("Solution "<<q.transpose());
+                        //ROS_INFO_STREAM_THROTTLE(0.5,"Solution "<<q.transpose());
+                        ROS_INFO_STREAM_THROTTLE(0.5,"Solution "<<solution);
                     }
                     else
                     {
-                        ROS_INFO_STREAM("Failed to find solution");
+                        double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
+                        ROS_INFO_STREAM_THROTTLE(0.5,"Failed to find solution ("<<time<<"s)");
                     }
                 }
             }

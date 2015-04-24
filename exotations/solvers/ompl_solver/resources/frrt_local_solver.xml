@@ -9,11 +9,11 @@
      
      <!-- Other server functionalities other than parameters TODO -->
      <!-- Specify Planning Mode: Optimization or Sampling. Skip unnecessary steps if in sampling mode-->
-     <PlanningMode>Sampling</PlanningMode>
+     <PlanningMode>Optimization</PlanningMode>
   </Server>
   <IKsolver name="FRRTLocal">
-    <MaxIt>100</MaxIt>
-    <MaxStep>0.02</MaxStep>
+    <MaxIt>500</MaxIt>
+    <MaxStep>0.1</MaxStep>
   </IKsolver>
 
   <IKProblem name="LocalProblem">
@@ -40,7 +40,7 @@
       <Scene name="TestScene"/>
     </Map>
 
-    <Task name="CSpaceTask" type="TaskSqrError">
+    <Task name="LocalTask" type="TaskSqrError">
       <map name="CSpaceMap"/>
       <Rho>1e1</Rho>
       <Weights dim="1">1.0</Weights>
@@ -68,7 +68,26 @@
       <Goal>0.0</Goal>
     </Task>
 
-    <Tolerance>0.005</Tolerance> 
+    <Map type="EffPosition" name="EffPositionMap">
+      <Scene name="TestScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="lwr_arm_7_link">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+    
+    <Task name="GlobalTask" type="TaskSqrError">
+      <map name="EffPositionMap"/>
+      <Rho>1.0</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0.56 0.1 0.58</Goal>
+      <Threshold>1e-2</Threshold>
+      <!-- Task Parameters -->
+    </Task>
+
+    <Tolerance>0.01</Tolerance> 
     <W> 7 6 5 4 3 2 1</W>
   </IKProblem>
 </ExampleConfiguration>

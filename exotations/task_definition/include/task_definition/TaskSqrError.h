@@ -113,7 +113,7 @@ namespace exotica
       boost::mutex      rho_lock_;  //!< Locking mechanism for rho
 
   };
-
+  typedef boost::shared_ptr<TaskSqrError> TaskSqrError_ptr;
   class TaskVelocitySqrError : public TaskSqrError
   {
 

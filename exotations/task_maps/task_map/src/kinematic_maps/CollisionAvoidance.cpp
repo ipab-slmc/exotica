@@ -22,28 +22,32 @@ namespace exotica
 		ROS_ERROR("Running collision avoidance taskmap in debug mode");
 		nh_ = ros::NodeHandle("CollisionAvoidance");
 		close_pub_ = nh_.advertise<visualization_msgs::Marker>("close_marker", 100);
-		centre_pub_ = nh_.advertise<visualization_msgs::Marker>("centre_marker", 100);
+		robot_centre_pub_ = nh_.advertise<visualization_msgs::Marker>("robot_centre_marker", 100);
+		world_centre_pub_ = nh_.advertise<visualization_msgs::Marker>("world_centre_marker", 100);
 		close_.type = visualization_msgs::Marker::LINE_LIST;
 		close_.scale.x = 0.004;
 		close_.color.g = 1;
 		close_.color.a = 1;
 
-		centre_.type = visualization_msgs::Marker::SPHERE_LIST;
-		centre_.scale.x = close_.scale.y = close_.scale.z = 0.05;
-		centre_.color.g = 1;
-		centre_.color.a = 1;
+		robot_centre_.type = visualization_msgs::Marker::SPHERE_LIST;
+		robot_centre_.scale.x = close_.scale.y = close_.scale.z = 0.05;
+		robot_centre_.color.g = 1;
+		robot_centre_.color.a = 1;
+		world_centre_ = robot_centre_;
+		world_centre_.color.r = 1;
+		world_centre_.color.g = 0;
 #endif
 	}
 
-    EReturn CollisionAvoidance::setObsFrame(const KDL::Frame & tf)
-    {
-        std::vector<double> q(4);
-        tf.M.GetQuaternion(q[0], q[1], q[2], q[3]);
-        fcl::Quaternion3f quat(q[3], q[0], q[1], q[2]);
-        fcl::Vec3f vec(tf.p.x(), tf.p.y(), tf.p.z() + 0.05);
-        obs_in_base_tf_.setTransform(quat, vec);
-        return SUCCESS;
-    }
+	EReturn CollisionAvoidance::setObsFrame(const KDL::Frame & tf)
+	{
+		std::vector<double> q(4);
+		tf.M.GetQuaternion(q[0], q[1], q[2], q[3]);
+		fcl::Quaternion3f quat(q[3], q[0], q[1], q[2]);
+		fcl::Vec3f vec(tf.p.x(), tf.p.y(), tf.p.z() + 0.05);
+		obs_in_base_tf_.setTransform(quat, vec);
+		return SUCCESS;
+	}
 
 	CollisionAvoidance::~CollisionAvoidance()
 	{
@@ -66,15 +70,17 @@ namespace exotica
 		sol.end_effector_offs = std::vector<KDL::Frame>(effs_.size());
 		kin_sol_.updateEndEffectors(sol);
 #ifdef C_DEBUG
-		centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
+		robot_centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
+		world_centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
 #endif
-        return SUCCESS;
+		return SUCCESS;
 	}
 
-    EReturn CollisionAvoidance::setPreUpdateCallback(boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback)
-    {
-        pre_update_callback_ = pre_update_callback;
-    }
+	EReturn CollisionAvoidance::setPreUpdateCallback(
+			boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback)
+	{
+		pre_update_callback_ = pre_update_callback;
+	}
 
 	EReturn CollisionAvoidance::taskSpaceDim(int & task_dim)
 	{
@@ -84,7 +90,8 @@ namespace exotica
 	EReturn CollisionAvoidance::update(const Eigen::VectorXd & x, const int t)
 	{
 		invalidate();
-        if (pre_update_callback_) pre_update_callback_(this, x, t);
+		if (pre_update_callback_)
+			pre_update_callback_(this, x, t);
 		int M = scene_->getMapSize(object_name_), N = x.rows();
 		if (M != effs_.size())
 		{
@@ -108,16 +115,17 @@ namespace exotica
 		std::vector<Eigen::Vector3d> norms(M);
 #ifdef C_DEBUG
 		close_.points.clear();
-		centre_.points.clear();
+		robot_centre_.points.clear();
+		world_centre_.points.clear();
 #endif
 
-        for (auto& objvec : scene_->getCollisionScene()->getFCLWorld())
-        {
-            for (boost::shared_ptr<fcl::CollisionObject> obj : objvec.second)
-            {
-                obj->setTransform(obs_in_base_tf_);
-            }
-        }
+		for (auto& objvec : scene_->getCollisionScene()->getFCLWorld())
+		{
+			for (boost::shared_ptr<fcl::CollisionObject> obj : objvec.second)
+			{
+				obj->setTransform(obs_in_base_tf_);
+			}
+		}
 
 		for (int i = 0; i < M; i++)
 		{
@@ -127,7 +135,7 @@ namespace exotica
 			if (dists[i] <= 0)
 			{
 #ifdef C_DEBUG
-				ROS_ERROR_STREAM("Robot link " << effs_[i] << " is in collision");
+				ROS_ERROR_STREAM_THROTTLE(5, "Robot link " << effs_[i] << " is in collision");
 #endif
 				costs[i] = 1;
 			}
@@ -164,14 +172,15 @@ namespace exotica
 			close_.points.push_back(p2);
 			eigen2Point(c1s[i], p1);
 			eigen2Point(c2s[i], p2);
-			centre_.points.push_back(p1);
-			centre_.points.push_back(p2);
+			robot_centre_.points.push_back(p1);
+			world_centre_.points.push_back(p2);
 #endif
 		}
 
 #ifdef C_DEBUG
 		close_pub_.publish(close_);
-		centre_pub_.publish(centre_);
+		robot_centre_pub_.publish(robot_centre_);
+		world_centre_pub_.publish(world_centre_);
 		ros::spinOnce();
 #endif
 

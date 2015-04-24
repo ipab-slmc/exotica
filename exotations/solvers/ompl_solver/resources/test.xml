@@ -36,7 +36,7 @@
       </Kinematica>
     </Scene> 
     
-    <Map type="EffPosition" name="LeftHandPositionMap">
+    <Map type="EffPosition" name="EffPositionMap">
       <Scene name="TestScene"/>
       <EndEffector ignore_unused="true"> <!-- List of end effectors -->
           <limb segment="lwr_arm_7_link">
@@ -46,8 +46,8 @@
       </EndEffector>
     </Map>
     
-    <Task name="LeftHandPosition" type="TaskTerminationCriterion">
-      <map name="LeftHandPositionMap"/>
+    <Task name="EffPositionTask" type="TaskTerminationCriterion">
+      <map name="EffPositionMap"/>
       <Rho>1.0</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0.56 0.1 0.58</Goal>

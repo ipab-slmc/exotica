@@ -10,8 +10,10 @@
 
 #include "ompl/geometric/planners/PlannerIncludes.h"
 #include <ompl/base/spaces/RealVectorStateSpace.h>
+#include <ompl/base/goals/GoalState.h>
 #include "ompl/datastructures/NearestNeighbors.h"
 #include "exotica/EXOTica.hpp"
+#include <ompl_solver/OMPLGoal.h>
 #include <ik_solver/ik_solver.h>
 namespace ompl
 {
@@ -105,7 +107,8 @@ namespace ompl
 				 * @param	scene		EXOTica scene
 				 * @return	True if succeeded, false otherwise
 				 */
-				bool setUpLocalPlanner(const std::string & xml_file, const exotica::Scene_ptr & scene);
+				bool setUpLocalPlanner(const std::string & xml_file,
+						const exotica::Scene_ptr & scene);
 			protected:
 				/*
 				 * \brief	Motion class. This is where all the planner specific parameters are defined
@@ -139,7 +142,7 @@ namespace ompl
 						///	The parent node
 						Motion *parent;
 						///	The internal flexible path
-						boost::shared_ptr<Eigen::MatrixXd> interal_path;
+						boost::shared_ptr<Eigen::MatrixXd> internal_path;
 				};
 
 				/*
@@ -173,7 +176,20 @@ namespace ompl
 
 			private:
 				///	Local solver
+				bool localSolve(Motion *sm, Motion *gm);
 				exotica::IKsolver_ptr local_solver_;
+
+				///	Store the local taskmap and task
+				exotica::TaskSqrError_ptr local_task_;
+				exotica::TaskSqrError_ptr global_task_;
+
+				///	For analyse
+				int global_try_;
+				int global_succeeded_;
+				int local_try_;
+				int local_succeeded_;
+				int normal_try_;
+				int normal_succeeded_;
 		};
 	}
 }

@@ -24,6 +24,8 @@ namespace exotica
 
 			 virtual bool isSatisfied(const ompl::base::State *st) const;
 			 virtual bool isSatisfied(const ompl::base::State *st, double *distance) const;
+
+			 const OMPLProblem_ptr getProblem();
 		private:
 			 OMPLProblem_ptr prob_;
 			 boost::shared_ptr<OMPLStateSpace> state_space_;

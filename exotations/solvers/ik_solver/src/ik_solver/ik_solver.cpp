@@ -100,12 +100,12 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn IKsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution)
-    {
-        Solve(q0,solution,0);
-    }
+	EReturn IKsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution)
+	{
+		Solve(q0, solution, 0);
+	}
 
-    EReturn IKsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution, int t)
+	EReturn IKsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution, int t)
 	{
 		ros::Time start = ros::Time::now();
 
@@ -115,77 +115,148 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-        solution.resize(1, size_);
-        vel_vec_.resize(size_);
-        rhos.resize(prob_->getTaskDefinitions().size());
+		solution.resize(1, size_);
+		vel_vec_.resize(size_);
+		rhos.resize(prob_->getTaskDefinitions().size());
 		solution.row(0) = q0;
-        double err = INFINITY;
-        bool found = false;
-        maxdim_=0;
-        for (int i = 0; i < maxit_->data; i++)
+		double err = INFINITY;
+		bool found = false;
+		maxdim_ = 0;
+		for (int i = 0; i < maxit_->data; i++)
 		{
-            if(ok(prob_->update(solution.row(0), t)))
-            {
-                vel_solve(err,t);
-                double max_vel = vel_vec_.cwiseAbs().maxCoeff();
-                vel_vec_ = max_vel > maxstep_->data?vel_vec_*maxstep_->data / max_vel:vel_vec_;
+			if (ok(prob_->update(solution.row(0), t)))
+			{
+				vel_solve(err, t);
+				double max_vel = vel_vec_.cwiseAbs().maxCoeff();
+				vel_vec_ =
+						max_vel > maxstep_->data ? vel_vec_ * maxstep_->data / max_vel : vel_vec_;
 
-                solution.row(0) = solution.row(0) + vel_vec_.transpose();
+				solution.row(0) = solution.row(0) + vel_vec_.transpose();
 
-                if (err <= prob_->getTau())
-                {
-                    found = true;
-                    break;
-                }
-            }
-            else
-            {
-                INDICATE_FAILURE;
-                return FAILURE;
-            }
+				if (err <= prob_->getTau())
+				{
+					found = true;
+					break;
+				}
+			}
+			else
+			{
+				INDICATE_FAILURE
+				;
+				return FAILURE;
+			}
 		}
 
-        planning_time_ = ros::Duration(ros::Time::now() - start);
+		planning_time_ = ros::Duration(ros::Time::now() - start);
 
-        if(found)
-        {
-            return SUCCESS;
-        }
-        else
-        {
-            return FAILURE;
-        }
+		if (found)
+		{
+			return SUCCESS;
+		}
+		else
+		{
+			return FAILURE;
+		}
 	}
 
-    EReturn IKsolver::vel_solve(double & err, int t)
+	EReturn IKsolver::SolveWithFullSolution(Eigen::VectorXd q0, Eigen::MatrixXd & solution)
 	{
-        vel_vec_.setZero();
+		return SolveWithFullSolution(q0, solution, 0);
+	}
+
+	EReturn IKsolver::SolveWithFullSolution(Eigen::VectorXd q0, Eigen::MatrixXd & solution, int t)
+	{
+		ros::Time start = ros::Time::now();
+
+		if (size_ != q0.rows())
+		{
+			std::cout << "Wrong size q0 size=" << q0.rows() << ", required size=" << size_ << std::endl;
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+		Eigen::MatrixXd tmp_solution = Eigen::MatrixXd::Zero(maxit_->data, size_);
+		vel_vec_.resize(size_);
+		rhos.resize(prob_->getTaskDefinitions().size());
+		tmp_solution.row(0) = q0;
+		double err = INFINITY;
+		bool found = false;
+		int i = 0;
+		double max_vel;
+		maxdim_ = 0;
+		for (i = 1; i < maxit_->data; i++)
+		{
+			if (ok(prob_->update(tmp_solution.row(i - 1), t)))
+			{
+				vel_solve(err, t);
+				max_vel = vel_vec_.cwiseAbs().maxCoeff();
+				vel_vec_ =
+						max_vel > maxstep_->data ? vel_vec_ * maxstep_->data / max_vel : vel_vec_;
+
+				tmp_solution.row(i) = tmp_solution.row(i - 1) + vel_vec_.transpose();
+
+				if (err <= prob_->getTau())
+				{
+					found = true;
+					solution.resize(i, size_);
+					solution = tmp_solution.block(0, 0, i, size_);
+					break;
+				}
+			}
+			else
+			{
+				INDICATE_FAILURE
+				;
+				return FAILURE;
+			}
+		}
+		if (i <= maxit_->data && max_vel == 0.01 * maxstep_->data)
+		{
+			solution.resize(i, size_);
+			solution = tmp_solution.block(0, 0, i, size_);
+			found = true;
+		}
+		planning_time_ = ros::Duration(ros::Time::now() - start);
+
+		if (found)
+		{
+			return SUCCESS;
+		}
+		else
+		{
+			return FAILURE;
+		}
+	}
+
+	EReturn IKsolver::vel_solve(double & err, int t)
+	{
+		vel_vec_.setZero();
 		int dim = 0, big_size = 0, cnt = 0, cur_rows = 0;
 		double rho;
 
 // Get big jacobian size and rho
-        for (auto & it : prob_->getTaskDefinitions())
+		for (auto & it : prob_->getTaskDefinitions())
 		{
-            boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(it.second);
-            task->getRho(rho, t);
+			boost::shared_ptr<TaskSqrError> task =
+					boost::static_pointer_cast<TaskSqrError>(it.second);
+			task->getRho(rho, t);
 			if (rho > 0)
 			{
 				task->taskSpaceDim(dim);
 				big_size += dim;
-                maxdim_=dim>maxdim_?dim:maxdim_;
+				maxdim_ = dim > maxdim_ ? dim : maxdim_;
 				rhos[cnt] = rho * Eigen::VectorXd::Ones(dim);
 				cnt++;
 			}
 		}
 		cnt = 0;
 		big_jacobian.resize(big_size, size_);
-        task_weights.resize(big_size);
-        goal.resize(maxdim_);
-        phi.resize(maxdim_);
+		task_weights.resize(big_size);
+		goal.resize(maxdim_);
+		phi.resize(maxdim_);
 
 		err = 0;
 		cur_rows = 0;
-        // Get big task error
+		// Get big task error
 		task_error.resize(big_size, 1);
 
 		// Get big jacobian and C
@@ -193,37 +264,36 @@ namespace exotica
 		{
 			boost::shared_ptr<TaskSqrError> task =
 					boost::static_pointer_cast<TaskSqrError>(it.second);
-            task->getRho(rho,t);
+			task->getRho(rho, t);
 			if (rho > 0)
 			{
-                task->taskSpaceDim(dim);
-                task->jacobian(big_jacobian.block(cur_rows, 0, dim, size_),t);
-                task_weights.diagonal().block(cur_rows, 0, dim, 1) = rhos[cnt];
+				task->taskSpaceDim(dim);
+				task->jacobian(big_jacobian.block(cur_rows, 0, dim, size_), t);
+				task_weights.diagonal().block(cur_rows, 0, dim, 1) = rhos[cnt];
 				cnt++;
 
-
-                if (!ok(task->getGoal(goal.head(dim),t)))
+				if (!ok(task->getGoal(goal.head(dim), t)))
 				{
 					std::cout << "Velocity solver get goal failed" << std::endl;
 					return FAILURE;
 				}
-                if (!ok(task->phi(phi.head(dim),t)))
+				if (!ok(task->phi(phi.head(dim), t)))
 				{
 					std::cout << "Velocity solver get phi failed" << std::endl;
 					return FAILURE;
 				}
-                task_error.segment(cur_rows, dim) = goal.head(dim) - phi.head(dim);
+				task_error.segment(cur_rows, dim) = goal.head(dim) - phi.head(dim);
 				err += task_error.norm();
 				cur_rows += dim;
 			}
-        }
+		}
 
-        // Compute velocity
+		// Compute velocity
 
-        vel_vec_ =
-                (((big_jacobian.transpose() * task_weights * big_jacobian + prob_->getW()).inverse()
-                * big_jacobian.transpose() * task_weights))* task_error; //(Jt*C*J+W)
-        return SUCCESS;
+		vel_vec_ =
+				(((big_jacobian.transpose() * task_weights * big_jacobian + prob_->getW()).inverse()
+						* big_jacobian.transpose() * task_weights)) * task_error; //(Jt*C*J+W)
+		return SUCCESS;
 	}
 }
 

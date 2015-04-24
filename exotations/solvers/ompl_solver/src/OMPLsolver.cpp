@@ -224,8 +224,8 @@ namespace exotica
 		ROS_ERROR_STREAM("States before simplification: "<<pg.getStateCount()<<", length:"<<pg.length());
 		ompl::geometric::PathSimplifier ps(ompl_simple_setup_->getSpaceInformation());
 
-		ps.shortcutPath(pg);
-		ps.smoothBSpline(pg);
+//		ps.shortcutPath(pg);
+//		ps.smoothBSpline(pg);
 		ROS_ERROR_STREAM("States after simplification: "<<pg.getStateCount()<<", length:"<<pg.length());
 		convertPath(pg, traj);
 

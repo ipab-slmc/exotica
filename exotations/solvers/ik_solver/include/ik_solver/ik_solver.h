@@ -26,13 +26,22 @@ namespace exotica
 			virtual ~IKsolver();
 
 			/**
-			 * \brief	Solves the problem
+			 * \brief	Solves the problem. This returns the final state
 			 * @param	q0			Start state.
-			 * @param	solution	This will be filled with the solution in joint space.
+			 * @param	solution	This will be filled with the solution in joint space(Vector).
 			 * @return	SUCESS if solution has been found, corresponding error code if not.
 			 */
 			EReturn Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution);
-            EReturn Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution, int t);
+			EReturn Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution, int t);
+
+			/**
+			 * \brief	Solves the problem. This returns the full solution
+			 * @param	q0			Start state.
+			 * @param	solution	This will be filled with the solution in joint space(Matrix).
+			 * @return	SUCESS if solution has been found, corresponding error code if not.
+			 */
+			EReturn SolveWithFullSolution(Eigen::VectorXd q0, Eigen::MatrixXd & solution);
+			EReturn SolveWithFullSolution(Eigen::VectorXd q0, Eigen::MatrixXd & solution, int t);
 
 			/**
 			 * \brief	Binds the solver to a specific problem which must be pre-initalised
@@ -71,21 +80,21 @@ namespace exotica
 			 * \brief	IK velocity solver
 			 * @param	err	Task error
 			 */
-            inline EReturn vel_solve(double & err, int t);
+			inline EReturn vel_solve(double & err, int t);
 			IKProblem_ptr prob_; // Shared pointer to the planning problem.
 			Eigen::VectorXd vel_vec_;	//Velocity vector
-            Eigen::DiagonalMatrix<double, Eigen::Dynamic> task_weights; //!< Weight Matrices
+			Eigen::DiagonalMatrix<double, Eigen::Dynamic> task_weights; //!< Weight Matrices
 			Eigen::MatrixXd big_jacobian, inv_jacobian; //!< Jacobian and its pseudo-Inverse
 			Eigen::VectorXd task_error; //!< Task Error vector for the current optimisation level
 			Eigen::VectorXd phi, goal;	// Goal and phi
-            int maxdim_;
+			int maxdim_;
 			int size_;	//Configuration size
 			EParam<std_msgs::Int64> maxit_;	// Maximum iteration
 
 			EParam<std_msgs::Float64> maxstep_;	// Maximum step
-            std::vector<Eigen::VectorXd> rhos;
-            Eigen::VectorXd diag;
-            ros::Duration planning_time_;
+			std::vector<Eigen::VectorXd> rhos;
+			Eigen::VectorXd diag;
+			ros::Duration planning_time_;
 	};
 	typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

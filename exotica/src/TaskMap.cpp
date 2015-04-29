@@ -111,6 +111,10 @@ namespace exotica
 
     bool TaskMap::isRegistered(int t)
     {
+        if(phi_.size()==1)
+        {
+            return true;
+        }
         if(phiFlag_(t)==1)
         {
             if(phiCnt_!=phiFlag_.size())
@@ -147,8 +151,12 @@ namespace exotica
 
     EReturn TaskMap::setTimeSteps(const int T)
     {
-        phi_.assign(T,Eigen::VectorXdRef_ptr());
-        jac_.assign(T,Eigen::MatrixXdRef_ptr());
+        int dim;
+        taskSpaceDim(dim);
+        phi0_.resize(dim);
+        jac0_.resize(dim,scene_->getNumJoints());
+        phi_.assign(T,Eigen::VectorXdRef_ptr(phi0_.segment(0,dim)));
+        jac_.assign(T,Eigen::MatrixXdRef_ptr(jac0_.block(0,0,dim,scene_->getNumJoints())));
         phiFlag_.resize(T);
         phiFlag_.setZero();
         jacFlag_.resize(T);

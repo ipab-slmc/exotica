@@ -104,6 +104,10 @@ namespace exotica
             Scene_ptr getScene();
 
             bool updateJacobian_;
+
+            std::vector<Eigen::VectorXdRef_ptr> phi_;       //!< The Task-space co-ordinates
+            std::vector<Eigen::MatrixXdRef_ptr> jac_;       //!< The Task Jacobian matrix
+
 		protected:
 
 			/**
@@ -122,8 +126,7 @@ namespace exotica
 			/**
 			 * \brief Private data members for information hiding and thread-safety
 			 */
-            std::vector<Eigen::VectorXdRef_ptr> phi_;       //!< The Task-space co-ordinates
-            std::vector<Eigen::MatrixXdRef_ptr> jac_;       //!< The Task Jacobian matrix
+
             Eigen::VectorXdRef_ptr eff_phi_;                //!< End-effector phi (output of kinematica)
             Eigen::MatrixXdRef_ptr eff_jac_;                //!< End-effector Jacobian (output of kinematica)
             bool getEffReferences();
@@ -131,6 +134,8 @@ namespace exotica
             int jacCnt_;
             Eigen::VectorXi phiFlag_;
             Eigen::VectorXi jacFlag_;
+            Eigen::VectorXd phi0_;
+            Eigen::MatrixXd jac0_;
 	};
 
 	//!< Typedefines for some common functionality

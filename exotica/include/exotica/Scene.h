@@ -336,6 +336,12 @@ namespace exotica
              * @return Indication of success
              */
             EReturn getPoses(const std::vector<std::string> names, std::vector<KDL::Frame> & poses);
+
+            /**
+             * @brief getRobotModel Returns the robot model
+             * @return Robot model
+             */
+            robot_model::RobotModelPtr getRobotModel();
 		private:
 
             ///	ROS node handle

@@ -23,6 +23,8 @@ namespace exotica
 			AICOexample ();
 			virtual
 			~AICOexample ();
+            ros::NodeHandle nh_;
+            ros::NodeHandle nhg_;
 	};
 
 } /* namespace exotica */

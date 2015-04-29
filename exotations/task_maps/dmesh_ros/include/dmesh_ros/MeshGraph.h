@@ -252,7 +252,7 @@ public:
 	 * @param	link_poses	Links' position that needs to be updated
 	 * @return	True if succeeded, false otherwise
 	 */
-	bool updateLinks(const Eigen::VectorXd & link_poses);
+    bool updateLinksRef(Eigen::VectorXdRefConst link_poses);
 	bool updateLinks(const Eigen::MatrixX3d & link_poses);
 
 	/**

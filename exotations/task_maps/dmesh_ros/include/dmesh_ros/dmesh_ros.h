@@ -46,7 +46,7 @@ namespace exotica
 			 * \brief	Concrete implementation of update method
 			 * @param	x		Joint space configuration
 			 */
-            virtual EReturn update(const Eigen::VectorXd & x, const int t);
+            virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
 			/**
 			 * \brief	Get the task space dimension
@@ -58,7 +58,7 @@ namespace exotica
 			 * \brief	Get the goal laplace
 			 * @param	goal	Goal laplace
 			 */
-			EReturn getGoalLaplace(Eigen::VectorXd & goal);
+            EReturn getGoalLaplace(Eigen::VectorXd & goal, int t);
 
 			/**
 			 * \brief	Update external objects
@@ -94,17 +94,17 @@ namespace exotica
 			/**
 			 * \brief	Compute Laplace
 			 */
-			EReturn computeLaplace();
+            EReturn computeLaplace(int t);
 
 			/**
 			 * \brief	Compute Jacobian
 			 */
-			EReturn computeJacobian();
+            EReturn computeJacobian(int t);
 
 			/**
 			 * \brief	Update the graph from kinematic scene
 			 */
-			EReturn updateGraphFromKS();
+            EReturn updateGraphFromKS(int t);
 
 			/**
 			 * \brief	Update the graph externally
@@ -163,9 +163,6 @@ namespace exotica
 
 			//	Laplace
 			Eigen::VectorXd laplace_;
-
-			//	Jacobian
-			Eigen::MatrixXd jac_;
 
 			//	Distance matrix
 			Eigen::MatrixXd dist_;

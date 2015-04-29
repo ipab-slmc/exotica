@@ -88,38 +88,42 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn DMeshROS::update(const Eigen::VectorXd & x, const int t)
+    EReturn DMeshROS::update(Eigen::VectorXdRefConst x, const int t)
 	{
 		q_size_ = x.rows();
 
-		if (!initialised_)
+        if (initialised_)
+        {
+            if (ok(computeLaplace(t)))
+            {
+                if(updateJacobian_)
+                {
+                    if (ok(computeJacobian(t)))
+                    {
+                        return SUCCESS;
+                    }
+                    else
+                    {
+                        INDICATE_FAILURE
+                        return FAILURE;
+                    }
+                }
+                else
+                {
+                    return SUCCESS;
+                }
+            }
+            else
+            {
+                INDICATE_FAILURE
+                return FAILURE;
+            }
+        }
+        else
 		{
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-
-		if (!ok(computeLaplace()))
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-
-		if (!ok(computeJacobian()))
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-        if (!ok(setPhi(laplace_,t)))
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-        if (!ok(setJacobian(jac_,t)))
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-		return SUCCESS;
 	}
 	EReturn DMeshROS::taskSpaceDim(int & task_dim)
 	{
@@ -134,7 +138,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn DMeshROS::getGoalLaplace(Eigen::VectorXd & goal)
+    EReturn DMeshROS::getGoalLaplace(Eigen::VectorXd & goal,int t)
 	{
 		LOCK(lock_);
 		if (!initialised_)
@@ -143,7 +147,7 @@ namespace exotica
 			return MMB_NIN;
 		}
 
-		if (!ok(updateGraphFromKS()))
+        if (!ok(updateGraphFromKS(t)))
 		{
 			INDICATE_FAILURE
 			return FAILURE;
@@ -195,7 +199,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn DMeshROS::computeLaplace()
+    EReturn DMeshROS::computeLaplace(int t)
 	{
 		LOCK(lock_);
 		if (!initialised_)
@@ -204,7 +208,7 @@ namespace exotica
 			return MMB_NIN;
 		}
 
-		if (!ok(updateGraphFromKS()))
+        if (!ok(updateGraphFromKS(t)))
 		{
 			INDICATE_FAILURE
 			return FAILURE;
@@ -215,7 +219,7 @@ namespace exotica
 			return FAILURE;
 		}
 		//Eigen::MatrixXd vel(gManager_.getGraph()->getVelocity());
-		laplace_.setZero(task_size_);
+        PHI.setZero();
 		uint j, l, cnt = 0;
 		double b = 0, d = 0;
 		for (j = 0; j < robot_size_; j++)
@@ -229,28 +233,28 @@ namespace exotica
 				switch (gManager_.getGraph()->getVertex(l)->getType())
 				{
 					case VERTEX_TYPE::LINK:
-						laplace_(cnt) = kp_->data * dist_(j, l);
+                        PHI(cnt) = kp_->data * dist_(j, l);
 						break;
 					case VERTEX_TYPE::OBSTACLE:
 						if (gManager_.getGraph()->getVertex(l)->checkList(links_->strings[j]))
 						{
 							if (dist_(j, l) - gManager_.getGraph()->getVertex(j)->getRadius()
 									- gManager_.getGraph()->getVertex(l)->getRadius() < 0.05)
-								laplace_(cnt) = ko_->data * (1 - exp(-wo_ * dist_(j, l)));
+                                PHI(cnt) = ko_->data * (1 - exp(-wo_ * dist_(j, l)));
 							else
-								laplace_(cnt) = ko_->data;
+                                PHI(cnt) = ko_->data;
 
 						}
 						break;
 					case VERTEX_TYPE::OBSTACLE_TO_ALL:
 						if (dist_(j, l) - gManager_.getGraph()->getVertex(j)->getRadius()
 								- gManager_.getGraph()->getVertex(l)->getRadius() < 0.05)
-							laplace_(cnt) = ko_->data * (1 - exp(-wo_ * dist_(j, l)));
+                            PHI(cnt) = ko_->data * (1 - exp(-wo_ * dist_(j, l)));
 						else
-							laplace_(cnt) = ko_->data;
+                            PHI(cnt) = ko_->data;
 						break;
 					case VERTEX_TYPE::GOAL:
-						laplace_(cnt) = gManager_.getGraph()->getVertex(l)->w_ * dist_(j, l);
+                        PHI(cnt) = gManager_.getGraph()->getVertex(l)->w_ * dist_(j, l);
 						break;
 					default:
 						break;
@@ -261,15 +265,11 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn DMeshROS::computeJacobian()
+    EReturn DMeshROS::computeJacobian(int t)
 	{
-		Eigen::MatrixXd _p(3 * robot_size_, q_size_);
-		jac_.setZero(task_size_, q_size_);
-		scene_->getJacobian(object_name_, _p);
-		Eigen::MatrixXd vel(gManager_.getGraph()->getVelocity());
+        JAC.setZero();
 		double d_ = 0;
 		uint i, j, l, cnt;
-		double d, b;
 		for (i = 0; i < q_size_; i++)
 		{
 			cnt = 0;
@@ -287,10 +287,10 @@ namespace exotica
 							case VERTEX_TYPE::LINK:
 								d_ =
 										((gManager_.getGraph()->getVertex(j)->position_
-												- gManager_.getGraph()->getVertex(l)->position_).dot(Eigen::Vector3d(_p.block(3
-												* j, i, 3, 1) - _p.block(3 * l, i, 3, 1))))
+                                                - gManager_.getGraph()->getVertex(l)->position_).dot(Eigen::Vector3d(EFFJAC.block(3
+                                                * j, i, 3, 1) - EFFJAC.block(3 * l, i, 3, 1))))
 												/ dist_(j, l);
-								jac_(cnt, i) = kp_->data * d_;
+                                JAC(cnt, i) = kp_->data * d_;
 								break;
 							case VERTEX_TYPE::OBSTACLE:
 								if (gManager_.getGraph()->getVertex(l)->checkList(links_->strings[j]))
@@ -301,9 +301,9 @@ namespace exotica
 									{
 										d_ =
 												((gManager_.getGraph()->getVertex(j)->position_
-														- gManager_.getGraph()->getVertex(l)->position_).dot(Eigen::Vector3d(_p.block(3
+                                                        - gManager_.getGraph()->getVertex(l)->position_).dot(Eigen::Vector3d(EFFJAC.block(3
 														* j, i, 3, 1)))) / dist_(j, l);
-										jac_(cnt, i) = ko_->data * wo_ * d_
+                                        JAC(cnt, i) = ko_->data * wo_ * d_
 												* exp(-wo_ * dist_(j, l));
 									}
 								}
@@ -314,18 +314,18 @@ namespace exotica
 								{
 									d_ =
 											((gManager_.getGraph()->getVertex(j)->position_
-													- gManager_.getGraph()->getVertex(l)->position_).dot(Eigen::Vector3d(_p.block(3
+                                                    - gManager_.getGraph()->getVertex(l)->position_).dot(Eigen::Vector3d(EFFJAC.block(3
 													* j, i, 3, 1)))) / dist_(j, l);
-									jac_(cnt, i) = ko_->data * wo_ * d_ * exp(-wo_ * dist_(j, l));
+                                    JAC(cnt, i) = ko_->data * wo_ * d_ * exp(-wo_ * dist_(j, l));
 								}
 
 								break;
 							case VERTEX_TYPE::GOAL:
 								d_ =
 										((gManager_.getGraph()->getVertex(j)->position_
-												- gManager_.getGraph()->getVertex(l)->position_).dot(Eigen::Vector3d(_p.block(3
+                                                - gManager_.getGraph()->getVertex(l)->position_).dot(Eigen::Vector3d(EFFJAC.block(3
 												* j, i, 3, 1)))) / dist_(j, l);
-								jac_(cnt, i) = gManager_.getGraph()->getVertex(l)->w_ * d_;
+                                JAC(cnt, i) = gManager_.getGraph()->getVertex(l)->w_ * d_;
 								break;
 							default:
 								break;
@@ -335,19 +335,12 @@ namespace exotica
 				}
 			}
 		}
-//		std::cout << "Dist \n" << dist_ << std::endl;
-//		std::cout << "Lap: " << laplace_.transpose() << std::endl;
-//		std::cout << "Jac: \n" << jac_ << std::endl;
-//		getchar();
 
 		return SUCCESS;
 	}
-	EReturn DMeshROS::updateGraphFromKS()
+    EReturn DMeshROS::updateGraphFromKS(int t)
 	{
-		Eigen::VectorXd tmp(robot_size_ * 3);
-		scene_->getForwardMap(object_name_,tmp);
-
-		if (!gManager_.getGraph()->updateLinks(tmp))
+        if (!gManager_.getGraph()->updateLinksRef(EFFPHI))
 		{
 			INDICATE_FAILURE
 			return FAILURE;
@@ -389,7 +382,7 @@ namespace exotica
 		tmp(3 * (robot_size_ - 1) + 1) = 5;
 		tmp(3 * (robot_size_ - 1) + 2) = 0.2;
 
-		if (!gManager_.getGraph()->updateLinks(tmp))
+        if (!gManager_.getGraph()->updateLinksRef(tmp))
 		{
 			INDICATE_FAILURE
 			return FAILURE;

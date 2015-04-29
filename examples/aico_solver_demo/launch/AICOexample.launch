@@ -1,6 +1,7 @@
 <launch>
 
   <param name="robot_description" textfile="$(find aico_solver_demo)/resources/lwr_simplified.urdf" />
+  <param name="robot_description_semantic" textfile="$(find aico_solver_demo)/resources/lwr_simplified.srdf" />
 	
   <node pkg="aico_solver_demo" type="AICOexample" name="AICOSolverDemoNode" output="screen">
     <param name="config" type="string" value="$(find aico_solver_demo)/resources/example.xml" />

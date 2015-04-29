@@ -55,18 +55,6 @@
       <Rho>1.0e6</Rho>
       <Goal>0.4 -0.1 0.5</Goal>
     </Task>
-
-    <Map type="JointLimit" name="JointLimitMap">
-      <Scene name="AICOSolverDemoScene"/>
-      <LowerLimits>-2.9321 -2.0594 -2.9321 -2.0594 -2.9321 -2.0594 -2.9321</LowerLimits>
-      <UpperLimits>2.9321 2.0594 2.9321 2.0594 2.9321 2.0594 2.9321</UpperLimits>
-      <SafePercentage>0.10</SafePercentage>
-    </Map>
-    <Task name="JointLimitTask" type="TaskSqrError">
-      <map name="JointLimitMap"/>
-      <Rho>0</Rho>
-      <Goal>0 0 0 0 0 0 0</Goal>
-    </Task>
    
     <!-- Problem parameters (structuring etc...) -->
     <T>20</T>

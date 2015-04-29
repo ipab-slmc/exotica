@@ -35,19 +35,10 @@ namespace exotica
 			virtual ~IMesh();
 
 			/**
-			 * \brief Initializes the interaction mesh manually
-			 * @param n Number of vertices
-			 */
-			exotica::EReturn initManual(int n);
-
-
-			EReturn setVertices(const Eigen::VectorXd & v);
-
-			/**
 			 * @brief	Concrete implementation of update method
 			 * @param	x	Joint space configuration
 			 */
-            virtual EReturn update(const Eigen::VectorXd & x, const int t);
+            virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
 			/**
 			 * @brief	Get the task space dimension
@@ -66,33 +57,21 @@ namespace exotica
 			EReturn setWeights(const Eigen::MatrixXd & weights);
 
 			/**
-			 * @brief	Get Laplace coordinates
-			 * @return	Laplace Matrix or Laplace Verctor
-			 */
-			Eigen::MatrixXd getLaplace();
-			Eigen::VectorXd getVectorLaplace();
-
-			/**
 			 * @brief	Compute laplace coordinates of a vertices set
 			 * @param	V		3xN matrix of vertices positions
 			 * @param	wsum	Array of weight normalisers (out put)
 			 * @param	dist	Triangular matrix of distances between vertices (out put)
 			 * @return	3xN Laplace coordinates
 			 */
-			EReturn computeLaplace(const Eigen::MatrixXd & V);
-			EReturn computeLaplace(const Eigen::MatrixXd & V, Eigen::VectorXd & wsum,
-					Eigen::MatrixXd & dist);
+            EReturn computeLaplace(int t);
 
-			EReturn updateExternal(const Eigen::Matrix3Xd & ext);
-			Eigen::MatrixXd getVertices();
-			Eigen::MatrixXd getOriginalVertices(Eigen::MatrixXd & v_map);
 		protected:
 			/**
 			 * @brief	Concrete implementation of initialisation from xml
 			 * @param	handle	XML handler
 			 */
 			virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-		private:
+
 			/** Member Functions **/
 
 
@@ -102,7 +81,7 @@ namespace exotica
 			 * @param	q	Joint angles
 			 * @return	Jacobian matrix
 			 */
-			exotica::EReturn computeJacobian(const Eigen::VectorXd & q);
+            exotica::EReturn computeIMesh(int t);
 
 			/**
 			 * @brief	Update newest vertices status
@@ -115,19 +94,12 @@ namespace exotica
 			bool initialised_;	//!< Initialisation flag
 
 			/** Interaction Mesh Variables **/
-			Eigen::MatrixXd vertices_;	//!< Vertex positions
-			Eigen::MatrixXd vertices_old_;
-			Eigen::MatrixXd laplace_;	//!< Laplace coordinates
 			Eigen::MatrixXd weights_;	//!< Weighting matrix, currently set to ones
-			Eigen::Matrix3Xd ext_;
-			Eigen::Matrix3Xd ext_old_;
-			Eigen::MatrixXd J;
 
-			Eigen::MatrixXd original_v_;
-			Eigen::MatrixXd visual_map_;
-			int eff_size_;
-			int max_size_;
-			double safe_range_;
+            Eigen::MatrixXd dist;
+            Eigen::VectorXd wsum;
+
+            int eff_size_;
 	};
 }
 

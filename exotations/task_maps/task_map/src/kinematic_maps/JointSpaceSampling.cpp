@@ -26,7 +26,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn JointSpaceSampling::update(const Eigen::VectorXd & x, const int t)
+	EReturn JointSpaceSampling::update(Eigen::VectorXdRefConst x, const int t)
 	{
 		return SUCCESS;
 	}

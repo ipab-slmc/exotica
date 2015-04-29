@@ -40,14 +40,14 @@ namespace exotica
 			 * @param	x	Input configuration
 			 * @return	Exotica return type
 			 */
-			virtual EReturn update(const Eigen::VectorXd & x, const int t);
+			virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
 			/**
 			 * \brief Concrete implementation of the task-space size
 			 */
 			virtual EReturn taskSpaceDim(int & task_dim);
 
-            EReturn setPreUpdateCallback(boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &,int)> pre_update_callback);
+            EReturn setPreUpdateCallback(boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst,int)> pre_update_callback);
             EReturn setObsFrame(const KDL::Frame & tf);
 
 		protected:
@@ -71,7 +71,7 @@ namespace exotica
 			//	Internal kinematica solver
 			kinematica::KinematicTree kin_sol_;
 
-            boost::function<void(CollisionAvoidance*, const Eigen::VectorXd &, int)> pre_update_callback_;
+            boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst, int)> pre_update_callback_;
             fcl::Transform3f obs_in_base_tf_;
 
 #ifdef C_DEBUG

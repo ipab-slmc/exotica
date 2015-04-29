@@ -38,18 +38,30 @@ namespace exotica
 		{
 			XML_OK(getDouble(*xmltmp, tau_));
 		}
+        xmltmp = handle.FirstChildElement("T").ToElement();
+        if (xmltmp)
+        {
+            if(ok(getInt(*xmltmp, T_)))
+            {
+                // Everything is fine
+            }
+            else
+            {
+                T_=1;
+            }
+        }
+        else
+        {
+            T_=1;
+        }
 		return SUCCESS;
 	}
 
-	TaskDefinition_map& IKProblem::getTaskDefinitions()
-	{
-		return task_defs_;
-	}
+    int IKProblem::getT()
+    {
+        return T_;
+    }
 
-	TaskMap_map& IKProblem::getTaskMaps()
-	{
-		return task_maps_;
-	}
 	Eigen::MatrixXd IKProblem::getW()
 	{
 		return config_w_;

@@ -17,12 +17,12 @@ namespace exotica //!< Since this is part of the core library, it will be within
        * \brief Default constructor
        */
       Orientation();
-      virtual ~Orientation(){};
+      virtual ~Orientation(){}
 
       /**
        * \brief Concrete implementation of the update method
        */
-      virtual EReturn update(const Eigen::VectorXd & x, const int t);
+      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
       /**
        * \brief Concrete implementation of the task-space size
@@ -35,11 +35,6 @@ namespace exotica //!< Since this is part of the core library, it will be within
        * @return  Always returns success
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-  private:
-      Eigen::VectorXd tmp_phi_;
-      Eigen::MatrixXd tmp_jac_;
-      Eigen::VectorXd ret_phi_;
-      Eigen::MatrixXd ret_jac_;
   };
 }
 

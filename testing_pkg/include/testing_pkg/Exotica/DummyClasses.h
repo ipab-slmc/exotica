@@ -17,7 +17,7 @@ namespace testing
       
       void clearFlags() { derived_called = update_called = false; }
       
-      virtual exotica::EReturn update(const Eigen::VectorXd & x)
+      virtual exotica::EReturn update(Eigen::VectorXdRefConst x)
       {
         LOCK(scene_lock_);
         

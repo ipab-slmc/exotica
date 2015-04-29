@@ -20,10 +20,6 @@ namespace exotica
 		n = scene_->getNumJoints();
 		taskSpaceDim(m);
 		T_ = T;
-		J_.resize(m, n);
-		J_.setZero();
-		y_.resize(m);
-		y_.setZero();
 		Verts_ = Eigen::VectorXd::Zero(scene_->getMapSize(object_name_) * T_ * 3);
 
 		if (T_ < 2)
@@ -241,36 +237,34 @@ namespace exotica
 
 	}
 
-	EReturn SweepFlux::update(const Eigen::VectorXd & x, const int t)
+	EReturn SweepFlux::update(Eigen::VectorXdRefConst x, const int t)
 	{
-		LOCK(scene_lock_);
-		invalidate();
-		if (scene_ == nullptr)
+        if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
+        if (scene_ != nullptr)
+        {
+            if (initialised_)
+            {
+                if(ok(computeFlux(t)))
+                {
+                    return SUCCESS;
+                }
+                else
+                {
+                    INDICATE_FAILURE;
+                    return MMB_NIN;
+                }
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return MMB_NIN;
+            }
+        }
+        else
 		{
-			INDICATE_FAILURE
-			;
+            INDICATE_FAILURE;
 			return MMB_NIN;
 		}
-		if (!initialised_)
-		{
-			INDICATE_FAILURE
-			;
-			return MMB_NIN;
-		}
-		if (ok(computeJacobian(x, t)))
-		{
-			setPhi(y_, t);
-			setJacobian(J_, t);
-		}
-		else
-		{
-			INDICATE_FAILURE
-			;
-			return FAILURE;
-		}
-
-		//!< Phi will be updated in computeJacobian
-		return SUCCESS;
 	}
 
 	EReturn SweepFlux::taskSpaceDim(int & task_dim)
@@ -314,64 +308,29 @@ namespace exotica
 		}
 	}
 
-	EReturn SweepFlux::computeJacobian(const Eigen::VectorXd & q, const int t)
+    EReturn SweepFlux::computeFlux(const int t)
 	{
-		Eigen::VectorXd tmp(scene_->getMapSize(object_name_) * 3);
-		bool success = scene_->getForwardMap(object_name_, tmp);
-		if (!success)
-		{
-			INDICATE_FAILURE
-			;
-			return FAILURE;
-		}
-		Verts_.segment(t * scene_->getMapSize(object_name_) * 3, scene_->getMapSize(object_name_) * 3) = tmp;
-		//ROS_WARN_STREAM("ID range: "<<t*scene_->getMapSize(object_name_)<<" to "<<t*scene_->getMapSize(object_name_)+scene_->getMapSize(object_name_)-1);
-		//ROS_WARN_STREAM("\n"<<Verts_.block(t*scene_->getMapSize(object_name_)*3,0,scene_->getMapSize(object_name_)*3,1)<<"\n---\n"<<tmp);
-		VertJ_ = Eigen::MatrixXd::Zero(scene_->getMapSize(object_name_) * 3 * 3, q.rows());
-		Eigen::MatrixXd tmpM(scene_->getMapSize(object_name_) * 3, q.rows());
-		success = scene_->getJacobian(object_name_, tmpM);
-		if (!success)
-		{
-			INDICATE_FAILURE
-			;
-			return FAILURE;
-		}
+        Verts_.segment(t * scene_->getMapSize(object_name_) * 3, scene_->getMapSize(object_name_) * 3) = EFFPHI;
+        VertJ_ = Eigen::MatrixXd::Zero(scene_->getMapSize(object_name_) * 3 * 3, EFFJAC.cols());
+
 		if (t == 0)
 		{
-			VertJ_.block(0, 0, scene_->getMapSize(object_name_) * 3, q.rows()) = tmpM;
+            VertJ_.block(0, 0, scene_->getMapSize(object_name_) * 3, EFFJAC.cols()) = EFFJAC;
 		}
 		else
 		{
-			VertJ_.block(scene_->getMapSize(object_name_) * 3, 0, scene_->getMapSize(object_name_) * 3, q.rows()) = tmpM;
+            VertJ_.block(scene_->getMapSize(object_name_) * 3, 0, scene_->getMapSize(object_name_) * 3, EFFJAC.cols()) = EFFJAC;
 		}
 
-		int tri_start = (t + (t == 0 ? 0 : -1)) * TrisStride_;
-		//int tri_start=(t+((t==T_-1&&!capEnds_->data)?-1:0))*TrisStride_;
+        int tri_start = (t + (t == 0 ? 0 : -1)) * TrisStride_;
 		int tri_length = ((t == -1 || ((t == T_ - 1) && capEnds_->data)) ? 2 : 1) * TrisStride_;
-		/* FluxTriangleTriangle(
-		 Tris_.segment
-		 (tri_start*3,
-		 tri_length*3),
-		 Verts_,
-		 VertJ_,
-		 Tris_.segment(0,TrisStride_*3*3),
-		 TrisQ_,VertsQ_,TriFlux_.segment(tri_start,tri_length),J_);*/
 
-		FluxTriangleTriangle(&Tris_.data()[tri_start * 3], Verts_.data(), VertJ_.data(), Tris_.data(), TrisQ_.data(), VertsQ_.data(), &TriFlux_.data()[tri_start], J_.data(), tri_length, VertJ_.rows(), VertJ_.cols(), TrisQ_.rows()
+        FluxTriangleTriangle(&Tris_.data()[tri_start * 3], Verts_.data(), VertJ_.data(), Tris_.data(), TrisQ_.data(), VertsQ_.data(), &TriFlux_.data()[tri_start], JAC.data(), tri_length, VertJ_.rows(), VertJ_.cols(), TrisQ_.rows()
 				/ 3, &FluxQ_.data()[(t + (t == 0 ? 0 : -1)) * (TrisQ_.rows() / 3)]);
 
-		//y_(0)=TriFlux_.sum();///((double)T_);
 
-		//J_=J_/((double)T_);
-		y_(0) = TriFlux_.segment(tri_start, tri_length).sum();
-		/*
-		 if(t==T_-1)
-		 {
-		 //ROS_WARN_STREAM("\n"<<TriFlux_.transpose());
-		 //ROS_WARN_STREAM(J_);
-		 ROS_WARN_STREAM(TriFlux_.sum());
-		 }
-		 */
+        PHI(0) = TriFlux_.segment(tri_start, tri_length).sum();
+
 		return SUCCESS;
 	}
 
@@ -443,134 +402,6 @@ namespace exotica
 		delete[] bJ;
 		delete[] cJ;
 		delete[] tmpFluxJ;
-	}
-
-	void SweepFlux::FluxTriangleTriangle(const Eigen::Ref<const Eigen::VectorXi> & Tris,
-			const Eigen::Ref<const Eigen::VectorXd> & Verts,
-			const Eigen::Ref<const Eigen::MatrixXd> & VertJ,
-			const Eigen::Ref<const Eigen::VectorXi> & TrisJ,
-			const Eigen::Ref<const Eigen::VectorXi> & TrisQ,
-			const Eigen::Ref<const Eigen::VectorXd> & VertsQ, Eigen::Ref<Eigen::VectorXd> Flux,
-			Eigen::Ref<Eigen::MatrixXd> FluxJ)
-	{
-		//Eigen::VectorXd tFlux(Tris.rows());
-		//Eigen::MatrixXd tFluxJ(Tris.rows(),VertJ.cols());
-		Flux.setZero();
-		FluxJ.setZero();
-		int i, j;
-		Eigen::Vector3d a, b, c, d, e, f, tmp, m1, m2, m3, m4;
-		Eigen::MatrixXd aJ, bJ, cJ;
-		//ROS_ERROR_STREAM(Tris.minCoeff()<<" "<<Tris.maxCoeff());
-		//ROS_ERROR_STREAM(TrisJ);
-		Eigen::MatrixXd tmpFluxJ(4, VertJ.cols());
-		double area, thr = 1.0 / 3.0, f0, f1, f2, f3;
-		for (j = 0; j < TrisQ.rows() / 3; j++)
-		{
-			d = VertsQ.segment(TrisQ(j * 3) * 3, 3);
-			e = VertsQ.segment(TrisQ(j * 3 + 1) * 3, 3);
-			f = VertsQ.segment(TrisQ(j * 3 + 2) * 3, 3);
-			tmp = (e - d).cross(f - d);
-			area = tmp.norm() * 0.5;
-			for (i = 0; i < Tris.rows() / 3; i++)
-			{
-				a = Verts.segment(Tris(i * 3) * 3, 3);
-				b = Verts.segment(Tris(i * 3 + 1) * 3, 3);
-				c = Verts.segment(Tris(i * 3 + 2) * 3, 3);
-				aJ = VertJ.middleRows(TrisJ(i * 3) * 3, 3);
-				bJ = VertJ.middleRows(TrisJ(i * 3 + 1) * 3, 3);
-				cJ = VertJ.middleRows(TrisJ(i * 3 + 2) * 3, 3);
-
-				/*FluxPointTriangle(Eigen::Vector3d((4.0*d+e+f)*thr*thr),a,b,c,aJ,bJ,cJ,f0,tmpFluxJ.block(0,0,1,tmpFluxJ.cols()));
-				 FluxPointTriangle(Eigen::Vector3d((d+4.0*e+f)*thr*thr),a,b,c,aJ,bJ,cJ,f1,tmpFluxJ.block(1,0,1,tmpFluxJ.cols()));
-				 FluxPointTriangle(Eigen::Vector3d((d+e+4.0*f)*thr*thr),a,b,c,aJ,bJ,cJ,f2,tmpFluxJ.block(2,0,1,tmpFluxJ.cols()));
-				 FluxPointTriangle(Eigen::Vector3d((d+e+f)*thr        ),a,b,c,aJ,bJ,cJ,f3,tmpFluxJ.block(3,0,1,tmpFluxJ.cols()));*/
-				//if(aJ(0,0)!=0)
-				{
-					//ROS_ERROR_STREAM(aJ);
-					//ROS_ERROR_STREAM(aJ.data()[0]<<" "<<aJ.data()[1]<<" "<<aJ.data()[2]<<" "<<aJ.data()[3]<<" "<<aJ.data()[4]<<" "<<aJ.data()[5]<<" "<<aJ.data()[6]);
-				}
-				m1 = (4.0 * d + e + f) * thr * thr;
-				m2 = (d + 4.0 * e + f) * thr * thr;
-				m3 = (d + e + 4.0 * f) * thr * thr;
-				m4 = (d + e + f) * thr;
-
-				//ROS_ERROR_STREAM(aJ);
-				FluxPointTriangle(m1.data(), a.data(), b.data(), c.data(), aJ.data(), bJ.data(), cJ.data(), &f0, tmpFluxJ.block(0, 0, 1, tmpFluxJ.cols()).data(), tmpFluxJ.cols());
-				//ROS_ERROR_STREAM(aJ);
-				FluxPointTriangle(m2.data(), a.data(), b.data(), c.data(), aJ.data(), bJ.data(), cJ.data(), &f1, tmpFluxJ.block(1, 0, 1, tmpFluxJ.cols()).data(), tmpFluxJ.cols());
-				//ROS_ERROR_STREAM(aJ);
-				FluxPointTriangle(m3.data(), a.data(), b.data(), c.data(), aJ.data(), bJ.data(), cJ.data(), &f2, tmpFluxJ.block(2, 0, 1, tmpFluxJ.cols()).data(), tmpFluxJ.cols());
-				//ROS_ERROR_STREAM(aJ);
-				FluxPointTriangle(m4.data(), a.data(), b.data(), c.data(), aJ.data(), bJ.data(), cJ.data(), &f3, tmpFluxJ.block(3, 0, 1, tmpFluxJ.cols()).data(), tmpFluxJ.cols());
-
-				//ROS_ERROR_STREAM(f0<<" "<<f1<<" "<<f2<<" "<<f3<<" "<<area);
-				Flux(i) += (f0 + f1 + f2 + f3) * area;
-				for (int k = 0; k < FluxJ.cols(); k++)
-					FluxJ(0, k) += (tmpFluxJ(0, k) + tmpFluxJ(1, k) + tmpFluxJ(2, k)
-							+ tmpFluxJ(3, k)) * area;
-			}
-		}
-		//ROS_WARN_STREAM(FluxJ);
-		//Flux+=tFlux;
-		//FluxJ+=tFluxJ;
-	}
-
-	void SweepFlux::FluxPointTriangle(const Eigen::Ref<const Eigen::Vector3d> & x,
-			const Eigen::Ref<const Eigen::Vector3d> & a,
-			const Eigen::Ref<const Eigen::Vector3d> & b,
-			const Eigen::Ref<const Eigen::Vector3d> & c,
-			const Eigen::Ref<const Eigen::MatrixXd> & aJ,
-			const Eigen::Ref<const Eigen::MatrixXd> & bJ,
-			const Eigen::Ref<const Eigen::MatrixXd> & cJ, double& Flux,
-			Eigen::Ref<Eigen::MatrixXd> FluxJ)
-	{
-		double J, K, _J, _K, nax, nbx, ncx, _nax, _nbx, _ncx, dab, dac, dcb;
-		Eigen::Vector3d tmp, tmp1, tmp2, _a, _b, _c;
-		nax = (x - a).norm();
-		nbx = (x - b).norm();
-		ncx = (x - c).norm();
-		dab = (x - a).dot(x - b);
-		dac = (x - a).dot(x - c);
-		dcb = (x - c).dot(x - b);
-
-		tmp = (x - a).cross(x - b);
-		J = tmp.dot(x - c);
-		K = nax * nbx * ncx + dab * ncx + dac * nbx + dcb * nax;
-		Flux = 0;
-		FluxJ.setZero();
-		if (K * K < 1e-50 || nax < 1e-50 || nbx < 1e-50 || ncx < 1e-50)
-			return;
-		Flux = 2.0 * atan2(J, K);
-
-		int j;
-
-		for (j = 0; j < FluxJ.cols(); j++)
-		{
-			_a(0) = -aJ(0, j);
-			_a(1) = -aJ(1, j);
-			_a(2) = -aJ(2, j);
-			_b(0) = -bJ(0, j);
-			_b(1) = -bJ(1, j);
-			_b(2) = -bJ(2, j);
-			_c(0) = -cJ(0, j);
-			_c(1) = -cJ(1, j);
-			_c(2) = -cJ(2, j);
-			_nax = _a.dot(x - a) / nax;
-			_nbx = _b.dot(x - b) / nbx;
-			_ncx = _c.dot(x - c) / ncx;
-			tmp1 = _a.cross(x - b);
-			tmp2 = (x - a).cross(_b);
-			_J = (tmp1 + tmp2).dot(x - c) + tmp.dot(_c);
-			_K = _nax * nbx * ncx + nax * _nbx * ncx + nax * nbx * _ncx
-					+ (_a.dot(x - b) + (x - a).dot(_b)) * ncx + dab * _ncx
-					+ (_a.dot(x - c) + (x - a).dot(_c)) * nbx + dac * _nbx
-					+ (_c.dot(x - b) + (x - c).dot(_b)) * nax + dcb * _nax;
-
-			if ((J * J + K * K) < 1e-50)
-				continue;
-
-			FluxJ(0, j) = 2.0 * (_J * K - J * _K) / (J * J + K * K);
-		}
 	}
 
 }

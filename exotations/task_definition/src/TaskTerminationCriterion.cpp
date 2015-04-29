@@ -6,50 +6,63 @@ namespace exotica
 {
 
 	TaskTerminationCriterion::TaskTerminationCriterion() :
-			threshold_(0.0),
-			dim_(0)
+            threshold_(0.0)
 	{
-
+        order=0;
 	}
 
 	EReturn TaskTerminationCriterion::initDerived(tinyxml2::XMLHandle & handle)
 	{
-		EReturn temp_return = TaskSqrError::initDerived(handle);
-		double thr;
-		if (temp_return) { INDICATE_FAILURE; }
-		else
-											{ if (!handle.FirstChildElement("Threshold").ToElement()) {temp_return = PAR_ERR; } }
-		if (temp_return) { INDICATE_FAILURE; }
-		else             { temp_return = getDouble(*(handle.FirstChildElement("Threshold").ToElement()), thr); }
-		if (temp_return) { INDICATE_FAILURE; }
-		else             { temp_return = setThreshold(thr); }
-		taskSpaceDim(dim_);
-		y_.resize(dim_);
-		return temp_return;
+        if(TaskSqrError::initDerived(handle))
+        {
+            double thr;
+            if (handle.FirstChildElement("Threshold").ToElement())
+            {
+                if(getDouble(*(handle.FirstChildElement("Threshold").ToElement()), thr))
+                {
+                    threshold0_.resize(1);
+                    threshold0_(0)=thr;
+                }
+                else
+                {
+                    INDICATE_FAILURE;
+                    return PAR_ERR;
+                }
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return PAR_ERR;
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+
+        return SUCCESS;
 	}
 
-	EReturn TaskTerminationCriterion::terminate(bool & end, double& err)
+    EReturn TaskTerminationCriterion::terminate(bool & end, double& err, int t)
 	{
-		phi(y_);
-		Eigen::VectorXd y_star(y_.rows());
-		getGoal(y_star);
-		double rho;
-		getRho(rho);
-		err=(y_-y_star).squaredNorm()*rho;
-		end = err<threshold_;
+        err=((*(y_.at(t)))-(*(y_star_.at(t)))).squaredNorm()*(*(rho_.at(t)))(0);
+        end = err<(*(threshold_.at(t)))(0);
 		return SUCCESS;
 	}
 
-	EReturn TaskTerminationCriterion::setThreshold(const double & thr)
-	{
-		threshold_=thr;
-		return SUCCESS;
-	}
+    EReturn TaskTerminationCriterion::registerThreshold(Eigen::VectorXdRef_ptr threshold, int t)
+    {
+        threshold_.at(t)=threshold;
+        return SUCCESS;
+    }
 
-	EReturn TaskTerminationCriterion::getThreshold(double & thr)
-	{
-		thr=threshold_;
-		return SUCCESS;
-	}
+    EReturn TaskTerminationCriterion::setTimeSteps(const int T)
+    {
+        TaskSqrError::setTimeSteps(T);
+        threshold_.assign(T,Eigen::VectorXdRef_ptr(threshold0_));
+        return SUCCESS;
+    }
+
 
 }

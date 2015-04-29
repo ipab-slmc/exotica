@@ -21,22 +21,12 @@ namespace exotica
 			virtual ~IKProblem();
 
 			/**
-			 * \brief	Get task definitions
-			 * @return	Task definitions
-			 */
-			TaskDefinition_map& getTaskDefinitions();
-
-			/**
-			 * \brief	Get task maps
-			 * @return Task maps
-			 */
-			TaskMap_map& getTaskMaps();
-
-			/**
 			 * \brief	Get configuration weight
 			 * @return	configuration weight
 			 */
 			Eigen::MatrixXd getW();
+
+            int getT();
 
 			/**
 			 * \brief	Get tolerance
@@ -50,9 +40,10 @@ namespace exotica
 			 * @return Indication of success/failure
 			 */
 			virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-		private:
+
 			Eigen::MatrixXd config_w_;	//Configuration weight
 			double tau_;	// Tolerance
+            int T_;
 
 	};
 	typedef boost::shared_ptr<exotica::IKProblem> IKProblem_ptr;

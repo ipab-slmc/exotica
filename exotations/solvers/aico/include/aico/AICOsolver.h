@@ -108,6 +108,9 @@ namespace exotica
 
         bool preupdateTrajectory_;
 
+        std::vector<Eigen::VectorXd> y_star; //!< Task cost mappings
+        std::vector<Eigen::VectorXd> rhos; //!< Task precisions
+
 	protected:
 		/**
 		 * \brief Derived-elements initialiser: Pure Virtual
@@ -120,7 +123,7 @@ namespace exotica
 		 *  @param q0 Start configuration
 		 *  @return  Indicates success
 		 */
-		EReturn initMessages(const Eigen::Ref<const Eigen::VectorXd> & q0);
+        EReturn initMessages();
 
 		/**
 		 * \brief Initialise AICO messages from an initial trajectory
@@ -141,7 +144,7 @@ namespace exotica
 		bool dynamic; //!< Plan
 		std::vector<Eigen::VectorXd> phiBar; //!< Task cost mappings
 		std::vector<Eigen::MatrixXd> JBar; //!< Task cost Jacobians
-		std::vector<Eigen::VectorXd> y_star; //!< Task cost mappings
+        Eigen::VectorXi dim; //!< Task dimension
         std::vector<sp_mean_covariance> q_stat; //!< Cost weigthed normal distribution of configurations across sweeps.
 
 		std::vector<Eigen::VectorXd> s; //!< Forward message mean
@@ -162,6 +165,8 @@ namespace exotica
 		std::vector<Eigen::VectorXd> phiBar_old; //!< Task cost mappings (last most optimal value)
 		std::vector<Eigen::MatrixXd> JBar_old; //!< Task cost Jacobians (last most optimal value)
 		std::vector<Eigen::VectorXd> y_star_old; //!< Task cost mappings (last most optimal value)
+        std::vector<Eigen::VectorXd> rhos_old; //!< Task precisions (last most optimal value)
+        Eigen::VectorXi dim_old; //!< Task dimension
 
 		std::vector<Eigen::VectorXd> s_old; //!< Forward message mean (last most optimal value)
 		std::vector<Eigen::MatrixXd> Sinv_old; //!< Forward message covariance inverse (last most optimal value)

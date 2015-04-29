@@ -14,7 +14,7 @@ REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver);
 namespace exotica
 {
 	IKsolver::IKsolver() :
-			size_(0)
+            size_(0), T(0), initialised_(false)
 	{
 		//TODO
 	}
@@ -53,36 +53,98 @@ namespace exotica
 		}
 		problem_ = pointer;
 		prob_ = boost::static_pointer_cast<IKProblem>(pointer);
-		size_ = prob_->getW().rows();
+        size_ = prob_->getScenes().begin()->second->getNumJoints();
+        for (auto & it : prob_->getScenes())
+        {
+            if(!ok(it.second->activateTaskMaps()))
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
 
-		for (auto & it : prob_->getTaskDefinitions())
-		{
-			if (it.second->type().compare(std::string("exotica::TaskSqrError")) != 0)
-			{
-				ERROR("IK Solver currently can only solve exotica::TaskSqrError. Unable to solve Task: "<<it.second->type());
-				return FAILURE;
-			}
-		}
+        T=prob_->getT();
+        int big_size = 0;
+        int i=0, cur_rows=0;
+
+        rhos.resize(T);
+        big_jacobian.resize(T);
+        goal.resize(T);
+        phi.resize(T);
+        dim.resize(T);
+        taskIndex.clear();
+
+        for(int t=0;t<T;t++)
+        {
+            dim.at(t).resize(prob_->getTaskDefinitions().size());
+            i=0;
+            for (auto & it : prob_->getTaskDefinitions())
+            {
+                if (it.second->type().compare(std::string("exotica::TaskSqrError")) != 0)
+                {
+                    ERROR("IK Solver currently can only solve exotica::TaskSqrError. Unable to solve Task: "<<it.second->type());
+                    return FAILURE;
+                }
+                else
+                {
+                    TaskSqrError_ptr task = boost::static_pointer_cast<TaskSqrError>(it.second);
+                    task->setTimeSteps(T);
+                    task->taskSpaceDim(dim.at(t)(i));
+                }
+                i++;
+            }
+            big_size = dim.at(t).sum();
+
+            big_jacobian.at(t).resize(big_size, size_);
+            task_weights.resize(big_size);
+            phi.at(t).resize(big_size);
+            goal.at(t).resize(big_size);
+            task_error.resize(big_size, 1);
+            rhos.at(t).resize(prob_->getTaskDefinitions().size());
+            rhos.at(t).setZero();
+            goal.at(t).setZero();
+            i=0;
+            for (auto & it : prob_->getTaskDefinitions())
+            {
+                TaskSqrError_ptr task = boost::static_pointer_cast<TaskSqrError>(it.second);
+                task->registerRho(Eigen::VectorXdRef_ptr(rhos.at(t).segment(i,1)),t);
+                task->registerGoal(Eigen::VectorXdRef_ptr(goal.at(t).segment(cur_rows,dim.at(t)(i))),t);
+                task->setDefaultGoals(t);
+                task->registerPhi(Eigen::VectorXdRef_ptr(phi.at(t).segment(cur_rows,dim.at(t)(i))),t);
+                task->registerJacobian(Eigen::MatrixXdRef_ptr(big_jacobian.at(t).block(cur_rows,0,dim.at(t)(i),size_)),t);
+                task_weights.diagonal().block(cur_rows, 0, dim.at(t)(i), 1).setConstant(rhos.at(t)(i));
+                if(t==0)
+                {
+                    taskIndex[it.first]= std::pair<int,int>(i,cur_rows);
+                }
+                cur_rows += dim.at(t)(i);
+            }
+        }
+        initialised_=true;
 		return SUCCESS;
 	}
 
-	EReturn IKsolver::setGoal(const std::string & task_name, const Eigen::VectorXd & goal)
+    EReturn IKsolver::setGoal(const std::string & task_name, Eigen::VectorXdRefConst _goal, int t)
 	{
-//Lets now just consider one task at a time
-		if (prob_->getTaskDefinitions().find(task_name) == prob_->getTaskDefinitions().end())
+        if (taskIndex.find(task_name) == taskIndex.end())
 		{
 			std::cout << "Task name " << task_name << " does not exist" << std::endl;
 			return FAILURE;
 		}
-
-		boost::shared_ptr<TaskSqrError> task =
-				boost::static_pointer_cast<TaskSqrError>(prob_->getTaskDefinitions().at(task_name));
-		if (!ok(task->setGoal(goal)))
-		{
-			std::cout << "Setting goal for " << task_name << " failed" << std::endl;
-			return FAILURE;
-		}
-		return SUCCESS;
+        else
+        {
+            std::pair<int,int> id = taskIndex.at(task_name);
+            if(_goal.rows()==dim.at(t)(id.first))
+            {
+                goal.at(t).segment(id.second,dim.at(t)(id.first))=_goal;
+                return SUCCESS;
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
 	}
 
 	IKProblem_ptr& IKsolver::getProblem()
@@ -95,144 +157,137 @@ namespace exotica
 		return (int) maxit_->data;
 	}
 
-	EReturn IKsolver::setRho(const std::string & task_name, const double rho)
+    EReturn IKsolver::setRho(const std::string & task_name, const double rho, int t)
 	{
-		if (prob_->getTaskDefinitions().find(task_name) == prob_->getTaskDefinitions().end())
-		{
-			ERROR("Task name "<<task_name<<" does not exist");
-			return FAILURE;
-		}
-		boost::shared_ptr<TaskSqrError> task =
-				boost::static_pointer_cast<TaskSqrError>(prob_->getTaskDefinitions().at(task_name));
-		if (!ok(task->setRho(rho)))
-			return FAILURE;
-		return SUCCESS;
+        if (taskIndex.find(task_name) == taskIndex.end())
+        {
+            std::cout << "Task name " << task_name << " does not exist" << std::endl;
+            return FAILURE;
+        }
+        else
+        {
+            std::pair<int,int> id = taskIndex.at(task_name);
+            rhos.at(t)(id.first)=rho;
+            return SUCCESS;
+        }
 	}
 
-    EReturn IKsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution)
+    EReturn IKsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution)
     {
-        Solve(q0,solution,0);
-    }
-
-    EReturn IKsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution, int t)
-	{
-		ros::Time start = ros::Time::now();
-
-		if (size_ != q0.rows())
-		{
-			std::cout << "Wrong size q0 size=" << q0.rows() << ", required size=" << size_ << std::endl;
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-        solution.resize(1, size_);
-        vel_vec_.resize(size_);
-        rhos.resize(prob_->getTaskDefinitions().size());
-		solution.row(0) = q0;
-        double err = INFINITY;
-        bool found = false;
-        maxdim_=0;
-        for (int i = 0; i < maxit_->data; i++)
-		{
-            if(ok(prob_->update(solution.row(0), t)))
+        if(initialised_)
+        {
+            ros::Time start = ros::Time::now();
+            if (size_ != q0.rows())
             {
-                vel_solve(err,t);
-                double max_vel = vel_vec_.cwiseAbs().maxCoeff();
-                vel_vec_ = max_vel > maxstep_->data?vel_vec_*maxstep_->data / max_vel:vel_vec_;
-
-                solution.row(0) = solution.row(0) + vel_vec_.transpose();
-
-                if (err <= prob_->getTau())
-                {
-                    found = true;
-                    break;
-                }
-            }
-            else
-            {
-                INDICATE_FAILURE;
+                std::cout << "Wrong size q0 size=" << q0.rows() << ", required size=" << size_ << std::endl;
+                INDICATE_FAILURE
                 return FAILURE;
             }
-		}
+            solution.resize(T, size_);
 
-        planning_time_ = ros::Duration(ros::Time::now() - start);
-
-        if(found)
-        {
+            Eigen::VectorXd q = q0;
+            for(int t=0;t<T;t++)
+            {
+                if(ok(Solve(q,solution.block(t,0,1,size_),t)))
+                {
+                    q=solution.row(t);
+                }
+                else
+                {
+                    INDICATE_FAILURE;
+                    return FAILURE;
+                }
+            }
+            planning_time_ = ros::Duration(ros::Time::now() - start);
             return SUCCESS;
         }
         else
         {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+    }
+
+    EReturn IKsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXdRef solution, int t)
+	{
+        if(initialised_)
+        {
+            vel_vec_.resize(size_);
+
+            solution.row(0) = q0;
+            error = INFINITY;
+            bool found = false;
+            maxdim_=0;
+            for (int i = 0; i < maxit_->data; i++)
+            {
+                if(ok(prob_->update(solution.row(0), t)))
+                {
+                    vel_solve(error,t);
+                    double max_vel = vel_vec_.cwiseAbs().maxCoeff();
+                    if(max_vel > maxstep_->data)
+                    {
+                        vel_vec_ = vel_vec_*maxstep_->data / max_vel;
+                    }
+
+                    solution.row(0) = solution.row(0) + vel_vec_.transpose();
+
+                    if (error <= prob_->getTau())
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    INDICATE_FAILURE;
+                    return FAILURE;
+                }
+            }
+
+
+
+            if(found)
+            {
+                return SUCCESS;
+            }
+            else
+            {
+                INFO("Solution not found after reaching max number of iterations");
+                return WARNING;
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE;
             return FAILURE;
         }
 	}
 
     EReturn IKsolver::vel_solve(double & err, int t)
 	{
-        vel_vec_.setZero();
-		int dim = 0, big_size = 0, cnt = 0, cur_rows = 0;
-		double rho;
+        if(initialised_)
+        {
+            vel_vec_.setZero();
+            int cur_rows = 0;
+            for (int i=0;i<dim.at(t).rows();i++)
+            {
+                task_weights.diagonal().block(cur_rows, 0, dim.at(t)(i), 1).setConstant(rhos.at(t)(i));
+                cur_rows += dim.at(t)(i);
+            }
+            task_error = goal.at(t) - phi.at(t);
+            err = task_error.squaredNorm();
+            // Compute velocity
 
-// Get big jacobian size and rho
-        for (auto & it : prob_->getTaskDefinitions())
-		{
-            boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(it.second);
-            task->getRho(rho, t);
-			if (rho > 0)
-			{
-				task->taskSpaceDim(dim);
-				big_size += dim;
-                maxdim_=dim>maxdim_?dim:maxdim_;
-				rhos[cnt] = rho * Eigen::VectorXd::Ones(dim);
-				cnt++;
-			}
-		}
-		cnt = 0;
-		big_jacobian.resize(big_size, size_);
-        task_weights.resize(big_size);
-        goal.resize(maxdim_);
-        phi.resize(maxdim_);
-
-		err = 0;
-		cur_rows = 0;
-        // Get big task error
-		task_error.resize(big_size, 1);
-
-		// Get big jacobian and C
-		for (auto & it : prob_->getTaskDefinitions())
-		{
-			boost::shared_ptr<TaskSqrError> task =
-					boost::static_pointer_cast<TaskSqrError>(it.second);
-            task->getRho(rho,t);
-			if (rho > 0)
-			{
-                task->taskSpaceDim(dim);
-                task->jacobian(big_jacobian.block(cur_rows, 0, dim, size_),t);
-                task_weights.diagonal().block(cur_rows, 0, dim, 1) = rhos[cnt];
-				cnt++;
-
-
-                if (!ok(task->getGoal(goal.head(dim),t)))
-				{
-					std::cout << "Velocity solver get goal failed" << std::endl;
-					return FAILURE;
-				}
-                if (!ok(task->phi(phi.head(dim),t)))
-				{
-					std::cout << "Velocity solver get phi failed" << std::endl;
-					return FAILURE;
-				}
-                task_error.segment(cur_rows, dim) = goal.head(dim) - phi.head(dim);
-				err += task_error.norm();
-				cur_rows += dim;
-			}
+            vel_vec_ =
+                    (((big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t) + prob_->getW()).inverse()
+                    * big_jacobian.at(t).transpose() * task_weights))* task_error; //(Jt*C*J+W)
+            return SUCCESS;
         }
-
-        // Compute velocity
-
-        vel_vec_ =
-                (((big_jacobian.transpose() * task_weights * big_jacobian + prob_->getW()).inverse()
-                * big_jacobian.transpose() * task_weights))* task_error; //(Jt*C*J+W)
-        return SUCCESS;
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
 	}
 }
 

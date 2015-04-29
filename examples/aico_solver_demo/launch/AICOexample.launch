@@ -1,0 +1,11 @@
+<launch>
+
+  <param name="robot_description" textfile="$(find aico_solver_demo)/resources/lwr_simplified.urdf" />
+	
+  <node pkg="aico_solver_demo" type="AICOexample" name="AICOSolverDemoNode" output="screen">
+    <param name="config" type="string" value="$(find aico_solver_demo)/resources/example.xml" />
+    <param name="solver" type="string" value="MyAICOsolver" />
+    <param name="problem" type="string" value="MyAICOProblem" />
+  </node>
+  
+</launch>

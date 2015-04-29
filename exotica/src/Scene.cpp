@@ -326,6 +326,12 @@ namespace exotica
 //TODO
 	}
 
+    robot_model::RobotModelPtr Scene::getRobotModel()
+    {
+        return model_;
+
+    }
+
 	std::string Scene::getName()
 	{
 		return name_;

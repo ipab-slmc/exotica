@@ -49,7 +49,6 @@ namespace exotica
     EReturn TaskDefinition::registerPhi(Eigen::VectorXdRef_ptr y, int t)
     {
         LOCK(map_lock_);
-        y_.at(t)=y;
         task_map_->registerPhi(y,t);
         return SUCCESS;
     }
@@ -57,7 +56,6 @@ namespace exotica
     EReturn TaskDefinition::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
     {
         LOCK(map_lock_);
-        J_.at(t)=J;
         task_map_->registerJacobian(J,t);
         return SUCCESS;
     }
@@ -80,9 +78,7 @@ namespace exotica
         LOCK(map_lock_);
         if (task_map_ != nullptr)
         {
-          y_.assign(T,Eigen::VectorXdRef_ptr());
-          J_.assign(T,Eigen::MatrixXdRef_ptr());
-          return task_map_->setTimeSteps(T);
+            return task_map_->setTimeSteps(T);
         }
         else
         {

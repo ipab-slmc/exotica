@@ -41,6 +41,18 @@ namespace exotica
 			}
 		}
 
+        robot_model::RobotModelPtr model = scenes_.begin()->second->getRobotModel();
+        std::vector<std::string> joints = scenes_.begin()->second->getSolver().getJointNames();
+        int n=joints.size();
+        bounds_.resize(n*2);
+
+        for(int i=0;i<n;i++)
+        {
+            boost::shared_ptr<urdf::JointLimits> lim=model->getURDF()->getJoint(joints[i])->limits;
+            bounds_[i]=lim->lower;
+            bounds_[i+n]=lim->upper;
+        }
+
 		return SUCCESS;
 	}
 

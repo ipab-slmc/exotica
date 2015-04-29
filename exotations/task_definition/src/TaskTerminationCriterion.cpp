@@ -13,12 +13,12 @@ namespace exotica
 
 	EReturn TaskTerminationCriterion::initDerived(tinyxml2::XMLHandle & handle)
 	{
-        if(TaskSqrError::initDerived(handle))
+        if(ok(TaskSqrError::initDerived(handle)))
         {
             double thr;
             if (handle.FirstChildElement("Threshold").ToElement())
             {
-                if(getDouble(*(handle.FirstChildElement("Threshold").ToElement()), thr))
+                if(ok(getDouble(*(handle.FirstChildElement("Threshold").ToElement()), thr)))
                 {
                     threshold0_.resize(1);
                     threshold0_(0)=thr;
@@ -41,12 +41,14 @@ namespace exotica
             return FAILURE;
         }
 
+        setTimeSteps(1);
+
         return SUCCESS;
 	}
 
     EReturn TaskTerminationCriterion::terminate(bool & end, double& err, int t)
 	{
-        err=((*(y_.at(t)))-(*(y_star_.at(t)))).squaredNorm()*(*(rho_.at(t)))(0);
+        err=((*(task_map_->phi_.at(t)))-(*(y_star_.at(t)))).squaredNorm()*(*(rho_.at(t)))(0);
         end = err<(*(threshold_.at(t)))(0);
 		return SUCCESS;
 	}

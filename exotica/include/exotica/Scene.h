@@ -62,7 +62,7 @@ namespace exotica
 			 * @param	x		Configuration
              * @return Indication of success
 			 */
-			EReturn update(const Eigen::VectorXd x);
+            EReturn update(Eigen::VectorXdRefConst x);
 
             /**
 			 * \brief	Get closest distance between two objects
@@ -197,7 +197,7 @@ namespace exotica
 			 * @param	x	System state
              * @return Indication of success
 			 */
-			virtual EReturn update(const Eigen::VectorXd x, const int t = 0);
+            virtual EReturn update(Eigen::VectorXdRefConst x, const int t = 0);
 
             /**
 			 * \brief	Set collision scene
@@ -239,20 +239,37 @@ namespace exotica
 					const std::vector<KDL::Frame> & offset);
 
             /**
-			 * \brief	Get forward map
+             * \brief	Get forward map (values)
 			 * @param	task	Task name
-			 * @param	phi		Forward map
+             * @param	phi		Returned forward map
              * @return Indication of success
 			 */
-			EReturn getForwardMap(const std::string & task, Eigen::Ref<Eigen::VectorXd> phi);
+            EReturn getForwardMap(const std::string & task, Eigen::VectorXdRef phi);
 
             /**
-			 * \brief	Get jacobian
+             * @brief Get forward map reference
+             * @param task Task name
+             * @param phi Returned forward map reference
+             * @return Indication of success
+             */
+            EReturn getForwardMap(const std::string & task, Eigen::VectorXdRef_ptr& phi, bool force=false);
+
+
+            /**
+             * \brief	Get jacobian (values)
 			 * @param	task	Task name
-			 * @param	jac		Jacobian
+             * @param	jac		Returned Jacobian
              * @return Indication of success
 			 */
-			EReturn getJacobian(const std::string & task, Eigen::Ref<Eigen::MatrixXd> jac);
+            EReturn getJacobian(const std::string & task, Eigen::MatrixXdRef jac);
+
+            /**
+             * @brief Get jacobian reference
+             * @param task Task name
+             * @param jac Returned Jacobian reference
+             * @return Indication of success
+             */
+            EReturn getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac, bool force=false);
 
             /**
 			 * \brief	Get joint number N
@@ -377,7 +394,7 @@ namespace exotica
 #endif
 	};
 	typedef boost::shared_ptr<Scene> Scene_ptr;
-	typedef std::map<std::string, Scene_ptr> Scene_map;
+    typedef std::map<std::string, Scene_ptr> Scene_map;
 
 }	//	namespace exotica
 

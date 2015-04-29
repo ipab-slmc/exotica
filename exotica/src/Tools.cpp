@@ -20,7 +20,7 @@ exotica::EReturn exotica::saveMatrix(std::string file_name, const Eigen::Ref<con
 
 bool exotica::ok(const EReturn & value)
 {
-	return (value == SUCCESS or value == WARNING);
+    return (value == SUCCESS || value == WARNING);
 }
 
 exotica::EReturn exotica::getMatrix(const tinyxml2::XMLElement & xml_matrix,

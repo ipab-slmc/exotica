@@ -26,27 +26,30 @@ namespace exotica
       virtual ~TaskTerminationCriterion(){};
       
       
-      /**
-       * \brief Terminate Query: PURE VIRTUAL
-       * @pre                  Should check initialisation is ok
-       * @param terminate[out] Returns indication of termination, as either continue, soft_stop or hard_stop
-       * @return               Indication of success or otherwise
-       */
-      virtual EReturn terminate(bool & end, double& err);
-      
-      /**
-			 * \brief Setter for error threshold
-			 * @param thr[in]   Threshold value
-			 * @return        SUCCESS always
-			 */
-			EReturn setThreshold(const double & thr);
 
-			/**
-			 * \brief Getter for error threshold
-			 * @param thr[in]   Threshold value
-			 * @return        SUCCESS always
-			 */
-			EReturn getThreshold(double & thr);
+      /**
+       * @brief terminate Checks if current state should terminate
+       * @param end Returns true if state should terminate
+       * @param err Error
+       * @return Indication of success
+       */
+      virtual EReturn terminate(bool & end, double& err, int t=0);
+
+      /**
+       * @brief registerGoal Registers threshold reference at time t
+       * @param y_star Threshold reference
+       * @param t Time step
+       * @return Indication of success
+       */
+      EReturn registerThreshold(Eigen::VectorXdRef_ptr threshold, int t=0);
+
+      /**
+       * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
+       * @param T Number of time steps (this should be set by the planning problem)
+       * @return Returns success.
+       */
+      virtual EReturn setTimeSteps(const int T);
+      
 
     protected:
       /**
@@ -57,11 +60,8 @@ namespace exotica
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
       
       /// \brief Threshold on squared error.
-      double threshold_;
-    private:
-      Eigen::VectorXd y_;
-      int dim_;
-      
+      Eigen::VectorXd   threshold0_;
+      std::vector<Eigen::VectorXdRef_ptr> threshold_;
   };
 
   typedef exotica::Factory<std::string, exotica::TaskTerminationCriterion> TerminationCriterionCreator; //!< Convenience name for the EndCriterion Singleton Factory

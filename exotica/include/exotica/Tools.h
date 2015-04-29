@@ -27,9 +27,9 @@
 #ifdef EXOTICA_DEBUG_MODE
 #define CHECK_EXECUTION         std::cout << "Ok in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n"; //!< With endline
 #define INDICATE_FAILURE        std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
-#define WARNING(x)							 std::clog << "Warning in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
-#define ERROR(x)								 std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
-#define INFO(x)									 std::clog << "Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
+#define WARNING(x)				std::clog << "Warning in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
+#define ERROR(x)				std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
+#define INFO(x)					std::clog << "Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
 #else
 #define CHECK_EXECUTION         // No operation
 #define INDICATE_FAILURE        std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
@@ -71,12 +71,27 @@ namespace Eigen
         {
             this->reset(new Ref<Derived>(other));
         }
+
+        inline Ref_ptr(Derived& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+
+        inline Ref_ptr(const Derived& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
     };
 
     /// \brief Reference to sub-vector.
     typedef Ref_ptr<VectorXd> VectorXdRef_ptr;
     /// \brief Reference to sub-Matrix.
     typedef Ref_ptr<MatrixXd> MatrixXdRef_ptr;
+
+    typedef Ref<VectorXd> VectorXdRef;
+    typedef const Ref<const VectorXd>& VectorXdRefConst;
+    typedef Ref<MatrixXd> MatrixXdRef;
+    typedef const Ref<const MatrixXd>& MatrixXdRefConst;
 }
 
 /**

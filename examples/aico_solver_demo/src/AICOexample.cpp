@@ -5,7 +5,7 @@
  *      Author: s0972326
  */
 
-#include "aico/AICOexample.h"
+#include "aico_solver_demo/AICOexample.h"
 
 namespace exotica
 {

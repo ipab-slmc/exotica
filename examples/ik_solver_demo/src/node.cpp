@@ -12,7 +12,7 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
         Server_ptr ser;
         PlanningProblem_ptr prob;
 
-	// Get config file path, problem name and solver name from launch file
+        // Get config file path, problem name and solver name from launch file
         std::string problem_name, solver_name, config_name;
         nh_.getParam("config", config_name);
         nh_.getParam("problem", problem_name);
@@ -29,7 +29,7 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
             Eigen::MatrixXd solution;
             // Cast the generic solver instance into IK solver
             exotica::IKsolver_ptr solIK=boost::static_pointer_cast<exotica::IKsolver>(sol); 
-            ROS_INFO_STREAM("Calling solve() in infinite loop");
+            ROS_INFO_STREAM("Calling solve() in an infinite loop");
 
             {
                 while(ros::ok())
@@ -39,7 +39,7 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
                     if(ok(solIK->Solve(q,solution)))
                     {
                         double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-                        ROS_INFO_STREAM_THROTTLE(0.5,"Finished solving ("<<time<<"s)");
+                        ROS_INFO_STREAM_THROTTLE(0.5,"Finished solving ("<<time<<"s), error: "<<solIK->error);
                         q=solution.row(solution.rows()-1);
                         //ROS_INFO_STREAM_THROTTLE(0.5,"Solution "<<q.transpose());
                         ROS_INFO_STREAM_THROTTLE(0.5,"Solution "<<solution);
@@ -48,6 +48,7 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
                     {
                         double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
                         ROS_INFO_STREAM_THROTTLE(0.5,"Failed to find solution ("<<time<<"s)");
+                        break;
                     }
                 }
             }

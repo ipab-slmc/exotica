@@ -12,7 +12,7 @@
      <PlanningMode>Sampling</PlanningMode>
   </Server>
   <OMPLsolver name="OMPL Interface">
-    <algorithm>FRRT</algorithm>
+    <algorithm>RRT</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
   </OMPLsolver>
 

@@ -8,5 +8,9 @@
     <param name="solver" type="string" value="OMPL Interface" />
     <param name="problem" type="string" value="OMPLProblem" />
   </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find ompl_solver_demo)/resources/rviz.rviz" />
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="ompl_st_pub" />
   
 </launch>

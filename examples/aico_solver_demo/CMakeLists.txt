@@ -10,12 +10,13 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   exotica
   aico
+  sensor_msgs
 )
 
 find_package(Eigen3 REQUIRED)
 
 catkin_package(
- CATKIN_DEPENDS roscpp exotica aico
+ CATKIN_DEPENDS roscpp exotica aico sensor_msgs
  DEPENDS system_lib
 )
 

@@ -13,6 +13,7 @@
 #include <ros/package.h>
 #include <kinematic_maps/EffPosition.h>
 #include <exotica/Initialiser.h>
+#include <sensor_msgs/JointState.h>
 
 namespace exotica
 {
@@ -25,6 +26,7 @@ namespace exotica
 			~AICOexample ();
             ros::NodeHandle nh_;
             ros::NodeHandle nhg_;
+            ros::Publisher jointStatePublisher_;
 	};
 
 } /* namespace exotica */

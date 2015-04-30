@@ -10,10 +10,11 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   exotica
   ik_solver
+  sensor_msgs
 )
 
 catkin_package(
- CATKIN_DEPENDS roscpp exotica ik_solver
+ CATKIN_DEPENDS roscpp exotica ik_solver sensor_msgs
  DEPENDS system_lib
 )
 

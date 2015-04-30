@@ -57,8 +57,8 @@
     </Task>
    
     <!-- Problem parameters (structuring etc...) -->
-    <T>20</T>
-    <duration>10.0</duration>
+    <T>100</T>
+    <duration>5.0</duration>
     <Qrate>1e-10</Qrate>
     <Hrate>1.0</Hrate>
     <Wrate>1.0</Wrate>

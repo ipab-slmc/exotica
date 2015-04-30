@@ -38,6 +38,27 @@ OMPLSolverDemoNode::OMPLSolverDemoNode() : nh_("~"), nhg_()
                 double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
                 ROS_INFO_STREAM_THROTTLE(0.5,"Finished solving ("<<time<<"s)");
                 ROS_INFO_STREAM_THROTTLE(0.5,"Solution "<<solution.row(solution.rows()-1));
+
+                // Publish the states to rviz
+                jointStatePublisher_ = nhg_.advertise<sensor_msgs::JointState>("/joint_states", 1);
+                sensor_msgs::JointState jnt;
+                jnt.position.resize(solution.cols());
+                jnt.name = prob->scenes_.begin()->second->getSolver().getJointNames();
+                ros::Rate loop_rate(50.0); // Magic number for now
+                int t=0;
+                ROS_INFO_STREAM_THROTTLE(0.5,"Publishing states to rviz ...");
+                while (ros::ok())
+                {
+                    jnt.header.stamp = ros::Time::now();
+                    jnt.header.seq++;
+                    for (int j = 0; j < solution.cols(); j++)
+                        jnt.position[j] = solution(t, j);
+                    jointStatePublisher_.publish(jnt);
+
+                    t=t+1>=solution.rows()?0:t+1;
+                    ros::spinOnce();
+                    loop_rate.sleep();
+                }
             }
             else
             {

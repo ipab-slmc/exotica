@@ -14,8 +14,9 @@
   <build_depend>roscpp</build_depend>
   <build_depend>exotica</build_depend>
   <build_depend>ik_solver</build_depend>
+  <build_depend>sensor_msgs</build_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>exotica</run_depend>
   <run_depend>ik_solver</run_depend>
-
+  <run_depend>sensor_msgs</run_depend>
 </package>

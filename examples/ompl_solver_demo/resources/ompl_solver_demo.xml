@@ -13,7 +13,7 @@
   </Server>
   <OMPLsolver name="OMPL Interface">
     <algorithm>RRT</algorithm>
-    <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
+    <max_goal_sampling_attempts>2500</max_goal_sampling_attempts>
   </OMPLsolver>
 
   <OMPLProblem name="OMPLProblem">
@@ -50,7 +50,7 @@
       <map name="LeftHandPositionMap"/>
       <Rho>1.0</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal>0.56 0.1 0.58</Goal>
+      <Goal>0.4 -0.1 0.5</Goal>
       <Threshold>1e-2</Threshold>
     </Task>
   </OMPLProblem>

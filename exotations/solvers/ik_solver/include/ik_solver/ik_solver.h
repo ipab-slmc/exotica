@@ -73,7 +73,7 @@ namespace exotica
 			 * \brief	IK velocity solver
 			 * @param	err	Task error
 			 */
-            inline EReturn vel_solve(double & err, int t);
+            inline EReturn vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
 			IKProblem_ptr prob_; // Shared pointer to the planning problem.
             EParam<std_msgs::Int64> maxit_;	// Maximum iteration
             EParam<std_msgs::Float64> maxstep_;	// Maximum step

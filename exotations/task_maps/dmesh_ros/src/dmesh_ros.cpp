@@ -25,8 +25,6 @@ namespace exotica
 
 	EReturn DMeshROS::initDerived(tinyxml2::XMLHandle & handle)
 	{
-		tinyxml2::XMLElement* xmltmp;
-
 		//	Example of register dynamic parameters to EXOTica Server
 		if (!ok(server_->getParam("EXOTicaServer/DMeshSize", size_)))
 		{
@@ -141,6 +139,7 @@ namespace exotica
     EReturn DMeshROS::getGoalLaplace(Eigen::VectorXd & goal,int t)
 	{
 		LOCK(lock_);
+        if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
 		if (!initialised_)
 		{
 			INDICATE_FAILURE
@@ -201,6 +200,7 @@ namespace exotica
 
     EReturn DMeshROS::computeLaplace(int t)
 	{
+        if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
 		LOCK(lock_);
 		if (!initialised_)
 		{
@@ -267,6 +267,7 @@ namespace exotica
 
     EReturn DMeshROS::computeJacobian(int t)
 	{
+        if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
         JAC.setZero();
 		double d_ = 0;
 		uint i, j, l, cnt;
@@ -340,6 +341,7 @@ namespace exotica
 	}
     EReturn DMeshROS::updateGraphFromKS(int t)
 	{
+        if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
         if (!gManager_.getGraph()->updateLinksRef(EFFPHI))
 		{
 			INDICATE_FAILURE
@@ -416,45 +418,6 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn DMeshROS::setProblemPtr(const PlanningProblem_ptr & prob)
-	{
-		if (prob->type().compare("exotica::IKProblem"))
-		{
-			INDICATE_FAILURE
-			std::cout << "DMeshROS only support IK problem, " << prob->type() << " is not supported" << std::endl;
-			return FAILURE;
-		}
-		prob_ = boost::static_pointer_cast<IKProblem>(prob);
-		return SUCCESS;
-	}
-
-	EReturn DMeshROS::modifyGoal(const std::string & task_name, const int & index,
-			const double & value)
-	{
-		if (prob_.get() == nullptr)
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
-		if (prob_->getTaskDefinitions().find(task_name) == prob_->getTaskDefinitions().end())
-		{
-			std::cout << "Task name " << task_name << " does not exist" << std::endl;
-			return FAILURE;
-		}
-
-		boost::shared_ptr<TaskSqrError> task =
-				boost::static_pointer_cast<TaskSqrError>(prob_->getTaskDefinitions().at(task_name));
-		if (!ok(task->modifyGoal(index, value)))
-		{
-			std::cout << "Modifying goal for " << task_name << " failed" << std::endl;
-			return FAILURE;
-		}
-//		Eigen::VectorXd g(task_size_);
-//		task->getGoal(g);
-//		std::cout << "Goal " << g.transpose() << std::endl;
-//		getchar();
-		return SUCCESS;
-	}
 
 	bool DMeshROS::hasActiveObstacle()
 	{

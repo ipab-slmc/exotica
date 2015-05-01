@@ -55,20 +55,30 @@ namespace exotica
                 getTaskMap()->taskSpaceDim(dim);
                 if(dim>0)
                 {
-                    y_star0_.resize(0);
+                    y_star0_.resize(dim);
                     y_star0_.setZero();
-                    WARNING("Task definition '"<<object_name_<<"':Goal was not specified, setting goal to zeros.");
                 }
                 else
                 {
-                    WARNING("Task definition '"<<object_name_<<"':Goal was not specified and task vector size is dynamic.");
+                    ERROR("Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
+                    return FAILURE;
                 }
             }
         }
         else
         {
-          INDICATE_FAILURE;
-          return PAR_ERR;
+            int dim;
+            getTaskMap()->taskSpaceDim(dim);
+            if(dim>0)
+            {
+                y_star0_.resize(dim);
+                y_star0_.setZero();
+            }
+            else
+            {
+                ERROR("Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
+                return FAILURE;
+            }
         }
 
         // Set default number of time steps
@@ -95,13 +105,6 @@ namespace exotica
     EReturn TaskSqrError::registerRho(Eigen::VectorXdRef_ptr rho, int t)
     {
         rho_.at(t)=rho;
-        return SUCCESS;
-    }
-
-    EReturn TaskSqrError::modifyGoal(const int & index, const double & value, int t)
-    {
-        //	Modifying goal on the fly, ignore it unless you using DMesh
-        (*(y_star_.at(t)))(index) = value;
         return SUCCESS;
     }
 

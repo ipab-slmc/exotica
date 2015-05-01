@@ -52,13 +52,6 @@ namespace exotica
       double getRho(int t);
 
       /**
-       * \brief	Modify the goal. Currently used for DMeshROS
-       * @param	index	Goal entry index
-       * @param	value	New goal value
-       */
-      EReturn modifyGoal(const int & index, const double & value, int t=0);
-
-      /**
        * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
        * @param T Number of time steps (this should be set by the planning problem)
        * @return Returns success.

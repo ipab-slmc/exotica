@@ -68,20 +68,6 @@ namespace exotica
 
 			EReturn removeVertex(const std::string & name);
 
-			/**
-			 * \brief	Get access to the problem
-			 * @param	prob	Planning problem
-			 */
-			EReturn setProblemPtr(const PlanningProblem_ptr & prob);
-
-			/**
-			 * \brief	Modify goal on the fly
-			 * @param	task_name	Task map name
-			 * @param	index	Goal vector entry index
-			 * @param	value	New goal value
-			 */
-			EReturn modifyGoal(const std::string & task_name, const int & index, const double & value);
-
 			bool hasActiveObstacle();
 		protected:
 			/**
@@ -161,9 +147,6 @@ namespace exotica
 			//	Gain to reach goal
 			EParam<std_msgs::Float64> kg_;
 
-			//	Laplace
-			Eigen::VectorXd laplace_;
-
 			//	Distance matrix
 			Eigen::MatrixXd dist_;
 
@@ -172,9 +155,6 @@ namespace exotica
 
 			//	Scoped locker
 			boost::mutex::scoped_lock lock_;
-
-			//	Pointer to the problem
-			IKProblem_ptr prob_;
 
 			//	True if the obstacle is close
 			std::vector<bool> obs_close_;

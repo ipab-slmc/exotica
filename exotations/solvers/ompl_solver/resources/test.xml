@@ -11,12 +11,12 @@
      <!-- Specify Planning Mode: Optimization or Sampling. Skip unnecessary steps if in sampling mode-->
      <PlanningMode>Sampling</PlanningMode>
   </Server>
-  <OMPLsolver name="OMPL Interface">
-    <algorithm>RRT</algorithm>
+  <OMPLsolver name="OMPL_Interface">
+    <algorithm>FRRT</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
   </OMPLsolver>
 
-  <OMPLProblem name="TestProblem">
+  <OMPLProblem name="FRRT">
     <Scene name="TestScene">
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->

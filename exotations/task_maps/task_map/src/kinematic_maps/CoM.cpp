@@ -18,6 +18,7 @@ namespace exotica
         com_pub_ = nh_.advertise<visualization_msgs::Marker>("coms_marker", 1);
         COM_pub_ = nh_.advertise<visualization_msgs::Marker>("COM_marker", 1);
         goal_pub_ = nh_.advertise<visualization_msgs::Marker>("goal_marker", 1);
+        marker_offset_=KDL::Frame::Identity();
     }
 
     CoM::~CoM()
@@ -238,19 +239,18 @@ namespace exotica
     {
         if (debug_->data)
         {
-            if (offset == KDL::Frame::Identity())
-                INDICATE_FAILURE
+
             if (left)
             {
-                com_marker_.header.frame_id = "base_link";
-                COM_marker_.header.frame_id = "base_link";
-                goal_marker_.header.frame_id = "base_link";
+                com_marker_.header.frame_id = "l_sole";
+                COM_marker_.header.frame_id = "l_sole";
+                goal_marker_.header.frame_id = "l_sole";
             }
             else
             {
-                com_marker_.header.frame_id = "base_link";
-                COM_marker_.header.frame_id = "base_link";
-                goal_marker_.header.frame_id = "base_link";
+                com_marker_.header.frame_id = "r_sole";
+                COM_marker_.header.frame_id = "r_sole";
+                goal_marker_.header.frame_id = "r_sole";
             }
             marker_offset_=offset.Inverse();
         }

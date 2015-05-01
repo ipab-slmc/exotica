@@ -108,8 +108,42 @@ namespace exotica
 
         bool preupdateTrajectory_;
 
+        /**
+         * \brief	Set new goal
+         * @param	task_name	Task map name
+         * @param	goal	new goal
+         * @param   t time step
+         */
+        EReturn setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal, int t=0);
+
+        /**
+         * \brief	Set rho
+         * @param	task_name	Task map name
+         * @param	rho	Rho
+         * @param   t time step
+         */
+        EReturn setRho(const std::string & task_name, const double rho, int t=0);
+
+        /**
+         * \brief	Get goal
+         * @param	task_name	Task map name
+         * @param	goal	returned goal
+         * @param   t time step
+         */
+        EReturn getGoal(const std::string & task_name, Eigen::VectorXd& goal, int t=0);
+
+        /**
+         * \brief	Get rho
+         * @param	task_name	Task map name
+         * @param	goal	returned rho
+         * @param   t time step
+         */
+        EReturn getRho(const std::string & task_name, double& rho, int t=0);
+
         std::vector<Eigen::VectorXd> y_star; //!< Task cost mappings
         std::vector<Eigen::VectorXd> rhos; //!< Task precisions
+        std::map<std::string, std::pair<int, int> > taskIndex;
+        Eigen::VectorXi dim; //!< Task dimension
 
 	protected:
 		/**
@@ -144,7 +178,7 @@ namespace exotica
 		bool dynamic; //!< Plan
 		std::vector<Eigen::VectorXd> phiBar; //!< Task cost mappings
 		std::vector<Eigen::MatrixXd> JBar; //!< Task cost Jacobians
-        Eigen::VectorXi dim; //!< Task dimension
+
         std::vector<sp_mean_covariance> q_stat; //!< Cost weigthed normal distribution of configurations across sweeps.
 
 		std::vector<Eigen::VectorXd> s; //!< Forward message mean

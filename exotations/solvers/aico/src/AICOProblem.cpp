@@ -29,9 +29,9 @@ namespace exotica
 
         // Update task maps if the task definition precision (rho) is non-zero
 
-        for (TaskDefinition_map::const_iterator it = task_defs_.begin(); it != task_defs_.end() ; ++it)
+        for (auto& it : task_defs_)
         {
-            boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(it->second);
+            boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(it.second);
             if(task->getRho(t)>0)
             {
                 if(ok(task->getTaskMap()->update(x,t)))
@@ -40,7 +40,7 @@ namespace exotica
                 }
                 else
                 {
-                    ERROR("Failed updateing '" << task->getObjectName() << "'");
+                    ERROR("Failed updating '" << task->getObjectName() << "'");
                     return FAILURE;
                 }
             }

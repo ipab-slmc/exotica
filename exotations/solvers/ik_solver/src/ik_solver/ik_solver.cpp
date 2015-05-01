@@ -118,6 +118,7 @@ namespace exotica
                     taskIndex[it.first]= std::pair<int,int>(i,cur_rows);
                 }
                 cur_rows += dim.at(t)(i);
+                i++;
             }
         }
         initialised_=true;
@@ -223,7 +224,7 @@ namespace exotica
             {
                 if(ok(prob_->update(solution.row(0), t)))
                 {
-                    vel_solve(error,t);
+                    vel_solve(error,t,solution.row(0));
                     double max_vel = vel_vec_.cwiseAbs().maxCoeff();
                     if(max_vel > maxstep_->data)
                     {
@@ -264,8 +265,9 @@ namespace exotica
         }
 	}
 
-    EReturn IKsolver::vel_solve(double & err, int t)
-	{
+    EReturn IKsolver::vel_solve(double & err, int t, Eigen::VectorXdRefConst q)
+    {
+        static Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->getW().rows(),prob_->getW().rows());
         if(initialised_)
         {
             vel_vec_.setZero();
@@ -278,10 +280,14 @@ namespace exotica
             task_error = goal.at(t) - phi.at(t);
             err = task_error.squaredNorm();
             // Compute velocity
+            Eigen::MatrixXd Jpinv;
+            Jpinv = (big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t) + prob_->getW() ).inverse()
+                    * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C
+            //Jpinv = (prob_->getW()+ I*1e-3) * big_jacobian.at(t).transpose()
+            //        * (big_jacobian.at(t).transpose() * (prob_->getW()+ I*1e-3) * big_jacobian.at(t) + task_weights ).inverse();
+                     //W*Jt*(Jt*W*J+C)
 
-            vel_vec_ =
-                    (((big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t) + prob_->getW()).inverse()
-                    * big_jacobian.at(t).transpose() * task_weights))* task_error; //(Jt*C*J+W)
+            vel_vec_ = Jpinv* task_error;
             return SUCCESS;
         }
         else

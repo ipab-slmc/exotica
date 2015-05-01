@@ -46,7 +46,7 @@ namespace exotica
 			 * \brief	Concrete implementation of update method
 			 * @param	x		Joint space configuration
 			 */
-            virtual EReturn update(const Eigen::VectorXd & x, const int t);
+			virtual EReturn update(const Eigen::VectorXd & x, const int t);
 
 			/**
 			 * \brief	Get the task space dimension
@@ -80,9 +80,13 @@ namespace exotica
 			 * @param	index	Goal vector entry index
 			 * @param	value	New goal value
 			 */
-			EReturn modifyGoal(const std::string & task_name, const int & index, const double & value);
+			EReturn modifyGoal(const std::string & task_name, const int & index,
+					const double & value);
 
 			bool hasActiveObstacle();
+
+			//	Graph Manager
+			GraphManager gManager_;
 		protected:
 			/**
 			 * \brief	Concrete implementation of initialisation from xml
@@ -122,9 +126,6 @@ namespace exotica
 			 * @param	V		The given links' poses
 			 */
 			EReturn updateGraphFromPoses(const Eigen::Matrix3Xd & V);
-
-			//	Graph Manager
-			GraphManager gManager_;
 
 			//	Robot links
 			EParam<exotica::StringList> links_;

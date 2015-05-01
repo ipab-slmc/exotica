@@ -356,6 +356,8 @@ public:
 
 	//	Print the graph
 	void printGraph();
+
+	void publishEdges();
 private:
 
 	/*
@@ -363,8 +365,6 @@ private:
 	 * @param	ext		The new external object
 	 */
 	void checkActivation(const VertexPtr & ext);
-
-	void publishEdges();
 
 	Eigen::MatrixXd groundTruthDistance();
 

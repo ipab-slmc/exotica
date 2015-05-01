@@ -24,6 +24,7 @@ exotica::EReturn exotica::Identity::update(Eigen::VectorXdRefConst x, const int 
       INDICATE_FAILURE;
       return FAILURE;
   }
+  return SUCCESS;
 }
 
 exotica::EReturn exotica::Identity::initDerived(tinyxml2::XMLHandle & handle)

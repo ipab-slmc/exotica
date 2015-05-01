@@ -83,9 +83,10 @@ namespace exotica
 	}
 	EReturn CollisionAvoidance::update(Eigen::VectorXdRefConst x, const int t)
 	{
+        if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
         if (pre_update_callback_) pre_update_callback_(this, x, t);
 
-        int M = PHI.rows();
+        int M = EFFPHI.rows()/3;
 
         PHI.setZero();
 		std::vector<double> dists(M);
@@ -105,7 +106,6 @@ namespace exotica
                 obj->setTransform(obs_in_base_tf_);
             }
         }
-
 		for (int i = 0; i < M; i++)
 		{
 			Eigen::Vector3d tmp1, tmp2;
@@ -123,15 +123,15 @@ namespace exotica
 			else
 				costs[i] = (1.0 - dists[i] / safe_range_->data);
 
-            (*(phi_.at(t)))(0) = (*(phi_.at(t)))(0) + costs[i] * costs[i];
+            PHI(0) = PHI(0) + costs[i] * costs[i];
 
 			//	Modify end-effectors
             if(updateJacobian_)
                 {
-
                 tip_offset = KDL::Frame(KDL::Vector(EFFPHI(3 * i), EFFPHI(3 * i + 1), EFFPHI(3 * i + 2)));
                 cp_offset = KDL::Frame(KDL::Vector(tmp1(0), tmp1(1), tmp1(2)));
                 eff_offset = tip_offset.Inverse() * cp_offset;
+
                 if (!kin_sol_.modifyEndEffector(effs_[i], eff_offset))
                 {
                     INDICATE_FAILURE
@@ -170,7 +170,6 @@ namespace exotica
                 INDICATE_FAILURE
                 return FAILURE;
             }
-
             JAC.setZero();
             for (int i = 0; i < M; i++)
             {

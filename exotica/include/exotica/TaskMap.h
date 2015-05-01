@@ -129,7 +129,7 @@ namespace exotica
 
             Eigen::VectorXdRef_ptr eff_phi_;                //!< End-effector phi (output of kinematica)
             Eigen::MatrixXdRef_ptr eff_jac_;                //!< End-effector Jacobian (output of kinematica)
-            bool getEffReferences();
+            virtual bool getEffReferences();
             int phiCnt_;
             int jacCnt_;
             Eigen::VectorXi phiFlag_;

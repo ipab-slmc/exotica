@@ -101,7 +101,7 @@ namespace exotica
 
         for (i = 0; i < N; i++)
         {
-            KDL::Frame tmp_frame(KDL::Vector(PHI(3 * i), PHI(3 * i + 1), PHI(3 * i + 2)));
+            KDL::Frame tmp_frame(KDL::Vector(EFFPHI(3 * i), EFFPHI(3 * i + 1), EFFPHI(3 * i + 2)));
             com = com + mass_[i] * tmp_frame.p;
             if (debug_->data)
             {
@@ -118,7 +118,7 @@ namespace exotica
 
         PHI.setZero();
         for (int i = 0; i < dim_; i++)
-            PHI(i) = com.data[i];
+            PHI(i) = com[i];
 
         if (debug_->data)
         {

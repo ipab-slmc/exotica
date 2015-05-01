@@ -65,6 +65,72 @@ namespace exotica
 		// Whoop whoop whoop whoop ...
 	}
 
+    EReturn AICOsolver::setGoal(const std::string & task_name, Eigen::VectorXdRefConst _goal, int t)
+    {
+        if (taskIndex.find(task_name) == taskIndex.end())
+        {
+            std::cout << "Task name " << task_name << " does not exist" << std::endl;
+            return FAILURE;
+        }
+        else
+        {
+            std::pair<int,int> id = taskIndex.at(task_name);
+            if(_goal.rows()==dim(id.first))
+            {
+                y_star.at(t).segment(id.second,dim(id.first))=_goal;
+                return SUCCESS;
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+    }
+
+    EReturn AICOsolver::setRho(const std::string & task_name, const double rho, int t)
+    {
+        if (taskIndex.find(task_name) == taskIndex.end())
+        {
+            std::cout << "Task name " << task_name << " does not exist" << std::endl;
+            return FAILURE;
+        }
+        else
+        {
+            std::pair<int,int> id = taskIndex.at(task_name);
+            rhos.at(t)(id.first)=rho;
+            return SUCCESS;
+        }
+    }
+
+    EReturn AICOsolver::getGoal(const std::string & task_name, Eigen::VectorXd& goal, int t)
+    {
+        if (taskIndex.find(task_name) == taskIndex.end())
+        {
+            std::cout << "Task name " << task_name << " does not exist" << std::endl;
+            return FAILURE;
+        }
+        else
+        {
+            std::pair<int,int> id = taskIndex.at(task_name);
+            goal = y_star.at(t).segment(id.second,dim(id.first));
+        }
+    }
+
+    EReturn AICOsolver::getRho(const std::string & task_name, double& rho, int t)
+    {
+        if (taskIndex.find(task_name) == taskIndex.end())
+        {
+            std::cout << "Task name " << task_name << " does not exist" << std::endl;
+            return FAILURE;
+        }
+        else
+        {
+            std::pair<int,int> id = taskIndex.at(task_name);
+            rho=rhos.at(t)(id.first);
+        }
+    }
+
 	EReturn AICOsolver::initDerived(tinyxml2::XMLHandle & handle)
 	{
 		tinyxml2::XMLElement* xmltmp;
@@ -97,6 +163,9 @@ namespace exotica
 		problem_ = pointer;
 		prob_ = boost::static_pointer_cast<AICOProblem>(pointer);
 		T=prob_->getT();
+        taskNames.resize(prob_->getTaskDefinitions().size());
+        dim.resize(prob_->getTaskDefinitions().size());
+        int i=0,cur_rows=0;
         for (auto& task_ : prob_->getTaskDefinitions())
         {
             if(task_.second->type().compare(std::string("TaskSqrError"))==0)
@@ -104,7 +173,14 @@ namespace exotica
                 ERROR("Task variable " << task_.first << " is not an squared error!");
                 return FAILURE;
             }
+            boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(task_.second);
+            task->taskSpaceDim(dim(i));
+            taskNames[i]=task_.first;
+            taskIndex[task_.first]= std::pair<int,int>(i,cur_rows);
+            cur_rows+=dim(i);
+            i++;
         }
+
         if(!ok(initMessages())) {INDICATE_FAILURE; return FAILURE;}
 		return SUCCESS;
 	}
@@ -232,19 +308,8 @@ namespace exotica
         }
         int m=0;
         //for (TaskDefinition_map::const_iterator it=prob_->getTaskDefinitions().begin(); it!=prob_->getTaskDefinitions().end(); ++it)
-        taskNames.resize(prob_->getTaskDefinitions().size());
-        dim.resize(prob_->getTaskDefinitions().size());
-        {
-            int i=0;
-            for (auto & it : prob_->getTaskDefinitions())
-            {
-                boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(it.second);
-                task->taskSpaceDim(dim(i));
-                taskNames[i]=it.first;
-                i++;
-            }
-            m=dim.sum();
-        }
+
+        m=dim.sum();
         if(m==0) {ERROR("No tasks were found!");return FAILURE;}
         phiBar.assign(TT,Eigen::VectorXd::Zero(m));
         JBar.assign(TT,Eigen::MatrixXd::Zero(m,dynamic?n2:n));

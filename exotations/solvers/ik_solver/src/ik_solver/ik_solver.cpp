@@ -147,18 +147,8 @@ namespace exotica
         }
 	}
 
-	IKProblem_ptr& IKsolver::getProblem()
-	{
-		return prob_;
-	}
-
-	int IKsolver::getMaxIteration()
-	{
-		return (int) maxit_->data;
-	}
-
     EReturn IKsolver::setRho(const std::string & task_name, const double rho, int t)
-	{
+    {
         if (taskIndex.find(task_name) == taskIndex.end())
         {
             std::cout << "Task name " << task_name << " does not exist" << std::endl;
@@ -170,7 +160,18 @@ namespace exotica
             rhos.at(t)(id.first)=rho;
             return SUCCESS;
         }
+    }
+
+	IKProblem_ptr& IKsolver::getProblem()
+	{
+		return prob_;
 	}
+
+	int IKsolver::getMaxIteration()
+	{
+		return (int) maxit_->data;
+	}
+
 
     EReturn IKsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution)
     {

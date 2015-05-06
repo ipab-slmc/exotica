@@ -15,14 +15,19 @@ find_package(catkin REQUIRED COMPONENTS
   aico
   ik_solver
   dynamic_reconfigure
-  eigen_conversions
   moveit_core
   moveit_ros_planning
   pluginlib
   roscpp
   tf
   task_definition
-  task_map
+  task_map 
+  eigen_conversions
+  rospy
+  std_msgs
+  message_generation
+  exotica
+  ompl_solver
 )
 
 
@@ -34,8 +39,17 @@ find_package(Boost REQUIRED system filesystem date_time thread serialization)
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 # catkin_python_setup()
+add_service_files(
+  FILES
+  ExoticaPlanning.srv
+)
 
-
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  moveit_msgs
+  exotica
+)
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -48,7 +62,7 @@ find_package(Boost REQUIRED system filesystem date_time thread serialization)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES exotica_moveit
-  CATKIN_DEPENDS aico ik_solver dynamic_reconfigure eigen_conversions moveit_core moveit_ros_planning_interface pluginlib roscpp tf task_definition task_map 
+  CATKIN_DEPENDS aico ik_solver dynamic_reconfigure eigen_conversions moveit_core moveit_ros_planning_interface pluginlib roscpp tf task_definition task_map rospy std_msgs message_generation exotica ompl_solver
   DEPENDS system_lib
 )
 
@@ -73,6 +87,10 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 add_library(moveit_exotica_planner_plugin src/EXOTicaPlannerManager.cpp)
 target_link_libraries(moveit_exotica_planner_plugin ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(ExoticaPlanningServer src/EXOTicaPlannerServiceNode.cpp)
+target_link_libraries(ExoticaPlanningServer ${catkin_LIBRARIES})
+add_dependencies(ExoticaPlanningServer exotica_moveit_gencpp)
 
 #############
 ## Install ##

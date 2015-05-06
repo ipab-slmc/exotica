@@ -2,11 +2,15 @@ cmake_minimum_required(VERSION 2.8.3)
 project(task_definition)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-add_definitions(-DEXOTICA_DEBUG_MODE) 
+set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
+set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
+set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
 )
+
+find_package(Eigen3 REQUIRED)
 
 ##find_package(EIGEN REQUIRED)
 
@@ -27,11 +31,11 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 ## Declare a cpp library
 add_library(${PROJECT_NAME} src/TaskSqrError.cpp
-                            #src/TaskTerminationCriterion.cpp
+                            src/TaskTerminationCriterion.cpp
            )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${EIGEN_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})

@@ -94,6 +94,7 @@ namespace exotica
 				if (it != type_registry_.end())       //!< If exists
 				{
 					const_cast<boost::shared_ptr<BO>&>(object).reset(it->second()); //!< Call the function associated with this entry
+
 					if (object != nullptr)
 					{
 						return SUCCESS;
@@ -158,8 +159,13 @@ namespace exotica
 						}
 						else
 						{
-							WARNING("XML element '"<<type<<"' does not map to a known type for this factory!");
-							return WARNING;
+                            std::string types;
+                            for (auto it = type_registry_.begin(); it != type_registry_.end(); it++)
+                            {
+                                types=types+(it==type_registry_.begin()?std::string("'"):std::string(", '"))+(it->first)+std::string("'");
+                            }
+                            ERROR("XML element '"<<type<<"' does not map to a known type for this factory! Supported types are:\n"<<types);
+                            return FAILURE;
 						}
 					}
 					else

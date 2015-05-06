@@ -35,7 +35,7 @@ namespace exotica
          * @brief	Concrete implementation of update method
          * @param	x	Joint space configuration
          */
-        virtual EReturn update(const Eigen::VectorXd & x, const int t);
+        virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
         /**
          * @brief	Get the task space dimension
@@ -76,8 +76,6 @@ namespace exotica
         bool initialised_, init_int_, init_vis_;	//!< Initialisation flag
         int T_; //!< Number of time steps
 
-        Eigen::MatrixXd J_;
-        Eigen::VectorXd y_;
         Eigen::VectorXi TrisQ_;
         Eigen::VectorXd VertsQ_orig_;
         Eigen::VectorXd VertsQ_;
@@ -102,30 +100,7 @@ namespace exotica
          * @param	q	Joint angles
          * @return	Jacobian matrix
          */
-        exotica::EReturn computeJacobian(const Eigen::VectorXd & q, const int t);
-        //const Eigen::Ref<const Eigen::VectorXd> &
-        //const Eigen::Ref<const Eigen::MatrixXd> &
-        //Eigen::Ref<Eigen::MatrixXd>
-        //Eigen::Ref<Eigen::VectorXd>
-
-        /**
-         * @brief FluxTriangleTriangle Computes flux between a set of field generating triangles (TisQ) and a set of flux measuring surface triangles (Tris)
-         * @param Tris Index matrix of measurment triangles (Mx3)
-         * @param Verts Positions of vertices of measurement triangles (3K)
-         * @param VertJ Jacobians of vertex positions of measurement triangles (3KxN)
-         * @param TrisQ Index matrix of field generating tringles (Jx3)
-         * @param VertsQ Positions of vertices of field generating triangles (Ix3)
-         * @param Flux Returned Flux value (1)
-         * @param FluxJ Returned Flux Jacobian (1xN)
-         */
-        void FluxTriangleTriangle(const Eigen::Ref<const Eigen::VectorXi> & Tris,
-                                  const Eigen::Ref<const Eigen::VectorXd> & Verts,
-                                  const Eigen::Ref<const Eigen::MatrixXd> & VertJ,
-                                  const Eigen::Ref<const Eigen::VectorXi> & TrisJ,
-                                  const Eigen::Ref<const Eigen::VectorXi> & TrisQ,
-                                  const Eigen::Ref<const Eigen::VectorXd> & VertsQ,
-                                  Eigen::Ref<Eigen::VectorXd> Flux,
-                                  Eigen::Ref<Eigen::MatrixXd> FluxJ);
+        exotica::EReturn computeFlux(const int t);
 
         void FluxTriangleTriangle(int* Tris,
                                   double* Verts,
@@ -141,27 +116,6 @@ namespace exotica
                                   int nTrisQ,
                                   double* FluxQ);
 
-        /**
-         * @brief FluxPointTriangle Computes flux and its Jacobian between point x and triangle abc.
-         * @param x Measurement point position
-         * @param a Triangle vertex position
-         * @param b Triangle vertex position
-         * @param c Triangle vertex position
-         * @param aJ Triangle vertex Jacobian
-         * @param bJ Triangle vertex Jacobian
-         * @param cJ Triangle vertex Jacobian
-         * @param Flux Returned flux value
-         * @param FluxJ Returned Flux Jacobian
-         */
-        void FluxPointTriangle(const Eigen::Ref<const Eigen::Vector3d> & x,
-                               const Eigen::Ref<const Eigen::Vector3d> & a,
-                               const Eigen::Ref<const Eigen::Vector3d> & b,
-                               const Eigen::Ref<const Eigen::Vector3d> & c,
-                               const Eigen::Ref<const Eigen::MatrixXd> & aJ,
-                               const Eigen::Ref<const Eigen::MatrixXd> & bJ,
-                               const Eigen::Ref<const Eigen::MatrixXd> & cJ,
-                               double& Flux,
-                               Eigen::Ref<Eigen::MatrixXd> FluxJ);
 
         inline double norm(double* a, double* b)
         {

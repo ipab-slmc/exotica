@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<ExampleConfiguration>
+  <Server name="EXOTicaServer">
+     <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
+     Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
+     <Parameters>
+
+     </Parameters>
+     
+     <!-- Other server functionalities other than parameters TODO -->
+     <PlanningMode>Optimization</PlanningMode>
+  </Server>
+
+  <AICOsolver name="MyAICOsolver">
+    <sweepMode>Symmetric</sweepMode>
+    <max_iterations>100</max_iterations>
+    <tolerance>1e-3</tolerance>
+    <damping>0.01</damping>
+    <UseBackwardMessage>0</UseBackwardMessage>
+    <dynamic>0</dynamic>
+  </AICOsolver>
+
+  <AICOProblem name="MyAICOProblem">
+    <Scene name="AICOSolverDemoScene"> <!-- Kinematic scene -->
+      <Kinematica>
+        <Urdf>/robot_description</Urdf> <!-- Robot URDF -->
+        <Root segment="base"> <!-- Base frame -->
+          <vector>0.0 0.0 0.0</vector>
+          <quaternion>1.0 0.0 0.0 0.0</quaternion>
+        </Root>        
+        <Update zero_unnamed="true"> <!-- List of controlled joints -->
+          <joint name="lwr_arm_0_joint"/>
+          <joint name="lwr_arm_1_joint"/>
+          <joint name="lwr_arm_2_joint"/>
+          <joint name="lwr_arm_3_joint"/>
+          <joint name="lwr_arm_4_joint"/>
+          <joint name="lwr_arm_5_joint"/>
+          <joint name="lwr_arm_6_joint"/>
+        </Update>
+      </Kinematica>
+    </Scene>
+
+    <Map type="EffPosition" name="AICOSolverDemoMap"> <!-- The end-effector position task map -->
+      <Scene name="AICOSolverDemoScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="lwr_arm_6_link">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+
+    <Task name="AICOSolverDemoTask" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
+      <map name="AICOSolverDemoMap"/>
+      <Rho>1.0e6</Rho>
+      <Goal>0.4 -0.1 0.5</Goal>
+    </Task>
+   
+    <!-- Problem parameters (structuring etc...) -->
+    <T>100</T>
+    <duration>5.0</duration>
+    <Qrate>1e-10</Qrate>
+    <Hrate>1.0</Hrate>
+    <Wrate>1.0</Wrate>
+    <W> 7 6 5 4 3 2 1 </W>
+  </AICOProblem>
+</ExampleConfiguration>

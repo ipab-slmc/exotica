@@ -26,59 +26,30 @@ namespace exotica
        * \brief Default Constructor
        */
       TaskSqrError();
-      virtual ~TaskSqrError(){};
+      virtual ~TaskSqrError(){}
       
       /**
-       * \brief Setter for a new goal condition
-       * @param y_star[in]  The Goal vector (in task-space co-ordinates)
-       * @return            Currently returns SUCCESS always
+       * @brief registerGoal Registers a goal reference at time t
+       * @param y_star Goal reference
+       * @param t Time step
+       * @return Indication of success
        */
-      EReturn setGoal(const Eigen::Ref<const Eigen::VectorXd> & y_star, int t=0);
-      
+      EReturn registerGoal(Eigen::VectorXdRef_ptr y_star, int t=0);
+
       /**
-       * \brief Getter for the goal vector
-       * @param y_star[out] The Goal Vector (task-space)
-       * @return            SUCCESS if ok 
-       *                    @n MMB_NIN if no goal was previously set
+       * @brief registerGoal Registers rho reference at time t
+       * @param y_star Rho reference
+       * @param t Time step
+       * @return Indication of success
        */
-      EReturn getGoal(Eigen::Ref<Eigen::VectorXd> y_star, int t=0);
-      
+      EReturn registerRho(Eigen::VectorXdRef_ptr rho, int t=0);
+
       /**
-       * \brief Setter for the intra-Task Weight Matrix W
-       * @param W[in]   The Weight Matrix..
-       * @return        Always SUCCESS
+       * @brief getRho Returns the value of rho at time step t
+       * @param t Timestep
+       * @return rho
        */
-      EReturn setWeight(const Eigen::Ref<const Eigen::MatrixXd> & W, int t=0);
-      
-      /**
-       * \brief Getter for the Weight Matrix W
-       * @param W[out]  The Weight Matrix
-       * @return        SUCCESS if there is something to return
-       *                @n MMB_NIN if the weight matrix is not initialised
-       */
-      EReturn getWeight(Eigen::Ref<Eigen::MatrixXd> W, int t=0);
-      
-      /**
-       * \brief Setter for the Inter-Task weight scalar (rho)
-       * @param rho[in]   The scalar weight
-       * @return        SUCCESS always
-       */
-      EReturn setRho(const double & rho, int t=0);
-      
-      /**
-       * \brief Getter for the Rho scalar
-       * @param rho[out]  The scalar weight
-       * @return          SUCCESS if ok
-       *                  @n MMB_NIN if not initialised
-       */
-      EReturn getRho(double & rho, int t=0);
-      
-      /**
-       * \brief	Modify the goal. Currently used for DMeshROS
-       * @param	index	Goal entry index
-       * @param	value	New goal value
-       */
-      EReturn modifyGoal(const int & index, const double & value, int t=0);
+      double getRho(int t);
 
       /**
        * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
@@ -86,6 +57,16 @@ namespace exotica
        * @return Returns success.
        */
       virtual EReturn setTimeSteps(const int T);
+
+      /**
+       * @brief setDefaultGoals Sets Goals and Rhos to default values
+       * @return Indicates success
+       */
+      EReturn setDefaultGoals(int t);
+
+      Eigen::VectorXd   y_star0_;    //!< The goal vector
+      Eigen::VectorXd   rho0_,rho1_;       //!< The scalar inter-task weight
+      bool wasFullyInitialised_;
 
     protected:
       /**
@@ -95,28 +76,21 @@ namespace exotica
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
       
-      /**
-       * \brief Resets all parameters to invalid state but does not de-allocate memory!
-       */
-      void invalidate();
-      
-    private:
       /** The internal storage **/
-      std::vector<Eigen::VectorXd>   y_star_;    //!< The goal vector
-      std::vector<Eigen::MatrixXd>   W_;         //!< The Weight matrix
-      std::vector<double>            rho_;       //!< The scalar inter-task weight
-      bool              y_star_ok_; //!< Initialised flag (goal)
-      bool              W_ok_;      //!< Initialised flag (weight)
-      bool              rho_ok_;    //!< Initialised flag (rho)
-      boost::mutex      y_lock_;    //!< Locking mechanism for the goal vector
-      boost::mutex      W_lock_;    //!< Locking mechanism for the weight matrix
-      boost::mutex      rho_lock_;  //!< Locking mechanism for rho
+      std::vector<Eigen::VectorXdRef_ptr>   y_star_;    //!< The goal vector
+      std::vector<Eigen::VectorXdRef_ptr>   rho_;       //!< The scalar inter-task weight
+
+
+
 
   };
 
   class TaskVelocitySqrError : public TaskSqrError
   {
-
+  public:
+    TaskVelocitySqrError();
   };
+  typedef boost::shared_ptr<TaskSqrError> TaskSqrError_ptr;
+  typedef boost::shared_ptr<TaskVelocitySqrError> TaskVelocitySqrError_ptr;
 }
 #endif

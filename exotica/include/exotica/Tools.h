@@ -14,7 +14,10 @@
 
 #include "tinyxml2/tinyxml2.h"
 #include <Eigen/Dense>
+#include <kdl/tree.hpp>
 #include <iostream>
+#include <boost/shared_ptr.hpp>
+#include "rapidjson/document.h"
 
 /**
  * \brief A set of debugging tools: basically these provide easy ways of checking code execution through std::cout prints
@@ -26,16 +29,72 @@
 #ifdef EXOTICA_DEBUG_MODE
 #define CHECK_EXECUTION         std::cout << "Ok in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n"; //!< With endline
 #define INDICATE_FAILURE        std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
-#define WARNING(x)							 std::clog << "Warning in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
-#define ERROR(x)								 std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
-#define INFO(x)									 std::clog << "Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
+#define WARNING(x)				std::clog << "Warning in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
+#define ERROR(x)				std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
+#define INFO(x)					std::clog << "Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
 #else
-#define CHECK_EXECUTION   //!< No operation
+#define CHECK_EXECUTION         // No operation
 #define INDICATE_FAILURE        std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
-#define WARNING(x)        //!< No operation
-#define ERROR(x)
-#define INFO(x)
+#define WARNING(x)              // No operation
+#define ERROR(x)                std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
+#define INFO(x)                 // No operation
 #endif
+
+
+namespace Eigen
+{
+
+    /// \brief Convenience wrapper for storing references to sub-matrices/vectors
+    template<typename Derived>
+    class Ref_ptr : public boost::shared_ptr<Ref<Derived> >
+    {
+    public:
+        inline Ref_ptr(): boost::shared_ptr<Ref<Derived> >()
+        {
+
+        }
+
+        inline Ref_ptr(const Eigen::Block<Derived>& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+
+        inline Ref_ptr(Eigen::Block<Derived>& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+
+        inline Ref_ptr(const Eigen::VectorBlock<Derived>& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+
+        inline Ref_ptr(Eigen::VectorBlock<Derived>& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+
+        inline Ref_ptr(Derived& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+
+        inline Ref_ptr(const Derived& other)
+        {
+            this->reset(new Ref<Derived>(other));
+        }
+    };
+
+    /// \brief Reference to sub-vector.
+    typedef Ref_ptr<VectorXd> VectorXdRef_ptr;
+    /// \brief Reference to sub-Matrix.
+    typedef Ref_ptr<MatrixXd> MatrixXdRef_ptr;
+
+    typedef Ref<VectorXd> VectorXdRef;
+    typedef const Ref<const VectorXd>& VectorXdRefConst;
+    typedef Ref<MatrixXd> MatrixXdRef;
+    typedef const Ref<const MatrixXd>& MatrixXdRefConst;
+}
 
 /**
  * \brief A convenience macro for the boost scoped lock
@@ -61,7 +120,16 @@ namespace exotica
 		MMB_NIN = 3,  //!< A member required by this function is Not INititialised correctly
 		MEM_ERR = 4,  //!< A memory error (for example when creating a new class)
 		WARNING = 50, //!< A generic warning:
-		FAILURE = 100 //!< Indicates a generic failure
+        FAILURE = 100, //!< Indicates a generic failure
+        CANCELLED = 200 //!< The process has been successful but the results should be ignored
+	};
+
+	/**
+	 * \brief	Enum for termination criterion
+	 */
+	enum ETerminate
+	{
+		TERMINATE = 0, CONTINUE = 1
 	};
 
 	bool ok(const EReturn & value);
@@ -147,6 +215,14 @@ namespace exotica
      * @return Indication of SUCCESS
      */
     EReturn loadOBJ(std::string & data,Eigen::VectorXi& tri, Eigen::VectorXd& vert);
+
+    EReturn saveMatrix(std::string file_name, const Eigen::Ref<const Eigen::MatrixXd> mat);
+
+    EReturn getJSON(const rapidjson::Value& a, Eigen::VectorXd& ret);
+    EReturn getJSON(const rapidjson::Value& a, double& ret);
+    EReturn getJSON(const rapidjson::Value& a, int& ret);
+    EReturn getJSON(const rapidjson::Value& a, std::string& ret);
+    EReturn getJSON(const rapidjson::Value& a, KDL::Frame& ret);
 
 }
 #endif

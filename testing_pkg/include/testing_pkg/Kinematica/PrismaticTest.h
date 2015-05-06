@@ -110,7 +110,7 @@ class KinematicaYoubotTest : public ::testing::Test
       }
     }
     
-    void setUpVector(const Eigen::VectorXd & mapping, const Eigen::VectorXd & full_config, KDL::JntArray & sub_config)
+    void setUpVector(Eigen::VectorXdRefConst mapping, Eigen::VectorXdRefConst full_config, KDL::JntArray & sub_config)
     {
       sub_config.resize(mapping.size());
       for (int i=0; i<mapping.size(); i++)

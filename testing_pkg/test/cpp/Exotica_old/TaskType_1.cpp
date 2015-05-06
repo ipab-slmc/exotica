@@ -7,7 +7,7 @@ ExoticaTaskTest_1::ExoticaTaskTest_1(const exotica::OptimisationParameters_t & o
   update_called = false;
 }
 
-bool ExoticaTaskTest_1::updateTask(const Eigen::VectorXd & configuration, int index)
+bool ExoticaTaskTest_1::updateTask(Eigen::VectorXdRefConst configuration, int index)
 {
   update_called = true;
   if (configuration.size() != 3) { return false; }

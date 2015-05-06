@@ -12,15 +12,11 @@
 #include "exotica/TaskDefinition.h"//!< The Component base
 #include "exotica/Factory.h"      //!< The Factory template
 #include "exotica/Tools.h"        //!< For XML-Parsing/ErrorFunction definition
-
-/**
- * \brief Convenience registrar for the Termination Criterion Type
- */
-#define REGISTER_ENDCRITERION_TYPE(TYPE, DERIV) EXOTICA_REGISTER(std::string, exotica::Terminator, TYPE, DERIV)
+#include "task_definition/TaskSqrError.h"
 
 namespace exotica
 {
-  class TaskTerminationCriterion : public TaskDefinition
+  class TaskTerminationCriterion : public TaskSqrError
   {
     public:
       /**
@@ -29,52 +25,47 @@ namespace exotica
       TaskTerminationCriterion();
       virtual ~TaskTerminationCriterion(){};
       
-      /**
-       * \brief Initialiser
-       * @post         Guaranteed to call the derived method
-       * @param handle XML handle to the node describing the termination criterion
-       * @return       SUCCESS if everything goes well (including the initDerived)
-       *               PAR_ERR if fails to initialise the criterion strength
-       *               specific error from the initDerived if applicable
-       */
-      EReturn initBase(tinyxml2::XMLHandle & handle);
       
+
       /**
-       * \brief Terminate Query: PURE VIRTUAL
-       * @pre                  Should check initialisation is ok
-       * @param terminate[out] Returns indication of termination, as either continue, soft_stop or hard_stop
-       * @return               Indication of success or otherwise
+       * @brief terminate Checks if current state should terminate
+       * @param end Returns true if state should terminate
+       * @param err Error
+       * @return Indication of success
        */
-      virtual EReturn terminate(ETerminate & end) = 0;
+      virtual EReturn terminate(bool & end, double& err, int t=0);
+
+      /**
+       * @brief registerGoal Registers threshold reference at time t
+       * @param y_star Threshold reference
+       * @param t Time step
+       * @return Indication of success
+       */
+      EReturn registerThreshold(Eigen::VectorXdRef_ptr threshold, int t=0);
+
+      /**
+       * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
+       * @param T Number of time steps (this should be set by the planning problem)
+       * @return Returns success.
+       */
+      virtual EReturn setTimeSteps(const int T);
       
+
+      Eigen::VectorXd   threshold0_;
     protected:
       /**
        * \brief Derived-Initialisation
        * @param handle XML handle for any derived parameters
        * @return       Should indicate success/failure
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle) = 0;
+      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
       
-      /**
-       * \brief Controlled access to the type of the termination condition
-       *              Should only be called if the termination condition is met to indicate the type of termination
-       * @param type  The ETerminate type (soft or hard)
-       * @return      SUCCESS if ok, MMB_NIN if the initialisation is not valid
-       */
-      EReturn getStrength(ETerminate & strength);
-      
-    private:
-      ETerminate    strength_;        //!< The 'stength' of the termination criterion
-      boost::mutex  strength_lock_;   //!< Lock for thread-safety
-      
-      /**
-       * \brief Private setter for the termination criterion: no error checking!
-       * @param strength ETerminate strength
-       */
-      void setStrength(const ETerminate & strength);
-      
+      /// \brief Threshold on squared error.
+
+      std::vector<Eigen::VectorXdRef_ptr> threshold_;
   };
 
   typedef exotica::Factory<std::string, exotica::TaskTerminationCriterion> TerminationCriterionCreator; //!< Convenience name for the EndCriterion Singleton Factory
+  typedef boost::shared_ptr<exotica::TaskTerminationCriterion> TaskTerminationCriterion_ptr;
 }
 #endif

@@ -3,20 +3,21 @@
   <Server name="EXOTicaServer">
      <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
      Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
-     <Parameters>  
+     <Parameters>
 
      </Parameters>
      
      <!-- Other server functionalities other than parameters TODO -->
+     <PlanningMode>Optimization</PlanningMode>
   </Server>
 
   <IKsolver name="IKSolverDemo">   <!-- Motion solver definition -->
-    <MaxIt>100</MaxIt>
+    <MaxIt>20</MaxIt>
     <MaxStep>0.02</MaxStep>
   </IKsolver>
 
   <IKProblem name="IKSolverDemoProblem"> <!-- Problem definition -->
-    <KScene name="IKSolverDemoScene"> <!-- Kinematic scene -->
+    <Scene name="IKSolverDemoScene"> <!-- Kinematic scene -->
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!-- Robot URDF -->
         <Root segment="base"> <!-- Base frame -->
@@ -32,29 +33,27 @@
           <joint name="lwr_arm_5_joint"/>
           <joint name="lwr_arm_6_joint"/>
         </Update>
-        <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+      </Kinematica>
+    </Scene>
+
+    <Map type="EffPosition" name="IKSolverDemoMap"> <!-- The end-effector position task map -->
+      <Scene name="IKSolverDemoScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
           <limb segment="lwr_arm_6_link">
             <vector>0.0 0.0 0.0</vector>
             <quaternion>1.0 0.0 0.0 0.0</quaternion>
           </limb>
-        </EndEffector>
-      </Kinematica>
-    </KScene>
-
-    <Map type="EffPosition" name="IKSolverDemoMap"> <!-- The end-effector position task map -->
-      <kscene name="IKSolverDemoScene"/>
+      </EndEffector>
     </Map>
 
     <Task name="IKSolverDemoTask" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
       <map name="IKSolverDemoMap"/>
-      <Rho>1.0e1</Rho>
-      <Weights dim="1">1.0</Weights>
-      <Goal>-0.05 -0.095 -0.505</Goal>
+      <Rho>1e0</Rho>
+      <Goal>0.4 -0.1 0.5</Goal>
     </Task>
 
-     
     <!-- Problem parameters: tolerance and per joint weighting -->
-    <Tolerance>0.005</Tolerance> 
+    <Tolerance>1e-6</Tolerance>
     <W> 7 6 5 4 3 2 1</W>
   </IKProblem>
 

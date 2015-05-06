@@ -11,7 +11,7 @@ class ExoticaTaskTest_1 : public exotica::TaskDefinition
   
     ExoticaTaskTest_1(const exotica::OptimisationParameters_t & optimisation_params);  //!< Constructor
     
-    virtual bool updateTask(const Eigen::VectorXd & configuration, int index=0);  //!< Task Updator
+    virtual bool updateTask(Eigen::VectorXdRefConst configuration, int index=0);  //!< Task Updator
     
     virtual bool initDerived(tinyxml2::XMLHandle & derived_element);  //!< The Initialiser
     

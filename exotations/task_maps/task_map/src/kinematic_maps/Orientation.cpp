@@ -17,6 +17,56 @@ namespace exotica
         //!< Empty constructor
     }
 
+    EReturn Orientation::initialise(const rapidjson::Value& a)
+    {
+        std::string eff;
+        if(ok(getJSON(a["linkName"],eff)))
+        {
+            KDL::Frame quat, xoffset(KDL::Vector(1e0,0.0,0.0)), yoffset(KDL::Vector(0.0,1e0,0.0)), zoffset(KDL::Vector(0.0,0.0,1e0));
+            if(ok(getJSON(a["quaternion"],quat)))
+            {
+                std::vector<std::string> tmp_eff(12);
+                tmp_eff[0]=getScene()->getRootName();
+                tmp_eff[1]=getScene()->getRootName();
+                tmp_eff[2]=eff;
+                tmp_eff[3]=eff;
+                tmp_eff[4]=getScene()->getRootName();
+                tmp_eff[5]=getScene()->getRootName();
+                tmp_eff[6]=eff;
+                tmp_eff[7]=eff;
+                tmp_eff[8]=getScene()->getRootName();
+                tmp_eff[9]=getScene()->getRootName();
+                tmp_eff[10]=eff;
+                tmp_eff[11]=eff;
+                std::vector<KDL::Frame> tmp_offset(12);
+                tmp_offset[0]=quat;
+                tmp_offset[1]=quat*xoffset;
+                tmp_offset[2]=KDL::Frame::Identity();
+                tmp_offset[3]=xoffset.Inverse();
+                tmp_offset[4]=quat;
+                tmp_offset[5]=quat*yoffset;
+                tmp_offset[6]=KDL::Frame::Identity();
+                tmp_offset[7]=yoffset.Inverse();
+                tmp_offset[8]=quat;
+                tmp_offset[9]=quat*zoffset;
+                tmp_offset[10]=KDL::Frame::Identity();
+                tmp_offset[11]=zoffset.Inverse();
+                return scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+
+    }
+
     EReturn Orientation::update(Eigen::VectorXdRefConst x, const int t)
     {
         if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
@@ -31,7 +81,7 @@ namespace exotica
                     + (EFFPHI(P2 Z) - EFFPHI(P1 Z) + EFFPHI(P4 Z) - EFFPHI(P3 Z))
                     * (EFFPHI(P2 Z) - EFFPHI(P1 Z) + EFFPHI(P4 Z) - EFFPHI(P3 Z)) );
 
-            if (updateJacobian_ && PHI(i) > 1e-50)
+            if (updateJacobian_ && PHI(i) > 1e-100)
             {
                 for (int j = 0; j < JAC.cols(); j++)
                 {
@@ -42,7 +92,7 @@ namespace exotica
                               * (EFFJAC(P2 Y, j) - EFFJAC(P1 Y, j) + EFFJAC(P4 Y, j) - EFFJAC(P3 Y, j))
                              + (EFFPHI(P2 Z) - EFFPHI(P1 Z) + EFFPHI(P4 Z) - EFFPHI(P3 Z))
                               * (EFFJAC(P2 Z, j) - EFFJAC(P1 Z, j) + EFFJAC(P4 Z, j) - EFFJAC(P3 Z, j))
-                            ) / PHI(i);
+                            ) / PHI(i)*2.0;
                 }
             }
         }

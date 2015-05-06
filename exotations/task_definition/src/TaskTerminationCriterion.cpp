@@ -9,6 +9,10 @@ namespace exotica
             threshold_(0.0)
 	{
         order=0;
+        rho0_.resize(1);
+        rho1_.resize(1);
+        threshold0_.resize(1);
+        wasFullyInitialised_ = false;
 	}
 
 	EReturn TaskTerminationCriterion::initDerived(tinyxml2::XMLHandle & handle)
@@ -19,8 +23,7 @@ namespace exotica
             if (handle.FirstChildElement("Threshold").ToElement())
             {
                 if(ok(getDouble(*(handle.FirstChildElement("Threshold").ToElement()), thr)))
-                {
-                    threshold0_.resize(1);
+                {                    
                     threshold0_(0)=thr;
                 }
                 else

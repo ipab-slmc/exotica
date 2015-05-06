@@ -29,6 +29,8 @@ namespace exotica //!< Since this is part of the core library, it will be within
        */
       virtual EReturn taskSpaceDim(int & task_dim);
 
+      virtual EReturn initialise(const rapidjson::Value& a);
+
     protected:
       /**
        * \brief Concrete implementation of TaskMap::initDerived()

@@ -28,6 +28,8 @@ namespace exotica //!< Since this is part of the core library, it will be within
        * \brief Concrete implementation of the task-space size
        */
       virtual EReturn taskSpaceDim(int & task_dim);
+
+      virtual EReturn initialise(const rapidjson::Value& a);
       
     protected:
       /**

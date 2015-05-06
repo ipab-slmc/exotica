@@ -8,6 +8,7 @@
 #ifndef IK_PROBLEM_H_
 #define IK_PROBLEM_H_
 #include <exotica/PlanningProblem.h>
+#include "task_definition/TaskSqrError.h"
 
 namespace exotica
 {
@@ -33,6 +34,8 @@ namespace exotica
 			 * @return	tolerance
 			 */
 			double getTau();
+
+            virtual EReturn reinitialise(rapidjson::Document& document);
 		protected:
 			/**
 			 * \brief Derived Initialiser (from XML): PURE VIRTUAL

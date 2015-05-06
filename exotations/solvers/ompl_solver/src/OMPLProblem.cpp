@@ -31,6 +31,112 @@ namespace exotica
 		return bounds_;
 	}
 
+    EReturn OMPLProblem::reinitialise(rapidjson::Document& document)
+    {
+        task_defs_.clear();
+        task_maps_.clear();
+        goals_.clear();
+        if(document.IsArray())
+        {
+            for (rapidjson::SizeType i=0;i<document.Size();i++)
+            {
+                rapidjson::Value& obj = document[i];
+                if(obj.IsObject())
+                {
+                    std::string constraintClass;
+                    if(ok(getJSON(obj["class"],constraintClass)))
+                    {
+                        if(knownMaps_.find(constraintClass)!=knownMaps_.end())
+                        {
+                            TaskMap_ptr taskmap;
+                            if(ok(TaskMap_fac::Instance().createObject(knownMaps_[constraintClass],taskmap)))
+                            {
+                                EReturn ret = taskmap->initialise(obj,server_,scenes_);
+                                if(ok(ret))
+                                {
+                                    if(ret!=CANCELLED)
+                                    {
+                                        std::string name=taskmap->getObjectName();
+                                        task_maps_[name]=taskmap;
+                                        TaskDefinition_ptr task;
+                                        if(ok(TaskDefinition_fac::Instance().createObject("TaskTerminationCriterion",task)))
+                                        {
+                                            TaskTerminationCriterion_ptr sqr = boost::static_pointer_cast<TaskTerminationCriterion>(task);
+                                            sqr->setTaskMap(taskmap);
+                                            int dim;
+                                            taskmap->taskSpaceDim(dim);
+                                            sqr->y_star0_.resize(dim);
+                                            sqr->rho0_(0)=1.0;
+                                            sqr->threshold0_(0)=1e-1;
+                                            sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+
+                                            // TODO: Better implementation of stting goals from JSON
+                                            sqr->y_star0_.setZero();
+
+                                            sqr->setTimeSteps(1);
+                                            sqr->wasFullyInitialised_=true;
+                                            task_defs_[name]=task;
+                                            goals_.push_back(sqr);
+                                        }
+                                        else
+                                        {
+                                            INDICATE_FAILURE;
+                                            return FAILURE;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    INDICATE_FAILURE;
+                                    return FAILURE;
+                                }
+                            }
+                            else
+                            {
+                                INDICATE_FAILURE;
+                                return FAILURE;
+                            }
+
+                        }
+                        else
+                        {
+                            WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
+                        }
+                    }
+                    else
+                    {
+                        INDICATE_FAILURE;
+                        return FAILURE;
+                    }
+                }
+                else
+                {
+                    INDICATE_FAILURE;
+                    return FAILURE;
+                }
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+
+        robot_model::RobotModelPtr model = scenes_.begin()->second->getRobotModel();
+        std::vector<std::string> joints = scenes_.begin()->second->getSolver().getJointNames();
+        int n=joints.size();
+        bounds_.resize(n*2);
+
+        for(int i=0;i<n;i++)
+        {
+            boost::shared_ptr<urdf::JointLimits> lim=model->getURDF()->getJoint(joints[i])->limits;
+            bounds_[i]=lim->lower;
+            bounds_[i+n]=lim->upper;
+        }
+        return SUCCESS;
+
+    }
+
 	EReturn OMPLProblem::initDerived(tinyxml2::XMLHandle & handle)
 	{
 		for (auto goal : task_defs_)

@@ -181,6 +181,15 @@ namespace exotica
             i++;
         }
 
+        for (auto & it : prob_->getScenes())
+        {
+            if(!ok(it.second->activateTaskMaps()))
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+
         if(!ok(initMessages())) {INDICATE_FAILURE; return FAILURE;}
 		return SUCCESS;
 	}
@@ -199,6 +208,7 @@ namespace exotica
 
 	EReturn AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init, Eigen::MatrixXd & solution)
 	{
+        ros::Time startTime = ros::Time::now();
         ROS_WARN_STREAM("AICO: Setting up the solver");
 		updateCount=0;
         sweep=-1;
@@ -221,12 +231,14 @@ namespace exotica
 		Eigen::MatrixXd sol(T+1,n);
 		for(int tt=0;tt<=T;tt++) {sol.row(tt)=q[tt];}
 		solution=sol;
-    return SUCCESS;
+        planning_time_=ros::Time::now()-startTime;
+        return SUCCESS;
 	}
 
     EReturn AICOsolver::initMessages()
 	{
 		if(prob_==nullptr) {ERROR("Problem definition is a NULL pointer!");return FAILURE;}
+        // TODO: Issue #4
         n=prob_->getScenes().begin()->second->getNumJoints();
         int n2=n/2;
 		if(dynamic)

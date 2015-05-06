@@ -144,6 +144,7 @@ namespace exotica
         std::vector<Eigen::VectorXd> rhos; //!< Task precisions
         std::map<std::string, std::pair<int, int> > taskIndex;
         Eigen::VectorXi dim; //!< Task dimension
+        ros::Duration planning_time_;
 
 	protected:
 		/**

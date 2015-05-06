@@ -9,6 +9,37 @@ namespace exotica
         //!< Empty constructor
     }
 
+    EReturn Distance::initialise(const rapidjson::Value& a)
+    {
+        std::string eff;
+        if(ok(getJSON(a["linkName"],eff)))
+        {
+            std::vector<std::string> tmp_eff(2);
+            std::vector<KDL::Frame> tmp_offset(2);
+            Eigen::VectorXd rel;
+            if(ok(getJSON(a["pointInLink"]["__ndarray__"],rel)) && rel.rows()==3 && ok(getJSON(a["referenceFrame"],tmp_offset[1])))
+            {
+                tmp_offset[0]=KDL::Frame(KDL::Vector(rel(0),rel(1),rel(2)));
+
+                tmp_eff[0]=eff;
+                tmp_eff[1]=getScene()->getRootName();
+
+                return scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+
+    }
+
     EReturn Distance::update(Eigen::VectorXdRefConst x, const int t)
     {
         if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}

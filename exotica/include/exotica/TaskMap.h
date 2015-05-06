@@ -103,6 +103,9 @@ namespace exotica
 
             Scene_ptr getScene();
 
+            virtual EReturn initialise(const rapidjson::Value& a);
+            EReturn initialise(const rapidjson::Value& a, Server_ptr & server, const Scene_map & scene_ptr);
+
             bool updateJacobian_;
 
             std::vector<Eigen::VectorXdRef_ptr> phi_;       //!< The Task-space co-ordinates

@@ -58,6 +58,7 @@ namespace exotica
 			IKProblem_ptr& getProblem();
 
             double error;
+            ros::Duration planning_time_;
 
 			int getMaxIteration();
 		protected:
@@ -92,7 +93,7 @@ namespace exotica
             int size_;	//Configuration size
             Eigen::MatrixXd inv_jacobian;
             Eigen::VectorXd diag;
-            ros::Duration planning_time_;
+
             int T;
             bool initialised_;
 	};

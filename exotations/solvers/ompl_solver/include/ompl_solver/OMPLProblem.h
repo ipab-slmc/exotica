@@ -33,6 +33,8 @@ namespace exotica
 			std::vector<TaskTerminationCriterion_ptr>& getGoals();
 			std::vector<double>& getBounds();
 
+            virtual EReturn reinitialise(rapidjson::Document& document);
+
 		protected:
 			/**
 			 * \brief Derived Initialiser (from XML): PURE VIRTUAL

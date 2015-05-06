@@ -64,6 +64,10 @@ namespace exotica
        */
       EReturn setDefaultGoals(int t);
 
+      Eigen::VectorXd   y_star0_;    //!< The goal vector
+      Eigen::VectorXd   rho0_,rho1_;       //!< The scalar inter-task weight
+      bool wasFullyInitialised_;
+
     protected:
       /**
        * \brief Concrete implementation of the initDerived
@@ -76,8 +80,8 @@ namespace exotica
       std::vector<Eigen::VectorXdRef_ptr>   y_star_;    //!< The goal vector
       std::vector<Eigen::VectorXdRef_ptr>   rho_;       //!< The scalar inter-task weight
 
-      Eigen::VectorXd   y_star0_;    //!< The goal vector
-      Eigen::VectorXd   rho0_;       //!< The scalar inter-task weight
+
+
 
   };
 

@@ -26,6 +26,7 @@
 #include <exotica/StringList.h>
 #include <exotica/BoolList.h>
 #include <exotica/Vector.h>
+#include <exotica/Tools.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
 namespace exotica

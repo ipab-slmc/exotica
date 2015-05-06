@@ -71,6 +71,8 @@ namespace exotica
 
 			void setMaxPlanningTime(double t);
 
+            ros::Duration planning_time_;
+
 		protected:
 			/**
 			 * \brief Registers default planners

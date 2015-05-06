@@ -51,6 +51,7 @@ namespace exotica
       virtual EReturn setTimeSteps(const int T);
       
 
+      Eigen::VectorXd   threshold0_;
     protected:
       /**
        * \brief Derived-Initialisation
@@ -60,7 +61,7 @@ namespace exotica
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
       
       /// \brief Threshold on squared error.
-      Eigen::VectorXd   threshold0_;
+
       std::vector<Eigen::VectorXdRef_ptr> threshold_;
   };
 

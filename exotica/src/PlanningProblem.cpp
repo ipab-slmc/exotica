@@ -4,11 +4,21 @@ namespace exotica
 {
     PlanningProblem::PlanningProblem()
     {
+
+    }
+
+    EReturn PlanningProblem::reinitialise(rapidjson::Document& document)
+    {
+        ERROR("This has to implemented in the derived class!");
+        return FAILURE;
     }
 
     EReturn PlanningProblem::initBase(tinyxml2::XMLHandle & handle,
             const Server_ptr & server)
     {
+        knownMaps_["PositionConstraint"]="Distance";
+        knownMaps_["QuatConstraint"]="Orientation";
+
         Object::initBase(handle, server);
         if (!server)
         {
@@ -55,6 +65,7 @@ namespace exotica
                 break;
             }
             scenes_.at(name)->initialisation(xml_handle, server_);
+            count++;
             xml_handle = xml_handle.NextSiblingElement("Scene");
         }
         //!< No maps defined:

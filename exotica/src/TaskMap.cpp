@@ -2,6 +2,7 @@
 
 namespace exotica
 {
+
     TaskMap::TaskMap() : updateJacobian_(true)
     {
 
@@ -10,6 +11,33 @@ namespace exotica
     Scene_ptr TaskMap::getScene()
     {
         return scene_;
+    }
+
+    EReturn TaskMap::initialise(const rapidjson::Value& a)
+    {
+        ERROR("This has to be implemented in the derived class!");
+        return FAILURE;
+    }
+
+    EReturn TaskMap::initialise(const rapidjson::Value& a, Server_ptr & server, const Scene_map & scene_ptr)
+    {
+        if(ok(getJSON(a["class"],object_name_)))
+        {
+            if (!server)
+            {
+                INDICATE_FAILURE
+                return FAILURE;
+            }
+            object_name_=object_name_+std::to_string((unsigned long)this);
+            server_ = server;
+            scene_ = scene_ptr.begin()->second;
+            return initialise(a);
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
     }
 
     EReturn TaskMap::initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,

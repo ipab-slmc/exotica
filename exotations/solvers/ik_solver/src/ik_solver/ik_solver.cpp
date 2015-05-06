@@ -88,7 +88,6 @@ namespace exotica
                 else
                 {
                     TaskSqrError_ptr task = boost::static_pointer_cast<TaskSqrError>(it.second);
-                    task->setTimeSteps(T);
                     task->taskSpaceDim(dim.at(t)(i));
                 }
                 i++;

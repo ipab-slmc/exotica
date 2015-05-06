@@ -16,6 +16,8 @@
 #include <string>   //!< C++ type strings
 #include <exotica/Tools.h>
 #include <exotica/Server.h>
+#include "rapidjson/document.h"
+
 namespace exotica
 {
 	template<typename I, typename BO> class Factory;
@@ -32,14 +34,12 @@ namespace exotica
 					ns_("")
 			{
 				//!< Empty constructor
-			}
-			;
+            }
 
 			virtual ~Object()
 			{
 
-			}
-			;
+            }
 
 			/**
 			 * \brief Type Information wrapper: must be virtual so that it is polymorphic...
@@ -56,11 +56,11 @@ namespace exotica
 				free(temp);
 				return name;
 			}
-			;
+
 			std::string getObjectName()
 			{
 				return object_name_;
-            };
+            }
 
             virtual EReturn initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server)
 			{
@@ -71,11 +71,10 @@ namespace exotica
                 }
 				return SUCCESS;
 			}
-			;
 
 			//	Namespace, i.e. problem/scene/...etc
             std::string ns_;
 			std::string object_name_;
-	};
+    };
 }
 #endif

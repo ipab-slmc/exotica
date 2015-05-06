@@ -9,11 +9,17 @@ namespace exotica
     TaskVelocitySqrError::TaskVelocitySqrError()
     {
         order=1;
+        rho0_.resize(1);
+        rho1_.resize(1);
+        wasFullyInitialised_ = false;
     }
 
     TaskSqrError::TaskSqrError()
     {
         order=0;
+        rho0_.resize(1);
+        rho1_.resize(1);
+        wasFullyInitialised_ = false;
     }
 
     EReturn TaskSqrError::initDerived(tinyxml2::XMLHandle & handle)
@@ -21,13 +27,12 @@ namespace exotica
         //!< Temporaries
         Eigen::VectorXd y_star; //!< The Goal vector
         double          rho;
-
         // Load Rho
         if (handle.FirstChildElement("Rho").ToElement())
         {
           if(ok(getDouble(*(handle.FirstChildElement("Rho").ToElement()), rho)))
           {
-              rho0_.resize(1);
+
               rho0_(0)=rho;
           }
           else
@@ -97,6 +102,7 @@ namespace exotica
 
     EReturn TaskSqrError::registerGoal(Eigen::VectorXdRef_ptr y_star, int t)
     {
+        if(wasFullyInitialised_) (*y_star)=(*(y_star_.at(t)));
         y_star_.at(t)=y_star;
         return SUCCESS;
     }
@@ -104,14 +110,18 @@ namespace exotica
 
     EReturn TaskSqrError::registerRho(Eigen::VectorXdRef_ptr rho, int t)
     {
+        if(wasFullyInitialised_) (*rho)=(*(rho_.at(t)));
         rho_.at(t)=rho;
         return SUCCESS;
     }
 
     EReturn TaskSqrError::setDefaultGoals(int t)
     {
-        (*(y_star_.at(t)))=y_star0_;
-        (*(rho_.at(t)))=rho0_;
+        if(!wasFullyInitialised_)
+        {
+            (*(y_star_.at(t)))=y_star0_;
+            (*(rho_.at(t)))=rho0_;
+        }
         return SUCCESS;
     }
 

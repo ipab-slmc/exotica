@@ -49,7 +49,6 @@
     <Task name="LeftHandPosition" type="TaskTerminationCriterion">
       <map name="LeftHandPositionMap"/>
       <Rho>1.0</Rho>
-      <Weights dim="1">1.0</Weights>
       <Goal>0.4 -0.1 0.5</Goal>
       <Threshold>1e-2</Threshold>
     </Task>

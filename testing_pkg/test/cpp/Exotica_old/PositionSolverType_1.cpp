@@ -9,7 +9,7 @@ PositionSolverType_1::PositionSolverType_1(const exotica::OptimisationParameters
   clearFlags();
 }
 
-bool PositionSolverType_1::solve(const Eigen::VectorXd & init_conf, Eigen::VectorXd & solution_vector)
+bool PositionSolverType_1::solve(Eigen::VectorXdRefConst init_conf, Eigen::VectorXd & solution_vector)
 {
   solution_vector = init_conf; //!< Just copy one into the other
   return true;

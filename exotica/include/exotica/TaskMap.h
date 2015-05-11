@@ -25,6 +25,11 @@
  */
 #define REGISTER_TASKMAP_TYPE(TYPE, DERIV) EXOTICA_REGISTER(std::string, exotica::TaskMap, TYPE, DERIV)
 
+#define PHI (*(phi_.at(t)))
+#define JAC (*(jac_.at(t)))
+#define EFFPHI (*eff_phi_)
+#define EFFJAC (*eff_jac_)
+
 namespace exotica
 {
 	class TaskMap: public Object
@@ -37,7 +42,7 @@ namespace exotica
 			virtual ~TaskMap()
 			{
 			}
-			;
+
 
 			/**
 			 * \brief Initialiser (from XML): mainly resolves the KinematicScene pointer
@@ -62,23 +67,23 @@ namespace exotica
 			 * @param  x  The State-space vector for the robot
 			 * @return    Should indicate success/otherwise using the Exotica error types
 			 */
-			virtual EReturn update(const Eigen::VectorXd & x, const int t) = 0;
+            virtual EReturn update(Eigen::VectorXdRefConst x, const int t) = 0;
 
-			/**
-			 * \brief Getter for the task-space vector
-			 * @param  y  Placeholder for storing the task-space vector
-			 * @return    Indication of success or otherwise: SUCCESS if ok
-			 *                                                MMB_NIN if the phi-vector is not correctly defined
-			 */
-			EReturn phi(Eigen::Ref<Eigen::VectorXd> y, int t = 0);
+            /**
+             * @brief registerPhi Registers a memory location for the output of phi at time t
+             * @param y Reference to memory location to be registered
+             * @param t Time step
+             * @return Indication of success
+             */
+            EReturn registerPhi(Eigen::VectorXdRef_ptr y, int t);
 
-			/**
-			 * \brief Getter for the task-space velocity matrix
-			 * @param  ydot Placeholder for the Jacobian
-			 * @return      Indication of success or otherwise: SUCCESS if ok
-			 *                                                  MMB_NIN if the jacobian is not correctly computed
-			 */
-			EReturn jacobian(Eigen::Ref<Eigen::MatrixXd> J, int t = 0);
+            /**
+             * @brief registerJacobian egisters a memory location for the output of Jacobian at time t
+             * @param J Reference to memory location to be registered
+             * @param t Time step
+             * @return Indication of success
+             */
+            EReturn registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
 
 			/**
 			 * \brief Indicator of the Task-Dimension size: PURE VIRTUAL
@@ -94,26 +99,19 @@ namespace exotica
 			 */
 			virtual EReturn setTimeSteps(const int T);
 
+            bool isRegistered(int t);
+
             Scene_ptr getScene();
+
+            virtual EReturn initialise(const rapidjson::Value& a);
+            EReturn initialise(const rapidjson::Value& a, Server_ptr & server, const Scene_map & scene_ptr);
+
+            bool updateJacobian_;
+
+            std::vector<Eigen::VectorXdRef_ptr> phi_;       //!< The Task-space co-ordinates
+            std::vector<Eigen::MatrixXdRef_ptr> jac_;       //!< The Task Jacobian matrix
+
 		protected:
-			/**
-			 * \brief Setter for the Task-space mapping: enforces thread-safety
-			 * @param  y  The task-space vector
-			 * @return    Always returns SUCCESS
-			 */
-			EReturn setPhi(const Eigen::Ref<const Eigen::VectorXd> & y, int t = 0);
-
-			/**
-			 * \brief Setter for the Task-space Velocity (Jacobian): enforces thread-safety
-			 * @param  ydot  The task-space Jacobian
-			 * @return       Always returns SUCCESS
-			 */
-			EReturn setJacobian(const Eigen::Ref<const Eigen::MatrixXd> & J, int t = 0);
-
-			/**
-			 * \brief Invalidates the phi and jacobian matrices: does not de-allocate memory!
-			 */
-			void invalidate();
 
 			/**
 			 * \brief Initialises members of the derived type: PURE_VIRTUAL
@@ -128,16 +126,19 @@ namespace exotica
 			Scene_ptr scene_;  //!< The Scene object (smart-pointer):
 			boost::mutex scene_lock_;  //!< Synchronisation for the scene object
 			Server_ptr server_; //!< Pointer to EXOTica parameter server;
-		private:
 			/**
 			 * \brief Private data members for information hiding and thread-safety
 			 */
-			std::vector<Eigen::VectorXd> phi_;       //!< The Task-space co-ordinates
-			std::vector<Eigen::MatrixXd> jac_;       //!< The Jacobian matrix
-			bool phi_ok_;    //!< Indicates that the phi matrix contains valid data
-			bool jac_ok_;    //!< Indicates that the jacobian contains valid data
-			boost::mutex phi_lock_;  //!< Lock around the Y-Vector
-			boost::mutex jac_lock_;  //!< Lock around the Jacobian
+
+            Eigen::VectorXdRef_ptr eff_phi_;                //!< End-effector phi (output of kinematica)
+            Eigen::MatrixXdRef_ptr eff_jac_;                //!< End-effector Jacobian (output of kinematica)
+            virtual bool getEffReferences();
+            int phiCnt_;
+            int jacCnt_;
+            Eigen::VectorXi phiFlag_;
+            Eigen::VectorXi jacFlag_;
+            Eigen::VectorXd phi0_;
+            Eigen::MatrixXd jac0_;
 	};
 
 	//!< Typedefines for some common functionality

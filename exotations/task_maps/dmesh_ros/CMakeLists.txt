@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(dmesh_ros)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
+
 find_package(catkin REQUIRED COMPONENTS
   exotica
   roscpp
@@ -15,8 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
-
-
 
 
 catkin_package(

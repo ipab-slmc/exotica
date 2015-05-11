@@ -12,7 +12,7 @@ class PositionSolverType_1 : public exotica::PositionSolver
   
     PositionSolverType_1(const exotica::OptimisationParameters_t & params);
     
-    virtual bool solve(const Eigen::VectorXd & init_conf, Eigen::VectorXd & solution_vector);
+    virtual bool solve(Eigen::VectorXdRefConst init_conf, Eigen::VectorXd & solution_vector);
     
     void clearFlags() { derived_called = false; }
     

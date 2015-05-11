@@ -15,6 +15,8 @@
 #include "exotica/MotionSolver.h"
 #include "exotica/PlanningProblem.h"
 #include "exotica/Server.h"
+#include "rapidjson/document.h"
+
 namespace exotica
 {
   class Initialiser : public Object
@@ -55,6 +57,9 @@ namespace exotica
        * @return Indication of success
        */
       EReturn listSolversAndProblems(const std::string & file_name, std::vector<std::string>& problems, std::vector<std::string>& solvers);
+
+      EReturn initialiseProblemJSON(PlanningProblem_ptr problem, const std::string& constraints, const std::string& poses);
+
     private:
 
       /** Class Parameters **/

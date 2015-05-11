@@ -69,6 +69,7 @@ namespace exotica
 
 	EReturn OMPLsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution)
 	{
+        ros::Time startTime = ros::Time::now();
 		finishedSolving_ = false;
 		ompl::base::ScopedState<> ompl_start_state(state_space_);
 		if (ok(state_space_->copyToOMPLState(ompl_start_state.get(), q0)))
@@ -94,18 +95,21 @@ namespace exotica
 					return FAILURE;
 
 				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution);
+                planning_time_=ros::Time::now()-startTime;
 				return SUCCESS;
 			}
 			else
 			{
 				finishedSolving_ = true;
 				postSolve();
+                planning_time_=ros::Time::now()-startTime;
 				return FAILURE;
 			}
 		}
 		else
 		{
 			ERROR("Can't copy start state!");
+            planning_time_=ros::Time::now()-startTime;
 			return FAILURE;
 		}
 
@@ -265,6 +269,16 @@ namespace exotica
 		}
 		problem_ = pointer;
 		prob_ = boost::static_pointer_cast<OMPLProblem>(pointer);
+
+        for (auto & it : prob_->getScenes())
+        {
+            if(!ok(it.second->activateTaskMaps()))
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+
 		state_space_ = OMPLStateSpace::FromProblem(prob_);
 		ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
 		ob::GoalPtr goal = constructGoal();

@@ -22,12 +22,14 @@ namespace exotica //!< Since this is part of the core library, it will be within
       /**
        * \brief Concrete implementation of the update method
        */
-      virtual EReturn update(const Eigen::VectorXd & x, const int t);
+      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
       
       /**
        * \brief Concrete implementation of the task-space size
        */
       virtual EReturn taskSpaceDim(int & task_dim);
+
+      virtual EReturn initialise(const rapidjson::Value& a);
       
     protected:
       /**
@@ -35,10 +37,6 @@ namespace exotica //!< Since this is part of the core library, it will be within
        * @return  Always returns success
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-
-  private:
-      Eigen::VectorXd phi_tmp;
-      Eigen::MatrixXd jac_tmp;
   };
 }
 

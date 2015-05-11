@@ -92,7 +92,9 @@ namespace exotica
              * @param t time step
              * @return  Indication of success TODO
              */
-            virtual EReturn update(const Eigen::VectorXd & x, const int t);
+            virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+
+            virtual EReturn reinitialise(rapidjson::Document& document);
 
 		protected:
 			/**
@@ -108,6 +110,7 @@ namespace exotica
 			double Q_rate; //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
 			double H_rate; //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)
 			double W_rate; //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+
 
 	};
 

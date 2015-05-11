@@ -356,7 +356,7 @@ namespace exotica
 		return initialised_;
 	}
 
-	bool MeshGraph::updateLinks(const Eigen::VectorXd & link_poses)
+    bool MeshGraph::updateLinksRef(Eigen::VectorXdRefConst link_poses)
 	{
 		//	Check size, assume they are in correct order
 		if (robot_size_ != link_poses.rows() / 3 || link_poses.rows() % 3 != 0)

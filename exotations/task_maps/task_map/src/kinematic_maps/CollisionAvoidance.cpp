@@ -159,14 +159,15 @@ namespace exotica
                 close_.points.push_back(p2);
                 eigen2Point(c1s[i], p1);
                 eigen2Point(c2s[i], p2);
-                centre_.points.push_back(p1);
-                centre_.points.push_back(p2);
+                robot_centre_.points.push_back(p1);
+		world_centre_.points.push_back(p2);
     #endif
             }
 
     #ifdef C_DEBUG
             close_pub_.publish(close_);
-            centre_pub_.publish(centre_);
+            robot_centre_pub_.publish(robot_centre_);
+	    world_centre_pub_.publish(world_centre_);
             ros::spinOnce();
     #endif
 

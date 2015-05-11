@@ -24,7 +24,7 @@
  * @param prec  The precision at which we want to fail
  * @return      True if equal, false if something is wrong
  */
-inline bool compareVectors(const Eigen::VectorXd & vec_1, const Eigen::VectorXd & vec_2, double prec=TOLERANCE)
+inline bool compareVectors(Eigen::VectorXdRefConst vec_1, Eigen::VectorXdRefConst vec_2, double prec=TOLERANCE)
 {
   if (vec_1.size() != vec_2.size()) { return false; }  //!< If not equal size then definitely not equal
   for (int i=0; i<vec_1.size(); i++)

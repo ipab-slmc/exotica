@@ -43,25 +43,21 @@ namespace exotica
       EReturn initBase(tinyxml2::XMLHandle & handle, const TaskMap_map & map_list);
       
       /**
-       * \brief Wrapper for the underlying phi
-       * @param  y  Placeholder for storing the task-space vector
-       * @return    Indication of success or otherwise: SUCCESS if ok
-       *                                                MEM_ERR if the Pointer fails to dereference
-       *                                                MMB_NIN if the phi-vector is not correctly defined
+       * @brief registerPhi Registers a memory location for the output of phi at time t
+       * @param y Reference to memory location to be registered
+       * @param t Time step
+       * @return Indication of success
        */
-      EReturn phi(Eigen::Ref<Eigen::VectorXd> y);
-      EReturn phi(Eigen::Ref<Eigen::VectorXd> y, int t);
-      
+      EReturn registerPhi(Eigen::VectorXdRef_ptr y, int t);
+
       /**
-       * \brief Wrapper around the task-space velocity matrix
-       * @param  J Placeholder for the Jacobian
-       * @return      Indication of success or otherwise: SUCCESS if ok
-       *                                                  MEM_ERR if pointer is incorrect
-       *                                                  MMB_NIN if the jacobian is not correctly computed
+       * @brief registerJacobian egisters a memory location for the output of Jacobian at time t
+       * @param J Reference to memory location to be registered
+       * @param t Time step
+       * @return Indication of success
        */
-      EReturn jacobian(Eigen::Ref<Eigen::MatrixXd> J);
-      EReturn jacobian(Eigen::Ref<Eigen::MatrixXd> J, int t);
-      
+      EReturn registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
+           
       /**
 			 * \brief Wrapper for the underlying task dimension getter
 			 * @param  task_dim Task dimension to be returned
@@ -89,6 +85,8 @@ namespace exotica
        */
       TaskMap_ptr getTaskMap();
 
+      bool order;
+
     protected:
       /**
        * \brief Initialises members of the derived type: PURE_VIRTUAL
@@ -97,7 +95,6 @@ namespace exotica
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle) = 0;
       
-    private:
       boost::shared_ptr<TaskMap>  task_map_;  //!< Shared pointer to a Task Map from which it gets its inputs
       boost::mutex                map_lock_;  //!< Mapping Lock for synchronisation
       

@@ -3,31 +3,27 @@
 REGISTER_TASKMAP_TYPE("EffPosition", exotica::EffPosition);
 REGISTER_FOR_XML_TEST("EffPosition", "EffPosition.xml");
 
-exotica::EffPosition::EffPosition()
+namespace exotica
 {
-	//!< Empty constructor
-}
+    EffPosition::EffPosition()
+    {
+        //!< Empty constructor
+    }
 
-exotica::EReturn exotica::EffPosition::update(const Eigen::VectorXd & x, const int t)
-{
-	//!< Prepare
-	invalidate();
-	LOCK(scene_lock_);
-
-	//!< Check
-	if (scene_ == nullptr)
-	{
-        INDICATE_FAILURE;
-		return MMB_NIN;
-	}
-
-    if (ok(scene_->getForwardMap(object_name_, phi_tmp)))
-	{
-        if(ok(scene_->getJacobian(object_name_, jac_tmp)))
+    EReturn EffPosition::initialise(const rapidjson::Value& a)
+    {
+        std::vector<std::string> tmp_eff(1);
+        if(ok(getJSON(a["linkName"],tmp_eff[0])))
         {
-            if(ok(setPhi(phi_tmp, t)) && ok(setJacobian(jac_tmp, t)))
+            Eigen::VectorXd rel;
+            if(ok(getJSON(a["pointInLink"]["__ndarray__"],rel)) && rel.rows()==3)
             {
-                return SUCCESS;
+                std::vector<KDL::Frame> tmp_offset(1);
+                tmp_offset[0]=KDL::Frame::Identity();
+                tmp_offset[0].p[0]=rel(0);
+                tmp_offset[0].p[1]=rel(1);
+                tmp_offset[0].p[2]=rel(2);
+                return scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
             }
             else
             {
@@ -40,34 +36,37 @@ exotica::EReturn exotica::EffPosition::update(const Eigen::VectorXd & x, const i
             INDICATE_FAILURE;
             return FAILURE;
         }
+
     }
-    else
+
+    EReturn EffPosition::update(Eigen::VectorXdRefConst x, const int t)
     {
-        INDICATE_FAILURE;
-		return FAILURE;
-	}
+        if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
+        PHI=EFFPHI;
+        if(updateJacobian_)
+        {
+            JAC=EFFJAC;
+        }
+        return SUCCESS;
+    }
 
+    EReturn EffPosition::initDerived(tinyxml2::XMLHandle & handle)
+    {
+        return SUCCESS;
+    }
 
-}
-
-exotica::EReturn exotica::EffPosition::initDerived(tinyxml2::XMLHandle & handle)
-{
-    phi_tmp.resize(scene_->getMapSize(object_name_) * 3);
-    jac_tmp.resize(scene_->getMapSize(object_name_) * 3, scene_->getNumJoints());
-	return SUCCESS;
-}
-
-exotica::EReturn exotica::EffPosition::taskSpaceDim(int & task_dim)
-{
-	if (!scene_)
-	{
-		task_dim = -1;
-		ERROR("Kinematic scene has not been initialized!");
-		return exotica::MMB_NIN;
-	}
-	else
-	{
-		task_dim = scene_->getMapSize(object_name_) * 3;
-	}
-	return exotica::SUCCESS;
+    EReturn EffPosition::taskSpaceDim(int & task_dim)
+    {
+        if (!scene_)
+        {
+            task_dim = -1;
+            ERROR("Kinematic scene has not been initialized!");
+            return MMB_NIN;
+        }
+        else
+        {
+            task_dim = scene_->getMapSize(object_name_) * 3;
+        }
+        return SUCCESS;
+    }
 }

@@ -30,7 +30,7 @@ namespace exotica
 			 * @param	solution	The solution
 			 * @param	time		Planning time
 			 */
-			EReturn solve(const Eigen::VectorXd & q0, const std::string & xml_file,
+			EReturn solve(Eigen::VectorXdRefConst q0, const std::string & xml_file,
 					Eigen::MatrixXd & solution, double time);
 
 		private:
@@ -49,7 +49,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn vectorEigenToExotica(const Eigen::VectorXd & eigen, exotica::Vector & exotica)
+	EReturn vectorEigenToExotica(Eigen::VectorXdRefConst eigen, exotica::Vector & exotica)
 	{
 		exotica.data.resize(eigen.rows());
 		for (int i = 0; i < eigen.rows(); i++)

@@ -16,12 +16,12 @@ namespace exotica
        * \brief Default constructor
        */
       Identity();
-      virtual ~Identity(){};
+      virtual ~Identity(){}
       
       /**
        * \brief Concrete implementation of the update method
        */
-      virtual EReturn update(const Eigen::VectorXd & x, const int t);
+      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
       
       /**
        * \brief Concrete implementation of the task-space size

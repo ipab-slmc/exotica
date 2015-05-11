@@ -14,6 +14,7 @@
 #include "exotica/TaskDefinition.h"
 #include "exotica/Server.h"
 #include "exotica/Scene.h"
+#include "exotica/Tools.h"
 #include "tinyxml2/tinyxml2.h"
 
 #include <vector>
@@ -47,7 +48,7 @@ namespace exotica
              * @param t Time step (not used by most task maps)
 			 * @return  Indication of success TODO
 			 */
-            virtual EReturn update(const Eigen::VectorXd & x, const int t);
+            virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
 			/**
 			 * \brief Returns the reference to the task definition map.
@@ -61,6 +62,8 @@ namespace exotica
 			 */
 			TaskMap_map& getTaskMaps();
 
+            Scene_map& getScenes();
+
 			/**
 			 * \brief Update the kinematic scene
 			 * @param scene	The planning scene from moveit
@@ -73,7 +76,11 @@ namespace exotica
 			 */
 			EReturn setScene(const planning_scene::PlanningSceneConstPtr & scene);
 			EReturn setScene(const moveit_msgs::PlanningSceneConstPtr & scene);
-			Scene_map scenes_;  //!< Kinematic scene(s) indexed by name
+            Scene_map scenes_;  //!< Kinematic scene(s) indexed by name
+
+            Eigen::VectorXd startState;
+
+            virtual EReturn reinitialise(rapidjson::Document& document);
 
 		protected:
 
@@ -87,6 +94,7 @@ namespace exotica
 			Server_ptr server_; //!< Pointer to EXOTica parameter server;
 			TaskMap_map task_maps_; //!< The set of taskmaps we will be using, which will be shared between task-definitions
 			TaskDefinition_map task_defs_; //!< The set of task definition objects
+            std::map<std::string,std::string> knownMaps_;
 	};
 	
 	typedef Factory<std::string, PlanningProblem> PlanningProblem_fac;

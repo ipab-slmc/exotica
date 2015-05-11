@@ -12,7 +12,7 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
         Server_ptr ser;
         PlanningProblem_ptr prob;
 
-	// Get config file path, problem name and solver name from launch file
+        // Get config file path, problem name and solver name from launch file
         std::string problem_name, solver_name, config_name;
         nh_.getParam("config", config_name);
         nh_.getParam("problem", problem_name);
@@ -29,28 +29,60 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
             Eigen::MatrixXd solution;
             // Cast the generic solver instance into IK solver
             exotica::IKsolver_ptr solIK=boost::static_pointer_cast<exotica::IKsolver>(sol); 
-            ROS_INFO_STREAM("Calling solve() in infinite loop");
+            ROS_INFO_STREAM("Calling solve() in an infinite loop");
 
+            // Publish the states to rviz
+            jointStatePublisher_ = nhg_.advertise<sensor_msgs::JointState>("/joint_states", 1);
+            sensor_msgs::JointState jnt;
+            jnt.name = prob->scenes_.begin()->second->getSolver().getJointNames();
+            jnt.position.resize(jnt.name.size());
+            double t = 0.0;
+
+            while(ros::ok())
             {
-                while(ros::ok())
+                ros::WallTime start_time = ros::WallTime::now();
+
+                // Update the goal if necessary
+                // e.g. figure eight
+                Eigen::VectorXd goal(3);
+                goal << 0.4, -0.1+sin(t*2.0*M_PI*0.5)*0.1, 0.5+sin(t*M_PI*0.5)*0.2;
+                solIK->setGoal("IKSolverDemoTask",goal,0);
+
+                // Solve the problem using the IK solver
+                if(ok(solIK->Solve(q,solution)))
                 {
-                    ros::WallTime start_time = ros::WallTime::now();
-                    // Solve the problem using the IK solver
-                    if(ok(solIK->Solve(q,solution)))
+                    double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
+                    ROS_INFO_STREAM_THROTTLE(0.5,"Finished solving ("<<time<<"s), error: "<<solIK->error);
+                    q=solution.row(solution.rows()-1);
+                    ROS_INFO_STREAM_THROTTLE(0.5,"Solution "<<solution);
+
+                    jnt.header.stamp = ros::Time::now();
+                    jnt.header.seq++;
+                    for (int j = 0; j < solution.cols(); j++)
+                        jnt.position[j] = q(j);
+                    jointStatePublisher_.publish(jnt);
+
+                    ros::spinOnce();
+                    time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
+                    if(time<0.005)
                     {
-                        double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-                        ROS_INFO_STREAM_THROTTLE(0.5,"Finished solving ("<<time<<"s)");
-                        q=solution.row(solution.rows()-1);
-                        //ROS_INFO_STREAM_THROTTLE(0.5,"Solution "<<q.transpose());
-                        ROS_INFO_STREAM_THROTTLE(0.5,"Solution "<<solution);
+                        ros::Rate loop_rate(1.0 /(0.005-time));
+                        loop_rate.sleep();
+                        t+=0.005;
                     }
                     else
                     {
-                        double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-                        ROS_INFO_STREAM_THROTTLE(0.5,"Failed to find solution ("<<time<<"s)");
+                        t+=time;
                     }
                 }
+                else
+                {
+                    double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
+                    ROS_INFO_STREAM_THROTTLE(0.5,"Failed to find solution ("<<time<<"s)");
+                    break;
+                }
             }
+
         }
     }
 }

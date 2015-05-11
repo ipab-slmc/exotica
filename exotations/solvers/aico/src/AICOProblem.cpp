@@ -15,35 +15,85 @@ REGISTER_PROBLEM_TYPE("AICOProblem",exotica::AICOProblem);
 namespace exotica
 {
 
-    exotica::EReturn exotica::AICOProblem::update(const Eigen::VectorXd & x, const int t)
+    EReturn AICOProblem::reinitialise(rapidjson::Document& document)
     {
-        EReturn ret_value = SUCCESS;
-
-        //!< Update the Task maps
-        if (task_maps_.size() == 0 and ok(ret_value))
+        task_defs_.clear();
+        task_maps_.clear();
+        if(document.IsArray())
         {
-            ret_value = WARNING;
-        }
-        else
-        {
-            double rho;
-            for (TaskDefinition_map::const_iterator it = task_defs_.begin();
-                    it != task_defs_.end() and ok(ret_value); ++it)
+            for (rapidjson::SizeType i=0;i<document.Size();i++)
             {
-                boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(it->second);
-                task->getRho(rho,t);
-                if(rho>0)
+                rapidjson::Value& obj = document[i];
+                if(obj.IsObject())
                 {
-                    if (ok(task->getTaskMap()->getScene()->update(x,t)))
+                    std::string constraintClass;
+                    if(ok(getJSON(obj["class"],constraintClass)))
                     {
-                        if(ok(task->getTaskMap()->update(x,t)))
+                        if(knownMaps_.find(constraintClass)!=knownMaps_.end())
                         {
-                            // All is fine
+                            TaskMap_ptr taskmap;
+                            if(ok(TaskMap_fac::Instance().createObject(knownMaps_[constraintClass],taskmap)))
+                            {
+                                EReturn ret = taskmap->initialise(obj,server_,scenes_);
+                                if(ok(ret))
+                                {
+                                    if(ret!=CANCELLED)
+                                    {
+                                        std::string name=taskmap->getObjectName();
+                                        task_maps_[name]=taskmap;
+                                        TaskDefinition_ptr task;
+                                        if(ok(TaskDefinition_fac::Instance().createObject("TaskSqrError",task)))
+                                        {
+                                            TaskSqrError_ptr sqr = boost::static_pointer_cast<TaskSqrError>(task);
+                                            sqr->setTaskMap(taskmap);
+                                            int dim;
+                                            taskmap->taskSpaceDim(dim);
+                                            sqr->y_star0_.resize(dim);
+                                            sqr->rho0_(0)=0.0;
+                                            sqr->rho1_(0)=1e4;
+                                            sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+
+                                            // TODO: Better implementation of stting goals from JSON
+                                            sqr->y_star0_.setZero();
+
+                                            sqr->setTimeSteps(T+2);
+                                            Eigen::VectorXd tspan(2);
+                                            Eigen::VectorXi tspani(2);
+                                            getJSON(obj["tspan"],tspan);
+                                            if(tspan(0)<=0.0) tspan(0)=0.0;
+                                            if(tspan(1)>=1.0) tspan(1)=1.0;
+                                            tspani(0)=(int)(T*tspan(0));
+                                            tspani(1)=(int)(T*tspan(1));
+                                            for(int t=tspani(0);t<=tspani(1);t++)
+                                            {
+                                                sqr->registerRho(Eigen::VectorXdRef_ptr(sqr->rho1_.segment(0,1)),t);
+                                            }
+                                            sqr->wasFullyInitialised_=true;
+                                            task_defs_[name]=task;
+                                        }
+                                        else
+                                        {
+                                            INDICATE_FAILURE;
+                                            return FAILURE;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    INDICATE_FAILURE;
+                                    return FAILURE;
+                                }
+                            }
+                            else
+                            {
+                                INDICATE_FAILURE;
+                                return FAILURE;
+                            }
+
                         }
                         else
                         {
-                            ERROR("Failed updateing '" << task->getObjectName() << "'");
-                            return FAILURE;
+                            WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
                         }
                     }
                     else
@@ -52,21 +102,64 @@ namespace exotica
                         return FAILURE;
                     }
                 }
+                else
+                {
+                    INDICATE_FAILURE;
+                    return FAILURE;
+                }
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+        return SUCCESS;
+
+    }
+
+    EReturn AICOProblem::update(Eigen::VectorXdRefConst x, const int t)
+    {
+        // Update the KinematicScene(s)...
+        for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
+        {
+            if(!ok(it->second->update(x)))
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
             }
         }
 
-        return ret_value;
+        // Update task maps if the task definition precision (rho) is non-zero
+
+        for (auto& it : task_defs_)
+        {
+            boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(it.second);
+            if(task->getRho(t)>0)
+            {
+                if(ok(task->getTaskMap()->update(x,t)))
+                {
+                    // All is fine
+                }
+                else
+                {
+                    ERROR("Failed updating '" << task->getObjectName() << "'");
+                    return FAILURE;
+                }
+            }
+        }
+
+        return SUCCESS;
     }
 
 	AICOProblem::AICOProblem(): T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
 	{
-		// TODO Auto-generated constructor stub
 
 	}
 
 	AICOProblem::~AICOProblem ()
 	{
-		// TODO Auto-generated destructor stub
+
 	}
 
 	EReturn AICOProblem::initDerived(tinyxml2::XMLHandle & handle)
@@ -116,17 +209,15 @@ namespace exotica
         tau=(double)T*tau/(double)T_;
         T=T_;
 		// Set number of time steps
-		EReturn ret_value = SUCCESS;
-        for (TaskDefinition_map::const_iterator it = task_defs_.begin();
-                it != task_defs_.end() and ok(ret_value); ++it)
+        for (auto& it : task_defs_)
 		{
-		    EReturn temp_return = it->second->setTimeSteps(T+1);
-		    if (temp_return)
+            if(!ok(it.second->setTimeSteps(T+2)))
 		    {
-		        ret_value = temp_return;
+                INDICATE_FAILURE;
+                return FAILURE;
 		    }
 		}
-        return ret_value;
+        return SUCCESS;
 	}
 
 	void AICOProblem::getT(int& T_)

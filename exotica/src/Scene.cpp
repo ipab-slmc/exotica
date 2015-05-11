@@ -99,7 +99,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn CollisionScene::update(const Eigen::VectorXd x)
+    EReturn CollisionScene::update(Eigen::VectorXdRefConst x)
 	{
 		for (std::size_t i = 0; i < joint_index_.size(); i++)
 			ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i], x(i));
@@ -329,6 +329,12 @@ namespace exotica
 //TODO
 	}
 
+    robot_model::RobotModelPtr Scene::getRobotModel()
+    {
+        return model_;
+
+    }
+
 	std::string Scene::getName()
 	{
 		return name_;
@@ -381,7 +387,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn Scene::getForwardMap(const std::string & task, Eigen::Ref<Eigen::VectorXd> phi)
+    EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)
 	{
 		LOCK(lock_);
 		if (phis_.find(task) == phis_.end())
@@ -397,7 +403,22 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn Scene::getJacobian(const std::string & task, Eigen::Ref<Eigen::MatrixXd> jac)
+    EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef_ptr& phi, bool force)
+    {
+        LOCK(lock_);
+        if(phi==NULL||force)
+        {
+            if (phis_.find(task) == phis_.end())
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+            phi = phis_.at(task);
+        }
+        return SUCCESS;
+    }
+
+    EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef jac)
 	{
 		LOCK(lock_);
 		if (jacs_.find(task) == jacs_.end())
@@ -415,6 +436,21 @@ namespace exotica
 		}
 		return SUCCESS;
 	}
+
+    EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac, bool force)
+    {
+        LOCK(lock_);
+        if(jac==NULL||force)
+        {
+            if (jacs_.find(task) == jacs_.end())
+            {
+                INDICATE_FAILURE
+                return FAILURE;
+            }
+            jac = jacs_.at(task);
+        }
+        return SUCCESS;
+    }
 
 	EReturn Scene::appendTaskMap(const std::string & name, const std::vector<std::string> & eff,
 			const std::vector<KDL::Frame> & offset)
@@ -526,7 +562,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn Scene::update(const Eigen::VectorXd x, const int t)
+    EReturn Scene::update(Eigen::VectorXdRefConst x, const int t)
 	{
 		LOCK(lock_);
 		if (!initialised_)

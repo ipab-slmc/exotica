@@ -6,8 +6,6 @@
 #include <ros/package.h>
 #include <exotica/Initialiser.h>
 #include <sensor_msgs/JointState.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <eigen_conversions/eigen_msg.h>
 
 class IKSolverDemoNode
 {
@@ -17,6 +15,7 @@ private:
     ros::NodeHandle nh_;
     ros::NodeHandle nhg_;
     std::string resource_path_;
+    ros::Publisher jointStatePublisher_;
 };
 
 #endif // IK_SOLVER_DEMO_NODE_H

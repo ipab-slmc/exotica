@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>aico_solver_demo</name>
+  <version>0.0.0</version>
+  <description>The aico_solver_demo package</description>
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+
+  <license>TODO</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>exotica</build_depend>
+  <build_depend>aico</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>exotica</run_depend>
+  <run_depend>aico</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+</package>

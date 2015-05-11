@@ -8,6 +8,7 @@
 #ifndef IK_PROBLEM_H_
 #define IK_PROBLEM_H_
 #include <exotica/PlanningProblem.h>
+#include "task_definition/TaskSqrError.h"
 
 namespace exotica
 {
@@ -26,11 +27,15 @@ namespace exotica
 			 */
 			Eigen::MatrixXd getW();
 
+            int getT();
+
 			/**
 			 * \brief	Get tolerance
 			 * @return	tolerance
 			 */
 			double getTau();
+
+            virtual EReturn reinitialise(rapidjson::Document& document);
 		protected:
 			/**
 			 * \brief Derived Initialiser (from XML): PURE VIRTUAL
@@ -38,9 +43,10 @@ namespace exotica
 			 * @return Indication of success/failure
 			 */
 			virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-		private:
+
 			Eigen::MatrixXd config_w_;	//Configuration weight
 			double tau_;	// Tolerance
+            int T_;
 
 	};
 	typedef boost::shared_ptr<exotica::IKProblem> IKProblem_ptr;

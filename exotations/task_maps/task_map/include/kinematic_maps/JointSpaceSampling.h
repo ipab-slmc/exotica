@@ -30,7 +30,7 @@ namespace exotica
 			 * @brief	Concrete implementation of update method
 			 * @param	x	Joint space configuration
 			 */
-			virtual EReturn update(const Eigen::VectorXd & x, const int t);
+			virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
 			/*
 			 * \brief	Check state validation

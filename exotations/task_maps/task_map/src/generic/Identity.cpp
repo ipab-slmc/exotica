@@ -8,17 +8,23 @@ exotica::Identity::Identity()
   //!< Empty constructor
 }
 
-exotica::EReturn exotica::Identity::update(const Eigen::VectorXd & x, const int t)
+exotica::EReturn exotica::Identity::update(Eigen::VectorXdRefConst x, const int t)
 {
-  invalidate();
-  if (setPhi(x,t) == SUCCESS)
+  if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
+  if(x.rows()==PHI.rows())
   {
-    return setJacobian(Eigen::MatrixXd::Identity(x.size(), x.size()),t);
+    PHI=x;
+    if(updateJacobian_)
+    {
+        JAC=Eigen::MatrixXd::Identity(x.rows(), x.rows());
+    }
   }
   else
   {
-    return FAILURE;
+      INDICATE_FAILURE;
+      return FAILURE;
   }
+  return SUCCESS;
 }
 
 exotica::EReturn exotica::Identity::initDerived(tinyxml2::XMLHandle & handle)

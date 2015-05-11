@@ -63,26 +63,24 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn JointLimit::update(const Eigen::VectorXd & x, const int t)
+    EReturn JointLimit::update(Eigen::VectorXdRefConst x, const int t)
 	{
+        if(!isRegistered(t)) {INDICATE_FAILURE; return FAILURE;}
 		if (!initialised_)
 			return MMB_NIN;
-		int size = x.rows();
-		if (size != tau_.rows())
-			return FAILURE;
 		//	Compute Phi and Jac
-		Eigen::VectorXd phi = Eigen::VectorXd::Zero(size);
-		Eigen::MatrixXd jac = Eigen::MatrixXd::Zero(size, size);
+        PHI.setZero();
+        JAC.setZero();
 		double d;
-		for (int i = 0; i < size; i++)
+        for (int i = 0; i < PHI.rows(); i++)
 		{
 			if (x(i) < center_(i))
 			{
 				d = x(i) - low_limits_(i);
 				if (d < tau_(i))
 				{
-					phi(i) = tau_(i) - d;
-					jac(i, i) = -1;
+                    PHI(i) = tau_(i) - d;
+                    if(updateJacobian_) JAC(i, i) = -1;
 				}
 			}
 			else if (x(i) > center_(i))
@@ -90,13 +88,11 @@ namespace exotica
 				d = high_limits_(i) - x(i);
 				if (d < tau_(i))
 				{
-					phi(i) = tau_(i) - d;
-					jac(i, i) = 1;
+                    PHI(i) = tau_(i) - d;
+                    if(updateJacobian_) JAC(i, i) = 1;
 				}
 			}
 		}
-        setPhi(phi,t);
-        setJacobian(jac,t);
 		return SUCCESS;
 	}
 }

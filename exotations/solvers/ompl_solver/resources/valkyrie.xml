@@ -13,7 +13,7 @@
   </Server>
   <OMPLsolver name="OMPL_Interface">
     <algorithm>FRRT</algorithm>
-    <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
+    <max_goal_sampling_attempts>500</max_goal_sampling_attempts>#
     <TrajectorySmooth>1</TrajectorySmooth>
   </OMPLsolver>
 
@@ -21,18 +21,21 @@
     <Scene name="TestScene">
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
-        <Root segment="base"> <!-- Optional: The root segment to use: xyz -->
+        <Root segment="Pelvis"> <!-- Optional: The root segment to use: xyz -->
           <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
           <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
         </Root>
         <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
-          <joint name="lwr_arm_0_joint"/> 
-          <joint name="lwr_arm_1_joint"/>
-          <joint name="lwr_arm_2_joint"/> 
-          <joint name="lwr_arm_3_joint"/> 
-          <joint name="lwr_arm_4_joint"/>
-          <joint name="lwr_arm_5_joint"/>
-          <joint name="lwr_arm_6_joint"/>	
+          <joint name="WaistRotator"/> 
+          <joint name="WaistExtensor"/>
+          <joint name="WaistLateralExtensor"/> 
+          <joint name="LeftShoulderExtensor"/> 
+          <joint name="LeftShoulderAdductor"/>
+          <joint name="LeftShoulderSupinator"/>
+          <joint name="LeftElbowExtensor"/>	
+          <joint name="LeftForearmSupinator"/>	
+          <joint name="LeftWristExtensor"/>	
+          <joint name="LeftWrist"/>	
         </Update>
       </Kinematica>
     </Scene> 
@@ -40,7 +43,7 @@
     <Map type="EffPosition" name="EffPositionMap">
       <Scene name="TestScene"/>
       <EndEffector ignore_unused="true"> <!-- List of end effectors -->
-          <limb segment="lwr_arm_7_link">
+          <limb segment="LeftPalm">
             <vector>0.0 0.0 0.0</vector>
             <quaternion>1.0 0.0 0.0 0.0</quaternion>
           </limb>
@@ -51,12 +54,12 @@
       <map name="EffPositionMap"/>
       <Rho>1.0</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal>0.56 0.1 0.58</Goal>
+      <Goal>0.79 0.31 0.376</Goal>
       <Threshold>1e-2</Threshold>
       <!-- Task Parameters -->
     </Task>
    
     <!-- Problem parameters (structuring etc...) -->
-    <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/frrt_local_solver.xml</LocalPlannerConfig>
+    <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/valkyrie_local_solver.xml</LocalPlannerConfig>
   </OMPLProblem>
 </ExampleConfiguration>

@@ -22,6 +22,13 @@ namespace fcl_convert
 		eigen(1) = fcl.getTranslation().data.vs[1];
 		eigen(2) = fcl.getTranslation().data.vs[2];
 	}
+
+	void fcl2EigenTranslation(const fcl::Vec3f & fcl, Eigen::Vector3d & eigen)
+	{
+		eigen(0) = fcl.data.vs[0];
+		eigen(1) = fcl.data.vs[1];
+		eigen(2) = fcl.data.vs[2];
+	}
 }
 namespace exotica
 {
@@ -52,7 +59,7 @@ namespace exotica
 		ps_->getCurrentStateNonConst().update(true);
 		const std::vector<const robot_model::LinkModel*>& links =
 				ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
-
+		acm_ = ps_->getAllowedCollisionMatrix();
 		for (std::size_t i = 0; i < links.size(); ++i)
 		{
 			geo_robot_[links[i]->getName()] = geos_ptr(0);
@@ -75,6 +82,26 @@ namespace exotica
 			}
 		}
 
+		collision_detection::WorldConstPtr tmp_world = ps_->getCollisionWorld()->getWorld();
+		std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
+		if (obj_id_.size() > 0)
+		{
+			for (std::size_t i = 0; i < obj_id_.size(); ++i)
+			{
+				std::size_t index_size = tmp_world->getObject(obj_id_[i])->shapes_.size();
+				fcl_world_[obj_id_[i]] = fcls_ptr(0);
+				geo_world_[obj_id_[i]] = geos_ptr(0);
+				for (std::size_t j = 0; j < index_size; j++)
+				{
+					collision_detection::FCLGeometryConstPtr g =
+							collision_detection::createCollisionGeometry(tmp_world->getObject(obj_id_[i])->shapes_[j], tmp_world->getObject(obj_id_[i]).get());
+					geo_world_.at(obj_id_[i]).push_back(g);
+					fcl::CollisionObject *co =
+							new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j]));
+					fcl_world_.at(obj_id_[i]).push_back(boost::shared_ptr<fcl::CollisionObject>(co));
+				}
+			}
+		}
 		joint_index_.resize(joints.size());
 
 		for (std::size_t i = 0; i < ps_->getCurrentState().getVariableNames().size(); i++)
@@ -99,8 +126,13 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn CollisionScene::update(Eigen::VectorXdRefConst x)
+	EReturn CollisionScene::update(Eigen::VectorXdRefConst x)
 	{
+		if (joint_index_.size() != x.rows())
+		{
+			ERROR("Size does not match, need vector size of "<<joint_index_.size()<<" but "<<x.rows()<<" is provided");
+			return FAILURE;
+		}
 		for (std::size_t i = 0; i < joint_index_.size(); i++)
 			ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i], x(i));
 		ps_->getCurrentStateNonConst().update(true);
@@ -115,25 +147,6 @@ namespace exotica
 					it.second[i]->setTransform(collision_detection::transform2fcl(ps_->getCurrentState().getCollisionBodyTransform(cd->ptr.link, cd->shape_index)));
 					it.second[i]->getTransform().transform(it.second[i]->collisionGeometry()->aabb_center);
 				}
-
-			collision_detection::WorldConstPtr tmp_world = ps_->getCollisionWorld()->getWorld();
-			std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
-			fcl_world_.clear();
-			if (obj_id_.size() > 0)
-			{
-				for (std::size_t i = 0; i < obj_id_.size(); ++i)
-				{
-					std::size_t index_size = tmp_world->getObject(obj_id_[i])->shapes_.size();
-					fcl_world_[obj_id_[i]] = fcls_ptr(index_size);
-					for (std::size_t j = 0; j < index_size; j++)
-					{
-						collision_detection::FCLGeometryConstPtr g =
-								collision_detection::createCollisionGeometry(tmp_world->getObject(obj_id_[i])->shapes_[j], tmp_world->getObject(obj_id_[i]).get());
-						fcl_world_.at(obj_id_[i])[j].reset(new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
-						fcl_world_.at(obj_id_[i])[j]->getTransform().transform(fcl_world_.at(obj_id_[i])[j]->collisionGeometry()->aabb_center);
-					}
-				}
-			}
 		}
 		return SUCCESS;
 	}
@@ -217,7 +230,7 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-		d = 9999;
+		d = INFINITY;
 		fcl::DistanceRequest req(true);
 		fcl::DistanceResult res;
 		fcl_convert::fcl2Eigen(fcl_link[0]->getTransform().transform(fcl_link[0]->collisionGeometry()->aabb_center), c1);
@@ -241,6 +254,30 @@ namespace exotica
 				}
 			}
 		}
+
+		fcl_world_.clear();
+		geo_world_.clear();
+		collision_detection::WorldConstPtr tmp_world = ps_->getCollisionWorld()->getWorld();
+		std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
+		if (obj_id_.size() > 0)
+		{
+			for (std::size_t i = 0; i < obj_id_.size(); ++i)
+			{
+				std::size_t index_size = tmp_world->getObject(obj_id_[i])->shapes_.size();
+				fcl_world_[obj_id_[i]] = fcls_ptr(0);
+				geo_world_[obj_id_[i]] = geos_ptr(0);
+				for (std::size_t j = 0; j < index_size; j++)
+				{
+					collision_detection::FCLGeometryConstPtr g =
+							collision_detection::createCollisionGeometry(tmp_world->getObject(obj_id_[i])->shapes_[j], tmp_world->getObject(obj_id_[i]).get());
+					geo_world_.at(obj_id_[i]).push_back(g);
+					fcl::CollisionObject *co =
+							new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j]));
+					fcl_world_.at(obj_id_[i]).push_back(boost::shared_ptr<fcl::CollisionObject>(co));
+				}
+			}
+		}
+
 		for (auto & it : fcl_world_)
 		{
 			for (std::size_t i = 0; i < it.second.size(); i++)
@@ -253,12 +290,10 @@ namespace exotica
 				else if (res.min_distance < d)
 				{
 					d = res.min_distance;
-
 					fcl_convert::fcl2Eigen(it.second[i]->getTransform().transform(it.second[i]->collisionGeometry()->aabb_center), c2);
 				}
 			}
 		}
-
 		fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
 		fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
 
@@ -329,11 +364,11 @@ namespace exotica
 //TODO
 	}
 
-    robot_model::RobotModelPtr Scene::getRobotModel()
-    {
-        return model_;
+	robot_model::RobotModelPtr Scene::getRobotModel()
+	{
+		return model_;
 
-    }
+	}
 
 	std::string Scene::getName()
 	{
@@ -387,7 +422,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)
+	EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)
 	{
 		LOCK(lock_);
 		if (phis_.find(task) == phis_.end())
@@ -403,22 +438,23 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef_ptr& phi, bool force)
-    {
-        LOCK(lock_);
-        if(phi==NULL||force)
-        {
-            if (phis_.find(task) == phis_.end())
-            {
-                INDICATE_FAILURE;
-                return FAILURE;
-            }
-            phi = phis_.at(task);
-        }
-        return SUCCESS;
-    }
+	EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef_ptr& phi, bool force)
+	{
+		LOCK(lock_);
+		if (phi == NULL || force)
+		{
+			if (phis_.find(task) == phis_.end())
+			{
+				INDICATE_FAILURE
+				;
+				return FAILURE;
+			}
+			phi = phis_.at(task);
+		}
+		return SUCCESS;
+	}
 
-    EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef jac)
+	EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef jac)
 	{
 		LOCK(lock_);
 		if (jacs_.find(task) == jacs_.end())
@@ -437,20 +473,20 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac, bool force)
-    {
-        LOCK(lock_);
-        if(jac==NULL||force)
-        {
-            if (jacs_.find(task) == jacs_.end())
-            {
-                INDICATE_FAILURE
-                return FAILURE;
-            }
-            jac = jacs_.at(task);
-        }
-        return SUCCESS;
-    }
+	EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac, bool force)
+	{
+		LOCK(lock_);
+		if (jac == NULL || force)
+		{
+			if (jacs_.find(task) == jacs_.end())
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
+			jac = jacs_.at(task);
+		}
+		return SUCCESS;
+	}
 
 	EReturn Scene::appendTaskMap(const std::string & name, const std::vector<std::string> & eff,
 			const std::vector<KDL::Frame> & offset)
@@ -562,7 +598,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn Scene::update(Eigen::VectorXdRefConst x, const int t)
+	EReturn Scene::update(Eigen::VectorXdRefConst x, const int t)
 	{
 		LOCK(lock_);
 		if (!initialised_)

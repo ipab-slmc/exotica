@@ -58,7 +58,9 @@ namespace exotica
 	{
 		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("SafetyRange");
 		server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, safe_range_);
-		std::cout << "Collision avoidance threshold " << safe_range_->data << " m." << std::endl;
+		tmp_handle = handle.FirstChildElement("SelfCollision");
+		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, self_);
+		ROS_INFO_STREAM("Collision avoidance threshold " << safe_range_->data << " m. Self Collision is "<<(self_->data ? "Enabled":"Disabled"));
 		if (!ok(scene_->getEndEffectors(object_name_, effs_)))
 			return MMB_NIN;
 		init_offsets_.resize(effs_.size());
@@ -76,10 +78,11 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn CollisionAvoidance::setPreUpdateCallback(boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst, int)> pre_update_callback)
-    {
-        pre_update_callback_ = pre_update_callback;
-    }
+	EReturn CollisionAvoidance::setPreUpdateCallback(
+			boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst, int)> pre_update_callback)
+	{
+		pre_update_callback_ = pre_update_callback;
+	}
 
 	EReturn CollisionAvoidance::taskSpaceDim(int & task_dim)
 	{
@@ -88,12 +91,18 @@ namespace exotica
 	}
 	EReturn CollisionAvoidance::update(Eigen::VectorXdRefConst x, const int t)
 	{
-        if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}
-        if (pre_update_callback_) pre_update_callback_(this, x, t);
+		if (!isRegistered(t) || !getEffReferences())
+		{
+			INDICATE_FAILURE
+			;
+			return FAILURE;
+		}
+		if (pre_update_callback_)
+			pre_update_callback_(this, x, t);
 
-        int M = EFFPHI.rows()/3;
+		int M = EFFPHI.rows() / 3;
 
-        PHI.setZero();
+		PHI.setZero();
 		std::vector<double> dists(M);
 		std::vector<double> costs(M);
 		std::vector<Eigen::Vector3d> c1s(M), c2s(M);
@@ -105,17 +114,17 @@ namespace exotica
 		world_centre_.points.clear();
 #endif
 
-        for (auto& objvec : scene_->getCollisionScene()->getFCLWorld())
-        {
-            for (boost::shared_ptr<fcl::CollisionObject> obj : objvec.second)
-            {
-                obj->setTransform(obs_in_base_tf_);
-            }
-        }
+		for (auto& objvec : scene_->getCollisionScene()->getFCLWorld())
+		{
+			for (boost::shared_ptr<fcl::CollisionObject> obj : objvec.second)
+			{
+				obj->setTransform(obs_in_base_tf_);
+			}
+		}
 		for (int i = 0; i < M; i++)
 		{
 			Eigen::Vector3d tmp1, tmp2;
-			scene_->getCollisionScene()->getRobotDistance(effs_[i], false, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i]);
+			scene_->getCollisionScene()->getRobotDistance(effs_[i], self_->data, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i]);
 			//	Compute Phi
 			if (dists[i] <= 0)
 			{
@@ -129,69 +138,70 @@ namespace exotica
 			else
 				costs[i] = (1.0 - dists[i] / safe_range_->data);
 
-            PHI(0) = PHI(0) + costs[i] * costs[i];
+			PHI(0) = PHI(0) + costs[i] * costs[i];
 
 			//	Modify end-effectors
-            if(updateJacobian_)
-                {
-                tip_offset = KDL::Frame(KDL::Vector(EFFPHI(3 * i), EFFPHI(3 * i + 1), EFFPHI(3 * i + 2)));
-                cp_offset = KDL::Frame(KDL::Vector(tmp1(0), tmp1(1), tmp1(2)));
-                eff_offset = tip_offset.Inverse() * cp_offset;
+			if (updateJacobian_)
+			{
+				tip_offset = KDL::Frame(KDL::Vector(EFFPHI(3 * i), EFFPHI(3 * i + 1), EFFPHI(3 * i
+						+ 2)));
+				cp_offset = KDL::Frame(KDL::Vector(tmp1(0), tmp1(1), tmp1(2)));
+				eff_offset = tip_offset.Inverse() * cp_offset;
 
-                if (!kin_sol_.modifyEndEffector(effs_[i], eff_offset))
-                {
-                    INDICATE_FAILURE
-                    return FAILURE;
-                }
-    #ifdef C_DEBUG
-                geometry_msgs::Point p1, p2;
-                if (dists[i] > 0)
-                {
-                    eigen2Point(tmp1, p1);
-                    eigen2Point(tmp2, p2);
-                }
-                else
-                {
-                    eigen2Point(c1s[i], p1);
-                    eigen2Point(c2s[i], p2);
-                }
-                close_.points.push_back(p1);
-                close_.points.push_back(p2);
-                eigen2Point(c1s[i], p1);
-                eigen2Point(c2s[i], p2);
-                robot_centre_.points.push_back(p1);
-		world_centre_.points.push_back(p2);
-    #endif
-            }
+				if (!kin_sol_.modifyEndEffector(effs_[i], eff_offset))
+				{
+					INDICATE_FAILURE
+					return FAILURE;
+				}
+#ifdef C_DEBUG
+				geometry_msgs::Point p1, p2;
+				if (dists[i] > 0)
+				{
+					eigen2Point(tmp1, p1);
+					eigen2Point(tmp2, p2);
+				}
+				else
+				{
+					eigen2Point(c1s[i], p1);
+					eigen2Point(c2s[i], p2);
+				}
+				close_.points.push_back(p1);
+				close_.points.push_back(p2);
+				eigen2Point(c1s[i], p1);
+				eigen2Point(c2s[i], p2);
+				robot_centre_.points.push_back(p1);
+				world_centre_.points.push_back(p2);
+#endif
+			}
 
-    #ifdef C_DEBUG
-            close_pub_.publish(close_);
-            robot_centre_pub_.publish(robot_centre_);
-	    world_centre_pub_.publish(world_centre_);
-            ros::spinOnce();
-    #endif
+#ifdef C_DEBUG
+			close_pub_.publish(close_);
+			robot_centre_pub_.publish(robot_centre_);
+			world_centre_pub_.publish(world_centre_);
+			ros::spinOnce();
+#endif
 
-            if (!kin_sol_.updateConfiguration(x) || !kin_sol_.generateForwardMap()
-                    || !kin_sol_.generateJacobian(EFFJAC))
-            {
-                INDICATE_FAILURE
-                return FAILURE;
-            }
-            JAC.setZero();
-            for (int i = 0; i < M; i++)
-            {
-                if (dists[i] <= 0)
-                {
-                    Eigen::Vector3d tmpnorm = c2s[i] - c1s[i];
-                    tmpnorm.normalize();
-                    JAC += ((2.0 * costs[i]) / safe_range_->data)
-                            * (tmpnorm.transpose() * EFFJAC.block(3 * i, 0, 3, JAC.cols()));
-                }
-                else if (dists[i] <= safe_range_->data)
-                    JAC += ((2.0 * costs[i]) / safe_range_->data)
-                            * (norms[i].transpose() * EFFJAC.block(3 * i, 0, 3, JAC.cols()));
-            }
-        }
+			if (!kin_sol_.updateConfiguration(x) || !kin_sol_.generateForwardMap()
+					|| !kin_sol_.generateJacobian(EFFJAC))
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
+			JAC.setZero();
+			for (int i = 0; i < M; i++)
+			{
+				if (dists[i] <= 0)
+				{
+					Eigen::Vector3d tmpnorm = c2s[i] - c1s[i];
+					tmpnorm.normalize();
+					JAC += ((2.0 * costs[i]) / safe_range_->data)
+							* (tmpnorm.transpose() * EFFJAC.block(3 * i, 0, 3, JAC.cols()));
+				}
+				else if (dists[i] <= safe_range_->data)
+					JAC += ((2.0 * costs[i]) / safe_range_->data)
+							* (norms[i].transpose() * EFFJAC.block(3 * i, 0, 3, JAC.cols()));
+			}
+		}
 		return SUCCESS;
 	}
 }

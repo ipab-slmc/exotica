@@ -33,7 +33,7 @@ class ExoticaService
 			Eigen::MatrixXd solution;
 			exotica::Initialiser ini;
 
-			if (exotica::ok(ini.initialise(req.xml_file_, server, solver, problem)))
+			if (exotica::ok(ini.initialise(req.xml_file_, server, solver, problem, req.problem_, req.solver_)))
 			{
 				moveit_msgs::PlanningScenePtr scene_ptr;
 				scene_ptr.reset(new moveit_msgs::PlanningScene(req.scene_));

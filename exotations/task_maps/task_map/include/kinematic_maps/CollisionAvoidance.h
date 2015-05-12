@@ -59,6 +59,9 @@ namespace exotica
 			virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
 
 		private:
+			//	Indicate if self collision checking is required
+			EParam<std_msgs::Bool> self_;
+
 			//	Safety range
 			EParam<std_msgs::Float64> safe_range_;
 

@@ -37,7 +37,7 @@
 #define INDICATE_FAILURE        std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
 #define WARNING(x)              // No operation
 #define ERROR(x)                std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
-#define INFO(x)                 // No operation
+#define INFO(x)					std::clog << "Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
 #endif
 
 

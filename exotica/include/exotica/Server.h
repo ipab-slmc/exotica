@@ -194,7 +194,7 @@ namespace exotica
 					{
 						std_msgs::Bool tmp;
 						const char* tmp_str = handle.ToElement()->GetText();
-						if (strcmp(tmp_str, "true") == 0)
+						if (strcmp(tmp_str, "true") == 0 || strcmp(tmp_str, "1") == 0)
 							tmp.data = true;
 						else
 							tmp.data = false;

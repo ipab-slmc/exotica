@@ -69,7 +69,7 @@ namespace exotica
 
 	EReturn OMPLsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution)
 	{
-        ros::Time startTime = ros::Time::now();
+		ros::Time startTime = ros::Time::now();
 		finishedSolving_ = false;
 		ompl::base::ScopedState<> ompl_start_state(state_space_);
 		if (ok(state_space_->copyToOMPLState(ompl_start_state.get(), q0)))
@@ -93,23 +93,22 @@ namespace exotica
 
 				if (!ompl_simple_setup_->haveSolutionPath())
 					return FAILURE;
-
+				planning_time_ = ros::Time::now() - startTime;
 				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution);
-                planning_time_=ros::Time::now()-startTime;
 				return SUCCESS;
 			}
 			else
 			{
 				finishedSolving_ = true;
 				postSolve();
-                planning_time_=ros::Time::now()-startTime;
+				planning_time_ = ros::Time::now() - startTime;
 				return FAILURE;
 			}
 		}
 		else
 		{
 			ERROR("Can't copy start state!");
-            planning_time_=ros::Time::now()-startTime;
+			planning_time_ = ros::Time::now() - startTime;
 			return FAILURE;
 		}
 
@@ -225,12 +224,16 @@ namespace exotica
 	EReturn OMPLsolver::getSimplifiedPath(ompl::geometric::PathGeometric &pg,
 			Eigen::MatrixXd & traj)
 	{
-		ROS_ERROR_STREAM("States before simplification: "<<pg.getStateCount()<<", length:"<<pg.length());
-		ompl::geometric::PathSimplifier ps(ompl_simple_setup_->getSpaceInformation());
-
-//		ps.shortcutPath(pg);
-//		ps.smoothBSpline(pg);
-		ROS_ERROR_STREAM("States after simplification: "<<pg.getStateCount()<<", length:"<<pg.length());
+		if (smooth_->data)
+		{
+			ROS_ERROR_STREAM("States before simplification: "<<pg.getStateCount()<<", length:"<<pg.length());
+			ros::Time start = ros::Time::now();
+			ompl::geometric::PathSimplifier ps(ompl_simple_setup_->getSpaceInformation());
+			ps.shortcutPath(pg);
+			ps.smoothBSpline(pg);
+			ROS_ERROR_STREAM("States after simplification: "<<pg.getStateCount()<<", length:"<<pg.length());
+			ROS_ERROR_STREAM("Simplification took "<<ros::Duration(ros::Time::now()-start).toSec()<<"sec");
+		}
 		convertPath(pg, traj);
 
 		return SUCCESS;
@@ -238,6 +241,9 @@ namespace exotica
 
 	EReturn OMPLsolver::initDerived(tinyxml2::XMLHandle & handle)
 	{
+		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("TrajectorySmooth");
+		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, smooth_);
+
 		tinyxml2::XMLElement* xmltmp;
 		XML_CHECK("algorithm");
 		{
@@ -249,7 +255,7 @@ namespace exotica
 				if (txt.compare(s.substr(11)) == 0)
 				{
 					selected_planner_ = s;
-					INFO("Using planning algorithm: "<<selected_planner_);
+					INFO("Using planning algorithm: "<<selected_planner_<<". Trajectory smoother is "<<(smooth_->data?"Enabled":"Disabled"));
 					known = true;
 					break;
 				}
@@ -257,6 +263,7 @@ namespace exotica
 		}
 		XML_CHECK("max_goal_sampling_attempts");
 		XML_OK(getInt(*xmltmp, goal_ampling_max_attempts_));
+
 		return SUCCESS;
 	}
 
@@ -270,14 +277,15 @@ namespace exotica
 		problem_ = pointer;
 		prob_ = boost::static_pointer_cast<OMPLProblem>(pointer);
 
-        for (auto & it : prob_->getScenes())
-        {
-            if(!ok(it.second->activateTaskMaps()))
-            {
-                INDICATE_FAILURE;
-                return FAILURE;
-            }
-        }
+		for (auto & it : prob_->getScenes())
+		{
+			if (!ok(it.second->activateTaskMaps()))
+			{
+				INDICATE_FAILURE
+				;
+				return FAILURE;
+			}
+		}
 
 		state_space_ = OMPLStateSpace::FromProblem(prob_);
 		ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));

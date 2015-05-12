@@ -172,7 +172,8 @@ namespace exotica
 			// \brief Max number of attempts at sampling the goal region
 			int goal_ampling_max_attempts_;
 
-
+			/// \brief	Indicate if trajectory smoother is required
+			EParam<std_msgs::Bool> smooth_;
 	};
 
 	typedef boost::shared_ptr<exotica::OMPLsolver> OMPLsolver_ptr;

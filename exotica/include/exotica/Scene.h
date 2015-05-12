@@ -159,6 +159,9 @@ namespace exotica
 
             ///	Indicate if distance computation is required
 			bool compute_dist;
+
+			///	The allowed collisiom matrix
+			collision_detection::AllowedCollisionMatrix acm_;
 	};
 
 	typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;

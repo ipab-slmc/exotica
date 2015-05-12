@@ -262,8 +262,10 @@ namespace exotica
 		moveit_msgs::PlanningScene tmp;
 		planning_scene_->getPlanningSceneMsg(tmp);
 		srv.request.scene_ = tmp;
-		srv.request.group_name_ =request_.group_name;
+		srv.request.group_name_ = request_.group_name;
 		srv.request.max_time_ = getMotionPlanRequest().allowed_planning_time;
+		srv.request.problem_ = problem_name_;
+		srv.request.solver_ = solver_name_;
 		if (!client_.waitForExistence(ros::Duration(5)))
 		{
 			ROS_ERROR("Exotica Planning service does not exist");

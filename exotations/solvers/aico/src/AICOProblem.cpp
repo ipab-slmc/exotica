@@ -168,7 +168,7 @@ namespace exotica
 		tinyxml2::XMLElement* xmltmp;
 		bool hastime=false;
 		XML_CHECK("T"); XML_OK(getInt(*xmltmp,T));
-		if(T<=0) {INDICATE_FAILURE; return PAR_ERR;}
+        if(T<=2) {INDICATE_FAILURE; return PAR_ERR;}
 		xmltmp=handle.FirstChildElement("duration").ToElement();if (xmltmp) {XML_OK(getDouble(*xmltmp,tau));tau=tau/((double)T);hastime=true;}
 		if(hastime)
 		{

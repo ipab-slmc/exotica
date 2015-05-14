@@ -17,6 +17,8 @@
   </IKsolver>
 
   <IKProblem name="IKSolverDemoProblem"> <!-- Problem definition -->
+
+
     <Scene name="IKSolverDemoScene"> <!-- Kinematic scene -->
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!-- Robot URDF -->
@@ -46,7 +48,8 @@
       </EndEffector>
     </Map>
 
-    <Task name="IKSolverDemoTask" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
+    <!-- Squared error cost term based on end-effector position task map -->
+    <Task name="IKSolverDemoTask" type="TaskSqrError">
       <map name="IKSolverDemoMap"/>
       <Rho>1e0</Rho>
       <Goal>0.4 -0.1 0.5</Goal>

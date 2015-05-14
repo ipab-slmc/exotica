@@ -1,16 +1,14 @@
 <?xml version="1.0" ?>
 <ExampleConfiguration>
+
   <Server name="EXOTicaServer">
-     <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
-     Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
      <Parameters>
 
      </Parameters>
-
-     <!-- Other server functionalities other than parameters TODO -->
-     <!-- Specify Planning Mode: Optimization or Sampling. Skip unnecessary steps if in sampling mode-->
      <PlanningMode>Sampling</PlanningMode>
   </Server>
+
+
   <OMPLsolver name="OMPL Interface">
     <algorithm>RRT</algorithm>
     <max_goal_sampling_attempts>2500</max_goal_sampling_attempts>

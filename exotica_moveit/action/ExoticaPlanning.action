@@ -9,3 +9,5 @@ string solver_
 float32 planning_time_
 exotica/Matrix solution_
 bool succeeded_
+---
+float32 solving_time_

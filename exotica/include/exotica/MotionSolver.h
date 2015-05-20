@@ -46,6 +46,21 @@ namespace exotica
 			 * @return        Always successful
 			 */
 			virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
+
+			/**
+			 * \brief	Solve the problem. PURE VIRTUAL
+			 * @param	q0			Start configuration
+			 * @param	solution	Solution
+			 * @param	t			Time step
+			 */
+			virtual EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution) = 0;
+
+			/*
+			 * \brief	Check if a problem is solvable by this solver (Pure Virtual)
+			 * @param	prob		Planning problem
+			 * @return	True if solvable, false otherwise
+			 */
+			virtual bool isSolvable(const PlanningProblem_ptr & prob) = 0;
 		protected:
 			/**
 			 * \brief Derived-elements initialiser: Pure Virtual

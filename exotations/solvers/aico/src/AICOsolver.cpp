@@ -194,12 +194,19 @@ namespace exotica
 		return SUCCESS;
 	}
 
+	bool AICOsolver::isSolvable(const PlanningProblem_ptr & prob)
+	{
+		if(prob->type().compare("exotica::AICOProblem")==0)
+			return true;
+		return false;
+	}
+
 	AICOProblem_ptr& AICOsolver::getProblem()
 	{
 		return prob_;
 	}
 
-    EReturn AICOsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution)
+    EReturn AICOsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution)
     {
         std::vector<Eigen::VectorXd> q_init; q_init.resize(TT,Eigen::VectorXd::Zero(q0.rows()));
         q_init[0]=q0;

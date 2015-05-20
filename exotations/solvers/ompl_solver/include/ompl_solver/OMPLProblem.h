@@ -44,7 +44,6 @@ namespace exotica
 			boost::mutex update_lock_;
 			std::vector<TaskTerminationCriterion_ptr> goals_;
 			std::vector<double> bounds_;
-
 	};
 
 	typedef boost::shared_ptr<exotica::OMPLProblem> OMPLProblem_ptr;

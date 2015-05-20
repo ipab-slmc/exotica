@@ -156,7 +156,8 @@ namespace exotica
 					tau_(0.0),
 					nh_("~"),
 					problem_name_(problem_name),
-					solver_name_(solver_name)
+					solver_name_(solver_name),
+					client_("/ExoticaPlanning", true)
 	{
 	}
 
@@ -172,40 +173,15 @@ namespace exotica
 			return false;
 		}
 		config_file_ = filename;
-//		ROS_INFO_STREAM("Loading exotica from: "<<filename);
-//		exotica::AICOsolver_ptr tmp_sol;
-//		PlanningProblem_ptr prob;
-//		if (ok(ini.initialise(filename, ser_, sol, prob, problem_name_, solver_name_)))
-//		{
-//			if (sol->type().compare("exotica::AICOsolver") == 0)
-//			{
-//				tau_ = boost::static_pointer_cast<AICOProblem>(prob)->getTau();
-//			}
-//			else if (sol->type().compare("exotica::IKsolver") == 0)
-//			{
-//				tau_ = boost::static_pointer_cast<IKProblem>(prob)->getTau();
-//			}
-//			if (!ok(sol->specifyProblem(prob)))
-//			{
-//				INDICATE_FAILURE
-//				;
-//				return false;
-//			}
-//			if (!ok(prob->setScene(scene)))
-//			{
-//				INDICATE_FAILURE
-//				;
-//				return false;
-//			}
-//		}
-//		else
-//		{
-//			ROS_WARN_STREAM("Could not initialize EXOTica!");
-//			return false;
-//		}
-
-		client_ = nh_.serviceClient<exotica_moveit::ExoticaPlanning>("/exotica_planning");
-		return true;
+		if (client_.waitForServer(ros::Duration(5)))
+		{
+			return true;
+		}
+		else
+		{
+			ROS_ERROR("Can not connect to EXOTica Planning Action server");
+			return false;
+		}
 	}
 
 	/** \brief Solve the motion planning problem and store the result in \e res. This function should not clear data structures before computing. The constructor and clear() do that. */
@@ -231,68 +207,40 @@ namespace exotica
 		Eigen::MatrixXd solution;
 		bool found_solution = false;
 
-//		if (sol->type().compare("exotica::AICOsolver") == 0)
-//		{
-//			found_solution = ok(boost::static_pointer_cast<AICOsolver>(sol)->Solve(q0, solution));
-//		}
-//		else if (sol->type().compare("exotica::IKsolver") == 0)
-//		{
-//			found_solution = ok(boost::static_pointer_cast<IKsolver>(sol)->Solve(q0, solution));
-//		}
-//
-//		if (found_solution)
-//		{
-//			ROS_WARN_STREAM("Solution found.");
-//			res.trajectory_.reset(new robot_trajectory::RobotTrajectory(planning_scene_->getRobotModel(), model_group->getName()));
-//			copySolution(solution, res.trajectory_.get());
-//			res.error_code_.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
-//			res.planning_time_ = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-//			solution_ = solution;
-//			return true;
-//		}
-//		else
-//		{
-//			res.error_code_.val = moveit_msgs::MoveItErrorCodes::PLANNING_FAILED;
-//			return false;
-//		}
-
-		exotica_moveit::ExoticaPlanning srv;
-		vectorEigenToExotica(q0, srv.request.q0);
-		srv.request.xml_file_ = config_file_;
+		exotica_moveit::ExoticaPlanningGoal goal;
+		vectorEigenToExotica(q0, goal.q0);
+		goal.xml_file_ = config_file_;
 		moveit_msgs::PlanningScene tmp;
 		planning_scene_->getPlanningSceneMsg(tmp);
-		srv.request.scene_ = tmp;
-		srv.request.group_name_ = request_.group_name;
-		srv.request.max_time_ = getMotionPlanRequest().allowed_planning_time;
-		srv.request.problem_ = problem_name_;
-		srv.request.solver_ = solver_name_;
-		if (!client_.waitForExistence(ros::Duration(5)))
+		goal.scene_ = tmp;
+		goal.group_name_ = request_.group_name;
+		goal.max_time_ = getMotionPlanRequest().allowed_planning_time;
+		goal.problem_ = problem_name_;
+		goal.solver_ = solver_name_;
+		client_.sendGoal(goal);
+		bool finished_before_timeout = client_.waitForResult(ros::Duration(goal.max_time_));
+		if (finished_before_timeout)
 		{
-			ROS_ERROR("Exotica Planning service does not exist");
-		}
-		else
-			ROS_ERROR("Calling Exotica Planning service");
-		if (!client_.isValid())
-			ROS_ERROR("Exotica Planning Client not valid");
-
-		if (client_.call(srv))
-		{
-			ROS_ERROR("Calling Exotica Planning service succeeded");
-			if (srv.response.succeeded_)
+			if (client_.getResult()->succeeded_)
 			{
-				if (ok(matrixExoticaToEigen(srv.response.solution_, solution)))
+				if (ok(matrixExoticaToEigen(client_.getResult()->solution_, solution)))
 				{
 					res.trajectory_.reset(new robot_trajectory::RobotTrajectory(planning_scene_->getRobotModel(), model_group->getName()));
-					res.planning_time_ = srv.response.planning_time_;
+					res.planning_time_ = client_.getResult()->planning_time_;
 					copySolution(solution, res.trajectory_.get());
 					solution_ = solution;
 					return true;
+				}
+				else
+				{
+					INDICATE_FAILURE
+					return false;
 				}
 			}
 		}
 		else
 		{
-			std::cout << "Result " << srv.response.planning_time_ << std::endl;
+			std::cout << "Result " << client_.getResult()->planning_time_ << std::endl;
 			ROS_ERROR("Calling Exotica Planning service failed");
 		}
 		res.error_code_.val = moveit_msgs::MoveItErrorCodes::PLANNING_FAILED;

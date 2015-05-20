@@ -109,6 +109,8 @@ namespace ompl
 				 */
 				bool setUpLocalPlanner(const std::string & xml_file,
 						const exotica::Scene_ptr & scene);
+
+				bool resetScene(const exotica::Scene_ptr & scene);
 			protected:
 				/*
 				 * \brief	Motion class. This is where all the planner specific parameters are defined
@@ -177,6 +179,7 @@ namespace ompl
 			private:
 				///	Local solver
 				bool localSolve(Motion *sm, Motion *gm);
+
 				exotica::IKsolver_ptr local_solver_;
 
 				///	Store the local taskmap and task

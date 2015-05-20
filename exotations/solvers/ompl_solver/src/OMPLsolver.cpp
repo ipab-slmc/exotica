@@ -67,7 +67,7 @@ namespace exotica
 		timeout_ = t;
 	}
 
-	EReturn OMPLsolver::Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution)
+	EReturn OMPLsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution)
 	{
 		ros::Time startTime = ros::Time::now();
 		finishedSolving_ = false;
@@ -95,6 +95,7 @@ namespace exotica
 					return FAILURE;
 				planning_time_ = ros::Time::now() - startTime;
 				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution);
+
 				return SUCCESS;
 			}
 			else
@@ -226,13 +227,14 @@ namespace exotica
 	{
 		if (smooth_->data)
 		{
-			ROS_ERROR_STREAM("States before simplification: "<<pg.getStateCount()<<", length:"<<pg.length());
+			int original_cnt = pg.getStateCount();
 			ros::Time start = ros::Time::now();
-			ompl::geometric::PathSimplifier ps(ompl_simple_setup_->getSpaceInformation());
-			ps.shortcutPath(pg);
-			ps.smoothBSpline(pg);
-			ROS_ERROR_STREAM("States after simplification: "<<pg.getStateCount()<<", length:"<<pg.length());
-			ROS_ERROR_STREAM("Simplification took "<<ros::Duration(ros::Time::now()-start).toSec()<<"sec");
+			ompl_simple_setup_->simplifySolution();
+			if (ompl_simple_setup_->haveSolutionPath())
+			{
+				pg.interpolate();
+			}
+			HIGHLIGHT_NAMED("OMPLSolver", "Simplification took "<<ros::Duration(ros::Time::now()-start).toSec()<<"sec. States: "<<original_cnt<<"->"<<pg.getStateCount());
 		}
 		convertPath(pg, traj);
 
@@ -264,6 +266,26 @@ namespace exotica
 		XML_CHECK("max_goal_sampling_attempts");
 		XML_OK(getInt(*xmltmp, goal_ampling_max_attempts_));
 
+		projection_joints_.clear();
+		tmp_handle = handle.FirstChildElement("ProjectionJoints");
+		if (tmp_handle.ToElement())
+		{
+			tinyxml2::XMLHandle jnt_handle = tmp_handle.FirstChildElement("joint");
+			while (jnt_handle.ToElement())
+			{
+				const char* atr = jnt_handle.ToElement()->Attribute("name");
+				if (atr)
+				{
+					projection_joints_.push_back(std::string(atr));
+				}
+				else
+				{
+					INDICATE_FAILURE
+					return FAILURE;
+				}
+				jnt_handle = jnt_handle.NextSiblingElement("joint");
+			}
+		}
 		return SUCCESS;
 	}
 
@@ -289,6 +311,7 @@ namespace exotica
 
 		state_space_ = OMPLStateSpace::FromProblem(prob_);
 		ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
+
 		ob::GoalPtr goal = constructGoal();
 		if (goal)
 		{
@@ -303,6 +326,40 @@ namespace exotica
 			// call setup() again for possibly new param values
 			//ompl_simple_setup_.getSpaceInformation()->setup();
 
+			std::vector<std::string> jnts;
+			prob_->getScenes().begin()->second->getJointNames(jnts);
+			if (projection_joints_.size() > 0)
+			{
+				bool projects_ok_ = true;
+				std::vector<int> vars(projection_joints_.size());
+				for (int i = 0; i < projection_joints_.size(); i++)
+				{
+					bool found = false;
+					for (int j = 0; j < jnts.size(); j++)
+					{
+						if (projection_joints_[i].compare(jnts[j]) == 0)
+						{
+							vars[i] = j;
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						WARNING("Projection joint ["<<projection_joints_[i]<<"] does not exist, OMPL Projection Evaluator not used");
+						projects_ok_ = false;
+						break;
+					}
+				}
+				if (projects_ok_)
+				{
+					ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new exotica::OMPLProjection(state_space_, vars)));
+					std::string tmp;
+					for (int i = 0; i < projection_joints_.size(); i++)
+						tmp = tmp + "[" + projection_joints_[i] + "] ";
+					HIGHLIGHT_NAMED(object_name_, " Using projection joints "<<tmp);
+				}
+			}
 			if (ompl_simple_setup_->getGoal())
 				ompl_simple_setup_->setup();
 			if (selected_planner_.compare("geometric::FRRT") == 0)
@@ -318,6 +375,26 @@ namespace exotica
 		}
 		INDICATE_FAILURE
 		return FAILURE;
+	}
+
+	EReturn OMPLsolver::resetIfNeeded()
+	{
+		if (selected_planner_.compare("geometric::FRRT") == 0)
+		{
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->resetScene(prob_->scenes_.begin()->second))
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
+		}
+		return SUCCESS;
+	}
+
+	bool OMPLsolver::isSolvable(const PlanningProblem_ptr & prob)
+	{
+		if (prob->type().compare("exotica::OMPLProblem") == 0)
+			return true;
+		return false;
 	}
 
 	template<typename T> static ompl::base::PlannerPtr allocatePlanner(

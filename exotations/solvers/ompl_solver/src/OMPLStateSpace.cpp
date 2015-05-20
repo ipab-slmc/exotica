@@ -54,7 +54,7 @@ namespace exotica
 
 		if(q.rows()!=(int)getDimension())
 		{
-			ERROR("State vector and internal state dimension disagree");
+			ERROR("State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
 			return FAILURE;
 		}
 		memcpy(state->as<ompl::base::RealVectorStateSpace::StateType>()->values,q.data(),sizeof(double)*q.rows());

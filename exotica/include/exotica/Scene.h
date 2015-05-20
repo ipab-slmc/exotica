@@ -24,6 +24,10 @@
 #include <moveit_msgs/PlanningScene.h>
 #include <moveit/planning_scene/planning_scene.h>
 
+#ifndef EXOTICA_DEBUG_MODE
+#define EXOTICA_DEBUG_MODE
+#endif
+
 #ifdef EXOTICA_DEBUG_MODE
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
@@ -39,8 +43,9 @@ namespace exotica
 		public:
             /**
 			 * \brief	Default constructor
+			 * @param	server	Pointer to exotica server
 			 */
-			CollisionScene();
+			CollisionScene(const Server_ptr & server);
 
             /**
 			 * \brief	Destructor
@@ -49,13 +54,12 @@ namespace exotica
 
             /**
 			 * \brief	Initialisation function
-			 * @param	ps		Moveit planning scene (for model building)
+			 * @param	psmsg	Moveit planning scene message
 			 * @param	joints	Joint names
-			 * @param	mode	Optimization or sampling
              * @return Indication of success
 			 */
-			EReturn initialise(const planning_scene::PlanningSceneConstPtr & ps,
-					const std::vector<std::string> & joints, std::string & mode);
+			EReturn initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
+					const std::vector<std::string> & joints);
 
             /**
 			 * \brief	Update the robot collision properties
@@ -151,6 +155,9 @@ namespace exotica
             ///	FCL collision geometry for the world
 			std::map<std::string, geos_ptr> geo_world_;
 
+			///	To correct FCL transform
+			std::map<std::string, std::vector<fcl::Transform3f>> trans_world_;
+
             ///	Internal moveit planning scene
 			planning_scene::PlanningScenePtr ps_;
 
@@ -162,6 +169,9 @@ namespace exotica
 
 			///	The allowed collisiom matrix
 			collision_detection::AllowedCollisionMatrix acm_;
+
+			///	Pointer to exotica server
+			exotica::Server_ptr server_;
 	};
 
 	typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
@@ -345,6 +355,12 @@ namespace exotica
              * @return Robot model
              */
             robot_model::RobotModelPtr getRobotModel();
+
+            /**
+             * \brief	Get controlled joint names
+             * @param	joints	Joint names
+             */
+            EReturn getJointNames(std::vector<std::string> & joints);
 		private:
 
             ///	ROS node handle

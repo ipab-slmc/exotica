@@ -26,28 +26,46 @@ namespace exotica
 		//TODO
 	}
 
-    EReturn Server::getModel(std::string path, robot_model::RobotModelPtr & model)
-    {
-        if(robot_models_.find(path)!=robot_models_.end())
-        {
-            model=robot_models_[path];
-            return SUCCESS;
-        }
-        else
-        {
-            model = robot_model_loader::RobotModelLoader(path).getModel();
-            if(model)
-            {
-                robot_models_[path]=model;
-                return SUCCESS;
-            }
-            else
-            {
-                INDICATE_FAILURE;
-                return FAILURE;
-            }
-        }
-    }
+	EReturn Server::getModel(std::string path, robot_model::RobotModelPtr & model)
+	{
+		if (robot_models_.find(path) != robot_models_.end())
+		{
+			model = robot_models_[path];
+			return SUCCESS;
+		}
+		else
+		{
+			model = robot_model_loader::RobotModelLoader(path).getModel();
+			if (model)
+			{
+				robot_models_[path] = model;
+				return SUCCESS;
+			}
+			else
+			{
+				INDICATE_FAILURE
+				;
+				return FAILURE;
+			}
+		}
+	}
+
+	robot_model::RobotModelConstPtr Server::getModel(std::string path)
+	{
+		if (robot_models_.find(path) != robot_models_.end())
+		{
+			return robot_models_[path];
+		}
+		else
+		{
+			return robot_model_loader::RobotModelLoader(path).getModel();
+		}
+	}
+
+	bool Server::hasModel(const std::string & path)
+	{
+		return robot_models_.find(path) != robot_models_.end();
+	}
 
 	EReturn Server::initialise(tinyxml2::XMLHandle & handle)
 	{
@@ -69,22 +87,23 @@ namespace exotica
 		tinyxml2::XMLHandle mode_handle(handle.FirstChildElement("PlanningMode"));
 		if (mode_handle.ToElement())
 		{
-			std::string str =mode_handle.ToElement()->GetText();
-			if (str.compare("Optimization")==0)
+			std::string str = mode_handle.ToElement()->GetText();
+			if (str.compare("Optimization") == 0)
 			{
-				ROS_INFO("EXOTica Planning Mode: Optimization Mode");
+				HIGHLIGHT("EXOTica Planning Mode: Optimization Mode");
 			}
-			else if(str.compare("Sampling")==0)
+			else if (str.compare("Sampling") == 0)
 			{
-				ROS_INFO("EXOTica Planning Mode: Sampling Mode");
+				HIGHLIGHT("EXOTica Planning Mode: Sampling Mode");
 			}
 			else
 			{
-				ROS_INFO("EXOTica Planning Mode Undefined, Using Default Mode: Optimization Mode");
+				HIGHLIGHT("EXOTica Planning Mode Undefined, Using Default Mode: Optimization Mode");
 			}
 			std_msgs::String ros_s;
 			ros_s.data = str;
-			params_["/PlanningMode"] = boost::shared_ptr<std_msgs::String>(new std_msgs::String(ros_s));
+			params_["/PlanningMode"] =
+					boost::shared_ptr<std_msgs::String>(new std_msgs::String(ros_s));
 		}
 		INFO("EXOTica Server Initialised")
 		return SUCCESS;
@@ -195,11 +214,11 @@ namespace exotica
 
 	void Server::listParameters()
 	{
-		ROS_INFO("************* Parameters *************");
+		INFO("************* Parameters *************");
 		for (auto & it : params_)
 		{
-			ROS_INFO_STREAM("Parameter: "<<it.first);
+			INFO("Parameter: "<<it.first);
 		}
-		ROS_INFO("**************************************");
+		INFO("**************************************");
 	}
 }

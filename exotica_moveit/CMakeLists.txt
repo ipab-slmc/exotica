@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   exotica
   ompl_solver
+  actionlib_msgs
 )
 
 
@@ -39,9 +40,9 @@ find_package(Boost REQUIRED system filesystem date_time thread serialization)
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 # catkin_python_setup()
-add_service_files(
-  FILES
-  ExoticaPlanning.srv
+add_action_files(
+  DIRECTORY action
+  FILES ExoticaPlanning.action
 )
 
 generate_messages(
@@ -62,7 +63,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES exotica_moveit
-  CATKIN_DEPENDS aico ik_solver dynamic_reconfigure eigen_conversions moveit_core moveit_ros_planning_interface pluginlib roscpp tf task_definition task_map rospy std_msgs message_generation exotica ompl_solver
+  CATKIN_DEPENDS aico ik_solver dynamic_reconfigure eigen_conversions moveit_core moveit_ros_planning_interface pluginlib roscpp tf task_definition task_map rospy std_msgs message_generation exotica ompl_solver actionlib_msgs
   DEPENDS system_lib
 )
 
@@ -75,7 +76,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(include)
 include_directories(
   include/
   ${catkin_INCLUDE_DIRS}
@@ -88,9 +89,12 @@ link_directories(${Boost_LIBRARY_DIRS})
 add_library(moveit_exotica_planner_plugin src/EXOTicaPlannerManager.cpp)
 target_link_libraries(moveit_exotica_planner_plugin ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_executable(ExoticaPlanningServer src/EXOTicaPlannerServiceNode.cpp)
-target_link_libraries(ExoticaPlanningServer ${catkin_LIBRARIES})
-add_dependencies(ExoticaPlanningServer exotica_moveit_gencpp)
+add_library(${PROJECT_NAME} src/EXOTicaPlannerService.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(ExoticaPlannerServiceNode src/EXOTicaPlannerServiceNode.cpp src/EXOTicaPlannerService.cpp)
+target_link_libraries(ExoticaPlannerServiceNode ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(ExoticaPlannerServiceNode exotica_moveit_gencpp)
 
 #############
 ## Install ##

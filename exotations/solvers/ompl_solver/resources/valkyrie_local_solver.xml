@@ -12,8 +12,9 @@
      <PlanningMode>Optimization</PlanningMode>
   </Server>
   <IKsolver name="FRRTLocal">
-    <MaxIt>100</MaxIt>
+    <MaxIt>1000</MaxIt>
     <MaxStep>0.1</MaxStep>
+    <LocalMinimaThreshold>0</LocalMinimaThreshold>
   </IKsolver>
 
   <IKProblem name="LocalProblem">
@@ -61,13 +62,13 @@
 	  <limb segment="LeftForearm"></limb>
 	  <limb segment="LeftPalm"></limb>
       </EndEffector>
-      <SafetyRange>0.1</SafetyRange>
-      <SelfCollision>0</SelfCollision>
+      <SafetyRange>0.0</SafetyRange>
+      <SelfCollision>1</SelfCollision>
     </Map>
 
     <Task name="CollisionAvoidanceTask" type="TaskSqrError">
       <map name="CollisionAvoidanceMap"/>
-      <Rho>1e1</Rho>
+      <Rho>1e3</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0.0</Goal>
     </Task>
@@ -84,14 +85,14 @@
     
     <Task name="GlobalTask" type="TaskSqrError">
       <map name="EffPositionMap"/>
-      <Rho>1.0</Rho>
+      <Rho>1e1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0.79 0.31 0.376</Goal>
       <Threshold>1e-2</Threshold>
       <!-- Task Parameters -->
     </Task>
 
-    <Tolerance>0.01</Tolerance> 
-    <W> 10 10 10 6 6 6 4 3 2 1</W>
+    <Tolerance>1e-2</Tolerance> 
+    <W> 20 20 10 5 5  4 3 2 1</W>
   </IKProblem>
 </ExampleConfiguration>

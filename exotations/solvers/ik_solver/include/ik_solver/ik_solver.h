@@ -48,6 +48,13 @@ namespace exotica
 			 */
 			virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
 
+			/*
+			 * \brief	Check if a problem is solvable by this solver (Pure Virtual)
+			 * @param	prob		Planning problem
+			 * @return	True if solvable, false otherwise
+			 */
+			virtual bool isSolvable(const PlanningProblem_ptr & prob);
+
 			/**
 			 * \brief	Set new goal
 			 * @param	task_name	Task map name
@@ -103,6 +110,7 @@ namespace exotica
 
 			int T;
 			bool initialised_;
+			EParam<std_msgs::Float64> local_minima_threshold_;
 	};
 	typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

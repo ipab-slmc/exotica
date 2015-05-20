@@ -129,15 +129,18 @@ namespace exotica
 			if (dists[i] <= 0)
 			{
 #ifdef C_DEBUG
-				ROS_ERROR_STREAM_THROTTLE(5, "Robot link " << effs_[i] << " is in collision");
+				ROS_ERROR_STREAM_THROTTLE(1, "Robot link " << effs_[i] << " is in collision");
 #endif
 				costs[i] = 1;
 			}
 			else if (dists[i] > safe_range_->data)
+			{
 				costs[i] = 0;
+			}
 			else
+			{
 				costs[i] = (1.0 - dists[i] / safe_range_->data);
-
+			}
 			PHI(0) = PHI(0) + costs[i] * costs[i];
 
 			//	Modify end-effectors
@@ -170,6 +173,7 @@ namespace exotica
 				eigen2Point(c1s[i], p1);
 				eigen2Point(c2s[i], p2);
 				robot_centre_.points.push_back(p1);
+
 				world_centre_.points.push_back(p2);
 #endif
 			}

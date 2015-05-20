@@ -14,19 +14,19 @@
 #include "ompl_solver/common.h"
 #include "ompl_solver/OMPLStateValidityChecker.h"
 #include "ompl_solver/OMPLGoalSampler.h"
+#include "ompl_solver/OMPLProjection.h"
 #include <ompl/geometric/PathSimplifier.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
-
 namespace exotica
 {
 
-	class OMPLsolver : public MotionSolver, public boost::enable_shared_from_this<OMPLsolver>
+	class OMPLsolver: public MotionSolver, public boost::enable_shared_from_this<OMPLsolver>
 	{
 		public:
-			OMPLsolver ();
+			OMPLsolver();
 			virtual
-			~OMPLsolver ();
+			~OMPLsolver();
 
 			/**
 			 * \brief Binds the solver to a specific problem which must be pre-initalised
@@ -34,6 +34,13 @@ namespace exotica
 			 * @return        Successful if the problem is a valid AICOProblem
 			 */
 			virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
+
+			/*
+			 * \brief	Check if a problem is solvable by this solver (Pure Virtual)
+			 * @param	prob		Planning problem
+			 * @return	True if solvable, false otherwise
+			 */
+			virtual bool isSolvable(const PlanningProblem_ptr & prob);
 
 			std::vector<std::string> getPlannerNames();
 
@@ -43,7 +50,7 @@ namespace exotica
 			 * @param solution This will be filled with the solution in joint space.
 			 * @return SUCESS if solution has been found, corresponding error code if not.
 			 */
-			EReturn Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution);
+			EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
 
 			/**
 			 * \brief Terminates planning
@@ -76,7 +83,8 @@ namespace exotica
 
 			void setMaxPlanningTime(double t);
 
-            ros::Duration planning_time_;
+			EReturn resetIfNeeded();
+			ros::Duration planning_time_;
 
 		protected:
 			/**
@@ -97,7 +105,8 @@ namespace exotica
 			 * @param planner_id Planner name
 			 * @param pa Planner allocation function
 			 */
-			void registerPlannerAllocator(const std::string &planner_id, const ConfiguredPlannerAllocator &pa)
+			void registerPlannerAllocator(const std::string &planner_id,
+					const ConfiguredPlannerAllocator &pa)
 			{
 				known_planners_[planner_id] = pa;
 			}
@@ -174,6 +183,9 @@ namespace exotica
 
 			/// \brief	Indicate if trajectory smoother is required
 			EParam<std_msgs::Bool> smooth_;
+
+			std::vector<std::string> projection_joints_;
+
 	};
 
 	typedef boost::shared_ptr<exotica::OMPLsolver> OMPLsolver_ptr;

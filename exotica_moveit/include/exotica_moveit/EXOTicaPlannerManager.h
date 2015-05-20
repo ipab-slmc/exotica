@@ -19,6 +19,7 @@
 #include <moveit/profiler/profiler.h>
 #include <class_loader/class_loader.h>
 #include <pluginlib/class_list_macros.h>
+#include <actionlib/client/simple_action_client.h>
 
 #include <dynamic_reconfigure/server.h>
 //#include "moveit_planners_ompl/OMPLDynamicReconfigureConfig.h"
@@ -26,7 +27,7 @@
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit_msgs/GetMotionPlan.h>
-#include "exotica_moveit/ExoticaPlanning.h"
+#include "exotica_moveit/ExoticaPlanningAction.h"
 #include "exotica_moveit/EXOTicaPlannerService.h"
 #include "aico/AICOsolver.h"
 #include <ompl_solver/OMPLsolver.h>
@@ -91,7 +92,7 @@ namespace exotica
 			std::string problem_name_;
 			std::string solver_name_;
 			std::string config_file_;
-			ros::ServiceClient client_;
+			actionlib::SimpleActionClient<exotica_moveit::ExoticaPlanningAction> client_;
   };
 
 } /* namespace exotica */

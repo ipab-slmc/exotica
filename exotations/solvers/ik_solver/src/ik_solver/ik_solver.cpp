@@ -32,6 +32,9 @@ namespace exotica
 			server_->registerParam<std_msgs::Int64>(ns_, tmp_handle, maxit_);
 			tmp_handle = handle.FirstChildElement("MaxStep");
 			server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, maxstep_);
+			tmp_handle = handle.FirstChildElement("LocalMinimaThreshold");
+			server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, local_minima_threshold_);
+
 		}
 		catch (int e)
 		{
@@ -125,6 +128,13 @@ namespace exotica
 		return SUCCESS;
 	}
 
+	bool IKsolver::isSolvable(const PlanningProblem_ptr & prob)
+	{
+		if (prob->type().compare("exotica::IKProblem") == 0)
+			return true;
+		return false;
+	}
+
 	EReturn IKsolver::setGoal(const std::string & task_name, Eigen::VectorXdRefConst _goal, int t)
 	{
 		if (taskIndex.find(task_name) == taskIndex.end())
@@ -191,6 +201,7 @@ namespace exotica
 			Eigen::VectorXd q = q0;
 			for (int t = 0; t < T; t++)
 			{
+
 				if (ok(Solve(q, solution.block(t, 0, 1, size_), t)))
 				{
 					q = solution.row(t);
@@ -298,6 +309,16 @@ namespace exotica
 						found = true;
 						break;
 					}
+					else if (error > 3 * prob_->getTau())
+					{
+						double change = (tmp.row(i + 1) - tmp.row(i)).norm();
+//						ROS_ERROR_STREAM("Change "<<change);
+						if (change < local_minima_threshold_->data)
+						{
+							ROS_ERROR_STREAM("Running into local minima");
+							return FAILURE;
+						}
+					}
 				}
 				else
 				{
@@ -311,11 +332,12 @@ namespace exotica
 			{
 				solution.resize(i + 1, size_);
 				solution = tmp.block(0, 0, i + 1, size_);
+				ROS_INFO_STREAM("IK solution found in "<<i<<" iterations");
 				return SUCCESS;
 			}
 			else
 			{
-				WARNING("Solution not found after reaching max number of iterations");
+				ROS_ERROR_STREAM("Solution not found after reaching max number of iterations");
 				return FAILURE;
 			}
 		}

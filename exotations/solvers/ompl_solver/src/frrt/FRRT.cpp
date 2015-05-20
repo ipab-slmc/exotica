@@ -44,6 +44,12 @@ namespace ompl
 			if (nn_)
 				nn_->clear();
 			lastGoalMotion_ = NULL;
+			global_try_ = 0;
+			global_succeeded_ = 0;
+			local_try_ = 0;
+			local_succeeded_ = 0;
+			normal_try_ = 0;
+			normal_succeeded_ = 0;
 		}
 
 		void FRRT::setup()
@@ -102,7 +108,8 @@ namespace ompl
 			Motion *rmotion = new Motion(si_);
 			rmotion->state = si_->allocState();
 			rmotion = nn_->nearest(rmotion);
-			Motion *last_motion = rmotion;
+			Motion *last_motion;
+			last_motion = rmotion;
 			while (ptc == false)
 			{
 				bool valid_state = false;
@@ -112,7 +119,11 @@ namespace ompl
 				{
 					Motion *nmotion = nn_->nearest(last_motion);
 					bool valid = false;
-					if (last_motion->state != nmotion->state)
+					if (nn_->size()==1)
+					{
+						valid = true;
+					}
+					else if (last_motion->state != nmotion->state)
 					{
 						if (!si_->checkMotion(last_motion->state, nmotion->state))
 						{
@@ -142,7 +153,7 @@ namespace ompl
 					{
 						/* set the local to global goal */
 						global_try_++;
-						if (!ok(local_solver_->setRho("GlobalTask", 1, 0))
+						if (!ok(local_solver_->setRho("GlobalTask", 1e1, 0))
 								|| !ok(local_solver_->setRho("LocalTask", 0, 0)))
 						{
 							INDICATE_FAILURE
@@ -182,7 +193,6 @@ namespace ompl
 					}
 					else
 					{
-
 						local_try_++;
 						/* set the local to local goal */
 						Eigen::VectorXd eigen_g((int) si_->getStateDimension());
@@ -254,7 +264,6 @@ namespace ompl
 					else
 					{
 						mpath.push_back(solution);
-						ROS_INFO("Put back normal state");
 					}
 					solution = solution->parent;
 				}
@@ -271,9 +280,6 @@ namespace ompl
 				OMPL_INFORM("Problem Solved");
 			}
 
-			if (rmotion->state)
-				si_->freeState(rmotion->state);
-			delete rmotion;
 			OMPL_INFORM("%s: Created %d states", getName().c_str(), nn_->size());
 			OMPL_INFORM("%s: Global succeeded/try %d / %d", getName().c_str(), global_succeeded_, global_try_);
 			OMPL_INFORM("%s: Local succeeded/try %d / %d", getName().c_str(), local_succeeded_, local_try_);
@@ -325,7 +331,6 @@ namespace ompl
 				return false;
 			}
 			prob->setScene(scene->getPlanningScene());
-
 			base::Goal *goal = pdef_->getGoal().get();
 			if (!goal)
 			{
@@ -349,13 +354,22 @@ namespace ompl
 			return true;
 		}
 
+		bool FRRT::resetScene(const exotica::Scene_ptr & scene)
+		{
+			if(!ok(local_solver_->getProblem()->setScene(scene->getPlanningScene())))
+			{
+				INDICATE_FAILURE
+				return false;
+			}
+			return true;
+		}
+
 		bool FRRT::localSolve(Motion *sm, Motion *gm)
 		{
 			int dim = (int) si_->getStateDimension();
 			Eigen::VectorXd qs(dim), qg(dim);
 			memcpy(qs.data(), sm->state->as<ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
 					* qs.rows());
-
 			Eigen::MatrixXd local_path;
 			if (ok(local_solver_->SolveFullSolution(qs, local_path)))
 			{

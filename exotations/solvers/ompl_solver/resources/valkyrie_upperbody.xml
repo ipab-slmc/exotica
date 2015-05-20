@@ -1,0 +1,249 @@
+<?xml version="1.0" ?>
+<ExampleConfiguration>
+  <Server name="EXOTicaServer">
+     <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
+     Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
+     <Parameters>  
+
+     </Parameters>
+     
+     <!-- Other server functionalities other than parameters TODO -->
+     <!-- Specify Planning Mode: Optimization or Sampling. Skip unnecessary steps if in sampling mode-->
+     <PlanningMode>Optimization</PlanningMode>
+  </Server>
+  <OMPLsolver name="OMPL_Interface">
+    <algorithm>RRT</algorithm>
+    <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
+    <TrajectorySmooth>1</TrajectorySmooth>
+  </OMPLsolver>
+
+  <OMPLProblem name="OMPLProblem">
+    <Scene name="TestScene">
+      <Kinematica>
+        <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
+        <Root segment="Pelvis"> <!-- Optional: The root segment to use: xyz -->
+          <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
+          <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
+        </Root>
+        <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="WaistRotator"/> 
+          <joint name="WaistExtensor"/>
+          <joint name="WaistLateralExtensor"/> 
+          <joint name="LeftShoulderExtensor"/> 
+          <joint name="LeftShoulderAdductor"/>
+          <joint name="LeftShoulderSupinator"/>
+          <joint name="LeftElbowExtensor"/>	
+          <joint name="LeftForearmSupinator"/>	
+          <joint name="LeftWristExtensor"/>	
+          <joint name="LeftWrist"/>	
+        </Update>
+      </Kinematica>
+    </Scene> 
+    
+    <Map type="EffPosition" name="EffPositionMap">
+      <Scene name="TestScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="LeftPalm">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+    
+    <Task name="EffPositionTask" type="TaskTerminationCriterion">
+      <map name="EffPositionMap"/>
+      <Rho>1.0</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0.79 0.31 0.376</Goal>
+      <Threshold>1e-2</Threshold>
+      <!-- Task Parameters -->
+    </Task>
+    <!-- Problem parameters (structuring etc...) -->
+    <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/valkyrie_local_solver.xml</LocalPlannerConfig>
+  </OMPLProblem>
+
+  <OMPLProblem name="OMPLWholeBodyProblem">
+    <Scene name="WholeBodyScene">
+      <Kinematica>
+        <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
+        <Root segment="Pelvis"> <!-- Optional: The root segment to use: xyz -->
+          <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
+          <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
+        </Root>
+        <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="LeftHipRotator"/> 
+          <joint name="LeftHipAdductor"/>
+          <joint name="LeftHipExtensor"/> 
+          <joint name="LeftKneeExtensor"/> 
+          <joint name="LeftAnkleExtensor"/>
+          <joint name="LeftAnkle"/>
+          <joint name="RightHipRotator"/>	
+          <joint name="RightHipAdductor"/>	
+          <joint name="RightHipExtensor"/>	
+          <joint name="RightKneeExtensor"/>	
+          <joint name="RightAnkleExtensor"/>
+          <joint name="RightAnkle"/>	
+
+          <joint name="WaistRotator"/>	
+          <joint name="WaistExtensor"/>	
+          <joint name="WaistLateralExtensor"/>	
+
+          <joint name="LeftShoulderExtensor"/>	
+          <joint name="LeftShoulderAdductor"/>	
+          <joint name="LeftShoulderSupinator"/>	
+          <joint name="LeftElbowExtensor"/>	
+          <joint name="LeftForearmSupinator"/>	
+          <joint name="LeftWristExtensor"/>
+	
+          <joint name="UpperNeckExtensor"/>
+	
+          <joint name="RightShoulderExtensor"/>	
+          <joint name="RightShoulderAdductor"/>	
+          <joint name="RightShoulderSupinator"/>	
+          <joint name="RightElbowExtensor"/>	
+          <joint name="RightForearmSupinator"/>	
+          <joint name="RightWristExtensor"/>	
+
+        </Update>
+      </Kinematica>
+    </Scene> 
+    
+    <Map type="EffPosition" name="EffPositionMap">
+      <Scene name="WholeBodyScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="LeftPalm">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+    
+    <Task name="EffPositionTask" type="TaskTerminationCriterion">
+      <map name="EffPositionMap"/>
+      <Rho>1.0</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0.79 0.31 0.376</Goal>
+      <Threshold>1e-2</Threshold>
+      <!-- Task Parameters -->
+    </Task>
+    <!-- Problem parameters (structuring etc...) -->
+    <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/valkyrie_local_solver.xml</LocalPlannerConfig>
+  </OMPLProblem>
+
+
+
+  <IKsolver name="MyIKsolver">   <!-- Motion solver definition -->
+    <MaxIt>1000</MaxIt>
+    <MaxStep>0.02</MaxStep>
+  </IKsolver>
+
+  <IKProblem name="MyIKProblem">
+    <Scene name="IKDemoScene"> <!-- Kinematic scene -->
+      <Kinematica>
+        <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
+        <Root segment="Pelvis"> <!-- Optional: The root segment to use: xyz -->
+          <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
+          <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
+        </Root>
+        <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="WaistRotator"/> 
+          <joint name="WaistExtensor"/>
+          <joint name="WaistLateralExtensor"/> 
+          <joint name="LeftShoulderExtensor"/> 
+          <joint name="LeftShoulderAdductor"/>
+          <joint name="LeftShoulderSupinator"/>
+          <joint name="LeftElbowExtensor"/>	
+          <joint name="LeftForearmSupinator"/>	
+          <joint name="LeftWristExtensor"/>	
+          <joint name="LeftWrist"/>	
+        </Update>
+      </Kinematica>
+    </Scene>
+
+    <Map type="EffPosition" name="AICOSolverDemoMap"> <!-- The end-effector position task map -->
+      <Scene name="IKDemoScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="LeftPalm">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+
+    <Task name="AICOSolverDemoTask" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
+      <map name="AICOSolverDemoMap"/>
+      <Rho>1.0</Rho>
+      <Goal>0.79 0.31 0.376</Goal>
+    </Task>
+
+    <Map type="CollisionAvoidance" name="CollisionAvoidanceMap">
+      <Scene name="IKDemoScene"/>
+      <EndEffector ignore_unused="true">
+	  <limb segment="Trunk"></limb>
+	  <limb segment="LeftShoulderExtensor"></limb>
+	  <limb segment="LeftShoulderAdductor"></limb>
+	  <limb segment="LeftShoulderRotator"></limb>
+	  <limb segment="LeftElbowExtensor"></limb>
+	  <limb segment="LeftForearm"></limb>
+	  <limb segment="LeftPalm"></limb>
+      </EndEffector>
+      <SafetyRange>0.1</SafetyRange>
+      <SelfCollision>0</SelfCollision>
+    </Map>
+
+    <Task name="CollisionAvoidanceTask" type="TaskSqrError">
+      <map name="CollisionAvoidanceMap"/>
+      <Rho>0</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0.0</Goal>
+    </Task>
+   
+    <Map type="Orientation" name="OrientationMapX">
+      <Scene name="IKDemoScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="LeftPalm"></limb>
+          <limb segment="LeftPalm">
+            <vector>-0.5 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+          <limb segment="Pelvis"></limb>
+          <limb segment="Pelvis">
+            <vector>0.5 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+    <Task name="OrientationTaskX" type="TaskSqrError">
+      <map name="OrientationMapX"/>
+      <Rho>1.0</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0</Goal>
+      <!-- Task Parameters -->
+    </Task>
+
+    <Map type="Orientation" name="OrientationMapY">
+      <Scene name="IKDemoScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="LeftPalm"></limb>
+          <limb segment="LeftPalm">
+            <vector>0.0 -0.5 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+          <limb segment="Pelvis"></limb>
+          <limb segment="Pelvis">
+            <vector>0.0 0.5 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+    <Task name="OrientationTaskY" type="TaskSqrError">
+      <map name="OrientationMapY"/>
+      <Rho>1.0</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0</Goal>
+      <!-- Task Parameters -->
+    </Task>
+    <Tolerance>1e-2</Tolerance>
+    <W> 100 100 100 5 5 4 4 3 2 1</W>
+  </IKProblem>
+</ExampleConfiguration>

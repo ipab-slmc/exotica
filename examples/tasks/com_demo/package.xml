@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>ik_solver_demo</name>
+  <name>com_demo</name>
   <version>0.0.0</version>
-  <description>The ik_solver_demo package</description>
+  <description>The com_demo package</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
 

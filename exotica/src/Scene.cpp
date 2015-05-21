@@ -402,26 +402,35 @@ namespace exotica
     EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef_ptr& phi, bool force)
     {
         LOCK(lock_);
-        if(phi==NULL||force)
+        if(kinematica_.getEffSize()==0)
         {
-            if (phis_.find(task) == phis_.end())
+            phi=Eigen::VectorXdRef_ptr();
+
+        }
+        else
+        {
+            if(phi==NULL||force)
             {
-                INDICATE_FAILURE;
-                return FAILURE;
+                if (phis_.find(task) == phis_.end())
+                {
+                    INDICATE_FAILURE;
+                    return FAILURE;
+                }
+                phi = phis_.at(task);
             }
-            phi = phis_.at(task);
         }
         return SUCCESS;
+
     }
 
     EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef jac)
 	{
-		LOCK(lock_);
-		if (jacs_.find(task) == jacs_.end())
-		{
-			INDICATE_FAILURE
-			return FAILURE;
-		}
+        LOCK(lock_);
+        if (jacs_.find(task) == jacs_.end())
+        {
+            INDICATE_FAILURE
+            return FAILURE;
+        }
         Eigen::Ref<Eigen::MatrixXd> J(*(jacs_.at(task)));
         for(int r=0;r<jac.rows();r++)
         {
@@ -436,14 +445,22 @@ namespace exotica
     EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac, bool force)
     {
         LOCK(lock_);
-        if(jac==NULL||force)
+        if(kinematica_.getEffSize()==0)
         {
-            if (jacs_.find(task) == jacs_.end())
+            jac=Eigen::MatrixXdRef_ptr();
+
+        }
+        else
+        {
+            if(jac==NULL||force)
             {
-                INDICATE_FAILURE
-                return FAILURE;
+                if (jacs_.find(task) == jacs_.end())
+                {
+                    INDICATE_FAILURE
+                    return FAILURE;
+                }
+                jac = jacs_.at(task);
             }
-            jac = jacs_.at(task);
         }
         return SUCCESS;
     }
@@ -567,34 +584,37 @@ namespace exotica
         {
             if (ok(collision_scene_->update(x)))
             {
-                if (kinematica_.updateConfiguration(x))
+                if(kinematica_.getEffSize()>0)
                 {
-                    if (kinematica_.generateForwardMap(Phi_))
+                    if (kinematica_.updateConfiguration(x))
                     {
-                        if (update_jacobians_)
+                        if (kinematica_.generateForwardMap(Phi_))
                         {
-                            if (kinematica_.generateJacobian(Jac_))
+                            if (update_jacobians_)
                             {
-                                // All is fine
+                                if (kinematica_.generateJacobian(Jac_))
+                                {
+                                    // All is fine
+                                }
+                                else
+                                {
+                                    INDICATE_FAILURE;
+                                    return FAILURE;
+                                }
                             }
-                            else
-                            {
-                                INDICATE_FAILURE;
-                                return FAILURE;
-                            }
+                            // else Also fine, just skip computing the Jacobians
                         }
-                        // else Also fine, just skip computing the Jacobians
+                        else
+                        {
+                            INDICATE_FAILURE;
+                            return FAILURE;
+                        }
                     }
                     else
                     {
                         INDICATE_FAILURE;
                         return FAILURE;
                     }
-                }
-                else
-                {
-                    INDICATE_FAILURE;
-                    return FAILURE;
                 }
             }
             else

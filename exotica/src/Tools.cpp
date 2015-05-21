@@ -455,7 +455,7 @@ namespace exotica
             ret.resize(a.Size());
             for(int i=0;i<a.Size();i++)
             {
-                if(a[i].IsDouble())
+                if(a[i].IsNumber())
                 {
                     ret(i)=a[i].GetDouble();
                 }
@@ -474,9 +474,27 @@ namespace exotica
         }
     }
 
+    EReturn getJSON(const rapidjson::Value& a, std::vector<std::string>& ret)
+    {
+        if(a.IsArray())
+        {
+            ret.resize(a.Size());
+            for(int i=0;i<a.Size();i++)
+            {
+                ret[i]=a[i].GetString();
+            }
+            return SUCCESS;
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return FAILURE;
+        }
+    }
+
     EReturn getJSON(const rapidjson::Value& a, double& ret)
     {
-        if(a.IsDouble())
+        if(a.IsNumber())
         {
             ret=a.GetDouble();
             return SUCCESS;

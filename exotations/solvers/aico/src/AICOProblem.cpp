@@ -15,7 +15,7 @@ REGISTER_PROBLEM_TYPE("AICOProblem",exotica::AICOProblem);
 namespace exotica
 {
 
-    EReturn AICOProblem::reinitialise(rapidjson::Document& document)
+    EReturn AICOProblem::reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem)
     {
         task_defs_.clear();
         task_maps_.clear();
@@ -34,7 +34,7 @@ namespace exotica
                             TaskMap_ptr taskmap;
                             if(ok(TaskMap_fac::Instance().createObject(knownMaps_[constraintClass],taskmap)))
                             {
-                                EReturn ret = taskmap->initialise(obj,server_,scenes_);
+                                EReturn ret = taskmap->initialise(obj,server_,scenes_, problem);
                                 if(ok(ret))
                                 {
                                     if(ret!=CANCELLED)
@@ -59,7 +59,14 @@ namespace exotica
                                             sqr->setTimeSteps(T+2);
                                             Eigen::VectorXd tspan(2);
                                             Eigen::VectorXi tspani(2);
-                                            getJSON(obj["tspan"],tspan);
+                                            if(obj["tspan"]["__ndarray__"].IsArray())
+                                            {
+                                                getJSON(obj["tspan"]["__ndarray__"],tspan);
+                                            }
+                                            else
+                                            {
+                                                getJSON(obj["tspan"],tspan);
+                                            }
                                             if(tspan(0)<=0.0) tspan(0)=0.0;
                                             if(tspan(1)>=1.0) tspan(1)=1.0;
                                             tspani(0)=(int)(T*tspan(0));
@@ -76,6 +83,10 @@ namespace exotica
                                             INDICATE_FAILURE;
                                             return FAILURE;
                                         }
+                                    }
+                                    else
+                                    {
+                                        ROS_WARN_STREAM("Creation of '"<<constraintClass<<"' cancelled!");
                                     }
                                 }
                                 else

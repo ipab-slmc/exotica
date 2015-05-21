@@ -1,4 +1,5 @@
 #include "exotica/TaskMap.h"
+#include "exotica/PlanningProblem.h"
 
 namespace exotica
 {
@@ -19,7 +20,7 @@ namespace exotica
         return FAILURE;
     }
 
-    EReturn TaskMap::initialise(const rapidjson::Value& a, Server_ptr & server, const Scene_map & scene_ptr)
+    EReturn TaskMap::initialise(const rapidjson::Value& a, Server_ptr & server, const Scene_map & scene_ptr, PlanningProblem_ptr prob)
     {
         if(ok(getJSON(a["class"],object_name_)))
         {
@@ -31,6 +32,8 @@ namespace exotica
             object_name_=object_name_+std::to_string((unsigned long)this);
             server_ = server;
             scene_ = scene_ptr.begin()->second;
+            poses = prob->poses;
+            posesJointNames = prob->posesJointNames;
             return initialise(a);
         }
         else
@@ -220,6 +223,7 @@ namespace exotica
 
     bool TaskMap::getEffReferences()
     {
+
         if(ok(scene_->getForwardMap(object_name_, eff_phi_)))
         {
             if(updateJacobian_)

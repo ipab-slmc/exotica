@@ -80,7 +80,10 @@ namespace exotica
 
             Eigen::VectorXd startState;
 
-            virtual EReturn reinitialise(rapidjson::Document& document);
+            virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
+
+            boost::shared_ptr<std::map<std::string,Eigen::VectorXd> > poses;
+            boost::shared_ptr<std::vector<std::string> > posesJointNames;
 
 		protected:
 
@@ -95,6 +98,7 @@ namespace exotica
 			TaskMap_map task_maps_; //!< The set of taskmaps we will be using, which will be shared between task-definitions
 			TaskDefinition_map task_defs_; //!< The set of task definition objects
             std::map<std::string,std::string> knownMaps_;
+
 	};
 	
 	typedef Factory<std::string, PlanningProblem> PlanningProblem_fac;

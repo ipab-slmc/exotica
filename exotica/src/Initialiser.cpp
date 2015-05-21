@@ -16,13 +16,13 @@ namespace exotica
         return initialise(file_name, server, solver, problem, std::string(), std::string());
     }
 
-    EReturn Initialiser::initialiseProblemJSON(PlanningProblem_ptr problem, const std::string& constraints, const std::string& poses)
+    EReturn Initialiser::initialiseProblemJSON(PlanningProblem_ptr problem, const std::string& constraints)
     {
         {
             Document document;
             if (!document.Parse<0>(constraints.c_str()).HasParseError())
             {
-                if(ok(problem->reinitialise(document)))
+                if(ok(problem->reinitialise(document,problem)))
                 {
                     // Everythinh is fine
                 }
@@ -38,38 +38,6 @@ namespace exotica
                 return FAILURE;
             }
         }
-        {
-            Document document;
-            if (!document.Parse<0>(poses.c_str()).HasParseError())
-            {
-                Eigen::VectorXd tmp;
-                if(ok(getJSON(document["reach_start"],tmp)))
-                {
-                    int n = problem->getScenes().begin()->second->getNumJoints();
-                    if(tmp.rows()>=n)
-                    {
-                        problem->startState=tmp.tail(n);
-                    }
-                    else
-                    {
-                        INDICATE_FAILURE;
-                        return FAILURE;
-                    }
-                }
-                else
-                {
-                    ERROR("Start pose not specified!");
-                    return FAILURE;
-                }
-            }
-            else
-            {
-                ERROR("Can't parse constraints from JSON string!\n"<<document.GetParseError() <<"\n"<<poses.substr(document.GetErrorOffset(),50));
-                return FAILURE;
-            }
-        }
-
-
         return SUCCESS;
     }
 

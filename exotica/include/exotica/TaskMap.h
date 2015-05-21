@@ -32,6 +32,8 @@
 
 namespace exotica
 {
+    class PlanningProblem;
+
 	class TaskMap: public Object
 	{
 		public:
@@ -104,12 +106,15 @@ namespace exotica
             Scene_ptr getScene();
 
             virtual EReturn initialise(const rapidjson::Value& a);
-            EReturn initialise(const rapidjson::Value& a, Server_ptr & server, const Scene_map & scene_ptr);
+            EReturn initialise(const rapidjson::Value& a, Server_ptr & server, const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
 
             bool updateJacobian_;
 
             std::vector<Eigen::VectorXdRef_ptr> phi_;       //!< The Task-space co-ordinates
             std::vector<Eigen::MatrixXdRef_ptr> jac_;       //!< The Task Jacobian matrix
+
+            boost::shared_ptr<std::map<std::string,Eigen::VectorXd> > poses;
+            boost::shared_ptr<std::vector<std::string> > posesJointNames;
 
 		protected:
 

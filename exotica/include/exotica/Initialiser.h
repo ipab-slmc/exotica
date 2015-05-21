@@ -58,7 +58,7 @@ namespace exotica
        */
       EReturn listSolversAndProblems(const std::string & file_name, std::vector<std::string>& problems, std::vector<std::string>& solvers);
 
-      EReturn initialiseProblemJSON(PlanningProblem_ptr problem, const std::string& constraints, const std::string& poses);
+      EReturn initialiseProblemJSON(PlanningProblem_ptr problem, const std::string& constraints);
 
     private:
 

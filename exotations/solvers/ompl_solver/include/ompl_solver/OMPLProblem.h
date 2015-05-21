@@ -33,7 +33,7 @@ namespace exotica
 			std::vector<TaskTerminationCriterion_ptr>& getGoals();
 			std::vector<double>& getBounds();
 
-            virtual EReturn reinitialise(rapidjson::Document& document);
+            virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
 
 		protected:
 			/**

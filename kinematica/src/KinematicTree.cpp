@@ -887,6 +887,7 @@ bool kinematica::KinematicTree::setEndEffectors(const SolutionForm_t & optimisat
 	if (optimisation.end_effector_offs.size() < 0 //OK if == 0
 	&& (optimisation.end_effector_segs.size() != optimisation.end_effector_offs.size()))
 	{
+        INDICATE_FAILURE;
 		return false;
 	}
 
@@ -911,7 +912,7 @@ bool kinematica::KinematicTree::setEndEffectors(const SolutionForm_t & optimisat
 		}
 		else
         {
-            INFO("setEndEffectors Function ...  Could not use End effector " << optimisation.end_effector_segs[i]);
+            ERROR("setEndEffectors Function ...  Could not use End effector " << optimisation.end_effector_segs[i]);
 			success = false;
 		}
 	}
@@ -930,6 +931,10 @@ bool kinematica::KinematicTree::setEndEffectors(const SolutionForm_t & optimisat
 			} //!< Set all as needed
 		}
 	}
+    else
+    {
+        INDICATE_FAILURE;
+    }
 
 	return success;
 }

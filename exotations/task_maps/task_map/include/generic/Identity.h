@@ -27,12 +27,21 @@ namespace exotica
        * \brief Concrete implementation of the task-space size
        */
       virtual EReturn taskSpaceDim(int & task_dim);
+
+      virtual EReturn initialise(const rapidjson::Value& a);
       
     protected:
       /**
        * \brief Concrete implementation of the initialisation method
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+
+      int getJointIDexternal(std::string& name);
+      int getJointID(std::string& name);
+
+      bool useRef;
+      std::vector<int> jointMap;
+      Eigen::VectorXd jointRef;
   };
 }
 #endif

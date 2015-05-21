@@ -46,7 +46,7 @@ namespace exotica
 	}
 
 	EReturn CollisionScene::initialise(const moveit_msgs::PlanningSceneConstPtr & msg,
-			const std::vector<std::string> & joints)
+			const std::vector<std::string> & joints, std::string & mode)
 	{
 		fcl_robot_.clear();
 		fcl_world_.clear();
@@ -125,9 +125,7 @@ namespace exotica
 			}
 		}
 
-		EParam<std_msgs::String> mode;
-		server_->getParam("/PlanningMode", mode);
-		if (mode->data.compare("Sampling") == 0)
+		if (mode.compare("Sampling") == 0)
 		{
 			compute_dist = false;
 			INFO("Computing distance in Collision scene is Disabled");
@@ -359,7 +357,7 @@ namespace exotica
 ///////////////////////////////////////////////////////////////
 
 	Scene::Scene(const std::string & name) :
-			name_(name), nh_(name + "_node"), N(0), initialised_(false), update_jacobians_(true)
+			name_(name), N(0), initialised_(false), update_jacobians_(true)
 	{
 		eff_names_.clear();
 		eff_offsets_.clear();
@@ -386,6 +384,7 @@ namespace exotica
 	EReturn Scene::initialisation(tinyxml2::XMLHandle & handle, const Server_ptr & server)
 	{
 		LOCK(lock_);
+		server_ = server;
 		if (!handle.FirstChildElement("Kinematica").ToElement())
 		{
 			INDICATE_FAILURE
@@ -398,29 +397,40 @@ namespace exotica
 			return FAILURE;
 		}
 
-		tinyxml2::XMLHandle kinematica_handle(handle.FirstChildElement("Kinematica"));
-		if (!kinematica_.initKinematics(kinematica_handle, model_->getURDF().get()))
+		tinyxml2::XMLHandle tmp_handle(handle.FirstChildElement("Kinematica"));
+		if (!kinematica_.initKinematics(tmp_handle, model_->getURDF().get()))
 		{
 			INDICATE_FAILURE
 			return FAILURE;
 		}
 		N = kinematica_.getNumJoints();
-		collision_scene_.reset(new CollisionScene(server));
+		collision_scene_.reset(new CollisionScene(server_));
 
-		EParam<std_msgs::String> tmp;
-		server->getParam("/PlanningMode", tmp);
-		mode_ = tmp->data;
-		if (mode_.compare("Sampling") == 0)
-			update_jacobians_ = false;
-#ifdef EXOTICA_DEBUG_MODE
-		state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("disp_state", 100);
-		HIGHLIGHT_NAMED(name_, "Running in debug mode, a robot state will be published to '"<<name_<<"_node/disp_state'");
-#endif
+		tmp_handle = handle.FirstChildElement("PlanningMode");
+		if (!ok(server_->registerParam<std_msgs::String>(name_, tmp_handle, mode_)))
+		{
+			mode_->data = "Optimization";
+			WARNING_NAMED(name_, "Planning mode not specified, using default: Optimization.");
+		}
+		else
+		{
+			INFO_NAMED(name_, "Planning mode set to "<<mode_->data);
+		}
+		update_jacobians_ = mode_->data.compare("Sampling") != 0 ? true : false;
+
+		tmp_handle = handle.FirstChildElement("VisualDebug");
+		server_->registerParam<std_msgs::Bool>(name_, tmp_handle, visual_debug_);
+		if (visual_debug_->data)
+		{
+			state_pub_ =
+					server_->advertise<moveit_msgs::DisplayRobotState>(name_ + "/disp_state", 100);
+			HIGHLIGHT_NAMED(name_, "Running in debug mode, a robot state will be published to '"<<server_->getName()<<"/"<<name_<<"/disp_state'");
+		}
 		{
 			planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
 			moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
 			tmp->getPlanningSceneMsg(*msg.get());
-			if (!ok(collision_scene_->initialise(msg, kinematica_.getJointNames())))
+			if (!ok(collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_->data)))
 			{
 				INDICATE_FAILURE
 				;
@@ -661,12 +671,12 @@ namespace exotica
 			}
 		}
 
-#ifdef EXOTICA_DEBUG_MODE
-		moveit_msgs::DisplayRobotState msg;
-		robot_state::robotStateToRobotStateMsg(collision_scene_->getCurrentState(), msg.state);
-		state_pub_.publish(msg);
-		ros::spinOnce();
-#endif
+		if (visual_debug_->data)
+		{
+			moveit_msgs::DisplayRobotState msg;
+			robot_state::robotStateToRobotStateMsg(collision_scene_->getCurrentState(), msg.state);
+			state_pub_.publish(msg);
+		}
 
 		return SUCCESS;
 	}
@@ -675,12 +685,12 @@ namespace exotica
 	{
 		moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
 		scene->getPlanningSceneMsg(*msg.get());
-		return collision_scene_->initialise(msg, kinematica_.getJointNames());
+		return collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_->data);
 	}
 
 	EReturn Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene)
 	{
-		return collision_scene_->initialise(scene, kinematica_.getJointNames());
+		return collision_scene_->initialise(scene, kinematica_.getJointNames(), mode_->data);
 	}
 
 	int Scene::getNumJoints()
@@ -757,6 +767,11 @@ namespace exotica
 		if (joints.size() > 0)
 			return SUCCESS;
 		return FAILURE;
+	}
+
+	std::string & Scene::getPlanningMode()
+	{
+		return mode_->data;
 	}
 }
 //	namespace exotica

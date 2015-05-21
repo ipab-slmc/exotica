@@ -6,22 +6,11 @@
  */
 
 #include "exotica/Server.h"
-
+exotica::Server_ptr exotica::Server::singleton_server_ = NULL;
 namespace exotica
 {
 	Server::Server() :
-			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("")
-	{
-		//TODO
-	}
-
-	Server::Server(const boost::shared_ptr<ros::NodeHandle> & node) :
-			nh_(node), name_("")
-	{
-		//TODO
-	}
-
-	Server::~Server()
+			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("EXOTicaServer")
 	{
 		//TODO
 	}
@@ -67,45 +56,32 @@ namespace exotica
 		return robot_models_.find(path) != robot_models_.end();
 	}
 
+	std::string Server::getName()
+	{
+		return name_;
+	}
+
 	EReturn Server::initialise(tinyxml2::XMLHandle & handle)
 	{
-		name_ = handle.ToElement()->Attribute("name");
-		INFO("Initialising EXOTica Server"<<name_)
-		std::string ns = name_;
+		if (!singleton_server_)
+		{
+			name_ = handle.ToElement()->Attribute("name");
+			std::string ns = name_;
+		}
 		tinyxml2::XMLHandle param_handle(handle.FirstChildElement("Parameters"));
 		tinyxml2::XMLHandle tmp_handle = param_handle.FirstChild();
 		while (tmp_handle.ToElement())
 		{
-			if (!ok(createParam(ns, tmp_handle)))
+			if (!ok(createParam(name_, tmp_handle)))
 			{
 				INDICATE_FAILURE
 				return FAILURE;
 			}
 			tmp_handle = tmp_handle.NextSibling();
 		}
+		if (!singleton_server_)
 
-		tinyxml2::XMLHandle mode_handle(handle.FirstChildElement("PlanningMode"));
-		if (mode_handle.ToElement())
-		{
-			std::string str = mode_handle.ToElement()->GetText();
-			if (str.compare("Optimization") == 0)
-			{
-				HIGHLIGHT("EXOTica Planning Mode: Optimization Mode");
-			}
-			else if (str.compare("Sampling") == 0)
-			{
-				HIGHLIGHT("EXOTica Planning Mode: Sampling Mode");
-			}
-			else
-			{
-				HIGHLIGHT("EXOTica Planning Mode Undefined, Using Default Mode: Optimization Mode");
-			}
-			std_msgs::String ros_s;
-			ros_s.data = str;
-			params_["/PlanningMode"] =
-					boost::shared_ptr<std_msgs::String>(new std_msgs::String(ros_s));
-		}
-		INFO("EXOTica Server Initialised")
+			HIGHLIGHT_NAMED(name_, "EXOTica Server Initialised")
 		return SUCCESS;
 	}
 

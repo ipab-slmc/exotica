@@ -198,6 +198,6 @@
       <!-- Task Parameters -->
     </Task>
     <Tolerance>1e-2</Tolerance>
-    <W> 100 100 100 5 5 4 4 3 2 1</W>
+    <W> 10 10 10 5 5 4 4 3 2 1</W>
   </IKProblem>
 </ExampleConfiguration>

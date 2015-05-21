@@ -221,28 +221,21 @@ namespace exotica
 			return ret_val;
 		}
 
-		if (server != nullptr)
+		server = Server::Instance();
+		tinyxml2::XMLHandle server_handle(root_handle.FirstChildElement("Server"));
+		if (server_handle.ToElement())
 		{
-			INFO("Using existing EXOTica server");
-		}
-		else
-		{
-			server.reset(new Server);
-			tinyxml2::XMLHandle server_handle(root_handle.FirstChildElement("Server"));
-			if (server_handle.ToElement())
+			if (!ok(server->initialise(server_handle)))
 			{
-				if (!ok(server->initialise(server_handle)))
-				{
-					INDICATE_FAILURE
-					return FAILURE;
-				}
-			}
-			else
-			{
-				ERROR("EXOTica Server element is missing in the xml");
 				INDICATE_FAILURE
 				return FAILURE;
 			}
+		}
+		else
+		{
+			ERROR("EXOTica Server element is missing in the xml");
+			INDICATE_FAILURE
+			return FAILURE;
 		}
 
 		if (problem_name.empty())

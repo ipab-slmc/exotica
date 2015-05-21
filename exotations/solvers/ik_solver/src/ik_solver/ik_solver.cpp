@@ -315,15 +315,13 @@ namespace exotica
 //						ROS_ERROR_STREAM("Change "<<change);
 						if (change < local_minima_threshold_->data)
 						{
-							ROS_ERROR_STREAM("Running into local minima");
+							WARNING_NAMED(object_name_, "Running into local minima");
 							return FAILURE;
 						}
 					}
 				}
 				else
 				{
-					INDICATE_FAILURE
-					;
 					return FAILURE;
 				}
 			}
@@ -332,12 +330,12 @@ namespace exotica
 			{
 				solution.resize(i + 1, size_);
 				solution = tmp.block(0, 0, i + 1, size_);
-				ROS_INFO_STREAM("IK solution found in "<<i<<" iterations");
+				INFO_NAMED(object_name_, "IK solution found in "<<i<<" iterations");
 				return SUCCESS;
 			}
 			else
 			{
-				ROS_ERROR_STREAM("Solution not found after reaching max number of iterations");
+				WARNING_NAMED(object_name_, "Solution not found after reaching max number of iterations, with error "<<error);
 				return FAILURE;
 			}
 		}
@@ -363,6 +361,8 @@ namespace exotica
 				cur_rows += dim.at(t)(i);
 			}
 			task_error = goal.at(t) - phi.at(t);
+//			ROS_INFO_STREAM("Goal "<<goal.at(t).transpose());
+//			ROS_INFO_STREAM("Phi  "<<phi.at(t).transpose());
 			err = (task_weights * task_error).squaredNorm();
 			// Compute velocity
 			Eigen::MatrixXd Jpinv;

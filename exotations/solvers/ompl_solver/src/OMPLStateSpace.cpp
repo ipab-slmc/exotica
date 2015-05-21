@@ -7,19 +7,19 @@
 
 #include "ompl_solver/OMPLStateSpace.h"
 
-
 namespace exotica
 {
 
-	OMPLStateSpace::OMPLStateSpace (unsigned int dim) : ompl::base::RealVectorStateSpace(dim)
+	OMPLStateSpace::OMPLStateSpace(unsigned int dim) :
+			ompl::base::RealVectorStateSpace(dim)
 	{
 	}
 
 	boost::shared_ptr<OMPLStateSpace> OMPLStateSpace::FromProblem(OMPLProblem_ptr prob)
 	{
-		int n=prob->getSpaceDim();
+		int n = prob->getSpaceDim();
 		boost::shared_ptr<OMPLStateSpace> ret;
-		if(n<=0)
+		if (n <= 0)
 		{
 			ERROR("State space size error!");
 		}
@@ -27,12 +27,12 @@ namespace exotica
 		{
 			ret.reset(new OMPLStateSpace(n));
 			ompl::base::RealVectorBounds bounds(n);
-			if(prob->getBounds().size()==2*n)
+			if (prob->getBounds().size() == 2 * n)
 			{
-				for(int i=0;i<n;i++)
+				for (int i = 0; i < n; i++)
 				{
-					bounds.setHigh(i,prob->getBounds()[i+n]);
-					bounds.setLow(i,prob->getBounds()[i]);
+					bounds.setHigh(i, prob->getBounds()[i + n]);
+					bounds.setLow(i, prob->getBounds()[i]);
 				}
 			}
 			else
@@ -44,7 +44,7 @@ namespace exotica
 		return ret;
 	}
 
-	OMPLStateSpace::~OMPLStateSpace ()
+	OMPLStateSpace::~OMPLStateSpace()
 	{
 		// TODO Auto-generated destructor stub
 	}
@@ -52,23 +52,26 @@ namespace exotica
 	EReturn OMPLStateSpace::copyToOMPLState(ompl::base::State *state, Eigen::VectorXd q) const
 	{
 
-		if(q.rows()!=(int)getDimension())
+		if (q.rows() != (int) getDimension())
 		{
 			ERROR("State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
 			return FAILURE;
 		}
-		memcpy(state->as<ompl::base::RealVectorStateSpace::StateType>()->values,q.data(),sizeof(double)*q.rows());
+		memcpy(state->as<ompl::base::RealVectorStateSpace::StateType>()->values, q.data(), sizeof(double)
+				* q.rows());
 		return SUCCESS;
 	}
 
-	EReturn OMPLStateSpace::copyFromOMPLState(const ompl::base::State *state, Eigen::VectorXd& q) const
+	EReturn OMPLStateSpace::copyFromOMPLState(const ompl::base::State *state,
+			Eigen::VectorXd& q) const
 	{
-		if(q.rows()!=(int)getDimension())
+		if (q.rows() != (int) getDimension())
 		{
 			ERROR("State vector and internal state dimension disagree");
 			return FAILURE;
 		}
-		memcpy(q.data(),state->as<ompl::base::RealVectorStateSpace::StateType>()->values,sizeof(double)*q.rows());
+		memcpy(q.data(), state->as<ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
+				* q.rows());
 		return SUCCESS;
 	}
 

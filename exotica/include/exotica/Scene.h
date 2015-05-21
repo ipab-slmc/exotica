@@ -24,15 +24,9 @@
 #include <moveit_msgs/PlanningScene.h>
 #include <moveit/planning_scene/planning_scene.h>
 
-#ifndef EXOTICA_DEBUG_MODE
-#define EXOTICA_DEBUG_MODE
-#endif
-
-#ifdef EXOTICA_DEBUG_MODE
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit/robot_state/conversions.h>
-#endif
 namespace exotica
 {
 	typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
@@ -56,10 +50,11 @@ namespace exotica
 			 * \brief	Initialisation function
 			 * @param	psmsg	Moveit planning scene message
 			 * @param	joints	Joint names
+			 * @param	mode	Update mode
              * @return Indication of success
 			 */
 			EReturn initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
-					const std::vector<std::string> & joints);
+					const std::vector<std::string> & joints, std::string & mode);
 
             /**
 			 * \brief	Update the robot collision properties
@@ -361,10 +356,15 @@ namespace exotica
              * @param	joints	Joint names
              */
             EReturn getJointNames(std::vector<std::string> & joints);
-		private:
 
-            ///	ROS node handle
-			ros::NodeHandle nh_;
+            /*
+             * \brief	Get planning mode
+             * @return	Planning mode
+             */
+            std::string & getPlanningMode();
+		private:
+            ///	EXOTica server
+            Server_ptr server_;
 
             ///	The name of the scene
 			std::string name_;
@@ -408,15 +408,15 @@ namespace exotica
             ///	The collision scene
 			CollisionScene_ptr collision_scene_;
 
-            ///	Update mode
-			std::string mode_;
+            ///	Update mode (Sampling or Optimization)
+			EParam<std_msgs::String> mode_;
 
             /// Indicates whether to update Jacobians during the update call
             bool update_jacobians_;
 
-#ifdef EXOTICA_DEBUG_MODE
+            ///	Visual debug
+            EParam<std_msgs::Bool> visual_debug_;
 			ros::Publisher state_pub_;
-#endif
 	};
 	typedef boost::shared_ptr<Scene> Scene_ptr;
     typedef std::map<std::string, Scene_ptr> Scene_map;

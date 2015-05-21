@@ -25,6 +25,10 @@ namespace ompl
 		class FRRT: public base::Planner
 		{
 			public:
+				enum LocalMode
+				{
+					GLOBAL = 0, LOCAL = 10, GOAL_SAMPLER = 20
+				};
 				/*
 				 * \brief	Default constructor
 				 * @param	si		OMPL space information
@@ -122,12 +126,12 @@ namespace ompl
 						 * \brief	Constructor
 						 */
 						Motion() :
-								state(NULL), parent(NULL)
+								state(NULL), parent(NULL), global_valid_(true)
 						{
 						}
 
 						Motion(const base::SpaceInformationPtr &si) :
-								state(si->allocState()), parent(NULL)
+								state(si->allocState()), parent(NULL), global_valid_(true)
 						{
 
 						}
@@ -139,12 +143,23 @@ namespace ompl
 
 						}
 
+						void setGlobalInvalid()
+						{
+							global_valid_ = false;
+						}
+
+						bool isGlobalValid()
+						{
+							return global_valid_;
+						}
 						///	The OMPL state
 						base::State *state;
 						///	The parent node
 						Motion *parent;
 						///	The internal flexible path
 						boost::shared_ptr<Eigen::MatrixXd> internal_path;
+					private:
+						bool global_valid_;
 				};
 
 				/*
@@ -178,15 +193,21 @@ namespace ompl
 
 			private:
 				///	Local solver
-				bool localSolve(Motion *sm, Motion *gm);
+				bool localSolve(Motion *sm, Motion *gm, LocalMode mode);
 
 				exotica::IKsolver_ptr local_solver_;
 
 				///	Store the local taskmap and task
 				exotica::TaskSqrError_ptr local_task_;
 				exotica::TaskSqrError_ptr global_task_;
+				exotica::TaskSqrError_ptr collision_task_;
 
+				///	Store initial rhos
+				std::vector<double> init_rho_;
 				///	For analyse
+				std::vector<int> try_cnt_;
+				std::vector<int> suc_cnt_;
+
 				int global_try_;
 				int global_succeeded_;
 				int local_try_;

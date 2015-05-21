@@ -94,8 +94,9 @@ namespace exotica
 				if (!ompl_simple_setup_->haveSolutionPath())
 					return FAILURE;
 				planning_time_ = ros::Time::now() - startTime;
-				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution);
-
+				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution, timeout_
+						- planning_time_.toSec());
+				planning_time_ = ros::Time::now() - startTime;
 				return SUCCESS;
 			}
 			else
@@ -223,13 +224,13 @@ namespace exotica
 	}
 
 	EReturn OMPLsolver::getSimplifiedPath(ompl::geometric::PathGeometric &pg,
-			Eigen::MatrixXd & traj)
+			Eigen::MatrixXd & traj, double d)
 	{
-		if (smooth_->data)
+		if (smooth_->data && d > 0)
 		{
 			int original_cnt = pg.getStateCount();
 			ros::Time start = ros::Time::now();
-			ompl_simple_setup_->simplifySolution();
+			ompl_simple_setup_->simplifySolution(d);
 			if (ompl_simple_setup_->haveSolutionPath())
 			{
 				pg.interpolate();
@@ -364,7 +365,7 @@ namespace exotica
 				ompl_simple_setup_->setup();
 			if (selected_planner_.compare("geometric::FRRT") == 0)
 			{
-				INFO("Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
+				INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
 				if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
 				{
 					INDICATE_FAILURE

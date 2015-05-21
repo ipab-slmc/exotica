@@ -37,15 +37,15 @@ namespace exotica
 
 		public:
 			/*
-			 * \brief	Default Constructor
+			 * \brief	Get the server
 			 */
-			Server();
-			Server(const boost::shared_ptr<ros::NodeHandle> & node);
-
-			/*
-			 * \brief	Destructor
-			 */
-			~Server();
+			static boost::shared_ptr<Server> Instance()
+			{
+				if(!singleton_server_)
+					singleton_server_.reset(new Server);
+				return singleton_server_;
+			}
+			;
 
 			EReturn initialise(tinyxml2::XMLHandle & handle);
 
@@ -118,7 +118,7 @@ namespace exotica
 			{
 				if (!handle.ToElement())
 				{
-					ERROR(ns<<" register parameter failed, check the XML file");
+					WARNING_NAMED(ns, "Register parameter failed, XML tag does not exist, check the XML file");
 					ptr = boost::shared_ptr<T>(new T());
 					return FAILURE;
 				}
@@ -236,15 +236,27 @@ namespace exotica
 					}
 					else if (typeid(T) == typeid(std_msgs::Bool))
 					{
-						std_msgs::Bool vec;
+						std_msgs::Bool val;
 						bool b;
 						if (!ok(getBool(*handle.ToElement(), b)))
 						{
 							INDICATE_FAILURE
 							return FAILURE;
 						}
-						vec.data = b;
-						params_[name] = boost::shared_ptr<std_msgs::Bool>(new std_msgs::Bool(vec));
+						val.data = b;
+						params_[name] = boost::shared_ptr<std_msgs::Bool>(new std_msgs::Bool(val));
+					}
+					else if (typeid(T) == typeid(std_msgs::String))
+					{
+						std_msgs::String val;
+						const char * atr= handle.ToElement()->GetText();
+						if (!atr)
+						{
+							INDICATE_FAILURE
+							return FAILURE;
+						}
+						val.data = std::string(atr);
+						params_[name] = boost::shared_ptr<std_msgs::String>(new std_msgs::String(val));
 					}
 					else
 					{
@@ -418,7 +430,22 @@ namespace exotica
 			 * @return	robot model
 			 */
 			robot_model::RobotModelConstPtr getModel(std::string path);
+
+			/*
+			 * \brief	Get the name of ther server
+			 * @return	Server name
+			 */
+			std::string getName();
 		private:
+			/*
+			 * \brief	Constructor
+			 */
+			Server();
+			static boost::shared_ptr<Server> singleton_server_;
+			///	\brief	Make sure the singleton does not get copied
+			Server(Server const&) = delete;
+			void operator=(Server const&) = delete;
+
 			template<typename T>
 			void paramCallback(const boost::shared_ptr<T const> & ptr, boost::any & param)
 			{

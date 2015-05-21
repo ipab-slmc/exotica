@@ -8,12 +8,11 @@
      </Parameters>
 
      <!-- Other server functionalities other than parameters TODO -->
-     <!-- Specify Planning Mode: Optimization or Sampling. Skip unnecessary steps if in sampling mode-->
-     <PlanningMode>Sampling</PlanningMode>
   </Server>
   <OMPLsolver name="OMPL Interface">
     <algorithm>RRT</algorithm>
     <max_goal_sampling_attempts>2500</max_goal_sampling_attempts>
+    <TrajectorySmooth>1</TrajectorySmooth>
   </OMPLsolver>
 
   <OMPLProblem name="OMPLProblem">
@@ -34,6 +33,7 @@
           <joint name="lwr_arm_6_joint"/>
         </Update>
       </Kinematica>
+      <PlanningMode>Sampling</PlanningMode>
     </Scene>
 
     <Map type="EffPosition" name="LeftHandPositionMap">

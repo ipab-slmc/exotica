@@ -63,18 +63,6 @@ namespace exotica
 			double getDuration();
 
 			/**
-			 * \brief Returns the reference to the task definition map.
-			 * @return Task definitions
-			 */
-			TaskDefinition_map& getTaskDefinitions();
-
-			/**
-			 * \brief	Get task maps
-			 * @return Task maps
-			 */
-			TaskMap_map& getTaskMaps();
-
-			/**
 			 * \brief Get kinematic system transition error covariance
 			 * @return Kinematic system transition error covariance
 			 */

@@ -34,7 +34,7 @@ namespace exotica
 			std::vector<double>& getBounds();
 
             virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
-
+			std::string local_planner_config_;
 		protected:
 			/**
 			 * \brief Derived Initialiser (from XML): PURE VIRTUAL
@@ -46,6 +46,7 @@ namespace exotica
 			boost::mutex update_lock_;
 			std::vector<TaskTerminationCriterion_ptr> goals_;
 			std::vector<double> bounds_;
+			int space_dim_;
 	};
 
 	typedef boost::shared_ptr<exotica::OMPLProblem> OMPLProblem_ptr;

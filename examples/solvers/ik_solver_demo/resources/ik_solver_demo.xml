@@ -8,7 +8,6 @@
      </Parameters>
      
      <!-- Other server functionalities other than parameters TODO -->
-     <PlanningMode>Optimization</PlanningMode>
   </Server>
 
   <IKsolver name="IKSolverDemo">   <!-- Motion solver definition -->
@@ -36,6 +35,7 @@
           <joint name="lwr_arm_6_joint"/>
         </Update>
       </Kinematica>
+      <PlanningMode>Optimization</PlanningMode>
     </Scene>
 
     <Map type="EffPosition" name="IKSolverDemoMap"> <!-- The end-effector position task map -->

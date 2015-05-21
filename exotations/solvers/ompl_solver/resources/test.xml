@@ -11,12 +11,13 @@
      <!-- Specify Planning Mode: Optimization or Sampling. Skip unnecessary steps if in sampling mode-->
      <PlanningMode>Sampling</PlanningMode>
   </Server>
-  <OMPLsolver name="OMPL Interface">
-    <algorithm>RRT</algorithm>
+  <OMPLsolver name="OMPL_Interface">
+    <algorithm>FRRT</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
+    <TrajectorySmooth>1</TrajectorySmooth>
   </OMPLsolver>
 
-  <OMPLProblem name="TestProblem">
+  <OMPLProblem name="FRRT">
     <Scene name="TestScene">
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
@@ -36,7 +37,7 @@
       </Kinematica>
     </Scene> 
     
-    <Map type="EffPosition" name="LeftHandPositionMap">
+    <Map type="EffPosition" name="EffPositionMap">
       <Scene name="TestScene"/>
       <EndEffector ignore_unused="true"> <!-- List of end effectors -->
           <limb segment="lwr_arm_7_link">
@@ -46,8 +47,8 @@
       </EndEffector>
     </Map>
     
-    <Task name="LeftHandPosition" type="TaskTerminationCriterion">
-      <map name="LeftHandPositionMap"/>
+    <Task name="EffPositionTask" type="TaskTerminationCriterion">
+      <map name="EffPositionMap"/>
       <Rho>1.0</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0.56 0.1 0.58</Goal>
@@ -56,6 +57,6 @@
     </Task>
    
     <!-- Problem parameters (structuring etc...) -->
-
+    <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/frrt_local_solver.xml</LocalPlannerConfig>
   </OMPLProblem>
 </ExampleConfiguration>

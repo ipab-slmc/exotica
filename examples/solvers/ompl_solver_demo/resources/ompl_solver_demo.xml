@@ -1,17 +1,18 @@
 <?xml version="1.0" ?>
 <ExampleConfiguration>
-
   <Server name="EXOTicaServer">
+     <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
+     Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
      <Parameters>
 
      </Parameters>
-     <PlanningMode>Sampling</PlanningMode>
+
+     <!-- Other server functionalities other than parameters TODO -->
   </Server>
-
-
   <OMPLsolver name="OMPL Interface">
     <algorithm>RRT</algorithm>
     <max_goal_sampling_attempts>2500</max_goal_sampling_attempts>
+    <TrajectorySmooth>1</TrajectorySmooth>
   </OMPLsolver>
 
   <OMPLProblem name="OMPLProblem">
@@ -32,6 +33,7 @@
           <joint name="lwr_arm_6_joint"/>
         </Update>
       </Kinematica>
+      <PlanningMode>Sampling</PlanningMode>
     </Scene>
 
     <Map type="EffPosition" name="LeftHandPositionMap">

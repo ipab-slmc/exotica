@@ -7,7 +7,7 @@
 
 #include "ompl_solver/OMPLProblem.h"
 
-REGISTER_PROBLEM_TYPE("OMPLProblem",exotica::OMPLProblem);
+REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem);
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
 #define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
@@ -15,13 +15,14 @@ REGISTER_PROBLEM_TYPE("OMPLProblem",exotica::OMPLProblem);
 namespace exotica
 {
 
-	OMPLProblem::OMPLProblem ()
+	OMPLProblem::OMPLProblem() :
+			space_dim_(0)
 	{
 		// TODO Auto-generated constructor stub
 
 	}
 
-	OMPLProblem::~OMPLProblem ()
+	OMPLProblem::~OMPLProblem()
 	{
 		// TODO Auto-generated destructor stub
 	}
@@ -145,44 +146,31 @@ namespace exotica
 	{
 		for (auto goal : task_defs_)
 		{
-			if(goal.second->type().compare("exotica::TaskTerminationCriterion")==0)
+			if (goal.second->type().compare("exotica::TaskTerminationCriterion") == 0)
 			{
 				goals_.push_back(boost::static_pointer_cast<exotica::TaskTerminationCriterion>(goal.second));
 			}
 		}
-
-        robot_model::RobotModelPtr model = scenes_.begin()->second->getRobotModel();
-        std::vector<std::string> joints = scenes_.begin()->second->getSolver().getJointNames();
-        int n=joints.size();
-        bounds_.resize(n*2);
-
-        for(int i=0;i<n;i++)
-        {
-            boost::shared_ptr<urdf::JointLimits> lim=model->getURDF()->getJoint(joints[i])->limits;
-            bounds_[i]=lim->lower;
-            bounds_[i+n]=lim->upper;
-        }
-
-		return SUCCESS;
-	}
-
-	int OMPLProblem::getSpaceDim()
-	{
-		int n=0;
-		for( auto scene : scenes_)
+		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("LocalPlannerConfig");
+		if (tmp_handle.ToElement())
 		{
-			int nn=scene.second->getNumJoints();
-			if(n==0)
+			local_planner_config_ = tmp_handle.ToElement()->GetText();
+		}
+
+		for (auto scene : scenes_)
+		{
+			int nn = scene.second->getNumJoints();
+			if (space_dim_ == 0)
 			{
-				n=nn;
+				space_dim_ = nn;
 				continue;
 			}
 			else
 			{
-				if(n!=nn)
+				if (space_dim_ != nn)
 				{
 					ERROR("Kinematic scenes have different joint space sizes!");
-					return -1;
+					return FAILURE;
 				}
 				else
 				{
@@ -190,7 +178,22 @@ namespace exotica
 				}
 			}
 		}
-		return n;
+
+		std::vector<std::string> jnts;
+		scenes_.begin()->second->getJointNames(jnts);
+		robot_model::RobotModelConstPtr model=server_->getModel("robot_description");
+		getBounds().resize(jnts.size() * 2);
+		for (int i = 0; i < jnts.size(); i++)
+		{
+			getBounds()[i] = model->getJointModel(jnts[i])->getVariableBounds()[0].min_position_;
+			getBounds()[i + jnts.size()] = model->getJointModel(jnts[i])->getVariableBounds()[0].max_position_;
+		}
+		return SUCCESS;
+	}
+
+	int OMPLProblem::getSpaceDim()
+	{
+		return space_dim_;
 	}
 
 	std::vector<TaskTerminationCriterion_ptr>& OMPLProblem::getGoals()

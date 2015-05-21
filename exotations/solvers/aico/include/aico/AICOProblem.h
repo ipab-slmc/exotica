@@ -106,7 +106,7 @@ namespace exotica
              */
             virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
-            virtual EReturn reinitialise(rapidjson::Document& document);
+            virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
 
 		protected:
 			/**

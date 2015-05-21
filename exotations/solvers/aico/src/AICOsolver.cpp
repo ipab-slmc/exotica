@@ -160,8 +160,9 @@ namespace exotica
 	{
 		if(pointer->type().compare(std::string("exotica::AICOProblem"))!=0)
 		  {ERROR("This solver can't use problem of type '" << pointer->type() << "'!");return PAR_INV;}
-		problem_ = pointer;
+        MotionSolver::specifyProblem(pointer);
 		prob_ = boost::static_pointer_cast<AICOProblem>(pointer);
+
 		T=prob_->getT();
         taskNames.resize(prob_->getTaskDefinitions().size());
         dim.resize(prob_->getTaskDefinitions().size());

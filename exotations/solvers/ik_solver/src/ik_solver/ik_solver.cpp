@@ -51,7 +51,7 @@ namespace exotica
 			ERROR("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
 			return PAR_INV;
 		}
-		problem_ = pointer;
+        MotionSolver::specifyProblem(pointer);
 		prob_ = boost::static_pointer_cast<IKProblem>(pointer);
         size_ = prob_->getScenes().begin()->second->getNumJoints();
         for (auto & it : prob_->getScenes())
@@ -279,7 +279,7 @@ namespace exotica
 
 
             task_error = goal.at(t) - phi.at(t);
-            err = task_error.squaredNorm();
+            err = (task_weights*task_error).squaredNorm();
             // Compute velocity
             Eigen::MatrixXd Jpinv;
             Jpinv = (big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t) + prob_->getW() ).inverse()

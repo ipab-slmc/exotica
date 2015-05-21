@@ -31,7 +31,7 @@ namespace exotica
 		return bounds_;
 	}
 
-    EReturn OMPLProblem::reinitialise(rapidjson::Document& document)
+    EReturn OMPLProblem::reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem)
     {
         task_defs_.clear();
         task_maps_.clear();
@@ -51,7 +51,7 @@ namespace exotica
                             TaskMap_ptr taskmap;
                             if(ok(TaskMap_fac::Instance().createObject(knownMaps_[constraintClass],taskmap)))
                             {
-                                EReturn ret = taskmap->initialise(obj,server_,scenes_);
+                                EReturn ret = taskmap->initialise(obj,server_,scenes_,problem);
                                 if(ok(ret))
                                 {
                                     if(ret!=CANCELLED)
@@ -83,6 +83,10 @@ namespace exotica
                                             INDICATE_FAILURE;
                                             return FAILURE;
                                         }
+                                    }
+                                    else
+                                    {
+                                        ROS_WARN_STREAM("Creation of '"<<constraintClass<<"' cancelled!");
                                     }
                                 }
                                 else

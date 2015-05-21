@@ -1,4 +1,4 @@
-#include "ik_solver_demo/node.h"
+#include "com_demo/node.h"
 
 using namespace exotica;
 
@@ -45,16 +45,15 @@ IKSolverDemoNode::IKSolverDemoNode() : nh_("~"), nhg_()
                 // Update the goal if necessary
                 // e.g. figure eight
                 Eigen::VectorXd goal(3);
-                goal << 0.4, -0.1+sin(t*2.0*M_PI*0.5)*0.1, 0.5+sin(t*M_PI*0.5)*0.2;
-                solIK->setGoal("IKSolverDemoTask",goal,0);
+                goal << 0.0, 0.2+sin(t*2.0*M_PI*0.5)*0.05, 0.0;
+                solIK->setGoal("FootPosition",goal,0);
 
                 // Solve the problem using the IK solver
                 if(ok(solIK->Solve(q,solution)))
                 {
                     double time=ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-                    ROS_INFO_STREAM_THROTTLE(0.5,"Finished solving ("<<time<<"s), error: "<<solIK->error);
+                    ROS_INFO_STREAM_THROTTLE(1.0,"Finished solving ("<<time<<"s), error: "<<solIK->error);
                     q=solution.row(solution.rows()-1);
-                    ROS_INFO_STREAM_THROTTLE(0.5,"Solution "<<solution);
 
                     jnt.header.stamp = ros::Time::now();
                     jnt.header.seq++;

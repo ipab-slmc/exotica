@@ -1,17 +1,16 @@
 <launch>
 
-  <param name="robot_description" textfile="$(find ik_solver_demo)/resources/lwr_simplified.urdf" />
-  <param name="robot_description_semantic" textfile="$(find ik_solver_demo)/resources/lwr_simplified.srdf" />
+  <param name="robot_description" textfile="$(find com_demo)/resources/V1_simple.urdf" />
+  <param name="robot_description_semantic" textfile="$(find com_demo)/resources/V1_simple.srdf" />
 	
-  <node pkg="ik_solver_demo" type="IKexample" name="IKSolverDemoNode" output="screen">
-    <param name="config" type="string" value="$(find ik_solver_demo)/resources/ik_solver_demo.xml" />
-    <param name="solver" type="string" value="IKSolverDemo" />
-    <param name="problem" type="string" value="IKSolverDemoProblem" />
+  <node pkg="com_demo" type="COMexample" name="COMDemoNode" output="screen">
+    <param name="config" type="string" value="$(find com_demo)/resources/com_demo.xml" />
+    <param name="solver" type="string" value="COMDemo" />
+    <param name="problem" type="string" value="COMDemoProblem" />
   </node>
 
-  <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find ik_solver_demo)/resources/rviz.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find com_demo)/resources/rviz.rviz" />
 
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="ik_st_pub" />
-
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="com_st_pub" />
   
 </launch>

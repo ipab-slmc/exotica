@@ -4,7 +4,7 @@ set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
 
 cmake_minimum_required(VERSION 2.8.3)
-project(ik_solver_demo)
+project(com_demo)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -28,10 +28,10 @@ include_directories(
 )
 
 ## Declare a cpp executable
-add_executable(IKexample src/node.cpp)
+add_executable(COMexample src/node.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(IKexample
+target_link_libraries(COMexample
   ${catkin_LIBRARIES}
   ik_solver
   exotica

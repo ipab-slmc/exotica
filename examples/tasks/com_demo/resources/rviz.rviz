@@ -7,7 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /RobotModel1/Links1
-        - /RobotModel1/Links1/lwr_arm_7_link1
       Splitter Ratio: 0.589404
     Tree Height: 745
   - Class: rviz/Selection
@@ -56,55 +55,461 @@ Visualization Manager:
       Enabled: true
       Links:
         All Links Enabled: true
+        EnsensoIR_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Ensenso_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
+        Head:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        HeadCamBoardIR_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        HeadCamBoard_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        HeadIMU_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        HeadWebcam_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Ibeo_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftAnkleYoke:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftCOP_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftCamBoardIR_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftCamBoard_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftElbowExtensor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftForearm:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftHazardCamera_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftHipAdductor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftHipRotator:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftIMU_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftLeg:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftLeg6Axis_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftLegCamBoardIR_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftLegCamBoard_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftLegHermes_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftLegHokuyo_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftLittleDistalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftLittleMedialPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftLittleProximalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftMPU6000_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftMedialMetacarpal:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftMiddleDistalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftMiddleMedialPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftMiddleProximalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftPalm:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftPelvisIMU_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftPrimaryDistalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftPrimaryMedialPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftPrimaryMetacarpal:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftPrimaryProximalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftShankStructure:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftShoulderAdductor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftShoulderExtensor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftShoulderRotator:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftThumbDistalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftThumbMedialPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftThumbMetacarpal:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        LeftThumbProximalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LeftWristYoke:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         Link Tree Style: Links in Alphabetic Order
-        base:
+        LowerNeckExtensor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        NeckRotator:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Pelvis:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lwr_arm_0_link:
+        RightAnkleYoke:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightCOP_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightCamBoardIR_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightCamBoard_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightElbowExtensor:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lwr_arm_1_link:
+        RightForearm:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lwr_arm_2_link:
+        RightHazardCamera_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightHipAdductor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightHipRotator:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lwr_arm_3_link:
+        RightIMU_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightLeg:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lwr_arm_4_link:
+        RightLeg6Axis_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightLegCamBoardIR_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightLegCamBoard_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightLegHermes_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightLegHokuyo_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightLittleDistalPhalanx:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lwr_arm_5_link:
+        RightLittleMedialPhalanx:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lwr_arm_6_link:
+        RightLittleProximalPhalanx:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lwr_arm_7_link:
+        RightMPU6000_Frame:
           Alpha: 1
           Show Axes: false
-          Show Trail: true
+          Show Trail: false
+        RightMedialMetacarpal:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightMiddleDistalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
           Value: true
+        RightMiddleMedialPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightMiddleProximalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightPalm:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightPelvisIMU_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightPrimaryDistalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightPrimaryMedialPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightPrimaryMetacarpal:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightPrimaryProximalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightShankStructure:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightShoulderAdductor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightShoulderExtensor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightShoulderRotator:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightThumbDistalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightThumbMedialPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightThumbMetacarpal:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        RightThumbProximalPhalanx:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RightWristYoke:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        StereoHazardCamera_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Trunk:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        WaistExtensor:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        WaistRotator:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        l_foot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        l_hand_face:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        l_hand_force_torque:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        left_palm:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        r_foot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        r_hand_face:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        r_hand_force_torque:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        right_palm:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -114,7 +519,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base
+    Fixed Frame: l_foot
     Frame Rate: 30
   Name: root
   Tools:
@@ -142,15 +547,15 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.0193573
-        Y: -0.0676511
-        Z: 0.0527021
+        X: -0.742498
+        Y: 0.402781
+        Z: 0.0534342
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.574796
+      Pitch: -1.5698
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.777181
+      Yaw: 3.12218
     Saved: ~
 Window Geometry:
   Displays:
@@ -168,5 +573,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1637
-  X: 43
-  Y: 24
+  X: 37
+  Y: 14

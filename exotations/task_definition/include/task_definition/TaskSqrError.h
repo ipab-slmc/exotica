@@ -52,6 +52,13 @@ namespace exotica
       double getRho(int t);
 
       /**
+       * @brief setRho Returns the value of rho at time step t
+       * @param t Timestep
+       * @param rho
+       */
+      EReturn setRho(int t, double rho);
+
+      /**
        * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
        * @param T Number of time steps (this should be set by the planning problem)
        * @return Returns success.

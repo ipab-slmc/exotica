@@ -119,7 +119,7 @@ namespace exotica
 			 */
 			EReturn convertPath(const ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj);
 
-			EReturn getSimplifiedPath(ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj);
+			EReturn getSimplifiedPath(ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj, double d);
 			/**
 			 * \brief Registers trajectory termination condition
 			 * @param ptc Termination criteria

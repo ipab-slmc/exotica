@@ -8,17 +8,14 @@
 #ifndef EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_COLLISIONAVOIDANCE_H_
 #define EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_COLLISIONAVOIDANCE_H_
 
-#define C_DEBUG
+//#define C_DEBUG
 #include <exotica/TaskMap.h>
 #include <exotica/Factory.h>
 #include <exotica/Test.h>
 #include <tinyxml2/tinyxml2.h>
 #include <Eigen/Dense>
 #include <boost/thread/mutex.hpp>
-
-#ifdef C_DEBUG
 #include <visualization_msgs/Marker.h>
-#endif
 
 namespace exotica
 {
@@ -62,6 +59,9 @@ namespace exotica
 			//	Indicate if self collision checking is required
 			EParam<std_msgs::Bool> self_;
 
+			//	In hardconstrain mode, report failure once a collision is detected
+			EParam<std_msgs::Bool> hard_;
+
 			//	Safety range
 			EParam<std_msgs::Float64> safe_range_;
 
@@ -77,16 +77,14 @@ namespace exotica
             boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst, int)> pre_update_callback_;
             fcl::Transform3f obs_in_base_tf_;
 
-#ifdef C_DEBUG
+            //	Visual debug
+            EParam<std_msgs::Bool> visual_debug_;
 			ros::Publisher close_pub_;
 			ros::Publisher robot_centre_pub_;
 			ros::Publisher world_centre_pub_;
-
-			ros::NodeHandle nh_;
 			visualization_msgs::Marker close_;
 			visualization_msgs::Marker robot_centre_;
 			visualization_msgs::Marker world_centre_;
-#endif
 	};
 }
 

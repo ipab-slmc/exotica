@@ -8,8 +8,6 @@
      </Parameters>
      
      <!-- Other server functionalities other than parameters TODO -->
-     <!-- Specify Planning Mode: Optimization or Sampling. Skip unnecessary steps if in sampling mode-->
-     <PlanningMode>Optimization</PlanningMode>
   </Server>
   <OMPLsolver name="OMPL_Interface">
     <algorithm>RRT</algorithm>
@@ -38,6 +36,8 @@
           <joint name="LeftWrist"/>	
         </Update>
       </Kinematica>
+      <PlanningMode>Sampling</PlanningMode>
+      <VisualDebug>1</VisualDebug>
     </Scene> 
     
     <Map type="EffPosition" name="EffPositionMap">
@@ -52,88 +52,18 @@
     
     <Task name="EffPositionTask" type="TaskTerminationCriterion">
       <map name="EffPositionMap"/>
-      <Rho>1.0</Rho>
+      <Rho>1e1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0.79 0.31 0.376</Goal>
-      <Threshold>1e-2</Threshold>
+      <Threshold>1e-1</Threshold>
       <!-- Task Parameters -->
     </Task>
     <!-- Problem parameters (structuring etc...) -->
     <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/valkyrie_local_solver.xml</LocalPlannerConfig>
   </OMPLProblem>
-
-  <OMPLProblem name="OMPLWholeBodyProblem">
-    <Scene name="WholeBodyScene">
-      <Kinematica>
-        <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
-        <Root segment="Pelvis"> <!-- Optional: The root segment to use: xyz -->
-          <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
-          <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
-        </Root>
-        <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
-          <joint name="LeftHipRotator"/> 
-          <joint name="LeftHipAdductor"/>
-          <joint name="LeftHipExtensor"/> 
-          <joint name="LeftKneeExtensor"/> 
-          <joint name="LeftAnkleExtensor"/>
-          <joint name="LeftAnkle"/>
-          <joint name="RightHipRotator"/>	
-          <joint name="RightHipAdductor"/>	
-          <joint name="RightHipExtensor"/>	
-          <joint name="RightKneeExtensor"/>	
-          <joint name="RightAnkleExtensor"/>
-          <joint name="RightAnkle"/>	
-
-          <joint name="WaistRotator"/>	
-          <joint name="WaistExtensor"/>	
-          <joint name="WaistLateralExtensor"/>	
-
-          <joint name="LeftShoulderExtensor"/>	
-          <joint name="LeftShoulderAdductor"/>	
-          <joint name="LeftShoulderSupinator"/>	
-          <joint name="LeftElbowExtensor"/>	
-          <joint name="LeftForearmSupinator"/>	
-          <joint name="LeftWristExtensor"/>
-	
-          <joint name="UpperNeckExtensor"/>
-	
-          <joint name="RightShoulderExtensor"/>	
-          <joint name="RightShoulderAdductor"/>	
-          <joint name="RightShoulderSupinator"/>	
-          <joint name="RightElbowExtensor"/>	
-          <joint name="RightForearmSupinator"/>	
-          <joint name="RightWristExtensor"/>	
-
-        </Update>
-      </Kinematica>
-    </Scene> 
-    
-    <Map type="EffPosition" name="EffPositionMap">
-      <Scene name="WholeBodyScene"/>
-      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
-          <limb segment="LeftPalm">
-            <vector>0.0 0.0 0.0</vector>
-            <quaternion>1.0 0.0 0.0 0.0</quaternion>
-          </limb>
-      </EndEffector>
-    </Map>
-    
-    <Task name="EffPositionTask" type="TaskTerminationCriterion">
-      <map name="EffPositionMap"/>
-      <Rho>1.0</Rho>
-      <Weights dim="1">1.0</Weights>
-      <Goal>0.79 0.31 0.376</Goal>
-      <Threshold>1e-2</Threshold>
-      <!-- Task Parameters -->
-    </Task>
-    <!-- Problem parameters (structuring etc...) -->
-    <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/valkyrie_local_solver.xml</LocalPlannerConfig>
-  </OMPLProblem>
-
-
 
   <IKsolver name="MyIKsolver">   <!-- Motion solver definition -->
-    <MaxIt>1000</MaxIt>
+    <MaxIt>2000</MaxIt>
     <MaxStep>0.02</MaxStep>
   </IKsolver>
 
@@ -158,6 +88,8 @@
           <joint name="LeftWrist"/>	
         </Update>
       </Kinematica>
+      <VisualDebug>1</VisualDebug>
+      <PlanningMode>Sampling</PlanningMode>
     </Scene>
 
     <Map type="EffPosition" name="AICOSolverDemoMap"> <!-- The end-effector position task map -->
@@ -172,7 +104,7 @@
 
     <Task name="AICOSolverDemoTask" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
       <map name="AICOSolverDemoMap"/>
-      <Rho>1.0</Rho>
+      <Rho>1e3</Rho>
       <Goal>0.79 0.31 0.376</Goal>
     </Task>
 
@@ -198,9 +130,9 @@
       <Goal>0.0</Goal>
     </Task>
    
-    <Map type="Orientation" name="OrientationMapX">
+    <!--Map type="Orientation" name="OrientationMapX">
       <Scene name="IKDemoScene"/>
-      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+      <EndEffector ignore_unused="true">
           <limb segment="LeftPalm"></limb>
           <limb segment="LeftPalm">
             <vector>-0.5 0.0 0.0</vector>
@@ -218,12 +150,11 @@
       <Rho>1.0</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0</Goal>
-      <!-- Task Parameters -->
     </Task>
 
     <Map type="Orientation" name="OrientationMapY">
       <Scene name="IKDemoScene"/>
-      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+      <EndEffector ignore_unused="true">
           <limb segment="LeftPalm"></limb>
           <limb segment="LeftPalm">
             <vector>0.0 -0.5 0.0</vector>
@@ -241,9 +172,8 @@
       <Rho>1.0</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0</Goal>
-      <!-- Task Parameters -->
-    </Task>
+    </Task-->
     <Tolerance>1e-2</Tolerance>
-    <W> 100 100 100 5 5 4 4 3 2 1</W>
+    <W> 10 10 10 5 5 4 4 3 2 1</W>
   </IKProblem>
 </ExampleConfiguration>

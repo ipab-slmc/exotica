@@ -18,25 +18,6 @@ namespace exotica
 {
 	CollisionAvoidance::CollisionAvoidance()
 	{
-#ifdef C_DEBUG
-		ROS_ERROR("Running collision avoidance taskmap in debug mode");
-		nh_ = ros::NodeHandle("CollisionAvoidance");
-		close_pub_ = nh_.advertise<visualization_msgs::Marker>("close_marker", 100);
-		robot_centre_pub_ = nh_.advertise<visualization_msgs::Marker>("robot_centre_marker", 100);
-		world_centre_pub_ = nh_.advertise<visualization_msgs::Marker>("world_centre_marker", 100);
-		close_.type = visualization_msgs::Marker::LINE_LIST;
-		close_.scale.x = 0.004;
-		close_.color.g = 1;
-		close_.color.a = 1;
-
-		robot_centre_.type = visualization_msgs::Marker::SPHERE_LIST;
-		robot_centre_.scale.x = close_.scale.y = close_.scale.z = 0.05;
-		robot_centre_.color.g = 1;
-		robot_centre_.color.a = 1;
-		world_centre_ = robot_centre_;
-		world_centre_.color.r = 1;
-		world_centre_.color.g = 0;
-#endif
 	}
 
 	EReturn CollisionAvoidance::setObsFrame(const KDL::Frame & tf)
@@ -60,7 +41,12 @@ namespace exotica
 		server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, safe_range_);
 		tmp_handle = handle.FirstChildElement("SelfCollision");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, self_);
-		ROS_INFO_STREAM("Collision avoidance threshold " << safe_range_->data << " m. Self Collision is "<<(self_->data ? "Enabled":"Disabled"));
+
+		tmp_handle = handle.FirstChildElement("HardConstrain");
+		if (!ok(server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, hard_)))
+		{
+			hard_->data = false;
+		}
 		if (!ok(scene_->getEndEffectors(object_name_, effs_)))
 			return MMB_NIN;
 		init_offsets_.resize(effs_.size());
@@ -71,10 +57,34 @@ namespace exotica
 		sol.end_effector_segs = effs_;
 		sol.end_effector_offs = std::vector<KDL::Frame>(effs_.size());
 		kin_sol_.updateEndEffectors(sol);
-#ifdef C_DEBUG
-		robot_centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
-		world_centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
-#endif
+
+		tmp_handle = handle.FirstChildElement("VisualDebug");
+		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, visual_debug_);
+		if (visual_debug_->data)
+		{
+			close_pub_ = server_->advertise<visualization_msgs::Marker>(object_name_
+					+ "/close_marker", 100);
+			robot_centre_pub_ = server_->advertise<visualization_msgs::Marker>(object_name_
+					+ "/robot_centre_marker", 100);
+			world_centre_pub_ = server_->advertise<visualization_msgs::Marker>(object_name_
+					+ "/world_centre_marker", 100);
+			close_.type = visualization_msgs::Marker::LINE_LIST;
+			close_.scale.x = 0.004;
+			close_.color.g = 1;
+			close_.color.a = 1;
+
+			robot_centre_.type = visualization_msgs::Marker::SPHERE_LIST;
+			robot_centre_.scale.x = close_.scale.y = close_.scale.z = 0.05;
+			robot_centre_.color.g = 1;
+			robot_centre_.color.a = 1;
+			world_centre_ = robot_centre_;
+			world_centre_.color.r = 1;
+			world_centre_.color.g = 0;
+
+			robot_centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
+			world_centre_.header.frame_id = close_.header.frame_id = "/" + kin_sol_.getRootName();
+			HIGHLIGHT_NAMED(object_name_, "Collision avoidance taskmap running in debug mode, collision info will be published to marker msgs.");
+		}
 		return SUCCESS;
 	}
 
@@ -82,6 +92,7 @@ namespace exotica
 			boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst, int)> pre_update_callback)
 	{
 		pre_update_callback_ = pre_update_callback;
+		return SUCCESS;
 	}
 
 	EReturn CollisionAvoidance::taskSpaceDim(int & task_dim)
@@ -108,11 +119,12 @@ namespace exotica
 		std::vector<Eigen::Vector3d> c1s(M), c2s(M);
 		KDL::Frame tip_offset, cp_offset, eff_offset;
 		std::vector<Eigen::Vector3d> norms(M);
-#ifdef C_DEBUG
-		close_.points.clear();
-		robot_centre_.points.clear();
-		world_centre_.points.clear();
-#endif
+		if (visual_debug_->data)
+		{
+			close_.points.clear();
+			robot_centre_.points.clear();
+			world_centre_.points.clear();
+		}
 
 		for (auto& objvec : scene_->getCollisionScene()->getFCLWorld())
 		{
@@ -128,9 +140,12 @@ namespace exotica
 			//	Compute Phi
 			if (dists[i] <= 0)
 			{
-#ifdef C_DEBUG
-				ROS_ERROR_STREAM_THROTTLE(1, "Robot link " << effs_[i] << " is in collision");
-#endif
+				WARNING_NAMED(object_name_, "Robot link " << effs_[i] << " is in collision");
+				//	In hard constrain mode, collision == FAILURE
+				if (hard_->data)
+				{
+					return FAILURE;
+				}
 				costs[i] = 1;
 			}
 			else if (dists[i] > safe_range_->data)
@@ -156,34 +171,36 @@ namespace exotica
 					INDICATE_FAILURE
 					return FAILURE;
 				}
-#ifdef C_DEBUG
-				geometry_msgs::Point p1, p2;
-				if (dists[i] > 0)
+				if (visual_debug_->data)
 				{
-					eigen2Point(tmp1, p1);
-					eigen2Point(tmp2, p2);
-				}
-				else
-				{
+					geometry_msgs::Point p1, p2;
+					if (dists[i] > 0)
+					{
+						eigen2Point(tmp1, p1);
+						eigen2Point(tmp2, p2);
+					}
+					else
+					{
+						eigen2Point(c1s[i], p1);
+						eigen2Point(c2s[i], p2);
+					}
+					close_.points.push_back(p1);
+					close_.points.push_back(p2);
 					eigen2Point(c1s[i], p1);
 					eigen2Point(c2s[i], p2);
-				}
-				close_.points.push_back(p1);
-				close_.points.push_back(p2);
-				eigen2Point(c1s[i], p1);
-				eigen2Point(c2s[i], p2);
-				robot_centre_.points.push_back(p1);
+					robot_centre_.points.push_back(p1);
 
-				world_centre_.points.push_back(p2);
-#endif
+					world_centre_.points.push_back(p2);
+				}
 			}
 
-#ifdef C_DEBUG
-			close_pub_.publish(close_);
-			robot_centre_pub_.publish(robot_centre_);
-			world_centre_pub_.publish(world_centre_);
-			ros::spinOnce();
-#endif
+			if (visual_debug_->data)
+			{
+				close_pub_.publish(close_);
+				robot_centre_pub_.publish(robot_centre_);
+				world_centre_pub_.publish(world_centre_);
+				ros::spinOnce();
+			}
 
 			if (!kin_sol_.updateConfiguration(x) || !kin_sol_.generateForwardMap()
 					|| !kin_sol_.generateJacobian(EFFJAC))

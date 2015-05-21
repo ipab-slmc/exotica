@@ -6,87 +6,82 @@
  */
 
 #include "exotica/Server.h"
-
+exotica::Server_ptr exotica::Server::singleton_server_ = NULL;
 namespace exotica
 {
 	Server::Server() :
-			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("")
+			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("EXOTicaServer")
 	{
 		//TODO
 	}
 
-	Server::Server(const boost::shared_ptr<ros::NodeHandle> & node) :
-			nh_(node), name_("")
+	EReturn Server::getModel(std::string path, robot_model::RobotModelPtr & model)
 	{
-		//TODO
+		if (robot_models_.find(path) != robot_models_.end())
+		{
+			model = robot_models_[path];
+			return SUCCESS;
+		}
+		else
+		{
+			model = robot_model_loader::RobotModelLoader(path).getModel();
+			if (model)
+			{
+				robot_models_[path] = model;
+				return SUCCESS;
+			}
+			else
+			{
+				INDICATE_FAILURE
+				;
+				return FAILURE;
+			}
+		}
 	}
 
-	Server::~Server()
+	robot_model::RobotModelConstPtr Server::getModel(std::string path)
 	{
-		//TODO
+		if (robot_models_.find(path) != robot_models_.end())
+		{
+			return robot_models_[path];
+		}
+		else
+		{
+			return robot_model_loader::RobotModelLoader(path).getModel();
+		}
 	}
 
-    EReturn Server::getModel(std::string path, robot_model::RobotModelPtr & model)
-    {
-        if(robot_models_.find(path)!=robot_models_.end())
-        {
-            model=robot_models_[path];
-            return SUCCESS;
-        }
-        else
-        {
-            model = robot_model_loader::RobotModelLoader(path).getModel();
-            if(model)
-            {
-                robot_models_[path]=model;
-                return SUCCESS;
-            }
-            else
-            {
-                INDICATE_FAILURE;
-                return FAILURE;
-            }
-        }
-    }
+	bool Server::hasModel(const std::string & path)
+	{
+		return robot_models_.find(path) != robot_models_.end();
+	}
+
+	std::string Server::getName()
+	{
+		return name_;
+	}
 
 	EReturn Server::initialise(tinyxml2::XMLHandle & handle)
 	{
-		name_ = handle.ToElement()->Attribute("name");
-		INFO("Initialising EXOTica Server"<<name_)
-		std::string ns = name_;
+		if (!singleton_server_)
+		{
+			name_ = handle.ToElement()->Attribute("name");
+			std::string ns = name_;
+		}
 		tinyxml2::XMLHandle param_handle(handle.FirstChildElement("Parameters"));
 		tinyxml2::XMLHandle tmp_handle = param_handle.FirstChild();
 		while (tmp_handle.ToElement())
 		{
-			if (!ok(createParam(ns, tmp_handle)))
+			if (!ok(createParam(name_, tmp_handle)))
 			{
 				INDICATE_FAILURE
 				return FAILURE;
 			}
 			tmp_handle = tmp_handle.NextSibling();
 		}
+		if (!singleton_server_)
 
-		tinyxml2::XMLHandle mode_handle(handle.FirstChildElement("PlanningMode"));
-		if (mode_handle.ToElement())
-		{
-			std::string str =mode_handle.ToElement()->GetText();
-			if (str.compare("Optimization")==0)
-			{
-				ROS_INFO("EXOTica Planning Mode: Optimization Mode");
-			}
-			else if(str.compare("Sampling")==0)
-			{
-				ROS_INFO("EXOTica Planning Mode: Sampling Mode");
-			}
-			else
-			{
-				ROS_INFO("EXOTica Planning Mode Undefined, Using Default Mode: Optimization Mode");
-			}
-			std_msgs::String ros_s;
-			ros_s.data = str;
-			params_["/PlanningMode"] = boost::shared_ptr<std_msgs::String>(new std_msgs::String(ros_s));
-		}
-		INFO("EXOTica Server Initialised")
+			HIGHLIGHT_NAMED(name_, "EXOTica Server Initialised")
 		return SUCCESS;
 	}
 
@@ -195,11 +190,11 @@ namespace exotica
 
 	void Server::listParameters()
 	{
-		ROS_INFO("************* Parameters *************");
+		INFO("************* Parameters *************");
 		for (auto & it : params_)
 		{
-			ROS_INFO_STREAM("Parameter: "<<it.first);
+			INFO("Parameter: "<<it.first);
 		}
-		ROS_INFO("**************************************");
+		INFO("**************************************");
 	}
 }

@@ -68,7 +68,7 @@ namespace exotica
 		 * @param solution This will be filled with the solution in joint space.
 		 * @return SUCESS if solution has been found, corresponding error code if not.
 		 */
-		EReturn Solve(Eigen::VectorXd q0, Eigen::MatrixXd & solution);
+		EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
 
 		/**
 		 * \brief Solves the problem
@@ -84,6 +84,13 @@ namespace exotica
 		 * @return        Successful if the problem is a valid AICOProblem
 		 */
 		virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
+
+		/*
+		 * \brief	Check if a problem is solvable by this solver (Pure Virtual)
+		 * @param	prob		Planning problem
+		 * @return	True if solvable, false otherwise
+		 */
+		virtual bool isSolvable(const PlanningProblem_ptr & prob);
 
 		AICOProblem_ptr& getProblem();
 

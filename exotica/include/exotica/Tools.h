@@ -18,6 +18,11 @@
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 #include "rapidjson/document.h"
+#include <exotica/MeshVertex.h>
+#include <exotica/StringList.h>
+#include <exotica/BoolList.h>
+#include <exotica/Vector.h>
+#include <exotica/Matrix.h>
 
 /**
  * \brief A set of debugging tools: basically these provide easy ways of checking code execution through std::cout prints
@@ -27,73 +32,76 @@
 #endif
 
 #ifdef EXOTICA_DEBUG_MODE
-#define CHECK_EXECUTION         std::cout << "Ok in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n"; //!< With endline
-#define INDICATE_FAILURE        std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
-#define WARNING(x)				std::clog << "Warning in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
-#define ERROR(x)				std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
-#define INFO(x)					std::clog << "Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
+#define CHECK_EXECUTION         std::cout << "\033[1;32m[EXOTica]:\033[0m Ok in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n"; //!< With endline
+#define INDICATE_FAILURE        std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\033[0m\n";//!< With endline
+#define WARNING(x)				std::clog << "\033[1;32m[EXOTica]:\033[0m \033[33mWarning in " << __PRETTY_FUNCTION__ << ": " << x << "\033[0m\n";//!< With endline
+#define ERROR(x)				std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\033[0m\n";//!< With endline
+#define INFO(x)					std::clog << "\033[1;32m[EXOTica]:\033[0m Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
 #else
 #define CHECK_EXECUTION         // No operation
-#define INDICATE_FAILURE        std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
-#define WARNING(x)              // No operation
-#define ERROR(x)                std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
-#define INFO(x)                 // No operation
+#define INDICATE_FAILURE        std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\033[31m\n";//!< With endline
+#define WARNING(x)
+#define ERROR(x)                std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\033[0m\n";//!< With endline
+#define INFO(x)
 #endif
-
-
+#define HIGHLIGHT(x)			std::cout << "\033[1;32m[EXOTica]:\033[0m \033[36m" << x << "\033[0m\n";
+#define HIGHLIGHT_NAMED(name, x)std::cout << "\033[1;32m[EXOTica]:\033[0m \033[35m[" << name <<"]\033[0m \033[36m" << x << "\033[0m\n";
+#define WARNING_NAMED(name, x)	std::cout << "\033[1;32m[EXOTica]:\033[0m \033[35m[" << name <<"]\033[0m \033[33m" << x << "\033[0m\n";
+#define INFO_NAMED(name, x)		std::cout << "\033[1;32m[EXOTica]:\033[0m \033[35m[" << name <<"]\033[0m " << x << "\n";
 namespace Eigen
 {
 
-    /// \brief Convenience wrapper for storing references to sub-matrices/vectors
-    template<typename Derived>
-    class Ref_ptr : public boost::shared_ptr<Ref<Derived> >
-    {
-    public:
-        inline Ref_ptr(): boost::shared_ptr<Ref<Derived> >()
-        {
+	/// \brief Convenience wrapper for storing references to sub-matrices/vectors
+	template<typename Derived>
+	class Ref_ptr: public boost::shared_ptr<Ref<Derived> >
+	{
+		public:
+			inline Ref_ptr() :
+					boost::shared_ptr<Ref<Derived> >()
+			{
 
-        }
+			}
 
-        inline Ref_ptr(const Eigen::Block<Derived>& other)
-        {
-            this->reset(new Ref<Derived>(other));
-        }
+			inline Ref_ptr(const Eigen::Block<Derived>& other)
+			{
+				this->reset(new Ref<Derived>(other));
+			}
 
-        inline Ref_ptr(Eigen::Block<Derived>& other)
-        {
-            this->reset(new Ref<Derived>(other));
-        }
+			inline Ref_ptr(Eigen::Block<Derived>& other)
+			{
+				this->reset(new Ref<Derived>(other));
+			}
 
-        inline Ref_ptr(const Eigen::VectorBlock<Derived>& other)
-        {
-            this->reset(new Ref<Derived>(other));
-        }
+			inline Ref_ptr(const Eigen::VectorBlock<Derived>& other)
+			{
+				this->reset(new Ref<Derived>(other));
+			}
 
-        inline Ref_ptr(Eigen::VectorBlock<Derived>& other)
-        {
-            this->reset(new Ref<Derived>(other));
-        }
+			inline Ref_ptr(Eigen::VectorBlock<Derived>& other)
+			{
+				this->reset(new Ref<Derived>(other));
+			}
 
-        inline Ref_ptr(Derived& other)
-        {
-            this->reset(new Ref<Derived>(other));
-        }
+			inline Ref_ptr(Derived& other)
+			{
+				this->reset(new Ref<Derived>(other));
+			}
 
-        inline Ref_ptr(const Derived& other)
-        {
-            this->reset(new Ref<Derived>(other));
-        }
-    };
+			inline Ref_ptr(const Derived& other)
+			{
+				this->reset(new Ref<Derived>(other));
+			}
+	};
 
-    /// \brief Reference to sub-vector.
-    typedef Ref_ptr<VectorXd> VectorXdRef_ptr;
-    /// \brief Reference to sub-Matrix.
-    typedef Ref_ptr<MatrixXd> MatrixXdRef_ptr;
+	/// \brief Reference to sub-vector.
+	typedef Ref_ptr<VectorXd> VectorXdRef_ptr;
+	/// \brief Reference to sub-Matrix.
+	typedef Ref_ptr<MatrixXd> MatrixXdRef_ptr;
 
-    typedef Ref<VectorXd> VectorXdRef;
-    typedef const Ref<const VectorXd>& VectorXdRefConst;
-    typedef Ref<MatrixXd> MatrixXdRef;
-    typedef const Ref<const MatrixXd>& MatrixXdRefConst;
+	typedef Ref<VectorXd> VectorXdRef;
+	typedef const Ref<const VectorXd>& VectorXdRefConst;
+	typedef Ref<MatrixXd> MatrixXdRef;
+	typedef const Ref<const MatrixXd>& MatrixXdRefConst;
 }
 
 /**
@@ -120,8 +128,8 @@ namespace exotica
 		MMB_NIN = 3,  //!< A member required by this function is Not INititialised correctly
 		MEM_ERR = 4,  //!< A memory error (for example when creating a new class)
 		WARNING = 50, //!< A generic warning:
-        FAILURE = 100, //!< Indicates a generic failure
-        CANCELLED = 200 //!< The process has been successful but the results should be ignored
+		FAILURE = 100, //!< Indicates a generic failure
+		CANCELLED = 200 //!< The process has been successful but the results should be ignored
 	};
 
 	/**
@@ -207,16 +215,16 @@ namespace exotica
 	 */
 	EReturn deepCopy(tinyxml2::XMLHandle & parent, tinyxml2::XMLHandle & child);
 
-    /**
-     * @brief loadOBJ Loads mesh data from an OBJ file
-     * @param file_name File name
-     * @param tri Returned vertex indices of triangles
-     * @param vert Vertex positions
-     * @return Indication of SUCCESS
-     */
-    EReturn loadOBJ(std::string & data,Eigen::VectorXi& tri, Eigen::VectorXd& vert);
+	/**
+	 * @brief loadOBJ Loads mesh data from an OBJ file
+	 * @param file_name File name
+	 * @param tri Returned vertex indices of triangles
+	 * @param vert Vertex positions
+	 * @return Indication of SUCCESS
+	 */
+	EReturn loadOBJ(std::string & data, Eigen::VectorXi& tri, Eigen::VectorXd& vert);
 
-    EReturn saveMatrix(std::string file_name, const Eigen::Ref<const Eigen::MatrixXd> mat);
+	EReturn saveMatrix(std::string file_name, const Eigen::Ref<const Eigen::MatrixXd> mat);
 
     EReturn getJSON(const rapidjson::Value& a, Eigen::VectorXd& ret);
     EReturn getJSON(const rapidjson::Value& a, double& ret);
@@ -225,5 +233,9 @@ namespace exotica
     EReturn getJSON(const rapidjson::Value& a, KDL::Frame& ret);
     EReturn getJSON(const rapidjson::Value& a, std::vector<std::string>& ret);
 
+	EReturn vectorExoticaToEigen(const exotica::Vector & exotica, Eigen::VectorXd & eigen);
+	EReturn vectorEigenToExotica(Eigen::VectorXd eigen, exotica::Vector & exotica);
+	EReturn matrixExoticaToEigen(const exotica::Matrix & exotica, Eigen::MatrixXd & eigen);
+	EReturn matrixEigenToExotica(const Eigen::MatrixXd & eigen, exotica::Matrix & exotica);
 }
 #endif

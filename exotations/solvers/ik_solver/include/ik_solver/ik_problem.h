@@ -35,7 +35,7 @@ namespace exotica
 			 */
 			double getTau();
 
-            virtual EReturn reinitialise(rapidjson::Document& document);
+            virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
 		protected:
 			/**
 			 * \brief Derived Initialiser (from XML): PURE VIRTUAL

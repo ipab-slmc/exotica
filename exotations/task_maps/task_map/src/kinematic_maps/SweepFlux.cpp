@@ -16,6 +16,7 @@ namespace exotica
 
 	EReturn SweepFlux::setTimeSteps(const int T)
 	{
+        TaskMap::setTimeSteps(T);
 		int n, m;
 		n = scene_->getNumJoints();
 		taskSpaceDim(m);
@@ -23,15 +24,13 @@ namespace exotica
 		Verts_ = Eigen::VectorXd::Zero(scene_->getMapSize(object_name_) * T_ * 3);
 
 		if (T_ < 2)
-		{
-			INDICATE_FAILURE
-			;
-			return FAILURE;
+        {
+            //INDICATE_FAILURE;
+            return WARNING;
 		}
 		if (scene_->getMapSize(object_name_) < 2)
 		{
-			INDICATE_FAILURE
-			;
+            INDICATE_FAILURE;
 			return FAILURE;
 		}
 		TrisStride_ = (scene_->getMapSize(object_name_) - 1) * 2 + (capTop_->data ? 1 : 0)

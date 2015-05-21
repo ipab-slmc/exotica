@@ -51,7 +51,7 @@ namespace exotica
 			ERROR("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
 			return PAR_INV;
 		}
-		problem_ = pointer;
+        MotionSolver::specifyProblem(pointer);
 		prob_ = boost::static_pointer_cast<IKProblem>(pointer);
         size_ = prob_->getScenes().begin()->second->getNumJoints();
         for (auto & it : prob_->getScenes())
@@ -276,18 +276,19 @@ namespace exotica
                 task_weights.diagonal().block(cur_rows, 0, dim.at(t)(i), 1).setConstant(rhos.at(t)(i));
                 cur_rows += dim.at(t)(i);
             }
+
+
             task_error = goal.at(t) - phi.at(t);
-            err = task_error.squaredNorm();
+            err = (task_weights*task_error).squaredNorm();
             // Compute velocity
             Eigen::MatrixXd Jpinv;
             Jpinv = (big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t) + prob_->getW() ).inverse()
                     * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C
-            //Jpinv = (prob_->getW()+ I*1e-3) * big_jacobian.at(t).transpose()
-            //        * (big_jacobian.at(t).transpose() * (prob_->getW()+ I*1e-3) * big_jacobian.at(t) + task_weights ).inverse();
-                     //W*Jt*(Jt*W*J+C)
 
             vel_vec_ = Jpinv* task_error;
             return SUCCESS;
+
+
         }
         else
         {

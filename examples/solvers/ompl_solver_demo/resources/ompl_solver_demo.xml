@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<ExampleConfiguration>
+
+  <Server name="EXOTicaServer">
+     <Parameters>
+
+     </Parameters>
+     <PlanningMode>Sampling</PlanningMode>
+  </Server>
+
+
+  <OMPLsolver name="OMPL Interface">
+    <algorithm>RRT</algorithm>
+    <max_goal_sampling_attempts>2500</max_goal_sampling_attempts>
+  </OMPLsolver>
+
+  <OMPLProblem name="OMPLProblem">
+    <Scene name="TestScene">
+      <Kinematica>
+        <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
+        <Root segment="base"> <!-- Optional: The root segment to use: xyz -->
+          <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
+          <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
+        </Root>
+        <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="lwr_arm_0_joint"/>
+          <joint name="lwr_arm_1_joint"/>
+          <joint name="lwr_arm_2_joint"/>
+          <joint name="lwr_arm_3_joint"/>
+          <joint name="lwr_arm_4_joint"/>
+          <joint name="lwr_arm_5_joint"/>
+          <joint name="lwr_arm_6_joint"/>
+        </Update>
+      </Kinematica>
+    </Scene>
+
+    <Map type="EffPosition" name="LeftHandPositionMap">
+      <Scene name="TestScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="lwr_arm_7_link">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+
+    <Task name="LeftHandPosition" type="TaskTerminationCriterion">
+      <map name="LeftHandPositionMap"/>
+      <Rho>1.0</Rho>
+      <Goal>0.4 -0.1 0.5</Goal>
+      <Threshold>1e-2</Threshold>
+    </Task>
+  </OMPLProblem>
+</ExampleConfiguration>

@@ -259,7 +259,7 @@ namespace kinematica
 			std::string getRootName();
 
 			bool getEndEffectorIndex(std::vector<int> & eff_index);
-		private:
+        //private:
 			/****************** Class members ********************/
 
 			/**

@@ -7,7 +7,7 @@ namespace exotica
 
     }
 
-    EReturn PlanningProblem::reinitialise(rapidjson::Document& document)
+    EReturn PlanningProblem::reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem)
     {
         ERROR("This has to implemented in the derived class!");
         return FAILURE;
@@ -16,8 +16,11 @@ namespace exotica
     EReturn PlanningProblem::initBase(tinyxml2::XMLHandle & handle,
             const Server_ptr & server)
     {
+        poses.reset(new std::map<std::string,Eigen::VectorXd>());
+        posesJointNames.reset(new std::vector<std::string>());
         knownMaps_["PositionConstraint"]="Distance";
         knownMaps_["QuatConstraint"]="Orientation";
+        knownMaps_["PostureConstraint"]="Identity";
 
         Object::initBase(handle, server);
         if (!server)

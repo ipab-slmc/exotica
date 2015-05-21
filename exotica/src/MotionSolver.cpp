@@ -20,5 +20,10 @@ exotica::EReturn exotica::MotionSolver::initBase(tinyxml2::XMLHandle & handle,
 exotica::EReturn exotica::MotionSolver::specifyProblem(PlanningProblem_ptr pointer)
 {
 	problem_ = pointer;
+    for(auto& map : problem_->getTaskMaps())
+    {
+        map.second->poses = problem_->poses;
+        map.second->posesJointNames = problem_->posesJointNames;
+    }
 	return SUCCESS;
 }

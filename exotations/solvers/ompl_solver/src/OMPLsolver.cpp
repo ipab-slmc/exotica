@@ -274,7 +274,7 @@ namespace exotica
 			ERROR("This solver can't use problem of type '" << pointer->type() << "'!");
 			return PAR_INV;
 		}
-		problem_ = pointer;
+        MotionSolver::specifyProblem(pointer);
 		prob_ = boost::static_pointer_cast<OMPLProblem>(pointer);
 
         for (auto & it : prob_->getScenes())

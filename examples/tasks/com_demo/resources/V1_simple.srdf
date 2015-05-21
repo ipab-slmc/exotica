@@ -1,0 +1,947 @@
+<?xml version="1.0" ?>
+<!--This does not replace URDF, and is not an extension of URDF.
+    This is a format for representing semantic information about the robot structure.
+    A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
+-->
+<robot name="V1">
+    <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
+    <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
+    <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
+    <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
+    <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
+    <group name="WholeBody">
+        <joint name="world" />
+        <joint name="LeftHipRotator" />
+        <joint name="LeftHipAdductor" />
+        <joint name="LeftHipExtensor" />
+        <joint name="LeftKneeExtensor" />
+        <joint name="LeftAnkleExtensor" />
+        <joint name="LeftAnkle" />
+        <joint name="RightHipRotator" />
+        <joint name="RightHipAdductor" />
+        <joint name="RightHipExtensor" />
+        <joint name="RightKneeExtensor" />
+        <joint name="RightAnkleExtensor" />
+        <joint name="RightAnkle" />
+        <joint name="WaistRotator" />
+        <joint name="WaistExtensor" />
+        <joint name="WaistLateralExtensor" />
+        <joint name="LeftShoulderExtensor" />
+        <joint name="LeftShoulderAdductor" />
+        <joint name="LeftShoulderSupinator" />
+        <joint name="LeftElbowExtensor" />
+        <joint name="LeftForearmSupinator" />
+        <joint name="LeftWristExtensor" />
+        <joint name="LeftWrist" />
+        <joint name="LeftLittleMPYaw" />
+        <joint name="LeftLittleMPExtensor" />
+        <joint name="LeftLittlePIPExtensor" />
+        <joint name="LeftLittleDIPExtensor" />
+        <joint name="LeftMiddleMPExtensor" />
+        <joint name="LeftMiddlePIPExtensor" />
+        <joint name="LeftMiddleDIPExtensor" />
+        <joint name="LeftPrimaryMPYaw" />
+        <joint name="LeftPrimaryMPExtensor" />
+        <joint name="LeftPrimaryPIPExtensor" />
+        <joint name="LeftPrimaryDIPExtensor" />
+        <joint name="LeftThumbMPYaw" />
+        <joint name="LeftThumbMPExtensor" />
+        <joint name="LeftThumbPIPExtensor" />
+        <joint name="LeftThumbDIPExtensor" />
+        <joint name="LowerNeckExtensor" />
+        <joint name="NeckRotator" />
+        <joint name="UpperNeckExtensor" />
+        <joint name="RightShoulderExtensor" />
+        <joint name="RightShoulderAdductor" />
+        <joint name="RightShoulderSupinator" />
+        <joint name="RightElbowExtensor" />
+        <joint name="RightForearmSupinator" />
+        <joint name="RightWrist" />
+        <joint name="RightLittleMPYaw" />
+        <joint name="RightLittleMPExtensor" />
+        <joint name="RightLittlePIPExtensor" />
+        <joint name="RightLittleDIPExtensor" />
+        <joint name="RightMiddleMPExtensor" />
+        <joint name="RightMiddlePIPExtensor" />
+        <joint name="RightMiddleDIPExtensor" />
+        <joint name="RightPrimaryMPYaw" />
+        <joint name="RightPrimaryMPExtensor" />
+        <joint name="RightPrimaryPIPExtensor" />
+        <joint name="RightPrimaryDIPExtensor" />
+        <joint name="RightThumbMPYaw" />
+        <joint name="RightThumbMPExtensor" />
+        <joint name="RightThumbPIPExtensor" />
+        <joint name="RightThumbDIPExtensor" />
+    </group>
+    <group name="WholeBodyPinned">
+        <joint name="LeftHipRotator" />
+        <joint name="LeftHipAdductor" />
+        <joint name="LeftHipExtensor" />
+        <joint name="LeftKneeExtensor" />
+        <joint name="LeftAnkleExtensor" />
+        <joint name="LeftAnkle" />
+        <joint name="RightHipRotator" />
+        <joint name="RightHipAdductor" />
+        <joint name="RightHipExtensor" />
+        <joint name="RightKneeExtensor" />
+        <joint name="RightAnkleExtensor" />
+        <joint name="RightAnkle" />
+        <joint name="WaistRotator" />
+        <joint name="WaistExtensor" />
+        <joint name="WaistLateralExtensor" />
+        <joint name="LeftShoulderExtensor" />
+        <joint name="LeftShoulderAdductor" />
+        <joint name="LeftShoulderSupinator" />
+        <joint name="LeftElbowExtensor" />
+        <joint name="LeftForearmSupinator" />
+        <joint name="LeftWristExtensor" />
+        <joint name="LeftWrist" />
+        <joint name="LeftLittleMPYaw" />
+        <joint name="LeftLittleMPExtensor" />
+        <joint name="LeftLittlePIPExtensor" />
+        <joint name="LeftLittleDIPExtensor" />
+        <joint name="LeftMiddleMPExtensor" />
+        <joint name="LeftMiddlePIPExtensor" />
+        <joint name="LeftMiddleDIPExtensor" />
+        <joint name="LeftPrimaryMPYaw" />
+        <joint name="LeftPrimaryMPExtensor" />
+        <joint name="LeftPrimaryPIPExtensor" />
+        <joint name="LeftPrimaryDIPExtensor" />
+        <joint name="LeftThumbMPYaw" />
+        <joint name="LeftThumbMPExtensor" />
+        <joint name="LeftThumbPIPExtensor" />
+        <joint name="LeftThumbDIPExtensor" />
+        <joint name="LowerNeckExtensor" />
+        <joint name="NeckRotator" />
+        <joint name="UpperNeckExtensor" />
+        <joint name="RightShoulderExtensor" />
+        <joint name="RightShoulderAdductor" />
+        <joint name="RightShoulderSupinator" />
+        <joint name="RightElbowExtensor" />
+        <joint name="RightForearmSupinator" />
+        <joint name="RightWrist" />
+        <joint name="RightLittleMPYaw" />
+        <joint name="RightLittleMPExtensor" />
+        <joint name="RightLittlePIPExtensor" />
+        <joint name="RightLittleDIPExtensor" />
+        <joint name="RightMiddleMPExtensor" />
+        <joint name="RightMiddlePIPExtensor" />
+        <joint name="RightMiddleDIPExtensor" />
+        <joint name="RightPrimaryMPYaw" />
+        <joint name="RightPrimaryMPExtensor" />
+        <joint name="RightPrimaryPIPExtensor" />
+        <joint name="RightPrimaryDIPExtensor" />
+        <joint name="RightThumbMPYaw" />
+        <joint name="RightThumbMPExtensor" />
+        <joint name="RightThumbPIPExtensor" />
+        <joint name="RightThumbDIPExtensor" />
+    </group>
+    <group name="WholeBodyNoHandsPinned">
+        <joint name="WaistRotator" />
+        <joint name="WaistExtensor" />
+        <joint name="WaistLateralExtensor" />
+        <joint name="LeftWristExtensor" />
+        <joint name="LeftWrist" />
+        <joint name="LowerNeckExtensor" />
+        <joint name="NeckRotator" />
+        <joint name="UpperNeckExtensor" />
+        <joint name="RightShoulderExtensor" />
+        <joint name="RightShoulderAdductor" />
+        <joint name="RightShoulderSupinator" />
+        <joint name="LeftShoulderExtensor" />
+        <joint name="LeftShoulderAdductor" />
+        <joint name="LeftShoulderSupinator" />
+        <joint name="LeftElbowExtensor" />
+        <joint name="LeftForearmSupinator" />
+        <joint name="RightElbowExtensor" />
+        <joint name="RightForearmSupinator" />
+        <joint name="RightWristExtensor" />
+        <joint name="RightWrist" />
+        <joint name="LeftHipRotator" />
+        <joint name="LeftHipAdductor" />
+        <joint name="LeftHipExtensor" />
+        <joint name="LeftKneeExtensor" />
+        <joint name="LeftAnkleExtensor" />
+        <joint name="LeftAnkle" />
+        <joint name="RightHipRotator" />
+        <joint name="RightHipAdductor" />
+        <joint name="RightHipExtensor" />
+        <joint name="RightKneeExtensor" />
+        <joint name="RightAnkleExtensor" />
+        <joint name="RightAnkle" />
+    </group>
+    <group name="WholeBodyNoHands">
+        <joint name="world" />
+        <joint name="WaistRotator" />
+        <joint name="WaistExtensor" />
+        <joint name="WaistLateralExtensor" />
+        <joint name="LeftWristExtensor" />
+        <joint name="LeftWrist" />
+        <joint name="LowerNeckExtensor" />
+        <joint name="NeckRotator" />
+        <joint name="UpperNeckExtensor" />
+        <joint name="RightShoulderExtensor" />
+        <joint name="RightShoulderAdductor" />
+        <joint name="RightShoulderSupinator" />
+        <joint name="LeftShoulderExtensor" />
+        <joint name="LeftShoulderAdductor" />
+        <joint name="LeftShoulderSupinator" />
+        <joint name="LeftElbowExtensor" />
+        <joint name="LeftForearmSupinator" />
+        <joint name="RightElbowExtensor" />
+        <joint name="RightForearmSupinator" />
+        <joint name="RightWristExtensor" />
+        <joint name="RightWrist" />
+        <joint name="LeftHipRotator" />
+        <joint name="LeftHipAdductor" />
+        <joint name="LeftHipExtensor" />
+        <joint name="LeftKneeExtensor" />
+        <joint name="LeftAnkleExtensor" />
+        <joint name="LeftAnkle" />
+        <joint name="RightHipRotator" />
+        <joint name="RightHipAdductor" />
+        <joint name="RightHipExtensor" />
+        <joint name="RightKneeExtensor" />
+        <joint name="RightAnkleExtensor" />
+        <joint name="RightAnkle" />
+    </group>
+    <group name="UpperBody">
+        <joint name="WaistRotator" />
+        <joint name="WaistExtensor" />
+        <joint name="WaistLateralExtensor" />
+        <joint name="LeftWristExtensor" />
+        <joint name="LeftWrist" />
+        <joint name="LowerNeckExtensor" />
+        <joint name="NeckRotator" />
+        <joint name="UpperNeckExtensor" />
+        <joint name="RightShoulderExtensor" />
+        <joint name="RightShoulderAdductor" />
+        <joint name="RightShoulderSupinator" />
+        <joint name="LeftShoulderExtensor" />
+        <joint name="LeftShoulderAdductor" />
+        <joint name="LeftShoulderSupinator" />
+        <joint name="LeftElbowExtensor" />
+        <joint name="LeftForearmSupinator" />
+        <joint name="RightElbowExtensor" />
+        <joint name="RightForearmSupinator" />
+        <joint name="RightWristExtensor" />
+        <joint name="RightWrist" />
+    </group>
+    <group name="LowerBody">
+        <joint name="LeftHipRotator" />
+        <joint name="LeftHipAdductor" />
+        <joint name="LeftHipExtensor" />
+        <joint name="LeftKneeExtensor" />
+        <joint name="LeftAnkleExtensor" />
+        <joint name="LeftAnkle" />
+        <joint name="RightHipRotator" />
+        <joint name="RightHipAdductor" />
+        <joint name="RightHipExtensor" />
+        <joint name="RightKneeExtensor" />
+        <joint name="RightAnkleExtensor" />
+        <joint name="RightAnkle" />
+    </group>
+    <group name="LeftArm">
+        <chain base_link="Trunk" tip_link="LeftPalm" />
+    </group>
+    <group name="RightArm">
+        <chain base_link="Trunk" tip_link="RightPalm" />
+    </group>
+    <group name="LeftLeg">
+        <chain base_link="Pelvis" tip_link="l_foot" />
+    </group>
+    <group name="RoghtLeg">
+        <chain base_link="Pelvis" tip_link="r_foot" />
+    </group>
+    <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
+    <virtual_joint name="world" type="floating" parent_frame="world" child_link="Pelvis" />
+    <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->
+    <passive_joint name="world" />
+    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="Head" link2="LeftElbowExtensor" reason="Never" />
+    <disable_collisions link1="Head" link2="LeftHipRotator" reason="Never" />
+    <disable_collisions link1="Head" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="Head" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="Head" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="Head" link2="Pelvis" reason="Never" />
+    <disable_collisions link1="Head" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="Head" link2="RightHipRotator" reason="Never" />
+    <disable_collisions link1="Head" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="Head" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="Head" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="Head" link2="Trunk" reason="Adjacent" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftForearm" reason="Adjacent" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftHipRotator" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftPalm" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftShoulderRotator" reason="Adjacent" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightHipRotator" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightLeg" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftElbowExtensor" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftPalm" reason="Adjacent" />
+    <disable_collisions link1="LeftForearm" link2="LeftPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftForearm" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="LeftLeg" reason="Adjacent" />
+    <disable_collisions link1="LeftHipRotator" link2="LeftShankStructure" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="Pelvis" reason="Adjacent" />
+    <disable_collisions link1="LeftHipRotator" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="RightHipRotator" reason="Default" />
+    <disable_collisions link1="LeftHipRotator" link2="RightLeg" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="RightShankStructure" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="Trunk" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="l_foot" reason="Never" />
+    <disable_collisions link1="LeftHipRotator" link2="r_foot" reason="Never" />
+    <disable_collisions link1="LeftLeg" link2="LeftShankStructure" reason="Adjacent" />
+    <disable_collisions link1="LeftLeg" link2="Pelvis" reason="Default" />
+    <disable_collisions link1="LeftLeg" link2="RightHipRotator" reason="Never" />
+    <disable_collisions link1="LeftLeg" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftLeg" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftLeg" link2="l_foot" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftLittleMedialPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftPalm" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleDistalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftLittleProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftPalm" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleMedialPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftPalm" reason="Adjacent" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftLittleProximalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftMiddleMedialPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftPalm" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleDistalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftMiddleProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftPalm" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleMedialPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftPalm" reason="Adjacent" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftMiddleProximalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="LeftPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="LeftPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="LeftPrimaryProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftPalm" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="LeftThumbProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftPalm" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPalm" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="LeftPrimaryMedialPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="LeftPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryDistalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="LeftPrimaryProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryMedialPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="LeftShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="LeftShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftPrimaryProximalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShankStructure" link2="Pelvis" reason="Never" />
+    <disable_collisions link1="LeftShankStructure" link2="RightHipRotator" reason="Never" />
+    <disable_collisions link1="LeftShankStructure" link2="l_foot" reason="Adjacent" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="LeftShoulderExtensor" reason="Adjacent" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="LeftShoulderRotator" reason="Adjacent" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="Pelvis" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightHipRotator" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightLeg" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderAdductor" link2="r_foot" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="LeftShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="Pelvis" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightHipRotator" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightLeg" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderExtensor" link2="Trunk" reason="Adjacent" />
+    <disable_collisions link1="LeftShoulderRotator" link2="LeftThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="LeftThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="Pelvis" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightHipRotator" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightLeg" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftShoulderRotator" link2="Trunk" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="LeftThumbMedialPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="LeftThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbDistalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="LeftThumbProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbMedialPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightElbowExtensor" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightForearm" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="LeftThumbProximalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="Pelvis" link2="RightHipRotator" reason="Adjacent" />
+    <disable_collisions link1="Pelvis" link2="RightLeg" reason="Default" />
+    <disable_collisions link1="Pelvis" link2="RightShankStructure" reason="Never" />
+    <disable_collisions link1="Pelvis" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="Pelvis" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="Pelvis" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="Pelvis" link2="Trunk" reason="Adjacent" />
+    <disable_collisions link1="Pelvis" link2="l_foot" reason="Never" />
+    <disable_collisions link1="Pelvis" link2="r_foot" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightForearm" reason="Adjacent" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightHipRotator" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightShoulderRotator" reason="Adjacent" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightElbowExtensor" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightLittleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightLittleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightPalm" reason="Adjacent" />
+    <disable_collisions link1="RightForearm" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightForearm" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightHipRotator" link2="RightLeg" reason="Adjacent" />
+    <disable_collisions link1="RightHipRotator" link2="RightShankStructure" reason="Never" />
+    <disable_collisions link1="RightHipRotator" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightHipRotator" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightHipRotator" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightHipRotator" link2="Trunk" reason="Never" />
+    <disable_collisions link1="RightHipRotator" link2="l_foot" reason="Never" />
+    <disable_collisions link1="RightHipRotator" link2="r_foot" reason="Never" />
+    <disable_collisions link1="RightLeg" link2="RightShankStructure" reason="Adjacent" />
+    <disable_collisions link1="RightLeg" link2="r_foot" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightLittleMedialPhalanx" reason="Adjacent" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightLittleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleDistalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightLittleProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleMedialPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightMiddleDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightMiddleMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightPalm" reason="Adjacent" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightLittleProximalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightMiddleMedialPhalanx" reason="Adjacent" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightMiddleProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleDistalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightMiddleProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightPalm" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleMedialPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightPalm" reason="Adjacent" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightMiddleProximalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightPalm" link2="RightPrimaryDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightPalm" link2="RightPrimaryMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightPalm" link2="RightPrimaryProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="RightPalm" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightPalm" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightPalm" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightPalm" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightPalm" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightPalm" link2="RightThumbProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="RightPrimaryDistalPhalanx" link2="RightPrimaryMedialPhalanx" reason="Adjacent" />
+    <disable_collisions link1="RightPrimaryDistalPhalanx" link2="RightPrimaryProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightPrimaryDistalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightPrimaryDistalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightPrimaryDistalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightPrimaryDistalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightPrimaryDistalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightPrimaryDistalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightPrimaryMedialPhalanx" link2="RightPrimaryProximalPhalanx" reason="Adjacent" />
+    <disable_collisions link1="RightPrimaryMedialPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightPrimaryMedialPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightPrimaryMedialPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightPrimaryMedialPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightPrimaryMedialPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightPrimaryMedialPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightPrimaryProximalPhalanx" link2="RightShoulderAdductor" reason="Never" />
+    <disable_collisions link1="RightPrimaryProximalPhalanx" link2="RightShoulderExtensor" reason="Never" />
+    <disable_collisions link1="RightPrimaryProximalPhalanx" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightPrimaryProximalPhalanx" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightPrimaryProximalPhalanx" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightPrimaryProximalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightShankStructure" link2="r_foot" reason="Adjacent" />
+    <disable_collisions link1="RightShoulderAdductor" link2="RightShoulderExtensor" reason="Adjacent" />
+    <disable_collisions link1="RightShoulderAdductor" link2="RightShoulderRotator" reason="Adjacent" />
+    <disable_collisions link1="RightShoulderAdductor" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightShoulderAdductor" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightShoulderAdductor" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightShoulderExtensor" link2="RightShoulderRotator" reason="Never" />
+    <disable_collisions link1="RightShoulderExtensor" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightShoulderExtensor" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightShoulderExtensor" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightShoulderExtensor" link2="Trunk" reason="Adjacent" />
+    <disable_collisions link1="RightShoulderRotator" link2="RightThumbDistalPhalanx" reason="Never" />
+    <disable_collisions link1="RightShoulderRotator" link2="RightThumbMedialPhalanx" reason="Never" />
+    <disable_collisions link1="RightShoulderRotator" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightShoulderRotator" link2="Trunk" reason="Never" />
+    <disable_collisions link1="RightThumbDistalPhalanx" link2="RightThumbMedialPhalanx" reason="Adjacent" />
+    <disable_collisions link1="RightThumbDistalPhalanx" link2="RightThumbProximalPhalanx" reason="Never" />
+    <disable_collisions link1="RightThumbDistalPhalanx" link2="l_foot" reason="Never" />
+    <disable_collisions link1="RightThumbMedialPhalanx" link2="RightThumbProximalPhalanx" reason="Adjacent" />
+</robot>

@@ -8,6 +8,7 @@
 #include "ompl_solver/OMPLProblem.h"
 
 REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem);
+REGISTER_TASKDEFINITION_TYPE("TaskBias", exotica::TaskBias);
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
 #define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
@@ -15,8 +16,13 @@ REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem);
 namespace exotica
 {
 
+    TaskBias::TaskBias() : TaskSqrError()
+    {
+
+    }
+
 	OMPLProblem::OMPLProblem() :
-			space_dim_(0)
+            space_dim_(0), problemType(OMPL_PROBLEM_GOAL)
 	{
 		// TODO Auto-generated constructor stub
 
@@ -144,14 +150,98 @@ namespace exotica
 
 	EReturn OMPLProblem::initDerived(tinyxml2::XMLHandle & handle)
 	{
-		for (auto goal : task_defs_)
-		{
-			if (goal.second->type().compare("exotica::TaskTerminationCriterion") == 0)
-			{
-				goals_.push_back(boost::static_pointer_cast<exotica::TaskTerminationCriterion>(goal.second));
-			}
-		}
-		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("LocalPlannerConfig");
+        tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("PlroblemType");
+        if (tmp_handle.ToElement())
+        {
+            std::string tmp = tmp_handle.ToElement()->GetText();
+            if(tmp.compare("Costs")==0)
+            {
+                problemType=OMPL_PROBLEM_COSTS;
+            }
+            else if(tmp.compare("GoalBias")==0)
+            {
+                problemType=OMPL_PROBLEM_GOAL_BIAS;
+            }
+            else if(tmp.compare("SamplingBias")==0)
+            {
+                problemType=OMPL_PROBLEM_SAMPLING_BIAS;
+            }
+            else if(tmp.compare("Goals")==0)
+            {
+                problemType=OMPL_PROBLEM_GOAL;
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+        else
+        {
+            problemType=OMPL_PROBLEM_GOAL;
+        }
+
+        switch(problemType)
+        {
+        case OMPL_PROBLEM_GOAL:
+            for (auto goal : task_defs_)
+            {
+                if (goal.second->type().compare("exotica::TaskTerminationCriterion") == 0)
+                {
+                    goals_.push_back(boost::static_pointer_cast<exotica::TaskTerminationCriterion>(goal.second));
+                }
+                else
+                {
+                    ERROR(goal.first << " has wrong type, ignored!");
+                }
+            }
+            break;
+
+        case OMPL_PROBLEM_COSTS:
+            for (auto goal : task_defs_)
+            {
+                if (goal.second->type().compare("exotica::TaskSqrError") == 0)
+                {
+                    costs_.push_back(boost::static_pointer_cast<exotica::TaskSqrError>(goal.second));
+                }
+                else
+                {
+                    ERROR(goal.first << " has wrong type, ignored!");
+                }
+            }
+            break;
+
+        case OMPL_PROBLEM_GOAL_BIAS:
+            for (auto goal : task_defs_)
+            {
+                if (goal.second->type().compare("exotica::TaskBias") == 0)
+                {
+                    goalBias_.push_back(boost::static_pointer_cast<exotica::TaskBias>(goal.second));
+                }
+                else
+                {
+                    ERROR(goal.first << " has wrong type, ignored!");
+                }
+            }
+            break;
+
+        case OMPL_PROBLEM_SAMPLING_BIAS:
+            for (auto goal : task_defs_)
+            {
+                if (goal.second->type().compare("exotica::TaskBias") == 0)
+                {
+                    samplingBias_.push_back(boost::static_pointer_cast<exotica::TaskBias>(goal.second));
+                }
+                else
+                {
+                    ERROR(goal.first << " has wrong type, ignored!");
+                }
+            }
+            break;
+        }
+
+
+        tmp_handle = handle.FirstChildElement("LocalPlannerConfig");
 		if (tmp_handle.ToElement())
 		{
 			local_planner_config_ = tmp_handle.ToElement()->GetText();
@@ -200,5 +290,21 @@ namespace exotica
 	{
 		return goals_;
 	}
+
+    std::vector<TaskSqrError_ptr>& OMPLProblem::getCosts()
+    {
+        return costs_;
+    }
+
+    std::vector<TaskBias_ptr>& OMPLProblem::getGoalBias()
+    {
+        return goalBias_;
+    }
+
+    std::vector<TaskBias_ptr>& OMPLProblem::getSamplingBias()
+    {
+        return samplingBias_;
+    }
+
 
 } /* namespace exotica */

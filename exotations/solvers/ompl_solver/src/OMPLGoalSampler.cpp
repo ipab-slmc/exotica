@@ -6,7 +6,7 @@
  */
 
 #include "ompl_solver/OMPLGoalSampler.h"
-#include "generic/Identity.h"
+
 
 namespace exotica
 {
@@ -17,37 +17,31 @@ namespace exotica
         return 0.0;
     }
 
-    OMPLGoalSampler::OMPLGoalSampler (const ompl::base::SpaceInformationPtr &si, OMPLProblem_ptr prob) :
+    OMPLGoalSampler::OMPLGoalSampler (const ompl::base::SpaceInformationPtr &si, OMPLProblem_ptr prob, OMPLProblem_ptr goalBias) :
         ompl::base::GoalSampleableRegion(si), OMPLGoal(si, prob), prob_(prob)
 	{
         OMPLGoal::type_ = ompl::base::GOAL_SAMPLEABLE_REGION;
-        bool hasIdentityTask=false;
-        boost::shared_ptr<Identity> taskI;
-        for(auto& task : prob->getTaskMaps())
+        hasIdentityTask=false;
+        goalBias_=goalBias;
+        if(goalBias)
         {
-            if(task.second->type().compare("exotica::Identity")==0)
+            for(auto& task : goalBias->getTaskMaps())
             {
-                taskI=boost::static_pointer_cast<Identity>(task.second);
-                hasIdentityTask=true;
-                break;
+                if(task.second->type().compare("exotica::Identity")==0)
+                {
+                    taskI=boost::static_pointer_cast<Identity>(task.second);
+                    hasIdentityTask=true;
+                    break;
+                }
             }
-        }
-        if(hasIdentityTask && taskI->useRef)
-        {
-            goalState_ = si->allocState();
-            ompl::base::RealVectorStateSpace::StateType* state = goalState_->as<ompl::base::RealVectorStateSpace::StateType>();
-            int n=(OMPLGoal::si_->getStateSpace()->as<ompl::base::RealVectorStateSpace>())->getDimension();
-            HIGHLIGHT_NAMED("OMPL","Setting goal bias reference.");
-            for(int i=0;i<n;i++)
+            if(hasIdentityTask && taskI->useRef)
             {
-                (*state)[i]=taskI->jointRef(i);
-                HIGHLIGHT_NAMED("OMPL",(*state)[i]);
+                HIGHLIGHT_NAMED("OMPL","Setting goal bias reference.");
             }
-        }
-        else
-        {
-            HIGHLIGHT_NAMED("OMPL","No configuration space goal was defined!");
-            goalState_=NULL;
+            else
+            {
+                HIGHLIGHT_NAMED("OMPL","No configuration space goal was defined!");
+            }
         }
 	}
 
@@ -60,26 +54,26 @@ namespace exotica
     {
         if(st)
         {
-            ompl::base::RealVectorStateSpace::StateType* state = st->as<ompl::base::RealVectorStateSpace::StateType>();
-            ompl::base::RealVectorStateSpace::StateType* state1 = goalState_->as<ompl::base::RealVectorStateSpace::StateType>();
-            int n=(OMPLGoal::si_->getStateSpace()->as<ompl::base::RealVectorStateSpace>())->getDimension();
-            for(int i=0;i<n;i++)
+            if(hasIdentityTask)
             {
-                (*state)[i]=(*state1)[i];
+                ompl::base::RealVectorStateSpace::StateType* state = st->as<ompl::base::RealVectorStateSpace::StateType>();
+                int n=(OMPLGoal::si_->getStateSpace()->as<ompl::base::RealVectorStateSpace>())->getDimension();
+                for(int i=0;i<n;i++)
+                {
+                    (*state)[i]=taskI->jointRef(i);
+                }
             }
-            HIGHLIGHT_NAMED("OMPL","biased towards the goal - copy");
         }
         else
         {
-            st = goalState_;
-            HIGHLIGHT_NAMED("OMPL","biased towards the goal - replace");
+            INDICATE_FAILURE;
+            return;
         }
-        //HIGHLIGHT_NAMED("OMPL","biased towards the goal");
     }
 
     unsigned int OMPLGoalSampler::maxSampleCount() const
     {
-        if(goalState_)
+        if(hasIdentityTask)
         {
             return 1;
         }

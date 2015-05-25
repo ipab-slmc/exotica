@@ -75,6 +75,13 @@ namespace exotica
       Eigen::VectorXd   rho0_,rho1_;       //!< The scalar inter-task weight
       bool wasFullyInitialised_;
 
+      /**
+       * \bref	Get goal
+       * @param	t		Time step
+       * @return		Goal
+       */
+      Eigen::VectorXdRef_ptr getGoal(int t = 0);
+
     protected:
       /**
        * \brief Concrete implementation of the initDerived

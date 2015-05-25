@@ -140,4 +140,17 @@ namespace exotica
 		(*(rho_.at(t)))(0) = rho;
 		return SUCCESS;
 	}
+
+	Eigen::VectorXdRef_ptr TaskSqrError::getGoal(int t)
+	{
+		if (t < y_star_.size())
+		{
+			return y_star_[t];
+		}
+		else
+		{
+			INDICATE_FAILURE
+			return y_star_[0];
+		}
+	}
 }

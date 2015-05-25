@@ -14,7 +14,6 @@
 #include <exotica/Initialiser.h>
 #include <exotica_moveit/ExoticaPlanningAction.h>
 #include <actionlib/server/simple_action_server.h>
-#include <ros/package.h>
 #include <actionlib/server/simple_action_server.h>
 
 namespace exotica
@@ -61,6 +60,7 @@ namespace exotica
 
 			///	Moveit planning scene
 			moveit_msgs::PlanningScenePtr scene_;
+
 	};
 }
 

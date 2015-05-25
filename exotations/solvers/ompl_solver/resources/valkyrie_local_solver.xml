@@ -14,7 +14,7 @@
   <IKsolver name="FRRTLocal">
     <MaxIt>100</MaxIt>
     <MaxStep>0.05</MaxStep>
-    <LocalMinimaThreshold>0</LocalMinimaThreshold>
+    <LocalMinimaThreshold>1e-3</LocalMinimaThreshold>
   </IKsolver>
 
   <IKProblem name="LocalProblem">
@@ -68,6 +68,7 @@
       <SafetyRange>0.2</SafetyRange>
       <HardConstrain>1</HardConstrain>
       <SelfCollision>0</SelfCollision>
+      <VisualDebug>1</VisualDebug>
     </Map>
 
     <Task name="CollisionAvoidanceTask" type="TaskSqrError">
@@ -104,7 +105,7 @@
       <Rho>1</Rho>
       <Goal>0 0 0 0 0 0 0 0 0 0</Goal>
     </Task>
-    <Tolerance>1e-2</Tolerance> 
-    <W> 10 10 10 5 5 4 4 3 2 1</W>
+    <Tolerance>3e-2</Tolerance> 
+    <W> 5 5 5 5 5 4 4 3 2 1</W>
   </IKProblem>
 </ExampleConfiguration>

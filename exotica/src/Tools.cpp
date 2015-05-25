@@ -549,4 +549,58 @@ namespace exotica
             return FAILURE;
         }
     }
+
+	EReturn vectorExoticaToEigen(const exotica::Vector & exotica, Eigen::VectorXd & eigen)
+	{
+		eigen.resize(exotica.data.size());
+		for (int i = 0; i < exotica.data.size(); i++)
+			eigen(i) = exotica.data[i];
+		return SUCCESS;
+	}
+
+	EReturn vectorEigenToExotica(Eigen::VectorXd eigen, exotica::Vector & exotica)
+	{
+		exotica.data.resize(eigen.rows());
+		for (int i = 0; i < eigen.rows(); i++)
+			exotica.data[i] = eigen(i);
+		return SUCCESS;
+	}
+
+	EReturn matrixExoticaToEigen(const exotica::Matrix & exotica, Eigen::MatrixXd & eigen)
+	{
+		if (exotica.col == 0 || exotica.row == 0 || exotica.data.size() == 0)
+		{
+			ERROR("Matrix conversion failed, no data in the matrix.");
+			return FAILURE;
+		}
+		if (exotica.col * exotica.row != exotica.data.size())
+		{
+			ERROR("Matrix conversion failed, size mismatch."<<exotica.col<<" * "<<exotica.row<<" != "<<exotica.data.size());
+			return FAILURE;
+		}
+		eigen.resize(exotica.row, exotica.col);
+		int cnt = 0;
+		for (int r = 0; r < exotica.row; r++)
+			for (int c = 0; c < exotica.col; c++)
+			{
+				eigen(r, c) = exotica.data[cnt];
+				cnt++;
+			}
+		return SUCCESS;
+	}
+
+	EReturn matrixEigenToExotica(const Eigen::MatrixXd & eigen, exotica::Matrix & exotica)
+	{
+		exotica.row = eigen.rows();
+		exotica.col = eigen.cols();
+		exotica.data.resize(exotica.col * exotica.row);
+		int cnt = 0;
+		for (int r = 0; r < exotica.row; r++)
+			for (int c = 0; c < exotica.col; c++)
+			{
+				exotica.data[cnt] = eigen(r, c);
+				cnt++;
+			}
+		return SUCCESS;
+	}
 }

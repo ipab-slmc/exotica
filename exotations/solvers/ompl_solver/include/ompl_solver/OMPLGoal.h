@@ -15,15 +15,16 @@
 namespace exotica
 {
 
-	class OMPLGoal : public ompl::base::Goal
+    class OMPLGoal : public ompl::base::Goal
 	{
 		public:
 			OMPLGoal (const ompl::base::SpaceInformationPtr &si, OMPLProblem_ptr prob);
-			virtual
-			~OMPLGoal ();
+            virtual	~OMPLGoal ();
 
 			 virtual bool isSatisfied(const ompl::base::State *st) const;
 			 virtual bool isSatisfied(const ompl::base::State *st, double *distance) const;
+
+			 const OMPLProblem_ptr getProblem();
 		private:
 			 OMPLProblem_ptr prob_;
 			 boost::shared_ptr<OMPLStateSpace> state_space_;

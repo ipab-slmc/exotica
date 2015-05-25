@@ -69,6 +69,9 @@ namespace exotica
 			EReturn removeVertex(const std::string & name);
 
 			bool hasActiveObstacle();
+
+			//	Graph Manager
+			GraphManager gManager_;
 		protected:
 			/**
 			 * \brief	Concrete implementation of initialisation from xml
@@ -108,9 +111,6 @@ namespace exotica
 			 * @param	V		The given links' poses
 			 */
 			EReturn updateGraphFromPoses(const Eigen::Matrix3Xd & V);
-
-			//	Graph Manager
-			GraphManager gManager_;
 
 			//	Robot links
 			EParam<exotica::StringList> links_;

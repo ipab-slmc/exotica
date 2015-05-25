@@ -315,25 +315,26 @@ namespace exotica
 
 		}
 
-		edges_[0].scale.x = 0.004;
-		edges_[1].scale.x = 0.004;
-		edges_[2].scale.x = 0.008;
-		edges_[3].scale.x = 0.004;
-		edges_[4].scale.x = 0.004;
+		edges_[0].scale.x = 0.002;
+		edges_[1].scale.x = 0.002;
+		edges_[2].scale.x = 0.006;
+		edges_[3].scale.x = 0.002;
+		edges_[4].scale.x = 0.002;
+
 
 		edges_[0].color.r = 0;
 		edges_[0].color.g = 1;
 		edges_[0].color.b = 0.6;
 		edges_[0].color.a = .6;
 
-		edges_[1].color.r = 0.815;
-		edges_[1].color.g = 0.496;
-		edges_[1].color.b = 0.066;
+		edges_[1].color.r = 0.721;
+		edges_[1].color.g = 0.698;
+		edges_[1].color.b = 0.698;
 		edges_[1].color.a = 1;
 
-		edges_[2].color.r = 0;
-		edges_[2].color.g = 1;
-		edges_[2].color.b = 0;
+		edges_[2].color.r = 0.050;
+		edges_[2].color.g = 0.686;
+		edges_[2].color.b = 0.192;
 		edges_[2].color.a = 1;
 
 		edges_[3].color.r = 0;
@@ -680,7 +681,6 @@ namespace exotica
 		}
 //		dist_.resize(size_, size_);
 		dist_ = dist;
-		publishEdges();
 		return true;
 	}
 
@@ -749,8 +749,6 @@ namespace exotica
 
 		for (int i = 0; i < 5; i++)
 			pubs_[i].publish(edges_[i]);
-		ros::spinOnce();
-
 	}
 	double MeshGraph::getInteractRange()
 	{

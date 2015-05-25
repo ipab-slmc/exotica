@@ -29,6 +29,10 @@ namespace exotica
       virtual EReturn taskSpaceDim(int & task_dim);
 
       virtual EReturn initialise(const rapidjson::Value& a);
+
+      bool useRef;
+      std::vector<int> jointMap;
+      Eigen::VectorXd jointRef;
       
     protected:
       /**
@@ -39,9 +43,7 @@ namespace exotica
       int getJointIDexternal(std::string& name);
       int getJointID(std::string& name);
 
-      bool useRef;
-      std::vector<int> jointMap;
-      Eigen::VectorXd jointRef;
+
   };
 }
 #endif

@@ -55,6 +55,27 @@ namespace exotica
                     {
                         if(knownMaps_.find(constraintClass)!=knownMaps_.end())
                         {
+                            bool IsGoal=false;
+                            if(knownMaps_[constraintClass].compare("Identity")==0)
+                            {
+                                std::string postureName;
+                                if(ok(getJSON(obj["postureName"],postureName)))
+                                {
+                                    if(postureName.compare("reach_end")!=0)
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        IsGoal=true;
+                                    }
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            if(problemType==OMPL_PROBLEM_GOAL_BIAS && !IsGoal ) continue;
                             TaskMap_ptr taskmap;
                             if(ok(TaskMap_fac::Instance().createObject(knownMaps_[constraintClass],taskmap)))
                             {
@@ -66,29 +87,57 @@ namespace exotica
                                         std::string name=taskmap->getObjectName();
                                         task_maps_[name]=taskmap;
                                         TaskDefinition_ptr task;
-                                        if(ok(TaskDefinition_fac::Instance().createObject("TaskTerminationCriterion",task)))
+
+                                        if(IsGoal && problemType==OMPL_PROBLEM_GOAL_BIAS)
                                         {
-                                            TaskTerminationCriterion_ptr sqr = boost::static_pointer_cast<TaskTerminationCriterion>(task);
-                                            sqr->setTaskMap(taskmap);
-                                            int dim;
-                                            taskmap->taskSpaceDim(dim);
-                                            sqr->y_star0_.resize(dim);
-                                            sqr->rho0_(0)=1.0;
-                                            sqr->threshold0_(0)=1e-1;
-                                            sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+                                            if(ok(TaskDefinition_fac::Instance().createObject("TaskBias",task)))
+                                            {
+                                                TaskBias_ptr sqr = boost::static_pointer_cast<TaskBias>(task);
+                                                sqr->setTaskMap(taskmap);
+                                                int dim;
+                                                taskmap->taskSpaceDim(dim);
+                                                sqr->y_star0_.resize(dim);
+                                                sqr->rho0_(0)=1.0;
+                                                sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+                                                sqr->y_star0_.setZero();
 
-                                            // TODO: Better implementation of stting goals from JSON
-                                            sqr->y_star0_.setZero();
-
-                                            sqr->setTimeSteps(1);
-                                            sqr->wasFullyInitialised_=true;
-                                            task_defs_[name]=task;
-                                            goals_.push_back(sqr);
+                                                sqr->setTimeSteps(1);
+                                                sqr->wasFullyInitialised_=true;
+                                                task_defs_[name]=task;
+                                                goalBias_.push_back(sqr);
+                                            }
+                                            else
+                                            {
+                                                INDICATE_FAILURE;
+                                                return FAILURE;
+                                            }
                                         }
                                         else
                                         {
-                                            INDICATE_FAILURE;
-                                            return FAILURE;
+                                            if(ok(TaskDefinition_fac::Instance().createObject("TaskTerminationCriterion",task)))
+                                            {
+                                                TaskTerminationCriterion_ptr sqr = boost::static_pointer_cast<TaskTerminationCriterion>(task);
+                                                sqr->setTaskMap(taskmap);
+                                                int dim;
+                                                taskmap->taskSpaceDim(dim);
+                                                sqr->y_star0_.resize(dim);
+                                                sqr->rho0_(0)=1.0;
+                                                sqr->threshold0_(0)=1e-6;
+                                                sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+
+                                                // TODO: Better implementation of stting goals from JSON
+                                                sqr->y_star0_.setZero();
+
+                                                sqr->setTimeSteps(1);
+                                                sqr->wasFullyInitialised_=true;
+                                                task_defs_[name]=task;
+                                                goals_.push_back(sqr);
+                                            }
+                                            else
+                                            {
+                                                INDICATE_FAILURE;
+                                                return FAILURE;
+                                            }
                                         }
                                     }
                                     else

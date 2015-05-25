@@ -116,6 +116,8 @@ namespace exotica
             boost::shared_ptr<std::map<std::string,Eigen::VectorXd> > poses;
             boost::shared_ptr<std::vector<std::string> > posesJointNames;
 
+            virtual std::string print(std::string prepend);
+
 		protected:
 
 			/**

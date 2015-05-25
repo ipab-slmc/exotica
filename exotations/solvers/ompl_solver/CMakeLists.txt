@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ompl_solver)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   task_definition
   task_map
+  ik_solver
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -22,7 +23,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ompl_solver
-  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map 
+  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map ik_solver
   DEPENDS system_lib ompl
 )
 
@@ -48,7 +49,9 @@ add_library(ompl_solver
    src/OMPLStateSpace.cpp
    src/OMPLStateValidityChecker.cpp
    src/OMPLGoalSampler.cpp
-) 
+   src/frrt/FRRT.cpp
+)
+
 link_directories(${catkin_LIBRARY_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 link_directories(${OMPL_LIBRARY_DIRS})

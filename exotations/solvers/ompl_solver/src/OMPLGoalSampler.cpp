@@ -7,15 +7,42 @@
 
 #include "ompl_solver/OMPLGoalSampler.h"
 
+
 namespace exotica
 {
 
-	OMPLGoalSampler::OMPLGoalSampler (const ompl::base::SpaceInformationPtr &si, OMPLProblem_ptr prob, boost::shared_ptr<OMPLsolver> sol) :
-		ompl::base::GoalLazySamples(si, boost::bind(&OMPLGoalSampler::sampleGoal, this, _1, _2), false),
-	  prob_(prob),
-	  sol_(sol)
-	{
+    double OMPLGoalSampler::distanceGoal(const ompl::base::State *st) const
+    {
+        HIGHLIGHT_NAMED("OMPL","Distance query");
+        return 0.0;
+    }
 
+    OMPLGoalSampler::OMPLGoalSampler (const ompl::base::SpaceInformationPtr &si, OMPLProblem_ptr prob, OMPLProblem_ptr goalBias) :
+        ompl::base::GoalSampleableRegion(si), OMPLGoal(si, prob), prob_(prob)
+	{
+        OMPLGoal::type_ = ompl::base::GOAL_SAMPLEABLE_REGION;
+        hasIdentityTask=false;
+        goalBias_=goalBias;
+        if(goalBias)
+        {
+            for(auto& task : goalBias->getTaskMaps())
+            {
+                if(task.second->type().compare("exotica::Identity")==0)
+                {
+                    taskI=boost::static_pointer_cast<Identity>(task.second);
+                    hasIdentityTask=true;
+                    break;
+                }
+            }
+            if(hasIdentityTask && taskI->useRef)
+            {
+                HIGHLIGHT_NAMED("OMPL","Setting goal bias reference.");
+            }
+            else
+            {
+                HIGHLIGHT_NAMED("OMPL","No configuration space goal was defined!");
+            }
+        }
 	}
 
 	OMPLGoalSampler::~OMPLGoalSampler ()
@@ -23,31 +50,37 @@ namespace exotica
 
 	}
 
-	bool OMPLGoalSampler::sampleGoal(const ompl::base::GoalLazySamples *gls, ompl::base::State *newGoal)
-	{
-		// terminate after too many attempts
-		//if (attempts_so_far >= max_attempts)
-		//	return false;
+    void OMPLGoalSampler::sampleGoal(ompl::base::State *st) const
+    {
+        if(st)
+        {
+            if(hasIdentityTask)
+            {
+                ompl::base::RealVectorStateSpace::StateType* state = st->as<ompl::base::RealVectorStateSpace::StateType>();
+                int n=(OMPLGoal::si_->getStateSpace()->as<ompl::base::RealVectorStateSpace>())->getDimension();
+                for(int i=0;i<n;i++)
+                {
+                    (*state)[i]=taskI->jointRef(i);
+                }
+            }
+        }
+        else
+        {
+            INDICATE_FAILURE;
+            return;
+        }
+    }
 
-		// terminate after a maximum number of samples
-		//if (gls->getStateCount() >= planning_context_->getMaximumGoalSamples())
-		//	return false;
-
-		int max_attempts = sol_->getGoalMaxAttempts();
-
-		// terminate the sampling thread when a solution has been found
-		if (sol_->getFinishedSolving())
-			return false;
-
-		for (int a = gls->samplingAttemptsCount() ; a < max_attempts && gls->isSampling() ; ++a)
-		{
-			default_sampler_->sampleUniform(newGoal);
-			if (static_cast<const OMPLStateValidityChecker*>(si_->getStateValidityChecker().get())->isValid(newGoal))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+    unsigned int OMPLGoalSampler::maxSampleCount() const
+    {
+        if(hasIdentityTask)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 
 } /* namespace exotica */

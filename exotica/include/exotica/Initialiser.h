@@ -28,6 +28,34 @@ namespace exotica
        *        Currently, is an empty constructor definition.
        */
       Initialiser();
+
+      ///
+      /// \brief initialise Initialises the server from XML handle
+      /// \param root_handle XML handle
+      /// \param server Returned server object
+      /// \return Indication of success
+      ///
+      EReturn initialise(tinyxml2::XMLHandle root_handle, Server_ptr & server);
+
+      ///
+      /// \brief initialise Initialises the problem from XML handle
+      /// \param root_handle XML handle
+      /// \param problem Returned problem object
+      /// \param problem_name Requested problem name
+      /// \param server Server to use with this object
+      /// \return Indication of success
+      ///
+      EReturn initialise(tinyxml2::XMLHandle root_handle, PlanningProblem_ptr & problem, const std::string & problem_name, Server_ptr & server);
+
+      ///
+      /// \brief initialise Initialises the solver from XML handle
+      /// \param root_handle XML handle
+      /// \param problem Returned solver object
+      /// \param problem_name Requested solver name
+      /// \param server Server to use with this object
+      /// \return Indication of success
+      ///
+      EReturn initialise(tinyxml2::XMLHandle root_handle, MotionSolver_ptr & solver, const std::string & solver_name, Server_ptr & server);
     
       /**
        * \brief Initialiser function
@@ -41,11 +69,22 @@ namespace exotica
       /**
        * \brief Initialiser function
        * @param file_name XML_file for initialising the problem with.
+       * @param solver    Returned vector of shared pointers to a motion solvers
+       * @param problem   Returned vector of shared pointers to a problems
+       * @param problem_name Vector of requested problem names
+       * @param solver_name Vector of requested solver names
+       * @return          Indication of Success
+       */
+      EReturn initialise(const std::string & file_name, Server_ptr & server, std::vector<MotionSolver_ptr> & solver, std::vector<PlanningProblem_ptr> & problem,std::vector<std::string> & problem_name, std::vector<std::string> & solver_name);
+
+      /**
+       * \brief Initialiser function
+       * @param file_name XML_file for initialising the problem with.
        * @param solver    Shared pointer to a Motion Solver
        * @param problem   Shared pointer to a Planning Problem
        * @param problem_name Problem name
        * @param solver_name Solver name
-       * @return          Indication of Success: TODO
+       * @return          Indication of Success
        */
       EReturn initialise(const std::string & file_name, Server_ptr & server, MotionSolver_ptr & solver, PlanningProblem_ptr & problem, const std::string & problem_name, const std::string & solver_name);
 
@@ -58,7 +97,19 @@ namespace exotica
        */
       EReturn listSolversAndProblems(const std::string & file_name, std::vector<std::string>& problems, std::vector<std::string>& solvers);
 
+      ///
+      /// \brief initialiseProblemJSON Reinitialises the problem from JSON string
+      /// \param problem Problem to be reinitialised
+      /// \param constraints JSON string
+      /// \return Indication of success
+      ///
       EReturn initialiseProblemJSON(PlanningProblem_ptr problem, const std::string& constraints);
+
+      ///
+      /// \brief initialiseProblemMoveit Reinitialises the problem from moveit planning scene stored within the Scene object of the problem
+      /// \param problem Problem to be reinitialised
+      /// \return Indication of success
+      ///
       EReturn initialiseProblemMoveit(PlanningProblem_ptr problem);
     private:
 

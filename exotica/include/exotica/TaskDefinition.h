@@ -87,6 +87,8 @@ namespace exotica
 
       bool order;
 
+      virtual std::string print(std::string prepend);
+
     protected:
       /**
        * \brief Initialises members of the derived type: PURE_VIRTUAL

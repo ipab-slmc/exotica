@@ -172,7 +172,7 @@ namespace exotica
 	typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
 
     ///	The class of EXOTica Scene
-	class Scene
+    class Scene : public Object
 	{
 		public:
             /**

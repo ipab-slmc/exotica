@@ -13,6 +13,7 @@
 #include "ompl_solver/OMPLsolver.h"
 #include "ompl_solver/OMPLProblem.h"
 #include "ompl_solver/OMPLGoal.h"
+#include "generic/Identity.h"
 
 namespace exotica
 {
@@ -24,7 +25,7 @@ namespace exotica
     class OMPLGoalSampler : public OMPLGoal, public ompl::base::GoalSampleableRegion
 	{
 		public:
-            OMPLGoalSampler (const ompl::base::SpaceInformationPtr &si, OMPLProblem_ptr prob);
+            OMPLGoalSampler (const ompl::base::SpaceInformationPtr &si, OMPLProblem_ptr prob, OMPLProblem_ptr samplingBias);
 			virtual
 			~OMPLGoalSampler ();
             virtual void sampleGoal(ompl::base::State *st) const ;
@@ -35,8 +36,10 @@ namespace exotica
 
 			OMPLProblem_ptr prob_;
 			boost::shared_ptr<OMPLsolver> sol_;
-			ompl::base::StateSamplerPtr                      default_sampler_;
-            ompl::base::State *goalState_;
+            ompl::base::StateSamplerPtr default_sampler_;
+            bool hasIdentityTask;
+            boost::shared_ptr<Identity> taskI;
+            OMPLProblem_ptr goalBias_;
 
 	};
 	typedef boost::shared_ptr<exotica::OMPLGoalSampler> OMPLGoalSampler_ptr;

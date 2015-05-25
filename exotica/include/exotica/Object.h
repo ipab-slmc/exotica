@@ -72,6 +72,11 @@ namespace exotica
 				return SUCCESS;
 			}
 
+            virtual std::string print(std::string prepend)
+            {
+                return prepend + "  " + object_name_ + " (" + type() + ")";
+            }
+
 			//	Namespace, i.e. problem/scene/...etc
             std::string ns_;
 			std::string object_name_;

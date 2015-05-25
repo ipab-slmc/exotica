@@ -14,6 +14,14 @@ namespace exotica
         return scene_;
     }
 
+    std::string TaskMap::print(std::string prepend)
+    {
+        std::string ret = Object::print(prepend);
+        ret+="\n"+prepend+"  Scene:";
+        ret+="\n"+scene_->print(prepend+"    ");
+        return ret;
+    }
+
     EReturn TaskMap::initialise(const rapidjson::Value& a)
     {
         ERROR("This has to be implemented in the derived class!");

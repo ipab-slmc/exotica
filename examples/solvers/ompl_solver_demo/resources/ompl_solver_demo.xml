@@ -46,10 +46,22 @@
       </EndEffector>
     </Map>
 
+    <Map type="Identity" name="ConfigurationSpaceGoal">
+      <Scene name="TestScene"/>
+      <Ref>-0.134914   -0.229508   -0.124971     1.94267 -1.4921e-17           0           0</Ref>
+    </Map>
+
     <Task name="LeftHandPosition" type="TaskTerminationCriterion">
       <map name="LeftHandPositionMap"/>
       <Rho>1.0</Rho>
       <Goal>0.4 -0.1 0.5</Goal>
+      <Threshold>1e-2</Threshold>
+    </Task>
+
+    <Task name="ConfigurationSpaceGoal" type="TaskTerminationCriterion">
+      <map name="ConfigurationSpaceGoal"/>
+      <Rho>1.0</Rho>
+      <Goal>0 0 0 0 0 0 0</Goal>
       <Threshold>1e-2</Threshold>
     </Task>
   </OMPLProblem>

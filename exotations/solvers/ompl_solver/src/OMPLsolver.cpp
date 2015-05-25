@@ -133,22 +133,7 @@ namespace exotica
 
 	ompl::base::GoalPtr OMPLsolver::constructGoal()
 	{
-		return ob::GoalPtr(new OMPLGoal(ompl_simple_setup_->getSpaceInformation(), prob_));
-
-		std::vector<ob::GoalPtr> goals;
-
-		//ompl::base::SpaceInformationPtr spi(new ompl::base::SpaceInformation(boost::static_pointer_cast<ompl::base::StateSpace>(state_space_)));
-		ob::GoalPtr g = ob::GoalPtr(new OMPLGoal(ompl_simple_setup_->getSpaceInformation(), prob_));
-		//ob::GoalPtr g = ob::GoalPtr(new OMPLGoalSampler(ompl_simple_setup_->getSpaceInformation(), prob_, shared_from_this()));
-		goals.push_back(g);
-
-		if (!goals.empty())
-			return ompl::base::GoalPtr(new OMPLGoalUnion(goals));
-		//return goals.size() == 1 ? goals[0] : ompl::base::GoalPtr(new OMPLGoalUnion(goals));
-		else
-			logError("Unable to construct goal representation");
-
-		return ob::GoalPtr();
+        return ob::GoalPtr((OMPLGoal*)new OMPLGoalSampler(ompl_simple_setup_->getSpaceInformation(), prob_));
 	}
 
 	void OMPLsolver::startSampling()
@@ -330,8 +315,8 @@ namespace exotica
 
 		ob::GoalPtr goal = constructGoal();
 		if (goal)
-		{
-			ompl_simple_setup_->setGoal(goal);
+        {
+            ompl_simple_setup_->setGoal(goal);
 			INFO("Goal has been set");
 
 			ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(this)));

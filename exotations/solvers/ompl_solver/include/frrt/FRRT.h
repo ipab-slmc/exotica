@@ -126,12 +126,15 @@ namespace ompl
 						 * \brief	Constructor
 						 */
 						Motion() :
-								state(NULL), parent(NULL), global_valid_(true)
+								state(NULL), inter_state(NULL), parent(NULL), global_valid_(true)
 						{
 						}
 
 						Motion(const base::SpaceInformationPtr &si) :
-								state(si->allocState()), parent(NULL), global_valid_(true)
+										state(si->allocState()),
+										inter_state(NULL),
+										parent(NULL),
+										global_valid_(true)
 						{
 
 						}
@@ -154,6 +157,8 @@ namespace ompl
 						}
 						///	The OMPL state
 						base::State *state;
+						///	Internal state
+						base::State *inter_state;
 						///	The parent node
 						Motion *parent;
 						///	The internal flexible path
@@ -193,7 +198,7 @@ namespace ompl
 
 			private:
 				///	Local solver
-				bool localSolve(Motion *sm, Motion *gm, LocalMode mode);
+				bool localSolve(Motion *sm, base::State *is, Motion *gm, LocalMode mode);
 
 				exotica::IKsolver_ptr local_solver_;
 

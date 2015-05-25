@@ -97,6 +97,12 @@ namespace exotica
 				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution, timeout_
 						- planning_time_.toSec());
 				planning_time_ = ros::Time::now() - startTime;
+				ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());
+				ompl_simple_setup_->getPlanner()->getPlannerData(data);
+
+				succ_cnt_++;
+//				result_file_ << succ_cnt_ << " " << planning_time_.toSec() << " " << data.numVertices() << std::endl;
+//				HIGHLIGHT_NAMED("OMPLBenchmarking", "Success No "<<succ_cnt_<<", Time: "<<planning_time_.toSec()<<", Nodes: "<<data.numVertices());
 				return SUCCESS;
 			}
 			else
@@ -287,6 +293,15 @@ namespace exotica
 				jnt_handle = jnt_handle.NextSiblingElement("joint");
 			}
 		}
+
+		std::string path = ros::package::getPath("ompl_solver") + "/result/result.txt";
+		result_file_.open(path);
+		if (!result_file_.is_open())
+		{
+			ERROR("Error open "<<path);
+			return FAILURE;
+		}
+		succ_cnt_ = 0;
 		return SUCCESS;
 	}
 
@@ -297,7 +312,7 @@ namespace exotica
 			ERROR("This solver can't use problem of type '" << pointer->type() << "'!");
 			return PAR_INV;
 		}
-        MotionSolver::specifyProblem(pointer);
+		MotionSolver::specifyProblem(pointer);
 		prob_ = boost::static_pointer_cast<OMPLProblem>(pointer);
 
 		for (auto & it : prob_->getScenes())

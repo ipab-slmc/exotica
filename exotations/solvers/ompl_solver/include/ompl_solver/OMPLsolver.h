@@ -16,8 +16,11 @@
 #include "ompl_solver/OMPLGoalSampler.h"
 #include "ompl_solver/OMPLProjection.h"
 #include <ompl/geometric/PathSimplifier.h>
+#include <ompl/base/DiscreteMotionValidator.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
+#include <ros/package.h>
+#include <fstream>
 namespace exotica
 {
 
@@ -185,6 +188,9 @@ namespace exotica
 			EParam<std_msgs::Bool> smooth_;
 
 			std::vector<std::string> projection_joints_;
+
+			std::ofstream result_file_;
+			int succ_cnt_;
 
 	};
 

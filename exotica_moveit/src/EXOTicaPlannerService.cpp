@@ -79,10 +79,14 @@ namespace exotica
 			INDICATE_FAILURE
 			return false;
 		}
-		HIGHLIGHT_NAMED("MoveitInterface", "Using Solver "<<solver_->object_name_<<"["<<solver_->type()<<"], Problem "<<problem_->object_name_<<"["<<problem_->type()<<"].");
+//		HIGHLIGHT_NAMED("MoveitInterface", "Using Solver "<<solver_->object_name_<<"["<<solver_->type()<<"], Problem "<<problem_->object_name_<<"["<<problem_->type()<<"].");
 		if (solver_->type().compare("exotica::OMPLsolver") == 0)
 		{
 			exotica::OMPLsolver_ptr ss = boost::static_pointer_cast<exotica::OMPLsolver>(solver_);
+
+			Eigen::VectorXd qT;
+			exotica::vectorExoticaToEigen(goal->qT, qT);
+			(*boost::static_pointer_cast<exotica::TaskTerminationCriterion>(ss->getProblem()->getTaskDefinitions().at("Goal"))->getGoal(0).get())=qT;
 			ss->setMaxPlanningTime(goal->max_time_);
 			if (!ok(ss->resetIfNeeded()))
 			{
@@ -103,16 +107,17 @@ namespace exotica
 		}
 		else
 			found = solver_->Solve(q0, solution);
+
 		if (ok(found))
 		{
+			std::cout<<"Sol \n"<<solution<<std::endl;
 			res_.succeeded_ = true;
 			fb_.solving_time_ = res_.planning_time_ =
 					ros::Duration(ros::Time::now() - start).toSec();
 			exotica::matrixEigenToExotica(solution, res_.solution_);
 			as_.setSucceeded(res_);
-			return true;
 		}
-		return false;
+		return res_.succeeded_;
 	}
 }
 

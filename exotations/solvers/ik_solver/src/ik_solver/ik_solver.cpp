@@ -296,6 +296,7 @@ namespace exotica
 			{
 				if (ok(prob_->update(solution.row(0), t)))
 				{
+
 					vel_solve(error, t, solution.row(0));
 					double max_vel = vel_vec_.cwiseAbs().maxCoeff();
 					if (max_vel > maxstep_->data)
@@ -316,6 +317,11 @@ namespace exotica
 						if (change < local_minima_threshold_->data)
 						{
 							WARNING_NAMED(object_name_, "Running into local minima");
+
+							std::cout<<"Global:\n"<<* prob_->getTaskMaps().at("EffPositionMap")->jac_[0].get()<<std::endl;
+							std::cout<<"Local:\n"<<* prob_->getTaskMaps().at("CSpaceMap")->jac_[0].get()<<std::endl;
+							std::cout<<"Collision:\n"<<* prob_->getTaskMaps().at("CollisionAvoidanceMap")->jac_[0].get()<<std::endl;
+							getchar();
 							return FAILURE;
 						}
 					}
@@ -330,12 +336,12 @@ namespace exotica
 			{
 				solution.resize(i + 1, size_);
 				solution = tmp.block(0, 0, i + 1, size_);
-				INFO_NAMED(object_name_, "IK solution found in "<<i<<" iterations");
+//				INFO_NAMED(object_name_, "IK solution found in "<<i<<" iterations");
 				return SUCCESS;
 			}
 			else
 			{
-				WARNING_NAMED(object_name_, "Solution not found after reaching max number of iterations, with error "<<error);
+//				WARNING_NAMED(object_name_, "Solution not found after reaching max number of iterations, with error "<<error);
 				return FAILURE;
 			}
 		}
@@ -361,8 +367,7 @@ namespace exotica
 				cur_rows += dim.at(t)(i);
 			}
 			task_error = goal.at(t) - phi.at(t);
-//			ROS_INFO_STREAM("Goal "<<goal.at(t).transpose());
-//			ROS_INFO_STREAM("Phi  "<<phi.at(t).transpose());
+			std::cout<<"BIG :\n"<<task_weights * big_jacobian.at(t)<<std::endl;
 			err = (task_weights * task_error).squaredNorm();
 			// Compute velocity
 			Eigen::MatrixXd Jpinv;

@@ -16,6 +16,8 @@
   </OMPLsolver>
 
   <OMPLProblem name="OMPLProblem">
+    <PlroblemType>Goals</PlroblemType> <!-- Optional -->
+
     <Scene name="TestScene">
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
@@ -36,33 +38,51 @@
       <PlanningMode>Sampling</PlanningMode>
     </Scene>
 
-    <Map type="EffPosition" name="LeftHandPositionMap">
+    <Map type="Identity" name="ConfigurationSpaceGoal">
       <Scene name="TestScene"/>
-      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
-          <limb segment="lwr_arm_7_link">
-            <vector>0.0 0.0 0.0</vector>
-            <quaternion>1.0 0.0 0.0 0.0</quaternion>
-          </limb>
-      </EndEffector>
+      <Ref>-0.134914   -0.229508   -0.124971     1.94267 -1.4921e-17           0           0</Ref>
     </Map>
+
+    <Task name="ConfigurationSpaceGoal" type="TaskTerminationCriterion">
+      <map name="ConfigurationSpaceGoal"/>
+      <Rho>1.0</Rho>
+      <Goal>0 0 0 0 0 0 0</Goal>
+      <Threshold>1e-6</Threshold>
+    </Task>
+  </OMPLProblem>
+
+
+  <OMPLProblem name="OMPLGoalBias">
+    <PlroblemType>SamplingBias</PlroblemType>
+    <Scene name="TestScene">
+      <Kinematica>
+        <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
+        <Root segment="base"> <!-- Optional: The root segment to use: xyz -->
+          <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
+          <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
+        </Root>
+        <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="lwr_arm_0_joint"/>
+          <joint name="lwr_arm_1_joint"/>
+          <joint name="lwr_arm_2_joint"/>
+          <joint name="lwr_arm_3_joint"/>
+          <joint name="lwr_arm_4_joint"/>
+          <joint name="lwr_arm_5_joint"/>
+          <joint name="lwr_arm_6_joint"/>
+        </Update>
+      </Kinematica>
+      <PlanningMode>Sampling</PlanningMode>
+    </Scene>
 
     <Map type="Identity" name="ConfigurationSpaceGoal">
       <Scene name="TestScene"/>
       <Ref>-0.134914   -0.229508   -0.124971     1.94267 -1.4921e-17           0           0</Ref>
     </Map>
 
-    <Task name="LeftHandPosition" type="TaskTerminationCriterion">
-      <map name="LeftHandPositionMap"/>
-      <Rho>1.0</Rho>
-      <Goal>0.4 -0.1 0.5</Goal>
-      <Threshold>1e-2</Threshold>
-    </Task>
-
-    <Task name="ConfigurationSpaceGoal" type="TaskTerminationCriterion">
+    <Task name="ConfigurationSpaceGoal" type="TaskBias">
       <map name="ConfigurationSpaceGoal"/>
       <Rho>1.0</Rho>
       <Goal>0 0 0 0 0 0 0</Goal>
-      <Threshold>1e-2</Threshold>
     </Task>
   </OMPLProblem>
 </ExampleConfiguration>

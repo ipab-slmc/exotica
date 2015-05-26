@@ -133,7 +133,7 @@ namespace exotica
 
 	ompl::base::GoalPtr OMPLsolver::constructGoal()
 	{
-        return ob::GoalPtr((OMPLGoal*)new OMPLGoalSampler(ompl_simple_setup_->getSpaceInformation(), prob_));
+		return ob::GoalPtr((OMPLGoal*) new OMPLGoalSampler(ompl_simple_setup_->getSpaceInformation(), prob_));
 	}
 
 	void OMPLsolver::startSampling()
@@ -179,6 +179,7 @@ namespace exotica
 			planner->clear();
 		//startSampling();
 		ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
+		ompl_simple_setup_->setGoal(constructGoal());
 	}
 
 	void OMPLsolver::postSolve()
@@ -231,6 +232,12 @@ namespace exotica
 		convertPath(pg, traj);
 
 		return SUCCESS;
+	}
+
+	void OMPLsolver::getOriginalSolution(Eigen::MatrixXd & orig)
+	{
+		orig.resize(original_solution_.rows(), original_solution_.cols());
+		orig = original_solution_;
 	}
 
 	EReturn OMPLsolver::initDerived(tinyxml2::XMLHandle & handle)
@@ -315,8 +322,8 @@ namespace exotica
 
 		ob::GoalPtr goal = constructGoal();
 		if (goal)
-        {
-            ompl_simple_setup_->setGoal(goal);
+		{
+			ompl_simple_setup_->setGoal(goal);
 			INFO("Goal has been set");
 
 			ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(this)));
@@ -382,7 +389,8 @@ namespace exotica
 	{
 		if (selected_planner_.compare("geometric::FRRT") == 0)
 		{
-			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->resetScene(prob_->scenes_.begin()->second))
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
+					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
 			{
 				INDICATE_FAILURE
 				return FAILURE;

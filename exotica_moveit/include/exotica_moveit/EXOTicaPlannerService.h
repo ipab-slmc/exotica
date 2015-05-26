@@ -12,6 +12,7 @@
 #include <ompl_solver/OMPLsolver.h>
 #include <ik_solver/ik_solver.h>
 #include <exotica/Initialiser.h>
+#include <generic/Identity.h>
 #include <exotica_moveit/ExoticaPlanningAction.h>
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/server/simple_action_server.h>

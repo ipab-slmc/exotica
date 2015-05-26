@@ -65,6 +65,9 @@ namespace exotica
 			//	Safety range
 			EParam<std_msgs::Float64> safe_range_;
 
+			//	Indicate clear, true if current state has no obstacle in the safe range
+			EParam<std_msgs::Bool> isClear_;
+
 			//	End-effector names
 			std::vector<std::string> effs_;
 

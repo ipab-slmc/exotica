@@ -78,6 +78,7 @@ namespace ompl
 			nn_->clear();
 			checkValidity();
 			base::Goal *goal = pdef_->getGoal().get();
+			base::GoalSampleableRegion *goal_s = dynamic_cast<base::GoalSampleableRegion*>(goal);
 			Motion *init_motion = NULL;
 			while (const base::State *st = pis_.nextStart())
 			{
@@ -108,13 +109,6 @@ namespace ompl
 				try_cnt_[i] = suc_cnt_[i] = 0;
 
 			///Lets do it clean and nice !!!!!!!
-//			Motion *goal_motion = new Motion(si_);
-//			//	First get a goal motion
-//			if (!localSolve(init_motion, goal_motion, GOAL_SAMPLER))
-//			{
-//				OMPL_ERROR("Can not get goal motion");
-//				return base::PlannerStatus::INVALID_START;
-//			}
 			bool newTry = true;
 			Motion *start_motion = init_motion;
 			while (ptc == false)
@@ -125,7 +119,9 @@ namespace ompl
 				{
 					newTry = false;
 					try_cnt_[0]++;
-					if (localSolve(start_motion, NULL, new_motion, GLOBAL))
+					local_map_->jointRef = global_goal_;
+					local_solver_->getProblem()->setTau(1e-10);
+					if (localSolve(start_motion, NULL, new_motion))
 					{
 						suc_cnt_[0]++;
 						new_motion->parent = start_motion;
@@ -153,7 +149,14 @@ namespace ompl
 					bool r_ok = false;
 					do
 					{
-						sampler_->sampleUniform(new_motion->state);
+						if (goal_s && rng_.uniform01() < goalBias_ && goal_s->canSample())
+						{
+							goal_s->sampleGoal(new_motion->state);
+						}
+						else
+						{
+							sampler_->sampleUniform(new_motion->state);
+						}
 						r_ok = si_->getStateValidityChecker()->isValid(new_motion->state);
 					}
 					while (!r_ok && ptc == false);
@@ -168,7 +171,7 @@ namespace ompl
 
 					///	Do a regular line segment check
 					ompl::base::State *last_valid_state = si_->allocState();
-					si_->copyState(last_valid_state,near_motion->state);
+					si_->copyState(last_valid_state, near_motion->state);
 					std::pair<ompl::base::State*, double> last_valid(last_valid_state, 0);
 					try_cnt_[2]++;
 					if (si_->checkMotion(near_motion->state, new_motion->state, last_valid))
@@ -181,16 +184,17 @@ namespace ompl
 					///	Do a local try
 					else
 					{
-						if(last_valid.second==0)
-							last_valid_state=NULL;
+						if (last_valid.second == 0)
+							last_valid_state = NULL;
 						try_cnt_[1]++;
 						///	Set local solver goal
 						Eigen::VectorXd eigen_g((int) si_->getStateDimension());
 						memcpy(eigen_g.data(), new_motion->state->as<
 								ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
 								* eigen_g.rows());
-						local_solver_->setGoal("LocalTask", eigen_g, 0);
-						if (localSolve(near_motion, last_valid_state, new_motion, LOCAL))
+						local_map_->jointRef = eigen_g;
+						local_solver_->getProblem()->setTau(1e-2);
+						if (localSolve(near_motion, last_valid_state, new_motion))
 						{
 							suc_cnt_[1]++;
 							new_motion->parent = near_motion;
@@ -225,7 +229,7 @@ namespace ompl
 									* (int) si_->getStateDimension());
 							mpath.push_back(local_motion);
 						}
-						if(solution->inter_state != NULL)
+						if (solution->inter_state != NULL)
 						{
 							Motion *local_motion = new Motion(si_);
 							si_->copyState(local_motion->state, solution->inter_state);
@@ -306,26 +310,27 @@ namespace ompl
 				ERROR("Missing XML tag of 'LocalTask'");
 				return false;
 			}
-			if (prob->getTaskDefinitions().find("GlobalTask") == prob->getTaskDefinitions().end())
+			if (prob->getTaskMaps().find("CSpaceMap") == prob->getTaskMaps().end())
 			{
-				ERROR("Missing XML tag of 'GlobalTask'");
+				ERROR("Missing XML tag of 'CSpaceMap'");
 				return false;
 			}
 			local_task_ =
 					boost::static_pointer_cast<exotica::TaskSqrError>(prob->getTaskDefinitions().at("LocalTask"));
-			global_task_ =
-					boost::static_pointer_cast<exotica::TaskSqrError>(prob->getTaskDefinitions().at("GlobalTask"));
+			local_map_ =
+					boost::static_pointer_cast<exotica::Identity>(prob->getTaskMaps().at("CSpaceMap"));
 			collision_task_ =
 					boost::static_pointer_cast<exotica::TaskSqrError>(prob->getTaskDefinitions().at("CollisionAvoidanceTask"));
 
-			init_rho_[0] = global_task_->getRho(0);
-			init_rho_[1] = local_task_->getRho(0);
-			init_rho_[2] = collision_task_->getRho(0);
+			init_rho_[0] = local_task_->getRho(0);
+			init_rho_[1] = collision_task_->getRho(0);
 			return true;
 		}
 
-		bool FRRT::resetScene(const exotica::Scene_ptr & scene)
+		bool FRRT::resetSceneAndGoal(const exotica::Scene_ptr & scene, const Eigen::VectorXd & goal)
 		{
+			global_goal_.setZero(goal.size());
+			global_goal_ = goal;
 			if (!ok(local_solver_->getProblem()->setScene(scene->getPlanningScene())))
 			{
 				INDICATE_FAILURE
@@ -334,12 +339,8 @@ namespace ompl
 			return true;
 		}
 
-		bool FRRT::localSolve(Motion *sm, base::State *is, Motion *gm, LocalMode mode)
+		bool FRRT::localSolve(Motion *sm, base::State *is, Motion *gm)
 		{
-			local_solver_->setRho("GlobalTask",
-					(mode == GLOBAL || mode == GOAL_SAMPLER) ? init_rho_[0] : 0);
-			local_solver_->setRho("LocalTask", (mode == LOCAL) ? init_rho_[1] : 0);
-			local_solver_->setRho("LocalTask", (mode == GOAL_SAMPLER) ? init_rho_[2] : 0);
 			int dim = (int) si_->getStateDimension();
 			Eigen::VectorXd qs(dim), qg(dim);
 			memcpy(qs.data(),

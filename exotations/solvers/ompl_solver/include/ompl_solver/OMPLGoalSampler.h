@@ -13,6 +13,7 @@
 #include "ompl_solver/OMPLsolver.h"
 #include "ompl_solver/OMPLProblem.h"
 #include "ompl_solver/OMPLGoal.h"
+#include "generic/Identity.h"
 
 namespace exotica
 {
@@ -31,12 +32,14 @@ namespace exotica
             virtual unsigned int maxSampleCount() const ;
             virtual double distanceGoal(const ompl::base::State *st) const;
 
+            EReturn resetGoalRef();
         private:
 
 			OMPLProblem_ptr prob_;
 			boost::shared_ptr<OMPLsolver> sol_;
 			ompl::base::StateSamplerPtr                      default_sampler_;
             ompl::base::State *goalState_;
+            boost::shared_ptr<Identity> taskI_;
 
 	};
 	typedef boost::shared_ptr<exotica::OMPLGoalSampler> OMPLGoalSampler_ptr;

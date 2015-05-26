@@ -34,6 +34,7 @@ namespace exotica
 			 * @return	tolerance
 			 */
 			double getTau();
+			void setTau(double tau);
 
             virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
 		protected:

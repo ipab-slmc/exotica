@@ -39,8 +39,12 @@ namespace exotica
 	{
 		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("SafetyRange");
 		server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, safe_range_);
+
 		tmp_handle = handle.FirstChildElement("SelfCollision");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, self_);
+
+		tmp_handle = handle.FirstChildElement("IndicateClear");
+		server_->registerParam<std_msgs::Bool>(server_->getName(), tmp_handle, isClear_);
 
 		tmp_handle = handle.FirstChildElement("HardConstrain");
 		if (!ok(server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, hard_)))
@@ -133,6 +137,7 @@ namespace exotica
 				obj->setTransform(obs_in_base_tf_);
 			}
 		}
+		isClear_->data = true;
 		for (int i = 0; i < M; i++)
 		{
 			Eigen::Vector3d tmp1, tmp2;
@@ -140,6 +145,7 @@ namespace exotica
 			//	Compute Phi
 			if (dists[i] <= 0)
 			{
+				isClear_->data = false;
 				WARNING_NAMED(object_name_, "Robot link " << effs_[i] << " is in collision");
 				//	In hard constrain mode, collision == FAILURE
 				if (hard_->data)
@@ -154,6 +160,7 @@ namespace exotica
 			}
 			else
 			{
+				isClear_->data = false;
 				costs[i] = (1.0 - dists[i] / safe_range_->data);
 			}
 			PHI(0) = PHI(0) + costs[i] * costs[i];

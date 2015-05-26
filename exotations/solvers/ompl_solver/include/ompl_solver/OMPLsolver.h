@@ -89,6 +89,7 @@ namespace exotica
 			EReturn resetIfNeeded();
 			ros::Duration planning_time_;
 
+			void getOriginalSolution(Eigen::MatrixXd & orig);
 		protected:
 			/**
 			 * \brief Registers default planners
@@ -186,6 +187,9 @@ namespace exotica
 
 			/// \brief	Indicate if trajectory smoother is required
 			EParam<std_msgs::Bool> smooth_;
+
+			///	\brief	View original solution before trajectory smoothness
+			Eigen::MatrixXd original_solution_;
 
 			std::vector<std::string> projection_joints_;
 

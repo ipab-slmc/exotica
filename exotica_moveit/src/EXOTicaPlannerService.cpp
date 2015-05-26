@@ -86,7 +86,7 @@ namespace exotica
 
 			Eigen::VectorXd qT;
 			exotica::vectorExoticaToEigen(goal->qT, qT);
-			(*boost::static_pointer_cast<exotica::TaskTerminationCriterion>(ss->getProblem()->getTaskDefinitions().at("Goal"))->getGoal(0).get())=qT;
+			boost::static_pointer_cast<exotica::Identity>(ss->getProblem()->getTaskMaps().at("CSpaceGoalMap"))->jointRef=qT;
 			ss->setMaxPlanningTime(goal->max_time_);
 			if (!ok(ss->resetIfNeeded()))
 			{
@@ -110,7 +110,6 @@ namespace exotica
 
 		if (ok(found))
 		{
-			std::cout<<"Sol \n"<<solution<<std::endl;
 			res_.succeeded_ = true;
 			fb_.solving_time_ = res_.planning_time_ =
 					ros::Duration(ros::Time::now() - start).toSec();

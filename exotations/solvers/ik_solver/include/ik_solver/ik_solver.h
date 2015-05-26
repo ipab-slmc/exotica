@@ -11,6 +11,7 @@
 #include <exotica/EXOTica.hpp>
 #include <ik_solver/ik_problem.h>
 #include <task_definition/TaskSqrError.h>
+#include <generic/Identity.h>
 #include <iostream>
 #include <fstream>
 
@@ -92,6 +93,7 @@ namespace exotica
 			IKProblem_ptr prob_; // Shared pointer to the planning problem.
 			EParam<std_msgs::Int64> maxit_;	// Maximum iteration
 			EParam<std_msgs::Float64> maxstep_;	// Maximum step
+			EParam<std_msgs::Bool> multi_task_;
 			std::map<std::string, std::pair<int, int> > taskIndex;
 
 			std::vector<Eigen::VectorXd> rhos;
@@ -101,8 +103,13 @@ namespace exotica
 			std::vector<Eigen::VectorXi> dim;
 
 			Eigen::DiagonalMatrix<double, Eigen::Dynamic> task_weights; //!< Weight Matrices
+			std::vector<Eigen::MatrixXd> weights;
 			Eigen::VectorXd vel_vec_;	//Velocity vector
 			Eigen::VectorXd task_error; //!< Task Error vector for the current optimisation level
+			std::vector<Eigen::MatrixXd> JTCinv_;
+			Eigen::MatrixXd JTCinvJ_;
+			Eigen::MatrixXd JTCinvdy_;
+			TaskDefinition_map tasks_;
 			int maxdim_;
 			int size_;	//Configuration size
 			Eigen::MatrixXd inv_jacobian;
@@ -110,7 +117,11 @@ namespace exotica
 
 			int T;
 			bool initialised_;
+
+			///	For FRRT debug
 			EParam<std_msgs::Float64> local_minima_threshold_;
+			ros::Publisher jac_pub_;
+			visualization_msgs::MarkerArray jac_arr_;
 	};
 	typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

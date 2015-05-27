@@ -27,6 +27,9 @@
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit/robot_state/conversions.h>
+
+#include <geometric_shapes/mesh_operations.h>
+#include <geometric_shapes/shape_operations.h>
 namespace exotica
 {
 	typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;

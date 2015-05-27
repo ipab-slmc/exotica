@@ -14,7 +14,7 @@ REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver);
 namespace exotica
 {
 	IKsolver::IKsolver() :
-            size_(0), T(0), initialised_(false)
+			size_(0), T(0), initialised_(false)
 	{
 		//TODO
 	}
@@ -34,7 +34,28 @@ namespace exotica
 			server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, maxstep_);
 			tmp_handle = handle.FirstChildElement("LocalMinimaThreshold");
 			server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, local_minima_threshold_);
+			tmp_handle = handle.FirstChildElement("MultiTaskMode");
+			server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, multi_task_);
 
+			jac_pub_ = server_->advertise<visualization_msgs::MarkerArray>("JacobianVector", 1);
+			jac_arr_.markers.resize(2);
+			jac_arr_.markers[0].type = visualization_msgs::Marker::ARROW;
+			jac_arr_.markers[1].type = visualization_msgs::Marker::ARROW;
+			jac_arr_.markers[0].header.frame_id = "base";
+			jac_arr_.markers[1].header.frame_id = "base";
+			jac_arr_.markers[0].id = 0;
+			jac_arr_.markers[1].id = 1;
+			jac_arr_.markers[0].color.r = 1;
+			jac_arr_.markers[0].color.a = 1;
+			jac_arr_.markers[1].color.g = 1;
+			jac_arr_.markers[1].color.a = 1;
+
+			jac_arr_.markers[0].scale.x = 0.015;
+			jac_arr_.markers[0].scale.y = 0.04;
+			jac_arr_.markers[0].scale.z = 0.04;
+			jac_arr_.markers[1].scale.x = 0.015;
+			jac_arr_.markers[1].scale.y = 0.04;
+			jac_arr_.markers[1].scale.z = 0.04;
 		}
 		catch (int e)
 		{
@@ -54,7 +75,7 @@ namespace exotica
 			ERROR("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
 			return PAR_INV;
 		}
-        MotionSolver::specifyProblem(pointer);
+		MotionSolver::specifyProblem(pointer);
 		prob_ = boost::static_pointer_cast<IKProblem>(pointer);
 		size_ = prob_->getScenes().begin()->second->getNumJoints();
 		for (auto & it : prob_->getScenes())
@@ -100,6 +121,7 @@ namespace exotica
 
 			big_jacobian.at(t).resize(big_size, size_);
 			task_weights.resize(big_size);
+			weights.resize(prob_->getTaskDefinitions().size());
 			phi.at(t).resize(big_size);
 			goal.at(t).resize(big_size);
 			task_error.resize(big_size, 1);
@@ -115,7 +137,10 @@ namespace exotica
 				task->setDefaultGoals(t);
 				task->registerPhi(Eigen::VectorXdRef_ptr(phi.at(t).segment(cur_rows, dim.at(t)(i))), t);
 				task->registerJacobian(Eigen::MatrixXdRef_ptr(big_jacobian.at(t).block(cur_rows, 0, dim.at(t)(i), size_)), t);
+
 				task_weights.diagonal().block(cur_rows, 0, dim.at(t)(i), 1).setConstant(rhos.at(t)(i));
+				weights[i].resize(dim.at(t)(i), dim.at(t)(i));
+				weights[i].diagonal() = task_weights.diagonal().block(cur_rows, 0, dim.at(t)(i), 1);
 				if (t == 0)
 				{
 					taskIndex[it.first] = std::pair<int, int>(i, cur_rows);
@@ -124,6 +149,10 @@ namespace exotica
 				i++;
 			}
 		}
+		tasks_ = prob_->getTaskDefinitions();
+		JTCinv_.resize(tasks_.size());
+		JTCinvJ_.resize(size_, size_);
+		JTCinvdy_.resize(size_, size_);
 		initialised_ = true;
 		return SUCCESS;
 	}
@@ -283,6 +312,7 @@ namespace exotica
 		int t = 0;
 		if (initialised_)
 		{
+			ros::Time start = ros::Time::now();
 			vel_vec_.resize(size_);
 			Eigen::MatrixXd tmp(maxit_->data, size_);
 			solution.resize(1, size_);
@@ -296,7 +326,13 @@ namespace exotica
 			{
 				if (ok(prob_->update(solution.row(0), t)))
 				{
+
 					vel_solve(error, t, solution.row(0));
+					if (vel_vec_ != vel_vec_)
+					{
+						INDICATE_FAILURE
+						return FAILURE;
+					}
 					double max_vel = vel_vec_.cwiseAbs().maxCoeff();
 					if (max_vel > maxstep_->data)
 					{
@@ -312,10 +348,9 @@ namespace exotica
 					else if (error > 3 * prob_->getTau())
 					{
 						double change = (tmp.row(i + 1) - tmp.row(i)).norm();
-//						ROS_ERROR_STREAM("Change "<<change);
 						if (change < local_minima_threshold_->data)
 						{
-							WARNING_NAMED(object_name_, "Running into local minima");
+							WARNING_NAMED(object_name_, "Running into local minima with velocity "<<change);
 							return FAILURE;
 						}
 					}
@@ -324,25 +359,27 @@ namespace exotica
 				{
 					return FAILURE;
 				}
+//				std::cout << "BIG "<<i<<" :\n" << task_weights * big_jacobian.at(t) << std::endl;
+//				std::cout << "Phi: "<<phi.at(t).transpose() << std::endl;
+//				getchar();
 			}
 
 			if (found)
 			{
 				solution.resize(i + 1, size_);
 				solution = tmp.block(0, 0, i + 1, size_);
-				INFO_NAMED(object_name_, "IK solution found in "<<i<<" iterations");
+				INFO_NAMED(object_name_, "IK solution found in "<<ros::Duration(ros::Time::now()-start).toSec()<<"sec");
 				return SUCCESS;
 			}
 			else
 			{
-				WARNING_NAMED(object_name_, "Solution not found after reaching max number of iterations, with error "<<error);
+				WARNING_NAMED(object_name_, "Solution not found after reaching max number of iterations, with error "<<error<<" ("<<ros::Duration(ros::Time::now()-start).toSec()<<"sec)");
 				return FAILURE;
 			}
 		}
 		else
 		{
 			INDICATE_FAILURE
-			;
 			return FAILURE;
 		}
 	}
@@ -354,25 +391,64 @@ namespace exotica
 		if (initialised_)
 		{
 			vel_vec_.setZero();
-			int cur_rows = 0;
-			for (int i = 0; i < dim.at(t).rows(); i++)
-			{
-				task_weights.diagonal().block(cur_rows, 0, dim.at(t)(i), 1).setConstant(rhos.at(t)(i));
-				cur_rows += dim.at(t)(i);
-			}
 			task_error = goal.at(t) - phi.at(t);
-//			ROS_INFO_STREAM("Goal "<<goal.at(t).transpose());
-//			ROS_INFO_STREAM("Phi  "<<phi.at(t).transpose());
 			err = (task_weights * task_error).squaredNorm();
-			// Compute velocity
-			Eigen::MatrixXd Jpinv;
-			Jpinv = (big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t)
-					+ prob_->getW()).inverse() * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C
-			//Jpinv = (prob_->getW()+ I*1e-3) * big_jacobian.at(t).transpose()
-			//        * (big_jacobian.at(t).transpose() * (prob_->getW()+ I*1e-3) * big_jacobian.at(t) + task_weights ).inverse();
-			//W*Jt*(Jt*W*J+C)
 
-			vel_vec_ = Jpinv * task_error;
+			if (!multi_task_->data)
+			{
+				// Compute velocity
+				Eigen::MatrixXd Jpinv;
+				Jpinv = (big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t)
+						+ prob_->getW()).inverse() * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C
+				if (Jpinv != Jpinv)
+				{
+					INDICATE_FAILURE
+					return FAILURE;
+				}
+				vel_vec_ = Jpinv * task_error;
+			}
+			else
+			{
+				int i = 0;
+				JTCinvJ_.setZero();
+				JTCinvdy_.setZero();
+//				Eigen::VectorXd ref =
+//						boost::static_pointer_cast<exotica::Identity>(prob_->getTaskMaps().at("CSpaceMap"))->jointRef;
+//				geometry_msgs::Point robot;
+//				robot.x = ref(0) + phi.at(t)(1);
+//				robot.y = ref(1) + phi.at(t)(2);
+//				jac_arr_.markers[0].header.stamp = jac_arr_.markers[1].header.stamp =
+//						ros::Time::now();
+//				jac_arr_.markers[0].points.resize(2);
+//				jac_arr_.markers[1].points.resize(2);
+//				jac_arr_.markers[0].points[0] = jac_arr_.markers[0].points[1] =
+//						jac_arr_.markers[1].points[0] = jac_arr_.markers[1].points[1] = robot;
+				for (auto & it : tasks_)
+				{
+					JTCinv_[i] = it.second->getTaskMap()->jac_.at(t)->transpose() * weights[i];
+
+					std::pair<int, int> id = taskIndex.at(it.first);
+					Eigen::MatrixXd tmp_JTCinvJ = JTCinv_[i]
+							* (*(it.second->getTaskMap()->jac_.at(t)));
+					Eigen::MatrixXd tmp_JTCinvdy = JTCinv_[i]
+							* (goal.at(t).segment(id.second, dim.at(t)(id.first))
+									- *(it.second->getTaskMap()->phi_.at(t)));
+					JTCinvJ_ += tmp_JTCinvJ;
+					JTCinvdy_ += tmp_JTCinvdy;
+
+//					Eigen::VectorXd tmpv(2);
+//					if (tmp_JTCinvJ.isZero())
+//						tmpv.setZero();
+//					else
+//						tmpv = (tmp_JTCinvJ).inverse() * tmp_JTCinvdy;
+//
+//					jac_arr_.markers[i].points[1].x += tmpv(0);
+//					jac_arr_.markers[i].points[1].y += tmpv(1);
+					i++;
+				}
+//				jac_pub_.publish(jac_arr_);
+				vel_vec_ = (JTCinvJ_ + prob_->getW()).inverse() * JTCinvdy_;
+			}
 			return SUCCESS;
 		}
 		else

@@ -14,7 +14,7 @@
   <IKsolver name="FRRTLocal">
     <MaxIt>100</MaxIt>
     <MaxStep>0.05</MaxStep>
-    <LocalMinimaThreshold>0</LocalMinimaThreshold>
+    <LocalMinimaThreshold>1e-10</LocalMinimaThreshold>
   </IKsolver>
 
   <IKProblem name="LocalProblem">
@@ -26,31 +26,39 @@
           <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
         </Root>
         <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
-          <joint name="WaistRotator"/> 
-          <joint name="WaistExtensor"/>
-          <joint name="WaistLateralExtensor"/> 
-          <joint name="LeftShoulderExtensor"/> 
-          <joint name="LeftShoulderAdductor"/>
-          <joint name="LeftShoulderSupinator"/>
-          <joint name="LeftElbowExtensor"/>	
-          <joint name="LeftForearmSupinator"/>	
-          <joint name="LeftWristExtensor"/>	
-          <joint name="LeftWrist"/>	
+          <joint name="WaistRotator" />
+          <joint name="WaistExtensor" />
+          <joint name="WaistLateralExtensor" />
+          <joint name="LeftShoulderExtensor" />
+          <joint name="LeftShoulderAdductor" />
+          <joint name="LeftShoulderSupinator" />
+          <joint name="LeftElbowExtensor" />
+          <joint name="LeftForearmSupinator" />
+          <joint name="LeftWristExtensor" />
+          <joint name="LeftWrist"/>
+          <joint name="RightShoulderExtensor" />
+          <joint name="RightShoulderAdductor" />
+          <joint name="RightShoulderSupinator" />
+          <joint name="RightElbowExtensor" />
+          <joint name="RightForearmSupinator" />
+          <joint name="RightWristExtensor" />
+          <joint name="RightWrist" />	
         </Update>
       </Kinematica>
-      <VisualDebug>1</VisualDebug>
+      <VisualDebug>0</VisualDebug>
       <PlanningMode>Optimization</PlanningMode>
     </Scene> 
     
     <Map type="Identity" name="CSpaceMap">
       <Scene name="LocalScene"/>
+      <Ref> 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Ref>
     </Map>
 
     <Task name="LocalTask" type="TaskSqrError">
       <map name="CSpaceMap"/>
-      <Rho>1e3</Rho>
+      <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal> 0 0 0 0 0 0 0 </Goal>
+      <Goal> 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task>
    
     <Map type="CollisionAvoidance" name="CollisionAvoidanceMap">
@@ -64,10 +72,29 @@
 	  <limb segment="LeftElbowExtensor"></limb>
 	  <limb segment="LeftForearm"></limb>
 	  <limb segment="LeftPalm"></limb>
+	  <limb segment="RightShoulderExtensor"></limb>
+	  <limb segment="RightShoulderAdductor"></limb>
+	  <limb segment="RightShoulderRotator"></limb>
+	  <limb segment="RightElbowExtensor"></limb>
+	  <limb segment="RightForearm"></limb>
+	  <limb segment="RightPalm"></limb>
+
+	<limb segment="Pelvis"/>
+	<limb segment="LeftHipRotator"/>
+	<limb segment="LeftHipAdductor"/>
+	<limb segment="LeftLeg"/>
+	<limb segment="LeftShankStructure"/>
+	<limb segment="l_foot"/>
+	<limb segment="RightHipRotator"/>
+	<limb segment="RightHipAdductor"/>
+	<limb segment="RightLeg"/>
+	<limb segment="RightShankStructure"/>
+	<limb segment="r_foot"/>
       </EndEffector>
-      <SafetyRange>0.2</SafetyRange>
+      <SafetyRange>0.05</SafetyRange>
       <HardConstrain>1</HardConstrain>
       <SelfCollision>0</SelfCollision>
+      <VisualDebug>0</VisualDebug>
     </Map>
 
     <Task name="CollisionAvoidanceTask" type="TaskSqrError">
@@ -77,34 +104,16 @@
       <Goal>0.0</Goal>
     </Task>
 
-    <Map type="EffPosition" name="EffPositionMap">
-      <Scene name="LocalScene"/>
-      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
-          <limb segment="LeftPalm">
-            <vector>0.0 0.0 0.0</vector>
-            <quaternion>1.0 0.0 0.0 0.0</quaternion>
-          </limb>
-      </EndEffector>
-    </Map>
-    
-    <Task name="GlobalTask" type="TaskSqrError">
-      <map name="EffPositionMap"/>
-      <Rho>1e3</Rho>
-      <Weights dim="1">1.0</Weights>
-      <Goal>0.79 0.31 0.376</Goal>
-      <!-- Task Parameters -->
-    </Task>
-
     <Map type="JointLimit" name="JointLimitMap">
       <Scene name="LocalScene"/>
-      <SafePercentage>0.10</SafePercentage>
+      <SafePercentage>0.05</SafePercentage>
     </Map>
     <Task name="JointLimitTask" type="TaskSqrError">
       <map name="JointLimitMap"/>
-      <Rho>1</Rho>
-      <Goal>0 0 0 0 0 0 0 0 0 0</Goal>
+      <Rho>0</Rho>
+      <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task>
-    <Tolerance>1e-2</Tolerance> 
-    <W> 10 10 10 5 5 4 4 3 2 1</W>
+    <Tolerance>1e-5</Tolerance> 
+    <W> 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</W>
   </IKProblem>
 </ExampleConfiguration>

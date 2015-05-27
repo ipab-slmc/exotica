@@ -16,8 +16,11 @@
 #include "ompl_solver/OMPLGoalSampler.h"
 #include "ompl_solver/OMPLProjection.h"
 #include <ompl/geometric/PathSimplifier.h>
+#include <ompl/base/DiscreteMotionValidator.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
+#include <ros/package.h>
+#include <fstream>
 namespace exotica
 {
 
@@ -89,6 +92,7 @@ namespace exotica
 
             virtual std::string print(std::string prepend);
 
+			void getOriginalSolution(Eigen::MatrixXd & orig);
 		protected:
 			/**
 			 * \brief Registers default planners
@@ -190,7 +194,13 @@ namespace exotica
 			/// \brief	Indicate if trajectory smoother is required
 			EParam<std_msgs::Bool> smooth_;
 
+			///	\brief	View original solution before trajectory smoothness
+			Eigen::MatrixXd original_solution_;
+
 			std::vector<std::string> projection_joints_;
+
+			std::ofstream result_file_;
+			int succ_cnt_;
 
 	};
 

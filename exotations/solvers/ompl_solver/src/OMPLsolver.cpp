@@ -89,6 +89,11 @@ namespace exotica
 	{
 		ros::Time startTime = ros::Time::now();
 		finishedSolving_ = false;
+
+        ompl_simple_setup_->setGoal(constructGoal());
+        if (ompl_simple_setup_->getGoal())
+            ompl_simple_setup_->setup();
+
 		ompl::base::ScopedState<> ompl_start_state(state_space_);
 		if (ok(state_space_->copyToOMPLState(ompl_start_state.get(), q0)))
 		{
@@ -180,7 +185,6 @@ namespace exotica
         if (planner) planner->clear();
         startSampling();
 		ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
-		ompl_simple_setup_->setGoal(constructGoal());
 	}
 
 	void OMPLsolver::postSolve()
@@ -416,8 +420,7 @@ namespace exotica
 				HIGHLIGHT_NAMED(object_name_, " Using projection joints "<<tmp);
 			}
 		}
-		if (ompl_simple_setup_->getGoal())
-			ompl_simple_setup_->setup();
+
 		if (selected_planner_.compare("geometric::FRRT") == 0)
 		{
 			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);

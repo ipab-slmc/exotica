@@ -100,8 +100,19 @@ namespace exotica
 				trans_world_[obj_id_[i]] = std::vector<fcl::Transform3f>(0);
 				for (std::size_t j = 0; j < index_size; j++)
 				{
+					shapes::ShapeConstPtr tmp_shape;
+					if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type != shapes::MESH)
+						tmp_shape =
+								boost::shared_ptr<const shapes::Shape>(shapes::createMeshFromShape(tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
+					else
+						tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
+					if (!tmp_shape || !tmp_shape.get())
+					{
+						INDICATE_FAILURE
+						return FAILURE;
+					}
 					collision_detection::FCLGeometryConstPtr g =
-							collision_detection::createCollisionGeometry(tmp_world->getObject(obj_id_[i])->shapes_[j], tmp_world->getObject(obj_id_[i]).get());
+							collision_detection::createCollisionGeometry(tmp_shape, tmp_world->getObject(obj_id_[i]).get());
 					geo_world_.at(obj_id_[i]).push_back(g);
 					fcl::Transform3f pose(collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j]));
 					trans_world_.at(obj_id_[i]).push_back(pose);
@@ -457,71 +468,72 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef_ptr& phi, bool force)
-    {
-        LOCK(lock_);
-        if(kinematica_.getEffSize()==0)
-        {
-            phi=Eigen::VectorXdRef_ptr();
+	EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef_ptr& phi, bool force)
+	{
+		LOCK(lock_);
+		if (kinematica_.getEffSize() == 0)
+		{
+			phi = Eigen::VectorXdRef_ptr();
 
-        }
-        else
-        {
-            if(phi==NULL||force)
-            {
-                if (phis_.find(task) == phis_.end())
-                {
-                    INDICATE_FAILURE;
-                    return FAILURE;
-                }
-                phi = phis_.at(task);
-            }
-        }
-        return SUCCESS;
+		}
+		else
+		{
+			if (phi == NULL || force)
+			{
+				if (phis_.find(task) == phis_.end())
+				{
+					INDICATE_FAILURE
+					;
+					return FAILURE;
+				}
+				phi = phis_.at(task);
+			}
+		}
+		return SUCCESS;
 
-    }
+	}
 
 	EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef jac)
 	{
-        LOCK(lock_);
-        if (jacs_.find(task) == jacs_.end())
-        {
-            INDICATE_FAILURE
-            return FAILURE;
-        }
-        Eigen::Ref<Eigen::MatrixXd> J(*(jacs_.at(task)));
-        for(int r=0;r<jac.rows();r++)
-        {
-            for(int c=0;c<jac.cols();c++)
-            {
-                jac(r,c) = J(r,c);
-            }
-        }
+		LOCK(lock_);
+		if (jacs_.find(task) == jacs_.end())
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+		Eigen::Ref<Eigen::MatrixXd> J(*(jacs_.at(task)));
+		for (int r = 0; r < jac.rows(); r++)
+		{
+			for (int c = 0; c < jac.cols(); c++)
+			{
+				jac(r, c) = J(r, c);
+			}
+		}
 		return SUCCESS;
 	}
 
-    EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac, bool force)
-    {
-        LOCK(lock_);
-        if(kinematica_.getEffSize()==0)
-        {
-            jac=Eigen::MatrixXdRef_ptr();
+	EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac, bool force)
+	{
+		LOCK(lock_);
+		if (kinematica_.getEffSize() == 0)
+		{
+			jac = Eigen::MatrixXdRef_ptr();
 
-        }
-        else
-        {
-            if(jac==NULL||force)
-            {
-                if (jacs_.find(task) == jacs_.end())
-                {
-                    INDICATE_FAILURE
-                    return FAILURE;
-                }
-                jac = jacs_.at(task);
-            }
-        }
-        return SUCCESS;
-    }
+		}
+		else
+		{
+			if (jac == NULL || force)
+			{
+				if (jacs_.find(task) == jacs_.end())
+				{
+					INDICATE_FAILURE
+					return FAILURE;
+				}
+				jac = jacs_.at(task);
+			}
+		}
+		return SUCCESS;
+	}
 
 	EReturn Scene::appendTaskMap(const std::string & name, const std::vector<std::string> & eff,
 			const std::vector<KDL::Frame> & offset)
@@ -642,49 +654,53 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-        else
-        {
-            if (ok(collision_scene_->update(x)))
-            {
-                if(kinematica_.getEffSize()>0)
-                {
-                    if (kinematica_.updateConfiguration(x))
-                    {
-                        if (kinematica_.generateForwardMap(Phi_))
-                        {
-                            if (update_jacobians_)
-                            {
-                                if (kinematica_.generateJacobian(Jac_))
-                                {
-                                    // All is fine
-                                }
-                                else
-                                {
-                                    INDICATE_FAILURE;
-                                    return FAILURE;
-                                }
-                            }
-                            // else Also fine, just skip computing the Jacobians
-                        }
-                        else
-                        {
-                            INDICATE_FAILURE;
-                            return FAILURE;
-                        }
-                    }
-                    else
-                    {
-                        INDICATE_FAILURE;
-                        return FAILURE;
-                    }
-                }
-            }
-            else
-            {
-                INDICATE_FAILURE;
-                return FAILURE;
-            }
-        }
+		else
+		{
+			if (ok(collision_scene_->update(x)))
+			{
+				if (kinematica_.getEffSize() > 0)
+				{
+					if (kinematica_.updateConfiguration(x))
+					{
+						if (kinematica_.generateForwardMap(Phi_))
+						{
+							if (update_jacobians_)
+							{
+								if (kinematica_.generateJacobian(Jac_))
+								{
+									// All is fine
+								}
+								else
+								{
+									INDICATE_FAILURE
+									;
+									return FAILURE;
+								}
+							}
+							// else Also fine, just skip computing the Jacobians
+						}
+						else
+						{
+							INDICATE_FAILURE
+							;
+							return FAILURE;
+						}
+					}
+					else
+					{
+						INDICATE_FAILURE
+						;
+						return FAILURE;
+					}
+				}
+			}
+			else
+			{
+				INDICATE_FAILURE
+				;
+				return FAILURE;
+			}
+		}
 
 		if (visual_debug_->data)
 		{

@@ -358,7 +358,7 @@ namespace exotica
 					return FAILURE;
 				}
 
-				//	If the parameter is existed, return the pointer
+				//	If the parameter exists, return the pointer
 				if (params_.find(name) != params_.end())
 				{
 					ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));

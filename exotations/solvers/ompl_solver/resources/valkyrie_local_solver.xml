@@ -26,16 +26,23 @@
           <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
         </Root>
         <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
-          <joint name="WaistRotator"/> 
-          <joint name="WaistExtensor"/>
-          <joint name="WaistLateralExtensor"/> 
-          <joint name="LeftShoulderExtensor"/> 
-          <joint name="LeftShoulderAdductor"/>
-          <joint name="LeftShoulderSupinator"/>
-          <joint name="LeftElbowExtensor"/>	
-          <joint name="LeftForearmSupinator"/>	
-          <joint name="LeftWristExtensor"/>	
-          <joint name="LeftWrist"/>	
+          <joint name="WaistRotator" />
+          <joint name="WaistExtensor" />
+          <joint name="WaistLateralExtensor" />
+          <joint name="LeftShoulderExtensor" />
+          <joint name="LeftShoulderAdductor" />
+          <joint name="LeftShoulderSupinator" />
+          <joint name="LeftElbowExtensor" />
+          <joint name="LeftForearmSupinator" />
+          <joint name="LeftWristExtensor" />
+          <joint name="LeftWrist"/>
+          <joint name="RightShoulderExtensor" />
+          <joint name="RightShoulderAdductor" />
+          <joint name="RightShoulderSupinator" />
+          <joint name="RightElbowExtensor" />
+          <joint name="RightForearmSupinator" />
+          <joint name="RightWristExtensor" />
+          <joint name="RightWrist" />	
         </Update>
       </Kinematica>
       <VisualDebug>0</VisualDebug>
@@ -44,14 +51,14 @@
     
     <Map type="Identity" name="CSpaceMap">
       <Scene name="LocalScene"/>
-      <Ref> 0 0 0 0 0 0 0 0 0 0</Ref>
+      <Ref> 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Ref>
     </Map>
 
     <Task name="LocalTask" type="TaskSqrError">
       <map name="CSpaceMap"/>
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal> 0 0 0 0 0 0 0 0 0 0</Goal>
+      <Goal> 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task>
    
     <Map type="CollisionAvoidance" name="CollisionAvoidanceMap">
@@ -65,6 +72,24 @@
 	  <limb segment="LeftElbowExtensor"></limb>
 	  <limb segment="LeftForearm"></limb>
 	  <limb segment="LeftPalm"></limb>
+	  <limb segment="RightShoulderExtensor"></limb>
+	  <limb segment="RightShoulderAdductor"></limb>
+	  <limb segment="RightShoulderRotator"></limb>
+	  <limb segment="RightElbowExtensor"></limb>
+	  <limb segment="RightForearm"></limb>
+	  <limb segment="RightPalm"></limb>
+
+	<limb segment="Pelvis"/>
+	<limb segment="LeftHipRotator"/>
+	<limb segment="LeftHipAdductor"/>
+	<limb segment="LeftLeg"/>
+	<limb segment="LeftShankStructure"/>
+	<limb segment="l_foot"/>
+	<limb segment="RightHipRotator"/>
+	<limb segment="RightHipAdductor"/>
+	<limb segment="RightLeg"/>
+	<limb segment="RightShankStructure"/>
+	<limb segment="r_foot"/>
       </EndEffector>
       <SafetyRange>0.05</SafetyRange>
       <HardConstrain>1</HardConstrain>
@@ -86,9 +111,9 @@
     <Task name="JointLimitTask" type="TaskSqrError">
       <map name="JointLimitMap"/>
       <Rho>0</Rho>
-      <Goal>0 0 0 0 0 0 0 0 0 0</Goal>
+      <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task>
-    <Tolerance>1e-6</Tolerance> 
-    <W> 5 5 5 5 5 4 4 3 2 1</W>
+    <Tolerance>1e-5</Tolerance> 
+    <W> 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</W>
   </IKProblem>
 </ExampleConfiguration>

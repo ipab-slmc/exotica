@@ -55,6 +55,8 @@ namespace exotica
 
             virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
 			std::string local_planner_config_;
+
+            virtual void clear(bool keepOriginals=true);
 		protected:
 			/**
 			 * \brief Derived Initialiser (from XML): PURE VIRTUAL
@@ -71,6 +73,11 @@ namespace exotica
 			std::vector<double> bounds_;
 			int space_dim_;
             OMPLProblem_Type problemType;
+
+            std::vector<TaskTerminationCriterion_ptr> originalGoals_;
+            std::vector<TaskSqrError_ptr> originalCosts_;
+            std::vector<TaskBias_ptr> originalGoalBias_;
+            std::vector<TaskBias_ptr> originalSamplingBias_;
 	};
 
 	typedef boost::shared_ptr<exotica::OMPLProblem> OMPLProblem_ptr;

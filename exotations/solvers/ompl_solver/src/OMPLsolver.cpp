@@ -221,7 +221,7 @@ namespace exotica
 	EReturn OMPLsolver::getSimplifiedPath(ompl::geometric::PathGeometric &pg,
 			Eigen::MatrixXd & traj, double d)
 	{
-		if (smooth_->data && d > 0)
+        if (smooth_->data)
 		{
 			int original_cnt = pg.getStateCount();
 			ros::Time start = ros::Time::now();

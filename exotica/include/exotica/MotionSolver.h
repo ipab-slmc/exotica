@@ -47,6 +47,8 @@ namespace exotica
 			 */
 			virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
 
+            EReturn specifyProblem(PlanningProblem_ptr goals, PlanningProblem_ptr costs, PlanningProblem_ptr goalBias, PlanningProblem_ptr samplingBias);
+
 			/**
 			 * \brief	Solve the problem. PURE VIRTUAL
 			 * @param	q0			Start configuration
@@ -61,6 +63,8 @@ namespace exotica
 			 * @return	True if solvable, false otherwise
 			 */
 			virtual bool isSolvable(const PlanningProblem_ptr & prob) = 0;
+
+            virtual std::string print(std::string prepend);
 		protected:
 			/**
 			 * \brief Derived-elements initialiser: Pure Virtual

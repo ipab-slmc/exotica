@@ -8,6 +8,7 @@
 #include "ompl_solver/OMPLProblem.h"
 
 REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem);
+REGISTER_TASKDEFINITION_TYPE("TaskBias", exotica::TaskBias);
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
 #define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
@@ -15,8 +16,13 @@ REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem);
 namespace exotica
 {
 
+    TaskBias::TaskBias() : TaskSqrError()
+    {
+
+    }
+
 	OMPLProblem::OMPLProblem() :
-			space_dim_(0)
+            space_dim_(0), problemType(OMPL_PROBLEM_GOAL)
 	{
 		// TODO Auto-generated constructor stub
 
@@ -49,6 +55,27 @@ namespace exotica
                     {
                         if(knownMaps_.find(constraintClass)!=knownMaps_.end())
                         {
+                            bool IsGoal=false;
+                            if(knownMaps_[constraintClass].compare("Identity")==0)
+                            {
+                                std::string postureName;
+                                if(ok(getJSON(obj["postureName"],postureName)))
+                                {
+                                    if(postureName.compare("reach_end")!=0)
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        IsGoal=true;
+                                    }
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            if(problemType==OMPL_PROBLEM_GOAL_BIAS && !IsGoal ) continue;
                             TaskMap_ptr taskmap;
                             if(ok(TaskMap_fac::Instance().createObject(knownMaps_[constraintClass],taskmap)))
                             {
@@ -60,29 +87,57 @@ namespace exotica
                                         std::string name=taskmap->getObjectName();
                                         task_maps_[name]=taskmap;
                                         TaskDefinition_ptr task;
-                                        if(ok(TaskDefinition_fac::Instance().createObject("TaskTerminationCriterion",task)))
+
+                                        if(IsGoal && problemType==OMPL_PROBLEM_GOAL_BIAS)
                                         {
-                                            TaskTerminationCriterion_ptr sqr = boost::static_pointer_cast<TaskTerminationCriterion>(task);
-                                            sqr->setTaskMap(taskmap);
-                                            int dim;
-                                            taskmap->taskSpaceDim(dim);
-                                            sqr->y_star0_.resize(dim);
-                                            sqr->rho0_(0)=1.0;
-                                            sqr->threshold0_(0)=1e-1;
-                                            sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+                                            if(ok(TaskDefinition_fac::Instance().createObject("TaskBias",task)))
+                                            {
+                                                TaskBias_ptr sqr = boost::static_pointer_cast<TaskBias>(task);
+                                                sqr->setTaskMap(taskmap);
+                                                int dim;
+                                                taskmap->taskSpaceDim(dim);
+                                                sqr->y_star0_.resize(dim);
+                                                sqr->rho0_(0)=1.0;
+                                                sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+                                                sqr->y_star0_.setZero();
 
-                                            // TODO: Better implementation of stting goals from JSON
-                                            sqr->y_star0_.setZero();
-
-                                            sqr->setTimeSteps(1);
-                                            sqr->wasFullyInitialised_=true;
-                                            task_defs_[name]=task;
-                                            goals_.push_back(sqr);
+                                                sqr->setTimeSteps(1);
+                                                sqr->wasFullyInitialised_=true;
+                                                task_defs_[name]=task;
+                                                goalBias_.push_back(sqr);
+                                            }
+                                            else
+                                            {
+                                                INDICATE_FAILURE;
+                                                return FAILURE;
+                                            }
                                         }
                                         else
                                         {
-                                            INDICATE_FAILURE;
-                                            return FAILURE;
+                                            if(ok(TaskDefinition_fac::Instance().createObject("TaskTerminationCriterion",task)))
+                                            {
+                                                TaskTerminationCriterion_ptr sqr = boost::static_pointer_cast<TaskTerminationCriterion>(task);
+                                                sqr->setTaskMap(taskmap);
+                                                int dim;
+                                                taskmap->taskSpaceDim(dim);
+                                                sqr->y_star0_.resize(dim);
+                                                sqr->rho0_(0)=1.0;
+                                                sqr->threshold0_(0)=1e-6;
+                                                sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+
+                                                // TODO: Better implementation of stting goals from JSON
+                                                sqr->y_star0_.setZero();
+
+                                                sqr->setTimeSteps(1);
+                                                sqr->wasFullyInitialised_=true;
+                                                task_defs_[name]=task;
+                                                goals_.push_back(sqr);
+                                            }
+                                            else
+                                            {
+                                                INDICATE_FAILURE;
+                                                return FAILURE;
+                                            }
                                         }
                                     }
                                     else
@@ -144,14 +199,98 @@ namespace exotica
 
 	EReturn OMPLProblem::initDerived(tinyxml2::XMLHandle & handle)
 	{
-		for (auto goal : task_defs_)
-		{
-			if (goal.second->type().compare("exotica::TaskTerminationCriterion") == 0)
-			{
-				goals_.push_back(boost::static_pointer_cast<exotica::TaskTerminationCriterion>(goal.second));
-			}
-		}
-		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("LocalPlannerConfig");
+        tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("PlroblemType");
+        if (tmp_handle.ToElement())
+        {
+            std::string tmp = tmp_handle.ToElement()->GetText();
+            if(tmp.compare("Costs")==0)
+            {
+                problemType=OMPL_PROBLEM_COSTS;
+            }
+            else if(tmp.compare("GoalBias")==0)
+            {
+                problemType=OMPL_PROBLEM_GOAL_BIAS;
+            }
+            else if(tmp.compare("SamplingBias")==0)
+            {
+                problemType=OMPL_PROBLEM_SAMPLING_BIAS;
+            }
+            else if(tmp.compare("Goals")==0)
+            {
+                problemType=OMPL_PROBLEM_GOAL;
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+        else
+        {
+            problemType=OMPL_PROBLEM_GOAL;
+        }
+
+        switch(problemType)
+        {
+        case OMPL_PROBLEM_GOAL:
+            for (auto goal : task_defs_)
+            {
+                if (goal.second->type().compare("exotica::TaskTerminationCriterion") == 0)
+                {
+                    goals_.push_back(boost::static_pointer_cast<exotica::TaskTerminationCriterion>(goal.second));
+                }
+                else
+                {
+                    ERROR(goal.first << " has wrong type, ignored!");
+                }
+            }
+            break;
+
+        case OMPL_PROBLEM_COSTS:
+            for (auto goal : task_defs_)
+            {
+                if (goal.second->type().compare("exotica::TaskSqrError") == 0)
+                {
+                    costs_.push_back(boost::static_pointer_cast<exotica::TaskSqrError>(goal.second));
+                }
+                else
+                {
+                    ERROR(goal.first << " has wrong type, ignored!");
+                }
+            }
+            break;
+
+        case OMPL_PROBLEM_GOAL_BIAS:
+            for (auto goal : task_defs_)
+            {
+                if (goal.second->type().compare("exotica::TaskBias") == 0)
+                {
+                    goalBias_.push_back(boost::static_pointer_cast<exotica::TaskBias>(goal.second));
+                }
+                else
+                {
+                    ERROR(goal.first << " has wrong type, ignored!");
+                }
+            }
+            break;
+
+        case OMPL_PROBLEM_SAMPLING_BIAS:
+            for (auto goal : task_defs_)
+            {
+                if (goal.second->type().compare("exotica::TaskBias") == 0)
+                {
+                    samplingBias_.push_back(boost::static_pointer_cast<exotica::TaskBias>(goal.second));
+                }
+                else
+                {
+                    ERROR(goal.first << " has wrong type, ignored!");
+                }
+            }
+            break;
+        }
+
+
+        tmp_handle = handle.FirstChildElement("LocalPlannerConfig");
 		if (tmp_handle.ToElement())
 		{
 			local_planner_config_ = tmp_handle.ToElement()->GetText();
@@ -200,5 +339,21 @@ namespace exotica
 	{
 		return goals_;
 	}
+
+    std::vector<TaskSqrError_ptr>& OMPLProblem::getCosts()
+    {
+        return costs_;
+    }
+
+    std::vector<TaskBias_ptr>& OMPLProblem::getGoalBias()
+    {
+        return goalBias_;
+    }
+
+    std::vector<TaskBias_ptr>& OMPLProblem::getSamplingBias()
+    {
+        return samplingBias_;
+    }
+
 
 } /* namespace exotica */

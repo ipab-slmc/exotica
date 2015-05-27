@@ -92,6 +92,19 @@ namespace ompl
 				nn_->add(motion);
 			}
 
+			if (goal_s && rng_.uniform01() < goalBias_ && goal_s->canSample())
+			{
+				Motion *goal_motion = new Motion(si_);
+				;
+
+				goal_s->sampleGoal(goal_motion->state);
+				if (!goal->isSatisfied(goal_motion->state))
+				{
+					ERROR("FRRT, Invalid goal state");
+					return base::PlannerStatus::INVALID_GOAL;
+				}
+			}
+
 			if (nn_->size() == 0)
 			{
 				OMPL_ERROR("%s: There are no valid initial states!", getName().c_str());
@@ -120,7 +133,7 @@ namespace ompl
 					newTry = false;
 					try_cnt_[0]++;
 					local_map_->jointRef = global_goal_;
-					local_solver_->getProblem()->setTau(1e-10);
+					local_solver_->getProblem()->setTau(1e-5);
 					if (localSolve(start_motion, NULL, new_motion))
 					{
 						suc_cnt_[0]++;

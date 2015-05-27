@@ -10,7 +10,7 @@
      <!-- Other server functionalities other than parameters TODO -->
   </Server>
   <OMPLsolver name="OMPL_Interface">
-    <algorithm>FRRT</algorithm>
+    <algorithm>RRT</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
     <TrajectorySmooth>1</TrajectorySmooth>
   </OMPLsolver>
@@ -24,33 +24,83 @@
           <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
         </Root>
         <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
-          <joint name="WaistRotator"/> 
-          <joint name="WaistExtensor"/>
-          <joint name="WaistLateralExtensor"/> 
-          <joint name="LeftShoulderExtensor"/> 
-          <joint name="LeftShoulderAdductor"/>
-          <joint name="LeftShoulderSupinator"/>
-          <joint name="LeftElbowExtensor"/>	
-          <joint name="LeftForearmSupinator"/>	
-          <joint name="LeftWristExtensor"/>	
-          <joint name="LeftWrist"/>	
+	  <joint name="WaistRotator" />
+          <joint name="WaistExtensor" />
+          <joint name="WaistLateralExtensor" />
+          <joint name="LeftShoulderExtensor" />
+          <joint name="LeftShoulderAdductor" />
+          <joint name="LeftShoulderSupinator" />
+          <joint name="LeftElbowExtensor" />
+          <joint name="LeftForearmSupinator" />
+          <joint name="LeftWristExtensor" />
+          <joint name="LeftWrist"/>
+          <joint name="RightShoulderExtensor" />
+          <joint name="RightShoulderAdductor" />
+          <joint name="RightShoulderSupinator" />
+          <joint name="RightElbowExtensor" />
+          <joint name="RightForearmSupinator" />
+          <joint name="RightWristExtensor" />
+          <joint name="RightWrist" />
         </Update>
       </Kinematica>
       <PlanningMode>Sampling</PlanningMode>
-      <VisualDebug>0</VisualDebug>
+      <VisualDebug>1</VisualDebug>
     </Scene> 
     
     <Map type="Identity" name="CSpaceGoalMap">
       <Scene name="TestScene"/>
-      <Ref>0 0 0 0 0 0 0 0 0 0</Ref>
+      <Ref>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 </Ref>
     </Map>
 
     <Task name="Goal" type="TaskTerminationCriterion">
       <map name="CSpaceGoalMap"/>
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal>0 0 0 0 0 0 0 0 0 0</Goal>
-      <Threshold>1e-6</Threshold>
+      <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
+      <Threshold>1e-5</Threshold>
+    </Task>
+
+    <Map type="CoM" name="CoMMap">
+      <Scene name="TestScene"/>
+      <EnableZ>false</EnableZ>
+      <Debug>false</Debug>
+      <SupportRadius>0.1 0.15</SupportRadius>
+      <EndEffector ignore_unused="false">
+        <limb segment="Trunk"/>
+        <limb segment="LeftShoulderExtensor"/>
+        <limb segment="LeftShoulderAdductor"/>
+        <limb segment="LeftShoulderRotator"/>
+        <limb segment="LeftElbowExtensor"/>
+        <limb segment="LeftForearm"/>
+        <limb segment="LeftPalm"/>
+	<limb segment="RightShoulderExtensor"/>
+        <limb segment="RightShoulderAdductor"/>
+        <limb segment="RightShoulderRotator"/>
+        <limb segment="RightElbowExtensor"/>
+        <limb segment="RightForearm"/>
+        <limb segment="RightPalm"/>
+        <limb segment="Head"/>
+
+	<limb segment="Pelvis"/>
+	<limb segment="LeftHipRotator"/>
+	<limb segment="LeftHipAdductor"/>
+	<limb segment="LeftLeg"/>
+	<limb segment="LeftShankStructure"/>
+	<limb segment="l_foot"/>
+	<limb segment="RightHipRotator"/>
+	<limb segment="RightHipAdductor"/>
+	<limb segment="RightLeg"/>
+	<limb segment="RightShankStructure"/>
+	<limb segment="r_foot"/>
+      </EndEffector>
+    </Map>
+
+    <Task name="CoMTask" type="TaskTerminationCriterion">
+      <map name="CoMMap"/>
+      <Rho>1e1</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0 0</Goal>
+      <Threshold>1e-5</Threshold>
     </Task>
     <!-- Problem parameters (structuring etc...) -->
     <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/valkyrie_local_solver.xml</LocalPlannerConfig>

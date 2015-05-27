@@ -12,6 +12,14 @@ namespace exotica
         return task_map_;
     }
 
+    std::string TaskDefinition::print(std::string prepend)
+    {
+        std::string ret = Object::print(prepend);
+        ret+="\n"+prepend+"  Task Map:";
+        ret+="\n"+task_map_->print(prepend+"    ");
+        return ret;
+    }
+
     EReturn TaskDefinition::initBase(tinyxml2::XMLHandle & handle, const TaskMap_map & map_list)
     {
         Server_ptr server;

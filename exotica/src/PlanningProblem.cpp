@@ -13,6 +13,14 @@ namespace exotica
         return FAILURE;
     }
 
+    std::string PlanningProblem::print(std::string prepend)
+    {
+        std::string ret = Object::print(prepend);
+        ret+="\n"+prepend+"  Task definitions:";
+        for(auto& it : task_defs_) ret+="\n"+it.second->print(prepend+"    ");
+        return ret;
+    }
+
     EReturn PlanningProblem::initBase(tinyxml2::XMLHandle & handle,
             const Server_ptr & server)
     {

@@ -37,6 +37,7 @@ namespace exotica
 			 * @return        Successful if the problem is a valid AICOProblem
 			 */
 			virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
+            virtual EReturn specifyProblem(PlanningProblem_ptr goals, PlanningProblem_ptr costs, PlanningProblem_ptr goalBias, PlanningProblem_ptr samplingBias);
 
 			/*
 			 * \brief	Check if a problem is solvable by this solver (Pure Virtual)
@@ -88,6 +89,8 @@ namespace exotica
 
 			EReturn resetIfNeeded();
 			ros::Duration planning_time_;
+
+            virtual std::string print(std::string prepend);
 
 			void getOriginalSolution(Eigen::MatrixXd & orig);
 		protected:
@@ -158,6 +161,9 @@ namespace exotica
 			ompl::base::GoalPtr constructGoal();
 
 			OMPLProblem_ptr prob_; //!< Shared pointer to the planning problem.
+            OMPLProblem_ptr costs_; //!< Shared pointer to the planning problem.
+            OMPLProblem_ptr goalBias_; //!< Shared pointer to the planning problem.
+            OMPLProblem_ptr samplingBias_; //!< Shared pointer to the planning problem.
 
 			/// \brief List of all known OMPL planners
 			std::map<std::string, ConfiguredPlannerAllocator> known_planners_;

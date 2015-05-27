@@ -58,6 +58,7 @@ namespace exotica
 			 */
 			EReturn initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
 					const std::vector<std::string> & joints, std::string & mode);
+            EReturn reinitialise();
 
             /**
 			 * \brief	Update the robot collision properties

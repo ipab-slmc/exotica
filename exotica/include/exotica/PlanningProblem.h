@@ -87,6 +87,8 @@ namespace exotica
 
             virtual std::string print(std::string prepend);
 
+            virtual void clear(bool keepOriginals=true);
+
 		protected:
 
 			/**
@@ -100,6 +102,8 @@ namespace exotica
 			TaskMap_map task_maps_; //!< The set of taskmaps we will be using, which will be shared between task-definitions
 			TaskDefinition_map task_defs_; //!< The set of task definition objects
             std::map<std::string,std::string> knownMaps_;
+            TaskMap_map originalMaps_;
+            TaskDefinition_map originalDefs_;
 
 	};
 	

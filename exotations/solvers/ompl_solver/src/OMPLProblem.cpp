@@ -38,30 +38,11 @@ namespace exotica
 		return bounds_;
 	}
 
-    void OMPLProblem::clear(bool keepOriginals)
-    {
-        if(keepOriginals)
-        {
-            task_maps_=originalMaps_;
-            goals_=originalGoals_;
-            costs_=originalCosts_;
-            goalBias_=originalGoalBias_;
-            samplingBias_=originalSamplingBias_;
-        }
-        else
-        {
-            task_maps_.clear();
-            task_defs_.clear();
-            goals_.clear();
-            costs_.clear();
-            goalBias_.clear();
-            samplingBias_.clear();
-        }
-    }
-
     EReturn OMPLProblem::reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem)
     {
-        clear();
+        task_defs_.clear();
+        task_maps_.clear();
+        goals_.clear();
         if(document.IsArray())
         {
             for (rapidjson::SizeType i=0;i<document.Size();i++)
@@ -336,12 +317,6 @@ namespace exotica
 				}
 			}
 		}
-
-        originalMaps_=task_maps_;
-        originalGoals_=goals_;
-        originalCosts_=costs_;
-        originalGoalBias_=goalBias_;
-        originalSamplingBias_=samplingBias_;
 
 		std::vector<std::string> jnts;
 		scenes_.begin()->second->getJointNames(jnts);

@@ -78,6 +78,40 @@
 	  <limb segment="RightElbowExtensor"></limb>
 	  <limb segment="RightForearm"></limb>
 	  <limb segment="RightPalm"></limb>
+      </EndEffector>
+      <SafetyRange>0.05</SafetyRange>
+      <HardConstrain>1</HardConstrain>
+      <SelfCollision>0</SelfCollision>
+      <VisualDebug>0</VisualDebug>
+    </Map>
+
+    <Task name="CollisionAvoidanceTask" type="TaskSqrError">
+      <map name="CollisionAvoidanceMap"/>
+      <Rho>1e2</Rho>
+      <Weights dim="1">1.0</Weights>
+      <Goal>0.0</Goal>
+    </Task>
+
+    <Map type="CoM" name="CoMMap">
+      <Scene name="LocalScene"/>
+      <EnableZ>false</EnableZ>
+      <Debug>false</Debug>
+      <SupportRadius>0.1 0.15</SupportRadius>
+      <EndEffector ignore_unused="false">
+        <limb segment="Trunk"/>
+        <limb segment="LeftShoulderExtensor"/>
+        <limb segment="LeftShoulderAdductor"/>
+        <limb segment="LeftShoulderRotator"/>
+        <limb segment="LeftElbowExtensor"/>
+        <limb segment="LeftForearm"/>
+        <limb segment="LeftPalm"/>
+	<limb segment="RightShoulderExtensor"/>
+        <limb segment="RightShoulderAdductor"/>
+        <limb segment="RightShoulderRotator"/>
+        <limb segment="RightElbowExtensor"/>
+        <limb segment="RightForearm"/>
+        <limb segment="RightPalm"/>
+        <limb segment="Head"/>
 
 	<limb segment="Pelvis"/>
 	<limb segment="LeftHipRotator"/>
@@ -91,17 +125,13 @@
 	<limb segment="RightShankStructure"/>
 	<limb segment="r_foot"/>
       </EndEffector>
-      <SafetyRange>0.05</SafetyRange>
-      <HardConstrain>1</HardConstrain>
-      <SelfCollision>0</SelfCollision>
-      <VisualDebug>0</VisualDebug>
     </Map>
 
-    <Task name="CollisionAvoidanceTask" type="TaskSqrError">
-      <map name="CollisionAvoidanceMap"/>
-      <Rho>1e2</Rho>
+    <Task name="CoMTask" type="TaskSqrError">
+      <map name="CoMMap"/>
+      <Rho>1e1</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal>0.0</Goal>
+      <Goal>0 0</Goal>
     </Task>
 
     <Map type="JointLimit" name="JointLimitMap">

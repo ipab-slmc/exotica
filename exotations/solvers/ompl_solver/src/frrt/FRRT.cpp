@@ -91,13 +91,12 @@ namespace ompl
 				}
 				nn_->add(motion);
 			}
-
-			if (goal_s && rng_.uniform01() < goalBias_ && goal_s->canSample())
+			INFO_NAMED("FRRT","Checking if goal is valid");
+			if (goal_s && goal_s->canSample())
 			{
 				Motion *goal_motion = new Motion(si_);
-				;
-
 				goal_s->sampleGoal(goal_motion->state);
+
 				if (!goal->isSatisfied(goal_motion->state))
 				{
 					ERROR("FRRT, Invalid goal state");

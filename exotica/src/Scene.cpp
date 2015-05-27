@@ -45,6 +45,75 @@ namespace exotica
 		//TODO
 	}
 
+    EReturn CollisionScene::reinitialise()
+    {
+        fcl_robot_.clear();
+        fcl_world_.clear();
+        geo_robot_.clear();
+        geo_world_.clear();
+        ps_->getCurrentStateNonConst().update(true);
+        const std::vector<const robot_model::LinkModel*>& links =
+                ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
+        acm_ = ps_->getAllowedCollisionMatrix();
+        for (std::size_t i = 0; i < links.size(); ++i)
+        {
+            geo_robot_[links[i]->getName()] = geos_ptr(0);
+            fcl_robot_[links[i]->getName()] = fcls_ptr(0);
+            for (std::size_t j = 0; j < links[i]->getShapes().size(); ++j)
+            {
+                collision_detection::FCLGeometryConstPtr g =
+                        collision_detection::createCollisionGeometry(links[i]->getShapes()[j], links[i], j);
+                if (g)
+                {
+                    geo_robot_.at(links[i]->getName()).push_back(g);
+                    fcl::CollisionObject *tmp =
+                            new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(ps_->getCurrentState().getCollisionBodyTransform(g->collision_geometry_data_->ptr.link, g->collision_geometry_data_->shape_index)));
+                    fcl_robot_.at(links[i]->getName()).push_back(boost::shared_ptr<
+                            fcl::CollisionObject>(tmp));
+
+                }
+                else
+                    ERROR("Unable to construct collision geometry for link "<< links[i]->getName().c_str());
+            }
+        }
+
+        collision_detection::WorldConstPtr tmp_world = ps_->getCollisionWorld()->getWorld();
+        std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
+        if (obj_id_.size() > 0)
+        {
+            for (std::size_t i = 0; i < obj_id_.size(); ++i)
+            {
+                std::size_t index_size = tmp_world->getObject(obj_id_[i])->shapes_.size();
+                fcl_world_[obj_id_[i]] = fcls_ptr(0);
+                geo_world_[obj_id_[i]] = geos_ptr(0);
+                trans_world_[obj_id_[i]] = std::vector<fcl::Transform3f>(0);
+                for (std::size_t j = 0; j < index_size; j++)
+                {
+                    shapes::ShapeConstPtr tmp_shape;
+                    if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type != shapes::MESH)
+                        tmp_shape =
+                                boost::shared_ptr<const shapes::Shape>(shapes::createMeshFromShape(tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
+                    else
+                        tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
+                    if (!tmp_shape || !tmp_shape.get())
+                    {
+                        INDICATE_FAILURE
+                        return FAILURE;
+                    }
+                    collision_detection::FCLGeometryConstPtr g =
+                            collision_detection::createCollisionGeometry(tmp_shape, tmp_world->getObject(obj_id_[i]).get());
+                    geo_world_.at(obj_id_[i]).push_back(g);
+                    fcl::Transform3f pose(collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j]));
+                    trans_world_.at(obj_id_[i]).push_back(pose);
+                    fcl::CollisionObject *co =
+                            new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j]));
+                    fcl_world_.at(obj_id_[i]).push_back(boost::shared_ptr<fcl::CollisionObject>(co));
+                }
+            }
+        }
+        return SUCCESS;
+    }
+
 	EReturn CollisionScene::initialise(const moveit_msgs::PlanningSceneConstPtr & msg,
 			const std::vector<std::string> & joints, std::string & mode)
 	{
@@ -619,8 +688,7 @@ namespace exotica
 		std::vector<int> tmp_index;
 		if (!kinematica_.getEndEffectorIndex(tmp_index))
 		{
-			INDICATE_FAILURE
-			;
+            INDICATE_FAILURE;
 			return FAILURE;
 		}
 		Phi_.setZero(3 * kinematica_.getEffSize());

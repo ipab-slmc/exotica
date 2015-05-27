@@ -13,7 +13,7 @@
 #include <ompl/base/goals/GoalState.h>
 #include "ompl/datastructures/NearestNeighbors.h"
 #include "exotica/EXOTica.hpp"
-#include <ompl_solver/OMPLGoal.h>
+#include <ompl_solver/OMPLGoalSampler.h>
 #include <ik_solver/ik_solver.h>
 namespace ompl
 {
@@ -25,10 +25,6 @@ namespace ompl
 		class FRRT: public base::Planner
 		{
 			public:
-				enum LocalMode
-				{
-					GLOBAL = 0, LOCAL = 10, GOAL_SAMPLER = 20
-				};
 				/*
 				 * \brief	Default constructor
 				 * @param	si		OMPL space information
@@ -114,7 +110,7 @@ namespace ompl
 				bool setUpLocalPlanner(const std::string & xml_file,
 						const exotica::Scene_ptr & scene);
 
-				bool resetScene(const exotica::Scene_ptr & scene);
+				bool resetSceneAndGoal(const exotica::Scene_ptr & scene,const Eigen::VectorXd & goal);
 			protected:
 				/*
 				 * \brief	Motion class. This is where all the planner specific parameters are defined
@@ -126,12 +122,15 @@ namespace ompl
 						 * \brief	Constructor
 						 */
 						Motion() :
-								state(NULL), parent(NULL), global_valid_(true)
+								state(NULL), inter_state(NULL), parent(NULL), global_valid_(true)
 						{
 						}
 
 						Motion(const base::SpaceInformationPtr &si) :
-								state(si->allocState()), parent(NULL), global_valid_(true)
+										state(si->allocState()),
+										inter_state(NULL),
+										parent(NULL),
+										global_valid_(true)
 						{
 
 						}
@@ -154,6 +153,8 @@ namespace ompl
 						}
 						///	The OMPL state
 						base::State *state;
+						///	Internal state
+						base::State *inter_state;
 						///	The parent node
 						Motion *parent;
 						///	The internal flexible path
@@ -193,15 +194,15 @@ namespace ompl
 
 			private:
 				///	Local solver
-				bool localSolve(Motion *sm, Motion *gm, LocalMode mode);
+				bool localSolve(Motion *sm, base::State *is, Motion *gm);
 
 				exotica::IKsolver_ptr local_solver_;
 
 				///	Store the local taskmap and task
 				exotica::TaskSqrError_ptr local_task_;
-				exotica::TaskSqrError_ptr global_task_;
+				boost::shared_ptr<exotica::Identity> local_map_;
 				exotica::TaskSqrError_ptr collision_task_;
-
+				Eigen::VectorXd global_goal_;
 				///	Store initial rhos
 				std::vector<double> init_rho_;
 				///	For analyse

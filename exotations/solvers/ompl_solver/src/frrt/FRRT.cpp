@@ -78,6 +78,7 @@ namespace ompl
 			nn_->clear();
 			checkValidity();
 			base::Goal *goal = pdef_->getGoal().get();
+			base::GoalSampleableRegion *goal_s = dynamic_cast<base::GoalSampleableRegion*>(goal);
 			Motion *init_motion = NULL;
 			while (const base::State *st = pis_.nextStart())
 			{
@@ -89,6 +90,19 @@ namespace ompl
 					si_->copyState(init_motion->state, st);
 				}
 				nn_->add(motion);
+			}
+
+			if (goal_s && rng_.uniform01() < goalBias_ && goal_s->canSample())
+			{
+				Motion *goal_motion = new Motion(si_);
+				;
+
+				goal_s->sampleGoal(goal_motion->state);
+				if (!goal->isSatisfied(goal_motion->state))
+				{
+					ERROR("FRRT, Invalid goal state");
+					return base::PlannerStatus::INVALID_GOAL;
+				}
 			}
 
 			if (nn_->size() == 0)
@@ -108,13 +122,6 @@ namespace ompl
 				try_cnt_[i] = suc_cnt_[i] = 0;
 
 			///Lets do it clean and nice !!!!!!!
-//			Motion *goal_motion = new Motion(si_);
-//			//	First get a goal motion
-//			if (!localSolve(init_motion, goal_motion, GOAL_SAMPLER))
-//			{
-//				OMPL_ERROR("Can not get goal motion");
-//				return base::PlannerStatus::INVALID_START;
-//			}
 			bool newTry = true;
 			Motion *start_motion = init_motion;
 			while (ptc == false)
@@ -125,7 +132,9 @@ namespace ompl
 				{
 					newTry = false;
 					try_cnt_[0]++;
-					if (localSolve(start_motion, new_motion, GLOBAL))
+					local_map_->jointRef = global_goal_;
+					local_solver_->getProblem()->setTau(1e-5);
+					if (localSolve(start_motion, NULL, new_motion))
 					{
 						suc_cnt_[0]++;
 						new_motion->parent = start_motion;
@@ -153,7 +162,14 @@ namespace ompl
 					bool r_ok = false;
 					do
 					{
-						sampler_->sampleUniform(new_motion->state);
+						if (goal_s && rng_.uniform01() < goalBias_ && goal_s->canSample())
+						{
+							goal_s->sampleGoal(new_motion->state);
+						}
+						else
+						{
+							sampler_->sampleUniform(new_motion->state);
+						}
 						r_ok = si_->getStateValidityChecker()->isValid(new_motion->state);
 					}
 					while (!r_ok && ptc == false);
@@ -167,9 +183,11 @@ namespace ompl
 					bool valid = false;
 
 					///	Do a regular line segment check
-
+					ompl::base::State *last_valid_state = si_->allocState();
+					si_->copyState(last_valid_state, near_motion->state);
+					std::pair<ompl::base::State*, double> last_valid(last_valid_state, 0);
 					try_cnt_[2]++;
-					if (si_->checkMotion(near_motion->state, new_motion->state))
+					if (si_->checkMotion(near_motion->state, new_motion->state, last_valid))
 					{
 						suc_cnt_[2]++;
 						new_motion->parent = near_motion;
@@ -179,15 +197,17 @@ namespace ompl
 					///	Do a local try
 					else
 					{
+						if (last_valid.second == 0)
+							last_valid_state = NULL;
 						try_cnt_[1]++;
 						///	Set local solver goal
 						Eigen::VectorXd eigen_g((int) si_->getStateDimension());
 						memcpy(eigen_g.data(), new_motion->state->as<
 								ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
 								* eigen_g.rows());
-						local_solver_->setGoal("LocalTask", eigen_g, 0);
-
-						if (localSolve(near_motion, new_motion, LOCAL))
+						local_map_->jointRef = eigen_g;
+						local_solver_->getProblem()->setTau(1e-2);
+						if (localSolve(near_motion, last_valid_state, new_motion))
 						{
 							suc_cnt_[1]++;
 							new_motion->parent = near_motion;
@@ -222,6 +242,12 @@ namespace ompl
 									* (int) si_->getStateDimension());
 							mpath.push_back(local_motion);
 						}
+						if (solution->inter_state != NULL)
+						{
+							Motion *local_motion = new Motion(si_);
+							si_->copyState(local_motion->state, solution->inter_state);
+							mpath.push_back(local_motion);
+						}
 					}
 					else
 					{
@@ -229,11 +255,6 @@ namespace ompl
 					}
 					solution = solution->parent;
 				}
-				//				Eigen::VectorXd tmp((int) si_->getStateDimension());
-				//				memcpy(tmp.data(), mpath[mpath.size() - 1]->state->as<
-				//						ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
-				//						* (int) si_->getStateDimension());
-				//				ROS_ERROR_STREAM("First "<<tmp.transpose());
 				PathGeometric *path = new PathGeometric(si_);
 				for (int i = mpath.size() - 1; i >= 0; --i)
 					path->append(mpath[i]->state);
@@ -245,208 +266,6 @@ namespace ompl
 			WARNING_NAMED("FRRT", "Global succeeded/try "<<suc_cnt_[0]<<"/"<<try_cnt_[0]);
 			WARNING_NAMED("FRRT", "Local succeeded/try "<<suc_cnt_[1]<<"/"<<try_cnt_[1]);
 			WARNING_NAMED("FRRT", "Normal succeeded/try "<<suc_cnt_[2]<<"/"<<try_cnt_[2]);
-			///Old version
-//			Motion *solution = NULL;
-//			Motion *approxsol = NULL;
-//			double approxdif = std::numeric_limits<double>::infinity();
-//			Motion *rmotion = new Motion(si_);
-//			rmotion->state = si_->allocState();
-//			rmotion = nn_->nearest(rmotion);
-//			Motion *last_motion;
-//			last_motion = rmotion;
-//			while (ptc == false)
-//			{
-//				bool valid_state = false;
-//				Motion *motion = new Motion(si_);
-//
-//				if (si_->getStateValidityChecker()->isValid(last_motion->state))
-//				{
-//					Motion *nmotion = nn_->nearest(last_motion);
-//					bool valid = false;
-//					if (nn_->size() == 1)
-//					{
-//						valid = true;
-//					}
-//					else if (last_motion->state != nmotion->state)
-//					{
-//						if (!si_->checkMotion(last_motion->state, nmotion->state))
-//						{
-//							Eigen::VectorXd eigen_g((int) si_->getStateDimension());
-//							memcpy(eigen_g.data(), last_motion->state->as<
-//									ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
-//									* eigen_g.rows());
-//
-//							local_solver_->setRho("GlobalTask", 0, 0);
-//							local_solver_->setRho("LocalTask", 1e3, 0);
-//							local_solver_->setGoal("LocalTask", eigen_g, 0);
-//							Motion *tmp_motion = last_motion;
-//							if (localSolve(nmotion, tmp_motion))
-//							{
-//
-//								if (!si_->getStateValidityChecker()->isValid(tmp_motion->state))
-//								{
-//									WARNING_NAMED("FRRT", "Global try found an invalid state when connecting tree !");
-//								}
-//								else
-//								{
-//									nn_->add(tmp_motion);
-//									valid = true;
-//								}
-//							}
-//						}
-//					}
-//					else
-//					{
-//						valid = true;
-//					}
-//
-//					if (valid)
-//					{
-//						/* set the local to global goal */
-//						global_try_++;
-//						if (!ok(local_solver_->setRho("GlobalTask", 1e3, 0))
-//								|| !ok(local_solver_->setRho("LocalTask", 0, 0)))
-//						{
-//							INDICATE_FAILURE
-//						}
-//						if (localSolve(last_motion, motion))
-//						{
-//							if (!si_->getStateValidityChecker()->isValid(motion->state))
-//							{
-//								WARNING_NAMED("FRRT", "Global try found an invalid state when converging to goal !");
-//							}
-//							else
-//							{
-//								valid_state = true;
-//								global_succeeded_++;
-//							}
-//						}
-//						else
-//						{
-//							;
-//						}
-//					}
-//
-//				}
-//				else
-//				{
-//					ROS_ERROR("Initial state is invalid");
-//				}
-//				if (!valid_state)
-//				{
-//					sampler_->sampleUniform(rmotion->state);
-//					if (!si_->getStateValidityChecker()->isValid(rmotion->state))
-//					{
-//						continue;
-//					}
-//					/* find closest state in the tree */
-//					Motion *nmotion = nn_->nearest(rmotion);
-//					si_->copyState(motion->state, rmotion->state);
-//
-//					normal_try_++;
-//					if (si_->checkMotion(nmotion->state, rmotion->state))
-//					{
-//						motion->parent = nmotion;
-//						valid_state = true;
-//						normal_succeeded_++;
-//					}
-//					else
-//					{
-//						local_try_++;
-//						/* set the local to local goal */
-//						Eigen::VectorXd eigen_g((int) si_->getStateDimension());
-//						memcpy(eigen_g.data(), rmotion->state->as<
-//								ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
-//								* eigen_g.rows());
-//
-//						local_solver_->setRho("GlobalTask", 0, 0);
-//						local_solver_->setRho("LocalTask", 1e3, 0);
-//						local_solver_->setGoal("LocalTask", eigen_g, 0);
-//						if (localSolve(nmotion, motion))
-//						{
-//							if (!si_->getStateValidityChecker()->isValid(motion->state))
-//							{
-//								WARNING_NAMED("FRRT", "Local try found an invalid state!");
-//							}
-//							else
-//							{
-//								local_succeeded_++;
-//								valid_state = true;
-//							}
-//						}
-//						else
-//						{
-//							continue; //ERROR("Local planning failed");
-//						}
-//					}
-//				}
-//				if (valid_state)
-//				{
-//					nn_->add(motion);
-//					double dist = 0.0;
-//					bool sat = goal->isSatisfied(motion->state, &dist);
-//					if (sat)
-//					{
-//						approxdif = dist;
-//						solution = motion;
-//						break;
-//					}
-//					if (dist < approxdif)
-//					{
-//						approxdif = dist;
-//						approxsol = motion;
-//					}
-//				}
-//				last_motion = motion;
-//			}
-//			bool solved = false;
-//			bool approximate = false;
-//			if (solution == NULL)
-//			{
-//				solution = approxsol;
-//				approximate = true;
-//			}
-//			if (!approximate && solution != NULL)
-//			{
-//				lastGoalMotion_ = solution;
-//				/* construct the solution path */
-//				std::vector<Motion*> mpath;
-//				while (solution != NULL)
-//				{
-//					if (solution->internal_path != nullptr)
-//					{
-//						for (int i = solution->internal_path->rows() - 1; i > 0; i--)
-//						{
-//							Motion *local_motion = new Motion(si_);
-//							Eigen::VectorXd tmp = solution->internal_path->row(i);
-//							memcpy(local_motion->state->as<
-//									ompl::base::RealVectorStateSpace::StateType>()->values, tmp.data(), sizeof(double)
-//									* (int) si_->getStateDimension());
-//							mpath.push_back(local_motion);
-//						}
-//					}
-//					else
-//					{
-//						mpath.push_back(solution);
-//					}
-//					solution = solution->parent;
-//				}
-////				Eigen::VectorXd tmp((int) si_->getStateDimension());
-////				memcpy(tmp.data(), mpath[mpath.size() - 1]->state->as<
-////						ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
-////						* (int) si_->getStateDimension());
-////				ROS_ERROR_STREAM("First "<<tmp.transpose());
-//				PathGeometric *path = new PathGeometric(si_);
-//				for (int i = mpath.size() - 1; i >= 0; --i)
-//					path->append(mpath[i]->state);
-//				pdef_->addSolutionPath(base::PathPtr(path), approximate, approxdif, getName());
-//				solved = true;
-//				OMPL_INFORM("Problem Solved");
-//				OMPL_INFORM("%s: Created %d states", getName().c_str(), nn_->size());
-//				OMPL_INFORM("%s: Global succeeded/try %d / %d", getName().c_str(), global_succeeded_, global_try_);
-//				OMPL_INFORM("%s: Local succeeded/try %d / %d", getName().c_str(), local_succeeded_, local_try_);
-//				OMPL_INFORM("%s: Normal succeeded/try %d / %d", getName().c_str(), normal_succeeded_, normal_try_);
-//			}
 			return base::PlannerStatus(solved, false);
 		}
 
@@ -504,26 +323,27 @@ namespace ompl
 				ERROR("Missing XML tag of 'LocalTask'");
 				return false;
 			}
-			if (prob->getTaskDefinitions().find("GlobalTask") == prob->getTaskDefinitions().end())
+			if (prob->getTaskMaps().find("CSpaceMap") == prob->getTaskMaps().end())
 			{
-				ERROR("Missing XML tag of 'GlobalTask'");
+				ERROR("Missing XML tag of 'CSpaceMap'");
 				return false;
 			}
 			local_task_ =
 					boost::static_pointer_cast<exotica::TaskSqrError>(prob->getTaskDefinitions().at("LocalTask"));
-			global_task_ =
-					boost::static_pointer_cast<exotica::TaskSqrError>(prob->getTaskDefinitions().at("GlobalTask"));
+			local_map_ =
+					boost::static_pointer_cast<exotica::Identity>(prob->getTaskMaps().at("CSpaceMap"));
 			collision_task_ =
 					boost::static_pointer_cast<exotica::TaskSqrError>(prob->getTaskDefinitions().at("CollisionAvoidanceTask"));
 
-			init_rho_[0] = global_task_->getRho(0);
-			init_rho_[1] = local_task_->getRho(0);
-			init_rho_[2] = collision_task_->getRho(0);
+			init_rho_[0] = local_task_->getRho(0);
+			init_rho_[1] = collision_task_->getRho(0);
 			return true;
 		}
 
-		bool FRRT::resetScene(const exotica::Scene_ptr & scene)
+		bool FRRT::resetSceneAndGoal(const exotica::Scene_ptr & scene, const Eigen::VectorXd & goal)
 		{
+			global_goal_.setZero(goal.size());
+			global_goal_ = goal;
 			if (!ok(local_solver_->getProblem()->setScene(scene->getPlanningScene())))
 			{
 				INDICATE_FAILURE
@@ -532,20 +352,19 @@ namespace ompl
 			return true;
 		}
 
-		bool FRRT::localSolve(Motion *sm, Motion *gm, LocalMode mode)
+		bool FRRT::localSolve(Motion *sm, base::State *is, Motion *gm)
 		{
-			local_solver_->setRho("GlobalTask",
-					(mode == GLOBAL || mode == GOAL_SAMPLER) ? init_rho_[0] : 0);
-			local_solver_->setRho("LocalTask", (mode == LOCAL) ? init_rho_[1] : 0);
-			local_solver_->setRho("LocalTask", (mode == GOAL_SAMPLER) ? init_rho_[2] : 0);
 			int dim = (int) si_->getStateDimension();
 			Eigen::VectorXd qs(dim), qg(dim);
-			memcpy(qs.data(), sm->state->as<ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
+			memcpy(qs.data(),
+					is == NULL ? sm->state->as<ompl::base::RealVectorStateSpace::StateType>()->values : is->as<
+							ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
 					* qs.rows());
 			Eigen::MatrixXd local_path;
 			if (ok(local_solver_->SolveFullSolution(qs, local_path)))
 			{
 				/* Local planner succeeded */
+				gm->inter_state = is;
 				gm->internal_path.reset(new Eigen::MatrixXd(local_path));
 				gm->parent = sm;
 				qg = local_path.row(local_path.rows() - 1).transpose();

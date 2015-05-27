@@ -104,7 +104,6 @@ namespace exotica
 			context_->clear();
 			robot_state::RobotStatePtr start_state =
 					planning_scene->getCurrentStateUpdated(req.start_state);
-
 			// Setup the context
 			context_->setPlanningScene(planning_scene);
 			context_->setMotionPlanRequest(req);
@@ -194,21 +193,25 @@ namespace exotica
 		ROS_ERROR_STREAM("Move group: '"<< model_group->getName() <<"'");
 		std::vector<std::string> names = model_group->getJointModelNames();
 
-		Eigen::VectorXd q0 = Eigen::VectorXd::Zero(names.size());
+		Eigen::VectorXd q0 = Eigen::VectorXd::Zero(names.size()), qT =
+				Eigen::VectorXd::Zero(names.size());
 		std::string tmp_name = "";
 		for (int i = 0; i < names.size(); i++)
 		{
 			q0(i) = *start_state_.getJointPositions(names[i]);
+			qT(i) = getMotionPlanRequest().goal_constraints[0].joint_constraints[i].position;
 			tmp_name = tmp_name + " " + names[i];
 		}
 		ROS_ERROR_STREAM("Joints="<<tmp_name);
 		ROS_ERROR_STREAM("q0="<<q0.transpose());
+		ROS_ERROR_STREAM("qT="<<qT.transpose());
 
 		Eigen::MatrixXd solution;
 		bool found_solution = false;
 
 		exotica_moveit::ExoticaPlanningGoal goal;
 		vectorEigenToExotica(q0, goal.q0);
+		vectorEigenToExotica(qT, goal.qT);
 		goal.xml_file_ = config_file_;
 		moveit_msgs::PlanningScene tmp;
 		planning_scene_->getPlanningSceneMsg(tmp);

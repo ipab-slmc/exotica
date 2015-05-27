@@ -3,7 +3,7 @@
     <param name="config" type="string" value="$(find ompl_solver)/resources/valkyrie_upperbody.xml" />
     <param name="solver" type="string" value="OMPL_Interface" />
     <param name="problem" type="string" value="OMPLProblem" />
-    <param name="planning_group" type="string" value="l_arm" />
+    <param name="planning_group" type="string" value="upper_body" />
   </node>
   
 </launch>

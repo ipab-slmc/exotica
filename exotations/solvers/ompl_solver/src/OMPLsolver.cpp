@@ -114,6 +114,12 @@ namespace exotica
 				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution, timeout_
 						- planning_time_.toSec());
 				planning_time_ = ros::Time::now() - startTime;
+				ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());
+				ompl_simple_setup_->getPlanner()->getPlannerData(data);
+
+				succ_cnt_++;
+//				result_file_ << succ_cnt_ << " " << planning_time_.toSec() << " " << data.numVertices() << std::endl;
+//				HIGHLIGHT_NAMED("OMPLBenchmarking", "Success No "<<succ_cnt_<<", Time: "<<planning_time_.toSec()<<", Nodes: "<<data.numVertices());
 				return SUCCESS;
 			}
 			else
@@ -174,6 +180,7 @@ namespace exotica
         if (planner) planner->clear();
         startSampling();
 		ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
+		ompl_simple_setup_->setGoal(constructGoal());
 	}
 
 	void OMPLsolver::postSolve()
@@ -226,6 +233,12 @@ namespace exotica
 		return SUCCESS;
 	}
 
+	void OMPLsolver::getOriginalSolution(Eigen::MatrixXd & orig)
+	{
+		orig.resize(original_solution_.rows(), original_solution_.cols());
+		orig = original_solution_;
+	}
+
 	EReturn OMPLsolver::initDerived(tinyxml2::XMLHandle & handle)
 	{
 		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("TrajectorySmooth");
@@ -271,6 +284,15 @@ namespace exotica
 				jnt_handle = jnt_handle.NextSiblingElement("joint");
 			}
 		}
+
+		std::string path = ros::package::getPath("ompl_solver") + "/result/result.txt";
+		result_file_.open(path);
+		if (!result_file_.is_open())
+		{
+			ERROR("Error open "<<path);
+			return FAILURE;
+		}
+		succ_cnt_ = 0;
 		return SUCCESS;
 	}
 
@@ -355,71 +377,65 @@ namespace exotica
 		state_space_ = OMPLStateSpace::FromProblem(prob_);
 		ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
 
-		ob::GoalPtr goal = constructGoal();
-		if (goal)
-        {
-            ompl_simple_setup_->setGoal(goal);
 
-			ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(this)));
-			ompl_simple_setup_->setPlannerAllocator(boost::bind(known_planners_[selected_planner_], _1, this->getObjectName()));
-            ompl_simple_setup_->getSpaceInformation()->setup();
+		ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(this)));
+		ompl_simple_setup_->setPlannerAllocator(boost::bind(known_planners_[selected_planner_], _1, this->getObjectName()));
+        ompl_simple_setup_->getSpaceInformation()->setup();
 
-			std::vector<std::string> jnts;
-			prob_->getScenes().begin()->second->getJointNames(jnts);
-			if (projection_joints_.size() > 0)
+		std::vector<std::string> jnts;
+		prob_->getScenes().begin()->second->getJointNames(jnts);
+		if (projection_joints_.size() > 0)
+		{
+			bool projects_ok_ = true;
+			std::vector<int> vars(projection_joints_.size());
+			for (int i = 0; i < projection_joints_.size(); i++)
 			{
-				bool projects_ok_ = true;
-				std::vector<int> vars(projection_joints_.size());
-				for (int i = 0; i < projection_joints_.size(); i++)
+				bool found = false;
+				for (int j = 0; j < jnts.size(); j++)
 				{
-					bool found = false;
-					for (int j = 0; j < jnts.size(); j++)
+					if (projection_joints_[i].compare(jnts[j]) == 0)
 					{
-						if (projection_joints_[i].compare(jnts[j]) == 0)
-						{
-							vars[i] = j;
-							found = true;
-							break;
-						}
-					}
-					if (!found)
-					{
-						WARNING("Projection joint ["<<projection_joints_[i]<<"] does not exist, OMPL Projection Evaluator not used");
-						projects_ok_ = false;
+						vars[i] = j;
+						found = true;
 						break;
 					}
 				}
-				if (projects_ok_)
+				if (!found)
 				{
-					ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new exotica::OMPLProjection(state_space_, vars)));
-					std::string tmp;
-					for (int i = 0; i < projection_joints_.size(); i++)
-						tmp = tmp + "[" + projection_joints_[i] + "] ";
-					HIGHLIGHT_NAMED(object_name_, " Using projection joints "<<tmp);
+					WARNING("Projection joint ["<<projection_joints_[i]<<"] does not exist, OMPL Projection Evaluator not used");
+					projects_ok_ = false;
+					break;
 				}
 			}
-			if (ompl_simple_setup_->getGoal())
-				ompl_simple_setup_->setup();
-			if (selected_planner_.compare("geometric::FRRT") == 0)
+			if (projects_ok_)
 			{
-				INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
-				if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
-				{
-					INDICATE_FAILURE
-					return FAILURE;
-				}
+				ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new exotica::OMPLProjection(state_space_, vars)));
+				std::string tmp;
+				for (int i = 0; i < projection_joints_.size(); i++)
+					tmp = tmp + "[" + projection_joints_[i] + "] ";
+				HIGHLIGHT_NAMED(object_name_, " Using projection joints "<<tmp);
 			}
-			return SUCCESS;
 		}
-		INDICATE_FAILURE
-		return FAILURE;
+		if (ompl_simple_setup_->getGoal())
+			ompl_simple_setup_->setup();
+		if (selected_planner_.compare("geometric::FRRT") == 0)
+		{
+			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
+		}
+		return SUCCESS;
 	}
 
 	EReturn OMPLsolver::resetIfNeeded()
 	{
 		if (selected_planner_.compare("geometric::FRRT") == 0)
 		{
-			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->resetScene(prob_->scenes_.begin()->second))
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
+					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
 			{
 				INDICATE_FAILURE
 				return FAILURE;

@@ -237,8 +237,7 @@ namespace exotica
 				}
 				else
 				{
-					INDICATE_FAILURE
-					;
+                    INDICATE_FAILURE;
 					return FAILURE;
 				}
 			}
@@ -267,7 +266,11 @@ namespace exotica
 			{
 				if (ok(prob_->update(solution.row(0), t)))
 				{
-					vel_solve(error, t, solution.row(0));
+                    if(!ok(vel_solve(error, t, solution.row(0))))
+                    {
+                        INDICATE_FAILURE
+                        return FAILURE;
+                    }
 					double max_vel = vel_vec_.cwiseAbs().maxCoeff();
 					if (max_vel > maxstep_->data)
 					{
@@ -327,7 +330,11 @@ namespace exotica
 				if (ok(prob_->update(solution.row(0), t)))
 				{
 
-					vel_solve(error, t, solution.row(0));
+                    if(!ok(vel_solve(error, t, solution.row(0))))
+                    {
+                        INDICATE_FAILURE
+                        return FAILURE;
+                    }
 					if (vel_vec_ != vel_vec_)
 					{
 						INDICATE_FAILURE
@@ -384,6 +391,13 @@ namespace exotica
 		}
 	}
 
+    template<typename Scalar>
+    struct CwiseClampOp {
+      CwiseClampOp(const Scalar& inf, const Scalar& sup) : m_inf(inf), m_sup(sup) {}
+      const Scalar operator()(const Scalar& x) const { return x<m_inf ? m_inf : (x>m_sup ? m_sup : x); }
+      Scalar m_inf, m_sup;
+    };
+
 	EReturn IKsolver::vel_solve(double & err, int t, Eigen::VectorXdRefConst q)
 	{
 		static Eigen::MatrixXd I =
@@ -398,12 +412,14 @@ namespace exotica
 			{
 				// Compute velocity
 				Eigen::MatrixXd Jpinv;
+                big_jacobian.at(t)=big_jacobian.at(t).unaryExpr(CwiseClampOp<double>(-1e10,1e10));
 				Jpinv = (big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t)
 						+ prob_->getW()).inverse() * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C
 				if (Jpinv != Jpinv)
 				{
 					INDICATE_FAILURE
-					return FAILURE;
+                    HIGHLIGHT(big_jacobian.at(t));
+                    return FAILURE;
 				}
 				vel_vec_ = Jpinv * task_error;
 			}

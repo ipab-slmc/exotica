@@ -17,7 +17,8 @@ namespace exotica
 
     EReturn AICOProblem::reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem)
     {
-        clear();
+        task_defs_.clear();
+        task_maps_.clear();
         if(document.IsArray())
         {
             for (rapidjson::SizeType i=0;i<document.Size();i++)

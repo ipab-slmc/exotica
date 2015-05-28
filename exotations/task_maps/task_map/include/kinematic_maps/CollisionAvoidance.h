@@ -69,6 +69,9 @@ namespace exotica
 			//	Indicate clear, true if current state has no obstacle in the safe range
 			EParam<std_msgs::Bool> isClear_;
 
+            //  When set to true, every pair of colliding bodies will print a warning message
+            EParam<std_msgs::Bool> printWhenInCollision_;
+
 			//	End-effector names
 			std::vector<std::string> effs_;
 
@@ -80,6 +83,7 @@ namespace exotica
 
 			//	Internal kinematica solver
 			kinematica::KinematicTree kin_sol_;
+            Eigen::MatrixXd effJac;
 
             boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst, int)> pre_update_callback_;
             fcl::Transform3f obs_in_base_tf_;

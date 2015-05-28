@@ -76,6 +76,7 @@ namespace exotica
 			ros::Duration planning_time_;
 
 			int getMaxIteration();
+            Eigen::VectorXd nullSpaceRef;
 		protected:
 			/**
 			 * \brief	Derived-elements initialiser: Pure Virtual
@@ -102,18 +103,24 @@ namespace exotica
 			std::vector<Eigen::VectorXd> phi;
 			std::vector<Eigen::VectorXi> dim;
 
+            std::vector<std::vector<Eigen::VectorXdRef_ptr> > _rhos;
+            std::vector<std::vector<Eigen::MatrixXdRef_ptr> > _jacobian;
+            std::vector<std::vector<Eigen::VectorXdRef_ptr> > _goal;
+            std::vector<std::vector<Eigen::VectorXdRef_ptr> > _phi;
+
 			Eigen::DiagonalMatrix<double, Eigen::Dynamic> task_weights; //!< Weight Matrices
 			std::vector<Eigen::MatrixXd> weights;
 			Eigen::VectorXd vel_vec_;	//Velocity vector
 			Eigen::VectorXd task_error; //!< Task Error vector for the current optimisation level
 			std::vector<Eigen::MatrixXd> JTCinv_;
 			Eigen::MatrixXd JTCinvJ_;
-			Eigen::VectorXd JTCinvdy_;
+            Eigen::VectorXd JTCinvdy_;
 			TaskDefinition_map tasks_;
 			int maxdim_;
 			int size_;	//Configuration size
 			Eigen::MatrixXd inv_jacobian;
 			Eigen::VectorXd diag;
+
 
 			int T;
 			bool initialised_;

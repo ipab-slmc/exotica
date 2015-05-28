@@ -36,7 +36,7 @@ namespace exotica
             }
             if(hasIdentityTask && taskI->useRef)
             {
-                HIGHLIGHT_NAMED("OMPL","Setting goal bias reference.");
+
             }
             else
             {

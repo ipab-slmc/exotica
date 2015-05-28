@@ -257,8 +257,26 @@ namespace exotica
 		//!< Exit
 		if (!server)
 			return FAILURE;
+
+        originalMaps_=task_maps_;
+        originalDefs_=task_defs_;
+
 		return ok(ret_value) ? initDerived(handle) : ret_value;
 	}
+
+    void PlanningProblem::clear(bool keepOriginals)
+    {
+        if(keepOriginals)
+        {
+            task_maps_=originalMaps_;
+            task_defs_=originalDefs_;
+        }
+        else
+        {
+            task_maps_.clear();
+            task_defs_.clear();
+        }
+    }
 
 	EReturn PlanningProblem::update(Eigen::VectorXdRefConst x, const int t)
 	{

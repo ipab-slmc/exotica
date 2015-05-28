@@ -90,11 +90,6 @@ namespace exotica
 		ros::Time startTime = ros::Time::now();
 		finishedSolving_ = false;
 
-        if (!ompl_simple_setup_->getGoal())
-        {
-        	WARNING_NAMED(object_name_,"Can not get goal");
-        }
-
 		ompl::base::ScopedState<> ompl_start_state(state_space_);
 		if (ok(state_space_->copyToOMPLState(ompl_start_state.get(), q0)))
 		{
@@ -222,7 +217,7 @@ namespace exotica
 	EReturn OMPLsolver::getSimplifiedPath(ompl::geometric::PathGeometric &pg,
 			Eigen::MatrixXd & traj, double d)
 	{
-		if (smooth_->data && d > 0)
+        if (smooth_->data)
 		{
 			int original_cnt = pg.getStateCount();
 			ros::Time start = ros::Time::now();
@@ -421,8 +416,11 @@ namespace exotica
 				HIGHLIGHT_NAMED(object_name_, " Using projection joints "<<tmp);
 			}
 		}
-		ompl_simple_setup_->setGoal(constructGoal());
-		ompl_simple_setup_->setup();
+
+        ompl_simple_setup_->setGoal(constructGoal());
+        if (ompl_simple_setup_->getGoal())
+            ompl_simple_setup_->setup();
+
 		if (selected_planner_.compare("geometric::FRRT") == 0)
 		{
 			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);

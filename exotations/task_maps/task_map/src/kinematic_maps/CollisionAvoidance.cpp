@@ -148,7 +148,7 @@ namespace exotica
 		for (int i = 0; i < M; i++)
 		{
 			Eigen::Vector3d tmp1, tmp2;
-			scene_->getCollisionScene()->getRobotDistance(effs_[i], self_->data, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i]);
+            scene_->getCollisionScene()->getRobotDistance(effs_[i], self_->data, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i], safe_range_->data);
 			//	Compute Phi
 			if (dists[i] <= 0)
 			{

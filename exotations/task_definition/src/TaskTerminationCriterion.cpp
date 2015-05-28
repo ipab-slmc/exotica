@@ -51,10 +51,9 @@ namespace exotica
 
     EReturn TaskTerminationCriterion::terminate(bool & end, double& err, int t)
 	{
-    	HIGHLIGHT_NAMED(object_name_,"Phi "<<task_map_->phi_.at(t)->transpose()<<" goal "<<y_star_.at(t)->transpose()<<" rho "<<*(rho_.at(t)));
-    	getchar();
         err=((*(task_map_->phi_.at(t)))-(*(y_star_.at(t)))).squaredNorm()*(*(rho_.at(t)))(0);
         end = err<(*(threshold_.at(t)))(0);
+//    	HIGHLIGHT_NAMED(object_name_,"Phi "<<task_map_->phi_.at(t)->transpose()<<" goal "<<y_star_.at(t)->transpose()<<" Err "<<err);
 		return SUCCESS;
 	}
 

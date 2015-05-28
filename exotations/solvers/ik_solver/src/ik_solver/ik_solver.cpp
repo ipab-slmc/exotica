@@ -62,9 +62,7 @@ namespace exotica
 			std::cout << "IK solver initialisation, parameter error\n";
 			return FAILURE;
 		}
-
-		//INFO("IK Solver parameters update [maximum iteration]: " << maxit_);
-		//INFO("IK Solver parameters update [maximum step velocity]: " << maxstep_);
+		HIGHLIGHT_NAMED(object_name_, "Initialised at "<<this);
 		return SUCCESS;
 	}
 
@@ -152,7 +150,7 @@ namespace exotica
 		tasks_ = prob_->getTaskDefinitions();
 		JTCinv_.resize(tasks_.size());
 		JTCinvJ_.resize(size_, size_);
-		JTCinvdy_.resize(size_, size_);
+		JTCinvdy_.resize(size_);
 		initialised_ = true;
 		return SUCCESS;
 	}
@@ -340,15 +338,16 @@ namespace exotica
 					}
 					solution.row(0) = solution.row(0) + vel_vec_.transpose();
 					tmp.row(i + 1) = solution.row(0);
+					static double init_err = error;
 					if (error <= prob_->getTau())
 					{
 						found = true;
 						break;
 					}
-					else if (error > 3 * prob_->getTau())
+					else if (i > 2 && error > 0.1 * init_err)
 					{
-						double change = (tmp.row(i + 1) - tmp.row(i)).norm();
-						if (change < local_minima_threshold_->data)
+						double change = (tmp.row(i + 1) - tmp.row(i - 1)).cwiseAbs().sum();
+						if (change < maxstep_->data)
 						{
 							WARNING_NAMED(object_name_, "Running into local minima with velocity "<<change);
 							return FAILURE;
@@ -412,17 +411,6 @@ namespace exotica
 				int i = 0;
 				JTCinvJ_.setZero();
 				JTCinvdy_.setZero();
-//				Eigen::VectorXd ref =
-//						boost::static_pointer_cast<exotica::Identity>(prob_->getTaskMaps().at("CSpaceMap"))->jointRef;
-//				geometry_msgs::Point robot;
-//				robot.x = ref(0) + phi.at(t)(1);
-//				robot.y = ref(1) + phi.at(t)(2);
-//				jac_arr_.markers[0].header.stamp = jac_arr_.markers[1].header.stamp =
-//						ros::Time::now();
-//				jac_arr_.markers[0].points.resize(2);
-//				jac_arr_.markers[1].points.resize(2);
-//				jac_arr_.markers[0].points[0] = jac_arr_.markers[0].points[1] =
-//						jac_arr_.markers[1].points[0] = jac_arr_.markers[1].points[1] = robot;
 				for (auto & it : tasks_)
 				{
 					JTCinv_[i] = it.second->getTaskMap()->jac_.at(t)->transpose() * weights[i];
@@ -435,20 +423,11 @@ namespace exotica
 									- *(it.second->getTaskMap()->phi_.at(t)));
 					JTCinvJ_ += tmp_JTCinvJ;
 					JTCinvdy_ += tmp_JTCinvdy;
-
-//					Eigen::VectorXd tmpv(2);
-//					if (tmp_JTCinvJ.isZero())
-//						tmpv.setZero();
-//					else
-//						tmpv = (tmp_JTCinvJ).inverse() * tmp_JTCinvdy;
-//
-//					jac_arr_.markers[i].points[1].x += tmpv(0);
-//					jac_arr_.markers[i].points[1].y += tmpv(1);
 					i++;
 				}
-//				jac_pub_.publish(jac_arr_);
 				vel_vec_ = (JTCinvJ_ + prob_->getW()).inverse() * JTCinvdy_;
 			}
+
 			return SUCCESS;
 		}
 		else

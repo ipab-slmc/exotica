@@ -47,6 +47,7 @@ namespace exotica
             EReturn setPreUpdateCallback(boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst,int)> pre_update_callback);
             EReturn setObsFrame(const KDL::Frame & tf);
 
+            bool isClear();
 		protected:
 			/**
 			 * @brief	Concrete implementation of the initialisation method
@@ -73,6 +74,9 @@ namespace exotica
 
 			//	Initial end-effector offsets
 			std::vector<KDL::Frame> init_offsets_;
+
+			//	Link velocities
+			std::vector<Eigen::VectorXd> vels_;
 
 			//	Internal kinematica solver
 			kinematica::KinematicTree kin_sol_;

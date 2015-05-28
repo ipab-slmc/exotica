@@ -55,6 +55,8 @@ namespace exotica
 
 			///	Pointer to selected problem
 			exotica::PlanningProblem_ptr problem_;
+			boost::shared_ptr<exotica::Identity> goal_bias_map_;
+			boost::shared_ptr<exotica::Identity> goal_map_;
 
 			///	ROS service
 			ros::ServiceServer service_;

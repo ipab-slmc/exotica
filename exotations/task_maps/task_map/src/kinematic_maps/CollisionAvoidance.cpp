@@ -45,7 +45,7 @@ namespace exotica
 
 		tmp_handle = handle.FirstChildElement("IndicateClear");
 		server_->registerParam<std_msgs::Bool>(server_->getName(), tmp_handle, isClear_);
-
+		isClear_->data=true;
 		tmp_handle = handle.FirstChildElement("HardConstrain");
 		if (!ok(server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, hard_)))
 		{
@@ -103,6 +103,11 @@ namespace exotica
 	{
 		task_dim = 1;
 		return SUCCESS;
+	}
+
+	bool CollisionAvoidance::isClear()
+	{
+		return isClear_->data;
 	}
 	EReturn CollisionAvoidance::update(Eigen::VectorXdRefConst x, const int t)
 	{

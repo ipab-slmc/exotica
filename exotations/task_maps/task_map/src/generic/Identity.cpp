@@ -107,10 +107,9 @@ namespace exotica
 
 	EReturn Identity::update(Eigen::VectorXdRefConst x, const int t)
 	{
-		if (!isRegistered(t) || !getEffReferences())
+        if (!isRegistered(t))
 		{
-			INDICATE_FAILURE
-			;
+            INDICATE_FAILURE;
 			return FAILURE;
 		}
 		if (x.rows() == PHI.rows())

@@ -102,7 +102,7 @@ namespace exotica
 			std::ofstream com_file_;
 			EParam<std_msgs::Bool> debug_;
 			EParam<std_msgs::Bool> enable_z_;
-			EParam<std_msgs::Float64> support_r_;
+			EParam<exotica::Vector> support_r_;
 			int dim_;
 	};
 }

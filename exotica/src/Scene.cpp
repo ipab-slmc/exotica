@@ -374,7 +374,7 @@ namespace exotica
 		eff_offsets_.clear();
 		phis_.clear();
 		jacs_.clear();
-        object_name_=name_;
+		object_name_ = name_;
 	}
 
 	Scene::~Scene()
@@ -431,13 +431,13 @@ namespace exotica
 		update_jacobians_ = mode_->data.compare("Sampling") != 0 ? true : false;
 
 		tmp_handle = handle.FirstChildElement("VisualDebug");
-        server_->registerParam<std_msgs::Bool>(name_, tmp_handle, visual_debug_);
-        if (visual_debug_->data)
-        {
-            state_pub_ =
-                    server_->advertise<moveit_msgs::DisplayRobotState>(name_ + "/disp_state", 100);
-            HIGHLIGHT_NAMED(name_, "Running in debug mode, a robot state will be published to '"<<server_->getName()<<"/"<<name_<<"/disp_state'");
-        }
+		server_->registerParam<std_msgs::Bool>(name_, tmp_handle, visual_debug_);
+		if (visual_debug_->data)
+		{
+			state_pub_ =
+					server_->advertise<moveit_msgs::DisplayRobotState>(name_ + "/disp_state", 100);
+			HIGHLIGHT_NAMED(name_, "Running in debug mode, a robot state will be published to '"<<server_->getName()<<"/"<<name_<<"/disp_state'");
+		}
 		{
 			planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
 			moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());

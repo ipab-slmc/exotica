@@ -108,7 +108,7 @@ namespace exotica
 			Eigen::VectorXd task_error; //!< Task Error vector for the current optimisation level
 			std::vector<Eigen::MatrixXd> JTCinv_;
 			Eigen::MatrixXd JTCinvJ_;
-			Eigen::MatrixXd JTCinvdy_;
+			Eigen::VectorXd JTCinvdy_;
 			TaskDefinition_map tasks_;
 			int maxdim_;
 			int size_;	//Configuration size

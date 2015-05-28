@@ -91,7 +91,7 @@ namespace ompl
 				}
 				nn_->add(motion);
 			}
-			INFO_NAMED("FRRT","Checking if goal is valid");
+			INFO_NAMED("FRRT", "Checking if goal is valid");
 			if (goal_s && goal_s->canSample())
 			{
 				Motion *goal_motion = new Motion(si_);
@@ -298,6 +298,7 @@ namespace ompl
 			}
 			if (sol->type().compare("exotica::IKsolver") == 0)
 			{
+				HIGHLIGHT_NAMED("FRRT", "Using local planner "<<sol->object_name_<<" at "<<sol.get());
 				local_solver_ = boost::static_pointer_cast<exotica::IKsolver>(sol);
 			}
 			else

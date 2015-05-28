@@ -14,7 +14,8 @@
   <IKsolver name="FRRTLocal">
     <MaxIt>100</MaxIt>
     <MaxStep>0.05</MaxStep>
-    <LocalMinimaThreshold>1e-10</LocalMinimaThreshold>
+    <LocalMinimaThreshold>1e-5</LocalMinimaThreshold>
+    <MultiTaskMode>0</MultiTaskMode>
   </IKsolver>
 
   <IKProblem name="LocalProblem">
@@ -45,7 +46,7 @@
           <joint name="RightWrist" />	
         </Update>
       </Kinematica>
-      <VisualDebug>0</VisualDebug>
+      <VisualDebug>1</VisualDebug>
       <PlanningMode>Optimization</PlanningMode>
     </Scene> 
     
@@ -79,7 +80,7 @@
 	  <limb segment="RightForearm"></limb>
 	  <limb segment="RightPalm"></limb>
       </EndEffector>
-      <SafetyRange>0.05</SafetyRange>
+      <SafetyRange>0.1</SafetyRange>
       <HardConstrain>1</HardConstrain>
       <SelfCollision>0</SelfCollision>
       <VisualDebug>0</VisualDebug>
@@ -87,7 +88,7 @@
 
     <Task name="CollisionAvoidanceTask" type="TaskSqrError">
       <map name="CollisionAvoidanceMap"/>
-      <Rho>1e2</Rho>
+      <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0.0</Goal>
     </Task>
@@ -129,7 +130,7 @@
 
     <Task name="CoMTask" type="TaskSqrError">
       <map name="CoMMap"/>
-      <Rho>1e1</Rho>
+      <Rho>0</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0 0</Goal>
     </Task>
@@ -140,7 +141,7 @@
     </Map>
     <Task name="JointLimitTask" type="TaskSqrError">
       <map name="JointLimitMap"/>
-      <Rho>0</Rho>
+      <Rho>1e-1</Rho>
       <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task>
     <Tolerance>1e-5</Tolerance> 

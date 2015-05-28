@@ -125,14 +125,10 @@ namespace exotica
 		PHI.setZero();
 		for (int i = 0; i < dim_; i++)
 		{
-			if (fabs(com[i]) > support_r_->data)
+			if (fabs(com[i]) > support_r_->data[i])
 			{
 				PHI(i) = com[i];
-				WARNING_NAMED(object_name_, i<<" axis is out of balance, error "<<com[i]<<">"<<support_r_->data);
-			}
-			else
-			{
-				INFO_NAMED(object_name_, i<<" axis is in balance, error "<<com[i]<<"<"<<support_r_->data);
+				WARNING_NAMED(object_name_, i<<" axis is out of balance, error "<<com[i]<<">"<<support_r_->data[i]);
 			}
 		}
 		if (debug_->data)
@@ -172,13 +168,17 @@ namespace exotica
 	{
 		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("EnableZ");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, enable_z_);
-		tmp_handle = handle.FirstChildElement("SupportRadius");
-		if (!ok(server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, support_r_)))
-			support_r_->data = 0;
 		if (enable_z_->data)
 			dim_ = 3;
 		else
 			dim_ = 2;
+		tmp_handle = handle.FirstChildElement("SupportRadius");
+		if (!ok(server_->registerParam<exotica::Vector>(ns_, tmp_handle, support_r_)))
+		{
+			support_r_->data.resize(dim_);
+			for (int i = 0; i < dim_; i++)
+				support_r_->data[i] = 0;
+		}
 		tmp_handle = handle.FirstChildElement("Debug");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, debug_);
 		if (debug_->data)

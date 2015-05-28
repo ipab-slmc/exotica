@@ -91,7 +91,6 @@ namespace exotica
             std::vector<KDL::Frame> base_pose_;	//!< Base poses
 			bool initialised_;	//!< For Error checking
 			boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback_;
-			ros::NodeHandle nh_;
 			ros::Publisher com_pub_;
 			ros::Publisher COM_pub_;
 			ros::Publisher goal_pub_;
@@ -103,6 +102,7 @@ namespace exotica
 			std::ofstream com_file_;
 			EParam<std_msgs::Bool> debug_;
 			EParam<std_msgs::Bool> enable_z_;
+			EParam<exotica::Vector> support_r_;
 			int dim_;
 	};
 }

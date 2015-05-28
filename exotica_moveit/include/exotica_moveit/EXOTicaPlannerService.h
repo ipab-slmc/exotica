@@ -12,9 +12,9 @@
 #include <ompl_solver/OMPLsolver.h>
 #include <ik_solver/ik_solver.h>
 #include <exotica/Initialiser.h>
+#include <generic/Identity.h>
 #include <exotica_moveit/ExoticaPlanningAction.h>
 #include <actionlib/server/simple_action_server.h>
-#include <ros/package.h>
 #include <actionlib/server/simple_action_server.h>
 
 namespace exotica
@@ -55,12 +55,15 @@ namespace exotica
 
 			///	Pointer to selected problem
 			exotica::PlanningProblem_ptr problem_;
+			boost::shared_ptr<exotica::Identity> goal_bias_map_;
+			boost::shared_ptr<exotica::Identity> goal_map_;
 
 			///	ROS service
 			ros::ServiceServer service_;
 
 			///	Moveit planning scene
 			moveit_msgs::PlanningScenePtr scene_;
+
 	};
 }
 

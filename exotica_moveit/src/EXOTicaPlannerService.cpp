@@ -26,24 +26,51 @@ namespace exotica
 	{
 		exotica::Initialiser ini;
 
+		std::vector<exotica::MotionSolver_ptr> solvers;
+		std::vector<exotica::PlanningProblem_ptr> probs;
+		std::vector<std::string> solver_names(1), prob_names(2);
+		solver_names[0] = solver;
+		prob_names[0] = problem;
+		prob_names[1] = problem + "Bias";
 		INFO("Loading from "<<config);
-		if (!ok(ini.initialise(config, server_, solver_, problem_, problem, solver)))
+		initialised_ = true;
+		if (!ok(ini.initialise(config, server_, solvers, probs, prob_names, solver_names)))
 		{
 			ERROR("EXOTica/MoveIt Action service: EXOTica initialisation failed !!!!");
 			initialised_ = false;
 		}
 		else
 		{
-			if (solver_->type().compare("exotica::AICOsolver") == 0)
+			solver_ = solvers[0];
+			problem_ = probs[0];
+			if (solver_->type().compare("exotica::OMPLsolver") == 0)
 			{
-				;
-			}
-			else if (solver_->type().compare("exotica::IKsolver") == 0)
-			{
-				;
-			}
-			else if (solver_->type().compare("exotica::OMPLsolver") == 0)
-			{
+				if (problem_->getTaskMaps().find("CSpaceGoalMap") == problem_->getTaskMaps().end()
+						|| problem_->getTaskMaps().at("CSpaceGoalMap")->type().compare("exotica::Identity")
+								!= 0)
+				{
+					INDICATE_FAILURE
+					initialised_ = false;
+				}
+				else
+				{
+					goal_map_ =
+							boost::static_pointer_cast<exotica::Identity>(problem_->getTaskMaps().at("CSpaceGoalMap"));
+				}
+
+				if (probs[1]->getTaskMaps().find("GoalBiasMap") == probs[1]->getTaskMaps().end()
+						|| probs[1]->getTaskMaps().at("GoalBiasMap")->type().compare("exotica::Identity")
+								!= 0)
+				{
+					INDICATE_FAILURE
+					initialised_ = false;
+				}
+				else
+				{
+					goal_bias_map_ =
+							boost::static_pointer_cast<exotica::Identity>(probs[1]->getTaskMaps().at("GoalBiasMap"));
+				}
+
 				const moveit::core::JointModelGroup* model_group =
 						server_->getModel("robot_description")->getJointModelGroup(group);
 				moveit::core::JointBoundsVector b = model_group->getActiveJointModelsBounds();
@@ -55,18 +82,19 @@ namespace exotica
 					tmp->getBounds()[i] = (*b[i])[0].min_position_;
 					tmp->getBounds()[i + b.size()] = (*b[i])[0].max_position_;
 				}
+				if (!exotica::ok(boost::static_pointer_cast<exotica::OMPLsolver>(solver_)->specifyProblem(probs[0], NULL, probs[1], NULL)))
+				{
+					INDICATE_FAILURE
+					initialised_ = false;
+				}
 			}
-
-			if (!exotica::ok(solver_->specifyProblem(problem_)))
+			else if (!exotica::ok(solver_->specifyProblem(problem_)))
 			{
 				INDICATE_FAILURE
 				initialised_ = false;
 			}
-			else
-			{
-				initialised_ = true;
+			if (initialised_)
 				as_.start();
-			}
 		}
 		return initialised_;
 	}
@@ -79,10 +107,15 @@ namespace exotica
 			INDICATE_FAILURE
 			return false;
 		}
-		HIGHLIGHT_NAMED("MoveitInterface", "Using Solver "<<solver_->object_name_<<"["<<solver_->type()<<"], Problem "<<problem_->object_name_<<"["<<problem_->type()<<"].");
+//		HIGHLIGHT_NAMED("MoveitInterface", "Using Solver "<<solver_->object_name_<<"["<<solver_->type()<<"], Problem "<<problem_->object_name_<<"["<<problem_->type()<<"].");
 		if (solver_->type().compare("exotica::OMPLsolver") == 0)
 		{
 			exotica::OMPLsolver_ptr ss = boost::static_pointer_cast<exotica::OMPLsolver>(solver_);
+
+			Eigen::VectorXd qT;
+			exotica::vectorExoticaToEigen(goal->qT, qT);
+			goal_bias_map_->jointRef = qT;
+			goal_map_->jointRef = qT;
 			ss->setMaxPlanningTime(goal->max_time_);
 			if (!ok(ss->resetIfNeeded()))
 			{
@@ -103,6 +136,7 @@ namespace exotica
 		}
 		else
 			found = solver_->Solve(q0, solution);
+
 		if (ok(found))
 		{
 			res_.succeeded_ = true;
@@ -110,9 +144,8 @@ namespace exotica
 					ros::Duration(ros::Time::now() - start).toSec();
 			exotica::matrixEigenToExotica(solution, res_.solution_);
 			as_.setSucceeded(res_);
-			return true;
 		}
-		return false;
+		return res_.succeeded_;
 	}
 }
 

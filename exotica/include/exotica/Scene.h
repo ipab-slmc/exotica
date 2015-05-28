@@ -27,6 +27,9 @@
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit/robot_state/conversions.h>
+
+#include <geometric_shapes/mesh_operations.h>
+#include <geometric_shapes/shape_operations.h>
 namespace exotica
 {
 	typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
@@ -55,6 +58,7 @@ namespace exotica
 			 */
 			EReturn initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
 					const std::vector<std::string> & joints, std::string & mode);
+            EReturn reinitialise();
 
             /**
 			 * \brief	Update the robot collision properties
@@ -70,7 +74,7 @@ namespace exotica
 			 * @param	d		Closest distance (-1 if in collision)
              * @return Indication of success
 			 */
-			EReturn getDistance(const std::string & o1, const std::string & o2, double d);
+            EReturn getDistance(const std::string & o1, const std::string & o2, double& d, double safeDist);
             /**
              * @brief Get closest distance between two objects
              * @param	o1		Name of object 1
@@ -80,8 +84,8 @@ namespace exotica
              * @param	p2		Closest point on o2
              * @return Indication of success
              */
-			EReturn getDistance(const std::string & o1, const std::string & o2, double d,
-					Eigen::Vector3d & p1, Eigen::Vector3d & p2);
+            EReturn getDistance(const std::string & o1, const std::string & o2, double& d,
+                    Eigen::Vector3d & p1, Eigen::Vector3d & p2, double safeDist);
 
             /**
 			 * \brief	Check if the whole robot is valid (collision and feasibility)
@@ -102,7 +106,7 @@ namespace exotica
 			 */
 			EReturn getRobotDistance(const std::string & link, bool self, double & d,
 					Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm,
-					Eigen::Vector3d & c1, Eigen::Vector3d & c2);
+                    Eigen::Vector3d & c1, Eigen::Vector3d & c2, double safeDist);
 
             /**
 			 * \brief	Get current robot state
@@ -137,7 +141,7 @@ namespace exotica
              * @return Distance to collision
 			 */
 			double distance(const fcls_ptr & fcl1, const fcls_ptr & fcl2,
-					const fcl::DistanceRequest & req, fcl::DistanceResult & res);
+                    const fcl::DistanceRequest & req, fcl::DistanceResult & res, double safeDist);
             ///	FCL collision object for the robot
 			std::map<std::string, fcls_ptr> fcl_robot_;
 

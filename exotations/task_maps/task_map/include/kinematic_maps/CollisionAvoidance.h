@@ -47,6 +47,7 @@ namespace exotica
             EReturn setPreUpdateCallback(boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst,int)> pre_update_callback);
             EReturn setObsFrame(const KDL::Frame & tf);
 
+            bool isClear();
 		protected:
 			/**
 			 * @brief	Concrete implementation of the initialisation method
@@ -65,14 +66,24 @@ namespace exotica
 			//	Safety range
 			EParam<std_msgs::Float64> safe_range_;
 
+			//	Indicate clear, true if current state has no obstacle in the safe range
+			EParam<std_msgs::Bool> isClear_;
+
+            //  When set to true, every pair of colliding bodies will print a warning message
+            EParam<std_msgs::Bool> printWhenInCollision_;
+
 			//	End-effector names
 			std::vector<std::string> effs_;
 
 			//	Initial end-effector offsets
 			std::vector<KDL::Frame> init_offsets_;
 
+			//	Link velocities
+			std::vector<Eigen::VectorXd> vels_;
+
 			//	Internal kinematica solver
 			kinematica::KinematicTree kin_sol_;
+            Eigen::MatrixXd effJac;
 
             boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst, int)> pre_update_callback_;
             fcl::Transform3f obs_in_base_tf_;

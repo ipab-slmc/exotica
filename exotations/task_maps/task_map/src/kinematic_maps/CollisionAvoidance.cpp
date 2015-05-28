@@ -39,9 +39,15 @@ namespace exotica
 	{
 		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("SafetyRange");
 		server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, safe_range_);
+
 		tmp_handle = handle.FirstChildElement("SelfCollision");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, self_);
 
+		tmp_handle = handle.FirstChildElement("IndicateClear");
+		server_->registerParam<std_msgs::Bool>(server_->getName(), tmp_handle, isClear_);
+		isClear_->data=true;
+        tmp_handle = handle.FirstChildElement("PrintWhenInCollision");
+        server_->registerParam<std_msgs::Bool>(server_->getName(), tmp_handle, printWhenInCollision_);
 		tmp_handle = handle.FirstChildElement("HardConstrain");
 		if (!ok(server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, hard_)))
 		{
@@ -49,9 +55,8 @@ namespace exotica
 		}
 		if (!ok(scene_->getEndEffectors(object_name_, effs_)))
 			return MMB_NIN;
-		init_offsets_.resize(effs_.size());
-		for (int i = 0; i < effs_.size(); i++)
-			init_offsets_[i] = KDL::Frame::Identity();
+        init_offsets_.assign(effs_.size(), KDL::Frame::Identity());
+
 		kin_sol_ = scene_->getSolver();
 		kinematica::SolutionForm_t sol;
 		sol.end_effector_segs = effs_;
@@ -100,20 +105,30 @@ namespace exotica
 		task_dim = 1;
 		return SUCCESS;
 	}
+
+	bool CollisionAvoidance::isClear()
+	{
+		return isClear_->data;
+	}
 	EReturn CollisionAvoidance::update(Eigen::VectorXdRefConst x, const int t)
 	{
 		if (!isRegistered(t) || !getEffReferences())
 		{
-			INDICATE_FAILURE
-			;
+            INDICATE_FAILURE;
 			return FAILURE;
 		}
+
+        PHI.setZero();
+        if (updateJacobian_)
+        {
+            JAC.setZero();
+        }
+
 		if (pre_update_callback_)
 			pre_update_callback_(this, x, t);
 
 		int M = EFFPHI.rows() / 3;
 
-		PHI.setZero();
 		std::vector<double> dists(M);
 		std::vector<double> costs(M);
 		std::vector<Eigen::Vector3d> c1s(M), c2s(M);
@@ -133,14 +148,16 @@ namespace exotica
 				obj->setTransform(obs_in_base_tf_);
 			}
 		}
+		isClear_->data = true;
 		for (int i = 0; i < M; i++)
 		{
 			Eigen::Vector3d tmp1, tmp2;
-			scene_->getCollisionScene()->getRobotDistance(effs_[i], self_->data, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i]);
+            scene_->getCollisionScene()->getRobotDistance(effs_[i], self_->data, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i], safe_range_->data);
 			//	Compute Phi
 			if (dists[i] <= 0)
 			{
-				WARNING_NAMED(object_name_, "Robot link " << effs_[i] << " is in collision");
+				isClear_->data = false;
+                if(printWhenInCollision_->data) WARNING_NAMED(object_name_, "Robot link " << effs_[i] << " is in collision");
 				//	In hard constrain mode, collision == FAILURE
 				if (hard_->data)
 				{
@@ -154,6 +171,7 @@ namespace exotica
 			}
 			else
 			{
+				isClear_->data = false;
 				costs[i] = (1.0 - dists[i] / safe_range_->data);
 			}
 			PHI(0) = PHI(0) + costs[i] * costs[i];
@@ -193,36 +211,44 @@ namespace exotica
 					world_centre_.points.push_back(p2);
 				}
 			}
+        }
 
-			if (visual_debug_->data)
-			{
-				close_pub_.publish(close_);
-				robot_centre_pub_.publish(robot_centre_);
-				world_centre_pub_.publish(world_centre_);
-				ros::spinOnce();
-			}
+        if (updateJacobian_)
+        {
+            if (visual_debug_->data)
+            {
+                close_pub_.publish(close_);
+                robot_centre_pub_.publish(robot_centre_);
+                world_centre_pub_.publish(world_centre_);
+                ros::spinOnce();
+            }
 
-			if (!kin_sol_.updateConfiguration(x) || !kin_sol_.generateForwardMap()
-					|| !kin_sol_.generateJacobian(EFFJAC))
-			{
-				INDICATE_FAILURE
-				return FAILURE;
-			}
-			JAC.setZero();
-			for (int i = 0; i < M; i++)
-			{
-				if (dists[i] <= 0)
-				{
-					Eigen::Vector3d tmpnorm = c2s[i] - c1s[i];
-					tmpnorm.normalize();
-					JAC += ((2.0 * costs[i]) / safe_range_->data)
-							* (tmpnorm.transpose() * EFFJAC.block(3 * i, 0, 3, JAC.cols()));
-				}
-				else if (dists[i] <= safe_range_->data)
-					JAC += ((2.0 * costs[i]) / safe_range_->data)
-							* (norms[i].transpose() * EFFJAC.block(3 * i, 0, 3, JAC.cols()));
-			}
-		}
+            if(kin_sol_.getEffSize() > 0)
+            {
+                effJac.resize(kin_sol_.getEffSize()*3,kin_sol_.getNumJoints());
+                if (!kin_sol_.updateConfiguration(x) || !kin_sol_.generateForwardMap()
+                        || !kin_sol_.generateJacobian(effJac))
+                {
+                    INDICATE_FAILURE
+                    return FAILURE;
+                }
+
+                for (int i = 0; i < M; i++)
+                {
+                    if (dists[i] <= 0)
+                    {
+                        Eigen::Vector3d tmpnorm = c2s[i] - c1s[i];
+                        tmpnorm.normalize();
+                        JAC += ((2.0 * costs[i]) / safe_range_->data)
+                                * (tmpnorm.transpose() * effJac.block(3 * i, 0, 3, JAC.cols()));
+                    }
+                    else if (dists[i] <= safe_range_->data)
+                        JAC += ((2.0 * costs[i]) / safe_range_->data)
+                                * (norms[i].transpose() * effJac.block(3 * i, 0, 3, JAC.cols()));
+                }
+            }
+        }
+
 		return SUCCESS;
 	}
 }

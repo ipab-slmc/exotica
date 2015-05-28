@@ -12,7 +12,7 @@
      <PlanningMode>Optimization</PlanningMode>
   </Server>
   <OMPLsolver name="OMPL_Interface">
-    <algorithm>RRT</algorithm>
+    <algorithm>FRRT</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
     <TrajectorySmooth>1</TrajectorySmooth>
     <ProjectionJoints>

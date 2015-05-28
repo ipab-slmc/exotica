@@ -165,6 +165,7 @@ namespace exotica
 
 		T=prob_->getT();
         taskNames.resize(prob_->getTaskDefinitions().size());
+        taskIndex.clear();
         dim.resize(prob_->getTaskDefinitions().size());
         int i=0,cur_rows=0;
         for (auto& task_ : prob_->getTaskDefinitions())
@@ -216,6 +217,7 @@ namespace exotica
 
 	EReturn AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init, Eigen::MatrixXd & solution)
 	{
+        HIGHLIGHT_NAMED("AICO debug:\n",print(""))
         ros::Time startTime = ros::Time::now();
         ROS_WARN_STREAM("AICO: Setting up the solver");
 		updateCount=0;

@@ -97,6 +97,10 @@ namespace exotica
 		goal.resize(T);
 		phi.resize(T);
 		dim.resize(T);
+        _rhos.resize(T);
+        _jacobian.resize(T);
+        _goal.resize(T);
+        _phi.resize(T);
 		taskIndex.clear();
 
 		for (int t = 0; t < T; t++)
@@ -128,15 +132,25 @@ namespace exotica
 			rhos.at(t).resize(prob_->getTaskDefinitions().size());
 			rhos.at(t).setZero();
 			goal.at(t).setZero();
+
+            _rhos[t].resize(prob_->getTaskDefinitions().size());
+            _jacobian[t].resize(prob_->getTaskDefinitions().size());
+            _goal[t].resize(prob_->getTaskDefinitions().size());
+            _phi[t].resize(prob_->getTaskDefinitions().size());
 			i = 0;
 			for (auto & it : prob_->getTaskDefinitions())
 			{
 				TaskSqrError_ptr task = boost::static_pointer_cast<TaskSqrError>(it.second);
-				task->registerRho(Eigen::VectorXdRef_ptr(rhos.at(t).segment(i, 1)), t);
-				task->registerGoal(Eigen::VectorXdRef_ptr(goal.at(t).segment(cur_rows, dim.at(t)(i))), t);
+                _rhos[t][i]=Eigen::VectorXdRef_ptr(rhos.at(t).segment(i, 1));
+                _goal[t][i]=Eigen::VectorXdRef_ptr(goal.at(t).segment(cur_rows, dim.at(t)(i)));
+                _phi[t][i]=Eigen::VectorXdRef_ptr(phi.at(t).segment(cur_rows, dim.at(t)(i)));
+                _jacobian[t][i]=Eigen::MatrixXdRef_ptr(big_jacobian.at(t).block(cur_rows, 0, dim.at(t)(i), size_));
+
+                task->registerRho(_rhos[t][i], t);
+                task->registerGoal(_goal[t][i], t);
 				task->setDefaultGoals(t);
-				task->registerPhi(Eigen::VectorXdRef_ptr(phi.at(t).segment(cur_rows, dim.at(t)(i))), t);
-				task->registerJacobian(Eigen::MatrixXdRef_ptr(big_jacobian.at(t).block(cur_rows, 0, dim.at(t)(i), size_)), t);
+                task->registerPhi(_phi[t][i], t);
+                task->registerJacobian(_jacobian[t][i], t);
 
 				task_weights.diagonal().block(cur_rows, 0, dim.at(t)(i), 1).setConstant(rhos.at(t)(i));
 				weights[i].resize(dim.at(t)(i), dim.at(t)(i));
@@ -152,7 +166,7 @@ namespace exotica
 		tasks_ = prob_->getTaskDefinitions();
 		JTCinv_.resize(tasks_.size());
 		JTCinvJ_.resize(size_, size_);
-		JTCinvdy_.resize(size_, size_);
+        JTCinvdy_.resize(size_);
 		initialised_ = true;
 		return SUCCESS;
 	}
@@ -276,8 +290,14 @@ namespace exotica
 					{
 						vel_vec_ = vel_vec_ * maxstep_->data / max_vel;
 					}
-
-					solution.row(0) = solution.row(0) + vel_vec_.transpose();
+                    if(error <= prob_->getTau()*2.0)
+                    {
+                        solution.row(0) = solution.row(0) + vel_vec_.transpose();
+                    }
+                    else
+                    {
+                        solution.row(0) = solution.row(0) + vel_vec_.transpose()*0.5;
+                    }
 					if (error <= prob_->getTau())
 					{
 						found = true;
@@ -413,57 +433,40 @@ namespace exotica
 				// Compute velocity
 				Eigen::MatrixXd Jpinv;
                 big_jacobian.at(t)=big_jacobian.at(t).unaryExpr(CwiseClampOp<double>(-1e10,1e10));
-				Jpinv = (big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t)
-						+ prob_->getW()).inverse() * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C
+                Jpinv = (big_jacobian.at(t).transpose() * task_weights * big_jacobian.at(t)
+                        + prob_->getW()).inverse() * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C */
+                /*Jpinv = prob_->getW()*big_jacobian.at(t).transpose() * (big_jacobian.at(t).transpose()*prob_->getW()*big_jacobian.at(t) + Eigen::MatrixXd::Identity(task_weights.rows(),task_weights.rows())*task_weights ).inverse(); //W*Jt*(Jt*W*J+C)*/
+                /*Jpinv=big_jacobian.at(t).transpose();*/
 				if (Jpinv != Jpinv)
 				{
 					INDICATE_FAILURE
                     HIGHLIGHT(big_jacobian.at(t));
                     return FAILURE;
 				}
-				vel_vec_ = Jpinv * task_error;
+                /*if(nullSpaceRef.rows()==q.rows())
+                {
+                    vel_vec_ = Jpinv * task_error + (I-Jpinv*big_jacobian.at(t))*(nullSpaceRef-q);
+                }
+                else*/
+                {
+                    vel_vec_ = Jpinv * task_error;
+                }
+
 			}
 			else
 			{
 				int i = 0;
 				JTCinvJ_.setZero();
 				JTCinvdy_.setZero();
-//				Eigen::VectorXd ref =
-//						boost::static_pointer_cast<exotica::Identity>(prob_->getTaskMaps().at("CSpaceMap"))->jointRef;
-//				geometry_msgs::Point robot;
-//				robot.x = ref(0) + phi.at(t)(1);
-//				robot.y = ref(1) + phi.at(t)(2);
-//				jac_arr_.markers[0].header.stamp = jac_arr_.markers[1].header.stamp =
-//						ros::Time::now();
-//				jac_arr_.markers[0].points.resize(2);
-//				jac_arr_.markers[1].points.resize(2);
-//				jac_arr_.markers[0].points[0] = jac_arr_.markers[0].points[1] =
-//						jac_arr_.markers[1].points[0] = jac_arr_.markers[1].points[1] = robot;
 				for (auto & it : tasks_)
 				{
-					JTCinv_[i] = it.second->getTaskMap()->jac_.at(t)->transpose() * weights[i];
-
-					std::pair<int, int> id = taskIndex.at(it.first);
-					Eigen::MatrixXd tmp_JTCinvJ = JTCinv_[i]
-							* (*(it.second->getTaskMap()->jac_.at(t)));
-					Eigen::MatrixXd tmp_JTCinvdy = JTCinv_[i]
-							* (goal.at(t).segment(id.second, dim.at(t)(id.first))
-									- *(it.second->getTaskMap()->phi_.at(t)));
-					JTCinvJ_ += tmp_JTCinvJ;
-					JTCinvdy_ += tmp_JTCinvdy;
-
-//					Eigen::VectorXd tmpv(2);
-//					if (tmp_JTCinvJ.isZero())
-//						tmpv.setZero();
-//					else
-//						tmpv = (tmp_JTCinvJ).inverse() * tmp_JTCinvdy;
-//
-//					jac_arr_.markers[i].points[1].x += tmpv(0);
-//					jac_arr_.markers[i].points[1].y += tmpv(1);
+                    JTCinv_[i] = _jacobian[t][i]->transpose() * weights[i];
+                    JTCinvJ_ += JTCinv_[i] * (*(_jacobian[t][i])) + prob_->getW();
+                    JTCinvdy_ += JTCinv_[i] * ((*(_goal[t][i]))-(*(_phi[t][i])));
 					i++;
 				}
 //				jac_pub_.publish(jac_arr_);
-				vel_vec_ = (JTCinvJ_ + prob_->getW()).inverse() * JTCinvdy_;
+                vel_vec_ = JTCinvJ_.inverse() * JTCinvdy_;
 			}
 			return SUCCESS;
 		}

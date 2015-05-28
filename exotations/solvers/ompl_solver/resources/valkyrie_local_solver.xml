@@ -14,7 +14,7 @@
   <IKsolver name="FRRTLocal">
     <MaxIt>100</MaxIt>
     <MaxStep>0.05</MaxStep>
-    <LocalMinimaThreshold>1e-5</LocalMinimaThreshold>
+    <LocalMinimaThreshold>1e-4</LocalMinimaThreshold>
     <MultiTaskMode>0</MultiTaskMode>
   </IKsolver>
 
@@ -80,7 +80,7 @@
 	  <limb segment="RightForearm"></limb>
 	  <limb segment="RightPalm"></limb>
       </EndEffector>
-      <SafetyRange>0.1</SafetyRange>
+      <SafetyRange>0.05</SafetyRange>
       <HardConstrain>1</HardConstrain>
       <SelfCollision>0</SelfCollision>
       <VisualDebug>0</VisualDebug>
@@ -144,7 +144,7 @@
       <Rho>1e-1</Rho>
       <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task>
-    <Tolerance>1e-5</Tolerance> 
+    <Tolerance>1e-4</Tolerance> 
     <W> 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</W>
   </IKProblem>
 </ExampleConfiguration>

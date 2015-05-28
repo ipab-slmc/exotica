@@ -26,8 +26,7 @@ namespace exotica
 	EReturn IKProblem::reinitialise(rapidjson::Document& document,
 			boost::shared_ptr<PlanningProblem> problem)
 	{
-		task_defs_.clear();
-		task_maps_.clear();
+        clear();
 		if (document.IsArray())
 		{
 			for (rapidjson::SizeType i = 0; i < document.Size(); i++)

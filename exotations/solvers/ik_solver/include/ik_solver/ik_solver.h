@@ -39,7 +39,6 @@ namespace exotica
 			 * \brief	Solves the problem. This returns the whole trajectory
 			 * @param	q0			Start state.
 			 * @param	solution	This will be filled with the solution in joint space(Vector).
-			 * @return	SUCESS if solution has been found, corresponding error code if not.
 			 */
 			EReturn SolveFullSolution(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
 			/**
@@ -76,7 +75,7 @@ namespace exotica
 			ros::Duration planning_time_;
 
 			int getMaxIteration();
-            Eigen::VectorXd nullSpaceRef;
+			Eigen::VectorXd nullSpaceRef;
 		protected:
 			/**
 			 * \brief	Derived-elements initialiser: Pure Virtual
@@ -103,10 +102,10 @@ namespace exotica
 			std::vector<Eigen::VectorXd> phi;
 			std::vector<Eigen::VectorXi> dim;
 
-            std::vector<std::vector<Eigen::VectorXdRef_ptr> > _rhos;
-            std::vector<std::vector<Eigen::MatrixXdRef_ptr> > _jacobian;
-            std::vector<std::vector<Eigen::VectorXdRef_ptr> > _goal;
-            std::vector<std::vector<Eigen::VectorXdRef_ptr> > _phi;
+			std::vector<std::vector<Eigen::VectorXdRef_ptr> > _rhos;
+			std::vector<std::vector<Eigen::MatrixXdRef_ptr> > _jacobian;
+			std::vector<std::vector<Eigen::VectorXdRef_ptr> > _goal;
+			std::vector<std::vector<Eigen::VectorXdRef_ptr> > _phi;
 
 			Eigen::DiagonalMatrix<double, Eigen::Dynamic> task_weights; //!< Weight Matrices
 			std::vector<Eigen::MatrixXd> weights;
@@ -114,21 +113,24 @@ namespace exotica
 			Eigen::VectorXd task_error; //!< Task Error vector for the current optimisation level
 			std::vector<Eigen::MatrixXd> JTCinv_;
 			Eigen::MatrixXd JTCinvJ_;
-            Eigen::VectorXd JTCinvdy_;
+			Eigen::VectorXd JTCinvdy_;
 			TaskDefinition_map tasks_;
 			int maxdim_;
 			int size_;	//Configuration size
 			Eigen::MatrixXd inv_jacobian;
 			Eigen::VectorXd diag;
 
-
 			int T;
 			bool initialised_;
 
 			///	For FRRT debug
+			bool FRRT_;
 			EParam<std_msgs::Float64> local_minima_threshold_;
 			ros::Publisher jac_pub_;
 			visualization_msgs::MarkerArray jac_arr_;
+			std::pair<int, int> coll_index_;
+			std::pair<int, int> goal_index_;
+			EParam<std_msgs::Bool> ignore_obs_near_goal_;
 	};
 	typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

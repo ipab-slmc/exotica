@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ompl_solver)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
@@ -50,6 +50,7 @@ add_library(ompl_solver
    src/OMPLStateValidityChecker.cpp
    src/OMPLGoalSampler.cpp
    src/frrt/FRRT.cpp
+   src/frrt/BFRRT.cpp
 )
 
 link_directories(${catkin_LIBRARY_DIRS})

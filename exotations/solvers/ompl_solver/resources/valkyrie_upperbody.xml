@@ -10,9 +10,13 @@
      <!-- Other server functionalities other than parameters TODO -->
   </Server>
   <OMPLsolver name="OMPL_Interface">
-    <algorithm>FRRT</algorithm>
+    <algorithm>BKPIECE</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
-    <TrajectorySmooth>1</TrajectorySmooth>
+    <TrajectorySmooth>0</TrajectorySmooth>
+    <ProjectionJoints>
+    	  <joint name="WaistRotator" />
+          <joint name="WaistExtensor" />
+    </ProjectionJoints>
   </OMPLsolver>
 
   <OMPLProblem name="OMPLProblem">
@@ -45,7 +49,7 @@
         </Update>
       </Kinematica>
       <PlanningMode>Sampling</PlanningMode>
-      <VisualDebug>1</VisualDebug>
+      <VisualDebug>0</VisualDebug>
     </Scene> 
     
     <Map type="Identity" name="CSpaceGoalMap">
@@ -58,14 +62,14 @@
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
-      <Threshold>1e-4</Threshold>
+      <Threshold>1e-3</Threshold>
     </Task>
 
     <Map type="CoM" name="CoMMap">
       <Scene name="TestScene"/>
       <EnableZ>false</EnableZ>
       <Debug>false</Debug>
-      <SupportRadius>0.2 0.203</SupportRadius>
+      <SupportRadius>0.15 0.203</SupportRadius>
       <EndEffector ignore_unused="false">
         <limb segment="Trunk"/>
         <limb segment="LeftShoulderExtensor"/>
@@ -98,10 +102,10 @@
 
     <Task name="CoMTask" type="TaskTerminationCriterion">
       <map name="CoMMap"/>
-      <Rho>0</Rho>
+      <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0 0</Goal>
-      <Threshold>1e-4</Threshold>
+      <Threshold>1e-3</Threshold>
     </Task>
     <!-- Problem parameters (structuring etc...) -->
     <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/valkyrie_local_solver.xml</LocalPlannerConfig>
@@ -150,7 +154,7 @@
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
-      <Threshold>1e-4</Threshold>
+      <Threshold>1e-3</Threshold>
     </Task>
   </OMPLProblem>
 </ExampleConfiguration>

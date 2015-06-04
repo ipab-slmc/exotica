@@ -110,7 +110,8 @@ namespace ompl
 				bool setUpLocalPlanner(const std::string & xml_file,
 						const exotica::Scene_ptr & scene);
 
-				bool resetSceneAndGoal(const exotica::Scene_ptr & scene,const Eigen::VectorXd & goal);
+				bool resetSceneAndGoal(const exotica::Scene_ptr & scene,
+						const Eigen::VectorXd & goal);
 			protected:
 				/*
 				 * \brief	Motion class. This is where all the planner specific parameters are defined
@@ -151,6 +152,7 @@ namespace ompl
 						{
 							return global_valid_;
 						}
+
 						///	The OMPL state
 						base::State *state;
 						///	Internal state
@@ -176,7 +178,8 @@ namespace ompl
 				 */
 				double distanceFunction(const Motion *a, const Motion *b) const
 				{
-					return si_->distance(a->state, b->state);
+					double d=si_->distance(a->state, b->state);
+					return d;
 				}
 
 				///	State sampler
@@ -195,8 +198,10 @@ namespace ompl
 			private:
 				///	Local solver
 				bool localSolve(Motion *sm, base::State *is, Motion *gm);
-
+				exotica::Server_ptr ser_;
 				exotica::IKsolver_ptr local_solver_;
+				exotica::EParam<std_msgs::Float64> gTau_;
+				exotica::EParam<std_msgs::Float64> lTau_;
 
 				///	Store the local taskmap and task
 				exotica::TaskSqrError_ptr local_task_;
@@ -215,6 +220,11 @@ namespace ompl
 				int local_succeeded_;
 				int normal_try_;
 				int normal_succeeded_;
+
+				ros::Publisher node_pub_;
+				ros::Publisher edge_pub_;
+				visualization_msgs::Marker nodes_;
+				visualization_msgs::Marker edges_;
 		};
 	}
 }

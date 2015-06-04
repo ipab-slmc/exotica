@@ -8,7 +8,7 @@
 #ifndef OMPLGOALSAMPLER_H_
 #define OMPLGOALSAMPLER_H_
 
-#include <ompl/base/goals/GoalSampleableRegion.h>
+#include <ompl/base/goals/GoalState.h>
 #include <ompl/base/goals/GoalRegion.h>
 #include "ompl_solver/OMPLsolver.h"
 #include "ompl_solver/OMPLProblem.h"
@@ -22,16 +22,15 @@ namespace exotica
 
 	class OMPLsolver;
 
-    class OMPLGoalSampler : public OMPLGoal, public ompl::base::GoalSampleableRegion
+    class OMPLGoalSampler : public ompl::base::GoalSampleableRegion, public OMPLGoal
 	{
 		public:
             OMPLGoalSampler (const ompl::base::SpaceInformationPtr &si, OMPLProblem_ptr prob, OMPLProblem_ptr samplingBias);
 			virtual
 			~OMPLGoalSampler ();
-            virtual void sampleGoal(ompl::base::State *st) const ;
+			virtual void sampleGoal(ompl::base::State *st) const;
             virtual unsigned int maxSampleCount() const ;
             virtual double distanceGoal(const ompl::base::State *st) const;
-
         private:
 
 			OMPLProblem_ptr prob_;

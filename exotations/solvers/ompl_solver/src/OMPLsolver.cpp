@@ -30,8 +30,9 @@
 #include <ompl/geometric/planners/rrt/RRTstar.h>
 #include <ompl/geometric/planners/stride/STRIDE.h>
 #include "frrt/FRRT.h"
+#include "frrt/BFRRT.h"
 
-#include <ompl/base/goals/GoalLazySamples.h>
+//#include <ompl/base/goals/GoalLazySamples.h>
 #include "ompl_solver/OMPLGoalUnion.h"
 #include "ompl_solver/OMPLGoal.h"
 #include "ompl_solver/OMPLGoalSampler.h"
@@ -62,23 +63,23 @@ namespace exotica
 		// Whoop whoop whoop whoop ...
 	}
 
-    std::string OMPLsolver::print(std::string prepend)
-    {
-        std::string ret = Object::print(prepend);
-        ret+="\n"+prepend+"  Goal:";
-        if(prob_)
-          ret+="\n"+prob_->print(prepend+"    ");
-        ret+="\n"+prepend+"  Cost:";
-        if(costs_)
-          ret+="\n"+costs_->print(prepend+"    ");
-        ret+="\n"+prepend+"  Goal bias:";
-        if(goalBias_)
-          ret+="\n"+goalBias_->print(prepend+"    ");
-        ret+="\n"+prepend+"  Sampling bias:";
-        if(samplingBias_)
-          ret+="\n"+samplingBias_->print(prepend+"    ");
-        return ret;
-    }
+	std::string OMPLsolver::print(std::string prepend)
+	{
+		std::string ret = Object::print(prepend);
+		ret += "\n" + prepend + "  Goal:";
+		if (prob_)
+			ret += "\n" + prob_->print(prepend + "    ");
+		ret += "\n" + prepend + "  Cost:";
+		if (costs_)
+			ret += "\n" + costs_->print(prepend + "    ");
+		ret += "\n" + prepend + "  Goal bias:";
+		if (goalBias_)
+			ret += "\n" + goalBias_->print(prepend + "    ");
+		ret += "\n" + prepend + "  Sampling bias:";
+		if (samplingBias_)
+			ret += "\n" + samplingBias_->print(prepend + "    ");
+		return ret;
+	}
 
 	void OMPLsolver::setMaxPlanningTime(double t)
 	{
@@ -93,12 +94,18 @@ namespace exotica
 		ompl::base::ScopedState<> ompl_start_state(state_space_);
 		if (ok(state_space_->copyToOMPLState(ompl_start_state.get(), q0)))
 		{
-			ompl_simple_setup_->setStartState(ompl_start_state);
 
+			ompl_simple_setup_->setStartState(ompl_start_state);
+			if (!ompl_simple_setup_->getGoal())
+			{
+				WARNING_NAMED(object_name_, "Goal state not set, can not use bi-directional algorithms!");
+				ompl_simple_setup_->setGoal(constructGoal());
+			}
+			preSolve();
 			// Solve here
 			ompl::time::point start = ompl::time::now();
-			preSolve();
-            ob::PlannerTerminationCondition ptc = ob::timedPlannerTerminationCondition(timeout_	- ompl::time::seconds(ompl::time::now() - start));
+			ob::PlannerTerminationCondition ptc = ob::timedPlannerTerminationCondition(timeout_
+					- ompl::time::seconds(ompl::time::now() - start));
 			registerTerminationCondition(ptc);
 			if (ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION)
 			{
@@ -107,27 +114,55 @@ namespace exotica
 
 				finishedSolving_ = true;
 
-				postSolve();
-
 				if (!ompl_simple_setup_->haveSolutionPath())
 					return FAILURE;
 				planning_time_ = ros::Time::now() - startTime;
 				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution, timeout_
 						- planning_time_.toSec());
 				planning_time_ = ros::Time::now() - startTime;
+				succ_cnt_++;
+
 				ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());
 				ompl_simple_setup_->getPlanner()->getPlannerData(data);
-
+				result_file_ << 1 << " " << planning_time_ << " " << data.numVertices();
+				if (selected_planner_.compare("geometric::FRRT") == 0)
+				{
+					result_file_ << " " << data.properties.at("GlobalSolveTry");
+					result_file_ << " " << data.properties.at("GlobalSolveSuccess");
+					result_file_ << " " << data.properties.at("GlobalCheckTry");
+					result_file_ << " " << data.properties.at("GlobalCheckSuccess");
+					result_file_ << " " << data.properties.at("LocalSolveTry");
+					result_file_ << " " << data.properties.at("LocalSolveSuccess");
+					result_file_ << " " << data.properties.at("LocalCheckTry");
+					result_file_ << " " << data.properties.at("LocalCheckSuccess");
+				}
+				result_file_ << "\n";
+				postSolve();
 				succ_cnt_++;
-//				result_file_ << succ_cnt_ << " " << planning_time_.toSec() << " " << data.numVertices() << std::endl;
-//				HIGHLIGHT_NAMED("OMPLBenchmarking", "Success No "<<succ_cnt_<<", Time: "<<planning_time_.toSec()<<", Nodes: "<<data.numVertices());
 				return SUCCESS;
 			}
 			else
 			{
 				finishedSolving_ = true;
-				postSolve();
 				planning_time_ = ros::Time::now() - startTime;
+
+				ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());
+				ompl_simple_setup_->getPlanner()->getPlannerData(data);
+				result_file_ << -1 << " " << planning_time_ << " " << data.numVertices();
+				if (selected_planner_.compare("geometric::FRRT") == 0)
+				{
+					result_file_ << " " << data.properties.at("GlobalSolveTry");
+					result_file_ << " " << data.properties.at("GlobalSolveSuccess");
+					result_file_ << " " << data.properties.at("GlobalCheckTry");
+					result_file_ << " " << data.properties.at("GlobalCheckSuccess");
+					result_file_ << " " << data.properties.at("LocalSolveTry");
+					result_file_ << " " << data.properties.at("LocalSolveSuccess");
+					result_file_ << " " << data.properties.at("LocalCheckTry");
+					result_file_ << " " << data.properties.at("LocalCheckSuccess");
+				}
+				result_file_ << "\n";
+				postSolve();
+
 				return FAILURE;
 			}
 		}
@@ -151,25 +186,25 @@ namespace exotica
 
 	ompl::base::GoalPtr OMPLsolver::constructGoal()
 	{
-        return ob::GoalPtr((OMPLGoal*)new OMPLGoalSampler(ompl_simple_setup_->getSpaceInformation(), prob_, goalBias_));
+		return ob::GoalPtr((OMPLGoal*) new OMPLGoalSampler(ompl_simple_setup_->getSpaceInformation(), prob_, goalBias_));
 	}
 
 	void OMPLsolver::startSampling()
-    {
-		bool gls = ompl_simple_setup_->getGoal()->hasType(ob::GOAL_LAZY_SAMPLES);
-		if (gls)
-		{
-			static_cast<ob::GoalLazySamples*>(ompl_simple_setup_->getGoal().get())->startSampling();
-        }
+	{
+//		bool gls = ompl_simple_setup_->getGoal()->hasType(ob::GOAL_LAZY_SAMPLES);
+//		if (gls)
+//		{
+//			static_cast<ob::GoalLazySamples*>(ompl_simple_setup_->getGoal().get())->startSampling();
+//		}
 	}
 
 	void OMPLsolver::stopSampling()
 	{
-		bool gls = ompl_simple_setup_->getGoal()->hasType(ob::GOAL_LAZY_SAMPLES);
-		if (gls)
-        {
-			static_cast<ob::GoalLazySamples*>(ompl_simple_setup_->getGoal().get())->stopSampling();
-        }
+//		bool gls = ompl_simple_setup_->getGoal()->hasType(ob::GOAL_LAZY_SAMPLES);
+//		if (gls)
+//		{
+//			static_cast<ob::GoalLazySamples*>(ompl_simple_setup_->getGoal().get())->stopSampling();
+//		}
 
 	}
 
@@ -178,16 +213,22 @@ namespace exotica
 		// clear previously computed solutions
 		ompl_simple_setup_->getProblemDefinition()->clearSolutionPaths();
 		const ob::PlannerPtr planner = ompl_simple_setup_->getPlanner();
-        if (planner) planner->clear();
-        startSampling();
+		if (planner)
+			planner->clear();
+		startSampling();
 		ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
+		ompl_simple_setup_->getPlanner()->setProblemDefinition(ompl_simple_setup_->getProblemDefinition());
 	}
 
 	void OMPLsolver::postSolve()
 	{
-        stopSampling();
-        int v = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getValidMotionCount();
-        int iv = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getInvalidMotionCount();
+		stopSampling();
+		ompl_simple_setup_->clearStartStates();
+		ompl_simple_setup_->getProblemDefinition()->clearGoal();
+		int v =
+				ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getValidMotionCount();
+		int iv =
+				ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getInvalidMotionCount();
 		logDebug("There were %d valid motions and %d invalid motions.", v, iv);
 
 		if (ompl_simple_setup_->getProblemDefinition()->hasApproximateSolution())
@@ -217,7 +258,7 @@ namespace exotica
 	EReturn OMPLsolver::getSimplifiedPath(ompl::geometric::PathGeometric &pg,
 			Eigen::MatrixXd & traj, double d)
 	{
-        if (smooth_->data)
+		if (smooth_->data)
 		{
 			int original_cnt = pg.getStateCount();
 			ros::Time start = ros::Time::now();
@@ -245,9 +286,10 @@ namespace exotica
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, smooth_);
 
 		tinyxml2::XMLElement* xmltmp;
+		std::string txt;
 		XML_CHECK("algorithm");
 		{
-			std::string txt = std::string(xmltmp->GetText());
+			txt = std::string(xmltmp->GetText());
 			bool known = false;
 			std::vector<std::string> nm = getPlannerNames();
 			for (std::string s : nm)
@@ -260,7 +302,13 @@ namespace exotica
 					break;
 				}
 			}
+			if (!known)
+			{
+				ERROR("Unknown planning algorithm ["<<txt<<"]");
+				return FAILURE;
+			}
 		}
+
 		XML_CHECK("max_goal_sampling_attempts");
 		XML_OK(getInt(*xmltmp, goal_ampling_max_attempts_));
 
@@ -285,7 +333,7 @@ namespace exotica
 			}
 		}
 
-		std::string path = ros::package::getPath("ompl_solver") + "/result/result.txt";
+		std::string path = ros::package::getPath("ompl_solver") + "/result/" + txt + ".txt";
 		result_file_.open(path);
 		if (!result_file_.is_open())
 		{
@@ -296,91 +344,96 @@ namespace exotica
 		return SUCCESS;
 	}
 
-    EReturn OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
-    {
-        return specifyProblem(pointer, NULL, NULL, NULL);
-    }
-
-    EReturn OMPLsolver::specifyProblem(PlanningProblem_ptr goals, PlanningProblem_ptr costs, PlanningProblem_ptr goalBias, PlanningProblem_ptr samplingBias)
+	EReturn OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
 	{
-        if (goals->type().compare(std::string("exotica::OMPLProblem")) != 0)
+		return specifyProblem(pointer, NULL, NULL, NULL);
+	}
+
+	EReturn OMPLsolver::specifyProblem(PlanningProblem_ptr goals, PlanningProblem_ptr costs,
+			PlanningProblem_ptr goalBias, PlanningProblem_ptr samplingBias)
+	{
+		if (goals->type().compare(std::string("exotica::OMPLProblem")) != 0)
 		{
-            ERROR("This solver can't use problem of type '" << goals->type() << "'!");
+			ERROR("This solver can't use problem of type '" << goals->type() << "'!");
 			return PAR_INV;
 		}
-        if (costs && costs->type().compare(std::string("exotica::OMPLProblem")) != 0)
-        {
-            ERROR("This solver can't use problem of type '" << costs->type() << "'!");
-            return PAR_INV;
-        }
-        if (goalBias && goalBias->type().compare(std::string("exotica::OMPLProblem")) != 0)
-        {
-            ERROR("This solver can't use problem of type '" << goalBias->type() << "'!");
-            return PAR_INV;
-        }
-        if (samplingBias && samplingBias->type().compare(std::string("exotica::OMPLProblem")) != 0)
-        {
-            ERROR("This solver can't use problem of type '" << samplingBias->type() << "'!");
-            return PAR_INV;
-        }
-        MotionSolver::specifyProblem(goals);
-        prob_ = boost::static_pointer_cast<OMPLProblem>(goals);
-        costs_ = boost::static_pointer_cast<OMPLProblem>(costs);
-        goalBias_ = boost::static_pointer_cast<OMPLProblem>(goalBias);
-        samplingBias_ = boost::static_pointer_cast<OMPLProblem>(samplingBias);
+		if (costs && costs->type().compare(std::string("exotica::OMPLProblem")) != 0)
+		{
+			ERROR("This solver can't use problem of type '" << costs->type() << "'!");
+			return PAR_INV;
+		}
+		if (goalBias && goalBias->type().compare(std::string("exotica::OMPLProblem")) != 0)
+		{
+			ERROR("This solver can't use problem of type '" << goalBias->type() << "'!");
+			return PAR_INV;
+		}
+		if (samplingBias && samplingBias->type().compare(std::string("exotica::OMPLProblem")) != 0)
+		{
+			ERROR("This solver can't use problem of type '" << samplingBias->type() << "'!");
+			return PAR_INV;
+		}
+		MotionSolver::specifyProblem(goals);
+		prob_ = boost::static_pointer_cast<OMPLProblem>(goals);
+		costs_ = boost::static_pointer_cast<OMPLProblem>(costs);
+		goalBias_ = boost::static_pointer_cast<OMPLProblem>(goalBias);
+		samplingBias_ = boost::static_pointer_cast<OMPLProblem>(samplingBias);
 
 		for (auto & it : prob_->getScenes())
 		{
 			if (!ok(it.second->activateTaskMaps()))
 			{
-				INDICATE_FAILURE				;
+				INDICATE_FAILURE
+				;
 				return FAILURE;
 			}
 		}
 
-        if (costs)
-        {
-            for (auto & it : costs_->getScenes())
-            {
-                if (!ok(it.second->activateTaskMaps()))
-                {
-                    INDICATE_FAILURE				;
-                    return FAILURE;
-                }
-            }
-        }
+		if (costs)
+		{
+			for (auto & it : costs_->getScenes())
+			{
+				if (!ok(it.second->activateTaskMaps()))
+				{
+					INDICATE_FAILURE
+					;
+					return FAILURE;
+				}
+			}
+		}
 
-        if (goalBias_)
-        {
-            for (auto & it : goalBias_->getScenes())
-            {
-                if (!ok(it.second->activateTaskMaps()))
-                {
-                    INDICATE_FAILURE				;
-                    return FAILURE;
-                }
-            }
-        }
+		if (goalBias_)
+		{
+			for (auto & it : goalBias_->getScenes())
+			{
+				if (!ok(it.second->activateTaskMaps()))
+				{
+					INDICATE_FAILURE
+					;
+					return FAILURE;
+				}
+			}
+		}
 
-        if (samplingBias_)
-        {
-            for (auto & it : samplingBias_->getScenes())
-            {
-                if (!ok(it.second->activateTaskMaps()))
-                {
-                    INDICATE_FAILURE				;
-                    return FAILURE;
-                }
-            }
-        }
+		if (samplingBias_)
+		{
+			for (auto & it : samplingBias_->getScenes())
+			{
+				if (!ok(it.second->activateTaskMaps()))
+				{
+					INDICATE_FAILURE
+					;
+					return FAILURE;
+				}
+			}
+		}
 
 		state_space_ = OMPLStateSpace::FromProblem(prob_);
 		ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
 
-
 		ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(this)));
-		ompl_simple_setup_->setPlannerAllocator(boost::bind(known_planners_[selected_planner_], _1, this->getObjectName()));
-        ompl_simple_setup_->getSpaceInformation()->setup();
+		ompl_simple_setup_->setPlannerAllocator(boost::bind(known_planners_[selected_planner_], _1, this->getObjectName()
+				+ "_" + selected_planner_));
+		ompl_simple_setup_->getSpaceInformation()->setup();
 
 		std::vector<std::string> jnts;
 		prob_->getScenes().begin()->second->getJointNames(jnts);
@@ -416,15 +469,22 @@ namespace exotica
 				HIGHLIGHT_NAMED(object_name_, " Using projection joints "<<tmp);
 			}
 		}
-
-        ompl_simple_setup_->setGoal(constructGoal());
-        if (ompl_simple_setup_->getGoal())
-            ompl_simple_setup_->setup();
+		ompl_simple_setup_->setGoal(constructGoal());
+		ompl_simple_setup_->setup();
 
 		if (selected_planner_.compare("geometric::FRRT") == 0)
 		{
 			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
 			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
+		}
+		if (selected_planner_.compare("geometric::BFRRT") == 0)
+		{
+			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::BFRRT>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
 			{
 				INDICATE_FAILURE
 				return FAILURE;
@@ -438,6 +498,15 @@ namespace exotica
 		if (selected_planner_.compare("geometric::FRRT") == 0)
 		{
 			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
+					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
+		}
+		if (selected_planner_.compare("geometric::BFRRT") == 0)
+		{
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::BFRRT>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
 					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
 			{
 				INDICATE_FAILURE
@@ -467,7 +536,8 @@ namespace exotica
 	void OMPLsolver::registerDefaultPlanners()
 	{
 		registerPlannerAllocator("geometric::RRT", boost::bind(&allocatePlanner<og::RRT>, _1, _2));
-        registerPlannerAllocator("geometric::RRTConnect", boost::bind(&allocatePlanner<og::RRTConnect>, _1, _2));
+		registerPlannerAllocator("geometric::RRTConnect", boost::bind(&allocatePlanner<
+				og::RRTConnect>, _1, _2));
 		registerPlannerAllocator("geometric::LazyRRT", boost::bind(&allocatePlanner<og::LazyRRT>, _1, _2));
 		registerPlannerAllocator("geometric::TRRT", boost::bind(&allocatePlanner<og::TRRT>, _1, _2));
 		registerPlannerAllocator("geometric::EST", boost::bind(&allocatePlanner<og::EST>, _1, _2));
@@ -486,8 +556,9 @@ namespace exotica
 		registerPlannerAllocator("geometric::LBTRRT", boost::bind(&allocatePlanner<og::LBTRRT>, _1, _2));
 		registerPlannerAllocator("geometric::RRTstar", boost::bind(&allocatePlanner<og::RRTstar>, _1, _2));
 		registerPlannerAllocator("geometric::STRIDE", boost::bind(&allocatePlanner<og::STRIDE>, _1, _2));
-
-		registerPlannerAllocator("geometric::FRRT", boost::bind(&allocatePlanner<og::FRRT>, _1, _2));
+//
+//		registerPlannerAllocator("geometric::FRRT", boost::bind(&allocatePlanner<og::FRRT>, _1, _2));
+//		registerPlannerAllocator("geometric::BFRRT", boost::bind(&allocatePlanner<og::BFRRT>, _1, _2));
 	}
 
 	std::vector<std::string> OMPLsolver::getPlannerNames()
@@ -518,6 +589,24 @@ namespace exotica
 		if (ptc_)
 			ptc_->terminate();
 		return true;
+	}
+
+	EReturn OMPLsolver::setGoalState(const Eigen::VectorXd & qT, const double eps)
+	{
+		LOCK(goal_lock_);
+		if (prob_->getSpaceDim() != qT.rows())
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+
+		ompl::base::ScopedState<> gs(state_space_);
+		if (ok(state_space_->copyToOMPLState(gs.get(), qT)))
+		{
+			ompl_simple_setup_->setGoalState(gs, eps);
+		}
+//		HIGHLIGHT_NAMED(object_name_, "Goal state is set, now you can use bi-directional algorithms!");
+		return SUCCESS;
 	}
 
 } /* namespace exotica */

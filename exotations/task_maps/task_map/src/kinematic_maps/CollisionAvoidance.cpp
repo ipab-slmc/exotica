@@ -45,9 +45,9 @@ namespace exotica
 
 		tmp_handle = handle.FirstChildElement("IndicateClear");
 		server_->registerParam<std_msgs::Bool>(server_->getName(), tmp_handle, isClear_);
-		isClear_->data=true;
-        tmp_handle = handle.FirstChildElement("PrintWhenInCollision");
-        server_->registerParam<std_msgs::Bool>(server_->getName(), tmp_handle, printWhenInCollision_);
+		isClear_->data = true;
+		tmp_handle = handle.FirstChildElement("PrintWhenInCollision");
+		server_->registerParam<std_msgs::Bool>(server_->getName(), tmp_handle, printWhenInCollision_);
 		tmp_handle = handle.FirstChildElement("HardConstrain");
 		if (!ok(server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, hard_)))
 		{
@@ -55,7 +55,7 @@ namespace exotica
 		}
 		if (!ok(scene_->getEndEffectors(object_name_, effs_)))
 			return MMB_NIN;
-        init_offsets_.assign(effs_.size(), KDL::Frame::Identity());
+		init_offsets_.assign(effs_.size(), KDL::Frame::Identity());
 
 		kin_sol_ = scene_->getSolver();
 		kinematica::SolutionForm_t sol;
@@ -63,6 +63,13 @@ namespace exotica
 		sol.end_effector_offs = std::vector<KDL::Frame>(effs_.size());
 		kin_sol_.updateEndEffectors(sol);
 
+		tmp_handle = handle.FirstChildElement("UseVelocity");
+		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, use_vel_);
+		if (use_vel_->data)
+		{
+			vels_.setZero(3 * effs_.size());
+			old_eff_phi_.setZero(3 * effs_.size());
+		}
 		tmp_handle = handle.FirstChildElement("VisualDebug");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, visual_debug_);
 		if (visual_debug_->data)
@@ -114,19 +121,25 @@ namespace exotica
 	{
 		if (!isRegistered(t) || !getEffReferences())
 		{
-            INDICATE_FAILURE;
+			INDICATE_FAILURE
+			;
 			return FAILURE;
 		}
 
-        PHI.setZero();
-        if (updateJacobian_)
-        {
-            JAC.setZero();
-        }
+		PHI.setZero();
+		if (updateJacobian_)
+		{
+			JAC.setZero();
+		}
 
 		if (pre_update_callback_)
 			pre_update_callback_(this, x, t);
 
+		static bool first = true;
+		if (use_vel_->data && !first)
+		{
+			vels_ = EFFPHI - old_eff_phi_;
+		}
 		int M = EFFPHI.rows() / 3;
 
 		std::vector<double> dists(M);
@@ -141,23 +154,27 @@ namespace exotica
 			world_centre_.points.clear();
 		}
 
-		for (auto& objvec : scene_->getCollisionScene()->getFCLWorld())
-		{
-			for (boost::shared_ptr<fcl::CollisionObject> obj : objvec.second)
-			{
-				obj->setTransform(obs_in_base_tf_);
-			}
-		}
+//		for (auto& objvec : scene_->getCollisionScene()->getFCLWorld())
+//		{
+//			for (boost::shared_ptr<fcl::CollisionObject> obj : objvec.second)
+//			{
+//				obj->setTransform(obs_in_base_tf_);
+//			}
+//		}
 		isClear_->data = true;
+		Eigen::VectorXd discounts = Eigen::VectorXd::Ones(M);
+		if (scene_->getCollisionScene()->getFCLWorld().size() == 0)
+			return SUCCESS;
 		for (int i = 0; i < M; i++)
 		{
 			Eigen::Vector3d tmp1, tmp2;
-            scene_->getCollisionScene()->getRobotDistance(effs_[i], self_->data, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i], safe_range_->data);
+			scene_->getCollisionScene()->getRobotDistance(effs_[i], self_->data, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i], safe_range_->data);
 			//	Compute Phi
 			if (dists[i] <= 0)
 			{
 				isClear_->data = false;
-                if(printWhenInCollision_->data) WARNING_NAMED(object_name_, "Robot link " << effs_[i] << " is in collision");
+				if (printWhenInCollision_->data)
+					WARNING_NAMED(object_name_, "Robot link " << effs_[i] << " is in collision");
 				//	In hard constrain mode, collision == FAILURE
 				if (hard_->data)
 				{
@@ -172,9 +189,29 @@ namespace exotica
 			else
 			{
 				isClear_->data = false;
+				if (use_vel_->data && !first)
+				{
+					Eigen::Vector3d tmpv = vels_.segment(3 * i, 3);
+					double ct = tmpv.dot(norms[i]) / (tmpv.norm() * norms[i].norm());
+					if (ct !=ct)
+					{
+						;
+					}
+					else if (ct<0)
+					{
+						discounts(i) = 0;
+						HIGHLIGHT_NAMED(effs_[i], "Opposite direction");
+					}
+					else
+					{
+						discounts(i) = ct;
+						HIGHLIGHT_NAMED(effs_[i], "CosTheta "<<ct<<" Discount "<<discounts(i));
+					}
+//					getchar();
+				}
 				costs[i] = (1.0 - dists[i] / safe_range_->data);
 			}
-			PHI(0) = PHI(0) + costs[i] * costs[i];
+			PHI(0) = PHI(0) + discounts(i) * (costs[i] * costs[i]);
 
 			//	Modify end-effectors
 			if (updateJacobian_)
@@ -211,44 +248,50 @@ namespace exotica
 					world_centre_.points.push_back(p2);
 				}
 			}
-        }
+		}
 
-        if (updateJacobian_)
-        {
-            if (visual_debug_->data)
-            {
-                close_pub_.publish(close_);
-                robot_centre_pub_.publish(robot_centre_);
-                world_centre_pub_.publish(world_centre_);
-                ros::spinOnce();
-            }
+		if (updateJacobian_)
+		{
+			if (visual_debug_->data)
+			{
+				close_pub_.publish(close_);
+				robot_centre_pub_.publish(robot_centre_);
+				world_centre_pub_.publish(world_centre_);
+				ros::spinOnce();
+			}
 
-            if(kin_sol_.getEffSize() > 0)
-            {
-                effJac.resize(kin_sol_.getEffSize()*3,kin_sol_.getNumJoints());
-                if (!kin_sol_.updateConfiguration(x) || !kin_sol_.generateForwardMap()
-                        || !kin_sol_.generateJacobian(effJac))
-                {
-                    INDICATE_FAILURE
-                    return FAILURE;
-                }
+			if (kin_sol_.getEffSize() > 0)
+			{
+				effJac.resize(kin_sol_.getEffSize() * 3, kin_sol_.getNumJoints());
+				if (!kin_sol_.updateConfiguration(x) || !kin_sol_.generateForwardMap()
+						|| !kin_sol_.generateJacobian(effJac))
+				{
+					INDICATE_FAILURE
+					return FAILURE;
+				}
 
-                for (int i = 0; i < M; i++)
-                {
-                    if (dists[i] <= 0)
-                    {
-                        Eigen::Vector3d tmpnorm = c2s[i] - c1s[i];
-                        tmpnorm.normalize();
-                        JAC += ((2.0 * costs[i]) / safe_range_->data)
-                                * (tmpnorm.transpose() * effJac.block(3 * i, 0, 3, JAC.cols()));
-                    }
-                    else if (dists[i] <= safe_range_->data)
-                        JAC += ((2.0 * costs[i]) / safe_range_->data)
-                                * (norms[i].transpose() * effJac.block(3 * i, 0, 3, JAC.cols()));
-                }
-            }
-        }
+				for (int i = 0; i < M; i++)
+				{
+					if (dists[i] <= 0)
+					{
+						Eigen::Vector3d tmpnorm = c2s[i] - c1s[i];
+						tmpnorm.normalize();
+						JAC += ((2.0 * discounts(i) * costs[i]) / safe_range_->data)
+								* (tmpnorm.transpose() * effJac.block(3 * i, 0, 3, JAC.cols()));
+					}
+					else if (dists[i] <= safe_range_->data)
+						JAC += ((2.0 * discounts(i) * costs[i]) / safe_range_->data)
+								* (norms[i].transpose() * effJac.block(3 * i, 0, 3, JAC.cols()));
+				}
+			}
+		}
 
+		if (use_vel_->data)
+		{
+			if (first)
+				first = false;
+			old_eff_phi_ = EFFPHI;
+		}
 		return SUCCESS;
 	}
 }

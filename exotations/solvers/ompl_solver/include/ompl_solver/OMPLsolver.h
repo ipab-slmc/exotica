@@ -37,7 +37,8 @@ namespace exotica
 			 * @return        Successful if the problem is a valid AICOProblem
 			 */
 			virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
-            virtual EReturn specifyProblem(PlanningProblem_ptr goals, PlanningProblem_ptr costs, PlanningProblem_ptr goalBias, PlanningProblem_ptr samplingBias);
+			virtual EReturn specifyProblem(PlanningProblem_ptr goals, PlanningProblem_ptr costs,
+					PlanningProblem_ptr goalBias, PlanningProblem_ptr samplingBias);
 
 			/*
 			 * \brief	Check if a problem is solvable by this solver (Pure Virtual)
@@ -90,9 +91,12 @@ namespace exotica
 			EReturn resetIfNeeded();
 			ros::Duration planning_time_;
 
-            virtual std::string print(std::string prepend);
+			virtual std::string print(std::string prepend);
 
 			void getOriginalSolution(Eigen::MatrixXd & orig);
+
+			EReturn setGoalState(const Eigen::VectorXd & qT,
+					const double eps = std::numeric_limits<double>::epsilon());
 		protected:
 			/**
 			 * \brief Registers default planners
@@ -126,7 +130,8 @@ namespace exotica
 			 */
 			EReturn convertPath(const ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj);
 
-			EReturn getSimplifiedPath(ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj, double d);
+			EReturn getSimplifiedPath(ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj,
+					double d);
 			/**
 			 * \brief Registers trajectory termination condition
 			 * @param ptc Termination criteria
@@ -161,9 +166,9 @@ namespace exotica
 			ompl::base::GoalPtr constructGoal();
 
 			OMPLProblem_ptr prob_; //!< Shared pointer to the planning problem.
-            OMPLProblem_ptr costs_; //!< Shared pointer to the planning problem.
-            OMPLProblem_ptr goalBias_; //!< Shared pointer to the planning problem.
-            OMPLProblem_ptr samplingBias_; //!< Shared pointer to the planning problem.
+			OMPLProblem_ptr costs_; //!< Shared pointer to the planning problem.
+			OMPLProblem_ptr goalBias_; //!< Shared pointer to the planning problem.
+			OMPLProblem_ptr samplingBias_; //!< Shared pointer to the planning problem.
 
 			/// \brief List of all known OMPL planners
 			std::map<std::string, ConfiguredPlannerAllocator> known_planners_;
@@ -197,11 +202,15 @@ namespace exotica
 			///	\brief	View original solution before trajectory smoothness
 			Eigen::MatrixXd original_solution_;
 
+			///	\brief	Projection joints
 			std::vector<std::string> projection_joints_;
 
-			std::ofstream result_file_;
-			int succ_cnt_;
+			///	\brief	Threads locker
+			boost::mutex goal_lock_;
 
+			std::ofstream result_file_;
+
+			int succ_cnt_;
 	};
 
 	typedef boost::shared_ptr<exotica::OMPLsolver> OMPLsolver_ptr;

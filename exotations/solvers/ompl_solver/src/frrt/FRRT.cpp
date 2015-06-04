@@ -22,9 +22,9 @@ namespace ompl
 			lastGoalMotion_ = NULL;
 			Planner::declareParam<double>("range", this, &FRRT::setRange, &FRRT::getRange, "0.:1.:10000.");
 			Planner::declareParam<double>("goal_bias", this, &FRRT::setGoalBias, &FRRT::getGoalBias, "0.:.05:1.");
-
-			try_cnt_.resize(3);
-			suc_cnt_.resize(3);
+			HIGHLIGHT("FRRT constructor")
+			try_cnt_.resize(4);
+			suc_cnt_.resize(4);
 			init_rho_.resize(3);
 		}
 
@@ -41,8 +41,11 @@ namespace ompl
 			if (nn_)
 				nn_->clear();
 			lastGoalMotion_ = NULL;
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < 4; i++)
 				try_cnt_[i] = suc_cnt_[i] = 0;
+			nodes_.points.clear();
+			edges_.colors.clear();
+			edges_.points.clear();
 		}
 
 		void FRRT::setup()
@@ -91,17 +94,20 @@ namespace ompl
 				}
 				nn_->add(motion);
 			}
-			INFO_NAMED("FRRT", "Checking if goal is valid");
+			Motion *goal_motion = NULL;
+			double nearest_r = 0;
 			if (goal_s && goal_s->canSample())
 			{
-				Motion *goal_motion = new Motion(si_);
-				goal_s->sampleGoal(goal_motion->state);
+				Motion *tmpgoal = new Motion(si_);
+				goal_s->sampleGoal(tmpgoal->state);
 
-				if (!goal->isSatisfied(goal_motion->state))
+				if (!goal->isSatisfied(tmpgoal->state))
 				{
 					ERROR("FRRT, Invalid goal state");
 					return base::PlannerStatus::INVALID_GOAL;
 				}
+				goal_motion = tmpgoal;
+				nearest_r = 0.05 * distanceFunction(init_motion, goal_motion);
 			}
 
 			if (nn_->size() == 0)
@@ -117,7 +123,7 @@ namespace ompl
 			///	Solution info
 			Motion *solution = NULL;
 			bool solved = false;
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < 4; i++)
 				try_cnt_[i] = suc_cnt_[i] = 0;
 
 			///Lets do it clean and nice !!!!!!!
@@ -125,17 +131,90 @@ namespace ompl
 			Motion *start_motion = init_motion;
 			while (ptc == false)
 			{
+				///	Decide if a global attempt is needed
+				if (newTry)
+				{
+					std::vector<Motion*> n_motions;
+					nn_->nearestR(start_motion, nearest_r, n_motions);
+					for (int i = 0; i < n_motions.size(); i++)
+						if (!n_motions[i]->isGlobalValid())
+						{
+							newTry = false;
+							break;
+						}
+				}
+
 				/// Move from start to goal
 				Motion *new_motion = new Motion(si_);
 				if (newTry)
 				{
 					newTry = false;
-					try_cnt_[0]++;
-					local_map_->jointRef = global_goal_;
-					local_solver_->getProblem()->setTau(1e-5);
-					if (localSolve(start_motion, NULL, new_motion))
+
+					ompl::base::State *last_valid_state = si_->allocState();
+					std::pair<ompl::base::State*, double> last_valid(last_valid_state, 0);
+					bool valid = false;
+					try_cnt_[3]++;
+					if (si_->checkMotion(start_motion->state, goal_motion->state, last_valid))
 					{
-						suc_cnt_[0]++;
+						new_motion = goal_motion;
+						valid = true;
+						suc_cnt_[3]++;
+
+//						geometry_msgs::Point tmp, tmp_p;
+//						tmp.x =
+//								goal_motion->state->as<ompl::base::RealVectorStateSpace::StateType>()->values[0];
+//						tmp.y =
+//								goal_motion->state->as<ompl::base::RealVectorStateSpace::StateType>()->values[1];
+//						tmp_p.x = start_motion->state->as<
+//								ompl::base::RealVectorStateSpace::StateType>()->values[0];
+//						tmp_p.y = start_motion->state->as<
+//								ompl::base::RealVectorStateSpace::StateType>()->values[1];
+//						nodes_.points.push_back(tmp);
+//						edges_.points.push_back(tmp_p);
+//						edges_.points.push_back(tmp);
+//						std_msgs::ColorRGBA c1, c2;
+//						c1.b = 1;
+//						c1.a = 1;
+//						c2 = c1;
+//						edges_.colors.push_back(c1);
+//						edges_.colors.push_back(c2);
+//						node_pub_.publish(nodes_);
+//						edge_pub_.publish(edges_);
+					}
+					if (!valid)
+					{
+						try_cnt_[0]++;
+						if (last_valid.second == 0)
+							last_valid_state = NULL;
+						local_map_->jointRef = global_goal_;
+						local_solver_->getProblem()->setTau(1e-6);
+						if (localSolve(start_motion, last_valid_state, new_motion))
+						{
+							valid = true;
+							suc_cnt_[0]++;
+						}
+						else if(new_motion->internal_path)
+						{
+							bool addNew = true;
+							std::vector<Motion*> n_motions;
+							nn_->nearestR(new_motion, nearest_r, n_motions);
+							for (int i = 0; i < n_motions.size(); i++)
+								if (!n_motions[i]->isGlobalValid())
+								{
+									addNew = false;
+									break;
+								}
+							if (addNew)
+							{
+								new_motion->parent = start_motion;
+								nn_->add(new_motion);
+							}
+							start_motion->setGlobalInvalid();
+						}
+					}
+
+					if (valid)
+					{
 						new_motion->parent = start_motion;
 						nn_->add(new_motion);
 
@@ -155,8 +234,6 @@ namespace ompl
 				///	If global not succeeded
 				else
 				{
-					///	This start motion can not be connected to goal
-					start_motion->setGlobalInvalid();
 					///	Sample a random state
 					bool r_ok = false;
 					do
@@ -183,7 +260,7 @@ namespace ompl
 
 					///	Do a regular line segment check
 					ompl::base::State *last_valid_state = si_->allocState();
-					si_->copyState(last_valid_state, near_motion->state);
+//					si_->copyState(last_valid_state, near_motion->state);
 					std::pair<ompl::base::State*, double> last_valid(last_valid_state, 0);
 					try_cnt_[2]++;
 					if (si_->checkMotion(near_motion->state, new_motion->state, last_valid))
@@ -192,26 +269,76 @@ namespace ompl
 						new_motion->parent = near_motion;
 						nn_->add(new_motion);
 						valid = true;
+//						geometry_msgs::Point tmp, tmp_p;
+//						tmp.x =
+//								new_motion->state->as<ompl::base::RealVectorStateSpace::StateType>()->values[0];
+//						tmp.y =
+//								new_motion->state->as<ompl::base::RealVectorStateSpace::StateType>()->values[1];
+//						tmp_p.x =
+//								near_motion->state->as<ompl::base::RealVectorStateSpace::StateType>()->values[0];
+//						tmp_p.y =
+//								near_motion->state->as<ompl::base::RealVectorStateSpace::StateType>()->values[1];
+//						nodes_.points.push_back(tmp);
+//						edges_.points.push_back(tmp_p);
+//						edges_.points.push_back(tmp);
+//						std_msgs::ColorRGBA c1, c2;
+//						c1.b = 1;
+//						c1.a = 1;
+//						c2 = c1;
+//						edges_.colors.push_back(c1);
+//						edges_.colors.push_back(c2);
+//						node_pub_.publish(nodes_);
+//						edge_pub_.publish(edges_);
 					}
 					///	Do a local try
 					else
 					{
-						if (last_valid.second == 0)
-							last_valid_state = NULL;
-						try_cnt_[1]++;
-						///	Set local solver goal
-						Eigen::VectorXd eigen_g((int) si_->getStateDimension());
-						memcpy(eigen_g.data(), new_motion->state->as<
-								ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
-								* eigen_g.rows());
-						local_map_->jointRef = eigen_g;
-						local_solver_->getProblem()->setTau(1e-2);
-						if (localSolve(near_motion, last_valid_state, new_motion))
+						bool local_try = true;
+						std::vector<Motion*> n_motions;
+						nn_->nearestR(near_motion, nearest_r, n_motions);
+						for (int i = 0; i < n_motions.size(); i++)
+							if (!n_motions[i]->isGlobalValid())
+							{
+								local_try = false;
+								break;
+							}
+						if (local_try)
 						{
-							suc_cnt_[1]++;
-							new_motion->parent = near_motion;
-							nn_->add(new_motion);
-							valid = true;
+							if (last_valid.second == 0)
+								last_valid_state = NULL;
+							try_cnt_[1]++;
+							///	Set local solver goal
+							Eigen::VectorXd eigen_g((int) si_->getStateDimension());
+							memcpy(eigen_g.data(), new_motion->state->as<
+									ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
+									* eigen_g.rows());
+							local_map_->jointRef = eigen_g;
+							local_solver_->getProblem()->setTau(1e-2);
+							if (localSolve(near_motion, last_valid_state, new_motion))
+							{
+								suc_cnt_[1]++;
+								new_motion->parent = near_motion;
+								nn_->add(new_motion);
+								valid = true;
+							}
+							else if(new_motion->internal_path)
+							{
+								bool addNew = true;
+								std::vector<Motion*> n_motions;
+								nn_->nearestR(new_motion, nearest_r, n_motions);
+								for (int i = 0; i < n_motions.size(); i++)
+									if (!n_motions[i]->isGlobalValid())
+									{
+										addNew = false;
+										break;
+									}
+								if (addNew)
+								{
+									new_motion->parent = start_motion;
+									nn_->add(new_motion);
+								}
+								near_motion->setGlobalInvalid();
+							}
 						}
 					}
 
@@ -221,6 +348,7 @@ namespace ompl
 						start_motion = new_motion;
 					}
 				}
+
 			}
 
 			if (solution != NULL)
@@ -263,6 +391,7 @@ namespace ompl
 			}
 			WARNING_NAMED("FRRT", "Created "<<nn_->size()<<" states");
 			WARNING_NAMED("FRRT", "Global succeeded/try "<<suc_cnt_[0]<<"/"<<try_cnt_[0]);
+			WARNING_NAMED("FRRT", "GNormal succeeded/try "<<suc_cnt_[3]<<"/"<<try_cnt_[3]);
 			WARNING_NAMED("FRRT", "Local succeeded/try "<<suc_cnt_[1]<<"/"<<try_cnt_[1]);
 			WARNING_NAMED("FRRT", "Normal succeeded/try "<<suc_cnt_[2]<<"/"<<try_cnt_[2]);
 			return base::PlannerStatus(solved, false);
@@ -283,15 +412,22 @@ namespace ompl
 				else
 					data.addEdge(base::PlannerDataVertex(motions[i]->parent->state), base::PlannerDataVertex(motions[i]->state));
 			}
+			data.properties["GlobalSolveTry"] = std::to_string(try_cnt_[0]);
+			data.properties["GlobalSolveSuccess"] = std::to_string(suc_cnt_[0]);
+			data.properties["GlobalCheckTry"] = std::to_string(try_cnt_[3]);
+			data.properties["GlobalCheckSuccess"] = std::to_string(suc_cnt_[3]);
+			data.properties["LocalSolveTry"] = std::to_string(try_cnt_[1]);
+			data.properties["LocalSolveSuccess"] = std::to_string(suc_cnt_[1]);
+			data.properties["LocalCheckTry"] = std::to_string(try_cnt_[2]);
+			data.properties["LocalCheckSuccess"] = std::to_string(suc_cnt_[2]);
 		}
 
 		bool FRRT::setUpLocalPlanner(const std::string & xml_file, const exotica::Scene_ptr & scene)
 		{
 			exotica::Initialiser ini;
-			exotica::Server_ptr ser;
 			exotica::PlanningProblem_ptr prob;
 			exotica::MotionSolver_ptr sol;
-			if (!ok(ini.initialise(xml_file, ser, sol, prob, "LocalProblem", "FRRTLocal")))
+			if (!ok(ini.initialise(xml_file, ser_, sol, prob, "LocalProblem", "FRRTLocal")))
 			{
 				INDICATE_FAILURE
 				return false;
@@ -312,12 +448,7 @@ namespace ompl
 				return false;
 			}
 			prob->setScene(scene->getPlanningScene());
-			base::Goal *goal = pdef_->getGoal().get();
-			if (!goal)
-			{
-				INDICATE_FAILURE
-				return false;
-			}
+
 			if (prob->getTaskDefinitions().find("LocalTask") == prob->getTaskDefinitions().end())
 			{
 				ERROR("Missing XML tag of 'LocalTask'");
@@ -337,6 +468,18 @@ namespace ompl
 
 			init_rho_[0] = local_task_->getRho(0);
 			init_rho_[1] = collision_task_->getRho(0);
+
+			node_pub_ = ser_->advertise<visualization_msgs::Marker>("FRRTNodes", 1);
+			edge_pub_ = ser_->advertise<visualization_msgs::Marker>("FRRTEdges", 1);
+			nodes_.type = visualization_msgs::Marker::POINTS;
+			nodes_.scale.x = 0.02;
+			nodes_.scale.y = 0.02;
+			nodes_.color.r = 1;
+			nodes_.color.a = 1;
+			edges_.type = visualization_msgs::Marker::LINE_LIST;
+			edges_.scale.x = 0.005;
+
+			nodes_.header.frame_id = edges_.header.frame_id = "/base";
 			return true;
 		}
 
@@ -361,7 +504,8 @@ namespace ompl
 							ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
 					* qs.rows());
 			Eigen::MatrixXd local_path;
-			if (ok(local_solver_->SolveFullSolution(qs, local_path)))
+			exotica::EReturn ret = local_solver_->SolveFullSolution(qs, local_path);
+			if (ok(ret))
 			{
 				/* Local planner succeeded */
 				gm->inter_state = is;
@@ -370,9 +514,46 @@ namespace ompl
 				qg = local_path.row(local_path.rows() - 1).transpose();
 				memcpy(gm->state->as<ompl::base::RealVectorStateSpace::StateType>()->values, qg.data(), sizeof(double)
 						* qg.rows());
-				return true;
 			}
-			return false;
+//			for (int i = local_path.rows() - 1; i > 0; i--)
+//			{
+//				geometry_msgs::Point tmp, tmp_p;
+//				tmp.x = local_path(i, 0);
+//				tmp.y = local_path(i, 1);
+//				tmp_p.x = local_path(i - 1, 0);
+//				tmp_p.y = local_path(i - 1, 1);
+//				nodes_.points.push_back(tmp);
+//				std_msgs::ColorRGBA c1, c2;
+//				c1.g = 1;
+//				c1.a = 1;
+//				c2 = c1;
+//				edges_.colors.push_back(c1);
+//				edges_.colors.push_back(c2);
+//				edges_.points.push_back(tmp_p);
+//				edges_.points.push_back(tmp);
+//			}
+//			if (is)
+//			{
+//				geometry_msgs::Point tmp, tmp_p;
+//				tmp.x = is->as<ompl::base::RealVectorStateSpace::StateType>()->values[0];
+//				tmp.y = is->as<ompl::base::RealVectorStateSpace::StateType>()->values[1];
+//				tmp_p.x = sm->state->as<ompl::base::RealVectorStateSpace::StateType>()->values[0];
+//				tmp_p.y = sm->state->as<ompl::base::RealVectorStateSpace::StateType>()->values[1];
+//				nodes_.points.push_back(tmp);
+//				edges_.points.push_back(tmp_p);
+//				edges_.points.push_back(tmp);
+//				std_msgs::ColorRGBA c1, c2;
+//				c1.b = .5;
+//				c1.g = .5;
+//				c1.a = 1;
+//				c2 = c1;
+//				edges_.colors.push_back(c1);
+//				edges_.colors.push_back(c2);
+//			}
+//			node_pub_.publish(nodes_);
+//			edge_pub_.publish(edges_);
+
+			return ret == exotica::SUCCESS ? true : false;
 		}
 	}	//	Namespace geometric
 }	//	Namespace ompl

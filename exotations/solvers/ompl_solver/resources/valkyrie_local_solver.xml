@@ -83,7 +83,7 @@
 	  <limb segment="RightForearm"></limb>
 	  <limb segment="RightPalm"></limb>
       </EndEffector>
-      <SafetyRange>0.2</SafetyRange>
+      <SafetyRange>0.1</SafetyRange>
       <HardConstrain>1</HardConstrain>
       <SelfCollision>0</SelfCollision>
       <VisualDebug>0</VisualDebug>
@@ -92,12 +92,12 @@
 
     <Task name="CollisionAvoidanceTask" type="TaskSqrError">
       <map name="CollisionAvoidanceMap"/>
-      <Rho>1</Rho>
+      <Rho>2</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0.0</Goal>
     </Task>
 
-    <Map type="CoM" name="CoMMap">
+    <!--Map type="CoM" name="CoMMap">
       <Scene name="LocalScene"/>
       <EnableZ>false</EnableZ>
       <Debug>false</Debug>
@@ -137,7 +137,7 @@
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0 0</Goal>
-    </Task>
+    </Task-->
 
     <!--Map type="JointLimit" name="JointLimitMap">
       <Scene name="LocalScene"/>

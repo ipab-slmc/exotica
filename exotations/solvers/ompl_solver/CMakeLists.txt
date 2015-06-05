@@ -51,6 +51,7 @@ add_library(ompl_solver
    src/OMPLGoalSampler.cpp
    src/frrt/FRRT.cpp
    src/frrt/BFRRT.cpp
+   src/frrt/FRRTConnect.cpp
 )
 
 link_directories(${catkin_LIBRARY_DIRS})

@@ -1,64 +1,42 @@
-% boxplot([freerrtresult(:,2),freefrrtresult(:,2),simplerrtresult(:,2),simplefrrtresult(:,2)], 'positions',[1 2 4 5])
-% 
-% xtix = {'FreeSpace RRT','FreeSpace FRRT','SimpleObs RRT','SimpleObs FRRT'}; 
-% xtixloc = [1 2 4 5];
-% set(gca,'XTickMode','auto','XTickLabel',xtix,'XTick',xtixloc);
-% 
-% figure
-E2_EST_S=[];
-E2_KPIECE_S=[];
-E2_PDST_S=[];
-E2_FRRT_S=[];
-for i=1:50
-   if E2_EST(i,1)==1
-      E2_EST_S(size(E2_EST_S,1)+1,:)=E2_EST(i,:); 
-   end
-   if E2_KPIECE(i,1)==1
-      E2_KPIECE_S(size(E2_KPIECE_S,1)+1,:)=E2_KPIECE(i,:); 
-   end
-   if E2_PDST(i,1)==1
-      E2_PDST_S(size(E2_PDST_S,1)+1,:)=E2_PDST(i,:); 
-   end
-   if E2_FRRT(i,1)==1
-      E2_FRRT_S(size(E2_FRRT_S,1)+1,:)=E2_FRRT(i,:); 
-   end
-end
-clear min
-clear min_index
-clear max
-clear max_index
-[min,min_index]=min(E2_EST_S(:,2));
-[max,max_index]=max(E2_EST_S(:,2));
-E2_EST_S([min_index,max_index],:) = [];
-clear min
-clear min_index
-clear max
-clear max_index
-[min,min_index]=min(E2_KPIECE_S(:,2));
-[max,max_index]=max(E2_KPIECE_S(:,2));
-E2_KPIECE_S([min_index,max_index],:) = [];
-clear min
-clear min_index
-clear max
-clear max_index
-[min,min_index]=min(E2_PDST_S(:,2));
-[max,max_index]=max(E2_PDST_S(:,2));
-E2_PDST_S([min_index,max_index],:) = [];
-clear min
-clear min_index
-clear max
-clear max_index
-[min,min_index]=min(E2_FRRT_S(:,2));
-[max,max_index]=max(E2_FRRT_S(:,2));
-E2_FRRT_S([min_index,max_index],:) = [];
-clear min
-clear min_index
-clear max
-clear max_index
-boxplot([E2_EST_S(:,2);E2_KPIECE_S(:,2);E2_PDST_S(:,2);E2_FRRT_S(:,2)], [zeros(size(E2_EST_S,1),1);ones(size(E2_KPIECE_S,1),1);2*ones(size(E2_PDST_S,1),1);3*ones(size(E2_FRRT_S,1),1)],'positions',[1 2 3 4])
-xtix = {'EST', 'KPIECE','PDST','FRRT'}; 
-xtixloc = [1 2 3 4];
-set(gca,'XTickMode','auto','XTickLabel',xtix,'XTick',xtixloc);
+ExpID='E2';
+%'EST','PDST','KPIECE','FRRT',
+Algorithms={'BKPIECE','LBKPIECE','RRTConnect','BFRRT','FRRTConnect'};
+n=size(Algorithms,2);
 
+DataNames=cell(1,n);
+clear Data
+clear Data_S
+Data=cell(1,n);
+Data_S=cell(1,n);
+for i=1:n
+    DataNames{i}=strcat(ExpID,'_',char(Algorithms{i}));
+    Data{i}=eval(char(DataNames(i)));
+    for j=1:50
+        if Data{i}(j,1)==1
+            Data_S{i}(size(Data_S{i},1)+1,:)=Data{i}(j,:);
+        end
+    end
+    clear min
+    clear min_index
+    clear max
+    clear max_index
+    [min,min_index]=min(Data_S{i}(:,2));
+    [max,max_index]=max(Data_S{i}(:,2));
+    Data_S{i}([min_index,max_index],:) = [];
+end
+
+pd=[];
+pg=[];
+pp=[];
+for i=1:n
+pd=[pd;Data_S{i}(:,2)];
+pg=[pg;(i-1)*ones(size(Data_S{i},1),1)];
+pp=[pp i];
+end
+boxplot(pd,pg,'positions',pp);
+xtix = Algorithms;
+xtixloc = pp;
+set(gca,'XTickMode','auto','XTickLabel',xtix,'XTick',xtixloc,'FontSize',15);
+set(findobj(gca,'type','line'),'linew',1.5)
 ylabel('Planning Time (sec)');
-title('Valkyrie Upperbody E1 (17 DOF)');
+title(strcat('Valkyrie Upperbody ',ExpID,' (17 DOF)'));

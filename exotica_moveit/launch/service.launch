@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="exotica_moveit" type="ExoticaPlannerServiceNode" name="exotica_service" output="screen" launch-prefix="gdb -ex run --args">
+  <node pkg="exotica_moveit" type="ExoticaPlannerServiceNode" name="exotica_service" output="screen" >
     <param name="config" type="string" value="$(find ompl_solver)/resources/valkyrie_upperbody.xml" />
     <param name="solver" type="string" value="OMPL_Interface" />
     <param name="problem" type="string" value="OMPLProblem" />

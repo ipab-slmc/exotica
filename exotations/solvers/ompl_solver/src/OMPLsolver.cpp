@@ -31,6 +31,7 @@
 #include <ompl/geometric/planners/stride/STRIDE.h>
 #include "frrt/FRRT.h"
 #include "frrt/BFRRT.h"
+#include "frrt/FRRTConnect.h"
 
 //#include <ompl/base/goals/GoalLazySamples.h>
 #include "ompl_solver/OMPLGoalUnion.h"
@@ -490,6 +491,15 @@ namespace exotica
 				return FAILURE;
 			}
 		}
+		if (selected_planner_.compare("geometric::FRRTConnect") == 0)
+		{
+			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRTConnect>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
+		}
 		return SUCCESS;
 	}
 
@@ -507,6 +517,15 @@ namespace exotica
 		if (selected_planner_.compare("geometric::BFRRT") == 0)
 		{
 			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::BFRRT>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
+					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
+		}
+		if (selected_planner_.compare("geometric::FRRTConnect") == 0)
+		{
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRTConnect>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
 					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
 			{
 				INDICATE_FAILURE
@@ -556,9 +575,11 @@ namespace exotica
 		registerPlannerAllocator("geometric::LBTRRT", boost::bind(&allocatePlanner<og::LBTRRT>, _1, _2));
 		registerPlannerAllocator("geometric::RRTstar", boost::bind(&allocatePlanner<og::RRTstar>, _1, _2));
 		registerPlannerAllocator("geometric::STRIDE", boost::bind(&allocatePlanner<og::STRIDE>, _1, _2));
-//
-//		registerPlannerAllocator("geometric::FRRT", boost::bind(&allocatePlanner<og::FRRT>, _1, _2));
-//		registerPlannerAllocator("geometric::BFRRT", boost::bind(&allocatePlanner<og::BFRRT>, _1, _2));
+
+		registerPlannerAllocator("geometric::FRRT", boost::bind(&allocatePlanner<og::FRRT>, _1, _2));
+		registerPlannerAllocator("geometric::BFRRT", boost::bind(&allocatePlanner<og::BFRRT>, _1, _2));
+		registerPlannerAllocator("geometric::FRRTConnect", boost::bind(&allocatePlanner<og::FRRTConnect>, _1, _2));
+
 	}
 
 	std::vector<std::string> OMPLsolver::getPlannerNames()

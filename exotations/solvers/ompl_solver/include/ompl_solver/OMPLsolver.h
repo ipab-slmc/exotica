@@ -14,7 +14,8 @@
 #include "ompl_solver/common.h"
 #include "ompl_solver/OMPLStateValidityChecker.h"
 #include "ompl_solver/OMPLGoalSampler.h"
-#include "ompl_solver/OMPLProjection.h"
+#include "projections/OMPLProjection.h"
+#include "projections/DMeshProjection.h"
 #include <ompl/geometric/PathSimplifier.h>
 #include <ompl/base/DiscreteMotionValidator.h>
 #include <boost/thread/mutex.hpp>
@@ -202,8 +203,10 @@ namespace exotica
 			///	\brief	View original solution before trajectory smoothness
 			Eigen::MatrixXd original_solution_;
 
-			///	\brief	Projection joints
-			std::vector<std::string> projection_joints_;
+			///	\brief	Porjection type
+			std::string projector_;
+			///	\brief	Projection components
+			std::vector<std::string> projection_components_;
 
 			///	\brief	Threads locker
 			boost::mutex goal_lock_;

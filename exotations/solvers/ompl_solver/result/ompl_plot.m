@@ -1,8 +1,8 @@
-ExpID='E2';
+ExpID='E1';
 %'EST','PDST','KPIECE','FRRT',
-Algorithms={'BKPIECE','LBKPIECE','RRTConnect','BFRRT','FRRTConnect'};
+Algorithms={'BKPIECE','BKPIECE_JOINTS','BKPIECE_DMESH_1','BKPIECE_DMESH_2','BKPIECE_DMESH_3','BKPIECE_DMESH_4','BKPIECE_DMESH_5','BKPIECE_DMESH_6'};
 n=size(Algorithms,2);
-
+colorMap = hsv(n);
 DataNames=cell(1,n);
 clear Data
 clear Data_S
@@ -33,10 +33,10 @@ pd=[pd;Data_S{i}(:,2)];
 pg=[pg;(i-1)*ones(size(Data_S{i},1),1)];
 pp=[pp i];
 end
-boxplot(pd,pg,'positions',pp);
+boxplot(pd,pg,'positions',pp,'colors',colorMap);
 xtix = Algorithms;
 xtixloc = pp;
-set(gca,'XTickMode','auto','XTickLabel',xtix,'XTick',xtixloc,'FontSize',15);
-set(findobj(gca,'type','line'),'linew',1.5)
+set(gca,'XTickMode','auto','XTickLabel',xtix,'XTick',xtixloc,'FontSize',10);
+set(findobj(gca,'type','line'),'linew',2)
 ylabel('Planning Time (sec)');
 title(strcat('Valkyrie Upperbody ',ExpID,' (17 DOF)'));

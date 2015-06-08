@@ -10,13 +10,19 @@
      <!-- Other server functionalities other than parameters TODO -->
   </Server>
   <OMPLsolver name="OMPL_Interface">
-    <algorithm>LBKPIECE</algorithm>
+    <algorithm>BKPIECE</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
     <TrajectorySmooth>0</TrajectorySmooth>
-    <ProjectionJoints>
-    	  <joint name="WaistRotator" />
-          <joint name="WaistExtensor" />
-    </ProjectionJoints>
+    <Projection type="Jointss">
+    	  <component name="WaistRotator" />
+          <component name="WaistExtensor" />
+    </Projection>
+    <!--Projection type="DMesh">
+    	  <component name="Trunk"/>
+	  <component name="LeftShoulderAdductor"/>
+          <component name="LeftForearm"/>
+	  <component name="LeftPalm"/>
+    </Projection-->
   </OMPLsolver>
 
   <OMPLProblem name="OMPLProblem">

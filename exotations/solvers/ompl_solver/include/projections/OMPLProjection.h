@@ -32,7 +32,7 @@ namespace exotica
 				return variables_.size();
 			}
 
-			void defaultCellSizes()
+			virtual void defaultCellSizes()
 			{
 				cellSizes_.clear();
 				cellSizes_.resize(variables_.size(), 0.1);

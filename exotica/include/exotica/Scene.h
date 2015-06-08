@@ -347,7 +347,7 @@ namespace exotica
              * @param poses Returned poses
              * @return Indication of success
              */
-            EReturn getPoses(const std::vector<std::string> names, std::vector<KDL::Frame> & poses);
+            EReturn getPoses(const std::vector<std::string> & names, std::vector<KDL::Frame> & poses);
 
             /**
              * @brief getRobotModel Returns the robot model

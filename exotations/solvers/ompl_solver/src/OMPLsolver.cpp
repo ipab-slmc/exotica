@@ -313,24 +313,25 @@ namespace exotica
 		XML_CHECK("max_goal_sampling_attempts");
 		XML_OK(getInt(*xmltmp, goal_ampling_max_attempts_));
 
-		projection_joints_.clear();
-		tmp_handle = handle.FirstChildElement("ProjectionJoints");
+		projection_components_.clear();
+		tmp_handle = handle.FirstChildElement("Projection");
 		if (tmp_handle.ToElement())
 		{
-			tinyxml2::XMLHandle jnt_handle = tmp_handle.FirstChildElement("joint");
+			projector_ = tmp_handle.ToElement()->Attribute("type");
+			tinyxml2::XMLHandle jnt_handle = tmp_handle.FirstChildElement("component");
 			while (jnt_handle.ToElement())
 			{
 				const char* atr = jnt_handle.ToElement()->Attribute("name");
 				if (atr)
 				{
-					projection_joints_.push_back(std::string(atr));
+					projection_components_.push_back(std::string(atr));
 				}
 				else
 				{
 					INDICATE_FAILURE
 					return FAILURE;
 				}
-				jnt_handle = jnt_handle.NextSiblingElement("joint");
+				jnt_handle = jnt_handle.NextSiblingElement("component");
 			}
 		}
 
@@ -438,16 +439,16 @@ namespace exotica
 
 		std::vector<std::string> jnts;
 		prob_->getScenes().begin()->second->getJointNames(jnts);
-		if (projection_joints_.size() > 0)
+		if (projector_.compare("Joints")==0)
 		{
 			bool projects_ok_ = true;
-			std::vector<int> vars(projection_joints_.size());
-			for (int i = 0; i < projection_joints_.size(); i++)
+			std::vector<int> vars(projection_components_.size());
+			for (int i = 0; i < projection_components_.size(); i++)
 			{
 				bool found = false;
 				for (int j = 0; j < jnts.size(); j++)
 				{
-					if (projection_joints_[i].compare(jnts[j]) == 0)
+					if (projection_components_[i].compare(jnts[j]) == 0)
 					{
 						vars[i] = j;
 						found = true;
@@ -456,7 +457,7 @@ namespace exotica
 				}
 				if (!found)
 				{
-					WARNING("Projection joint ["<<projection_joints_[i]<<"] does not exist, OMPL Projection Evaluator not used");
+					WARNING("Projection joint ["<<projection_components_[i]<<"] does not exist, OMPL Projection Evaluator not used");
 					projects_ok_ = false;
 					break;
 				}
@@ -465,10 +466,29 @@ namespace exotica
 			{
 				ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new exotica::OMPLProjection(state_space_, vars)));
 				std::string tmp;
-				for (int i = 0; i < projection_joints_.size(); i++)
-					tmp = tmp + "[" + projection_joints_[i] + "] ";
+				for (int i = 0; i < projection_components_.size(); i++)
+					tmp = tmp + "[" + projection_components_[i] + "] ";
 				HIGHLIGHT_NAMED(object_name_, " Using projection joints "<<tmp);
 			}
+		}
+		else if (projector_.compare("DMesh")==0)
+		{
+			std::vector<std::pair<int, int> > tmp_index(3);
+			tmp_index[0].first = 0;
+			tmp_index[0].second = 3;
+//			tmp_index[1].first = 1;
+//			tmp_index[1].second = 3;
+//			tmp_index[2].first = 1;
+//			tmp_index[2].second = 3;
+			ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new exotica::DMeshProjection(state_space_, projection_components_, tmp_index, prob_->getScenes().begin()->second)));
+			std::string tmp;
+			for (int i = 0; i < projection_components_.size(); i++)
+				tmp = tmp + "[" + projection_components_[i] + "] ";
+			HIGHLIGHT_NAMED(object_name_, " Using DMesh Projection links "<<tmp);
+		}
+		else
+		{
+			WARNING_NAMED(object_name_,"Unknown projection type "<<projector_<<". Setting ProjectionEvaluator failed.");
 		}
 		ompl_simple_setup_->setGoal(constructGoal());
 		ompl_simple_setup_->setup();
@@ -578,7 +598,8 @@ namespace exotica
 
 		registerPlannerAllocator("geometric::FRRT", boost::bind(&allocatePlanner<og::FRRT>, _1, _2));
 		registerPlannerAllocator("geometric::BFRRT", boost::bind(&allocatePlanner<og::BFRRT>, _1, _2));
-		registerPlannerAllocator("geometric::FRRTConnect", boost::bind(&allocatePlanner<og::FRRTConnect>, _1, _2));
+		registerPlannerAllocator("geometric::FRRTConnect", boost::bind(&allocatePlanner<
+				og::FRRTConnect>, _1, _2));
 
 	}
 

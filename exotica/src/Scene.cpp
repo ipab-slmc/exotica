@@ -582,7 +582,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn Scene::getPoses(const std::vector<std::string> names, std::vector<KDL::Frame> & poses)
+	EReturn Scene::getPoses(const std::vector<std::string> & names, std::vector<KDL::Frame> & poses)
 	{
 		LOCK(lock_);
 		poses.resize(names.size());

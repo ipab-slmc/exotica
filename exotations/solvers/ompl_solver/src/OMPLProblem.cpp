@@ -6,6 +6,7 @@
  */
 
 #include "ompl_solver/OMPLProblem.h"
+#include "generic/Identity.h"
 
 REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem);
 REGISTER_TASKDEFINITION_TYPE("TaskBias", exotica::TaskBias);
@@ -107,56 +108,29 @@ namespace exotica
                                         task_maps_[name]=taskmap;
                                         TaskDefinition_ptr task;
 
-                                        if(IsGoal && problemType==OMPL_PROBLEM_GOAL_BIAS)
+                                        if(ok(TaskDefinition_fac::Instance().createObject("TaskTerminationCriterion",task)))
                                         {
-                                            if(ok(TaskDefinition_fac::Instance().createObject("TaskBias",task)))
-                                            {
-                                                TaskBias_ptr sqr = boost::static_pointer_cast<TaskBias>(task);
-                                                sqr->setTaskMap(taskmap);
-                                                int dim;
-                                                taskmap->taskSpaceDim(dim);
-                                                sqr->y_star0_.resize(dim);
-                                                sqr->rho0_(0)=1.0;
-                                                sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
-                                                sqr->y_star0_.setZero();
+                                            TaskTerminationCriterion_ptr sqr = boost::static_pointer_cast<TaskTerminationCriterion>(task);
+                                            sqr->setTaskMap(taskmap);
+                                            int dim;
+                                            taskmap->taskSpaceDim(dim);
+                                            sqr->y_star0_.resize(dim);
+                                            sqr->rho0_(0)=1.0;
+                                            sqr->threshold0_(0)=1e-6;
+                                            sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
 
-                                                sqr->setTimeSteps(1);
-                                                sqr->wasFullyInitialised_=true;
-                                                task_defs_[name]=task;
-                                                goalBias_.push_back(sqr);
-                                            }
-                                            else
-                                            {
-                                                INDICATE_FAILURE;
-                                                return FAILURE;
-                                            }
+                                            // TODO: Better implementation of stting goals from JSON
+                                            sqr->y_star0_.setZero();
+
+                                            sqr->setTimeSteps(1);
+                                            sqr->wasFullyInitialised_=true;
+                                            task_defs_[name]=task;
+                                            goals_.push_back(sqr);
                                         }
                                         else
                                         {
-                                            if(ok(TaskDefinition_fac::Instance().createObject("TaskTerminationCriterion",task)))
-                                            {
-                                                TaskTerminationCriterion_ptr sqr = boost::static_pointer_cast<TaskTerminationCriterion>(task);
-                                                sqr->setTaskMap(taskmap);
-                                                int dim;
-                                                taskmap->taskSpaceDim(dim);
-                                                sqr->y_star0_.resize(dim);
-                                                sqr->rho0_(0)=1.0;
-                                                sqr->threshold0_(0)=1e-6;
-                                                sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
-
-                                                // TODO: Better implementation of stting goals from JSON
-                                                sqr->y_star0_.setZero();
-
-                                                sqr->setTimeSteps(1);
-                                                sqr->wasFullyInitialised_=true;
-                                                task_defs_[name]=task;
-                                                goals_.push_back(sqr);
-                                            }
-                                            else
-                                            {
-                                                INDICATE_FAILURE;
-                                                return FAILURE;
-                                            }
+                                            INDICATE_FAILURE;
+                                            return FAILURE;
                                         }
                                     }
                                     else
@@ -194,6 +168,55 @@ namespace exotica
                     return FAILURE;
                 }
             }
+
+            // HACK - special case
+            // Add goal bias ////////////////////////////
+            if(!problem->endStateName.empty() && problemType==OMPL_PROBLEM_GOAL_BIAS)
+            {
+                TaskMap_ptr taskmap;
+                if(ok(TaskMap_fac::Instance().createObject("Identity",taskmap)))
+                {
+                    boost::shared_ptr<exotica::Identity> idt = boost::static_pointer_cast<exotica::Identity>(taskmap);
+                    EReturn ret1 = taskmap->initialiseManual("exotica::Identity",server_,scenes_,problem);
+                    EReturn ret = idt->initialise(problem->endStateName, *(problem->posesJointNames));
+                    if(ok(ret)&&ok(ret1))
+                    {
+                        if(ret!=CANCELLED)
+                        {
+                            std::string name=taskmap->getObjectName();
+                            task_maps_[name]=taskmap;
+                            TaskDefinition_ptr task;
+                            if(endState.rows()>0)
+                            {
+                                if(ok(TaskDefinition_fac::Instance().createObject("TaskBias",task)))
+                                {
+                                    TaskBias_ptr sqr = boost::static_pointer_cast<TaskBias>(task);
+                                    sqr->setTaskMap(taskmap);
+                                    int dim;
+                                    taskmap->taskSpaceDim(dim);
+                                    sqr->y_star0_.resize(dim);
+                                    sqr->rho0_(0)=1.0;
+                                    sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+                                    sqr->y_star0_.setZero();
+
+                                    sqr->setTimeSteps(1);
+                                    sqr->wasFullyInitialised_=true;
+                                    task_defs_[name]=task;
+                                    goalBias_.push_back(sqr);
+                                }
+                                else
+                                {
+                                    INDICATE_FAILURE;
+                                    return FAILURE;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
         }
         else
         {

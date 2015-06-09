@@ -114,6 +114,7 @@ namespace exotica
         {
             std::pair<int,int> id = taskIndex.at(task_name);
             goal = y_star.at(t).segment(id.second,dim(id.first));
+            return SUCCESS;
         }
     }
 
@@ -128,6 +129,7 @@ namespace exotica
         {
             std::pair<int,int> id = taskIndex.at(task_name);
             rho=rhos.at(t)(id.first);
+            return SUCCESS;
         }
     }
 

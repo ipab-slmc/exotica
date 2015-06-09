@@ -79,6 +79,11 @@ namespace exotica
             Scene_map scenes_;  //!< Kinematic scene(s) indexed by name
 
             Eigen::VectorXd startState;
+            Eigen::VectorXd endState;
+            Eigen::VectorXd nominalState;
+            std::string startStateName;
+            std::string endStateName;
+            std::string nominalStateName;
 
             virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
 

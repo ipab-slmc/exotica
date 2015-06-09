@@ -28,6 +28,7 @@ namespace exotica
        */
       virtual EReturn taskSpaceDim(int & task_dim);
 
+      EReturn initialise(std::string& postureName, std::vector<std::string>& joints, bool skipUnknown=false);
       virtual EReturn initialise(const rapidjson::Value& a);
 
       bool useRef;

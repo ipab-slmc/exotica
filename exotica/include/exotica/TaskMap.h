@@ -107,6 +107,7 @@ namespace exotica
 
             virtual EReturn initialise(const rapidjson::Value& a);
             EReturn initialise(const rapidjson::Value& a, Server_ptr & server, const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
+            EReturn initialiseManual(std::string name, Server_ptr & server, const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
 
             bool updateJacobian_;
 

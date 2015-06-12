@@ -249,7 +249,6 @@ namespace exotica
 
 	bool CollisionScene::isStateValid(bool self)
 	{
-        //	TODO
 		return ps_->isStateValid(ps_->getCurrentState());
 	}
 
@@ -325,12 +324,13 @@ namespace exotica
                 if (distance(fcl_link, it.second, req, res, safeDist) < 0)
 				{
 					d = -1;
+					fcl_convert::fcl2Eigen(it.second[i]->getAABB().center(), c2);
 					return WARNING;
 				}
 				else if (res.min_distance < d)
 				{
                     d = res.min_distance;
-                    it.second[i]->getAABB().center();
+					fcl_convert::fcl2Eigen(it.second[i]->getAABB().center(), c2);
 				}
 			}
         }
@@ -582,7 +582,7 @@ namespace exotica
 		return SUCCESS;
 	}
 
-	EReturn Scene::getPoses(const std::vector<std::string> names, std::vector<KDL::Frame> & poses)
+	EReturn Scene::getPoses(const std::vector<std::string> & names, std::vector<KDL::Frame> & poses)
 	{
 		LOCK(lock_);
 		poses.resize(names.size());

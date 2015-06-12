@@ -29,7 +29,6 @@ namespace exotica
 			virtual bool isValid(const ompl::base::State *state, double &dist) const;
 
 			virtual double clearance(const ompl::base::State *state) const;
-
 		protected:
 			exotica::OMPLsolver* sol_;
 			boost::shared_ptr<exotica::OMPLProblem> prob_;

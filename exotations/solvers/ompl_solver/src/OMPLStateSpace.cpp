@@ -51,7 +51,11 @@ namespace exotica
 
 	EReturn OMPLStateSpace::copyToOMPLState(ompl::base::State *state, Eigen::VectorXd q) const
 	{
-
+		if (!state)
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
 		if (q.rows() != (int) getDimension())
 		{
 			ERROR("State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
@@ -65,6 +69,11 @@ namespace exotica
 	EReturn OMPLStateSpace::copyFromOMPLState(const ompl::base::State *state,
 			Eigen::VectorXd& q) const
 	{
+		if (!state)
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
 		if (q.rows() != (int) getDimension())
 		{
 			ERROR("State vector and internal state dimension disagree");

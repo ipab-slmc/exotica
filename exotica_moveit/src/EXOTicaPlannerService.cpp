@@ -93,6 +93,7 @@ namespace exotica
 				INDICATE_FAILURE
 				initialised_ = false;
 			}
+
 			if (initialised_)
 				as_.start();
 		}
@@ -108,42 +109,48 @@ namespace exotica
 			return false;
 		}
 //		HIGHLIGHT_NAMED("MoveitInterface", "Using Solver "<<solver_->object_name_<<"["<<solver_->type()<<"], Problem "<<problem_->object_name_<<"["<<problem_->type()<<"].");
-		if (solver_->type().compare("exotica::OMPLsolver") == 0)
-		{
-			exotica::OMPLsolver_ptr ss = boost::static_pointer_cast<exotica::OMPLsolver>(solver_);
 
-			Eigen::VectorXd qT;
-			exotica::vectorExoticaToEigen(goal->qT, qT);
-			goal_bias_map_->jointRef = qT;
-			goal_map_->jointRef = qT;
-			ss->setMaxPlanningTime(goal->max_time_);
-			if (!ok(ss->resetIfNeeded()))
+		for (int i = 0; i < 50; i++)
+		{
+			if (solver_->type().compare("exotica::OMPLsolver") == 0)
 			{
-				INDICATE_FAILURE
-				return FAILURE;
+				exotica::OMPLsolver_ptr ss =
+						boost::static_pointer_cast<exotica::OMPLsolver>(solver_);
+
+				Eigen::VectorXd qT;
+				exotica::vectorExoticaToEigen(goal->qT, qT);
+				goal_bias_map_->jointRef = qT;
+				goal_map_->jointRef = qT;
+				ss->setGoalState(qT, 1e-4);
+				ss->setMaxPlanningTime(goal->max_time_);
+				if (!ok(ss->resetIfNeeded()))
+				{
+					INDICATE_FAILURE
+					return FAILURE;
+				}
 			}
-		}
 
-		Eigen::VectorXd q0;
-		Eigen::MatrixXd solution;
-		exotica::vectorExoticaToEigen(goal->q0, q0);
-		ros::Time start = ros::Time::now();
-		EReturn found = FAILURE;
-		if (solver_->type().compare("exotica::IKsolver") == 0)
-		{
-			found =
-					boost::static_pointer_cast<exotica::IKsolver>(solver_)->SolveFullSolution(q0, solution);
-		}
-		else
-			found = solver_->Solve(q0, solution);
-
-		if (ok(found))
-		{
-			res_.succeeded_ = true;
-			fb_.solving_time_ = res_.planning_time_ =
-					ros::Duration(ros::Time::now() - start).toSec();
-			exotica::matrixEigenToExotica(solution, res_.solution_);
-			as_.setSucceeded(res_);
+			EReturn found = FAILURE;
+			Eigen::VectorXd q0;
+			Eigen::MatrixXd solution;
+			exotica::vectorExoticaToEigen(goal->q0, q0);
+			ros::Time start = ros::Time::now();
+			if (solver_->type().compare("exotica::IKsolver") == 0)
+			{
+				found =
+						boost::static_pointer_cast<exotica::IKsolver>(solver_)->SolveFullSolution(q0, solution);
+			}
+			else
+				found = solver_->Solve(q0, solution);
+			if (ok(found))
+			{
+				res_.succeeded_ = true;
+				fb_.solving_time_ = res_.planning_time_ =
+						ros::Duration(ros::Time::now() - start).toSec();
+				exotica::matrixEigenToExotica(solution, res_.solution_);
+				as_.setSucceeded(res_);
+			}
+			HIGHLIGHT_NAMED("OMPL Benchmark", "Solving time "<<i<<"/50 "<< (ok(found) ? "Succeed":"Failed"));
 		}
 		return res_.succeeded_;
 	}

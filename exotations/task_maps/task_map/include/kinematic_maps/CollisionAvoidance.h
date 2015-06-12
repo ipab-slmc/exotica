@@ -79,7 +79,9 @@ namespace exotica
 			std::vector<KDL::Frame> init_offsets_;
 
 			//	Link velocities
-			std::vector<Eigen::VectorXd> vels_;
+			Eigen::VectorXd vels_;
+			Eigen::VectorXd old_eff_phi_;
+			EParam<std_msgs::Bool> use_vel_;
 
 			//	Internal kinematica solver
 			kinematica::KinematicTree kin_sol_;

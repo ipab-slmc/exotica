@@ -28,10 +28,12 @@
 #include <ompl/geometric/planners/prm/SPARStwo.h>
 #include <ompl/geometric/planners/rrt/LBTRRT.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>
+#include <ompl/geometric/planners/rrt/pRRT.h>
 #include <ompl/geometric/planners/stride/STRIDE.h>
 #include "frrt/FRRT.h"
 #include "frrt/BFRRT.h"
 #include "frrt/FRRTConnect.h"
+#include "frrt/FKPIECE.h"
 
 //#include <ompl/base/goals/GoalLazySamples.h>
 #include "ompl_solver/OMPLGoalUnion.h"
@@ -82,6 +84,24 @@ namespace exotica
 		return ret;
 	}
 
+	void OMPLsolver::recordData()
+	{
+		ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());
+		ompl_simple_setup_->getPlanner()->getPlannerData(data);
+		result_file_ << 1 << " " << planning_time_ << " " << data.numVertices();
+		if (selected_planner_.compare("geometric::FRRT") == 0)
+		{
+			result_file_ << " " << data.properties.at("GlobalSolveTry");
+			result_file_ << " " << data.properties.at("GlobalSolveSuccess");
+			result_file_ << " " << data.properties.at("GlobalCheckTry");
+			result_file_ << " " << data.properties.at("GlobalCheckSuccess");
+			result_file_ << " " << data.properties.at("LocalSolveTry");
+			result_file_ << " " << data.properties.at("LocalSolveSuccess");
+			result_file_ << " " << data.properties.at("LocalCheckTry");
+			result_file_ << " " << data.properties.at("LocalCheckSuccess");
+		}
+		result_file_ << "\n";
+	}
 	void OMPLsolver::setMaxPlanningTime(double t)
 	{
 		timeout_ = t;
@@ -121,23 +141,7 @@ namespace exotica
 				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution, timeout_
 						- planning_time_.toSec());
 				planning_time_ = ros::Time::now() - startTime;
-				succ_cnt_++;
-
-				ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());
-				ompl_simple_setup_->getPlanner()->getPlannerData(data);
-				result_file_ << 1 << " " << planning_time_ << " " << data.numVertices();
-				if (selected_planner_.compare("geometric::FRRT") == 0)
-				{
-					result_file_ << " " << data.properties.at("GlobalSolveTry");
-					result_file_ << " " << data.properties.at("GlobalSolveSuccess");
-					result_file_ << " " << data.properties.at("GlobalCheckTry");
-					result_file_ << " " << data.properties.at("GlobalCheckSuccess");
-					result_file_ << " " << data.properties.at("LocalSolveTry");
-					result_file_ << " " << data.properties.at("LocalSolveSuccess");
-					result_file_ << " " << data.properties.at("LocalCheckTry");
-					result_file_ << " " << data.properties.at("LocalCheckSuccess");
-				}
-				result_file_ << "\n";
+				recordData();
 				postSolve();
 				succ_cnt_++;
 				return SUCCESS;
@@ -146,24 +150,8 @@ namespace exotica
 			{
 				finishedSolving_ = true;
 				planning_time_ = ros::Time::now() - startTime;
-
-				ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());
-				ompl_simple_setup_->getPlanner()->getPlannerData(data);
-				result_file_ << -1 << " " << planning_time_ << " " << data.numVertices();
-				if (selected_planner_.compare("geometric::FRRT") == 0)
-				{
-					result_file_ << " " << data.properties.at("GlobalSolveTry");
-					result_file_ << " " << data.properties.at("GlobalSolveSuccess");
-					result_file_ << " " << data.properties.at("GlobalCheckTry");
-					result_file_ << " " << data.properties.at("GlobalCheckSuccess");
-					result_file_ << " " << data.properties.at("LocalSolveTry");
-					result_file_ << " " << data.properties.at("LocalSolveSuccess");
-					result_file_ << " " << data.properties.at("LocalCheckTry");
-					result_file_ << " " << data.properties.at("LocalCheckSuccess");
-				}
-				result_file_ << "\n";
+				recordData();
 				postSolve();
-
 				return FAILURE;
 			}
 		}
@@ -439,7 +427,7 @@ namespace exotica
 
 		std::vector<std::string> jnts;
 		prob_->getScenes().begin()->second->getJointNames(jnts);
-		if (projector_.compare("Joints")==0)
+		if (projector_.compare("Joints") == 0)
 		{
 			bool projects_ok_ = true;
 			std::vector<int> vars(projection_components_.size());
@@ -471,15 +459,15 @@ namespace exotica
 				HIGHLIGHT_NAMED(object_name_, " Using projection joints "<<tmp);
 			}
 		}
-		else if (projector_.compare("DMesh")==0)
+		else if (projector_.compare("DMesh") == 0)
 		{
-			std::vector<std::pair<int, int> > tmp_index(3);
-			tmp_index[0].first = 0;
-			tmp_index[0].second = 3;
-//			tmp_index[1].first = 1;
-//			tmp_index[1].second = 3;
-//			tmp_index[2].first = 1;
-//			tmp_index[2].second = 3;
+			//	Construct default DMesh projection relationship
+			std::vector<std::pair<int, int> > tmp_index(projection_components_.size() - 2);
+			for (int i = 0; i < tmp_index.size(); i++)
+			{
+				tmp_index[i].first = i;
+				tmp_index[i].second = tmp_index.size();
+			}
 			ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new exotica::DMeshProjection(state_space_, projection_components_, tmp_index, prob_->getScenes().begin()->second)));
 			std::string tmp;
 			for (int i = 0; i < projection_components_.size(); i++)
@@ -488,64 +476,39 @@ namespace exotica
 		}
 		else
 		{
-			WARNING_NAMED(object_name_,"Unknown projection type "<<projector_<<". Setting ProjectionEvaluator failed.");
+			WARNING_NAMED(object_name_, "Unknown projection type "<<projector_<<". Setting ProjectionEvaluator failed.");
 		}
-		ompl_simple_setup_->setGoal(constructGoal());
+//		ompl_simple_setup_->setGoal(constructGoal());
 		ompl_simple_setup_->setup();
 
-		if (selected_planner_.compare("geometric::FRRT") == 0)
+		if (selected_planner_.compare("geometric::FRRT") == 0
+				|| selected_planner_.compare("geometric::BFRRT") == 0
+				|| selected_planner_.compare("geometric::FRRTConnect") == 0
+				|| selected_planner_.compare("geometric::FKPIECE") == 0)
 		{
 			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
-			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FlexiblePlanner>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
 			{
 				INDICATE_FAILURE
 				return FAILURE;
 			}
 		}
-		if (selected_planner_.compare("geometric::BFRRT") == 0)
+		if (selected_planner_.compare("geometric::pFRRT") == 0)
 		{
-			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
-			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::BFRRT>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
-			{
-				INDICATE_FAILURE
-				return FAILURE;
-			}
+			ompl_simple_setup_->getPlanner()->as<ompl::geometric::pRRT>()->setThreadCount(10);
 		}
-		if (selected_planner_.compare("geometric::FRRTConnect") == 0)
-		{
-			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
-			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRTConnect>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
-			{
-				INDICATE_FAILURE
-				return FAILURE;
-			}
-		}
+
 		return SUCCESS;
 	}
 
 	EReturn OMPLsolver::resetIfNeeded()
 	{
-		if (selected_planner_.compare("geometric::FRRT") == 0)
+		if (selected_planner_.compare("geometric::FRRT") == 0
+				|| selected_planner_.compare("geometric::BFRRT") == 0
+				|| selected_planner_.compare("geometric::FRRTConnect") == 0
+				|| selected_planner_.compare("geometric::FKPIECE") == 0)
 		{
-			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRT>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
-					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
-			{
-				INDICATE_FAILURE
-				return FAILURE;
-			}
-		}
-		if (selected_planner_.compare("geometric::BFRRT") == 0)
-		{
-			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::BFRRT>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
-					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
-			{
-				INDICATE_FAILURE
-				return FAILURE;
-			}
-		}
-		if (selected_planner_.compare("geometric::FRRTConnect") == 0)
-		{
-			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FRRTConnect>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
+			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FlexiblePlanner>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
 					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
 			{
 				INDICATE_FAILURE
@@ -575,6 +538,7 @@ namespace exotica
 	void OMPLsolver::registerDefaultPlanners()
 	{
 		registerPlannerAllocator("geometric::RRT", boost::bind(&allocatePlanner<og::RRT>, _1, _2));
+		registerPlannerAllocator("geometric::pRRT", boost::bind(&allocatePlanner<og::pRRT>, _1, _2));
 		registerPlannerAllocator("geometric::RRTConnect", boost::bind(&allocatePlanner<
 				og::RRTConnect>, _1, _2));
 		registerPlannerAllocator("geometric::LazyRRT", boost::bind(&allocatePlanner<og::LazyRRT>, _1, _2));
@@ -600,6 +564,7 @@ namespace exotica
 		registerPlannerAllocator("geometric::BFRRT", boost::bind(&allocatePlanner<og::BFRRT>, _1, _2));
 		registerPlannerAllocator("geometric::FRRTConnect", boost::bind(&allocatePlanner<
 				og::FRRTConnect>, _1, _2));
+		registerPlannerAllocator("geometric::FKPIECE", boost::bind(&allocatePlanner<og::FKPIECE>, _1, _2));
 
 	}
 

@@ -4,16 +4,21 @@
      <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
      Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
      <Parameters>  
-
+	<GlobalTau type="double">
+	   <default>1e-5</default>
+        </GlobalTau>
+	<LocalTau type="double">
+	   <default>1e-2</default>
+        </LocalTau>
      </Parameters>
      
      <!-- Other server functionalities other than parameters TODO -->
   </Server>
   <OMPLsolver name="OMPL_Interface">
-    <algorithm>BKPIECE</algorithm>
+    <algorithm>KPIECE</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
     <TrajectorySmooth>0</TrajectorySmooth>
-    <Projection type="Jointss">
+    <Projection type="Joints">
     	  <component name="WaistRotator" />
           <component name="WaistExtensor" />
     </Projection>

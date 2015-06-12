@@ -49,9 +49,11 @@ add_library(ompl_solver
    src/OMPLStateSpace.cpp
    src/OMPLStateValidityChecker.cpp
    src/OMPLGoalSampler.cpp
+   src/frrt/FlexiblePlanner.cpp
    src/frrt/FRRT.cpp
    src/frrt/BFRRT.cpp
    src/frrt/FRRTConnect.cpp
+   src/frrt/FKPIECE.cpp
 )
 
 link_directories(${catkin_LIBRARY_DIRS})

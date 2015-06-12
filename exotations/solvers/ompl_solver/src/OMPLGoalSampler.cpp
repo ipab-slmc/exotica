@@ -61,7 +61,7 @@ namespace exotica
 
 	void OMPLGoalSampler::sampleGoal(ompl::base::State *st) const
 	{
-		HIGHLIGHT_NAMED("GoalSampler", "Sample goal "<<taskI->jointRef.transpose());
+//		HIGHLIGHT_NAMED("GoalSampler", "Sample goal "<<taskI->jointRef.transpose());
 		if (st && hasIdentityTask)
 		{
 			ompl::base::RealVectorStateSpace::StateType* state = st->as<

@@ -148,7 +148,7 @@
       <Rho>1e-1</Rho>
       <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task-->
-    <Tolerance>1e-4</Tolerance> 
+    <Tolerance>1e-5</Tolerance> 
     <W> 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</W>
   </IKProblem>
 </ExampleConfiguration>

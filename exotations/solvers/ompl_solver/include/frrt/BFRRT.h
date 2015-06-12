@@ -8,21 +8,14 @@
 #ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_FRRT_BFRRT_H_
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_FRRT_BFRRT_H_
 
-#include <ompl/geometric/planners/PlannerIncludes.h>
-#include <ompl/base/spaces/RealVectorStateSpace.h>
-#include <ompl/base/goals/GoalState.h>
-#include <ompl/datastructures/NearestNeighbors.h>
-#include <ompl/tools/config/SelfConfig.h>
-#include "exotica/EXOTica.hpp"
-#include <ompl_solver/OMPLGoalSampler.h>
-#include <ik_solver/ik_solver.h>
+#include "FlexiblePlanner.h"
 
 namespace ompl
 {
 	namespace geometric
 	{
 		///	\brief	The bi-directional FRRT
-		class BFRRT: public base::Planner
+		class BFRRT: public FlexiblePlanner
 		{
 			public:
 				/*
@@ -65,17 +58,6 @@ namespace ompl
 
 				virtual void setup();
 
-				/*
-				 * \brief	Set up the local planner (EXOTica)
-				 * @param	xml_file	XML configuration file
-				 * @param	scene		EXOTica scene
-				 * @return	True if succeeded, false otherwise
-				 */
-				bool setUpLocalPlanner(const std::string & xml_file,
-						const exotica::Scene_ptr & scene);
-
-				bool resetSceneAndGoal(const exotica::Scene_ptr & scene,
-						const Eigen::VectorXd & goal);
 			protected:
 
 				/** \brief Representation of a motion */
@@ -158,9 +140,6 @@ namespace ompl
 				/** \brief Grow a tree towards a random state */
 				GrowState growTree(TreeData &tree, TreeGrowingInfo &tgi, Motion *rmotion);
 
-				/** \brief State sampler */
-				base::StateSamplerPtr sampler_;
-
 				/** \brief The start tree */
 				TreeData tStart_;
 
@@ -170,22 +149,12 @@ namespace ompl
 				/** \brief The maximum length of a motion to be added to a tree */
 				double maxDistance_;
 
-				/** \brief The random number generator */
-				RNG rng_;
-
 				/** \brief The pair of states in each tree connected during planning.  Used for PlannerData computation */
 				std::pair<base::State*, base::State*> connectionPoint_;
 
 			private:
 				///	Local solver
 				bool localSolve(Motion *sm, base::State *is, Motion *gm);
-				exotica::Server_ptr ser_;
-				exotica::IKsolver_ptr local_solver_;
-
-				exotica::TaskSqrError_ptr local_task_;
-				boost::shared_ptr<exotica::Identity> local_map_;
-				exotica::TaskSqrError_ptr collision_task_;
-				Eigen::VectorXd global_goal_;
 		};
 	}	//	Geometric namespace
 }	//	OMPL namespace

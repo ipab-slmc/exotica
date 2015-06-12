@@ -12,10 +12,8 @@ namespace ompl
 	namespace geometric
 	{
 		BFRRT::BFRRT(const base::SpaceInformationPtr & si) :
-				base::Planner(si, "BFRRT")
+				FlexiblePlanner(si, "BFRRT")
 		{
-			specs_.recognizedGoal = base::GOAL_SAMPLEABLE_REGION;
-			specs_.directed = true;
 			maxDistance_ = 0.0;
 			Planner::declareParam<double>("range", this, &BFRRT::setRange, &BFRRT::getRange, "0.:1.:10000.");
 			connectionPoint_ = std::make_pair<base::State*, base::State*>(NULL, NULL);
@@ -245,7 +243,7 @@ namespace ompl
 						{
 							new_motion->global_valid_ = false;
 							tStart_->add(new_motion);
-							si_->copyState(rmotion->state,new_motion->state);
+							si_->copyState(rmotion->state, new_motion->state);
 						}
 					}
 				}
@@ -377,66 +375,6 @@ namespace ompl
 			return solved ? base::PlannerStatus::EXACT_SOLUTION : base::PlannerStatus::TIMEOUT;
 		}
 
-		bool BFRRT::setUpLocalPlanner(const std::string & xml_file,
-				const exotica::Scene_ptr & scene)
-		{
-			exotica::Initialiser ini;
-			exotica::PlanningProblem_ptr prob;
-			exotica::MotionSolver_ptr sol;
-			if (!ok(ini.initialise(xml_file, ser_, sol, prob, "LocalProblem", "FRRTLocal")))
-			{
-				INDICATE_FAILURE
-				return false;
-			}
-			if (sol->type().compare("exotica::IKsolver") == 0)
-			{
-				HIGHLIGHT_NAMED("FRRT", "Using local planner "<<sol->object_name_<<" at "<<sol.get());
-				local_solver_ = boost::static_pointer_cast<exotica::IKsolver>(sol);
-			}
-			else
-			{
-				INDICATE_FAILURE
-				return false;
-			}
-			if (!ok(local_solver_->specifyProblem(prob)))
-			{
-				INDICATE_FAILURE
-				return false;
-			}
-			prob->setScene(scene->getPlanningScene());
-
-			if (prob->getTaskDefinitions().find("LocalTask") == prob->getTaskDefinitions().end())
-			{
-				ERROR("Missing XML tag of 'LocalTask'");
-				return false;
-			}
-			if (prob->getTaskMaps().find("CSpaceMap") == prob->getTaskMaps().end())
-			{
-				ERROR("Missing XML tag of 'CSpaceMap'");
-				return false;
-			}
-			local_task_ =
-					boost::static_pointer_cast<exotica::TaskSqrError>(prob->getTaskDefinitions().at("LocalTask"));
-			local_map_ =
-					boost::static_pointer_cast<exotica::Identity>(prob->getTaskMaps().at("CSpaceMap"));
-			collision_task_ =
-					boost::static_pointer_cast<exotica::TaskSqrError>(prob->getTaskDefinitions().at("CollisionAvoidanceTask"));
-			return true;
-		}
-
-		bool BFRRT::resetSceneAndGoal(const exotica::Scene_ptr & scene,
-				const Eigen::VectorXd & goal)
-		{
-			global_goal_.setZero(goal.size());
-			global_goal_ = goal;
-			if (!ok(local_solver_->getProblem()->setScene(scene->getPlanningScene())))
-			{
-				INDICATE_FAILURE
-				return false;
-			}
-			return true;
-		}
-
 		void BFRRT::getPlannerData(base::PlannerData &data) const
 		{
 			Planner::getPlannerData(data);
@@ -483,7 +421,7 @@ namespace ompl
 							ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
 					* qs.rows());
 			Eigen::MatrixXd local_path;
-			exotica::EReturn ret = local_solver_->SolveFullSolution(qs, local_path);
+			exotica::EReturn ret = FlexiblePlanner::localSolve(qs, qg, local_path);
 			if (ok(ret))
 			{
 				/* Local planner succeeded */

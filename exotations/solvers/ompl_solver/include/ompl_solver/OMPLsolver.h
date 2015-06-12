@@ -208,6 +208,8 @@ namespace exotica
 			///	\brief	View original solution before trajectory smoothness
 			Eigen::MatrixXd original_solution_;
 
+            EParam<std_msgs::Bool> saveResults_;
+
 			///	\brief	Porjection type
 			std::string projector_;
 			///	\brief	Projection components

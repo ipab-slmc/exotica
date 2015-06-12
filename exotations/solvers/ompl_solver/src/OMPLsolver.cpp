@@ -141,7 +141,7 @@ namespace exotica
 				getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), solution, timeout_
 						- planning_time_.toSec());
 				planning_time_ = ros::Time::now() - startTime;
-				recordData();
+                if(saveResults_->data) recordData();
 				postSolve();
 				succ_cnt_++;
 				return SUCCESS;
@@ -150,7 +150,7 @@ namespace exotica
 			{
 				finishedSolving_ = true;
 				planning_time_ = ros::Time::now() - startTime;
-				recordData();
+                if(saveResults_->data) recordData();
 				postSolve();
 				return FAILURE;
 			}
@@ -274,6 +274,9 @@ namespace exotica
 		tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("TrajectorySmooth");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, smooth_);
 
+        tmp_handle = handle.FirstChildElement("SaveResults");
+        server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, saveResults_);
+
 		tinyxml2::XMLElement* xmltmp;
 		std::string txt;
 		XML_CHECK("algorithm");
@@ -316,20 +319,23 @@ namespace exotica
 				}
 				else
 				{
-					INDICATE_FAILURE
+                    INDICATE_FAILURE;
 					return FAILURE;
 				}
 				jnt_handle = jnt_handle.NextSiblingElement("component");
 			}
 		}
 
-		std::string path = ros::package::getPath("ompl_solver") + "/result/" + txt + ".txt";
-		result_file_.open(path);
-		if (!result_file_.is_open())
-		{
-			ERROR("Error open "<<path);
-			return FAILURE;
-		}
+        if(saveResults_->data)
+        {
+            std::string path = ros::package::getPath("ompl_solver") + "/result/" + txt + ".txt";
+            result_file_.open(path);
+            if (!result_file_.is_open())
+            {
+                ERROR("Error open "<<path);
+                return FAILURE;
+            }
+        }
 		succ_cnt_ = 0;
 		return SUCCESS;
 	}
@@ -612,7 +618,7 @@ namespace exotica
 		{
 			ompl_simple_setup_->setGoalState(gs, eps);
 		}
-//		HIGHLIGHT_NAMED(object_name_, "Goal state is set, now you can use bi-directional algorithms!");
+        //HIGHLIGHT_NAMED(object_name_, "Goal state is set, now you can use bi-directional algorithms!\n"<< qT.transpose());
 		return SUCCESS;
 	}
 

@@ -169,6 +169,7 @@ namespace exotica
 		{
 			Eigen::Vector3d tmp1, tmp2;
 			scene_->getCollisionScene()->getRobotDistance(effs_[i], self_->data, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i], safe_range_->data);
+
 			//	Compute Phi
 			if (dists[i] <= 0)
 			{
@@ -207,7 +208,6 @@ namespace exotica
 						discounts(i) = ct;
 						HIGHLIGHT_NAMED(effs_[i], "CosTheta "<<ct<<" Discount "<<discounts(i));
 					}
-//					getchar();
 				}
 				costs[i] = (1.0 - dists[i] / safe_range_->data);
 			}

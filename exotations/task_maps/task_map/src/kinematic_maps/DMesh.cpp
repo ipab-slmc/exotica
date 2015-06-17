@@ -46,6 +46,14 @@ namespace exotica
 		tmp_handle = handle.FirstChildElement("GoalGain");
 		if (!ok(server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, kg_)))
 			kg_->data = 100;
+
+		tmp_handle = handle.FirstChildElement("ExpGain");
+		if (!ok(server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, kexp_)))
+			kexp_->data = 1;
+
+		tmp_handle = handle.FirstChildElement("InteractRange");
+		if (!ok(server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, di_)))
+			di_->data = 0.5;
 		///	Initialise the mesh
 		vertices_.resize(graph_size_);
 		vertex_map_.clear();
@@ -85,7 +93,7 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-		if (!ok(updateDistances()))
+		if (!ok(updateDistances()) || !ok(updatePositions()))
 		{
 			INDICATE_FAILURE
 			return FAILURE;
@@ -116,6 +124,44 @@ namespace exotica
 		}
 	}
 
+	EReturn DMesh::getGoalLaplace(Eigen::VectorXd & goal, int t)
+	{
+		LOCK(lock_);
+		if (!isRegistered(t) || !getEffReferences())
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+		if (!ok(updateDistances()) || !ok(updatePositions()))
+		{
+			INDICATE_FAILURE
+			return FAILURE;
+		}
+		goal.setZero(task_size_);
+		uint j, l, cnt = 0;
+		double d, b;
+		for (j = 0; j < robot_size_; j++)
+		{
+			for (l = robot_size_; l < graph_size_; l++)
+			{
+				switch (vertices_[l]->type_)
+				{
+					case Vertex::LINK:
+						goal(cnt) = kp_->data * dist_(j, l);
+						break;
+					case Vertex::OBSTACLE_TO_ALL:
+						goal(cnt) = ko_->data;
+						break;
+					default:
+						//	All other types will zero for goal laplace
+						break;
+				}
+				cnt++;
+			}
+		}
+
+		return SUCCESS;
+	}
 	EReturn DMesh::computeLaplace(int t)
 	{
 		LOCK(lock_);
@@ -124,37 +170,19 @@ namespace exotica
 		double b = 0, d = 0;
 		for (j = 0; j < robot_size_; j++)
 		{
-			int tmp = robot_size_;
-			if (usePose_->data)
-				tmp = j + 2;
-			for (l = tmp; l < graph_size_; l++)
+			for (l = robot_size_; l < graph_size_; l++)
 			{
 				b = d = 0;
-				switch (gManager_.getGraph()->getVertex(l)->getType())
+				switch (vertices_[l]->type_)
 				{
-					case VERTEX_TYPE::LINK:
+					case Vertex::LINK:
 						PHI(cnt) = kp_->data * dist_(j, l);
 						break;
-					case VERTEX_TYPE::OBSTACLE:
-						if (gManager_.getGraph()->getVertex(l)->checkList(links_->strings[j]))
-						{
-							if (dist_(j, l) - gManager_.getGraph()->getVertex(j)->getRadius()
-									- gManager_.getGraph()->getVertex(l)->getRadius() < 0.05)
-								PHI(cnt) = ko_->data * (1 - exp(-wo_ * dist_(j, l)));
-							else
-								PHI(cnt) = ko_->data;
-
-						}
+					case Vertex::OBSTACLE_TO_ALL:
+						PHI(cnt) = ko_->data * (1 - exp(-kexp_->data * dist_(j, l)));
 						break;
-					case VERTEX_TYPE::OBSTACLE_TO_ALL:
-						if (dist_(j, l) - gManager_.getGraph()->getVertex(j)->getRadius()
-								- gManager_.getGraph()->getVertex(l)->getRadius() < 0.05)
-							PHI(cnt) = ko_->data * (1 - exp(-wo_ * dist_(j, l)));
-						else
-							PHI(cnt) = ko_->data;
-						break;
-					case VERTEX_TYPE::GOAL:
-						PHI(cnt) = gManager_.getGraph()->getVertex(l)->w_ * dist_(j, l);
+					case Vertex::GOAL:
+						PHI(cnt) = kg_->data * (1 - exp(-kexp_->data * dist_(j, l)));
 						break;
 					default:
 						break;
@@ -165,19 +193,94 @@ namespace exotica
 		return SUCCESS;
 	}
 
+	EReturn DMesh::computeJacobian(int t)
+	{
+		JAC.setZero();
+		double d_ = 0;
+		uint i, j, l, cnt;
+		for (i = 0; i < q_size_; i++)
+		{
+			cnt = 0;
+			for (j = 0; j < robot_size_; j++)
+			{
+				for (l = robot_size_; l < graph_size_; l++)
+				{
+					if (dist_(j, l) > 0)
+					{
+						switch (vertices_[l]->type_)
+						{
+							case Vertex::LINK:
+								d_ =
+										((vertices_[j]->position_ - vertices_[l]->position_).dot(Eigen::Vector3d(EFFJAC.block(3
+												* j, i, 3, 1) - EFFJAC.block(3 * l, i, 3, 1))))
+												/ dist_(j, l);
+								JAC(cnt, i) = kp_->data * d_;
+								break;
+							case Vertex::OBSTACLE_TO_ALL:
+								if (dist_(j, l) < 0.5)
+								{
+									d_ =
+											((vertices_[j]->position_ - vertices_[l]->position_).dot(Eigen::Vector3d(EFFJAC.block(3
+													* j, i, 3, 1)))) / dist_(j, l);
+									JAC(cnt, i) = ko_->data * kexp_->data * d_
+											* exp(-kexp_->data * dist_(j, l));
+								}
+
+								break;
+							case Vertex::GOAL:
+								d_ =
+										((vertices_[j]->position_ - vertices_[l]->position_).dot(Eigen::Vector3d(EFFJAC.block(3
+												* j, i, 3, 1)))) / dist_(j, l);
+								JAC(cnt, i) = kg_->data * kexp_->data * d_
+										* exp(-kexp_->data * dist_(j, l));
+								break;
+							default:
+								break;
+						}
+					}
+					cnt++;
+				}
+			}
+		}
+		return SUCCESS;
+	}
+
 	EReturn DMesh::updateDistances()
 	{
+		dist_.setZero();
 		for (int j = 0; j < current_size_; j++)
 		{
 			for (auto & it : vertices_[j]->toVertices_)
-				scene_->getCollisionScene()->getDistance(vertices_[j]->name_, it.first,
-						(j < it.second) ? dist_(j, it.second) : dist_(it.second, j), di_->data);
+			{
+				double tmpd = 0;
+				scene_->getCollisionScene()->getDistance(vertices_[j]->name_, it.first, tmpd, di_->data);
+				if (tmpd < di_->data)
+					j < it.second ? dist_(j, it.second) : dist_(it.second, j);
+			}
+		}
+		return SUCCESS;
+	}
+
+	EReturn DMesh::updatePositions()
+	{
+		for (int j = 0; j < current_size_; j++)
+		{
+			if (!ok(scene_->getCollisionScene()->getTranslation(vertices_[j]->name_, vertices_[j]->position_)))
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
 		}
 		return SUCCESS;
 	}
 
 	EReturn DMesh::addGoal(const std::string & name, std::string & toLink)
 	{
+		if (vertex_map_.find(name) != vertex_map_.end())
+		{
+			WARNING_NAMED("DMesh", "Add Goal ["<<name<<"] failed, already exists");
+			return FAILURE;
+		}
 		Vertex *tmp = new Vertex(name, Vertex::GOAL, current_size_);
 		int eff_index = -1;
 		for (int i = 0; i < links_->strings.size(); i++)
@@ -200,7 +303,7 @@ namespace exotica
 	{
 		if (vertex_map_.find(name) != vertex_map_.end())
 		{
-			WARNING_NAMED("DMesh", "Add obstacle ["<<name<<"], already exists");
+			WARNING_NAMED("DMesh", "Add obstacle ["<<name<<"] failed, already exists");
 			return FAILURE;
 		}
 		Vertex *tmp = new Vertex(name, Vertex::OBSTACLE_TO_ALL, current_size_);

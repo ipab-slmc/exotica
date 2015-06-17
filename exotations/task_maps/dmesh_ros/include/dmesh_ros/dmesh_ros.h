@@ -60,6 +60,7 @@ namespace exotica
 			 */
             EReturn getGoalLaplace(Eigen::VectorXd & goal, int t);
 
+            EReturn getLaplace(Eigen::VectorXd & lap);
 			/**
 			 * \brief	Update external objects
 			 */

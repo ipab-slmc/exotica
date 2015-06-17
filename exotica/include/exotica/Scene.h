@@ -61,6 +61,12 @@ namespace exotica
             EReturn reinitialise();
 
             /**
+             * \breif	Update world object pose
+             * @param	world	Planning scene world message
+             */
+            EReturn updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr & world);
+
+            /**
 			 * \brief	Update the robot collision properties
 			 * @param	x		Configuration
              * @return Indication of success
@@ -129,6 +135,10 @@ namespace exotica
             {
                 return fcl_robot_;
             }
+
+            EReturn getCollisionLinkTranslation(const std::string & name, Eigen::Vector3d & translation);
+            EReturn getWorldObjectTranslation(const std::string & name, Eigen::Vector3d & translation);
+            EReturn getTranslation(const std::string & name, Eigen::Vector3d & translation);
 
 		private:
 

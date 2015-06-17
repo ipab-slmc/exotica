@@ -15,7 +15,7 @@
      <!-- Other server functionalities other than parameters TODO -->
   </Server>
   <OMPLsolver name="OMPL_Interface">
-    <algorithm>KPIECE</algorithm>
+    <algorithm>RRTConnect</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
     <TrajectorySmooth>0</TrajectorySmooth>
     <Projection type="Joints">

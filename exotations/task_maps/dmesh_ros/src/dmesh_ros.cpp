@@ -51,9 +51,8 @@ namespace exotica
 			INDICATE_FAILURE
 			return FAILURE;
 		}
-
 		wo_ = 10;
-		wg_ = 2;
+		wg_ = 10;
 		if (scene_ == nullptr)
 		{
 			INDICATE_FAILURE
@@ -72,7 +71,6 @@ namespace exotica
 			INDICATE_FAILURE
 			return MMB_NIN;
 		}
-
 		robot_size_ = links_->strings.size();
 		ext_size_ = size_->data - robot_size_;
 		if (usePose_->data)
@@ -81,7 +79,7 @@ namespace exotica
 		else
 			task_size_ = robot_size_ * ext_size_;
 		obs_close_.resize(ext_size_);
-		ROS_INFO_STREAM("Distance Mesh (ROS) has been initialised: Maximum Graph size="<<size_->data<<", Robot link size="<<robot_size_<<", Unconnected external object size="<<ext_size_);
+		HIGHLIGHT_NAMED("DMeshROS", "Distance Mesh (ROS) has been initialised: Maximum Graph size="<<size_->data<<", Robot link size="<<robot_size_<<", Unconnected external object size="<<ext_size_);
 		initialised_ = true;
 		return SUCCESS;
 	}
@@ -198,6 +196,12 @@ namespace exotica
 		return SUCCESS;
 	}
 
+    EReturn DMeshROS::getLaplace(Eigen::VectorXd & lap)
+    {
+    	int t=0;
+    	lap=PHI;
+    	return SUCCESS;
+    }
     EReturn DMeshROS::computeLaplace(int t)
 	{
         if(!isRegistered(t)||!getEffReferences()) {INDICATE_FAILURE; return FAILURE;}

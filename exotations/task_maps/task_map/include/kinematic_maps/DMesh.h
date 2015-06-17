@@ -22,6 +22,7 @@ namespace exotica
 			virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 			virtual EReturn taskSpaceDim(int & task_dim);
 
+			EReturn getGoalLaplace(Eigen::VectorXd & goal,int t = 0);
 			EReturn addGoal(const std::string & name, std::string & toLink);
 			EReturn addObstacle(const std::string & name);
 		protected:
@@ -31,6 +32,7 @@ namespace exotica
 			EReturn computeLaplace(int t = 0);
 			EReturn computeJacobian(int t = 0);
 			EReturn updateDistances();
+			EReturn updatePositions();
 
 			class Vertex
 			{
@@ -58,6 +60,7 @@ namespace exotica
 					std::string name_;
 					TYPE type_;
 					int index_;
+					Eigen::Vector3d position_;
 					std::map<std::string, int> toVertices_;
 
 			};
@@ -89,6 +92,9 @@ namespace exotica
 
 			//	Gain to reach goal
 			EParam<std_msgs::Float64> kg_;
+
+			//	Gain in exp term
+			EParam<std_msgs::Float64> kexp_;
 
 			EParam<std_msgs::Float64> di_;
 

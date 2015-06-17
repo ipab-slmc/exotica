@@ -679,7 +679,7 @@ namespace exotica
 
 			}
 		}
-//		dist_.resize(size_, size_);
+		publishEdges();
 		dist_ = dist;
 		return true;
 	}

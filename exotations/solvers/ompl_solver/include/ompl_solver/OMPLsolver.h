@@ -13,7 +13,7 @@
 #include "ompl_solver/OMPLStateSpace.h"
 #include "ompl_solver/common.h"
 #include "ompl_solver/OMPLStateValidityChecker.h"
-#include "ompl_solver/OMPLGoalSampler.h"
+#include "ompl_solver/OMPLGoalState.h"
 #include "projections/OMPLProjection.h"
 #include "projections/DMeshProjection.h"
 #include <ompl/geometric/PathSimplifier.h>
@@ -218,6 +218,7 @@ namespace exotica
 
 			std::ofstream result_file_;
 
+			boost::shared_ptr<OMPLGoalState> goal_state_;
 			int succ_cnt_;
 	};
 

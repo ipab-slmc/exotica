@@ -117,11 +117,6 @@ namespace exotica
 		{
 
 			ompl_simple_setup_->setStartState(ompl_start_state);
-			if (!ompl_simple_setup_->getGoal())
-			{
-				WARNING_NAMED(object_name_, "Goal state not set, can not use bi-directional algorithms!");
-				ompl_simple_setup_->setGoal(constructGoal());
-			}
 			preSolve();
 			// Solve here
 			ompl::time::point start = ompl::time::now();
@@ -175,7 +170,8 @@ namespace exotica
 
 	ompl::base::GoalPtr OMPLsolver::constructGoal()
 	{
-		return ob::GoalPtr((OMPLGoal*) new OMPLGoalSampler(ompl_simple_setup_->getSpaceInformation(), prob_, goalBias_));
+		goal_state_.reset(new OMPLGoalState(ompl_simple_setup_->getSpaceInformation(), prob_));
+		return ob::GoalPtr(goal_state_);
 	}
 
 	void OMPLsolver::startSampling()
@@ -211,9 +207,8 @@ namespace exotica
 
 	void OMPLsolver::postSolve()
 	{
-		stopSampling();
 		ompl_simple_setup_->clearStartStates();
-		ompl_simple_setup_->getProblemDefinition()->clearGoal();
+		goal_state_->clearGoalState();
 		int v =
 				ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getValidMotionCount();
 		int iv =
@@ -478,7 +473,7 @@ namespace exotica
 		{
 			WARNING_NAMED(object_name_, "Unknown projection type "<<projector_<<". Setting ProjectionEvaluator failed.");
 		}
-//		ompl_simple_setup_->setGoal(constructGoal());
+		ompl_simple_setup_->setGoal(constructGoal());
 		ompl_simple_setup_->setup();
 
 		if (selected_planner_.compare("geometric::FRRT") == 0
@@ -601,18 +596,24 @@ namespace exotica
 	EReturn OMPLsolver::setGoalState(const Eigen::VectorXd & qT, const double eps)
 	{
 		LOCK(goal_lock_);
-		if (prob_->getSpaceDim() != qT.rows())
+
+		ompl::base::ScopedState<> gs(state_space_);
+		if (ok(state_space_->copyToOMPLState(gs.get(), qT)))
+		{
+			if (!goal_state_->isSatisfied(gs.get()))
+			{
+				INDICATE_FAILURE
+				return FAILURE;
+			}
+			goal_state_->setState(gs);
+			goal_state_->setThreshold(eps);
+		}
+		else
 		{
 			INDICATE_FAILURE
 			return FAILURE;
 		}
 
-		ompl::base::ScopedState<> gs(state_space_);
-		if (ok(state_space_->copyToOMPLState(gs.get(), qT)))
-		{
-			ompl_simple_setup_->setGoalState(gs, eps);
-		}
-//		HIGHLIGHT_NAMED(object_name_, "Goal state is set, now you can use bi-directional algorithms!");
 		return SUCCESS;
 	}
 

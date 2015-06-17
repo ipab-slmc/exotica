@@ -45,10 +45,9 @@ add_library(ompl_solver
    src/OMPLsolver.cpp
    src/OMPLProblem.cpp
    src/OMPLGoalUnion.cpp
-   src/OMPLGoal.cpp
    src/OMPLStateSpace.cpp
    src/OMPLStateValidityChecker.cpp
-   src/OMPLGoalSampler.cpp
+   src/OMPLGoalState.cpp
    src/frrt/FlexiblePlanner.cpp
    src/frrt/FRRT.cpp
    src/frrt/BFRRT.cpp

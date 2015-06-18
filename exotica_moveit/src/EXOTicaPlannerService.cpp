@@ -110,7 +110,7 @@ namespace exotica
 		}
 //		HIGHLIGHT_NAMED("MoveitInterface", "Using Solver "<<solver_->object_name_<<"["<<solver_->type()<<"], Problem "<<problem_->object_name_<<"["<<problem_->type()<<"].");
 
-		for (int i = 0; i < 50; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			if (solver_->type().compare("exotica::OMPLsolver") == 0)
 			{

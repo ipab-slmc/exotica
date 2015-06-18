@@ -171,6 +171,8 @@ namespace exotica
 			 */
 			void recordData();
 
+			bool isFlexiblePlanner();
+
 			OMPLProblem_ptr prob_; //!< Shared pointer to the planning problem.
 			OMPLProblem_ptr costs_; //!< Shared pointer to the planning problem.
 			OMPLProblem_ptr goalBias_; //!< Shared pointer to the planning problem.

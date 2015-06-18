@@ -58,5 +58,4 @@ namespace exotica
 		isValid(state, tmp);
 		return tmp;
 	}
-
 } /* namespace exotica */

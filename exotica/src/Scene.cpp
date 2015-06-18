@@ -36,7 +36,7 @@ namespace exotica
 	///////////////////////	Collision Scene	///////////////////////
 	///////////////////////////////////////////////////////////////
 	CollisionScene::CollisionScene(const Server_ptr & server) :
-			server_(server), compute_dist(true)
+			server_(server), compute_dist(true), stateCheckCnt_(0)
 	{
 	}
 
@@ -249,6 +249,7 @@ namespace exotica
 
 	bool CollisionScene::isStateValid(bool self)
 	{
+		stateCheckCnt_++;
 		return ps_->isStateValid(ps_->getCurrentState());
 	}
 

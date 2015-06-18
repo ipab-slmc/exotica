@@ -64,6 +64,8 @@ target_link_libraries(ompl_solver
    ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES}
 )
 
+add_executable(OMPLEffTrahectoryNode src/OMPLEffTrajectoryNode.cpp)
+target_link_libraries(OMPLEffTrahectoryNode ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 #set_target_properties(ompl_solver PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 #set_target_properties(ompl_solver PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 

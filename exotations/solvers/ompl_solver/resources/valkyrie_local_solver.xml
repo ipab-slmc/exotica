@@ -83,7 +83,7 @@
 	  <limb segment="RightForearm"></limb>
 	  <limb segment="RightPalm"></limb>
       </EndEffector>
-      <SafetyRange>0.1</SafetyRange>
+      <SafetyRange>0.15</SafetyRange>
       <HardConstrain>1</HardConstrain>
       <SelfCollision>0</SelfCollision>
       <VisualDebug>0</VisualDebug>

@@ -88,19 +88,17 @@ namespace exotica
 	{
 		ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());
 		ompl_simple_setup_->getPlanner()->getPlannerData(data);
-		result_file_ << 1 << " " << planning_time_ << " " << data.numVertices();
-		if (selected_planner_.compare("geometric::FRRT") == 0)
+		int cnt = prob_->getScenes().begin()->second->getCollisionScene()->stateCheckCnt_;
+		result_file_ << 1 << " " << planning_time_ << " " << data.numVertices() << " " << cnt;
+		if (isFlexiblePlanner())
 		{
-			result_file_ << " " << data.properties.at("GlobalSolveTry");
-			result_file_ << " " << data.properties.at("GlobalSolveSuccess");
-			result_file_ << " " << data.properties.at("GlobalCheckTry");
-			result_file_ << " " << data.properties.at("GlobalCheckSuccess");
-			result_file_ << " " << data.properties.at("LocalSolveTry");
-			result_file_ << " " << data.properties.at("LocalSolveSuccess");
-			result_file_ << " " << data.properties.at("LocalCheckTry");
-			result_file_ << " " << data.properties.at("LocalCheckSuccess");
+			cnt =
+					ompl_simple_setup_->getPlanner()->as<ompl::geometric::FlexiblePlanner>()->checkCnt_;
+			result_file_<<" "<<cnt;
 		}
-		result_file_ << "\n";
+		result_file_<<std::endl;
+
+		prob_->getScenes().begin()->second->getCollisionScene()->stateCheckCnt_ = 0;
 	}
 	void OMPLsolver::setMaxPlanningTime(double t)
 	{
@@ -476,10 +474,7 @@ namespace exotica
 		ompl_simple_setup_->setGoal(constructGoal());
 		ompl_simple_setup_->setup();
 
-		if (selected_planner_.compare("geometric::FRRT") == 0
-				|| selected_planner_.compare("geometric::BFRRT") == 0
-				|| selected_planner_.compare("geometric::FRRTConnect") == 0
-				|| selected_planner_.compare("geometric::FKPIECE") == 0)
+		if (isFlexiblePlanner())
 		{
 			INFO_NAMED(object_name_, "Setting up FRRT Local planner from file\n"<<prob_->local_planner_config_);
 			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FlexiblePlanner>()->setUpLocalPlanner(prob_->local_planner_config_, prob_->scenes_.begin()->second))
@@ -498,10 +493,7 @@ namespace exotica
 
 	EReturn OMPLsolver::resetIfNeeded()
 	{
-		if (selected_planner_.compare("geometric::FRRT") == 0
-				|| selected_planner_.compare("geometric::BFRRT") == 0
-				|| selected_planner_.compare("geometric::FRRTConnect") == 0
-				|| selected_planner_.compare("geometric::FKPIECE") == 0)
+		if (isFlexiblePlanner())
 		{
 			if (!ompl_simple_setup_->getPlanner()->as<ompl::geometric::FlexiblePlanner>()->resetSceneAndGoal(prob_->scenes_.begin()->second, boost::static_pointer_cast<
 					exotica::Identity>(prob_->getTaskMaps().at("CSpaceGoalMap"))->jointRef))
@@ -561,6 +553,16 @@ namespace exotica
 				og::FRRTConnect>, _1, _2));
 		registerPlannerAllocator("geometric::FKPIECE", boost::bind(&allocatePlanner<og::FKPIECE>, _1, _2));
 
+	}
+
+	bool OMPLsolver::isFlexiblePlanner()
+	{
+		if (selected_planner_.compare("geometric::FRRT") == 0
+				|| selected_planner_.compare("geometric::BFRRT") == 0
+				|| selected_planner_.compare("geometric::FRRTConnect") == 0
+				|| selected_planner_.compare("geometric::FKPIECE") == 0)
+			return true;
+		return false;
 	}
 
 	std::vector<std::string> OMPLsolver::getPlannerNames()

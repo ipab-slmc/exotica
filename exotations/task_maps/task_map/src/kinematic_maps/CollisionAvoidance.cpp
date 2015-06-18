@@ -194,11 +194,11 @@ namespace exotica
 				{
 					Eigen::Vector3d tmpv = vels_.segment(3 * i, 3);
 					double ct = tmpv.dot(norms[i]) / (tmpv.norm() * norms[i].norm());
-					if (ct !=ct)
+					if (ct != ct)
 					{
 						;
 					}
-					else if (ct<0)
+					else if (ct < 0)
 					{
 						discounts(i) = 0;
 						HIGHLIGHT_NAMED(effs_[i], "Opposite direction");

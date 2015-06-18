@@ -130,6 +130,7 @@ namespace exotica
                 return fcl_robot_;
             }
 
+            int stateCheckCnt_;
 		private:
 
             /**

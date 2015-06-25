@@ -56,6 +56,7 @@ namespace ompl
 				///	Random number generator
 				RNG rng_;
 
+				int checkCnt_;
 			protected:
 				///	Local solver
 				exotica::EReturn localSolve(const Eigen::VectorXd & qs, Eigen::VectorXd & qg, Eigen::MatrixXd & solution);

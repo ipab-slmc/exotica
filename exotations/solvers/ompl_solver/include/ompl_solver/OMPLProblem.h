@@ -55,6 +55,7 @@ namespace exotica
 
             virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
 			std::string local_planner_config_;
+            EParam<std_msgs::Bool> full_body_plan_;
 
             virtual void clear(bool keepOriginals=true);
 		protected:
@@ -78,6 +79,7 @@ namespace exotica
             std::vector<TaskSqrError_ptr> originalCosts_;
             std::vector<TaskBias_ptr> originalGoalBias_;
             std::vector<TaskBias_ptr> originalSamplingBias_;
+
 	};
 
 	typedef boost::shared_ptr<exotica::OMPLProblem> OMPLProblem_ptr;

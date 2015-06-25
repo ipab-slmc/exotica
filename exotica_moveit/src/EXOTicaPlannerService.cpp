@@ -110,7 +110,7 @@ namespace exotica
 		}
 //		HIGHLIGHT_NAMED("MoveitInterface", "Using Solver "<<solver_->object_name_<<"["<<solver_->type()<<"], Problem "<<problem_->object_name_<<"["<<problem_->type()<<"].");
 
-		for (int i = 0; i < 50; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			if (solver_->type().compare("exotica::OMPLsolver") == 0)
 			{
@@ -119,8 +119,10 @@ namespace exotica
 
 				Eigen::VectorXd qT;
 				exotica::vectorExoticaToEigen(goal->qT, qT);
-				goal_bias_map_->jointRef = qT;
-				goal_map_->jointRef = qT;
+				int dim = 0;
+				goal_bias_map_->taskSpaceDim(dim);
+				goal_bias_map_->jointRef = qT.segment(0, dim);
+				goal_map_->jointRef = qT.segment(0, dim);
 				ss->setGoalState(qT, 1e-4);
 				ss->setMaxPlanningTime(goal->max_time_);
 				if (!ok(ss->resetIfNeeded()))

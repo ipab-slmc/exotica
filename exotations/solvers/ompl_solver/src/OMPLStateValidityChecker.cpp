@@ -40,10 +40,18 @@ namespace exotica
 // State rejection (e.g. collisions)
 			for (auto & it : prob_->scenes_)
 			{
-				it.second->getCollisionScene()->update(q);
-				if (!it.second->getCollisionScene()->isStateValid())
+				if (ok(it.second->getCollisionScene()->update(q.segment(0, prob_->getSpaceDim()))))
+				{
+					if (!it.second->getCollisionScene()->isStateValid())
+					{
+						dist = -1;
+						return false;
+					}
+				}
+				else
 				{
 					dist = -1;
+					INDICATE_FAILURE
 					return false;
 				}
 			}
@@ -58,5 +66,4 @@ namespace exotica
 		isValid(state, tmp);
 		return tmp;
 	}
-
 } /* namespace exotica */

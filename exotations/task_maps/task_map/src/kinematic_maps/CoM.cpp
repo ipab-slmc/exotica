@@ -125,10 +125,10 @@ namespace exotica
 		PHI.setZero();
 		for (int i = 0; i < dim_; i++)
 		{
-			if (fabs(com[i]) > support_r_->data[i])
+			if (fabs(com[i]) > fabs(bounds_->data[2 * i]))
 			{
 				PHI(i) = com[i];
-				WARNING_NAMED(object_name_, i<<" axis is out of balance, error "<<com[i]<<">"<<support_r_->data[i]);
+				WARNING_NAMED(object_name_, i<<" axis is out of balance, error "<<com[i]<<">"<<bounds_->data[2*i]);
 			}
 		}
 		if (debug_->data)
@@ -172,12 +172,12 @@ namespace exotica
 			dim_ = 3;
 		else
 			dim_ = 2;
-		tmp_handle = handle.FirstChildElement("SupportRadius");
-		if (!ok(server_->registerParam<exotica::Vector>(ns_, tmp_handle, support_r_)))
+		tmp_handle = handle.FirstChildElement("Bounds");
+		if (!ok(server_->registerParam<exotica::Vector>(ns_, tmp_handle, bounds_)))
 		{
-			support_r_->data.resize(dim_);
+			bounds_->data.resize(dim_);
 			for (int i = 0; i < dim_; i++)
-				support_r_->data[i] = 0;
+				bounds_->data[i] = 0;
 		}
 		tmp_handle = handle.FirstChildElement("Debug");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, debug_);

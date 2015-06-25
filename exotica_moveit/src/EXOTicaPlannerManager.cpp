@@ -152,6 +152,7 @@ namespace exotica
 			const std::string &problem_name, const std::string &solver_name) :
 					planning_interface::PlanningContext(name, group),
 					start_state_(model),
+					goal_state_(model),
 					tau_(0.0),
 					nh_("~"),
 					problem_name_(problem_name),
@@ -187,7 +188,8 @@ namespace exotica
 	bool EXOTicaPlanningContext::solve(planning_interface::MotionPlanResponse &res)
 	{
 		ros::WallTime start_time = ros::WallTime::now();
-
+		bool fullbody = false;
+		nh_.getParam("/EXOTica/fullbody", fullbody);
 		const moveit::core::JointModelGroup* model_group =
 				planning_scene_->getRobotModel()->getJointModelGroup(request_.group_name);
 		ROS_ERROR_STREAM("Move group: '"<< model_group->getName() <<"'");
@@ -200,6 +202,7 @@ namespace exotica
 		{
 			q0(i) = *start_state_.getJointPositions(names[i]);
 			qT(i) = getMotionPlanRequest().goal_constraints[0].joint_constraints[i].position;
+			goal_state_.setVariablePosition(names[i], qT(i));
 			tmp_name = tmp_name + " " + names[i];
 		}
 		ROS_ERROR_STREAM("Joints="<<tmp_name);

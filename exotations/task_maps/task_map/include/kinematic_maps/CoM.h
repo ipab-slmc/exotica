@@ -44,7 +44,7 @@ namespace exotica
 			 * @param	x	Input configuration
 			 * @return	Exotica return type
 			 */
-            virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+			virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
 			/**
 			 * @brief	Get the task space dimension
@@ -56,9 +56,15 @@ namespace exotica
 			 */
 			virtual EReturn taskSpaceDim(int & task_dim);
 
-			EReturn setOffsetCallback(boost::function<void(CoM*, Eigen::VectorXdRefConst,int)> offset_callback);
+			EReturn setOffsetCallback(
+					boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback);
 			EReturn setOffset(bool left, const KDL::Frame & offset);
 			void checkGoal(const Eigen::Vector3d & goal);
+			EParam<exotica::Vector> getBounds()
+			{
+				return bounds_;
+			}
+
 		protected:
 			/**
 			 * @brief	Concrete implementation of the initialisation method
@@ -72,13 +78,13 @@ namespace exotica
 			 * @brief	Compute the forward map (centre of mass position)
 			 * @return	True if succeeded, false otherwise
 			 */
-            bool computeForwardMap(int t);
+			bool computeForwardMap(int t);
 
 			/**
 			 * @brief	Compute the jacobian
 			 * @return	True if succeeded, false otherwise
 			 */
-            bool computeJacobian(int t);
+			bool computeJacobian(int t);
 
 			/**
 			 * @brief	Change end-effectors offset to centre of mass
@@ -88,7 +94,7 @@ namespace exotica
 			Eigen::VectorXd mass_;	//!< Mass of each link
 			std::vector<KDL::Vector> cog_;	//!< Centre of gravity of each link
 			std::vector<KDL::Frame> tip_pose_;	//!< Tip poses
-            std::vector<KDL::Frame> base_pose_;	//!< Base poses
+			std::vector<KDL::Frame> base_pose_;	//!< Base poses
 			bool initialised_;	//!< For Error checking
 			boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback_;
 			ros::Publisher com_pub_;
@@ -98,11 +104,11 @@ namespace exotica
 			visualization_msgs::Marker COM_marker_;
 			visualization_msgs::Marker goal_marker_;
 			KDL::Frame base_offset_;
-            KDL::Frame marker_offset_;
+			KDL::Frame marker_offset_;
 			std::ofstream com_file_;
 			EParam<std_msgs::Bool> debug_;
 			EParam<std_msgs::Bool> enable_z_;
-			EParam<exotica::Vector> support_r_;
+			EParam<exotica::Vector> bounds_;
 			int dim_;
 	};
 }

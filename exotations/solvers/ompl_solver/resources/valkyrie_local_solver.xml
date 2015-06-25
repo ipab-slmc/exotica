@@ -13,7 +13,7 @@
   </Server>
   <IKsolver name="FRRTLocal">
     <MaxIt>100</MaxIt>
-    <MaxStep>0.1</MaxStep>
+    <MaxStep>0.2</MaxStep>
     <MultiTaskMode>0</MultiTaskMode>
     <FRRTLocal><!-- Some paramters for FRRT local solver -->
     	<LocalMinimaThreshold>1e-4</LocalMinimaThreshold>
@@ -83,7 +83,7 @@
 	  <limb segment="RightForearm"></limb>
 	  <limb segment="RightPalm"></limb>
       </EndEffector>
-      <SafetyRange>0.1</SafetyRange>
+      <SafetyRange>0.15</SafetyRange>
       <HardConstrain>1</HardConstrain>
       <SelfCollision>0</SelfCollision>
       <VisualDebug>0</VisualDebug>

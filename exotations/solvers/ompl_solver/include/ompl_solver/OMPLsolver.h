@@ -13,7 +13,7 @@
 #include "ompl_solver/OMPLStateSpace.h"
 #include "ompl_solver/common.h"
 #include "ompl_solver/OMPLStateValidityChecker.h"
-#include "ompl_solver/OMPLGoalSampler.h"
+#include "ompl_solver/OMPLGoalState.h"
 #include "projections/OMPLProjection.h"
 #include "projections/DMeshProjection.h"
 #include <ompl/geometric/PathSimplifier.h>
@@ -132,7 +132,7 @@ namespace exotica
 			EReturn convertPath(const ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj);
 
 			EReturn getSimplifiedPath(ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj,
-					double d);
+					ob::PlannerTerminationCondition &ptc);
 			/**
 			 * \brief Registers trajectory termination condition
 			 * @param ptc Termination criteria
@@ -171,6 +171,8 @@ namespace exotica
 			 */
 			void recordData();
 
+			bool isFlexiblePlanner();
+
 			OMPLProblem_ptr prob_; //!< Shared pointer to the planning problem.
 			OMPLProblem_ptr costs_; //!< Shared pointer to the planning problem.
 			OMPLProblem_ptr goalBias_; //!< Shared pointer to the planning problem.
@@ -205,6 +207,9 @@ namespace exotica
 			/// \brief	Indicate if trajectory smoother is required
 			EParam<std_msgs::Bool> smooth_;
 
+			///	\brief	Maximum step
+			EParam<std_msgs::String> range_;
+
 			///	\brief	View original solution before trajectory smoothness
 			Eigen::MatrixXd original_solution_;
 
@@ -218,6 +223,7 @@ namespace exotica
 
 			std::ofstream result_file_;
 
+			boost::shared_ptr<OMPLGoalState> goal_state_;
 			int succ_cnt_;
 	};
 

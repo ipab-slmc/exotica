@@ -24,7 +24,8 @@
 #include <std_msgs/String.h>
 #include <exotica/Tools.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
-
+#include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 namespace exotica
 {
 	//	EXOTica Parameter type
@@ -41,11 +42,11 @@ namespace exotica
 			 */
 			static boost::shared_ptr<Server> Instance()
 			{
-				if(!singleton_server_)
+				if (!singleton_server_)
 					singleton_server_.reset(new Server);
 				return singleton_server_;
 			}
-			;
+			virtual ~Server();
 
 			EReturn initialise(tinyxml2::XMLHandle & handle);
 
@@ -249,14 +250,15 @@ namespace exotica
 					else if (typeid(T) == typeid(std_msgs::String))
 					{
 						std_msgs::String val;
-						const char * atr= handle.ToElement()->GetText();
+						const char * atr = handle.ToElement()->GetText();
 						if (!atr)
 						{
 							INDICATE_FAILURE
 							return FAILURE;
 						}
 						val.data = std::string(atr);
-						params_[name] = boost::shared_ptr<std_msgs::String>(new std_msgs::String(val));
+						params_[name] =
+								boost::shared_ptr<std_msgs::String>(new std_msgs::String(val));
 					}
 					else
 					{
@@ -272,7 +274,7 @@ namespace exotica
 			/*
 			 * \brief	Register a parameter to ROS parameter
 			 * @param	name	Parameter name
-			 * @param	topic	ROS parameter name
+			 * @param	topic	ROS parameter nametf::TransformListener listener;
 			 * @param	ptr		Parameter pointer
 			 */
 			template<typename T>
@@ -458,6 +460,9 @@ namespace exotica
 
 			/// \brief	ROS node handle
 			boost::shared_ptr<ros::NodeHandle> nh_;
+
+			///	\brief	spinner
+			ros::AsyncSpinner sp_;
 
 			std::map<std::string, ros::Subscriber> subs_;
 

@@ -10,9 +10,15 @@ exotica::Server_ptr exotica::Server::singleton_server_ = NULL;
 namespace exotica
 {
 	Server::Server() :
-			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("EXOTicaServer")
+			nh_(new ros::NodeHandle("/EXOTicaServer")), name_("EXOTicaServer"), sp_(2)
 	{
 		//TODO
+		sp_.start();
+	}
+
+	Server::~Server()
+	{
+		sp_.stop();
 	}
 
 	EReturn Server::getModel(std::string path, robot_model::RobotModelPtr & model)
@@ -63,6 +69,7 @@ namespace exotica
 
 	EReturn Server::initialise(tinyxml2::XMLHandle & handle)
 	{
+		static bool first = true;
 		if (!singleton_server_)
 		{
 			name_ = handle.ToElement()->Attribute("name");
@@ -79,9 +86,11 @@ namespace exotica
 			}
 			tmp_handle = tmp_handle.NextSibling();
 		}
-		if (!singleton_server_)
-
-			HIGHLIGHT_NAMED(name_, "EXOTica Server Initialised")
+		if (first)
+		{
+			HIGHLIGHT_NAMED(name_, "EXOTica Server Initialised");
+			first = false;
+		}
 		return SUCCESS;
 	}
 

@@ -35,8 +35,8 @@ namespace exotica
 	///////////////////////////////////////////////////////////////
 	///////////////////////	Collision Scene	///////////////////////
 	///////////////////////////////////////////////////////////////
-	CollisionScene::CollisionScene(const Server_ptr & server) :
-			server_(server), compute_dist(true)
+	CollisionScene::CollisionScene(const Server_ptr & server, const std::string & scene_name) :
+			server_(server), compute_dist(true), stateCheckCnt_(0), scene_name_(scene_name)
 	{
 	}
 
@@ -189,7 +189,6 @@ namespace exotica
 		for (std::size_t i = 0; i < joint_index_.size(); i++)
 			ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i], x(i));
 		ps_->getCurrentStateNonConst().update(true);
-
 		if (compute_dist)
 		{
 			for (auto & it : fcl_robot_)
@@ -268,6 +267,7 @@ namespace exotica
 
 	bool CollisionScene::isStateValid(bool self)
 	{
+		stateCheckCnt_++;
 		return ps_->isStateValid(ps_->getCurrentState());
 	}
 
@@ -511,7 +511,7 @@ namespace exotica
 			return FAILURE;
 		}
 		N = kinematica_.getNumJoints();
-		collision_scene_.reset(new CollisionScene(server_));
+		collision_scene_.reset(new CollisionScene(server_, name_));
 
 		tmp_handle = handle.FirstChildElement("PlanningMode");
 		if (!ok(server_->registerParam<std_msgs::String>(name_, tmp_handle, mode_)))

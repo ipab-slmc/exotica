@@ -15,9 +15,10 @@
      <!-- Other server functionalities other than parameters TODO -->
   </Server>
   <OMPLsolver name="OMPL_Interface">
-    <algorithm>KPIECE</algorithm>
+    <algorithm>RRTConnect</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
-    <TrajectorySmooth>0</TrajectorySmooth>
+    <TrajectorySmooth>1</TrajectorySmooth>
+    <Range>0.2</Range>
     <Projection type="Joints">
     	  <component name="WaistRotator" />
           <component name="WaistExtensor" />
@@ -32,6 +33,7 @@
 
   <OMPLProblem name="OMPLProblem">
     <PlroblemType>Goals</PlroblemType>
+    <FullBodyPlan>1</FullBodyPlan>
     <Scene name="TestScene">
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
@@ -60,7 +62,7 @@
         </Update>
       </Kinematica>
       <PlanningMode>Sampling</PlanningMode>
-      <VisualDebug>0</VisualDebug>
+      <VisualDebug>1</VisualDebug>
     </Scene> 
     
     <Map type="Identity" name="CSpaceGoalMap">
@@ -80,7 +82,7 @@
       <Scene name="TestScene"/>
       <EnableZ>false</EnableZ>
       <Debug>false</Debug>
-      <SupportRadius>0.15 0.203</SupportRadius>
+      <Bounds>-0.12 0.12 -0.12 0.12 -0.8 1.2</Bounds>
       <EndEffector ignore_unused="false">
         <limb segment="Trunk"/>
         <limb segment="LeftShoulderExtensor"/>

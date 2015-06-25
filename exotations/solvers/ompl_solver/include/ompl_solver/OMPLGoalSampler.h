@@ -8,8 +8,7 @@
 #ifndef OMPLGOALSAMPLER_H_
 #define OMPLGOALSAMPLER_H_
 
-#include <ompl/base/goals/GoalState.h>
-#include <ompl/base/goals/GoalRegion.h>
+#include <ompl/base/goals/GoalSampleableRegion.h>
 #include "ompl_solver/OMPLsolver.h"
 #include "ompl_solver/OMPLProblem.h"
 #include "ompl_solver/OMPLGoal.h"

@@ -35,7 +35,6 @@ namespace exotica
 			double dist = si_->distance(st, state_);
 			if (dist > threshold_)
 			{
-				WARNING_NAMED("OMPLGoalState","Err="<<dist<<", threshold="<<threshold_);
 				return false;
 			}
 		}

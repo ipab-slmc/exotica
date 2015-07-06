@@ -91,6 +91,7 @@ namespace exotica
 			Server_ptr ser_;
 			std::string problem_name_;
 			std::string solver_name_;
+			std::vector<std::string> used_names_;
 			std::string config_file_;
 			actionlib::SimpleActionClient<exotica_moveit::ExoticaPlanningAction> client_;
   };

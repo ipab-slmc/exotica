@@ -25,11 +25,17 @@
     <Scene name="LocalScene">
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
-        <Root segment="Pelvis"> <!-- Optional: The root segment to use: xyz -->
+        <Root segment="Pelvis" type="floating"> <!-- Optional: The root segment to use: xyz -->
           <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
           <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
         </Root>
         <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="world_joint/trans_x" />
+          <joint name="world_joint/trans_y" />
+          <joint name="world_joint/trans_z" />
+	  <joint name="world_joint/rot_x" />
+	  <joint name="world_joint/rot_y" />
+	  <joint name="Pelvis/virtual_joint" />
           <joint name="WaistRotator" />
           <joint name="WaistExtensor" />
           <joint name="WaistLateralExtensor" />
@@ -49,20 +55,20 @@
           <joint name="RightWrist" />	
         </Update>
       </Kinematica>
-      <VisualDebug>0</VisualDebug>
+      <VisualDebug>1</VisualDebug>
       <PlanningMode>Optimization</PlanningMode>
     </Scene> 
     
     <Map type="Identity" name="CSpaceMap">
       <Scene name="LocalScene"/>
-      <Ref> 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Ref>
+      <Ref> 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Ref>
     </Map>
 
     <Task name="LocalTask" type="TaskSqrError">
       <map name="CSpaceMap"/>
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal> 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
+      <Goal> 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task>
    
     <Map type="CollisionAvoidance" name="CollisionAvoidanceMap">
@@ -97,11 +103,11 @@
       <Goal>0.0</Goal>
     </Task>
 
-    <!--Map type="CoM" name="CoMMap">
+    <Map type="CoM" name="CoMMap">
       <Scene name="LocalScene"/>
       <EnableZ>false</EnableZ>
       <Debug>false</Debug>
-      <SupportRadius>0.15 0.203</SupportRadius>
+      <Bounds>-0.12 0.12 -0.12 0.12 -0.8 1.2</Bounds>
       <EndEffector ignore_unused="false">
         <limb segment="Trunk"/>
         <limb segment="LeftShoulderExtensor"/>
@@ -137,7 +143,7 @@
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0 0</Goal>
-    </Task-->
+    </Task>
 
     <!--Map type="JointLimit" name="JointLimitMap">
       <Scene name="LocalScene"/>
@@ -149,6 +155,6 @@
       <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task-->
     <Tolerance>1e-5</Tolerance> 
-    <W> 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</W>
+    <W> 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</W>
   </IKProblem>
 </ExampleConfiguration>

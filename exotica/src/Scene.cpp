@@ -127,11 +127,11 @@ namespace exotica
 	}
 
 	EReturn CollisionScene::initialise(const moveit_msgs::PlanningSceneConstPtr & msg,
-			const std::vector<std::string> & joints, std::string & mode)
+			const std::vector<std::string> & joints, std::string & mode, BASE_TYPE base_type)
 	{
 		ps_.reset(new planning_scene::PlanningScene(server_->getModel("robot_description")));
 		ps_->setPlanningSceneMsg(*msg.get());
-
+		base_type_ = base_type;
 		if (ok(reinitialise()))
 		{
 			joint_index_.resize(joints.size());
@@ -186,8 +186,32 @@ namespace exotica
 			ERROR("Size does not match, need vector size of "<<joint_index_.size()<<" but "<<x.rows()<<" is provided");
 			return FAILURE;
 		}
-		for (std::size_t i = 0; i < joint_index_.size(); i++)
-			ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i], x(i));
+		if (base_type_ == BASE_TYPE::FIXED)
+		{
+			for (std::size_t i = 0; i < joint_index_.size(); i++)
+				ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i], x(i));
+		}
+		else if (base_type_ == BASE_TYPE::FLOATING)
+		{
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/trans_x", x(0));
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/trans_y", x(1));
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/trans_z", x(2));
+			KDL::Rotation rot = KDL::Rotation::EulerZYX(x(3), x(4), x(5));
+			Eigen::VectorXd quat(4);
+			rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/rot_x", quat(0));
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/rot_y", quat(1));
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/rot_z", quat(2));
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/rot_w", quat(3));
+			for (std::size_t i = 6; i < joint_index_.size(); i++)
+				ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i], x(i));
+		}
+		else if (base_type_ == BASE_TYPE::PLANAR)
+		{
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/x", x(0));
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/y", x(1));
+			ps_->getCurrentStateNonConst().setVariablePosition("world_joint/theta", x(2));
+		}
 		ps_->getCurrentStateNonConst().update(true);
 		if (compute_dist)
 		{
@@ -505,11 +529,19 @@ namespace exotica
 		}
 
 		tinyxml2::XMLHandle tmp_handle(handle.FirstChildElement("Kinematica"));
-		if (!kinematica_.initKinematics(tmp_handle, model_->getURDF().get()))
+		if (!kinematica_.initKinematics(tmp_handle, model_))
 		{
 			INDICATE_FAILURE
 			return FAILURE;
 		}
+		std::string base_type = kinematica_.getBaseType();
+		if (base_type.compare("fixed") == 0)
+			base_type_ = BASE_TYPE::FIXED;
+		else if (base_type.compare("floating") == 0)
+			base_type_ = BASE_TYPE::FLOATING;
+		else if (base_type.compare("planar") == 0)
+			base_type_ = BASE_TYPE::PLANAR;
+
 		N = kinematica_.getNumJoints();
 		collision_scene_.reset(new CollisionScene(server_, name_));
 
@@ -534,7 +566,7 @@ namespace exotica
 			planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
 			moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
 			tmp->getPlanningSceneMsg(*msg.get());
-			if (!ok(collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_->data)))
+			if (!ok(collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_->data, base_type_)))
 			{
 				INDICATE_FAILURE
 				;
@@ -808,12 +840,12 @@ namespace exotica
 	{
 		moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
 		scene->getPlanningSceneMsg(*msg.get());
-		return collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_->data);
+		return collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_->data, base_type_);
 	}
 
 	EReturn Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene)
 	{
-		return collision_scene_->initialise(scene, kinematica_.getJointNames(), mode_->data);
+		return collision_scene_->initialise(scene, kinematica_.getJointNames(), mode_->data,base_type_);
 	}
 
 	int Scene::getNumJoints()
@@ -895,6 +927,11 @@ namespace exotica
 	std::string & Scene::getPlanningMode()
 	{
 		return mode_->data;
+	}
+
+	KDL::Frame Scene::getRobotRootWorldTransform()
+	{
+		return kinematica_.getRobotRootWorldTransform();
 	}
 }
 //	namespace exotica

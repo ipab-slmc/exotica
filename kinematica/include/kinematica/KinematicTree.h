@@ -5,6 +5,7 @@
 #include <boost/thread/mutex.hpp>
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
+#include <moveit/robot_model/robot_model.h>
 #include <Eigen/Eigen>
 #include <map>
 #include <string>
@@ -41,7 +42,8 @@ namespace kinematica
 			std::vector<std::string> joints_update;    //!< The vector of joints we will be updating
 			bool zero_other_joints;  //!< Zero out the other joints not referenced
 			bool ignore_unused_segs; //!< Flag to ignore unnecessary sub-chains from the tree
-			bool compute_com;	//!<< Flag to compute centre of mass
+			bool compute_com;	//!< Flag to compute centre of mass
+			std::string base_type;	//!< Flag to indicate if the base is floating or fixed
 			std::vector<std::string> end_effector_segs; //!< The segments to which the end-effectors are attached
 			std::vector<KDL::Frame> end_effector_offs; //!< End Effector Offsets from the segment of choice: must be empty or same size as the end_effector_segs
 	};
@@ -61,6 +63,7 @@ namespace kinematica
 			Eigen::Vector3d joint_axis;		//!< The Joint Axis of rotation (in the global frame)...
 			std::vector<int> child;    		//!< Any child links
 			Eigen::Vector3d com;	//!< Centre of mass
+			std::vector<double> joint_limits_;
 	};
 
 	class KinematicTree
@@ -93,7 +96,7 @@ namespace kinematica
 					const SolutionForm_t & optimisation); //!< Variant taking urdf file
 			bool initKinematics(const KDL::Tree & temp_tree, const SolutionForm_t & optimisation); //!< Variant taking kdl tree
 			bool initKinematics(tinyxml2::XMLHandle & handle);
-            bool initKinematics(tinyxml2::XMLHandle & handle, const urdf::ModelInterface* urdf);
+            bool initKinematics(tinyxml2::XMLHandle & handle, const robot_model::RobotModelPtr & model);
 
 			/**
 			 * \brief Provides dynamic updating of the end-effector list
@@ -259,6 +262,12 @@ namespace kinematica
 			std::string getRootName();
 
 			bool getEndEffectorIndex(std::vector<int> & eff_index);
+
+			std::string getBaseType();
+			std::map<std::string, int> getJointMap();
+			std::map<std::string, std::vector<double>> getUsedJointLimits();
+
+			KDL::Frame getRobotRootWorldTransform();
         //private:
 			/****************** Class members ********************/
 
@@ -267,6 +276,12 @@ namespace kinematica
 			 */
 			std::vector<KinematicElement_t> robot_tree_;    //!< The tree structure
 			std::map<std::string, int> segment_map_; //!< Mapping from segment names to positions in the vector robot_tree_
+			std::map<std::string, int> joint_map_;
+			/**
+			 * \brief	ROS/MoveIt SRDF model
+			 */
+			robot_model::RobotModelPtr model_;
+			std::pair<std::string, int> robot_root_;
 
 			std::vector<std::string> used_joints_;
 			std::vector<std::string> used_joints_segs_;
@@ -275,6 +290,7 @@ namespace kinematica
 			 */
 			bool zero_undef_jnts_; //!< Indicates whether we wish to zero-out undefined joints.
 			int num_jnts_spec_;	  //!< Number of joints which will be specified
+			std::string base_type_;
 			std::vector<int> eff_segments_; //!< The End-Effector segments (for Jacobian Computation)
 			std::vector<KDL::Frame> eff_seg_offs_; //!< Offsets from the end effector segments (if required)
 			std::vector<std::string> eff_segments_ini_;
@@ -311,6 +327,8 @@ namespace kinematica
 			 */
 			bool buildTree(const KDL::Tree & temp_tree, std::string root,
 					std::map<std::string, int> & joint_map);
+
+			bool setJointLimits();
 
 			/**
 			 * \brief Set the Joint ordering we will use : NOT THREAD-SAFE

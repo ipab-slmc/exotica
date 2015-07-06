@@ -1,12 +1,12 @@
 /*
- * OMPLFullBodyStateSpace.h
+ * OMPLUpperBodyPelvisStateSpace.h
  *
  *  Created on: 22 Jun 2015
  *      Author: yiming
  */
 
-#ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLFULLBODYSTATESPACE_H_
-#define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLFULLBODYSTATESPACE_H_
+#ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNCOMPOUNDSTATESPACE_H_
+#define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNCOMPOUNDSTATESPACE_H_
 
 #include "exotica/EXOTica.hpp"
 #include "ompl_solver/OMPLProblem.h"
@@ -17,10 +17,10 @@ namespace ob = ompl::base;
 namespace exotica
 {
 
-	class OMPLFullBodyStateSampler: public ob::StateSampler
+	class OMPLSE3RNCompoundStateSampler: public ob::StateSampler
 	{
 		public:
-			OMPLFullBodyStateSampler(const ob::StateSpace *space) :
+			OMPLSE3RNCompoundStateSampler(const ob::StateSpace *space) :
 					ob::StateSampler(space)
 			{
 			}
@@ -28,7 +28,7 @@ namespace exotica
 			virtual void sampleUniformNear(ob::State *state, const ob::State *near, const double distance);
 			virtual void sampleGaussian(ob::State *state, const ob::State * mean, const double stdDev);
 	};
-	class OMPLFullBodyStateSpace: public ompl::base::CompoundStateSpace
+	class OMPLSE3RNCompoundStateSpace: public ompl::base::CompoundStateSpace
 	{
 		public:
 			class StateType: public ob::CompoundStateSpace::StateType
@@ -60,12 +60,12 @@ namespace exotica
 					}
 			};
 
-			OMPLFullBodyStateSpace(unsigned int dim, bool fullbody);
-			virtual ~OMPLFullBodyStateSpace();
+			OMPLSE3RNCompoundStateSpace(unsigned int dim);
+			virtual ~OMPLSE3RNCompoundStateSpace();
 			virtual unsigned int getDimension() const;
 			virtual ompl::base::StateSamplerPtr allocDefaultStateSampler();
 
-			static boost::shared_ptr<OMPLFullBodyStateSpace> FromProblem(OMPLProblem_ptr prob);
+			static boost::shared_ptr<OMPLSE3RNCompoundStateSpace> FromProblem(OMPLProblem_ptr prob);
 			EReturn OMPLStateToEigen(const ob::State *ompl, Eigen::VectorXd &eigen);
 			EReturn EigenToOMPLState(const Eigen::VectorXd &eigen, ob::State *ompl);
 			/*
@@ -83,7 +83,6 @@ namespace exotica
 			void setPelvisBounds(const ob::RealVectorBounds &xyz, const double dist);
 			const ob::RealVectorBounds & getPelvisPositionBounds() const;
 			const double & getPelvisRotationBound() const;
-			bool fullbody_;
 		private:
 			ob::RealVectorBounds pelvis_xyx_bounds_;
 			double pelvis_angle_bound_;
@@ -91,4 +90,4 @@ namespace exotica
 	};
 } //	Namespace exotica
 
-#endif /* EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLFULLBODYSTATESPACE_H_ */
+#endif /* EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNCOMPOUNDSTATESPACE_H_ */

@@ -120,6 +120,7 @@ namespace ompl
 			///Lets do it clean and nice !!!!!!!
 			bool newTry = true;
 			Motion *start_motion = init_motion;
+			static bool first_check = true;
 			while (ptc == false)
 			{
 				///	Decide if a global attempt is needed
@@ -140,17 +141,20 @@ namespace ompl
 				if (newTry)
 				{
 					newTry = false;
-
 					ompl::base::State *last_valid_state = si_->allocState();
 					std::pair<ompl::base::State*, double> last_valid(last_valid_state, 0);
 					bool valid = false;
-					try_cnt_[3]++;
-					if (si_->checkMotion(start_motion->state, goal_motion->state, last_valid))
+					if (!first_check)
+						try_cnt_[3]++;
+					if (!first_check
+							&& si_->checkMotion(start_motion->state, goal_motion->state, last_valid))
 					{
 						new_motion = goal_motion;
 						valid = true;
 						suc_cnt_[3]++;
 					}
+					if (first_check)
+						first_check = false;
 					if (!valid)
 					{
 						try_cnt_[0]++;
@@ -344,6 +348,7 @@ namespace ompl
 			WARNING_NAMED("FRRT", "GNormal succeeded/try "<<suc_cnt_[3]<<"/"<<try_cnt_[3]);
 			WARNING_NAMED("FRRT", "Local succeeded/try "<<suc_cnt_[1]<<"/"<<try_cnt_[1]);
 			WARNING_NAMED("FRRT", "Normal succeeded/try "<<suc_cnt_[2]<<"/"<<try_cnt_[2]);
+			first_check = true;
 			return base::PlannerStatus(solved, false);
 		}
 

@@ -5,7 +5,7 @@
      Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
      <Parameters>  
 	<GlobalTau type="double">
-	   <default>1e-5</default>
+	   <default>1e-10</default>
         </GlobalTau>
 	<LocalTau type="double">
 	   <default>1e-2</default>
@@ -18,10 +18,10 @@
     <algorithm>RRTConnect</algorithm>
     <max_goal_sampling_attempts>500</max_goal_sampling_attempts>
     <TrajectorySmooth>1</TrajectorySmooth>
-    <Range>0.2</Range>
+
     <Projection type="Joints">
-    	  <component name="WaistRotator" />
-          <component name="WaistExtensor" />
+    	  <component name="world_joint/trans_x" />
+          <component name="world_joint/trans_y" />
     </Projection>
     <!--Projection type="DMesh">
     	  <component name="Trunk"/>
@@ -33,15 +33,20 @@
 
   <OMPLProblem name="OMPLProblem">
     <PlroblemType>Goals</PlroblemType>
-    <FullBodyPlan>1</FullBodyPlan>
     <Scene name="TestScene">
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
-        <Root segment="Pelvis"> <!-- Optional: The root segment to use: xyz -->
+        <Root segment="Pelvis" type="floating"> <!-- Optional: The root segment to use: xyz -->
           <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
           <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
         </Root>
         <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="world_joint/trans_x" />
+          <joint name="world_joint/trans_y" />
+          <joint name="world_joint/trans_z" />
+	  <joint name="world_joint/rot_x" />
+	  <joint name="world_joint/rot_y" />
+	  <joint name="Pelvis/virtual_joint" />
 	  <joint name="WaistRotator" />
           <joint name="WaistExtensor" />
           <joint name="WaistLateralExtensor" />
@@ -67,21 +72,21 @@
     
     <Map type="Identity" name="CSpaceGoalMap">
       <Scene name="TestScene"/>
-      <Ref>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 </Ref>
+      <Ref>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Ref>
     </Map>
 
     <Task name="Goal" type="TaskTerminationCriterion">
       <map name="CSpaceGoalMap"/>
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
+      <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
       <Threshold>1e-3</Threshold>
     </Task>
 
     <Map type="CoM" name="CoMMap">
       <Scene name="TestScene"/>
       <EnableZ>false</EnableZ>
-      <Debug>false</Debug>
+      <Debug>1</Debug>
       <Bounds>-0.12 0.12 -0.12 0.12 -0.8 1.2</Bounds>
       <EndEffector ignore_unused="false">
         <limb segment="Trunk"/>
@@ -118,7 +123,7 @@
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0 0</Goal>
-      <Threshold>1e-3</Threshold>
+      <Threshold>0.12</Threshold>
     </Task>
     <!-- Problem parameters (structuring etc...) -->
     <LocalPlannerConfig>/home/yiming/ros/exotica/src/exotica/exotations/solvers/ompl_solver/resources/valkyrie_local_solver.xml</LocalPlannerConfig>
@@ -129,11 +134,17 @@
     <Scene name="BiasScene">
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
-        <Root segment="Pelvis"> <!-- Optional: The root segment to use: xyz -->
+        <Root segment="Pelvis" type="floating"> <!-- Optional: The root segment to use: xyz -->
           <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
           <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
         </Root>
         <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <joint name="world_joint/trans_x" />
+          <joint name="world_joint/trans_y" />
+          <joint name="world_joint/trans_z" />
+	  <joint name="world_joint/rot_x" />
+	  <joint name="world_joint/rot_y" />
+	  <joint name="Pelvis/virtual_joint" />
 	  <joint name="WaistRotator" />
           <joint name="WaistExtensor" />
           <joint name="WaistLateralExtensor" />
@@ -159,14 +170,14 @@
     
     <Map type="Identity" name="GoalBiasMap">
       <Scene name="BiasScene"/>
-      <Ref>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 </Ref>
+      <Ref>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Ref>
     </Map>
 
     <Task name="GoalBias" type="TaskBias">
       <map name="GoalBiasMap"/>
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
-      <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
+      <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
       <Threshold>1e-3</Threshold>
     </Task>
   </OMPLProblem>

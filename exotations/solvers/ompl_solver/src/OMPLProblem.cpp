@@ -216,17 +216,18 @@ namespace exotica
 			return FAILURE;
 		}
 
-		robot_model::RobotModelPtr model = scenes_.begin()->second->getRobotModel();
-		std::vector<std::string> joints = scenes_.begin()->second->getSolver().getJointNames();
-		int n = joints.size();
-		bounds_.resize(n * 2);
+		std::vector<std::string> jnts;
+		scenes_.begin()->second->getJointNames(jnts);
 
-		for (int i = 0; i < n; i++)
+		getBounds().resize(jnts.size() * 2);
+		std::map<std::string, std::vector<double>> joint_limits =
+				scenes_.begin()->second->getSolver().getUsedJointLimits();
+		for (int i = 0; i < jnts.size(); i++)
 		{
-			boost::shared_ptr<urdf::JointLimits> lim = model->getURDF()->getJoint(joints[i])->limits;
-			bounds_[i] = lim->lower;
-			bounds_[i + n] = lim->upper;
+			getBounds()[i] = joint_limits.at(jnts[i])[0];
+			getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1];
 		}
+
 		return SUCCESS;
 
 	}
@@ -325,9 +326,6 @@ namespace exotica
 				break;
 		}
 
-		tmp_handle = handle.FirstChildElement("FullBodyPlan");
-		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, full_body_plan_);
-
 		tmp_handle = handle.FirstChildElement("LocalPlannerConfig");
 		if (tmp_handle.ToElement())
 		{
@@ -364,13 +362,14 @@ namespace exotica
 
 		std::vector<std::string> jnts;
 		scenes_.begin()->second->getJointNames(jnts);
-		robot_model::RobotModelConstPtr model = server_->getModel("robot_description");
+
 		getBounds().resize(jnts.size() * 2);
+		std::map<std::string, std::vector<double>> joint_limits =
+				scenes_.begin()->second->getSolver().getUsedJointLimits();
 		for (int i = 0; i < jnts.size(); i++)
 		{
-			getBounds()[i] = model->getJointModel(jnts[i])->getVariableBounds()[0].min_position_;
-			getBounds()[i + jnts.size()] =
-					model->getJointModel(jnts[i])->getVariableBounds()[0].max_position_;
+			getBounds()[i] = joint_limits.at(jnts[i])[0];
+			getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1];
 		}
 		return SUCCESS;
 	}

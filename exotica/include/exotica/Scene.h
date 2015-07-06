@@ -34,6 +34,10 @@ namespace exotica
 {
 	typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
 	typedef std::vector<boost::shared_ptr<fcl::CollisionObject> > fcls_ptr;
+	enum BASE_TYPE
+	{
+		FIXED = 0, FLOATING = 10, PLANAR = 20
+	};
 	///	The class of collision scene
 	class CollisionScene
 	{
@@ -57,7 +61,7 @@ namespace exotica
 			 * @return Indication of success
 			 */
 			EReturn initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
-					const std::vector<std::string> & joints, std::string & mode);
+					const std::vector<std::string> & joints, std::string & mode, BASE_TYPE base_type);
 			EReturn reinitialise();
 
 			/**
@@ -180,6 +184,7 @@ namespace exotica
 			///	Pointer to exotica server
 			exotica::Server_ptr server_;
 			std::string scene_name_;
+			BASE_TYPE base_type_;
 	};
 
 	typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
@@ -377,6 +382,17 @@ namespace exotica
 			 * @return	Planning mode
 			 */
 			std::string & getPlanningMode();
+
+			/*
+			 * \breif	Get robot base type
+			 * @return	Base type
+			 */
+			BASE_TYPE getBaseType()
+			{
+				return base_type_;
+			}
+
+			KDL::Frame getRobotRootWorldTransform();
 		private:
 			///	EXOTica server
 			Server_ptr server_;
@@ -389,6 +405,9 @@ namespace exotica
 
 			///	Robot model
 			robot_model::RobotModelPtr model_;
+
+			///	Robot base type
+			BASE_TYPE base_type_;
 
 			///	The controlled joint size
 			int N;

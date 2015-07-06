@@ -409,7 +409,7 @@ namespace exotica
 			{
 				solution.resize(i + 1, size_);
 				solution = tmp.block(0, 0, i + 1, size_);
-				INFO_NAMED(object_name_, "IK solution found in "<<ros::Duration(ros::Time::now()-start).toSec()<<"sec. Error "<<error<<" / "<<prob_->getTau());
+				INFO_NAMED(object_name_, "IK solution found in "<<ros::Duration(ros::Time::now()-start).toSec()<<"sec, with "<<i<<" iterations. Error "<<error<<" / "<<prob_->getTau());
 				return SUCCESS;
 			}
 			else

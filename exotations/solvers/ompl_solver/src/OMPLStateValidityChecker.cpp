@@ -33,28 +33,35 @@ namespace exotica
 		sol_->getOMPLStateSpace()->copyFromOMPLState(state, q);
 		{
 			boost::mutex::scoped_lock lock(prob_->getLock());
-//			prob_->update(q, 0);
+			prob_->update(q, 0);
 
 // TODO: Implement this
 // Constraints
 // State rejection (e.g. collisions)
 			for (auto & it : prob_->scenes_)
 			{
-				if (ok(it.second->getCollisionScene()->update(q.segment(0, prob_->getSpaceDim()))))
+				if (!it.second->getCollisionScene()->isStateValid())
 				{
-					if (!it.second->getCollisionScene()->isStateValid())
+					dist = -1;
+					return false;
+				}
+			}
+
+			double err;
+			bool terminate;
+			for (TaskTerminationCriterion_ptr goal : prob_->getGoals())
+			{
+				if (goal->type().compare("exotica::CoM") == 0)
+				{
+					goal->terminate(terminate, err);
+					if (!terminate)
 					{
 						dist = -1;
 						return false;
 					}
 				}
-				else
-				{
-					dist = -1;
-					INDICATE_FAILURE
-					return false;
-				}
 			}
+
 		}
 
 		return true;

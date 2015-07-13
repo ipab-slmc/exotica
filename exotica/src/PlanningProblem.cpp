@@ -31,6 +31,10 @@ namespace exotica
 		knownMaps_["QuatConstraint"] = "Orientation";
 		knownMaps_["PostureConstraint"] = "Identity";
 
+        startState.resize(0);
+        endState.resize(0);
+        nominalState.resize(0);
+
 		Object::initBase(handle, server);
 		if (!server)
 		{

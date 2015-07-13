@@ -349,6 +349,7 @@ namespace exotica
 	{
 		//TODO - make interruptible
 		ROS_WARN_STREAM("Attempting to terminate");
+        return true;
 	}
 
 	/** \brief Clear the data structures used by the planner */

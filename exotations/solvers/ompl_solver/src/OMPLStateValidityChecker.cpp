@@ -15,6 +15,7 @@ namespace exotica
 					ompl::base::StateValidityChecker(sol->getOMPLSimpleSetup()->getSpaceInformation()),
 					prob_(sol->getProblem())
 	{
+		compound_ = prob_->isCompoundStateSpace();
 	}
 
 	OMPLStateValidityChecker::~OMPLStateValidityChecker()
@@ -30,7 +31,11 @@ namespace exotica
 	bool OMPLStateValidityChecker::isValid(const ompl::base::State *state, double &dist) const
 	{
 		Eigen::VectorXd q(prob_->getSpaceDim());
-		sol_->getOMPLStateSpace()->copyFromOMPLState(state, q);
+		if(compound_)
+			boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(sol_->getOMPLStateSpace())->OMPLStateToEigen(state,q);
+		else
+			boost::static_pointer_cast<OMPLStateSpace>(sol_->getOMPLStateSpace())->copyFromOMPLState(state, q);
+
 		{
 			boost::mutex::scoped_lock lock(prob_->getLock());
 			prob_->update(q, 0);
@@ -51,7 +56,7 @@ namespace exotica
 			bool terminate;
 			for (TaskTerminationCriterion_ptr goal : prob_->getGoals())
 			{
-				if (goal->type().compare("exotica::CoM") == 0)
+				if (goal->object_name_.compare("CoMTask") == 0)
 				{
 					goal->terminate(terminate, err);
 					if (!terminate)

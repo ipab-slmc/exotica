@@ -110,7 +110,8 @@ namespace exotica
 		}
 //		HIGHLIGHT_NAMED("MoveitInterface", "Using Solver "<<solver_->object_name_<<"["<<solver_->type()<<"], Problem "<<problem_->object_name_<<"["<<problem_->type()<<"].");
 
-		for (int i = 0; i < 1; i++)
+		int benchmark_cnt = 1;
+		for (int i = 0; i < benchmark_cnt; i++)
 		{
 			if (solver_->type().compare("exotica::OMPLsolver") == 0)
 			{
@@ -150,9 +151,12 @@ namespace exotica
 				fb_.solving_time_ = res_.planning_time_ =
 						ros::Duration(ros::Time::now() - start).toSec();
 				exotica::matrixEigenToExotica(solution, res_.solution_);
-				as_.setSucceeded(res_);
 			}
-			HIGHLIGHT_NAMED("OMPL Benchmark", "Solving time "<<i<<"/50 "<< (ok(found) ? "Succeed":"Failed"));
+			else
+				res_.succeeded_ = false;
+			as_.setSucceeded(res_);
+			if (benchmark_cnt > 1)
+				HIGHLIGHT_NAMED("OMPL Benchmark", "Solving time "<<i<<"/ "<<benchmark_cnt<< (ok(found) ? "Succeed":"Failed"));
 		}
 		return res_.succeeded_;
 	}

@@ -13,6 +13,7 @@ namespace exotica
 	OMPLStateSpace::OMPLStateSpace(unsigned int dim) :
 			ompl::base::RealVectorStateSpace(dim)
 	{
+		setName("OMPLStateSpace");
 	}
 
 	boost::shared_ptr<OMPLStateSpace> OMPLStateSpace::FromProblem(OMPLProblem_ptr prob)

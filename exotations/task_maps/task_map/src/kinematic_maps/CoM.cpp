@@ -109,7 +109,7 @@ namespace exotica
 		for (i = 0; i < N; i++)
 		{
 			KDL::Frame tmp_frame(KDL::Vector(EFFPHI(3 * i), EFFPHI(3 * i + 1), EFFPHI(3 * i + 2)));
-//			tmp_frame = tmp_frame * (root_tf.Inverse());
+			tmp_frame = tmp_frame * (root_tf.Inverse());
 			com = com + mass_[i] * tmp_frame.p;
 			if (debug_->data)
 			{
@@ -206,7 +206,7 @@ namespace exotica
 			goal_marker_.color.r = 0;
 			goal_marker_.color.g = 1;
 
-			com_marker_.header.frame_id = COM_marker_.header.frame_id = goal_marker_.header.frame_id = "Pelvis";
+			com_marker_.header.frame_id = COM_marker_.header.frame_id = goal_marker_.header.frame_id = scene_->getRootName();
 		}
 
 		com_pub_ = server_->advertise<visualization_msgs::Marker>(object_name_ + "coms_marker", 1);

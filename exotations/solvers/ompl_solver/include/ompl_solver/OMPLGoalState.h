@@ -11,6 +11,8 @@
 #include <ompl/base/goals/GoalState.h>
 #include "ompl_solver/OMPLProblem.h"
 #include "ompl_solver/OMPLStateSpace.h"
+#include "ompl_solver/OMPLSE3RNCompoundStateSpace.h"
+
 namespace ob = ompl::base;
 namespace exotica
 {
@@ -32,7 +34,7 @@ namespace exotica
 			const OMPLProblem_ptr getProblem();
 		private:
 			OMPLProblem_ptr prob_;
-			boost::shared_ptr<OMPLStateSpace> state_space_;
+			boost::shared_ptr<ob::StateSpace> state_space_;
 	};
 }
 

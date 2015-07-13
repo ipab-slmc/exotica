@@ -32,6 +32,7 @@ namespace exotica
 		protected:
 			exotica::OMPLsolver* sol_;
 			boost::shared_ptr<exotica::OMPLProblem> prob_;
+			bool compound_;
 	};
 
 } /* namespace exotica */

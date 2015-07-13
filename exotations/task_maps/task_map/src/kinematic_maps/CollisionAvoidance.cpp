@@ -8,12 +8,7 @@
 
 REGISTER_TASKMAP_TYPE("CollisionAvoidance", exotica::CollisionAvoidance);
 
-void eigen2Point(const Eigen::Vector3d & eigen, geometry_msgs::Point & point)
-{
-	point.x = eigen(0);
-	point.y = eigen(1);
-	point.z = eigen(2);
-}
+
 namespace exotica
 {
 	CollisionAvoidance::CollisionAvoidance()
@@ -169,7 +164,6 @@ namespace exotica
 		{
 			Eigen::Vector3d tmp1, tmp2;
 			scene_->getCollisionScene()->getRobotDistance(effs_[i], self_->data, dists[i], tmp1, tmp2, norms[i], c1s[i], c2s[i], safe_range_->data);
-
 			//	Compute Phi
 			if (dists[i] <= 0)
 			{

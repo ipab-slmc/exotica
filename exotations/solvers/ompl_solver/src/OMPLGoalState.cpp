@@ -13,7 +13,7 @@ namespace exotica
 			ob::GoalState(si), prob_(prob)
 	{
 		type_ = ob::GOAL_STATE;
-		state_space_ = boost::static_pointer_cast<OMPLStateSpace>(si->getStateSpace());
+		state_space_ = si->getStateSpace();
 		setThreshold(std::numeric_limits<double>::epsilon());
 	}
 
@@ -41,13 +41,18 @@ namespace exotica
 		double err = 0.0, tmp;
 		bool ret = true, tmpret;
 		Eigen::VectorXd q(prob_->getSpaceDim());
-		state_space_->copyFromOMPLState(st, q);
+		if(prob_->isCompoundStateSpace())
+			boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->OMPLStateToEigen(st,q);
+		else
+			boost::static_pointer_cast<OMPLStateSpace>(state_space_)->copyFromOMPLState(st, q);
 		{
 			boost::mutex::scoped_lock lock(prob_->getLock());
 			prob_->update(q, 0);
 			for (TaskTerminationCriterion_ptr goal : prob_->getGoals())
 			{
 				goal->terminate(tmpret, tmp);
+				if(!tmpret)
+					HIGHLIGHT_NAMED(goal->getObjectName(),"Does not pass with err "<<tmp);
 				err += tmp;
 				ret = ret && tmpret;
 			}

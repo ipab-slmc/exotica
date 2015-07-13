@@ -11,6 +11,7 @@
 #include <exotica/MotionSolver.h>
 #include "ompl_solver/OMPLProblem.h"
 #include "ompl_solver/OMPLStateSpace.h"
+#include "ompl_solver/OMPLSE3RNCompoundStateSpace.h"
 #include "ompl_solver/common.h"
 #include "ompl_solver/OMPLStateValidityChecker.h"
 #include "ompl_solver/OMPLGoalState.h"
@@ -63,7 +64,7 @@ namespace exotica
 			 */
 			bool terminate();
 
-			const boost::shared_ptr<OMPLStateSpace> getOMPLStateSpace() const
+			const boost::shared_ptr<ob::StateSpace> getOMPLStateSpace() const
 			{
 				return state_space_;
 			}
@@ -185,7 +186,8 @@ namespace exotica
 			boost::shared_ptr<og::SimpleSetup> ompl_simple_setup_;
 
 			/// \brief OMPL state space specification
-			boost::shared_ptr<OMPLStateSpace> state_space_;
+			boost::shared_ptr<ob::StateSpace> state_space_;
+			bool compound_;
 
 			/// \brief Planner name
 			std::string selected_planner_;

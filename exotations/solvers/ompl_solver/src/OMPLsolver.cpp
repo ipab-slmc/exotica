@@ -112,7 +112,8 @@ namespace exotica
 		finishedSolving_ = false;
 
 		ompl::base::ScopedState<> ompl_start_state(state_space_);
-		if (ok(state_space_->copyToOMPLState(ompl_start_state.get(),q0)))
+		if (ok(compound_ ? boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->EigenToOMPLState(q0, ompl_start_state.get()) : boost::static_pointer_cast<
+									OMPLStateSpace>(state_space_)->copyToOMPLState(ompl_start_state.get(), q0)))
 		{
 
 			ompl_simple_setup_->setStartState(ompl_start_state);
@@ -222,9 +223,11 @@ namespace exotica
 	{
 		traj.resize(pg.getStateCount(), state_space_->getDimension());
 		Eigen::VectorXd tmp(state_space_->getDimension());
+
 		for (int i = 0; i < (int) pg.getStateCount(); ++i)
 		{
-			if (!ok(state_space_->copyFromOMPLState(pg.getState(i), tmp)))
+			if (!ok(compound_ ? boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->OMPLStateToEigen(pg.getState(i), tmp) : boost::static_pointer_cast<
+										OMPLStateSpace>(state_space_)->copyFromOMPLState(pg.getState(i), tmp)))
 			{
 				ERROR("Can't copy state "<<i);
 				return FAILURE;
@@ -365,6 +368,9 @@ namespace exotica
 			if (!known)
 			{
 				ERROR("Unknown planning algorithm ["<<txt<<"]");
+				HIGHLIGHT_NAMED(object_name_,"Available algorithms:");
+				for(std::string s:nm)
+					HIGHLIGHT_NAMED(object_name_,s);
 				return FAILURE;
 			}
 		}
@@ -416,10 +422,9 @@ namespace exotica
 		return specifyProblem(pointer, NULL, NULL, NULL);
 	}
 
-	ompl::base::StateSamplerPtr allocFullbodyStateSampler(const ompl::base::StateSpace *ss)
+	ompl::base::StateSamplerPtr allocSE3RNStateSampler(const ompl::base::StateSpace *ss)
 	{
-//		return ob::StateSamplerPtr(new OMPLFullBodyStateSampler(ss));
-		return NULL;
+		return ob::StateSamplerPtr(new OMPLSE3RNCompoundStateSampler(ss));
 	}
 	EReturn OMPLsolver::specifyProblem(PlanningProblem_ptr goals, PlanningProblem_ptr costs,
 			PlanningProblem_ptr goalBias, PlanningProblem_ptr samplingBias)
@@ -499,13 +504,25 @@ namespace exotica
 			}
 		}
 
-		state_space_ = OMPLStateSpace::FromProblem(prob_);
+		compound_ = prob_->isCompoundStateSpace();
+		if (compound_)
+		{
+			state_space_ =
+					ob::StateSpacePtr(OMPLSE3RNCompoundStateSpace::FromProblem(prob_, server_));
+		}
+		else
+		{
+			state_space_ = OMPLStateSpace::FromProblem(prob_);
+		}
+
+		HIGHLIGHT_NAMED(object_name_,"Using state space: "<<state_space_->getName());
 		ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
 
 		ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(this)));
 		ompl_simple_setup_->setPlannerAllocator(boost::bind(known_planners_[selected_planner_], _1, this->getObjectName()
 				+ "_" + selected_planner_));
-//		ompl_simple_setup_->getStateSpace()->setStateSamplerAllocator(boost::bind(&allocFullbodyStateSampler, (ob::StateSpace*)state_space_.get()));
+		if (compound_)
+			ompl_simple_setup_->getStateSpace()->setStateSamplerAllocator(boost::bind(&allocSE3RNStateSampler, (ob::StateSpace*) state_space_.get()));
 		ompl_simple_setup_->getSpaceInformation()->setup();
 
 		std::vector<std::string> jnts;
@@ -627,7 +644,7 @@ namespace exotica
 		registerPlannerAllocator("geometric::KPIECE", boost::bind(&allocatePlanner<og::KPIECE1>, _1, _2));
 		registerPlannerAllocator("geometric::BKPIECE", boost::bind(&allocatePlanner<og::BKPIECE1>, _1, _2));
 		registerPlannerAllocator("geometric::LBKPIECE", boost::bind(&allocatePlanner<og::LBKPIECE1>, _1, _2));
-		registerPlannerAllocator("geometric::RRTstar", boost::bind(&allocatePlanner<og::RRTstar>, _1, _2));
+		registerPlannerAllocator("geometric::RRTStar", boost::bind(&allocatePlanner<og::RRTstar>, _1, _2));
 		registerPlannerAllocator("geometric::PRM", boost::bind(&allocatePlanner<og::PRM>, _1, _2));
 		registerPlannerAllocator("geometric::PRMstar", boost::bind(&allocatePlanner<og::PRMstar>, _1, _2));
 		//registerPlannerAllocator("geometric::FMT", boost::bind(&allocatePlanner<og::FMT>, _1, _2));
@@ -636,7 +653,6 @@ namespace exotica
 		registerPlannerAllocator("geometric::SPARS", boost::bind(&allocatePlanner<og::SPARS>, _1, _2));
 		registerPlannerAllocator("geometric::SPARStwo", boost::bind(&allocatePlanner<og::SPARStwo>, _1, _2));
 		registerPlannerAllocator("geometric::LBTRRT", boost::bind(&allocatePlanner<og::LBTRRT>, _1, _2));
-		registerPlannerAllocator("geometric::RRTstar", boost::bind(&allocatePlanner<og::RRTstar>, _1, _2));
 		registerPlannerAllocator("geometric::STRIDE", boost::bind(&allocatePlanner<og::STRIDE>, _1, _2));
 
 		registerPlannerAllocator("geometric::FRRT", boost::bind(&allocatePlanner<og::FRRT>, _1, _2));
@@ -691,7 +707,8 @@ namespace exotica
 	{
 		LOCK(goal_lock_);
 		ompl::base::ScopedState<> gs(state_space_);
-		if (ok(state_space_->copyToOMPLState(gs.get(),qT)))
+		if (ok(compound_ ? boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->EigenToOMPLState(qT, gs.get()) : boost::static_pointer_cast<
+									OMPLStateSpace>(state_space_)->copyToOMPLState(gs.get(), qT)))
 		{
 			if (!goal_state_->isSatisfied(gs.get()))
 			{

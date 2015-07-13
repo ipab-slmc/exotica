@@ -43,6 +43,7 @@ add_library(${PROJECT_NAME} src/kinematic_maps/CoM.cpp
                             src/kinematic_maps/Distance.cpp
                             src/kinematic_maps/Orientation.cpp
                             src/kinematic_maps/CollisionAvoidance.cpp
+                            src/kinematic_maps/GJKCollisionAvoidance.cpp
                             src/generic/Identity.cpp
                             src/kinematic_maps/JointSpaceSampling.cpp
            )

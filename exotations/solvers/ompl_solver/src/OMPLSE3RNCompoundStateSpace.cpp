@@ -6,19 +6,31 @@
  */
 
 #include <ompl_solver/OMPLSE3RNCompoundStateSpace.h>
-#include "kinematic_maps/CoM.h"
 namespace exotica
 {
 
-	OMPLSE3RNCompoundStateSpace::OMPLSE3RNCompoundStateSpace(unsigned int dim) :
-					ob::CompoundStateSpace(),
-					pelvis_angle_bound_(0.1),
-					upperbody_dim_(dim),
-					pelvis_xyx_bounds_(3)
+	OMPLSE3RNCompoundStateSpace::OMPLSE3RNCompoundStateSpace(unsigned int dim,
+			const Server_ptr &server) :
+			ob::CompoundStateSpace(), realvectordim_(dim), server_(server)
 	{
-		setName("OMPLUpperBodyPelvisStateSpace");
+		setName("OMPLSE3RNCompoundStateSpace");
+		addSubspace(ob::StateSpacePtr(new ob::SE3StateSpace()), 10.0);
 		addSubspace(ob::StateSpacePtr(new ob::RealVectorStateSpace(dim)), 1.0);
-		addSubspace(ob::StateSpacePtr(new ob::SE3StateSpace()), 1.0);
+		weights_.reset(new Vector());
+		weights_->data.resize(dim + 6);
+		for (int i = 0; i < dim + 6; i++)
+			weights_->data[i] = 1;
+		if (server_->hasParam(server_->getName() + "/SE3RNSpaceWeights"))
+		{
+			EParam<exotica::Vector> tmp;
+			if (ok(server_->getParam(server_->getName() + "/SE3RNSpaceWeights", tmp)))
+			{
+				if (tmp->data.size() == dim + 6)
+				{
+					weights_ = tmp;
+				}
+			}
+		}
 		lock();
 	}
 
@@ -29,129 +41,126 @@ namespace exotica
 
 	ob::StateSamplerPtr OMPLSE3RNCompoundStateSpace::allocDefaultStateSampler()
 	{
-		OMPLSE3RNCompoundStateSpace *ss = new OMPLSE3RNCompoundStateSpace(this);
+		OMPLSE3RNCompoundStateSampler *ss = new OMPLSE3RNCompoundStateSampler(this);
 		return ob::StateSamplerPtr(ss);
 	}
 	boost::shared_ptr<OMPLSE3RNCompoundStateSpace> OMPLSE3RNCompoundStateSpace::FromProblem(
-			OMPLProblem_ptr prob)
+			OMPLProblem_ptr prob, const Server_ptr &server)
 	{
 		unsigned int n = prob->getSpaceDim();
 		boost::shared_ptr<OMPLSE3RNCompoundStateSpace> ret;
+		BASE_TYPE base_type = prob->getScenes().begin()->second->getBaseType();
 
-		if (n <= 0)
+		int rn = n - 6;
+		if (rn <= 0)
 		{
 			ERROR("State space size error!");
 			return ret;
 		}
-		ret.reset(new OMPLSE3RNCompoundStateSpace(n));
-		ompl::base::RealVectorBounds bounds(n);
+
+		ret.reset(new OMPLSE3RNCompoundStateSpace(rn, server));
 		if (prob->getBounds().size() == 2 * n)
 		{
-			for (int i = 0; i < n; i++)
+			ompl::base::RealVectorBounds RNbounds(rn);
+			ompl::base::RealVectorBounds SE3bounds(3);
+
+			for (int i = 0; i < 3; i++)
 			{
-				bounds.setHigh(i, prob->getBounds()[i + n]);
-				bounds.setLow(i, prob->getBounds()[i]);
+				SE3bounds.setHigh(i, prob->getBounds()[i + n]);
+				SE3bounds.setLow(i, prob->getBounds()[i]);
 			}
+			ret->setSE3StateSpaceBounds(SE3bounds);
+			for (int i = 6; i < n; i++)
+			{
+				RNbounds.setHigh(i - 6, prob->getBounds()[i + n]);
+				RNbounds.setLow(i - 6, prob->getBounds()[i]);
+			}
+
+			ret->setRealVectorStateSpaceBounds(RNbounds);
 		}
 		else
 		{
 			WARNING("State space bounds were not specified!\n"<< prob->getBounds().size() << " " << n);
 		}
-		ret->setUpperBodyBounds(bounds);
 
-		if (prob->full_body_plan_->data)
-		{
-			if (prob->getTaskMaps().find("CoMMap") == prob->getTaskMaps().end())
-			{
-				ERROR("A 'CoMMap'(TaskMap::CoM) is required for OMPLUpperBodyPelvisStateSpace");
-				return ret;
-			}
-			else
-			{
-				HIGHLIGHT_NAMED("OMPLUpperBodyPelvisStateSpace", "OMPL State set to Fullbody mode");
-				boost::shared_ptr<exotica::CoM> com_map =
-						boost::static_pointer_cast<exotica::CoM>(prob->getTaskMaps().at("CoMMap"));
-				unsigned int size = com_map->getBounds()->data.size() / 2;
-				if (com_map->getBounds()->data.size() != 6)
-				{
-					WARNING_NAMED("OMPLUpperBodyPelvisStateSpace", "COM has bounds size "<<com_map->getBounds()->data.size()<<". Suppose to be 6");
-					size = 2;
-				}
-				ompl::base::RealVectorBounds com_bounds(size);
-				for (int i = 0; i < size; i++)
-				{
-					com_bounds.setLow(i, com_map->getBounds()->data[2 * i]);
-					com_bounds.setHigh(i, com_map->getBounds()->data[2 * i + 1]);
-				}
-				HIGHLIGHT("Pelvis Bounds ["<<com_bounds.low[0]<<","<<com_bounds.high[0]<<"] ["<<com_bounds.low[1]<<","<<com_bounds.high[1]<<"] ["<<com_bounds.low[2]<<","<<com_bounds.high[2]<<"].")
-				ret->setPelvisBounds(com_bounds, 0.1);
-			}
-		}
-		else
-		{
-			HIGHLIGHT_NAMED("OMPLUpperBodyPelvisStateSpace", "OMPL State set to NON-Fullbody mode");
-		}
 		return ret;
 	}
 	unsigned int OMPLSE3RNCompoundStateSpace::getDimension() const
 	{
-		return upperbody_dim_;
+		return realvectordim_ + 6;
 	}
-	void OMPLSE3RNCompoundStateSpace::setUpperBodyBounds(const ob::RealVectorBounds &bounds)
+	void OMPLSE3RNCompoundStateSpace::setRealVectorStateSpaceBounds(
+			const ob::RealVectorBounds &bounds)
 	{
-		getSubspace(0)->as<ob::RealVectorStateSpace>()->setBounds(bounds);
+		bounds.check();
+		getSubspace(1)->as<ob::RealVectorStateSpace>()->setBounds(bounds);
 	}
 
-	const ob::RealVectorBounds & OMPLSE3RNCompoundStateSpace::getUpperBodyBounds() const
+	const ob::RealVectorBounds & OMPLSE3RNCompoundStateSpace::getRealVectorStateSpaceBounds() const
 	{
-		return getSubspace(0)->as<ob::RealVectorStateSpace>()->getBounds();
+		return getSubspace(1)->as<ob::RealVectorStateSpace>()->getBounds();
 	}
 
-	void OMPLSE3RNCompoundStateSpace::setPelvisBounds(const ob::RealVectorBounds &xyz,
+	void OMPLSE3RNCompoundStateSpace::setSE3StateSpaceBounds(const ob::RealVectorBounds &xyz,
 			const double dist)
 	{
 		xyz.check();
-		getSubspace(1)->as<ob::SE3StateSpace>()->setBounds(xyz);
-		pelvis_xyx_bounds_ = xyz;
-		pelvis_angle_bound_ = dist;
+		getSubspace(0)->as<ob::SE3StateSpace>()->setBounds(xyz);
 	}
 
-	const ob::RealVectorBounds & OMPLSE3RNCompoundStateSpace::getPelvisPositionBounds() const
+	const ob::RealVectorBounds & OMPLSE3RNCompoundStateSpace::getSE3StateSpaceBounds() const
 	{
-		return pelvis_xyx_bounds_;
-	}
-
-	const double & OMPLSE3RNCompoundStateSpace::getPelvisRotationBound() const
-	{
-		return pelvis_angle_bound_;
+		return getSubspace(0)->as<ob::SE3StateSpace>()->getBounds();
 	}
 
 	void OMPLSE3RNCompoundStateSampler::sampleUniform(ob::State *state)
 	{
-		HIGHLIGHT("Calling sampleUniform");
-		//	First sample for the upper body
+		//	First sample for the RN space
 		OMPLSE3RNCompoundStateSpace::StateType *rstate =
 				static_cast<OMPLSE3RNCompoundStateSpace::StateType*>(state);
-		const ob::RealVectorBounds &upperbody_bounds =
-				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getUpperBodyBounds();
-		const unsigned int dim = upperbody_bounds.high.size();
+		const ob::RealVectorBounds &realvector_bounds =
+				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getRealVectorStateSpaceBounds();
+		const unsigned int dim = realvector_bounds.high.size();
 		for (unsigned int i = 0; i < dim; ++i)
-			rstate->upperBodyConfiguration().values[i] =
-					rng_.uniformReal(upperbody_bounds.low[i], upperbody_bounds.high[i]);
+			rstate->RealVectorStateSpace().values[i] =
+					rng_.uniformReal(realvector_bounds.low[i], realvector_bounds.high[i]);
 
-		//	Now sample for the pelvis
-		const ob::RealVectorBounds &pelvis_bounds =
-				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getPelvisPositionBounds();
-		const double &pelvis_rot =
-				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getPelvisRotationBound();
-		rstate->pelvisPose().setXYZ(rng_.uniformReal(pelvis_bounds.low[0], pelvis_bounds.high[0]), rng_.uniformReal(pelvis_bounds.low[1], pelvis_bounds.high[1]), rng_.uniformReal(pelvis_bounds.low[2], pelvis_bounds.high[2]));
-		rstate->pelvisPose().rotation().setAxisAngle(0, 0, 1, rng_.uniformReal(0, pelvis_rot));
+		//	Now sample for the SE3 space
+		const ob::RealVectorBounds &se3_bounds =
+				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getSE3StateSpaceBounds();
+		rstate->SE3StateSpace().setXYZ(rng_.uniformReal(se3_bounds.low[0], se3_bounds.high[0]), rng_.uniformReal(se3_bounds.low[1], se3_bounds.high[1]), rng_.uniformReal(se3_bounds.low[2], se3_bounds.high[2]));
+		rstate->SE3StateSpace().rotation().setAxisAngle(0, 0, 1, rng_.uniformReal(-1.57, 1.57));
 	}
 
 	void OMPLSE3RNCompoundStateSampler::sampleUniformNear(ob::State *state, const ob::State *near,
 			const double distance)
 	{
-		WARNING_NAMED("OMPLFullBodyStateSampler", "sampleUniformNear not implemented");
+		//	First sample for the upper body
+		OMPLSE3RNCompoundStateSpace::StateType *rstate =
+				static_cast<OMPLSE3RNCompoundStateSpace::StateType*>(state);
+		const OMPLSE3RNCompoundStateSpace::StateType *nstate =
+				static_cast<const OMPLSE3RNCompoundStateSpace::StateType*>(near);
+		const ob::RealVectorBounds &realvector_bounds =
+				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getRealVectorStateSpaceBounds();
+		const unsigned int dim = realvector_bounds.high.size();
+		for (unsigned int i = 0; i < dim; ++i)
+			rstate->RealVectorStateSpace().values[i] =
+					rng_.uniformReal(std::max(realvector_bounds.low[i], nstate->RealVectorStateSpace().values[i]
+							- distance * weightImportance_[i + 6]), std::min(realvector_bounds.high[i], nstate->RealVectorStateSpace().values[i]
+							+ distance * weightImportance_[i + 6]));
+		//	Now sample for the SE3 space
+		const ob::RealVectorBounds &se3_bounds =
+				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getSE3StateSpaceBounds();
+		rstate->SE3StateSpace().setX(rng_.uniformReal(std::max(se3_bounds.low[0], nstate->SE3StateSpace().getX()
+				- distance * weightImportance_[0]), std::min(se3_bounds.high[0], nstate->SE3StateSpace().getX()
+				+ distance * weightImportance_[0])));
+		rstate->SE3StateSpace().setY(rng_.uniformReal(std::max(se3_bounds.low[1], nstate->SE3StateSpace().getY()
+				- distance * weightImportance_[1]), std::min(se3_bounds.high[1], nstate->SE3StateSpace().getY()
+				+ distance * weightImportance_[1])));
+		rstate->SE3StateSpace().setZ(rng_.uniformReal(std::max(se3_bounds.low[2], nstate->SE3StateSpace().getZ()
+				- distance * weightImportance_[2]), std::min(se3_bounds.high[2], nstate->SE3StateSpace().getZ()
+				+ distance * weightImportance_[2])));
+		rstate->SE3StateSpace().rotation().setAxisAngle(0, 0, 1, rng_.uniformReal(-1.57, 1.57));
 	}
 
 	void OMPLSE3RNCompoundStateSampler::sampleGaussian(ob::State *state, const ob::State * mean,
@@ -163,6 +172,18 @@ namespace exotica
 	EReturn OMPLSE3RNCompoundStateSpace::OMPLStateToEigen(const ob::State *ompl,
 			Eigen::VectorXd &eigen)
 	{
+		eigen.setZero(getDimension());
+		const OMPLSE3RNCompoundStateSpace::StateType *statetype =
+				static_cast<const OMPLSE3RNCompoundStateSpace::StateType*>(ompl);
+		memcpy(eigen.segment(6, eigen.rows() - 6).data(), statetype->RealVectorStateSpace().values, sizeof(double)
+				* (eigen.rows() - 6));
+		eigen(0) = statetype->SE3StateSpace().getX();
+		eigen(1) = statetype->SE3StateSpace().getY();
+		eigen(2) = statetype->SE3StateSpace().getZ();
+
+		KDL::Rotation tmp =
+				KDL::Rotation::Quaternion(statetype->SE3StateSpace().rotation().x, statetype->SE3StateSpace().rotation().y, statetype->SE3StateSpace().rotation().z, statetype->SE3StateSpace().rotation().w);
+		tmp.GetEulerZYX(eigen(3), eigen(4), eigen(5));
 
 		return SUCCESS;
 	}
@@ -170,6 +191,15 @@ namespace exotica
 	EReturn OMPLSE3RNCompoundStateSpace::EigenToOMPLState(const Eigen::VectorXd &eigen,
 			ob::State *ompl)
 	{
+		OMPLSE3RNCompoundStateSpace::StateType *statetype =
+				static_cast<OMPLSE3RNCompoundStateSpace::StateType*>(ompl);
+		statetype->SE3StateSpace().setXYZ(eigen(0), eigen(1), eigen(2));
+		KDL::Rotation tmp = KDL::Rotation::EulerZYX(eigen(3), eigen(4), eigen(5));
+		tmp.GetQuaternion(statetype->SE3StateSpace().rotation().x, statetype->SE3StateSpace().rotation().y, statetype->SE3StateSpace().rotation().z, statetype->SE3StateSpace().rotation().w);
+
+		memcpy(statetype->RealVectorStateSpace().values, eigen.segment(6, eigen.rows() - 6).data(), sizeof(double)
+				* (eigen.rows() - 6));
+
 		return SUCCESS;
 	}
 }

@@ -360,6 +360,10 @@ namespace exotica
 		originalGoalBias_ = goalBias_;
 		originalSamplingBias_ = samplingBias_;
 
+		if (scenes_.begin()->second->getBaseType() != exotica::BASE_TYPE::FIXED)
+			compound_ = true;
+		else
+			compound_ = false;
 		std::vector<std::string> jnts;
 		scenes_.begin()->second->getJointNames(jnts);
 
@@ -384,6 +388,10 @@ namespace exotica
 		return goals_;
 	}
 
+	bool OMPLProblem::isCompoundStateSpace()
+	{
+		return compound_;
+	}
 	std::vector<TaskSqrError_ptr>& OMPLProblem::getCosts()
 	{
 		return costs_;

@@ -46,7 +46,7 @@ add_library(ompl_solver
    src/OMPLProblem.cpp
    src/OMPLGoalUnion.cpp
    src/OMPLStateSpace.cpp
-   #src/OMPLUpperBodyPelvisStateSpace.cpp
+   src/OMPLSE3RNCompoundStateSpace.cpp
    src/OMPLStateValidityChecker.cpp
    src/OMPLGoalState.cpp
    src/frrt/FlexiblePlanner.cpp

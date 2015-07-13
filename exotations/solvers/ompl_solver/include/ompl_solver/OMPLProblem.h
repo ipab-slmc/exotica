@@ -52,7 +52,7 @@ namespace exotica
             std::vector<TaskBias_ptr>& getGoalBias();
             std::vector<TaskBias_ptr>& getSamplingBias();
 			std::vector<double>& getBounds();
-
+			bool isCompoundStateSpace();
             virtual EReturn reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem);
 			std::string local_planner_config_;
             EParam<std_msgs::Bool> full_body_plan_;
@@ -74,7 +74,7 @@ namespace exotica
 			std::vector<double> bounds_;
 			int space_dim_;
             OMPLProblem_Type problemType;
-
+            bool compound_;
             std::vector<TaskTerminationCriterion_ptr> originalGoals_;
             std::vector<TaskSqrError_ptr> originalCosts_;
             std::vector<TaskBias_ptr> originalGoalBias_;

@@ -287,11 +287,9 @@ namespace exotica
 			if (!ok(it->second->update(x)))
 			{
 				INDICATE_FAILURE
-				;
 				return FAILURE;
 			}
 		}
-
 		// Update the Task maps
 
 #ifdef EXOTICA_DEBUG_MODE
@@ -309,9 +307,7 @@ namespace exotica
 				INDICATE_FAILURE
 				return FAILURE;
 			}
-
 		}
-
 		return SUCCESS;
 	}
 

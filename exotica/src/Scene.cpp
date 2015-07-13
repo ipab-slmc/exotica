@@ -186,6 +186,7 @@ namespace exotica
 			ERROR("Size does not match, need vector size of "<<joint_index_.size()<<" but "<<x.rows()<<" is provided");
 			return FAILURE;
 		}
+
 		if (base_type_ == BASE_TYPE::FIXED)
 		{
 			for (std::size_t i = 0; i < joint_index_.size(); i++)

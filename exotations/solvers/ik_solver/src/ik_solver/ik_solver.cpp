@@ -365,7 +365,6 @@ namespace exotica
 			{
 				if (ok(prob_->update(solution.row(0), t)))
 				{
-
 					if (!ok(vel_solve(error, t, solution.row(0))))
 					{
 						INDICATE_FAILURE
@@ -392,7 +391,7 @@ namespace exotica
 					else if (i > 2 && error > 0.1 * init_err)
 					{
 						double change = (tmp.row(i + 1) - tmp.row(i - 1)).cwiseAbs().maxCoeff();
-						if (change < 1.5* maxstep_->data)
+						if (change < .5* maxstep_->data)
 						{
 							WARNING_NAMED(object_name_, "Running into local minima with velocity "<<change);
 							break;
@@ -404,7 +403,6 @@ namespace exotica
 					return FAILURE;
 				}
 			}
-
 			if (found)
 			{
 				solution.resize(i + 1, size_);

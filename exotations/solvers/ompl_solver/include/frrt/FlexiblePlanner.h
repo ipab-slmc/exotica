@@ -58,6 +58,42 @@ namespace ompl
 
 				int checkCnt_;
 			protected:
+				bool copyStateToEigen(const ob::State *state, Eigen::VectorXd & eigen)
+				{
+					std::string spacename = si_->getStateSpace()->getName();
+					if (spacename.compare("OMPLSE3RNCompoundStateSpace") == 0)
+					{
+						return exotica::ok(si_->getStateSpace()->as<
+								exotica::OMPLSE3RNCompoundStateSpace>()->OMPLStateToEigen(state, eigen));
+					}
+					else if (spacename.compare("OMPLStateSpace") == 0)
+					{
+						return exotica::ok(si_->getStateSpace()->as<exotica::OMPLStateSpace>()->copyFromOMPLState(state, eigen));
+					}
+					else
+					{
+						ERROR("Can not convert state space "<<spacename);
+					}
+					return false;
+				}
+				bool copyEigenToState(const Eigen::VectorXd & eigen, ob::State *state)
+				{
+					std::string spacename = si_->getStateSpace()->getName();
+					if (spacename.compare("OMPLSE3RNCompoundStateSpace") == 0)
+					{
+						return exotica::ok(si_->getStateSpace()->as<
+								exotica::OMPLSE3RNCompoundStateSpace>()->EigenToOMPLState(eigen, state));
+					}
+					else if (spacename.compare("OMPLStateSpace") == 0)
+					{
+						return exotica::ok(si_->getStateSpace()->as<exotica::OMPLStateSpace>()->copyToOMPLState(state, eigen));
+					}
+					else
+					{
+						ERROR("Can not convert state space "<<spacename);
+					}
+					return false;
+				}
 				class FlexibleMotion
 				{
 					public:
@@ -65,12 +101,12 @@ namespace ompl
 						 * \brief	Constructor
 						 */
 						FlexibleMotion() :
-								state(NULL), inter_state(NULL), parent(NULL)
+								state(NULL), inter_state(NULL)
 						{
 						}
 
 						FlexibleMotion(const base::SpaceInformationPtr &si) :
-								state(si->allocState()), inter_state(NULL), parent(NULL)
+								state(si->allocState()), inter_state(NULL)
 						{
 						}
 						/*
@@ -85,8 +121,6 @@ namespace ompl
 						base::State *state;
 						///	Internal state
 						base::State *inter_state;
-						///	The parent node
-						FlexibleMotion *parent;
 						///	The internal flexible path
 						boost::shared_ptr<Eigen::MatrixXd> internal_path;
 				};

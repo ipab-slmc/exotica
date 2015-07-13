@@ -35,74 +35,89 @@ namespace exotica
 		return -1;
 	}
 
+    EReturn Identity::initialise(std::string& postureName, std::vector<std::string>& joints, bool skipUnknown)
+    {
+        if (!poses || !posesJointNames)
+        {
+            ERROR("Poses have not been set!");
+            return FAILURE;
+        }
+
+        std::map<std::string, Eigen::VectorXd>::const_iterator pose = poses->find(postureName);
+        if (pose != poses->end())
+        {
+            useRef = true;
+            jointMap.resize(0);
+            jointRef.resize(0);
+
+            for (int i = 0; i < joints.size(); i++)
+            {
+                int idext = getJointIDexternal(joints[i]);
+                if (idext >= 0)
+                {
+                    int id = getJointID(joints[i]);
+                    if (id >= 0)
+                    {
+                        jointMap.push_back(id);
+                        jointRef.conservativeResize(jointRef.rows() + 1);
+                        jointRef(jointRef.rows() - 1) = pose->second(idext);
+                        continue;
+                    }
+                }
+                else
+                {
+                    if(!skipUnknown)
+                    {
+                        ERROR("Requesting unknown joint '"<<joints[i]<<"'");
+                        return FAILURE;
+                    }
+                }
+            }
+            if (jointMap.size() == 0)
+            {
+                return CANCELLED;
+            }
+            else
+            {
+                return SUCCESS;
+            }
+        }
+        else
+        {
+            ERROR("Can't find pose '"<<postureName<<"'");
+            return FAILURE;
+        }
+    }
+
 	EReturn Identity::initialise(const rapidjson::Value& a)
 	{
-		if (!poses || !posesJointNames)
-		{
-			ERROR("Poses have not been set!");
-			return FAILURE;
-		}
-		std::string postureName;
-		if (ok(getJSON(a["postureName"], postureName)))
-		{
-			std::map<std::string, Eigen::VectorXd>::const_iterator pose = poses->find(postureName);
-			if (pose != poses->end())
-			{
-				std::vector<std::string> joints;
-				if (ok(getJSON(a["joints"], joints)))
-				{
-					useRef = true;
-					jointMap.resize(0);
-					jointRef.resize(0);
-
-					for (int i = 0; i < joints.size(); i++)
-					{
-						int idext = getJointIDexternal(joints[i]);
-						if (idext >= 0)
-						{
-							int id = getJointID(joints[i]);
-							if (id >= 0)
-							{
-								jointMap.push_back(id);
-								jointRef.conservativeResize(jointRef.rows() + 1);
-								jointRef(jointRef.rows() - 1) = pose->second(idext);
-								continue;
-							}
-						}
-						else
-						{
-							ERROR("Requesting unknown joint '"<<joints[i]<<"'");
-							return FAILURE;
-						}
-					}
-					if (jointMap.size() == 0)
-					{
-						return CANCELLED;
-					}
-					else
-					{
-						return SUCCESS;
-					}
-				}
-				else
-				{
-					INDICATE_FAILURE
-					;
-					return FAILURE;
-				}
-			}
-			else
-			{
-				ERROR("Can't find pose '"<<postureName<<"'");
-				return FAILURE;
-			}
-		}
-		else
-		{
-			INDICATE_FAILURE
-			;
-			return FAILURE;
-		}
+        if (poses && posesJointNames)
+        {
+            std::string postureName;
+            if (ok(getJSON(a["postureName"], postureName)))
+            {
+                std::vector<std::string> joints;
+                if (ok(getJSON(a["joints"], joints)))
+                {
+                    return initialise(postureName, joints);
+                }
+                else
+                {
+                    INDICATE_FAILURE;
+                    return FAILURE;
+                }
+            }
+            else
+            {
+                INDICATE_FAILURE;
+                return FAILURE;
+            }
+        }
+        else
+        {
+            ERROR("Poses have not been set!");
+            return FAILURE;
+        }
 	}
 
 	EReturn Identity::update(Eigen::VectorXdRefConst x, const int t)

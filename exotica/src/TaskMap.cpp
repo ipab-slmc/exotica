@@ -34,14 +34,10 @@ namespace exotica
         {
             if (!server)
             {
-                INDICATE_FAILURE
+                INDICATE_FAILURE;
                 return FAILURE;
             }
-            object_name_=object_name_+std::to_string((unsigned long)this);
-            server_ = server;
-            scene_ = scene_ptr.begin()->second;
-            poses = prob->poses;
-            posesJointNames = prob->posesJointNames;
+            initialiseManual(object_name_, server, scene_ptr, prob);
             return initialise(a);
         }
         else
@@ -51,6 +47,16 @@ namespace exotica
         }
     }
 
+    EReturn TaskMap::initialiseManual(std::string name, Server_ptr & server, const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob)
+    {
+        object_name_=name+std::to_string((unsigned long)this);
+        server_ = server;
+        scene_ = scene_ptr.begin()->second;
+        poses = prob->poses;
+        posesJointNames = prob->posesJointNames;
+        return SUCCESS;
+    }
+
     EReturn TaskMap::initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
             const Scene_map & scene_ptr)
     {
@@ -58,7 +64,7 @@ namespace exotica
         Object::initBase(handle, server);
         if (!server)
         {
-            INDICATE_FAILURE
+            INDICATE_FAILURE;
             return FAILURE;
         }
         server_ = server;
@@ -70,13 +76,13 @@ namespace exotica
             const char * name = handle.FirstChildElement("Scene").ToElement()->Attribute("name");
             if (name == nullptr)
             {
-                INDICATE_FAILURE
+                INDICATE_FAILURE;
                 return PAR_ERR;
             }
             auto it = scene_ptr.find(name);
             if (it == scene_ptr.end())
             {
-                INDICATE_FAILURE
+                INDICATE_FAILURE;
                 return PAR_ERR;
             }
             scene_ = it->second;

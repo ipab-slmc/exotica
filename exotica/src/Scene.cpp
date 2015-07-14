@@ -396,7 +396,7 @@ namespace exotica
 		return ps_->getCurrentState();
 	}
 
-	const planning_scene::PlanningScenePtr CollisionScene::getPlanningScene()
+	planning_scene::PlanningScenePtr& CollisionScene::getPlanningScene()
 	{
 		return ps_;
 	}

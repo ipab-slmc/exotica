@@ -69,7 +69,9 @@ namespace exotica
 											sqr->setTimeSteps(T_);
 											Eigen::VectorXd tspan(2);
 											Eigen::VectorXi tspani(2);
-											if (obj["tspan"]["__ndarray__"].IsArray())
+
+											//	TODO fix ndarray problem
+											if (false && obj["tspan"].HasMember("__ndarray__") && obj["tspan"]["__ndarray__"].IsArray())
 											{
 												getJSON(obj["tspan"]["__ndarray__"], tspan);
 											}

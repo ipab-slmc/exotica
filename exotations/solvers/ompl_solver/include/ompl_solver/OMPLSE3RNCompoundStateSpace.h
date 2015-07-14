@@ -72,7 +72,14 @@ namespace exotica
 			void setSE3StateSpaceBounds(const ob::RealVectorBounds &xyz, const double dist = 0);
 			const ob::RealVectorBounds & getSE3StateSpaceBounds() const;
 			const double getSE3StateSpaceRobotationBound() const;
+			void setStart(const Eigen::VectorXd &start);
+			void setGoal(const Eigen::VectorXd &goal);
 			EParam<exotica::Vector> weights_;
+			Eigen::VectorXd start_;
+			Eigen::VectorXd goal_;
+			double base_dist_;
+			EParam<std_msgs::Float64> rn_bias_percentage_;
+			bool useGoal_;
 		private:
 			Server_ptr server_;
 			int realvectordim_;

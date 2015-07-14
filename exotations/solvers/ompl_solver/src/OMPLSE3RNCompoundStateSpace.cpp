@@ -31,6 +31,9 @@ namespace exotica
 				}
 			}
 		}
+		if (!ok(server_->getParam(server_->getName() + "/SE3RNSpaceRNBias", rn_bias_percentage_)))
+			rn_bias_percentage_->data = 0.1;
+
 		lock();
 	}
 
@@ -75,8 +78,8 @@ namespace exotica
 				RNbounds.setHigh(i - 6, prob->getBounds()[i + n]);
 				RNbounds.setLow(i - 6, prob->getBounds()[i]);
 			}
-
 			ret->setRealVectorStateSpaceBounds(RNbounds);
+
 		}
 		else
 		{
@@ -113,23 +116,56 @@ namespace exotica
 		return getSubspace(0)->as<ob::SE3StateSpace>()->getBounds();
 	}
 
+	void OMPLSE3RNCompoundStateSpace::setStart(const Eigen::VectorXd &start)
+	{
+		start_ = start;
+		base_dist_ = (goal_.segment(0, 2) - start_.segment(0, 2)).norm();
+	}
+
+	void OMPLSE3RNCompoundStateSpace::setGoal(const Eigen::VectorXd &goal)
+	{
+		if (goal.rows() == realvectordim_ + 6)
+		{
+			useGoal_ = true;
+			goal_ = goal;
+		}
+	}
 	void OMPLSE3RNCompoundStateSampler::sampleUniform(ob::State *state)
 	{
-		//	First sample for the RN space
 		OMPLSE3RNCompoundStateSpace::StateType *rstate =
 				static_cast<OMPLSE3RNCompoundStateSpace::StateType*>(state);
-		const ob::RealVectorBounds &realvector_bounds =
-				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getRealVectorStateSpaceBounds();
-		const unsigned int dim = realvector_bounds.high.size();
-		for (unsigned int i = 0; i < dim; ++i)
-			rstate->RealVectorStateSpace().values[i] =
-					rng_.uniformReal(realvector_bounds.low[i], realvector_bounds.high[i]);
 
-		//	Now sample for the SE3 space
+		//	Sample for the SE3 space
+		const OMPLSE3RNCompoundStateSpace* space =
+				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_);
 		const ob::RealVectorBounds &se3_bounds =
 				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getSE3StateSpaceBounds();
 		rstate->SE3StateSpace().setXYZ(rng_.uniformReal(se3_bounds.low[0], se3_bounds.high[0]), rng_.uniformReal(se3_bounds.low[1], se3_bounds.high[1]), rng_.uniformReal(se3_bounds.low[2], se3_bounds.high[2]));
 		rstate->SE3StateSpace().rotation().setAxisAngle(0, 0, 1, rng_.uniformReal(-1.57, 1.57));
+
+		//	Sample for the RN space
+		const ob::RealVectorBounds &realvector_bounds =
+				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getRealVectorStateSpaceBounds();
+		const unsigned int dim = realvector_bounds.high.size();
+		if (space->useGoal_)
+		{
+			Eigen::VectorXd tmp(2);
+			tmp << rstate->SE3StateSpace().getX(), rstate->SE3StateSpace().getY();
+			double percentage = (space->goal_.segment(0, 2) - tmp).norm() / space->base_dist_;
+			if (percentage < space->rn_bias_percentage_->data)
+			{
+				for (unsigned int i = 0; i < dim; ++i)
+					rstate->RealVectorStateSpace().values[i] =
+							rng_.uniformReal(realvector_bounds.low[i], realvector_bounds.high[i]);
+			}
+			else
+				for (unsigned int i = 0; i < dim; ++i)
+					rstate->RealVectorStateSpace().values[i] = space->start_(i + 6);
+		}
+		else
+			for (unsigned int i = 0; i < dim; ++i)
+				rstate->RealVectorStateSpace().values[i] =
+						rng_.uniformReal(realvector_bounds.low[i], realvector_bounds.high[i]);
 	}
 
 	void OMPLSE3RNCompoundStateSampler::sampleUniformNear(ob::State *state, const ob::State *near,
@@ -184,7 +220,6 @@ namespace exotica
 		KDL::Rotation tmp =
 				KDL::Rotation::Quaternion(statetype->SE3StateSpace().rotation().x, statetype->SE3StateSpace().rotation().y, statetype->SE3StateSpace().rotation().z, statetype->SE3StateSpace().rotation().w);
 		tmp.GetEulerZYX(eigen(3), eigen(4), eigen(5));
-
 		return SUCCESS;
 	}
 

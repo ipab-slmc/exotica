@@ -142,7 +142,7 @@ bool kinematica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
 
 //!< Now the solution params:
 	solution.root_segment = "";
-	solution.base_type = "fixed";
+	base_type_ = solution.base_type = "fixed";
 	solution.root_seg_off = KDL::Frame::Identity();
 	if (handle.FirstChildElement("Root").ToElement())
 	{
@@ -152,10 +152,10 @@ bool kinematica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
 			return false;
 		}
 		solution.root_segment = handle.FirstChildElement("Root").ToElement()->Attribute("segment");
-		std::string base_type = "fixed";
+
 		if (handle.FirstChildElement("Root").ToElement()->Attribute("type"))
 		{
-			base_type = handle.FirstChildElement("Root").ToElement()->Attribute("type");
+			std::string base_type = handle.FirstChildElement("Root").ToElement()->Attribute("type");
 			if (base_type.compare("floating"))
 				base_type_ = solution.base_type = base_type;
 			else if (base_type.compare("planar"))
@@ -854,7 +854,7 @@ bool kinematica::KinematicTree::buildTree(const KDL::Tree & temp_tree, std::stri
 	}
 	else                                 //!< We first need to check if this root actually exists...
 	{
-		INFO("buildTree Function ... root is ");
+		INFO("buildTree Function ... root is "<<root);
 		KDL::SegmentMap tree_segments = temp_tree.getSegments(); //!< Map of tree segments for checking that desired segment actually exists
 		if (tree_segments.find(root) != tree_segments.end()) //!< If it exists...
 		{
@@ -862,6 +862,7 @@ bool kinematica::KinematicTree::buildTree(const KDL::Tree & temp_tree, std::stri
 		}
 		else
 		{
+			ERROR("Root "<<root<<" does not exist in the model "<<model_->getName());
 			return false; //!< Indicate failure
 		}
 	}
@@ -963,12 +964,20 @@ bool kinematica::KinematicTree::buildTree(const KDL::Tree & temp_tree, std::stri
 				}
 				robot_root_.second = 3;
 			}
-			if (!base_tree.addTree(temp_tree, root_segment->first))
+			if (base_type_.compare("fixed") == 0)
 			{
-				INDICATE_FAILURE
+				return addSegment(temp_tree.getRootSegment(), ROOT, rubbish, true, false, world, joint_map);
+			}
+			else if (base_tree.addTree(temp_tree, root_segment->first))
+			{
+				return addSegment(base_tree.getRootSegment(), ROOT, rubbish, true, false, world, joint_map);
+			}
+			else
+			{
+				ERROR("Cant initialise KDL tree for root "<<root<<" with type "<<base_type_);
 				return false;
 			}
-			return addSegment(base_tree.getRootSegment(), ROOT, rubbish, true, false, world, joint_map);
+
 		}
 
 	}
@@ -1012,13 +1021,13 @@ bool kinematica::KinematicTree::setJointLimits()
 	for (int i = 0; i < vars.size(); i++)
 	{
 
-			if (joint_map_.find(vars[i])!=joint_map_.end())
-			{
-				int index = joint_map_.at(vars[i]);
-				robot_tree_[index].joint_limits_.resize(2);
-				robot_tree_[index].joint_limits_[0] =model_->getVariableBounds(vars[i]).min_position_;
-				robot_tree_[index].joint_limits_[1] =model_->getVariableBounds(vars[i]).max_position_;
-			}
+		if (joint_map_.find(vars[i]) != joint_map_.end())
+		{
+			int index = joint_map_.at(vars[i]);
+			robot_tree_[index].joint_limits_.resize(2);
+			robot_tree_[index].joint_limits_[0] = model_->getVariableBounds(vars[i]).min_position_;
+			robot_tree_[index].joint_limits_[1] = model_->getVariableBounds(vars[i]).max_position_;
+		}
 	}
 
 	///	Manually defined floating base limits
@@ -1034,8 +1043,8 @@ bool kinematica::KinematicTree::setJointLimits()
 		robot_tree_[2].joint_limits_[1] = 10;
 
 		robot_tree_[3].joint_limits_.resize(2);
-		robot_tree_[3].joint_limits_[0] = -0;
-		robot_tree_[3].joint_limits_[1] = 0;
+		robot_tree_[3].joint_limits_[0] = 1.025;
+		robot_tree_[3].joint_limits_[1] = 1.025;
 
 		robot_tree_[4].joint_limits_.resize(2);
 		robot_tree_[4].joint_limits_[0] = -1.57;

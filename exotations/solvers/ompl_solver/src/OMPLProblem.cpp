@@ -223,7 +223,8 @@ namespace exotica
             INDICATE_FAILURE;
             return FAILURE;
         }
-
+	std::vector<std::string> jnts;
+	scenes_.begin()->second->getJointNames(jnts);
         getBounds().resize(jnts.size() * 2);
 		std::map<std::string, std::vector<double>> joint_limits =
 				scenes_.begin()->second->getSolver().getUsedJointLimits();

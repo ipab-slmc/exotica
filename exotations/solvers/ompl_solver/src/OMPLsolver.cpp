@@ -115,7 +115,8 @@ namespace exotica
 		if (ok(compound_ ? boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->EigenToOMPLState(q0, ompl_start_state.get()) : boost::static_pointer_cast<
 									OMPLStateSpace>(state_space_)->copyToOMPLState(ompl_start_state.get(), q0)))
 		{
-
+			if(compound_)
+				boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->setStart(q0);
 			ompl_simple_setup_->setStartState(ompl_start_state);
 			preSolve();
 			// Solve here
@@ -409,13 +410,6 @@ namespace exotica
 			server_->registerParam<std_msgs::String>(ns_, tmp_handle, range_);
 		}
 
-		std::string path = ros::package::getPath("ompl_solver") + "/result/" + txt + ".txt";
-		result_file_.open(path);
-		if (!result_file_.is_open())
-		{
-			ERROR("Error open "<<path);
-			return FAILURE;
-		}
         if(saveResults_->data)
         {
             std::string path = ros::package::getPath("ompl_solver") + "/result/" + txt + ".txt";
@@ -723,11 +717,8 @@ namespace exotica
 		if (ok(compound_ ? boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->EigenToOMPLState(qT, gs.get()) : boost::static_pointer_cast<
 									OMPLStateSpace>(state_space_)->copyToOMPLState(gs.get(), qT)))
 		{
-			if (!goal_state_->isSatisfied(gs.get()))
-			{
-				INDICATE_FAILURE
-				return FAILURE;
-			}
+			if(compound_)
+				boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->setGoal(qT);
 			goal_state_->setState(gs);
 			goal_state_->setThreshold(eps);
 		}

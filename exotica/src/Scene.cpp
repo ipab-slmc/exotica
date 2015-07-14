@@ -559,9 +559,8 @@ namespace exotica
 		server_->registerParam<std_msgs::Bool>(name_, tmp_handle, visual_debug_);
 		if (visual_debug_->data)
 		{
-			state_pub_ =
-					server_->advertise<moveit_msgs::DisplayRobotState>(name_ + "/disp_state", 100);
-			HIGHLIGHT_NAMED(name_, "Running in debug mode, a robot state will be published to '"<<server_->getName()<<"/"<<name_<<"/disp_state'");
+			ps_pub_ = server_->advertise<moveit_msgs::PlanningScene>(name_ + "/PlanningScene", 100);
+			HIGHLIGHT_NAMED(name_, "Running in debug mode, planning scene will be published to '"<<server_->getName()<<"/"<<name_<<"/PlanningScene'");
 		}
 		{
 			planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
@@ -829,9 +828,9 @@ namespace exotica
 
 		if (visual_debug_->data)
 		{
-			moveit_msgs::DisplayRobotState msg;
-			robot_state::robotStateToRobotStateMsg(collision_scene_->getCurrentState(), msg.state);
-			state_pub_.publish(msg);
+			moveit_msgs::PlanningScene msg;
+			collision_scene_->getPlanningScene()->getPlanningSceneMsg(msg);
+			ps_pub_.publish(msg);
 		}
 
 		return SUCCESS;
@@ -846,7 +845,7 @@ namespace exotica
 
 	EReturn Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene)
 	{
-		return collision_scene_->initialise(scene, kinematica_.getJointNames(), mode_->data,base_type_);
+		return collision_scene_->initialise(scene, kinematica_.getJointNames(), mode_->data, base_type_);
 	}
 
 	int Scene::getNumJoints()

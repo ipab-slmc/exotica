@@ -185,6 +185,7 @@ namespace exotica
 			exotica::Server_ptr server_;
 			std::string scene_name_;
 			BASE_TYPE base_type_;
+
 	};
 
 	typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
@@ -450,7 +451,7 @@ namespace exotica
 
 			///	Visual debug
 			EParam<std_msgs::Bool> visual_debug_;
-			ros::Publisher state_pub_;
+			ros::Publisher ps_pub_;
 	};
 	typedef boost::shared_ptr<Scene> Scene_ptr;
 	typedef std::map<std::string, Scene_ptr> Scene_map;

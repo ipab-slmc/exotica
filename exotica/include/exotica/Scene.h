@@ -118,7 +118,7 @@ namespace exotica
 			 * \brief	Get the moveit planning scene
 			 * @return	Moveit planning scene
 			 */
-			const planning_scene::PlanningScenePtr getPlanningScene();
+			planning_scene::PlanningScenePtr& getPlanningScene();
 
             inline std::map<std::string, fcls_ptr>& getFCLWorld()
             {

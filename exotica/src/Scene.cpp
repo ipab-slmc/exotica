@@ -101,14 +101,24 @@ namespace exotica
                 for (std::size_t j = 0; j < index_size; j++)
                 {
                     shapes::ShapeConstPtr tmp_shape;
-                    if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type != shapes::MESH)
+
+                    if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type == shapes::OCTREE)
                     {
-                        tmp_shape = boost::shared_ptr<const shapes::Shape>(shapes::createMeshFromShape(tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
+                        tmp_world->getObject(obj_id_[i])->shapes_[j]->print();
+                        tmp_shape = boost::static_pointer_cast<const shapes::Shape>(tmp_world->getObject(obj_id_[i])->shapes_[j]);
                     }
                     else
                     {
-                        tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
+                        if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type != shapes::MESH)
+                        {
+                            tmp_shape = boost::shared_ptr<const shapes::Shape>(shapes::createMeshFromShape(tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
+                        }
+                        else
+                        {
+                            tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
+                        }
                     }
+
                     if (!tmp_shape || !tmp_shape.get())
                     {
                         INDICATE_FAILURE
@@ -396,7 +406,7 @@ namespace exotica
 		return ps_->getCurrentState();
 	}
 
-	const planning_scene::PlanningScenePtr CollisionScene::getPlanningScene()
+	planning_scene::PlanningScenePtr& CollisionScene::getPlanningScene()
 	{
 		return ps_;
 	}

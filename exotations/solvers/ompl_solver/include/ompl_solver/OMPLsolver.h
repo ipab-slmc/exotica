@@ -11,9 +11,10 @@
 #include <exotica/MotionSolver.h>
 #include "ompl_solver/OMPLProblem.h"
 #include "ompl_solver/OMPLStateSpace.h"
+#include "ompl_solver/OMPLSE3RNCompoundStateSpace.h"
 #include "ompl_solver/common.h"
 #include "ompl_solver/OMPLStateValidityChecker.h"
-#include "ompl_solver/OMPLGoalSampler.h"
+#include "ompl_solver/OMPLGoalState.h"
 #include "projections/OMPLProjection.h"
 #include "projections/DMeshProjection.h"
 #include <ompl/geometric/PathSimplifier.h>
@@ -63,7 +64,7 @@ namespace exotica
 			 */
 			bool terminate();
 
-			const boost::shared_ptr<OMPLStateSpace> getOMPLStateSpace() const
+			const boost::shared_ptr<ob::StateSpace> getOMPLStateSpace() const
 			{
 				return state_space_;
 			}
@@ -132,7 +133,7 @@ namespace exotica
 			EReturn convertPath(const ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj);
 
 			EReturn getSimplifiedPath(ompl::geometric::PathGeometric &pg, Eigen::MatrixXd & traj,
-					double d);
+					ob::PlannerTerminationCondition &ptc);
 			/**
 			 * \brief Registers trajectory termination condition
 			 * @param ptc Termination criteria
@@ -171,6 +172,8 @@ namespace exotica
 			 */
 			void recordData();
 
+			bool isFlexiblePlanner();
+
 			OMPLProblem_ptr prob_; //!< Shared pointer to the planning problem.
 			OMPLProblem_ptr costs_; //!< Shared pointer to the planning problem.
 			OMPLProblem_ptr goalBias_; //!< Shared pointer to the planning problem.
@@ -183,7 +186,8 @@ namespace exotica
 			boost::shared_ptr<og::SimpleSetup> ompl_simple_setup_;
 
 			/// \brief OMPL state space specification
-			boost::shared_ptr<OMPLStateSpace> state_space_;
+			boost::shared_ptr<ob::StateSpace> state_space_;
+			bool compound_;
 
 			/// \brief Planner name
 			std::string selected_planner_;
@@ -205,6 +209,9 @@ namespace exotica
 			/// \brief	Indicate if trajectory smoother is required
 			EParam<std_msgs::Bool> smooth_;
 
+			///	\brief	Maximum step
+			EParam<std_msgs::String> range_;
+
 			///	\brief	View original solution before trajectory smoothness
 			Eigen::MatrixXd original_solution_;
 
@@ -220,6 +227,7 @@ namespace exotica
 
 			std::ofstream result_file_;
 
+			boost::shared_ptr<OMPLGoalState> goal_state_;
 			int succ_cnt_;
 	};
 

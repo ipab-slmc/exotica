@@ -8,12 +8,7 @@
 
 REGISTER_TASKMAP_TYPE("CollisionAvoidance", exotica::CollisionAvoidance);
 
-void eigen2Point(const Eigen::Vector3d & eigen, geometry_msgs::Point & point)
-{
-	point.x = eigen(0);
-	point.y = eigen(1);
-	point.z = eigen(2);
-}
+
 namespace exotica
 {
 	CollisionAvoidance::CollisionAvoidance()
@@ -193,11 +188,11 @@ namespace exotica
 				{
 					Eigen::Vector3d tmpv = vels_.segment(3 * i, 3);
 					double ct = tmpv.dot(norms[i]) / (tmpv.norm() * norms[i].norm());
-					if (ct !=ct)
+					if (ct != ct)
 					{
 						;
 					}
-					else if (ct<0)
+					else if (ct < 0)
 					{
 						discounts(i) = 0;
 						HIGHLIGHT_NAMED(effs_[i], "Opposite direction");
@@ -207,7 +202,6 @@ namespace exotica
 						discounts(i) = ct;
 						HIGHLIGHT_NAMED(effs_[i], "CosTheta "<<ct<<" Discount "<<discounts(i));
 					}
-//					getchar();
 				}
 				costs[i] = (1.0 - dists[i] / safe_range_->data);
 			}

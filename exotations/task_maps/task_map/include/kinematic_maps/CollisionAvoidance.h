@@ -56,7 +56,13 @@ namespace exotica
 			 */
 			virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
 
-		private:
+			void eigen2Point(const Eigen::Vector3d & eigen, geometry_msgs::Point & point)
+			{
+				point.x = eigen(0);
+				point.y = eigen(1);
+				point.z = eigen(2);
+			}
+//		private:
 			//	Indicate if self collision checking is required
 			EParam<std_msgs::Bool> self_;
 

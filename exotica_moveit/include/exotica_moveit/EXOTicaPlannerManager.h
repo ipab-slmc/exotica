@@ -82,15 +82,16 @@ namespace exotica
 
 			void setCompleteInitialState(const robot_state::RobotState &complete_initial_robot_state);
 
-
 			MotionSolver_ptr sol;
 			Eigen::MatrixXd solution_;
 			robot_state::RobotState start_state_;
+			robot_state::RobotState goal_state_;
 			double tau_;
 			ros::NodeHandle nh_;
 			Server_ptr ser_;
 			std::string problem_name_;
 			std::string solver_name_;
+			std::vector<std::string> used_names_;
 			std::string config_file_;
 			actionlib::SimpleActionClient<exotica_moveit::ExoticaPlanningAction> client_;
   };

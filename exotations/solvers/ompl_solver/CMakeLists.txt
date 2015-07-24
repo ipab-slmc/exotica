@@ -45,10 +45,10 @@ add_library(ompl_solver
    src/OMPLsolver.cpp
    src/OMPLProblem.cpp
    src/OMPLGoalUnion.cpp
-   src/OMPLGoal.cpp
    src/OMPLStateSpace.cpp
+   src/OMPLSE3RNCompoundStateSpace.cpp
    src/OMPLStateValidityChecker.cpp
-   src/OMPLGoalSampler.cpp
+   src/OMPLGoalState.cpp
    src/frrt/FlexiblePlanner.cpp
    src/frrt/FRRT.cpp
    src/frrt/BFRRT.cpp
@@ -65,6 +65,8 @@ target_link_libraries(ompl_solver
    ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES}
 )
 
+add_executable(OMPLEffTrahectoryNode src/OMPLEffTrajectoryNode.cpp)
+target_link_libraries(OMPLEffTrahectoryNode ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 #set_target_properties(ompl_solver PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 #set_target_properties(ompl_solver PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 

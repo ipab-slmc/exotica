@@ -13,10 +13,10 @@
   </Server>
   <IKsolver name="FRRTLocal">
     <MaxIt>100</MaxIt>
-    <MaxStep>0.1</MaxStep>
+    <MaxStep>0.2</MaxStep>
     <MultiTaskMode>0</MultiTaskMode>
     <FRRTLocal><!-- Some paramters for FRRT local solver -->
-    	<LocalMinimaThreshold>1e-4</LocalMinimaThreshold>
+    	<LocalMinimaThreshold>1e-5</LocalMinimaThreshold>
 	<IgnoreObsNearGoal>1</IgnoreObsNearGoal>
     </FRRTLocal>
   </IKsolver>
@@ -25,11 +25,17 @@
     <Scene name="LocalScene">
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!--The URDF containing the tree structure-->
-        <Root segment="Pelvis"> <!-- Optional: The root segment to use: xyz -->
+        <Root segment="Pelvis" type="fixed"> <!-- Optional: The root segment to use: xyz -->
           <vector>0.0 0.0 0.0</vector>  <!-- x y z-->
           <quaternion>1.0 0.0 0.0 0.0</quaternion> <!-- w x y z-->
         </Root>
         <Update zero_unnamed="true">  <!--compulsary: the list of joints which will be updated: IF flag not present, defaults to true-->
+          <!--joint name="world_joint/trans_x" />
+          <joint name="world_joint/trans_y" />
+          <joint name="world_joint/trans_z" />
+	  <joint name="world_joint/rot_x" />
+	  <joint name="world_joint/rot_y" />
+	  <joint name="Pelvis/virtual_joint" /-->
           <joint name="WaistRotator" />
           <joint name="WaistExtensor" />
           <joint name="WaistLateralExtensor" />
@@ -49,7 +55,7 @@
           <joint name="RightWrist" />	
         </Update>
       </Kinematica>
-      <VisualDebug>0</VisualDebug>
+      <VisualDebug>1</VisualDebug>
       <PlanningMode>Optimization</PlanningMode>
     </Scene> 
     
@@ -65,7 +71,7 @@
       <Goal> 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task>
    
-    <Map type="CollisionAvoidance" name="CollisionAvoidanceMap">
+    <Map type="GJKCollisionAvoidance" name="CollisionAvoidanceMap">
       <Scene name="LocalScene"/>
       <EndEffector ignore_unused="true">
           <limb segment="Head"></limb>
@@ -83,7 +89,7 @@
 	  <limb segment="RightForearm"></limb>
 	  <limb segment="RightPalm"></limb>
       </EndEffector>
-      <SafetyRange>0.1</SafetyRange>
+      <SafetyRange>0.2</SafetyRange>
       <HardConstrain>1</HardConstrain>
       <SelfCollision>0</SelfCollision>
       <VisualDebug>0</VisualDebug>
@@ -97,11 +103,11 @@
       <Goal>0.0</Goal>
     </Task>
 
-    <!--Map type="CoM" name="CoMMap">
+    <Map type="CoM" name="CoMMap">
       <Scene name="LocalScene"/>
       <EnableZ>false</EnableZ>
       <Debug>false</Debug>
-      <SupportRadius>0.15 0.203</SupportRadius>
+      <Bounds>-0.12 0.12 -0.12 0.12 -0.8 1.2</Bounds>
       <EndEffector ignore_unused="false">
         <limb segment="Trunk"/>
         <limb segment="LeftShoulderExtensor"/>
@@ -118,7 +124,7 @@
         <limb segment="RightPalm"/>
         <limb segment="Head"/>
 
-	<limb segment="Pelvis"/>
+	<!--limb segment="Pelvis"/>
 	<limb segment="LeftHipRotator"/>
 	<limb segment="LeftHipAdductor"/>
 	<limb segment="LeftLeg"/>
@@ -128,7 +134,7 @@
 	<limb segment="RightHipAdductor"/>
 	<limb segment="RightLeg"/>
 	<limb segment="RightShankStructure"/>
-	<limb segment="r_foot"/>
+	<limb segment="r_foot"/-->
       </EndEffector>
     </Map>
 
@@ -137,7 +143,7 @@
       <Rho>1</Rho>
       <Weights dim="1">1.0</Weights>
       <Goal>0 0</Goal>
-    </Task-->
+    </Task>
 
     <!--Map type="JointLimit" name="JointLimitMap">
       <Scene name="LocalScene"/>
@@ -149,6 +155,6 @@
       <Goal>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</Goal>
     </Task-->
     <Tolerance>1e-5</Tolerance> 
-    <W> 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</W>
+    <W>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</W>
   </IKProblem>
 </ExampleConfiguration>

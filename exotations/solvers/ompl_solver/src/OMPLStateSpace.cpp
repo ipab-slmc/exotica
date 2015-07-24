@@ -13,6 +13,7 @@ namespace exotica
 	OMPLStateSpace::OMPLStateSpace(unsigned int dim) :
 			ompl::base::RealVectorStateSpace(dim)
 	{
+		setName("OMPLStateSpace");
 	}
 
 	boost::shared_ptr<OMPLStateSpace> OMPLStateSpace::FromProblem(OMPLProblem_ptr prob)
@@ -76,7 +77,7 @@ namespace exotica
 		}
 		if (q.rows() != (int) getDimension())
 		{
-			ERROR("State vector and internal state dimension disagree");
+			ERROR("State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
 			return FAILURE;
 		}
 		memcpy(q.data(), state->as<ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)

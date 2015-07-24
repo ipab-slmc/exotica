@@ -10,6 +10,8 @@
 #include <ompl/base/ProjectionEvaluator.h>
 #include "exotica/Scene.h"
 #include "ompl_solver/OMPLStateSpace.h"
+#include "ompl_solver/OMPLSE3RNCompoundStateSpace.h"
+
 namespace exotica
 {
 	class DMeshProjection: public ompl::base::ProjectionEvaluator
@@ -21,9 +23,13 @@ namespace exotica
 							ompl::base::ProjectionEvaluator(space),
 							links_(links),
 							dist_index_(dist_index),
-							scene_(scene)
+							scene_(scene),space_(space)
 			{
-				space_ = boost::static_pointer_cast<OMPLStateSpace>(space);
+				std::string str=space_->getName();
+				if(str.compare("OMPLSE3RNCompoundStateSpace")==0)
+					compound_=true;
+				else
+					compound_=false;
 			}
 
 			~DMeshProjection()
@@ -47,7 +53,7 @@ namespace exotica
 			{
 //				HIGHLIGHT_NAMED("DMeshProjection", "Calling project");
 				Eigen::VectorXd q(space_->getDimension());
-				space_->copyFromOMPLState(state, q);
+				compound_? space_->as<OMPLSE3RNCompoundStateSpace>()->OMPLStateToEigen(state,q): space_->as<OMPLStateSpace>()->copyFromOMPLState(state,q);
 				scene_->update(q, 0);
 				std::vector<KDL::Frame> poses;
 				scene_->getPoses(links_, poses);
@@ -59,7 +65,8 @@ namespace exotica
 			std::vector<std::string> links_;
 			std::vector<std::pair<int, int> > dist_index_;
 			Scene_ptr scene_;
-			boost::shared_ptr<OMPLStateSpace> space_;
+			boost::shared_ptr<ob::StateSpace> space_;
+			bool compound_;
 	};
 }
 

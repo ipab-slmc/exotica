@@ -42,7 +42,6 @@ namespace exotica
             ERROR("Poses have not been set!");
             return FAILURE;
         }
-
         std::map<std::string, Eigen::VectorXd>::const_iterator pose = poses->find(postureName);
         if (pose != poses->end())
         {
@@ -69,7 +68,7 @@ namespace exotica
                     if(!skipUnknown)
                     {
                         ERROR("Requesting unknown joint '"<<joints[i]<<"'");
-                        return FAILURE;
+                        return WARNING;
                     }
                 }
             }
@@ -127,7 +126,11 @@ namespace exotica
             INDICATE_FAILURE;
 			return FAILURE;
 		}
-		if (x.rows() == PHI.rows())
+//        std::cout<<"Updating ";
+//        for(int i=0;i<jointMap.size();i++)
+//        	std::cout<<(*posesJointNames)[jointMap[i]]<<" ";
+//        std::cout<<std::endl;
+		if (x.rows() >= PHI.rows())
 		{
 			if (useRef)
 			{

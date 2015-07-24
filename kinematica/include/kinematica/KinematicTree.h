@@ -96,7 +96,8 @@ namespace kinematica
 					const SolutionForm_t & optimisation); //!< Variant taking urdf file
 			bool initKinematics(const KDL::Tree & temp_tree, const SolutionForm_t & optimisation); //!< Variant taking kdl tree
 			bool initKinematics(tinyxml2::XMLHandle & handle);
-            bool initKinematics(tinyxml2::XMLHandle & handle, const robot_model::RobotModelPtr & model);
+			bool initKinematics(tinyxml2::XMLHandle & handle,
+					const robot_model::RobotModelPtr & model);
 
 			/**
 			 * \brief Provides dynamic updating of the end-effector list
@@ -225,9 +226,9 @@ namespace kinematica
 			 * @param	tip_pose	Tip pose of each link
 			 * @param	base_pose	Base pose of each link
 			 */
-            bool getCoMProperties(const std::vector<int>& ids, std::vector<std::string> & segs, Eigen::VectorXd & mass,
-					std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
-					std::vector<KDL::Frame> & base_pose);
+			bool getCoMProperties(const std::vector<int>& ids, std::vector<std::string> & segs,
+					Eigen::VectorXd & mass, std::vector<KDL::Vector> & cog,
+					std::vector<KDL::Frame> & tip_pose, std::vector<KDL::Frame> & base_pose);
 
 			/**
 			 * \brief Allows traversing the tree structure by getting the parent
@@ -268,7 +269,10 @@ namespace kinematica
 			std::map<std::string, std::vector<double>> getUsedJointLimits();
 
 			KDL::Frame getRobotRootWorldTransform();
-        //private:
+
+			bool setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double> & lower,
+					const std::vector<double> & upper);
+			//private:
 			/****************** Class members ********************/
 
 			/**

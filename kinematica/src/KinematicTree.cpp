@@ -1014,6 +1014,26 @@ KDL::Frame kinematica::KinematicTree::getRobotRootWorldTransform()
 	return trans;
 }
 
+bool kinematica::KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
+		const std::vector<double> & lower, const std::vector<double> & upper)
+{
+	if (base_type_.compare("floating") != 0)
+	{
+		INDICATE_FAILURE
+		return false;
+	}
+	if (lower.size() != 6 || upper.size() != 6)
+	{
+		INDICATE_FAILURE
+		return false;
+	}
+	for (int i = 0; i < 6; i++)
+	{
+		robot_tree_[i + 1].joint_limits_[0] = lower[i];
+		robot_tree_[i + 1].joint_limits_[1] = upper[i];
+	}
+	return true;
+}
 bool kinematica::KinematicTree::setJointLimits()
 {
 	srdf::Model::VirtualJoint virtual_joint = model_->getSRDF()->getVirtualJoints()[0];
@@ -1043,8 +1063,8 @@ bool kinematica::KinematicTree::setJointLimits()
 		robot_tree_[2].joint_limits_[1] = 10;
 
 		robot_tree_[3].joint_limits_.resize(2);
-		robot_tree_[3].joint_limits_[0] = 1.025;
-		robot_tree_[3].joint_limits_[1] = 1.025;
+		robot_tree_[3].joint_limits_[0] = 0.8;
+		robot_tree_[3].joint_limits_[1] = 1.25;
 
 		robot_tree_[4].joint_limits_.resize(2);
 		robot_tree_[4].joint_limits_[0] = -1.57;

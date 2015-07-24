@@ -88,43 +88,51 @@ namespace exotica
 			}
 		}
 
-		collision_detection::WorldConstPtr tmp_world = ps_->getCollisionWorld()->getWorld();
-		std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
-		if (obj_id_.size() > 0)
-		{
-			for (std::size_t i = 0; i < obj_id_.size(); ++i)
-			{
-				std::size_t index_size = tmp_world->getObject(obj_id_[i])->shapes_.size();
-				fcl_world_[obj_id_[i]] = fcls_ptr(0);
-				geo_world_[obj_id_[i]] = geos_ptr(0);
-				trans_world_[obj_id_[i]] = std::vector<fcl::Transform3f>(0);
-				for (std::size_t j = 0; j < index_size; j++)
-				{
-					shapes::ShapeConstPtr tmp_shape;
-					if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type != shapes::MESH)
-					{
-						tmp_shape =
-								boost::shared_ptr<const shapes::Shape>(shapes::createMeshFromShape(tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
-					}
-					else
-					{
-						tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
-					}
-					if (!tmp_shape || !tmp_shape.get())
-					{
-						INDICATE_FAILURE
-						return FAILURE;
-					}
-					collision_detection::FCLGeometryConstPtr g =
-							collision_detection::createCollisionGeometry(tmp_shape, tmp_world->getObject(obj_id_[i]).get());
-					geo_world_.at(obj_id_[i]).push_back(g);
-					trans_world_.at(obj_id_[i]).push_back(fcl::Transform3f(collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
-					fcl_world_.at(obj_id_[i]).push_back(boost::shared_ptr<fcl::CollisionObject>(new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j]))));
-				}
-			}
-		}
-		return SUCCESS;
-	}
+        collision_detection::WorldConstPtr tmp_world = ps_->getCollisionWorld()->getWorld();
+        std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
+        if (obj_id_.size() > 0)
+        {
+            for (std::size_t i = 0; i < obj_id_.size(); ++i)
+            {
+                std::size_t index_size = tmp_world->getObject(obj_id_[i])->shapes_.size();
+                fcl_world_[obj_id_[i]] = fcls_ptr(0);
+                geo_world_[obj_id_[i]] = geos_ptr(0);
+                trans_world_[obj_id_[i]] = std::vector<fcl::Transform3f>(0);
+                for (std::size_t j = 0; j < index_size; j++)
+                {
+                    shapes::ShapeConstPtr tmp_shape;
+
+                    if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type == shapes::OCTREE)
+                    {
+                        tmp_world->getObject(obj_id_[i])->shapes_[j]->print();
+                        tmp_shape = boost::static_pointer_cast<const shapes::Shape>(tmp_world->getObject(obj_id_[i])->shapes_[j]);
+                    }
+                    else
+                    {
+                        if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type != shapes::MESH)
+                        {
+                            tmp_shape = boost::shared_ptr<const shapes::Shape>(shapes::createMeshFromShape(tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
+                        }
+                        else
+                        {
+                            tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
+                        }
+                    }
+
+                    if (!tmp_shape || !tmp_shape.get())
+                    {
+                        INDICATE_FAILURE
+                        return FAILURE;
+                    }
+                    collision_detection::FCLGeometryConstPtr g = collision_detection::createCollisionGeometry(tmp_shape, tmp_world->getObject(obj_id_[i]).get());
+                    geo_world_.at(obj_id_[i]).push_back(g);
+                    trans_world_.at(obj_id_[i]).push_back(fcl::Transform3f(collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
+                    fcl_world_.at(obj_id_[i]).push_back(boost::shared_ptr<fcl::CollisionObject>(new fcl::CollisionObject(g->collision_geometry_, collision_detection::transform2fcl(tmp_world->getObject(obj_id_[i])->shape_poses_[j]))  ));
+                }
+            }
+        }
+        return SUCCESS;
+    }
 
 	EReturn CollisionScene::initialise(const moveit_msgs::PlanningSceneConstPtr & msg,
 			const std::vector<std::string> & joints, std::string & mode, BASE_TYPE base_type)
@@ -440,7 +448,7 @@ namespace exotica
 		return ps_->getCurrentState();
 	}
 
-	const planning_scene::PlanningScenePtr CollisionScene::getPlanningScene()
+	planning_scene::PlanningScenePtr CollisionScene::getPlanningScene()
 	{
 		return ps_;
 	}

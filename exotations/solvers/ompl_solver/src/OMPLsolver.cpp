@@ -717,6 +717,11 @@ namespace exotica
 		if (ok(compound_ ? boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->EigenToOMPLState(qT, gs.get()) : boost::static_pointer_cast<
 									OMPLStateSpace>(state_space_)->copyToOMPLState(gs.get(), qT)))
 		{
+			if(!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
+			{
+				WARNING_NAMED(object_name_,"Invalid goal state");
+				return FAILURE;
+			}
 			if(compound_)
 				boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->setGoal(qT);
 			goal_state_->setState(gs);

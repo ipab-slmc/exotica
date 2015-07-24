@@ -199,11 +199,11 @@ namespace exotica
 
 	void Server::listParameters()
 	{
-		INFO("************* Parameters *************");
+		HIGHLIGHT("************* Parameters *************");
 		for (auto & it : params_)
 		{
-			INFO("Parameter: "<<it.first);
+			HIGHLIGHT("Parameter: "<<it.first);
 		}
-		INFO("**************************************");
+		HIGHLIGHT("**************************************");
 	}
 }

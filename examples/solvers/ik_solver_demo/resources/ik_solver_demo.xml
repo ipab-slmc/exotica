@@ -21,7 +21,7 @@
     <Scene name="IKSolverDemoScene"> <!-- Kinematic scene -->
       <Kinematica>
         <Urdf>/robot_description</Urdf> <!-- Robot URDF -->
-        <Root segment="base"> <!-- Base frame -->
+        <Root segment="base" type="fixed"> <!-- Base frame -->
           <vector>0.0 0.0 0.0</vector>
           <quaternion>1.0 0.0 0.0 0.0</quaternion>
         </Root>        

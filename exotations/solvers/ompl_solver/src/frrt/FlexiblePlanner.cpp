@@ -14,7 +14,7 @@ namespace ompl
 	{
 		FlexiblePlanner::FlexiblePlanner(const base::SpaceInformationPtr &si,
 				const std::string & name) :
-				base::Planner(si, name)
+				base::Planner(si, name), checkCnt_(0)
 		{
 			specs_.approximateSolutions = true;
 			specs_.directed = true;
@@ -77,6 +77,7 @@ namespace ompl
 		bool FlexiblePlanner::resetSceneAndGoal(const exotica::Scene_ptr & scene,
 				const Eigen::VectorXd & goal)
 		{
+			checkCnt_ = 0;
 			global_goal_.setZero(goal.size());
 			global_goal_ = goal;
 			if (!ok(local_solver_->getProblem()->setScene(scene->getPlanningScene())))
@@ -95,6 +96,7 @@ namespace ompl
 			exotica::EReturn ret = local_solver_->SolveFullSolution(qs, solution);
 			qg.resize(dim);
 			qg = solution.row(solution.rows() - 1).transpose();
+			checkCnt_ += (solution.rows() - 1);
 			return ret;
 		}
 	}

@@ -152,6 +152,7 @@ namespace exotica
 			const std::string &problem_name, const std::string &solver_name) :
 					planning_interface::PlanningContext(name, group),
 					start_state_(model),
+					goal_state_(model),
 					tau_(0.0),
 					nh_("~"),
 					problem_name_(problem_name),
@@ -187,21 +188,55 @@ namespace exotica
 	bool EXOTicaPlanningContext::solve(planning_interface::MotionPlanResponse &res)
 	{
 		ros::WallTime start_time = ros::WallTime::now();
-
+		bool fullbody = false;
+		nh_.getParam("/EXOTica/fullbody", fullbody);
 		const moveit::core::JointModelGroup* model_group =
 				planning_scene_->getRobotModel()->getJointModelGroup(request_.group_name);
 		ROS_ERROR_STREAM("Move group: '"<< model_group->getName() <<"'");
-		std::vector<std::string> names = model_group->getJointModelNames();
+		std::vector<std::string> names = model_group->getVariableNames();
 
-		Eigen::VectorXd q0 = Eigen::VectorXd::Zero(names.size()), qT =
-				Eigen::VectorXd::Zero(names.size());
-		std::string tmp_name = "";
 		for (int i = 0; i < names.size(); i++)
+			goal_state_.setVariablePosition(getMotionPlanRequest().goal_constraints[0].joint_constraints[i].joint_name, getMotionPlanRequest().goal_constraints[0].joint_constraints[i].position);
+		goal_state_.update(true);
+		used_names_ = names;
+		Eigen::VectorXd q0, qT;
+		std::string tmp_name = "";
+		if (fullbody)
 		{
-			q0(i) = *start_state_.getJointPositions(names[i]);
-			qT(i) = getMotionPlanRequest().goal_constraints[0].joint_constraints[i].position;
-			tmp_name = tmp_name + " " + names[i];
+			int size = names.size() - 1;
+			q0.setZero(size);
+			qT.setZero(size);
+			for (int i = 0; i < 3; i++)
+			{
+				q0(i) = start_state_.getVariablePosition(names[i]);
+				qT(i) = goal_state_.getVariablePosition(names[i]);
+			}
+			KDL::Rotation rot_s =
+					KDL::Rotation::Quaternion(start_state_.getVariablePosition(names[3]), start_state_.getVariablePosition(names[4]), start_state_.getVariablePosition(names[5]), start_state_.getVariablePosition(names[6]));
+			KDL::Rotation rot_g =
+					KDL::Rotation::Quaternion(goal_state_.getVariablePosition(names[3]), goal_state_.getVariablePosition(names[4]), goal_state_.getVariablePosition(names[5]), goal_state_.getVariablePosition(names[6]));
+			rot_s.GetEulerZYX(q0(3), q0(4), q0(5));
+			rot_g.GetEulerZYX(qT(3), qT(4), qT(5));
+			for (int i = 6; i < size; i++)
+			{
+				q0(i) = start_state_.getVariablePosition(names[i + 1]);
+				tmp_name = tmp_name + " " + names[i];
+				qT(i) = goal_state_.getVariablePosition(names[i + 1]);
+			}
 		}
+		else
+		{
+			int size = names.size();
+			q0.setZero(size);
+			qT.setZero(size);
+			for (int i = 0; i < size; i++)
+			{
+				q0(i) = start_state_.getVariablePosition(names[i]);
+				tmp_name = tmp_name + " " + names[i];
+				qT(i) = goal_state_.getVariablePosition(names[i]);
+			}
+		}
+
 		ROS_ERROR_STREAM("Joints="<<tmp_name);
 		ROS_ERROR_STREAM("q0="<<q0.transpose());
 		ROS_ERROR_STREAM("qT="<<qT.transpose());
@@ -280,9 +315,30 @@ namespace exotica
 				planning_scene_->getRobotModel()->getJointModelGroup(request_.group_name);
 		traj->clear();
 		moveit::core::RobotState state = start_state_;
+		bool fullbody = false;
+		nh_.getParam("/EXOTica/fullbody", fullbody);
 		for (int t = 0; t < solution.rows(); t++)
 		{
-			state.setJointGroupPositions(model_group, solution.row(t));
+			if (fullbody)
+			{
+				for (int i = 0; i < 3; i++)
+					state.setVariablePosition(used_names_[i], solution(t, i));
+				KDL::Rotation rot =
+						KDL::Rotation::EulerZYX(solution(t, 3), solution(t, 4), solution(t, 5));
+				Eigen::VectorXd quat(4);
+				rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
+				state.setVariablePosition(used_names_[3], quat(0));
+				state.setVariablePosition(used_names_[4], quat(1));
+				state.setVariablePosition(used_names_[5], quat(2));
+				state.setVariablePosition(used_names_[6], quat(3));
+				for (int i = 7; i < used_names_.size(); i++)
+					state.setVariablePosition(used_names_[i], solution(t, i-1));
+			}
+			else
+			{
+				for (int i = 0; i < used_names_.size(); i++)
+					state.setVariablePosition(used_names_[i], solution(t, i));
+			}
 			state.update();
 			traj->addSuffixWayPoint(state, tau_);
 		}

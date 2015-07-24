@@ -7,28 +7,29 @@ namespace exotica
 
 	}
 
-    EReturn PlanningProblem::reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem)
-    {
-        ERROR("This has to implemented in the derived class!");
-        return FAILURE;
-    }
+	EReturn PlanningProblem::reinitialise(rapidjson::Document& document,
+			boost::shared_ptr<PlanningProblem> problem)
+	{
+		ERROR("This has to implemented in the derived class!");
+		return FAILURE;
+	}
 
-    std::string PlanningProblem::print(std::string prepend)
-    {
-        std::string ret = Object::print(prepend);
-        ret+="\n"+prepend+"  Task definitions:";
-        for(auto& it : task_defs_) ret+="\n"+it.second->print(prepend+"    ");
-        return ret;
-    }
+	std::string PlanningProblem::print(std::string prepend)
+	{
+		std::string ret = Object::print(prepend);
+		ret += "\n" + prepend + "  Task definitions:";
+		for (auto& it : task_defs_)
+			ret += "\n" + it.second->print(prepend + "    ");
+		return ret;
+	}
 
-    EReturn PlanningProblem::initBase(tinyxml2::XMLHandle & handle,
-            const Server_ptr & server)
-    {
-        poses.reset(new std::map<std::string,Eigen::VectorXd>());
-        posesJointNames.reset(new std::vector<std::string>());
-        knownMaps_["PositionConstraint"]="Distance";
-        knownMaps_["QuatConstraint"]="Orientation";
-        knownMaps_["PostureConstraint"]="Identity";
+	EReturn PlanningProblem::initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server)
+	{
+		poses.reset(new std::map<std::string, Eigen::VectorXd>());
+		posesJointNames.reset(new std::vector<std::string>());
+		knownMaps_["PositionConstraint"] = "Distance";
+		knownMaps_["QuatConstraint"] = "Orientation";
+		knownMaps_["PostureConstraint"] = "Identity";
 
         startState.resize(0);
         endState.resize(0);
@@ -262,25 +263,25 @@ namespace exotica
 		if (!server)
 			return FAILURE;
 
-        originalMaps_=task_maps_;
-        originalDefs_=task_defs_;
+		originalMaps_ = task_maps_;
+		originalDefs_ = task_defs_;
 
 		return ok(ret_value) ? initDerived(handle) : ret_value;
 	}
 
-    void PlanningProblem::clear(bool keepOriginals)
-    {
-        if(keepOriginals)
-        {
-            task_maps_=originalMaps_;
-            task_defs_=originalDefs_;
-        }
-        else
-        {
-            task_maps_.clear();
-            task_defs_.clear();
-        }
-    }
+	void PlanningProblem::clear(bool keepOriginals)
+	{
+		if (keepOriginals)
+		{
+			task_maps_ = originalMaps_;
+			task_defs_ = originalDefs_;
+		}
+		else
+		{
+			task_maps_.clear();
+			task_defs_.clear();
+		}
+	}
 
 	EReturn PlanningProblem::update(Eigen::VectorXdRefConst x, const int t)
 	{
@@ -290,11 +291,9 @@ namespace exotica
 			if (!ok(it->second->update(x)))
 			{
 				INDICATE_FAILURE
-				;
 				return FAILURE;
 			}
 		}
-
 		// Update the Task maps
 
 #ifdef EXOTICA_DEBUG_MODE
@@ -312,9 +311,7 @@ namespace exotica
 				INDICATE_FAILURE
 				return FAILURE;
 			}
-
 		}
-
 		return SUCCESS;
 	}
 

@@ -30,16 +30,16 @@ namespace ompl
 			ompl::tools::SelfConfig sc(si_, getName());
 			sc.configurePlannerRange(maxDistance_);
 			if (!tStart_)
-				tStart_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion*>(si_->getStateSpace()));
+				tStart_.reset(tools::SelfConfig::getDefaultNearestNeighbors<FM_RRTConnect*>(si_->getStateSpace()));
 			if (!tGoal_)
-				tGoal_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion*>(si_->getStateSpace()));
+				tGoal_.reset(tools::SelfConfig::getDefaultNearestNeighbors<FM_RRTConnect*>(si_->getStateSpace()));
 			tStart_->setDistanceFunction(boost::bind(&FRRTConnect::distanceFunction, this, _1, _2));
 			tGoal_->setDistanceFunction(boost::bind(&FRRTConnect::distanceFunction, this, _1, _2));
 		}
 
 		void FRRTConnect::freeMemory()
 		{
-			std::vector<Motion*> motions;
+			std::vector<FM_RRTConnect*> motions;
 			if (tStart_)
 			{
 				tStart_->list(motions);
@@ -79,10 +79,10 @@ namespace ompl
 		}
 
 		FRRTConnect::GrowState FRRTConnect::growTree(TreeData &tree, TreeGrowingInfo &tgi,
-				Motion *rmotion)
+				FM_RRTConnect *rmotion)
 		{
 			/* find closest state in the tree */
-			Motion *nmotion = tree->nearest(rmotion);
+			FM_RRTConnect *nmotion = tree->nearest(rmotion);
 
 			/* assume we can reach the state we go towards */
 			bool reach = true;
@@ -97,7 +97,7 @@ namespace ompl
 				reach = false;
 			}
 
-			Motion *last_valid_motion = new Motion(si_);
+			FM_RRTConnect *last_valid_motion = new FM_RRTConnect(si_);
 			std::pair<ompl::base::State*, double> last_valid(last_valid_motion->state, 0);
 
 			// if we are in the start tree, we just check the motion like we normally do;
@@ -108,24 +108,16 @@ namespace ompl
 										&& si_->checkMotion(dstate, nmotion->state, last_valid);
 
 			//	Give local solver a try
-			Motion *motion = new Motion(si_);
+			FM_RRTConnect *motion = new FM_RRTConnect(si_);
 			if (!validMotion)
 			{
 				Eigen::VectorXd q_goal(si_->getStateDimension());
-				memcpy(q_goal.data(),
-						tgi.start ? dstate->as<ompl::base::RealVectorStateSpace::StateType>()->values : nmotion->state->as<
-								ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
-						* q_goal.rows());
-
+				tgi.start ? copyStateToEigen(dstate, q_goal) : copyStateToEigen(nmotion->state, q_goal);
 				local_map_->jointRef = q_goal;
-				local_solver_->getProblem()->setTau(gTau_->data);
-				Motion * s_motion = new Motion(si_);
+				local_solver_->getProblem()->setTau(lTau_->data);
+				FM_RRTConnect * s_motion = new FM_RRTConnect(si_);
 				si_->copyState(s_motion->state, (tgi.start ? nmotion->state : dstate));
 				if (localSolve(s_motion, last_valid_motion->state, motion))
-				{
-					validMotion = true;
-				}
-				else if (motion->internal_path)
 				{
 					validMotion = true;
 				}
@@ -164,7 +156,7 @@ namespace ompl
 
 			while (const base::State *st = pis_.nextStart())
 			{
-				Motion *motion = new Motion(si_);
+				FM_RRTConnect *motion = new FM_RRTConnect(si_);
 				si_->copyState(motion->state, st);
 				motion->root = motion->state;
 				tStart_->add(motion);
@@ -191,7 +183,7 @@ namespace ompl
 			TreeGrowingInfo tgi;
 			tgi.xstate = si_->allocState();
 
-			Motion *rmotion = new Motion(si_);
+			FM_RRTConnect *rmotion = new FM_RRTConnect(si_);
 			base::State *rstate = rmotion->state;
 			bool startTree = true;
 			bool solved = false;
@@ -209,7 +201,7 @@ namespace ompl
 							tGoal_->size() == 0 ? pis_.nextGoal(ptc) : pis_.nextGoal();
 					if (st)
 					{
-						Motion *motion = new Motion(si_);
+						FM_RRTConnect *motion = new FM_RRTConnect(si_);
 						si_->copyState(motion->state, st);
 						motion->root = motion->state;
 						tGoal_->add(motion);
@@ -233,7 +225,7 @@ namespace ompl
 				if (gs != TRAPPED)
 				{
 					/* remember which motion was just added */
-					Motion *addedMotion = tgi.xmotion;
+					FM_RRTConnect *addedMotion = tgi.xmotion;
 
 					/* attempt to connect trees */
 
@@ -246,8 +238,8 @@ namespace ompl
 					while (gsc == ADVANCED)
 						gsc = growTree(otherTree, tgi, rmotion);
 
-					Motion *startMotion = startTree ? tgi.xmotion : addedMotion;
-					Motion *goalMotion = startTree ? addedMotion : tgi.xmotion;
+					FM_RRTConnect *startMotion = startTree ? tgi.xmotion : addedMotion;
+					FM_RRTConnect *goalMotion = startTree ? addedMotion : tgi.xmotion;
 
 					/* if we connected the trees in a valid way (start and goal pair is valid)*/
 					if (gsc == REACHED
@@ -264,24 +256,22 @@ namespace ompl
 						connectionPoint_ = std::make_pair(startMotion->state, goalMotion->state);
 
 						/* construct the solution path */
-						Motion *solution = startMotion;
-						std::vector<Motion*> mpath1;
+						FM_RRTConnect *solution = startMotion;
+						std::vector<FM_RRTConnect*> mpath1;
 						while (solution != NULL)
 						{
 							if (solution->internal_path != nullptr)
 							{
 								for (int i = solution->internal_path->rows() - 1; i > 0; i--)
 								{
-									Motion *local_motion = new Motion(si_);
+									FM_RRTConnect *local_motion = new FM_RRTConnect(si_);
 									Eigen::VectorXd tmp = solution->internal_path->row(i);
-									memcpy(local_motion->state->as<
-											ompl::base::RealVectorStateSpace::StateType>()->values, tmp.data(), sizeof(double)
-											* (int) si_->getStateDimension());
+									copyEigenToState(tmp,local_motion->state);
 									mpath1.push_back(local_motion);
 								}
 								if (solution->inter_state != NULL)
 								{
-									Motion *local_motion = new Motion(si_);
+									FM_RRTConnect *local_motion = new FM_RRTConnect(si_);
 									si_->copyState(local_motion->state, solution->inter_state);
 									mpath1.push_back(local_motion);
 								}
@@ -292,23 +282,21 @@ namespace ompl
 						}
 
 						solution = goalMotion;
-						std::vector<Motion*> mpath2;
+						std::vector<FM_RRTConnect*> mpath2;
 						while (solution != NULL)
 						{
 							if (solution->internal_path != nullptr)
 							{
 								for (int i = solution->internal_path->rows() - 1; i > 0; i--)
 								{
-									Motion *local_motion = new Motion(si_);
+									FM_RRTConnect *local_motion = new FM_RRTConnect(si_);
 									Eigen::VectorXd tmp = solution->internal_path->row(i);
-									memcpy(local_motion->state->as<
-											ompl::base::RealVectorStateSpace::StateType>()->values, tmp.data(), sizeof(double)
-											* (int) si_->getStateDimension());
+									copyEigenToState(tmp,local_motion->state);
 									mpath2.push_back(local_motion);
 								}
 								if (solution->inter_state != NULL)
 								{
-									Motion *local_motion = new Motion(si_);
+									FM_RRTConnect *local_motion = new FM_RRTConnect(si_);
 									si_->copyState(local_motion->state, solution->inter_state);
 									mpath2.push_back(local_motion);
 								}
@@ -346,7 +334,7 @@ namespace ompl
 		{
 			Planner::getPlannerData(data);
 
-			std::vector<Motion*> motions;
+			std::vector<FM_RRTConnect*> motions;
 			if (tStart_)
 				tStart_->list(motions);
 
@@ -379,14 +367,11 @@ namespace ompl
 			data.addEdge(data.vertexIndex(connectionPoint_.first), data.vertexIndex(connectionPoint_.second));
 		}
 
-		bool FRRTConnect::localSolve(Motion *sm, base::State *is, Motion *gm)
+		bool FRRTConnect::localSolve(FM_RRTConnect *sm, base::State *is, FM_RRTConnect *gm)
 		{
 			int dim = (int) si_->getStateDimension();
 			Eigen::VectorXd qs(dim), qg(dim);
-			memcpy(qs.data(),
-					is == NULL ? sm->state->as<ompl::base::RealVectorStateSpace::StateType>()->values : is->as<
-							ompl::base::RealVectorStateSpace::StateType>()->values, sizeof(double)
-					* qs.rows());
+			copyStateToEigen(is == NULL ? sm->state : is, qs);
 			Eigen::MatrixXd local_path;
 			exotica::EReturn ret = FlexiblePlanner::localSolve(qs, qg, local_path);
 			if (ok(ret))
@@ -400,8 +385,7 @@ namespace ompl
 				gm->internal_path.reset(new Eigen::MatrixXd(local_path));
 				gm->parent = sm;
 				qg = local_path.row(local_path.rows() - 1).transpose();
-				memcpy(gm->state->as<ompl::base::RealVectorStateSpace::StateType>()->values, qg.data(), sizeof(double)
-						* qg.rows());
+				copyEigenToState(qg, gm->state);
 			}
 			return ret == exotica::SUCCESS ? true : false;
 		}

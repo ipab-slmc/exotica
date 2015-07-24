@@ -74,14 +74,14 @@ namespace exotica
 				const moveit::core::JointModelGroup* model_group =
 						server_->getModel("robot_description")->getJointModelGroup(group);
 				moveit::core::JointBoundsVector b = model_group->getActiveJointModelsBounds();
-				exotica::OMPLProblem_ptr tmp =
-						boost::static_pointer_cast<exotica::OMPLProblem>(problem_);
-				tmp->getBounds().resize(b.size() * 2);
-				for (int i = 0; i < b.size(); i++)
-				{
-					tmp->getBounds()[i] = (*b[i])[0].min_position_;
-					tmp->getBounds()[i + b.size()] = (*b[i])[0].max_position_;
-				}
+//				exotica::OMPLProblem_ptr tmp =
+//						boost::static_pointer_cast<exotica::OMPLProblem>(problem_);
+//				tmp->getBounds().resize(b.size() * 2);
+//				for (int i = 0; i < b.size(); i++)
+//				{
+//					tmp->getBounds()[i] = (*b[i])[0].min_position_;
+//					tmp->getBounds()[i + b.size()] = (*b[i])[0].max_position_;
+//				}
 				if (!exotica::ok(boost::static_pointer_cast<exotica::OMPLsolver>(solver_)->specifyProblem(probs[0], NULL, probs[1], NULL)))
 				{
 					INDICATE_FAILURE
@@ -110,7 +110,8 @@ namespace exotica
 		}
 //		HIGHLIGHT_NAMED("MoveitInterface", "Using Solver "<<solver_->object_name_<<"["<<solver_->type()<<"], Problem "<<problem_->object_name_<<"["<<problem_->type()<<"].");
 
-		for (int i = 0; i < 50; i++)
+		int benchmark_cnt = 1;
+		for (int i = 0; i < benchmark_cnt; i++)
 		{
 			if (solver_->type().compare("exotica::OMPLsolver") == 0)
 			{
@@ -119,6 +120,8 @@ namespace exotica
 
 				Eigen::VectorXd qT;
 				exotica::vectorExoticaToEigen(goal->qT, qT);
+				int dim = 0;
+				goal_bias_map_->taskSpaceDim(dim);
 				goal_bias_map_->jointRef = qT;
 				goal_map_->jointRef = qT;
 				ss->setGoalState(qT, 1e-4);
@@ -148,9 +151,12 @@ namespace exotica
 				fb_.solving_time_ = res_.planning_time_ =
 						ros::Duration(ros::Time::now() - start).toSec();
 				exotica::matrixEigenToExotica(solution, res_.solution_);
-				as_.setSucceeded(res_);
 			}
-			HIGHLIGHT_NAMED("OMPL Benchmark", "Solving time "<<i<<"/50 "<< (ok(found) ? "Succeed":"Failed"));
+			else
+				res_.succeeded_ = false;
+			as_.setSucceeded(res_);
+			if (benchmark_cnt > 1)
+				HIGHLIGHT_NAMED("OMPL Benchmark", "Solving time "<<i<<"/ "<<benchmark_cnt<< (ok(found) ? "Succeed":"Failed"));
 		}
 		return res_.succeeded_;
 	}

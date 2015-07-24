@@ -47,71 +47,48 @@ namespace ompl
 				{
 					return maxDistance_;
 				}
+				virtual void setup();
+			protected:
+				class FM_RRTConnect: public FlexibleMotion
+				{
+					public:
+						/*
+						 * \brief	Constructor
+						 */
+						FM_RRTConnect() :
+							FlexibleMotion(), root(NULL),parent(NULL)
+						{
+						}
 
+						FM_RRTConnect(const base::SpaceInformationPtr &si) :
+							FlexibleMotion(si), root(NULL),parent(NULL)
+						{
+						}
+						/*
+						 * \brief	Destructor
+						 */
+						~FM_RRTConnect()
+						{
+
+						}
+						FM_RRTConnect *parent;
+						const base::State *root;
+				};
 				/** \brief Set a different nearest neighbors datastructure */
 				template<template<typename T> class NN>
 				void setNearestNeighbors()
 				{
-					tStart_.reset(new NN<Motion*>());
-					tGoal_.reset(new NN<Motion*>());
+					tStart_.reset(new NN<FM_RRTConnect*>());
+					tGoal_.reset(new NN<FM_RRTConnect*>());
 				}
-
-				virtual void setup();
-			protected:
-
-				/** \brief Representation of a motion */
-				class Motion
-				{
-					public:
-
-						Motion() :
-										root(NULL),
-										state(NULL),
-										inter_state(NULL),
-										parent(NULL),
-										global_valid_(true)
-						{
-						}
-
-						Motion(const base::SpaceInformationPtr &si) :
-										root(NULL),
-										state(si->allocState()),
-										inter_state(NULL),
-										parent(NULL),
-										global_valid_(true)
-						{
-						}
-
-						~Motion()
-						{
-						}
-
-						bool isChecked(const Motion *motion)
-						{
-							return checked_.find(motion) != checked_.end() ? true : false;
-						}
-						const base::State *root;
-						base::State *state;
-						///	Internal state
-						base::State *inter_state;
-						///	The parent node
-						Motion *parent;
-						///	The internal flexible path
-						boost::shared_ptr<Eigen::MatrixXd> internal_path;
-						bool global_valid_;
-					private:
-						std::map<const Motion*, bool> checked_;
-
-				};
-
 				/** \brief A nearest-neighbor datastructure representing a tree of motions */
-				typedef boost::shared_ptr<NearestNeighbors<Motion*> > TreeData;
+				typedef boost::shared_ptr<NearestNeighbors<FM_RRTConnect*> > TreeData;
 
 				/** \brief Information attached to growing a tree of motions (used internally) */
 				struct TreeGrowingInfo
 				{
 						base::State *xstate;
-						Motion *xmotion;
+						FM_RRTConnect *xmotion;
 						bool start;
 				};
 
@@ -129,14 +106,8 @@ namespace ompl
 				/** \brief Free the memory allocated by this planner */
 				void freeMemory();
 
-				/** \brief Compute distance between motions (actually distance between contained states) */
-				double distanceFunction(const Motion *a, const Motion *b) const
-				{
-					return si_->distance(a->state, b->state);
-				}
-
 				/** \brief Grow a tree towards a random state */
-				GrowState growTree(TreeData &tree, TreeGrowingInfo &tgi, Motion *rmotion);
+				GrowState growTree(TreeData &tree, TreeGrowingInfo &tgi, FM_RRTConnect *rmotion);
 
 				/** \brief The start tree */
 				TreeData tStart_;
@@ -150,7 +121,7 @@ namespace ompl
 				/** \brief The pair of states in each tree connected during planning.  Used for PlannerData computation */
 				std::pair<base::State*, base::State*> connectionPoint_;
 			private:
-				bool localSolve(Motion *sm, base::State *is, Motion *gm);
+				bool localSolve(FM_RRTConnect *sm, base::State *is, FM_RRTConnect *gm);
 		};
 	}	//	Geometric namespace
 }	//	OMPL namespace

@@ -84,101 +84,59 @@ namespace ompl
 					return maxDist_;
 				}
 
-				template<template<typename T> class NN>
-				void setNearestNeighbors()
-				{
-					nn_.reset(new NN<Motion*>());
-				}
-
 				/*
 				 * \brief	Set up the planner
 				 */
 				virtual void setup();
 
 			protected:
-				/*
-				 * \brief	Motion class. This is where all the planner specific parameters are defined
-				 */
-				class Motion
+				class FM_RRT: public FlexibleMotion
 				{
 					public:
 						/*
 						 * \brief	Constructor
 						 */
-						Motion() :
-								state(NULL), inter_state(NULL), parent(NULL), global_valid_(true)
+						FM_RRT() :
+								FlexibleMotion(), parent(NULL)
 						{
 						}
 
-						Motion(const base::SpaceInformationPtr &si) :
-										state(si->allocState()),
-										inter_state(NULL),
-										parent(NULL),
-										global_valid_(true)
+						FM_RRT(const base::SpaceInformationPtr &si) :
+								FlexibleMotion(si), parent(NULL)
 						{
-
 						}
 						/*
 						 * \brief	Destructor
 						 */
-						~Motion()
+						~FM_RRT()
 						{
 
 						}
-
-						void setGlobalInvalid()
-						{
-							global_valid_ = false;
-						}
-
-						bool isGlobalValid()
-						{
-							return global_valid_;
-						}
-
-						///	The OMPL state
-						base::State *state;
-						///	Internal state
-						base::State *inter_state;
-						///	The parent node
-						Motion *parent;
-						///	The internal flexible path
-						boost::shared_ptr<Eigen::MatrixXd> internal_path;
-					private:
-						bool global_valid_;
+						FM_RRT *parent;
 				};
-
+				template<template<typename T> class NN>
+				void setNearestNeighbors()
+				{
+					nn_.reset(new NN<FM_RRT*>());
+				}
 				/*
 				 * \brief	Release memory
 				 */
 				void freeMemory();
 
-				/*
-				 * \brief	Compute distance between motions (actually distance between contained states)
-				 * @param	a		Motion a
-				 * @param	b		Motion b
-				 * @return	Distance between a and b
-				 */
-				double distanceFunction(const Motion *a, const Motion *b) const
-				{
-					double d=si_->distance(a->state, b->state);
-					return d;
-				}
-
 				///	The tree
-				boost::shared_ptr<NearestNeighbors<Motion*> > nn_;
+				boost::shared_ptr<NearestNeighbors<FM_RRT*> > nn_;
 				/// Goal bias
 				double goalBias_;
 				///	Maximum distance
 				double maxDist_;
 				///	Random number generator
 				///	Last goal
-				Motion *lastGoalMotion_;
+				FlexibleMotion *lastGoalMotion_;
 
 			private:
 				///	Local solver
-				bool localSolve(Motion *sm, base::State *is, Motion *gm);
-
+				bool localSolve(FM_RRT *sm, base::State *is, FM_RRT *gm);
 
 				///	For analyse
 				std::vector<int> try_cnt_;

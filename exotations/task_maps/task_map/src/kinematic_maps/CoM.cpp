@@ -104,10 +104,12 @@ namespace exotica
 		int N = mass_.rows(), i;
 		KDL::Vector com;
 		double M = mass_.sum();
-
+		KDL::Frame root_tf = scene_->getRobotRootWorldTransform();
+		root_tf.M = KDL::Rotation::Identity();
 		for (i = 0; i < N; i++)
 		{
 			KDL::Frame tmp_frame(KDL::Vector(EFFPHI(3 * i), EFFPHI(3 * i + 1), EFFPHI(3 * i + 2)));
+			tmp_frame = tmp_frame * (root_tf.Inverse());
 			com = com + mass_[i] * tmp_frame.p;
 			if (debug_->data)
 			{
@@ -125,10 +127,9 @@ namespace exotica
 		PHI.setZero();
 		for (int i = 0; i < dim_; i++)
 		{
-			if (fabs(com[i]) > support_r_->data[i])
+			if (fabs(com[i]) > fabs(bounds_->data[2 * i]))
 			{
 				PHI(i) = com[i];
-				WARNING_NAMED(object_name_, i<<" axis is out of balance, error "<<com[i]<<">"<<support_r_->data[i]);
 			}
 		}
 		if (debug_->data)
@@ -172,12 +173,12 @@ namespace exotica
 			dim_ = 3;
 		else
 			dim_ = 2;
-		tmp_handle = handle.FirstChildElement("SupportRadius");
-		if (!ok(server_->registerParam<exotica::Vector>(ns_, tmp_handle, support_r_)))
+		tmp_handle = handle.FirstChildElement("Bounds");
+		if (!ok(server_->registerParam<exotica::Vector>(ns_, tmp_handle, bounds_)))
 		{
-			support_r_->data.resize(dim_);
+			bounds_->data.resize(dim_);
 			for (int i = 0; i < dim_; i++)
-				support_r_->data[i] = 0;
+				bounds_->data[i] = 0;
 		}
 		tmp_handle = handle.FirstChildElement("Debug");
 		server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, debug_);
@@ -204,6 +205,8 @@ namespace exotica
 			goal_marker_ = COM_marker_;
 			goal_marker_.color.r = 0;
 			goal_marker_.color.g = 1;
+
+			com_marker_.header.frame_id = COM_marker_.header.frame_id = goal_marker_.header.frame_id = scene_->getRootName();
 		}
 
 		com_pub_ = server_->advertise<visualization_msgs::Marker>(object_name_ + "coms_marker", 1);

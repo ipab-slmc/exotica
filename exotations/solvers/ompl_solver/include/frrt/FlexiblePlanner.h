@@ -56,9 +56,89 @@ namespace ompl
 				///	Random number generator
 				RNG rng_;
 
+				int checkCnt_;
 			protected:
+				bool copyStateToEigen(const ob::State *state, Eigen::VectorXd & eigen)
+				{
+					std::string spacename = si_->getStateSpace()->getName();
+					if (spacename.compare("OMPLSE3RNCompoundStateSpace") == 0)
+					{
+						return exotica::ok(si_->getStateSpace()->as<
+								exotica::OMPLSE3RNCompoundStateSpace>()->OMPLStateToEigen(state, eigen));
+					}
+					else if (spacename.compare("OMPLStateSpace") == 0)
+					{
+						return exotica::ok(si_->getStateSpace()->as<exotica::OMPLStateSpace>()->copyFromOMPLState(state, eigen));
+					}
+					else
+					{
+						ERROR("Can not convert state space "<<spacename);
+					}
+					return false;
+				}
+				bool copyEigenToState(const Eigen::VectorXd & eigen, ob::State *state)
+				{
+					std::string spacename = si_->getStateSpace()->getName();
+					if (spacename.compare("OMPLSE3RNCompoundStateSpace") == 0)
+					{
+						return exotica::ok(si_->getStateSpace()->as<
+								exotica::OMPLSE3RNCompoundStateSpace>()->EigenToOMPLState(eigen, state));
+					}
+					else if (spacename.compare("OMPLStateSpace") == 0)
+					{
+						return exotica::ok(si_->getStateSpace()->as<exotica::OMPLStateSpace>()->copyToOMPLState(state, eigen));
+					}
+					else
+					{
+						ERROR("Can not convert state space "<<spacename);
+					}
+					return false;
+				}
+				class FlexibleMotion
+				{
+					public:
+						/*
+						 * \brief	Constructor
+						 */
+						FlexibleMotion() :
+								state(NULL), inter_state(NULL)
+						{
+						}
+
+						FlexibleMotion(const base::SpaceInformationPtr &si) :
+								state(si->allocState()), inter_state(NULL)
+						{
+						}
+						/*
+						 * \brief	Destructor
+						 */
+						~FlexibleMotion()
+						{
+
+						}
+
+						///	The OMPL state
+						base::State *state;
+						///	Internal state
+						base::State *inter_state;
+						///	The internal flexible path
+						boost::shared_ptr<Eigen::MatrixXd> internal_path;
+				};
+
+				/*
+				 * \brief	Compute distance between motions (actually distance between contained states)
+				 * @param	a		Motion a
+				 * @param	b		Motion b
+				 * @return	Distance between a and b
+				 */
+				double distanceFunction(const FlexibleMotion *a, const FlexibleMotion *b) const
+				{
+					double d = si_->distance(a->state, b->state);
+					return d;
+				}
 				///	Local solver
-				exotica::EReturn localSolve(const Eigen::VectorXd & qs, Eigen::VectorXd & qg, Eigen::MatrixXd & solution);
+				exotica::EReturn localSolve(const Eigen::VectorXd & qs, Eigen::VectorXd & qg,
+						Eigen::MatrixXd & solution);
 				exotica::Server_ptr ser_;
 				exotica::IKsolver_ptr local_solver_;
 				boost::shared_ptr<exotica::Identity> local_map_;

@@ -69,7 +69,7 @@ namespace exotica
 			 * @param	xyz			Pelvis XYZ position bounds
 			 * @param	dist		Pelvis maximum allowed angle from z-axis
 			 */
-			void setSE3StateSpaceBounds(const ob::RealVectorBounds &xyz, const double dist = 0);
+			void setSE3StateSpaceBounds(const ob::RealVectorBounds &xyz, double dist = 0);
 			const ob::RealVectorBounds & getSE3StateSpaceBounds() const;
 			const double getSE3StateSpaceRobotationBound() const;
 			void setStart(const Eigen::VectorXd &start);
@@ -79,6 +79,7 @@ namespace exotica
 			Eigen::VectorXd goal_;
 			double base_dist_;
 			EParam<std_msgs::Float64> rn_bias_percentage_;
+			ob::RealVectorBounds SO3Bounds_;
 			bool useGoal_;
 		private:
 			Server_ptr server_;

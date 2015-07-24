@@ -11,7 +11,11 @@ namespace exotica
 
 	OMPLSE3RNCompoundStateSpace::OMPLSE3RNCompoundStateSpace(unsigned int dim,
 			const Server_ptr &server) :
-			ob::CompoundStateSpace(), realvectordim_(dim), server_(server)
+					ob::CompoundStateSpace(),
+					realvectordim_(dim),
+					server_(server),
+					SO3Bounds_(3),
+					useGoal_(false)
 	{
 		setName("OMPLSE3RNCompoundStateSpace");
 		addSubspace(ob::StateSpacePtr(new ob::SE3StateSpace()), 10.0);
@@ -31,9 +35,11 @@ namespace exotica
 				}
 			}
 		}
-		if (!ok(server_->getParam(server_->getName() + "/SE3RNSpaceRNBias", rn_bias_percentage_)))
-			rn_bias_percentage_->data = 0.1;
-
+		if (server_->hasParam(server_->getName() + "/SE3RNSpaceRNBias")
+				&& ok(server_->getParam(server_->getName() + "/SE3RNSpaceRNBias", rn_bias_percentage_)))
+		{
+			useGoal_ = true;
+		}
 		lock();
 	}
 
@@ -72,12 +78,45 @@ namespace exotica
 				SE3bounds.setHigh(i, prob->getBounds()[i + n]);
 				SE3bounds.setLow(i, prob->getBounds()[i]);
 			}
+			std::cout << "SE3Bounds Low:";
+			for (int i = 0; i < 3; i++)
+				std::cout << prob->getBounds()[i] << " ";
+			std::cout << std::endl;
+			std::cout << "SE3Bounds High:";
+			for (int i = 0; i < 3; i++)
+				std::cout << prob->getBounds()[i + n] << " ";
+			std::cout << std::endl;
+
+			ret->SO3Bounds_.resize(3);
+			std::cout << "SO3Bounds Low:";
+			for (int i = 3; i < 6; i++)
+			{
+				ret->SO3Bounds_.low[i - 3] = prob->getBounds()[i];
+				std::cout << prob->getBounds()[i] << " ";
+			}
+			std::cout << std::endl;
+			std::cout << "SO3Bounds High:";
+			for (int i = 3; i < 6; i++)
+			{
+				ret->SO3Bounds_.high[i - 3] = prob->getBounds()[i + n];
+				std::cout << prob->getBounds()[i + n] << " ";
+			}
+			std::cout << std::endl;
+
 			ret->setSE3StateSpaceBounds(SE3bounds);
 			for (int i = 6; i < n; i++)
 			{
 				RNbounds.setHigh(i - 6, prob->getBounds()[i + n]);
 				RNbounds.setLow(i - 6, prob->getBounds()[i]);
 			}
+			std::cout << "RNBounds Low:";
+			for (int i = 6; i < n; i++)
+				std::cout << prob->getBounds()[i] << " ";
+			std::cout << std::endl;
+			std::cout << "RNBounds High:";
+			for (int i = 6; i < n; i++)
+				std::cout << prob->getBounds()[i + n] << " ";
+			std::cout << std::endl;
 			ret->setRealVectorStateSpaceBounds(RNbounds);
 
 		}
@@ -126,7 +165,6 @@ namespace exotica
 	{
 		if (goal.rows() == realvectordim_ + 6)
 		{
-			useGoal_ = true;
 			goal_ = goal;
 		}
 	}
@@ -140,9 +178,13 @@ namespace exotica
 				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_);
 		const ob::RealVectorBounds &se3_bounds =
 				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getSE3StateSpaceBounds();
+		ob::RealVectorBounds so3_bounds =
+				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->SO3Bounds_;
 		rstate->SE3StateSpace().setXYZ(rng_.uniformReal(se3_bounds.low[0], se3_bounds.high[0]), rng_.uniformReal(se3_bounds.low[1], se3_bounds.high[1]), rng_.uniformReal(se3_bounds.low[2], se3_bounds.high[2]));
-		rstate->SE3StateSpace().rotation().setAxisAngle(0, 0, 1, rng_.uniformReal(-1.57, 1.57));
-
+		//	Only rotates along Z, for base movement
+		rstate->SE3StateSpace().rotation().setAxisAngle(0, 0, 1, rng_.uniformReal(so3_bounds.low[0], so3_bounds.high[0]));
+		rstate->SE3StateSpace().rotation().setAxisAngle(0, 1, 0, rng_.uniformReal(so3_bounds.low[1], so3_bounds.high[1]));
+		rstate->SE3StateSpace().rotation().setAxisAngle(1, 0, 0, rng_.uniformReal(so3_bounds.low[2], so3_bounds.high[2]));
 		//	Sample for the RN space
 		const ob::RealVectorBounds &realvector_bounds =
 				static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getRealVectorStateSpaceBounds();

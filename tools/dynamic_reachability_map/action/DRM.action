@@ -1,0 +1,8 @@
+geometry_msgs/Pose goal_pose
+moveit_msgs/PlanningScene ps
+---
+bool succeed
+exotica/Vector q_out
+---
+int32 goal_cell_index
+int32 sample_index

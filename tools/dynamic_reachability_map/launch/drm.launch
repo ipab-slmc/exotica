@@ -1,0 +1,14 @@
+<launch>
+
+  <node pkg="dynamic_reachability_map" type="DRMActionNode" name="DRMActionNode" output="screen" >
+    <param name="drm_robot_description_semantic" textfile="$(find dynamic_reachability_map)/resources/IndexedCellRobot.srdf"/>
+    <param name="drm_robot_description" textfile="$(find dynamic_reachability_map)/resources/IndexedCellRobot.urdf"/>
+
+    <param name="RobotModel" type="string" value="/robot_description"/>
+    <param name="DRMModel" type="string" value="drm_robot_description"/>
+    <param name="DRMPath" type="string" value="/home/yiming/ros/reachability/src/dynamic_reachability/result/lwr_100000_0.050000"/>
+    <param name="EndEffector" type="string" value="pen_tip_link"/>
+    <param name="Group" type="string" value="arm"/>
+
+  </node>
+</launch>

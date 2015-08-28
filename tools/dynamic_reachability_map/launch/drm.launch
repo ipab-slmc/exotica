@@ -6,8 +6,8 @@
 
     <param name="RobotModel" type="string" value="/robot_description"/>
     <param name="DRMModel" type="string" value="drm_robot_description"/>
-    <param name="DRMPath" type="string" value="/home/yiming/ros/reachability/src/dynamic_reachability/result/lwr_100000_0.050000"/>
-    <param name="EndEffector" type="string" value="pen_tip_link"/>
+    <param name="DRMPath" type="string" value="$(find dynamic_reachability_map)/result/lwr_100000_0.100000"/>
+    <param name="EndEffector" type="string" value="lwr_arm_7_link"/>
     <param name="Group" type="string" value="arm"/>
 
   </node>

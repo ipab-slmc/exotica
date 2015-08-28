@@ -11,6 +11,7 @@
 #include "dynamic_reachability_map/dynamic_reachability_map.h"
 #include <actionlib/server/simple_action_server.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <moveit_msgs/DisplayRobotState.h>
 namespace dynamic_reachability_map {
 class DRMActionNode {
 public:
@@ -29,6 +30,10 @@ private:
 	ros::Publisher drm_pub_;
 	visualization_msgs::Marker drm_mark_;
 	ros::Timer drm_timer_;
+
+	ros::Publisher cell_ps_pub_;
+	ros::Publisher state_pub_;
+	moveit_msgs::DisplayRobotState disp_state_;
 };
 }
 

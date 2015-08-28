@@ -679,30 +679,46 @@ dynamic_reachability_map::DRMResult DynamicReachabilityMap::getIKSolution(
 		ROS_ERROR_STREAM(
 				"Cell "<<tcp_index<<" is not reachable in current environment");
 		return result;
-	} else
-		result.succeed = true;
-
+	}
 	double dist = INFINITY;
-	int tmp_index = 0;
+	int tmp_index = -1;
+	Eigen::VectorXd e1(4 + dimension_);
+	e1(0) = goal->goal_pose.orientation.x;
+	e1(1) = goal->goal_pose.orientation.y;
+	e1(2) = goal->goal_pose.orientation.z;
+	e1(3) = goal->goal_pose.orientation.w;
+	for(int i=0;i<dimension_;i++)
+		e1(i+4) = goal->q0.data[i];
 	for (int i = 0; i < tcps_[tcp_index].samples.size(); i++) {
 		if (samples_[tcps_[tcp_index].samples[i]].valid) {
-			Eigen::VectorXd e1(7), e2(7);
-			e1(0) = goal->goal_pose.position.x;
-			e1(1) = goal->goal_pose.position.y;
-			e1(2) = goal->goal_pose.position.z;
-			e1(3) = goal->goal_pose.orientation.x;
-			e1(4) = goal->goal_pose.orientation.y;
-			e1(5) = goal->goal_pose.orientation.z;
-			e1(6) = goal->goal_pose.orientation.w;
-			e2 << samples_[tcps_[tcp_index].samples[i]].tcp.position.x, samples_[tcps_[tcp_index].samples[i]].tcp.position.y, samples_[tcps_[tcp_index].samples[i]].tcp.position.z, samples_[tcps_[tcp_index].samples[i]].tcp.orientation.x, samples_[tcps_[tcp_index].samples[i]].tcp.orientation.y, samples_[tcps_[tcp_index].samples[i]].tcp.orientation.z, samples_[tcps_[tcp_index].samples[i]].tcp.orientation.w;
-			double tmp_dist = (e1 - e2).norm();
-			if (tmp_dist < dist) {
-				dist = tmp_dist;
-				tmp_index = tcps_[tcp_index].samples[i];
+			bool invalid = false;
+			for (int j = 0; j < goal->invalid_samples.size(); j++)
+				if (goal->invalid_samples[j] == tcps_[tcp_index].samples[i]) {
+					invalid = true;
+					break;
+				}
+			if (!invalid) {
+				Eigen::VectorXd e2(4 + dimension_);
+
+				e2(0) = samples_[tcps_[tcp_index].samples[i]].tcp.orientation.x;
+				e2(1) = samples_[tcps_[tcp_index].samples[i]].tcp.orientation.y;
+				e2(2) = samples_[tcps_[tcp_index].samples[i]].tcp.orientation.z;
+				e2(3) = samples_[tcps_[tcp_index].samples[i]].tcp.orientation.w;
+				e2.segment(4, dimension_) =
+						samples_[tcps_[tcp_index].samples[i]].q;
+				double tmp_dist = (e1 - e2).norm();
+				if (tmp_dist < dist) {
+					dist = tmp_dist;
+					tmp_index = tcps_[tcp_index].samples[i];
+				}
 			}
 		}
 	}
-	exotica::vectorEigenToExotica(samples_[tmp_index].q, result.q_out);
+	if (tmp_index != -1) {
+		result.sample_index = tmp_index;
+		result.succeed = true;
+		exotica::vectorEigenToExotica(samples_[tmp_index].q, result.q_out);
+	}
 	return result;
 }
 bool DynamicReachabilityMap::checkPath(const std::vector<int> &sample_path) {

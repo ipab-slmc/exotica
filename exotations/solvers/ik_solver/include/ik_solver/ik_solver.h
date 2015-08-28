@@ -14,6 +14,8 @@
 #include <generic/Identity.h>
 #include <iostream>
 #include <fstream>
+#include <dynamic_reachability_map/DRMAction.h>
+#include <actionlib/client/simple_action_client.h>
 
 namespace exotica
 {
@@ -76,6 +78,7 @@ namespace exotica
 
 			int getMaxIteration();
 			Eigen::VectorXd nullSpaceRef;
+			void setReachGoal(const geometry_msgs::Pose &goal);
 		protected:
 			/**
 			 * \brief	Derived-elements initialiser: Pure Virtual
@@ -131,6 +134,12 @@ namespace exotica
 			std::pair<int, int> coll_index_;
 			std::pair<int, int> goal_index_;
 			EParam<std_msgs::Bool> ignore_obs_near_goal_;
+
+			EParam<std_msgs::Bool> use_drm_;
+			actionlib::SimpleActionClient<dynamic_reachability_map::DRMAction> drm_client_;
+			geometry_msgs::Pose reach_goal_;
+			Distance_Ptr reach_position_taskmap_;
+			Orientation_Ptr reach_orientation_taskmap_;
 	};
 	typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

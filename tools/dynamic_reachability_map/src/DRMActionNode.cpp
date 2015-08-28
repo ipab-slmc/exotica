@@ -34,7 +34,7 @@ double KDLDist2D(const KDL::Vector &v1, const KDL::Vector &v2) {
 
 namespace dynamic_reachability_map {
 DRMActionNode::DRMActionNode() :
-		nh_("~"), as_(nh_, "/IKRequest",
+		nh_("~"), as_(nh_, "/DRM_IK",
 				boost::bind(
 						&dynamic_reachability_map::DRMActionNode::getIKSolution,
 						this, _1), false) {
@@ -78,12 +78,15 @@ bool DRMActionNode::initialise() {
 		return false;
 	}
 	drm_.computeDensity();
-	drm_timer_ = nh_.createTimer(ros::Duration(1),
-			&DRMActionNode::drmTimeCallback, this);
+//	drm_timer_ = nh_.createTimer(ros::Duration(1),
+//			&DRMActionNode::drmTimeCallback, this);
 	robot_model_loader::RobotModelLoader cellbot_loader(drm_model);
 	robot_model::RobotModelPtr cellbot_model = cellbot_loader.getModel();
 	cell_ps_.reset(new planning_scene::PlanningScene(cellbot_model));
-
+	cell_ps_pub_ = nh_.advertise<moveit_msgs::PlanningScene>(
+			"CellPlanningScene", 10);
+	state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>(
+			"DRMResultState", 10);
 	drm_pub_ = nh_.advertise<visualization_msgs::Marker>(
 			"DynamicReachabilityMap", 10);
 	drm_mark_.type = visualization_msgs::Marker::CUBE_LIST;
@@ -91,6 +94,7 @@ bool DRMActionNode::initialise() {
 	drm_mark_.header.frame_id = "world_frame";
 	drm_mark_.scale.x = drm_mark_.scale.y = drm_mark_.scale.z = drm_.cell_size_;
 	drm_mark_.action = visualization_msgs::Marker::ADD;
+	as_.start();
 	return true;
 }
 
@@ -100,6 +104,10 @@ bool DRMActionNode::updateDRM(const KDL::Frame &base_pose) {
 	request.contacts = true;
 	request.max_contacts = 1;
 	collision_detection::CollisionResult result;
+
+	moveit_msgs::PlanningScene msg;
+	cell_ps_->getPlanningSceneMsg(msg);
+	cell_ps_pub_.publish(msg);
 	for (int i = 0; i < drm_.space_size_; i++) {
 		KDL::Frame cell_pose = point2KDL(drm_.space_[i].centre);
 		cell_pose = base_pose * cell_pose;
@@ -123,20 +131,54 @@ bool DRMActionNode::updateDRM(const KDL::Frame &base_pose) {
 				drm_.samples_[drm_.space_[i].occupiedSmaples[j]].valid = false;
 		}
 		result.clear();
+
 	}
 
 	drm_.computeDensity();
 
+	std::vector<int> density = drm_.getDensity();
+	int size = density.size();
+	Eigen::VectorXd density_eigen(size);
+	for (int i = 0; i < size; i++)
+		density_eigen(i) = density[i];
+	double max = density_eigen.maxCoeff();
+	density_eigen = density_eigen / max;
+
+	drm_mark_.colors.clear();
+	drm_mark_.points.clear();
+	for (int i = 0; i < size; i++) {
+		if (density[i] > 0) {
+			std_msgs::ColorRGBA c;
+			c.a = density_eigen(i);
+			c.r = 1 - density_eigen(i);
+			c.g = 1;
+			c.b = density_eigen(i);
+			drm_mark_.colors.push_back(c);
+			drm_mark_.points.push_back(drm_.space_[i].centre);
+		}
+	}
+	if (drm_mark_.points.size() == 0)
+		ERROR("Empty DRM!!!!");
+	drm_pub_.publish(drm_mark_);
 	return true;
 }
 bool DRMActionNode::getIKSolution(
 		const dynamic_reachability_map::DRMGoalConstPtr &goal) {
-	cell_ps_->processPlanningSceneWorldMsg(goal->ps.world);
+	static bool first = true;
+	if (first) {
+		disp_state_.state = goal->ps.robot_state;
+		first = false;
+	}
+	moveit_msgs::PlanningSceneWorld world = goal->ps.world;
+	for (int i = 0; i < world.collision_objects.size(); i++)
+		world.collision_objects[i].header.frame_id = "/world_frame";
+	cell_ps_->processPlanningSceneWorldMsg(world);
 	updateDRM();
-
 	dynamic_reachability_map::DRMResult result = drm_.getIKSolution(goal);
-	if (result.succeed)
-		as_.setSucceeded(result);
+	as_.setSucceeded(result);
+	for (int i = 0; i < result.q_out.data.size(); i++)
+		disp_state_.state.joint_state.position[i] = result.q_out.data[i];
+	state_pub_.publish(disp_state_);
 	return result.succeed;
 }
 
@@ -162,14 +204,14 @@ void DRMActionNode::drmTimeCallback(const ros::TimerEvent& event) {
 			drm_mark_.points.push_back(drm_.space_[i].centre);
 		}
 	}
-	if(drm_mark_.points.size()==0)
+	if (drm_mark_.points.size() == 0)
 		ERROR("Empty DRM!!!!");
 	drm_pub_.publish(drm_mark_);
 }
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "DynamicReachabilityMap");
+	ros::init(argc, argv, "~");
 	ros::AsyncSpinner sp(1);
 	dynamic_reachability_map::DRMActionNode drm;
 	if (!drm.initialise()) {

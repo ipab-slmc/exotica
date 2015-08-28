@@ -1,0 +1,11 @@
+<launch>
+  <param name="robot_description" textfile="$(find lwr_defs)/robots/lwr_pen.urdf"/>
+  <node pkg="dynamic_reachability_map" type="DRMSpaceSampler" name="DRMSpaceSampler" output="screen" >
+    <param name="EndEffector" type="string" value="lwr_arm_7_link"/>
+    <param name="Group" type="string" value="arm"/>
+    <param name="SpaceBounds" type="string" value="-1 1 -1 1 0.1 1.6"/>
+    <param name="CellSize" value="0.1"/>
+    <param name="ThreadsNumber" value="8"/>
+    <param name="SampleSize" value="1000000"/>
+  </node>
+</launch>

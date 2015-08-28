@@ -23,7 +23,7 @@ namespace exotica
 
                 tmp_eff[0]=eff;
                 tmp_eff[1]=getScene()->getRootName();
-
+                ref_pose_ = tmp_offset[1];
                 return scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
             }
             else

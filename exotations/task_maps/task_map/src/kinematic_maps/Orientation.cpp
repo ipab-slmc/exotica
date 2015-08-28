@@ -51,6 +51,7 @@ namespace exotica
                 tmp_offset[9]=quat*zoffset;
                 tmp_offset[10]=KDL::Frame::Identity();
                 tmp_offset[11]=zoffset.Inverse();
+                ref_pose_ = quat;
                 return scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
             }
             else

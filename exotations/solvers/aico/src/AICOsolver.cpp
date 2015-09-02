@@ -213,7 +213,8 @@ namespace exotica
     EReturn AICOsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution)
     {
         std::vector<Eigen::VectorXd> q_init; q_init.resize(TT,Eigen::VectorXd::Zero(q0.rows()));
-        q_init[0]=q0;
+        for(int i=0;i<q_init.size();i++)
+        	q_init[i]=q0;
         return Solve(q_init, solution);
     }
 

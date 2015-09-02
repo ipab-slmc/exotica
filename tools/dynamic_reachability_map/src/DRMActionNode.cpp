@@ -172,6 +172,7 @@ bool DRMActionNode::getIKSolution(
 	moveit_msgs::PlanningSceneWorld world = goal->ps.world;
 	for (int i = 0; i < world.collision_objects.size(); i++)
 		world.collision_objects[i].header.frame_id = "/world_frame";
+	cell_ps_->getWorldNonConst()->clearObjects();
 	cell_ps_->processPlanningSceneWorldMsg(world);
 	updateDRM();
 	dynamic_reachability_map::DRMResult result = drm_.getIKSolution(goal);

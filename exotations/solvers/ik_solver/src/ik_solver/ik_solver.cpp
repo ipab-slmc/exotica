@@ -326,8 +326,7 @@ EReturn IKsolver::Solve(Eigen::VectorXdRefConst q0,
 						if (prob_->scenes_.begin()->second->getCollisionScene()->isStateValid(
 								q)) {
 							solution.row(solution.rows() - 1) = q.transpose();
-							HIGHLIGHT(
-									"Solution "<<solution.row(solution.rows() - 1));
+							planning_time_ = ros::Duration(ros::Time::now() - start);
 							return SUCCESS;
 						} else {
 							int tmp = drm_client_.getResult()->sample_index;

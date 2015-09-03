@@ -7,6 +7,7 @@
 
 #include "dynamic_reachability_map/DRMActionNode.h"
 #include <ros/package.h>
+#include <std_msgs/Float64MultiArray.h>
 void kdl2Pose(const KDL::Frame & kdl, geometry_msgs::Pose &pose) {
 	pose.position.x = kdl.p.x();
 	pose.position.y = kdl.p.y();
@@ -85,10 +86,11 @@ bool DRMActionNode::initialise() {
 	cell_ps_.reset(new planning_scene::PlanningScene(cellbot_model));
 	cell_ps_pub_ = nh_.advertise<moveit_msgs::PlanningScene>(
 			"CellPlanningScene", 10);
-	state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>(
-			"DRMResultState", 10);
+	state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("DRMResultState",
+			10);
 	drm_pub_ = nh_.advertise<visualization_msgs::Marker>(
 			"DynamicReachabilityMap", 10);
+
 	drm_mark_.type = visualization_msgs::Marker::CUBE_LIST;
 	drm_mark_.header.stamp = ros::Time::now();
 	drm_mark_.header.frame_id = "world_frame";
@@ -177,9 +179,14 @@ bool DRMActionNode::getIKSolution(
 	updateDRM();
 	dynamic_reachability_map::DRMResult result = drm_.getIKSolution(goal);
 	as_.setSucceeded(result);
-	for (int i = 0; i < result.q_out.data.size(); i++)
-		disp_state_.state.joint_state.position[i] = result.q_out.data[i];
-	state_pub_.publish(disp_state_);
+	if (result.succeed) {
+		for (int i = 0; i < result.q_out.data.size(); i++)
+			disp_state_.state.joint_state.position[i] = result.q_out.data[i];
+		Eigen::VectorXd q0(drm_.dimension_);
+		for (int i = 0; i < drm_.dimension_; i++)
+			q0(i) = goal->q0.data[i];
+		state_pub_.publish(disp_state_);
+	}
 	return result.succeed;
 }
 

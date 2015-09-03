@@ -64,6 +64,7 @@ namespace exotica
        * @return Returns success.
        */
       virtual EReturn setTimeSteps(const int T);
+      int getTimeSteps(){return y_star_.size();}
 
       /**
        * @brief setDefaultGoals Sets Goals and Rhos to default values

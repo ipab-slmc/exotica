@@ -372,7 +372,7 @@ std::vector<int> &DynamicReachabilityMap::getDensity() {
 }
 
 bool DynamicReachabilityMap::solve(const Eigen::VectorXd & q0,
-		const geometry_msgs::Point & goal, Eigen::MatrixXd & solution,
+		const geometry_msgs::Pose & goal, Eigen::MatrixXd & solution,
 		Eigen::MatrixXd & smooth_solution, std::vector<int> & sample_path) {
 	///	First find the current TCP cell
 	if (q0.rows() != dimension_ || q0.rows() != group_->getVariableCount()) {
@@ -419,9 +419,9 @@ bool DynamicReachabilityMap::solve(const Eigen::VectorXd & q0,
 		return false;
 	}
 	//	Find out goal index
-	x = (goal.x - bounds_[0](0)) / cell_size_;
-	y = (goal.y - bounds_[1](0)) / cell_size_;
-	z = (goal.z - bounds_[2](0)) / cell_size_;
+	x = (goal.position.x - bounds_[0](0)) / cell_size_;
+	y = (goal.position.y - bounds_[1](0)) / cell_size_;
+	z = (goal.position.z - bounds_[2](0)) / cell_size_;
 	int goal_index = x + y * cell_cnts_[0] + z * cell_cnts_[0] * cell_cnts_[1];
 	if (goal_index >= space_size_) {
 		ROS_ERROR_STREAM(
@@ -503,25 +503,6 @@ bool DynamicReachabilityMap::solve(const Eigen::VectorXd & q0,
 					if (tmp_dist < dist) {
 						dist = tmp_dist;
 						sample_index = tcps_[path[i]].samples[j];
-					}
-				}
-			}
-
-			if (i != path.size() - 1) {
-				std::map<int, double> neighbors = getNeighbors(path[i]);
-				for (std::map<int, double>::iterator it = neighbors.begin();
-						it != neighbors.end(); it++) {
-					cell_sample_cnt = tcps_[it->first].samples.size();
-					for (int j = 0; j < cell_sample_cnt; j++) {
-						if (samples_[tcps_[it->first].samples[j]].valid) {
-							double tmp_dist =
-									(samples_[tcps_[it->first].samples[j]].q
-											- current).cwiseAbs().maxCoeff();
-							if (tmp_dist < dist) {
-								dist = tmp_dist;
-								sample_index = tcps_[it->first].samples[j];
-							}
-						}
 					}
 				}
 			}

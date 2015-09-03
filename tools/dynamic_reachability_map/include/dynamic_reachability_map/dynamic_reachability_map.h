@@ -94,7 +94,7 @@ public:
 	std::vector<int> &getDensity();
 	bool update(const geometry_msgs::Point & point, int &index);
 	bool updatePlanningScene(const geometry_msgs::Point & point, int &index);
-	bool solve(const Eigen::VectorXd & q0, const geometry_msgs::Point & goal,
+	bool solve(const Eigen::VectorXd & q0, const geometry_msgs::Pose & goal,
 			Eigen::MatrixXd & solution, Eigen::MatrixXd & smooth_solution,
 			std::vector<int> & sample_path);
 

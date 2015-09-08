@@ -8,13 +8,12 @@ project(ompl_solver_demo)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  exotica
-  ompl_solver
+  exotica_distro
   sensor_msgs
 )
 
 catkin_package(
- CATKIN_DEPENDS roscpp exotica ompl_solver sensor_msgs
+ CATKIN_DEPENDS roscpp exotica_distro sensor_msgs
  DEPENDS system_lib
 )
 
@@ -33,6 +32,4 @@ add_executable(OMPLexample src/node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(OMPLexample
   ${catkin_LIBRARIES}
-  ompl_solver
-  exotica
 )

@@ -8,13 +8,12 @@ project(com_demo)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  exotica
-  ik_solver
+  exotica_distro
   sensor_msgs
 )
 
 catkin_package(
- CATKIN_DEPENDS roscpp exotica ik_solver sensor_msgs
+ CATKIN_DEPENDS roscpp exotica_distro sensor_msgs
  DEPENDS system_lib
 )
 
@@ -33,6 +32,4 @@ add_executable(COMexample src/node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(COMexample
   ${catkin_LIBRARIES}
-  ik_solver
-  exotica
 )

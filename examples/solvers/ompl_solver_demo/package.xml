@@ -1,23 +1,21 @@
 <?xml version="1.0"?>
 <package>
   <name>ompl_solver_demo</name>
-  <version>0.0.0</version>
+  <version>3.0.0</version>
   <description>The ik_solver_demo package</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
 
   <license>TODO</license>
 
+  <url type="website">https://bitbucket.org/IPAB-SLMC/exotica</url>
 
-  <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>exotica</build_depend>
-  <build_depend>ompl_solver</build_depend>
+  <build_depend>exotica_distro</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>exotica</run_depend>
-  <run_depend>ompl_solver</run_depend>
+  <run_depend>exotica_distro</run_depend>
   <run_depend>sensor_msgs</run_depend>
 
 </package>

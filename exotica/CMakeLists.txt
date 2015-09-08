@@ -23,6 +23,9 @@ find_package(catkin REQUIRED COMPONENTS
   ${MSG_DEPS}
 )
 
+find_package(Boost REQUIRED COMPONENTS python)
+find_package(PythonLibs REQUIRED)
+
 set(MSG_FILES
   MeshVertex.msg
   MeshVertexArray.msg
@@ -71,6 +74,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
+  ${PYTHON_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME}

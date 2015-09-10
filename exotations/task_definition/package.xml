@@ -4,9 +4,13 @@
   <version>0.0.0</version>
   <description>The TaskDefinition implementations package</description>
 
-  <maintainer email="mcamnadur@gmail.com">michael</maintainer>
-  
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+  <author email="mcamnadur@gmail.com">Michael Camilleri</author>
+
   <license>TODO</license>
+
+  <url type="website">https://bitbucket.org/IPAB-SLMC/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica</build_depend>

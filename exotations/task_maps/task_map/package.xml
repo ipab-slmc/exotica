@@ -1,19 +1,16 @@
 <?xml version="1.0"?>
 <package>
   <name>task_map</name>
-  <version>0.0.0</version>
+  <version>3.0.0</version>
   <description>A package for defining new task maps</description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag --> 
-  <!-- Example:  -->
-  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="michael@todo.todo">michael</maintainer>
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+  <author email="mcamnadur@gmail.com">Michael Camilleri</author>
 
-
-  <!-- One license tag required, multiple allowed, one license per tag -->
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
   <license>TODO</license>
+
+  <url type="website">https://bitbucket.org/IPAB-SLMC/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica</build_depend>

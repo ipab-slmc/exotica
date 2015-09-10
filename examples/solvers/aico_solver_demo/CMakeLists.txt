@@ -8,15 +8,14 @@ project(aico_solver_demo)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  exotica
-  aico
+  exotica_distro
   sensor_msgs
 )
 
 find_package(Eigen3 REQUIRED)
 
 catkin_package(
- CATKIN_DEPENDS roscpp exotica aico sensor_msgs
+ CATKIN_DEPENDS roscpp exotica_distro sensor_msgs
  DEPENDS system_lib
 )
 
@@ -36,6 +35,4 @@ add_executable(AICOexample src/AICOexample.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(AICOexample
   ${catkin_LIBRARIES}
-  aico
-  exotica
 )

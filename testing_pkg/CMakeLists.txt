@@ -7,13 +7,8 @@ set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
 
 
 find_package(catkin REQUIRED COMPONENTS
-  kinematica
-  exotica
-  task_map
-  task_definition
-  roscpp
+  exotica_distro
   rostest
-  roslib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -24,7 +19,7 @@ find_package(Boost REQUIRED)
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES ${PROJECT_NAME}
- CATKIN_DEPENDS kinematica roscpp roslib exotica task_map task_definition
+ CATKIN_DEPENDS exotica_distro
  DEPENDS system_lib orocos_kdl eigen
 )
 

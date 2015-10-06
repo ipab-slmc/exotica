@@ -1,0 +1,13 @@
+<launch>
+  <param name="robot_description" textfile="$(find lwr_defs)/robots/lwr_hand.urdf"/>
+  <param name="robot_description_semantic" textfile="$(find lwr_hand_moveit)/config/lwr.srdf"/> 
+  <node pkg="dynamic_reachability_map" type="DRMSpaceSampler" name="DRMSpaceSampler" output="screen" launch-prefix="gdb -ex run --args">
+    <param name="EndEffector" type="string" value="sdh_grasp_link"/>
+    <param name="Group" type="string" value="arm"/>
+    <param name="SpaceBounds" type="string" value="-1.1 1.1 -1.1 1.1 0.05 1.7"/>
+    <param name="CellSize" value="0.01"/>
+    <param name="ThreadsNumber" value="1"/>
+    <param name="CheckOccupation" value="0"/>
+    <param name="SampleSize" value="1000"/>
+  </node>
+</launch>

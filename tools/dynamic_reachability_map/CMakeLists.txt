@@ -42,16 +42,36 @@ include_directories(
 
 ## Declare a cpp library
 add_library(dynamic_reachability_map
-  src/dynamic_reachability_map.cpp
+  src/dynamic_reachability_map/DRM.cpp
+  src/dynamic_reachability_map/DRMSampler.cpp
+  src/dynamic_reachability_map/DRMSpace.cpp
+  src/dynamic_reachability_map/DRMSpaceSaver.cpp
+  src/dynamic_reachability_map/DRMSpaceLoader.cpp
+  src/dynamic_reachability_map/Conversions.cpp
+  src/dynamic_reachability_map/DRMSampleCluster.cpp
 )
 target_link_libraries(dynamic_reachability_map ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_executable(DRMActionNode src/DRMActionNode.cpp src/dynamic_reachability_map.cpp)
+add_executable(DRMActionNode
+  src/DRMActionNode.cpp
+  src/dynamic_reachability_map/DRM.cpp
+  src/dynamic_reachability_map/DRMSpace.cpp
+  src/dynamic_reachability_map/DRMSampler.cpp
+  src/dynamic_reachability_map/DRMSpaceSaver.cpp
+  src/dynamic_reachability_map/DRMSpaceLoader.cpp
+  src/dynamic_reachability_map/Conversions.cpp
+  src/dynamic_reachability_map/DRMSampleCluster.cpp)
 target_link_libraries(DRMActionNode
   ${catkin_LIBRARIES}
 )
 
-add_executable(DRMSpaceSampler src/drm_space_sampler.cpp src/dynamic_reachability_map.cpp)
+add_executable(DRMSpaceSampler 
+  src/drm_space_sampler.cpp 
+  src/dynamic_reachability_map/DRMSpace.cpp 
+  src/dynamic_reachability_map/DRMSampler.cpp
+  src/dynamic_reachability_map/DRMSpaceSaver.cpp
+  src/dynamic_reachability_map/DRMSpaceLoader.cpp
+  src/dynamic_reachability_map/Conversions.cpp)
 target_link_libraries(DRMSpaceSampler
   ${catkin_LIBRARIES}
 )

@@ -1,14 +1,14 @@
 <launch>
+  <param name="robot_description" textfile="$(find lwr_defs)/robots/lwr_hand.urdf"/>
+  <param name="robot_description_semantic" textfile="$(find lwr_hand_moveit)/config/lwr.srdf"/> 
 
+  <param name="drm_robot_description_semantic" textfile="$(find dynamic_reachability_map)/resources/IndexedCellRobot.srdf"/>
+  <param name="drm_robot_description" textfile="$(find dynamic_reachability_map)/resources/IndexedCellRobot.urdf"/>
   <node pkg="dynamic_reachability_map" type="DRMActionNode" name="DRMActionNode" output="screen" >
-    <param name="drm_robot_description_semantic" textfile="$(find dynamic_reachability_map)/resources/IndexedCellRobot.srdf"/>
-    <param name="drm_robot_description" textfile="$(find dynamic_reachability_map)/resources/IndexedCellRobot.urdf"/>
 
     <param name="RobotModel" type="string" value="/robot_description"/>
-    <param name="DRMModel" type="string" value="drm_robot_description"/>
-    <param name="DRMPath" type="string" value="$(find dynamic_reachability_map)/result/lwr_100000_0.100000"/>
-    <param name="EndEffector" type="string" value="lwr_arm_7_link"/>
-    <param name="Group" type="string" value="arm"/>
-
+    <param name="DRMModel" type="string" value="/drm_robot_description"/>
+    <param name="DRMPath" type="string" value="$(find dynamic_reachability_map)/result2/lwr_1000_0.100000_1443794978"/>
+    <param name="Clustering" type="bool" value="0"/>
   </node>
 </launch>

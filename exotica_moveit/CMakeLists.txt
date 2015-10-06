@@ -12,34 +12,23 @@ add_definitions(-DEXOTICA_DEBUG_MODE)  #Controls whether to compile with certain
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  aico
-  ik_solver
+  exotica_distro
   dynamic_reconfigure
   moveit_core
   moveit_ros_planning
   pluginlib
   roscpp
   tf
-  task_definition
-  task_map 
   eigen_conversions
   rospy
   std_msgs
   message_generation
-  exotica
-  ompl_solver
   actionlib_msgs
 )
 
 
 find_package(Boost REQUIRED system filesystem date_time thread serialization)
 
-#generate_dynamic_reconfigure_options("cfg/EXOTicaDynamicReconfigure.cfg")
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
 add_action_files(
   DIRECTORY action
   FILES ExoticaPlanning.action
@@ -51,31 +40,19 @@ generate_messages(
   moveit_msgs
   exotica
 )
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if you package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES exotica_moveit
-  CATKIN_DEPENDS aico ik_solver dynamic_reconfigure eigen_conversions moveit_core moveit_ros_planning_interface pluginlib roscpp tf task_definition task_map rospy std_msgs message_generation exotica ompl_solver actionlib_msgs
+  CATKIN_DEPENDS exotica_distro dynamic_reconfigure eigen_conversions moveit_core moveit_ros_planning_interface pluginlib roscpp tf rospy std_msgs message_generation actionlib_msgs
   DEPENDS system_lib
 )
-
-# planning_interface planning_scene_monitor
 
 ###########
 ## Build ##
 ###########
 
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
 include_directories(include)
 include_directories(
   include/

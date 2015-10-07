@@ -639,6 +639,12 @@ EReturn Scene::appendTaskMap(const std::string & name,
 	return SUCCESS;
 }
 
+EReturn Scene::clearTaskMap(){
+  eff_names_.clear();
+  eff_offsets_.clear();
+  return SUCCESS;
+}
+
 EReturn Scene::getPoses(const std::vector<std::string> & names,
 		std::vector<KDL::Frame> & poses) {
 	LOCK(lock_);
@@ -804,6 +810,18 @@ EReturn Scene::getEndEffectors(const std::string & task,
 		return FAILURE;
 	}
 	effs = eff_names_.at(task);
+	return SUCCESS;
+}
+
+EReturn Scene::getEndEffectors(const std::string & task,
+			std::pair<std::vector<std::string>, std::vector<KDL::Frame>> & effs)
+{
+	if (eff_names_.find(task) == eff_names_.end()) {
+		INDICATE_FAILURE
+		return FAILURE;
+	}
+	effs.first=eff_names_.at(task);
+	effs.second=eff_offsets_.at(task);
 	return SUCCESS;
 }
 

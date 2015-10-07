@@ -260,6 +260,11 @@ public:
 			const std::vector<KDL::Frame> & offset);
 
 	/**
+	 * \brief	Clear all the appended taskmaps
+	 */
+	EReturn clearTaskMap();
+
+	/**
 	 * \brief	Called after appending
 	 * @return Indication of success
 	 */
@@ -322,6 +327,8 @@ public:
 	 */
 	EReturn getEndEffectors(const std::string & task,
 			std::vector<std::string> & effs);
+	EReturn getEndEffectors(const std::string & task,
+			std::pair<std::vector<std::string>, std::vector<KDL::Frame>> & effs);
 
 	/**
 	 * \brief	Get exotica collision scene ptr

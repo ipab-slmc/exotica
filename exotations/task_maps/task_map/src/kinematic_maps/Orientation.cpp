@@ -85,10 +85,10 @@ namespace exotica
       PHI(i) = sqrt(
           (EFFPHI(P2 X) - EFFPHI(P1 X) + EFFPHI(P4 X) - EFFPHI(P3 X))
               * (EFFPHI(P2 X) - EFFPHI(P1 X) + EFFPHI(P4 X) - EFFPHI(P3 X))
-              + (EFFPHI(P2Y) - EFFPHI(P1Y) + EFFPHI(P4Y) - EFFPHI(P3Y))
-                  * (EFFPHI(P2Y) - EFFPHI(P1Y) + EFFPHI(P4Y) - EFFPHI(P3Y))
-              + (EFFPHI(P2Z) - EFFPHI(P1Z) + EFFPHI(P4Z) - EFFPHI(P3Z))
-                  * (EFFPHI(P2Z) - EFFPHI(P1Z) + EFFPHI(P4Z) - EFFPHI(P3Z)));
+              + (EFFPHI(P2 Y) - EFFPHI(P1 Y) + EFFPHI(P4 Y) - EFFPHI(P3 Y))
+                  * (EFFPHI(P2 Y) - EFFPHI(P1 Y) + EFFPHI(P4 Y) - EFFPHI(P3 Y))
+              + (EFFPHI(P2 Z) - EFFPHI(P1 Z) + EFFPHI(P4 Z) - EFFPHI(P3 Z))
+                  * (EFFPHI(P2 Z) - EFFPHI(P1 Z) + EFFPHI(P4 Z) - EFFPHI(P3 Z)));
 
       if (updateJacobian_ && PHI(i) > 1e-100)
       {
@@ -98,12 +98,12 @@ namespace exotica
               - EFFPHI(P3 X))
               * (EFFJAC(P2 X, j) - EFFJAC(P1 X, j) + EFFJAC(P4 X, j)
                   - EFFJAC(P3 X, j))
-              + (EFFPHI(P2Y) - EFFPHI(P1Y) + EFFPHI(P4Y) - EFFPHI(P3Y))
-                  * (EFFJAC(P2Y, j) - EFFJAC(P1Y, j) + EFFJAC(P4Y, j)
-                      - EFFJAC(P3Y, j))
-              + (EFFPHI(P2Z) - EFFPHI(P1Z) + EFFPHI(P4Z) - EFFPHI(P3Z))
-                  * (EFFJAC(P2Z, j) - EFFJAC(P1Z, j) + EFFJAC(P4Z, j)
-                      - EFFJAC(P3Z, j))) / PHI(i) * 2.0;
+              + (EFFPHI(P2 Y) - EFFPHI(P1 Y) + EFFPHI(P4 Y) - EFFPHI(P3 Y))
+                  * (EFFJAC(P2 Y, j) - EFFJAC(P1 Y, j) + EFFJAC(P4 Y, j)
+                      - EFFJAC(P3 Y, j))
+              + (EFFPHI(P2 Z) - EFFPHI(P1 Z) + EFFPHI(P4 Z) - EFFPHI(P3 Z))
+                  * (EFFJAC(P2 Z, j) - EFFJAC(P1 Z, j) + EFFJAC(P4 Z, j)
+                      - EFFJAC(P3 Z, j))) / PHI(i) * 2.0;
         }
       }
     }

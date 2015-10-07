@@ -1,9 +1,9 @@
 /***********************************************************************\
 |    Test is a Test-Creator Factory for EXOTica                        |
-|                                                                       |
-|           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
-|                    Last Edited: 13 - March - 2014                     |
-\***********************************************************************/
+ |                                                                       |
+ |           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
+ |                    Last Edited: 13 - March - 2014                     |
+ \***********************************************************************/
 
 #ifndef EXOTICA_TEST_FACTORY_H
 #define EXOTICA_TEST_FACTORY_H
@@ -34,19 +34,20 @@ namespace exotica
    * @param I   The identifier type (typically a string: should be the same as used to register the object type)
    * @param T   The Test object type (typically a string for a filename)
    */
-  template <typename I, typename T>
-  class Test : public Object
+  template<typename I, typename T>
+  class Test: public Object
   {
     public:
       /**
        * \brief Singleton implementation: returns a reference to a singleton instance of the instantiated class
        */
-      static Test<I,T> & Instance(void)
+      static Test<I, T> & Instance(void)
       {
-        static Test<I,T> tester_;  //!< Declared static so will only be created once
-        return tester_;             //!< At other times, just return the reference to it
-      };
-      
+        static Test<I, T> tester_; //!< Declared static so will only be created once
+        return tester_;     //!< At other times, just return the reference to it
+      }
+      ;
+
       /**
        * \brief Registers a new test
        * @param type[in]  The name of the class (typically string): must be a unique identifier
@@ -55,7 +56,7 @@ namespace exotica
        */
       EReturn registerTest(const I & type, const T & test)
       {
-        if (test_registry_.find(type) == test_registry_.end())  //!< If it does not already exist
+        if (test_registry_.find(type) == test_registry_.end()) //!< If it does not already exist
         {
           test_registry_[type] = test;
           return SUCCESS;
@@ -64,8 +65,9 @@ namespace exotica
         {
           return PAR_ERR;
         }
-      };
-      
+      }
+      ;
+
       /**
        * \brief Finds the testing object: must implement the copy operator
        * @param type[in]   Identifier as used by the instantiation of the factory
@@ -84,18 +86,22 @@ namespace exotica
         {
           return PAR_ERR;   //!< Type not found
         }
-      };
-      
+      }
+      ;
+
     private:
       /**
        * \brief Private Constructor 
        */
-      inline explicit Test<I,T>() {};
-      
+      inline explicit Test<I, T>()
+      {
+      }
+      ;
+
       /** The Map containing the register of the different types of classes **/
       std::map<I, T> test_registry_;
   };
-  
+
   /**
    * \brief Registration Class for the object type: Also templated:
    * @param I   The Identifier type (typically string)
@@ -110,17 +116,17 @@ namespace exotica
        * @param name   The name for the new class type
        * @param test   The test object
        */
-      TestRegistrar(const I & name, const T & test )
+      TestRegistrar(const I & name, const T & test)
       {
-        Test<I,T>::Instance().registerTest(name, test);
-      };
+        Test<I, T>::Instance().registerTest(name, test);
+      }
+      ;
   };
-  
+
   /**
    * \brief Typedefinition of the specialisation for the XML-based tests
    */
   typedef Test<std::string, std::string> XMLTester;
 }
-
 
 #endif

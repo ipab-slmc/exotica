@@ -1,10 +1,10 @@
 /***********************************************************************\
 |    This class wraps up all the functionality of initialising a new    |
-|  EXOTica planning problem.                                            |
-|                                                                       |
-|           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
-|                    Last Edited: 02 - April - 2014                     |
-\***********************************************************************/
+ |  EXOTica planning problem.                                            |
+ |                                                                       |
+ |           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
+ |                    Last Edited: 02 - April - 2014                     |
+ \***********************************************************************/
 
 #ifndef EXOTICA_INITIALISER_H
 #define EXOTICA_INITIALISER_H
@@ -19,7 +19,7 @@
 
 namespace exotica
 {
-  class Initialiser : public Object
+  class Initialiser: public Object
   {
     public:
       /**
@@ -45,7 +45,9 @@ namespace exotica
       /// \param server Server to use with this object
       /// \return Indication of success
       ///
-      EReturn initialise(tinyxml2::XMLHandle root_handle, PlanningProblem_ptr & problem, const std::string & problem_name, Server_ptr & server);
+      EReturn initialise(tinyxml2::XMLHandle root_handle,
+          PlanningProblem_ptr & problem, const std::string & problem_name,
+          Server_ptr & server);
 
       ///
       /// \brief initialise Initialises the solver from XML handle
@@ -55,8 +57,10 @@ namespace exotica
       /// \param server Server to use with this object
       /// \return Indication of success
       ///
-      EReturn initialise(tinyxml2::XMLHandle root_handle, MotionSolver_ptr & solver, const std::string & solver_name, Server_ptr & server);
-    
+      EReturn initialise(tinyxml2::XMLHandle root_handle,
+          MotionSolver_ptr & solver, const std::string & solver_name,
+          Server_ptr & server);
+
       /**
        * \brief Initialiser function
        * @param file_name XML_file for initialising the problem with.
@@ -64,7 +68,8 @@ namespace exotica
        * @param problem   Shared pointer to a Planning Problem
        * @return          Indication of Success: TODO
        */
-      EReturn initialise(const std::string & file_name, Server_ptr & server, MotionSolver_ptr & solver, PlanningProblem_ptr & problem);
+      EReturn initialise(const std::string & file_name, Server_ptr & server,
+          MotionSolver_ptr & solver, PlanningProblem_ptr & problem);
 
       /**
        * \brief Initialiser function
@@ -75,7 +80,11 @@ namespace exotica
        * @param solver_name Vector of requested solver names
        * @return          Indication of Success
        */
-      EReturn initialise(const std::string & file_name, Server_ptr & server, std::vector<MotionSolver_ptr> & solver, std::vector<PlanningProblem_ptr> & problem,std::vector<std::string> & problem_name, std::vector<std::string> & solver_name);
+      EReturn initialise(const std::string & file_name, Server_ptr & server,
+          std::vector<MotionSolver_ptr> & solver,
+          std::vector<PlanningProblem_ptr> & problem,
+          std::vector<std::string> & problem_name,
+          std::vector<std::string> & solver_name);
 
       /**
        * \brief Initialiser function
@@ -86,7 +95,9 @@ namespace exotica
        * @param solver_name Solver name
        * @return          Indication of Success
        */
-      EReturn initialise(const std::string & file_name, Server_ptr & server, MotionSolver_ptr & solver, PlanningProblem_ptr & problem, const std::string & problem_name, const std::string & solver_name);
+      EReturn initialise(const std::string & file_name, Server_ptr & server,
+          MotionSolver_ptr & solver, PlanningProblem_ptr & problem,
+          const std::string & problem_name, const std::string & solver_name);
 
       /**
        * \brief Creates a list of supported problems and solvers specified in a XML file
@@ -95,7 +106,9 @@ namespace exotica
        * @param problems Return vector of solver names
        * @return Indication of success
        */
-      EReturn listSolversAndProblems(const std::string & file_name, std::vector<std::string>& problems, std::vector<std::string>& solvers);
+      EReturn listSolversAndProblems(const std::string & file_name,
+          std::vector<std::string>& problems,
+          std::vector<std::string>& solvers);
 
       ///
       /// \brief initialiseProblemJSON Reinitialises the problem from JSON string
@@ -103,7 +116,8 @@ namespace exotica
       /// \param constraints JSON string
       /// \return Indication of success
       ///
-      EReturn initialiseProblemJSON(PlanningProblem_ptr problem, const std::string& constraints);
+      EReturn initialiseProblemJSON(PlanningProblem_ptr problem,
+          const std::string& constraints);
 
       ///
       /// \brief initialiseProblemMoveit Reinitialises the problem from moveit planning scene stored within the Scene object of the problem

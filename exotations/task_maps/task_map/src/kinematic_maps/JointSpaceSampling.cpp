@@ -9,32 +9,32 @@
 
 namespace exotica
 {
-	JointSpaceSampling::JointSpaceSampling() :
-			stateValid_(false)
-	{
-		//TODO
-	}
+  JointSpaceSampling::JointSpaceSampling()
+      : stateValid_(false)
+  {
+    //TODO
+  }
 
-	JointSpaceSampling::~JointSpaceSampling()
-	{
-		//TODO
-	}
+  JointSpaceSampling::~JointSpaceSampling()
+  {
+    //TODO
+  }
 
-	EReturn JointSpaceSampling::initDerived(tinyxml2::XMLHandle & handle)
-	{
+  EReturn JointSpaceSampling::initDerived(tinyxml2::XMLHandle & handle)
+  {
 
-		return SUCCESS;
-	}
+    return SUCCESS;
+  }
 
-	EReturn JointSpaceSampling::update(Eigen::VectorXdRefConst x, const int t)
-	{
-		return SUCCESS;
-	}
+  EReturn JointSpaceSampling::update(Eigen::VectorXdRefConst x, const int t)
+  {
+    return SUCCESS;
+  }
 
-	EReturn JointSpaceSampling::isStateValid(bool valid)
-	{
+  EReturn JointSpaceSampling::isStateValid(bool valid)
+  {
 
-		return SUCCESS;
-	}
+    return SUCCESS;
+  }
 }
 

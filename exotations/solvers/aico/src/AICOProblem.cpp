@@ -7,7 +7,7 @@
 
 #include "aico/AICOProblem.h"
 
-REGISTER_PROBLEM_TYPE("AICOProblem",exotica::AICOProblem);
+REGISTER_PROBLEM_TYPE("AICOProblem", exotica::AICOProblem);
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
 #define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
@@ -15,259 +15,304 @@ REGISTER_PROBLEM_TYPE("AICOProblem",exotica::AICOProblem);
 namespace exotica
 {
 
-    EReturn AICOProblem::reinitialise(rapidjson::Document& document, boost::shared_ptr<PlanningProblem> problem)
+  EReturn AICOProblem::reinitialise(rapidjson::Document& document,
+      boost::shared_ptr<PlanningProblem> problem)
+  {
+    clear();
+    if (document.IsArray())
     {
-        clear();
-        if(document.IsArray())
+      for (rapidjson::SizeType i = 0; i < document.Size(); i++)
+      {
+        rapidjson::Value& obj = document[i];
+        if (obj.IsObject())
         {
-            for (rapidjson::SizeType i=0;i<document.Size();i++)
+          std::string constraintClass;
+          if (ok(getJSON(obj["class"], constraintClass)))
+          {
+            if (knownMaps_.find(constraintClass) != knownMaps_.end())
             {
-                rapidjson::Value& obj = document[i];
-                if(obj.IsObject())
+              TaskMap_ptr taskmap;
+              if (ok(
+                  TaskMap_fac::Instance().createObject(
+                      knownMaps_[constraintClass], taskmap)))
+              {
+                EReturn ret = taskmap->initialise(obj, server_, scenes_,
+                    problem);
+                if (ok(ret))
                 {
-                    std::string constraintClass;
-                    if(ok(getJSON(obj["class"],constraintClass)))
+                  if (ret != CANCELLED)
+                  {
+                    std::string name = taskmap->getObjectName();
+                    task_maps_[name] = taskmap;
+                    TaskDefinition_ptr task;
+                    if (ok(
+                        TaskDefinition_fac::Instance().createObject(
+                            "TaskSqrError", task)))
                     {
-                        if(knownMaps_.find(constraintClass)!=knownMaps_.end())
-                        {
-                            TaskMap_ptr taskmap;
-                            if(ok(TaskMap_fac::Instance().createObject(knownMaps_[constraintClass],taskmap)))
-                            {
-                                EReturn ret = taskmap->initialise(obj,server_,scenes_, problem);
-                                if(ok(ret))
-                                {
-                                    if(ret!=CANCELLED)
-                                    {
-                                        std::string name=taskmap->getObjectName();
-                                        task_maps_[name]=taskmap;
-                                        TaskDefinition_ptr task;
-                                        if(ok(TaskDefinition_fac::Instance().createObject("TaskSqrError",task)))
-                                        {
-                                            TaskSqrError_ptr sqr = boost::static_pointer_cast<TaskSqrError>(task);
-                                            sqr->setTaskMap(taskmap);
-                                            int dim;
-                                            taskmap->taskSpaceDim(dim);
-                                            sqr->y_star0_.resize(dim);
-                                            sqr->rho0_(0)=0.0;
-                                            sqr->rho1_(0)=1e4;
-                                            sqr->object_name_=name+std::to_string((unsigned long)sqr.get());
+                      TaskSqrError_ptr sqr = boost::static_pointer_cast<
+                          TaskSqrError>(task);
+                      sqr->setTaskMap(taskmap);
+                      int dim;
+                      taskmap->taskSpaceDim(dim);
+                      sqr->y_star0_.resize(dim);
+                      sqr->rho0_(0) = 0.0;
+                      sqr->rho1_(0) = 1e4;
+                      sqr->object_name_ = name
+                          + std::to_string((unsigned long) sqr.get());
 
-                                            // TODO: Better implementation of stting goals from JSON
-                                            sqr->y_star0_.setZero();
+                      // TODO: Better implementation of stting goals from JSON
+                      sqr->y_star0_.setZero();
 
-                                            sqr->setTimeSteps(T+2);
-                                            Eigen::VectorXd tspan(2);
-                                            Eigen::VectorXi tspani(2);
-                                            if(obj["tspan"]["__ndarray__"].IsArray())
-                                            {
-                                                getJSON(obj["tspan"]["__ndarray__"],tspan);
-                                            }
-                                            else
-                                            {
-                                                getJSON(obj["tspan"],tspan);
-                                            }
-                                            if(tspan(0)<=0.0) tspan(0)=0.0;
-                                            if(tspan(1)>=1.0) tspan(1)=1.0;
-                                            tspani(0)=(int)(T*tspan(0));
-                                            tspani(1)=(int)(T*tspan(1));
-                                            for(int t=tspani(0);t<=tspani(1);t++)
-                                            {
-                                                sqr->registerRho(Eigen::VectorXdRef_ptr(sqr->rho1_.segment(0,1)),t);
-                                            }
-                                            sqr->wasFullyInitialised_=true;
-                                            task_defs_[name]=task;
-                                        }
-                                        else
-                                        {
-                                            INDICATE_FAILURE;
-                                            return FAILURE;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        ROS_WARN_STREAM("Creation of '"<<constraintClass<<"' cancelled!");
-                                    }
-                                }
-                                else
-                                {
-                                    INDICATE_FAILURE;
-                                    return FAILURE;
-                                }
-                            }
-                            else
-                            {
-                                INDICATE_FAILURE;
-                                return FAILURE;
-                            }
-
-                        }
-                        else
-                        {
-                            WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
-                        }
+                      sqr->setTimeSteps(T + 2);
+                      Eigen::VectorXd tspan(2);
+                      Eigen::VectorXi tspani(2);
+                      if (obj["tspan"]["__ndarray__"].IsArray())
+                      {
+                        getJSON(obj["tspan"]["__ndarray__"], tspan);
+                      }
+                      else
+                      {
+                        getJSON(obj["tspan"], tspan);
+                      }
+                      if (tspan(0) <= 0.0) tspan(0) = 0.0;
+                      if (tspan(1) >= 1.0) tspan(1) = 1.0;
+                      tspani(0) = (int) (T * tspan(0));
+                      tspani(1) = (int) (T * tspan(1));
+                      for (int t = tspani(0); t <= tspani(1); t++)
+                      {
+                        sqr->registerRho(
+                            Eigen::VectorXdRef_ptr(sqr->rho1_.segment(0, 1)),
+                            t);
+                      }
+                      sqr->wasFullyInitialised_ = true;
+                      task_defs_[name] = task;
                     }
                     else
                     {
-                        INDICATE_FAILURE;
-                        return FAILURE;
+                      INDICATE_FAILURE
+                      ;
+                      return FAILURE;
                     }
+                  }
+                  else
+                  {
+                    ROS_WARN_STREAM(
+                        "Creation of '"<<constraintClass<<"' cancelled!");
+                  }
                 }
                 else
                 {
-                    INDICATE_FAILURE;
-                    return FAILURE;
+                  INDICATE_FAILURE
+                  ;
+                  return FAILURE;
                 }
+              }
+              else
+              {
+                INDICATE_FAILURE
+                ;
+                return FAILURE;
+              }
+
             }
+            else
+            {
+              WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
+            }
+          }
+          else
+          {
+            INDICATE_FAILURE
+            ;
+            return FAILURE;
+          }
         }
         else
         {
-            INDICATE_FAILURE;
-            return FAILURE;
+          INDICATE_FAILURE
+          ;
+          return FAILURE;
         }
-        return SUCCESS;
-
+      }
     }
-
-    EReturn AICOProblem::update(Eigen::VectorXdRefConst x, const int t)
+    else
     {
-        // Update the KinematicScene(s)...
-        for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
-        {
-            if(!ok(it->second->update(x)))
-            {
-                INDICATE_FAILURE;
-                return FAILURE;
-            }
-        }
+      INDICATE_FAILURE
+      ;
+      return FAILURE;
+    }
+    return SUCCESS;
 
-        // Update task maps if the task definition precision (rho) is non-zero
+  }
 
-        for (auto& it : task_defs_)
-        {
-            boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<TaskSqrError>(it.second);
-            if(task->getRho(t)>0)
-            {
-                if(ok(task->getTaskMap()->update(x,t)))
-                {
-                    // All is fine
-                }
-                else
-                {
-                    ERROR("Failed updating '" << task->getObjectName() << "'");
-                    return FAILURE;
-                }
-            }
-        }
-
-        return SUCCESS;
+  EReturn AICOProblem::update(Eigen::VectorXdRefConst x, const int t)
+  {
+    // Update the KinematicScene(s)...
+    for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
+    {
+      if (!ok(it->second->update(x)))
+      {
+        INDICATE_FAILURE
+        ;
+        return FAILURE;
+      }
     }
 
-	AICOProblem::AICOProblem(): T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
-	{
+    // Update task maps if the task definition precision (rho) is non-zero
 
-	}
-
-	AICOProblem::~AICOProblem ()
-	{
-
-	}
-
-	EReturn AICOProblem::initDerived(tinyxml2::XMLHandle & handle)
-	{
-        EReturn ret_value = SUCCESS;
-		tinyxml2::XMLElement* xmltmp;
-		bool hastime=false;
-		XML_CHECK("T"); XML_OK(getInt(*xmltmp,T));
-        if(T<=2) {INDICATE_FAILURE; return PAR_ERR;}
-		xmltmp=handle.FirstChildElement("duration").ToElement();if (xmltmp) {XML_OK(getDouble(*xmltmp,tau));tau=tau/((double)T);hastime=true;}
-		if(hastime)
-		{
-			xmltmp=handle.FirstChildElement("tau").ToElement();
-			if (xmltmp) WARNING("Duration has already been specified, tau is ignored.");
-		}
-		else
-		{
-			XML_CHECK("tau"); XML_OK(getDouble(*xmltmp,tau));
-		}
-
-		XML_CHECK("Qrate"); XML_OK(getDouble(*xmltmp,Q_rate));
-		XML_CHECK("Hrate"); XML_OK(getDouble(*xmltmp,H_rate));
-		XML_CHECK("Wrate"); XML_OK(getDouble(*xmltmp,W_rate));
-		{
-			Eigen::VectorXd tmp;
-			XML_CHECK("W"); XML_OK(getVector(*xmltmp,tmp));
-			W=Eigen::MatrixXd::Identity(tmp.rows(),tmp.rows());
-			W.diagonal() = tmp;
-		}
-        for (TaskDefinition_map::const_iterator it = task_defs_.begin();
-                it != task_defs_.end() and ok(ret_value); ++it)
+    for (auto& it : task_defs_)
+    {
+      boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<
+          TaskSqrError>(it.second);
+      if (task->getRho(t) > 0)
+      {
+        if (ok(task->getTaskMap()->update(x, t)))
         {
-          if(it->second->type().compare(std::string("TaskSqrError"))==0) ERROR("Task variable " << it->first << " is not an squared error!");
+          // All is fine
         }
-        // Set number of time steps
-        return setTime(T);
-	}
+        else
+        {
+          ERROR("Failed updating '" << task->getObjectName() << "'");
+          return FAILURE;
+        }
+      }
+    }
 
-	int AICOProblem::getT()
-	{
-		return T;
-	}
-        
-    EReturn AICOProblem::setTime(int T_)
-	{
-        if(T_<=0) {INDICATE_FAILURE; return PAR_ERR;}
-        tau=(double)T*tau/(double)T_;
-        T=T_;
-		// Set number of time steps
-        for (auto& it : task_defs_)
-		{
-            if(!ok(it.second->setTimeSteps(T+2)))
-		    {
-                INDICATE_FAILURE;
-                return FAILURE;
-		    }
-		}
-        return SUCCESS;
-	}
+    return SUCCESS;
+  }
 
-	void AICOProblem::getT(int& T_)
-	{
-		T_=T;
-	}
+  AICOProblem::AICOProblem()
+      : T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
+  {
 
-	double AICOProblem::getTau()
-	{
-		return tau;
-	}
+  }
 
-	void AICOProblem::getTau(double& tau_)
-	{
-		tau_=tau;
-	}
+  AICOProblem::~AICOProblem()
+  {
 
-	double AICOProblem::getDuration()
-	{
-		return tau*(double)T;
-	}
+  }
 
-	Eigen::MatrixXd AICOProblem::getW()
-	{
-		return W;
-	}
+  EReturn AICOProblem::initDerived(tinyxml2::XMLHandle & handle)
+  {
+    EReturn ret_value = SUCCESS;
+    tinyxml2::XMLElement* xmltmp;
+    bool hastime = false;
+    XML_CHECK("T");
+    XML_OK(getInt(*xmltmp, T));
+    if (T <= 2)
+    {
+      INDICATE_FAILURE
+      ;
+      return PAR_ERR;
+    }
+    xmltmp = handle.FirstChildElement("duration").ToElement();
+    if (xmltmp)
+    {
+      XML_OK(getDouble(*xmltmp, tau));
+      tau = tau / ((double) T);
+      hastime = true;
+    }
+    if (hastime)
+    {
+      xmltmp = handle.FirstChildElement("tau").ToElement();
+      if (xmltmp)
+        WARNING("Duration has already been specified, tau is ignored.");
+    }
+    else
+    {
+      XML_CHECK("tau");
+      XML_OK(getDouble(*xmltmp, tau));
+    }
 
-	double AICOProblem::getQrate()
-	{
-		return Q_rate;
-	}
+    XML_CHECK("Qrate");
+    XML_OK(getDouble(*xmltmp, Q_rate));
+    XML_CHECK("Hrate");
+    XML_OK(getDouble(*xmltmp, H_rate));
+    XML_CHECK("Wrate");
+    XML_OK(getDouble(*xmltmp, W_rate));
+    {
+      Eigen::VectorXd tmp;
+      XML_CHECK("W");
+      XML_OK(getVector(*xmltmp, tmp));
+      W = Eigen::MatrixXd::Identity(tmp.rows(), tmp.rows());
+      W.diagonal() = tmp;
+    }
+    for (TaskDefinition_map::const_iterator it = task_defs_.begin();
+        it != task_defs_.end() and ok(ret_value); ++it)
+    {
+      if (it->second->type().compare(std::string("TaskSqrError")) == 0)
+        ERROR("Task variable " << it->first << " is not an squared error!");
+    }
+    // Set number of time steps
+    return setTime(T);
+  }
 
-	double AICOProblem::getWrate()
-	{
-		return W_rate;
-	}
+  int AICOProblem::getT()
+  {
+    return T;
+  }
 
-	double AICOProblem::getHrate()
-	{
-		return H_rate;
-	}
+  EReturn AICOProblem::setTime(int T_)
+  {
+    if (T_ <= 0)
+    {
+      INDICATE_FAILURE
+      ;
+      return PAR_ERR;
+    }
+    tau = (double) T * tau / (double) T_;
+    T = T_;
+    // Set number of time steps
+    for (auto& it : task_defs_)
+    {
+      if (!ok(it.second->setTimeSteps(T + 2)))
+      {
+        INDICATE_FAILURE
+        ;
+        return FAILURE;
+      }
+    }
+    return SUCCESS;
+  }
+
+  void AICOProblem::getT(int& T_)
+  {
+    T_ = T;
+  }
+
+  double AICOProblem::getTau()
+  {
+    return tau;
+  }
+
+  void AICOProblem::getTau(double& tau_)
+  {
+    tau_ = tau;
+  }
+
+  double AICOProblem::getDuration()
+  {
+    return tau * (double) T;
+  }
+
+  Eigen::MatrixXd AICOProblem::getW()
+  {
+    return W;
+  }
+
+  double AICOProblem::getQrate()
+  {
+    return Q_rate;
+  }
+
+  double AICOProblem::getWrate()
+  {
+    return W_rate;
+  }
+
+  double AICOProblem::getHrate()
+  {
+    return H_rate;
+  }
 
 } /* namespace exotica */

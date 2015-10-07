@@ -17,30 +17,32 @@
 namespace exotica
 {
 
-    class OMPLGoal;
+  class OMPLGoal;
 
-	class OMPLsolver;
+  class OMPLsolver;
 
-    class OMPLGoalSampler : public ompl::base::GoalSampleableRegion, public OMPLGoal
-	{
-		public:
-            OMPLGoalSampler (const ompl::base::SpaceInformationPtr &si, OMPLProblem_ptr prob, OMPLProblem_ptr samplingBias);
-			virtual
-			~OMPLGoalSampler ();
-			virtual void sampleGoal(ompl::base::State *st) const;
-            virtual unsigned int maxSampleCount() const ;
-            virtual double distanceGoal(const ompl::base::State *st) const;
-        private:
+  class OMPLGoalSampler: public ompl::base::GoalSampleableRegion,
+      public OMPLGoal
+  {
+    public:
+      OMPLGoalSampler(const ompl::base::SpaceInformationPtr &si,
+          OMPLProblem_ptr prob, OMPLProblem_ptr samplingBias);
+      virtual
+      ~OMPLGoalSampler();
+      virtual void sampleGoal(ompl::base::State *st) const;
+      virtual unsigned int maxSampleCount() const;
+      virtual double distanceGoal(const ompl::base::State *st) const;
+    private:
 
-			OMPLProblem_ptr prob_;
-			boost::shared_ptr<OMPLsolver> sol_;
-            ompl::base::StateSamplerPtr default_sampler_;
-            bool hasIdentityTask;
-            boost::shared_ptr<Identity> taskI;
-            OMPLProblem_ptr goalBias_;
+      OMPLProblem_ptr prob_;
+      boost::shared_ptr<OMPLsolver> sol_;
+      ompl::base::StateSamplerPtr default_sampler_;
+      bool hasIdentityTask;
+      boost::shared_ptr<Identity> taskI;
+      OMPLProblem_ptr goalBias_;
 
-	};
-	typedef boost::shared_ptr<exotica::OMPLGoalSampler> OMPLGoalSampler_ptr;
+  };
+  typedef boost::shared_ptr<exotica::OMPLGoalSampler> OMPLGoalSampler_ptr;
 } /* namespace exotica */
 
 #endif /* OMPLGOALSAMPLER_H_ */

@@ -12,103 +12,156 @@
 #pragma warning(disable : 4127) // conditional expression is constant
 #endif
 
-namespace rapidjson {
+namespace rapidjson
+{
 
 //! JSON writer
-/*! Writer implements the concept Handler.
-	It generates JSON text by events to an output stream.
+  /*! Writer implements the concept Handler.
+   It generates JSON text by events to an output stream.
 
-	User may programmatically calls the functions of a writer to generate JSON text.
+   User may programmatically calls the functions of a writer to generate JSON text.
 
-	On the other side, a writer can also be passed to objects that generates events, 
+   On the other side, a writer can also be passed to objects that generates events, 
 
-	for example Reader::Parse() and Document::Accept().
+   for example Reader::Parse() and Document::Accept().
 
-	\tparam Stream Type of ouptut stream.
-	\tparam Encoding Encoding of both source strings and output.
-	\implements Handler
-*/
-template<typename Stream, typename Encoding = UTF8<>, typename Allocator = MemoryPoolAllocator<> >
-class Writer {
-public:
-	typedef typename Encoding::Ch Ch;
+   \tparam Stream Type of ouptut stream.
+   \tparam Encoding Encoding of both source strings and output.
+   \implements Handler
+   */
+  template<typename Stream, typename Encoding = UTF8<>,
+      typename Allocator = MemoryPoolAllocator<> >
+  class Writer
+  {
+    public:
+      typedef typename Encoding::Ch Ch;
 
-	Writer(Stream& stream, Allocator* allocator = 0, size_t levelDepth = kDefaultLevelDepth) : 
-		stream_(stream), level_stack_(allocator, levelDepth * sizeof(Level)) {}
+      Writer(Stream& stream, Allocator* allocator = 0, size_t levelDepth =
+          kDefaultLevelDepth)
+          : stream_(stream), level_stack_(allocator, levelDepth * sizeof(Level))
+      {
+      }
 
-	//@name Implementation of Handler
-	//@{
-	Writer& Null()					{ Prefix(kNullType);   WriteNull();			return *this; }
-	Writer& Bool(bool b)			{ Prefix(b ? kTrueType : kFalseType); WriteBool(b); return *this; }
-	Writer& Int(int i)				{ Prefix(kNumberType); WriteInt(i);			return *this; }
-	Writer& Uint(unsigned u)		{ Prefix(kNumberType); WriteUint(u);		return *this; }
-	Writer& Int64(int64_t i64)		{ Prefix(kNumberType); WriteInt64(i64);		return *this; }
-	Writer& Uint64(uint64_t u64)	{ Prefix(kNumberType); WriteUint64(u64);	return *this; }
-	Writer& Double(double d)		{ Prefix(kNumberType); WriteDouble(d);		return *this; }
+      //@name Implementation of Handler
+      //@{
+      Writer& Null()
+      {
+        Prefix(kNullType);
+        WriteNull();
+        return *this;
+      }
+      Writer& Bool(bool b)
+      {
+        Prefix(b ? kTrueType : kFalseType);
+        WriteBool(b);
+        return *this;
+      }
+      Writer& Int(int i)
+      {
+        Prefix(kNumberType);
+        WriteInt(i);
+        return *this;
+      }
+      Writer& Uint(unsigned u)
+      {
+        Prefix(kNumberType);
+        WriteUint(u);
+        return *this;
+      }
+      Writer& Int64(int64_t i64)
+      {
+        Prefix(kNumberType);
+        WriteInt64(i64);
+        return *this;
+      }
+      Writer& Uint64(uint64_t u64)
+      {
+        Prefix(kNumberType);
+        WriteUint64(u64);
+        return *this;
+      }
+      Writer& Double(double d)
+      {
+        Prefix(kNumberType);
+        WriteDouble(d);
+        return *this;
+      }
 
-	Writer& String(const Ch* str, SizeType length, bool copy = false) {
-		(void)copy;
-		Prefix(kStringType);
-		WriteString(str, length);
-		return *this;
-	}
+      Writer& String(const Ch* str, SizeType length, bool copy = false)
+      {
+        (void) copy;
+        Prefix(kStringType);
+        WriteString(str, length);
+        return *this;
+      }
 
-	Writer& StartObject() {
-		Prefix(kObjectType);
-		new (level_stack_.template Push<Level>()) Level(false);
-		WriteStartObject();
-		return *this;
-	}
+      Writer& StartObject()
+      {
+        Prefix(kObjectType);
+        new (level_stack_.template Push<Level>()) Level(false);
+        WriteStartObject();
+        return *this;
+      }
 
-	Writer& EndObject(SizeType memberCount = 0) {
-		(void)memberCount;
-		RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level));
-		RAPIDJSON_ASSERT(!level_stack_.template Top<Level>()->inArray);
-		level_stack_.template Pop<Level>(1);
-		WriteEndObject();
-		return *this;
-	}
+      Writer& EndObject(SizeType memberCount = 0)
+      {
+        (void) memberCount;
+        RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level));
+        RAPIDJSON_ASSERT(!level_stack_.template Top<Level>()->inArray);
+      level_stack_.template Pop<Level>(1);
+      WriteEndObject();
+      return *this;
+    }
 
-	Writer& StartArray() {
-		Prefix(kArrayType);
-		new (level_stack_.template Push<Level>()) Level(true);
-		WriteStartArray();
-		return *this;
-	}
+    Writer& StartArray()
+    {
+      Prefix(kArrayType);
+      new (level_stack_.template Push<Level>()) Level(true);
+      WriteStartArray();
+      return *this;
+    }
 
-	Writer& EndArray(SizeType elementCount = 0) {
-		(void)elementCount;
-		RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level));
-		RAPIDJSON_ASSERT(level_stack_.template Top<Level>()->inArray);
-		level_stack_.template Pop<Level>(1);
-		WriteEndArray();
-		return *this;
-	}
-	//@}
+    Writer& EndArray(SizeType elementCount = 0)
+    {
+      (void)elementCount;
+      RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level));
+      RAPIDJSON_ASSERT(level_stack_.template Top<Level>()->inArray);
+      level_stack_.template Pop<Level>(1);
+      WriteEndArray();
+      return *this;
+    }
+    //@}
 
-	//! Simpler but slower overload.
-	Writer& String(const Ch* str) { return String(str, internal::StrLen(str)); }
+    //! Simpler but slower overload.
+    Writer& String(const Ch* str)
+    { return String(str, internal::StrLen(str));}
 
-protected:
-	//! Information for each nested level
-	struct Level {
-		Level(bool inArray_) : inArray(inArray_), valueCount(0) {}
-		bool inArray;		//!< true if in array, otherwise in object
-		size_t valueCount;	//!< number of values in this level
-	};
+    protected:
+    //! Information for each nested level
+    struct Level
+    {
+      Level(bool inArray_) : inArray(inArray_), valueCount(0)
+      {}
+      bool inArray;		//!< true if in array, otherwise in object
+      size_t valueCount;//!< number of values in this level
+    };
 
-	static const size_t kDefaultLevelDepth = 32;
+    static const size_t kDefaultLevelDepth = 32;
 
-	void WriteNull()  {
-		stream_.Put('n'); stream_.Put('u'); stream_.Put('l'); stream_.Put('l');
-	}
+    void WriteNull()
+    {
+      stream_.Put('n'); stream_.Put('u'); stream_.Put('l'); stream_.Put('l');
+    }
 
-	void WriteBool(bool b)  {
-		if (b) {
-			stream_.Put('t'); stream_.Put('r'); stream_.Put('u'); stream_.Put('e');
-		}
-		else {
-			stream_.Put('f'); stream_.Put('a'); stream_.Put('l'); stream_.Put('s'); stream_.Put('e');
+    void WriteBool(bool b)
+    {
+      if (b)
+      {
+        stream_.Put('t'); stream_.Put('r'); stream_.Put('u'); stream_.Put('e');
+      }
+      else
+      {
+        stream_.Put('f'); stream_.Put('a'); stream_.Put('l'); stream_.Put('s');stream_.Put('e');
 		}
 	}
 

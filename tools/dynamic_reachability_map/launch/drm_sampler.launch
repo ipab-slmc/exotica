@@ -1,0 +1,12 @@
+<launch>
+  <param name="robot_description" textfile="$(find test_robot_2d)/robots/test_robot_2d.urdf"/>
+  <param name="robot_description_semantic" textfile="$(find test_robot_2d_moveit)/config/test_robot_2d.srdf"/>  
+  <node pkg="dynamic_reachability_map" type="DRMSpaceSampler" name="DRMSpaceSampler" output="screen">
+    <param name="EndEffector" type="string" value="link_tip"/>
+    <param name="Group" type="string" value="arm"/>
+    <param name="SpaceBounds" type="string" value="0 1.5 -1.5 1.5 -0.04 0.04"/>
+    <param name="CellSize" value="0.1"/>
+    <param name="ThreadsNumber" value="8"/>
+    <param name="SampleSize" value="500000"/>
+  </node>
+</launch>

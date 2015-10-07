@@ -10,26 +10,32 @@
 #include "testing_pkg/TestingTools.h"
 #include "testing_pkg/Exotica/DummyClasses.h"
 
-class TaskMapTest : public ::testing::Test  //!< Testing class for the exotica library
+class TaskMapTest: public ::testing::Test //!< Testing class for the exotica library
 {
-  public: 
-  
+  public:
+
     virtual void SetUp()
     {
-      ASSERT_EQ(exotica::SUCCESS, (exotica::TaskMap_fac::Instance().listImplementations(registered_types_)));  //!< Ensure that the object loads
+      ASSERT_EQ(exotica::SUCCESS,
+          (exotica::TaskMap_fac::Instance().listImplementations(
+              registered_types_)));  //!< Ensure that the object loads
       std::string package_path;
-      ASSERT_TRUE(findPackagePath("testing_pkg", package_path));  //!< Removes dependency on ros (in the future)
+      ASSERT_TRUE(findPackagePath("testing_pkg", package_path)); //!< Removes dependency on ros (in the future)
       resource_path_ = package_path.append("/resource/Exotica/");
-    };
-    
-    virtual void TearDown() {};
-  
+    }
+    ;
+
+    virtual void TearDown()
+    {
+    }
+    ;
+
     //!< Member Variables
-    std::vector<std::string>                registered_types_;
-    std::string                             resource_path_;
-    boost::shared_ptr<exotica::TaskMap>     base_ptr_;
-    kinematica::KinematicScene_map          kin_scenes_;
-    
+    std::vector<std::string> registered_types_;
+    std::string resource_path_;
+    boost::shared_ptr<exotica::TaskMap> base_ptr_;
+    kinematica::KinematicScene_map kin_scenes_;
+
 };
 
 #endif

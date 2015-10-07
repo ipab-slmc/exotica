@@ -13,18 +13,16 @@
 
 namespace ompl
 {
-	namespace base
-	{
-		class FRRTBiasedStateSampler : public ValidStateSampler
-		{
-			public:
-				FRRTBiasedStateSampler(const SpaceInformation *si);
-				virtual ~FRRTBiasedStateSampler();
-				
-				
-		};
-	}
-}
+  namespace base
+  {
+    class FRRTBiasedStateSampler: public ValidStateSampler
+    {
+      public:
+        FRRTBiasedStateSampler(const SpaceInformation *si);
+        virtual ~FRRTBiasedStateSampler();
 
+    };
+  }
+}
 
 #endif /* EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_FRRT_FRRTBIASEDSTATESAMPLER_H_ */

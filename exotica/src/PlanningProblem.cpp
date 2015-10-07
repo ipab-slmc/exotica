@@ -275,11 +275,24 @@ namespace exotica
 		{
 			task_maps_ = originalMaps_;
 			task_defs_ = originalDefs_;
+			std::map<std::string, std::pair<std::vector<std::string>, std::vector<KDL::Frame>>> tmp;
+			for(auto &it:task_maps_)
+			{
+			    std::pair<std::vector<std::string>, std::vector<KDL::Frame>> tmp_pair;
+			    if(it.second->getScene()->getEndEffectors(it.first,tmp_pair))
+				tmp[it.first]=tmp_pair;
+			}
+			for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
+			    it->second->clearTaskMap();
+			for(auto &it:originalMaps_)
+			  it.second->getScene()->appendTaskMap(it.first,tmp.at(it.first).first,tmp.at(it.first).second);
 		}
 		else
 		{
 			task_maps_.clear();
 			task_defs_.clear();
+			for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
+			    it->second->clearTaskMap();
 		}
 	}
 

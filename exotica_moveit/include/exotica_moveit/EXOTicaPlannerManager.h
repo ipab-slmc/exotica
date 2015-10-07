@@ -38,62 +38,68 @@
 namespace exotica
 {
 
-	class EXOTicaPlannerManager : public planning_interface::PlannerManager
-	{
-		public:
-			EXOTicaPlannerManager ();
-			virtual
-			~EXOTicaPlannerManager ();
-
-			virtual bool initialize(const robot_model::RobotModelConstPtr& model, const std::string &ns);
-			virtual bool canServiceRequest(const planning_interface::MotionPlanRequest& req) const;
-			virtual std::string getDescription() const;
-			virtual void getPlanningAlgorithms(std::vector<std::string> &algs) const;
-
-			virtual planning_interface::PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-			                                                const planning_interface::MotionPlanRequest &req,
-			                                                moveit_msgs::MoveItErrorCodes &error_code) const;
-
-			ros::NodeHandle nh_;
-			std::vector<std::string> problems_;
-			std::vector<std::string> solvers_;
-	};
-
-  class EXOTicaPlanningContext : public planning_interface::PlanningContext
+  class EXOTicaPlannerManager: public planning_interface::PlannerManager
   {
-  	public:
-  		EXOTicaPlanningContext(const std::string &name, const std::string &group, const robot_model::RobotModelConstPtr& model,
-  		                       const std::string &problem_name, const std::string &solver_name);
-  		bool configure(const planning_scene::PlanningSceneConstPtr & scene);
+    public:
+      EXOTicaPlannerManager();
+      virtual
+      ~EXOTicaPlannerManager();
 
-  	  /** \brief Solve the motion planning problem and store the result in \e res. This function should not clear data structures before computing. The constructor and clear() do that. */
-  		virtual bool solve(planning_interface::MotionPlanResponse &res);
+      virtual bool initialize(const robot_model::RobotModelConstPtr& model,
+          const std::string &ns);
+      virtual bool canServiceRequest(
+          const planning_interface::MotionPlanRequest& req) const;
+      virtual std::string getDescription() const;
+      virtual void getPlanningAlgorithms(std::vector<std::string> &algs) const;
 
-			/** \brief Solve the motion planning problem and store the detailed result in \e res. This function should not clear data structures before computing. The constructor and clear() do that. */
-			virtual bool solve(planning_interface::MotionPlanDetailedResponse &res);
+      virtual planning_interface::PlanningContextPtr getPlanningContext(
+          const planning_scene::PlanningSceneConstPtr& planning_scene,
+          const planning_interface::MotionPlanRequest &req,
+          moveit_msgs::MoveItErrorCodes &error_code) const;
 
-			/** \brief If solve() is running, terminate the computation. Return false if termination not possible. No-op if solve() is not running (returns true).*/
-			virtual bool terminate();
+      ros::NodeHandle nh_;
+      std::vector<std::string> problems_;
+      std::vector<std::string> solvers_;
+  };
 
-			/** \brief Clear the data structures used by the planner */
-			virtual void clear();
+  class EXOTicaPlanningContext: public planning_interface::PlanningContext
+  {
+    public:
+      EXOTicaPlanningContext(const std::string &name, const std::string &group,
+          const robot_model::RobotModelConstPtr& model,
+          const std::string &problem_name, const std::string &solver_name);
+      bool configure(const planning_scene::PlanningSceneConstPtr & scene);
 
-			void copySolution(const Eigen::Ref<const Eigen::MatrixXd> & solution, robot_trajectory::RobotTrajectory* traj);
+      /** \brief Solve the motion planning problem and store the result in \e res. This function should not clear data structures before computing. The constructor and clear() do that. */
+      virtual bool solve(planning_interface::MotionPlanResponse &res);
 
-			void setCompleteInitialState(const robot_state::RobotState &complete_initial_robot_state);
+      /** \brief Solve the motion planning problem and store the detailed result in \e res. This function should not clear data structures before computing. The constructor and clear() do that. */
+      virtual bool solve(planning_interface::MotionPlanDetailedResponse &res);
 
-			MotionSolver_ptr sol;
-			Eigen::MatrixXd solution_;
-			robot_state::RobotState start_state_;
-			robot_state::RobotState goal_state_;
-			double tau_;
-			ros::NodeHandle nh_;
-			Server_ptr ser_;
-			std::string problem_name_;
-			std::string solver_name_;
-			std::vector<std::string> used_names_;
-			std::string config_file_;
-			actionlib::SimpleActionClient<exotica_moveit::ExoticaPlanningAction> client_;
+      /** \brief If solve() is running, terminate the computation. Return false if termination not possible. No-op if solve() is not running (returns true).*/
+      virtual bool terminate();
+
+      /** \brief Clear the data structures used by the planner */
+      virtual void clear();
+
+      void copySolution(const Eigen::Ref<const Eigen::MatrixXd> & solution,
+          robot_trajectory::RobotTrajectory* traj);
+
+      void setCompleteInitialState(
+          const robot_state::RobotState &complete_initial_robot_state);
+
+      MotionSolver_ptr sol;
+      Eigen::MatrixXd solution_;
+      robot_state::RobotState start_state_;
+      robot_state::RobotState goal_state_;
+      double tau_;
+      ros::NodeHandle nh_;
+      Server_ptr ser_;
+      std::string problem_name_;
+      std::string solver_name_;
+      std::vector<std::string> used_names_;
+      std::string config_file_;
+      actionlib::SimpleActionClient<exotica_moveit::ExoticaPlanningAction> client_;
   };
 
 } /* namespace exotica */

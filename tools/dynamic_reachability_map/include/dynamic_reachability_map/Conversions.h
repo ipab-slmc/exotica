@@ -19,11 +19,11 @@
 
 namespace dynamic_reachability_map
 {
-std::vector<std::string> getStringVector(const std::string &s);
-void kdl2Pose(const KDL::Frame & kdl, geometry_msgs::Pose &pose);
-KDL::Frame point2KDL(const geometry_msgs::Point &point);
-KDL::Frame pose2KDL(const geometry_msgs::Pose &pose);
-double KDLDist2D(const KDL::Vector &v1, const KDL::Vector &v2);
+  std::vector<std::string> getStringVector(const std::string &s);
+  void kdl2Pose(const KDL::Frame & kdl, geometry_msgs::Pose &pose);
+  KDL::Frame point2KDL(const geometry_msgs::Point &point);
+  KDL::Frame pose2KDL(const geometry_msgs::Pose &pose);
+  double KDLDist2D(const KDL::Vector &v1, const KDL::Vector &v2);
 }
 
 #endif /* EXOTICA_TOOLS_DYNAMIC_REACHABILITY_MAP_INCLUDE_DYNAMIC_REACHABILITY_MAP_CONVERSIONS_H_ */

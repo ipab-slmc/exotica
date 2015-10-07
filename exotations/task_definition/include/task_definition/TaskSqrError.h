@@ -1,11 +1,11 @@
 /*!*******************************************************************!*\
 |    TaskSqrError provides storage for squared-error forms of Task      |
-|  definitions. It attempts to implement this through a thread-safe     |
-|  accessor system.                                                     |
-|                                                                       |
-|           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
-|                    Last Edited: 31 - March - 2014                     |
-\***********************************************************************/
+ |  definitions. It attempts to implement this through a thread-safe     |
+ |  accessor system.                                                     |
+ |                                                                       |
+ |           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
+ |                    Last Edited: 31 - March - 2014                     |
+ \***********************************************************************/
 
 #ifndef EXOTICA_ERROR_CLASS_H
 #define EXOTICA_ERROR_CLASS_H
@@ -16,25 +16,27 @@
 #include "exotica/Test.h"         //!< For Testing factory
 #include <Eigen/Dense>            //!< Generally dense manipulations should be enough
 #include <boost/thread/mutex.hpp> //!< The boost thread-library for synchronisation
- 
+
 namespace exotica
 {
-  class TaskSqrError : public TaskDefinition
+  class TaskSqrError: public TaskDefinition
   {
     public:
       /**
        * \brief Default Constructor
        */
       TaskSqrError();
-      virtual ~TaskSqrError(){}
-      
+      virtual ~TaskSqrError()
+      {
+      }
+
       /**
        * @brief registerGoal Registers a goal reference at time t
        * @param y_star Goal reference
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerGoal(Eigen::VectorXdRef_ptr y_star, int t=0);
+      EReturn registerGoal(Eigen::VectorXdRef_ptr y_star, int t = 0);
 
       /**
        * @brief registerGoal Registers rho reference at time t
@@ -42,7 +44,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerRho(Eigen::VectorXdRef_ptr rho, int t=0);
+      EReturn registerRho(Eigen::VectorXdRef_ptr rho, int t = 0);
 
       /**
        * @brief getRho Returns the value of rho at time step t
@@ -64,7 +66,10 @@ namespace exotica
        * @return Returns success.
        */
       virtual EReturn setTimeSteps(const int T);
-      int getTimeSteps(){return y_star_.size();}
+      int getTimeSteps()
+      {
+        return y_star_.size();
+      }
 
       /**
        * @brief setDefaultGoals Sets Goals and Rhos to default values
@@ -72,8 +77,8 @@ namespace exotica
        */
       EReturn setDefaultGoals(int t);
 
-      Eigen::VectorXd   y_star0_;    //!< The goal vector
-      Eigen::VectorXd   rho0_,rho1_;       //!< The scalar inter-task weight
+      Eigen::VectorXd y_star0_;    //!< The goal vector
+      Eigen::VectorXd rho0_, rho1_;       //!< The scalar inter-task weight
       bool wasFullyInitialised_;
 
       /**
@@ -90,20 +95,17 @@ namespace exotica
        * @return        Should indicate success/failure
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-      
+
       /** The internal storage **/
-      std::vector<Eigen::VectorXdRef_ptr>   y_star_;    //!< The goal vector
-      std::vector<Eigen::VectorXdRef_ptr>   rho_;       //!< The scalar inter-task weight
-
-
-
+      std::vector<Eigen::VectorXdRef_ptr> y_star_;    //!< The goal vector
+      std::vector<Eigen::VectorXdRef_ptr> rho_; //!< The scalar inter-task weight
 
   };
   typedef boost::shared_ptr<TaskSqrError> TaskSqrError_ptr;
-  class TaskVelocitySqrError : public TaskSqrError
+  class TaskVelocitySqrError: public TaskSqrError
   {
-  public:
-    TaskVelocitySqrError();
+    public:
+      TaskVelocitySqrError();
   };
   typedef boost::shared_ptr<TaskSqrError> TaskSqrError_ptr;
   typedef boost::shared_ptr<TaskVelocitySqrError> TaskVelocitySqrError_ptr;

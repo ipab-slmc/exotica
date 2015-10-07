@@ -9,9 +9,9 @@
 
 class IKSolverDemoNode
 {
-public:
+  public:
     IKSolverDemoNode();
-private:
+  private:
     ros::NodeHandle nh_;
     ros::NodeHandle nhg_;
     std::string resource_path_;

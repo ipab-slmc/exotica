@@ -9,7 +9,7 @@
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit/robot_state/conversions.h>
 
-
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
 }

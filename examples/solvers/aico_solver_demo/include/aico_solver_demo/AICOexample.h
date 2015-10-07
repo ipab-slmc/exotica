@@ -18,16 +18,16 @@
 namespace exotica
 {
 
-	class AICOexample
-	{
-		public:
-			AICOexample ();
-			virtual
-			~AICOexample ();
-            ros::NodeHandle nh_;
-            ros::NodeHandle nhg_;
-            ros::Publisher jointStatePublisher_;
-	};
+  class AICOexample
+  {
+    public:
+      AICOexample();
+      virtual
+      ~AICOexample();
+      ros::NodeHandle nh_;
+      ros::NodeHandle nhg_;
+      ros::Publisher jointStatePublisher_;
+  };
 
 } /* namespace exotica */
 

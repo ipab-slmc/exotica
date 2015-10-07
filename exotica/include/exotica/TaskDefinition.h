@@ -1,12 +1,12 @@
 /***********************************************************************\
 |    This is the base class for all forms of cost-function type         |
-|  implementations. It currently provides no functionality apart from   |
-|  allowing polymorphic behaviour between the different cost            |
-|  components. THREAD-SAFE                                              |
-|                                                                       |
-|           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
-|                    Last Edited: 18 - March - 2014                     |
-\***********************************************************************/
+ |  implementations. It currently provides no functionality apart from   |
+ |  allowing polymorphic behaviour between the different cost            |
+ |  components. THREAD-SAFE                                              |
+ |                                                                       |
+ |           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
+ |                    Last Edited: 18 - March - 2014                     |
+ \***********************************************************************/
 
 #ifndef EXOTICA_TASK_DEFINITION_H
 #define EXOTICA_TASK_DEFINITION_H
@@ -23,15 +23,18 @@
 
 namespace exotica
 {
-  class TaskDefinition : public Object
+  class TaskDefinition: public Object
   {
     public:
       /**
        * \brief Default Constructor
        */
       TaskDefinition();
-      virtual ~TaskDefinition(){};
-      
+      virtual ~TaskDefinition()
+      {
+      }
+      ;
+
       /**
        * \brief Base Initialiser
        * @pre             The TaskMaps must be initialised
@@ -40,8 +43,9 @@ namespace exotica
        * @param map_list  A map from names to TaskMap pointers (for initialising the map)
        * @return          The result of calling the initDerived() function
        */
-      EReturn initBase(tinyxml2::XMLHandle & handle, const TaskMap_map & map_list);
-      
+      EReturn initBase(tinyxml2::XMLHandle & handle,
+          const TaskMap_map & map_list);
+
       /**
        * @brief registerPhi Registers a memory location for the output of phi at time t
        * @param y Reference to memory location to be registered
@@ -57,12 +61,12 @@ namespace exotica
        * @return Indication of success
        */
       EReturn registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
-           
+
       /**
-			 * \brief Wrapper for the underlying task dimension getter
-			 * @param  task_dim Task dimension to be returned
-			 * @return      Indication of success
-			 */
+       * \brief Wrapper for the underlying task dimension getter
+       * @param  task_dim Task dimension to be returned
+       * @return      Indication of success
+       */
       EReturn taskSpaceDim(int & task_dim);
 
       /**
@@ -96,15 +100,15 @@ namespace exotica
        * @return        Should indicate success/failure
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle) = 0;
-      
-      boost::shared_ptr<TaskMap>  task_map_;  //!< Shared pointer to a Task Map from which it gets its inputs
-      boost::mutex                map_lock_;  //!< Mapping Lock for synchronisation
-      
+
+      boost::shared_ptr<TaskMap> task_map_; //!< Shared pointer to a Task Map from which it gets its inputs
+      boost::mutex map_lock_;  //!< Mapping Lock for synchronisation
+
   };
-  
-  typedef Factory<std::string, TaskDefinition>      TaskDefinition_fac;
-  typedef boost::shared_ptr<TaskDefinition>         TaskDefinition_ptr;
+
+  typedef Factory<std::string, TaskDefinition> TaskDefinition_fac;
+  typedef boost::shared_ptr<TaskDefinition> TaskDefinition_ptr;
   typedef std::map<std::string, TaskDefinition_ptr> TaskDefinition_map;
-  
+
 }
 #endif

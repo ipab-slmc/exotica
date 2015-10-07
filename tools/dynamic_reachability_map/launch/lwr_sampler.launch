@@ -5,9 +5,9 @@
     <param name="EndEffector" type="string" value="sdh_grasp_link"/>
     <param name="Group" type="string" value="arm"/>
     <param name="SpaceBounds" type="string" value="-1.1 1.1 -1.1 1.1 0.05 1.7"/>
-    <param name="CellSize" value="0.01"/>
-    <param name="ThreadsNumber" value="1"/>
-    <param name="CheckOccupation" value="0"/>
-    <param name="SampleSize" value="1000"/>
+    <param name="CellSize" value="0.1"/>
+    <param name="ThreadsNumber" value="8"/>
+    <param name="CheckOccupation" value="1"/>
+    <param name="SampleSize" value="1000000"/>
   </node>
 </launch>

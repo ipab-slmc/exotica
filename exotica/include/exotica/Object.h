@@ -20,66 +20,67 @@
 
 namespace exotica
 {
-	template<typename I, typename BO> class Factory;
+  template<typename I, typename BO> class Factory;
 
-	class Object
-	{
-			template<typename I, typename BO> friend class Factory;
-		public:
+  class Object
+  {
+      template<typename I, typename BO> friend class Factory;
+    public:
 
-			/**
-			 * \brief Constructor: default
-			 */
-			Object() :
-					ns_("")
-			{
-				//!< Empty constructor
-            }
+      /**
+       * \brief Constructor: default
+       */
+      Object()
+          : ns_("")
+      {
+        //!< Empty constructor
+      }
 
-			virtual ~Object()
-			{
+      virtual ~Object()
+      {
 
-            }
+      }
 
-			/**
-			 * \brief Type Information wrapper: must be virtual so that it is polymorphic...
-			 * @return String containing the type of the object
-			 */
-			inline virtual std::string type()
-			{
-				int status;
-				std::string name;
-				char * temp; //!< We need to store this to free the memory!
+      /**
+       * \brief Type Information wrapper: must be virtual so that it is polymorphic...
+       * @return String containing the type of the object
+       */
+      inline virtual std::string type()
+      {
+        int status;
+        std::string name;
+        char * temp; //!< We need to store this to free the memory!
 
-				temp = abi::__cxa_demangle(typeid(*this).name(), 0, 0, &status);
-				name = std::string(temp);
-				free(temp);
-				return name;
-			}
+        temp = abi::__cxa_demangle(typeid(*this).name(), 0, 0, &status);
+        name = std::string(temp);
+        free(temp);
+        return name;
+      }
 
-			std::string getObjectName()
-			{
-				return object_name_;
-            }
+      std::string getObjectName()
+      {
+        return object_name_;
+      }
 
-            virtual EReturn initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server)
-			{
-                const char* atr = handle.ToElement()->Attribute("name");
-                if(atr)
-                {
-                    object_name_=std::string(atr);
-                }
-				return SUCCESS;
-			}
+      virtual EReturn initBase(tinyxml2::XMLHandle & handle,
+          const Server_ptr & server)
+      {
+        const char* atr = handle.ToElement()->Attribute("name");
+        if (atr)
+        {
+          object_name_ = std::string(atr);
+        }
+        return SUCCESS;
+      }
 
-            virtual std::string print(std::string prepend)
-            {
-                return prepend + "  " + object_name_ + " (" + type() + ")";
-            }
+      virtual std::string print(std::string prepend)
+      {
+        return prepend + "  " + object_name_ + " (" + type() + ")";
+      }
 
-			//	Namespace, i.e. problem/scene/...etc
-            std::string ns_;
-			std::string object_name_;
-    };
+      //	Namespace, i.e. problem/scene/...etc
+      std::string ns_;
+      std::string object_name_;
+  };
 }
 #endif

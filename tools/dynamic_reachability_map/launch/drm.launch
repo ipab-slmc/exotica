@@ -8,7 +8,7 @@
 
     <param name="RobotModel" type="string" value="/robot_description"/>
     <param name="DRMModel" type="string" value="/drm_robot_description"/>
-    <param name="DRMPath" type="string" value="$(find dynamic_reachability_map)/result2/lwr_1000_0.100000_1443794978"/>
+    <param name="DRMPath" type="string" value="$(find dynamic_reachability_map)/result2/lwr_1000000_0.100000_1444227338"/>
     <param name="Clustering" type="bool" value="0"/>
   </node>
 </launch>

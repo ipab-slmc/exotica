@@ -39,9 +39,9 @@ int main(int argc, char **argv)
 
   try
   {
-    stm >> bounds[0](0) >> bounds[0](1) >> bounds[1](0) >> bounds[1](1) >> bounds[2](0) >> bounds[2](1);
-  }
-  catch (int e)
+    stm >> bounds[0](0) >> bounds[0](1) >> bounds[1](0) >> bounds[1](1)
+        >> bounds[2](0) >> bounds[2](1);
+  } catch (int e)
   {
     ROS_ERROR("Get space bounds failed");
     return 0;
@@ -137,7 +137,8 @@ int main(int argc, char **argv)
   drms.startSampling(space, sample_cnt, samples);
   std::ofstream density_file_;
   ros::Time time = ros::Time::now();
-  std::string path = ros::package::getPath("dynamic_reachability_map") + "/result2";
+  std::string path = ros::package::getPath("dynamic_reachability_map")
+      + "/result2";
   std::string savepath;
   dynamic_reachability_map::DRMSpaceSaver saver;
   saver.saveSpace(path, space, savepath);
@@ -152,15 +153,19 @@ int main(int argc, char **argv)
     return 0;
   }
   else
-    ROS_INFO_STREAM("DRMSpace loaded! Space size "<<space->getSpaceSize()<<", samples size "<<space->getSampleSize());
+    ROS_INFO_STREAM(
+        "DRMSpace loaded! Space size "<<space->getSpaceSize()<<", samples size "<<space->getSampleSize());
 
-  ros::Publisher drm_pub = nh.advertise<visualization_msgs::Marker>("DynamicReachabilityMap", 10);
-  ros::Publisher occup_pub = nh.advertise<visualization_msgs::Marker>("OccupationMap", 10);
+  ros::Publisher drm_pub = nh.advertise<visualization_msgs::Marker>(
+      "DynamicReachabilityMap", 10);
+  ros::Publisher occup_pub = nh.advertise<visualization_msgs::Marker>(
+      "OccupationMap", 10);
   visualization_msgs::Marker drm_mark_, occup_mark;
   drm_mark_.type = visualization_msgs::Marker::CUBE_LIST;
   drm_mark_.header.stamp = ros::Time::now();
   drm_mark_.header.frame_id = "world_frame";
-  drm_mark_.scale.x = drm_mark_.scale.y = drm_mark_.scale.z = space->getResolution();
+  drm_mark_.scale.x = drm_mark_.scale.y = drm_mark_.scale.z =
+      space->getResolution();
   drm_mark_.action = visualization_msgs::Marker::ADD;
 
   occup_mark = drm_mark_;
@@ -197,7 +202,7 @@ int main(int argc, char **argv)
       }
     }
     if (drm_mark_.points.size() == 0)
-      ROS_ERROR("Empty DRM!!!!");
+    ROS_ERROR("Empty DRM!!!!");
     drm_pub.publish(drm_mark_);
 
     occup_mark.header.stamp = ros::Time::now();

@@ -11,15 +11,16 @@
 #include "dynamic_reachability_map/DRMSpace.h"
 namespace dynamic_reachability_map
 {
-class DRMSpaceSaver
-{
-public:
-  DRMSpaceSaver();
+  class DRMSpaceSaver
+  {
+    public:
+      DRMSpaceSaver();
 
-  ~DRMSpaceSaver();
+      ~DRMSpaceSaver();
 
-  bool saveSpace(const std::string &path, DRMSpace_ptr &space, std::string &savepath);
-};
+      bool saveSpace(const std::string &path, DRMSpace_ptr &space,
+          std::string &savepath);
+  };
 }
 
 #endif /* EXOTICA_TOOLS_DYNAMIC_REACHABILITY_MAP_INCLUDE_DYNAMIC_REACHABILITY_MAP_DRMSPACESAVER_H_ */

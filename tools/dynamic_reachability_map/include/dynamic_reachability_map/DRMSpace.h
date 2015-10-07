@@ -18,186 +18,194 @@
 
 namespace dynamic_reachability_map
 {
-struct SpaceBounds
-{
-  SpaceBounds();
-  SpaceBounds(double xlow, double xup, double ylow, double yup, double zlow, double zup);
-
-  bool isValid();
-
-  bool inBounds(const geometry_msgs::Point &p);
-  bool inBounds(const Eigen::Affine3d &p);
-
-  void print();
-
-  double x_low;
-  double x_upper;
-  double y_low;
-  double y_upper;
-  double z_low;
-  double z_upper;
-};
-
-struct VolumeBounds
-{
-  VolumeBounds();
-
-  VolumeBounds(const SpaceBounds &bounds, double volume_resolution);
-
-  bool inBounds(const std::vector<int> &p);
-
-  int bx;
-  int by;
-  int bz;
-};
-
-struct SparseBitSets
-{
-  struct SparsePair
+  struct SpaceBounds
   {
-    unsigned int low;
-    unsigned int upper;
+      SpaceBounds();
+      SpaceBounds(double xlow, double xup, double ylow, double yup, double zlow,
+          double zup);
+
+      bool isValid();
+
+      bool inBounds(const geometry_msgs::Point &p);
+      bool inBounds(const Eigen::Affine3d &p);
+
+      void print();
+
+      double x_low;
+      double x_upper;
+      double y_low;
+      double y_upper;
+      double z_low;
+      double z_upper;
   };
-  SparseBitSets();
 
-  ~SparseBitSets();
+  struct VolumeBounds
+  {
+      VolumeBounds();
 
-  void setFromBoolVector(const std::vector<bool> &bitset);
+      VolumeBounds(const SpaceBounds &bounds, double volume_resolution);
 
-  std::vector<int> getOccupList();
+      bool inBounds(const std::vector<int> &p);
 
-  unsigned int pair_size;
-  SparsePair* data;
-};
+      int bx;
+      int by;
+      int bz;
+  };
 
-struct Node
-{
-  Node();
+  struct SparseBitSets
+  {
+      struct SparsePair
+      {
+          unsigned int low;
+          unsigned int upper;
+      };
+      SparseBitSets();
 
-  ~Node();
+      ~SparseBitSets();
 
-  void invalidate();
+      void setFromBoolVector(const std::vector<bool> &bitset);
 
-  float* q;
-  geometry_msgs::Pose effpose;
-  unsigned int eff_index;
-  bool isValid;
-  std::vector<unsigned long int> edges;
-};
+      std::vector<int> getOccupList();
 
-struct Volume
-{
-  Volume();
-  ~Volume();
-  geometry_msgs::Point center;
-  std::vector<unsigned long int> occup_samples;
-  std::vector<unsigned long int> reach_samples;
-  std::vector<unsigned long int> occup_edges;
-  bool isFree;
-};
+      unsigned int pair_size;
+      SparsePair* data;
+  };
 
-struct Edge
-{
-  Edge();
-  Edge(unsigned long int a_,unsigned long int b_,double length_);
-  ~Edge();
-  unsigned long int a;
-  unsigned long int b;
-  double length;
-  bool isValid;
-};
+  struct Node
+  {
+      Node();
 
-class DRMSpace
-{
-  friend class DRMSpaceSaver;
-  friend class DRMSpaceLoader;
-  friend class MultiThreadsSpaceOccupationLoader;
-  friend class DRMSampler;
-  friend class DRMSampleCluster;
-  friend class DRM;
-public:
-  DRMSpace();
-  ~DRMSpace();
+      ~Node();
 
-  bool createSpace(const SpaceBounds &bounds, double volume_resolution, const robot_model::RobotModelConstPtr &model,
-                   const std::string & eff, const std::string & group_name);
+      void invalidate();
 
-  void clear();
-  const SpaceBounds & getSpaceBounds();
+      float* q;
+      geometry_msgs::Pose effpose;
+      unsigned int eff_index;
+      bool isValid;
+      std::vector<unsigned long int> edges;
+  };
 
-  const VolumeBounds & getVolumeBounds();
+  struct Volume
+  {
+      Volume();
+      ~Volume();
+      geometry_msgs::Point center;
+      std::vector<unsigned long int> occup_samples;
+      std::vector<unsigned long int> reach_samples;
+      std::vector<unsigned long int> occup_edges;
+      bool isFree;
+  };
 
-  bool isReachable(const geometry_msgs::Point &p);
+  struct Edge
+  {
+      Edge();
+      Edge(unsigned long int a_, unsigned long int b_, double length_);
+      ~Edge();
+      unsigned long int a;
+      unsigned long int b;
+      double length;
+      bool isValid;
+  };
 
-  double getResolution();
+  class DRMSpace
+  {
+      friend class DRMSpaceSaver;
+      friend class DRMSpaceLoader;
+      friend class MultiThreadsSpaceOccupationLoader;
+      friend class DRMSampler;
+      friend class DRMSampleCluster;
+      friend class DRM;
+    public:
+      DRMSpace();
+      ~DRMSpace();
 
-  unsigned int getSpaceSize();
+      bool createSpace(const SpaceBounds &bounds, double volume_resolution,
+          const robot_model::RobotModelConstPtr &model, const std::string & eff,
+          const std::string & group_name);
 
-  unsigned long int getSampleSize();
+      void clear();
+      const SpaceBounds & getSpaceBounds();
 
-  int getDimension();
+      const VolumeBounds & getVolumeBounds();
 
-  bool getVolumeIndex(const geometry_msgs::Point &p, unsigned int & index);
-  bool getVolumeIndex(const Eigen::Affine3d &p, unsigned int & index);
-  std::vector<std::pair<unsigned int, double> > getNeighborIndices(unsigned int index, unsigned int depth);
-  double getDistance(unsigned int a, unsigned int b);
+      bool isReachable(const geometry_msgs::Point &p);
 
-  void registOccupation(const Node* const &node);
-  void initialiseSamples(int sample_size);
-  void reserveSamples(int sample_size);
+      double getResolution();
 
-  const Volume & at(unsigned x, unsigned y, unsigned z) const;
+      unsigned int getSpaceSize();
 
-  const Volume & at(unsigned index) const;
+      unsigned long int getSampleSize();
 
-  Volume & atNonConst(unsigned x, unsigned y, unsigned z);
+      int getDimension();
 
-  Volume & atNonConst(unsigned int index);
+      bool getVolumeIndex(const geometry_msgs::Point &p, unsigned int & index);
+      bool getVolumeIndex(const Eigen::Affine3d &p, unsigned int & index);
+      std::vector<std::pair<unsigned int, double> > getNeighborIndices(
+          unsigned int index, unsigned int depth);
+      double getDistance(unsigned int a, unsigned int b);
 
-  void addOccupSample(unsigned int volume_index, unsigned long int sample_index);
-  void addReachSample(unsigned int volume_index, unsigned long int sample_index);
+      void registOccupation(const Node* const &node);
+      void initialiseSamples(int sample_size);
+      void reserveSamples(int sample_size);
 
-  Node & getSampleNonConst(unsigned long int index);
+      const Volume & at(unsigned x, unsigned y, unsigned z) const;
 
-  const Node & getSample(unsigned int index) const;
+      const Volume & at(unsigned index) const;
 
-  void setVolumeOccupied(unsigned int index, bool invalidate_samples = true);
+      Volume & atNonConst(unsigned x, unsigned y, unsigned z);
 
-  std::vector<unsigned int> getVolumeReachabilities();
-  unsigned long int CurrentlyReachability(unsigned int index, std::vector<unsigned long int> & valid_samples);
-  void qArray2Eigen(const float* q, Eigen::VectorXf &eigen);
-  void qEigen2Array(const Eigen::VectorXf &eigen, float* q);
-  planning_scene::PlanningScenePtr & getPlanningScene();
-  const robot_state::JointModelGroup *getGroup();
+      Volume & atNonConst(unsigned int index);
 
-  void buildConnectionGraph(double dmax);
-  std::vector<Edge> edges_;
-private:
-  SpaceBounds space_bounds_;
-  VolumeBounds volume_bounds_;
-  double resolution_;
-  unsigned int space_size_;
-  std::vector<Volume> volumes_;
-  std::vector<Node> samples_;
-  unsigned long int sample_size_;
-  planning_scene::PlanningScenePtr ps_;
-  std::string eff_;
-  const robot_state::JointModelGroup *group_;
-  std::vector<int> var_index_;
-  int dimension_;
-  int thread_size_;
-  boost::mutex space_lock_;
-  boost::ptr_vector<boost::mutex> volume_locks_;
+      void addOccupSample(unsigned int volume_index,
+          unsigned long int sample_index);
+      void addReachSample(unsigned int volume_index,
+          unsigned long int sample_index);
 
-  void buildGraphThreadFn(int thread_id, std::pair<unsigned int, unsigned int> &volumes, double dmax);
-  bool newEdge(unsigned long int a, unsigned long int b);
-  void addEdge(unsigned long int a, unsigned long int b);
-  std::vector<std::vector<std::pair<Edge, std::vector<unsigned int> > > > th_edges_;
-  std::vector<std::vector<unsigned int> > sample_occupation_;
-  std::map<unsigned long int, unsigned long int> checked_edges_;
-  boost::mutex check_edges_lock_;
-};
-typedef boost::shared_ptr<DRMSpace> DRMSpace_ptr;
+      Node & getSampleNonConst(unsigned long int index);
+
+      const Node & getSample(unsigned int index) const;
+
+      void setVolumeOccupied(unsigned int index,
+          bool invalidate_samples = true);
+
+      std::vector<unsigned int> getVolumeReachabilities();
+      unsigned long int CurrentlyReachability(unsigned int index,
+          std::vector<unsigned long int> & valid_samples);
+      void qArray2Eigen(const float* q, Eigen::VectorXf &eigen);
+      void qEigen2Array(const Eigen::VectorXf &eigen, float* q);
+      planning_scene::PlanningScenePtr & getPlanningScene();
+      const robot_state::JointModelGroup *getGroup();
+
+      void buildConnectionGraph(double dmax);
+      std::vector<Edge> edges_;
+    private:
+      SpaceBounds space_bounds_;
+      VolumeBounds volume_bounds_;
+      double resolution_;
+      unsigned int space_size_;
+      std::vector<Volume> volumes_;
+      std::vector<Node> samples_;
+      unsigned long int sample_size_;
+      planning_scene::PlanningScenePtr ps_;
+      std::string eff_;
+      const robot_state::JointModelGroup *group_;
+      std::vector<int> var_index_;
+      int dimension_;
+      int thread_size_;
+      boost::mutex space_lock_;
+      boost::ptr_vector<boost::mutex> volume_locks_;
+
+      void buildGraphThreadFn(int thread_id,
+          std::pair<unsigned int, unsigned int> &volumes, double dmax);
+      bool newEdge(unsigned long int a, unsigned long int b);
+      void addEdge(unsigned long int a, unsigned long int b);
+      std::vector<std::vector<std::pair<Edge, std::vector<unsigned int> > > > th_edges_;
+      std::vector<std::vector<unsigned int> > sample_occupation_;
+      std::map<unsigned long int, unsigned long int> checked_edges_;
+      boost::mutex check_edges_lock_;
+  };
+  typedef boost::shared_ptr<DRMSpace> DRMSpace_ptr;
 }
 
 #endif /* EXOTICA_TOOLS_DYNAMIC_REACHABILITY_MAP_INCLUDE_DYNAMIC_REACHABILITY_MAP_DRMSPACE_H_ */

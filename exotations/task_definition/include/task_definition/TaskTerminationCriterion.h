@@ -1,11 +1,11 @@
 /***********************************************************************\
 |    The base class for all Termination Criteria. Since these can be    |
-|  quite variable the base implementation only defines the initialisers |
-|  and the form of the query function.                                  |
-|                                                                       |
-|           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
-|                    Last Edited: 19 - March - 2014                     |
-\***********************************************************************/
+ |  quite variable the base implementation only defines the initialisers |
+ |  and the form of the query function.                                  |
+ |                                                                       |
+ |           Developer: Michael Camilleri (mcamnadur@gmail.com)          |
+ |                    Last Edited: 19 - March - 2014                     |
+ \***********************************************************************/
 #ifndef EXOTICA_TASK_TERMINATION_CRITERION_H
 #define EXOTICA_TASK_TERMINATION_CRITERION_H
 
@@ -16,16 +16,17 @@
 
 namespace exotica
 {
-  class TaskTerminationCriterion : public TaskSqrError
+  class TaskTerminationCriterion: public TaskSqrError
   {
     public:
       /**
        * \brief Default Constructor
        */
       TaskTerminationCriterion();
-      virtual ~TaskTerminationCriterion(){};
-      
-      
+      virtual ~TaskTerminationCriterion()
+      {
+      }
+      ;
 
       /**
        * @brief terminate Checks if current state should terminate
@@ -33,7 +34,7 @@ namespace exotica
        * @param err Error
        * @return Indication of success
        */
-      virtual EReturn terminate(bool & end, double& err, int t=0);
+      virtual EReturn terminate(bool & end, double& err, int t = 0);
 
       /**
        * @brief registerGoal Registers threshold reference at time t
@@ -41,7 +42,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerThreshold(Eigen::VectorXdRef_ptr threshold, int t=0);
+      EReturn registerThreshold(Eigen::VectorXdRef_ptr threshold, int t = 0);
 
       /**
        * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
@@ -49,9 +50,8 @@ namespace exotica
        * @return Returns success.
        */
       virtual EReturn setTimeSteps(const int T);
-      
 
-      Eigen::VectorXd   threshold0_;
+      Eigen::VectorXd threshold0_;
     protected:
       /**
        * \brief Derived-Initialisation
@@ -59,7 +59,7 @@ namespace exotica
        * @return       Should indicate success/failure
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-      
+
       /// \brief Threshold on squared error.
 
       std::vector<Eigen::VectorXdRef_ptr> threshold_;

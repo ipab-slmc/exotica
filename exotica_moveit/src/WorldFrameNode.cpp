@@ -9,23 +9,23 @@
 #include <tf/transform_broadcaster.h>
 class WorldFrame
 {
-	public:
-		WorldFrame()
-		{
+  public:
+    WorldFrame()
+    {
 
-		}
-		~WorldFrame()
-		{
+    }
+    ~WorldFrame()
+    {
 
-		}
+    }
 
-	private:
-		void poseCallback(const geometry_msgs::TransformStampedConstPtr & pose)
-		{
-			boost::mutex::scoped_lock(lock_);
-		}
-		ros::Timer timer_;
-		geometry_msgs::TransformStamped tf_;
-		boost::mutex lock_;
+  private:
+    void poseCallback(const geometry_msgs::TransformStampedConstPtr & pose)
+    {
+      boost::mutex::scoped_lock(lock_);
+    }
+    ros::Timer timer_;
+    geometry_msgs::TransformStamped tf_;
+    boost::mutex lock_;
 };
 

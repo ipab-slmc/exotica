@@ -14,20 +14,23 @@
 namespace exotica
 {
 
-	class OMPLStateSpace : public ompl::base::RealVectorStateSpace
-	{
-		public:
+  class OMPLStateSpace: public ompl::base::RealVectorStateSpace
+  {
+    public:
 
-		  static boost::shared_ptr<OMPLStateSpace> FromProblem(OMPLProblem_ptr prob);
+      static boost::shared_ptr<OMPLStateSpace> FromProblem(
+          OMPLProblem_ptr prob);
 
-			OMPLStateSpace (unsigned int dim = 0);
-			virtual
-			~OMPLStateSpace ();
+      OMPLStateSpace(unsigned int dim = 0);
+      virtual
+      ~OMPLStateSpace();
 
-			EReturn copyToOMPLState(ompl::base::State *state, Eigen::VectorXd q) const;
-			EReturn copyFromOMPLState(const ompl::base::State *state, Eigen::VectorXd& q) const;
+      EReturn copyToOMPLState(ompl::base::State *state,
+          Eigen::VectorXd q) const;
+      EReturn copyFromOMPLState(const ompl::base::State *state,
+          Eigen::VectorXd& q) const;
 
-	};
+  };
 
 } /* namespace exotica */
 

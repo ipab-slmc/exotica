@@ -9,32 +9,35 @@
 
 namespace exotica
 {
-  class Identity : public TaskMap
+  class Identity: public TaskMap
   {
     public:
       /**
        * \brief Default constructor
        */
       Identity();
-      virtual ~Identity(){}
-      
+      virtual ~Identity()
+      {
+      }
+
       /**
        * \brief Concrete implementation of the update method
        */
       virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
-      
+
       /**
        * \brief Concrete implementation of the task-space size
        */
       virtual EReturn taskSpaceDim(int & task_dim);
 
-      EReturn initialise(std::string& postureName, std::vector<std::string>& joints, bool skipUnknown=false);
+      EReturn initialise(std::string& postureName,
+          std::vector<std::string>& joints, bool skipUnknown = false);
       virtual EReturn initialise(const rapidjson::Value& a);
 
       bool useRef;
       std::vector<int> jointMap;
       Eigen::VectorXd jointRef;
-      
+
     protected:
       /**
        * \brief Concrete implementation of the initialisation method
@@ -43,7 +46,6 @@ namespace exotica
 
       int getJointIDexternal(std::string& name);
       int getJointID(std::string& name);
-
 
   };
 }

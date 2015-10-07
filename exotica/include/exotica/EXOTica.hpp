@@ -17,5 +17,4 @@
 // JSON parser
 #include <rapidjson/document.h>
 
-
 #endif

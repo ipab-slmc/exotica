@@ -9,7 +9,7 @@
 
 namespace testing
 {
-  class DClass : public exotica::Object
+  class DClass: public exotica::Object
   {
     public:
       DClass()
@@ -18,11 +18,10 @@ namespace testing
       }
       std::string name;
   };
-  
+
   EXOTICA_REGISTER(std::string, exotica::Object, "ObjectTest", exotica::Object);
   EXOTICA_REGISTER(std::string, exotica::Object, "DClassTest", testing::DClass);
   REGISTER_FOR_XML_TEST("DClassTest", "DerivedXML");
 }
-
 
 #endif

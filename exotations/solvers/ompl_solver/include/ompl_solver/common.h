@@ -16,13 +16,14 @@
 namespace exotica
 {
 
-	namespace ob = ompl::base;
-	namespace og = ompl::geometric;
-	namespace ot = ompl::tools;
+  namespace ob = ompl::base;
+  namespace og = ompl::geometric;
+  namespace ot = ompl::tools;
 
-	typedef boost::function<ob::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
+  typedef boost::function<
+      ob::PlannerPtr(const ompl::base::SpaceInformationPtr &si,
+          const std::string &name)> ConfiguredPlannerAllocator;
 
 }
-
 
 #endif /* COMMON_H_ */

@@ -10,27 +10,30 @@
 
 namespace exotica //!< Since this is part of the core library, it will be within the same namespace
 {
-  class EffPosition : public TaskMap
+  class EffPosition: public TaskMap
   {
     public:
       /**
        * \brief Default constructor
        */
       EffPosition();
-      virtual ~EffPosition(){};
-      
+      virtual ~EffPosition()
+      {
+      }
+      ;
+
       /**
        * \brief Concrete implementation of the update method
        */
       virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
-      
+
       /**
        * \brief Concrete implementation of the task-space size
        */
       virtual EReturn taskSpaceDim(int & task_dim);
 
       virtual EReturn initialise(const rapidjson::Value& a);
-      
+
     protected:
       /**
        * \brief Concrete implementation of TaskMap::initDerived()

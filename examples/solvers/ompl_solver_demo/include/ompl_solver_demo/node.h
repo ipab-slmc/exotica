@@ -9,9 +9,9 @@
 
 class OMPLSolverDemoNode
 {
-public:
+  public:
     OMPLSolverDemoNode();
-private:
+  private:
     ros::NodeHandle nh_;
     ros::NodeHandle nhg_;
     std::string resource_path_;

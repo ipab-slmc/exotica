@@ -9,24 +9,30 @@
 #include "testing_pkg/TestingTools.h"
 #include "testing_pkg/Exotica/DummyClasses.h"
 
-class PlanningProblemTest : public ::testing::Test  //!< Testing class for the exotica library
+class PlanningProblemTest: public ::testing::Test //!< Testing class for the exotica library
 {
-  public: 
-  
+  public:
+
     virtual void SetUp()
     {
-      ASSERT_EQ(exotica::SUCCESS, (exotica::PlanningProblem_fac::Instance().listImplementations(registered_types_)));  //!< Ensure that the object loads
+      ASSERT_EQ(exotica::SUCCESS,
+          (exotica::PlanningProblem_fac::Instance().listImplementations(
+              registered_types_)));  //!< Ensure that the object loads
       std::string package_path;
-      ASSERT_TRUE(findPackagePath("testing_pkg", package_path));  //!< Removes dependency on ros (in the future)
+      ASSERT_TRUE(findPackagePath("testing_pkg", package_path)); //!< Removes dependency on ros (in the future)
       resource_path_ = package_path.append("/resource/Exotica/");
-    };
-    
-    virtual void TearDown() {};
-  
+    }
+    ;
+
+    virtual void TearDown()
+    {
+    }
+    ;
+
     //!< Member Variables
-    std::vector<std::string>      registered_types_;
-    std::string                   resource_path_;
-    exotica::PlanningProblem_ptr  base_ptr_;    
+    std::vector<std::string> registered_types_;
+    std::string resource_path_;
+    exotica::PlanningProblem_ptr base_ptr_;
 };
 
 #endif

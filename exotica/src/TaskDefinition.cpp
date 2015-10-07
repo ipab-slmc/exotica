@@ -2,97 +2,116 @@
 
 namespace exotica
 {
-    TaskDefinition::TaskDefinition() : order(0)
+  TaskDefinition::TaskDefinition()
+      : order(0)
+  {
+    //! Empty Constructor...
+  }
+
+  TaskMap_ptr TaskDefinition::getTaskMap()
+  {
+    return task_map_;
+  }
+
+  std::string TaskDefinition::print(std::string prepend)
+  {
+    std::string ret = Object::print(prepend);
+    ret += "\n" + prepend + "  Task Map:";
+    ret += "\n" + task_map_->print(prepend + "    ");
+    return ret;
+  }
+
+  EReturn TaskDefinition::initBase(tinyxml2::XMLHandle & handle,
+      const TaskMap_map & map_list)
+  {
+    Server_ptr server;
+    Object::initBase(handle, server);
+    //!< Temporaries
+    EReturn tmp_rtn = SUCCESS;
+    EReturn aux_rtn = FAILURE;
+
+    //!< Attempt to set the task-map
+    if (!handle.FirstChildElement("map").ToElement())
     {
-      //! Empty Constructor...
+      tmp_rtn = WARNING; //!< Warn if no map set up: this means phi and jacobian will not be available
     }
-
-    TaskMap_ptr TaskDefinition::getTaskMap()
+    else
     {
-        return task_map_;
-    }
-
-    std::string TaskDefinition::print(std::string prepend)
-    {
-        std::string ret = Object::print(prepend);
-        ret+="\n"+prepend+"  Task Map:";
-        ret+="\n"+task_map_->print(prepend+"    ");
-        return ret;
-    }
-
-    EReturn TaskDefinition::initBase(tinyxml2::XMLHandle & handle, const TaskMap_map & map_list)
-    {
-        Server_ptr server;
-        Object::initBase(handle,server);
-      //!< Temporaries
-      EReturn tmp_rtn = SUCCESS;
-      EReturn aux_rtn = FAILURE;
-
-      //!< Attempt to set the task-map
-      if(!handle.FirstChildElement("map").ToElement())
+      const char * map_name =
+          handle.FirstChildElement("map").ToElement()->Attribute("name");
+      if (map_name == nullptr)
       {
-        tmp_rtn = WARNING;  //!< Warn if no map set up: this means phi and jacobian will not be available
+        INDICATE_FAILURE
+        ;
+        return PAR_ERR;
       }
-      else
+      auto it = map_list.find(map_name);
+      if (it == map_list.end())
       {
-        const char * map_name = handle.FirstChildElement("map").ToElement()->Attribute("name");
-        if (map_name == nullptr)      { INDICATE_FAILURE; return PAR_ERR; }
-        auto it = map_list.find(map_name);
-        if (it == map_list.end())     { INDICATE_FAILURE; return PAR_ERR; }
-        aux_rtn = setTaskMap(it->second);
-        if (!ok(aux_rtn))             { INDICATE_FAILURE; return aux_rtn; }
+        INDICATE_FAILURE
+        ;
+        return PAR_ERR;
       }
-
-      aux_rtn = initDerived(handle);
-      if (aux_rtn)
+      aux_rtn = setTaskMap(it->second);
+      if (!ok(aux_rtn))
       {
+        INDICATE_FAILURE
+        ;
         return aux_rtn;
       }
-      else
-      {
-        return tmp_rtn;
-      }
     }
 
-    EReturn TaskDefinition::registerPhi(Eigen::VectorXdRef_ptr y, int t)
+    aux_rtn = initDerived(handle);
+    if (aux_rtn)
     {
-        LOCK(map_lock_);
-        task_map_->registerPhi(y,t);
-        return SUCCESS;
+      return aux_rtn;
     }
-
-    EReturn TaskDefinition::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
+    else
     {
-        LOCK(map_lock_);
-        task_map_->registerJacobian(J,t);
-        return SUCCESS;
+      return tmp_rtn;
     }
+  }
 
+  EReturn TaskDefinition::registerPhi(Eigen::VectorXdRef_ptr y, int t)
+  {
+    LOCK(map_lock_);
+    task_map_->registerPhi(y, t);
+    return SUCCESS;
+  }
 
-    EReturn TaskDefinition::taskSpaceDim(int & task_dim)
+  EReturn TaskDefinition::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
+  {
+    LOCK(map_lock_);
+    task_map_->registerJacobian(J, t);
+    return SUCCESS;
+  }
+
+  EReturn TaskDefinition::taskSpaceDim(int & task_dim)
+  {
+    return task_map_->taskSpaceDim(task_dim);
+  }
+
+  EReturn TaskDefinition::setTaskMap(
+      const boost::shared_ptr<TaskMap> & task_map)
+  {
+    LOCK(map_lock_);
+    task_map_ = task_map;
+    return SUCCESS;
+  }
+
+  EReturn TaskDefinition::setTimeSteps(const int T)
+  {
+    LOCK(map_lock_);
+    if (task_map_ != nullptr)
     {
-        return task_map_->taskSpaceDim(task_dim);
+      return task_map_->setTimeSteps(T);
     }
-
-    EReturn TaskDefinition::setTaskMap(const boost::shared_ptr<TaskMap> & task_map)
+    else
     {
-      LOCK(map_lock_);
-      task_map_ = task_map;
-      return SUCCESS;
+      INDICATE_FAILURE
+      ;
+      return MEM_ERR;
     }
 
-    EReturn TaskDefinition::setTimeSteps(const int T)
-    {
-        LOCK(map_lock_);
-        if (task_map_ != nullptr)
-        {
-            return task_map_->setTimeSteps(T);
-        }
-        else
-        {
-          INDICATE_FAILURE;
-          return MEM_ERR;
-        }
-
-    }
+  }
 }

@@ -19,52 +19,52 @@
 
 namespace exotica
 {
-	class EXOTicaPlannerService
-	{
-		public:
-			EXOTicaPlannerService();
-			~EXOTicaPlannerService();
+  class EXOTicaPlannerService
+  {
+    public:
+      EXOTicaPlannerService();
+      ~EXOTicaPlannerService();
 
-			bool initialise(const std::string & config, const std::string & solver,
-					const std::string & problem, const std::string & group);
+      bool initialise(const std::string & config, const std::string & solver,
+          const std::string & problem, const std::string & group);
 
-			/*
-			 * \brief	Solve function
-			 * @param	goal	Planning goal and constraints
-			 */
-			bool solve(const exotica_moveit::ExoticaPlanningGoalConstPtr & goal);
-			bool initialised_;
-		private:
-			///	The ROS node handle
-			ros::NodeHandle nh_;
+      /*
+       * \brief	Solve function
+       * @param	goal	Planning goal and constraints
+       */
+      bool solve(const exotica_moveit::ExoticaPlanningGoalConstPtr & goal);
+      bool initialised_;
+    private:
+      ///	The ROS node handle
+      ros::NodeHandle nh_;
 
-			///	ROS action service
-			actionlib::SimpleActionServer<exotica_moveit::ExoticaPlanningAction> as_;
+      ///	ROS action service
+      actionlib::SimpleActionServer<exotica_moveit::ExoticaPlanningAction> as_;
 
-			///	Action result
-			exotica_moveit::ExoticaPlanningResult res_;
+      ///	Action result
+      exotica_moveit::ExoticaPlanningResult res_;
 
-			///	Action feedback
-			exotica_moveit::ExoticaPlanningFeedback fb_;
+      ///	Action feedback
+      exotica_moveit::ExoticaPlanningFeedback fb_;
 
-			///	EXOTica server
-			exotica::Server_ptr server_;
+      ///	EXOTica server
+      exotica::Server_ptr server_;
 
-			///	Pointer to selected solver
-			exotica::MotionSolver_ptr solver_;
+      ///	Pointer to selected solver
+      exotica::MotionSolver_ptr solver_;
 
-			///	Pointer to selected problem
-			exotica::PlanningProblem_ptr problem_;
-			boost::shared_ptr<exotica::Identity> goal_bias_map_;
-			boost::shared_ptr<exotica::Identity> goal_map_;
+      ///	Pointer to selected problem
+      exotica::PlanningProblem_ptr problem_;
+      boost::shared_ptr<exotica::Identity> goal_bias_map_;
+      boost::shared_ptr<exotica::Identity> goal_map_;
 
-			///	ROS service
-			ros::ServiceServer service_;
+      ///	ROS service
+      ros::ServiceServer service_;
 
-			///	Moveit planning scene
-			moveit_msgs::PlanningScenePtr scene_;
+      ///	Moveit planning scene
+      moveit_msgs::PlanningScenePtr scene_;
 
-	};
+  };
 }
 
 #endif /* EXOTICA_EXOTICA_MOVEIT_INCLUDE_EXOTICA_MOVEIT_EXOTICAPLANNERSERVICE_H_ */

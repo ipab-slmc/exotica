@@ -10,43 +10,43 @@
 
 namespace exotica
 {
-	enum VERTEX_GEO_TYPE
-	{
-		UNKNOWN = 0, SPHERE = 10, CAPSULE = 20, PLANE = 30
-	};
+  enum VERTEX_GEO_TYPE
+  {
+    UNKNOWN = 0, SPHERE = 10, CAPSULE = 20, PLANE = 30
+  };
 //	\brief	Implementation of graph vertex geometry properties
-	class VertexGeometry
-	{
-		public:
-			/**
-			 * \brief	Constructor
-			 */
-			VertexGeometry();
+  class VertexGeometry
+  {
+    public:
+      /**
+       * \brief	Constructor
+       */
+      VertexGeometry();
 
-			/**
-			 * \brief	Destructor
-			 */
-			~VertexGeometry();
+      /**
+       * \brief	Destructor
+       */
+      ~VertexGeometry();
 
-			/**
-			 * \brief	Initialise to sphere
-			 * @param	r		Radius
-			 */
-			bool initSphere(const double & r);
+      /**
+       * \brief	Initialise to sphere
+       * @param	r		Radius
+       */
+      bool initSphere(const double & r);
 
-			/**
-			 * \brief	Initialise to capsule
-			 * @param	l		Height of the cylindrical part
-			 * @param	r		Radius
-			 */
-			bool initCapsule(const double & l, const double & r);
+      /**
+       * \brief	Initialise to capsule
+       * @param	l		Height of the cylindrical part
+       * @param	r		Radius
+       */
+      bool initCapsule(const double & l, const double & r);
 
-			/**
-			 * \brief	Initialise to plane
-			 *
-			 */
+      /**
+       * \brief	Initialise to plane
+       *
+       */
 
-	};
+  };
 }
 
 #endif /* VERTEXGEOMETRY_H_ */

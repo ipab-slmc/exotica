@@ -1,13 +1,15 @@
 #include "testing_pkg/Exotica/VelocitySolverType_1.h"
 
-VelocitySolverType_1::VelocitySolverType_1(const exotica::OptimisationParameters_t & params) : 
-  VelocitySolver(params),
-  name ("VelocitySolverType_1")
+VelocitySolverType_1::VelocitySolverType_1(
+    const exotica::OptimisationParameters_t & params)
+    : VelocitySolver(params), name("VelocitySolverType_1")
 {
   clearFlags();
 }
 
-bool VelocitySolverType_1::getInverse(const Eigen::MatrixXd & big_jacobian, const Eigen::MatrixXd & config_weights, const Eigen::MatrixXd & task_weights, Eigen::MatrixXd & inv_jacobian)
+bool VelocitySolverType_1::getInverse(const Eigen::MatrixXd & big_jacobian,
+    const Eigen::MatrixXd & config_weights,
+    const Eigen::MatrixXd & task_weights, Eigen::MatrixXd & inv_jacobian)
 {
   inverse_called = true;
   //!< Basic inverse function
@@ -22,7 +24,6 @@ bool VelocitySolverType_1::getInverse(const Eigen::MatrixXd & big_jacobian, cons
   }
 }
 
-
 bool VelocitySolverType_1::initDerived(tinyxml2::XMLHandle & derived_element)
 {
   derived_called = true;
@@ -32,9 +33,10 @@ bool VelocitySolverType_1::initDerived(tinyxml2::XMLHandle & derived_element)
   }
   else
   {
-    string_element = std::string(derived_element.FirstChildElement("string").ToElement()->GetText());
+    string_element = std::string(
+        derived_element.FirstChildElement("string").ToElement()->GetText());
     return true;
-  }    
+  }
 }
 
 REGISTER_VELOCITY_SOLVER_TYPE("VelocitySolverType_1", VelocitySolverType_1);

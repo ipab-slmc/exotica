@@ -10,14 +10,16 @@
 
 namespace exotica //!< Since this is part of the core library, it will be within the same namespace
 {
-  class Distance : public TaskMap
+  class Distance: public TaskMap
   {
     public:
       /**
        * \brief Default constructor
        */
       Distance();
-      virtual ~Distance(){}
+      virtual ~Distance()
+      {
+      }
 
       /**
        * \brief Concrete implementation of the update method

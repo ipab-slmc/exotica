@@ -2,8 +2,6 @@
   <param name="robot_description" textfile="$(find lwr_defs)/robots/lwr_hand.urdf"/>
   <param name="robot_description_semantic" textfile="$(find lwr_hand_moveit)/config/lwr.srdf"/> 
 
-  <param name="drm_robot_description_semantic" textfile="$(find dynamic_reachability_map)/resources/IndexedCellRobot.srdf"/>
-  <param name="drm_robot_description" textfile="$(find dynamic_reachability_map)/resources/IndexedCellRobot.urdf"/>
   <node pkg="dynamic_reachability_map" type="DRMActionNode" name="DRMActionNode" output="screen" >
 
     <param name="RobotModel" type="string" value="/robot_description"/>

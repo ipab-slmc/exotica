@@ -14,7 +14,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
-
+#include <moveit/collision_detection_fcl/collision_world_fcl.h>
 namespace dynamic_reachability_map
 {
   class DRMActionNode
@@ -30,10 +30,13 @@ namespace dynamic_reachability_map
       void drmStateTimeCallback(const ros::TimerEvent& event);
       void graphTimeCallback(const ros::TimerEvent& event);
     private:
+      void createdSpaceCollisionWorld();
       ros::NodeHandle nh_;
       DRM_ptr drm_;
       actionlib::SimpleActionServer<dynamic_reachability_map::DRMAction> as_;
-      planning_scene::PlanningScenePtr cell_ps_;
+//      collision_detection::WorldPtr space_world_;
+      boost::shared_ptr<collision_detection::CollisionWorldFCL> space_cworld_;
+      std::map<std::string, unsigned int> volume_map_;
 
       ros::Publisher drm_pub_;
       visualization_msgs::Marker drm_mark_;

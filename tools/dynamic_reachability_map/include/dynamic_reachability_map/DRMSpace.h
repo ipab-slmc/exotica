@@ -168,6 +168,8 @@ namespace dynamic_reachability_map
 
       void setVolumeOccupied(unsigned int index,
           bool invalidate_samples = true);
+      void setVolumeFree(unsigned int index,
+          bool free_samples = true);
 
       std::vector<unsigned int> getVolumeReachabilities();
       unsigned long int CurrentlyReachability(unsigned int index,

@@ -63,6 +63,27 @@ namespace dynamic_reachability_map
       space_->edges_[i].isValid = true;
   }
 
+  void DRM::updateOccupation(const std::map<unsigned int, bool> &occup_list)
+  {
+    for (auto&it : invalid_volumes_)
+    {
+      space_->volumes_[it.first].isFree = true;
+      for (unsigned long int j = 0;
+          j < space_->volumes_[it.first].occup_samples.size(); j++)
+        space_->samples_[space_->volumes_[it.first].occup_samples[j]].isValid =
+            true;
+    }
+    invalid_volumes_ = occup_list;
+    for (auto&it : invalid_volumes_)
+    {
+      space_->volumes_[it.first].isFree = false;
+      for (unsigned long int j = 0;
+          j < space_->volumes_[it.first].occup_samples.size(); j++)
+        space_->samples_[space_->volumes_[it.first].occup_samples[j]].isValid =
+            false;
+    }
+  }
+
   dynamic_reachability_map::DRMResult DRM::getIKSolution(
       const dynamic_reachability_map::DRMGoalConstPtr &goal)
   {

@@ -181,9 +181,9 @@ namespace dynamic_reachability_map
     urdf << "</material>" << std::endl;
     urdf << "<link name=\"base\">" << std::endl;
     urdf << "</link>" << std::endl;
+    urdf << "<link name=\"cell" << "\">" << std::endl;
     for (int i = 0; i < space->space_size_; i++)
     {
-      urdf << "<link name=\"cell_" << i << "\">" << std::endl;
       urdf << "\t<visual>" << std::endl;
       urdf << "\t\t<origin rpy=\"0 0 0\" xyz=\"" << space->at(i).center.x << " "
           << space->at(i).center.y << " " << space->at(i).center.z << "\"/>"
@@ -206,16 +206,16 @@ namespace dynamic_reachability_map
           << std::endl;
       urdf << "\t\t</geometry>" << std::endl;
       urdf << "\t</collision>" << std::endl;
-      urdf << "</link>" << std::endl;
     }
-    for (int i = 0; i < space->space_size_; i++)
-    {
-      urdf << "<joint name=\"joint_" << i << "\" type=\"fixed\">" << std::endl;
-      urdf << "\t<origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" << std::endl;
-      urdf << "\t<parent link=\"base\"/>" << std::endl;
-      urdf << "\t<child link=\"cell_" << i << "\"/>" << std::endl;
-      urdf << "</joint>" << std::endl;
-    }
+    urdf << "</link>" << std::endl;
+//    for (int i = 0; i < space->space_size_; i++)
+//    {
+    urdf << "<joint name=\"joint\" type=\"fixed\">" << std::endl;
+    urdf << "\t<origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" << std::endl;
+    urdf << "\t<parent link=\"base\"/>" << std::endl;
+    urdf << "\t<child link=\"cell\"/>" << std::endl;
+    urdf << "</joint>" << std::endl;
+//    }
     urdf << "</robot>" << std::endl;
     return true;
   }

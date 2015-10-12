@@ -10,6 +10,7 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include "dynamic_reachability_map/DRMSpaceSaver.h"
+#include <geometric_shapes/shape_operations.h>
 
 namespace dynamic_reachability_map
 {
@@ -86,9 +87,7 @@ namespace dynamic_reachability_map
     astar_pub_ = nh_.advertise<moveit_msgs::DisplayTrajectory>(
         "AStarTrajectory", 1);
 
-    robot_model_loader::RobotModelLoader cellbot_loader(drm_model);
-    robot_model::RobotModelPtr cellbot_model = cellbot_loader.getModel();
-    cell_ps_.reset(new planning_scene::PlanningScene(cellbot_model));
+    createdSpaceCollisionWorld();
     cell_ps_pub_ = nh_.advertise<moveit_msgs::PlanningScene>(
         "CellPlanningScene", 10);
     state_pub_ = nh_.advertise<moveit_msgs::DisplayRobotState>("DRMState", 10);
@@ -155,83 +154,155 @@ namespace dynamic_reachability_map
     }
 //  graph_timer_ = nh_.createTimer(ros::Duration(2), &DRMActionNode::graphTimeCallback, this);
     as_.start();
-
+    ROS_INFO_STREAM("DRM is ready");
     return true;
+  }
+
+  void DRMActionNode::createdSpaceCollisionWorld()
+  {
+    collision_detection::WorldPtr space_world_;
+    space_world_.reset(new collision_detection::World());
+    moveit_msgs::PlanningSceneWorld world_msg;
+    for (unsigned int i = 0; i < drm_->space()->getSpaceSize(); i++)
+    {
+      std::string id = std::to_string(i);
+      volume_map_[id] = i;
+      shape_msgs::SolidPrimitive cell;
+      cell.type = cell.BOX;
+      cell.dimensions.resize(3);
+      cell.dimensions[0] = cell.dimensions[1] = cell.dimensions[2] =
+          drm_->space()->getResolution();
+      geometry_msgs::Pose pose;
+      pose.orientation.w = 1;
+      pose.position = drm_->space()->at(i).center;
+      shapes::Shape *s = shapes::constructShapeFromMsg(cell);
+      Eigen::Affine3d p;
+      tf::poseMsgToEigen(pose, p);
+      space_world_->addToObject(id, shapes::ShapeConstPtr(s), p);
+    }
+    space_cworld_.reset(
+        new collision_detection::CollisionWorldFCL(space_world_));
   }
 
   bool DRMActionNode::updateDRM(
       const dynamic_reachability_map::DRMGoalConstPtr &goal,
       const KDL::Frame &base_pose)
   {
-    drm_->resetDRM2FreeSpace();
+    moveit_msgs::PlanningSceneWorld world = goal->ps.world;
+    ros::Time test_start1 = ros::Time::now();
+
+    for (int i = 0; i < world.collision_objects.size(); i++)
+      world.collision_objects[i].header.frame_id =
+          drm_->space()->getPlanningScene()->getRobotModel()->getRootLinkName();
+    drm_->space()->getPlanningScene()->getWorldNonConst()->clearObjects();
+    drm_->space()->getPlanningScene()->processPlanningSceneWorldMsg(world);
+
+    ros::Time test_start = ros::Time::now();
+//    drm_->resetDRM2FreeSpace();
+    ROS_INFO_STREAM(
+        "Test time "<<ros::Duration(ros::Time::now()-test_start).toSec());
     collision_detection::CollisionRequest request;
     request.contacts = true;
-    request.max_contacts = 1;
+    request.max_contacts = drm_->space()->getSpaceSize();
     collision_detection::CollisionResult result;
 
-    moveit_msgs::PlanningScene msg;
-    cell_ps_->getPlanningSceneMsg(msg);
-    cell_ps_pub_.publish(msg);
-    for (unsigned int i = 0; i < drm_->space()->getSpaceSize(); i++)
+    space_cworld_->checkWorldCollision(request, result,
+        *drm_->space()->getPlanningScene()->getCollisionWorld());
+    std::map<unsigned int, bool> occup_list;
+    ros::Time update_start = ros::Time::now();
+    if (result.collision)
     {
-      KDL::Frame cell_pose = point2KDL(drm_->space()->at(i).center);
-      cell_pose = base_pose * cell_pose;
-      cell_ps_->getCurrentStateNonConst().setVariablePosition(0,
-          cell_pose.p.x());
-      cell_ps_->getCurrentStateNonConst().setVariablePosition(1,
-          cell_pose.p.y());
-      cell_ps_->getCurrentStateNonConst().setVariablePosition(2,
-          cell_pose.p.z());
-      std::vector<double> quat(4);
-      cell_pose.M.GetQuaternion(quat[0], quat[1], quat[2], quat[3]);
-      cell_ps_->getCurrentStateNonConst().setVariablePosition(3, quat[0]);
-      cell_ps_->getCurrentStateNonConst().setVariablePosition(4, quat[1]);
-      cell_ps_->getCurrentStateNonConst().setVariablePosition(5, quat[2]);
-      cell_ps_->getCurrentStateNonConst().setVariablePosition(6, quat[3]);
-      cell_ps_->getCurrentStateNonConst().update(true);
-      cell_ps_->checkCollision(request, result);
-      if (result.collision)
+      std::map<unsigned int, bool> checked;
+      for (auto &it : result.contacts)
       {
-        drm_->space()->setVolumeOccupied(i, true);
+        unsigned int tmp;
+        if (volume_map_.find(it.first.first) != volume_map_.end())
+        {
+          tmp = volume_map_.at(it.first.first);
+        }
+        else if (volume_map_.find(it.first.second) != volume_map_.end())
+        {
+          tmp = volume_map_.at(it.first.second);
+        }
+        else
+        {
+          ROS_ERROR_STREAM(
+              "This should not happen! Contact between "<<it.first.first<<" and "<<it.first.second);
+          continue;
+        }
+        if (checked.find(tmp) == checked.end())
+        {
+          occup_list[tmp] = true;
+          checked[tmp] = true;
+//          drm_->space()->setVolumeOccupied(tmp);
+        }
       }
-      result.clear();
 
     }
-
-//  std::vector<unsigned int> density = drm_->space()->getVolumeReachabilities();
-//
-//  int size = density.size();
-//  Eigen::VectorXd density_eigen(size);
-//  for (unsigned int i = 0; i < size; i++)
-//    density_eigen(i) = density[i];
-//  double max = density_eigen.maxCoeff();
-//  density_eigen = density_eigen / max;
-//
-//  drm_mark_.colors.clear();
-//  drm_mark_.points.clear();
-//  unsigned int goal_index = 0;
-//  if (drm_->space()->getVolumeIndex(goal->goal_pose.position, goal_index))
-//  {
-//    std_msgs::ColorRGBA c;
-//    c.a = c.r = 1;
-//    drm_mark_.colors.push_back(c);
-//    drm_mark_.points.push_back(drm_->space()->at(goal_index).center);
-//  }
-//
-//  for (unsigned int i = 0; i < size; i++)
-//  {
-//    if (density[i] > 0)
+    drm_->updateOccupation(occup_list);
+    ROS_INFO_STREAM(
+        "DRM time "<<ros::Duration(ros::Time::now()-update_start).toSec()<<"sec, "<<result.contacts.size());
+//    for (unsigned int i = 0; i < drm_->space()->getSpaceSize(); i++)
 //    {
-//      std_msgs::ColorRGBA c;
-//      c.a = density_eigen(i) + 0.1;
-//      c.g = density_eigen(i);
-//      drm_mark_.colors.push_back(c);
-//      drm_mark_.points.push_back(drm_->space()->at(i).center);
+//      KDL::Frame cell_pose = point2KDL(drm_->space()->at(i).center);
+//      cell_pose = base_pose * cell_pose;
+//      cell_ps_->getCurrentStateNonConst().setVariablePosition(0,
+//          cell_pose.p.x());
+//      cell_ps_->getCurrentStateNonConst().setVariablePosition(1,
+//          cell_pose.p.y());
+//      cell_ps_->getCurrentStateNonConst().setVariablePosition(2,
+//          cell_pose.p.z());
+//      std::vector<double> quat(4);
+//      cell_pose.M.GetQuaternion(quat[0], quat[1], quat[2], quat[3]);
+//      cell_ps_->getCurrentStateNonConst().setVariablePosition(3, quat[0]);
+//      cell_ps_->getCurrentStateNonConst().setVariablePosition(4, quat[1]);
+//      cell_ps_->getCurrentStateNonConst().setVariablePosition(5, quat[2]);
+//      cell_ps_->getCurrentStateNonConst().setVariablePosition(6, quat[3]);
+//      cell_ps_->getCurrentStateNonConst().update(true);
+//      cell_ps_->checkCollision(request, result);
+//      if (result.collision)
+//      {
+//        drm_->space()->setVolumeOccupied(i, true);
+//      }
+//      result.clear();
+//
 //    }
-//  }
-//  if (drm_mark_.points.size() == 0)
-//    ROS_ERROR("Empty DRM!!!!");
-//  drm_pub_.publish(drm_mark_);
+
+    std::vector<unsigned int> density =
+        drm_->space()->getVolumeReachabilities();
+
+    int size = density.size();
+    Eigen::VectorXd density_eigen(size);
+    for (unsigned int i = 0; i < size; i++)
+      density_eigen(i) = density[i];
+    double max = density_eigen.maxCoeff();
+    density_eigen = density_eigen / max;
+
+    drm_mark_.colors.clear();
+    drm_mark_.points.clear();
+    unsigned int goal_index = 0;
+    if (drm_->space()->getVolumeIndex(goal->goal_pose.position, goal_index))
+    {
+      std_msgs::ColorRGBA c;
+      c.a = c.r = 1;
+      drm_mark_.colors.push_back(c);
+      drm_mark_.points.push_back(drm_->space()->at(goal_index).center);
+    }
+
+    for (unsigned int i = 0; i < size; i++)
+    {
+      if (density[i] > 0)
+      {
+        std_msgs::ColorRGBA c;
+        c.a = density_eigen(i) + 0.1;
+        c.g = density_eigen(i);
+        drm_mark_.colors.push_back(c);
+        drm_mark_.points.push_back(drm_->space()->at(i).center);
+      }
+    }
+    if (drm_mark_.points.size() <= 1)
+    ROS_ERROR("Empty DRM!!!!");
+    drm_pub_.publish(drm_mark_);
     return true;
   }
   bool DRMActionNode::getIKSolution(
@@ -243,18 +314,7 @@ namespace dynamic_reachability_map
       disp_state_.state = goal->ps.robot_state;
       first = false;
     }
-    ros::Time update_start = ros::Time::now();
-    moveit_msgs::PlanningSceneWorld world = goal->ps.world;
-    for (int i = 0; i < world.collision_objects.size(); i++)
-      world.collision_objects[i].header.frame_id = "/world_frame";
-    cell_ps_->getWorldNonConst()->clearObjects();
-    cell_ps_->processPlanningSceneWorldMsg(world);
-    ROS_INFO_STREAM(
-        "DRM ps time "<<ros::Duration(ros::Time::now()-update_start).toSec()<<"sec");
-    update_start = ros::Time::now();
     updateDRM(goal);
-    ROS_INFO_STREAM(
-        "DRM update time "<<ros::Duration(ros::Time::now()-update_start).toSec()<<"sec");
     dynamic_reachability_map::DRMResult result = drm_->getIKSolution(goal);
     as_.setSucceeded(result);
     for (int i = 0; i < result.q_out.data.size(); i++)

@@ -14,6 +14,7 @@ namespace exotica
 {
   class DrakeIKsolver: public MotionSolver
   {
+      friend class DRMDrakeIKsolver;
     public:
       DrakeIKsolver();
       virtual ~DrakeIKsolver();
@@ -24,7 +25,7 @@ namespace exotica
        * @param solution  This will be filled with the solution in joint space(Vector).
        * @return  SUCESS if solution has been found, corresponding error code if not.
        */
-      EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      virtual EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
 
       /**
        * \brief Binds the solver to a specific problem which must be pre-initalised
@@ -40,6 +41,7 @@ namespace exotica
        */
       virtual bool isSolvable(const PlanningProblem_ptr & prob);
       int info;
+      ros::Duration planning_time_;
     protected:
       /**
        * \brief Derived-elements initialiser: Pure Virtual
@@ -52,6 +54,7 @@ namespace exotica
       DrakeIKProblem_ptr prob_;
       IKoptions* ik_options_;
       Eigen::VectorXd last_solve_;
+      bool has_last_solve_;
   };
   typedef boost::shared_ptr<exotica::DrakeIKsolver> DrakeIKsolver_ptr;
 

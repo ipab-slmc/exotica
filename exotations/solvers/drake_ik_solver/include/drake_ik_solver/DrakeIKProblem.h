@@ -34,6 +34,7 @@ namespace exotica
   };
   class DrakeIKProblem: public PlanningProblem
   {
+      friend class DRMDrakeIKProblem;
     public:
       DrakeIKProblem();
       virtual ~DrakeIKProblem();

@@ -124,7 +124,16 @@ namespace exotica
       INDICATE_FAILURE
       return FAILURE;
     }
-
+//    Eigen::VectorXd quat(4);
+//    quat << 1, 0, 0, 0;
+//    WorldQuatConstraint* ptr_left = new WorldQuatConstraint(model_,
+//        model_->findLinkId("rightFoot"), quat, 0, tspan01);
+//    WorldQuatConstraint* ptr_right = new WorldQuatConstraint(model_,
+//            model_->findLinkId("leftFoot"), quat, 0, tspan01);
+//    constraints_.push_back(ptr_left);
+//    constraints_.push_back(ptr_right);
+    HIGHLIGHT_NAMED(object_name_,
+        "Created "<<constraints_.size()<<" constraints");
     return SUCCESS;
   }
 

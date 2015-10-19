@@ -34,7 +34,7 @@ namespace exotica
        * @param	solution	This will be filled with the solution in joint space(Vector).
        * @return	SUCESS if solution has been found, corresponding error code if not.
        */
-      EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      virtual EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
       EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXdRef solution,
           int t);
 

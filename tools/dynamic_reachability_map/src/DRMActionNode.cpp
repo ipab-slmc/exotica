@@ -12,6 +12,16 @@
 #include "dynamic_reachability_map/DRMSpaceSaver.h"
 #include <geometric_shapes/shape_operations.h>
 
+void pose2TF(const geometry_msgs::Pose &pose, geometry_msgs::Transform &tf)
+{
+  tf.translation.x = pose.position.x;
+  tf.translation.y = pose.position.y;
+  tf.translation.z = pose.position.z;
+  tf.rotation.x = pose.orientation.x;
+  tf.rotation.y = pose.orientation.y;
+  tf.rotation.z = pose.orientation.z;
+  tf.rotation.w = pose.orientation.w;
+}
 namespace dynamic_reachability_map
 {
   DRMActionNode::DRMActionNode()
@@ -54,25 +64,6 @@ namespace dynamic_reachability_map
     {
       return false;
     }
-
-    bool clustering = false;
-    if (nh_.hasParam("Clustering")) nh_.getParam("Clustering", clustering);
-    if (clustering)
-    {
-      drm_cluster_ = new DRMSampleCluster();
-      DRMClusterParam cluster_param;
-      drm_cluster_->startClustering(drm_->spaceNonConst(), cluster_param);
-      delete drm_cluster_;
-//    std::string path = ros::package::getPath("dynamic_reachability_map") + "/result2";
-//    std::string savepath;
-//    ROS_INFO_STREAM("Saving sampling result to "<<path);
-//    dynamic_reachability_map::DRMSpaceSaver saver;
-//    saver.saveSpace(path, drm_->spaceNonConst(), savepath);
-    }
-//  drm_->space()->buildConnectionGraph( M_PI / 4);
-//  drm_timer_ = nh_.createTimer(ros::Duration(1), &DRMActionNode::drmTimeCallback, this);
-//  if (clustering)
-//  drm_state_timer_ = nh_.createTimer(ros::Duration(1), &DRMActionNode::drmStateTimeCallback, this);
 
     traj_pub_ = nh_.advertise<moveit_msgs::DisplayTrajectory>("ClusterCenters",
         1);
@@ -188,19 +179,20 @@ namespace dynamic_reachability_map
       const dynamic_reachability_map::DRMGoalConstPtr &goal,
       const KDL::Frame &base_pose)
   {
+    ros::Time update_start = ros::Time::now();
     moveit_msgs::PlanningSceneWorld world = goal->ps.world;
-    ros::Time test_start1 = ros::Time::now();
-
     for (int i = 0; i < world.collision_objects.size(); i++)
+    {
       world.collision_objects[i].header.frame_id =
           drm_->space()->getPlanningScene()->getRobotModel()->getRootLinkName();
+      for (int j = 0; j < world.collision_objects[i].primitive_poses.size();
+          j++)
+        world.collision_objects[i].primitive_poses[j].position.z -= 1.025;
+      for (int j = 0; j < world.collision_objects[i].mesh_poses.size(); j++)
+        world.collision_objects[i].mesh_poses[j].position.z -= 1.025;
+    }
     drm_->space()->getPlanningScene()->getWorldNonConst()->clearObjects();
     drm_->space()->getPlanningScene()->processPlanningSceneWorldMsg(world);
-
-    ros::Time test_start = ros::Time::now();
-//    drm_->resetDRM2FreeSpace();
-    ROS_INFO_STREAM(
-        "Test time "<<ros::Duration(ros::Time::now()-test_start).toSec());
     collision_detection::CollisionRequest request;
     request.contacts = true;
     request.max_contacts = drm_->space()->getSpaceSize();
@@ -209,7 +201,6 @@ namespace dynamic_reachability_map
     space_cworld_->checkWorldCollision(request, result,
         *drm_->space()->getPlanningScene()->getCollisionWorld());
     std::map<unsigned int, bool> occup_list;
-    ros::Time update_start = ros::Time::now();
     if (result.collision)
     {
       std::map<unsigned int, bool> checked;
@@ -234,39 +225,13 @@ namespace dynamic_reachability_map
         {
           occup_list[tmp] = true;
           checked[tmp] = true;
-//          drm_->space()->setVolumeOccupied(tmp);
         }
       }
 
     }
     drm_->updateOccupation(occup_list);
     ROS_INFO_STREAM(
-        "DRM time "<<ros::Duration(ros::Time::now()-update_start).toSec()<<"sec, "<<result.contacts.size());
-//    for (unsigned int i = 0; i < drm_->space()->getSpaceSize(); i++)
-//    {
-//      KDL::Frame cell_pose = point2KDL(drm_->space()->at(i).center);
-//      cell_pose = base_pose * cell_pose;
-//      cell_ps_->getCurrentStateNonConst().setVariablePosition(0,
-//          cell_pose.p.x());
-//      cell_ps_->getCurrentStateNonConst().setVariablePosition(1,
-//          cell_pose.p.y());
-//      cell_ps_->getCurrentStateNonConst().setVariablePosition(2,
-//          cell_pose.p.z());
-//      std::vector<double> quat(4);
-//      cell_pose.M.GetQuaternion(quat[0], quat[1], quat[2], quat[3]);
-//      cell_ps_->getCurrentStateNonConst().setVariablePosition(3, quat[0]);
-//      cell_ps_->getCurrentStateNonConst().setVariablePosition(4, quat[1]);
-//      cell_ps_->getCurrentStateNonConst().setVariablePosition(5, quat[2]);
-//      cell_ps_->getCurrentStateNonConst().setVariablePosition(6, quat[3]);
-//      cell_ps_->getCurrentStateNonConst().update(true);
-//      cell_ps_->checkCollision(request, result);
-//      if (result.collision)
-//      {
-//        drm_->space()->setVolumeOccupied(i, true);
-//      }
-//      result.clear();
-//
-//    }
+        "Update DRM time "<<ros::Duration(ros::Time::now()-update_start).toSec()<<"sec, "<<result.contacts.size());
 
     std::vector<unsigned int> density =
         drm_->space()->getVolumeReachabilities();
@@ -277,7 +242,6 @@ namespace dynamic_reachability_map
       density_eigen(i) = density[i];
     double max = density_eigen.maxCoeff();
     density_eigen = density_eigen / max;
-
     drm_mark_.colors.clear();
     drm_mark_.points.clear();
     unsigned int goal_index = 0;
@@ -286,7 +250,11 @@ namespace dynamic_reachability_map
       std_msgs::ColorRGBA c;
       c.a = c.r = 1;
       drm_mark_.colors.push_back(c);
-      drm_mark_.points.push_back(drm_->space()->at(goal_index).center);
+      geometry_msgs::Point tmp = drm_->space()->at(goal_index).center;
+      tmp.x += goal->base_pose.position.x;
+      tmp.y += goal->base_pose.position.y;
+      tmp.z += goal->base_pose.position.z;
+      drm_mark_.points.push_back(tmp);
     }
 
     for (unsigned int i = 0; i < size; i++)
@@ -297,7 +265,11 @@ namespace dynamic_reachability_map
         c.a = density_eigen(i) + 0.1;
         c.g = density_eigen(i);
         drm_mark_.colors.push_back(c);
-        drm_mark_.points.push_back(drm_->space()->at(i).center);
+        geometry_msgs::Point tmp = drm_->space()->at(i).center;
+        tmp.x += goal->base_pose.position.x;
+        tmp.y += goal->base_pose.position.y;
+        tmp.z += goal->base_pose.position.z;
+        drm_mark_.points.push_back(tmp);
       }
     }
     if (drm_mark_.points.size() <= 1)
@@ -308,62 +280,83 @@ namespace dynamic_reachability_map
   bool DRMActionNode::getIKSolution(
       const dynamic_reachability_map::DRMGoalConstPtr &goal)
   {
+    ros::Time cb_start = ros::Time::now();
     static bool first = true;
+    static int mdof_cnt = 0;
     if (first)
     {
       disp_state_.state = goal->ps.robot_state;
+      if (drm_->space()->getPlanningScene()->getRobotModel()->getMultiDOFJointModels().size()
+          > 0)
+        mdof_cnt =
+            drm_->space()->getPlanningScene()->getRobotModel()->getMultiDOFJointModels()[0]->getVariableCount();
       first = false;
     }
-    updateDRM(goal);
+    if (false || goal->ps.world.collision_objects.size() > 0) updateDRM(goal);
     dynamic_reachability_map::DRMResult result = drm_->getIKSolution(goal);
     as_.setSucceeded(result);
-    for (int i = 0; i < result.q_out.data.size(); i++)
-      disp_state_.state.joint_state.position[i] = result.q_out.data[i];
+    if (!result.succeed) return false;
+    for (int i = 7; i < result.q_out.data.size(); i++)
+    {
+//      std::cout << "Index " << i << " "
+//          << drm_->space()->getPlanningScene()->getRobotModel()->getVariableNames()[drm_->space()->getGroup()->getVariableIndexList()[i]]
+//          << std::endl;
+      disp_state_.state.joint_state.position[drm_->space()->getGroup()->getVariableIndexList()[i]
+          - 7] = result.q_out.data[i];
+    }
+    geometry_msgs::Pose tmp_base_pose = goal->base_pose;
+    tmp_base_pose.position.x += result.q_out.data[0];
+    tmp_base_pose.position.y += result.q_out.data[1];
+    tmp_base_pose.position.z += result.q_out.data[2];
+    pose2TF(tmp_base_pose,
+        disp_state_.state.multi_dof_joint_state.transforms[0]);
     Eigen::VectorXd q0(drm_->space()->getDimension());
     for (int i = 0; i < drm_->space()->getDimension(); i++)
       q0(i) = goal->q0.data[i];
     state_pub_.publish(disp_state_);
-    graphTimeCallback(ros::TimerEvent());
-    if (false && result.succeed)
-    {
-      ros::Time astar_start = ros::Time::now();
-      std::vector<unsigned long int> path;
-      if (drm_->solve(goal, result.sample_index, path))
-      {
-        ROS_INFO_STREAM(
-            "A* succeeded in "<<ros::Duration(ros::Time::now()-astar_start).toSec()<<" path length "<<path.size());
-        for (int i = 0; i < path.size(); i++)
-        {
-          std::cout << "Path " << i << ": " << path[i] << " ";
-          for (int d = 0; d < 7; d++)
-            std::cout << drm_->space()->getSample(path[i]).q[d] << " ";
-          std::cout << std::endl;
-        }
-        astar_traj_.trajectory[0].joint_trajectory.header.stamp =
-            ros::Time::now();
-        astar_traj_.trajectory[0].joint_trajectory.points.resize(path.size());
-        for (int i = 0; i < path.size(); i++)
-        {
-          astar_traj_.trajectory[0].joint_trajectory.points[i].positions.resize(
-              drm_->space()->getDimension());
-          for (int j = 0; j < drm_->space()->getDimension(); j++)
-          {
-            astar_traj_.trajectory[0].joint_trajectory.points[i].positions[j] =
-                drm_->space()->getSample(path[i]).q[j];
-          }
-        }
-        astar_traj_.trajectory_start.joint_state.name =
-            astar_traj_.trajectory[0].joint_trajectory.joint_names;
-        astar_traj_.trajectory_start.joint_state.position =
-            astar_traj_.trajectory[0].joint_trajectory.points[path.size() - 1].positions;
-
-        astar_pub_.publish(astar_traj_);
-      }
-      else
-      {
-        ROS_ERROR("A* failed");
-      }
-    }
+//    graphTimeCallback(ros::TimerEvent());
+//    if (false && result.succeed)
+//    {
+//      ros::Time astar_start = ros::Time::now();
+//      std::vector<unsigned long int> path;
+//      if (drm_->solve(goal, result.sample_index, path))
+//      {
+//        ROS_INFO_STREAM(
+//            "A* succeeded in "<<ros::Duration(ros::Time::now()-astar_start).toSec()<<" path length "<<path.size());
+//        for (int i = 0; i < path.size(); i++)
+//        {
+//          std::cout << "Path " << i << ": " << path[i] << " ";
+//          for (int d = 0; d < 7; d++)
+//            std::cout << drm_->space()->getSample(path[i]).q[d] << " ";
+//          std::cout << std::endl;
+//        }
+//        astar_traj_.trajectory[0].joint_trajectory.header.stamp =
+//            ros::Time::now();
+//        astar_traj_.trajectory[0].joint_trajectory.points.resize(path.size());
+//        for (int i = 0; i < path.size(); i++)
+//        {
+//          astar_traj_.trajectory[0].joint_trajectory.points[i].positions.resize(
+//              drm_->space()->getDimension());
+//          for (int j = 0; j < drm_->space()->getDimension(); j++)
+//          {
+//            astar_traj_.trajectory[0].joint_trajectory.points[i].positions[j] =
+//                drm_->space()->getSample(path[i]).q[j];
+//          }
+//        }
+//        astar_traj_.trajectory_start.joint_state.name =
+//            astar_traj_.trajectory[0].joint_trajectory.joint_names;
+//        astar_traj_.trajectory_start.joint_state.position =
+//            astar_traj_.trajectory[0].joint_trajectory.points[path.size() - 1].positions;
+//
+//        astar_pub_.publish(astar_traj_);
+//      }
+//      else
+//      {
+//        ROS_ERROR("A* failed");
+//      }
+//    }
+    ROS_INFO_STREAM(
+        "Callback time "<<ros::Duration(ros::Time::now()-cb_start).toSec());
     return result.succeed;
   }
 

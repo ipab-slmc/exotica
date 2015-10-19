@@ -486,6 +486,7 @@ namespace dynamic_reachability_map
       std::vector<unsigned long int> & valid_samples)
   {
     valid_samples.clear();
+    valid_samples.reserve(volumes_[index].reach_samples.size());
     for (unsigned long int j = 0; j < volumes_[index].reach_samples.size(); j++)
       if (samples_[volumes_[index].reach_samples[j]].isValid)
         valid_samples.push_back(volumes_[index].reach_samples[j]);

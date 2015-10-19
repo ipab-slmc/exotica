@@ -65,6 +65,9 @@ namespace dynamic_reachability_map
 
   void DRM::updateOccupation(const std::map<unsigned int, bool> &occup_list)
   {
+    if (invalid_volumes_.size() == occup_list.size()
+        && std::equal(invalid_volumes_.begin(), invalid_volumes_.end(),
+            occup_list.begin())) return;
     for (auto&it : invalid_volumes_)
     {
       space_->volumes_[it.first].isFree = true;

@@ -1,13 +1,13 @@
 <launch>
-  <param name="robot_description" textfile="$(find lwr_defs)/robots/lwr_hand.urdf"/>
-  <param name="robot_description_semantic" textfile="$(find lwr_hand_moveit)/config/lwr.srdf"/> 
+  <param name="robot_description" textfile="$(find val_description)/urdf/valkyrie_A_sim_drake.urdf"/>
+  <param name="robot_description_semantic" textfile="$(find val_moveit)/config/valkyrie.srdf"/> 
   <node pkg="dynamic_reachability_map" type="DRMSpaceSampler" name="DRMSpaceSampler" output="screen">
-    <param name="EndEffector" type="string" value="sdh_grasp_link"/>
-    <param name="Group" type="string" value="arm"/>
-    <param name="SpaceBounds" type="string" value="-1.1 1.1 -1.1 1.1 0.05 1.7"/>
+    <param name="EndEffector" type="string" value="leftPalm"/>
+    <param name="Group" type="string" value="BaseUpperBodyLeft"/>
+    <param name="SpaceBounds" type="string" value="-0.1 1.7 -0.5 1.9 -0.9 1.3"/>
     <param name="CellSize" value="0.1"/>
     <param name="ThreadsNumber" value="8"/>
     <param name="CheckOccupation" value="0"/>
-    <param name="SampleSize" value="10000000"/>
+    <param name="SampleSize" value="2000000"/>
   </node>
 </launch>

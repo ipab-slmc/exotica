@@ -92,15 +92,20 @@ int main(int argc, char **argv)
   space_bounds.z_upper = bounds[2](1);
   dynamic_reachability_map::DRMSpace_ptr space;
   space.reset(new dynamic_reachability_map::DRMSpace());
-  space->createSpace(space_bounds, cell_size, model, eff, group_name);
+  if(!space->createSpace(space_bounds, cell_size, model, eff, group_name))
+  {
+    ROS_ERROR("Can not create DRM space");
+    return 0;
+  }
   dynamic_reachability_map::DRMSampler drms(thread_cnt);
 
 //  int points_cnt = 4;
 //  int dim = space->getDimension();
-//  std::vector<std::vector<double>> samples(std::pow(points_cnt, dim));
 //  std::vector<std::string> var_names = space->getGroup()->getVariableNames();
 //  std::vector<std::vector<double>> points(dim);
 //  std::vector<int> current(dim);
+//  std::vector<std::vector<double>> samples(std::pow(points_cnt, dim));
+//
 //  for (int i = 0; i < dim; i++)
 //  {
 //    double max = model->getVariableBounds(var_names[i]).max_position_;

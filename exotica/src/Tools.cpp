@@ -528,6 +528,20 @@ namespace exotica
     }
   }
 
+  EReturn getJSON(const rapidjson::Value& a, bool& ret)
+  {
+    if(a.IsBool())
+    {
+      ret=a.GetBool();
+      return SUCCESS;
+    }
+    else
+    {
+      INDICATE_FAILURE
+      return FAILURE;
+    }
+  }
+
   EReturn getJSON(const rapidjson::Value& a, std::string& ret)
   {
     ret = a.GetString();

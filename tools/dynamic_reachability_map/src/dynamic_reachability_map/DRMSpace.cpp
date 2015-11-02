@@ -446,15 +446,37 @@ namespace dynamic_reachability_map
     }
   }
 
+  void DRMSpace::setVolumeFree(unsigned int index, bool free_samples)
+  {
+    if (index < space_size_)
+    {
+      volumes_[index].isFree = true;
+      if (free_samples)
+      {
+        for (unsigned long int i = 0; i < volumes_[index].occup_samples.size();
+            i++)
+          samples_[volumes_[index].occup_samples[i]].isValid = true;
+        for (unsigned long int i = 0; i < volumes_[index].occup_edges.size();
+            i++)
+          edges_[volumes_[index].occup_edges[i]].isValid = true;
+      }
+    }
+  }
+
   std::vector<unsigned int> DRMSpace::getVolumeReachabilities()
   {
     std::vector<unsigned int> ret(space_size_);
     for (unsigned int i = 0; i < space_size_; i++)
     {
-      unsigned int tmp = 0;
-      for (unsigned long int j = 0; j < volumes_[i].reach_samples.size(); j++)
-        if (samples_[volumes_[i].reach_samples[j]].isValid) tmp++;
-      ret[i] = tmp;
+      if (volumes_[i].isFree)
+      {
+        unsigned int tmp = 0;
+        for (unsigned long int j = 0; j < volumes_[i].reach_samples.size(); j++)
+          if (samples_[volumes_[i].reach_samples[j]].isValid) tmp++;
+        ret[i] = tmp;
+      }
+      else
+        ret[i] = 0;
     }
 
     return ret;
@@ -464,6 +486,7 @@ namespace dynamic_reachability_map
       std::vector<unsigned long int> & valid_samples)
   {
     valid_samples.clear();
+    valid_samples.reserve(volumes_[index].reach_samples.size());
     for (unsigned long int j = 0; j < volumes_[index].reach_samples.size(); j++)
       if (samples_[volumes_[index].reach_samples[j]].isValid)
         valid_samples.push_back(volumes_[index].reach_samples[j]);

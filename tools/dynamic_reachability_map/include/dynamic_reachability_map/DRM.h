@@ -27,6 +27,7 @@ namespace dynamic_reachability_map
       const DRMSpace_ptr & space() const;
       DRMSpace_ptr & spaceNonConst();
       void resetDRM2FreeSpace();
+      void updateOccupation(const std::map<unsigned int, bool> &occup_list);
 
       std::vector<std::pair<unsigned int, double> > getNeighborIndices(
           unsigned long int index, unsigned int depth);
@@ -49,6 +50,7 @@ namespace dynamic_reachability_map
       double heuristicCost(unsigned long int a, unsigned long int b);
       DRMSpace_ptr space_;
       Eigen::MatrixXd W_;
+      std::map<unsigned int, bool> invalid_volumes_;
   };
 
   typedef boost::shared_ptr<DRM> DRM_ptr;

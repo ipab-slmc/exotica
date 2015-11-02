@@ -1,12 +1,11 @@
 <launch>
-  <param name="robot_description" textfile="$(find val_description)/urdf/valkyrie_A_sim.urdf"/>
+  <param name="robot_description" textfile="$(find val_description)/urdf/valkyrie_A_sim_drake.urdf"/>
   <param name="robot_description_semantic" textfile="$(find val_moveit)/config/valkyrie.srdf"/> 
-
   <node pkg="dynamic_reachability_map" type="DRMActionNode" name="DRMActionNode" output="screen" >
 
     <param name="RobotModel" type="string" value="/robot_description"/>
     <param name="DRMModel" type="string" value="/drm_robot_description"/>
-    <param name="DRMPath" type="string" value="$(find dynamic_reachability_map)/result2/valkyrie_2000000_0.100000_1445108068"/>
+    <param name="DRMPath" type="string" value="$(find dynamic_reachability_map)/result2/valkyrie_100000_0.100000_1444745940"/>
     <param name="Clustering" type="bool" value="0"/>
   </node>
 </launch>

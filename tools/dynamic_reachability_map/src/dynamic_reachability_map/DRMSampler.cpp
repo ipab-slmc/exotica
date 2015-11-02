@@ -7,6 +7,12 @@
 
 #include "dynamic_reachability_map/DRMSampler.h"
 
+double dRand(double dMin, double dMax)
+{
+  double d = (double) rand() / RAND_MAX;
+  return dMin + d * (dMax - dMin);
+}
+
 namespace dynamic_reachability_map
 {
 
@@ -152,11 +158,28 @@ namespace dynamic_reachability_map
     else
     {
       collision_detection::CollisionRequest self_req;
+      self_req.group_name = space_->group_->getName();
       collision_detection::CollisionResult self_res;
       while (true)
       {
         srand(time(NULL));
         ps_[id]->getCurrentStateNonConst().setToRandomPositions(space_->group_);
+        ps_[id]->getCurrentStateNonConst().setVariablePosition(
+            "world_joint/trans_x", dRand(-0.3, 0.3));
+        ps_[id]->getCurrentStateNonConst().setVariablePosition(
+            "world_joint/trans_y", dRand(-0.3, 0.3));
+        ps_[id]->getCurrentStateNonConst().setVariablePosition(
+            "world_joint/trans_z", dRand(-0.35, 0.05));
+        ps_[id]->getCurrentStateNonConst().setVariablePosition(
+            "world_joint/rot_x", 0);
+        ps_[id]->getCurrentStateNonConst().setVariablePosition(
+            "world_joint/rot_y", 0);
+        ps_[id]->getCurrentStateNonConst().setVariablePosition(
+            "world_joint/rot_z", 0);
+        ps_[id]->getCurrentStateNonConst().setVariablePosition(
+            "world_joint/rot_w", 1);
+        ps_[id]->getCurrentStateNonConst().setVariablePosition("torsoPitch",
+            dRand(-0.13, 0.5));
         ps_[id]->getCurrentStateNonConst().update(true);
         effpose = ps_[id]->getCurrentStateNonConst().getGlobalLinkTransform(
             space_->eff_);

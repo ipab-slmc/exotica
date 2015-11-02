@@ -56,7 +56,6 @@ namespace exotica
       {
         goal->terminate(tmpret, tmp);
         if (!tmpret)
-        HIGHLIGHT_NAMED(goal->getObjectName(), "Does not pass with err "<<tmp);
         err += tmp;
         ret = ret && tmpret;
       }

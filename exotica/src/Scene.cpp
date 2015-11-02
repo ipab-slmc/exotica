@@ -347,7 +347,14 @@ namespace exotica
   bool CollisionScene::isStateValid(bool self)
   {
     stateCheckCnt_++;
-    return ps_->isStateValid(ps_->getCurrentState());
+    collision_detection::CollisionRequest req;
+    collision_detection::CollisionResult res;
+    ps_->getCollisionWorld()->checkRobotCollision(req,res,*ps_->getCollisionRobot(),ps_->getCurrentState());
+//    ERROR(ps_->getCurrentState().getCollisionBodyTransform("leftForearmLink",0).translation().transpose());
+//    if(res.collision){
+//      HIGHLIGHT("Contact "<<res.contacts.begin()->first.first<<" "<<res.contacts.begin()->first.second<<" at "<<res.contacts.begin()->second[0].pos.transpose());
+//    }
+    return !res.collision;
   }
 
   bool CollisionScene::isStateValid(const Eigen::VectorXd &q, bool self)

@@ -100,8 +100,8 @@ namespace exotica
                   }
                   else
                   {
-                    ROS_WARN_STREAM(
-                        "Creation of '"<<constraintClass<<"' cancelled!");
+//                    ROS_WARN_STREAM(
+//                        "Creation of '"<<constraintClass<<"' cancelled!");
                   }
                 }
                 else
@@ -121,7 +121,7 @@ namespace exotica
             }
             else
             {
-              WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
+//              WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
             }
           }
           else

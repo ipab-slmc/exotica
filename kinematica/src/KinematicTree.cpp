@@ -1174,6 +1174,8 @@ bool kinematica::KinematicTree::setJointOrder(
     switch (robot_tree_[joint_map.at(joints[i])].segment.getJoint().getType())
     {
     case KDL::Joint::RotAxis:
+      robot_tree_[joint_map.at(joints[i])].joint_type = JNT_ROTARY;
+      break;
     case KDL::Joint::RotX:
       robot_tree_[joint_map.at(joints[i])].joint_type = JNT_ROTARY;
       break;
@@ -1290,6 +1292,12 @@ bool kinematica::KinematicTree::modifyRootOffset(KDL::Frame & offset)
   robot_tree_[0].tip_pose = offset.Inverse();
   return true;
 }
+
+KDL::Frame kinematica::KinematicTree::getRootOffset()
+{
+  return robot_tree_[0].tip_pose.Inverse();
+}
+
 bool kinematica::KinematicTree::addSegment(
     KDL::SegmentMap::const_iterator current_segment, int parent, int & current,
     bool from_ptip, bool to_ctip, const std::string & root_name,

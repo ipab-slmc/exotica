@@ -269,6 +269,7 @@ namespace kinematica
       bool getInitialEff(std::vector<std::string> & segs,
           std::vector<KDL::Frame> & offsets);
       bool modifyRootOffset(KDL::Frame & offset);
+      KDL::Frame getRootOffset();
       std::string getRootName();
 
       bool getEndEffectorIndex(std::vector<int> & eff_index);

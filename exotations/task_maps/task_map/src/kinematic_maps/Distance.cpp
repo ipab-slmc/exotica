@@ -17,11 +17,11 @@ namespace exotica
       std::vector<std::string> tmp_eff(2);
       std::vector<KDL::Frame> tmp_offset(2);
       Eigen::VectorXd rel;
-      if (ok(getJSON(a["pointInLink"]["__ndarray__"], rel)) && rel.rows() == 3
+      if (ok(getJSON(a["pointInLink"], rel)) && rel.rows() == 3
           && ok(getJSON(a["referenceFrame"], tmp_offset[1])))
       {
         tmp_offset[0] = KDL::Frame(KDL::Vector(rel(0), rel(1), rel(2)));
-
+        tmp_offset[1].p = tmp_offset[1].p - scene_->getSolver().getRootOffset().p;
         tmp_eff[0] = eff;
         tmp_eff[1] = getScene()->getRootName();
         ref_pose_ = tmp_offset[1];

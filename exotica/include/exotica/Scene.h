@@ -36,7 +36,7 @@ namespace exotica
   typedef std::vector<boost::shared_ptr<fcl::CollisionObject> > fcls_ptr;
   enum BASE_TYPE
   {
-    FIXED = 0, FLOATING = 10, PLANAR = 20
+    FIXED = 0, FLOATING = 10, PLANAR = 20, FLOATING_FIXED = 30
   };
 ///	The class of collision scene
   class CollisionScene

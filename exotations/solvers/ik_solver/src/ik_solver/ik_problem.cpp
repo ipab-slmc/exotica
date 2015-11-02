@@ -76,15 +76,8 @@ namespace exotica
                       Eigen::VectorXi tspani(2);
 
                       //	TODO fix ndarray problem
-                      if (false && obj["tspan"].HasMember("__ndarray__")
-                          && obj["tspan"]["__ndarray__"].IsArray())
-                      {
-                        getJSON(obj["tspan"]["__ndarray__"], tspan);
-                      }
-                      else
-                      {
-                        getJSON(obj["tspan"], tspan);
-                      }
+
+                      getJSON(obj["tspan"], tspan);
                       if (tspan(0) <= 0.0) tspan(0) = 0.0;
                       if (tspan(1) >= 1.0) tspan(1) = 1.0;
                       tspani(0) = (int) ((T_ - 1) * tspan(0));
@@ -107,8 +100,8 @@ namespace exotica
                   }
                   else
                   {
-                    ROS_WARN_STREAM(
-                        "Creation of '"<<constraintClass<<"' cancelled!");
+//                    ROS_WARN_STREAM(
+//                        "Creation of '"<<constraintClass<<"' cancelled!");
                   }
                 }
                 else
@@ -128,7 +121,7 @@ namespace exotica
             }
             else
             {
-              WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
+//              WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
             }
           }
           else

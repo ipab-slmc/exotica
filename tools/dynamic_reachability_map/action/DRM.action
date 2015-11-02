@@ -1,5 +1,6 @@
 exotica/Vector q0
 geometry_msgs/Pose goal_pose
+geometry_msgs/Pose base_pose
 moveit_msgs/PlanningScene ps
 uint64[] invalid_samples
 ---

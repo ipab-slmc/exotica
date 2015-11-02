@@ -158,6 +158,65 @@ namespace dynamic_reachability_map
         << "\"/>" << std::endl;
     info_file << "</DynamicReachabilityMap>" << std::endl;
     info_file.close();
+    createCellURDF(folderpath, space);
+    return true;
+  }
+
+  bool DRMSpaceSaver::createCellURDF(const std::string & path,
+      DRMSpace_ptr &space)
+  {
+    struct stat st = { 0 };
+    if (stat(path.c_str(), &st) == -1 && mkdir(path.c_str(), 0700) != 0)
+    {
+      ROS_ERROR("Cannot create directory");
+      return false;
+    }
+    ROS_INFO("Creating DynamicReachabilityMapCell URDF");
+    std::ofstream urdf;
+    urdf.open(path + "/DRMCells.urdf");
+    urdf << "<?xml version=\"1.0\" ?>" << std::endl;
+    urdf << "<robot name=\"DRMCells\">" << std::endl;
+    urdf << "<material name=\"Black\">" << std::endl;
+    urdf << "\t<color rgba=\"0 0 0 .5\"/>" << std::endl;
+    urdf << "</material>" << std::endl;
+    urdf << "<link name=\"base\">" << std::endl;
+    urdf << "</link>" << std::endl;
+    urdf << "<link name=\"cell" << "\">" << std::endl;
+    for (int i = 0; i < space->space_size_; i++)
+    {
+      urdf << "\t<visual>" << std::endl;
+      urdf << "\t\t<origin rpy=\"0 0 0\" xyz=\"" << space->at(i).center.x << " "
+          << space->at(i).center.y << " " << space->at(i).center.z << "\"/>"
+          << std::endl;
+      urdf << "\t\t<geometry>" << std::endl;
+      urdf << "\t\t\t<box size=\"" << space->resolution_ << " "
+          << space->resolution_ << " " << space->resolution_ << "\"/>"
+          << std::endl;
+      urdf << "\t\t</geometry>" << std::endl;
+      urdf << "\t\t<material name=\"Black\"/>" << std::endl;
+      urdf << "\t</visual>" << std::endl;
+
+      urdf << "\t<collision>" << std::endl;
+      urdf << "\t\t<origin rpy=\"0 0 0\" xyz=\"" << space->at(i).center.x << " "
+          << space->at(i).center.y << " " << space->at(i).center.z << "\"/>"
+          << std::endl;
+      urdf << "\t\t<geometry>" << std::endl;
+      urdf << "\t\t\t<box size=\"" << space->resolution_ << " "
+          << space->resolution_ << " " << space->resolution_ << "\"/>"
+          << std::endl;
+      urdf << "\t\t</geometry>" << std::endl;
+      urdf << "\t</collision>" << std::endl;
+    }
+    urdf << "</link>" << std::endl;
+//    for (int i = 0; i < space->space_size_; i++)
+//    {
+    urdf << "<joint name=\"joint\" type=\"fixed\">" << std::endl;
+    urdf << "\t<origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" << std::endl;
+    urdf << "\t<parent link=\"base\"/>" << std::endl;
+    urdf << "\t<child link=\"cell\"/>" << std::endl;
+    urdf << "</joint>" << std::endl;
+//    }
+    urdf << "</robot>" << std::endl;
     return true;
   }
 }

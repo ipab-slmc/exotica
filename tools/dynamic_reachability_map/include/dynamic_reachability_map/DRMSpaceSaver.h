@@ -20,6 +20,7 @@ namespace dynamic_reachability_map
 
       bool saveSpace(const std::string &path, DRMSpace_ptr &space,
           std::string &savepath);
+      bool createCellURDF(const std::string & path, DRMSpace_ptr &space);
   };
 }
 

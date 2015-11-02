@@ -918,12 +918,16 @@ namespace exotica
 
     if (visual_debug_->data)
     {
-      moveit_msgs::PlanningScene msg;
-      collision_scene_->getPlanningScene()->getPlanningSceneMsg(msg);
-      ps_pub_.publish(msg);
+      publishScene();
     }
 
     return SUCCESS;
+  }
+  void Scene::publishScene()
+  {
+    moveit_msgs::PlanningScene msg;
+    collision_scene_->getPlanningScene()->getPlanningSceneMsg(msg);
+    ps_pub_.publish(msg);
   }
 
   EReturn Scene::setCollisionScene(

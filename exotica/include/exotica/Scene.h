@@ -420,7 +420,7 @@ namespace exotica
       }
 
       KDL::Frame getRobotRootWorldTransform();
-    private:
+//    private:
       ///	EXOTica server
       Server_ptr server_;
 

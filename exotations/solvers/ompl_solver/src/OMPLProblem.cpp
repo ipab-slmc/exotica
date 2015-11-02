@@ -146,8 +146,8 @@ namespace exotica
                   }
                   else
                   {
-                    ROS_WARN_STREAM(
-                        "Creation of '"<<constraintClass<<"' cancelled!");
+//                    ROS_WARN_STREAM(
+//                        "Creation of '"<<constraintClass<<"' cancelled!");
                   }
                 }
                 else
@@ -167,7 +167,7 @@ namespace exotica
             }
             else
             {
-              WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
+//              WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
             }
           }
           else
@@ -289,8 +289,8 @@ namespace exotica
         scenes_.begin()->second->getSolver().getUsedJointLimits();
     for (int i = 0; i < jnts.size(); i++)
     {
-      getBounds()[i] = joint_limits.at(jnts[i])[0];
-      getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1];
+      getBounds()[i] = -3;//joint_limits.at(jnts[i])[0];
+      getBounds()[i + jnts.size()] =3;// joint_limits.at(jnts[i])[1];
     }
     return SUCCESS;
 

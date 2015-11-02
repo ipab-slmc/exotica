@@ -145,7 +145,7 @@ namespace dynamic_reachability_map
     }
 //  graph_timer_ = nh_.createTimer(ros::Duration(2), &DRMActionNode::graphTimeCallback, this);
     as_.start();
-    ROS_INFO_STREAM("DRM is ready");
+    ROS_WARN_STREAM("[Dynamic Reachability Map] is ready! DRM info will be published to "<<nh_.getNamespace()+"/DynamicReachabilityMap");
     return true;
   }
 

@@ -50,7 +50,7 @@ namespace exotica
             if (link_name.compare(eff_link_) == 0)
             {
               Eigen::VectorXd tmp;
-              if (!ok(getJSON(obj["pointInLink"]["__ndarray__"], tmp)))
+              if (!ok(getJSON(obj["pointInLink"], tmp)))
               {
                 INDICATE_FAILURE
                 return FAILURE;
@@ -102,7 +102,7 @@ namespace exotica
       return FAILURE;
     }
     pos.M = quat.M;
-    pos.p.data[2] -= 1.025;
+//    pos.p.data[2] -= 1.025;
     eff_goal_pose = pos * (pointInLink.Inverse());
     HIGHLIGHT_NAMED(object_name_,
         "Eff: "<<eff_link_<<" goalpos ("<<eff_goal_pose.p[0]<<" "<<eff_goal_pose.p[1]<<" "<<eff_goal_pose.p[2]<<")");

@@ -98,7 +98,7 @@ namespace exotica
       goal.q0.data[i] = q0(drm_drake_joints_map_[i]);
     goal.goal_pose.position.x = prob_->eff_goal_pose.p[0];
     goal.goal_pose.position.y = prob_->eff_goal_pose.p[1];
-    goal.goal_pose.position.z = prob_->eff_goal_pose.p[2]; // - 1.025;
+    goal.goal_pose.position.z = prob_->eff_goal_pose.p[2] - 1.025;
     prob_->eff_goal_pose.M.GetQuaternion(goal.goal_pose.orientation.x,
         goal.goal_pose.orientation.y, goal.goal_pose.orientation.z,
         goal.goal_pose.orientation.w);
@@ -110,33 +110,41 @@ namespace exotica
     int cnt = 0;
     bool succeeded = false;
     ros::Time start = ros::Time::now();
-    while (cnt < 20)
+    while (cnt < 50)
     {
       if (drm_client_.sendGoalAndWait(goal, ros::Duration(2)).state_
           == actionlib::SimpleClientGoalState::SUCCEEDED)
       {
         if (drm_client_.getResult()->succeed)
         {
-          for (int i = 0; i < drm_drake_joints_map_.size(); i++)
-            qs(drm_drake_joints_map_[i]) =
-                drm_client_.getResult()->q_out.data[i];
-          Eigen::VectorXd lb, ub;
-          lb = qs.segment<3>(0) - Eigen::Vector3d::Ones() * 0.02;
-          ub = qs.segment<3>(0) + Eigen::Vector3d::Ones() * 0.02;
-          lb(2) += 1.025;
-          ub(2) += 1.025;
-          HIGHLIGHT("LB "<<lb.transpose()<<" UB "<<ub.transpose());
-          std::vector<int> idx = { 0, 1, 2 };
           PostureConstraint* base_pos_ptr = new PostureConstraint(
               prob_->getDrakeModel());
-          base_pos_ptr->setJointLimits(3, idx.data(), lb, ub);
-          prob_->constraints_.push_back(base_pos_ptr);
+          if (cnt == 0)
+            qs = q0;
+          else
+          {
+            for (int i = 0; i < drm_drake_joints_map_.size(); i++)
+              qs(drm_drake_joints_map_[i]) =
+                  drm_client_.getResult()->q_out.data[i];
+            Eigen::VectorXd lb, ub;
+            lb = qs.segment<3>(0) - Eigen::Vector3d::Ones() * 0.02;
+            ub = qs.segment<3>(0) + Eigen::Vector3d::Ones() * 0.02;
+            lb(2) += 1.025;
+            ub(2) += 1.025;
+            std::vector<int> idx = { 0, 1, 2 };
+
+            base_pos_ptr->setJointLimits(3, idx.data(), lb, ub);
+            prob_->constraints_.push_back(base_pos_ptr);
+          }
           std::vector<std::string> infeasible_constraint;
           inverseKin(prob_->getDrakeModel(), qs, qs, prob_->constraints_.size(),
               &prob_->constraints_[0], q_sol, info, infeasible_constraint,
               *ik_options_);
-          prob_->constraints_.pop_back();
-          delete base_pos_ptr;
+          if (cnt != 0)
+          {
+            prob_->constraints_.pop_back();
+            delete base_pos_ptr;
+          }
           for (int i = 6; i < prob_->getDrakeModel()->num_positions; i++)
             prob_->getScenes().begin()->second->getPlanningScene()->getCurrentStateNonConst().setVariablePosition(
                 prob_->getDrakeModel()->getPositionName(i), q_sol(i));
@@ -179,8 +187,8 @@ namespace exotica
                       drm_client_.getResult()->sample_index);
                   col = true;
                   succeeded = false;
-                  HIGHLIGHT(
-                      "Collision between "<<it.first.first<<" and "<<it.first.second);
+//                  HIGHLIGHT(
+//                      "Collision between "<<it.first.first<<" and "<<it.first.second);
                   break;
                 }
               }
@@ -189,7 +197,7 @@ namespace exotica
         }
         else
         {
-          HIGHLIGHT("Unsucceeded iteration "<<cnt);
+//          HIGHLIGHT("Unsucceeded iteration "<<cnt);
         }
       }
       else

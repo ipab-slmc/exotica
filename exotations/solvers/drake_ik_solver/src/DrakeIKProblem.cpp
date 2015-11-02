@@ -124,14 +124,14 @@ namespace exotica
       INDICATE_FAILURE
       return FAILURE;
     }
-//    Eigen::VectorXd quat(4);
-//    quat << 1, 0, 0, 0;
-//    WorldQuatConstraint* ptr_left = new WorldQuatConstraint(model_,
-//        model_->findLinkId("rightFoot"), quat, 0, tspan01);
-//    WorldQuatConstraint* ptr_right = new WorldQuatConstraint(model_,
-//            model_->findLinkId("leftFoot"), quat, 0, tspan01);
-//    constraints_.push_back(ptr_left);
-//    constraints_.push_back(ptr_right);
+    Eigen::VectorXd quat(4);
+    quat << 1, 0, 0, 0;
+    WorldQuatConstraint* ptr_left = new WorldQuatConstraint(model_,
+        model_->findLinkId("rightFoot"), quat, 0, tspan01);
+    WorldQuatConstraint* ptr_right = new WorldQuatConstraint(model_,
+            model_->findLinkId("leftFoot"), quat, 0, tspan01);
+    constraints_.push_back(ptr_left);
+    constraints_.push_back(ptr_right);
     HIGHLIGHT_NAMED(object_name_,
         "Created "<<constraints_.size()<<" constraints");
     return SUCCESS;
@@ -223,12 +223,8 @@ namespace exotica
     if (ok(getJSON(obj["joints"], joints))
         && ok(getJSON(obj["postureName"], pose_name))
         && poses->find(pose_name) != poses->end()
-        && (obj["jointsLowerBound"].IsArray() ?
-            ok(getJSON(obj["jointsLowerBound"], lb)) :
-            ok(getJSON(obj["jointsLowerBound"]["__ndarray__"], lb)))
-        && (obj["jointsUpperBound"].IsArray() ?
-            ok(getJSON(obj["jointsUpperBound"], ub)) :
-            ok(getJSON(obj["jointsUpperBound"]["__ndarray__"], ub))))
+        && ok(getJSON(obj["jointsLowerBound"], lb))
+        && ok(getJSON(obj["jointsUpperBound"], ub)))
     {
       Eigen::VectorXd q_pose = poses->at(pose_name);
       Eigen::VectorXd q(joints.size());
@@ -260,16 +256,10 @@ namespace exotica
     Eigen::VectorXd pointInLink;
     std::string link_name;
     Eigen::VectorXd frame;
-    if ((
-        obj["lowerBound"].IsArray() ?
-            ok(getJSON(obj["lowerBound"], lb)) :
-            ok(getJSON(obj["lowerBound"]["__ndarray__"], lb)))
-        && (obj["upperBound"].IsArray() ?
-            ok(getJSON(obj["upperBound"], ub)) :
-            ok(getJSON(obj["upperBound"]["__ndarray__"], ub)))
+    if (ok(getJSON(obj["lowerBound"], lb)) && ok(getJSON(obj["upperBound"], ub))
         && ok(getJSON(obj["tspan"], tspan))
-        && ok(getJSON(obj["referenceFrame"]["position"]["__ndarray__"], frame))
-        && ok(getJSON(obj["pointInLink"]["__ndarray__"], pointInLink))
+        && ok(getJSON(obj["referenceFrame"]["position"], frame))
+        && ok(getJSON(obj["pointInLink"], pointInLink))
         && ok(getJSON(obj["linkName"], link_name)))
     {
       lb += frame;
@@ -324,18 +314,18 @@ namespace exotica
     double tol;
     if (ok(getJSON(obj["linkName"], link_name))
         && ok(getJSON(obj["tspan"], tspan))
-        && ok(getJSON(obj["lowerBound"]["__ndarray__"], lb))
-        && ok(getJSON(obj["upperBound"]["__ndarray__"], ub))
+        && ok(getJSON(obj["lowerBound"], lb))
+        && ok(getJSON(obj["upperBound"], ub))
         && ok(getJSON(obj["poseName"], pose_name))
         && poses->find(pose_name) != poses->end()
         && ok(getJSON(obj["angleToleranceInDegrees"], tol)))
     {
       Eigen::VectorXd q = poses->at(pose_name);
       Eigen::VectorXd v = Eigen::VectorXd::Zero(model_->num_velocities);
-      model_->doKinematics(q, v, false, false);
+      KinematicsCache<double> cache = model_->doKinematics(q, v, false, false);
       int idx = model_->findLinkId(link_name);
       Eigen::Vector3d pt = Eigen::Vector3d::Zero();
-      Eigen::VectorXd pos = model_->forwardKin(pt, idx, 0, 0, 0).value();
+      Eigen::VectorXd pos = model_->forwardKin(cache, pt, idx, 0, 0, 0).value();
       lb += pos;
       ub += pos;
       pos_ptr = new WorldPositionConstraint(model_, idx,

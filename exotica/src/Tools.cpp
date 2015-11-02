@@ -528,6 +528,20 @@ namespace exotica
     }
   }
 
+  EReturn getJSON(const rapidjson::Value& a, bool& ret)
+  {
+    if(a.IsBool())
+    {
+      ret=a.GetBool();
+      return SUCCESS;
+    }
+    else
+    {
+      INDICATE_FAILURE
+      return FAILURE;
+    }
+  }
+
   EReturn getJSON(const rapidjson::Value& a, std::string& ret)
   {
     ret = a.GetString();
@@ -539,8 +553,8 @@ namespace exotica
     if (a.IsObject())
     {
       Eigen::VectorXd pos(3), rot(4);
-      if (ok(getJSON(a["position"]["__ndarray__"], pos))
-          && ok(getJSON(a["quaternion"]["__ndarray__"], rot)))
+      if (ok(a["position"].HasMember("__ndarray__") ? getJSON(a["position"]["__ndarray__"], pos):getJSON(a["position"], pos))
+          && ok(a["quaternion"].HasMember("__ndarray__") ? getJSON(a["quaternion"]["__ndarray__"], rot):getJSON(a["quaternion"], rot)))
       {
         rot = rot / rot.norm();
         ret = KDL::Frame(

@@ -15,6 +15,8 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>kdl_parser</build_depend>
   <run_depend>kdl_parser</run_depend>  
+  <build_depend>cmake_modules</build_depend>
+  <run_depend>cmake_modules</run_depend>
   <export>
   </export>
 </package>

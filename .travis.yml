@@ -23,10 +23,17 @@ install:
   - rosdep update
   # Use rosdep to install all dependencies (including ROS itself)
   - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
-  - git clone https://github.com/RobotLocomotion/eigen-pod.git
-  - cd eigen-pod
-  - make
-  - cd ..
+  #- git clone https://github.com/RobotLocomotion/eigen-pod.git
+  #- cd eigen-pod
+  #- make
+  #- cd ..
+  #- mkdir cmake
+  #- cd cmake
+  #- wget https://bitbucket.org/eigen/eigen/raw/633aade5f4c7a58aa23b8f3c2c7b19b2ad892695/cmake/FindEigen3.cmake
+  #- cd ..
+  #- export
+  - locate FindEigen3.cmake
+  - locate eigen
 script:
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash
   - mkdir -p $CATKIN_WS_SRC

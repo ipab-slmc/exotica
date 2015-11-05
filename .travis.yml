@@ -19,7 +19,7 @@ before_install:
   - cd eigen-eigen-c58038c56923
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+  - cmake .. #-DCMAKE_INSTALL_PREFIX=/usr
   - sudo make install
   - cd ../..
 

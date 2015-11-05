@@ -13,8 +13,7 @@ env:
 #    - CI_ROS_DISTRO="indigo"
 #    - CI_ROS_DISTRO="jade"
 
-install:
-  - uname -a
+before_install:
   - wget https://bitbucket.org/eigen/eigen/get/3.2.6.zip
   - unzip 3.2.6.zip
   - cd eigen-eigen-c58038c56923
@@ -23,6 +22,8 @@ install:
   - cmake .. -DCMAKE_INSTALL_PREFIX=/usr
   - sudo make install
   - cd ../..
+
+install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - sudo apt-get update -qq
@@ -38,9 +39,6 @@ script:
   - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
   - cd $CATKIN_WS
   - catkin init
-  #- mkdir -p ~/catkin_ws/src/exotica/cmake
-  #- ln -s /usr/share/cmake-2.8/Modules/FindEigen3.cmake ~/catkin_ws/src/exotica/cmake/FindEigen3.cmake
-  #- export CMAKE_MODULE_PATH=~/catkin_ws/src/exotica/cmake/FindEigen3.cmake
   # Enable install space
   #- catkin config --install
   # Build [and Install] packages

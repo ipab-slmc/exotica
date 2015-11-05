@@ -10,7 +10,9 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
 )
 
-find_package(Eigen3 REQUIRED)
+#find_package(Eigen3 REQUIRED)
+find_package(PkgConfig)
+pkg_search_module(Eigen3 REQUIRED eigen3)
 
 ##find_package(EIGEN REQUIRED)
 

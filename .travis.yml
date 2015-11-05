@@ -22,6 +22,7 @@ before_install:
   - cmake .. #-DCMAKE_INSTALL_PREFIX=/usr
   - sudo make install
   - cd ../..
+  - sudo apt-get install -qq -y liblapack-dev # for f2c / aico
 
 install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'

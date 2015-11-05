@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS signals)
 find_package(orocos_kdl REQUIRED)
-find_package(cmake_modules REQUIRED) # required for indigo and newer to have Eigen work
 find_package(Eigen3 REQUIRED)
 
 catkin_package(

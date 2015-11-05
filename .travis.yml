@@ -33,6 +33,7 @@ script:
   - catkin init
   - mkdir -p ~/catkin_ws/src/exotica/cmake
   - ln -s /usr/share/cmake-2.8/Modules/FindEigen3.cmake ~/catkin_ws/src/exotica/cmake/FindEigen3.cmake
+  - export CMAKE_MODULE_PATH=~/catkin_ws/src/exotica/cmake/FindEigen3.cmake
   # Enable install space
   #- catkin config --install
   # Build [and Install] packages

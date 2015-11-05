@@ -37,9 +37,10 @@ script:
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash
   - mkdir -p $CATKIN_WS_SRC
   - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
-  - cd $CATKIN_WS
+  - cd $CATKIN_WS_SRC
   #- catkin init
   - catkin_init_workspace
+  - cd ..
   # Blacklist Drake IK Solver since no drake on build server (yet, TODO)
   - touch $CATKIN_WS_SRC/exotica/exotations/solvers/drake_ik_solver/CATKIN_IGNORE
   # Enable install space

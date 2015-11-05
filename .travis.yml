@@ -32,8 +32,10 @@ install:
   #- wget https://bitbucket.org/eigen/eigen/raw/633aade5f4c7a58aa23b8f3c2c7b19b2ad892695/cmake/FindEigen3.cmake
   #- cd ..
   #- export
-  - locate FindEigen3.cmake
-  - locate eigen
+  #- locate FindEigen3.cmake
+  #- locate eigen
+  - mkdir -p ~/catkin_ws/src/exotica/cmake
+  - ln -s /usr/share/cmake-2.8/Modules/FindEigen3.cmake ~/catkin_ws/src/exotica/cmake
 script:
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash
   - mkdir -p $CATKIN_WS_SRC

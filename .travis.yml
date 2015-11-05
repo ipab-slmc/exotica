@@ -43,6 +43,8 @@ script:
   - cd ..
   # Blacklist Drake IK Solver since no drake on build server (yet, TODO)
   - touch $CATKIN_WS_SRC/exotica/exotations/solvers/drake_ik_solver/CATKIN_IGNORE
+  # Blacklist DRM IK Solver since it requires Drake IK Solver
+  - touch $CATKIN_WS_SRC/exotica/exotations/solvers/drm_ik_solver/CATKIN_IGNORE
   # Enable install space
   #- catkin config --install
   # Build [and Install] packages

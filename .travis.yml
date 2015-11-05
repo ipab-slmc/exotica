@@ -27,7 +27,7 @@ install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - sudo apt-get update -qq
-  - sudo apt-get install -qq -y python-rosdep #python-catkin-tools
+  - sudo apt-get install -qq -y python-rosdep python-catkin-tools
   - sudo rosdep init
   - rosdep update
   # Use rosdep to install all dependencies (including ROS itself)
@@ -38,13 +38,13 @@ script:
   - mkdir -p $CATKIN_WS_SRC
   - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
   - cd $CATKIN_WS
-  #- catkin init
-  - catkin_init_workspace
+  - catkin init
+  #- catkin_init_workspace
   # Enable install space
   #- catkin config --install
   # Build [and Install] packages
-  - catkin_make -DCMAKE_BUILD_TYPE=Release
-  #- catkin build --limit-status-rate 0.1 --no-notify -DCMAKE_BUILD_TYPE=Release
+  #- catkin_make -DCMAKE_BUILD_TYPE=Release
+  - catkin build --limit-status-rate 0.1 --no-notify -DCMAKE_BUILD_TYPE=Release
   # Build tests
   # - catkin build --limit-status-rate 0.1 --no-notify --make-args tests
   # Run tests

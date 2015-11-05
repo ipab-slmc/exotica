@@ -13,7 +13,7 @@ env:
 #    - CI_ROS_DISTRO="indigo"
 #    - CI_ROS_DISTRO="jade"
 
-before_install:
+install:
   - uname -a
   - wget https://bitbucket.org/eigen/eigen/get/3.2.6.zip
   - unzip 3.2.6.zip
@@ -22,16 +22,15 @@ before_install:
   - cd build
   - cmake .. -DCMAKE_INSTALL_PREFIX=/usr
   - sudo make install
+  - cd ../..
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - sudo apt-get update -qq
-  #- sudo apt-get install -qq -y cmake cmake-data libeigen3-dev
   - sudo apt-get install -qq -y python-rosdep python-catkin-tools
   - sudo rosdep init
   - rosdep update
   # Use rosdep to install all dependencies (including ROS itself)
   - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
-  #- wget https://bitbucket.org/eigen/eigen/raw/633aade5f4c7a58aa23b8f3c2c7b19b2ad892695/cmake/FindEigen3.cmake
 
 script:
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash

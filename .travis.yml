@@ -3,7 +3,7 @@ dist: trusty
 # Force travis to use its minimal image with default Python settings
 language: generic
 compiler:
-  - cmake
+  - gcc
 env:
   global:
     - CATKIN_WS=~/catkin_ws

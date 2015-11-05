@@ -19,7 +19,7 @@ before_install:
   - cd eigen-eigen-c58038c56923
   - mkdir build
   - cd build
-  - cmake .. #-DCMAKE_INSTALL_PREFIX=/usr
+  - cmake ..
   - sudo make install
   - cd ../..
 
@@ -39,19 +39,11 @@ script:
   - mkdir -p $CATKIN_WS_SRC
   - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
   - cd $CATKIN_WS_SRC
-  #- catkin init
   - catkin_init_workspace
   - cd ..
   # Blacklist Drake IK Solver since no drake on build server (yet, TODO)
   - touch $CATKIN_WS_SRC/exotica/exotations/solvers/drake_ik_solver/CATKIN_IGNORE
   # Blacklist DRM IK Solver since it requires Drake IK Solver
   - touch $CATKIN_WS_SRC/exotica/exotations/solvers/drm_ik_solver/CATKIN_IGNORE
-  # Enable install space
-  #- catkin config --install
   # Build [and Install] packages
-  #- catkin build --limit-status-rate 0.1 --no-notify -DCMAKE_BUILD_TYPE=Release
   - catkin_make -DCMAKE_BUILD_TYPE=Release
-  # Build tests
-  # - catkin build --limit-status-rate 0.1 --no-notify --make-args tests
-  # Run tests
-  #- catkin run_tests

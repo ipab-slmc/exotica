@@ -28,7 +28,7 @@ install:
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - sudo apt-get update -qq
   - sudo apt-get install -qq -y python-rosdep python-catkin-tools
-  - sudo apt-get install -qq -y liblapack-dev # for f2c / aico
+  - sudo apt-get install -qq -y liblapack-dev libf2c2-dev # for f2c / aico
   - sudo rosdep init
   - rosdep update
   # Use rosdep to install all dependencies (including ROS itself)

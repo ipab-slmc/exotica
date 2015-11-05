@@ -12,26 +12,27 @@ env:
 #  matrix:
 #    - CI_ROS_DISTRO="indigo"
 #    - CI_ROS_DISTRO="jade"
-install:
+
+before_install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - sudo apt-get update -qq
   #- sudo apt-get install -qq -y cmake cmake-data libeigen3-dev
+  - sudo apt-get install -qq -y python-rosdep python-catkin-tools
   - sudo rosdep init
   - rosdep update
   # Use rosdep to install all dependencies (including ROS itself)
   - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
-  #- mkdir cmake
-  #- cd cmake
   #- wget https://bitbucket.org/eigen/eigen/raw/633aade5f4c7a58aa23b8f3c2c7b19b2ad892695/cmake/FindEigen3.cmake
-  - mkdir -p ~/catkin_ws/src/exotica/cmake
-  - ln -s /usr/share/cmake-2.8/Modules/FindEigen3.cmake ~/catkin_ws/src/exotica/cmake/FindEigen3.cmake
+
 script:
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash
   - mkdir -p $CATKIN_WS_SRC
   - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
   - cd $CATKIN_WS
   - catkin init
+  - mkdir -p ~/catkin_ws/src/exotica/cmake
+  - ln -s /usr/share/cmake-2.8/Modules/FindEigen3.cmake ~/catkin_ws/src/exotica/cmake/FindEigen3.cmake
   # Enable install space
   #- catkin config --install
   # Build [and Install] packages

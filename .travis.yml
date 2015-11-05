@@ -35,7 +35,7 @@ install:
   #- locate FindEigen3.cmake
   #- locate eigen
   - mkdir -p ~/catkin_ws/src/exotica/cmake
-  - ln -s /usr/share/cmake-2.8/Modules/FindEigen3.cmake ~/catkin_ws/src/exotica/cmake
+  - ln -s /usr/share/cmake-2.8/Modules/FindEigen3.cmake ~/catkin_ws/src/exotica/cmake/FindEigen3.cmake
 script:
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash
   - mkdir -p $CATKIN_WS_SRC

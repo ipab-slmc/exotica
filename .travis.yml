@@ -17,23 +17,13 @@ install:
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - sudo apt-get update -qq
   #- sudo apt-get install -qq -y cmake cmake-data libeigen3-dev
-  - sudo apt-get install -qq -y python-rosdep python-catkin-tools libxmu-dev libxmu-headers
-# ros-$CRI_ROS_DISTRO-moveit-core ros-$CRI_ROS_DISTRO-moveit-ros-planning-interface
   - sudo rosdep init
   - rosdep update
   # Use rosdep to install all dependencies (including ROS itself)
   - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
-  #- git clone https://github.com/RobotLocomotion/eigen-pod.git
-  #- cd eigen-pod
-  #- make
-  #- cd ..
   #- mkdir cmake
   #- cd cmake
   #- wget https://bitbucket.org/eigen/eigen/raw/633aade5f4c7a58aa23b8f3c2c7b19b2ad892695/cmake/FindEigen3.cmake
-  #- cd ..
-  #- export
-  #- locate FindEigen3.cmake
-  #- locate eigen
   - mkdir -p ~/catkin_ws/src/exotica/cmake
   - ln -s /usr/share/cmake-2.8/Modules/FindEigen3.cmake ~/catkin_ws/src/exotica/cmake/FindEigen3.cmake
 script:

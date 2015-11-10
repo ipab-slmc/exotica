@@ -1,0 +1,49 @@
+sudo: required
+dist: trusty
+# Force travis to use its minimal image with default Python settings
+language: generic
+compiler:
+  - gcc
+env:
+  global:
+    - CATKIN_WS=~/catkin_ws
+    - CATKIN_WS_SRC=${CATKIN_WS}/src
+    - CI_ROS_DISTRO="indigo"
+#  matrix:
+#    - CI_ROS_DISTRO="indigo"
+#    - CI_ROS_DISTRO="jade"
+
+before_install:
+  - wget https://bitbucket.org/eigen/eigen/get/3.2.6.zip
+  - unzip 3.2.6.zip
+  - cd eigen-eigen-c58038c56923
+  - mkdir build
+  - cd build
+  - cmake ..
+  - sudo make install
+  - cd ../..
+
+install:
+  - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
+  - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq -y python-rosdep python-catkin-tools
+  - sudo apt-get install -qq -y liblapack-dev libf2c2-dev # for f2c / aico
+  - sudo rosdep init
+  - rosdep update
+  # Use rosdep to install all dependencies (including ROS itself)
+  - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
+
+script:
+  - source /opt/ros/$CI_ROS_DISTRO/setup.bash
+  - mkdir -p $CATKIN_WS_SRC
+  - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
+  - cd $CATKIN_WS_SRC
+  - catkin_init_workspace
+  - cd ..
+  # Blacklist Drake IK Solver since no drake on build server (yet, TODO)
+  - touch $CATKIN_WS_SRC/exotica/exotations/solvers/drake_ik_solver/CATKIN_IGNORE
+  # Blacklist DRM IK Solver since it requires Drake IK Solver
+  - touch $CATKIN_WS_SRC/exotica/exotations/solvers/drm_ik_solver/CATKIN_IGNORE
+  # Build [and Install] packages
+  - catkin_make -DCMAKE_BUILD_TYPE=Release

@@ -51,10 +51,15 @@ generate_messages(
 find_package(Boost REQUIRED COMPONENTS signals)
 
 ## System dependencies are found with CMake's conventions
-find_package(Eigen3 REQUIRED)
+#find_package(Eigen3 REQUIRED)
+find_package(PkgConfig)
+pkg_search_module(Eigen3 REQUIRED eigen3)
 
 if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/Ref.h")
    message(STATUS "Eigen found")
+elseif(EXISTS "/usr/include/eigen3/Eigen/src/Core/Ref.h")
+  message(WARNING "Manually setting to /usr/include/eigen3")
+  set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
 else()
    message(FATAL_ERROR "Eigen version 3.2.1 or higher is required! Install it in the standard directory.")
 endif()

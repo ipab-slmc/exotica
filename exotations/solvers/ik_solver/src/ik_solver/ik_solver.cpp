@@ -349,7 +349,7 @@ namespace exotica
         goal.goal_pose = reach_goal_;
         for (int j = 0; j < 10; j++)
         {
-          goal.invalid_samples = invalid_samples;
+          //goal.invalid_samples = invalid_samples;
           if (drm_client_.sendGoalAndWait(goal, ros::Duration(2)).state_
               == actionlib::SimpleClientGoalState::SUCCEEDED)
           {

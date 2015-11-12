@@ -64,15 +64,25 @@ namespace dynamic_reachability_map
     {
       return false;
     }
-
-    traj_pub_ = nh_.advertise<moveit_msgs::DisplayTrajectory>("ClusterCenters",
-        1);
+    drm_cluster_ = new DRMSampleCluster();
+    DRMClusterParam param;
+    drm_cluster_->startClustering(drm_->spaceNonConst(), param);
+    drm_cluster_->saveClusters(path);
+//    drm_cluster_->loadClusters(path, drm_->spaceNonConst());
+    traj_pub_ = nh_.advertise<moveit_msgs::DisplayTrajectory>("Clusters", 1);
     disp_traj_.model_id =
         drm_->space()->getPlanningScene()->getRobotModel()->getName();
     disp_traj_.trajectory.resize(1);
     disp_traj_.trajectory[0].joint_trajectory.header.frame_id = "world_frame";
-    disp_traj_.trajectory[0].joint_trajectory.joint_names =
-        drm_->space()->getGroup()->getVariableNames();
+    disp_traj_.trajectory[0].multi_dof_joint_trajectory.joint_names.resize(1);
+    disp_traj_.trajectory[0].joint_trajectory.joint_names.resize(
+        drm_->space()->getGroup()->getVariableNames().size() - 7);
+    disp_traj_.trajectory[0].multi_dof_joint_trajectory.joint_names[0] =
+        drm_->space()->getPlanningScene()->getRobotModel()->getMultiDOFJointModels()[0]->getName();
+    for (int i = 7; i < drm_->space()->getGroup()->getVariableNames().size();
+        i++)
+      disp_traj_.trajectory[0].joint_trajectory.joint_names[i - 7] =
+          drm_->space()->getGroup()->getVariableNames()[i];
 
     astar_traj_ = disp_traj_;
     astar_pub_ = nh_.advertise<moveit_msgs::DisplayTrajectory>(
@@ -143,9 +153,12 @@ namespace dynamic_reachability_map
       graph_markers_.markers[1].colors[2 * i + 1] = c2;
 
     }
+    drm_state_timer_ = nh_.createTimer(ros::Duration(2),
+        &DRMActionNode::drmClusterTimeCallback, this);
 //  graph_timer_ = nh_.createTimer(ros::Duration(2), &DRMActionNode::graphTimeCallback, this);
     as_.start();
-    ROS_WARN_STREAM("[Dynamic Reachability Map] is ready! DRM info will be published to "<<nh_.getNamespace()+"/DynamicReachabilityMap");
+    ROS_WARN_STREAM(
+        "[Dynamic Reachability Map] is ready! DRM info will be published to "<<nh_.getNamespace()+"/DynamicReachabilityMap");
     return true;
   }
 
@@ -179,6 +192,7 @@ namespace dynamic_reachability_map
       const dynamic_reachability_map::DRMGoalConstPtr &goal,
       const KDL::Frame &base_pose)
   {
+    ROS_INFO("Updating DRM");
     ros::Time update_start = ros::Time::now();
     moveit_msgs::PlanningSceneWorld world = goal->ps.world;
     for (int i = 0; i < world.collision_objects.size(); i++)
@@ -392,40 +406,80 @@ namespace dynamic_reachability_map
     drm_pub_.publish(drm_mark_);
   }
 
-  void DRMActionNode::drmStateTimeCallback(const ros::TimerEvent& event)
+  void DRMActionNode::drmClusterTimeCallback(const ros::TimerEvent& event)
   {
-    static unsigned int space_index = 0;
-    if (space_index == drm_->space()->getSpaceSize()) space_index = 0;
-    while (drm_->space()->at(space_index).reach_samples.size() <= 0)
+    static int space_index = 0;
+    static int last_space_index = space_index;
+    nh_.getParam("/SpaceIndex", space_index);
+    if (space_index == 0 || space_index >= drm_->space()->getSpaceSize())
     {
-      space_index++;
-      if (space_index == drm_->space()->getSpaceSize()) space_index = 0;
+      ROS_ERROR_STREAM("Index " << space_index << " is not valid");
+      return;
     }
-    ROS_INFO_STREAM(
-        "Publishing Volume "<<space_index<<": "<<drm_->space()->at(space_index).reach_samples.size()<<" clusters");
+    if (drm_->space()->at(space_index).reach_samples.size() <= 0)
+    {
+      ROS_ERROR_STREAM("Index "<<space_index<<" is not reachable");
+      return;
+    }
+    static int cluster_index = 0;
+    static int last_cluster_index = cluster_index;
+    nh_.getParam("/ClusterIndex", cluster_index);
+    if (drm_->space()->at(space_index).reach_clusters.size() <= cluster_index)
+    {
+      ROS_ERROR_STREAM(
+          "Index "<<space_index<<" only has "<<drm_->space()->at(space_index).reach_clusters.size()<<" clusters");
+      return;
+    }
+    if (space_index == last_space_index && cluster_index == last_cluster_index)
+      return;
+    ROS_INFO_STREAM("Process Volume "<<space_index<<" cluster "<<cluster_index);
     disp_traj_.trajectory[0].joint_trajectory.header.stamp = ros::Time::now();
     disp_traj_.trajectory[0].joint_trajectory.points.resize(
-        drm_->space()->at(space_index).reach_samples.size());
-    for (int i = 0; i < drm_->space()->at(space_index).reach_samples.size();
+        drm_->space()->at(space_index).reach_clusters[cluster_index].size());
+    disp_traj_.trajectory[0].multi_dof_joint_trajectory.points.resize(
+        drm_->space()->at(space_index).reach_clusters[cluster_index].size());
+    for (int i = 0;
+        i < drm_->space()->at(space_index).reach_clusters[cluster_index].size();
         i++)
     {
-      disp_traj_.trajectory[0].joint_trajectory.points[i].positions.resize(
-          drm_->space()->getDimension());
-      for (int j = 0; j < drm_->space()->getDimension(); j++)
+      trajectory_msgs::JointTrajectoryPoint tmp;
+      tmp.positions.resize(drm_->space()->getDimension() - 7);
+
+      for (int j = 7; j < drm_->space()->getDimension(); j++)
       {
-        disp_traj_.trajectory[0].joint_trajectory.points[i].positions[j] =
+        tmp.positions[j - 7] =
             drm_->space()->getSample(
-                drm_->space()->at(space_index).reach_samples[i]).q[j];
+                drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[j];
       }
+      disp_traj_.trajectory[0].joint_trajectory.points[i] = tmp;
+      trajectory_msgs::MultiDOFJointTrajectoryPoint multi_tmp;
+      multi_tmp.transforms.resize(1);
+      multi_tmp.transforms[0].translation.x = drm_->space()->getSample(
+          drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[0];
+      multi_tmp.transforms[0].translation.y = drm_->space()->getSample(
+          drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[1];
+      multi_tmp.transforms[0].translation.z = drm_->space()->getSample(
+          drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[2];
+      multi_tmp.transforms[0].rotation.x = drm_->space()->getSample(
+          drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[0];
+      multi_tmp.transforms[0].rotation.y = drm_->space()->getSample(
+          drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[1];
+      multi_tmp.transforms[0].rotation.z = drm_->space()->getSample(
+          drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[2];
+      multi_tmp.transforms[0].rotation.w = drm_->space()->getSample(
+          drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[3];
+      disp_traj_.trajectory[0].multi_dof_joint_trajectory.points[i] = multi_tmp;
     }
+    ROS_INFO_STREAM(
+        "Publishing Volume "<<space_index<<" cluster "<<cluster_index<<" size = "<<disp_traj_.trajectory[0].joint_trajectory.points.size());
     disp_traj_.trajectory_start.joint_state.name =
         disp_traj_.trajectory[0].joint_trajectory.joint_names;
     disp_traj_.trajectory_start.joint_state.position =
-        disp_traj_.trajectory[0].joint_trajectory.points[drm_->space()->at(
-            space_index).reach_samples.size() - 1].positions;
+        disp_traj_.trajectory[0].joint_trajectory.points[0].positions;
 
     traj_pub_.publish(disp_traj_);
-    space_index++;
+    last_space_index = space_index;
+    last_cluster_index = cluster_index;
   }
 
   void DRMActionNode::graphTimeCallback(const ros::TimerEvent& event)

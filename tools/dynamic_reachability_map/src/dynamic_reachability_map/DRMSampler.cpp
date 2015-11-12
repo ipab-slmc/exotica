@@ -165,11 +165,11 @@ namespace dynamic_reachability_map
         srand(time(NULL));
         ps_[id]->getCurrentStateNonConst().setToRandomPositions(space_->group_);
         ps_[id]->getCurrentStateNonConst().setVariablePosition(
-            "world_joint/trans_x", dRand(-0.3, 0.3));
+            "world_joint/trans_x", dRand(-0.2, 0.2));
         ps_[id]->getCurrentStateNonConst().setVariablePosition(
-            "world_joint/trans_y", dRand(-0.3, 0.3));
+            "world_joint/trans_y", dRand(-0.25, 0.25));
         ps_[id]->getCurrentStateNonConst().setVariablePosition(
-            "world_joint/trans_z", dRand(-0.35, 0.05));
+            "world_joint/trans_z", dRand(-0.35, 0.15));
         ps_[id]->getCurrentStateNonConst().setVariablePosition(
             "world_joint/rot_x", 0);
         ps_[id]->getCurrentStateNonConst().setVariablePosition(

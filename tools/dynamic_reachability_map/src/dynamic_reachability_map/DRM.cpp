@@ -100,10 +100,11 @@ namespace dynamic_reachability_map
           "Pose ("<<goal->goal_pose.position.x<<","<<goal->goal_pose.position.y<<","<<goal->goal_pose.position.z<<") is not in the reachable space");
       return result;
     }
-
     unsigned long int sample_index = 0;
     std::vector<unsigned long int> candidate_samples;
-    if (space_->CurrentlyReachability(index, candidate_samples) > 0)
+    std::vector<std::pair<unsigned int, unsigned int>> candidate_info;
+    if (space_->CurrentlyReachability(index, goal->invalid_clusters,
+        goal->invalid_cluster_cells, candidate_samples, candidate_info) > 0)
     {
       if (getClosestSample(goal, candidate_samples, sample_index))
         result.succeed = true;
@@ -117,7 +118,8 @@ namespace dynamic_reachability_map
       for (unsigned int i = 0; i < neighbours.size(); i++)
       {
         if (space_->CurrentlyReachability(neighbours[i].first,
-            candidate_samples) > 0
+            goal->invalid_clusters, goal->invalid_cluster_cells,
+            candidate_samples, candidate_info) > 0
             && getClosestSample(goal, candidate_samples, sample_index))
         {
           result.succeed = true;
@@ -128,10 +130,13 @@ namespace dynamic_reachability_map
 
     if (result.succeed)
     {
-      result.sample_index = sample_index;
+      result.sample_index = candidate_samples[sample_index];
+      result.sample_eff_index = candidate_info[sample_index].first;
+      result.cluster_index = candidate_info[sample_index].second;
       result.q_out.data.resize(space_->getDimension());
       for (int i = 0; i < space_->getDimension(); i++)
-        result.q_out.data[i] = space_->getSample(sample_index).q[i];
+        result.q_out.data[i] = space_->getSample(
+            candidate_samples[sample_index]).q[i];
     }
     ROS_WARN_STREAM(
         "IK request time: "<<ros::Duration(ros::Time::now()-start_time).toSec()<<"sec");
@@ -269,9 +274,8 @@ namespace dynamic_reachability_map
       std::vector<unsigned long int> &candidate_samples,
       unsigned long int &sample_index, bool use_invalids)
   {
-
+    if (candidate_samples.size() == 0) return false;
     double dist = INFINITY;
-    bool invalid = false;
     Eigen::VectorXf e1(4 + space_->getDimension());
     e1(0) = goal->goal_pose.orientation.x;
     e1(1) = goal->goal_pose.orientation.y;
@@ -281,36 +285,23 @@ namespace dynamic_reachability_map
       e1(i + 4) = goal->q0.data[i];
     for (unsigned long int i = 0; i < candidate_samples.size(); i++)
     {
-      invalid = false;
-      if (use_invalids) for (int j = 0; j < goal->invalid_samples.size(); j++)
-        if (goal->invalid_samples[j] == candidate_samples[i])
-        {
-          invalid = true;
-          break;
-        }
-      if (!invalid)
+
+      Eigen::VectorXf e2(4 + space_->getDimension());
+      static double w = 1e3;
+      e2(0) = w * space_->getSample(candidate_samples[i]).effpose.orientation.x;
+      e2(1) = w * space_->getSample(candidate_samples[i]).effpose.orientation.y;
+      e2(2) = w * space_->getSample(candidate_samples[i]).effpose.orientation.z;
+      e2(3) = w * space_->getSample(candidate_samples[i]).effpose.orientation.w;
+      for (int j = 0; j < space_->getDimension(); j++)
+        e2(4 + j) = space_->getSample(candidate_samples[i]).q[j];
+      double tmp_dist = (e1 - e2).norm();
+      if (tmp_dist < dist)
       {
-        Eigen::VectorXf e2(4 + space_->getDimension());
-        static double w = 1e3;
-        e2(0) = w
-            * space_->getSample(candidate_samples[i]).effpose.orientation.x;
-        e2(1) = w
-            * space_->getSample(candidate_samples[i]).effpose.orientation.y;
-        e2(2) = w
-            * space_->getSample(candidate_samples[i]).effpose.orientation.z;
-        e2(3) = w
-            * space_->getSample(candidate_samples[i]).effpose.orientation.w;
-        for (int j = 0; j < space_->getDimension(); j++)
-          e2(4 + j) = space_->getSample(candidate_samples[i]).q[j];
-        double tmp_dist = (e1 - e2).norm();
-        if (tmp_dist < dist)
-        {
-          dist = tmp_dist;
-          sample_index = candidate_samples[i];
-        }
+        dist = tmp_dist;
+        sample_index = i;
       }
     }
-    return !invalid;
+    return true;
   }
 
   bool DRM::getClosestSample(const exotica::Vector &q,

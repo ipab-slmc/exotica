@@ -129,9 +129,20 @@ namespace exotica
     WorldQuatConstraint* ptr_left = new WorldQuatConstraint(model_,
         model_->findLinkId("rightFoot"), quat, 0, tspan01);
     WorldQuatConstraint* ptr_right = new WorldQuatConstraint(model_,
-            model_->findLinkId("leftFoot"), quat, 0, tspan01);
+        model_->findLinkId("leftFoot"), quat, 0, tspan01);
     constraints_.push_back(ptr_left);
     constraints_.push_back(ptr_right);
+
+    Eigen::Vector2d lb, ub;
+    lb << 0.1, 0.1;
+    ub << 0.4, 0.4;
+    Eigen::Matrix3Xd pt = Eigen::Matrix3Xd::Zero(3, 1);
+    Point2PointDistanceConstraint* feet_dist =
+        new Point2PointDistanceConstraint(model_,
+            model_->findLinkId("rightFoot"), model_->findLinkId("leftFoot"), pt,
+            pt, lb, ub);
+    constraints_.push_back(feet_dist);
+
     HIGHLIGHT_NAMED(object_name_,
         "Created "<<constraints_.size()<<" constraints");
     return SUCCESS;

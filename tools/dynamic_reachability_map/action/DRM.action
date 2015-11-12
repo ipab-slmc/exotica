@@ -2,11 +2,14 @@ exotica/Vector q0
 geometry_msgs/Pose goal_pose
 geometry_msgs/Pose base_pose
 moveit_msgs/PlanningScene ps
-uint64[] invalid_samples
+uint32[] invalid_clusters
+uint32[] invalid_cluster_cells
 ---
 bool succeed
 exotica/Vector q_out
 uint64 sample_index
+uint32 sample_eff_index
+uint32 cluster_index
 ---
 uint32 goal_cell_index
 

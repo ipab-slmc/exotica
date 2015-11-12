@@ -27,7 +27,7 @@ namespace dynamic_reachability_map
       Eigen::VectorXf center;
       std::vector<unsigned long int> samples;
   };
-  typedef std::map<unsigned long int, Cluster> VolumeClusters;
+  typedef std::map<int, Cluster> VolumeClusters;
   typedef std::vector<std::vector<Cluster> > Clusters;
 
   class DRMSampleCluster
@@ -36,6 +36,8 @@ namespace dynamic_reachability_map
       DRMSampleCluster();
       ~DRMSampleCluster();
       bool startClustering(DRMSpace_ptr &space, DRMClusterParam &param);
+      bool loadClusters(const std::string &path, DRMSpace_ptr &space);
+      bool saveClusters(const std::string &path);
       Clusters clusters_;
       unsigned long int clusters_cnt_;
     private:

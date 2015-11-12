@@ -27,7 +27,7 @@ namespace dynamic_reachability_map
       bool updateDRM(const dynamic_reachability_map::DRMGoalConstPtr &goal,
           const KDL::Frame &base_pose = KDL::Frame::Identity());
       void drmTimeCallback(const ros::TimerEvent& event);
-      void drmStateTimeCallback(const ros::TimerEvent& event);
+      void drmClusterTimeCallback(const ros::TimerEvent& event);
       void graphTimeCallback(const ros::TimerEvent& event);
     private:
       void createdSpaceCollisionWorld();

@@ -493,6 +493,40 @@ namespace dynamic_reachability_map
     return valid_samples.size();
   }
 
+  unsigned long int DRMSpace::CurrentlyReachability(unsigned int index,
+      const std::vector<unsigned int> &invalid_clusters,
+      const std::vector<unsigned int> &invalid_cluster_cells,
+      std::vector<unsigned long int> & valid_samples,
+      std::vector<std::pair<unsigned int, unsigned int>> & sample_info)
+  {
+    valid_samples.clear();
+    valid_samples.reserve(volumes_[index].reach_samples.size());
+    sample_info.clear();
+    sample_info.reserve(valid_samples.capacity());
+    for (unsigned long int i = 0; i < volumes_[index].reach_clusters.size();
+        i++)
+    {
+      bool valid = true;
+      for (unsigned int j = 0; j < invalid_clusters.size(); j++)
+        if (invalid_cluster_cells[j] == index && i == invalid_clusters[j])
+        {
+          valid = false;
+          break;
+        }
+      if (valid)
+      {
+        for (unsigned int j = 0; j < volumes_[index].reach_clusters[i].size();
+            j++)
+        {
+          valid_samples.push_back(volumes_[index].reach_clusters[i][j]);
+          std::pair<unsigned int, unsigned int> tmp_pair(index, i);
+          sample_info.push_back(tmp_pair);
+        }
+      }
+    }
+    return valid_samples.size();
+  }
+
   void DRMSpace::qArray2Eigen(const float* q, Eigen::VectorXf &eigen)
   {
     eigen.resize(dimension_);

@@ -93,6 +93,7 @@ namespace dynamic_reachability_map
       geometry_msgs::Point center;
       std::vector<unsigned long int> occup_samples;
       std::vector<unsigned long int> reach_samples;
+      std::vector<std::vector<unsigned long int> > reach_clusters;
       std::vector<unsigned long int> occup_edges;
       bool isFree;
   };
@@ -168,12 +169,16 @@ namespace dynamic_reachability_map
 
       void setVolumeOccupied(unsigned int index,
           bool invalidate_samples = true);
-      void setVolumeFree(unsigned int index,
-          bool free_samples = true);
+      void setVolumeFree(unsigned int index, bool free_samples = true);
 
       std::vector<unsigned int> getVolumeReachabilities();
       unsigned long int CurrentlyReachability(unsigned int index,
           std::vector<unsigned long int> & valid_samples);
+      unsigned long int CurrentlyReachability(unsigned int index,
+          const std::vector<unsigned int> &invalid_clusters,
+          const std::vector<unsigned int> &invalid_cluster_cells,
+          std::vector<unsigned long int> & valid_samples,
+          std::vector<std::pair<unsigned int, unsigned int>> & sample_info);
       void qArray2Eigen(const float* q, Eigen::VectorXf &eigen);
       void qEigen2Array(const Eigen::VectorXf &eigen, float* q);
       planning_scene::PlanningScenePtr & getPlanningScene();

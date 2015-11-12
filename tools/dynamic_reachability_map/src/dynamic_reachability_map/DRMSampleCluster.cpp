@@ -10,8 +10,8 @@
 namespace dynamic_reachability_map
 {
   DRMClusterParam::DRMClusterParam()
-      : min_num_clusters(1), small_cluster_cutoff(0.02), max_joint_step(
-          M_PI / 8), tolerance(1e-5), algorithm("MeanShift")
+      : min_num_clusters(1), small_cluster_cutoff(0.0), max_joint_step(
+      M_PI / 3.14), tolerance(1e-5), algorithm("MeanShift")
   {
 
   }
@@ -45,20 +45,69 @@ namespace dynamic_reachability_map
 
     //Process occupation for clusters
 //  processOccupation();
-    space->clear();
-    dynamic_reachability_map::DRMSampler drms(space->thread_size_);
-    std::vector<std::vector<double>> samples;
-    for (unsigned int s = 0; s < clusters_.size(); s++)
+//    space->clear();
+//    dynamic_reachability_map::DRMSampler drms(space->thread_size_);
+//    std::vector<std::vector<double>> samples;
+//    for (unsigned int s = 0; s < clusters_.size(); s++)
+//    {
+//      for (unsigned int i = 0; i < clusters_[s].size(); i++)
+//      {
+//        std::vector<double> tmp(space->getDimension());
+//        for (int n = 0; n < space->getDimension(); n++)
+//          tmp[n] = clusters_[s][i].center(n);
+//        samples.push_back(tmp);
+//      }
+//    }
+//    drms.startSampling(space, clusters_.size(), samples);
+    return true;
+  }
+
+  bool DRMSampleCluster::saveClusters(const std::string &path)
+  {
+    std::ofstream cluster_file;
+    cluster_file.open(path + "/Clusters.txt");
+    for (unsigned int i = 0; i < space_->getSpaceSize(); i++)
     {
-      for (unsigned int i = 0; i < clusters_[s].size(); i++)
+      cluster_file << space_->at(i).reach_clusters.size() << " ";
+      for (unsigned int j = 0; j < space_->at(i).reach_clusters.size(); j++)
       {
-        std::vector<double> tmp(space->getDimension());
-        for (int n = 0; n < space->getDimension(); n++)
-          tmp[n] = clusters_[s][i].center(n);
-        samples.push_back(tmp);
+        cluster_file << space_->at(i).reach_clusters[j].size() << " ";
+        for (unsigned int k = 0; k < space_->at(i).reach_clusters[j].size();
+            k++)
+          cluster_file << space_->at(i).reach_clusters[j][k] << " ";
+      }
+      cluster_file << std::endl;
+    }
+    ROS_INFO_STREAM("Write clusters finished");
+    cluster_file.close();
+    return true;
+  }
+
+  bool DRMSampleCluster::loadClusters(const std::string &path,
+      DRMSpace_ptr &space)
+  {
+    std::ifstream cluster_file;
+    cluster_file.open(path + "/Clusters.txt");
+    std::string line;
+    for (int i = 0; i < space->space_size_; i++)
+    {
+      getline(cluster_file, line);
+      std::vector<std::string> clusters = getStringVector(line);
+      space->volumes_[i].reach_clusters.resize(std::stoi(clusters[0]));
+      int cnt = 1;
+      for (int j = 0; j < space->volumes_[i].reach_clusters.size(); j++)
+      {
+        int tmp = std::stoi(clusters[cnt]);
+        space->volumes_[i].reach_clusters[j].resize(tmp);
+        cnt++;
+        for (int k = 0; k < tmp; k++)
+        {
+          space->volumes_[i].reach_clusters[j][k] =
+              (unsigned long int) std::stoi(clusters[cnt]);
+          cnt++;
+        }
       }
     }
-    drms.startSampling(space, clusters_.size(), samples);
     return true;
   }
 
@@ -204,7 +253,7 @@ namespace dynamic_reachability_map
       unsigned int index, DRMClusterParam &param)
   {
     //Finally, let's do the clustering
-    unsigned int sample_size = space_->volumes_[index].reach_samples.size();
+    int sample_size = space_->volumes_[index].reach_samples.size();
     if (sample_size == 0) return;
     //No need for clustering
     if (sample_size <= param.min_num_clusters)
@@ -213,9 +262,6 @@ namespace dynamic_reachability_map
       for (unsigned long int i = 0; i < sample_size; i++)
       {
         Cluster tmp_cluster;
-        space_->qArray2Eigen(
-            space_->samples_[space_->volumes_[index].reach_samples[i]].q,
-            tmp_cluster.center);
         tmp_cluster.samples.push_back(space_->volumes_[index].reach_samples[i]);
         clusters_[index].push_back(tmp_cluster);
         sample_clustered_[space_->volumes_[index].reach_samples[i]] = true;
@@ -229,7 +275,7 @@ namespace dynamic_reachability_map
       std::vector<Eigen::VectorXi> votes(0);
       std::vector<unsigned long int> samples(sample_size);
       std::vector<bool> open(sample_size);
-      for (unsigned int i = 0; i < sample_size; i++)
+      for (int i = 0; i < sample_size; i++)
       {
         samples[i] = space_->volumes_[index].reach_samples[i];
         open[i] = true;
@@ -238,111 +284,142 @@ namespace dynamic_reachability_map
       unsigned int cnt = sample_size;
       while (cnt > 0)
       {
-        unsigned int tmp_index, start_index;
+        unsigned long int start_index;
+        int tmp_index;
         while (true)
         {
           tmp_index = rand() % sample_size;
           if (!open[tmp_index]) continue;
           start_index = samples[tmp_index];
+
           break;
         }
+        double base_w = 40;
+        double eff_w = 40;
+        double q_w = 1;
+        double q_w2 = 5;
+        for (int j = 7; j < space_->dimension_; j++)
+          old_mean(j) = q_w * space_->samples_[start_index].q[j];
+        old_mean(7) *= q_w2;
+        old_mean(8) *= q_w2;
+        old_mean(9) *= q_w2;
+        old_mean(11) *= q_w2;
+        old_mean(13) *= q_w2;
 
-        space_->qArray2Eigen(space_->samples_[start_index].q, old_mean);
-        unsigned int iteration = 0;
-        while (iteration < sample_size)
+        old_mean(0) = base_w * space_->samples_[start_index].q[0];
+        old_mean(1) = base_w * space_->samples_[start_index].q[1];
+        old_mean(2) = base_w * space_->samples_[start_index].q[2];
+        old_mean(3) = eff_w
+            * space_->samples_[start_index].effpose.orientation.x;
+        old_mean(4) = eff_w
+            * space_->samples_[start_index].effpose.orientation.y;
+        old_mean(5) = eff_w
+            * space_->samples_[start_index].effpose.orientation.z;
+        old_mean(6) = eff_w
+            * space_->samples_[start_index].effpose.orientation.w;
+
+        while (true)
         {
           Eigen::VectorXf my_mean = Eigen::VectorXf::Zero(space_->dimension_);
           Eigen::VectorXi this_votes = Eigen::VectorXi::Zero(sample_size);
           std::vector<unsigned long int> my_members;
           my_members.reserve(sample_size);
-          std::vector<unsigned int> closed;
-          for (unsigned int i = 0; i < samples.size(); i++)
+
+          for (int i = 0; i < sample_size; i++)
           {
-            double max_dist = (old_mean
-                - Eigen::Map<Eigen::VectorXf>(space_->samples_[samples[i]].q,
-                    space_->dimension_)).norm(); //cwiseAbs().maxCoeff();
-            if (max_dist < sqrt(space_->getDimension()) * param.max_joint_step)
+            Eigen::VectorXf tmp(space_->dimension_);
+            for (int j = 7; j < space_->dimension_; j++)
+              tmp(j) = q_w * space_->samples_[samples[i]].q[j];
+            tmp(7) *= q_w2;
+            tmp(8) *= q_w2;
+            tmp(9) *= q_w2;
+            tmp(11) *= q_w2;
+            tmp(13) *= q_w2;
+            tmp(0) = base_w * space_->samples_[samples[i]].q[0];
+            tmp(1) = base_w * space_->samples_[samples[i]].q[1];
+            tmp(2) = base_w * space_->samples_[samples[i]].q[2];
+            tmp(3) = eff_w * space_->samples_[samples[i]].effpose.orientation.x;
+            tmp(4) = eff_w * space_->samples_[samples[i]].effpose.orientation.y;
+            tmp(5) = eff_w * space_->samples_[samples[i]].effpose.orientation.z;
+            tmp(6) = eff_w * space_->samples_[samples[i]].effpose.orientation.w;
+            if (i == tmp_index)
             {
               this_votes(i) = this_votes(i) + 1;
-              my_members.push_back(samples[i]);
-              open[i] = false;
-              my_mean += Eigen::Map<Eigen::VectorXf>(
-                  space_->samples_[samples[i]].q, space_->dimension_);
+              my_members.push_back(i);
+              my_mean += tmp;
+            }
+            else
+            {
+              double max_dist = (old_mean - tmp).norm(); //cwiseAbs().maxCoeff();
+              if (max_dist < sqrt(space_->dimension_) * param.max_joint_step)
+              {
+                this_votes(i) = this_votes(i) + 1;
+                my_members.push_back(i);
+                my_mean += tmp;
+              }
             }
           }
-
           my_mean /= my_members.size();
-          if ((my_mean - old_mean).norm() < param.tolerance)
+          if ((my_mean - old_mean).norm() <= param.tolerance)
           {
             bool new_cluster = true;
+            int cluster_index = -1;
             for (auto &it : clusters)
             {
+              cluster_index = it.first;
               if ((my_mean - it.second.center).norm()
                   < sqrt(space_->dimension_) * param.max_joint_step / 2)
               {
                 new_cluster = false;
                 it.second.center = (it.second.center + my_mean) / 2;
-                votes[it.first] += this_votes;
+                votes[cluster_index] = votes[cluster_index] + this_votes;
                 break;
               }
             }
             if (new_cluster)
             {
+              cluster_index = clusters.size();
               Cluster new_cluster;
               new_cluster.center = my_mean;
-              clusters[clusters.size()] = new_cluster;
+              clusters[cluster_index] = new_cluster;
               votes.push_back(this_votes);
+              votes[cluster_index] = this_votes;
             }
+            for (int i = 0; i < sample_size; i++)
+              if (votes[cluster_index](i) > 0) open[i] = false;
             break;
           }
           old_mean = my_mean;
-          iteration++;
         }
 
         cnt = 0;
         for (int i = 0; i < open.size(); i++)
           if (open[i]) cnt++;
       }
-
-      Eigen::MatrixXi votes_mat(clusters.size(), sample_size);
-      for (unsigned int i = 0; i < clusters.size(); i++)
-        votes_mat.row(i) = votes[i].transpose();
-      std::vector<unsigned int> max_votes(sample_size);
-      Eigen::MatrixXi votes_T = votes_mat.transpose();
-      for (int i = 0; i < votes_T.rows(); i++)
+      space_->volumes_[index].reach_clusters.resize(clusters.size());
+      for (int i = 0; i < samples.size(); i++)
       {
-        Eigen::VectorXi::Index max_index;
-        Eigen::VectorXi(votes_T.row(i)).maxCoeff(&max_index);
-        clusters[max_index].samples.push_back(
+        int max_index = -1;
+        int max = -1;
+        for (int j = 0; j < clusters.size(); j++)
+        {
+          int tmp = votes[j](i);
+          if (tmp > max)
+          {
+            max = tmp;
+            max_index = j;
+          }
+        }
+        if (max == 0)
+        ROS_ERROR_STREAM("Volume "<<index<<" sample "<<i<<" not clustered");
+        space_->volumes_[index].reach_clusters[max_index].push_back(
             space_->volumes_[index].reach_samples[i]);
         sample_clustered_[space_->volumes_[index].reach_samples[i]] = true;
       }
-
-      clusters_[index].clear();
-      for (unsigned int i = 0; i < clusters.size(); i++)
-      {
-        if (clusters.size() <= param.min_num_clusters
-            || clusters[i].samples.size()
-                > param.small_cluster_cutoff * sample_size)
-        {
-          for (int n = 0; n < var_index_.size(); n++)
-            space_->ps_->getCurrentStateNonConst().setVariablePosition(
-                var_index_[n], clusters[i].center(n));
-          space_->ps_->getCurrentStateNonConst().update(true);
-          geometry_msgs::Pose tmppose;
-          tf::poseEigenToMsg(
-              space_->ps_->getCurrentStateNonConst().getGlobalLinkTransform(
-                  space_->eff_), tmppose);
-          unsigned int tmp_check = 0;
-          if (space_->getVolumeIndex(tmppose.position, tmp_check))
-            clusters_[index].push_back(clusters[i]);
-        }
-      }
-
       if (thread_id == 3)
       {
         ROS_INFO_STREAM(
-            "Volume "<<index<<" has "<<sample_size<<" samples, "<< clusters.size()<<" clustered into "<<clusters_[index].size()<<" clusters. (cutoff "<<param.small_cluster_cutoff*sample_size<<")");
+            "Volume "<<index<<" has "<<sample_size<<" samples, "<< clusters.size()<<" clusters");
       }
     }
   }

@@ -110,7 +110,7 @@ namespace exotica
     int cnt = 0;
     bool succeeded = false;
     ros::Time start = ros::Time::now();
-    while (cnt < 50)
+    while (true)
     {
       if (drm_client_.sendGoalAndWait(goal, ros::Duration(2)).state_
           == actionlib::SimpleClientGoalState::SUCCEEDED)
@@ -127,9 +127,9 @@ namespace exotica
               qs(drm_drake_joints_map_[i]) =
                   drm_client_.getResult()->q_out.data[i];
             Eigen::VectorXd lb, ub;
-            lb = qs.segment<3>(0) - Eigen::Vector3d::Ones() * 0.02;
-            ub = qs.segment<3>(0) + Eigen::Vector3d::Ones() * 0.02;
-            lb(2) += 1.025;
+            lb = qs.segment<3>(0) - Eigen::Vector3d::Ones() * 0.15;
+            ub = qs.segment<3>(0) + Eigen::Vector3d::Ones() * 0.15;
+            lb(2) += 1.025 + 0.1;
             ub(2) += 1.025;
             std::vector<int> idx = { 0, 1, 2 };
 
@@ -140,10 +140,22 @@ namespace exotica
           inverseKin(prob_->getDrakeModel(), qs, qs, prob_->constraints_.size(),
               &prob_->constraints_[0], q_sol, info, infeasible_constraint,
               *ik_options_);
+          for (int i = 0; i < infeasible_constraint.size(); i++)
+            ERROR("Infeasible: "<<infeasible_constraint[i]);
           if (cnt != 0)
           {
             prob_->constraints_.pop_back();
             delete base_pos_ptr;
+          }
+
+          if (info != 0 && info != 1)
+          {
+            cnt++;
+            goal.invalid_clusters.push_back(
+                drm_client_.getResult()->cluster_index);
+            goal.invalid_cluster_cells.push_back(
+                drm_client_.getResult()->sample_eff_index);
+            continue;
           }
           for (int i = 6; i < prob_->getDrakeModel()->num_positions; i++)
             prob_->getScenes().begin()->second->getPlanningScene()->getCurrentStateNonConst().setVariablePosition(
@@ -183,8 +195,10 @@ namespace exotica
                     || it.first.second.compare(it2.first) == 0)
                     && (it.first.second.compare("leftPalm") != 0))
                 {
-                  goal.invalid_samples.push_back(
-                      drm_client_.getResult()->sample_index);
+                  goal.invalid_clusters.push_back(
+                      drm_client_.getResult()->cluster_index);
+                  goal.invalid_cluster_cells.push_back(
+                      drm_client_.getResult()->sample_eff_index);
                   col = true;
                   succeeded = false;
 //                  HIGHLIGHT(
@@ -197,7 +211,7 @@ namespace exotica
         }
         else
         {
-//          HIGHLIGHT("Unsucceeded iteration "<<cnt);
+          break;
         }
       }
       else

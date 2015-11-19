@@ -38,9 +38,10 @@ namespace exotica
           local_minima_threshold_);
       tmp_handle = handle.FirstChildElement("MultiTaskMode");
       server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, multi_task_);
+#ifdef WITH_DRM
       tmp_handle = handle.FirstChildElement("UseDRM");
       server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, use_drm_);
-
+#endif
       ///	Check if this IK is running as FRRT local solver
       tinyxml2::XMLHandle frrthandle = handle.FirstChildElement("FRRTLocal");
       if (frrthandle.ToElement())
@@ -293,7 +294,9 @@ namespace exotica
       solution.resize(T, size_);
 
       Eigen::VectorXd q = q0;
+#ifdef WITH_DRM
       if (!use_drm_->data)
+#endif
       {
         int t;
         for (t = 0; t < T; t++)
@@ -312,7 +315,7 @@ namespace exotica
         }
         planning_time_ = ros::Duration(ros::Time::now() - start);
       }
-
+#ifdef WITH_DRM
       else
       {
         if (!drm_client_.waitForServer(ros::Duration(2)))
@@ -402,6 +405,7 @@ namespace exotica
           }
         }
       }
+#endif
       return SUCCESS;
     }
     else

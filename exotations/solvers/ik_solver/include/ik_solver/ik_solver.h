@@ -14,7 +14,9 @@
 #include <generic/Identity.h>
 #include <iostream>
 #include <fstream>
+#ifdef WITH_DRM
 #include <dynamic_reachability_map/DRMAction.h>
+#endif
 #include <actionlib/client/simple_action_client.h>
 
 namespace exotica
@@ -138,9 +140,10 @@ namespace exotica
       std::pair<int, int> coll_index_;
       std::pair<int, int> goal_index_;
       EParam<std_msgs::Bool> ignore_obs_near_goal_;
-
+#ifdef WITH_DRM
       EParam<std_msgs::Bool> use_drm_;
       actionlib::SimpleActionClient<dynamic_reachability_map::DRMAction> drm_client_;
+#endif
       geometry_msgs::Pose reach_goal_;
       Distance_Ptr reach_position_taskmap_;
       Orientation_Ptr reach_orientation_taskmap_;

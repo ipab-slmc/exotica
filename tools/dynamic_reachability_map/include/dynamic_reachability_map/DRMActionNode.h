@@ -24,8 +24,10 @@ namespace dynamic_reachability_map
       virtual ~DRMActionNode();
       bool initialise();
       bool getIKSolution(const dynamic_reachability_map::DRMGoalConstPtr &goal);
-      bool updateDRM(const dynamic_reachability_map::DRMGoalConstPtr &goal,
-          const KDL::Frame &base_pose = KDL::Frame::Identity());
+      bool getTrajectory(
+          const dynamic_reachability_map::DRMTrajGoalConstPtr &goal);
+      bool updateDRM(const moveit_msgs::PlanningScene &scene,
+          const geometry_msgs::Pose &base_pose);
       void drmTimeCallback(const ros::TimerEvent& event);
       void drmClusterTimeCallback(const ros::TimerEvent& event);
       void graphTimeCallback(const ros::TimerEvent& event);
@@ -34,6 +36,7 @@ namespace dynamic_reachability_map
       ros::NodeHandle nh_;
       DRM_ptr drm_;
       actionlib::SimpleActionServer<dynamic_reachability_map::DRMAction> as_;
+      actionlib::SimpleActionServer<dynamic_reachability_map::DRMTrajAction> traj_as_;
 //      collision_detection::WorldPtr space_world_;
       boost::shared_ptr<collision_detection::CollisionWorldFCL> space_cworld_;
       std::map<std::string, unsigned int> volume_map_;

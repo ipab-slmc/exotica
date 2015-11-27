@@ -57,6 +57,16 @@ namespace dynamic_reachability_map
     }
     samples_file.close();
 
+    ROS_INFO("Saving Drake Configurations");
+    std::ofstream drake_file(folderpath + "/drake_configurations.bin",
+        std::ios_base::binary);
+    for (int i = 0; i < space->sample_size_; i++)
+    {
+      for (int j = 0; j < space->samples_[i].drake_q.rows(); j++)
+        drake_file.write((char*) &space->samples_[i].drake_q(j), sizeof(float));
+    }
+    drake_file.close();
+
     ROS_INFO("Saving space occupation");
     mkdir((folderpath + "/space_occupation").c_str(), 0700);
     for (int t = 0; t < space->thread_size_; t++)

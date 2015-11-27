@@ -6,12 +6,19 @@
  */
 
 #include "dynamic_reachability_map/DRM.h"
+#include <visualization_msgs/MarkerArray.h>
 
 namespace dynamic_reachability_map
 {
   DRM::DRM()
+      : nh_("~")
   {
-
+    astar_pub_ = nh_.advertise<visualization_msgs::Marker>("AStar", 1);
+    astar_mark_.type = visualization_msgs::Marker::CUBE_LIST;
+    astar_mark_.header.stamp = ros::Time::now();
+    astar_mark_.header.frame_id = "world_frame";
+    astar_mark_.scale.x = astar_mark_.scale.y = astar_mark_.scale.z = 0.1;
+    astar_mark_.action = visualization_msgs::Marker::ADD;
   }
 
   DRM::~DRM()
@@ -114,7 +121,7 @@ namespace dynamic_reachability_map
       ROS_WARN_STREAM(
           "Pose ("<<goal->goal_pose.position.x<<","<<goal->goal_pose.position.y<<","<<goal->goal_pose.position.z<<") is not in current environment. Try neighbours");
       std::vector<std::pair<unsigned int, double> > neighbours =
-          space_->getNeighborIndices(index, 1);
+          space_->getNeighborIndices(index, 3);
       for (unsigned int i = 0; i < neighbours.size(); i++)
       {
         if (space_->CurrentlyReachability(neighbours[i].first,
@@ -143,131 +150,184 @@ namespace dynamic_reachability_map
     return result;
   }
 
-  bool DRM::solve(const dynamic_reachability_map::DRMGoalConstPtr &goal,
-      unsigned long int goal_sample_index, std::vector<unsigned long int> &path)
+  dynamic_reachability_map::DRMTrajResult DRM::getTrajectory(
+      const dynamic_reachability_map::DRMTrajGoalConstPtr &goal)
   {
 
-    unsigned long int start_sample_index = 0;
+    dynamic_reachability_map::DRMTrajResult result;
+    unsigned int start_space_index = 0, goal_space_index = 0;
     std::vector<unsigned long int> candidate_samples;
     unsigned int index = 0;
 
-    exotica::Vector q0;
-    q0.data.resize(7);
-    for (int i = 0; i < 7; i++)
-      q0.data[i] = 0;
-    if (!getClosestSample(q0, start_sample_index)) return false;
-    ROS_WARN_STREAM(
-        "Start Pose "<<space_->getSample(start_sample_index).effpose.position.x<<","<<space_->getSample(start_sample_index).effpose.position.y<<","<<space_->getSample(start_sample_index).effpose.position.z);
-    return searchAStar(start_sample_index, goal_sample_index, path);
-  }
-
-  bool DRM::searchAStar(unsigned long int start_sample_index,
-      unsigned long int goal_sample_index, std::vector<unsigned long int> &path)
-  {
-    ROS_INFO_STREAM(
-        "AStar from "<<start_sample_index<<" to "<<goal_sample_index);
-    //https://en.wikipedia.org/wiki/A*_search_algorithm
-    bool succeeded = false;
-    std::map<unsigned long int, bool> closed;
-    std::map<unsigned long int, bool> open;
-    std::map<unsigned long int, double> g_score;
-    std::map<unsigned long int, double> f_score;
-    std::map<unsigned long int, unsigned long int> came_from;
-    std::map<unsigned int, bool> closed_volume;
-
-    g_score[start_sample_index] = 0;
-    f_score[start_sample_index] = g_score[start_sample_index]
-        + heuristicCost(start_sample_index, goal_sample_index);
-    open[start_sample_index] = true;
-    unsigned long int current_index = start_sample_index;
-    while (open.size() > 0)
+    if (!getSampleReachIndex(goal->q0, start_space_index)
+        || !getSampleReachIndex(goal->qT, goal_space_index))
     {
-      std::map<unsigned long int, bool>::iterator current = open.begin();
-
-      for (std::map<unsigned long int, bool>::iterator it = open.begin();
-          it != open.end(); it++)
+      result.succeed = false;
+      return result;
+    }
+    ROS_WARN_STREAM(
+        "start index "<<start_space_index<<"("<<space_->at(start_space_index).center.x<<","<<space_->at(start_space_index).center.y<<","<<space_->at(start_space_index).center.z<<"), goal index "<<goal_space_index<<"("<<space_->at(goal_space_index).center.x<<","<<space_->at(goal_space_index).center.y<<","<<space_->at(goal_space_index).center.z<<")");
+    std::vector<unsigned int> path;
+    if (searchAStar(start_space_index, goal_space_index, path))
+    {
+      std::cout << "A star path ";
+      for (int i = 0; i < path.size(); i++)
+        std::cout << path[i] << " ";
+      std::cout << std::endl;
+      result.solution.resize(path.size() + 2);
+      result.solution[0] = goal->q0;
+      for (int i = 0; i < path.size(); i++)
       {
-        if (current->second < it->second) current = it;
-      }
-      current_index = current->first;
-      unsigned int current_volume;
-      space_->getVolumeIndex(space_->getSample(current_index).effpose.position,
-          current_volume);
-      if (current_index == goal_sample_index)
-      {
-        succeeded = true;
-        break;
-      }
-      closed[current->first] = true;
-      open.erase(current);
-
-      std::vector<unsigned long int> edges =
-          space_->samples_[current_index].edges;
-//    ROS_INFO_STREAM("Sample "<<current_index<<" has "<<edges.size()<<" edges");
-      for (unsigned int i = 0; i < edges.size(); i++)
-      {
-//      ROS_INFO_STREAM("Edge "<<edges[i]<<" a="<<space_->edges_[edges[i]].a<<",b="<<space_->edges_[edges[i]].b);
-        unsigned long int neighbour_index =
-            current_index == space_->edges_[edges[i]].a ?
-                space_->edges_[edges[i]].b : space_->edges_[edges[i]].a;
-//      ROS_INFO_STREAM("Sample "<<current_index<<" process edge "<<i<<"/"<<edges.size()<<" Neighbour "<<neighbour_index);
-
-        if (closed.find(neighbour_index) == closed.end())
+        double dist = INFINITY;
+        unsigned long int tmp_index = 0;
+        Eigen::VectorXd tmp(space_->getDimension());
+        for (int k = 0; k < space_->getDimension(); k++)
+          tmp(k) = result.solution[i].data[k];
+        for (int k = 0; k < 3; k++)
+          tmp(k) *= 1e5;
+        for (int j = 0; j < space_->at(path[i]).reach_samples.size(); j++)
         {
-          double tentative_g = g_score[current_index]
-              + 0.1 * space_->edges_[edges[i]].length;
-
-          if (open.find(neighbour_index) == open.end()
-              || tentative_g < g_score.at(neighbour_index))
+          if (space_->getSample(space_->at(path[i]).reach_samples[j]).isValid)
           {
-//          ROS_INFO_STREAM("Process "<<neighbour_index);
-            came_from[neighbour_index] = current_index;
-            g_score[neighbour_index] = tentative_g;
-            f_score[neighbour_index] = tentative_g
-                + heuristicCost(neighbour_index, goal_sample_index);
-            if (open.find(neighbour_index) == open.end())
+            Eigen::VectorXd tmp2(space_->getDimension());
+            for (int k = 0; k < space_->getDimension(); k++)
+              tmp2(k) =
+                  space_->getSample(space_->at(path[i]).reach_samples[j]).q[k];
+            for (int k = 0; k < 3; k++)
+              tmp2(k) *= 1e5;
+            double tmp_dist = (tmp - tmp2).norm();
+            if (tmp_dist < dist)
             {
-
-              unsigned int neighbour_volume;
-              space_->getVolumeIndex(
-                  space_->getSample(neighbour_index).effpose.position,
-                  neighbour_volume);
-//            ROS_INFO_STREAM("Neighbour "<<neighbour_index<<" added");
-              if (closed_volume.find(neighbour_volume) == closed_volume.end())
-                open[neighbour_index] = true;
+              dist = tmp_dist;
+              tmp_index = space_->at(path[i]).reach_samples[j];
             }
           }
         }
+        result.solution[i + 1].data.resize(space_->getDimension());
+        for (int k = 0; k < space_->getDimension(); k++)
+          result.solution[i + 1].data[k] = space_->getSample(tmp_index).q[k];
+        result.solution[i + 1].data[2] += 1.025;
       }
-
-      closed_volume[current_volume] = true;
+      result.solution[path.size() + 1] = goal->qT;
+      result.succeed = true;
     }
-
-    path.clear();
-    if (succeeded)
+    else
     {
-      path.push_back(current_index);
-      while (came_from.find(current_index) != came_from.end())
-      {
-        current_index = came_from.at(current_index);
-        path.push_back(current_index);
-      }
-      ROS_INFO_STREAM("Camefrom "<<came_from.size()<<" path "<<path.size());
-      std::reverse(path.begin(), path.end());
+      result.solution.resize(2);
+      result.solution[0] = goal->q0;
+      result.solution[1] = goal->qT;
+      result.succeed = false;
     }
-
-    return succeeded;
+    return result;
   }
 
-  double DRM::heuristicCost(unsigned long int a, unsigned long int b)
+  bool DRM::searchAStar(unsigned int start_space_index,
+      unsigned int goal_space_index, std::vector<unsigned int> &space_path)
   {
-    Eigen::VectorXd ea(7), eb(7);
-    ea << space_->samples_[a].effpose.position.x, space_->samples_[a].effpose.position.y, space_->samples_[a].effpose.position.z, space_->samples_[a].effpose.orientation.x, space_->samples_[a].effpose.orientation.y, space_->samples_[a].effpose.orientation.z, space_->samples_[a].effpose.orientation.w;
-    eb << space_->samples_[b].effpose.position.x, space_->samples_[b].effpose.position.y, space_->samples_[b].effpose.position.z, space_->samples_[b].effpose.orientation.x, space_->samples_[b].effpose.orientation.y, space_->samples_[b].effpose.orientation.z, space_->samples_[b].effpose.orientation.w;
+    ROS_INFO_STREAM("AStar from "<<start_space_index<<" to "<<goal_space_index);
+    std::map<unsigned int, double> closed;
+    std::map<unsigned int, double> open;
+    std::vector<AStarNode> aStar;
+    aStar.resize(space_->getSpaceSize());
+    aStar[start_space_index].g = 0;
+    aStar[start_space_index].h = heuristicCost(start_space_index,
+        goal_space_index);
+    open[start_space_index] = aStar[start_space_index].f();
 
-    return (ea - eb).norm();
-//  return (Eigen::Map<Eigen::VectorXd>(space_->samples_[a].q, space_->dimension_)
-//      - Eigen::Map<Eigen::VectorXd>(space_->samples_[b].q, space_->dimension_)).norm();
+    while (open.size() > 0)
+    {
+      double min = INFINITY;
+      std::map<unsigned int, double>::iterator current;
+      for (std::map<unsigned int, double>::iterator it = open.begin();
+          it != open.end(); it++)
+      {
+        if (it->second < min)
+        {
+          current = it;
+          min = it->second;
+        }
+      }
+      if (current->first == goal_space_index)
+      {
+        ROS_INFO("A star succeeded");
+        space_path.resize(0);
+        int index = current->first;
+        space_path.push_back(index);
+        while (aStar[index].parent != -1)
+        {
+          index = aStar[index].parent;
+          space_path.push_back(index);
+        }
+        std::reverse(space_path.begin(), space_path.end());
+        ROS_INFO("A star path constructed");
+        return true;
+      }
+//      astar_mark_.colors.clear();
+//      astar_mark_.points.clear();
+//      std_msgs::ColorRGBA c;
+//      c.a = 1;
+//      c.g = 1;
+//      astar_mark_.colors.push_back(c);
+//      geometry_msgs::Point tmp = space_->at(current->first).center;
+//      tmp.z += 1.025;
+//      astar_mark_.points.push_back(tmp);
+
+      unsigned int tmp_index = current->first;
+      closed[current->first] = current->second;
+      open.erase(current);
+      current = closed.find(tmp_index);
+      std::vector<std::pair<unsigned int, double> > neighbors =
+          space_->getNeighborIndices(current->first, 1);
+      if (neighbors.size() == 0)
+      {
+        ROS_ERROR_STREAM(
+            "Volume "<<current->first<<"("<<space_->at(current->first).center.x<<","<<space_->at(current->first).center.y<<","<<space_->at(current->first).center.z<<") has no neighbors");
+        continue;
+      }
+//      else
+//      {
+//        for (int i = 0; i < neighbors.size(); i++)
+//        {
+//          std_msgs::ColorRGBA cc;
+//          cc.a = 0.5;
+//          cc.r = 1;
+//          astar_mark_.colors.push_back(cc);
+//          geometry_msgs::Point tmp2 = space_->at(neighbors[i].first).center;
+//          tmp2.z += 1.025;
+//          astar_mark_.points.push_back(tmp2);
+//        }
+//      }
+//      astar_pub_.publish(astar_mark_);
+//      ros::spinOnce();
+//      ros::Duration(1).sleep();
+      for (int i = 0; i < neighbors.size(); i++)
+      {
+        if (closed.find(neighbors[i].first) == closed.end())
+        {
+          double tentative_g = aStar[current->first].g + neighbors[i].second;
+          if (open.find(neighbors[i].first) == open.end()
+              || tentative_g < aStar[neighbors[i].first].g)
+          {
+            aStar[neighbors[i].first].parent = current->first;
+            aStar[neighbors[i].first].g = tentative_g;
+            double h_dist = heuristicCost(neighbors[i].first, goal_space_index);
+            aStar[neighbors[i].first].h = h_dist;
+            if (open.find(neighbors[i].first) == open.end())
+              open[neighbors[i].first] = tentative_g + h_dist;
+          }
+        }
+      }
+    }
+    ROS_WARN("AStart reaches end, failed");
+    return false;
+  }
+
+  double DRM::heuristicCost(unsigned int a, unsigned int b)
+  {
+    Eigen::Vector3d ea, eb;
+    ea << space_->at(a).center.x, space_->at(a).center.y, space_->at(a).center.z;
+    eb << space_->at(b).center.x, space_->at(b).center.y, space_->at(b).center.z;
+    return 1e1 * sqrt((ea - eb).cwiseAbs2().sum());
   }
   bool DRM::getClosestSample(
       const dynamic_reachability_map::DRMGoalConstPtr &goal,
@@ -282,7 +342,7 @@ namespace dynamic_reachability_map
     e1(2) = goal->goal_pose.orientation.z;
     e1(3) = goal->goal_pose.orientation.w;
     for (int i = 0; i < space_->getDimension(); i++)
-      e1(i + 4) = goal->q0.data[i];
+      e1(i + 4) = 0 * goal->q0.data[i];
     for (unsigned long int i = 0; i < candidate_samples.size(); i++)
     {
 
@@ -293,7 +353,7 @@ namespace dynamic_reachability_map
       e2(2) = w * space_->getSample(candidate_samples[i]).effpose.orientation.z;
       e2(3) = w * space_->getSample(candidate_samples[i]).effpose.orientation.w;
       for (int j = 0; j < space_->getDimension(); j++)
-        e2(4 + j) = space_->getSample(candidate_samples[i]).q[j];
+        e2(4 + j) = 0 * space_->getSample(candidate_samples[i]).q[j];
       double tmp_dist = (e1 - e2).norm();
       if (tmp_dist < dist)
       {
@@ -305,7 +365,7 @@ namespace dynamic_reachability_map
   }
 
   bool DRM::getClosestSample(const exotica::Vector &q,
-      unsigned long int &sample_index)
+      unsigned long int &sample_index, unsigned int &space_index)
   {
     Eigen::VectorXf q_eigen(q.data.size());
     for (int i = 0; i < space_->dimension_; i++)
@@ -319,24 +379,49 @@ namespace dynamic_reachability_map
     Eigen::Affine3d effpose =
         space_->ps_->getCurrentStateNonConst().getGlobalLinkTransform(
             space_->eff_);
-    unsigned int volume_index = 0;
-    if (!space_->getVolumeIndex(effpose, volume_index))
+    if (!space_->getVolumeIndex(effpose, space_index))
     {
       ROS_ERROR("Get volume index failed");
       return false;
     }
     double dist = INFINITY;
     for (unsigned long int i = 0;
-        i < space_->volumes_[volume_index].reach_samples.size(); i++)
+        i < space_->volumes_[space_index].reach_samples.size(); i++)
     {
       double tmp_dist = (Eigen::Map<Eigen::VectorXf>(
-          space_->samples_[space_->volumes_[volume_index].reach_samples[i]].q,
+          space_->samples_[space_->volumes_[space_index].reach_samples[i]].q,
           space_->dimension_) - q_eigen).norm();
       if (tmp_dist < dist)
       {
         dist = tmp_dist;
-        sample_index = space_->volumes_[volume_index].reach_samples[i];
+        sample_index = space_->volumes_[space_index].reach_samples[i];
       }
+    }
+    return true;
+  }
+
+  bool DRM::getSampleReachIndex(const exotica::Vector &q,
+      unsigned int &space_index)
+  {
+    Eigen::VectorXf q_eigen(q.data.size());
+    for (int i = 0; i < space_->dimension_; i++)
+    {
+      space_->ps_->getCurrentStateNonConst().setVariablePosition(
+          space_->var_index_[i], q.data[i]);
+      q_eigen(i) = q.data[i];
+    }
+    space_->ps_->getCurrentStateNonConst().update(true);
+    Eigen::Affine3d effpose =
+        space_->ps_->getCurrentStateNonConst().getGlobalLinkTransform(
+            space_->eff_);
+    geometry_msgs::Pose pose;
+    tf::poseEigenToMsg(effpose, pose);
+    pose.position.z -= 1.025;
+    if (!space_->getVolumeIndex(pose.position, space_index))
+    {
+      ROS_ERROR_STREAM(
+          "Get volume index failed Index "<<space_index<<" ("<<effpose.translation().transpose()<<")");
+      return false;
     }
     return true;
   }

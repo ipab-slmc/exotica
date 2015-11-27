@@ -49,10 +49,9 @@ namespace exotica
        * @return  Should indicate success or otherwise
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-
+      IKoptions* ik_options_;
     private:
       DrakeIKProblem_ptr prob_;
-      IKoptions* ik_options_;
       Eigen::VectorXd last_solve_;
       bool has_last_solve_;
   };

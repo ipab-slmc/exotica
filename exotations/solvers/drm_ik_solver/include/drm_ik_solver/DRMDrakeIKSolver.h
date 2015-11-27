@@ -26,12 +26,13 @@ namespace exotica
       EReturn specifyProblem(PlanningProblem_ptr pointer);
     protected:
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-      actionlib::SimpleActionClient<dynamic_reachability_map::DRMAction> drm_client_;
       EParam<StringList> drm_joints_;
       std::vector<int> drm_drake_joints_map_;
       std::vector<int> drm_ps_joints_map_;
       DRMDrakeIKProblem_ptr prob_;
+      actionlib::SimpleActionClient<dynamic_reachability_map::DRMAction> drm_client_;
   };
+  typedef boost::shared_ptr<exotica::DRMDrakeIKsolver> DRMDrakeIKsolver_ptr;
 }
 
 #endif /* EXOTICA_EXOTATIONS_SOLVERS_DRM_IK_SOLVER_INCLUDE_DRMDRAKEIKSOLVER_H_ */

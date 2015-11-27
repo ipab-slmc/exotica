@@ -26,6 +26,7 @@ include_directories(
 add_library(drm_ik_solver
   src/DRMDrakeIKSolver.cpp
   src/DRMDrakeIKProblem.cpp
+  src/DRMDrakeTrajSolver.cpp
 )
 pods_use_pkg_config_packages(drm_ik_solver drake-rbm drake-ik)
 

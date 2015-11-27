@@ -15,6 +15,7 @@ namespace dynamic_reachability_map
 
   class DRMSampler
   {
+      friend class DRMFullBodySampler;
     public:
       DRMSampler(int nt);
       ~DRMSampler();
@@ -25,7 +26,7 @@ namespace dynamic_reachability_map
       void multiThreadSamplingFn(int id);
       std::vector<std::vector<double>> preProcessSamples(
           std::vector<std::vector<double>> &samples);
-      unsigned long int setToNextState(int id, Eigen::Affine3d &effpose,
+      virtual unsigned long int setToNextState(int id, Eigen::Affine3d &effpose,
           unsigned int &volume_index);
       DRMSpace_ptr space_;
       std::vector<planning_scene::PlanningScenePtr> ps_;
@@ -36,6 +37,11 @@ namespace dynamic_reachability_map
       unsigned long int curr_cnt_;
       boost::mutex curr_cnt_lock;
       std::vector<std::vector<Volume>> tmp_volumes_;
+      double dRand(double dMin, double dMax)
+      {
+        double d = (double) rand() / RAND_MAX;
+        return dMin + d * (dMax - dMin);
+      }
   };
 }
 

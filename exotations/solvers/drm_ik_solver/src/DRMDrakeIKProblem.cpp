@@ -98,14 +98,16 @@ namespace exotica
 
     if (!pos_ok)
     {
-      ERROR("Position constraint not found");
-      return FAILURE;
+      WARNING("Position constraint not found");
     }
-    pos.M = quat.M;
+    else
+    {
+      pos.M = quat.M;
 //    pos.p.data[2] -= 1.025;
-    eff_goal_pose = pos * (pointInLink.Inverse());
-    HIGHLIGHT_NAMED(object_name_,
-        "Eff: "<<eff_link_<<" goalpos ("<<eff_goal_pose.p[0]<<" "<<eff_goal_pose.p[1]<<" "<<eff_goal_pose.p[2]<<")");
+      eff_goal_pose = pos * (pointInLink.Inverse());
+      HIGHLIGHT_NAMED(object_name_,
+          "Eff: "<<eff_link_<<" goalpos ("<<eff_goal_pose.p[0]<<" "<<eff_goal_pose.p[1]<<" "<<eff_goal_pose.p[2]<<")");
+    }
     return SUCCESS;
   }
 

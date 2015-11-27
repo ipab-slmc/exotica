@@ -7,12 +7,6 @@
 
 #include "dynamic_reachability_map/DRMSampler.h"
 
-double dRand(double dMin, double dMax)
-{
-  double d = (double) rand() / RAND_MAX;
-  return dMin + d * (dMax - dMin);
-}
-
 namespace dynamic_reachability_map
 {
 
@@ -163,13 +157,18 @@ namespace dynamic_reachability_map
       while (true)
       {
         srand(time(NULL));
+        double drand_x = dRand(-0.087, 0.087);
+        double drand_y = dRand(-0.087, 0.027);
+        double drand_z = dRand(-0.25, 0.05);
+        if (sqrt(drand_x * drand_x + drand_z * drand_z + drand_z * drand_z)
+            > 0.25) continue;
         ps_[id]->getCurrentStateNonConst().setToRandomPositions(space_->group_);
         ps_[id]->getCurrentStateNonConst().setVariablePosition(
-            "world_joint/trans_x", dRand(-0.2, 0.2));
+            "world_joint/trans_x", drand_x);
         ps_[id]->getCurrentStateNonConst().setVariablePosition(
-            "world_joint/trans_y", dRand(-0.25, 0.25));
+            "world_joint/trans_y", drand_y);
         ps_[id]->getCurrentStateNonConst().setVariablePosition(
-            "world_joint/trans_z", dRand(-0.35, 0.15));
+            "world_joint/trans_z", drand_z);
         ps_[id]->getCurrentStateNonConst().setVariablePosition(
             "world_joint/rot_x", 0);
         ps_[id]->getCurrentStateNonConst().setVariablePosition(
@@ -183,6 +182,7 @@ namespace dynamic_reachability_map
         ps_[id]->getCurrentStateNonConst().update(true);
         effpose = ps_[id]->getCurrentStateNonConst().getGlobalLinkTransform(
             space_->eff_);
+        if (effpose.translation()(0) < drand_x + 0.1) continue; //reach behind robot
         if (!space_->getVolumeIndex(effpose, volume_index)) continue;
         ps_[id]->checkSelfCollision(self_req, self_res);
         if (!self_res.collision)
@@ -212,37 +212,45 @@ namespace dynamic_reachability_map
             << (double) sample_index / (double) sample_cnt_ * 100.0 << "%).\r";
         std::cout.flush();
       }
-      collision_detection::CollisionRequest request;
-      request.contacts = true;
-      request.max_contacts = space_->getSpaceSize();
-      request.group_name = space_->group_->getName();
-      collision_detection::CollisionResult result;
-      std::map<int, bool> checked;
-      ps_[id]->checkCollision(request, result);
-      if (result.collision)
+      bool check_occup = true;
+      if (check_occup)
       {
-        for (auto &it : result.contacts)
+        collision_detection::CollisionRequest request;
+        request.contacts = true;
+        request.max_contacts = space_->getSpaceSize();
+        request.group_name = space_->group_->getName();
+        collision_detection::CollisionResult result;
+        std::map<int, bool> checked;
+        ps_[id]->checkCollision(request, result);
+        if (result.collision)
         {
-          unsigned int tmp;
-          if (volume_map_.find(it.first.first) != volume_map_.end())
+          for (auto &it : result.contacts)
           {
-            tmp = volume_map_.at(it.first.first);
-          }
-          else if (volume_map_.find(it.first.second) != volume_map_.end())
-          {
-            tmp = volume_map_.at(it.first.second);
-          }
-          else
-          {
-            ROS_ERROR_STREAM(
-                "This should not happen! Contact between "<<it.first.first<<" and "<<it.first.second);
-            continue;
-          }
-          if (checked.find(tmp) == checked.end())
-          {
-            tmp_volumes_[id][tmp].occup_samples.push_back(sample_index);
+            unsigned int tmp;
+            if (volume_map_.find(it.first.first) != volume_map_.end()
+                && it.first.second != "leftHipPitchLink"
+                && it.first.second != "rightHipPitchLink")
+            {
+              tmp = volume_map_.at(it.first.first);
+            }
+            else if (volume_map_.find(it.first.second) != volume_map_.end()
+                && it.first.first != "leftHipPitchLink"
+                && it.first.first != "rightHipPitchLink")
+            {
+              tmp = volume_map_.at(it.first.second);
+            }
+            else
+            {
+//              ROS_ERROR_STREAM(
+//                  "This should not happen! Contact between "<<it.first.first<<" and "<<it.first.second);
+              continue;
+            }
+            if (checked.find(tmp) == checked.end())
+            {
+              tmp_volumes_[id][tmp].occup_samples.push_back(sample_index);
 //          space_->addOccupSample(tmp, sample_index);
-            checked[tmp] = true;
+              checked[tmp] = true;
+            }
           }
         }
       }

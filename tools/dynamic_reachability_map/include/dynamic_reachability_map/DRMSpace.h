@@ -84,6 +84,7 @@ namespace dynamic_reachability_map
       unsigned int eff_index;
       bool isValid;
       std::vector<unsigned long int> edges;
+      Eigen::VectorXf drake_q;
   };
 
   struct Volume
@@ -115,6 +116,7 @@ namespace dynamic_reachability_map
       friend class DRMSpaceLoader;
       friend class MultiThreadsSpaceOccupationLoader;
       friend class DRMSampler;
+      friend class DRMFullBodySampler;
       friend class DRMSampleCluster;
       friend class DRM;
     public:

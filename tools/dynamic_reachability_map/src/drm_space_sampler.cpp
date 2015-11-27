@@ -8,6 +8,7 @@
 #include "dynamic_reachability_map/DRMSampler.h"
 #include "dynamic_reachability_map/DRMSpaceSaver.h"
 #include "dynamic_reachability_map/DRMSpaceLoader.h"
+#include "dynamic_reachability_map/DRMFullBodySampler.h"
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
 #include <ros/package.h>
@@ -92,13 +93,18 @@ int main(int argc, char **argv)
   space_bounds.z_upper = bounds[2](1);
   dynamic_reachability_map::DRMSpace_ptr space;
   space.reset(new dynamic_reachability_map::DRMSpace());
-  if(!space->createSpace(space_bounds, cell_size, model, eff, group_name))
+  if (!space->createSpace(space_bounds, cell_size, model, eff, group_name))
   {
     ROS_ERROR("Can not create DRM space");
     return 0;
   }
-  dynamic_reachability_map::DRMSampler drms(thread_cnt);
-
+  dynamic_reachability_map::DRMFullBodySampler drms(thread_cnt);
+  if(!drms.initialise(
+      "/home/yiming/devel/ipab-distro/drc/software/models/val_description/urdf/valkyrie_A_sim_drake.urdf"))
+  {
+    ROS_ERROR("DRMS initialization failed");
+    return 0;
+  }
 //  int points_cnt = 4;
 //  int dim = space->getDimension();
 //  std::vector<std::string> var_names = space->getGroup()->getVariableNames();

@@ -10,8 +10,8 @@
 namespace dynamic_reachability_map
 {
   DRMClusterParam::DRMClusterParam()
-      : min_num_clusters(1), small_cluster_cutoff(0.0), max_joint_step(
-      M_PI / 3.14), tolerance(1e-5), algorithm("MeanShift")
+      : min_num_clusters(1), small_cluster_cutoff(0.0), max_joint_step(0.3), tolerance(
+          1e-5), algorithm("MeanShift")
   {
 
   }
@@ -87,27 +87,66 @@ namespace dynamic_reachability_map
       DRMSpace_ptr &space)
   {
     std::ifstream cluster_file;
-    cluster_file.open(path + "/Clusters.txt");
-    std::string line;
-    for (int i = 0; i < space->space_size_; i++)
+    DIR *dp;
+    struct dirent *dirp;
+    if ((dp = opendir(path.c_str())) == NULL)
     {
-      getline(cluster_file, line);
-      std::vector<std::string> clusters = getStringVector(line);
-      space->volumes_[i].reach_clusters.resize(std::stoi(clusters[0]));
-      int cnt = 1;
-      for (int j = 0; j < space->volumes_[i].reach_clusters.size(); j++)
+      ROS_ERROR_STREAM("Result directory "<<path<<" does not exist");
+      return false;
+    }
+    std::string file_name = "Clusters.txt";
+    bool found = false;
+    while ((dirp = readdir(dp)) != NULL)
+    {
+      if (dirp->d_name == file_name)
       {
-        int tmp = std::stoi(clusters[cnt]);
-        space->volumes_[i].reach_clusters[j].resize(tmp);
-        cnt++;
-        for (int k = 0; k < tmp; k++)
+        found = true;
+        break;
+      }
+    }
+    int cluster_cnt = 0;
+    if (!found)
+    {
+      for (int i = 0; i < space->space_size_; i++)
+      {
+        space->volumes_[i].reach_clusters.resize(
+            space->volumes_[i].reach_samples.size());
+        cluster_cnt += space->volumes_[i].reach_clusters.size();
+        for (int j = 0; j < space->volumes_[i].reach_clusters.size(); j++)
         {
-          space->volumes_[i].reach_clusters[j][k] =
-              (unsigned long int) std::stoi(clusters[cnt]);
-          cnt++;
+          space->volumes_[i].reach_clusters[j].resize(1);
+          space->volumes_[i].reach_clusters[j][0] =
+              space->volumes_[i].reach_samples[j];
         }
       }
     }
+    else
+    {
+      cluster_file.open(path + "/Clusters.txt");
+      std::string line;
+      for (int i = 0; i < space->space_size_; i++)
+      {
+        getline(cluster_file, line);
+        std::vector<std::string> clusters = getStringVector(line);
+        space->volumes_[i].reach_clusters.resize(std::stoi(clusters[0]));
+        cluster_cnt += space->volumes_[i].reach_clusters.size();
+        int cnt = 1;
+        for (int j = 0; j < space->volumes_[i].reach_clusters.size(); j++)
+        {
+          int tmp = std::stoi(clusters[cnt]);
+          space->volumes_[i].reach_clusters[j].resize(tmp);
+          cnt++;
+          for (int k = 0; k < tmp; k++)
+          {
+            space->volumes_[i].reach_clusters[j][k] =
+                (unsigned long int) std::stoi(clusters[cnt]);
+            cnt++;
+          }
+        }
+      }
+    }
+    ROS_INFO_STREAM(
+        "DRM space contains "<<space->getSampleSize()<<" samples, "<<cluster_cnt<<" clusters");
     return true;
   }
 
@@ -294,10 +333,10 @@ namespace dynamic_reachability_map
 
           break;
         }
-        double base_w = 40;
-        double eff_w = 40;
+        double base_w = 10;
+        double eff_w = 10;
         double q_w = 1;
-        double q_w2 = 5;
+        double q_w2 = 2;
         for (int j = 7; j < space_->dimension_; j++)
           old_mean(j) = q_w * space_->samples_[start_index].q[j];
         old_mean(7) *= q_w2;

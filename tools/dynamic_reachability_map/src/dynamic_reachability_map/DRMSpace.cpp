@@ -329,16 +329,14 @@ namespace dynamic_reachability_map
   std::vector<std::pair<unsigned int, double> > DRMSpace::getNeighborIndices(
       unsigned int index, unsigned int depth)
   {
-    std::vector<std::pair<unsigned int, double> > ret;
+    std::vector<std::pair<unsigned int, double> > ret(0);
     if (depth < 1) return ret;
 
     geometry_msgs::Point c = volumes_[index].center;
-    for (double x = -0.5 * resolution_ * depth; x <= 0.5 * resolution_;
-        x += 0.5 * resolution_)
-      for (double y = -0.5 * resolution_ * depth; y <= 0.5 * resolution_;
-          y += 0.5 * resolution_)
-        for (double z = -0.5 * resolution_ * depth; z <= 0.5 * resolution_;
-            z += 0.5 * resolution_)
+    for (double x = -resolution_; x <= resolution_ * depth; x += resolution_)
+      for (double y = -resolution_; y <= resolution_ * depth; y += resolution_)
+        for (double z = -resolution_; z <= resolution_ * depth; z +=
+            resolution_)
         {
           geometry_msgs::Point n;
           n.x = c.x + x;
@@ -347,9 +345,20 @@ namespace dynamic_reachability_map
           unsigned int n_index = 0;
           if (getVolumeIndex(n, n_index) && index != n_index)
           {
-            std::pair<unsigned int, double> tmp(n_index,
-                sqrt(getDistance(index, n_index)));
-            ret.push_back(tmp);
+            bool reachable = false;
+            for (unsigned long int j = 0;
+                j < volumes_[index].reach_samples.size(); j++)
+              if (samples_[volumes_[index].reach_samples[j]].isValid)
+              {
+                reachable = true;
+                break;
+              }
+            if (reachable)
+            {
+              std::pair<unsigned int, double> tmp(n_index,
+                  sqrt(getDistance(index, n_index)));
+              ret.push_back(tmp);
+            }
           }
         }
     return ret;

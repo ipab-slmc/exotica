@@ -42,6 +42,8 @@ namespace exotica
           boost::shared_ptr<PlanningProblem> problem);
       RigidBodyManipulator* getDrakeModel();
       std::vector<RigidBodyConstraint*> constraints_;
+      std::map<std::string, int> joints_map_;
+      Magic magic_;
     protected:
       /**
        * \brief Derived Initialiser (from XML): PURE VIRTUAL
@@ -49,7 +51,6 @@ namespace exotica
        * @return Indication of success/failure
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-
     private:
       EReturn buildQuasiStaticConstraint(const rapidjson::Value& obj,
           QuasiStaticConstraint* &ptr);
@@ -64,8 +65,6 @@ namespace exotica
       EReturn getBounds(const rapidjson::Value& obj, Eigen::Vector2d &lb,
           Eigen::Vector2d &ub);
       RigidBodyManipulator* model_;
-      std::map<std::string, int> joints_map_;
-      Magic magic_;
   };
 
   typedef boost::shared_ptr<DrakeIKProblem> DrakeIKProblem_ptr;

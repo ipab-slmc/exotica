@@ -423,7 +423,7 @@ bool kinematica::KinematicTree::addEndEffector(const std::string & name,
   }
   eff_segments_.push_back(segment_map_[name]);
   eff_seg_offs_.push_back(offset);
-  forward_map_.resize(3 * eff_segments_.size());//!< Just position/velocity of end-effector
+  forward_map_.resize(3 * eff_segments_.size()); //!< Just position/velocity of end-effector
   jacobian_.resize(3 * eff_segments_.size(), num_jnts_spec_);
   return true;
 }
@@ -1107,28 +1107,28 @@ bool kinematica::KinematicTree::setJointLimits()
   if (base_type_.compare("floating") == 0)
   {
     robot_tree_[1].joint_limits_.resize(2);
-    robot_tree_[1].joint_limits_[0] = -10;
-    robot_tree_[1].joint_limits_[1] = 10;
+    robot_tree_[1].joint_limits_[0] = -0.15;
+    robot_tree_[1].joint_limits_[1] = 0.15;
 
     robot_tree_[2].joint_limits_.resize(2);
-    robot_tree_[2].joint_limits_[0] = -10;
-    robot_tree_[2].joint_limits_[1] = 10;
+    robot_tree_[2].joint_limits_[0] = -0.15;
+    robot_tree_[2].joint_limits_[1] = 0.15;
 
     robot_tree_[3].joint_limits_.resize(2);
-    robot_tree_[3].joint_limits_[0] = 0.8;
-    robot_tree_[3].joint_limits_[1] = 1.25;
+    robot_tree_[3].joint_limits_[0] = 0.925;
+    robot_tree_[3].joint_limits_[1] = 1.125;
 
     robot_tree_[4].joint_limits_.resize(2);
-    robot_tree_[4].joint_limits_[0] = -1.57;
-    robot_tree_[4].joint_limits_[1] = 1.57;
+    robot_tree_[4].joint_limits_[0] = -1.3290;
+    robot_tree_[4].joint_limits_[1] = 1.1810;
 
     robot_tree_[5].joint_limits_.resize(2);
-    robot_tree_[5].joint_limits_[0] = 0;
-    robot_tree_[5].joint_limits_[1] = 0;
+    robot_tree_[5].joint_limits_[0] = -0.1300;
+    robot_tree_[5].joint_limits_[1] = 0.6660;
 
     robot_tree_[6].joint_limits_.resize(2);
-    robot_tree_[6].joint_limits_[0] = 0;
-    robot_tree_[6].joint_limits_[1] = 0;
+    robot_tree_[6].joint_limits_[0] = -0.2;
+    robot_tree_[6].joint_limits_[1] = 0.2550;
   }
   else if (base_type_.compare("planar") == 0)
   {
@@ -1363,7 +1363,7 @@ bool kinematica::KinematicTree::addSegment(
         INFO("addSegment Function ... Checking parent of root ");
         int child;
         success = addSegment(current_segment->second.parent, current, child,
-            false, false, root_name, joint_map);//!< We are moving from base towards base
+            false, false, root_name, joint_map); //!< We are moving from base towards base
         robot_tree_[current].child.push_back(child);	//!< Add as child
       }
     }
@@ -1507,7 +1507,7 @@ bool kinematica::KinematicTree::computePosJacobian()
               robot_tree_[robot_tree_[segment_index].parent].joint_axis;
         }
       }
-      segment_index = robot_tree_[segment_index].parent;//!< Move to its parent
+      segment_index = robot_tree_[segment_index].parent; //!< Move to its parent
     }
   }
 

@@ -77,30 +77,30 @@ namespace exotica
         SE3bounds.setHigh(i, prob->getBounds()[i + n]);
         SE3bounds.setLow(i, prob->getBounds()[i]);
       }
-      std::cout << "SE3Bounds Low:";
-      for (int i = 0; i < 3; i++)
-        std::cout << prob->getBounds()[i] << " ";
-      std::cout << std::endl;
-      std::cout << "SE3Bounds High:";
-      for (int i = 0; i < 3; i++)
-        std::cout << prob->getBounds()[i + n] << " ";
-      std::cout << std::endl;
+//      std::cout << "SE3Bounds Low:";
+//      for (int i = 0; i < 3; i++)
+//        std::cout << prob->getBounds()[i] << " ";
+//      std::cout << std::endl;
+//      std::cout << "SE3Bounds High:";
+//      for (int i = 0; i < 3; i++)
+//        std::cout << prob->getBounds()[i + n] << " ";
+//      std::cout << std::endl;
 
       ret->SO3Bounds_.resize(3);
-      std::cout << "SO3Bounds Low:";
+//      std::cout << "SO3Bounds Low:";
       for (int i = 3; i < 6; i++)
       {
         ret->SO3Bounds_.low[i - 3] = prob->getBounds()[i];
-        std::cout << prob->getBounds()[i] << " ";
+//        std::cout << prob->getBounds()[i] << " ";
       }
-      std::cout << std::endl;
-      std::cout << "SO3Bounds High:";
+//      std::cout << std::endl;
+//      std::cout << "SO3Bounds High:";
       for (int i = 3; i < 6; i++)
       {
         ret->SO3Bounds_.high[i - 3] = prob->getBounds()[i + n];
-        std::cout << prob->getBounds()[i + n] << " ";
+//        std::cout << prob->getBounds()[i + n] << " ";
       }
-      std::cout << std::endl;
+//      std::cout << std::endl;
 
       ret->setSE3StateSpaceBounds(SE3bounds);
       for (int i = 6; i < n; i++)
@@ -108,14 +108,14 @@ namespace exotica
         RNbounds.setHigh(i - 6, prob->getBounds()[i + n]);
         RNbounds.setLow(i - 6, prob->getBounds()[i]);
       }
-      std::cout << "RNBounds Low:";
-      for (int i = 6; i < n; i++)
-        std::cout << prob->getBounds()[i] << " ";
-      std::cout << std::endl;
-      std::cout << "RNBounds High:";
-      for (int i = 6; i < n; i++)
-        std::cout << prob->getBounds()[i + n] << " ";
-      std::cout << std::endl;
+//      std::cout << "RNBounds Low:";
+//      for (int i = 6; i < n; i++)
+//        std::cout << prob->getBounds()[i] << " ";
+//      std::cout << std::endl;
+//      std::cout << "RNBounds High:";
+//      for (int i = 6; i < n; i++)
+//        std::cout << prob->getBounds()[i + n] << " ";
+//      std::cout << std::endl;
       ret->setRealVectorStateSpaceBounds(RNbounds);
 
     }

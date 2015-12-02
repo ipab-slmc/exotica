@@ -6,7 +6,7 @@
  */
 
 #include "drake_ik_solver/DrakeIKProblem.h"
-
+#include <ros/package.h>
 REGISTER_PROBLEM_TYPE("DrakeIKProblem", exotica::DrakeIKProblem);
 
 namespace exotica
@@ -155,22 +155,17 @@ namespace exotica
 
   EReturn DrakeIKProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
-    tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("URDFPath");
-    if (!tmp_handle.ToElement())
-    {
-      ERROR("URDFPath is required for Drake RigidBodyManipulator");
-      return FAILURE;
-    }
-    std::string urdf_path = tmp_handle.ToElement()->GetText();
+    tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("URDFPackage");
+    EParam<std_msgs::String> package, file;
+    server_->registerParam<std_msgs::String>(ns_, tmp_handle, package);
+    tmp_handle = handle.FirstChildElement("URDFFile");
+    server_->registerParam<std_msgs::String>(ns_, tmp_handle, file);
+    std::string urdf_path = ros::package::getPath(package->data) + "/urdf/"
+        + file->data;
     if (model_) delete model_;
     model_ = new RigidBodyManipulator(urdf_path);
     for (int i = 0; i < model_->num_positions; i++)
-    {
-//      ROS_INFO_STREAM("Joint "<<i<<" "<<model_->getPositionName(i));
       joints_map_[model_->getPositionName(i)] = i;
-    }
-//    for (int i = 0; i < model_->num_bodies; i++)
-//      ROS_INFO_STREAM("Frame "<<i<<" "<<model_->bodies[i]->linkname);
 
     magic_.l_foot_pts = Eigen::Matrix3Xd::Zero(3, 4);
     magic_.l_foot_pts << -0.0820, -0.0820, 0.1780, 0.1780, 0.0624, -0.0624, 0.0624, -0.0624, -0.0811, -0.0811, -0.0811, -0.0811;

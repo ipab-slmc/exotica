@@ -118,10 +118,10 @@ namespace dynamic_reachability_map
     }
     else
     {
-      ROS_WARN_STREAM(
-          "Pose ("<<goal->goal_pose.position.x<<","<<goal->goal_pose.position.y<<","<<goal->goal_pose.position.z<<") is not in current environment. Try neighbours");
       std::vector<std::pair<unsigned int, double> > neighbours =
-          space_->getNeighborIndices(index, 3);
+          space_->getNeighborIndices(index, 1);
+      ROS_WARN_STREAM(
+          "Pose ("<<goal->goal_pose.position.x<<","<<goal->goal_pose.position.y<<","<<goal->goal_pose.position.z<<") is not in current environment. Try "<<neighbours.size()<<" neighbours");
       for (unsigned int i = 0; i < neighbours.size(); i++)
       {
         if (space_->CurrentlyReachability(neighbours[i].first,

@@ -333,10 +333,10 @@ namespace dynamic_reachability_map
 
           break;
         }
-        double base_w = 10;
-        double eff_w = 10;
+        double base_w = 1;
+        double eff_w = 2;
         double q_w = 1;
-        double q_w2 = 2;
+        double q_w2 = 1;
         for (int j = 7; j < space_->dimension_; j++)
           old_mean(j) = q_w * space_->samples_[start_index].q[j];
         old_mean(7) *= q_w2;
@@ -455,7 +455,7 @@ namespace dynamic_reachability_map
             space_->volumes_[index].reach_samples[i]);
         sample_clustered_[space_->volumes_[index].reach_samples[i]] = true;
       }
-      if (thread_id == 3)
+      if (thread_id == 0)
       {
         ROS_INFO_STREAM(
             "Volume "<<index<<" has "<<sample_size<<" samples, "<< clusters.size()<<" clusters");

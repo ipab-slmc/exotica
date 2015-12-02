@@ -36,15 +36,6 @@ namespace dynamic_reachability_map
         model_->findLinkId("leftFoot"), quat, 0, tspan01);
     constraints_.push_back(ptr_left);
     constraints_.push_back(ptr_right);
-    Eigen::Vector2d lb, ub;
-    lb << 0.1, 0.1;
-    ub << 0.4, 0.4;
-    Eigen::Matrix3Xd pt = Eigen::Matrix3Xd::Zero(3, 1);
-    Point2PointDistanceConstraint* feet_dist =
-        new Point2PointDistanceConstraint(model_,
-            model_->findLinkId("rightFoot"), model_->findLinkId("leftFoot"), pt,
-            pt, lb, ub);
-    constraints_.push_back(feet_dist);
 
     QuasiStaticConstraint* kc_quasi = new QuasiStaticConstraint(model_);
     kc_quasi->setActive(true);
@@ -122,6 +113,7 @@ namespace dynamic_reachability_map
     Eigen::VectorXd v = Eigen::VectorXd::Zero(model_->num_velocities);
     KinematicsCache<double> cache = model_->doKinematics(reach_start_, v, false,
         false);
+    Eigen::Matrix3Xd pt = Eigen::Matrix3Xd::Zero(3, 1);
     {
       int idx = model_->findLinkId("leftFoot");
       Eigen::VectorXd pos = model_->forwardKin(cache, pt, idx, 0, 0, 0).value();
@@ -157,7 +149,7 @@ namespace dynamic_reachability_map
       ps_[id]->getCurrentStateNonConst().setToRandomPositions();
       Eigen::VectorXd tmp_start = reach_start_;
       Eigen::Vector3d tmp_base;
-      tmp_base << dRand(-0.087, 0.087), dRand(-0.087, 0.027), dRand(-0.25, 0.05)
+      tmp_base << dRand(-0.087, 0.087), dRand(-0.087, 0.027), dRand(-0.5, 0.05)
           + 1.025;
       tmp_start.segment(0, 3) = tmp_base;
 
@@ -196,34 +188,16 @@ namespace dynamic_reachability_map
       ps_[id]->getCurrentStateNonConst().setVariablePosition(
           "world_joint/rot_w", quat[3]);
 
-      for (int i = 0; i < ps_[id]->getRobotModel()->getLinkModelNames().size();
-          i++)
-//      collision_detection::CollisionRequest self_req;
-//      self_req.group_name = space_->group_->getName();
-//      self_req.contacts = true;
-//      self_req.max_contacts = 100;
-//      collision_detection::CollisionResult self_res;
-
-        ps_[id]->getCurrentStateNonConst().update(false);
+      ps_[id]->getCurrentStateNonConst().update(false);
       effpose = ps_[id]->getCurrentStateNonConst().getGlobalLinkTransform(
           space_->eff_);
       if (!space_->getVolumeIndex(effpose, volume_index)) continue;
-
-//      ps_[id]->checkSelfCollision(self_req, self_res);
-//      if (self_res.collision)
-//      {
-//        for (auto &it : self_res.contacts)
-//          ROS_ERROR_STREAM(
-//              "Contact "<<it.first.first<<" and "<<it.first.second);
-//        continue;
-//      }
-      ROS_INFO_STREAM("Good sample "<<index);
-      moveit_msgs::DisplayRobotState state_msg;
-      robot_state::robotStateToRobotStateMsg(ps_[id]->getCurrentState(),
-          state_msg.state);
-      state_pub_.publish(state_msg);
-      ros::spinOnce();
-      ros::Duration(0.05).sleep();
+//      moveit_msgs::DisplayRobotState state_msg;
+//      robot_state::robotStateToRobotStateMsg(ps_[id]->getCurrentState(),
+//          state_msg.state);
+//      state_pub_.publish(state_msg);
+//      ros::spinOnce();
+//      ros::Duration(0.05).sleep();
       space_->samples_[index].drake_q = tmp_sol.cast<float>();
 
       break;

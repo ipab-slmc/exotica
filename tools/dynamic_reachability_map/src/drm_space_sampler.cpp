@@ -99,8 +99,9 @@ int main(int argc, char **argv)
     return 0;
   }
   dynamic_reachability_map::DRMFullBodySampler drms(thread_cnt);
-  if(!drms.initialise(
-      "/home/yiming/devel/ipab-distro/drc/software/models/val_description/urdf/valkyrie_A_sim_drake.urdf"))
+  if (!drms.initialise(
+      ros::package::getPath("val_description")
+          + "/urdf/valkyrie_A_sim_drake.urdf"))
   {
     ROS_ERROR("DRMS initialization failed");
     return 0;

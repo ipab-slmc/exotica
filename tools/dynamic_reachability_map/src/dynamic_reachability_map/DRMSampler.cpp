@@ -229,13 +229,17 @@ namespace dynamic_reachability_map
             unsigned int tmp;
             if (volume_map_.find(it.first.first) != volume_map_.end()
                 && it.first.second != "leftHipPitchLink"
-                && it.first.second != "rightHipPitchLink")
+                && it.first.second != "rightHipPitchLink"
+                && it.first.second != "leftKneePitchLink"
+                && it.first.second != "rightKneePitchLink")
             {
               tmp = volume_map_.at(it.first.first);
             }
             else if (volume_map_.find(it.first.second) != volume_map_.end()
                 && it.first.first != "leftHipPitchLink"
-                && it.first.first != "rightHipPitchLink")
+                && it.first.first != "rightHipPitchLink"
+                && it.first.first != "leftKneePitchLink"
+                && it.first.first != "rightKneePitchLink")
             {
               tmp = volume_map_.at(it.first.second);
             }

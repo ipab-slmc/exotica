@@ -333,9 +333,11 @@ namespace dynamic_reachability_map
     if (depth < 1) return ret;
 
     geometry_msgs::Point c = volumes_[index].center;
-    for (double x = -resolution_; x <= resolution_ * depth; x += resolution_)
-      for (double y = -resolution_; y <= resolution_ * depth; y += resolution_)
-        for (double z = -resolution_; z <= resolution_ * depth; z +=
+    for (double x = -resolution_ * depth; x <= resolution_ * depth; x +=
+        resolution_)
+      for (double y = -resolution_ * depth; y <= resolution_ * depth; y +=
+          resolution_)
+        for (double z = -resolution_ * depth; z <= resolution_ * depth; z +=
             resolution_)
         {
           geometry_msgs::Point n;
@@ -343,12 +345,12 @@ namespace dynamic_reachability_map
           n.y = c.y + y;
           n.z = c.z + z;
           unsigned int n_index = 0;
+          bool reachable = false;
           if (getVolumeIndex(n, n_index) && index != n_index)
           {
-            bool reachable = false;
             for (unsigned long int j = 0;
-                j < volumes_[index].reach_samples.size(); j++)
-              if (samples_[volumes_[index].reach_samples[j]].isValid)
+                j < volumes_[n_index].reach_samples.size(); j++)
+              if (samples_[volumes_[n_index].reach_samples[j]].isValid)
               {
                 reachable = true;
                 break;

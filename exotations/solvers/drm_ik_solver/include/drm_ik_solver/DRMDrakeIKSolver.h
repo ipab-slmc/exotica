@@ -24,11 +24,13 @@ namespace exotica
       virtual EReturn Solve(Eigen::VectorXdRefConst q0,
           Eigen::MatrixXd & solution);
       EReturn specifyProblem(PlanningProblem_ptr pointer);
+      EParam<std_msgs::Bool> use_drm_;
     protected:
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
       EParam<StringList> drm_joints_;
       std::vector<int> drm_drake_joints_map_;
       std::vector<int> drm_ps_joints_map_;
+      const moveit::core::JointModelGroup* group_;
       DRMDrakeIKProblem_ptr prob_;
       actionlib::SimpleActionClient<dynamic_reachability_map::DRMAction> drm_client_;
   };

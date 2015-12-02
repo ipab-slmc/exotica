@@ -195,7 +195,6 @@ namespace dynamic_reachability_map
   bool DRMActionNode::updateDRM(const moveit_msgs::PlanningScene &scene,
       const geometry_msgs::Pose &base_pose)
   {
-    ROS_INFO("Updating DRM");
     ros::Time update_start = ros::Time::now();
     moveit_msgs::PlanningSceneWorld world = scene.world;
     for (int i = 0; i < world.collision_objects.size(); i++)
@@ -294,37 +293,38 @@ namespace dynamic_reachability_map
             drm_->space()->getPlanningScene()->getRobotModel()->getMultiDOFJointModels()[0]->getVariableCount();
       first = false;
     }
-    if (goal->ps.world.collision_objects.size() > 0)
+    if (goal->ps.world.collision_objects.size() > 0
+        && goal->invalid_clusters.size() == 0)
       updateDRM(goal->ps, goal->base_pose);
     dynamic_reachability_map::DRMResult result = drm_->getIKSolution(goal);
     as_.setSucceeded(result);
     if (!result.succeed) return false;
-    drm_mark_.colors.clear();
-    drm_mark_.points.clear();
-    std_msgs::ColorRGBA cc;
-    cc.a = cc.r = 1;
-    drm_mark_.colors.push_back(cc);
-    unsigned int tmp_index;
-    drm_->space()->getVolumeIndex(goal->goal_pose.position,tmp_index);
-    geometry_msgs::Point tmp = drm_->space()->at(tmp_index).center;
-    drm_mark_.points.push_back(tmp);
-    for (unsigned int i = 0; i < drm_->space()->getSpaceSize(); i++)
-    {
-      for (int j = 0; j < drm_->space()->at(i).occup_samples.size(); j++)
-      {
-        if (result.sample_index == drm_->space()->at(i).occup_samples[j])
-        {
-          std_msgs::ColorRGBA c;
-          c.a = c.g = 1;
-          drm_mark_.colors.push_back(c);
-          geometry_msgs::Point tmp = drm_->space()->at(i).center;
-          drm_mark_.points.push_back(tmp);
-          break;
-        }
-      }
-    }
-    drm_mark_.header.stamp = ros::Time::now();
-    drm_pub_.publish(drm_mark_);
+//    drm_mark_.colors.clear();
+//    drm_mark_.points.clear();
+//    std_msgs::ColorRGBA cc;
+//    cc.a = cc.r = 1;
+//    drm_mark_.colors.push_back(cc);
+//    unsigned int tmp_index;
+//    drm_->space()->getVolumeIndex(goal->goal_pose.position, tmp_index);
+//    geometry_msgs::Point tmp = drm_->space()->at(tmp_index).center;
+//    drm_mark_.points.push_back(tmp);
+//    for (unsigned int i = 0; i < drm_->space()->getSpaceSize(); i++)
+//    {
+//      for (int j = 0; j < drm_->space()->at(i).occup_samples.size(); j++)
+//      {
+//        if (result.sample_index == drm_->space()->at(i).occup_samples[j])
+//        {
+//          std_msgs::ColorRGBA c;
+//          c.a = c.g = 1;
+//          drm_mark_.colors.push_back(c);
+//          geometry_msgs::Point tmp = drm_->space()->at(i).center;
+//          drm_mark_.points.push_back(tmp);
+//          break;
+//        }
+//      }
+//    }
+//    drm_mark_.header.stamp = ros::Time::now();
+//    drm_pub_.publish(drm_mark_);
 
     for (int i = 7; i < result.q_out.data.size(); i++)
     {

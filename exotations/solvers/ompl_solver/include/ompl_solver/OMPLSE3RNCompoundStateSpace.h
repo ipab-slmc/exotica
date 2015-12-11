@@ -12,7 +12,8 @@
 #include "ompl_solver/OMPLProblem.h"
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
-
+#include <drake_ik_filter/DrakeIKFilter.h>
+#include <ros/package.h>
 namespace ob = ompl::base;
 namespace exotica
 {
@@ -48,15 +49,20 @@ namespace exotica
           }
       };
 
-      OMPLSE3RNCompoundStateSpace(unsigned int dim, const Server_ptr &server);
+      OMPLSE3RNCompoundStateSpace(unsigned int dim, const Server_ptr &server,
+          OMPLProblem_ptr &prob);
       virtual ~OMPLSE3RNCompoundStateSpace();
       virtual unsigned int getDimension() const;
       virtual ompl::base::StateSamplerPtr allocDefaultStateSampler();
-
+      virtual double distance(const ob::State *state1,
+          const ob::State *state2) const;
       static boost::shared_ptr<OMPLSE3RNCompoundStateSpace> FromProblem(
           OMPLProblem_ptr prob, const Server_ptr &server);
       EReturn OMPLStateToEigen(const ob::State *ompl, Eigen::VectorXd &eigen);
       EReturn EigenToOMPLState(const Eigen::VectorXd &eigen, ob::State *ompl);
+      EReturn ExoticaToDrakeState(const Eigen::VectorXd &exotica,
+          Eigen::VectorXd &drake);
+
       /*
        * \brief	Set the bounds for upper body configuration
        * @param	bounds		Real vector bounds for upper body
@@ -82,9 +88,14 @@ namespace exotica
       EParam<std_msgs::Float64> rn_bias_percentage_;
       ob::RealVectorBounds SO3Bounds_;
       bool useGoal_;
+      std::vector<std::string> jointNames_;
+      std::map<std::string, std::pair<int, int> > exotica_json_joints_map_;
+      Eigen::VectorXd reach_start_;
     private:
       Server_ptr server_;
       int realvectordim_;
+      DrakeIKFilter drake_ik_filter_;
+      OMPLProblem_ptr prob_;
   };
   class OMPLSE3RNCompoundStateSampler: public ob::StateSampler
   {
@@ -100,6 +111,10 @@ namespace exotica
           sum += weights->data[i];
         for (int i = 0; i < weights->data.size(); i++)
           weightImportance_[i] = weights->data[i] / sum;
+        ik_filter_.reset(new DrakeIKFilter());
+        std::string urdf_path = ros::package::getPath("val_description")
+            + "/urdf/valkyrie_A_sim_drake.urdf";
+        ik_filter_->initialise(urdf_path);
       }
       virtual void sampleUniform(ob::State *state);
       virtual void sampleUniformNear(ob::State *state, const ob::State *near,
@@ -107,6 +122,7 @@ namespace exotica
       virtual void sampleGaussian(ob::State *state, const ob::State * mean,
           const double stdDev);
       std::vector<double> weightImportance_;
+      DrakeIKFilter_ptr ik_filter_;
   };
 } //	Namespace exotica
 

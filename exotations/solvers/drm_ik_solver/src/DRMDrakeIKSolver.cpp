@@ -107,12 +107,13 @@ namespace exotica
     ros::Time start = ros::Time::now();
     int cnt = -1;
     bool succeeded = false;
-    while (cnt < 100)
+    while (cnt < 1000)
     {
       cnt++;
-      if (cnt == 0)
-        qs = q0;
-      else if (!use_drm_->data)
+//      if (cnt == 0)
+//        qs = q0;
+//      else
+      if (!use_drm_->data)
       {
         prob_->getScenes().begin()->second->getPlanningScene()->getCurrentStateNonConst().setToRandomPositions(
             group_);
@@ -182,7 +183,6 @@ namespace exotica
           return FAILURE;
         }
       }
-
       std::vector<std::string> infeasible_constraint;
       inverseKin(prob_->getDrakeModel(), qs, qs, prob_->constraints_.size(),
           &prob_->constraints_[0], q_sol, info, infeasible_constraint,
@@ -224,6 +224,24 @@ namespace exotica
             "world_joint", tmp_affine);
         prob_->getScenes().begin()->second->getPlanningScene()->getCurrentStateNonConst().update(
             true);
+        bool outofbounds = false;
+        for (int i = 7; i < drm_joints_->strings.size(); i++)
+        {
+          if (prob_->getScenes().begin()->second->getPlanningScene()->getCurrentState().getVariablePosition(
+              drm_ps_joints_map_[i])
+              < prob_->getScenes().begin()->second->getPlanningScene()->getCurrentState().getJointModel(
+                  drm_joints_->strings[i])->getVariableBounds()[0].min_position_
+              || prob_->getScenes().begin()->second->getPlanningScene()->getCurrentState().getVariablePosition(
+                  drm_ps_joints_map_[i])
+                  > prob_->getScenes().begin()->second->getPlanningScene()->getCurrentState().getJointModel(
+                      drm_joints_->strings[i])->getVariableBounds()[0].max_position_)
+          {
+            ROS_ERROR_STREAM(drm_joints_->strings[i]<<" is out of bound");
+            outofbounds = true;
+          }
+          if (outofbounds) break;
+        }
+        if (outofbounds) continue;
         prob_->getScenes().begin()->second->publishScene();
         collision_detection::CollisionRequest req;
         req.distance = true;
@@ -261,10 +279,11 @@ namespace exotica
             }
           }
         }
+
       }
       if (succeeded) break;
     }
-
+    trials_ = cnt;
     if (succeeded)
     {
       solution.resize(1, prob_->getDrakeModel()->num_positions);

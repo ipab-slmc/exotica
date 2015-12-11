@@ -10,7 +10,7 @@
 namespace dynamic_reachability_map
 {
   DRMClusterParam::DRMClusterParam()
-      : min_num_clusters(1), small_cluster_cutoff(0.0), max_joint_step(0.3), tolerance(
+      : min_num_clusters(1), small_cluster_cutoff(0.0), max_joint_step(0.4), tolerance(
           1e-5), algorithm("MeanShift")
   {
 
@@ -310,6 +310,10 @@ namespace dynamic_reachability_map
 //Clustering is needed
     else
     {
+      if (thread_id == 0)
+      {
+        ROS_INFO_STREAM("Clustering volume "<<index<<"/"<<space_->space_size_<<" with "<<sample_size<<" samples");
+      }
       VolumeClusters clusters;
       std::vector<Eigen::VectorXi> votes(0);
       std::vector<unsigned long int> samples(sample_size);

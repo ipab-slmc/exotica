@@ -137,7 +137,6 @@ namespace exotica
     prob_->scenes_.begin()->second->getPlanningScene()->getPlanningSceneMsg(
         msg);
     goal.ps = msg;
-
     if (traj_client_.sendGoalAndWait(goal, ros::Duration(100)).state_
         == actionlib::SimpleClientGoalState::SUCCEEDED)
     {
@@ -145,27 +144,32 @@ namespace exotica
       {
         dynamic_reachability_map::DRMTrajResultConstPtr result =
             traj_client_.getResult();
-        solution.resize(result->solution.size(),
+        solution.resize(result->solution.size() + 2,
             prob_->getDrakeModel()->num_positions);
-        for (int i = 0; i < result->solution.size(); i++)
-          solution.row(i) = q0;
+        solution.row(0) = q0;
+        solution.row(solution.rows() - 1) = qT_;
         for (int i = 0; i < result->solution.size(); i++)
         {
-          for (int j = 0; j < drm_drake_joints_map_.size(); j++)
-            solution(i, drm_drake_joints_map_[j]) = result->solution[i].data[j];
-          tmp_rot = KDL::Rotation::Quaternion(
-              traj_client_.getResult()->solution[i].data[3],
-              traj_client_.getResult()->solution[i].data[4],
-              traj_client_.getResult()->solution[i].data[5],
-              traj_client_.getResult()->solution[i].data[6]);
-          tmp_rot.GetRPY(solution(i, 3), solution(i, 4), solution(i, 5));
+          for (int j = 0; j < prob_->getDrakeModel()->num_positions; j++)
+            solution(i + 1, j) = result->solution[i].data[j];
         }
+//        for (int i = 0; i < result->solution.size(); i++)
+//          solution.row(i) = q0;
+//        for (int i = 0; i < result->solution.size(); i++)
+//        {
+//          for (int j = 0; j < drm_drake_joints_map_.size(); j++)
+//            solution(i, drm_drake_joints_map_[j]) = result->solution[i].data[j];
+//          tmp_rot = KDL::Rotation::Quaternion(
+//              traj_client_.getResult()->solution[i].data[3],
+//              traj_client_.getResult()->solution[i].data[4],
+//              traj_client_.getResult()->solution[i].data[5],
+//              traj_client_.getResult()->solution[i].data[6]);
+//          tmp_rot.GetRPY(solution(i, 3), solution(i, 4), solution(i, 5));
+//        }
         HIGHLIGHT(
             "DRM planning succeeded, trajectory length "<<result->solution.size());
         info = 0;
-        HIGHLIGHT("Solution old \n "<<solution);
-        IKFilter(solution);
-        HIGHLIGHT("Solution \n "<<solution);
+//        IKFilter(solution);
         return SUCCESS;
       }
       else

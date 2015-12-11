@@ -70,7 +70,8 @@ add_library(${PROJECT_NAME} src/EXOTicaPlannerService.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(ExoticaPlannerServiceNode src/EXOTicaPlannerServiceNode.cpp src/EXOTicaPlannerService.cpp)
-target_link_libraries(ExoticaPlannerServiceNode ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+pods_use_pkg_config_packages(ExoticaPlannerServiceNode drake-rbm drake-ik)
+target_link_libraries(ExoticaPlannerServiceNode ${catkin_LIBRARIES} ${Boost_LIBRARIES} drakeRBM drakeIK)
 add_dependencies(ExoticaPlannerServiceNode exotica_moveit_gencpp)
 
 #############

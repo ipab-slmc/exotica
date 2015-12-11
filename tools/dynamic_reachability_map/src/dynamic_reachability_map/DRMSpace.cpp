@@ -614,6 +614,33 @@ namespace dynamic_reachability_map
     checked_edges_.clear();
   }
 
+  void DRMSpace::buildPRMGraph()
+  {
+    ROS_INFO("BUILDING PRM GRAPH");
+    edges_.clear();
+    std::vector<std::vector<unsigned int>> sample_occups(sample_size_);
+
+//    for (unsigned int i = 0; i < space_size_; i++)
+//    {
+//      volumes_[i].occup_edges.clear();
+//      for (unsigned int j = 0; j < volumes_[i].occup_samples.size(); j++)
+//        sample_occups[volumes_[i].occup_samples[j]].push_back(i);
+//    }
+
+    for (unsigned long int i = 0; i < sample_size_; i++)
+    {
+      ROS_INFO_STREAM("Building graph for node "<<i<<"/"<<sample_size_);
+      std::map<double, unsigned long int> knn;
+      getKNN(i, knn);
+      for (auto &it : knn)
+      {
+        Edge new_edge(i, it.second, it.first);
+        edges_.push_back(new_edge);
+      }
+    }
+    ROS_INFO_STREAM("BUILD PRM FINISHED WITH "<<edges_.size()<<" Edges");
+  }
+
   void DRMSpace::buildGraphThreadFn(int thread_id,
       std::pair<unsigned int, unsigned int> &volumes, double dmax)
   {
@@ -674,6 +701,39 @@ namespace dynamic_reachability_map
         "Thread "<<thread_id<<" finished with "<<th_edges_[thread_id].size()<<" edges, dmax="<<dmax);
   }
 
+  void DRMSpace::savePRMGraph(const std::string &path)
+  {
+    std::ofstream graph_file(path + "/PRMGraph.bin", std::ios_base::binary);
+    unsigned long int size = edges_.size();
+    graph_file.write((char *) &size, sizeof(unsigned long int));
+    for (int i = 0; i < edges_.size(); i++)
+    {
+      graph_file.write((char *) &edges_[i].a, sizeof(unsigned long int));
+      graph_file.write((char *) &edges_[i].b, sizeof(unsigned long int));
+      graph_file.write((char *) &edges_[i].length, sizeof(double));
+    }
+    ROS_INFO_STREAM("Saving PRM Graph to "<<path<<"/PRMGraph.bin");
+    graph_file.close();
+  }
+
+  void DRMSpace::loadPRMGraph(const std::string &path)
+  {
+    std::ifstream graph_file(path + "/PRMGraph.bin", std::ios_base::binary);
+    unsigned long int size;
+    graph_file.read((char *) &size, sizeof(unsigned long int));
+    edges_.resize(size);
+    for (int i = 0; i < size; i++)
+    {
+      graph_file.read((char *) &edges_[i].a, sizeof(unsigned long int));
+      graph_file.read((char *) &edges_[i].b, sizeof(unsigned long int));
+      graph_file.read((char *) &edges_[i].length, sizeof(double));
+
+      samples_[edges_[i].a].edges.push_back(i);
+      samples_[edges_[i].b].edges.push_back(i);
+    }
+    graph_file.close();
+  }
+
   bool DRMSpace::newEdge(unsigned long int a, unsigned long int b)
   {
     if (checked_edges_.find(std::min(a, b)) == checked_edges_.end())
@@ -688,6 +748,41 @@ namespace dynamic_reachability_map
   {
     boost::mutex::scoped_lock(check_edges_lock_);
     checked_edges_[std::min(a, b)] = std::max(a, b);
+  }
+
+  void DRMSpace::getKNN(const unsigned long int index,
+      std::map<double, unsigned long int> &knn)
+  {
+    int k = 10;
+    double tol = M_PI / 8;
+    std::vector<std::pair<unsigned int, double> > neighbors =
+        getNeighborIndices(samples_[index].eff_index, 2);
+    for (int i = 0; i < neighbors.size(); i++)
+    {
+      for (int j = 0; j < volumes_[neighbors[i].first].reach_samples.size();
+          j++)
+      {
+        unsigned long int tmp_index =
+            volumes_[neighbors[i].first].reach_samples[j];
+        if (tmp_index > index)
+        {
+          double dist =
+              (samples_[index].drake_q - samples_[tmp_index].drake_q).cwiseAbs().maxCoeff();
+          if (dist < tol)
+          {
+            if (knn.size() < k)
+            {
+              knn[dist] = tmp_index;
+            }
+            else if (knn.rbegin()->first > dist)
+            {
+              knn.erase(knn.rbegin()->first);
+              knn[dist] = tmp_index;
+            }
+          }
+        }
+      }
+    }
   }
 }
 

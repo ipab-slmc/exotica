@@ -25,7 +25,8 @@ namespace exotica
       DrakeIKFilter();
       ~DrakeIKFilter();
       EReturn initialise(const std::string &urdf);
-      EReturn convert(const Eigen::VectorXd &state, Eigen::VectorXd &drake);
+      EReturn convert(const Eigen::VectorXd &state, Eigen::VectorXd &drake,
+          bool fix_joints = true);
     private:
       RigidBodyManipulator* model_;
       std::vector<RigidBodyConstraint*> constraints_;
@@ -34,6 +35,7 @@ namespace exotica
       Eigen::VectorXd reach_start_;
       IKoptions* ik_options_;
   };
+  typedef boost::shared_ptr<DrakeIKFilter> DrakeIKFilter_ptr;
 }
 
 #endif /* EXOTICA_TOOLS_DRAKE_IK_FILTER_INCLUDE_DRAKE_IK_FILTER_DRAKEIKFILTER_H_ */

@@ -101,6 +101,9 @@ namespace exotica
 
       EReturn setGoalState(const Eigen::VectorXd & qT, const double eps =
           std::numeric_limits<double>::epsilon());
+      void setAssignJsonIndex(std::vector<std::string> &jointNames,
+          std::map<std::string, std::pair<int, int> > &exotica_json_joints_map,
+          Eigen::VectorXd &reach_start);
     protected:
       /**
        * \brief Registers default planners

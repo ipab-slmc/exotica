@@ -34,6 +34,7 @@ namespace dynamic_reachability_map
     files["samples.bin"] = false;
     files["reach.txt"] = false;
     files["info.xml"] = false;
+    files["drake_configurations.bin"] = false;
     while ((dirp = readdir(dp)) != NULL)
     {
       if (files.find(dirp->d_name) != files.end()) files.at(dirp->d_name) =
@@ -284,28 +285,20 @@ namespace dynamic_reachability_map
           sizeof(float));
       for (int j = 0; j < space->dimension_; j++)
         samples_file.read((char *) &space->samples_[i].q[j], sizeof(float));
-
-//    getline(samples_file, line);
-//    std::vector<std::string> sample = getStringVector(line);
-//    if (sample.size() != space->dimension_ + 8)
-//    {
-//      ROS_ERROR_STREAM(
-//          "Error sample, required dimension "<<space->dimension_<<"+7(SE3)="<<space->dimension_+8<<", but "<<line.size()<<" found");
-//      space->clear();
-//      return false;
-//    }
-//    space->samples_[i].eff_index = (unsigned int)std::stod(sample[0]);
-//    space->samples_[i].effpose.position.x = std::stod(sample[1]);
-//    space->samples_[i].effpose.position.y = std::stod(sample[2]);
-//    space->samples_[i].effpose.position.z = std::stod(sample[3]);
-//    space->samples_[i].effpose.orientation.x = std::stod(sample[4]);
-//    space->samples_[i].effpose.orientation.y = std::stod(sample[5]);
-//    space->samples_[i].effpose.orientation.z = std::stod(sample[6]);
-//    space->samples_[i].effpose.orientation.w = std::stod(sample[7]);
-//    for (int j = 0; j < space->dimension_; j++)
-//      space->samples_[i].q[j] = std::stod(sample[j + 8]);
     }
     samples_file.close();
+
+    ROS_INFO("Loading drake configurations");
+    std::ifstream drake_file(path + "/drake_configurations.bin",
+        std::ios_base::binary);
+    for (int i = 0; i < sample_size; i++)
+    {
+      space->samples_[i].drake_q.resize(38);
+      for (int j = 0; j < 38; j++)
+        drake_file.read((char *) &space->samples_[i].drake_q(j),
+            sizeof(float));
+    }
+    drake_file.close();
 
     //Loading reach samples
     ROS_INFO("Loading reach samples");

@@ -603,7 +603,7 @@ namespace exotica
     {
       //	Construct default DMesh projection relationship
       std::vector<std::pair<int, int> > tmp_index(
-          projection_components_.size() - 2);
+          projection_components_.size() - 1);
       for (int i = 0; i < tmp_index.size(); i++)
       {
         tmp_index[i].first = i;
@@ -800,5 +800,20 @@ namespace exotica
     }
 
     return SUCCESS;
+  }
+
+  void OMPLsolver::setAssignJsonIndex(std::vector<std::string> &jointNames,
+      std::map<std::string, std::pair<int, int> > &exotica_json_joints_map,
+      Eigen::VectorXd &reach_start)
+  {
+    if (compound_)
+    {
+      boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->jointNames_ =
+          jointNames;
+      boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->exotica_json_joints_map_ =
+          exotica_json_joints_map;
+      boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->reach_start_ =
+          reach_start;
+    }
   }
 } /* namespace exotica */

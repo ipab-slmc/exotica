@@ -49,6 +49,7 @@ namespace dynamic_reachability_map
       const DRMSpace_ptr & space() const;
       DRMSpace_ptr & spaceNonConst();
       void resetDRM2FreeSpace();
+      void invalidateVolume(unsigned int v);
       void updateOccupation(const std::map<unsigned int, bool> &occup_list);
 
       std::vector<std::pair<unsigned int, double> > getNeighborIndices(
@@ -68,14 +69,18 @@ namespace dynamic_reachability_map
           unsigned int &space_index);
       bool searchAStar(unsigned int start_space_index,
           unsigned int goal_space_index, std::vector<unsigned int> &space_path);
-
+      bool searchPRM(unsigned long int start, unsigned long int end,
+          std::vector<unsigned long int> &path);
       double heuristicCost(unsigned int a, unsigned int b);
+      double cSpaceHeuristicCost(unsigned long int a, unsigned long int b);
       DRMSpace_ptr space_;
       Eigen::MatrixXd W_;
       std::map<unsigned int, bool> invalid_volumes_;
       ros::NodeHandle nh_;
       ros::Publisher astar_pub_;
       visualization_msgs::Marker astar_mark_;
+
+      unsigned long int last_ik_sample_;
   };
 
   typedef boost::shared_ptr<DRM> DRM_ptr;

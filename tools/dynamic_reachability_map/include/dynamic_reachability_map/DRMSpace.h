@@ -119,6 +119,7 @@ namespace dynamic_reachability_map
       friend class DRMFullBodySampler;
       friend class DRMSampleCluster;
       friend class DRM;
+      friend class DRMGraphConstructor;
     public:
       DRMSpace();
       ~DRMSpace();
@@ -187,6 +188,10 @@ namespace dynamic_reachability_map
       const robot_state::JointModelGroup *getGroup();
 
       void buildConnectionGraph(double dmax);
+      void buildPRMGraph();
+      void savePRMGraph(const std::string &path);
+      void loadPRMGraph(const std::string &path);
+
       std::vector<Edge> edges_;
     private:
       SpaceBounds space_bounds_;
@@ -209,6 +214,9 @@ namespace dynamic_reachability_map
           std::pair<unsigned int, unsigned int> &volumes, double dmax);
       bool newEdge(unsigned long int a, unsigned long int b);
       void addEdge(unsigned long int a, unsigned long int b);
+
+      void getKNN(const unsigned long int index,
+          std::map<double, unsigned long int> &knn);
       std::vector<std::vector<std::pair<Edge, std::vector<unsigned int> > > > th_edges_;
       std::vector<std::vector<unsigned int> > sample_occupation_;
       std::map<unsigned long int, unsigned long int> checked_edges_;

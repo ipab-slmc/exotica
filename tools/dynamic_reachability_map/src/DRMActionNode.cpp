@@ -67,26 +67,17 @@ namespace dynamic_reachability_map
     {
       return false;
     }
-    drm_cluster_ = new DRMSampleCluster();
+//    drm_cluster_ = new DRMSampleCluster();
 //    DRMClusterParam param;
 //    drm_cluster_->startClustering(drm_->spaceNonConst(), param);
 //    drm_cluster_->saveClusters(path);
     drm_cluster_->loadClusters(path, drm_->spaceNonConst());
-    traj_pub_ = nh_.advertise<moveit_msgs::DisplayTrajectory>("Clusters", 1);
+    traj_pub_ = nh_.advertise<moveit_msgs::DisplayTrajectory>("Trajectory", 1);
     disp_traj_.model_id =
         drm_->space()->getPlanningScene()->getRobotModel()->getName();
     disp_traj_.trajectory.resize(1);
     disp_traj_.trajectory[0].joint_trajectory.header.frame_id = "world_frame";
     disp_traj_.trajectory[0].multi_dof_joint_trajectory.joint_names.resize(1);
-    disp_traj_.trajectory[0].joint_trajectory.joint_names.resize(
-        drm_->space()->getGroup()->getVariableNames().size() - 7);
-    disp_traj_.trajectory[0].multi_dof_joint_trajectory.joint_names[0] =
-        drm_->space()->getPlanningScene()->getRobotModel()->getMultiDOFJointModels()[0]->getName();
-    for (int i = 7; i < drm_->space()->getGroup()->getVariableNames().size();
-        i++)
-      disp_traj_.trajectory[0].joint_trajectory.joint_names[i - 7] =
-          drm_->space()->getGroup()->getVariableNames()[i];
-
     astar_traj_ = disp_traj_;
     astar_pub_ = nh_.advertise<moveit_msgs::DisplayTrajectory>(
         "AStarTrajectory", 1);
@@ -156,6 +147,10 @@ namespace dynamic_reachability_map
       graph_markers_.markers[1].colors[2 * i + 1] = c2;
 
     }
+
+//    drm_->spaceNonConst()->buildPRMGraph();
+//    drm_->spaceNonConst()->savePRMGraph(path);
+    drm_->spaceNonConst()->loadPRMGraph(path);
 //    drm_state_timer_ = nh_.createTimer(ros::Duration(2),
 //        &DRMActionNode::drmClusterTimeCallback, this);
 //  graph_timer_ = nh_.createTimer(ros::Duration(2), &DRMActionNode::graphTimeCallback, this);
@@ -196,19 +191,10 @@ namespace dynamic_reachability_map
       const geometry_msgs::Pose &base_pose)
   {
     ros::Time update_start = ros::Time::now();
-    moveit_msgs::PlanningSceneWorld world = scene.world;
-    for (int i = 0; i < world.collision_objects.size(); i++)
-    {
-      world.collision_objects[i].header.frame_id =
-          drm_->space()->getPlanningScene()->getRobotModel()->getRootLinkName();
-//      for (int j = 0; j < world.collision_objects[i].primitive_poses.size();
-//          j++)
-//        world.collision_objects[i].primitive_poses[j].position.z -= 1.025;
-//      for (int j = 0; j < world.collision_objects[i].mesh_poses.size(); j++)
-//        world.collision_objects[i].mesh_poses[j].position.z -= 1.025;
-    }
+    drm_->resetDRM2FreeSpace();
     drm_->space()->getPlanningScene()->getWorldNonConst()->clearObjects();
-    drm_->space()->getPlanningScene()->processPlanningSceneWorldMsg(world);
+    drm_->space()->getPlanningScene()->processPlanningSceneWorldMsg(
+        scene.world);
     collision_detection::CollisionRequest request;
     request.contacts = true;
     request.max_contacts = drm_->space()->getSpaceSize();
@@ -216,7 +202,6 @@ namespace dynamic_reachability_map
 
     space_cworld_->checkWorldCollision(request, result,
         *drm_->space()->getPlanningScene()->getCollisionWorld());
-    std::map<unsigned int, bool> occup_list;
     if (result.collision)
     {
       std::map<unsigned int, bool> checked;
@@ -239,13 +224,10 @@ namespace dynamic_reachability_map
         }
         if (checked.find(tmp) == checked.end())
         {
-          occup_list[tmp] = true;
-          checked[tmp] = true;
+          drm_->invalidateVolume(tmp);
         }
       }
-
     }
-    drm_->updateOccupation(occup_list);
     ROS_INFO_STREAM(
         "Update DRM time "<<ros::Duration(ros::Time::now()-update_start).toSec()<<"sec, "<<result.contacts.size());
 
@@ -258,24 +240,22 @@ namespace dynamic_reachability_map
       density_eigen(i) = density[i];
     double max = density_eigen.maxCoeff();
     density_eigen = density_eigen / max;
-//    drm_mark_.colors.clear();
-//    drm_mark_.points.clear();
-//
-//    for (unsigned int i = 0; i < size; i++)
-//    {
-//      if (density[i] > 0)
-//      {
-//        std_msgs::ColorRGBA c;
-//        c.a = density_eigen(i) + 0.1;
-//        c.g = density_eigen(i);
-//        drm_mark_.colors.push_back(c);
-//        geometry_msgs::Point tmp = drm_->space()->at(i).center;
-//        drm_mark_.points.push_back(tmp);
-//      }
-//    }
-//    if (drm_mark_.points.size() <= 1)
-//    ROS_ERROR("Empty DRM!!!!");
-//    drm_pub_.publish(drm_mark_);
+    drm_mark_.colors.clear();
+    drm_mark_.points.clear();
+
+    for (unsigned int i = 0; i < size; i++)
+    {
+      if (density[i] > 0)
+      {
+        std_msgs::ColorRGBA c;
+        c.a = density_eigen(i) + 0.1;
+        c.g = density_eigen(i);
+        drm_mark_.colors.push_back(c);
+        geometry_msgs::Point tmp = drm_->space()->at(i).center;
+        drm_mark_.points.push_back(tmp);
+      }
+    }
+    drm_pub_.publish(drm_mark_);
     return true;
   }
   bool DRMActionNode::getIKSolution(
@@ -293,9 +273,7 @@ namespace dynamic_reachability_map
             drm_->space()->getPlanningScene()->getRobotModel()->getMultiDOFJointModels()[0]->getVariableCount();
       first = false;
     }
-    if (goal->ps.world.collision_objects.size() > 0
-        && goal->invalid_clusters.size() == 0)
-      updateDRM(goal->ps, goal->base_pose);
+    updateDRM(goal->ps, goal->base_pose);
     dynamic_reachability_map::DRMResult result = drm_->getIKSolution(goal);
     as_.setSucceeded(result);
     if (!result.succeed) return false;
@@ -355,59 +333,57 @@ namespace dynamic_reachability_map
       const dynamic_reachability_map::DRMTrajGoalConstPtr &goal)
   {
     ros::Time cb_start = ros::Time::now();
-    static bool first = true;
-    static int mdof_cnt = 0;
-    if (first)
-    {
-      disp_state_.state = goal->ps.robot_state;
-      if (drm_->space()->getPlanningScene()->getRobotModel()->getMultiDOFJointModels().size()
-          > 0)
-        mdof_cnt =
-            drm_->space()->getPlanningScene()->getRobotModel()->getMultiDOFJointModels()[0]->getVariableCount();
-      first = false;
-    }
-    if (goal->ps.world.collision_objects.size() > 0)
-      updateDRM(goal->ps, goal->base_pose);
+    disp_state_.state = goal->ps.robot_state;
+
+    updateDRM(goal->ps, goal->base_pose);
     dynamic_reachability_map::DRMTrajResult result = drm_->getTrajectory(goal);
     traj_as_.setSucceeded(result);
 
     if (result.succeed)
     {
-      disp_traj_.trajectory[0].joint_trajectory.header.stamp = ros::Time::now();
-      disp_traj_.trajectory[0].joint_trajectory.points.resize(
+      astar_traj_.trajectory[0].joint_trajectory.joint_names =
+      { "torsoYaw","torsoPitch", "torsoRoll", "lowerNeckPitch", "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll", "rightWristPitch", "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll"};
+      astar_traj_.trajectory[0].joint_trajectory.header.stamp =
+      ros::Time::now();
+      astar_traj_.trajectory[0].joint_trajectory.points.resize(
           result.solution.size());
-      disp_traj_.trajectory[0].multi_dof_joint_trajectory.points.resize(
+      astar_traj_.trajectory[0].multi_dof_joint_trajectory.points.resize(
           result.solution.size());
       for (int i = 0; i < result.solution.size(); i++)
       {
         trajectory_msgs::JointTrajectoryPoint tmp;
-        tmp.positions.resize(drm_->space()->getDimension() - 7);
-        ROS_INFO_STREAM(
-            i<<" Base ("<<result.solution[i].data[0]<<","<<result.solution[i].data[1]<<","<<result.solution[i].data[2]<<")");
-        for (int j = 7; j < drm_->space()->getDimension(); j++)
+        tmp.positions.resize(result.solution[i].data.size() - 6);
+        for (int j = 6; j < result.solution[i].data.size(); j++)
         {
-          tmp.positions[j - 7] = result.solution[i].data[j];
+          tmp.positions[j - 6] = result.solution[i].data[j];
         }
-        disp_traj_.trajectory[0].joint_trajectory.points[i] = tmp;
+        astar_traj_.trajectory[0].joint_trajectory.points[i] = tmp;
         trajectory_msgs::MultiDOFJointTrajectoryPoint multi_tmp;
         multi_tmp.transforms.resize(1);
+        KDL::Rotation base_rot = KDL::Rotation::RPY(result.solution[i].data[3],
+            result.solution[i].data[4], result.solution[i].data[5]);
+        base_rot.GetQuaternion(multi_tmp.transforms[0].rotation.x,
+            multi_tmp.transforms[0].rotation.y,
+            multi_tmp.transforms[0].rotation.z,
+            multi_tmp.transforms[0].rotation.w);
         multi_tmp.transforms[0].translation.x = result.solution[i].data[0];
         multi_tmp.transforms[0].translation.y = result.solution[i].data[1];
         multi_tmp.transforms[0].translation.z = result.solution[i].data[2];
-        multi_tmp.transforms[0].rotation.x = result.solution[i].data[3];
-        multi_tmp.transforms[0].rotation.y = result.solution[i].data[4];
-        multi_tmp.transforms[0].rotation.z = result.solution[i].data[5];
-        multi_tmp.transforms[0].rotation.w = result.solution[i].data[6];
-        disp_traj_.trajectory[0].multi_dof_joint_trajectory.points[i] =
-            multi_tmp;
+        astar_traj_.trajectory[0].multi_dof_joint_trajectory.header=astar_traj_.trajectory[0].joint_trajectory.header;
+        astar_traj_.trajectory[0].multi_dof_joint_trajectory.joint_names=
+        { "world_joint"};
+        astar_traj_.trajectory[0].multi_dof_joint_trajectory.points[i] =
+        multi_tmp;
       }
       ROS_INFO_STREAM("Publishing trajectory length: "<<result.solution.size());
-      disp_traj_.trajectory_start.joint_state.name =
-          disp_traj_.trajectory[0].joint_trajectory.joint_names;
-      disp_traj_.trajectory_start.joint_state.position =
-          disp_traj_.trajectory[0].joint_trajectory.points[0].positions;
-
-      traj_pub_.publish(disp_traj_);
+      astar_traj_.trajectory_start.joint_state.name =
+      astar_traj_.trajectory[0].joint_trajectory.joint_names;
+      astar_traj_.trajectory_start.joint_state.position =
+      astar_traj_.trajectory[0].joint_trajectory.points[0].positions;
+      astar_traj_.trajectory_start.multi_dof_joint_state.transforms =
+      astar_traj_.trajectory[0].multi_dof_joint_trajectory.points[0].transforms;
+      astar_traj_.trajectory_start.multi_dof_joint_state.joint_names=astar_traj_.trajectory[0].multi_dof_joint_trajectory.joint_names;
+      astar_pub_.publish(astar_traj_);
     }
     return result.succeed;
   }
@@ -497,7 +473,6 @@ namespace dynamic_reachability_map
           drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[1];
       multi_tmp.transforms[0].translation.z = drm_->space()->getSample(
           drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[2];
-//          + 1.025;
       multi_tmp.transforms[0].rotation.x = drm_->space()->getSample(
           drm_->space()->at(space_index).reach_clusters[cluster_index][i]).q[0];
       multi_tmp.transforms[0].rotation.y = drm_->space()->getSample(

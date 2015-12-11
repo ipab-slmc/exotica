@@ -42,6 +42,7 @@ namespace exotica
       virtual bool isSolvable(const PlanningProblem_ptr & prob);
       int info;
       ros::Duration planning_time_;
+      int trials_;
     protected:
       /**
        * \brief Derived-elements initialiser: Pure Virtual

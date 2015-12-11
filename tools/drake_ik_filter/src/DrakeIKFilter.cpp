@@ -82,7 +82,8 @@ namespace exotica
         "rightWristRoll", "rightWristPitch" };
     std::vector<int> other_idx(other_joints.size());
     joints_idx_.resize(joints_.size());
-    Eigen::VectorXd bb(other_joints.size());
+    Eigen::VectorXd other_lb(other_joints.size()), other_ub(
+        other_joints.size());
     for (int i = 0; i < model_->num_positions; i++)
     {
       bool other = false;
@@ -91,7 +92,8 @@ namespace exotica
         if (model_->getPositionName(i).compare(other_joints[j]) == 0)
         {
           other_idx[j] = i;
-          bb(j) = reach_start_[i];
+          other_lb(j) = reach_start_[i] - 1e-3;
+          other_ub(j) = reach_start_[i] + 1e-3;
           other = true;
           break;
         }
@@ -109,7 +111,8 @@ namespace exotica
       }
     }
     PostureConstraint* other_cspace = new PostureConstraint(model_);
-    other_cspace->setJointLimits(other_joints.size(), other_idx.data(), bb, bb);
+    other_cspace->setJointLimits(other_joints.size(), other_idx.data(),
+        other_lb, other_ub);
     constraints_.push_back(other_cspace);
 
 //    Eigen::VectorXd eff_lb_(3);
@@ -139,31 +142,39 @@ namespace exotica
           model_, idx, Eigen::Vector3d::Zero(), pos, pos, tspan01);
       constraints_.push_back(right_foot_pos_ptr);
     }
+
     ik_options_ = new IKoptions(model_);
-    HIGHLIGHT("DrakeIKFilter initialised");
     return SUCCESS;
   }
 
   EReturn DrakeIKFilter::convert(const Eigen::VectorXd &state,
-      Eigen::VectorXd &drake)
+      Eigen::VectorXd &drake, bool fix_joints)
   {
     PostureConstraint* cspace = new PostureConstraint(model_);
-    Eigen::VectorXd c_value(joints_.size());
-    for (int i = 0; i < joints_.size(); i++)
-      c_value(i) = state(joints_idx_[i]);
-    Eigen::VectorXd lb, ub;
-    lb = c_value - 1e-3 * Eigen::VectorXd::Ones(joints_.size());
-    ub = c_value + 1e-3 * Eigen::VectorXd::Ones(joints_.size());
-    cspace->setJointLimits(joints_.size(), joints_idx_.data(), lb, ub);
-    constraints_.push_back(cspace);
+    if (fix_joints)
+    {
+      Eigen::VectorXd c_value(joints_.size());
+      for (int i = 0; i < joints_.size(); i++)
+        c_value(i) = state(joints_idx_[i]);
+      Eigen::VectorXd lb, ub;
+      lb = c_value - 1e-3 * Eigen::VectorXd::Ones(joints_.size());
+      ub = c_value + 1e-3 * Eigen::VectorXd::Ones(joints_.size());
+      cspace->setJointLimits(joints_.size(), joints_idx_.data(), lb, ub);
+      constraints_.push_back(cspace);
+    }
     std::vector<std::string> infeasible_constraint;
     int info;
     inverseKin(model_, state, state, constraints_.size(), &constraints_[0],
         drake, info, infeasible_constraint, *ik_options_);
-    constraints_.pop_back();
+    if (fix_joints) constraints_.pop_back();
     delete cspace;
-    if (info > 13)
-    WARNING("Drake IK INFO = "<<info);
+    if (info > 10)
+    {
+      WARNING_NAMED("DrakeIK filter", "Drake IK INFO = "<<info);
+      for (int i = 0; i < infeasible_constraint.size(); i++)
+        ROS_INFO_STREAM(
+            "infeasible constraint "<<i<<" "<<infeasible_constraint[i]);
+    }
     return SUCCESS;
   }
 }

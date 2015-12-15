@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   task_definition
   task_map
   ik_solver
-  drake_ik_filter
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -24,7 +23,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ompl_solver
-  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map ik_solver drake_ik_filter
+  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map ik_solver
   DEPENDS system_lib ompl
 )
 
@@ -55,16 +54,14 @@ add_library(ompl_solver
    src/frrt/BFRRT.cpp
    src/frrt/FRRTConnect.cpp
    src/frrt/FKPIECE.cpp
-   src/drm/OMPLDRM.cpp
 )
 
 link_directories(${catkin_LIBRARY_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 link_directories(${OMPL_LIBRARY_DIRS})
 
-pods_use_pkg_config_packages(ompl_solver drake-rbm drake-ik)
 target_link_libraries(ompl_solver
-   ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES} drakeRBM drakeIK
+   ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES}
 )
 
 #add_executable(OMPLEffTrahectoryNode src/OMPLEffTrajectoryNode.cpp)

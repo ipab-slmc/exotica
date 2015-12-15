@@ -6,7 +6,6 @@
  */
 
 #include <ompl_solver/OMPLSE3RNCompoundStateSpace.h>
-#include <ros/package.h>
 namespace exotica
 {
 
@@ -41,21 +40,6 @@ namespace exotica
       useGoal_ = true;
     }
 
-    ros::Time start = ros::Time::now();
-    EParam<std_msgs::String> package, file;
-    if (!ok(server_->getParam(server_->getName() + "/URDFPackage", package))
-        || !ok(server_->getParam(server_->getName() + "/URDFFile", file)))
-    {
-      ERROR("URDFPackage or/and URDFFile not specified in Server::Parameter");
-    }
-    else
-    {
-      std::string urdf_path = ros::package::getPath(package->data) + "/urdf/"
-          + file->data;
-      drake_ik_filter_.initialise(urdf_path);
-      HIGHLIGHT(
-          "DIF initialised "<<ros::Duration(ros::Time::now()-start).toSec());
-    }
     lock();
   }
 
@@ -70,59 +54,6 @@ namespace exotica
     return ob::StateSamplerPtr(ss);
   }
 
-  double OMPLSE3RNCompoundStateSpace::distance(const ob::State *state1,
-      const ob::State *state2) const
-  {
-    double cdist = ob::CompoundStateSpace::distance(state1, state2);
-    exotica::Scene_ptr scene = prob_->getScenes().begin()->second;
-    Eigen::VectorXd state1_eigen, state2_eigen;
-    {
-      state1_eigen.setZero(getDimension());
-      const OMPLSE3RNCompoundStateSpace::StateType *statetype =
-          static_cast<const OMPLSE3RNCompoundStateSpace::StateType*>(state1);
-      memcpy(state1_eigen.segment(6, state1_eigen.rows() - 6).data(),
-          statetype->RealVectorStateSpace().values,
-          sizeof(double) * (state1_eigen.rows() - 6));
-      state1_eigen(0) = statetype->SE3StateSpace().getX();
-      state1_eigen(1) = statetype->SE3StateSpace().getY();
-      state1_eigen(2) = statetype->SE3StateSpace().getZ();
-
-      KDL::Rotation tmp = KDL::Rotation::Quaternion(
-          statetype->SE3StateSpace().rotation().x,
-          statetype->SE3StateSpace().rotation().y,
-          statetype->SE3StateSpace().rotation().z,
-          statetype->SE3StateSpace().rotation().w);
-      tmp.GetEulerZYX(state1_eigen(3), state1_eigen(4), state1_eigen(5));
-    }
-    {
-      state2_eigen.setZero(getDimension());
-      const OMPLSE3RNCompoundStateSpace::StateType *statetype =
-          static_cast<const OMPLSE3RNCompoundStateSpace::StateType*>(state2);
-      memcpy(state1_eigen.segment(6, state2_eigen.rows() - 6).data(),
-          statetype->RealVectorStateSpace().values,
-          sizeof(double) * (state2_eigen.rows() - 6));
-      state2_eigen(0) = statetype->SE3StateSpace().getX();
-      state2_eigen(1) = statetype->SE3StateSpace().getY();
-      state2_eigen(2) = statetype->SE3StateSpace().getZ();
-
-      KDL::Rotation tmp = KDL::Rotation::Quaternion(
-          statetype->SE3StateSpace().rotation().x,
-          statetype->SE3StateSpace().rotation().y,
-          statetype->SE3StateSpace().rotation().z,
-          statetype->SE3StateSpace().rotation().w);
-      tmp.GetEulerZYX(state2_eigen(3), state2_eigen(4), state2_eigen(5));
-    }
-    scene->update(state1_eigen, 0);
-    Eigen::Affine3d pose1 =
-        scene->getPlanningScene()->getCurrentState().getGlobalLinkTransform(
-            "leftPalm");
-    scene->update(state2_eigen, 0);
-    Eigen::Affine3d pose2 =
-        scene->getPlanningScene()->getCurrentState().getGlobalLinkTransform(
-            "leftPalm");
-    double edist = (pose1.translation() - pose2.translation()).norm();
-    return edist + cdist;
-  }
   boost::shared_ptr<OMPLSE3RNCompoundStateSpace> OMPLSE3RNCompoundStateSpace::FromProblem(
       OMPLProblem_ptr prob, const Server_ptr &server)
   {
@@ -148,30 +79,11 @@ namespace exotica
         SE3bounds.setHigh(i, prob->getBounds()[i + n]);
         SE3bounds.setLow(i, prob->getBounds()[i]);
       }
-//      std::cout << "SE3Bounds Low:";
-//      for (int i = 0; i < 3; i++)
-//        std::cout << prob->getBounds()[i] << " ";
-//      std::cout << std::endl;
-//      std::cout << "SE3Bounds High:";
-//      for (int i = 0; i < 3; i++)
-//        std::cout << prob->getBounds()[i + n] << " ";
-//      std::cout << std::endl;
-
       ret->SO3Bounds_.resize(3);
-//      std::cout << "SO3Bounds Low:";
       for (int i = 3; i < 6; i++)
-      {
         ret->SO3Bounds_.low[i - 3] = prob->getBounds()[i];
-//        std::cout << prob->getBounds()[i] << " ";
-      }
-//      std::cout << std::endl;
-//      std::cout << "SO3Bounds High:";
       for (int i = 3; i < 6; i++)
-      {
         ret->SO3Bounds_.high[i - 3] = prob->getBounds()[i + n];
-//        std::cout << prob->getBounds()[i + n] << " ";
-      }
-//      std::cout << std::endl;
 
       ret->setSE3StateSpaceBounds(SE3bounds);
       for (int i = 6; i < n; i++)
@@ -179,14 +91,6 @@ namespace exotica
         RNbounds.setHigh(i - 6, prob->getBounds()[i + n]);
         RNbounds.setLow(i - 6, prob->getBounds()[i]);
       }
-//      std::cout << "RNBounds Low:";
-//      for (int i = 6; i < n; i++)
-//        std::cout << prob->getBounds()[i] << " ";
-//      std::cout << std::endl;
-//      std::cout << "RNBounds High:";
-//      for (int i = 6; i < n; i++)
-//        std::cout << prob->getBounds()[i + n] << " ";
-//      std::cout << std::endl;
       ret->setRealVectorStateSpaceBounds(RNbounds);
 
     }
@@ -286,23 +190,6 @@ namespace exotica
       for (unsigned int i = 0; i < dim; ++i)
         rstate->RealVectorStateSpace().values[i] = rng_.uniformReal(
             realvector_bounds.low[i], realvector_bounds.high[i]);
-//    Eigen::VectorXd exotica_state, tmp_state, drake_state;
-//    ((OMPLSE3RNCompoundStateSpace*) space_)->OMPLStateToEigen(state,
-//        exotica_state);
-//    ((OMPLSE3RNCompoundStateSpace*) space_)->ExoticaToDrakeState(exotica_state,
-//        tmp_state);
-//    ik_filter_->convert(tmp_state, drake_state, false);
-//    rstate->SE3StateSpace().setXYZ(drake_state(0), drake_state(1),
-//        drake_state(2));
-//    KDL::Rotation tmp = KDL::Rotation::EulerZYX(drake_state(3), drake_state(4),
-//        drake_state(5));
-//    tmp.GetQuaternion(rstate->SE3StateSpace().rotation().x,
-//        rstate->SE3StateSpace().rotation().y,
-//        rstate->SE3StateSpace().rotation().z,
-//        rstate->SE3StateSpace().rotation().w);
-//    for (auto &it : ((OMPLSE3RNCompoundStateSpace*) space_)->exotica_json_joints_map_)
-//      rstate->RealVectorStateSpace().values[it.second.first - 6] = drake_state(
-//          it.second.second);
   }
 
   void OMPLSE3RNCompoundStateSampler::sampleUniformNear(ob::State *state,
@@ -353,25 +240,6 @@ namespace exotica
                     + distance * weightImportance_[2])));
     rstate->SE3StateSpace().rotation().setAxisAngle(0, 0, 1,
         rng_.uniformReal(-1.57, 1.57));
-//    Eigen::VectorXd exotica_state, tmp_state, drake_state(38);
-//    ((OMPLSE3RNCompoundStateSpace*) space_)->OMPLStateToEigen(state,
-//        exotica_state);
-//    ((OMPLSE3RNCompoundStateSpace*) space_)->ExoticaToDrakeState(exotica_state,
-//        tmp_state);
-//    HIGHLIGHT("Tmp state size "<<tmp_state.rows());
-//    HIGHLIGHT("Tmp state "<<tmp_state.transpose());
-//    ik_filter_->convert(tmp_state, drake_state, false);
-//    rstate->SE3StateSpace().setXYZ(drake_state(0), drake_state(1),
-//        drake_state(2));
-//    KDL::Rotation tmp = KDL::Rotation::EulerZYX(drake_state(3), drake_state(4),
-//        drake_state(5));
-//    tmp.GetQuaternion(rstate->SE3StateSpace().rotation().x,
-//        rstate->SE3StateSpace().rotation().y,
-//        rstate->SE3StateSpace().rotation().z,
-//        rstate->SE3StateSpace().rotation().w);
-//    for (auto &it : ((OMPLSE3RNCompoundStateSpace*) space_)->exotica_json_joints_map_)
-//      rstate->RealVectorStateSpace().values[it.second.first - 7] = drake_state(
-//          it.second.second);
   }
 
   void OMPLSE3RNCompoundStateSampler::sampleGaussian(ob::State *state,
@@ -418,39 +286,6 @@ namespace exotica
         eigen.segment(6, eigen.rows() - 6).data(),
         sizeof(double) * (eigen.rows() - 6));
 
-    return SUCCESS;
-  }
-  EReturn OMPLSE3RNCompoundStateSpace::ExoticaToDrakeState(
-      const Eigen::VectorXd &exotica, Eigen::VectorXd &drake)
-  {
-    drake.resize(reach_start_.rows());
-    for (int j = 0; j < jointNames_.size(); j++)
-    {
-      if (exotica_json_joints_map_.find(jointNames_[j])
-          != exotica_json_joints_map_.end())
-      {
-        drake(exotica_json_joints_map_.at(jointNames_[j]).second) = exotica(
-            exotica_json_joints_map_.at(jointNames_[j]).first);
-      }
-      else
-      {
-        drake(j) = reach_start_(j);
-      }
-    }
-
-    drake.segment(0, 3) = exotica.segment(0, 3);
-    KDL::Rotation base_rot = KDL::Rotation::EulerZYX(exotica(3), exotica(4),
-        exotica(5));
-    base_rot.GetRPY(drake(3), drake(4), drake(5));
-    return SUCCESS;
-  }
-
-  EReturn OMPLSE3RNCompoundStateSpace::DrakeStateToExotica(
-      const Eigen::VectorXd &drake, Eigen::VectorXd &exotica)
-  {
-    exotica.resize(jointNames_.size());
-    for (auto &it : exotica_json_joints_map_)
-      exotica(it.second.first) = drake(it.second.second);
     return SUCCESS;
   }
 }

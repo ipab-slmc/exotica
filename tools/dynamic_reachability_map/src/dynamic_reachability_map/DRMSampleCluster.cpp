@@ -140,6 +140,8 @@ namespace dynamic_reachability_map
           {
             space->volumes_[i].reach_clusters[j][k] =
                 (unsigned long int) std::stoi(clusters[cnt]);
+            space->samples_[space->volumes_[i].reach_clusters[j][k]].cluster =
+                j;
             cnt++;
           }
         }
@@ -251,7 +253,7 @@ namespace dynamic_reachability_map
       sample_clustered_[i] = false;
 
     clusters_.resize(space_->space_size_);
-    unsigned int thread_size = space_->thread_size_;
+    unsigned int thread_size = 8;
     std::vector<boost::thread*> th(thread_size);
 
     unsigned int tmp = space_->space_size_ / thread_size;
@@ -312,7 +314,8 @@ namespace dynamic_reachability_map
     {
       if (thread_id == 0)
       {
-        ROS_INFO_STREAM("Clustering volume "<<index<<"/"<<space_->space_size_<<" with "<<sample_size<<" samples");
+        ROS_INFO_STREAM(
+            "Clustering volume "<<index<<"/"<<space_->space_size_<<" with "<<sample_size<<" samples");
       }
       VolumeClusters clusters;
       std::vector<Eigen::VectorXi> votes(0);

@@ -174,7 +174,10 @@ namespace exotica
       for (int i = 0; i < infeasible_constraint.size(); i++)
         ROS_INFO_STREAM(
             "infeasible constraint "<<i<<" "<<infeasible_constraint[i]);
+      WARNING_NAMED("Base", state.segment(0, 6).transpose());
     }
+    else
+      HIGHLIGHT_NAMED("Base", state.segment(0, 6).transpose());
     return SUCCESS;
   }
 }

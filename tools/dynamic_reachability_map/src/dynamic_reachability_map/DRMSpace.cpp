@@ -753,10 +753,11 @@ namespace dynamic_reachability_map
   void DRMSpace::getKNN(const unsigned long int index,
       std::map<double, unsigned long int> &knn)
   {
-    int k = 10;
+    std::map<unsigned long int, unsigned long int> clusters;
+    int k = 20;
     double tol = M_PI / 8;
     std::vector<std::pair<unsigned int, double> > neighbors =
-        getNeighborIndices(samples_[index].eff_index, 2);
+        getNeighborIndices(samples_[index].eff_index, 3);
     for (int i = 0; i < neighbors.size(); i++)
     {
       for (int j = 0; j < volumes_[neighbors[i].first].reach_samples.size();
@@ -776,8 +777,23 @@ namespace dynamic_reachability_map
             }
             else if (knn.rbegin()->first > dist)
             {
-              knn.erase(knn.rbegin()->first);
-              knn[dist] = tmp_index;
+              bool exist = false;
+              for (auto &it : knn)
+              {
+                if (samples_[it.second].eff_index
+                    == samples_[tmp_index].eff_index
+                    && samples_[it.second].cluster
+                        == samples_[tmp_index].cluster)
+                {
+                  exist = true;
+                  break;
+                }
+              }
+              if (!exist)
+              {
+                knn.erase(knn.rbegin()->first);
+                knn[dist] = tmp_index;
+              }
             }
           }
         }

@@ -444,5 +444,14 @@ namespace exotica
     base_rot.GetRPY(drake(3), drake(4), drake(5));
     return SUCCESS;
   }
+
+  EReturn OMPLSE3RNCompoundStateSpace::DrakeStateToExotica(
+      const Eigen::VectorXd &drake, Eigen::VectorXd &exotica)
+  {
+    exotica.resize(jointNames_.size());
+    for (auto &it : exotica_json_joints_map_)
+      exotica(it.second.first) = drake(it.second.second);
+    return SUCCESS;
+  }
 }
 

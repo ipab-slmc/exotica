@@ -85,6 +85,7 @@ namespace dynamic_reachability_map
       bool isValid;
       std::vector<unsigned long int> edges;
       Eigen::VectorXf drake_q;
+      unsigned int cluster;
   };
 
   struct Volume

@@ -33,6 +33,7 @@
 #include "frrt/FRRT.h"
 #include "frrt/BFRRT.h"
 #include "frrt/FRRTConnect.h"
+#include "drm/OMPLDRM.h"
 //#include "frrt/FKPIECE.h"
 
 //#include <ompl/base/goals/GoalLazySamples.h>
@@ -121,6 +122,14 @@ namespace exotica
       if (compound_)
         boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->setStart(
             q0);
+      if (selected_planner_.compare("geometric::DRM") == 0)
+      {
+        moveit_msgs::PlanningScene msg;
+        prob_->getScenes().begin()->second->getPlanningScene()->getPlanningSceneMsg(
+            msg);
+        ompl_simple_setup_->getPlanner()->as<ompl::geometric::DRM>()->setScene(
+            msg);
+      }
       ompl_simple_setup_->setStartState(ompl_start_state);
       preSolve();
       // Solve here
@@ -729,7 +738,8 @@ namespace exotica
     registerPlannerAllocator("geometric::FRRTConnect",
         boost::bind(&allocatePlanner<og::FRRTConnect>, _1, _2));
 //		registerPlannerAllocator("geometric::FKPIECE", boost::bind(&allocatePlanner<og::FKPIECE>, _1, _2));
-
+    registerPlannerAllocator("geometric::DRM",
+        boost::bind(&allocatePlanner<og::DRM>, _1, _2));
   }
 
   bool OMPLsolver::isFlexiblePlanner()

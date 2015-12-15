@@ -148,9 +148,9 @@ namespace dynamic_reachability_map
 
     }
 
-//    drm_->spaceNonConst()->buildPRMGraph();
-//    drm_->spaceNonConst()->savePRMGraph(path);
-    drm_->spaceNonConst()->loadPRMGraph(path);
+    drm_->spaceNonConst()->buildPRMGraph();
+    drm_->spaceNonConst()->savePRMGraph(path);
+//    drm_->spaceNonConst()->loadPRMGraph(path);
 //    drm_state_timer_ = nh_.createTimer(ros::Duration(2),
 //        &DRMActionNode::drmClusterTimeCallback, this);
 //  graph_timer_ = nh_.createTimer(ros::Duration(2), &DRMActionNode::graphTimeCallback, this);
@@ -229,7 +229,7 @@ namespace dynamic_reachability_map
       }
     }
     ROS_INFO_STREAM(
-        "Update DRM time "<<ros::Duration(ros::Time::now()-update_start).toSec()<<"sec, "<<result.contacts.size());
+        "Update DRM time "<<ros::Duration(ros::Time::now()-update_start).toSec()<<"sec, object cnt "<<scene.world.collision_objects.size()<<" contacts: "<<result.contacts.size());
 
     std::vector<unsigned int> density =
         drm_->space()->getVolumeReachabilities();

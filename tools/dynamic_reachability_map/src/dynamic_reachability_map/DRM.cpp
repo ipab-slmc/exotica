@@ -152,7 +152,8 @@ namespace dynamic_reachability_map
         result.q_out.data[i] = space_->getSample(
             candidate_samples[sample_index]).q[i];
       last_ik_sample_ = result.sample_index;
-      ROS_INFO_STREAM("Sample "<<last_ik_sample_<<"has"<<space_->samples_[last_ik_sample_].edges.size()<<" edges");
+      ROS_INFO_STREAM(
+          "Sample "<<last_ik_sample_<<"has"<<space_->samples_[last_ik_sample_].edges.size()<<" edges");
     }
     ROS_WARN_STREAM(
         "IK request time: "<<ros::Duration(ros::Time::now()-start_time).toSec()<<"sec");
@@ -479,6 +480,7 @@ namespace dynamic_reachability_map
   bool DRM::searchPRM(unsigned long int start, unsigned long int end,
       std::vector<unsigned long int> &path)
   {
+    unsigned long int cnt = 0, cnt2 = 0;
     path.clear();
     struct AStarCost
     {
@@ -512,6 +514,7 @@ namespace dynamic_reachability_map
     open[start] = aStar[start].cost;
     while (open.size())
     {
+      cnt++;
       double min = INFINITY;
       std::map<unsigned long int, AStarCost>::iterator current;
       for (std::map<unsigned long int, AStarCost>::iterator it = open.begin();
@@ -553,7 +556,10 @@ namespace dynamic_reachability_map
           if (closed.find(other_end) == closed.end())
           {
             double dist = cSpaceHeuristicCost(tmp_index, other_end);
-            double th = cSpaceHeuristicCost(other_end, end);
+//            double th = cSpaceHeuristicCost(other_end, end);
+            double th = 1e1
+                * space_->getDistance(space_->samples_[other_end].eff_index,
+                    space_->samples_[end].eff_index);
             double tg = tmp_cost.g + dist;
             if (open.find(other_end) == open.end())
             {
@@ -564,12 +570,14 @@ namespace dynamic_reachability_map
             }
             else if (tg >= open.at(other_end).g) continue;
             aStar[other_end] = AStarPRM(tmp_index, tg, tg + th);
+            cnt2++;
           }
         }
       }
     }
     if (path.size() == 0)
     ROS_WARN_STREAM("No path found");
+    ROS_INFO_STREAM("Checked "<<cnt<<" open samples, a star size "<<cnt2);
     return path.size() > 0;
   }
 

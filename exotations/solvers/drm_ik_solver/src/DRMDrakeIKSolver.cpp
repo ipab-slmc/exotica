@@ -107,7 +107,7 @@ namespace exotica
     ros::Time start = ros::Time::now();
     int cnt = -1;
     bool succeeded = false;
-    while (cnt < 1000)
+    while (cnt < 100)
     {
       cnt++;
 //      if (cnt == 0)

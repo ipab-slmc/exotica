@@ -14,8 +14,7 @@ REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver);
 namespace exotica
 {
   IKsolver::IKsolver()
-      : size_(0), T(0), initialised_(false), FRRT_(false), drm_client_(
-          "/DRM_IK", true)
+      : size_(0), T(0), initialised_(false), FRRT_(false)
   {
     //TODO
   }
@@ -38,10 +37,7 @@ namespace exotica
           local_minima_threshold_);
       tmp_handle = handle.FirstChildElement("MultiTaskMode");
       server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, multi_task_);
-#ifdef WITH_DRM
-      tmp_handle = handle.FirstChildElement("UseDRM");
-      server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, use_drm_);
-#endif
+
       ///	Check if this IK is running as FRRT local solver
       tinyxml2::XMLHandle frrthandle = handle.FirstChildElement("FRRTLocal");
       if (frrthandle.ToElement())
@@ -294,118 +290,22 @@ namespace exotica
       solution.resize(T, size_);
 
       Eigen::VectorXd q = q0;
-#ifdef WITH_DRM
-      if (!use_drm_->data)
-#endif
+      int t;
+      for (t = 0; t < T; t++)
       {
-        int t;
-        for (t = 0; t < T; t++)
-        {
 
-          if (ok(Solve(q, solution.block(t, 0, 1, size_), t)))
-          {
-            q = solution.row(t);
-          }
-          else
-          {
-            INDICATE_FAILURE
-            ;
-            return FAILURE;
-          }
-        }
-        planning_time_ = ros::Duration(ros::Time::now() - start);
-      }
-#ifdef WITH_DRM
-      else
-      {
-        if (!drm_client_.waitForServer(ros::Duration(2)))
+        if (ok(Solve(q, solution.block(t, 0, 1, size_), t)))
         {
-          WARNING_NAMED(object_name_,
-              "Can not connect to dynamic reachability map server");
-        }
-        dynamic_reachability_map::DRMGoal goal;
-        moveit_msgs::PlanningScene msg;
-        prob_->scenes_.begin()->second->getPlanningScene()->getPlanningSceneMsg(
-            msg);
-        goal.ps = msg;
-        exotica::vectorEigenToExotica(q0, goal.q0);
-        if (reach_position_taskmap_)
-        {
-          reach_goal_.position.x = reach_position_taskmap_->ref_pose_.p[0];
-          reach_goal_.position.y = reach_position_taskmap_->ref_pose_.p[1];
-          reach_goal_.position.z = reach_position_taskmap_->ref_pose_.p[2];
+          q = solution.row(t);
         }
         else
         {
-          ERROR("Reach position not defined");
+          INDICATE_FAILURE
+          ;
           return FAILURE;
         }
-        if (reach_orientation_taskmap_)
-          reach_orientation_taskmap_->ref_pose_.M.GetQuaternion(
-              reach_goal_.orientation.x, reach_goal_.orientation.y,
-              reach_goal_.orientation.z, reach_goal_.orientation.w);
-        else
-          reach_goal_.orientation.w = 1;
-
-        std::vector<unsigned long int> invalid_samples;
-        invalid_samples.clear();
-        goal.goal_pose = reach_goal_;
-        for (int j = 0; j < 10; j++)
-        {
-          //goal.invalid_samples = invalid_samples;
-          if (drm_client_.sendGoalAndWait(goal, ros::Duration(2)).state_
-              == actionlib::SimpleClientGoalState::SUCCEEDED)
-          {
-            if (drm_client_.getResult()->succeed)
-            {
-              if (ok(vectorExoticaToEigen(drm_client_.getResult()->q_out, q)))
-              {
-                ros::Time solve_start = ros::Time::now();
-                for (int t = 0; t < T; t++)
-                {
-                  if (ok(Solve(q, solution.block(t, 0, 1, size_), t)))
-                  {
-                    q = solution.row(t);
-                  }
-                  else
-                  {
-                    INDICATE_FAILURE
-                    return FAILURE;
-                  }
-                }
-                ROS_INFO_STREAM(
-                    "IK solve time "<<ros::Duration(ros::Time::now()-solve_start).toSec()<<"sec");
-              }
-              if (prob_->scenes_.begin()->second->getCollisionScene()->isStateValid(
-                  q))
-              {
-                solution.row(solution.rows() - 1) = q.transpose();
-                planning_time_ = ros::Duration(ros::Time::now() - start);
-                return SUCCESS;
-              }
-              else
-              {
-                int tmp = drm_client_.getResult()->sample_index;
-                invalid_samples.push_back(
-                    drm_client_.getResult()->sample_index);
-              }
-            }
-            else
-            {
-              WARNING_NAMED(object_name_,
-                  "Dynamic reachability map can not find solution");
-              return FAILURE;
-            }
-          }
-          else
-          {
-            WARNING_NAMED(object_name_,
-                "Calling dynamic reachability map failed");
-            return FAILURE;
-          }
-        }
       }
-#endif
+      planning_time_ = ros::Duration(ros::Time::now() - start);
       return SUCCESS;
     }
     else

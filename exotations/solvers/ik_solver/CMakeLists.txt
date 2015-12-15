@@ -6,6 +6,8 @@ set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
 
+add_definitions(-DWITH_DRM)
+
 find_package(catkin REQUIRED COMPONENTS
   exotica
   roscpp

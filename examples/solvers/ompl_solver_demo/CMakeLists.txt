@@ -28,8 +28,7 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(OMPLexample src/node.cpp)
-pods_use_pkg_config_packages(OMPLexample drake-rbm drake-ik)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(OMPLexample
-  ${catkin_LIBRARIES} drakeRBM drakeIK
+  ${catkin_LIBRARIES}
 )

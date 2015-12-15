@@ -55,6 +55,7 @@ add_library(ompl_solver
    src/frrt/BFRRT.cpp
    src/frrt/FRRTConnect.cpp
    src/frrt/FKPIECE.cpp
+   src/drm/OMPLDRM.cpp
 )
 
 link_directories(${catkin_LIBRARY_DIRS})

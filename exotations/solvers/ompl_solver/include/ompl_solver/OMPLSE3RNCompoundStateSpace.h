@@ -62,6 +62,8 @@ namespace exotica
       EReturn EigenToOMPLState(const Eigen::VectorXd &eigen, ob::State *ompl);
       EReturn ExoticaToDrakeState(const Eigen::VectorXd &exotica,
           Eigen::VectorXd &drake);
+      EReturn DrakeStateToExotica(const Eigen::VectorXd &drake,
+          Eigen::VectorXd &exotica);
 
       /*
        * \brief	Set the bounds for upper body configuration

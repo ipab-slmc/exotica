@@ -55,7 +55,7 @@ namespace testing
         return derived_called ? exotica::SUCCESS : exotica::MMB_NIN;
       }
 
-      kinematica::KinematicScene_ptr & scene_ptr_;
+      exotica::KinematicScene_ptr & scene_ptr_;
     protected:
       virtual exotica::EReturn initDerived(tinyxml2::XMLHandle & handle)
       {
@@ -97,7 +97,7 @@ namespace testing
 
       bool derived_called;
 
-      kinematica::KinematicScene_map & scenes_ref_; //!< Kinematic scene(s) indexed by name
+      exotica::KinematicScene_map & scenes_ref_; //!< Kinematic scene(s) indexed by name
       exotica::TaskMap_map & maps_ref_; //!< The set of taskmaps we will be using, which will be shared between task-definitions
       exotica::TaskDefinition_map & defs_ref_; //!< The set of task definition objects
 

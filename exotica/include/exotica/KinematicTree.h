@@ -14,7 +14,7 @@
 
 #define ROOT  -1     //!< The value of the parent for the root segment
 
-namespace kinematica
+namespace exotica
 {
   /**
    * \brief Defines the two types of supported joints
@@ -419,7 +419,7 @@ namespace kinematica
   Eigen::Vector3d vectorKdlToEigen(const KDL::Vector & kdl_vec);
   bool xmlGetVector(const tinyxml2::XMLElement & xml_vector,
       Eigen::VectorXd & eigen_vector);
-  bool recursivePrint(kinematica::KinematicTree & robot, std::string node,
+  bool recursivePrint(exotica::KinematicTree & robot, std::string node,
       std::string tab);
 }
 #endif

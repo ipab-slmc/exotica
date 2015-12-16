@@ -10,14 +10,13 @@ add_definitions(-DEXOTICA_DEBUG_MODE)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  kinematica
   geometry_msgs
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS exotica kinematica geometry_msgs
+  CATKIN_DEPENDS exotica geometry_msgs
   DEPENDS #system_lib
 )
 

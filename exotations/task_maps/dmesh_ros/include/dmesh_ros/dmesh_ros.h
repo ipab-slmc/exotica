@@ -11,7 +11,7 @@
 //EXOTica and SYSTEM packages
 #include <exotica/EXOTica.hpp>
 #include <tinyxml2/tinyxml2.h>
-#include <kinematica/KinematicTree.h>
+#include <exotica/KinematicTree.h>
 #include <Eigen/Eigen>
 #include <boost/thread/mutex.hpp>
 #include "GraphManager.h"

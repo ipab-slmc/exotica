@@ -28,6 +28,7 @@ namespace exotica
     //	Example of register dynamic parameters to EXOTica Server
     if (!ok(server_->getParam("EXOTicaServer/DMeshSize", size_)))
     {
+      server_->listParameters();
       INDICATE_FAILURE
       return FAILURE;
     }

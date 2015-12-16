@@ -17,9 +17,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 
 find_package(Boost REQUIRED COMPONENTS signals)
-#find_package(Eigen3 REQUIRED)
-find_package(PkgConfig)
-pkg_search_module(Eigen3 REQUIRED eigen3)
 
 catkin_package(
 INCLUDE_DIRS include
@@ -31,8 +28,6 @@ DEPENDS system_lib
 include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIR}
-  ${Boost_INCLUDE_DIRS}
 )
 
 add_library(ik_solver

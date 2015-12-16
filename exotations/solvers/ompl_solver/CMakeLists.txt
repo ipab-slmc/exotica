@@ -36,9 +36,9 @@ catkin_package(
 # include_directories(include)
 include_directories(
   include
-  SYSTEM
   ${catkin_INCLUDE_DIRS}
   ${OMPL_INCLUDE_DIRS}
+  SYSTEM
 )
 
 add_library(ompl_solver

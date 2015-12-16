@@ -6,14 +6,13 @@ find_package(catkin REQUIRED COMPONENTS
   aico
   dmesh_ros
   ik_solver
-  kinematica
   ompl_solver
   task_definition
   task_map
 )
 
 catkin_package(
-  CATKIN_DEPENDS aico dmesh_ros exotica ik_solver kinematica ompl_solver task_definition task_map
+  CATKIN_DEPENDS aico dmesh_ros exotica ik_solver ompl_solver task_definition task_map
 )
 
 include_directories(

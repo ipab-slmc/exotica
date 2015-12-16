@@ -1,7 +1,7 @@
 #ifndef TESTING_KINEMATICA_ATLAS_TEST_H
 #define TESTING_KINEMATICA_ATLAS_TEST_H
 
-#include <kinematica/KinematicTree.h>
+#include <exotica/KinematicTree.h>
 #include <kdl/tree.hpp>
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
@@ -124,9 +124,9 @@ class KinematicaAtlasTest: public ::testing::Test
       }
     }
 
-    kinematica::SolutionForm_t robot_solution_;
+    exotica::SolutionForm_t robot_solution_;
 
-    kinematica::KinematicTree robot_tree_;
+    exotica::KinematicTree robot_tree_;
     std::string robot_urdf_;
 
     Eigen::VectorXd joint_config_1_;

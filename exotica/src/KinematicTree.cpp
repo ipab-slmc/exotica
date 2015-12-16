@@ -1,4 +1,4 @@
-#include "kinematica/KinematicTree.h"
+#include "exotica/KinematicTree.h"
 
 #ifdef KIN_DEBUG_MODE
 #include <iostream>
@@ -18,12 +18,12 @@
 #define INFO(x)
 #endif
 
-int kinematica::KinematicTree::getNumJoints()
+int exotica::KinematicTree::getNumJoints()
 {
   return num_jnts_spec_;
 }
 
-kinematica::KinematicTree::KinematicTree()
+exotica::KinematicTree::KinematicTree()
 {
 #ifdef KIN_DEBUG_MODE
   std::cout << "Default Constructor ... ";
@@ -35,7 +35,7 @@ kinematica::KinematicTree::KinematicTree()
   INFO("Done");
 }
 
-kinematica::KinematicTree::KinematicTree(const std::string & urdf_param,
+exotica::KinematicTree::KinematicTree(const std::string & urdf_param,
     const SolutionForm_t & optimisation)
 {
   INFO("Initialiser Constructor ... (urdf-file)");
@@ -48,7 +48,7 @@ kinematica::KinematicTree::KinematicTree(const std::string & urdf_param,
   INFO(std::cout << "Done");
 }
 
-kinematica::KinematicTree::KinematicTree(const KDL::Tree & temp_tree,
+exotica::KinematicTree::KinematicTree(const KDL::Tree & temp_tree,
     const SolutionForm_t & optimisation)
 {
   INFO("Initialiser Constructor ... (temp-tree)");
@@ -61,7 +61,7 @@ kinematica::KinematicTree::KinematicTree(const KDL::Tree & temp_tree,
   INFO("Done");
 }
 
-kinematica::KinematicTree::KinematicTree(const kinematica::KinematicTree & rhs)
+exotica::KinematicTree::KinematicTree(const exotica::KinematicTree & rhs)
 {
   robot_tree_ = rhs.robot_tree_;
   segment_map_ = rhs.segment_map_;
@@ -79,8 +79,8 @@ kinematica::KinematicTree::KinematicTree(const kinematica::KinematicTree & rhs)
   com_ = rhs.com_;
 }
 
-kinematica::KinematicTree & kinematica::KinematicTree::operator=(
-    const kinematica::KinematicTree & rhs)
+exotica::KinematicTree & exotica::KinematicTree::operator=(
+    const exotica::KinematicTree & rhs)
 {
   robot_tree_ = rhs.robot_tree_;
   segment_map_ = rhs.segment_map_;
@@ -98,8 +98,8 @@ kinematica::KinematicTree & kinematica::KinematicTree::operator=(
   return *this;
 }
 
-bool kinematica::KinematicTree::initKinematics(const std::string & urdf_param,
-    const kinematica::SolutionForm_t & optimisation)
+bool exotica::KinematicTree::initKinematics(const std::string & urdf_param,
+    const exotica::SolutionForm_t & optimisation)
 {
   KDL::Tree temp_tree;  //!< KDL Tree structure from urdf
   boost::mutex::scoped_lock(member_lock_);
@@ -113,24 +113,24 @@ bool kinematica::KinematicTree::initKinematics(const std::string & urdf_param,
   }
 }
 
-bool kinematica::KinematicTree::initKinematics(const KDL::Tree & temp_tree,
-    const kinematica::SolutionForm_t & optimisation)
+bool exotica::KinematicTree::initKinematics(const KDL::Tree & temp_tree,
+    const exotica::SolutionForm_t & optimisation)
 {
   boost::mutex::scoped_lock(member_lock_);
   return initialise(temp_tree, optimisation); //!< Just call
 }
 
-bool kinematica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle)
+bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle)
 {
   return initKinematics(handle, NULL);
 }
 
-bool kinematica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
+bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
     const robot_model::RobotModelPtr & model)
 {
   INFO("Initialisation from xml");
 
-  kinematica::SolutionForm_t solution;
+  exotica::SolutionForm_t solution;
 
   //!< Checks for compulsaries
 
@@ -350,7 +350,7 @@ bool kinematica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
     }
   }
 }
-bool kinematica::KinematicTree::updateEndEffectors(
+bool exotica::KinematicTree::updateEndEffectors(
     const SolutionForm_t & new_end_effectors)
 {
 //!< Lock for synchronisation
@@ -368,7 +368,7 @@ bool kinematica::KinematicTree::updateEndEffectors(
   return setEndEffectors(new_end_effectors);
 }
 
-bool kinematica::KinematicTree::updateEndEffectorOffsets(
+bool exotica::KinematicTree::updateEndEffectorOffsets(
     const std::vector<int> & index, const std::vector<KDL::Frame> & offset)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -380,7 +380,7 @@ bool kinematica::KinematicTree::updateEndEffectorOffsets(
   return true;
 }
 
-bool kinematica::KinematicTree::getEndEffectorIndex(
+bool exotica::KinematicTree::getEndEffectorIndex(
     std::vector<int> & eff_index)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -389,12 +389,12 @@ bool kinematica::KinematicTree::getEndEffectorIndex(
   return true;
 }
 
-std::string kinematica::KinematicTree::getBaseType()
+std::string exotica::KinematicTree::getBaseType()
 {
   return base_type_;
 }
 
-bool kinematica::KinematicTree::addEndEffector(const std::string & name,
+bool exotica::KinematicTree::addEndEffector(const std::string & name,
     const KDL::Frame & offset)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -428,7 +428,7 @@ bool kinematica::KinematicTree::addEndEffector(const std::string & name,
   return true;
 }
 
-bool kinematica::KinematicTree::removeEndEffector(const std::string & name)
+bool exotica::KinematicTree::removeEndEffector(const std::string & name)
 {
   boost::mutex::scoped_lock(member_lock_);
   if (!isInitialised())
@@ -466,7 +466,7 @@ bool kinematica::KinematicTree::removeEndEffector(const std::string & name)
   return false;
 }
 
-bool kinematica::KinematicTree::modifyEndEffector(const std::string & name,
+bool exotica::KinematicTree::modifyEndEffector(const std::string & name,
     const KDL::Frame & offset)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -490,7 +490,7 @@ bool kinematica::KinematicTree::modifyEndEffector(const std::string & name,
   return false;
 }
 
-bool kinematica::KinematicTree::modifySegment(const std::string & name,
+bool exotica::KinematicTree::modifySegment(const std::string & name,
     const KDL::Frame & offset)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -505,7 +505,7 @@ bool kinematica::KinematicTree::modifySegment(const std::string & name,
   return true;
 }
 
-bool kinematica::KinematicTree::updateConfiguration(
+bool exotica::KinematicTree::updateConfiguration(
     const Eigen::Ref<const Eigen::VectorXd> & joint_configuration)
 {
 //!< Temporaries
@@ -605,13 +605,13 @@ bool kinematica::KinematicTree::updateConfiguration(
   return true;
 }
 
-bool kinematica::KinematicTree::generateForwardMap()
+bool exotica::KinematicTree::generateForwardMap()
 {
   boost::mutex::scoped_lock(member_lock_);	//!< Lock:
   return computePhi();
 }
 
-bool kinematica::KinematicTree::generateForwardMap(
+bool exotica::KinematicTree::generateForwardMap(
     Eigen::Ref<Eigen::VectorXd> phi)
 {
   boost::mutex::scoped_lock(member_lock_);	//!< Lock for thread-safety
@@ -638,7 +638,7 @@ bool kinematica::KinematicTree::generateForwardMap(
   }
 }
 
-bool kinematica::KinematicTree::getPhi(Eigen::Ref<Eigen::VectorXd> phi)
+bool exotica::KinematicTree::getPhi(Eigen::Ref<Eigen::VectorXd> phi)
 {
   boost::mutex::scoped_lock(member_lock_);	//!< Lock for thread-safety
   if (phi.rows() != forward_map_.rows())
@@ -651,13 +651,13 @@ bool kinematica::KinematicTree::getPhi(Eigen::Ref<Eigen::VectorXd> phi)
   return true;
 }
 
-bool kinematica::KinematicTree::generateJacobian()
+bool exotica::KinematicTree::generateJacobian()
 {
   boost::mutex::scoped_lock(member_lock_); 	//!< Locking
   return computePosJacobian();
 }
 
-bool kinematica::KinematicTree::getJacobian(Eigen::Ref<Eigen::MatrixXd> jac)
+bool exotica::KinematicTree::getJacobian(Eigen::Ref<Eigen::MatrixXd> jac)
 {
   boost::mutex::scoped_lock(member_lock_);	//!< Lock for thread-safety
   if (jac.rows() != jacobian_.rows() || jac.cols() != jacobian_.cols())
@@ -671,7 +671,7 @@ bool kinematica::KinematicTree::getJacobian(Eigen::Ref<Eigen::MatrixXd> jac)
   return true;
 }
 
-bool kinematica::KinematicTree::generateJacobian(
+bool exotica::KinematicTree::generateJacobian(
     Eigen::Ref<Eigen::MatrixXd> jacobian)
 {
   boost::mutex::scoped_lock(member_lock_); 	//!< Locking
@@ -696,7 +696,7 @@ bool kinematica::KinematicTree::generateJacobian(
   }
 }
 
-bool kinematica::KinematicTree::generateCoM()
+bool exotica::KinematicTree::generateCoM()
 {
 
   if (!isInitialised())
@@ -724,7 +724,7 @@ bool kinematica::KinematicTree::generateCoM()
   com_.z() = com.z();
   return true;
 }
-bool kinematica::KinematicTree::getCoMProperties(const std::vector<int>& ids,
+bool exotica::KinematicTree::getCoMProperties(const std::vector<int>& ids,
     std::vector<std::string> & segs, Eigen::VectorXd & mass,
     std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
     std::vector<KDL::Frame> & base_pose)
@@ -752,7 +752,7 @@ bool kinematica::KinematicTree::getCoMProperties(const std::vector<int>& ids,
   return true;
 }
 
-bool kinematica::KinematicTree::getSegment(KDL::Segment & seg, int index)
+bool exotica::KinematicTree::getSegment(KDL::Segment & seg, int index)
 {
   boost::mutex::scoped_lock(member_lock_);
   if (index < 0 || index >= robot_tree_.size() || !isInitialised())
@@ -763,7 +763,7 @@ bool kinematica::KinematicTree::getSegment(KDL::Segment & seg, int index)
   return true;
 }
 
-bool kinematica::KinematicTree::getSegments(std::vector<KDL::Segment> & segs)
+bool exotica::KinematicTree::getSegments(std::vector<KDL::Segment> & segs)
 {
   boost::mutex::scoped_lock(member_lock_);
   if (!isInitialised())
@@ -779,7 +779,7 @@ bool kinematica::KinematicTree::getSegments(std::vector<KDL::Segment> & segs)
   return true;
 }
 
-bool kinematica::KinematicTree::getControlledSegmentsAndJoints(
+bool exotica::KinematicTree::getControlledSegmentsAndJoints(
     std::vector<std::string> & segs, std::vector<std::string> & joints)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -794,7 +794,7 @@ bool kinematica::KinematicTree::getControlledSegmentsAndJoints(
   return true;
 }
 
-bool kinematica::KinematicTree::getInitialEff(std::vector<std::string> & segs,
+bool exotica::KinematicTree::getInitialEff(std::vector<std::string> & segs,
     std::vector<KDL::Frame> & offsets)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -808,8 +808,8 @@ bool kinematica::KinematicTree::getInitialEff(std::vector<std::string> & segs,
   offsets = eff_seg_offs_ini_;
   return true;
 }
-bool kinematica::KinematicTree::initialise(const KDL::Tree & temp_tree,
-    const kinematica::SolutionForm_t & optimisation)
+bool exotica::KinematicTree::initialise(const KDL::Tree & temp_tree,
+    const exotica::SolutionForm_t & optimisation)
 {
   bool success; //!< Running measure of success
 
@@ -883,7 +883,7 @@ bool kinematica::KinematicTree::initialise(const KDL::Tree & temp_tree,
   return success;
 }
 
-bool kinematica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
+bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
     std::string root, std::map<std::string, int> & joint_map)
 {
   INFO("buildTree Function ... ");
@@ -1053,12 +1053,12 @@ bool kinematica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
   }
 }
 
-std::map<std::string, int> kinematica::KinematicTree::getJointMap()
+std::map<std::string, int> exotica::KinematicTree::getJointMap()
 {
   return joint_map_;
 }
 
-std::map<std::string, std::vector<double>> kinematica::KinematicTree::getUsedJointLimits()
+std::map<std::string, std::vector<double>> exotica::KinematicTree::getUsedJointLimits()
 {
   std::map<std::string, std::vector<double>> limits;
   for (auto & it : joint_map_)
@@ -1068,7 +1068,7 @@ std::map<std::string, std::vector<double>> kinematica::KinematicTree::getUsedJoi
   return limits;
 }
 
-KDL::Frame kinematica::KinematicTree::getRobotRootWorldTransform()
+KDL::Frame exotica::KinematicTree::getRobotRootWorldTransform()
 {
   KDL::Frame trans = KDL::Frame::Identity();
   if (base_type_.compare("fixed") == 0)
@@ -1078,7 +1078,7 @@ KDL::Frame kinematica::KinematicTree::getRobotRootWorldTransform()
   return trans;
 }
 
-bool kinematica::KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
+bool exotica::KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
     const std::vector<double> & lower, const std::vector<double> & upper)
 {
   if (base_type_.compare("floating") != 0)
@@ -1098,7 +1098,7 @@ bool kinematica::KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
   }
   return true;
 }
-bool kinematica::KinematicTree::setJointLimits()
+bool exotica::KinematicTree::setJointLimits()
 {
   srdf::Model::VirtualJoint virtual_joint =
       model_->getSRDF()->getVirtualJoints()[0];
@@ -1163,7 +1163,7 @@ bool kinematica::KinematicTree::setJointLimits()
   return true;
 }
 
-bool kinematica::KinematicTree::setJointOrder(
+bool exotica::KinematicTree::setJointOrder(
     const std::vector<std::string> & joints, bool zero_out,
     const std::map<std::string, int> & joint_map)
 {
@@ -1225,7 +1225,7 @@ bool kinematica::KinematicTree::setJointOrder(
   return true;
 }
 
-bool kinematica::KinematicTree::setEndEffectors(
+bool exotica::KinematicTree::setEndEffectors(
     const SolutionForm_t & optimisation)
 {
 //!< Variable Declaration
@@ -1292,12 +1292,12 @@ bool kinematica::KinematicTree::setEndEffectors(
   return success;
 }
 
-std::string kinematica::KinematicTree::getRootName()
+std::string exotica::KinematicTree::getRootName()
 {
   return robot_tree_[0].segment.getName();
 }
 
-bool kinematica::KinematicTree::modifyRootOffset(KDL::Frame & offset)
+bool exotica::KinematicTree::modifyRootOffset(KDL::Frame & offset)
 {
   if (!isInitialised())
   {
@@ -1308,12 +1308,12 @@ bool kinematica::KinematicTree::modifyRootOffset(KDL::Frame & offset)
   return true;
 }
 
-KDL::Frame kinematica::KinematicTree::getRootOffset()
+KDL::Frame exotica::KinematicTree::getRootOffset()
 {
   return robot_tree_[0].tip_pose.Inverse();
 }
 
-bool kinematica::KinematicTree::addSegment(
+bool exotica::KinematicTree::addSegment(
     KDL::SegmentMap::const_iterator current_segment, int parent, int & current,
     bool from_ptip, bool to_ctip, const std::string & root_name,
     std::map<std::string, int> & joint_map)
@@ -1417,7 +1417,7 @@ bool kinematica::KinematicTree::addSegment(
   return success;
 }
 
-bool kinematica::KinematicTree::recurseNeedFlag(int node)
+bool exotica::KinematicTree::recurseNeedFlag(int node)
 {
   robot_tree_[node].needed = true;	//!< Indicate that needed
 //!< Handle Base Case first:
@@ -1432,12 +1432,12 @@ bool kinematica::KinematicTree::recurseNeedFlag(int node)
   }
 }
 
-int kinematica::KinematicTree::getEffSize()
+int exotica::KinematicTree::getEffSize()
 {
   return eff_segments_.size();
 }
 
-bool kinematica::KinematicTree::computePhi()
+bool exotica::KinematicTree::computePhi()
 {
 //!< Checks
   if (!isInitialised())
@@ -1460,7 +1460,7 @@ bool kinematica::KinematicTree::computePhi()
   return true;
 }
 
-bool kinematica::KinematicTree::computePosJacobian()
+bool exotica::KinematicTree::computePosJacobian()
 {
 //!< Checks
   if (!isInitialised())
@@ -1530,7 +1530,7 @@ bool kinematica::KinematicTree::computePosJacobian()
   return true;
 }
 
-bool kinematica::KinematicTree::getPose(std::string child, std::string parent,
+bool exotica::KinematicTree::getPose(std::string child, std::string parent,
     KDL::Frame & pose)
 {
 //!< Synchronisation
@@ -1564,7 +1564,7 @@ bool kinematica::KinematicTree::getPose(std::string child, std::string parent,
   return true;
 }
 
-bool kinematica::KinematicTree::getPose(std::string child, KDL::Frame & pose)
+bool exotica::KinematicTree::getPose(std::string child, KDL::Frame & pose)
 {
 //!< Synchronisation
   boost::mutex::scoped_lock(member_lock_);
@@ -1590,7 +1590,7 @@ bool kinematica::KinematicTree::getPose(std::string child, KDL::Frame & pose)
   return true;
 }
 
-bool kinematica::KinematicTree::getPose(int child, int parent,
+bool exotica::KinematicTree::getPose(int child, int parent,
     KDL::Frame & pose)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -1619,7 +1619,7 @@ bool kinematica::KinematicTree::getPose(int child, int parent,
   return true;
 }
 
-bool kinematica::KinematicTree::getPose(int child, KDL::Frame & pose)
+bool exotica::KinematicTree::getPose(int child, KDL::Frame & pose)
 {
   boost::mutex::scoped_lock(member_lock_);
 
@@ -1641,7 +1641,7 @@ bool kinematica::KinematicTree::getPose(int child, KDL::Frame & pose)
   return true;
 }
 
-bool kinematica::KinematicTree::getSegmentMap(
+bool exotica::KinematicTree::getSegmentMap(
     std::map<std::string, int> & segment_map)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -1657,7 +1657,7 @@ bool kinematica::KinematicTree::getSegmentMap(
 
 }
 
-std::string kinematica::KinematicTree::getParent(std::string child)
+std::string exotica::KinematicTree::getParent(std::string child)
 {
   boost::mutex::scoped_lock(member_lock_);
 
@@ -1671,7 +1671,7 @@ std::string kinematica::KinematicTree::getParent(std::string child)
   }
 }
 
-int kinematica::KinematicTree::getParent(int child)
+int exotica::KinematicTree::getParent(int child)
 {
   boost::mutex::scoped_lock(member_lock_);
 
@@ -1685,7 +1685,7 @@ int kinematica::KinematicTree::getParent(int child)
   }
 }
 
-std::vector<std::string> kinematica::KinematicTree::getChildren(
+std::vector<std::string> exotica::KinematicTree::getChildren(
     std::string parent)
 {
   boost::mutex::scoped_lock(member_lock_);
@@ -1703,7 +1703,7 @@ std::vector<std::string> kinematica::KinematicTree::getChildren(
   return children; //!< Which may be an empty array
 }
 
-std::vector<int> kinematica::KinematicTree::getChildren(int parent)
+std::vector<int> exotica::KinematicTree::getChildren(int parent)
 {
   boost::mutex::scoped_lock(member_lock_);
 
@@ -1718,7 +1718,7 @@ std::vector<int> kinematica::KinematicTree::getChildren(int parent)
   }
 }
 
-Eigen::Vector3d kinematica::vectorKdlToEigen(const KDL::Vector & kdl_vec)
+Eigen::Vector3d exotica::vectorKdlToEigen(const KDL::Vector & kdl_vec)
 {
   Eigen::Vector3d eigen_vec;
 
@@ -1729,7 +1729,7 @@ Eigen::Vector3d kinematica::vectorKdlToEigen(const KDL::Vector & kdl_vec)
   return eigen_vec;
 }
 
-bool kinematica::recursivePrint(kinematica::KinematicTree & robot,
+bool exotica::recursivePrint(exotica::KinematicTree & robot,
     std::string node, std::string tab)
 {
   if (tab.size() == 0)
@@ -1774,7 +1774,7 @@ bool kinematica::recursivePrint(kinematica::KinematicTree & robot,
   return success;
 }
 
-bool kinematica::xmlGetVector(const tinyxml2::XMLElement & xml_vector,
+bool exotica::xmlGetVector(const tinyxml2::XMLElement & xml_vector,
     Eigen::VectorXd & eigen_vector)
 {
   //!< Temporaries

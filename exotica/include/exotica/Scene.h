@@ -11,7 +11,7 @@
 #include "exotica/Object.h"
 #include "exotica/Server.h"
 #include "tinyxml2/tinyxml2.h"
-#include "kinematica/KinematicTree.h"
+#include "exotica/KinematicTree.h"
 
 //	For collision
 #include <moveit/collision_detection/world.h>
@@ -381,7 +381,7 @@ namespace exotica
        * @brief getSolver Returns the instance of Kinematica solver associated with this Scene
        * @return Kinematic tree solver
        */
-      kinematica::KinematicTree & getSolver();
+      exotica::KinematicTree & getSolver();
 
       /**
        * @brief Returns poses ofrequested end-effectors
@@ -430,7 +430,7 @@ namespace exotica
       std::string name_;
 
       ///	The kinematica tree
-      kinematica::KinematicTree kinematica_;
+      exotica::KinematicTree kinematica_;
 
       ///	Robot model
       robot_model::RobotModelPtr model_;

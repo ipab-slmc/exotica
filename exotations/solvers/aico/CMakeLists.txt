@@ -20,12 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS signals)
-
-## System dependencies are found with CMake's conventions
-#find_package(Eigen3 REQUIRED)
-find_package(PkgConfig)
-pkg_search_module(Eigen3 REQUIRED eigen3)
-
 find_package(LAPACK REQUIRED)
 
 catkin_package(
@@ -43,8 +37,6 @@ include_directories(
   include
   SYSTEM
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIR}
-  ${Boost_INCLUDE_DIRS}
   ${LAPACK_INCLUDE_DIRS}
 )
 

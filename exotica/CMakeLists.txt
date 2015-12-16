@@ -44,19 +44,17 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   ${MSG_DEPS}
-)
+) 
 
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS signals)
 
-## System dependencies are found with CMake's conventions
-#find_package(Eigen3 REQUIRED)
-find_package(PkgConfig)
-pkg_search_module(Eigen3 REQUIRED eigen3)
-
 if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/Ref.h")
-   message(STATUS "Eigen found")
+   message(WARNING "Eigen found")
+elseif(IS_DIRECTORY $ENV{DRC_BASE})
+  set(EIGEN3_INCLUDE_DIR $ENV{DRC_BASE}/software/build/include/eigen3)
+  message(WARNING "Using OpenHumanoids version of Eigen")
 elseif(EXISTS "/usr/include/eigen3/Eigen/src/Core/Ref.h")
   message(WARNING "Manually setting to /usr/include/eigen3")
   set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
@@ -66,7 +64,7 @@ endif()
 
 ## catkin specific configuration ##
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp  message_runtime kinematica moveit_ros_planning_interface moveit_core tf
   DEPENDS eigen system_lib boost
@@ -74,12 +72,12 @@ catkin_package(
 
 ## Build ##
 include_directories(
-  include
-  SYSTEM
-  ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
+  include
+  ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
+  SYSTEM
 )
 
 add_library(${PROJECT_NAME}

@@ -13,9 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 
 find_package(Boost REQUIRED COMPONENTS signals)
-#find_package(Eigen3 REQUIRED)
-find_package(PkgConfig)
-pkg_search_module(Eigen3 REQUIRED eigen3)
+
+
 
 catkin_package(
 INCLUDE_DIRS include
@@ -24,17 +23,18 @@ CATKIN_DEPENDS exotica roscpp roslib
 DEPENDS system_lib
 )
 
-include_directories(include)
 include_directories(
+  include  
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
+  SYSTEM
 )
 
 add_library(drake_ik_solver
   src/DrakeIKProblem.cpp
   src/DrakeIKSolver.cpp
 )
+
 pods_use_pkg_config_packages(drake_ik_solver drake-rbm drake-ik lcm)
 
 target_link_libraries(drake_ik_solver

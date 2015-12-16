@@ -633,7 +633,7 @@ namespace exotica
     if (visual_debug_->data)
     {
       ps_pub_ = server_->advertise<moveit_msgs::PlanningScene>(
-          name_ + "/PlanningScene", 100);
+          name_ + "/PlanningScene", 100, true);
       HIGHLIGHT_NAMED(name_,
           "Running in debug mode, planning scene will be published to '"<<server_->getName()<<"/"<<name_<<"/PlanningScene'");
     }

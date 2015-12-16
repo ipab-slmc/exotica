@@ -11,24 +11,33 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS signals)
 find_package(orocos_kdl REQUIRED)
-#find_package(Eigen3 REQUIRED)
-find_package(PkgConfig)
-pkg_search_module(Eigen3 REQUIRED eigen3)
+
+if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/Ref.h")
+   message(WARNING "Eigen found")
+elseif(IS_DIRECTORY $ENV{DRC_BASE})
+  set(EIGEN3_INCLUDE_DIR $ENV{DRC_BASE}/software/build/include/eigen3)
+  message(WARNING "Using OpenHumanoids version of Eigen")
+elseif(EXISTS "/usr/include/eigen3/Eigen/src/Core/Ref.h")
+  message(WARNING "Manually setting to /usr/include/eigen3")
+  set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
+else()
+   message(FATAL_ERROR "Eigen version 3.2.1 or higher is required! Install it in the standard directory.")
+endif()
 
 catkin_package(
- INCLUDE_DIRS include
+ INCLUDE_DIRS  ${EIGEN3_INCLUDE_DIR} include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${orocos_kdl_INCLUDE_DIRS}
  LIBRARIES ${PROJECT_NAME}
  CATKIN_DEPENDS kdl_parser
  DEPENDS system_lib boost orocos_kdl eigen
 )
 
 include_directories(
-  include
-  SYSTEM
-  ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
+  include
+  ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${orocos_kdl_INCLUDE_DIRS}
+  SYSTEM  
 )
 
 add_library(${PROJECT_NAME} src/KinematicTree.cpp src/tinyxml2.cpp)

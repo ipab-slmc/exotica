@@ -12,7 +12,7 @@
 #include <exotica/Factory.h>
 #include <exotica/Test.h>
 #include <tinyxml2/tinyxml2.h>
-#include <kinematica/KinematicTree.h>
+#include <exotica/KinematicTree.h>
 #include <Eigen/Eigen>
 #include <boost/thread/mutex.hpp>
 

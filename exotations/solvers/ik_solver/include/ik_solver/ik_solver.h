@@ -74,6 +74,7 @@ namespace exotica
        */
       EReturn setRho(const std::string & task_name, const double rho,
           int t = 0);
+      double getRho(const std::string & task_name, int t = 0);
 
       IKProblem_ptr& getProblem();
 
@@ -108,6 +109,7 @@ namespace exotica
       std::vector<Eigen::VectorXd> goal;
       std::vector<Eigen::VectorXd> phi;
       std::vector<Eigen::VectorXi> dim;
+      std::vector<Eigen::VectorXi> dimid;
 
       std::vector<std::vector<Eigen::VectorXdRef_ptr> > _rhos;
       std::vector<std::vector<Eigen::MatrixXdRef_ptr> > _jacobian;

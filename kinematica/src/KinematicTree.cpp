@@ -490,6 +490,21 @@ bool kinematica::KinematicTree::modifyEndEffector(const std::string & name,
   return false;
 }
 
+bool kinematica::KinematicTree::modifySegment(const std::string & name,
+    const KDL::Frame & offset)
+{
+  boost::mutex::scoped_lock(member_lock_);
+  if (!isInitialised())
+  {
+    return false;
+  }
+//!< Check if the end-effector is a segment
+  std::map<std::string, int>::iterator map_it = segment_map_.find(name);
+  if (map_it == segment_map_.end()) return false;
+  robot_tree_[map_it->second].offset=offset;
+  return true;
+}
+
 bool kinematica::KinematicTree::updateConfiguration(
     const Eigen::Ref<const Eigen::VectorXd> & joint_configuration)
 {
@@ -558,14 +573,14 @@ bool kinematica::KinematicTree::updateConfiguration(
       if (robot_tree_[i].to_tip)	//!< We are moving towards the tip
       {	//!< We generally do not need to concern ourselves with the joint_pose: however might need it for the joint origin computation
         robot_tree_[i].tip_pose = parent_transform
-            * robot_tree_[i].segment.pose(jnt_angle);
-        robot_tree_[i].joint_pose = parent_transform;
+            * robot_tree_[i].segment.pose(jnt_angle)*robot_tree_[i].offset;
+        robot_tree_[i].joint_pose = parent_transform*robot_tree_[i].offset;
       }
       else //!< Moving towards the base
       {
-        robot_tree_[i].tip_pose = parent_transform;	//!< We cannot be moving towards base from a tip
+        robot_tree_[i].tip_pose = parent_transform*robot_tree_[i].offset;	//!< We cannot be moving towards base from a tip
         robot_tree_[i].joint_pose = parent_transform
-            * robot_tree_[i].segment.pose(jnt_angle).Inverse();
+            * robot_tree_[i].segment.pose(jnt_angle).Inverse()*robot_tree_[i].offset;
       }
 
       //!< Finally set the joint_origin/axis

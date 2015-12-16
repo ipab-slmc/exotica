@@ -66,6 +66,7 @@ namespace kinematica
       std::vector<int> child;    		//!< Any child links
       Eigen::Vector3d com;	//!< Centre of mass
       std::vector<double> joint_limits_;
+      KDL::Frame offset;
   };
 
   class KinematicTree
@@ -141,6 +142,15 @@ namespace kinematica
        * @return	True if succeeded, false otherwise
        */
       bool modifyEndEffector(const std::string & name,
+          const KDL::Frame & offset);
+
+      /**
+       * \brief	Modify segment tip pose
+       * @param	name	Segment name
+       * @param	offset	Segment offset
+       * @return	True if succeeded, false otherwise
+       */
+      bool modifySegment(const std::string & name,
           const KDL::Frame & offset);
 
       /**

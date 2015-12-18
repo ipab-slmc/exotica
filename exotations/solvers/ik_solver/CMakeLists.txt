@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   task_definition
   task_map
-  dynamic_reachability_map
 )
 
 

@@ -28,7 +28,6 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(OMPLexample src/node.cpp)
-
 ## Specify libraries to link a library or executable target against
 target_link_libraries(OMPLexample
   ${catkin_LIBRARIES}

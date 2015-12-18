@@ -69,6 +69,7 @@ add_library(${PROJECT_NAME} src/EXOTicaPlannerService.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(ExoticaPlannerServiceNode src/EXOTicaPlannerServiceNode.cpp src/EXOTicaPlannerService.cpp)
+
 target_link_libraries(ExoticaPlannerServiceNode ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(ExoticaPlannerServiceNode exotica_moveit_gencpp)
 

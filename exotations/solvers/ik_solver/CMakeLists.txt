@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   task_definition
   task_map
-  dynamic_reachability_map
 )
 
 
@@ -21,7 +20,7 @@ find_package(Boost REQUIRED COMPONENTS signals)
 catkin_package(
 INCLUDE_DIRS include
 LIBRARIES ik_solver
-CATKIN_DEPENDS exotica roscpp roslib task_definition task_map dynamic_reachability_map
+CATKIN_DEPENDS exotica roscpp roslib task_definition task_map
 DEPENDS system_lib
 )
 

@@ -292,6 +292,8 @@ namespace exotica
 
       bool setFloatingBaseLimitsPosXYZEulerZYX(
           const std::vector<double> & lower, const std::vector<double> & upper);
+
+      bool setBasePosition(const Eigen::Vector3d &pos);
       //private:
       /****************** Class members ********************/
 

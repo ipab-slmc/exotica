@@ -782,7 +782,7 @@ namespace exotica
     {
       if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
       {
-        WARNING_NAMED(object_name_, "Invalid goal state");
+        WARNING_NAMED(object_name_, "Invalid goal state\n"<<qT.transpose());
         return FAILURE;
       }
       if (compound_)

@@ -1122,16 +1122,16 @@ bool exotica::KinematicTree::setJointLimits()
   if (base_type_.compare("floating") == 0)
   {
     robot_tree_[1].joint_limits_.resize(2);
-    robot_tree_[1].joint_limits_[0] = -0.2 / 2;
-    robot_tree_[1].joint_limits_[1] = 0.2 / 2;
+    robot_tree_[1].joint_limits_[0] = -0.1;
+    robot_tree_[1].joint_limits_[1] = 0.1;
 
     robot_tree_[2].joint_limits_.resize(2);
-    robot_tree_[2].joint_limits_[0] = -0.2 / 2;
-    robot_tree_[2].joint_limits_[1] = 0.2 / 2;
+    robot_tree_[2].joint_limits_[0] = -0.1;
+    robot_tree_[2].joint_limits_[1] = 0.1;
 
     robot_tree_[3].joint_limits_.resize(2);
-    robot_tree_[3].joint_limits_[0] = 0.875 + 0.05;
-    robot_tree_[3].joint_limits_[1] = 1.125 - 0.05;
+    robot_tree_[3].joint_limits_[0] = 0.875;
+    robot_tree_[3].joint_limits_[1] = 1.125;
 
     robot_tree_[4].joint_limits_.resize(2);
     robot_tree_[4].joint_limits_[0] = -0.087 / 2;
@@ -1160,6 +1160,25 @@ bool exotica::KinematicTree::setJointLimits()
     robot_tree_[3].joint_limits_[1] = 1.57;
   }
 
+  return true;
+}
+
+bool exotica::KinematicTree::setBasePosition(const Eigen::Vector3d &pos)
+{
+  if (base_type_.compare("floating") == 0)
+  {
+    robot_tree_[1].joint_limits_.resize(2);
+    robot_tree_[1].joint_limits_[0] = pos(0) - 0.1;
+    robot_tree_[1].joint_limits_[1] = pos(0) + 0.1;
+
+    robot_tree_[2].joint_limits_.resize(2);
+    robot_tree_[2].joint_limits_[0] = pos(1) - 0.1;
+    robot_tree_[2].joint_limits_[1] = pos(1) + 0.1;
+
+    robot_tree_[3].joint_limits_.resize(2);
+    robot_tree_[3].joint_limits_[0] = pos(2) - 0.1;
+    robot_tree_[3].joint_limits_[1] = pos(2) + 0.1;
+  }
   return true;
 }
 

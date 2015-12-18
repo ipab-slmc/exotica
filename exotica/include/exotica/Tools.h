@@ -240,6 +240,7 @@ namespace exotica
   EReturn getJSON(const rapidjson::Value& a, std::string& ret);
   EReturn getJSON(const rapidjson::Value& a, KDL::Frame& ret);
   EReturn getJSON(const rapidjson::Value& a, std::vector<std::string>& ret);
+  EReturn getJSONFrameNdArray(const rapidjson::Value& a, KDL::Frame& ret);
 
   EReturn vectorExoticaToEigen(const exotica::Vector & exotica,
       Eigen::VectorXd & eigen);

@@ -287,10 +287,15 @@ namespace exotica
 
     std::map<std::string, std::vector<double>> joint_limits =
         scenes_.begin()->second->getSolver().getUsedJointLimits();
-    for (int i = 0; i < jnts.size(); i++)
+    for (int i = 0; i < 3; i++)
     {
-      getBounds()[i] = -3;//joint_limits.at(jnts[i])[0];
-      getBounds()[i + jnts.size()] =3;// joint_limits.at(jnts[i])[1];
+      getBounds()[i] = joint_limits.at(jnts[i])[0];
+      getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1];
+    }
+    for (int i = 6; i < jnts.size(); i++)
+    {
+      getBounds()[i] = joint_limits.at(jnts[i])[0] - 1e-3;
+      getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1] + 1e-3;
     }
     return SUCCESS;
 

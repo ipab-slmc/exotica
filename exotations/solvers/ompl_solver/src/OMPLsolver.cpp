@@ -603,7 +603,7 @@ namespace exotica
     {
       //	Construct default DMesh projection relationship
       std::vector<std::pair<int, int> > tmp_index(
-          projection_components_.size() - 2);
+          projection_components_.size() - 1);
       for (int i = 0; i < tmp_index.size(); i++)
       {
         tmp_index[i].first = i;
@@ -728,8 +728,6 @@ namespace exotica
         boost::bind(&allocatePlanner<og::BFRRT>, _1, _2));
     registerPlannerAllocator("geometric::FRRTConnect",
         boost::bind(&allocatePlanner<og::FRRTConnect>, _1, _2));
-//		registerPlannerAllocator("geometric::FKPIECE", boost::bind(&allocatePlanner<og::FKPIECE>, _1, _2));
-
   }
 
   bool OMPLsolver::isFlexiblePlanner()
@@ -782,11 +780,11 @@ namespace exotica
             boost::static_pointer_cast<OMPLStateSpace>(state_space_)->copyToOMPLState(
                 gs.get(), qT)))
     {
-//      if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
-//      {
-//        WARNING_NAMED(object_name_, "Invalid goal state");
-//        return FAILURE;
-//      }
+      if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
+      {
+        WARNING_NAMED(object_name_, "Invalid goal state");
+        return FAILURE;
+      }
       if (compound_)
         boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(state_space_)->setGoal(
             qT);

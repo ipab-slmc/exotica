@@ -12,7 +12,6 @@
 #include "ompl_solver/OMPLProblem.h"
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
-
 namespace ob = ompl::base;
 namespace exotica
 {
@@ -48,15 +47,16 @@ namespace exotica
           }
       };
 
-      OMPLSE3RNCompoundStateSpace(unsigned int dim, const Server_ptr &server);
+      OMPLSE3RNCompoundStateSpace(unsigned int dim, const Server_ptr &server,
+          OMPLProblem_ptr &prob);
       virtual ~OMPLSE3RNCompoundStateSpace();
       virtual unsigned int getDimension() const;
       virtual ompl::base::StateSamplerPtr allocDefaultStateSampler();
-
       static boost::shared_ptr<OMPLSE3RNCompoundStateSpace> FromProblem(
           OMPLProblem_ptr prob, const Server_ptr &server);
       EReturn OMPLStateToEigen(const ob::State *ompl, Eigen::VectorXd &eigen);
       EReturn EigenToOMPLState(const Eigen::VectorXd &eigen, ob::State *ompl);
+
       /*
        * \brief	Set the bounds for upper body configuration
        * @param	bounds		Real vector bounds for upper body
@@ -85,6 +85,7 @@ namespace exotica
     private:
       Server_ptr server_;
       int realvectordim_;
+      OMPLProblem_ptr prob_;
   };
   class OMPLSE3RNCompoundStateSampler: public ob::StateSampler
   {

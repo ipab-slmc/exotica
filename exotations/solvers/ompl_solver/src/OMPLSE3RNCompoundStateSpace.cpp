@@ -10,9 +10,9 @@ namespace exotica
 {
 
   OMPLSE3RNCompoundStateSpace::OMPLSE3RNCompoundStateSpace(unsigned int dim,
-      const Server_ptr &server)
-      : ob::CompoundStateSpace(), realvectordim_(dim), server_(server), SO3Bounds_(
-          3), useGoal_(false)
+      const Server_ptr &server, OMPLProblem_ptr &prob)
+      : ob::CompoundStateSpace(), realvectordim_(dim), server_(server), prob_(
+          prob), SO3Bounds_(3), useGoal_(false)
   {
     setName("OMPLSE3RNCompoundStateSpace");
     addSubspace(ob::StateSpacePtr(new ob::SE3StateSpace()), 10.0);
@@ -39,6 +39,7 @@ namespace exotica
     {
       useGoal_ = true;
     }
+
     lock();
   }
 
@@ -52,6 +53,7 @@ namespace exotica
     OMPLSE3RNCompoundStateSampler *ss = new OMPLSE3RNCompoundStateSampler(this);
     return ob::StateSamplerPtr(ss);
   }
+
   boost::shared_ptr<OMPLSE3RNCompoundStateSpace> OMPLSE3RNCompoundStateSpace::FromProblem(
       OMPLProblem_ptr prob, const Server_ptr &server)
   {
@@ -66,7 +68,7 @@ namespace exotica
       return ret;
     }
 
-    ret.reset(new OMPLSE3RNCompoundStateSpace(rn, server));
+    ret.reset(new OMPLSE3RNCompoundStateSpace(rn, server, prob));
     if (prob->getBounds().size() == 2 * n)
     {
       ompl::base::RealVectorBounds RNbounds(rn);
@@ -77,30 +79,11 @@ namespace exotica
         SE3bounds.setHigh(i, prob->getBounds()[i + n]);
         SE3bounds.setLow(i, prob->getBounds()[i]);
       }
-      std::cout << "SE3Bounds Low:";
-      for (int i = 0; i < 3; i++)
-        std::cout << prob->getBounds()[i] << " ";
-      std::cout << std::endl;
-      std::cout << "SE3Bounds High:";
-      for (int i = 0; i < 3; i++)
-        std::cout << prob->getBounds()[i + n] << " ";
-      std::cout << std::endl;
-
       ret->SO3Bounds_.resize(3);
-      std::cout << "SO3Bounds Low:";
       for (int i = 3; i < 6; i++)
-      {
         ret->SO3Bounds_.low[i - 3] = prob->getBounds()[i];
-        std::cout << prob->getBounds()[i] << " ";
-      }
-      std::cout << std::endl;
-      std::cout << "SO3Bounds High:";
       for (int i = 3; i < 6; i++)
-      {
         ret->SO3Bounds_.high[i - 3] = prob->getBounds()[i + n];
-        std::cout << prob->getBounds()[i + n] << " ";
-      }
-      std::cout << std::endl;
 
       ret->setSE3StateSpaceBounds(SE3bounds);
       for (int i = 6; i < n; i++)
@@ -108,14 +91,6 @@ namespace exotica
         RNbounds.setHigh(i - 6, prob->getBounds()[i + n]);
         RNbounds.setLow(i - 6, prob->getBounds()[i]);
       }
-      std::cout << "RNBounds Low:";
-      for (int i = 6; i < n; i++)
-        std::cout << prob->getBounds()[i] << " ";
-      std::cout << std::endl;
-      std::cout << "RNBounds High:";
-      for (int i = 6; i < n; i++)
-        std::cout << prob->getBounds()[i + n] << " ";
-      std::cout << std::endl;
       ret->setRealVectorStateSpaceBounds(RNbounds);
 
     }

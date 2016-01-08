@@ -45,7 +45,7 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   ${MSG_DEPS}
-) 
+)
 
 
 ## System dependencies are found with CMake's conventions
@@ -84,14 +84,20 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/TaskMap.cpp
   src/tinyxml2.cpp
-  src/Tools.cpp 
-  src/TaskDefinition.cpp 
-  src/PlanningProblem.cpp 
-  src/MotionSolver.cpp 
-  src/Initialiser.cpp 
+  src/Tools.cpp
+  src/TaskDefinition.cpp
+  src/PlanningProblem.cpp
+  src/MotionSolver.cpp
+  src/Initialiser.cpp
   src/Server.cpp
   src/Scene.cpp
   src/KinematicTree.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${orocos_kdl_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp)
+
+## Install
+install(TARGETS ${PROJECT_NAME}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)

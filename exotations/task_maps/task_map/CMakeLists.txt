@@ -42,6 +42,12 @@ add_library(${PROJECT_NAME} src/kinematic_maps/CoM.cpp
                             src/generic/Identity.cpp
                             src/kinematic_maps/JointSpaceSampling.cpp
            )
-           
+
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
+## Install
+install(TARGETS ${PROJECT_NAME}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)

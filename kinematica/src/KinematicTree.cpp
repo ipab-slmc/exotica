@@ -1107,16 +1107,16 @@ bool kinematica::KinematicTree::setJointLimits()
   if (base_type_.compare("floating") == 0)
   {
     robot_tree_[1].joint_limits_.resize(2);
-    robot_tree_[1].joint_limits_[0] = -0.1;
-    robot_tree_[1].joint_limits_[1] = 0.1;
+    robot_tree_[1].joint_limits_[0] = -0.05;
+    robot_tree_[1].joint_limits_[1] = 0.05;
 
     robot_tree_[2].joint_limits_.resize(2);
-    robot_tree_[2].joint_limits_[0] = -0.1;
-    robot_tree_[2].joint_limits_[1] = 0.1;
+    robot_tree_[2].joint_limits_[0] = -0.05;
+    robot_tree_[2].joint_limits_[1] = 0.05;
 
     robot_tree_[3].joint_limits_.resize(2);
     robot_tree_[3].joint_limits_[0] = 0.875;
-    robot_tree_[3].joint_limits_[1] = 1.125;
+    robot_tree_[3].joint_limits_[1] = 1.075;
 
     robot_tree_[4].joint_limits_.resize(2);
     robot_tree_[4].joint_limits_[0] = -0.087 / 2;

@@ -1,3 +1,14 @@
+/*
+@BOOKlaug,
+AUTHOR = Anderson, E. and Bai, Z. and Bischof, C. and Blackford, S. and Demmel, J. and Dongarra, J. and Du Croz, J. and Greenbaum, A. and Hammarling, S. and McKenney, A. and Sorensen, D.,
+TITLE = LAPACK Users' Guide,
+EDITION = Third,
+PUBLISHER = Society for Industrial and Applied Mathematics,
+YEAR = 1999,
+ADDRESS = Philadelphia, PA,
+ISBN = 0-89871-447-8 (paperback) 
+*/
+
 /* CLAPACK 3.0 BLAS wrapper macros
  * Feb 5, 2000
  */

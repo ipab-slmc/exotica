@@ -6,7 +6,7 @@
 
   <maintainer email="mcamnadur@gmail.com">Michael Camilleri</maintainer>
 
-  <license>TODO</license>
+  <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
   

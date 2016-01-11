@@ -14,10 +14,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica</build_depend>
-  <build_depend>kinematica</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <run_depend>exotica</run_depend>
-  <run_depend>kinematica</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <export>
   </export>

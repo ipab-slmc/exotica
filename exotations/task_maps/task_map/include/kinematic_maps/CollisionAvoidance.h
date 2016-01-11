@@ -93,7 +93,7 @@ namespace exotica
       EParam<std_msgs::Bool> use_vel_;
 
       //	Internal kinematica solver
-      kinematica::KinematicTree kin_sol_;
+      exotica::KinematicTree kin_sol_;
       Eigen::MatrixXd effJac;
 
       boost::function<void(CollisionAvoidance*, Eigen::VectorXdRefConst, int)> pre_update_callback_;

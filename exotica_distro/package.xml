@@ -17,7 +17,6 @@
   <build_depend>dmesh_ros</build_depend>
   <build_depend>exotica</build_depend>
   <build_depend>ik_solver</build_depend>
-  <build_depend>kinematica</build_depend>
   <build_depend>ompl_solver</build_depend>
   <build_depend>task_definition</build_depend>
   <build_depend>task_map</build_depend>
@@ -25,7 +24,6 @@
   <run_depend>dmesh_ros</run_depend>
   <run_depend>exotica</run_depend>
   <run_depend>ik_solver</run_depend>
-  <run_depend>kinematica</run_depend>
   <run_depend>ompl_solver</run_depend>
   <run_depend>task_definition</run_depend>
   <run_depend>task_map</run_depend>

@@ -60,7 +60,7 @@ TEST_F(TaskMapTest, XIT)  //!< XML Initialisation Test
       boost::dynamic_pointer_cast<testing::DTaskMap>(base_ptr_)->scene_ptr_);
 
   //!< Test with correctly defined kscene pointer
-  kin_scenes_["kscene1"] = kinematica::KinematicScene_ptr();
+  kin_scenes_["kscene1"] = exotica::KinematicScene_ptr();
   boost::dynamic_pointer_cast<testing::DTaskMap>(base_ptr_)->clearFlags();
   EXPECT_EQ(exotica::SUCCESS, base_ptr_->initBase(map_handle, kin_scenes_));
   EXPECT_TRUE(
@@ -121,7 +121,7 @@ TEST_F(TaskMapTest, DMT) //!< Derived-task Mapping Tests: will contain tests to 
           continue;
         }
         CHECK_OK;
-        kin_scenes_[name].reset(new kinematica::KinematicScene(name));
+        kin_scenes_[name].reset(new exotica::KinematicScene(name));
         CHECK_OK;
         if (kin_scenes_[name] == nullptr)
         {

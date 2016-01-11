@@ -16,15 +16,16 @@ set(MSG_DEPS
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   message_generation
-  kinematica
   moveit_ros_planning_interface
   moveit_core
   tf
+  kdl_parser
   ${MSG_DEPS}
 )
 
 find_package(Boost REQUIRED COMPONENTS python)
 find_package(PythonLibs REQUIRED)
+find_package(orocos_kdl REQUIRED)
 
 set(MSG_FILES
   MeshVertex.msg
@@ -44,19 +45,17 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   ${MSG_DEPS}
-)
+) 
 
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS signals)
 
-## System dependencies are found with CMake's conventions
-#find_package(Eigen3 REQUIRED)
-find_package(PkgConfig)
-pkg_search_module(Eigen3 REQUIRED eigen3)
-
 if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/Ref.h")
-   message(STATUS "Eigen found")
+   message(WARNING "Eigen found")
+elseif(IS_DIRECTORY $ENV{DRC_BASE})
+  set(EIGEN3_INCLUDE_DIR $ENV{DRC_BASE}/software/build/include/eigen3)
+  message(WARNING "Using OpenHumanoids version of Eigen")
 elseif(EXISTS "/usr/include/eigen3/Eigen/src/Core/Ref.h")
   message(WARNING "Manually setting to /usr/include/eigen3")
   set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
@@ -66,20 +65,20 @@ endif()
 
 ## catkin specific configuration ##
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} ${orocos_kdl_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp  message_runtime kinematica moveit_ros_planning_interface moveit_core tf
-  DEPENDS eigen system_lib boost
+  CATKIN_DEPENDS roscpp  message_runtime moveit_ros_planning_interface moveit_core tf kdl_parser
+  DEPENDS eigen system_lib boost orocos_kdl
 )
 
 ## Build ##
 include_directories(
-  include
-  SYSTEM
-  ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
+  include
+  ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
+  SYSTEM
 )
 
 add_library(${PROJECT_NAME}
@@ -91,7 +90,8 @@ add_library(${PROJECT_NAME}
   src/MotionSolver.cpp 
   src/Initialiser.cpp 
   src/Server.cpp
-  src/Scene.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+  src/Scene.cpp
+  src/KinematicTree.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${orocos_kdl_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp)

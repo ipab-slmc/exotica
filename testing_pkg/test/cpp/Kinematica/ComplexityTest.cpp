@@ -558,13 +558,13 @@ TEST_F(KinematicaAtlasTest, TestingPhiComputation)
 
   //!< Check that they match up
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_1, result_pose));
-  individual.segment(0, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(0, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_2, result_pose));
-  individual.segment(3, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(3, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_3, result_pose));
-  individual.segment(6, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(6, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_4, result_pose));
-  individual.segment(9, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(9, 3) = exotica::vectorKdlToEigen(result_pose.p);
 
   ASSERT_TRUE(robot_tree_.generateForwardMap(forward_map));
   EXPECT_TRUE(compareVectors(individual, forward_map, 0.0001))
@@ -575,13 +575,13 @@ TEST_F(KinematicaAtlasTest, TestingPhiComputation)
 
   //!< Check that they match up
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_1, result_pose));
-  individual.segment(0, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(0, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_2, result_pose));
-  individual.segment(3, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(3, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_3, result_pose));
-  individual.segment(6, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(6, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_4, result_pose));
-  individual.segment(9, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(9, 3) = exotica::vectorKdlToEigen(result_pose.p);
 
   ASSERT_TRUE(robot_tree_.generateForwardMap(forward_map));
   EXPECT_TRUE(compareVectors(individual, forward_map, 0.0001))
@@ -595,13 +595,13 @@ TEST_F(KinematicaAtlasTest, TestingPhiComputation)
 
   //!< Check that they match up
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_1, result_pose));
-  individual.segment(0, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(0, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_2, result_pose));
-  individual.segment(3, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(3, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_3, result_pose));
-  individual.segment(6, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(6, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_4, result_pose));
-  individual.segment(9, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(9, 3) = exotica::vectorKdlToEigen(result_pose.p);
 
   ASSERT_TRUE(robot_tree_.generateForwardMap(forward_map));
   EXPECT_TRUE(compareVectors(individual, forward_map, 0.0001))
@@ -612,13 +612,13 @@ TEST_F(KinematicaAtlasTest, TestingPhiComputation)
 
   //!< Check that they match up
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_1, result_pose));
-  individual.segment(0, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(0, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_2, result_pose));
-  individual.segment(3, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(3, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_3, result_pose));
-  individual.segment(6, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(6, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_4, result_pose));
-  individual.segment(9, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(9, 3) = exotica::vectorKdlToEigen(result_pose.p);
 
   ASSERT_TRUE(robot_tree_.generateForwardMap(forward_map));
   EXPECT_TRUE(compareVectors(individual, forward_map, 0.0001))
@@ -633,9 +633,9 @@ TEST_F(KinematicaAtlasTest, TestingPhiComputation)
 
   //!< Check that they match up
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_4, result_pose));
-  individual.segment(0, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(0, 3) = exotica::vectorKdlToEigen(result_pose.p);
   ASSERT_TRUE(robot_tree_.getPose(SEGMENT_2, result_pose));
-  individual.segment(3, 3) = kinematica::vectorKdlToEigen(result_pose.p);
+  individual.segment(3, 3) = exotica::vectorKdlToEigen(result_pose.p);
 
   ASSERT_TRUE(robot_tree_.generateForwardMap(forward_map));
   EXPECT_TRUE(compareVectors(individual, forward_map, 0.0001))

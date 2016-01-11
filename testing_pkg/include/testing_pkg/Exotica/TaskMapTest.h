@@ -34,7 +34,7 @@ class TaskMapTest: public ::testing::Test //!< Testing class for the exotica lib
     std::vector<std::string> registered_types_;
     std::string resource_path_;
     boost::shared_ptr<exotica::TaskMap> base_ptr_;
-    kinematica::KinematicScene_map kin_scenes_;
+    exotica::KinematicScene_map kin_scenes_;
 
 };
 

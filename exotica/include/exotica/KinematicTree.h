@@ -14,7 +14,7 @@
 
 #define ROOT  -1     //!< The value of the parent for the root segment
 
-namespace kinematica
+namespace exotica
 {
   /**
    * \brief Defines the two types of supported joints
@@ -66,6 +66,7 @@ namespace kinematica
       std::vector<int> child;    		//!< Any child links
       Eigen::Vector3d com;	//!< Centre of mass
       std::vector<double> joint_limits_;
+      KDL::Frame offset;
   };
 
   class KinematicTree
@@ -141,6 +142,15 @@ namespace kinematica
        * @return	True if succeeded, false otherwise
        */
       bool modifyEndEffector(const std::string & name,
+          const KDL::Frame & offset);
+
+      /**
+       * \brief	Modify segment tip pose
+       * @param	name	Segment name
+       * @param	offset	Segment offset
+       * @return	True if succeeded, false otherwise
+       */
+      bool modifySegment(const std::string & name,
           const KDL::Frame & offset);
 
       /**
@@ -411,7 +421,7 @@ namespace kinematica
   Eigen::Vector3d vectorKdlToEigen(const KDL::Vector & kdl_vec);
   bool xmlGetVector(const tinyxml2::XMLElement & xml_vector,
       Eigen::VectorXd & eigen_vector);
-  bool recursivePrint(kinematica::KinematicTree & robot, std::string node,
+  bool recursivePrint(exotica::KinematicTree & robot, std::string node,
       std::string tab);
 }
 #endif

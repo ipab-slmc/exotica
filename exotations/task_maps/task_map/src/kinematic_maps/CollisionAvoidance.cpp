@@ -53,7 +53,7 @@ namespace exotica
     init_offsets_.assign(effs_.size(), KDL::Frame::Identity());
 
     kin_sol_ = scene_->getSolver();
-    kinematica::SolutionForm_t sol;
+    exotica::SolutionForm_t sol;
     sol.end_effector_segs = effs_;
     sol.end_effector_offs = std::vector<KDL::Frame>(effs_.size());
     kin_sol_.updateEndEffectors(sol);

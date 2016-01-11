@@ -106,6 +106,7 @@ namespace exotica
     goal.resize(T);
     phi.resize(T);
     dim.resize(T);
+    dimid.resize(T);
     _rhos.resize(T);
     _jacobian.resize(T);
     _goal.resize(T);
@@ -115,6 +116,7 @@ namespace exotica
     for (int t = 0; t < T; t++)
     {
       dim.at(t).resize(prob_->getTaskDefinitions().size());
+      dimid.at(t).resize(prob_->getTaskDefinitions().size());
       i = 0;
       for (auto & it : prob_->getTaskDefinitions())
       {
@@ -168,6 +170,7 @@ namespace exotica
         task->registerPhi(_phi[t][i], t);
         task->registerJacobian(_jacobian[t][i], t);
 
+        dimid.at(t)(i)=cur_rows;
         task_weights.diagonal().block(cur_rows, 0, dim.at(t)(i), 1).setConstant(
             rhos.at(t)(i));
         weights[i].resize(dim.at(t)(i), dim.at(t)(i));
@@ -255,7 +258,22 @@ namespace exotica
     {
       std::pair<int, int> id = taskIndex.at(task_name);
       rhos.at(t)(id.first) = rho;
+      if(task_weights.rows()>id.first) task_weights.diagonal().block(dimid.at(t)(id.first), 0, dim.at(t)(id.first), 1).setConstant(rho);
       return SUCCESS;
+    }
+  }
+
+  double IKsolver::getRho(const std::string & task_name, int t)
+  {
+    if (taskIndex.find(task_name) == taskIndex.end())
+    {
+      std::cout << "Task name " << task_name << " does not exist" << std::endl;
+      return -1.0;
+    }
+    else
+    {
+      std::pair<int, int> id = taskIndex.at(task_name);
+      return rhos.at(t)(id.first);
     }
   }
 

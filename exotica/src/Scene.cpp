@@ -633,7 +633,7 @@ namespace exotica
     if (visual_debug_->data)
     {
       ps_pub_ = server_->advertise<moveit_msgs::PlanningScene>(
-          name_ + "/PlanningScene", 100);
+          name_ + "/PlanningScene", 100, true);
       HIGHLIGHT_NAMED(name_,
           "Running in debug mode, planning scene will be published to '"<<server_->getName()<<"/"<<name_<<"/PlanningScene'");
     }
@@ -804,7 +804,7 @@ namespace exotica
   {
 
     LOCK(lock_);
-    kinematica::SolutionForm_t tmp_sol;
+    exotica::SolutionForm_t tmp_sol;
     tmp_sol.end_effector_segs.clear();
     for (auto & it : eff_names_)
     {
@@ -1024,7 +1024,7 @@ namespace exotica
     return collision_scene_->getPlanningScene();
   }
 
-  kinematica::KinematicTree & Scene::getSolver()
+  exotica::KinematicTree & Scene::getSolver()
   {
     return kinematica_;
   }

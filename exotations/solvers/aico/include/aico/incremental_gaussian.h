@@ -1,10 +1,48 @@
-#ifndef SP_MEAN_COVARIANCE_HPP
-#define SP_MEAN_COVARIANCE_HPP
+/*
+ *  Created on: 19 Apr 2014
+ *      Author: Vladimir Ivan
+ * 
+ * Copyright (c) 2016, University Of Edinburgh 
+ * All rights reserved. 
+ * 
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions are met: 
+ * 
+ *  * Redistributions of source code must retain the above copyright notice, 
+ *    this list of conditions and the following disclaimer. 
+ *  * Redistributions in binary form must reproduce the above copyright 
+ *    notice, this list of conditions and the following disclaimer in the 
+ *    documentation and/or other materials provided with the distribution. 
+ *  * Neither the name of  nor the names of its contributors may be used to 
+ *    endorse or promote products derived from this software without specific 
+ *    prior written permission. 
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE. 
+ *
+ */
+
+/*
+The algorithm is based on the paper :
+Chan, Tony F.; Golub, Gene H.; LeVeque, Randall J. (1979), “Updating Formulae and a Pairwise Algorithm for Computing Sample Variances.”, Technical Report STAN-CS-79-773, Department of Computer Science, Stanford University.
+*/
+
+#ifndef SINGLE_PASS_MEAN_COVARIANCE_H
+#define SINGLE_PASS_MEAN_COVARIANCE_H
 
 #include <vector>
 #include <Eigen/Dense>
 
-struct sp_mean_covariance
+class SinglePassMeanCoviariance
 {
     int D;
     int D2;
@@ -12,8 +50,8 @@ struct sp_mean_covariance
     Eigen::VectorXd T;
     Eigen::VectorXd dX;
     Eigen::MatrixXd S;
-
-    sp_mean_covariance()
+public:
+    SinglePassMeanCoviariance()
     {
       D = 0;
       D2 = 0;
@@ -22,7 +60,7 @@ struct sp_mean_covariance
       S.resize(0, 0);
     }
 
-    sp_mean_covariance(int D_)
+    SinglePassMeanCoviariance(int D_)
     {
       resize(D_);
     }
@@ -69,7 +107,7 @@ struct sp_mean_covariance
       }
     }
 
-    inline void add(sp_mean_covariance& M)
+    inline void add(SinglePassMeanCoviariance& M)
     {
       add(M.W, M.T, M.S);
     }
@@ -100,9 +138,6 @@ struct sp_mean_covariance
 
     inline void addw(double w, const Eigen::Ref<const Eigen::VectorXd> & x)
     {
-      //--------------------------------
-      // add( w, w*x, 0. );
-      //--------------------------------
       if (W == 0.)
       {
         W = w;

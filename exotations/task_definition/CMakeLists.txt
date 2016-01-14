@@ -36,3 +36,9 @@ add_library(${PROJECT_NAME} src/TaskSqrError.cpp
                             src/TaskTerminationCriterion.cpp
            )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
+## Install
+install(TARGETS ${PROJECT_NAME}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)

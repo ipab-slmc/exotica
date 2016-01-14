@@ -1,6 +1,8 @@
 sudo: required
 dist: trusty
-cache: apt
+cache:
+  - apt
+  - ccache
 # Force travis to use its minimal image with default Python settings
 language: generic
 compiler:

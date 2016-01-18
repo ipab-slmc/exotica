@@ -44,4 +44,5 @@ script:
   - cd $CATKIN_WS_SRC
   - catkin_init_workspace
   - cd ..
-  - catkin_make -DCMAKE_BUILD_TYPE=Release
+  # Build packages
+  - catkin_make -DCMAKE_BUILD_TYPE=Release -j4

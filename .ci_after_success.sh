@@ -27,5 +27,5 @@ Description: This is a preliminary debian package for EXOTica.
   cp -R ~/catkin_ws/install/lib/ ~/create_deb/opt/ros/indigo/
   cp -R ~/catkin_ws/install/share/ ~/create_deb/opt/ros/indigo/
 
-  dpkg-deb --build ~/create_deb ~/exotica.deb
+  dpkg-deb --build ~/create_deb $TRAVIS_BUILD_DIR/exotica.deb
 #fi

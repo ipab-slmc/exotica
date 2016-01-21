@@ -11,6 +11,7 @@ env:
   - CATKIN_WS=~/catkin_ws
   - CATKIN_WS_SRC=${CATKIN_WS}/src
   - CI_ROS_DISTRO="indigo"
+  - secure: "smFIa1qA533FrLwuCW9AtegXk2bs0C2swDJWXWAikCSgET+fpF7DsGXAeE407PeZQBodnG/ZO3BODyE8orNvszBsNlK0QUx68kp8V2fgicg1V/PqlfhhUCNAZlhnI2xas/dZhvl4Ao8rfY1GZlyfms279yJljGdnVFiEyqQzQtiIN/komwpZKT7flTon9RrZ7QK5+N0nHA+17mX9Nl0L7H+pd2h3vBd7Wz4eb5S8O14zeuTcMcxlxJb8WP4W5KvHIwmiWFluhFamedc45LVXhJb0gECm7nNx1Qyrf1MQdRlBlWJ16AaxmHgdmiONQrc0/U7L2zs7aUfedJC9lmxTwCcQSTrdbO27e4nnb4VPptXITtGM2/8yn+m1pQzRNyJbrCcQyRilPPSRfhrQ24oaiingOATH+BCJ/sTkZTB8/9qjcMXkk7zPIMHTjGwonvyot33ftwlLMmu3pwm23dHcTttuEBlAjngDIarWhEFhZwvO6N9/vp478b1RJpFzDUgIZsbZWA3w6JjSkl49jXjLVn9ni5ciIs6rA6jo9MnVlVN9uLqOdJiavLRuakt6B2bzoU8Ghmz8JpcaBdRG2LhLb1HDCFdMehnTmmpcrQoUAgW6mQxJvUt1GV7LsODR1vhCb+zDh30zbCSKDDZQLjiQOMb1DAv7qrnfr+4MDkcxLbk="
 before_install:
 - wget https://bitbucket.org/eigen/eigen/get/3.2.6.zip
 - unzip 3.2.6.zip
@@ -36,8 +37,19 @@ script:
 - catkin_init_workspace
 - cd ..
 - catkin_make install -DCMAKE_BUILD_TYPE=Release -j4
-after_success:
+before_deploy:
 - bash $TRAVIS_BUILD_DIR/.ci_after_success.sh
+# Create git tag
+- git config --global user.email "builds@travis-ci.com"
+- git config --global user.name "Travis CI"
+#- export GIT_TAG=build-$TRAVIS_BRANCH-$(date -u "+%Y-%m-%d")-$TRAVIS_BUILD_NUMBER
+- export GIT_TAG=latest
+- git tag $GIT_TAG -a -m "Updated tag latest from build $TRAVIS_BUILD_NUMBER"
+- git push --quiet --tags https://$GITHUBKEY@github.com/openhumanoids/exotica $GIT_TAG > /dev/null 2>&1
+branches:
+  except:
+    - /^build-[0-9a-z\-]*/
+    - /^latest*/
 deploy:
   provider: releases
   api_key:

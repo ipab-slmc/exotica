@@ -25,7 +25,6 @@ install:
 - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 - sudo apt-get update -qq
 - sudo apt-get install -qq -y python-rosdep python-catkin-tools
-- sudo apt-get install -qq -y liblapack-dev libf2c2-dev # for f2c / aico
 - sudo rosdep init
 - rosdep update
 - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
@@ -47,4 +46,3 @@ deploy:
   file: /exotica.deb
   on:
     repo: openhumanoids/exotica
-    # branch: master

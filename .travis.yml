@@ -55,7 +55,7 @@ deploy:
   api_key:
     secure: Q5HEVWeizz926t9snRXDsh/rZvYq1Cno6fe9vSdDf8H1FRVyjD5HyOAuvlb5Aawdwzi37oGx+oWQvVUkjNAziLke/pBaW6ni1pdvTxiLWXJCAQawxEtnum1leqqOA7U2zz4ufpTxrCw9ss+f2qcKQP3O3B0DjK7EcsjflBsAz5gAGcut6FAv77pzp6KToKSeKrFuheWTHnoL3r+UXT8WO3Lw82sH1rISosP7SBuumLqcT1TIWoYEdnLgnzFcaKkXDTQW9/2VP8drBR57HsbKj6IplgRoOmXjOREgrgRoQ4hhVi1Zoq8ia9CWa7k7w7WUWqpoHq0MwzMab07nWZBcTw6vGki2d5tGmykHTU+TM8rVRZzOS7uUjnJNUM+5yoWt6IE2PCI6jdJpRH2ZU50BwGVx7etYl8sgQQDL1gdZKBjEWX8cdOCj4aPiCxuuoiTTggI1wvG3UmSUUUA3XIk5hAQ1B5e5fsKcpAluouOWulCYoyS+agK/sZVHyMwiaDSp2ddaRuZmtaJMRWtmOU5IUP89EiJWCqSj9ZY89gp1TPD6+1hmlXOr25K7N83ez3/8aGLHSV7my5gr5fCTpLCe9/3HO7Y+L/7xw0JHtsdxdJ/S4XSK5as+TQEY9QiDNlG0xEsv/g6o7CU3ns0qfM3y+BuoqSY2unyhlRsyL9YjPm4=
   skip_cleanup: true
-  file: /exotica.deb
+  file: ~/exotica.deb
   on:
     repo: openhumanoids/exotica
     all_branches: true

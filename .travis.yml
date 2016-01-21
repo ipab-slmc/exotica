@@ -45,7 +45,7 @@ before_deploy:
 #- export GIT_TAG=build-$TRAVIS_BRANCH-$(date -u "+%Y-%m-%d")-$TRAVIS_BUILD_NUMBER
 - cd $TRAVIS_BUILD_DIR
 - export GIT_TAG=latest
-- git tag $GIT_TAG -a -m "Updated tag latest from build $TRAVIS_BUILD_NUMBER"
+- git tag $GIT_TAG -a -m "Updated tag latest from build $TRAVIS_BUILD_NUMBER" -f
 - git push --quiet --tags https://$GITHUBKEY@github.com/openhumanoids/exotica $GIT_TAG > /dev/null 2>&1
 branches:
   except:

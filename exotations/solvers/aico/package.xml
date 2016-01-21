@@ -9,6 +9,7 @@
   <license>BSD</license>
 
   <url type="website">https://github.com/openhumanoids/exotica</url>
+  <url type="bugtracker">https://github.com/openhumanoids/exotica/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica</build_depend>

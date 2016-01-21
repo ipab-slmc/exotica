@@ -1,48 +1,49 @@
 sudo: required
 dist: trusty
 cache:
-  - apt
-  - ccache
-# Force travis to use its minimal image with default Python settings
+- apt
+- ccache
 language: generic
 compiler:
-  - gcc
+- gcc
 env:
   global:
-    - CATKIN_WS=~/catkin_ws
-    - CATKIN_WS_SRC=${CATKIN_WS}/src
-    - CI_ROS_DISTRO="indigo"
-#  matrix:
-#    - CI_ROS_DISTRO="indigo"
-#    - CI_ROS_DISTRO="jade"
-
+  - CATKIN_WS=~/catkin_ws
+  - CATKIN_WS_SRC=${CATKIN_WS}/src
+  - CI_ROS_DISTRO="indigo"
 before_install:
-  - wget https://bitbucket.org/eigen/eigen/get/3.2.6.zip
-  - unzip 3.2.6.zip
-  - cd eigen-eigen-c58038c56923
-  - mkdir build
-  - cd build
-  - cmake ..
-  - sudo make install
-  - cd ../..
-
+- wget https://bitbucket.org/eigen/eigen/get/3.2.6.zip
+- unzip 3.2.6.zip
+- cd eigen-eigen-c58038c56923
+- mkdir build
+- cd build
+- cmake ..
+- sudo make install
+- cd ../..
 install:
-  - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
-  - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq -y python-rosdep python-catkin-tools
-  - sudo apt-get install -qq -y liblapack-dev libf2c2-dev # for f2c / aico
-  - sudo rosdep init
-  - rosdep update
-  # Use rosdep to install all dependencies (including ROS itself)
-  - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
-
+- sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
+- wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+- sudo apt-get update -qq
+- sudo apt-get install -qq -y python-rosdep python-catkin-tools
+- sudo rosdep init
+- rosdep update
+- rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 script:
-  - source /opt/ros/$CI_ROS_DISTRO/setup.bash
-  - mkdir -p $CATKIN_WS_SRC
-  - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
-  - cd $CATKIN_WS_SRC
-  - catkin_init_workspace
-  - cd ..
-  # Build packages
-  - catkin_make -DCMAKE_BUILD_TYPE=Release -j4
+- source /opt/ros/$CI_ROS_DISTRO/setup.bash
+- mkdir -p $CATKIN_WS_SRC
+- ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
+- cd $CATKIN_WS_SRC
+- catkin_init_workspace
+- cd ..
+- catkin_make install -DCMAKE_BUILD_TYPE=Release -j4
+after_success:
+- bash ./.ci_after_success.sh
+deploy:
+  provider: releases
+  api_key:
+    secure: Q5HEVWeizz926t9snRXDsh/rZvYq1Cno6fe9vSdDf8H1FRVyjD5HyOAuvlb5Aawdwzi37oGx+oWQvVUkjNAziLke/pBaW6ni1pdvTxiLWXJCAQawxEtnum1leqqOA7U2zz4ufpTxrCw9ss+f2qcKQP3O3B0DjK7EcsjflBsAz5gAGcut6FAv77pzp6KToKSeKrFuheWTHnoL3r+UXT8WO3Lw82sH1rISosP7SBuumLqcT1TIWoYEdnLgnzFcaKkXDTQW9/2VP8drBR57HsbKj6IplgRoOmXjOREgrgRoQ4hhVi1Zoq8ia9CWa7k7w7WUWqpoHq0MwzMab07nWZBcTw6vGki2d5tGmykHTU+TM8rVRZzOS7uUjnJNUM+5yoWt6IE2PCI6jdJpRH2ZU50BwGVx7etYl8sgQQDL1gdZKBjEWX8cdOCj4aPiCxuuoiTTggI1wvG3UmSUUUA3XIk5hAQ1B5e5fsKcpAluouOWulCYoyS+agK/sZVHyMwiaDSp2ddaRuZmtaJMRWtmOU5IUP89EiJWCqSj9ZY89gp1TPD6+1hmlXOr25K7N83ez3/8aGLHSV7my5gr5fCTpLCe9/3HO7Y+L/7xw0JHtsdxdJ/S4XSK5as+TQEY9QiDNlG0xEsv/g6o7CU3ns0qfM3y+BuoqSY2unyhlRsyL9YjPm4=
+  skip_cleanup: true
+  file: /exotica.deb
+  on:
+    repo: openhumanoids/exotica
+    # branch: master

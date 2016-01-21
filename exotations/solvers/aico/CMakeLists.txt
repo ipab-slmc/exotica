@@ -13,7 +13,6 @@ add_definitions(-DEXOTICA_DEBUG_MODE)  #Controls whether to compile with certain
 find_package(catkin REQUIRED COMPONENTS
   exotica
   roscpp
-  roslib
   task_definition
   task_map
 )
@@ -25,7 +24,7 @@ find_package(LAPACK REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aico
-  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map
+  CATKIN_DEPENDS exotica roscpp task_definition task_map
   DEPENDS system_lib
 )
 

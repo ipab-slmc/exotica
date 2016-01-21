@@ -4,8 +4,8 @@
 # author: Wolfgang Merkt
 
 # Only build a deb for the master branch
-if [ $TRAVIS_BRANCH -eq "master" ]
-then
+#if [ $TRAVIS_BRANCH -eq "master" ]
+#then
   VERSION=`date +%Y.%m.%d-%H-%M`
 
   mkdir -p /create_deb/DEBIAN
@@ -28,4 +28,4 @@ Description: This is a preliminary debian package for EXOTica.
   cp -R ~/catkin_ws/install/share/ /create_deb/opt/ros/indigo/
 
   dpkg-deb --build /create_deb /exotica.deb
-fi
+#fi

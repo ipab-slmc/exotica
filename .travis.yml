@@ -46,3 +46,4 @@ deploy:
   file: /exotica.deb
   on:
     repo: openhumanoids/exotica
+    all_branches: true

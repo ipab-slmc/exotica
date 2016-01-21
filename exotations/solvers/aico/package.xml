@@ -17,6 +17,7 @@
   <build_depend>task_definition</build_depend>
   <build_depend>task_map</build_depend>
   <build_depend>liblapack-dev</build_depend>
+  <build_depend>f2c</build_depend>
 
   <run_depend>exotica</run_depend>
   <run_depend>roscpp</run_depend>
@@ -24,6 +25,7 @@
   <run_depend>task_definition</run_depend>
   <run_depend>task_map</run_depend>
   <run_depend>liblapack-dev</run_depend>
+  <run_depend>f2c</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -165,6 +165,24 @@ namespace exotica
     return SUCCESS;
   }
 
+  EReturn IMesh::computeGoalLaplace(const Eigen::VectorXd &x,
+      Eigen::VectorXd &goal)
+  {
+    int t = 0;
+    if (!ok(scene_->update(x, t)))
+    {
+      INDICATE_FAILURE
+      return FAILURE;
+    }
+    if (!ok(computeLaplace(t)))
+    {
+      INDICATE_FAILURE
+      return FAILURE;
+    }
+    goal = PHI;
+    return SUCCESS;
+  }
+
   EReturn IMesh::computeIMesh(int t)
   {
     int M = eff_size_;

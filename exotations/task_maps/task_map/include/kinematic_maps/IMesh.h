@@ -90,6 +90,7 @@ namespace exotica
        */
       EReturn computeLaplace(int t);
 
+      EReturn computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
     protected:
       /**
        * @brief	Concrete implementation of initialisation from xml
@@ -124,6 +125,7 @@ namespace exotica
 
       int eff_size_;
   };
+  typedef boost::shared_ptr<IMesh> IMesh_Ptr;  //!< Task Map smart pointer
 }
 
 #endif /* IMESH_H_ */

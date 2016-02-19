@@ -361,7 +361,7 @@ namespace exotica
 //					}
 //				}
 
-        pg.interpolate(length);
+        pg.interpolate(50);
       }
 
 //			if (ompl_simple_setup_->haveSolutionPath())

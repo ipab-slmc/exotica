@@ -44,13 +44,12 @@ int main(int argc, char **argv)
   std::string group_name;
   if (!nh.getParam("problem", problem_name)
       || !nh.getParam("solver", solver_name)
-      || !nh.getParam("config", config_name)
-      || !nh.getParam("planning_group", group_name))
+      || !nh.getParam("config", config_name))
   {
     INDICATE_FAILURE
     return 0;
   }
-  if (ser.initialise(config_name, solver_name, problem_name, group_name))
+  if (ser.initialise(config_name, solver_name, problem_name, ""))
   {
     HIGHLIGHT_NAMED("MoveitInterface", "Exotica Planning Action is ready");
     ros::spin();

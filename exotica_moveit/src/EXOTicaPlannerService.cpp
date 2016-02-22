@@ -104,7 +104,7 @@ namespace exotica
 
         if (!exotica::ok(
             boost::static_pointer_cast<exotica::OMPLsolver>(solver_)->specifyProblem(
-                probs[0], NULL, probs[1], NULL)))
+                probs[0])))
         {
           INDICATE_FAILURE
           initialised_ = false;
@@ -144,12 +144,7 @@ namespace exotica
       goal_bias_map_->jointRef = qT;
       goal_map_->jointRef = qT;
       ss->setGoalState(qT, 1e-4);
-      ss->setMaxPlanningTime(goal->max_time_);
-      if (!ok(ss->resetIfNeeded()))
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+//      ss->setMaxPlanningTime(goal->max_time_);
     }
 
     EReturn found = FAILURE;

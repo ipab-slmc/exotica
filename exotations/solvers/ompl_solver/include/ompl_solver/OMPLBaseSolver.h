@@ -34,6 +34,7 @@ namespace exotica
       double getPlanningTime();
     protected:
       OMPLBaseSolver();
+      std::string algorithm_;
 
     private:
       virtual void setAlgorithmName() = 0;
@@ -109,8 +110,6 @@ namespace exotica
       std::vector<std::string> projection_components_;
 
       ros::Duration planning_time_;
-
-      std::string algorithm_;
   };
   typedef boost::shared_ptr<exotica::OMPLBaseSolver> OMPLBaseSolver_ptr;
 }

@@ -38,6 +38,9 @@
 #include "ompl_solver/OMPLBaseSolver.h"
 #include <ros/package.h>
 #include <fstream>
+
+#define REGISTER_OMPL_SOLVER_TYPE(TYPE, DERIV) EXOTICA_REGISTER(std::string, exotica::MotionSolver, TYPE, DERIV)
+
 namespace exotica
 {
   class OMPLsolver: public MotionSolver
@@ -82,6 +85,11 @@ namespace exotica
         return base_solver_->getAlgorithm();
       }
 
+      const OMPLBaseSolver_ptr getOMPLSolver()
+      {
+        return base_solver_;
+      }
+
       virtual std::string print(std::string prepend);
 
       EReturn setGoalState(const Eigen::VectorXd & qT, const double eps =
@@ -105,7 +113,8 @@ namespace exotica
       /// \brief  Maximum step
       EParam<std_msgs::String> range_;
 
-      EParam<std_msgs::String> algorithm_;
+      EParam<std_msgs::String> solver_;
+      EParam<std_msgs::String> solver_package_;
   };
 
   typedef boost::shared_ptr<exotica::OMPLsolver> OMPLsolver_ptr;

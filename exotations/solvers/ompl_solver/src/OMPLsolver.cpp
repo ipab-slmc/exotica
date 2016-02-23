@@ -162,19 +162,34 @@ namespace exotica
         "TrajectorySmooth");
     server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, smooth_);
 
-    std::string txt;
-    tmp_handle = handle.FirstChildElement("Algorithm");
-    server_->registerParam<std_msgs::String>(ns_, tmp_handle, algorithm_);
+    tmp_handle = handle.FirstChildElement("Solver");
+    if (!ok(server_->registerParam<std_msgs::String>(ns_, tmp_handle, solver_)))
+    {
+      INDICATE_FAILURE
+      return PAR_ERR;
+    }
+
+    tmp_handle = handle.FirstChildElement("SolverPackage");
+    if (!ok(
+        server_->registerParam<std_msgs::String>(ns_, tmp_handle,
+            solver_package_)))
+    {
+      INDICATE_FAILURE
+      return PAR_ERR;
+    }
 
     try
     {
       pluginlib::ClassLoader<exotica::OMPLBaseSolver> base_solver_loader(
-          "ompl_solver", "exotica::OMPLBaseSolver");
-      OMPLBaseSolver_ptr triangle = base_solver_loader.createInstance(
-          "exotica::" + algorithm_->data);
+          solver_package_->data, "exotica::OMPLBaseSolver");
+      base_solver_ = base_solver_loader.createInstance(
+          "exotica::" + solver_->data);
+      HIGHLIGHT_NAMED(object_name_,
+          "Using ["<<solver_->data<<"] from package ["<<solver_package_->data<<"].");
     } catch (pluginlib::PluginlibException& ex)
     {
-      ERROR("EXOTica-OMPL plugin failed to load algorithm "<<algorithm_->data<<". \nError: %s" << ex.what());
+      ERROR(
+          "EXOTica-OMPL plugin failed to load solver "<<solver_->data<<". \nError: %s" << ex.what());
     }
     tmp_handle = handle.FirstChildElement("Range");
     if (tmp_handle.ToElement())

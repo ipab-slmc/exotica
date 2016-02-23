@@ -80,5 +80,7 @@ namespace exotica
       int getJointID(std::string& name);
 
   };
+
+  typedef boost::shared_ptr<exotica::Identity> Identity_ptr;
 }
 #endif

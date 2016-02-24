@@ -10,7 +10,7 @@
 namespace exotica
 {
   OMPLBaseSolver::OMPLBaseSolver()
-      : timeout_(60.0), finishedSolving_(false)
+      : timeout_(60.0), finishedSolving_(false), algorithm_("NONE")
   {
 
   }
@@ -26,11 +26,6 @@ namespace exotica
     int cnt =
         prob_->getScenes().begin()->second->getCollisionScene()->stateCheckCnt_;
     prob_->getScenes().begin()->second->getCollisionScene()->stateCheckCnt_ = 0;
-  }
-
-  std::string OMPLBaseSolver::getAlgorithm()
-  {
-    return algorithm_;
   }
 
   double OMPLBaseSolver::getPlanningTime()
@@ -59,7 +54,7 @@ namespace exotica
     logDebug("There were %d valid motions and %d invalid motions.", v, iv);
 
     if (ompl_simple_setup_->getProblemDefinition()->hasApproximateSolution())
-      logWarn("Computed solution is approximate");
+    logWarn("Computed solution is approximate");
   }
 
   void OMPLBaseSolver::registerTerminationCondition(

@@ -30,15 +30,13 @@ namespace exotica
       virtual EReturn setGoalState(const Eigen::VectorXd & qT,
           const double eps = std::numeric_limits<double>::epsilon()) = 0;
 
-      std::string getAlgorithm();
+      virtual std::string & getAlgorithmName() = 0;
       double getPlanningTime();
     protected:
       OMPLBaseSolver();
       std::string algorithm_;
 
     private:
-      virtual void setAlgorithmName() = 0;
-
       /**
        * \biref Converts OMPL trajectory into Eigen Matrix
        * @param pg OMPL trajectory

@@ -880,7 +880,7 @@ namespace exotica
     }
 
     initialised_ = true;
-
+    HIGHLIGHT_NAMED(object_name_,"Taskmaps are activated");
     return SUCCESS;
   }
 

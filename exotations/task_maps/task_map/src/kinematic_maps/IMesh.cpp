@@ -174,6 +174,11 @@ namespace exotica
       INDICATE_FAILURE
       return FAILURE;
     }
+    if (!ok(update(x, t)))
+    {
+      INDICATE_FAILURE
+      return FAILURE;
+    }
     if (!ok(computeLaplace(t)))
     {
       INDICATE_FAILURE

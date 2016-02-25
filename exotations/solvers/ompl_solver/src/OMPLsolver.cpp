@@ -191,12 +191,11 @@ namespace exotica
       ERROR(
           "EXOTica-OMPL plugin failed to load solver "<<solver_->data<<". \nError: %s" << ex.what());
     }
-    tmp_handle = handle.FirstChildElement("Range");
-    if (tmp_handle.ToElement())
+    if (!ok(base_solver_->initialiseBaseSolver(handle, server_)))
     {
-      server_->registerParam<std_msgs::String>(ns_, tmp_handle, range_);
+      INDICATE_FAILURE
+      return FAILURE;
     }
-
     return SUCCESS;
   }
 
@@ -211,9 +210,13 @@ namespace exotica
       if (!ok(it.second->activateTaskMaps()))
       {
         INDICATE_FAILURE
-        ;
         return FAILURE;
       }
+    }
+    if (!ok(base_solver_->specifyProblem(prob_)))
+    {
+      INDICATE_FAILURE
+      return FAILURE;
     }
     return SUCCESS;
   }

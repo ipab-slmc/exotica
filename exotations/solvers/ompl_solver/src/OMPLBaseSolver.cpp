@@ -9,14 +9,22 @@
 
 namespace exotica
 {
-  OMPLBaseSolver::OMPLBaseSolver()
-      : timeout_(60.0), finishedSolving_(false), algorithm_("NONE")
+  OMPLBaseSolver::OMPLBaseSolver(const std::string planner_name)
+      : timeout_(60.0), finishedSolving_(false), planner_name_(planner_name)
   {
 
   }
   OMPLBaseSolver::~OMPLBaseSolver()
   {
 
+  }
+
+  EReturn OMPLBaseSolver::initialiseBaseSolver(tinyxml2::XMLHandle & handle,
+      const Server_ptr &server)
+  {
+    server_ = server;
+    registerDefaultPlanners();
+    return initialiseSolver(handle);
   }
 
   void OMPLBaseSolver::recordData()
@@ -38,10 +46,17 @@ namespace exotica
     // clear previously computed solutions
     ompl_simple_setup_->getProblemDefinition()->clearSolutionPaths();
     const ob::PlannerPtr planner = ompl_simple_setup_->getPlanner();
-    if (planner) planner->clear();
-    ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
-    ompl_simple_setup_->getPlanner()->setProblemDefinition(
-        ompl_simple_setup_->getProblemDefinition());
+    if (planner)
+    {
+      planner->clear();
+    }
+    else
+    {
+      ERROR("Planner not found");
+    }
+//    ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
+//    ompl_simple_setup_->getPlanner()->setProblemDefinition(
+//        ompl_simple_setup_->getProblemDefinition());
   }
 
   void OMPLBaseSolver::postSolve()
@@ -68,5 +83,10 @@ namespace exotica
   {
     boost::mutex::scoped_lock slock(ptc_lock_);
     ptc_ = NULL;
+  }
+
+  const boost::shared_ptr<og::SimpleSetup> OMPLBaseSolver::getOMPLSimpleSetup() const
+  {
+    return ompl_simple_setup_;
   }
 }

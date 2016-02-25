@@ -82,7 +82,7 @@ namespace exotica
        */
       const std::string getAlgorithm()
       {
-        return base_solver_->getAlgorithmName();
+        return base_solver_->getPlannerName();
       }
 
       const OMPLBaseSolver_ptr getOMPLSolver()

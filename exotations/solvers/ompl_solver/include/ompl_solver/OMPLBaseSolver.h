@@ -23,20 +23,39 @@ namespace exotica
   {
     public:
       virtual ~OMPLBaseSolver();
-      virtual EReturn initialise(tinyxml2::XMLHandle & handle,
-          const OMPLProblem_ptr &prob) = 0;
+      EReturn initialiseBaseSolver(tinyxml2::XMLHandle & handle,
+          const Server_ptr &server);
+      virtual EReturn initialiseSolver(tinyxml2::XMLHandle & handle) = 0;
       virtual EReturn solve(const Eigen::VectorXd &x0,
           Eigen::MatrixXd &sol) = 0;
       virtual EReturn setGoalState(const Eigen::VectorXd & qT,
           const double eps = std::numeric_limits<double>::epsilon()) = 0;
 
-      virtual std::string & getAlgorithmName() = 0;
+      virtual std::string & getPlannerName() = 0;
       double getPlanningTime();
-    protected:
-      OMPLBaseSolver();
-      std::string algorithm_;
 
-    private:
+      const boost::shared_ptr<og::SimpleSetup> getOMPLSimpleSetup() const;
+
+      virtual EReturn specifyProblem(const OMPLProblem_ptr &prob) = 0;
+    protected:
+      OMPLBaseSolver(const std::string planner_name);
+      void registerPlannerAllocator(const std::string &planner_id,
+          const ConfiguredPlannerAllocator &pa)
+      {
+        known_algorithms_[planner_id] = pa;
+      }
+      template<typename T> static ob::PlannerPtr allocatePlanner(
+          const ob::SpaceInformationPtr &si, const std::string &new_name)
+      {
+        ompl::base::PlannerPtr planner(new T(si));
+        if (!new_name.empty()) planner->setName(new_name);
+        planner->setup();
+        return planner;
+      }
+      std::map<std::string, ConfiguredPlannerAllocator> known_algorithms_;
+      std::string planner_name_;
+
+      virtual void registerDefaultPlanners() = 0;
       /**
        * \biref Converts OMPL trajectory into Eigen Matrix
        * @param pg OMPL trajectory
@@ -80,6 +99,8 @@ namespace exotica
       void recordData();
 
       OMPLProblem_ptr prob_; //!< Shared pointer to the planning problem.
+
+      Server_ptr server_;
 
       /// The OMPL planning context; this contains the problem definition and the planner used
       boost::shared_ptr<og::SimpleSetup> ompl_simple_setup_;

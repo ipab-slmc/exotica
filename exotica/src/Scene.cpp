@@ -286,6 +286,9 @@ namespace exotica
       ps_->getCurrentStateNonConst().setVariablePosition("world_joint/y", x(1));
       ps_->getCurrentStateNonConst().setVariablePosition("world_joint/theta",
           x(2));
+      for (std::size_t i = 3; i < joint_index_.size(); i++)
+        ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
+            x(i));
     }
     ps_->getCurrentStateNonConst().update(true);
     if (compute_dist)
@@ -374,7 +377,8 @@ namespace exotica
     stateCheckCnt_++;
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
-    ps_->getCollisionWorld()->checkRobotCollision(req,res,*ps_->getCollisionRobot(),ps_->getCurrentState());
+    ps_->getCollisionWorld()->checkRobotCollision(req, res,
+        *ps_->getCollisionRobot(), ps_->getCurrentState());
 //    ERROR(ps_->getCurrentState().getCollisionBodyTransform("leftForearmLink",0).translation().transpose());
 //    if(res.collision){
 //      HIGHLIGHT("Contact "<<res.contacts.begin()->first.first<<" "<<res.contacts.begin()->first.second<<" at "<<res.contacts.begin()->second[0].pos.transpose());
@@ -880,7 +884,7 @@ namespace exotica
     }
 
     initialised_ = true;
-    HIGHLIGHT_NAMED(object_name_,"Taskmaps are activated");
+    HIGHLIGHT_NAMED(object_name_, "Taskmaps are activated");
     return SUCCESS;
   }
 

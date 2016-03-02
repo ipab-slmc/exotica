@@ -59,7 +59,7 @@ namespace exotica
   {
     Eigen::VectorXd q(prob_->getSpaceDim());
     if (compound_)
-      boost::static_pointer_cast<OMPLSE3RNCompoundStateSpace>(
+      boost::static_pointer_cast<OMPLSE3RNStateSpace>(
           sol_->getOMPLStateSpace())->OMPLStateToEigen(state, q);
     else
       boost::static_pointer_cast<OMPLStateSpace>(sol_->getOMPLStateSpace())->copyFromOMPLState(

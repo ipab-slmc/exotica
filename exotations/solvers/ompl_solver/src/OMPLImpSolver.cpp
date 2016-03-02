@@ -1,0 +1,286 @@
+/*
+ *  Created on: 2 Mar 2016
+ *      Author: Yiming Yang
+ *
+ * Copyright (c) 2016, University Of Edinburgh
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  * Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *  * Neither the name of  nor the names of its contributors may be used to
+ *    endorse or promote products derived from this software without specific
+ *    prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+#include "ompl_solver/OMPLImpSolver.h"
+#include "ompl_solver/OMPLRNStateSpace.h"
+#include "ompl_solver/OMPLSE3RNStateSpace.h"
+
+#include <ompl/geometric/planners/rrt/RRT.h>
+#include <ompl/geometric/planners/rrt/pRRT.h>
+#include <ompl/geometric/planners/rrt/RRTConnect.h>
+#include <ompl/geometric/planners/rrt/TRRT.h>
+#include <ompl/geometric/planners/rrt/LazyRRT.h>
+#include <ompl/geometric/planners/est/EST.h>
+#include <ompl/geometric/planners/sbl/SBL.h>
+#include <ompl/geometric/planners/sbl/pSBL.h>
+#include <ompl/geometric/planners/kpiece/KPIECE1.h>
+#include <ompl/geometric/planners/kpiece/BKPIECE1.h>
+#include <ompl/geometric/planners/kpiece/LBKPIECE1.h>
+#include <ompl/geometric/planners/rrt/RRTstar.h>
+#include <ompl/geometric/planners/prm/PRM.h>
+#include <ompl/geometric/planners/prm/PRMstar.h>
+#include <ompl/geometric/planners/pdst/PDST.h>
+#include <ompl/geometric/planners/prm/LazyPRM.h>
+#include <ompl/geometric/planners/prm/SPARS.h>
+#include <ompl/geometric/planners/prm/SPARStwo.h>
+#include <ompl/geometric/planners/rrt/LBTRRT.h>
+#include <ompl/geometric/planners/rrt/RRTstar.h>
+#include <ompl/geometric/planners/rrt/pRRT.h>
+#include <ompl/geometric/planners/stride/STRIDE.h>
+namespace exotica
+{
+  OMPLImpSolver::OMPLImpSolver()
+      : OMPLBaseSolver("OMPLImpSolver"), algorithm_("geometric::RRTConnect")
+  {
+
+  }
+
+  EReturn OMPLImpSolver::initialiseSolver(tinyxml2::XMLHandle & handle)
+  {
+    tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("Algorithm");
+    if (!tmp_handle.ToElement())
+    {
+      WARNING(
+          "Algorithm is not specified in XML, using default algorithm "<<algorithm_);
+    }
+    else
+    {
+      algorithm_ = "geometric::"
+          + std::string(tmp_handle.ToElement()->GetText());
+    }
+    if (known_algorithms_.find(algorithm_) != known_algorithms_.end())
+    {
+      HIGHLIGHT("Using planning algorithm "<<algorithm_);
+    }
+    else
+    {
+      ERROR("Unknown planning algorithm "<<algorithm_<<".");
+      ERROR("Available algorithms: ");
+      for (auto &it : known_algorithms_)
+        ERROR(it.first);
+    }
+    return SUCCESS;
+  }
+
+  EReturn OMPLImpSolver::specifyProblem(const OMPLProblem_ptr &prob)
+  {
+    prob_ = prob;
+    base_type_ = prob_->getScenes().begin()->second->getBaseType();
+    if (base_type_ == BASE_TYPE::FIXED)
+      state_space_.reset(
+          new OMPLRNStateSpace(prob_->getSpaceDim() - 3, server_, prob_));
+    else if (base_type_ == BASE_TYPE::FLOATING)
+      state_space_.reset(
+          new OMPLSE3RNStateSpace(prob_->getSpaceDim() - 3, server_, prob_));
+
+    ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
+    ompl_simple_setup_->setStateValidityChecker(
+        ob::StateValidityCheckerPtr(
+            new OMPLStateValidityChecker(
+                ompl_simple_setup_->getSpaceInformation(), prob_)));
+    ompl_simple_setup_->setPlannerAllocator(
+        boost::bind(known_algorithms_[algorithm_], _1,
+            "Exotica_" + algorithm_));
+    ompl_simple_setup_->getSpaceInformation()->setup();
+    ompl_simple_setup_->setup();
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
+      ompl_simple_setup_->getPlanner()->params().setParam("range", "1");
+    HIGHLIGHT("Mantis problem specified");
+    return SUCCESS;
+  }
+
+  EReturn OMPLImpSolver::solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol)
+  {
+    ros::Time startTime = ros::Time::now();
+    finishedSolving_ = false;
+    ompl::base::ScopedState<> ompl_start_state(state_space_);
+    state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(x0,
+        ompl_start_state.get());
+    ompl_simple_setup_->setStartState(ompl_start_state);
+    preSolve();
+    ompl::time::point start = ompl::time::now();
+    ob::PlannerTerminationCondition ptc = ob::timedPlannerTerminationCondition(
+        timeout_ - ompl::time::seconds(ompl::time::now() - start));
+    registerTerminationCondition(ptc);
+
+    if (ompl_simple_setup_->solve(ptc)
+        == ompl::base::PlannerStatus::EXACT_SOLUTION)
+    {
+      double last_plan_time_ = ompl_simple_setup_->getLastPlanComputationTime();
+      unregisterTerminationCondition();
+
+      finishedSolving_ = true;
+
+      if (!ompl_simple_setup_->haveSolutionPath()) return FAILURE;
+      planning_time_ = ros::Time::now() - startTime;
+      getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), sol, ptc);
+      planning_time_ = ros::Time::now() - startTime;
+      postSolve();
+      return SUCCESS;
+    }
+    else
+    {
+      finishedSolving_ = true;
+      planning_time_ = ros::Time::now() - startTime;
+      postSolve();
+      return FAILURE;
+    }
+    return SUCCESS;
+  }
+
+  EReturn OMPLImpSolver::convertPath(const og::PathGeometric &pg,
+      Eigen::MatrixXd & traj)
+  {
+    traj.resize(pg.getStateCount(), prob_->getSpaceDim());
+    Eigen::VectorXd tmp(prob_->getSpaceDim());
+
+    for (int i = 0; i < (int) pg.getStateCount(); ++i)
+    {
+      state_space_->as<OMPLBaseStateSpace>()->OMPLToExoticaState(pg.getState(i),
+          tmp);
+      traj.row(i) = tmp;
+    }
+    return SUCCESS;
+  }
+
+  EReturn OMPLImpSolver::getSimplifiedPath(og::PathGeometric &pg,
+      Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc)
+  {
+    ros::Time start = ros::Time::now();
+
+    og::PathSimplifierPtr psf_ = ompl_simple_setup_->getPathSimplifier();
+    const ob::SpaceInformationPtr &si =
+        ompl_simple_setup_->getSpaceInformation();
+
+    bool tryMore = false;
+    if (ptc == false) tryMore = psf_->reduceVertices(pg);
+    if (ptc == false) psf_->collapseCloseVertices(pg);
+    int times = 0;
+    while (tryMore && ptc == false)
+    {
+      tryMore = psf_->reduceVertices(pg);
+      times++;
+    }
+    if (si->getStateSpace()->isMetricSpace())
+    {
+      if (ptc == false)
+        tryMore = psf_->shortcutPath(pg);
+      else
+        tryMore = false;
+      times = 0;
+      while (tryMore && ptc == false)
+      {
+        tryMore = psf_->shortcutPath(pg);
+        times++;
+      }
+    }
+
+    std::vector<ob::State*> &states = pg.getStates();
+    //  Calculate number of states required
+    unsigned int length = 0;
+    const int n1 = states.size() - 1;
+    for (int i = 0; i < n1; ++i)
+      length += si->getStateSpace()->validSegmentCount(states[i],
+          states[i + 1]);
+    pg.interpolate(length);
+    convertPath(pg, traj);
+    return SUCCESS;
+  }
+
+  ompl::base::GoalPtr OMPLImpSolver::constructGoal()
+  {
+    return NULL;
+  }
+
+  std::string & OMPLImpSolver::getPlannerName()
+  {
+    return planner_name_;
+  }
+
+  EReturn OMPLImpSolver::setGoalState(const Eigen::VectorXd & qT,
+      const double eps)
+  {
+    ompl::base::ScopedState<> gs(state_space_);
+    state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());
+    if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
+    {
+      ERROR("Invalid goal state\n"<<qT.transpose());
+      return FAILURE;
+    }
+    ompl_simple_setup_->setGoalState(gs, eps);
+    return SUCCESS;
+  }
+
+  void OMPLImpSolver::registerDefaultPlanners()
+  {
+    registerPlannerAllocator("geometric::RRT",
+        boost::bind(&allocatePlanner<og::RRT>, _1, _2));
+    registerPlannerAllocator("geometric::pRRT",
+        boost::bind(&allocatePlanner<og::pRRT>, _1, _2));
+    registerPlannerAllocator("geometric::RRTConnect",
+        boost::bind(&allocatePlanner<og::RRTConnect>, _1, _2));
+    registerPlannerAllocator("geometric::LazyRRT",
+        boost::bind(&allocatePlanner<og::LazyRRT>, _1, _2));
+    registerPlannerAllocator("geometric::TRRT",
+        boost::bind(&allocatePlanner<og::TRRT>, _1, _2));
+    registerPlannerAllocator("geometric::EST",
+        boost::bind(&allocatePlanner<og::EST>, _1, _2));
+    registerPlannerAllocator("geometric::SBL",
+        boost::bind(&allocatePlanner<og::SBL>, _1, _2));
+    registerPlannerAllocator("geometric::KPIECE",
+        boost::bind(&allocatePlanner<og::KPIECE1>, _1, _2));
+    registerPlannerAllocator("geometric::BKPIECE",
+        boost::bind(&allocatePlanner<og::BKPIECE1>, _1, _2));
+    registerPlannerAllocator("geometric::LBKPIECE",
+        boost::bind(&allocatePlanner<og::LBKPIECE1>, _1, _2));
+    registerPlannerAllocator("geometric::RRTStar",
+        boost::bind(&allocatePlanner<og::RRTstar>, _1, _2));
+    registerPlannerAllocator("geometric::PRM",
+        boost::bind(&allocatePlanner<og::PRM>, _1, _2));
+    registerPlannerAllocator("geometric::PRMstar",
+        boost::bind(&allocatePlanner<og::PRMstar>, _1, _2));
+    registerPlannerAllocator("geometric::PDST",
+        boost::bind(&allocatePlanner<og::PDST>, _1, _2));
+    registerPlannerAllocator("geometric::LazyPRM",
+        boost::bind(&allocatePlanner<og::LazyPRM>, _1, _2));
+    registerPlannerAllocator("geometric::SPARS",
+        boost::bind(&allocatePlanner<og::SPARS>, _1, _2));
+    registerPlannerAllocator("geometric::SPARStwo",
+        boost::bind(&allocatePlanner<og::SPARStwo>, _1, _2));
+    registerPlannerAllocator("geometric::LBTRRT",
+        boost::bind(&allocatePlanner<og::LBTRRT>, _1, _2));
+    registerPlannerAllocator("geometric::STRIDE",
+        boost::bind(&allocatePlanner<og::STRIDE>, _1, _2));
+  }
+}
+

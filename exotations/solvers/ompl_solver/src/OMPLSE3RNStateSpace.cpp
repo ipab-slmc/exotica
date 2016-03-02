@@ -31,14 +31,13 @@
  *
  */
 
-#include <ompl_solver/OMPLSE3RNCompoundStateSpace.h>
+#include <ompl_solver/OMPLSE3RNStateSpace.h>
 namespace exotica
 {
-
-  OMPLSE3RNCompoundStateSpace::OMPLSE3RNCompoundStateSpace(unsigned int dim,
+  OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(unsigned int dim,
       const Server_ptr &server, OMPLProblem_ptr &prob)
-      : ob::CompoundStateSpace(), realvectordim_(dim), server_(server), prob_(
-          prob), SO3Bounds_(3), useGoal_(false)
+      : OMPLBaseStateSpace(dim, server, prob), realvectordim_(dim), SO3Bounds_(
+          3), useGoal_(false)
   {
     setName("OMPLSE3RNCompoundStateSpace");
     addSubspace(ob::StateSpacePtr(new ob::SE3StateSpace()), 10.0);
@@ -66,38 +65,10 @@ namespace exotica
       useGoal_ = true;
     }
 
-    lock();
-  }
-
-  OMPLSE3RNCompoundStateSpace::~OMPLSE3RNCompoundStateSpace()
-  {
-
-  }
-
-  ob::StateSamplerPtr OMPLSE3RNCompoundStateSpace::allocDefaultStateSampler()
-  {
-    OMPLSE3RNCompoundStateSampler *ss = new OMPLSE3RNCompoundStateSampler(this);
-    return ob::StateSamplerPtr(ss);
-  }
-
-  boost::shared_ptr<OMPLSE3RNCompoundStateSpace> OMPLSE3RNCompoundStateSpace::FromProblem(
-      OMPLProblem_ptr prob, const Server_ptr &server)
-  {
-    unsigned int n = prob->getSpaceDim();
-    boost::shared_ptr<OMPLSE3RNCompoundStateSpace> ret;
-    BASE_TYPE base_type = prob->getScenes().begin()->second->getBaseType();
-
-    int rn = n - 6;
-    if (rn <= 0)
-    {
-      ERROR("State space size error!");
-      return ret;
-    }
-
-    ret.reset(new OMPLSE3RNCompoundStateSpace(rn, server, prob));
+    unsigned int n = dim + 6;
     if (prob->getBounds().size() == 2 * n)
     {
-      ompl::base::RealVectorBounds RNbounds(rn);
+      ompl::base::RealVectorBounds RNbounds(dim);
       ompl::base::RealVectorBounds SE3bounds(3);
 
       for (int i = 0; i < 3; i++)
@@ -105,82 +76,89 @@ namespace exotica
         SE3bounds.setHigh(i, prob->getBounds()[i + n]);
         SE3bounds.setLow(i, prob->getBounds()[i]);
       }
-      ret->SO3Bounds_.resize(3);
+      SO3Bounds_.resize(3);
       for (int i = 3; i < 6; i++)
-        ret->SO3Bounds_.low[i - 3] = prob->getBounds()[i];
+        SO3Bounds_.low[i - 3] = prob->getBounds()[i];
       for (int i = 3; i < 6; i++)
-        ret->SO3Bounds_.high[i - 3] = prob->getBounds()[i + n];
+        SO3Bounds_.high[i - 3] = prob->getBounds()[i + n];
 
-      ret->setSE3StateSpaceBounds(SE3bounds);
+      setSE3StateSpaceBounds(SE3bounds);
       for (int i = 6; i < n; i++)
       {
         RNbounds.setHigh(i - 6, prob->getBounds()[i + n]);
         RNbounds.setLow(i - 6, prob->getBounds()[i]);
       }
-      ret->setRealVectorStateSpaceBounds(RNbounds);
-
+      setRealVectorStateSpaceBounds(RNbounds);
     }
     else
     {
       WARNING(
           "State space bounds were not specified!\n"<< prob->getBounds().size() << " " << n);
     }
-
-    return ret;
+    lock();
   }
-  unsigned int OMPLSE3RNCompoundStateSpace::getDimension() const
+
+  ob::StateSamplerPtr OMPLSE3RNStateSpace::allocDefaultStateSampler(
+      const ompl::base::StateSpace *ss)
+  {
+    OMPLSE3RNStateSampler *state_sampler = new OMPLSE3RNStateSampler(this);
+    return ob::StateSamplerPtr(state_sampler);
+  }
+
+  unsigned int OMPLSE3RNStateSpace::getDimension() const
   {
     return realvectordim_ + 6;
   }
-  void OMPLSE3RNCompoundStateSpace::setRealVectorStateSpaceBounds(
+
+  void OMPLSE3RNStateSpace::setRealVectorStateSpaceBounds(
       const ob::RealVectorBounds &bounds)
   {
     bounds.check();
     getSubspace(1)->as<ob::RealVectorStateSpace>()->setBounds(bounds);
   }
 
-  const ob::RealVectorBounds & OMPLSE3RNCompoundStateSpace::getRealVectorStateSpaceBounds() const
+  const ob::RealVectorBounds & OMPLSE3RNStateSpace::getRealVectorStateSpaceBounds() const
   {
     return getSubspace(1)->as<ob::RealVectorStateSpace>()->getBounds();
   }
 
-  void OMPLSE3RNCompoundStateSpace::setSE3StateSpaceBounds(
+  void OMPLSE3RNStateSpace::setSE3StateSpaceBounds(
       const ob::RealVectorBounds &xyz, const double dist)
   {
     xyz.check();
     getSubspace(0)->as<ob::SE3StateSpace>()->setBounds(xyz);
   }
 
-  const ob::RealVectorBounds & OMPLSE3RNCompoundStateSpace::getSE3StateSpaceBounds() const
+  const ob::RealVectorBounds & OMPLSE3RNStateSpace::getSE3StateSpaceBounds() const
   {
     return getSubspace(0)->as<ob::SE3StateSpace>()->getBounds();
   }
 
-  void OMPLSE3RNCompoundStateSpace::setStart(const Eigen::VectorXd &start)
+  void OMPLSE3RNStateSpace::setStart(const Eigen::VectorXd &start)
   {
     start_ = start;
     base_dist_ = (goal_.segment(0, 2) - start_.segment(0, 2)).norm();
   }
 
-  void OMPLSE3RNCompoundStateSpace::setGoal(const Eigen::VectorXd &goal)
+  void OMPLSE3RNStateSpace::setGoal(const Eigen::VectorXd &goal)
   {
     if (goal.rows() == realvectordim_ + 6)
     {
       goal_ = goal;
     }
   }
-  void OMPLSE3RNCompoundStateSampler::sampleUniform(ob::State *state)
+  void OMPLSE3RNStateSampler::sampleUniform(ob::State *state)
   {
-    OMPLSE3RNCompoundStateSpace::StateType *rstate =
-        static_cast<OMPLSE3RNCompoundStateSpace::StateType*>(state);
+    OMPLSE3RNStateSpace::StateType *rstate =
+        static_cast<OMPLSE3RNStateSpace::StateType*>(state);
 
     //	Sample for the SE3 space
-    const OMPLSE3RNCompoundStateSpace* space =
-        static_cast<const OMPLSE3RNCompoundStateSpace*>(space_);
+    const OMPLSE3RNStateSpace* space =
+        static_cast<const OMPLSE3RNStateSpace*>(space_);
     const ob::RealVectorBounds &se3_bounds =
-        static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getSE3StateSpaceBounds();
+        static_cast<const OMPLSE3RNStateSpace*>(space_)->getSE3StateSpaceBounds();
     ob::RealVectorBounds so3_bounds =
-        static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->SO3Bounds_;
+        static_cast<const OMPLSE3RNStateSpace*>(space_)->SO3Bounds_;
     rstate->SE3StateSpace().setXYZ(
         rng_.uniformReal(se3_bounds.low[0], se3_bounds.high[0]),
         rng_.uniformReal(se3_bounds.low[1], se3_bounds.high[1]),
@@ -194,7 +172,7 @@ namespace exotica
         rng_.uniformReal(so3_bounds.low[2], so3_bounds.high[2]));
     //	Sample for the RN space
     const ob::RealVectorBounds &realvector_bounds =
-        static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getRealVectorStateSpaceBounds();
+        static_cast<const OMPLSE3RNStateSpace*>(space_)->getRealVectorStateSpaceBounds();
     const unsigned int dim = realvector_bounds.high.size();
     if (space->useGoal_)
     {
@@ -218,16 +196,16 @@ namespace exotica
             realvector_bounds.low[i], realvector_bounds.high[i]);
   }
 
-  void OMPLSE3RNCompoundStateSampler::sampleUniformNear(ob::State *state,
+  void OMPLSE3RNStateSampler::sampleUniformNear(ob::State *state,
       const ob::State *near, const double distance)
   {
     //	First sample for the upper body
-    OMPLSE3RNCompoundStateSpace::StateType *rstate =
-        static_cast<OMPLSE3RNCompoundStateSpace::StateType*>(state);
-    const OMPLSE3RNCompoundStateSpace::StateType *nstate =
-        static_cast<const OMPLSE3RNCompoundStateSpace::StateType*>(near);
+    OMPLSE3RNStateSpace::StateType *rstate =
+        static_cast<OMPLSE3RNStateSpace::StateType*>(state);
+    const OMPLSE3RNStateSpace::StateType *nstate =
+        static_cast<const OMPLSE3RNStateSpace::StateType*>(near);
     const ob::RealVectorBounds &realvector_bounds =
-        static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getRealVectorStateSpaceBounds();
+        static_cast<const OMPLSE3RNStateSpace*>(space_)->getRealVectorStateSpaceBounds();
     const unsigned int dim = realvector_bounds.high.size();
     for (unsigned int i = 0; i < dim; ++i)
       rstate->RealVectorStateSpace().values[i] = rng_.uniformReal(
@@ -239,7 +217,7 @@ namespace exotica
                   + distance * weightImportance_[i + 6]));
     //	Now sample for the SE3 space
     const ob::RealVectorBounds &se3_bounds =
-        static_cast<const OMPLSE3RNCompoundStateSpace*>(space_)->getSE3StateSpaceBounds();
+        static_cast<const OMPLSE3RNStateSpace*>(space_)->getSE3StateSpaceBounds();
     rstate->SE3StateSpace().setX(
         rng_.uniformReal(
             std::max(se3_bounds.low[0],
@@ -268,50 +246,48 @@ namespace exotica
         rng_.uniformReal(-1.57, 1.57));
   }
 
-  void OMPLSE3RNCompoundStateSampler::sampleGaussian(ob::State *state,
+  void OMPLSE3RNStateSampler::sampleGaussian(ob::State *state,
       const ob::State * mean, const double stdDev)
   {
     WARNING_NAMED("OMPLFullBodyStateSampler", "sampleGaussian not implemented");
   }
 
-  EReturn OMPLSE3RNCompoundStateSpace::OMPLStateToEigen(const ob::State *ompl,
-      Eigen::VectorXd &eigen)
+  EReturn OMPLSE3RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
+      ompl::base::State *state) const
   {
-    eigen.setZero(getDimension());
-    const OMPLSE3RNCompoundStateSpace::StateType *statetype =
-        static_cast<const OMPLSE3RNCompoundStateSpace::StateType*>(ompl);
-    memcpy(eigen.segment(6, eigen.rows() - 6).data(),
-        statetype->RealVectorStateSpace().values,
-        sizeof(double) * (eigen.rows() - 6));
-    eigen(0) = statetype->SE3StateSpace().getX();
-    eigen(1) = statetype->SE3StateSpace().getY();
-    eigen(2) = statetype->SE3StateSpace().getZ();
-
-    KDL::Rotation tmp = KDL::Rotation::Quaternion(
-        statetype->SE3StateSpace().rotation().x,
-        statetype->SE3StateSpace().rotation().y,
-        statetype->SE3StateSpace().rotation().z,
-        statetype->SE3StateSpace().rotation().w);
-    tmp.GetEulerZYX(eigen(3), eigen(4), eigen(5));
-    return SUCCESS;
-  }
-
-  EReturn OMPLSE3RNCompoundStateSpace::EigenToOMPLState(
-      const Eigen::VectorXd &eigen, ob::State *ompl)
-  {
-    OMPLSE3RNCompoundStateSpace::StateType *statetype =
-        static_cast<OMPLSE3RNCompoundStateSpace::StateType*>(ompl);
-    statetype->SE3StateSpace().setXYZ(eigen(0), eigen(1), eigen(2));
-    KDL::Rotation tmp = KDL::Rotation::EulerZYX(eigen(3), eigen(4), eigen(5));
+    OMPLSE3RNStateSpace::StateType *statetype =
+        static_cast<OMPLSE3RNStateSpace::StateType*>(state);
+    statetype->SE3StateSpace().setXYZ(q(0), q(1), q(2));
+    KDL::Rotation tmp = KDL::Rotation::EulerZYX(q(3), q(4), q(5));
     tmp.GetQuaternion(statetype->SE3StateSpace().rotation().x,
         statetype->SE3StateSpace().rotation().y,
         statetype->SE3StateSpace().rotation().z,
         statetype->SE3StateSpace().rotation().w);
 
     memcpy(statetype->RealVectorStateSpace().values,
-        eigen.segment(6, eigen.rows() - 6).data(),
-        sizeof(double) * (eigen.rows() - 6));
+        q.segment(6, q.rows() - 6).data(), sizeof(double) * (q.rows() - 6));
+    return SUCCESS;
+  }
 
+  EReturn OMPLSE3RNStateSpace::OMPLToExoticaState(
+      const ompl::base::State *state, Eigen::VectorXd &q) const
+  {
+    q.setZero(getDimension());
+    const OMPLSE3RNStateSpace::StateType *statetype =
+        static_cast<const OMPLSE3RNStateSpace::StateType*>(state);
+    memcpy(q.segment(6, q.rows() - 6).data(),
+        statetype->RealVectorStateSpace().values,
+        sizeof(double) * (q.rows() - 6));
+    q(0) = statetype->SE3StateSpace().getX();
+    q(1) = statetype->SE3StateSpace().getY();
+    q(2) = statetype->SE3StateSpace().getZ();
+
+    KDL::Rotation tmp = KDL::Rotation::Quaternion(
+        statetype->SE3StateSpace().rotation().x,
+        statetype->SE3StateSpace().rotation().y,
+        statetype->SE3StateSpace().rotation().z,
+        statetype->SE3StateSpace().rotation().w);
+    tmp.GetEulerZYX(q(3), q(4), q(5));
     return SUCCESS;
   }
 }

@@ -34,9 +34,9 @@
 #ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_PROJECTIONS_DMESHPROJECTION_H_
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_PROJECTIONS_DMESHPROJECTION_H_
 #include <ompl/base/ProjectionEvaluator.h>
+#include <ompl_solver/OMPLSE3RNStateSpace.h>
 #include "exotica/Scene.h"
 #include "ompl_solver/OMPLStateSpace.h"
-#include "ompl_solver/OMPLSE3RNCompoundStateSpace.h"
 
 namespace exotica
 {
@@ -78,7 +78,7 @@ namespace exotica
 //				HIGHLIGHT_NAMED("DMeshProjection", "Calling project");
         Eigen::VectorXd q(space_->getDimension());
         compound_ ?
-            space_->as<OMPLSE3RNCompoundStateSpace>()->OMPLStateToEigen(state,
+            space_->as<OMPLSE3RNStateSpace>()->OMPLStateToEigen(state,
                 q) :
             space_->as<OMPLStateSpace>()->copyFromOMPLState(state, q);
         scene_->update(q, 0);

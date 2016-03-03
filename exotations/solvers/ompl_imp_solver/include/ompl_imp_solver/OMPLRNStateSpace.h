@@ -34,7 +34,7 @@
 #ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLRNSTATESPACE_H_
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLRNSTATESPACE_H_
 
-#include "ompl_solver/OMPLBaseStateSpace.h"
+#include "ompl_imp_solver/OMPLBaseStateSpace.h"
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/SpaceInformation.h>
 

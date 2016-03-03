@@ -35,7 +35,9 @@
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLIMPSOLVER_H_
 
 #include "ompl_solver/OMPLBaseSolver.h"
-#include "ompl_solver/OMPLBaseStateSpace.h"
+#include "ompl_imp_solver/OMPLRNStateSpace.h"
+#include "ompl_imp_solver/OMPLSE3RNStateSpace.h"
+#include <pluginlib/class_loader.h>
 
 namespace exotica
 {

@@ -28,8 +28,4 @@
   <run_depend>ompl</run_depend>
   <run_depend>ik_solver</run_depend>
   <run_depend>pluginlib</run_depend>
-  
-  <export>
-  	<ompl_imp_solver plugin="${prefix}/ompl_solver_plugins.xml" />
-  </export>
 </package>

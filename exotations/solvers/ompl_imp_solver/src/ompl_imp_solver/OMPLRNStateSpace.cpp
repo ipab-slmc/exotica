@@ -31,7 +31,7 @@
  *
  */
 
-#include "ompl_solver/OMPLRNStateSpace.h"
+#include "ompl_imp_solver/OMPLRNStateSpace.h"
 
 namespace exotica
 {
@@ -43,18 +43,17 @@ namespace exotica
     addSubspace(
         ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)),
         1.0);
-
     ompl::base::RealVectorBounds bounds(dim);
     for (int i = 0; i < dim; i++)
     {
-      bounds.setHigh(i, prob->getBounds()[i + 3 + dim + 3]);
-      bounds.setLow(i, prob->getBounds()[i + 3]);
+      bounds.setHigh(i, prob->getBounds()[i + dim]);
+      bounds.setLow(i, prob->getBounds()[i]);
     }
     getSubspace(0)->as<ob::RealVectorStateSpace>()->setBounds(bounds);
     lock();
   }
 
-  ompl::base::StateSamplerPtr allocDefaultStateSampler(
+  ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler(
       const ompl::base::StateSpace *ss)
   {
     return ob::StateSamplerPtr(new ob::RealVectorStateSampler(ss));

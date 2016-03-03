@@ -46,7 +46,6 @@ add_library(ompl_solver
    src/OMPLsolver.cpp
    src/OMPLProblem.cpp
    src/OMPLBaseSolver.cpp
-   src/OMPLBaseStateSpace.cpp
 )
 
 link_directories(${catkin_LIBRARY_DIRS})
@@ -54,15 +53,6 @@ link_directories(${Boost_LIBRARY_DIRS})
 link_directories(${OMPL_LIBRARY_DIRS})
 
 target_link_libraries(ompl_solver
-   ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES}
-)
-
-add_library(ompl_imp_solver
-   src/OMPLImpSolver.cpp
-   src/OMPLRNStateSpace.cpp
-   src/OMPLSE3RNStateSpace.cpp
-)
-target_link_libraries(ompl_imp_solver
    ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES}
 )
 

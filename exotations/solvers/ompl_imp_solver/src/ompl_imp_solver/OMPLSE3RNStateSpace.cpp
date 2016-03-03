@@ -31,7 +31,7 @@
  *
  */
 
-#include <ompl_solver/OMPLSE3RNStateSpace.h>
+#include <ompl_imp_solver/OMPLSE3RNStateSpace.h>
 namespace exotica
 {
   OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(unsigned int dim,

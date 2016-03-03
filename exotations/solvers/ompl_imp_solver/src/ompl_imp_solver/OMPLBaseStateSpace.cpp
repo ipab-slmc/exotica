@@ -31,7 +31,7 @@
  *
  */
 
-#include "ompl_solver/OMPLBaseStateSpace.h"
+#include "ompl_imp_solver/OMPLBaseStateSpace.h"
 
 namespace exotica
 {

@@ -31,7 +31,7 @@
  *
  */
 
-#include "ompl_solver/OMPLStateValidityChecker.h"
+#include "ompl_imp_solver/OMPLStateValidityChecker.h"
 
 namespace exotica
 {

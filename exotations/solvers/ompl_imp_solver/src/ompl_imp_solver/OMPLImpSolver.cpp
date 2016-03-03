@@ -31,9 +31,8 @@
  *
  */
 
-#include "ompl_solver/OMPLImpSolver.h"
-#include "ompl_solver/OMPLRNStateSpace.h"
-#include "ompl_solver/OMPLSE3RNStateSpace.h"
+#include "ompl_imp_solver/OMPLImpSolver.h"
+#include <pluginlib/class_list_macros.h>
 
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/pRRT.h>
@@ -57,6 +56,9 @@
 #include <ompl/geometric/planners/rrt/RRTstar.h>
 #include <ompl/geometric/planners/rrt/pRRT.h>
 #include <ompl/geometric/planners/stride/STRIDE.h>
+
+PLUGINLIB_EXPORT_CLASS(exotica::OMPLImpSolver, exotica::OMPLBaseSolver)
+
 namespace exotica
 {
   OMPLImpSolver::OMPLImpSolver()
@@ -98,10 +100,10 @@ namespace exotica
     base_type_ = prob_->getScenes().begin()->second->getBaseType();
     if (base_type_ == BASE_TYPE::FIXED)
       state_space_.reset(
-          new OMPLRNStateSpace(prob_->getSpaceDim() - 3, server_, prob_));
+          new OMPLRNStateSpace(prob_->getSpaceDim(), server_, prob_));
     else if (base_type_ == BASE_TYPE::FLOATING)
       state_space_.reset(
-          new OMPLSE3RNStateSpace(prob_->getSpaceDim() - 3, server_, prob_));
+          new OMPLSE3RNStateSpace(prob_->getSpaceDim(), server_, prob_));
 
     ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(
@@ -115,7 +117,6 @@ namespace exotica
     ompl_simple_setup_->setup();
     if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
       ompl_simple_setup_->getPlanner()->params().setParam("range", "1");
-    HIGHLIGHT("Mantis problem specified");
     return SUCCESS;
   }
 
@@ -234,7 +235,13 @@ namespace exotica
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());
     if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
     {
-      ERROR("Invalid goal state\n"<<qT.transpose());
+      ERROR("Invalid goal state [Collision]\n"<<qT.transpose());
+      return FAILURE;
+    }
+
+    if (!ompl_simple_setup_->getSpaceInformation()->satisfiesBounds(gs.get()))
+    {
+      ERROR("Invalid goal state [Invalid joint bounds]\n"<<qT.transpose());
       return FAILURE;
     }
     ompl_simple_setup_->setGoalState(gs, eps);

@@ -103,7 +103,7 @@ namespace exotica
           new OMPLRNStateSpace(prob_->getSpaceDim(), server_, prob_));
     else if (base_type_ == BASE_TYPE::FLOATING)
       state_space_.reset(
-          new OMPLSE3RNStateSpace(prob_->getSpaceDim(), server_, prob_));
+          new OMPLSE3RNStateSpace(prob_->getSpaceDim() - 6, server_, prob_));
 
     ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(
@@ -113,6 +113,18 @@ namespace exotica
     ompl_simple_setup_->setPlannerAllocator(
         boost::bind(known_algorithms_[algorithm_], _1,
             "Exotica_" + algorithm_));
+
+    std::vector<std::string> jnt_names;
+    prob_->getScenes().begin()->second->getJointNames(jnt_names);
+    std::vector<int> project_vars = { 0, 1 };
+    if (base_type_ == BASE_TYPE::FIXED)
+      ompl_simple_setup_->getStateSpace()->registerDefaultProjection(
+          ob::ProjectionEvaluatorPtr(
+              new OMPLRNProjection(state_space_, project_vars)));
+    else if (base_type_ == BASE_TYPE::FLOATING)
+      ompl_simple_setup_->getStateSpace()->registerDefaultProjection(
+          ob::ProjectionEvaluatorPtr(
+              new OMPLSE3RNProjection(state_space_, project_vars)));
     ompl_simple_setup_->getSpaceInformation()->setup();
     ompl_simple_setup_->setup();
     if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
@@ -215,6 +227,8 @@ namespace exotica
           states[i + 1]);
     pg.interpolate(length);
     convertPath(pg, traj);
+    HIGHLIGHT(
+        "Trajectory simplification took "<<ros::Duration(ros::Time::now()-start).toSec()<<" sec");
     return SUCCESS;
   }
 
@@ -258,8 +272,8 @@ namespace exotica
         boost::bind(&allocatePlanner<og::RRTConnect>, _1, _2));
     registerPlannerAllocator("geometric::LazyRRT",
         boost::bind(&allocatePlanner<og::LazyRRT>, _1, _2));
-    registerPlannerAllocator("geometric::TRRT",
-        boost::bind(&allocatePlanner<og::TRRT>, _1, _2));
+//    registerPlannerAllocator("geometric::TRRT",
+//        boost::bind(&allocatePlanner<og::TRRT>, _1, _2));
     registerPlannerAllocator("geometric::EST",
         boost::bind(&allocatePlanner<og::EST>, _1, _2));
     registerPlannerAllocator("geometric::SBL",

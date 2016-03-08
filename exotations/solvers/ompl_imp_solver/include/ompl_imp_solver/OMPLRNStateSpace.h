@@ -72,6 +72,44 @@ namespace exotica
       virtual EReturn OMPLToExoticaState(const ompl::base::State *state,
           Eigen::VectorXd &q) const;
   };
+
+  class OMPLRNProjection: public ompl::base::ProjectionEvaluator
+  {
+    public:
+      OMPLRNProjection(const ompl::base::StateSpacePtr &space,
+          const std::vector<int> & vars)
+          : ompl::base::ProjectionEvaluator(space), variables_(vars)
+      {
+
+      }
+
+      ~OMPLRNProjection()
+      {
+        //TODO
+      }
+
+      virtual unsigned int getDimension(void) const
+      {
+        return variables_.size();
+      }
+
+      virtual void defaultCellSizes()
+      {
+        cellSizes_.clear();
+        cellSizes_.resize(variables_.size(), 0.1);
+      }
+
+      virtual void project(const ompl::base::State *state,
+          ompl::base::EuclideanProjection &projection) const
+      {
+        for (std::size_t i = 0; i < variables_.size(); ++i)
+          projection(i) =
+              state->as<exotica::OMPLRNStateSpace::StateType>()->getRNSpace().values[variables_[i]];
+      }
+
+    private:
+      std::vector<int> variables_;
+  };
 }
 
 #endif /* EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLRNSTATESPACE_H_ */

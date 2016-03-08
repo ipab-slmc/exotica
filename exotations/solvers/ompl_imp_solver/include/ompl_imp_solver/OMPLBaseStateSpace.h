@@ -38,6 +38,7 @@
 #include "ompl_solver/OMPLProblem.h"
 #include <ompl/base/StateValidityChecker.h>
 #include <ompl/base/SpaceInformation.h>
+#include <ompl/base/ProjectionEvaluator.h>
 
 namespace ob = ompl::base;
 namespace exotica

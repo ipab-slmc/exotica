@@ -289,7 +289,6 @@ namespace exotica
               server_->getParam(server_->getName() + "/FloatingBaseUpperLimits",
                   tmp_upper)) && tmp_upper->data.size() == 6)
       {
-        HIGHLIGHT("Setting floating base bounds");
         std::vector<double> lower = tmp_lower->data;
         std::vector<double> upper = tmp_upper->data;
         for (int i = 0; i < 3; i++)

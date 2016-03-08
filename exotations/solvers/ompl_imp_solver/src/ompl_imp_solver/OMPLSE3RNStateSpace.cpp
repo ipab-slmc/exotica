@@ -64,7 +64,6 @@ namespace exotica
     {
       useGoal_ = true;
     }
-
     unsigned int n = dim + 6;
     if (prob->getBounds().size() == 2 * n)
     {
@@ -81,7 +80,6 @@ namespace exotica
         SO3Bounds_.low[i - 3] = prob->getBounds()[i];
       for (int i = 3; i < 6; i++)
         SO3Bounds_.high[i - 3] = prob->getBounds()[i + n];
-
       setSE3StateSpaceBounds(SE3bounds);
       for (int i = 6; i < n; i++)
       {
@@ -92,7 +90,7 @@ namespace exotica
     }
     else
     {
-      WARNING(
+      ERROR(
           "State space bounds were not specified!\n"<< prob->getBounds().size() << " " << n);
     }
     lock();

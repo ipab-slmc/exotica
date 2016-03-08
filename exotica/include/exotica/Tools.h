@@ -55,13 +55,13 @@
 #ifdef EXOTICA_DEBUG_MODE
 #define CHECK_EXECUTION         std::cout << "\033[1;32m[EXOTica]:\033[0m Ok in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n"; //!< With endline
 #define INDICATE_FAILURE        std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\033[0m\n";//!< With endline
-#define WARNING(x)				std::clog << "\033[1;32m[EXOTica]:\033[0m \033[33mWarning in " << __PRETTY_FUNCTION__ << ": " << x << "\033[0m\n";//!< With endline
+#define WARNING(x)				std::cout << "\033[1;32m[EXOTica]:\033[0m \033[33mWarning in " << __PRETTY_FUNCTION__ << ": " << x << "\033[0m\n";//!< With endline
 #define ERROR(x)				std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\033[0m\n";//!< With endline
 #define INFO(x)					std::clog << "\033[1;32m[EXOTica]:\033[0m Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
 #else
 #define CHECK_EXECUTION         // No operation
 #define INDICATE_FAILURE        std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\033[0m\n";//!< With endline
-#define WARNING(x)
+#define WARNING(x)        std::cout << "\033[1;32m[EXOTica]:\033[0m \033[33mWarning in " << __PRETTY_FUNCTION__ << ": " << x << "\033[0m\n";//!< With endline
 #define ERROR(x)                std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\033[0m\n";//!< With endline
 #define INFO(x)
 #endif

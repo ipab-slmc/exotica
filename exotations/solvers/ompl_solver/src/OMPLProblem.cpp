@@ -221,8 +221,9 @@ namespace exotica
         {
           boost::shared_ptr<exotica::Identity> idt = boost::static_pointer_cast<
               exotica::Identity>(taskmap);
+          std::vector<std::pair<std::string,std::string> > tmpParams;
           EReturn ret1 = taskmap->initialiseManual("exotica::Identity", server_,
-              scenes_, problem);
+              scenes_, problem,tmpParams);
           EReturn ret = idt->initialise(problem->endStateName,
               *(problem->posesJointNames));
           if (ok(ret) && ok(ret1))

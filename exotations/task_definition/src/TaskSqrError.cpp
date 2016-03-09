@@ -55,6 +55,19 @@ namespace exotica
     wasFullyInitialised_ = false;
   }
 
+  EReturn TaskSqrError::initialiseManual(std::string name, Server_ptr & server,
+      boost::shared_ptr<PlanningProblem> prob,
+      std::vector<std::pair<std::string,std::string> >& params)
+  {
+      EReturn ret = TaskDefinition::initialiseManual(name,server,prob,params);
+      int dim;
+      task_map_->taskSpaceDim(dim);
+      y_star0_.resize(dim);
+      y_star0_.setZero();
+      rho0_(0) = 1.0;
+      return ret;
+  }
+
   EReturn TaskSqrError::initDerived(tinyxml2::XMLHandle & handle)
   {
     //!< Temporaries

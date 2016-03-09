@@ -53,6 +53,13 @@ namespace exotica
     return ret;
   }
 
+  EReturn TaskDefinition::initialiseManual(std::string name, Server_ptr & server,
+            boost::shared_ptr<PlanningProblem> prob,
+            std::vector<std::pair<std::string,std::string> >& params)
+  {
+      object_name_ = name + std::to_string((unsigned long) this);
+  }
+
   EReturn TaskDefinition::initBase(tinyxml2::XMLHandle & handle,
       const TaskMap_map & map_list)
   {

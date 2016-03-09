@@ -32,6 +32,7 @@
 
 #include "exotica/Tools.h"
 #include <fstream>
+#include <boost/algorithm/string.hpp>
 
 namespace exotica
 {
@@ -691,6 +692,28 @@ namespace exotica
         cnt++;
       }
     return SUCCESS;
+  }
+
+  EReturn getText(std::string& txt, KDL::Frame& ret)
+  {
+      std::vector<std::string> strs;
+      boost::split(strs, txt, boost::is_any_of(" "));
+      if(strs.size()!=7)
+      {
+          HIGHLIGHT(txt);
+          INDICATE_FAILURE;
+          return FAILURE;
+      }
+
+      std::vector<double> doubleVector(strs.size());
+      std::transform(strs.begin(), strs.end(), doubleVector.begin(), [](const std::string& val)
+      {
+          return std::stod(val);
+      });
+
+      ret.p = KDL::Vector(doubleVector[0],doubleVector[1],doubleVector[2]);
+      ret.M = KDL::Rotation::Quaternion(doubleVector[4],doubleVector[5],doubleVector[6],doubleVector[3]);
+      return SUCCESS;
   }
 
 }

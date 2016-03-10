@@ -259,7 +259,7 @@ namespace exotica
       if (phiCnt_ != phiFlag_.size())
       {
         WARNING(
-            "Task map '"<<object_name_<<"' is hasn't got phi registered at all time steps!");
+            "Task map '"<<object_name_<<"' is hasn't got phi registered at all time steps! phiCnt "<<phiCnt_<<" size "<<phiFlag_.size());
       }
       if (updateJacobian_)
       {
@@ -268,7 +268,7 @@ namespace exotica
           if (jacCnt_ != jacFlag_.size())
           {
             WARNING(
-                "Task map '"<<object_name_<<"' is hasn't got phi registered at all time steps!");
+                "Task map '"<<object_name_<<"' is hasn't got phi registered at all time steps! phiCnt "<<phiCnt_<<" size "<<phiFlag_.size());
           }
           return true;
         }

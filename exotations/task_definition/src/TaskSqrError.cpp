@@ -65,6 +65,7 @@ namespace exotica
       y_star0_.resize(dim);
       y_star0_.setZero();
       rho0_(0) = 1.0;
+      wasFullyInitialised_ = true;
       return ret;
   }
 

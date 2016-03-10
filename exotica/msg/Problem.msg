@@ -1,0 +1,11 @@
+Header   header
+string   problem_name
+string   problem_type
+int32    tasks
+string[] task_name
+string[] task_type
+string[] map_type
+Matrix[] task_goal
+Matrix[] task_reference
+StringList[] task_params
+StringList[] map_params

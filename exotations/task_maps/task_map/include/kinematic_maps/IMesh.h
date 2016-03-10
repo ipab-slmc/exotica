@@ -65,6 +65,10 @@ namespace exotica
        */
       virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
+      virtual EReturn initialiseManual(std::string name, Server_ptr & server,
+          const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
+          std::vector<std::pair<std::string,std::string> >& params);
+
       /**
        * @brief	Get the task space dimension
        * @return	Exotica return type, SUCCESS if succeeded

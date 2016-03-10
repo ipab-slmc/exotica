@@ -55,6 +55,52 @@ namespace exotica
     return ret;
   }
 
+  std::vector<std::pair<std::string,std::string> > vector2map(std::vector<std::string> vec)
+  {
+      std::vector<std::pair<std::string,std::string> > ret;
+      int n=vec.size()/2;
+      for(int i=0;i<n;i++)
+      {
+          ret.push_back(std::pair<std::string,std::string>(vec[i*2],vec[i*2+1]));
+      }
+      return ret;
+  }
+
+  EReturn PlanningProblem::reinitialise(Problem& msg, boost::shared_ptr<PlanningProblem> problem)
+  {
+      if(type().compare(msg.problem_type)!=0)
+      {
+          INDICATE_FAILURE;
+          return FAILURE;
+      }
+
+      if(msg.map_type.size()<msg.tasks) {HIGHLIGHT("Invalid map types!");return FAILURE;}
+      if(msg.task_type.size()<msg.tasks) {HIGHLIGHT("Invalid task types!");return FAILURE;}
+      if(msg.task_name.size()<msg.tasks) {HIGHLIGHT("Invalid task names!");return FAILURE;}
+      if(msg.task_goal.size()<msg.tasks) {HIGHLIGHT("Invalid task goals!");return FAILURE;}
+
+      for(int i=0;i<msg.tasks;i++)
+      {
+          TaskMap_ptr map;
+          TaskMap_fac::Instance().createObject(msg.map_type.at(i),map);
+          std::vector<std::pair<std::string,std::string> > tmpParams;
+          if(msg.map_params.size()!=0) tmpParams=vector2map(msg.map_params.at(i).strings);
+
+          map->initialiseManual(msg.task_name.at(i),server_,scenes_,problem,tmpParams);
+          std::string name = map->getObjectName();
+          task_maps_[name] = map;
+
+          TaskDefinition_ptr def;
+          TaskDefinition_fac::Instance().createObject(msg.task_type.at(i),def);
+          def->setTaskMap(map);
+          if(msg.task_params.size()!=0) tmpParams=vector2map(msg.task_params.at(i).strings);
+          def->initialiseManual(msg.task_name.at(i),server_,problem,tmpParams);
+          def->setTimeSteps(msg.task_goal.at(i).row);
+          task_defs_[msg.task_name.at(i)]=def;
+      }
+      return SUCCESS;
+  }
+
   EReturn PlanningProblem::initBase(tinyxml2::XMLHandle & handle,
       const Server_ptr & server)
   {
@@ -309,11 +355,11 @@ namespace exotica
       task_maps_ = originalMaps_;
       task_defs_ = originalDefs_;
       std::map<std::string,
-          std::pair<std::vector<std::string>, std::vector<KDL::Frame>>>tmp;
-      for (auto &it : task_maps_)
+          std::pair<std::vector<std::string>, std::vector<KDL::Frame> > >tmp;
+      for (auto &it : originalMaps_)
       {
-        std::pair<std::vector<std::string>, std::vector<KDL::Frame>> tmp_pair;
-        if (it.second->getScene()->getEndEffectors(it.first, tmp_pair))
+        std::pair<std::vector<std::string>, std::vector<KDL::Frame> > tmp_pair;
+        if (ok(it.second->getScene()->getEndEffectors(it.first, tmp_pair)))
           tmp[it.first] = tmp_pair;
       }
       for (auto it = scenes_.begin(); it != scenes_.end(); ++it)

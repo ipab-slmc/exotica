@@ -68,6 +68,10 @@ namespace exotica
       EReturn initBase(tinyxml2::XMLHandle & handle,
           const TaskMap_map & map_list);
 
+      virtual EReturn initialiseManual(std::string name, Server_ptr & server,
+          boost::shared_ptr<PlanningProblem> prob,
+          std::vector<std::pair<std::string,std::string> >& params);
+
       /**
        * @brief registerPhi Registers a memory location for the output of phi at time t
        * @param y Reference to memory location to be registered

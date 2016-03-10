@@ -97,6 +97,18 @@ namespace exotica
     return SUCCESS;
   }
 
+  EReturn IMesh::initialiseManual(std::string name, Server_ptr & server,
+            const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
+            std::vector<std::pair<std::string,std::string> >& params)
+  {
+      EReturn ret = TaskMap::initialiseManual(name,server,scene_ptr,prob,params);
+      if(!ok(ret)) {INDICATE_FAILURE; return ret;}
+      eff_size_ = scene_->getMapSize(object_name_);
+      weights_.setOnes(eff_size_, eff_size_);
+      initialised_ = true;
+      return ret;
+  }
+
   EReturn IMesh::taskSpaceDim(int & task_dim)
   {
     LOCK(locker_);

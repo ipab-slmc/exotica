@@ -56,6 +56,11 @@ namespace exotica
     return ret;
   }
 
+  void TaskMap::debug()
+  {
+    //  You need to implement this in your own taskmap
+  }
+
   EReturn TaskMap::initialise(const rapidjson::Value& a)
   {
     ERROR("This has to be implemented in the derived class!");
@@ -73,7 +78,7 @@ namespace exotica
         ;
         return FAILURE;
       }
-      std::vector<std::pair<std::string,std::string> > tmp;
+      std::vector<std::pair<std::string, std::string> > tmp;
       initialiseManual(object_name_, server, scene_ptr, prob, tmp);
       return initialise(a);
     }
@@ -87,57 +92,57 @@ namespace exotica
 
   EReturn TaskMap::initialiseManual(std::string name, Server_ptr & server,
       const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
-      std::vector<std::pair<std::string,std::string> >& params)
+      std::vector<std::pair<std::string, std::string> >& params)
   {
     object_name_ = name + std::to_string((unsigned long) this);
     server_ = server;
     scene_ = scene_ptr.begin()->second;
     poses = prob->poses;
     posesJointNames = prob->posesJointNames;
-    int limbs=0;
+    int limbs = 0;
     std::vector<std::string> tmp_eff(0);
     std::vector<KDL::Frame> tmp_offset(0);
-    for(auto& par : params)
+    for (auto& par : params)
     {
-        if(par.first.compare("limb")==0)
+      if (par.first.compare("limb") == 0)
+      {
+        std::vector<std::string> strs;
+        boost::split(strs, par.second, boost::is_any_of(";"));
+        if (strs.size() == 1)
         {
-            std::vector<std::string> strs;
-            boost::split(strs, par.second, boost::is_any_of(";"));
-            if(strs.size()==1)
-            {
-                tmp_eff.push_back(strs[0]);
-                tmp_offset.push_back(KDL::Frame::Identity());
-                limbs++;
-            }
-            else if(strs.size()==2)
-            {
-                tmp_eff.push_back(strs[0]);
-                KDL::Frame tmp;
-                if(!ok(getText(strs[1],tmp)))
-                {
-                    HIGHLIGHT_NAMED(object_name_,"Invalid limb transform found!")
-                    return FAILURE;
-                }
-
-                tmp_offset.push_back(tmp);
-                limbs++;
-            }
-            else
-            {
-                HIGHLIGHT_NAMED(object_name_,"Invalid limbs found!")
-                return FAILURE;
-            }
+          tmp_eff.push_back(strs[0]);
+          tmp_offset.push_back(KDL::Frame::Identity());
+          limbs++;
         }
+        else if (strs.size() == 2)
+        {
+          tmp_eff.push_back(strs[0]);
+          KDL::Frame tmp;
+          if (!ok(getText(strs[1], tmp)))
+          {
+            HIGHLIGHT_NAMED(object_name_, "Invalid limb transform found!")
+            return FAILURE;
+          }
+
+          tmp_offset.push_back(tmp);
+          limbs++;
+        }
+        else
+        {
+          HIGHLIGHT_NAMED(object_name_, "Invalid limbs found!")
+          return FAILURE;
+        }
+      }
     }
-    if(limbs>1)
+    if (limbs > 1)
     {
-        scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
-        return SUCCESS;
+      scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
+      return SUCCESS;
     }
     else
     {
-        HIGHLIGHT_NAMED(object_name_,"No limbs found!")
-        return FAILURE;
+      HIGHLIGHT_NAMED(object_name_, "No limbs found!")
+      return FAILURE;
     }
   }
 

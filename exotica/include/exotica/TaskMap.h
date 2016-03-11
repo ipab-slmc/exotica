@@ -145,6 +145,7 @@ namespace exotica
 
       virtual std::string print(std::string prepend);
 
+      virtual void debug();
     protected:
 
       /**

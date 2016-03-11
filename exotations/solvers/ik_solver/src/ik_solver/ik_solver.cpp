@@ -413,7 +413,7 @@ namespace exotica
       }
       else
       {
-        WARNING("Solution not found after reaching max number of iterations");
+        ROS_WARN_STREAM_THROTTLE(1.0,"Solution not found after reaching max number of iterations");
         return WARNING;
       }
     }

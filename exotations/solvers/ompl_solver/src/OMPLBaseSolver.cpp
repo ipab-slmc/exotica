@@ -41,7 +41,7 @@ namespace exotica
     return planning_time_.toSec();
   }
 
-  void OMPLBaseSolver::preSolve()
+  bool OMPLBaseSolver::preSolve()
   {
     // clear previously computed solutions
     ompl_simple_setup_->getProblemDefinition()->clearSolutionPaths();
@@ -53,13 +53,15 @@ namespace exotica
     else
     {
       ERROR("Planner not found");
+      return false;
     }
-//    ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
-//    ompl_simple_setup_->getPlanner()->setProblemDefinition(
-//        ompl_simple_setup_->getProblemDefinition());
+    ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
+    ompl_simple_setup_->getPlanner()->setProblemDefinition(
+        ompl_simple_setup_->getProblemDefinition());
+    return true;
   }
 
-  void OMPLBaseSolver::postSolve()
+  bool OMPLBaseSolver::postSolve()
   {
     ompl_simple_setup_->clearStartStates();
     int v =
@@ -70,6 +72,7 @@ namespace exotica
 
     if (ompl_simple_setup_->getProblemDefinition()->hasApproximateSolution())
     logWarn("Computed solution is approximate");
+    return true;
   }
 
   void OMPLBaseSolver::registerTerminationCondition(

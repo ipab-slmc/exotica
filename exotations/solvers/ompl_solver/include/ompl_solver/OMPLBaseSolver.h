@@ -108,11 +108,11 @@ namespace exotica
       /**
        * \brief Executes pre solve steps
        */
-      void preSolve();
+      bool virtual preSolve();
       /**
        * \brief Executes post solve steps
        */
-      void postSolve();
+      bool virtual postSolve();
 
       /**
        * Constructs goal representation

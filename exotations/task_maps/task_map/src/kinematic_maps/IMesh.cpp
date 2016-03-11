@@ -88,21 +88,24 @@ namespace exotica
 
   }
 
+  void IMesh::initDebug(std::string ref)
+  {
+      imesh_mark_.scale.x = 0.005;
+      imesh_mark_.color.a = imesh_mark_.color.r = 1;
+      imesh_mark_.type = visualization_msgs::Marker::LINE_LIST;
+      imesh_mark_.header.frame_id = ref;
+      imesh_mark_.ns = getObjectName();
+      imesh_mark_pub_ = server_->advertise<visualization_msgs::Marker>(ns_ +"/InteractionMesh", 1, true);
+      HIGHLIGHT("InteractionMesh connectivity is published on ROS topic "<<imesh_mark_pub_.getTopic()<<", in reference frame "<<ref);
+  }
+
   EReturn IMesh::initDerived(tinyxml2::XMLHandle & handle)
   {
     EParam<std_msgs::String> ref;
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("ReferenceFrame");
     server_->registerParam(ns_, tmp_handle, ref);
-    if (!tmp_handle.ToElement()) ref->data = "/world_frame";
-
-    imesh_mark_.scale.x = 0.005;
-    imesh_mark_.color.a = imesh_mark_.color.r = 1;
-    imesh_mark_.type = visualization_msgs::Marker::LINE_LIST;
-    imesh_mark_.header.frame_id = ref->data;
-    imesh_mark_pub_ = server_->advertise<visualization_msgs::Marker>(
-        ns_ + "/InteractionMesh", 1, true);
-    HIGHLIGHT(
-        "InteractionMesh connectivity is published on ROS topic "<<imesh_mark_pub_.getTopic()<<", in reference frame "<<ref->data);
+    if (!tmp_handle.ToElement()) ref->data = "/world";
+    initDebug(ref->data);
     eff_size_ = scene_->getMapSize(object_name_);
     weights_.setOnes(eff_size_, eff_size_);
     initialised_ = true;
@@ -145,6 +148,7 @@ namespace exotica
       ;
       return ret;
     }
+    initDebug("/world");
     eff_size_ = scene_->getMapSize(object_name_);
     weights_.setOnes(eff_size_, eff_size_);
     initialised_ = true;

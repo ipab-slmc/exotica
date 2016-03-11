@@ -97,6 +97,7 @@ namespace exotica
       EReturn computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
 
       virtual void debug();
+      void initDebug(std::string ref);
     protected:
       /**
        * @brief	Concrete implementation of initialisation from xml

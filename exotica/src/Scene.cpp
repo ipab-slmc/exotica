@@ -835,6 +835,35 @@ namespace exotica
     return SUCCESS;
   }
 
+  EReturn Scene::updateEndEffector(const std::string &task,
+      const std::string &eff, const KDL::Frame& offset)
+  {
+    LOCK(lock_);
+    if (eff_names_.find(task) == eff_names_.end())
+    {
+      INDICATE_FAILURE
+      ERROR("Task name: '"<<task<<"'\n"<<eff_names_.size());
+      return FAILURE;
+    }
+    std::vector<std::string> names = eff_names_.at(task);
+    bool found = false;
+    for (int i = 0; i < names.size(); i++)
+    {
+      if (names[i].compare(eff) == 0)
+      {
+        found = true;
+        kinematica_.modifyEndEffector(eff, offset);
+        eff_offsets_.at(task)[i] = offset;
+      }
+    }
+    if (!found)
+    {
+      INDICATE_FAILURE
+      return FAILURE;
+    }
+    return SUCCESS;
+  }
+
   EReturn Scene::activateTaskMaps()
   {
 

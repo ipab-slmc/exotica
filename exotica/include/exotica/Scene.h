@@ -312,6 +312,15 @@ namespace exotica
       EReturn updateEndEffectors(const std::string & task,
           const std::vector<KDL::Frame> & offset);
 
+      /*
+       * \brief Updated individual end-effector
+       * @param task  Task name
+       * @param eff   End-effector name
+       * @param offset  New end-effector offset
+       */
+      EReturn updateEndEffector(const std::string &task, const std::string &eff,
+          const KDL::Frame& offset);
+
       /**
        * \brief	Get forward map (values)
        * @param	task	Task name

@@ -172,7 +172,7 @@ namespace exotica
   }
 
   EReturn IMesh::computeLaplace(int t)
-  {
+  {debug();
     int N = eff_size_;
     dist.resize(N, N);
     dist.setZero();

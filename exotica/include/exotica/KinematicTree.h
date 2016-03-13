@@ -321,11 +321,10 @@ namespace exotica
       std::map<std::string, std::vector<double>> getUsedJointLimits();
 
       KDL::Frame getRobotRootWorldTransform();
-
+      bool setBasePose(const KDL::Frame &pose);
       bool setFloatingBaseLimitsPosXYZEulerZYX(
           const std::vector<double> & lower, const std::vector<double> & upper);
 
-      bool setBasePosition(const Eigen::Vector3d &pos);
       //private:
       /****************** Class members ********************/
 
@@ -349,6 +348,8 @@ namespace exotica
       bool zero_undef_jnts_; //!< Indicates whether we wish to zero-out undefined joints.
       int num_jnts_spec_;	  //!< Number of joints which will be specified
       std::string base_type_;
+      bool controlled_base_;
+      KDL::Frame current_base_pose_;
       std::vector<int> eff_segments_; //!< The End-Effector segments (for Jacobian Computation)
       std::vector<KDL::Frame> eff_seg_offs_; //!< Offsets from the end effector segments (if required)
       std::vector<std::string> eff_segments_ini_;

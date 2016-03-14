@@ -607,8 +607,6 @@ bool exotica::KinematicTree::updateConfiguration(
         {
           KDL::Vector tmp(0, 0, 1);
           jnt_angle = current_base_pose_.M.GetRotAngle(tmp, 1e-10);
-          std::cout << " joint 3 " << robot_tree_[i].segment.getName()
-              << std::endl;
         }
       }
       else

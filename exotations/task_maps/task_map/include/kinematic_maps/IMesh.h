@@ -98,6 +98,7 @@ namespace exotica
 
       virtual void debug();
       void initDebug(std::string ref);
+      void destroyDebug();
     protected:
       /**
        * @brief	Concrete implementation of initialisation from xml

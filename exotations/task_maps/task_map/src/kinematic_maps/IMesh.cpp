@@ -136,6 +136,14 @@ namespace exotica
     imesh_mark_pub_.publish(imesh_mark_);
   }
 
+  void IMesh::destroyDebug()
+  {
+      imesh_mark_.points.clear();
+      imesh_mark_.action = visualization_msgs::Marker::DELETE;
+      imesh_mark_.header.stamp = ros::Time::now();
+      imesh_mark_pub_.publish(imesh_mark_);
+  }
+
   EReturn IMesh::initialiseManual(std::string name, Server_ptr & server,
       const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
       std::vector<std::pair<std::string, std::string> >& params)

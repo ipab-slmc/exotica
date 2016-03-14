@@ -173,10 +173,6 @@ namespace exotica
 
   EReturn IMesh::computeLaplace(int t)
   {
-//    debug();
-//    ros::Duration d(0.05);
-//    d.sleep();
-
     int N = eff_size_;
     dist.resize(N, N);
     dist.setZero();

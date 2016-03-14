@@ -597,14 +597,14 @@ bool exotica::KinematicTree::updateConfiguration(
       KDL::Frame parent_transform;
 
       //!< Settle Angle
-      if (!controlled_base_)
+      if (!controlled_base_ && i < 4)
       {
         if (i == 1) jnt_angle = current_base_pose_.p.data[0];
         if (i == 2) jnt_angle = current_base_pose_.p.data[1];
         if (i == 3)
         {
-          KDL::Vector tmp(0, 0, 1);
-          jnt_angle = current_base_pose_.M.GetRotAngle(tmp, 1e-10);
+          KDL::Vector axis(0, 0, 1);
+          jnt_angle = current_base_pose_.M.GetRotAngle(axis);
         }
       }
       else

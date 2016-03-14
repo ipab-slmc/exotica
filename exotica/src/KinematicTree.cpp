@@ -198,16 +198,14 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
         base_type_ = solution.base_type = "fixed";
     }
 
+    controlled_base_ = true;
     if (handle.FirstChildElement("Root").ToElement()->Attribute(
         "controlled_root"))
     {
       std::string controlled_base =
           handle.FirstChildElement("Root").ToElement()->Attribute(
               "controlled_root");
-      if (controlled_base.compare("false") == 0)
-        controlled_base_ = false;
-      else
-        controlled_base_ = true;
+      if (controlled_base.compare("false") == 0) controlled_base_ = false;
     }
 
     if (handle.FirstChildElement("Root").FirstChildElement("vector").ToElement())
@@ -607,8 +605,6 @@ bool exotica::KinematicTree::updateConfiguration(
         {
           KDL::Vector tmp(0, 0, 1);
           jnt_angle = current_base_pose_.M.GetRotAngle(tmp, 1e-10);
-          std::cout << " joint 3 " << robot_tree_[i].segment.getName()
-              << std::endl;
         }
       }
       else

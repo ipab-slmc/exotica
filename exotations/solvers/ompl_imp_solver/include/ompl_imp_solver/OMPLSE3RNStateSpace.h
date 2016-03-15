@@ -31,17 +31,16 @@
  *
  */
 
-#ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNCOMPOUNDSTATESPACE_H_
-#define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNCOMPOUNDSTATESPACE_H_
+#ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNSTATESPACE_H_
+#define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNSTATESPACE_H_
 
-#include "exotica/EXOTica.hpp"
-#include "ompl_solver/OMPLProblem.h"
+#include "ompl_imp_solver/OMPLBaseStateSpace.h"
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
-namespace ob = ompl::base;
+
 namespace exotica
 {
-  class OMPLSE3RNCompoundStateSpace: public ompl::base::CompoundStateSpace
+  class OMPLSE3RNStateSpace: public OMPLBaseStateSpace
   {
     public:
       class StateType: public ob::CompoundStateSpace::StateType
@@ -73,15 +72,15 @@ namespace exotica
           }
       };
 
-      OMPLSE3RNCompoundStateSpace(unsigned int dim, const Server_ptr &server,
+      OMPLSE3RNStateSpace(unsigned int dim, const Server_ptr &server,
           OMPLProblem_ptr &prob);
-      virtual ~OMPLSE3RNCompoundStateSpace();
       virtual unsigned int getDimension() const;
-      virtual ompl::base::StateSamplerPtr allocDefaultStateSampler();
-      static boost::shared_ptr<OMPLSE3RNCompoundStateSpace> FromProblem(
-          OMPLProblem_ptr prob, const Server_ptr &server);
-      EReturn OMPLStateToEigen(const ob::State *ompl, Eigen::VectorXd &eigen);
-      EReturn EigenToOMPLState(const Eigen::VectorXd &eigen, ob::State *ompl);
+      virtual ompl::base::StateSamplerPtr allocDefaultStateSampler(
+          const ompl::base::StateSpace *ss);
+      virtual EReturn ExoticaToOMPLState(const Eigen::VectorXd &q,
+          ompl::base::State *state) const;
+      virtual EReturn OMPLToExoticaState(const ompl::base::State *state,
+          Eigen::VectorXd &q) const;
 
       /*
        * \brief	Set the bounds for upper body configuration
@@ -109,18 +108,17 @@ namespace exotica
       ob::RealVectorBounds SO3Bounds_;
       bool useGoal_;
     private:
-      Server_ptr server_;
       int realvectordim_;
-      OMPLProblem_ptr prob_;
   };
-  class OMPLSE3RNCompoundStateSampler: public ob::StateSampler
+
+  class OMPLSE3RNStateSampler: public ob::StateSampler
   {
     public:
-      OMPLSE3RNCompoundStateSampler(const ob::StateSpace *space)
+      OMPLSE3RNStateSampler(const ob::StateSpace *space)
           : ob::StateSampler(space)
       {
         EParam<exotica::Vector> weights =
-            space->as<OMPLSE3RNCompoundStateSpace>()->weights_;
+            space->as<OMPLSE3RNStateSpace>()->weights_;
         weightImportance_.resize(weights->data.size());
         double sum = 0;
         for (int i = 0; i < weights->data.size(); i++)
@@ -135,6 +133,45 @@ namespace exotica
           const double stdDev);
       std::vector<double> weightImportance_;
   };
-} //	Namespace exotica
 
-#endif /* EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNCOMPOUNDSTATESPACE_H_ */
+  class OMPLSE3RNProjection: public ompl::base::ProjectionEvaluator
+  {
+    public:
+      OMPLSE3RNProjection(const ompl::base::StateSpacePtr &space,
+          const std::vector<int> & vars)
+          : ompl::base::ProjectionEvaluator(space), variables_(vars)
+      {
+
+      }
+
+      ~OMPLSE3RNProjection()
+      {
+        //TODO
+      }
+
+      virtual unsigned int getDimension(void) const
+      {
+        return variables_.size();
+      }
+
+      virtual void defaultCellSizes()
+      {
+        cellSizes_.clear();
+        cellSizes_.resize(variables_.size(), 0.1);
+      }
+
+      virtual void project(const ompl::base::State *state,
+          ompl::base::EuclideanProjection &projection) const
+      {
+        for (std::size_t i = 0; i < variables_.size(); ++i)
+          projection(i) =
+              state->as<exotica::OMPLSE3RNStateSpace::StateType>()->RealVectorStateSpace().values[variables_[i]];
+      }
+
+    private:
+      std::vector<int> variables_;
+  };
+}
+//	Namespace exotica
+
+#endif /* EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNSTATESPACE_H_ */

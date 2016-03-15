@@ -259,22 +259,24 @@ namespace exotica
     }
     else if (base_type_ == BASE_TYPE::FLOATING)
     {
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/trans_x",
-          x(0));
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/trans_y",
-          x(1));
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/trans_z",
-          x(2));
+      const std::string world_name =
+          ps_->getCurrentStateNonConst().getRobotModel()->getSRDF()->getVirtualJoints()[0].name_;
+      ps_->getCurrentStateNonConst().setVariablePosition(
+          world_name + "/trans_x", x(0));
+      ps_->getCurrentStateNonConst().setVariablePosition(
+          world_name + "/trans_y", x(1));
+      ps_->getCurrentStateNonConst().setVariablePosition(
+          world_name + "/trans_z", x(2));
       KDL::Rotation rot = KDL::Rotation::EulerZYX(x(3), x(4), x(5));
       Eigen::VectorXd quat(4);
       rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/rot_x",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_x",
           quat(0));
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/rot_y",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_y",
           quat(1));
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/rot_z",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_z",
           quat(2));
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/rot_w",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_w",
           quat(3));
       for (std::size_t i = 6; i < joint_index_.size(); i++)
         ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
@@ -282,10 +284,17 @@ namespace exotica
     }
     else if (base_type_ == BASE_TYPE::PLANAR)
     {
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/x", x(0));
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/y", x(1));
-      ps_->getCurrentStateNonConst().setVariablePosition("world_joint/theta",
+      const std::string world_name =
+          ps_->getCurrentStateNonConst().getRobotModel()->getSRDF()->getVirtualJoints()[0].name_;
+      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/x",
+          x(0));
+      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/y",
+          x(1));
+      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/theta",
           x(2));
+      for (std::size_t i = 3; i < joint_index_.size(); i++)
+        ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
+            x(i));
     }
     ps_->getCurrentStateNonConst().update(true);
     if (compute_dist)
@@ -374,7 +383,8 @@ namespace exotica
     stateCheckCnt_++;
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
-    ps_->getCollisionWorld()->checkRobotCollision(req,res,*ps_->getCollisionRobot(),ps_->getCurrentState());
+    ps_->getCollisionWorld()->checkRobotCollision(req, res,
+        *ps_->getCollisionRobot(), ps_->getCurrentState());
 //    ERROR(ps_->getCurrentState().getCollisionBodyTransform("leftForearmLink",0).translation().transpose());
 //    if(res.collision){
 //      HIGHLIGHT("Contact "<<res.contacts.begin()->first.first<<" "<<res.contacts.begin()->first.second<<" at "<<res.contacts.begin()->second[0].pos.transpose());
@@ -825,6 +835,35 @@ namespace exotica
     return SUCCESS;
   }
 
+  EReturn Scene::updateEndEffector(const std::string &task,
+      const std::string &eff, const KDL::Frame& offset)
+  {
+    LOCK(lock_);
+    if (eff_names_.find(task) == eff_names_.end())
+    {
+      INDICATE_FAILURE
+      ERROR("Task name: '"<<task<<"'\n"<<eff_names_.size());
+      return FAILURE;
+    }
+    std::vector<std::string> names = eff_names_.at(task);
+    bool found = false;
+    for (int i = 0; i < names.size(); i++)
+    {
+      if (names[i].compare(eff) == 0)
+      {
+        found = true;
+        kinematica_.modifyEndEffector(eff, offset);
+        eff_offsets_.at(task)[i] = offset;
+      }
+    }
+    if (!found)
+    {
+      INDICATE_FAILURE
+      return FAILURE;
+    }
+    return SUCCESS;
+  }
+
   EReturn Scene::activateTaskMaps()
   {
 
@@ -880,7 +919,7 @@ namespace exotica
     }
 
     initialised_ = true;
-
+    HIGHLIGHT_NAMED(object_name_, "Taskmaps are activated");
     return SUCCESS;
   }
 

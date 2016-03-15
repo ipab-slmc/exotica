@@ -91,7 +91,7 @@ namespace ompl
           if (spacename.compare("OMPLSE3RNCompoundStateSpace") == 0)
           {
             return exotica::ok(
-                si_->getStateSpace()->as<exotica::OMPLSE3RNCompoundStateSpace>()->OMPLStateToEigen(
+                si_->getStateSpace()->as<exotica::OMPLSE3RNStateSpace>()->OMPLStateToEigen(
                     state, eigen));
           }
           else if (spacename.compare("OMPLStateSpace") == 0)
@@ -112,7 +112,7 @@ namespace ompl
           if (spacename.compare("OMPLSE3RNCompoundStateSpace") == 0)
           {
             return exotica::ok(
-                si_->getStateSpace()->as<exotica::OMPLSE3RNCompoundStateSpace>()->EigenToOMPLState(
+                si_->getStateSpace()->as<exotica::OMPLSE3RNStateSpace>()->EigenToOMPLState(
                     eigen, state));
           }
           else if (spacename.compare("OMPLStateSpace") == 0)

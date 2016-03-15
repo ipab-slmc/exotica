@@ -39,6 +39,7 @@
 #include "exotica/Server.h"
 #include "exotica/Scene.h"
 #include "exotica/Tools.h"
+#include "exotica/Problem.h"
 #include "tinyxml2/tinyxml2.h"
 
 #include <vector>
@@ -115,6 +116,8 @@ namespace exotica
 
       virtual EReturn reinitialise(rapidjson::Document& document,
           boost::shared_ptr<PlanningProblem> problem);
+
+      virtual EReturn reinitialise(Problem& msg, boost::shared_ptr<PlanningProblem> problem);
 
       boost::shared_ptr<std::map<std::string, Eigen::VectorXd> > poses;
       boost::shared_ptr<std::vector<std::string> > posesJointNames;

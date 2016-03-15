@@ -221,8 +221,9 @@ namespace exotica
         {
           boost::shared_ptr<exotica::Identity> idt = boost::static_pointer_cast<
               exotica::Identity>(taskmap);
+          std::vector<std::pair<std::string,std::string> > tmpParams;
           EReturn ret1 = taskmap->initialiseManual("exotica::Identity", server_,
-              scenes_, problem);
+              scenes_, problem,tmpParams);
           EReturn ret = idt->initialise(problem->endStateName,
               *(problem->posesJointNames));
           if (ok(ret) && ok(ret1))
@@ -289,7 +290,6 @@ namespace exotica
               server_->getParam(server_->getName() + "/FloatingBaseUpperLimits",
                   tmp_upper)) && tmp_upper->data.size() == 6)
       {
-        HIGHLIGHT("Setting floating base bounds");
         std::vector<double> lower = tmp_lower->data;
         std::vector<double> upper = tmp_upper->data;
         for (int i = 0; i < 3; i++)

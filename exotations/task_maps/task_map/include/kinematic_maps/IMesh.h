@@ -65,6 +65,10 @@ namespace exotica
        */
       virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
 
+      virtual EReturn initialiseManual(std::string name, Server_ptr & server,
+          const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
+          std::vector<std::pair<std::string,std::string> >& params);
+
       /**
        * @brief	Get the task space dimension
        * @return	Exotica return type, SUCCESS if succeeded
@@ -90,6 +94,11 @@ namespace exotica
        */
       EReturn computeLaplace(int t);
 
+      EReturn computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
+
+      virtual void debug();
+      void initDebug(std::string ref);
+      void destroyDebug();
     protected:
       /**
        * @brief	Concrete implementation of initialisation from xml
@@ -123,7 +132,11 @@ namespace exotica
       Eigen::VectorXd wsum;
 
       int eff_size_;
+
+      ros::Publisher imesh_mark_pub_;
+      visualization_msgs::Marker imesh_mark_;
   };
+  typedef boost::shared_ptr<IMesh> IMesh_Ptr;  //!< Task Map smart pointer
 }
 
 #endif /* IMESH_H_ */

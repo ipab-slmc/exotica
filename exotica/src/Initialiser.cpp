@@ -315,7 +315,11 @@ namespace exotica
           continue;
         }
       }
-
+      else
+      {
+        ERROR("Empty solver name");
+        return FAILURE;
+      }
     }
 
     ERROR("File does not contain the '"<<solver_name<<"' solver.");

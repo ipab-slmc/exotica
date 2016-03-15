@@ -197,6 +197,17 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
       else
         base_type_ = solution.base_type = "fixed";
     }
+
+    controlled_base_ = true;
+    if (handle.FirstChildElement("Root").ToElement()->Attribute(
+        "controlled_root"))
+    {
+      std::string controlled_base =
+          handle.FirstChildElement("Root").ToElement()->Attribute(
+              "controlled_root");
+      if (controlled_base.compare("false") == 0) controlled_base_ = false;
+    }
+
     if (handle.FirstChildElement("Root").FirstChildElement("vector").ToElement())
     {
       Eigen::VectorXd temp_vector;
@@ -412,8 +423,7 @@ bool exotica::KinematicTree::updateEndEffectorOffsets(
   return true;
 }
 
-bool exotica::KinematicTree::getEndEffectorIndex(
-    std::vector<int> & eff_index)
+bool exotica::KinematicTree::getEndEffectorIndex(std::vector<int> & eff_index)
 {
   boost::mutex::scoped_lock(member_lock_);
   if (!isInitialised()) return false;
@@ -533,7 +543,7 @@ bool exotica::KinematicTree::modifySegment(const std::string & name,
 //!< Check if the end-effector is a segment
   std::map<std::string, int>::iterator map_it = segment_map_.find(name);
   if (map_it == segment_map_.end()) return false;
-  robot_tree_[map_it->second].offset=offset;
+  robot_tree_[map_it->second].offset = offset;
   return true;
 }
 
@@ -587,9 +597,20 @@ bool exotica::KinematicTree::updateConfiguration(
       KDL::Frame parent_transform;
 
       //!< Settle Angle
-      jnt_angle =
-          (robot_tree_[i].joint_type == JNT_UNUSED) ?
-              0 : joint_configuration[robot_tree_[i].joint_index];
+      if (!controlled_base_ && i < 4)
+      {
+        if (i == 1) jnt_angle = current_base_pose_.p.data[0];
+        if (i == 2) jnt_angle = current_base_pose_.p.data[1];
+        if (i == 3)
+        {
+          KDL::Vector axis(0, 0, 1);
+          jnt_angle = current_base_pose_.M.GetRotAngle(axis);
+        }
+      }
+      else
+        jnt_angle =
+            (robot_tree_[i].joint_type == JNT_UNUSED) ?
+                0 : joint_configuration[robot_tree_[i].joint_index];
 
       //!< Settle which parent transform to use
       if (robot_tree_[i].from_tip)//If we are coming from the tip of the parent
@@ -605,14 +626,15 @@ bool exotica::KinematicTree::updateConfiguration(
       if (robot_tree_[i].to_tip)	//!< We are moving towards the tip
       {	//!< We generally do not need to concern ourselves with the joint_pose: however might need it for the joint origin computation
         robot_tree_[i].tip_pose = parent_transform
-            * robot_tree_[i].segment.pose(jnt_angle)*robot_tree_[i].offset;
-        robot_tree_[i].joint_pose = parent_transform*robot_tree_[i].offset;
+            * robot_tree_[i].segment.pose(jnt_angle) * robot_tree_[i].offset;
+        robot_tree_[i].joint_pose = parent_transform * robot_tree_[i].offset;
       }
       else //!< Moving towards the base
       {
-        robot_tree_[i].tip_pose = parent_transform*robot_tree_[i].offset;	//!< We cannot be moving towards base from a tip
+        robot_tree_[i].tip_pose = parent_transform * robot_tree_[i].offset;	//!< We cannot be moving towards base from a tip
         robot_tree_[i].joint_pose = parent_transform
-            * robot_tree_[i].segment.pose(jnt_angle).Inverse()*robot_tree_[i].offset;
+            * robot_tree_[i].segment.pose(jnt_angle).Inverse()
+            * robot_tree_[i].offset;
       }
 
       //!< Finally set the joint_origin/axis
@@ -637,14 +659,45 @@ bool exotica::KinematicTree::updateConfiguration(
   return true;
 }
 
+bool exotica::KinematicTree::setBasePose(const KDL::Frame &pose)
+{
+  current_base_pose_ = pose;
+  return true;
+}
+
+bool exotica::KinematicTree::setBaseBounds(const std::vector<double> &bounds)
+{
+  if (bounds.size() != 6)
+  {
+    ERROR("Expect base bounds size 6, but received bounds size "<<bounds.size());
+    return false;
+  }
+
+  if (base_type_.compare("floating") == 0)
+  {
+    //Here we are just setting the bounds of allowed base movement
+    robot_tree_[1].joint_limits_.resize(2);
+    robot_tree_[1].joint_limits_[0] = bounds[0];
+    robot_tree_[1].joint_limits_[1] = bounds[3];
+
+    robot_tree_[2].joint_limits_.resize(2);
+    robot_tree_[2].joint_limits_[0] = bounds[1];
+    robot_tree_[2].joint_limits_[1] = bounds[4];
+
+    robot_tree_[3].joint_limits_.resize(2);
+    robot_tree_[3].joint_limits_[0] = bounds[2];
+    robot_tree_[3].joint_limits_[1] = bounds[5];
+  }
+  return true;
+}
+
 bool exotica::KinematicTree::generateForwardMap()
 {
   boost::mutex::scoped_lock(member_lock_);	//!< Lock:
   return computePhi();
 }
 
-bool exotica::KinematicTree::generateForwardMap(
-    Eigen::Ref<Eigen::VectorXd> phi)
+bool exotica::KinematicTree::generateForwardMap(Eigen::Ref<Eigen::VectorXd> phi)
 {
   boost::mutex::scoped_lock(member_lock_);	//!< Lock for thread-safety
 
@@ -848,7 +901,7 @@ bool exotica::KinematicTree::initialise(const KDL::Tree & temp_tree,
 //!< First clear/reset everything
   robot_tree_.clear();
   segment_map_.clear();
-  zero_undef_jnts_ = false;
+  zero_undef_jnts_ = true;
   num_jnts_spec_ = 0;
   eff_segments_.clear();
   eff_seg_offs_.clear();
@@ -949,7 +1002,7 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
 
   robot_root_.first = root_segment->first;
 
-  //!< if using floating base
+//!< if using floating base
   if (base_type_.compare("fixed") != 0)
   {
     if (model_->getSRDF()->getVirtualJoints().size() != 1)
@@ -1048,7 +1101,7 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
         }
         KDL::Segment rot_seg(root_segment->first,
             KDL::Joint(root_segment->first + "/virtual_joint",
-                KDL::Joint::RotY));
+                KDL::Joint::RotZ));
         if (!base_tree.addSegment(rot_seg, world + "/y"))
         {
           INDICATE_FAILURE
@@ -1149,8 +1202,8 @@ bool exotica::KinematicTree::setJointLimits()
     }
   }
 
-  ///	Manually defined floating base limits
-  ///	Should be done more systematically with robot model class
+///	Manually defined floating base limits
+///	Should be done more systematically with robot model class
   if (base_type_.compare("floating") == 0)
   {
     robot_tree_[1].joint_limits_.resize(2);
@@ -1192,25 +1245,6 @@ bool exotica::KinematicTree::setJointLimits()
     robot_tree_[3].joint_limits_[1] = 1.57;
   }
 
-  return true;
-}
-
-bool exotica::KinematicTree::setBasePosition(const Eigen::Vector3d &pos)
-{
-  if (base_type_.compare("floating") == 0)
-  {
-    robot_tree_[1].joint_limits_.resize(2);
-    robot_tree_[1].joint_limits_[0] = pos(0) - 0.1;
-    robot_tree_[1].joint_limits_[1] = pos(0) + 0.1;
-
-    robot_tree_[2].joint_limits_.resize(2);
-    robot_tree_[2].joint_limits_[0] = pos(1) - 0.1;
-    robot_tree_[2].joint_limits_[1] = pos(1) + 0.1;
-
-    robot_tree_[3].joint_limits_.resize(2);
-    robot_tree_[3].joint_limits_[0] = pos(2) - 0.1;
-    robot_tree_[3].joint_limits_[1] = pos(2) + 0.1;
-  }
   return true;
 }
 
@@ -1641,8 +1675,7 @@ bool exotica::KinematicTree::getPose(std::string child, KDL::Frame & pose)
   return true;
 }
 
-bool exotica::KinematicTree::getPose(int child, int parent,
-    KDL::Frame & pose)
+bool exotica::KinematicTree::getPose(int child, int parent, KDL::Frame & pose)
 {
   boost::mutex::scoped_lock(member_lock_);
 
@@ -1736,8 +1769,7 @@ int exotica::KinematicTree::getParent(int child)
   }
 }
 
-std::vector<std::string> exotica::KinematicTree::getChildren(
-    std::string parent)
+std::vector<std::string> exotica::KinematicTree::getChildren(std::string parent)
 {
   boost::mutex::scoped_lock(member_lock_);
 
@@ -1780,8 +1812,8 @@ Eigen::Vector3d exotica::vectorKdlToEigen(const KDL::Vector & kdl_vec)
   return eigen_vec;
 }
 
-bool exotica::recursivePrint(exotica::KinematicTree & robot,
-    std::string node, std::string tab)
+bool exotica::recursivePrint(exotica::KinematicTree & robot, std::string node,
+    std::string tab)
 {
   if (tab.size() == 0)
   {
@@ -1828,7 +1860,7 @@ bool exotica::recursivePrint(exotica::KinematicTree & robot,
 bool exotica::xmlGetVector(const tinyxml2::XMLElement & xml_vector,
     Eigen::VectorXd & eigen_vector)
 {
-  //!< Temporaries
+//!< Temporaries
   double temp_entry;
   int i = 0;
 
@@ -1841,7 +1873,7 @@ bool exotica::xmlGetVector(const tinyxml2::XMLElement & xml_vector,
   }
   std::istringstream text_parser(xml_vector.GetText());
 
-  //!< Initialise looping
+//!< Initialise looping
   text_parser >> temp_entry;
   while (!(text_parser.fail() || text_parser.bad()))  //!< No commenting!
   {

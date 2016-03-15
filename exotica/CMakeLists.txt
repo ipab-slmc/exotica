@@ -34,6 +34,7 @@ set(MSG_FILES
   BoolList.msg
   Vector.msg
   Matrix.msg
+  Problem.msg
 )
 
 add_message_files(

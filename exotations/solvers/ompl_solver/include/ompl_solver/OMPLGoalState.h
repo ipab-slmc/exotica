@@ -35,9 +35,9 @@
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLGOALSTATE_H_
 
 #include <ompl/base/goals/GoalState.h>
+#include <ompl_solver/OMPLSE3RNStateSpace.h>
 #include "ompl_solver/OMPLProblem.h"
 #include "ompl_solver/OMPLStateSpace.h"
-#include "ompl_solver/OMPLSE3RNCompoundStateSpace.h"
 
 namespace ob = ompl::base;
 namespace exotica

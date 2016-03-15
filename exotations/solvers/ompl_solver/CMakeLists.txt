@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   task_definition
   task_map
   ik_solver
+  pluginlib
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -23,7 +24,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ompl_solver
-  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map ik_solver
+  CATKIN_DEPENDS exotica roscpp roslib task_definition task_map ik_solver pluginlib
   DEPENDS system_lib ompl
 )
 
@@ -44,16 +45,7 @@ include_directories(
 add_library(ompl_solver
    src/OMPLsolver.cpp
    src/OMPLProblem.cpp
-   src/OMPLGoalUnion.cpp
-   src/OMPLStateSpace.cpp
-   src/OMPLSE3RNCompoundStateSpace.cpp
-   src/OMPLStateValidityChecker.cpp
-   src/OMPLGoalState.cpp
-   src/frrt/FlexiblePlanner.cpp
-   src/frrt/FRRT.cpp
-   src/frrt/BFRRT.cpp
-   src/frrt/FRRTConnect.cpp
-   src/frrt/FKPIECE.cpp
+   src/OMPLBaseSolver.cpp
 )
 
 link_directories(${catkin_LIBRARY_DIRS})
@@ -63,11 +55,6 @@ link_directories(${OMPL_LIBRARY_DIRS})
 target_link_libraries(ompl_solver
    ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES}
 )
-
-#add_executable(OMPLEffTrahectoryNode src/OMPLEffTrajectoryNode.cpp)
-#target_link_libraries(OMPLEffTrahectoryNode ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-#set_target_properties(ompl_solver PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-#set_target_properties(ompl_solver PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
 install(TARGETS ompl_solver
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

@@ -63,7 +63,7 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
       // Assign the problem to the solver
       // Cast the generic solver instance into IK solver
       OMPLsolver_ptr solOMPL = boost::static_pointer_cast<OMPLsolver>(sol[0]);
-      if (!ok(solOMPL->specifyProblem(prob[0], NULL, prob[1], NULL)))
+      if (!ok(solOMPL->specifyProblem(prob[0])))
       {
         INDICATE_FAILURE
         ;

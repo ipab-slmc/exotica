@@ -321,6 +321,7 @@ namespace exotica
       std::map<std::string, std::vector<double>> getUsedJointLimits();
 
       KDL::Frame getRobotRootWorldTransform();
+      bool setBaseBounds(const std::vector<double> &bounds);
       bool setBasePose(const KDL::Frame &pose);
       bool setFloatingBaseLimitsPosXYZEulerZYX(
           const std::vector<double> & lower, const std::vector<double> & upper);

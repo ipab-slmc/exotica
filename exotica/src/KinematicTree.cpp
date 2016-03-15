@@ -665,6 +665,32 @@ bool exotica::KinematicTree::setBasePose(const KDL::Frame &pose)
   return true;
 }
 
+bool exotica::KinematicTree::setBaseBounds(const std::vector<double> &bounds)
+{
+  if (bounds.size() != 6)
+  {
+    ERROR("Expect base bounds size 6, but received bounds size "<<bounds.size());
+    return false;
+  }
+
+  if (base_type_.compare("floating") == 0)
+  {
+    //Here we are just setting the bounds of allowed base movement
+    robot_tree_[1].joint_limits_.resize(2);
+    robot_tree_[1].joint_limits_[0] = bounds[0];
+    robot_tree_[1].joint_limits_[1] = bounds[3];
+
+    robot_tree_[2].joint_limits_.resize(2);
+    robot_tree_[2].joint_limits_[0] = bounds[1];
+    robot_tree_[2].joint_limits_[1] = bounds[4];
+
+    robot_tree_[3].joint_limits_.resize(2);
+    robot_tree_[3].joint_limits_[0] = bounds[2];
+    robot_tree_[3].joint_limits_[1] = bounds[5];
+  }
+  return true;
+}
+
 bool exotica::KinematicTree::generateForwardMap()
 {
   boost::mutex::scoped_lock(member_lock_);	//!< Lock:

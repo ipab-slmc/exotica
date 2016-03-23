@@ -193,6 +193,11 @@ namespace exotica
             server_->getModel("robot_description")));
     ps_->setPlanningSceneMsg(*msg.get());
     base_type_ = base_type;
+    if (server_->hasParam(server_->getName() + "/DrakeFullBody"))
+      server_->getParam(server_->getName() + "/DrakeFullBody",
+          drake_full_body_);
+    else
+      drake_full_body_.reset(new std_msgs::Bool());
     if (ok(reinitialise()))
     {
       joint_index_.resize(joints.size());
@@ -267,7 +272,10 @@ namespace exotica
           world_name + "/trans_y", x(1));
       ps_->getCurrentStateNonConst().setVariablePosition(
           world_name + "/trans_z", x(2));
-      KDL::Rotation rot = KDL::Rotation::EulerZYX(x(3), x(4), x(5));
+      KDL::Rotation rot =
+          drake_full_body_->data ?
+              KDL::Rotation::RPY(x(3), x(4), x(5)) :
+              KDL::Rotation::EulerZYX(x(3), x(4), x(5));
       Eigen::VectorXd quat(4);
       rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
       ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_x",

@@ -223,6 +223,7 @@ namespace exotica
       exotica::Server_ptr server_;
       std::string scene_name_;
       BASE_TYPE base_type_;
+      EParam<std_msgs::Bool> drake_full_body_;;
 
   };
 

@@ -63,7 +63,7 @@ namespace exotica
        * @param x0      start configuration
        * @param sol     Solution
        */
-      EReturn solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol);
+      virtual EReturn solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol);
 
       /*
        * \brief Set goal state to the sampled state space
@@ -83,7 +83,7 @@ namespace exotica
        * \brief Assign exotica problem to this solver
        * @param prob    EXOTica Planning Problem pointer
        */
-      EReturn specifyProblem(const OMPLProblem_ptr &prob);
+      virtual EReturn specifyProblem(const OMPLProblem_ptr &prob);
     protected:
       /*
        * \brief Register default ompl planning algorithms

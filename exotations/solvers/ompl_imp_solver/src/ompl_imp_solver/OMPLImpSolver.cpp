@@ -91,6 +91,16 @@ namespace exotica
       for (auto &it : known_algorithms_)
         ERROR(it.first);
     }
+
+    tmp_handle = handle.FirstChildElement("Range");
+    if (!tmp_handle.ToElement())
+    {
+      range_ = "1";
+    }
+    else
+    {
+      range_ = std::string(tmp_handle.ToElement()->GetText());
+    }
     return SUCCESS;
   }
 
@@ -128,7 +138,7 @@ namespace exotica
     ompl_simple_setup_->getSpaceInformation()->setup();
     ompl_simple_setup_->setup();
     if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
-      ompl_simple_setup_->getPlanner()->params().setParam("range", "1");
+      ompl_simple_setup_->getPlanner()->params().setParam("range", range_);
     return SUCCESS;
   }
 
@@ -199,7 +209,7 @@ namespace exotica
     if (ptc == false) tryMore = psf_->reduceVertices(pg);
     if (ptc == false) psf_->collapseCloseVertices(pg);
     int times = 0;
-    while (tryMore && ptc == false)
+    while (times < 5 && tryMore && ptc == false)
     {
       tryMore = psf_->reduceVertices(pg);
       times++;
@@ -211,7 +221,7 @@ namespace exotica
       else
         tryMore = false;
       times = 0;
-      while (tryMore && ptc == false)
+      while (times < 5 && tryMore && ptc == false)
       {
         tryMore = psf_->shortcutPath(pg);
         times++;
@@ -225,6 +235,7 @@ namespace exotica
     for (int i = 0; i < n1; ++i)
       length += si->getStateSpace()->validSegmentCount(states[i],
           states[i + 1]);
+    HIGHLIGHT("Interpolate Length "<<length);
     pg.interpolate(length);
     convertPath(pg, traj);
     HIGHLIGHT(

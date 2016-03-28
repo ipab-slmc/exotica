@@ -75,8 +75,7 @@ namespace exotica
       OMPLSE3RNStateSpace(unsigned int dim, const Server_ptr &server,
           OMPLProblem_ptr &prob);
       virtual unsigned int getDimension() const;
-      virtual ompl::base::StateSamplerPtr allocDefaultStateSampler(
-          const ompl::base::StateSpace *ss);
+      virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
       virtual EReturn ExoticaToOMPLState(const Eigen::VectorXd &q,
           ompl::base::State *state) const;
       virtual EReturn OMPLToExoticaState(const ompl::base::State *state,

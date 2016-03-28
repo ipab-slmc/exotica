@@ -53,10 +53,9 @@ namespace exotica
     lock();
   }
 
-  ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler(
-      const ompl::base::StateSpace *ss)
+  ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler() const
   {
-    return ob::StateSamplerPtr(new ob::RealVectorStateSampler(ss));
+    return CompoundStateSpace::allocDefaultStateSampler();
   }
 
   EReturn OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,

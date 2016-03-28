@@ -55,8 +55,7 @@ namespace exotica
       virtual EReturn OMPLToExoticaState(const ompl::base::State *state,
           Eigen::VectorXd &q) const = 0;
 
-      virtual ompl::base::StateSamplerPtr allocDefaultStateSampler(
-          const ompl::base::StateSpace *ss) = 0;
+      virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const = 0;
     protected:
       Server_ptr server_;
       OMPLProblem_ptr prob_;

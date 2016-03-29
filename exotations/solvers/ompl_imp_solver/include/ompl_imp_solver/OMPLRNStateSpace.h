@@ -70,6 +70,7 @@ namespace exotica
           ompl::base::State *state) const;
       virtual EReturn OMPLToExoticaState(const ompl::base::State *state,
           Eigen::VectorXd &q) const;
+      virtual void stateDebug(const Eigen::VectorXd &q) const;
   };
 
   class OMPLRNProjection: public ompl::base::ProjectionEvaluator

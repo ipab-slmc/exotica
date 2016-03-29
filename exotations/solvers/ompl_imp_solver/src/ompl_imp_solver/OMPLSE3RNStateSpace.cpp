@@ -102,6 +102,11 @@ namespace exotica
     return ob::StateSamplerPtr(state_sampler);
   }
 
+  void OMPLSE3RNStateSpace::stateDebug(const Eigen::VectorXd &q) const
+  {
+    //  TODO
+  }
+
   unsigned int OMPLSE3RNStateSpace::getDimension() const
   {
     return realvectordim_ + 6;

@@ -169,6 +169,8 @@ namespace exotica
       getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), sol, ptc);
       planning_time_ = ros::Time::now() - startTime;
       postSolve();
+      prob_->update(Eigen::VectorXd(sol.row(sol.rows() - 1)), 0);
+      prob_->getScenes().begin()->second->publishScene();
       return SUCCESS;
     }
     else
@@ -266,6 +268,7 @@ namespace exotica
 
     if (!ompl_simple_setup_->getSpaceInformation()->satisfiesBounds(gs.get()))
     {
+      state_space_->as<OMPLBaseStateSpace>()->stateDebug(qT);
       ERROR("Invalid goal state [Invalid joint bounds]\n"<<qT.transpose());
       return FAILURE;
     }

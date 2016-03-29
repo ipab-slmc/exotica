@@ -91,5 +91,10 @@ namespace exotica
         sizeof(double) * q.rows());
     return SUCCESS;
   }
+
+  void OMPLRNStateSpace::stateDebug(const Eigen::VectorXd &q) const
+  {
+    //  TODO
+  }
 }
 

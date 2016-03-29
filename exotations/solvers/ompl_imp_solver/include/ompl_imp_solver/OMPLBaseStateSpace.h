@@ -56,6 +56,7 @@ namespace exotica
           Eigen::VectorXd &q) const = 0;
 
       virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const = 0;
+      virtual void stateDebug(const Eigen::VectorXd &q) const = 0;
     protected:
       Server_ptr server_;
       OMPLProblem_ptr prob_;

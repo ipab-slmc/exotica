@@ -73,6 +73,7 @@ namespace exotica
       virtual bool isValid(const ompl::base::State *state, double &dist) const;
     protected:
       OMPLProblem_ptr prob_;
+      EParam<std_msgs::Float64> margin_;
   };
 
 } /* namespace exotica */

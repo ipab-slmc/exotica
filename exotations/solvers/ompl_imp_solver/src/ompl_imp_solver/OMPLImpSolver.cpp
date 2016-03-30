@@ -211,7 +211,7 @@ namespace exotica
     if (ptc == false) tryMore = psf_->reduceVertices(pg);
     if (ptc == false) psf_->collapseCloseVertices(pg);
     int times = 0;
-    while (times < 5 && tryMore && ptc == false)
+    while (times < 10 && tryMore && ptc == false)
     {
       tryMore = psf_->reduceVertices(pg);
       times++;
@@ -223,7 +223,7 @@ namespace exotica
       else
         tryMore = false;
       times = 0;
-      while (times < 5 && tryMore && ptc == false)
+      while (times < 10 && tryMore && ptc == false)
       {
         tryMore = psf_->shortcutPath(pg);
         times++;

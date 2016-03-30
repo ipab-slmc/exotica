@@ -124,7 +124,7 @@ namespace exotica
        * @param	self	Indicate if self collision check is required
        * @return True, if the state is collision free.
        */
-      bool isStateValid(bool self = true);
+      bool isStateValid(bool self = true, double dist = 0);
 
       /**
        * \brief	Check if the whole robot is valid given a configuration

@@ -386,18 +386,15 @@ namespace exotica
     return SUCCESS;
   }
 
-  bool CollisionScene::isStateValid(bool self)
+  bool CollisionScene::isStateValid(bool self, double dist)
   {
     stateCheckCnt_++;
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
+    if (dist > 0) req.distance = true;
     ps_->getCollisionWorld()->checkRobotCollision(req, res,
         *ps_->getCollisionRobot(), ps_->getCurrentState());
-//    ERROR(ps_->getCurrentState().getCollisionBodyTransform("leftForearmLink",0).translation().transpose());
-//    if(res.collision){
-//      HIGHLIGHT("Contact "<<res.contacts.begin()->first.first<<" "<<res.contacts.begin()->first.second<<" at "<<res.contacts.begin()->second[0].pos.transpose());
-//    }
-    return !res.collision;
+    return dist == 0 ? !res.collision : res.distance > dist;
   }
 
   bool CollisionScene::isStateValid(const Eigen::VectorXd &q, bool self)

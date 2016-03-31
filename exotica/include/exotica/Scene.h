@@ -217,7 +217,7 @@ namespace exotica
       bool compute_dist;
 
       ///	The allowed collisiom matrix
-      collision_detection::AllowedCollisionMatrix acm_;
+      collision_detection::AllowedCollisionMatrixPtr acm_;
 
       ///	Pointer to exotica server
       exotica::Server_ptr server_;

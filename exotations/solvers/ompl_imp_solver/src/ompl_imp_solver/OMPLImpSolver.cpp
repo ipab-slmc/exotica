@@ -222,7 +222,6 @@ namespace exotica
         tryMore = psf_->shortcutPath(pg);
       else
         tryMore = false;
-      times = 0;
       while (times < 10 && tryMore && ptc == false)
       {
         tryMore = psf_->shortcutPath(pg);
@@ -230,14 +229,15 @@ namespace exotica
       }
     }
 
-    std::vector<ob::State*> &states = pg.getStates();
-    //  Calculate number of states required
-    unsigned int length = 0;
-    const int n1 = states.size() - 1;
-    for (int i = 0; i < n1; ++i)
-      length += si->getStateSpace()->validSegmentCount(states[i],
-          states[i + 1]);
-    HIGHLIGHT("Interpolate Length "<<length);
+//    std::vector<ob::State*> &states = pg.getStates();
+//    //  Calculate number of states required
+//    unsigned int length = 0;
+//    const int n1 = states.size() - 1;
+//    for (int i = 0; i < n1; ++i)
+//      length += si->getStateSpace()->validSegmentCount(states[i],
+//          states[i + 1]);
+//    HIGHLIGHT("Interpolate Length "<<length);
+    unsigned int length = 50;
     pg.interpolate(length);
     convertPath(pg, traj);
     HIGHLIGHT(

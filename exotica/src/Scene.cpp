@@ -81,7 +81,6 @@ namespace exotica
     ps_->getCurrentStateNonConst().update(true);
     const std::vector<const robot_model::LinkModel*>& links =
         ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
-    acm_ = ps_->getAllowedCollisionMatrix();
     for (std::size_t i = 0; i < links.size(); ++i)
     {
       geo_robot_[links[i]->getName()] = geos_ptr(0);
@@ -191,6 +190,12 @@ namespace exotica
     ps_.reset(
         new planning_scene::PlanningScene(
             server_->getModel("robot_description")));
+    if (!acm_)
+    {
+      acm_.reset(
+          new collision_detection::AllowedCollisionMatrix(
+              ps_->getAllowedCollisionMatrix()));
+    }
     ps_->setPlanningSceneMsg(*msg.get());
     base_type_ = base_type;
     if (server_->hasParam(server_->getName() + "/DrakeFullBody"))
@@ -391,6 +396,13 @@ namespace exotica
     stateCheckCnt_++;
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
+    req.contacts = true;
+    req.max_contacts = 1000;
+    ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
+    if (res.collision)
+    {
+      return false;
+    }
     if (dist > 0) req.distance = true;
     ps_->getCollisionWorld()->checkRobotCollision(req, res,
         *ps_->getCollisionRobot(), ps_->getCurrentState());
@@ -435,7 +447,7 @@ namespace exotica
       {
         collision_detection::AllowedCollision::Type type =
             collision_detection::AllowedCollision::ALWAYS;
-        if (link.compare(it.first) != 0 && acm_.getEntry(link, it.first, type))
+        if (link.compare(it.first) != 0 && acm_->getEntry(link, it.first, type))
         {
           if (type == collision_detection::AllowedCollision::NEVER)
           {

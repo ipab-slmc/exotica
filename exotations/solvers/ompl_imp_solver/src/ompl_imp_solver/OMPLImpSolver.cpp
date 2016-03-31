@@ -169,6 +169,7 @@ namespace exotica
       getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), sol, ptc);
       planning_time_ = ros::Time::now() - startTime;
       postSolve();
+      margin_->data = init_margin_;
       prob_->update(Eigen::VectorXd(sol.row(sol.rows() - 1)), 0);
       prob_->getScenes().begin()->second->publishScene();
       return SUCCESS;
@@ -258,22 +259,57 @@ namespace exotica
   EReturn OMPLImpSolver::setGoalState(const Eigen::VectorXd & qT,
       const double eps)
   {
+    EReturn ret = SUCCESS;
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());
+    init_margin_ = margin_->data;
     if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
     {
-      ERROR("Invalid goal state [Collision]\n"<<qT.transpose());
-      return FAILURE;
+      ERROR(
+          "Invalid goal state [Collision]\n"<<qT.transpose()<<", safety margin = "<<margin_->data);
+      //  Try to reduce safety margin
+      bool state_good = false;
+      if (margin_->data > 0)
+      {
+        unsigned int trial = 0;
+        while (trial < 5)
+        {
+          margin_->data /= 2.0;
+          HIGHLIGHT("Retry with safety margin = "<<margin_->data);
+          if (ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
+          {
+            state_good = true;
+            break;
+          }
+          trial++;
+        }
+      }
+      //  Last try
+      if (!state_good)
+      {
+        margin_->data = 0.0;
+        HIGHLIGHT("Retry with safety margin = "<<margin_->data);
+        if (ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
+          state_good = true;
+      }
+      if (state_good)
+      {
+        HIGHLIGHT(
+            "Goal state passed collision check with safety margin = "<<margin_->data);
+      }
+      else
+        ret = FAILURE;
     }
 
     if (!ompl_simple_setup_->getSpaceInformation()->satisfiesBounds(gs.get()))
     {
       state_space_->as<OMPLBaseStateSpace>()->stateDebug(qT);
       ERROR("Invalid goal state [Invalid joint bounds]\n"<<qT.transpose());
-      return FAILURE;
+      ret = FAILURE;
     }
     ompl_simple_setup_->setGoalState(gs, eps);
-    return SUCCESS;
+    if (!ok(ret)) margin_->data = init_margin_;
+    return ret;
   }
 
   void OMPLImpSolver::registerDefaultPlanners()

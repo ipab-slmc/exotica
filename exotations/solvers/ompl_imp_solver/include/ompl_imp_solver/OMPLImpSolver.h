@@ -114,8 +114,10 @@ namespace exotica
       virtual ompl::base::GoalPtr constructGoal();
       std::string algorithm_;
       std::string range_;
+      EParam<std_msgs::Float64> margin_;
     private:
       BASE_TYPE base_type_;
+      double init_margin_;
   };
 }
 

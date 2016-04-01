@@ -396,13 +396,13 @@ namespace exotica
     stateCheckCnt_++;
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
-    req.contacts = true;
-    req.max_contacts = 1000;
     ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
     if (res.collision)
     {
       return false;
     }
+    req.contacts = true;
+    req.max_contacts = 1000;
     if (dist > 0) req.distance = true;
     ps_->getCollisionWorld()->checkRobotCollision(req, res,
         *ps_->getCollisionRobot(), ps_->getCurrentState());

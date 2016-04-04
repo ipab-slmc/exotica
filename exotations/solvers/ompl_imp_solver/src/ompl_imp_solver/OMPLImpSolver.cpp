@@ -91,6 +91,16 @@ namespace exotica
       for (auto &it : known_algorithms_)
         ERROR(it.first);
     }
+
+    tmp_handle = handle.FirstChildElement("Range");
+    if (!tmp_handle.ToElement())
+    {
+      range_ = "1";
+    }
+    else
+    {
+      range_ = std::string(tmp_handle.ToElement()->GetText());
+    }
     return SUCCESS;
   }
 
@@ -128,7 +138,7 @@ namespace exotica
     ompl_simple_setup_->getSpaceInformation()->setup();
     ompl_simple_setup_->setup();
     if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
-      ompl_simple_setup_->getPlanner()->params().setParam("range", "1");
+      ompl_simple_setup_->getPlanner()->params().setParam("range", range_);
     return SUCCESS;
   }
 
@@ -159,6 +169,9 @@ namespace exotica
       getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), sol, ptc);
       planning_time_ = ros::Time::now() - startTime;
       postSolve();
+      margin_->data = init_margin_;
+      prob_->update(Eigen::VectorXd(sol.row(sol.rows() - 1)), 0);
+      prob_->getScenes().begin()->second->publishScene();
       return SUCCESS;
     }
     else
@@ -199,7 +212,7 @@ namespace exotica
     if (ptc == false) tryMore = psf_->reduceVertices(pg);
     if (ptc == false) psf_->collapseCloseVertices(pg);
     int times = 0;
-    while (tryMore && ptc == false)
+    while (times < 10 && tryMore && ptc == false)
     {
       tryMore = psf_->reduceVertices(pg);
       times++;
@@ -210,21 +223,22 @@ namespace exotica
         tryMore = psf_->shortcutPath(pg);
       else
         tryMore = false;
-      times = 0;
-      while (tryMore && ptc == false)
+      while (times < 10 && tryMore && ptc == false)
       {
         tryMore = psf_->shortcutPath(pg);
         times++;
       }
     }
 
-    std::vector<ob::State*> &states = pg.getStates();
-    //  Calculate number of states required
-    unsigned int length = 0;
-    const int n1 = states.size() - 1;
-    for (int i = 0; i < n1; ++i)
-      length += si->getStateSpace()->validSegmentCount(states[i],
-          states[i + 1]);
+//    std::vector<ob::State*> &states = pg.getStates();
+//    //  Calculate number of states required
+//    unsigned int length = 0;
+//    const int n1 = states.size() - 1;
+//    for (int i = 0; i < n1; ++i)
+//      length += si->getStateSpace()->validSegmentCount(states[i],
+//          states[i + 1]);
+//    HIGHLIGHT("Interpolate Length "<<length);
+    unsigned int length = 50;
     pg.interpolate(length);
     convertPath(pg, traj);
     HIGHLIGHT(
@@ -245,21 +259,57 @@ namespace exotica
   EReturn OMPLImpSolver::setGoalState(const Eigen::VectorXd & qT,
       const double eps)
   {
+    EReturn ret = SUCCESS;
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());
+    init_margin_ = margin_->data;
     if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
     {
-      ERROR("Invalid goal state [Collision]\n"<<qT.transpose());
-      return FAILURE;
+      ERROR(
+          "Invalid goal state [Collision]\n"<<qT.transpose()<<", safety margin = "<<margin_->data);
+      //  Try to reduce safety margin
+      bool state_good = false;
+      if (margin_->data > 0)
+      {
+        unsigned int trial = 0;
+        while (trial < 5)
+        {
+          margin_->data /= 2.0;
+          HIGHLIGHT("Retry with safety margin = "<<margin_->data);
+          if (ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
+          {
+            state_good = true;
+            break;
+          }
+          trial++;
+        }
+      }
+      //  Last try
+      if (!state_good)
+      {
+        margin_->data = 0.0;
+        HIGHLIGHT("Retry with safety margin = "<<margin_->data);
+        if (ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
+          state_good = true;
+      }
+      if (state_good)
+      {
+        HIGHLIGHT(
+            "Goal state passed collision check with safety margin = "<<margin_->data);
+      }
+      else
+        ret = FAILURE;
     }
 
     if (!ompl_simple_setup_->getSpaceInformation()->satisfiesBounds(gs.get()))
     {
+      state_space_->as<OMPLBaseStateSpace>()->stateDebug(qT);
       ERROR("Invalid goal state [Invalid joint bounds]\n"<<qT.transpose());
-      return FAILURE;
+      ret = FAILURE;
     }
     ompl_simple_setup_->setGoalState(gs, eps);
-    return SUCCESS;
+    if (!ok(ret)) margin_->data = init_margin_;
+    return ret;
   }
 
   void OMPLImpSolver::registerDefaultPlanners()

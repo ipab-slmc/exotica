@@ -73,7 +73,7 @@ namespace exotica
 // Constraints
 // State rejection (e.g. collisions)
       for (auto & it : prob_->scenes_)
-      {
+      {it.second->publishScene();
         if (!it.second->getCollisionScene()->isStateValid())
         {
           dist = -1;

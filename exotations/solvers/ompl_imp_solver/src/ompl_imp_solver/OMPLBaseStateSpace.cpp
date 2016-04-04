@@ -39,14 +39,23 @@ namespace exotica
       const Server_ptr &server, OMPLProblem_ptr &prob)
       : ob::CompoundStateSpace(), server_(server), prob_(prob)
   {
-
   }
 
   OMPLStateValidityChecker::OMPLStateValidityChecker(
       const ob::SpaceInformationPtr &si, const OMPLProblem_ptr &prob)
       : ob::StateValidityChecker(si), prob_(prob)
   {
-
+    Server_ptr server = Server::Instance();
+    if (server->hasParam(server->getName() + "/SafetyMargin"))
+      server->getParam(server->getName() + "/SafetyMargin", margin_);
+    else
+    {
+      margin_.reset(new std_msgs::Float64());
+      margin_->data = 0.0;
+      server->setParam(server->getName() + "/SafetyMargin", margin_);
+    }
+    HIGHLIGHT_NAMED("OMPLStateValidityChecker",
+        "Safety Margin: " << margin_->data);
   }
 
   bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
@@ -66,7 +75,7 @@ namespace exotica
 
     for (auto & it : prob_->scenes_)
     {
-      if (!it.second->getCollisionScene()->isStateValid())
+      if (!it.second->getCollisionScene()->isStateValid(0, margin_->data))
       {
         dist = -1;
         return false;

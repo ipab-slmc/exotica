@@ -96,11 +96,15 @@ namespace exotica
     lock();
   }
 
-  ob::StateSamplerPtr OMPLSE3RNStateSpace::allocDefaultStateSampler(
-      const ompl::base::StateSpace *ss)
+  ob::StateSamplerPtr OMPLSE3RNStateSpace::allocDefaultStateSampler() const
   {
     OMPLSE3RNStateSampler *state_sampler = new OMPLSE3RNStateSampler(this);
     return ob::StateSamplerPtr(state_sampler);
+  }
+
+  void OMPLSE3RNStateSpace::stateDebug(const Eigen::VectorXd &q) const
+  {
+    //  TODO
   }
 
   unsigned int OMPLSE3RNStateSpace::getDimension() const

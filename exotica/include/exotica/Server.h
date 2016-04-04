@@ -100,7 +100,7 @@ namespace exotica
         LOCK(param_lock_);
         if (params_.find(name) == params_.end())
         {
-          std::cout << " Exotica Param " << name << " does not exist\n";
+          WARNING_NAMED(name_,"Param " << name << " does not exist");
           listParameters();
           INDICATE_FAILURE
           return FAILURE;
@@ -119,11 +119,9 @@ namespace exotica
       {
         LOCK(param_lock_);
         if (params_.find(name) == params_.end())
-        {
-          INDICATE_FAILURE
-          return FAILURE;
-        }
-        params_.at(name) = ptr;
+          params_[name] = ptr;
+        else
+          params_.at(name) = ptr;
         return SUCCESS;
       }
 

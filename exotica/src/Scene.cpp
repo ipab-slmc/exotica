@@ -81,7 +81,6 @@ namespace exotica
     ps_->getCurrentStateNonConst().update(true);
     const std::vector<const robot_model::LinkModel*>& links =
         ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
-    acm_ = ps_->getAllowedCollisionMatrix();
     for (std::size_t i = 0; i < links.size(); ++i)
     {
       geo_robot_[links[i]->getName()] = geos_ptr(0);
@@ -191,8 +190,19 @@ namespace exotica
     ps_.reset(
         new planning_scene::PlanningScene(
             server_->getModel("robot_description")));
+    if (!acm_)
+    {
+      acm_.reset(
+          new collision_detection::AllowedCollisionMatrix(
+              ps_->getAllowedCollisionMatrix()));
+    }
     ps_->setPlanningSceneMsg(*msg.get());
     base_type_ = base_type;
+    if (server_->hasParam(server_->getName() + "/DrakeFullBody"))
+      server_->getParam(server_->getName() + "/DrakeFullBody",
+          drake_full_body_);
+    else
+      drake_full_body_.reset(new std_msgs::Bool());
     if (ok(reinitialise()))
     {
       joint_index_.resize(joints.size());
@@ -267,7 +277,10 @@ namespace exotica
           world_name + "/trans_y", x(1));
       ps_->getCurrentStateNonConst().setVariablePosition(
           world_name + "/trans_z", x(2));
-      KDL::Rotation rot = KDL::Rotation::EulerZYX(x(3), x(4), x(5));
+      KDL::Rotation rot =
+          drake_full_body_->data ?
+              KDL::Rotation::RPY(x(3), x(4), x(5)) :
+              KDL::Rotation::EulerZYX(x(3), x(4), x(5));
       Eigen::VectorXd quat(4);
       rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
       ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_x",
@@ -378,18 +391,22 @@ namespace exotica
     return SUCCESS;
   }
 
-  bool CollisionScene::isStateValid(bool self)
+  bool CollisionScene::isStateValid(bool self, double dist)
   {
     stateCheckCnt_++;
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
+    ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
+    if (res.collision)
+    {
+      return false;
+    }
+    req.contacts = true;
+    req.max_contacts = 1000;
+    if (dist > 0) req.distance = true;
     ps_->getCollisionWorld()->checkRobotCollision(req, res,
         *ps_->getCollisionRobot(), ps_->getCurrentState());
-//    ERROR(ps_->getCurrentState().getCollisionBodyTransform("leftForearmLink",0).translation().transpose());
-//    if(res.collision){
-//      HIGHLIGHT("Contact "<<res.contacts.begin()->first.first<<" "<<res.contacts.begin()->first.second<<" at "<<res.contacts.begin()->second[0].pos.transpose());
-//    }
-    return !res.collision;
+    return dist == 0 ? !res.collision : res.distance > dist;
   }
 
   bool CollisionScene::isStateValid(const Eigen::VectorXd &q, bool self)
@@ -430,7 +447,7 @@ namespace exotica
       {
         collision_detection::AllowedCollision::Type type =
             collision_detection::AllowedCollision::ALWAYS;
-        if (link.compare(it.first) != 0 && acm_.getEntry(link, it.first, type))
+        if (link.compare(it.first) != 0 && acm_->getEntry(link, it.first, type))
         {
           if (type == collision_detection::AllowedCollision::NEVER)
           {

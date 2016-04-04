@@ -53,10 +53,9 @@ namespace exotica
     lock();
   }
 
-  ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler(
-      const ompl::base::StateSpace *ss)
+  ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler() const
   {
-    return ob::StateSamplerPtr(new ob::RealVectorStateSampler(ss));
+    return CompoundStateSpace::allocDefaultStateSampler();
   }
 
   EReturn OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
@@ -91,6 +90,11 @@ namespace exotica
         state->as<OMPLRNStateSpace::StateType>()->getRNSpace().values,
         sizeof(double) * q.rows());
     return SUCCESS;
+  }
+
+  void OMPLRNStateSpace::stateDebug(const Eigen::VectorXd &q) const
+  {
+    //  TODO
   }
 }
 

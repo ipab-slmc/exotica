@@ -124,7 +124,7 @@ namespace exotica
        * @param	self	Indicate if self collision check is required
        * @return True, if the state is collision free.
        */
-      bool isStateValid(bool self = true);
+      bool isStateValid(bool self = true, double dist = 0);
 
       /**
        * \brief	Check if the whole robot is valid given a configuration
@@ -217,12 +217,13 @@ namespace exotica
       bool compute_dist;
 
       ///	The allowed collisiom matrix
-      collision_detection::AllowedCollisionMatrix acm_;
+      collision_detection::AllowedCollisionMatrixPtr acm_;
 
       ///	Pointer to exotica server
       exotica::Server_ptr server_;
       std::string scene_name_;
       BASE_TYPE base_type_;
+      EParam<std_msgs::Bool> drake_full_body_;;
 
   };
 

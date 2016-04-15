@@ -373,9 +373,9 @@ namespace exotica
       maxdim_ = 0;
       for (int i = 0; i < maxit_->data; i++)
       {
-        if (ok(prob_->update(solution.row(0), t)))
+        if (ok(prob_->update(solution.row(0).transpose(), t)))
         {
-          if (!ok(vel_solve(error, t, solution.row(0))))
+          if (!ok(vel_solve(error, t, solution.row(0).transpose())))
           {
             INDICATE_FAILURE
             return FAILURE;
@@ -413,7 +413,7 @@ namespace exotica
       }
       else
       {
-        ROS_WARN_STREAM_THROTTLE(1.0,"Solution not found after reaching max number of iterations");
+        ROS_WARN_STREAM_THROTTLE(1.0,"Solution not found after reaching max number of iterations. Error = "<<error);
         return WARNING;
       }
     }
@@ -443,9 +443,9 @@ namespace exotica
       int i = 0;
       for (i = 0; i < maxit_->data; i++)
       {
-        if (ok(prob_->update(solution.row(0), t)))
+        if (ok(prob_->update(solution.row(0).transpose(), t)))
         {
-          if (!ok(vel_solve(error, t, solution.row(0))))
+          if (!ok(vel_solve(error, t, solution.row(0).transpose())))
           {
             INDICATE_FAILURE
             return FAILURE;
@@ -554,11 +554,11 @@ namespace exotica
       if (!multi_task_->data)
       {
         // Compute velocity
-        Eigen::MatrixXd Jpinv;
+        Eigen::MatrixXd Jpinv(big_jacobian.at(t).cols(),big_jacobian.at(t).rows());
         big_jacobian.at(t) = big_jacobian.at(t).unaryExpr(
             CwiseClampOp<double>(-1e10, 1e10));
         Jpinv = (big_jacobian.at(t).transpose() * task_weights
-            * big_jacobian.at(t) + prob_->getW()).inverse()
+            * big_jacobian.at(t) + prob_->getW()).inverse().transpose()
             * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C */
         /*Jpinv = prob_->getW()*big_jacobian.at(t).transpose() * (big_jacobian.at(t).transpose()*prob_->getW()*big_jacobian.at(t) + Eigen::MatrixXd::Identity(task_weights.rows(),task_weights.rows())*task_weights ).inverse(); //W*Jt*(Jt*W*J+C)*/
         /*Jpinv=big_jacobian.at(t).transpose();*/

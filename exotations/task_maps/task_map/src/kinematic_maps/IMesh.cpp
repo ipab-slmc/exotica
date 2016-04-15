@@ -186,6 +186,7 @@ namespace exotica
     dist.setZero();
     wsum.resize(N);
     wsum.setZero();
+    PHI.setZero();
     int j, l;
     double w;
     /** Compute distance matrix (inverse proportional) */
@@ -201,7 +202,7 @@ namespace exotica
         }
       }
     }
-    /** Computer weight normaliser */
+    /** Compute weight normaliser */
     for (j = 0; j < N; j++)
     {
       for (l = 0; l < N; l++)
@@ -245,11 +246,11 @@ namespace exotica
       INDICATE_FAILURE
       return FAILURE;
     }
-    if (!ok(computeLaplace(t)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
+//    if (!ok(computeLaplace(t)))
+//    {
+//      INDICATE_FAILURE
+//      return FAILURE;
+//    }
     goal = PHI;
     return SUCCESS;
   }

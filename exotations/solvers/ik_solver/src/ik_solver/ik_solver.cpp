@@ -532,7 +532,6 @@ namespace exotica
   {
     static Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->getW().rows(),
         prob_->getW().rows());
-    ROS_ERROR_STREAM("Matrix storage order is "<<(I.Options&Eigen::RowMajor?" row major":"column major"));
     if (initialised_)
     {
       vel_vec_.setZero();
@@ -558,10 +557,12 @@ namespace exotica
         Eigen::MatrixXd Jpinv(big_jacobian.at(t).cols(),big_jacobian.at(t).rows());
         big_jacobian.at(t) = big_jacobian.at(t).unaryExpr(
             CwiseClampOp<double>(-1e10, 1e10));
-        Eigen::MatrixXd tmp = (big_jacobian.at(t).transpose() * task_weights
-            * big_jacobian.at(t) + prob_->getW()).inverse();
-        Jpinv = tmp
+//        Eigen::MatrixXd tmp = (big_jacobian.at(t).transpose() * task_weights
+//            * big_jacobian.at(t) + prob_->getW()).inverse().transpose();
+        Jpinv = Eigen::MatrixXd(big_jacobian.at(t).transpose() * task_weights
+                * big_jacobian.at(t) + prob_->getW()).inverse().transpose()
             * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C */
+
         /*Jpinv = prob_->getW()*big_jacobian.at(t).transpose() * (big_jacobian.at(t).transpose()*prob_->getW()*big_jacobian.at(t) + Eigen::MatrixXd::Identity(task_weights.rows(),task_weights.rows())*task_weights ).inverse(); //W*Jt*(Jt*W*J+C)*/
         /*Jpinv=big_jacobian.at(t).transpose();*/
         if (Jpinv != Jpinv)

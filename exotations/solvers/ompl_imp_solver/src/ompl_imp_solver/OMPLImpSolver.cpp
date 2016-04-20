@@ -171,7 +171,7 @@ namespace exotica
       postSolve();
       margin_->data = init_margin_;
       prob_->update(Eigen::VectorXd(sol.row(sol.rows() - 1)), 0);
-      prob_->getScenes().begin()->second->publishScene();
+      //prob_->getScenes().begin()->second->publishScene();
       return SUCCESS;
     }
     else

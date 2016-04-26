@@ -559,9 +559,13 @@ namespace exotica
         big_jacobian.at(t) = big_jacobian.at(t).unaryExpr(
             CwiseClampOp<double>(-1e10, 1e10));
         Eigen::MatrixXd tmp = (big_jacobian.at(t).transpose() * task_weights
-            * big_jacobian.at(t) + prob_->getW()).inverse();
+            * big_jacobian.at(t) + prob_->getW()).inverse().transpose();
         Jpinv = tmp
             * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C */
+        //Jpinv = Eigen::MatrixXd(big_jacobian.at(t).transpose() * task_weights
+        //    * big_jacobian.at(t) + prob_->getW()).inverse().transpose()
+        //    * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C */
+
         /*Jpinv = prob_->getW()*big_jacobian.at(t).transpose() * (big_jacobian.at(t).transpose()*prob_->getW()*big_jacobian.at(t) + Eigen::MatrixXd::Identity(task_weights.rows(),task_weights.rows())*task_weights ).inverse(); //W*Jt*(Jt*W*J+C)*/
         /*Jpinv=big_jacobian.at(t).transpose();*/
         if (Jpinv != Jpinv)

@@ -266,6 +266,7 @@ namespace exotica
       double A, _A, Sk, Sl, w, _w;
       int i, j, k, l, N;
       N = EFFJAC.cols();
+      JAC.setZero();
       Eigen::Vector3d distance, _distance = Eigen::Vector3d::Zero(3, 1);
       for (i = 0; i < N; i++)
       {

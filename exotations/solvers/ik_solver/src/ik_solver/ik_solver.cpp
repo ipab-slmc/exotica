@@ -551,18 +551,25 @@ namespace exotica
 
       }
       err = (task_weights * task_error).squaredNorm();
+      HIGHLIGHT("Error " << err);
       if (!multi_task_->data)
       {
         // Compute velocity
         Eigen::MatrixXd Jpinv(big_jacobian.at(t).cols(),big_jacobian.at(t).rows());
-        big_jacobian.at(t) = big_jacobian.at(t).unaryExpr(
-            CwiseClampOp<double>(-1e10, 1e10));
+        //big_jacobian.at(t) = big_jacobian.at(t).unaryExpr(
+        //    CwiseClampOp<double>(-1e10, 1e10));
         Eigen::MatrixXd tmp = (big_jacobian.at(t).transpose() * task_weights
-            * big_jacobian.at(t) + prob_->getW()).inverse().transpose();
+            * big_jacobian.at(t) + prob_->getW()).inverse();
         Jpinv = tmp
             * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C */
+        //Eigen::MatrixXd tmp = (big_jacobian.at(t)*prob_->getW().inverse()*big_jacobian.at(t).transpose() + task_weights.inverse()).inverse();
+        //Jpinv = prob_->getW().inverse() * big_jacobian.at(t).transpose() * tmp; //W^-1*Jt*(J*W^-1*Jt+C^-1)^-1 */
+
+        //HIGHLIGHT_NAMED("Jac:\n",big_jacobian.at(t));
+        //HIGHLIGHT_NAMED("JacTmp:\n",tmp);
+        //HIGHLIGHT_NAMED("JacInv:\n",Jpinv);
         //Jpinv = Eigen::MatrixXd(big_jacobian.at(t).transpose() * task_weights
-        //    * big_jacobian.at(t) + prob_->getW()).inverse().transpose()
+        //    * big_jacobian.at(t) + prob_->getW()).inverse()
         //    * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C */
 
         /*Jpinv = prob_->getW()*big_jacobian.at(t).transpose() * (big_jacobian.at(t).transpose()*prob_->getW()*big_jacobian.at(t) + Eigen::MatrixXd::Identity(task_weights.rows(),task_weights.rows())*task_weights ).inverse(); //W*Jt*(Jt*W*J+C)*/

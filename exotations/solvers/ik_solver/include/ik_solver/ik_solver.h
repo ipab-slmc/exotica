@@ -108,6 +108,8 @@ namespace exotica
       int getMaxIteration();
       Eigen::VectorXd nullSpaceRef;
       void setReachGoal(const geometry_msgs::Pose &goal);
+      EReturn vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
+
     protected:
       /**
        * \brief	Derived-elements initialiser: Pure Virtual
@@ -121,7 +123,7 @@ namespace exotica
        * \brief	IK velocity solver
        * @param	err	Task error
        */
-      inline EReturn vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
+
       IKProblem_ptr prob_; // Shared pointer to the planning problem.
       EParam<std_msgs::Int64> maxit_;	// Maximum iteration
       EParam<std_msgs::Float64> maxstep_;	// Maximum step

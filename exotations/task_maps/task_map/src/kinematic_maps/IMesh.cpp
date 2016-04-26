@@ -124,9 +124,9 @@ namespace exotica
       points[i].z = eff_mat(2, i);
     }
 
-    for(int i=0;i<eff_size_;i++)
+    for(int i=0;i<eff_size_-3;i++)
     {
-      for(int j=i+1;j<eff_size_;j++)
+      for(int j=i+1;j<eff_size_-3;j++)
       {
           imesh_mark_.points.push_back(points[i]);
           imesh_mark_.points.push_back(points[j]);

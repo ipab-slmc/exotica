@@ -532,7 +532,6 @@ namespace exotica
   {
     static Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->getW().rows(),
         prob_->getW().rows());
-    ROS_ERROR_STREAM("Matrix storage order is "<<(I.Options&Eigen::RowMajor?" row major":"column major"));
     if (initialised_)
     {
       vel_vec_.setZero();

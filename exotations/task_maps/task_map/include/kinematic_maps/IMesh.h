@@ -33,12 +33,7 @@
 #ifndef IMESH_H_
 #define IMESH_H_
 
-#include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <exotica/Test.h>
-#include <tinyxml2/tinyxml2.h>
-#include <exotica/KinematicTree.h>
-#include <Eigen/Eigen>
+#include <exotica/EXOTica.hpp>
 #include <boost/thread/mutex.hpp>
 
 namespace exotica

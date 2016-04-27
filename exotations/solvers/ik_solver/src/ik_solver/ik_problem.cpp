@@ -175,6 +175,23 @@ namespace exotica
 
   }
 
+  EReturn IKProblem::reinitialise(Problem& msg, boost::shared_ptr<PlanningProblem> problem)
+  {
+      EReturn ret = PlanningProblem::reinitialise(msg, problem);
+      if (!ok(ret))
+      {
+        INDICATE_FAILURE
+        ;
+        return ret;
+      }
+      for(auto def : task_defs_)
+      {
+          boost::static_pointer_cast<TaskSqrError>(def.second)->setTimeSteps(T_);
+          boost::static_pointer_cast<TaskSqrError>(def.second)->wasFullyInitialised_ = true;
+      }
+      return SUCCESS;
+  }
+
   EReturn IKProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLElement* xmltmp;

@@ -65,6 +65,8 @@ namespace exotica
 
       virtual EReturn reinitialise(rapidjson::Document& document,
           boost::shared_ptr<PlanningProblem> problem);
+
+      virtual EReturn reinitialise(Problem& msg, boost::shared_ptr<PlanningProblem> problem);
     protected:
       /**
        * \brief Derived Initialiser (from XML): PURE VIRTUAL

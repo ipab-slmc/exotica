@@ -135,15 +135,15 @@ namespace exotica
       ompl_simple_setup_->getStateSpace()->registerDefaultProjection(
           ob::ProjectionEvaluatorPtr(
               new OMPLSE3RNProjection(state_space_, project_vars)));
-    ompl_simple_setup_->getSpaceInformation()->setup();
-    ompl_simple_setup_->setup();
-    if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
-      ompl_simple_setup_->getPlanner()->params().setParam("range", range_);
     return SUCCESS;
   }
 
   EReturn OMPLImpSolver::solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol)
   {
+    ompl_simple_setup_->getSpaceInformation()->setup();
+    ompl_simple_setup_->setup();
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
+      ompl_simple_setup_->getPlanner()->params().setParam("range", range_);
     ros::Time startTime = ros::Time::now();
     finishedSolving_ = false;
     ompl::base::ScopedState<> ompl_start_state(state_space_);
@@ -308,7 +308,10 @@ namespace exotica
       ret = FAILURE;
     }
     ompl_simple_setup_->setGoalState(gs, eps);
-    if (!ok(ret)) margin_->data = init_margin_;
+    if (!ok(ret))
+      margin_->data = init_margin_;
+    else
+      qT_ = qT;
     return ret;
   }
 

@@ -95,7 +95,7 @@ namespace exotica
     tmp_handle = handle.FirstChildElement("Range");
     if (!tmp_handle.ToElement())
     {
-      range_ = "1";
+      range_ = "none";
     }
     else
     {
@@ -259,6 +259,7 @@ namespace exotica
       const double eps)
   {
     EReturn ret = SUCCESS;
+    qT_ = qT;
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());
     init_margin_ = margin_->data;

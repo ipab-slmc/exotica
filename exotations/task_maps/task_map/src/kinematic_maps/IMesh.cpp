@@ -95,7 +95,7 @@ namespace exotica
       imesh_mark_.type = visualization_msgs::Marker::LINE_LIST;
       imesh_mark_.header.frame_id = ref;
       imesh_mark_.ns = getObjectName();
-      imesh_mark_pub_ = server_->advertise<visualization_msgs::Marker>(ns_ +"/InteractionMesh", 1, true);
+      imesh_mark_pub_ = server_->advertise<visualization_msgs::Marker>("InteractionMesh", 1, true);
       HIGHLIGHT("InteractionMesh connectivity is published on ROS topic "<<imesh_mark_pub_.getTopic()<<", in reference frame "<<ref);
   }
 

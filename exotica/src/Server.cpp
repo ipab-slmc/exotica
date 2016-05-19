@@ -35,11 +35,9 @@ exotica::Server_ptr exotica::Server::singleton_server_ = NULL;
 namespace exotica
 {
   Server::Server()
-      : nh_(new ros::NodeHandle("/EXOTicaServer")), name_("EXOTicaServer"), sp_(
+      : nh_(new ros::NodeHandle("~")), name_("EXOTicaServer"), sp_(
           2)
   {
-    //TODO
-    sp_.start();
   }
 
   Server::~Server()
@@ -96,11 +94,9 @@ namespace exotica
   EReturn Server::initialise(tinyxml2::XMLHandle & handle)
   {
     static bool first = true;
-    if (!singleton_server_)
-    {
-      name_ = handle.ToElement()->Attribute("name");
-      std::string ns = name_;
-    }
+    name_ = handle.ToElement()->Attribute("name");
+    nh_.reset(new ros::NodeHandle(name_));
+    sp_.start();
     tinyxml2::XMLHandle param_handle(handle.FirstChildElement("Parameters"));
     tinyxml2::XMLHandle tmp_handle = param_handle.FirstChild();
     while (tmp_handle.ToElement())

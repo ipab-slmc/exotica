@@ -241,7 +241,7 @@ namespace exotica
     return T_;
   }
 
-  Eigen::MatrixXd IKProblem::getW()
+  Eigen::MatrixXd &IKProblem::getW()
   {
     return config_w_;
   }

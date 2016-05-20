@@ -52,7 +52,7 @@ namespace exotica
        * \brief	Get configuration weight
        * @return	configuration weight
        */
-      Eigen::MatrixXd getW();
+      Eigen::MatrixXd &getW();
 
       int getT();
 

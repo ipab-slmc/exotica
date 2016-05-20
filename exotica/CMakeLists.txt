@@ -52,11 +52,11 @@ generate_messages(
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS signals)
 
-if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/Ref.h")
-   message(WARNING "Eigen found")
-elseif(IS_DIRECTORY $ENV{DRC_BASE})
+if(IS_DIRECTORY $ENV{DRC_BASE})
   set(EIGEN3_INCLUDE_DIR $ENV{DRC_BASE}/software/build/include/eigen3)
   message(WARNING "Using OpenHumanoids version of Eigen")
+elseif(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/Ref.h")
+   message(WARNING "Eigen found")
 elseif(EXISTS "/usr/include/eigen3/Eigen/src/Core/Ref.h")
   message(WARNING "Manually setting to /usr/include/eigen3")
   set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")

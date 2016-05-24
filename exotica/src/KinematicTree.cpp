@@ -607,10 +607,10 @@ bool exotica::KinematicTree::updateConfiguration(
           jnt_angle = current_base_pose_.M.GetRotAngle(axis);
         }
       }
+      else if (robot_tree_[i].joint_type == JNT_UNUSED)
+        jnt_angle = current_state_(i);
       else
-        jnt_angle =
-            (robot_tree_[i].joint_type == JNT_UNUSED) ?
-                0 : joint_configuration[robot_tree_[i].joint_index];
+        jnt_angle = joint_configuration[robot_tree_[i].joint_index];
 
       //!< Settle which parent transform to use
       if (robot_tree_[i].from_tip)//If we are coming from the tip of the parent
@@ -663,6 +663,42 @@ bool exotica::KinematicTree::setBasePose(const KDL::Frame &pose)
 {
   current_base_pose_ = pose;
   return true;
+}
+
+bool exotica::KinematicTree::setJointPosition(const std::string &joint,
+    double position)
+{
+  if (joint_map_.find(joint) != joint_map_.end())
+  {
+    INDICATE_FAILURE
+    return false;
+  }
+  current_state_(joint_map_.at(joint)) = position;
+  return true;
+}
+
+bool exotica::KinematicTree::setJointPositions(
+    const std::vector<std::string> &joints, std::vector<double> &positions)
+{
+  if (joints.size() != positions.size())
+  {
+    INDICATE_FAILURE
+    return false;
+  }
+  for (int i = 0; i < joints.size(); i++)
+  {
+    if (!setJointPosition(joints[i], positions[i]))
+    {
+      INDICATE_FAILURE
+      return false;
+    }
+  }
+  return true;
+}
+
+void exotica::KinematicTree::resetStateToZero()
+{
+  current_state_.setZero();
 }
 
 bool exotica::KinematicTree::setBaseBounds(const std::vector<double> &bounds)
@@ -908,6 +944,7 @@ bool exotica::KinematicTree::initialise(const KDL::Tree & temp_tree,
 
 //!< Attempt to Build the Tree
   success = buildTree(temp_tree, optimisation.root_segment, joint_map_);
+  current_state_.setZero(joint_map_.size());
 
   if (success)
   {

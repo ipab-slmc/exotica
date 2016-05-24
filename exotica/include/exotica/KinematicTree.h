@@ -325,6 +325,9 @@ namespace exotica
       bool setBasePose(const KDL::Frame &pose);
       bool setFloatingBaseLimitsPosXYZEulerZYX(
           const std::vector<double> & lower, const std::vector<double> & upper);
+      bool setJointPosition(const std::string &joint, double position);
+      bool setJointPositions(const std::vector<std::string> &joints, std::vector<double> &positions);
+      void resetStateToZero();
 
       //private:
       /****************** Class members ********************/
@@ -355,6 +358,8 @@ namespace exotica
       std::vector<KDL::Frame> eff_seg_offs_; //!< Offsets from the end effector segments (if required)
       std::vector<std::string> eff_segments_ini_;
       std::vector<KDL::Frame> eff_seg_offs_ini_;
+
+      Eigen::VectorXd current_state_;
 
       /**
        *  \brief Solution Storage

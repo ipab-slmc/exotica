@@ -134,7 +134,7 @@ namespace exotica
         }
       }
     }
-    if (limbs > 1)
+    if (limbs > 0)
     {
       scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
       return SUCCESS;

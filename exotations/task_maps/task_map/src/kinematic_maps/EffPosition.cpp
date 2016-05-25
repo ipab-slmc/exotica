@@ -94,6 +94,47 @@ namespace exotica
     return SUCCESS;
   }
 
+  EReturn EffPosition::initialiseManual(std::string name, Server_ptr & server,
+      const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
+      std::vector<std::pair<std::string, std::string> >& params)
+  {
+    EReturn ret = TaskMap::initialiseManual(name, server, scene_ptr, prob,
+        params);
+    initDebug("/world");
+    return ret;
+  }
+
+  void EffPosition::initDebug(std::string ref)
+  {
+    eff_mark_.scale.x = eff_mark_.scale.y = eff_mark_.scale.z = 0.1;
+    eff_mark_.color.a = eff_mark_.color.b = 1;
+    eff_mark_.type = visualization_msgs::Marker::SPHERE_LIST;
+    eff_mark_.header.frame_id = ref;
+    eff_mark_.ns = getObjectName();
+    eff_mark_.points.resize(scene_->getMapSize(object_name_));
+    eff_mark_pub_ = server_->advertise<visualization_msgs::Marker>(
+        "EffPosition", 1, true);
+    HIGHLIGHT(
+        "EffPosition is published on ROS topic "<<eff_mark_pub_.getTopic()<<", in reference frame "<<ref);
+  }
+
+  void EffPosition::debug()
+  {
+    if(eff_mark_.points.size()==0)
+      initDebug("/world");
+    const int eff_size = scene_->getMapSize(object_name_);
+    Eigen::Map<Eigen::MatrixXd> eff_mat(EFFPHI.data(), 3, eff_size);
+    for (int i = 0; i < eff_size; i++)
+    {
+      eff_mark_.points[i].x = eff_mat(0, i);
+      eff_mark_.points[i].y = eff_mat(1, i);
+      eff_mark_.points[i].z = eff_mat(2, i);
+    }
+
+    eff_mark_.header.stamp = ros::Time::now();
+    eff_mark_pub_.publish(eff_mark_);
+  }
+
   EReturn EffPosition::taskSpaceDim(int & task_dim)
   {
     if (!scene_)

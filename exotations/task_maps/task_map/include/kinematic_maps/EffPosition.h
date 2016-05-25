@@ -65,15 +65,23 @@ namespace exotica //!< Since this is part of the core library, it will be within
       virtual EReturn taskSpaceDim(int & task_dim);
 
       virtual EReturn initialise(const rapidjson::Value& a);
-
+      virtual EReturn initialiseManual(std::string name, Server_ptr & server,
+          const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
+          std::vector<std::pair<std::string, std::string> >& params);
+      virtual void debug();
+      void initDebug(std::string ref);
     protected:
       /**
        * \brief Concrete implementation of TaskMap::initDerived()
        * @return  Always returns success
        */
       virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+
+    private:
+      ros::Publisher eff_mark_pub_;
+      visualization_msgs::Marker eff_mark_;
   };
-  typedef boost::shared_ptr<EffPosition> EffPosition_ptr;  //!< Task Map smart pointer
+  typedef boost::shared_ptr<EffPosition> EffPosition_ptr; //!< Task Map smart pointer
 }
 
 #endif

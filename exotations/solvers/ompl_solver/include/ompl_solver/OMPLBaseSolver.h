@@ -75,7 +75,7 @@ namespace exotica
       {
         ompl::base::PlannerPtr planner(new T(si));
         if (!new_name.empty()) planner->setName(new_name);
-        planner->setup();
+//        planner->setup();
         return planner;
       }
       std::map<std::string, ConfiguredPlannerAllocator> known_algorithms_;

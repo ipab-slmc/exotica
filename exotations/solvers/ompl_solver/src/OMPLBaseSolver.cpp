@@ -10,7 +10,7 @@
 namespace exotica
 {
   OMPLBaseSolver::OMPLBaseSolver(const std::string planner_name)
-      : timeout_(60.0), finishedSolving_(false), planner_name_(planner_name)
+      : timeout_(600.0), finishedSolving_(false), planner_name_(planner_name)
   {
 
   }

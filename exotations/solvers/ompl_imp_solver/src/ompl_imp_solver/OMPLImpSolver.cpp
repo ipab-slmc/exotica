@@ -154,8 +154,7 @@ namespace exotica
     ompl_simple_setup_->setStartState(ompl_start_state);
     preSolve();
     ompl::time::point start = ompl::time::now();
-    ob::PlannerTerminationCondition ptc = ob::timedPlannerTerminationCondition(
-        timeout_ - ompl::time::seconds(ompl::time::now() - start));
+    ob::PlannerTerminationCondition ptc = ob::timedPlannerTerminationCondition(100);
     registerTerminationCondition(ptc);
 
     if (ompl_simple_setup_->solve(ptc)

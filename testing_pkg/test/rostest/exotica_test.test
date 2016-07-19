@@ -1,3 +1,0 @@
-<launch>
-  <test test-name="exotica_test_node" pkg="testing_pkg" type="exotica_test_node" />
-</launch>

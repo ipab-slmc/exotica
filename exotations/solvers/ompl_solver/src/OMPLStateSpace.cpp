@@ -78,43 +78,35 @@ namespace exotica
     // TODO Auto-generated destructor stub
   }
 
-  EReturn OMPLStateSpace::copyToOMPLState(ompl::base::State *state,
+  void OMPLStateSpace::copyToOMPLState(ompl::base::State *state,
       Eigen::VectorXd q) const
   {
     if (!state)
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Invalid state!");
     }
     if (q.rows() != (int) getDimension())
     {
-      ERROR(
-          "State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
-      return FAILURE;
+      throw_pretty("State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
     }
     memcpy(state->as<ompl::base::RealVectorStateSpace::StateType>()->values,
         q.data(), sizeof(double) * q.rows());
-    return SUCCESS;
   }
 
-  EReturn OMPLStateSpace::copyFromOMPLState(const ompl::base::State *state,
+  void OMPLStateSpace::copyFromOMPLState(const ompl::base::State *state,
       Eigen::VectorXd& q) const
   {
     if (!state)
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Invalid state!");
     }
     if (q.rows() != (int) getDimension())
     {
-      ERROR(
-          "State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
-      return FAILURE;
+      throw_pretty("State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
     }
     memcpy(q.data(),
         state->as<ompl::base::RealVectorStateSpace::StateType>()->values,
         sizeof(double) * q.rows());
-    return SUCCESS;
   }
 
 } /* namespace exotica */

@@ -19,12 +19,12 @@ namespace exotica
 
   }
 
-  EReturn OMPLBaseSolver::initialiseBaseSolver(tinyxml2::XMLHandle & handle,
+  void OMPLBaseSolver::initialiseBaseSolver(tinyxml2::XMLHandle & handle,
       const Server_ptr &server)
   {
     server_ = server;
     registerDefaultPlanners();
-    return initialiseSolver(handle);
+    initialiseSolver(handle);
   }
 
   void OMPLBaseSolver::recordData()

@@ -67,20 +67,20 @@ namespace exotica
        * @brief	Concrete implementation of update method
        * @param	x	Joint space configuration
        */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(Eigen::VectorXdRefConst x, const int t);
 
       /**
        * @brief	Get the task space dimension
        * @return	Exotica return type, SUCCESS if succeeded
        */
-      virtual EReturn taskSpaceDim(int & task_dim);
+      virtual void taskSpaceDim(int & task_dim);
 
       /**
        * @brief setTimeSteps Sets number of timesteps and allocates memory
        * @param T Number of time steps (this should be set by the planning problem)
        * @return Returns success.
        */
-      virtual EReturn setTimeSteps(const int T);
+      virtual void setTimeSteps(const int T);
 
       /**
        * @brief initVis Initialises visualisation
@@ -100,7 +100,7 @@ namespace exotica
        * @brief	Concrete implementation of initialisation from xml
        * @param	handle	XML handler
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
     private:
       /** Member Variables **/
@@ -131,7 +131,7 @@ namespace exotica
        * @param	q	Joint angles
        * @return	Jacobian matrix
        */
-      exotica::EReturn computeFlux(const int t);
+      exotica::void computeFlux(const int t);
 
       void FluxTriangleTriangle(int* Tris, double* Verts, double* VertJ,
           int* TrisJ, int* TrisQ, double* VertsQ, double* Flux, double* FluxJ,

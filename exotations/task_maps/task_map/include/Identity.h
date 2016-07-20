@@ -1,5 +1,5 @@
 /*
- *      Author: Yiming Yang
+ *      Author: Michael Camilleri
  * 
  * Copyright (c) 2016, University Of Edinburgh 
  * All rights reserved. 
@@ -30,27 +30,57 @@
  *
  */
 
-#ifndef EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_GJKCOLLISIONAVOIDANCE_H_
-#define EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_GJKCOLLISIONAVOIDANCE_H_
+#ifndef EXOTICA_GENERIC_IDENTITY_H
+#define EXOTICA_GENERIC_IDENTITY_H
 
-#include "CollisionAvoidance.h"
+#include <exotica/TaskMap.h>
+#include <exotica/Factory.h>
+#include <exotica/Test.h>
+#include <tinyxml2/tinyxml2.h>
+#include <Eigen/Dense>
+
 namespace exotica
 {
-  /*
-   * \brief	This class uses GilbertJohnson-Keerthi algorithm(GJK) algorithms to calculate the
-   * 			distance information between two objects
-   * 			A fast procedure for computing the distance between complex objects in three-dimensional space
-   * 			http://graphics.stanford.edu/courses/cs448b-00-winter/papers/gilbert.pdf
-   */
-  class GJKCollisionAvoidance: public CollisionAvoidance
+  class Identity: public TaskMap
   {
     public:
-      GJKCollisionAvoidance();
-      virtual ~GJKCollisionAvoidance();
+      /**
+       * \brief Default constructor
+       */
+      Identity();
+      virtual ~Identity()
+      {
+      }
 
-      ///	We only need to change the update function, other functions state the same as in collision avoidance
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+      /**
+       * \brief Concrete implementation of the update method
+       */
+      virtual void update(Eigen::VectorXdRefConst x, const int t);
+
+      /**
+       * \brief Concrete implementation of the task-space size
+       */
+      virtual void taskSpaceDim(int & task_dim);
+
+      void initialise(std::string& postureName,
+          std::vector<std::string>& joints, bool skipUnknown = false);
+      virtual void initialise(const rapidjson::Value& a);
+
+      bool useRef;
+      std::vector<int> jointMap;
+      Eigen::VectorXd jointRef;
+
+    protected:
+      /**
+       * \brief Concrete implementation of the initialisation method
+       */
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
+
+      int getJointIDexternal(std::string& name);
+      int getJointID(std::string& name);
+
   };
-}
 
-#endif /* EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_GJKCOLLISIONAVOIDANCE_H_ */
+  typedef boost::shared_ptr<exotica::Identity> Identity_ptr;
+}
+#endif

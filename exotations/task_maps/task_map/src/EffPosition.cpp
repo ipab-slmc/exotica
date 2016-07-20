@@ -30,51 +30,59 @@
  *
  */
 
-#ifndef EXOTICA_TASKMAP_ORIENTATION_H
-#define EXOTICA_TASKMAP_ORIENTATION_H
+#include "EffPosition.h"
 
-#include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <exotica/Test.h>
-#include <tinyxml2/tinyxml2.h>
-#include <Eigen/Dense>
-#include <boost/thread/mutex.hpp>
+REGISTER_TASKMAP_TYPE("EffPosition", exotica::EffPosition);
+REGISTER_FOR_XML_TEST("EffPosition", "EffPosition.xml");
 
-namespace exotica //!< Since this is part of the core library, it will be within the same namespace
+namespace exotica
 {
-  class Orientation: public TaskMap
+  EffPosition::EffPosition()
   {
-    public:
-      /**
-       * \brief Default constructor
-       */
-      Orientation();
-      virtual ~Orientation()
-      {
-      }
+    //!< Empty constructor
+  }
 
-      /**
-       * \brief Concrete implementation of the update method
-       */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+  void EffPosition::initialise(const rapidjson::Value& a)
+  {
+    std::vector<std::string> tmp_eff(1);
+    getJSON(a["linkName"], tmp_eff[0]);
+    Eigen::VectorXd rel;
+    getJSON(a["pointInLink"], rel);
+    if(rel.rows() != 3) throw_named("Incorrect size!");
+    std::vector<KDL::Frame> tmp_offset(1);
+    tmp_offset[0] = KDL::Frame::Identity();
+    tmp_offset[0].p[0] = rel(0);
+    tmp_offset[0].p[1] = rel(1);
+    tmp_offset[0].p[2] = rel(2);
+    scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
+  }
 
-      /**
-       * \brief Concrete implementation of the task-space size
-       */
-      virtual EReturn taskSpaceDim(int & task_dim);
+  void EffPosition::update(Eigen::VectorXdRefConst x, const int t)
+  {
+    if (!isRegistered(t) || !getEffReferences())
+    {
+      throw_named("Not fully initialized!");
+    }
+    PHI = EFFPHI;
+    if (updateJacobian_)
+    {
+      JAC = EFFJAC;
+    }
+  }
 
-      virtual EReturn initialise(const rapidjson::Value& a);
+  void EffPosition::initDerived(tinyxml2::XMLHandle & handle)
+  {
+  }
 
-      KDL::Frame ref_pose_;
-
-    protected:
-      /**
-       * \brief Concrete implementation of TaskMap::initDerived()
-       * @return  Always returns success
-       */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-  };
-  typedef boost::shared_ptr<Orientation> Orientation_Ptr;
+  void EffPosition::taskSpaceDim(int & task_dim)
+  {
+    if (!scene_)
+    {
+      throw_named("Kinematic scene has not been initialized!");
+    }
+    else
+    {
+      task_dim = scene_->getMapSize(object_name_) * 3;
+    }
+  }
 }
-
-#endif

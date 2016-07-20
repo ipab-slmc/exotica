@@ -62,7 +62,7 @@ namespace exotica
       /**
        * \brief Set number of time steps
        */
-      EReturn setTime(int T);
+      void setTime(int T);
 
       /**
        * \brief Get number of time steps
@@ -118,9 +118,9 @@ namespace exotica
        * @param t time step
        * @return  Indication of success TODO
        */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+      void void update(Eigen::VectorXdRefConst x, const int t);
 
-      virtual EReturn reinitialise(rapidjson::Document& document,
+      virtual void reinitialise(rapidjson::Document& document,
           boost::shared_ptr<PlanningProblem> problem);
 
     protected:
@@ -129,7 +129,7 @@ namespace exotica
        * @param handle The handle to the XML-element describing the Problem Definition
        * @return Indication of success/failure
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
     private:
       int T; //!< Number of time steps
       double tau; //!< Time step duration

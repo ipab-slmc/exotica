@@ -465,8 +465,7 @@ namespace ompl
               is->as<ompl::base::RealVectorStateSpace::StateType>()->values,
           sizeof(double) * qs.rows());
       Eigen::MatrixXd local_path;
-      exotica::EReturn ret = FlexiblePlanner::localSolve(qs, qg, local_path);
-      if (ok(ret))
+      if (FlexiblePlanner::localSolve(qs, qg, local_path))
       {
         /* Local planner succeeded */
         if (is)
@@ -480,8 +479,9 @@ namespace ompl
         memcpy(
             gm->state->as<ompl::base::RealVectorStateSpace::StateType>()->values,
             qg.data(), sizeof(double) * qg.rows());
+        return true;
       }
-      return ret == exotica::SUCCESS ? true : false;
+      return false;
     }
   }
 }

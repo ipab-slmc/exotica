@@ -30,7 +30,7 @@
  *
  */
 
-#include "generic/Identity.h"
+#include "Identity.h"
 
 REGISTER_TASKMAP_TYPE("Identity", exotica::Identity);
 REGISTER_FOR_XML_TEST("Identity", "Identity.xml");
@@ -67,13 +67,12 @@ namespace exotica
     return -1;
   }
 
-  EReturn Identity::initialise(std::string& postureName,
+  void Identity::initialise(std::string& postureName,
       std::vector<std::string>& joints, bool skipUnknown)
   {
     if (!poses || !posesJointNames)
     {
-      ERROR("Poses have not been set!");
-      return FAILURE;
+      throw_named("Poses have not been set!");
     }
     std::map<std::string, Eigen::VectorXd>::const_iterator pose = poses->find(
         postureName);
@@ -101,67 +100,42 @@ namespace exotica
         {
           if (!skipUnknown)
           {
-            ERROR("Requesting unknown joint '"<<joints[i]<<"'");
-            return WARNING;
+            throw_named("Requesting unknown joint '"<<joints[i]<<"'");
           }
         }
       }
       if (jointMap.size() == 0)
       {
-        return CANCELLED;
-      }
-      else
-      {
-        return SUCCESS;
+        throw_named("No joints have been specified!");
       }
     }
     else
     {
-      ERROR("Can't find pose '"<<postureName<<"'");
-      return FAILURE;
+      throw_named("Can't find pose '"<<postureName<<"'");
     }
   }
 
-  EReturn Identity::initialise(const rapidjson::Value& a)
+  void Identity::initialise(const rapidjson::Value& a)
   {
     if (poses && posesJointNames)
     {
-      std::string postureName;
-      if (ok(getJSON(a["postureName"], postureName)))
-      {
+        std::string postureName;
+        getJSON(a["postureName"], postureName);
         std::vector<std::string> joints;
-        if (ok(getJSON(a["joints"], joints)))
-        {
-          return initialise(postureName, joints);
-        }
-        else
-        {
-          INDICATE_FAILURE
-          ;
-          return FAILURE;
-        }
-      }
-      else
-      {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
-      }
+        getJSON(a["joints"], joints);
+        initialise(postureName, joints);
     }
     else
     {
-      ERROR("Poses have not been set!");
-      return FAILURE;
+      throw_named("Poses have not been set!");
     }
   }
 
-  EReturn Identity::update(Eigen::VectorXdRefConst x, const int t)
+  void Identity::update(Eigen::VectorXdRefConst x, const int t)
   {
     if (!isRegistered(t))
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Not fully initialized!");
     }
 //        std::cout<<"Updating ";
 //        for(int i=0;i<jointMap.size();i++)
@@ -193,30 +167,24 @@ namespace exotica
     }
     else
     {
-      ERROR("Size mismatch "<<x.rows()<<"!="<<PHI.rows());
-      return FAILURE;
+      throw_named("Size mismatch "<<x.rows()<<"!="<<PHI.rows());
     }
-    return SUCCESS;
   }
 
-  EReturn Identity::initDerived(tinyxml2::XMLHandle & handle)
+  void Identity::initDerived(tinyxml2::XMLHandle & handle)
   {
     // Load the goal
     if (handle.FirstChildElement("Ref").ToElement())
     {
-      if (ok(
-          getVector(*(handle.FirstChildElement("Ref").ToElement()), jointRef)))
-      {
+        getVector(*(handle.FirstChildElement("Ref").ToElement()), jointRef);
         jointMap.resize(jointRef.rows());
         for (int i = 0; i < jointRef.rows(); i++)
-          jointMap[i] = i;
+            jointMap[i] = i;
         useRef = true;
-      }
     }
-    return SUCCESS;
   }
 
-  EReturn Identity::taskSpaceDim(int & task_dim)
+  void Identity::taskSpaceDim(int & task_dim)
   {
     if (useRef)
     {
@@ -226,6 +194,5 @@ namespace exotica
     {
       task_dim = scene_->getNumJoints();
     }
-    return SUCCESS;
   }
 }

@@ -71,28 +71,28 @@ namespace exotica
        * \brief	Concrete implementation of update method
        * @param	x		Joint space configuration
        */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(Eigen::VectorXdRefConst x, const int t);
 
       /**
        * \brief	Get the task space dimension
        * @return	Exotica return type, SUCCESS if succeeded
        */
-      virtual EReturn taskSpaceDim(int & task_dim);
+      virtual void taskSpaceDim(int & task_dim);
 
       /**
        * \brief	Get the goal laplace
        * @param	goal	Goal laplace
        */
-      EReturn getGoalLaplace(Eigen::VectorXd & goal, int t);
+      void getGoalLaplace(Eigen::VectorXd & goal, int t);
 
-      EReturn getLaplace(Eigen::VectorXd & lap);
+      void getLaplace(Eigen::VectorXd & lap);
       /**
        * \brief	Update external objects
        */
-      EReturn updateExternal(const exotica::MeshVertex & ext);
-      EReturn updateExternal(const exotica::MeshVertexArray & ext);
+      void updateExternal(const exotica::MeshVertex & ext);
+      void updateExternal(const exotica::MeshVertexArray & ext);
 
-      EReturn removeVertex(const std::string & name);
+      void removeVertex(const std::string & name);
 
       bool hasActiveObstacle();
 
@@ -103,41 +103,41 @@ namespace exotica
        * \brief	Concrete implementation of initialisation from xml
        * @param	handle	XML handler
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
     private:
       /**
        * \brief	Compute Laplace
        */
-      EReturn computeLaplace(int t);
+      void computeLaplace(int t);
 
       /**
        * \brief	Compute Jacobian
        */
-      EReturn computeJacobian(int t);
+      void computeJacobian(int t);
 
       /**
        * \brief	Update the graph from kinematic scene
        */
-      EReturn updateGraphFromKS(int t);
+      void updateGraphFromKS(int t);
 
       /**
        * \brief	Update the graph externally
        * @param	name		Vertex name
        * @param	pose		Vertex position
        */
-      EReturn updateGraphFromExternal(const std::string & name,
+      void updateGraphFromExternal(const std::string & name,
           const Eigen::Vector3d & pose);
 
       /**
        * \brief	Update the graph from real transform
        */
-      EReturn updateGraphFromTF();
+      void updateGraphFromTF();
       /**
        * \brief	Update the graph from given poses
        * @param	V		The given links' poses
        */
-      EReturn updateGraphFromPoses(const Eigen::Matrix3Xd & V);
+      void updateGraphFromPoses(const Eigen::Matrix3Xd & V);
 
       //	Robot links
       EParam<exotica::StringList> links_;

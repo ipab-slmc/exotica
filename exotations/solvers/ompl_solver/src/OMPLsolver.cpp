@@ -57,43 +57,31 @@ namespace exotica
     return ret;
   }
 
-  EReturn OMPLsolver::Solve(Eigen::VectorXdRefConst q0,
+  void OMPLsolver::Solve(Eigen::VectorXdRefConst q0,
       Eigen::MatrixXd & solution)
   {
-    EReturn ret = base_solver_->solve(q0, solution);
-    if (ok(ret))
+    if (base_solver_->solve(q0, solution))
     {
       HIGHLIGHT(
           "OMPL solving succeeded, planning time "<<base_solver_->getPlanningTime()<<"sec");
     }
     else
     {
-      HIGHLIGHT("OMPL solving failed");
+      throw_solve("OMPL solving failed");
     }
-    return ret;
   }
 
-  EReturn OMPLsolver::initDerived(tinyxml2::XMLHandle & handle)
+  void OMPLsolver::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement(
         "TrajectorySmooth");
     server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, smooth_);
 
     tmp_handle = handle.FirstChildElement("Solver");
-    if (!ok(server_->registerParam<std_msgs::String>(ns_, tmp_handle, solver_)))
-    {
-      INDICATE_FAILURE
-      return PAR_ERR;
-    }
+    server_->registerParam<std_msgs::String>(ns_, tmp_handle, solver_);
 
     tmp_handle = handle.FirstChildElement("SolverPackage");
-    if (!ok(
-        server_->registerParam<std_msgs::String>(ns_, tmp_handle,
-            solver_package_)))
-    {
-      INDICATE_FAILURE
-      return PAR_ERR;
-    }
+    server_->registerParam<std_msgs::String>(ns_, tmp_handle,solver_package_);
 
     try
     {
@@ -105,18 +93,12 @@ namespace exotica
           "Using ["<<solver_->data<<"] from package ["<<solver_package_->data<<"].");
     } catch (pluginlib::PluginlibException& ex)
     {
-      ERROR(
-          "EXOTica-OMPL plugin failed to load solver "<<solver_->data<<". \nError: %s" << ex.what());
+      throw_named("EXOTica-OMPL plugin failed to load solver "<<solver_->data<<". \nError: %s" << ex.what());
     }
-    if (!ok(base_solver_->initialiseBaseSolver(handle, server_)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
-    return SUCCESS;
+    base_solver_->initialiseBaseSolver(handle, server_);
   }
 
-  EReturn OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
+  void OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
 
   {
     MotionSolver::specifyProblem(pointer);
@@ -124,18 +106,9 @@ namespace exotica
 
     for (auto & it : prob_->getScenes())
     {
-      if (!ok(it.second->activateTaskMaps()))
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+      it.second->activateTaskMaps();
     }
-    if (!ok(base_solver_->specifyProblem(prob_)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
-    return SUCCESS;
+    base_solver_->specifyProblem(prob_);
   }
 
   bool OMPLsolver::isSolvable(const PlanningProblem_ptr & prob)
@@ -153,8 +126,8 @@ namespace exotica
     return planner;
   }
 
-  EReturn OMPLsolver::setGoalState(const Eigen::VectorXd & qT, const double eps)
+  void OMPLsolver::setGoalState(const Eigen::VectorXd & qT, const double eps)
   {
-    return base_solver_->setGoalState(qT, eps);
+    base_solver_->setGoalState(qT, eps);
   }
 } /* namespace exotica */

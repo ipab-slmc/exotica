@@ -63,16 +63,16 @@ namespace exotica
        * @param	server	Server
        * @return       Result of calling initDerived()
        */
-      EReturn initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server);
+      void initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server);
 
       /**
        * \brief Binds the solver to a specific problem which must be pre-initalised
        * @param problem Shared pointer to the motion planning problem
        * @return        Always successful
        */
-      virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
+      virtual void specifyProblem(PlanningProblem_ptr pointer);
 
-      EReturn specifyProblem(PlanningProblem_ptr goals,
+      void specifyProblem(PlanningProblem_ptr goals,
           PlanningProblem_ptr costs, PlanningProblem_ptr goalBias,
           PlanningProblem_ptr samplingBias);
 
@@ -82,7 +82,7 @@ namespace exotica
        * @param	solution	Solution
        * @param	t			Time step
        */
-      virtual EReturn Solve(Eigen::VectorXdRefConst q0,
+      virtual void Solve(Eigen::VectorXdRefConst q0,
           Eigen::MatrixXd & solution) = 0;
 
       /*
@@ -99,7 +99,7 @@ namespace exotica
        * @param handle XMLHandle to the Solver element
        * @return       Should indicate success or otherwise
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle) = 0;
+      virtual void initDerived(tinyxml2::XMLHandle & handle) = 0;
 
       PlanningProblem_ptr problem_; //!< Shared pointer to the planning problem: Anyone using it should check if it is initialised
       Server_ptr server_; //!< Pointer to EXOTica parameter server;

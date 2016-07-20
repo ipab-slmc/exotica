@@ -30,9 +30,10 @@
  *
  */
 
-#include "kinematic_maps/JointLimit.h"
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
-#define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
+#include "JointLimit.h"
+
+#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
+
 REGISTER_TASKMAP_TYPE("JointLimit", exotica::JointLimit);
 namespace exotica
 {
@@ -46,12 +47,12 @@ namespace exotica
     //TODO
   }
 
-  EReturn JointLimit::initDerived(tinyxml2::XMLHandle & handle)
+  void JointLimit::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLElement* xmltmp;
     double percent = 0.1;
     XML_CHECK("SafePercentage");
-    XML_OK(getDouble(*xmltmp, percent));
+    getDouble(*xmltmp, percent);
 
     std::vector<std::string> jnts;
     scene_->getJointNames(jnts);
@@ -75,25 +76,21 @@ namespace exotica
       tau_(i) = percent * (high_limits_(i) - low_limits_(i)) / 2;
     }
     initialised_ = true;
-    return SUCCESS;
   }
 
-  EReturn JointLimit::taskSpaceDim(int & task_dim)
+  void JointLimit::taskSpaceDim(int & task_dim)
   {
-    if (!initialised_) return MMB_NIN;
+    if (!initialised_) throw_named("Not initialized!");;
     task_dim = tau_.rows();
-    return SUCCESS;
   }
 
-  EReturn JointLimit::update(Eigen::VectorXdRefConst x, const int t)
+  void JointLimit::update(Eigen::VectorXdRefConst x, const int t)
   {
     if (!isRegistered(t))
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Not fully initialized!");
     }
-    if (!initialised_) return MMB_NIN;
+    if (!initialised_) throw_named("Not initialized!");;
     //	Compute Phi and Jac
     PHI.setZero();
     JAC.setZero();
@@ -121,7 +118,6 @@ namespace exotica
         }
       }
     }
-    return SUCCESS;
   }
 }
 

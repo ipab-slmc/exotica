@@ -72,14 +72,14 @@ namespace exotica
       }
       virtual ~Server();
 
-      EReturn initialise(tinyxml2::XMLHandle & handle);
+      void initialise(tinyxml2::XMLHandle & handle);
 
       /*
        * \brief	Create a new parameter entry from an XML handle
        * @param	ns				namespace
        * @param	tmp_handle		XML handle
        */
-      EReturn createParam(const std::string & ns,
+      void createParam(const std::string & ns,
           tinyxml2::XMLHandle & tmp_handle);
 
       /*
@@ -95,18 +95,16 @@ namespace exotica
        * @param	ptr			Parameter pointer
        */
       template<typename T>
-      EReturn getParam(const std::string & name, EParam<T> & ptr)
+      void getParam(const std::string & name, EParam<T> & ptr)
       {
         LOCK(param_lock_);
         if (params_.find(name) == params_.end())
         {
           WARNING_NAMED(name_,"Param " << name << " does not exist");
           listParameters();
-          INDICATE_FAILURE
-          return FAILURE;
+          throw_pretty("Can't find parameter '"<<name<<"'");
         }
         ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
-        return SUCCESS;
       }
 
       /*
@@ -115,14 +113,13 @@ namespace exotica
        * @param	ptr			Pointer to the parameter
        */
       template<typename T>
-      EReturn setParam(const std::string & name, const EParam<T> & ptr)
+      void setParam(const std::string & name, const EParam<T> & ptr)
       {
         LOCK(param_lock_);
         if (params_.find(name) == params_.end())
           params_[name] = ptr;
         else
           params_.at(name) = ptr;
-        return SUCCESS;
       }
 
       /*
@@ -137,7 +134,7 @@ namespace exotica
        * @param	ptr		output pointer
        */
       template<typename T>
-      EReturn registerParam(const std::string & ns,
+      void registerParam(const std::string & ns,
           tinyxml2::XMLHandle & handle, EParam<T> & ptr)
       {
         if (!handle.ToElement())
@@ -145,7 +142,7 @@ namespace exotica
           WARNING_NAMED(ns,
               "Register parameter failed, XML tag does not exist, check the XML file");
           ptr = boost::shared_ptr<T>(new T());
-          return FAILURE;
+          throw_pretty("XML tag does not exist!");
         }
         std::string name;
         if (handle.ToElement()->Attribute("source"))
@@ -154,12 +151,10 @@ namespace exotica
           if (params_.find(name) != params_.end())
           {
             ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
-            return SUCCESS;
           }
           else
           {
-            INDICATE_FAILURE
-            return FAILURE;
+            throw_pretty("Can't find source '"<<name<<"'");
           }
         }
 
@@ -168,7 +163,6 @@ namespace exotica
         if (params_.find(name) != params_.end())
         {
           ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
-          return SUCCESS;
         }
 
         //	If not, create a new parameter entry
@@ -177,7 +171,7 @@ namespace exotica
           std::string topic = handle.ToElement()->Attribute("topic");
           //	If a topic is specified
           params_[name] = boost::shared_ptr<T>(new T);
-          subs_[name] = nh_->subscribe<T>(topic, 1,
+          subs_[name] = nh_.subscribe<T>(topic, 1,
               boost::bind(&exotica::Server::paramCallback<T>, this, _1,
                   params_.at(name)));
         }
@@ -187,28 +181,26 @@ namespace exotica
           if (typeid(T) == typeid(std::string))
           {
             std::string val;
-            nh_->getParam(rosparam, val);
+            nh_.getParam(rosparam, val);
             params_[name] = boost::shared_ptr<std::string>(
                 new std::string(val));
           }
           else if (typeid(T) == typeid(double))
           {
             double val;
-            nh_->getParam(rosparam, val);
+            nh_.getParam(rosparam, val);
             params_[name] = boost::shared_ptr<double>(new double(val));
           }
           else if (typeid(T) == typeid(int))
           {
             int val;
-            nh_->getParam(rosparam, val);
+            nh_.getParam(rosparam, val);
             params_[name] = boost::shared_ptr<int>(new int(val));
           }
           else
           {
-            std::cout << "ROS parameter " << name << " [" << typeid(T).name()
-                << "] is not supported\n";
-            INDICATE_FAILURE
-            return FAILURE;
+            throw_pretty("ROS parameter " << name << " [" << typeid(T).name()
+                << "] is not supported\n");
           }
         }
         else
@@ -228,11 +220,7 @@ namespace exotica
           else if (typeid(T) == typeid(std_msgs::Int64))
           {
             double tmp;
-            if (!ok(getDouble(*handle.ToElement(), tmp)))
-            {
-              INDICATE_FAILURE
-              return FAILURE;
-            }
+            getDouble(*handle.ToElement(), tmp);
             std_msgs::Int64 val;
             val.data = (int) tmp;
             params_[name] = boost::shared_ptr<std_msgs::Int64>(
@@ -241,11 +229,7 @@ namespace exotica
           else if (typeid(T) == typeid(std_msgs::Float64))
           {
             double tmp;
-            if (!ok(getDouble(*handle.ToElement(), tmp)))
-            {
-              INDICATE_FAILURE
-              return FAILURE;
-            }
+            getDouble(*handle.ToElement(), tmp);
             std_msgs::Float64 val;
             val.data = tmp;
             params_[name] = boost::shared_ptr<std_msgs::Float64>(
@@ -254,11 +238,7 @@ namespace exotica
           else if (typeid(T) == typeid(exotica::Vector))
           {
             exotica::Vector vec;
-            if (!ok(getStdVector(*handle.ToElement(), vec.data)))
-            {
-              INDICATE_FAILURE
-              return FAILURE;
-            }
+            getStdVector(*handle.ToElement(), vec.data);
             params_[name] = boost::shared_ptr<exotica::Vector>(
                 new exotica::Vector(vec));
           }
@@ -266,11 +246,7 @@ namespace exotica
           {
             std_msgs::Bool val;
             bool b;
-            if (!ok(getBool(*handle.ToElement(), b)))
-            {
-              INDICATE_FAILURE
-              return FAILURE;
-            }
+            getBool(*handle.ToElement(), b);
             val.data = b;
             params_[name] = boost::shared_ptr<std_msgs::Bool>(
                 new std_msgs::Bool(val));
@@ -281,8 +257,7 @@ namespace exotica
             const char * atr = handle.ToElement()->GetText();
             if (!atr)
             {
-              INDICATE_FAILURE
-              return FAILURE;
+              throw_pretty("Parsing error");
             }
             val.data = std::string(atr);
             params_[name] = boost::shared_ptr<std_msgs::String>(
@@ -290,14 +265,11 @@ namespace exotica
           }
           else
           {
-            std::cout << "Parameter " << name << " [" << typeid(T).name()
-                << "] is not supported\n";
-            INDICATE_FAILURE
-            return FAILURE;
+            throw_pretty("Parameter " << name << " [" << typeid(T).name()
+                << "] is not supported\n");
           }
         }
         ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
-        return SUCCESS;
       }
 
       /*
@@ -307,14 +279,12 @@ namespace exotica
        * @param	ptr		Parameter pointer
        */
       template<typename T>
-      EReturn registerRosParam(const std::string & ns,
+      void registerRosParam(const std::string & ns,
           tinyxml2::XMLHandle & handle, EParam<T> & ptr)
       {
         if (!handle.ToElement())
         {
-          ERROR(ns<<" register parameter failed, check the XML file");
-          ptr = boost::shared_ptr<T>(new T());
-          return FAILURE;
+          throw_pretty(ns<<" register parameter failed, check the XML file");
         }
         std::string name;
         if (handle.ToElement()->Attribute("source"))
@@ -323,12 +293,10 @@ namespace exotica
           if (params_.find(name) != params_.end())
           {
             ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
-            return SUCCESS;
           }
           else
           {
-            INDICATE_FAILURE
-            return FAILURE;
+            throw_pretty("Can't find attribute '"<<name<<"'");
           }
         }
 
@@ -337,7 +305,6 @@ namespace exotica
         if (params_.find(name) != params_.end())
         {
           ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
-          return SUCCESS;
         }
 
         //	If not, create a new parameter entry
@@ -347,32 +314,29 @@ namespace exotica
           if (typeid(T) == typeid(std::string))
           {
             std::string val;
-            nh_->getParam(rosparam, val);
+            nh_.getParam(rosparam, val);
             params_[name] = boost::shared_ptr<std::string>(
                 new std::string(val));
           }
           else if (typeid(T) == typeid(double))
           {
             double val;
-            nh_->getParam(rosparam, val);
+            nh_.getParam(rosparam, val);
             params_[name] = boost::shared_ptr<double>(new double(val));
           }
           else if (typeid(T) == typeid(int))
           {
             int val;
-            nh_->getParam(rosparam, val);
+            nh_.getParam(rosparam, val);
             params_[name] = boost::shared_ptr<int>(new int(val));
           }
           else
           {
-            std::cout << "ROS parameter " << name << " [" << typeid(T).name()
-                << "] is not supported\n";
-            INDICATE_FAILURE
-            return FAILURE;
+            throw_pretty("ROS parameter " << name << " [" << typeid(T).name()
+                << "] is not supported");
           }
         }
         ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
-        return SUCCESS;
       }
 
       /*
@@ -382,38 +346,34 @@ namespace exotica
        * @param	ptr		Parameter pointer
        */
       template<typename T>
-      EReturn registerParam(const std::string & name, const std::string & topic,
+      void registerParam(const std::string & name, const std::string & topic,
           EParam<T> & ptr)
       {
-        if (name.compare("") == 0)
+        if (name="")
         {
-          INDICATE_FAILURE
-          return FAILURE;
+          throw_pretty("Invalid parameter name!");
         }
 
         //	If the parameter exists, return the pointer
         if (params_.find(name) != params_.end())
         {
           ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
-          return SUCCESS;
+          return;
         }
 
-        if (topic.compare("") != 0)
+        if (topic=="")
         {
           params_[name] = boost::shared_ptr<T>(new T);
-          subs_[name] = nh_->subscribe<T>(topic, 1,
+          subs_[name] = nh_.subscribe<T>(topic, 1,
               boost::bind(&exotica::Server::paramCallback<T>, this, _1,
                   params_.at(name)));
         }
         else
         {
-          INDICATE_FAILURE
-          return FAILURE;
+          throw_pretty("Ivalid topic name!");
         }
 
         ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
-
-        return SUCCESS;
       }
 
       /*
@@ -422,25 +382,20 @@ namespace exotica
        * @param	name	Parameter name
        * @param	handle	XML handle
        */
-      EReturn registerStatic(const std::string & name,
+      void registerStatic(const std::string & name,
           tinyxml2::XMLHandle & handle, EParam<int> & ptr)
       {
         double tmp;
-        if (!ok(getDouble(*handle.ToElement(), tmp)))
-        {
-          INDICATE_FAILURE
-          return FAILURE;
-        }
+        getDouble(*handle.ToElement(), tmp);
         int val = tmp;
         *boost::any_cast<boost::shared_ptr<int>>(params_.at(name)) = val;
-        return SUCCESS;
       }
 
       template<typename T>
       ros::Publisher advertise(const std::string &topic, uint32_t queue_size,
           bool latch = false)
       {
-        return nh_->advertise<T>(topic, queue_size, latch);
+        return nh_.advertise<T>(topic, queue_size, latch);
       }
 
       /*
@@ -455,7 +410,7 @@ namespace exotica
        * @param	path	Robot model name
        * @param	model	Robot model
        */
-      EReturn getModel(std::string path, robot_model::RobotModelPtr& model);
+      void getModel(std::string path, robot_model::RobotModelPtr& model);
 
       /*
        * \brief	Get robot model
@@ -491,7 +446,7 @@ namespace exotica
       std::string name_;
 
       /// \brief	ROS node handle
-      boost::shared_ptr<ros::NodeHandle> nh_;
+      ros::NodeHandle nh_;
 
       ///	\brief	spinner
       ros::AsyncSpinner sp_;

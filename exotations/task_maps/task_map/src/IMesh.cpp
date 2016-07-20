@@ -30,7 +30,7 @@
  *
  */
 
-#include "kinematic_maps/IMesh.h"
+#include "IMesh.h"
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
 #define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
 //#define DEBUG_MODE
@@ -49,41 +49,26 @@ namespace exotica
     //TODO
   }
 
-  EReturn IMesh::update(Eigen::VectorXdRefConst x, const int t)
+  void IMesh::update(Eigen::VectorXdRefConst x, const int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Not fully initialized!");
     }
     if (scene_ != nullptr)
     {
       if (initialised_)
       {
-        if (ok(computeIMesh(t)))
-        {
-          return SUCCESS;
-        }
-        else
-        {
-          INDICATE_FAILURE
-          ;
-          return FAILURE;
-        }
+        computeIMesh(t);
       }
       else
       {
-        INDICATE_FAILURE
-        ;
-        return MMB_NIN;
+        throw_named("Not initialized!");
       }
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return MMB_NIN;
+      throw_named("Not fully initialized!");
     }
 
   }
@@ -99,7 +84,7 @@ namespace exotica
       HIGHLIGHT("InteractionMesh connectivity is published on ROS topic "<<imesh_mark_pub_.getTopic()<<", in reference frame "<<ref);
   }
 
-  EReturn IMesh::initDerived(tinyxml2::XMLHandle & handle)
+  void IMesh::initDerived(tinyxml2::XMLHandle & handle)
   {
     EParam<std_msgs::String> ref;
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("ReferenceFrame");
@@ -109,7 +94,6 @@ namespace exotica
     eff_size_ = scene_->getMapSize(object_name_);
     weights_.setOnes(eff_size_, eff_size_);
     initialised_ = true;
-    return SUCCESS;
   }
 
   void IMesh::debug()
@@ -144,42 +128,31 @@ namespace exotica
       imesh_mark_pub_.publish(imesh_mark_);
   }
 
-  EReturn IMesh::initialiseManual(std::string name, Server_ptr & server,
+  void IMesh::initialiseManual(std::string name, Server_ptr & server,
       const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
       std::vector<std::pair<std::string, std::string> >& params)
   {
-    EReturn ret = TaskMap::initialiseManual(name, server, scene_ptr, prob,
-        params);
-    if (!ok(ret))
-    {
-      INDICATE_FAILURE
-      ;
-      return ret;
-    }
+    TaskMap::initialiseManual(name, server, scene_ptr, prob, params);
     initDebug("/world");
     eff_size_ = scene_->getMapSize(object_name_);
     weights_.setOnes(eff_size_, eff_size_);
     initialised_ = true;
-    return ret;
   }
 
-  EReturn IMesh::taskSpaceDim(int & task_dim)
+  void IMesh::taskSpaceDim(int & task_dim)
   {
     LOCK(locker_);
     if (!initialised_)
     {
-      INDICATE_FAILURE
-      ;
-      return MMB_NIN;
+      throw_named("Not initialized!");
     }
     else
     {
       task_dim = 3 * eff_size_;
-      return SUCCESS;
     }
   }
 
-  EReturn IMesh::computeLaplace(int t)
+  void IMesh::computeLaplace(int t)
   {
     int N = eff_size_;
     dist.resize(N, N);
@@ -228,33 +201,19 @@ namespace exotica
         }
       }
     }
-    return SUCCESS;
   }
 
-  EReturn IMesh::computeGoalLaplace(const Eigen::VectorXd &x,
+  void IMesh::computeGoalLaplace(const Eigen::VectorXd &x,
       Eigen::VectorXd &goal)
   {
     int t = 0;
-    if (!ok(scene_->update(x, t)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
-    if (!ok(update(x, t)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
-    if (!ok(computeLaplace(t)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
+    scene_->update(x, t);
+    update(x, t);
+    computeLaplace(t);
     goal = PHI;
-    return SUCCESS;
   }
 
-  EReturn IMesh::computeIMesh(int t)
+  void IMesh::computeIMesh(int t)
   {
     int M = eff_size_;
 
@@ -340,37 +299,31 @@ namespace exotica
         }
       }
     }
-    return SUCCESS;
   }
 
-  EReturn IMesh::setWeight(int i, int j, double weight)
+  void IMesh::setWeight(int i, int j, double weight)
   {
     uint M = weights_.cols();
     if (i < 0 || i >= M || j < 0 || j >= M)
     {
-      std::cout << "Invalid weight element (" << i << "," << j
-          << "). Weight matrix " << M << "x" << M << std::endl;
-      return FAILURE;
+      throw_named("Invalid weight element (" << i << "," << j
+          << "). Weight matrix " << M << "x" << M );
     }
     if (weight < 0)
     {
-      std::cout << "Invalid weight: " << weight << std::endl;
-      return FAILURE;
+      throw_named("Invalid weight: " << weight );
     }
     weights_(i, j) = weight;
-    return SUCCESS;
   }
 
-  EReturn IMesh::setWeights(const Eigen::MatrixXd & weights)
+  void IMesh::setWeights(const Eigen::MatrixXd & weights)
   {
     uint M = weights_.cols();
     if (weights.rows() != M || weights.cols() != M)
     {
-      std::cout << "Invalid weight matrix (" << weights.rows() << "X"
-          << weights.cols() << "). Has to be" << M << "x" << M << std::endl;
-      return FAILURE;
+      throw_named("Invalid weight matrix (" << weights.rows() << "X"
+          << weights.cols() << "). Has to be" << M << "x" << M );
     }
     weights_ = weights;
-    return SUCCESS;
   }
 }

@@ -1,5 +1,5 @@
 /*
- *      Author: Yiming Yang
+ *      Author: Vladimir Ivan
  * 
  * Copyright (c) 2016, University Of Edinburgh 
  * All rights reserved. 
@@ -30,36 +30,50 @@
  *
  */
 
-#include "kinematic_maps/JointSpaceSampling.h"
+#ifndef EXOTICA_TASKMAP_EFF_POSITION_H
+#define EXOTICA_TASKMAP_EFF_POSITION_H
 
-namespace exotica
+#include <exotica/TaskMap.h>
+#include <exotica/Factory.h>
+#include <exotica/Test.h>
+#include <tinyxml2/tinyxml2.h>
+#include <Eigen/Dense>
+#include <boost/thread/mutex.hpp>
+
+namespace exotica //!< Since this is part of the core library, it will be within the same namespace
 {
-  JointSpaceSampling::JointSpaceSampling()
-      : stateValid_(false)
+  class EffPosition: public TaskMap
   {
-    //TODO
-  }
+    public:
+      /**
+       * \brief Default constructor
+       */
+      EffPosition();
+      virtual ~EffPosition()
+      {
+      }
+      ;
 
-  JointSpaceSampling::~JointSpaceSampling()
-  {
-    //TODO
-  }
+      /**
+       * \brief Concrete implementation of the update method
+       */
+      virtual void update(Eigen::VectorXdRefConst x, const int t);
 
-  EReturn JointSpaceSampling::initDerived(tinyxml2::XMLHandle & handle)
-  {
+      /**
+       * \brief Concrete implementation of the task-space size
+       */
+      virtual void taskSpaceDim(int & task_dim);
 
-    return SUCCESS;
-  }
+      virtual void initialise(const rapidjson::Value& a);
 
-  EReturn JointSpaceSampling::update(Eigen::VectorXdRefConst x, const int t)
-  {
-    return SUCCESS;
-  }
-
-  EReturn JointSpaceSampling::isStateValid(bool valid)
-  {
-
-    return SUCCESS;
-  }
+    protected:
+      /**
+       * \brief Concrete implementation of TaskMap::initDerived()
+       * @return  Always returns success
+       */
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
+  };
+  typedef boost::shared_ptr<EffPosition> EffPosition_ptr;  //!< Task Map smart pointer
 }
 
+#endif

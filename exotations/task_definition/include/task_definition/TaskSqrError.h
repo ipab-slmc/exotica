@@ -53,7 +53,7 @@ namespace exotica
       {
       }
 
-      virtual EReturn initialiseManual(std::string name, Server_ptr & server,
+      virtual void initialiseManual(std::string name, Server_ptr & server,
           boost::shared_ptr<PlanningProblem> prob,
           std::vector<std::pair<std::string,std::string> >& params);
 
@@ -63,7 +63,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerGoal(Eigen::VectorXdRef_ptr y_star, int t = 0);
+      void registerGoal(Eigen::VectorXdRef_ptr y_star, int t = 0);
 
       /**
        * @brief registerGoal Registers rho reference at time t
@@ -71,7 +71,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerRho(Eigen::VectorXdRef_ptr rho, int t = 0);
+      void registerRho(Eigen::VectorXdRef_ptr rho, int t = 0);
 
       /**
        * @brief getRho Returns the value of rho at time step t
@@ -85,14 +85,14 @@ namespace exotica
        * @param t Timestep
        * @param rho
        */
-      EReturn setRho(int t, double rho);
+      void setRho(int t, double rho);
 
       /**
        * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
        * @param T Number of time steps (this should be set by the planning problem)
        * @return Returns success.
        */
-      virtual EReturn setTimeSteps(const int T);
+      virtual void setTimeSteps(const int T);
       int getTimeSteps()
       {
         return y_star_.size();
@@ -102,7 +102,7 @@ namespace exotica
        * @brief setDefaultGoals Sets Goals and Rhos to default values
        * @return Indicates success
        */
-      EReturn setDefaultGoals(int t);
+      void setDefaultGoals(int t);
 
       Eigen::VectorXd y_star0_;    //!< The goal vector
       Eigen::VectorXd rho0_, rho1_;       //!< The scalar inter-task weight
@@ -121,7 +121,7 @@ namespace exotica
        * @param handle  The handle to the XML-element describing the ErrorFunction Function
        * @return        Should indicate success/failure
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       /** The internal storage **/
       std::vector<Eigen::VectorXdRef_ptr> y_star_;    //!< The goal vector

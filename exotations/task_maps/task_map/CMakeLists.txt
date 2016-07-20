@@ -29,18 +29,14 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/kinematic_maps/CoM.cpp
-                            src/kinematic_maps/IMesh.cpp
-                            src/kinematic_maps/DMesh.cpp
-                            src/kinematic_maps/EffPosition.cpp
-                            src/kinematic_maps/JointLimit.cpp
-                            src/kinematic_maps/SweepFlux.cpp
-                            src/kinematic_maps/Distance.cpp
-                            src/kinematic_maps/Orientation.cpp
-                            src/kinematic_maps/CollisionAvoidance.cpp
-                            src/kinematic_maps/GJKCollisionAvoidance.cpp
-                            src/generic/Identity.cpp
-                            src/kinematic_maps/JointSpaceSampling.cpp
+add_library(${PROJECT_NAME} src/CoM.cpp
+                            src/IMesh.cpp
+                            src/DMesh.cpp
+                            src/EffPosition.cpp
+                            src/JointLimit.cpp
+                            src/SweepFlux.cpp
+                            src/Distance.cpp
+                            src/Identity.cpp
            )
 
 

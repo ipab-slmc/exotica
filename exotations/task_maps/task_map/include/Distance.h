@@ -1,5 +1,5 @@
 /*
- *      Author: Yiming Yang
+ *      Author: Vladimir Ivan
  * 
  * Copyright (c) 2016, University Of Edinburgh 
  * All rights reserved. 
@@ -30,47 +30,51 @@
  *
  */
 
-#ifndef EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_JOINTSPACESAMPLING_H_
-#define EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_JOINTSPACESAMPLING_H_
+#ifndef EXOTICA_TASKMAP_DISTANCE_H
+#define EXOTICA_TASKMAP_DISTANCE_H
 
 #include <exotica/TaskMap.h>
 #include <exotica/Factory.h>
+#include <exotica/Test.h>
+#include <tinyxml2/tinyxml2.h>
+#include <Eigen/Dense>
+#include <boost/thread/mutex.hpp>
 
-namespace exotica
+namespace exotica //!< Since this is part of the core library, it will be within the same namespace
 {
-  class JointSpaceSampling: public TaskMap
+  class Distance: public TaskMap
   {
     public:
-      /*
-       * \brief	Default constructor
+      /**
+       * \brief Default constructor
        */
-      JointSpaceSampling();
-
-      /*
-       * \brief	Default destructor
-       */
-      virtual ~JointSpaceSampling();
+      Distance();
+      virtual ~Distance()
+      {
+      }
 
       /**
-       * @brief	Concrete implementation of update method
-       * @param	x	Joint space configuration
+       * \brief Concrete implementation of the update method
        */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(Eigen::VectorXdRefConst x, const int t);
 
-      /*
-       * \brief	Check state validation
-       * @param	valid	Validation flag
+      /**
+       * \brief Concrete implementation of the task-space size
        */
-      EReturn isStateValid(bool valid);
+      virtual void taskSpaceDim(int & task_dim);
+
+      virtual void initialise(const rapidjson::Value& a);
+
+      KDL::Frame ref_pose_;
+
     protected:
       /**
-       * @brief	Concrete implementation of initialisation from xml
-       * @param	handle	XML handler
+       * \brief Concrete implementation of TaskMap::initDerived()
+       * @return  Always returns success
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
-    private:
-      bool stateValid_;	//	State validation flag
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
   };
+  typedef boost::shared_ptr<Distance> Distance_Ptr;
 }
 
-#endif /* EXOTICA_EXOTATIONS_TASK_MAPS_TASK_MAP_INCLUDE_KINEMATIC_MAPS_JOINTSPACESAMPLING_H_ */
+#endif

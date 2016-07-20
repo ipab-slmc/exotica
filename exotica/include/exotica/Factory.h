@@ -76,16 +76,15 @@ namespace exotica
        * @param creator[in] A pointer to the creator function
        * @return            Indication of success: Returns SUCCESS if registered, or PAR_ERR if the type already exists
        */
-      EReturn registerType(const I & type, BO * (*creator_function)())
+      void registerType(const I & type, BO * (*creator_function)())
       {
         if (type_registry_.find(type) == type_registry_.end()) //!< If it does not already exist
         {
           type_registry_[type] = creator_function;
-          return SUCCESS;
         }
         else //!< I.e. it exists, then cannot re-create it!
         {
-          return PAR_ERR;
+          throw_pretty("Trying to register already existing type '"<<type<<"'!");
         }
       }
       ;
@@ -95,16 +94,14 @@ namespace exotica
        * @param task_types[out] Vector of task-type names
        * @return                Always returns SUCCESS
        */
-      EReturn listImplementations(std::vector<I> & registered_types)
+      void listImplementations(std::vector<I> & registered_types)
       {
         registered_types.clear();
         for (auto it = type_registry_.begin(); it != type_registry_.end(); it++)
         {
           registered_types.push_back(it->first);
         }
-        return SUCCESS;
       }
-      ;
 
       /**
        * \brief Creates a new Instance of a derived class
@@ -112,7 +109,7 @@ namespace exotica
        * @param object[out]  Shared pointer to the object (placeholder)
        * @return             Indication of success: SUCCESS if ok, MEM_ERR if could not create it and PAR_ERR if the type is not found
        */
-      EReturn createObject(const I & type, boost::shared_ptr<BO> const & object)
+      void createObject(const I & type, boost::shared_ptr<BO> const & object)
       {
         auto it = type_registry_.find(type);  //!< Attempt to find it
         if (it != type_registry_.end())       //!< If exists
@@ -121,23 +118,20 @@ namespace exotica
 
           if (object != nullptr)
           {
-            return SUCCESS;
+            return;
           }
           else
           {
-            ERROR("Object could not be created: pointer = NULL!");
-            return MEM_ERR; //!< Memory error
+            throw_pretty("Object could not be created: pointer = NULL!");
           }
         }
         else
         {
-          ERROR("This factory does not recognize type '"<< type << "'");
-          return PAR_ERR;   //!< Type not found
+          throw_pretty("This factory does not recognize type '"<< type << "'");
         }
       }
-      ;
 
-      EReturn createObject(boost::shared_ptr<BO> & object,
+      void createObject(boost::shared_ptr<BO> & object,
           tinyxml2::XMLHandle & handle, const Server_ptr & server)
       {
         if (handle.ToElement())
@@ -161,26 +155,21 @@ namespace exotica
                     //const_cast< boost::shared_ptr<BO>& >(object)->object_name_=name;
                     object->object_name_ = name;
                     object->ns_ = name;
-                    return object->initBase(handle, server);
+                    object->initBase(handle, server);
                   }
                   else
                   {
-                    ERROR("Object could not be created: pointer = NULL!");
-                    return MEM_ERR; //!< Memory error
+                    throw_pretty("Object could not be created: pointer = NULL!");
                   }
                 }
                 else
                 {
-                  ERROR(
-                      "Object name for object of type '"<< type <<"' was not specified.");
-                  return PAR_INV;
+                  throw_pretty("Object name for object of type '"<< type <<"' was not specified.");
                 }
               }
               else
               {
-                ERROR(
-                    "Object name for object of type '"<< type <<"' was not specified.");
-                return PAR_INV;
+                throw_pretty("Object name for object of type '"<< type <<"' was not specified.");
               }
             }
             else
@@ -194,25 +183,21 @@ namespace exotica
                         std::string("'") : std::string(", '")) + (it->first)
                     + std::string("'");
               }
-              ERROR(
+              throw_pretty(
                   "XML element '"<<type<<"' does not map to a known type for this factory! Supported types are:\n"<<types);
-              return FAILURE;
             }
           }
           else
           {
-            ERROR(
+            throw_pretty(
                 "This factory can only handle std::string type of object idenfiers.");
-            return PAR_INV;
           }
         }
         else
         {
-          ERROR("Invalid XML handle");
-          return PAR_ERR;
+          throw_pretty("Invalid XML handle");
         }
       }
-      ;
 
     private:
       /**
@@ -221,7 +206,6 @@ namespace exotica
       inline explicit Factory<I, BO>()
       {
       }
-      ;
 
       /** The Map containing the register of the different types of classes **/
       std::map<I, BO * (*)()> type_registry_;
@@ -245,7 +229,6 @@ namespace exotica
       {
         Factory<I, BO>::Instance().registerType(name, creator);
       }
-      ;
   };
 }
 

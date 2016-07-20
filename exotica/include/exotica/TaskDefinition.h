@@ -65,10 +65,10 @@ namespace exotica
        * @param map_list  A map from names to TaskMap pointers (for initialising the map)
        * @return          The result of calling the initDerived() function
        */
-      EReturn initBase(tinyxml2::XMLHandle & handle,
+      void initBase(tinyxml2::XMLHandle & handle,
           const TaskMap_map & map_list);
 
-      virtual EReturn initialiseManual(std::string name, Server_ptr & server,
+      virtual void initialiseManual(std::string name, Server_ptr & server,
           boost::shared_ptr<PlanningProblem> prob,
           std::vector<std::pair<std::string,std::string> >& params);
 
@@ -78,7 +78,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerPhi(Eigen::VectorXdRef_ptr y, int t);
+      void registerPhi(Eigen::VectorXdRef_ptr y, int t);
 
       /**
        * @brief registerJacobian egisters a memory location for the output of Jacobian at time t
@@ -86,28 +86,28 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
+      void registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
 
       /**
        * \brief Wrapper for the underlying task dimension getter
        * @param  task_dim Task dimension to be returned
        * @return      Indication of success
        */
-      EReturn taskSpaceDim(int & task_dim);
+      void taskSpaceDim(int & task_dim);
 
       /**
        * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
        * @param T Number of time steps (this should be set by the planning problem)
        * @return Returns success.
        */
-      virtual EReturn setTimeSteps(const int T);
+      virtual void setTimeSteps(const int T);
 
       /**
        * \brief Member function for binding the Task definition to a Task-Map
        * @param task_map  Smart pointer to a task-map
        * @return          SUCCESS always.
        */
-      EReturn setTaskMap(const TaskMap_ptr & task_map);
+      void setTaskMap(const TaskMap_ptr & task_map);
 
       /**
        * \brief Member function for getting the Task-Map
@@ -125,7 +125,7 @@ namespace exotica
        * @param handle  The handle to the XML-element describing the ErrorFunction Function
        * @return        Should indicate success/failure
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle) = 0;
+      virtual void initDerived(tinyxml2::XMLHandle & handle) = 0;
 
       boost::shared_ptr<TaskMap> task_map_; //!< Shared pointer to a Task Map from which it gets its inputs
       boost::mutex map_lock_;  //!< Mapping Lock for synchronisation

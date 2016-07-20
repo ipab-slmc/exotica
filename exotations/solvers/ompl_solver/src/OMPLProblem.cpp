@@ -87,7 +87,7 @@ namespace exotica
     }
   }
 
-  EReturn OMPLProblem::reinitialise(rapidjson::Document& document,
+  void OMPLProblem::reinitialise(rapidjson::Document& document,
       boost::shared_ptr<PlanningProblem> problem)
   {
     clear();
@@ -99,10 +99,9 @@ namespace exotica
         if (obj.IsObject())
         {
           std::string constraintClass;
-          if (ok(getJSON(obj["class"], constraintClass)))
+          getJSON(obj["class"], constraintClass);
+          if (knownMaps_.find(constraintClass) != knownMaps_.end())
           {
-            if (knownMaps_.find(constraintClass) != knownMaps_.end())
-            {
               bool IsGoal = false;
               if (knownMaps_[constraintClass].compare("Identity") == 0)
               {
@@ -123,72 +122,30 @@ namespace exotica
                   continue;
                 }
               }
-              if (problemType == OMPL_PROBLEM_GOAL_BIAS && !IsGoal) continue;
-              TaskMap_ptr taskmap;
-              if (ok(
-                  TaskMap_fac::Instance().createObject(
-                      knownMaps_[constraintClass], taskmap)))
-              {
-                EReturn ret = taskmap->initialise(obj, server_, scenes_,
-                    problem);
-                if (ok(ret))
-                {
-                  if (ret != CANCELLED)
-                  {
-                    std::string name = taskmap->getObjectName();
-                    task_maps_[name] = taskmap;
-                    TaskDefinition_ptr task;
+                  if (problemType == OMPL_PROBLEM_GOAL_BIAS && !IsGoal) continue;
+                  TaskMap_ptr taskmap;
+                  TaskMap_fac::Instance().createObject(knownMaps_[constraintClass], taskmap);
+                  taskmap->initialise(obj, server_, scenes_,problem);
+                  std::string name = taskmap->getObjectName();
+                  task_maps_[name] = taskmap;
+                  TaskDefinition_ptr task;
+                  TaskDefinition_fac::Instance().createObject("TaskTerminationCriterion", task);
+                  TaskTerminationCriterion_ptr sqr =boost::static_pointer_cast<TaskTerminationCriterion>(task);
+                  sqr->setTaskMap(taskmap);
+                  int dim;
+                  taskmap->taskSpaceDim(dim);
+                  sqr->y_star0_.resize(dim);
+                  sqr->rho0_(0) = 1.0;
+                  sqr->threshold0_(0) = 1e-6;
+                  sqr->object_name_ = name+ std::to_string((unsigned long) sqr.get());
 
-                    if (ok(
-                        TaskDefinition_fac::Instance().createObject(
-                            "TaskTerminationCriterion", task)))
-                    {
-                      TaskTerminationCriterion_ptr sqr =
-                          boost::static_pointer_cast<TaskTerminationCriterion>(
-                              task);
-                      sqr->setTaskMap(taskmap);
-                      int dim;
-                      taskmap->taskSpaceDim(dim);
-                      sqr->y_star0_.resize(dim);
-                      sqr->rho0_(0) = 1.0;
-                      sqr->threshold0_(0) = 1e-6;
-                      sqr->object_name_ = name
-                          + std::to_string((unsigned long) sqr.get());
+                  // TODO: Better implementation of stting goals from JSON
+                  sqr->y_star0_.setZero();
 
-                      // TODO: Better implementation of stting goals from JSON
-                      sqr->y_star0_.setZero();
-
-                      sqr->setTimeSteps(1);
-                      sqr->wasFullyInitialised_ = true;
-                      task_defs_[name] = task;
-                      goals_.push_back(sqr);
-                    }
-                    else
-                    {
-                      INDICATE_FAILURE
-                      ;
-                      return FAILURE;
-                    }
-                  }
-                  else
-                  {
-//                    ROS_WARN_STREAM(
-//                        "Creation of '"<<constraintClass<<"' cancelled!");
-                  }
-                }
-                else
-                {
-                  INDICATE_FAILURE
-                  ;
-                  return FAILURE;
-                }
-              }
-              else
-              {
-                INDICATE_FAILURE
-                ;
-                return FAILURE;
-              }
+                  sqr->setTimeSteps(1);
+                  sqr->wasFullyInitialised_ = true;
+                  task_defs_[name] = task;
+                  goals_.push_back(sqr);
 
             }
             else
@@ -198,17 +155,8 @@ namespace exotica
           }
           else
           {
-            INDICATE_FAILURE
-            ;
-            return FAILURE;
+            throw_named("Invalid JSON document object!");
           }
-        }
-        else
-        {
-          INDICATE_FAILURE
-          ;
-          return FAILURE;
-        }
       }
 
       // HACK - special case
@@ -217,28 +165,18 @@ namespace exotica
           && problemType == OMPL_PROBLEM_GOAL_BIAS)
       {
         TaskMap_ptr taskmap;
-        if (ok(TaskMap_fac::Instance().createObject("Identity", taskmap)))
-        {
+        TaskMap_fac::Instance().createObject("Identity", taskmap);
           boost::shared_ptr<exotica::Identity> idt = boost::static_pointer_cast<
               exotica::Identity>(taskmap);
           std::vector<std::pair<std::string,std::string> > tmpParams;
-          EReturn ret1 = taskmap->initialiseManual("exotica::Identity", server_,
-              scenes_, problem,tmpParams);
-          EReturn ret = idt->initialise(problem->endStateName,
-              *(problem->posesJointNames));
-          if (ok(ret) && ok(ret1))
-          {
-            if (ret != CANCELLED)
-            {
+          taskmap->initialiseManual("exotica::Identity", server_,scenes_, problem,tmpParams);
+          idt->initialise(problem->endStateName,*(problem->posesJointNames));
               std::string name = taskmap->getObjectName();
               task_maps_[name] = taskmap;
               TaskDefinition_ptr task;
               if (endState.rows() > 0)
               {
-                if (ok(
-                    TaskDefinition_fac::Instance().createObject("TaskBias",
-                        task)))
-                {
+                TaskDefinition_fac::Instance().createObject("TaskBias",task);
                   TaskBias_ptr sqr = boost::static_pointer_cast<TaskBias>(task);
                   sqr->setTaskMap(taskmap);
                   int dim;
@@ -253,25 +191,13 @@ namespace exotica
                   sqr->wasFullyInitialised_ = true;
                   task_defs_[name] = task;
                   goalBias_.push_back(sqr);
-                }
-                else
-                {
-                  INDICATE_FAILURE
-                  ;
-                  return FAILURE;
-                }
               }
-            }
-          }
-        }
       }
 
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+        throw_named("Invalid JSON array!");
     }
     std::vector<std::string> jnts;
     scenes_.begin()->second->getJointNames(jnts);
@@ -283,12 +209,9 @@ namespace exotica
     {
 
       EParam<exotica::Vector> tmp_lower, tmp_upper;
-      if (ok(
-          server_->getParam(server_->getName() + "/FloatingBaseLowerLimits",
-              tmp_lower)) && tmp_lower->data.size() == 6
-          && ok(
-              server_->getParam(server_->getName() + "/FloatingBaseUpperLimits",
-                  tmp_upper)) && tmp_upper->data.size() == 6)
+      server_->getParam(server_->getName() + "/FloatingBaseLowerLimits",tmp_lower);
+      server_->getParam(server_->getName() + "/FloatingBaseUpperLimits",tmp_upper);
+      if (tmp_lower->data.size() == 6 && tmp_upper->data.size() == 6)
       {
         std::vector<double> lower = tmp_lower->data;
         std::vector<double> upper = tmp_upper->data;
@@ -302,8 +225,7 @@ namespace exotica
       }
       else
       {
-        INDICATE_FAILURE
-        return FAILURE;
+        throw_named("Can't register parameters!");
       }
     }
     else if (scenes_.begin()->second->getBaseType() == BASE_TYPE::FLOATING)
@@ -323,11 +245,9 @@ namespace exotica
       getBounds()[i] = joint_limits.at(jnts[i])[0] - 1e-3;
       getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1] + 1e-3;
     }
-    return SUCCESS;
-
   }
 
-  EReturn OMPLProblem::initDerived(tinyxml2::XMLHandle & handle)
+  void OMPLProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("PlroblemType");
     if (tmp_handle.ToElement())
@@ -351,9 +271,7 @@ namespace exotica
       }
       else
       {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
+        throw_named("Unknown problem type!");
       }
     }
     else
@@ -444,8 +362,7 @@ namespace exotica
       {
         if (space_dim_ != nn)
         {
-          ERROR("Kinematic scenes have different joint space sizes!");
-          return FAILURE;
+          throw_named("Kinematic scenes have different joint space sizes!");
         }
         else
         {
@@ -475,7 +392,6 @@ namespace exotica
       getBounds()[i] = joint_limits.at(jnts[i])[0];
       getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1];
     }
-    return SUCCESS;
   }
 
   int OMPLProblem::getSpaceDim()

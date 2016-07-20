@@ -52,7 +52,7 @@ namespace exotica
        */
       ~LocalSolver();
 
-      EReturn localSolve();
+      void localSolve();
 
   };
 }

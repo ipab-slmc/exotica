@@ -118,12 +118,12 @@ namespace ompl
       return true;
     }
 
-    exotica::EReturn FlexiblePlanner::localSolve(const Eigen::VectorXd & qs,
+    bool FlexiblePlanner::localSolve(const Eigen::VectorXd & qs,
         Eigen::VectorXd & qg, Eigen::MatrixXd & solution)
     {
 
       int dim = (int) si_->getStateDimension();
-      exotica::EReturn ret = local_solver_->SolveFullSolution(qs, solution);
+      bool ret = local_solver_->SolveFullSolution(qs, solution);
       qg.resize(dim);
       qg = solution.row(solution.rows() - 1).transpose();
       checkCnt_ += (solution.rows() - 1);

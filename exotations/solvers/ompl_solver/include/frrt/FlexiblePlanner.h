@@ -171,7 +171,7 @@ namespace ompl
           return d;
         }
         ///	Local solver
-        exotica::EReturn localSolve(const Eigen::VectorXd & qs,
+        bool localSolve(const Eigen::VectorXd & qs,
             Eigen::VectorXd & qg, Eigen::MatrixXd & solution);
         exotica::Server_ptr ser_;
         exotica::IKsolver_ptr local_solver_;

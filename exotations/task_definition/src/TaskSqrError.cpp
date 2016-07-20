@@ -55,21 +55,20 @@ namespace exotica
     wasFullyInitialised_ = false;
   }
 
-  EReturn TaskSqrError::initialiseManual(std::string name, Server_ptr & server,
+  void TaskSqrError::initialiseManual(std::string name, Server_ptr & server,
       boost::shared_ptr<PlanningProblem> prob,
       std::vector<std::pair<std::string,std::string> >& params)
   {
-      EReturn ret = TaskDefinition::initialiseManual(name,server,prob,params);
+      TaskDefinition::initialiseManual(name,server,prob,params);
       int dim;
       task_map_->taskSpaceDim(dim);
       y_star0_.resize(dim);
       y_star0_.setZero();
       rho0_(0) = 1.0;
       wasFullyInitialised_ = true;
-      return ret;
   }
 
-  EReturn TaskSqrError::initDerived(tinyxml2::XMLHandle & handle)
+  void TaskSqrError::initDerived(tinyxml2::XMLHandle & handle)
   {
     //!< Temporaries
     Eigen::VectorXd y_star; //!< The Goal vector
@@ -77,23 +76,12 @@ namespace exotica
     // Load Rho
     if (handle.FirstChildElement("Rho").ToElement())
     {
-      if (ok(getDouble(*(handle.FirstChildElement("Rho").ToElement()), rho)))
-      {
-
-        rho0_(0) = rho;
-      }
-      else
-      {
-        INDICATE_FAILURE
-        ;
-        return PAR_ERR;
-      }
+      getDouble(*(handle.FirstChildElement("Rho").ToElement()), rho);
+      rho0_(0) = rho;
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return PAR_ERR;
+      throw_named("Parameter not found!");
     }
 
     // Load the goal
@@ -115,9 +103,7 @@ namespace exotica
         }
         else
         {
-          ERROR(
-              "Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
-          return FAILURE;
+          throw_named("Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
         }
       }
     }
@@ -132,48 +118,40 @@ namespace exotica
       }
       else
       {
-        ERROR(
-            "Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
-        return FAILURE;
+        throw_named("Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
       }
     }
 
     // Set default number of time steps
     setTimeSteps(1);
-
-    return SUCCESS;
   }
 
-  EReturn TaskSqrError::setTimeSteps(const int T)
+  void TaskSqrError::setTimeSteps(const int T)
   {
     TaskDefinition::setTimeSteps(T);
     y_star_.assign(T, Eigen::VectorXdRef_ptr(y_star0_));
     rho_.assign(T, Eigen::VectorXdRef_ptr(rho0_));
-    return SUCCESS;
   }
 
-  EReturn TaskSqrError::registerGoal(Eigen::VectorXdRef_ptr y_star, int t)
+  void TaskSqrError::registerGoal(Eigen::VectorXdRef_ptr y_star, int t)
   {
     if (wasFullyInitialised_) (*y_star) = (*(y_star_.at(t)));
     y_star_.at(t) = y_star;
-    return SUCCESS;
   }
 
-  EReturn TaskSqrError::registerRho(Eigen::VectorXdRef_ptr rho, int t)
+  void TaskSqrError::registerRho(Eigen::VectorXdRef_ptr rho, int t)
   {
     if (wasFullyInitialised_) (*rho) = (*(rho_.at(t)));
     rho_.at(t) = rho;
-    return SUCCESS;
   }
 
-  EReturn TaskSqrError::setDefaultGoals(int t)
+  void TaskSqrError::setDefaultGoals(int t)
   {
     if (!wasFullyInitialised_)
     {
       (*(y_star_.at(t))) = y_star0_;
       (*(rho_.at(t))) = rho0_;
     }
-    return SUCCESS;
   }
 
   double TaskSqrError::getRho(int t)
@@ -181,11 +159,10 @@ namespace exotica
     return (*(rho_.at(t)))(0);
   }
 
-  EReturn TaskSqrError::setRho(int t, double rho)
+  void TaskSqrError::setRho(int t, double rho)
   {
-    if (!rho_.at(t)) return FAILURE;
+    if (!rho_.at(t)) throw_named("Invalid Rho!");
     (*(rho_.at(t)))(0) = rho;
-    return SUCCESS;
   }
 
   Eigen::VectorXdRef_ptr TaskSqrError::getGoal(int t)

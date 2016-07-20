@@ -58,7 +58,7 @@ namespace exotica
        * @param err Error
        * @return Indication of success
        */
-      virtual EReturn terminate(bool & end, double& err, int t = 0);
+      virtual void terminate(bool & end, double& err, int t = 0);
 
       /**
        * @brief registerGoal Registers threshold reference at time t
@@ -66,14 +66,14 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerThreshold(Eigen::VectorXdRef_ptr threshold, int t = 0);
+      void registerThreshold(Eigen::VectorXdRef_ptr threshold, int t = 0);
 
       /**
        * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
        * @param T Number of time steps (this should be set by the planning problem)
        * @return Returns success.
        */
-      virtual EReturn setTimeSteps(const int T);
+      virtual void setTimeSteps(const int T);
 
       Eigen::VectorXd threshold0_;
     protected:
@@ -82,7 +82,7 @@ namespace exotica
        * @param handle XML handle for any derived parameters
        * @return       Should indicate success/failure
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       /// \brief Threshold on squared error.
 

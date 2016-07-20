@@ -86,6 +86,7 @@ add_library(${PROJECT_NAME}
   src/TaskMap.cpp
   src/tinyxml2.cpp
   src/Tools.cpp
+  src/Tools/Exception.cpp
   src/TaskDefinition.cpp
   src/PlanningProblem.cpp
   src/MotionSolver.cpp

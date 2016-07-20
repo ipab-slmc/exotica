@@ -35,7 +35,7 @@ exotica::Server_ptr exotica::Server::singleton_server_ = NULL;
 namespace exotica
 {
   Server::Server()
-      : nh_(new ros::NodeHandle("/EXOTicaServer")), name_("EXOTicaServer"), sp_(
+      : nh_("/EXOTicaServer"), name_("EXOTicaServer"), sp_(
           2)
   {
     //TODO
@@ -47,12 +47,11 @@ namespace exotica
     sp_.stop();
   }
 
-  EReturn Server::getModel(std::string path, robot_model::RobotModelPtr & model)
+  void Server::getModel(std::string path, robot_model::RobotModelPtr & model)
   {
     if (robot_models_.find(path) != robot_models_.end())
     {
       model = robot_models_[path];
-      return SUCCESS;
     }
     else
     {
@@ -60,13 +59,10 @@ namespace exotica
       if (model)
       {
         robot_models_[path] = model;
-        return SUCCESS;
       }
       else
       {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
+        throw_named("Couldn't load the model!");
       }
     }
   }
@@ -93,7 +89,7 @@ namespace exotica
     return name_;
   }
 
-  EReturn Server::initialise(tinyxml2::XMLHandle & handle)
+  void Server::initialise(tinyxml2::XMLHandle & handle)
   {
     static bool first = true;
     if (!singleton_server_)
@@ -105,11 +101,7 @@ namespace exotica
     tinyxml2::XMLHandle tmp_handle = param_handle.FirstChild();
     while (tmp_handle.ToElement())
     {
-      if (!ok(createParam(name_, tmp_handle)))
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+      createParam(name_, tmp_handle);
       tmp_handle = tmp_handle.NextSibling();
     }
     if (first)
@@ -117,10 +109,9 @@ namespace exotica
       HIGHLIGHT_NAMED(name_, "EXOTica Server Initialised");
       first = false;
     }
-    return SUCCESS;
   }
 
-  EReturn Server::createParam(const std::string & ns,
+  void Server::createParam(const std::string & ns,
       tinyxml2::XMLHandle & tmp_handle)
   {
     std::string name = ns + "/" + tmp_handle.ToElement()->Name();
@@ -128,12 +119,7 @@ namespace exotica
     if (type.compare("int") == 0)
     {
       double dou;
-      if (!ok(
-          getDouble(*tmp_handle.FirstChildElement("default").ToElement(), dou)))
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+      getDouble(*tmp_handle.FirstChildElement("default").ToElement(), dou);
       std_msgs::Int64 val;
       val.data = dou;
       params_[name] = boost::shared_ptr<std_msgs::Int64>(
@@ -142,12 +128,7 @@ namespace exotica
     else if (type.compare("double") == 0)
     {
       double dou;
-      if (!ok(
-          getDouble(*tmp_handle.FirstChildElement("default").ToElement(), dou)))
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+      getDouble(*tmp_handle.FirstChildElement("default").ToElement(), dou);
       std_msgs::Float64 val;
       val.data = dou;
       params_[name] = boost::shared_ptr<std_msgs::Float64>(
@@ -156,25 +137,15 @@ namespace exotica
     else if (type.compare("vector") == 0)
     {
       exotica::Vector vec;
-      if (!ok(
-          getStdVector(*tmp_handle.FirstChildElement("default").ToElement(),
-              vec.data)))
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+      getStdVector(*tmp_handle.FirstChildElement("default").ToElement(),
+              vec.data);
       params_[name] = boost::shared_ptr<exotica::Vector>(
           new exotica::Vector(vec));
     }
     else if (type.compare("bool") == 0)
     {
       bool val;
-      if (!ok(
-          getBool(*tmp_handle.FirstChildElement("default").ToElement(), val)))
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+      getBool(*tmp_handle.FirstChildElement("default").ToElement(), val);
       std_msgs::Bool ros_bool;
       ros_bool.data = val;
       params_[name] = boost::shared_ptr<std_msgs::Bool>(
@@ -184,13 +155,8 @@ namespace exotica
     {
       exotica::BoolList boollist;
       std::vector<bool> vec;
-      if (!ok(
-          getBoolVector(*tmp_handle.FirstChildElement("default").ToElement(),
-              vec)))
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+      getBoolVector(*tmp_handle.FirstChildElement("default").ToElement(),
+              vec);
       boollist.data.resize(vec.size());
       for (int i = 0; i < vec.size(); i++)
         boollist.data[i] = vec[i];
@@ -203,8 +169,7 @@ namespace exotica
           tmp_handle.FirstChildElement("default").ToElement()->GetText();
       if (str.size() == 0)
       {
-        INDICATE_FAILURE
-        return FAILURE;
+        throw_named("Invalid srtring!");
       }
       std_msgs::String ros_s;
       ros_s.data =
@@ -215,23 +180,16 @@ namespace exotica
     else if (type.compare("stringlist") == 0)
     {
       exotica::StringList list;
-      if (!ok(
-          getList(*tmp_handle.FirstChildElement("default").ToElement(),
-              list.strings)))
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+      getList(*tmp_handle.FirstChildElement("default").ToElement(),
+              list.strings);
       params_[name] = boost::shared_ptr<exotica::StringList>(
           new exotica::StringList(list));
     }
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Unknown type!");
     }
     INFO("Register new paramter "<<name)
-    return SUCCESS;
   }
 
   bool Server::hasParam(const std::string & name)

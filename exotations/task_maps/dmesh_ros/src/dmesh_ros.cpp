@@ -48,15 +48,10 @@ namespace exotica
     //TODO
   }
 
-  EReturn DMeshROS::initDerived(tinyxml2::XMLHandle & handle)
+  void DMeshROS::initDerived(tinyxml2::XMLHandle & handle)
   {
     //	Example of register dynamic parameters to EXOTica Server
-    if (!ok(server_->getParam("EXOTicaServer/DMeshSize", size_)))
-    {
-      server_->listParameters();
-      INDICATE_FAILURE
-      return FAILURE;
-    }
+    server_->getParam("EXOTicaServer/DMeshSize", size_);
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("DMeshLinks");
     server_->registerParam<exotica::StringList>(ns_, tmp_handle, links_);
 
@@ -72,31 +67,21 @@ namespace exotica
     tmp_handle = handle.FirstChildElement("GoalGain");
     server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, kg_);
 
-    if (!ok(server_->getParam("EXOTicaServer/UsePose", usePose_)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
+    server_->getParam("EXOTicaServer/UsePose", usePose_);
     wo_ = 10;
     wg_ = 10;
     if (scene_ == nullptr)
     {
-      INDICATE_FAILURE
-      return MMB_NIN;
+      throw_named("Invalid scene!");
     }
 
     EParam<exotica::Vector> radius;
-    if (!ok(server_->getParam("EXOTicaServer/DMeshRadius", radius)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
+    server_->getParam("EXOTicaServer/DMeshRadius", radius);
 
     if (!gManager_.initialisation(links_, link_types_, radius->data,
         size_->data))
     {
-      INDICATE_FAILURE
-      return MMB_NIN;
+      throw_named("Can't initialize the graph!");
     }
     robot_size_ = links_->strings.size();
     ext_size_ = size_->data - robot_size_;
@@ -109,85 +94,58 @@ namespace exotica
     HIGHLIGHT_NAMED("DMeshROS",
         "Distance Mesh (ROS) has been initialised: Maximum Graph size="<<size_->data<<", Robot link size="<<robot_size_<<", Unconnected external object size="<<ext_size_);
     initialised_ = true;
-    return SUCCESS;
   }
 
-  EReturn DMeshROS::update(Eigen::VectorXdRefConst x, const int t)
+  void DMeshROS::update(Eigen::VectorXdRefConst x, const int t)
   {
     q_size_ = x.rows();
 
     if (initialised_)
     {
-      if (ok(computeLaplace(t)))
-      {
+        computeLaplace(t);
         if (updateJacobian_)
         {
-          if (ok(computeJacobian(t)))
-          {
-            return SUCCESS;
-          }
-          else
-          {
-            INDICATE_FAILURE
-            return FAILURE;
-          }
+          computeJacobian(t);
         }
-        else
-        {
-          return SUCCESS;
-        }
-      }
-      else
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
     }
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Not initialized!");
     }
   }
-  EReturn DMeshROS::taskSpaceDim(int & task_dim)
+
+  void DMeshROS::taskSpaceDim(int & task_dim)
   {
     LOCK(lock_);
     if (!initialised_)
     {
-      INDICATE_FAILURE
-      return MMB_NIN;
+      throw_named("Not initialized!");
     }
     //task_size_ = gManager_.getGraph()->getCurrentSize();
     task_dim = task_size_;
-    return SUCCESS;
   }
 
-  EReturn DMeshROS::getGoalLaplace(Eigen::VectorXd & goal, int t)
+  void DMeshROS::getGoalLaplace(Eigen::VectorXd & goal, int t)
   {
     LOCK(lock_);
     if (!isRegistered(t) || !getEffReferences())
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Not fully initialized!");
     }
     if (!initialised_)
     {
-      INDICATE_FAILURE
-      return MMB_NIN;
+      throw_named("Not initialized!");
     }
 
     if (!ok(updateGraphFromKS(t)))
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Failed to update the graph!");
     }
 
     Eigen::MatrixXd dist;
     if (!gManager_.getGraph()->getGoalDistanceEigen(dist))
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Failed to get distances!");
     }
     goal.setZero(task_size_);
     uint j, l, cnt = 0;
@@ -226,39 +184,30 @@ namespace exotica
 //		std::cout << "Dist \n" << dist << std::endl;
 //		std::cout << "GOAL: " << goal.transpose() << std::endl;
 //		getchar();
-    return SUCCESS;
   }
 
-  EReturn DMeshROS::getLaplace(Eigen::VectorXd & lap)
+  void DMeshROS::getLaplace(Eigen::VectorXd & lap)
   {
     int t = 0;
     lap = PHI;
-    return SUCCESS;
   }
-  EReturn DMeshROS::computeLaplace(int t)
+
+  void DMeshROS::computeLaplace(int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Not fully initialized!");
     }
     LOCK(lock_);
     if (!initialised_)
     {
-      INDICATE_FAILURE
-      return MMB_NIN;
+      throw_named("Not initialized!");
     }
 
-    if (!ok(updateGraphFromKS(t)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
+    updateGraphFromKS(t);
     if (!gManager_.getGraph()->getAcutalDistanceEigen(dist_))
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Couldn't get actual distances!");
     }
     //Eigen::MatrixXd vel(gManager_.getGraph()->getVelocity());
     PHI.setZero();
@@ -303,16 +252,13 @@ namespace exotica
         cnt++;
       }
     }
-    return SUCCESS;
   }
 
-  EReturn DMeshROS::computeJacobian(int t)
+  void DMeshROS::computeJacobian(int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Not fully initialized!");
     }
     JAC.setZero();
     double d_ = 0;
@@ -380,37 +326,30 @@ namespace exotica
         }
       }
     }
-
-    return SUCCESS;
   }
-  EReturn DMeshROS::updateGraphFromKS(int t)
+
+  void DMeshROS::updateGraphFromKS(int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Not fully initialized!");
     }
     if (!gManager_.getGraph()->updateLinksRef(EFFPHI))
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Not initialized!");
     }
-    return SUCCESS;
   }
 
-  EReturn DMeshROS::updateGraphFromExternal(const std::string & name,
+  void DMeshROS::updateGraphFromExternal(const std::string & name,
       const Eigen::Vector3d & pose)
   {
     if (!gManager_.getGraph()->updateLink(name, pose))
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Can't update the link!");
     }
-    return SUCCESS;
   }
 
-  EReturn DMeshROS::updateGraphFromTF()
+  void DMeshROS::updateGraphFromTF()
   {
     Eigen::VectorXd tmp = Eigen::VectorXd::Zero(robot_size_ * 3);
     for (int i = 1; i < robot_size_ - 1; i++)
@@ -421,9 +360,9 @@ namespace exotica
             ros::Time(0), transform_);
       } catch (tf::TransformException &ex)
       {
-        ROS_ERROR("%s", ex.what());
+
         ros::Duration(1.0).sleep();
-        return FAILURE;
+        throw_named(ex.what());
       }
       tmp(3 * i) = transform_.getOrigin().x();
       tmp(3 * i + 1) = transform_.getOrigin().y();
@@ -435,36 +374,32 @@ namespace exotica
 
     if (!gManager_.getGraph()->updateLinksRef(tmp))
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Can't update link references!");
     }
-    return SUCCESS;
   }
 
-  EReturn DMeshROS::updateExternal(const exotica::MeshVertex & ext)
+  void DMeshROS::updateExternal(const exotica::MeshVertex & ext)
   {
     if (!gManager_.getGraph()->updateExternal(ext))
     {
       ROS_ERROR_STREAM("Update "<<ext.name<<" failed");
     }
-    return SUCCESS;
   }
-  EReturn DMeshROS::updateExternal(const exotica::MeshVertexArray & ext)
+
+  void DMeshROS::updateExternal(const exotica::MeshVertexArray & ext)
   {
     for (int i = 0; i < ext.vertices.size(); i++)
     {
       updateExternal(ext.vertices[i]);
     }
-    return SUCCESS;
   }
 
-  EReturn DMeshROS::removeVertex(const std::string & name)
+  void DMeshROS::removeVertex(const std::string & name)
   {
     if (!gManager_.getGraph()->removeVertex(name))
     {
       ROS_ERROR_STREAM("Remove "<<name<<" failed");
     }
-    return SUCCESS;
   }
 
   bool DMeshROS::hasActiveObstacle()

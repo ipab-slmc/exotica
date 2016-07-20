@@ -364,8 +364,7 @@ namespace ompl
       Eigen::VectorXd qs(dim), qg(dim);
       copyStateToEigen(is == NULL ? sm->state : is, qs);
       Eigen::MatrixXd local_path;
-      exotica::EReturn ret = FlexiblePlanner::localSolve(qs, qg, local_path);
-      if (ok(ret))
+      if (FlexiblePlanner::localSolve(qs, qg, local_path))
       {
         /* Local planner succeeded */
         gm->inter_state = is;
@@ -373,8 +372,9 @@ namespace ompl
         gm->parent = sm;
         qg = local_path.row(local_path.rows() - 1).transpose();
         copyEigenToState(qg, gm->state);
+        return true;
       }
-      return ret == exotica::SUCCESS ? true : false;
+      return false;
     }
   }	//	Namespace geometric
 }	//	Namespace ompl

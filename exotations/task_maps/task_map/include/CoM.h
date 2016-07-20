@@ -69,7 +69,7 @@ namespace exotica
        * @param	x	Input configuration
        * @return	Exotica return type
        */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(Eigen::VectorXdRefConst x, const int t);
 
       /**
        * @brief	Get the task space dimension
@@ -79,11 +79,11 @@ namespace exotica
       /**
        * \brief Concrete implementation of the task-space size
        */
-      virtual EReturn taskSpaceDim(int & task_dim);
+      virtual void taskSpaceDim(int & task_dim);
 
-      EReturn setOffsetCallback(
+      void setOffsetCallback(
           boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback);
-      EReturn setOffset(bool left, const KDL::Frame & offset);
+      void setOffset(bool left, const KDL::Frame & offset);
       void checkGoal(const Eigen::Vector3d & goal);
       EParam<exotica::Vector> getBounds()
       {
@@ -96,26 +96,26 @@ namespace exotica
        * @param	handle	XML handle
        * @return	Exotica return type
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
     private:
       /**
        * @brief	Compute the forward map (centre of mass position)
        * @return	True if succeeded, false otherwise
        */
-      bool computeForwardMap(int t);
+      void computeForwardMap(int t);
 
       /**
        * @brief	Compute the jacobian
        * @return	True if succeeded, false otherwise
        */
-      bool computeJacobian(int t);
+      void computeJacobian(int t);
 
       /**
        * @brief	Change end-effectors offset to centre of mass
        * @return	True if succeeded, false otherwise
        */
-      bool changeEffToCoM();
+      void changeEffToCoM();
       Eigen::VectorXd mass_;	//!< Mass of each link
       std::vector<KDL::Vector> cog_;	//!< Centre of gravity of each link
       std::vector<KDL::Frame> tip_pose_;	//!< Tip poses

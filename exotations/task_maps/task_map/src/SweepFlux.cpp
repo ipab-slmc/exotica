@@ -30,10 +30,9 @@
  *
  */
 
-#include "kinematic_maps/SweepFlux.h"
+#include "SweepFlux.h"
 
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
-#define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
+#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 //#define DEBUG_MODE
 REGISTER_TASKMAP_TYPE("SweepFlux", exotica::SweepFlux);
@@ -46,7 +45,7 @@ namespace exotica
 
   }
 
-  EReturn SweepFlux::setTimeSteps(const int T)
+  void SweepFlux::setTimeSteps(const int T)
   {
     TaskMap::setTimeSteps(T);
     int n, m;
@@ -57,14 +56,11 @@ namespace exotica
 
     if (T_ < 2)
     {
-      //INDICATE_FAILURE;
-      return WARNING;
+      throw_named("Too few timesteps!");
     }
     if (scene_->getMapSize(object_name_) < 2)
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Wrong number of end-effectors!");
     }
     TrisStride_ = (scene_->getMapSize(object_name_) - 1) * 2
         + (capTop_->data ? 1 : 0) + (capBottom_->data ? 1 : 0);
@@ -131,7 +127,6 @@ namespace exotica
     //ROS_WARN_STREAM("\n"<<Tris_);
     TriFlux_.setZero();
     initialised_ = true;
-    return SUCCESS;
 
   }
 
@@ -281,58 +276,39 @@ namespace exotica
 
   }
 
-  EReturn SweepFlux::update(Eigen::VectorXdRefConst x, const int t)
+  void SweepFlux::update(Eigen::VectorXdRefConst x, const int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Not fully initialized!");
     }
     if (scene_ != nullptr)
     {
       if (initialised_)
       {
-        if (ok(computeFlux(t)))
-        {
-          return SUCCESS;
-        }
-        else
-        {
-          INDICATE_FAILURE
-          ;
-          return MMB_NIN;
-        }
+        computeFlux(t);
       }
       else
       {
-        INDICATE_FAILURE
-        ;
-        return MMB_NIN;
+        throw_named("Not initialized!");
       }
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return MMB_NIN;
+      throw_named("Not fully initialized!");
     }
   }
 
-  EReturn SweepFlux::taskSpaceDim(int & task_dim)
+  void SweepFlux::taskSpaceDim(int & task_dim)
   {
     task_dim = 1;
-    return SUCCESS;
   }
 
-  EReturn SweepFlux::initDerived(tinyxml2::XMLHandle & handle)
+  void SweepFlux::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("ObjectMesh");
     server_->registerRosParam<std::string>(ns_, tmp_handle, obj_file_);
-    if (!ok(loadOBJ(*obj_file_, TrisQ_, VertsQ_orig_)))
-    {
-      return PAR_ERR;
-    }
+    loadOBJ(*obj_file_, TrisQ_, VertsQ_orig_);
 
     tmp_handle = handle.FirstChildElement("CapTop");
     server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capTop_);
@@ -346,7 +322,6 @@ namespace exotica
     transform(val);
 
     init_int_ = true;
-    return SUCCESS;
   }
 
   void SweepFlux::transform(Eigen::Affine3d& val)
@@ -360,7 +335,7 @@ namespace exotica
     }
   }
 
-  EReturn SweepFlux::computeFlux(const int t)
+  void SweepFlux::computeFlux(const int t)
   {
     Verts_.segment(t * scene_->getMapSize(object_name_) * 3,
         scene_->getMapSize(object_name_) * 3) = EFFPHI;
@@ -389,8 +364,6 @@ namespace exotica
         &FluxQ_.data()[(t + (t == 0 ? 0 : -1)) * (TrisQ_.rows() / 3)]);
 
     PHI(0) = TriFlux_.segment(tri_start, tri_length).sum();
-
-    return SUCCESS;
   }
 
   void SweepFlux::FluxTriangleTriangle(int* Tris, double* Verts, double* VertJ,

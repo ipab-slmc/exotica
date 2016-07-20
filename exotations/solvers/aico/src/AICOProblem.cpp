@@ -35,153 +35,93 @@
 
 REGISTER_PROBLEM_TYPE("AICOProblem", exotica::AICOProblem);
 
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
-#define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
+#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 namespace exotica
 {
 
-  EReturn AICOProblem::reinitialise(rapidjson::Document& document,
-      boost::shared_ptr<PlanningProblem> problem)
-  {
-    clear();
-    if (document.IsArray())
+    void AICOProblem::reinitialise(rapidjson::Document& document,
+          boost::shared_ptr<PlanningProblem> problem)
     {
-      for (rapidjson::SizeType i = 0; i < document.Size(); i++)
-      {
-        rapidjson::Value& obj = document[i];
-        if (obj.IsObject())
+        clear();
+        if (document.IsArray())
         {
-          std::string constraintClass;
-          if (ok(getJSON(obj["class"], constraintClass)))
-          {
-            if (knownMaps_.find(constraintClass) != knownMaps_.end())
+            for (rapidjson::SizeType i = 0; i < document.Size(); i++)
             {
-              TaskMap_ptr taskmap;
-              if (ok(
-                  TaskMap_fac::Instance().createObject(
-                      knownMaps_[constraintClass], taskmap)))
-              {
-                EReturn ret = taskmap->initialise(obj, server_, scenes_,
-                    problem);
-                if (ok(ret))
+                rapidjson::Value& obj = document[i];
+            if (obj.IsObject())
+            {
+                std::string constraintClass;
+                getJSON(obj["class"], constraintClass);
+                if (knownMaps_.find(constraintClass) != knownMaps_.end())
                 {
-                  if (ret != CANCELLED)
-                  {
+                    TaskMap_ptr taskmap;
+                    TaskMap_fac::Instance().createObject(knownMaps_[constraintClass], taskmap);
+                    taskmap->initialise(obj, server_, scenes_, problem);
                     std::string name = taskmap->getObjectName();
                     task_maps_[name] = taskmap;
                     TaskDefinition_ptr task;
-                    if (ok(
-                        TaskDefinition_fac::Instance().createObject(
-                            "TaskSqrError", task)))
+                    TaskDefinition_fac::Instance().createObject("TaskSqrError", task);
+                    TaskSqrError_ptr sqr = boost::static_pointer_cast<TaskSqrError>(task);
+                    sqr->setTaskMap(taskmap);
+                    int dim;
+                    taskmap->taskSpaceDim(dim);
+                    sqr->y_star0_.resize(dim);
+                    sqr->rho0_(0) = 0.0;
+                    sqr->rho1_(0) = 1e4;
+                    sqr->object_name_ = name + std::to_string((unsigned long) sqr.get());
+
+                    // TODO: Better implementation of stting goals from JSON
+                    sqr->y_star0_.setZero();
+
+                    sqr->setTimeSteps(T + 2);
+                    Eigen::VectorXd tspan(2);
+                    Eigen::VectorXi tspani(2);
+                    if (obj["tspan"]["__ndarray__"].IsArray())
                     {
-                      TaskSqrError_ptr sqr = boost::static_pointer_cast<
-                          TaskSqrError>(task);
-                      sqr->setTaskMap(taskmap);
-                      int dim;
-                      taskmap->taskSpaceDim(dim);
-                      sqr->y_star0_.resize(dim);
-                      sqr->rho0_(0) = 0.0;
-                      sqr->rho1_(0) = 1e4;
-                      sqr->object_name_ = name
-                          + std::to_string((unsigned long) sqr.get());
-
-                      // TODO: Better implementation of stting goals from JSON
-                      sqr->y_star0_.setZero();
-
-                      sqr->setTimeSteps(T + 2);
-                      Eigen::VectorXd tspan(2);
-                      Eigen::VectorXi tspani(2);
-                      if (obj["tspan"]["__ndarray__"].IsArray())
-                      {
                         getJSON(obj["tspan"]["__ndarray__"], tspan);
-                      }
-                      else
-                      {
-                        getJSON(obj["tspan"], tspan);
-                      }
-                      if (tspan(0) <= 0.0) tspan(0) = 0.0;
-                      if (tspan(1) >= 1.0) tspan(1) = 1.0;
-                      tspani(0) = (int) (T * tspan(0));
-                      tspani(1) = (int) (T * tspan(1));
-                      for (int t = tspani(0); t <= tspani(1); t++)
-                      {
-                        sqr->registerRho(
-                            Eigen::VectorXdRef_ptr(sqr->rho1_.segment(0, 1)),
-                            t);
-                      }
-                      sqr->wasFullyInitialised_ = true;
-                      task_defs_[name] = task;
                     }
                     else
                     {
-                      INDICATE_FAILURE
-                      ;
-                      return FAILURE;
+                        getJSON(obj["tspan"], tspan);
                     }
-                  }
-                  else
-                  {
-                    ROS_WARN_STREAM(
-                        "Creation of '"<<constraintClass<<"' cancelled!");
-                  }
+                    if (tspan(0) <= 0.0) tspan(0) = 0.0;
+                    if (tspan(1) >= 1.0) tspan(1) = 1.0;
+                    tspani(0) = (int) (T * tspan(0));
+                    tspani(1) = (int) (T * tspan(1));
+                    for (int t = tspani(0); t <= tspani(1); t++)
+                    {
+                        sqr->registerRho(
+                        Eigen::VectorXdRef_ptr(sqr->rho1_.segment(0, 1)),
+                        t);
+                    }
+                    sqr->wasFullyInitialised_ = true;
+                    task_defs_[name] = task;
                 }
                 else
                 {
-                  INDICATE_FAILURE
-                  ;
-                  return FAILURE;
+                    throw_named("Unknown constraint '"<<constraintClass<<"'");
                 }
-              }
-              else
-              {
-                INDICATE_FAILURE
-                ;
-                return FAILURE;
-              }
-
             }
             else
             {
-              WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
+              throw_named("Invalid JSON document object!");
             }
-          }
-          else
-          {
-            INDICATE_FAILURE
-            ;
-            return FAILURE;
-          }
         }
         else
         {
-          INDICATE_FAILURE
-          ;
-          return FAILURE;
+            throw_named("Invalid JSON array!");
         }
       }
-    }
-    else
-    {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
-    }
-    return SUCCESS;
 
-  }
+    }
 
-  EReturn AICOProblem::update(Eigen::VectorXdRefConst x, const int t)
+  void AICOProblem::update(Eigen::VectorXdRefConst x, const int t)
   {
     // Update the KinematicScene(s)...
     for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
     {
-      if (!ok(it->second->update(x)))
-      {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
-      }
+      it->second->update(x);
     }
 
     // Update task maps if the task definition precision (rho) is non-zero
@@ -192,19 +132,9 @@ namespace exotica
           TaskSqrError>(it.second);
       if (task->getRho(t) > 0)
       {
-        if (ok(task->getTaskMap()->update(x, t)))
-        {
-          // All is fine
-        }
-        else
-        {
-          ERROR("Failed updating '" << task->getObjectName() << "'");
-          return FAILURE;
-        }
+        task->getTaskMap()->update(x, t);
       }
     }
-
-    return SUCCESS;
   }
 
   AICOProblem::AICOProblem()
@@ -218,18 +148,15 @@ namespace exotica
 
   }
 
-  EReturn AICOProblem::initDerived(tinyxml2::XMLHandle & handle)
+  void AICOProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
-    EReturn ret_value = SUCCESS;
     tinyxml2::XMLElement* xmltmp;
     bool hastime = false;
     XML_CHECK("T");
-    XML_OK(getInt(*xmltmp, T));
+    getInt(*xmltmp, T);
     if (T <= 2)
     {
-      INDICATE_FAILURE
-      ;
-      return PAR_ERR;
+      throw_named("Invalid number of timesteps: "<<T);
     }
     xmltmp = handle.FirstChildElement("duration").ToElement();
     if (xmltmp)
@@ -247,30 +174,30 @@ namespace exotica
     else
     {
       XML_CHECK("tau");
-      XML_OK(getDouble(*xmltmp, tau));
+      getDouble(*xmltmp, tau);
     }
 
     XML_CHECK("Qrate");
-    XML_OK(getDouble(*xmltmp, Q_rate));
+    getDouble(*xmltmp, Q_rate);
     XML_CHECK("Hrate");
-    XML_OK(getDouble(*xmltmp, H_rate));
+    getDouble(*xmltmp, H_rate);
     XML_CHECK("Wrate");
-    XML_OK(getDouble(*xmltmp, W_rate));
+    getDouble(*xmltmp, W_rate);
     {
       Eigen::VectorXd tmp;
       XML_CHECK("W");
-      XML_OK(getVector(*xmltmp, tmp));
+      getVector(*xmltmp, tmp);
       W = Eigen::MatrixXd::Identity(tmp.rows(), tmp.rows());
       W.diagonal() = tmp;
     }
     for (TaskDefinition_map::const_iterator it = task_defs_.begin();
-        it != task_defs_.end() and ok(ret_value); ++it)
+        it != task_defs_.end(); ++it)
     {
       if (it->second->type().compare(std::string("TaskSqrError")) == 0)
         ERROR("Task variable " << it->first << " is not an squared error!");
     }
     // Set number of time steps
-    return setTime(T);
+    setTime(T);
   }
 
   int AICOProblem::getT()
@@ -278,27 +205,19 @@ namespace exotica
     return T;
   }
 
-  EReturn AICOProblem::setTime(int T_)
+  void AICOProblem::setTime(int T_)
   {
     if (T_ <= 0)
     {
-      INDICATE_FAILURE
-      ;
-      return PAR_ERR;
+      throw_named("Invalid number of timesteps: "<<T);
     }
     tau = (double) T * tau / (double) T_;
     T = T_;
     // Set number of time steps
     for (auto& it : task_defs_)
     {
-      if (!ok(it.second->setTimeSteps(T + 2)))
-      {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
-      }
+      it.second->setTimeSteps(T + 2);
     }
-    return SUCCESS;
   }
 
   void AICOProblem::getT(int& T_)

@@ -30,7 +30,7 @@
  *
  */
 
-#include "kinematic_maps/CoM.h"
+#include "CoM.h"
 
 REGISTER_TASKMAP_TYPE("CoM", exotica::CoM);
 
@@ -47,82 +47,53 @@ namespace exotica
     //TODO
   }
 
-  EReturn CoM::update(Eigen::VectorXdRefConst x, const int t)
+  void CoM::update(Eigen::VectorXdRefConst x, const int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Not fully initialized!");
     }
     static bool fistTime = true;
     if (fistTime)
     {
       if (!changeEffToCoM())
       {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
+        throw_named("Can't change end-effectors!");
       }
       fistTime = false;
     }
     if (initialised_)
     {
-      if (offset_callback_) offset_callback_(this, x, t);
-
-      if (computeForwardMap(t))
-      {
+        if (offset_callback_) offset_callback_(this, x, t);
+        computeForwardMap(t);
         if (updateJacobian_)
         {
-          if (computeJacobian(t))
-          {
-            return SUCCESS;
-          }
-          else
-          {
-            INDICATE_FAILURE
-            return FAILURE;
-          }
+          computeJacobian(t);
         }
-        else
-        {
-          return SUCCESS;
-        }
-      }
-      else
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
     }
     else
     {
-      INDICATE_FAILURE
-      return MMB_NIN;
+      throw_named("Not initialized!");
     }
   }
 
-  EReturn CoM::taskSpaceDim(int & task_dim)
+  void CoM::taskSpaceDim(int & task_dim)
   {
     if (initialised_)
     {
       task_dim = dim_;
-      return SUCCESS;
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return MMB_NIN;
+      throw_named("Not initialized!");
     }
   }
-  bool CoM::computeForwardMap(int t)
+
+  void CoM::computeForwardMap(int t)
   {
     if (!initialised_)
     {
-      INDICATE_FAILURE
-      ;
-      return false;
+      throw_named("Not initialized!");
     }
 
     int N = mass_.rows(), i;
@@ -170,16 +141,13 @@ namespace exotica
       COM_pub_.publish(COM_marker_);
       goal_pub_.publish(goal_marker_);
     }
-    return true;
   }
 
-  bool CoM::computeJacobian(int t)
+  void CoM::computeJacobian(int t)
   {
     if (!initialised_)
     {
-      INDICATE_FAILURE
-      ;
-      return false;
+      throw_named("Not fully initialized!");
     }
 
     JAC.setZero();
@@ -188,10 +156,9 @@ namespace exotica
       JAC += mass_[i] / mass_.sum()
           * EFFJAC.block(3 * i, 0, dim_, EFFJAC.cols());
     }
-    return true;
   }
 
-  EReturn CoM::initDerived(tinyxml2::XMLHandle & handle)
+  void CoM::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("EnableZ");
     server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, enable_z_);
@@ -200,7 +167,11 @@ namespace exotica
     else
       dim_ = 2;
     tmp_handle = handle.FirstChildElement("Bounds");
-    if (!ok(server_->registerParam<exotica::Vector>(ns_, tmp_handle, bounds_)))
+    try
+    {
+        server_->registerParam<exotica::Vector>(ns_, tmp_handle, bounds_);
+    }
+    catch (Exception e)
     {
       bounds_->data.resize(dim_);
       for (int i = 0; i < dim_; i++)
@@ -243,21 +214,14 @@ namespace exotica
     goal_pub_ = server_->advertise<visualization_msgs::Marker>(
         object_name_ + "goal_marker", 1);
     initialised_ = true;
-    return SUCCESS;
   }
 
-  bool CoM::changeEffToCoM()
+  void CoM::changeEffToCoM()
   {
     std::vector<std::string> names;
 
-    if (!ok(
-        scene_->getCoMProperties(object_name_, names, mass_, cog_, tip_pose_,
-            base_pose_)))
-    {
-      INDICATE_FAILURE
-      ;
-      return false;
-    }
+    scene_->getCoMProperties(object_name_, names, mass_, cog_, tip_pose_,
+            base_pose_);
     std::vector<KDL::Frame> com_offs;
     int N = mass_.size(), i;
     com_offs.resize(N);
@@ -267,34 +231,22 @@ namespace exotica
           * KDL::Frame(cog_[i]);
     }
 
-    if (!ok(scene_->updateEndEffectors(object_name_, com_offs)))
-    {
-      INDICATE_FAILURE
-      ;
-      return false;
-    }
+    scene_->updateEndEffectors(object_name_, com_offs);
     if (debug_->data)
     {
       com_marker_.points.resize(cog_.size());
     }
 
-    if (!getEffReferences())
-    {
-      INDICATE_FAILURE
-      ;
-      return false;
-    }
-    return true;
+    getEffReferences();
   }
 
-  EReturn CoM::setOffsetCallback(
+  void CoM::setOffsetCallback(
       boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback)
   {
     offset_callback_ = offset_callback;
-    return SUCCESS;
   }
 
-  EReturn CoM::setOffset(bool left, const KDL::Frame & offset)
+  void CoM::setOffset(bool left, const KDL::Frame & offset)
   {
     if (debug_->data)
     {
@@ -313,7 +265,6 @@ namespace exotica
       }
       marker_offset_ = offset.Inverse();
     }
-    return SUCCESS;
   }
 
   void CoM::checkGoal(const Eigen::Vector3d & goal_)

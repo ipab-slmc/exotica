@@ -51,9 +51,9 @@ namespace exotica
       virtual
       ~OMPLStateSpace();
 
-      EReturn copyToOMPLState(ompl::base::State *state,
+      void copyToOMPLState(ompl::base::State *state,
           Eigen::VectorXd q) const;
-      EReturn copyFromOMPLState(const ompl::base::State *state,
+      void copyFromOMPLState(const ompl::base::State *state,
           Eigen::VectorXd& q) const;
 
   };

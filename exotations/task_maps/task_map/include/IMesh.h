@@ -63,9 +63,9 @@ namespace exotica
        * @brief	Concrete implementation of update method
        * @param	x	Joint space configuration
        */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(Eigen::VectorXdRefConst x, const int t);
 
-      virtual EReturn initialiseManual(std::string name, Server_ptr & server,
+      virtual void initialiseManual(std::string name, Server_ptr & server,
           const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
           std::vector<std::pair<std::string,std::string> >& params);
 
@@ -73,7 +73,7 @@ namespace exotica
        * @brief	Get the task space dimension
        * @return	Exotica return type, SUCCESS if succeeded
        */
-      virtual EReturn taskSpaceDim(int & task_dim);
+      virtual void taskSpaceDim(int & task_dim);
 
       /**
        * @brief	Set edge weight(s)
@@ -82,8 +82,8 @@ namespace exotica
        * @param	weights	Weight matrix
        * @return	Exotica return type
        */
-      EReturn setWeight(int i, int j, double weight);
-      EReturn setWeights(const Eigen::MatrixXd & weights);
+      void setWeight(int i, int j, double weight);
+      void setWeights(const Eigen::MatrixXd & weights);
 
       /**
        * @brief	Compute laplace coordinates of a vertices set
@@ -92,9 +92,9 @@ namespace exotica
        * @param	dist	Triangular matrix of distances between vertices (out put)
        * @return	3xN Laplace coordinates
        */
-      EReturn computeLaplace(int t);
+      void computeLaplace(int t);
 
-      EReturn computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
+      void computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
 
       virtual void debug();
       void initDebug(std::string ref);
@@ -104,7 +104,7 @@ namespace exotica
        * @brief	Concrete implementation of initialisation from xml
        * @param	handle	XML handler
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       /** Member Functions **/
 
@@ -113,14 +113,14 @@ namespace exotica
        * @param	q	Joint angles
        * @return	Jacobian matrix
        */
-      exotica::EReturn computeIMesh(int t);
+      exotica::void computeIMesh(int t);
 
       /**
        * @brief	Update newest vertices status
        * @param	q	Robot joint configuration
        * @return	Exotica return type
        */
-      EReturn updateVertices();
+      void updateVertices();
       /** Member Variables **/
       boost::mutex locker_;	//!<Thread locker
       bool initialised_;	//!< Initialisation flag

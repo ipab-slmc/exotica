@@ -42,9 +42,8 @@
 
 #include "aico/AICOsolver.h"
 
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
-#define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
-#define MAT_OK(x) if(!ok(x)){INDICATE_FAILURE; exit(1);}
+#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
+
 // t_0 is the start state
 // t_T is the final state
 // t_{T+1} is the state before t_0 for computing the velocity at the time t_0
@@ -54,7 +53,7 @@ REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver);
 
 namespace exotica
 {
-  EReturn AICOsolver::saveCosts(std::string file_name)
+  void AICOsolver::saveCosts(std::string file_name)
   {
     std::ofstream myfile;
     myfile.open(file_name.c_str());
@@ -70,7 +69,6 @@ namespace exotica
       }
     }
     myfile.close();
-    return SUCCESS;
   }
 
   AICOsolver::AICOsolver()
@@ -82,10 +80,9 @@ namespace exotica
 
   }
 
-  EReturn AICOsolver::getStats(std::vector<SinglePassMeanCoviariance>& q_stat_)
+  void AICOsolver::getStats(std::vector<SinglePassMeanCoviariance>& q_stat_)
   {
     q_stat_ = q_stat;
-    return SUCCESS;
   }
 
   AICOsolver::~AICOsolver()
@@ -94,13 +91,12 @@ namespace exotica
     // Whoop whoop whoop whoop ...
   }
 
-  EReturn AICOsolver::setGoal(const std::string & task_name,
+  void AICOsolver::setGoal(const std::string & task_name,
       Eigen::VectorXdRefConst _goal, int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
       std::cout << "Task name " << task_name << " does not exist" << std::endl;
-      return FAILURE;
     }
     else
     {
@@ -108,65 +104,56 @@ namespace exotica
       if (_goal.rows() == dim(id.first))
       {
         y_star.at(t).segment(id.second, dim(id.first)) = _goal;
-        return SUCCESS;
       }
       else
       {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
+        throw_named("Can't find task '"<<task_name<<"'");
       }
     }
   }
 
-  EReturn AICOsolver::setRho(const std::string & task_name, const double rho,
+  void AICOsolver::setRho(const std::string & task_name, const double rho,
       int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
-      std::cout << "Task name " << task_name << " does not exist" << std::endl;
-      return FAILURE;
+      throw_named("Can't find task '"<<task_name<<"'");
     }
     else
     {
       std::pair<int, int> id = taskIndex.at(task_name);
       rhos.at(t)(id.first) = rho;
-      return SUCCESS;
     }
   }
 
-  EReturn AICOsolver::getGoal(const std::string & task_name,
+  void AICOsolver::getGoal(const std::string & task_name,
       Eigen::VectorXd& goal, int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
-      std::cout << "Task name " << task_name << " does not exist" << std::endl;
-      return FAILURE;
+      throw_named("Can't find task '"<<task_name<<"'");
     }
     else
     {
       std::pair<int, int> id = taskIndex.at(task_name);
       goal = y_star.at(t).segment(id.second, dim(id.first));
-      return SUCCESS;
     }
   }
 
-  EReturn AICOsolver::getRho(const std::string & task_name, double& rho, int t)
+  void AICOsolver::getRho(const std::string & task_name, double& rho, int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
-      std::cout << "Task name " << task_name << " does not exist" << std::endl;
-      return FAILURE;
+      throw_named("Can't find task '"<<task_name<<"'");
     }
     else
     {
       std::pair<int, int> id = taskIndex.at(task_name);
       rho = rhos.at(t)(id.first);
-      return SUCCESS;
     }
   }
 
-  EReturn AICOsolver::initDerived(tinyxml2::XMLHandle & handle)
+  void AICOsolver::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLElement* xmltmp;
     XML_CHECK("sweepMode");
@@ -181,33 +168,28 @@ namespace exotica
       sweepMode = smLocalGaussNewtonDamped;
     else
     {
-      INDICATE_FAILURE
-      ;
-      return PAR_ERR;
+      throw_named("Unknown sweep mode '"<<txt<<"'");
     }
     XML_CHECK("max_iterations");
-    XML_OK(getInt(*xmltmp, max_iterations));
+    getInt(*xmltmp, max_iterations);
     XML_CHECK("tolerance");
-    XML_OK(getDouble(*xmltmp, tolerance));
+    getDouble(*xmltmp, tolerance);
     XML_CHECK("damping");
-    XML_OK(getDouble(*xmltmp, damping_init));
+    getDouble(*xmltmp, damping_init);
     int tmpi;
     XML_CHECK("UseBackwardMessage");
-    XML_OK(getInt(*xmltmp, tmpi));
+    getInt(*xmltmp, tmpi);
     useBwdMsg = tmpi != 0;
     XML_CHECK("dynamic");
-    XML_OK(getInt(*xmltmp, tmpi));
+    getInt(*xmltmp, tmpi);
     dynamic = tmpi != 0;
-    return SUCCESS;
   }
 
-  EReturn AICOsolver::specifyProblem(PlanningProblem_ptr pointer)
+  void AICOsolver::specifyProblem(PlanningProblem_ptr pointer)
   {
     if (pointer->type().compare(std::string("exotica::AICOProblem")) != 0)
     {
-      ERROR(
-          "This solver can't use problem of type '" << pointer->type() << "'!");
-      return PAR_INV;
+      throw_named("This solver can't use problem of type '" << pointer->type() << "'!");
     }
     MotionSolver::specifyProblem(pointer);
     prob_ = boost::static_pointer_cast<AICOProblem>(pointer);
@@ -221,8 +203,7 @@ namespace exotica
     {
       if (task_.second->type().compare(std::string("TaskSqrError")) == 0)
       {
-        ERROR("Task variable " << task_.first << " is not an squared error!");
-        return FAILURE;
+        throw_named("Task variable " << task_.first << " is not an squared error!");
       }
       boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<
           TaskSqrError>(task_.second);
@@ -235,21 +216,10 @@ namespace exotica
 
     for (auto & it : prob_->getScenes())
     {
-      if (!ok(it.second->activateTaskMaps()))
-      {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
-      }
+      it.second->activateTaskMaps();
     }
 
-    if (!ok(initMessages()))
-    {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
-    }
-    return SUCCESS;
+    initMessages();
   }
 
   bool AICOsolver::isSolvable(const PlanningProblem_ptr & prob)
@@ -263,17 +233,17 @@ namespace exotica
     return prob_;
   }
 
-  EReturn AICOsolver::Solve(Eigen::VectorXdRefConst q0,
+  bool AICOsolver::Solve(Eigen::VectorXdRefConst q0,
       Eigen::MatrixXd & solution)
   {
     std::vector<Eigen::VectorXd> q_init;
     q_init.resize(TT, Eigen::VectorXd::Zero(q0.rows()));
     for (int i = 0; i < q_init.size(); i++)
       q_init[i] = q0;
-    return Solve(q_init, solution);
+    Solve(q_init, solution);
   }
 
-  EReturn AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init,
+  bool AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init,
       Eigen::MatrixXd & solution)
   {
     HIGHLIGHT_NAMED("AICO debug:\n", print(""))
@@ -285,15 +255,9 @@ namespace exotica
     double d;
     if (!(T > 0))
     {
-      ERROR("Problem has not been initialized properly: T=0!");
-      return FAILURE;
+      throw_named("Problem has not been initialized properly: T=0!");
     }
-    if (!ok(initTrajectory(q_init)))
-    {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
-    }
+    initTrajectory(q_init);
     sweep = 0;
     ROS_WARN_STREAM("AICO: Solving");
     for (int k = 0; k < max_iterations && ros::ok(); k++)
@@ -301,9 +265,7 @@ namespace exotica
       d = step();
       if (d < 0)
       {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
+        throw_named("Negative step size!");
       }
       if (k && d < tolerance) break;
     }
@@ -314,15 +276,13 @@ namespace exotica
     }
     solution = sol;
     planning_time_ = ros::Time::now() - startTime;
-    return SUCCESS;
   }
 
-  EReturn AICOsolver::initMessages()
+  void AICOsolver::initMessages()
   {
     if (prob_ == nullptr)
     {
-      ERROR("Problem definition is a NULL pointer!");
-      return FAILURE;
+      throw_named("Problem definition is a NULL pointer!");
     }
     // TODO: Issue #4
     n = prob_->getScenes().begin()->second->getNumJoints();
@@ -331,22 +291,19 @@ namespace exotica
     {
       if (n < 2)
       {
-        ERROR("State dimension is too small: n="<<n);
-        return FAILURE;
+        throw_named("State dimension is too small: n="<<n);
       }
     }
     else
     {
       if (n < 1)
       {
-        ERROR("State dimension is too small: n="<<n);
-        return FAILURE;
+        throw_named("State dimension is too small: n="<<n);
       }
     }
     if (T < 2)
     {
-      ERROR("Number of time steps is too small: T="<<T);
-      return FAILURE;
+      throw_named("Number of time steps is too small: T="<<T);
     }
 
     s.assign(TT, Eigen::VectorXd::Zero(n));
@@ -387,10 +344,7 @@ namespace exotica
           q.at(i) = b.at(i).head(n2);
         if (prob_->getW().rows() != n2)
         {
-          INDICATE_FAILURE
-          ;
-          ERROR(prob_->getW().rows()<<"!="<<n2);
-          return PAR_ERR;
+          throw_named(prob_->getW().rows()<<"!="<<n2);
         }
       }
       else
@@ -398,10 +352,7 @@ namespace exotica
         q = b;
         if (prob_->getW().rows() != n)
         {
-          INDICATE_FAILURE
-          ;
-          ERROR(prob_->getW().rows()<<"!="<<n);
-          return PAR_ERR;
+          throw_named(prob_->getW().rows()<<"!="<<n);
         }
       }
       // All the process parameters are assumed to be constant throughout the trajectory.
@@ -444,8 +395,7 @@ namespace exotica
     m = dim.sum();
     if (m == 0)
     {
-      ERROR("No tasks were found!");
-      return FAILURE;
+      throw_named("No tasks were found!");
     }
     phiBar.assign(TT, Eigen::VectorXd::Zero(m));
     JBar.assign(TT, Eigen::MatrixXd::Zero(m, dynamic ? n2 : n));
@@ -517,13 +467,11 @@ namespace exotica
     }
   }
 
-  EReturn AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
+  void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
   {
     if (q_init.size() != TT)
     {
-      INDICATE_FAILURE
-      ;
-      return PAR_ERR;
+      throw_named("Incorrect number of timesteps provided!");
     }
     qhat[0] = q_init[0];
     dampingReference[0] = q_init[0];
@@ -541,23 +489,19 @@ namespace exotica
     for (int t = 0; t <= T; t++)
       Vinv.at(t).diagonal().setConstant(damping);
     dampingReference = b;
-    for (int t = 0; t <= T; t++)
+    for (int t = 0; t <= T && ros::ok(); t++)
     {
       // Compute task message reference
-      if (!updateTaskMessage(t, b.at(t), 1.0) || !ros::ok())
-      {
-        return FAILURE;
-      }
+      updateTaskMessage(t, b.at(t), 1.0);
     }
     cost = evaluateTrajectory(b, true);
     if (cost < 0) return FAILURE;
     INFO(
         "Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost <<", updates: "<<updateCount);
     rememberOldState();
-    return SUCCESS;
   }
 
-  EReturn AICOsolver::inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
+  void AICOsolver::inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
       const Eigen::Ref<const Eigen::MatrixXd> & A_)
   {
     Ainv_ = A_;
@@ -568,21 +512,18 @@ namespace exotica
     dpotrf_((char*) "L", &nn, AA, &nn, &info);
     if (info != 0)
     {
-      ERROR(info<<"\n"<<A_);
-      return FAILURE;
+      throw_named(info<<"\n"<<A_);
     }
     // Invert
     dpotri_((char*) "L", &nn, AA, &nn, &info);
     if (info != 0)
     {
-      ERROR(info);
-      return FAILURE;
+      throw_named(info);
     }
     Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
-    return SUCCESS;
   }
 
-  EReturn AICOsolver::AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
+  void AICOsolver::AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
       const Eigen::Ref<const Eigen::MatrixXd> & A_,
       const Eigen::Ref<const Eigen::VectorXd> & b_)
   {
@@ -595,10 +536,8 @@ namespace exotica
     dposv_((char*) "L", &n_, &m_, AA, &n_, xx, &n_, &info);
     if (info != 0)
     {
-      ERROR(info);
-      return FAILURE;
+      throw_named(info);
     }
-    return SUCCESS;
   }
 
   void AICOsolver::updateFwdMessage(int t)
@@ -672,7 +611,7 @@ namespace exotica
     }
   }
 
-  bool AICOsolver::updateTaskMessage(int t,
+  void AICOsolver::updateTaskMessage(int t,
       const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_,
       double maxStepSize)
   {
@@ -688,19 +627,11 @@ namespace exotica
       qhat[t] = qhat_t;
     }
 
-    if (ok(prob_->update(dynamic ? qhat[t].head(n / 2) : qhat[t], t)))
-    {
-      updateCount++;
-      double c = getTaskCosts(t);
-      q_stat[t].addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
-      return true;
-    }
-    else
-    {
-      INDICATE_FAILURE
-      ;
-      return false;
-    }
+    prob_->update(dynamic ? qhat[t].head(n / 2) : qhat[t], t);
+    updateCount++;
+    double c = getTaskCosts(t);
+    q_stat[t].addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
+
     // If using fully dynamic system, update Q, Hinv and process variables here.
   }
 
@@ -804,13 +735,12 @@ namespace exotica
     return C;
   }
 
-  bool AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
+  void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
       int maxRelocationIterations, double tolerance_, bool forceRelocation,
       double maxStepSize)
   {
     if (updateFwd) updateFwdMessage(t);
     if (updateBwd) updateBwdMessage(t);
-    Eigen::VectorXd tmp;
 
     if (damping)
     {
@@ -828,13 +758,12 @@ namespace exotica
           AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]));
     }
 
-    for (int k = 0; k < maxRelocationIterations; k++)
+    for (int k = 0; k < maxRelocationIterations && ros::ok(); k++)
     {
       if (!((!k && forceRelocation)
           || (b[t] - qhat[t]).array().abs().maxCoeff() > tolerance_)) break;
 
-      if (updateTaskMessage(t, b[t], 0., maxStepSize) && ros::ok())
-      {
+      updateTaskMessage(t, b[t], 0., maxStepSize);
 
         //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
         if (updateFwd) updateFwdMessage(t);
@@ -856,23 +785,16 @@ namespace exotica
               AinvBSymPosDef(b[t], Binv[t],
                   Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]));
         }
-      }
-      else
-      {
-        INDICATE_FAILURE
-        ;
-        return false;
-      }
+
     }
-    return true;
   }
 
-  bool AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd,
+  void AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd,
       bool updateBwd, int maxRelocationIterations, double tolerance,
       double maxStepSize)
   {
     // TODO: implement updateTimeStepGaussNewton
-    return false;
+    throw_named("Not implemented yet!");
   }
 
   double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
@@ -904,12 +826,7 @@ namespace exotica
       {
         if (!ros::ok()) return -1.0;
         updateCount++;
-        if (!ok(prob_->update(q[t], t)))
-        {
-          INDICATE_FAILURE
-          ;
-          return -1;
-        }
+        prob_->update(q[t], t);
       }
     }
     dPre = ros::Time::now() - start - dSet;
@@ -921,12 +838,7 @@ namespace exotica
       if (!skipUpdate)
       {
         updateCount++;
-        if (!ok(prob_->update(q[t], t)))
-        {
-          INDICATE_FAILURE
-          ;
-          return -1;
-        }
+        prob_->update(q[t], t);
       }
       dUpd += ros::Time::now() - tmpTime;
       tmpTime = ros::Time::now();
@@ -1001,8 +913,7 @@ namespace exotica
         }
         else
         {
-          ERROR("Task variable " << task_.first << " is not supported!");
-          return -1;
+          throw_named("Task variable " << task_.first << " is not supported!");
         }
         offset += dim(i);
         i++;
@@ -1023,94 +934,50 @@ namespace exotica
     case smForwardly:
       for (t = 1; t <= T; t++)
       {
-        if (!updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.)) //relocate once on fwd Sweep
-        {
-          INDICATE_FAILURE
-          ;
-          return -1.0;
-        }
+        updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.); //relocate once on fwd Sweep
       }
       for (t = T + 1; --t;)
       {
-        if (!updateTimeStep(t, false, true, 0, tolerance, false, 1.)) //...not on bwd Sweep
-        {
-          INDICATE_FAILURE
-          ;
-          return -1.0;
-        }
+        updateTimeStep(t, false, true, 0, tolerance, false, 1.); //...not on bwd Sweep
       }
       break;
     case smSymmetric:
       ROS_WARN_STREAM("Updating forward, sweep "<<sweep);
       for (t = 1; t <= T; t++)
       {
-        if (!updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.)) //relocate once on fwd & bwd Sweep
-        {
-          INDICATE_FAILURE
-          ;
-          return -1.0;
-        }
+        updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.); //relocate once on fwd & bwd Sweep
       }
       ROS_WARN_STREAM("Updating backward, sweep "<<sweep);
       for (t = T + 1; --t;)
       {
-        if (!updateTimeStep(t, false, true, (sweep ? 1 : 0), tolerance, false,
-            1.))
-        {
-          INDICATE_FAILURE
-          ;
-          return -1.0;
-        }
+        updateTimeStep(t, false, true, (sweep ? 1 : 0), tolerance, false,1.);
       }
       break;
     case smLocalGaussNewton:
       for (t = 1; t <= T; t++)
       {
-        if (!updateTimeStep(t, true, false, (sweep ? 5 : 1), tolerance, !sweep,
-            1.)) //relocate iteratively on
-        {
-          INDICATE_FAILURE
-          ;
-          return -1.0;
-        }
+        updateTimeStep(t, true, false, (sweep ? 5 : 1), tolerance, !sweep,
+            1.); //relocate iteratively on
       }
       for (t = T + 1; --t;)
       {
-        if (!updateTimeStep(t, false, true, (sweep ? 5 : 0), tolerance, false,
-            1.)) //...fwd & bwd Sweep
-        {
-          INDICATE_FAILURE
-          ;
-          return -1.0;
-        }
+        updateTimeStep(t, false, true, (sweep ? 5 : 0), tolerance, false,
+            1.); //...fwd & bwd Sweep
       }
       break;
     case smLocalGaussNewtonDamped:
       for (t = 1; t <= T; t++)
       {
-        if (!updateTimeStepGaussNewton(t, true, false, (sweep ? 5 : 1),
-            tolerance, 1.)) //GaussNewton in fwd & bwd Sweep
-        {
-          INDICATE_FAILURE
-          ;
-          return -1.0;
-        }
+        updateTimeStepGaussNewton(t, true, false, (sweep ? 5 : 1),
+            tolerance, 1.); //GaussNewton in fwd & bwd Sweep
       }
       for (t = T + 1; --t;)
       {
-        if (!updateTimeStep(t, false, true, (sweep ? 5 : 0), tolerance, false,
-            1.))
-        {
-          INDICATE_FAILURE
-          ;
-          return -1.0;
-        }
+        updateTimeStep(t, false, true, (sweep ? 5 : 0), tolerance, false,1.);
       }
       break;
     default:
-      ERROR("non-existing Sweep mode")
-      ;
-      break;
+      throw_named("non-existing Sweep mode");
     }
     b_step = 0.0;
     for (t = 0; t < b.size(); t++)
@@ -1184,12 +1051,7 @@ namespace exotica
         for (int t = 0; t <= T; t++)
         {
           updateCount++;
-          if (!ok(prob_->update(q[t], t)))
-          {
-            INDICATE_FAILURE
-            ;
-            return;
-          }
+          prob_->update(q[t], t);
         }
       }
       INFO("Reverting to previous step");

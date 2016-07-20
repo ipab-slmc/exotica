@@ -44,6 +44,7 @@
 #include <exotica/BoolList.h>
 #include <exotica/Vector.h>
 #include <exotica/Matrix.h>
+#include <exotica/Tools/Exception.h>
 
 /**
  * \brief A set of debugging tools: basically these provide easy ways of checking code execution through std::cout prints

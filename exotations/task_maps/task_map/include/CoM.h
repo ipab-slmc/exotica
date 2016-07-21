@@ -72,7 +72,6 @@ namespace exotica
 
       /**
        * @brief	Get the task space dimension
-       * @return	Exotica return type, SUCCESS if succeeded
        */
 
       /**

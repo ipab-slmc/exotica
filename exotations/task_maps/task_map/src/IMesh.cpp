@@ -31,8 +31,8 @@
  */
 
 #include "IMesh.h"
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
-#define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
+#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
+
 //#define DEBUG_MODE
 REGISTER_TASKMAP_TYPE("IMesh", exotica::IMesh);
 

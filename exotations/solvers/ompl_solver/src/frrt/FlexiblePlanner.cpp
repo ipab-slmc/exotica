@@ -57,14 +57,9 @@ namespace ompl
       exotica::Initialiser ini;
       exotica::PlanningProblem_ptr prob;
       exotica::MotionSolver_ptr sol;
-      if (!ok(
-          ini.initialise(xml_file, ser_, sol, prob, "LocalProblem",
-              "FRRTLocal")))
-      {
-        INDICATE_FAILURE
-        return false;
-      }
-      if (sol->type().compare("exotica::IKsolver") == 0)
+      ini.initialise(xml_file, ser_, sol, prob, "LocalProblem",
+              "FRRTLocal");
+      if (sol->type()=="exotica::IKsolver")
       {
         HIGHLIGHT_NAMED("FRRT",
             "Using local planner "<<sol->object_name_<<" at "<<sol.get());
@@ -72,14 +67,9 @@ namespace ompl
       }
       else
       {
-        INDICATE_FAILURE
-        return false;
+        throw_pretty("Unknown solver type!");
       }
-      if (!ok(local_solver_->specifyProblem(prob)))
-      {
-        INDICATE_FAILURE
-        return false;
-      }
+      local_solver_->specifyProblem(prob);
       prob->setScene(scene->getPlanningScene());
 
       if (prob->getTaskDefinitions().find("LocalTask")
@@ -90,16 +80,8 @@ namespace ompl
       }
       local_map_ = boost::static_pointer_cast<exotica::Identity>(
           prob->getTaskMaps().at("CSpaceMap"));
-      if (!exotica::ok(ser_->getParam(ser_->getName() + "/GlobalTau", gTau_)))
-      {
-        INDICATE_FAILURE
-        return false;
-      }
-      if (!exotica::ok(ser_->getParam(ser_->getName() + "/LocalTau", lTau_)))
-      {
-        INDICATE_FAILURE
-        return false;
-      }
+      ser_->getParam(ser_->getName() + "/GlobalTau", gTau_);
+      ser_->getParam(ser_->getName() + "/LocalTau", lTau_);
 
       return true;
     }
@@ -110,11 +92,7 @@ namespace ompl
       checkCnt_ = 0;
       global_goal_.setZero(goal.size());
       global_goal_ = goal;
-      if (!ok(local_solver_->getProblem()->setScene(scene->getPlanningScene())))
-      {
-        INDICATE_FAILURE
-        return false;
-      }
+      local_solver_->getProblem()->setScene(scene->getPlanningScene());
       return true;
     }
 

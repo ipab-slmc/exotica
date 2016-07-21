@@ -208,9 +208,6 @@ namespace exotica
   /**
    * \brief Removes all characters after the last forward slash (/): intended to be used to get a parent directory from a file-path
    * @param file_path[inout]  The complete file-path to be processed: the returned string contains no trailing forward slashes...
-   * @return                  SUCCESS if everything ok
-   *                          @n WARNING if already in root directory
-   *                          @n PAR_ERR if string is incorrectly formed.
    */
   void resolveParent(std::string & file_path);
 
@@ -227,7 +224,6 @@ namespace exotica
    * \brief Utility function for copying a complete sub-tree from one document to another
    * @param parent[inout] The parent-to-be, where the sub-tree will be copied
    * @param child[in]     The next child to add to this parent...
-   * @return              Indication of SUCCESS TODO
    */
   void deepCopy(tinyxml2::XMLHandle & parent, tinyxml2::XMLHandle & child);
 
@@ -236,7 +232,6 @@ namespace exotica
    * @param file_name File name
    * @param tri Returned vertex indices of triangles
    * @param vert Vertex positions
-   * @return Indication of SUCCESS
    */
   void loadOBJ(std::string & data, Eigen::VectorXi& tri,
       Eigen::VectorXd& vert);

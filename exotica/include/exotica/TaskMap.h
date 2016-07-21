@@ -111,7 +111,6 @@ namespace exotica
       /**
        * \brief Indicator of the Task-Dimension size: PURE VIRTUAL
        * @param task_dim  The dimensionality of the Task space, or -1 if dynamic...
-       * @return          SUCCESS if ok, MMB_NIN if called on an uninitialised object
        */
       virtual void taskSpaceDim(int & task_dim) = 0;
 

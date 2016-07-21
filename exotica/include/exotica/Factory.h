@@ -74,7 +74,6 @@ namespace exotica
        * \brief Registers a new derived class type
        * @param type[in]    The name of the class (string): must be a unique identifier
        * @param creator[in] A pointer to the creator function
-       * @return            Indication of success: Returns SUCCESS if registered, or PAR_ERR if the type already exists
        */
       void registerType(const I & type, BO * (*creator_function)())
       {
@@ -92,7 +91,6 @@ namespace exotica
       /**
        * \brief Lists the valid implementations which are available and registered
        * @param task_types[out] Vector of task-type names
-       * @return                Always returns SUCCESS
        */
       void listImplementations(std::vector<I> & registered_types)
       {
@@ -107,7 +105,6 @@ namespace exotica
        * \brief Creates a new Instance of a derived class
        * @param type  [in]   Identifier as used by the instantiation of the factory
        * @param object[out]  Shared pointer to the object (placeholder)
-       * @return             Indication of success: SUCCESS if ok, MEM_ERR if could not create it and PAR_ERR if the type is not found
        */
       void createObject(const I & type, boost::shared_ptr<BO> const & object)
       {

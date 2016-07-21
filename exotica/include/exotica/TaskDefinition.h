@@ -105,7 +105,6 @@ namespace exotica
       /**
        * \brief Member function for binding the Task definition to a Task-Map
        * @param task_map  Smart pointer to a task-map
-       * @return          SUCCESS always.
        */
       void setTaskMap(const TaskMap_ptr & task_map);
 

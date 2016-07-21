@@ -180,7 +180,7 @@ namespace exotica
     //!< Now we will create the maps
     xml_handle = handle.FirstChildElement("Map");
     count = 0;
-    while (xml_handle.ToElement() and ok(ret_value)) //!< While we are still in a valid situation
+    while (xml_handle.ToElement()) //!< While we are still in a valid situation
     {
       const char * temp_name = xml_handle.ToElement()->Attribute("name");
       if (temp_name == nullptr)
@@ -223,7 +223,7 @@ namespace exotica
     //!< Now the Task Definitions (all)
     xml_handle = handle.FirstChildElement("Task");
     count = 0;
-    while (xml_handle.ToElement() and ok(ret_value)) //!< May not be ok due to previous error
+    while (xml_handle.ToElement()) //!< May not be ok due to previous error
     {
       //!< Check that name is available and not duplicated
       const char * temp_name = xml_handle.ToElement()->Attribute("name");
@@ -283,8 +283,14 @@ namespace exotica
       for (auto &it : originalMaps_)
       {
         std::pair<std::vector<std::string>, std::vector<KDL::Frame> > tmp_pair;
-        if (ok(it.second->getScene()->getEndEffectors(it.first, tmp_pair)))
+        try
+        {
+          it.second->getScene()->getEndEffectors(it.first, tmp_pair);
+        }
+        catch (Exception e)
+        {
           tmp[it.first] = tmp_pair;
+        }
       }
       for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
         it->second->clearTaskMap();
@@ -343,7 +349,7 @@ namespace exotica
   {
     for (auto & it : scenes_)
     {
-      it.second->setCollisionScene(scene)));
+      it.second->setCollisionScene(scene);
     }
   }
 

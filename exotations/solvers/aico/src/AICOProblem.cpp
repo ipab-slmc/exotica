@@ -107,13 +107,13 @@ namespace exotica
             {
               throw_named("Invalid JSON document object!");
             }
+          }
+
         }
         else
         {
             throw_named("Invalid JSON array!");
         }
-      }
-
     }
 
   void AICOProblem::update(Eigen::VectorXdRefConst x, const int t)
@@ -161,7 +161,7 @@ namespace exotica
     xmltmp = handle.FirstChildElement("duration").ToElement();
     if (xmltmp)
     {
-      XML_OK(getDouble(*xmltmp, tau));
+      getDouble(*xmltmp, tau);
       tau = tau / ((double) T);
       hastime = true;
     }

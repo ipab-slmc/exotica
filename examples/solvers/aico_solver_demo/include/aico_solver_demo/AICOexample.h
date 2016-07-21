@@ -39,7 +39,7 @@
 #include "aico/AICOsolver.h"
 #include <ros/ros.h>
 #include <ros/package.h>
-#include <kinematic_maps/EffPosition.h>
+#include <EffPosition.h>
 #include <exotica/Initialiser.h>
 #include <sensor_msgs/JointState.h>
 

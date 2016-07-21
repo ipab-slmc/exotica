@@ -56,21 +56,21 @@ namespace exotica
        * \brief Initialisation function
        * @param handle  XML handle that contains solver specific parameters
        */
-      virtual EReturn initialiseSolver(tinyxml2::XMLHandle & handle);
+      virtual void initialiseSolver(tinyxml2::XMLHandle & handle);
 
       /*
        * \brief Solve function
        * @param x0      start configuration
        * @param sol     Solution
        */
-      virtual EReturn solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol);
+      virtual bool solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol);
 
       /*
        * \brief Set goal state to the sampled state space
        * @param qT      Goal state in sampled state space
        * @param eps     Numerical tolerance
        */
-      virtual EReturn setGoalState(const Eigen::VectorXd & qT, const double eps =
+      virtual void setGoalState(const Eigen::VectorXd & qT, const double eps =
           std::numeric_limits<double>::epsilon());
 
       /*
@@ -83,7 +83,7 @@ namespace exotica
        * \brief Assign exotica problem to this solver
        * @param prob    EXOTica Planning Problem pointer
        */
-      virtual EReturn specifyProblem(const OMPLProblem_ptr &prob);
+      virtual void specifyProblem(const OMPLProblem_ptr &prob);
     protected:
       /*
        * \brief Register default ompl planning algorithms
@@ -101,7 +101,7 @@ namespace exotica
        * @param pg      OMPL trajectory
        * @param traj    Eigen Matrix trajectory
        */
-      virtual EReturn convertPath(const og::PathGeometric &pg,
+      virtual void convertPath(const og::PathGeometric &pg,
           Eigen::MatrixXd & traj);
 
       /*
@@ -109,11 +109,12 @@ namespace exotica
        * @param pg      OMPL geometric path
        * @param
        */
-      virtual EReturn getSimplifiedPath(og::PathGeometric &pg,
+      virtual void getSimplifiedPath(og::PathGeometric &pg,
           Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc);
       virtual ompl::base::GoalPtr constructGoal();
       std::string algorithm_;
       std::string range_;
+      std::string object_name_;
       EParam<std_msgs::Float64> margin_;
     private:
       BASE_TYPE base_type_;

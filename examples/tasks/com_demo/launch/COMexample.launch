@@ -2,7 +2,7 @@
 
   <param name="robot_description" textfile="$(find com_demo)/resources/V1_simple.urdf" />
   <param name="robot_description_semantic" textfile="$(find com_demo)/resources/V1_simple.srdf" />
-	
+
   <node pkg="com_demo" type="COMexample" name="COMDemoNode" output="screen">
     <param name="config" type="string" value="$(find com_demo)/resources/com_demo.xml" />
     <param name="solver" type="string" value="COMDemo" />

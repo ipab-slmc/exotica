@@ -35,7 +35,6 @@
 
 #include "exotica/Object.h"       //!< The EXOTica base class
 #include "exotica/Factory.h"      //!< The Factory template
-#include "exotica/Test.h"         //!< The Test factory template
 #include "exotica/Server.h"
 #include "exotica/Scene.h"
 

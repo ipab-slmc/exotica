@@ -36,7 +36,6 @@
 #include "exotica/TaskDefinition.h"//!< The Component base
 #include "exotica/Factory.h"      //!< The Factory template
 #include "exotica/Tools.h"        //!< For XML-Parsing/ErrorFunction definition
-#include "exotica/Test.h"         //!< For Testing factory
 #include <Eigen/Dense>            //!< Generally dense manipulations should be enough
 #include <boost/thread/mutex.hpp> //!< The boost thread-library for synchronisation
 

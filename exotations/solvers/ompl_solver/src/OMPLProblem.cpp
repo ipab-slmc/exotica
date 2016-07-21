@@ -32,7 +32,7 @@
  */
 
 #include "ompl_solver/OMPLProblem.h"
-#include "generic/Identity.h"
+#include "Identity.h"
 
 REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem);
 REGISTER_TASKDEFINITION_TYPE("TaskBias", exotica::TaskBias);
@@ -106,8 +106,9 @@ namespace exotica
               if (knownMaps_[constraintClass].compare("Identity") == 0)
               {
                 std::string postureName;
-                if (ok(getJSON(obj["postureName"], postureName)))
+                try
                 {
+                    getJSON(obj["postureName"], postureName);
                   if (postureName.compare("reach_end") != 0)
                   {
                     continue;
@@ -117,7 +118,7 @@ namespace exotica
                     IsGoal = true;
                   }
                 }
-                else
+                catch (Exception e)
                 {
                   continue;
                 }

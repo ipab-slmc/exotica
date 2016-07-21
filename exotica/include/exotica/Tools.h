@@ -33,6 +33,7 @@
 #ifndef EXOTICA_TOOLS_H
 #define EXOTICA_TOOLS_H
 
+#include <string>
 #include "tinyxml2/tinyxml2.h"
 #include <Eigen/Dense>
 #include <kdl/tree.hpp>
@@ -142,17 +143,6 @@ namespace exotica
   /**
    * \brief Enum for error reporting throughout the library
    */
-  enum EReturn
-  {
-    SUCCESS = 0,  //!< Indicates successful execution of function
-    PAR_INV = 1,  //!< Invalid Parameter TYPE! (when using dynamic polymorphism)
-    PAR_ERR = 2, //!< Uninitialised or incorrect parameter value (could be sizes of vectors, nan etc...)
-    MMB_NIN = 3, //!< A member required by this function is Not INititialised correctly
-    MEM_ERR = 4,  //!< A memory error (for example when creating a new class)
-    WARNING = 50, //!< A generic warning:
-    FAILURE = 100, //!< Indicates a generic failure
-    CANCELLED = 200 //!< The process has been successful but the results should be ignored
-  };
 
   /**
    * \brief	Enum for termination criterion
@@ -162,7 +152,6 @@ namespace exotica
     TERMINATE = 0, CONTINUE = 1
   };
 
-  bool ok(const EReturn & value);
 
   /**
    * \brief Parses an XML element into an Eigen Matrix. The handle must point directly to the element with the matrix as its text child and must have no comments!
@@ -170,7 +159,7 @@ namespace exotica
    * @param eigen_matrix  Placeholder for storing the parsed matrix
    * @return              Indication of success: TODO
    */
-  EReturn getMatrix(const tinyxml2::XMLElement & xml_matrix,
+  void getMatrix(const tinyxml2::XMLElement & xml_matrix,
       Eigen::MatrixXd & eigen_matrix);
 
   /**
@@ -179,17 +168,17 @@ namespace exotica
    * @param eigen_matrix  Placeholder for storing the parsed vector
    * @return              Indication of success: TODO
    */
-  EReturn getVector(const tinyxml2::XMLElement & xml_vector,
+  void getVector(const tinyxml2::XMLElement & xml_vector,
       Eigen::VectorXd & eigen_vector);
-  EReturn getStdVector(const tinyxml2::XMLElement & xml_vector,
+  void getStdVector(const tinyxml2::XMLElement & xml_vector,
       std::vector<double> & std_vector);
-  EReturn getBoolVector(const tinyxml2::XMLElement & xml_vector,
+  void getBoolVector(const tinyxml2::XMLElement & xml_vector,
       std::vector<bool> & bool_vector);
 
   /**
    * \brief Get boolean
    */
-  EReturn getBool(const tinyxml2::XMLElement & xml_vector, bool & val);
+  void getBool(const tinyxml2::XMLElement & xml_vector, bool & val);
 
   /**
    * \brief Parses an XML element into an float (for convenience)
@@ -197,7 +186,7 @@ namespace exotica
    * @param value  Placeholder for storing the parsed double
    * @return              Indication of success: TODO
    */
-  EReturn getDouble(const tinyxml2::XMLElement & xml_value, double & value);
+  void getDouble(const tinyxml2::XMLElement & xml_value, double & value);
 
   /**
    * \brief Parses an XML element into an float (for convenience)
@@ -205,7 +194,7 @@ namespace exotica
    * @param value  Placeholder for storing the parsed integer
    * @return              Indication of success: TODO
    */
-  EReturn getInt(const tinyxml2::XMLElement & xml_value, int & value);
+  void getInt(const tinyxml2::XMLElement & xml_value, int & value);
 
   /**
    * \brief Parses an XML element into a vector of string
@@ -213,7 +202,7 @@ namespace exotica
    * @param value  Placeholder for storing the parsed list
    * @return              Indication of success: TODO
    */
-  EReturn getList(const tinyxml2::XMLElement & xml_value,
+  void getList(const tinyxml2::XMLElement & xml_value,
       std::vector<std::string> & value);
 
   /**
@@ -223,7 +212,7 @@ namespace exotica
    *                          @n WARNING if already in root directory
    *                          @n PAR_ERR if string is incorrectly formed.
    */
-  EReturn resolveParent(std::string & file_path);
+  void resolveParent(std::string & file_path);
 
   /**
    * \brief Utility function for including files:
@@ -232,7 +221,7 @@ namespace exotica
    * @param directory The current working directory
    * @return          Indication of success TODO
    */
-  EReturn parseIncludes(tinyxml2::XMLHandle & handle, std::string directory);
+  void parseIncludes(tinyxml2::XMLHandle & handle, std::string directory);
 
   /**
    * \brief Utility function for copying a complete sub-tree from one document to another
@@ -240,7 +229,7 @@ namespace exotica
    * @param child[in]     The next child to add to this parent...
    * @return              Indication of SUCCESS TODO
    */
-  EReturn deepCopy(tinyxml2::XMLHandle & parent, tinyxml2::XMLHandle & child);
+  void deepCopy(tinyxml2::XMLHandle & parent, tinyxml2::XMLHandle & child);
 
   /**
    * @brief loadOBJ Loads mesh data from an OBJ file
@@ -249,30 +238,30 @@ namespace exotica
    * @param vert Vertex positions
    * @return Indication of SUCCESS
    */
-  EReturn loadOBJ(std::string & data, Eigen::VectorXi& tri,
+  void loadOBJ(std::string & data, Eigen::VectorXi& tri,
       Eigen::VectorXd& vert);
 
-  EReturn saveMatrix(std::string file_name,
+  void saveMatrix(std::string file_name,
       const Eigen::Ref<const Eigen::MatrixXd> mat);
 
-  EReturn getJSON(const rapidjson::Value& a, Eigen::VectorXd& ret);
-  EReturn getJSON(const rapidjson::Value& a, double& ret);
-  EReturn getJSON(const rapidjson::Value& a, int& ret);
-  EReturn getJSON(const rapidjson::Value& a, bool& ret);
-  EReturn getJSON(const rapidjson::Value& a, std::string& ret);
-  EReturn getJSON(const rapidjson::Value& a, KDL::Frame& ret);
-  EReturn getJSON(const rapidjson::Value& a, std::vector<std::string>& ret);
-  EReturn getJSONFrameNdArray(const rapidjson::Value& a, KDL::Frame& ret);
+  void getJSON(const rapidjson::Value& a, Eigen::VectorXd& ret);
+  void getJSON(const rapidjson::Value& a, double& ret);
+  void getJSON(const rapidjson::Value& a, int& ret);
+  void getJSON(const rapidjson::Value& a, bool& ret);
+  void getJSON(const rapidjson::Value& a, std::string& ret);
+  void getJSON(const rapidjson::Value& a, KDL::Frame& ret);
+  void getJSON(const rapidjson::Value& a, std::vector<std::string>& ret);
+  void getJSONFrameNdArray(const rapidjson::Value& a, KDL::Frame& ret);
 
-  EReturn getText(std::string& txt, KDL::Frame& ret);
+  void getText(std::string& txt, KDL::Frame& ret);
 
-  EReturn vectorExoticaToEigen(const exotica::Vector & exotica,
+  void vectorExoticaToEigen(const exotica::Vector & exotica,
       Eigen::VectorXd & eigen);
-  EReturn vectorEigenToExotica(Eigen::VectorXd eigen,
+  void vectorEigenToExotica(Eigen::VectorXd eigen,
       exotica::Vector & exotica);
-  EReturn matrixExoticaToEigen(const exotica::Matrix & exotica,
+  void matrixExoticaToEigen(const exotica::Matrix & exotica,
       Eigen::MatrixXd & eigen);
-  EReturn matrixEigenToExotica(const Eigen::MatrixXd & eigen,
+  void matrixEigenToExotica(const Eigen::MatrixXd & eigen,
       exotica::Matrix & exotica);
 }
 #endif

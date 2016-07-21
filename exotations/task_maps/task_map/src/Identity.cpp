@@ -33,7 +33,6 @@
 #include "Identity.h"
 
 REGISTER_TASKMAP_TYPE("Identity", exotica::Identity);
-REGISTER_FOR_XML_TEST("Identity", "Identity.xml");
 
 namespace exotica
 {

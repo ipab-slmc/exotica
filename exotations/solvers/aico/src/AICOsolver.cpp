@@ -233,7 +233,7 @@ namespace exotica
     return prob_;
   }
 
-  bool AICOsolver::Solve(Eigen::VectorXdRefConst q0,
+  void AICOsolver::Solve(Eigen::VectorXdRefConst q0,
       Eigen::MatrixXd & solution)
   {
     std::vector<Eigen::VectorXd> q_init;
@@ -243,7 +243,7 @@ namespace exotica
     Solve(q_init, solution);
   }
 
-  bool AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init,
+  void AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init,
       Eigen::MatrixXd & solution)
   {
     HIGHLIGHT_NAMED("AICO debug:\n", print(""))
@@ -435,7 +435,6 @@ namespace exotica
     {
       q_stat[t].resize(n);
     }
-    return SUCCESS;
   }
 
   void AICOsolver::getProcess(Eigen::Ref<Eigen::MatrixXd> A_,
@@ -495,7 +494,7 @@ namespace exotica
       updateTaskMessage(t, b.at(t), 1.0);
     }
     cost = evaluateTrajectory(b, true);
-    if (cost < 0) return FAILURE;
+    if (cost < 0) throw_named("Invalid cost!");
     INFO(
         "Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost <<", updates: "<<updateCount);
     rememberOldState();
@@ -545,18 +544,18 @@ namespace exotica
     Eigen::MatrixXd barS(n, n), St;
     if (dynamic)
     {
-      MAT_OK(inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]));
+      inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]);
       St = Q[t - 1] + B[t - 1] * Hinv[t - 1] * tB[t - 1]
           + A[t - 1] * barS * tA[t - 1];
       s[t] = a[t - 1] + A[t - 1] * (barS * (Sinv[t - 1] * s[t - 1] + r[t - 1]));
-      MAT_OK(inverseSymPosDef(Sinv[t], St));
+      inverseSymPosDef(Sinv[t], St);
     }
     else
     {
-      MAT_OK(inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]));
+      inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]);
       s[t] = barS * (Sinv[t - 1] * s[t - 1] + r[t - 1]);
       St = Winv[t - 1] + barS;
-      MAT_OK(inverseSymPosDef(Sinv[t], St));
+      inverseSymPosDef(Sinv[t], St);
     }
   }
 
@@ -567,10 +566,10 @@ namespace exotica
     {
       if (t < T)
       {
-        MAT_OK(inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]));
+        inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]);
         Vt = Ainv[t] * (Q[t] + B[t] * Hinv[t] * tB[t] + barV) * invtA[t];
         v[t] = Ainv[t] * (-a[t] + barV * (Vinv[t + 1] * v[t + 1] + r[t + 1]));
-        MAT_OK(inverseSymPosDef(Vinv[t], Vt));
+        inverseSymPosDef(Vinv[t], Vt);
       }
       if (t == T)
       {
@@ -590,10 +589,10 @@ namespace exotica
     {
       if (t < T)
       {
-        MAT_OK(inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]));
+        inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]);
         v[t] = barV * (Vinv[t + 1] * v[t + 1] + r[t + 1]);
         Vt = Winv[t] + barV;
-        MAT_OK(inverseSymPosDef(Vinv[t], Vt));
+        inverseSymPosDef(Vinv[t], Vt);
       }
       if (t == T)
       {
@@ -616,7 +615,7 @@ namespace exotica
       double maxStepSize)
   {
     Eigen::VectorXd diff = qhat_t - qhat[t];
-    if ((diff.array().abs().maxCoeff() < tolerance_)) return true;
+    if ((diff.array().abs().maxCoeff() < tolerance_)) return;
     double nrm = diff.norm();
     if (maxStepSize > 0. && nrm > maxStepSize)
     {
@@ -725,8 +724,7 @@ namespace exotica
         }
         else
         {
-          ERROR("Task variable " << task_.first << " is not supported!");
-          return FAILURE;
+          throw_named("Task variable " << task_.first << " is not supported!");
         }
         offset += dim(i);
         i++;
@@ -744,18 +742,13 @@ namespace exotica
 
     if (damping)
     {
-      Binv[t] = Sinv[t] + Vinv[t] + R[t]
-          + Eigen::MatrixXd::Identity(n, n) * damping;
-      MAT_OK(
-          AinvBSymPosDef(b[t], Binv[t],
-              Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]
-                  + damping * dampingReference[t]));
+      Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(n, n) * damping;
+      AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * dampingReference[t]);
     }
     else
     {
       Binv[t] = Sinv[t] + Vinv[t] + R[t];
-      MAT_OK(
-          AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]));
+      AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]);
     }
 
     for (int k = 0; k < maxRelocationIterations && ros::ok(); k++)
@@ -771,19 +764,13 @@ namespace exotica
 
         if (damping)
         {
-          Binv[t] = Sinv[t] + Vinv[t] + R[t]
-              + Eigen::MatrixXd::Identity(n, n) * damping;
-          MAT_OK(
-              AinvBSymPosDef(b[t], Binv[t],
-                  Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]
-                      + damping * dampingReference[t]));
+          Binv[t] = Sinv[t] + Vinv[t] + R[t]+ Eigen::MatrixXd::Identity(n, n) * damping;
+          AinvBSymPosDef(b[t], Binv[t],Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]+ damping * dampingReference[t]);
         }
         else
         {
           Binv[t] = Sinv[t] + Vinv[t] + R[t];
-          MAT_OK(
-              AinvBSymPosDef(b[t], Binv[t],
-                  Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]));
+          AinvBSymPosDef(b[t], Binv[t],Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]);
         }
 
     }

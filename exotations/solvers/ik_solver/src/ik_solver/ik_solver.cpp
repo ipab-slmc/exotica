@@ -40,7 +40,7 @@ REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver);
 namespace exotica
 {
   IKsolver::IKsolver()
-      : size_(0), T(0), initialised_(false), FRRT_(false)
+      : size_(0), T(0), initialised_(false), FRRT_(false),iterations_(-1)
   {
     //TODO
   }
@@ -95,7 +95,7 @@ namespace exotica
       }
     } catch (int e)
     {
-      stthrow_named("IK solver initialisation, parameter error\n");
+      throw_named("IK solver initialisation, parameter error\n");
     }
     HIGHLIGHT_NAMED(object_name_, "Initialised at "<<this);
   }
@@ -137,9 +137,9 @@ namespace exotica
       i = 0;
       for (auto & it : prob_->getTaskDefinitions())
       {
-        if (it.second->type=="exotica::TaskSqrError")
+        if (it.second->type()!="exotica::TaskSqrError")
         {
-          throw_named("IK Solver currently can only solve exotica::TaskSqrError. Unable to solve Task: "<<it.second->type());
+          throw_named("IK Solver currently can only solve 'exotica::TaskSqrError'. Unable to solve Task: '"<<it.second->type()<<"'");
         }
         else
         {
@@ -217,14 +217,8 @@ namespace exotica
         reach_position_taskmap_ = boost::static_pointer_cast<Distance>(
             it.second->getTaskMap());
       }
-      else if (it.second->getTaskMap()->type=="exotica::Orientation")
-      {
-        reach_orientation_taskmap_ = boost::static_pointer_cast<Orientation>(
-            it.second->getTaskMap());
-      }
     }
     initialised_ = true;
-    return SUCCESS;
   }
 
   bool IKsolver::isSolvable(const PlanningProblem_ptr & prob)
@@ -249,7 +243,7 @@ namespace exotica
       }
       else
       {
-        throw_named("Incorrect goal dimension, expected " << dim.at(t)(id.first << " got "<<_goal.rows());
+        throw_named("Incorrect goal dimension, expected " << dim.at(t)(id.first) << " got "<<_goal.rows());
       }
     }
   }
@@ -292,6 +286,12 @@ namespace exotica
     return (int) maxit_->data;
   }
 
+  int IKsolver::getLastIteration()
+  {
+    return iterations_;
+  }
+
+
   void IKsolver::setReachGoal(const geometry_msgs::Pose &goal)
   {
     reach_goal_ = goal;
@@ -314,15 +314,11 @@ namespace exotica
       bool ret = true;
       for (t = 0; t < T; t++)
       {
-
-        ret = ret && Solve(q, solution.block(t, 0, 1, size_), t);
-        q = solution.row(t);
+          ret = ret && Solve(q, solution.block(t, 0, 1, size_), t);
+          q = solution.row(t);
       }
       planning_time_ = ros::Duration(ros::Time::now() - start);
-      if(!ret)
-      {
-          throw_solve("Solution not found after reaching max number of iterations!");
-      }
+      if(!ret) throw_solve("Solution not found after max number of iterations ("<<maxit_->data<<")!");
     }
     else
     {
@@ -361,18 +357,17 @@ namespace exotica
         if (error <= prob_->getTau())
         {
             found = true;
+            iterations_=i+1;
             break;
         }
       }
 
-      if (found)
+      if (!found)
       {
-        return true;
-      }
-      else
-      {
+        iterations_=  maxit_->data;
         return false;
       }
+      return true;
     }
     else
     {

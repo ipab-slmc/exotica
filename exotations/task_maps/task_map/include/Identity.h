@@ -35,7 +35,6 @@
 
 #include <exotica/TaskMap.h>
 #include <exotica/Factory.h>
-#include <exotica/Test.h>
 #include <tinyxml2/tinyxml2.h>
 #include <Eigen/Dense>
 

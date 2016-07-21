@@ -50,7 +50,7 @@ namespace exotica
     Eigen::VectorXd rel;
     getJSON(a["pointInLink"], rel);
     if (rel.rows() != 3) throw_named("Incorrect size!");
-    ok(getJSON(a["referenceFrame"], tmp_offset[1]);
+    getJSON(a["referenceFrame"], tmp_offset[1]);
     tmp_offset[0] = KDL::Frame(KDL::Vector(rel(0), rel(1), rel(2)));
     tmp_offset[1].p = tmp_offset[1].p - scene_->getSolver().getRootOffset().p;
     tmp_eff[0] = eff;

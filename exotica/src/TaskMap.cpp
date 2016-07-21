@@ -61,36 +61,25 @@ namespace exotica
     //  You need to implement this in your own taskmap
   }
 
-  EReturn TaskMap::initialise(const rapidjson::Value& a)
+  void TaskMap::initialise(const rapidjson::Value& a)
   {
-    ERROR("This has to be implemented in the derived class!");
-    return FAILURE;
+    throw_named("This has to be implemented in the derived class!");
   }
 
-  EReturn TaskMap::initialise(const rapidjson::Value& a, Server_ptr & server,
+  void TaskMap::initialise(const rapidjson::Value& a, Server_ptr & server,
       const Scene_map & scene_ptr, PlanningProblem_ptr prob)
   {
-    if (ok(getJSON(a["class"], object_name_)))
-    {
+    getJSON(a["class"], object_name_);
       if (!server)
       {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
+        throw_named("Invalid server!");
       }
       std::vector<std::pair<std::string, std::string> > tmp;
       initialiseManual(object_name_, server, scene_ptr, prob, tmp);
-      return initialise(a);
-    }
-    else
-    {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
-    }
+      initialise(a);
   }
 
-  EReturn TaskMap::initialiseManual(std::string name, Server_ptr & server,
+  void TaskMap::initialiseManual(std::string name, Server_ptr & server,
       const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
       std::vector<std::pair<std::string, std::string> >& params)
   {
@@ -118,10 +107,13 @@ namespace exotica
         {
           tmp_eff.push_back(strs[0]);
           KDL::Frame tmp;
-          if (!ok(getText(strs[1], tmp)))
+          try
           {
-            HIGHLIGHT_NAMED(object_name_, "Invalid limb transform found!")
-            return FAILURE;
+            getText(strs[1], tmp);
+          }
+          catch (Exception e)
+          {
+            throw_named("Invalid limb transform found!");
           }
 
           tmp_offset.push_back(tmp);
@@ -129,33 +121,28 @@ namespace exotica
         }
         else
         {
-          HIGHLIGHT_NAMED(object_name_, "Invalid limbs found!")
-          return FAILURE;
+          throw_named("Invalid limbs found!")
         }
       }
     }
     if (limbs > 1)
     {
       scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
-      return SUCCESS;
     }
     else
     {
-      HIGHLIGHT_NAMED(object_name_, "No limbs found!")
-      return FAILURE;
+      throw_named("No limbs found!");
     }
   }
 
-  EReturn TaskMap::initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
+  void TaskMap::initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
       const Scene_map & scene_ptr)
   {
     //!< Clear flags and kinematic scene pointer
     Object::initBase(handle, server);
     if (!server)
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Invalid server!");
     }
     server_ = server;
     scene_ = Scene_ptr();  //!< Null pointer
@@ -167,23 +154,18 @@ namespace exotica
           handle.FirstChildElement("Scene").ToElement()->Attribute("name");
       if (name == nullptr)
       {
-        INDICATE_FAILURE
-        ;
-        return PAR_ERR;
+        throw_named("Invalid scene name!");
       }
       auto it = scene_ptr.find(name);
       if (it == scene_ptr.end())
       {
-        INDICATE_FAILURE
-        ;
-        return PAR_ERR;
+        throw_named("Can't find the scene!");
       }
       scene_ = it->second;
     }
     else
     {
-      ERROR("No scene was specified!");
-      return PAR_ERR;
+      throw_named("No scene was specified!");
     }
 
     std::vector<std::string> tmp_eff(0);
@@ -195,24 +177,18 @@ namespace exotica
     {
       if (!segment_handle.ToElement()->Attribute("segment"))
       {
-        INDICATE_FAILURE
-        return FAILURE;
+        throw_named("Invalid segment!");
       }
       tmp_eff.push_back(segment_handle.ToElement()->Attribute("segment"));
       KDL::Frame temp_frame = KDL::Frame::Identity(); //!< Initialise to identity
       if (segment_handle.FirstChildElement("vector").ToElement())
       {
         Eigen::VectorXd temp_vector;
-        if (!ok(
-            getVector(*(segment_handle.FirstChildElement("vector").ToElement()),
-                temp_vector)))
-        {
-          INDICATE_FAILURE
-          return FAILURE;
-        }
+        getVector(*(segment_handle.FirstChildElement("vector").ToElement()),
+                temp_vector);
         if (temp_vector.size() != 3)
         {
-          return FAILURE;
+          throw_named("Invalid vector size!");
         }
         temp_frame.p.x(temp_vector(0));
         temp_frame.p.y(temp_vector(1));
@@ -221,18 +197,12 @@ namespace exotica
       if (segment_handle.FirstChildElement("quaternion").ToElement())
       {
         Eigen::VectorXd temp_vector;
-        if (!ok(
-            getVector(
+        getVector(
                 *(segment_handle.FirstChildElement("quaternion").ToElement()),
-                temp_vector)))
-        {
-          INDICATE_FAILURE
-          return FAILURE;
-        }
+                temp_vector);
         if (temp_vector.size() != 4)
         {
-          INDICATE_FAILURE
-          return FAILURE;
+          throw_named("Invalid vector size!");
         }
         temp_frame.M = KDL::Rotation::Quaternion(temp_vector(1), temp_vector(2),
             temp_vector(3), temp_vector(0));
@@ -242,15 +212,7 @@ namespace exotica
     }
 
     scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
-    if (ok(initDerived(handle)))
-    {
-      return SUCCESS;
-    }
-    else
-    {
-      ERROR("Failed to initialise task '"<<getObjectName() <<"'");
-      return FAILURE;
-    }
+    initDerived(handle);
   }
 
   bool TaskMap::isRegistered(int t)
@@ -297,7 +259,7 @@ namespace exotica
     }
   }
 
-  EReturn TaskMap::setTimeSteps(const int T)
+  void TaskMap::setTimeSteps(const int T)
   {
     int dim;
     taskSpaceDim(dim);
@@ -312,10 +274,9 @@ namespace exotica
     jacFlag_.setZero();
     phiCnt_ = 0;
     jacCnt_ = 0;
-    return SUCCESS;
   }
 
-  EReturn TaskMap::registerPhi(Eigen::VectorXdRef_ptr y, int t)
+  void TaskMap::registerPhi(Eigen::VectorXdRef_ptr y, int t)
   {
     LOCK(map_lock_);
     phi_.at(t) = y;
@@ -324,10 +285,9 @@ namespace exotica
       phiFlag_(t) = 1;
       phiCnt_++;
     }
-    return SUCCESS;
   }
 
-  EReturn TaskMap::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
+  void TaskMap::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
   {
     LOCK(map_lock_);
     jac_.at(t) = J;
@@ -336,37 +296,20 @@ namespace exotica
       jacFlag_(t) = 1;
       jacCnt_++;
     }
-    return SUCCESS;
   }
 
   bool TaskMap::getEffReferences()
   {
 
-    if (ok(scene_->getForwardMap(object_name_, eff_phi_)))
-    {
+      scene_->getForwardMap(object_name_, eff_phi_);
       if (updateJacobian_)
       {
-        if (ok(scene_->getJacobian(object_name_, eff_jac_)))
-        {
-          return true;
-        }
-        else
-        {
-          INDICATE_FAILURE
-          ;
-          return false;
-        }
+        scene_->getJacobian(object_name_, eff_jac_);
+        return true;
       }
       else
       {
         return true;
       }
-    }
-    else
-    {
-      INDICATE_FAILURE
-      ;
-      return false;
-    }
   }
 }

@@ -76,10 +76,10 @@
       <Rho>1e0</Rho>
       <Goal>0 0.2 0</Goal>
     </Task>
-
-    <Map type="Orientation" name="Alignment"> <!-- The end-effector position task map -->
+<!--
+    <Map type="Orientation" name="Alignment">
       <Scene name="COMDemoScene"/>
-      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+      <EndEffector ignore_unused="true">
           <limb segment="r_foot"><vector>0.0 0.0 0.0</vector></limb>
           <limb segment="r_foot"><vector>0.0 0.0 1.0</vector></limb>
           <limb segment="l_foot"><vector>0.0 0.0 0.0</vector></limb>
@@ -97,12 +97,12 @@
       </EndEffector>
     </Map>
 
-    <Task name="Alignment" type="TaskSqrError"> <!-- Squared error cost term based on end-effector position task map -->
+    <Task name="Alignment" type="TaskSqrError">
       <map name="Alignment"/>
       <Rho>1e-1</Rho>
       <Goal>0.0 0.0 0.0</Goal>
     </Task>
-
+-->
 
     <Map type="CoM" name="CoMMap">
       <Scene name="COMDemoScene"/>

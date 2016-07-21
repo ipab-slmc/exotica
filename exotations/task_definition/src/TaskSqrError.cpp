@@ -87,12 +87,12 @@ namespace exotica
     // Load the goal
     if (handle.FirstChildElement("Goal").ToElement())
     {
-      if (ok(
-          getVector(*(handle.FirstChildElement("Goal").ToElement()), y_star)))
+      try
       {
+        getVector(*(handle.FirstChildElement("Goal").ToElement()), y_star);
         y_star0_ = y_star;
       }
-      else
+      catch (Exception e)
       {
         int dim;
         getTaskMap()->taskSpaceDim(dim);

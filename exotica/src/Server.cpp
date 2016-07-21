@@ -62,7 +62,7 @@ namespace exotica
       }
       else
       {
-        throw_named("Couldn't load the model!");
+        throw_pretty("Couldn't load the model!");
       }
     }
   }
@@ -169,7 +169,7 @@ namespace exotica
           tmp_handle.FirstChildElement("default").ToElement()->GetText();
       if (str.size() == 0)
       {
-        throw_named("Invalid srtring!");
+        throw_pretty("Invalid srtring!");
       }
       std_msgs::String ros_s;
       ros_s.data =
@@ -187,7 +187,7 @@ namespace exotica
     }
     else
     {
-      throw_named("Unknown type!");
+      throw_pretty("Unknown type!");
     }
     INFO("Register new paramter "<<name)
   }

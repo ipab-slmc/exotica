@@ -31,7 +31,6 @@ include_directories(
 
 add_library(${PROJECT_NAME} src/CoM.cpp
                             src/IMesh.cpp
-                            src/DMesh.cpp
                             src/EffPosition.cpp
                             src/JointLimit.cpp
                             src/SweepFlux.cpp

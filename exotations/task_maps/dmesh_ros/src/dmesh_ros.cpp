@@ -137,10 +137,7 @@ namespace exotica
       throw_named("Not initialized!");
     }
 
-    if (!ok(updateGraphFromKS(t)))
-    {
-      throw_named("Failed to update the graph!");
-    }
+    updateGraphFromKS(t);
 
     Eigen::MatrixXd dist;
     if (!gManager_.getGraph()->getGoalDistanceEigen(dist))

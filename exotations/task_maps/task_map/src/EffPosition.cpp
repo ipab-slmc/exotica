@@ -33,7 +33,6 @@
 #include "EffPosition.h"
 
 REGISTER_TASKMAP_TYPE("EffPosition", exotica::EffPosition);
-REGISTER_FOR_XML_TEST("EffPosition", "EffPosition.xml");
 
 namespace exotica
 {

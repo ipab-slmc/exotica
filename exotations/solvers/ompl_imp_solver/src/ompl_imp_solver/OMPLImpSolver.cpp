@@ -64,10 +64,10 @@ namespace exotica
   OMPLImpSolver::OMPLImpSolver()
       : OMPLBaseSolver("OMPLImpSolver"), algorithm_("geometric::RRTConnect")
   {
-
+    object_name_=algorithm_;
   }
 
-  EReturn OMPLImpSolver::initialiseSolver(tinyxml2::XMLHandle & handle)
+  void OMPLImpSolver::initialiseSolver(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("Algorithm");
     if (!tmp_handle.ToElement())
@@ -79,6 +79,7 @@ namespace exotica
     {
       algorithm_ = "geometric::"
           + std::string(tmp_handle.ToElement()->GetText());
+      object_name_=algorithm_;
     }
     if (known_algorithms_.find(algorithm_) != known_algorithms_.end())
     {
@@ -101,10 +102,9 @@ namespace exotica
     {
       range_ = std::string(tmp_handle.ToElement()->GetText());
     }
-    return SUCCESS;
   }
 
-  EReturn OMPLImpSolver::specifyProblem(const OMPLProblem_ptr &prob)
+  void OMPLImpSolver::specifyProblem(const OMPLProblem_ptr &prob)
   {
     prob_ = prob;
     base_type_ = prob_->getScenes().begin()->second->getBaseType();
@@ -139,10 +139,9 @@ namespace exotica
     ompl_simple_setup_->setup();
     if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
       ompl_simple_setup_->getPlanner()->params().setParam("range", range_);
-    return SUCCESS;
   }
 
-  EReturn OMPLImpSolver::solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol)
+  bool OMPLImpSolver::solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol)
   {
     ros::Time startTime = ros::Time::now();
     finishedSolving_ = false;
@@ -164,7 +163,7 @@ namespace exotica
 
       finishedSolving_ = true;
 
-      if (!ompl_simple_setup_->haveSolutionPath()) return FAILURE;
+      if (!ompl_simple_setup_->haveSolutionPath()) return false;
       planning_time_ = ros::Time::now() - startTime;
       getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), sol, ptc);
       planning_time_ = ros::Time::now() - startTime;
@@ -172,19 +171,18 @@ namespace exotica
       margin_->data = init_margin_;
       prob_->update(Eigen::VectorXd(sol.row(sol.rows() - 1)), 0);
       prob_->getScenes().begin()->second->publishScene();
-      return SUCCESS;
+      return true;
     }
     else
     {
       finishedSolving_ = true;
       planning_time_ = ros::Time::now() - startTime;
       postSolve();
-      return FAILURE;
+      return false;
     }
-    return SUCCESS;
   }
 
-  EReturn OMPLImpSolver::convertPath(const og::PathGeometric &pg,
+  void OMPLImpSolver::convertPath(const og::PathGeometric &pg,
       Eigen::MatrixXd & traj)
   {
     traj.resize(pg.getStateCount(), prob_->getSpaceDim());
@@ -196,10 +194,9 @@ namespace exotica
           tmp);
       traj.row(i) = tmp;
     }
-    return SUCCESS;
   }
 
-  EReturn OMPLImpSolver::getSimplifiedPath(og::PathGeometric &pg,
+  void OMPLImpSolver::getSimplifiedPath(og::PathGeometric &pg,
       Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc)
   {
     ros::Time start = ros::Time::now();
@@ -242,7 +239,6 @@ namespace exotica
     convertPath(pg, traj);
     HIGHLIGHT(
         "Trajectory simplification took "<<ros::Duration(ros::Time::now()-start).toSec()<<" sec. Trajectory length after interpolation = "<<length);
-    return SUCCESS;
   }
 
   ompl::base::GoalPtr OMPLImpSolver::constructGoal()
@@ -255,10 +251,9 @@ namespace exotica
     return planner_name_;
   }
 
-  EReturn OMPLImpSolver::setGoalState(const Eigen::VectorXd & qT,
+  void OMPLImpSolver::setGoalState(const Eigen::VectorXd & qT,
       const double eps)
   {
-    EReturn ret = SUCCESS;
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());
     init_margin_ = margin_->data;
@@ -297,18 +292,16 @@ namespace exotica
             "Goal state passed collision check with safety margin = "<<margin_->data);
       }
       else
-        ret = FAILURE;
+        throw_named("Goal state is not valid!");
     }
 
     if (!ompl_simple_setup_->getSpaceInformation()->satisfiesBounds(gs.get()))
     {
       state_space_->as<OMPLBaseStateSpace>()->stateDebug(qT);
-      ERROR("Invalid goal state [Invalid joint bounds]\n"<<qT.transpose());
-      ret = FAILURE;
+      throw_named("Invalid goal state [Invalid joint bounds]\n"<<qT.transpose());
     }
     ompl_simple_setup_->setGoalState(gs, eps);
-    if (!ok(ret)) margin_->data = init_margin_;
-    return ret;
+    margin_->data = init_margin_;
   }
 
   void OMPLImpSolver::registerDefaultPlanners()

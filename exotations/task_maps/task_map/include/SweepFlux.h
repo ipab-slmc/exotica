@@ -35,12 +35,11 @@
 
 #include <exotica/TaskMap.h>
 #include <exotica/Factory.h>
-#include <exotica/Test.h>
 #include <tinyxml2/tinyxml2.h>
 #include <exotica/KinematicTree.h>
 #include <Eigen/Eigen>
 #include <boost/thread/mutex.hpp>
-#include "kinematic_maps/SweepFlux.h"
+#include "SweepFlux.h"
 #include <visualization_msgs/Marker.h>
 
 #define ID(x,a,b) {if(!(x>=a&&x<a+b)) ERROR("Out of bounds: "<<x <<" ("<<a<<" "<<b<<")");}
@@ -131,7 +130,7 @@ namespace exotica
        * @param	q	Joint angles
        * @return	Jacobian matrix
        */
-      exotica::void computeFlux(const int t);
+      void computeFlux(const int t);
 
       void FluxTriangleTriangle(int* Tris, double* Verts, double* VertJ,
           int* TrisJ, int* TrisQ, double* VertsQ, double* Flux, double* FluxJ,

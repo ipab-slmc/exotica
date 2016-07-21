@@ -53,26 +53,24 @@ namespace exotica
     return ret;
   }
 
-  EReturn TaskDefinition::initialiseManual(std::string name, Server_ptr & server,
+  void TaskDefinition::initialiseManual(std::string name, Server_ptr & server,
             boost::shared_ptr<PlanningProblem> prob,
             std::vector<std::pair<std::string,std::string> >& params)
   {
       object_name_ = name + std::to_string((unsigned long) this);
   }
 
-  EReturn TaskDefinition::initBase(tinyxml2::XMLHandle & handle,
+  void TaskDefinition::initBase(tinyxml2::XMLHandle & handle,
       const TaskMap_map & map_list)
   {
     Server_ptr server;
     Object::initBase(handle, server);
     //!< Temporaries
-    EReturn tmp_rtn = SUCCESS;
-    EReturn aux_rtn = FAILURE;
 
     //!< Attempt to set the task-map
     if (!handle.FirstChildElement("map").ToElement())
     {
-      tmp_rtn = WARNING; //!< Warn if no map set up: this means phi and jacobian will not be available
+      throw_named("Missing map!");
     }
     else
     {
@@ -80,65 +78,44 @@ namespace exotica
           handle.FirstChildElement("map").ToElement()->Attribute("name");
       if (map_name == nullptr)
       {
-        INDICATE_FAILURE
-        ;
-        return PAR_ERR;
+        throw_named("Invalid map name!");
       }
       auto it = map_list.find(map_name);
       if (it == map_list.end())
       {
-        INDICATE_FAILURE
-        ;
-        return PAR_ERR;
+        throw_named("Can't find the map!");
       }
-      aux_rtn = setTaskMap(it->second);
-      if (!ok(aux_rtn))
-      {
-        INDICATE_FAILURE
-        ;
-        return aux_rtn;
-      }
+      setTaskMap(it->second);
     }
 
-    aux_rtn = initDerived(handle);
-    if (aux_rtn)
-    {
-      return aux_rtn;
-    }
-    else
-    {
-      return tmp_rtn;
-    }
+    initDerived(handle);
   }
 
-  EReturn TaskDefinition::registerPhi(Eigen::VectorXdRef_ptr y, int t)
+  void TaskDefinition::registerPhi(Eigen::VectorXdRef_ptr y, int t)
   {
     LOCK(map_lock_);
     task_map_->registerPhi(y, t);
-    return SUCCESS;
   }
 
-  EReturn TaskDefinition::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
+  void TaskDefinition::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
   {
     LOCK(map_lock_);
     task_map_->registerJacobian(J, t);
-    return SUCCESS;
   }
 
-  EReturn TaskDefinition::taskSpaceDim(int & task_dim)
+  void TaskDefinition::taskSpaceDim(int & task_dim)
   {
-    return task_map_->taskSpaceDim(task_dim);
+    task_map_->taskSpaceDim(task_dim);
   }
 
-  EReturn TaskDefinition::setTaskMap(
+  void TaskDefinition::setTaskMap(
       const boost::shared_ptr<TaskMap> & task_map)
   {
     LOCK(map_lock_);
     task_map_ = task_map;
-    return SUCCESS;
   }
 
-  EReturn TaskDefinition::setTimeSteps(const int T)
+  void TaskDefinition::setTimeSteps(const int T)
   {
     LOCK(map_lock_);
     if (task_map_ != nullptr)
@@ -147,9 +124,7 @@ namespace exotica
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return MEM_ERR;
+      throw_named("Invalid map!");
     }
 
   }

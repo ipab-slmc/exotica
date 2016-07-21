@@ -112,11 +112,12 @@ namespace exotica
               throw_named("Invalid JSON document object!");
             }
         }
-        else
-        {
-            throw_named("Invalid JSON array!");
-        }
 
+
+    }
+    else
+    {
+        throw_named("Invalid JSON array!");
     }
   }
 

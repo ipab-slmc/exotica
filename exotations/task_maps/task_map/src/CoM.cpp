@@ -56,10 +56,7 @@ namespace exotica
     static bool fistTime = true;
     if (fistTime)
     {
-      if (!changeEffToCoM())
-      {
-        throw_named("Can't change end-effectors!");
-      }
+      changeEffToCoM();
       fistTime = false;
     }
     if (initialised_)

@@ -142,7 +142,7 @@ namespace exotica
           WARNING_NAMED(ns,
               "Register parameter failed, XML tag does not exist, check the XML file");
           ptr = boost::shared_ptr<T>(new T());
-          throw_pretty("XML tag does not exist!");
+          return;
         }
         std::string name;
         if (handle.ToElement()->Attribute("source"))

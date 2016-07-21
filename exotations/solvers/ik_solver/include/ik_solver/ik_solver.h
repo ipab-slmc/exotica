@@ -37,7 +37,7 @@
 #include <exotica/EXOTica.hpp>
 #include <ik_solver/ik_problem.h>
 #include <task_definition/TaskSqrError.h>
-#include <generic/Identity.h>
+#include <Identity.h>
 #include <iostream>
 #include <fstream>
 
@@ -59,7 +59,7 @@ namespace exotica
        * @return	SUCESS if solution has been found, corresponding error code if not.
        */
       virtual void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
-      void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXdRef solution,
+      bool Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXdRef solution,
           int t);
 
       /**
@@ -106,6 +106,7 @@ namespace exotica
       ros::Duration planning_time_;
 
       int getMaxIteration();
+      int getLastIteration();
       Eigen::VectorXd nullSpaceRef;
       void setReachGoal(const geometry_msgs::Pose &goal);
     protected:
@@ -155,6 +156,7 @@ namespace exotica
 
       int T;
       bool initialised_;
+      int iterations_;
 
       ///	For FRRT debug
       bool FRRT_;
@@ -166,7 +168,6 @@ namespace exotica
       EParam<std_msgs::Bool> ignore_obs_near_goal_;
       geometry_msgs::Pose reach_goal_;
       Distance_Ptr reach_position_taskmap_;
-      Orientation_Ptr reach_orientation_taskmap_;
   };
   typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

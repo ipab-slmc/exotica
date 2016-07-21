@@ -11,8 +11,8 @@
   </Server>
 
   <IKsolver name="IKSolverDemo">   <!-- Motion solver definition -->
-    <MaxIt>20</MaxIt>
-    <MaxStep>0.02</MaxStep>
+    <MaxIt>1</MaxIt>
+    <MaxStep>0.2</MaxStep>
   </IKsolver>
 
   <IKProblem name="IKSolverDemoProblem"> <!-- Problem definition -->
@@ -56,7 +56,7 @@
     </Task>
 
     <!-- Problem parameters: tolerance and per joint weighting -->
-    <Tolerance>1e-6</Tolerance>
+    <Tolerance>1e-5</Tolerance>
     <W> 7 6 5 4 3 2 1</W>
   </IKProblem>
 

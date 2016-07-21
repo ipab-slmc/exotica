@@ -72,7 +72,7 @@ namespace exotica
     //TODO
   }
 
-  EReturn CollisionScene::reinitialise()
+  void CollisionScene::reinitialise()
   {
     fcl_robot_.clear();
     fcl_world_.clear();
@@ -95,8 +95,7 @@ namespace exotica
           tmp_shape = links[i]->getShapes()[j];
         if (!tmp_shape || !tmp_shape.get())
         {
-          INDICATE_FAILURE
-          return FAILURE;
+          throw_pretty("Invalid shape!");
         }
         collision_detection::FCLGeometryConstPtr g =
             collision_detection::createCollisionGeometry(tmp_shape, links[i],
@@ -160,8 +159,7 @@ namespace exotica
 
           if (!tmp_shape || !tmp_shape.get())
           {
-            INDICATE_FAILURE
-            return FAILURE;
+            throw_pretty("Invalid shape!");
           }
           collision_detection::FCLGeometryConstPtr g =
               collision_detection::createCollisionGeometry(tmp_shape,
@@ -179,10 +177,9 @@ namespace exotica
         }
       }
     }
-    return SUCCESS;
   }
 
-  EReturn CollisionScene::initialise(
+  void CollisionScene::initialise(
       const moveit_msgs::PlanningSceneConstPtr & msg,
       const std::vector<std::string> & joints, std::string & mode,
       BASE_TYPE base_type)
@@ -203,8 +200,7 @@ namespace exotica
           drake_full_body_);
     else
       drake_full_body_.reset(new std_msgs::Bool());
-    if (ok(reinitialise()))
-    {
+    reinitialise();
       joint_index_.resize(joints.size());
 
       for (std::size_t i = 0;
@@ -227,15 +223,9 @@ namespace exotica
       }
       else
         INFO("Computing distance in Collision scene is Enabled");
-      return SUCCESS;
-    }
-    else
-    {
-      return FAILURE;
-    }
   }
 
-  EReturn CollisionScene::updateWorld(
+  void CollisionScene::updateWorld(
       const moveit_msgs::PlanningSceneWorldConstPtr & world)
   {
 //		for (int i=0;i<world->collision_objects.size();i++)
@@ -249,16 +239,14 @@ namespace exotica
 //				}
 //			}
 //		}
-    return SUCCESS;
   }
 
-  EReturn CollisionScene::update(Eigen::VectorXdRefConst x)
+  void CollisionScene::update(Eigen::VectorXdRefConst x)
   {
     if (joint_index_.size() != x.rows())
     {
-      ERROR(
+      throw_pretty(
           "Size does not match, need vector size of "<<joint_index_.size()<<" but "<<x.rows()<<" is provided");
-      return FAILURE;
     }
 
     if (base_type_ == BASE_TYPE::FIXED)
@@ -325,10 +313,9 @@ namespace exotica
               it.second[i]->collisionGeometry()->aabb_center);
         }
     }
-    return SUCCESS;
   }
 
-  EReturn CollisionScene::getDistance(const std::string & o1,
+  void CollisionScene::getDistance(const std::string & o1,
       const std::string & o2, double& d, double safeDist)
   {
     fcls_ptr fcl1, fcl2;
@@ -338,8 +325,7 @@ namespace exotica
       fcl1 = fcl_world_.at(o1);
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Object 1 not found!");
     }
     if (fcl_world_.find(o2) != fcl_world_.end())
       fcl2 = fcl_world_.at(o2);
@@ -347,16 +333,15 @@ namespace exotica
       fcl2 = fcl_robot_.at(o2);
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Object 2 not found!");
     }
 
     fcl::DistanceRequest req(false);
     fcl::DistanceResult res;
     d = distance(fcl1, fcl2, req, res, safeDist);
-    return SUCCESS;
   }
-  EReturn CollisionScene::getDistance(const std::string & o1,
+
+  void CollisionScene::getDistance(const std::string & o1,
       const std::string & o2, double& d, Eigen::Vector3d & p1,
       Eigen::Vector3d & p2, double safeDist)
   {
@@ -367,8 +352,7 @@ namespace exotica
       fcl1 = fcl_world_.at(o1);
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Object 1 not found!");
     }
     if (fcl_world_.find(o2) != fcl_world_.end())
       fcl2 = fcl_world_.at(o2);
@@ -376,8 +360,7 @@ namespace exotica
       fcl2 = fcl_robot_.at(o2);
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Object 2 not found!");
     }
 
     fcl::DistanceRequest req(true);
@@ -388,7 +371,6 @@ namespace exotica
       fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
       fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
     }
-    return SUCCESS;
   }
 
   bool CollisionScene::isStateValid(bool self, double dist)
@@ -415,7 +397,7 @@ namespace exotica
     return ps_->isStateValid(ps_->getCurrentState());
   }
 
-  EReturn CollisionScene::getRobotDistance(const std::string & link, bool self,
+  void CollisionScene::getRobotDistance(const std::string & link, bool self,
       double & d, Eigen::Vector3d & p1, Eigen::Vector3d & p2,
       Eigen::Vector3d & norm, Eigen::Vector3d & c1, Eigen::Vector3d & c2,
       double safeDist)
@@ -425,8 +407,7 @@ namespace exotica
       fcl_link = fcl_robot_.at(link);
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Link not found!");
     }
     d = INFINITY;
     fcl::DistanceRequest req(true);
@@ -459,7 +440,7 @@ namespace exotica
               {
 //							INDICATE_FAILURE
                 d = -1;
-                return WARNING;
+                return; // WARNING;
               }
               else if (res.min_distance < d)
               {
@@ -493,7 +474,7 @@ namespace exotica
         {
           d = -1;
           fcl_convert::fcl2Eigen(it.second[i]->getAABB().center(), c2);
-          return WARNING;
+          return;
         }
         else if (res.min_distance < d)
         {
@@ -519,8 +500,8 @@ namespace exotica
 //		p2(1)=tmp2.p.data[1];
 //		p2(2)=tmp2.p.data[2];
     norm = p2 - p1;
-    return SUCCESS;
   }
+
   double CollisionScene::distance(const fcls_ptr & fcl1, const fcls_ptr & fcl2,
       const fcl::DistanceRequest & req, fcl::DistanceResult & res,
       double safeDist)
@@ -532,11 +513,11 @@ namespace exotica
       {
         if (fcl1[i] == nullptr)
         {
-          INDICATE_FAILURE
+          throw_pretty("Object 1 not found!");
         }
         if (fcl2[j] == nullptr)
         {
-          INDICATE_FAILURE
+          throw_pretty("Object 2 not found!");
         }
         if (fcl2[j]->getAABB().distance(fcl2[j]->getAABB()) < safeDist)
         {
@@ -570,10 +551,10 @@ namespace exotica
     return ps_;
   }
 
-  EReturn CollisionScene::getCollisionLinkTranslation(const std::string & name,
+  void CollisionScene::getCollisionLinkTranslation(const std::string & name,
       Eigen::Vector3d & translation)
   {
-    if (fcl_robot_.find(name) == fcl_robot_.end()) return FAILURE;
+    if (fcl_robot_.find(name) == fcl_robot_.end()) throw_pretty("Robot not found!");;
     std::map<std::string, fcls_ptr>::iterator it = fcl_robot_.find(name);
     fcl::AABB sumAABB;
     for (int i = 0; i < it->second.size(); i++)
@@ -582,13 +563,12 @@ namespace exotica
       sumAABB += it->second[i]->getAABB();
     }
     fcl_convert::fcl2Eigen(sumAABB.center(), translation);
-    return SUCCESS;
   }
 
-  EReturn CollisionScene::getWorldObjectTranslation(const std::string & name,
+  void CollisionScene::getWorldObjectTranslation(const std::string & name,
       Eigen::Vector3d & translation)
   {
-    if (fcl_world_.find(name) == fcl_world_.end()) return FAILURE;
+    if (fcl_world_.find(name) == fcl_world_.end()) throw_pretty("Robot not found!");;
     std::map<std::string, fcls_ptr>::iterator it = fcl_world_.find(name);
     fcl::AABB sumAABB;
     for (int i = 0; i < it->second.size(); i++)
@@ -597,14 +577,13 @@ namespace exotica
       sumAABB += it->second[i]->getAABB();
     }
     fcl_convert::fcl2Eigen(sumAABB.center(), translation);
-    return SUCCESS;
   }
 
-  EReturn CollisionScene::getTranslation(const std::string & name,
+  void CollisionScene::getTranslation(const std::string & name,
       Eigen::Vector3d & translation)
   {
-    EReturn ret = getCollisionLinkTranslation(name, translation);
-    return ok(ret) ? ret : getWorldObjectTranslation(name, translation);
+    getCollisionLinkTranslation(name, translation);
+    getWorldObjectTranslation(name, translation);
   }
 
 ///////////////////////////////////////////////////////////////
@@ -637,28 +616,22 @@ namespace exotica
     return name_;
   }
 
-  EReturn Scene::initialisation(tinyxml2::XMLHandle & handle,
+  void Scene::initialisation(tinyxml2::XMLHandle & handle,
       const Server_ptr & server)
   {
     LOCK(lock_);
     server_ = server;
     if (!handle.FirstChildElement("Kinematica").ToElement())
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Kinametica not found!");
     }
 
-    if (!ok(server->getModel("robot_description", model_)))
-    {
-      ERROR("Could not load robot model from 'robot_description' parameter!");
-      return FAILURE;
-    }
+    server->getModel("robot_description", model_);
 
     tinyxml2::XMLHandle tmp_handle(handle.FirstChildElement("Kinematica"));
     if (!kinematica_.initKinematics(tmp_handle, model_))
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Kinametica not initialized!");
     }
     std::string base_type = kinematica_.getBaseType();
     if (base_type.compare("fixed") == 0)
@@ -671,7 +644,11 @@ namespace exotica
     collision_scene_.reset(new CollisionScene(server_, name_));
 
     tmp_handle = handle.FirstChildElement("PlanningMode");
-    if (!ok(server_->registerParam<std_msgs::String>(name_, tmp_handle, mode_)))
+    try
+    {
+        server_->registerParam<std_msgs::String>(name_, tmp_handle, mode_);
+    }
+    catch (Exception e)
     {
       mode_->data = "Optimization";
       WARNING_NAMED(name_,
@@ -694,37 +671,28 @@ namespace exotica
           new planning_scene::PlanningScene(model_));
       moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
       tmp->getPlanningSceneMsg(*msg.get());
-      if (!ok(
-          collision_scene_->initialise(msg, kinematica_.getJointNames(),
-              mode_->data, base_type_)))
-      {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
-      }
+      collision_scene_->initialise(msg, kinematica_.getJointNames(),
+              mode_->data, base_type_);
     }
     INFO_NAMED(name_,
         "Exotica Scene initialised, planning mode set to "<<mode_->data);
-    return SUCCESS;
   }
 
-  EReturn Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)
+  void Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)
   {
     LOCK(lock_);
     if (phis_.find(task) == phis_.end())
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Task not found!");
     }
     Eigen::Ref<Eigen::VectorXd> y(*(phis_.at(task)));
     for (int r = 0; r < phi.rows(); r++)
     {
       phi(r) = y(r);
     }
-    return SUCCESS;
   }
 
-  EReturn Scene::getForwardMap(const std::string & task,
+  void Scene::getForwardMap(const std::string & task,
       Eigen::VectorXdRef_ptr& phi, bool force)
   {
     LOCK(lock_);
@@ -739,23 +707,20 @@ namespace exotica
       {
         if (phis_.find(task) == phis_.end())
         {
-          ERROR("Can't find task '"<<task<<"' in " << object_name_);
-          return FAILURE;
+          throw_named("Can't find task '"<<task<<"' in " << object_name_);
         }
         phi = phis_.at(task);
       }
     }
-    return SUCCESS;
 
   }
 
-  EReturn Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef jac)
+  void Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef jac)
   {
     LOCK(lock_);
     if (jacs_.find(task) == jacs_.end())
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Task not found!");
     }
     Eigen::Ref<Eigen::MatrixXd> J(*(jacs_.at(task)));
     for (int r = 0; r < jac.rows(); r++)
@@ -765,10 +730,9 @@ namespace exotica
         jac(r, c) = J(r, c);
       }
     }
-    return SUCCESS;
   }
 
-  EReturn Scene::getJacobian(const std::string & task,
+  void Scene::getJacobian(const std::string & task,
       Eigen::MatrixXdRef_ptr& jac, bool force)
   {
     LOCK(lock_);
@@ -783,34 +747,29 @@ namespace exotica
       {
         if (jacs_.find(task) == jacs_.end())
         {
-          INDICATE_FAILURE
-          return FAILURE;
+          throw_named("Task not found!");
         }
         jac = jacs_.at(task);
       }
     }
-    return SUCCESS;
   }
 
-  EReturn Scene::appendTaskMap(const std::string & name,
+  void Scene::appendTaskMap(const std::string & name,
       const std::vector<std::string> & eff,
       const std::vector<KDL::Frame> & offset)
   {
     LOCK(lock_);
     eff_names_[name] = eff;
     eff_offsets_[name] = offset;
-
-    return SUCCESS;
   }
 
-  EReturn Scene::clearTaskMap()
+  void Scene::clearTaskMap()
   {
     eff_names_.clear();
     eff_offsets_.clear();
-    return SUCCESS;
   }
 
-  EReturn Scene::getPoses(const std::vector<std::string> & names,
+  void Scene::getPoses(const std::vector<std::string> & names,
       std::vector<KDL::Frame> & poses)
   {
     LOCK(lock_);
@@ -820,47 +779,37 @@ namespace exotica
       if (!kinematica_.getPose(names[i], poses[i]))
       {
         poses.resize(0);
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
+        throw_named("Pose not found!");
       }
 
     }
-    return SUCCESS;
   }
 
-  EReturn Scene::updateEndEffectors(const std::string & task,
+  void Scene::updateEndEffectors(const std::string & task,
       const std::vector<KDL::Frame> & offset)
   {
     LOCK(lock_);
     if (eff_index_.find(task) == eff_index_.end())
     {
-      INDICATE_FAILURE
-      ERROR("Task name: '"<<task<<"'\n"<<eff_index_.size());
-      return FAILURE;
+      throw_named("Task name: '"<<task<<"'\n"<<eff_index_.size());
     }
     if (offset.size() != eff_index_.at(task).size())
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Incorrect offset array size!");
     }
     if (!kinematica_.updateEndEffectorOffsets(eff_index_.at(task), offset))
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Can't update offsets!");
     }
-    return SUCCESS;
   }
 
-  EReturn Scene::updateEndEffector(const std::string &task,
+  void Scene::updateEndEffector(const std::string &task,
       const std::string &eff, const KDL::Frame& offset)
   {
     LOCK(lock_);
     if (eff_names_.find(task) == eff_names_.end())
     {
-      INDICATE_FAILURE
-      ERROR("Task name: '"<<task<<"'\n"<<eff_names_.size());
-      return FAILURE;
+      throw_named("Task name: '"<<task<<"'\n"<<eff_names_.size());
     }
     std::vector<std::string> names = eff_names_.at(task);
     bool found = false;
@@ -875,13 +824,11 @@ namespace exotica
     }
     if (!found)
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("End-effector not found!");
     }
-    return SUCCESS;
   }
 
-  EReturn Scene::activateTaskMaps()
+  void Scene::activateTaskMaps()
   {
 
     LOCK(lock_);
@@ -906,16 +853,12 @@ namespace exotica
 
     if (!kinematica_.updateEndEffectors(tmp_sol))
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Can't update end-effectors!");
     }
     std::vector<int> tmp_index;
     if (!kinematica_.getEndEffectorIndex(tmp_index))
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Can't get end-effector index!");
     }
     Phi_.setZero(3 * kinematica_.getEffSize());
     Jac_.setZero(3 * kinematica_.getEffSize(), N);
@@ -937,22 +880,18 @@ namespace exotica
 
     initialised_ = true;
     HIGHLIGHT_NAMED(object_name_, "Taskmaps are activated");
-    return SUCCESS;
   }
 
-  EReturn Scene::update(Eigen::VectorXdRefConst x, const int t)
+  void Scene::update(Eigen::VectorXdRefConst x, const int t)
   {
     LOCK(lock_);
     if (!initialised_)
     {
-      ERROR("EXOTica scene needs to be initialised via 'activateTaskMaps()'.");
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("EXOTica scene needs to be initialised via 'activateTaskMaps()'.");
     }
     else
     {
-      if (ok(collision_scene_->update(x)))
-      {
+      collision_scene_->update(x);
         if (kinematica_.getEffSize() > 0)
         {
           if (kinematica_.updateConfiguration(x))
@@ -967,34 +906,21 @@ namespace exotica
                 }
                 else
                 {
-                  INDICATE_FAILURE
-                  ;
-                  return FAILURE;
+                  throw_named("Failed generating Jacobians!");
                 }
               }
               // else Also fine, just skip computing the Jacobians
             }
             else
             {
-              INDICATE_FAILURE
-              ;
-              return FAILURE;
+              throw_named("Failed generating forward maps!");
             }
           }
           else
           {
-            INDICATE_FAILURE
-            ;
-            return FAILURE;
+            throw_named("Failed updating state!");
           }
         }
-      }
-      else
-      {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
-      }
     }
 
     if (visual_debug_->data)
@@ -1002,7 +928,6 @@ namespace exotica
       publishScene();
     }
 
-    return SUCCESS;
   }
   void Scene::publishScene()
   {
@@ -1011,19 +936,19 @@ namespace exotica
     ps_pub_.publish(msg);
   }
 
-  EReturn Scene::setCollisionScene(
+  void Scene::setCollisionScene(
       const planning_scene::PlanningSceneConstPtr & scene)
   {
     moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
     scene->getPlanningSceneMsg(*msg.get());
-    return collision_scene_->initialise(msg, kinematica_.getJointNames(),
+    collision_scene_->initialise(msg, kinematica_.getJointNames(),
         mode_->data, base_type_);
   }
 
-  EReturn Scene::setCollisionScene(
+  void Scene::setCollisionScene(
       const moveit_msgs::PlanningSceneConstPtr & scene)
   {
-    return collision_scene_->initialise(scene, kinematica_.getJointNames(),
+    collision_scene_->initialise(scene, kinematica_.getJointNames(),
         mode_->data, base_type_);
   }
 
@@ -1038,29 +963,25 @@ namespace exotica
     return collision_scene_;
   }
 
-  EReturn Scene::getEndEffectors(const std::string & task,
+  void Scene::getEndEffectors(const std::string & task,
       std::vector<std::string> & effs)
   {
     if (eff_names_.find(task) == eff_names_.end())
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Can't find task!");
     }
     effs = eff_names_.at(task);
-    return SUCCESS;
   }
 
-  EReturn Scene::getEndEffectors(const std::string & task,
+  void Scene::getEndEffectors(const std::string & task,
       std::pair<std::vector<std::string>, std::vector<KDL::Frame>> & effs)
   {
     if (eff_names_.find(task) == eff_names_.end())
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Can't find task!");
     }
     effs.first = eff_names_.at(task);
     effs.second = eff_offsets_.at(task);
-    return SUCCESS;
   }
 
   int Scene::getMapSize(const std::string & task)
@@ -1070,7 +991,7 @@ namespace exotica
     return eff_names_.at(task).size();
   }
 
-  EReturn Scene::getCoMProperties(std::string& task,
+  void Scene::getCoMProperties(std::string& task,
       std::vector<std::string> & segs, Eigen::VectorXd & mass,
       std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
       std::vector<KDL::Frame> & base_pose)
@@ -1078,19 +999,16 @@ namespace exotica
     LOCK(lock_);
     if (eff_index_.find(task) == eff_index_.end())
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("Can't find task!");
     }
     if (kinematica_.getCoMProperties(eff_index_.at(task), segs, mass, cog,
         tip_pose, base_pose))
     {
-      return SUCCESS;
+      return;
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("Can't get CoM!");
     }
   }
 
@@ -1110,11 +1028,10 @@ namespace exotica
     return kinematica_;
   }
 
-  EReturn Scene::getJointNames(std::vector<std::string> & joints)
+  void Scene::getJointNames(std::vector<std::string> & joints)
   {
     joints = kinematica_.getJointNames();
-    if (joints.size() > 0) return SUCCESS;
-    return FAILURE;
+    if (joints.size() == 0) throw_named("No joints!");
   }
 
   std::string & Scene::getPlanningMode()

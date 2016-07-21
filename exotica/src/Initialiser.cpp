@@ -80,10 +80,8 @@ namespace exotica
     xml_file.Clear();
     if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
     {
-      INDICATE_FAILURE
-      ;
       xml_file.Clear();
-      return PAR_ERR;
+      throw_named("Can't load file!");
     }
     tinyxml2::XMLHandle root_handle(xml_file.RootElement());
 
@@ -259,8 +257,7 @@ namespace exotica
       }
       else
       {
-        ERROR("Empty solver name");
-        return FAILURE;
+        throw_named("Empty solver name");
       }
     }
 

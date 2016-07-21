@@ -122,7 +122,6 @@ namespace exotica
     poses.reset(new std::map<std::string, Eigen::VectorXd>());
     posesJointNames.reset(new std::vector<std::string>());
     knownMaps_["PositionConstraint"] = "Distance";
-    knownMaps_["QuatConstraint"] = "Orientation";
     knownMaps_["PostureConstraint"] = "Identity";
 
     startState.resize(0);
@@ -210,7 +209,7 @@ namespace exotica
     //!< No maps defined:
     if (count < 1)
     {
-      throw_named("No maps were defined!");
+      HIGHLIGHT("No maps were defined!");
     }
 
     //!< NEW------------
@@ -262,7 +261,7 @@ namespace exotica
     //!< IF no task definitions defined
     if (count < 1)
     {
-      throw_named("No tasks were defined!");
+      HIGHLIGHT("No tasks were defined!");
     }
 
     //!< If ok so far...

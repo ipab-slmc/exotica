@@ -131,7 +131,7 @@ namespace exotica
     }
     else
     {
-      throw_named("No limbs found!");
+      HIGHLIGHT("No limbs found!");
     }
   }
 

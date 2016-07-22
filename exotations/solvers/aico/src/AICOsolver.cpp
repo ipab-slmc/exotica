@@ -41,6 +41,7 @@
  \brief Approximate Inference Control */
 
 #include "aico/AICOsolver.h"
+#include <pluginlib/class_list_macros.h>
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
@@ -49,7 +50,8 @@
 // t_{T+1} is the state before t_0 for computing the velocity at the time t_0
 #define TT T+2
 
-REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver);
+REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver)
+PLUGINLIB_EXPORT_CLASS(exotica::AICOsolver, exotica::MotionSolver)
 
 namespace exotica
 {

@@ -18,4 +18,9 @@
   <depend>task_map</depend>
   <depend>liblapack-dev</depend>
   <depend>f2c</depend>
+  <depend>pluginlib</depend>
+
+  <export>
+    <aico plugin="${prefix}/solver_plugins.xml" />
+  </export>
 </package>

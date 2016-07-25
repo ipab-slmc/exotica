@@ -40,7 +40,6 @@ IKSolverDemoNode::IKSolverDemoNode()
     : nh_("~"), nhg_()
 {
     // Declarations
-    Initialiser ini;
     MotionSolver_ptr sol;
     Server_ptr ser;
     PlanningProblem_ptr prob;
@@ -54,7 +53,7 @@ IKSolverDemoNode::IKSolverDemoNode()
         "Config: "<<config_name<<"\nSolver: "<<solver_name<<"\nProblem: "<<problem_name);
 
     // Initialise and solve
-    ini.initialise(config_name, ser, sol, prob, problem_name, solver_name);
+    Initialiser::Instance()->initialise(config_name, ser, sol, prob, problem_name, solver_name);
 
     // Assign the problem to the solver
     sol->specifyProblem(prob);

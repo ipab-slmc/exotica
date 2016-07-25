@@ -33,6 +33,12 @@
 
 #include "ik_solver/ik_solver.h"
 
+#include <lapack/cblas.h>
+#include "f2c.h"
+#undef small
+#undef large
+#include <lapack/clapack.h>
+
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver);
@@ -48,6 +54,42 @@ namespace exotica
   IKsolver::~IKsolver()
   {
 
+  }
+
+  template<typename Scalar>
+  struct CwiseClampOp
+  {
+      CwiseClampOp(const Scalar& inf, const Scalar& sup)
+          : m_inf(inf), m_sup(sup)
+      {
+      }
+      const Scalar operator()(const Scalar& x) const
+      {
+        return x < m_inf ? m_inf : (x > m_sup ? m_sup : x);
+      }
+      Scalar m_inf, m_sup;
+  };
+
+  Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd> & A_)
+  {
+      Eigen::MatrixXd Ainv_ = A_;
+      double* AA = Ainv_.data();
+      integer info;
+      integer nn = A_.rows();
+      // Compute Cholesky
+      dpotrf_((char*) "L", &nn, AA, &nn, &info);
+      if (info != 0)
+      {
+        throw_pretty(info<<"\n"<<A_);
+      }
+      // Invert
+      dpotri_((char*) "L", &nn, AA, &nn, &info);
+      if (info != 0)
+      {
+        throw_pretty(info);
+      }
+      Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
+      return Ainv_;
   }
 
   void IKsolver::initDerived(tinyxml2::XMLHandle & handle)
@@ -130,6 +172,18 @@ namespace exotica
     _phi.resize(T);
     taskIndex.clear();
 
+    // Get joint limits
+    qmin_=Eigen::VectorXd::Ones(size_)*-1e100;
+    qmax_=Eigen::VectorXd::Ones(size_)*1e100;
+    std::vector<std::string> jnts;
+    prob_->getScenes().begin()->second->getJointNames(jnts);
+    std::map<std::string, std::vector<double>> joint_limits = prob_->getScenes().begin()->second->getSolver().getUsedJointLimits();
+    for (int i = 0; i < size_; i++)
+    {
+      qmin_(i) = joint_limits.at(jnts[i])[0];
+      qmax_(i) = joint_limits.at(jnts[i])[1];
+    }
+
     for (int t = 0; t < T; t++)
     {
       dim.at(t).resize(prob_->getTaskDefinitions().size());
@@ -152,7 +206,10 @@ namespace exotica
       big_size = dim.at(t).sum();
 
       big_jacobian.at(t).resize(big_size, size_);
-      task_weights.resize(big_size);
+      Cinv=Eigen::MatrixXd::Identity(big_size,big_size);
+      C=Eigen::MatrixXd::Identity(big_size,big_size);
+      W=Eigen::MatrixXd::Identity(size_,size_);
+      Winv=Eigen::MatrixXd::Identity(size_,size_);
       weights.resize(prob_->getTaskDefinitions().size());
       phi.at(t).resize(big_size);
       goal.at(t).resize(big_size);
@@ -185,10 +242,10 @@ namespace exotica
         task->registerJacobian(_jacobian[t][i], t);
 
         dimid.at(t)(i)=cur_rows;
-        task_weights.diagonal().block(cur_rows, 0, dim.at(t)(i), 1).setConstant(
+        Cinv.diagonal().block(cur_rows, 0, dim.at(t)(i), 1).setConstant(
             rhos.at(t)(i));
         weights[i].resize(dim.at(t)(i), dim.at(t)(i));
-        weights[i].diagonal() = task_weights.diagonal().block(cur_rows, 0,
+        weights[i].diagonal() = Cinv.diagonal().block(cur_rows, 0,
             dim.at(t)(i), 1);
         if (t == 0)
         {
@@ -204,7 +261,16 @@ namespace exotica
         cur_rows += dim.at(t)(i);
         i++;
       }
+
     }
+    C.diagonal()=Cinv.diagonal().unaryExpr(CwiseClampOp<double>(1e-10, 1e10));
+    C=C.inverse();
+    W.diagonal()=prob_->getW().diagonal().unaryExpr(CwiseClampOp<double>(1e-10, 1e10));
+    Winv=W.inverse();
+    HIGHLIGHT_NAMED("C","\n"<<C);
+    HIGHLIGHT_NAMED("Cinv","\n"<<Cinv);
+    HIGHLIGHT_NAMED("W","\n"<<W);
+    HIGHLIGHT_NAMED("Winv","\n"<<Winv);
     tasks_ = prob_->getTaskDefinitions();
     JTCinv_.resize(tasks_.size());
     JTCinvJ_.resize(size_, size_);
@@ -259,7 +325,7 @@ namespace exotica
     {
       std::pair<int, int> id = taskIndex.at(task_name);
       rhos.at(t)(id.first) = rho;
-      if(task_weights.rows()>id.first) task_weights.diagonal().block(dimid.at(t)(id.first), 0, dim.at(t)(id.first), 1).setConstant(rho);
+      if(Cinv.rows()>id.first) Cinv.diagonal().block(dimid.at(t)(id.first), 0, dim.at(t)(id.first), 1).setConstant(rho);
     }
   }
 
@@ -337,6 +403,7 @@ namespace exotica
       error = INFINITY;
       bool found = false;
       maxdim_ = 0;
+
       for (int i = 0; i < maxit_->data; i++)
       {
         prob_->update(solution.row(0), t);
@@ -346,6 +413,19 @@ namespace exotica
         {
             vel_vec_ = vel_vec_ * maxstep_->data / max_vel;
         }
+
+        for (int j=0;j<q0.rows();j++)
+        {
+            if(solution(0,j)+vel_vec_(j)<qmin_(j))
+            {
+                vel_vec_(j)=qmin_(j)-solution(0,j);
+            }
+            if(solution(0,j)+vel_vec_(j)>qmax_(j))
+            {
+                vel_vec_(j)=qmax_(j)-solution(0,j);
+            }
+        }
+
         if (error <= prob_->getTau() * 2.0)
         {
             solution.row(0) = solution.row(0) + vel_vec_.transpose();
@@ -452,26 +532,27 @@ namespace exotica
     }
   }
 
-  template<typename Scalar>
-  struct CwiseClampOp
-  {
-      CwiseClampOp(const Scalar& inf, const Scalar& sup)
-          : m_inf(inf), m_sup(sup)
-      {
-      }
-      const Scalar operator()(const Scalar& x) const
-      {
-        return x < m_inf ? m_inf : (x > m_sup ? m_sup : x);
-      }
-      Scalar m_inf, m_sup;
-  };
-
   void IKsolver::vel_solve(double & err, int t, Eigen::VectorXdRefConst q)
   {
-    static Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->getW().rows(),
-        prob_->getW().rows());
     if (initialised_)
     {
+        Eigen::VectorXd yj=Eigen::VectorXd::Zero(q.rows());
+        Eigen::MatrixXd Nj=Eigen::MatrixXd::Identity(q.rows(),q.rows());
+
+        for (int i=0;i<q.rows();i++)
+        {
+            if(q(i)<qmin_(i))
+            {
+                yj(i)=qmin_(i)-q(i);
+                Nj(i,i)=0;
+            }
+            if(q(i)>qmax_(i))
+            {
+                yj(i)=qmax_(i)-q(i);
+                Nj(i,i)=0;
+            }
+        }
+
       vel_vec_.setZero();
       task_error = goal.at(t) - phi.at(t);
       if (FRRT_)
@@ -488,29 +569,37 @@ namespace exotica
         }
 
       }
-      err = (task_weights * task_error).squaredNorm();
+      err = (task_error*C*task_error.transpose())(0);
       if (!multi_task_->data)
       {
         // Compute velocity
         Eigen::MatrixXd Jpinv;
-        big_jacobian.at(t) = big_jacobian.at(t).unaryExpr(
-            CwiseClampOp<double>(-1e10, 1e10));
-        Jpinv = (big_jacobian.at(t).transpose() * task_weights
-            * big_jacobian.at(t) + prob_->getW()).inverse()
-            * big_jacobian.at(t).transpose() * task_weights; //(Jt*C*J+W)*Jt*C */
-        /*Jpinv = prob_->getW()*big_jacobian.at(t).transpose() * (big_jacobian.at(t).transpose()*prob_->getW()*big_jacobian.at(t) + Eigen::MatrixXd::Identity(task_weights.rows(),task_weights.rows())*task_weights ).inverse(); //W*Jt*(Jt*W*J+C)*/
-        /*Jpinv=big_jacobian.at(t).transpose();*/
+        double det;
+
+        if(big_jacobian.at(t).cols()<big_jacobian.at(t).rows())
+        {
+            det= (big_jacobian.at(t)*big_jacobian.at(t).transpose()).determinant();
+
+            //(Jt*C^-1*J+W)^-1*Jt*C^-1
+            Jpinv = inverseSymPosDef(big_jacobian.at(t).transpose()*Cinv*big_jacobian.at(t) + W)
+                * big_jacobian.at(t).transpose() * Cinv;
+        }
+        else
+        {
+            det= (big_jacobian.at(t)*big_jacobian.at(t).transpose()).determinant();
+
+            //W^-1*Jt(J*W^-1*Jt+C)
+            Jpinv = Winv*big_jacobian.at(t).transpose() *
+                    inverseSymPosDef(big_jacobian.at(t)*Winv*big_jacobian.at(t).transpose()+C);
+        }
+
         if (Jpinv != Jpinv)
         {
           throw_named(big_jacobian.at(t));
         }
-        /*if(nullSpaceRef.rows()==q.rows())
-         {
-         vel_vec_ = Jpinv * task_error + (I-Jpinv*big_jacobian.at(t))*(nullSpaceRef-q);
-         }
-         else*/
         {
-          vel_vec_ = Jpinv * task_error;
+
+          vel_vec_ = yj + Nj*Jpinv * task_error;
         }
 
       }

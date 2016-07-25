@@ -89,7 +89,7 @@ namespace exotica
       std::vector<Eigen::VectorXdRef_ptr> threshold_;
   };
 
-  typedef exotica::Factory<std::string, exotica::TaskTerminationCriterion> TerminationCriterionCreator; //!< Convenience name for the EndCriterion Singleton Factory
+  typedef exotica::Factory<exotica::TaskTerminationCriterion> TerminationCriterionCreator; //!< Convenience name for the EndCriterion Singleton Factory
   typedef boost::shared_ptr<exotica::TaskTerminationCriterion> TaskTerminationCriterion_ptr;
 }
 #endif

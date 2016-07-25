@@ -16,9 +16,7 @@
   <license>TODO</license>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica_distro</build_depend>
-  <build_depend>pluginlib</build_depend>
   <run_depend>exotica_distro</run_depend>
-  <run_depend>pluginlib</run_depend>
 
 
   <export>

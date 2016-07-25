@@ -1,0 +1,8 @@
+<library path="lib/libaico">
+  <class name="exotica/IKsolver" type="exotica::IKsolver" base_class_type="exotica::MotionSolver">
+    <description>IK solver</description>
+  </class>
+  <class name="exotica/IKProblem" type="exotica::IKProblem" base_class_type="exotica::PlanningProblem">
+    <description>IK problem</description>
+  </class>
+</library>

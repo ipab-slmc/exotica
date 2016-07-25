@@ -33,7 +33,7 @@
 
 #include "aico/AICOProblem.h"
 
-REGISTER_PROBLEM_TYPE("AICOProblem", exotica::AICOProblem);
+REGISTER_PROBLEM_TYPE("AICOProblem", exotica::AICOProblem)
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 

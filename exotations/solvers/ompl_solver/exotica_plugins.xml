@@ -1,0 +1,8 @@
+<library path="lib/libaico">
+  <class name="exotica/OMPLsolver" type="exotica::OMPLsolver" base_class_type="exotica::MotionSolver">
+    <description>OMPL solver</description>
+  </class>
+  <class name="exotica/OMPLProblem" type="exotica::OMPLProblem" base_class_type="exotica::PlanningProblem">
+    <description>OMPL problem</description>
+  </class>
+</library>

@@ -42,11 +42,11 @@
 
 namespace exotica
 {
-  template<typename I, typename BO> class Factory;
+  template<typename BO> class Factory;
 
   class Object
   {
-      template<typename I, typename BO> friend class Factory;
+      template<typename BO> friend class Factory;
     public:
 
       /**

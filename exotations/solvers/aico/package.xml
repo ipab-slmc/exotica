@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package>
   <name>aico</name>
   <version>3.0.0</version>
   <description>Implementation of the Approximate Inference Control algorithm (AICO)</description>
@@ -12,15 +12,18 @@
   <url type="bugtracker">https://github.com/openhumanoids/exotica/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>exotica</depend>
-  <depend>roscpp</depend>
-  <depend>task_definition</depend>
-  <depend>task_map</depend>
-  <depend>liblapack-dev</depend>
-  <depend>f2c</depend>
-  <depend>pluginlib</depend>
+  <build_depend>exotica</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>task_definition</build_depend>
+  <build_depend>liblapack-dev</build_depend>
+  <build_depend>f2c</build_depend>
+  <run_depend>exotica</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>task_definition</run_depend>
+  <run_depend>liblapack-dev</run_depend>
+  <run_depend>f2c</run_depend>
 
   <export>
-    <aico plugin="${prefix}/solver_plugins.xml" />
+    <exotica plugin="${prefix}/exotica_plugins.xml" />
   </export>
 </package>

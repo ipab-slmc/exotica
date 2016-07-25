@@ -17,5 +17,6 @@
   <run_depend>exotica</run_depend>
 
   <export>
+    <exotica plugin="${prefix}/exotica_plugins.xml" />
   </export>
 </package>

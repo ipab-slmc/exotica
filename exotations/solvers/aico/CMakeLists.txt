@@ -10,7 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
   roscpp
   task_definition
-  task_map
 )
 
 ## System dependencies are found with CMake's conventions
@@ -20,7 +19,7 @@ find_package(LAPACK REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aico
-  CATKIN_DEPENDS exotica roscpp task_definition task_map
+  CATKIN_DEPENDS exotica roscpp task_definition
   DEPENDS system_lib
 )
 

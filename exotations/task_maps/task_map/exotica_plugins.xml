@@ -1,0 +1,23 @@
+<library path="lib/libaico">
+  <class name="exotica/CoM" type="exotica::CoM" base_class_type="exotica::TaskMap">
+    <description>Centre of mass</description>
+  </class>
+  <class name="exotica/Distance" type="exotica::Distance" base_class_type="exotica::TaskMap">
+    <description>Distance</description>
+  </class>
+  <class name="exotica/EffPosition" type="exotica::EffPosition" base_class_type="exotica::TaskMap">
+    <description>End-effector position (3D)</description>
+  </class>
+  <class name="exotica/Identity" type="exotica::Identity" base_class_type="exotica::TaskMap">
+    <description>Joint position reference</description>
+  </class>
+  <class name="exotica/IMesh" type="exotica::IMesh" base_class_type="exotica::TaskMap">
+    <description>Interaction Mesh</description>
+  </class>
+  <class name="exotica/JointLimit" type="exotica::JointLimit" base_class_type="exotica::TaskMap">
+    <description>Joint limits</description>
+  </class>
+  <class name="exotica/SweepFlux" type="exotica::SweepFlux" base_class_type="exotica::TaskMap">
+    <description>Sweep flux</description>
+  </class>
+</library>

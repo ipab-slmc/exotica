@@ -68,7 +68,6 @@
 #include <exotica/EXOTica.hpp>
 #include <aico/AICOProblem.h>
 #include <task_definition/TaskSqrError.h>
-#include <EffPosition.h>
 #include <iostream>
 #include <fstream>
 #include <aico/incremental_gaussian.h>

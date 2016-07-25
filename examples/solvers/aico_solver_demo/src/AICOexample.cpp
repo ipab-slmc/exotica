@@ -46,7 +46,6 @@ namespace exotica
     ROS_INFO_STREAM("Loaded path: " << resource_path);
 
     // Declarations
-    Initialiser ini;
     MotionSolver_ptr sol;
     Server_ptr ser;
     PlanningProblem_ptr prob;
@@ -60,7 +59,7 @@ namespace exotica
         "Config: "<<config_name<<"\nSolver: "<<solver_name<<"\nProblem: "<<problem_name);
 
     // Initialise and solve
-        ini.initialise(config_name, ser, sol, prob, problem_name, solver_name);
+      Initialiser::Instance()->initialise(config_name, ser, sol, prob, problem_name, solver_name);
       // Cast the generic solver instance into AICO solver
       AICOsolver_ptr solAICO = boost::static_pointer_cast<AICOsolver>(sol);
 

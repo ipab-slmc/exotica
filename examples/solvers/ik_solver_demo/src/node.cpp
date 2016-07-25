@@ -42,7 +42,6 @@ IKSolverDemoNode::IKSolverDemoNode()
 
   {
     // Declarations
-    Initialiser ini;
     MotionSolver_ptr sol;
     Server_ptr ser;
     PlanningProblem_ptr prob;
@@ -56,7 +55,7 @@ IKSolverDemoNode::IKSolverDemoNode()
         "Config: "<<config_name<<"\nSolver: "<<solver_name<<"\nProblem: "<<problem_name);
 
     // Initialise and solve
-    ini.initialise(config_name, ser, sol, prob, problem_name, solver_name);
+    Initialiser::Instance()->initialise(config_name, ser, sol, prob, problem_name, solver_name);
       // Assign the problem to the solver
       sol->specifyProblem(prob);
       // Create the initial configuration
@@ -75,7 +74,7 @@ IKSolverDemoNode::IKSolverDemoNode()
       jnt.name = prob->scenes_.begin()->second->getSolver().getJointNames();
       jnt.position.resize(jnt.name.size());
       double t = 0.0;
-      ros::Rate loop_rate(1.0 / 0.005);
+      ros::Rate loop_rate(1000.0);
       ros::WallTime init_time = ros::WallTime::now();
 
       while (ros::ok())
@@ -85,9 +84,13 @@ IKSolverDemoNode::IKSolverDemoNode()
         // Update the goal if necessary
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-        Eigen::VectorXd goal(3);
-        goal << 0.4, -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1, 0.5
-            + sin(t * M_PI * 0.5) * 0.2;
+        Eigen::VectorXd goal(6);
+        goal << 0.6,
+                -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                0.5 + sin(t * M_PI * 0.5) * 0.2,
+                1.1,
+                -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                0.5 + sin(t * M_PI * 0.5) * 0.2;
         solIK->setGoal("IKSolverDemoTask", goal, 0);
 
         // Solve the problem using the IK solver

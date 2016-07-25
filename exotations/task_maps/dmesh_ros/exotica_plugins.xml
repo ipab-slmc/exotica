@@ -1,0 +1,5 @@
+<library path="lib/libaico">
+  <class name="exotica/DMeshROS" type="exotica::DMeshROS" base_class_type="exotica::TaskMap">
+    <description>Distance mesh</description>
+  </class>
+</library>

@@ -11,7 +11,7 @@
 
   <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find ik_solver_demo)/resources/rviz.rviz" />
 
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="ik_st_pub" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="ik_st_pub" publish_frequency="100" />
 
   
 </launch>

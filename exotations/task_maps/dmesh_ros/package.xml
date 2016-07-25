@@ -22,4 +22,8 @@
   <run_depend>ik_solver</run_depend>  
   <run_depend>task_definition</run_depend>
   <run_depend>visualization_msgs</run_depend> 
+
+  <export>
+    <exotica plugin="${prefix}/exotica_plugins.xml" />
+  </export>
 </package>

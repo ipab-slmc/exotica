@@ -141,7 +141,14 @@ namespace exotica
       std::vector<std::vector<Eigen::VectorXdRef_ptr> > _goal;
       std::vector<std::vector<Eigen::VectorXdRef_ptr> > _phi;
 
-      Eigen::DiagonalMatrix<double, Eigen::Dynamic> task_weights; //!< Weight Matrices
+      //Eigen::DiagonalMatrix<double, Eigen::Dynamic> Cinv; //!< Weight Matrices
+      //Eigen::DiagonalMatrix<double, Eigen::Dynamic> C;
+      //Eigen::DiagonalMatrix<double, Eigen::Dynamic> W;
+      //Eigen::DiagonalMatrix<double, Eigen::Dynamic> Winv;
+      Eigen::MatrixXd Cinv; //!< Weight Matrices
+      Eigen::MatrixXd C;
+      Eigen::MatrixXd W;
+      Eigen::MatrixXd Winv;
       std::vector<Eigen::MatrixXd> weights;
       Eigen::VectorXd vel_vec_;	//Velocity vector
       Eigen::VectorXd task_error; //!< Task Error vector for the current optimisation level
@@ -153,6 +160,8 @@ namespace exotica
       int size_;	//Configuration size
       Eigen::MatrixXd inv_jacobian;
       Eigen::VectorXd diag;
+
+      Eigen::VectorXd qmin_,qmax_;
 
       int T;
       bool initialised_;

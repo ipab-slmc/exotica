@@ -41,7 +41,7 @@
 
 #include "tinyxml2/tinyxml2.h"
 
-#define REGISTER_MOTIONSOLVER_TYPE(TYPE, DERIV) EXOTICA_REGISTER(std::string, exotica::MotionSolver, TYPE, DERIV)
+#define REGISTER_MOTIONSOLVER_TYPE(TYPE, DERIV) EXOTICA_REGISTER(exotica::MotionSolver, TYPE, DERIV)
 
 namespace exotica
 {
@@ -105,7 +105,7 @@ namespace exotica
       Server_ptr server_; //!< Pointer to EXOTica parameter server;
   };
 
-  typedef exotica::Factory<std::string, exotica::MotionSolver> MotionSolver_fac;
+  typedef exotica::Factory<exotica::MotionSolver> MotionSolver_fac;
   typedef boost::shared_ptr<exotica::MotionSolver> MotionSolver_ptr;
 }
 

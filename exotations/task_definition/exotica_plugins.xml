@@ -1,0 +1,8 @@
+<library path="lib/libaico">
+  <class name="exotica/TaskSqrError" type="exotica::TaskSqrError" base_class_type="exotica::TaskDefinition">
+    <description>Squared error</description>
+  </class>
+  <class name="exotica/TaskTerminationCriterion" type="exotica::TaskTerminationCriterion" base_class_type="exotica::TaskDefinition">
+    <description>Termination criterion/description>
+  </class>
+</library>

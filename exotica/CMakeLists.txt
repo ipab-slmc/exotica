@@ -54,7 +54,6 @@ catkin_package(
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp  message_runtime moveit_ros_planning_interface moveit_core tf kdl_parser pluginlib
-  DEPENDS
   CFG_EXTRAS Exotica.cmake
 )
 

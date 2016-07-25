@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Boost REQUIRED COMPONENTS signals)
 
+find_package(LAPACK REQUIRED)
+
 catkin_package(
 INCLUDE_DIRS include
 LIBRARIES ik_solver
@@ -19,8 +21,8 @@ CATKIN_DEPENDS exotica roscpp roslib task_definition task_map
 DEPENDS system_lib
 )
 
-include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 

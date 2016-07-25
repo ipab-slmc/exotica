@@ -39,6 +39,7 @@
 
 #include "exotica/Server.h"
 #include "exotica/Tools.h"
+#include <pluginlib/class_list_macros.h>
 
 /**
  * \brief Generic Factory Macro definition: to be specialised by each new base type which wishes to make use of a factory for instantiation of derived classes
@@ -47,7 +48,8 @@
  * @param TYPE    The name to identify the class (should be of type IDENT)
  * @param DERIV   The Derived Class type (should inherit from BASE)
  */
-#define EXOTICA_REGISTER(IDENT, BASE, TYPE, DERIV) static exotica::Registrar<IDENT, BASE> EX_UNIQ(object_registrar_, __LINE__) (TYPE, [] () -> BASE * { return new DERIV(); } );
+#define EXOTICA_REGISTER(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) (TYPE, [] () -> BASE * { return new DERIV(); } ); \
+    PLUGINLIB_EXPORT_CLASS(DERIV, BASE)
 
 namespace exotica
 {
@@ -56,16 +58,16 @@ namespace exotica
    * @param I   The identifier type (typically a string)
    * @param BO  The Base Object type
    */
-  template<typename I, typename BO>
+  template<typename BO>
   class Factory: public Object
   {
     public:
       /**
        * \brief Singleton implementation: returns a reference to a singleton instance of the instantiated class
        */
-      static Factory<I, BO> & Instance(void)
+      static Factory<BO> & Instance(void)
       {
-        static Factory<I, BO> factory_; //!< Declared static so will only be created once
+        static Factory<BO> factory_; //!< Declared static so will only be created once
         return factory_;    //!< At other times, just return the reference to it
       }
       ;
@@ -75,7 +77,7 @@ namespace exotica
        * @param type[in]    The name of the class (string): must be a unique identifier
        * @param creator[in] A pointer to the creator function
        */
-      void registerType(const I & type, BO * (*creator_function)())
+      void registerType(const std::string & type, BO * (*creator_function)())
       {
         if (type_registry_.find(type) == type_registry_.end()) //!< If it does not already exist
         {
@@ -92,7 +94,7 @@ namespace exotica
        * \brief Lists the valid implementations which are available and registered
        * @param task_types[out] Vector of task-type names
        */
-      void listImplementations(std::vector<I> & registered_types)
+      void listImplementations(std::vector<std::string> & registered_types)
       {
         registered_types.clear();
         for (auto it = type_registry_.begin(); it != type_registry_.end(); it++)
@@ -106,7 +108,7 @@ namespace exotica
        * @param type  [in]   Identifier as used by the instantiation of the factory
        * @param object[out]  Shared pointer to the object (placeholder)
        */
-      void createObject(const I & type, boost::shared_ptr<BO> const & object)
+      void createObject(const std::string & type, boost::shared_ptr<BO> const & object)
       {
         auto it = type_registry_.find(type);  //!< Attempt to find it
         if (it != type_registry_.end())       //!< If exists
@@ -133,7 +135,7 @@ namespace exotica
       {
         if (handle.ToElement())
         {
-          if (typeid(I) == typeid(std::string))
+          if (typeid(std::string) == typeid(std::string))
           {
             std::string type = std::string(handle.ToElement()->Name());
             auto it = type_registry_.find(type);
@@ -200,12 +202,12 @@ namespace exotica
       /**
        * \brief Private Constructor
        */
-      inline explicit Factory<I, BO>()
+      inline explicit Factory<BO>()
       {
       }
 
       /** The Map containing the register of the different types of classes **/
-      std::map<I, BO * (*)()> type_registry_;
+      std::map<std::string, BO * (*)()> type_registry_;
   };
 
   /**
@@ -213,7 +215,7 @@ namespace exotica
    * @param I   The Identifier type (typically string)
    * @param BO  The Base object type (required for the sake of the singleton factory)
    */
-  template<typename I, typename BO>
+  template<typename BO>
   class Registrar
   {
     public:
@@ -222,9 +224,9 @@ namespace exotica
        * @param name      The name for the new class type
        * @param creator   The creator function for the DERIVED class type but which returns a pointer to the base-class type!
        */
-      Registrar(const I & name, BO * (*creator)())
+      Registrar(const std::string & name, BO * (*creator)())
       {
-        Factory<I, BO>::Instance().registerType(name, creator);
+        Factory<BO>::Instance().registerType(name, creator);
       }
   };
 }

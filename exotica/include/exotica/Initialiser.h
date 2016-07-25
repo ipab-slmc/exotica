@@ -41,17 +41,27 @@
 #include "exotica/Server.h"
 #include "rapidjson/document.h"
 
+#include <pluginlib/class_loader.h>
+
 namespace exotica
 {
   class Initialiser: public Object
   {
     public:
-      /**
-       * \brief Default Constructor
-       * 
-       *        Currently, is an empty constructor definition.
-       */
-      Initialiser();
+
+      ~Initialiser() noexcept {}
+
+      static boost::shared_ptr<Initialiser> Instance()
+      {
+        if (!singleton_initialiser_) singleton_initialiser_.reset(new Initialiser);
+        return singleton_initialiser_;
+      }
+
+      static void printSupportedClasses();
+      static boost::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return Instance()->createObjectInternal(type, Instance()->solvers_);}
+      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->createObjectInternal(type, Instance()->problems_);}
+      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return Instance()->createObjectInternal(type, Instance()->definitions_);}
+      static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->createObjectInternal(type, Instance()->maps_);}
 
       ///
       /// \brief initialise Initialises the server from XML handle
@@ -151,8 +161,31 @@ namespace exotica
       void initialiseProblemMoveit(PlanningProblem_ptr problem);
     private:
 
+      /**
+       * \brief Default Constructor
+       *
+       *        Currently, is an empty constructor definition.
+       */
+      Initialiser();
+      static boost::shared_ptr<Initialiser> singleton_initialiser_;
+      ///	\brief	Make sure the singleton does not get copied
+      Initialiser(Initialiser const&) = delete;
+      void operator=(Initialiser const&) = delete;
+
+      template<class C> boost::shared_ptr<C> createObjectInternal(const std::string & type,pluginlib::ClassLoader<C> & loader)
+      {
+          return loader.createInstance(type);
+      }
+
       /** Class Parameters **/
       tinyxml2::XMLDocument xml_file;
+      pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
+      pluginlib::ClassLoader<exotica::PlanningProblem> problems_;
+      pluginlib::ClassLoader<exotica::TaskMap> maps_;
+      pluginlib::ClassLoader<exotica::TaskDefinition> definitions_;
   };
+
+  typedef boost::shared_ptr<Initialiser> Initialiser_ptr;
 }
+
 #endif

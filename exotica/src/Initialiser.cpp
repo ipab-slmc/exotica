@@ -36,10 +36,40 @@ using namespace rapidjson;
 
 namespace exotica
 {
+  Initialiser_ptr Initialiser::singleton_initialiser_ = NULL;
 
-  Initialiser::Initialiser()
+  void Initialiser::printSupportedClasses()
   {
-    //!< Empty constructor
+      HIGHLIGHT("Registered solvers:");
+      std::vector<std::string> solvers =  Instance()->solvers_.getDeclaredClasses();
+      for(std::string s : solvers)
+      {
+          HIGHLIGHT(" '"<<s<<"'");
+      }
+      HIGHLIGHT("Registered problems:");
+      std::vector<std::string> problems =  Instance()->problems_.getDeclaredClasses();
+      for(std::string s : problems)
+      {
+          HIGHLIGHT(" '"<<s<<"'");
+      }
+      HIGHLIGHT("Registered task definitions:");
+      std::vector<std::string> definitions =  Instance()->definitions_.getDeclaredClasses();
+      for(std::string s : definitions)
+      {
+          HIGHLIGHT(" '"<<s<<"'");
+      }
+      HIGHLIGHT("Registered task maps:");
+      std::vector<std::string> maps =  Instance()->maps_.getDeclaredClasses();
+      for(std::string s : maps)
+      {
+          HIGHLIGHT(" '"<<s<<"'");
+      }
+  }
+
+  Initialiser::Initialiser() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap"),
+    definitions_("exotica","exotica::TaskDefinition"), problems_("exotica","exotica::PlanningProblem")
+  {
+
   }
 
   void Initialiser::initialise(const std::string & file_name,

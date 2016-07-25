@@ -41,7 +41,6 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
 
   {
     // Declarations
-    Initialiser ini;
     std::vector<MotionSolver_ptr> sol;
     Server_ptr ser;
     std::vector<PlanningProblem_ptr> prob;
@@ -57,7 +56,7 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
         "Config: "<<config_name<<"\nSolver: "<<solver_name[0]<<"\nProblem: "<<problem_name[0]<<"\nBias: "<<problem_name[1]);
 
     // Initialise and solve
-        ini.initialise(config_name, ser, sol, prob, problem_name, solver_name);
+      Initialiser::Instance()->initialise(config_name, ser, sol, prob, problem_name, solver_name);
       // Assign the problem to the solver
       // Cast the generic solver instance into IK solver
       OMPLsolver_ptr solOMPL = boost::static_pointer_cast<OMPLsolver>(sol[0]);

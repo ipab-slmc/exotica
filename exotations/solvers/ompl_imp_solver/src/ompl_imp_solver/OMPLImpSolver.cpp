@@ -126,15 +126,15 @@ namespace exotica
 
     std::vector<std::string> jnt_names;
     prob_->getScenes().begin()->second->getJointNames(jnt_names);
-    std::vector<int> project_vars = { 0, 1 };
-    if (base_type_ == BASE_TYPE::FIXED)
-      ompl_simple_setup_->getStateSpace()->registerDefaultProjection(
-          ob::ProjectionEvaluatorPtr(
-              new OMPLRNProjection(state_space_, project_vars)));
-    else if (base_type_ == BASE_TYPE::FLOATING)
-      ompl_simple_setup_->getStateSpace()->registerDefaultProjection(
-          ob::ProjectionEvaluatorPtr(
-              new OMPLSE3RNProjection(state_space_, project_vars)));
+//    std::vector<int> project_vars = { 0, 1 };
+//    if (base_type_ == BASE_TYPE::FIXED)
+//      ompl_simple_setup_->getStateSpace()->registerDefaultProjection(
+//          ob::ProjectionEvaluatorPtr(
+//              new OMPLRNProjection(state_space_, project_vars)));
+//    else if (base_type_ == BASE_TYPE::FLOATING)
+//      ompl_simple_setup_->getStateSpace()->registerDefaultProjection(
+//          ob::ProjectionEvaluatorPtr(
+//              new OMPLSE3RNProjection(state_space_, project_vars)));
     return SUCCESS;
   }
 

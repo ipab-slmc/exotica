@@ -54,9 +54,7 @@ namespace exotica
       margin_->data = 0.0;
       server->setParam(server->getName() + "/SafetyMargin", margin_);
     }
-    server->getParam(server->getName() + "/ValidSampleCnt", valid_cnt_);
-    server->getParam(server->getName() + "/InvalidSampleCnt", invalid_cnt_);
-    server->getParam(server->getName() + "/CollisionTime", collision_time_);
+
     HIGHLIGHT_NAMED("OMPLStateValidityChecker",
         "Safety Margin: " << margin_->data);
   }
@@ -70,7 +68,6 @@ namespace exotica
   bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
       double &dist) const
   {
-    ros::Time start = ros::Time::now();
     Eigen::VectorXd q(prob_->getSpaceDim());
     boost::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
         state, q);
@@ -82,12 +79,9 @@ namespace exotica
       if (!it.second->getCollisionScene()->isStateValid(0, margin_->data))
       {
         dist = -1;
-        invalid_cnt_->data = invalid_cnt_->data + 1;
         return false;
       }
     }
-    valid_cnt_->data = valid_cnt_->data + 1;
-    collision_time_->data += ros::Duration(ros::Time::now() - start).toSec();
     return true;
   }
 }

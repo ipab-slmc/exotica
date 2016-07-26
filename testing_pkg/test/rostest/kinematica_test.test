@@ -1,3 +1,0 @@
-<launch>
-  <test test-name="kinematica_test_node" pkg="testing_pkg" type="kinematica_test_node" />
-</launch>

@@ -68,7 +68,7 @@ namespace exotica
        * @param	server	Server
        * @return           Indication of success/failure: TODO
        */
-      EReturn initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server);
+      void initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server);
 
       /**
        * \brief Updator: declared virtual so can be overridden.
@@ -76,7 +76,7 @@ namespace exotica
        * @param t Time step (not used by most task maps)
        * @return  Indication of success TODO
        */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(Eigen::VectorXdRefConst x, const int t);
 
       /**
        * \brief Returns the reference to the task definition map.
@@ -96,15 +96,15 @@ namespace exotica
        * \brief Update the kinematic scene
        * @param scene	The planning scene from moveit
        */
-      EReturn updateKinematicScene(
+      void updateKinematicScene(
           const planning_scene::PlanningSceneConstPtr & scene);
 
       /*
        * \brief	Set EXOTica Scene from a moveit planning scene
        * @param	scene	Moveit planning scene
        */
-      EReturn setScene(const planning_scene::PlanningSceneConstPtr & scene);
-      EReturn setScene(const moveit_msgs::PlanningSceneConstPtr & scene);
+      void setScene(const planning_scene::PlanningSceneConstPtr & scene);
+      void setScene(const moveit_msgs::PlanningSceneConstPtr & scene);
       Scene_map scenes_;  //!< Kinematic scene(s) indexed by name
 
       Eigen::VectorXd startState;
@@ -114,10 +114,10 @@ namespace exotica
       std::string endStateName;
       std::string nominalStateName;
 
-      virtual EReturn reinitialise(rapidjson::Document& document,
+      virtual void reinitialise(rapidjson::Document& document,
           boost::shared_ptr<PlanningProblem> problem);
 
-      virtual EReturn reinitialise(Problem& msg, boost::shared_ptr<PlanningProblem> problem);
+      virtual void reinitialise(Problem& msg, boost::shared_ptr<PlanningProblem> problem);
 
       boost::shared_ptr<std::map<std::string, Eigen::VectorXd> > poses;
       boost::shared_ptr<std::vector<std::string> > posesJointNames;
@@ -133,7 +133,7 @@ namespace exotica
        * @param handle[in] The handle to the XML-element describing the Problem Definition
        * @return           Indication of success/failure: TODO
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle) = 0;
+      virtual void initDerived(tinyxml2::XMLHandle & handle) = 0;
 
       Server_ptr server_; //!< Pointer to EXOTica parameter server;
       TaskMap_map task_maps_; //!< The set of taskmaps we will be using, which will be shared between task-definitions

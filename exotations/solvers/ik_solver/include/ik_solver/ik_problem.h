@@ -35,8 +35,7 @@
 #define IK_PROBLEM_H_
 #include <exotica/PlanningProblem.h>
 #include "task_definition/TaskSqrError.h"
-#include "kinematic_maps/Distance.h"
-#include "kinematic_maps/Orientation.h"
+#include "Distance.h"
 namespace exotica
 {
   /**
@@ -63,7 +62,7 @@ namespace exotica
       double getTau();
       void setTau(double tau);
 
-      virtual EReturn reinitialise(rapidjson::Document& document,
+      virtual void reinitialise(rapidjson::Document& document,
           boost::shared_ptr<PlanningProblem> problem);
     protected:
       /**
@@ -71,7 +70,7 @@ namespace exotica
        * @param handle The handle to the XML-element describing the Problem Definition
        * @return Indication of success/failure
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       Eigen::MatrixXd config_w_;	//Configuration weight
       double tau_;	// Tolerance

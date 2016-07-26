@@ -90,42 +90,39 @@ namespace ompl
           std::string spacename = si_->getStateSpace()->getName();
           if (spacename.compare("OMPLSE3RNCompoundStateSpace") == 0)
           {
-            return exotica::ok(
                 si_->getStateSpace()->as<exotica::OMPLSE3RNStateSpace>()->OMPLStateToEigen(
-                    state, eigen));
+                    state, eigen);
           }
           else if (spacename.compare("OMPLStateSpace") == 0)
           {
-            return exotica::ok(
                 si_->getStateSpace()->as<exotica::OMPLStateSpace>()->copyFromOMPLState(
-                    state, eigen));
+                    state, eigen);
           }
           else
           {
-            ERROR("Can not convert state space "<<spacename);
+            throw_pretty("Can not convert state space "<<spacename);
           }
-          return false;
+          return true;
         }
+
         bool copyEigenToState(const Eigen::VectorXd & eigen, ob::State *state)
         {
           std::string spacename = si_->getStateSpace()->getName();
           if (spacename.compare("OMPLSE3RNCompoundStateSpace") == 0)
           {
-            return exotica::ok(
                 si_->getStateSpace()->as<exotica::OMPLSE3RNStateSpace>()->EigenToOMPLState(
-                    eigen, state));
+                    eigen, state);
           }
           else if (spacename.compare("OMPLStateSpace") == 0)
           {
-            return exotica::ok(
                 si_->getStateSpace()->as<exotica::OMPLStateSpace>()->copyToOMPLState(
-                    state, eigen));
+                    state, eigen);
           }
           else
           {
-            ERROR("Can not convert state space "<<spacename);
+            throw_pretty("Can not convert state space "<<spacename);
           }
-          return false;
+          return true;
         }
         class FlexibleMotion
         {
@@ -171,7 +168,7 @@ namespace ompl
           return d;
         }
         ///	Local solver
-        exotica::EReturn localSolve(const Eigen::VectorXd & qs,
+        bool localSolve(const Eigen::VectorXd & qs,
             Eigen::VectorXd & qg, Eigen::MatrixXd & solution);
         exotica::Server_ptr ser_;
         exotica::IKsolver_ptr local_solver_;

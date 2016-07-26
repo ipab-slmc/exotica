@@ -1,8 +1,0 @@
-<launch>
-  <node pkg="exotica_moveit" type="ExoticaPlannerServiceNode" name="exotica_service" output="screen" >
-    <param name="config" type="string" value="$(find mantis_moveit)/config/exotica.xml" />
-    <param name="solver" type="string" value="OMPL_Interface" />
-    <param name="problem" type="string" value="OMPLProblem" />
-  </node>
-  
-</launch>

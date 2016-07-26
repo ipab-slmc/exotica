@@ -37,7 +37,7 @@
 #include <exotica/EXOTica.hpp>
 #include <ik_solver/ik_problem.h>
 #include <task_definition/TaskSqrError.h>
-#include <generic/Identity.h>
+#include <Identity.h>
 #include <iostream>
 #include <fstream>
 
@@ -58,8 +58,8 @@ namespace exotica
        * @param	solution	This will be filled with the solution in joint space(Vector).
        * @return	SUCESS if solution has been found, corresponding error code if not.
        */
-      virtual EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
-      EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXdRef solution,
+      virtual void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      bool Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXdRef solution,
           int t);
 
       /**
@@ -67,14 +67,14 @@ namespace exotica
        * @param	q0			Start state.
        * @param	solution	This will be filled with the solution in joint space(Vector).
        */
-      EReturn SolveFullSolution(Eigen::VectorXdRefConst q0,
+      bool SolveFullSolution(Eigen::VectorXdRefConst q0,
           Eigen::MatrixXd & solution);
       /**
        * \brief	Binds the solver to a specific problem which must be pre-initalised
        * @param	pointer	Shared pointer to the motion planning problem
        * @return	Successful if the problem is a valid AICOProblem
        */
-      virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
+      virtual void specifyProblem(PlanningProblem_ptr pointer);
 
       /*
        * \brief	Check if a problem is solvable by this solver (Pure Virtual)
@@ -88,7 +88,7 @@ namespace exotica
        * @param	task_name	Task map name
        * @param	goal	new goal
        */
-      EReturn setGoal(const std::string & task_name,
+      void setGoal(const std::string & task_name,
           Eigen::VectorXdRefConst goal, int t = 0);
 
       /**
@@ -96,7 +96,7 @@ namespace exotica
        * @param	task_name	Task map name
        * @param	rho	Rho
        */
-      EReturn setRho(const std::string & task_name, const double rho,
+      void setRho(const std::string & task_name, const double rho,
           int t = 0);
       double getRho(const std::string & task_name, int t = 0);
 
@@ -106,6 +106,7 @@ namespace exotica
       ros::Duration planning_time_;
 
       int getMaxIteration();
+      int getLastIteration();
       Eigen::VectorXd nullSpaceRef;
       void setReachGoal(const geometry_msgs::Pose &goal);
     protected:
@@ -114,14 +115,14 @@ namespace exotica
        * @param	handle	XMLHandle to the Solver element
        * @return	Should indicate success or otherwise
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
     private:
       /**
        * \brief	IK velocity solver
        * @param	err	Task error
        */
-      inline EReturn vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
+      inline void vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
       IKProblem_ptr prob_; // Shared pointer to the planning problem.
       EParam<std_msgs::Int64> maxit_;	// Maximum iteration
       EParam<std_msgs::Float64> maxstep_;	// Maximum step
@@ -155,6 +156,7 @@ namespace exotica
 
       int T;
       bool initialised_;
+      int iterations_;
 
       ///	For FRRT debug
       bool FRRT_;
@@ -166,7 +168,6 @@ namespace exotica
       EParam<std_msgs::Bool> ignore_obs_near_goal_;
       geometry_msgs::Pose reach_goal_;
       Distance_Ptr reach_position_taskmap_;
-      Orientation_Ptr reach_orientation_taskmap_;
   };
   typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

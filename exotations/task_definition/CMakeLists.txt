@@ -1,16 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(task_definition)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
-set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
-set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
-
 find_package(catkin REQUIRED COMPONENTS
   exotica
 )
 
-##find_package(EIGEN REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -19,13 +13,6 @@ catkin_package(
   DEPENDS
 )
 
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-# include_directories(include)
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}

@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(exotica)
 
-## Set Flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
-set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
-set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
-
 set(MSG_DEPS
   geometry_msgs
   std_msgs
@@ -48,21 +42,16 @@ generate_messages(
   ${MSG_DEPS}
 )
 
-
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS signals)
 
-if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/Ref.h")
-   message(WARNING "Eigen found")
-elseif(IS_DIRECTORY $ENV{DRC_BASE})
-  set(EIGEN3_INCLUDE_DIR $ENV{DRC_BASE}/software/build/include/eigen3)
-  message(WARNING "Using OpenHumanoids version of Eigen")
-elseif(EXISTS "/usr/include/eigen3/Eigen/src/Core/Ref.h")
-  message(WARNING "Manually setting to /usr/include/eigen3")
-  set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
-else()
-   message(FATAL_ERROR "Eigen version 3.2.1 or higher is required! Install it in the standard directory.")
-endif()
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(Exotica)
+
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+configure_file("src/Version.cpp.in" "${exotica_BINARY_DIR}/generated/Version.cpp" @ONLY)
 
 ## catkin specific configuration ##
 catkin_package(
@@ -70,6 +59,7 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp  message_runtime moveit_ros_planning_interface moveit_core tf kdl_parser
   DEPENDS eigen system_lib boost orocos_kdl
+  CFG_EXTRAS Exotica.cmake
 )
 
 ## Build ##
@@ -86,6 +76,7 @@ add_library(${PROJECT_NAME}
   src/TaskMap.cpp
   src/tinyxml2.cpp
   src/Tools.cpp
+  src/Tools/Exception.cpp
   src/TaskDefinition.cpp
   src/PlanningProblem.cpp
   src/MotionSolver.cpp
@@ -95,7 +86,7 @@ add_library(${PROJECT_NAME}
   src/KinematicTree.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${orocos_kdl_LIBRARIES})
 
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${exotica_BINARY_DIR}/generated/Version.cpp)
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

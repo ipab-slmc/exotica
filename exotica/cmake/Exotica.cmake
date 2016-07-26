@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 2.8.3)
+
+message(STATUS "Compiling using c++ 11 (required by EXOTica)")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
+set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
+set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
+
+SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE} CACHE STRING "RelWithDebInfo" FORCE)
+message(STATUS "Forcing build type ${CMAKE_BUILD_TYPE} (required by EXOTica)")
+
+if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/Ref.h")
+   message(STATUS "Eigen found")
+elseif(IS_DIRECTORY $ENV{DRC_BASE})
+  set(EIGEN3_INCLUDE_DIR $ENV{DRC_BASE}/software/build/include/eigen3)
+  message(STATUS "Using OpenHumanoids version of Eigen")
+elseif(EXISTS "/usr/include/eigen3/Eigen/src/Core/Ref.h")
+  message(STATUS "Manually setting to /usr/include/eigen3")
+  set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
+else()
+   message(FATAL_ERROR "Eigen version 3.2.1 or higher is required! Install it in the standard directory.")
+endif()

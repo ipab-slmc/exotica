@@ -59,7 +59,7 @@ namespace exotica
       /// \param server Returned server object
       /// \return Indication of success
       ///
-      EReturn initialise(tinyxml2::XMLHandle root_handle, Server_ptr & server);
+      void initialise(tinyxml2::XMLHandle root_handle, Server_ptr & server);
 
       ///
       /// \brief initialise Initialises the problem from XML handle
@@ -69,7 +69,7 @@ namespace exotica
       /// \param server Server to use with this object
       /// \return Indication of success
       ///
-      EReturn initialise(tinyxml2::XMLHandle root_handle,
+      void initialise(tinyxml2::XMLHandle root_handle,
           PlanningProblem_ptr & problem, const std::string & problem_name,
           Server_ptr & server);
 
@@ -81,7 +81,7 @@ namespace exotica
       /// \param server Server to use with this object
       /// \return Indication of success
       ///
-      EReturn initialise(tinyxml2::XMLHandle root_handle,
+      void initialise(tinyxml2::XMLHandle root_handle,
           MotionSolver_ptr & solver, const std::string & solver_name,
           Server_ptr & server);
 
@@ -92,7 +92,7 @@ namespace exotica
        * @param problem   Shared pointer to a Planning Problem
        * @return          Indication of Success: TODO
        */
-      EReturn initialise(const std::string & file_name, Server_ptr & server,
+      void initialise(const std::string & file_name, Server_ptr & server,
           MotionSolver_ptr & solver, PlanningProblem_ptr & problem);
 
       /**
@@ -104,7 +104,7 @@ namespace exotica
        * @param solver_name Vector of requested solver names
        * @return          Indication of Success
        */
-      EReturn initialise(const std::string & file_name, Server_ptr & server,
+      void initialise(const std::string & file_name, Server_ptr & server,
           std::vector<MotionSolver_ptr> & solver,
           std::vector<PlanningProblem_ptr> & problem,
           std::vector<std::string> & problem_name,
@@ -119,7 +119,7 @@ namespace exotica
        * @param solver_name Solver name
        * @return          Indication of Success
        */
-      EReturn initialise(const std::string & file_name, Server_ptr & server,
+      void initialise(const std::string & file_name, Server_ptr & server,
           MotionSolver_ptr & solver, PlanningProblem_ptr & problem,
           const std::string & problem_name, const std::string & solver_name);
 
@@ -130,7 +130,7 @@ namespace exotica
        * @param problems Return vector of solver names
        * @return Indication of success
        */
-      EReturn listSolversAndProblems(const std::string & file_name,
+      void listSolversAndProblems(const std::string & file_name,
           std::vector<std::string>& problems,
           std::vector<std::string>& solvers);
 
@@ -140,7 +140,7 @@ namespace exotica
       /// \param constraints JSON string
       /// \return Indication of success
       ///
-      EReturn initialiseProblemJSON(PlanningProblem_ptr problem,
+      void initialiseProblemJSON(PlanningProblem_ptr problem,
           const std::string& constraints);
 
       ///
@@ -148,7 +148,7 @@ namespace exotica
       /// \param problem Problem to be reinitialised
       /// \return Indication of success
       ///
-      EReturn initialiseProblemMoveit(PlanningProblem_ptr problem);
+      void initialiseProblemMoveit(PlanningProblem_ptr problem);
     private:
 
       /** Class Parameters **/

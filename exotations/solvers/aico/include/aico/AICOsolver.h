@@ -68,7 +68,7 @@
 #include <exotica/EXOTica.hpp>
 #include <aico/AICOProblem.h>
 #include <task_definition/TaskSqrError.h>
-#include <kinematic_maps/EffPosition.h>
+#include <EffPosition.h>
 #include <iostream>
 #include <fstream>
 #include <aico/incremental_gaussian.h>
@@ -100,7 +100,7 @@ namespace exotica
        * @param solution This will be filled with the solution in joint space.
        * @return SUCESS if solution has been found, corresponding error code if not.
        */
-      EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
 
       /**
        * \brief Solves the problem
@@ -108,7 +108,7 @@ namespace exotica
        * @param solution This will be filled with the solution in joint space.
        * @return SUCESS if solution has been found, corresponding error code if not.
        */
-      EReturn Solve(const std::vector<Eigen::VectorXd>& q_init,
+      void Solve(const std::vector<Eigen::VectorXd>& q_init,
           Eigen::MatrixXd & solution);
 
       /**
@@ -116,7 +116,7 @@ namespace exotica
        * @param pointer Shared pointer to the motion planning problem
        * @return        Successful if the problem is a valid AICOProblem
        */
-      virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
+      virtual void specifyProblem(PlanningProblem_ptr pointer);
 
       /*
        * \brief	Check if a problem is solvable by this solver (Pure Virtual)
@@ -130,24 +130,24 @@ namespace exotica
       /**
        * \brief Stores costs into a file
        */
-      EReturn saveCosts(std::string file_name);
+      void saveCosts(std::string file_name);
 
       /**
        * \brief Computes an inverse of symmetric positive definite matrix using LAPACK (very fast)
        * @param Ainv Resulting inverted matrix.
        * @param A A symmetric positive definite matrix to be inverted.
        */
-      EReturn inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
+      void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
           const Eigen::Ref<const Eigen::MatrixXd> & A_);
 
       /**
        * \brief Computes the solution to the linear problem \f$x=Ab\f$ for symmetric positive definite matrix A
        */
-      EReturn AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
+      void AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
           const Eigen::Ref<const Eigen::MatrixXd> & A_,
           const Eigen::Ref<const Eigen::VectorXd> & b_);
 
-      EReturn getStats(std::vector<SinglePassMeanCoviariance>& q_stat_);
+      void getStats(std::vector<SinglePassMeanCoviariance>& q_stat_);
 
       bool preupdateTrajectory_;
 
@@ -157,7 +157,7 @@ namespace exotica
        * @param	goal	new goal
        * @param   t time step
        */
-      EReturn setGoal(const std::string & task_name,
+      void setGoal(const std::string & task_name,
           Eigen::VectorXdRefConst goal, int t = 0);
 
       /**
@@ -166,7 +166,7 @@ namespace exotica
        * @param	rho	Rho
        * @param   t time step
        */
-      EReturn setRho(const std::string & task_name, const double rho,
+      void setRho(const std::string & task_name, const double rho,
           int t = 0);
 
       /**
@@ -175,7 +175,7 @@ namespace exotica
        * @param	goal	returned goal
        * @param   t time step
        */
-      EReturn getGoal(const std::string & task_name, Eigen::VectorXd& goal,
+      void getGoal(const std::string & task_name, Eigen::VectorXd& goal,
           int t = 0);
 
       /**
@@ -184,7 +184,7 @@ namespace exotica
        * @param	goal	returned rho
        * @param   t time step
        */
-      EReturn getRho(const std::string & task_name, double& rho, int t = 0);
+      void getRho(const std::string & task_name, double& rho, int t = 0);
 
       std::vector<Eigen::VectorXd> y_star; //!< Task cost mappings
       std::vector<Eigen::VectorXd> rhos; //!< Task precisions
@@ -198,20 +198,20 @@ namespace exotica
        * @param handle XMLHandle to the Solver element
        * @return       Should indicate success or otherwise
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       /** \brief Initializes message data.
        *  @param q0 Start configuration
        *  @return  Indicates success
        */
-      EReturn initMessages();
+      void initMessages();
 
       /**
        * \brief Initialise AICO messages from an initial trajectory
        * @param q_init Initial trajectory
        * @return  Indicates success
        */
-      EReturn initTrajectory(const std::vector<Eigen::VectorXd>& q_init);
+      void initTrajectory(const std::vector<Eigen::VectorXd>& q_init);
 
     private:
       AICOProblem_ptr prob_; //!< Shared pointer to the planning problem.
@@ -330,7 +330,7 @@ namespace exotica
        * Updates the mean and covariance of the task message using:
        * \f$ \mu_{z_t\rightarrow x_t}(x)=\mathcal{N}[x_t|r_t,R_t] \f$
        */
-      bool updateTaskMessage(int t,
+      void updateTaskMessage(int t,
           const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_,
           double maxStepSize = -1.);
       /**
@@ -343,7 +343,7 @@ namespace exotica
        * @param forceRelocation Set to true to force relocation even when the result is within tolerance.
        * @param maxStepSize Step size for updateTaskMessage.
        */
-      bool updateTimeStep(int t, bool updateFwd, bool updateBwd,
+      void updateTimeStep(int t, bool updateFwd, bool updateBwd,
           int maxRelocationIterations, double tolerance_, bool forceRelocation,
           double maxStepSize = -1.);
       /**
@@ -363,7 +363,7 @@ namespace exotica
        * where the mean and covariance are updated as follows:
        * \f$ b_t(X_t)=\mathcal{N}\left(x_t|(S_t^{-1}+V_t^{-1}+R_t)^{-1}(S_t^{-1}s_t+V_t^{-1}v_t+r_t),S_t^{-1}+V_t^{-1}+R_t \right) \f$.
        */
-      bool updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd,
+      void updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd,
           int maxRelocationIterations, double tolerance, double maxStepSize =
               -1.);
       /**

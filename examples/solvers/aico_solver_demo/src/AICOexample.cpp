@@ -60,19 +60,12 @@ namespace exotica
         "Config: "<<config_name<<"\nSolver: "<<solver_name<<"\nProblem: "<<problem_name);
 
     // Initialise and solve
-    if (ok(
-        ini.initialise(config_name, ser, sol, prob, problem_name, solver_name)))
-    {
+        ini.initialise(config_name, ser, sol, prob, problem_name, solver_name);
       // Cast the generic solver instance into AICO solver
       AICOsolver_ptr solAICO = boost::static_pointer_cast<AICOsolver>(sol);
 
       // Assign the problem to the solver
-      if (!ok(sol->specifyProblem(prob)))
-      {
-        INDICATE_FAILURE
-        ;
-        return;
-      }
+      sol->specifyProblem(prob);
 
       // If necessary, modify the problem after calling sol->specifyProblem()
       // e.g. set different rho:
@@ -92,8 +85,9 @@ namespace exotica
       {
         ros::WallTime start_time = ros::WallTime::now();
         // Solve the problem using the AICO solver
-        if (ok(solAICO->Solve(q, solution)))
+        try
         {
+          solAICO->Solve(q, solution);
           double time = ros::Duration(
               (ros::WallTime::now() - start_time).toSec()).toSec();
           ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving ("<<time<<"s)");
@@ -123,15 +117,15 @@ namespace exotica
             loop_rate.sleep();
           }
         }
-        else
+        catch (SolveException e)
         {
           double time = ros::Duration(
               (ros::WallTime::now() - start_time).toSec()).toSec();
           ROS_INFO_STREAM_THROTTLE(0.5,
-              "Failed to find solution ("<<time<<"s)");
+              e.what()<<" ("<<time<<"s)");
         }
       }
-    }
+
 
   }
 

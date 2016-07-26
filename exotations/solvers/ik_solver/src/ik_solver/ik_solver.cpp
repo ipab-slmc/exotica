@@ -32,15 +32,15 @@
  */
 
 #include "ik_solver/ik_solver.h"
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) {INDICATE_FAILURE; return PAR_ERR;}}
-#define XML_OK(x) if(!ok(x)){INDICATE_FAILURE; return PAR_ERR;}
+
+#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver);
 
 namespace exotica
 {
   IKsolver::IKsolver()
-      : size_(0), T(0), initialised_(false), FRRT_(false)
+      : size_(0), T(0), initialised_(false), FRRT_(false),iterations_(-1)
   {
     //TODO
   }
@@ -50,7 +50,7 @@ namespace exotica
 
   }
 
-  EReturn IKsolver::initDerived(tinyxml2::XMLHandle & handle)
+  void IKsolver::initDerived(tinyxml2::XMLHandle & handle)
   {
     try
     {
@@ -95,32 +95,23 @@ namespace exotica
       }
     } catch (int e)
     {
-      std::cout << "IK solver initialisation, parameter error\n";
-      return FAILURE;
+      throw_named("IK solver initialisation, parameter error\n");
     }
     HIGHLIGHT_NAMED(object_name_, "Initialised at "<<this);
-    return SUCCESS;
   }
 
-  EReturn IKsolver::specifyProblem(PlanningProblem_ptr pointer)
+  void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
   {
     if (pointer->type().compare(std::string("exotica::IKProblem")) != 0)
     {
-      ERROR(
-          "This IKsolver can't solve problem of type '" << pointer->type() << "'!");
-      return PAR_INV;
+      throw_named("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
     }
     MotionSolver::specifyProblem(pointer);
     prob_ = boost::static_pointer_cast<IKProblem>(pointer);
     size_ = prob_->getScenes().begin()->second->getNumJoints();
     for (auto & it : prob_->getScenes())
     {
-      if (!ok(it.second->activateTaskMaps()))
-      {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
-      }
+      it.second->activateTaskMaps();
     }
 
     T = prob_->getT();
@@ -146,12 +137,9 @@ namespace exotica
       i = 0;
       for (auto & it : prob_->getTaskDefinitions())
       {
-        if (it.second->type().compare(std::string("exotica::TaskSqrError"))
-            != 0)
+        if (it.second->type()!="exotica::TaskSqrError")
         {
-          ERROR(
-              "IK Solver currently can only solve exotica::TaskSqrError. Unable to solve Task: "<<it.second->type());
-          return FAILURE;
+          throw_named("IK Solver currently can only solve 'exotica::TaskSqrError'. Unable to solve Task: '"<<it.second->type()<<"'");
         }
         else
         {
@@ -207,8 +195,7 @@ namespace exotica
           taskIndex[it.first] = std::pair<int, int>(i, cur_rows);
           if (FRRT_)
           {
-            if (it.second->getTaskMap()->type().compare(
-                "exotica::CollisionAvoidance") == 0)
+            if (it.second->getTaskMap()->type()=="exotica::CollisionAvoidance")
               coll_index_ = std::pair<int, int>(i, cur_rows);
             if (it.second->getTaskMap()->type().compare("exotica::Identity")
                 == 0) goal_index_ = std::pair<int, int>(i, cur_rows);
@@ -225,20 +212,13 @@ namespace exotica
 
     for (auto &it : tasks_)
     {
-      if (it.second->getTaskMap()->type().compare("exotica::Distance") == 0)
+      if (it.second->getTaskMap()->type()=="exotica::Distance")
       {
         reach_position_taskmap_ = boost::static_pointer_cast<Distance>(
             it.second->getTaskMap());
       }
-      else if (it.second->getTaskMap()->type().compare("exotica::Orientation")
-          == 0)
-      {
-        reach_orientation_taskmap_ = boost::static_pointer_cast<Orientation>(
-            it.second->getTaskMap());
-      }
     }
     initialised_ = true;
-    return SUCCESS;
   }
 
   bool IKsolver::isSolvable(const PlanningProblem_ptr & prob)
@@ -247,13 +227,12 @@ namespace exotica
     return false;
   }
 
-  EReturn IKsolver::setGoal(const std::string & task_name,
+  void IKsolver::setGoal(const std::string & task_name,
       Eigen::VectorXdRefConst _goal, int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
-      std::cout << "Task name " << task_name << " does not exist" << std::endl;
-      return FAILURE;
+      throw_named("Task name " << task_name << " does not exist");
     }
     else
     {
@@ -261,31 +240,26 @@ namespace exotica
       if (_goal.rows() == dim.at(t)(id.first))
       {
         goal.at(t).segment(id.second, dim.at(t)(id.first)) = _goal;
-        return SUCCESS;
       }
       else
       {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
+        throw_named("Incorrect goal dimension, expected " << dim.at(t)(id.first) << " got "<<_goal.rows());
       }
     }
   }
 
-  EReturn IKsolver::setRho(const std::string & task_name, const double rho,
+  void IKsolver::setRho(const std::string & task_name, const double rho,
       int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
-      std::cout << "Task name " << task_name << " does not exist" << std::endl;
-      return FAILURE;
+      throw_named("Task name " << task_name << " does not exist");
     }
     else
     {
       std::pair<int, int> id = taskIndex.at(task_name);
       rhos.at(t)(id.first) = rho;
       if(task_weights.rows()>id.first) task_weights.diagonal().block(dimid.at(t)(id.first), 0, dim.at(t)(id.first), 1).setConstant(rho);
-      return SUCCESS;
     }
   }
 
@@ -293,8 +267,7 @@ namespace exotica
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
-      std::cout << "Task name " << task_name << " does not exist" << std::endl;
-      return -1.0;
+      throw_named("Task name " << task_name << " does not exist");
     }
     else
     {
@@ -313,12 +286,18 @@ namespace exotica
     return (int) maxit_->data;
   }
 
+  int IKsolver::getLastIteration()
+  {
+    return iterations_;
+  }
+
+
   void IKsolver::setReachGoal(const geometry_msgs::Pose &goal)
   {
     reach_goal_ = goal;
   }
 
-  EReturn IKsolver::Solve(Eigen::VectorXdRefConst q0,
+  void IKsolver::Solve(Eigen::VectorXdRefConst q0,
       Eigen::MatrixXd & solution)
   {
     if (initialised_)
@@ -326,41 +305,28 @@ namespace exotica
       ros::Time start = ros::Time::now();
       if (size_ != q0.rows())
       {
-        std::cout << "Wrong size q0 size=" << q0.rows() << ", required size="
-            << size_ << std::endl;
-        INDICATE_FAILURE
-        return FAILURE;
+        throw_named("Wrong size q0 size=" << q0.rows() << ", required size="<< size_);
       }
       solution.resize(T, size_);
 
       Eigen::VectorXd q = q0;
       int t;
+      bool ret = true;
       for (t = 0; t < T; t++)
       {
-
-        if (ok(Solve(q, solution.block(t, 0, 1, size_), t)))
-        {
+          ret = ret && Solve(q, solution.block(t, 0, 1, size_), t);
           q = solution.row(t);
-        }
-        else
-        {
-          INDICATE_FAILURE
-          ;
-          return FAILURE;
-        }
       }
       planning_time_ = ros::Duration(ros::Time::now() - start);
-      return SUCCESS;
+      if(!ret) throw_solve("Solution not found after max number of iterations ("<<maxit_->data<<")!");
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("IK solver has not been fully initialized!");
     }
   }
 
-  EReturn IKsolver::Solve(Eigen::VectorXdRefConst q0,
+  bool IKsolver::Solve(Eigen::VectorXdRefConst q0,
       Eigen::MatrixXdRef solution, int t)
   {
     if (initialised_)
@@ -373,59 +339,43 @@ namespace exotica
       maxdim_ = 0;
       for (int i = 0; i < maxit_->data; i++)
       {
-        if (ok(prob_->update(solution.row(0), t)))
+        prob_->update(solution.row(0), t);
+        vel_solve(error, t, solution.row(0));
+        double max_vel = vel_vec_.cwiseAbs().maxCoeff();
+        if (max_vel > maxstep_->data)
         {
-          if (!ok(vel_solve(error, t, solution.row(0))))
-          {
-            INDICATE_FAILURE
-            return FAILURE;
-          }
-          double max_vel = vel_vec_.cwiseAbs().maxCoeff();
-          if (max_vel > maxstep_->data)
-          {
             vel_vec_ = vel_vec_ * maxstep_->data / max_vel;
-          }
-          if (error <= prob_->getTau() * 2.0)
-          {
+        }
+        if (error <= prob_->getTau() * 2.0)
+        {
             solution.row(0) = solution.row(0) + vel_vec_.transpose();
-          }
-          else
-          {
-            solution.row(0) = solution.row(0) + vel_vec_.transpose() * 0.5;
-          }
-          if (error <= prob_->getTau())
-          {
-            found = true;
-            break;
-          }
         }
         else
         {
-          INDICATE_FAILURE
-          ;
-          return FAILURE;
+            solution.row(0) = solution.row(0) + vel_vec_.transpose() * 0.5;
+        }
+        if (error <= prob_->getTau())
+        {
+            found = true;
+            iterations_=i+1;
+            break;
         }
       }
 
-      if (found)
+      if (!found)
       {
-        return SUCCESS;
+        iterations_=  maxit_->data;
+        return false;
       }
-      else
-      {
-        ROS_WARN_STREAM_THROTTLE(1.0,"Solution not found after reaching max number of iterations");
-        return WARNING;
-      }
+      return true;
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("IK solver has not been fully initialized!");
     }
   }
 
-  EReturn IKsolver::SolveFullSolution(Eigen::VectorXdRefConst q0,
+  bool IKsolver::SolveFullSolution(Eigen::VectorXdRefConst q0,
       Eigen::MatrixXd & solution)
   {
     int t = 0;
@@ -443,17 +393,11 @@ namespace exotica
       int i = 0;
       for (i = 0; i < maxit_->data; i++)
       {
-        if (ok(prob_->update(solution.row(0), t)))
-        {
-          if (!ok(vel_solve(error, t, solution.row(0))))
-          {
-            INDICATE_FAILURE
-            return FAILURE;
-          }
+        prob_->update(solution.row(0), t);
+          vel_solve(error, t, solution.row(0));
           if (vel_vec_ != vel_vec_)
           {
-            INDICATE_FAILURE
-            return FAILURE;
+            throw_named("Invalid velocity vector!");
           }
           double max_vel = vel_vec_.cwiseAbs().maxCoeff();
           if (max_vel > maxstep_->data)
@@ -479,11 +423,6 @@ namespace exotica
               break;
             }
           }
-        }
-        else
-        {
-          return FAILURE;
-        }
       }
       if (found)
       {
@@ -491,7 +430,7 @@ namespace exotica
         solution = tmp.block(0, 0, i + 1, size_);
         INFO_NAMED(object_name_,
             "IK solution found in "<<ros::Duration(ros::Time::now()-start).toSec()<<"sec, with "<<i<<" iterations. Error "<<error<<" / "<<prob_->getTau());
-        return SUCCESS;
+        return true;
       }
       else
       {
@@ -501,16 +440,15 @@ namespace exotica
         {
           solution.resize(i, size_);
           solution = tmp.block(0, 0, i, size_);
-          return WARNING;
+          return false;
         }
         else
-          return FAILURE;
+          return false;
       }
     }
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_named("IK solver has not been fully initialized!");
     }
   }
 
@@ -528,7 +466,7 @@ namespace exotica
       Scalar m_inf, m_sup;
   };
 
-  EReturn IKsolver::vel_solve(double & err, int t, Eigen::VectorXdRefConst q)
+  void IKsolver::vel_solve(double & err, int t, Eigen::VectorXdRefConst q)
   {
     static Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->getW().rows(),
         prob_->getW().rows());
@@ -564,9 +502,7 @@ namespace exotica
         /*Jpinv=big_jacobian.at(t).transpose();*/
         if (Jpinv != Jpinv)
         {
-          INDICATE_FAILURE
-          HIGHLIGHT(big_jacobian.at(t));
-          return FAILURE;
+          throw_named(big_jacobian.at(t));
         }
         /*if(nullSpaceRef.rows()==q.rows())
          {
@@ -593,13 +529,10 @@ namespace exotica
 //				jac_pub_.publish(jac_arr_);
         vel_vec_ = JTCinvJ_.inverse() * JTCinvdy_;
       }
-      return SUCCESS;
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_named("IK solver has not been fully initialized!");
     }
   }
 }

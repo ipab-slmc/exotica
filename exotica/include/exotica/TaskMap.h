@@ -35,7 +35,6 @@
 
 #include "exotica/Object.h"       //!< The EXOTica base class
 #include "exotica/Factory.h"      //!< The Factory template
-#include "exotica/Test.h"         //!< The Test factory template
 #include "exotica/Server.h"
 #include "exotica/Scene.h"
 
@@ -78,7 +77,7 @@ namespace exotica
        * @return          Result of initDerived() if initialisation successful,
        *                  \n PAR_ERR if could not bind scene information.
        */
-      EReturn initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
+      void initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
           const Scene_map & scene_ptr = Scene_map());
 
       /**
@@ -91,7 +90,7 @@ namespace exotica
        * @param  x  The State-space vector for the robot
        * @return    Should indicate success/otherwise using the Exotica error types
        */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t) = 0;
+      virtual void update(Eigen::VectorXdRefConst x, const int t) = 0;
 
       /**
        * @brief registerPhi Registers a memory location for the output of phi at time t
@@ -99,7 +98,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerPhi(Eigen::VectorXdRef_ptr y, int t);
+      void registerPhi(Eigen::VectorXdRef_ptr y, int t);
 
       /**
        * @brief registerJacobian egisters a memory location for the output of Jacobian at time t
@@ -107,31 +106,30 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      EReturn registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
+      void registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
 
       /**
        * \brief Indicator of the Task-Dimension size: PURE VIRTUAL
        * @param task_dim  The dimensionality of the Task space, or -1 if dynamic...
-       * @return          SUCCESS if ok, MMB_NIN if called on an uninitialised object
        */
-      virtual EReturn taskSpaceDim(int & task_dim) = 0;
+      virtual void taskSpaceDim(int & task_dim) = 0;
 
       /**
        * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
        * @param T Number of time steps (this should be set by the planning problem)
        * @return Returns success.
        */
-      virtual EReturn setTimeSteps(const int T);
+      virtual void setTimeSteps(const int T);
 
       bool isRegistered(int t);
 
       Scene_ptr getScene();
 
-      virtual EReturn initialise(const rapidjson::Value& a);
-      EReturn initialise(const rapidjson::Value& a, Server_ptr & server,
+      virtual void initialise(const rapidjson::Value& a);
+      void initialise(const rapidjson::Value& a, Server_ptr & server,
           const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
 
-      virtual EReturn initialiseManual(std::string name, Server_ptr & server,
+      virtual void initialiseManual(std::string name, Server_ptr & server,
           const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
           std::vector<std::pair<std::string,std::string> >& params);
 
@@ -153,7 +151,7 @@ namespace exotica
        * @param handle  The handle to the XML-element describing the task
        * @return        Should indicate success/failure
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle) = 0;
+      virtual void initDerived(tinyxml2::XMLHandle & handle) = 0;
 
       /**
        * Member Variables

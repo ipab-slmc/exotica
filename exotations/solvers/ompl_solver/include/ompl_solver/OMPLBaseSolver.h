@@ -49,12 +49,12 @@ namespace exotica
   {
     public:
       virtual ~OMPLBaseSolver();
-      EReturn initialiseBaseSolver(tinyxml2::XMLHandle & handle,
+      void initialiseBaseSolver(tinyxml2::XMLHandle & handle,
           const Server_ptr &server);
-      virtual EReturn initialiseSolver(tinyxml2::XMLHandle & handle) = 0;
-      virtual EReturn solve(const Eigen::VectorXd &x0,
+      virtual void initialiseSolver(tinyxml2::XMLHandle & handle) = 0;
+      virtual bool solve(const Eigen::VectorXd &x0,
           Eigen::MatrixXd &sol) = 0;
-      virtual EReturn setGoalState(const Eigen::VectorXd & qT,
+      virtual void setGoalState(const Eigen::VectorXd & qT,
           const double eps = std::numeric_limits<double>::epsilon()) = 0;
 
       virtual std::string & getPlannerName() = 0;
@@ -62,7 +62,7 @@ namespace exotica
 
       const boost::shared_ptr<og::SimpleSetup> getOMPLSimpleSetup() const;
 
-      virtual EReturn specifyProblem(const OMPLProblem_ptr &prob) = 0;
+      virtual void specifyProblem(const OMPLProblem_ptr &prob) = 0;
     protected:
       OMPLBaseSolver(const std::string planner_name);
       void registerPlannerAllocator(const std::string &planner_id,
@@ -88,10 +88,10 @@ namespace exotica
        * @param traj Eigen Matrix trajectory
        * @return Indicates success
        */
-      virtual EReturn convertPath(const og::PathGeometric &pg,
+      virtual void convertPath(const og::PathGeometric &pg,
           Eigen::MatrixXd & traj) = 0;
 
-      virtual EReturn getSimplifiedPath(og::PathGeometric &pg,
+      virtual void getSimplifiedPath(og::PathGeometric &pg,
           Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc) = 0;
       /**
        * \brief Registers trajectory termination condition

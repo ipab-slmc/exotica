@@ -58,7 +58,7 @@ namespace exotica
        * @param pointer Shared pointer to the motion planning problem
        * @return        Successful if the problem is a valid AICOProblem
        */
-      virtual EReturn specifyProblem(PlanningProblem_ptr pointer);
+      virtual void specifyProblem(PlanningProblem_ptr pointer);
 
       /*
        * \brief	Check if a problem is solvable by this solver (Pure Virtual)
@@ -67,7 +67,7 @@ namespace exotica
        */
       virtual bool isSolvable(const PlanningProblem_ptr & prob);
 
-      EReturn Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
 
       /*
        * \brief Get planning problem
@@ -92,7 +92,7 @@ namespace exotica
 
       virtual std::string print(std::string prepend);
 
-      EReturn setGoalState(const Eigen::VectorXd & qT, const double eps =
+      void setGoalState(const Eigen::VectorXd & qT, const double eps =
           std::numeric_limits<double>::epsilon());
     protected:
 
@@ -101,7 +101,7 @@ namespace exotica
        * @param handle XMLHandle to the Solver element
        * @return       Should indicate success or otherwise
        */
-      virtual EReturn initDerived(tinyxml2::XMLHandle & handle);
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
     private:
       OMPLProblem_ptr prob_; //!< Shared pointer to the planning problem.
 

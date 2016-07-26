@@ -58,38 +58,33 @@ namespace exotica
     return CompoundStateSpace::allocDefaultStateSampler();
   }
 
-  EReturn OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
+  void OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
       ompl::base::State *state) const
   {
     if (!state)
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Invalid state!");
     }
     if (q.rows() != (int) getDimension())
     {
-      ERROR(
+      throw_pretty(
           "State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
-      return FAILURE;
     }
     memcpy(state->as<OMPLRNStateSpace::StateType>()->getRNSpace().values,
         q.data(), sizeof(double) * q.rows());
-    return SUCCESS;
   }
 
-  EReturn OMPLRNStateSpace::OMPLToExoticaState(const ompl::base::State *state,
+  void OMPLRNStateSpace::OMPLToExoticaState(const ompl::base::State *state,
       Eigen::VectorXd &q) const
   {
     if (!state)
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Invalid state!");
     }
     if (q.rows() != (int) getDimension()) q.resize((int) getDimension());
     memcpy(q.data(),
         state->as<OMPLRNStateSpace::StateType>()->getRNSpace().values,
         sizeof(double) * q.rows());
-    return SUCCESS;
   }
 
   void OMPLRNStateSpace::stateDebug(const Eigen::VectorXd &q) const

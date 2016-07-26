@@ -66,9 +66,9 @@ namespace exotica
           OMPLProblem_ptr &prob);
 
       virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-      virtual EReturn ExoticaToOMPLState(const Eigen::VectorXd &q,
+      virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
           ompl::base::State *state) const;
-      virtual EReturn OMPLToExoticaState(const ompl::base::State *state,
+      virtual void OMPLToExoticaState(const ompl::base::State *state,
           Eigen::VectorXd &q) const;
       virtual void stateDebug(const Eigen::VectorXd &q) const;
   };

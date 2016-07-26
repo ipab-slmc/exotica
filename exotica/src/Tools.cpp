@@ -37,7 +37,7 @@
 namespace exotica
 {
 
-  EReturn saveMatrix(std::string file_name,
+  void saveMatrix(std::string file_name,
       const Eigen::Ref<const Eigen::MatrixXd> mat)
   {
     std::ofstream myfile;
@@ -46,21 +46,15 @@ namespace exotica
     {
       myfile << mat;
       myfile.close();
-      return SUCCESS;
     }
     else
     {
       myfile.close();
-      return FAILURE;
+      throw_pretty("Can't open file!");
     }
   }
 
-  bool ok(const EReturn & value)
-  {
-    return (value == SUCCESS || value == WARNING || value == CANCELLED);
-  }
-
-  EReturn getMatrix(const tinyxml2::XMLElement & xml_matrix,
+  void getMatrix(const tinyxml2::XMLElement & xml_matrix,
       Eigen::MatrixXd & eigen_matrix)
   {
     int dimension = 0;
@@ -68,27 +62,18 @@ namespace exotica
     if (xml_matrix.QueryIntAttribute("dim", &dimension)
         != tinyxml2::XML_NO_ERROR)
     {
-      INDICATE_FAILURE
-      ;
-      eigen_matrix = Eigen::MatrixXd(); //!< Null matrix again
-      return PAR_ERR;
+      throw_pretty("Missing dim!");
     }
 
     if (dimension < 1)
     {
-      INDICATE_FAILURE
-      ;
-      eigen_matrix = Eigen::MatrixXd(); //!< Null matrix again
-      return PAR_ERR;
+      throw_pretty("Invalid dim!");
     }
     eigen_matrix.resize(dimension, dimension);
 
     if (!xml_matrix.GetText())
     {
-      INDICATE_FAILURE
-      ;
-      eigen_matrix = Eigen::MatrixXd(); //!< Null matrix again
-      return PAR_ERR;
+      throw_pretty("Invalid value!");
     }
 
     std::istringstream text_parser(xml_matrix.GetText());
@@ -100,10 +85,7 @@ namespace exotica
         text_parser >> temp_entry;
         if (text_parser.fail() || text_parser.bad()) //!< If a failure other than end of file
         {
-          INDICATE_FAILURE
-          ;
-          eigen_matrix.resize(0, 0);
-          return PAR_ERR;
+          throw_pretty("Can't parse value!");
         }
         else
         {
@@ -111,11 +93,9 @@ namespace exotica
         }
       }
     }
-
-    return SUCCESS;
   }
 
-  EReturn getVector(const tinyxml2::XMLElement & xml_vector,
+  void getVector(const tinyxml2::XMLElement & xml_vector,
       Eigen::VectorXd & eigen_vector)
   {
     //!< Temporaries
@@ -124,10 +104,7 @@ namespace exotica
 
     if (!xml_vector.GetText())
     {
-      INDICATE_FAILURE
-      ;
-      eigen_vector = Eigen::VectorXd(); //!< Null matrix again
-      return PAR_ERR;
+     throw_pretty("Can't get value!");
     }
     std::istringstream text_parser(xml_vector.GetText());
 
@@ -139,10 +116,10 @@ namespace exotica
       eigen_vector(i - 1) = temp_entry;
       text_parser >> temp_entry;
     }
-    return (i > 0) ? SUCCESS : PAR_ERR;
+    if (i == 0) throw_pretty("Empty vector!");;
   }
 
-  EReturn getStdVector(const tinyxml2::XMLElement & xml_vector,
+  void getStdVector(const tinyxml2::XMLElement & xml_vector,
       std::vector<double> & std_vector)
   {
     //!< Temporaries
@@ -151,8 +128,7 @@ namespace exotica
     std_vector.resize(0);
     if (!xml_vector.GetText())
     {
-      INDICATE_FAILURE
-      return PAR_ERR;
+      throw_pretty("Can't get value!");
     }
     std::istringstream text_parser(xml_vector.GetText());
 
@@ -165,24 +141,17 @@ namespace exotica
     }
     if (std_vector.size() == 0)
     {
-      INDICATE_FAILURE
-      return PAR_ERR;
+      throw_pretty("Empy vector!");
     }
-    return SUCCESS;
   }
 
-  EReturn getBool(const tinyxml2::XMLElement & xml_vector, bool & val)
+  void getBool(const tinyxml2::XMLElement & xml_vector, bool & val)
   {
     std::vector<bool> tmp;
-    if (!ok(getBoolVector(xml_vector, tmp)))
-    {
-      INDICATE_FAILURE
-      return FAILURE;
-    }
+    getBoolVector(xml_vector, tmp);
     val = tmp[0];
-    return SUCCESS;
   }
-  EReturn getBoolVector(const tinyxml2::XMLElement & xml_vector,
+  void getBoolVector(const tinyxml2::XMLElement & xml_vector,
       std::vector<bool> & bool_vector)
   {
     //!< Temporaries
@@ -191,8 +160,7 @@ namespace exotica
     bool_vector.resize(0);
     if (!xml_vector.GetText())
     {
-      INDICATE_FAILURE
-      return PAR_ERR;
+      throw_pretty("Can't get value!");
     }
     std::istringstream text_parser(xml_vector.GetText());
 
@@ -208,54 +176,41 @@ namespace exotica
     }
     if (bool_vector.size() == 0)
     {
-      INDICATE_FAILURE
-      return PAR_ERR;
+      throw_pretty("Empty vector!");
     }
-    return SUCCESS;
   }
 
-  EReturn getDouble(const tinyxml2::XMLElement & xml_value, double & value)
+  void getDouble(const tinyxml2::XMLElement & xml_value, double & value)
   {
     if (!xml_value.GetText())
     {
-      INDICATE_FAILURE
-      ;
-      return PAR_ERR;
+      throw_pretty("Can't get value!");
     }
     std::istringstream text_parser(xml_value.GetText());
 
     text_parser >> value;
-    if (!(text_parser.fail() || text_parser.bad()))
+    if ((text_parser.fail() || text_parser.bad()))
     {
-      return SUCCESS;
-    }
-    else
-    {
-      return PAR_ERR;
+      throw_pretty("Can't parse value!");
     }
   }
 
-  EReturn getInt(const tinyxml2::XMLElement & xml_value, int & value)
+  void getInt(const tinyxml2::XMLElement & xml_value, int & value)
   {
     if (!xml_value.GetText())
     {
-      INDICATE_FAILURE
-      return PAR_ERR;
+      throw_pretty("Can't get value!");
     }
     std::istringstream text_parser(xml_value.GetText());
 
     text_parser >> value;
-    if (!(text_parser.fail() || text_parser.bad()))
+    if ((text_parser.fail() || text_parser.bad()))
     {
-      return SUCCESS;
-    }
-    else
-    {
-      return PAR_ERR;
+      throw_pretty("Can't parse value!");
     }
   }
 
-  EReturn getList(const tinyxml2::XMLElement & xml_value,
+  void getList(const tinyxml2::XMLElement & xml_value,
       std::vector<std::string> & value)
   {
     std::stringstream ss(xml_value.GetText());
@@ -264,73 +219,63 @@ namespace exotica
     {
       value.push_back(item);
     }
-    if (value.size() == 0) return FAILURE;
-    return SUCCESS;
+    if (value.size() == 0) throw_pretty("Empty vector!");;
   }
-  EReturn resolveParent(std::string & file_path)
+
+  void resolveParent(std::string & file_path)
   {
     size_t parent_dir = file_path.find_last_of('/'); //!< Find the last forward slash
 
     if (parent_dir == std::string::npos)
     {
-      return PAR_ERR;
+      throw_pretty("Invalid parent!");
     }
     else
     {
       if (parent_dir == 0)
       {
         file_path = "/";  //!< Assign to just the root directory
-        return WARNING;
+        return;
       }
       else
       {
         file_path = file_path.substr(0, parent_dir); //!< Assign to the substring
-        return SUCCESS;
       }
     }
   }
 
-  EReturn deepCopy(tinyxml2::XMLHandle & parent, tinyxml2::XMLHandle & child)
+  void deepCopy(tinyxml2::XMLHandle & parent, tinyxml2::XMLHandle & child)
   {
     //!< First copy the child to the parent
     if (!parent.ToNode())
     {
-      return WARNING;
+      throw_pretty("Invalid parent!");
     }
     if (!child.ToNode())
     {
-      return WARNING;
+      throw_pretty("Invalid child!");
     }
     tinyxml2::XMLNode * node_ptr = parent.ToNode()->InsertEndChild(
         child.ToNode()->ShallowClone(parent.ToNode()->GetDocument()));
     if (node_ptr == 0)
     {
-      return FAILURE;
+      throw_pretty("Invalid node!");
     }
     // Here we are first performing a shallow clone to assign the child node as a node of the parent's document and then moving that to be actually a child of the parent
 
     //!< Now iterate recursively on its children
     tinyxml2::XMLHandle grandchild(child.FirstChild());
     tinyxml2::XMLHandle new_child(node_ptr);
-    EReturn ret_val = SUCCESS;
-    while (grandchild.ToNode() and ok(ret_val))
+    while (grandchild.ToNode())
     {
-      EReturn aux_ret = deepCopy(new_child, grandchild);
-      if (aux_ret)
-      {
-        ret_val = aux_ret;
-      }
-
+      deepCopy(new_child, grandchild);
       grandchild = grandchild.NextSibling();
     }
-
-    return ret_val;
   }
 
-  EReturn parseIncludes(tinyxml2::XMLHandle & handle, std::string directory)
+  void parseIncludes(tinyxml2::XMLHandle & handle, std::string directory)
   {
     //!< Temporaries
-    EReturn ret_val = SUCCESS;
     std::string temp_path = directory;
     tinyxml2::XMLDocument doc;
 
@@ -342,54 +287,30 @@ namespace exotica
       const char * file_path = include_handle.ToElement()->Attribute("file");
       if (file_path == nullptr)
       {
-        INDICATE_FAILURE
-        ;
-        return PAR_ERR;
+        throw_pretty("Empty file name!");
       }
       temp_path = directory.append(file_path); //!< Append to the current working directory
 
       //!< load the document
       if (doc.LoadFile(temp_path.c_str()) != tinyxml2::XML_NO_ERROR)
       {
-        INDICATE_FAILURE
-        ;
-        return PAR_ERR;
+        throw_pretty("Failed loading XML!");
       }
       if (!doc.RootElement())
       {
-        INDICATE_FAILURE
-        ;
-        return PAR_ERR;
+        throw_pretty("Invalid document!");
       }  //!< If no root element!
 
       //!< Change the scope (file-path) for this node which just got included
-      EReturn aux_rtn = resolveParent(temp_path);
+      resolveParent(temp_path);
       temp_path.append("/");
-      if (aux_rtn)
-      {
-        ret_val = aux_rtn;
-      }
-      if (!ok(ret_val))
-      {
-        INDICATE_FAILURE
-        ;
-        return ret_val;
-      }
+
       doc.RootElement()->SetAttribute("current_path_scope", temp_path.c_str());
 
       //!< Now actually resolve the xml-structure
       tinyxml2::XMLHandle sub_tree(doc.RootElement());
-      aux_rtn = deepCopy(handle, sub_tree); //!< Note that the ordering is no longer maintained at this level (i.e. the included tag will go at the end)
-      if (aux_rtn)
-      {
-        ret_val = aux_rtn;
-      }
-      if (!ok(ret_val))
-      {
-        INDICATE_FAILURE
-        ;
-        return ret_val;
-      }
+      deepCopy(handle, sub_tree); //!< Note that the ordering is no longer maintained at this level (i.e. the included tag will go at the end)
+
       handle.ToNode()->DeleteChild(include_handle.ToNode()); //!< Delete the node handle;
 
       //!< Prepare for next <include> which now will be the first child element of the name
@@ -401,41 +322,25 @@ namespace exotica
     tinyxml2::XMLHandle child_handle(handle.FirstChild());
     while (child_handle.ToElement()) //!< While a valid element (cannot be text etc...)
     {
-      //!< Temporary
-      EReturn aux_rtn;
-
       //!< Check if scope available, and if so use it
       const char * scope_path = child_handle.ToElement()->Attribute(
           "current_path_scope");
       if (scope_path != nullptr)
       {
-        aux_rtn = parseIncludes(child_handle, scope_path);
+        parseIncludes(child_handle, scope_path);
       }
       else
       {
-        aux_rtn = parseIncludes(child_handle, directory);
+        parseIncludes(child_handle, directory);
       }
 
-      //!< Error Checking
-      if (aux_rtn)
-      {
-        ret_val = aux_rtn;
-      }
-      if (!ok(ret_val))
-      {
-        INDICATE_FAILURE
-        ;
-        return ret_val;
-      }
 
       //!< Prepare for next iteration
       child_handle = child_handle.NextSibling();
     }
-
-    return ret_val;
   }
 
-  EReturn loadOBJ(std::string & data, Eigen::VectorXi& tri,
+  void loadOBJ(std::string & data, Eigen::VectorXi& tri,
       Eigen::VectorXd& vert)
   {
     std::stringstream ss(data);
@@ -469,9 +374,7 @@ namespace exotica
         }
         if (i < 8)
         {
-          INDICATE_FAILURE
-          ;
-          return PAR_ERR;
+          throw_pretty("Invalid format!");
         }
         tri.conservativeResize((tn + 1) * 3);
         tri(tn * 3) = vv[0] - 1;
@@ -480,11 +383,9 @@ namespace exotica
         tn++;
       }
     }
-
-    return SUCCESS;
   }
 
-  EReturn getJSON(const rapidjson::Value& a, Eigen::VectorXd& ret)
+  void getJSON(const rapidjson::Value& a, Eigen::VectorXd& ret)
   {
     if (a.IsArray())
     {
@@ -497,22 +398,17 @@ namespace exotica
         }
         else
         {
-          INDICATE_FAILURE
-          ;
-          return FAILURE;
+          throw_pretty("NaN!");
         }
       }
-      return SUCCESS;
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_pretty("Not an array!");
     }
   }
 
-  EReturn getJSON(const rapidjson::Value& a, std::vector<std::string>& ret)
+  void getJSON(const rapidjson::Value& a, std::vector<std::string>& ret)
   {
     if (a.IsArray())
     {
@@ -521,151 +417,116 @@ namespace exotica
       {
         ret[i] = a[i].GetString();
       }
-      return SUCCESS;
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_pretty("Not an array!");
     }
   }
 
-  EReturn getJSON(const rapidjson::Value& a, double& ret)
+  void getJSON(const rapidjson::Value& a, double& ret)
   {
     if (a.IsNumber())
     {
       ret = a.GetDouble();
-      return SUCCESS;
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_pretty("NaN!");
     }
   }
 
-  EReturn getJSON(const rapidjson::Value& a, int& ret)
+  void getJSON(const rapidjson::Value& a, int& ret)
   {
     if (a.IsInt())
     {
       ret = a.GetInt();
-      return SUCCESS;
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_pretty("Not an int!");
     }
   }
 
-  EReturn getJSON(const rapidjson::Value& a, bool& ret)
+  void getJSON(const rapidjson::Value& a, bool& ret)
   {
     if (a.IsBool())
     {
       ret = a.GetBool();
-      return SUCCESS;
     }
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Not a bool!");
     }
   }
 
-  EReturn getJSON(const rapidjson::Value& a, std::string& ret)
+  void getJSON(const rapidjson::Value& a, std::string& ret)
   {
     ret = a.GetString();
-    return SUCCESS;
   }
 
-  EReturn getJSON(const rapidjson::Value& a, KDL::Frame& ret)
+  void getJSON(const rapidjson::Value& a, KDL::Frame& ret)
   {
     if (a.IsObject())
     {
       Eigen::VectorXd pos(3), rot(4);
-      if (ok(getJSON(a["position"], pos)) && ok(getJSON(a["quaternion"], rot)))
-      {
-        rot = rot / rot.norm();
-        ret = KDL::Frame(
-            KDL::Rotation::Quaternion(rot(1), rot(2), rot(3), rot(0)),
-            KDL::Vector(pos(0), pos(1), pos(2)));
-        return SUCCESS;
-      }
-      else
-      {
-        INDICATE_FAILURE
-        ;
-        return FAILURE;
-      }
+      getJSON(a["position"], pos);
+      getJSON(a["quaternion"], rot);
+      rot = rot / rot.norm();
+      ret = KDL::Frame(
+      KDL::Rotation::Quaternion(rot(1), rot(2), rot(3), rot(0)),
+      KDL::Vector(pos(0), pos(1), pos(2)));
     }
     else
     {
-      INDICATE_FAILURE
-      ;
-      return FAILURE;
+      throw_pretty("Not an object!");
     }
   }
 
-  EReturn getJSONFrameNdArray(const rapidjson::Value& a, KDL::Frame& ret)
+  void getJSONFrameNdArray(const rapidjson::Value& a, KDL::Frame& ret)
   {
     if (a.IsObject())
     {
-      Eigen::VectorXd pos(3), rot(4);
-      if (ok(getJSON(a["position"]["__ndarray__"], pos))
-          && ok(getJSON(a["quaternion"]["__ndarray__"], rot)))
-      {
+        Eigen::VectorXd pos(3), rot(4);
+        getJSON(a["position"]["__ndarray__"], pos);
+        getJSON(a["quaternion"]["__ndarray__"], rot);
         rot = rot / rot.norm();
         ret = KDL::Frame(
-            KDL::Rotation::Quaternion(rot(1), rot(2), rot(3), rot(0)),
-            KDL::Vector(pos(0), pos(1), pos(2)));
-        return SUCCESS;
-      }
-      else
-      {
-        INDICATE_FAILURE
-        return FAILURE;
-      }
+        KDL::Rotation::Quaternion(rot(1), rot(2), rot(3), rot(0)),
+        KDL::Vector(pos(0), pos(1), pos(2)));
     }
     else
     {
-      INDICATE_FAILURE
-      return FAILURE;
+      throw_pretty("Not an object!");
     }
   }
 
-  EReturn vectorExoticaToEigen(const exotica::Vector & exotica,
+  void vectorExoticaToEigen(const exotica::Vector & exotica,
       Eigen::VectorXd & eigen)
   {
     eigen.resize(exotica.data.size());
     for (int i = 0; i < exotica.data.size(); i++)
       eigen(i) = exotica.data[i];
-    return SUCCESS;
   }
 
-  EReturn vectorEigenToExotica(Eigen::VectorXd eigen, exotica::Vector & exotica)
+  void vectorEigenToExotica(Eigen::VectorXd eigen, exotica::Vector & exotica)
   {
     exotica.data.resize(eigen.rows());
     for (int i = 0; i < eigen.rows(); i++)
       exotica.data[i] = eigen(i);
-    return SUCCESS;
   }
 
-  EReturn matrixExoticaToEigen(const exotica::Matrix & exotica,
+  void matrixExoticaToEigen(const exotica::Matrix & exotica,
       Eigen::MatrixXd & eigen)
   {
     if (exotica.col == 0 || exotica.row == 0 || exotica.data.size() == 0)
     {
-      ERROR("Matrix conversion failed, no data in the matrix.");
-      return FAILURE;
+      throw_pretty("Matrix conversion failed, no data in the matrix.");
     }
     if (exotica.col * exotica.row != exotica.data.size())
     {
-      ERROR(
+      throw_pretty(
           "Matrix conversion failed, size mismatch."<<exotica.col<<" * "<<exotica.row<<" != "<<exotica.data.size());
-      return FAILURE;
     }
     eigen.resize(exotica.row, exotica.col);
     int cnt = 0;
@@ -675,10 +536,9 @@ namespace exotica
         eigen(r, c) = exotica.data[cnt];
         cnt++;
       }
-    return SUCCESS;
   }
 
-  EReturn matrixEigenToExotica(const Eigen::MatrixXd & eigen,
+  void matrixEigenToExotica(const Eigen::MatrixXd & eigen,
       exotica::Matrix & exotica)
   {
     exotica.row = eigen.rows();
@@ -691,18 +551,15 @@ namespace exotica
         exotica.data[cnt] = eigen(r, c);
         cnt++;
       }
-    return SUCCESS;
   }
 
-  EReturn getText(std::string& txt, KDL::Frame& ret)
+  void getText(std::string& txt, KDL::Frame& ret)
   {
       std::vector<std::string> strs;
       boost::split(strs, txt, boost::is_any_of(" "));
       if(strs.size()!=7)
       {
-          HIGHLIGHT(txt);
-          INDICATE_FAILURE;
-          return FAILURE;
+          throw_pretty("Not a frame! " <<txt);
       }
 
       std::vector<double> doubleVector(strs.size());
@@ -713,7 +570,6 @@ namespace exotica
 
       ret.p = KDL::Vector(doubleVector[0],doubleVector[1],doubleVector[2]);
       ret.M = KDL::Rotation::Quaternion(doubleVector[4],doubleVector[5],doubleVector[6],doubleVector[3]);
-      return SUCCESS;
   }
 
 }

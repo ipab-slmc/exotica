@@ -426,7 +426,7 @@ namespace exotica
       bool recurseNeedFlag(int node);
 
       /**
-       * \brief Checks that everything is ok() : NOT THREAD-SAFE
+       * \brief Checks that everything is ok : NOT THREAD-SAFE
        * @return	Currently returns the state of the robot_tree_..
        */
       inline bool isInitialised()

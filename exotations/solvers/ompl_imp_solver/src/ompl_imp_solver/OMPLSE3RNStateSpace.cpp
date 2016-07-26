@@ -49,19 +49,16 @@ namespace exotica
     if (server_->hasParam(server_->getName() + "/SE3RNSpaceWeights"))
     {
       EParam<exotica::Vector> tmp;
-      if (ok(server_->getParam(server_->getName() + "/SE3RNSpaceWeights", tmp)))
-      {
+      server_->getParam(server_->getName() + "/SE3RNSpaceWeights", tmp);
         if (tmp->data.size() == dim + 6)
         {
           weights_ = tmp;
         }
-      }
     }
-    if (server_->hasParam(server_->getName() + "/SE3RNSpaceRNBias")
-        && ok(
-            server_->getParam(server_->getName() + "/SE3RNSpaceRNBias",
-                rn_bias_percentage_)))
+    if (server_->hasParam(server_->getName() + "/SE3RNSpaceRNBias"))
     {
+        server_->getParam(server_->getName() + "/SE3RNSpaceRNBias",
+            rn_bias_percentage_);
       useGoal_ = true;
     }
     unsigned int n = dim + 6;
@@ -254,7 +251,7 @@ namespace exotica
     WARNING_NAMED("OMPLFullBodyStateSampler", "sampleGaussian not implemented");
   }
 
-  EReturn OMPLSE3RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
+  void OMPLSE3RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
       ompl::base::State *state) const
   {
     OMPLSE3RNStateSpace::StateType *statetype =
@@ -268,10 +265,9 @@ namespace exotica
 
     memcpy(statetype->RealVectorStateSpace().values,
         q.segment(6, q.rows() - 6).data(), sizeof(double) * (q.rows() - 6));
-    return SUCCESS;
   }
 
-  EReturn OMPLSE3RNStateSpace::OMPLToExoticaState(
+  void OMPLSE3RNStateSpace::OMPLToExoticaState(
       const ompl::base::State *state, Eigen::VectorXd &q) const
   {
     q.setZero(getDimension());
@@ -290,7 +286,6 @@ namespace exotica
         statetype->SE3StateSpace().rotation().z,
         statetype->SE3StateSpace().rotation().w);
     tmp.GetEulerZYX(q(3), q(4), q(5));
-    return SUCCESS;
   }
 }
 

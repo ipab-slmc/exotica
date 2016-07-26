@@ -85,17 +85,17 @@ namespace exotica
        * @param	mode	Update mode
        * @return Indication of success
        */
-      EReturn initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
+      void initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
           const std::vector<std::string> & joints, std::string & mode,
           BASE_TYPE base_type);
-      EReturn reinitialise();
+      void reinitialise();
 
       /**
        * \brief	Update the robot collision properties
        * @param	x		Configuration
        * @return Indication of success
        */
-      EReturn update(Eigen::VectorXdRefConst x);
+      void update(Eigen::VectorXdRefConst x);
 
       /**
        * \brief	Get closest distance between two objects
@@ -104,7 +104,7 @@ namespace exotica
        * @param	d		Closest distance (-1 if in collision)
        * @return Indication of success
        */
-      EReturn getDistance(const std::string & o1, const std::string & o2,
+      void getDistance(const std::string & o1, const std::string & o2,
           double& d, double safeDist);
       /**
        * @brief Get closest distance between two objects
@@ -115,7 +115,7 @@ namespace exotica
        * @param	p2		Closest point on o2
        * @return Indication of success
        */
-      EReturn getDistance(const std::string & o1, const std::string & o2,
+      void getDistance(const std::string & o1, const std::string & o2,
           double& d, Eigen::Vector3d & p1, Eigen::Vector3d & p2,
           double safeDist);
 
@@ -144,7 +144,7 @@ namespace exotica
        * @param	norm	Normal vector on robot link
        * @return Indication of success
        */
-      EReturn getRobotDistance(const std::string & link, bool self, double & d,
+      void getRobotDistance(const std::string & link, bool self, double & d,
           Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm,
           Eigen::Vector3d & c1, Eigen::Vector3d & c2, double safeDist);
 
@@ -170,13 +170,13 @@ namespace exotica
         return fcl_robot_;
       }
 
-      EReturn updateWorld(
+      void updateWorld(
           const moveit_msgs::PlanningSceneWorldConstPtr & world);
-      EReturn getCollisionLinkTranslation(const std::string & name,
+      void getCollisionLinkTranslation(const std::string & name,
           Eigen::Vector3d & translation);
-      EReturn getWorldObjectTranslation(const std::string & name,
+      void getWorldObjectTranslation(const std::string & name,
           Eigen::Vector3d & translation);
-      EReturn getTranslation(const std::string & name,
+      void getTranslation(const std::string & name,
           Eigen::Vector3d & translation);
       int stateCheckCnt_;
     private:
@@ -256,7 +256,7 @@ namespace exotica
        * @param	server	Server pointer
        * @return Indication of success
        */
-      EReturn initialisation(tinyxml2::XMLHandle & handle,
+      void initialisation(tinyxml2::XMLHandle & handle,
           const Server_ptr & server);
 
       /**
@@ -264,14 +264,14 @@ namespace exotica
        * @param	x	System state
        * @return Indication of success
        */
-      virtual EReturn update(Eigen::VectorXdRefConst x, const int t = 0);
+      virtual void update(Eigen::VectorXdRefConst x, const int t = 0);
 
       /**
        * \brief	Set collision scene
        * @param	scene	Moveit planning scene
        * @return Indication of success
        */
-      EReturn setCollisionScene(
+      void setCollisionScene(
           const planning_scene::PlanningSceneConstPtr & scene);
 
       /**
@@ -279,7 +279,7 @@ namespace exotica
        * @param scene Planning scene message
        * @return Indication of success
        */
-      EReturn setCollisionScene(
+      void setCollisionScene(
           const moveit_msgs::PlanningSceneConstPtr & scene);
 
       /**
@@ -289,20 +289,20 @@ namespace exotica
        * @param	offset	Endeffector offsets
        * @return Indication of success
        */
-      EReturn appendTaskMap(const std::string & name,
+      void appendTaskMap(const std::string & name,
           const std::vector<std::string> & eff,
           const std::vector<KDL::Frame> & offset);
 
       /**
        * \brief	Clear all the appended taskmaps
        */
-      EReturn clearTaskMap();
+      void clearTaskMap();
 
       /**
        * \brief	Called after appending
        * @return Indication of success
        */
-      EReturn activateTaskMaps();
+      void activateTaskMaps();
 
       /**
        * \brief	Update task map (eff)
@@ -310,7 +310,7 @@ namespace exotica
        * @param	offset	Task end-effector offsets
        * @return Indication of success
        */
-      EReturn updateEndEffectors(const std::string & task,
+      void updateEndEffectors(const std::string & task,
           const std::vector<KDL::Frame> & offset);
 
       /*
@@ -319,7 +319,7 @@ namespace exotica
        * @param eff   End-effector name
        * @param offset  New end-effector offset
        */
-      EReturn updateEndEffector(const std::string &task, const std::string &eff,
+      void updateEndEffector(const std::string &task, const std::string &eff,
           const KDL::Frame& offset);
 
       /**
@@ -328,7 +328,7 @@ namespace exotica
        * @param	phi		Returned forward map
        * @return Indication of success
        */
-      EReturn getForwardMap(const std::string & task, Eigen::VectorXdRef phi);
+      void getForwardMap(const std::string & task, Eigen::VectorXdRef phi);
 
       /**
        * @brief Get forward map reference
@@ -336,7 +336,7 @@ namespace exotica
        * @param phi Returned forward map reference
        * @return Indication of success
        */
-      EReturn getForwardMap(const std::string & task,
+      void getForwardMap(const std::string & task,
           Eigen::VectorXdRef_ptr& phi, bool force = false);
 
       /**
@@ -345,7 +345,7 @@ namespace exotica
        * @param	jac		Returned Jacobian
        * @return Indication of success
        */
-      EReturn getJacobian(const std::string & task, Eigen::MatrixXdRef jac);
+      void getJacobian(const std::string & task, Eigen::MatrixXdRef jac);
 
       /**
        * @brief Get jacobian reference
@@ -353,7 +353,7 @@ namespace exotica
        * @param jac Returned Jacobian reference
        * @return Indication of success
        */
-      EReturn getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac,
+      void getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac,
           bool force = false);
 
       /**
@@ -368,9 +368,9 @@ namespace exotica
        * @param	effs	Endeffector names
        * @return Indication of success
        */
-      EReturn getEndEffectors(const std::string & task,
+      void getEndEffectors(const std::string & task,
           std::vector<std::string> & effs);
-      EReturn getEndEffectors(const std::string & task,
+      void getEndEffectors(const std::string & task,
           std::pair<std::vector<std::string>, std::vector<KDL::Frame>> & effs);
 
       /**
@@ -395,7 +395,7 @@ namespace exotica
        * @param	base_pose	Base pose of each link
        * @return Indication of success
        */
-      EReturn getCoMProperties(std::string& task,
+      void getCoMProperties(std::string& task,
           std::vector<std::string> & segs, Eigen::VectorXd & mass,
           std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
           std::vector<KDL::Frame> & base_pose);
@@ -424,7 +424,7 @@ namespace exotica
        * @param poses Returned poses
        * @return Indication of success
        */
-      EReturn getPoses(const std::vector<std::string> & names,
+      void getPoses(const std::vector<std::string> & names,
           std::vector<KDL::Frame> & poses);
 
       /**
@@ -437,7 +437,7 @@ namespace exotica
        * \brief	Get controlled joint names
        * @param	joints	Joint names
        */
-      EReturn getJointNames(std::vector<std::string> & joints);
+      void getJointNames(std::vector<std::string> & joints);
 
       /*
        * \brief	Get planning mode

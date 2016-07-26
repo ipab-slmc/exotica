@@ -57,18 +57,11 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
         "Config: "<<config_name<<"\nSolver: "<<solver_name[0]<<"\nProblem: "<<problem_name[0]<<"\nBias: "<<problem_name[1]);
 
     // Initialise and solve
-    if (ok(
-        ini.initialise(config_name, ser, sol, prob, problem_name, solver_name)))
-    {
+        ini.initialise(config_name, ser, sol, prob, problem_name, solver_name);
       // Assign the problem to the solver
       // Cast the generic solver instance into IK solver
       OMPLsolver_ptr solOMPL = boost::static_pointer_cast<OMPLsolver>(sol[0]);
-      if (!ok(solOMPL->specifyProblem(prob[0])))
-      {
-        INDICATE_FAILURE
-        ;
-        return;
-      }
+      solOMPL->specifyProblem(prob[0]);
       // Create the initial configuration
       Eigen::VectorXd q = Eigen::VectorXd::Zero(
           prob[0]->scenes_.begin()->second->getNumJoints());
@@ -80,8 +73,9 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
 
       ros::WallTime start_time = ros::WallTime::now();
       // Solve the problem using the IK solver
-      if (ok(solOMPL->Solve(q, solution)))
+      try
       {
+        solOMPL->Solve(q, solution);
         double time =
             ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
         ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving ("<<time<<"s)");
@@ -111,14 +105,15 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
           loop_rate.sleep();
         }
       }
-      else
+      catch (SolveException e)
       {
-        double time =
-            ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-        ROS_INFO_STREAM_THROTTLE(0.5, "Failed to find solution ("<<time<<"s)");
+        double time = ros::Duration(
+            (ros::WallTime::now() - start_time).toSec()).toSec();
+        ROS_INFO_STREAM_THROTTLE(0.5,
+            e.what()<<" ("<<time<<"s)");
       }
 
-    }
+
   }
 }
 

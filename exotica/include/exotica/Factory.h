@@ -51,6 +51,9 @@
 #define EXOTICA_REGISTER(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) (TYPE, [] () -> BASE * { return new DERIV(); } ); \
     PLUGINLIB_EXPORT_CLASS(DERIV, BASE)
 
+#define EXOTICA_REGISTER_CORE(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) (TYPE, [] () -> BASE * { return new DERIV(); } );
+
+
 namespace exotica
 {
   /**
@@ -58,7 +61,7 @@ namespace exotica
    * @param I   The identifier type (typically a string)
    * @param BO  The Base Object type
    */
-  template<typename BO>
+  template<class BO>
   class Factory: public Object
   {
     public:
@@ -88,48 +91,41 @@ namespace exotica
           throw_pretty("Trying to register already existing type '"<<type<<"'!");
         }
       }
-      ;
 
-      /**
-       * \brief Lists the valid implementations which are available and registered
-       * @param task_types[out] Vector of task-type names
-       */
-      void listImplementations(std::vector<std::string> & registered_types)
+
+      boost::shared_ptr<BO> createInstance(const std::string & type)
       {
-        registered_types.clear();
-        for (auto it = type_registry_.begin(); it != type_registry_.end(); it++)
-        {
-          registered_types.push_back(it->first);
-        }
-      }
-
-      /**
-       * \brief Creates a new Instance of a derived class
-       * @param type  [in]   Identifier as used by the instantiation of the factory
-       * @param object[out]  Shared pointer to the object (placeholder)
-       */
-      void createObject(const std::string & type, boost::shared_ptr<BO> const & object)
-      {
-        auto it = type_registry_.find(type);  //!< Attempt to find it
-        if (it != type_registry_.end())       //!< If exists
-        {
-          const_cast<boost::shared_ptr<BO>&>(object).reset(it->second()); //!< Call the function associated with this entry
-
-          if (object != nullptr)
+          auto it = type_registry_.find(type);  //!< Attempt to find it
+          if (it != type_registry_.end())       //!< If exists
           {
-            return;
+             return boost::shared_ptr<BO>(it->second());
           }
           else
           {
-            throw_pretty("Object could not be created: pointer = NULL!");
+            throw_pretty("This factory does not recognize type '"<< type << "'");
           }
-        }
-        else
-        {
-          throw_pretty("This factory does not recognize type '"<< type << "'");
-        }
       }
 
+      /**
+       * \brief Lists the valid implementations which are available and registered
+       */
+      std::vector<std::string> getDeclaredClasses()
+      {
+        std::vector<std::string> DeclaredClasses;
+        for (auto it = type_registry_.begin(); it != type_registry_.end(); it++)
+        {
+          DeclaredClasses.push_back(it->first);
+        }
+        return DeclaredClasses;
+      }
+
+      // Depricated
+      void createObject(const std::string & type, boost::shared_ptr<BO> & object)
+      {
+        object = createInstance(type);
+      }
+
+      // Depricated
       void createObject(boost::shared_ptr<BO> & object,
           tinyxml2::XMLHandle & handle, const Server_ptr & server)
       {
@@ -138,28 +134,17 @@ namespace exotica
           if (typeid(std::string) == typeid(std::string))
           {
             std::string type = std::string(handle.ToElement()->Name());
-            auto it = type_registry_.find(type);
-            if (it != type_registry_.end())
-            {
+            object = createInstance(type);
               const char * atr = handle.ToElement()->Attribute("name");
               if (atr)
               {
                 std::string name = std::string(atr);
                 if (name.length() > 0)
                 {
-                  //const_cast< boost::shared_ptr<BO>& >(object).reset(it->second());
-                  object.reset(it->second());
-                  if (object != nullptr)
-                  {
                     //const_cast< boost::shared_ptr<BO>& >(object)->object_name_=name;
                     object->object_name_ = name;
                     object->ns_ = name;
                     object->initBase(handle, server);
-                  }
-                  else
-                  {
-                    throw_pretty("Object could not be created: pointer = NULL!");
-                  }
                 }
                 else
                 {
@@ -170,21 +155,6 @@ namespace exotica
               {
                 throw_pretty("Object name for object of type '"<< type <<"' was not specified.");
               }
-            }
-            else
-            {
-              std::string types;
-              for (auto it = type_registry_.begin(); it != type_registry_.end();
-                  it++)
-              {
-                types = types
-                    + (it == type_registry_.begin() ?
-                        std::string("'") : std::string(", '")) + (it->first)
-                    + std::string("'");
-              }
-              throw_pretty(
-                  "XML element '"<<type<<"' does not map to a known type for this factory! Supported types are:\n"<<types);
-            }
           }
           else
           {

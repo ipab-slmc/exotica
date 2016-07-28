@@ -31,7 +31,6 @@
  */
 
 #include "exotica/Initialiser.h"
-
 using namespace rapidjson;
 
 namespace exotica
@@ -138,7 +137,7 @@ namespace exotica
     }
 
     std::vector<std::string> registered_problems;
-    PlanningProblem_fac::Instance().listImplementations(registered_problems);
+    registered_problems = PlanningProblem_fac::Instance().getDeclaredClasses();
     tinyxml2::XMLHandle problem_handle(root_handle.FirstChildElement());
     problems.clear();
     while (problem_handle.ToElement())
@@ -172,7 +171,7 @@ namespace exotica
     }
 
     std::vector<std::string> registered_solvers;
-    MotionSolver_fac::Instance().listImplementations(registered_solvers);
+    registered_solvers = MotionSolver_fac::Instance().getDeclaredClasses();
     tinyxml2::XMLHandle solver_handle(root_handle.FirstChildElement());
     solvers.clear();
     while (solver_handle.ToElement())

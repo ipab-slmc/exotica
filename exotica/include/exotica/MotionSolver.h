@@ -45,7 +45,7 @@
 
 namespace exotica
 {
-  class MotionSolver: public Object
+  class MotionSolver: public Object, Uncopyable
   {
     public:
       /**

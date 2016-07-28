@@ -45,7 +45,7 @@
 
 namespace exotica
 {
-  class Initialiser: public Object
+  class Initialiser: public Object, Uncopyable
   {
     public:
 

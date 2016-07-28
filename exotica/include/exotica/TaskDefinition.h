@@ -45,7 +45,7 @@
 
 namespace exotica
 {
-  class TaskDefinition: public Object
+  class TaskDefinition: public Object, Uncopyable
   {
     public:
       /**

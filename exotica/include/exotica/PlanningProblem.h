@@ -50,7 +50,7 @@
 
 namespace exotica
 {
-  class PlanningProblem: public Object
+  class PlanningProblem: public Object, Uncopyable
   {
     public:
       /**

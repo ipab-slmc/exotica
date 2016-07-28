@@ -58,7 +58,7 @@ namespace exotica
   using EParam = boost::shared_ptr<T>;
 
   //	Implementation of EXOTica Server class
-  class Server
+  class Server : public Uncopyable
   {
 
     public:

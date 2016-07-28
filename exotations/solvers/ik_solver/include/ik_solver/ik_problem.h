@@ -35,7 +35,7 @@
 #define IK_PROBLEM_H_
 #include <exotica/PlanningProblem.h>
 #include "task_definition/TaskSqrError.h"
-#include "Distance.h"
+
 namespace exotica
 {
   /**

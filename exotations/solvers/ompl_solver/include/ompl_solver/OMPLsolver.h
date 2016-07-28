@@ -92,7 +92,7 @@ namespace exotica
 
       virtual std::string print(std::string prepend);
 
-      void setGoalState(const Eigen::VectorXd & qT, const double eps =
+      virtual void setGoalState(const Eigen::VectorXd & qT, const double eps =
           std::numeric_limits<double>::epsilon());
     protected:
 

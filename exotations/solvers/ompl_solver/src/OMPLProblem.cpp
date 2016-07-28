@@ -71,18 +71,12 @@ namespace exotica
     {
       task_maps_ = originalMaps_;
       goals_ = originalGoals_;
-      costs_ = originalCosts_;
-      goalBias_ = originalGoalBias_;
-      samplingBias_ = originalSamplingBias_;
     }
     else
     {
       task_maps_.clear();
       task_defs_.clear();
       goals_.clear();
-      costs_.clear();
-      goalBias_.clear();
-      samplingBias_.clear();
     }
   }
 
@@ -101,28 +95,6 @@ namespace exotica
           getJSON(obj["class"], constraintClass);
           if (knownMaps_.find(constraintClass) != knownMaps_.end())
           {
-              bool IsGoal = false;
-              if (knownMaps_[constraintClass].compare("Identity") == 0)
-              {
-                std::string postureName;
-                try
-                {
-                    getJSON(obj["postureName"], postureName);
-                  if (postureName.compare("reach_end") != 0)
-                  {
-                    continue;
-                  }
-                  else
-                  {
-                    IsGoal = true;
-                  }
-                }
-                catch (Exception e)
-                {
-                  continue;
-                }
-              }
-                  if (problemType == OMPL_PROBLEM_GOAL_BIAS && !IsGoal) continue;
                   TaskMap_ptr taskmap;
                   TaskMap_fac::Instance().createObject(knownMaps_[constraintClass], taskmap);
                   taskmap->initialise(obj, server_, scenes_,problem);
@@ -157,41 +129,6 @@ namespace exotica
           {
             throw_named("Invalid JSON document object!");
           }
-      }
-
-      // HACK - special case
-      // Add goal bias ////////////////////////////
-      if (!problem->endStateName.empty()
-          && problemType == OMPL_PROBLEM_GOAL_BIAS)
-      {
-        TaskMap_ptr taskmap;
-        TaskMap_fac::Instance().createObject("Identity", taskmap);
-          boost::shared_ptr<exotica::Identity> idt = boost::static_pointer_cast<
-              exotica::Identity>(taskmap);
-          std::vector<std::pair<std::string,std::string> > tmpParams;
-          taskmap->initialiseManual("exotica::Identity", server_,scenes_, problem,tmpParams);
-          idt->initialise(problem->endStateName,*(problem->posesJointNames));
-              std::string name = taskmap->getObjectName();
-              task_maps_[name] = taskmap;
-              TaskDefinition_ptr task;
-              if (endState.rows() > 0)
-              {
-                TaskDefinition_fac::Instance().createObject("TaskBias",task);
-                  TaskBias_ptr sqr = boost::static_pointer_cast<TaskBias>(task);
-                  sqr->setTaskMap(taskmap);
-                  int dim;
-                  taskmap->taskSpaceDim(dim);
-                  sqr->y_star0_.resize(dim);
-                  sqr->rho0_(0) = 1.0;
-                  sqr->object_name_ = name
-                      + std::to_string((unsigned long) sqr.get());
-                  sqr->y_star0_.setZero();
-
-                  sqr->setTimeSteps(1);
-                  sqr->wasFullyInitialised_ = true;
-                  task_defs_[name] = task;
-                  goalBias_.push_back(sqr);
-              }
       }
 
     }
@@ -297,52 +234,10 @@ namespace exotica
         }
       }
       break;
-
-    case OMPL_PROBLEM_COSTS:
-      for (auto goal : task_defs_)
-      {
-        if (goal.second->type().compare("exotica::TaskSqrError") == 0)
-        {
-          costs_.push_back(
-              boost::static_pointer_cast<exotica::TaskSqrError>(goal.second));
-        }
-        else
-        {
-          ERROR(goal.first << " has wrong type, ignored!");
-        }
-      }
-      break;
-
-    case OMPL_PROBLEM_GOAL_BIAS:
-      for (auto goal : task_defs_)
-      {
-        if (goal.second->type().compare("exotica::TaskBias") == 0)
-        {
-          goalBias_.push_back(
-              boost::static_pointer_cast<exotica::TaskBias>(goal.second));
-        }
-        else
-        {
-          ERROR(goal.first << " has wrong type, ignored!");
-        }
-      }
-      break;
-
-    case OMPL_PROBLEM_SAMPLING_BIAS:
-      for (auto goal : task_defs_)
-      {
-        if (goal.second->type().compare("exotica::TaskBias") == 0)
-        {
-          samplingBias_.push_back(
-              boost::static_pointer_cast<exotica::TaskBias>(goal.second));
-        }
-        else
-        {
-          ERROR(goal.first << " has wrong type, ignored!");
-        }
-      }
-      break;
+    default:
+        throw_named("Unsupported OMPL problem type!");
     }
+
 
     tmp_handle = handle.FirstChildElement("LocalPlannerConfig");
     if (tmp_handle.ToElement())
@@ -373,9 +268,6 @@ namespace exotica
 
     originalMaps_ = task_maps_;
     originalGoals_ = goals_;
-    originalCosts_ = costs_;
-    originalGoalBias_ = goalBias_;
-    originalSamplingBias_ = samplingBias_;
 
     if (scenes_.begin()->second->getBaseType() != exotica::BASE_TYPE::FIXED)
       compound_ = true;
@@ -407,20 +299,6 @@ namespace exotica
   bool OMPLProblem::isCompoundStateSpace()
   {
     return compound_;
-  }
-  std::vector<TaskSqrError_ptr>& OMPLProblem::getCosts()
-  {
-    return costs_;
-  }
-
-  std::vector<TaskBias_ptr>& OMPLProblem::getGoalBias()
-  {
-    return goalBias_;
-  }
-
-  std::vector<TaskBias_ptr>& OMPLProblem::getSamplingBias()
-  {
-    return samplingBias_;
   }
 
 } /* namespace exotica */

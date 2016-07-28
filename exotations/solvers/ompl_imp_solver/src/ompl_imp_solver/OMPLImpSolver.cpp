@@ -65,6 +65,7 @@ namespace exotica
       : OMPLBaseSolver("OMPLImpSolver"), algorithm_("geometric::RRTConnect")
   {
     object_name_=algorithm_;
+    margin_=boost::any_cast<boost::shared_ptr<std_msgs::Float64>>(boost::shared_ptr<std_msgs::Float64>(new std_msgs::Float64()));
   }
 
   void OMPLImpSolver::initialiseSolver(tinyxml2::XMLHandle & handle)

@@ -228,11 +228,6 @@ namespace exotica
     return false;
   }
 
-  AICOProblem_ptr& AICOsolver::getProblem()
-  {
-    return prob_;
-  }
-
   void AICOsolver::Solve(Eigen::VectorXdRefConst q0,
       Eigen::MatrixXd & solution)
   {

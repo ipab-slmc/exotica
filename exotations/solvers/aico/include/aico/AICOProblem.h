@@ -57,7 +57,7 @@ namespace exotica
        * \brief Get number of time steps
        * @return Number of time steps
        */
-      int getT();
+      virtual int getT();
 
       /**
        * \brief Set number of time steps

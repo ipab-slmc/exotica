@@ -276,14 +276,6 @@ namespace exotica
     JTCinvJ_.resize(size_, size_);
     JTCinvdy_.resize(size_);
 
-    for (auto &it : tasks_)
-    {
-      if (it.second->getTaskMap()->type()=="exotica::Distance")
-      {
-        reach_position_taskmap_ = boost::static_pointer_cast<Distance>(
-            it.second->getTaskMap());
-      }
-    }
     initialised_ = true;
   }
 

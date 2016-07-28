@@ -60,20 +60,22 @@ namespace exotica
 
     // Initialise and solve
       Initialiser::Instance()->initialise(config_name, ser, sol, prob, problem_name, solver_name);
-      // Cast the generic solver instance into AICO solver
-      AICOsolver_ptr solAICO = boost::static_pointer_cast<AICOsolver>(sol);
 
       // Assign the problem to the solver
       sol->specifyProblem(prob);
 
       // If necessary, modify the problem after calling sol->specifyProblem()
       // e.g. set different rho:
-      for (int t = 0; t < solAICO->getProblem()->getT(); t++)
+
+      for (int t = 0; t < sol->getProblem()->getT(); t++)
       {
         // This sets the precision of all time steps BUT the last one to zero
         // This means we only aim to minimize the task cost in the last time step
         // The rest of the trajectory minimizes the control cost
-        solAICO->rhos.at(t).setZero();
+        for(auto it : sol->getProblem()->getTaskDefinitions())
+        {
+            sol->setRho(it.first,0.0,t);
+        }
       }
 
       // Create the initial configuration
@@ -86,13 +88,12 @@ namespace exotica
         // Solve the problem using the AICO solver
         try
         {
-          solAICO->Solve(q, solution);
+          sol->Solve(q, solution);
           double time = ros::Duration(
               (ros::WallTime::now() - start_time).toSec()).toSec();
           ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving ("<<time<<"s)");
           ROS_INFO_STREAM_THROTTLE(0.5,
               "Solution "<<solution.row(solution.rows()-1));
-          solAICO->saveCosts(std::string("costs.txt"));
 
           // Publish the states to rviz
           jointStatePublisher_ = nhg_.advertise<sensor_msgs::JointState>(
@@ -100,7 +101,7 @@ namespace exotica
           sensor_msgs::JointState jnt;
           jnt.position.resize(solution.cols());
           jnt.name = prob->scenes_.begin()->second->getSolver().getJointNames();
-          ros::Rate loop_rate(1.0 / solAICO->getProblem()->getTau());
+          ros::Rate loop_rate(50.0);
           int t = 0;
           ROS_INFO_STREAM_THROTTLE(0.5, "Publishing states to rviz ...");
           while (ros::ok())

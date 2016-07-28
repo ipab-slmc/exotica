@@ -8,7 +8,6 @@
     <param name="config" type="string" value="$(find ompl_solver_demo)/resources/ompl_solver_demo.xml" />
     <param name="solver" type="string" value="OMPL Interface" />
     <param name="problem" type="string" value="OMPLProblem" />
-    <param name="bias" type="string" value="OMPLGoalBias" />
   </node>
 
   <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find ompl_solver_demo)/resources/rviz.rviz" />

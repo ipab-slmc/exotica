@@ -88,7 +88,7 @@ namespace exotica
        * @param	task_name	Task map name
        * @param	goal	new goal
        */
-      void setGoal(const std::string & task_name,
+      virtual void setGoal(const std::string & task_name,
           Eigen::VectorXdRefConst goal, int t = 0);
 
       /**
@@ -176,7 +176,6 @@ namespace exotica
       std::pair<int, int> goal_index_;
       EParam<std_msgs::Bool> ignore_obs_near_goal_;
       geometry_msgs::Pose reach_goal_;
-      Distance_Ptr reach_position_taskmap_;
   };
   typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

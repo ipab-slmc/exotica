@@ -41,32 +41,31 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
 
   {
     // Declarations
-    std::vector<MotionSolver_ptr> sol;
+    MotionSolver_ptr sol;
     Server_ptr ser;
-    std::vector<PlanningProblem_ptr> prob;
+    PlanningProblem_ptr prob;
 
     // Get config file path, problem name and solver name from launch file
     std::string config_name;
-    std::vector<std::string> problem_name(2), solver_name(1);
+    std::string problem_name, solver_name;
     nh_.getParam("config", config_name);
-    nh_.getParam("problem", problem_name[0]);
-    nh_.getParam("bias", problem_name[1]);
-    nh_.getParam("solver", solver_name[0]);
-    ROS_INFO_STREAM(
-        "Config: "<<config_name<<"\nSolver: "<<solver_name[0]<<"\nProblem: "<<problem_name[0]<<"\nBias: "<<problem_name[1]);
+    nh_.getParam("problem", problem_name);
+    nh_.getParam("solver", solver_name);
+    ROS_INFO_STREAM("Config: "<<config_name<<"\nSolver: "<<solver_name[0]<<"\nProblem: "<<problem_name[0]);
 
-    // Initialise and solve
+      // Initialise and solve
       Initialiser::Instance()->initialise(config_name, ser, sol, prob, problem_name, solver_name);
       // Assign the problem to the solver
-      // Cast the generic solver instance into IK solver
-      OMPLsolver_ptr solOMPL = boost::static_pointer_cast<OMPLsolver>(sol[0]);
-      solOMPL->specifyProblem(prob[0]);
+      sol->specifyProblem(prob);
       // Create the initial configuration
       Eigen::VectorXd q = Eigen::VectorXd::Zero(
-          prob[0]->scenes_.begin()->second->getNumJoints());
+          prob->scenes_.begin()->second->getNumJoints());
       Eigen::MatrixXd solution;
 
-      HIGHLIGHT("Problem description:\n"<<solOMPL->print(""));
+      Eigen::VectorXd goal = *boost::static_pointer_cast<TaskTerminationCriterion>(prob->getTaskDefinitions().begin()->second)->getGoal();
+      sol->setGoalState(goal);
+
+      HIGHLIGHT("Problem description:\n"<<sol->print(""));
 
       ROS_INFO_STREAM("Calling solve()");
 
@@ -74,7 +73,7 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
       // Solve the problem using the IK solver
       try
       {
-        solOMPL->Solve(q, solution);
+        sol->Solve(q, solution);
         double time =
             ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
         ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving ("<<time<<"s)");
@@ -87,7 +86,7 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
         sensor_msgs::JointState jnt;
         jnt.position.resize(solution.cols());
         jnt.name =
-            prob[0]->scenes_.begin()->second->getSolver().getJointNames();
+            prob->scenes_.begin()->second->getSolver().getJointNames();
         ros::Rate loop_rate(50.0); // Magic number for now
         int t = 0;
         ROS_INFO_STREAM_THROTTLE(0.5, "Publishing states to rviz ...");

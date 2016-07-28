@@ -126,6 +126,8 @@ namespace exotica
 
       virtual void clear(bool keepOriginals = true);
 
+      virtual int getT() {throw_named("Not implemented!");};
+
     protected:
 
       /**

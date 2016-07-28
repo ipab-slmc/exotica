@@ -124,8 +124,6 @@ namespace exotica
        */
       virtual bool isSolvable(const PlanningProblem_ptr & prob);
 
-      AICOProblem_ptr& getProblem();
-
       /**
        * \brief Stores costs into a file
        */
@@ -156,7 +154,7 @@ namespace exotica
        * @param	goal	new goal
        * @param   t time step
        */
-      void setGoal(const std::string & task_name,
+      virtual void setGoal(const std::string & task_name,
           Eigen::VectorXdRefConst goal, int t = 0);
 
       /**
@@ -165,7 +163,7 @@ namespace exotica
        * @param	rho	Rho
        * @param   t time step
        */
-      void setRho(const std::string & task_name, const double rho,
+      virtual void setRho(const std::string & task_name, const double rho,
           int t = 0);
 
       /**
@@ -174,7 +172,7 @@ namespace exotica
        * @param	goal	returned goal
        * @param   t time step
        */
-      void getGoal(const std::string & task_name, Eigen::VectorXd& goal,
+      virtual void getGoal(const std::string & task_name, Eigen::VectorXd& goal,
           int t = 0);
 
       /**
@@ -183,7 +181,7 @@ namespace exotica
        * @param	goal	returned rho
        * @param   t time step
        */
-      void getRho(const std::string & task_name, double& rho, int t = 0);
+      virtual void getRho(const std::string & task_name, double& rho, int t = 0);
 
       std::vector<Eigen::VectorXd> y_star; //!< Task cost mappings
       std::vector<Eigen::VectorXd> rhos; //!< Task precisions

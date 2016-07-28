@@ -92,6 +92,17 @@ namespace exotica
        */
       virtual bool isSolvable(const PlanningProblem_ptr & prob) = 0;
 
+      virtual void setGoalState(const Eigen::VectorXd & qT, const double eps =
+              std::numeric_limits<double>::epsilon()) {throw_named("Not implemented!");}
+      virtual void setGoal(const std::string & task_name,
+          Eigen::VectorXdRefConst goal, int t = 0) {throw_named("Not implemented!");}
+
+      virtual void setRho(const std::string & task_name, const double rho,int t = 0) {throw_named("Not implemented!");}
+      virtual void getGoal(const std::string & task_name, Eigen::VectorXd& goal,int t = 0) {throw_named("Not implemented!");}
+      virtual void getRho(const std::string & task_name, double& rho, int t = 0) {throw_named("Not implemented!");}
+
+      PlanningProblem_ptr getProblem() {return problem_;}
+
       virtual std::string print(std::string prepend);
     protected:
       /**

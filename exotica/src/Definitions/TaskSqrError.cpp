@@ -30,22 +30,12 @@
  *
  */
 
-#include "task_definition/TaskSqrError.h"
+#include "exotica/Definitions/TaskSqrError.h"
 
-REGISTER_TASKDEFINITION_TYPE("TaskSqrError", exotica::TaskSqrError);
-REGISTER_TASKDEFINITION_TYPE("TaskVelocitySqrError",
-    exotica::TaskVelocitySqrError);
+REGISTER_TASKDEFINITION_TYPE("TaskSqrError", exotica::TaskSqrError)
 
 namespace exotica
 {
-
-  TaskVelocitySqrError::TaskVelocitySqrError()
-  {
-    order = 1;
-    rho0_.resize(1);
-    rho1_.resize(1);
-    wasFullyInitialised_ = false;
-  }
 
   TaskSqrError::TaskSqrError()
   {

@@ -31,7 +31,7 @@
  *
  */
 
-#include "ik_solver/ik_solver.h"
+#include "ik_solver/IKSolver.h"
 
 #include <lapack/cblas.h>
 #include "f2c.h"
@@ -41,7 +41,7 @@
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
-REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver);
+REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver)
 
 namespace exotica
 {
@@ -139,7 +139,6 @@ namespace exotica
     {
       throw_named("IK solver initialisation, parameter error\n");
     }
-    HIGHLIGHT_NAMED(object_name_, "Initialised at "<<this);
   }
 
   void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
@@ -267,10 +266,6 @@ namespace exotica
     C=C.inverse();
     W.diagonal()=prob_->getW().diagonal().unaryExpr(CwiseClampOp<double>(1e-10, 1e10));
     Winv=W.inverse();
-    HIGHLIGHT_NAMED("C","\n"<<C);
-    HIGHLIGHT_NAMED("Cinv","\n"<<Cinv);
-    HIGHLIGHT_NAMED("W","\n"<<W);
-    HIGHLIGHT_NAMED("Winv","\n"<<Winv);
     tasks_ = prob_->getTaskDefinitions();
     JTCinv_.resize(tasks_.size());
     JTCinvJ_.resize(size_, size_);

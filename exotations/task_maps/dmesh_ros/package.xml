@@ -13,14 +13,12 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>ik_solver</build_depend>  
-  <build_depend>task_definition</build_depend> 
+  <build_depend>ik_solver</build_depend>
   <build_depend>visualization_msgs</build_depend>  
 
   <run_depend>exotica</run_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>ik_solver</run_depend>  
-  <run_depend>task_definition</run_depend>
+  <run_depend>ik_solver</run_depend>
   <run_depend>visualization_msgs</run_depend> 
 
   <export>

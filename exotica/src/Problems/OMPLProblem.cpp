@@ -31,22 +31,13 @@
  *
  */
 
-#include "ompl_solver/OMPLProblem.h"
-#include "Identity.h"
+#include "exotica/Problems/OMPLProblem.h"
 
-REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem);
-REGISTER_TASKDEFINITION_TYPE("TaskBias", exotica::TaskBias);
-
+REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem)
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 namespace exotica
 {
-
-  TaskBias::TaskBias()
-      : TaskSqrError()
-  {
-
-  }
 
   OMPLProblem::OMPLProblem()
       : space_dim_(0), problemType(OMPL_PROBLEM_GOAL)

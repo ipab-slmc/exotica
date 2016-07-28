@@ -38,7 +38,7 @@
 #define AICOPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
-#include "task_definition/TaskSqrError.h"
+#include "exotica/Definitions/TaskSqrError.h"
 
 namespace exotica
 {

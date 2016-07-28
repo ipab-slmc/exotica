@@ -31,9 +31,9 @@
  *
  */
 
-#include "ik_solver/ik_problem.h"
+#include "exotica/Problems/IKProblem.h"
 
-REGISTER_PROBLEM_TYPE("IKProblem", exotica::IKProblem);
+REGISTER_PROBLEM_TYPE("IKProblem", exotica::IKProblem)
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 

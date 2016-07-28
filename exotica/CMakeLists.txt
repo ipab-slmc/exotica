@@ -69,14 +69,19 @@ add_library(${PROJECT_NAME}
   src/TaskMap.cpp
   src/tinyxml2.cpp
   src/Tools.cpp
-  src/Tools/Exception.cpp
   src/TaskDefinition.cpp
   src/PlanningProblem.cpp
   src/MotionSolver.cpp
   src/Initialiser.cpp
   src/Server.cpp
   src/Scene.cpp
-  src/KinematicTree.cpp)
+  src/KinematicTree.cpp
+  src/Tools/Exception.cpp
+  src/Problems/AICOProblem.cpp
+  src/Problems/IKProblem.cpp
+  src/Problems/OMPLProblem.cpp
+  src/Definitions/TaskSqrError.cpp
+  src/Definitions/TaskTerminationCriterion.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${exotica_BINARY_DIR}/generated/Version.cpp)

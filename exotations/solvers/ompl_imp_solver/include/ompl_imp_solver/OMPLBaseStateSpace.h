@@ -35,7 +35,7 @@
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLBASESTATESPACE_H_
 
 #include <ompl/base/StateSpace.h>
-#include "ompl_solver/OMPLProblem.h"
+#include "exotica/Problems/OMPLProblem.h"
 #include <ompl/base/StateValidityChecker.h>
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/ProjectionEvaluator.h>

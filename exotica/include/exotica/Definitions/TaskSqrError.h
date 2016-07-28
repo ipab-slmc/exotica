@@ -128,12 +128,5 @@ namespace exotica
 
   };
   typedef boost::shared_ptr<TaskSqrError> TaskSqrError_ptr;
-  class TaskVelocitySqrError: public TaskSqrError
-  {
-    public:
-      TaskVelocitySqrError();
-  };
-  typedef boost::shared_ptr<TaskSqrError> TaskSqrError_ptr;
-  typedef boost::shared_ptr<TaskVelocitySqrError> TaskVelocitySqrError_ptr;
 }
 #endif

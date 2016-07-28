@@ -36,7 +36,7 @@
 #include "exotica/TaskDefinition.h"//!< The Component base
 #include "exotica/Factory.h"      //!< The Factory template
 #include "exotica/Tools.h"        //!< For XML-Parsing/ErrorFunction definition
-#include "task_definition/TaskSqrError.h"
+#include "exotica/Definitions/TaskSqrError.h"
 
 namespace exotica
 {

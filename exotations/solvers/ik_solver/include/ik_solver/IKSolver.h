@@ -35,8 +35,8 @@
 #define IK_SOLVER_H_
 
 #include <exotica/EXOTica.hpp>
-#include <ik_solver/ik_problem.h>
-#include <task_definition/TaskSqrError.h>
+#include <exotica/Problems/IKProblem.h>
+#include <exotica/Definitions/TaskSqrError.h>
 #include <Identity.h>
 #include <iostream>
 #include <fstream>

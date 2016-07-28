@@ -34,7 +34,7 @@
 #ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLBASESOLVER_H_
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLBASESOLVER_H_
 
-#include "ompl_solver/OMPLProblem.h"
+#include "exotica/Problems/OMPLProblem.h"
 #include "ompl_solver/common.h"
 #include <ompl/geometric/PathSimplifier.h>
 #include <ompl/base/DiscreteMotionValidator.h>

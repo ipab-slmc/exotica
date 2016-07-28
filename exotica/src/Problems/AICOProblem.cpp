@@ -31,7 +31,7 @@
  *
  */
 
-#include "aico/AICOProblem.h"
+#include "exotica/Problems/AICOProblem.h"
 
 REGISTER_PROBLEM_TYPE("AICOProblem", exotica::AICOProblem)
 

@@ -1,5 +1,6 @@
 /*
- *      Author: Michael Camilleri
+ *  Created on: 15 Jul 2014
+ *      Author: Yiming Yang
  * 
  * Copyright (c) 2016, University Of Edinburgh 
  * All rights reserved. 
@@ -30,59 +31,53 @@
  *
  */
 
-#include "task_definition/TaskTerminationCriterion.h"
-
-REGISTER_TASKDEFINITION_TYPE("TaskTerminationCriterion",
-    exotica::TaskTerminationCriterion);
+#ifndef IK_PROBLEM_H_
+#define IK_PROBLEM_H_
+#include <exotica/PlanningProblem.h>
+#include "exotica/Definitions/TaskSqrError.h"
 
 namespace exotica
 {
-
-  TaskTerminationCriterion::TaskTerminationCriterion()
-      : threshold_(0.0)
+  /**
+   * IK problem implementation
+   */
+  class IKProblem: public PlanningProblem
   {
-    order = 0;
-    rho0_.resize(1);
-    rho1_.resize(1);
-    threshold0_.resize(1);
-    wasFullyInitialised_ = false;
-  }
+    public:
+      IKProblem();
+      virtual ~IKProblem();
 
-  void TaskTerminationCriterion::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    TaskSqrError::initDerived(handle);
-      double thr;
-      if (handle.FirstChildElement("Threshold").ToElement())
-      {
-        getDouble(*(handle.FirstChildElement("Threshold").ToElement()),thr);
-        threshold0_(0) = thr;
-      }
-      else
-      {
-        throw_named("Threshold was not specified");
-      }
+      /**
+       * \brief	Get configuration weight
+       * @return	configuration weight
+       */
+      Eigen::MatrixXd getW();
 
-    setTimeSteps(1);
-  }
+      int getT();
 
-  void TaskTerminationCriterion::terminate(bool & end, double& err, int t)
-  {
-    err = ((*(task_map_->phi_.at(t))) - (*(y_star_.at(t)))).squaredNorm()
-        * (*(rho_.at(t)))(0);
-    end = err <= (*(threshold_.at(t)))(0);
-//    	HIGHLIGHT_NAMED(object_name_,"Phi "<<task_map_->phi_.at(t)->transpose()<<" goal "<<y_star_.at(t)->transpose()<<" Err "<<err);
-  }
+      /**
+       * \brief	Get tolerance
+       * @return	tolerance
+       */
+      double getTau();
+      void setTau(double tau);
 
-  void TaskTerminationCriterion::registerThreshold(
-      Eigen::VectorXdRef_ptr threshold, int t)
-  {
-    threshold_.at(t) = threshold;
-  }
+      virtual void reinitialise(rapidjson::Document& document,
+          boost::shared_ptr<PlanningProblem> problem);
+    protected:
+      /**
+       * \brief Derived Initialiser (from XML): PURE VIRTUAL
+       * @param handle The handle to the XML-element describing the Problem Definition
+       * @return Indication of success/failure
+       */
+      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
-  void TaskTerminationCriterion::setTimeSteps(const int T)
-  {
-    TaskSqrError::setTimeSteps(T);
-    threshold_.assign(T, Eigen::VectorXdRef_ptr(threshold0_));
-  }
+      Eigen::MatrixXd config_w_;	//Configuration weight
+      double tau_;	// Tolerance
+      int T_;
 
+  };
+  typedef boost::shared_ptr<exotica::IKProblem> IKProblem_ptr;
 }
+
+#endif /* IK_PROBLEM_H_ */

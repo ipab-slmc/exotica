@@ -101,7 +101,7 @@ IKSolverDemoNode::IKSolverDemoNode()
         }
         double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
         ROS_INFO_STREAM_THROTTLE(0.5,
-          "Finished solving ("<<time<<"s. Solution "<<solution);
+          "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
         q = solution.row(solution.rows() - 1);
 
         jnt.header.stamp = ros::Time::now();

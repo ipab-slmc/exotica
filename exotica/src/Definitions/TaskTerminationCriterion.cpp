@@ -1,6 +1,5 @@
 /*
- *  Created on: 30 Apr 2014
- *      Author: Vladimir Ivan
+ *      Author: Michael Camilleri
  * 
  * Copyright (c) 2016, University Of Edinburgh 
  * All rights reserved. 
@@ -31,25 +30,59 @@
  *
  */
 
-
-#ifndef IK_SOLVER_DEMO_NODE_H
-#define IK_SOLVER_DEMO_NODE_H
-
-#include <ros/ros.h>
-#include <ros/package.h>
-#include <exotica/Initialiser.h>
-#include <sensor_msgs/JointState.h>
 #include "exotica/Definitions/TaskTerminationCriterion.h"
 
-class OMPLSolverDemoNode
-{
-  public:
-    OMPLSolverDemoNode();
-  private:
-    ros::NodeHandle nh_;
-    ros::NodeHandle nhg_;
-    std::string resource_path_;
-    ros::Publisher jointStatePublisher_;
-};
+REGISTER_TASKDEFINITION_TYPE("TaskTerminationCriterion",
+    exotica::TaskTerminationCriterion);
 
-#endif // IK_SOLVER_DEMO_NODE_H
+namespace exotica
+{
+
+  TaskTerminationCriterion::TaskTerminationCriterion()
+      : threshold_(0.0)
+  {
+    order = 0;
+    rho0_.resize(1);
+    rho1_.resize(1);
+    threshold0_.resize(1);
+    wasFullyInitialised_ = false;
+  }
+
+  void TaskTerminationCriterion::initDerived(tinyxml2::XMLHandle & handle)
+  {
+    TaskSqrError::initDerived(handle);
+      double thr;
+      if (handle.FirstChildElement("Threshold").ToElement())
+      {
+        getDouble(*(handle.FirstChildElement("Threshold").ToElement()),thr);
+        threshold0_(0) = thr;
+      }
+      else
+      {
+        throw_named("Threshold was not specified");
+      }
+
+    setTimeSteps(1);
+  }
+
+  void TaskTerminationCriterion::terminate(bool & end, double& err, int t)
+  {
+    err = ((*(task_map_->phi_.at(t))) - (*(y_star_.at(t)))).squaredNorm()
+        * (*(rho_.at(t)))(0);
+    end = err <= (*(threshold_.at(t)))(0);
+//    	HIGHLIGHT_NAMED(object_name_,"Phi "<<task_map_->phi_.at(t)->transpose()<<" goal "<<y_star_.at(t)->transpose()<<" Err "<<err);
+  }
+
+  void TaskTerminationCriterion::registerThreshold(
+      Eigen::VectorXdRef_ptr threshold, int t)
+  {
+    threshold_.at(t) = threshold;
+  }
+
+  void TaskTerminationCriterion::setTimeSteps(const int T)
+  {
+    TaskSqrError::setTimeSteps(T);
+    threshold_.assign(T, Eigen::VectorXdRef_ptr(threshold0_));
+  }
+
+}

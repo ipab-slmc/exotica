@@ -3,6 +3,7 @@
   <param name="robot_description" textfile="$(find ik_solver_demo)/resources/lwr_simplified.urdf" />
   <param name="robot_description_semantic" textfile="$(find ik_solver_demo)/resources/lwr_simplified.srdf" />
 	
+  <!-- launch-prefix="xterm -e gdb -args" -->
   <node pkg="ik_solver_demo" type="IKexample" name="IKSolverDemoNode" output="screen">
     <param name="config" type="string" value="$(find ik_solver_demo)/resources/ik_solver_demo.xml" />
     <param name="solver" type="string" value="IKSolverDemo" />

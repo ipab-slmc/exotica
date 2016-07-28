@@ -46,7 +46,7 @@
 #include <string>
 #include <map>
 
-#define REGISTER_PROBLEM_TYPE(TYPE, DERIV) EXOTICA_REGISTER(exotica::PlanningProblem, TYPE, DERIV)
+#define REGISTER_PROBLEM_TYPE(TYPE, DERIV) EXOTICA_REGISTER_CORE(exotica::PlanningProblem, TYPE, DERIV)
 
 namespace exotica
 {

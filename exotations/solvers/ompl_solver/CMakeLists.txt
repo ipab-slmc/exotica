@@ -6,10 +6,6 @@ find_package(OMPL REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  roscpp
-  roslib
-  task_map
-  ik_solver
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -18,7 +14,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ompl_solver
-  CATKIN_DEPENDS exotica roscpp roslib task_map ik_solver
+  CATKIN_DEPENDS exotica
   DEPENDS system_lib ompl
 )
 

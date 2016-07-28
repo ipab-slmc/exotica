@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(ompl_imp_solver)
 
 find_package(catkin REQUIRED COMPONENTS
-  exotica_distro
+  exotica
+  ompl_solver
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -11,7 +12,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ompl_imp_solver
-  CATKIN_DEPENDS exotica_distro
+  CATKIN_DEPENDS exotica ompl_solver
   DEPENDS system_lib
 )
 

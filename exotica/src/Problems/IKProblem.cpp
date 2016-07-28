@@ -32,6 +32,7 @@
  */
 
 #include "exotica/Problems/IKProblem.h"
+#include "exotica/Initialiser.h"
 
 REGISTER_PROBLEM_TYPE("IKProblem", exotica::IKProblem)
 
@@ -65,14 +66,11 @@ namespace exotica
                 getJSON(obj["class"], constraintClass);
                 if (knownMaps_.find(constraintClass) != knownMaps_.end())
                 {
-                    TaskMap_ptr taskmap;
-                    TaskMap_fac::Instance().createObject(
-                    knownMaps_[constraintClass], taskmap);
+                    TaskMap_ptr taskmap = Initialiser::createMap(knownMaps_[constraintClass]);
                     taskmap->initialise(obj, server_, scenes_,problem);
                     std::string name = taskmap->getObjectName();
                     task_maps_[name] = taskmap;
-                    TaskDefinition_ptr task;
-                    TaskDefinition_fac::Instance().createObject("TaskSqrError", task);
+                    TaskDefinition_ptr task = Initialiser::createDefinition("TaskSqrError");
                     TaskSqrError_ptr sqr = boost::static_pointer_cast<TaskSqrError>(task);
                     sqr->setTaskMap(taskmap);
                     int dim;

@@ -45,18 +45,6 @@ namespace exotica
       {
           HIGHLIGHT(" '"<<s<<"'");
       }
-      HIGHLIGHT("Registered problems:");
-      std::vector<std::string> problems =  Instance()->problems_.getDeclaredClasses();
-      for(std::string s : problems)
-      {
-          HIGHLIGHT(" '"<<s<<"'");
-      }
-      HIGHLIGHT("Registered task definitions:");
-      std::vector<std::string> definitions =  Instance()->definitions_.getDeclaredClasses();
-      for(std::string s : definitions)
-      {
-          HIGHLIGHT(" '"<<s<<"'");
-      }
       HIGHLIGHT("Registered task maps:");
       std::vector<std::string> maps =  Instance()->maps_.getDeclaredClasses();
       for(std::string s : maps)
@@ -65,8 +53,7 @@ namespace exotica
       }
   }
 
-  Initialiser::Initialiser() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap"),
-    definitions_("exotica","exotica::TaskDefinition"), problems_("exotica","exotica::PlanningProblem")
+  Initialiser::Initialiser() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap")
   {
 
   }
@@ -230,10 +217,11 @@ namespace exotica
       const char* atr = problem_handle.ToElement()->Attribute("name");
       if (atr)
       {
-        if (std::string(atr).compare(problem_name) == 0)
+        if (std::string(atr)==problem_name)
         {
-
-            PlanningProblem_fac::Instance().createObject(problem,problem_handle, server);
+            std::string type = std::string(problem_handle.ToElement()->Name());
+            problem = createProblem(type);
+            problem->initBase(problem_handle, server);
             return;
         }
         else
@@ -265,9 +253,11 @@ namespace exotica
         const char* atr = solver_handle.ToElement()->Attribute("name");
         if (atr)
         {
-          if (std::string(atr).compare(solver_name) == 0)
+          if (std::string(atr)==solver_name)
           {
-            MotionSolver_fac::Instance().createObject(solver, solver_handle,server);
+            std::string type = std::string(solver_handle.ToElement()->Name());
+            solver = createSolver(type);
+            solver->initBase(solver_handle,server);
             return;
           }
           else

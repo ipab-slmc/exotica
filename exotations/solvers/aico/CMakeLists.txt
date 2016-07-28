@@ -4,7 +4,6 @@ project(aico)
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  roscpp
 )
 
 ## System dependencies are found with CMake's conventions
@@ -14,7 +13,7 @@ find_package(LAPACK REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aico
-  CATKIN_DEPENDS exotica roscpp
+  CATKIN_DEPENDS exotica
   DEPENDS system_lib
 )
 

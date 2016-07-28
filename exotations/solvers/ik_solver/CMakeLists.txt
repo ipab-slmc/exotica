@@ -3,9 +3,6 @@ project(ik_solver)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  roscpp
-  roslib
-  task_map
 )
 
 
@@ -16,7 +13,7 @@ find_package(LAPACK REQUIRED)
 catkin_package(
 INCLUDE_DIRS include
 LIBRARIES ik_solver
-CATKIN_DEPENDS exotica roscpp roslib task_map
+CATKIN_DEPENDS exotica
 DEPENDS system_lib
 )
 

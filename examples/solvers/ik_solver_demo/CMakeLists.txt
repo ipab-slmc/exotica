@@ -2,13 +2,12 @@ cmake_minimum_required(VERSION 2.8.3)
 project(ik_solver_demo)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  exotica_distro
+  exotica
   sensor_msgs
 )
 
 catkin_package(
- CATKIN_DEPENDS roscpp exotica_distro sensor_msgs
+ CATKIN_DEPENDS exotica sensor_msgs
  DEPENDS system_lib
 )
 

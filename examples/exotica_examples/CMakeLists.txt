@@ -3,7 +3,6 @@ project(exotica_examples)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  roscpp
 )
 
 catkin_package(

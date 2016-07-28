@@ -37,7 +37,6 @@
 #include <exotica/EXOTica.hpp>
 #include <exotica/Problems/IKProblem.h>
 #include <exotica/Definitions/TaskSqrError.h>
-#include <Identity.h>
 #include <iostream>
 #include <fstream>
 

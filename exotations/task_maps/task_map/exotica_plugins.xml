@@ -1,4 +1,4 @@
-<library path="lib/libaico">
+<library path="lib/libtask_map">
   <class name="exotica/CoM" type="exotica::CoM" base_class_type="exotica::TaskMap">
     <description>Centre of mass</description>
   </class>

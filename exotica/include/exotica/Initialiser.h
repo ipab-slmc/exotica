@@ -58,10 +58,10 @@ namespace exotica
       }
 
       static void printSupportedClasses();
-      static boost::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return Instance()->createObjectInternal(type, Instance()->solvers_);}
-      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->createObjectInternal(type, Instance()->problems_);}
-      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return Instance()->createObjectInternal(type, Instance()->definitions_);}
-      static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->createObjectInternal(type, Instance()->maps_);}
+      static boost::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return Instance()->solvers_.createInstance("exotica/"+type);}
+      static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->maps_.createInstance("exotica/"+type);}
+      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return TaskDefinition_fac::Instance().createInstance("exotica/"+type);}
+      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return PlanningProblem_fac::Instance().createInstance("exotica/"+type);}
 
       ///
       /// \brief initialise Initialises the server from XML handle
@@ -172,17 +172,10 @@ namespace exotica
       Initialiser(Initialiser const&) = delete;
       void operator=(Initialiser const&) = delete;
 
-      template<class C> boost::shared_ptr<C> createObjectInternal(const std::string & type,pluginlib::ClassLoader<C> & loader)
-      {
-          return loader.createInstance(type);
-      }
-
       /** Class Parameters **/
       tinyxml2::XMLDocument xml_file;
       pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
-      pluginlib::ClassLoader<exotica::PlanningProblem> problems_;
       pluginlib::ClassLoader<exotica::TaskMap> maps_;
-      pluginlib::ClassLoader<exotica::TaskDefinition> definitions_;
   };
 
   typedef boost::shared_ptr<Initialiser> Initialiser_ptr;

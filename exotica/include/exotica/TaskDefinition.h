@@ -41,7 +41,7 @@
 #include <string>
 #include <map>
 
-#define REGISTER_TASKDEFINITION_TYPE(TYPE, DERIV) EXOTICA_REGISTER(exotica::TaskDefinition, TYPE, DERIV)
+#define REGISTER_TASKDEFINITION_TYPE(TYPE, DERIV) EXOTICA_REGISTER_CORE(exotica::TaskDefinition, TYPE, DERIV)
 
 namespace exotica
 {

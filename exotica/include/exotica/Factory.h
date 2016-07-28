@@ -48,10 +48,10 @@
  * @param TYPE    The name to identify the class (should be of type IDENT)
  * @param DERIV   The Derived Class type (should inherit from BASE)
  */
-#define EXOTICA_REGISTER(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) (TYPE, [] () -> BASE * { return new DERIV(); } ); \
+#define EXOTICA_REGISTER(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) ("exotica/" TYPE, [] () -> BASE * { return new DERIV(); } ); \
     PLUGINLIB_EXPORT_CLASS(DERIV, BASE)
 
-#define EXOTICA_REGISTER_CORE(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) (TYPE, [] () -> BASE * { return new DERIV(); } );
+#define EXOTICA_REGISTER_CORE(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) ("exotica/" TYPE, [] () -> BASE * { return new DERIV(); } );
 
 
 namespace exotica
@@ -131,8 +131,6 @@ namespace exotica
       {
         if (handle.ToElement())
         {
-          if (typeid(std::string) == typeid(std::string))
-          {
             std::string type = std::string(handle.ToElement()->Name());
             object = createInstance(type);
               const char * atr = handle.ToElement()->Attribute("name");
@@ -155,12 +153,6 @@ namespace exotica
               {
                 throw_pretty("Object name for object of type '"<< type <<"' was not specified.");
               }
-          }
-          else
-          {
-            throw_pretty(
-                "This factory can only handle std::string type of object idenfiers.");
-          }
         }
         else
         {

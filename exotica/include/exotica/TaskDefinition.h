@@ -41,11 +41,11 @@
 #include <string>
 #include <map>
 
-#define REGISTER_TASKDEFINITION_TYPE(TYPE, DERIV) EXOTICA_REGISTER(std::string, exotica::TaskDefinition, TYPE, DERIV)
+#define REGISTER_TASKDEFINITION_TYPE(TYPE, DERIV) EXOTICA_REGISTER_CORE(exotica::TaskDefinition, TYPE, DERIV)
 
 namespace exotica
 {
-  class TaskDefinition: public Object
+  class TaskDefinition: public Object, Uncopyable
   {
     public:
       /**
@@ -131,7 +131,7 @@ namespace exotica
 
   };
 
-  typedef Factory<std::string, TaskDefinition> TaskDefinition_fac;
+  typedef Factory<TaskDefinition> TaskDefinition_fac;
   typedef boost::shared_ptr<TaskDefinition> TaskDefinition_ptr;
   typedef std::map<std::string, TaskDefinition_ptr> TaskDefinition_map;
 

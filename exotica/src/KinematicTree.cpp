@@ -36,20 +36,6 @@
 #include <iostream>
 #endif
 
-#ifdef KIN_DEBUG_MODE
-#define CHECK_EXECUTION         std::cout << "Ok in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n"; //!< With endline
-#define INDICATE_FAILURE        std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
-#define WARNING(x)							 std::clog << "Warning in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
-#define ERROR(x)								 std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
-#define INFO(x)									 std::clog << "Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";//!< With endline
-#else
-#define CHECK_EXECUTION     //!< No operation
-#define INDICATE_FAILURE    std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n";//!< With endline
-#define WARNING(x)          //!< No operation
-#define ERROR(x)            std::cerr << "Failed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" << x << "\n";//!< With endline
-#define INFO(x)
-#endif
-
 int exotica::KinematicTree::getNumJoints()
 {
   return num_jnts_spec_;

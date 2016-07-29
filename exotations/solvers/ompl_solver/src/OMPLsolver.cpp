@@ -93,7 +93,7 @@ namespace exotica
           "Using ["<<solver_->data<<"] from package ["<<solver_package_->data<<"].");
     } catch (pluginlib::PluginlibException& ex)
     {
-      throw_named("EXOTica-OMPL plugin failed to load solver "<<solver_->data<<". \nError: %s" << ex.what());
+      throw_named("EXOTica-OMPL plugin failed to load solver "<<solver_->data<<". Solver package: '"<<solver_package_->data<< "'. \nError: " << ex.what());
     }
     base_solver_->initialiseBaseSolver(handle, server_);
   }

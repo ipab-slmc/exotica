@@ -64,7 +64,7 @@ namespace exotica
     FIXED = 0, FLOATING = 10, PLANAR = 20
   };
 ///	The class of collision scene
-  class CollisionScene
+  class CollisionScene : public Uncopyable
   {
     public:
       /**
@@ -230,7 +230,7 @@ namespace exotica
   typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
 
 ///	The class of EXOTica Scene
-  class Scene: public Object
+  class Scene: public Object, Uncopyable
   {
     public:
       /**

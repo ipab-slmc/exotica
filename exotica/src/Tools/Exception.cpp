@@ -3,7 +3,7 @@
 namespace exotica
 {
 
-Exception::ReportingType Exception::reporting_ = Exception::Message;
+Exception::ReportingType Exception::reporting_ = Exception::Message | Exception::FileName | Exception::FunctionName | Exception::LineNumber | Exception::ObjectName;
 
 Exception::Exception()
 {

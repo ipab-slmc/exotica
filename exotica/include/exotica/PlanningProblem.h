@@ -46,11 +46,11 @@
 #include <string>
 #include <map>
 
-#define REGISTER_PROBLEM_TYPE(TYPE, DERIV) EXOTICA_REGISTER(std::string, exotica::PlanningProblem, TYPE, DERIV)
+#define REGISTER_PROBLEM_TYPE(TYPE, DERIV) EXOTICA_REGISTER_CORE(exotica::PlanningProblem, TYPE, DERIV)
 
 namespace exotica
 {
-  class PlanningProblem: public Object
+  class PlanningProblem: public Object, Uncopyable
   {
     public:
       /**
@@ -126,6 +126,12 @@ namespace exotica
 
       virtual void clear(bool keepOriginals = true);
 
+      virtual int getT() {throw_named("Not implemented!");}
+
+      virtual double getTau() {throw_named("Not implemented!");}
+
+      virtual void setLimits(Eigen::VectorXd limits) {throw_named("Not implemented!");}
+
     protected:
 
       /**
@@ -144,7 +150,7 @@ namespace exotica
 
   };
 
-  typedef Factory<std::string, PlanningProblem> PlanningProblem_fac;
+  typedef Factory<PlanningProblem> PlanningProblem_fac;
   typedef boost::shared_ptr<PlanningProblem> PlanningProblem_ptr;
 
 }

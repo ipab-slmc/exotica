@@ -31,15 +31,31 @@
  */
 
 #include "exotica/Initialiser.h"
-
 using namespace rapidjson;
 
 namespace exotica
 {
+  Initialiser_ptr Initialiser::singleton_initialiser_ = NULL;
 
-  Initialiser::Initialiser()
+  void Initialiser::printSupportedClasses()
   {
-    //!< Empty constructor
+      HIGHLIGHT("Registered solvers:");
+      std::vector<std::string> solvers =  Instance()->solvers_.getDeclaredClasses();
+      for(std::string s : solvers)
+      {
+          HIGHLIGHT(" '"<<s<<"'");
+      }
+      HIGHLIGHT("Registered task maps:");
+      std::vector<std::string> maps =  Instance()->maps_.getDeclaredClasses();
+      for(std::string s : maps)
+      {
+          HIGHLIGHT(" '"<<s<<"'");
+      }
+  }
+
+  Initialiser::Initialiser() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap")
+  {
+
   }
 
   void Initialiser::initialise(const std::string & file_name,
@@ -108,7 +124,7 @@ namespace exotica
     }
 
     std::vector<std::string> registered_problems;
-    PlanningProblem_fac::Instance().listImplementations(registered_problems);
+    registered_problems = PlanningProblem_fac::Instance().getDeclaredClasses();
     tinyxml2::XMLHandle problem_handle(root_handle.FirstChildElement());
     problems.clear();
     while (problem_handle.ToElement())
@@ -142,7 +158,7 @@ namespace exotica
     }
 
     std::vector<std::string> registered_solvers;
-    MotionSolver_fac::Instance().listImplementations(registered_solvers);
+    registered_solvers = MotionSolver_fac::Instance().getDeclaredClasses();
     tinyxml2::XMLHandle solver_handle(root_handle.FirstChildElement());
     solvers.clear();
     while (solver_handle.ToElement())
@@ -201,10 +217,11 @@ namespace exotica
       const char* atr = problem_handle.ToElement()->Attribute("name");
       if (atr)
       {
-        if (std::string(atr).compare(problem_name) == 0)
+        if (std::string(atr)==problem_name)
         {
-
-            PlanningProblem_fac::Instance().createObject(problem,problem_handle, server);
+            std::string type = std::string(problem_handle.ToElement()->Name());
+            problem = createProblem(type);
+            problem->initBase(problem_handle, server);
             return;
         }
         else
@@ -236,9 +253,11 @@ namespace exotica
         const char* atr = solver_handle.ToElement()->Attribute("name");
         if (atr)
         {
-          if (std::string(atr).compare(solver_name) == 0)
+          if (std::string(atr)==solver_name)
           {
-            MotionSolver_fac::Instance().createObject(solver, solver_handle,server);
+            std::string type = std::string(solver_handle.ToElement()->Name());
+            solver = createSolver(type);
+            solver->initBase(solver_handle,server);
             return;
           }
           else

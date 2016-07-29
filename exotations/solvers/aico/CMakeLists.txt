@@ -1,16 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(aico)
 
-## Set Flags
-add_definitions(-DEXOTICA_DEBUG_MODE)  #Controls whether to compile with certain debug checks included (-DEXOTICA_DEBUG_MODE)
-
-
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  roscpp
-  task_definition
-  task_map
 )
 
 ## System dependencies are found with CMake's conventions
@@ -20,7 +13,7 @@ find_package(LAPACK REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aico
-  CATKIN_DEPENDS exotica roscpp task_definition task_map
+  CATKIN_DEPENDS exotica
   DEPENDS system_lib
 )
 
@@ -38,7 +31,6 @@ include_directories(
 ## Declare a cpp library
 add_library(aico
   src/AICOsolver.cpp
-  src/AICOProblem.cpp
 )
 
 ## Specify libraries to link a library or executable target against

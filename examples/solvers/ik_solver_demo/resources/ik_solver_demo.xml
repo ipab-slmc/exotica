@@ -11,7 +11,7 @@
   </Server>
 
   <IKsolver name="IKSolverDemo">   <!-- Motion solver definition -->
-    <MaxIt>1</MaxIt>
+    <MaxIt>50</MaxIt>
     <MaxStep>0.2</MaxStep>
   </IKsolver>
 
@@ -45,14 +45,18 @@
             <vector>0.0 0.0 0.0</vector>
             <quaternion>1.0 0.0 0.0 0.0</quaternion>
           </limb>
+          <limb segment="lwr_arm_6_link">
+            <vector>0.0 0.0 0.5</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
       </EndEffector>
     </Map>
 
     <!-- Squared error cost term based on end-effector position task map -->
     <Task name="IKSolverDemoTask" type="TaskSqrError">
       <map name="IKSolverDemoMap"/>
-      <Rho>1e0</Rho>
-      <Goal>0.4 -0.1 0.5</Goal>
+      <Rho>1e2</Rho>
+      <Goal>0.4 -0.1 0.5 0.4 -0.1 0.5 0.4 -0.1 0.5 </Goal>
     </Task>
 
     <!-- Problem parameters: tolerance and per joint weighting -->

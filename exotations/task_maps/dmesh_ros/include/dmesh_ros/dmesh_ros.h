@@ -41,8 +41,8 @@
 #include <boost/thread/mutex.hpp>
 #include "GraphManager.h"
 #include <tf/transform_listener.h>
-#include <ik_solver/ik_problem.h>
-#include <task_definition/TaskSqrError.h>
+#include <exotica/Problems/IKProblem.h>
+#include <exotica/Definitions/TaskSqrError.h>
 //ROS packages
 #include <ros/ros.h>
 #include <geometry_msgs/PoseArray.h>

@@ -41,17 +41,27 @@
 #include "exotica/Server.h"
 #include "rapidjson/document.h"
 
+#include <pluginlib/class_loader.h>
+
 namespace exotica
 {
-  class Initialiser: public Object
+  class Initialiser: public Object, Uncopyable
   {
     public:
-      /**
-       * \brief Default Constructor
-       * 
-       *        Currently, is an empty constructor definition.
-       */
-      Initialiser();
+
+      ~Initialiser() noexcept {}
+
+      static boost::shared_ptr<Initialiser> Instance()
+      {
+        if (!singleton_initialiser_) singleton_initialiser_.reset(new Initialiser);
+        return singleton_initialiser_;
+      }
+
+      static void printSupportedClasses();
+      static boost::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return Instance()->solvers_.createInstance("exotica/"+type);}
+      static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->maps_.createInstance("exotica/"+type);}
+      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return TaskDefinition_fac::Instance().createInstance("exotica/"+type);}
+      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return PlanningProblem_fac::Instance().createInstance("exotica/"+type);}
 
       ///
       /// \brief initialise Initialises the server from XML handle
@@ -151,8 +161,24 @@ namespace exotica
       void initialiseProblemMoveit(PlanningProblem_ptr problem);
     private:
 
+      /**
+       * \brief Default Constructor
+       *
+       *        Currently, is an empty constructor definition.
+       */
+      Initialiser();
+      static boost::shared_ptr<Initialiser> singleton_initialiser_;
+      ///	\brief	Make sure the singleton does not get copied
+      Initialiser(Initialiser const&) = delete;
+      void operator=(Initialiser const&) = delete;
+
       /** Class Parameters **/
       tinyxml2::XMLDocument xml_file;
+      pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
+      pluginlib::ClassLoader<exotica::TaskMap> maps_;
   };
+
+  typedef boost::shared_ptr<Initialiser> Initialiser_ptr;
 }
+
 #endif

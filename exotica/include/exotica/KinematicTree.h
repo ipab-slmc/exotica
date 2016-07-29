@@ -43,6 +43,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <exotica/Tools.h>
 
 #define ROOT  -1     //!< The value of the parent for the root segment
 
@@ -101,7 +102,7 @@ namespace exotica
       KDL::Frame offset;
   };
 
-  class KinematicTree
+  class KinematicTree : public Uncopyable
   {
     public:
 

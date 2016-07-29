@@ -45,7 +45,7 @@
 /**
  * \brief Convenience registrar for the TaskMap Type
  */
-#define REGISTER_TASKMAP_TYPE(TYPE, DERIV) EXOTICA_REGISTER(std::string, exotica::TaskMap, TYPE, DERIV)
+#define REGISTER_TASKMAP_TYPE(TYPE, DERIV) EXOTICA_REGISTER(exotica::TaskMap, TYPE, DERIV)
 
 #define PHI (*(phi_.at(t)))
 #define JAC (*(jac_.at(t)))
@@ -56,7 +56,7 @@ namespace exotica
 {
   class PlanningProblem;
 
-  class TaskMap: public Object
+  class TaskMap: public Object, Uncopyable
   {
     public:
       /**
@@ -175,7 +175,7 @@ namespace exotica
   };
 
   //!< Typedefines for some common functionality
-  typedef Factory<std::string, TaskMap> TaskMap_fac;  //!< Task Map Factory
+  typedef Factory<TaskMap> TaskMap_fac;  //!< Task Map Factory
   typedef boost::shared_ptr<TaskMap> TaskMap_ptr;  //!< Task Map smart pointer
   typedef std::map<std::string, TaskMap_ptr> TaskMap_map; //!< The mapping by name of TaskMaps
 }

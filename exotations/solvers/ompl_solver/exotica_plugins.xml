@@ -1,0 +1,5 @@
+<library path="lib/libompl_solver">
+  <class name="exotica/OMPLsolver" type="exotica::OMPLsolver" base_class_type="exotica::MotionSolver">
+    <description>OMPL solver</description>
+  </class>
+</library>

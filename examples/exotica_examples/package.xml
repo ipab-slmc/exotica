@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>exotica_examples</name>
+  <version>4.0.0</version>
+  <description>The exotica_examples package</description>
+
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">https://bitbucket.org/IPAB-SLMC/exotica</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>exotica</build_depend>
+  <run_depend>exotica</run_depend>
+
+</package>

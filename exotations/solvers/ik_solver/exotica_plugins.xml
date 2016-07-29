@@ -1,0 +1,5 @@
+<library path="lib/libik_solver">
+  <class name="exotica/IKsolver" type="exotica::IKsolver" base_class_type="exotica::MotionSolver">
+    <description>IK solver</description>
+  </class>
+</library>

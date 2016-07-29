@@ -49,7 +49,7 @@
 // t_{T+1} is the state before t_0 for computing the velocity at the time t_0
 #define TT T+2
 
-REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver);
+REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver)
 
 namespace exotica
 {
@@ -226,11 +226,6 @@ namespace exotica
   {
     if (prob->type().compare("exotica::AICOProblem") == 0) return true;
     return false;
-  }
-
-  AICOProblem_ptr& AICOsolver::getProblem()
-  {
-    return prob_;
   }
 
   void AICOsolver::Solve(Eigen::VectorXdRefConst q0,

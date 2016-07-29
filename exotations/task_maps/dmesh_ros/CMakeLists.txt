@@ -5,7 +5,6 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
   roscpp
   ik_solver
-  task_definition
   visualization_msgs
 )
 
@@ -15,7 +14,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES dmesh_ros
-  CATKIN_DEPENDS exotica roscpp ik_solver task_definition  visualization_msgs
+  CATKIN_DEPENDS exotica roscpp ik_solver visualization_msgs
   DEPENDS system_lib
 )
 

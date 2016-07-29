@@ -12,10 +12,8 @@
   <url type="website">https://bitbucket.org/IPAB-SLMC/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>exotica_distro</build_depend>
+  <build_depend>exotica</build_depend>
   <build_depend>sensor_msgs</build_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>exotica_distro</run_depend>
+  <run_depend>exotica</run_depend>
   <run_depend>sensor_msgs</run_depend>
 </package>

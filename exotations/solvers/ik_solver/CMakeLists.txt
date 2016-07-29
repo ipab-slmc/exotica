@@ -3,30 +3,27 @@ project(ik_solver)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  roscpp
-  roslib
-  task_definition
-  task_map
 )
 
 
 find_package(Boost REQUIRED COMPONENTS signals)
 
+find_package(LAPACK REQUIRED)
+
 catkin_package(
 INCLUDE_DIRS include
 LIBRARIES ik_solver
-CATKIN_DEPENDS exotica roscpp roslib task_definition task_map
+CATKIN_DEPENDS exotica
 DEPENDS system_lib
 )
 
-include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 add_library(ik_solver
-  src/ik_solver/ik_solver.cpp
-  src/ik_solver/ik_problem.cpp
+  src/ik_solver/IKSolver.cpp
 )
 
 target_link_libraries(ik_solver

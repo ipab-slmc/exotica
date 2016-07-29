@@ -62,9 +62,10 @@ PLUGINLIB_EXPORT_CLASS(exotica::OMPLImpSolver, exotica::OMPLBaseSolver)
 namespace exotica
 {
   OMPLImpSolver::OMPLImpSolver()
-      : OMPLBaseSolver("OMPLImpSolver"), algorithm_("geometric::RRTConnect"), min_traj_length_(0)
+      : OMPLBaseSolver("OMPLImpSolver"), algorithm_("geometric::RRTConnect")
   {
-    object_name_ = algorithm_;
+    object_name_=algorithm_;
+    margin_=boost::any_cast<boost::shared_ptr<std_msgs::Float64>>(boost::shared_ptr<std_msgs::Float64>(new std_msgs::Float64()));
   }
 
   void OMPLImpSolver::initialiseSolver(tinyxml2::XMLHandle & handle)
@@ -79,7 +80,7 @@ namespace exotica
     {
       algorithm_ = "geometric::"
           + std::string(tmp_handle.ToElement()->GetText());
-      object_name_ = algorithm_;
+      object_name_=algorithm_;
     }
     if (known_algorithms_.find(algorithm_) != known_algorithms_.end())
     {
@@ -96,7 +97,7 @@ namespace exotica
     tmp_handle = handle.FirstChildElement("Range");
     if (!tmp_handle.ToElement())
     {
-      range_ = "none";
+      range_ = "1";
     }
     else
     {
@@ -143,12 +144,6 @@ namespace exotica
 
   bool OMPLImpSolver::solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol)
   {
-    ompl_simple_setup_->getSpaceInformation()->setup();
-    ompl_simple_setup_->setup();
-    if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
-      ompl_simple_setup_->getPlanner()->params().setParam("range", range_);
-    if (ompl_simple_setup_->getPlanner()->params().hasParam("goal_bias"))
-      ompl_simple_setup_->getPlanner()->params().setParam("goal_bias", "0.05");
     ros::Time startTime = ros::Time::now();
     finishedSolving_ = false;
     ompl::base::ScopedState<> ompl_start_state(state_space_);
@@ -158,7 +153,7 @@ namespace exotica
     preSolve();
     ompl::time::point start = ompl::time::now();
     ob::PlannerTerminationCondition ptc = ob::timedPlannerTerminationCondition(
-        100);
+        timeout_ - ompl::time::seconds(ompl::time::now() - start));
     registerTerminationCondition(ptc);
 
     if (ompl_simple_setup_->solve(ptc)
@@ -240,7 +235,7 @@ namespace exotica
     for (int i = 0; i < n1; ++i)
       length += si->getStateSpace()->validSegmentCount(states[i],
           states[i + 1]);
-    if (min_traj_length_ > length) length = min_traj_length_;
+    //  unsigned int length = 50;
     pg.interpolate(length);
     convertPath(pg, traj);
     HIGHLIGHT(
@@ -257,7 +252,8 @@ namespace exotica
     return planner_name_;
   }
 
-  void OMPLImpSolver::setGoalState(const Eigen::VectorXd & qT, const double eps)
+  void OMPLImpSolver::setGoalState(const Eigen::VectorXd & qT,
+      const double eps)
   {
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());

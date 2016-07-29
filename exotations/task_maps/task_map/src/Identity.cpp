@@ -80,7 +80,6 @@ namespace exotica
       useRef = true;
       jointMap.resize(0);
       jointRef.resize(0);
-
       for (int i = 0; i < joints.size(); i++)
       {
         int idext = getJointIDexternal(joints[i]);
@@ -105,7 +104,7 @@ namespace exotica
       }
       if (jointMap.size() == 0)
       {
-        throw_named("No joints have been specified!");
+        HIGHLIGHT("No joints have been specified!");
       }
     }
     else

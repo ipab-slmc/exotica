@@ -1,0 +1,5 @@
+<library path="lib/libaico">
+  <class name="exotica/AICOsolver" type="exotica::AICOsolver" base_class_type="exotica::MotionSolver">
+    <description>AICO solver</description>
+  </class>
+</library>

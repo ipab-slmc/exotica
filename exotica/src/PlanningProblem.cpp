@@ -31,6 +31,7 @@
  */
 
 #include "exotica/PlanningProblem.h"
+#include "exotica/Initialiser.h"
 
 namespace exotica
 {
@@ -94,8 +95,7 @@ namespace exotica
 
     for (int i = 0; i < msg.tasks; i++)
     {
-      TaskMap_ptr map;
-      TaskMap_fac::Instance().createObject(msg.map_type.at(i), map);
+      TaskMap_ptr map = Initialiser::createMap(msg.map_type.at(i));
       std::vector<std::pair<std::string, std::string> > tmpParams;
       if (msg.map_params.size() != 0)
         tmpParams = vector2map(msg.map_params.at(i).strings);
@@ -105,8 +105,7 @@ namespace exotica
       std::string name = map->getObjectName();
       task_maps_[name] = map;
 
-      TaskDefinition_ptr def;
-      TaskDefinition_fac::Instance().createObject(msg.task_type.at(i), def);
+      TaskDefinition_ptr def = Initialiser::createDefinition(msg.task_type.at(i));
       def->setTaskMap(map);
       if (msg.task_params.size() != 0)
         tmpParams = vector2map(msg.task_params.at(i).strings);
@@ -197,8 +196,7 @@ namespace exotica
         throw_named("Can't find the type!");
       }
       type = temp_type;
-      TaskMap_ptr temp_ptr;
-      TaskMap_fac::Instance().createObject(type, temp_ptr);
+      TaskMap_ptr temp_ptr = Initialiser::createMap(type);
 
         task_maps_[name] = temp_ptr;  //!< Copy the shared_ptr;
         task_maps_.at(name)->ns_ = ns_ + "/" + name;
@@ -245,8 +243,7 @@ namespace exotica
       type = temp_type;
 
       //!< attempt to create
-      TaskDefinition_ptr temp_ptr;
-      TaskDefinition_fac::Instance().createObject(type,temp_ptr);
+      TaskDefinition_ptr temp_ptr = Initialiser::createDefinition(type);
 
       //!< Attempt to initialise
 

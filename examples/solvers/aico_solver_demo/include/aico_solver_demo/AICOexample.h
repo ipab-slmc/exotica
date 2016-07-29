@@ -36,10 +36,8 @@
 #ifndef AICOEXAMPLE_H_
 #define AICOEXAMPLE_H_
 
-#include "aico/AICOsolver.h"
 #include <ros/ros.h>
 #include <ros/package.h>
-#include <EffPosition.h>
 #include <exotica/Initialiser.h>
 #include <sensor_msgs/JointState.h>
 

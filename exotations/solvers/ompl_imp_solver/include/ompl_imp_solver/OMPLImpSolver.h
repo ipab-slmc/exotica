@@ -116,6 +116,8 @@ namespace exotica
       std::string range_;
       std::string object_name_;
       EParam<std_msgs::Float64> margin_;
+      Eigen::VectorXd qT_;
+      int min_traj_length_;
     private:
       BASE_TYPE base_type_;
       double init_margin_;

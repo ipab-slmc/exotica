@@ -54,6 +54,7 @@ namespace exotica
       margin_->data = 0.0;
       server->setParam(server->getName() + "/SafetyMargin", margin_);
     }
+
     HIGHLIGHT_NAMED("OMPLStateValidityChecker",
         "Safety Margin: " << margin_->data);
   }
@@ -81,7 +82,6 @@ namespace exotica
         return false;
       }
     }
-
     return true;
   }
 }

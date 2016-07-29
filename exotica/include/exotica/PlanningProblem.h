@@ -126,7 +126,11 @@ namespace exotica
 
       virtual void clear(bool keepOriginals = true);
 
-      virtual int getT() {throw_named("Not implemented!");};
+      virtual int getT() {throw_named("Not implemented!");}
+
+      virtual double getTau() {throw_named("Not implemented!");}
+
+      virtual void setLimits(Eigen::VectorXd limits) {throw_named("Not implemented!");}
 
     protected:
 

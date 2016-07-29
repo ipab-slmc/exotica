@@ -106,7 +106,6 @@ namespace exotica
 
       int getMaxIteration();
       int getLastIteration();
-      Eigen::VectorXd nullSpaceRef;
       void setReachGoal(const geometry_msgs::Pose &goal);
     protected:
       /**

@@ -74,7 +74,7 @@ namespace exotica
        * \brief Get time step duration
        * @return Time step duration
        */
-      double getTau();
+      virtual double getTau();
 
       /**
        * \brief Get time step duration

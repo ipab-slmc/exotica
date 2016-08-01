@@ -41,6 +41,10 @@ generate_messages(
   ${MSG_DEPS}
 )
 
+message(STATUS "Include path: '${CATKIN_INSTALL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}'")
+message(FATAL_ERROR "Include path: '${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}'")
+
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(Exotica)

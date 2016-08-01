@@ -40,6 +40,7 @@
 #include <ompl/base/DiscreteMotionValidator.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
+#include <pluginlib/class_loader.h>
 
 namespace exotica
 {
@@ -63,6 +64,8 @@ namespace exotica
       const boost::shared_ptr<og::SimpleSetup> getOMPLSimpleSetup() const;
 
       virtual void specifyProblem(const OMPLProblem_ptr &prob) = 0;
+
+      static pluginlib::ClassLoader<exotica::OMPLBaseSolver> base_solver_loader;
     protected:
       OMPLBaseSolver(const std::string planner_name);
       void registerPlannerAllocator(const std::string &planner_id,
@@ -155,6 +158,7 @@ namespace exotica
       std::vector<std::string> projection_components_;
 
       ros::Duration planning_time_;
+
   };
   typedef boost::shared_ptr<exotica::OMPLBaseSolver> OMPLBaseSolver_ptr;
 }

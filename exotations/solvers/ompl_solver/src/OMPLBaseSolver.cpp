@@ -9,6 +9,8 @@
 
 namespace exotica
 {
+  pluginlib::ClassLoader<exotica::OMPLBaseSolver> OMPLBaseSolver::base_solver_loader("ompl_solver","exotica::OMPLBaseSolver");
+
   OMPLBaseSolver::OMPLBaseSolver(const std::string planner_name)
       : timeout_(600.0), finishedSolving_(false), planner_name_(planner_name)
   {

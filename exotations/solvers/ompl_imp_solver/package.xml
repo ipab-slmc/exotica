@@ -19,9 +19,11 @@
   <run_depend>exotica</run_depend>
   <build_depend>ompl_solver</build_depend>
   <run_depend>ompl_solver</run_depend>
+  <build_depend>pluginlib</build_depend>
+  <run_depend>pluginlib</run_depend>
 
 
   <export>
-  	<ompl_imp_solver plugin="${prefix}/ompl_imp_solver_plugins.xml" />
+    <ompl_solver plugin="${prefix}/ompl_imp_solver_plugins.xml" />
   </export>
 </package>

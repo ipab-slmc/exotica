@@ -33,8 +33,8 @@
 
 #include "ompl_solver/OMPLsolver.h"
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
-#include <pluginlib/class_loader.h>
-REGISTER_MOTIONSOLVER_TYPE("OMPLsolver", exotica::OMPLsolver);
+
+REGISTER_MOTIONSOLVER_TYPE("OMPLsolver", exotica::OMPLsolver)
 
 namespace exotica
 {
@@ -85,12 +85,10 @@ namespace exotica
 
     try
     {
-      pluginlib::ClassLoader<exotica::OMPLBaseSolver> base_solver_loader(
-          solver_package_->data, "exotica::OMPLBaseSolver");
-      base_solver_ = base_solver_loader.createInstance(
-          "exotica::" + solver_->data);
       HIGHLIGHT_NAMED(object_name_,
           "Using ["<<solver_->data<<"] from package ["<<solver_package_->data<<"].");
+      base_solver_ = OMPLBaseSolver::base_solver_loader.createInstance(
+          "ompl_solver/" + solver_->data);
     } catch (pluginlib::PluginlibException& ex)
     {
       throw_named("EXOTica-OMPL plugin failed to load solver "<<solver_->data<<". Solver package: '"<<solver_package_->data<< "'. \nError: " << ex.what());

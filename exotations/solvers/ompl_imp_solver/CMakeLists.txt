@@ -4,6 +4,7 @@ project(ompl_imp_solver)
 find_package(catkin REQUIRED COMPONENTS
   exotica
   ompl_solver
+  pluginlib
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -12,7 +13,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ompl_imp_solver
-  CATKIN_DEPENDS exotica ompl_solver
+  CATKIN_DEPENDS exotica ompl_solver pluginlib
   DEPENDS system_lib
 )
 

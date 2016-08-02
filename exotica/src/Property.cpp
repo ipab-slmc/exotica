@@ -1,4 +1,4 @@
-#include "property.h"
+#include "exotica/Property.h"
 
 std::ostream& operator<< (std::ostream& os, const Printable& s)
 {

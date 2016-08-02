@@ -41,6 +41,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 #include <pluginlib/class_loader.h>
+#include <exotica/Property.h>
 
 namespace exotica
 {
@@ -50,6 +51,10 @@ namespace exotica
   {
     public:
       virtual ~OMPLBaseSolver();
+
+      void initialiseBaseSolver(PropertyContainer& init, const Server_ptr &server);
+      virtual void initialiseSolver(PropertyContainer& init) = 0;
+
       void initialiseBaseSolver(tinyxml2::XMLHandle & handle,
           const Server_ptr &server);
       virtual void initialiseSolver(tinyxml2::XMLHandle & handle) = 0;

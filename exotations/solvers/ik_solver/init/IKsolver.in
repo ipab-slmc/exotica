@@ -1,0 +1,3 @@
+Optional int MaxIt = 50;
+Optional double MaxStep = 0.02;
+Optional bool MultiTaskMode = false;

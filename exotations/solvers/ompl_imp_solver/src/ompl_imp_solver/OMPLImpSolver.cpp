@@ -56,6 +56,7 @@
 #include <ompl/geometric/planners/rrt/RRTstar.h>
 #include <ompl/geometric/planners/rrt/pRRT.h>
 #include <ompl/geometric/planners/stride/STRIDE.h>
+#include <ompl_solver/OMPLsolverInitializer.h>
 
 PLUGINLIB_EXPORT_CLASS(exotica::OMPLImpSolver, exotica::OMPLBaseSolver)
 
@@ -66,6 +67,26 @@ namespace exotica
   {
     object_name_=algorithm_;
     margin_=boost::any_cast<boost::shared_ptr<std_msgs::Float64>>(boost::shared_ptr<std_msgs::Float64>(new std_msgs::Float64()));
+  }
+
+  void OMPLImpSolver::initialiseSolver(PropertyContainer& init)
+  {
+      OMPLsolverInitializer prop = (OMPLsolverInitializer&)init;
+      range_ = prop.Range;
+      algorithm_ = "geometric::"+(std::string)prop.Solver;
+      object_name_=algorithm_;
+
+      if (known_algorithms_.find(algorithm_) != known_algorithms_.end())
+      {
+        HIGHLIGHT("Using planning algorithm "<<algorithm_);
+      }
+      else
+      {
+        ERROR("Unknown planning algorithm "<<algorithm_<<".");
+        ERROR("Available algorithms: ");
+        for (auto &it : known_algorithms_)
+          ERROR(it.first);
+      }
   }
 
   void OMPLImpSolver::initialiseSolver(tinyxml2::XMLHandle & handle)

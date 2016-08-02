@@ -37,6 +37,7 @@
 #include <exotica/EXOTica.hpp>
 #include <exotica/Problems/IKProblem.h>
 #include <exotica/Definitions/TaskSqrError.h>
+#include <ik_solver/IKsolverInitializer.h>
 #include <iostream>
 #include <fstream>
 
@@ -45,11 +46,13 @@ namespace exotica
   /**
    * \brief	IK position solver
    */
-  class IKsolver: public MotionSolver
+  class IKsolver: public MotionSolver, public Instantiable<IKsolverInitializer>
   {
     public:
       IKsolver();
       virtual ~IKsolver();
+
+      virtual void Instantiate(IKsolverInitializer& init);
 
       /**
        * \brief	Solves the problem. This returns the final state
@@ -120,6 +123,9 @@ namespace exotica
        * \brief	IK velocity solver
        * @param	err	Task error
        */
+
+      IKsolverInitializer parameters_;
+
       inline void vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
       IKProblem_ptr prob_; // Shared pointer to the planning problem.
       EParam<std_msgs::Int64> maxit_;	// Maximum iteration
@@ -167,12 +173,12 @@ namespace exotica
 
       ///	For FRRT debug
       bool FRRT_;
-      EParam<std_msgs::Float64> local_minima_threshold_;
+
       ros::Publisher jac_pub_;
       visualization_msgs::MarkerArray jac_arr_;
       std::pair<int, int> coll_index_;
       std::pair<int, int> goal_index_;
-      EParam<std_msgs::Bool> ignore_obs_near_goal_;
+
       geometry_msgs::Pose reach_goal_;
   };
   typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;

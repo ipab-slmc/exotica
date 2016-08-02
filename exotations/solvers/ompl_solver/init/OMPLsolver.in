@@ -1,0 +1,4 @@
+Required std::string Solver;
+Optional std::string Range = "1";
+Optional bool Smooth = true;
+Optional double Margin = 2.0;

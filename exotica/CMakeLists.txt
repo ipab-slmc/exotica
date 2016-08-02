@@ -41,13 +41,11 @@ generate_messages(
   ${MSG_DEPS}
 )
 
-message(STATUS "Include path: '${CATKIN_INSTALL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}'")
-message(FATAL_ERROR "Include path: '${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}'")
-
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(Exotica)
+include(AddInitializer)
 
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
@@ -58,7 +56,7 @@ catkin_package(
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp  message_runtime moveit_ros_planning_interface moveit_core tf kdl_parser pluginlib
-  CFG_EXTRAS Exotica.cmake
+  CFG_EXTRAS Exotica.cmake AddInitializer.cmake
 )
 
 ## Build ##
@@ -79,6 +77,7 @@ add_library(${PROJECT_NAME}
   src/Initialiser.cpp
   src/Server.cpp
   src/Scene.cpp
+  src/Property.cpp
   src/KinematicTree.cpp
   src/Tools/Exception.cpp
   src/Problems/AICOProblem.cpp

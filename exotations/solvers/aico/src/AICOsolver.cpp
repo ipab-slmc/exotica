@@ -53,6 +53,11 @@ REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver)
 
 namespace exotica
 {
+  void AICOsolver::Instantiate(AICOsolverInitializer& init)
+  {
+
+  }
+
   void AICOsolver::saveCosts(std::string file_name)
   {
     std::ofstream myfile;

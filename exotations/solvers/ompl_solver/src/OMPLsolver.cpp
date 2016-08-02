@@ -43,6 +43,20 @@ namespace exotica
 
   }
 
+  void OMPLsolver::Instantiate(OMPLsolverInitializer& init)
+  {
+      parameters_ = init;
+      try
+      {
+        HIGHLIGHT_NAMED(object_name_,"Using ["<<parameters_.Solver<<"]");
+        base_solver_ = OMPLBaseSolver::base_solver_loader.createInstance("ompl_solver/" + (std::string)parameters_.Solver);
+      } catch (pluginlib::PluginlibException& ex)
+      {
+        throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());
+      }
+      base_solver_->initialiseBaseSolver(init, server_);
+  }
+
   OMPLsolver::~OMPLsolver()
   {
     // If this is not empty, your code is bad and you should feel bad!
@@ -76,22 +90,21 @@ namespace exotica
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement(
         "TrajectorySmooth");
     server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, smooth_);
+    parameters_.Smooth = smooth_->data;
 
     tmp_handle = handle.FirstChildElement("Solver");
     server_->registerParam<std_msgs::String>(ns_, tmp_handle, solver_);
-
-    tmp_handle = handle.FirstChildElement("SolverPackage");
-    server_->registerParam<std_msgs::String>(ns_, tmp_handle,solver_package_);
+    parameters_.Solver = solver_->data;
 
     try
     {
       HIGHLIGHT_NAMED(object_name_,
-          "Using ["<<solver_->data<<"] from package ["<<solver_package_->data<<"].");
+          "Using ["<<parameters_.Solver<<"]");
       base_solver_ = OMPLBaseSolver::base_solver_loader.createInstance(
-          "ompl_solver/" + solver_->data);
+          "ompl_solver/" + (std::string)parameters_.Solver);
     } catch (pluginlib::PluginlibException& ex)
     {
-      throw_named("EXOTica-OMPL plugin failed to load solver "<<solver_->data<<". Solver package: '"<<solver_package_->data<< "'. \nError: " << ex.what());
+      throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());
     }
     base_solver_->initialiseBaseSolver(handle, server_);
   }

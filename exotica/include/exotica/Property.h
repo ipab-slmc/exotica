@@ -1,22 +1,12 @@
 #ifndef PROPERTY_H
 #define PROPERTY_H
-#include <boost/preprocessor.hpp>
 
+#include <exotica/Tools/Printable.h>
+#include <exotica/Tools/Exception.h>
 #include <memory>
 #include <map>
 #include <vector>
-#include <iostream>
 #include <typeinfo>
-
-
-
-// This should be somewhere else
-class Printable
-{
-public:
-    virtual void print(std::ostream& os) const = 0;
-};
-
 
 class PropertyElement : public Printable
 {
@@ -51,8 +41,6 @@ template<typename I, typename T>std::ostream& operator<< (std::ostream& os, cons
     return os;
 }
 
-// This is a declaration, it shouldn't be in a cpp file (to avoid having to declare Property<T> for every existing T)
-// It can be done if that is desired though, e.g. to keep a list of known property types in one place.
 template<typename T>
 class Property : public PropertyElement
 {
@@ -86,6 +74,13 @@ public:
     // Property<T> prop = T();
     // Just like dealing with T directly.
     Property<T>& operator=(const T& val)
+    {
+        value_ = val;
+        isSet_ = true;
+        return *this;
+    }
+
+    Property<T>& operator=(T& val)
     {
         value_ = val;
         isSet_ = true;
@@ -143,14 +138,14 @@ public:
 };
 
 template<class C>
-class Instantiable : public InstantiableBase
+class Instantiable : public virtual InstantiableBase
 {
 public:
     virtual void InstantiateInternal(const PropertyContainer& init)
     {
         if(const_cast<PropertyContainer&>(init).getName()==C::getContainerName())
         {
-            Instanciate(static_cast<C&>(const_cast<PropertyContainer&>(init)));
+            Instantiate(static_cast<C&>(const_cast<PropertyContainer&>(init)));
         }
         else
         {
@@ -165,11 +160,10 @@ public:
                 else
                 {
                     //problem
-                    std::cerr << "Combining incompatible initializers!\n";
-                    return;
+                    throw_pretty("Combining incompatible initializers!");
                 }
             }
-            Instanciate(tmp);
+            Instantiate(tmp);
         }
     }
 
@@ -178,7 +172,7 @@ public:
         return C();
     }
 
-    virtual void Instanciate(C& init) = 0;
+    virtual void Instantiate(C& init) = 0;
 };
 
 

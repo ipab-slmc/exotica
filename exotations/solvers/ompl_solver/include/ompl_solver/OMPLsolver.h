@@ -35,6 +35,7 @@
 #define OMPLSOLVER_H_
 
 #include <exotica/MotionSolver.h>
+#include <ompl_solver/OMPLsolverInitializer.h>
 #include "ompl_solver/OMPLBaseSolver.h"
 #include <ros/package.h>
 #include <fstream>
@@ -43,10 +44,12 @@
 
 namespace exotica
 {
-  class OMPLsolver: public MotionSolver
+  class OMPLsolver: public MotionSolver, Instantiable<OMPLsolverInitializer>
   {
     public:
       OMPLsolver();
+
+      virtual void Instantiate(OMPLsolverInitializer& init);
 
       /*
        * \breif Default destructor
@@ -109,12 +112,11 @@ namespace exotica
 
       /// \brief  Indicate if trajectory smoother is required
       EParam<std_msgs::Bool> smooth_;
-
       /// \brief  Maximum step
       EParam<std_msgs::String> range_;
-
       EParam<std_msgs::String> solver_;
-      EParam<std_msgs::String> solver_package_;
+
+      OMPLsolverInitializer parameters_;
   };
 
   typedef boost::shared_ptr<exotica::OMPLsolver> OMPLsolver_ptr;

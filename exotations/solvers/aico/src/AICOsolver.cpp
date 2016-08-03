@@ -55,7 +55,24 @@ namespace exotica
 {
   void AICOsolver::Instantiate(AICOsolverInitializer& init)
   {
-
+      std::string mode = init.SweepMode;
+      if (mode=="Forwardly")
+        sweepMode = smForwardly;
+      else if (mode=="Symmetric")
+        sweepMode = smSymmetric;
+      else if (mode=="LocalGaussNewton")
+        sweepMode = smLocalGaussNewton;
+      else if (mode=="LocalGaussNewtonDamped")
+        sweepMode = smLocalGaussNewtonDamped;
+      else
+      {
+        throw_named("Unknown sweep mode '"<<init.SweepMode<<"'");
+      }
+      max_iterations = init.MaxIterations;
+      tolerance = init.Tolerance;
+      damping_init = init.Damping;
+      useBwdMsg = init.UseBackwardMessage;
+      dynamic = init.Dynamic;
   }
 
   void AICOsolver::saveCosts(std::string file_name)

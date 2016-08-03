@@ -1,0 +1,6 @@
+Required std::string SweepMode;
+Required int MaxIterations;
+Required double Tolerance;
+Required double Damping;
+Optional bool UseBackwardMessage = false;
+Optional bool Dynamic = false;

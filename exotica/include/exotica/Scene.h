@@ -517,7 +517,7 @@ namespace exotica
       ros::Publisher ps_pub_;
   };
   typedef boost::shared_ptr<Scene> Scene_ptr;
-  typedef std::map<std::string, Scene_ptr> Scene_map;
+//  typedef std::map<std::string, Scene_ptr> Scene_map;
 
 }	//	namespace exotica
 

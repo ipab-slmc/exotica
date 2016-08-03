@@ -102,10 +102,11 @@ namespace exotica
     MotionSolver::specifyProblem(pointer);
     prob_ = boost::static_pointer_cast<OMPLProblem>(pointer);
 
-    for (auto & it : prob_->getScenes())
-    {
-      it.second->activateTaskMaps();
-    }
+//    for (auto & it : prob_->getScenes())
+//    {
+//      it.second->activateTaskMaps();
+//    }
+    prob_->getScene()->activateTaskMaps();
     base_solver_->specifyProblem(prob_);
   }
 

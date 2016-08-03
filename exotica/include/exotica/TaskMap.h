@@ -78,7 +78,7 @@ namespace exotica
        *                  \n PAR_ERR if could not bind scene information.
        */
       void initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
-          const Scene_map & scene_ptr = Scene_map());
+          const Scene_ptr & scene_ptr);
 
       /**
        * \brief Updates the output functions (phi and jacobian): PURE VIRTUAL
@@ -127,10 +127,10 @@ namespace exotica
 
       virtual void initialise(const rapidjson::Value& a);
       void initialise(const rapidjson::Value& a, Server_ptr & server,
-          const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
+          const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
 
       virtual void initialiseManual(std::string name, Server_ptr & server,
-          const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
+          const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
           std::vector<std::pair<std::string,std::string> >& params);
 
       bool updateJacobian_;

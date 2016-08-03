@@ -67,7 +67,7 @@ namespace exotica
                 if (knownMaps_.find(constraintClass) != knownMaps_.end())
                 {
                     TaskMap_ptr taskmap = Initialiser::createMap(knownMaps_[constraintClass]);
-                    taskmap->initialise(obj, server_, scenes_,problem);
+                    taskmap->initialise(obj, server_, scene_,problem);
                     std::string name = taskmap->getObjectName();
                     task_maps_[name] = taskmap;
                     TaskDefinition_ptr task = Initialiser::createDefinition("TaskSqrError");

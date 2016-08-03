@@ -80,7 +80,7 @@ namespace exotica
 
       // Create the initial configuration
       Eigen::VectorXd q = Eigen::VectorXd::Zero(
-          prob->scenes_.begin()->second->getNumJoints());
+          prob->scene_->getNumJoints());
       Eigen::MatrixXd solution;
       ROS_INFO_STREAM("Calling solve()");
       {
@@ -100,7 +100,7 @@ namespace exotica
               "/joint_states", 1);
           sensor_msgs::JointState jnt;
           jnt.position.resize(solution.cols());
-          jnt.name = prob->scenes_.begin()->second->getSolver().getJointNames();
+          jnt.name = prob->scene_->getSolver().getJointNames();
           ros::Rate loop_rate(50.0);
           int t = 0;
           ROS_INFO_STREAM_THROTTLE(0.5, "Publishing states to rviz ...");

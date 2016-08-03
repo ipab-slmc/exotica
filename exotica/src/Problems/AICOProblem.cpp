@@ -57,7 +57,7 @@ namespace exotica
                 if (knownMaps_.find(constraintClass) != knownMaps_.end())
                 {
                     TaskMap_ptr taskmap = Initialiser::createMap(knownMaps_[constraintClass]);
-                    taskmap->initialise(obj, server_, scenes_, problem);
+                    taskmap->initialise(obj, server_, scene_, problem);
                     std::string name = taskmap->getObjectName();
                     task_maps_[name] = taskmap;
                     TaskDefinition_ptr task = Initialiser::createDefinition("TaskSqrError");
@@ -118,11 +118,11 @@ namespace exotica
   void AICOProblem::update(Eigen::VectorXdRefConst x, const int t)
   {
     // Update the KinematicScene(s)...
-    for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
-    {
-      it->second->update(x);
-    }
-
+//    for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
+//    {
+//      it->second->update(x);
+//    }
+    scene_->update(x);
     // Update task maps if the task definition precision (rho) is non-zero
 
     for (auto& it : task_defs_)

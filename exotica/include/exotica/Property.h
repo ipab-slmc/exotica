@@ -73,19 +73,26 @@ public:
     // This makes it possible to do:
     // Property<T> prop = T();
     // Just like dealing with T directly.
-    Property<T>& operator=(const T& val)
+    /*Property<T>& operator=(const T& val)
     {
         value_ = val;
         isSet_ = true;
         return *this;
+    }*/
+
+    void operator=(const T& val)
+    {
+        value_ = val;
+        isSet_ = true;
     }
 
-    Property<T>& operator=(T& val)
+    void operator=(T& val)
     {
         value_ = val;
         isSet_ = true;
-        return *this;
     }
+
+    const T getValue() const {return value_;}
 
     // Return contained value
     // This makes it possible to do:
@@ -102,6 +109,35 @@ public:
 private:
     T value_;
 };
+
+template<typename T>
+inline T operator+(T lhs, const Property<T>& rhs)
+{
+  return lhs + rhs.getValue();
+}
+
+inline std::string operator+(const char* lhs, const Property<std::string>& rhs)
+{
+  return std::string(lhs) + rhs.getValue();
+}
+
+template<typename T>
+inline T operator-(T lhs, const Property<T>& rhs)
+{
+  return lhs - rhs.getValue();
+}
+
+template<typename T>
+inline T operator*(T lhs, const Property<T>& rhs)
+{
+  return lhs * rhs.getValue();
+}
+
+template<typename T>
+inline T operator/(T lhs, const Property<T>& rhs)
+{
+  return lhs / rhs.getValue();
+}
 
 // All user property containers must inherit from this.
 // Use CMake tool to generate Initializers inheriting from this class

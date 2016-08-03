@@ -73,7 +73,7 @@ namespace exotica
   {
       OMPLsolverInitializer prop = (OMPLsolverInitializer&)init;
       range_ = prop.Range;
-      algorithm_ = "geometric::"+(std::string)prop.Solver;
+      algorithm_ = "geometric::"+prop.Solver;
       object_name_=algorithm_;
 
       if (known_algorithms_.find(algorithm_) != known_algorithms_.end())

@@ -1,11 +1,5 @@
 #include "exotica/Property.h"
 
-std::ostream& operator<< (std::ostream& os, const Printable& s)
-{
-  s.print(os);
-  return os;
-}
-
 PropertyElement::PropertyElement() {}
 PropertyElement::PropertyElement(bool isSet, bool isRequired,const std::string type, const std::string name)
     : isSet_(isSet),isRequired_(isRequired), type_(type), name_(name) {}

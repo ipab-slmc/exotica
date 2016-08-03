@@ -80,6 +80,7 @@ add_library(${PROJECT_NAME}
   src/Property.cpp
   src/KinematicTree.cpp
   src/Tools/Exception.cpp
+  src/Tools/Printable.cpp
   src/Problems/AICOProblem.cpp
   src/Problems/IKProblem.cpp
   src/Problems/OMPLProblem.cpp

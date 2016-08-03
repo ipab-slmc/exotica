@@ -49,7 +49,7 @@ namespace exotica
       try
       {
         HIGHLIGHT_NAMED(object_name_,"Using ["<<parameters_.Solver<<"]");
-        base_solver_ = OMPLBaseSolver::base_solver_loader.createInstance("ompl_solver/" + (std::string)parameters_.Solver);
+        base_solver_ = OMPLBaseSolver::base_solver_loader.createInstance("ompl_solver/" + parameters_.Solver);
       } catch (pluginlib::PluginlibException& ex)
       {
         throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());
@@ -101,7 +101,7 @@ namespace exotica
       HIGHLIGHT_NAMED(object_name_,
           "Using ["<<parameters_.Solver<<"]");
       base_solver_ = OMPLBaseSolver::base_solver_loader.createInstance(
-          "ompl_solver/" + (std::string)parameters_.Solver);
+          "ompl_solver/" + parameters_.Solver);
     } catch (pluginlib::PluginlibException& ex)
     {
       throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());

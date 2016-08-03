@@ -67,7 +67,7 @@ namespace exotica
   }
 
   void TaskMap::initialise(const rapidjson::Value& a, Server_ptr & server,
-      const Scene_map & scene_ptr, PlanningProblem_ptr prob)
+      const Scene_ptr & scene_ptr, PlanningProblem_ptr prob)
   {
     getJSON(a["class"], object_name_);
       if (!server)
@@ -80,12 +80,12 @@ namespace exotica
   }
 
   void TaskMap::initialiseManual(std::string name, Server_ptr & server,
-      const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
+      const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
       std::vector<std::pair<std::string, std::string> >& params)
   {
     object_name_ = name + std::to_string((unsigned long) this);
     server_ = server;
-    scene_ = scene_ptr.begin()->second;
+    scene_ = scene_ptr;
     poses = prob->poses;
     posesJointNames = prob->posesJointNames;
     int limbs = 0;
@@ -136,7 +136,7 @@ namespace exotica
   }
 
   void TaskMap::initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
-      const Scene_map & scene_ptr)
+      const Scene_ptr & scene_ptr)
   {
     //!< Clear flags and kinematic scene pointer
     Object::initBase(handle, server);
@@ -145,28 +145,28 @@ namespace exotica
       throw_named("Invalid server!");
     }
     server_ = server;
-    scene_ = Scene_ptr();  //!< Null pointer
+    scene_ = scene_ptr;  //!< Null pointer
 
-    if (handle.FirstChildElement("Scene").ToElement())
-    {
-      LOCK(scene_lock_);  //!< Local lock
-      const char * name =
-          handle.FirstChildElement("Scene").ToElement()->Attribute("name");
-      if (name == nullptr)
-      {
-        throw_named("Invalid scene name!");
-      }
-      auto it = scene_ptr.find(name);
-      if (it == scene_ptr.end())
-      {
-        throw_named("Can't find the scene!");
-      }
-      scene_ = it->second;
-    }
-    else
-    {
-      throw_named("No scene was specified!");
-    }
+//    if (handle.FirstChildElement("Scene").ToElement())
+//    {
+//      LOCK(scene_lock_);  //!< Local lock
+//      const char * name =
+//          handle.FirstChildElement("Scene").ToElement()->Attribute("name");
+//      if (name == nullptr)
+//      {
+//        throw_named("Invalid scene name!");
+//      }
+//      auto it = scene_ptr.find(name);
+//      if (it == scene_ptr.end())
+//      {
+//        throw_named("Can't find the scene!");
+//      }
+//      scene_ = it->second;
+//    }
+//    else
+//    {
+//      throw_named("No scene was specified!");
+//    }
 
     std::vector<std::string> tmp_eff(0);
     std::vector<KDL::Frame> tmp_offset(0);

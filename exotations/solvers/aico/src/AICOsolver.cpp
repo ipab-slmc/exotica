@@ -219,10 +219,11 @@ namespace exotica
       i++;
     }
 
-    for (auto & it : prob_->getScenes())
-    {
-      it.second->activateTaskMaps();
-    }
+//    for (auto & it : prob_->getScenes())
+//    {
+//      it.second->activateTaskMaps();
+//    }
+    prob_->getScene()->activateTaskMaps();
 
     initMessages();
   }
@@ -285,7 +286,7 @@ namespace exotica
       throw_named("Problem definition is a NULL pointer!");
     }
     // TODO: Issue #4
-    n = prob_->getScenes().begin()->second->getNumJoints();
+    n = prob_->getScene()->getNumJoints();
     int n2 = n / 2;
     if (dynamic)
     {

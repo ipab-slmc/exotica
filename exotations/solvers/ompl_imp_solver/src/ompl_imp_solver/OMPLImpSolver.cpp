@@ -129,7 +129,7 @@ namespace exotica
   void OMPLImpSolver::specifyProblem(const OMPLProblem_ptr &prob)
   {
     prob_ = prob;
-    base_type_ = prob_->getScenes().begin()->second->getBaseType();
+    base_type_ = prob_->getScene()->getBaseType();
     if (base_type_ == BASE_TYPE::FIXED)
       state_space_.reset(
           new OMPLRNStateSpace(prob_->getSpaceDim(), server_, prob_));
@@ -147,7 +147,7 @@ namespace exotica
             "Exotica_" + algorithm_));
 
     std::vector<std::string> jnt_names;
-    prob_->getScenes().begin()->second->getJointNames(jnt_names);
+    prob_->getScene()->getJointNames(jnt_names);
     std::vector<int> project_vars = { 0, 1 };
     if (base_type_ == BASE_TYPE::FIXED)
       ompl_simple_setup_->getStateSpace()->registerDefaultProjection(
@@ -192,7 +192,7 @@ namespace exotica
       postSolve();
       margin_->data = init_margin_;
       prob_->update(Eigen::VectorXd(sol.row(sol.rows() - 1)), 0);
-      prob_->getScenes().begin()->second->publishScene();
+      prob_->getScene()->publishScene();
       return true;
     }
     else

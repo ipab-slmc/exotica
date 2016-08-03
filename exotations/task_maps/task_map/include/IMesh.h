@@ -65,7 +65,7 @@ namespace exotica
       virtual void update(Eigen::VectorXdRefConst x, const int t);
 
       virtual void initialiseManual(std::string name, Server_ptr & server,
-          const Scene_map & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
+          const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
           std::vector<std::pair<std::string,std::string> >& params);
 
       /**

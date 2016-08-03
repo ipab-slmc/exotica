@@ -88,7 +88,7 @@ namespace exotica
           if (knownMaps_.find(constraintClass) != knownMaps_.end())
           {
                   TaskMap_ptr taskmap = Initialiser::createMap(knownMaps_[constraintClass]);
-                  taskmap->initialise(obj, server_, scenes_,problem);
+                  taskmap->initialise(obj, server_, scene_,problem);
                   std::string name = taskmap->getObjectName();
                   task_maps_[name] = taskmap;
                   TaskDefinition_ptr task = Initialiser::createDefinition("TaskTerminationCriterion");
@@ -127,10 +127,10 @@ namespace exotica
         throw_named("Invalid JSON array!");
     }
     std::vector<std::string> jnts;
-    scenes_.begin()->second->getJointNames(jnts);
+    scene_->getJointNames(jnts);
     getBounds().resize(jnts.size() * 2);
 
-    if (scenes_.begin()->second->getBaseType() == BASE_TYPE::FLOATING
+    if (scene_->getBaseType() == BASE_TYPE::FLOATING
         && server_->hasParam(server_->getName() + "/FloatingBaseLowerLimits")
         && server_->hasParam(server_->getName() + "/FloatingBaseUpperLimits"))
     {
@@ -147,7 +147,7 @@ namespace exotica
           lower[i] += std::min((double) startState(i), (double) endState(i));
           upper[i] += std::max((double) startState(i), (double) endState(i));
         }
-        scenes_.begin()->second->getSolver().setFloatingBaseLimitsPosXYZEulerZYX(
+        scene_->getSolver().setFloatingBaseLimitsPosXYZEulerZYX(
             lower, upper);
       }
       else
@@ -155,13 +155,13 @@ namespace exotica
         throw_named("Can't register parameters!");
       }
     }
-    else if (scenes_.begin()->second->getBaseType() == BASE_TYPE::FLOATING)
+    else if (scene_->getBaseType() == BASE_TYPE::FLOATING)
     {
       WARNING("Using floating base without bounds!");
     }
 
     std::map<std::string, std::vector<double>> joint_limits =
-        scenes_.begin()->second->getSolver().getUsedJointLimits();
+        scene_->getSolver().getUsedJointLimits();
     for (int i = 0; i < 3; i++)
     {
       getBounds()[i] = joint_limits.at(jnts[i])[0];
@@ -235,40 +235,41 @@ namespace exotica
       local_planner_config_ = tmp_handle.ToElement()->GetText();
     }
 
-    for (auto scene : scenes_)
-    {
-      int nn = scene.second->getNumJoints();
-      if (space_dim_ == 0)
-      {
-        space_dim_ = nn;
-        continue;
-      }
-      else
-      {
-        if (space_dim_ != nn)
-        {
-          throw_named("Kinematic scenes have different joint space sizes!");
-        }
-        else
-        {
-          continue;
-        }
-      }
-    }
+    space_dim_ = scene_->getNumJoints();
+//    for (auto scene : scenes_)
+//    {
+//      int nn = scene.second->getNumJoints();
+//      if (space_dim_ == 0)
+//      {
+//        space_dim_ = nn;
+//        continue;
+//      }
+//      else
+//      {
+//        if (space_dim_ != nn)
+//        {
+//          throw_named("Kinematic scenes have different joint space sizes!");
+//        }
+//        else
+//        {
+//          continue;
+//        }
+//      }
+//    }
 
     originalMaps_ = task_maps_;
     originalGoals_ = goals_;
 
-    if (scenes_.begin()->second->getBaseType() != exotica::BASE_TYPE::FIXED)
+    if (scene_->getBaseType() != exotica::BASE_TYPE::FIXED)
       compound_ = true;
     else
       compound_ = false;
     std::vector<std::string> jnts;
-    scenes_.begin()->second->getJointNames(jnts);
+    scene_->getJointNames(jnts);
 
     getBounds().resize(jnts.size() * 2);
     std::map<std::string, std::vector<double>> joint_limits =
-        scenes_.begin()->second->getSolver().getUsedJointLimits();
+        scene_->getSolver().getUsedJointLimits();
     for (int i = 0; i < jnts.size(); i++)
     {
       getBounds()[i] = joint_limits.at(jnts[i])[0];

@@ -124,11 +124,12 @@ namespace exotica
     }
     MotionSolver::specifyProblem(pointer);
     prob_ = boost::static_pointer_cast<IKProblem>(pointer);
-    size_ = prob_->getScenes().begin()->second->getNumJoints();
-    for (auto & it : prob_->getScenes())
-    {
-      it.second->activateTaskMaps();
-    }
+    size_ = prob_->getScene()->getNumJoints();
+//    for (auto & it : prob_->getScenes())
+//    {
+//      it.second->activateTaskMaps();
+//    }
+    prob_->getScene()->activateTaskMaps();
 
     T = prob_->getT();
     int big_size = 0;
@@ -150,8 +151,8 @@ namespace exotica
     qmin_=Eigen::VectorXd::Ones(size_)*-1e100;
     qmax_=Eigen::VectorXd::Ones(size_)*1e100;
     std::vector<std::string> jnts;
-    prob_->getScenes().begin()->second->getJointNames(jnts);
-    std::map<std::string, std::vector<double>> joint_limits = prob_->getScenes().begin()->second->getSolver().getUsedJointLimits();
+    prob_->getScene()->getJointNames(jnts);
+    std::map<std::string, std::vector<double>> joint_limits = prob_->getScene()->getSolver().getUsedJointLimits();
     for (int i = 0; i < size_; i++)
     {
       qmin_(i) = joint_limits.at(jnts[i])[0];

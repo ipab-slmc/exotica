@@ -45,6 +45,20 @@ namespace exotica
 
   }
 
+  void SweepFlux::Instantiate(SweepFluxInitializer& init)
+  {
+      obj_file_ = init.ObjectMesh;
+      loadOBJ(obj_file_, TrisQ_, VertsQ_orig_);
+
+      capTop_ = init.CapTop;
+      capBottom_=init.CapBottom;
+      capEnds_=init.CapEnds;
+      Eigen::Affine3d val;
+      transform(val);
+
+      init_int_ = true;
+  }
+
   void SweepFlux::setTimeSteps(const int T)
   {
     TaskMap::setTimeSteps(T);
@@ -63,8 +77,8 @@ namespace exotica
       throw_named("Wrong number of end-effectors!");
     }
     TrisStride_ = (scene_->getMapSize(object_name_) - 1) * 2
-        + (capTop_->data ? 1 : 0) + (capBottom_->data ? 1 : 0);
-    if (capEnds_->data)
+        + (capTop_ ? 1 : 0) + (capBottom_ ? 1 : 0);
+    if (capEnds_)
     {
       Tris_.resize(TrisStride_ * T_ * 3);
       TriFlux_.resize(TrisStride_ * T_);
@@ -78,9 +92,9 @@ namespace exotica
     }
     FluxQ_.setZero();
     int a, b, c, d;
-    for (int t = 0; t < (capEnds_->data ? T_ : (T_ - 1)); t++)
+    for (int t = 0; t < (capEnds_ ? T_ : (T_ - 1)); t++)
     {
-      if (capTop_->data)
+      if (capTop_)
       {
         a = t * (scene_->getMapSize(object_name_));
         b = ((t + 1) % T_) * (scene_->getMapSize(object_name_));
@@ -89,7 +103,7 @@ namespace exotica
         Tris_(t * TrisStride_ * 3 + 1) = b;
         Tris_(t * TrisStride_ * 3 + 2) = c;
       }
-      if (capBottom_->data)
+      if (capBottom_)
       {
         b = t * (scene_->getMapSize(object_name_))
             + scene_->getMapSize(object_name_) - 1;
@@ -97,13 +111,13 @@ namespace exotica
             + scene_->getMapSize(object_name_) - 1;
         c = scene_->getMapSize(object_name_) - 1;
         Tris_(
-            ((capTop_->data ? 1 : 0) + t * TrisStride_
+            ((capTop_ ? 1 : 0) + t * TrisStride_
                 + (scene_->getMapSize(object_name_) - 1) * 2) * 3) = a;
         Tris_(
-            ((capTop_->data ? 1 : 0) + t * TrisStride_
+            ((capTop_ ? 1 : 0) + t * TrisStride_
                 + (scene_->getMapSize(object_name_) - 1) * 2) * 3 + 1) = b;
         Tris_(
-            ((capTop_->data ? 1 : 0) + t * TrisStride_
+            ((capTop_ ? 1 : 0) + t * TrisStride_
                 + (scene_->getMapSize(object_name_) - 1) * 2) * 3 + 2) = c;
       }
       for (int i = 0; i < scene_->getMapSize(object_name_) - 1; i++)
@@ -112,15 +126,15 @@ namespace exotica
         b = t * (scene_->getMapSize(object_name_)) + i + 1;
         c = ((t + 1) % T_) * (scene_->getMapSize(object_name_)) + i;
         d = ((t + 1) % T_) * (scene_->getMapSize(object_name_)) + i + 1;
-        Tris_(((capTop_->data ? 1 : 0) + t * TrisStride_ + i * 2 + 0) * 3) = a;
-        Tris_(((capTop_->data ? 1 : 0) + t * TrisStride_ + i * 2 + 0) * 3 + 1) =
+        Tris_(((capTop_ ? 1 : 0) + t * TrisStride_ + i * 2 + 0) * 3) = a;
+        Tris_(((capTop_ ? 1 : 0) + t * TrisStride_ + i * 2 + 0) * 3 + 1) =
             b;
-        Tris_(((capTop_->data ? 1 : 0) + t * TrisStride_ + i * 2 + 0) * 3 + 2) =
+        Tris_(((capTop_ ? 1 : 0) + t * TrisStride_ + i * 2 + 0) * 3 + 2) =
             c;
-        Tris_(((capTop_->data ? 1 : 0) + t * TrisStride_ + i * 2 + 1) * 3) = c;
-        Tris_(((capTop_->data ? 1 : 0) + t * TrisStride_ + i * 2 + 1) * 3 + 1) =
+        Tris_(((capTop_ ? 1 : 0) + t * TrisStride_ + i * 2 + 1) * 3) = c;
+        Tris_(((capTop_ ? 1 : 0) + t * TrisStride_ + i * 2 + 1) * 3 + 1) =
             b;
-        Tris_(((capTop_->data ? 1 : 0) + t * TrisStride_ + i * 2 + 1) * 3 + 2) =
+        Tris_(((capTop_ ? 1 : 0) + t * TrisStride_ + i * 2 + 1) * 3 + 2) =
             d;
       }
     }
@@ -306,18 +320,25 @@ namespace exotica
 
   void SweepFlux::initDerived(tinyxml2::XMLHandle & handle)
   {
+    EParam<std::string> obj_file;
+    EParam<std_msgs::Bool> capTop, capBottom, capEnds;
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("ObjectMesh");
-    server_->registerRosParam<std::string>(ns_, tmp_handle, obj_file_);
-    loadOBJ(*obj_file_, TrisQ_, VertsQ_orig_);
+
+    server_->registerRosParam<std::string>(ns_, tmp_handle, obj_file);
+    loadOBJ(*obj_file, TrisQ_, VertsQ_orig_);
 
     tmp_handle = handle.FirstChildElement("CapTop");
-    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capTop_);
+    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capTop);
     tmp_handle = handle.FirstChildElement("CapBottom");
-    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capBottom_);
+    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capBottom);
     tmp_handle = handle.FirstChildElement("CapEnds");
-    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capEnds_);
-    //tmp_handle = handle.FirstChildElement("ObjectPose");
-    //server_->registerParam<geometry_msgs::PoseStamped>(ns_, tmp_handle, obj_pose_);
+    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capEnds);
+
+    obj_file_ = *obj_file;
+    capTop_ = capTop->data;
+    capBottom_ = capBottom->data;
+    capEnds_ = capEnds->data;
+
     Eigen::Affine3d val;
     transform(val);
 
@@ -354,7 +375,7 @@ namespace exotica
     }
 
     int tri_start = (t + (t == 0 ? 0 : -1)) * TrisStride_;
-    int tri_length = ((t == -1 || ((t == T_ - 1) && capEnds_->data)) ? 2 : 1)
+    int tri_length = ((t == -1 || ((t == T_ - 1) && capEnds_)) ? 2 : 1)
         * TrisStride_;
 
     FluxTriangleTriangle(&Tris_.data()[tri_start * 3], Verts_.data(),

@@ -37,6 +37,7 @@
 #include "exotica/Factory.h"      //!< The Factory template
 #include "exotica/Server.h"
 #include "exotica/Scene.h"
+#include "exotica/Property.h"
 
 #include <Eigen/Dense>            //!< Generally dense manipulations should be enough
 #include <boost/thread/mutex.hpp> //!< The boost thread-library for synchronisation
@@ -56,7 +57,7 @@ namespace exotica
 {
   class PlanningProblem;
 
-  class TaskMap: public Object, Uncopyable
+  class TaskMap: public Object, Uncopyable, virtual InstantiableBase
   {
     public:
       /**

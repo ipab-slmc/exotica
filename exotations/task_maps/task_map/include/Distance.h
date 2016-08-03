@@ -34,14 +34,11 @@
 #define EXOTICA_TASKMAP_DISTANCE_H
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
-#include <Eigen/Dense>
-#include <boost/thread/mutex.hpp>
+#include <task_map/DistanceInitializer.h>
 
 namespace exotica //!< Since this is part of the core library, it will be within the same namespace
 {
-  class Distance: public TaskMap
+  class Distance: public TaskMap, public Instantiable<DistanceInitializer>
   {
     public:
       /**
@@ -51,6 +48,8 @@ namespace exotica //!< Since this is part of the core library, it will be within
       virtual ~Distance()
       {
       }
+
+       virtual void Instantiate(DistanceInitializer& init) {};
 
       /**
        * \brief Concrete implementation of the update method

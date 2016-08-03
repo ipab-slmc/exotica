@@ -135,6 +135,20 @@ namespace exotica
     }
   }
 
+  void TaskMap::InstantiateBase(const PropertyContainer& init)
+  {
+    Object::InstatiateObject(init);
+
+    //scene_ = scene_ptr;  //!< Null pointer
+
+    std::vector<std::string> tmp_eff(0);
+    std::vector<KDL::Frame> tmp_offset(0);
+
+
+
+    scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
+  }
+
   void TaskMap::initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
       const Scene_ptr & scene_ptr)
   {

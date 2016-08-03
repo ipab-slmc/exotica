@@ -57,6 +57,8 @@ namespace exotica
       {
       }
 
+      virtual void InstantiateBase(const PropertyContainer& init);
+
       /**
        * \brief Base initialiser: Currently simply calls the derived method
        * @param handle XMLHandle to the Solver element

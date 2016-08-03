@@ -34,29 +34,25 @@
 #define COM_H_
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
+#include <task_map/CoMInitializer.h>
 #include <exotica/KinematicTree.h>
-#include <Eigen/Dense>
-#include <boost/thread/mutex.hpp>
-#include <ros/ros.h>
-#include <ros/package.h>
-#include <visualization_msgs/MarkerArray.h>
-#include <iostream>
 #include <fstream>
+#include <visualization_msgs/MarkerArray.h>
 namespace exotica
 {
   /**
    * @brief	Centre of mass Task Map.
    * 			Using a short-cut to get the jacobian from kinematica, not efficient.
    */
-  class CoM: public TaskMap
+  class CoM: public TaskMap, public Instantiable<CoMInitializer>
   {
     public:
       /**
        * @brief	Constructor of CoMTaskMap
        */
       CoM();
+
+      virtual void Instantiate(CoMInitializer& init) {};
 
       /**
        * @brief	Destructor of CoMTaskMap

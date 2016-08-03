@@ -34,14 +34,11 @@
 #define EXOTICA_TASKMAP_EFF_POSITION_H
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
-#include <Eigen/Dense>
-#include <boost/thread/mutex.hpp>
+#include <task_map/EffPositionInitializer.h>
 
 namespace exotica //!< Since this is part of the core library, it will be within the same namespace
 {
-  class EffPosition: public TaskMap
+  class EffPosition: public TaskMap, public Instantiable<EffPositionInitializer>
   {
     public:
       /**
@@ -51,7 +48,8 @@ namespace exotica //!< Since this is part of the core library, it will be within
       virtual ~EffPosition()
       {
       }
-      ;
+
+      virtual void Instantiate(EffPositionInitializer& init) {};
 
       /**
        * \brief Concrete implementation of the update method

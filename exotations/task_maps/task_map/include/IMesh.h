@@ -34,24 +34,23 @@
 #define IMESH_H_
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
 #include <exotica/KinematicTree.h>
-#include <Eigen/Eigen>
-#include <boost/thread/mutex.hpp>
+#include <task_map/IMeshInitializer.h>
 
 namespace exotica
 {
   /**
    * @brief	Implementation of Interaction Mesh Task Map
    */
-  class IMesh: public TaskMap
+  class IMesh: public TaskMap, public Instantiable<IMeshInitializer>
   {
     public:
       /**
        * @brief	Default constructor
        */
       IMesh();
+
+      virtual void Instantiate(IMeshInitializer& init) {};
 
       /**
        * @brief	Destructor

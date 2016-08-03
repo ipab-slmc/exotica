@@ -34,12 +34,7 @@
 #define SWEEPFLUX_H
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
 #include <exotica/KinematicTree.h>
-#include <Eigen/Eigen>
-#include <boost/thread/mutex.hpp>
-#include "SweepFlux.h"
 #include <visualization_msgs/Marker.h>
 #include <task_map/SweepFluxInitializer.h>
 

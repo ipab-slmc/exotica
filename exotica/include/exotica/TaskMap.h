@@ -68,6 +68,8 @@ namespace exotica
       {
       }
 
+      virtual void InstantiateBase(const PropertyContainer& init);
+
       /**
        * \brief Initialiser (from XML): mainly resolves the KinematicScene pointer
        * @pre             The Kinematic Scenes must already be initialised

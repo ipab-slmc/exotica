@@ -40,6 +40,8 @@
 #include <exotica/Server.h>
 #include "rapidjson/document.h"
 
+#include "exotica/Property.h"
+
 namespace exotica
 {
   template<typename BO> class Factory;
@@ -82,6 +84,11 @@ namespace exotica
       std::string getObjectName()
       {
         return object_name_;
+      }
+
+      void InstatiateObject(const PropertyContainer& init)
+      {
+          object_name_ = static_cast<const Property<std::string>*>(init.getProperties().at("Name"))->getValue();
       }
 
       virtual void initBase(tinyxml2::XMLHandle & handle,

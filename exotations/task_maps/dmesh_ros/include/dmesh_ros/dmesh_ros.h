@@ -35,9 +35,7 @@
 
 //EXOTica and SYSTEM packages
 #include <exotica/EXOTica.hpp>
-#include <tinyxml2/tinyxml2.h>
 #include <exotica/KinematicTree.h>
-#include <Eigen/Eigen>
 #include <boost/thread/mutex.hpp>
 #include "GraphManager.h"
 #include <tf/transform_listener.h>
@@ -46,6 +44,9 @@
 //ROS packages
 #include <ros/ros.h>
 #include <geometry_msgs/PoseArray.h>
+
+#include <dmesh_ros/DMeshROSInitializer.h>
+
 namespace exotica
 {
   /**
@@ -54,13 +55,15 @@ namespace exotica
    * The main improvement is now dMeshROS taking computation, visualisation, and robust into consideration
    * L(d_jl)=K*||p_j-p_l||, K(gain)={PoseGain(kp),ObstacleGain(ko),GoalGain(kg)}
    */
-  class DMeshROS: public TaskMap
+  class DMeshROS: public TaskMap, public Instantiable<DMeshROSInitializer>
   {
     public:
       /**
        * \brief	Default constructor
        */
       DMeshROS();
+
+      virtual void Instantiate(DMeshROSInitializer& init) {};
 
       /**
        * \brief	Default destructor

@@ -46,11 +46,9 @@ class Property : public PropertyElement
 {
 public:
     // Various constructors
-    Property(){}
+    Property() = default;
     Property(const std::string& type, const std::string& name) : PropertyElement(false, true, type, name) {}
     Property(const std::string& type, const std::string& name, bool isRequired) : PropertyElement(false, isRequired, type, name) {}
-    Property(const std::string& type, const std::string& name, T& value) : PropertyElement(true, true, type, name),value_(value) {}
-    Property(const std::string& type, const std::string& name, const T& value) : PropertyElement(true, true, type, name),value_(value) {}
     Property(const std::string& type, const std::string& name, bool isRequired, T& value) : PropertyElement(true, isRequired, type, name),value_(value) {}
     Property(const std::string& type, const std::string& name, bool isRequired, const T& value) : PropertyElement(true, isRequired, type, name),value_(value) {}
     Property(Property& obj) : PropertyElement(obj.isSet_,obj.isRequired_, obj.type_, obj.name_), value_(obj.value_){}
@@ -73,13 +71,6 @@ public:
     // This makes it possible to do:
     // Property<T> prop = T();
     // Just like dealing with T directly.
-    /*Property<T>& operator=(const T& val)
-    {
-        value_ = val;
-        isSet_ = true;
-        return *this;
-    }*/
-
     void operator=(const T& val)
     {
         value_ = val;
@@ -169,16 +160,20 @@ protected:
 class InstantiableBase
 {
 public:
-    virtual const PropertyContainer& getInicializerTemplate() = 0;
+    virtual const PropertyContainer& getInitializerTemplate() = 0;
     virtual void InstantiateInternal(const PropertyContainer& init) = 0;
+    virtual void InstantiateBase(const PropertyContainer& init) = 0;
 };
 
 template<class C>
 class Instantiable : public virtual InstantiableBase
 {
 public:
+
+
     virtual void InstantiateInternal(const PropertyContainer& init)
     {
+        InstantiateBase(init);
         if(const_cast<PropertyContainer&>(init).getName()==C::getContainerName())
         {
             Instantiate(static_cast<C&>(const_cast<PropertyContainer&>(init)));
@@ -203,7 +198,7 @@ public:
         }
     }
 
-    virtual const PropertyContainer& getInicializerTemplate()
+    virtual const PropertyContainer& getInitializerTemplate()
     {
         return C();
     }

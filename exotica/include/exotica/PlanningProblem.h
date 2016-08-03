@@ -90,7 +90,7 @@ namespace exotica
        */
       TaskMap_map& getTaskMaps();
 
-      Scene_map& getScenes();
+      Scene_ptr getScene();
 
       /**
        * \brief Update the kinematic scene
@@ -105,8 +105,8 @@ namespace exotica
        */
       void setScene(const planning_scene::PlanningSceneConstPtr & scene);
       void setScene(const moveit_msgs::PlanningSceneConstPtr & scene);
-      Scene_map scenes_;  //!< Kinematic scene(s) indexed by name
-
+//      Scene_map scenes_;  //!< Kinematic scene(s) indexed by name
+      Scene_ptr scene_;
       Eigen::VectorXd startState;
       Eigen::VectorXd endState;
       Eigen::VectorXd nominalState;

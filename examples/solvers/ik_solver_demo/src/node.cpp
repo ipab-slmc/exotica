@@ -60,7 +60,7 @@ IKSolverDemoNode::IKSolverDemoNode()
       sol->specifyProblem(prob);
       // Create the initial configuration
       Eigen::VectorXd q = Eigen::VectorXd::Zero(
-          prob->scenes_.begin()->second->getNumJoints());
+          prob->scene_->getNumJoints());
       Eigen::MatrixXd solution;
       ROS_INFO_STREAM("Calling solve() in an infinite loop");
 
@@ -68,7 +68,7 @@ IKSolverDemoNode::IKSolverDemoNode()
       jointStatePublisher_ = nhg_.advertise<sensor_msgs::JointState>(
           "/joint_states", 1);
       sensor_msgs::JointState jnt;
-      jnt.name = prob->scenes_.begin()->second->getSolver().getJointNames();
+      jnt.name = prob->scene_->getSolver().getJointNames();
       jnt.position.resize(jnt.name.size());
       double t = 0.0;
       ros::Rate loop_rate(1000.0);

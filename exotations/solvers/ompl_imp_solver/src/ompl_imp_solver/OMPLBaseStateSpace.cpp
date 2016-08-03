@@ -73,14 +73,10 @@ namespace exotica
         state, q);
     boost::mutex::scoped_lock lock(prob_->getLock());
     prob_->update(q, 0);
-
-    for (auto & it : prob_->scenes_)
+    if (!prob_->getScene()->getCollisionScene()->isStateValid(0, margin_->data))
     {
-      if (!it.second->getCollisionScene()->isStateValid(0, margin_->data))
-      {
-        dist = -1;
-        return false;
-      }
+      dist = -1;
+      return false;
     }
     return true;
   }

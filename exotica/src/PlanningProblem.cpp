@@ -100,7 +100,7 @@ namespace exotica
       if (msg.map_params.size() != 0)
         tmpParams = vector2map(msg.map_params.at(i).strings);
 
-      map->initialiseManual(msg.task_name.at(i), server_, scenes_, problem,
+      map->initialiseManual(msg.task_name.at(i), server_, scene_, problem,
           tmpParams);
       std::string name = map->getObjectName();
       task_maps_[name] = map;
@@ -140,40 +140,51 @@ namespace exotica
     std::string type;
 
     //!< Refresh
-    scenes_.clear();
+//    scenes_.clear();
     task_maps_.clear();
     task_defs_.clear();
 
     //!< First create the Kinematic Scenes
+//    xml_handle = handle.FirstChildElement("Scene");
+//    count = 0;
+//    while (xml_handle.ToElement()) //!< While we are still in a valid situation
+//    {
+//      const char * temp_name = xml_handle.ToElement()->Attribute("name");
+//      if (temp_name == nullptr)
+//      {
+//        throw_named("No name specified!");
+//      }
+//      name = temp_name;
+//      if (scenes_.find(name) != scenes_.end())
+//      {
+//        throw_named("Can't find the Scene!");
+//      }
+//      scenes_[name].reset(new Scene(name));
+//      if (scenes_[name] == nullptr)
+//      {
+//        throw_named("Failed to create a Scene!");
+//      }
+//      scenes_.at(name)->initialisation(xml_handle, server_);
+//      count++;
+//      xml_handle = xml_handle.NextSiblingElement("Scene");
+//    }
+//
+//    //!< No maps defined:
+//    if (count < 1)
+//    {
+//      throw_named("No maps were defined!");
+//    }
     xml_handle = handle.FirstChildElement("Scene");
-    count = 0;
-    while (xml_handle.ToElement()) //!< While we are still in a valid situation
+    if (!xml_handle.ToElement())
+    throw_named("No Scene was defined!");
+    const char * temp_name = xml_handle.ToElement()->Attribute("name");
+    if (temp_name == nullptr)
     {
-      const char * temp_name = xml_handle.ToElement()->Attribute("name");
-      if (temp_name == nullptr)
-      {
-        throw_named("No name specified!");
-      }
-      name = temp_name;
-      if (scenes_.find(name) != scenes_.end())
-      {
-        throw_named("Can't find the Scene!");
-      }
-      scenes_[name].reset(new Scene(name));
-      if (scenes_[name] == nullptr)
-      {
-        throw_named("Failed to create a Scene!");
-      }
-      scenes_.at(name)->initialisation(xml_handle, server_);
-      count++;
-      xml_handle = xml_handle.NextSiblingElement("Scene");
+      throw_named("No Scene name was specified!");
     }
-
-    //!< No maps defined:
-    if (count < 1)
-    {
-      throw_named("No maps were defined!");
-    }
+    name = temp_name;
+    scene_.reset(new Scene(name));
+    scene_->initialisation(xml_handle, server_);
 
     //!< Now we will create the maps
     xml_handle = handle.FirstChildElement("Map");
@@ -201,7 +212,7 @@ namespace exotica
         task_maps_[name] = temp_ptr;  //!< Copy the shared_ptr;
         task_maps_.at(name)->ns_ = ns_ + "/" + name;
         count++;
-        temp_ptr->initBase(xml_handle, server_, scenes_);
+        temp_ptr->initBase(xml_handle, server_, scene_);
       xml_handle = xml_handle.NextSiblingElement("Map");
     }
     //!< No maps defined:
@@ -212,10 +223,11 @@ namespace exotica
 
     //!< NEW------------
     //!< Now we initialise the scene
-    for (auto & it : scenes_)
-    {
-      it.second->activateTaskMaps();
-    }
+//    for (auto & it : scenes_)
+//    {
+//      it.second->activateTaskMaps();
+//    }
+    scene_->activateTaskMaps();
 
     //!< Now the Task Definitions (all)
     xml_handle = handle.FirstChildElement("Task");
@@ -288,8 +300,9 @@ namespace exotica
           tmp[it.first] = tmp_pair;
         }
       }
-      for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
-        it->second->clearTaskMap();
+//      for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
+//        it->second->clearTaskMap();
+      scene_->clearTaskMap();
       for (auto &it : originalMaps_)
         it.second->getScene()->appendTaskMap(it.first, tmp.at(it.first).first,
             tmp.at(it.first).second);
@@ -298,18 +311,20 @@ namespace exotica
     {
       task_maps_.clear();
       task_defs_.clear();
-      for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
-        it->second->clearTaskMap();
+//      for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
+//        it->second->clearTaskMap();
+      scene_->clearTaskMap();
     }
   }
 
   void PlanningProblem::update(Eigen::VectorXdRefConst x, const int t)
   {
     // Update the KinematicScene(s)...
-    for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
-    {
-      it->second->update(x);
-    }
+//    for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
+//    {
+//      it->second->update(x);
+//    }
+    scene_->update(x);
     // Update the Task maps
 
 #ifdef EXOTICA_DEBUG_MODE
@@ -335,27 +350,29 @@ namespace exotica
     return task_maps_;
   }
 
-  Scene_map& PlanningProblem::getScenes()
+  Scene_ptr PlanningProblem::getScene()
   {
-    return scenes_;
+    return scene_;
   }
 
   void PlanningProblem::setScene(
       const planning_scene::PlanningSceneConstPtr & scene)
   {
-    for (auto & it : scenes_)
-    {
-      it.second->setCollisionScene(scene);
-    }
+//    for (auto & it : scenes_)
+//    {
+//      it.second->setCollisionScene(scene);
+//    }
+    scene_->setCollisionScene(scene);
   }
 
   void PlanningProblem::setScene(
       const moveit_msgs::PlanningSceneConstPtr & scene)
   {
-    for (auto & it : scenes_)
-    {
-      it.second->setCollisionScene(scene);
-    }
+//    for (auto & it : scenes_)
+//    {
+//      it.second->setCollisionScene(scene);
+//    }
+    scene_->setCollisionScene(scene);
   }
 
   void PlanningProblem::updateKinematicScene(

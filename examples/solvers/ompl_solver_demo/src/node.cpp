@@ -59,7 +59,7 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
       sol->specifyProblem(prob);
       // Create the initial configuration
       Eigen::VectorXd q = Eigen::VectorXd::Zero(
-          prob->scenes_.begin()->second->getNumJoints());
+          prob->scene_->getNumJoints());
       Eigen::MatrixXd solution;
 
       Eigen::VectorXd goal = *boost::static_pointer_cast<TaskTerminationCriterion>(prob->getTaskDefinitions().begin()->second)->getGoal();
@@ -86,7 +86,7 @@ OMPLSolverDemoNode::OMPLSolverDemoNode()
         sensor_msgs::JointState jnt;
         jnt.position.resize(solution.cols());
         jnt.name =
-            prob->scenes_.begin()->second->getSolver().getJointNames();
+            prob->scene_->getSolver().getJointNames();
         ros::Rate loop_rate(50.0); // Magic number for now
         int t = 0;
         ROS_INFO_STREAM_THROTTLE(0.5, "Publishing states to rviz ...");

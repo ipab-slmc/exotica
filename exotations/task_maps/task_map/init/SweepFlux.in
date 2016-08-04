@@ -1,3 +1,4 @@
+#extends <exotica/TaskMap>
 Required std::string ObjectMesh;
 Required bool CapTop;
 Required bool CapBottom;

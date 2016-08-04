@@ -1,3 +1,4 @@
+#extends <exotica/MotionSolver>
 Required std::string SweepMode;
 Required int MaxIterations;
 Required double Tolerance;

@@ -94,7 +94,6 @@ public:
     virtual void print(std::ostream& os) const
     {
         PropertyElement::print(os);
-        os << ", Value: '" << value_<<"'";
     }
 
 private:
@@ -145,6 +144,12 @@ public:
     PropertyContainer() : name_("") {}
     PropertyContainer(const std::string& name) : name_(name) {}
     std::string getName() {return name_;}
+
+    template<typename C> void getProperty(std::string Name, C& ret) const
+    {
+        ret = static_cast<Property<C>*>(properties_.at(Name))->getValue();
+    }
+
 
     const std::map<std::string, PropertyElement*>& getProperties() const {return properties_;}
     std::map<std::string, PropertyElement*>& getProperties() {return properties_;}

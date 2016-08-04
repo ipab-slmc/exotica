@@ -33,6 +33,7 @@
 #include "exotica/TaskMap.h"
 #include "exotica/PlanningProblem.h"
 #include <boost/algorithm/string.hpp>
+#include <exotica/LimbInitializer.h>
 
 namespace exotica
 {
@@ -139,14 +140,31 @@ namespace exotica
   {
     Object::InstatiateObject(init);
 
-    //scene_ = scene_ptr;  //!< Null pointer
+    tmp_eff.clear();
+    tmp_offset.clear();
 
-    std::vector<std::string> tmp_eff(0);
-    std::vector<KDL::Frame> tmp_offset(0);
+    init.getProperty("Scene",scene_name_);
 
 
+    std::vector<LimbInitializer> limbs;
+    init.getProperty("EndEffector",limbs);
+    for(LimbInitializer& limb : limbs)
+    {
+        tmp_eff.push_back(limb.Segment);
+        tmp_offset.push_back(limb.Frame);
+    }
 
-    scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
+  }
+
+  void TaskMap::registerScene(Scene_ptr scene)
+  {
+      scene_ = scene;
+      scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
+  }
+
+  std::string TaskMap::getSceneName()
+  {
+      return scene_name_;
   }
 
   void TaskMap::initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,

@@ -36,6 +36,7 @@ add_library(aico
 target_link_libraries(aico
   ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${LAPACK_LIBRARIES}
 )
+
 add_dependencies(aico aico_initializers)
 
 ## Install

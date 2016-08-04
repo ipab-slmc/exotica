@@ -88,7 +88,7 @@ namespace exotica
 
       void InstatiateObject(const PropertyContainer& init)
       {
-          object_name_ = static_cast<const Property<std::string>*>(init.getProperties().at("Name"))->getValue();
+         init.getProperty("Name",object_name_);
       }
 
       virtual void initBase(tinyxml2::XMLHandle & handle,

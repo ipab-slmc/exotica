@@ -23,12 +23,16 @@ def ConstructorList(Data):
 def DefaultValue(Data):
     if Data['Value']==None:
         return ""
+    elif Data['Value']=='{}':
+        return ""
     else:
         return ", "+Data['Value']
 
 def DefaultArgumentValue(Data):
     if Data['Value']==None:
         return ""
+    elif Data['Value']=='{}':
+        return "={}"
     else:
         return " = "+Data['Value']
 
@@ -168,7 +172,7 @@ def ParseLine(line, ln, fn):
         eq = line.find("=")
         if eq==-1:
             eq=last;
-            value = "{}"
+            value = '{}'
         else:
             value = line[eq+1:last]
         nameStart=line[0:eq].strip().rfind(" ")

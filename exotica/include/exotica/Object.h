@@ -55,7 +55,7 @@ namespace exotica
        * \brief Constructor: default
        */
       Object()
-          : ns_("")
+          : ns_(""),debug_(false)
       {
         //!< Empty constructor
       }
@@ -89,6 +89,7 @@ namespace exotica
       void InstatiateObject(const PropertyContainer& init)
       {
          init.getProperty("Name",object_name_);
+         init.getProperty("Debug",debug_);
       }
 
       virtual void initBase(tinyxml2::XMLHandle & handle,
@@ -109,6 +110,7 @@ namespace exotica
       //	Namespace, i.e. problem/scene/...etc
       std::string ns_;
       std::string object_name_;
+      bool debug_;
   };
 }
 #endif

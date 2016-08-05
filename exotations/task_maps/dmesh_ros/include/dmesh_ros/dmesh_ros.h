@@ -63,7 +63,7 @@ namespace exotica
        */
       DMeshROS();
 
-      virtual void Instantiate(DMeshROSInitializer& init) {};
+      virtual void Instantiate(DMeshROSInitializer& init);
 
       /**
        * \brief	Default destructor
@@ -141,11 +141,9 @@ namespace exotica
        */
       void updateGraphFromPoses(const Eigen::Matrix3Xd & V);
 
-      //	Robot links
-      EParam<exotica::StringList> links_;
-
-      //	Link types
-      EParam<exotica::BoolList> link_types_;
+      std::vector<std::string> links_;
+      std::vector<bool> link_types_;
+      Eigen::VectorXd radius_;
 
       //	If we want to get real joint state
       tf::TransformListener listener_;
@@ -153,7 +151,7 @@ namespace exotica
       tf::StampedTransform transform_;
 
       //	Maximum graph size
-      EParam<std_msgs::Int64> size_;
+      int size_;
 
       //	Robot links size
       int robot_size_;
@@ -167,14 +165,9 @@ namespace exotica
       //	Configuration size
       int q_size_;
 
-      //	Gain to keep robot pose
-      EParam<std_msgs::Float64> kp_;
-
-      //	Gain to avoid obstacle
-      EParam<std_msgs::Float64> ko_;
-
-      //	Gain to reach goal
-      EParam<std_msgs::Float64> kg_;
+      double kp_;
+      double ko_;
+      double kg_;
 
       //	Distance matrix
       Eigen::MatrixXd dist_;
@@ -194,7 +187,8 @@ namespace exotica
       double wo_;
       double wg_;
 
-      EParam<std_msgs::Bool> usePose_;
+      bool usePose_;
+
 
   };
   typedef boost::shared_ptr<DMeshROS> DMeshROS_Ptr;

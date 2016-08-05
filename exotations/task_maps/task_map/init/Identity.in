@@ -1,1 +1,4 @@
+#include <Eigen/Dense>
 #extends <exotica/TaskMap>
+Optional Eigen::VectorXd JointRef;
+Optional std::vector<int> JointMap;

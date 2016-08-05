@@ -50,7 +50,7 @@ namespace exotica
        */
       IMesh();
 
-      virtual void Instantiate(IMeshInitializer& init) {};
+      virtual void Instantiate(IMeshInitializer& init);
 
       /**
        * @brief	Destructor

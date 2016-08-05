@@ -49,7 +49,7 @@ namespace exotica //!< Since this is part of the core library, it will be within
       {
       }
 
-       virtual void Instantiate(DistanceInitializer& init) {};
+       virtual void Instantiate(DistanceInitializer& init);
 
       /**
        * \brief Concrete implementation of the update method

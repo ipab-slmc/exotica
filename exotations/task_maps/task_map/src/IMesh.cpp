@@ -84,6 +84,14 @@ namespace exotica
       HIGHLIGHT("InteractionMesh connectivity is published on ROS topic "<<imesh_mark_pub_.getTopic()<<", in reference frame "<<ref);
   }
 
+  void IMesh::Instantiate(IMeshInitializer& init)
+  {
+      initDebug(init.ReferenceFrame);
+      eff_size_ = scene_->getMapSize(object_name_);
+      weights_.setOnes(eff_size_, eff_size_);
+      initialised_ = true;
+  }
+
   void IMesh::initDerived(tinyxml2::XMLHandle & handle)
   {
     EParam<std_msgs::String> ref;

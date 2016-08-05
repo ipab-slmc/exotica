@@ -280,7 +280,7 @@ namespace exotica
   bool MeshGraph::initialisation(const int size,
       const std::vector<std::string> & link_names,
       const std::vector<bool> link_type,
-      const std::vector<double> & link_radius, const double i_range,
+      Eigen::VectorXd & link_radius, const double i_range,
       const double eps, const bool dummy_table)
   {
     if (initialised_ || link_names.size() == 0 || size < link_names.size()
@@ -304,7 +304,7 @@ namespace exotica
       }
       vertices_[i].reset(new Vertex);
       vertices_[i]->setAsLink(link_names[i], true, Eigen::Vector3d::Zero(),
-          link_radius[i]);
+          link_radius(i));
       if (!link_type[i]) vertices_[i]->setToDummy();
       vertex_map_[link_names[i]] = i;
     }

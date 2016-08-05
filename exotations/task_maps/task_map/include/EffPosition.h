@@ -49,7 +49,7 @@ namespace exotica //!< Since this is part of the core library, it will be within
       {
       }
 
-      virtual void Instantiate(EffPositionInitializer& init) {};
+      virtual void Instantiate(EffPositionInitializer& init) {}
 
       /**
        * \brief Concrete implementation of the update method

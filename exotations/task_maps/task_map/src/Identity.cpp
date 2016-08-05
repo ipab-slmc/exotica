@@ -169,6 +169,26 @@ namespace exotica
     }
   }
 
+  void Identity::Instantiate(IdentityInitializer& init)
+  {
+      if(init.JointRef.isSet())
+      {
+          jointRef = init.JointRef;
+          if(init.JointMap.isSet())
+          {
+              jointMap = init.JointMap;
+              if(jointMap.size()!=jointRef.rows()) throw_named("Incorrect joint map size!");
+          }
+          else
+          {
+              jointMap.resize(jointRef.rows());
+              for (int i = 0; i < jointRef.rows(); i++)
+                  jointMap[i] = i;
+          }
+          useRef = true;
+      }
+  }
+
   void Identity::initDerived(tinyxml2::XMLHandle & handle)
   {
     // Load the goal

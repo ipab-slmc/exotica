@@ -46,14 +46,14 @@ namespace exotica
     //TODO
   }
 
-  bool GraphManager::initialisation(const exotica::StringListPtr & links,
-      const exotica::BoolListPtr & link_types,
-      const std::vector<double> & link_radius, const int size)
+  bool GraphManager::initialisation(std::vector<std::string> & links,
+      std::vector<bool> & link_types,
+      Eigen::VectorXd & link_radius, int size)
   {
-    if (links->strings.size() == 0 || size < links->strings.size())
+    if (links.size() == 0 || size < links.size())
     {
       std::cout << "Mesh Graph Manager: wrong size(link size="
-          << links->strings.size() << ", size=" << size << ")\n";
+          << links.size() << ", size=" << size << ")\n";
       INDICATE_FAILURE
       return false;
     }
@@ -72,14 +72,7 @@ namespace exotica
     }
     bool dummy_table = false;
     nh_.getParam("/MeshGraphManager/DummyTable", dummy_table);
-    std::vector<bool> tmp_types(links->strings.size());
-    std::vector<std::string> tmp_links(links->strings.size());
-    for (int i = 0; i < links->strings.size(); i++)
-    {
-      tmp_links[i] = links->strings[i];
-      tmp_types[i] = link_types->data[i];
-    }
-    if (!graph_->initialisation(size, tmp_links, tmp_types, link_radius,
+    if (!graph_->initialisation(size, links, link_types, link_radius,
         i_range, eps, dummy_table))
     {
       INDICATE_FAILURE

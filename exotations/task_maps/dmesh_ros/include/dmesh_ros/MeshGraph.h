@@ -276,7 +276,7 @@ namespace exotica
       bool initialisation(const int size,
           const std::vector<std::string> & link_names,
           const std::vector<bool> link_type,
-          const std::vector<double> & link_radius, const double i_range,
+          Eigen::VectorXd & link_radius, const double i_range,
           const double eps, const bool dummy_table);
 
       /**

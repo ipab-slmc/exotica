@@ -49,7 +49,7 @@ namespace exotica
       {
       }
 
-      virtual void Instantiate(IdentityInitializer& init) {};
+      virtual void Instantiate(IdentityInitializer& init);
 
       /**
        * \brief Concrete implementation of the update method

@@ -186,12 +186,12 @@ public:
         else
         {
             C tmp;
-            for(auto& param : init.getProperties())
+            for(auto& param : tmp.getProperties())
             {
-                if(tmp.getProperties().find(param.first)!= tmp.getProperties().end())
+                if(init.getProperties().find(param.first)!= init.getProperties().end())
                 {
                     // Copies over typeless PropertyElements using a virtual copyValue method
-                    *tmp.getProperties()[param.first] = *param.second;
+                    *tmp.getProperties()[param.first] = *init.getProperties().at(param.first);
                 }
                 else
                 {

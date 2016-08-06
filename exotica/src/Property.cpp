@@ -1,5 +1,8 @@
 #include "exotica/Property.h"
 
+namespace exotica
+{
+
 PropertyElement::PropertyElement() {}
 PropertyElement::PropertyElement(bool isSet, bool isRequired,const std::string type, const std::string name)
     : isSet_(isSet),isRequired_(isRequired), type_(type), name_(name) {}
@@ -21,4 +24,6 @@ std::string PropertyElement::getName() const {return name_;}
 void PropertyElement::print(std::ostream& os) const
 {
     os << "Property '" << name_ << "': type '" << type_ << "', " << (isSet_?"Set, ":"Unset, ") << (isRequired_?"Required":"Optional");
+}
+
 }

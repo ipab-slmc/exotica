@@ -8,6 +8,9 @@
 #include <vector>
 #include <typeinfo>
 
+namespace exotica
+{
+
 class PropertyElement : public Printable
 {
 public:
@@ -28,18 +31,6 @@ protected:
     std::string name_;
     std::string type_;
 };
-std::ostream& operator<< (std::ostream& os, const Printable& s);
-template<typename T>std::ostream& operator<< (std::ostream& os, const std::vector<T>& s)
-{
-    for(auto& p : s) os << p << "\n";
-    return os;
-}
-
-template<typename I, typename T>std::ostream& operator<< (std::ostream& os, const std::map<I,T>& s)
-{
-    for(auto& p : s) os << p.first << ": "<<p.second<<"\n";
-    return os;
-}
 
 template<typename T>
 class Property : public PropertyElement
@@ -143,7 +134,7 @@ public:
 
     PropertyContainer() : name_("") {}
     PropertyContainer(const std::string& name) : name_(name) {}
-    std::string getName() {return name_;}
+    std::string getName() const {return name_;}
 
     template<typename C> void getProperty(std::string Name, C& ret) const
     {
@@ -211,5 +202,6 @@ public:
     virtual void Instantiate(C& init) = 0;
 };
 
+}
 
 #endif // PROPERTY_H

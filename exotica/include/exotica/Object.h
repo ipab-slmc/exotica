@@ -41,6 +41,7 @@
 #include "rapidjson/document.h"
 
 #include "exotica/Property.h"
+#include "exotica/ObjectInitializer.h"
 
 namespace exotica
 {
@@ -88,8 +89,9 @@ namespace exotica
 
       void InstatiateObject(const PropertyContainer& init)
       {
-         init.getProperty("Name",object_name_);
-         init.getProperty("Debug",debug_);
+         ObjectInitializer oinit(init);
+         object_name_=oinit.Name;
+         debug_=oinit.Debug;
       }
 
       virtual void initBase(tinyxml2::XMLHandle & handle,

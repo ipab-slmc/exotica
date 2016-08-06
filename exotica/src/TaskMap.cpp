@@ -33,7 +33,7 @@
 #include "exotica/TaskMap.h"
 #include "exotica/PlanningProblem.h"
 #include <boost/algorithm/string.hpp>
-#include <exotica/LimbInitializer.h>
+#include <exotica/TaskMapInitializer.h>
 
 namespace exotica
 {
@@ -139,15 +139,14 @@ namespace exotica
   void TaskMap::InstantiateBase(const PropertyContainer& init)
   {
     Object::InstatiateObject(init);
+    TaskMapInitializer tminit(init);
 
     tmp_eff.clear();
     tmp_offset.clear();
 
-    init.getProperty("Scene",scene_name_);
+    scene_name_ = tminit.Scene;
 
-
-    std::vector<LimbInitializer> limbs;
-    init.getProperty("EndEffector",limbs);
+    std::vector<LimbInitializer> limbs = tminit.EndEffector;
     for(LimbInitializer& limb : limbs)
     {
         tmp_eff.push_back(limb.Segment);

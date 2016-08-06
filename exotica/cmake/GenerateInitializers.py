@@ -105,6 +105,24 @@ public:
         RegisterParams();
     }
 
+    """+ClassName+"""(const PropertyContainer& other)
+    {
+        RegisterParams();
+        for(auto& param : properties_)
+        {
+            if(other.getProperties().find(param.first)!= other.getProperties().end())
+            {
+                // Copies over typeless PropertyElements using a virtual copyValue method
+                *properties_[param.first] = *other.getProperties().at(param.first);
+            }
+            else
+            {
+                //problem
+                throw_pretty("Combining incompatible initializers!");
+            }
+        }
+    }
+
     void RegisterParams()
     {
 """

@@ -89,7 +89,8 @@ add_library(${PROJECT_NAME}
   src/Problems/IKProblem.cpp
   src/Problems/OMPLProblem.cpp
   src/Definitions/TaskSqrError.cpp
-  src/Definitions/TaskTerminationCriterion.cpp)
+  src/Definitions/TaskTerminationCriterion.cpp
+  ${exotica_BINARY_DIR}/generated/Version.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${exotica_BINARY_DIR}/generated/Version.cpp ${PROJECT_NAME}_initializers)

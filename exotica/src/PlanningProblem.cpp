@@ -134,16 +134,14 @@ namespace exotica
       task_defs_.clear();
 
       // Create the scene
-      SceneInitializer initS(init);
+      SceneInitializer initS(init.Scene.getValue());
       scene_.reset(new Scene(initS.Name));
-      //scene_->InitializeInternal(init.Scene);
+      scene_->InstantiateInternal(init.Scene);
 
       // Create the maps
       for(const PropertyContainer& map : init.Maps.getValue())
       {
-          const std::string type = map.getName();
-          TaskMap_ptr temp_ptr = Initialiser::createMap(type);
-          temp_ptr->InstantiateInternal(map);
+          TaskMap_ptr temp_ptr = Initialiser::createMap(map);
           temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
           if (task_maps_.find(temp_ptr->getObjectName()) != task_maps_.end())
           {
@@ -158,20 +156,19 @@ namespace exotica
         HIGHLIGHT("No maps were defined!");
       }
 
-      scene_->activateTaskMaps();
-
       // Create the task definitions
       for(const PropertyContainer& task : init.Tasks.getValue())
       {
-          TaskDefinition_ptr temp_ptr = Initialiser::createDefinition(task.getName());
-          temp_ptr->InstantiateInternal(task);
+          PropertyContainer mapped_task(task);
+          Property<TaskMap_map> maps("TaskMap_map","TaskMaps",true,task_maps_);
+          mapped_task.getProperties()["TaskMaps"] = &maps;
+          TaskDefinition_ptr temp_ptr = Initialiser::createDefinition(mapped_task);
           temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
           if (task_defs_.find(temp_ptr->getObjectName()) != task_defs_.end())
           {
               throw_named("Task definition '"+temp_ptr->getObjectName()+"' already exists!");
           }
           task_defs_[temp_ptr->getObjectName()] = temp_ptr;
-          temp_ptr->setTaskMap(task_maps_.at(temp_ptr->getTaskMapName()));
       }
       if (init.Tasks.getValue().size() == 0)
       {

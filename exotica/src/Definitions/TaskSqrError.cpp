@@ -62,7 +62,7 @@ namespace exotica
   {
       rho0_(0) = (double)init.Rho;
 
-      if(init.Goal.isSet())
+      if(init.Goal.isSet() && init.Goal.getValue().rows()>0)
       {
           y_star0_ = init.Goal;
       }

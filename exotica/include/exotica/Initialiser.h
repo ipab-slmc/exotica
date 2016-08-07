@@ -40,6 +40,7 @@
 #include "exotica/PlanningProblem.h"
 #include "exotica/Server.h"
 #include "rapidjson/document.h"
+#include <exotica/Property.h>
 
 #include <pluginlib/class_loader.h>
 
@@ -49,7 +50,9 @@ namespace exotica
   {
     public:
 
-      ~Initialiser() noexcept {}
+      ~Initialiser() noexcept
+      {
+      }
 
       static boost::shared_ptr<Initialiser> Instance()
       {
@@ -57,11 +60,41 @@ namespace exotica
         return singleton_initialiser_;
       }
 
+      static void Destroy()
+      {
+          if (singleton_initialiser_) singleton_initialiser_.reset();
+      }
+
       static void printSupportedClasses();
       static boost::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return Instance()->solvers_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->maps_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return Instance()->tasks_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->problems_.createInstance("exotica/"+type);}
+
+      static boost::shared_ptr<exotica::MotionSolver> createSolver(const PropertyContainer& init)
+      {
+          boost::shared_ptr<exotica::MotionSolver> ret = Instance()->solvers_.createInstance(init.getName());
+          ret->InstantiateInternal(init);
+          return ret;
+      }
+      static boost::shared_ptr<exotica::TaskMap> createMap(const PropertyContainer& init)
+      {
+          boost::shared_ptr<exotica::TaskMap> ret = Instance()->maps_.createInstance(init.getName());
+          ret->InstantiateInternal(init);
+          return ret;
+      }
+      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const PropertyContainer& init)
+      {
+          boost::shared_ptr<exotica::TaskDefinition> ret = Instance()->tasks_.createInstance(init.getName());
+          ret->InstantiateInternal(init);
+          return ret;
+      }
+      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const PropertyContainer& init)
+      {
+          boost::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.createInstance(init.getName());
+          ret->InstantiateInternal(init);
+          return ret;
+      }
 
       ///
       /// \brief initialise Initialises the server from XML handle

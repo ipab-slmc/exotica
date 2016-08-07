@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <kdl/frames.hpp>
 
 class Printable
 {
@@ -24,5 +25,7 @@ template<typename I, typename T>std::ostream& operator<< (std::ostream& os, cons
     for(auto& p : s) os << p.first << ": "<<p.second<<"\n";
     return os;
 }
+
+std::string toString(const KDL::Frame& s);
 
 #endif // PRINTABLE_H

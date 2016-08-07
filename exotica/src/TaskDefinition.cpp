@@ -65,12 +65,9 @@ namespace exotica
   {
       Object::InstatiateObject(init_);
       TaskDefinitionInitializer init(init_);
-      task_map_name_ = init.Map;
-  }
-
-  std::string TaskDefinition::getTaskMapName() const
-  {
-      return task_map_name_;
+      TaskMap_map maps;
+      init.getProperty("TaskMaps", maps);
+      setTaskMap(maps.at(init.Map.getValue()));
   }
 
   void TaskDefinition::initBase(tinyxml2::XMLHandle & handle,

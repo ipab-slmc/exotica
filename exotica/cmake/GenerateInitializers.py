@@ -101,7 +101,7 @@ public:
     }
 
     """
-    ret=ret+ClassName+"("+ConstructorArgumentList(Data)+") : PropertyContainer(\""+Namespace+"::"+ClassName+"\")"+ConstructorList(Data)+"""
+    ret=ret+ClassName+"("+ConstructorArgumentList(Data)+") : PropertyContainer(\""+Namespace+"/"+CalssNameOrig+"\")"+ConstructorList(Data)+"""
     {
         RegisterParams();
     }
@@ -120,6 +120,16 @@ public:
             {
                 //problem
                 throw_pretty("Combining incompatible initializers!");
+            }
+        }
+        if(properties_.size()!=other.getProperties().size())
+        {
+            for(auto& param : other.getProperties())
+            {
+                if(properties_.find(param.first)== properties_.end())
+                {
+                    properties_[param.first]=param.second;
+                }
             }
         }
     }

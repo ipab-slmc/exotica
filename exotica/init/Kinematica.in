@@ -2,5 +2,5 @@
 Required LimbInitializer Root;
 Required std::vector<std::string> Joints;
 Optional std::string BaseType = "fixed";
-Optional bool ControlledBase = false;
+Optional bool ControlledBase = true;
 Optional bool ZeroOtherJoints = true;

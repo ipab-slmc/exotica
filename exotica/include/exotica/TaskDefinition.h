@@ -114,7 +114,6 @@ namespace exotica
        * @return          Smart pointer to a task-map
        */
       TaskMap_ptr getTaskMap();
-      std::string getTaskMapName() const;
 
       bool order;
 
@@ -130,7 +129,6 @@ namespace exotica
 
       boost::shared_ptr<TaskMap> task_map_; //!< Shared pointer to a Task Map from which it gets its inputs
       boost::mutex map_lock_;  //!< Mapping Lock for synchronisation
-      std::string task_map_name_;
 
   };
 

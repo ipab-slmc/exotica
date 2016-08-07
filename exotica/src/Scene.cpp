@@ -634,7 +634,7 @@ namespace exotica
 
       mode_ = init.PlanningMode;
 
-      update_jacobians_ = mode_=="Sampling"? true : false;
+      update_jacobians_ = mode_!="Sampling"? true : false;
 
       if (visual_debug_)
       {
@@ -693,7 +693,7 @@ namespace exotica
           "Planning mode not specified, using default: Optimization.");
     }
 
-    update_jacobians_ = mode_=="Sampling"? true : false;
+    update_jacobians_ = mode_!="Sampling"? true : false;
 
     tmp_handle = handle.FirstChildElement("VisualDebug");
     EParam<std_msgs::Bool> visual_debug;

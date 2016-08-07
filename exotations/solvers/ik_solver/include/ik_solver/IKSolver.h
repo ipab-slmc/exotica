@@ -92,6 +92,7 @@ namespace exotica
        */
       virtual void setGoal(const std::string & task_name,
           Eigen::VectorXdRefConst goal, int t = 0);
+      virtual void getGoal(const std::string & task_name, Eigen::VectorXd& goal,int t = 0);
 
       /**
        * \brief	Set rho
@@ -101,6 +102,7 @@ namespace exotica
       void setRho(const std::string & task_name, const double rho,
           int t = 0);
       double getRho(const std::string & task_name, int t = 0);
+      virtual void getRho(const std::string & task_name, double& rho, int t = 0);
 
       IKProblem_ptr& getProblem();
 

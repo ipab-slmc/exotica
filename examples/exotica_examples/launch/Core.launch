@@ -1,0 +1,5 @@
+<launch>
+
+  <node pkg="exotica_examples" type="ExoticaCore" name="ExoticaCoreExampleNode" output="screen" />
+
+</launch>

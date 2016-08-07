@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<IKSolverDemoConfig>
+  <Server name="EXOTicaServer">
+     <!-- Here we initialise these parameters that can be used and modified by different objects, i.e. joints, links, flags, etc.
+     Parameters that require ROS topics' infomation will be specified during solver, problem, or taskmap initialisation. -->
+     <Parameters>
+
+     </Parameters>
+     
+     <!-- Other server functionalities other than parameters TODO -->
+  </Server>
+
+  <IKsolver name="IKSolverDemo">   <!-- Motion solver definition -->
+    <MaxIt>50</MaxIt>
+    <MaxStep>0.2</MaxStep>
+  </IKsolver>
+
+  <IKProblem name="IKSolverDemoProblem"> <!-- Problem definition -->
+
+
+    <Scene name="IKSolverDemoScene"> <!-- Kinematic scene -->
+      <Kinematica>
+        <Urdf>/robot_description</Urdf> <!-- Robot URDF -->
+        <Root segment="base" type="fixed"> <!-- Base frame -->
+          <vector>0.0 0.0 0.0</vector>
+          <quaternion>1.0 0.0 0.0 0.0</quaternion>
+        </Root>        
+        <Update zero_unnamed="true"> <!-- List of controlled joints -->
+          <joint name="lwr_arm_0_joint"/>
+          <joint name="lwr_arm_1_joint"/>
+          <joint name="lwr_arm_2_joint"/>
+          <joint name="lwr_arm_3_joint"/>
+          <joint name="lwr_arm_4_joint"/>
+          <joint name="lwr_arm_5_joint"/>
+          <joint name="lwr_arm_6_joint"/>
+        </Update>
+      </Kinematica>
+      <PlanningMode>Optimization</PlanningMode>
+    </Scene>
+
+    <Map type="EffPosition" name="IKSolverDemoMap"> <!-- The end-effector position task map -->
+      <Scene name="IKSolverDemoScene"/>
+      <EndEffector ignore_unused="true"> <!-- List of end effectors -->
+          <limb segment="lwr_arm_6_link">
+            <vector>0.0 0.0 0.0</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+          <limb segment="lwr_arm_6_link">
+            <vector>0.0 0.0 0.5</vector>
+            <quaternion>1.0 0.0 0.0 0.0</quaternion>
+          </limb>
+      </EndEffector>
+    </Map>
+
+    <!-- Squared error cost term based on end-effector position task map -->
+    <Task name="IKSolverDemoTask" type="TaskSqrError">
+      <map name="IKSolverDemoMap"/>
+      <Rho>1e2</Rho>
+      <Goal>0.4 -0.1 0.5 0.4 -0.1 0.5 0.4 -0.1 0.5 </Goal>
+    </Task>
+
+    <!-- Problem parameters: tolerance and per joint weighting -->
+    <Tolerance>1e-5</Tolerance>
+    <W> 7 6 5 4 3 2 1</W>
+  </IKProblem>
+
+</IKSolverDemoConfig>

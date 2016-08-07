@@ -3,6 +3,7 @@ project(exotica_examples)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
+  sensor_msgs
 )
 
 catkin_package(
@@ -14,8 +15,14 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(exotica_core src/core.cpp)
+add_executable(ExoticaCore src/core.cpp)
 
-target_link_libraries(exotica_core
+target_link_libraries(ExoticaCore
+  ${catkin_LIBRARIES}
+)
+
+add_executable(ManualInitialization src/manual.cpp)
+
+target_link_libraries(ManualInitialization
   ${catkin_LIBRARIES}
 )

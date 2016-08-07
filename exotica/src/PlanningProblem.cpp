@@ -32,10 +32,11 @@
 
 #include "exotica/PlanningProblem.h"
 #include "exotica/Initialiser.h"
+#include "exotica/PlanningProblemInitializer.h"
 
 namespace exotica
 {
-  PlanningProblem::PlanningProblem()
+  PlanningProblem::PlanningProblem() : server_(Server::Instance())
   {
 
   }
@@ -113,6 +114,72 @@ namespace exotica
       def->setTimeSteps(msg.task_goal.at(i).row);
       task_defs_[msg.task_name.at(i)] = def;
     }
+  }
+
+  void PlanningProblem::InstantiateBase(const PropertyContainer& init_)
+  {
+      Object::InstatiateObject(init_);
+      PlanningProblemInitializer init(init_);
+
+      poses.reset(new std::map<std::string, Eigen::VectorXd>());
+      posesJointNames.reset(new std::vector<std::string>());
+      knownMaps_["PositionConstraint"] = "Distance";
+      knownMaps_["PostureConstraint"] = "Identity";
+
+      startState.resize(0);
+      endState.resize(0);
+      nominalState.resize(0);
+
+      task_maps_.clear();
+      task_defs_.clear();
+
+      // Create the scene
+      SceneInitializer initS(init);
+      scene_.reset(new Scene(initS.Name));
+      //scene_->InitializeInternal(init.Scene);
+
+      // Create the maps
+      for(const PropertyContainer& map : init.Maps.getValue())
+      {
+          const std::string type = map.getName();
+          TaskMap_ptr temp_ptr = Initialiser::createMap(type);
+          temp_ptr->InstantiateInternal(map);
+          temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
+          if (task_maps_.find(temp_ptr->getObjectName()) != task_maps_.end())
+          {
+              throw_named("Map '"+temp_ptr->getObjectName()+"' already exists!");
+          }
+          task_maps_[temp_ptr->getObjectName()] = temp_ptr;
+          temp_ptr->registerScene(scene_);
+      }
+
+      if (init.Maps.getValue().size() == 0)
+      {
+        HIGHLIGHT("No maps were defined!");
+      }
+
+      scene_->activateTaskMaps();
+
+      // Create the task definitions
+      for(const PropertyContainer& task : init.Tasks.getValue())
+      {
+          TaskDefinition_ptr temp_ptr = Initialiser::createDefinition(task.getName());
+          temp_ptr->InstantiateInternal(task);
+          temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
+          if (task_defs_.find(temp_ptr->getObjectName()) != task_defs_.end())
+          {
+              throw_named("Task definition '"+temp_ptr->getObjectName()+"' already exists!");
+          }
+          task_defs_[temp_ptr->getObjectName()] = temp_ptr;
+          temp_ptr->setTaskMap(task_maps_.at(temp_ptr->getTaskMapName()));
+      }
+      if (init.Tasks.getValue().size() == 0)
+      {
+        HIGHLIGHT("No tasks were defined!");
+      }
+
+      originalMaps_ = task_maps_;
+      originalDefs_ = task_defs_;
   }
 
   void PlanningProblem::initBase(tinyxml2::XMLHandle & handle,

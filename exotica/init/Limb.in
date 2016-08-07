@@ -1,3 +1,3 @@
 #include <kdl/tree.hpp>
 Required std::string Segment;
-Optional KDL::Frame Frame = KDL::Frame();
+Optional KDL::Frame Frame = KDL::Frame::Identity();

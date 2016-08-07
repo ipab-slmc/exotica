@@ -46,7 +46,7 @@
 
 namespace exotica
 {
-  class MotionSolver: public Object, Uncopyable, virtual InstantiableBase
+  class MotionSolver: public Object, Uncopyable, public virtual InstantiableBase
   {
     public:
       /**

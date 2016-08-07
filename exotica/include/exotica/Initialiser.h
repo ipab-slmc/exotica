@@ -60,8 +60,8 @@ namespace exotica
       static void printSupportedClasses();
       static boost::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return Instance()->solvers_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->maps_.createInstance("exotica/"+type);}
-      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return TaskDefinition_fac::Instance().createInstance("exotica/"+type);}
-      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return PlanningProblem_fac::Instance().createInstance("exotica/"+type);}
+      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return Instance()->tasks_.createInstance("exotica/"+type);}
+      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->problems_.createInstance("exotica/"+type);}
 
       ///
       /// \brief initialise Initialises the server from XML handle
@@ -176,6 +176,8 @@ namespace exotica
       tinyxml2::XMLDocument xml_file;
       pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
       pluginlib::ClassLoader<exotica::TaskMap> maps_;
+      PlanningProblem_fac problems_;
+      TaskDefinition_fac tasks_;
   };
 
   typedef boost::shared_ptr<Initialiser> Initialiser_ptr;

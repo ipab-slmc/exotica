@@ -45,7 +45,7 @@
 
 namespace exotica
 {
-  class TaskDefinition: public Object, Uncopyable
+  class TaskDefinition: public Object, Uncopyable, public virtual InstantiableBase
   {
     public:
       /**
@@ -55,7 +55,8 @@ namespace exotica
       virtual ~TaskDefinition()
       {
       }
-      ;
+
+      virtual void InstantiateBase(const PropertyContainer& init);
 
       /**
        * \brief Base Initialiser
@@ -113,6 +114,7 @@ namespace exotica
        * @return          Smart pointer to a task-map
        */
       TaskMap_ptr getTaskMap();
+      std::string getTaskMapName() const;
 
       bool order;
 
@@ -128,6 +130,7 @@ namespace exotica
 
       boost::shared_ptr<TaskMap> task_map_; //!< Shared pointer to a Task Map from which it gets its inputs
       boost::mutex map_lock_;  //!< Mapping Lock for synchronisation
+      std::string task_map_name_;
 
   };
 

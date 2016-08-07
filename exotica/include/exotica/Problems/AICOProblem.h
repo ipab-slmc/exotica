@@ -39,6 +39,7 @@
 
 #include <exotica/PlanningProblem.h>
 #include "exotica/Definitions/TaskSqrError.h"
+#include <exotica/AICOProblemInitializer.h>
 
 namespace exotica
 {
@@ -47,11 +48,13 @@ namespace exotica
    * \brief Problem specification for Approximate Inference Control method.
    * \ingroup AICO
    */
-  class AICOProblem: public PlanningProblem
+  class AICOProblem: public PlanningProblem, public Instantiable<AICOProblemInitializer>
   {
     public:
       AICOProblem();
       virtual ~AICOProblem();
+
+      virtual void Instantiate(AICOProblemInitializer& init);
 
       /**
        * \brief Get number of time steps

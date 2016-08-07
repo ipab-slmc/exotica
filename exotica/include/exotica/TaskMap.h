@@ -57,7 +57,7 @@ namespace exotica
 {
   class PlanningProblem;
 
-  class TaskMap: public Object, Uncopyable, virtual InstantiableBase
+  class TaskMap: public Object, Uncopyable, public virtual InstantiableBase
   {
     public:
       /**

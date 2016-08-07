@@ -45,6 +45,18 @@ namespace exotica
       {
           HIGHLIGHT(" '"<<s<<"'");
       }
+      HIGHLIGHT("Registered problems:");
+      std::vector<std::string> problems =  Instance()->problems_.getDeclaredClasses();
+      for(std::string s : problems)
+      {
+          HIGHLIGHT(" '"<<s<<"'");
+      }
+      HIGHLIGHT("Registered task definitions:");
+      std::vector<std::string> tasks =  Instance()->tasks_.getDeclaredClasses();
+      for(std::string s : tasks)
+      {
+          HIGHLIGHT(" '"<<s<<"'");
+      }
       HIGHLIGHT("Registered task maps:");
       std::vector<std::string> maps =  Instance()->maps_.getDeclaredClasses();
       for(std::string s : maps)
@@ -53,7 +65,8 @@ namespace exotica
       }
   }
 
-  Initialiser::Initialiser() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap")
+  Initialiser::Initialiser() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap"),
+      problems_(PlanningProblem_fac::Instance()), tasks_(TaskDefinition_fac::Instance())
   {
 
   }

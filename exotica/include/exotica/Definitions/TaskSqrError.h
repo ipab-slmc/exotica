@@ -38,10 +38,11 @@
 #include "exotica/Tools.h"        //!< For XML-Parsing/ErrorFunction definition
 #include <Eigen/Dense>            //!< Generally dense manipulations should be enough
 #include <boost/thread/mutex.hpp> //!< The boost thread-library for synchronisation
+#include <exotica/TaskSqrErrorInitializer.h>
 
 namespace exotica
 {
-  class TaskSqrError: public TaskDefinition
+  class TaskSqrError: public TaskDefinition, public Instantiable<TaskSqrErrorInitializer>
   {
     public:
       /**
@@ -51,6 +52,8 @@ namespace exotica
       virtual ~TaskSqrError()
       {
       }
+
+      virtual void Instantiate(TaskSqrErrorInitializer& init);
 
       virtual void initialiseManual(std::string name, Server_ptr & server,
           boost::shared_ptr<PlanningProblem> prob,

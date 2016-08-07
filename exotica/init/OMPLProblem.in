@@ -1,0 +1,3 @@
+#extends <exotica/PlanningProblem>
+Optional std::string PlroblemType = "Goals";
+Optional std::string LocalPlannerConfig;

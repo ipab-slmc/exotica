@@ -50,17 +50,19 @@
 
 namespace exotica
 {
-  class PlanningProblem: public Object, Uncopyable
+  class PlanningProblem: public Object, Uncopyable, public virtual InstantiableBase
   {
     public:
       /**
        * \brief Default Constructor
        */
       PlanningProblem();
+
       virtual ~PlanningProblem()
       {
       }
-      ;
+
+      virtual void InstantiateBase(const PropertyContainer& init);
 
       /**
        * \brief Initialiser (from XML): takes care of instantiating the TaskMaps and Definitions and the Kinematic Scenes

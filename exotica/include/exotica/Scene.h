@@ -37,6 +37,8 @@
 #include "exotica/Server.h"
 #include "tinyxml2/tinyxml2.h"
 #include "exotica/KinematicTree.h"
+#include <exotica/Property.h>
+#include <exotica/SceneInitializer.h>
 
 //	For collision
 #include <moveit/collision_detection/world.h>
@@ -230,7 +232,7 @@ namespace exotica
   typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
 
 ///	The class of EXOTica Scene
-  class Scene: public Object, Uncopyable
+  class Scene: public Object, Uncopyable, public InstantiableFinal<SceneInitializer>
   {
     public:
       /**
@@ -243,6 +245,8 @@ namespace exotica
        * \brief	Destructor
        */
       virtual ~Scene();
+
+      virtual void Instantiate(SceneInitializer& init);
 
       /**
        * \brief	Get scene name
@@ -507,13 +511,13 @@ namespace exotica
       CollisionScene_ptr collision_scene_;
 
       ///	Update mode (Sampling or Optimization)
-      EParam<std_msgs::String> mode_;
+      std::string mode_;
 
       /// Indicates whether to update Jacobians during the update call
       bool update_jacobians_;
 
       ///	Visual debug
-      EParam<std_msgs::Bool> visual_debug_;
+      bool visual_debug_;
       ros::Publisher ps_pub_;
   };
   typedef boost::shared_ptr<Scene> Scene_ptr;

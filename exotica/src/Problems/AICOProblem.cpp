@@ -147,6 +147,29 @@ namespace exotica
 
   }
 
+  void AICOProblem::Instantiate(AICOProblemInitializer& init)
+  {
+      T = init.T;
+      if (T <= 2)
+      {
+        throw_named("Invalid number of timesteps: "<<T);
+      }
+      tau = init.Tau;
+      Q_rate = init.Qrate;
+      H_rate = init.Hrate;
+      W_rate = init.Wrate;
+      W = Eigen::MatrixXd::Identity(init.W.getValue().rows(), init.W.getValue().rows());
+      W.diagonal() = init.W.getValue();
+
+      for (auto& task : task_defs_)
+      {
+        if (task.second->type()!="TaskSqrError")
+          throw_named("Task variable '" + task.first + "'' is not an squared error!");
+      }
+      // Set number of time steps
+      setTime(T);
+  }
+
   void AICOProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLElement* xmltmp;

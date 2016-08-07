@@ -1,0 +1,5 @@
+#include <exotica/SceneInitializer.h>
+#extends <exotica/Object>
+Required exotica::SceneInitializer Scene;
+Required std::vector<exotica::PropertyContainer> Maps;
+Required std::vector<exotica::PropertyContainer> Tasks;

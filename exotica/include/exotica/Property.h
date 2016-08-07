@@ -80,7 +80,7 @@ public:
     // This makes it possible to do:
     // T val = prop;
     // Just like dealing with T directly.
-    operator T() {return value_;}
+    operator T() const {return value_;}
 
     virtual void print(std::ostream& os) const
     {
@@ -166,37 +166,40 @@ class Instantiable : public virtual InstantiableBase
 {
 public:
 
-
     virtual void InstantiateInternal(const PropertyContainer& init)
     {
         InstantiateBase(init);
-        if(const_cast<PropertyContainer&>(init).getName()==C::getContainerName())
-        {
-            Instantiate(static_cast<C&>(const_cast<PropertyContainer&>(init)));
-        }
-        else
-        {
-            C tmp;
-            for(auto& param : tmp.getProperties())
-            {
-                if(init.getProperties().find(param.first)!= init.getProperties().end())
-                {
-                    // Copies over typeless PropertyElements using a virtual copyValue method
-                    *tmp.getProperties()[param.first] = *init.getProperties().at(param.first);
-                }
-                else
-                {
-                    //problem
-                    throw_pretty("Combining incompatible initializers!");
-                }
-            }
-            Instantiate(tmp);
-        }
+        C tmp(init);
+        Instantiate(tmp);
     }
 
     virtual const PropertyContainer& getInitializerTemplate()
     {
         return C();
+    }
+
+    virtual void Instantiate(C& init) = 0;
+};
+
+template<class C>
+class InstantiableFinal : public virtual InstantiableBase
+{
+public:
+
+    virtual void InstantiateInternal(const PropertyContainer& init)
+    {
+        C tmp(init);
+        Instantiate(tmp);
+    }
+
+    virtual const PropertyContainer& getInitializerTemplate()
+    {
+        return C();
+    }
+
+    virtual void InstantiateBase(const PropertyContainer& init)
+    {
+
     }
 
     virtual void Instantiate(C& init) = 0;

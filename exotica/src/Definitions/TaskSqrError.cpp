@@ -58,6 +58,32 @@ namespace exotica
       wasFullyInitialised_ = true;
   }
 
+  void TaskSqrError::Instantiate(TaskSqrErrorInitializer& init)
+  {
+      rho0_(0) = (double)init.Rho;
+
+      if(init.Goal.isSet())
+      {
+          y_star0_ = init.Goal;
+      }
+      else
+      {
+          int dim;
+          getTaskMap()->taskSpaceDim(dim);
+          if (dim > 0)
+          {
+            y_star0_.resize(dim);
+            y_star0_.setZero();
+          }
+          else
+          {
+            throw_named("Task definition '"<<object_name_<<"':Goal was defined not and task map dimension is invalid!");
+          }
+      }
+      // Set default number of time steps
+      setTimeSteps(1);
+  }
+
   void TaskSqrError::initDerived(tinyxml2::XMLHandle & handle)
   {
     //!< Temporaries

@@ -1,0 +1,8 @@
+#include <Eigen/Dense>
+#extends <exotica/PlanningProblem>
+Required int T;
+Required double Tau;
+Required double Qrate;
+Required double Hrate;
+Required double Wrate;
+Required Eigen::VectorXd W;

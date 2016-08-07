@@ -39,7 +39,7 @@ namespace exotica
 {
 
   TaskMap::TaskMap()
-      : updateJacobian_(true)
+      : updateJacobian_(true), server_(Server::Instance())
   {
 
   }

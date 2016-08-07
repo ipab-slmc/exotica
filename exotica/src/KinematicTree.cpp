@@ -53,32 +53,6 @@ exotica::KinematicTree::KinematicTree()
   INFO("Done");
 }
 
-exotica::KinematicTree::KinematicTree(const std::string & urdf_param,
-    const SolutionForm_t & optimisation)
-{
-  INFO("Initialiser Constructor ... (urdf-file)");
-  //!< Set to default values
-  zero_undef_jnts_ = false;
-
-  //!< Attempt initialisation
-  initKinematics(urdf_param, optimisation);
-
-  INFO(std::cout << "Done");
-}
-
-exotica::KinematicTree::KinematicTree(const KDL::Tree & temp_tree,
-    const SolutionForm_t & optimisation)
-{
-  INFO("Initialiser Constructor ... (temp-tree)");
-  //!< Set to default values
-  zero_undef_jnts_ = false;
-
-  //!< Attempt initialisation
-  initKinematics(temp_tree, optimisation);
-
-  INFO("Done");
-}
-
 exotica::KinematicTree::KinematicTree(const exotica::KinematicTree & rhs)
 {
   robot_tree_ = rhs.robot_tree_;
@@ -116,35 +90,54 @@ exotica::KinematicTree & exotica::KinematicTree::operator=(
   return *this;
 }
 
-bool exotica::KinematicTree::initKinematics(const std::string & urdf_param,
-    const exotica::SolutionForm_t & optimisation)
+void exotica::KinematicTree::Instantiate(const KinematicaInitializer& init, robot_model::RobotModelPtr model)
 {
-  KDL::Tree temp_tree;  //!< KDL Tree structure from urdf
-  boost::mutex::scoped_lock(member_lock_);
-  if (kdl_parser::treeFromParam(urdf_param, temp_tree))
-  {
-    return initialise(temp_tree, optimisation);
-  }
-  else
-  {
-    return false;
-  }
-}
+    exotica::SolutionForm_t solution;
+    solution.root_segment = init.Root.getValue().Segment;
+    solution.root_seg_off = init.Root.getValue().Frame;
 
-bool exotica::KinematicTree::initKinematics(const KDL::Tree & temp_tree,
-    const exotica::SolutionForm_t & optimisation)
-{
-  boost::mutex::scoped_lock(member_lock_);
-  return initialise(temp_tree, optimisation); //!< Just call
-}
+    if (init.BaseType.getValue() == "floating")
+        base_type_ = solution.base_type = init.BaseType;
+    else if (init.BaseType.getValue() == "planar")
+        base_type_ = solution.base_type = init.BaseType;
+    else
+        base_type_ = solution.base_type = "fixed";
 
-bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle)
-{
-  return initKinematics(handle, NULL);
+    controlled_base_ = init.ControlledBase;
+
+    solution.zero_other_joints = init.ZeroOtherJoints;
+    solution.joints_update = init.Joints;
+
+    if (solution.joints_update.size() < 1)
+    {
+        throw_pretty("No update joint is specified");
+    }
+
+    if (!model)
+    {
+      throw_pretty("No robot model provided!");
+    }
+    else
+    {
+      model_ = model;
+      KDL::Tree temp_tree;
+      boost::mutex::scoped_lock(member_lock_);
+      if (kdl_parser::treeFromUrdfModel(*model_->getURDF(), temp_tree))
+      {
+        if(!initialise(temp_tree, solution))
+        {
+            throw_pretty("Can't initialize Kinematica!");
+        }
+      }
+      else
+      {
+        throw_pretty("Can't load URDF model!");
+      }
+    }
 }
 
 bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
-    const robot_model::RobotModelPtr & model)
+    const robot_model::RobotModelPtr model)
 {
   INFO("Initialisation from xml");
 
@@ -341,27 +334,7 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
 
   if (model_ == NULL)
   {
-    INDICATE_FAILURE
-    return false;
-    if (!handle.FirstChildElement("Urdf").ToElement())
-    {
-      ERROR("Urdf element not exist");
-      return false;
-    }
-    else
-    {
-      std::string urdf_file =
-          handle.FirstChildElement("Urdf").ToElement()->GetText();
-      if (urdf_file.empty())
-      {
-        ERROR("URDF is empty");
-        return false;
-      }
-      else
-      {
-        return initKinematics(urdf_file, solution);
-      }
-    }
+    throw_pretty("No robot model provided!");
   }
   else
   {
@@ -379,6 +352,9 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
     }
   }
 }
+
+
+
 bool exotica::KinematicTree::updateEndEffectors(
     const SolutionForm_t & new_end_effectors)
 {

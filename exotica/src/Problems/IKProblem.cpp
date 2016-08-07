@@ -119,6 +119,18 @@ namespace exotica
     }
   }
 
+  void IKProblem::Instantiate(IKProblemInitializer& init)
+  {
+      tau_ = init.Tolerance;
+      config_w_ = Eigen::MatrixXd::Identity(init.W.getValue().rows(), init.W.getValue().rows());
+      config_w_.diagonal() = init.W.getValue();
+      T_ = init.T;
+      for (auto& it : task_defs_)
+      {
+          it.second->setTimeSteps(T_);
+      }
+  }
+
   void IKProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLElement* xmltmp;

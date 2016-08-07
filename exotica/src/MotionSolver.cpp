@@ -40,7 +40,7 @@ namespace exotica
     Object::InstatiateObject(init);
   }
 
-  MotionSolver::MotionSolver()
+  MotionSolver::MotionSolver() : server_(Server::Instance())
   {
   }
 

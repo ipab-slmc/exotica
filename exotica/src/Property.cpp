@@ -17,6 +17,11 @@ void PropertyElement::operator=(const PropertyElement& other)
     copyValues(other);
 }
 
+std::string PropertyElement::getKnownType() const
+{
+    return type_;
+}
+
 bool PropertyElement::isSet() const {return isSet_;}
 bool PropertyElement::isRequired() const {return isRequired_;}
 std::string PropertyElement::getType() const {return type_;}

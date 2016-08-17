@@ -31,6 +31,7 @@
  */
 
 #include "exotica/Initialiser.h"
+#include <type_traits>
 using namespace rapidjson;
 
 namespace exotica
@@ -63,6 +64,77 @@ namespace exotica
       {
           HIGHLIGHT(" '"<<s<<"'");
       }
+      HIGHLIGHT("Registered initializer types:");
+      std::map<std::string,std::vector<std::string>> inits = getInitilizerTypes();
+      for(auto& i : inits)
+      {
+          HIGHLIGHT(i.first);
+          for(std::string s : i.second)
+          {
+              HIGHLIGHT("  - "<<s);
+          }
+      }
+  }
+
+  void updateInitilizerTypes(PropertyContainer& init, std::map<std::string,std::vector<std::string>>& inits)
+  {
+      for(auto& p : init.getProperties())
+      {
+          if(p.second->isContainer())
+          {
+              inits["exotica::PropertyContainer"].push_back(init.getName()+"/"+p.first);
+              PropertyContainer init_child = p.second->getContainerTemplate();
+              updateInitilizerTypes(init_child,inits);
+          }
+          else if(p.second->isContainerVector())
+          {
+              inits["std::vector<exotica::PropertyContainer>"].push_back(init.getName()+"/"+p.first);
+          }
+          else
+          {
+              inits[p.second->getType()].push_back(init.getName()+"/"+p.first);
+              PropertyContainer init_child = p.second->getContainerTemplate();
+              updateInitilizerTypes(init_child,inits);
+          }
+      }
+  }
+
+  std::map<std::string,std::vector<std::string>> Initialiser::getInitilizerTypes()
+  {
+      std::map<std::string,std::vector<std::string>> inits;
+
+      std::vector<std::string> solvers =  Instance()->solvers_.getDeclaredClasses();
+      for(std::string s : solvers)
+      {
+          auto ptr = createSolver(s.substr(8));
+          updateInitilizerTypes(ptr->getInitializerTemplate(),inits);
+      }
+
+      std::vector<std::string> problems =  Instance()->problems_.getDeclaredClasses();
+      for(std::string s : problems)
+      {
+         auto ptr = createProblem(s.substr(8));
+         updateInitilizerTypes(ptr->getInitializerTemplate(),inits);
+      }
+
+      std::vector<std::string> maps =  Instance()->maps_.getDeclaredClasses();
+      for(std::string s : maps)
+      {
+         auto ptr = createMap(s.substr(8));
+         updateInitilizerTypes(ptr->getInitializerTemplate(),inits);
+      }
+
+      std::vector<std::string> tasks =  Instance()->tasks_.getDeclaredClasses();
+      for(std::string s : tasks)
+      {
+         auto ptr = createDefinition(s.substr(8));
+         updateInitilizerTypes(ptr->getInitializerTemplate(),inits);
+      }
+
+      SceneInitializer init;
+      updateInitilizerTypes(init,inits);
+
+      return inits;
   }
 
   Initialiser::Initialiser() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap"),

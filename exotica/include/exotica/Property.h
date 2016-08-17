@@ -11,7 +11,53 @@
 namespace exotica
 {
 
-class PropertyElement : public Printable
+class PropertyElement;
+
+// All user property containers must inherit from this.
+// Use CMake tool to generate Initializers inheriting from this class
+class PropertyContainer : public Printable
+{
+public:
+    virtual void print(std::ostream& os) const
+    {
+        os << "Container '" << name_ << "'\n";
+    }
+
+    PropertyContainer() : name_("") {}
+    PropertyContainer(const std::string& name) : name_(name) {}
+    std::string getName() const {return name_;}
+
+    const std::map<std::string, PropertyElement*>& getProperties() const {return properties_;}
+    std::map<std::string, PropertyElement*>& getProperties() {return properties_;}
+    const std::vector<PropertyElement*>& getPropertiesOrdered() const {return propertiesOrdered_;}
+    std::vector<PropertyElement*>& getPropertiesOrdered() {return propertiesOrdered_;}
+
+protected:
+    std::string name_;
+    std::map<std::string, PropertyElement*> properties_;
+    std::vector<PropertyElement*> propertiesOrdered_;
+};
+
+class InstantiableBase
+{
+public:
+    virtual PropertyContainer& getInitializerTemplate() = 0;
+    virtual void InstantiateInternal(const PropertyContainer& init) = 0;
+    virtual void InstantiateBase(const PropertyContainer& init) = 0;
+};
+
+class Containerable
+{
+public:
+    Containerable& operator=(const Containerable&) = default;
+    virtual bool isContainer() {return false;}
+    virtual bool isContainerVector() {return false;}
+    virtual PropertyContainer& getContainerTemplate() {return dummy_container_template_;}
+protected:
+    PropertyContainer dummy_container_template_;
+};
+
+class PropertyElement : public Printable, public virtual Containerable
 {
 public:
     PropertyElement();
@@ -21,6 +67,7 @@ public:
     bool isSet() const;
     bool isRequired() const;
     std::string getType() const;
+    std::string getKnownType() const;
     std::string getName() const;
     virtual void print(std::ostream& os) const;
     virtual void copyValues(PropertyElement& other) = 0;
@@ -33,7 +80,12 @@ protected:
 };
 
 template<typename T>
-class Property : public PropertyElement
+class IsContainer : public virtual Containerable
+{
+};
+
+template<typename T>
+class Property : public PropertyElement, public IsContainer<T>
 {
 public:
     // Various constructors
@@ -45,12 +97,9 @@ public:
     Property(Property& obj) : PropertyElement(obj.isSet_,obj.isRequired_, obj.type_, obj.name_), value_(obj.value_){}
     Property(const Property& obj) : PropertyElement(obj.isSet_,obj.isRequired_, obj.type_, obj.name_), value_(obj.value_){}
 
-    virtual void copyValues(PropertyElement& other)
-    {
-        if(other.isSet()) value_=static_cast<Property<T>&>(other).value_;
-    }
+    void copyValues(PropertyElement& other){ if(other.isSet()) value_=static_cast<Property<T>&>(other).value_; }
 
-    virtual void copyValues(const PropertyElement& other)
+    void copyValues(const PropertyElement& other)
     {
         if(other.isSet()) value_=static_cast<const Property<T>&>(other).value_;
     }
@@ -91,6 +140,12 @@ private:
     T value_;
 };
 
+template<typename C>
+void getProperty(std::string Name, const PropertyContainer& init, C& ret)
+{
+    ret = static_cast<Property<C>*>(init.getProperties().at(Name))->getValue();
+}
+
 template<typename T>
 inline T operator+(T lhs, const Property<T>& rhs)
 {
@@ -120,51 +175,11 @@ inline T operator/(T lhs, const Property<T>& rhs)
   return lhs / rhs.getValue();
 }
 
-// All user property containers must inherit from this.
-// Use CMake tool to generate Initializers inheriting from this class
-class PropertyContainer : public Printable
-{
-public:
-    virtual void print(std::ostream& os) const
-    {
-        os << "Container '" << name_ << "'\n";
-        for(auto& prop : propertiesOrdered_)
-          os << "  " << *prop <<"\n";
-    }
-
-    PropertyContainer() : name_("") {}
-    PropertyContainer(const std::string& name) : name_(name) {}
-    std::string getName() const {return name_;}
-
-    template<typename C> void getProperty(std::string Name, C& ret) const
-    {
-        ret = static_cast<Property<C>*>(properties_.at(Name))->getValue();
-    }
-
-
-    const std::map<std::string, PropertyElement*>& getProperties() const {return properties_;}
-    std::map<std::string, PropertyElement*>& getProperties() {return properties_;}
-    const std::vector<PropertyElement*>& getPropertiesOrdered() const {return propertiesOrdered_;}
-    std::vector<PropertyElement*>& getPropertiesOrdered() {return propertiesOrdered_;}
-
-protected:
-    std::string name_;
-    std::map<std::string, PropertyElement*> properties_;
-    std::vector<PropertyElement*> propertiesOrdered_;
-};
-
-class InstantiableBase
-{
-public:
-    virtual const PropertyContainer& getInitializerTemplate() = 0;
-    virtual void InstantiateInternal(const PropertyContainer& init) = 0;
-    virtual void InstantiateBase(const PropertyContainer& init) = 0;
-};
-
 template<class C>
 class Instantiable : public virtual InstantiableBase
 {
 public:
+    C template_initializer_;
 
     virtual void InstantiateInternal(const PropertyContainer& init)
     {
@@ -173,9 +188,9 @@ public:
         Instantiate(tmp);
     }
 
-    virtual const PropertyContainer& getInitializerTemplate()
+    virtual PropertyContainer& getInitializerTemplate()
     {
-        return C();
+        return template_initializer_;
     }
 
     virtual void Instantiate(C& init) = 0;
@@ -185,6 +200,7 @@ template<class C>
 class InstantiableFinal : public virtual InstantiableBase
 {
 public:
+    C template_initializer_;
 
     virtual void InstantiateInternal(const PropertyContainer& init)
     {
@@ -192,9 +208,9 @@ public:
         Instantiate(tmp);
     }
 
-    virtual const PropertyContainer& getInitializerTemplate()
+    virtual PropertyContainer& getInitializerTemplate()
     {
-        return C();
+        return template_initializer_;
     }
 
     virtual void InstantiateBase(const PropertyContainer& init)

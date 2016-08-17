@@ -70,6 +70,7 @@ namespace exotica
       static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->maps_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return Instance()->tasks_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->problems_.createInstance("exotica/"+type);}
+      static std::map<std::string,std::vector<std::string>> getInitilizerTypes();
 
       static boost::shared_ptr<exotica::MotionSolver> createSolver(const PropertyContainer& init)
       {

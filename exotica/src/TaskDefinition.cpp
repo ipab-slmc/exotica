@@ -66,7 +66,7 @@ namespace exotica
       Object::InstatiateObject(init_);
       TaskDefinitionInitializer init(init_);
       TaskMap_map maps;
-      init.getProperty("TaskMaps", maps);
+      getProperty("TaskMaps", init_, maps);
       setTaskMap(maps.at(init.Map.getValue()));
   }
 

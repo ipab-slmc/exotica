@@ -159,7 +159,38 @@ public:
 """
     for d in Data:
         ret+=Declaration(d)
-    ret+="};\n}\n#endif"
+    ret+="};"+"""
+
+template<>
+class IsContainer<"""+ClassName+"""> : public virtual Containerable
+{
+public:
+    virtual bool isContainer() {return true;}
+    virtual bool isContainerVector() {return false; }
+    virtual PropertyContainer& getContainerTemplate()
+    {
+        return value_template_;
+    }
+protected:
+    """+ClassName+""" value_template_;
+};
+
+template<>
+class IsContainer<std::vector<"""+ClassName+""">> : public virtual Containerable
+{
+public:
+    virtual bool isContainer() {return false;}
+    virtual bool isContainerVector() {return true; }
+    virtual PropertyContainer& getContainerTemplate()
+    {
+        value_template_.resize(1);
+        return value_template_[0];
+    }
+protected:
+    std::vector<"""+ClassName+"""> value_template_;
+};
+
+}\n#endif"""
     return ret
 
 def ParseLine(line, ln, fn):

@@ -1,5 +1,9 @@
 <launch>
 
-  <node pkg="exotica_examples" type="ExoticaCore" name="ExoticaCoreExampleNode" output="screen" />
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg     if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
+
+  <node launch-prefix="$(arg launch_prefix)" pkg="exotica_examples" type="ExoticaCore" name="ExoticaCoreExampleNode" output="screen" />
 
 </launch>

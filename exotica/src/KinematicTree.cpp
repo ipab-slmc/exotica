@@ -94,7 +94,7 @@ void exotica::KinematicTree::Instantiate(const KinematicaInitializer& init, robo
 {
     exotica::SolutionForm_t solution;
     solution.root_segment = init.Root.getValue().Segment;
-    solution.root_seg_off = init.Root.getValue().Frame;
+    solution.root_seg_off = getFrame(init.Root.getValue().Frame.getValue());
 
     if (init.BaseType.getValue() == "floating")
         base_type_ = solution.base_type = init.BaseType;

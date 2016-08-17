@@ -150,7 +150,7 @@ namespace exotica
     for(LimbInitializer& limb : limbs)
     {
         tmp_eff.push_back(limb.Segment);
-        tmp_offset.push_back(limb.Frame);
+        tmp_offset.push_back(getFrame(limb.Frame.getValue()));
     }
 
   }

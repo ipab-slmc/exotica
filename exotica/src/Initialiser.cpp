@@ -80,21 +80,33 @@ namespace exotica
   {
       for(auto& p : init.getProperties())
       {
+          std::string PropertyName = init.getName()+"/"+p.first;
           if(p.second->isContainer())
           {
-              inits["exotica::PropertyContainer"].push_back(init.getName()+"/"+p.first);
-              PropertyContainer init_child = p.second->getContainerTemplate();
-              updateInitilizerTypes(init_child,inits);
+              std::vector<int> a;
+
+              if(!contains(PropertyName,inits["exotica::PropertyContainer"]))
+              {
+                  inits["exotica::PropertyContainer"].push_back(PropertyName);
+                  PropertyContainer init_child = p.second->getContainerTemplate();
+                  updateInitilizerTypes(init_child,inits);
+              }
           }
           else if(p.second->isContainerVector())
           {
-              inits["std::vector<exotica::PropertyContainer>"].push_back(init.getName()+"/"+p.first);
+              if(!contains(PropertyName,inits["std::vector<exotica::PropertyContainer>"]))
+              {
+                  inits["std::vector<exotica::PropertyContainer>"].push_back(PropertyName);
+                  PropertyContainer init_child = p.second->getContainerTemplate();
+                  updateInitilizerTypes(init_child,inits);
+              }
           }
           else
           {
-              inits[p.second->getType()].push_back(init.getName()+"/"+p.first);
-              PropertyContainer init_child = p.second->getContainerTemplate();
-              updateInitilizerTypes(init_child,inits);
+              if(!contains(PropertyName,inits[p.second->getType()]))
+              {
+                inits[p.second->getType()].push_back(PropertyName);
+              }
           }
       }
   }

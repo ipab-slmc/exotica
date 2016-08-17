@@ -38,7 +38,6 @@
 #include <Eigen/Dense>
 #include <kdl/tree.hpp>
 #include <iostream>
-#include <boost/shared_ptr.hpp>
 #include "rapidjson/document.h"
 #include <exotica/MeshVertex.h>
 #include <exotica/StringList.h>
@@ -48,64 +47,9 @@
 #include <exotica/Tools/Exception.h>
 #include <exotica/Tools/Uncopyable.h>
 #include <exotica/Tools/Printable.h>
+#include <exotica/Tools/Conversions.h>
 #include <exotica/Version.h>
 
-
-namespace Eigen
-{
-
-  /// \brief Convenience wrapper for storing references to sub-matrices/vectors
-  template<typename Derived>
-  class Ref_ptr: public boost::shared_ptr<Ref<Derived> >
-  {
-    public:
-      inline Ref_ptr()
-          : boost::shared_ptr<Ref<Derived> >()
-      {
-
-      }
-
-      inline Ref_ptr(const Eigen::Block<Derived>& other)
-      {
-        this->reset(new Ref<Derived>(other));
-      }
-
-      inline Ref_ptr(Eigen::Block<Derived>& other)
-      {
-        this->reset(new Ref<Derived>(other));
-      }
-
-      inline Ref_ptr(const Eigen::VectorBlock<Derived>& other)
-      {
-        this->reset(new Ref<Derived>(other));
-      }
-
-      inline Ref_ptr(Eigen::VectorBlock<Derived>& other)
-      {
-        this->reset(new Ref<Derived>(other));
-      }
-
-      inline Ref_ptr(Derived& other)
-      {
-        this->reset(new Ref<Derived>(other));
-      }
-
-      inline Ref_ptr(const Derived& other)
-      {
-        this->reset(new Ref<Derived>(other));
-      }
-  };
-
-  /// \brief Reference to sub-vector.
-  typedef Ref_ptr<VectorXd> VectorXdRef_ptr;
-  /// \brief Reference to sub-Matrix.
-  typedef Ref_ptr<MatrixXd> MatrixXdRef_ptr;
-
-  typedef Ref<VectorXd> VectorXdRef;
-  typedef const Ref<const VectorXd>& VectorXdRefConst;
-  typedef Ref<MatrixXd> MatrixXdRef;
-  typedef const Ref<const MatrixXd>& MatrixXdRefConst;
-}
 
 /**
  * \brief A convenience macro for the boost scoped lock

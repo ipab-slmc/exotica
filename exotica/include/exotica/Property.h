@@ -3,6 +3,7 @@
 
 #include <exotica/Tools/Printable.h>
 #include <exotica/Tools/Exception.h>
+#include <exotica/Tools/Conversions.h>
 #include <memory>
 #include <map>
 #include <vector>

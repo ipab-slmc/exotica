@@ -69,7 +69,7 @@ def Copy(Data):
 
 def Register(Data):
     if Data.has_key('Required'):
-      return "        properties_[\""+Data['Name']+"\"] = static_cast<PropertyElement*>(&"+Data['Name']+");\n" + "        propertiesOrdered_.push_back( static_cast<PropertyElement*>(&"+Data['Name']+") );\n"
+      return "        properties_[\""+Data['Name']+"\"] = static_cast<PropertyElement*>(&"+Data['Name']+");\n"
     else:
       return ""
 
@@ -106,20 +106,22 @@ public:
         RegisterParams();
     }
 
-    """+ClassName+"""(const PropertyContainer& other)
+    """+ClassName+"""(const PropertyContainer& other) : """+ClassName+"""()
     {
-        RegisterParams();
         for(auto& param : properties_)
         {
             if(other.getProperties().find(param.first)!= other.getProperties().end())
             {
                 // Copies over typeless PropertyElements using a virtual copyValue method
-                *properties_[param.first] = *other.getProperties().at(param.first);
+                properties_[param.first]->copyValues(*other.getProperties().at(param.first));
             }
             else
             {
-                //problem
-                throw_pretty("Combining incompatible initializers!");
+                if(properties_[param.first]->isRequired())
+                {
+                    HIGHLIGHT("You forgot to set parameter '"<<param.first<<"'! ("<<getContainerName()<<")");
+                    throw_pretty("Combining incompatible initializers!");
+                }
             }
         }
         if(properties_.size()!=other.getProperties().size())

@@ -5,6 +5,7 @@
 #include <kdl/tree.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <exotica/Tools/Exception.h>
 
 namespace Eigen
 {
@@ -71,6 +72,78 @@ namespace exotica
     KDL::Frame getFrame(Eigen::VectorXdRefConst val);
 
     bool contains(std::string key, const std::vector<std::string>& vec);
+
+    inline std::string trim(const std::string &s)
+    {
+       auto  wsfront=std::find_if_not(s.begin(),s.end(),[](int c){return std::isspace(c);});
+       return std::string(wsfront,std::find_if_not(s.rbegin(),std::string::const_reverse_iterator(wsfront),[](int c){return std::isspace(c);}).base());
+    }
+
+    inline Eigen::VectorXd parseVector(const std::string value)
+    {
+        Eigen::VectorXd ret;
+        double temp_entry;
+        int i = 0;
+
+        std::istringstream text_parser(value);
+
+        text_parser >> temp_entry;
+        while (!(text_parser.fail() || text_parser.bad()))
+        {
+            ret.conservativeResize(++i);
+            ret(i - 1) = temp_entry;
+            text_parser >> temp_entry;
+        }
+        if (i == 0) throw_pretty("Empty vector!");
+        return ret;
+    }
+
+    inline bool parseBool(const std::string value)
+    {
+        bool ret;
+        std::istringstream text_parser(value);
+        text_parser >> ret;
+        return ret;
+    }
+
+    inline double parseDouble(const std::string value)
+    {
+        double ret;
+        std::istringstream text_parser(value);
+
+        text_parser >> ret;
+        if ((text_parser.fail() || text_parser.bad()))
+        {
+            throw_pretty("Can't parse value!");
+        }
+        return ret;
+    }
+
+    inline int parseInt(const std::string value)
+    {
+        int ret;
+        std::istringstream text_parser(value);
+
+        text_parser >> ret;
+        if ((text_parser.fail() || text_parser.bad()))
+        {
+            throw_pretty("Can't parse value!");
+        }
+        return ret;
+    }
+
+    inline std::vector<std::string> parseList(const std::string value)
+    {
+        std::stringstream ss(value);
+        std::string item;
+        std::vector<std::string> ret;
+        while (std::getline(ss, item, ','))
+        {
+            ret.push_back(trim(item));
+        }
+        if (ret.size() == 0) throw_pretty("Empty vector!");
+        return ret;
+    }
 }
 
 #endif // CONVERSIONS_H

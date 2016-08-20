@@ -39,5 +39,6 @@
 #include <exotica/Initialiser.h>
 #include <exotica/PlanningProblem.h>
 #include <exotica/MotionSolver.h>
+#include <exotica/Loaders/XMLLoader.h>
 
 #endif // EXOTICA_H

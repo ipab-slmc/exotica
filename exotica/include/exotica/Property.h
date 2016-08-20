@@ -19,24 +19,21 @@ class PropertyElement;
 class PropertyContainer : public Printable
 {
 public:
-    virtual void print(std::ostream& os) const
-    {
-        os << "Container '" << name_ << "'\n";
-    }
+    virtual void print(std::ostream& os) const;
 
-    PropertyContainer() : name_("") {}
-    PropertyContainer(const std::string& name) : name_(name) {}
-    std::string getName() const {return name_;}
+    PropertyContainer();
+    PropertyContainer(const std::string& name);
+    std::string getName() const;
+    void setName(const std::string& name);
 
-    const std::map<std::string, PropertyElement*>& getProperties() const {return properties_;}
-    std::map<std::string, PropertyElement*>& getProperties() {return properties_;}
-    const std::vector<PropertyElement*>& getPropertiesOrdered() const {return propertiesOrdered_;}
-    std::vector<PropertyElement*>& getPropertiesOrdered() {return propertiesOrdered_;}
+    const std::map<std::string, PropertyElement*>& getProperties() const;
+    std::map<std::string, PropertyElement*>& getProperties();
+    void addProperty(boost::shared_ptr<PropertyElement> prop);
 
 protected:
     std::string name_;
     std::map<std::string, PropertyElement*> properties_;
-    std::vector<PropertyElement*> propertiesOrdered_;
+    std::vector<boost::shared_ptr<PropertyElement>> managedProperties_;
 };
 
 class InstantiableBase
@@ -51,9 +48,9 @@ class Containerable
 {
 public:
     Containerable& operator=(const Containerable&) = default;
-    virtual bool isContainer() {return false;}
-    virtual bool isContainerVector() {return false;}
-    virtual PropertyContainer& getContainerTemplate() {return dummy_container_template_;}
+    virtual bool isContainer();
+    virtual bool isContainerVector();
+    virtual PropertyContainer& getContainerTemplate();
 protected:
     PropertyContainer dummy_container_template_;
 };
@@ -95,8 +92,6 @@ public:
     Property(const std::string& type, const std::string& name, bool isRequired) : PropertyElement(false, isRequired, type, name) {}
     Property(const std::string& type, const std::string& name, bool isRequired, T& value) : PropertyElement(true, isRequired, type, name),value_(value) {}
     Property(const std::string& type, const std::string& name, bool isRequired, const T& value) : PropertyElement(true, isRequired, type, name),value_(value) {}
-    Property(Property& obj) : PropertyElement(obj.isSet_,obj.isRequired_, obj.type_, obj.name_), value_(obj.value_){}
-    Property(const Property& obj) : PropertyElement(obj.isSet_,obj.isRequired_, obj.type_, obj.name_), value_(obj.value_){}
 
     void copyValues(PropertyElement& other){ if(other.isSet()) value_=static_cast<Property<T>&>(other).value_; }
 
@@ -104,9 +99,6 @@ public:
     {
         if(other.isSet()) value_=static_cast<const Property<T>&>(other).value_;
     }
-
-    // Construction from unique pointer as a copy constructor inside registerProperty (special case)
-    Property(std::unique_ptr<Property<T>> obj) : PropertyElement(obj->isSet_,obj->isRequired_, obj->type_, obj->name_),value_(obj->value_) {}
 
     // Assign contained value
     // This makes it possible to do:
@@ -125,6 +117,7 @@ public:
     }
 
     const T getValue() const {return value_;}
+    T& getValue() {return value_;}
 
     // Return contained value
     // This makes it possible to do:

@@ -26,3 +26,9 @@ add_executable(ManualInitialization src/manual.cpp)
 target_link_libraries(ManualInitialization
   ${catkin_LIBRARIES}
 )
+
+add_executable(XMLInitialization src/xml.cpp)
+
+target_link_libraries(XMLInitialization
+  ${catkin_LIBRARIES}
+)

@@ -116,7 +116,7 @@ namespace exotica
     }
   }
 
-  void PlanningProblem::InstantiateBase(const PropertyContainer& init_)
+  void PlanningProblem::InstantiateBase(const InitializerGeneric& init_)
   {
       Object::InstatiateObject(init_);
       PlanningProblemInitializer init(init_);
@@ -136,10 +136,10 @@ namespace exotica
       // Create the scene
       SceneInitializer initS(init.Scene.getValue());
       scene_.reset(new Scene(initS.Name));
-      scene_->InstantiateInternal(init.Scene);
+      scene_->InstantiateInternal(init.Scene.getValue());
 
       // Create the maps
-      for(const PropertyContainer& map : init.Maps.getValue())
+      for(const InitializerGeneric& map : init.Maps.getValue())
       {
           TaskMap_ptr temp_ptr = Initialiser::createMap(map);
           temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
@@ -157,11 +157,10 @@ namespace exotica
       }
 
       // Create the task definitions
-      for(const PropertyContainer& task : init.Tasks.getValue())
+      for(const InitializerGeneric& task : init.Tasks.getValue())
       {
-          PropertyContainer mapped_task(task);
-          Property<TaskMap_map> maps("TaskMap_map","TaskMaps",true,task_maps_);
-          mapped_task.getProperties()["TaskMaps"] = &maps;
+          InitializerGeneric mapped_task(task);
+          mapped_task.addProperty(Property<TaskMap_map>("TaskMap_map","TaskMaps",true,task_maps_));
           TaskDefinition_ptr temp_ptr = Initialiser::createDefinition(mapped_task);
           temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
           if (task_defs_.find(temp_ptr->getObjectName()) != task_defs_.end())

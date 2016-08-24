@@ -58,7 +58,7 @@ namespace exotica
        * @param handle  XML handle that contains solver specific parameters
        */
       virtual void initialiseSolver(tinyxml2::XMLHandle & handle);
-      virtual void initialiseSolver(PropertyContainer& init);
+      virtual void initialiseSolver(InitializerGeneric& init);
 
       /*
        * \brief Solve function

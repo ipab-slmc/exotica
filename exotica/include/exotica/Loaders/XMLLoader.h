@@ -20,8 +20,8 @@ public:
     {
     }
 
-    void loadXML(std::string file_name, PropertyContainer& solver, PropertyContainer& problem, const std::string& solver_name, const std::string& problem_name);
-    static void load(std::string file_name, PropertyContainer& solver, PropertyContainer& problem, const std::string& solver_name, const std::string& problem_name)
+    void loadXML(std::string file_name, InitializerGeneric& solver, InitializerGeneric& problem, const std::string& solver_name, const std::string& problem_name);
+    static void load(std::string file_name, InitializerGeneric& solver, InitializerGeneric& problem, const std::string& solver_name, const std::string& problem_name)
     {
         Instance()->loadXML(file_name,solver,problem,solver_name,problem_name);
     }

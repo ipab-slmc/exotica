@@ -52,8 +52,8 @@ namespace exotica
     public:
       virtual ~OMPLBaseSolver();
 
-      void initialiseBaseSolver(PropertyContainer& init, const Server_ptr &server);
-      virtual void initialiseSolver(PropertyContainer& init) = 0;
+      void initialiseBaseSolver(InitializerGeneric& init, const Server_ptr &server);
+      virtual void initialiseSolver(InitializerGeneric& init) = 0;
 
       void initialiseBaseSolver(tinyxml2::XMLHandle & handle,
           const Server_ptr &server);

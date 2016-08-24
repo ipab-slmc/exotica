@@ -54,7 +54,8 @@ namespace exotica
       {
         throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());
       }
-      base_solver_->initialiseBaseSolver(init, server_);
+      InitializerGeneric baseInit = init;
+      base_solver_->initialiseBaseSolver( baseInit, server_);
   }
 
   OMPLsolver::~OMPLsolver()

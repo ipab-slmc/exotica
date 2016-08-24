@@ -13,46 +13,101 @@ namespace exotica
 {
 
 class PropertyElement;
+class PropertyReferenceManaged;
+class PropertyReferenceMember;
+class PropertyContainerBase;
+class InitializerGeneric;
+class InitializerBase;
+
+
+class PropertyReferenceManaged
+{
+public:
+    PropertyReferenceManaged();
+    PropertyReferenceManaged(const PropertyReferenceMember& other);
+    PropertyReferenceManaged(boost::shared_ptr<PropertyElement> managed);
+    PropertyElement& get();
+    const PropertyElement& get() const;
+    friend class PropertyReferenceMember;
+protected:
+    boost::shared_ptr<PropertyElement> managed_;
+};
+
+class PropertyReferenceMember
+{
+public:
+    PropertyReferenceMember();
+    PropertyReferenceMember(const PropertyReferenceMember& other);
+    void operator=(const PropertyReferenceManaged& other);
+    void operator=(const PropertyReferenceMember& other);
+    PropertyReferenceMember(PropertyContainerBase* parent,PropertyElement* member);
+    PropertyElement& get();
+    const PropertyElement& get() const;
+    friend class PropertyReferenceManaged;
+protected:
+    PropertyElement* member_;
+    PropertyContainerBase* parent_;
+};
 
 // All user property containers must inherit from this.
 // Use CMake tool to generate Initializers inheriting from this class
-class PropertyContainer : public Printable
+class PropertyContainerBase : public Printable
 {
 public:
     virtual void print(std::ostream& os) const;
 
-    PropertyContainer();
-    PropertyContainer(const std::string& name);
+    PropertyContainerBase();
+    PropertyContainerBase(const std::string& name);
     std::string getName() const;
-    void setName(const std::string& name);
-
-    const std::map<std::string, PropertyElement*>& getProperties() const;
-    std::map<std::string, PropertyElement*>& getProperties();
+    void addProperty(const PropertyElement& prop);
     void addProperty(boost::shared_ptr<PropertyElement> prop);
+    const std::map<std::string, PropertyReferenceManaged>& getManagedProperties() const;
+    std::map<std::string, PropertyReferenceManaged>& getManagedProperties();
 
 protected:
     std::string name_;
-    std::map<std::string, PropertyElement*> properties_;
-    std::vector<boost::shared_ptr<PropertyElement>> managedProperties_;
+    std::map<std::string, PropertyReferenceManaged> propertiesManaged_;
+};
+
+class InitializerBase : public PropertyContainerBase
+{
+public:
+    InitializerBase(const std::string& name);
+    void specialize(const InitializerGeneric& other);
+    virtual void RegisterParams() = 0;
+    const std::map<std::string, PropertyReferenceMember>& getProperties() const;
+    std::map<std::string, PropertyReferenceMember>& getProperties();
+    friend class InitializerGeneric;
+protected:
+    std::map<std::string, PropertyReferenceMember> properties_;
+};
+
+class InitializerGeneric : public PropertyContainerBase
+{
+public:
+    InitializerGeneric();
+    InitializerGeneric(const std::string& name);
+    void setName(const std::string& name);
+    InitializerGeneric(const InitializerBase& other);
+    InitializerGeneric(InitializerBase& other);
+    friend class InitializerBase;
 };
 
 class InstantiableBase
 {
 public:
-    virtual PropertyContainer& getInitializerTemplate() = 0;
-    virtual void InstantiateInternal(const PropertyContainer& init) = 0;
-    virtual void InstantiateBase(const PropertyContainer& init) = 0;
+    virtual InitializerGeneric getInitializerTemplate() = 0;
+    virtual void InstantiateInternal(const InitializerGeneric& init) = 0;
+    virtual void InstantiateBase(const InitializerGeneric& init) = 0;
 };
 
 class Containerable
 {
 public:
     Containerable& operator=(const Containerable&) = default;
-    virtual bool isContainer();
-    virtual bool isContainerVector();
-    virtual PropertyContainer& getContainerTemplate();
-protected:
-    PropertyContainer dummy_container_template_;
+    virtual bool isContainer() const;
+    virtual bool isContainerVector() const;
+    virtual InitializerGeneric getContainerTemplate() const;
 };
 
 class PropertyElement : public Printable, public virtual Containerable
@@ -70,6 +125,7 @@ public:
     virtual void print(std::ostream& os) const;
     virtual void copyValues(PropertyElement& other) = 0;
     virtual void copyValues(const PropertyElement& other) = 0;
+    virtual boost::shared_ptr<PropertyElement> getCopy() const = 0;
 protected:
     bool isSet_;
     bool isRequired_;
@@ -92,8 +148,17 @@ public:
     Property(const std::string& type, const std::string& name, bool isRequired) : PropertyElement(false, isRequired, type, name) {}
     Property(const std::string& type, const std::string& name, bool isRequired, T& value) : PropertyElement(true, isRequired, type, name),value_(value) {}
     Property(const std::string& type, const std::string& name, bool isRequired, const T& value) : PropertyElement(true, isRequired, type, name),value_(value) {}
+    virtual boost::shared_ptr<PropertyElement> getCopy() const
+    {
+        boost::shared_ptr<Property<T>> ret(new Property<T>(type_,name_,isRequired_));
+        ret->value_ = value_;
+        return ret;
+    }
 
-    void copyValues(PropertyElement& other){ if(other.isSet()) value_=static_cast<Property<T>&>(other).value_; }
+    void copyValues(PropertyElement& other)
+    {
+        if(other.isSet()) value_=static_cast<Property<T>&>(other).value_;
+    }
 
     void copyValues(const PropertyElement& other)
     {
@@ -135,9 +200,9 @@ private:
 };
 
 template<typename C>
-void getProperty(std::string Name, const PropertyContainer& init, C& ret)
+void getProperty(std::string Name, const InitializerGeneric& init, C& ret)
 {
-    ret = static_cast<Property<C>*>(init.getProperties().at(Name))->getValue();
+    ret = static_cast<const Property<C>&>(init.getManagedProperties().at(Name).get()).getValue();
 }
 
 template<typename T>
@@ -173,18 +238,16 @@ template<class C>
 class Instantiable : public virtual InstantiableBase
 {
 public:
-    C template_initializer_;
 
-    virtual void InstantiateInternal(const PropertyContainer& init)
+    virtual void InstantiateInternal(const InitializerGeneric& init)
     {
-        InstantiateBase(init);
-        C tmp(init);
-        Instantiate(tmp);
+        InstantiateBase((C&)init);
+        Instantiate((C&)init);
     }
 
-    virtual PropertyContainer& getInitializerTemplate()
+    virtual InitializerGeneric getInitializerTemplate()
     {
-        return template_initializer_;
+        return InitializerGeneric(C());
     }
 
     virtual void Instantiate(C& init) = 0;
@@ -194,20 +257,17 @@ template<class C>
 class InstantiableFinal : public virtual InstantiableBase
 {
 public:
-    C template_initializer_;
-
-    virtual void InstantiateInternal(const PropertyContainer& init)
+    virtual void InstantiateInternal(const InitializerGeneric& init)
     {
-        C tmp(init);
-        Instantiate(tmp);
+        Instantiate((C&)init);
     }
 
-    virtual PropertyContainer& getInitializerTemplate()
+    virtual InitializerGeneric getInitializerTemplate()
     {
-        return template_initializer_;
+        return InitializerGeneric(C());
     }
 
-    virtual void InstantiateBase(const PropertyContainer& init)
+    virtual void InstantiateBase(const InitializerGeneric& init)
     {
 
     }

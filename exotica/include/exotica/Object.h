@@ -87,7 +87,7 @@ namespace exotica
         return object_name_;
       }
 
-      void InstatiateObject(const PropertyContainer& init)
+      void InstatiateObject(const InitializerGeneric& init)
       {
          ObjectInitializer oinit(init);
          object_name_=oinit.Name;

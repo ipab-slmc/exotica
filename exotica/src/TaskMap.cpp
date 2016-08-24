@@ -136,7 +136,7 @@ namespace exotica
     }
   }
 
-  void TaskMap::InstantiateBase(const PropertyContainer& init)
+  void TaskMap::InstantiateBase(const InitializerGeneric& init)
   {
     Object::InstatiateObject(init);
     TaskMapInitializer tminit(init);

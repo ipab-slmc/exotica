@@ -56,7 +56,7 @@ namespace exotica
       {
       }
 
-      virtual void InstantiateBase(const PropertyContainer& init);
+      virtual void InstantiateBase(const InitializerGeneric& init);
 
       /**
        * \brief Base Initialiser

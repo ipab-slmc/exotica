@@ -61,7 +61,7 @@ namespace exotica
       object_name_ = name + std::to_string((unsigned long) this);
   }
 
-  void TaskDefinition::InstantiateBase(const PropertyContainer& init_)
+  void TaskDefinition::InstantiateBase(const InitializerGeneric& init_)
   {
       Object::InstatiateObject(init_);
       TaskDefinitionInitializer init(init_);

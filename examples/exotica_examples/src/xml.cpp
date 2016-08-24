@@ -1,4 +1,5 @@
 #include <exotica/Exotica.h>
+#include <exotica/IKProblemInitializer.h>
 
 using namespace exotica;
 
@@ -7,7 +8,7 @@ void run()
     ros::NodeHandle nhg_;
     ros::NodeHandle nh_("~");
 
-    PropertyContainer solver, problem;
+    InitializerGeneric solver, problem;
 
     std::string file_name, solver_name, problem_name;
     nh_.getParam("ConfigurationFile",file_name);
@@ -16,11 +17,18 @@ void run()
 
     XMLLoader::load(file_name,solver, problem, solver_name, problem_name);
 
+    HIGHLIGHT_NAMED("XMLnode","Test");
+
+    IKProblemInitializer pr = problem;
+
+    HIGHLIGHT_NAMED("XMLnode","Loaded from XML");
 
     // Initialize
 
     PlanningProblem_ptr any_problem = Initialiser::createProblem(problem);
+    HIGHLIGHT_NAMED("XMLnode","Init Problem");
     MotionSolver_ptr any_solver = Initialiser::createSolver(solver);
+    HIGHLIGHT_NAMED("XMLnode","Init Solver");
     // Assign the problem to the solver
     any_solver->specifyProblem(any_problem);
 

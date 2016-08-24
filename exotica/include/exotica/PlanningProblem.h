@@ -62,7 +62,7 @@ namespace exotica
       {
       }
 
-      virtual void InstantiateBase(const PropertyContainer& init);
+      virtual void InstantiateBase(const InitializerGeneric& init);
 
       /**
        * \brief Initialiser (from XML): takes care of instantiating the TaskMaps and Definitions and the Kinematic Scenes

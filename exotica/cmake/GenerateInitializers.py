@@ -67,9 +67,15 @@ def Copy(Data):
     else:
       return ""
 
+def Add(Data):
+    if Data.has_key('Required'):
+      return "       boost::shared_ptr<Property<"+Data['Type']+">> "+Data['Name']+"_tmp(new Property<"+Data['Type']+">("+Data['Name']+")); other.addProperty("+Data['Name']+"_tmp);\n"
+    else:
+      return ""
+
 def Register(Data):
     if Data.has_key('Required'):
-      return "        properties_[\""+Data['Name']+"\"] = static_cast<PropertyElement*>(&"+Data['Name']+");\n"
+      return "        properties_.emplace(\""+Data['Name']+"\", PropertyReferenceMember(this, &"+Data['Name']+"));\n"
     else:
       return ""
 
@@ -88,76 +94,39 @@ def Construct(Namespace, ClassName, Data,Include):
 namespace """ +Namespace+ """
 {
 
-class """+ClassName+" : public PropertyContainer"+"""
+class """+ClassName+" : public InitializerBase"+"""
 {
 public:
     static std::string getContainerName() {return """+"\""+Namespace+"/"+CalssNameOrig+"\""+ """ ;}
 
     """
     if NeedsDefaultConstructor(Data):
-        ret=ret+ClassName+"() : PropertyContainer(\""+Namespace+"/"+CalssNameOrig+"\")"+DefaultConstructorList(Data)+"""
+        ret=ret+ClassName+"() : InitializerBase(\""+Namespace+"/"+CalssNameOrig+"\")"+DefaultConstructorList(Data)+"""
     {
         RegisterParams();
     }
 
     """
-    ret=ret+ClassName+"("+ConstructorArgumentList(Data)+") : PropertyContainer(\""+Namespace+"/"+CalssNameOrig+"\")"+ConstructorList(Data)+"""
+    ret=ret+ClassName+"("+ConstructorArgumentList(Data)+") : InitializerBase(\""+Namespace+"/"+CalssNameOrig+"\")"+ConstructorList(Data)+"""
     {
         RegisterParams();
     }
 
-    """+ClassName+"""(const PropertyContainer& other) : """+ClassName+"""()
+    """+ClassName+"""(const InitializerGeneric& other) : """+ClassName+"""()
     {
-        for(auto& param : properties_)
-        {
-            if(other.getProperties().find(param.first)!= other.getProperties().end())
-            {
-                // Copies over typeless PropertyElements using a virtual copyValue method
-                properties_[param.first]->copyValues(*other.getProperties().at(param.first));
-            }
-            else
-            {
-                if(properties_[param.first]->isRequired())
-                {
-                    HIGHLIGHT("You forgot to set parameter '"<<param.first<<"'! ("<<getContainerName()<<")");
-                    throw_pretty("Combining incompatible initializers!");
-                }
-            }
-        }
-        if(properties_.size()!=other.getProperties().size())
-        {
-            for(auto& param : other.getProperties())
-            {
-                if(properties_.find(param.first)== properties_.end())
-                {
-                    properties_[param.first]=param.second;
-                }
-            }
-        }
+        specialize(other);
     }
 
-    void RegisterParams()
+    operator InitializerGeneric() {return InitializerGeneric(*(InitializerBase*)this);}
+
+    virtual void RegisterParams()
     {
 """
     for d in Data:
         ret+=Register(d)
-    ret+="""    }
-
-    void RegisterParams("""+ClassName+"""& other)
-    {
-"""
-    for d in Data:
-        ret+=Copy(d)
-    ret+="""        RegisterParams();
+    ret+="""
     }
 
-    void RegisterParams(const """+ClassName+"""& other)
-    {
-"""
-    for d in Data:
-        ret+=Copy(d)
-    ret+="""        RegisterParams();
-    }
 """
     for d in Data:
         ret+=Declaration(d)
@@ -167,29 +136,24 @@ template<>
 class IsContainer<"""+ClassName+"""> : public virtual Containerable
 {
 public:
-    virtual bool isContainer() {return true;}
-    virtual bool isContainerVector() {return false; }
-    virtual PropertyContainer& getContainerTemplate()
+    virtual bool isContainer() const {return true;}
+    virtual bool isContainerVector() const {return false; }
+    virtual InitializerGeneric getContainerTemplate() const
     {
-        return value_template_;
+        return """+ClassName+"""();
     }
-protected:
-    """+ClassName+""" value_template_;
 };
 
 template<>
 class IsContainer<std::vector<"""+ClassName+""">> : public virtual Containerable
 {
 public:
-    virtual bool isContainer() {return false;}
-    virtual bool isContainerVector() {return true; }
-    virtual PropertyContainer& getContainerTemplate()
+    virtual bool isContainer() const {return false;}
+    virtual bool isContainerVector() const {return true; }
+    virtual InitializerGeneric getContainerTemplate() const
     {
-        value_template_.resize(1);
-        return value_template_[0];
+        return """+ClassName+"""();
     }
-protected:
-    std::vector<"""+ClassName+"""> value_template_;
 };
 
 }\n#endif"""

@@ -76,36 +76,36 @@ namespace exotica
       }
   }
 
-  void updateInitilizerTypes(PropertyContainer& init, std::map<std::string,std::vector<std::string>>& inits)
+  void updateInitilizerTypes(const InitializerGeneric& init, std::map<std::string,std::vector<std::string>>& inits)
   {
-      for(auto& p : init.getProperties())
+      for(auto& p : init.getManagedProperties())
       {
           std::string PropertyName = init.getName()+"/"+p.first;
-          if(p.second->isContainer())
+          if(p.second.get().isContainer())
           {
               std::vector<int> a;
 
               if(!contains(PropertyName,inits["exotica::PropertyContainer"]))
               {
                   inits["exotica::PropertyContainer"].push_back(PropertyName);
-                  PropertyContainer init_child = p.second->getContainerTemplate();
+                  InitializerGeneric init_child = p.second.get().getContainerTemplate();
                   updateInitilizerTypes(init_child,inits);
               }
           }
-          else if(p.second->isContainerVector())
+          else if(p.second.get().isContainerVector())
           {
               if(!contains(PropertyName,inits["std::vector<exotica::PropertyContainer>"]))
               {
                   inits["std::vector<exotica::PropertyContainer>"].push_back(PropertyName);
-                  PropertyContainer init_child = p.second->getContainerTemplate();
+                  InitializerGeneric init_child = p.second.get().getContainerTemplate();
                   updateInitilizerTypes(init_child,inits);
               }
           }
           else
           {
-              if(!contains(PropertyName,inits[p.second->getType()]))
+              if(!contains(PropertyName,inits[p.second.get().getType()]))
               {
-                inits[p.second->getType()].push_back(PropertyName);
+                inits[p.second.get().getType()].push_back(PropertyName);
               }
           }
       }
@@ -143,7 +143,7 @@ namespace exotica
          updateInitilizerTypes(ptr->getInitializerTemplate(),inits);
       }
 
-      SceneInitializer init;
+      InitializerGeneric init = SceneInitializer();
       updateInitilizerTypes(init,inits);
 
       return inits;

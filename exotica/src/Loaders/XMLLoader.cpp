@@ -35,7 +35,7 @@ namespace exotica
         return type=="std::vector<exotica::PropertyContainer>";
     }
 
-    bool parse(tinyxml2::XMLHandle& tag, PropertyContainer& parent, std::map<std::string,std::map<std::string,PropertyInfo>>& info);
+    bool parse(tinyxml2::XMLHandle& tag, InitializerGeneric& parent, std::map<std::string,std::map<std::string,PropertyInfo>>& info);
 
     boost::shared_ptr<PropertyElement> parseValue(const std::string type, const std::string name, const std::string value)
     {
@@ -67,38 +67,40 @@ namespace exotica
         return ret;
     }
 
-    void appendChild(PropertyContainer& parent, std::string& name, PropertyInfo& prop, bool isAttribute, tinyxml2::XMLHandle& tag, std::map<std::string,std::map<std::string,PropertyInfo>>& info)
+    void appendChild(InitializerGeneric& parent, std::string& name, PropertyInfo& prop, bool isAttribute, tinyxml2::XMLHandle& tag, std::map<std::string,std::map<std::string,PropertyInfo>>& info)
     {
+        //HIGHLIGHT("Adding property '"<<parent.getName()<<"/"<<name<<"'");
         if(isAttribute && (prop.IsContainer || prop.IsVectorContainer)) throw_pretty("Attributes can only be basic types! ("+parent.getName()+"/"+name+")");
         if(prop.IsContainer)
         {
 
             tinyxml2::XMLHandle child_tag(tag.FirstChildElement());
-            boost::shared_ptr<Property<PropertyContainer>> child(new Property<PropertyContainer>(prop.Type,name,true,PropertyContainer()));
-            if(parse(child_tag, child->getValue(),info))
+            Property<InitializerGeneric> child(prop.Type,name,true,InitializerGeneric());
+            if(parse(child_tag, child.getValue(),info))
             {
+                //HIGHLIGHT("Adding container '"<<child->getValue().getName()<<"'");
                 parent.addProperty(child);
             }
         }
         else if (prop.IsVectorContainer)
         {
-            std::vector<PropertyContainer> tmp_vec;
+            std::vector<InitializerGeneric> tmp_vec;
             tinyxml2::XMLHandle child_tag(tag.FirstChildElement());
             while(child_tag.ToElement())
             {
-                tmp_vec.push_back(PropertyContainer());
+                tmp_vec.push_back(InitializerGeneric("New"+name));
                 if(!parse(child_tag,tmp_vec[tmp_vec.size()-1],info))
                 {
                     tmp_vec.pop_back();
                 }
                 child_tag = child_tag.NextSiblingElement();
             }
-            boost::shared_ptr<PropertyElement> tmp(new Property<std::vector<PropertyContainer>>(prop.Type,name,true,tmp_vec));
+            Property<std::vector<InitializerGeneric>> tmp(prop.Type,name,true,tmp_vec);
             parent.addProperty(tmp);
         }
         else
         {
-            HIGHLIGHT("Parsing known property '"<<name<<"' of type '"<<prop.Type<<"' as child of '"<<parent.getName()<<"'");
+            //HIGHLIGHT("Parsing known property '"<<name<<"' of type '"<<prop.Type<<"' as child of '"<<parent.getName()<<"'");
             if(isAttribute)
             {
                 std::string value = tag.ToElement()->Attribute(name.c_str());
@@ -118,7 +120,7 @@ namespace exotica
         }
     }
 
-    bool parse(tinyxml2::XMLHandle& tag, PropertyContainer& parent, std::map<std::string,std::map<std::string,PropertyInfo>>& info)
+    bool parse(tinyxml2::XMLHandle& tag, InitializerGeneric& parent, std::map<std::string,std::map<std::string,PropertyInfo>>& info)
     {
         std::string name = std::string(tag.ToElement()->Name());
         if(info.find(name)!=info.end())
@@ -164,7 +166,7 @@ namespace exotica
         }
     }
 
-    void XMLLoader::loadXML(std::string file_name, PropertyContainer& solver, PropertyContainer& problem, const std::string& solver_name, const std::string& problem_name)
+    void XMLLoader::loadXML(std::string file_name, InitializerGeneric& solver, InitializerGeneric& problem, const std::string& solver_name, const std::string& problem_name)
     {
         std::map<std::string,std::vector<std::string>> inits = Initialiser::Instance()->getInitilizerTypes();
         std::map<std::string,std::map<std::string,PropertyInfo>> info;
@@ -194,11 +196,11 @@ namespace exotica
           throw_pretty("Can't load file!");
         }
 
-        std::vector<PropertyContainer> initializers;
+        std::vector<InitializerGeneric> initializers;
         tinyxml2::XMLHandle root_tag(xml_file.RootElement()->FirstChildElement());
         while (root_tag.ToElement())
         {
-            initializers.push_back(PropertyContainer());
+            initializers.push_back(InitializerGeneric("TopLevel"));
             if(!parse(root_tag,initializers[initializers.size()-1], info))
             {
                 initializers.pop_back();
@@ -207,7 +209,7 @@ namespace exotica
         }
         bool foundSolver = false;
         bool foundProblem = false;
-        for(PropertyContainer& i : initializers)
+        for(InitializerGeneric& i : initializers)
         {
             std::string name;
             getProperty("Name",i,name);

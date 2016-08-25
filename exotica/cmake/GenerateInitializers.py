@@ -61,21 +61,22 @@ def Declaration(Data):
     else:
       return ""
 
+
 def Copy(Data):
     if Data.has_key('Required'):
-      return "        "+Data['Name']+" = other."+Data['Name']+";\n"
+      return "        propertiesManaged_.emplace(\""+Data['Name']+"\", "+Data['Name']+".getCopy());\n"
     else:
       return ""
 
 def Add(Data):
     if Data.has_key('Required'):
-      return "       boost::shared_ptr<Property<"+Data['Type']+">> "+Data['Name']+"_tmp(new Property<"+Data['Type']+">("+Data['Name']+")); other.addProperty("+Data['Name']+"_tmp);\n"
+      return "        if(propertiesManaged_.find(\""+Data['Name']+"\")!=propertiesManaged_.end()) convertValues<"+Data['Type']+">::get("+Data['Name']+",propertiesManaged_.at(\""+Data['Name']+"\"));\n"
     else:
       return ""
 
-def Register(Data):
-    if Data.has_key('Required'):
-      return "        properties_.emplace(\""+Data['Name']+"\", PropertyReferenceMember(this, &"+Data['Name']+"));\n"
+def Check(Data, Name):
+    if Data.has_key('Required') and Data['Required']:
+      return "        if(!"+Data['Name']+".isSet()) throw_pretty(\"Initializer "+Name+" requires property "+Data['Name']+" to be set!\");\n"
     else:
       return ""
 
@@ -103,28 +104,40 @@ public:
     if NeedsDefaultConstructor(Data):
         ret=ret+ClassName+"() : InitializerBase(\""+Namespace+"/"+CalssNameOrig+"\")"+DefaultConstructorList(Data)+"""
     {
-        RegisterParams();
     }
 
     """
     ret=ret+ClassName+"("+ConstructorArgumentList(Data)+") : InitializerBase(\""+Namespace+"/"+CalssNameOrig+"\")"+ConstructorList(Data)+"""
     {
-        RegisterParams();
     }
 
     """+ClassName+"""(const InitializerGeneric& other) : """+ClassName+"""()
     {
-        specialize(other);
+        HIGHLIGHT("Specializing """+ClassName+""" ");
+        propertiesManaged_ = other.getManagedProperties();
+"""
+    for d in Data:
+        ret+=Add(d)
+    ret+="""
     }
 
-    operator InitializerGeneric() {return InitializerGeneric(*(InitializerBase*)this);}
-
-    virtual void RegisterParams()
+    virtual void check() const
     {
 """
     for d in Data:
-        ret+=Register(d)
+        ret+=Check(d,ClassName)
     ret+="""
+    }
+
+    operator InitializerGeneric()
+    {
+"""
+    for d in Data:
+        ret+=Copy(d)
+    ret+="""
+        InitializerGeneric ret(name_);
+        for(auto& p : propertiesManaged_) ret.addProperty(p.second);
+        return ret;
     }
 
 """
@@ -153,6 +166,54 @@ public:
     virtual InitializerGeneric getContainerTemplate() const
     {
         return """+ClassName+"""();
+    }
+};
+
+template<>
+class convertValues<"""+ClassName+""">
+{
+public:
+    static void get(Property<"""+ClassName+""">& a, boost::shared_ptr<PropertyElement> b)
+    {
+        if(b->getType()==a.getType())
+        {
+            a=boost::static_pointer_cast<Property<"""+ClassName+""">>(b)->getValue();
+        }
+        else if(b->getType()=="exotica::InitializerGeneric")
+        {
+            HIGHLIGHT("Converting """+ClassName+""" ");
+            a="""+ClassName+"""(boost::static_pointer_cast<Property<InitializerGeneric>>(b)->getValue());
+        }
+        else
+        {
+            throw_pretty("Converting incompatible types: "+b->getType()+" to "+a.getType());
+        }
+    }
+};
+
+template<>
+class convertValues<std::vector<"""+ClassName+""">>
+{
+public:
+    static void get(Property<std::vector<"""+ClassName+""">>& a, boost::shared_ptr<PropertyElement> b)
+    {
+        if(b->getType()==a.getType())
+        {
+            a=boost::static_pointer_cast<Property<std::vector<"""+ClassName+""">>>(b)->getValue();
+        }
+        else if(b->getType()=="std::vector<exotica::InitializerGeneric>")
+        {
+            HIGHLIGHT("Converting std::vector<"""+ClassName+"""> ");
+            std::vector<"""+ClassName+"""> vec;
+            for(auto& p : boost::static_pointer_cast<Property<std::vector<exotica::InitializerGeneric>>>(b)->getValue())
+                vec.push_back("""+ClassName+"""(p));
+            a=vec;
+
+        }
+        else
+        {
+            throw_pretty("Converting incompatible types: "+b->getType()+" to "+a.getType());
+        }
     }
 };
 

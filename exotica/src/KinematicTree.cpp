@@ -92,6 +92,7 @@ exotica::KinematicTree & exotica::KinematicTree::operator=(
 
 void exotica::KinematicTree::Instantiate(const KinematicaInitializer& init, robot_model::RobotModelPtr model)
 {
+    init.check();
     exotica::SolutionForm_t solution;
     solution.root_segment = init.Root.getValue().Segment;
     solution.root_seg_off = getFrame(init.Root.getValue().Frame.getValue());

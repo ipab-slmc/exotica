@@ -17,10 +17,6 @@ void run()
 
     XMLLoader::load(file_name,solver, problem, solver_name, problem_name);
 
-    HIGHLIGHT_NAMED("XMLnode","Test");
-
-    IKProblemInitializer pr = problem;
-
     HIGHLIGHT_NAMED("XMLnode","Loaded from XML");
 
     // Initialize

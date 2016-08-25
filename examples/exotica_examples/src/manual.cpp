@@ -24,11 +24,10 @@ void run()
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
 
-    HIGHLIGHT_NAMED("ManualNode","Loaded manually");
-
     IKProblemInitializer problem("MyProblem",scene,{map},{task},1e-5,W);
     IKsolverInitializer solver("MySolver",false,1);
 
+    HIGHLIGHT_NAMED("ManualNode","Loaded manually");
     // Initialize
 
     PlanningProblem_ptr any_problem = Initialiser::createProblem(problem);

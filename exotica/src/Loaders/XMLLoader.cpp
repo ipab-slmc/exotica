@@ -22,7 +22,7 @@ namespace exotica
 
     inline bool IsContainerType(std::string type)
     {
-        return type=="exotica::PropertyContainer";
+        return type=="exotica::InitializerGeneric";
     }
 
     inline bool IsVectorType(std::string type)
@@ -32,10 +32,10 @@ namespace exotica
 
     inline bool IsVectorContainerType(std::string type)
     {
-        return type=="std::vector<exotica::PropertyContainer>";
+        return type=="std::vector<exotica::InitializerGeneric>";
     }
 
-    bool parse(tinyxml2::XMLHandle& tag, InitializerGeneric& parent, std::map<std::string,std::map<std::string,PropertyInfo>>& info);
+    bool parse(tinyxml2::XMLHandle& tag, InitializerGeneric& parent, std::map<std::string,std::map<std::string,PropertyInfo>>& info, const std::string& prefix);
 
     boost::shared_ptr<PropertyElement> parseValue(const std::string type, const std::string name, const std::string value)
     {
@@ -67,19 +67,23 @@ namespace exotica
         return ret;
     }
 
-    void appendChild(InitializerGeneric& parent, std::string& name, PropertyInfo& prop, bool isAttribute, tinyxml2::XMLHandle& tag, std::map<std::string,std::map<std::string,PropertyInfo>>& info)
+    void appendChild(InitializerGeneric& parent, std::string& name, PropertyInfo& prop, bool isAttribute, tinyxml2::XMLHandle& tag, std::map<std::string,std::map<std::string,PropertyInfo>>& info, const std::string& prefix)
     {
-        //HIGHLIGHT("Adding property '"<<parent.getName()<<"/"<<name<<"'");
         if(isAttribute && (prop.IsContainer || prop.IsVectorContainer)) throw_pretty("Attributes can only be basic types! ("+parent.getName()+"/"+name+")");
+        HIGHLIGHT(prefix<<"Adding "<<name<<" to " << parent.getName());
         if(prop.IsContainer)
         {
-
+            HIGHLIGHT(prefix<<". Parsing container "<<name<<" (" << parent.getName()<<")");
             tinyxml2::XMLHandle child_tag(tag.FirstChildElement());
-            Property<InitializerGeneric> child(prop.Type,name,true,InitializerGeneric());
-            if(parse(child_tag, child.getValue(),info))
+            InitializerGeneric tmp;
+            if(parse(child_tag,tmp,info,prefix+"- "))
             {
-                //HIGHLIGHT("Adding container '"<<child->getValue().getName()<<"'");
-                parent.addProperty(child);
+                HIGHLIGHT(prefix<<". Adding parsed "<<name<<" to " << parent.getName());
+                parent.addProperty(boost::shared_ptr<Property<InitializerGeneric>>(new Property<InitializerGeneric>(prop.Type,name,true,tmp)));
+            }
+            else
+            {
+                HIGHLIGHT(prefix<<". Failed to parse "<<name<<" (" << parent.getName()<<")");
             }
         }
         else if (prop.IsVectorContainer)
@@ -89,18 +93,22 @@ namespace exotica
             while(child_tag.ToElement())
             {
                 tmp_vec.push_back(InitializerGeneric("New"+name));
-                if(!parse(child_tag,tmp_vec[tmp_vec.size()-1],info))
+                if(!parse(child_tag,tmp_vec[tmp_vec.size()-1],info,prefix+"- "))
                 {
                     tmp_vec.pop_back();
                 }
+                else
+                {
+                    HIGHLIGHT(prefix<<". Adding parsed vector element "<<name<<" to " << parent.getName());
+                }
                 child_tag = child_tag.NextSiblingElement();
             }
-            Property<std::vector<InitializerGeneric>> tmp(prop.Type,name,true,tmp_vec);
-            parent.addProperty(tmp);
+            HIGHLIGHT(prefix<<". Adding parsed vector "<<name<<" to " << parent.getName());
+            parent.addProperty(boost::shared_ptr<Property<std::vector<InitializerGeneric>>>(new Property<std::vector<InitializerGeneric>>(prop.Type,name,true,tmp_vec)));
         }
         else
         {
-            //HIGHLIGHT("Parsing known property '"<<name<<"' of type '"<<prop.Type<<"' as child of '"<<parent.getName()<<"'");
+            HIGHLIGHT(prefix<<". Adding parsed value "<<name<<" to " << parent.getName());
             if(isAttribute)
             {
                 std::string value = tag.ToElement()->Attribute(name.c_str());
@@ -111,7 +119,7 @@ namespace exotica
                 std::string value;
                 if (!tag.ToElement()->GetText())
                 {
-                    throw_pretty("Can't get value!");
+                    throw_pretty("Can't get value! ("+name+")");
                 }
                 value = tag.ToElement()->GetText();
                 parent.addProperty(parseValue(prop.Type,name,value));
@@ -120,11 +128,12 @@ namespace exotica
         }
     }
 
-    bool parse(tinyxml2::XMLHandle& tag, InitializerGeneric& parent, std::map<std::string,std::map<std::string,PropertyInfo>>& info)
+    bool parse(tinyxml2::XMLHandle& tag, InitializerGeneric& parent, std::map<std::string,std::map<std::string,PropertyInfo>>& info, const std::string& prefix)
     {
         std::string name = std::string(tag.ToElement()->Name());
         if(info.find(name)!=info.end())
         {
+            HIGHLIGHT(prefix<<name<<" added");
             parent.setName("exotica/"+name);
             std::map<std::string,PropertyInfo>& members = info[name];
             tinyxml2::XMLAttribute* attr = const_cast<tinyxml2::XMLAttribute*>(tag.ToElement()->FirstAttribute());
@@ -133,7 +142,7 @@ namespace exotica
                 std::string member_name = attr->Name();
                 if(members.find(member_name)!=members.end())
                 {
-                    appendChild(parent,member_name,members.at(member_name),true,tag,info);
+                    appendChild(parent,member_name,members.at(member_name),true,tag,info,prefix+"- ");
                 }
                 else
                 {
@@ -148,7 +157,7 @@ namespace exotica
                 std::string member_name = std::string(member_tag.ToElement()->Name());
                 if(members.find(member_name)!=members.end())
                 {
-                    appendChild(parent,member_name,members.at(member_name),false,member_tag,info);
+                    appendChild(parent,member_name,members.at(member_name),false,member_tag,info,prefix+"- ");
                 }
                 else
                 {
@@ -157,6 +166,7 @@ namespace exotica
 
                 member_tag = member_tag.NextSiblingElement();
             }
+            HIGHLIGHT(prefix<<name<<" finished parsing");
             return true;
         }
         else
@@ -180,15 +190,15 @@ namespace exotica
                 info[name][member]=PropertyInfo(prop.first,IsContainerType(prop.first),IsVectorContainerType(prop.first));
             }
         }
-        /*
+
         for(auto& i : info)
         {
             HIGHLIGHT(i.first);
             for(auto& j : i.second)
             {
-                HIGHLIGHT(" - "<<j.first<<", "<<j.second.Type);
+                HIGHLIGHT(" - "<<j.first<<", "<<j.second.Type<<" "<<j.second.IsContainer<<" "<<j.second.IsVectorContainer);
             }
-        }*/
+        }
 
         tinyxml2::XMLDocument xml_file;
         if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
@@ -201,7 +211,7 @@ namespace exotica
         while (root_tag.ToElement())
         {
             initializers.push_back(InitializerGeneric("TopLevel"));
-            if(!parse(root_tag,initializers[initializers.size()-1], info))
+            if(!parse(root_tag,initializers[initializers.size()-1], info,""))
             {
                 initializers.pop_back();
             }

@@ -81,31 +81,31 @@ namespace exotica
       for(auto& p : init.getManagedProperties())
       {
           std::string PropertyName = init.getName()+"/"+p.first;
-          if(p.second.get().isContainer())
+          if(p.second->isContainer())
           {
               std::vector<int> a;
 
-              if(!contains(PropertyName,inits["exotica::PropertyContainer"]))
+              if(!contains(PropertyName,inits["exotica::InitializerGeneric"]))
               {
-                  inits["exotica::PropertyContainer"].push_back(PropertyName);
-                  InitializerGeneric init_child = p.second.get().getContainerTemplate();
+                  inits["exotica::InitializerGeneric"].push_back(PropertyName);
+                  InitializerGeneric init_child = p.second->getContainerTemplate();
                   updateInitilizerTypes(init_child,inits);
               }
           }
-          else if(p.second.get().isContainerVector())
+          else if(p.second->isContainerVector())
           {
-              if(!contains(PropertyName,inits["std::vector<exotica::PropertyContainer>"]))
+              if(!contains(PropertyName,inits["std::vector<exotica::InitializerGeneric>"]))
               {
-                  inits["std::vector<exotica::PropertyContainer>"].push_back(PropertyName);
-                  InitializerGeneric init_child = p.second.get().getContainerTemplate();
+                  inits["std::vector<exotica::InitializerGeneric>"].push_back(PropertyName);
+                  InitializerGeneric init_child = p.second->getContainerTemplate();
                   updateInitilizerTypes(init_child,inits);
               }
           }
           else
           {
-              if(!contains(PropertyName,inits[p.second.get().getType()]))
+              if(!contains(PropertyName,inits[p.second->getType()]))
               {
-                inits[p.second.get().getType()].push_back(PropertyName);
+                inits[p.second->getType()].push_back(PropertyName);
               }
           }
       }

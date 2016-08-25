@@ -120,7 +120,7 @@ namespace exotica
   {
       Object::InstatiateObject(init_);
       PlanningProblemInitializer init(init_);
-
+      init.check();
       poses.reset(new std::map<std::string, Eigen::VectorXd>());
       posesJointNames.reset(new std::vector<std::string>());
       knownMaps_["PositionConstraint"] = "Distance";
@@ -135,8 +135,13 @@ namespace exotica
 
       // Create the scene
       SceneInitializer initS(init.Scene.getValue());
+      initS.check();
+
+      InitializerGeneric g = initS;
+      SceneInitializer s =g;
+
       scene_.reset(new Scene(initS.Name));
-      scene_->InstantiateInternal(init.Scene.getValue());
+      scene_->InstantiateInternal(g);
 
       // Create the maps
       for(const InitializerGeneric& map : init.Maps.getValue())

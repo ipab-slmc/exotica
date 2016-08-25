@@ -9,13 +9,12 @@
 
   <node launch-prefix="$(arg launch_prefix)" pkg="exotica_examples" type="XMLInitialization" name="ExoticaXMLInitializationExampleNode" output="screen">
     <param name="ConfigurationFile" type="string" value="$(find exotica_examples)/resources/ik_solver_demo.xml" />
-    <param name="Solver" type="string" value="IKSolverDemo" />
-    <param name="Problem" type="string" value="IKSolverDemoProblem" />
+    <param name="Solver" type="string" value="MySolver" />
+    <param name="Problem" type="string" value="MyProblem" />
   </node>
 
-<!--
   <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find exotica_examples)/resources/rviz.rviz" />
 
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="ik_st_pub" />
--->
+
 </launch>

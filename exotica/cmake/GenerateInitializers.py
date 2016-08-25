@@ -113,7 +113,6 @@ public:
 
     """+ClassName+"""(const InitializerGeneric& other) : """+ClassName+"""()
     {
-        HIGHLIGHT("Specializing """+ClassName+""" ");
         propertiesManaged_ = other.getManagedProperties();
 """
     for d in Data:
@@ -181,7 +180,6 @@ public:
         }
         else if(b->getType()=="exotica::InitializerGeneric")
         {
-            HIGHLIGHT("Converting """+ClassName+""" ");
             a="""+ClassName+"""(boost::static_pointer_cast<Property<InitializerGeneric>>(b)->getValue());
         }
         else
@@ -203,7 +201,6 @@ public:
         }
         else if(b->getType()=="std::vector<exotica::InitializerGeneric>")
         {
-            HIGHLIGHT("Converting std::vector<"""+ClassName+"""> ");
             std::vector<"""+ClassName+"""> vec;
             for(auto& p : boost::static_pointer_cast<Property<std::vector<exotica::InitializerGeneric>>>(b)->getValue())
                 vec.push_back("""+ClassName+"""(p));

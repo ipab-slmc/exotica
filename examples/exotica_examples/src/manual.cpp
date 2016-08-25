@@ -27,7 +27,6 @@ void run()
     IKProblemInitializer problem("MyProblem",scene,{map},{task},1e-5,W);
     IKsolverInitializer solver("MySolver",false,1);
 
-    HIGHLIGHT_NAMED("ManualNode","Loaded manually");
     // Initialize
 
     PlanningProblem_ptr any_problem = Initialiser::createProblem(problem);

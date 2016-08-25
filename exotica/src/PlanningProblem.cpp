@@ -136,12 +136,8 @@ namespace exotica
       // Create the scene
       SceneInitializer initS(init.Scene.getValue());
       initS.check();
-
-      InitializerGeneric g = initS;
-      SceneInitializer s =g;
-
       scene_.reset(new Scene(initS.Name));
-      scene_->InstantiateInternal(g);
+      scene_->InstantiateInternal(initS);
 
       // Create the maps
       for(const InitializerGeneric& map : init.Maps.getValue())

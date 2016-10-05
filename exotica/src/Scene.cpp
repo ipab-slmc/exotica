@@ -378,10 +378,13 @@ namespace exotica
     stateCheckCnt_++;
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
-    ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
-    if (res.collision)
+    if (self)
     {
-      return false;
+      ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
+      if (res.collision)
+      {
+        return false;
+      }
     }
     req.contacts = false;
     if (dist > 0) req.distance = true;

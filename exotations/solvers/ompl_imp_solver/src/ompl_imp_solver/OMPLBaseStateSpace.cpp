@@ -54,6 +54,14 @@ namespace exotica
       margin_->data = 0.0;
       server->setParam(server->getName() + "/SafetyMargin", margin_);
     }
+    if (server->hasParam(server->getName() + "/SelfCollisionCheck"))
+      server->getParam(server->getName() + "/SelfCollisionCheck", self_collision_);
+    else
+    {
+      self_collision_.reset(new std_msgs::Bool());
+      self_collision_->data = false;
+      server->setParam(server->getName() + "/SelfCollisionCheck", self_collision_);
+    }
 
     HIGHLIGHT_NAMED("OMPLStateValidityChecker",
         "Safety Margin: " << margin_->data);
@@ -73,7 +81,7 @@ namespace exotica
         state, q);
     boost::mutex::scoped_lock lock(prob_->getLock());
     prob_->update(q, 0);
-    if (!prob_->getScene()->getCollisionScene()->isStateValid(0, margin_->data))
+    if (!prob_->getScene()->getCollisionScene()->isStateValid(self_collision_->data, margin_->data))
     {
       dist = -1;
       return false;

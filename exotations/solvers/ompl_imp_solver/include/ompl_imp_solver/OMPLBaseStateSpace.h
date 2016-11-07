@@ -74,6 +74,7 @@ namespace exotica
     protected:
       OMPLProblem_ptr prob_;
       EParam<std_msgs::Float64> margin_;
+      EParam<std_msgs::Bool> self_collision_;
   };
 
 } /* namespace exotica */

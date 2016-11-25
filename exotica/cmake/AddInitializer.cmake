@@ -4,7 +4,7 @@ set(_InitializerInputFiles)
 set(_InitializerOutputFiles)
 set(_InitializerCopyFiles)
 set(_InitializerScriptDir ${CMAKE_CURRENT_LIST_DIR})
-set(_InitializerSearchPaths ${CMAKE_INSTALL_PREFIX})
+set(_InitializerSearchPaths ${CMAKE_INSTALL_PREFIX}:${CATKIN_DEVEL_PREFIX})
 foreach(path ${CMAKE_PREFIX_PATH})
     set(_InitializerSearchPaths "${_InitializerSearchPaths}:${path}")
 endforeach()
@@ -19,6 +19,7 @@ macro(AddInitializer)
 endmacro(AddInitializer)
 
 macro(GenInitializers)
+include_directories(${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION})
 add_custom_command(
   OUTPUT ${_InitializerOutputFiles}
   COMMAND python ${_InitializerScriptDir}/GenerateInitializers.py exotica "${_InitializerSearchPaths}" ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION} ${_InitializerInputFiles} ${_InitializerOutputFiles}

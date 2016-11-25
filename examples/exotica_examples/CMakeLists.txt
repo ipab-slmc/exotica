@@ -4,6 +4,7 @@ project(exotica_examples)
 find_package(catkin REQUIRED COMPONENTS
   exotica
   sensor_msgs
+  ik_solver
 )
 
 catkin_package(

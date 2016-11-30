@@ -84,7 +84,7 @@ add_library(${PROJECT_NAME}
   src/Definitions/TaskTerminationCriterion.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${exotica_BINARY_DIR}/generated/Version.cpp)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

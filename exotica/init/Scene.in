@@ -1,4 +1,4 @@
-#include <exotica/KinematicaInitializer.h>
-#extends <exotica/Object>
-Required exotica::KinematicaInitializer Kinematica;
+include <exotica/KinematicaInitializer>
+extend <exotica/Object>
+Required exotica::Initializer Solver; # KinematicaInitializer
 Optional std::string PlanningMode = "Optimization";

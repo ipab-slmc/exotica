@@ -48,9 +48,9 @@ namespace exotica
 
   void TaskTerminationCriterion::Instantiate(TaskTerminationCriterionInitializer& init)
   {
-      rho0_(0) = (double)init.Rho;
+      rho0_(0) = init.Rho;
 
-      if(init.Goal.isSet())
+      if(init.Goal.rows()>0)
       {
           y_star0_ = init.Goal;
       }

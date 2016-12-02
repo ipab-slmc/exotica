@@ -116,11 +116,11 @@ namespace exotica
     }
   }
 
-  void PlanningProblem::InstantiateBase(const InitializerGeneric& init_)
+  void PlanningProblem::InstantiateBase(const Initializer& init_)
   {
       Object::InstatiateObject(init_);
       PlanningProblemInitializer init(init_);
-      init.check();
+      init.check(init_);
       poses.reset(new std::map<std::string, Eigen::VectorXd>());
       posesJointNames.reset(new std::vector<std::string>());
       knownMaps_["PositionConstraint"] = "Distance";
@@ -134,13 +134,13 @@ namespace exotica
       task_defs_.clear();
 
       // Create the scene
-      SceneInitializer initS(init.Scene.getValue());
-      initS.check();
+      SceneInitializer initS(init.PlanningScene);
+      initS.check(init.PlanningScene);
       scene_.reset(new Scene(initS.Name));
       scene_->InstantiateInternal(initS);
 
       // Create the maps
-      for(const InitializerGeneric& map : init.Maps.getValue())
+      for(const Initializer& map : init.Maps)
       {
           TaskMap_ptr temp_ptr = Initialiser::createMap(map);
           temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
@@ -152,16 +152,16 @@ namespace exotica
           temp_ptr->registerScene(scene_);
       }
 
-      if (init.Maps.getValue().size() == 0)
+      if (init.Maps.size() == 0)
       {
         HIGHLIGHT("No maps were defined!");
       }
 
       // Create the task definitions
-      for(const InitializerGeneric& task : init.Tasks.getValue())
+      for(const Initializer& task : init.Tasks)
       {
-          InitializerGeneric mapped_task(task);
-          mapped_task.addProperty(Property<TaskMap_map>("TaskMap_map","TaskMaps",true,task_maps_));
+          Initializer mapped_task(task);
+          mapped_task.addProperty(Property("TaskMaps",true,boost::any(task_maps_)));
           TaskDefinition_ptr temp_ptr = Initialiser::createDefinition(mapped_task);
           temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
           if (task_defs_.find(temp_ptr->getObjectName()) != task_defs_.end())
@@ -170,7 +170,7 @@ namespace exotica
           }
           task_defs_[temp_ptr->getObjectName()] = temp_ptr;
       }
-      if (init.Tasks.getValue().size() == 0)
+      if (init.Tasks.size() == 0)
       {
         HIGHLIGHT("No tasks were defined!");
       }

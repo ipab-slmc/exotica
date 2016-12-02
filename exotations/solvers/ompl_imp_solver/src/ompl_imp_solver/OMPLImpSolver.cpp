@@ -69,7 +69,7 @@ namespace exotica
     margin_=boost::any_cast<boost::shared_ptr<std_msgs::Float64>>(boost::shared_ptr<std_msgs::Float64>(new std_msgs::Float64()));
   }
 
-  void OMPLImpSolver::initialiseSolver(InitializerGeneric& init)
+  void OMPLImpSolver::initialiseSolver(Initializer& init)
   {
       OMPLsolverInitializer prop = (OMPLsolverInitializer&)init;
       range_ = prop.Range;

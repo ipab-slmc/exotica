@@ -1,5 +1,4 @@
-#include <Eigen/Dense>
-#extends <exotica/TaskMap>
+extend <exotica/TaskMap>
 Required int DMeshSize;
 Required std::vector<std::string> DMeshLinks;
 Required std::vector<bool> DMeshLinkTypes;

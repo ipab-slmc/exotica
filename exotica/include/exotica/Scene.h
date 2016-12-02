@@ -232,7 +232,7 @@ namespace exotica
   typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
 
 ///	The class of EXOTica Scene
-  class Scene: public Object, Uncopyable, public InstantiableFinal<SceneInitializer>
+  class Scene: public Object, Uncopyable, public Instantiable<SceneInitializer>
   {
     public:
       /**

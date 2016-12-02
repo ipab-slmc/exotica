@@ -61,13 +61,12 @@ namespace exotica
       object_name_ = name + std::to_string((unsigned long) this);
   }
 
-  void TaskDefinition::InstantiateBase(const InitializerGeneric& init_)
+  void TaskDefinition::InstantiateBase(const Initializer& init_)
   {
       Object::InstatiateObject(init_);
       TaskDefinitionInitializer init(init_);
-      TaskMap_map maps;
-      getProperty("TaskMaps", init_, maps);
-      setTaskMap(maps.at(init.Map.getValue()));
+      TaskMap_map maps = boost::any_cast<TaskMap_map>(init_.getProperty("TaskMaps"));
+      setTaskMap(maps.at(init.Map));
   }
 
   void TaskDefinition::initBase(tinyxml2::XMLHandle & handle,

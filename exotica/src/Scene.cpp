@@ -622,7 +622,9 @@ namespace exotica
   {
 
       server_->getModel("robot_description", model_);
-      kinematica_.Instantiate(init.Kinematica.getValue(), model_);
+      KinematicaInitializer kinit(init.Solver);
+      kinit.check(init.Solver);
+      kinematica_.Instantiate(kinit, model_);
 
       std::string base_type = kinematica_.getBaseType();
       if (base_type=="fixed")

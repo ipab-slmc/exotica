@@ -196,7 +196,7 @@ namespace exotica
           throw_named("Unsupported OMPL problem type!");
       }
 
-      if(init.LocalPlannerConfig.isSet())
+      if(init.LocalPlannerConfig!="")
       {
           local_planner_config_ = init.LocalPlannerConfig;
       }

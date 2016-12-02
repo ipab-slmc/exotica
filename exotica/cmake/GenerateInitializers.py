@@ -1,6 +1,10 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import sys
 import os
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 def eprint(msg):
     sys.stderr.write(msg+'\n')
@@ -17,7 +21,7 @@ def ConstructorList(Data):
     ret=""
     for d in Data:
         if d.has_key('Required'):
-            ret+=",\n        "+d['Name']+"(\""+d['Type']+"\", \""+d['Name']+"\", "+IsRequired(d)+", "+d['Name']+"_) "
+            ret+=",\n        "+d['Name']+"("+d['Name']+"_) "
     return ret
 
 def DefaultValue(Data):
@@ -26,7 +30,7 @@ def DefaultValue(Data):
     elif Data['Value']=='{}':
         return ""
     else:
-        return ", "+Data['Value']
+        return Data['Value']
 
 def DefaultArgumentValue(Data):
     if Data['Value']==None:
@@ -45,8 +49,8 @@ def IsRequired(Data):
 def DefaultConstructorList(Data):
     ret=""
     for d in Data:
-        if d.has_key('Required'):
-            ret+=",\n        "+d['Name']+"(\""+d['Type']+"\", \""+d['Name']+"\", "+IsRequired(d)+DefaultValue(d)+") "
+        if d.has_key('Required') and not d['Required']:
+            ret+=",\n        "+d['Name']+"("+DefaultValue(d)+") "
     return ret
 
 def NeedsDefaultConstructor(Data):
@@ -57,28 +61,58 @@ def NeedsDefaultConstructor(Data):
 
 def Declaration(Data):
     if Data.has_key('Required'):
-      return "    Property<"+Data['Type']+"> "+Data['Name']+";\n"
+      return "    "+Data['Type']+" "+Data['Name']+";\n"
     else:
       return ""
+
+def Parser(Type):
+    parser=""
+    if Type=='std::string':
+        return "boost::any_cast<"+Type+">(prop.get())"
+    elif Type=='exotica::Initializer' or Type=='Initializer':
+        return "prop.isInitializerVectorType()?boost::any_cast<std::vector<exotica::Initializer>>(prop.get()).at(0):boost::any_cast<exotica::Initializer>(prop.get())"
+    elif Type=='std::vector<Initializer>' or Type=='std::vector<exotica::Initializer>':
+        return "boost::any_cast<std::vector<exotica::Initializer>>(prop.get())"
+    elif Type=='Eigen::VectorXd':
+        parser= "parseVector"
+    elif Type=='bool':
+        parser= "parseBool"
+    elif Type=='double':
+        parser= "parseDouble"
+    elif Type=='int':
+        parser= "parseInt"
+    elif Type=='std::vector<std::string>':
+        parser= "parseList"
+    elif Type=='std::vector<int>':
+        parser= "parseIntList"
+    elif Type=='std::vector<bool>':
+        parser= "parseBoolList"
+    else:
+        eprint("Unknown data type '"+Type+"'")
+        sys.exit(2)
+
+    return "prop.isStringType()?"+parser+"(boost::any_cast<std::string>(prop.get())):boost::any_cast<"+Type+">(prop.get())"
 
 
 def Copy(Data):
     if Data.has_key('Required'):
-      return "        propertiesManaged_.emplace(\""+Data['Name']+"\", "+Data['Name']+".getCopy());\n"
+      return "        ret.properties.emplace(\""+Data['Name']+"\", Property(\""+Data['Name']+"\", "+IsRequired(Data)+", boost::any("+Data['Name']+")));\n"
     else:
       return ""
 
 def Add(Data):
     if Data.has_key('Required'):
-      return "        if(propertiesManaged_.find(\""+Data['Name']+"\")!=propertiesManaged_.end()) convertValues<"+Data['Type']+">::get("+Data['Name']+",propertiesManaged_.at(\""+Data['Name']+"\"));\n"
+      return "        if (other.hasProperty(\""+Data['Name']+"\")) {const Property& prop=other.properties.at(\""+Data['Name']+"\"); if(prop.isSet()) "+Data['Name']+" = "+Parser(Data['Type'])+";}\n"
     else:
       return ""
 
 def Check(Data, Name):
     if Data.has_key('Required') and Data['Required']:
-      return "        if(!"+Data['Name']+".isSet()) throw_pretty(\"Initializer "+Name+" requires property "+Data['Name']+" to be set!\");\n"
+      return "        if(!other.hasProperty(\""+Data['Name']+"\") || !other.properties.at(\""+Data['Name']+"\").isSet()) throw_pretty(\"Initializer "+Name+" requires property "+Data['Name']+" to be set!\");\n"
     else:
       return ""
+
+
 
 def Construct(Namespace, ClassName, Data,Include):
     CalssNameOrig=ClassName[0:-11]
@@ -89,7 +123,7 @@ def Construct(Namespace, ClassName, Data,Include):
 #include "exotica/Property.h"
 """
     for i in Include:
-        ret+=i+"\n"
+        ret+="#include <"+i+".h>\n"
     ret+="""
 
 namespace """ +Namespace+ """
@@ -102,25 +136,29 @@ public:
 
     """
     if NeedsDefaultConstructor(Data):
-        ret=ret+ClassName+"() : InitializerBase(\""+Namespace+"/"+CalssNameOrig+"\")"+DefaultConstructorList(Data)+"""
+        ret=ret+ClassName+"() : InitializerBase()"+DefaultConstructorList(Data)+"""
     {
     }
 
     """
-    ret=ret+ClassName+"("+ConstructorArgumentList(Data)+") : InitializerBase(\""+Namespace+"/"+CalssNameOrig+"\")"+ConstructorList(Data)+"""
+    ret=ret+ClassName+"("+ConstructorArgumentList(Data)+") : InitializerBase()"+ConstructorList(Data)+"""
     {
     }
 
-    """+ClassName+"""(const InitializerGeneric& other) : """+ClassName+"""()
+    """+ClassName+"""(const Initializer& other) : """+ClassName+"""()
     {
-        propertiesManaged_ = other.getManagedProperties();
 """
     for d in Data:
         ret+=Add(d)
     ret+="""
     }
 
-    virtual void check() const
+    virtual Initializer getTemplate() const
+    {
+        return (Initializer)"""+ClassName+"""();
+    }
+
+    virtual void check(const Initializer& other) const
     {
 """
     for d in Data:
@@ -128,14 +166,14 @@ public:
     ret+="""
     }
 
-    operator InitializerGeneric()
+    operator Initializer()
     {
+        Initializer ret(getContainerName());
 """
     for d in Data:
         ret+=Copy(d)
     ret+="""
-        InitializerGeneric ret(name_);
-        for(auto& p : propertiesManaged_) ret.addProperty(p.second);
+
         return ret;
     }
 
@@ -143,76 +181,6 @@ public:
     for d in Data:
         ret+=Declaration(d)
     ret+="};"+"""
-
-template<>
-class IsContainer<"""+ClassName+"""> : public virtual Containerable
-{
-public:
-    virtual bool isContainer() const {return true;}
-    virtual bool isContainerVector() const {return false; }
-    virtual InitializerGeneric getContainerTemplate() const
-    {
-        return """+ClassName+"""();
-    }
-};
-
-template<>
-class IsContainer<std::vector<"""+ClassName+""">> : public virtual Containerable
-{
-public:
-    virtual bool isContainer() const {return false;}
-    virtual bool isContainerVector() const {return true; }
-    virtual InitializerGeneric getContainerTemplate() const
-    {
-        return """+ClassName+"""();
-    }
-};
-
-template<>
-class convertValues<"""+ClassName+""">
-{
-public:
-    static void get(Property<"""+ClassName+""">& a, boost::shared_ptr<PropertyElement> b)
-    {
-        if(b->getType()==a.getType())
-        {
-            a=boost::static_pointer_cast<Property<"""+ClassName+""">>(b)->getValue();
-        }
-        else if(b->getType()=="exotica::InitializerGeneric")
-        {
-            a="""+ClassName+"""(boost::static_pointer_cast<Property<InitializerGeneric>>(b)->getValue());
-        }
-        else
-        {
-            throw_pretty("Converting incompatible types: "+b->getType()+" to "+a.getType());
-        }
-    }
-};
-
-template<>
-class convertValues<std::vector<"""+ClassName+""">>
-{
-public:
-    static void get(Property<std::vector<"""+ClassName+""">>& a, boost::shared_ptr<PropertyElement> b)
-    {
-        if(b->getType()==a.getType())
-        {
-            a=boost::static_pointer_cast<Property<std::vector<"""+ClassName+""">>>(b)->getValue();
-        }
-        else if(b->getType()=="std::vector<exotica::InitializerGeneric>")
-        {
-            std::vector<"""+ClassName+"""> vec;
-            for(auto& p : boost::static_pointer_cast<Property<std::vector<exotica::InitializerGeneric>>>(b)->getValue())
-                vec.push_back("""+ClassName+"""(p));
-            a=vec;
-
-        }
-        else
-        {
-            throw_pretty("Converting incompatible types: "+b->getType()+" to "+a.getType());
-        }
-    }
-};
 
 }\n#endif"""
     return ret
@@ -231,13 +199,13 @@ def ParseLine(line, ln, fn):
     if len(line)==0:
         return None
 
-    if line.startswith("#include"):
-        return {'Include':line[8:].strip().strip(">").strip("<").strip('"'), 'Code':line.strip()}
-    if line.startswith("#extends"):
-        return {'Extends':line[8:].strip().strip(">").strip("<").strip('"'), 'Code':line.strip()}
+    if line.startswith("include"):
+        return {'Include':line[7:].strip().strip(">").strip("<").strip('"'), 'Code':line.strip()}
+    if line.startswith("extend"):
+        return {'Extends':line[6:].strip().strip(">").strip("<").strip('"'), 'Code':line.strip()}
 
     if last==-1:
-        print "Can't find ';' in '"+fn+"', on line " + `ln`
+        eprint("Can't find ';' in '"+fn+"', on line " + `ln`)
         sys.exit(2)
 
     required = True
@@ -246,7 +214,7 @@ def ParseLine(line, ln, fn):
     elif line.startswith("Optional"):
         required = False
     else:
-        print "Can't parse 'Required/Optional' tag in '"+fn+"', on line " + `ln`
+        eprint("Can't parse 'Required/Optional' tag in '"+fn+"', on line " + `ln`)
         sys.exit(2)
 
     value = None
@@ -286,11 +254,11 @@ def ParseFile(filename):
                     optionalOnly=True
                 else:
                     if optionalOnly:
-                        print "Required properties have to come before Optional ones, in '"+filename+"', on line " + `i`
+                        eprint("Required properties have to come before Optional ones, in '"+filename+"', on line " + `i`)
                         sys.exit(2)
                 Data.append(d)
             if d.has_key('Include'):
-                Include.append(d['Code'])
+                Include.append(d['Include'])
             if d.has_key('Extends'):
                 Extends.append(d['Extends'])
     return {"Data":Data,"Include":Include,"Extends":Extends}
@@ -334,7 +302,7 @@ def CollectExtensions(Input,SearchDirs,Content,ClassName):
       for d in content['Data']:
           cls = ContainsData(d['Type'],d['Name'],Content['Data'])
           if cls:
-              print "Property '"+d['Type']+" "+d['Name']+" in "+Input+" hides the parent's ("+cls+") property with the same id."
+              eprint("Property '"+d['Type']+" "+d['Name']+" in "+Input+" hides the parent's ("+cls+") property with the same id.")
               sys.exit(2)
           else:
               d['Class']=ClassName
@@ -355,7 +323,7 @@ def SortData(Data):
             b.append(d)
     return a+b
 def Generate(Input, Output, Namespace, ClassName,SearchDirs,DevelDir):
-    print "Generating "+Output
+    print("Generating "+Output)
     content = CollectExtensions(Input,SearchDirs,{'Data':[],'Include':[],'Extends':[]},ClassName)
     txt=Construct(Namespace,ClassName+"Initializer",SortData(content["Data"]),content["Include"])
     dir=os.path.dirname(Output)
@@ -371,7 +339,7 @@ if __name__ == "__main__":
         n=(len(sys.argv)-offset)/2
         Namespace=sys.argv[1]
         SearchDirs=sys.argv[2].split(':')
-        print SearchDirs
+        print(SearchDirs)
         DevelDir=sys.argv[3]
         if not os.path.exists(DevelDir+'/init'):
             os.makedirs(DevelDir+'/init')
@@ -389,5 +357,5 @@ if __name__ == "__main__":
             ClassName = os.path.basename(sys.argv[offset+i][0:-3])
             Generate(Input,Output,Namespace,ClassName,SearchDirs,DevelDir)
     else:
-      print "Initializer generation failure: invalid arguments!"
+      eprint("Initializer generation failure: invalid arguments!")
       sys.exit(1)

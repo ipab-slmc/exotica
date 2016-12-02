@@ -1,1 +1,1 @@
-#extends <exotica/Object>
+extend <exotica/Object>

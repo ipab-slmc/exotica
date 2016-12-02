@@ -1,3 +1,2 @@
-#include <kdl/tree.hpp>
 Required std::string Segment;
 Optional Eigen::VectorXd Frame = Eigen::IdentityTransform();

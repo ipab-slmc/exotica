@@ -1,2 +1,2 @@
-#extends <exotica/TaskMap>
+extend <exotica/TaskMap>
 Required double SafePercentage;

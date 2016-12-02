@@ -3,90 +3,78 @@
 namespace exotica
 {
 
-// //////////////////////////// InitializerGeneric ///////////////////////////////////
+// //////////////////////////////// Property //////////////////////////////////////
 
-InitializerGeneric::InitializerGeneric() : InitializerBase("") {}
-InitializerGeneric::InitializerGeneric(const std::string& name) : InitializerBase(name) {}
+boost::any Property::get() const {return value;}
+template<typename C> void Property::set(const C val) {value = val;}
+Property::Property(std::string prop_name) : name(prop_name), required(true) {}
+Property::Property(std::string prop_name, bool isRequired) : name(prop_name), required(isRequired) {}
+Property::Property(std::string prop_name, bool isRequired, boost::any val) : name(prop_name), required(isRequired) {value = val;}
+bool Property::isRequired() const {return required;}
+bool Property::isSet() const {return !value.empty();}
+bool Property::isStringType() const {return value.type()==typeid(std::string);}
+bool Property::isInitializerVectorType() const {return value.type()==typeid(std::vector<exotica::Initializer>);}
+std::string Property::getName() const {return name;}
+std::string Property::getType() const {return value.type().name();}
+Property::Property(std::initializer_list<boost::any> val_)
+{
+    std::vector<boost::any> val(val_);
+    if(val.size()!=2 || val[0].type()!=typeid(std::string)) throw_pretty("Invalid property initialization!");
+    name = boost::any_cast<std::string>(val[0]);
+    value = val[1];
+}
 
 // //////////////////////////// InitializerBase ///////////////////////////////////
-
-
-InitializerBase::InitializerBase() : name_("") {}
-InitializerBase::InitializerBase(const std::string& name) : name_(name) {}
-
-void InitializerBase::check() const
+Initializer::Initializer()
 {
-    for(auto& p : propertiesManaged_)
+
+}
+
+Initializer::Initializer(std::string name_) : name(name_)
+{
+}
+
+Initializer::Initializer(std::string name_, std::map<std::string,boost::any> properties_) : name(name_)
+{
+    for(auto& prop : properties_)
     {
-        if(p.second->isRequired() && !p.second->isSet()) throw_pretty("Initializer "+name_+" requires property "+p.second->getName()+"to be set!");
+        properties.emplace(prop.first,Property(prop.first,true,prop.second));
     }
 }
 
-void InitializerBase::setName(const std::string& name)
+std::string Initializer::getName() const
 {
-    name_=name;
+    return name;
 }
 
-void InitializerBase::print(std::ostream& os) const
+void Initializer::addProperty(const Property& prop)
 {
-    os << "Container '" << name_ << "'\n";
+    properties.emplace(prop.getName(), prop);
 }
 
-std::string InitializerBase::getName() const
+bool Initializer::hasProperty(std::string name_) const
 {
-    return name_;
+    if(properties.find( name_ ) != properties.end())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
-void InitializerBase::addProperty(const PropertyElement& prop)
+boost::any Initializer::getProperty(std::string name_) const
 {
-    propertiesManaged_.emplace(prop.getName(), prop.getCopy());
+    return properties.at(name_).get();
 }
 
-void InitializerBase::addProperty(boost::shared_ptr<PropertyElement> prop)
+void Initializer::setName(std::string name_)
 {
-    propertiesManaged_.emplace(prop->getName(), prop);
+    name = name_;
 }
 
-const std::map<std::string, boost::shared_ptr<PropertyElement>>& InitializerBase::getManagedProperties() const
-{
-    return propertiesManaged_;
-}
 
-std::map<std::string, boost::shared_ptr<PropertyElement>>& InitializerBase::getManagedProperties()
-{
-    return propertiesManaged_;
-}
-
-// //////////////////////////// PropertyElement ///////////////////////////////////
-
-PropertyElement::PropertyElement()
-{
-
-}
-
-PropertyElement::PropertyElement(bool isSet, bool isRequired,const std::string type, const std::string name)
-    : isSet_(isSet),isRequired_(isRequired), type_(type), name_(name) {}
-
-std::string PropertyElement::getKnownType() const
-{
-    return type_;
-}
-
-bool PropertyElement::isSet() const {return isSet_;}
-bool PropertyElement::isRequired() const {return isRequired_;}
-std::string PropertyElement::getType() const {return type_;}
-std::string PropertyElement::getName() const {return name_;}
-
-void PropertyElement::print(std::ostream& os) const
-{
-    os << "Property '" << name_ << "': type '" << type_ << "', " << (isSet_?"Set, ":"Unset, ") << (isRequired_?"Required":"Optional");
-}
-
-// //////////////////////////// Containerable ///////////////////////////////////
-
-bool Containerable::isContainer() const {return false;}
-bool Containerable::isContainerVector() const {return false;}
-InitializerGeneric Containerable::getContainerTemplate() const {return InitializerGeneric();}
 
 }
 

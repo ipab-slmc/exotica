@@ -57,7 +57,7 @@ namespace exotica
       {
       }
 
-      virtual void InstantiateBase(const InitializerGeneric& init);
+      virtual void InstantiateBase(const Initializer& init);
 
       /**
        * \brief Base initialiser: Currently simply calls the derived method

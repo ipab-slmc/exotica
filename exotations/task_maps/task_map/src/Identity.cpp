@@ -171,10 +171,10 @@ namespace exotica
 
   void Identity::Instantiate(IdentityInitializer& init)
   {
-      if(init.JointRef.isSet())
+      if(init.JointRef.rows()>0)
       {
           jointRef = init.JointRef;
-          if(init.JointMap.isSet())
+          if(init.JointMap.size()>0)
           {
               jointMap = init.JointMap;
               if(jointMap.size()!=jointRef.rows()) throw_named("Incorrect joint map size!");

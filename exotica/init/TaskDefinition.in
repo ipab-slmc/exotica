@@ -1,2 +1,2 @@
-#extends <exotica/Object>
+extend <exotica/Object>
 Required std::string Map;

@@ -130,6 +130,7 @@ namespace exotica
 //      it.second->activateTaskMaps();
 //    }
     prob_->getScene()->activateTaskMaps();
+    HIGHLIGHT(prob_->getW());
 
     T = prob_->getT();
     int big_size = 0;
@@ -385,14 +386,14 @@ namespace exotica
       bool found = false;
       maxdim_ = 0;
 
-      for (int i = 0; i < parameters_.MaxIt.getValue(); i++)
+      for (int i = 0; i < parameters_.MaxIt; i++)
       {
         prob_->update(solution.row(0), t);
         vel_solve(error, t, solution.row(0));
         double max_vel = vel_vec_.cwiseAbs().maxCoeff();
-        if (max_vel > parameters_.MaxStep.getValue())
+        if (max_vel > parameters_.MaxStep)
         {
-            vel_vec_ = vel_vec_ * parameters_.MaxStep.getValue() / max_vel;
+            vel_vec_ = vel_vec_ * parameters_.MaxStep / max_vel;
         }
 
         for (int j=0;j<q0.rows();j++)
@@ -425,7 +426,7 @@ namespace exotica
 
       if (!found)
       {
-        iterations_=  parameters_.MaxIt.getValue();
+        iterations_=  parameters_.MaxIt;
         return false;
       }
       return true;
@@ -452,7 +453,7 @@ namespace exotica
       bool found = false;
       maxdim_ = 0;
       int i = 0;
-      for (i = 0; i < parameters_.MaxIt.getValue(); i++)
+      for (i = 0; i < parameters_.MaxIt; i++)
       {
         prob_->update(solution.row(0), t);
           vel_solve(error, t, solution.row(0));
@@ -461,9 +462,9 @@ namespace exotica
             throw_named("Invalid velocity vector!");
           }
           double max_vel = vel_vec_.cwiseAbs().maxCoeff();
-          if (max_vel > parameters_.MaxStep.getValue())
+          if (max_vel > parameters_.MaxStep)
           {
-            vel_vec_ = vel_vec_ * parameters_.MaxStep.getValue() / max_vel;
+            vel_vec_ = vel_vec_ * parameters_.MaxStep / max_vel;
           }
           solution.row(0) = solution.row(0) + vel_vec_.transpose();
           tmp.row(i + 1) = solution.row(0);
@@ -477,7 +478,7 @@ namespace exotica
           {
             double change =
                 (tmp.row(i + 1) - tmp.row(i - 1)).cwiseAbs().maxCoeff();
-            if (change < .5 * parameters_.MaxStep.getValue())
+            if (change < .5 * parameters_.MaxStep)
             {
               WARNING_NAMED(object_name_,
                   "Running into local minima with velocity "<<change);
@@ -551,7 +552,7 @@ namespace exotica
 
       }
       err = (task_error*C*task_error.transpose())(0);
-      if (!parameters_.MultiTaskMode.getValue())
+      if (!parameters_.MultiTaskMode)
       {
         // Compute velocity
         Eigen::MatrixXd Jpinv;

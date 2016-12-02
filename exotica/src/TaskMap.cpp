@@ -136,7 +136,7 @@ namespace exotica
     }
   }
 
-  void TaskMap::InstantiateBase(const InitializerGeneric& init)
+  void TaskMap::InstantiateBase(const Initializer& init)
   {
     Object::InstatiateObject(init);
     TaskMapInitializer tminit(init);
@@ -146,11 +146,11 @@ namespace exotica
 
     scene_name_ = tminit.Scene;
 
-    std::vector<LimbInitializer> limbs = tminit.EndEffector;
-    for(LimbInitializer& limb : limbs)
+    for(Initializer& eff : tminit.EndEffector)
     {
+        LimbInitializer limb(eff);
         tmp_eff.push_back(limb.Segment);
-        tmp_offset.push_back(getFrame(limb.Frame.getValue()));
+        tmp_offset.push_back(getFrame(limb.Frame));
     }
 
   }

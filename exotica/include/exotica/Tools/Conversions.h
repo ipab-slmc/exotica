@@ -69,6 +69,21 @@ namespace Eigen
 
 namespace exotica
 {
+    inline bool IsContainerType(std::string type)
+    {
+        return type=="exotica::Initializer";
+    }
+
+    inline bool IsVectorType(std::string type)
+    {
+        return type.substr(0,11)=="std::vector";
+    }
+
+    inline bool IsVectorContainerType(std::string type)
+    {
+        return type=="std::vector<exotica::Initializer>";
+    }
+
     KDL::Frame getFrame(Eigen::VectorXdRefConst val);
 
     bool contains(std::string key, const std::vector<std::string>& vec);
@@ -140,6 +155,46 @@ namespace exotica
         while (std::getline(ss, item, ','))
         {
             ret.push_back(trim(item));
+        }
+        if (ret.size() == 0) throw_pretty("Empty vector!");
+        return ret;
+    }
+
+    inline std::vector<int> parseIntList(const std::string value)
+    {
+        std::istringstream text_parser(value);
+        std::stringstream ss(value);
+        std::string item;
+        std::vector<int> ret;
+        while (std::getline(ss, item, ','))
+        {
+            int tmp;
+            text_parser >> tmp;
+            if ((text_parser.fail() || text_parser.bad()))
+            {
+                throw_pretty("Can't parse value!");
+            }
+            ret.push_back(tmp);
+        }
+        if (ret.size() == 0) throw_pretty("Empty vector!");
+        return ret;
+    }
+
+    inline std::vector<bool> parseBoolList(const std::string value)
+    {
+        std::istringstream text_parser(value);
+        std::stringstream ss(value);
+        std::string item;
+        std::vector<bool> ret;
+        while (std::getline(ss, item, ','))
+        {
+            bool tmp;
+            text_parser >> tmp;
+            if ((text_parser.fail() || text_parser.bad()))
+            {
+                throw_pretty("Can't parse value!");
+            }
+            ret.push_back(tmp);
         }
         if (ret.size() == 0) throw_pretty("Empty vector!");
         return ret;

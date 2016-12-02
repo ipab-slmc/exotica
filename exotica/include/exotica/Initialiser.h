@@ -70,27 +70,26 @@ namespace exotica
       static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->maps_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return Instance()->tasks_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->problems_.createInstance("exotica/"+type);}
-      static std::map<std::string,std::vector<std::string>> getInitilizerTypes();
 
-      static boost::shared_ptr<exotica::MotionSolver> createSolver(const InitializerGeneric& init)
+      static boost::shared_ptr<exotica::MotionSolver> createSolver(const Initializer& init)
       {
           boost::shared_ptr<exotica::MotionSolver> ret = Instance()->solvers_.createInstance(init.getName());
           ret->InstantiateInternal(init);
           return ret;
       }
-      static boost::shared_ptr<exotica::TaskMap> createMap(const InitializerGeneric& init)
+      static boost::shared_ptr<exotica::TaskMap> createMap(const Initializer& init)
       {
           boost::shared_ptr<exotica::TaskMap> ret = Instance()->maps_.createInstance(init.getName());
           ret->InstantiateInternal(init);
           return ret;
       }
-      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const InitializerGeneric& init)
+      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const Initializer& init)
       {
           boost::shared_ptr<exotica::TaskDefinition> ret = Instance()->tasks_.createInstance(init.getName());
           ret->InstantiateInternal(init);
           return ret;
       }
-      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const InitializerGeneric& init)
+      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const Initializer& init)
       {
           boost::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.createInstance(init.getName());
           ret->InstantiateInternal(init);

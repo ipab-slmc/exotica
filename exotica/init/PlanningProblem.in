@@ -1,5 +1,5 @@
-#include <exotica/SceneInitializer.h>
-#extends <exotica/Object>
-Required exotica::SceneInitializer Scene;
-Required std::vector<exotica::InitializerGeneric> Maps;
-Required std::vector<exotica::InitializerGeneric> Tasks;
+include <exotica/SceneInitializer>
+extend <exotica/Object>
+Required exotica::Initializer PlanningScene; # SceneInitializer
+Required std::vector<exotica::Initializer> Maps;
+Required std::vector<exotica::Initializer> Tasks;

@@ -158,8 +158,8 @@ namespace exotica
       Q_rate = init.Qrate;
       H_rate = init.Hrate;
       W_rate = init.Wrate;
-      W = Eigen::MatrixXd::Identity(init.W.getValue().rows(), init.W.getValue().rows());
-      W.diagonal() = init.W.getValue();
+      W = Eigen::MatrixXd::Identity(init.W.rows(), init.W.rows());
+      W.diagonal() = init.W;
 
       for (auto& task : task_defs_)
       {

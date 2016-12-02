@@ -92,14 +92,14 @@ exotica::KinematicTree & exotica::KinematicTree::operator=(
 
 void exotica::KinematicTree::Instantiate(const KinematicaInitializer& init, robot_model::RobotModelPtr model)
 {
-    init.check();
     exotica::SolutionForm_t solution;
-    solution.root_segment = init.Root.getValue().Segment;
-    solution.root_seg_off = getFrame(init.Root.getValue().Frame.getValue());
+    LimbInitializer root(init.Root);
+    solution.root_segment = root.Segment;
+    solution.root_seg_off = getFrame(root.Frame);
 
-    if (init.BaseType.getValue() == "floating")
+    if (init.BaseType == "floating")
         base_type_ = solution.base_type = init.BaseType;
-    else if (init.BaseType.getValue() == "planar")
+    else if (init.BaseType == "planar")
         base_type_ = solution.base_type = init.BaseType;
     else
         base_type_ = solution.base_type = "fixed";

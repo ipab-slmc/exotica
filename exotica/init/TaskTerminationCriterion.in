@@ -1,2 +1,2 @@
-#extends <exotica/TaskSqrError>
+extend <exotica/TaskSqrError>
 Required double Threshold;

@@ -35,7 +35,7 @@
 namespace exotica
 {
 
-  void MotionSolver::InstantiateBase(const InitializerGeneric& init)
+  void MotionSolver::InstantiateBase(const Initializer& init)
   {
     Object::InstatiateObject(init);
   }

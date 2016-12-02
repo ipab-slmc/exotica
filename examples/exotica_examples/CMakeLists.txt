@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
   sensor_msgs
   ik_solver
+  task_map
 )
 
 catkin_package(
@@ -23,13 +24,10 @@ target_link_libraries(ExoticaCore
 )
 
 add_executable(ManualInitialization src/manual.cpp)
+target_link_libraries(ManualInitialization ${catkin_LIBRARIES})
 
-target_link_libraries(ManualInitialization
-  ${catkin_LIBRARIES}
-)
+add_executable(GenericInitialization src/generic.cpp)
+target_link_libraries(GenericInitialization ${catkin_LIBRARIES})
 
 add_executable(XMLInitialization src/xml.cpp)
-
-target_link_libraries(XMLInitialization
-  ${catkin_LIBRARIES}
-)
+target_link_libraries(XMLInitialization ${catkin_LIBRARIES})

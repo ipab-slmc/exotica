@@ -14,4 +14,5 @@
   <depend>exotica</depend>
   <depend>sensor_msgs</depend>
   <depend>ik_solver</depend>
+  <depend>task_map</depend>
 </package>

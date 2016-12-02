@@ -31,6 +31,7 @@ void run()
 
     PlanningProblem_ptr any_problem = Initialiser::createProblem(problem);
     MotionSolver_ptr any_solver = Initialiser::createSolver(solver);
+
     // Assign the problem to the solver
     any_solver->specifyProblem(any_problem);
 

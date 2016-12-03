@@ -130,7 +130,6 @@ namespace exotica
 //      it.second->activateTaskMaps();
 //    }
     prob_->getScene()->activateTaskMaps();
-    HIGHLIGHT(prob_->getW());
 
     T = prob_->getT();
     int big_size = 0;

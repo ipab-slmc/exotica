@@ -163,8 +163,8 @@ namespace exotica
 
       for (auto& task : task_defs_)
       {
-        if (task.second->type()!="TaskSqrError")
-          throw_named("Task variable '" + task.first + "'' is not an squared error!");
+        if (task.second->type()!="exotica::TaskSqrError")
+          throw_named("Task variable '" + task.first + "' is not an squared error! ("+task.second->type()+")");
       }
       // Set number of time steps
       setTime(T);

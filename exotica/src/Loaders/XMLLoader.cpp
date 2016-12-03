@@ -94,7 +94,7 @@ namespace exotica
         tinyxml2::XMLDocument xml_file;
         if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
         {
-          throw_pretty("Can't load file!");
+          throw_pretty("Can't load file!\nFile: '"+file_name+"'");
         }
 
         std::vector<Initializer> initializers;

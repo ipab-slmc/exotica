@@ -223,9 +223,9 @@ namespace exotica
     int i = 0, cur_rows = 0;
     for (auto& task_ : prob_->getTaskDefinitions())
     {
-      if (task_.second->type().compare(std::string("TaskSqrError")) == 0)
+      if (task_.second->type()!="exotica::TaskSqrError")
       {
-        throw_named("Task variable " << task_.first << " is not an squared error!");
+        throw_named("Task variable " << task_.first << " is not an squared error! ("+task_.second->type()+")");
       }
       boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<
           TaskSqrError>(task_.second);
@@ -264,7 +264,6 @@ namespace exotica
   void AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init,
       Eigen::MatrixXd & solution)
   {
-    HIGHLIGHT_NAMED("AICO debug:\n", print(""))
     ros::Time startTime = ros::Time::now();
     ROS_WARN_STREAM("AICO: Setting up the solver");
     updateCount = 0;

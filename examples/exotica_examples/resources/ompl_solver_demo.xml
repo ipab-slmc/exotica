@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+
+  <OMPLsolver Name="MySolver">
+    <Algorithm>RRTConnect</Algorithm>
+    <Solver>OMPLImpSolver</Solver>
+  </OMPLsolver>
+
+  <OMPLProblem Name="MyProblem">
+
+    <PlanningScene>
+      <Scene Name="OMPLSolverDemoScene">
+        <PlanningMode>Sampling</PlanningMode>
+        <Solver>
+          <Kinematica>
+            <Root><Limb Segment="base"/></Root>
+            <Joints>
+              lwr_arm_0_joint,lwr_arm_1_joint,lwr_arm_2_joint,lwr_arm_3_joint,lwr_arm_4_joint,lwr_arm_5_joint,lwr_arm_6_joint
+            </Joints>
+          </Kinematica>
+        </Solver>
+      </Scene>
+    </PlanningScene>
+
+    <Maps>
+      <Identity Name="ConfigurationSpaceGoal">
+        <Scene>OMPLSolverDemoScene</Scene>
+      </Identity>
+    </Maps>
+
+    <Tasks> 
+      <TaskTerminationCriterion Name="OMPLSolverDemoTask">
+        <Map>ConfigurationSpaceGoal</Map>
+        <Rho>1.0</Rho>
+        <Threshold>1e-6</Threshold>
+      </TaskTerminationCriterion>
+    </Tasks>
+  </OMPLProblem>
+
+</PlannerDemoConfig>

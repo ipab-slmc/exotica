@@ -31,3 +31,6 @@ target_link_libraries(GenericInitialization ${catkin_LIBRARIES})
 
 add_executable(XMLInitialization src/xml.cpp)
 target_link_libraries(XMLInitialization ${catkin_LIBRARIES})
+
+add_executable(PlannerDemo src/planner.cpp)
+target_link_libraries(PlannerDemo ${catkin_LIBRARIES})

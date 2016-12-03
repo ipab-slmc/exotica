@@ -45,6 +45,8 @@ void run()
                             {"MaxIt",1},
                         });
 
+    HIGHLIGHT_NAMED("GenericLoader","Loaded from a hardcoded generic initializer.");
+
     // Initialize
 
     PlanningProblem_ptr any_problem = Initialiser::createProblem(problem);

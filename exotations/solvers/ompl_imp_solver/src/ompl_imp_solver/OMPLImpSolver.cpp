@@ -71,9 +71,12 @@ namespace exotica
 
   void OMPLImpSolver::initialiseSolver(Initializer& init)
   {
-      OMPLsolverInitializer prop = (OMPLsolverInitializer&)init;
+      OMPLsolverInitializer prop(init);
       range_ = prop.Range;
-      algorithm_ = "geometric::"+prop.Solver;
+      if(init.hasProperty("Algorithm"))
+      {
+        algorithm_ = "geometric::"+boost::any_cast<std::string>(init.getProperty("Algorithm"));
+      }
       object_name_=algorithm_;
 
       if (known_algorithms_.find(algorithm_) != known_algorithms_.end())

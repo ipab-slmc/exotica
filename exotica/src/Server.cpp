@@ -62,7 +62,7 @@ namespace exotica
       }
       else
       {
-        throw_pretty("Couldn't load the model!");
+        throw_pretty("Couldn't load the model at path " << path << "!");
       }
     }
   }

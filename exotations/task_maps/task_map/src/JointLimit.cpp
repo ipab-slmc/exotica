@@ -59,8 +59,17 @@ namespace exotica
     int size = jnts.size();
     low_limits_.resize(size);
     high_limits_.resize(size);
-    robot_model::RobotModelConstPtr model = server_->getModel(
-        "robot_description");
+
+    robot_model::RobotModelConstPtr model;
+    if (server_->hasParam("RobotDescription")) {
+      EParam<std_msgs::String> robot_description_param;
+      server_->getParam("RobotDescription", robot_description_param);
+      ROS_INFO_STREAM("Loading joint limits for robot_description at " << robot_description_param->data);
+      model = server_->getModel(robot_description_param->data);
+    } else {
+      model = server_->getModel("robot_description");
+    }
+
     for (int i = 0; i < jnts.size(); i++)
     {
       low_limits_(i) =

@@ -66,6 +66,11 @@ namespace exotica
       server_->getParam("RobotDescription", robot_description_param);
       ROS_INFO_STREAM("Loading joint limits for robot_description at " << robot_description_param->data);
       model = server_->getModel(robot_description_param->data);
+    } else if (server_->hasParam(server_->getName() + "/RobotDescription")) {
+      EParam<std_msgs::String> robot_description_param;
+      server_->getParam(server_->getName() + "/RobotDescription", robot_description_param);
+      ROS_INFO_STREAM("Loading joint limits for robot_description at " << robot_description_param->data);
+      model = server_->getModel(robot_description_param->data);
     } else {
       model = server_->getModel("robot_description");
     }

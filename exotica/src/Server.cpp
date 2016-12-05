@@ -169,7 +169,7 @@ namespace exotica
           tmp_handle.FirstChildElement("default").ToElement()->GetText();
       if (str.size() == 0)
       {
-        throw_pretty("Invalid srtring!");
+        throw_pretty("Invalid string!");
       }
       std_msgs::String ros_s;
       ros_s.data =

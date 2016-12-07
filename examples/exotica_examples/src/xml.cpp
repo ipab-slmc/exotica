@@ -9,12 +9,10 @@ void run()
 
     Initializer solver, problem;
 
-    std::string file_name, solver_name, problem_name;
+    std::string file_name;
     nh_.getParam("ConfigurationFile",file_name);
-    nh_.getParam("Solver",solver_name);
-    nh_.getParam("Problem",problem_name);
 
-    XMLLoader::load(file_name,solver, problem, solver_name, problem_name);
+    XMLLoader::load(file_name,solver, problem);
 
     HIGHLIGHT_NAMED("XMLnode","Loaded from XML");
 

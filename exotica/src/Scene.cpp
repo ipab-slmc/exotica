@@ -184,9 +184,26 @@ namespace exotica
       const std::vector<std::string> & joints, std::string & mode,
       BASE_TYPE base_type)
   {
-    ps_.reset(
+    if (server_->hasParam("RobotDescription")) {
+      EParam<std_msgs::String> robot_description_param;
+      server_->getParam("RobotDescription", robot_description_param);
+      ROS_INFO_STREAM("Loading collision scene for robot_description at " << robot_description_param->data);
+      ps_.reset(
+        new planning_scene::PlanningScene(
+            server_->getModel(robot_description_param->data)));
+    } else if (server_->hasParam(server_->getName() + "/RobotDescription")) {
+      EParam<std_msgs::String> robot_description_param;
+      server_->getParam(server_->getName() + "/RobotDescription", robot_description_param);
+      ROS_INFO_STREAM("Loading collision scene for robot_description at " << robot_description_param->data);
+      ps_.reset(
+        new planning_scene::PlanningScene(
+            server_->getModel(robot_description_param->data)));
+    } else {
+      ps_.reset(
         new planning_scene::PlanningScene(
             server_->getModel("robot_description")));
+    }
+
     if (!acm_)
     {
       acm_.reset(
@@ -664,15 +681,27 @@ namespace exotica
     server_ = server;
     if (!handle.FirstChildElement("Kinematica").ToElement())
     {
-      throw_named("Kinametica not found!");
+      throw_named("Kinematica not found!");
     }
 
-    server->getModel("robot_description", model_);
+    if (server_->hasParam("RobotDescription")) {
+      EParam<std_msgs::String> robot_description_param;
+      server_->getParam("RobotDescription", robot_description_param);
+      ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
+      server->getModel(robot_description_param->data, model_);
+    } else if (server_->hasParam(server_->getName() + "/RobotDescription")) {
+      EParam<std_msgs::String> robot_description_param;
+      server_->getParam(server_->getName() + "/RobotDescription", robot_description_param);
+      ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
+      server->getModel(robot_description_param->data, model_);
+    } else {
+      server->getModel("robot_description", model_);
+    }
 
     tinyxml2::XMLHandle tmp_handle(handle.FirstChildElement("Kinematica"));
     if (!kinematica_.initKinematics(tmp_handle, model_))
     {
-      throw_named("Kinametica not initialized!");
+      throw_named("Kinematica not initialized!");
     }
     std::string base_type = kinematica_.getBaseType();
     if (base_type.compare("fixed") == 0)

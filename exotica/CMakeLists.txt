@@ -95,7 +95,7 @@ add_library(${PROJECT_NAME}
   ${exotica_BINARY_DIR}/generated/Version.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${exotica_BINARY_DIR}/generated/Version.cpp ${PROJECT_NAME}_initializers)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_initializers)
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

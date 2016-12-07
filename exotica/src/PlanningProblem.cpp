@@ -30,9 +30,9 @@
  *
  */
 
-#include "exotica/PlanningProblem.h"
-#include "exotica/Initialiser.h"
-#include "exotica/PlanningProblemInitializer.h"
+#include <exotica/PlanningProblem.h>
+#include <exotica/Setup.h>
+#include <exotica/PlanningProblemInitializer.h>
 
 namespace exotica
 {
@@ -96,7 +96,7 @@ namespace exotica
 
     for (int i = 0; i < msg.tasks; i++)
     {
-      TaskMap_ptr map = Initialiser::createMap(msg.map_type.at(i));
+      TaskMap_ptr map = Setup::createMap(msg.map_type.at(i));
       std::vector<std::pair<std::string, std::string> > tmpParams;
       if (msg.map_params.size() != 0)
         tmpParams = vector2map(msg.map_params.at(i).strings);
@@ -106,7 +106,7 @@ namespace exotica
       std::string name = map->getObjectName();
       task_maps_[name] = map;
 
-      TaskDefinition_ptr def = Initialiser::createDefinition(msg.task_type.at(i));
+      TaskDefinition_ptr def = Setup::createDefinition(msg.task_type.at(i));
       def->setTaskMap(map);
       if (msg.task_params.size() != 0)
         tmpParams = vector2map(msg.task_params.at(i).strings);
@@ -142,7 +142,7 @@ namespace exotica
       // Create the maps
       for(const Initializer& map : init.Maps)
       {
-          TaskMap_ptr temp_ptr = Initialiser::createMap(map);
+          TaskMap_ptr temp_ptr = Setup::createMap(map);
           temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
           if (task_maps_.find(temp_ptr->getObjectName()) != task_maps_.end())
           {
@@ -162,7 +162,7 @@ namespace exotica
       {
           Initializer mapped_task(task);
           mapped_task.addProperty(Property("TaskMaps",true,boost::any(task_maps_)));
-          TaskDefinition_ptr temp_ptr = Initialiser::createDefinition(mapped_task);
+          TaskDefinition_ptr temp_ptr = Setup::createDefinition(mapped_task);
           temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
           if (task_defs_.find(temp_ptr->getObjectName()) != task_defs_.end())
           {
@@ -271,7 +271,7 @@ namespace exotica
         throw_named("Can't find the type!");
       }
       type = temp_type;
-      TaskMap_ptr temp_ptr = Initialiser::createMap(type);
+      TaskMap_ptr temp_ptr = Setup::createMap(type);
 
         task_maps_[name] = temp_ptr;  //!< Copy the shared_ptr;
         task_maps_.at(name)->ns_ = ns_ + "/" + name;
@@ -319,7 +319,7 @@ namespace exotica
       type = temp_type;
 
       //!< attempt to create
-      TaskDefinition_ptr temp_ptr = Initialiser::createDefinition(type);
+      TaskDefinition_ptr temp_ptr = Setup::createDefinition(type);
 
       //!< Attempt to initialise
 

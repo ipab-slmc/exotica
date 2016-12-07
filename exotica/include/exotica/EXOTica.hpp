@@ -43,7 +43,7 @@
 #include <exotica/MotionSolver.h>
 #include <exotica/Server.h>
 #include <exotica/Scene.h>
-#include <exotica/Initialiser.h>
+#include <exotica/Setup.h>
 // The XML parser
 #include <tinyxml2/tinyxml2.h>
 // JSON parser

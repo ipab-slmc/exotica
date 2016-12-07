@@ -1,5 +1,5 @@
 #include <exotica/Exotica.h>
-#include "exotica/Initialiser.h"
+#include <exotica/Setup.h>
 #include <ik_solver/IKsolverInitializer.h>
 #include <task_map/EffPositionInitializer.h>
 #include <exotica/TaskSqrErrorInitializer.h>
@@ -9,10 +9,10 @@ using namespace exotica;
 
 bool testCore()
 {
-    if(Initialiser::getSolvers().size()==0) {HIGHLIGHT_NAMED("EXOTica","Failed to find any solvers."); return false;}
-    if(Initialiser::getProblems().size()==0) {HIGHLIGHT_NAMED("EXOTica","Failed to find any problems."); return false;}
-    if(Initialiser::getMaps().size()==0) {HIGHLIGHT_NAMED("EXOTica","Failed to find any maps."); return false;}
-    if(Initialiser::getTasks().size()==0) {HIGHLIGHT_NAMED("EXOTica","Failed to find any Tasks."); return false;}
+    if(Setup::getSolvers().size()==0) {HIGHLIGHT_NAMED("EXOTica","Failed to find any solvers."); return false;}
+    if(Setup::getProblems().size()==0) {HIGHLIGHT_NAMED("EXOTica","Failed to find any problems."); return false;}
+    if(Setup::getMaps().size()==0) {HIGHLIGHT_NAMED("EXOTica","Failed to find any maps."); return false;}
+    if(Setup::getTasks().size()==0) {HIGHLIGHT_NAMED("EXOTica","Failed to find any Tasks."); return false;}
     return true;
 }
 
@@ -28,8 +28,8 @@ bool testManualInit()
     W << 7,6,5,4,3,2,1;
     IKProblemInitializer problem("MyProblem",scene,{map},{task},1e-5,W);
     IKsolverInitializer solver("MySolver",false,1);
-    PlanningProblem_ptr any_problem = Initialiser::createProblem(problem);
-    MotionSolver_ptr any_solver = Initialiser::createSolver(solver);
+    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
+    MotionSolver_ptr any_solver = Setup::createSolver(solver);
     return true;
 }
 

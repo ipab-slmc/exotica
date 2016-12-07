@@ -36,7 +36,7 @@
 //!< Core Library
 #include <exotica/Version.h>
 #include <exotica/Tools.h>
-#include <exotica/Initialiser.h>
+#include <exotica/Setup.h>
 #include <exotica/PlanningProblem.h>
 #include <exotica/MotionSolver.h>
 #include <exotica/Loaders/XMLLoader.h>

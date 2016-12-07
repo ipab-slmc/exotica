@@ -30,15 +30,15 @@
  *
  */
 
-#include "exotica/Initialiser.h"
+#include <exotica/Setup.h>
 #include <type_traits>
 using namespace rapidjson;
 
 namespace exotica
 {
-  Initialiser_ptr Initialiser::singleton_initialiser_ = nullptr;
+  Initialiser_ptr Setup::singleton_initialiser_ = nullptr;
 
-  void Initialiser::printSupportedClasses()
+  void Setup::printSupportedClasses()
   {
       HIGHLIGHT("Registered solvers:");
       std::vector<std::string> solvers =  Instance()->solvers_.getDeclaredClasses();
@@ -66,23 +66,23 @@ namespace exotica
       }
   }
 
-  std::vector<std::string> Initialiser::getSolvers() {return Instance()->solvers_.getDeclaredClasses();}
-  std::vector<std::string> Initialiser::getProblems() {return Instance()->problems_.getDeclaredClasses();}
-  std::vector<std::string> Initialiser::getMaps() {return Instance()->tasks_.getDeclaredClasses();}
-  std::vector<std::string> Initialiser::getTasks() {return Instance()->maps_.getDeclaredClasses();}
+  std::vector<std::string> Setup::getSolvers() {return Instance()->solvers_.getDeclaredClasses();}
+  std::vector<std::string> Setup::getProblems() {return Instance()->problems_.getDeclaredClasses();}
+  std::vector<std::string> Setup::getMaps() {return Instance()->tasks_.getDeclaredClasses();}
+  std::vector<std::string> Setup::getTasks() {return Instance()->maps_.getDeclaredClasses();}
 
-  Initialiser::Initialiser() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap"),
+  Setup::Setup() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap"),
       problems_(PlanningProblem_fac::Instance()), tasks_(TaskDefinition_fac::Instance())
   {
 
   }
 
-  void Initialiser::initialise(const std::string & file_name,
+  void Setup::initialise(const std::string & file_name,
       Server_ptr & server, MotionSolver_ptr & solver,
       PlanningProblem_ptr & problem)
   {
     std::vector<std::string> probs, sols;
-    Initialiser::listSolversAndProblems(file_name, probs, sols);
+    Setup::listSolversAndProblems(file_name, probs, sols);
     if (probs.size() > 0 && sols.size() > 0)
     {
         return initialise(file_name, server, solver, problem, probs[0], sols[0]);
@@ -93,7 +93,7 @@ namespace exotica
     }
   }
 
-  void Initialiser::initialiseProblemJSON(PlanningProblem_ptr problem,
+  void Setup::initialiseProblemJSON(PlanningProblem_ptr problem,
       const std::string& constraints)
   {
     {
@@ -109,7 +109,7 @@ namespace exotica
     }
   }
 
-  void Initialiser::listSolversAndProblems(const std::string & file_name,
+  void Setup::listSolversAndProblems(const std::string & file_name,
       std::vector<std::string>& problems, std::vector<std::string>& solvers)
   {
     xml_file.Clear();
@@ -211,7 +211,7 @@ namespace exotica
     }
   }
 
-  void Initialiser::initialise(tinyxml2::XMLHandle root_handle,
+  void Setup::initialise(tinyxml2::XMLHandle root_handle,
       Server_ptr & server)
   {
     server = Server::Instance();
@@ -226,7 +226,7 @@ namespace exotica
     }
   }
 
-  void Initialiser::initialise(tinyxml2::XMLHandle root_handle,
+  void Setup::initialise(tinyxml2::XMLHandle root_handle,
       PlanningProblem_ptr & problem, const std::string & problem_name,
       Server_ptr & server)
   {
@@ -260,7 +260,7 @@ namespace exotica
     throw_named("File does not contain the '"<<problem_name<<"' problem definition.");
   }
 
-  void Initialiser::initialise(tinyxml2::XMLHandle root_handle,
+  void Setup::initialise(tinyxml2::XMLHandle root_handle,
       MotionSolver_ptr & solver, const std::string & solver_name,
       Server_ptr & server)
   {
@@ -302,7 +302,7 @@ namespace exotica
     throw_named("File does not contain the '"<<solver_name<<"' solver.");
   }
 
-  void Initialiser::initialise(const std::string & file_name,
+  void Setup::initialise(const std::string & file_name,
       Server_ptr & server, MotionSolver_ptr & solver,
       PlanningProblem_ptr & problem, const std::string & problem_name,
       const std::string & solver_name)
@@ -353,7 +353,7 @@ namespace exotica
     initialise(root_handle, solver, solver_name, server);
   }
 
-  void Initialiser::initialise(const std::string & file_name,
+  void Setup::initialise(const std::string & file_name,
       Server_ptr & server, std::vector<MotionSolver_ptr> & solver,
       std::vector<PlanningProblem_ptr> & problem,
       std::vector<std::string> & problem_name,

@@ -31,8 +31,8 @@
  *
  */
 
-#include "exotica/Problems/OMPLProblem.h"
-#include "exotica/Initialiser.h"
+#include <exotica/Problems/OMPLProblem.h>
+#include <exotica/Setup.h>
 
 REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem)
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
@@ -87,11 +87,11 @@ namespace exotica
           getJSON(obj["class"], constraintClass);
           if (knownMaps_.find(constraintClass) != knownMaps_.end())
           {
-                  TaskMap_ptr taskmap = Initialiser::createMap(knownMaps_[constraintClass]);
+                  TaskMap_ptr taskmap = Setup::createMap(knownMaps_[constraintClass]);
                   taskmap->initialise(obj, server_, scene_,problem);
                   std::string name = taskmap->getObjectName();
                   task_maps_[name] = taskmap;
-                  TaskDefinition_ptr task = Initialiser::createDefinition("TaskTerminationCriterion");
+                  TaskDefinition_ptr task = Setup::createDefinition("TaskTerminationCriterion");
                   TaskTerminationCriterion_ptr sqr =boost::static_pointer_cast<TaskTerminationCriterion>(task);
                   sqr->setTaskMap(taskmap);
                   int dim;

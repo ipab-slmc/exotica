@@ -22,8 +22,8 @@ void run()
 
     // Initialize
 
-    PlanningProblem_ptr any_problem = Initialiser::createProblem(problem);
-    MotionSolver_ptr any_solver = Initialiser::createSolver(solver);
+    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
+    MotionSolver_ptr any_solver = Setup::createSolver(solver);
 
     // Assign the problem to the solver
     any_solver->specifyProblem(any_problem);
@@ -117,5 +117,5 @@ int main(int argc, char **argv)
 
     // Clean up
     // Run this only after all the exoica classes have been disposed of!
-    Initialiser::Destroy();
+    Setup::Destroy();
 }

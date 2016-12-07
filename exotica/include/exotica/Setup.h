@@ -46,17 +46,17 @@
 
 namespace exotica
 {
-  class Initialiser: public Object, Uncopyable
+  class Setup: public Object, Uncopyable
   {
     public:
 
-      ~Initialiser() noexcept
+      ~Setup() noexcept
       {
       }
 
-      static boost::shared_ptr<Initialiser> Instance()
+      static boost::shared_ptr<Setup> Instance()
       {
-        if (!singleton_initialiser_) singleton_initialiser_.reset(new Initialiser);
+        if (!singleton_initialiser_) singleton_initialiser_.reset(new Setup);
         return singleton_initialiser_;
       }
 
@@ -203,11 +203,11 @@ namespace exotica
        *
        *        Currently, is an empty constructor definition.
        */
-      Initialiser();
-      static boost::shared_ptr<Initialiser> singleton_initialiser_;
+      Setup();
+      static boost::shared_ptr<Setup> singleton_initialiser_;
       ///	\brief	Make sure the singleton does not get copied
-      Initialiser(Initialiser const&) = delete;
-      void operator=(Initialiser const&) = delete;
+      Setup(Setup const&) = delete;
+      void operator=(Setup const&) = delete;
 
       /** Class Parameters **/
       tinyxml2::XMLDocument xml_file;
@@ -217,7 +217,7 @@ namespace exotica
       TaskDefinition_fac tasks_;
   };
 
-  typedef boost::shared_ptr<Initialiser> Initialiser_ptr;
+  typedef boost::shared_ptr<Setup> Initialiser_ptr;
 }
 
 #endif

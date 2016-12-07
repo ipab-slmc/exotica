@@ -78,7 +78,7 @@ add_library(${PROJECT_NAME}
   src/TaskDefinition.cpp
   src/PlanningProblem.cpp
   src/MotionSolver.cpp
-  src/Initialiser.cpp
+  src/Setup.cpp
   src/Server.cpp
   src/Scene.cpp
   src/Property.cpp

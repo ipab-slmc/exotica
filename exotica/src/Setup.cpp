@@ -36,7 +36,7 @@ using namespace rapidjson;
 
 namespace exotica
 {
-  Initialiser_ptr Setup::singleton_initialiser_ = nullptr;
+  Setup_ptr Setup::singleton_initialiser_ = nullptr;
 
   void Setup::printSupportedClasses()
   {

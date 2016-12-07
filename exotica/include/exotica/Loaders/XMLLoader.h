@@ -19,10 +19,10 @@ public:
     {
     }
 
-    void loadXML(std::string file_name, Initializer& solver, Initializer& problem, const std::string& solver_name, const std::string& problem_name);
-    static void load(std::string file_name, Initializer& solver, Initializer& problem, const std::string& solver_name, const std::string& problem_name)
+    void loadXML(std::string file_name, Initializer& solver, Initializer& problem, const std::string& solver_name = "", const std::string& problem_name = "", bool parsePathAsXML=false);
+    static void load(std::string file_name, Initializer& solver, Initializer& problem, const std::string& solver_name = "", const std::string& problem_name = "", bool parsePathAsXML=false)
     {
-        Instance()->loadXML(file_name,solver,problem,solver_name,problem_name);
+        Instance()->loadXML(file_name,solver,problem,solver_name,problem_name, parsePathAsXML);
     }
 
 private:

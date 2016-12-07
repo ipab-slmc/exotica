@@ -217,7 +217,7 @@ namespace exotica
       TaskDefinition_fac tasks_;
   };
 
-  typedef boost::shared_ptr<Setup> Initialiser_ptr;
+  typedef boost::shared_ptr<Setup> Setup_ptr;
 }
 
 #endif

@@ -1,5 +1,6 @@
 #include <exotica/Loaders/XMLLoader.h>
 #include <tinyxml2/tinyxml2.h>
+#include <exotica/Setup.h>
 
 namespace exotica
 {
@@ -89,12 +90,22 @@ namespace exotica
         return true;
     }
 
-    void XMLLoader::loadXML(std::string file_name, Initializer& solver, Initializer& problem, const std::string& solver_name, const std::string& problem_name)
+    void XMLLoader::loadXML(std::string file_name, Initializer& solver, Initializer& problem, const std::string& solver_name, const std::string& problem_name, bool parsePathAsXML)
     {
         tinyxml2::XMLDocument xml_file;
-        if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
+        if(parsePathAsXML)
         {
-          throw_pretty("Can't load file!\nFile: '"+file_name+"'");
+            if (xml_file.Parse(file_name.c_str(),file_name.size()) != tinyxml2::XML_NO_ERROR)
+            {
+              throw_pretty("Can't load file!\nFile: '"+file_name+"'");
+            }
+        }
+        else
+        {
+            if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
+            {
+              throw_pretty("Can't load file!\nFile: '"+file_name+"'");
+            }
         }
 
         std::vector<Initializer> initializers;
@@ -110,11 +121,35 @@ namespace exotica
         }
         bool foundSolver = false;
         bool foundProblem = false;
-        for(Initializer& i : initializers)
+        if (solver_name=="" || solver_name=="")
         {
-            std::string name = boost::any_cast<std::string>(i.getProperty("Name"));
-            if(name==solver_name) {solver = i; foundSolver=true;}
-            if(name==problem_name) {problem = i; foundProblem=true;}
+            for(Initializer& i : initializers)
+            {
+                std::string initializer_type = i.getName();
+                if(!foundSolver)
+                {
+                    for(std::string known_type : Setup::getSolvers())
+                    {
+                        if(known_type==initializer_type) {solver = i; foundSolver=true; break;}
+                    }
+                }
+                if(!foundProblem)
+                {
+                    for(std::string known_type : Setup::getProblems())
+                    {
+                        if(known_type==initializer_type) {problem = i; foundProblem=true; break;}
+                    }
+                }
+            }
+        }
+        else
+        {
+            for(Initializer& i : initializers)
+            {
+                std::string name = boost::any_cast<std::string>(i.getProperty("Name"));
+                if(name==solver_name) {solver = i; foundSolver=true;}
+                if(name==problem_name) {problem = i; foundProblem=true;}
+            }
         }
         if(!foundSolver) throw_pretty("Can't find solver '"+solver_name+"' in '"+file_name+"'!");
         if(!foundProblem) throw_pretty("Can't find problem '"+problem_name+"' in '"+file_name+"'!");

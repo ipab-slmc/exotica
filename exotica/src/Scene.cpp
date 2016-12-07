@@ -182,27 +182,9 @@ namespace exotica
   void CollisionScene::initialise(
       const moveit_msgs::PlanningSceneConstPtr & msg,
       const std::vector<std::string> & joints, std::string & mode,
-      BASE_TYPE base_type)
+      BASE_TYPE base_type, robot_model::RobotModelPtr model_)
   {
-    if (server_->hasParam("RobotDescription")) {
-      EParam<std_msgs::String> robot_description_param;
-      server_->getParam("RobotDescription", robot_description_param);
-      ROS_INFO_STREAM("Loading collision scene for robot_description at " << robot_description_param->data);
-      ps_.reset(
-        new planning_scene::PlanningScene(
-            server_->getModel(robot_description_param->data)));
-    } else if (server_->hasParam(server_->getName() + "/RobotDescription")) {
-      EParam<std_msgs::String> robot_description_param;
-      server_->getParam(server_->getName() + "/RobotDescription", robot_description_param);
-      ROS_INFO_STREAM("Loading collision scene for robot_description at " << robot_description_param->data);
-      ps_.reset(
-        new planning_scene::PlanningScene(
-            server_->getModel(robot_description_param->data)));
-    } else {
-      ps_.reset(
-        new planning_scene::PlanningScene(
-            server_->getModel("robot_description")));
-    }
+    ps_.reset(new planning_scene::PlanningScene(model_));
 
     if (!acm_)
     {
@@ -638,7 +620,7 @@ namespace exotica
   void Scene::Instantiate(SceneInitializer& init)
   {
 
-      server_->getModel("robot_description", model_);
+      server_->getModel(init.RobotDescription, model_);
       KinematicaInitializer kinit(init.Solver);
       kinit.check(init.Solver);
       kinematica_.Instantiate(kinit, model_);
@@ -668,7 +650,7 @@ namespace exotica
           planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
           moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
           tmp->getPlanningSceneMsg(*msg.get());
-          collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_, base_type_);
+          collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_, base_type_,model_);
       }
       INFO_NAMED(name_,
           "Exotica Scene initialised, planning mode set to "<<mode_);
@@ -684,19 +666,7 @@ namespace exotica
       throw_named("Kinematica not found!");
     }
 
-    if (server_->hasParam("RobotDescription")) {
-      EParam<std_msgs::String> robot_description_param;
-      server_->getParam("RobotDescription", robot_description_param);
-      ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
-      server->getModel(robot_description_param->data, model_);
-    } else if (server_->hasParam(server_->getName() + "/RobotDescription")) {
-      EParam<std_msgs::String> robot_description_param;
-      server_->getParam(server_->getName() + "/RobotDescription", robot_description_param);
-      ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
-      server->getModel(robot_description_param->data, model_);
-    } else {
-      server->getModel("robot_description", model_);
-    }
+    server->getModel("robot_description", model_);
 
     tinyxml2::XMLHandle tmp_handle(handle.FirstChildElement("Kinematica"));
     if (!kinematica_.initKinematics(tmp_handle, model_))
@@ -746,7 +716,7 @@ namespace exotica
       moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
       tmp->getPlanningSceneMsg(*msg.get());
       collision_scene_->initialise(msg, kinematica_.getJointNames(),
-              mode_, base_type_);
+              mode_, base_type_,model_);
     }
     INFO_NAMED(name_,
         "Exotica Scene initialised, planning mode set to "<<mode_);
@@ -1016,14 +986,14 @@ namespace exotica
     moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
     scene->getPlanningSceneMsg(*msg.get());
     collision_scene_->initialise(msg, kinematica_.getJointNames(),
-        mode_, base_type_);
+        mode_, base_type_, model_);
   }
 
   void Scene::setCollisionScene(
       const moveit_msgs::PlanningSceneConstPtr & scene)
   {
     collision_scene_->initialise(scene, kinematica_.getJointNames(),
-        mode_, base_type_);
+        mode_, base_type_,model_);
   }
 
   int Scene::getNumJoints()

@@ -66,6 +66,11 @@ namespace exotica
       }
   }
 
+  std::vector<std::string> Initialiser::getSolvers() {return Instance()->solvers_.getDeclaredClasses();}
+  std::vector<std::string> Initialiser::getProblems() {return Instance()->problems_.getDeclaredClasses();}
+  std::vector<std::string> Initialiser::getMaps() {return Instance()->tasks_.getDeclaredClasses();}
+  std::vector<std::string> Initialiser::getTasks() {return Instance()->maps_.getDeclaredClasses();}
+
   Initialiser::Initialiser() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap"),
       problems_(PlanningProblem_fac::Instance()), tasks_(TaskDefinition_fac::Instance())
   {

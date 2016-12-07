@@ -102,3 +102,12 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY include/ DESTINATION include)
+
+
+## Testing
+
+if(CATKIN_ENABLE_TESTING)
+    add_executable(test_initializers tests/test_initializers.cpp)
+    target_link_libraries(test_initializers ${PROJECT_NAME} ${catkin_LIBRARIES})
+    install(TARGETS test_initializers RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+endif(CATKIN_ENABLE_TESTING)

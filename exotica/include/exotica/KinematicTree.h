@@ -116,7 +116,7 @@ namespace exotica
       KinematicTree(const KinematicTree & rhs);
       KinematicTree & operator=(const KinematicTree & rhs);
 
-      void Instantiate(const KinematicaInitializer& init, robot_model::RobotModelPtr model);
+      void Instantiate(KinematicaInitializer& init, robot_model::RobotModelPtr model);
 
       ~KinematicTree()
       {

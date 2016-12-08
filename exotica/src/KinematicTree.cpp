@@ -90,7 +90,7 @@ exotica::KinematicTree & exotica::KinematicTree::operator=(
   return *this;
 }
 
-void exotica::KinematicTree::Instantiate(const KinematicaInitializer& init, robot_model::RobotModelPtr model)
+void exotica::KinematicTree::Instantiate(KinematicaInitializer& init, robot_model::RobotModelPtr model)
 {
     exotica::SolutionForm_t solution;
     LimbInitializer root(init.Root);

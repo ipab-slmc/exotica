@@ -75,6 +75,8 @@ namespace exotica
       std::string local_planner_config_;
       EParam<std_msgs::Bool> full_body_plan_;
 
+      OMPLProblemInitializer Parameters;
+
       virtual void clear(bool keepOriginals = true);
     protected:
       /**

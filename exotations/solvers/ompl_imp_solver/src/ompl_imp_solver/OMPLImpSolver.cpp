@@ -56,7 +56,7 @@
 #include <ompl/geometric/planners/rrt/RRTstar.h>
 #include <ompl/geometric/planners/rrt/pRRT.h>
 #include <ompl/geometric/planners/stride/STRIDE.h>
-#include <ompl_solver/OMPLsolverInitializer.h>
+#include <ompl_imp_solver/OMPLImplementationInitializer.h>
 
 PLUGINLIB_EXPORT_CLASS(exotica::OMPLImpSolver, exotica::OMPLBaseSolver)
 
@@ -71,11 +71,11 @@ namespace exotica
 
   void OMPLImpSolver::initialiseSolver(Initializer& init)
   {
-      OMPLsolverInitializer prop(init);
+      OMPLImplementationInitializer prop(init);
       range_ = prop.Range;
-      if(init.hasProperty("Algorithm"))
+      if(prop.Algorithm!="")
       {
-        algorithm_ = "geometric::"+boost::any_cast<std::string>(init.getProperty("Algorithm"));
+        algorithm_ = "geometric::"+prop.Algorithm;
       }
       object_name_=algorithm_;
 
@@ -90,6 +90,8 @@ namespace exotica
         for (auto &it : known_algorithms_)
           ERROR(it.first);
       }
+
+      timeout_ = prop.Timeout;
   }
 
   void OMPLImpSolver::initialiseSolver(tinyxml2::XMLHandle & handle)

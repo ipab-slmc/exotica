@@ -1,0 +1,5 @@
+extend <ompl_solver/OMPLsolver>
+Optional std::string Algorithm = "RRTConnect";
+Optional std::string SamplingSpace = "ConfigurationSpace";
+Optional int MaxGoalSamplingAttempts = 500;
+Optional double Timeout = 60.0;

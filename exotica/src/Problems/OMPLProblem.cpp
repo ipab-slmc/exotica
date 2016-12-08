@@ -176,6 +176,7 @@ namespace exotica
 
   void OMPLProblem::Instantiate(OMPLProblemInitializer& init)
   {
+      Parameters = init;
       std::string PlroblemType = init.PlroblemType;
       if(PlroblemType=="Goals")
       {

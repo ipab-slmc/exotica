@@ -17,6 +17,9 @@ catkin_package(
   DEPENDS system_lib
 )
 
+AddInitializer(OMPLImplementation)
+GenInitializers()
+
 include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
@@ -31,3 +34,9 @@ add_library(ompl_imp_solver
 target_link_libraries(ompl_imp_solver
    ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES}
 )
+add_dependencies(ompl_imp_solver ompl_imp_solver_initializers)
+
+install(TARGETS ompl_imp_solver
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)

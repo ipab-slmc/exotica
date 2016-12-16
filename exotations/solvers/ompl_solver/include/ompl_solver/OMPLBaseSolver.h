@@ -66,7 +66,7 @@ namespace exotica
       virtual void specifyProblem(const OMPLProblem_ptr &prob) = 0;
 
       static pluginlib::ClassLoader<exotica::OMPLBaseSolver> base_solver_loader;
-    protected:
+//    protected:
       OMPLBaseSolver(const std::string planner_name);
       void registerPlannerAllocator(const std::string &planner_id,
           const ConfiguredPlannerAllocator &pa)
@@ -151,6 +151,9 @@ namespace exotica
       // \brief Max number of attempts at sampling the goal region
       int goal_ampling_max_attempts_;
 
+      //  \maximum simplification trails
+      int simplify_trails_;
+
       /// \brief  Porjection type
       std::string projector_;
 
@@ -158,7 +161,7 @@ namespace exotica
       std::vector<std::string> projection_components_;
 
       ros::Duration planning_time_;
-
+      ros::Duration simplification_time_;
   };
   typedef boost::shared_ptr<exotica::OMPLBaseSolver> OMPLBaseSolver_ptr;
 }

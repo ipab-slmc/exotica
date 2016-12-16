@@ -64,8 +64,9 @@ namespace exotica
   OMPLImpSolver::OMPLImpSolver()
       : OMPLBaseSolver("OMPLImpSolver"), algorithm_("geometric::RRTConnect")
   {
-    object_name_=algorithm_;
-    margin_=boost::any_cast<boost::shared_ptr<std_msgs::Float64>>(boost::shared_ptr<std_msgs::Float64>(new std_msgs::Float64()));
+    object_name_ = algorithm_;
+    margin_ = boost::any_cast<boost::shared_ptr<std_msgs::Float64>>(
+        boost::shared_ptr<std_msgs::Float64>(new std_msgs::Float64()));
   }
 
   void OMPLImpSolver::initialiseSolver(tinyxml2::XMLHandle & handle)
@@ -80,7 +81,7 @@ namespace exotica
     {
       algorithm_ = "geometric::"
           + std::string(tmp_handle.ToElement()->GetText());
-      object_name_=algorithm_;
+      object_name_ = algorithm_;
     }
     if (known_algorithms_.find(algorithm_) != known_algorithms_.end())
     {
@@ -166,8 +167,9 @@ namespace exotica
 
       if (!ompl_simple_setup_->haveSolutionPath()) return false;
       planning_time_ = ros::Time::now() - startTime;
+      startTime = ros::Time::now();
       getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), sol, ptc);
-      planning_time_ = ros::Time::now() - startTime;
+      simplification_time_ = ros::Time::now() - startTime;
       postSolve();
       margin_->data = init_margin_;
       prob_->update(Eigen::VectorXd(sol.row(sol.rows() - 1)), 0);
@@ -210,7 +212,7 @@ namespace exotica
     if (ptc == false) tryMore = psf_->reduceVertices(pg);
     if (ptc == false) psf_->collapseCloseVertices(pg);
     int times = 0;
-    while (times < 10 && tryMore && ptc == false)
+    while (times < simplify_trails_ && tryMore && ptc == false)
     {
       tryMore = psf_->reduceVertices(pg);
       times++;
@@ -221,7 +223,7 @@ namespace exotica
         tryMore = psf_->shortcutPath(pg);
       else
         tryMore = false;
-      while (times < 10 && tryMore && ptc == false)
+      while (times < simplify_trails_ && tryMore && ptc == false)
       {
         tryMore = psf_->shortcutPath(pg);
         times++;
@@ -230,12 +232,12 @@ namespace exotica
 
     std::vector<ob::State*> &states = pg.getStates();
     //  Calculate number of states required
-    unsigned int length = 0;
-    const int n1 = states.size() - 1;
-    for (int i = 0; i < n1; ++i)
-      length += si->getStateSpace()->validSegmentCount(states[i],
-          states[i + 1]);
-    //  unsigned int length = 50;
+//    unsigned int length = 0;
+//    const int n1 = states.size() - 1;
+//    for (int i = 0; i < n1; ++i)
+//      length += si->getStateSpace()->validSegmentCount(states[i],
+//          states[i + 1]);
+      unsigned int length = 50;
     pg.interpolate(length);
     convertPath(pg, traj);
     HIGHLIGHT(
@@ -252,8 +254,7 @@ namespace exotica
     return planner_name_;
   }
 
-  void OMPLImpSolver::setGoalState(const Eigen::VectorXd & qT,
-      const double eps)
+  void OMPLImpSolver::setGoalState(const Eigen::VectorXd & qT, const double eps)
   {
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());

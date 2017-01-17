@@ -9,7 +9,7 @@ The EXOTica library is a generic Optimisation Toolset for Robotics platforms, wr
 
 The library itself consists of two major specifications, both of which are abstract classes. The first is the Problem Solver which defines the way optimisation should proceed: current implementation include iLQG, AICO, Jacobian pseudo-inverse IK, and a range of sampling based solvers from the [OMPL](http://ompl.kavrakilab.org/) library. The other is the Task Definition which describes the task itself by providing two necessary functions to compute the forward map from Configuration space (say joint angles in IK) to Task space (say end-effector positions in IK). The tasks themselves can describe a complete trajectory. Using the library then involves passing in an initial state and requesting a solution to the problem, which may consist of a single configuration or complete trajectory.
 
-# Prerequisits
+# Prerequisites
 * Ubuntu 14.04
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/)
 * [rosdep](http://wiki.ros.org/rosdep)
@@ -17,7 +17,7 @@ The library itself consists of two major specifications, both of which are abstr
 
 # Installation
 
-1. [Create a catkin workspace](https://catkin-tools.readthedocs.io/en/latest/quick_start.html#initializing-a-new-workspace) or use an existing workspace. [catkin_tools]() is the preferred build system.
+1. [Create a catkin workspace](https://catkin-tools.readthedocs.io/en/latest/quick_start.html#initializing-a-new-workspace) or use an existing workspace. [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) is the preferred build system.
 1. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do).
 1. ```cd``` into the the cloned directory.
 1. Install dependencies
@@ -34,7 +34,7 @@ rosdep check --from-paths ./ -s -i
 
 # Demos
 Have a look at ```examples/exotica_examples```.
-If you have sourced the wroskpace correctly you should be able to run any of the demos:
+If you have sourced the workspace correctly you should be able to run any of the demos:
 
 ```
 roslaunch exotica_examples Core.launch

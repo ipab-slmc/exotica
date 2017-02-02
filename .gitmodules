@@ -1,0 +1,3 @@
+[submodule "swigmake/wigmake"]
+path = swigmake/swigmake
+url = git@github.com:ipab-slmc/swigmake.git

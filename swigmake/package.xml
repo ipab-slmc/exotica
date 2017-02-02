@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>swigmake</name>
+  <version>1.0.0</version>
+  <description>SWIG scripts</description>
+
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>swig</depend>
+</package>

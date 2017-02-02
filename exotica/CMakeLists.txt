@@ -15,10 +15,15 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   kdl_parser
   pluginlib
+  swigmake
   ${MSG_DEPS}
 )
 
 find_package(Boost REQUIRED COMPONENTS python signals)
+find_package(SWIG REQUIRED)
+find_package(Eigen3 3.2.10 REQUIRED)
+find_package(NumPy REQUIRED)
+mex_setup(REQUIRED)
 
 set(MSG_FILES
   MeshVertex.msg
@@ -59,7 +64,7 @@ GenInitializers()
 catkin_package(
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp  message_runtime moveit_ros_planning_interface moveit_core tf kdl_parser pluginlib
+  CATKIN_DEPENDS roscpp message_runtime moveit_ros_planning_interface moveit_core tf kdl_parser pluginlib
   CFG_EXTRAS Exotica.cmake AddInitializer.cmake
 )
 
@@ -69,7 +74,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
-)
+) 
 
 add_library(${PROJECT_NAME}
   src/TaskMap.cpp
@@ -96,6 +101,10 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_initializers)
+
+set_property(SOURCE swig/exotica.i PROPERTY CPLUSPLUS ON)
+add_swig_python_module(exopy swig/exotica.i CPLUSPLUS LINK_LIBRARIES ${PROJECT_NAME})
+add_swig_matlab_module(exomat swig/exotica.i CPLUSPLUS LINK_LIBRARIES ${PROJECT_NAME})
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

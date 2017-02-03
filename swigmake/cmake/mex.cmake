@@ -241,6 +241,11 @@ function(mex_setup)
     message(WARNING "Your MEX compiler flags contained '-ansi', but we've removed that flag for compatibility with C++11")
   endif()
 
+  if (${MEX_COMPILE_FLAGS} MATCHES "-fPIC")
+    string(REPLACE "-fPIC" "" MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
+    message(WARNING "Your MEX compiler flags contained '-fPIC', but we've removed that flag for compatibility with shared libraries")
+  endif()
+
   set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS}" PARENT_SCOPE)
 
   # note: on ubuntu, gcc did not like the MEX_CLIBS coming along with LINK_FLAGS (it only works if they appear after the  input files).  this is a nasty trick that I found online

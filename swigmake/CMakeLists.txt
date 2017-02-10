@@ -17,8 +17,11 @@ catkin_package(
   CFG_EXTRAS swigmake.cmake mex.cmake ../swigmake/cmake/SwigMatlab.cmake ../swigmake/cmake/SwigPython.cmake
 )
 
+add_custom_target(includes ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/swigmake/swig" "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/swig")
+
 ## Install
-install(DIRECTORY swigmake/swig/matlab DESTINATION share/swigmake/swig/)
-install(DIRECTORY swigmake/swig/python DESTINATION share/swigmake/swig/)
-install(DIRECTORY swigmake/swig/common DESTINATION share/swigmake/swig/)
+install(DIRECTORY swigmake/swig/matlab DESTINATION share/swigmake/swig/matlab)
+install(DIRECTORY swigmake/swig/python DESTINATION share/swigmake/swig/python)
+install(DIRECTORY swigmake/swig/common DESTINATION share/swigmake/swig/common)
 install(DIRECTORY swigmake/cmake/ DESTINATION share/swigmake/cmake/)

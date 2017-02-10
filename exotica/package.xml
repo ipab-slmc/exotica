@@ -24,5 +24,4 @@
   <depend>tf</depend>
   <depend>kdl_parser</depend>
   <depend>pluginlib</depend>
-  <depend>swigmake</depend>
 </package>

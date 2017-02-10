@@ -49,7 +49,7 @@ namespace exotica
     //TODO
   }
 
-  void IMesh::update(Eigen::VectorXdRefConst x, const int t)
+  void IMesh::update(const Eigen::Ref<const Eigen::VectorXd> x, const int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {

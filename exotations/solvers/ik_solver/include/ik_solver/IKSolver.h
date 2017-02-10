@@ -60,8 +60,8 @@ namespace exotica
        * @param	solution	This will be filled with the solution in joint space(Vector).
        * @return	SUCESS if solution has been found, corresponding error code if not.
        */
-      virtual void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
-      bool Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXdRef solution,
+      virtual void Solve(const Eigen::Ref<const Eigen::VectorXd> q0, Eigen::MatrixXd & solution);
+      bool Solve(const Eigen::Ref<const Eigen::VectorXd> q0, Eigen::Ref<Eigen::MatrixXd> solution,
           int t);
 
       /**
@@ -69,7 +69,7 @@ namespace exotica
        * @param	q0			Start state.
        * @param	solution	This will be filled with the solution in joint space(Vector).
        */
-      bool SolveFullSolution(Eigen::VectorXdRefConst q0,
+      bool SolveFullSolution(const Eigen::Ref<const Eigen::VectorXd> q0,
           Eigen::MatrixXd & solution);
       /**
        * \brief	Binds the solver to a specific problem which must be pre-initalised
@@ -91,7 +91,7 @@ namespace exotica
        * @param	goal	new goal
        */
       virtual void setGoal(const std::string & task_name,
-          Eigen::VectorXdRefConst goal, int t = 0);
+          const Eigen::Ref<const Eigen::VectorXd> goal, int t = 0);
       virtual void getGoal(const std::string & task_name, Eigen::VectorXd& goal,int t = 0);
 
       /**
@@ -128,7 +128,7 @@ namespace exotica
 
       IKsolverInitializer parameters_;
 
-      inline void vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
+      inline void vel_solve(double & err, int t, const Eigen::Ref<const Eigen::VectorXd> q);
       IKProblem_ptr prob_; // Shared pointer to the planning problem.
       EParam<std_msgs::Int64> maxit_;	// Maximum iteration
       EParam<std_msgs::Float64> maxstep_;	// Maximum step
@@ -142,10 +142,10 @@ namespace exotica
       std::vector<Eigen::VectorXi> dim;
       std::vector<Eigen::VectorXi> dimid;
 
-      std::vector<std::vector<Eigen::VectorXdRef_ptr> > _rhos;
-      std::vector<std::vector<Eigen::MatrixXdRef_ptr> > _jacobian;
-      std::vector<std::vector<Eigen::VectorXdRef_ptr> > _goal;
-      std::vector<std::vector<Eigen::VectorXdRef_ptr> > _phi;
+      std::vector<std::vector<Eigen::Ref_ptr<Eigen::VectorXd>> > _rhos;
+      std::vector<std::vector<Eigen::Ref_ptr<Eigen::MatrixXd>> > _jacobian;
+      std::vector<std::vector<Eigen::Ref_ptr<Eigen::VectorXd>> > _goal;
+      std::vector<std::vector<Eigen::Ref_ptr<Eigen::VectorXd>> > _phi;
 
       //Eigen::DiagonalMatrix<double, Eigen::Dynamic> Cinv; //!< Weight Matrices
       //Eigen::DiagonalMatrix<double, Eigen::Dynamic> C;

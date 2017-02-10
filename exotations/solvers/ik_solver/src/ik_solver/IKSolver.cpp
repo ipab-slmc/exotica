@@ -202,12 +202,12 @@ namespace exotica
       {
         TaskSqrError_ptr task = boost::static_pointer_cast<TaskSqrError>(
             it.second);
-        _rhos[t][i] = Eigen::VectorXdRef_ptr(rhos.at(t).segment(i, 1));
-        _goal[t][i] = Eigen::VectorXdRef_ptr(
+        _rhos[t][i] = Eigen::Ref_ptr<Eigen::VectorXd>(rhos.at(t).segment(i, 1));
+        _goal[t][i] = Eigen::Ref_ptr<Eigen::VectorXd>(
             goal.at(t).segment(cur_rows, dim.at(t)(i)));
-        _phi[t][i] = Eigen::VectorXdRef_ptr(
+        _phi[t][i] = Eigen::Ref_ptr<Eigen::VectorXd>(
             phi.at(t).segment(cur_rows, dim.at(t)(i)));
-        _jacobian[t][i] = Eigen::MatrixXdRef_ptr(
+        _jacobian[t][i] = Eigen::Ref_ptr<Eigen::MatrixXd>(
             big_jacobian.at(t).block(cur_rows, 0, dim.at(t)(i), size_));
 
         task->registerRho(_rhos[t][i], t);
@@ -257,7 +257,7 @@ namespace exotica
   }
 
   void IKsolver::setGoal(const std::string & task_name,
-      Eigen::VectorXdRefConst _goal, int t)
+      const Eigen::Ref<const Eigen::VectorXd> _goal, int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
@@ -344,7 +344,7 @@ namespace exotica
     reach_goal_ = goal;
   }
 
-  void IKsolver::Solve(Eigen::VectorXdRefConst q0,
+  void IKsolver::Solve(const Eigen::Ref<const Eigen::VectorXd> q0,
       Eigen::MatrixXd & solution)
   {
     if (initialised_)
@@ -373,8 +373,8 @@ namespace exotica
     }
   }
 
-  bool IKsolver::Solve(Eigen::VectorXdRefConst q0,
-      Eigen::MatrixXdRef solution, int t)
+  bool IKsolver::Solve(const Eigen::Ref<const Eigen::VectorXd> q0,
+      Eigen::Ref<Eigen::MatrixXd> solution, int t)
   {
     if (initialised_)
     {
@@ -436,7 +436,7 @@ namespace exotica
     }
   }
 
-  bool IKsolver::SolveFullSolution(Eigen::VectorXdRefConst q0,
+  bool IKsolver::SolveFullSolution(const Eigen::Ref<const Eigen::VectorXd> q0,
       Eigen::MatrixXd & solution)
   {
     int t = 0;
@@ -513,7 +513,7 @@ namespace exotica
     }
   }
 
-  void IKsolver::vel_solve(double & err, int t, Eigen::VectorXdRefConst q)
+  void IKsolver::vel_solve(double & err, int t, const Eigen::Ref<const Eigen::VectorXd> q)
   {
     if (initialised_)
     {

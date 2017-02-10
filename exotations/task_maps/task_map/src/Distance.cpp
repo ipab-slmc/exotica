@@ -59,7 +59,7 @@ namespace exotica
     scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
   }
 
-  void Distance::update(Eigen::VectorXdRefConst x, const int t)
+  void Distance::update(const Eigen::Ref<const Eigen::VectorXd> x, const int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {

@@ -64,7 +64,7 @@ namespace exotica
        * @param	x	Input configuration
        * @return	Exotica return type
        */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(const Eigen::Ref<const Eigen::VectorXd> x, const int t);
 
       /**
        * @brief	Get the task space dimension
@@ -76,7 +76,7 @@ namespace exotica
       virtual void taskSpaceDim(int & task_dim);
 
       void setOffsetCallback(
-          boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback);
+          boost::function<void(CoM*, const Eigen::Ref<const Eigen::VectorXd>, int)> offset_callback);
       void setOffset(bool left, const KDL::Frame & offset);
       void checkGoal(const Eigen::Vector3d & goal);
 
@@ -111,7 +111,7 @@ namespace exotica
       std::vector<KDL::Frame> tip_pose_;	//!< Tip poses
       std::vector<KDL::Frame> base_pose_;	//!< Base poses
       bool initialised_;	//!< For Error checking
-      boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback_;
+      boost::function<void(CoM*, const Eigen::Ref<const Eigen::VectorXd>, int)> offset_callback_;
       ros::Publisher com_pub_;
       ros::Publisher COM_pub_;
       ros::Publisher goal_pub_;

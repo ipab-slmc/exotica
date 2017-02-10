@@ -145,17 +145,17 @@ namespace exotica
   void TaskSqrError::setTimeSteps(const int T)
   {
     TaskDefinition::setTimeSteps(T);
-    y_star_.assign(T, Eigen::VectorXdRef_ptr(y_star0_));
-    rho_.assign(T, Eigen::VectorXdRef_ptr(rho0_));
+    y_star_.assign(T, Eigen::Ref_ptr<Eigen::VectorXd>(y_star0_));
+    rho_.assign(T, Eigen::Ref_ptr<Eigen::VectorXd>(rho0_));
   }
 
-  void TaskSqrError::registerGoal(Eigen::VectorXdRef_ptr y_star, int t)
+  void TaskSqrError::registerGoal(Eigen::Ref_ptr<Eigen::VectorXd> y_star, int t)
   {
     if (wasFullyInitialised_) (*y_star) = (*(y_star_.at(t)));
     y_star_.at(t) = y_star;
   }
 
-  void TaskSqrError::registerRho(Eigen::VectorXdRef_ptr rho, int t)
+  void TaskSqrError::registerRho(Eigen::Ref_ptr<Eigen::VectorXd> rho, int t)
   {
     if (wasFullyInitialised_) (*rho) = (*(rho_.at(t)));
     rho_.at(t) = rho;
@@ -181,7 +181,7 @@ namespace exotica
     (*(rho_.at(t)))(0) = rho;
   }
 
-  Eigen::VectorXdRef_ptr TaskSqrError::getGoal(int t)
+  Eigen::Ref_ptr<Eigen::VectorXd> TaskSqrError::getGoal(int t)
   {
     if (t < y_star_.size())
     {

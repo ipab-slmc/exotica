@@ -96,7 +96,7 @@ namespace exotica
                     tspani(1) = (int) ((T_ - 1) * tspan(1));
                     for (int t = tspani(0); t <= tspani(1); t++)
                     {
-                        sqr->registerRho(Eigen::VectorXdRef_ptr(sqr->rho1_.segment(0, 1)),t);
+                        sqr->registerRho(Eigen::Ref_ptr<Eigen::VectorXd>(sqr->rho1_.segment(0, 1)),t);
                     }
                     sqr->wasFullyInitialised_ = true;
                     task_defs_[name] = task;

@@ -291,7 +291,7 @@ namespace exotica
 
   }
 
-  void SweepFlux::update(Eigen::VectorXdRefConst x, const int t)
+  void SweepFlux::update(const Eigen::Ref<const Eigen::VectorXd> x, const int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {

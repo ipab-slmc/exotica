@@ -78,7 +78,7 @@ namespace exotica
        * @param t Time step (not used by most task maps)
        * @return  Indication of success TODO
        */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(const Eigen::Ref<const Eigen::VectorXd> x, const int t);
 
       /**
        * \brief Returns the reference to the task definition map.

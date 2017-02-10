@@ -114,7 +114,7 @@ namespace exotica
   }
 
   void AICOsolver::setGoal(const std::string & task_name,
-      Eigen::VectorXdRefConst _goal, int t)
+      const Eigen::Ref<const Eigen::VectorXd> _goal, int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
@@ -251,7 +251,7 @@ namespace exotica
     return false;
   }
 
-  void AICOsolver::Solve(Eigen::VectorXdRefConst q0,
+  void AICOsolver::Solve(const Eigen::Ref<const Eigen::VectorXd> q0,
       Eigen::MatrixXd & solution)
   {
     std::vector<Eigen::VectorXd> q_init;
@@ -432,13 +432,13 @@ namespace exotica
         for (int t = 0; t < TT; t++)
         {
           task->registerGoal(
-              Eigen::VectorXdRef_ptr(y_star[t].block(cnt, 0, dim(i), 1)), t);
+              Eigen::Ref_ptr<Eigen::VectorXd>(y_star[t].block(cnt, 0, dim(i), 1)), t);
           task->registerJacobian(
-              Eigen::MatrixXdRef_ptr(
+              Eigen::Ref_ptr<Eigen::MatrixXd>(
                   JBar[t].block(cnt, 0, dim(i), dynamic ? n2 : n)), t);
           task->registerPhi(
-              Eigen::VectorXdRef_ptr(phiBar[t].block(cnt, 0, dim(i), 1)), t);
-          task->registerRho(Eigen::VectorXdRef_ptr(rhos[t].block(i, 0, 1, 1)),
+              Eigen::Ref_ptr<Eigen::VectorXd>(phiBar[t].block(cnt, 0, dim(i), 1)), t);
+          task->registerRho(Eigen::Ref_ptr<Eigen::VectorXd>(rhos[t].block(i, 0, 1, 1)),
               t);
           task->setDefaultGoals(t);
         }

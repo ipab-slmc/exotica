@@ -70,7 +70,7 @@ namespace exotica
        */
       virtual bool isSolvable(const PlanningProblem_ptr & prob);
 
-      void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      void Solve(const Eigen::Ref<const Eigen::VectorXd> q0, Eigen::MatrixXd & solution);
 
       /*
        * \brief Get planning problem

@@ -240,7 +240,7 @@ namespace exotica
 //		}
   }
 
-  void CollisionScene::update(Eigen::VectorXdRefConst x)
+  void CollisionScene::update(const Eigen::Ref<const Eigen::VectorXd>& x)
   {
     if (joint_index_.size() != x.rows())
     {
@@ -722,7 +722,7 @@ namespace exotica
         "Exotica Scene initialised, planning mode set to "<<mode_);
   }
 
-  void Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)
+  void Scene::getForwardMap(const std::string & task, Eigen::Ref<Eigen::VectorXd>& phi)
   {
     LOCK(lock_);
     if (phis_.find(task) == phis_.end())
@@ -737,12 +737,12 @@ namespace exotica
   }
 
   void Scene::getForwardMap(const std::string & task,
-      Eigen::VectorXdRef_ptr& phi, bool force)
+      Eigen::Ref_ptr<Eigen::VectorXd>& phi, bool force)
   {
     LOCK(lock_);
     if (kinematica_.getEffSize() == 0)
     {
-      phi = Eigen::VectorXdRef_ptr();
+      phi = Eigen::Ref_ptr<Eigen::VectorXd>();
 
     }
     else
@@ -759,7 +759,7 @@ namespace exotica
 
   }
 
-  void Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef jac)
+  void Scene::getJacobian(const std::string & task, Eigen::Ref<Eigen::MatrixXd>& jac)
   {
     LOCK(lock_);
     if (jacs_.find(task) == jacs_.end())
@@ -777,12 +777,12 @@ namespace exotica
   }
 
   void Scene::getJacobian(const std::string & task,
-      Eigen::MatrixXdRef_ptr& jac, bool force)
+      Eigen::Ref_ptr<Eigen::MatrixXd>& jac, bool force)
   {
     LOCK(lock_);
     if (kinematica_.getEffSize() == 0)
     {
-      jac = Eigen::MatrixXdRef_ptr();
+      jac = Eigen::Ref_ptr<Eigen::MatrixXd>();
 
     }
     else
@@ -914,9 +914,9 @@ namespace exotica
     {
       eff_index_[it.first] = std::vector<int>(tmp_index.begin() + tmp_eff_size,
           tmp_index.begin() + tmp_eff_size + it.second.size());
-      phis_[it.first] = Eigen::VectorXdRef_ptr(
+      phis_[it.first] = Eigen::Ref_ptr<Eigen::VectorXd>(
           Phi_.segment(tmp_size, 3 * it.second.size()));
-      jacs_[it.first] = Eigen::MatrixXdRef_ptr(
+      jacs_[it.first] = Eigen::Ref_ptr<Eigen::MatrixXd>(
           Jac_.block(tmp_size, 0, 3 * it.second.size(), N));
       tmp_size += 3 * it.second.size();
       tmp_eff_size += it.second.size();
@@ -926,7 +926,7 @@ namespace exotica
     HIGHLIGHT_NAMED(object_name_, "Taskmaps are activated");
   }
 
-  void Scene::update(Eigen::VectorXdRefConst x, const int t)
+  void Scene::update(const Eigen::Ref<const Eigen::VectorXd>& x, const int t)
   {
     LOCK(lock_);
     if (!initialised_)

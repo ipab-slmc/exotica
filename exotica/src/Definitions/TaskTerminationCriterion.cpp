@@ -149,7 +149,7 @@ namespace exotica
   }
 
   void TaskTerminationCriterion::registerThreshold(
-      Eigen::VectorXdRef_ptr threshold, int t)
+      Eigen::Ref_ptr<Eigen::VectorXd> threshold, int t)
   {
     threshold_.at(t) = threshold;
   }
@@ -157,19 +157,19 @@ namespace exotica
   void TaskTerminationCriterion::setTimeSteps(const int T)
   {
       TaskDefinition::setTimeSteps(T);
-      y_star_.assign(T, Eigen::VectorXdRef_ptr(y_star0_));
-      rho_.assign(T, Eigen::VectorXdRef_ptr(rho0_));
-      threshold_.assign(T, Eigen::VectorXdRef_ptr(threshold0_));
+      y_star_.assign(T, Eigen::Ref_ptr<Eigen::VectorXd>(y_star0_));
+      rho_.assign(T, Eigen::Ref_ptr<Eigen::VectorXd>(rho0_));
+      threshold_.assign(T, Eigen::Ref_ptr<Eigen::VectorXd>(threshold0_));
   }
 
 
-  void TaskTerminationCriterion::registerGoal(Eigen::VectorXdRef_ptr y_star, int t)
+  void TaskTerminationCriterion::registerGoal(Eigen::Ref_ptr<Eigen::VectorXd> y_star, int t)
   {
     if (wasFullyInitialised_) (*y_star) = (*(y_star_.at(t)));
     y_star_.at(t) = y_star;
   }
 
-  void TaskTerminationCriterion::registerRho(Eigen::VectorXdRef_ptr rho, int t)
+  void TaskTerminationCriterion::registerRho(Eigen::Ref_ptr<Eigen::VectorXd> rho, int t)
   {
     if (wasFullyInitialised_) (*rho) = (*(rho_.at(t)));
     rho_.at(t) = rho;
@@ -195,7 +195,7 @@ namespace exotica
     (*(rho_.at(t)))(0) = rho;
   }
 
-  Eigen::VectorXdRef_ptr TaskTerminationCriterion::getGoal(int t)
+  Eigen::Ref_ptr<Eigen::VectorXd> TaskTerminationCriterion::getGoal(int t)
   {
     if (t < y_star_.size())
     {

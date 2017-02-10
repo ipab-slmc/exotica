@@ -18,7 +18,7 @@ namespace Eigen
 
 namespace exotica
 {
-    KDL::Frame getFrame(Eigen::VectorXdRefConst val)
+    KDL::Frame getFrame(const Eigen::Ref<const Eigen::VectorXd> val)
     {
         if(val.rows()!=7) throw_pretty("Eigen vector has incorrect length! ("+std::to_string(val.rows())+")");
         return KDL::Frame(KDL::Rotation::Quaternion(val(3),val(4),val(5),val(6)),KDL::Vector(val(0),val(1),val(2)));

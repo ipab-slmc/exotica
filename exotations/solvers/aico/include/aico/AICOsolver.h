@@ -101,7 +101,7 @@ namespace exotica
        * @param solution This will be filled with the solution in joint space.
        * @return SUCESS if solution has been found, corresponding error code if not.
        */
-      void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      void Solve(const Eigen::Ref<const Eigen::VectorXd> q0, Eigen::MatrixXd & solution);
 
       /**
        * \brief Solves the problem
@@ -157,7 +157,7 @@ namespace exotica
        * @param   t time step
        */
       virtual void setGoal(const std::string & task_name,
-          Eigen::VectorXdRefConst goal, int t = 0);
+          const Eigen::Ref<const Eigen::VectorXd> goal, int t = 0);
 
       /**
        * \brief	Set rho

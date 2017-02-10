@@ -57,7 +57,7 @@ namespace exotica
        * @brief	Concrete implementation of update method
        * @param	x	Joint space configuration
        */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(const Eigen::Ref<const Eigen::VectorXd> x, const int t);
 
       /**
        * @brief	Get the task space dimension

@@ -381,7 +381,7 @@ namespace exotica
     }
   }
 
-  void PlanningProblem::update(Eigen::VectorXdRefConst x, const int t)
+  void PlanningProblem::update(const Eigen::Ref<const Eigen::VectorXd> x, const int t)
   {
     // Update the KinematicScene(s)...
 //    for (auto it = scenes_.begin(); it != scenes_.end(); ++it)

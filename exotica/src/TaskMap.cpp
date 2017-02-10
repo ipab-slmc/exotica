@@ -296,9 +296,9 @@ namespace exotica
     taskSpaceDim(dim);
     phi0_.resize(dim);
     jac0_.resize(dim, scene_->getNumJoints());
-    phi_.assign(T, Eigen::VectorXdRef_ptr(phi0_.segment(0, dim)));
+    phi_.assign(T, Eigen::Ref_ptr<Eigen::VectorXd>(phi0_.segment(0, dim)));
     jac_.assign(T,
-        Eigen::MatrixXdRef_ptr(jac0_.block(0, 0, dim, scene_->getNumJoints())));
+        Eigen::Ref_ptr<Eigen::MatrixXd>(jac0_.block(0, 0, dim, scene_->getNumJoints())));
     phiFlag_.resize(T);
     phiFlag_.setZero();
     jacFlag_.resize(T);
@@ -307,7 +307,7 @@ namespace exotica
     jacCnt_ = 0;
   }
 
-  void TaskMap::registerPhi(Eigen::VectorXdRef_ptr y, int t)
+  void TaskMap::registerPhi(Eigen::Ref_ptr<Eigen::VectorXd> y, int t)
   {
     LOCK(map_lock_);
     phi_.at(t) = y;
@@ -318,7 +318,7 @@ namespace exotica
     }
   }
 
-  void TaskMap::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
+  void TaskMap::registerJacobian(Eigen::Ref_ptr<Eigen::MatrixXd> J, int t)
   {
     LOCK(map_lock_);
     jac_.at(t) = J;

@@ -382,7 +382,7 @@ namespace exotica
        * @param joint_map  The Mapping from the joint to the index for the associated segment
        * @return           True if ok, false if not
        */
-      bool buildTree(const KDL::Tree & temp_tree, std::string root,
+      void buildTree(const KDL::Tree & temp_tree, std::string root,
           std::map<std::string, int> & joint_map);
 
       bool setJointLimits();
@@ -409,7 +409,7 @@ namespace exotica
        * TODO
        * @return        True if successful, false otherwise
        */
-      bool addSegment(KDL::SegmentMap::const_iterator current_segment,
+      void addSegment(KDL::SegmentMap::const_iterator current_segment,
           int parent, int & current, bool from_ptip, bool to_ctip,
           const std::string & root_name,
           std::map<std::string, int> & joint_map);

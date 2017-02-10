@@ -56,7 +56,7 @@ namespace exotica
     scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
   }
 
-  void EffPosition::update(Eigen::VectorXdRefConst x, const int t)
+  void EffPosition::update(const Eigen::Ref<const Eigen::VectorXd> x, const int t)
   {
     if (!isRegistered(t) || !getEffReferences())
     {

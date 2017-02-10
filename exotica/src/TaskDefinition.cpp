@@ -100,13 +100,13 @@ namespace exotica
     initDerived(handle);
   }
 
-  void TaskDefinition::registerPhi(Eigen::VectorXdRef_ptr y, int t)
+  void TaskDefinition::registerPhi(Eigen::Ref_ptr<Eigen::VectorXd> y, int t)
   {
     LOCK(map_lock_);
     task_map_->registerPhi(y, t);
   }
 
-  void TaskDefinition::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
+  void TaskDefinition::registerJacobian(Eigen::Ref_ptr<Eigen::MatrixXd> J, int t)
   {
     LOCK(map_lock_);
     task_map_->registerJacobian(J, t);

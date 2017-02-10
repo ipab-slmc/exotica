@@ -93,7 +93,7 @@ namespace exotica
        * @param  x  The State-space vector for the robot
        * @return    Should indicate success/otherwise using the Exotica error types
        */
-      virtual void update(Eigen::VectorXdRefConst x, const int t) = 0;
+      virtual void update(const Eigen::Ref<const Eigen::VectorXd> x, const int t) = 0;
 
       /**
        * @brief registerPhi Registers a memory location for the output of phi at time t
@@ -101,7 +101,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      void registerPhi(Eigen::VectorXdRef_ptr y, int t);
+      void registerPhi(Eigen::Ref_ptr<Eigen::VectorXd> y, int t);
 
       /**
        * @brief registerJacobian egisters a memory location for the output of Jacobian at time t
@@ -109,7 +109,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      void registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
+      void registerJacobian(Eigen::Ref_ptr<Eigen::MatrixXd> J, int t);
 
       /**
        * \brief Indicator of the Task-Dimension size: PURE VIRTUAL
@@ -138,8 +138,8 @@ namespace exotica
 
       bool updateJacobian_;
 
-      std::vector<Eigen::VectorXdRef_ptr> phi_; //!< The Task-space co-ordinates
-      std::vector<Eigen::MatrixXdRef_ptr> jac_;    //!< The Task Jacobian matrix
+      std::vector<Eigen::Ref_ptr<Eigen::VectorXd>> phi_; //!< The Task-space co-ordinates
+      std::vector<Eigen::Ref_ptr<Eigen::MatrixXd>> jac_;    //!< The Task Jacobian matrix
 
       boost::shared_ptr<std::map<std::string, Eigen::VectorXd> > poses;
       boost::shared_ptr<std::vector<std::string> > posesJointNames;
@@ -170,8 +170,8 @@ namespace exotica
        * \brief Private data members for information hiding and thread-safety
        */
 
-      Eigen::VectorXdRef_ptr eff_phi_; //!< End-effector phi (output of kinematica)
-      Eigen::MatrixXdRef_ptr eff_jac_; //!< End-effector Jacobian (output of kinematica)
+      Eigen::Ref_ptr<Eigen::VectorXd> eff_phi_; //!< End-effector phi (output of kinematica)
+      Eigen::Ref_ptr<Eigen::MatrixXd> eff_jac_; //!< End-effector Jacobian (output of kinematica)
       virtual bool getEffReferences();
       int phiCnt_;
       int jacCnt_;

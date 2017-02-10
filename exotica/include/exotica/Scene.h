@@ -97,7 +97,7 @@ namespace exotica
        * @param	x		Configuration
        * @return Indication of success
        */
-      void update(Eigen::VectorXdRefConst x);
+      void update(const Eigen::Ref<const Eigen::VectorXd>& x);
 
       /**
        * \brief	Get closest distance between two objects
@@ -232,7 +232,7 @@ namespace exotica
   typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
 
 ///	The class of EXOTica Scene
-  class Scene: public Object, Uncopyable, public Instantiable<SceneInitializer>
+  class Scene: public Object, public Uncopyable, public Instantiable<SceneInitializer>
   {
     public:
       /**
@@ -268,7 +268,7 @@ namespace exotica
        * @param	x	System state
        * @return Indication of success
        */
-      virtual void update(Eigen::VectorXdRefConst x, const int t = 0);
+      virtual void update(const Eigen::Ref<const Eigen::VectorXd>& x, const int t = 0);
 
       /**
        * \brief	Set collision scene
@@ -332,7 +332,7 @@ namespace exotica
        * @param	phi		Returned forward map
        * @return Indication of success
        */
-      void getForwardMap(const std::string & task, Eigen::VectorXdRef phi);
+      void getForwardMap(const std::string & task, Eigen::Ref<Eigen::VectorXd>& phi);
 
       /**
        * @brief Get forward map reference
@@ -341,7 +341,7 @@ namespace exotica
        * @return Indication of success
        */
       void getForwardMap(const std::string & task,
-          Eigen::VectorXdRef_ptr& phi, bool force = false);
+          Eigen::Ref_ptr<Eigen::VectorXd>& phi, bool force = false);
 
       /**
        * \brief	Get jacobian (values)
@@ -349,7 +349,7 @@ namespace exotica
        * @param	jac		Returned Jacobian
        * @return Indication of success
        */
-      void getJacobian(const std::string & task, Eigen::MatrixXdRef jac);
+      void getJacobian(const std::string & task, Eigen::Ref<Eigen::MatrixXd>& jac);
 
       /**
        * @brief Get jacobian reference
@@ -357,7 +357,7 @@ namespace exotica
        * @param jac Returned Jacobian reference
        * @return Indication of success
        */
-      void getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac,
+      void getJacobian(const std::string & task, Eigen::Ref_ptr<Eigen::MatrixXd>& jac,
           bool force = false);
 
       /**
@@ -490,10 +490,10 @@ namespace exotica
       Eigen::MatrixXd Jac_;
 
       ///	Forwardmaps referring to subvectors of the big phi
-      std::map<std::string, Eigen::VectorXdRef_ptr> phis_;
+      std::map<std::string, Eigen::Ref_ptr<Eigen::VectorXd>> phis_;
 
       ///	Jacobians referring to submatrices of the big jacobian
-      std::map<std::string, Eigen::MatrixXdRef_ptr> jacs_;
+      std::map<std::string, Eigen::Ref_ptr<Eigen::MatrixXd>> jacs_;
 
       ///	End-effector names
       std::map<std::string, std::vector<std::string> > eff_names_;

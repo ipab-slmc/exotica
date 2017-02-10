@@ -129,7 +129,7 @@ namespace exotica
     }
   }
 
-  void Identity::update(Eigen::VectorXdRefConst x, const int t)
+  void Identity::update(const Eigen::Ref<const Eigen::VectorXd> x, const int t)
   {
     if (!isRegistered(t))
     {

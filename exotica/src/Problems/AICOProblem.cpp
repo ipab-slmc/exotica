@@ -91,7 +91,7 @@ namespace exotica
                     for (int t = tspani(0); t <= tspani(1); t++)
                     {
                         sqr->registerRho(
-                        Eigen::VectorXdRef_ptr(sqr->rho1_.segment(0, 1)),
+                        Eigen::Ref_ptr<Eigen::VectorXd>(sqr->rho1_.segment(0, 1)),
                         t);
                     }
                     sqr->wasFullyInitialised_ = true;
@@ -115,7 +115,7 @@ namespace exotica
         }
     }
 
-  void AICOProblem::update(Eigen::VectorXdRefConst x, const int t)
+  void AICOProblem::update(const Eigen::Ref<const Eigen::VectorXd> x, const int t)
   {
     // Update the KinematicScene(s)...
 //    for (auto it = scenes_.begin(); it != scenes_.end(); ++it)

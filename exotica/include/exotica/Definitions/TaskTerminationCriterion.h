@@ -67,7 +67,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      void registerThreshold(Eigen::VectorXdRef_ptr threshold, int t = 0);
+      void registerThreshold(Eigen::Ref_ptr<Eigen::VectorXd> threshold, int t = 0);
 
       /**
        * @brief registerGoal Registers a goal reference at time t
@@ -75,7 +75,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      void registerGoal(Eigen::VectorXdRef_ptr y_star, int t = 0);
+      void registerGoal(Eigen::Ref_ptr<Eigen::VectorXd> y_star, int t = 0);
 
       /**
        * @brief registerGoal Registers rho reference at time t
@@ -83,7 +83,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      void registerRho(Eigen::VectorXdRef_ptr rho, int t = 0);
+      void registerRho(Eigen::Ref_ptr<Eigen::VectorXd> rho, int t = 0);
 
       /**
        * @brief getRho Returns the value of rho at time step t
@@ -121,7 +121,7 @@ namespace exotica
        * @param	t		Time step
        * @return		Goal
        */
-      Eigen::VectorXdRef_ptr getGoal(int t = 0);
+      Eigen::Ref_ptr<Eigen::VectorXd> getGoal(int t = 0);
 
       Eigen::VectorXd y_star0_;    //!< The goal vector
       Eigen::VectorXd rho0_, rho1_;       //!< The scalar inter-task weight
@@ -136,9 +136,9 @@ namespace exotica
       virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       /** The internal storage **/
-      std::vector<Eigen::VectorXdRef_ptr> y_star_;    //!< The goal vector
-      std::vector<Eigen::VectorXdRef_ptr> rho_; //!< The scalar inter-task weight
-      std::vector<Eigen::VectorXdRef_ptr> threshold_;
+      std::vector<Eigen::Ref_ptr<Eigen::VectorXd>> y_star_;    //!< The goal vector
+      std::vector<Eigen::Ref_ptr<Eigen::VectorXd>> rho_; //!< The scalar inter-task weight
+      std::vector<Eigen::Ref_ptr<Eigen::VectorXd>> threshold_;
   };
 
   typedef exotica::Factory<exotica::TaskTerminationCriterion> TerminationCriterionCreator; //!< Convenience name for the EndCriterion Singleton Factory

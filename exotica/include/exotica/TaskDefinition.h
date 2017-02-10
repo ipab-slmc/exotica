@@ -79,7 +79,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      void registerPhi(Eigen::VectorXdRef_ptr y, int t);
+      void registerPhi(Eigen::Ref_ptr<Eigen::VectorXd> y, int t);
 
       /**
        * @brief registerJacobian egisters a memory location for the output of Jacobian at time t
@@ -87,7 +87,7 @@ namespace exotica
        * @param t Time step
        * @return Indication of success
        */
-      void registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
+      void registerJacobian(Eigen::Ref_ptr<Eigen::MatrixXd> J, int t);
 
       /**
        * \brief Wrapper for the underlying task dimension getter

@@ -84,7 +84,7 @@ namespace exotica
        * @param	solution	Solution
        * @param	t			Time step
        */
-      virtual void Solve(Eigen::VectorXdRefConst q0,
+      virtual void Solve(const Eigen::Ref<const Eigen::VectorXd> q0,
           Eigen::MatrixXd & solution) = 0;
 
       /*
@@ -97,7 +97,7 @@ namespace exotica
       virtual void setGoalState(const Eigen::VectorXd & qT, const double eps =
               std::numeric_limits<double>::epsilon()) {throw_named("Not implemented!");}
       virtual void setGoal(const std::string & task_name,
-          Eigen::VectorXdRefConst goal, int t = 0) {throw_named("Not implemented!");}
+          const Eigen::Ref<const Eigen::VectorXd> goal, int t = 0) {throw_named("Not implemented!");}
 
       virtual void setRho(const std::string & task_name, const double rho,int t = 0) {throw_named("Not implemented!");}
       virtual void getGoal(const std::string & task_name, Eigen::VectorXd& goal,int t = 0) {throw_named("Not implemented!");}

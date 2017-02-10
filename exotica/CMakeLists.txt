@@ -15,15 +15,10 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   kdl_parser
   pluginlib
-  swigmake
   ${MSG_DEPS}
 )
 
-find_package(Boost REQUIRED COMPONENTS python signals)
-find_package(SWIG REQUIRED)
-find_package(Eigen3 3.2.10 REQUIRED)
-find_package(NumPy REQUIRED)
-mex_setup(REQUIRED)
+find_package(Boost REQUIRED COMPONENTS signals)
 
 set(MSG_FILES
   MeshVertex.msg
@@ -97,12 +92,7 @@ add_library(${PROJECT_NAME}
   src/Problems/SamplingProblem.cpp
   ${exotica_BINARY_DIR}/generated/Version.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_initializers)
-
-set_property(SOURCE swig/exotica.i PROPERTY CPLUSPLUS ON)
-add_swig_python_module(exopy swig/exotica.i CPLUSPLUS LINK_LIBRARIES ${PROJECT_NAME})
-add_swig_matlab_module(exomat swig/exotica.i CPLUSPLUS LINK_LIBRARIES ${PROJECT_NAME})
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

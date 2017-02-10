@@ -639,6 +639,7 @@ namespace exotica
       mode_ = init.PlanningMode;
 
       update_jacobians_ = mode_!="Sampling"? true : false;
+      visual_debug_=init.VisualDebug;
 
       if (visual_debug_)
       {

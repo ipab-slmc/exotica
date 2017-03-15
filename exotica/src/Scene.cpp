@@ -1088,6 +1088,25 @@ namespace exotica
   {
     return kinematica_.getRobotRootWorldTransform();
   }
+
+  void Scene::LoadScene(const std::string& scene)
+  {
+    std::stringstream ss(scene);
+    getPlanningScene()->loadGeometryFromStream(ss);
+  }
+
+  std::string Scene::GetScene()
+  {
+    std::stringstream ss;
+    getPlanningScene()->saveGeometryToStream(ss);
+    return ss.str();
+  }
+
+  void Scene::CleanScene()
+  {
+    getPlanningScene()->removeAllCollisionObjects();
+  }
+
 }
 //	namespace exotica
 

@@ -461,6 +461,10 @@ namespace exotica
       KDL::Frame getRobotRootWorldTransform();
 
       void publishScene();
+
+      void LoadScene(const std::string& scene);
+      std::string GetScene();
+      void CleanScene();
     private:
       ///	EXOTica server
       Server_ptr server_;

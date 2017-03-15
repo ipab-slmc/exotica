@@ -249,6 +249,10 @@ namespace exotica
       }
 
       void publishScene();
+
+      void LoadScene(const std::string& scene);
+      std::string GetScene();
+      void CleanScene();
     private:
       ///	The name of the scene
       std::string name_;

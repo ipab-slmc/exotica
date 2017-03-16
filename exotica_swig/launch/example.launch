@@ -1,0 +1,9 @@
+<launch>
+
+  <param name="robot_description" textfile="$(find exotica_swig)/resources/lwr_simplified.urdf" />
+  <param name="robot_description_semantic" textfile="$(find exotica_swig)/resources/lwr_simplified.srdf" />
+
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find exotica_swig)/resources/rviz.rviz" />
+
+
+</launch>

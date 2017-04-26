@@ -87,7 +87,7 @@ namespace exotica
   void IMesh::Instantiate(IMeshInitializer& init)
   {
       initDebug(init.ReferenceFrame);
-      eff_size_ = scene_->getMapSize(object_name_);
+      eff_size_ = tmp_eff.size();
       weights_.setOnes(eff_size_, eff_size_);
       initialised_ = true;
   }

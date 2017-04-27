@@ -365,7 +365,7 @@ namespace exotica
           q = solution.row(t);
       }
       planning_time_ = ros::Duration(ros::Time::now() - start);
-      if(!ret) throw_solve("Solution not found after max number of iterations ("<<parameters_.MaxIt<<")!");
+      //if(!ret) throw_solve("Solution not found after max number of iterations ("<<parameters_.MaxIt<<")!");
     }
     else
     {

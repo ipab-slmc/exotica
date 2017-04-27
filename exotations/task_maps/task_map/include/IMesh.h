@@ -81,6 +81,7 @@ namespace exotica
        */
       void setWeight(int i, int j, double weight);
       void setWeights(const Eigen::MatrixXd & weights);
+      Eigen::MatrixXd getWeights();
 
       /**
        * @brief	Compute laplace coordinates of a vertices set
@@ -89,11 +90,11 @@ namespace exotica
        * @param	dist	Triangular matrix of distances between vertices (out put)
        * @return	3xN Laplace coordinates
        */
-      static Eigen::VectorXd computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
+      static Eigen::VectorXd computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXdRefConst Weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
 
       void computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
 
-      static void computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal);
+      static void computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal, Eigen::MatrixXdRefConst Weights);
 
       virtual void debug();
       void initDebug(std::string ref);

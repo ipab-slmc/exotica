@@ -74,11 +74,13 @@ namespace exotica
 
   }
 
+  Eigen::MatrixXd IMesh::getWeights()
+  {
+    return weights_;
+  }
+
   void IMesh::initDebug(std::string ref)
   {
-      imesh_mark_.scale.x = 0.005;
-      imesh_mark_.color.a = imesh_mark_.color.r = 1;
-      imesh_mark_.type = visualization_msgs::Marker::LINE_LIST;
       imesh_mark_.header.frame_id = ref;
       imesh_mark_.ns = getObjectName();
       imesh_mark_pub_ = server_->advertise<visualization_msgs::Marker>(ns_ +"/InteractionMesh", 1, true);
@@ -91,6 +93,11 @@ namespace exotica
       Debug = init.Debug;
       eff_size_ = tmp_eff.size();
       weights_.setOnes(eff_size_, eff_size_);
+      if(init.Weights.rows()==eff_size_*eff_size_)
+      {
+          weights_.array() = init.Weights.array();
+          HIGHLIGHT("Loading iMesh weights.\n"<<weights_);
+      }
       initialised_ = true;
   }
 
@@ -108,7 +115,14 @@ namespace exotica
 
   void IMesh::debug()
   {
+    static int textid = 0;
+    {
     Eigen::Map<Eigen::MatrixXd> eff_mat(EFFPHI.data(), 3, eff_size_);
+    imesh_mark_.scale.x = 0.005;
+    imesh_mark_.color.a = imesh_mark_.color.r = 1;
+    imesh_mark_.type = visualization_msgs::Marker::LINE_LIST;
+    imesh_mark_.pose = geometry_msgs::Pose();
+    imesh_mark_.ns = getObjectName();
     imesh_mark_.points.clear();
     std::vector<geometry_msgs::Point> points(eff_size_);
     for (int i = 0; i < eff_size_; i++)
@@ -122,12 +136,56 @@ namespace exotica
     {
       for(int j=i+1;j<eff_size_;j++)
       {
-          imesh_mark_.points.push_back(points[i]);
-          imesh_mark_.points.push_back(points[j]);
+          if(weights_(i, j)>0.0)
+          {
+              imesh_mark_.points.push_back(points[i]);
+              imesh_mark_.points.push_back(points[j]);
+          }
       }
     }
     imesh_mark_.header.stamp = ros::Time::now();
     imesh_mark_pub_.publish(imesh_mark_);
+    }
+    {
+    int t=0;
+    Eigen::Map<Eigen::MatrixXd> eff_mat(PHI.data(), 3, eff_size_);
+    imesh_mark_.ns = getObjectName()+"Raw";
+    imesh_mark_.points.clear();
+    std::vector<geometry_msgs::Point> points(eff_size_);
+    for (int i = 0; i < eff_size_; i++)
+    {
+      points[i].x = eff_mat(0, i);
+      points[i].y = eff_mat(1, i);
+      points[i].z = eff_mat(2, i);
+    }
+
+    for(int i=0;i<eff_size_;i++)
+    {
+      for(int j=i+1;j<eff_size_;j++)
+      {
+          if(weights_(i, j)>0.0)
+          {
+              imesh_mark_.points.push_back(points[i]);
+              imesh_mark_.points.push_back(points[j]);
+          }
+      }
+    }
+    imesh_mark_.header.stamp = ros::Time::now();
+    imesh_mark_pub_.publish(imesh_mark_);
+
+    imesh_mark_.points.clear();
+    imesh_mark_.scale.z = 0.05;
+    imesh_mark_.color.a = imesh_mark_.color.r = imesh_mark_.color.g = imesh_mark_.color.b = 1;
+    imesh_mark_.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    imesh_mark_.text = std::to_string(textid);
+    imesh_mark_.pose.position = points[textid];
+    imesh_mark_.pose.position.z += 0.05;
+    imesh_mark_.ns = getObjectName()+"Id";
+    imesh_mark_.header.stamp = ros::Time::now();
+    imesh_mark_pub_.publish(imesh_mark_);
+
+    textid=(textid+1)%eff_size_;
+    }
   }
 
   void IMesh::destroyDebug()
@@ -162,7 +220,7 @@ namespace exotica
     }
   }
 
-  Eigen::VectorXd IMesh::computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXd* dist_ptr, Eigen::VectorXd* wsum_ptr)
+  Eigen::VectorXd IMesh::computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXdRefConst Weights, Eigen::MatrixXd* dist_ptr, Eigen::VectorXd* wsum_ptr)
   {
     int N = EffPhi.rows()/3;
     Eigen::VectorXd Phi = Eigen::VectorXd::Zero(N*3);
@@ -176,8 +234,8 @@ namespace exotica
         if (!(j >= N && l >= N))
         {
           dist(j, l) = dist(l, j) = sqrt(
-              (EffPhi.segment(j, 3) - EffPhi.segment(l, 3)).dot(
-                  ( EffPhi.segment(j, 3) - EffPhi.segment(l, 3))));
+              (EffPhi.segment(j*3, 3) - EffPhi.segment(l*3, 3)).dot(
+                  ( EffPhi.segment(j*3, 3) - EffPhi.segment(l*3, 3))));
         }
       }
     }
@@ -188,7 +246,7 @@ namespace exotica
       {
         if (dist(j, l) > 0 && j != l)
         {
-          wsum(j) += 1.0 / dist(j, l);
+          wsum(j) += Weights(j,l) / dist(j, l);
         }
       }
     }
@@ -202,7 +260,7 @@ namespace exotica
         {
           if (dist(j, l) > 0 && wsum(j) > 0)
           {
-            Phi.segment(j, 3) -= EffPhi.segment(l, 3) / (dist(j, l) * wsum(j));
+            Phi.segment(j*3, 3) -= EffPhi.segment(l*3, 3) * Weights(j,l) / (dist(j, l) * wsum(j));
           }
         }
       }
@@ -212,7 +270,7 @@ namespace exotica
     return Phi;
   }
 
-  void IMesh::computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal)
+  void IMesh::computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal, Eigen::MatrixXdRefConst Weights)
   {
     int N = nodes.size();
     Eigen::VectorXd EffPhi(3*N);
@@ -222,9 +280,7 @@ namespace exotica
       EffPhi(i*3+1) = nodes[i].p[1];
       EffPhi(i*3+2) = nodes[i].p[2];
     }
-    Eigen::MatrixXd dist;
-    Eigen::VectorXd wsum;
-    goal = computeLaplace(EffPhi, &dist, &wsum);
+    goal = computeLaplace(EffPhi, Weights);
   }
 
   void IMesh::computeGoalLaplace(const Eigen::VectorXd &x,
@@ -234,7 +290,7 @@ namespace exotica
     scene_->update(x, t);
     update(x, t);
     Eigen::VectorXd EffPhi = EFFPHI;
-    goal = computeLaplace(EffPhi);
+    goal = computeLaplace(EffPhi, weights_);
   }
 
   void IMesh::computeIMesh(int t)
@@ -246,7 +302,7 @@ namespace exotica
     Eigen::VectorXd EffPhi = EFFPHI;
     Eigen::MatrixXd EffJac= EFFJAC;
     Eigen::MatrixXd Jac = Eigen::MatrixXd::Zero(JAC.rows(),JAC.cols());
-    Eigen::VectorXd Phi = computeLaplace(EffPhi, &dist, &wsum);
+    Eigen::VectorXd Phi = computeLaplace(EffPhi, weights_, &dist, &wsum);
 
     if (updateJacobian_)
     {
@@ -264,13 +320,13 @@ namespace exotica
           {
             if (j != l)
             {
-              if (dist(j, l) > 0 && wsum(j) > 0)
+              if (dist(j, l) > 0 && wsum(j) > 0 && weights_(j, l) > 0)
               {
                 A = dist(j, l) * wsum(j);
-                w = 1.0 / A;
+                w = weights_(j, l) / A;
 
                 _A = 0;
-                distance = EffPhi.segment(j, 3) - EffPhi.segment(l, 3);
+                distance = EffPhi.segment(j*3, 3) - EffPhi.segment(l*3, 3);
                 if (j < M)
                 {
                   if (l < M)
@@ -291,9 +347,9 @@ namespace exotica
                 Sl = distance.dot(_distance) / dist(j, l);
                 for (k = 0; k < M; k++)
                 {
-                  if (j != k && dist(j, k) > 0 && 1.0 > 0)
+                  if (j != k && dist(j, k) > 0 && weights_(j, k) > 0)
                   {
-                    distance = EffPhi.segment(j, 3) - EffPhi.segment(k, 3);
+                    distance = EffPhi.segment(j*3, 3) - EffPhi.segment(k*3, 3);
                     if (j < M)
                     {
                       if (k < M)
@@ -307,11 +363,11 @@ namespace exotica
                       if (k < M) _distance = -EffJac.block(3 * k, i, 3, 1);
                     }
                     Sk = distance.dot(_distance) / dist(j, k);
-                    _A += 1.0 * (Sl * dist(j, k) - Sk * dist(j, l))
+                    _A += weights_(j, k) * (Sl * dist(j, k) - Sk * dist(j, l))
                         / (dist(j, k) * dist(j, k));
                   }
                 }
-                _w = -1.0 * _A / (A * A);
+                _w = -weights_(j, l) * _A / (A * A);
               }
               else
               {
@@ -319,10 +375,10 @@ namespace exotica
                 w = 0;
               }
               if (l < M)
-                Jac.block(3 * j, i, 3, 1) -= EffPhi.segment(l, 3) * _w
+                Jac.block(3 * j, i, 3, 1) -= EffPhi.segment(l*3, 3) * _w
                     + EffJac.block(3 * l, i, 3, 1) * w;
               else
-                Jac.block(3 * j, i, 3, 1) -= EffPhi.segment(l, 3) * _w;
+                Jac.block(3 * j, i, 3, 1) -= EffPhi.segment(l*3, 3) * _w;
             }
           }
         }

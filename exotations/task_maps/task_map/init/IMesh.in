@@ -1,2 +1,3 @@
 extend <exotica/TaskMap>
 Optional std::string ReferenceFrame = "/world";
+Optional Eigen::VectorXd Weights = Eigen::VectorXd();

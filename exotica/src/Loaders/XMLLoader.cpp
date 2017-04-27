@@ -90,6 +90,33 @@ namespace exotica
         return true;
     }
 
+    Initializer XMLLoader::loadXML(std::string file_name, bool parsePathAsXML)
+    {
+        tinyxml2::XMLDocument xml_file;
+        if(parsePathAsXML)
+        {
+            if (xml_file.Parse(file_name.c_str(),file_name.size()) != tinyxml2::XML_NO_ERROR)
+            {
+              throw_pretty("Can't load file!\nFile: '"+file_name+"'");
+            }
+        }
+        else
+        {
+            if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
+            {
+              throw_pretty("Can't load file!\nFile: '"+file_name+"'");
+            }
+        }
+
+        Initializer ret("TopLevel");
+        tinyxml2::XMLHandle root_tag(xml_file.RootElement()->FirstChildElement());
+        if(!parseXML(root_tag,ret, ""))
+        {
+            throw_pretty("Can't parse XML!\nFile: '"+file_name+"'");
+        }
+        return ret;
+    }
+
     void XMLLoader::loadXML(std::string file_name, Initializer& solver, Initializer& problem, const std::string& solver_name, const std::string& problem_name, bool parsePathAsXML)
     {
         tinyxml2::XMLDocument xml_file;

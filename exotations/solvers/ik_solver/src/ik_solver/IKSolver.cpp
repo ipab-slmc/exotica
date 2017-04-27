@@ -394,16 +394,19 @@ namespace exotica
         {
             vel_vec_ = vel_vec_ * parameters_.MaxStep / max_vel;
         }
-
-        for (int j=0;j<q0.rows();j++)
+        
+        if(parameters_.ClampToJointLimits)
         {
-            if(solution(0,j)+vel_vec_(j)<qmin_(j))
+            for (int j=0;j<q0.rows();j++)
             {
-                vel_vec_(j)=qmin_(j)-solution(0,j);
-            }
-            if(solution(0,j)+vel_vec_(j)>qmax_(j))
-            {
-                vel_vec_(j)=qmax_(j)-solution(0,j);
+                if(solution(0,j)+vel_vec_(j)<qmin_(j))
+                {
+                    vel_vec_(j)=qmin_(j)-solution(0,j);
+                }
+                if(solution(0,j)+vel_vec_(j)>qmax_(j))
+                {
+                    vel_vec_(j)=qmax_(j)-solution(0,j);
+                }
             }
         }
 

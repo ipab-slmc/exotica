@@ -60,6 +60,7 @@ namespace exotica
       if (initialised_)
       {
         computeIMesh(t);
+        if(Debug) debug();
       }
       else
       {
@@ -87,6 +88,7 @@ namespace exotica
   void IMesh::Instantiate(IMeshInitializer& init)
   {
       initDebug(init.ReferenceFrame);
+      Debug = init.Debug;
       eff_size_ = tmp_eff.size();
       weights_.setOnes(eff_size_, eff_size_);
       initialised_ = true;
@@ -160,55 +162,69 @@ namespace exotica
     }
   }
 
-  void IMesh::computeLaplace(int t)
+  Eigen::VectorXd IMesh::computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXd* dist_ptr, Eigen::VectorXd* wsum_ptr)
   {
-    int N = eff_size_;
-    dist.resize(N, N);
-    dist.setZero();
-    wsum.resize(N);
-    wsum.setZero();
-    int j, l;
-    double w;
+    int N = EffPhi.rows()/3;
+    Eigen::VectorXd Phi = Eigen::VectorXd::Zero(N*3);
+    Eigen::MatrixXd dist = Eigen::MatrixXd::Zero(N, N);
+    Eigen::VectorXd wsum = Eigen::VectorXd::Zero(N);
     /** Compute distance matrix (inverse proportional) */
-    for (j = 0; j < N; j++)
+    for (int j = 0; j < N; j++)
     {
-      for (l = j + 1; l < N; l++)
+      for (int l = j + 1; l < N; l++)
       {
         if (!(j >= N && l >= N))
         {
           dist(j, l) = dist(l, j) = sqrt(
-              (EFFPHI.segment(j, 3) - EFFPHI.segment(l, 3)).dot(
-                  ( EFFPHI.segment(j, 3) - EFFPHI.segment(l, 3))));
+              (EffPhi.segment(j, 3) - EffPhi.segment(l, 3)).dot(
+                  ( EffPhi.segment(j, 3) - EffPhi.segment(l, 3))));
         }
       }
     }
     /** Computer weight normaliser */
-    for (j = 0; j < N; j++)
+    for (int j = 0; j < N; j++)
     {
-      for (l = 0; l < N; l++)
+      for (int l = 0; l < N; l++)
       {
         if (dist(j, l) > 0 && j != l)
         {
-          wsum(j) += weights_(j, l) / dist(j, l);
+          wsum(j) += 1.0 / dist(j, l);
         }
       }
     }
     /** Compute Laplace coordinates */
-    for (j = 0; j < N; j++)
+    for (int j = 0; j < N; j++)
     {
-      PHI.segment(j, 3) = EFFPHI.segment(j, 3);
-      for (l = 0; l < N; l++)
+      Phi.segment(j*3, 3) = EffPhi.segment(j*3, 3);
+      for (int l = 0; l < N; l++)
       {
         if (j != l)
         {
           if (dist(j, l) > 0 && wsum(j) > 0)
           {
-            w = weights_(j, l) / (dist(j, l) * wsum(j));
-            PHI.segment(j, 3) -= EFFPHI.segment(l, 3) * w;
+            Phi.segment(j, 3) -= EffPhi.segment(l, 3) / (dist(j, l) * wsum(j));
           }
         }
       }
     }
+    if(dist_ptr) *dist_ptr = dist;
+    if(wsum_ptr) *wsum_ptr = wsum;
+    return Phi;
+  }
+
+  void IMesh::computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal)
+  {
+    int N = nodes.size();
+    Eigen::VectorXd EffPhi(3*N);
+    for(int i=0;i<N;i++)
+    {
+      EffPhi(i*3) = nodes[i].p[0];
+      EffPhi(i*3+1) = nodes[i].p[1];
+      EffPhi(i*3+2) = nodes[i].p[2];
+    }
+    Eigen::MatrixXd dist;
+    Eigen::VectorXd wsum;
+    goal = computeLaplace(EffPhi, &dist, &wsum);
   }
 
   void IMesh::computeGoalLaplace(const Eigen::VectorXd &x,
@@ -217,80 +233,85 @@ namespace exotica
     int t = 0;
     scene_->update(x, t);
     update(x, t);
-    computeLaplace(t);
-    goal = PHI;
+    Eigen::VectorXd EffPhi = EFFPHI;
+    goal = computeLaplace(EffPhi);
   }
 
   void IMesh::computeIMesh(int t)
   {
     int M = eff_size_;
 
-    computeLaplace(t);
+    Eigen::MatrixXd dist;
+    Eigen::VectorXd wsum;
+    Eigen::VectorXd EffPhi = EFFPHI;
+    Eigen::MatrixXd EffJac= EFFJAC;
+    Eigen::MatrixXd Jac = Eigen::MatrixXd::Zero(JAC.rows(),JAC.cols());
+    Eigen::VectorXd Phi = computeLaplace(EffPhi, &dist, &wsum);
 
     if (updateJacobian_)
     {
       double A, _A, Sk, Sl, w, _w;
       int i, j, k, l, N;
-      N = EFFJAC.cols();
+      N = EffJac.cols();
       Eigen::Vector3d distance, _distance = Eigen::Vector3d::Zero(3, 1);
       for (i = 0; i < N; i++)
       {
         for (j = 0; j < M; j++)
         {
           if (j < M)
-          JAC.block(3 * j, i, 3, 1) = EFFJAC.block(3 * j, i, 3, 1);
+          Jac.block(3 * j, i, 3, 1) = EffJac.block(3 * j, i, 3, 1);
           for (l = 0; l < M; l++)
           {
             if (j != l)
             {
-              if (dist(j, l) > 0 && wsum(j) > 0 && weights_(j, l) > 0)
+              if (dist(j, l) > 0 && wsum(j) > 0)
               {
                 A = dist(j, l) * wsum(j);
-                w = weights_(j, l) / A;
+                w = 1.0 / A;
 
                 _A = 0;
-                distance = EFFPHI.segment(j, 3) - EFFPHI.segment(l, 3);
+                distance = EffPhi.segment(j, 3) - EffPhi.segment(l, 3);
                 if (j < M)
                 {
                   if (l < M)
                     //Both j and l are points on the robot
-                    _distance = EFFJAC.block(3 * j, i, 3, 1)
-                        - EFFJAC.block(3 * l, i, 3, 1);
+                    _distance = EffJac.block(3 * j, i, 3, 1)
+                        - EffJac.block(3 * l, i, 3, 1);
                   else
                     //l is not on the robot
-                    _distance = EFFJAC.block(3 * j, i, 3, 1);
+                    _distance = EffJac.block(3 * j, i, 3, 1);
                 }
                 else
                 {
                   if (l < M)
                   //j is not on the robot
-                    _distance = -EFFJAC.block(3 * l, i, 3, 1);
+                    _distance = -EffJac.block(3 * l, i, 3, 1);
                 }
 
                 Sl = distance.dot(_distance) / dist(j, l);
                 for (k = 0; k < M; k++)
                 {
-                  if (j != k && dist(j, k) > 0 && weights_(j, k) > 0)
+                  if (j != k && dist(j, k) > 0 && 1.0 > 0)
                   {
-                    distance = EFFPHI.segment(j, 3) - EFFPHI.segment(k, 3);
+                    distance = EffPhi.segment(j, 3) - EffPhi.segment(k, 3);
                     if (j < M)
                     {
                       if (k < M)
-                        _distance = EFFJAC.block(3 * j, i, 3, 1)
-                            - EFFJAC.block(3 * k, i, 3, 1);
+                        _distance = EffJac.block(3 * j, i, 3, 1)
+                            - EffJac.block(3 * k, i, 3, 1);
                       else
-                        _distance = EFFJAC.block(3 * j, i, 3, 1);
+                        _distance = EffJac.block(3 * j, i, 3, 1);
                     }
                     else
                     {
-                      if (k < M) _distance = -EFFJAC.block(3 * k, i, 3, 1);
+                      if (k < M) _distance = -EffJac.block(3 * k, i, 3, 1);
                     }
                     Sk = distance.dot(_distance) / dist(j, k);
-                    _A += weights_(j, k) * (Sl * dist(j, k) - Sk * dist(j, l))
+                    _A += 1.0 * (Sl * dist(j, k) - Sk * dist(j, l))
                         / (dist(j, k) * dist(j, k));
                   }
                 }
-                _w = -weights_(j, l) * _A / (A * A);
+                _w = -1.0 * _A / (A * A);
               }
               else
               {
@@ -298,15 +319,17 @@ namespace exotica
                 w = 0;
               }
               if (l < M)
-                JAC.block(3 * j, i, 3, 1) -= EFFPHI.segment(l, 3) * _w
-                    + EFFJAC.block(3 * l, i, 3, 1) * w;
+                Jac.block(3 * j, i, 3, 1) -= EffPhi.segment(l, 3) * _w
+                    + EffJac.block(3 * l, i, 3, 1) * w;
               else
-                JAC.block(3 * j, i, 3, 1) -= EFFPHI.segment(l, 3) * _w;
+                Jac.block(3 * j, i, 3, 1) -= EffPhi.segment(l, 3) * _w;
             }
           }
         }
       }
     }
+    JAC = Jac;
+    PHI = Phi;
   }
 
   void IMesh::setWeight(int i, int j, double weight)

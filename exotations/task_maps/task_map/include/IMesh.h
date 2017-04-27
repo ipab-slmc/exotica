@@ -89,9 +89,11 @@ namespace exotica
        * @param	dist	Triangular matrix of distances between vertices (out put)
        * @return	3xN Laplace coordinates
        */
-      void computeLaplace(int t);
+      static Eigen::VectorXd computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
 
       void computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
+
+      static void computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal);
 
       virtual void debug();
       void initDebug(std::string ref);
@@ -125,10 +127,8 @@ namespace exotica
       /** Interaction Mesh Variables **/
       Eigen::MatrixXd weights_;	//!< Weighting matrix, currently set to ones
 
-      Eigen::MatrixXd dist;
-      Eigen::VectorXd wsum;
-
       int eff_size_;
+      bool Debug;
 
       ros::Publisher imesh_mark_pub_;
       visualization_msgs::Marker imesh_mark_;

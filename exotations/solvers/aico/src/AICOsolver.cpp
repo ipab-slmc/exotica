@@ -500,10 +500,16 @@ namespace exotica
       q.at(i) = b.at(i).head(n2);
     s = b;
     for (int t = 1; t <= T; t++)
+    {
+      Sinv.setZero(); 
       Sinv.at(t).diagonal().setConstant(damping);
+    }
     v = b;
     for (int t = 0; t <= T; t++)
+    {
+      Vinv.setZero();  
       Vinv.at(t).diagonal().setConstant(damping);
+    }
     dampingReference = b;
     for (int t = 0; t <= T && ros::ok(); t++)
     {

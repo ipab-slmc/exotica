@@ -501,13 +501,13 @@ namespace exotica
     s = b;
     for (int t = 1; t <= T; t++)
     {
-      Sinv.setZero(); 
+      Sinv.at(t).setZero(); 
       Sinv.at(t).diagonal().setConstant(damping);
     }
     v = b;
     for (int t = 0; t <= T; t++)
     {
-      Vinv.setZero();  
+      Vinv.at(t).setZero();  
       Vinv.at(t).diagonal().setConstant(damping);
     }
     dampingReference = b;

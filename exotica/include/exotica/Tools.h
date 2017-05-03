@@ -49,7 +49,7 @@
 #include <exotica/Tools/Printable.h>
 #include <exotica/Tools/Conversions.h>
 #include <exotica/Version.h>
-
+#include <std_msgs/ColorRGBA.h>
 
 /**
  * \brief A convenience macro for the boost scoped lock
@@ -76,6 +76,7 @@ namespace exotica
     TERMINATE = 0, CONTINUE = 1
   };
 
+  std_msgs::ColorRGBA randomColor();
 
   /**
    * \brief Parses an XML element into an Eigen Matrix. The handle must point directly to the element with the matrix as its text child and must have no comments!

@@ -33,9 +33,23 @@
 #include "exotica/Tools.h"
 #include <fstream>
 #include <boost/algorithm/string.hpp>
+#include <random>
 
 namespace exotica
 {
+
+    std_msgs::ColorRGBA randomColor()
+    {
+        std_msgs::ColorRGBA ret;
+        ret.a = 1.0;
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(0.0, 1.0);
+        ret.r = dis(gen);
+        ret.g = dis(gen);
+        ret.b = dis(gen);
+        return ret;
+    }
 
   void saveMatrix(std::string file_name,
       const Eigen::Ref<const Eigen::MatrixXd> mat)

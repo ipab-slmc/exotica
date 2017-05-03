@@ -15,7 +15,7 @@ catkin_package(
   DEPENDS #system_lib
 )
 
-AddInitializer(CoM IMesh EffPosition JointLimit SweepFlux Distance Identity)
+AddInitializer(CoM IMesh EffPosition JointLimit SweepFlux Distance Identity SphereCollision Sphere)
 GenInitializers()
 
 include_directories(
@@ -30,6 +30,7 @@ add_library(${PROJECT_NAME} src/CoM.cpp
                             src/SweepFlux.cpp
                             src/Distance.cpp
                             src/Identity.cpp
+                            src/SphereCollision.cpp
            )
 
 

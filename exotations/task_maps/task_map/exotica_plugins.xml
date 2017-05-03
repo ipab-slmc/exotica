@@ -8,6 +8,9 @@
   <class name="exotica/EffPosition" type="exotica::EffPosition" base_class_type="exotica::TaskMap">
     <description>End-effector position (3D)</description>
   </class>
+  <class name="exotica/SphereCollision" type="exotica::SphereCollision" base_class_type="exotica::TaskMap">
+    <description>Sphere collision avoidance</description>
+  </class>
   <class name="exotica/Identity" type="exotica::Identity" base_class_type="exotica::TaskMap">
     <description>Joint position reference</description>
   </class>

@@ -23,13 +23,7 @@ The library itself consists of two major specifications, both of which are abstr
 1. Install dependencies
   1. If running the rosdep for the first time start by running:
      ```sudo rosdep init```
-  1. 
-  
-     ``
-     rosdep update
-     rosdep check --from-paths ./ -s -i
-     ``
-
+  1. ```rosdep update ; rosdep check --from-paths ./ -s -i ```
 1. Compile the code ```catkin build -s```.
 1. Source the config file (ideally inside ```~/.bashrc```): ```source path_to_workspace/devel/setup.bash```. You may have to source the config file from your installspace if your workspace is configured for installation.
 

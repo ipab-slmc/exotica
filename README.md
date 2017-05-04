@@ -25,10 +25,11 @@ The library itself consists of two major specifications, both of which are abstr
      ```sudo rosdep init```
   1. 
   
-     ```
-rosdep update
-rosdep check --from-paths ./ -s -i
-     ```
+     ``
+     rosdep update
+     rosdep check --from-paths ./ -s -i
+     ``
+
 1. Compile the code ```catkin build -s```.
 1. Source the config file (ideally inside ```~/.bashrc```): ```source path_to_workspace/devel/setup.bash```. You may have to source the config file from your installspace if your workspace is configured for installation.
 

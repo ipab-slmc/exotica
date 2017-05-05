@@ -58,11 +58,6 @@ catkin/**/Makefile
 **/cmake/*-genmsg.cmake
 **/cmake/*-genmsg-context.py
 
-# Doxygen, Sphinx, etc
-**/doc/*
-**/docs/*
-**/**/doc/
-**/doc/**
 
 # Netbeans Files
 nbproject

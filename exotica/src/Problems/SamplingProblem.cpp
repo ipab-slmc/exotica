@@ -31,33 +31,33 @@
  *
  */
 
-#include <exotica/Problems/OMPLProblem.h>
+#include <exotica/Problems/SamplingProblem.h>
 #include <exotica/Setup.h>
 
-REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem)
+REGISTER_PROBLEM_TYPE("SamplingProblem", exotica::SamplingProblem)
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 namespace exotica
 {
 
-  OMPLProblem::OMPLProblem()
+  SamplingProblem::SamplingProblem()
       : space_dim_(0), problemType(OMPL_PROBLEM_GOAL)
   {
     // TODO Auto-generated constructor stub
 
   }
 
-  OMPLProblem::~OMPLProblem()
+  SamplingProblem::~SamplingProblem()
   {
     // TODO Auto-generated destructor stub
   }
 
-  std::vector<double>& OMPLProblem::getBounds()
+  std::vector<double>& SamplingProblem::getBounds()
   {
     return bounds_;
   }
 
-  void OMPLProblem::clear(bool keepOriginals)
+  void SamplingProblem::clear(bool keepOriginals)
   {
     if (keepOriginals)
     {
@@ -72,7 +72,7 @@ namespace exotica
     }
   }
 
-  void OMPLProblem::reinitialise(rapidjson::Document& document,
+  void SamplingProblem::reinitialise(rapidjson::Document& document,
       boost::shared_ptr<PlanningProblem> problem)
   {
     clear();
@@ -174,7 +174,7 @@ namespace exotica
     }
   }
 
-  void OMPLProblem::Instantiate(OMPLProblemInitializer& init)
+  void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
   {
       Parameters = init;
       std::string PlroblemType = init.PlroblemType;
@@ -224,7 +224,7 @@ namespace exotica
       }
   }
 
-  void OMPLProblem::initDerived(tinyxml2::XMLHandle & handle)
+  void SamplingProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("PlroblemType");
     if (tmp_handle.ToElement())
@@ -307,17 +307,17 @@ namespace exotica
     }
   }
 
-  int OMPLProblem::getSpaceDim()
+  int SamplingProblem::getSpaceDim()
   {
     return space_dim_;
   }
 
-  std::vector<TaskTerminationCriterion_ptr>& OMPLProblem::getGoals()
+  std::vector<TaskTerminationCriterion_ptr>& SamplingProblem::getGoals()
   {
     return goals_;
   }
 
-  bool OMPLProblem::isCompoundStateSpace()
+  bool SamplingProblem::isCompoundStateSpace()
   {
     return compound_;
   }

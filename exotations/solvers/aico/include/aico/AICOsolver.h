@@ -45,10 +45,10 @@
  * \defgroup AICO Approximate Inference Control (AICO) solver
  * @{
  * The AICO solver was designed to solve finite time horizon time discretized (\f$T\f$ number of time steps) motion planning problem.
- * The AICO solver is defined within the EXOTica framework, therefore it makes use of a specification of the exotica planning problem class (\ref AICOProblem) and the underlying tools for initialisation and kinematic computations.
+ * The AICO solver is defined within the EXOTica framework, therefore it makes use of a specification of the exotica planning problem class (\ref UnconstrainedTimeIndexedProblem) and the underlying tools for initialisation and kinematic computations.
  * The inputs of the system are:
  *   - The start point \f$x_0\f$
- *   - Problem definition (\ref exotica::AICOProblem)
+ *   - Problem definition (\ref exotica::UnconstrainedTimeIndexedProblem)
  * @}
  */
 
@@ -66,7 +66,7 @@
 #define AICOSOLVER_H_
 
 #include <exotica/EXOTica.hpp>
-#include <exotica/Problems/AICOProblem.h>
+#include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 #include <exotica/Definitions/TaskSqrError.h>
 #include <aico/AICOsolverInitializer.h>
 #include <iostream>
@@ -115,7 +115,7 @@ namespace exotica
       /**
        * \brief Binds the solver to a specific problem which must be pre-initalised
        * @param pointer Shared pointer to the motion planning problem
-       * @return        Successful if the problem is a valid AICOProblem
+       * @return        Successful if the problem is a valid UnconstrainedTimeIndexedProblem
        */
       virtual void specifyProblem(PlanningProblem_ptr pointer);
 
@@ -213,7 +213,7 @@ namespace exotica
       void initTrajectory(const std::vector<Eigen::VectorXd>& q_init);
 
     private:
-      AICOProblem_ptr prob_; //!< Shared pointer to the planning problem.
+      UnconstrainedTimeIndexedProblem_ptr prob_; //!< Shared pointer to the planning problem.
       double damping; //!< Damping
       double damping_init; //!< Damping
       double tolerance; //!< Termination error threshold
@@ -391,7 +391,7 @@ namespace exotica
           Eigen::Ref<Eigen::VectorXd> a_, Eigen::Ref<Eigen::MatrixXd> B_);
 
       /**
-       * \brief Updates the task cost terms \f$ R, r, \hat{r} \f$ for time step \f$t\f$. AICOProblem::update() has to be called before calling this function.
+       * \brief Updates the task cost terms \f$ R, r, \hat{r} \f$ for time step \f$t\f$. UnconstrainedTimeIndexedProblem::update() has to be called before calling this function.
        * @param t Time step to be updated.
        */
       double getTaskCosts(int t);

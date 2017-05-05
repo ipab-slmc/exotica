@@ -36,7 +36,7 @@
 namespace exotica
 {
   OMPLRNStateSpace::OMPLRNStateSpace(unsigned int dim, const Server_ptr &server,
-      OMPLProblem_ptr &prob)
+      SamplingProblem_ptr &prob)
       : OMPLBaseStateSpace(dim, server, prob)
   {
     setName("OMPLRNStateSpace");

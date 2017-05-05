@@ -39,7 +39,7 @@
 #include <boost/thread/mutex.hpp>
 #include "GraphManager.h"
 #include <tf/transform_listener.h>
-#include <exotica/Problems/IKProblem.h>
+#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/Definitions/TaskSqrError.h>
 //ROS packages
 #include <ros/ros.h>

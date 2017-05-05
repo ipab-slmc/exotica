@@ -85,7 +85,7 @@ namespace exotica
        * \brief Assign exotica problem to this solver
        * @param prob    EXOTica Planning Problem pointer
        */
-      virtual void specifyProblem(const OMPLProblem_ptr &prob);
+      virtual void specifyProblem(const SamplingProblem_ptr &prob);
     protected:
       /*
        * \brief Register default ompl planning algorithms

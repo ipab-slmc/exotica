@@ -35,7 +35,7 @@
 #define IK_SOLVER_H_
 
 #include <exotica/EXOTica.hpp>
-#include <exotica/Problems/IKProblem.h>
+#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/Definitions/TaskSqrError.h>
 #include <ik_solver/IKsolverInitializer.h>
 #include <iostream>
@@ -104,7 +104,7 @@ namespace exotica
       double getRho(const std::string & task_name, int t = 0);
       virtual void getRho(const std::string & task_name, double& rho, int t = 0);
 
-      IKProblem_ptr& getProblem();
+      UnconstrainedEndPoseProblem_ptr& getProblem();
 
       double error;
       ros::Duration planning_time_;
@@ -129,7 +129,7 @@ namespace exotica
       IKsolverInitializer parameters_;
 
       inline void vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
-      IKProblem_ptr prob_; // Shared pointer to the planning problem.
+      UnconstrainedEndPoseProblem_ptr prob_; // Shared pointer to the planning problem.
       EParam<std_msgs::Int64> maxit_;	// Maximum iteration
       EParam<std_msgs::Float64> maxstep_;	// Maximum step
       EParam<std_msgs::Bool> multi_task_;

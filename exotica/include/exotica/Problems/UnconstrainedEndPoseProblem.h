@@ -31,24 +31,24 @@
  *
  */
 
-#ifndef IK_PROBLEM_H_
-#define IK_PROBLEM_H_
+#ifndef UNCONSTRAINEDENDPOSEPROBLEM_H_
+#define UNCONSTRAINEDENDPOSEPROBLEM_H_
 #include <exotica/PlanningProblem.h>
 #include "exotica/Definitions/TaskSqrError.h"
-#include <exotica/IKProblemInitializer.h>
+#include <exotica/UnconstrainedEndPoseProblemInitializer.h>
 
 namespace exotica
 {
   /**
-   * IK problem implementation
+   * Unconstrained end-pose problem implementation
    */
-  class IKProblem: public PlanningProblem, public Instantiable<IKProblemInitializer>
+  class UnconstrainedEndPoseProblem: public PlanningProblem, public Instantiable<UnconstrainedEndPoseProblemInitializer>
   {
     public:
-      IKProblem();
-      virtual ~IKProblem();
+      UnconstrainedEndPoseProblem();
+      virtual ~UnconstrainedEndPoseProblem();
 
-      virtual void Instantiate(IKProblemInitializer& init);
+      virtual void Instantiate(UnconstrainedEndPoseProblemInitializer& init);
 
       /**
        * \brief	Get configuration weight
@@ -80,7 +80,7 @@ namespace exotica
       int T_;
 
   };
-  typedef boost::shared_ptr<exotica::IKProblem> IKProblem_ptr;
+  typedef boost::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
 }
 
-#endif /* IK_PROBLEM_H_ */
+#endif

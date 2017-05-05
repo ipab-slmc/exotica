@@ -73,7 +73,7 @@ namespace exotica
       };
 
       OMPLSE3RNStateSpace(unsigned int dim, const Server_ptr &server,
-          OMPLProblem_ptr &prob);
+          SamplingProblem_ptr &prob);
       virtual unsigned int getDimension() const;
       virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
       virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,

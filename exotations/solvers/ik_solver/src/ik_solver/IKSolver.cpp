@@ -118,12 +118,12 @@ namespace exotica
 
   void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
   {
-    if (pointer->type()!="exotica::IKProblem")
+    if (pointer->type()!="exotica::UnconstrainedEndPoseProblem")
     {
       throw_named("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
     }
     MotionSolver::specifyProblem(pointer);
-    prob_ = boost::static_pointer_cast<IKProblem>(pointer);
+    prob_ = boost::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
     size_ = prob_->getScene()->getNumJoints();
 //    for (auto & it : prob_->getScenes())
 //    {
@@ -323,7 +323,7 @@ namespace exotica
     }
   }
 
-  IKProblem_ptr& IKsolver::getProblem()
+  UnconstrainedEndPoseProblem_ptr& IKsolver::getProblem()
   {
     return prob_;
   }

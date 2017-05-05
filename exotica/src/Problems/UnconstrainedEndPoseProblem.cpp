@@ -31,27 +31,27 @@
  *
  */
 
-#include <exotica/Problems/IKProblem.h>
+#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/Setup.h>
 
-REGISTER_PROBLEM_TYPE("IKProblem", exotica::IKProblem)
+REGISTER_PROBLEM_TYPE("UnconstrainedEndPoseProblem", exotica::UnconstrainedEndPoseProblem)
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 namespace exotica
 {
-  IKProblem::IKProblem()
+  UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
       : tau_(0.01)
   {
 
   }
 
-  IKProblem::~IKProblem()
+  UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
   {
     //TODO
   }
 
-  void IKProblem::reinitialise(rapidjson::Document& document,
+  void UnconstrainedEndPoseProblem::reinitialise(rapidjson::Document& document,
       boost::shared_ptr<PlanningProblem> problem)
   {
     clear();
@@ -119,7 +119,7 @@ namespace exotica
     }
   }
 
-  void IKProblem::Instantiate(IKProblemInitializer& init)
+  void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
   {
       tau_ = init.Tolerance;
       config_w_ = Eigen::MatrixXd::Identity(init.W.rows(), init.W.rows());
@@ -131,7 +131,7 @@ namespace exotica
       }
   }
 
-  void IKProblem::initDerived(tinyxml2::XMLHandle & handle)
+  void UnconstrainedEndPoseProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLElement* xmltmp;
     xmltmp = handle.FirstChildElement("W").ToElement();
@@ -169,24 +169,24 @@ namespace exotica
     }
   }
 
-  int IKProblem::getT()
+  int UnconstrainedEndPoseProblem::getT()
   {
     return T_;
   }
 
-  Eigen::MatrixXd IKProblem::getW()
+  Eigen::MatrixXd UnconstrainedEndPoseProblem::getW()
   {
     return config_w_;
   }
 
-  double IKProblem::getTau()
+  double UnconstrainedEndPoseProblem::getTau()
   {
     return tau_;
   }
 
-  void IKProblem::setTau(double tau)
+  void UnconstrainedEndPoseProblem::setTau(double tau)
   {
     tau_ = tau;
   }
-}	//namespace exotica
+}
 

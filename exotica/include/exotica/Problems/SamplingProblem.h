@@ -31,19 +31,19 @@
  *
  */
 
-#ifndef OMPLPROBLEM_H_
-#define OMPLPROBLEM_H_
+#ifndef SAMPLINGPROBLEM_H_
+#define SAMPLINGPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 #include "exotica/Definitions/TaskTerminationCriterion.h"
-#include <exotica/OMPLProblemInitializer.h>
+#include <exotica/SamplingProblemInitializer.h>
 
 namespace exotica
 {
 
-  enum OMPLProblem_Type
+  enum SamplingProblem_Type
   {
     OMPL_PROBLEM_GOAL = 0,
     OMPL_PROBLEM_COSTS,
@@ -51,14 +51,14 @@ namespace exotica
     OMPL_PROBLEM_SAMPLING_BIAS
   };
 
-  class OMPLProblem: public PlanningProblem, public Instantiable<OMPLProblemInitializer>
+  class SamplingProblem: public PlanningProblem, public Instantiable<SamplingProblemInitializer>
   {
     public:
-      OMPLProblem();
+      SamplingProblem();
       virtual
-      ~OMPLProblem();
+      ~SamplingProblem();
 
-      virtual void Instantiate(OMPLProblemInitializer& init);
+      virtual void Instantiate(SamplingProblemInitializer& init);
 
       int getSpaceDim();
 
@@ -75,7 +75,7 @@ namespace exotica
       std::string local_planner_config_;
       EParam<std_msgs::Bool> full_body_plan_;
 
-      OMPLProblemInitializer Parameters;
+      SamplingProblemInitializer Parameters;
 
       virtual void clear(bool keepOriginals = true);
     protected:
@@ -90,14 +90,14 @@ namespace exotica
       std::vector<TaskTerminationCriterion_ptr> goals_;
       std::vector<double> bounds_;
       int space_dim_;
-      OMPLProblem_Type problemType;
+      SamplingProblem_Type problemType;
       bool compound_;
       std::vector<TaskTerminationCriterion_ptr> originalGoals_;
 
   };
 
-  typedef boost::shared_ptr<exotica::OMPLProblem> OMPLProblem_ptr;
+  typedef boost::shared_ptr<exotica::SamplingProblem> SamplingProblem_ptr;
 
-} /* namespace exotica */
+}
 
-#endif /* OMPLPROBLEM_H_ */
+#endif

@@ -10,7 +10,7 @@
     <Dynamic>0</Dynamic>
   </AICOsolver>
 
-  <AICOProblem Name="MyProblem">
+  <UnconstrainedTimeIndexedProblem Name="MyProblem">
 
     <PlanningScene>
       <Scene Name="AICOSolverDemoScene">
@@ -51,6 +51,6 @@
     <Hrate>1.0</Hrate>
     <Wrate>1.0</Wrate>
     <W> 7 6 5 4 3 2 1 </W>
-  </AICOProblem>
+  </UnconstrainedTimeIndexedProblem>
 
 </PlannerDemoConfig>

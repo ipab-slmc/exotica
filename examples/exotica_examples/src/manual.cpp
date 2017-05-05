@@ -2,7 +2,7 @@
 #include <ik_solver/IKsolverInitializer.h>
 #include <task_map/EffPositionInitializer.h>
 #include <exotica/TaskSqrErrorInitializer.h>
-#include <exotica/IKProblemInitializer.h>
+#include <exotica/UnconstrainedEndPoseProblemInitializer.h>
 
 using namespace exotica;
 
@@ -24,7 +24,7 @@ void run()
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
 
-    IKProblemInitializer problem("MyProblem",scene,{map},{task},1e-5,W);
+    UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,{map},{task},1e-5,W);
     IKsolverInitializer solver("MySolver",false,1);
 
     HIGHLIGHT_NAMED("ManualLoader","Loaded from a hardcoded specialized initializer.");

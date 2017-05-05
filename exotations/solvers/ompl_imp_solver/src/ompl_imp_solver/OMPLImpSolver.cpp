@@ -131,7 +131,7 @@ namespace exotica
     }
   }
 
-  void OMPLImpSolver::specifyProblem(const OMPLProblem_ptr &prob)
+  void OMPLImpSolver::specifyProblem(const SamplingProblem_ptr &prob)
   {
     prob_ = prob;
     base_type_ = prob_->getScene()->getBaseType();

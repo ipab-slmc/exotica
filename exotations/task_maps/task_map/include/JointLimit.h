@@ -34,10 +34,7 @@
 #define JOINTLIMIT_H_
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
-#include <Eigen/Dense>
-#include <boost/thread/mutex.hpp>
+#include <task_map/JointLimitInitializer.h>
 
 namespace exotica
 {
@@ -46,13 +43,15 @@ namespace exotica
    * 			Note: we dont want to always stay at the centre of the joint range,
    * 			be lazy as long as the joint is not too close to the low/high limits
    */
-  class JointLimit: public TaskMap
+  class JointLimit: public TaskMap, public Instantiable<JointLimitInitializer>
   {
     public:
       //	Default constructor
       JointLimit();
       //	Default destructor
       ~JointLimit();
+
+      virtual void Instantiate(JointLimitInitializer& init);
 
       /**
        * @brief	Concrete implementation of update method

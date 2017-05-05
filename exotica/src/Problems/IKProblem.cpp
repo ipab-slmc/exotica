@@ -31,8 +31,8 @@
  *
  */
 
-#include "exotica/Problems/IKProblem.h"
-#include "exotica/Initialiser.h"
+#include <exotica/Problems/IKProblem.h>
+#include <exotica/Setup.h>
 
 REGISTER_PROBLEM_TYPE("IKProblem", exotica::IKProblem)
 
@@ -66,11 +66,11 @@ namespace exotica
                 getJSON(obj["class"], constraintClass);
                 if (knownMaps_.find(constraintClass) != knownMaps_.end())
                 {
-                    TaskMap_ptr taskmap = Initialiser::createMap(knownMaps_[constraintClass]);
+                    TaskMap_ptr taskmap = Setup::createMap(knownMaps_[constraintClass]);
                     taskmap->initialise(obj, server_, scene_,problem);
                     std::string name = taskmap->getObjectName();
                     task_maps_[name] = taskmap;
-                    TaskDefinition_ptr task = Initialiser::createDefinition("TaskSqrError");
+                    TaskDefinition_ptr task = Setup::createDefinition("TaskSqrError");
                     TaskSqrError_ptr sqr = boost::static_pointer_cast<TaskSqrError>(task);
                     sqr->setTaskMap(taskmap);
                     int dim;
@@ -117,6 +117,18 @@ namespace exotica
     {
         throw_named("Invalid JSON array!");
     }
+  }
+
+  void IKProblem::Instantiate(IKProblemInitializer& init)
+  {
+      tau_ = init.Tolerance;
+      config_w_ = Eigen::MatrixXd::Identity(init.W.rows(), init.W.rows());
+      config_w_.diagonal() = init.W;
+      T_ = init.T;
+      for (auto& it : task_defs_)
+      {
+          it.second->setTimeSteps(T_);
+      }
   }
 
   void IKProblem::initDerived(tinyxml2::XMLHandle & handle)

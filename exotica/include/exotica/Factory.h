@@ -48,14 +48,15 @@
  * @param TYPE    The name to identify the class (should be of type IDENT)
  * @param DERIV   The Derived Class type (should inherit from BASE)
  */
-#define EXOTICA_REGISTER(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) ("exotica/" TYPE, [] () -> BASE * { return new DERIV(); } ); \
+#define EXOTICA_REGISTER(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) ("exotica/" TYPE, [] () -> BASE * { return new DERIV(); }, #BASE ); \
     PLUGINLIB_EXPORT_CLASS(DERIV, BASE)
 
-#define EXOTICA_REGISTER_CORE(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) ("exotica/" TYPE, [] () -> BASE * { return new DERIV(); } );
+#define EXOTICA_REGISTER_CORE(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) ("exotica/" TYPE, [] () -> BASE * { return new DERIV(); }, #BASE );
 
 
 namespace exotica
 {
+  template<typename BO> class Registrar;
   /**
    * \brief Templated Object factory for Default-constructible classes. The Factory is itself a singleton.
    * @param I   The identifier type (typically a string)
@@ -65,6 +66,7 @@ namespace exotica
   class Factory: public Object
   {
     public:
+      friend class Registrar<BO>;
       /**
        * \brief Singleton implementation: returns a reference to a singleton instance of the instantiated class
        */
@@ -102,7 +104,7 @@ namespace exotica
           }
           else
           {
-            throw_pretty("This factory does not recognize type '"<< type << "'");
+            throw_pretty("This factory does not recognize type '"<< type << "' ("+base_type_+")");
           }
       }
 
@@ -170,6 +172,7 @@ namespace exotica
 
       /** The Map containing the register of the different types of classes **/
       std::map<std::string, BO * (*)()> type_registry_;
+      std::string base_type_;
   };
 
   /**
@@ -186,8 +189,9 @@ namespace exotica
        * @param name      The name for the new class type
        * @param creator   The creator function for the DERIVED class type but which returns a pointer to the base-class type!
        */
-      Registrar(const std::string & name, BO * (*creator)())
+      Registrar(const std::string & name, BO * (*creator)(), const std::string& base_type)
       {
+        Factory<BO>::Instance().base_type_ = base_type;
         Factory<BO>::Instance().registerType(name, creator);
       }
   };

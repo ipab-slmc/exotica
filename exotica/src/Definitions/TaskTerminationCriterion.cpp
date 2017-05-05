@@ -32,14 +32,12 @@
 
 #include "exotica/Definitions/TaskTerminationCriterion.h"
 
-REGISTER_TASKDEFINITION_TYPE("TaskTerminationCriterion",
-    exotica::TaskTerminationCriterion);
+REGISTER_TASKDEFINITION_TYPE("TaskTerminationCriterion", exotica::TaskTerminationCriterion)
 
 namespace exotica
 {
 
-  TaskTerminationCriterion::TaskTerminationCriterion()
-      : threshold_(0.0)
+  TaskTerminationCriterion::TaskTerminationCriterion() : threshold_(0.0)
   {
     order = 0;
     rho0_.resize(1);
@@ -48,9 +46,86 @@ namespace exotica
     wasFullyInitialised_ = false;
   }
 
+  void TaskTerminationCriterion::Instantiate(TaskTerminationCriterionInitializer& init)
+  {
+      rho0_(0) = init.Rho;
+
+      if(init.Goal.rows()>0)
+      {
+          y_star0_ = init.Goal;
+      }
+      else
+      {
+          int dim;
+          getTaskMap()->taskSpaceDim(dim);
+          if (dim > 0)
+          {
+            y_star0_.resize(dim);
+            y_star0_.setZero();
+          }
+          else
+          {
+            throw_named("Task definition '"<<object_name_<<"':Goal was defined not and task map dimension is invalid!");
+          }
+      }
+      threshold0_(0) = (double)init.Threshold;
+      setTimeSteps(1);
+  }
+
   void TaskTerminationCriterion::initDerived(tinyxml2::XMLHandle & handle)
   {
-    TaskSqrError::initDerived(handle);
+      Eigen::VectorXd y_star; //!< The Goal vector
+      double rho;
+      // Load Rho
+      if (handle.FirstChildElement("Rho").ToElement())
+      {
+        getDouble(*(handle.FirstChildElement("Rho").ToElement()), rho);
+        rho0_(0) = rho;
+      }
+      else
+      {
+        throw_named("Parameter not found!");
+      }
+
+      // Load the goal
+      if (handle.FirstChildElement("Goal").ToElement())
+      {
+        try
+        {
+          getVector(*(handle.FirstChildElement("Goal").ToElement()), y_star);
+          y_star0_ = y_star;
+        }
+        catch (Exception e)
+        {
+          int dim;
+          getTaskMap()->taskSpaceDim(dim);
+          if (dim > 0)
+          {
+            y_star0_.resize(dim);
+            y_star0_.setZero();
+          }
+          else
+          {
+            throw_named("Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
+          }
+        }
+      }
+      else
+      {
+        int dim;
+        getTaskMap()->taskSpaceDim(dim);
+        if (dim > 0)
+        {
+          y_star0_.resize(dim);
+          y_star0_.setZero();
+        }
+        else
+        {
+          throw_named("Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
+        }
+      }
+
+
       double thr;
       if (handle.FirstChildElement("Threshold").ToElement())
       {
@@ -81,8 +156,56 @@ namespace exotica
 
   void TaskTerminationCriterion::setTimeSteps(const int T)
   {
-    TaskSqrError::setTimeSteps(T);
-    threshold_.assign(T, Eigen::VectorXdRef_ptr(threshold0_));
+      TaskDefinition::setTimeSteps(T);
+      y_star_.assign(T, Eigen::VectorXdRef_ptr(y_star0_));
+      rho_.assign(T, Eigen::VectorXdRef_ptr(rho0_));
+      threshold_.assign(T, Eigen::VectorXdRef_ptr(threshold0_));
+  }
+
+
+  void TaskTerminationCriterion::registerGoal(Eigen::VectorXdRef_ptr y_star, int t)
+  {
+    if (wasFullyInitialised_) (*y_star) = (*(y_star_.at(t)));
+    y_star_.at(t) = y_star;
+  }
+
+  void TaskTerminationCriterion::registerRho(Eigen::VectorXdRef_ptr rho, int t)
+  {
+    if (wasFullyInitialised_) (*rho) = (*(rho_.at(t)));
+    rho_.at(t) = rho;
+  }
+
+  void TaskTerminationCriterion::setDefaultGoals(int t)
+  {
+    if (!wasFullyInitialised_)
+    {
+      (*(y_star_.at(t))) = y_star0_;
+      (*(rho_.at(t))) = rho0_;
+    }
+  }
+
+  double TaskTerminationCriterion::getRho(int t)
+  {
+    return (*(rho_.at(t)))(0);
+  }
+
+  void TaskTerminationCriterion::setRho(int t, double rho)
+  {
+    if (!rho_.at(t)) throw_named("Invalid Rho!");
+    (*(rho_.at(t)))(0) = rho;
+  }
+
+  Eigen::VectorXdRef_ptr TaskTerminationCriterion::getGoal(int t)
+  {
+    if (t < y_star_.size())
+    {
+      return y_star_[t];
+    }
+    else
+    {
+      INDICATE_FAILURE
+      return y_star_[0];
+    }
   }
 
 }

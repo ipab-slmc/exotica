@@ -38,17 +38,10 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 #include "exotica/Definitions/TaskTerminationCriterion.h"
+#include <exotica/OMPLProblemInitializer.h>
 
 namespace exotica
 {
-
-  class TaskBias: public TaskSqrError
-  {
-    public:
-      TaskBias();
-  };
-
-  typedef boost::shared_ptr<exotica::TaskBias> TaskBias_ptr;
 
   enum OMPLProblem_Type
   {
@@ -58,12 +51,14 @@ namespace exotica
     OMPL_PROBLEM_SAMPLING_BIAS
   };
 
-  class OMPLProblem: public PlanningProblem
+  class OMPLProblem: public PlanningProblem, public Instantiable<OMPLProblemInitializer>
   {
     public:
       OMPLProblem();
       virtual
       ~OMPLProblem();
+
+      virtual void Instantiate(OMPLProblemInitializer& init);
 
       int getSpaceDim();
 
@@ -79,6 +74,8 @@ namespace exotica
           boost::shared_ptr<PlanningProblem> problem);
       std::string local_planner_config_;
       EParam<std_msgs::Bool> full_body_plan_;
+
+      OMPLProblemInitializer Parameters;
 
       virtual void clear(bool keepOriginals = true);
     protected:

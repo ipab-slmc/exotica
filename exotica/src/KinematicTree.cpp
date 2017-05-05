@@ -53,32 +53,6 @@ exotica::KinematicTree::KinematicTree()
   INFO("Done");
 }
 
-exotica::KinematicTree::KinematicTree(const std::string & urdf_param,
-    const SolutionForm_t & optimisation)
-{
-  INFO("Initialiser Constructor ... (urdf-file)");
-  //!< Set to default values
-  zero_undef_jnts_ = false;
-
-  //!< Attempt initialisation
-  initKinematics(urdf_param, optimisation);
-
-  INFO(std::cout << "Done");
-}
-
-exotica::KinematicTree::KinematicTree(const KDL::Tree & temp_tree,
-    const SolutionForm_t & optimisation)
-{
-  INFO("Initialiser Constructor ... (temp-tree)");
-  //!< Set to default values
-  zero_undef_jnts_ = false;
-
-  //!< Attempt initialisation
-  initKinematics(temp_tree, optimisation);
-
-  INFO("Done");
-}
-
 exotica::KinematicTree::KinematicTree(const exotica::KinematicTree & rhs)
 {
   robot_tree_ = rhs.robot_tree_;
@@ -116,35 +90,55 @@ exotica::KinematicTree & exotica::KinematicTree::operator=(
   return *this;
 }
 
-bool exotica::KinematicTree::initKinematics(const std::string & urdf_param,
-    const exotica::SolutionForm_t & optimisation)
+void exotica::KinematicTree::Instantiate(KinematicaInitializer& init, robot_model::RobotModelPtr model)
 {
-  KDL::Tree temp_tree;  //!< KDL Tree structure from urdf
-  boost::mutex::scoped_lock(member_lock_);
-  if (kdl_parser::treeFromParam(urdf_param, temp_tree))
-  {
-    return initialise(temp_tree, optimisation);
-  }
-  else
-  {
-    return false;
-  }
-}
+    exotica::SolutionForm_t solution;
+    LimbInitializer root(init.Root);
+    solution.root_segment = root.Segment;
+    solution.root_seg_off = getFrame(root.Frame);
 
-bool exotica::KinematicTree::initKinematics(const KDL::Tree & temp_tree,
-    const exotica::SolutionForm_t & optimisation)
-{
-  boost::mutex::scoped_lock(member_lock_);
-  return initialise(temp_tree, optimisation); //!< Just call
-}
+    if (init.BaseType == "floating")
+        base_type_ = solution.base_type = init.BaseType;
+    else if (init.BaseType == "planar")
+        base_type_ = solution.base_type = init.BaseType;
+    else
+        base_type_ = solution.base_type = "fixed";
 
-bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle)
-{
-  return initKinematics(handle, NULL);
+    controlled_base_ = init.ControlledBase;
+
+    solution.zero_other_joints = init.ZeroOtherJoints;
+    solution.joints_update = init.Joints;
+
+    if (solution.joints_update.size() < 1)
+    {
+        throw_pretty("No update joint is specified");
+    }
+
+    if (!model)
+    {
+      throw_pretty("No robot model provided!");
+    }
+    else
+    {
+      model_ = model;
+      KDL::Tree temp_tree;
+      boost::mutex::scoped_lock(member_lock_);
+      if (kdl_parser::treeFromUrdfModel(*model_->getURDF(), temp_tree))
+      {
+        if(!initialise(temp_tree, solution))
+        {
+            throw_pretty("Can't initialize Kinematica!");
+        }
+      }
+      else
+      {
+        throw_pretty("Can't load URDF model!");
+      }
+    }
 }
 
 bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
-    const robot_model::RobotModelPtr & model)
+    const robot_model::RobotModelPtr model)
 {
   INFO("Initialisation from xml");
 
@@ -341,27 +335,7 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
 
   if (model_ == NULL)
   {
-    INDICATE_FAILURE
-    return false;
-    if (!handle.FirstChildElement("Urdf").ToElement())
-    {
-      ERROR("Urdf element not exist");
-      return false;
-    }
-    else
-    {
-      std::string urdf_file =
-          handle.FirstChildElement("Urdf").ToElement()->GetText();
-      if (urdf_file.empty())
-      {
-        ERROR("URDF is empty");
-        return false;
-      }
-      else
-      {
-        return initKinematics(urdf_file, solution);
-      }
-    }
+    throw_pretty("No robot model provided!");
   }
   else
   {
@@ -379,6 +353,9 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
     }
   }
 }
+
+
+
 bool exotica::KinematicTree::updateEndEffectors(
     const SolutionForm_t & new_end_effectors)
 {
@@ -879,79 +856,45 @@ bool exotica::KinematicTree::getInitialEff(std::vector<std::string> & segs,
   offsets = eff_seg_offs_ini_;
   return true;
 }
+
 bool exotica::KinematicTree::initialise(const KDL::Tree & temp_tree,
     const exotica::SolutionForm_t & optimisation)
 {
-  bool success; //!< Running measure of success
+    // First clear/reset everything
+    robot_tree_.clear();
+    segment_map_.clear();
+    zero_undef_jnts_ = true;
+    num_jnts_spec_ = 0;
+    eff_segments_.clear();
+    eff_seg_offs_.clear();
 
-//!< First clear/reset everything
-  robot_tree_.clear();
-  segment_map_.clear();
-  zero_undef_jnts_ = true;
-  num_jnts_spec_ = 0;
-  eff_segments_.clear();
-  eff_seg_offs_.clear();
-
-//!< Attempt to Build the Tree
-  success = buildTree(temp_tree, optimisation.root_segment, joint_map_);
-
-  if (success)
-  {
-    std::cout << "Kinematica using " << base_type_
-        << " base, the robot true root is " << robot_root_.first << " at index "
-        << robot_root_.second << std::endl;
-  }
-#ifdef KIN_DEBUG_MODE
-  if (success)
-  INFO("Initialisation Function ... Built Internal Tree");
-#endif
-
-  if (success)
-  {
-    success = setJointLimits();
-  }
-//!< Set the Joint ordering
-  if (success)
-  {
-    success = setJointOrder(optimisation.joints_update,
-        optimisation.zero_other_joints, joint_map_);
-  }
-
-#ifdef KIN_DEBUG_MODE
-  if (success)
-  INFO("Initialisation Function ... Defined Joint Ordering");
-#endif
-
-//!< Set the End-Effector Kinematics
-  if (success)
-  {
-    success = setEndEffectors(optimisation);
-
-  }
-
-  eff_segments_ini_ = optimisation.end_effector_segs;
-  eff_seg_offs_ini_ = optimisation.end_effector_offs;
-#ifdef KIN_DEBUG_MODE
-  if (success)
-  INFO("Initialisation Function ... Set End Effectors");
-#endif
-
-//!< Clean up if necessary
-  if (!success)
-  { //!< Clear up everything
+    if(buildTree(temp_tree, optimisation.root_segment, joint_map_))
+    {
+        std::cout << "Kinematica using " << base_type_
+            << " base, the robot true root is " << robot_root_.first << " at index "
+            << robot_root_.second << std::endl;
+        if(setJointLimits())
+        {
+            if(setJointOrder(optimisation.joints_update,optimisation.zero_other_joints, joint_map_))
+            {
+                if(setEndEffectors(optimisation))
+                {
+                    eff_segments_ini_ = optimisation.end_effector_segs;
+                    eff_seg_offs_ini_ = optimisation.end_effector_offs;
+                    return true;
+                }
+            }
+        }
+    }
+    // Clear up everything on failure
     robot_tree_.clear();
     segment_map_.clear();
     zero_undef_jnts_ = false;
     num_jnts_spec_ = 0;
     eff_segments_.clear();
     eff_seg_offs_.clear();
-  }
 
-#ifdef KIN_DEBUG_MODE
-  if (success)
-  INFO("Initialisation Function ... returning");
-#endif
-  return success;
+    return false;
 }
 
 bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
@@ -1119,8 +1062,7 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
   {
     robot_root_.second = 0;
     true_root = temp_tree.getRootSegment()->second.segment.getName();
-    return addSegment(root_segment, ROOT, rubbish, true, false, true_root,
-        joint_map); //!< We do a little trick here to indicate that this is the root node
+    return addSegment(root_segment, ROOT, rubbish, true, false, true_root,joint_map); //!< We do a little trick here to indicate that this is the root node
   }
 }
 
@@ -1330,6 +1272,7 @@ bool exotica::KinematicTree::setEndEffectors(
       } //!< If larger than 0, push back the frame offset
       success = recurseNeedFlag(
           segment_map_[optimisation.end_effector_segs[i]]); //!< Set the needed flag for this and all parents
+
       INFO("setEndEffectors Function ...  Managed to add End effector " << optimisation.end_effector_segs[i]);
     }
     else
@@ -1339,6 +1282,7 @@ bool exotica::KinematicTree::setEndEffectors(
       success = false;
     }
   }
+
 
   if (success)
   {

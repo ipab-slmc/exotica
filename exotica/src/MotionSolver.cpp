@@ -35,7 +35,12 @@
 namespace exotica
 {
 
-  MotionSolver::MotionSolver()
+  void MotionSolver::InstantiateBase(const Initializer& init)
+  {
+    Object::InstatiateObject(init);
+  }
+
+  MotionSolver::MotionSolver() : server_(Server::Instance())
   {
   }
 

@@ -30,12 +30,13 @@
  *
  */
 
-#include "exotica/PlanningProblem.h"
-#include "exotica/Initialiser.h"
+#include <exotica/PlanningProblem.h>
+#include <exotica/Setup.h>
+#include <exotica/PlanningProblemInitializer.h>
 
 namespace exotica
 {
-  PlanningProblem::PlanningProblem()
+  PlanningProblem::PlanningProblem() : server_(Server::Instance())
   {
 
   }
@@ -95,7 +96,7 @@ namespace exotica
 
     for (int i = 0; i < msg.tasks; i++)
     {
-      TaskMap_ptr map = Initialiser::createMap(msg.map_type.at(i));
+      TaskMap_ptr map = Setup::createMap(msg.map_type.at(i));
       std::vector<std::pair<std::string, std::string> > tmpParams;
       if (msg.map_params.size() != 0)
         tmpParams = vector2map(msg.map_params.at(i).strings);
@@ -105,7 +106,7 @@ namespace exotica
       std::string name = map->getObjectName();
       task_maps_[name] = map;
 
-      TaskDefinition_ptr def = Initialiser::createDefinition(msg.task_type.at(i));
+      TaskDefinition_ptr def = Setup::createDefinition(msg.task_type.at(i));
       def->setTaskMap(map);
       if (msg.task_params.size() != 0)
         tmpParams = vector2map(msg.task_params.at(i).strings);
@@ -113,6 +114,69 @@ namespace exotica
       def->setTimeSteps(msg.task_goal.at(i).row);
       task_defs_[msg.task_name.at(i)] = def;
     }
+  }
+
+  void PlanningProblem::InstantiateBase(const Initializer& init_)
+  {
+      Object::InstatiateObject(init_);
+      PlanningProblemInitializer init(init_);
+      init.check(init_);
+      poses.reset(new std::map<std::string, Eigen::VectorXd>());
+      posesJointNames.reset(new std::vector<std::string>());
+      knownMaps_["PositionConstraint"] = "Distance";
+      knownMaps_["PostureConstraint"] = "Identity";
+
+      startState.resize(0);
+      endState.resize(0);
+      nominalState.resize(0);
+
+      task_maps_.clear();
+      task_defs_.clear();
+
+      // Create the scene
+      SceneInitializer initS(init.PlanningScene);
+      initS.check(init.PlanningScene);
+      scene_.reset(new Scene(initS.Name));
+      scene_->InstantiateInternal(initS);
+
+      // Create the maps
+      for(const Initializer& map : init.Maps)
+      {
+          TaskMap_ptr temp_ptr = Setup::createMap(map);
+          temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
+          if (task_maps_.find(temp_ptr->getObjectName()) != task_maps_.end())
+          {
+              throw_named("Map '"+temp_ptr->getObjectName()+"' already exists!");
+          }
+          task_maps_[temp_ptr->getObjectName()] = temp_ptr;
+          temp_ptr->registerScene(scene_);
+      }
+
+      if (init.Maps.size() == 0)
+      {
+        HIGHLIGHT("No maps were defined!");
+      }
+
+      // Create the task definitions
+      for(const Initializer& task : init.Tasks)
+      {
+          Initializer mapped_task(task);
+          mapped_task.addProperty(Property("TaskMaps",true,boost::any(task_maps_)));
+          TaskDefinition_ptr temp_ptr = Setup::createDefinition(mapped_task);
+          temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
+          if (task_defs_.find(temp_ptr->getObjectName()) != task_defs_.end())
+          {
+              throw_named("Task definition '"+temp_ptr->getObjectName()+"' already exists!");
+          }
+          task_defs_[temp_ptr->getObjectName()] = temp_ptr;
+      }
+      if (init.Tasks.size() == 0)
+      {
+        HIGHLIGHT("No tasks were defined!");
+      }
+
+      originalMaps_ = task_maps_;
+      originalDefs_ = task_defs_;
   }
 
   void PlanningProblem::initBase(tinyxml2::XMLHandle & handle,
@@ -207,7 +271,7 @@ namespace exotica
         throw_named("Can't find the type!");
       }
       type = temp_type;
-      TaskMap_ptr temp_ptr = Initialiser::createMap(type);
+      TaskMap_ptr temp_ptr = Setup::createMap(type);
 
         task_maps_[name] = temp_ptr;  //!< Copy the shared_ptr;
         task_maps_.at(name)->ns_ = ns_ + "/" + name;
@@ -255,7 +319,7 @@ namespace exotica
       type = temp_type;
 
       //!< attempt to create
-      TaskDefinition_ptr temp_ptr = Initialiser::createDefinition(type);
+      TaskDefinition_ptr temp_ptr = Setup::createDefinition(type);
 
       //!< Attempt to initialise
 

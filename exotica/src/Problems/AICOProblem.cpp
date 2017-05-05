@@ -31,8 +31,8 @@
  *
  */
 
-#include "exotica/Problems/AICOProblem.h"
-#include "exotica/Initialiser.h"
+#include <exotica/Problems/AICOProblem.h>
+#include <exotica/Setup.h>
 
 REGISTER_PROBLEM_TYPE("AICOProblem", exotica::AICOProblem)
 
@@ -56,11 +56,11 @@ namespace exotica
                 getJSON(obj["class"], constraintClass);
                 if (knownMaps_.find(constraintClass) != knownMaps_.end())
                 {
-                    TaskMap_ptr taskmap = Initialiser::createMap(knownMaps_[constraintClass]);
+                    TaskMap_ptr taskmap = Setup::createMap(knownMaps_[constraintClass]);
                     taskmap->initialise(obj, server_, scene_, problem);
                     std::string name = taskmap->getObjectName();
                     task_maps_[name] = taskmap;
-                    TaskDefinition_ptr task = Initialiser::createDefinition("TaskSqrError");
+                    TaskDefinition_ptr task = Setup::createDefinition("TaskSqrError");
                     TaskSqrError_ptr sqr = boost::static_pointer_cast<TaskSqrError>(task);
                     sqr->setTaskMap(taskmap);
                     int dim;
@@ -145,6 +145,29 @@ namespace exotica
   AICOProblem::~AICOProblem()
   {
 
+  }
+
+  void AICOProblem::Instantiate(AICOProblemInitializer& init)
+  {
+      T = init.T;
+      if (T <= 2)
+      {
+        throw_named("Invalid number of timesteps: "<<T);
+      }
+      tau = init.Tau;
+      Q_rate = init.Qrate;
+      H_rate = init.Hrate;
+      W_rate = init.Wrate;
+      W = Eigen::MatrixXd::Identity(init.W.rows(), init.W.rows());
+      W.diagonal() = init.W;
+
+      for (auto& task : task_defs_)
+      {
+        if (task.second->type()!="exotica::TaskSqrError")
+          throw_named("Task variable '" + task.first + "' is not an squared error! ("+task.second->type()+")");
+      }
+      // Set number of time steps
+      setTime(T);
   }
 
   void AICOProblem::initDerived(tinyxml2::XMLHandle & handle)

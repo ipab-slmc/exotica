@@ -37,6 +37,7 @@
 #include "exotica/Factory.h"      //!< The Factory template
 #include "exotica/Server.h"
 #include "exotica/Scene.h"
+#include "exotica/Property.h"
 
 #include <Eigen/Dense>            //!< Generally dense manipulations should be enough
 #include <boost/thread/mutex.hpp> //!< The boost thread-library for synchronisation
@@ -56,7 +57,7 @@ namespace exotica
 {
   class PlanningProblem;
 
-  class TaskMap: public Object, Uncopyable
+  class TaskMap: public Object, Uncopyable, public virtual InstantiableBase
   {
     public:
       /**
@@ -66,6 +67,8 @@ namespace exotica
       virtual ~TaskMap()
       {
       }
+
+      virtual void InstantiateBase(const Initializer& init);
 
       /**
        * \brief Initialiser (from XML): mainly resolves the KinematicScene pointer
@@ -143,6 +146,9 @@ namespace exotica
 
       virtual std::string print(std::string prepend);
 
+      void registerScene(Scene_ptr scene);
+      std::string getSceneName();
+
       virtual void debug();
     protected:
 
@@ -159,6 +165,7 @@ namespace exotica
       Scene_ptr scene_;  //!< The Scene object (smart-pointer):
       boost::mutex scene_lock_;  //!< Synchronisation for the scene object
       Server_ptr server_; //!< Pointer to EXOTica parameter server;
+      std::string scene_name_;
       /**
        * \brief Private data members for information hiding and thread-safety
        */
@@ -172,6 +179,9 @@ namespace exotica
       Eigen::VectorXi jacFlag_;
       Eigen::VectorXd phi0_;
       Eigen::MatrixXd jac0_;
+
+      std::vector<std::string> tmp_eff;
+      std::vector<KDL::Frame> tmp_offset;
   };
 
   //!< Typedefines for some common functionality

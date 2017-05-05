@@ -38,6 +38,7 @@
 #include "ompl_imp_solver/OMPLRNStateSpace.h"
 #include "ompl_imp_solver/OMPLSE3RNStateSpace.h"
 #include <pluginlib/class_loader.h>
+#include <exotica/Property.h>
 
 namespace exotica
 {
@@ -57,6 +58,7 @@ namespace exotica
        * @param handle  XML handle that contains solver specific parameters
        */
       virtual void initialiseSolver(tinyxml2::XMLHandle & handle);
+      virtual void initialiseSolver(Initializer& init);
 
       /*
        * \brief Solve function

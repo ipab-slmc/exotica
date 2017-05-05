@@ -21,6 +21,13 @@ namespace exotica
 
   }
 
+  void OMPLBaseSolver::initialiseBaseSolver(Initializer& init, const Server_ptr &server)
+  {
+      server_ = server;
+      registerDefaultPlanners();
+      initialiseSolver(init);
+  }
+
   void OMPLBaseSolver::initialiseBaseSolver(tinyxml2::XMLHandle & handle,
       const Server_ptr &server)
   {

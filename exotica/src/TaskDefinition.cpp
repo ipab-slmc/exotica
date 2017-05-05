@@ -31,6 +31,7 @@
  */
 
 #include "exotica/TaskDefinition.h"
+#include <exotica/TaskDefinitionInitializer.h>
 
 namespace exotica
 {
@@ -58,6 +59,14 @@ namespace exotica
             std::vector<std::pair<std::string,std::string> >& params)
   {
       object_name_ = name + std::to_string((unsigned long) this);
+  }
+
+  void TaskDefinition::InstantiateBase(const Initializer& init_)
+  {
+      Object::InstatiateObject(init_);
+      TaskDefinitionInitializer init(init_);
+      TaskMap_map maps = boost::any_cast<TaskMap_map>(init_.getProperty("TaskMaps"));
+      setTaskMap(maps.at(init.Map));
   }
 
   void TaskDefinition::initBase(tinyxml2::XMLHandle & handle,

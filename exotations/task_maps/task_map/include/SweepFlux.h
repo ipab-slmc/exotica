@@ -34,13 +34,9 @@
 #define SWEEPFLUX_H
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
 #include <exotica/KinematicTree.h>
-#include <Eigen/Eigen>
-#include <boost/thread/mutex.hpp>
-#include "SweepFlux.h"
 #include <visualization_msgs/Marker.h>
+#include <task_map/SweepFluxInitializer.h>
 
 #define ID(x,a,b) {if(!(x>=a&&x<a+b)) ERROR("Out of bounds: "<<x <<" ("<<a<<" "<<b<<")");}
 
@@ -49,13 +45,15 @@ namespace exotica
   /**
    * @brief	Implementation of Flux Measure of swept area
    */
-  class SweepFlux: public TaskMap
+  class SweepFlux: public TaskMap, public Instantiable<SweepFluxInitializer>
   {
     public:
       /**
        * @brief	Default constructor
        */
       SweepFlux();
+
+      virtual void Instantiate(SweepFluxInitializer& init);
 
       /**
        * @brief	Destructor
@@ -116,10 +114,10 @@ namespace exotica
       Eigen::MatrixXd VertJ_;
       int TrisStride_;
 
-      EParam<std::string> obj_file_;
+      std::string obj_file_;
       EParam<geometry_msgs::PoseStamped> obj_pose_;
       Eigen::Affine3d qTransform_;
-      EParam<std_msgs::Bool> capTop_, capBottom_, capEnds_;
+      bool capTop_, capBottom_, capEnds_;
 
       ros::Publisher vis_pub_;
       ros::NodeHandle nh_;

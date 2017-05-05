@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<IKSolverDemoConfig>
+
+  <IKsolver Name="MySolver">   <!-- Motion solver definition -->
+    <MaxIt>1</MaxIt>
+  </IKsolver>
+
+  <IKProblem Name="MyProblem"> <!-- Problem definition -->
+
+    <PlanningScene>
+      <Scene Name="MyScene"> <!-- Kinematic scene -->
+        <PlanningMode>Optimization</PlanningMode>
+        <Solver>
+          <Kinematica>
+            <Root><Limb Segment="base"/></Root>
+            <Joints>
+              lwr_arm_0_joint,lwr_arm_1_joint,lwr_arm_2_joint,lwr_arm_3_joint,lwr_arm_4_joint,lwr_arm_5_joint,lwr_arm_6_joint
+            </Joints>
+          </Kinematica>
+        </Solver>
+      </Scene>
+    </PlanningScene>
+    
+    <Maps>
+      <EffPosition Name="Position">
+        <Scene>MyScene</Scene>
+        <EndEffector>
+            <Limb Segment="lwr_arm_6_link" />
+            <Limb Segment="lwr_arm_6_link">
+              <Frame>0.0 0.0 0.5 0.0 0.0 0.0 1.0</Frame>
+            </Limb>
+        </EndEffector>
+      </EffPosition>
+    </Maps>
+
+    <Tasks>
+      <TaskSqrError Name="MinimizeError">
+        <Map>Position</Map>
+        <Rho>1e2</Rho>
+      </TaskSqrError>
+    </Tasks>
+
+
+    <!-- Problem parameters: tolerance and per joint weighting -->
+    <Tolerance>1e-5</Tolerance>
+    <W> 7 6 5 4 3 2 1 </W>
+  </IKProblem>
+
+</IKSolverDemoConfig>

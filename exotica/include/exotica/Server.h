@@ -410,14 +410,14 @@ namespace exotica
        * @param	path	Robot model name
        * @param	model	Robot model
        */
-      void getModel(std::string path, robot_model::RobotModelPtr& model);
+      void getModel(std::string path, robot_model::RobotModelPtr& model, std::string urdf="", std::string srdf="");
 
       /*
        * \brief	Get robot model
        * @param	path	Robot model name
        * @return	robot model
        */
-      robot_model::RobotModelConstPtr getModel(std::string path);
+      robot_model::RobotModelConstPtr getModel(std::string path, std::string urdf="", std::string srdf="");
 
       /*
        * \brief	Get the name of ther server
@@ -433,6 +433,7 @@ namespace exotica
       ///	\brief	Make sure the singleton does not get copied
       Server(Server const&) = delete;
       void operator=(Server const&) = delete;
+      robot_model::RobotModelPtr loadModel(std::string name, std::string urdf="", std::string srdf="");
 
       template<typename T>
       void paramCallback(const boost::shared_ptr<T const> & ptr,

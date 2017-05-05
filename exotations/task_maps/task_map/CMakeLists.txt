@@ -15,6 +15,9 @@ catkin_package(
   DEPENDS #system_lib
 )
 
+AddInitializer(CoM IMesh EffPosition JointLimit SweepFlux Distance Identity)
+GenInitializers()
+
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
@@ -31,6 +34,8 @@ add_library(${PROJECT_NAME} src/CoM.cpp
 
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

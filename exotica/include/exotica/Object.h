@@ -40,6 +40,9 @@
 #include <exotica/Server.h>
 #include "rapidjson/document.h"
 
+#include "exotica/Property.h"
+#include "exotica/ObjectInitializer.h"
+
 namespace exotica
 {
   template<typename BO> class Factory;
@@ -53,7 +56,7 @@ namespace exotica
        * \brief Constructor: default
        */
       Object()
-          : ns_("")
+          : ns_(""),debug_(false)
       {
         //!< Empty constructor
       }
@@ -84,6 +87,13 @@ namespace exotica
         return object_name_;
       }
 
+      void InstatiateObject(const Initializer& init)
+      {
+         ObjectInitializer oinit(init);
+         object_name_=oinit.Name;
+         debug_=oinit.Debug;
+      }
+
       virtual void initBase(tinyxml2::XMLHandle & handle,
           const Server_ptr & server)
       {
@@ -102,6 +112,7 @@ namespace exotica
       //	Namespace, i.e. problem/scene/...etc
       std::string ns_;
       std::string object_name_;
+      bool debug_;
   };
 }
 #endif

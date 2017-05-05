@@ -68,6 +68,7 @@
 #include <exotica/EXOTica.hpp>
 #include <exotica/Problems/AICOProblem.h>
 #include <exotica/Definitions/TaskSqrError.h>
+#include <aico/AICOsolverInitializer.h>
 #include <iostream>
 #include <fstream>
 #include <aico/incremental_gaussian.h>
@@ -88,10 +89,11 @@ namespace exotica
    * \brief Solves motion planning problem using Approximate Inference Control method.
    * \ingroup AICO
    */
-  class AICOsolver: public MotionSolver
+  class AICOsolver: public MotionSolver, public Instantiable<AICOsolverInitializer>
   {
     public:
       AICOsolver();
+      virtual void Instantiate(AICOsolverInitializer& init);
       virtual ~AICOsolver();
       /**
        * \brief Solves the problem

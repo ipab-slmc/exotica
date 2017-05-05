@@ -1,0 +1,5 @@
+include <exotica/KinematicaInitializer>
+extend <exotica/Object>
+Required exotica::Initializer Solver; # KinematicaInitializer
+Optional std::string PlanningMode = "Optimization";
+Optional std::string RobotDescription = "robot_description";

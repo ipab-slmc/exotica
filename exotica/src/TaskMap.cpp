@@ -33,12 +33,13 @@
 #include "exotica/TaskMap.h"
 #include "exotica/PlanningProblem.h"
 #include <boost/algorithm/string.hpp>
+#include <exotica/TaskMapInitializer.h>
 
 namespace exotica
 {
 
   TaskMap::TaskMap()
-      : updateJacobian_(true)
+      : updateJacobian_(true), server_(Server::Instance())
   {
 
   }
@@ -133,6 +134,36 @@ namespace exotica
     {
       HIGHLIGHT("No limbs found!");
     }
+  }
+
+  void TaskMap::InstantiateBase(const Initializer& init)
+  {
+    Object::InstatiateObject(init);
+    TaskMapInitializer tminit(init);
+
+    tmp_eff.clear();
+    tmp_offset.clear();
+
+    scene_name_ = tminit.Scene;
+
+    for(Initializer& eff : tminit.EndEffector)
+    {
+        LimbInitializer limb(eff);
+        tmp_eff.push_back(limb.Segment);
+        tmp_offset.push_back(getFrame(limb.Frame));
+    }
+
+  }
+
+  void TaskMap::registerScene(Scene_ptr scene)
+  {
+      scene_ = scene;
+      scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
+  }
+
+  std::string TaskMap::getSceneName()
+  {
+      return scene_name_;
   }
 
   void TaskMap::initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,

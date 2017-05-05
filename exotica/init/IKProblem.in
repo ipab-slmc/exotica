@@ -1,0 +1,4 @@
+extend <exotica/PlanningProblem>
+Required double Tolerance;
+Required Eigen::VectorXd W;
+Optional int T = 1;

@@ -34,24 +34,23 @@
 #define IMESH_H_
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
 #include <exotica/KinematicTree.h>
-#include <Eigen/Eigen>
-#include <boost/thread/mutex.hpp>
+#include <task_map/IMeshInitializer.h>
 
 namespace exotica
 {
   /**
    * @brief	Implementation of Interaction Mesh Task Map
    */
-  class IMesh: public TaskMap
+  class IMesh: public TaskMap, public Instantiable<IMeshInitializer>
   {
     public:
       /**
        * @brief	Default constructor
        */
       IMesh();
+
+      virtual void Instantiate(IMeshInitializer& init);
 
       /**
        * @brief	Destructor
@@ -82,6 +81,7 @@ namespace exotica
        */
       void setWeight(int i, int j, double weight);
       void setWeights(const Eigen::MatrixXd & weights);
+      Eigen::MatrixXd getWeights();
 
       /**
        * @brief	Compute laplace coordinates of a vertices set
@@ -90,9 +90,11 @@ namespace exotica
        * @param	dist	Triangular matrix of distances between vertices (out put)
        * @return	3xN Laplace coordinates
        */
-      void computeLaplace(int t);
+      static Eigen::VectorXd computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXdRefConst Weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
 
       void computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
+
+      static void computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal, Eigen::MatrixXdRefConst Weights);
 
       virtual void debug();
       void initDebug(std::string ref);
@@ -126,10 +128,8 @@ namespace exotica
       /** Interaction Mesh Variables **/
       Eigen::MatrixXd weights_;	//!< Weighting matrix, currently set to ones
 
-      Eigen::MatrixXd dist;
-      Eigen::VectorXd wsum;
-
       int eff_size_;
+      bool Debug;
 
       ros::Publisher imesh_mark_pub_;
       visualization_msgs::Marker imesh_mark_;

@@ -182,27 +182,9 @@ namespace exotica
   void CollisionScene::initialise(
       const moveit_msgs::PlanningSceneConstPtr & msg,
       const std::vector<std::string> & joints, std::string & mode,
-      BASE_TYPE base_type)
+      BASE_TYPE base_type, robot_model::RobotModelPtr model_)
   {
-    if (server_->hasParam("RobotDescription")) {
-      EParam<std_msgs::String> robot_description_param;
-      server_->getParam("RobotDescription", robot_description_param);
-      ROS_INFO_STREAM("Loading collision scene for robot_description at " << robot_description_param->data);
-      ps_.reset(
-        new planning_scene::PlanningScene(
-            server_->getModel(robot_description_param->data)));
-    } else if (server_->hasParam(server_->getName() + "/RobotDescription")) {
-      EParam<std_msgs::String> robot_description_param;
-      server_->getParam(server_->getName() + "/RobotDescription", robot_description_param);
-      ROS_INFO_STREAM("Loading collision scene for robot_description at " << robot_description_param->data);
-      ps_.reset(
-        new planning_scene::PlanningScene(
-            server_->getModel(robot_description_param->data)));
-    } else {
-      ps_.reset(
-        new planning_scene::PlanningScene(
-            server_->getModel("robot_description")));
-    }
+    ps_.reset(new planning_scene::PlanningScene(model_));
 
     if (!acm_)
     {
@@ -610,7 +592,7 @@ namespace exotica
 ///////////////////////////////////////////////////////////////
 
   Scene::Scene(const std::string & name)
-      : name_(name), N(0), initialised_(false), update_jacobians_(true)
+      : name_(name), N(0), initialised_(false), update_jacobians_(true), server_(Server::Instance())
   {
     eff_names_.clear();
     eff_offsets_.clear();
@@ -635,6 +617,45 @@ namespace exotica
     return name_;
   }
 
+  void Scene::Instantiate(SceneInitializer& init)
+  {
+
+      server_->getModel(init.RobotDescription, model_);
+      KinematicaInitializer kinit(init.Solver);
+      kinit.check(init.Solver);
+      kinematica_.Instantiate(kinit, model_);
+
+      std::string base_type = kinematica_.getBaseType();
+      if (base_type=="fixed")
+          base_type_ = BASE_TYPE::FIXED;
+      else if (base_type=="floating")
+          base_type_ = BASE_TYPE::FLOATING;
+      else if (base_type=="planar")
+          base_type_ = BASE_TYPE::PLANAR;
+
+      N = kinematica_.getNumJoints();
+      collision_scene_.reset(new CollisionScene(server_, name_));
+
+      mode_ = init.PlanningMode;
+
+      update_jacobians_ = mode_!="Sampling"? true : false;
+
+      if (visual_debug_)
+      {
+          ps_pub_ = server_->advertise<moveit_msgs::PlanningScene>(name_ + "/PlanningScene", 100, true);
+          HIGHLIGHT_NAMED(name_,
+            "Running in debug mode, planning scene will be published to '"<<server_->getName()<<"/"<<name_<<"/PlanningScene'");
+      }
+      {
+          planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
+          moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
+          tmp->getPlanningSceneMsg(*msg.get());
+          collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_, base_type_,model_);
+      }
+      INFO_NAMED(name_,
+          "Exotica Scene initialised, planning mode set to "<<mode_);
+  }
+
   void Scene::initialisation(tinyxml2::XMLHandle & handle,
       const Server_ptr & server)
   {
@@ -645,19 +666,7 @@ namespace exotica
       throw_named("Kinematica not found!");
     }
 
-    if (server_->hasParam("RobotDescription")) {
-      EParam<std_msgs::String> robot_description_param;
-      server_->getParam("RobotDescription", robot_description_param);
-      ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
-      server->getModel(robot_description_param->data, model_);
-    } else if (server_->hasParam(server_->getName() + "/RobotDescription")) {
-      EParam<std_msgs::String> robot_description_param;
-      server_->getParam(server_->getName() + "/RobotDescription", robot_description_param);
-      ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
-      server->getModel(robot_description_param->data, model_);
-    } else {
-      server->getModel("robot_description", model_);
-    }
+    server->getModel("robot_description", model_);
 
     tinyxml2::XMLHandle tmp_handle(handle.FirstChildElement("Kinematica"));
     if (!kinematica_.initKinematics(tmp_handle, model_))
@@ -675,22 +684,26 @@ namespace exotica
     collision_scene_.reset(new CollisionScene(server_, name_));
 
     tmp_handle = handle.FirstChildElement("PlanningMode");
+     EParam<std_msgs::String> mode;
     try
     {
-        server_->registerParam<std_msgs::String>(name_, tmp_handle, mode_);
+        server_->registerParam<std_msgs::String>(name_, tmp_handle, mode);
+        mode_ = mode->data;
     }
     catch (Exception e)
     {
-      mode_->data = "Optimization";
+      mode_ = "Optimization";
       WARNING_NAMED(name_,
           "Planning mode not specified, using default: Optimization.");
     }
 
-    update_jacobians_ = mode_->data.compare("Sampling") != 0 ? true : false;
+    update_jacobians_ = mode_!="Sampling"? true : false;
 
     tmp_handle = handle.FirstChildElement("VisualDebug");
-    server_->registerParam<std_msgs::Bool>(name_, tmp_handle, visual_debug_);
-    if (visual_debug_->data)
+    EParam<std_msgs::Bool> visual_debug;
+    server_->registerParam<std_msgs::Bool>(name_, tmp_handle, visual_debug);
+    visual_debug_=visual_debug->data;
+    if (visual_debug_)
     {
       ps_pub_ = server_->advertise<moveit_msgs::PlanningScene>(
           name_ + "/PlanningScene", 100, true);
@@ -703,10 +716,10 @@ namespace exotica
       moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
       tmp->getPlanningSceneMsg(*msg.get());
       collision_scene_->initialise(msg, kinematica_.getJointNames(),
-              mode_->data, base_type_);
+              mode_, base_type_,model_);
     }
     INFO_NAMED(name_,
-        "Exotica Scene initialised, planning mode set to "<<mode_->data);
+        "Exotica Scene initialised, planning mode set to "<<mode_);
   }
 
   void Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)
@@ -954,7 +967,7 @@ namespace exotica
         }
     }
 
-    if (visual_debug_->data)
+    if (visual_debug_)
     {
       publishScene();
     }
@@ -973,14 +986,14 @@ namespace exotica
     moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
     scene->getPlanningSceneMsg(*msg.get());
     collision_scene_->initialise(msg, kinematica_.getJointNames(),
-        mode_->data, base_type_);
+        mode_, base_type_, model_);
   }
 
   void Scene::setCollisionScene(
       const moveit_msgs::PlanningSceneConstPtr & scene)
   {
     collision_scene_->initialise(scene, kinematica_.getJointNames(),
-        mode_->data, base_type_);
+        mode_, base_type_,model_);
   }
 
   int Scene::getNumJoints()
@@ -1067,7 +1080,7 @@ namespace exotica
 
   std::string & Scene::getPlanningMode()
   {
-    return mode_->data;
+    return mode_;
   }
 
   KDL::Frame Scene::getRobotRootWorldTransform()

@@ -63,9 +63,9 @@ namespace exotica
        * @param	size		Maximum graph size
        * @return	True if succeeded, false otherwise
        */
-      bool initialisation(const exotica::StringListPtr & links,
-          const exotica::BoolListPtr & link_types,
-          const std::vector<double> & link_radius, const int size);
+      bool initialisation(std::vector<std::string> & links,
+          std::vector<bool> & link_types,
+          Eigen::VectorXd & link_radius, int size);
 
       /*
        * \brief	Get the graph pointer

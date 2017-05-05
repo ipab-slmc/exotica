@@ -45,7 +45,7 @@
 
 namespace exotica
 {
-  class TaskDefinition: public Object, Uncopyable
+  class TaskDefinition: public Object, Uncopyable, public virtual InstantiableBase
   {
     public:
       /**
@@ -55,7 +55,8 @@ namespace exotica
       virtual ~TaskDefinition()
       {
       }
-      ;
+
+      virtual void InstantiateBase(const Initializer& init);
 
       /**
        * \brief Base Initialiser

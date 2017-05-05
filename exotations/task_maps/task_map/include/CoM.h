@@ -34,29 +34,25 @@
 #define COM_H_
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
+#include <task_map/CoMInitializer.h>
 #include <exotica/KinematicTree.h>
-#include <Eigen/Dense>
-#include <boost/thread/mutex.hpp>
-#include <ros/ros.h>
-#include <ros/package.h>
-#include <visualization_msgs/MarkerArray.h>
-#include <iostream>
 #include <fstream>
+#include <visualization_msgs/MarkerArray.h>
 namespace exotica
 {
   /**
    * @brief	Centre of mass Task Map.
    * 			Using a short-cut to get the jacobian from kinematica, not efficient.
    */
-  class CoM: public TaskMap
+  class CoM: public TaskMap, public Instantiable<CoMInitializer>
   {
     public:
       /**
        * @brief	Constructor of CoMTaskMap
        */
       CoM();
+
+      virtual void Instantiate(CoMInitializer& init);
 
       /**
        * @brief	Destructor of CoMTaskMap
@@ -83,10 +79,6 @@ namespace exotica
           boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback);
       void setOffset(bool left, const KDL::Frame & offset);
       void checkGoal(const Eigen::Vector3d & goal);
-      EParam<exotica::Vector> getBounds()
-      {
-        return bounds_;
-      }
 
     protected:
       /**
@@ -129,9 +121,8 @@ namespace exotica
       KDL::Frame base_offset_;
       KDL::Frame marker_offset_;
       std::ofstream com_file_;
-      EParam<std_msgs::Bool> debug_;
-      EParam<std_msgs::Bool> enable_z_;
-      EParam<exotica::Vector> bounds_;
+      bool enable_z_;
+      Eigen::VectorXd bounds_;
       int dim_;
   };
 }

@@ -39,13 +39,9 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "ExoticaCoreExampleNode");
   ROS_INFO_STREAM("Started");
-
-  Initialiser::printSupportedClasses();
-  {
-      //MotionSolver_ptr aico = Initialiser::createSolver("exotica/AICOsolver");
-      //aico->print("");
-  }
+  ROS_INFO_STREAM("Exotica version: "<<exotica::Version);
+  Setup::printSupportedClasses();
   ROS_INFO_STREAM("Waiting");
   ros::spin();
-  Initialiser::Instance().reset();
+  Setup::Instance().reset();
 }

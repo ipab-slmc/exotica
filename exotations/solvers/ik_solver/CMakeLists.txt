@@ -17,6 +17,10 @@ CATKIN_DEPENDS exotica
 DEPENDS system_lib
 )
 
+AddInitializer(IKsolver)
+
+GenInitializers()
+
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
@@ -29,6 +33,8 @@ add_library(ik_solver
 target_link_libraries(ik_solver
   ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${LAPACK_LIBRARIES}
 )
+
+add_dependencies(ik_solver ik_solver_initializers)
 
 install(TARGETS ik_solver
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

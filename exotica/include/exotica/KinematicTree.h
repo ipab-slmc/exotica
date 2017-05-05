@@ -44,6 +44,7 @@
 #include <vector>
 #include <set>
 #include <exotica/Tools.h>
+#include <exotica/KinematicaInitializer.h>
 
 #define ROOT  -1     //!< The value of the parent for the root segment
 
@@ -112,12 +113,10 @@ namespace exotica
        * @param optimisation  Optimisation Parameters
        */
       KinematicTree(void);                      //!< Default Constructor
-      KinematicTree(const std::string & urdf_param,
-          const SolutionForm_t & optimisation); //!< Initialisation Constructor
-      KinematicTree(const KDL::Tree & temp_tree,
-          const SolutionForm_t & optimisation); //!< Initialisation Constructor
       KinematicTree(const KinematicTree & rhs);
       KinematicTree & operator=(const KinematicTree & rhs);
+
+      void Instantiate(KinematicaInitializer& init, robot_model::RobotModelPtr model);
 
       ~KinematicTree()
       {
@@ -130,13 +129,9 @@ namespace exotica
        * @param optimisation  Optimisation Parameters
        * @return              True if successful, false otherwise
        */
-      bool initKinematics(const std::string & urdf_param,
-          const SolutionForm_t & optimisation); //!< Variant taking urdf file
-      bool initKinematics(const KDL::Tree & temp_tree,
-          const SolutionForm_t & optimisation); //!< Variant taking kdl tree
-      bool initKinematics(tinyxml2::XMLHandle & handle);
+
       bool initKinematics(tinyxml2::XMLHandle & handle,
-          const robot_model::RobotModelPtr & model);
+          const robot_model::RobotModelPtr model);
 
       /**
        * \brief Provides dynamic updating of the end-effector list

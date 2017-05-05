@@ -36,11 +36,11 @@
 #include "exotica/TaskDefinition.h"//!< The Component base
 #include "exotica/Factory.h"      //!< The Factory template
 #include "exotica/Tools.h"        //!< For XML-Parsing/ErrorFunction definition
-#include "exotica/Definitions/TaskSqrError.h"
+#include <exotica/TaskTerminationCriterionInitializer.h>
 
 namespace exotica
 {
-  class TaskTerminationCriterion: public TaskSqrError
+  class TaskTerminationCriterion: public TaskDefinition, public Instantiable<TaskTerminationCriterionInitializer>
   {
     public:
       /**
@@ -50,7 +50,8 @@ namespace exotica
       virtual ~TaskTerminationCriterion()
       {
       }
-      ;
+
+      virtual void Instantiate(TaskTerminationCriterionInitializer& init);
 
       /**
        * @brief terminate Checks if current state should terminate
@@ -69,12 +70,62 @@ namespace exotica
       void registerThreshold(Eigen::VectorXdRef_ptr threshold, int t = 0);
 
       /**
+       * @brief registerGoal Registers a goal reference at time t
+       * @param y_star Goal reference
+       * @param t Time step
+       * @return Indication of success
+       */
+      void registerGoal(Eigen::VectorXdRef_ptr y_star, int t = 0);
+
+      /**
+       * @brief registerGoal Registers rho reference at time t
+       * @param y_star Rho reference
+       * @param t Time step
+       * @return Indication of success
+       */
+      void registerRho(Eigen::VectorXdRef_ptr rho, int t = 0);
+
+      /**
+       * @brief getRho Returns the value of rho at time step t
+       * @param t Timestep
+       * @return rho
+       */
+      double getRho(int t);
+
+      /**
+       * @brief setRho Returns the value of rho at time step t
+       * @param t Timestep
+       * @param rho
+       */
+      void setRho(int t, double rho);
+
+      /**
        * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
        * @param T Number of time steps (this should be set by the planning problem)
        * @return Returns success.
        */
       virtual void setTimeSteps(const int T);
+      int getTimeSteps()
+      {
+        return y_star_.size();
+      }
 
+      /**
+       * @brief setDefaultGoals Sets Goals and Rhos to default values
+       * @return Indicates success
+       */
+      void setDefaultGoals(int t);
+
+      /**
+       * \bref	Get goal
+       * @param	t		Time step
+       * @return		Goal
+       */
+      Eigen::VectorXdRef_ptr getGoal(int t = 0);
+
+      Eigen::VectorXd y_star0_;    //!< The goal vector
+      Eigen::VectorXd rho0_, rho1_;       //!< The scalar inter-task weight
+      bool wasFullyInitialised_;
       Eigen::VectorXd threshold0_;
     protected:
       /**
@@ -84,8 +135,9 @@ namespace exotica
        */
       virtual void initDerived(tinyxml2::XMLHandle & handle);
 
-      /// \brief Threshold on squared error.
-
+      /** The internal storage **/
+      std::vector<Eigen::VectorXdRef_ptr> y_star_;    //!< The goal vector
+      std::vector<Eigen::VectorXdRef_ptr> rho_; //!< The scalar inter-task weight
       std::vector<Eigen::VectorXdRef_ptr> threshold_;
   };
 

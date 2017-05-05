@@ -47,26 +47,55 @@ namespace exotica
     //TODO
   }
 
+  void DMeshROS::Instantiate(DMeshROSInitializer& init)
+  {
+
+  }
+
   void DMeshROS::initDerived(tinyxml2::XMLHandle & handle)
   {
+      EParam<std_msgs::Int64> size;
+      EParam<std_msgs::Float64> kp;
+      EParam<std_msgs::Float64> ko;
+      EParam<std_msgs::Float64> kg;
+      EParam<std_msgs::Bool> usePose;
+      EParam<exotica::StringList> links;
+      EParam<exotica::BoolList> link_types;
+      EParam<exotica::Vector> radius;
+
+    server_->getParam("EXOTicaServer/DMeshRadius", radius);
+    radius_.resize(radius->data.size());
+    for(int i=0;i<radius->data.size();i++) radius_(i)= radius->data[i];
+
     //	Example of register dynamic parameters to EXOTica Server
-    server_->getParam("EXOTicaServer/DMeshSize", size_);
+    server_->getParam("EXOTicaServer/DMeshSize", size);
+    size_ = size->data;
+
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("DMeshLinks");
-    server_->registerParam<exotica::StringList>(ns_, tmp_handle, links_);
+    server_->registerParam<exotica::StringList>(ns_, tmp_handle, links);
+    links_.resize(links->strings.size());
+    for(int i=0;i<links->strings.size();i++) links_[i]= links->strings[i];
 
     tmp_handle = handle.FirstChildElement("DMeshLinkTypes");
-    server_->registerParam<exotica::BoolList>(ns_, tmp_handle, link_types_);
+    server_->registerParam<exotica::BoolList>(ns_, tmp_handle, link_types);
+    link_types_.resize(link_types->data.size());
+    for(int i=0;i<link_types->data.size();i++) link_types_[i]= link_types->data[i];
 
     tmp_handle = handle.FirstChildElement("PoseGain");
-    server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, kp_);
+    server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, kp);
+    kp_=kp->data;
 
     tmp_handle = handle.FirstChildElement("ObstacleGain");
-    server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, ko_);
+    server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, ko);
+    ko_=ko->data;
 
     tmp_handle = handle.FirstChildElement("GoalGain");
-    server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, kg_);
+    server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, kg);
+    kg_=kg->data;
 
-    server_->getParam("EXOTicaServer/UsePose", usePose_);
+    server_->getParam("EXOTicaServer/UsePose", usePose);
+    usePose_=usePose->data;
+
     wo_ = 10;
     wg_ = 10;
     if (scene_ == nullptr)
@@ -74,24 +103,21 @@ namespace exotica
       throw_named("Invalid scene!");
     }
 
-    EParam<exotica::Vector> radius;
-    server_->getParam("EXOTicaServer/DMeshRadius", radius);
-
-    if (!gManager_.initialisation(links_, link_types_, radius->data,
-        size_->data))
+    if (!gManager_.initialisation(links_, link_types_, radius_,
+        size_))
     {
       throw_named("Can't initialize the graph!");
     }
-    robot_size_ = links_->strings.size();
-    ext_size_ = size_->data - robot_size_;
-    if (usePose_->data)
+    robot_size_ = links_.size();
+    ext_size_ = size_ - robot_size_;
+    if (usePose_)
       task_size_ = (robot_size_ + ext_size_) * (robot_size_ + ext_size_ - 1) / 2
           - robot_size_;
     else
       task_size_ = robot_size_ * ext_size_;
     obs_close_.resize(ext_size_);
     HIGHLIGHT_NAMED("DMeshROS",
-        "Distance Mesh (ROS) has been initialised: Maximum Graph size="<<size_->data<<", Robot link size="<<robot_size_<<", Unconnected external object size="<<ext_size_);
+        "Distance Mesh (ROS) has been initialised: Maximum Graph size="<<size_<<", Robot link size="<<robot_size_<<", Unconnected external object size="<<ext_size_);
     initialised_ = true;
   }
 
@@ -149,22 +175,22 @@ namespace exotica
     for (j = 0; j < robot_size_; j++)
     {
       int tmp = robot_size_;
-      if (usePose_->data) tmp = j + 2;
-      for (l = tmp; l < size_->data; l++)
+      if (usePose_) tmp = j + 2;
+      for (l = tmp; l < size_; l++)
       {
         switch (gManager_.getGraph()->getVertex(l)->getType())
         {
         case VERTEX_TYPE::LINK:
-          goal(cnt) = kp_->data * dist(j, l);
+          goal(cnt) = kp_ * dist(j, l);
           break;
         case VERTEX_TYPE::OBSTACLE:
-          if (gManager_.getGraph()->getVertex(l)->checkList(links_->strings[j]))
+          if (gManager_.getGraph()->getVertex(l)->checkList(links_[j]))
           {
-            goal(cnt) = ko_->data;
+            goal(cnt) = ko_;
           }
           break;
         case VERTEX_TYPE::OBSTACLE_TO_ALL:
-          goal(cnt) = ko_->data;
+          goal(cnt) = ko_;
           break;
         case VERTEX_TYPE::GOAL:
           goal(cnt) = gManager_.getGraph()->getVertex(l)->w_
@@ -212,32 +238,32 @@ namespace exotica
     for (j = 0; j < robot_size_; j++)
     {
       int tmp = robot_size_;
-      if (usePose_->data) tmp = j + 2;
-      for (l = tmp; l < size_->data; l++)
+      if (usePose_) tmp = j + 2;
+      for (l = tmp; l < size_; l++)
       {
         b = d = 0;
         switch (gManager_.getGraph()->getVertex(l)->getType())
         {
         case VERTEX_TYPE::LINK:
-          PHI(cnt) = kp_->data * dist_(j, l);
+          PHI(cnt) = kp_ * dist_(j, l);
           break;
         case VERTEX_TYPE::OBSTACLE:
-          if (gManager_.getGraph()->getVertex(l)->checkList(links_->strings[j]))
+          if (gManager_.getGraph()->getVertex(l)->checkList(links_[j]))
           {
             if (dist_(j, l) - gManager_.getGraph()->getVertex(j)->getRadius()
                 - gManager_.getGraph()->getVertex(l)->getRadius() < 0.05)
-              PHI(cnt) = ko_->data * (1 - exp(-wo_ * dist_(j, l)));
+              PHI(cnt) = ko_ * (1 - exp(-wo_ * dist_(j, l)));
             else
-              PHI(cnt) = ko_->data;
+              PHI(cnt) = ko_;
 
           }
           break;
         case VERTEX_TYPE::OBSTACLE_TO_ALL:
           if (dist_(j, l) - gManager_.getGraph()->getVertex(j)->getRadius()
               - gManager_.getGraph()->getVertex(l)->getRadius() < 0.05)
-            PHI(cnt) = ko_->data * (1 - exp(-wo_ * dist_(j, l)));
+            PHI(cnt) = ko_ * (1 - exp(-wo_ * dist_(j, l)));
           else
-            PHI(cnt) = ko_->data;
+            PHI(cnt) = ko_;
           break;
         case VERTEX_TYPE::GOAL:
           PHI(cnt) = gManager_.getGraph()->getVertex(l)->w_ * dist_(j, l);
@@ -265,8 +291,8 @@ namespace exotica
       for (j = 0; j < robot_size_; j++)
       {
         int tmp = robot_size_;
-        if (usePose_->data) tmp = j + 2;
-        for (l = tmp; l < size_->data; l++)
+        if (usePose_) tmp = j + 2;
+        for (l = tmp; l < size_; l++)
         {
           if (dist_(j, l) > 0)
           {
@@ -278,11 +304,11 @@ namespace exotica
                   Eigen::Vector3d(
                       EFFJAC.block(3 * j, i, 3, 1)
                           - EFFJAC.block(3 * l, i, 3, 1)))) / dist_(j, l);
-              JAC(cnt, i) = kp_->data * d_;
+              JAC(cnt, i) = kp_ * d_;
               break;
             case VERTEX_TYPE::OBSTACLE:
               if (gManager_.getGraph()->getVertex(l)->checkList(
-                  links_->strings[j]))
+                  links_[j]))
               {
                 if (dist_(j, l)
                     - gManager_.getGraph()->getVertex(j)->getRadius()
@@ -292,7 +318,7 @@ namespace exotica
                       - gManager_.getGraph()->getVertex(l)->position_).dot(
                       Eigen::Vector3d(EFFJAC.block(3 * j, i, 3, 1))))
                       / dist_(j, l);
-                  JAC(cnt, i) = ko_->data * wo_ * d_ * exp(-wo_ * dist_(j, l));
+                  JAC(cnt, i) = ko_ * wo_ * d_ * exp(-wo_ * dist_(j, l));
                 }
               }
               break;
@@ -304,7 +330,7 @@ namespace exotica
                     - gManager_.getGraph()->getVertex(l)->position_).dot(
                     Eigen::Vector3d(EFFJAC.block(3 * j, i, 3, 1))))
                     / dist_(j, l);
-                JAC(cnt, i) = ko_->data * wo_ * d_ * exp(-wo_ * dist_(j, l));
+                JAC(cnt, i) = ko_ * wo_ * d_ * exp(-wo_ * dist_(j, l));
               }
 
               break;
@@ -352,7 +378,7 @@ namespace exotica
     {
       try
       {
-        listener_.lookupTransform("/base", "/" + links_->strings[i],
+        listener_.lookupTransform("/base", "/" + links_[i],
             ros::Time(0), transform_);
       } catch (tf::TransformException &ex)
       {

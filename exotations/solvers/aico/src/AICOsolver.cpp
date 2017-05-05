@@ -53,6 +53,28 @@ REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver)
 
 namespace exotica
 {
+  void AICOsolver::Instantiate(AICOsolverInitializer& init)
+  {
+      std::string mode = init.SweepMode;
+      if (mode=="Forwardly")
+        sweepMode = smForwardly;
+      else if (mode=="Symmetric")
+        sweepMode = smSymmetric;
+      else if (mode=="LocalGaussNewton")
+        sweepMode = smLocalGaussNewton;
+      else if (mode=="LocalGaussNewtonDamped")
+        sweepMode = smLocalGaussNewtonDamped;
+      else
+      {
+        throw_named("Unknown sweep mode '"<<init.SweepMode<<"'");
+      }
+      max_iterations = init.MaxIterations;
+      tolerance = init.Tolerance;
+      damping_init = init.Damping;
+      useBwdMsg = init.UseBackwardMessage;
+      dynamic = init.Dynamic;
+  }
+
   void AICOsolver::saveCosts(std::string file_name)
   {
     std::ofstream myfile;
@@ -201,9 +223,9 @@ namespace exotica
     int i = 0, cur_rows = 0;
     for (auto& task_ : prob_->getTaskDefinitions())
     {
-      if (task_.second->type().compare(std::string("TaskSqrError")) == 0)
+      if (task_.second->type()!="exotica::TaskSqrError")
       {
-        throw_named("Task variable " << task_.first << " is not an squared error!");
+        throw_named("Task variable " << task_.first << " is not an squared error! ("+task_.second->type()+")");
       }
       boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<
           TaskSqrError>(task_.second);
@@ -242,7 +264,6 @@ namespace exotica
   void AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init,
       Eigen::MatrixXd & solution)
   {
-    HIGHLIGHT_NAMED("AICO debug:\n", print(""))
     ros::Time startTime = ros::Time::now();
     ROS_WARN_STREAM("AICO: Setting up the solver");
     updateCount = 0;
@@ -479,10 +500,16 @@ namespace exotica
       q.at(i) = b.at(i).head(n2);
     s = b;
     for (int t = 1; t <= T; t++)
+    {
+      Sinv.at(t).setZero(); 
       Sinv.at(t).diagonal().setConstant(damping);
+    }
     v = b;
     for (int t = 0; t <= T; t++)
+    {
+      Vinv.at(t).setZero();  
       Vinv.at(t).diagonal().setConstant(damping);
+    }
     dampingReference = b;
     for (int t = 0; t <= T && ros::ok(); t++)
     {

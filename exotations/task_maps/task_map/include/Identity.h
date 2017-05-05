@@ -34,13 +34,11 @@
 #define EXOTICA_GENERIC_IDENTITY_H
 
 #include <exotica/TaskMap.h>
-#include <exotica/Factory.h>
-#include <tinyxml2/tinyxml2.h>
-#include <Eigen/Dense>
+#include <task_map/IdentityInitializer.h>
 
 namespace exotica
 {
-  class Identity: public TaskMap
+  class Identity: public TaskMap, public Instantiable<IdentityInitializer>
   {
     public:
       /**
@@ -50,6 +48,8 @@ namespace exotica
       virtual ~Identity()
       {
       }
+
+      virtual void Instantiate(IdentityInitializer& init);
 
       /**
        * \brief Concrete implementation of the update method

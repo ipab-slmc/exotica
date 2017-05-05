@@ -104,7 +104,7 @@ namespace exotica
           KDL::Vector(EFFPHI(3 * i), EFFPHI(3 * i + 1), EFFPHI(3 * i + 2)));
       tmp_frame = tmp_frame * (root_tf.Inverse());
       com = com + mass_[i] * tmp_frame.p;
-      if (debug_->data)
+      if (debug_)
       {
         geometry_msgs::Point tmp;
         tmp_frame = marker_offset_ * tmp_frame;
@@ -120,12 +120,12 @@ namespace exotica
     PHI.setZero();
     for (int i = 0; i < dim_; i++)
     {
-      if (fabs(com[i]) > fabs(bounds_->data[2 * i]))
+      if (fabs(com[i]) > fabs(bounds_(i)))
       {
         PHI(i) = com[i];
       }
     }
-    if (debug_->data)
+    if (debug_)
     {
       KDL::Vector tmp_frame = marker_offset_ * com;
       COM_marker_.pose.position.x = tmp_frame[0];
@@ -155,28 +155,83 @@ namespace exotica
     }
   }
 
+  void CoM::Instantiate(CoMInitializer& init)
+  {
+      enable_z_ = init.EnableZ;
+      if (enable_z_)
+        dim_ = 3;
+      else
+        dim_ = 2;
+      bounds_ = init.Bounds;
+      if(bounds_.rows()<dim_) throw_named("Wrong bounds dimension!");
+
+      if (debug_)
+      {
+        com_marker_.points.resize(cog_.size());
+        com_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
+        com_marker_.color.a = .7;
+        com_marker_.color.r = 0.5;
+        com_marker_.color.g = 0;
+        com_marker_.color.b = 0;
+        com_marker_.scale.x = com_marker_.scale.y = com_marker_.scale.z = .02;
+        com_marker_.action = visualization_msgs::Marker::ADD;
+
+        COM_marker_.type = visualization_msgs::Marker::CYLINDER;
+        COM_marker_.color.a = 1;
+        COM_marker_.color.r = 1;
+        COM_marker_.color.g = 0;
+        COM_marker_.color.b = 0;
+        COM_marker_.scale.x = COM_marker_.scale.y = .15;
+        COM_marker_.scale.z = .02;
+        COM_marker_.action = visualization_msgs::Marker::ADD;
+
+        goal_marker_ = COM_marker_;
+        goal_marker_.color.r = 0;
+        goal_marker_.color.g = 1;
+
+        com_marker_.header.frame_id = COM_marker_.header.frame_id =
+            goal_marker_.header.frame_id = scene_->getRootName();
+      }
+
+      com_pub_ = server_->advertise<visualization_msgs::Marker>(
+          object_name_ + "coms_marker", 1);
+      COM_pub_ = server_->advertise<visualization_msgs::Marker>(
+          object_name_ + "COM_marker", 1);
+      goal_pub_ = server_->advertise<visualization_msgs::Marker>(
+          object_name_ + "goal_marker", 1);
+      initialised_ = true;
+  }
+
   void CoM::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("EnableZ");
-    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, enable_z_);
-    if (enable_z_->data)
+    EParam<std_msgs::Bool> enable_z;
+    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, enable_z);
+    enable_z_=enable_z->data;
+    if (enable_z_)
       dim_ = 3;
     else
       dim_ = 2;
     tmp_handle = handle.FirstChildElement("Bounds");
+    EParam<exotica::Vector> bounds;
     try
     {
-        server_->registerParam<exotica::Vector>(ns_, tmp_handle, bounds_);
+        server_->registerParam<exotica::Vector>(ns_, tmp_handle, bounds);
     }
     catch (Exception e)
     {
-      bounds_->data.resize(dim_);
+      bounds->data.resize(dim_);
       for (int i = 0; i < dim_; i++)
-        bounds_->data[i] = 0;
+        bounds->data[i] = 0;
     }
+    bounds_.resize(dim_);
+    for (int i = 0; i < dim_; i++)
+      bounds_(i)=bounds->data[i];
     tmp_handle = handle.FirstChildElement("Debug");
-    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, debug_);
-    if (debug_->data)
+    EParam<std_msgs::Bool> debug;
+    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, debug);
+    debug_=debug->data;
+    if (debug_)
     {
       com_marker_.points.resize(cog_.size());
       com_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
@@ -229,7 +284,7 @@ namespace exotica
     }
 
     scene_->updateEndEffectors(object_name_, com_offs);
-    if (debug_->data)
+    if (debug_)
     {
       com_marker_.points.resize(cog_.size());
     }
@@ -245,7 +300,7 @@ namespace exotica
 
   void CoM::setOffset(bool left, const KDL::Frame & offset)
   {
-    if (debug_->data)
+    if (debug_)
     {
 
       if (left)
@@ -266,13 +321,13 @@ namespace exotica
 
   void CoM::checkGoal(const Eigen::Vector3d & goal_)
   {
-    if (debug_->data)
+    if (debug_)
     {
       KDL::Vector goal = marker_offset_
           * KDL::Vector(goal_(0), goal_(1), goal_(2));
       goal_marker_.pose.position.x = goal[0];
       goal_marker_.pose.position.y = goal[1];
-      if (!enable_z_->data)
+      if (!enable_z_)
         goal_marker_.pose.position.z = 0;
       else
         goal_marker_.pose.position.z = goal[2];

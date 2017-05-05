@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Boost REQUIRED COMPONENTS system)
 
-
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ompl_base_solver
@@ -19,13 +18,9 @@ catkin_package(
   DEPENDS system_lib ompl
 )
 
-###########
-## Build ##
-###########
+AddInitializer(OMPLsolver)
+GenInitializers()
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-# include_directories(include)
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
@@ -57,6 +52,7 @@ add_library(ompl_solver
 target_link_libraries(ompl_solver
    ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES} ompl_base_solver
 )
+add_dependencies(ompl_solver ompl_solver_initializers)
 
 install(TARGETS ompl_solver
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

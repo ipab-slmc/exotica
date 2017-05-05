@@ -31,8 +31,8 @@
  *
  */
 
-#include "exotica/Problems/OMPLProblem.h"
-#include "exotica/Initialiser.h"
+#include <exotica/Problems/OMPLProblem.h>
+#include <exotica/Setup.h>
 
 REGISTER_PROBLEM_TYPE("OMPLProblem", exotica::OMPLProblem)
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
@@ -87,11 +87,11 @@ namespace exotica
           getJSON(obj["class"], constraintClass);
           if (knownMaps_.find(constraintClass) != knownMaps_.end())
           {
-                  TaskMap_ptr taskmap = Initialiser::createMap(knownMaps_[constraintClass]);
+                  TaskMap_ptr taskmap = Setup::createMap(knownMaps_[constraintClass]);
                   taskmap->initialise(obj, server_, scene_,problem);
                   std::string name = taskmap->getObjectName();
                   task_maps_[name] = taskmap;
-                  TaskDefinition_ptr task = Initialiser::createDefinition("TaskTerminationCriterion");
+                  TaskDefinition_ptr task = Setup::createDefinition("TaskTerminationCriterion");
                   TaskTerminationCriterion_ptr sqr =boost::static_pointer_cast<TaskTerminationCriterion>(task);
                   sqr->setTaskMap(taskmap);
                   int dim;
@@ -174,6 +174,56 @@ namespace exotica
     }
   }
 
+  void OMPLProblem::Instantiate(OMPLProblemInitializer& init)
+  {
+      Parameters = init;
+      std::string PlroblemType = init.PlroblemType;
+      if(PlroblemType=="Goals")
+      {
+        for (auto goal : task_defs_)
+        {
+          if (goal.second->type()=="exotica::TaskTerminationCriterion")
+          {
+            goals_.push_back( boost::static_pointer_cast<exotica::TaskTerminationCriterion>(goal.second));
+          }
+          else
+          {
+            ERROR(goal.first << " has wrong type, ignored!");
+          }
+        }
+       }
+      else
+      {
+          throw_named("Unsupported OMPL problem type!");
+      }
+
+      if(init.LocalPlannerConfig!="")
+      {
+          local_planner_config_ = init.LocalPlannerConfig;
+      }
+
+      space_dim_ = scene_->getNumJoints();
+
+      originalMaps_ = task_maps_;
+      originalGoals_ = goals_;
+
+      if (scene_->getBaseType() != exotica::BASE_TYPE::FIXED)
+        compound_ = true;
+      else
+        compound_ = false;
+      std::vector<std::string> jnts;
+      scene_->getJointNames(jnts);
+
+      getBounds().resize(jnts.size() * 2);
+      std::map<std::string, std::vector<double>> joint_limits =
+          scene_->getSolver().getUsedJointLimits();
+      for (int i = 0; i < jnts.size(); i++)
+      {
+        getBounds()[i] = joint_limits.at(jnts[i])[0];
+        getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1];
+      }
+  }
+
   void OMPLProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("PlroblemType");
@@ -236,26 +286,6 @@ namespace exotica
     }
 
     space_dim_ = scene_->getNumJoints();
-//    for (auto scene : scenes_)
-//    {
-//      int nn = scene.second->getNumJoints();
-//      if (space_dim_ == 0)
-//      {
-//        space_dim_ = nn;
-//        continue;
-//      }
-//      else
-//      {
-//        if (space_dim_ != nn)
-//        {
-//          throw_named("Kinematic scenes have different joint space sizes!");
-//        }
-//        else
-//        {
-//          continue;
-//        }
-//      }
-//    }
 
     originalMaps_ = task_maps_;
     originalGoals_ = goals_;

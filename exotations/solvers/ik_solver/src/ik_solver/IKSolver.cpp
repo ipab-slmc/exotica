@@ -92,49 +92,24 @@ namespace exotica
       return Ainv_;
   }
 
+  void IKsolver::Instantiate(IKsolverInitializer& init)
+  {
+        parameters_ = init;
+  }
+
   void IKsolver::initDerived(tinyxml2::XMLHandle & handle)
   {
     try
     {
       tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("MaxIt");
       server_->registerParam<std_msgs::Int64>(ns_, tmp_handle, maxit_);
+      parameters_.MaxIt = maxit_->data;
       tmp_handle = handle.FirstChildElement("MaxStep");
       server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, maxstep_);
-      tmp_handle = handle.FirstChildElement("LocalMinimaThreshold");
-      server_->registerParam<std_msgs::Float64>(ns_, tmp_handle,
-          local_minima_threshold_);
+      parameters_.MaxStep = maxstep_->data;
       tmp_handle = handle.FirstChildElement("MultiTaskMode");
       server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, multi_task_);
-
-      ///	Check if this IK is running as FRRT local solver
-      tinyxml2::XMLHandle frrthandle = handle.FirstChildElement("FRRTLocal");
-      if (frrthandle.ToElement())
-      {
-        FRRT_ = true;
-        tmp_handle = frrthandle.FirstChildElement("IgnoreObsNearGoal");
-        server_->registerParam<std_msgs::Bool>(ns_ + "/FRRTLocal", tmp_handle,
-            ignore_obs_near_goal_);
-        jac_pub_ = server_->advertise<visualization_msgs::MarkerArray>(
-            "JacobianVector", 1);
-        jac_arr_.markers.resize(2);
-        jac_arr_.markers[0].type = visualization_msgs::Marker::ARROW;
-        jac_arr_.markers[1].type = visualization_msgs::Marker::ARROW;
-        jac_arr_.markers[0].header.frame_id = "base";
-        jac_arr_.markers[1].header.frame_id = "base";
-        jac_arr_.markers[0].id = 0;
-        jac_arr_.markers[1].id = 1;
-        jac_arr_.markers[0].color.r = 1;
-        jac_arr_.markers[0].color.a = 1;
-        jac_arr_.markers[1].color.g = 1;
-        jac_arr_.markers[1].color.a = 1;
-
-        jac_arr_.markers[0].scale.x = 0.015;
-        jac_arr_.markers[0].scale.y = 0.04;
-        jac_arr_.markers[0].scale.z = 0.04;
-        jac_arr_.markers[1].scale.x = 0.015;
-        jac_arr_.markers[1].scale.y = 0.04;
-        jac_arr_.markers[1].scale.z = 0.04;
-      }
+      parameters_.MultiTaskMode = multi_task_->data;
     } catch (int e)
     {
       throw_named("IK solver initialisation, parameter error\n");
@@ -143,7 +118,7 @@ namespace exotica
 
   void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
   {
-    if (pointer->type().compare(std::string("exotica::IKProblem")) != 0)
+    if (pointer->type()!="exotica::IKProblem")
     {
       throw_named("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
     }
@@ -302,6 +277,19 @@ namespace exotica
     }
   }
 
+  void IKsolver::getGoal(const std::string & task_name, Eigen::VectorXd& _goal,int t)
+  {
+      if (taskIndex.find(task_name) == taskIndex.end())
+      {
+        throw_named("Task name " << task_name << " does not exist");
+      }
+      else
+      {
+        std::pair<int, int> id = taskIndex.at(task_name);
+        _goal = goal.at(t).segment(id.second, dim.at(t)(id.first));
+      }
+  }
+
   void IKsolver::setRho(const std::string & task_name, const double rho,
       int t)
   {
@@ -315,6 +303,11 @@ namespace exotica
       rhos.at(t)(id.first) = rho;
       if(Cinv.rows()>id.first) Cinv.diagonal().block(dimid.at(t)(id.first), 0, dim.at(t)(id.first), 1).setConstant(rho);
     }
+  }
+
+  void IKsolver::getRho(const std::string & task_name, double& rho, int t)
+  {
+      rho = getRho(task_name,t);
   }
 
   double IKsolver::getRho(const std::string & task_name, int t)
@@ -337,7 +330,7 @@ namespace exotica
 
   int IKsolver::getMaxIteration()
   {
-    return (int) maxit_->data;
+    return parameters_.MaxIt;
   }
 
   int IKsolver::getLastIteration()
@@ -372,7 +365,7 @@ namespace exotica
           q = solution.row(t);
       }
       planning_time_ = ros::Duration(ros::Time::now() - start);
-      if(!ret) throw_solve("Solution not found after max number of iterations ("<<maxit_->data<<")!");
+      //if(!ret) throw_solve("Solution not found after max number of iterations ("<<parameters_.MaxIt<<")!");
     }
     else
     {
@@ -392,25 +385,28 @@ namespace exotica
       bool found = false;
       maxdim_ = 0;
 
-      for (int i = 0; i < maxit_->data; i++)
+      for (int i = 0; i < parameters_.MaxIt; i++)
       {
         prob_->update(solution.row(0), t);
         vel_solve(error, t, solution.row(0));
         double max_vel = vel_vec_.cwiseAbs().maxCoeff();
-        if (max_vel > maxstep_->data)
+        if (max_vel > parameters_.MaxStep)
         {
-            vel_vec_ = vel_vec_ * maxstep_->data / max_vel;
+            vel_vec_ = vel_vec_ * parameters_.MaxStep / max_vel;
         }
-
-        for (int j=0;j<q0.rows();j++)
+        
+        if(parameters_.ClampToJointLimits)
         {
-            if(solution(0,j)+vel_vec_(j)<qmin_(j))
+            for (int j=0;j<q0.rows();j++)
             {
-                vel_vec_(j)=qmin_(j)-solution(0,j);
-            }
-            if(solution(0,j)+vel_vec_(j)>qmax_(j))
-            {
-                vel_vec_(j)=qmax_(j)-solution(0,j);
+                if(solution(0,j)+vel_vec_(j)<qmin_(j))
+                {
+                    vel_vec_(j)=qmin_(j)-solution(0,j);
+                }
+                if(solution(0,j)+vel_vec_(j)>qmax_(j))
+                {
+                    vel_vec_(j)=qmax_(j)-solution(0,j);
+                }
             }
         }
 
@@ -432,7 +428,7 @@ namespace exotica
 
       if (!found)
       {
-        iterations_=  maxit_->data;
+        iterations_=  parameters_.MaxIt;
         return false;
       }
       return true;
@@ -451,7 +447,7 @@ namespace exotica
     {
       ros::Time start = ros::Time::now();
       vel_vec_.resize(size_);
-      Eigen::MatrixXd tmp(maxit_->data, size_);
+      Eigen::MatrixXd tmp((int)parameters_.MaxIt, size_);
       solution.resize(1, size_);
       solution.row(0) = q0;
       tmp.row(0) = q0;
@@ -459,7 +455,7 @@ namespace exotica
       bool found = false;
       maxdim_ = 0;
       int i = 0;
-      for (i = 0; i < maxit_->data; i++)
+      for (i = 0; i < parameters_.MaxIt; i++)
       {
         prob_->update(solution.row(0), t);
           vel_solve(error, t, solution.row(0));
@@ -468,9 +464,9 @@ namespace exotica
             throw_named("Invalid velocity vector!");
           }
           double max_vel = vel_vec_.cwiseAbs().maxCoeff();
-          if (max_vel > maxstep_->data)
+          if (max_vel > parameters_.MaxStep)
           {
-            vel_vec_ = vel_vec_ * maxstep_->data / max_vel;
+            vel_vec_ = vel_vec_ * parameters_.MaxStep / max_vel;
           }
           solution.row(0) = solution.row(0) + vel_vec_.transpose();
           tmp.row(i + 1) = solution.row(0);
@@ -484,7 +480,7 @@ namespace exotica
           {
             double change =
                 (tmp.row(i + 1) - tmp.row(i - 1)).cwiseAbs().maxCoeff();
-            if (change < .5 * maxstep_->data)
+            if (change < .5 * parameters_.MaxStep)
             {
               WARNING_NAMED(object_name_,
                   "Running into local minima with velocity "<<change);
@@ -558,7 +554,7 @@ namespace exotica
 
       }
       err = (task_error*C*task_error.transpose())(0);
-      if (!multi_task_->data)
+      if (!parameters_.MultiTaskMode)
       {
         // Compute velocity
         Eigen::MatrixXd Jpinv;
@@ -585,11 +581,8 @@ namespace exotica
         {
           throw_named(big_jacobian.at(t));
         }
-        {
 
-          vel_vec_ = yj + Nj*Jpinv * task_error;
-        }
-
+        vel_vec_ = yj + Nj*Jpinv * task_error;
       }
       else
       {
@@ -613,4 +606,3 @@ namespace exotica
     }
   }
 }
-

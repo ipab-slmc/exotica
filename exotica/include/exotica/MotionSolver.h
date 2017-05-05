@@ -38,6 +38,7 @@
 #include "exotica/TaskDefinition.h"
 #include "exotica/PlanningProblem.h"
 #include "exotica/Server.h"
+#include "exotica/Property.h"
 
 #include "tinyxml2/tinyxml2.h"
 
@@ -45,7 +46,7 @@
 
 namespace exotica
 {
-  class MotionSolver: public Object, Uncopyable
+  class MotionSolver: public Object, Uncopyable, public virtual InstantiableBase
   {
     public:
       /**
@@ -55,7 +56,8 @@ namespace exotica
       virtual ~MotionSolver()
       {
       }
-      ;
+
+      virtual void InstantiateBase(const Initializer& init);
 
       /**
        * \brief Base initialiser: Currently simply calls the derived method

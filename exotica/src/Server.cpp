@@ -31,6 +31,7 @@
  */
 
 #include "exotica/Server.h"
+
 exotica::Server_ptr exotica::Server::singleton_server_ = NULL;
 namespace exotica
 {
@@ -47,7 +48,44 @@ namespace exotica
     sp_.stop();
   }
 
-  void Server::getModel(std::string path, robot_model::RobotModelPtr & model)
+  robot_model::RobotModelPtr Server::loadModel(std::string name, std::string urdf, std::string srdf)
+  {
+      robot_model::RobotModelPtr model;
+      if (hasParam("RobotDescription"))
+      {
+          EParam<std_msgs::String> robot_description_param;
+          getParam("RobotDescription", robot_description_param);
+          ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
+          model = robot_model_loader::RobotModelLoader(robot_description_param->data,false).getModel();
+      }
+      else if (hasParam(getName() + "/RobotDescription"))
+      {
+          EParam<std_msgs::String> robot_description_param;
+          getParam(getName() + "/RobotDescription", robot_description_param);
+          ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
+          model = robot_model_loader::RobotModelLoader(robot_description_param->data,false).getModel();
+      }
+      else if (urdf=="" || srdf=="")
+      {
+          model = robot_model_loader::RobotModelLoader(name,false).getModel();
+      }
+      else
+      {
+          model = robot_model_loader::RobotModelLoader(robot_model_loader::RobotModelLoader::Options(urdf,srdf)).getModel();
+      }
+
+      if (model)
+      {
+        robot_models_[name] = model;
+      }
+      else
+      {
+        throw_pretty("Couldn't load the model at path " << name << "!");
+      }
+      return model;
+  }
+
+  void Server::getModel(std::string path, robot_model::RobotModelPtr & model, std::string urdf, std::string srdf)
   {
     if (robot_models_.find(path) != robot_models_.end())
     {
@@ -55,19 +93,11 @@ namespace exotica
     }
     else
     {
-      model = robot_model_loader::RobotModelLoader(path).getModel();
-      if (model)
-      {
-        robot_models_[path] = model;
-      }
-      else
-      {
-        throw_pretty("Couldn't load the model at path " << path << "!");
-      }
+      model = loadModel(path,urdf,srdf);
     }
   }
 
-  robot_model::RobotModelConstPtr Server::getModel(std::string path)
+  robot_model::RobotModelConstPtr Server::getModel(std::string path, std::string urdf, std::string srdf)
   {
     if (robot_models_.find(path) != robot_models_.end())
     {
@@ -75,7 +105,7 @@ namespace exotica
     }
     else
     {
-      return robot_model_loader::RobotModelLoader(path).getModel();
+      return loadModel(path,urdf,srdf);
     }
   }
 

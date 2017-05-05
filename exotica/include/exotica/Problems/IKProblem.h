@@ -35,17 +35,20 @@
 #define IK_PROBLEM_H_
 #include <exotica/PlanningProblem.h>
 #include "exotica/Definitions/TaskSqrError.h"
+#include <exotica/IKProblemInitializer.h>
 
 namespace exotica
 {
   /**
    * IK problem implementation
    */
-  class IKProblem: public PlanningProblem
+  class IKProblem: public PlanningProblem, public Instantiable<IKProblemInitializer>
   {
     public:
       IKProblem();
       virtual ~IKProblem();
+
+      virtual void Instantiate(IKProblemInitializer& init);
 
       /**
        * \brief	Get configuration weight

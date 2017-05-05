@@ -37,7 +37,7 @@ namespace exotica
 {
   OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim,
       const Server_ptr &server, OMPLProblem_ptr &prob)
-      : ob::CompoundStateSpace(), server_(server), prob_(prob)
+      : ob::CompoundStateSpace(), server_(Server::Instance()), prob_(prob)
   {
   }
 

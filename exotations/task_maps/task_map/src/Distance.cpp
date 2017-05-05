@@ -92,6 +92,14 @@ namespace exotica
     }
   }
 
+  void Distance::Instantiate(DistanceInitializer& init)
+  {
+      if (scene_->getMapSize(object_name_) % 2 != 0)
+      {
+        throw_named("Kinematic scene must have even number of end-effectors!");
+      }
+  }
+
   void Distance::initDerived(tinyxml2::XMLHandle & handle)
   {
     if (scene_->getMapSize(object_name_) % 2 != 0)

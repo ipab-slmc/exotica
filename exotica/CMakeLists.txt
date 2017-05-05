@@ -41,20 +41,26 @@ generate_messages(
   ${MSG_DEPS}
 )
 
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(Exotica)
+include(AddInitializer)
 
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 configure_file("src/Version.cpp.in" "${exotica_BINARY_DIR}/generated/Version.cpp" @ONLY)
+
+AddInitializer(TaskMap Object Limb MotionSolver PlanningProblem Scene TaskDefinition Kinematica
+     AICOProblem IKProblem OMPLProblem TaskSqrError TaskTerminationCriterion)
+GenInitializers()
 
 ## catkin specific configuration ##
 catkin_package(
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp  message_runtime moveit_ros_planning_interface moveit_core tf kdl_parser pluginlib
-  CFG_EXTRAS Exotica.cmake
+  CFG_EXTRAS Exotica.cmake AddInitializer.cmake
 )
 
 ## Build ##
@@ -72,22 +78,37 @@ add_library(${PROJECT_NAME}
   src/TaskDefinition.cpp
   src/PlanningProblem.cpp
   src/MotionSolver.cpp
-  src/Initialiser.cpp
+  src/Setup.cpp
   src/Server.cpp
   src/Scene.cpp
+  src/Property.cpp
   src/KinematicTree.cpp
   src/Tools/Exception.cpp
+  src/Tools/Printable.cpp
+  src/Tools/Conversions.cpp
+  src/Loaders/XMLLoader.cpp
   src/Problems/AICOProblem.cpp
   src/Problems/IKProblem.cpp
   src/Problems/OMPLProblem.cpp
   src/Definitions/TaskSqrError.cpp
-  src/Definitions/TaskTerminationCriterion.cpp)
+  src/Definitions/TaskTerminationCriterion.cpp
+  ${exotica_BINARY_DIR}/generated/Version.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_initializers)
 
 ## Install
 install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY include/ DESTINATION include)
+install(FILES cmake/GenerateInitializers.py DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
+
+
+## Testing
+
+if(CATKIN_ENABLE_TESTING)
+    add_executable(test_initializers tests/test_initializers.cpp)
+    target_link_libraries(test_initializers ${PROJECT_NAME} ${catkin_LIBRARIES})
+    install(TARGETS test_initializers RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+endif(CATKIN_ENABLE_TESTING)

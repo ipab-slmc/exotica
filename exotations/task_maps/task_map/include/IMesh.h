@@ -36,6 +36,7 @@
 #include <exotica/TaskMap.h>
 #include <exotica/KinematicTree.h>
 #include <task_map/IMeshInitializer.h>
+#include <visualization_msgs/Marker.h>
 
 namespace exotica
 {

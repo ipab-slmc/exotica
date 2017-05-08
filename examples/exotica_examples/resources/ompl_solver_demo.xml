@@ -6,7 +6,7 @@
     <Solver>OMPLImpSolver</Solver>
   </OMPLsolver>
 
-  <OMPLProblem Name="MyProblem">
+  <SamplingProblem Name="MyProblem">
 
     <PlanningScene>
       <Scene Name="OMPLSolverDemoScene">
@@ -35,6 +35,6 @@
         <Threshold>1e-6</Threshold>
       </TaskTerminationCriterion>
     </Tasks>
-  </OMPLProblem>
+  </SamplingProblem>
 
 </PlannerDemoConfig>

@@ -5,7 +5,7 @@
     <MaxIt>1</MaxIt>
   </IKsolver>
 
-  <IKProblem Name="MyProblem"> <!-- Problem definition -->
+  <UnconstrainedEndPoseProblem Name="MyProblem"> <!-- Problem definition -->
 
     <PlanningScene>
       <Scene Name="MyScene"> <!-- Kinematic scene -->
@@ -44,6 +44,6 @@
     <!-- Problem parameters: tolerance and per joint weighting -->
     <Tolerance>1e-5</Tolerance>
     <W> 7 6 5 4 3 2 1 </W>
-  </IKProblem>
+  </UnconstrainedEndPoseProblem>
 
 </IKSolverDemoConfig>

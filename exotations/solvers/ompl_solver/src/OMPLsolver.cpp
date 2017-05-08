@@ -114,7 +114,7 @@ namespace exotica
 
   {
     MotionSolver::specifyProblem(pointer);
-    prob_ = boost::static_pointer_cast<OMPLProblem>(pointer);
+    prob_ = boost::static_pointer_cast<SamplingProblem>(pointer);
 
 //    for (auto & it : prob_->getScenes())
 //    {
@@ -126,7 +126,7 @@ namespace exotica
 
   bool OMPLsolver::isSolvable(const PlanningProblem_ptr & prob)
   {
-    if (prob->type().compare("exotica::OMPLProblem") == 0) return true;
+    if (prob->type().compare("exotica::SamplingProblem") == 0) return true;
     return false;
   }
 

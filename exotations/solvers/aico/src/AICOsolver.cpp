@@ -209,12 +209,12 @@ namespace exotica
 
   void AICOsolver::specifyProblem(PlanningProblem_ptr pointer)
   {
-    if (pointer->type().compare(std::string("exotica::AICOProblem")) != 0)
+    if (pointer->type().compare(std::string("exotica::UnconstrainedTimeIndexedProblem")) != 0)
     {
       throw_named("This solver can't use problem of type '" << pointer->type() << "'!");
     }
     MotionSolver::specifyProblem(pointer);
-    prob_ = boost::static_pointer_cast<AICOProblem>(pointer);
+    prob_ = boost::static_pointer_cast<UnconstrainedTimeIndexedProblem>(pointer);
 
     T = prob_->getT();
     taskNames.resize(prob_->getTaskDefinitions().size());
@@ -247,7 +247,7 @@ namespace exotica
 
   bool AICOsolver::isSolvable(const PlanningProblem_ptr & prob)
   {
-    if (prob->type().compare("exotica::AICOProblem") == 0) return true;
+    if (prob->type().compare("exotica::UnconstrainedTimeIndexedProblem") == 0) return true;
     return false;
   }
 

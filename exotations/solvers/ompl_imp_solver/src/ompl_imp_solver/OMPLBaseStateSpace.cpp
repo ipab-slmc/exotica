@@ -36,13 +36,13 @@
 namespace exotica
 {
   OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim,
-      const Server_ptr &server, OMPLProblem_ptr &prob)
+      const Server_ptr &server, SamplingProblem_ptr &prob)
       : ob::CompoundStateSpace(), server_(Server::Instance()), prob_(prob)
   {
   }
 
   OMPLStateValidityChecker::OMPLStateValidityChecker(
-      const ob::SpaceInformationPtr &si, const OMPLProblem_ptr &prob)
+      const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob)
       : ob::StateValidityChecker(si), prob_(prob)
   {
     Server_ptr server = Server::Instance();

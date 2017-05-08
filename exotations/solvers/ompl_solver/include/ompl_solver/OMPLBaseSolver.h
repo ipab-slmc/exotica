@@ -34,7 +34,7 @@
 #ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLBASESOLVER_H_
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLBASESOLVER_H_
 
-#include "exotica/Problems/OMPLProblem.h"
+#include "exotica/Problems/SamplingProblem.h"
 #include "ompl_solver/common.h"
 #include <ompl/geometric/PathSimplifier.h>
 #include <ompl/base/DiscreteMotionValidator.h>
@@ -68,7 +68,7 @@ namespace exotica
 
       const boost::shared_ptr<og::SimpleSetup> getOMPLSimpleSetup() const;
 
-      virtual void specifyProblem(const OMPLProblem_ptr &prob) = 0;
+      virtual void specifyProblem(const SamplingProblem_ptr &prob) = 0;
 
       static pluginlib::ClassLoader<exotica::OMPLBaseSolver> base_solver_loader;
     protected:
@@ -132,7 +132,7 @@ namespace exotica
        */
       void recordData();
 
-      OMPLProblem_ptr prob_; //!< Shared pointer to the planning problem.
+      SamplingProblem_ptr prob_; //!< Shared pointer to the planning problem.
 
       Server_ptr server_;
 

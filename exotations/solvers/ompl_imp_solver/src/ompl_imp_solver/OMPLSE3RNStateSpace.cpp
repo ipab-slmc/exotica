@@ -35,7 +35,7 @@
 namespace exotica
 {
   OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(unsigned int dim,
-      const Server_ptr &server, OMPLProblem_ptr &prob)
+      const Server_ptr &server, SamplingProblem_ptr &prob)
       : OMPLBaseStateSpace(dim, server, prob), realvectordim_(dim), SO3Bounds_(
           3), useGoal_(false)
   {

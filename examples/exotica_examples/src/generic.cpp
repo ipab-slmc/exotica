@@ -31,7 +31,7 @@ void run()
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
 
-    Initializer problem("exotica/IKProblem",{
+    Initializer problem("exotica/UnconstrainedEndPoseProblem",{
                             {"Name",std::string("MyProblem")},
                             {"PlanningScene",scene},
                             {"Maps",std::vector<Initializer>({map})},

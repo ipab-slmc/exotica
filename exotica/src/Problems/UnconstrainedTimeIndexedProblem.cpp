@@ -31,17 +31,17 @@
  *
  */
 
-#include <exotica/Problems/AICOProblem.h>
+#include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 #include <exotica/Setup.h>
 
-REGISTER_PROBLEM_TYPE("AICOProblem", exotica::AICOProblem)
+REGISTER_PROBLEM_TYPE("UnconstrainedTimeIndexedProblem", exotica::UnconstrainedTimeIndexedProblem)
 
 #define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 namespace exotica
 {
 
-    void AICOProblem::reinitialise(rapidjson::Document& document,
+    void UnconstrainedTimeIndexedProblem::reinitialise(rapidjson::Document& document,
           boost::shared_ptr<PlanningProblem> problem)
     {
         clear();
@@ -115,7 +115,7 @@ namespace exotica
         }
     }
 
-  void AICOProblem::update(Eigen::VectorXdRefConst x, const int t)
+  void UnconstrainedTimeIndexedProblem::update(Eigen::VectorXdRefConst x, const int t)
   {
     // Update the KinematicScene(s)...
 //    for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
@@ -136,18 +136,18 @@ namespace exotica
     }
   }
 
-  AICOProblem::AICOProblem()
+  UnconstrainedTimeIndexedProblem::UnconstrainedTimeIndexedProblem()
       : T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
   {
 
   }
 
-  AICOProblem::~AICOProblem()
+  UnconstrainedTimeIndexedProblem::~UnconstrainedTimeIndexedProblem()
   {
 
   }
 
-  void AICOProblem::Instantiate(AICOProblemInitializer& init)
+  void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProblemInitializer& init)
   {
       T = init.T;
       if (T <= 2)
@@ -170,7 +170,7 @@ namespace exotica
       setTime(T);
   }
 
-  void AICOProblem::initDerived(tinyxml2::XMLHandle & handle)
+  void UnconstrainedTimeIndexedProblem::initDerived(tinyxml2::XMLHandle & handle)
   {
     tinyxml2::XMLElement* xmltmp;
     bool hastime = false;
@@ -222,12 +222,12 @@ namespace exotica
     setTime(T);
   }
 
-  int AICOProblem::getT()
+  int UnconstrainedTimeIndexedProblem::getT()
   {
     return T;
   }
 
-  void AICOProblem::setTime(int T_)
+  void UnconstrainedTimeIndexedProblem::setTime(int T_)
   {
     if (T_ <= 0)
     {
@@ -242,42 +242,42 @@ namespace exotica
     }
   }
 
-  void AICOProblem::getT(int& T_)
+  void UnconstrainedTimeIndexedProblem::getT(int& T_)
   {
     T_ = T;
   }
 
-  double AICOProblem::getTau()
+  double UnconstrainedTimeIndexedProblem::getTau()
   {
     return tau;
   }
 
-  void AICOProblem::getTau(double& tau_)
+  void UnconstrainedTimeIndexedProblem::getTau(double& tau_)
   {
     tau_ = tau;
   }
 
-  double AICOProblem::getDuration()
+  double UnconstrainedTimeIndexedProblem::getDuration()
   {
     return tau * (double) T;
   }
 
-  Eigen::MatrixXd AICOProblem::getW()
+  Eigen::MatrixXd UnconstrainedTimeIndexedProblem::getW()
   {
     return W;
   }
 
-  double AICOProblem::getQrate()
+  double UnconstrainedTimeIndexedProblem::getQrate()
   {
     return Q_rate;
   }
 
-  double AICOProblem::getWrate()
+  double UnconstrainedTimeIndexedProblem::getWrate()
   {
     return W_rate;
   }
 
-  double AICOProblem::getHrate()
+  double UnconstrainedTimeIndexedProblem::getHrate()
   {
     return H_rate;
   }

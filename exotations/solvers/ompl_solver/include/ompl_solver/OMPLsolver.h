@@ -75,7 +75,7 @@ namespace exotica
       /*
        * \brief Get planning problem
        */
-      const OMPLProblem_ptr getProblem() const
+      const SamplingProblem_ptr getProblem() const
       {
         return prob_;
       }
@@ -106,7 +106,7 @@ namespace exotica
        */
       virtual void initDerived(tinyxml2::XMLHandle & handle);
     private:
-      OMPLProblem_ptr prob_; //!< Shared pointer to the planning problem.
+      SamplingProblem_ptr prob_; //!< Shared pointer to the planning problem.
 
       OMPLBaseSolver_ptr base_solver_;
 

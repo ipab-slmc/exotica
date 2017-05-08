@@ -31,30 +31,29 @@
  *
  */
 
-/** \file AICOProblem.h
+/** \file UnconstrainedTimeIndexedProblem.h
  \brief Approximate Inference Control Problem specification */
 
-#ifndef AICOPROBLEM_H_
-#define AICOPROBLEM_H_
+#ifndef UNCONSTRAINETIMEINDEXEDPROBLEM_H_
+#define UNCONSTRAINETIMEINDEXEDPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
 #include "exotica/Definitions/TaskSqrError.h"
-#include <exotica/AICOProblemInitializer.h>
+#include <exotica/UnconstrainedTimeIndexedProblemInitializer.h>
 
 namespace exotica
 {
 
   /**
-   * \brief Problem specification for Approximate Inference Control method.
-   * \ingroup AICO
+   * \brief Unconstrained time-indexed problem.
    */
-  class AICOProblem: public PlanningProblem, public Instantiable<AICOProblemInitializer>
+  class UnconstrainedTimeIndexedProblem: public PlanningProblem, public Instantiable<UnconstrainedTimeIndexedProblemInitializer>
   {
     public:
-      AICOProblem();
-      virtual ~AICOProblem();
+      UnconstrainedTimeIndexedProblem();
+      virtual ~UnconstrainedTimeIndexedProblem();
 
-      virtual void Instantiate(AICOProblemInitializer& init);
+      virtual void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init);
 
       /**
        * \brief Get number of time steps
@@ -116,7 +115,7 @@ namespace exotica
       double getHrate();
 
       /**
-       * @brief update Updates the AICO problem, adding lazy update of task maps for which the task definition has rho=0.
+       * @brief update Updates the problem, adding lazy update of task maps for which the task definition has rho=0.
        * @param x State
        * @param t time step
        * @return  Indication of success TODO
@@ -143,7 +142,7 @@ namespace exotica
 
   };
 
-  typedef boost::shared_ptr<exotica::AICOProblem> AICOProblem_ptr;
-} /* namespace exotica */
+  typedef boost::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;
+}
 
-#endif /* AICOPROBLEM_H_ */
+#endif

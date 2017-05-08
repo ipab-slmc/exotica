@@ -143,7 +143,7 @@ namespace exotica
        * @param new_end_effectors A solution form type: you only need to set the ignore_unused_segs flag, the end_effector_segs and the end_effector_offs
        * @return                  True if successful, false otherwise
        */
-      bool updateEndEffectors(const SolutionForm_t & new_end_effectors);
+      void updateEndEffectors(const SolutionForm_t & new_end_effectors);
 
       /**
        * \brief	Update end-effector offset
@@ -377,7 +377,7 @@ namespace exotica
        * @param optimisation  Solution Parameters
        * @return              True if successful, False otherwise
        */
-      bool initialise(const KDL::Tree & temp_tree,
+      void initialise(const KDL::Tree & temp_tree,
           const SolutionForm_t & optimisation);
 
       /**
@@ -387,10 +387,10 @@ namespace exotica
        * @param joint_map  The Mapping from the joint to the index for the associated segment
        * @return           True if ok, false if not
        */
-      bool buildTree(const KDL::Tree & temp_tree, std::string root,
+      void buildTree(const KDL::Tree & temp_tree, std::string root,
           std::map<std::string, int> & joint_map);
 
-      bool setJointLimits();
+      void setJointLimits();
 
       /**
        * \brief Set the Joint ordering we will use : NOT THREAD-SAFE
@@ -399,7 +399,7 @@ namespace exotica
        * @param joint_map Mapping from joint names to indexes of the correspdonding segment
        * @return          True if success, false otherwise
        */
-      bool setJointOrder(const std::vector<std::string> & joints, bool zero_out,
+      void setJointOrder(const std::vector<std::string> & joints, bool zero_out,
           const std::map<std::string, int> & joint_map);
 
       /**
@@ -407,14 +407,14 @@ namespace exotica
        * @param optimisation The Optimisation structure
        * @return             Indication of success (true) or otherwise
        */
-      bool setEndEffectors(const SolutionForm_t & optimisation);
+      void setEndEffectors(const SolutionForm_t & optimisation);
 
       /**
        * \brief Recursive Function which modifies the robot_tree_ and the segment_map_ : NOT THREAD-SAFE
        * TODO
        * @return        True if successful, false otherwise
        */
-      bool addSegment(KDL::SegmentMap::const_iterator current_segment,
+      void addSegment(KDL::SegmentMap::const_iterator current_segment,
           int parent, int & current, bool from_ptip, bool to_ctip,
           const std::string & root_name,
           std::map<std::string, int> & joint_map);
@@ -424,7 +424,7 @@ namespace exotica
        * @param	node Index into the next node to process.
        * @return	 True if successful, false otherwise
        */
-      bool recurseNeedFlag(int node);
+      void recurseNeedFlag(int node);
 
       /**
        * \brief Checks that everything is ok : NOT THREAD-SAFE

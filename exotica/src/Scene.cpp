@@ -883,10 +883,7 @@ namespace exotica
       }
     }
 
-    if (!kinematica_.updateEndEffectors(tmp_sol))
-    {
-      throw_named("Can't update end-effectors!");
-    }
+    kinematica_.updateEndEffectors(tmp_sol);
     std::vector<int> tmp_index;
     if (!kinematica_.getEndEffectorIndex(tmp_index))
     {

@@ -48,7 +48,7 @@ exotica::KinematicTree::KinematicTree()
   std::cout << "Default Constructor ... ";
 #endif
 
-  //!< Set to default values
+  // Set to default values
   zero_undef_jnts_ = false;
 
   INFO("Done");
@@ -120,26 +120,16 @@ void exotica::KinematicTree::Instantiate(std::string JointGroup, robot_model::Ro
         throw_pretty("No update joint is specified");
     }
 
-    if (!model)
+    model_ = model;
+    KDL::Tree temp_tree;
+    boost::mutex::scoped_lock(member_lock_);
+    if (kdl_parser::treeFromUrdfModel(*model_->getURDF(), temp_tree))
     {
-      throw_pretty("No robot model provided!");
+        initialise(temp_tree, solution);
     }
     else
     {
-      model_ = model;
-      KDL::Tree temp_tree;
-      boost::mutex::scoped_lock(member_lock_);
-      if (kdl_parser::treeFromUrdfModel(*model_->getURDF(), temp_tree))
-      {
-        if(!initialise(temp_tree, solution))
-        {
-            throw_pretty("Can't initialize Kinematica!");
-        }
-      }
-      else
-      {
         throw_pretty("Can't load URDF model!");
-      }
     }
 }
 
@@ -150,15 +140,15 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
 
   exotica::SolutionForm_t solution;
 
-  //!< Checks for compulsaries
+  // Checks for compulsaries
 
   if (!handle.FirstChildElement("Update").ToElement())
   {
     ERROR("Update element not exist");
     return false;
-  } //!< We must have the list of joints
+  } // We must have the list of joints
 
-//!< Now the solution params:
+// Now the solution params:
   solution.root_segment = "";
   base_type_ = solution.base_type = BASE_TYPE::FIXED;
   solution.root_seg_off = KDL::Frame::Identity();
@@ -191,7 +181,7 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
       std::string controlled_base =
           handle.FirstChildElement("Root").ToElement()->Attribute(
               "controlled_root");
-      if (controlled_base.compare("false") == 0) controlled_base_ = false;
+      if (controlled_base == "false") controlled_base_ = false;
     }
 
     if (handle.FirstChildElement("Root").FirstChildElement("vector").ToElement())
@@ -234,15 +224,15 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
     }
   }
 
-  solution.zero_other_joints = true;  //!< By default it is true
-  if (handle.FirstChildElement("Update").ToElement()->Attribute("zero_unnamed")) //!< If it exists
+  solution.zero_other_joints = true;  // By default it is true
+  if (handle.FirstChildElement("Update").ToElement()->Attribute("zero_unnamed")) // If it exists
   {
     if (handle.FirstChildElement("Update").ToElement()->QueryBoolAttribute(
         "zero_unnamed", &solution.zero_other_joints) != tinyxml2::XML_NO_ERROR)
     {
       ERROR("Update joints are not properly defined");
       return false;
-    }  //!< If exists but wrongly defined
+    }  // If exists but wrongly defined
   }
   tinyxml2::XMLHandle joint_handle(
       handle.FirstChildElement("Update").FirstChildElement("joint"));
@@ -252,7 +242,7 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
     {
       ERROR("Update joint names are invalid");
       return false;
-    } //!< If no name exists
+    } // If no name exists
     solution.joints_update.push_back(
         joint_handle.ToElement()->Attribute("name"));
     joint_handle = joint_handle.NextSiblingElement("joint");
@@ -261,7 +251,7 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
   {
     ERROR("No update joint is specified");
     return false;
-  }  //!< If no joints specified
+  }  // If no joints specified
 
   solution.ignore_unused_segs = true;
   if (handle.FirstChildElement("EndEffector").ToElement())
@@ -288,7 +278,7 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
       }
       solution.end_effector_segs.push_back(
           segment_handle.ToElement()->Attribute("segment"));
-      KDL::Frame temp_frame = KDL::Frame::Identity(); //!< Initialise to identity
+      KDL::Frame temp_frame = KDL::Frame::Identity(); // Initialise to identity
       if (segment_handle.FirstChildElement("vector").ToElement())
       {
         Eigen::VectorXd temp_vector;
@@ -349,7 +339,8 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
     boost::mutex::scoped_lock(member_lock_);
     if (kdl_parser::treeFromUrdfModel(*model_->getURDF(), temp_tree))
     {
-      return initialise(temp_tree, solution);
+      initialise(temp_tree, solution);
+      return true;
     }
     else
     {
@@ -362,13 +353,13 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
 
 
 
-bool exotica::KinematicTree::updateEndEffectors(
+void exotica::KinematicTree::updateEndEffectors(
     const SolutionForm_t & new_end_effectors)
 {
-//!< Lock for synchronisation
+// Lock for synchronisation
   boost::mutex::scoped_lock(member_lock_);
 
-//!< Clear the needed flag and the end-effector segments vectors
+// Clear the needed flag and the end-effector segments vectors
   for (int i = 0; i < robot_tree_.size(); ++i)
   {
     robot_tree_[i].needed = false;
@@ -376,8 +367,8 @@ bool exotica::KinematicTree::updateEndEffectors(
   eff_segments_.clear();
   eff_seg_offs_.clear();
 
-//!< Now do the actual updating
-  return setEndEffectors(new_end_effectors);
+// Now do the actual updating
+  setEndEffectors(new_end_effectors);
 }
 
 bool exotica::KinematicTree::updateEndEffectorOffsets(
@@ -413,7 +404,7 @@ bool exotica::KinematicTree::addEndEffector(const std::string & name,
   {
     return false;
   }
-//!< Check if the end-effector is a segment
+// Check if the end-effector is a segment
   std::map<std::string, int>::iterator map_it = segment_map_.find(name);
   if (map_it == segment_map_.end())
   {
@@ -428,13 +419,10 @@ bool exotica::KinematicTree::addEndEffector(const std::string & name,
       return false;
     }
   }
-  if (!recurseNeedFlag(segment_map_[name]))
-  {
-    return false;
-  }
+  recurseNeedFlag(segment_map_[name]);
   eff_segments_.push_back(segment_map_[name]);
   eff_seg_offs_.push_back(offset);
-  forward_map_.resize(3 * eff_segments_.size()); //!< Just position/velocity of end-effector
+  forward_map_.resize(3 * eff_segments_.size()); // Just position/velocity of end-effector
   jacobian_.resize(3 * eff_segments_.size(), num_jnts_spec_);
   return true;
 }
@@ -446,7 +434,7 @@ bool exotica::KinematicTree::removeEndEffector(const std::string & name)
   {
     return false;
   }
-//!< Check if the end-effector is a segment
+// Check if the end-effector is a segment
   std::map<std::string, int>::iterator map_it = segment_map_.find(name);
   if (map_it == segment_map_.end()) return false;
   uint N = eff_segments_.size(), i;
@@ -463,12 +451,9 @@ bool exotica::KinematicTree::removeEndEffector(const std::string & name)
 
       for (i = 0; i < N - 1; i++)
       {
-        if (!recurseNeedFlag(eff_segments_[i]))
-        {
-          return false;
-        }
+        recurseNeedFlag(eff_segments_[i]);
       }
-      forward_map_.resize(3 * (N - 1));	//!< Just position/velocity of end-effector
+      forward_map_.resize(3 * (N - 1));	// Just position/velocity of end-effector
       jacobian_.resize(3 * (N - 1), num_jnts_spec_);
       return true;
     }
@@ -485,7 +470,7 @@ bool exotica::KinematicTree::modifyEndEffector(const std::string & name,
   {
     return false;
   }
-//!< Check if the end-effector is a segment
+// Check if the end-effector is a segment
   std::map<std::string, int>::iterator map_it = segment_map_.find(name);
   if (map_it == segment_map_.end()) return false;
   uint index = map_it->second;
@@ -509,7 +494,7 @@ bool exotica::KinematicTree::modifySegment(const std::string & name,
   {
     return false;
   }
-//!< Check if the end-effector is a segment
+// Check if the end-effector is a segment
   std::map<std::string, int>::iterator map_it = segment_map_.find(name);
   if (map_it == segment_map_.end()) return false;
   robot_tree_[map_it->second].offset = offset;
@@ -519,13 +504,13 @@ bool exotica::KinematicTree::modifySegment(const std::string & name,
 bool exotica::KinematicTree::updateConfiguration(
     const Eigen::Ref<const Eigen::VectorXd> & joint_configuration)
 {
-//!< Temporaries
+// Temporaries
   double jnt_angle;
 
-  //!< Locking
+  // Locking
   boost::mutex::scoped_lock(member_lock_);
 
-//!< Checks
+// Checks
   if (!isInitialised())
   {
     ERROR("Scene was not initialized!");
@@ -538,13 +523,13 @@ bool exotica::KinematicTree::updateConfiguration(
     return false;
   }
 
-//!< Start update: start first with the root node...
+// Start update: start first with the root node...
   jnt_angle =
       (robot_tree_[0].joint_type == JNT_UNUSED) ?
           0 : joint_configuration[robot_tree_[0].joint_index];
   robot_tree_[0].joint_pose = robot_tree_[0].tip_pose
       * robot_tree_[0].segment.pose(jnt_angle).Inverse();
-  if (robot_tree_[0].joint_type)	//!< Will be greater than 0
+  if (robot_tree_[0].joint_type)	// Will be greater than 0
   {
     robot_tree_[0].joint_origin = vectorKdlToEigen(
         robot_tree_[0].joint_pose
@@ -560,12 +545,12 @@ bool exotica::KinematicTree::updateConfiguration(
 
   for (int i = 1; i < robot_tree_.size(); i++)
   {
-    if (robot_tree_[i].needed)	//!< Only proceed if needed
+    if (robot_tree_[i].needed)	// Only proceed if needed
     {
-      //!< Temporaries
+      // Temporaries
       KDL::Frame parent_transform;
 
-      //!< Settle Angle
+      // Settle Angle
       if (!controlled_base_ && i < 4)
       {
         if (i == 1) jnt_angle = current_base_pose_.p.data[0];
@@ -581,7 +566,7 @@ bool exotica::KinematicTree::updateConfiguration(
             (robot_tree_[i].joint_type == JNT_UNUSED) ?
                 0 : joint_configuration[robot_tree_[i].joint_index];
 
-      //!< Settle which parent transform to use
+      // Settle which parent transform to use
       if (robot_tree_[i].from_tip)//If we are coming from the tip of the parent
       {
         parent_transform = robot_tree_[robot_tree_[i].parent].tip_pose;
@@ -591,33 +576,33 @@ bool exotica::KinematicTree::updateConfiguration(
         parent_transform = robot_tree_[robot_tree_[i].parent].joint_pose;
       }
 
-      //!< Now settle the tip or base
-      if (robot_tree_[i].to_tip)	//!< We are moving towards the tip
-      {	//!< We generally do not need to concern ourselves with the joint_pose: however might need it for the joint origin computation
+      // Now settle the tip or base
+      if (robot_tree_[i].to_tip)	// We are moving towards the tip
+      {	// We generally do not need to concern ourselves with the joint_pose: however might need it for the joint origin computation
         robot_tree_[i].tip_pose = parent_transform
             * robot_tree_[i].segment.pose(jnt_angle) * robot_tree_[i].offset;
         robot_tree_[i].joint_pose = parent_transform * robot_tree_[i].offset;
       }
-      else //!< Moving towards the base
+      else // Moving towards the base
       {
-        robot_tree_[i].tip_pose = parent_transform * robot_tree_[i].offset;	//!< We cannot be moving towards base from a tip
+        robot_tree_[i].tip_pose = parent_transform * robot_tree_[i].offset;	// We cannot be moving towards base from a tip
         robot_tree_[i].joint_pose = parent_transform
             * robot_tree_[i].segment.pose(jnt_angle).Inverse()
             * robot_tree_[i].offset;
       }
 
-      //!< Finally set the joint_origin/axis
-      if (robot_tree_[i].joint_type)//!< If we are specifying this joint: if not, it does not make sense to compute it
+      // Finally set the joint_origin/axis
+      if (robot_tree_[i].joint_type)// If we are specifying this joint: if not, it does not make sense to compute it
       {
-        if (robot_tree_[i].joint_type == JNT_ROTARY) //!< Only compute axis if rotary
+        if (robot_tree_[i].joint_type == JNT_ROTARY) // Only compute axis if rotary
         {
           robot_tree_[i].joint_origin = vectorKdlToEigen(
               robot_tree_[i].joint_pose
-                  * robot_tree_[i].segment.getJoint().JointOrigin()); //!< Origin is just transformed into the global frame
+                  * robot_tree_[i].segment.getJoint().JointOrigin()); // Origin is just transformed into the global frame
         }
         robot_tree_[i].joint_axis = vectorKdlToEigen(
             robot_tree_[i].joint_pose.M
-                * robot_tree_[i].segment.getJoint().JointAxis()); //!< For the axes, we do not care about co-ordinates: we just pre-multiply by rotation: this is needed always, for both rotary and prismatic joints
+                * robot_tree_[i].segment.getJoint().JointAxis()); // For the axes, we do not care about co-ordinates: we just pre-multiply by rotation: this is needed always, for both rotary and prismatic joints
         if (!robot_tree_[i].to_tip)
         {
           robot_tree_[i].joint_axis = -1.0 * robot_tree_[i].joint_axis;
@@ -634,12 +619,11 @@ bool exotica::KinematicTree::setBasePose(const KDL::Frame &pose)
   return true;
 }
 
-bool exotica::KinematicTree::setBaseBounds(const std::vector<double> &bounds)
+void exotica::KinematicTree::setBaseBounds(const std::vector<double> &bounds)
 {
   if (bounds.size() != 6)
   {
-    ERROR("Expect base bounds size 6, but received bounds size "<<bounds.size());
-    return false;
+    throw_pretty("Expect base bounds size 6, but received bounds size "<<bounds.size());
   }
 
   if (base_type_ == BASE_TYPE::FLOATING)
@@ -657,20 +641,19 @@ bool exotica::KinematicTree::setBaseBounds(const std::vector<double> &bounds)
     robot_tree_[3].joint_limits_[0] = bounds[2];
     robot_tree_[3].joint_limits_[1] = bounds[5];
   }
-  return true;
 }
 
 bool exotica::KinematicTree::generateForwardMap()
 {
-  boost::mutex::scoped_lock(member_lock_);	//!< Lock:
+  boost::mutex::scoped_lock(member_lock_);	// Lock:
   return computePhi();
 }
 
 bool exotica::KinematicTree::generateForwardMap(Eigen::Ref<Eigen::VectorXd> phi)
 {
-  boost::mutex::scoped_lock(member_lock_);	//!< Lock for thread-safety
+  boost::mutex::scoped_lock(member_lock_);	// Lock for thread-safety
 
-  if (computePhi())	//!< If successful:
+  if (computePhi())	// If successful:
   {
     if (phi.rows() != forward_map_.rows())
     {
@@ -694,7 +677,7 @@ bool exotica::KinematicTree::generateForwardMap(Eigen::Ref<Eigen::VectorXd> phi)
 
 bool exotica::KinematicTree::getPhi(Eigen::Ref<Eigen::VectorXd> phi)
 {
-  boost::mutex::scoped_lock(member_lock_);	//!< Lock for thread-safety
+  boost::mutex::scoped_lock(member_lock_);	// Lock for thread-safety
   if (phi.rows() != forward_map_.rows())
   {
     ERROR(
@@ -707,13 +690,13 @@ bool exotica::KinematicTree::getPhi(Eigen::Ref<Eigen::VectorXd> phi)
 
 bool exotica::KinematicTree::generateJacobian()
 {
-  boost::mutex::scoped_lock(member_lock_); 	//!< Locking
+  boost::mutex::scoped_lock(member_lock_); 	// Locking
   return computePosJacobian();
 }
 
 bool exotica::KinematicTree::getJacobian(Eigen::Ref<Eigen::MatrixXd> jac)
 {
-  boost::mutex::scoped_lock(member_lock_);	//!< Lock for thread-safety
+  boost::mutex::scoped_lock(member_lock_);	// Lock for thread-safety
   if (jac.rows() != jacobian_.rows() || jac.cols() != jacobian_.cols())
   {
     std::cout << "Has " << jacobian_.rows() << "X" << jacobian_.cols()
@@ -728,9 +711,9 @@ bool exotica::KinematicTree::getJacobian(Eigen::Ref<Eigen::MatrixXd> jac)
 bool exotica::KinematicTree::generateJacobian(
     Eigen::Ref<Eigen::MatrixXd> jacobian)
 {
-  boost::mutex::scoped_lock(member_lock_); 	//!< Locking
+  boost::mutex::scoped_lock(member_lock_); 	// Locking
 
-  if (computePosJacobian()) 	//!< If ok...
+  if (computePosJacobian()) 	// If ok...
   {
     if (jacobian.rows() != jacobian_.rows()
         || jacobian.cols() != jacobian_.cols())
@@ -811,7 +794,7 @@ bool exotica::KinematicTree::getSegment(KDL::Segment & seg, int index)
   boost::mutex::scoped_lock(member_lock_);
   if (index < 0 || index >= robot_tree_.size() || !isInitialised())
   {
-    return false;	//!< Not initialised, or invalid index
+    return false;	// Not initialised, or invalid index
   }
   seg = robot_tree_[index].segment;
   return true;
@@ -863,7 +846,7 @@ bool exotica::KinematicTree::getInitialEff(std::vector<std::string> & segs,
   return true;
 }
 
-bool exotica::KinematicTree::initialise(const KDL::Tree & temp_tree,
+void exotica::KinematicTree::initialise(const KDL::Tree & temp_tree,
     const exotica::SolutionForm_t & optimisation)
 {
     // First clear/reset everything
@@ -874,64 +857,45 @@ bool exotica::KinematicTree::initialise(const KDL::Tree & temp_tree,
     eff_segments_.clear();
     eff_seg_offs_.clear();
 
-    if(buildTree(temp_tree, optimisation.root_segment, joint_map_))
-    {
-        std::cout << "Kinematica using " << base_type_
-            << " base, the robot true root is " << robot_root_.first << " at index "
-            << robot_root_.second << std::endl;
-        if(setJointLimits())
-        {
-            if(setJointOrder(optimisation.joints_update,optimisation.zero_other_joints, joint_map_))
-            {
-                if(setEndEffectors(optimisation))
-                {
-                    eff_segments_ini_ = optimisation.end_effector_segs;
-                    eff_seg_offs_ini_ = optimisation.end_effector_offs;
-                    return true;
-                }
-            }
-        }
-    }
-    // Clear up everything on failure
-    robot_tree_.clear();
-    segment_map_.clear();
-    zero_undef_jnts_ = false;
-    num_jnts_spec_ = 0;
-    eff_segments_.clear();
-    eff_seg_offs_.clear();
-
-    return false;
+    buildTree(temp_tree, optimisation.root_segment, joint_map_);
+    std::cout << "Kinematica using " << (base_type_==BASE_TYPE::PLANAR?"plannar":(base_type_==BASE_TYPE::FLOATING?"floating":"fixed"))
+        << " base, the robot true root is " << robot_root_.first << " at index "
+        << robot_root_.second << std::endl;
+    setJointLimits();
+    setJointOrder(optimisation.joints_update,optimisation.zero_other_joints, joint_map_);
+    setEndEffectors(optimisation);
+    eff_segments_ini_ = optimisation.end_effector_segs;
+    eff_seg_offs_ini_ = optimisation.end_effector_offs;
 }
 
-bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
+void exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
     std::string root, std::map<std::string, int> & joint_map)
 {
   INFO("buildTree Function ... ");
 
-//!< Variable Declarations
-  KDL::SegmentMap::const_iterator root_segment; //!< Root segment iterator
-  std::string true_root; //!< The urdf root name
-  int rubbish; //!< Garbage value since we know root will be at 0
+// Variable Declarations
+  KDL::SegmentMap::const_iterator root_segment; // Root segment iterator
+  std::string true_root; // The urdf root name
+  int rubbish; // Garbage value since we know root will be at 0
 
-//!< Get the desired segment as root...
-  if (root.size() == 0) //!< If no root specified, then we will use the urdf root
+// Get the desired segment as root...
+  if (root.size() == 0) // If no root specified, then we will use the urdf root
   {
     INFO("buildTree Function ... root is of size 0");
     root_segment = temp_tree.getRootSegment();
     INFO("buildTree Function ... root name: ");
   }
-  else               //!< We first need to check if this root actually exists...
+  else               // We first need to check if this root actually exists...
   {
     INFO("buildTree Function ... root is "<<root);
-    KDL::SegmentMap tree_segments = temp_tree.getSegments(); //!< Map of tree segments for checking that desired segment actually exists
-    if (tree_segments.find(root) != tree_segments.end()) //!< If it exists...
+    KDL::SegmentMap tree_segments = temp_tree.getSegments(); // Map of tree segments for checking that desired segment actually exists
+    if (tree_segments.find(root) != tree_segments.end()) // If it exists...
     {
       root_segment = temp_tree.getSegment(root);
     }
     else
     {
-      ERROR("Root "<<root<<" does not exist in the model "<<model_->getName());
-      return false; //!< Indicate failure
+      throw_pretty("Root "<<root<<" does not exist in the model "<<model_->getName());
     }
   }
 
@@ -942,20 +906,16 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
   {
     if (model_->getSRDF()->getVirtualJoints().size() != 1)
     {
-      ERROR(
-          model_->getSRDF()->getVirtualJoints().size()<<" virtual joints are defined, must be set to 1. Can not use floating base");
-      return false;
+      throw_pretty(model_->getSRDF()->getVirtualJoints().size()<<" virtual joints are defined, must be set to 1. Can not use floating base");
     }
     else
     {
       //	Tricky part, all we need is to create another tree with the floating base and append the robot tree to it
       srdf::Model::VirtualJoint virtual_joint =
           model_->getSRDF()->getVirtualJoints()[0];
-      if (virtual_joint.child_link_.compare(root_segment->first) != 0)
+      if (virtual_joint.child_link_ != root_segment->first)
       {
-        ERROR(
-            "Virtual joint has child link "<<virtual_joint.child_link_<<", but robot root is "<<root_segment->first);
-        return false;
+        throw_pretty("Virtual joint has child link "<<virtual_joint.child_link_<<", but robot root is "<<root_segment->first);
       }
       std::string world = virtual_joint.parent_frame_;
       std::string world_joint = virtual_joint.name_;
@@ -970,40 +930,35 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
             KDL::Joint(world_joint + "/trans_x", KDL::Joint::TransX));
         if (!base_tree.addSegment(transX_seg, world))
         {
-          INDICATE_FAILURE
-          return false;
+          throw_pretty("Can't add virtual joint!");
         }
         //	Add translation Y
         KDL::Segment transY_seg(world + "/trans_y",
             KDL::Joint(world_joint + "/trans_y", KDL::Joint::TransY));
         if (!base_tree.addSegment(transY_seg, world + "/trans_x"))
         {
-          INDICATE_FAILURE
-          return false;
+          throw_pretty("Can't add virtual joint!");
         }
         //	Add translation Z
         KDL::Segment transZ_seg(world + "/trans_z",
             KDL::Joint(world_joint + "/trans_z", KDL::Joint::TransZ));
         if (!base_tree.addSegment(transZ_seg, world + "/trans_y"))
         {
-          INDICATE_FAILURE
-          return false;
+          throw_pretty("Can't add virtual joint!");
         }
         //	Add rotation X
         KDL::Segment rotX_seg(world + "/rot_x",
             KDL::Joint(world_joint + "/rot_x", KDL::Joint::RotX));
         if (!base_tree.addSegment(rotX_seg, world + "/trans_z"))
         {
-          INDICATE_FAILURE
-          return false;
+          throw_pretty("Can't add virtual joint!");
         }
         //	Add rotation Y
         KDL::Segment rotY_seg(world + "/rot_y",
             KDL::Joint(world_joint + "/rot_y", KDL::Joint::RotY));
         if (!base_tree.addSegment(rotY_seg, world + "/rot_x"))
         {
-          INDICATE_FAILURE
-          return false;
+          throw_pretty("Can't add virtual joint!");
         }
         //	Add rotation Z (which should be named as robot tree's root)
         KDL::Segment rotZ_seg(root_segment->first,
@@ -1011,8 +966,7 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
                 KDL::Joint::RotZ));
         if (!base_tree.addSegment(rotZ_seg, world + "/rot_y"))
         {
-          INDICATE_FAILURE
-          return false;
+          throw_pretty("Can't add virtual joint!");
         }
 
         robot_root_.second = 6;
@@ -1023,42 +977,35 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
             KDL::Joint(world_joint + "/x", KDL::Joint::TransX));
         if (!base_tree.addSegment(X_seg, world))
         {
-          INDICATE_FAILURE
-          return false;
+          throw_pretty("Can't add virtual joint!");
         }
         //	Add translation Y
         KDL::Segment Y_seg(world + "/y",
             KDL::Joint(world_joint + "/y", KDL::Joint::TransY));
         if (!base_tree.addSegment(Y_seg, world + "/x"))
         {
-          INDICATE_FAILURE
-          return false;
+          throw_pretty("Can't add virtual joint!");
         }
         KDL::Segment rot_seg(root_segment->first,
             KDL::Joint(root_segment->first + "/virtual_joint",
                 KDL::Joint::RotZ));
         if (!base_tree.addSegment(rot_seg, world + "/y"))
         {
-          INDICATE_FAILURE
-          return false;
+          throw_pretty("Can't add virtual joint!");
         }
         robot_root_.second = 3;
       }
       if (base_type_==BASE_TYPE::FIXED)
       {
-        return addSegment(temp_tree.getRootSegment(), ROOT, rubbish, true,
-            false, world, joint_map);
+        addSegment(temp_tree.getRootSegment(), ROOT, rubbish, true, false, world, joint_map);
       }
       else if (base_tree.addTree(temp_tree, root_segment->first))
       {
-        return addSegment(base_tree.getRootSegment(), ROOT, rubbish, true,
-            false, world, joint_map);
+        addSegment(base_tree.getRootSegment(), ROOT, rubbish, true, false, world, joint_map);
       }
       else
       {
-        ERROR(
-            "Cant initialise KDL tree for root "<<root<<" with type "<<base_type_);
-        return false;
+        throw_pretty("Cant initialise KDL tree for root "<<root);
       }
 
     }
@@ -1068,7 +1015,7 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
   {
     robot_root_.second = 0;
     true_root = temp_tree.getRootSegment()->second.segment.getName();
-    return addSegment(root_segment, ROOT, rubbish, true, false, true_root,joint_map); //!< We do a little trick here to indicate that this is the root node
+    addSegment(root_segment, ROOT, rubbish, true, false, true_root,joint_map); // We do a little trick here to indicate that this is the root node
   }
 }
 
@@ -1097,27 +1044,24 @@ KDL::Frame exotica::KinematicTree::getRobotRootWorldTransform()
   return trans;
 }
 
-bool exotica::KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
+void exotica::KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
     const std::vector<double> & lower, const std::vector<double> & upper)
 {
   if (base_type_ != BASE_TYPE::FLOATING)
   {
-    INDICATE_FAILURE
-    return false;
+    throw_pretty("This is not a floating joint!");
   }
   if (lower.size() != 6 || upper.size() != 6)
   {
-    INDICATE_FAILURE
-    return false;
+    throw_pretty("Wrong limit data size!");
   }
   for (int i = 0; i < 6; i++)
   {
     robot_tree_[i + 1].joint_limits_[0] = lower[i];
     robot_tree_[i + 1].joint_limits_[1] = upper[i];
   }
-  return true;
 }
-bool exotica::KinematicTree::setJointLimits()
+void exotica::KinematicTree::setJointLimits()
 {
   srdf::Model::VirtualJoint virtual_joint =
       model_->getSRDF()->getVirtualJoints()[0];
@@ -1178,33 +1122,30 @@ bool exotica::KinematicTree::setJointLimits()
     robot_tree_[3].joint_limits_[0] = -1.57;
     robot_tree_[3].joint_limits_[1] = 1.57;
   }
-
-  return true;
 }
 
-bool exotica::KinematicTree::setJointOrder(
+void exotica::KinematicTree::setJointOrder(
     const std::vector<std::string> & joints, bool zero_out,
     const std::map<std::string, int> & joint_map)
 {
-//!< First do some checks
+// First do some checks
   if (!zero_out && joints.size() != joint_map.size())
   {
-    return false;
+    throw_pretty("Empty joint list/map!");
   }
 
-//!< Now fill in the joints that will be specified: rest will still be invalidated
+// Now fill in the joints that will be specified: rest will still be invalidated
   num_jnts_spec_ = joints.size();
   used_joints_.resize(num_jnts_spec_);
   used_joints_segs_.resize(num_jnts_spec_);
   used_joints_ = joints;
   for (int i = 0; i < num_jnts_spec_; i++)
   {
-    if (joint_map.find(joints[i]) == joint_map.end()) //!< Guard against possibility of specifying incorrect joints
+    if (joint_map.find(joints[i]) == joint_map.end()) // Guard against possibility of specifying incorrect joints
     {
-      ERROR("buildTree Function ...  could not find joint "<<joints[i]);
-      return false;
+      throw_pretty("buildTree Function ...  could not find joint "<<joints[i]);
     }
-    //!< First check what type of joint it is:
+    // First check what type of joint it is:
     switch (robot_tree_[joint_map.at(joints[i])].segment.getJoint().getType())
     {
     case KDL::Joint::RotAxis:
@@ -1232,85 +1173,65 @@ bool exotica::KinematicTree::setJointOrder(
       break;
 
     default:
-      return false;
-      break;
+      throw_pretty("Unknown joint type: "<<robot_tree_[joint_map.at(joints[i])].joint_type);
     }
-    //!< Now set the joint index
+    // Now set the joint index
     robot_tree_[joint_map.at(joints[i])].joint_index = i;
     used_joints_segs_[i] =
         robot_tree_[joint_map.at(joints[i])].segment.getName();
   }
-
-  return true;
 }
 
-bool exotica::KinematicTree::setEndEffectors(
+void exotica::KinematicTree::setEndEffectors(
     const SolutionForm_t & optimisation)
 {
-//!< Variable Declaration
-  bool success = true;
+// Variable Declaration
   INFO("setEndEffectors Function ...  Entered with offsets of size " << optimisation.end_effector_offs.size());
-//!< First do some checks
+// First do some checks
   if (optimisation.end_effector_offs.size() < 0 //OK if == 0
       && (optimisation.end_effector_segs.size()
           != optimisation.end_effector_offs.size()))
   {
-    INDICATE_FAILURE
-    ;
-    return false;
+    throw_pretty("Endeffector offset and segment name size mismatch: " << optimisation.end_effector_segs.size() << ", " <<optimisation.end_effector_offs.size());
   }
 
   INFO("setEndEffectors Function ...  Sizes match up OK!");
 
-//!< Initialise
-  robot_tree_[0].tip_pose = (optimisation.root_seg_off).Inverse(); //!< The Root's Tip Pose is the inverse of the given transformation: this will be constant!
+// Initialise
+  robot_tree_[0].tip_pose = (optimisation.root_seg_off).Inverse(); // The Root's Tip Pose is the inverse of the given transformation: this will be constant!
   used_joints_segs_ = optimisation.end_effector_segs;
 
-  for (int i = 0; i < optimisation.end_effector_segs.size() && success; i++)
+  for (int i = 0; i < optimisation.end_effector_segs.size(); i++)
   {
     if (segment_map_.find(optimisation.end_effector_segs[i])
         != segment_map_.end())
     {
-      eff_segments_.push_back(segment_map_[optimisation.end_effector_segs[i]]); //!< Push back the index
+      eff_segments_.push_back(segment_map_[optimisation.end_effector_segs[i]]); // Push back the index
       if (optimisation.end_effector_offs.size())
       {
         eff_seg_offs_.push_back(optimisation.end_effector_offs[i]);
-      } //!< If larger than 0, push back the frame offset
-      success = recurseNeedFlag(
-          segment_map_[optimisation.end_effector_segs[i]]); //!< Set the needed flag for this and all parents
+      } // If larger than 0, push back the frame offset
+      recurseNeedFlag(segment_map_[optimisation.end_effector_segs[i]]); // Set the needed flag for this and all parents
 
       INFO("setEndEffectors Function ...  Managed to add End effector " << optimisation.end_effector_segs[i]);
     }
     else
     {
-      ERROR(
-          "setEndEffectors Function ...  Could not use End effector " << optimisation.end_effector_segs[i]);
-      success = false;
+      throw_pretty("setEndEffectors Function ...  Could not use End effector " << optimisation.end_effector_segs[i]);
     }
   }
 
-
-  if (success)
-  {
-    forward_map_.resize(3 * optimisation.end_effector_segs.size());	//!< Just position/velocity of end-effector
+    forward_map_.resize(3 * optimisation.end_effector_segs.size());	// Just position/velocity of end-effector
     jacobian_.resize(3 * optimisation.end_effector_segs.size(), num_jnts_spec_);
 
     INFO("setEndEffectors Function ... Created Jacobian of size " << 3*optimisation.end_effector_segs.size() << " x " << num_jnts_spec_);
-    if (!optimisation.ignore_unused_segs) //!< If we do not wish to ignore unused chains
+    if (!optimisation.ignore_unused_segs) // If we do not wish to ignore unused chains
     {
       for (int i = 0; i < robot_tree_.size(); i++)
       {
         robot_tree_[i].needed = true;
-      } //!< Set all as needed
+      } // Set all as needed
     }
-  }
-  else
-  {
-    INDICATE_FAILURE
-    ;
-  }
-
-  return success;
 }
 
 std::string exotica::KinematicTree::getRootName()
@@ -1334,123 +1255,115 @@ KDL::Frame exotica::KinematicTree::getRootOffset()
   return robot_tree_[0].tip_pose.Inverse();
 }
 
-bool exotica::KinematicTree::addSegment(
+void exotica::KinematicTree::addSegment(
     KDL::SegmentMap::const_iterator current_segment, int parent, int & current,
     bool from_ptip, bool to_ctip, const std::string & root_name,
     std::map<std::string, int> & joint_map)
 {
-//!< Variable Declaration
-  bool success = true;
+// Variable Declaration
   KinematicElement_t current_node;
 
   INFO("addSegment Function ... with " << current_segment->second.segment.getName() << " parent: " << parent << " flags: " << from_ptip << to_ctip << " root: " << root_name);
 
-//!< First fill in this node
-  current_node.parent = parent; //!< Assign the parent
-  current_node.from_tip = from_ptip; //!< Indicate whether we reached this through the tip (true) or the base of the parent
-  current_node.to_tip = to_ctip; //!< Also check whether we are moving towards the tip or the base
-  current_node.segment = current_segment->second.segment; //!< Assign the segment information
+// First fill in this node
+  current_node.parent = parent; // Assign the parent
+  current_node.from_tip = from_ptip; // Indicate whether we reached this through the tip (true) or the base of the parent
+  current_node.to_tip = to_ctip; // Also check whether we are moving towards the tip or the base
+  current_node.segment = current_segment->second.segment; // Assign the segment information
   current_node.joint_type = JNT_UNUSED;
-  current_node.needed = false; //!< By default not needed
-  current = robot_tree_.size(); //!< Set where this node will be stored
-  robot_tree_.push_back(current_node); //!< Store
+  current_node.needed = false; // By default not needed
+  current = robot_tree_.size(); // Set where this node will be stored
+  robot_tree_.push_back(current_node); // Store
 
   INFO("addSegment Function ... created node and pushed back on tree at " << robot_tree_.size() - 1);
-//!< Update the Segment Map and the Joint Map:
+// Update the Segment Map and the Joint Map:
   segment_map_[current_node.segment.getName()] = current;
   joint_map[current_node.segment.getJoint().getName()] = current;
 
   INFO("addSegment Function ... Indexing Segment and joint maps (" << current_node.segment.getJoint().getName() << ")");
 
-//!< Now comes the tricky part:
-  if (to_ctip) //!< We are moving in the forward direction towards the tip (this was a child of the node calling the function)
+// Now comes the tricky part:
+  if (to_ctip) // We are moving in the forward direction towards the tip (this was a child of the node calling the function)
   {
     INFO("addSegment Function ... Moving to a tip ");
-    //!< First Iterate through children
-    for (int i = 0; i < current_segment->second.children.size() && success; i++) //!< Iterate through the children if any
+    // First Iterate through children
+    for (int i = 0; i < current_segment->second.children.size(); i++) // Iterate through the children if any
     {
       INFO("addSegment Function ... Iterating through children: " << i);
       int child;
-      success = addSegment(current_segment->second.children[i], current, child,
-          true, true, root_name, joint_map); //!< We are moving from tip towards a tip
-      robot_tree_[current].child.push_back(child); //!< Assign Child to this node
+      addSegment(current_segment->second.children[i], current, child,
+          true, true, root_name, joint_map); // We are moving from tip towards a tip
+      robot_tree_[current].child.push_back(child); // Assign Child to this node
     }
-    //!< Base Case: If empty, loop will be skipped
+    // Base Case: If empty, loop will be skipped
   }
-  else //!< We are moving towards the base
+  else // We are moving towards the base
   {
     INFO("addSegment Function ... Moving to a base ");
-    if (from_ptip) //!< This combination (from tip but moving to a base) is impossible, but is used to indicate this is the root node
+    if (from_ptip) // This combination (from tip but moving to a base) is impossible, but is used to indicate this is the root node
     {
       INFO("addSegment Function ... Manipulating Root segment ");
-      //!< Iterate first through children
-      for (int i = 0; i < current_segment->second.children.size() && success;
-          i++) //!< Iterate through the children if any
+      // Iterate first through children
+      for (int i = 0; i < current_segment->second.children.size();
+          i++) // Iterate through the children if any
       {
         INFO("addSegment Function ... Iterating through children of root: " << i);
         int child;
-        success = addSegment(current_segment->second.children[i], current,
-            child, true, true, root_name, joint_map); //!< We are moving from tip towards a tip
-        robot_tree_[current].child.push_back(child); //!< Assign Child to this node
+        addSegment(current_segment->second.children[i], current,
+            child, true, true, root_name, joint_map); // We are moving from tip towards a tip
+        robot_tree_[current].child.push_back(child); // Assign Child to this node
       }
-      //!< Now handle the parent: only if previously successfull and if this is not the original root node
-      if (root_name.compare(current_node.segment.getName()) && success)
+      // Now handle the parent: only if previously successfull and if this is not the original root node
+      if (root_name!=current_node.segment.getName())
       {
         INFO("addSegment Function ... Checking parent of root ");
         int child;
-        success = addSegment(current_segment->second.parent, current, child,
-            false, false, root_name, joint_map); //!< We are moving from base towards base
-        robot_tree_[current].child.push_back(child);	//!< Add as child
+        addSegment(current_segment->second.parent, current, child,
+            false, false, root_name, joint_map); // We are moving from base towards base
+        robot_tree_[current].child.push_back(child);	// Add as child
       }
     }
-    else	//!< I.e. we Are moving from base to a base
+    else	// I.e. we Are moving from base to a base
     {
       INFO("addSegment Function ... Moving from base to base: ");
-      //!< Iterate through children and set them as children of parent rather than current
-      for (int i = 0; i < current_segment->second.children.size() && success;
+      // Iterate through children and set them as children of parent rather than current
+      for (int i = 0; i < current_segment->second.children.size();
           i++)
       {
         INFO("addSegment Function ... Iterating through children of an inverted segment: " << i);
         int child;
         std::string child_name =
-            current_segment->second.children[i]->second.segment.getName();//!< The name of this child
-        std::string parent_name = robot_tree_[parent].segment.getName();//!< The name of the parent
-        if (parent_name.compare(child_name) == 0)
+            current_segment->second.children[i]->second.segment.getName();// The name of this child
+        std::string parent_name = robot_tree_[parent].segment.getName();// The name of the parent
+        if (parent_name==child_name)
         {
           continue;
-        }									//!< Skip the child who is now parent
-        success = addSegment(current_segment->second.children[i], parent, child,
+        }									// Skip the child who is now parent
+        addSegment(current_segment->second.children[i], parent, child,
             false, true, root_name, joint_map);
-        robot_tree_[parent].child.push_back(child);	//!< Assign child to parent node
+        robot_tree_[parent].child.push_back(child);	// Assign child to parent node
       }
-      //!< If empty, loop will be skipped
-      if (root_name.compare(current_node.segment.getName()) && success)	//!< IF not equal to the root
+      // If empty, loop will be skipped
+      if (root_name!=current_node.segment.getName())	// IF not equal to the root
       {
         INFO("addSegment Function ... Handling parent of inverted segment: ");
         int child;
-        success = addSegment(current_segment->second.parent, current, child,
-            false, false, root_name, joint_map); //!< Add its parent as its child, but indicate so in the traversal direction
+        addSegment(current_segment->second.parent, current, child,
+            false, false, root_name, joint_map); // Add its parent as its child, but indicate so in the traversal direction
         robot_tree_[current].child.push_back(child);
       }
-      //!< Base case if this is indeed the root node in the original urdf
+      // Base case if this is indeed the root node in the original urdf
     }
   }
-  return success;
 }
 
-bool exotica::KinematicTree::recurseNeedFlag(int node)
+void exotica::KinematicTree::recurseNeedFlag(int node)
 {
-  robot_tree_[node].needed = true;	//!< Indicate that needed
-//!< Handle Base Case first:
-  if (robot_tree_[node].parent == ROOT)
-  {
-    return true;
-  }
-//!< Else, recurse
-  else
-  {
-    return recurseNeedFlag(robot_tree_[node].parent);
-  }
+    robot_tree_[node].needed = true;
+    if (robot_tree_[node].parent == ROOT)
+        robot_tree_[robot_tree_[node].parent].needed = true;
+    else
+        recurseNeedFlag(robot_tree_[node].parent);
 }
 
 int exotica::KinematicTree::getEffSize()
@@ -1460,7 +1373,7 @@ int exotica::KinematicTree::getEffSize()
 
 bool exotica::KinematicTree::computePhi()
 {
-//!< Checks
+// Checks
   if (!isInitialised())
   {
     ERROR("Kinematic tree was not initialized!");
@@ -1469,10 +1382,10 @@ bool exotica::KinematicTree::computePhi()
 
   for (int i = 0; i < eff_segments_.size(); i++)
   {
-    KDL::Frame end_effector = robot_tree_[eff_segments_[i]].tip_pose;	//!< End effector is w.r.t. tip of segment always
-    if (eff_seg_offs_.size())	//!< if Size is greater than 0
+    KDL::Frame end_effector = robot_tree_[eff_segments_[i]].tip_pose;	// End effector is w.r.t. tip of segment always
+    if (eff_seg_offs_.size())	// if Size is greater than 0
     {
-      end_effector = end_effector * eff_seg_offs_[i];	//!< Append the respective final transformation
+      end_effector = end_effector * eff_seg_offs_[i];	// Append the respective final transformation
     }
     forward_map_(i * 3) = end_effector.p.x();
     forward_map_(i * 3 + 1) = end_effector.p.y();
@@ -1483,57 +1396,57 @@ bool exotica::KinematicTree::computePhi()
 
 bool exotica::KinematicTree::computePosJacobian()
 {
-//!< Checks
+// Checks
   if (!isInitialised())
   {
     INDICATE_FAILURE
     ;
     return false;
-  }		//!< Ensure that Variables are initialised
+  }		// Ensure that Variables are initialised
   if (!forward_map_.size())
   {
     INDICATE_FAILURE
     ;
     return false;
-  }	//!< Ensure that forward_map_ is generated
+  }	// Ensure that forward_map_ is generated
 
-//!< Compute Jacobian for each end-effector:
-  jacobian_.fill(0.0);	//!< Reset everything to 0
-  for (int i = 0; i < eff_segments_.size(); i++)//!< Iterate through the end-effectors
+// Compute Jacobian for each end-effector:
+  jacobian_.fill(0.0);	// Reset everything to 0
+  for (int i = 0; i < eff_segments_.size(); i++)// Iterate through the end-effectors
   {
-    //!< Temporaries
-    Eigen::Vector3d end_effector_pos = forward_map_.segment(i * 3, 3);//!< Global End-effector position
-    int segment_index = eff_segments_[i];	//!< Current segment index
-    while (robot_tree_[segment_index].parent != ROOT)	//!< Repeat until you reach the root joint
+    // Temporaries
+    Eigen::Vector3d end_effector_pos = forward_map_.segment(i * 3, 3);// Global End-effector position
+    int segment_index = eff_segments_[i];	// Current segment index
+    while (robot_tree_[segment_index].parent != ROOT)	// Repeat until you reach the root joint
     {
-      //!< Some tricks: basically, in some cases we may need to execute for both...
-      if (robot_tree_[segment_index].to_tip)//!< If in traversing through node we go from base to tip, then we need to consider the effect of its joint
+      // Some tricks: basically, in some cases we may need to execute for both...
+      if (robot_tree_[segment_index].to_tip)// If in traversing through node we go from base to tip, then we need to consider the effect of its joint
       {
         if (robot_tree_[segment_index].joint_type == JNT_ROTARY)
         {
           Eigen::Vector3d diff_vector = end_effector_pos
-              - robot_tree_[segment_index].joint_origin;	//!< Find the p-vector
+              - robot_tree_[segment_index].joint_origin;	// Find the p-vector
           jacobian_.block(i * 3, robot_tree_[segment_index].joint_index, 3, 1) =
-              robot_tree_[segment_index].joint_axis.cross(diff_vector);	//!< The Jacobian for this joint
+              robot_tree_[segment_index].joint_axis.cross(diff_vector);	// The Jacobian for this joint
         }
         else if (robot_tree_[segment_index].joint_type == JNT_PRISMATIC)
         {
           jacobian_.block(i * 3, robot_tree_[segment_index].joint_index, 3, 1) =
-              robot_tree_[segment_index].joint_axis; //!< Just the axis
+              robot_tree_[segment_index].joint_axis; // Just the axis
         }
-        //!< Else will not be considered
+        // Else will not be considered
       }
-      if (!robot_tree_[segment_index].from_tip) //!< If we are connected to parent from its base, then we (also) need to consider the parents' joint, which also moves us...
+      if (!robot_tree_[segment_index].from_tip) // If we are connected to parent from its base, then we (also) need to consider the parents' joint, which also moves us...
       {
         if (robot_tree_[robot_tree_[segment_index].parent].joint_type
             == JNT_ROTARY)
         {
           Eigen::Vector3d diff_vector = end_effector_pos
-              - robot_tree_[robot_tree_[segment_index].parent].joint_origin; //!< Find the p-vector (now with its parent joint)
+              - robot_tree_[robot_tree_[segment_index].parent].joint_origin; // Find the p-vector (now with its parent joint)
           jacobian_.block(i * 3,
               robot_tree_[robot_tree_[segment_index].parent].joint_index, 3, 1) =
               robot_tree_[robot_tree_[segment_index].parent].joint_axis.cross(
-                  diff_vector); //!< The Jacobian for this joint
+                  diff_vector); // The Jacobian for this joint
         }
         else if (robot_tree_[robot_tree_[segment_index].parent].joint_type
             == JNT_PRISMATIC)
@@ -1543,21 +1456,21 @@ bool exotica::KinematicTree::computePosJacobian()
               robot_tree_[robot_tree_[segment_index].parent].joint_axis;
         }
       }
-      segment_index = robot_tree_[segment_index].parent; //!< Move to its parent
+      segment_index = robot_tree_[segment_index].parent; // Move to its parent
     }
   }
 
-//!< If made it this far:
+// If made it this far:
   return true;
 }
 
 bool exotica::KinematicTree::getPose(std::string child, std::string parent,
     KDL::Frame & pose)
 {
-//!< Synchronisation
+// Synchronisation
   boost::mutex::scoped_lock(member_lock_);
 
-//!< Checks
+// Checks
   if (!isInitialised())
   {
     INDICATE_FAILURE
@@ -1577,20 +1490,20 @@ bool exotica::KinematicTree::getPose(std::string child, std::string parent,
     return false;
   }
 
-//!< Computation
+// Computation
   pose = robot_tree_[segment_map_[parent]].tip_pose.Inverse()
       * robot_tree_[segment_map_[child]].tip_pose;
 
-//!< Return
+// Return
   return true;
 }
 
 bool exotica::KinematicTree::getPose(std::string child, KDL::Frame & pose)
 {
-//!< Synchronisation
+// Synchronisation
   boost::mutex::scoped_lock(member_lock_);
 
-//!< Checks
+// Checks
   if (!isInitialised())
   {
     INDICATE_FAILURE
@@ -1604,10 +1517,10 @@ bool exotica::KinematicTree::getPose(std::string child, KDL::Frame & pose)
     return false;
   }
 
-//!< Computation
+// Computation
 
   pose = robot_tree_[segment_map_[child]].tip_pose;
-//!< Return
+// Return
   return true;
 }
 
@@ -1687,7 +1600,7 @@ std::string exotica::KinematicTree::getParent(std::string child)
   }
   else
   {
-    return "";  //!< Empty string
+    return "";  // Empty string
   }
 }
 
@@ -1719,7 +1632,7 @@ std::vector<std::string> exotica::KinematicTree::getChildren(std::string parent)
           robot_tree_[robot_tree_[segment_map_[parent]].child[i]].segment.getName());
     }
   }
-  return children; //!< Which may be an empty array
+  return children; // Which may be an empty array
 }
 
 std::vector<int> exotica::KinematicTree::getChildren(int parent)
@@ -1784,7 +1697,7 @@ bool exotica::recursivePrint(exotica::KinematicTree & robot, std::string node,
   bool success = true;
   for (int i = 0; i < children.size() && success; i++)
   {
-    if (i == children.size() - 1) //!< if last element...
+    if (i == children.size() - 1) // if last element...
     {
       tab.resize(tab.size() - 1);
     }
@@ -1796,24 +1709,24 @@ bool exotica::recursivePrint(exotica::KinematicTree & robot, std::string node,
 bool exotica::xmlGetVector(const tinyxml2::XMLElement & xml_vector,
     Eigen::VectorXd & eigen_vector)
 {
-//!< Temporaries
+// Temporaries
   double temp_entry;
   int i = 0;
 
   if (!xml_vector.GetText())
   {
-    eigen_vector = Eigen::VectorXd(); //!< Null matrix again
+    eigen_vector = Eigen::VectorXd(); // Null matrix again
     INDICATE_FAILURE
     ;
     return false;
   }
   std::istringstream text_parser(xml_vector.GetText());
 
-//!< Initialise looping
+// Initialise looping
   text_parser >> temp_entry;
-  while (!(text_parser.fail() || text_parser.bad()))  //!< No commenting!
+  while (!(text_parser.fail() || text_parser.bad()))  // No commenting!
   {
-    eigen_vector.conservativeResize(++i); //!< Allocate storage for this entry (by increasing i)
+    eigen_vector.conservativeResize(++i); // Allocate storage for this entry (by increasing i)
     eigen_vector(i - 1) = temp_entry;
     text_parser >> temp_entry;
   }

@@ -54,13 +54,6 @@ namespace exotica
     return ret;
   }
 
-  void TaskDefinition::initialiseManual(std::string name, Server_ptr & server,
-            boost::shared_ptr<PlanningProblem> prob,
-            std::vector<std::pair<std::string,std::string> >& params)
-  {
-      object_name_ = name + std::to_string((unsigned long) this);
-  }
-
   void TaskDefinition::InstantiateBase(const Initializer& init_)
   {
       Object::InstatiateObject(init_);
@@ -97,7 +90,6 @@ namespace exotica
       setTaskMap(it->second);
     }
 
-    initDerived(handle);
   }
 
   void TaskDefinition::registerPhi(Eigen::VectorXdRef_ptr y, int t)

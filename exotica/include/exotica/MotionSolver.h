@@ -63,7 +63,6 @@ namespace exotica
        * \brief Base initialiser: Currently simply calls the derived method
        * @param handle XMLHandle to the Solver element
        * @param	server	Server
-       * @return       Result of calling initDerived()
        */
       void initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server);
 
@@ -112,7 +111,6 @@ namespace exotica
        * @param handle XMLHandle to the Solver element
        * @return       Should indicate success or otherwise
        */
-      virtual void initDerived(tinyxml2::XMLHandle & handle) = 0;
 
       PlanningProblem_ptr problem_; //!< Shared pointer to the planning problem: Anyone using it should check if it is initialised
       Server_ptr server_; //!< Pointer to EXOTica parameter server;

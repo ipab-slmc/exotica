@@ -74,10 +74,8 @@ namespace exotica
        * \brief Initialiser (from XML): mainly resolves the KinematicScene pointer
        * @pre             The Kinematic Scenes must already be initialised
        * @post            If the xml-element contains a 'kscene' tag, then it will attempt to bind the map to that kinematic scene. Otherwise, scene_ will be set to a nullptr.
-       * @post            Will call the initDerived() function if everything is successful.
        * @param handle    The handle to the XML-element describing the task map
        * @param scene_ptr Map of kinematic scenes (Optional: defaulted)
-       * @return          Result of initDerived() if initialisation successful,
        *                  \n PAR_ERR if could not bind scene information.
        */
       void initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
@@ -132,10 +130,6 @@ namespace exotica
       void initialise(const rapidjson::Value& a, Server_ptr & server,
           const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
 
-      virtual void initialiseManual(std::string name, Server_ptr & server,
-          const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
-          std::vector<std::pair<std::string,std::string> >& params);
-
       bool updateJacobian_;
 
       std::vector<Eigen::VectorXdRef_ptr> phi_; //!< The Task-space co-ordinates
@@ -151,13 +145,6 @@ namespace exotica
 
       virtual void debug();
     protected:
-
-      /**
-       * \brief Initialises members of the derived type: PURE_VIRTUAL
-       * @param handle  The handle to the XML-element describing the task
-       * @return        Should indicate success/failure
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle) = 0;
 
       /**
        * Member Variables

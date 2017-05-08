@@ -53,7 +53,6 @@ namespace exotica
       throw_named("Not fully initialized!");
     }
     server_ = server;
-    initDerived(handle);
   }
 
   void MotionSolver::specifyProblem(PlanningProblem_ptr pointer)

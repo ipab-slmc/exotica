@@ -76,64 +76,7 @@ namespace exotica
         throw_named("Invalid server!");
       }
       std::vector<std::pair<std::string, std::string> > tmp;
-      initialiseManual(object_name_, server, scene_ptr, prob, tmp);
       initialise(a);
-  }
-
-  void TaskMap::initialiseManual(std::string name, Server_ptr & server,
-      const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
-      std::vector<std::pair<std::string, std::string> >& params)
-  {
-    object_name_ = name + std::to_string((unsigned long) this);
-    server_ = server;
-    scene_ = scene_ptr;
-    poses = prob->poses;
-    posesJointNames = prob->posesJointNames;
-    int limbs = 0;
-    std::vector<std::string> tmp_eff(0);
-    std::vector<KDL::Frame> tmp_offset(0);
-    for (auto& par : params)
-    {
-      if (par.first.compare("limb") == 0)
-      {
-        std::vector<std::string> strs;
-        boost::split(strs, par.second, boost::is_any_of(";"));
-        if (strs.size() == 1)
-        {
-          tmp_eff.push_back(strs[0]);
-          tmp_offset.push_back(KDL::Frame::Identity());
-          limbs++;
-        }
-        else if (strs.size() == 2)
-        {
-          tmp_eff.push_back(strs[0]);
-          KDL::Frame tmp;
-          try
-          {
-            getText(strs[1], tmp);
-          }
-          catch (Exception e)
-          {
-            throw_named("Invalid limb transform found!");
-          }
-
-          tmp_offset.push_back(tmp);
-          limbs++;
-        }
-        else
-        {
-          throw_named("Invalid limbs found!")
-        }
-      }
-    }
-    if (limbs > 1)
-    {
-      scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
-    }
-    else
-    {
-      HIGHLIGHT("No limbs found!");
-    }
   }
 
   void TaskMap::InstantiateBase(const Initializer& init)
@@ -243,7 +186,6 @@ namespace exotica
     }
 
     scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
-    initDerived(handle);
   }
 
   bool TaskMap::isRegistered(int t)

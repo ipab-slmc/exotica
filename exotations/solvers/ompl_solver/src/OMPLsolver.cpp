@@ -86,30 +86,6 @@ namespace exotica
     }
   }
 
-  void OMPLsolver::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement(
-        "TrajectorySmooth");
-    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, smooth_);
-    parameters_.Smooth = smooth_->data;
-
-    tmp_handle = handle.FirstChildElement("Solver");
-    server_->registerParam<std_msgs::String>(ns_, tmp_handle, solver_);
-    parameters_.Solver = solver_->data;
-
-    try
-    {
-      HIGHLIGHT_NAMED(object_name_,
-          "Using ["<<parameters_.Solver<<"]");
-      base_solver_ = OMPLBaseSolver::base_solver_loader.createInstance(
-          "ompl_solver/" + parameters_.Solver);
-    } catch (pluginlib::PluginlibException& ex)
-    {
-      throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());
-    }
-    base_solver_->initialiseBaseSolver(handle, server_);
-  }
-
   void OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
 
   {

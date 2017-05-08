@@ -189,19 +189,6 @@ namespace exotica
       }
   }
 
-  void Identity::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    // Load the goal
-    if (handle.FirstChildElement("Ref").ToElement())
-    {
-        getVector(*(handle.FirstChildElement("Ref").ToElement()), jointRef);
-        jointMap.resize(jointRef.rows());
-        for (int i = 0; i < jointRef.rows(); i++)
-            jointMap[i] = i;
-        useRef = true;
-    }
-  }
-
   void Identity::taskSpaceDim(int & task_dim)
   {
     if (useRef)

@@ -64,13 +64,6 @@ namespace exotica //!< Since this is part of the core library, it will be within
       virtual void initialise(const rapidjson::Value& a);
 
       KDL::Frame ref_pose_;
-
-    protected:
-      /**
-       * \brief Concrete implementation of TaskMap::initDerived()
-       * @return  Always returns success
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
   };
   typedef boost::shared_ptr<Distance> Distance_Ptr;
 }

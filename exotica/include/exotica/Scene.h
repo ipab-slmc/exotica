@@ -90,7 +90,6 @@ namespace exotica
       void initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
           const std::vector<std::string> & joints, std::string & mode,
           BASE_TYPE base_type, robot_model::RobotModelPtr model_);
-      void reinitialise();
 
       /**
        * \brief	Update the robot collision properties

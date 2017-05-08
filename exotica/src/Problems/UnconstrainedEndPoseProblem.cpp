@@ -131,44 +131,6 @@ namespace exotica
       }
   }
 
-  void UnconstrainedEndPoseProblem::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    tinyxml2::XMLElement* xmltmp;
-    xmltmp = handle.FirstChildElement("W").ToElement();
-    if (xmltmp)
-    {
-      Eigen::VectorXd tmp;
-      getVector(*xmltmp, tmp);
-      config_w_ = Eigen::MatrixXd::Identity(tmp.rows(), tmp.rows());
-      config_w_.diagonal() = tmp;
-    }
-    xmltmp = handle.FirstChildElement("Tolerance").ToElement();
-    if (xmltmp)
-    {
-      getDouble(*xmltmp, tau_);
-    }
-    xmltmp = handle.FirstChildElement("T").ToElement();
-    if (xmltmp)
-    {
-      try
-      {
-        getInt(*xmltmp, T_);
-      }
-      catch (Exception e)
-      {
-        T_ = 1;
-      }
-    }
-    else
-    {
-      T_ = 1;
-    }
-    for (auto& it : task_defs_)
-    {
-      it.second->setTimeSteps(T_);
-    }
-  }
-
   int UnconstrainedEndPoseProblem::getT()
   {
     return T_;

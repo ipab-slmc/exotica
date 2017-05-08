@@ -100,12 +100,6 @@ namespace exotica
 
       //	Graph Manager
       GraphManager gManager_;
-    protected:
-      /**
-       * \brief	Concrete implementation of initialisation from xml
-       * @param	handle	XML handler
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
     private:
       /**

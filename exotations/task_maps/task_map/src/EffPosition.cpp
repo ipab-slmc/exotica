@@ -69,10 +69,6 @@ namespace exotica
     }
   }
 
-  void EffPosition::initDerived(tinyxml2::XMLHandle & handle)
-  {
-  }
-
   void EffPosition::taskSpaceDim(int & task_dim)
   {
     if (!scene_)

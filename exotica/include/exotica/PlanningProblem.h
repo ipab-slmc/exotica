@@ -141,8 +141,6 @@ namespace exotica
        * @param handle[in] The handle to the XML-element describing the Problem Definition
        * @return           Indication of success/failure: TODO
        */
-      virtual void initDerived(tinyxml2::XMLHandle & handle) = 0;
-
       Server_ptr server_; //!< Pointer to EXOTica parameter server;
       TaskMap_map task_maps_; //!< The set of taskmaps we will be using, which will be shared between task-definitions
       TaskDefinition_map task_defs_; //!< The set of task definition objects

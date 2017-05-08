@@ -112,13 +112,6 @@ namespace exotica
       int getMaxIteration();
       int getLastIteration();
       void setReachGoal(const geometry_msgs::Pose &goal);
-    protected:
-      /**
-       * \brief	Derived-elements initialiser: Pure Virtual
-       * @param	handle	XMLHandle to the Solver element
-       * @return	Should indicate success or otherwise
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
     private:
       /**

@@ -73,8 +73,6 @@ namespace exotica
        * @param handle The handle to the XML-element describing the Problem Definition
        * @return Indication of success/failure
        */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
-
       Eigen::MatrixXd config_w_;	//Configuration weight
       double tau_;	// Tolerance
       int T_;

@@ -192,12 +192,6 @@ namespace exotica
       ros::Duration planning_time_;
 
     protected:
-      /**
-       * \brief Derived-elements initialiser: Pure Virtual
-       * @param handle XMLHandle to the Solver element
-       * @return       Should indicate success or otherwise
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       /** \brief Initializes message data.
        *  @param q0 Start configuration

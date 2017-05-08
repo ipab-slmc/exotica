@@ -170,58 +170,6 @@ namespace exotica
       setTime(T);
   }
 
-  void UnconstrainedTimeIndexedProblem::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    tinyxml2::XMLElement* xmltmp;
-    bool hastime = false;
-    XML_CHECK("T");
-    getInt(*xmltmp, T);
-    if (T <= 2)
-    {
-      throw_named("Invalid number of timesteps: "<<T);
-    }
-    xmltmp = handle.FirstChildElement("duration").ToElement();
-    if (xmltmp)
-    {
-      getDouble(*xmltmp, tau);
-      tau = tau / ((double) T);
-      hastime = true;
-    }
-    if (hastime)
-    {
-      xmltmp = handle.FirstChildElement("tau").ToElement();
-      if (xmltmp)
-        WARNING("Duration has already been specified, tau is ignored.");
-    }
-    else
-    {
-      XML_CHECK("tau");
-      getDouble(*xmltmp, tau);
-    }
-
-    XML_CHECK("Qrate");
-    getDouble(*xmltmp, Q_rate);
-    XML_CHECK("Hrate");
-    getDouble(*xmltmp, H_rate);
-    XML_CHECK("Wrate");
-    getDouble(*xmltmp, W_rate);
-    {
-      Eigen::VectorXd tmp;
-      XML_CHECK("W");
-      getVector(*xmltmp, tmp);
-      W = Eigen::MatrixXd::Identity(tmp.rows(), tmp.rows());
-      W.diagonal() = tmp;
-    }
-    for (TaskDefinition_map::const_iterator it = task_defs_.begin();
-        it != task_defs_.end(); ++it)
-    {
-      if (it->second->type().compare(std::string("TaskSqrError")) == 0)
-        ERROR("Task variable " << it->first << " is not an squared error!");
-    }
-    // Set number of time steps
-    setTime(T);
-  }
-
   int UnconstrainedTimeIndexedProblem::getT()
   {
     return T;

@@ -78,13 +78,6 @@ namespace exotica
       SamplingProblemInitializer Parameters;
 
       virtual void clear(bool keepOriginals = true);
-    protected:
-      /**
-       * \brief Derived Initialiser (from XML): PURE VIRTUAL
-       * @param handle The handle to the XML-element describing the Problem Definition
-       * @return Indication of success/failure
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
     private:
       boost::mutex update_lock_;
       std::vector<TaskTerminationCriterion_ptr> goals_;

@@ -101,18 +101,6 @@ namespace exotica
       initialised_ = true;
   }
 
-  void IMesh::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    EParam<std_msgs::String> ref;
-    tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("ReferenceFrame");
-    server_->registerParam(ns_, tmp_handle, ref);
-    if (!tmp_handle.ToElement()) ref->data = "/world";
-    initDebug(ref->data);
-    eff_size_ = scene_->getMapSize(object_name_);
-    weights_.setOnes(eff_size_, eff_size_);
-    initialised_ = true;
-  }
-
   void IMesh::debug()
   {
     static int textid = 0;
@@ -194,17 +182,6 @@ namespace exotica
       imesh_mark_.action = visualization_msgs::Marker::DELETE;
       imesh_mark_.header.stamp = ros::Time::now();
       imesh_mark_pub_.publish(imesh_mark_);
-  }
-
-  void IMesh::initialiseManual(std::string name, Server_ptr & server,
-      const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
-      std::vector<std::pair<std::string, std::string> >& params)
-  {
-    TaskMap::initialiseManual(name, server, scene_ptr, prob, params);
-    initDebug("/world");
-    eff_size_ = scene_->getMapSize(object_name_);
-    weights_.setOnes(eff_size_, eff_size_);
-    initialised_ = true;
   }
 
   void IMesh::taskSpaceDim(int & task_dim)

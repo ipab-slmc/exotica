@@ -61,17 +61,11 @@ namespace exotica
       /**
        * \brief Base Initialiser
        * @pre             The TaskMaps must be initialised
-       * @post            Will call the initDerived() function if everything is successful
        * @param handle    Handle to the XML Element
        * @param map_list  A map from names to TaskMap pointers (for initialising the map)
-       * @return          The result of calling the initDerived() function
        */
       void initBase(tinyxml2::XMLHandle & handle,
           const TaskMap_map & map_list);
-
-      virtual void initialiseManual(std::string name, Server_ptr & server,
-          boost::shared_ptr<PlanningProblem> prob,
-          std::vector<std::pair<std::string,std::string> >& params);
 
       /**
        * @brief registerPhi Registers a memory location for the output of phi at time t
@@ -125,8 +119,6 @@ namespace exotica
        * @param handle  The handle to the XML-element describing the ErrorFunction Function
        * @return        Should indicate success/failure
        */
-      virtual void initDerived(tinyxml2::XMLHandle & handle) = 0;
-
       boost::shared_ptr<TaskMap> task_map_; //!< Shared pointer to a Task Map from which it gets its inputs
       boost::mutex map_lock_;  //!< Mapping Lock for synchronisation
 

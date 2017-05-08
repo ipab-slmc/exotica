@@ -101,8 +101,6 @@ namespace exotica
       if (msg.map_params.size() != 0)
         tmpParams = vector2map(msg.map_params.at(i).strings);
 
-      map->initialiseManual(msg.task_name.at(i), server_, scene_, problem,
-          tmpParams);
       std::string name = map->getObjectName();
       task_maps_[name] = map;
 
@@ -110,7 +108,6 @@ namespace exotica
       def->setTaskMap(map);
       if (msg.task_params.size() != 0)
         tmpParams = vector2map(msg.task_params.at(i).strings);
-      def->initialiseManual(msg.task_name.at(i), server_, problem, tmpParams);
       def->setTimeSteps(msg.task_goal.at(i).row);
       task_defs_[msg.task_name.at(i)] = def;
     }
@@ -336,9 +333,6 @@ namespace exotica
     {
       HIGHLIGHT("No tasks were defined!");
     }
-
-    //!< If ok so far...
-    initDerived(handle);
 
     originalMaps_ = task_maps_;
     originalDefs_ = task_defs_;

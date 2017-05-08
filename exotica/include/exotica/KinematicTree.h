@@ -44,12 +44,17 @@
 #include <vector>
 #include <set>
 #include <exotica/Tools.h>
-#include <exotica/KinematicaInitializer.h>
 
 #define ROOT  -1     //!< The value of the parent for the root segment
 
 namespace exotica
 {
+
+    enum BASE_TYPE
+    {
+      FIXED = 0, FLOATING = 10, PLANAR = 20
+    };
+
   /**
    * \brief Defines the two types of supported joints
    */
@@ -79,7 +84,7 @@ namespace exotica
       bool zero_other_joints;  //!< Zero out the other joints not referenced
       bool ignore_unused_segs; //!< Flag to ignore unnecessary sub-chains from the tree
       bool compute_com;	//!< Flag to compute centre of mass
-      std::string base_type;//!< Flag to indicate if the base is floating or fixed
+      BASE_TYPE base_type;//!< Flag to indicate if the base is floating or fixed
       std::vector<std::string> end_effector_segs; //!< The segments to which the end-effectors are attached
       std::vector<KDL::Frame> end_effector_offs; //!< End Effector Offsets from the segment of choice: must be empty or same size as the end_effector_segs
   };
@@ -116,7 +121,7 @@ namespace exotica
       KinematicTree(const KinematicTree & rhs);
       KinematicTree & operator=(const KinematicTree & rhs);
 
-      void Instantiate(KinematicaInitializer& init, robot_model::RobotModelPtr model);
+      void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model);
 
       ~KinematicTree()
       {
@@ -312,14 +317,14 @@ namespace exotica
 
       bool getEndEffectorIndex(std::vector<int> & eff_index);
 
-      std::string getBaseType();
+      BASE_TYPE getBaseType();
       std::map<std::string, int> getJointMap();
       std::map<std::string, std::vector<double>> getUsedJointLimits();
 
       KDL::Frame getRobotRootWorldTransform();
-      bool setBaseBounds(const std::vector<double> &bounds);
+      void setBaseBounds(const std::vector<double> &bounds);
       bool setBasePose(const KDL::Frame &pose);
-      bool setFloatingBaseLimitsPosXYZEulerZYX(
+      void setFloatingBaseLimitsPosXYZEulerZYX(
           const std::vector<double> & lower, const std::vector<double> & upper);
 
       //private:
@@ -344,7 +349,7 @@ namespace exotica
        */
       bool zero_undef_jnts_; //!< Indicates whether we wish to zero-out undefined joints.
       int num_jnts_spec_;	  //!< Number of joints which will be specified
-      std::string base_type_;
+      BASE_TYPE base_type_;
       bool controlled_base_;
       KDL::Frame current_base_pose_;
       std::vector<int> eff_segments_; //!< The End-Effector segments (for Jacobian Computation)

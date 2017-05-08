@@ -11,14 +11,7 @@
     <PlanningScene>
       <Scene Name="OMPLSolverDemoScene">
         <PlanningMode>Sampling</PlanningMode>
-        <Solver>
-          <Kinematica>
-            <Root><Limb Segment="base"/></Root>
-            <Joints>
-              lwr_arm_0_joint,lwr_arm_1_joint,lwr_arm_2_joint,lwr_arm_3_joint,lwr_arm_4_joint,lwr_arm_5_joint,lwr_arm_6_joint
-            </Joints>
-          </Kinematica>
-        </Solver>
+        <JointGroup>arm</JointGroup>
       </Scene>
     </PlanningScene>
 

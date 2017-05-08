@@ -1,6 +1,0 @@
-include <exotica/LimbInitializer>
-Required Initializer Root; # LimbInitializer
-Required std::vector<std::string> Joints;
-Optional std::string BaseType = "fixed";
-Optional bool ControlledBase = true;
-Optional bool ZeroOtherJoints = true;

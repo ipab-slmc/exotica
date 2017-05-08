@@ -31,6 +31,7 @@
  */
 
 #include "exotica/KinematicTree.h"
+#include <moveit/robot_model/robot_model.h>
 
 #ifdef KIN_DEBUG_MODE
 #include <iostream>
@@ -90,24 +91,29 @@ exotica::KinematicTree & exotica::KinematicTree::operator=(
   return *this;
 }
 
-void exotica::KinematicTree::Instantiate(KinematicaInitializer& init, robot_model::RobotModelPtr model)
+void exotica::KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelPtr model)
 {
+    if (!model) throw_pretty("No robot model provided!");
+
     exotica::SolutionForm_t solution;
-    LimbInitializer root(init.Root);
-    solution.root_segment = root.Segment;
-    solution.root_seg_off = getFrame(root.Frame);
+    robot_model::JointModelGroup* group = model->getJointModelGroup(JointGroup);
+    if(!group) throw_pretty("Joint group '"<<JointGroup<<"' not defined in the robot model!");
+    solution.joints_update = group->getActiveJointModelNames();
+    const robot_model::JointModel* root_joint = model->getRootJoint();
+    solution.root_segment = root_joint->getChildLinkModel()->getName();
 
-    if (init.BaseType == "floating")
-        base_type_ = solution.base_type = init.BaseType;
-    else if (init.BaseType == "planar")
-        base_type_ = solution.base_type = init.BaseType;
+    if (root_joint->getType() == robot_model::JointModel::FLOATING)
+        base_type_ = solution.base_type = BASE_TYPE::FLOATING;
+    else if (root_joint->getType() == robot_model::JointModel::PLANAR)
+        base_type_ = solution.base_type = BASE_TYPE::PLANAR;
+    else if (root_joint->getType() == robot_model::JointModel::FIXED)
+        base_type_ = solution.base_type = BASE_TYPE::FIXED;
     else
-        base_type_ = solution.base_type = "fixed";
+        throw_pretty("Unsupported root joint type: "<< root_joint->getTypeName());
 
-    controlled_base_ = init.ControlledBase;
+    controlled_base_ = true;
 
-    solution.zero_other_joints = init.ZeroOtherJoints;
-    solution.joints_update = init.Joints;
+    solution.zero_other_joints = true;
 
     if (solution.joints_update.size() < 1)
     {
@@ -154,7 +160,7 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
 
 //!< Now the solution params:
   solution.root_segment = "";
-  base_type_ = solution.base_type = "fixed";
+  base_type_ = solution.base_type = BASE_TYPE::FIXED;
   solution.root_seg_off = KDL::Frame::Identity();
   if (handle.FirstChildElement("Root").ToElement())
   {
@@ -171,11 +177,11 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
       std::string base_type =
           handle.FirstChildElement("Root").ToElement()->Attribute("type");
       if (base_type.compare("floating"))
-        base_type_ = solution.base_type = base_type;
+        base_type_ = solution.base_type = BASE_TYPE::FLOATING;
       else if (base_type.compare("planar"))
-        base_type_ = solution.base_type = base_type;
+        base_type_ = solution.base_type = BASE_TYPE::PLANAR;
       else
-        base_type_ = solution.base_type = "fixed";
+        base_type_ = solution.base_type = BASE_TYPE::FIXED;
     }
 
     controlled_base_ = true;
@@ -327,7 +333,7 @@ bool exotica::KinematicTree::initKinematics(tinyxml2::XMLHandle & handle,
 
   if (model)
     model_ = model;
-  else if (base_type_.compare("fixed") != 0)
+  else if (base_type_ != BASE_TYPE::FIXED)
   {
     ERROR("Kinematica is in non-fixed base mode, but no srdf is provided");
     return false;
@@ -394,7 +400,7 @@ bool exotica::KinematicTree::getEndEffectorIndex(std::vector<int> & eff_index)
   return true;
 }
 
-std::string exotica::KinematicTree::getBaseType()
+exotica::BASE_TYPE exotica::KinematicTree::getBaseType()
 {
   return base_type_;
 }
@@ -636,7 +642,7 @@ bool exotica::KinematicTree::setBaseBounds(const std::vector<double> &bounds)
     return false;
   }
 
-  if (base_type_.compare("floating") == 0)
+  if (base_type_ == BASE_TYPE::FLOATING)
   {
     //Here we are just setting the bounds of allowed base movement
     robot_tree_[1].joint_limits_.resize(2);
@@ -931,8 +937,8 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
 
   robot_root_.first = root_segment->first;
 
-//!< if using floating base
-  if (base_type_.compare("fixed") != 0)
+// if using floating base
+  if (base_type_ != BASE_TYPE::FIXED)
   {
     if (model_->getSRDF()->getVirtualJoints().size() != 1)
     {
@@ -955,7 +961,7 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
       std::string world_joint = virtual_joint.name_;
       KDL::Tree base_tree(world);
 
-      if (base_type_.compare("floating") == 0)
+      if (base_type_ == BASE_TYPE::FLOATING)
       {
         //	Naming based on moveit::core::FloatingJointModel
         //	http://docs.ros.org/indigo/api/moveit_core/html/floating__joint__model_8cpp_source.html
@@ -1011,7 +1017,7 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
 
         robot_root_.second = 6;
       }
-      else if (base_type_.compare("planar") == 0)
+      else if (base_type_ == BASE_TYPE::PLANAR)
       {
         KDL::Segment X_seg(world + "/x",
             KDL::Joint(world_joint + "/x", KDL::Joint::TransX));
@@ -1038,7 +1044,7 @@ bool exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
         }
         robot_root_.second = 3;
       }
-      if (base_type_.compare("fixed") == 0)
+      if (base_type_==BASE_TYPE::FIXED)
       {
         return addSegment(temp_tree.getRootSegment(), ROOT, rubbish, true,
             false, world, joint_map);
@@ -1084,7 +1090,7 @@ std::map<std::string, std::vector<double>> exotica::KinematicTree::getUsedJointL
 KDL::Frame exotica::KinematicTree::getRobotRootWorldTransform()
 {
   KDL::Frame trans = KDL::Frame::Identity();
-  if (base_type_.compare("fixed") == 0)
+  if (base_type_ == BASE_TYPE::FIXED)
     return trans;
   else
     getPose(robot_root_.second, trans);
@@ -1094,7 +1100,7 @@ KDL::Frame exotica::KinematicTree::getRobotRootWorldTransform()
 bool exotica::KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
     const std::vector<double> & lower, const std::vector<double> & upper)
 {
-  if (base_type_.compare("floating") != 0)
+  if (base_type_ != BASE_TYPE::FLOATING)
   {
     INDICATE_FAILURE
     return false;
@@ -1132,7 +1138,7 @@ bool exotica::KinematicTree::setJointLimits()
 
 ///	Manually defined floating base limits
 ///	Should be done more systematically with robot model class
-  if (base_type_.compare("floating") == 0)
+  if (base_type_ == BASE_TYPE::FLOATING)
   {
     robot_tree_[1].joint_limits_.resize(2);
     robot_tree_[1].joint_limits_[0] = -0.05;
@@ -1158,7 +1164,7 @@ bool exotica::KinematicTree::setJointLimits()
     robot_tree_[6].joint_limits_[0] = -M_PI / 8;
     robot_tree_[6].joint_limits_[1] = M_PI / 8;
   }
-  else if (base_type_.compare("planar") == 0)
+  else if (base_type_ == BASE_TYPE::PLANAR)
   {
     robot_tree_[1].joint_limits_.resize(2);
     robot_tree_[1].joint_limits_[0] = -10;

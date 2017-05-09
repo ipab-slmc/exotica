@@ -65,7 +65,7 @@
 #ifndef AICOSOLVER_H_
 #define AICOSOLVER_H_
 
-#include <exotica/EXOTica.hpp>
+#include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 #include <exotica/Definitions/TaskSqrError.h>
 #include <aico/AICOsolverInitializer.h>

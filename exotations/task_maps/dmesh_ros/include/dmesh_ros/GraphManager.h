@@ -34,7 +34,7 @@
 #define GRAPHMANAGER_H_
 
 #include <ros/ros.h>
-#include <exotica/EXOTica.hpp>
+#include <exotica/Exotica.h>
 #include "MeshGraph.h"
 namespace exotica
 {

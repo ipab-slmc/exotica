@@ -34,7 +34,7 @@
 #ifndef IK_SOLVER_H_
 #define IK_SOLVER_H_
 
-#include <exotica/EXOTica.hpp>
+#include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/Definitions/TaskSqrError.h>
 #include <ik_solver/IKsolverInitializer.h>

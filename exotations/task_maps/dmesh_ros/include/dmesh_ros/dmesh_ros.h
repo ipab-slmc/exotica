@@ -34,7 +34,7 @@
 #define DMESH_ROS_H_
 
 //EXOTica and SYSTEM packages
-#include <exotica/EXOTica.hpp>
+#include <exotica/Exotica.h>
 #include <exotica/KinematicTree.h>
 #include <boost/thread/mutex.hpp>
 #include "GraphManager.h"

@@ -91,13 +91,6 @@ namespace exotica
 
       void transform(Eigen::Affine3d& val);
 
-    protected:
-      /**
-       * @brief	Concrete implementation of initialisation from xml
-       * @param	handle	XML handler
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
-
     private:
       /** Member Variables **/
       boost::mutex locker_;	//!<Thread locker

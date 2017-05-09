@@ -34,7 +34,7 @@
 #define DMESH_ROS_H_
 
 //EXOTica and SYSTEM packages
-#include <exotica/EXOTica.hpp>
+#include <exotica/Exotica.h>
 #include <exotica/KinematicTree.h>
 #include <boost/thread/mutex.hpp>
 #include "GraphManager.h"
@@ -100,12 +100,6 @@ namespace exotica
 
       //	Graph Manager
       GraphManager gManager_;
-    protected:
-      /**
-       * \brief	Concrete implementation of initialisation from xml
-       * @param	handle	XML handler
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
     private:
       /**

@@ -128,12 +128,6 @@ namespace exotica
       bool wasFullyInitialised_;
       Eigen::VectorXd threshold0_;
     protected:
-      /**
-       * \brief Derived-Initialisation
-       * @param handle XML handle for any derived parameters
-       * @return       Should indicate success/failure
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       /** The internal storage **/
       std::vector<Eigen::VectorXdRef_ptr> y_star_;    //!< The goal vector

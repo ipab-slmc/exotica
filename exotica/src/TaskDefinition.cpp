@@ -54,50 +54,12 @@ namespace exotica
     return ret;
   }
 
-  void TaskDefinition::initialiseManual(std::string name, Server_ptr & server,
-            boost::shared_ptr<PlanningProblem> prob,
-            std::vector<std::pair<std::string,std::string> >& params)
-  {
-      object_name_ = name + std::to_string((unsigned long) this);
-  }
-
   void TaskDefinition::InstantiateBase(const Initializer& init_)
   {
       Object::InstatiateObject(init_);
       TaskDefinitionInitializer init(init_);
       TaskMap_map maps = boost::any_cast<TaskMap_map>(init_.getProperty("TaskMaps"));
       setTaskMap(maps.at(init.Map));
-  }
-
-  void TaskDefinition::initBase(tinyxml2::XMLHandle & handle,
-      const TaskMap_map & map_list)
-  {
-    Server_ptr server;
-    Object::initBase(handle, server);
-    //!< Temporaries
-
-    //!< Attempt to set the task-map
-    if (!handle.FirstChildElement("map").ToElement())
-    {
-      throw_named("Missing map!");
-    }
-    else
-    {
-      const char * map_name =
-          handle.FirstChildElement("map").ToElement()->Attribute("name");
-      if (map_name == nullptr)
-      {
-        throw_named("Invalid map name!");
-      }
-      auto it = map_list.find(map_name);
-      if (it == map_list.end())
-      {
-        throw_named("Can't find the map!");
-      }
-      setTaskMap(it->second);
-    }
-
-    initDerived(handle);
   }
 
   void TaskDefinition::registerPhi(Eigen::VectorXdRef_ptr y, int t)

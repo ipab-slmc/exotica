@@ -63,14 +63,7 @@ namespace exotica //!< Since this is part of the core library, it will be within
        */
       virtual void taskSpaceDim(int & task_dim);
 
-      virtual void initialise(const rapidjson::Value& a)  {throw_named("Depricated!");}
-
     protected:
-      /**
-       * \brief Concrete implementation of TaskMap::initDerived()
-       * @return  Always returns success
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle) {throw_named("Depricated!");}
 
       double distance(Eigen::VectorXdRefConst effA, Eigen::VectorXdRefConst effB, double rA, double rB);
       Eigen::VectorXd Jacobian(Eigen::VectorXdRefConst effA, Eigen::VectorXdRefConst effB, Eigen::MatrixXdRefConst jacA, Eigen::MatrixXdRefConst jacB, double rA, double rB);

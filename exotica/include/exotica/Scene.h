@@ -35,7 +35,6 @@
 
 #include "exotica/Object.h"
 #include "exotica/Server.h"
-#include "tinyxml2/tinyxml2.h"
 #include "exotica/KinematicTree.h"
 #include <exotica/Property.h>
 #include <exotica/SceneInitializer.h>
@@ -87,7 +86,6 @@ namespace exotica
       void initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
           const std::vector<std::string> & joints, std::string & mode,
           BASE_TYPE base_type, robot_model::RobotModelPtr model_);
-      void reinitialise();
 
       /**
        * \brief	Update the robot collision properties
@@ -250,15 +248,6 @@ namespace exotica
        * @return	Name
        */
       std::string getName();
-
-      /**
-       * \brief	Initialisation function
-       * @param	handle	XML handle
-       * @param	server	Server pointer
-       * @return Indication of success
-       */
-      void initialisation(tinyxml2::XMLHandle & handle,
-          const Server_ptr & server);
 
       /**
        * \brief	Updator function

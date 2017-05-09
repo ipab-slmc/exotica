@@ -74,38 +74,6 @@ namespace exotica
       initialised_ = true;
   }
 
-  void JointLimit::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    tinyxml2::XMLElement* xmltmp;
-    double percent = 0.1;
-    XML_CHECK("SafePercentage");
-    getDouble(*xmltmp, percent);
-
-    std::vector<std::string> jnts;
-    scene_->getJointNames(jnts);
-    int size = jnts.size();
-    low_limits_.resize(size);
-    high_limits_.resize(size);
-
-    robot_model::RobotModelConstPtr model = server_->getModel("robot_description");
-
-    for (int i = 0; i < jnts.size(); i++)
-    {
-      low_limits_(i) =
-          model->getJointModel(jnts[i])->getVariableBounds()[0].min_position_;
-      high_limits_(i) =
-          model->getJointModel(jnts[i])->getVariableBounds()[0].max_position_;
-    }
-    tau_.resize(size);
-    center_.resize(size);
-    for (int i = 0; i < size; i++)
-    {
-      center_(i) = (low_limits_(i) + high_limits_(i)) / 2;
-      tau_(i) = percent * (high_limits_(i) - low_limits_(i)) / 2;
-    }
-    initialised_ = true;
-  }
-
   void JointLimit::taskSpaceDim(int & task_dim)
   {
     if (!initialised_) throw_named("Not initialized!");;

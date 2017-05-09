@@ -53,11 +53,6 @@ namespace exotica
        */
       OMPLImpSolver();
 
-      /*
-       * \brief Initialisation function
-       * @param handle  XML handle that contains solver specific parameters
-       */
-      virtual void initialiseSolver(tinyxml2::XMLHandle & handle);
       virtual void initialiseSolver(Initializer& init);
 
       /*

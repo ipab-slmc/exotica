@@ -113,22 +113,6 @@ namespace exotica
     }
   }
 
-  void Identity::initialise(const rapidjson::Value& a)
-  {
-    if (poses && posesJointNames)
-    {
-        std::string postureName;
-        getJSON(a["postureName"], postureName);
-        std::vector<std::string> joints;
-        getJSON(a["joints"], joints);
-        initialise(postureName, joints);
-    }
-    else
-    {
-      throw_named("Poses have not been set!");
-    }
-  }
-
   void Identity::update(Eigen::VectorXdRefConst x, const int t)
   {
     if (!isRegistered(t))
@@ -187,19 +171,6 @@ namespace exotica
           }
           useRef = true;
       }
-  }
-
-  void Identity::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    // Load the goal
-    if (handle.FirstChildElement("Ref").ToElement())
-    {
-        getVector(*(handle.FirstChildElement("Ref").ToElement()), jointRef);
-        jointMap.resize(jointRef.rows());
-        for (int i = 0; i < jointRef.rows(); i++)
-            jointMap[i] = i;
-        useRef = true;
-    }
   }
 
   void Identity::taskSpaceDim(int & task_dim)

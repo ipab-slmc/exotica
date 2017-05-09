@@ -80,14 +80,6 @@ namespace exotica
       void setOffset(bool left, const KDL::Frame & offset);
       void checkGoal(const Eigen::Vector3d & goal);
 
-    protected:
-      /**
-       * @brief	Concrete implementation of the initialisation method
-       * @param	handle	XML handle
-       * @return	Exotica return type
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
-
     private:
       /**
        * @brief	Compute the forward map (centre of mass position)

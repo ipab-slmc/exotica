@@ -63,17 +63,12 @@ namespace exotica
 
       void initialise(std::string& postureName,
           std::vector<std::string>& joints, bool skipUnknown = false);
-      virtual void initialise(const rapidjson::Value& a);
 
       bool useRef;
       std::vector<int> jointMap;
       Eigen::VectorXd jointRef;
 
     protected:
-      /**
-       * \brief Concrete implementation of the initialisation method
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       int getJointIDexternal(std::string& name);
       int getJointID(std::string& name);

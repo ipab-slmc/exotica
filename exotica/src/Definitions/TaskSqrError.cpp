@@ -45,19 +45,6 @@ namespace exotica
     wasFullyInitialised_ = false;
   }
 
-  void TaskSqrError::initialiseManual(std::string name, Server_ptr & server,
-      boost::shared_ptr<PlanningProblem> prob,
-      std::vector<std::pair<std::string,std::string> >& params)
-  {
-      TaskDefinition::initialiseManual(name,server,prob,params);
-      int dim;
-      task_map_->taskSpaceDim(dim);
-      y_star0_.resize(dim);
-      y_star0_.setZero();
-      rho0_(0) = 1.0;
-      wasFullyInitialised_ = true;
-  }
-
   void TaskSqrError::Instantiate(TaskSqrErrorInitializer& init)
   {
       rho0_(0) = (double)init.Rho;
@@ -82,64 +69,6 @@ namespace exotica
       }
       // Set default number of time steps
       setTimeSteps(1);
-  }
-
-  void TaskSqrError::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    //!< Temporaries
-    Eigen::VectorXd y_star; //!< The Goal vector
-    double rho;
-    // Load Rho
-    if (handle.FirstChildElement("Rho").ToElement())
-    {
-      getDouble(*(handle.FirstChildElement("Rho").ToElement()), rho);
-      rho0_(0) = rho;
-    }
-    else
-    {
-      throw_named("Parameter not found!");
-    }
-
-    // Load the goal
-    if (handle.FirstChildElement("Goal").ToElement())
-    {
-      try
-      {
-        getVector(*(handle.FirstChildElement("Goal").ToElement()), y_star);
-        y_star0_ = y_star;
-      }
-      catch (Exception e)
-      {
-        int dim;
-        getTaskMap()->taskSpaceDim(dim);
-        if (dim > 0)
-        {
-          y_star0_.resize(dim);
-          y_star0_.setZero();
-        }
-        else
-        {
-          throw_named("Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
-        }
-      }
-    }
-    else
-    {
-      int dim;
-      getTaskMap()->taskSpaceDim(dim);
-      if (dim > 0)
-      {
-        y_star0_.resize(dim);
-        y_star0_.setZero();
-      }
-      else
-      {
-        throw_named("Task definition '"<<object_name_<<"':Goal was not and task map dimension is invalid!");
-      }
-    }
-
-    // Set default number of time steps
-    setTimeSteps(1);
   }
 
   void TaskSqrError::setTimeSteps(const int T)

@@ -65,7 +65,7 @@
 #ifndef AICOSOLVER_H_
 #define AICOSOLVER_H_
 
-#include <exotica/EXOTica.hpp>
+#include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 #include <exotica/Definitions/TaskSqrError.h>
 #include <aico/AICOsolverInitializer.h>
@@ -192,12 +192,6 @@ namespace exotica
       ros::Duration planning_time_;
 
     protected:
-      /**
-       * \brief Derived-elements initialiser: Pure Virtual
-       * @param handle XMLHandle to the Solver element
-       * @return       Should indicate success or otherwise
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       /** \brief Initializes message data.
        *  @param q0 Start configuration

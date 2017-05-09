@@ -72,113 +72,6 @@ namespace exotica
     //TODO
   }
 
-  void CollisionScene::reinitialise()
-  {
-    fcl_robot_.clear();
-    fcl_world_.clear();
-    geo_robot_.clear();
-    geo_world_.clear();
-    ps_->getCurrentStateNonConst().update(true);
-    const std::vector<const robot_model::LinkModel*>& links =
-        ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
-    for (std::size_t i = 0; i < links.size(); ++i)
-    {
-      geo_robot_[links[i]->getName()] = geos_ptr(0);
-      fcl_robot_[links[i]->getName()] = fcls_ptr(0);
-      for (std::size_t j = 0; j < links[i]->getShapes().size(); ++j)
-      {
-        shapes::ShapeConstPtr tmp_shape;
-        if (links[i]->getShapes()[j]->type != shapes::MESH)
-          tmp_shape = boost::shared_ptr<const shapes::Shape>(
-              shapes::createMeshFromShape(links[i]->getShapes()[j].get()));
-        else
-          tmp_shape = links[i]->getShapes()[j];
-        if (!tmp_shape || !tmp_shape.get())
-        {
-          throw_pretty("Invalid shape!");
-        }
-        collision_detection::FCLGeometryConstPtr g =
-            collision_detection::createCollisionGeometry(tmp_shape, links[i],
-                j);
-        if (g)
-        {
-          geo_robot_.at(links[i]->getName()).push_back(g);
-          fcl::CollisionObject *tmp = new fcl::CollisionObject(
-              g->collision_geometry_,
-              collision_detection::transform2fcl(
-                  ps_->getCurrentState().getCollisionBodyTransform(
-                      g->collision_geometry_data_->ptr.link,
-                      g->collision_geometry_data_->shape_index)));
-          fcl_robot_.at(links[i]->getName()).push_back(
-              boost::shared_ptr<fcl::CollisionObject>(tmp));
-
-        }
-        else
-          ERROR(
-              "Unable to construct collision geometry for link "<< links[i]->getName().c_str());
-      }
-    }
-
-    collision_detection::WorldConstPtr tmp_world =
-        ps_->getCollisionWorld()->getWorld();
-    std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
-    if (obj_id_.size() > 0)
-    {
-      for (std::size_t i = 0; i < obj_id_.size(); ++i)
-      {
-        std::size_t index_size =
-            tmp_world->getObject(obj_id_[i])->shapes_.size();
-        fcl_world_[obj_id_[i]] = fcls_ptr(0);
-        geo_world_[obj_id_[i]] = geos_ptr(0);
-        trans_world_[obj_id_[i]] = std::vector<fcl::Transform3f>(0);
-        for (std::size_t j = 0; j < index_size; j++)
-        {
-          shapes::ShapeConstPtr tmp_shape;
-
-          if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type
-              == shapes::OCTREE)
-          {
-            tmp_world->getObject(obj_id_[i])->shapes_[j]->print();
-            tmp_shape = boost::static_pointer_cast<const shapes::Shape>(
-                tmp_world->getObject(obj_id_[i])->shapes_[j]);
-          }
-          else
-          {
-            if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type
-                != shapes::MESH)
-            {
-              tmp_shape = boost::shared_ptr<const shapes::Shape>(
-                  shapes::createMeshFromShape(
-                      tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
-            }
-            else
-            {
-              tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
-            }
-          }
-
-          if (!tmp_shape || !tmp_shape.get())
-          {
-            throw_pretty("Invalid shape!");
-          }
-          collision_detection::FCLGeometryConstPtr g =
-              collision_detection::createCollisionGeometry(tmp_shape,
-                  tmp_world->getObject(obj_id_[i]).get());
-          geo_world_.at(obj_id_[i]).push_back(g);
-          trans_world_.at(obj_id_[i]).push_back(
-              fcl::Transform3f(
-                  collision_detection::transform2fcl(
-                      tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
-          fcl_world_.at(obj_id_[i]).push_back(
-              boost::shared_ptr<fcl::CollisionObject>(
-                  new fcl::CollisionObject(g->collision_geometry_,
-                      collision_detection::transform2fcl(
-                          tmp_world->getObject(obj_id_[i])->shape_poses_[j]))));
-        }
-      }
-    }
-  }
-
   void CollisionScene::initialise(
       const moveit_msgs::PlanningSceneConstPtr & msg,
       const std::vector<std::string> & joints, std::string & mode,
@@ -199,7 +92,6 @@ namespace exotica
           drake_full_body_);
     else
       drake_full_body_.reset(new std_msgs::Bool());
-    reinitialise();
       joint_index_.resize(joints.size());
 
       for (std::size_t i = 0;
@@ -647,67 +539,6 @@ namespace exotica
       }
       INFO_NAMED(name_,
           "Exotica Scene initialised, planning mode set to "<<mode_);
-  }
-
-  void Scene::initialisation(tinyxml2::XMLHandle & handle,
-      const Server_ptr & server)
-  {
-    LOCK(lock_);
-    server_ = server;
-    if (!handle.FirstChildElement("Kinematica").ToElement())
-    {
-      throw_named("Kinematica not found!");
-    }
-
-    server->getModel("robot_description", model_);
-
-    tinyxml2::XMLHandle tmp_handle(handle.FirstChildElement("Kinematica"));
-    if (!kinematica_.initKinematics(tmp_handle, model_))
-    {
-      throw_named("Kinematica not initialized!");
-    }
-    base_type_ = kinematica_.getBaseType();
-
-    N = kinematica_.getNumJoints();
-    collision_scene_.reset(new CollisionScene(server_, name_));
-
-    tmp_handle = handle.FirstChildElement("PlanningMode");
-     EParam<std_msgs::String> mode;
-    try
-    {
-        server_->registerParam<std_msgs::String>(name_, tmp_handle, mode);
-        mode_ = mode->data;
-    }
-    catch (Exception e)
-    {
-      mode_ = "Optimization";
-      WARNING_NAMED(name_,
-          "Planning mode not specified, using default: Optimization.");
-    }
-
-    update_jacobians_ = mode_!="Sampling"? true : false;
-
-    tmp_handle = handle.FirstChildElement("VisualDebug");
-    EParam<std_msgs::Bool> visual_debug;
-    server_->registerParam<std_msgs::Bool>(name_, tmp_handle, visual_debug);
-    visual_debug_=visual_debug->data;
-    if (visual_debug_)
-    {
-      ps_pub_ = server_->advertise<moveit_msgs::PlanningScene>(
-          name_ + "/PlanningScene", 100, true);
-      HIGHLIGHT_NAMED(name_,
-          "Running in debug mode, planning scene will be published to '"<<server_->getName()<<"/"<<name_<<"/PlanningScene'");
-    }
-    {
-      planning_scene::PlanningScenePtr tmp(
-          new planning_scene::PlanningScene(model_));
-      moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
-      tmp->getPlanningSceneMsg(*msg.get());
-      collision_scene_->initialise(msg, kinematica_.getJointNames(),
-              mode_, base_type_,model_);
-    }
-    INFO_NAMED(name_,
-        "Exotica Scene initialised, planning mode set to "<<mode_);
   }
 
   void Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)

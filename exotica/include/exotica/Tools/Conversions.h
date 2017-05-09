@@ -6,6 +6,11 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <exotica/Tools/Exception.h>
+#include <exotica/MeshVertex.h>
+#include <exotica/StringList.h>
+#include <exotica/BoolList.h>
+#include <exotica/Vector.h>
+#include <exotica/Matrix.h>
 
 namespace Eigen
 {
@@ -199,6 +204,15 @@ namespace exotica
         if (ret.size() == 0) throw_pretty("Empty vector!");
         return ret;
     }
+
+    void vectorExoticaToEigen(const exotica::Vector & exotica,
+        Eigen::VectorXd & eigen);
+    void vectorEigenToExotica(Eigen::VectorXd eigen,
+        exotica::Vector & exotica);
+    void matrixExoticaToEigen(const exotica::Matrix & exotica,
+        Eigen::MatrixXd & eigen);
+    void matrixEigenToExotica(const Eigen::MatrixXd & eigen,
+        exotica::Matrix & exotica);
 }
 
 #endif // CONVERSIONS_H

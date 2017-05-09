@@ -1,4 +1,3 @@
-include <exotica/KinematicaInitializer>
 extend <exotica/Object>
 Required std::string JointGroup;
 Optional std::string PlanningMode = "Optimization";

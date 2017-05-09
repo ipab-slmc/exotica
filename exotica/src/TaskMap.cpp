@@ -62,11 +62,6 @@ namespace exotica
     //  You need to implement this in your own taskmap
   }
 
-  void TaskMap::initialise(const rapidjson::Value& a)
-  {
-    throw_named("This has to be implemented in the derived class!");
-  }
-
   void TaskMap::initialise(const rapidjson::Value& a, Server_ptr & server,
       const Scene_ptr & scene_ptr, PlanningProblem_ptr prob)
   {
@@ -76,8 +71,7 @@ namespace exotica
         throw_named("Invalid server!");
       }
       std::vector<std::pair<std::string, std::string> > tmp;
-      initialise(a);
-  }
+}
 
   void TaskMap::InstantiateBase(const Initializer& init)
   {
@@ -107,85 +101,6 @@ namespace exotica
   std::string TaskMap::getSceneName()
   {
       return scene_name_;
-  }
-
-  void TaskMap::initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
-      const Scene_ptr & scene_ptr)
-  {
-    //!< Clear flags and kinematic scene pointer
-    Object::initBase(handle, server);
-    if (!server)
-    {
-      throw_named("Invalid server!");
-    }
-    server_ = server;
-    scene_ = scene_ptr;  //!< Null pointer
-
-//    if (handle.FirstChildElement("Scene").ToElement())
-//    {
-//      LOCK(scene_lock_);  //!< Local lock
-//      const char * name =
-//          handle.FirstChildElement("Scene").ToElement()->Attribute("name");
-//      if (name == nullptr)
-//      {
-//        throw_named("Invalid scene name!");
-//      }
-//      auto it = scene_ptr.find(name);
-//      if (it == scene_ptr.end())
-//      {
-//        throw_named("Can't find the scene!");
-//      }
-//      scene_ = it->second;
-//    }
-//    else
-//    {
-//      throw_named("No scene was specified!");
-//    }
-
-    std::vector<std::string> tmp_eff(0);
-    std::vector<KDL::Frame> tmp_offset(0);
-
-    tinyxml2::XMLHandle segment_handle(
-        handle.FirstChildElement("EndEffector").FirstChildElement("limb"));
-    while (segment_handle.ToElement())
-    {
-      if (!segment_handle.ToElement()->Attribute("segment"))
-      {
-        throw_named("Invalid segment!");
-      }
-      tmp_eff.push_back(segment_handle.ToElement()->Attribute("segment"));
-      KDL::Frame temp_frame = KDL::Frame::Identity(); //!< Initialise to identity
-      if (segment_handle.FirstChildElement("vector").ToElement())
-      {
-        Eigen::VectorXd temp_vector;
-        getVector(*(segment_handle.FirstChildElement("vector").ToElement()),
-                temp_vector);
-        if (temp_vector.size() != 3)
-        {
-          throw_named("Invalid vector size!");
-        }
-        temp_frame.p.x(temp_vector(0));
-        temp_frame.p.y(temp_vector(1));
-        temp_frame.p.z(temp_vector(2));
-      }
-      if (segment_handle.FirstChildElement("quaternion").ToElement())
-      {
-        Eigen::VectorXd temp_vector;
-        getVector(
-                *(segment_handle.FirstChildElement("quaternion").ToElement()),
-                temp_vector);
-        if (temp_vector.size() != 4)
-        {
-          throw_named("Invalid vector size!");
-        }
-        temp_frame.M = KDL::Rotation::Quaternion(temp_vector(1), temp_vector(2),
-            temp_vector(3), temp_vector(0));
-      }
-      tmp_offset.push_back(temp_frame);
-      segment_handle = segment_handle.NextSiblingElement("limb");
-    }
-
-    scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
   }
 
   bool TaskMap::isRegistered(int t)

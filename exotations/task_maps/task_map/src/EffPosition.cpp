@@ -41,21 +41,6 @@ namespace exotica
     //!< Empty constructor
   }
 
-  void EffPosition::initialise(const rapidjson::Value& a)
-  {
-    std::vector<std::string> tmp_eff(1);
-    getJSON(a["linkName"], tmp_eff[0]);
-    Eigen::VectorXd rel;
-    getJSON(a["pointInLink"], rel);
-    if(rel.rows() != 3) throw_named("Incorrect size!");
-    std::vector<KDL::Frame> tmp_offset(1);
-    tmp_offset[0] = KDL::Frame::Identity();
-    tmp_offset[0].p[0] = rel(0);
-    tmp_offset[0].p[1] = rel(1);
-    tmp_offset[0].p[2] = rel(2);
-    scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
-  }
-
   void EffPosition::update(Eigen::VectorXdRefConst x, const int t)
   {
     if (!isRegistered(t) || !getEffReferences())

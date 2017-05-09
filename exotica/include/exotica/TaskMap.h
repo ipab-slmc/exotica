@@ -71,17 +71,6 @@ namespace exotica
       virtual void InstantiateBase(const Initializer& init);
 
       /**
-       * \brief Initialiser (from XML): mainly resolves the KinematicScene pointer
-       * @pre             The Kinematic Scenes must already be initialised
-       * @post            If the xml-element contains a 'kscene' tag, then it will attempt to bind the map to that kinematic scene. Otherwise, scene_ will be set to a nullptr.
-       * @param handle    The handle to the XML-element describing the task map
-       * @param scene_ptr Map of kinematic scenes (Optional: defaulted)
-       *                  \n PAR_ERR if could not bind scene information.
-       */
-      void initBase(tinyxml2::XMLHandle & handle, Server_ptr & server,
-          const Scene_ptr & scene_ptr);
-
-      /**
        * \brief Updates the output functions (phi and jacobian): PURE VIRTUAL
        * \details The Function should:
        *          \n call invalidate() before starting task-specific execution
@@ -126,9 +115,8 @@ namespace exotica
 
       Scene_ptr getScene();
 
-      virtual void initialise(const rapidjson::Value& a);
       void initialise(const rapidjson::Value& a, Server_ptr & server,
-          const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
+            const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
 
       bool updateJacobian_;
 

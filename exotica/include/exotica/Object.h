@@ -94,16 +94,6 @@ namespace exotica
          debug_=oinit.Debug;
       }
 
-      virtual void initBase(tinyxml2::XMLHandle & handle,
-          const Server_ptr & server)
-      {
-        const char* atr = handle.ToElement()->Attribute("name");
-        if (atr)
-        {
-          object_name_ = std::string(atr);
-        }
-      }
-
       virtual std::string print(std::string prepend)
       {
         return prepend + "  " + object_name_ + " (" + type() + ")";

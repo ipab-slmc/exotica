@@ -60,13 +60,6 @@ namespace exotica
       virtual void InstantiateBase(const Initializer& init);
 
       /**
-       * \brief Base initialiser: Currently simply calls the derived method
-       * @param handle XMLHandle to the Solver element
-       * @param	server	Server
-       */
-      void initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server);
-
-      /**
        * \brief Binds the solver to a specific problem which must be pre-initalised
        * @param problem Shared pointer to the motion planning problem
        * @return        Always successful

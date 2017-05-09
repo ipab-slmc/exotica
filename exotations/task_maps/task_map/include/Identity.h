@@ -63,7 +63,6 @@ namespace exotica
 
       void initialise(std::string& postureName,
           std::vector<std::string>& joints, bool skipUnknown = false);
-      virtual void initialise(const rapidjson::Value& a);
 
       bool useRef;
       std::vector<int> jointMap;

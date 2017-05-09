@@ -44,17 +44,6 @@ namespace exotica
   {
   }
 
-  void MotionSolver::initBase(tinyxml2::XMLHandle & handle,
-      const Server_ptr & server)
-  {
-    Object::initBase(handle, server);
-    if (!server)
-    {
-      throw_named("Not fully initialized!");
-    }
-    server_ = server;
-  }
-
   void MotionSolver::specifyProblem(PlanningProblem_ptr pointer)
   {
     problem_ = pointer;

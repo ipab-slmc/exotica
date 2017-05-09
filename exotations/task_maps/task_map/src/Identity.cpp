@@ -113,22 +113,6 @@ namespace exotica
     }
   }
 
-  void Identity::initialise(const rapidjson::Value& a)
-  {
-    if (poses && posesJointNames)
-    {
-        std::string postureName;
-        getJSON(a["postureName"], postureName);
-        std::vector<std::string> joints;
-        getJSON(a["joints"], joints);
-        initialise(postureName, joints);
-    }
-    else
-    {
-      throw_named("Poses have not been set!");
-    }
-  }
-
   void Identity::update(Eigen::VectorXdRefConst x, const int t)
   {
     if (!isRegistered(t))

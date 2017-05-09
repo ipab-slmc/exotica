@@ -41,24 +41,6 @@ namespace exotica
     //!< Empty constructor
   }
 
-  void Distance::initialise(const rapidjson::Value& a)
-  {
-    std::string eff;
-    getJSON(a["linkName"], eff);
-    std::vector<std::string> tmp_eff(2);
-    std::vector<KDL::Frame> tmp_offset(2);
-    Eigen::VectorXd rel;
-    getJSON(a["pointInLink"], rel);
-    if (rel.rows() != 3) throw_named("Incorrect size!");
-    getJSON(a["referenceFrame"], tmp_offset[1]);
-    tmp_offset[0] = KDL::Frame(KDL::Vector(rel(0), rel(1), rel(2)));
-    tmp_offset[1].p = tmp_offset[1].p - scene_->getSolver().getRootOffset().p;
-    tmp_eff[0] = eff;
-    tmp_eff[1] = getScene()->getRootName();
-    ref_pose_ = tmp_offset[1];
-    scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
-  }
-
   void Distance::update(Eigen::VectorXdRefConst x, const int t)
   {
     if (!isRegistered(t) || !getEffReferences())

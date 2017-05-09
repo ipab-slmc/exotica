@@ -63,8 +63,6 @@ namespace exotica //!< Since this is part of the core library, it will be within
        */
       virtual void taskSpaceDim(int & task_dim);
 
-      virtual void initialise(const rapidjson::Value& a)  {throw_named("Depricated!");}
-
     protected:
 
       double distance(Eigen::VectorXdRefConst effA, Eigen::VectorXdRefConst effB, double rA, double rB);

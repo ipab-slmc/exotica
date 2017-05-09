@@ -59,15 +59,6 @@ namespace exotica
       virtual void InstantiateBase(const Initializer& init);
 
       /**
-       * \brief Base Initialiser
-       * @pre             The TaskMaps must be initialised
-       * @param handle    Handle to the XML Element
-       * @param map_list  A map from names to TaskMap pointers (for initialising the map)
-       */
-      void initBase(tinyxml2::XMLHandle & handle,
-          const TaskMap_map & map_list);
-
-      /**
        * @brief registerPhi Registers a memory location for the output of phi at time t
        * @param y Reference to memory location to be registered
        * @param t Time step

@@ -122,16 +122,6 @@ namespace exotica
       {
       }
       ;
-      /**
-       * \brief Initialise the Kinematics Object. THREAD-SAFE
-       * @param urdf_param     Name of the urdf ROS parameter
-       * @param temp_tree     The KDL::Tree from which to construct the robot
-       * @param optimisation  Optimisation Parameters
-       * @return              True if successful, false otherwise
-       */
-
-      bool initKinematics(tinyxml2::XMLHandle & handle,
-          const robot_model::RobotModelPtr model);
 
       /**
        * \brief Provides dynamic updating of the end-effector list

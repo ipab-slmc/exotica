@@ -62,17 +62,6 @@ namespace exotica
     //  You need to implement this in your own taskmap
   }
 
-  void TaskMap::initialise(const rapidjson::Value& a, Server_ptr & server,
-      const Scene_ptr & scene_ptr, PlanningProblem_ptr prob)
-  {
-    getJSON(a["class"], object_name_);
-      if (!server)
-      {
-        throw_named("Invalid server!");
-      }
-      std::vector<std::pair<std::string, std::string> > tmp;
-}
-
   void TaskMap::InstantiateBase(const Initializer& init)
   {
     Object::InstatiateObject(init);

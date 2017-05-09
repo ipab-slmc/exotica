@@ -122,9 +122,6 @@ namespace exotica
        */
       void update(Eigen::VectorXdRefConst x, const int t);
 
-      virtual void reinitialise(rapidjson::Document& document,
-          boost::shared_ptr<PlanningProblem> problem);
-
     private:
       int T; //!< Number of time steps
       double tau; //!< Time step duration

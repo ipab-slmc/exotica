@@ -70,8 +70,6 @@ namespace exotica
       std::vector<TaskTerminationCriterion_ptr>& getGoals();
       std::vector<double>& getBounds();
       bool isCompoundStateSpace();
-      virtual void reinitialise(rapidjson::Document& document,
-          boost::shared_ptr<PlanningProblem> problem);
       std::string local_planner_config_;
       EParam<std_msgs::Bool> full_body_plan_;
 

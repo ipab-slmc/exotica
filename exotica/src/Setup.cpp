@@ -32,7 +32,6 @@
 
 #include <exotica/Setup.h>
 #include <type_traits>
-using namespace rapidjson;
 
 namespace exotica
 {

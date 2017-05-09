@@ -55,9 +55,6 @@ namespace exotica
       void initialiseBaseSolver(Initializer& init, const Server_ptr &server);
       virtual void initialiseSolver(Initializer& init) = 0;
 
-      void initialiseBaseSolver(tinyxml2::XMLHandle & handle,
-          const Server_ptr &server);
-      virtual void initialiseSolver(tinyxml2::XMLHandle & handle) = 0;
       virtual bool solve(const Eigen::VectorXd &x0,
           Eigen::MatrixXd &sol) = 0;
       virtual void setGoalState(const Eigen::VectorXd & qT,

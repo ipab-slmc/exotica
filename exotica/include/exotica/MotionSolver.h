@@ -40,8 +40,6 @@
 #include "exotica/Server.h"
 #include "exotica/Property.h"
 
-#include "tinyxml2/tinyxml2.h"
-
 #define REGISTER_MOTIONSOLVER_TYPE(TYPE, DERIV) EXOTICA_REGISTER(exotica::MotionSolver, TYPE, DERIV)
 
 namespace exotica

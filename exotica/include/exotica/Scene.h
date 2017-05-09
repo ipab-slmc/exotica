@@ -35,7 +35,6 @@
 
 #include "exotica/Object.h"
 #include "exotica/Server.h"
-#include "tinyxml2/tinyxml2.h"
 #include "exotica/KinematicTree.h"
 #include <exotica/Property.h>
 #include <exotica/SceneInitializer.h>
@@ -252,15 +251,6 @@ namespace exotica
        * @return	Name
        */
       std::string getName();
-
-      /**
-       * \brief	Initialisation function
-       * @param	handle	XML handle
-       * @param	server	Server pointer
-       * @return Indication of success
-       */
-      void initialisation(tinyxml2::XMLHandle & handle,
-          const Server_ptr & server);
 
       /**
        * \brief	Updator function

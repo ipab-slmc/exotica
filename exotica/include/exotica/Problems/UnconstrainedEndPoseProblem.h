@@ -64,9 +64,6 @@ namespace exotica
        */
       double getTau();
       void setTau(double tau);
-
-      virtual void reinitialise(rapidjson::Document& document,
-          boost::shared_ptr<PlanningProblem> problem);
     protected:
       /**
        * \brief Derived Initialiser (from XML): PURE VIRTUAL

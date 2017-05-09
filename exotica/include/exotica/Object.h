@@ -38,7 +38,6 @@
 #include <string>   //!< C++ type strings
 #include <exotica/Tools.h>
 #include <exotica/Server.h>
-#include "rapidjson/document.h"
 
 #include "exotica/Property.h"
 #include "exotica/ObjectInitializer.h"

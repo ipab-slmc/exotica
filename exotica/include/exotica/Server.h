@@ -35,7 +35,6 @@
 
 #include <ros/ros.h>
 #include "Tools.h"
-#include "tinyxml2/tinyxml2.h"
 #include <typeinfo>
 #include <Eigen/Dense>
 #include <map>

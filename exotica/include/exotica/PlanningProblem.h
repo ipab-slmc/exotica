@@ -40,7 +40,6 @@
 #include "exotica/Scene.h"
 #include "exotica/Tools.h"
 #include "exotica/Problem.h"
-#include "tinyxml2/tinyxml2.h"
 
 #include <vector>
 #include <string>

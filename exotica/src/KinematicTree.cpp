@@ -1568,38 +1568,3 @@ bool exotica::recursivePrint(exotica::KinematicTree & robot, std::string node,
   return success;
 }
 
-bool exotica::xmlGetVector(const tinyxml2::XMLElement & xml_vector,
-    Eigen::VectorXd & eigen_vector)
-{
-//!< Temporaries
-  double temp_entry;
-  int i = 0;
-
-  if (!xml_vector.GetText())
-  {
-    eigen_vector = Eigen::VectorXd(); //!< Null matrix again
-    INDICATE_FAILURE
-    ;
-    return false;
-  }
-  std::istringstream text_parser(xml_vector.GetText());
-
-//!< Initialise looping
-  text_parser >> temp_entry;
-  while (!(text_parser.fail() || text_parser.bad()))  //!< No commenting!
-  {
-    eigen_vector.conservativeResize(++i); //!< Allocate storage for this entry (by increasing i)
-    eigen_vector(i - 1) = temp_entry;
-    text_parser >> temp_entry;
-  }
-  if (i > 0)
-  {
-    return true;
-  }
-  else
-  {
-    INDICATE_FAILURE
-    ;
-    return false;
-  }
-}

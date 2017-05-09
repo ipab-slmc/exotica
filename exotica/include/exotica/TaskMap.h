@@ -115,9 +115,6 @@ namespace exotica
 
       Scene_ptr getScene();
 
-      void initialise(const rapidjson::Value& a, Server_ptr & server,
-            const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob);
-
       bool updateJacobian_;
 
       std::vector<Eigen::VectorXdRef_ptr> phi_; //!< The Task-space co-ordinates

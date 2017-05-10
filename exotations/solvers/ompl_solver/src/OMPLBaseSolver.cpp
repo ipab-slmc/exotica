@@ -28,14 +28,6 @@ namespace exotica
       initialiseSolver(init);
   }
 
-  void OMPLBaseSolver::initialiseBaseSolver(tinyxml2::XMLHandle & handle,
-      const Server_ptr &server)
-  {
-    server_ = server;
-    registerDefaultPlanners();
-    initialiseSolver(handle);
-  }
-
   void OMPLBaseSolver::recordData()
   {
     ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());

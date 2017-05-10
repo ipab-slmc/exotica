@@ -97,14 +97,6 @@ namespace exotica
 
       virtual void setGoalState(const Eigen::VectorXd & qT, const double eps =
           std::numeric_limits<double>::epsilon());
-    protected:
-
-      /**
-       * \brief Derived-elements initialiser: Pure Virtual
-       * @param handle XMLHandle to the Solver element
-       * @return       Should indicate success or otherwise
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
     private:
       SamplingProblem_ptr prob_; //!< Shared pointer to the planning problem.
 

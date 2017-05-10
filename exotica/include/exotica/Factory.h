@@ -121,47 +121,6 @@ namespace exotica
         return DeclaredClasses;
       }
 
-      // Depricated
-      void createObject(const std::string & type, boost::shared_ptr<BO> & object)
-      {
-        object = createInstance(type);
-      }
-
-      // Depricated
-      void createObject(boost::shared_ptr<BO> & object,
-          tinyxml2::XMLHandle & handle, const Server_ptr & server)
-      {
-        if (handle.ToElement())
-        {
-            std::string type = std::string(handle.ToElement()->Name());
-            object = createInstance(type);
-              const char * atr = handle.ToElement()->Attribute("name");
-              if (atr)
-              {
-                std::string name = std::string(atr);
-                if (name.length() > 0)
-                {
-                    //const_cast< boost::shared_ptr<BO>& >(object)->object_name_=name;
-                    object->object_name_ = name;
-                    object->ns_ = name;
-                    object->initBase(handle, server);
-                }
-                else
-                {
-                  throw_pretty("Object name for object of type '"<< type <<"' was not specified.");
-                }
-              }
-              else
-              {
-                throw_pretty("Object name for object of type '"<< type <<"' was not specified.");
-              }
-        }
-        else
-        {
-          throw_pretty("Invalid XML handle");
-        }
-      }
-
     private:
       /**
        * \brief Private Constructor

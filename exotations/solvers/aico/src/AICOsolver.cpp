@@ -175,38 +175,6 @@ namespace exotica
     }
   }
 
-  void AICOsolver::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    tinyxml2::XMLElement* xmltmp;
-    XML_CHECK("sweepMode");
-    const char* txt = xmltmp->GetText();
-    if (strcmp(txt, "Forwardly") == 0)
-      sweepMode = smForwardly;
-    else if (strcmp(txt, "Symmetric") == 0)
-      sweepMode = smSymmetric;
-    else if (strcmp(txt, "LocalGaussNewton") == 0)
-      sweepMode = smLocalGaussNewton;
-    else if (strcmp(txt, "LocalGaussNewtonDamped") == 0)
-      sweepMode = smLocalGaussNewtonDamped;
-    else
-    {
-      throw_named("Unknown sweep mode '"<<txt<<"'");
-    }
-    XML_CHECK("max_iterations");
-    getInt(*xmltmp, max_iterations);
-    XML_CHECK("tolerance");
-    getDouble(*xmltmp, tolerance);
-    XML_CHECK("damping");
-    getDouble(*xmltmp, damping_init);
-    int tmpi;
-    XML_CHECK("UseBackwardMessage");
-    getInt(*xmltmp, tmpi);
-    useBwdMsg = tmpi != 0;
-    XML_CHECK("dynamic");
-    getInt(*xmltmp, tmpi);
-    dynamic = tmpi != 0;
-  }
-
   void AICOsolver::specifyProblem(PlanningProblem_ptr pointer)
   {
     if (pointer->type().compare(std::string("exotica::UnconstrainedTimeIndexedProblem")) != 0)

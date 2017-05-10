@@ -64,10 +64,6 @@ namespace exotica
        */
       virtual void update(Eigen::VectorXdRefConst x, const int t);
 
-      virtual void initialiseManual(std::string name, Server_ptr & server,
-          const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob,
-          std::vector<std::pair<std::string,std::string> >& params);
-
       /**
        * @brief	Get the task space dimension
        */
@@ -101,11 +97,6 @@ namespace exotica
       void initDebug(std::string ref);
       void destroyDebug();
     protected:
-      /**
-       * @brief	Concrete implementation of initialisation from xml
-       * @param	handle	XML handler
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
 
       /** Member Functions **/
 

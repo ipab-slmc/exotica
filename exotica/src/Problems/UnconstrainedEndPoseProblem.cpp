@@ -51,74 +51,6 @@ namespace exotica
     //TODO
   }
 
-  void UnconstrainedEndPoseProblem::reinitialise(rapidjson::Document& document,
-      boost::shared_ptr<PlanningProblem> problem)
-  {
-    clear();
-    if (document.IsArray())
-    {
-        for (rapidjson::SizeType i = 0; i < document.Size(); i++)
-        {
-            rapidjson::Value& obj = document[i];
-            if (obj.IsObject())
-            {
-                std::string constraintClass;
-                getJSON(obj["class"], constraintClass);
-                if (knownMaps_.find(constraintClass) != knownMaps_.end())
-                {
-                    TaskMap_ptr taskmap = Setup::createMap(knownMaps_[constraintClass]);
-                    taskmap->initialise(obj, server_, scene_,problem);
-                    std::string name = taskmap->getObjectName();
-                    task_maps_[name] = taskmap;
-                    TaskDefinition_ptr task = Setup::createDefinition("TaskSqrError");
-                    TaskSqrError_ptr sqr = boost::static_pointer_cast<TaskSqrError>(task);
-                    sqr->setTaskMap(taskmap);
-                    int dim;
-                    taskmap->taskSpaceDim(dim);
-                    sqr->y_star0_.resize(dim);
-                    sqr->rho0_(0) = 0.0;
-                    sqr->rho1_(0) = 1.0;
-                    sqr->object_name_ = name+ std::to_string((unsigned long) sqr.get());
-
-                    // TODO: Better implementation of stting goals from JSON
-                    sqr->y_star0_.setZero();
-
-                    sqr->setTimeSteps(T_);
-                    Eigen::VectorXd tspan(2);
-                    Eigen::VectorXi tspani(2);
-
-                    //	TODO fix ndarray problem
-
-                    getJSON(obj["tspan"], tspan);
-                    if (tspan(0) <= 0.0) tspan(0) = 0.0;
-                    if (tspan(1) >= 1.0) tspan(1) = 1.0;
-                    tspani(0) = (int) ((T_ - 1) * tspan(0));
-                    tspani(1) = (int) ((T_ - 1) * tspan(1));
-                    for (int t = tspani(0); t <= tspani(1); t++)
-                    {
-                        sqr->registerRho(Eigen::VectorXdRef_ptr(sqr->rho1_.segment(0, 1)),t);
-                    }
-                    sqr->wasFullyInitialised_ = true;
-                    task_defs_[name] = task;
-                }
-                else
-                {
-                    // WARNING("Ignoring unknown constraint '"<<constraintClass<<"'");
-                }
-            }
-            {
-              throw_named("Invalid JSON document object!");
-            }
-        }
-
-
-    }
-    else
-    {
-        throw_named("Invalid JSON array!");
-    }
-  }
-
   void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
   {
       tau_ = init.Tolerance;
@@ -129,44 +61,6 @@ namespace exotica
       {
           it.second->setTimeSteps(T_);
       }
-  }
-
-  void UnconstrainedEndPoseProblem::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    tinyxml2::XMLElement* xmltmp;
-    xmltmp = handle.FirstChildElement("W").ToElement();
-    if (xmltmp)
-    {
-      Eigen::VectorXd tmp;
-      getVector(*xmltmp, tmp);
-      config_w_ = Eigen::MatrixXd::Identity(tmp.rows(), tmp.rows());
-      config_w_.diagonal() = tmp;
-    }
-    xmltmp = handle.FirstChildElement("Tolerance").ToElement();
-    if (xmltmp)
-    {
-      getDouble(*xmltmp, tau_);
-    }
-    xmltmp = handle.FirstChildElement("T").ToElement();
-    if (xmltmp)
-    {
-      try
-      {
-        getInt(*xmltmp, T_);
-      }
-      catch (Exception e)
-      {
-        T_ = 1;
-      }
-    }
-    else
-    {
-      T_ = 1;
-    }
-    for (auto& it : task_defs_)
-    {
-      it.second->setTimeSteps(T_);
-    }
   }
 
   int UnconstrainedEndPoseProblem::getT()

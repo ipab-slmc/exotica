@@ -40,7 +40,6 @@
 #include "exotica/Scene.h"
 #include "exotica/Tools.h"
 #include "exotica/Problem.h"
-#include "tinyxml2/tinyxml2.h"
 
 #include <vector>
 #include <string>
@@ -64,13 +63,6 @@ namespace exotica
 
       virtual void InstantiateBase(const Initializer& init);
 
-      /**
-       * \brief Initialiser (from XML): takes care of instantiating the TaskMaps and Definitions and the Kinematic Scenes
-       * @param handle[in] The handle to the XML-element describing the Problem Definition
-       * @param	server	Server
-       * @return           Indication of success/failure: TODO
-       */
-      void initBase(tinyxml2::XMLHandle & handle, const Server_ptr & server);
 
       /**
        * \brief Updator: declared virtual so can be overridden.
@@ -116,11 +108,6 @@ namespace exotica
       std::string endStateName;
       std::string nominalStateName;
 
-      virtual void reinitialise(rapidjson::Document& document,
-          boost::shared_ptr<PlanningProblem> problem);
-
-      virtual void reinitialise(Problem& msg, boost::shared_ptr<PlanningProblem> problem);
-
       boost::shared_ptr<std::map<std::string, Eigen::VectorXd> > poses;
       boost::shared_ptr<std::vector<std::string> > posesJointNames;
 
@@ -141,8 +128,6 @@ namespace exotica
        * @param handle[in] The handle to the XML-element describing the Problem Definition
        * @return           Indication of success/failure: TODO
        */
-      virtual void initDerived(tinyxml2::XMLHandle & handle) = 0;
-
       Server_ptr server_; //!< Pointer to EXOTica parameter server;
       TaskMap_map task_maps_; //!< The set of taskmaps we will be using, which will be shared between task-definitions
       TaskDefinition_map task_defs_; //!< The set of task definition objects

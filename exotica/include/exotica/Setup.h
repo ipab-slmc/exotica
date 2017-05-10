@@ -39,7 +39,6 @@
 #include "exotica/MotionSolver.h"
 #include "exotica/PlanningProblem.h"
 #include "exotica/Server.h"
-#include "rapidjson/document.h"
 #include <exotica/Property.h>
 
 #include <pluginlib/class_loader.h>
@@ -100,38 +99,6 @@ namespace exotica
           return ret;
       }
 
-      ///
-      /// \brief initialise Initialises the server from XML handle
-      /// \param root_handle XML handle
-      /// \param server Returned server object
-      /// \return Indication of success
-      ///
-      void initialise(tinyxml2::XMLHandle root_handle, Server_ptr & server);
-
-      ///
-      /// \brief initialise Initialises the problem from XML handle
-      /// \param root_handle XML handle
-      /// \param problem Returned problem object
-      /// \param problem_name Requested problem name
-      /// \param server Server to use with this object
-      /// \return Indication of success
-      ///
-      void initialise(tinyxml2::XMLHandle root_handle,
-          PlanningProblem_ptr & problem, const std::string & problem_name,
-          Server_ptr & server);
-
-      ///
-      /// \brief initialise Initialises the solver from XML handle
-      /// \param root_handle XML handle
-      /// \param problem Returned solver object
-      /// \param problem_name Requested solver name
-      /// \param server Server to use with this object
-      /// \return Indication of success
-      ///
-      void initialise(tinyxml2::XMLHandle root_handle,
-          MotionSolver_ptr & solver, const std::string & solver_name,
-          Server_ptr & server);
-
       /**
        * \brief Initialiser function
        * @param file_name XML_file for initialising the problem with.
@@ -182,15 +149,6 @@ namespace exotica
           std::vector<std::string>& solvers);
 
       ///
-      /// \brief initialiseProblemJSON Reinitialises the problem from JSON string
-      /// \param problem Problem to be reinitialised
-      /// \param constraints JSON string
-      /// \return Indication of success
-      ///
-      void initialiseProblemJSON(PlanningProblem_ptr problem,
-          const std::string& constraints);
-
-      ///
       /// \brief initialiseProblemMoveit Reinitialises the problem from moveit planning scene stored within the Scene object of the problem
       /// \param problem Problem to be reinitialised
       /// \return Indication of success
@@ -209,8 +167,6 @@ namespace exotica
       Setup(Setup const&) = delete;
       void operator=(Setup const&) = delete;
 
-      /** Class Parameters **/
-      tinyxml2::XMLDocument xml_file;
       pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
       pluginlib::ClassLoader<exotica::TaskMap> maps_;
       PlanningProblem_fac problems_;

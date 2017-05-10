@@ -33,7 +33,6 @@
 #ifndef KINEMATIC_TREE_H
 #define KINEMATIC_TREE_H
 
-#include "tinyxml2/tinyxml2.h"
 #include <boost/thread/mutex.hpp>
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
@@ -122,16 +121,6 @@ namespace exotica
       {
       }
       ;
-      /**
-       * \brief Initialise the Kinematics Object. THREAD-SAFE
-       * @param urdf_param     Name of the urdf ROS parameter
-       * @param temp_tree     The KDL::Tree from which to construct the robot
-       * @param optimisation  Optimisation Parameters
-       * @return              True if successful, false otherwise
-       */
-
-      bool initKinematics(tinyxml2::XMLHandle & handle,
-          const robot_model::RobotModelPtr model);
 
       /**
        * \brief Provides dynamic updating of the end-effector list
@@ -449,8 +438,6 @@ namespace exotica
    */
 
   Eigen::Vector3d vectorKdlToEigen(const KDL::Vector & kdl_vec);
-  bool xmlGetVector(const tinyxml2::XMLElement & xml_vector,
-      Eigen::VectorXd & eigen_vector);
   bool recursivePrint(exotica::KinematicTree & robot, std::string node,
       std::string tab);
 }

@@ -55,10 +55,6 @@ namespace exotica
 
       virtual void Instantiate(TaskSqrErrorInitializer& init);
 
-      virtual void initialiseManual(std::string name, Server_ptr & server,
-          boost::shared_ptr<PlanningProblem> prob,
-          std::vector<std::pair<std::string,std::string> >& params);
-
       /**
        * @brief registerGoal Registers a goal reference at time t
        * @param y_star Goal reference
@@ -118,13 +114,6 @@ namespace exotica
       Eigen::VectorXdRef_ptr getGoal(int t = 0);
 
     protected:
-      /**
-       * \brief Concrete implementation of the initDerived
-       * @param handle  The handle to the XML-element describing the ErrorFunction Function
-       * @return        Should indicate success/failure
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
-
       /** The internal storage **/
       std::vector<Eigen::VectorXdRef_ptr> y_star_;    //!< The goal vector
       std::vector<Eigen::VectorXdRef_ptr> rho_; //!< The scalar inter-task weight

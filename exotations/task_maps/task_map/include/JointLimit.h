@@ -64,13 +64,6 @@ namespace exotica
        */
       virtual void taskSpaceDim(int & task_dim);
 
-    protected:
-      /**
-       * @brief	Concrete implementation of initialisation from xml
-       * @param	handle	XML handler
-       */
-      virtual void initDerived(tinyxml2::XMLHandle & handle);
-
     private:
       Eigen::VectorXd low_limits_;	//	Lower joint limits
       Eigen::VectorXd high_limits_;	//	Higher joint limits

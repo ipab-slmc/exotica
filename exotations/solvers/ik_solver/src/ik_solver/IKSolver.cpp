@@ -97,25 +97,6 @@ namespace exotica
         parameters_ = init;
   }
 
-  void IKsolver::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    try
-    {
-      tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("MaxIt");
-      server_->registerParam<std_msgs::Int64>(ns_, tmp_handle, maxit_);
-      parameters_.MaxIt = maxit_->data;
-      tmp_handle = handle.FirstChildElement("MaxStep");
-      server_->registerParam<std_msgs::Float64>(ns_, tmp_handle, maxstep_);
-      parameters_.MaxStep = maxstep_->data;
-      tmp_handle = handle.FirstChildElement("MultiTaskMode");
-      server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, multi_task_);
-      parameters_.MultiTaskMode = multi_task_->data;
-    } catch (int e)
-    {
-      throw_named("IK solver initialisation, parameter error\n");
-    }
-  }
-
   void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
   {
     if (pointer->type()!="exotica::UnconstrainedEndPoseProblem")

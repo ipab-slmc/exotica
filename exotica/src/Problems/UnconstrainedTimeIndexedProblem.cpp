@@ -41,80 +41,6 @@ REGISTER_PROBLEM_TYPE("UnconstrainedTimeIndexedProblem", exotica::UnconstrainedT
 namespace exotica
 {
 
-    void UnconstrainedTimeIndexedProblem::reinitialise(rapidjson::Document& document,
-          boost::shared_ptr<PlanningProblem> problem)
-    {
-        clear();
-        if (document.IsArray())
-        {
-            for (rapidjson::SizeType i = 0; i < document.Size(); i++)
-            {
-                rapidjson::Value& obj = document[i];
-            if (obj.IsObject())
-            {
-                std::string constraintClass;
-                getJSON(obj["class"], constraintClass);
-                if (knownMaps_.find(constraintClass) != knownMaps_.end())
-                {
-                    TaskMap_ptr taskmap = Setup::createMap(knownMaps_[constraintClass]);
-                    taskmap->initialise(obj, server_, scene_, problem);
-                    std::string name = taskmap->getObjectName();
-                    task_maps_[name] = taskmap;
-                    TaskDefinition_ptr task = Setup::createDefinition("TaskSqrError");
-                    TaskSqrError_ptr sqr = boost::static_pointer_cast<TaskSqrError>(task);
-                    sqr->setTaskMap(taskmap);
-                    int dim;
-                    taskmap->taskSpaceDim(dim);
-                    sqr->y_star0_.resize(dim);
-                    sqr->rho0_(0) = 0.0;
-                    sqr->rho1_(0) = 1e4;
-                    sqr->object_name_ = name + std::to_string((unsigned long) sqr.get());
-
-                    // TODO: Better implementation of stting goals from JSON
-                    sqr->y_star0_.setZero();
-
-                    sqr->setTimeSteps(T + 2);
-                    Eigen::VectorXd tspan(2);
-                    Eigen::VectorXi tspani(2);
-                    if (obj["tspan"]["__ndarray__"].IsArray())
-                    {
-                        getJSON(obj["tspan"]["__ndarray__"], tspan);
-                    }
-                    else
-                    {
-                        getJSON(obj["tspan"], tspan);
-                    }
-                    if (tspan(0) <= 0.0) tspan(0) = 0.0;
-                    if (tspan(1) >= 1.0) tspan(1) = 1.0;
-                    tspani(0) = (int) (T * tspan(0));
-                    tspani(1) = (int) (T * tspan(1));
-                    for (int t = tspani(0); t <= tspani(1); t++)
-                    {
-                        sqr->registerRho(
-                        Eigen::VectorXdRef_ptr(sqr->rho1_.segment(0, 1)),
-                        t);
-                    }
-                    sqr->wasFullyInitialised_ = true;
-                    task_defs_[name] = task;
-                }
-                else
-                {
-                    throw_named("Unknown constraint '"<<constraintClass<<"'");
-                }
-            }
-            else
-            {
-              throw_named("Invalid JSON document object!");
-            }
-          }
-
-        }
-        else
-        {
-            throw_named("Invalid JSON array!");
-        }
-    }
-
   void UnconstrainedTimeIndexedProblem::update(Eigen::VectorXdRefConst x, const int t)
   {
     // Update the KinematicScene(s)...
@@ -168,58 +94,6 @@ namespace exotica
       }
       // Set number of time steps
       setTime(T);
-  }
-
-  void UnconstrainedTimeIndexedProblem::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    tinyxml2::XMLElement* xmltmp;
-    bool hastime = false;
-    XML_CHECK("T");
-    getInt(*xmltmp, T);
-    if (T <= 2)
-    {
-      throw_named("Invalid number of timesteps: "<<T);
-    }
-    xmltmp = handle.FirstChildElement("duration").ToElement();
-    if (xmltmp)
-    {
-      getDouble(*xmltmp, tau);
-      tau = tau / ((double) T);
-      hastime = true;
-    }
-    if (hastime)
-    {
-      xmltmp = handle.FirstChildElement("tau").ToElement();
-      if (xmltmp)
-        WARNING("Duration has already been specified, tau is ignored.");
-    }
-    else
-    {
-      XML_CHECK("tau");
-      getDouble(*xmltmp, tau);
-    }
-
-    XML_CHECK("Qrate");
-    getDouble(*xmltmp, Q_rate);
-    XML_CHECK("Hrate");
-    getDouble(*xmltmp, H_rate);
-    XML_CHECK("Wrate");
-    getDouble(*xmltmp, W_rate);
-    {
-      Eigen::VectorXd tmp;
-      XML_CHECK("W");
-      getVector(*xmltmp, tmp);
-      W = Eigen::MatrixXd::Identity(tmp.rows(), tmp.rows());
-      W.diagonal() = tmp;
-    }
-    for (TaskDefinition_map::const_iterator it = task_defs_.begin();
-        it != task_defs_.end(); ++it)
-    {
-      if (it->second->type().compare(std::string("TaskSqrError")) == 0)
-        ERROR("Task variable " << it->first << " is not an squared error!");
-    }
-    // Set number of time steps
-    setTime(T);
   }
 
   int UnconstrainedTimeIndexedProblem::getT()

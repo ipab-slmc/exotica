@@ -319,33 +319,6 @@ namespace exotica
     task_dim = 1;
   }
 
-  void SweepFlux::initDerived(tinyxml2::XMLHandle & handle)
-  {
-    EParam<std::string> obj_file;
-    EParam<std_msgs::Bool> capTop, capBottom, capEnds;
-    tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("ObjectMesh");
-
-    server_->registerRosParam<std::string>(ns_, tmp_handle, obj_file);
-    loadOBJ(*obj_file, TrisQ_, VertsQ_orig_);
-
-    tmp_handle = handle.FirstChildElement("CapTop");
-    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capTop);
-    tmp_handle = handle.FirstChildElement("CapBottom");
-    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capBottom);
-    tmp_handle = handle.FirstChildElement("CapEnds");
-    server_->registerParam<std_msgs::Bool>(ns_, tmp_handle, capEnds);
-
-    obj_file_ = *obj_file;
-    capTop_ = capTop->data;
-    capBottom_ = capBottom->data;
-    capEnds_ = capEnds->data;
-
-    Eigen::Affine3d val;
-    transform(val);
-
-    init_int_ = true;
-  }
-
   void SweepFlux::transform(Eigen::Affine3d& val)
   {
     qTransform_ = val;

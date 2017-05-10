@@ -94,43 +94,6 @@ namespace exotica
       timeout_ = prop.Timeout;
   }
 
-  void OMPLImpSolver::initialiseSolver(tinyxml2::XMLHandle & handle)
-  {
-    tinyxml2::XMLHandle tmp_handle = handle.FirstChildElement("Algorithm");
-    if (!tmp_handle.ToElement())
-    {
-      WARNING(
-          "Algorithm is not specified in XML, using default algorithm "<<algorithm_);
-    }
-    else
-    {
-      algorithm_ = "geometric::"
-          + std::string(tmp_handle.ToElement()->GetText());
-      object_name_=algorithm_;
-    }
-    if (known_algorithms_.find(algorithm_) != known_algorithms_.end())
-    {
-      HIGHLIGHT("Using planning algorithm "<<algorithm_);
-    }
-    else
-    {
-      ERROR("Unknown planning algorithm "<<algorithm_<<".");
-      ERROR("Available algorithms: ");
-      for (auto &it : known_algorithms_)
-        ERROR(it.first);
-    }
-
-    tmp_handle = handle.FirstChildElement("Range");
-    if (!tmp_handle.ToElement())
-    {
-      range_ = "1";
-    }
-    else
-    {
-      range_ = std::string(tmp_handle.ToElement()->GetText());
-    }
-  }
-
   void OMPLImpSolver::specifyProblem(const SamplingProblem_ptr &prob)
   {
     prob_ = prob;

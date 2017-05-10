@@ -695,7 +695,7 @@ namespace exotica
   {
 
     LOCK(lock_);
-    exotica::SolutionForm_t tmp_sol;
+    exotica::KinematicsRequest tmp_sol;
     tmp_sol.end_effector_segs.clear();
     for (auto & it : eff_names_)
     {

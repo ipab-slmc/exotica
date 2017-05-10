@@ -57,7 +57,7 @@ namespace exotica
   /**
    * \brief Defines the two types of supported joints
    */
-  enum JointType_t
+  enum JointType
   {
     JNT_UNUSED = 0,  //!< Undefined (will not be used)
     JNT_PRISMATIC = 1,  //!< Prismatic joint
@@ -75,15 +75,9 @@ namespace exotica
     KIN_FULL = 3
   };
 
-  struct SolutionForm_t
+  struct KinematicsRequest
   {
-      std::string root_segment;       //!< The root segment
-      KDL::Frame root_seg_off;		    //!< Offset from tip of root segment
-      std::vector<std::string> joints_update; //!< The vector of joints we will be updating
-      bool zero_other_joints;  //!< Zero out the other joints not referenced
-      bool ignore_unused_segs; //!< Flag to ignore unnecessary sub-chains from the tree
-      bool compute_com;	//!< Flag to compute centre of mass
-      BASE_TYPE base_type;//!< Flag to indicate if the base is floating or fixed
+      std::vector<std::string> ControlledJoints; //!< The vector of joints we will be updating
       std::vector<std::string> end_effector_segs; //!< The segments to which the end-effectors are attached
       std::vector<KDL::Frame> end_effector_offs; //!< End Effector Offsets from the segment of choice: must be empty or same size as the end_effector_segs
   };
@@ -95,7 +89,7 @@ namespace exotica
       int parent;   		//!< The parent link (index)
       bool from_tip; //!< Whether it is connected to the tip of its parent (true) or to its base
       bool to_tip;//!< Indicates whether we are moving towards the tip (true) or not
-      JointType_t joint_type;   //!< Type of joint
+      JointType joint_type;   //!< Type of joint
       int joint_index; //!< The Joint connecting this limb to its ORIGINAL parent (mapping into the configuration array), if used
       KDL::Frame tip_pose;     //!< The latest update of the pose w.r.t root
       KDL::Frame joint_pose; //!< The pose of the base of the joint at the base of this segment (N.B. THIS IS THE POSE OF THE BASE OF THE FULL SEGMENT, from base of joint)
@@ -132,7 +126,7 @@ namespace exotica
        * @param new_end_effectors A solution form type: you only need to set the ignore_unused_segs flag, the end_effector_segs and the end_effector_offs
        * @return                  True if successful, false otherwise
        */
-      void updateEndEffectors(const SolutionForm_t & new_end_effectors);
+      void updateEndEffectors(const KinematicsRequest & new_end_effectors);
 
       /**
        * \brief	Update end-effector offset
@@ -367,7 +361,7 @@ namespace exotica
        * @return              True if successful, False otherwise
        */
       void initialise(const KDL::Tree & temp_tree,
-          const SolutionForm_t & optimisation);
+          const KinematicsRequest & optimisation);
 
       /**
        * \brief Builds a robot tree from the kdl tree : NOT THREAD-SAFE
@@ -376,8 +370,7 @@ namespace exotica
        * @param joint_map  The Mapping from the joint to the index for the associated segment
        * @return           True if ok, false if not
        */
-      void buildTree(const KDL::Tree & temp_tree, std::string root,
-          std::map<std::string, int> & joint_map);
+      void buildTree(const KDL::Tree & temp_tree, std::map<std::string, int> & joint_map);
 
       void setJointLimits();
 
@@ -396,7 +389,7 @@ namespace exotica
        * @param optimisation The Optimisation structure
        * @return             Indication of success (true) or otherwise
        */
-      void setEndEffectors(const SolutionForm_t & optimisation);
+      void setEndEffectors(const KinematicsRequest & optimisation);
 
       /**
        * \brief Recursive Function which modifies the robot_tree_ and the segment_map_ : NOT THREAD-SAFE

@@ -95,27 +95,24 @@ void exotica::KinematicTree::Instantiate(std::string JointGroup, robot_model::Ro
 {
     if (!model) throw_pretty("No robot model provided!");
 
-    exotica::SolutionForm_t solution;
+    exotica::KinematicsRequest solution;
     robot_model::JointModelGroup* group = model->getJointModelGroup(JointGroup);
     if(!group) throw_pretty("Joint group '"<<JointGroup<<"' not defined in the robot model!");
-    solution.joints_update = group->getActiveJointModelNames();
+    solution.ControlledJoints = group->getActiveJointModelNames();
     const robot_model::JointModel* root_joint = model->getRootJoint();
-    solution.root_segment = root_joint->getChildLinkModel()->getName();
 
     if (root_joint->getType() == robot_model::JointModel::FLOATING)
-        base_type_ = solution.base_type = BASE_TYPE::FLOATING;
+        base_type_ = BASE_TYPE::FLOATING;
     else if (root_joint->getType() == robot_model::JointModel::PLANAR)
-        base_type_ = solution.base_type = BASE_TYPE::PLANAR;
+        base_type_ = BASE_TYPE::PLANAR;
     else if (root_joint->getType() == robot_model::JointModel::FIXED)
-        base_type_ = solution.base_type = BASE_TYPE::FIXED;
+        base_type_ = BASE_TYPE::FIXED;
     else
         throw_pretty("Unsupported root joint type: "<< root_joint->getTypeName());
 
     controlled_base_ = true;
 
-    solution.zero_other_joints = true;
-
-    if (solution.joints_update.size() < 1)
+    if (solution.ControlledJoints.size() < 1)
     {
         throw_pretty("No update joint is specified");
     }
@@ -134,7 +131,7 @@ void exotica::KinematicTree::Instantiate(std::string JointGroup, robot_model::Ro
 }
 
 void exotica::KinematicTree::updateEndEffectors(
-    const SolutionForm_t & new_end_effectors)
+    const KinematicsRequest & new_end_effectors)
 {
 // Lock for synchronisation
   boost::mutex::scoped_lock(member_lock_);
@@ -627,7 +624,7 @@ bool exotica::KinematicTree::getInitialEff(std::vector<std::string> & segs,
 }
 
 void exotica::KinematicTree::initialise(const KDL::Tree & temp_tree,
-    const exotica::SolutionForm_t & optimisation)
+    const exotica::KinematicsRequest & optimisation)
 {
     // First clear/reset everything
     robot_tree_.clear();
@@ -637,19 +634,19 @@ void exotica::KinematicTree::initialise(const KDL::Tree & temp_tree,
     eff_segments_.clear();
     eff_seg_offs_.clear();
 
-    buildTree(temp_tree, optimisation.root_segment, joint_map_);
+    buildTree(temp_tree, joint_map_);
     std::cout << "Kinematica using " << (base_type_==BASE_TYPE::PLANAR?"plannar":(base_type_==BASE_TYPE::FLOATING?"floating":"fixed"))
         << " base, the robot true root is " << robot_root_.first << " at index "
         << robot_root_.second << std::endl;
     setJointLimits();
-    setJointOrder(optimisation.joints_update,optimisation.zero_other_joints, joint_map_);
+    setJointOrder(optimisation.ControlledJoints,true, joint_map_);
     setEndEffectors(optimisation);
     eff_segments_ini_ = optimisation.end_effector_segs;
     eff_seg_offs_ini_ = optimisation.end_effector_offs;
 }
 
 void exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
-    std::string root, std::map<std::string, int> & joint_map)
+    std::map<std::string, int> & joint_map)
 {
   INFO("buildTree Function ... ");
 
@@ -658,26 +655,8 @@ void exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
   std::string true_root; // The urdf root name
   int rubbish; // Garbage value since we know root will be at 0
 
-// Get the desired segment as root...
-  if (root.size() == 0) // If no root specified, then we will use the urdf root
-  {
-    INFO("buildTree Function ... root is of size 0");
-    root_segment = temp_tree.getRootSegment();
-    INFO("buildTree Function ... root name: ");
-  }
-  else               // We first need to check if this root actually exists...
-  {
-    INFO("buildTree Function ... root is "<<root);
-    KDL::SegmentMap tree_segments = temp_tree.getSegments(); // Map of tree segments for checking that desired segment actually exists
-    if (tree_segments.find(root) != tree_segments.end()) // If it exists...
-    {
-      root_segment = temp_tree.getSegment(root);
-    }
-    else
-    {
-      throw_pretty("Root "<<root<<" does not exist in the model "<<model_->getName());
-    }
-  }
+  INFO("buildTree Function ... root is of size 0");
+  root_segment = temp_tree.getRootSegment();
 
   robot_root_.first = root_segment->first;
 
@@ -785,7 +764,7 @@ void exotica::KinematicTree::buildTree(const KDL::Tree & temp_tree,
       }
       else
       {
-        throw_pretty("Cant initialise KDL tree for root "<<root);
+        throw_pretty("Cant initialise KDL tree!");
       }
 
     }
@@ -963,7 +942,7 @@ void exotica::KinematicTree::setJointOrder(
 }
 
 void exotica::KinematicTree::setEndEffectors(
-    const SolutionForm_t & optimisation)
+    const KinematicsRequest & optimisation)
 {
 // Variable Declaration
   INFO("setEndEffectors Function ...  Entered with offsets of size " << optimisation.end_effector_offs.size());
@@ -978,7 +957,6 @@ void exotica::KinematicTree::setEndEffectors(
   INFO("setEndEffectors Function ...  Sizes match up OK!");
 
 // Initialise
-  robot_tree_[0].tip_pose = (optimisation.root_seg_off).Inverse(); // The Root's Tip Pose is the inverse of the given transformation: this will be constant!
   used_joints_segs_ = optimisation.end_effector_segs;
 
   for (int i = 0; i < optimisation.end_effector_segs.size(); i++)
@@ -1005,13 +983,10 @@ void exotica::KinematicTree::setEndEffectors(
     jacobian_.resize(3 * optimisation.end_effector_segs.size(), num_jnts_spec_);
 
     INFO("setEndEffectors Function ... Created Jacobian of size " << 3*optimisation.end_effector_segs.size() << " x " << num_jnts_spec_);
-    if (!optimisation.ignore_unused_segs) // If we do not wish to ignore unused chains
+    for (int i = 0; i < robot_tree_.size(); i++)
     {
-      for (int i = 0; i < robot_tree_.size(); i++)
-      {
         robot_tree_[i].needed = true;
-      } // Set all as needed
-    }
+    } // Set all as needed
 }
 
 std::string exotica::KinematicTree::getRootName()

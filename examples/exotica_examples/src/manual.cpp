@@ -10,12 +10,8 @@ void run()
 {
     ros::NodeHandle nhg_;
 
-    // Specify fixed base robot in the base frame
-    // Use all joints
-    KinematicaInitializer kinematica(LimbInitializer("base"),
-      {"lwr_arm_0_joint","lwr_arm_1_joint","lwr_arm_2_joint","lwr_arm_3_joint","lwr_arm_4_joint","lwr_arm_5_joint","lwr_arm_6_joint"});
-    // Scene using kinematica setup from above
-    SceneInitializer scene("MyScene",kinematica);
+    // Scene using joint group 'arm'
+    SceneInitializer scene("MyScene","arm");
     // End-effector task map with two position frames
     EffPositionInitializer map("Position","MyScene",false,
       {LimbInitializer("lwr_arm_6_link"),LimbInitializer("lwr_arm_6_link",Eigen::VectorTransform(0,0,0.5))});

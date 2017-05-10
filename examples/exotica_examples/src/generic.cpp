@@ -6,14 +6,8 @@ void run()
 {
     ros::NodeHandle nhg_;
 
-    // Specify fixed base robot in the base frame
-    // Use all joints
-    Initializer kinematica("Kinematica",std::map<std::string,boost::any>({
-                    { "Root",Initializer("Limb",{ {"Segment",std::string("base")} }) },
-                    { "Joints",std::string("lwr_arm_0_joint,lwr_arm_1_joint,lwr_arm_2_joint,lwr_arm_3_joint,lwr_arm_4_joint,lwr_arm_5_joint,lwr_arm_6_joint") }
-                             }));
-    // Scene using kinematica setup from above
-    Initializer scene("Scene",{{"Name",std::string("MyScene")},{"Solver",kinematica}});
+    // Scene using joint group 'arm'
+    Initializer scene("Scene",{{"Name",std::string("MyScene")},{"JointGroup",std::string("arm")}});
     // End-effector task map with two position frames
     Initializer map("exotica/EffPosition",{
                         {"Name",std::string("Position")},

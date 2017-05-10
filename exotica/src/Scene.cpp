@@ -513,17 +513,10 @@ namespace exotica
   {
 
       server_->getModel(init.RobotDescription, model_);
-      KinematicaInitializer kinit(init.Solver);
-      kinit.check(init.Solver);
-      kinematica_.Instantiate(kinit, model_);
+      kinematica_.Instantiate(init.JointGroup, model_);
+      group = model_->getJointModelGroup(init.JointGroup);
 
-      std::string base_type = kinematica_.getBaseType();
-      if (base_type=="fixed")
-          base_type_ = BASE_TYPE::FIXED;
-      else if (base_type=="floating")
-          base_type_ = BASE_TYPE::FLOATING;
-      else if (base_type=="planar")
-          base_type_ = BASE_TYPE::PLANAR;
+      base_type_ = kinematica_.getBaseType();
 
       N = kinematica_.getNumJoints();
       collision_scene_.reset(new CollisionScene(server_, name_));
@@ -721,10 +714,7 @@ namespace exotica
       }
     }
 
-    if (!kinematica_.updateEndEffectors(tmp_sol))
-    {
-      throw_named("Can't update end-effectors!");
-    }
+    kinematica_.updateEndEffectors(tmp_sol);
     std::vector<int> tmp_index;
     if (!kinematica_.getEndEffectorIndex(tmp_index))
     {

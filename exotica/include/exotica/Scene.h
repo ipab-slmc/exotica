@@ -60,10 +60,7 @@ namespace exotica
 {
   typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
   typedef std::vector<boost::shared_ptr<fcl::CollisionObject> > fcls_ptr;
-  enum BASE_TYPE
-  {
-    FIXED = 0, FLOATING = 10, PLANAR = 20
-  };
+
 ///	The class of collision scene
   class CollisionScene : public Uncopyable
   {
@@ -462,6 +459,9 @@ namespace exotica
 
       ///	Robot model
       robot_model::RobotModelPtr model_;
+
+      ///   Joint group
+      robot_model::JointModelGroup* group;
 
       ///	Robot base type
       BASE_TYPE base_type_;

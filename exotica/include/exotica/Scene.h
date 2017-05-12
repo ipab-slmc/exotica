@@ -235,6 +235,7 @@ namespace exotica
        * @param	name	The scene name
        */
       Scene(const std::string & name);
+      Scene();
 
       /**
        * \brief	Destructor
@@ -242,6 +243,8 @@ namespace exotica
       virtual ~Scene();
 
       virtual void Instantiate(SceneInitializer& init);
+
+      std::shared_ptr<KinematicResponse> RequestKinematics(KinematicsRequest& Request);
 
       /**
        * \brief	Get scene name

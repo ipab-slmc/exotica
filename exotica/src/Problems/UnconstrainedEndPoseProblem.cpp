@@ -43,7 +43,7 @@ namespace exotica
   UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
       : tau_(0.01)
   {
-
+    Flags = KIN_FK | KIN_J;
   }
 
   UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()

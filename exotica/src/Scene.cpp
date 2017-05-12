@@ -483,13 +483,14 @@ namespace exotica
 ///////////////////////	EXOTica Scene	///////////////////////
 ///////////////////////////////////////////////////////////////
 
+  Scene::Scene() : name_("Unnamed"), N(0), initialised_(false), update_jacobians_(true), server_(Server::Instance())
+  {
+
+  }
+
   Scene::Scene(const std::string & name)
       : name_(name), N(0), initialised_(false), update_jacobians_(true), server_(Server::Instance())
   {
-    eff_names_.clear();
-    eff_offsets_.clear();
-    phis_.clear();
-    jacs_.clear();
     object_name_ = name_;
   }
 
@@ -691,52 +692,40 @@ namespace exotica
     }
   }
 
+  std::shared_ptr<KinematicResponse> Scene::RequestKinematics(KinematicsRequest& Request)
+  {
+      initialised_ = true;
+      return kinematica_.RequestFrames(Request);
+  }
+
   void Scene::activateTaskMaps()
   {
 
-    LOCK(lock_);
-    exotica::KinematicsRequest tmp_sol;
-    tmp_sol.end_effector_segs.clear();
+    //LOCK(lock_);
+    exotica::KinematicsRequest request;
+    request.Frames.clear();
     for (auto & it : eff_names_)
     {
-      for (int i = 0; i < it.second.size(); i++)
+      std::vector<std::string> names = it.second;
+      std::vector<KDL::Frame> offsets = eff_offsets_.at(it.first);
+      for (int i = 0; i < names.size(); i++)
       {
-        tmp_sol.end_effector_segs.push_back(it.second[i]);
+        KinematicFrameRequest Frame;
+        Frame.FrameALinkName = names[i];
+        Frame.FrameAOffset = offsets[i];
+        request.Frames.push_back(Frame);
       }
     }
 
-    tmp_sol.end_effector_offs.clear();
-    for (auto & it : eff_offsets_)
-    {
-      for (int i = 0; i < it.second.size(); i++)
-      {
-        tmp_sol.end_effector_offs.push_back(it.second[i]);
-      }
-    }
+    request.Flags = KIN_FK | KIN_J;
 
-    kinematica_.updateEndEffectors(tmp_sol);
-    std::vector<int> tmp_index;
-    if (!kinematica_.getEndEffectorIndex(tmp_index))
-    {
-      throw_named("Can't get end-effector index!");
-    }
+    //kinematica_.updateEndEffectors(request);
+    //kinematica_.RequestFrames(request);
+
     Phi_.setZero(3 * kinematica_.getEffSize());
     Jac_.setZero(3 * kinematica_.getEffSize(), N);
-    int tmp_size = 0, tmp_eff_size = 0;
-    phis_.clear();
-    jacs_.clear();
-    eff_index_.clear();
-    for (auto & it : eff_names_)
-    {
-      eff_index_[it.first] = std::vector<int>(tmp_index.begin() + tmp_eff_size,
-          tmp_index.begin() + tmp_eff_size + it.second.size());
-      phis_[it.first] = Eigen::VectorXdRef_ptr(
-          Phi_.segment(tmp_size, 3 * it.second.size()));
-      jacs_[it.first] = Eigen::MatrixXdRef_ptr(
-          Jac_.block(tmp_size, 0, 3 * it.second.size(), N));
-      tmp_size += 3 * it.second.size();
-      tmp_eff_size += it.second.size();
-    }
+
+    // Pass Phi and J to task maps here
 
     initialised_ = true;
     HIGHLIGHT_NAMED(object_name_, "Taskmaps are activated");
@@ -752,6 +741,8 @@ namespace exotica
     else
     {
       collision_scene_->update(x);
+      kinematica_.Update(x);
+      /*
         if (kinematica_.getEffSize() > 0)
         {
           if (kinematica_.updateConfiguration(x))
@@ -781,6 +772,7 @@ namespace exotica
             throw_named("Failed updating state!");
           }
         }
+        */
     }
 
     if (visual_debug_)

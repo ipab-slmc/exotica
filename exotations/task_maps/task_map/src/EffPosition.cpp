@@ -36,33 +36,36 @@ REGISTER_TASKMAP_TYPE("EffPosition", exotica::EffPosition);
 
 namespace exotica
 {
-  EffPosition::EffPosition()
-  {
-    //!< Empty constructor
-  }
+    EffPosition::EffPosition()
+    {
+    }
 
-  void EffPosition::update(Eigen::VectorXdRefConst x, const int t)
-  {
-    if (!isRegistered(t) || !getEffReferences())
+    void EffPosition::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
-      throw_named("Not fully initialized!");
+        if(phi.rows() != Kinematics.Phi.rows()*3) throw_named("Wrong size of phi!");
+        for(int i=0;i<Kinematics.Phi.rows();i++)
+        {
+            phi(i*3) = Kinematics.Phi(i).p[0];
+            phi(i*3+1) = Kinematics.Phi(i).p[1];
+            phi(i*3+2) = Kinematics.Phi(i).p[2];
+        }
     }
-    PHI = EFFPHI;
-    if (updateJacobian_)
-    {
-      JAC = EFFJAC;
-    }
-  }
 
-  void EffPosition::taskSpaceDim(int & task_dim)
-  {
-    if (!scene_)
+    void EffPosition::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
     {
-      throw_named("Kinematic scene has not been initialized!");
+        if(phi.rows() != Kinematics.Phi.rows()*3) throw_named("Wrong size of phi!");
+        if(J.rows() != Kinematics.J.rows()*3 || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+        for(int i=0;i<Kinematics.Phi.rows();i++)
+        {
+            phi(i*3) = Kinematics.Phi(i).p[0];
+            phi(i*3+1) = Kinematics.Phi(i).p[1];
+            phi(i*3+2) = Kinematics.Phi(i).p[2];
+            J.middleRows(i*3,3) = Kinematics.J[i].data.topRows(3);
+        }
     }
-    else
+
+    void EffPosition::taskSpaceDim(int & task_dim)
     {
-      task_dim = scene_->getMapSize(object_name_) * 3;
+        task_dim = Kinematics.Phi.rows()*3;
     }
-  }
 }

@@ -36,7 +36,7 @@
 
 namespace exotica
 {
-  PlanningProblem::PlanningProblem() : server_(Server::Instance())
+  PlanningProblem::PlanningProblem() : server_(Server::Instance()), Flags(KIN_FK)
   {
 
   }
@@ -67,36 +67,48 @@ namespace exotica
   {
       Object::InstatiateObject(init_);
       PlanningProblemInitializer init(init_);
-      init.check(init_);
+
+      // To be removed::
       poses.reset(new std::map<std::string, Eigen::VectorXd>());
       posesJointNames.reset(new std::vector<std::string>());
       knownMaps_["PositionConstraint"] = "Distance";
       knownMaps_["PostureConstraint"] = "Identity";
-
       startState.resize(0);
       endState.resize(0);
       nominalState.resize(0);
 
-      task_maps_.clear();
+      TaskMaps.clear();
       task_defs_.clear();
 
       // Create the scene
-      SceneInitializer initS(init.PlanningScene);
-      initS.check(init.PlanningScene);
-      scene_.reset(new Scene(initS.Name));
-      scene_->InstantiateInternal(initS);
+      scene_.reset(new Scene());
+      scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
+
+      KinematicsRequest Request;
+      Request.Flags = Flags;
 
       // Create the maps
-      for(const Initializer& map : init.Maps)
+      int id=0;
+      for(const Initializer& MapInitializer : init.Maps)
       {
-          TaskMap_ptr temp_ptr = Setup::createMap(map);
-          temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
-          if (task_maps_.find(temp_ptr->getObjectName()) != task_maps_.end())
+          TaskMap_ptr NewMap = Setup::createMap(MapInitializer);
+          NewMap->ns_ = ns_ + "/" + NewMap->getObjectName();
+          if (TaskMaps.find(NewMap->getObjectName()) != TaskMaps.end())
           {
-              throw_named("Map '"+temp_ptr->getObjectName()+"' already exists!");
+              throw_named("Map '"+NewMap->getObjectName()+"' already exists!");
           }
-          task_maps_[temp_ptr->getObjectName()] = temp_ptr;
-          temp_ptr->registerScene(scene_);
+          std::vector<KinematicFrameRequest> frames = NewMap->GetFrames();
+
+          NewMap->Kinematics = KinematicSolution(id, frames.size());
+          id += frames.size();
+          Request.Frames.insert(Request.Frames.end(), frames.begin(), frames.end());
+          TaskMaps[NewMap->getObjectName()] = NewMap;
+      }
+
+      std::shared_ptr<KinematicResponse> Response = scene_->RequestKinematics(Request);
+      for(auto& map : TaskMaps)
+      {
+          map.second->Kinematics.Create(Response);
       }
 
       if (init.Maps.size() == 0)
@@ -108,7 +120,7 @@ namespace exotica
       for(const Initializer& task : init.Tasks)
       {
           Initializer mapped_task(task);
-          mapped_task.addProperty(Property("TaskMaps",true,boost::any(task_maps_)));
+          mapped_task.addProperty(Property("TaskMaps",true,boost::any(TaskMaps)));
           TaskDefinition_ptr temp_ptr = Setup::createDefinition(mapped_task);
           temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
           if (task_defs_.find(temp_ptr->getObjectName()) != task_defs_.end())
@@ -122,7 +134,7 @@ namespace exotica
         HIGHLIGHT("No tasks were defined!");
       }
 
-      originalMaps_ = task_maps_;
+      originalMaps_ = TaskMaps;
       originalDefs_ = task_defs_;
   }
 
@@ -130,7 +142,7 @@ namespace exotica
   {
     if (keepOriginals)
     {
-      task_maps_ = originalMaps_;
+      TaskMaps = originalMaps_;
       task_defs_ = originalDefs_;
       std::map<std::string,
           std::pair<std::vector<std::string>, std::vector<KDL::Frame> > > tmp;
@@ -139,7 +151,7 @@ namespace exotica
         std::pair<std::vector<std::string>, std::vector<KDL::Frame> > tmp_pair;
         try
         {
-          it.second->getScene()->getEndEffectors(it.first, tmp_pair);
+          //it.second->getScene()->getEndEffectors(it.first, tmp_pair);
         }
         catch (Exception e)
         {
@@ -149,13 +161,13 @@ namespace exotica
 //      for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
 //        it->second->clearTaskMap();
       scene_->clearTaskMap();
-      for (auto &it : originalMaps_)
-        it.second->getScene()->appendTaskMap(it.first, tmp.at(it.first).first,
-            tmp.at(it.first).second);
+      //for (auto &it : originalMaps_)
+        //it.second->getScene()->appendTaskMap(it.first, tmp.at(it.first).first,
+         //   tmp.at(it.first).second);
     }
     else
     {
-      task_maps_.clear();
+      TaskMaps.clear();
       task_defs_.clear();
 //      for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
 //        it->second->clearTaskMap();
@@ -173,16 +185,13 @@ namespace exotica
     scene_->update(x);
     // Update the Task maps
 
-#ifdef EXOTICA_DEBUG_MODE
-    if (!((x - x).array() == (x - x).array()).all())
+    for (auto& it : TaskMaps)
     {
-      throw_named("Infinite q= "<<x.transpose());
-    }
-#endif
-    for (TaskMap_map::const_iterator it = task_maps_.begin();
-        it != task_maps_.end(); ++it)
-    {
-      it->second->update(x, t);
+      Eigen::VectorXd y(6);
+      Eigen::MatrixXd J(6,10);
+      it.second->update(x,y,J);
+      HIGHLIGHT(y.transpose());
+      HIGHLIGHT(J);
     }
   }
 
@@ -193,7 +202,7 @@ namespace exotica
 
   TaskMap_map& PlanningProblem::getTaskMaps()
   {
-    return task_maps_;
+    return TaskMaps;
   }
 
   Scene_ptr PlanningProblem::getScene()

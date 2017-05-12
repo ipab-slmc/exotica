@@ -39,154 +39,33 @@ namespace exotica
 {
 
   TaskMap::TaskMap()
-      : updateJacobian_(true), server_(Server::Instance())
   {
 
-  }
-
-  Scene_ptr TaskMap::getScene()
-  {
-    return scene_;
   }
 
   std::string TaskMap::print(std::string prepend)
   {
     std::string ret = Object::print(prepend);
-    ret += "\n" + prepend + "  Scene:";
-    ret += "\n" + scene_->print(prepend + "    ");
     return ret;
-  }
-
-  void TaskMap::debug()
-  {
-    //  You need to implement this in your own taskmap
   }
 
   void TaskMap::InstantiateBase(const Initializer& init)
   {
     Object::InstatiateObject(init);
-    TaskMapInitializer tminit(init);
+    TaskMapInitializer MapInitializer(init);
 
-    tmp_eff.clear();
-    tmp_offset.clear();
+    Frames.clear();
 
-    scene_name_ = tminit.Scene;
-
-    for(Initializer& eff : tminit.EndEffector)
+    for(Initializer& eff : MapInitializer.EndEffector)
     {
         LimbInitializer limb(eff);
-        tmp_eff.push_back(limb.Segment);
-        tmp_offset.push_back(getFrame(limb.Frame));
+        Frames.push_back(KinematicFrameRequest(limb.Segment,getFrame(limb.Frame)));
     }
 
   }
 
-  void TaskMap::registerScene(Scene_ptr scene)
+  std::vector<KinematicFrameRequest> TaskMap::GetFrames()
   {
-      scene_ = scene;
-      scene_->appendTaskMap(getObjectName(), tmp_eff, tmp_offset);
-  }
-
-  std::string TaskMap::getSceneName()
-  {
-      return scene_name_;
-  }
-
-  bool TaskMap::isRegistered(int t)
-  {
-    if (phi_.size() == 1)
-    {
-      return true;
-    }
-    if (phiFlag_(t) == 1)
-    {
-      if (phiCnt_ != phiFlag_.size())
-      {
-        WARNING(
-            "Task map '"<<object_name_<<"' is hasn't got phi registered at all time steps! phiCnt "<<phiCnt_<<" size "<<phiFlag_.size());
-      }
-      if (updateJacobian_)
-      {
-        if (jacFlag_(t) == 1)
-        {
-          if (jacCnt_ != jacFlag_.size())
-          {
-            WARNING(
-                "Task map '"<<object_name_<<"' is hasn't got phi registered at all time steps! phiCnt "<<phiCnt_<<" size "<<phiFlag_.size());
-          }
-          return true;
-        }
-        else
-        {
-          INDICATE_FAILURE
-          ;
-          return false;
-        }
-      }
-      else
-      {
-        return true;
-      }
-    }
-    else
-    {
-      INDICATE_FAILURE
-      ;
-      return false;
-    }
-  }
-
-  void TaskMap::setTimeSteps(const int T)
-  {
-    int dim;
-    taskSpaceDim(dim);
-    phi0_.resize(dim);
-    jac0_.resize(dim, scene_->getNumJoints());
-    phi_.assign(T, Eigen::VectorXdRef_ptr(phi0_.segment(0, dim)));
-    jac_.assign(T,
-        Eigen::MatrixXdRef_ptr(jac0_.block(0, 0, dim, scene_->getNumJoints())));
-    phiFlag_.resize(T);
-    phiFlag_.setZero();
-    jacFlag_.resize(T);
-    jacFlag_.setZero();
-    phiCnt_ = 0;
-    jacCnt_ = 0;
-  }
-
-  void TaskMap::registerPhi(Eigen::VectorXdRef_ptr y, int t)
-  {
-    LOCK(map_lock_);
-    phi_.at(t) = y;
-    if (phiFlag_(t) == 0)
-    {
-      phiFlag_(t) = 1;
-      phiCnt_++;
-    }
-  }
-
-  void TaskMap::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
-  {
-    LOCK(map_lock_);
-    jac_.at(t) = J;
-    if (jacFlag_(t) == 0)
-    {
-      jacFlag_(t) = 1;
-      jacCnt_++;
-    }
-  }
-
-  bool TaskMap::getEffReferences()
-  {
-
-      scene_->getForwardMap(object_name_, eff_phi_);
-      if (updateJacobian_)
-      {
-        scene_->getJacobian(object_name_, eff_jac_);
-        return true;
-      }
-      else
-      {
-        return true;
-      }
+      return Frames;
   }
 }

@@ -57,7 +57,7 @@ namespace exotica
           TaskSqrError>(it.second);
       if (task->getRho(t) > 0)
       {
-        task->getTaskMap()->update(x, t);
+        //task->getTaskMap()->update(x);
       }
     }
   }
@@ -65,7 +65,7 @@ namespace exotica
   UnconstrainedTimeIndexedProblem::UnconstrainedTimeIndexedProblem()
       : T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
   {
-
+    Flags = KIN_FK | KIN_J;
   }
 
   UnconstrainedTimeIndexedProblem::~UnconstrainedTimeIndexedProblem()

@@ -35,6 +35,7 @@
 
 #include <boost/thread/mutex.hpp>
 #include <kdl/tree.hpp>
+#include <kdl/jacobian.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <Eigen/Eigen>
@@ -64,22 +65,84 @@ namespace exotica
     JNT_ROTARY = 2   //!< Rotary Joint
   };
 
-  /**
-   * \brief DEPRECATED : Defines different types of Jacobian Computations but will not be used
-   */
-  enum KinematicsType_t
+  enum KinematicRequestFlags
   {
-    KIN_ERROR = 0,  //!< No Jacobian Computation
-    KIN_POSIT = 1,
-    KIN_ROTAT = 2,
-    KIN_FULL = 3
+      KIN_FK = 0,
+      KIN_J = 2,
+      KIN_FK_VEL = 4,
+      KIN_J_DOT = 8
   };
 
-  struct KinematicsRequest
+  inline KinematicRequestFlags operator|(KinematicRequestFlags a, KinematicRequestFlags b)
+  {return static_cast<KinematicRequestFlags>(static_cast<int>(a) | static_cast<int>(b));}
+
+  inline KinematicRequestFlags operator&(KinematicRequestFlags a, KinematicRequestFlags b)
+  {return static_cast<KinematicRequestFlags>(static_cast<int>(a) & static_cast<int>(b));}
+
+  class KinematicFrameRequest
   {
-      std::vector<std::string> ControlledJoints; //!< The vector of joints we will be updating
-      std::vector<std::string> end_effector_segs; //!< The segments to which the end-effectors are attached
-      std::vector<KDL::Frame> end_effector_offs; //!< End Effector Offsets from the segment of choice: must be empty or same size as the end_effector_segs
+  public:
+      KinematicFrameRequest();
+      KinematicFrameRequest(std::string frameALinkName, KDL::Frame frameAOffset = KDL::Frame(), std::string frameBLinkName = "", KDL::Frame frameBOffset = KDL::Frame());
+      std::string FrameALinkName;
+      KDL::Frame FrameAOffset;
+      std::string FrameBLinkName;
+      KDL::Frame FrameBOffset;
+  };
+
+  class KinematicsRequest
+  {
+  public:
+      KinematicsRequest();
+      KinematicRequestFlags Flags;
+      std::vector<KinematicFrameRequest> Frames; //!< The segments to which the end-effectors are attached
+  };
+
+  class KinematicElement
+  {
+  public:
+      KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment);
+      int Id;
+      int ControlId;
+      bool IsControlled;
+      std::shared_ptr<KinematicElement> Parent;
+      std::vector<std::shared_ptr<KinematicElement>> Children;
+      KDL::Segment Segment;
+  };
+
+  struct KinematicFrame
+  {
+      std::shared_ptr<KinematicElement> FrameA;
+      KDL::Frame FrameAOffset;
+      std::shared_ptr<KinematicElement> FrameB;
+      KDL::Frame FrameBOffset;
+  };
+
+  class KinematicResponse
+  {
+  public:
+      KinematicResponse();
+      KinematicResponse(KinematicRequestFlags Flags, int Size, int N=0);
+      KinematicRequestFlags Flags;
+      std::vector<KinematicFrame> Frame;
+      ArrayFrame Phi;
+      ArrayTwist PhiDot;
+      ArrayJacobian J;
+      ArrayJacobian JDot;
+  };
+
+  class KinematicSolution
+  {
+  public:
+      KinematicSolution();
+      KinematicSolution(int start, int length);
+      void Create(std::shared_ptr<KinematicResponse> solution);
+      int Start;
+      int Length;
+      Eigen::Map<ArrayFrame> Phi;
+      Eigen::Map<ArrayTwist> PhiDot;
+      Eigen::Map<ArrayJacobian> J;
+      Eigen::Map<ArrayJacobian> JDot;
   };
 
   struct KinematicElement_t
@@ -111,8 +174,6 @@ namespace exotica
        * @param optimisation  Optimisation Parameters
        */
       KinematicTree(void);                      //!< Default Constructor
-      KinematicTree(const KinematicTree & rhs);
-      KinematicTree & operator=(const KinematicTree & rhs);
 
       void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model);
 
@@ -289,9 +350,8 @@ namespace exotica
       int getNumJoints();
       std::vector<std::string> & getJointNames()
       {
-        return used_joints_;
+        return ControlledJointsNames;
       }
-      ;
       bool getInitialEff(std::vector<std::string> & segs,
           std::vector<KDL::Frame> & offsets);
       bool modifyRootOffset(KDL::Frame & offset);
@@ -319,10 +379,6 @@ namespace exotica
       std::vector<KinematicElement_t> robot_tree_;    //!< The tree structure
       std::map<std::string, int> segment_map_; //!< Mapping from segment names to positions in the vector robot_tree_
       std::map<std::string, int> joint_map_;
-      /**
-       * \brief	ROS/MoveIt SRDF model
-       */
-      robot_model::RobotModelPtr model_;
       std::pair<std::string, int> robot_root_;
 
       std::vector<std::string> used_joints_;
@@ -331,7 +387,7 @@ namespace exotica
        * \brief Solver Constants (for optimisation)
        */
       bool zero_undef_jnts_; //!< Indicates whether we wish to zero-out undefined joints.
-      int num_jnts_spec_;	  //!< Number of joints which will be specified
+
       BASE_TYPE base_type_;
       bool controlled_base_;
       KDL::Frame current_base_pose_;
@@ -355,15 +411,6 @@ namespace exotica
       /*************** Private Class Methods *****************/
 
       /**
-       * \brief Private member function for initialising (wrapper for the buildTree(), setJointOrder() and setEndEffectors() functions)
-       * @param temp_tree     KDL tree from which to construct robot
-       * @param optimisation  Solution Parameters
-       * @return              True if successful, False otherwise
-       */
-      void initialise(const KDL::Tree & temp_tree,
-          const KinematicsRequest & optimisation);
-
-      /**
        * \brief Builds a robot tree from the kdl tree : NOT THREAD-SAFE
        * @param temp_tree  The KDL Tree
        * @param root       Name of the root segment
@@ -383,13 +430,6 @@ namespace exotica
        */
       void setJointOrder(const std::vector<std::string> & joints, bool zero_out,
           const std::map<std::string, int> & joint_map);
-
-      /**
-       * \brief Set the End Effector parameters : NOT THREAD-SAFE
-       * @param optimisation The Optimisation structure
-       * @return             Indication of success (true) or otherwise
-       */
-      void setEndEffectors(const KinematicsRequest & optimisation);
 
       /**
        * \brief Recursive Function which modifies the robot_tree_ and the segment_map_ : NOT THREAD-SAFE
@@ -429,7 +469,34 @@ namespace exotica
        * @return		True if successful, false otherwise
        */
       bool computePosJacobian();
-  };
+
+
+
+
+public:
+        std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
+        void Update(Eigen::VectorXdRefConst x);
+
+private:
+        void BuildTree(const KDL::Tree & RobotKinematics);
+        void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
+        int IsControlled(std::shared_ptr<KinematicElement> Joint);
+
+
+        int NumControlledJoints; //!< Number of controlled joints in the joint group.
+        int NumJoints; //!< Number of joints of the robot (including floating/plannar base, passive joints and uncontrolled joints).
+        int StateSize;
+        robot_model::RobotModelPtr Model;
+        std::vector<std::shared_ptr<KinematicElement>> Tree;
+        std::map<std::string, std::shared_ptr<KinematicElement>> TreeMap;
+        std::shared_ptr<KinematicElement> Root;
+        std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
+        std::vector<std::string> ModleJointsNames;
+        std::vector<std::string> ControlledJointsNames;
+        std::vector<KinematicFrame> Frames;
+        std::shared_ptr<KinematicResponse> Solution;
+        KinematicRequestFlags Flags;
+    };
 
   /**
    * \brief Helper Functions

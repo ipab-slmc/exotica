@@ -43,8 +43,7 @@ namespace exotica
   SamplingProblem::SamplingProblem()
       : space_dim_(0), problemType(OMPL_PROBLEM_GOAL)
   {
-    // TODO Auto-generated constructor stub
-
+    Flags = KIN_FK;
   }
 
   SamplingProblem::~SamplingProblem()
@@ -61,12 +60,12 @@ namespace exotica
   {
     if (keepOriginals)
     {
-      task_maps_ = originalMaps_;
+      TaskMaps = originalMaps_;
       goals_ = originalGoals_;
     }
     else
     {
-      task_maps_.clear();
+      TaskMaps.clear();
       task_defs_.clear();
       goals_.clear();
     }
@@ -102,7 +101,7 @@ namespace exotica
 
       space_dim_ = scene_->getNumJoints();
 
-      originalMaps_ = task_maps_;
+      originalMaps_ = TaskMaps;
       originalGoals_ = goals_;
 
       if (scene_->getBaseType() != exotica::BASE_TYPE::FIXED)

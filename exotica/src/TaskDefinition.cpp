@@ -65,13 +65,13 @@ namespace exotica
   void TaskDefinition::registerPhi(Eigen::VectorXdRef_ptr y, int t)
   {
     LOCK(map_lock_);
-    task_map_->registerPhi(y, t);
+    //task_map_->registerPhi(y, t);
   }
 
   void TaskDefinition::registerJacobian(Eigen::MatrixXdRef_ptr J, int t)
   {
     LOCK(map_lock_);
-    task_map_->registerJacobian(J, t);
+    //task_map_->registerJacobian(J, t);
   }
 
   void TaskDefinition::taskSpaceDim(int & task_dim)
@@ -91,7 +91,7 @@ namespace exotica
     LOCK(map_lock_);
     if (task_map_ != nullptr)
     {
-      return task_map_->setTimeSteps(T);
+      //return task_map_->setTimeSteps(T);
     }
     else
     {

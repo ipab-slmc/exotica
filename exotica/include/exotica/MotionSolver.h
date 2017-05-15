@@ -82,7 +82,7 @@ namespace exotica
        * @param	prob		Planning problem
        * @return	True if solvable, false otherwise
        */
-      virtual bool isSolvable(const PlanningProblem_ptr & prob) = 0;
+      virtual bool isSolvable(const PlanningProblem_ptr & prob) {throw_named("Not implemented!");}
 
       virtual void setGoalState(const Eigen::VectorXd & qT, const double eps =
               std::numeric_limits<double>::epsilon()) {throw_named("Not implemented!");}

@@ -258,6 +258,7 @@ namespace exotica
        * @return Indication of success
        */
       virtual void update(Eigen::VectorXdRefConst x, const int t = 0);
+      virtual void Update(Eigen::VectorXdRefConst x);
 
       /**
        * \brief	Set collision scene

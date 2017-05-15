@@ -731,6 +731,13 @@ namespace exotica
     HIGHLIGHT_NAMED(object_name_, "Taskmaps are activated");
   }
 
+  void Scene::Update(Eigen::VectorXdRefConst x)
+  {
+      collision_scene_->update(x);
+      kinematica_.Update(x);
+      if (visual_debug_) publishScene();
+  }
+
   void Scene::update(Eigen::VectorXdRefConst x, const int t)
   {
     LOCK(lock_);
@@ -806,7 +813,6 @@ namespace exotica
 
   int Scene::getNumJoints()
   {
-    LOCK(lock_);
     return N;
   }
 

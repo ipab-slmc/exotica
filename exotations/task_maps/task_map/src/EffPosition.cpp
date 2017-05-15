@@ -64,8 +64,8 @@ namespace exotica
         }
     }
 
-    void EffPosition::taskSpaceDim(int & task_dim)
+    int EffPosition::taskSpaceDim()
     {
-        task_dim = Kinematics.Phi.rows()*3;
+        return Kinematics.Phi.rows()*3;
     }
 }

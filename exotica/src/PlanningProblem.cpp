@@ -109,6 +109,7 @@ namespace exotica
       for(auto& map : TaskMaps)
       {
           map.second->Kinematics.Create(Response);
+          map.second->Length = map.second->taskSpaceDim();
       }
 
       if (init.Maps.size() == 0)

@@ -68,4 +68,9 @@ namespace exotica
   {
       return Frames;
   }
+
+  void TaskMap::taskSpaceDim(int & task_dim)
+  {
+      task_dim = taskSpaceDim();
+  }
 }

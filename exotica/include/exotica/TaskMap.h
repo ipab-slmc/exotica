@@ -74,7 +74,9 @@ namespace exotica
 
       virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot) { throw_named("Not implemented"); }
 
-      virtual void taskSpaceDim(int & task_dim) = 0;
+      virtual int taskSpaceDim() = 0;
+
+      void taskSpaceDim(int & task_dim);
 
       virtual std::string print(std::string prepend);
 
@@ -82,6 +84,8 @@ namespace exotica
 
       virtual void debug() { }
       KinematicSolution Kinematics;
+      int Start;
+      int Length;
     protected:
 
       std::vector<KinematicFrameRequest> Frames;
@@ -91,5 +95,6 @@ namespace exotica
   typedef Factory<TaskMap> TaskMap_fac;  //!< Task Map Factory
   typedef boost::shared_ptr<TaskMap> TaskMap_ptr;  //!< Task Map smart pointer
   typedef std::map<std::string, TaskMap_ptr> TaskMap_map; //!< The mapping by name of TaskMaps
+  typedef std::vector<TaskMap_ptr> TaskMap_vec;
 }
 #endif

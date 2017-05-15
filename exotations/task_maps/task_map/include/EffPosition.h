@@ -55,7 +55,7 @@ namespace exotica //!< Since this is part of the core library, it will be within
 
       virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual void taskSpaceDim(int & task_dim);
+      virtual int taskSpaceDim();
   };
   typedef boost::shared_ptr<EffPosition> EffPosition_ptr;  //!< Task Map smart pointer
 }

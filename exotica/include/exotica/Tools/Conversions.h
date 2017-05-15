@@ -100,6 +100,17 @@ namespace exotica
         return type=="std::vector<exotica::Initializer>";
     }
 
+    template <class Key, class Val>
+    std::vector<Val> MapToVec( const  std::map<Key,Val> & map)
+    {
+        std::vector<Val> ret;
+        for( auto& val : map)
+        {
+            ret.push_back( val.second );
+        }
+        return ret;
+    }
+
     KDL::Frame getFrame(Eigen::VectorXdRefConst val);
 
     bool contains(std::string key, const std::vector<std::string>& vec);

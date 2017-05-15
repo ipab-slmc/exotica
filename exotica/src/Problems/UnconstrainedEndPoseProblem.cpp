@@ -40,47 +40,48 @@ REGISTER_PROBLEM_TYPE("UnconstrainedEndPoseProblem", exotica::UnconstrainedEndPo
 
 namespace exotica
 {
-  UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
-      : tau_(0.01)
-  {
-    Flags = KIN_FK | KIN_J;
-  }
+    UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
+    {
+        Flags = KIN_FK | KIN_J;
+    }
 
-  UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
-  {
-    //TODO
-  }
+    UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
+    {
+    }
 
-  void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
-  {
-      tau_ = init.Tolerance;
-      config_w_ = Eigen::MatrixXd::Identity(init.W.rows(), init.W.rows());
-      config_w_.diagonal() = init.W;
-      T_ = init.T;
-      for (auto& it : task_defs_)
-      {
-          it.second->setTimeSteps(T_);
-      }
-  }
+    void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
+    {
+        W = Eigen::MatrixXd::Identity(init.W.rows(), init.W.rows());
+        W.diagonal() = init.W;
 
-  int UnconstrainedEndPoseProblem::getT()
-  {
-    return T_;
-  }
+        Tasks = MapToVec(TaskMaps);
+        NumTasks = Tasks.size();
+        Mapping.resize(NumTasks, 2);
+        int id=0;
+        for(int i=0;i<NumTasks;i++)
+        {
+            Mapping(i,0) = id;
+            Mapping(i,1) = Tasks[i]->taskSpaceDim();
+            id += Mapping(i,1);
+        }
+        PhiN = Mapping.col(1).sum();
 
-  Eigen::MatrixXd UnconstrainedEndPoseProblem::getW()
-  {
-    return config_w_;
-  }
+        N = scene_->getNumJoints();
 
-  double UnconstrainedEndPoseProblem::getTau()
-  {
-    return tau_;
-  }
+        Rho = Eigen::VectorXd::Ones(NumTasks);
+        y = Eigen::VectorXd::Zero(PhiN);
+        W = Eigen::MatrixXd::Identity(PhiN, PhiN);
+        Phi = Eigen::VectorXd::Zero(PhiN);
+        J = Eigen::MatrixXd(PhiN, N);
+    }
 
-  void UnconstrainedEndPoseProblem::setTau(double tau)
-  {
-    tau_ = tau;
-  }
+    void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
+    {
+        scene_->Update(x);
+        for(int i=0;i<NumTasks;i++)
+        {
+            Tasks[i]->update(x, Phi.segment(Mapping(i, 0), Mapping(i, 1)), J.middleRows(Mapping(i, 0), Mapping(i, 1)));
+        }
+    }
 }
 

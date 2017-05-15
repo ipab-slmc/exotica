@@ -3,6 +3,8 @@
 
   <IKsolver Name="MySolver">   <!-- Motion solver definition -->
     <MaxIt>1</MaxIt>
+    <Tolerance>1e-5</Tolerance>
+    <Alpha>1.0</Alpha>
   </IKsolver>
 
   <UnconstrainedEndPoseProblem Name="MyProblem"> <!-- Problem definition -->
@@ -35,7 +37,7 @@
 
 
     <!-- Problem parameters: tolerance and per joint weighting -->
-    <Tolerance>1e-5</Tolerance>
+
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedEndPoseProblem>
 

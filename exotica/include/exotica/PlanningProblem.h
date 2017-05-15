@@ -71,6 +71,7 @@ namespace exotica
        * @return  Indication of success TODO
        */
       virtual void update(Eigen::VectorXdRefConst x, const int t);
+      virtual void Update(Eigen::VectorXdRefConst x) {throw_named("Not implemented!");};
 
       /**
        * \brief Returns the reference to the task definition map.

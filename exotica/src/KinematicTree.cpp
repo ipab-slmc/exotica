@@ -187,6 +187,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     if (NumControlledJoints < 1) throw_pretty("No update joints specified!");
     ControlledJoints.resize(NumControlledJoints);
     Root = Tree[0];
+    TreeState = Eigen::VectorXd::Zero(Tree.size());
     for(std::shared_ptr<KinematicElement> Joint : Tree)
     {
         Joint->ControlId = IsControlled(Joint);
@@ -251,6 +252,71 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
 void KinematicTree::Update(Eigen::VectorXdRefConst x)
 {
     if(x.rows()!=StateSize) throw_pretty("Wrong state vector size! Got " << x.rows() << " expected " << StateSize);
+    UpdateTree(x);
+    UpdateFK();
+    if(Flags & KIN_J) UpdateJ();
+}
+
+void KinematicTree::UpdateTree(Eigen::VectorXdRefConst x)
+{
+    for(int i=0; i<ControlledJoints.size();i++)
+    {
+        TreeState(ControlledJoints[i]->Id) = x(i);
+    }
+    for(std::shared_ptr<KinematicElement> element : Tree)
+    {
+        KDL::Frame ParentFrame;
+        if(element->Id>0) ParentFrame = element->Parent->Frame;
+        element->Frame = ParentFrame * element->Segment.pose(TreeState(element->Id));
+    }
+}
+
+void KinematicTree::UpdateFK()
+{
+    int i = 0;
+    for(KinematicFrame&  frame : Solution->Frame)
+    {
+        frame.TempA = frame.FrameA->Frame * frame.FrameAOffset;
+        frame.TempB = frame.FrameB->Frame * frame.FrameBOffset;
+        frame.TempAB = frame.TempB.Inverse()*frame.TempA;
+        Solution->Phi(i) = frame.TempAB;
+        i++;
+    }
+}
+
+void KinematicTree::ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J)
+{
+    J.data.setZero();
+    std::shared_ptr<KinematicElement> it = frame.FrameA;
+    while(it!=Root)
+    {
+        if(it->IsControlled)
+        {
+            J.setColumn(it->ControlId, (it->Frame.M*it->Segment.twist(TreeState(it->Id),1.0)).RefPoint(frame.TempA.p-it->Frame.p));
+        }
+        it = it->Parent;
+    }
+    it = frame.FrameB;
+    while(it!=Root)
+    {
+        if(it->IsControlled)
+        {
+            J.setColumn(it->ControlId, J.getColumn(it->ControlId) + (it->Frame.M*it->Segment.twist(TreeState(it->Id),1.0)).RefPoint(frame.TempA.p-it->Frame.p));
+        }
+
+        it = it->Parent;
+    }
+    KDL::changeBase(J, frame.TempB.M, J);
+}
+
+void KinematicTree::UpdateJ()
+{
+    int i = 0;
+    for(const KinematicFrame&  frame : Solution->Frame)
+    {
+        ComputeJ(frame, Solution->J(i));
+        i++;
+    }
 }
 
 

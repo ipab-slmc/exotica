@@ -108,6 +108,7 @@ namespace exotica
       std::shared_ptr<KinematicElement> Parent;
       std::vector<std::shared_ptr<KinematicElement>> Children;
       KDL::Segment Segment;
+      KDL::Frame Frame;
   };
 
   struct KinematicFrame
@@ -116,6 +117,9 @@ namespace exotica
       KDL::Frame FrameAOffset;
       std::shared_ptr<KinematicElement> FrameB;
       KDL::Frame FrameBOffset;
+      KDL::Frame TempAB;
+      KDL::Frame TempA;
+      KDL::Frame TempB;
   };
 
   class KinematicResponse
@@ -481,11 +485,16 @@ private:
         void BuildTree(const KDL::Tree & RobotKinematics);
         void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
         int IsControlled(std::shared_ptr<KinematicElement> Joint);
+        void UpdateTree(Eigen::VectorXdRefConst x);
+        void UpdateFK();
+        void UpdateJ();
+        void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);
 
 
         int NumControlledJoints; //!< Number of controlled joints in the joint group.
         int NumJoints; //!< Number of joints of the robot (including floating/plannar base, passive joints and uncontrolled joints).
         int StateSize;
+        Eigen::VectorXd TreeState;
         robot_model::RobotModelPtr Model;
         std::vector<std::shared_ptr<KinematicElement>> Tree;
         std::map<std::string, std::shared_ptr<KinematicElement>> TreeMap;
@@ -493,7 +502,6 @@ private:
         std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
         std::vector<std::string> ModleJointsNames;
         std::vector<std::string> ControlledJointsNames;
-        std::vector<KinematicFrame> Frames;
         std::shared_ptr<KinematicResponse> Solution;
         KinematicRequestFlags Flags;
     };

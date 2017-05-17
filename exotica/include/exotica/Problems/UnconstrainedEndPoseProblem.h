@@ -56,6 +56,7 @@ namespace exotica
         Eigen::MatrixXd W;
         Eigen::VectorXd Phi;
         Eigen::MatrixXd J;
+        Eigen::VectorXd qNominal;
 
         TaskMap_vec Tasks;
         Eigen::MatrixXi Mapping;

@@ -78,13 +78,13 @@ namespace exotica
       dpotrf_((char*) "L", &nn, AA, &nn, &info);
       if (info != 0)
       {
-        throw_pretty(info<<"\n"<<A_);
+        throw_pretty("Can't invert matrix. Cholesky decomposition failsed: "<<info<<"\n"<<A_);
       }
       // Invert
       dpotri_((char*) "L", &nn, AA, &nn, &info);
       if (info != 0)
       {
-        throw_pretty(info);
+        throw_pretty("Can't invert matrix: "<<info<<"\n"<<A_);
       }
       Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
       return Ainv_;
@@ -136,6 +136,8 @@ namespace exotica
         ros::Time start = ros::Time::now();
         if (prob_->N != q0.rows()) throw_named("Wrong size q0 size=" << q0.rows() << ", required size="<< prob_->N);
 
+        bool UseNullspace = prob_->qNominal.rows()==prob_->N;
+
         solution.resize(1, prob_->N);
 
         Eigen::VectorXd q = q0;
@@ -146,14 +148,16 @@ namespace exotica
             prob_->Update(q);
             Eigen::VectorXd yd = prob_->y - prob_->Phi;
 
-            error = parameters_.C!=0?(yd*C*yd.transpose())(0):(yd*yd.transpose())(0);
+            error = yd.dot(yd);
 
             if(error < parameters_.Tolerance)
             {
                 break;
             }
 
-            Eigen::VectorXd qd = PseudoInverse(prob_->J) * yd;
+            Eigen::MatrixXd Jinv = PseudoInverse(prob_->J);
+            Eigen::VectorXd qd = Jinv * yd;
+            if(UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv*prob_->J)*(prob_->qNominal-q);
 
             ScaleToStepSize(qd);
 

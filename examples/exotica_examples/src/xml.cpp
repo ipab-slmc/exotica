@@ -27,8 +27,10 @@ void run()
     UnconstrainedEndPoseProblem_ptr my_problem = boost::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
     // Create the initial configuration
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->scene_->getNumJoints());
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(my_problem->N);
     Eigen::MatrixXd solution;
+
+    my_problem->qNominal = q;
 
 
     ROS_INFO_STREAM("Calling solve() in an infinite loop");
@@ -51,9 +53,6 @@ void run()
       t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
       my_problem->y << 0.6,
               -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-              0.5 + sin(t * M_PI * 0.5) * 0.2,
-              1.1,
-              -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
               0.5 + sin(t * M_PI * 0.5) * 0.2;
 
       // Solve the problem using the IK solver
@@ -66,8 +65,7 @@ void run()
         // Ignore failures
       }
       double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-      ROS_INFO_STREAM_THROTTLE(0.5,
-        "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
+      ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
       q = solution.row(0);
 
       jnt.header.stamp = ros::Time::now();

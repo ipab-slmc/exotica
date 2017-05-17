@@ -51,9 +51,6 @@ namespace exotica
 
     void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
     {
-        W = Eigen::MatrixXd::Identity(init.W.rows(), init.W.rows());
-        W.diagonal() = init.W;
-
         Tasks = MapToVec(TaskMaps);
         NumTasks = Tasks.size();
         Mapping.resize(NumTasks, 2);
@@ -68,9 +65,12 @@ namespace exotica
 
         N = scene_->getNumJoints();
 
+        if(init.W.rows()!=N) throw_named("W dimension mismatch! Expected "<<N<<", got "<<init.W.rows());
+
         Rho = Eigen::VectorXd::Ones(NumTasks);
         y = Eigen::VectorXd::Zero(PhiN);
-        W = Eigen::MatrixXd::Identity(PhiN, PhiN);
+        W = Eigen::MatrixXd::Identity(N, N);
+        W.diagonal() = init.W;
         Phi = Eigen::VectorXd::Zero(PhiN);
         J = Eigen::MatrixXd(PhiN, N);
     }

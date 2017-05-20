@@ -37,6 +37,10 @@ script:
 - catkin_init_workspace
 - cd ..
 - catkin_make install -DCMAKE_BUILD_TYPE=Release -j4
+after_success:
+  # Run tests
+- source devel/setup.bash
+- rosrun exotica test_initializers
 before_deploy:
 - bash $TRAVIS_BUILD_DIR/.ci_after_success.sh
 - git config --global user.email "builds@travis-ci.com"

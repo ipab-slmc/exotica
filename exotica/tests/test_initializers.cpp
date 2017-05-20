@@ -34,7 +34,7 @@ bool testGenericInit()
                          {"Rho",1e2}
                      });
     Eigen::VectorXd W(3);W << 3,2,1;
-    Initializer problem("exotica/IKProblem",{
+    Initializer problem("exotica/UnconstrainedEndPoseProblem",{
                             {"Name",std::string("MyProblem")},
                             {"PlanningScene",scene},
                             {"Maps",std::vector<Initializer>({map})},

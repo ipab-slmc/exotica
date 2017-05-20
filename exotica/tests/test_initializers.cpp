@@ -20,7 +20,7 @@ bool testGenericInit()
                     { "Root",Initializer("Limb",{ {"Segment",std::string("base")} }) },
                     { "Joints",std::string("joint1,joint2,joint3") }
                              }));
-    Initializer scene("Scene",{{"Name",std::string("MyScene")},{"Solver",kinematica}});
+    Initializer scene("Scene",{{"Name",std::string("MyScene")},{"Solver",kinematica},{"JointGroup",std::string("arm")}});
     Initializer map("exotica/EffPosition",{
                         {"Name",std::string("Position")},
                         {"Scene",std::string("MyScene")},
@@ -54,7 +54,7 @@ bool testGenericInit()
 
 bool testXMLInit()
 {
-    std::string XMLstring = "<IKSolverDemoConfig><IKsolver Name=\"MySolver\"><MaxIt>1</MaxIt></IKsolver><IKProblem Name=\"MyProblem\"><PlanningScene><Scene Name=\"MyScene\"><PlanningMode>Optimization</PlanningMode><Solver><Kinematica><Root><Limb Segment=\"base\"/></Root><Joints>joint1,joint2,joint3</Joints></Kinematica></Solver></Scene></PlanningScene><Maps><EffPosition Name=\"Position\"><Scene>MyScene</Scene><EndEffector><Limb Segment=\"endeff\" /><Limb Segment=\"endeff\"><Frame>0.0 0.0 0.5 0.0 0.0 0.0 1.0</Frame></Limb></EndEffector></EffPosition></Maps><Tasks><TaskSqrError Name=\"MinimizeError\"><Map>Position</Map><Rho>1e2</Rho></TaskSqrError></Tasks><Tolerance>1e-5</Tolerance><W> 3 2 1 </W></IKProblem></IKSolverDemoConfig>";
+    std::string XMLstring = "<IKSolverDemoConfig><IKsolver Name=\"MySolver\"><MaxIt>1</MaxIt></IKsolver><UnconstrainedEndPoseProblem Name=\"MyProblem\"><PlanningScene><Scene Name=\"MyScene\"><PlanningMode>Optimization</PlanningMode><Solver><Kinematica><Root><Limb Segment=\"base\"/></Root><Joints>joint1,joint2,joint3</Joints></Kinematica></Solver><JointGroup>arm</JointGroup></Scene></PlanningScene><Maps><EffPosition Name=\"Position\"><Scene>MyScene</Scene><EndEffector><Limb Segment=\"endeff\" /><Limb Segment=\"endeff\"><Frame>0.0 0.0 0.5 0.0 0.0 0.0 1.0</Frame></Limb></EndEffector></EffPosition></Maps><Tasks><TaskSqrError Name=\"MinimizeError\"><Map>Position</Map><Rho>1e2</Rho></TaskSqrError></Tasks><Tolerance>1e-5</Tolerance><W> 3 2 1 </W></UnconstrainedEndPoseProblem></IKSolverDemoConfig>";
     Initializer solver, problem;
     XMLLoader::load(XMLstring,solver, problem,"","",true);
     PlanningProblem_ptr any_problem = Setup::createProblem(problem);
@@ -65,9 +65,22 @@ bool testXMLInit()
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "EXOTica_test_initializers");
-    if(!testCore()) exit(2); HIGHLIGHT_NAMED("EXOTica","Core test passed.");
-    if(!testGenericInit()) exit(2); HIGHLIGHT_NAMED("EXOTica","Generic initialization test passed.");
-    if(!testXMLInit()) exit(2); HIGHLIGHT_NAMED("EXOTica","XML initialization test passed.");
+    
+    if (!testCore())
+      exit(2);
+    else
+      HIGHLIGHT_NAMED("EXOTica", "Core test passed.");
+
+    if (!testGenericInit())
+      exit(2);
+    else
+      HIGHLIGHT_NAMED("EXOTica", "Generic initialization test passed.");
+    
+    if (!testXMLInit())
+      exit(2);
+    else
+      HIGHLIGHT_NAMED("EXOTica", "XML initialization test passed.");
+    
     Setup::Destroy();
     return 0;
 }

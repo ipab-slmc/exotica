@@ -36,9 +36,11 @@ script:
 - cd $CATKIN_WS_SRC
 - catkin_init_workspace
 - cd ..
-- catkin_make install -DCMAKE_BUILD_TYPE=Release -j4
+- catkin config --init
+- catkin build -i
 after_success:
   # Run tests
+- source /opt/ros/indigo/setup.bash
 - source devel/setup.bash
 - rosrun exotica test_initializers
 before_deploy:

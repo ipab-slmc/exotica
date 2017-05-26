@@ -185,15 +185,6 @@ namespace exotica
 //    }
     scene_->update(x);
     // Update the Task maps
-
-    for (auto& it : TaskMaps)
-    {
-      Eigen::VectorXd y(6);
-      Eigen::MatrixXd J(6,10);
-      it.second->update(x,y,J);
-      HIGHLIGHT(y.transpose());
-      HIGHLIGHT(J);
-    }
   }
 
   TaskDefinition_map& PlanningProblem::getTaskDefinitions()

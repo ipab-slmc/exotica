@@ -36,31 +36,8 @@
 
 REGISTER_PROBLEM_TYPE("UnconstrainedTimeIndexedProblem", exotica::UnconstrainedTimeIndexedProblem)
 
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
-
 namespace exotica
 {
-
-  void UnconstrainedTimeIndexedProblem::update(Eigen::VectorXdRefConst x, const int t)
-  {
-    // Update the KinematicScene(s)...
-//    for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
-//    {
-//      it->second->update(x);
-//    }
-    scene_->update(x);
-    // Update task maps if the task definition precision (rho) is non-zero
-
-    for (auto& it : task_defs_)
-    {
-      boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<
-          TaskSqrError>(it.second);
-      if (task->getRho(t) > 0)
-      {
-        //task->getTaskMap()->update(x);
-      }
-    }
-  }
 
   UnconstrainedTimeIndexedProblem::UnconstrainedTimeIndexedProblem()
       : T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
@@ -84,76 +61,72 @@ namespace exotica
       Q_rate = init.Qrate;
       H_rate = init.Hrate;
       W_rate = init.Wrate;
-      W = Eigen::MatrixXd::Identity(init.W.rows(), init.W.rows());
-      W.diagonal() = init.W;
 
-      for (auto& task : task_defs_)
+      Tasks = MapToVec(TaskMaps);
+      NumTasks = Tasks.size();
+      Mapping.resize(NumTasks, 2);
+      int id=0;
+      for(int i=0;i<NumTasks;i++)
       {
-        if (task.second->type()!="exotica::TaskSqrError")
-          throw_named("Task variable '" + task.first + "' is not an squared error! ("+task.second->type()+")");
+          Mapping(i,0) = id;
+          Mapping(i,1) = Tasks[i]->taskSpaceDim();
+          Tasks[i]->Id = i;
+          Tasks[i]->Start = id;
+          Tasks[i]->Length = Tasks[i]->taskSpaceDim();
+          id += Mapping(i,1);
       }
-      // Set number of time steps
-      setTime(T);
+      PhiN = Mapping.col(1).sum();
+
+      N = scene_->getNumJoints();
+
+      if(init.W.rows()!=N) throw_named("W dimension mismatch! Expected "<<N<<", got "<<init.W.rows());
+      W = Eigen::MatrixXd::Identity(N, N);
+      W.diagonal() = init.W*W_rate;
+      H = Eigen::MatrixXd::Identity(N, N)*Q_rate;
+      Q = Eigen::MatrixXd::Identity(N, N)*H_rate;
+
+      Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
+      y.assign(T, Eigen::VectorXd::Zero(PhiN));
+      Phi.assign(T, Eigen::VectorXd::Zero(PhiN));
+      J.assign(T, Eigen::MatrixXd(PhiN, N));
   }
 
-  int UnconstrainedTimeIndexedProblem::getT()
-  {
-    return T;
-  }
-
-  void UnconstrainedTimeIndexedProblem::setTime(int T_)
-  {
-    if (T_ <= 0)
+    double UnconstrainedTimeIndexedProblem::getDuration()
     {
-      throw_named("Invalid number of timesteps: "<<T);
+        return tau * (double) T;
     }
-    tau = (double) T * tau / (double) T_;
-    T = T_;
-    // Set number of time steps
-    for (auto& it : task_defs_)
+
+    void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
     {
-      it.second->setTimeSteps(T + 2);
+        scene_->Update(x);
+        for(int i=0;i<NumTasks;i++)
+        {
+            Tasks[i]->update(x, Phi[t].segment(Mapping(i, 0), Mapping(i, 1)), J[t].middleRows(Mapping(i, 0), Mapping(i, 1)));
+        }
     }
-  }
 
-  void UnconstrainedTimeIndexedProblem::getT(int& T_)
-  {
-    T_ = T;
-  }
 
-  double UnconstrainedTimeIndexedProblem::getTau()
-  {
-    return tau;
-  }
+    void UnconstrainedTimeIndexedProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal, int t)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        y[t].segment(task->Start, task->Length) = goal;
+    }
 
-  void UnconstrainedTimeIndexedProblem::getTau(double& tau_)
-  {
-    tau_ = tau;
-  }
+    void UnconstrainedTimeIndexedProblem::setRho(const std::string & task_name, const double rho, int t)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        y[t](task->Id) = rho;
+    }
 
-  double UnconstrainedTimeIndexedProblem::getDuration()
-  {
-    return tau * (double) T;
-  }
+    Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string & task_name, int t)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        return y[t].segment(task->Start, task->Length);
+    }
 
-  Eigen::MatrixXd UnconstrainedTimeIndexedProblem::getW()
-  {
-    return W;
-  }
-
-  double UnconstrainedTimeIndexedProblem::getQrate()
-  {
-    return Q_rate;
-  }
-
-  double UnconstrainedTimeIndexedProblem::getWrate()
-  {
-    return W_rate;
-  }
-
-  double UnconstrainedTimeIndexedProblem::getHrate()
-  {
-    return H_rate;
-  }
-
-} /* namespace exotica */
+    double UnconstrainedTimeIndexedProblem::getRho(const std::string & task_name, int t)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        return y[t](task->Id);
+    }
+}

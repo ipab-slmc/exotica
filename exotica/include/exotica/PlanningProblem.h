@@ -71,7 +71,6 @@ namespace exotica
        * @return  Indication of success TODO
        */
       virtual void update(Eigen::VectorXdRefConst x, const int t);
-      virtual void Update(Eigen::VectorXdRefConst x) {throw_named("Not implemented!");};
 
       /**
        * \brief Returns the reference to the task definition map.
@@ -115,10 +114,6 @@ namespace exotica
       virtual std::string print(std::string prepend);
 
       virtual void clear(bool keepOriginals = true);
-
-      virtual int getT() {throw_named("Not implemented!");}
-
-      virtual double getTau() {throw_named("Not implemented!");}
 
       virtual void setLimits(Eigen::VectorXd limits) {throw_named("Not implemented!");}
 

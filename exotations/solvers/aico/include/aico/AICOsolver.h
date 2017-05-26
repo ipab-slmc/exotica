@@ -119,13 +119,6 @@ namespace exotica
        */
       virtual void specifyProblem(PlanningProblem_ptr pointer);
 
-      /*
-       * \brief	Check if a problem is solvable by this solver (Pure Virtual)
-       * @param	prob		Planning problem
-       * @return	True if solvable, false otherwise
-       */
-      virtual bool isSolvable(const PlanningProblem_ptr & prob);
-
       /**
        * \brief Stores costs into a file
        */
@@ -150,43 +143,6 @@ namespace exotica
 
       bool preupdateTrajectory_;
 
-      /**
-       * \brief	Set new goal
-       * @param	task_name	Task map name
-       * @param	goal	new goal
-       * @param   t time step
-       */
-      virtual void setGoal(const std::string & task_name,
-          Eigen::VectorXdRefConst goal, int t = 0);
-
-      /**
-       * \brief	Set rho
-       * @param	task_name	Task map name
-       * @param	rho	Rho
-       * @param   t time step
-       */
-      virtual void setRho(const std::string & task_name, const double rho,
-          int t = 0);
-
-      /**
-       * \brief	Get goal
-       * @param	task_name	Task map name
-       * @param	goal	returned goal
-       * @param   t time step
-       */
-      virtual void getGoal(const std::string & task_name, Eigen::VectorXd& goal,
-          int t = 0);
-
-      /**
-       * \brief	Get rho
-       * @param	task_name	Task map name
-       * @param	goal	returned rho
-       * @param   t time step
-       */
-      virtual void getRho(const std::string & task_name, double& rho, int t = 0);
-
-      std::vector<Eigen::VectorXd> y_star; //!< Task cost mappings
-      std::vector<Eigen::VectorXd> rhos; //!< Task precisions
       std::map<std::string, std::pair<int, int> > taskIndex;
       Eigen::VectorXi dim; //!< Task dimension
       ros::Duration planning_time_;
@@ -216,8 +172,6 @@ namespace exotica
       Eigen::VectorXd bwdMsg_v; //!< Backward message initialisation mean
       Eigen::MatrixXd bwdMsg_Vinv; //!< Backward message initialisation covariance
       bool dynamic; //!< Plan
-      std::vector<Eigen::VectorXd> phiBar; //!< Task cost mappings
-      std::vector<Eigen::MatrixXd> JBar; //!< Task cost Jacobians
 
       std::vector<SinglePassMeanCoviariance> q_stat; //!< Cost weigthed normal distribution of configurations across sweeps.
 
@@ -238,8 +192,6 @@ namespace exotica
 
       std::vector<Eigen::VectorXd> phiBar_old; //!< Task cost mappings (last most optimal value)
       std::vector<Eigen::MatrixXd> JBar_old; //!< Task cost Jacobians (last most optimal value)
-      std::vector<Eigen::VectorXd> y_star_old; //!< Task cost mappings (last most optimal value)
-      std::vector<Eigen::VectorXd> rhos_old; //!< Task precisions (last most optimal value)
       Eigen::VectorXi dim_old; //!< Task dimension
 
       std::vector<Eigen::VectorXd> s_old; //!< Forward message mean (last most optimal value)

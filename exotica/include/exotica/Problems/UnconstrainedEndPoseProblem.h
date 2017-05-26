@@ -49,7 +49,7 @@ namespace exotica
         virtual ~UnconstrainedEndPoseProblem();
 
         virtual void Instantiate(UnconstrainedEndPoseProblemInitializer& init);
-        virtual void Update(Eigen::VectorXdRefConst x);
+        void Update(Eigen::VectorXdRefConst x);
 
         Eigen::VectorXd Rho;
         Eigen::VectorXd y;

@@ -75,6 +75,9 @@ namespace exotica
 
       SamplingProblemInitializer Parameters;
 
+      void setGoalState(const Eigen::VectorXd & qT, const double eps =
+                std::numeric_limits<double>::epsilon()) {}
+
       virtual void clear(bool keepOriginals = true);
     private:
       boost::mutex update_lock_;

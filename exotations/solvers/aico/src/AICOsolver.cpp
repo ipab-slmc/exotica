@@ -42,13 +42,6 @@
 
 #include "aico/AICOsolver.h"
 
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
-
-// t_0 is the start state
-// t_T is the final state
-// t_{T+1} is the state before t_0 for computing the velocity at the time t_0
-#define TT T+2
-
 REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver)
 
 namespace exotica
@@ -82,7 +75,7 @@ namespace exotica
     myfile << "Control";
     for (auto s : taskNames)
       myfile << " " << s;
-    for (int t = 0; t < T + 1; t++)
+    for (int t = 0; t < T; t++)
     {
       myfile << "\n" << costControl(t);
       for (int i = 0; i < costTask.cols(); i++)
@@ -94,8 +87,8 @@ namespace exotica
   }
 
   AICOsolver::AICOsolver()
-      : damping(0.01), tolerance(1e-2), max_iterations(100), useBwdMsg(false), bwdMsg_v(), bwdMsg_Vinv(), phiBar(), JBar(), s(), Sinv(), v(), Vinv(), r(), R(), rhat(), b(), Binv(), q(), qhat(), s_old(), Sinv_old(), v_old(), Vinv_old(), r_old(), R_old(), rhat_old(), b_old(), Binv_old(), q_old(), qhat_old(), dampingReference(), cost(
-          0.0), cost_old(0.0), b_step(0.0), A(), tA(), Ainv(), invtA(), a(), B(), tB(), Winv(), Hinv(), Q(), sweep(
+      : damping(0.01), tolerance(1e-2), max_iterations(100), useBwdMsg(false), bwdMsg_v(), bwdMsg_Vinv(), s(), Sinv(), v(), Vinv(), r(), R(), rhat(), b(), Binv(), q(), qhat(), s_old(), Sinv_old(), v_old(), Vinv_old(), r_old(), R_old(), rhat_old(), b_old(), Binv_old(), q_old(), qhat_old(), dampingReference(),
+          cost(0.0), cost_old(0.0), b_step(0.0), A(), tA(), Ainv(), invtA(), a(), B(), tB(), Winv(), Hinv(), Q(), sweep(
           0), sweepMode(0), W(), H(), T(0), dynamic(false), n(0), updateCount(
           0), damping_init(0.0), preupdateTrajectory_(false), q_stat()
   {
@@ -113,124 +106,29 @@ namespace exotica
     // Whoop whoop whoop whoop ...
   }
 
-  void AICOsolver::setGoal(const std::string & task_name,
-      Eigen::VectorXdRefConst _goal, int t)
+  void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
   {
-    if (taskIndex.find(task_name) == taskIndex.end())
+    if (problem->type() != "exotica::UnconstrainedTimeIndexedProblem")
     {
-      std::cout << "Task name " << task_name << " does not exist" << std::endl;
+      throw_named("This solver can't use problem of type '" << problem->type() << "'!");
     }
-    else
-    {
-      std::pair<int, int> id = taskIndex.at(task_name);
-      if (_goal.rows() == dim(id.first))
-      {
-        y_star.at(t).segment(id.second, dim(id.first)) = _goal;
-      }
-      else
-      {
-        throw_named("Can't find task '"<<task_name<<"'");
-      }
-    }
-  }
+    MotionSolver::specifyProblem(problem);
+    prob_ = boost::static_pointer_cast<UnconstrainedTimeIndexedProblem>(problem);
 
-  void AICOsolver::setRho(const std::string & task_name, const double rho,
-      int t)
-  {
-    if (taskIndex.find(task_name) == taskIndex.end())
-    {
-      throw_named("Can't find task '"<<task_name<<"'");
-    }
-    else
-    {
-      std::pair<int, int> id = taskIndex.at(task_name);
-      rhos.at(t)(id.first) = rho;
-    }
-  }
-
-  void AICOsolver::getGoal(const std::string & task_name,
-      Eigen::VectorXd& goal, int t)
-  {
-    if (taskIndex.find(task_name) == taskIndex.end())
-    {
-      throw_named("Can't find task '"<<task_name<<"'");
-    }
-    else
-    {
-      std::pair<int, int> id = taskIndex.at(task_name);
-      goal = y_star.at(t).segment(id.second, dim(id.first));
-    }
-  }
-
-  void AICOsolver::getRho(const std::string & task_name, double& rho, int t)
-  {
-    if (taskIndex.find(task_name) == taskIndex.end())
-    {
-      throw_named("Can't find task '"<<task_name<<"'");
-    }
-    else
-    {
-      std::pair<int, int> id = taskIndex.at(task_name);
-      rho = rhos.at(t)(id.first);
-    }
-  }
-
-  void AICOsolver::specifyProblem(PlanningProblem_ptr pointer)
-  {
-    if (pointer->type().compare(std::string("exotica::UnconstrainedTimeIndexedProblem")) != 0)
-    {
-      throw_named("This solver can't use problem of type '" << pointer->type() << "'!");
-    }
-    MotionSolver::specifyProblem(pointer);
-    prob_ = boost::static_pointer_cast<UnconstrainedTimeIndexedProblem>(pointer);
-
-    T = prob_->getT();
-    taskNames.resize(prob_->getTaskDefinitions().size());
-    taskIndex.clear();
-    dim.resize(prob_->getTaskDefinitions().size());
-    int i = 0, cur_rows = 0;
-    for (auto& task_ : prob_->getTaskDefinitions())
-    {
-      if (task_.second->type()!="exotica::TaskSqrError")
-      {
-        throw_named("Task variable " << task_.first << " is not an squared error! ("+task_.second->type()+")");
-      }
-      boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<
-          TaskSqrError>(task_.second);
-      task->taskSpaceDim(dim(i));
-      taskNames[i] = task_.first;
-      taskIndex[task_.first] = std::pair<int, int>(i, cur_rows);
-      cur_rows += dim(i);
-      i++;
-    }
-
-//    for (auto & it : prob_->getScenes())
-//    {
-//      it.second->activateTaskMaps();
-//    }
-    prob_->getScene()->activateTaskMaps();
-
+    T = prob_->T;
     initMessages();
   }
 
-  bool AICOsolver::isSolvable(const PlanningProblem_ptr & prob)
-  {
-    if (prob->type().compare("exotica::UnconstrainedTimeIndexedProblem") == 0) return true;
-    return false;
-  }
-
-  void AICOsolver::Solve(Eigen::VectorXdRefConst q0,
-      Eigen::MatrixXd & solution)
+  void AICOsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution)
   {
     std::vector<Eigen::VectorXd> q_init;
-    q_init.resize(TT, Eigen::VectorXd::Zero(q0.rows()));
+    q_init.resize(T, Eigen::VectorXd::Zero(q0.rows()));
     for (int i = 0; i < q_init.size(); i++)
       q_init[i] = q0;
     Solve(q_init, solution);
   }
 
-  void AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init,
-      Eigen::MatrixXd & solution)
+  void AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init, Eigen::MatrixXd & solution)
   {
     ros::Time startTime = ros::Time::now();
     ROS_WARN_STREAM("AICO: Setting up the solver");
@@ -254,8 +152,8 @@ namespace exotica
       }
       if (k && d < tolerance) break;
     }
-    Eigen::MatrixXd sol(T + 1, n);
-    for (int tt = 0; tt <= T; tt++)
+    Eigen::MatrixXd sol(T, n);
+    for (int tt = 0; tt < T; tt++)
     {
       sol.row(tt) = q[tt];
     }
@@ -265,12 +163,9 @@ namespace exotica
 
   void AICOsolver::initMessages()
   {
-    if (prob_ == nullptr)
-    {
-      throw_named("Problem definition is a NULL pointer!");
-    }
+    if (prob_ == nullptr) throw_named("Problem definition is a NULL pointer!");
     // TODO: Issue #4
-    n = prob_->getScene()->getNumJoints();
+    n = prob_->N;
     int n2 = n / 2;
     if (dynamic)
     {
@@ -291,15 +186,14 @@ namespace exotica
       throw_named("Number of time steps is too small: T="<<T);
     }
 
-    s.assign(TT, Eigen::VectorXd::Zero(n));
-    Sinv.assign(TT, Eigen::MatrixXd::Zero(n, n));
+    s.assign(T, Eigen::VectorXd::Zero(n));
+    Sinv.assign(T, Eigen::MatrixXd::Zero(n, n));
     Sinv[0].diagonal().setConstant(1e10);
-    v.assign(TT, Eigen::VectorXd::Zero(n));
-    Vinv.assign(TT, Eigen::MatrixXd::Zero(n, n));
+    v.assign(T, Eigen::VectorXd::Zero(n));
+    Vinv.assign(T, Eigen::MatrixXd::Zero(n, n));
     if (useBwdMsg)
     {
-      if (bwdMsg_v.rows() == n && bwdMsg_Vinv.rows() == n
-          && bwdMsg_Vinv.cols() == n)
+      if (bwdMsg_v.rows() == n && bwdMsg_Vinv.rows() == n && bwdMsg_Vinv.cols() == n)
       {
         v[T] = bwdMsg_v;
         Vinv[T] = bwdMsg_Vinv;
@@ -307,37 +201,36 @@ namespace exotica
       else
       {
         useBwdMsg = false;
-        WARNING(
-            "Backward message initialisation skipped, matrices have incorrect dimensions.");
+        WARNING("Backward message initialisation skipped, matrices have incorrect dimensions.");
       }
     }
-    b.assign(TT, Eigen::VectorXd::Zero(n));
-    dampingReference.assign(TT, Eigen::VectorXd::Zero(n));
-    Binv.assign(TT, Eigen::MatrixXd::Zero(n, n));
+    b.assign(T, Eigen::VectorXd::Zero(n));
+    dampingReference.assign(T, Eigen::VectorXd::Zero(n));
+    Binv.assign(T, Eigen::MatrixXd::Zero(n, n));
     Binv[0].setIdentity();
     Binv[0] = Binv[0] * 1e10;
-    r.assign(TT, Eigen::VectorXd::Zero(n));
-    R.assign(TT, Eigen::MatrixXd::Zero(n, n));
-    rhat = Eigen::VectorXd::Zero(TT);
-    qhat.assign(TT, Eigen::VectorXd::Zero(n));
+    r.assign(T, Eigen::VectorXd::Zero(n));
+    R.assign(T, Eigen::MatrixXd::Zero(n, n));
+    rhat = Eigen::VectorXd::Zero(T);
+    qhat.assign(T, Eigen::VectorXd::Zero(n));
     linSolverTmp.resize(n, n);
     {
       if (dynamic)
       {
-        q.resize(TT);
+        q.resize(T);
         for (int i = 0; i < q.size(); i++)
           q.at(i) = b.at(i).head(n2);
-        if (prob_->getW().rows() != n2)
+        if (prob_->W.rows() != n2)
         {
-          throw_named(prob_->getW().rows()<<"!="<<n2);
+          throw_named(prob_->W.rows()<<"!="<<n2);
         }
       }
       else
       {
         q = b;
-        if (prob_->getW().rows() != n)
+        if (prob_->W.rows() != n)
         {
-          throw_named(prob_->getW().rows()<<"!="<<n);
+          throw_named(prob_->W.rows()<<"!="<<n);
         }
       }
       // All the process parameters are assumed to be constant throughout the trajectory.
@@ -351,72 +244,33 @@ namespace exotica
       tA_ = A_.transpose();
       Ainv_ = A_.inverse();
       invtA_ = Ainv_.transpose();
-      B.assign(TT, B_);
-      tB.assign(TT, tB_);
-      A.assign(TT, A_);
-      tA.assign(TT, tA_);
-      Ainv.assign(TT, Ainv_);
-      invtA.assign(TT, invtA_);
-      a.assign(TT, a_);
+      B.assign(T, B_);
+      tB.assign(T, tB_);
+      A.assign(T, A_);
+      tA.assign(T, tA_);
+      Ainv.assign(T, Ainv_);
+      invtA.assign(T, invtA_);
+      a.assign(T, a_);
     }
     {
+      HIGHLIGHT(prob_->W);
+      HIGHLIGHT(prob_->H);
+      HIGHLIGHT(prob_->Q);
       // Set constant W,Win,H,Hinv
-      Eigen::MatrixXd tmp;
-      tmp = prob_->getW() * prob_->getWrate();
-      W.assign(TT, tmp);
-      tmp = (prob_->getW() * prob_->getWrate()).inverse();
-      Winv.assign(TT, tmp);
-      tmp = prob_->getW() * prob_->getHrate();
-      H.assign(TT, tmp);
-      tmp = (prob_->getW() * prob_->getHrate()).inverse();
-      Hinv.assign(TT, tmp);
-      tmp.setZero();
-      tmp.diagonal().setConstant(prob_->getQrate());
-      Q.assign(TT, tmp);
+      W.assign(T, prob_->W);
+      Winv.assign(T, prob_->W.inverse());
+      H.assign(T, prob_->H);
+      Hinv.assign(T, prob_->H.inverse());
+      Q.assign(T, prob_->Q);
     }
-    int m = 0;
-    //for (TaskDefinition_map::const_iterator it=prob_->getTaskDefinitions().begin(); it!=prob_->getTaskDefinitions().end(); ++it)
 
-    m = dim.sum();
-    if (m == 0)
-    {
-      throw_named("No tasks were found!");
-    }
-    phiBar.assign(TT, Eigen::VectorXd::Zero(m));
-    JBar.assign(TT, Eigen::MatrixXd::Zero(m, dynamic ? n2 : n));
-    y_star.assign(TT, Eigen::VectorXd::Zero(m));
-    rhos.assign(TT, Eigen::VectorXd::Zero(prob_->getTaskDefinitions().size()));
-
-    costControl.resize(T + 1);
+    costControl.resize(T);
     costControl.setZero();
-    costTask.resize(T + 1, taskNames.size());
+    costTask.resize(T, prob_->PhiN);
     costTask.setZero();
-    {
-      int cnt = 0, i = 0;
-      for (auto & it : prob_->getTaskDefinitions())
-      {
-        boost::shared_ptr<TaskSqrError> task = boost::static_pointer_cast<
-            TaskSqrError>(it.second);
-        for (int t = 0; t < TT; t++)
-        {
-          task->registerGoal(
-              Eigen::VectorXdRef_ptr(y_star[t].block(cnt, 0, dim(i), 1)), t);
-          task->registerJacobian(
-              Eigen::MatrixXdRef_ptr(
-                  JBar[t].block(cnt, 0, dim(i), dynamic ? n2 : n)), t);
-          task->registerPhi(
-              Eigen::VectorXdRef_ptr(phiBar[t].block(cnt, 0, dim(i), 1)), t);
-          task->registerRho(Eigen::VectorXdRef_ptr(rhos[t].block(i, 0, 1, 1)),
-              t);
-          task->setDefaultGoals(t);
-        }
-        cnt += dim(i);
-        i++;
-      }
-    }
 
-    q_stat.resize(T + 1);
-    for (int t = 0; t <= T; t++)
+    q_stat.resize(T);
+    for (int t = 0; t < T; t++)
     {
       q_stat[t].resize(n);
     }
@@ -433,7 +287,7 @@ namespace exotica
     }
     else
     {
-      double tau = prob_->getTau();
+      double tau = prob_->tau;
       int n2 = n / 2;
       A_ = Eigen::MatrixXd::Identity(n, n);
       B_ = Eigen::MatrixXd::Zero(n, n2);
@@ -453,7 +307,7 @@ namespace exotica
 
   void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
   {
-    if (q_init.size() != TT)
+    if (q_init.size() != T)
     {
       throw_named("Incorrect number of timesteps provided!");
     }
@@ -467,27 +321,26 @@ namespace exotica
     for (int i = 0; i < q.size(); i++)
       q.at(i) = b.at(i).head(n2);
     s = b;
-    for (int t = 1; t <= T; t++)
+    for (int t = 1; t < T; t++)
     {
       Sinv.at(t).setZero(); 
       Sinv.at(t).diagonal().setConstant(damping);
     }
     v = b;
-    for (int t = 0; t <= T; t++)
+    for (int t = 0; t < T; t++)
     {
       Vinv.at(t).setZero();  
       Vinv.at(t).diagonal().setConstant(damping);
     }
     dampingReference = b;
-    for (int t = 0; t <= T && ros::ok(); t++)
+    for (int t = 0; t < T; t++)
     {
       // Compute task message reference
-      updateTaskMessage(t, b.at(t), 1.0);
+      updateTaskMessage(t, b.at(t), 0.0);
     }
     cost = evaluateTrajectory(b, true);
     if (cost < 0) throw_named("Invalid cost!");
-    INFO(
-        "Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost <<", updates: "<<updateCount);
+    INFO("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost <<", updates: "<<updateCount);
     rememberOldState();
   }
 
@@ -555,14 +408,14 @@ namespace exotica
     Eigen::MatrixXd barV(n, n), Vt;
     if (dynamic)
     {
-      if (t < T)
+      if (t < T-1)
       {
         inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]);
         Vt = Ainv[t] * (Q[t] + B[t] * Hinv[t] * tB[t] + barV) * invtA[t];
         v[t] = Ainv[t] * (-a[t] + barV * (Vinv[t + 1] * v[t + 1] + r[t + 1]));
         inverseSymPosDef(Vinv[t], Vt);
       }
-      if (t == T)
+      if (t == T-1)
       {
         if (!useBwdMsg)
         {
@@ -571,21 +424,21 @@ namespace exotica
         }
         else
         {
-          v[T] = bwdMsg_v;
-          Vinv[T] = bwdMsg_Vinv;
+          v[T-1] = bwdMsg_v;
+          Vinv[T-1] = bwdMsg_Vinv;
         }
       }
     }
     else
     {
-      if (t < T)
+      if (t < T-1)
       {
         inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]);
         v[t] = barV * (Vinv[t + 1] * v[t + 1] + r[t + 1]);
         Vt = Winv[t] + barV;
         inverseSymPosDef(Vinv[t], Vt);
       }
-      if (t == T)
+      if (t == T-1)
       {
         if (!useBwdMsg)
         {
@@ -594,8 +447,8 @@ namespace exotica
         }
         else
         {
-          v[T] = bwdMsg_v;
-          Vinv[T] = bwdMsg_Vinv;
+          v[T-1] = bwdMsg_v;
+          Vinv[T-1] = bwdMsg_Vinv;
         }
       }
     }
@@ -617,7 +470,7 @@ namespace exotica
       qhat[t] = qhat_t;
     }
 
-    prob_->update(dynamic ? qhat[t].head(n / 2) : qhat[t], t);
+    prob_->Update(dynamic ? qhat[t].head(n / 2) : qhat[t], t);
     updateCount++;
     double c = getTaskCosts(t);
     q_stat[t].addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
@@ -628,7 +481,6 @@ namespace exotica
   double AICOsolver::getTaskCosts(int t)
   {
     double C = 0;
-    int n2 = n / 2;
     if (!dynamic)
     {
       Eigen::MatrixXd Jt;
@@ -636,89 +488,60 @@ namespace exotica
       rhat[t] = 0;
       R[t].setZero();
       r[t].setZero();
-      int offset = 0;
-      for (int i = 0; i < prob_->getTaskDefinitions().size(); i++)
+      //HIGHLIGHT("Task update t=" <<t);
+      for (int i = 0; i < prob_->Mapping.rows(); i++)
       {
-        prec = rhos[t](i);
+        prec = prob_->Rho[t](i);
         if (prec > 0)
         {
-          Jt = JBar[t].middleRows(offset, dim(i)).transpose();
+            int start = prob_->Mapping(i,0);
+            int len = prob_->Mapping(i,1);
+            if(t==T-1) HIGHLIGHT("Task "<<i<<"\nRho: " <<prob_->Rho[t](i)<<"\ny = "<<prob_->y[t].segment(start, len).transpose()<<"\nPhi = "<<prob_->Phi[t].segment(start, len).transpose()<<"\nJ = \n"<<prob_->J[t].middleRows(start, len));
+          Jt = prob_->J[t].middleRows(start, len).transpose();
           C += prec
-              * (y_star[t].segment(offset, dim(i))
-                  - phiBar[t].segment(offset, dim(i))).squaredNorm();
-          R[t] += prec * Jt * JBar[t].middleRows(offset, dim(i));
+              * (prob_->y[t].segment(start, len)
+                  - prob_->Phi[t].segment(start, len)).squaredNorm();
+          R[t] += prec * Jt * prob_->J[t].middleRows(start, len);
           r[t] += prec * Jt
-              * (y_star[t].segment(offset, dim(i))
-                  - phiBar[t].segment(offset, dim(i))
-                  + JBar[t].middleRows(offset, dim(i)) * qhat[t]);
+              * (prob_->y[t].segment(start, len)
+                  - prob_->Phi[t].segment(start, len)
+                  + prob_->J[t].middleRows(start, len) * qhat[t]);
           rhat[t] += prec
-              * (y_star[t].segment(offset, dim(i))
-                  - phiBar[t].segment(offset, dim(i))
-                  + JBar[t].middleRows(offset, dim(i)) * qhat[t]).squaredNorm();
+              * (prob_->y[t].segment(start, len)
+                  - prob_->Phi[t].segment(start, len)
+                  + prob_->J[t].middleRows(start, len) * qhat[t]).squaredNorm();
         }
-        offset += dim(i);
       }
     }
     else
     {
-      Eigen::VectorXd v;
       Eigen::MatrixXd Jt;
+      int n2 = n / 2;
       double prec;
-      double tau = prob_->getTau();
       rhat[t] = 0;
       R[t].setZero();
       r[t].setZero();
-      int offset = 0, i = 0;
-      for (auto& task_ : prob_->getTaskDefinitions())
+      for (int i = 0; i < prob_->Mapping.rows(); i++)
       {
-        if (task_.second->order == 0)
-        {
-          prec = rhos[t](i);
+          prec = prob_->Rho[t](i);
           if (prec > 0)
           {
-            Jt = JBar[t].middleRows(offset, dim(i)).transpose();
-            C += prec
-                * (y_star[t].segment(offset, dim(i))
-                    - phiBar[t].segment(offset, dim(i))).squaredNorm();
-            R[t].topLeftCorner(n2, n2) += prec * Jt
-                * JBar[t].middleRows(offset, dim(i));
-            r[t].head(n2) += prec * Jt
-                * (y_star[t].segment(offset, dim(i))
-                    - phiBar[t].segment(offset, dim(i))
-                    + JBar[t].middleRows(offset, dim(i)) * qhat[t]);
-            rhat[t] +=
-                prec
-                    * (y_star[t].segment(offset, dim(i))
-                        - phiBar[t].segment(offset, dim(i))
-                        + JBar[t].middleRows(offset, dim(i)) * qhat[t]).squaredNorm();
+                int start = prob_->Mapping(i,0);
+                int len = prob_->Mapping(i,1);
+                Jt = prob_->J[t].middleRows(start, len).transpose();
+                C += prec
+                    * (prob_->y[t].segment(start, len)
+                        - prob_->Phi[t].segment(start, len)).squaredNorm();
+                R[t].topLeftCorner(n2, n2) += prec * Jt * prob_->J[t].middleRows(start, len);
+                r[t].head(n2) += prec * Jt
+                    * (prob_->y[t].segment(start, len)
+                        - prob_->Phi[t].segment(start, len)
+                        + prob_->J[t].middleRows(start, len) * qhat[t]);
+                rhat[t] += prec
+                    * (prob_->y[t].segment(start, len)
+                        - prob_->Phi[t].segment(start, len)
+                            + prob_->J[t].middleRows(start, len) * qhat[t]).squaredNorm();
           }
-        }
-        else if (task_.second->order == 1)
-        {
-          prec = rhos[t](i);
-          if (prec > 0)
-          {
-            v = (phiBar[t].segment(offset, dim(i))
-                - phiBar[t > 0 ? t - 1 : T + 1].segment(offset, dim(i))) / tau; // (phi_t-phi_{t-1})/tau
-            Jt = JBar[t].middleRows(offset, dim(i)).transpose();
-            C +=
-                prec
-                    * (v
-                        - JBar[t].middleRows(offset, dim(i))
-                            * (qhat[t].head(n / 2)
-                                - qhat[t > 0 ? t - 1 : T + 1].head(n / 2)) / tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
-            R[t].bottomRightCorner(n2, n2) += prec * Jt
-                * JBar[t].middleRows(offset, dim(i));
-            r[t].tail(n2) += prec * Jt * v;
-            rhat[t] += prec * (v).squaredNorm();
-          }
-        }
-        else
-        {
-          throw_named("Task variable " << task_.first << " is not supported!");
-        }
-        offset += dim(i);
-        i++;
       }
     }
     return C;
@@ -782,7 +605,7 @@ namespace exotica
     ros::Time start = ros::Time::now(), tmpTime;
     ros::Duration dSet, dPre, dUpd, dCtrl, dTask;
     double ret = 0.0;
-    double tau = prob_->getTau();
+    double tau = prob_->tau;
     double tau_1 = 1. / tau, tau_2 = tau_1 * tau_1;
     int n2 = n / 2;
     Eigen::VectorXd vv;
@@ -790,7 +613,7 @@ namespace exotica
     if (dynamic)
     {
       for (int i = 0; i < q.size(); i++)
-        q.at(i) = x.at(i).head(n / 2);
+        q.at(i) = x.at(i).head(n2);
     }
     else
     {
@@ -800,23 +623,23 @@ namespace exotica
     if (preupdateTrajectory_)
     {
       ROS_WARN_STREAM("Pre-update, sweep "<<sweep);
-      for (int t = 0; t <= T; t++)
+      for (int t = 0; t < T; t++)
       {
         if (!ros::ok()) return -1.0;
         updateCount++;
-        prob_->update(q[t], t);
+        prob_->Update(q[t], t);
       }
     }
     dPre = ros::Time::now() - start - dSet;
 
-    for (int t = 0; t <= T; t++)
+    for (int t = 0; t < T; t++)
     {
       tmpTime = ros::Time::now();
       if (!ros::ok()) return -1.0;
       if (!skipUpdate)
       {
         updateCount++;
-        prob_->update(q[t], t);
+        prob_->Update(q[t], t);
       }
       dUpd += ros::Time::now() - tmpTime;
       tmpTime = ros::Time::now();
@@ -836,7 +659,7 @@ namespace exotica
       }
       else
       {
-        if (t < T && t > 0)
+        if (t < T-1 && t > 0)
         {
           // For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t-1]-2.0*q[t])-F;
           vv = tau_2 * (q[t + 1] + q[t - 1] - 2.0 * q[t]);
@@ -856,49 +679,24 @@ namespace exotica
       dCtrl += ros::Time::now() - tmpTime;
       tmpTime = ros::Time::now();
       // Task cost
-      double prec;
-      int i = 0, offset = 0;
-      for (auto& task_ : prob_->getTaskDefinitions())
+      for (int i = 0; i < prob_->Mapping.rows(); i++)
       {
-        if (task_.second->order == 0)
-        {
           // Position cost
-          prec = rhos[t](i);
+          double prec = prob_->Rho[t](i);
           if (prec > 0)
           {
-            costTask(t, i) = prec
-                * (y_star[t].segment(offset, dim(i))
-                    - phiBar[t].segment(offset, dim(i))).squaredNorm();
-            ret += costTask(t, i);
+                int start = prob_->Mapping(i,0);
+                int len = prob_->Mapping(i,1);
+                if(t==T-1) HIGHLIGHT("Target: "<<prob_->y[t].segment(start, len).transpose());
+                if(t==T-1) HIGHLIGHT("Phi:    "<<prob_->Phi[t].segment(start, len).transpose());
+                costTask(t, i) = prec
+                    * (prob_->y[t].segment(start, len)
+                        - prob_->Phi[t].segment(start, len)).squaredNorm();
+                ret += costTask(t, i);
           }
-        }
-        else if (dynamic && task_.second->order == 1)
-        {
-          // Velocity cost
-          prec = rhos[t](i);
-          if (prec > 0)
-          {
-            vv = (phiBar[t].segment(offset, dim(i))
-                - phiBar[t > 0 ? t - 1 : T + 1].segment(offset, dim(i))) / tau; // (phi_t-phi_{t-1})/tau
-            costTask(t, i) =
-                prec
-                    * (vv
-                        - JBar[t].middleRows(offset, dim(i))
-                            * (qhat[t].head(n / 2)
-                                - qhat[t > 0 ? t - 1 : T + 1].head(n / 2)) / tau).squaredNorm(); // prec*J*q_dot; qdot=(qhat_t-q_hat_{t-1})/tau
-            ret += costTask(t, i);
-          }
-        }
-        else
-        {
-          throw_named("Task variable " << task_.first << " is not supported!");
-        }
-        offset += dim(i);
-        i++;
       }
       dTask += ros::Time::now() - tmpTime;
     }
-    //ROS_WARN_STREAM("Evaluation timing:\nState set: "<<dSet.toSec()<<"s\nPreupdate: "<< dPre.toSec()<<"s\nUpdate: "<< dUpd.toSec()<<"s\nControl: "<< dCtrl.toSec()<<"s\nTask: "<< dTask.toSec()<<"s\nTotal: "<<(dSet+dPre+dUpd+dCtrl+dTask).toSec()<<"s");
     return ret;
   }
 
@@ -910,46 +708,44 @@ namespace exotica
     {
     //NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
     case smForwardly:
-      for (t = 1; t <= T; t++)
+      for (t = 1; t < T; t++)
       {
         updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.); //relocate once on fwd Sweep
       }
-      for (t = T + 1; --t;)
+      for (t = T - 2; t>=0 ;t--)
       {
         updateTimeStep(t, false, true, 0, tolerance, false, 1.); //...not on bwd Sweep
       }
       break;
     case smSymmetric:
       ROS_WARN_STREAM("Updating forward, sweep "<<sweep);
-      for (t = 1; t <= T; t++)
+      for (t = 1; t < T; t++)
       {
         updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.); //relocate once on fwd & bwd Sweep
       }
       ROS_WARN_STREAM("Updating backward, sweep "<<sweep);
-      for (t = T + 1; --t;)
+      for (t = T - 2; t>=0; t--)
       {
         updateTimeStep(t, false, true, (sweep ? 1 : 0), tolerance, false,1.);
       }
       break;
     case smLocalGaussNewton:
-      for (t = 1; t <= T; t++)
+      for (t = 1; t < T; t++)
       {
-        updateTimeStep(t, true, false, (sweep ? 5 : 1), tolerance, !sweep,
-            1.); //relocate iteratively on
+        updateTimeStep(t, true, false, (sweep ? 5 : 1), tolerance, !sweep, 1.); //relocate iteratively on
       }
-      for (t = T + 1; --t;)
+      for (t = T - 2; t>=0; t--)
       {
-        updateTimeStep(t, false, true, (sweep ? 5 : 0), tolerance, false,
-            1.); //...fwd & bwd Sweep
+        updateTimeStep(t, false, true, (sweep ? 5 : 0), tolerance, false, 1.); //...fwd & bwd Sweep
       }
       break;
     case smLocalGaussNewtonDamped:
-      for (t = 1; t <= T; t++)
+      for (t = 1; t < T; t++)
       {
         updateTimeStepGaussNewton(t, true, false, (sweep ? 5 : 1),
             tolerance, 1.); //GaussNewton in fwd & bwd Sweep
       }
-      for (t = T + 1; --t;)
+      for (t = T - 2; t>=0; t--)
       {
         updateTimeStep(t, false, true, (sweep ? 5 : 0), tolerance, false,1.);
       }
@@ -966,8 +762,7 @@ namespace exotica
     // q is set inside of evaluateTrajectory() function
     cost = evaluateTrajectory(b);
     if (cost < 0) return -1.0;
-    INFO(
-        "Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq="<<b_step<<", damping="<<damping<<")");
+    INFO("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq="<<b_step<<", damping="<<damping<<")");
 
     if (sweep && damping) perhapsUndoStep();
     sweep++;
@@ -989,13 +784,9 @@ namespace exotica
     q_old = q;
     qhat_old = qhat;
     cost_old = cost;
-    phiBar_old = phiBar;
-    JBar_old = JBar;
-    y_star_old = y_star;
     costControl_old = costControl;
     costTask_old = costTask;
     dim_old = dim;
-    rhos_old = rhos;
   }
 
   void AICOsolver::perhapsUndoStep()
@@ -1016,20 +807,16 @@ namespace exotica
       q = q_old;
       qhat = qhat_old;
       cost = cost_old;
-      phiBar = phiBar_old;
-      JBar = JBar_old;
-      y_star = y_star_old;
       dampingReference = b_old;
       costControl = costControl_old;
       costTask = costTask_old;
       dim = dim_old;
-      rhos = rhos_old;
       if (preupdateTrajectory_)
       {
-        for (int t = 0; t <= T; t++)
+        for (int t = 0; t < T; t++)
         {
           updateCount++;
-          prob_->update(q[t], t);
+          prob_->Update(q[t], t);
         }
       }
       INFO("Reverting to previous step");

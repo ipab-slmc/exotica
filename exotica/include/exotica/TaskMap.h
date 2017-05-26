@@ -84,6 +84,7 @@ namespace exotica
 
       virtual void debug() { }
       KinematicSolution Kinematics;
+      int Id;
       int Start;
       int Length;
     protected:

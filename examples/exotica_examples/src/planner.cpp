@@ -33,25 +33,27 @@ void run()
 
     try
     {
-        for (int t = 0; t < any_problem->getT(); t++)
+        UnconstrainedTimeIndexedProblem_ptr problem = boost::static_pointer_cast<UnconstrainedTimeIndexedProblem>(any_problem);
+        for (int t = 0; t < problem->T-1; t++)
         {
           // This sets the precision of all time steps BUT the last one to zero
           // This means we only aim to minimize the task cost in the last time step
           // The rest of the trajectory minimizes the control cost
-          for(auto it : any_problem->getTaskDefinitions())
-          {
-              any_solver->setRho(it.first,0.0,t);
-          }
+          problem->setRho("Position",0.0,t);
         }
+        Eigen::VectorXd goal(3);
+        goal << 0.4, -0.1, 0.5;
+        problem->setGoal("Position", goal, problem->T-1);
     }
     catch(Exception e) {}
 
     // Set goal state for bi-directional OMPL algorithms
     try
     {
+        SamplingProblem_ptr problem = boost::static_pointer_cast<SamplingProblem>(any_problem);
         Eigen::VectorXd goal(7);
         goal << -0.134914, -0.229508, -0.124971, 1.94267, -1.4921e-17, 0.0, 0.0;
-        any_solver->setGoalState(goal);
+        problem->setGoalState(goal);
     }
     catch(Exception e) {}
 

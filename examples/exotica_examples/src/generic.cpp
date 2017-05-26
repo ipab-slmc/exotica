@@ -48,6 +48,7 @@ void run()
 
     // Assign the problem to the solver
     any_solver->specifyProblem(any_problem);
+    UnconstrainedEndPoseProblem_ptr my_problem = boost::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
     // Create the initial configuration
     Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->scene_->getNumJoints());
@@ -72,14 +73,9 @@ void run()
       // Update the goal if necessary
       // e.g. figure eight
       t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-      Eigen::VectorXd goal(6);
-      goal << 0.6,
-              -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-              0.5 + sin(t * M_PI * 0.5) * 0.2,
-              1.1,
+      my_problem->y << 0.6,
               -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
               0.5 + sin(t * M_PI * 0.5) * 0.2;
-      any_solver->setGoal("MinimizeError", goal);
 
       // Solve the problem using the IK solver
       try

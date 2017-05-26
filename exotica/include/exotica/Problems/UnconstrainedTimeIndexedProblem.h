@@ -52,83 +52,34 @@ namespace exotica
     public:
       UnconstrainedTimeIndexedProblem();
       virtual ~UnconstrainedTimeIndexedProblem();
-
       virtual void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init);
-
-      /**
-       * \brief Get number of time steps
-       * @return Number of time steps
-       */
-      virtual int getT();
-
-      /**
-       * \brief Set number of time steps
-       */
-      void setTime(int T);
-
-      /**
-       * \brief Get number of time steps
-       * @param T_ Number of time steps to return
-       */
-      void getT(int& T_);
-
-      /**
-       * \brief Get time step duration
-       * @return Time step duration
-       */
-      virtual double getTau();
-
-      /**
-       * \brief Get time step duration
-       * @param tau_ Time step duration to return
-       */
-      void getTau(double& tau_);
-
-      /**
-       * \brief Get trajectory duration
-       * @return Trajectory duration
-       */
       double getDuration();
+      void Update(Eigen::VectorXdRefConst x, int t);
+      void setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal, int t = 0);
+      void setRho(const std::string & task_name, const double rho, int t = 0);
+      Eigen::VectorXd getGoal(const std::string & task_name, int t = 0);
+      double getRho(const std::string & task_name, int t = 0);
 
-      /**
-       * \brief Get kinematic system transition error covariance
-       * @return Kinematic system transition error covariance
-       */
-      Eigen::MatrixXd getW();
 
-      /**
-       * \brief Get system transition error covariance multipler
-       * @return Transition error covariance multipler
-       */
-      double getQrate();
-
-      /**
-       * \brief Get kinematic system transition error covariance multiplier
-       * @return Kinematic system transition error covariance multiplier
-       */
-      double getWrate();
-
-      /**
-       * \brief Get control error covariance multipler
-       * @return Control error covariance multipler
-       */
-      double getHrate();
-
-      /**
-       * @brief update Updates the problem, adding lazy update of task maps for which the task definition has rho=0.
-       * @param x State
-       * @param t time step
-       * @return  Indication of success TODO
-       */
-      void update(Eigen::VectorXdRefConst x, const int t);
-
-    private:
       int T; //!< Number of time steps
       double tau; //!< Time step duration
-      Eigen::MatrixXd W; //!< Kinematic system transition error covariance (constant throughout the trajectory)
       double Q_rate; //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
       double H_rate; //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)
       double W_rate; //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+      Eigen::MatrixXd W;
+      Eigen::MatrixXd H;
+      Eigen::MatrixXd Q;
+
+      std::vector<Eigen::VectorXd> Rho;
+      std::vector<Eigen::VectorXd> y;
+      std::vector<Eigen::VectorXd> Phi;
+      std::vector<Eigen::MatrixXd> J;
+
+      TaskMap_vec Tasks;
+      Eigen::MatrixXi Mapping;
+      int PhiN;
+      int N;
+      int NumTasks;
 
   };
 

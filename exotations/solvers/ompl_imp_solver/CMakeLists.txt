@@ -26,7 +26,6 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ompl_imp_solver
   CATKIN_DEPENDS exotica ompl_solver pluginlib
-  DEPENDS system_lib
 )
 
 AddInitializer(OMPLImplementation)

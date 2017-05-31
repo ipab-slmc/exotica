@@ -15,7 +15,6 @@ catkin_package(
   INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/include
   LIBRARIES dmesh_ros
   CATKIN_DEPENDS exotica roscpp ik_solver visualization_msgs
-  DEPENDS system_lib
 )
 
 AddInitializer(DMeshROS)

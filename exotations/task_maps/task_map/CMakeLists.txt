@@ -12,7 +12,6 @@ catkin_package(
   INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS exotica geometry_msgs
-  DEPENDS #system_lib
 )
 
 AddInitializer(CoM IMesh EffPosition JointLimit SweepFlux Distance Identity SphereCollision Sphere)

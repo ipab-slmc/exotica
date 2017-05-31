@@ -11,7 +11,7 @@ find_package(Boost REQUIRED COMPONENTS signals)
 find_package(LAPACK REQUIRED)
 
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/include
   LIBRARIES aico
   CATKIN_DEPENDS exotica
 )

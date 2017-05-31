@@ -11,9 +11,9 @@ find_package(Boost REQUIRED COMPONENTS signals)
 find_package(LAPACK REQUIRED)
 
 catkin_package(
-INCLUDE_DIRS include
-LIBRARIES ik_solver
-CATKIN_DEPENDS exotica
+	INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/include
+	LIBRARIES ik_solver
+	CATKIN_DEPENDS exotica
 )
 
 AddInitializer(IKsolver)

@@ -12,7 +12,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/include
   LIBRARIES dmesh_ros
   CATKIN_DEPENDS exotica roscpp ik_solver visualization_msgs
   DEPENDS system_lib

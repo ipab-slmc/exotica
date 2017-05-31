@@ -14,7 +14,6 @@ catkin_package(
 INCLUDE_DIRS include
 LIBRARIES ik_solver
 CATKIN_DEPENDS exotica
-DEPENDS system_lib
 )
 
 AddInitializer(IKsolver)

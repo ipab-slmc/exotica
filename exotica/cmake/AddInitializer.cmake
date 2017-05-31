@@ -21,19 +21,16 @@ macro(AddInitializer)
 endmacro(AddInitializer)
 
 macro(GenInitializers)
-include_directories(${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION})
-add_custom_command(
-  OUTPUT ${_InitializerOutputFiles}
-  COMMAND ${PYTHON_EXECUTABLE} ${_InitializerScriptDir}/GenerateInitializers.py exotica "${_InitializerSearchPaths}" ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION} ${_InitializerInputFiles} ${_InitializerOutputFiles}
-  DEPENDS ${_InitializerInputFiles} ${_InitializerScriptDir}/GenerateInitializers.py
-)
-add_custom_target(${PROJECT_NAME}_initializers DEPENDS ${_InitializerOutputFiles})
+  include_directories(${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+  add_custom_command(
+    OUTPUT ${_InitializerOutputFiles}
+    COMMAND ${PYTHON_EXECUTABLE} ${_InitializerScriptDir}/GenerateInitializers.py exotica "${_InitializerSearchPaths}" ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION} ${_InitializerInputFiles} ${_InitializerOutputFiles}
+    DEPENDS ${_InitializerInputFiles} ${_InitializerScriptDir}/GenerateInitializers.py
+  )
+  add_custom_target(${PROJECT_NAME}_initializers DEPENDS ${_InitializerOutputFiles})
 
-install(FILES ${_InitializerOutputFiles}
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-install(FILES ${_InitializerInputFiles}
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/init)
-
+  install(FILES ${_InitializerOutputFiles}
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  install(FILES ${_InitializerInputFiles}
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/init)
 endmacro(GenInitializers)
-
-

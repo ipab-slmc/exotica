@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+find_package(PythonInterp REQUIRED)
+
 set(_InitializerInputFiles)
 set(_InitializerOutputFiles)
 set(_InitializerCopyFiles)
@@ -22,7 +24,7 @@ macro(GenInitializers)
 include_directories(${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION})
 add_custom_command(
   OUTPUT ${_InitializerOutputFiles}
-  COMMAND python ${_InitializerScriptDir}/GenerateInitializers.py exotica "${_InitializerSearchPaths}" ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION} ${_InitializerInputFiles} ${_InitializerOutputFiles}
+  COMMAND ${PYTHON_EXECUTABLE} ${_InitializerScriptDir}/GenerateInitializers.py exotica "${_InitializerSearchPaths}" ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION} ${_InitializerInputFiles} ${_InitializerOutputFiles}
   DEPENDS ${_InitializerInputFiles} ${_InitializerScriptDir}/GenerateInitializers.py
 )
 add_custom_target(${PROJECT_NAME}_initializers DEPENDS ${_InitializerOutputFiles})

@@ -7,7 +7,6 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS signals)
 find_package(LAPACK REQUIRED)
 
 AddInitializer(AICOsolver)
@@ -33,9 +32,8 @@ add_library(aico
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(aico
-  ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${LAPACK_LIBRARIES}
+  ${catkin_LIBRARIES} ${LAPACK_LIBRARIES}
 )
-
 add_dependencies(aico aico_initializers)
 
 ## Install

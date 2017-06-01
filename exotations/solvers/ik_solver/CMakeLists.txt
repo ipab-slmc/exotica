@@ -5,9 +5,6 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
 )
 
-
-find_package(Boost REQUIRED COMPONENTS signals)
-
 find_package(LAPACK REQUIRED)
 
 AddInitializer(IKsolver)
@@ -27,11 +24,9 @@ include_directories(
 add_library(ik_solver
   src/ik_solver/IKSolver.cpp
 )
-
 target_link_libraries(ik_solver
-  ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${LAPACK_LIBRARIES}
+  ${catkin_LIBRARIES} ${LAPACK_LIBRARIES}
 )
-
 add_dependencies(ik_solver ik_solver_initializers)
 
 install(TARGETS ik_solver

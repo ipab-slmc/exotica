@@ -10,15 +10,14 @@ find_package(Boost REQUIRED COMPONENTS signals)
 
 find_package(LAPACK REQUIRED)
 
+AddInitializer(IKsolver)
+GenInitializers()
+
 catkin_package(
-	INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/include
+	INCLUDE_DIRS include
 	LIBRARIES ik_solver
 	CATKIN_DEPENDS exotica
 )
-
-AddInitializer(IKsolver)
-
-GenInitializers()
 
 include_directories(
   include
@@ -38,4 +37,5 @@ add_dependencies(ik_solver ik_solver_initializers)
 install(TARGETS ik_solver
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(DIRECTORY ${CATKIN_DEVEL_PREFIX}/include/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

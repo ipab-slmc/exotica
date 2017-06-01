@@ -10,14 +10,14 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Boost REQUIRED COMPONENTS signals)
 find_package(LAPACK REQUIRED)
 
+AddInitializer(AICOsolver)
+GenInitializers()
+
 catkin_package(
-  INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/include
+  INCLUDE_DIRS include
   LIBRARIES aico
   CATKIN_DEPENDS exotica
 )
-
-AddInitializer(AICOsolver)
-GenInitializers()
 
 include_directories(
   include

@@ -253,9 +253,6 @@ namespace exotica
       a.assign(T, a_);
     }
     {
-      HIGHLIGHT(prob_->W);
-      HIGHLIGHT(prob_->H);
-      HIGHLIGHT(prob_->Q);
       // Set constant W,Win,H,Hinv
       W.assign(T, prob_->W);
       Winv.assign(T, prob_->W.inverse());
@@ -488,7 +485,6 @@ namespace exotica
       rhat[t] = 0;
       R[t].setZero();
       r[t].setZero();
-      //HIGHLIGHT("Task update t=" <<t);
       for (int i = 0; i < prob_->Mapping.rows(); i++)
       {
         prec = prob_->Rho[t](i);
@@ -496,7 +492,6 @@ namespace exotica
         {
             int start = prob_->Mapping(i,0);
             int len = prob_->Mapping(i,1);
-            if(t==T-1) HIGHLIGHT("Task "<<i<<"\nRho: " <<prob_->Rho[t](i)<<"\ny = "<<prob_->y[t].segment(start, len).transpose()<<"\nPhi = "<<prob_->Phi[t].segment(start, len).transpose()<<"\nJ = \n"<<prob_->J[t].middleRows(start, len));
           Jt = prob_->J[t].middleRows(start, len).transpose();
           C += prec
               * (prob_->y[t].segment(start, len)
@@ -687,8 +682,6 @@ namespace exotica
           {
                 int start = prob_->Mapping(i,0);
                 int len = prob_->Mapping(i,1);
-                if(t==T-1) HIGHLIGHT("Target: "<<prob_->y[t].segment(start, len).transpose());
-                if(t==T-1) HIGHLIGHT("Phi:    "<<prob_->Phi[t].segment(start, len).transpose());
                 costTask(t, i) = prec
                     * (prob_->y[t].segment(start, len)
                         - prob_->Phi[t].segment(start, len)).squaredNorm();
@@ -718,12 +711,12 @@ namespace exotica
       }
       break;
     case smSymmetric:
-      ROS_WARN_STREAM("Updating forward, sweep "<<sweep);
+      //ROS_WARN_STREAM("Updating forward, sweep "<<sweep);
       for (t = 1; t < T; t++)
       {
         updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.); //relocate once on fwd & bwd Sweep
       }
-      ROS_WARN_STREAM("Updating backward, sweep "<<sweep);
+      //ROS_WARN_STREAM("Updating backward, sweep "<<sweep);
       for (t = T - 2; t>=0; t--)
       {
         updateTimeStep(t, false, true, (sweep ? 1 : 0), tolerance, false,1.);
@@ -761,8 +754,9 @@ namespace exotica
     dampingReference = b;
     // q is set inside of evaluateTrajectory() function
     cost = evaluateTrajectory(b);
+    HIGHLIGHT("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq="<<b_step<<", damping="<<damping<<")");
     if (cost < 0) return -1.0;
-    INFO("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq="<<b_step<<", damping="<<damping<<")");
+
 
     if (sweep && damping) perhapsUndoStep();
     sweep++;

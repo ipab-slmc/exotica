@@ -115,7 +115,7 @@ namespace exotica
     void UnconstrainedTimeIndexedProblem::setRho(const std::string & task_name, const double rho, int t)
     {
         TaskMap_ptr task = TaskMaps.at(task_name);
-        y[t](task->Id) = rho;
+        Rho[t](task->Id) = rho;
     }
 
     Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string & task_name, int t)

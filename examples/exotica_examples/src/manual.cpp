@@ -20,7 +20,7 @@ void run()
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
 
-    UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,{map},{task},W);
+    UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,{task},W,false,{map});
     IKsolverInitializer solver("MySolver");
 
     HIGHLIGHT_NAMED("ManualLoader","Loaded from a hardcoded specialized initializer.");

@@ -41,7 +41,7 @@ namespace exotica
 {
 
   SamplingProblem::SamplingProblem()
-      : space_dim_(0), problemType(OMPL_PROBLEM_GOAL)
+      : space_dim_(0)
   {
     Flags = KIN_FK;
   }
@@ -61,38 +61,16 @@ namespace exotica
     if (keepOriginals)
     {
       TaskMaps = originalMaps_;
-      goals_ = originalGoals_;
     }
     else
     {
       TaskMaps.clear();
-      task_defs_.clear();
-      goals_.clear();
     }
   }
 
   void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
   {
       Parameters = init;
-      std::string PlroblemType = init.PlroblemType;
-      if(PlroblemType=="Goals")
-      {
-        for (auto goal : task_defs_)
-        {
-          if (goal.second->type()=="exotica::TaskTerminationCriterion")
-          {
-            goals_.push_back( boost::static_pointer_cast<exotica::TaskTerminationCriterion>(goal.second));
-          }
-          else
-          {
-            ERROR(goal.first << " has wrong type, ignored!");
-          }
-        }
-       }
-      else
-      {
-          throw_named("Unsupported OMPL problem type!");
-      }
 
       if(init.LocalPlannerConfig!="")
       {
@@ -102,7 +80,7 @@ namespace exotica
       space_dim_ = scene_->getNumJoints();
 
       originalMaps_ = TaskMaps;
-      originalGoals_ = goals_;
+      goal_ = init.Goal;
 
       if (scene_->getBaseType() != exotica::BASE_TYPE::FIXED)
         compound_ = true;
@@ -112,8 +90,7 @@ namespace exotica
       scene_->getJointNames(jnts);
 
       getBounds().resize(jnts.size() * 2);
-      std::map<std::string, std::vector<double>> joint_limits =
-          scene_->getSolver().getUsedJointLimits();
+      std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
       for (int i = 0; i < jnts.size(); i++)
       {
         getBounds()[i] = joint_limits.at(jnts[i])[0];
@@ -124,11 +101,6 @@ namespace exotica
   int SamplingProblem::getSpaceDim()
   {
     return space_dim_;
-  }
-
-  std::vector<TaskTerminationCriterion_ptr>& SamplingProblem::getGoals()
-  {
-    return goals_;
   }
 
   bool SamplingProblem::isCompoundStateSpace()

@@ -55,8 +55,7 @@ namespace exotica
   {
     public:
       SamplingProblem();
-      virtual
-      ~SamplingProblem();
+      virtual ~SamplingProblem();
 
       virtual void Instantiate(SamplingProblemInitializer& init);
 
@@ -67,26 +66,23 @@ namespace exotica
         return update_lock_;
       }
 
-      std::vector<TaskTerminationCriterion_ptr>& getGoals();
       std::vector<double>& getBounds();
       bool isCompoundStateSpace();
       std::string local_planner_config_;
-      EParam<std_msgs::Bool> full_body_plan_;
+      bool full_body_plan_;
 
       SamplingProblemInitializer Parameters;
 
-      void setGoalState(const Eigen::VectorXd & qT, const double eps =
-                std::numeric_limits<double>::epsilon()) {}
+      void setGoalState(const Eigen::VectorXd & qT, const double eps = std::numeric_limits<double>::epsilon()) {}
 
       virtual void clear(bool keepOriginals = true);
+
+      Eigen::VectorXd goal_;
     private:
       boost::mutex update_lock_;
-      std::vector<TaskTerminationCriterion_ptr> goals_;
       std::vector<double> bounds_;
       int space_dim_;
-      SamplingProblem_Type problemType;
       bool compound_;
-      std::vector<TaskTerminationCriterion_ptr> originalGoals_;
 
   };
 

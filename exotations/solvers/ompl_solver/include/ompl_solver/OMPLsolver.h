@@ -95,7 +95,7 @@ namespace exotica
 
       virtual std::string print(std::string prepend);
 
-      virtual void setGoalState(const Eigen::VectorXd & qT, const double eps =
+      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps =
           std::numeric_limits<double>::epsilon());
     private:
       SamplingProblem_ptr prob_; //!< Shared pointer to the planning problem.

@@ -55,34 +55,31 @@ namespace exotica
       void initialiseBaseSolver(Initializer& init, const Server_ptr &server);
       virtual void initialiseSolver(Initializer& init) = 0;
 
-      virtual bool solve(const Eigen::VectorXd &x0,
-          Eigen::MatrixXd &sol) = 0;
-      virtual void setGoalState(const Eigen::VectorXd & qT,
-          const double eps = std::numeric_limits<double>::epsilon()) = 0;
+      virtual bool solve(Eigen::VectorXdRefConst x0, Eigen::MatrixXd &sol) = 0;
+      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon()) = 0;
 
-      virtual std::string & getPlannerName() = 0;
+      virtual std::string getPlannerName() = 0;
       double getPlanningTime();
 
-      const boost::shared_ptr<og::SimpleSetup> getOMPLSimpleSetup() const;
+      const og::SimpleSetupPtr getOMPLSimpleSetup() const;
 
       virtual void specifyProblem(const SamplingProblem_ptr &prob) = 0;
 
       static pluginlib::ClassLoader<exotica::OMPLBaseSolver> base_solver_loader;
     protected:
       OMPLBaseSolver(const std::string planner_name);
-      void registerPlannerAllocator(const std::string &planner_id,
-          const ConfiguredPlannerAllocator &pa)
+      void registerPlannerAllocator(const std::string &planner_id, const ConfiguredPlannerAllocator &pa)
       {
         known_algorithms_[planner_id] = pa;
       }
-      template<typename T> static ob::PlannerPtr allocatePlanner(
-          const ob::SpaceInformationPtr &si, const std::string &new_name)
+
+      template<typename T> static ob::PlannerPtr allocatePlanner(const ob::SpaceInformationPtr &si, const std::string &new_name)
       {
         ompl::base::PlannerPtr planner(new T(si));
         if (!new_name.empty()) planner->setName(new_name);
-//        planner->setup();
         return planner;
       }
+
       std::map<std::string, ConfiguredPlannerAllocator> known_algorithms_;
       std::string planner_name_;
 
@@ -93,17 +90,14 @@ namespace exotica
        * @param traj Eigen Matrix trajectory
        * @return Indicates success
        */
-      virtual void convertPath(const og::PathGeometric &pg,
-          Eigen::MatrixXd & traj) = 0;
+      virtual void convertPath(const og::PathGeometric &pg, Eigen::MatrixXd & traj) = 0;
 
-      virtual void getSimplifiedPath(og::PathGeometric &pg,
-          Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc) = 0;
+      virtual void getSimplifiedPath(og::PathGeometric &pg, Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc) = 0;
       /**
        * \brief Registers trajectory termination condition
        * @param ptc Termination criteria
        */
-      void registerTerminationCondition(
-          const ob::PlannerTerminationCondition &ptc);
+      void registerTerminationCondition(const ob::PlannerTerminationCondition &ptc);
 
       /**
        * \brief Unregisters trajectory termination condition
@@ -134,10 +128,10 @@ namespace exotica
       Server_ptr server_;
 
       /// The OMPL planning context; this contains the problem definition and the planner used
-      boost::shared_ptr<og::SimpleSetup> ompl_simple_setup_;
+      og::SimpleSetupPtr ompl_simple_setup_;
 
       /// \brief OMPL state space specification
-      boost::shared_ptr<ob::StateSpace> state_space_;
+      ompl::base::StateSpacePtr state_space_;
 
       /// \brief Maximum allowed time for planning
       double timeout_;
@@ -151,7 +145,7 @@ namespace exotica
       bool finishedSolving_;
 
       // \brief Max number of attempts at sampling the goal region
-      int goal_ampling_max_attempts_;
+      int goal_sampling_max_attempts_;
 
       /// \brief  Porjection type
       std::string projector_;

@@ -31,7 +31,7 @@ void run()
     // If necessary, modify the problem after calling sol->specifyProblem()
     // e.g. set different rho:
 
-    try
+    if(any_problem->type()=="exotica::UnconstrainedTimeIndexedProblem")
     {
         UnconstrainedTimeIndexedProblem_ptr problem = boost::static_pointer_cast<UnconstrainedTimeIndexedProblem>(any_problem);
         for (int t = 0; t < problem->T-1; t++)
@@ -45,17 +45,6 @@ void run()
         goal << 0.4, -0.1, 0.5;
         problem->setGoal("Position", goal, problem->T-1);
     }
-    catch(Exception e) {}
-
-    // Set goal state for bi-directional OMPL algorithms
-    try
-    {
-        SamplingProblem_ptr problem = boost::static_pointer_cast<SamplingProblem>(any_problem);
-        Eigen::VectorXd goal(7);
-        goal << -0.134914, -0.229508, -0.124971, 1.94267, -1.4921e-17, 0.0, 0.0;
-        problem->setGoalState(goal);
-    }
-    catch(Exception e) {}
 
     // Create the initial configuration
     Eigen::VectorXd q = Eigen::VectorXd::Zero(

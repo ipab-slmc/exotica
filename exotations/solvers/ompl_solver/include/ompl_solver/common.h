@@ -46,9 +46,7 @@ namespace exotica
   namespace og = ompl::geometric;
   namespace ot = ompl::tools;
 
-  typedef boost::function<
-      ob::PlannerPtr(const ompl::base::SpaceInformationPtr &si,
-          const std::string &name)> ConfiguredPlannerAllocator;
+  typedef boost::function<ob::PlannerPtr(const ob::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
 
 }
 

@@ -77,8 +77,7 @@ namespace exotica
   {
     if (base_solver_->solve(q0, solution))
     {
-      HIGHLIGHT(
-          "OMPL solving succeeded, planning time "<<base_solver_->getPlanningTime()<<"sec");
+      HIGHLIGHT("OMPL solving succeeded, planning time "<<base_solver_->getPlanningTime()<<"sec");
     }
     else
     {
@@ -91,18 +90,13 @@ namespace exotica
   {
     MotionSolver::specifyProblem(pointer);
     prob_ = boost::static_pointer_cast<SamplingProblem>(pointer);
-
-//    for (auto & it : prob_->getScenes())
-//    {
-//      it.second->activateTaskMaps();
-//    }
-    prob_->getScene()->activateTaskMaps();
     base_solver_->specifyProblem(prob_);
+    setGoalState(prob_->goal_);
   }
 
   bool OMPLsolver::isSolvable(const PlanningProblem_ptr & prob)
   {
-    if (prob->type().compare("exotica::SamplingProblem") == 0) return true;
+    if (prob->type()=="exotica::SamplingProblem") return true;
     return false;
   }
 
@@ -115,7 +109,7 @@ namespace exotica
     return planner;
   }
 
-  void OMPLsolver::setGoalState(const Eigen::VectorXd & qT, const double eps)
+  void OMPLsolver::setGoalState(Eigen::VectorXdRefConst qT, const double eps)
   {
     base_solver_->setGoalState(qT, eps);
   }

@@ -194,7 +194,9 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         Joint->IsControlled = Joint->ControlId >= 0;
         if(Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
         TreeMap[Joint->Segment.getName()] = Joint;
+        ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
     }
+    setJointLimits();
 }
 
 void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
@@ -597,17 +599,9 @@ void KinematicTree::setBaseBounds(const std::vector<double> &bounds)
   if (base_type_ == BASE_TYPE::FLOATING)
   {
     //Here we are just setting the bounds of allowed base movement
-    robot_tree_[1].joint_limits_.resize(2);
-    robot_tree_[1].joint_limits_[0] = bounds[0];
-    robot_tree_[1].joint_limits_[1] = bounds[3];
-
-    robot_tree_[2].joint_limits_.resize(2);
-    robot_tree_[2].joint_limits_[0] = bounds[1];
-    robot_tree_[2].joint_limits_[1] = bounds[4];
-
-    robot_tree_[3].joint_limits_.resize(2);
-    robot_tree_[3].joint_limits_[0] = bounds[2];
-    robot_tree_[3].joint_limits_[1] = bounds[5];
+    ControlledJoints[0]->JointLimits = {bounds[0], bounds[3]};
+    ControlledJoints[1]->JointLimits = {bounds[1], bounds[4]};
+    ControlledJoints[2]->JointLimits = {bounds[2], bounds[5]};
   }
 }
 
@@ -957,9 +951,9 @@ std::map<std::string, int> KinematicTree::getJointMap()
 std::map<std::string, std::vector<double>> KinematicTree::getUsedJointLimits()
 {
   std::map<std::string, std::vector<double>> limits;
-  for (auto & it : joint_map_)
+  for (std::shared_ptr<KinematicElement> it : ControlledJoints)
   {
-    limits[it.first] = robot_tree_[it.second].joint_limits_;
+    limits[it->Segment.getJoint().getName()] = it->JointLimits;
   }
   return limits;
 }
@@ -987,26 +981,19 @@ void KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
   }
   for (int i = 0; i < 6; i++)
   {
-    robot_tree_[i + 1].joint_limits_[0] = lower[i];
-    robot_tree_[i + 1].joint_limits_[1] = upper[i];
+    ControlledJoints[i]->JointLimits = {lower[i], upper[i]};
   }
 }
 void KinematicTree::setJointLimits()
 {
-  srdf::Model::VirtualJoint virtual_joint =
-      Model->getSRDF()->getVirtualJoints()[0];
+  srdf::Model::VirtualJoint virtual_joint =  Model->getSRDF()->getVirtualJoints()[0];
   std::vector<std::string> vars = Model->getVariableNames();
   for (int i = 0; i < vars.size(); i++)
   {
-
-    if (joint_map_.find(vars[i]) != joint_map_.end())
+    if (ControlledJointsMap.find(vars[i]) != ControlledJointsMap.end())
     {
-      int index = joint_map_.at(vars[i]);
-      robot_tree_[index].joint_limits_.resize(2);
-      robot_tree_[index].joint_limits_[0] =
-          Model->getVariableBounds(vars[i]).min_position_;
-      robot_tree_[index].joint_limits_[1] =
-          Model->getVariableBounds(vars[i]).max_position_;
+      int index = ControlledJointsMap.at(vars[i])->ControlId;
+      ControlledJoints[index]->JointLimits = {Model->getVariableBounds(vars[i]).min_position_, Model->getVariableBounds(vars[i]).max_position_};
     }
   }
 
@@ -1014,43 +1001,25 @@ void KinematicTree::setJointLimits()
 ///	Should be done more systematically with robot model class
   if (base_type_ == BASE_TYPE::FLOATING)
   {
-    robot_tree_[1].joint_limits_.resize(2);
-    robot_tree_[1].joint_limits_[0] = -0.05;
-    robot_tree_[1].joint_limits_[1] = 0.05;
+    ControlledJoints[0]->JointLimits = {-0.05, 0.05};
 
-    robot_tree_[2].joint_limits_.resize(2);
-    robot_tree_[2].joint_limits_[0] = -0.05;
-    robot_tree_[2].joint_limits_[1] = 0.05;
+    ControlledJoints[1]->JointLimits = {-0.05, 0.05};
 
-    robot_tree_[3].joint_limits_.resize(2);
-    robot_tree_[3].joint_limits_[0] = 0.875;
-    robot_tree_[3].joint_limits_[1] = 1.075;
+    ControlledJoints[2]->JointLimits = {0.875, 1.075};
 
-    robot_tree_[4].joint_limits_.resize(2);
-    robot_tree_[4].joint_limits_[0] = -0.087 / 2;
-    robot_tree_[4].joint_limits_[1] = 0.087 / 2;
+    ControlledJoints[3]->JointLimits = {-0.087 / 2, 0.087 / 2};
 
-    robot_tree_[5].joint_limits_.resize(2);
-    robot_tree_[5].joint_limits_[0] = -0.087 / 2;
-    robot_tree_[5].joint_limits_[1] = 0.2617 / 2;
+    ControlledJoints[4]->JointLimits = {-0.087 / 2, 0.2617 / 2};
 
-    robot_tree_[6].joint_limits_.resize(2);
-    robot_tree_[6].joint_limits_[0] = -M_PI / 8;
-    robot_tree_[6].joint_limits_[1] = M_PI / 8;
+    ControlledJoints[5]->JointLimits = {-M_PI / 8, M_PI / 8};
   }
   else if (base_type_ == BASE_TYPE::PLANAR)
   {
-    robot_tree_[1].joint_limits_.resize(2);
-    robot_tree_[1].joint_limits_[0] = -10;
-    robot_tree_[1].joint_limits_[1] = 10;
+    ControlledJoints[0]->JointLimits = {-10, 10};
 
-    robot_tree_[2].joint_limits_.resize(2);
-    robot_tree_[2].joint_limits_[0] = -10;
-    robot_tree_[2].joint_limits_[1] = 10;
+    ControlledJoints[1]->JointLimits = {-10, 10};
 
-    robot_tree_[3].joint_limits_.resize(2);
-    robot_tree_[3].joint_limits_[0] = -1.57;
-    robot_tree_[3].joint_limits_[1] = 1.57;
+    ControlledJoints[2]->JointLimits = {-1.57, 1.57};
   }
 }
 

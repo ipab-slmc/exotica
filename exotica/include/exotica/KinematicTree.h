@@ -109,6 +109,7 @@ namespace exotica
       std::vector<std::shared_ptr<KinematicElement>> Children;
       KDL::Segment Segment;
       KDL::Frame Frame;
+      std::vector<double> JointLimits;
   };
 
   struct KinematicFrame
@@ -500,6 +501,7 @@ private:
         std::map<std::string, std::shared_ptr<KinematicElement>> TreeMap;
         std::shared_ptr<KinematicElement> Root;
         std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
+        std::map<std::string, std::shared_ptr<KinematicElement>> ControlledJointsMap;
         std::vector<std::string> ModleJointsNames;
         std::vector<std::string> ControlledJointsNames;
         std::shared_ptr<KinematicResponse> Solution;

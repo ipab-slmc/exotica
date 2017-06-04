@@ -28,13 +28,13 @@ namespace exotica
             for( tinyxml2::XMLHandle child = tag.FirstChild(); child.ToElement(); child = child.NextSibling() ) count++;
             if(count==0)
             {
-                // No child tags = this is a regular property
-                std::string value;
+
                 if (!tag.ToElement()->GetText())
                 {
-                    throw_pretty("Can't get value! ("+name+")");
+                    // No child tags = this is an empty vector of properties
+                    return;
                 }
-                value = tag.ToElement()->GetText();
+                std::string value = tag.ToElement()->GetText();
                 parent.addProperty(Property(name,true,value));
             }
             else

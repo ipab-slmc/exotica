@@ -67,7 +67,6 @@ namespace exotica
       static void printSupportedClasses();
       static boost::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return Instance()->solvers_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->maps_.createInstance("exotica/"+type);}
-      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return Instance()->tasks_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->problems_.createInstance("exotica/"+type);}
       static std::vector<std::string> getSolvers();
       static std::vector<std::string> getProblems();
@@ -83,12 +82,6 @@ namespace exotica
       static boost::shared_ptr<exotica::TaskMap> createMap(const Initializer& init)
       {
           boost::shared_ptr<exotica::TaskMap> ret = Instance()->maps_.createInstance(init.getName());
-          ret->InstantiateInternal(init);
-          return ret;
-      }
-      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const Initializer& init)
-      {
-          boost::shared_ptr<exotica::TaskDefinition> ret = Instance()->tasks_.createInstance(init.getName());
           ret->InstantiateInternal(init);
           return ret;
       }
@@ -170,7 +163,6 @@ namespace exotica
       pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
       pluginlib::ClassLoader<exotica::TaskMap> maps_;
       PlanningProblem_fac problems_;
-      TaskDefinition_fac tasks_;
   };
 
   typedef boost::shared_ptr<Setup> Setup_ptr;

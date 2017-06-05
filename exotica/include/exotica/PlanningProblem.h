@@ -35,7 +35,6 @@
 
 #include "exotica/Object.h"
 #include "exotica/TaskMap.h"
-#include "exotica/TaskDefinition.h"
 #include "exotica/Server.h"
 #include "exotica/Scene.h"
 #include "exotica/Tools.h"
@@ -71,12 +70,6 @@ namespace exotica
        * @return  Indication of success TODO
        */
       virtual void update(Eigen::VectorXdRefConst x, const int t);
-
-      /**
-       * \brief Returns the reference to the task definition map.
-       * @return Task definitions
-       */
-      TaskDefinition_map& getTaskDefinitions();
 
       /**
        * \brief	Get task maps
@@ -126,10 +119,8 @@ namespace exotica
        */
       Server_ptr server_; //!< Pointer to EXOTica parameter server;
       TaskMap_map TaskMaps; //!< The set of taskmaps we will be using, which will be shared between task-definitions
-      TaskDefinition_map task_defs_; //!< The set of task definition objects
       std::map<std::string, std::string> knownMaps_;
       TaskMap_map originalMaps_;
-      TaskDefinition_map originalDefs_;
       KinematicRequestFlags Flags;
 
   };

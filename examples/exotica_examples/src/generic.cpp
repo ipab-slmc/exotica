@@ -14,14 +14,7 @@ void run()
                         {"Scene",std::string("MyScene")},
                         {"EndEffector",std::vector<Initializer>({
                              Initializer("Limb",{{"Segment",std::string("lwr_arm_6_link")}}),
-                             Initializer("Limb",{{"Segment",std::string("lwr_arm_6_link")},{"Frame",Eigen::VectorTransform(0,0,0.5)}})
-                                        }) } });
-    // Create a task using the map above (goal will be specified later)
-    Initializer task("exotica/TaskSqrError",{
-                         {"Name",std::string("MinimizeError")},
-                         {"Map",std::string("Position")},
-                         {"Rho",1e2}
-                     });
+                                        })}});
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
 
@@ -29,7 +22,6 @@ void run()
                             {"Name",std::string("MyProblem")},
                             {"PlanningScene",scene},
                             {"Maps",std::vector<Initializer>({map})},
-                            {"Tasks",std::vector<Initializer>({task})},
                             {"W",W},
                             {"Tolerance",1e-5},
                         });
@@ -37,6 +29,8 @@ void run()
     Initializer solver("exotica/IKsolver",{
                             {"Name",std::string("MySolver")},
                             {"MaxIt",1},
+                            {"MaxStep", 0.1},
+                            {"C",1e-3},
                         });
 
     HIGHLIGHT_NAMED("GenericLoader","Loaded from a hardcoded generic initializer.");

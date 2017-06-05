@@ -15,22 +15,6 @@
       </Scene>
     </PlanningScene>
 
-    <Maps>
-        <EffPosition Name="Position">
-          <Scene>MyScene</Scene>
-          <EndEffector>
-              <Limb Segment="lwr_arm_6_link" />
-          </EndEffector>
-        </EffPosition>
-    </Maps>
-
-    <Tasks>
-        <TaskSqrError Name="MinimizeError">
-            <Map>Position</Map>
-            <Rho>1e2</Rho>
-        </TaskSqrError>
-    </Tasks>
-
     <Goal>-0.134914 -0.229508 -0.124971 1.94267 -1.4921e-17 0.0 0.0</Goal>
   </SamplingProblem>
 

@@ -27,14 +27,6 @@
       </EffPosition>
     </Maps>
 
-    <Tasks>
-      <TaskSqrError Name="MinimizeError">
-        <Map>Position</Map>
-        <Rho>1e2</Rho>
-      </TaskSqrError>
-    </Tasks>
-
-
     <!-- Problem parameters: tolerance and per joint weighting -->
 
     <W> 7 6 5 4 3 2 1 </W>

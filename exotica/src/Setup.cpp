@@ -51,12 +51,6 @@ namespace exotica
       {
           HIGHLIGHT(" '"<<s<<"'");
       }
-      HIGHLIGHT("Registered task definitions:");
-      std::vector<std::string> tasks =  Instance()->tasks_.getDeclaredClasses();
-      for(std::string s : tasks)
-      {
-          HIGHLIGHT(" '"<<s<<"'");
-      }
       HIGHLIGHT("Registered task maps:");
       std::vector<std::string> maps =  Instance()->maps_.getDeclaredClasses();
       for(std::string s : maps)
@@ -67,11 +61,10 @@ namespace exotica
 
   std::vector<std::string> Setup::getSolvers() {return Instance()->solvers_.getDeclaredClasses();}
   std::vector<std::string> Setup::getProblems() {return Instance()->problems_.getDeclaredClasses();}
-  std::vector<std::string> Setup::getMaps() {return Instance()->tasks_.getDeclaredClasses();}
-  std::vector<std::string> Setup::getTasks() {return Instance()->maps_.getDeclaredClasses();}
+  std::vector<std::string> Setup::getMaps() {return Instance()->maps_.getDeclaredClasses();}
 
   Setup::Setup() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap"),
-      problems_(PlanningProblem_fac::Instance()), tasks_(TaskDefinition_fac::Instance())
+      problems_(PlanningProblem_fac::Instance())
   {
 
   }

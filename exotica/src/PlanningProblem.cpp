@@ -45,7 +45,7 @@ namespace exotica
   {
     std::string ret = Object::print(prepend);
     ret += "\n" + prepend + "  Task definitions:";
-    for (auto& it : task_defs_)
+    for (auto& it : TaskMaps)
       ret += "\n" + it.second->print(prepend + "    ");
     return ret;
   }
@@ -78,7 +78,6 @@ namespace exotica
       nominalState.resize(0);
 
       TaskMaps.clear();
-      task_defs_.clear();
 
       // Create the scene
       scene_.reset(new Scene());
@@ -117,26 +116,7 @@ namespace exotica
         HIGHLIGHT("No maps were defined!");
       }
 
-      // Create the task definitions
-      for(const Initializer& task : init.Tasks)
-      {
-          Initializer mapped_task(task);
-          mapped_task.addProperty(Property("TaskMaps",true,boost::any(TaskMaps)));
-          TaskDefinition_ptr temp_ptr = Setup::createDefinition(mapped_task);
-          temp_ptr->ns_ = ns_ + "/" + temp_ptr->getObjectName();
-          if (task_defs_.find(temp_ptr->getObjectName()) != task_defs_.end())
-          {
-              throw_named("Task definition '"+temp_ptr->getObjectName()+"' already exists!");
-          }
-          task_defs_[temp_ptr->getObjectName()] = temp_ptr;
-      }
-      if (init.Tasks.size() == 0)
-      {
-        HIGHLIGHT("No tasks were defined!");
-      }
-
       originalMaps_ = TaskMaps;
-      originalDefs_ = task_defs_;
   }
 
   void PlanningProblem::clear(bool keepOriginals)
@@ -144,7 +124,6 @@ namespace exotica
     if (keepOriginals)
     {
       TaskMaps = originalMaps_;
-      task_defs_ = originalDefs_;
       std::map<std::string,
           std::pair<std::vector<std::string>, std::vector<KDL::Frame> > > tmp;
       for (auto &it : originalMaps_)
@@ -159,19 +138,11 @@ namespace exotica
           tmp[it.first] = tmp_pair;
         }
       }
-//      for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
-//        it->second->clearTaskMap();
       scene_->clearTaskMap();
-      //for (auto &it : originalMaps_)
-        //it.second->getScene()->appendTaskMap(it.first, tmp.at(it.first).first,
-         //   tmp.at(it.first).second);
     }
     else
     {
       TaskMaps.clear();
-      task_defs_.clear();
-//      for (auto it = scenes_.begin(); it != scenes_.end(); ++it)
-//        it->second->clearTaskMap();
       scene_->clearTaskMap();
     }
   }
@@ -185,11 +156,6 @@ namespace exotica
 //    }
     scene_->update(x);
     // Update the Task maps
-  }
-
-  TaskDefinition_map& PlanningProblem::getTaskDefinitions()
-  {
-    return task_defs_;
   }
 
   TaskMap_map& PlanningProblem::getTaskMaps()

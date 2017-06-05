@@ -35,7 +35,6 @@
 
 #include "exotica/Object.h"
 #include "exotica/TaskMap.h"
-#include "exotica/TaskDefinition.h"
 #include "exotica/PlanningProblem.h"
 #include "exotica/Server.h"
 #include "exotica/Property.h"

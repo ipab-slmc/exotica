@@ -27,14 +27,6 @@
         </EndEffector>
       </EffPosition>
     </Maps>
-
-    <Tasks> 
-      <TaskSqrError Name="AICOSolverDemoTask">
-        <Map>Position</Map>
-        <Rho>1e6</Rho>
-        <Goal>0.4 -0.1 0.5</Goal>
-      </TaskSqrError>
-    </Tasks>
    
     <T>100</T>
     <Tau>0.05</Tau>

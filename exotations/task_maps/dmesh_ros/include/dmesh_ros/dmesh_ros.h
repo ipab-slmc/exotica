@@ -40,7 +40,6 @@
 #include "GraphManager.h"
 #include <tf/transform_listener.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
-#include <exotica/Definitions/TaskSqrError.h>
 //ROS packages
 #include <ros/ros.h>
 #include <geometry_msgs/PoseArray.h>

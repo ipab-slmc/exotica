@@ -37,7 +37,6 @@
 #include <exotica/PlanningProblem.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
-#include "exotica/Definitions/TaskTerminationCriterion.h"
 #include <exotica/SamplingProblemInitializer.h>
 
 namespace exotica

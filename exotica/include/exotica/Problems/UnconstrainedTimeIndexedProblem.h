@@ -38,7 +38,6 @@
 #define UNCONSTRAINETIMEINDEXEDPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
-#include "exotica/Definitions/TaskSqrError.h"
 #include <exotica/UnconstrainedTimeIndexedProblemInitializer.h>
 
 namespace exotica

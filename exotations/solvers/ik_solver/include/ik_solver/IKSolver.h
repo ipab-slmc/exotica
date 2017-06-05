@@ -36,7 +36,6 @@
 
 #include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
-#include <exotica/Definitions/TaskSqrError.h>
 #include <ik_solver/IKsolverInitializer.h>
 #include <iostream>
 #include <fstream>

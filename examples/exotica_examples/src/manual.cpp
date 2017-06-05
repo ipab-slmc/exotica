@@ -14,14 +14,16 @@ void run()
     SceneInitializer scene("MyScene","arm");
     // End-effector task map with two position frames
     EffPositionInitializer map("Position","MyScene",false,
-      {LimbInitializer("lwr_arm_6_link"),LimbInitializer("lwr_arm_6_link",Eigen::VectorTransform(0,0,0.5))});
+      {LimbInitializer("lwr_arm_6_link")});
     // Create a task using the map above (goal will be specified later)
-    TaskSqrErrorInitializer task("MinimizeError","Position",1e2);
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
 
-    UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,{task},W,false,{map});
+    UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,W,false,{map});
     IKsolverInitializer solver("MySolver");
+    solver.C = 1e-3;
+    solver.MaxIt = 1;
+    solver.MaxStep = 0.1;
 
     HIGHLIGHT_NAMED("ManualLoader","Loaded from a hardcoded specialized initializer.");
 

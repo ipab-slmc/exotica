@@ -67,7 +67,6 @@
 
 #include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
-#include <exotica/Definitions/TaskSqrError.h>
 #include <aico/AICOsolverInitializer.h>
 #include <iostream>
 #include <fstream>

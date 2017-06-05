@@ -20,7 +20,4 @@
   <class name="exotica/JointLimit" type="exotica::JointLimit" base_class_type="exotica::TaskMap">
     <description>Joint limits</description>
   </class>
-  <class name="exotica/SweepFlux" type="exotica::SweepFlux" base_class_type="exotica::TaskMap">
-    <description>Sweep flux</description>
-  </class>
 </library>

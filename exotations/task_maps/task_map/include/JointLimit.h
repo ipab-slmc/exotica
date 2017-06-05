@@ -53,16 +53,15 @@ namespace exotica
 
       virtual void Instantiate(JointLimitInitializer& init);
 
-      /**
-       * @brief	Concrete implementation of update method
-       * @param	x	Joint space configuration
-       */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      virtual void assignScene(Scene_ptr scene);
 
-      /**
-       * @brief	Get the task space dimension
-       */
-      virtual void taskSpaceDim(int & task_dim);
+      void Initialize();
+
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+
+      virtual int taskSpaceDim();
 
     private:
       Eigen::VectorXd low_limits_;	//	Lower joint limits
@@ -70,6 +69,9 @@ namespace exotica
       Eigen::VectorXd center_;		//	Center of the joint range
       Eigen::VectorXd tau_;			//	Joint limits tolerance
       bool initialised_;
+      Scene_ptr scene_;
+      JointLimitInitializer init_;
+      int N;
 
   };
 }

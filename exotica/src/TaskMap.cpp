@@ -61,7 +61,6 @@ namespace exotica
         LimbInitializer limb(eff);
         Frames.push_back(KinematicFrameRequest(limb.Segment,getFrame(limb.Frame)));
     }
-
   }
 
   std::vector<KinematicFrameRequest> TaskMap::GetFrames()

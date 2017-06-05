@@ -36,138 +36,135 @@ REGISTER_TASKMAP_TYPE("CoM", exotica::CoM);
 
 namespace exotica
 {
-  CoM::CoM()
-      : initialised_(false)
-  {
-    marker_offset_ = KDL::Frame::Identity();
-  }
-
-  CoM::~CoM()
-  {
-    //TODO
-  }
-
-  void CoM::update(Eigen::VectorXdRefConst x, const int t)
-  {
-    if (!isRegistered(t) || !getEffReferences())
+    CoM::CoM()
     {
-      throw_named("Not fully initialized!");
     }
-    static bool fistTime = true;
-    if (fistTime)
+
+    CoM::~CoM()
     {
-      changeEffToCoM();
-      fistTime = false;
     }
-    if (initialised_)
+
+    void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
-        if (offset_callback_) offset_callback_(this, x, t);
-        computeForwardMap(t);
-        if (updateJacobian_)
+        if(phi.rows() != dim_) throw_named("Wrong size of phi!");
+        phi.setZero();
+        KDL::Vector com;
+        for(int i=0;i<Kinematics.Phi.rows();i++)
         {
-          computeJacobian(t);
+            com += Kinematics.Phi(i).p*mass_(i);
+            if (debug_)
+            {
+              com_marker_.points[i].x = Kinematics.Phi(i).p[0];
+              com_marker_.points[i].y = Kinematics.Phi(i).p[1];
+              com_marker_.points[i].z = Kinematics.Phi(i).p[2];
+            }
+        }
+        double M = mass_.sum();
+        com = com / M;
+        for(int i=0;i<dim_;i++) phi(i) = com[i];
+
+        if (debug_)
+        {
+          COM_marker_.pose.position.x = phi(0);
+          COM_marker_.pose.position.y = phi(1);
+          COM_marker_.pose.position.z = phi(2);
+
+          COM_marker_.header.stamp = com_marker_.header.stamp = ros::Time::now();
+          com_pub_.publish(com_marker_);
+          COM_pub_.publish(COM_marker_);
         }
     }
-    else
-    {
-      throw_named("Not initialized!");
-    }
-  }
 
-  void CoM::taskSpaceDim(int & task_dim)
-  {
-    if (initialised_)
+    void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
     {
-      task_dim = dim_;
-    }
-    else
-    {
-      throw_named("Not initialized!");
-    }
-  }
+        if(phi.rows() != dim_) throw_named("Wrong size of phi!");
+        if(J.rows() != dim_ || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+        phi.setZero();
+        J.setZero();
+        KDL::Vector com;
+        double M = mass_.sum();
+        for(int i=0;i<Kinematics.Phi.rows();i++)
+        {
+            com += Kinematics.Phi(i).p*mass_(i);
+            J += mass_(i) / M * Kinematics.J(i).data.topRows(dim_);
+            if (debug_)
+            {
+              com_marker_.points[i].x = Kinematics.Phi(i).p[0];
+              com_marker_.points[i].y = Kinematics.Phi(i).p[1];
+              com_marker_.points[i].z = Kinematics.Phi(i).p[2];
+            }
+        }
+        com =com / mass_.sum();
+        for(int i=0;i<dim_;i++) phi(i) = com[i];
 
-  void CoM::computeForwardMap(int t)
-  {
-    if (!initialised_)
-    {
-      throw_named("Not initialized!");
-    }
+        if (debug_)
+        {
+          COM_marker_.pose.position.x = phi(0);
+          COM_marker_.pose.position.y = phi(1);
+          COM_marker_.pose.position.z = phi(2);
 
-    int N = mass_.rows(), i;
-    KDL::Vector com;
-    double M = mass_.sum();
-    KDL::Frame root_tf = scene_->getRobotRootWorldTransform();
-    root_tf.M = KDL::Rotation::Identity();
-    for (i = 0; i < N; i++)
-    {
-      KDL::Frame tmp_frame(
-          KDL::Vector(EFFPHI(3 * i), EFFPHI(3 * i + 1), EFFPHI(3 * i + 2)));
-      tmp_frame = tmp_frame * (root_tf.Inverse());
-      com = com + mass_[i] * tmp_frame.p;
-      if (debug_)
-      {
-        geometry_msgs::Point tmp;
-        tmp_frame = marker_offset_ * tmp_frame;
-        tmp.x = tmp_frame.p.data[0];
-        tmp.y = tmp_frame.p.data[1];
-        tmp.z = tmp_frame.p.data[2];
-        com_marker_.points[i] = tmp;
-      }
+          COM_marker_.header.stamp = com_marker_.header.stamp = ros::Time::now();
+          com_pub_.publish(com_marker_);
+          COM_pub_.publish(COM_marker_);
+        }
     }
 
-    com = com / M;
-
-    PHI.setZero();
-    for (int i = 0; i < dim_; i++)
+    int CoM::taskSpaceDim()
     {
-      if (fabs(com[i]) > fabs(bounds_(i)))
-      {
-        PHI(i) = com[i];
-      }
-    }
-    if (debug_)
-    {
-      KDL::Vector tmp_frame = marker_offset_ * com;
-      COM_marker_.pose.position.x = tmp_frame[0];
-      COM_marker_.pose.position.y = tmp_frame[1];
-      COM_marker_.pose.position.z = tmp_frame[2];
-
-      COM_marker_.header.stamp = com_marker_.header.stamp =
-          goal_marker_.header.stamp = ros::Time::now();
-      com_pub_.publish(com_marker_);
-      COM_pub_.publish(COM_marker_);
-      goal_pub_.publish(goal_marker_);
-    }
-  }
-
-  void CoM::computeJacobian(int t)
-  {
-    if (!initialised_)
-    {
-      throw_named("Not fully initialized!");
+        return dim_;
     }
 
-    JAC.setZero();
-    for (int i = 0; i < mass_.size(); i++)
+    void CoM::Initialize()
     {
-      JAC += mass_[i] / mass_.sum()
-          * EFFJAC.block(3 * i, 0, dim_, EFFJAC.cols());
+        enable_z_ = init_.EnableZ;
+        if (enable_z_)
+          dim_ = 3;
+        else
+          dim_ = 2;
+
+        if(Frames.size()>0)
+        {
+            mass_.resize(Frames.size());
+            for(int i=0; i<Frames.size(); i++)
+            {
+                if(Frames[i].FrameBLinkName!="")
+                {
+                    throw_named("Requesting CoM frame with base other than root! '" << Frames[i].FrameALinkName << "'");
+                }
+                Frames[i].FrameAOffset.p = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getCOG();
+                mass_(i) = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getMass();
+            }
+        }
+        else
+        {
+            int N = scene_->getSolver().getTree().size();
+            mass_.resize(N);
+            Frames.resize(N);
+            for(int i=0; i<N; i++)
+            {
+                Frames[i].FrameALinkName = scene_->getSolver().getTree()[i]->Segment.getName();
+                Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i]->Segment.getInertia().getCOG();
+                mass_(i) = scene_->getSolver().getTree()[i]->Segment.getInertia().getMass();
+            }
+        }
+
+        InitDebug();
     }
-  }
 
-  void CoM::Instantiate(CoMInitializer& init)
-  {
-      enable_z_ = init.EnableZ;
-      if (enable_z_)
-        dim_ = 3;
-      else
-        dim_ = 2;
-      bounds_ = init.Bounds;
-      if(bounds_.rows()<dim_) throw_named("Wrong bounds dimension!");
+    void CoM::assignScene(Scene_ptr scene)
+    {
+        scene_ = scene;
+        Initialize();
+    }
 
-      if (debug_)
-      {
-        com_marker_.points.resize(cog_.size());
+    void CoM::Instantiate(CoMInitializer& init)
+    {
+        init_ = init;
+    }
+
+    void CoM::InitDebug()
+    {
+        com_marker_.points.resize(Frames.size());
         com_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
         com_marker_.color.a = .7;
         com_marker_.color.r = 0.5;
@@ -185,86 +182,9 @@ namespace exotica
         COM_marker_.scale.z = .02;
         COM_marker_.action = visualization_msgs::Marker::ADD;
 
-        goal_marker_ = COM_marker_;
-        goal_marker_.color.r = 0;
-        goal_marker_.color.g = 1;
+        com_marker_.header.frame_id = COM_marker_.header.frame_id = scene_->getRootName();
 
-        com_marker_.header.frame_id = COM_marker_.header.frame_id =
-            goal_marker_.header.frame_id = scene_->getRootName();
-      }
-
-      com_pub_ = server_->advertise<visualization_msgs::Marker>(
-          object_name_ + "coms_marker", 1);
-      COM_pub_ = server_->advertise<visualization_msgs::Marker>(
-          object_name_ + "COM_marker", 1);
-      goal_pub_ = server_->advertise<visualization_msgs::Marker>(
-          object_name_ + "goal_marker", 1);
-      initialised_ = true;
-  }
-
-  void CoM::changeEffToCoM()
-  {
-    std::vector<std::string> names;
-
-    scene_->getCoMProperties(object_name_, names, mass_, cog_, tip_pose_,
-            base_pose_);
-    std::vector<KDL::Frame> com_offs;
-    int N = mass_.size(), i;
-    com_offs.resize(N);
-    for (i = 0; i < N; i++)
-    {
-      com_offs[i] = tip_pose_[i].Inverse() * base_pose_[i]
-          * KDL::Frame(cog_[i]);
+        com_pub_ = Server::Instance()->advertise<visualization_msgs::Marker>(object_name_ + "coms_marker", 1);
+        COM_pub_ = Server::Instance()->advertise<visualization_msgs::Marker>(object_name_ + "COM_marker", 1);
     }
-
-    scene_->updateEndEffectors(object_name_, com_offs);
-    if (debug_)
-    {
-      com_marker_.points.resize(cog_.size());
-    }
-
-    getEffReferences();
-  }
-
-  void CoM::setOffsetCallback(
-      boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback)
-  {
-    offset_callback_ = offset_callback;
-  }
-
-  void CoM::setOffset(bool left, const KDL::Frame & offset)
-  {
-    if (debug_)
-    {
-
-      if (left)
-      {
-        com_marker_.header.frame_id = "l_sole";
-        COM_marker_.header.frame_id = "l_sole";
-        goal_marker_.header.frame_id = "l_sole";
-      }
-      else
-      {
-        com_marker_.header.frame_id = "r_sole";
-        COM_marker_.header.frame_id = "r_sole";
-        goal_marker_.header.frame_id = "r_sole";
-      }
-      marker_offset_ = offset.Inverse();
-    }
-  }
-
-  void CoM::checkGoal(const Eigen::Vector3d & goal_)
-  {
-    if (debug_)
-    {
-      KDL::Vector goal = marker_offset_
-          * KDL::Vector(goal_(0), goal_(1), goal_(2));
-      goal_marker_.pose.position.x = goal[0];
-      goal_marker_.pose.position.y = goal[1];
-      if (!enable_z_)
-        goal_marker_.pose.position.z = 0;
-      else
-        goal_marker_.pose.position.z = goal[2];
-    }
-  }
 }

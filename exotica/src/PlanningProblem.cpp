@@ -91,6 +91,7 @@ namespace exotica
       for(const Initializer& MapInitializer : init.Maps)
       {
           TaskMap_ptr NewMap = Setup::createMap(MapInitializer);
+          NewMap->assignScene(scene_);
           NewMap->ns_ = ns_ + "/" + NewMap->getObjectName();
           if (TaskMaps.find(NewMap->getObjectName()) != TaskMaps.end())
           {

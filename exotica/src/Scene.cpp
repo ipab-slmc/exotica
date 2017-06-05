@@ -889,7 +889,11 @@ namespace exotica
   void Scene::getJointNames(std::vector<std::string> & joints)
   {
     joints = kinematica_.getJointNames();
-    if (joints.size() == 0) throw_named("No joints!");
+  }
+
+  std::vector<std::string> Scene::getJointNames()
+  {
+    return kinematica_.getJointNames();
   }
 
   std::string & Scene::getPlanningMode()

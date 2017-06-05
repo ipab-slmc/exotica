@@ -321,6 +321,17 @@ void KinematicTree::UpdateJ()
     }
 }
 
+Eigen::MatrixXd KinematicTree::getJointLimits()
+{
+    Eigen::MatrixXd lim(getNumJoints(),2);
+    for(int i=0; i<ControlledJoints.size();i++)
+    {
+        lim(i,0) = ControlledJoints[i]->JointLimits[0];
+        lim(i,1) = ControlledJoints[i]->JointLimits[1];
+    }
+    return lim;
+}
+
 
 void KinematicTree::updateEndEffectors(
     const KinematicsRequest & new_end_effectors)

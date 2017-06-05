@@ -350,15 +350,8 @@ namespace exotica
        * \brief Returns the number of end-effectors.
        * @return Number of end-effectors.
        */
-      int getEffSize();
 
-      int getNumJoints();
-      std::vector<std::string> & getJointNames()
-      {
-        return ControlledJointsNames;
-      }
-      bool getInitialEff(std::vector<std::string> & segs,
-          std::vector<KDL::Frame> & offsets);
+      bool getInitialEff(std::vector<std::string> & segs, std::vector<KDL::Frame> & offsets);
       bool modifyRootOffset(KDL::Frame & offset);
       KDL::Frame getRootOffset();
       std::string getRootName();
@@ -370,10 +363,7 @@ namespace exotica
       std::map<std::string, std::vector<double>> getUsedJointLimits();
 
       KDL::Frame getRobotRootWorldTransform();
-      void setBaseBounds(const std::vector<double> &bounds);
       bool setBasePose(const KDL::Frame &pose);
-      void setFloatingBaseLimitsPosXYZEulerZYX(
-          const std::vector<double> & lower, const std::vector<double> & upper);
 
       //private:
       /****************** Class members ********************/
@@ -424,7 +414,7 @@ namespace exotica
        */
       void buildTree(const KDL::Tree & temp_tree, std::map<std::string, int> & joint_map);
 
-      void setJointLimits();
+
 
       /**
        * \brief Set the Joint ordering we will use : NOT THREAD-SAFE
@@ -481,6 +471,19 @@ namespace exotica
 public:
         std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
         void Update(Eigen::VectorXdRefConst x);
+        void setJointLimits();
+        void setBaseBounds(const std::vector<double> &bounds);
+        void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double> & lower, const std::vector<double> & upper);
+        int getEffSize();
+        int getNumJoints();
+        Eigen::MatrixXd getJointLimits();
+        std::vector<std::string> & getJointNames()
+        {
+          return ControlledJointsNames;
+        }
+
+        std::vector<std::shared_ptr<KinematicElement>> getTree() {return Tree;}
+        std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() {return TreeMap;}
 
 private:
         void BuildTree(const KDL::Tree & RobotKinematics);

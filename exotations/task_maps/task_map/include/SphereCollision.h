@@ -43,30 +43,21 @@ namespace exotica //!< Since this is part of the core library, it will be within
   class SphereCollision: public TaskMap, public Instantiable<SphereCollisionInitializer>
   {
     public:
-      /**
-       * \brief Default constructor
-       */
       SphereCollision();
-      virtual ~SphereCollision()
-      {
-      }
+      virtual ~SphereCollision() {}
 
       virtual void Instantiate(SphereCollisionInitializer& init);
 
-      /**
-       * \brief Concrete implementation of the update method
-       */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      /**
-       * \brief Concrete implementation of the task-space size
-       */
-      virtual void taskSpaceDim(int & task_dim);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+
+      virtual int taskSpaceDim();
 
     protected:
 
-      double distance(Eigen::VectorXdRefConst effA, Eigen::VectorXdRefConst effB, double rA, double rB);
-      Eigen::VectorXd Jacobian(Eigen::VectorXdRefConst effA, Eigen::VectorXdRefConst effB, Eigen::MatrixXdRefConst jacA, Eigen::MatrixXdRefConst jacB, double rA, double rB);
+      double distance(const KDL::Frame& effA, const KDL::Frame& effB, double rA, double rB);
+      Eigen::VectorXd Jacobian(const KDL::Frame& effA, const KDL::Frame& effB, const KDL::Jacobian& jacA, const KDL::Jacobian& jacB, double rA, double rB);
 
       std::map<std::string,std::vector<int>> groups;
       std::vector<double> radiuses;

@@ -432,6 +432,7 @@ namespace exotica
        * @param	joints	Joint names
        */
       void getJointNames(std::vector<std::string> & joints);
+      std::vector<std::string> getJointNames();
 
       /*
        * \brief	Get planning mode

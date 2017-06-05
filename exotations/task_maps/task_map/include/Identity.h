@@ -41,9 +41,6 @@ namespace exotica
   class Identity: public TaskMap, public Instantiable<IdentityInitializer>
   {
     public:
-      /**
-       * \brief Default constructor
-       */
       Identity();
       virtual ~Identity()
       {
@@ -51,27 +48,23 @@ namespace exotica
 
       virtual void Instantiate(IdentityInitializer& init);
 
-      /**
-       * \brief Concrete implementation of the update method
-       */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      virtual void assignScene(Scene_ptr scene);
 
-      /**
-       * \brief Concrete implementation of the task-space size
-       */
-      virtual void taskSpaceDim(int & task_dim);
+      void Initialize();
 
-      void initialise(std::string& postureName,
-          std::vector<std::string>& joints, bool skipUnknown = false);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      bool useRef;
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot);
+
+      virtual int taskSpaceDim();
+
       std::vector<int> jointMap;
       Eigen::VectorXd jointRef;
-
-    protected:
-
-      int getJointIDexternal(std::string& name);
-      int getJointID(std::string& name);
+      int N;
+      Scene_ptr scene_;
+      IdentityInitializer init_;
 
   };
 

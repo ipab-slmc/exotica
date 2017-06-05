@@ -41,56 +41,36 @@ namespace exotica
     //!< Empty constructor
   }
 
-  void Distance::update(Eigen::VectorXdRefConst x, const int t)
-  {
-    if (!isRegistered(t) || !getEffReferences())
+    void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
-      throw_named("Not fully initialized!");
-    }
-    JAC.setZero();
-    for (int i = 0; i < PHI.rows(); i++)
-    {
-      PHI(i) = sqrt(
-          (EFFPHI(i * 2 * 3) - EFFPHI(i * 2 * 3 + 3))
-              * (EFFPHI(i * 2 * 3) - EFFPHI(i * 2 * 3 + 3))
-              + (EFFPHI(i * 2 * 3 + 1) - EFFPHI(i * 2 * 3 + 4))
-                  * (EFFPHI(i * 2 * 3 + 1) - EFFPHI(i * 2 * 3 + 4))
-              + (EFFPHI(i * 2 * 3 + 2) - EFFPHI(i * 2 * 3 + 5))
-                  * (EFFPHI(i * 2 * 3 + 2) - EFFPHI(i * 2 * 3 + 5)));
-
-      if (updateJacobian_ && PHI(i) > 1e-50)
-      {
-        for (int j = 0; j < JAC.cols(); j++)
+        if(phi.rows() != Kinematics.Phi.rows()*3) throw_named("Wrong size of phi!");
+        for(int i=0;i<Kinematics.Phi.rows();i++)
         {
-          JAC(i, j) = ((EFFPHI(i * 2 * 3) - EFFPHI(i * 2 * 3 + 3))
-              * (EFFJAC(i * 2 * 3, j) - EFFJAC(i * 2 * 3 + 3, j))
-              + (EFFPHI(i * 2 * 3 + 1) - EFFPHI(i * 2 * 3 + 4))
-                  * (EFFJAC(i * 2 * 3 + 1, j) - EFFJAC(i * 2 * 3 + 4, j))
-              + (EFFPHI(i * 2 * 3 + 2) - EFFPHI(i * 2 * 3 + 5))
-                  * (EFFJAC(i * 2 * 3 + 2, j) - EFFJAC(i * 2 * 3 + 5, j)))
-              / PHI(i);
+            phi(i) = Kinematics.Phi(i).p.Norm();
         }
-      }
     }
-  }
 
-  void Distance::Instantiate(DistanceInitializer& init)
-  {
-      if (scene_->getMapSize(object_name_) % 2 != 0)
-      {
-        throw_named("Kinematic scene must have even number of end-effectors!");
-      }
-  }
+    void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+    {
+        if(phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
+        if(J.rows() != Kinematics.J.rows() || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+        for(int i=0;i<Kinematics.Phi.rows();i++)
+        {
+            phi(i) = Kinematics.Phi(i).p.Norm();
+            for (int j = 0; j < J.cols(); j++)
+            {
+                J(i,j) = ( Kinematics.Phi(i).p[0]*Kinematics.J[i].data(0,j) + Kinematics.Phi(i).p[1]*Kinematics.J[i].data(1,j) + Kinematics.Phi(i).p[2]*Kinematics.J[i].data(2,j) ) / phi(i);
+            }
+        }
+    }
 
-  void Distance::taskSpaceDim(int & task_dim)
-  {
-    if (!scene_)
+    void Distance::Instantiate(DistanceInitializer& init)
     {
-      throw_named("Kinematic scene has not been initialized!");
+
     }
-    else
+
+    int Distance::taskSpaceDim()
     {
-      task_dim = scene_->getMapSize(object_name_) / 2;
+        return Kinematics.Phi.rows();
     }
-  }
 }

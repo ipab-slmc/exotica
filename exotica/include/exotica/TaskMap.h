@@ -48,11 +48,6 @@
  */
 #define REGISTER_TASKMAP_TYPE(TYPE, DERIV) EXOTICA_REGISTER(exotica::TaskMap, TYPE, DERIV)
 
-#define PHI (*(phi_.at(t)))
-#define JAC (*(jac_.at(t)))
-#define EFFPHI (*eff_phi_)
-#define EFFJAC (*eff_jac_)
-
 namespace exotica
 {
   class PlanningProblem;
@@ -67,6 +62,8 @@ namespace exotica
       virtual ~TaskMap() { }
 
       virtual void InstantiateBase(const Initializer& init);
+
+      virtual void assignScene(Scene_ptr scene) {}
 
       virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
 

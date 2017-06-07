@@ -512,7 +512,9 @@ namespace exotica
 
   void Scene::Instantiate(SceneInitializer& init)
   {
-
+      Object::InstatiateObject(init);
+      name_ = object_name_;
+      kinematica_.Debug = debug_;
       server_->getModel(init.RobotDescription, model_);
       kinematica_.Instantiate(init.JointGroup, model_);
       group = model_->getJointModelGroup(init.JointGroup);
@@ -529,8 +531,7 @@ namespace exotica
       if (visual_debug_)
       {
           ps_pub_ = server_->advertise<moveit_msgs::PlanningScene>(name_ + "/PlanningScene", 100, true);
-          HIGHLIGHT_NAMED(name_,
-            "Running in debug mode, planning scene will be published to '"<<server_->getName()<<"/"<<name_<<"/PlanningScene'");
+          if(debug_) HIGHLIGHT_NAMED(name_, "Running in debug mode, planning scene will be published to '"<<server_->getName()<<"/"<<name_<<"/PlanningScene'");
       }
       {
           planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
@@ -538,8 +539,7 @@ namespace exotica
           tmp->getPlanningSceneMsg(*msg.get());
           collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_, base_type_,model_);
       }
-      INFO_NAMED(name_,
-          "Exotica Scene initialised, planning mode set to "<<mode_);
+      if(debug_) INFO_NAMED(name_, "Exotica Scene initialised, planning mode set to "<<mode_);
   }
 
   void Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)

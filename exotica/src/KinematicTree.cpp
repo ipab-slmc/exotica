@@ -101,7 +101,7 @@ int KinematicTree::getNumJoints()
   return NumControlledJoints;
 }
 
-KinematicTree::KinematicTree() : StateSize(-1)
+KinematicTree::KinematicTree() : StateSize(-1), Debug(false)
 {
 
 }
@@ -244,9 +244,12 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
         Solution->Frame[i].FrameBOffset = request.Frames[i].FrameBOffset;
     }
 
-    for(KinematicFrame& frame : Solution->Frame)
+    if(Debug)
     {
-        HIGHLIGHT(frame.FrameB->Segment.getName() << " " << (frame.FrameBOffset==KDL::Frame::Identity()?"":toString(frame.FrameBOffset)) << " -> "<< frame.FrameA->Segment.getName() << " " << (frame.FrameAOffset==KDL::Frame::Identity()?"":toString(frame.FrameAOffset)));
+        for(KinematicFrame& frame : Solution->Frame)
+        {
+            HIGHLIGHT(frame.FrameB->Segment.getName() << " " << (frame.FrameBOffset==KDL::Frame::Identity()?"":toString(frame.FrameBOffset)) << " -> "<< frame.FrameA->Segment.getName() << " " << (frame.FrameAOffset==KDL::Frame::Identity()?"":toString(frame.FrameAOffset)));
+        }
     }
     return Solution;
 }
@@ -1094,7 +1097,7 @@ void KinematicTree::setJointOrder(
 
 std::string KinematicTree::getRootName()
 {
-  return robot_tree_[0].segment.getName();
+  return Tree[0]->Segment.getName();
 }
 
 bool KinematicTree::modifyRootOffset(KDL::Frame & offset)

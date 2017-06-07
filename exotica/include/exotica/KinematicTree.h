@@ -484,6 +484,7 @@ public:
 
         std::vector<std::shared_ptr<KinematicElement>> getTree() {return Tree;}
         std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() {return TreeMap;}
+        bool Debug;
 
 private:
         void BuildTree(const KDL::Tree & RobotKinematics);

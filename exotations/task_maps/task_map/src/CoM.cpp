@@ -48,6 +48,9 @@ namespace exotica
     {
         if(phi.rows() != dim_) throw_named("Wrong size of phi!");
         phi.setZero();
+        double M = mass_.sum();
+        if(M==0.0) return;
+
         KDL::Vector com;
         for(int i=0;i<Kinematics.Phi.rows();i++)
         {
@@ -59,7 +62,7 @@ namespace exotica
               com_marker_.points[i].z = Kinematics.Phi(i).p[2];
             }
         }
-        double M = mass_.sum();
+
         com = com / M;
         for(int i=0;i<dim_;i++) phi(i) = com[i];
 
@@ -83,6 +86,7 @@ namespace exotica
         J.setZero();
         KDL::Vector com;
         double M = mass_.sum();
+        if(M==0.0) return;
         for(int i=0;i<Kinematics.Phi.rows();i++)
         {
             com += Kinematics.Phi(i).p*mass_(i);
@@ -94,7 +98,7 @@ namespace exotica
               com_marker_.points[i].z = Kinematics.Phi(i).p[2];
             }
         }
-        com =com / mass_.sum();
+        com =com / M;
         for(int i=0;i<dim_;i++) phi(i) = com[i];
 
         if (debug_)

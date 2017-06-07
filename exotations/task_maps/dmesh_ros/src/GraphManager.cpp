@@ -46,43 +46,32 @@ namespace exotica
     //TODO
   }
 
-  bool GraphManager::initialisation(std::vector<std::string> & links,
-      std::vector<bool> & link_types,
-      Eigen::VectorXd & link_radius, int size)
+  void GraphManager::initialisation(std::vector<DMeshVertexInitializer>& verts, int size)
   {
-    if (links.size() == 0 || size < links.size())
+    if (verts.size() == 0 || size < verts.size())
     {
-      std::cout << "Mesh Graph Manager: wrong size(link size="
-          << links.size() << ", size=" << size << ")\n";
-      INDICATE_FAILURE
-      return false;
+        throw_pretty("Mesh Graph Manager: wrong size(link size=" << verts.size() << ", size=" << size << ")\n");
     }
     double i_range;
     if (!nh_.getParam("/MeshGraphManager/InteractRange", i_range))
     {
-      INDICATE_FAILURE
-      return false;
+      throw_pretty("Parameter '/MeshGraphManager/InteractRange' not set!");
     }
 
     double eps;
     if (!nh_.getParam("/MeshGraphManager/SafetyThreshold", eps))
     {
-      INDICATE_FAILURE
-      return false;
+      throw_pretty("Parameter '/MeshGraphManager/SafetyThreshold' not set!");
     }
     bool dummy_table = false;
     nh_.getParam("/MeshGraphManager/DummyTable", dummy_table);
-    if (!graph_->initialisation(size, links, link_types, link_radius,
-        i_range, eps, dummy_table))
-    {
-      INDICATE_FAILURE
-      return false;
-    }
+
+    graph_->initialisation(size, verts, i_range, eps, dummy_table);
+
     std::string topic;
     if (!nh_.getParam("/MeshGraphManager/ExternalTopic", topic))
     {
-      INDICATE_FAILURE
-      return false;
+      throw_pretty("Parameter '/MeshGraphManager/ExternalTopic' not set!");
     }
 //		ext_sub_ =
 //				nh_.subscribe<exotica::MeshVertex>(topic, 10, boost::bind(&exotica::GraphManager::extCallback, this, _1));
@@ -93,7 +82,6 @@ namespace exotica
 
     ROS_INFO("Mesh Graph Manager has been initialised");
     initialised_ = true;
-    return true;
   }
 
   MeshGraphPtr GraphManager::getGraph()

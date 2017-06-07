@@ -41,6 +41,17 @@ namespace exotica
     position_.setZero();
   }
 
+  Vertex::Vertex(const std::string & name, const Eigen::Vector3d & position, double r, const std::vector<std::string> & tolinks, VERTEX_TYPE type, double w)
+  {
+      name_ = name;
+      type_ = type;
+      position_ = position;
+      radius_ = r;
+      isActive_ = true;
+      w_ = w;
+      toLinks_ = tolinks;
+  }
+
   bool Vertex::setAsLink(const std::string & name, bool real_link,
       const Eigen::Vector3d & position, double r)
   {
@@ -162,7 +173,7 @@ namespace exotica
   {
     if (type_ == NONE)
     {
-      WARNING("The vertex has not been initialised yet");
+      WARNING("The vertex has not been initialised yet "<<name_);
       return true;
     }
     isActive_ = false;
@@ -277,36 +288,44 @@ namespace exotica
     return vertices_[index];
   }
 
-  bool MeshGraph::initialisation(const int size,
-      const std::vector<std::string> & link_names,
-      const std::vector<bool> link_type,
-      Eigen::VectorXd & link_radius, const double i_range,
+  void MeshGraph::initialisation(const int size,
+      std::vector<DMeshVertexInitializer>& verts, const double i_range,
       const double eps, const bool dummy_table)
   {
-    if (initialised_ || link_names.size() == 0 || size < link_names.size()
+    if (initialised_ || verts.size() == 0 || size < verts.size()
         || i_range < 0 || eps < 0)
     {
-      INDICATE_FAILURE
-      return false;
+      throw_pretty("Wrong graph parameter sizes!");
     }
     size_ = size;
-    robot_size_ = link_names.size();
-    link_names_ = link_names;
+    robot_size_ = verts.size();
     interact_range_ = i_range;
     eps_ = eps;
     vertices_.resize(size_);
     for (int i = 0; i < robot_size_; i++)
     {
-      if (vertex_map_.find(link_names[i]) != vertex_map_.end())
+      if (vertex_map_.find(verts[i].Name) != vertex_map_.end())
       {
-        INDICATE_FAILURE
-        return false;
+        throw_pretty("Trying to add an already existing vertex '"<<verts[i].Name<<"'");
       }
-      vertices_[i].reset(new Vertex);
-      vertices_[i]->setAsLink(link_names[i], true, Eigen::Vector3d::Zero(),
-          link_radius(i));
-      if (!link_type[i]) vertices_[i]->setToDummy();
-      vertex_map_[link_names[i]] = i;
+      Eigen::Vector3d pos = verts[i].Frame.head(3);
+      VERTEX_TYPE type;
+      if(verts[i].LinkType == "LINK")
+        type = LINK;
+      else if(verts[i].LinkType == "DUMMY_LINK")
+        type = DUMMY_LINK;
+      else if(verts[i].LinkType == "GOAL")
+        type = GOAL;
+      else if(verts[i].LinkType == "OBSTACLE")
+        type = OBSTACLE;
+      else if(verts[i].LinkType == "OBSTACLE_TO_ALL")
+        type = OBSTACLE_TO_ALL;
+      else if(verts[i].LinkType == "IGNORE")
+        type = IGNORE;
+      else
+        type = NONE;
+      vertices_[i].reset(new Vertex(verts[i].Name, pos, verts[i].Radius, verts[i].ConnectTo, type, verts[i].W));
+      vertex_map_[verts[i].Name] = i;
     }
     for (int j = robot_size_; j < size_; j++)
       vertices_[j].reset(new Vertex);
@@ -374,7 +393,6 @@ namespace exotica
     edges_[4].color.a = 1;
 
     initialised_ = true;
-    return true;
   }
 
   bool MeshGraph::isInitialised()

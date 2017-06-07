@@ -1,0 +1,6 @@
+extend <exotica/Limb>
+Required std::string Name;
+Required double Radius;
+Optional std::vector<std::string> ConnectTo = std::vector<std::string>();
+Optional std::string LinkType = "";
+Optional double W = 1.0;

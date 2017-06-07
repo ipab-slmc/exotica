@@ -36,8 +36,7 @@
 //EXOTica and SYSTEM packages
 #include <exotica/Exotica.h>
 #include <exotica/KinematicTree.h>
-#include <boost/thread/mutex.hpp>
-#include "GraphManager.h"
+#include <dmesh_ros/GraphManager.h>
 #include <tf/transform_listener.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 //ROS packages
@@ -57,36 +56,29 @@ namespace exotica
   class DMeshROS: public TaskMap, public Instantiable<DMeshROSInitializer>
   {
     public:
-      /**
-       * \brief	Default constructor
-       */
+
       DMeshROS();
+
+      ~DMeshROS();
 
       virtual void Instantiate(DMeshROSInitializer& init);
 
-      /**
-       * \brief	Default destructor
-       */
-      ~DMeshROS();
+      virtual void assignScene(Scene_ptr scene);
 
-      /**
-       * \brief	Concrete implementation of update method
-       * @param	x		Joint space configuration
-       */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      void Initialize();
 
-      /**
-       * \brief	Get the task space dimension
-       */
-      virtual void taskSpaceDim(int & task_dim);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+
+      virtual int taskSpaceDim();
 
       /**
        * \brief	Get the goal laplace
        * @param	goal	Goal laplace
        */
-      void getGoalLaplace(Eigen::VectorXd & goal, int t);
+      Eigen::VectorXd getGoalLaplace();
 
-      void getLaplace(Eigen::VectorXd & lap);
       /**
        * \brief	Update external objects
        */
@@ -104,25 +96,24 @@ namespace exotica
       /**
        * \brief	Compute Laplace
        */
-      void computeLaplace(int t);
+      Eigen::VectorXd computeLaplace();
 
       /**
        * \brief	Compute Jacobian
        */
-      void computeJacobian(int t);
+      Eigen::MatrixXd computeJacobian();
 
       /**
        * \brief	Update the graph from kinematic scene
        */
-      void updateGraphFromKS(int t);
+      void updateGraphFromKS();
 
       /**
        * \brief	Update the graph externally
        * @param	name		Vertex name
        * @param	pose		Vertex position
        */
-      void updateGraphFromExternal(const std::string & name,
-          const Eigen::Vector3d & pose);
+      void updateGraphFromExternal(const std::string & name, const Eigen::Vector3d & pose);
 
       /**
        * \brief	Update the graph from real transform
@@ -165,12 +156,6 @@ namespace exotica
       //	Distance matrix
       Eigen::MatrixXd dist_;
 
-      //	Initialisation flag
-      bool initialised_;
-
-      //	Scoped locker
-      boost::mutex::scoped_lock lock_;
-
       //	True if the obstacle is close
       std::vector<bool> obs_close_;
 
@@ -181,6 +166,9 @@ namespace exotica
       double wg_;
 
       bool usePose_;
+
+      DMeshROSInitializer init_;
+      Scene_ptr scene_;
 
 
   };

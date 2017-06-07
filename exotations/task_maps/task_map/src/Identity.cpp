@@ -57,7 +57,7 @@ namespace exotica
       J.setZero();
       for(int i=0;i<jointMap.size();i++)
       {
-          phi(i) = jointRef(i) - x(jointMap[i]);
+          phi(i) = x(jointMap[i]) - jointRef(i);
           J(i, jointMap[i]) = 1.0;
       }
   }
@@ -71,8 +71,8 @@ namespace exotica
       Jdot.setZero();
       for(int i=0;i<jointMap.size();i++)
       {
-          phi(i) = jointRef(i) - x(jointMap[i]);
-          phidot(i) = jointRef(i+jointMap.size()) - x(jointMap[i]+N);
+          phi(i) = x(jointMap[i]) - jointRef(i);
+          phidot(i) = x(jointMap[i]+N) - jointRef(i+jointMap.size());
           J(i, jointMap[i]) = 1.0;
           Jdot(i, jointMap[i]) = 1.0;
       }
@@ -91,27 +91,27 @@ namespace exotica
 
   void Identity::Initialize()
   {
-      N = scene_->getSolver().getNumJoints();
+      N = std::max(scene_->getSolver().getNumJoints(), (int)init_.JointMap.size());
+      if(init_.JointMap.size()>0)
+      {
+          jointMap = init_.JointMap;
+      }
+      else
+      {
+          jointMap.resize(N);
+          for (int i = 0; i < N; i++) jointMap[i] = i;
+      }
+
       if(init_.JointRef.rows()>0)
       {
           jointRef = init_.JointRef;
-          if(init_.JointMap.size()>0)
-          {
-              jointMap = init_.JointMap;
-              if(jointMap.size()!=jointRef.rows()) throw_named("Incorrect joint map size!");
-          }
-          else
-          {
-              jointMap.resize(jointRef.rows());
-              for (int i = 0; i < jointRef.rows(); i++) jointMap[i] = i;
-          }
+          if(jointRef.rows()!=N) throw_named("Invalid joint reference size! Expecting " << N);
       }
       else
       {
           jointRef = Eigen::VectorXd::Zero(N);
-          jointMap.resize(N);
-          for (int i = 0; i < N; i++) jointMap[i] = i;
       }
+
   }
 
   int Identity::taskSpaceDim()

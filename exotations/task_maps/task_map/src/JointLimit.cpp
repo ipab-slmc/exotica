@@ -52,7 +52,7 @@ namespace exotica
     void JointLimit::assignScene(Scene_ptr scene)
     {
         scene_ = scene;
-    Initialize();
+        Initialize();
     }
 
     void JointLimit::Initialize()
@@ -65,10 +65,8 @@ namespace exotica
         low_limits_ = limits.col(0);
         high_limits_ = limits.col(1);
         tau_.resize(N);
-        center_.resize(N);
         for (int i = 0; i < N; i++)
         {
-            center_(i) = (low_limits_(i) + high_limits_(i))*0.5;
             tau_(i) = percent * (high_limits_(i) - low_limits_(i))*0.5;
         }
     }
@@ -84,21 +82,13 @@ namespace exotica
         phi.setZero();
         for(int i=0;i<N;i++)
         {
-            if (x(i) < center_(i))
+            if (x(i) < low_limits_(i) + tau_(i))
             {
-                double d = x(i) - low_limits_(i);
-                if (d < tau_(i))
-                {
-                    phi(i) = tau_(i) - d;
-                }
+                phi(i) = x(i) - low_limits_(i) - tau_(i);
             }
-            else
+            if (x(i) > high_limits_(i) - tau_(i))
             {
-                double d = high_limits_(i) - x(i);
-                if (d < tau_(i))
-                {
-                    phi(i) = tau_(i) - d;
-                }
+                phi(i) = x(i) - high_limits_(i) + tau_(i);
             }
         }
     }
@@ -108,26 +98,16 @@ namespace exotica
         if(phi.rows() != N) throw_named("Wrong size of phi!");
         if(J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);
         phi.setZero();
-        J.setZero();
+        J = Eigen::MatrixXd::Identity(N,N);
         for(int i=0;i<N;i++)
         {
-            if (x(i) < center_(i))
+            if (x(i) < low_limits_(i) + tau_(i))
             {
-                double d = x(i) - low_limits_(i);
-                if (d < tau_(i))
-                {
-                    phi(i) = tau_(i) - d;
-                    J(i, i) = -1.0;
-                }
+                phi(i) = x(i) - low_limits_(i) - tau_(i);
             }
-            else
+            if (x(i) > high_limits_(i) - tau_(i))
             {
-                double d = high_limits_(i) - x(i);
-                if (d < tau_(i))
-                {
-                    phi(i) = tau_(i) - d;
-                    J(i, i) = 1.0;
-                }
+                phi(i) = x(i) - high_limits_(i) + tau_(i);
             }
         }
     }

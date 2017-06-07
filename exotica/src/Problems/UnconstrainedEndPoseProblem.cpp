@@ -83,5 +83,29 @@ namespace exotica
             Tasks[i]->update(x, Phi.segment(Mapping(i, 0), Mapping(i, 1)), J.middleRows(Mapping(i, 0), Mapping(i, 1)));
         }
     }
+
+    void UnconstrainedEndPoseProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        y.segment(task->Start, task->Length) = goal;
+    }
+
+    void UnconstrainedEndPoseProblem::setRho(const std::string & task_name, const double rho)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        Rho(task->Id) = rho;
+    }
+
+    Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string & task_name)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        return y.segment(task->Start, task->Length);
+    }
+
+    double UnconstrainedEndPoseProblem::getRho(const std::string & task_name)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        return y(task->Id);
+    }
 }
 

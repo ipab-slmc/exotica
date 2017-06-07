@@ -50,6 +50,11 @@ namespace exotica
         virtual void Instantiate(UnconstrainedEndPoseProblemInitializer& init);
         void Update(Eigen::VectorXdRefConst x);
 
+        void setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal);
+        void setRho(const std::string & task_name, const double rho);
+        Eigen::VectorXd getGoal(const std::string & task_name);
+        double getRho(const std::string & task_name);
+
         Eigen::VectorXd Rho;
         Eigen::VectorXd y;
         Eigen::MatrixXd W;

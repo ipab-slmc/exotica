@@ -74,7 +74,7 @@ namespace exotica
 
         Eigen::MatrixXd dist;
         Eigen::VectorXd wsum;
-        Eigen::VectorXd EffPhi;
+        Eigen::VectorXd EffPhi(M*3);
         for(int i=0;i<M;i++)
         {
             EffPhi(i*3) = Kinematics.Phi(i).p[0];
@@ -108,7 +108,7 @@ namespace exotica
                                 if (l < M)
                                     //Both j and l are points on the robot
                                     _distance =  Kinematics.J[j].data.block(0, i, 3, 1)
-                                            -  Kinematics.J[l].data.block(3 * l, i, 3, 1);
+                                            -  Kinematics.J[l].data.block(0, i, 3, 1);
                                 else
                                     //l is not on the robot
                                     _distance =  Kinematics.J[j].data.block(0, i, 3, 1);
@@ -173,14 +173,14 @@ namespace exotica
         imesh_mark_.header.frame_id = ref;
         imesh_mark_.ns = getObjectName();
         imesh_mark_pub_ = Server::Instance()->advertise<visualization_msgs::Marker>(ns_ +"/InteractionMesh", 1, true);
-        HIGHLIGHT("InteractionMesh connectivity is published on ROS topic "<<imesh_mark_pub_.getTopic()<<", in reference frame "<<ref);
+        if(debug_) HIGHLIGHT("InteractionMesh connectivity is published on ROS topic "<<imesh_mark_pub_.getTopic()<<", in reference frame "<<ref);
     }
 
     void IMesh::Instantiate(IMeshInitializer& init)
     {
         initDebug(init.ReferenceFrame);
         Debug = init.Debug;
-        eff_size_ = Kinematics.Phi.rows();
+        eff_size_ = Frames.size();
         weights_.setOnes(eff_size_, eff_size_);
         if(init.Weights.rows()==eff_size_*eff_size_)
         {

@@ -138,6 +138,15 @@ namespace exotica
 
         bool UseNullspace = prob_->qNominal.rows()==prob_->N;
 
+        Eigen::MatrixXd S = Eigen::MatrixXd::Identity(prob_->PhiN, prob_->PhiN);
+        for(TaskMap_ptr task : prob_->Tasks)
+        {
+            for(int i=0; i < task->Length; i++)
+            {
+                S(i+task->Start, i+task->Start) = prob_->Rho(task->Id);
+            }
+        }
+
         solution.resize(1, prob_->N);
 
         Eigen::VectorXd q = q0;
@@ -146,7 +155,7 @@ namespace exotica
         for (i = 0; i < parameters_.MaxIt; i++)
         {
             prob_->Update(q);
-            Eigen::VectorXd yd = prob_->y - prob_->Phi;
+            Eigen::VectorXd yd = S*(prob_->y - prob_->Phi);
 
             error = yd.dot(yd);
 
@@ -155,9 +164,9 @@ namespace exotica
                 break;
             }
 
-            Eigen::MatrixXd Jinv = PseudoInverse(prob_->J);
+            Eigen::MatrixXd Jinv = PseudoInverse(S*prob_->J);
             Eigen::VectorXd qd = Jinv * yd;
-            if(UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv*prob_->J)*(prob_->qNominal-q);
+            if(UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv*S*prob_->J)*(prob_->qNominal-q);
 
             ScaleToStepSize(qd);
 

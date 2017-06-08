@@ -87,7 +87,7 @@ namespace exotica
       Request.Flags = Flags;
 
       // Create the maps
-      int id=0;
+      int id=0;      
       for(const Initializer& MapInitializer : init.Maps)
       {
           TaskMap_ptr NewMap = Setup::createMap(MapInitializer);
@@ -101,15 +101,22 @@ namespace exotica
 
           NewMap->Kinematics = KinematicSolution(id, frames.size());
           id += frames.size();
+
           Request.Frames.insert(Request.Frames.end(), frames.begin(), frames.end());
           TaskMaps[NewMap->getObjectName()] = NewMap;
       }
 
       std::shared_ptr<KinematicResponse> Response = scene_->RequestKinematics(Request);
+      int i=0;
+      id=0;
       for(auto& map : TaskMaps)
       {
           map.second->Kinematics.Create(Response);
+          map.second->Id = i;
+          map.second->Start = id;
           map.second->Length = map.second->taskSpaceDim();
+          i++;
+          id += map.second->Length;
       }
 
       if (init.Maps.size() == 0)

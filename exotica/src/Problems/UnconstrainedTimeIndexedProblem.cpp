@@ -70,9 +70,6 @@ namespace exotica
       {
           Mapping(i,0) = id;
           Mapping(i,1) = Tasks[i]->taskSpaceDim();
-          Tasks[i]->Id = i;
-          Tasks[i]->Start = id;
-          Tasks[i]->Length = Tasks[i]->taskSpaceDim();
           id += Mapping(i,1);
       }
       PhiN = Mapping.col(1).sum();

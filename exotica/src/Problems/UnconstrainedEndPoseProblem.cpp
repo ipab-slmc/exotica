@@ -59,7 +59,7 @@ namespace exotica
         {
             Mapping(i,0) = id;
             Mapping(i,1) = Tasks[i]->taskSpaceDim();
-            id += Mapping(i,1);
+            id += Mapping(i,1);            
         }
         PhiN = Mapping.col(1).sum();
 
@@ -73,6 +73,12 @@ namespace exotica
         W.diagonal() = init.W;
         Phi = Eigen::VectorXd::Zero(PhiN);
         J = Eigen::MatrixXd(PhiN, N);
+
+        if(init.Rho.rows()>0 && init.Rho.rows()!=NumTasks) throw_named("Invalide size of Rho (" << init.Rho.rows() << ") expected: "<< NumTasks);
+        if(init.Goal.rows()>0 && init.Goal.rows()!=PhiN) throw_named("Invalide size of Rho (" << init.Goal.rows() << ") expected: "<< PhiN);
+
+        if(init.Rho.rows()==NumTasks) Rho = init.Rho;
+        if(init.Goal.rows()==PhiN) y = init.Goal;
     }
 
     void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)

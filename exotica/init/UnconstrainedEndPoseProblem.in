@@ -1,2 +1,4 @@
 extend <exotica/PlanningProblem>
 Required Eigen::VectorXd W;
+Optional Eigen::VectorXd Rho = Eigen::VectorXd();
+Optional Eigen::VectorXd Goal = Eigen::VectorXd();

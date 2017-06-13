@@ -194,7 +194,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         Joint->IsControlled = Joint->ControlId >= 0;
         if(Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
         TreeMap[Joint->Segment.getName()] = Joint;
-        ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
+        if(Joint->IsControlled) ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
     }
     setJointLimits();
 }

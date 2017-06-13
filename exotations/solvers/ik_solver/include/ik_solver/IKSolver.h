@@ -59,6 +59,8 @@ namespace exotica
 
       UnconstrainedEndPoseProblem_ptr& getProblem();
 
+      Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
+
       double error;
       ros::Duration planning_time_;
 
@@ -69,8 +71,6 @@ namespace exotica
       IKsolverInitializer parameters_;
 
       inline void vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
-
-      Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
 
       void ScaleToStepSize(Eigen::VectorXdRef xd);
 

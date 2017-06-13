@@ -251,6 +251,10 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
             HIGHLIGHT(frame.FrameB->Segment.getName() << " " << (frame.FrameBOffset==KDL::Frame::Identity()?"":toString(frame.FrameBOffset)) << " -> "<< frame.FrameA->Segment.getName() << " " << (frame.FrameAOffset==KDL::Frame::Identity()?"":toString(frame.FrameAOffset)));
         }
     }
+
+    debugTree.resize(Tree.size());
+    debugFrames.resize(Solution->Frame.size()*2);
+
     return Solution;
 }
 
@@ -260,6 +264,7 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
     UpdateTree(x);
     UpdateFK();
     if(Flags & KIN_J) UpdateJ();
+    if(Debug) publishFrames();
 }
 
 void KinematicTree::UpdateTree(Eigen::VectorXdRefConst x)
@@ -274,6 +279,30 @@ void KinematicTree::UpdateTree(Eigen::VectorXdRefConst x)
         if(element->Id>0) ParentFrame = element->Parent->Frame;
         element->Frame = ParentFrame * element->Segment.pose(TreeState(element->Id));
     }
+}
+
+void KinematicTree::publishFrames()
+{
+    int i = 0;
+    for(std::shared_ptr<KinematicElement> element : Tree)
+    {
+        tf::Transform T;
+        tf::transformKDLToTF(element->Frame, T);
+        debugTree[i] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica", element->Segment.getName()));
+        i++;
+    }
+    debugTF.sendTransform(debugTree);
+    i = 0;
+    for(KinematicFrame&  frame : Solution->Frame)
+    {
+        tf::Transform T;
+        tf::transformKDLToTF(frame.TempA, T);
+        debugFrames[i*2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica","Frame"+std::to_string(i)+"A"+frame.FrameA->Segment.getName()));
+        tf::transformKDLToTF(frame.TempB, T);
+        debugFrames[i*2+1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()));
+        i++;
+    }
+    debugTF.sendTransform(debugFrames);
 }
 
 void KinematicTree::UpdateFK()

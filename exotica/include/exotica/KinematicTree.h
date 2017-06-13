@@ -45,6 +45,9 @@
 #include <set>
 #include <exotica/Tools.h>
 
+#include <tf/transform_broadcaster.h>
+#include <tf_conversions/tf_kdl.h>
+
 #define ROOT  -1     //!< The value of the parent for the root segment
 
 namespace exotica
@@ -476,8 +479,9 @@ public:
         void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double> & lower, const std::vector<double> & upper);
         int getEffSize();
         int getNumJoints();
+        void publishFrames();
         Eigen::MatrixXd getJointLimits();
-        std::vector<std::string> & getJointNames()
+        std::vector<std::string> getJointNames()
         {
           return ControlledJointsNames;
         }
@@ -510,6 +514,10 @@ private:
         std::vector<std::string> ControlledJointsNames;
         std::shared_ptr<KinematicResponse> Solution;
         KinematicRequestFlags Flags;
+
+        tf::TransformBroadcaster debugTF;
+        std::vector<tf::StampedTransform> debugTree;
+        std::vector<tf::StampedTransform> debugFrames;
     };
 
   /**

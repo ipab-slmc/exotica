@@ -137,18 +137,19 @@ namespace exotica
                 }
                 Frames[i].FrameAOffset.p = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getCOG();
                 mass_(i) = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getMass();
+                Frames[i].FrameALinkName = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Parent->Segment.getName();
             }
         }
         else
         {
-            int N = scene_->getSolver().getTree().size();
+            int N = scene_->getSolver().getTree().size()-1;
             mass_.resize(N);
             Frames.resize(N);
             for(int i=0; i<N; i++)
             {
-                Frames[i].FrameALinkName = scene_->getSolver().getTree()[i]->Segment.getName();
-                Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i]->Segment.getInertia().getCOG();
-                mass_(i) = scene_->getSolver().getTree()[i]->Segment.getInertia().getMass();
+                Frames[i].FrameALinkName = scene_->getSolver().getTree()[i+1]->Parent->Segment.getName();
+                Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i+1]->Segment.getInertia().getCOG();
+                mass_(i) = scene_->getSolver().getTree()[i+1]->Segment.getInertia().getMass();
             }
         }
 

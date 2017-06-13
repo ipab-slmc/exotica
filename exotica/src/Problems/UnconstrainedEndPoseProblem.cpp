@@ -93,6 +93,7 @@ namespace exotica
     void UnconstrainedEndPoseProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal)
     {
         TaskMap_ptr task = TaskMaps.at(task_name);
+        if(goal.rows()!=task->Length) throw_named("Invalid goal dimension "<<goal.rows()<<" expected "<<task->Length);
         y.segment(task->Start, task->Length) = goal;
     }
 

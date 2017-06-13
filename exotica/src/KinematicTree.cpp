@@ -326,7 +326,8 @@ void KinematicTree::ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J)
     {
         if(it->IsControlled)
         {
-            J.setColumn(it->ControlId, (it->Frame.M*it->Segment.twist(TreeState(it->Id),1.0)).RefPoint(frame.TempA.p-it->Frame.p));
+            KDL::Frame JointFrame = it->Parent->Frame*KDL::Frame(it->Segment.getJoint().JointOrigin());
+            J.setColumn(it->ControlId, JointFrame.M*it->Segment.getJoint().twist(1.0).RefPoint((JointFrame.Inverse()*frame.TempA).p));
         }
         it = it->Parent;
     }
@@ -335,7 +336,9 @@ void KinematicTree::ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J)
     {
         if(it->IsControlled)
         {
-            J.setColumn(it->ControlId, J.getColumn(it->ControlId) + (it->Frame.M*it->Segment.twist(TreeState(it->Id),1.0)).RefPoint(frame.TempA.p-it->Frame.p));
+            KDL::Frame JointFrame = it->Frame*it->Segment.getFrameToTip().Inverse();
+            KDL::Frame PreJointFrame = it->Parent->Frame*KDL::Frame(it->Segment.getJoint().JointOrigin());
+            J.setColumn(it->ControlId, J.getColumn(it->ControlId) + JointFrame.M*it->Segment.getJoint().twist(-1.0).RefPoint((PreJointFrame.Inverse()*frame.TempA).p));
         }
 
         it = it->Parent;

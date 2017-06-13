@@ -103,22 +103,7 @@ namespace exotica
 
                             _A = 0;
                             distance = EffPhi.segment(j*3, 3) - EffPhi.segment(l*3, 3);
-                            if (j < M)
-                            {
-                                if (l < M)
-                                    //Both j and l are points on the robot
-                                    _distance =  Kinematics.J[j].data.block(0, i, 3, 1)
-                                            -  Kinematics.J[l].data.block(0, i, 3, 1);
-                                else
-                                    //l is not on the robot
-                                    _distance =  Kinematics.J[j].data.block(0, i, 3, 1);
-                            }
-                            else
-                            {
-                                if (l < M)
-                                    //j is not on the robot
-                                    _distance = - Kinematics.J[l].data.block(0, i, 3, 1);
-                            }
+                            _distance = Kinematics.J[j].data.block(0, i, 3, 1) - Kinematics.J[l].data.block(0, i, 3, 1);
 
                             Sl = distance.dot(_distance) / dist(j, l);
                             for (k = 0; k < M; k++)
@@ -126,18 +111,7 @@ namespace exotica
                                 if (j != k && dist(j, k) > 0 && weights_(j, k) > 0)
                                 {
                                     distance = EffPhi.segment(j*3, 3) - EffPhi.segment(k*3, 3);
-                                    if (j < M)
-                                    {
-                                        if (k < M)
-                                            _distance =  Kinematics.J[j].data.block(0, i, 3, 1)
-                                                    -  Kinematics.J[k].data.block(0, i, 3, 1);
-                                        else
-                                            _distance =  Kinematics.J[j].data.block(0, i, 3, 1);
-                                    }
-                                    else
-                                    {
-                                        if (k < M) _distance = - Kinematics.J[k].data.block(0, i, 3, 1);
-                                    }
+                                    _distance = Kinematics.J[j].data.block(0, i, 3, 1) - Kinematics.J[k].data.block(0, i, 3, 1);
                                     Sk = distance.dot(_distance) / dist(j, k);
                                     _A += weights_(j, k) * (Sl * dist(j, k) - Sk * dist(j, l))
                                             / (dist(j, k) * dist(j, k));
@@ -150,11 +124,8 @@ namespace exotica
                             _w = 0;
                             w = 0;
                         }
-                        if (l < M)
-                            J.block(3 * j, i, 3, 1) -= EffPhi.segment(l*3, 3) * _w
-                                    +  Kinematics.J[l].data.block(0, i, 3, 1) * w;
-                        else
-                            J.block(3 * j, i, 3, 1) -= EffPhi.segment(l*3, 3) * _w;
+                        J.block(3 * j, i, 3, 1) -= EffPhi.segment(l*3, 3) * _w
+                                +  Kinematics.J[l].data.block(0, i, 3, 1) * w;
                     }
                 }
             }
@@ -227,15 +198,14 @@ namespace exotica
             imesh_mark_pub_.publish(imesh_mark_);
         }
         {
-            Eigen::Map<const Eigen::MatrixXd> eff_mat(phi.data(), 3, eff_size_);
             imesh_mark_.ns = getObjectName()+"Raw";
             imesh_mark_.points.clear();
             std::vector<geometry_msgs::Point> points(eff_size_);
             for (int i = 0; i < eff_size_; i++)
             {
-                points[i].x = eff_mat(0, i);
-                points[i].y = eff_mat(1, i);
-                points[i].z = eff_mat(2, i);
+                points[i].x = phi(i*3);
+                points[i].y = phi(i*3+1);
+                points[i].z = phi(i*3+2);
             }
 
             for(int i=0;i<eff_size_;i++)
@@ -293,9 +263,7 @@ namespace exotica
             {
                 if (!(j >= N && l >= N))
                 {
-                    dist(j, l) = dist(l, j) = sqrt(
-                    (EffPhi.segment(j*3, 3) - EffPhi.segment(l*3, 3)).dot(
-                    ( EffPhi.segment(j*3, 3) - EffPhi.segment(l*3, 3))));
+                    dist(j, l) = dist(l, j) = (EffPhi.segment(j*3, 3) - EffPhi.segment(l*3, 3)).norm();
                 }
             }
         }

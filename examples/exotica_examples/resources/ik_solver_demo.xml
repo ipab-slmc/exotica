@@ -22,7 +22,7 @@
       <EffPosition Name="Position">
         <Scene>MyScene</Scene>
         <EndEffector>
-            <Limb Segment="lwr_arm_6_link" />
+            <Frame Link="lwr_arm_6_link" />
         </EndEffector>
       </EffPosition>
     </Maps>

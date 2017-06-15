@@ -98,7 +98,7 @@ void testEffPosition()
     Initializer map("exotica/EffPosition",{
                         {"Name",std::string("Position")},
                         {"EndEffector",std::vector<Initializer>({
-                             Initializer("Limb",{{"Segment",std::string("endeff")}})
+                             Initializer("Frame",{{"Link",std::string("endeff")}})
                                         }) } });
     UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
     testRandom(problem);
@@ -138,7 +138,7 @@ void testDistance()
     Initializer map("exotica/Distance",{
                         {"Name",std::string("Distance")},
                         {"EndEffector",std::vector<Initializer>({
-                             Initializer("Limb",{{"Segment",std::string("endeff")}})
+                             Initializer("Frame",{{"Link",std::string("endeff")}})
                                         }) } });
     UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
     testRandom(problem);
@@ -206,8 +206,8 @@ void testSphereCollision()
                         {"Precision",1e-2},
                         {"ReferenceFrame",std::string("base")},
                         {"EndEffector",std::vector<Initializer>({
-                             Initializer("Limb",{{"Segment",std::string("base")}, {"Radius", 0.3}, {"Group", std::string("base")}}),
-                             Initializer("Limb",{{"Segment",std::string("endeff")}, {"Radius", 0.3}, {"Group", std::string("eff")}})
+                             Initializer("Frame",{{"Link",std::string("base")}, {"Radius", 0.3}, {"Group", std::string("base")}}),
+                             Initializer("Frame",{{"Link",std::string("endeff")}, {"Radius", 0.3}, {"Group", std::string("eff")}})
                                         }) } });
     UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
     testRandom(problem);
@@ -375,8 +375,8 @@ void testCoM()
                         {"Name",std::string("CoM")},
                         {"EnableZ", true},
                         {"EndEffector",std::vector<Initializer>({
-                               Initializer("Limb",{{"Segment",std::string("link2")}}),
-                               Initializer("Limb",{{"Segment",std::string("endeff")}})
+                               Initializer("Frame",{{"Link",std::string("link2")}}),
+                               Initializer("Frame",{{"Link",std::string("endeff")}})
                                           }) }});
     problem = setupProbelm(map);
     testRandom(problem);
@@ -449,9 +449,9 @@ void testIMesh()
                         {"Name",std::string("IMesh")},
                         {"ReferenceFrame",std::string("base")},
                         {"EndEffector",std::vector<Initializer>({
-                               Initializer("Limb",{{"Segment",std::string("base")}}),
-                               Initializer("Limb",{{"Segment",std::string("link2")}}),
-                               Initializer("Limb",{{"Segment",std::string("endeff")}})
+                               Initializer("Frame",{{"Link",std::string("base")}}),
+                               Initializer("Frame",{{"Link",std::string("link2")}}),
+                               Initializer("Frame",{{"Link",std::string("endeff")}})
                                           }) }
                          });
     UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);

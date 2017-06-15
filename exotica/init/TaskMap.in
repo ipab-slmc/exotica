@@ -1,4 +1,4 @@
-include <exotica/LimbInitializer>
+include <exotica/FrameInitializer>
 extend <exotica/Object>
 Required std::string Scene;
-Optional std::vector<exotica::Initializer> EndEffector = std::vector<exotica::Initializer>(); # LimbInitializer
+Optional std::vector<exotica::Initializer> EndEffector = std::vector<exotica::Initializer>(); # FrameInitializer

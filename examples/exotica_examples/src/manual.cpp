@@ -14,7 +14,7 @@ void run()
     SceneInitializer scene("MyScene","arm");
     // End-effector task map with two position frames
     EffPositionInitializer map("Position","MyScene",false,
-      {LimbInitializer("lwr_arm_6_link")});
+      {FrameInitializer("lwr_arm_6_link")});
     // Create a task using the map above (goal will be specified later)
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;

@@ -15,16 +15,12 @@ bool testCore()
 
 bool testGenericInit()
 {
-    Initializer kinematica("Kinematica",std::map<std::string,boost::any>({
-                    { "Root",Initializer("Limb",{ {"Segment",std::string("base")} }) },
-                    { "Joints",std::string("joint1,joint2,joint3") }
-                             }));
     Initializer scene("Scene",{{"Name",std::string("MyScene")},{"JointGroup",std::string("arm")}});
     Initializer map("exotica/EffPosition",{
                         {"Name",std::string("Position")},
                         {"Scene",std::string("MyScene")},
                         {"EndEffector",std::vector<Initializer>({
-                             Initializer("Limb",{{"Segment",std::string("endeff")}})
+                             Initializer("Frame",{{"Link",std::string("endeff")}})
                                         }) } });
     Eigen::VectorXd W(3);W << 3,2,1;
     Initializer problem("exotica/UnconstrainedEndPoseProblem",{
@@ -47,7 +43,7 @@ bool testGenericInit()
 
 bool testXMLInit()
 {
-    std::string XMLstring = "<IKSolverDemoConfig><IKsolver Name=\"MySolver\"><MaxIt>1</MaxIt><MaxStep>0.1</MaxStep><C>1e-3</C></IKsolver><UnconstrainedEndPoseProblem Name=\"MyProblem\"><PlanningScene><Scene Name=\"MyScene\"><PlanningMode>Optimization</PlanningMode><JointGroup>arm</JointGroup></Scene></PlanningScene><Maps><EffPosition Name=\"Position\"><Scene>MyScene</Scene><EndEffector><Limb Segment=\"endeff\" /></EndEffector></EffPosition></Maps><W> 3 2 1 </W></UnconstrainedEndPoseProblem></IKSolverDemoConfig>";
+    std::string XMLstring = "<IKSolverDemoConfig><IKsolver Name=\"MySolver\"><MaxIt>1</MaxIt><MaxStep>0.1</MaxStep><C>1e-3</C></IKsolver><UnconstrainedEndPoseProblem Name=\"MyProblem\"><PlanningScene><Scene Name=\"MyScene\"><PlanningMode>Optimization</PlanningMode><JointGroup>arm</JointGroup></Scene></PlanningScene><Maps><EffPosition Name=\"Position\"><Scene>MyScene</Scene><EndEffector><Frame Link=\"endeff\" /></EndEffector></EffPosition></Maps><W> 3 2 1 </W></UnconstrainedEndPoseProblem></IKSolverDemoConfig>";
     Initializer solver, problem;
     XMLLoader::load(XMLstring,solver, problem,"","",true);
     PlanningProblem_ptr any_problem = Setup::createProblem(problem);

@@ -308,7 +308,7 @@ namespace exotica
       {
         throw_pretty("Trying to add an already existing vertex '"<<verts[i].Name<<"'");
       }
-      Eigen::Vector3d pos = verts[i].Frame.head(3);
+      Eigen::Vector3d pos = verts[i].LinkOffset.head(3);
       VERTEX_TYPE type;
       if(verts[i].LinkType == "LINK")
         type = LINK;

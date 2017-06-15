@@ -13,7 +13,7 @@ void run()
                         {"Name",std::string("Position")},
                         {"Scene",std::string("MyScene")},
                         {"EndEffector",std::vector<Initializer>({
-                             Initializer("Limb",{{"Segment",std::string("lwr_arm_6_link")}}),
+                             Initializer("Frame",{{"Link",std::string("lwr_arm_6_link")}}),
                                         })}});
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;

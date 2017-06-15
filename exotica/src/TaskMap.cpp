@@ -30,10 +30,11 @@
  *
  */
 
-#include "exotica/TaskMap.h"
-#include "exotica/PlanningProblem.h"
+#include <exotica/TaskMap.h>
+#include <exotica/PlanningProblem.h>
 #include <boost/algorithm/string.hpp>
 #include <exotica/TaskMapInitializer.h>
+#include <exotica/FrameInitializer.h>
 
 namespace exotica
 {
@@ -58,8 +59,8 @@ namespace exotica
 
     for(Initializer& eff : MapInitializer.EndEffector)
     {
-        LimbInitializer limb(eff);
-        Frames.push_back(KinematicFrameRequest(limb.Segment,getFrame(limb.Frame)));
+        FrameInitializer frame(eff);
+        Frames.push_back(KinematicFrameRequest(frame.Link, getFrame(frame.LinkOffset), frame.Base, getFrame(frame.BaseOffset)));
     }
   }
 

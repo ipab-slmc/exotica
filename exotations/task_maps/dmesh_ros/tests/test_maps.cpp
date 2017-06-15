@@ -107,11 +107,11 @@ void testDMesh()
                         {"GoalGain",0.1},
                         {"UsePose",true},
                         {"EndEffector",std::vector<Initializer>({
-                             Initializer("Limb",{{"Name",std::string("A")}, {"LinkType",std::string("LINK")}, {"ConnectTo",std::string("B C D E")}, {"Segment",std::string("base")}, {"Radius", 0.4} }),
-                             Initializer("Limb",{{"Name",std::string("B")}, {"LinkType",std::string("LINK")}, {"ConnectTo",std::string("A C D E")}, {"Segment",std::string("endeff")}, {"Radius", 0.4} }),
-                             Initializer("Limb",{{"Name",std::string("C")}, {"LinkType",std::string("OBSTACLE")}, {"ConnectTo",std::string("B A D E")}, {"Segment",std::string("base")}, {"Radius", 0.2}, {"Frame", std::string("0.4 0.0 0.7 0.0 0.0 0.0 1.0")}}),
-                             Initializer("Limb",{{"Name",std::string("D")}, {"LinkType",std::string("OBSTACLE")}, {"ConnectTo",std::string("B C A E")}, {"Segment",std::string("base")}, {"Radius", 0.2}, {"Frame", std::string("0.0 0.4 0.7 0.0 0.0 0.0 1.0")}}),
-                             Initializer("Limb",{{"Name",std::string("E")}, {"LinkType",std::string("GOAL")}, {"ConnectTo",std::string("B C D A")}, {"Segment",std::string("base")}, {"Radius", 0.2}, {"Frame", std::string("0.0 -0.4 1.0 0.0 0.0 0.0 1.0")}})
+                             Initializer("Frame",{{"Name",std::string("A")}, {"LinkType",std::string("LINK")}, {"ConnectTo",std::string("B C D E")}, {"Link",std::string("base")}, {"Radius", 0.4} }),
+                             Initializer("Frame",{{"Name",std::string("B")}, {"LinkType",std::string("LINK")}, {"ConnectTo",std::string("A C D E")}, {"Link",std::string("endeff")}, {"Radius", 0.4} }),
+                             Initializer("Frame",{{"Name",std::string("C")}, {"LinkType",std::string("OBSTACLE")}, {"ConnectTo",std::string("B A D E")}, {"Link",std::string("base")}, {"Radius", 0.2}, {"LinkOffset", std::string("0.4 0.0 0.7 0.0 0.0 0.0 1.0")}}),
+                             Initializer("Frame",{{"Name",std::string("D")}, {"LinkType",std::string("OBSTACLE")}, {"ConnectTo",std::string("B C A E")}, {"Link",std::string("base")}, {"Radius", 0.2}, {"LinkOffset", std::string("0.0 0.4 0.7 0.0 0.0 0.0 1.0")}}),
+                             Initializer("Frame",{{"Name",std::string("E")}, {"LinkType",std::string("GOAL")}, {"ConnectTo",std::string("B C D A")}, {"Link",std::string("base")}, {"Radius", 0.2}, {"LinkOffset", std::string("0.0 -0.4 1.0 0.0 0.0 0.0 1.0")}})
                                         }) } });
     UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
     testRandom(problem);

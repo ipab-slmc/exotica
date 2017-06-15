@@ -1,4 +1,4 @@
-extend <exotica/Limb>
+extend <exotica/Frame>
 Required std::string Name;
 Required double Radius;
 Optional std::vector<std::string> ConnectTo = std::vector<std::string>();

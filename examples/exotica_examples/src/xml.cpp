@@ -35,11 +35,6 @@ void run()
 
     ROS_INFO_STREAM("Calling solve() in an infinite loop");
 
-    // Publish the states to rviz
-    ros::Publisher jointStatePublisher_ = nhg_.advertise<sensor_msgs::JointState>("/joint_states", 1);
-    sensor_msgs::JointState jnt;
-    jnt.name = any_problem->scene_->getSolver().getJointNames();
-    jnt.position.resize(jnt.name.size());
     double t = 0.0;
     ros::Rate loop_rate(500.0);
     ros::WallTime init_time = ros::WallTime::now();
@@ -68,11 +63,8 @@ void run()
       ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
       q = solution.row(0);
 
-      jnt.header.stamp = ros::Time::now();
-      jnt.header.seq++;
-      for (int j = 0; j < solution.cols(); j++)
-      jnt.position[j] = q(j);
-      jointStatePublisher_.publish(jnt);
+      my_problem->Update(q);
+      my_problem->getScene()->getSolver().publishFrames();
 
       ros::spinOnce();
       loop_rate.sleep();

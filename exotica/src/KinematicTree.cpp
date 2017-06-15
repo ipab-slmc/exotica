@@ -34,6 +34,8 @@
 #include <moveit/robot_model/robot_model.h>
 #include <algorithm>
 
+#include <kdl/frames_io.hpp>
+
 #ifdef KIN_DEBUG_MODE
 #include <iostream>
 #endif
@@ -296,10 +298,10 @@ void KinematicTree::publishFrames()
     for(KinematicFrame&  frame : Solution->Frame)
     {
         tf::Transform T;
-        tf::transformKDLToTF(frame.TempA, T);
-        debugFrames[i*2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica","Frame"+std::to_string(i)+"A"+frame.FrameA->Segment.getName()));
         tf::transformKDLToTF(frame.TempB, T);
-        debugFrames[i*2+1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()));
+        debugFrames[i*2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()));
+        tf::transformKDLToTF(frame.TempAB, T);
+        debugFrames[i*2+1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()), tf::resolve("exotica","Frame"+std::to_string(i)+"A"+frame.FrameA->Segment.getName()));
         i++;
     }
     debugTF.sendTransform(debugFrames);
@@ -318,32 +320,33 @@ void KinematicTree::UpdateFK()
     }
 }
 
+
 void KinematicTree::ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J)
 {
     J.data.setZero();
     std::shared_ptr<KinematicElement> it = frame.FrameA;
-    while(it!=Root)
+    while(it!=nullptr)
     {
         if(it->IsControlled)
         {
-            KDL::Frame JointFrame = it->Parent->Frame*KDL::Frame(it->Segment.getJoint().JointOrigin());
-            J.setColumn(it->ControlId, JointFrame.M*it->Segment.getJoint().twist(1.0).RefPoint((JointFrame.Inverse()*frame.TempA).p));
+            KDL::Frame SegmentReference;
+            if(it->Parent!=nullptr) SegmentReference = it->Parent->Frame;
+            J.setColumn(it->ControlId, frame.TempB.M.Inverse()*(SegmentReference.M*it->Segment.twist(TreeState(it->Id), 1.0)).RefPoint(frame.TempA.p-it->Frame.p));
+
         }
         it = it->Parent;
     }
     it = frame.FrameB;
-    while(it!=Root)
+    while(it!=nullptr)
     {
         if(it->IsControlled)
         {
-            KDL::Frame JointFrame = it->Frame*it->Segment.getFrameToTip().Inverse();
-            KDL::Frame PreJointFrame = it->Parent->Frame*KDL::Frame(it->Segment.getJoint().JointOrigin());
-            J.setColumn(it->ControlId, J.getColumn(it->ControlId) + JointFrame.M*it->Segment.getJoint().twist(-1.0).RefPoint((PreJointFrame.Inverse()*frame.TempA).p));
+            KDL::Frame SegmentReference;
+            if(it->Parent!=nullptr) SegmentReference = it->Parent->Frame;
+            J.setColumn(it->ControlId, J.getColumn(it->ControlId) - (frame.TempB.M.Inverse()*(SegmentReference.M*it->Segment.twist(TreeState(it->Id), 1.0)).RefPoint(frame.TempA.p-it->Frame.p)));
         }
-
         it = it->Parent;
     }
-    KDL::changeBase(J, frame.TempB.M, J);
 }
 
 void KinematicTree::UpdateJ()

@@ -254,7 +254,7 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
         }
     }
 
-    debugTree.resize(Tree.size());
+    debugTree.resize(Tree.size()-1);
     debugFrames.resize(Solution->Frame.size()*2);
 
     return Solution;
@@ -288,9 +288,10 @@ void KinematicTree::publishFrames()
     int i = 0;
     for(std::shared_ptr<KinematicElement> element : Tree)
     {
+
         tf::Transform T;
         tf::transformKDLToTF(element->Frame, T);
-        debugTree[i] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica", element->Segment.getName()));
+        if(i>0) debugTree[i-1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica", element->Segment.getName()));
         i++;
     }
     debugTF.sendTransform(debugTree);

@@ -9,12 +9,23 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Boost REQUIRED COMPONENTS system)
 
+# Check ROS version
+execute_process(
+  COMMAND rosversion -d
+  OUTPUT_VARIABLE ROS_VERSION
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if (${ROS_VERSION} MATCHES "(indigo|jade)")
+  add_definitions(-DROS_INDIGO)
+else (${ROS_VERSION} MATCHES "(kinetic|lunar")
+  add_definitions(-DROS_KINETIC)
+endif()
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ompl_imp_solver
   CATKIN_DEPENDS exotica ompl_solver pluginlib
-  DEPENDS system_lib
 )
 
 AddInitializer(OMPLImplementation)

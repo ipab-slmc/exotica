@@ -6,7 +6,7 @@ set(CMAKE_EXE_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_SHARED_LINKER_FLAGS -Wl,--no-as-needed)
 set(CMAKE_MODULE_LINKER_FLAGS -Wl,--no-as-needed)
 
-set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Anly allowes RelWithDebInfo" FORCE)
+set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Only allows RelWithDebInfo" FORCE)
 SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE} CACHE STRING "RelWithDebInfo" FORCE)
 message(STATUS "Forcing build type ${CMAKE_BUILD_TYPE} (required by EXOTica)")
 

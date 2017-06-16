@@ -110,3 +110,4 @@ Ogre.log
 **/doc/*.log
 **/doc/*.synctex.gz
 **/doc/*.toc
+*.out

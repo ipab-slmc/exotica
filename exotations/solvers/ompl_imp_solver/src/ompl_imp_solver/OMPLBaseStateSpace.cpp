@@ -75,8 +75,13 @@ namespace exotica
       double &dist) const
   {
     Eigen::VectorXd q(prob_->getSpaceDim());
+#ifdef ROS_INDIGO
     boost::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
         state, q);
+#elif ROS_KINETIC
+    std::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
+        state, q);
+#endif
     boost::mutex::scoped_lock lock(prob_->getLock());
     prob_->Update(q);
     if (!prob_->getScene()->getCollisionScene()->isStateValid(self_collision_->data, margin_->data))

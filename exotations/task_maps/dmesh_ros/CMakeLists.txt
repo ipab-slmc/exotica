@@ -10,15 +10,14 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Boost REQUIRED COMPONENTS system)
 
+AddInitializer(DMeshROS DMeshVertex)
+GenInitializers()
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES dmesh_ros
   CATKIN_DEPENDS exotica roscpp ik_solver visualization_msgs
-  DEPENDS system_lib
 )
-
-AddInitializer(DMeshROS DMeshVertex)
-GenInitializers()
 
 include_directories(
   include
@@ -32,7 +31,6 @@ add_library(${PROJECT_NAME}
   src/MeshGraph.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 ## Install

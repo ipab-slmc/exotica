@@ -7,18 +7,16 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS signals)
 find_package(LAPACK REQUIRED)
+
+AddInitializer(AICOsolver)
+GenInitializers()
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aico
   CATKIN_DEPENDS exotica
-  DEPENDS system_lib
 )
-
-AddInitializer(AICOsolver)
-GenInitializers()
 
 include_directories(
   include
@@ -34,9 +32,8 @@ add_library(aico
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(aico
-  ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${LAPACK_LIBRARIES}
+  ${catkin_LIBRARIES} ${LAPACK_LIBRARIES}
 )
-
 add_dependencies(aico aico_initializers)
 
 ## Install

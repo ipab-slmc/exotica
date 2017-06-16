@@ -2,13 +2,13 @@
 <package>
   <name>dmesh_ros</name>
   <version>3.0.0</version>
-  <description>The interaction mesh implementation integrated with ROS</description>
+  <description>The relative distance space representation (dmesh) implementation integrated with ROS</description>
 
   <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
 
   <license>BSD</license>
 
-  <url type="website">https://bitbucket.org/IPAB-SLMC/exotica</url>
+  <url type="website">https://github.com/openhumanoids/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica</build_depend>

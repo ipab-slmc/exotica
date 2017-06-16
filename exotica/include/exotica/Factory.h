@@ -7,9 +7,9 @@
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
  * 
- *  * Redistributions of source code must retain the above copyright notice, 
+ *  * Redistributions of source code must retain the aBaseClassve copyright notice,
  *    this list of conditions and the following disclaimer. 
- *  * Redistributions in binary form must reproduce the above copyright 
+ *  * Redistributions in binary form must reproduce the aBaseClassve copyright
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
  *  * Neither the name of  nor the names of its contributors may be used to 
@@ -56,23 +56,22 @@
 
 namespace exotica
 {
-  template<typename BO> class Registrar;
+  template<typename BaseClass> class Registrar;
   /**
    * \brief Templated Object factory for Default-constructible classes. The Factory is itself a singleton.
-   * @param I   The identifier type (typically a string)
-   * @param BO  The Base Object type
+   * @param BaseClass  The Base Object type
    */
-  template<class BO>
+  template<class BaseClass>
   class Factory: public Object
   {
     public:
-      friend class Registrar<BO>;
+      friend class Registrar<BaseClass>;
       /**
        * \brief Singleton implementation: returns a reference to a singleton instance of the instantiated class
        */
-      static Factory<BO> & Instance(void)
+      static Factory<BaseClass> & Instance(void)
       {
-        static Factory<BO> factory_; //!< Declared static so will only be created once
+        static Factory<BaseClass> factory_; //!< Declared static so will only be created once
         return factory_;    //!< At other times, just return the reference to it
       }
       ;
@@ -82,7 +81,7 @@ namespace exotica
        * @param type[in]    The name of the class (string): must be a unique identifier
        * @param creator[in] A pointer to the creator function
        */
-      void registerType(const std::string & type, BO * (*creator_function)())
+      void registerType(const std::string & type, BaseClass * (*creator_function)())
       {
         if (type_registry_.find(type) == type_registry_.end()) //!< If it does not already exist
         {
@@ -95,12 +94,12 @@ namespace exotica
       }
 
 
-      boost::shared_ptr<BO> createInstance(const std::string & type)
+      boost::shared_ptr<BaseClass> createInstance(const std::string & type)
       {
           auto it = type_registry_.find(type);  //!< Attempt to find it
           if (it != type_registry_.end())       //!< If exists
           {
-             return boost::shared_ptr<BO>(it->second());
+             return boost::shared_ptr<BaseClass>(it->second());
           }
           else
           {
@@ -125,21 +124,21 @@ namespace exotica
       /**
        * \brief Private Constructor
        */
-      inline explicit Factory<BO>()
+      inline explicit Factory<BaseClass>()
       {
       }
 
       /** The Map containing the register of the different types of classes **/
-      std::map<std::string, BO * (*)()> type_registry_;
+      std::map<std::string, BaseClass * (*)()> type_registry_;
       std::string base_type_;
   };
 
   /**
    * \brief Registration Class for the object type: Also templated:
    * @param I   The Identifier type (typically string)
-   * @param BO  The Base object type (required for the sake of the singleton factory)
+   * @param BaseClass  The Base object type (required for the sake of the singleton factory)
    */
-  template<typename BO>
+  template<typename BaseClass>
   class Registrar
   {
     public:
@@ -148,10 +147,10 @@ namespace exotica
        * @param name      The name for the new class type
        * @param creator   The creator function for the DERIVED class type but which returns a pointer to the base-class type!
        */
-      Registrar(const std::string & name, BO * (*creator)(), const std::string& base_type)
+      Registrar(const std::string & name, BaseClass * (*creator)(), const std::string& base_type)
       {
-        Factory<BO>::Instance().base_type_ = base_type;
-        Factory<BO>::Instance().registerType(name, creator);
+        Factory<BaseClass>::Instance().base_type_ = base_type;
+        Factory<BaseClass>::Instance().registerType(name, creator);
       }
   };
 }

@@ -21,9 +21,8 @@ namespace exotica
 
   }
 
-  void OMPLBaseSolver::initialiseBaseSolver(Initializer& init, const Server_ptr &server)
+  void OMPLBaseSolver::initialiseBaseSolver(Initializer& init)
   {
-      server_ = server;
       registerDefaultPlanners();
       initialiseSolver(init);
   }

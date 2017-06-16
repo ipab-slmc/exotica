@@ -65,11 +65,8 @@ namespace exotica
   class CollisionScene : public Uncopyable
   {
     public:
-      /**
-       * \brief	Default constructor
-       * @param	server	Pointer to exotica server
-       */
-      CollisionScene(const Server_ptr & server, const std::string & scene_name);
+
+      CollisionScene(const std::string & scene_name);
 
       /**
        * \brief	Destructor
@@ -84,7 +81,7 @@ namespace exotica
        * @return Indication of success
        */
       void initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
-          const std::vector<std::string> & joints, std::string & mode,
+          const std::vector<std::string> & joints, const std::string & mode,
           BASE_TYPE base_type, robot_model::RobotModelPtr model_);
 
       /**
@@ -216,10 +213,8 @@ namespace exotica
       ///	The allowed collisiom matrix
       collision_detection::AllowedCollisionMatrixPtr acm_;
 
-      ///	Pointer to exotica server
-      exotica::Server_ptr server_;
       std::string scene_name_;
-      BASE_TYPE base_type_;
+      BASE_TYPE BaseType;
       EParam<std_msgs::Bool> drake_full_body_;;
 
   };
@@ -230,232 +225,31 @@ namespace exotica
   class Scene: public Object, Uncopyable, public Instantiable<SceneInitializer>
   {
     public:
-      /**
-       * \brief	Default constructor
-       * @param	name	The scene name
-       */
       Scene(const std::string & name);
       Scene();
-
-      /**
-       * \brief	Destructor
-       */
       virtual ~Scene();
-
       virtual void Instantiate(SceneInitializer& init);
-
       std::shared_ptr<KinematicResponse> RequestKinematics(KinematicsRequest& Request);
-
-      /**
-       * \brief	Get scene name
-       * @return	Name
-       */
       std::string getName();
-
-      /**
-       * \brief	Updator function
-       * @param	x	System state
-       * @return Indication of success
-       */
-      virtual void update(Eigen::VectorXdRefConst x, const int t = 0);
       virtual void Update(Eigen::VectorXdRefConst x);
-
-      /**
-       * \brief	Set collision scene
-       * @param	scene	Moveit planning scene
-       * @return Indication of success
-       */
-      void setCollisionScene(
-          const planning_scene::PlanningSceneConstPtr & scene);
-
-      /**
-       * @brief Set collision scene
-       * @param scene Planning scene message
-       * @return Indication of success
-       */
-      void setCollisionScene(
-          const moveit_msgs::PlanningSceneConstPtr & scene);
-
-      /**
-       * \brief	Append new taskmap
-       * @param	name	Taskmap name
-       * @param	eff		Endeffector names
-       * @param	offset	Endeffector offsets
-       * @return Indication of success
-       */
-      void appendTaskMap(const std::string & name,
-          const std::vector<std::string> & eff,
-          const std::vector<KDL::Frame> & offset);
-
-      /**
-       * \brief	Clear all the appended taskmaps
-       */
-      void clearTaskMap();
-
-      /**
-       * \brief	Called after appending
-       * @return Indication of success
-       */
-      void activateTaskMaps();
-
-      /**
-       * \brief	Update task map (eff)
-       * @param	task	Task name
-       * @param	offset	Task end-effector offsets
-       * @return Indication of success
-       */
-      void updateEndEffectors(const std::string & task,
-          const std::vector<KDL::Frame> & offset);
-
-      /*
-       * \brief Updated individual end-effector
-       * @param task  Task name
-       * @param eff   End-effector name
-       * @param offset  New end-effector offset
-       */
-      void updateEndEffector(const std::string &task, const std::string &eff,
-          const KDL::Frame& offset);
-
-      /**
-       * \brief	Get forward map (values)
-       * @param	task	Task name
-       * @param	phi		Returned forward map
-       * @return Indication of success
-       */
-      void getForwardMap(const std::string & task, Eigen::VectorXdRef phi);
-
-      /**
-       * @brief Get forward map reference
-       * @param task Task name
-       * @param phi Returned forward map reference
-       * @return Indication of success
-       */
-      void getForwardMap(const std::string & task,
-          Eigen::VectorXdRef_ptr& phi, bool force = false);
-
-      /**
-       * \brief	Get jacobian (values)
-       * @param	task	Task name
-       * @param	jac		Returned Jacobian
-       * @return Indication of success
-       */
-      void getJacobian(const std::string & task, Eigen::MatrixXdRef jac);
-
-      /**
-       * @brief Get jacobian reference
-       * @param task Task name
-       * @param jac Returned Jacobian reference
-       * @return Indication of success
-       */
-      void getJacobian(const std::string & task, Eigen::MatrixXdRef_ptr& jac,
-          bool force = false);
-
-      /**
-       * \brief	Get joint number N
-       * @return	N
-       */
+      void setCollisionScene(const planning_scene::PlanningSceneConstPtr & scene);
+      void setCollisionScene( const moveit_msgs::PlanningSceneConstPtr & scene);
       int getNumJoints();
-
-      /**
-       * \brief	Get end-effector names for a task
-       * @param	task	Task name
-       * @param	effs	Endeffector names
-       * @return Indication of success
-       */
-      void getEndEffectors(const std::string & task,
-          std::vector<std::string> & effs);
-      void getEndEffectors(const std::string & task,
-          std::pair<std::vector<std::string>, std::vector<KDL::Frame>> & effs);
-
-      /**
-       * \brief	Get exotica collision scene ptr
-       * @return	CollisionScene pointer
-       */
       CollisionScene_ptr & getCollisionScene();
-
-      /**
-       * \brief	Get map size for particular taskmap
-       * @param	task	Task name
-       * @return	Map 	Size
-       */
-      int getMapSize(const std::string & task);
-
-      /**
-       * \brief	Get centre of mass properties
-       * @param	seg		Segment names
-       * @param	mass	Mass of each link
-       * @param	cog		Centre of gravity of each link
-       * @param	tip_pose	Tip pose of each link
-       * @param	base_pose	Base pose of each link
-       * @return Indication of success
-       */
-      void getCoMProperties(std::string& task,
-          std::vector<std::string> & segs, Eigen::VectorXd & mass,
-          std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
-          std::vector<KDL::Frame> & base_pose);
-
-      /**
-       * \brief	Get task root name
-       * @return	Root name
-       */
       std::string getRootName();
-
-      /**
-       * @brief getPlanningScene Returns the MoveIt! planning scene associated with this Scene
-       * @return Planning Scene
-       */
       planning_scene::PlanningScenePtr getPlanningScene();
-
-      /**
-       * @brief getSolver Returns the instance of Kinematica solver associated with this Scene
-       * @return Kinematic tree solver
-       */
       exotica::KinematicTree & getSolver();
-
-      /**
-       * @brief Returns poses ofrequested end-effectors
-       * @param names List of end-effector names
-       * @param poses Returned poses
-       * @return Indication of success
-       */
-      void getPoses(const std::vector<std::string> & names,
-          std::vector<KDL::Frame> & poses);
-
-      /**
-       * @brief getRobotModel Returns the robot model
-       * @return Robot model
-       */
       robot_model::RobotModelPtr getRobotModel();
-
-      /**
-       * \brief	Get controlled joint names
-       * @param	joints	Joint names
-       */
       void getJointNames(std::vector<std::string> & joints);
       std::vector<std::string> getJointNames();
 
-      /*
-       * \brief	Get planning mode
-       * @return	Planning mode
-       */
-      std::string & getPlanningMode();
-
-      /*
-       * \breif	Get robot base type
-       * @return	Base type
-       */
       BASE_TYPE getBaseType()
       {
-        return base_type_;
+        return BaseType;
       }
-
-      KDL::Frame getRobotRootWorldTransform();
 
       void publishScene();
     private:
-      ///	EXOTica server
-      Server_ptr server_;
-
       ///	The name of the scene
       std::string name_;
 
@@ -469,46 +263,10 @@ namespace exotica
       robot_model::JointModelGroup* group;
 
       ///	Robot base type
-      BASE_TYPE base_type_;
-
-      ///	The controlled joint size
-      int N;
-
-      ///	Initialisation flag
-      bool initialised_;
-
-      ///	The big phi
-      Eigen::VectorXd Phi_;
-
-      ///	The big jacobian
-      Eigen::MatrixXd Jac_;
-
-      ///	Forwardmaps referring to subvectors of the big phi
-      std::map<std::string, Eigen::VectorXdRef_ptr> phis_;
-
-      ///	Jacobians referring to submatrices of the big jacobian
-      std::map<std::string, Eigen::MatrixXdRef_ptr> jacs_;
-
-      ///	End-effector names
-      std::map<std::string, std::vector<std::string> > eff_names_;
-
-      ///	End-effector offsets
-      std::map<std::string, std::vector<KDL::Frame> > eff_offsets_;
-
-      ///	End-effector index (in kinematica)
-      std::map<std::string, std::vector<int> > eff_index_;
-
-      ///	Mutex locker
-      boost::mutex lock_;
+      BASE_TYPE BaseType;
 
       ///	The collision scene
       CollisionScene_ptr collision_scene_;
-
-      ///	Update mode (Sampling or Optimization)
-      std::string mode_;
-
-      /// Indicates whether to update Jacobians during the update call
-      bool update_jacobians_;
 
       ///	Visual debug
       bool visual_debug_;

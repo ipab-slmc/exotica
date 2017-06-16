@@ -56,18 +56,6 @@ namespace exotica
     return bounds_;
   }
 
-  void SamplingProblem::clear(bool keepOriginals)
-  {
-    if (keepOriginals)
-    {
-      TaskMaps = originalMaps_;
-    }
-    else
-    {
-      TaskMaps.clear();
-    }
-  }
-
   void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
   {
       Parameters = init;
@@ -79,7 +67,6 @@ namespace exotica
 
       space_dim_ = scene_->getNumJoints();
 
-      originalMaps_ = TaskMaps;
       goal_ = init.Goal;
 
       if (scene_->getBaseType() != exotica::BASE_TYPE::FIXED)
@@ -96,6 +83,11 @@ namespace exotica
         getBounds()[i] = joint_limits.at(jnts[i])[0];
         getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1];
       }
+  }
+
+  void SamplingProblem::Update(Eigen::VectorXdRefConst x)
+  {
+      scene_->Update(x);
   }
 
   int SamplingProblem::getSpaceDim()

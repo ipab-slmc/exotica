@@ -81,12 +81,11 @@ namespace exotica
             space_->as<OMPLSE3RNStateSpace>()->OMPLStateToEigen(state,
                 q) :
             space_->as<OMPLStateSpace>()->copyFromOMPLState(state, q);
-        scene_->update(q, 0);
-        std::vector<KDL::Frame> poses;
-        scene_->getPoses(links_, poses);
+        scene_->Update(q);
+        ArrayFrame poses = scene_->getSolver().Solution->Phi;
         for (std::size_t i = 0; i < dist_index_.size(); ++i)
-          projection(i) = (poses[dist_index_[i].second].p
-              - poses[dist_index_[i].first].p).Norm();
+          projection(i) = (poses(dist_index_[i].second).p
+              - poses(dist_index_[i].first).p).Norm();
       }
 
     private:

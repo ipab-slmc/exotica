@@ -34,9 +34,8 @@
 #include <ompl_imp_solver/OMPLSE3RNStateSpace.h>
 namespace exotica
 {
-  OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(unsigned int dim,
-      const Server_ptr &server, SamplingProblem_ptr &prob)
-      : OMPLBaseStateSpace(dim, server, prob), realvectordim_(dim), SO3Bounds_(
+  OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob)
+      : OMPLBaseStateSpace(dim, prob), realvectordim_(dim), SO3Bounds_(
           3), useGoal_(false)
   {
     setName("OMPLSE3RNCompoundStateSpace");
@@ -46,18 +45,18 @@ namespace exotica
     weights_->data.resize(dim + 6);
     for (int i = 0; i < dim + 6; i++)
       weights_->data[i] = 1;
-    if (server_->hasParam(server_->getName() + "/SE3RNSpaceWeights"))
+    if (Server::Instance()->hasParam(Server::Instance()->getName() + "/SE3RNSpaceWeights"))
     {
       EParam<exotica::Vector> tmp;
-      server_->getParam(server_->getName() + "/SE3RNSpaceWeights", tmp);
+      Server::Instance()->getParam(Server::Instance()->getName() + "/SE3RNSpaceWeights", tmp);
         if (tmp->data.size() == dim + 6)
         {
           weights_ = tmp;
         }
     }
-    if (server_->hasParam(server_->getName() + "/SE3RNSpaceRNBias"))
+    if (Server::Instance()->hasParam(Server::Instance()->getName() + "/SE3RNSpaceRNBias"))
     {
-        server_->getParam(server_->getName() + "/SE3RNSpaceRNBias",
+        Server::Instance()->getParam(Server::Instance()->getName() + "/SE3RNSpaceRNBias",
             rn_bias_percentage_);
       useGoal_ = true;
     }

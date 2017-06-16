@@ -63,13 +63,6 @@ namespace exotica
        */
       virtual void specifyProblem(PlanningProblem_ptr pointer);
 
-      /*
-       * \brief	Check if a problem is solvable by this solver (Pure Virtual)
-       * @param	prob		Planning problem
-       * @return	True if solvable, false otherwise
-       */
-      virtual bool isSolvable(const PlanningProblem_ptr & prob);
-
       void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
 
       /*
@@ -95,8 +88,7 @@ namespace exotica
 
       virtual std::string print(std::string prepend);
 
-      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps =
-          std::numeric_limits<double>::epsilon());
+      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon());
     private:
       SamplingProblem_ptr prob_; //!< Shared pointer to the planning problem.
 

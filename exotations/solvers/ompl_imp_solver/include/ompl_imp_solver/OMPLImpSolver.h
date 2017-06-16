@@ -112,7 +112,7 @@ namespace exotica
       Eigen::VectorXd qT_;
       int min_traj_length_;
     private:
-      BASE_TYPE base_type_;
+      BASE_TYPE BaseType;
       double init_margin_;
   };
 }

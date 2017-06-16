@@ -52,7 +52,7 @@ namespace exotica
     public:
       virtual ~OMPLBaseSolver();
 
-      void initialiseBaseSolver(Initializer& init, const Server_ptr &server);
+      void initialiseBaseSolver(Initializer& init);
       virtual void initialiseSolver(Initializer& init) = 0;
 
       virtual bool solve(Eigen::VectorXdRefConst x0, Eigen::MatrixXd &sol) = 0;
@@ -124,8 +124,6 @@ namespace exotica
       void recordData();
 
       SamplingProblem_ptr prob_; //!< Shared pointer to the planning problem.
-
-      Server_ptr server_;
 
       /// The OMPL planning context; this contains the problem definition and the planner used
       og::SimpleSetupPtr ompl_simple_setup_;

@@ -55,7 +55,7 @@ namespace exotica
         throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());
       }
       Initializer baseInit = (Initializer)init;
-      base_solver_->initialiseBaseSolver( baseInit, server_);
+      base_solver_->initialiseBaseSolver(baseInit);
   }
 
   OMPLsolver::~OMPLsolver()
@@ -92,12 +92,6 @@ namespace exotica
     prob_ = boost::static_pointer_cast<SamplingProblem>(pointer);
     base_solver_->specifyProblem(prob_);
     setGoalState(prob_->goal_);
-  }
-
-  bool OMPLsolver::isSolvable(const PlanningProblem_ptr & prob)
-  {
-    if (prob->type()=="exotica::SamplingProblem") return true;
-    return false;
   }
 
   template<typename T> static ompl::base::PlannerPtr allocatePlanner(

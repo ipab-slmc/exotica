@@ -58,6 +58,8 @@ namespace exotica
 
       virtual void Instantiate(SamplingProblemInitializer& init);
 
+      void Update(Eigen::VectorXdRefConst x);
+
       int getSpaceDim();
 
       boost::mutex& getLock()
@@ -73,8 +75,6 @@ namespace exotica
       SamplingProblemInitializer Parameters;
 
       void setGoalState(const Eigen::VectorXd & qT, const double eps = std::numeric_limits<double>::epsilon()) {}
-
-      virtual void clear(bool keepOriginals = true);
 
       Eigen::VectorXd goal_;
     private:

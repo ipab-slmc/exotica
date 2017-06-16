@@ -60,10 +60,8 @@ namespace exotica
 ///////////////////////////////////////////////////////////////
 ///////////////////////	Collision Scene	///////////////////////
 ///////////////////////////////////////////////////////////////
-  CollisionScene::CollisionScene(const Server_ptr & server,
-      const std::string & scene_name)
-      : server_(server), compute_dist(true), stateCheckCnt_(0), scene_name_(
-          scene_name)
+  CollisionScene::CollisionScene(const std::string & scene_name)
+      : compute_dist(true), stateCheckCnt_(0), scene_name_(scene_name)
   {
   }
 
@@ -74,7 +72,7 @@ namespace exotica
 
   void CollisionScene::initialise(
       const moveit_msgs::PlanningSceneConstPtr & msg,
-      const std::vector<std::string> & joints, std::string & mode,
+      const std::vector<std::string> & joints, const std::string & mode,
       BASE_TYPE base_type, robot_model::RobotModelPtr model_)
   {
     ps_.reset(new planning_scene::PlanningScene(model_));
@@ -86,9 +84,9 @@ namespace exotica
               ps_->getAllowedCollisionMatrix()));
     }
     ps_->setPlanningSceneMsg(*msg.get());
-    base_type_ = base_type;
-    if (server_->hasParam(server_->getName() + "/DrakeFullBody"))
-      server_->getParam(server_->getName() + "/DrakeFullBody",
+    BaseType = base_type;
+    if (Server::Instance()->hasParam(Server::Instance()->getName() + "/DrakeFullBody"))
+      Server::Instance()->getParam(Server::Instance()->getName() + "/DrakeFullBody",
           drake_full_body_);
     else
       drake_full_body_.reset(new std_msgs::Bool());
@@ -140,13 +138,13 @@ namespace exotica
           "Size does not match, need vector size of "<<joint_index_.size()<<" but "<<x.rows()<<" is provided");
     }
 
-    if (base_type_ == BASE_TYPE::FIXED)
+    if (BaseType == BASE_TYPE::FIXED)
     {
       for (std::size_t i = 0; i < joint_index_.size(); i++)
         ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
             x(i));
     }
-    else if (base_type_ == BASE_TYPE::FLOATING)
+    else if (BaseType == BASE_TYPE::FLOATING)
     {
       const std::string world_name =
           ps_->getCurrentStateNonConst().getRobotModel()->getSRDF()->getVirtualJoints()[0].name_;
@@ -174,7 +172,7 @@ namespace exotica
         ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
             x(i));
     }
-    else if (base_type_ == BASE_TYPE::PLANAR)
+    else if (BaseType == BASE_TYPE::PLANAR)
     {
       const std::string world_name =
           ps_->getCurrentStateNonConst().getRobotModel()->getSRDF()->getVirtualJoints()[0].name_;
@@ -483,13 +481,12 @@ namespace exotica
 ///////////////////////	EXOTica Scene	///////////////////////
 ///////////////////////////////////////////////////////////////
 
-  Scene::Scene() : name_("Unnamed"), N(0), initialised_(false), update_jacobians_(true), server_(Server::Instance())
+  Scene::Scene() : name_("Unnamed")
   {
 
   }
 
-  Scene::Scene(const std::string & name)
-      : name_(name), N(0), initialised_(false), update_jacobians_(true), server_(Server::Instance())
+  Scene::Scene(const std::string & name) : name_(name)
   {
     object_name_ = name_;
   }
@@ -515,220 +512,31 @@ namespace exotica
       Object::InstatiateObject(init);
       name_ = object_name_;
       kinematica_.Debug = debug_;
-      server_->getModel(init.RobotDescription, model_);
+      Server::Instance()->getModel(init.RobotDescription, model_);
       kinematica_.Instantiate(init.JointGroup, model_);
       group = model_->getJointModelGroup(init.JointGroup);
 
-      base_type_ = kinematica_.getBaseType();
+      BaseType = kinematica_.getBaseType();
 
-      N = kinematica_.getNumJoints();
-      collision_scene_.reset(new CollisionScene(server_, name_));
-
-      mode_ = init.PlanningMode;
-
-      update_jacobians_ = mode_!="Sampling"? true : false;
+      collision_scene_.reset(new CollisionScene(name_));
 
       if (visual_debug_)
       {
-          ps_pub_ = server_->advertise<moveit_msgs::PlanningScene>(name_ + "/PlanningScene", 100, true);
-          if(debug_) HIGHLIGHT_NAMED(name_, "Running in debug mode, planning scene will be published to '"<<server_->getName()<<"/"<<name_<<"/PlanningScene'");
+          ps_pub_ = Server::Instance()->advertise<moveit_msgs::PlanningScene>(name_ + "/PlanningScene", 100, true);
+          if(debug_) HIGHLIGHT_NAMED(name_, "Running in debug mode, planning scene will be published to '"<<Server::Instance()->getName()<<"/"<<name_<<"/PlanningScene'");
       }
       {
           planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
           moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
           tmp->getPlanningSceneMsg(*msg.get());
-          collision_scene_->initialise(msg, kinematica_.getJointNames(), mode_, base_type_,model_);
+          collision_scene_->initialise(msg, kinematica_.getJointNames(), "", BaseType,model_);
       }
-      if(debug_) INFO_NAMED(name_, "Exotica Scene initialised, planning mode set to "<<mode_);
-  }
-
-  void Scene::getForwardMap(const std::string & task, Eigen::VectorXdRef phi)
-  {
-    LOCK(lock_);
-    if (phis_.find(task) == phis_.end())
-    {
-      throw_named("Task not found!");
-    }
-    Eigen::Ref<Eigen::VectorXd> y(*(phis_.at(task)));
-    for (int r = 0; r < phi.rows(); r++)
-    {
-      phi(r) = y(r);
-    }
-  }
-
-  void Scene::getForwardMap(const std::string & task,
-      Eigen::VectorXdRef_ptr& phi, bool force)
-  {
-    LOCK(lock_);
-    if (kinematica_.getEffSize() == 0)
-    {
-      phi = Eigen::VectorXdRef_ptr();
-
-    }
-    else
-    {
-      if (phi == NULL || force)
-      {
-        if (phis_.find(task) == phis_.end())
-        {
-          throw_named("Can't find task '"<<task<<"' in " << object_name_);
-        }
-        phi = phis_.at(task);
-      }
-    }
-
-  }
-
-  void Scene::getJacobian(const std::string & task, Eigen::MatrixXdRef jac)
-  {
-    LOCK(lock_);
-    if (jacs_.find(task) == jacs_.end())
-    {
-      throw_named("Task not found!");
-    }
-    Eigen::Ref<Eigen::MatrixXd> J(*(jacs_.at(task)));
-    for (int r = 0; r < jac.rows(); r++)
-    {
-      for (int c = 0; c < jac.cols(); c++)
-      {
-        jac(r, c) = J(r, c);
-      }
-    }
-  }
-
-  void Scene::getJacobian(const std::string & task,
-      Eigen::MatrixXdRef_ptr& jac, bool force)
-  {
-    LOCK(lock_);
-    if (kinematica_.getEffSize() == 0)
-    {
-      jac = Eigen::MatrixXdRef_ptr();
-
-    }
-    else
-    {
-      if (jac == NULL || force)
-      {
-        if (jacs_.find(task) == jacs_.end())
-        {
-          throw_named("Task not found!");
-        }
-        jac = jacs_.at(task);
-      }
-    }
-  }
-
-  void Scene::appendTaskMap(const std::string & name,
-      const std::vector<std::string> & eff,
-      const std::vector<KDL::Frame> & offset)
-  {
-    LOCK(lock_);
-    eff_names_[name] = eff;
-    eff_offsets_[name] = offset;
-  }
-
-  void Scene::clearTaskMap()
-  {
-    eff_names_.clear();
-    eff_offsets_.clear();
-  }
-
-  void Scene::getPoses(const std::vector<std::string> & names,
-      std::vector<KDL::Frame> & poses)
-  {
-    LOCK(lock_);
-    poses.resize(names.size());
-    for (int i = 0; i < names.size(); i++)
-    {
-      if (!kinematica_.getPose(names[i], poses[i]))
-      {
-        poses.resize(0);
-        throw_named("Pose not found!");
-      }
-
-    }
-  }
-
-  void Scene::updateEndEffectors(const std::string & task,
-      const std::vector<KDL::Frame> & offset)
-  {
-    LOCK(lock_);
-    if (eff_index_.find(task) == eff_index_.end())
-    {
-      throw_named("Task name: '"<<task<<"'\n"<<eff_index_.size());
-    }
-    if (offset.size() != eff_index_.at(task).size())
-    {
-      throw_named("Incorrect offset array size!");
-    }
-    if (!kinematica_.updateEndEffectorOffsets(eff_index_.at(task), offset))
-    {
-      throw_named("Can't update offsets!");
-    }
-  }
-
-  void Scene::updateEndEffector(const std::string &task,
-      const std::string &eff, const KDL::Frame& offset)
-  {
-    LOCK(lock_);
-    if (eff_names_.find(task) == eff_names_.end())
-    {
-      throw_named("Task name: '"<<task<<"'\n"<<eff_names_.size());
-    }
-    std::vector<std::string> names = eff_names_.at(task);
-    bool found = false;
-    for (int i = 0; i < names.size(); i++)
-    {
-      if (names[i].compare(eff) == 0)
-      {
-        found = true;
-        kinematica_.modifyEndEffector(eff, offset);
-        eff_offsets_.at(task)[i] = offset;
-      }
-    }
-    if (!found)
-    {
-      throw_named("End-effector not found!");
-    }
+      if(debug_) INFO_NAMED(name_, "Exotica Scene initialised");
   }
 
   std::shared_ptr<KinematicResponse> Scene::RequestKinematics(KinematicsRequest& Request)
   {
-      initialised_ = true;
       return kinematica_.RequestFrames(Request);
-  }
-
-  void Scene::activateTaskMaps()
-  {
-
-    //LOCK(lock_);
-    exotica::KinematicsRequest request;
-    request.Frames.clear();
-    for (auto & it : eff_names_)
-    {
-      std::vector<std::string> names = it.second;
-      std::vector<KDL::Frame> offsets = eff_offsets_.at(it.first);
-      for (int i = 0; i < names.size(); i++)
-      {
-        KinematicFrameRequest Frame;
-        Frame.FrameALinkName = names[i];
-        Frame.FrameAOffset = offsets[i];
-        request.Frames.push_back(Frame);
-      }
-    }
-
-    request.Flags = KIN_FK | KIN_J;
-
-    //kinematica_.updateEndEffectors(request);
-    //kinematica_.RequestFrames(request);
-
-    Phi_.setZero(3 * kinematica_.getEffSize());
-    Jac_.setZero(3 * kinematica_.getEffSize(), N);
-
-    // Pass Phi and J to task maps here
-
-    initialised_ = true;
-    HIGHLIGHT_NAMED(object_name_, "Taskmaps are activated");
   }
 
   void Scene::Update(Eigen::VectorXdRefConst x)
@@ -738,56 +546,6 @@ namespace exotica
       if (visual_debug_) publishScene();
   }
 
-  void Scene::update(Eigen::VectorXdRefConst x, const int t)
-  {
-    LOCK(lock_);
-    if (!initialised_)
-    {
-      throw_named("EXOTica scene needs to be initialised via 'activateTaskMaps()'.");
-    }
-    else
-    {
-      collision_scene_->update(x);
-      kinematica_.Update(x);
-      /*
-        if (kinematica_.getEffSize() > 0)
-        {
-          if (kinematica_.updateConfiguration(x))
-          {
-            if (kinematica_.generateForwardMap(Phi_))
-            {
-              if (update_jacobians_)
-              {
-                if (kinematica_.generateJacobian(Jac_))
-                {
-                  // All is fine
-                }
-                else
-                {
-                  throw_named("Failed generating Jacobians!");
-                }
-              }
-              // else Also fine, just skip computing the Jacobians
-            }
-            else
-            {
-              throw_named("Failed generating forward maps!");
-            }
-          }
-          else
-          {
-            throw_named("Failed updating state!");
-          }
-        }
-        */
-    }
-
-    if (visual_debug_)
-    {
-      publishScene();
-    }
-
-  }
   void Scene::publishScene()
   {
     moveit_msgs::PlanningScene msg;
@@ -800,20 +558,17 @@ namespace exotica
   {
     moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
     scene->getPlanningSceneMsg(*msg.get());
-    collision_scene_->initialise(msg, kinematica_.getJointNames(),
-        mode_, base_type_, model_);
+    collision_scene_->initialise(msg, kinematica_.getJointNames(), "", BaseType, model_);
   }
 
-  void Scene::setCollisionScene(
-      const moveit_msgs::PlanningSceneConstPtr & scene)
+  void Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene)
   {
-    collision_scene_->initialise(scene, kinematica_.getJointNames(),
-        mode_, base_type_,model_);
+    collision_scene_->initialise(scene, kinematica_.getJointNames(), "", BaseType,model_);
   }
 
   int Scene::getNumJoints()
   {
-    return N;
+    return kinematica_.getNumJoints();
   }
 
   CollisionScene_ptr & Scene::getCollisionScene()
@@ -821,58 +576,8 @@ namespace exotica
     return collision_scene_;
   }
 
-  void Scene::getEndEffectors(const std::string & task,
-      std::vector<std::string> & effs)
-  {
-    if (eff_names_.find(task) == eff_names_.end())
-    {
-      throw_named("Can't find task!");
-    }
-    effs = eff_names_.at(task);
-  }
-
-  void Scene::getEndEffectors(const std::string & task,
-      std::pair<std::vector<std::string>, std::vector<KDL::Frame>> & effs)
-  {
-    if (eff_names_.find(task) == eff_names_.end())
-    {
-      throw_named("Can't find task!");
-    }
-    effs.first = eff_names_.at(task);
-    effs.second = eff_offsets_.at(task);
-  }
-
-  int Scene::getMapSize(const std::string & task)
-  {
-    LOCK(lock_);
-    if (eff_names_.find(task) == eff_names_.end()) return -1;
-    return eff_names_.at(task).size();
-  }
-
-  void Scene::getCoMProperties(std::string& task,
-      std::vector<std::string> & segs, Eigen::VectorXd & mass,
-      std::vector<KDL::Vector> & cog, std::vector<KDL::Frame> & tip_pose,
-      std::vector<KDL::Frame> & base_pose)
-  {
-    LOCK(lock_);
-    if (eff_index_.find(task) == eff_index_.end())
-    {
-      throw_named("Can't find task!");
-    }
-    if (kinematica_.getCoMProperties(eff_index_.at(task), segs, mass, cog,
-        tip_pose, base_pose))
-    {
-      return;
-    }
-    else
-    {
-      throw_named("Can't get CoM!");
-    }
-  }
-
   std::string Scene::getRootName()
   {
-    LOCK(lock_);
     return kinematica_.getRootName();
   }
 
@@ -894,16 +599,6 @@ namespace exotica
   std::vector<std::string> Scene::getJointNames()
   {
     return kinematica_.getJointNames();
-  }
-
-  std::string & Scene::getPlanningMode()
-  {
-    return mode_;
-  }
-
-  KDL::Frame Scene::getRobotRootWorldTransform()
-  {
-    return kinematica_.getRobotRootWorldTransform();
   }
 }
 //	namespace exotica

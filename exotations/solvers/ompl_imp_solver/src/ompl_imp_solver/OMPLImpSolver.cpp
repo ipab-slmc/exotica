@@ -95,20 +95,20 @@ namespace exotica
   void OMPLImpSolver::specifyProblem(const SamplingProblem_ptr &prob)
   {
     prob_ = prob;
-    base_type_ = prob_->getScene()->getBaseType();
-    if (base_type_ == BASE_TYPE::FIXED)
-      state_space_.reset(new OMPLRNStateSpace(prob_->getSpaceDim(), server_, prob_));
-    else if (base_type_ == BASE_TYPE::FLOATING)
-      state_space_.reset(new OMPLSE3RNStateSpace(prob_->getSpaceDim() - 6, server_, prob_));
+    BaseType = prob_->getScene()->getBaseType();
+    if (BaseType == BASE_TYPE::FIXED)
+      state_space_.reset(new OMPLRNStateSpace(prob_->getSpaceDim(), prob_));
+    else if (BaseType == BASE_TYPE::FLOATING)
+      state_space_.reset(new OMPLSE3RNStateSpace(prob_->getSpaceDim() - 6, prob_));
 
     ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
     ompl_simple_setup_->setPlannerAllocator(boost::bind(known_algorithms_[algorithm_], _1, "Exotica_" + algorithm_));
 
     std::vector<int> project_vars = { 0, 1 };
-    if (base_type_ == BASE_TYPE::FIXED)
+    if (BaseType == BASE_TYPE::FIXED)
       ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ob::ProjectionEvaluatorPtr(new OMPLRNProjection(state_space_, project_vars)));
-    else if (base_type_ == BASE_TYPE::FLOATING)
+    else if (BaseType == BASE_TYPE::FLOATING)
       ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ob::ProjectionEvaluatorPtr(new OMPLSE3RNProjection(state_space_, project_vars)));
     ompl_simple_setup_->getSpaceInformation()->setup();
     ompl_simple_setup_->setup();
@@ -140,7 +140,7 @@ namespace exotica
       planning_time_ = ros::Time::now() - startTime;
       postSolve();
       margin_ = init_margin_;
-      prob_->update(Eigen::VectorXd(sol.row(sol.rows() - 1)), 0);
+      prob_->Update(Eigen::VectorXd(sol.row(sol.rows() - 1)));
       prob_->getScene()->publishScene();
       return true;
     }

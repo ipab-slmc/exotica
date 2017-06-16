@@ -36,10 +36,10 @@ void run()
         UnconstrainedTimeIndexedProblem_ptr problem = boost::static_pointer_cast<UnconstrainedTimeIndexedProblem>(any_problem);
         for (int t = 0; t < problem->T-1; t++)
         {
-          // This sets the precision of all time steps BUT the last one to zero
-          // This means we only aim to minimize the task cost in the last time step
-          // The rest of the trajectory minimizes the control cost
-          problem->setRho("Position",0.0,t);
+            // This sets the precision of all time steps BUT the last one to zero
+            // This means we only aim to minimize the task cost in the last time step
+            // The rest of the trajectory minimizes the control cost
+            problem->setRho("Position",0.0,t);
         }
         Eigen::VectorXd goal(3);
         goal << 0.4, -0.1, 0.5;
@@ -48,17 +48,15 @@ void run()
 
     // Create the initial configuration
     Eigen::VectorXd q = Eigen::VectorXd::Zero(
-        any_problem->scene_->getNumJoints());
+                any_problem->getScene()->getNumJoints());
     Eigen::MatrixXd solution;
     ROS_INFO_STREAM("Calling solve()");
     {
-      ros::WallTime start_time = ros::WallTime::now();
-      // Solve the problem using the AICO solver
-      try
-      {
+        ros::WallTime start_time = ros::WallTime::now();
+        // Solve the problem using the AICO solver
         any_solver->Solve(q, solution);
         double time = ros::Duration(
-            (ros::WallTime::now() - start_time).toSec()).toSec();
+                    (ros::WallTime::now() - start_time).toSec()).toSec();
         ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving ("<<time<<"s)");
         ROS_INFO_STREAM_THROTTLE(0.5, "Solution "<<solution.row(solution.rows()-1));
 
@@ -74,14 +72,6 @@ void run()
             ros::spinOnce();
             loop_rate.sleep();
         }
-      }
-      catch (SolveException e)
-      {
-        double time = ros::Duration(
-            (ros::WallTime::now() - start_time).toSec()).toSec();
-        ROS_INFO_STREAM_THROTTLE(0.5,
-            e.what()<<" ("<<time<<"s)");
-      }
     }
 
 

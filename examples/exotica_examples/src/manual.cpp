@@ -8,13 +8,11 @@ using namespace exotica;
 
 void run()
 {
-    ros::NodeHandle nhg_;
-
     // Scene using joint group 'arm'
     SceneInitializer scene("MyScene","arm");
     // End-effector task map with two position frames
     EffPositionInitializer map("Position","MyScene",false,
-      {FrameInitializer("lwr_arm_6_link")});
+    {FrameInitializer("lwr_arm_6_link")});
     // Create a task using the map above (goal will be specified later)
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
@@ -38,7 +36,7 @@ void run()
 
 
     // Create the initial configuration
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->scene_->getNumJoints());
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumJoints());
     Eigen::MatrixXd solution;
 
 
@@ -50,34 +48,27 @@ void run()
 
     while (ros::ok())
     {
-      ros::WallTime start_time = ros::WallTime::now();
+        ros::WallTime start_time = ros::WallTime::now();
 
-      // Update the goal if necessary
-      // e.g. figure eight
-      t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-      my_problem->y << 0.6,
-              -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-              0.5 + sin(t * M_PI * 0.5) * 0.2;
+        // Update the goal if necessary
+        // e.g. figure eight
+        t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
+        my_problem->y << 0.6,
+                -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                0.5 + sin(t * M_PI * 0.5) * 0.2;
 
-      // Solve the problem using the IK solver
-      try
-      {
+        // Solve the problem using the IK solver
         any_solver->Solve(q, solution);
-      }
-      catch (SolveException e)
-      {
-        // Ignore failures
-      }
-      double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-      ROS_INFO_STREAM_THROTTLE(0.5,
-        "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
-      q = solution.row(solution.rows() - 1);
 
-      my_problem->Update(q);
-      my_problem->getScene()->getSolver().publishFrames();
+        double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
+        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
+        q = solution.row(solution.rows() - 1);
 
-      ros::spinOnce();
-      loop_rate.sleep();
+        my_problem->Update(q);
+        my_problem->getScene()->getSolver().publishFrames();
+
+        ros::spinOnce();
+        loop_rate.sleep();
     }
 
     // All classes will be destroyed at this point.

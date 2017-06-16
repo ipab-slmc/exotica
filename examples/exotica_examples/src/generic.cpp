@@ -14,7 +14,7 @@ void run()
                         {"Scene",std::string("MyScene")},
                         {"EndEffector",std::vector<Initializer>({
                              Initializer("Frame",{{"Link",std::string("lwr_arm_6_link")}}),
-                                        })}});
+                         })}});
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
 
@@ -27,11 +27,11 @@ void run()
                         });
 
     Initializer solver("exotica/IKsolver",{
-                            {"Name",std::string("MySolver")},
-                            {"MaxIt",1},
-                            {"MaxStep", 0.1},
-                            {"C",1e-3},
-                        });
+                           {"Name",std::string("MySolver")},
+                           {"MaxIt",1},
+                           {"MaxStep", 0.1},
+                           {"C",1e-3},
+                       });
 
     HIGHLIGHT_NAMED("GenericLoader","Loaded from a hardcoded generic initializer.");
 
@@ -45,7 +45,7 @@ void run()
     UnconstrainedEndPoseProblem_ptr my_problem = boost::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
     // Create the initial configuration
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->scene_->getNumJoints());
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumJoints());
     Eigen::MatrixXd solution;
 
 
@@ -57,34 +57,28 @@ void run()
 
     while (ros::ok())
     {
-      ros::WallTime start_time = ros::WallTime::now();
+        ros::WallTime start_time = ros::WallTime::now();
 
-      // Update the goal if necessary
-      // e.g. figure eight
-      t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-      my_problem->y << 0.6,
-              -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-              0.5 + sin(t * M_PI * 0.5) * 0.2;
+        // Update the goal if necessary
+        // e.g. figure eight
+        t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
+        my_problem->y << 0.6,
+                -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                0.5 + sin(t * M_PI * 0.5) * 0.2;
 
-      // Solve the problem using the IK solver
-      try
-      {
+        // Solve the problem using the IK solver
         any_solver->Solve(q, solution);
-      }
-      catch (SolveException e)
-      {
-        // Ignore failures
-      }
-      double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-      ROS_INFO_STREAM_THROTTLE(0.5,
-        "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
-      q = solution.row(solution.rows() - 1);
 
-      my_problem->Update(q);
-      my_problem->getScene()->getSolver().publishFrames();
+        double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
+        ROS_INFO_STREAM_THROTTLE(0.5,
+                                 "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
+        q = solution.row(solution.rows() - 1);
 
-      ros::spinOnce();
-      loop_rate.sleep();
+        my_problem->Update(q);
+        my_problem->getScene()->getSolver().publishFrames();
+
+        ros::spinOnce();
+        loop_rate.sleep();
     }
 
     // All classes will be destroyed at this point.

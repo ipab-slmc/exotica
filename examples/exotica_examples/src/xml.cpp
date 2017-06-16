@@ -5,7 +5,6 @@ using namespace exotica;
 
 void run()
 {
-    ros::NodeHandle nhg_;
     ros::NodeHandle nh_("~");
 
     Initializer solver, problem;
@@ -32,7 +31,6 @@ void run()
 
     my_problem->qNominal = q;
 
-
     ROS_INFO_STREAM("Calling solve() in an infinite loop");
 
     double t = 0.0;
@@ -41,33 +39,27 @@ void run()
 
     while (ros::ok())
     {
-      ros::WallTime start_time = ros::WallTime::now();
+        ros::WallTime start_time = ros::WallTime::now();
 
-      // Update the goal if necessary
-      // e.g. figure eight
-      t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-      my_problem->y << 0.6,
-              -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-              0.5 + sin(t * M_PI * 0.5) * 0.2;
+        // Update the goal if necessary
+        // e.g. figure eight
+        t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
+        my_problem->y << 0.6,
+                -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                0.5 + sin(t * M_PI * 0.5) * 0.2;
 
-      // Solve the problem using the IK solver
-      try
-      {
+        // Solve the problem using the IK solver
         any_solver->Solve(q, solution);
-      }
-      catch (SolveException e)
-      {
-        // Ignore failures
-      }
-      double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-      ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
-      q = solution.row(0);
 
-      my_problem->Update(q);
-      my_problem->getScene()->getSolver().publishFrames();
+        double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
+        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
+        q = solution.row(0);
 
-      ros::spinOnce();
-      loop_rate.sleep();
+        my_problem->Update(q);
+        my_problem->getScene()->getSolver().publishFrames();
+
+        ros::spinOnce();
+        loop_rate.sleep();
     }
 
     // All classes will be destroyed at this point.

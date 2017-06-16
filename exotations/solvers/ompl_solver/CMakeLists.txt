@@ -14,8 +14,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ompl_base_solver
-  CATKIN_DEPENDS exotica pluginlib
-  DEPENDS system_lib ompl
+  CATKIN_DEPENDS exotica pluginlib ompl
 )
 
 AddInitializer(OMPLsolver)

@@ -137,7 +137,7 @@ namespace exotica
       boost::shared_ptr<og::SimpleSetup> ompl_simple_setup_;
 
       /// \brief OMPL state space specification
-      boost::shared_ptr<ob::StateSpace> state_space_;
+      ompl::base::StateSpacePtr state_space_;
 
       /// \brief Maximum allowed time for planning
       double timeout_;

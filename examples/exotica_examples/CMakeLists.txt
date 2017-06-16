@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
-
 )
 
 include_directories(
@@ -18,7 +17,6 @@ include_directories(
 )
 
 add_executable(ExoticaCore src/core.cpp)
-
 target_link_libraries(ExoticaCore
   ${catkin_LIBRARIES}
 )

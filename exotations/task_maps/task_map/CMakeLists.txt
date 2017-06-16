@@ -8,15 +8,24 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
 )
 
+AddInitializer(
+  CoM
+  IMesh
+  EffPosition
+  JointLimit
+  SweepFlux
+  Distance
+  Identity
+  SphereCollision
+  Sphere
+)
+GenInitializers()
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS exotica geometry_msgs
-  DEPENDS #system_lib
 )
-
-AddInitializer(CoM IMesh EffPosition JointLimit SweepFlux Distance Identity SphereCollision Sphere)
-GenInitializers()
 
 include_directories(
   include

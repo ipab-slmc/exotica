@@ -8,7 +8,7 @@
 
   <license>BSD</license>
 
-  <url type="website">https://bitbucket.org/IPAB-SLMC/exotica</url>
+  <url type="website">https://github.com/openhumanoids/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>exotica</depend>

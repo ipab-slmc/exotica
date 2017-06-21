@@ -56,15 +56,14 @@ namespace exotica
         double getRho(const std::string & task_name);
 
         Eigen::VectorXd Rho;
-        Eigen::VectorXd y;
+        TaskSpaceVector y;
         Eigen::MatrixXd W;
-        Eigen::VectorXd Phi;
+        TaskSpaceVector Phi;
         Eigen::MatrixXd J;
         Eigen::VectorXd qNominal;
 
-        TaskMap_vec Tasks;
-        Eigen::MatrixXi Mapping;
         int PhiN;
+        int JN;
         int N;
         int NumTasks;
 

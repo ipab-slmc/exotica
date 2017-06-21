@@ -104,9 +104,9 @@ namespace exotica
         MotionSolver::specifyProblem(pointer);
         prob_ = boost::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 
-        C = Eigen::MatrixXd::Identity(prob_->PhiN, prob_->PhiN)*parameters_.C;
+        C = Eigen::MatrixXd::Identity(prob_->JN, prob_->JN)*parameters_.C;
         if(parameters_.C==0.0)
-            Cinv = Eigen::MatrixXd::Zero(prob_->PhiN, prob_->PhiN);
+            Cinv = Eigen::MatrixXd::Zero(prob_->JN, prob_->JN);
         else
             Cinv = C.inverse();
 
@@ -138,8 +138,8 @@ namespace exotica
 
         bool UseNullspace = prob_->qNominal.rows()==prob_->N;
 
-        Eigen::MatrixXd S = Eigen::MatrixXd::Identity(prob_->PhiN, prob_->PhiN);
-        for(TaskMap_ptr task : prob_->Tasks)
+        Eigen::MatrixXd S = Eigen::MatrixXd::Identity(prob_->JN, prob_->JN);
+        for(TaskMap_ptr task : prob_->getTasks())
         {
             for(int i=0; i < task->Length; i++)
             {

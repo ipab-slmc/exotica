@@ -33,11 +33,12 @@
 #ifndef EXOTICA_TASK_MAP_H
 #define EXOTICA_TASK_MAP_H
 
-#include "exotica/Object.h"       //!< The EXOTica base class
-#include "exotica/Factory.h"      //!< The Factory template
-#include "exotica/Server.h"
-#include "exotica/Scene.h"
-#include "exotica/Property.h"
+#include <exotica/Object.h>       //!< The EXOTica base class
+#include <exotica/Factory.h>      //!< The Factory template
+#include <exotica/Server.h>
+#include <exotica/Scene.h>
+#include <exotica/Property.h>
+#include <exotica/TaskSpaceVector.h>
 
 #include <Eigen/Dense>            //!< Generally dense manipulations should be enough
 #include <boost/thread/mutex.hpp> //!< The boost thread-library for synchronisation
@@ -73,6 +74,10 @@ namespace exotica
 
       virtual int taskSpaceDim() = 0;
 
+      virtual int taskSpaceJacobianDim() { return taskSpaceDim();}
+
+      virtual std::vector<TaskVectorEntry> getLieGroupIndices() {return std::vector<TaskVectorEntry>();}
+
       void taskSpaceDim(int & task_dim);
 
       virtual std::string print(std::string prepend);
@@ -84,6 +89,8 @@ namespace exotica
       int Id;
       int Start;
       int Length;
+      int StartJ;
+      int LengthJ;
     protected:
 
       std::vector<KinematicFrameRequest> Frames;

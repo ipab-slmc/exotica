@@ -70,13 +70,13 @@ namespace exotica
       Eigen::MatrixXd Q;
 
       std::vector<Eigen::VectorXd> Rho;
-      std::vector<Eigen::VectorXd> y;
-      std::vector<Eigen::VectorXd> Phi;
+      std::vector<TaskSpaceVector> y;
+      std::vector<TaskSpaceVector> Phi;
+      std::vector<Eigen::VectorXd> ydiff;
       std::vector<Eigen::MatrixXd> J;
 
-      TaskMap_vec Tasks;
-      Eigen::MatrixXi Mapping;
       int PhiN;
+      int JN;
       int N;
       int NumTasks;
 

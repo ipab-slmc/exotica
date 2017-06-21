@@ -33,12 +33,13 @@
 #ifndef EXOTICA_MOTION_PLANNING_PROBLEM_H
 #define EXOTICA_MOTION_PLANNING_PROBLEM_H
 
-#include "exotica/Object.h"
-#include "exotica/TaskMap.h"
-#include "exotica/Server.h"
-#include "exotica/Scene.h"
-#include "exotica/Tools.h"
-#include "exotica/Problem.h"
+#include <exotica/Object.h>
+#include <exotica/TaskMap.h>
+#include <exotica/Server.h>
+#include <exotica/Scene.h>
+#include <exotica/Tools.h>
+#include <exotica/Problem.h>
+#include <exotica/TaskSpaceVector.h>
 
 #include <vector>
 #include <string>
@@ -55,12 +56,14 @@ namespace exotica
         virtual ~PlanningProblem() {}
         virtual void InstantiateBase(const Initializer& init);
         TaskMap_map& getTaskMaps();
+        TaskMap_vec& getTasks();
         Scene_ptr getScene();
         virtual std::string print(std::string prepend);
 
     protected:
         Scene_ptr scene_;
         TaskMap_map TaskMaps;
+        TaskMap_vec Tasks;
         KinematicRequestFlags Flags;
 
     };

@@ -19,7 +19,7 @@ void testRandom(UnconstrainedEndPoseProblem_ptr problem)
         if(printInfo)
         {
             INFO_PLAIN("x = "<<x.transpose());
-            INFO_PLAIN("y = "<<problem->Phi.transpose());
+            INFO_PLAIN("y = "<<problem->Phi.data.transpose());
             INFO_PLAIN("J = \n"<<problem->J);
         }
     }
@@ -35,12 +35,18 @@ void testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eige
     for(int i=0;i<L;i++)
     {
         Eigen::VectorXd x = Xref.row(i);
-        Eigen::VectorXd y = Yref.row(i);
+        TaskSpaceVector y = problem->y;
+        y.data = Yref.row(i);
         Eigen::MatrixXd J = Jref.middleRows(i*M,M);
         problem->Update(x);
         double errY = (y - problem->Phi).norm();
         double errJ = (J - problem->J).norm();
-        if(errY > eps) throw_pretty("Task space error out of bounds: " << errY);
+        if(errY > eps)
+        {
+            HIGHLIGHT("y:  "<<problem->Phi.data.transpose());
+            HIGHLIGHT("y*: "<<y.data.transpose());
+            throw_pretty("Task space error out of bounds: " << errY);
+        }
         if(errJ > eps)
         {
             HIGHLIGHT("x: "<<x.transpose());
@@ -61,7 +67,7 @@ void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0);
-        Eigen::VectorXd y0 = problem->Phi;
+        TaskSpaceVector y0 = problem->Phi;
         Eigen::MatrixXd J0 = problem->J;
         Eigen::MatrixXd J = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
         for(int i=0;i<problem->N;i++)
@@ -72,7 +78,14 @@ void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
             J.col(i) = (problem->Phi - y0)/eps;
         }
         double errJ = (J-J0).norm();
-        if(errJ > eps) throw_pretty("Jacobian error out of bounds: " << errJ);
+        if(errJ > eps)
+        {
+            HIGHLIGHT("map: "<<y0.map.size());
+            HIGHLIGHT("x: "<<x0.transpose());
+            HIGHLIGHT("J*:\n"<<J);
+            HIGHLIGHT("J:\n"<<J0);
+            throw_pretty("Jacobian error out of bounds: " << errJ);
+        }
     }
     INFO_PLAIN("Test passed");
 }
@@ -128,6 +141,41 @@ void testEffPosition()
             , 0.356984, -0.165215, -0.0717477
             , 0, -0.370448, -0.361068;
     testValues(X ,Y ,J ,problem);
+
+    testJacobian(problem);
+}
+
+void testEffOrientation()
+{
+    HIGHLIGHT("End-effector orientation test");
+    std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
+
+    for(std::string type : types)
+    {
+        INFO_PLAIN("Rotation type "<<type);
+        Initializer map("exotica/EffOrientation",{
+                            {"Name",std::string("Orientation")},
+                            {"Type",type},
+                            {"EndEffector",std::vector<Initializer>({
+                                 Initializer("Frame",{{"Link",std::string("endeff")}})
+                                            }) } });
+        UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+        testRandom(problem);
+
+        testJacobian(problem);
+    }
+}
+
+void testEffFrame()
+{
+    HIGHLIGHT("End-effector frame test");
+    Initializer map("exotica/EffFrame",{
+                        {"Name",std::string("Frame")},
+                        {"EndEffector",std::vector<Initializer>({
+                             Initializer("Frame",{{"Link",std::string("endeff")}})
+                                        }) } });
+    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    testRandom(problem);
 
     testJacobian(problem);
 }
@@ -526,6 +574,8 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "EXOTica_test_maps");
     testEffPosition();
+    testEffOrientation();
+    testEffFrame();
     testDistance();
     testJointLimit();
     testSphereCollision();

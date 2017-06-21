@@ -12,6 +12,8 @@ AddInitializer(
   CoM
   IMesh
   EffPosition
+  EffOrientation
+  EffFrame
   JointLimit
   Distance
   Identity
@@ -34,6 +36,8 @@ include_directories(
 add_library(${PROJECT_NAME} src/CoM.cpp
                             src/IMesh.cpp
                             src/EffPosition.cpp
+                            src/EffOrientation.cpp
+                            src/EffFrame.cpp
                             src/JointLimit.cpp
                             src/Distance.cpp
                             src/Identity.cpp

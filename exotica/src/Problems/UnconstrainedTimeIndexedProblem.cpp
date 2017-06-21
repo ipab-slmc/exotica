@@ -62,17 +62,16 @@ namespace exotica
       H_rate = init.Hrate;
       W_rate = init.Wrate;
 
-      Tasks = MapToVec(TaskMaps);
       NumTasks = Tasks.size();
-      Mapping.resize(NumTasks, 2);
-      int id=0;
+      PhiN = 0;
+      JN = 0;
+      TaskSpaceVector yref;
       for(int i=0;i<NumTasks;i++)
       {
-          Mapping(i,0) = id;
-          Mapping(i,1) = Tasks[i]->taskSpaceDim();
-          id += Mapping(i,1);
+          appendVector(yref.map, Tasks[i]->getLieGroupIndices());
+          PhiN += Tasks[i]->Length;
+          JN += Tasks[i]->LengthJ;
       }
-      PhiN = Mapping.col(1).sum();
 
       N = scene_->getNumJoints();
 
@@ -83,9 +82,11 @@ namespace exotica
       Q = Eigen::MatrixXd::Identity(N, N)*H_rate;
 
       Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
-      y.assign(T, Eigen::VectorXd::Zero(PhiN));
-      Phi.assign(T, Eigen::VectorXd::Zero(PhiN));
-      J.assign(T, Eigen::MatrixXd(PhiN, N));
+      yref.data = Eigen::VectorXd::Zero(PhiN);
+      y.assign(T, yref);
+      Phi = y;
+      ydiff.assign(T, Eigen::VectorXd::Zero(JN));
+      J.assign(T, Eigen::MatrixXd(JN, N));
   }
 
     double UnconstrainedTimeIndexedProblem::getDuration()
@@ -98,15 +99,16 @@ namespace exotica
         scene_->Update(x);
         for(int i=0;i<NumTasks;i++)
         {
-            Tasks[i]->update(x, Phi[t].segment(Mapping(i, 0), Mapping(i, 1)), J[t].middleRows(Mapping(i, 0), Mapping(i, 1)));
+            Tasks[i]->update(x, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
         }
+        ydiff[t] = y[t] - Phi[t];
     }
 
 
     void UnconstrainedTimeIndexedProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal, int t)
     {
         TaskMap_ptr task = TaskMaps.at(task_name);
-        y[t].segment(task->Start, task->Length) = goal;
+        y[t].data.segment(task->Start, task->Length) = goal;
     }
 
     void UnconstrainedTimeIndexedProblem::setRho(const std::string & task_name, const double rho, int t)
@@ -118,12 +120,12 @@ namespace exotica
     Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string & task_name, int t)
     {
         TaskMap_ptr task = TaskMaps.at(task_name);
-        return y[t].segment(task->Start, task->Length);
+        return y[t].data.segment(task->Start, task->Length);
     }
 
     double UnconstrainedTimeIndexedProblem::getRho(const std::string & task_name, int t)
     {
         TaskMap_ptr task = TaskMaps.at(task_name);
-        return y[t](task->Id);
+        return Rho[t](task->Id);
     }
 }

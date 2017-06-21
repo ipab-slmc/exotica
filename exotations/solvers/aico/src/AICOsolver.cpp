@@ -263,7 +263,7 @@ namespace exotica
 
     costControl.resize(T);
     costControl.setZero();
-    costTask.resize(T, prob_->PhiN);
+    costTask.resize(T, prob_->JN);
     costTask.setZero();
 
     q_stat.resize(T);
@@ -485,25 +485,22 @@ namespace exotica
       rhat[t] = 0;
       R[t].setZero();
       r[t].setZero();
-      for (int i = 0; i < prob_->Mapping.rows(); i++)
+      for (int i = 0; i < prob_->getTasks().size(); i++)
       {
         prec = prob_->Rho[t](i);
         if (prec > 0)
         {
-            int start = prob_->Mapping(i,0);
-            int len = prob_->Mapping(i,1);
+            int start = prob_->getTasks()[i]->StartJ;
+            int len = prob_->getTasks()[i]->LengthJ;
           Jt = prob_->J[t].middleRows(start, len).transpose();
           C += prec
-              * (prob_->y[t].segment(start, len)
-                  - prob_->Phi[t].segment(start, len)).squaredNorm();
+              * (prob_->ydiff[t].segment(start, len)).squaredNorm();
           R[t] += prec * Jt * prob_->J[t].middleRows(start, len);
           r[t] += prec * Jt
-              * (prob_->y[t].segment(start, len)
-                  - prob_->Phi[t].segment(start, len)
+              * (prob_->ydiff[t].segment(start, len)
                   + prob_->J[t].middleRows(start, len) * qhat[t]);
           rhat[t] += prec
-              * (prob_->y[t].segment(start, len)
-                  - prob_->Phi[t].segment(start, len)
+              * (prob_->ydiff[t].segment(start, len)
                   + prob_->J[t].middleRows(start, len) * qhat[t]).squaredNorm();
         }
       }
@@ -516,25 +513,22 @@ namespace exotica
       rhat[t] = 0;
       R[t].setZero();
       r[t].setZero();
-      for (int i = 0; i < prob_->Mapping.rows(); i++)
+      for (int i = 0; i < prob_->getTasks().size(); i++)
       {
           prec = prob_->Rho[t](i);
           if (prec > 0)
           {
-                int start = prob_->Mapping(i,0);
-                int len = prob_->Mapping(i,1);
+              int start = prob_->getTasks()[i]->StartJ;
+              int len = prob_->getTasks()[i]->LengthJ;
                 Jt = prob_->J[t].middleRows(start, len).transpose();
                 C += prec
-                    * (prob_->y[t].segment(start, len)
-                        - prob_->Phi[t].segment(start, len)).squaredNorm();
+                    * (prob_->ydiff[t].segment(start, len)).squaredNorm();
                 R[t].topLeftCorner(n2, n2) += prec * Jt * prob_->J[t].middleRows(start, len);
                 r[t].head(n2) += prec * Jt
-                    * (prob_->y[t].segment(start, len)
-                        - prob_->Phi[t].segment(start, len)
+                    * (prob_->ydiff[t].segment(start, len)
                         + prob_->J[t].middleRows(start, len) * qhat[t]);
                 rhat[t] += prec
-                    * (prob_->y[t].segment(start, len)
-                        - prob_->Phi[t].segment(start, len)
+                    * (prob_->ydiff[t].segment(start, len)
                             + prob_->J[t].middleRows(start, len) * qhat[t]).squaredNorm();
           }
       }
@@ -674,17 +668,16 @@ namespace exotica
       dCtrl += ros::Time::now() - tmpTime;
       tmpTime = ros::Time::now();
       // Task cost
-      for (int i = 0; i < prob_->Mapping.rows(); i++)
+      for (int i = 0; i < prob_->getTasks().size(); i++)
       {
           // Position cost
           double prec = prob_->Rho[t](i);
           if (prec > 0)
           {
-                int start = prob_->Mapping(i,0);
-                int len = prob_->Mapping(i,1);
+              int start = prob_->getTasks()[i]->StartJ;
+              int len = prob_->getTasks()[i]->LengthJ;
                 costTask(t, i) = prec
-                    * (prob_->y[t].segment(start, len)
-                        - prob_->Phi[t].segment(start, len)).squaredNorm();
+                    * (prob_->ydiff[t].segment(start, len)).squaredNorm();
                 ret += costTask(t, i);
           }
       }

@@ -44,6 +44,7 @@ namespace exotica
         switch(type)
         {
         case RotationType::QUATERNION:
+            if(data.sum()==0.0) throw_pretty("Invalid quaternion transform!");
             return KDL::Rotation::Quaternion(data(0), data(1), data(2), data(3));
         case RotationType::RPY:
             return KDL::Rotation::RPY(data(0), data(1), data(2));
@@ -55,9 +56,17 @@ namespace exotica
             {
                 KDL::Vector axis(data(0), data(1), data(2));
                 double angle = axis.Norm();
-                return KDL::Rotation::Rot(axis/angle, angle);
+                if(abs(angle)>1e-10)
+                {
+                    return KDL::Rotation::Rot(axis, angle);
+                }
+                else
+                {
+                    return KDL::Rotation();
+                }
             }
         case RotationType::MATRIX:
+            if(data.sum()==0.0) throw_pretty("Invalid matrix transform!");
             return KDL::Rotation(data(0), data(1), data(2),
                                  data(3), data(4), data(5),
                                  data(6), data(7), data(8));

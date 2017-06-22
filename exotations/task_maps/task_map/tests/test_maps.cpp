@@ -80,7 +80,6 @@ void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
         double errJ = (J-J0).norm();
         if(errJ > eps)
         {
-            HIGHLIGHT("map: "<<y0.map.size());
             HIGHLIGHT("x: "<<x0.transpose());
             HIGHLIGHT("J*:\n"<<J);
             HIGHLIGHT("J:\n"<<J0);

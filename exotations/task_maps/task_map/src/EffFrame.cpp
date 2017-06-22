@@ -71,7 +71,7 @@ namespace exotica
         std::vector<TaskVectorEntry> ret;
         for(int i=0;i<Kinematics.Phi.rows();i++)
         {
-            ret.push_back(TaskVectorEntry(Start + i*bigStride + 3, StartJ + i*3 + 3, rotationType));
+            ret.push_back(TaskVectorEntry(Start + i*bigStride + 3, rotationType));
         }
         return ret;
     }

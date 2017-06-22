@@ -263,7 +263,7 @@ namespace exotica
 
     costControl.resize(T);
     costControl.setZero();
-    costTask.resize(T, prob_->JN);
+    costTask.resize(T, prob_->NumTasks);
     costTask.setZero();
 
     q_stat.resize(T);
@@ -335,6 +335,7 @@ namespace exotica
       // Compute task message reference
       updateTaskMessage(t, b.at(t), 0.0);
     }
+
     cost = evaluateTrajectory(b, true);
     if (cost < 0) throw_named("Invalid cost!");
     INFO("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost <<", updates: "<<updateCount);
@@ -352,13 +353,13 @@ namespace exotica
     dpotrf_((char*) "L", &nn, AA, &nn, &info);
     if (info != 0)
     {
-      throw_named(info<<"\n"<<A_);
+      throw_named("Cholesky decomposition error: "<<info<<"\n"<<A_);
     }
     // Invert
     dpotri_((char*) "L", &nn, AA, &nn, &info);
     if (info != 0)
     {
-      throw_named(info);
+      throw_named("Matrix inversion error: "<<info);
     }
     Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
   }
@@ -376,7 +377,7 @@ namespace exotica
     dposv_((char*) "L", &n_, &m_, AA, &n_, xx, &n_, &info);
     if (info != 0)
     {
-      throw_named(info);
+      throw_named("Linear solver error: "<<info<<"\nA:\n"<<A_<<"\nb: "<<b_.transpose()<<"\nx: "<<x_.transpose());
     }
   }
 
@@ -559,7 +560,7 @@ namespace exotica
       if (!((!k && forceRelocation)
           || (b[t] - qhat[t]).array().abs().maxCoeff() > tolerance_)) break;
 
-      updateTaskMessage(t, b[t], 0., maxStepSize);
+      updateTaskMessage(t, b.at(t), 0., maxStepSize);
 
         //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
         if (updateFwd) updateFwdMessage(t);
@@ -668,7 +669,7 @@ namespace exotica
       dCtrl += ros::Time::now() - tmpTime;
       tmpTime = ros::Time::now();
       // Task cost
-      for (int i = 0; i < prob_->getTasks().size(); i++)
+      for (int i = 0; i < prob_->NumTasks; i++)
       {
           // Position cost
           double prec = prob_->Rho[t](i);

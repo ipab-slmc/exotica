@@ -66,7 +66,7 @@ namespace exotica
         if(init.W.rows()!=N) throw_named("W dimension mismatch! Expected "<<N<<", got "<<init.W.rows());
 
         Rho = Eigen::VectorXd::Ones(NumTasks);
-        y.data = Eigen::VectorXd::Zero(PhiN);
+        y.setZero(PhiN);
         W = Eigen::MatrixXd::Identity(N, N);
         W.diagonal() = init.W;
         Phi = y;

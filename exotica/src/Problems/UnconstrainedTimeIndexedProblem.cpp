@@ -82,7 +82,7 @@ namespace exotica
       Q = Eigen::MatrixXd::Identity(N, N)*H_rate;
 
       Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
-      yref.data = Eigen::VectorXd::Zero(PhiN);
+      yref.setZero(PhiN);
       y.assign(T, yref);
       Phi = y;
       ydiff.assign(T, Eigen::VectorXd::Zero(JN));

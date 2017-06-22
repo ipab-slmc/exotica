@@ -67,7 +67,6 @@ namespace exotica
       static void printSupportedClasses();
       static boost::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return Instance()->solvers_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->maps_.createInstance("exotica/"+type);}
-      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const std::string & type) {return Instance()->tasks_.createInstance("exotica/"+type);}
       static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->problems_.createInstance("exotica/"+type);}
       static std::vector<std::string> getSolvers();
       static std::vector<std::string> getProblems();
@@ -86,12 +85,6 @@ namespace exotica
           ret->InstantiateInternal(init);
           return ret;
       }
-      static boost::shared_ptr<exotica::TaskDefinition> createDefinition(const Initializer& init)
-      {
-          boost::shared_ptr<exotica::TaskDefinition> ret = Instance()->tasks_.createInstance(init.getName());
-          ret->InstantiateInternal(init);
-          return ret;
-      }
       static boost::shared_ptr<exotica::PlanningProblem> createProblem(const Initializer& init)
       {
           boost::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.createInstance(init.getName());
@@ -99,61 +92,6 @@ namespace exotica
           return ret;
       }
 
-      /**
-       * \brief Initialiser function
-       * @param file_name XML_file for initialising the problem with.
-       * @param solver    Shared pointer to a Motion Solver
-       * @param problem   Shared pointer to a Planning Problem
-       * @return          Indication of Success: TODO
-       */
-      void initialise(const std::string & file_name, Server_ptr & server,
-          MotionSolver_ptr & solver, PlanningProblem_ptr & problem);
-
-      /**
-       * \brief Initialiser function
-       * @param file_name XML_file for initialising the problem with.
-       * @param solver    Returned vector of shared pointers to a motion solvers
-       * @param problem   Returned vector of shared pointers to a problems
-       * @param problem_name Vector of requested problem names
-       * @param solver_name Vector of requested solver names
-       * @return          Indication of Success
-       */
-      void initialise(const std::string & file_name, Server_ptr & server,
-          std::vector<MotionSolver_ptr> & solver,
-          std::vector<PlanningProblem_ptr> & problem,
-          std::vector<std::string> & problem_name,
-          std::vector<std::string> & solver_name);
-
-      /**
-       * \brief Initialiser function
-       * @param file_name XML_file for initialising the problem with.
-       * @param solver    Shared pointer to a Motion Solver
-       * @param problem   Shared pointer to a Planning Problem
-       * @param problem_name Problem name
-       * @param solver_name Solver name
-       * @return          Indication of Success
-       */
-      void initialise(const std::string & file_name, Server_ptr & server,
-          MotionSolver_ptr & solver, PlanningProblem_ptr & problem,
-          const std::string & problem_name, const std::string & solver_name);
-
-      /**
-       * \brief Creates a list of supported problems and solvers specified in a XML file
-       * @param file_name File name
-       * @param problems Return vector of prolem names
-       * @param problems Return vector of solver names
-       * @return Indication of success
-       */
-      void listSolversAndProblems(const std::string & file_name,
-          std::vector<std::string>& problems,
-          std::vector<std::string>& solvers);
-
-      ///
-      /// \brief initialiseProblemMoveit Reinitialises the problem from moveit planning scene stored within the Scene object of the problem
-      /// \param problem Problem to be reinitialised
-      /// \return Indication of success
-      ///
-      void initialiseProblemMoveit(PlanningProblem_ptr problem);
     private:
 
       /**
@@ -170,7 +108,6 @@ namespace exotica
       pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
       pluginlib::ClassLoader<exotica::TaskMap> maps_;
       PlanningProblem_fac problems_;
-      TaskDefinition_fac tasks_;
   };
 
   typedef boost::shared_ptr<Setup> Setup_ptr;

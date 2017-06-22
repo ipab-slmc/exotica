@@ -41,9 +41,6 @@ namespace exotica //!< Since this is part of the core library, it will be within
   class Distance: public TaskMap, public Instantiable<DistanceInitializer>
   {
     public:
-      /**
-       * \brief Default constructor
-       */
       Distance();
       virtual ~Distance()
       {
@@ -51,17 +48,11 @@ namespace exotica //!< Since this is part of the core library, it will be within
 
        virtual void Instantiate(DistanceInitializer& init);
 
-      /**
-       * \brief Concrete implementation of the update method
-       */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      /**
-       * \brief Concrete implementation of the task-space size
-       */
-      virtual void taskSpaceDim(int & task_dim);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      KDL::Frame ref_pose_;
+      virtual int taskSpaceDim();
   };
   typedef boost::shared_ptr<Distance> Distance_Ptr;
 }

@@ -1,9 +1,6 @@
 extend <exotica/TaskMap>
-Required int DMeshSize;
-Required std::vector<std::string> DMeshLinks;
-Required std::vector<bool> DMeshLinkTypes;
 Required double PoseGain;
 Required double ObstacleGain;
 Required double GoalGain;
 Required bool UsePose;
-Required Eigen::VectorXd DMeshRadius;
+Optional int Size = -1;

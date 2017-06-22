@@ -35,7 +35,9 @@
 
 #include <ros/ros.h>
 #include <exotica/Exotica.h>
-#include "MeshGraph.h"
+#include <dmesh_ros/MeshGraph.h>
+#include <dmesh_ros/DMeshVertexInitializer.h>
+
 namespace exotica
 {
   /**
@@ -63,9 +65,7 @@ namespace exotica
        * @param	size		Maximum graph size
        * @return	True if succeeded, false otherwise
        */
-      bool initialisation(std::vector<std::string> & links,
-          std::vector<bool> & link_types,
-          Eigen::VectorXd & link_radius, int size);
+      void initialisation(std::vector<DMeshVertexInitializer>& verts, int size);
 
       /*
        * \brief	Get the graph pointer

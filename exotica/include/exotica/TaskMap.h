@@ -48,11 +48,6 @@
  */
 #define REGISTER_TASKMAP_TYPE(TYPE, DERIV) EXOTICA_REGISTER(exotica::TaskMap, TYPE, DERIV)
 
-#define PHI (*(phi_.at(t)))
-#define JAC (*(jac_.at(t)))
-#define EFFPHI (*eff_phi_)
-#define EFFJAC (*eff_jac_)
-
 namespace exotica
 {
   class PlanningProblem;
@@ -64,101 +59,40 @@ namespace exotica
        * \brief Default Constructor
        */
       TaskMap();
-      virtual ~TaskMap()
-      {
-      }
+      virtual ~TaskMap() { }
 
       virtual void InstantiateBase(const Initializer& init);
 
-      /**
-       * \brief Updates the output functions (phi and jacobian): PURE VIRTUAL
-       * \details The Function should:
-       *          \n call invalidate() before starting task-specific execution
-       *          \n lock the scene_ pointer (using the scene_lock_ mutex)
-       *          \n check that everything it needs (including possibly the scene pointer) is valid
-       * @post      Should store the results using setY() and setYDot() if successful
-       * @param  x  The State-space vector for the robot
-       * @return    Should indicate success/otherwise using the Exotica error types
-       */
-      virtual void update(Eigen::VectorXdRefConst x, const int t) = 0;
+      virtual void assignScene(Scene_ptr scene) {}
 
-      /**
-       * @brief registerPhi Registers a memory location for the output of phi at time t
-       * @param y Reference to memory location to be registered
-       * @param t Time step
-       * @return Indication of success
-       */
-      void registerPhi(Eigen::VectorXdRef_ptr y, int t);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
 
-      /**
-       * @brief registerJacobian egisters a memory location for the output of Jacobian at time t
-       * @param J Reference to memory location to be registered
-       * @param t Time step
-       * @return Indication of success
-       */
-      void registerJacobian(Eigen::MatrixXdRef_ptr J, int t);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) { throw_named("Not implemented"); }
 
-      /**
-       * \brief Indicator of the Task-Dimension size: PURE VIRTUAL
-       * @param task_dim  The dimensionality of the Task space, or -1 if dynamic...
-       */
-      virtual void taskSpaceDim(int & task_dim) = 0;
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot) { throw_named("Not implemented"); }
 
-      /**
-       * @brief setTimeSteps Sets number of timesteps for tasks that require to keep track of task space coordinates over time (ignored in other tasks)
-       * @param T Number of time steps (this should be set by the planning problem)
-       * @return Returns success.
-       */
-      virtual void setTimeSteps(const int T);
+      virtual int taskSpaceDim() = 0;
 
-      bool isRegistered(int t);
-
-      Scene_ptr getScene();
-
-      bool updateJacobian_;
-
-      std::vector<Eigen::VectorXdRef_ptr> phi_; //!< The Task-space co-ordinates
-      std::vector<Eigen::MatrixXdRef_ptr> jac_;    //!< The Task Jacobian matrix
-
-      boost::shared_ptr<std::map<std::string, Eigen::VectorXd> > poses;
-      boost::shared_ptr<std::vector<std::string> > posesJointNames;
+      void taskSpaceDim(int & task_dim);
 
       virtual std::string print(std::string prepend);
 
-      void registerScene(Scene_ptr scene);
-      std::string getSceneName();
+      std::vector<KinematicFrameRequest> GetFrames();
 
-      virtual void debug();
+      virtual void debug() { }
+      KinematicSolution Kinematics;
+      int Id;
+      int Start;
+      int Length;
     protected:
 
-      /**
-       * Member Variables
-       */
-      Scene_ptr scene_;  //!< The Scene object (smart-pointer):
-      boost::mutex scene_lock_;  //!< Synchronisation for the scene object
-      Server_ptr server_; //!< Pointer to EXOTica parameter server;
-      std::string scene_name_;
-      /**
-       * \brief Private data members for information hiding and thread-safety
-       */
-
-      Eigen::VectorXdRef_ptr eff_phi_; //!< End-effector phi (output of kinematica)
-      Eigen::MatrixXdRef_ptr eff_jac_; //!< End-effector Jacobian (output of kinematica)
-      virtual bool getEffReferences();
-      int phiCnt_;
-      int jacCnt_;
-      Eigen::VectorXi phiFlag_;
-      Eigen::VectorXi jacFlag_;
-      Eigen::VectorXd phi0_;
-      Eigen::MatrixXd jac0_;
-
-      std::vector<std::string> tmp_eff;
-      std::vector<KDL::Frame> tmp_offset;
+      std::vector<KinematicFrameRequest> Frames;
   };
 
   //!< Typedefines for some common functionality
   typedef Factory<TaskMap> TaskMap_fac;  //!< Task Map Factory
   typedef boost::shared_ptr<TaskMap> TaskMap_ptr;  //!< Task Map smart pointer
   typedef std::map<std::string, TaskMap_ptr> TaskMap_map; //!< The mapping by name of TaskMaps
+  typedef std::vector<TaskMap_ptr> TaskMap_vec;
 }
 #endif

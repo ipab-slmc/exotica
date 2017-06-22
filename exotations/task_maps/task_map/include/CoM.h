@@ -40,82 +40,40 @@
 #include <visualization_msgs/MarkerArray.h>
 namespace exotica
 {
-  /**
-   * @brief	Centre of mass Task Map.
-   * 			Using a short-cut to get the jacobian from kinematica, not efficient.
-   */
   class CoM: public TaskMap, public Instantiable<CoMInitializer>
   {
     public:
-      /**
-       * @brief	Constructor of CoMTaskMap
-       */
       CoM();
+      virtual ~CoM();
 
       virtual void Instantiate(CoMInitializer& init);
 
-      /**
-       * @brief	Destructor of CoMTaskMap
-       */
-      virtual ~CoM();
+      virtual void assignScene(Scene_ptr scene);
 
-      /**
-       * @brief	Concrete implementation of the update method
-       * @param	x	Input configuration
-       * @return	Exotica return type
-       */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      void Initialize();
 
-      /**
-       * @brief	Get the task space dimension
-       */
+      void InitDebug();
 
-      /**
-       * \brief Concrete implementation of the task-space size
-       */
-      virtual void taskSpaceDim(int & task_dim);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      void setOffsetCallback(
-          boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback);
-      void setOffset(bool left, const KDL::Frame & offset);
-      void checkGoal(const Eigen::Vector3d & goal);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+
+      virtual int taskSpaceDim();
 
     private:
-      /**
-       * @brief	Compute the forward map (centre of mass position)
-       * @return	True if succeeded, false otherwise
-       */
-      void computeForwardMap(int t);
 
-      /**
-       * @brief	Compute the jacobian
-       * @return	True if succeeded, false otherwise
-       */
-      void computeJacobian(int t);
-
-      /**
-       * @brief	Change end-effectors offset to centre of mass
-       * @return	True if succeeded, false otherwise
-       */
-      void changeEffToCoM();
-      Eigen::VectorXd mass_;	//!< Mass of each link
-      std::vector<KDL::Vector> cog_;	//!< Centre of gravity of each link
-      std::vector<KDL::Frame> tip_pose_;	//!< Tip poses
-      std::vector<KDL::Frame> base_pose_;	//!< Base poses
-      bool initialised_;	//!< For Error checking
-      boost::function<void(CoM*, Eigen::VectorXdRefConst, int)> offset_callback_;
+      Eigen::VectorXd mass_;
       ros::Publisher com_pub_;
       ros::Publisher COM_pub_;
       ros::Publisher goal_pub_;
       visualization_msgs::Marker com_marker_;
       visualization_msgs::Marker COM_marker_;
       visualization_msgs::Marker goal_marker_;
-      KDL::Frame base_offset_;
-      KDL::Frame marker_offset_;
-      std::ofstream com_file_;
       bool enable_z_;
-      Eigen::VectorXd bounds_;
       int dim_;
+
+      CoMInitializer init_;
+      Scene_ptr scene_;
   };
 }
 

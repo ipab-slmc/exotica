@@ -55,7 +55,7 @@ namespace exotica
         throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());
       }
       Initializer baseInit = (Initializer)init;
-      base_solver_->initialiseBaseSolver( baseInit, server_);
+      base_solver_->initialiseBaseSolver(baseInit);
   }
 
   OMPLsolver::~OMPLsolver()
@@ -77,8 +77,7 @@ namespace exotica
   {
     if (base_solver_->solve(q0, solution))
     {
-      HIGHLIGHT(
-          "OMPL solving succeeded, planning time "<<base_solver_->getPlanningTime()<<"sec");
+      HIGHLIGHT("OMPL solving succeeded, planning time "<<base_solver_->getPlanningTime()<<"sec");
     }
     else
     {
@@ -91,19 +90,8 @@ namespace exotica
   {
     MotionSolver::specifyProblem(pointer);
     prob_ = boost::static_pointer_cast<SamplingProblem>(pointer);
-
-//    for (auto & it : prob_->getScenes())
-//    {
-//      it.second->activateTaskMaps();
-//    }
-    prob_->getScene()->activateTaskMaps();
     base_solver_->specifyProblem(prob_);
-  }
-
-  bool OMPLsolver::isSolvable(const PlanningProblem_ptr & prob)
-  {
-    if (prob->type().compare("exotica::SamplingProblem") == 0) return true;
-    return false;
+    setGoalState(prob_->goal_);
   }
 
   template<typename T> static ompl::base::PlannerPtr allocatePlanner(
@@ -115,7 +103,7 @@ namespace exotica
     return planner;
   }
 
-  void OMPLsolver::setGoalState(const Eigen::VectorXd & qT, const double eps)
+  void OMPLsolver::setGoalState(Eigen::VectorXdRefConst qT, const double eps)
   {
     base_solver_->setGoalState(qT, eps);
   }

@@ -15,19 +15,7 @@
       </Scene>
     </PlanningScene>
 
-    <Maps>
-      <Identity Name="ConfigurationSpaceGoal">
-        <Scene>OMPLSolverDemoScene</Scene>
-      </Identity>
-    </Maps>
-
-    <Tasks> 
-      <TaskTerminationCriterion Name="OMPLSolverDemoTask">
-        <Map>ConfigurationSpaceGoal</Map>
-        <Rho>1.0</Rho>
-        <Threshold>1e-6</Threshold>
-      </TaskTerminationCriterion>
-    </Tasks>
+    <Goal>-0.134914 -0.229508 -0.124971 1.94267 -1.4921e-17 0.0 0.0</Goal>
   </SamplingProblem>
 
 </PlannerDemoConfig>

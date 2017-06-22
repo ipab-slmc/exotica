@@ -36,115 +36,139 @@ REGISTER_TASKMAP_TYPE("SphereCollision", exotica::SphereCollision);
 
 namespace exotica
 {
-  SphereCollision::SphereCollision()
-  {
-    //!< Empty constructor
-  }
-
-  void SphereCollision::Instantiate(SphereCollisionInitializer& init)
-  {
-     eps = 1.0/init.Precision;
-     for(int i=0;i<init.EndEffector.size();i++)
-     {
-         SphereInitializer sphere(init.EndEffector[i]);
-         groups[sphere.Group].push_back(i);
-         radiuses.push_back(sphere.Radius);
-         visualization_msgs::Marker mrk;
-         mrk.action = visualization_msgs::Marker::ADD;
-         mrk.header.frame_id = init.ReferenceFrame;
-         mrk.id = i;
-         mrk.type = visualization_msgs::Marker::SPHERE;
-         mrk.scale.x = mrk.scale.y = mrk.scale.z = sphere.Radius*2;
-         debug_msg.markers.push_back(mrk);
-     }
-     for(auto& it : groups)
-     {
-         std_msgs::ColorRGBA col = randomColor();
-         col.a = init.Alpha;
-         for(int i : it.second)
-         {
-             debug_msg.markers[i].color = col;
-             debug_msg.markers[i].ns = it.first;
-         }
-     }
-     debug = init.Debug;
-     debug_pub = server_->advertise<visualization_msgs::MarkerArray>(ns_ +"/CollisionSpheres", 1, true);
-  }
-
-  double SphereCollision::distance(Eigen::VectorXdRefConst effA, Eigen::VectorXdRefConst effB, double rA, double rB)
-  {
-    return 1.0/(1.0 + exp(5.0 * eps * (sqrt((effA-effB).adjoint()*(effA-effB))-rA-rB)));
-  }
-
-  Eigen::VectorXd SphereCollision::Jacobian(Eigen::VectorXdRefConst effA, Eigen::VectorXdRefConst effB, Eigen::MatrixXdRefConst jacA, Eigen::MatrixXdRefConst jacB, double rA, double rB)
-  {
-    int n = jacA.cols();
-    Eigen::VectorXd ret = Eigen::VectorXd::Zero(n);
-    for(int i=0;i<n;i++)
+    SphereCollision::SphereCollision()
     {
-        ret(i) = -(double)((jacA.col(i)-jacB.col(i)).adjoint()*(effA-effB)) / sqrt((effA-effB).adjoint()*(effA-effB));
-    }
-    return ret;
-  }
-
-  void SphereCollision::update(Eigen::VectorXdRefConst x, const int t)
-  {
-    if (!isRegistered(t) || !getEffReferences())
-    {
-      throw_named("Not fully initialized!");
-    }
-    PHI.setZero();
-    if (updateJacobian_)
-    {
-      JAC.setZero();
     }
 
-    int i=0;
-    auto Aend = groups.end()--;
-    auto Bend = groups.end();
-    int phiI = 0;
-    for(auto A=groups.begin(); A!=Aend; A++)
+    void SphereCollision::Instantiate(SphereCollisionInitializer& init)
     {
-        for(auto B=std::next(A); B!=Bend; B++)
+        eps = 1.0/init.Precision;
+        for(int i=0;i<init.EndEffector.size();i++)
         {
-            for(int ii=0;ii<A->second.size();ii++)
+            SphereInitializer sphere(init.EndEffector[i]);
+            groups[sphere.Group].push_back(i);
+            radiuses.push_back(sphere.Radius);
+            visualization_msgs::Marker mrk;
+            mrk.action = visualization_msgs::Marker::ADD;
+            mrk.header.frame_id = init.ReferenceFrame;
+            mrk.id = i;
+            mrk.type = visualization_msgs::Marker::SPHERE;
+            mrk.scale.x = mrk.scale.y = mrk.scale.z = sphere.Radius*2;
+            debug_msg.markers.push_back(mrk);
+        }
+        for(auto& it : groups)
+        {
+            std_msgs::ColorRGBA col = randomColor();
+            col.a = init.Alpha;
+            for(int i : it.second)
             {
-                for(int jj=0;jj<B->second.size();jj++)
+                debug_msg.markers[i].color = col;
+                debug_msg.markers[i].ns = it.first;
+            }
+        }
+        debug = init.Debug;
+        debug_pub = Server::Instance()->advertise<visualization_msgs::MarkerArray>(ns_ +"/CollisionSpheres", 1, true);
+    }
+
+    double SphereCollision::distance(const KDL::Frame& effA, const KDL::Frame& effB, double rA, double rB)
+    {
+        return 1.0/(1.0 + exp(5.0 * eps * ((effA.p-effB.p).Norm()-rA-rB)));
+    }
+
+    Eigen::VectorXd SphereCollision::Jacobian(const KDL::Frame& effA, const KDL::Frame& effB, const KDL::Jacobian& jacA, const KDL::Jacobian& jacB, double rA, double rB)
+    {
+        int n = jacA.columns();
+        Eigen::VectorXd ret = Eigen::VectorXd::Zero(n);
+        Eigen::VectorXd eA(3);
+        Eigen::VectorXd eB(3);
+        for(int i=0;i<n;i++)
+        {
+            eA << effA.p[0], effA.p[1], effA.p[2];
+            eB << effB.p[0], effB.p[1], effB.p[2];
+            ret(i) = -(double)((jacA.data.col(i).head(3)-jacB.data.col(i).head(3)).adjoint()*(eA-eB)) / (effA.p-effB.p).Norm();
+        }
+        return ret;
+    }
+
+    void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+    {
+        if(phi.rows() != taskSpaceDim()) throw_named("Wrong size of phi!");
+        phi.setZero();
+
+        auto Aend = groups.end()--;
+        auto Bend = groups.end();
+        int phiI = 0;
+        for(auto A=groups.begin(); A!=Aend; A++)
+        {
+            for(auto B=std::next(A); B!=Bend; B++)
+            {
+                for(int ii=0;ii<A->second.size();ii++)
                 {
-                    int i = A->second[ii];
-                    int j = B->second[jj];
-                    PHI(phiI) += distance(EFFPHI.segment(i*3,3), EFFPHI.segment(j*3,3), radiuses[i], radiuses[j]);
-                    if (updateJacobian_)
+                    for(int jj=0;jj<B->second.size();jj++)
                     {
-                        JAC.row(phiI) += Jacobian(EFFPHI.segment(i*3,3), EFFPHI.segment(j*3,3), EFFJAC.middleRows(i*3,3), EFFJAC.middleRows(j*3,3), radiuses[i], radiuses[j]);
+                        int i = A->second[ii];
+                        int j = B->second[jj];
+                        phi(phiI) += distance(Kinematics.Phi(i), Kinematics.Phi(j), radiuses[i], radiuses[j]);
                     }
                 }
+                phiI++;
             }
-            phiI++;
         }
-    }
 
-    if(debug)
-    {
-        for(int i=0;i<debug_msg.markers.size();i++)
+        if(debug)
         {
-            debug_msg.markers[i].pose.position.x = EFFPHI(i*3);
-            debug_msg.markers[i].pose.position.y = EFFPHI(i*3+1);
-            debug_msg.markers[i].pose.position.z = EFFPHI(i*3+2);
+            for(int i=0;i<debug_msg.markers.size();i++)
+            {
+                debug_msg.markers[i].pose.position.x = Kinematics.Phi(i).p[0];
+                debug_msg.markers[i].pose.position.y = Kinematics.Phi(i).p[1];
+                debug_msg.markers[i].pose.position.z = Kinematics.Phi(i).p[2];
+            }
+            debug_pub.publish(debug_msg);
         }
-        debug_pub.publish(debug_msg);
     }
-  }
 
-  void SphereCollision::taskSpaceDim(int & task_dim)
-  {
-    if (!scene_)
+    void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
     {
-      throw_named("Kinematic scene has not been initialized!");
+        if(phi.rows() != taskSpaceDim()) throw_named("Wrong size of phi!");
+        if(J.rows() != taskSpaceDim() || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+        phi.setZero();
+        J.setZero();
+
+        auto Aend = groups.end()--;
+        auto Bend = groups.end();
+        int phiI = 0;
+        for(auto A=groups.begin(); A!=Aend; A++)
+        {
+            for(auto B=std::next(A); B!=Bend; B++)
+            {
+                for(int ii=0;ii<A->second.size();ii++)
+                {
+                    for(int jj=0;jj<B->second.size();jj++)
+                    {
+                        int i = A->second[ii];
+                        int j = B->second[jj];
+                        phi(phiI) += distance(Kinematics.Phi(i), Kinematics.Phi(j), radiuses[i], radiuses[j]);
+                        J.row(phiI) += Jacobian(Kinematics.Phi(i), Kinematics.Phi(j), Kinematics.J(i), Kinematics.J(j), radiuses[i], radiuses[j]);
+                    }
+                }
+                phiI++;
+            }
+        }
+
+        if(debug)
+        {
+            for(int i=0;i<debug_msg.markers.size();i++)
+            {
+                debug_msg.markers[i].pose.position.x = Kinematics.Phi(i).p[0];
+                debug_msg.markers[i].pose.position.y = Kinematics.Phi(i).p[1];
+                debug_msg.markers[i].pose.position.z = Kinematics.Phi(i).p[2];
+            }
+            debug_pub.publish(debug_msg);
+        }
     }
-    else
+
+    int SphereCollision::taskSpaceDim()
     {
-      task_dim = groups.size()*(groups.size()-1)/2;
+        return groups.size()*(groups.size()-1)/2;
     }
-  }
 }

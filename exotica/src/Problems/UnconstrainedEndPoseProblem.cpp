@@ -40,47 +40,79 @@ REGISTER_PROBLEM_TYPE("UnconstrainedEndPoseProblem", exotica::UnconstrainedEndPo
 
 namespace exotica
 {
-  UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
-      : tau_(0.01)
-  {
+    UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
+    {
+        Flags = KIN_FK | KIN_J;
+    }
 
-  }
+    UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
+    {
+    }
 
-  UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
-  {
-    //TODO
-  }
+    void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
+    {
+        Tasks = MapToVec(TaskMaps);
+        NumTasks = Tasks.size();
+        Mapping.resize(NumTasks, 2);
+        int id=0;
+        for(int i=0;i<NumTasks;i++)
+        {
+            Mapping(i,0) = id;
+            Mapping(i,1) = Tasks[i]->taskSpaceDim();
+            id += Mapping(i,1);            
+        }
+        PhiN = Mapping.col(1).sum();
 
-  void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
-  {
-      tau_ = init.Tolerance;
-      config_w_ = Eigen::MatrixXd::Identity(init.W.rows(), init.W.rows());
-      config_w_.diagonal() = init.W;
-      T_ = init.T;
-      for (auto& it : task_defs_)
-      {
-          it.second->setTimeSteps(T_);
-      }
-  }
+        N = scene_->getNumJoints();
 
-  int UnconstrainedEndPoseProblem::getT()
-  {
-    return T_;
-  }
+        if(init.W.rows()!=N) throw_named("W dimension mismatch! Expected "<<N<<", got "<<init.W.rows());
 
-  Eigen::MatrixXd UnconstrainedEndPoseProblem::getW()
-  {
-    return config_w_;
-  }
+        Rho = Eigen::VectorXd::Ones(NumTasks);
+        y = Eigen::VectorXd::Zero(PhiN);
+        W = Eigen::MatrixXd::Identity(N, N);
+        W.diagonal() = init.W;
+        Phi = Eigen::VectorXd::Zero(PhiN);
+        J = Eigen::MatrixXd(PhiN, N);
 
-  double UnconstrainedEndPoseProblem::getTau()
-  {
-    return tau_;
-  }
+        if(init.Rho.rows()>0 && init.Rho.rows()!=NumTasks) throw_named("Invalide size of Rho (" << init.Rho.rows() << ") expected: "<< NumTasks);
+        if(init.Goal.rows()>0 && init.Goal.rows()!=PhiN) throw_named("Invalide size of Rho (" << init.Goal.rows() << ") expected: "<< PhiN);
 
-  void UnconstrainedEndPoseProblem::setTau(double tau)
-  {
-    tau_ = tau;
-  }
+        if(init.Rho.rows()==NumTasks) Rho = init.Rho;
+        if(init.Goal.rows()==PhiN) y = init.Goal;
+    }
+
+    void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
+    {
+        scene_->Update(x);
+        for(int i=0;i<NumTasks;i++)
+        {
+            Tasks[i]->update(x, Phi.segment(Mapping(i, 0), Mapping(i, 1)), J.middleRows(Mapping(i, 0), Mapping(i, 1)));
+        }
+    }
+
+    void UnconstrainedEndPoseProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        if(goal.rows()!=task->Length) throw_named("Invalid goal dimension "<<goal.rows()<<" expected "<<task->Length);
+        y.segment(task->Start, task->Length) = goal;
+    }
+
+    void UnconstrainedEndPoseProblem::setRho(const std::string & task_name, const double rho)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        Rho(task->Id) = rho;
+    }
+
+    Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string & task_name)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        return y.segment(task->Start, task->Length);
+    }
+
+    double UnconstrainedEndPoseProblem::getRho(const std::string & task_name)
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        return y(task->Id);
+    }
 }
 

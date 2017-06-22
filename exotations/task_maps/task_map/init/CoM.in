@@ -1,3 +1,2 @@
 extend <exotica/TaskMap>
-Optional Eigen::VectorXd Bounds = Eigen::VectorXd::Zero(3);
 Optional bool EnableZ = true;

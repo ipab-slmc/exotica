@@ -1,4 +1,3 @@
 extend <exotica/Object>
 Required std::string JointGroup;
-Optional std::string PlanningMode = "Optimization";
 Optional std::string RobotDescription = "robot_description";

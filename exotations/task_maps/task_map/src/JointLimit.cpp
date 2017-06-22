@@ -32,88 +32,85 @@
 
 #include "JointLimit.h"
 
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
-
 REGISTER_TASKMAP_TYPE("JointLimit", exotica::JointLimit);
+
 namespace exotica
 {
-  JointLimit::JointLimit()
-      : initialised_(false)
-  {
-    //TODO
-  }
-  JointLimit::~JointLimit()
-  {
-    //TODO
-  }
-
-  void JointLimit::Instantiate(JointLimitInitializer& init)
-  {
-      double percent = init.SafePercentage;
-
-      std::vector<std::string> jnts;
-      scene_->getJointNames(jnts);
-      int size = jnts.size();
-      low_limits_.resize(size);
-      high_limits_.resize(size);
-      robot_model::RobotModelConstPtr model = server_->getModel(init.RobotDescription);
-      for (int i = 0; i < jnts.size(); i++)
-      {
-        low_limits_(i) =
-            model->getJointModel(jnts[i])->getVariableBounds()[0].min_position_;
-        high_limits_(i) =
-            model->getJointModel(jnts[i])->getVariableBounds()[0].max_position_;
-      }
-      tau_.resize(size);
-      center_.resize(size);
-      for (int i = 0; i < size; i++)
-      {
-        center_(i) = (low_limits_(i) + high_limits_(i)) / 2;
-        tau_(i) = percent * (high_limits_(i) - low_limits_(i)) / 2;
-      }
-      initialised_ = true;
-  }
-
-  void JointLimit::taskSpaceDim(int & task_dim)
-  {
-    if (!initialised_) throw_named("Not initialized!");;
-    task_dim = tau_.rows();
-  }
-
-  void JointLimit::update(Eigen::VectorXdRefConst x, const int t)
-  {
-    if (!isRegistered(t))
+    JointLimit::JointLimit()
     {
-      throw_named("Not fully initialized!");
     }
-    if (!initialised_) throw_named("Not initialized!");;
-    //	Compute Phi and Jac
-    PHI.setZero();
-    JAC.setZero();
-    double d;
-    for (int i = 0; i < PHI.rows(); i++)
+
+    JointLimit::~JointLimit()
     {
-      if (x(i) < center_(i))
-      {
-        d = x(i) - low_limits_(i);
-        if (d < tau_(i))
-        {
-          PHI(i) = tau_(i) - d;
-          if (updateJacobian_)
-          JAC(i, i) = -1;
-        }
-      }
-      else if (x(i) > center_(i))
-      {
-        d = high_limits_(i) - x(i);
-        if (d < tau_(i))
-        {
-          PHI(i) = tau_(i) - d;
-          if (updateJacobian_)
-          JAC(i, i) = 1;
-        }
-      }
     }
-  }
+
+    void JointLimit::Instantiate(JointLimitInitializer& init)
+    {
+        init_ = init;
+    }
+
+    void JointLimit::assignScene(Scene_ptr scene)
+    {
+        scene_ = scene;
+        Initialize();
+    }
+
+    void JointLimit::Initialize()
+    {
+        double percent = init_.SafePercentage;
+
+        std::vector<std::string> jnts = scene_->getJointNames();
+        N = jnts.size();
+        Eigen::MatrixXd limits = scene_->getSolver().getJointLimits();
+        low_limits_ = limits.col(0);
+        high_limits_ = limits.col(1);
+        tau_.resize(N);
+        for (int i = 0; i < N; i++)
+        {
+            tau_(i) = percent * (high_limits_(i) - low_limits_(i))*0.5;
+        }
+    }
+
+    int JointLimit::taskSpaceDim()
+    {
+        return N;
+    }
+
+    void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+    {
+        if(phi.rows() != N) throw_named("Wrong size of phi!");
+        phi.setZero();
+        for(int i=0;i<N;i++)
+        {
+            if (x(i) < low_limits_(i) + tau_(i))
+            {
+                phi(i) = x(i) - low_limits_(i) - tau_(i);
+            }
+            if (x(i) > high_limits_(i) - tau_(i))
+            {
+                phi(i) = x(i) - high_limits_(i) + tau_(i);
+            }
+        }
+    }
+
+    void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+    {
+        if(phi.rows() != N) throw_named("Wrong size of phi!");
+        if(J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);
+        phi.setZero();
+        J = Eigen::MatrixXd::Identity(N,N);
+        for(int i=0;i<N;i++)
+        {
+            if (x(i) < low_limits_(i) + tau_(i))
+            {
+                phi(i) = x(i) - low_limits_(i) - tau_(i);
+            }
+            if (x(i) > high_limits_(i) - tau_(i))
+            {
+                phi(i) = x(i) - high_limits_(i) + tau_(i);
+            }
+        }
+    }
+
 }
 

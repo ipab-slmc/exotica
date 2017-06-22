@@ -51,20 +51,8 @@ include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 configure_file("src/Version.cpp.in" "${exotica_BINARY_DIR}/generated/Version.cpp" @ONLY)
 
-AddInitializer(
-  TaskMap
-  Object
-  Limb
-  MotionSolver
-  PlanningProblem
-  Scene
-  TaskDefinition
-  UnconstrainedTimeIndexedProblem
-  UnconstrainedEndPoseProblem
-  SamplingProblem
-  TaskSqrError
-  TaskTerminationCriterion
-)
+AddInitializer(TaskMap Object Frame MotionSolver PlanningProblem Scene
+     UnconstrainedTimeIndexedProblem UnconstrainedEndPoseProblem SamplingProblem)
 GenInitializers()
 
 ## catkin specific configuration ##
@@ -87,7 +75,6 @@ add_library(${PROJECT_NAME}
   src/TaskMap.cpp
   src/Loaders/tinyxml2.cpp
   src/Tools.cpp
-  src/TaskDefinition.cpp
   src/PlanningProblem.cpp
   src/MotionSolver.cpp
   src/Setup.cpp
@@ -102,8 +89,6 @@ add_library(${PROJECT_NAME}
   src/Problems/UnconstrainedTimeIndexedProblem.cpp
   src/Problems/UnconstrainedEndPoseProblem.cpp
   src/Problems/SamplingProblem.cpp
-  src/Definitions/TaskSqrError.cpp
-  src/Definitions/TaskTerminationCriterion.cpp
   ${exotica_BINARY_DIR}/generated/Version.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 

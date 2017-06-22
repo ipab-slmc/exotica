@@ -25,16 +25,17 @@ namespace exotica
         else
         {
             int count = 0;
-            for( tinyxml2::XMLHandle child = tag.FirstChild(); child.ToElement(); child = child.NextSibling() ) count++;
+            for( tinyxml2::XMLHandle child = tag.FirstChild(); child.ToNode(); child = child.NextSibling() ) if(child.ToElement() != nullptr) count++;
             if(count==0)
             {
-                // No child tags = this is a regular property
-                std::string value;
+                if(tag.ToElement() == nullptr) return;
+
                 if (!tag.ToElement()->GetText())
                 {
-                    throw_pretty("Can't get value! ("+name+")");
+                    // No child tags = this is an empty vector of properties
+                    return;
                 }
-                value = tag.ToElement()->GetText();
+                std::string value = tag.ToElement()->GetText();
                 parent.addProperty(Property(name,true,value));
             }
             else
@@ -42,9 +43,14 @@ namespace exotica
                 // Child tags found = this is an initializer
                 // All initializers are treated as a vector
                 std::vector<Initializer> ret;
-                tinyxml2::XMLHandle child_tag(tag.FirstChildElement());
-                while(child_tag.ToElement())
+                tinyxml2::XMLHandle child_tag = tag.FirstChild();
+                while(child_tag.ToNode())
                 {
+                    if(child_tag.ToElement() == nullptr)
+                    {
+                        child_tag = child_tag.NextSibling();
+                        continue;
+                    }
                     ret.push_back(Initializer("New"+name));
                     if(!parseXML(child_tag,ret[ret.size()-1],prefix+"- "))
                     {
@@ -54,7 +60,7 @@ namespace exotica
                     {
                         //HIGHLIGHT(prefix<<". Adding parsed vector element "<<name<<" to " << parent.getName());
                     }
-                    child_tag = child_tag.NextSiblingElement();
+                    child_tag = child_tag.NextSibling();
                 }
                 parent.addProperty(Property(name,true,ret));
             }
@@ -79,12 +85,17 @@ namespace exotica
         }
 
         // Parse values stored in tags
-        tinyxml2::XMLHandle member_tag(tag.FirstChildElement());
-        while(member_tag.ToElement())
+        tinyxml2::XMLHandle member_tag = tag.FirstChild();
+        while(member_tag.ToNode())
         {
+            if(member_tag.ToElement() == nullptr)
+            {
+                member_tag = member_tag.NextSibling();
+                continue;
+            }
             std::string member_name = std::string(member_tag.ToElement()->Name());
             appendChildXML(parent,member_name,false,member_tag,prefix+"- ");
-            member_tag = member_tag.NextSiblingElement();
+            member_tag = member_tag.NextSibling();
         }
         //HIGHLIGHT(prefix<<name<<" finished parsing");
         return true;
@@ -136,15 +147,20 @@ namespace exotica
         }
 
         std::vector<Initializer> initializers;
-        tinyxml2::XMLHandle root_tag(xml_file.RootElement()->FirstChildElement());
-        while (root_tag.ToElement())
+        tinyxml2::XMLHandle root_tag = xml_file.RootElement()->FirstChild();
+        while (root_tag.ToNode())
         {
+            if(root_tag.ToElement() == nullptr)
+            {
+                root_tag = root_tag.NextSibling();
+                continue;
+            }
             initializers.push_back(Initializer("TopLevel"));
             if(!parseXML(root_tag,initializers[initializers.size()-1], ""))
             {
                 initializers.pop_back();
             }
-            root_tag = root_tag.NextSiblingElement();
+            root_tag = root_tag.NextSibling();
         }
         bool foundSolver = false;
         bool foundProblem = false;

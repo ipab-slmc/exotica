@@ -44,6 +44,7 @@
 #include <exotica/Vector.h>
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <dmesh_ros/DMeshVertexInitializer.h>
 
 namespace exotica
 {
@@ -67,6 +68,7 @@ namespace exotica
        * @param	name		The vertex name
        */
       Vertex(const std::string & name = "UNKNOWN");
+      Vertex(const std::string & name, const Eigen::Vector3d & position, double r, const std::vector<std::string> & tolinks, VERTEX_TYPE type, double w = 1.0);
 
       /**
        * \brief	Set this vertex as robot link
@@ -273,10 +275,8 @@ namespace exotica
        * @param	dummy_table	Flag indicate if use the dummy table obstacle
        * @return	True if succeeded, false otherwise
        */
-      bool initialisation(const int size,
-          const std::vector<std::string> & link_names,
-          const std::vector<bool> link_type,
-          Eigen::VectorXd & link_radius, const double i_range,
+      void initialisation(const int size,
+          std::vector<DMeshVertexInitializer>& verts, const double i_range,
           const double eps, const bool dummy_table);
 
       /**

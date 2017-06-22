@@ -3,6 +3,7 @@
 
 #include <Eigen/Dense>
 #include <kdl/tree.hpp>
+#include <kdl/jacobian.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <exotica/Tools/Exception.h>
@@ -74,6 +75,16 @@ namespace Eigen
 
 namespace exotica
 {
+    typedef Eigen::Array<KDL::Frame,Eigen::Dynamic,1> ArrayFrame;
+    typedef Eigen::Array<KDL::Twist,Eigen::Dynamic,1> ArrayTwist;
+    typedef Eigen::Array<KDL::Jacobian,Eigen::Dynamic,1> ArrayJacobian;
+    typedef Eigen::Ref<Eigen::Array<KDL::Frame,Eigen::Dynamic,1>> ArrayFrameRef;
+    typedef Eigen::Ref<Eigen::Array<KDL::Twist,Eigen::Dynamic,1>> ArrayTwistRef;
+    typedef Eigen::Ref<Eigen::Array<KDL::Jacobian,Eigen::Dynamic,1>> ArrayJacobianRef;
+    typedef const Eigen::Ref<Eigen::Array<KDL::Frame,Eigen::Dynamic,1>>& ArrayFrameRefConst;
+    typedef const Eigen::Ref<Eigen::Array<KDL::Twist,Eigen::Dynamic,1>>& ArrayTwistRefConst;
+    typedef const Eigen::Ref<Eigen::Array<KDL::Jacobian,Eigen::Dynamic,1>>& ArrayJacobianRefConst;
+
     inline bool IsContainerType(std::string type)
     {
         return type=="exotica::Initializer";
@@ -87,6 +98,17 @@ namespace exotica
     inline bool IsVectorContainerType(std::string type)
     {
         return type=="std::vector<exotica::Initializer>";
+    }
+
+    template <class Key, class Val>
+    std::vector<Val> MapToVec( const  std::map<Key,Val> & map)
+    {
+        std::vector<Val> ret;
+        for( auto& val : map)
+        {
+            ret.push_back( val.second );
+        }
+        return ret;
     }
 
     KDL::Frame getFrame(Eigen::VectorXdRefConst val);

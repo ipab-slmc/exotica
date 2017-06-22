@@ -36,6 +36,7 @@ after_success:
 - source /opt/ros/indigo/setup.bash
 - source devel/setup.bash
 - rosrun exotica test_initializers
+- rosrun task_map test_maps
 before_deploy:
 - bash $TRAVIS_BUILD_DIR/.ci/after_success.sh
 - git config --global user.email "builds@travis-ci.com"

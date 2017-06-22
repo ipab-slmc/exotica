@@ -60,21 +60,20 @@ namespace exotica
        * @param x0      start configuration
        * @param sol     Solution
        */
-      virtual bool solve(const Eigen::VectorXd &x0, Eigen::MatrixXd &sol);
+      virtual bool solve(Eigen::VectorXdRefConst x0, Eigen::MatrixXd &sol);
 
       /*
        * \brief Set goal state to the sampled state space
        * @param qT      Goal state in sampled state space
        * @param eps     Numerical tolerance
        */
-      virtual void setGoalState(const Eigen::VectorXd & qT, const double eps =
-          std::numeric_limits<double>::epsilon());
+      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon());
 
       /*
        * \brief Get the planner's name
        * @return  Planner's name
        */
-      virtual std::string & getPlannerName();
+      virtual std::string getPlannerName();
 
       /*
        * \brief Assign exotica problem to this solver
@@ -90,33 +89,30 @@ namespace exotica
       /*
        * \brief Allocate state space sampler
        */
-      ompl::base::StateSamplerPtr allocStateSampler(
-          const ompl::base::StateSpace *ss);
+      ompl::base::StateSamplerPtr allocStateSampler(const ompl::base::StateSpace *ss);
 
       /*
        * \biref Converts OMPL trajectory into Eigen Matrix
        * @param pg      OMPL trajectory
        * @param traj    Eigen Matrix trajectory
        */
-      virtual void convertPath(const og::PathGeometric &pg,
-          Eigen::MatrixXd & traj);
+      virtual void convertPath(const og::PathGeometric &pg, Eigen::MatrixXd & traj);
 
       /*
        * \brief Simplifying the trajectory
        * @param pg      OMPL geometric path
        * @param
        */
-      virtual void getSimplifiedPath(og::PathGeometric &pg,
-          Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc);
+      virtual void getSimplifiedPath(og::PathGeometric &pg, Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc);
       virtual ompl::base::GoalPtr constructGoal();
       std::string algorithm_;
       std::string range_;
       std::string object_name_;
-      EParam<std_msgs::Float64> margin_;
+      double margin_;
       Eigen::VectorXd qT_;
       int min_traj_length_;
     private:
-      BASE_TYPE base_type_;
+      BASE_TYPE BaseType;
       double init_margin_;
   };
 }

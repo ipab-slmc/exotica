@@ -3,6 +3,10 @@
 
   <IKsolver Name="MySolver">   <!-- Motion solver definition -->
     <MaxIt>1</MaxIt>
+    <MaxStep>0.1</MaxStep>
+    <Tolerance>1e-5</Tolerance>
+    <Alpha>1.0</Alpha>
+    <C>1e-3</C>
   </IKsolver>
 
   <UnconstrainedEndPoseProblem Name="MyProblem"> <!-- Problem definition -->
@@ -18,24 +22,13 @@
       <EffPosition Name="Position">
         <Scene>MyScene</Scene>
         <EndEffector>
-            <Limb Segment="lwr_arm_6_link" />
-            <Limb Segment="lwr_arm_6_link">
-              <Frame>0.0 0.0 0.5 0.0 0.0 0.0 1.0</Frame>
-            </Limb>
+            <Frame Link="lwr_arm_6_link" />
         </EndEffector>
       </EffPosition>
     </Maps>
 
-    <Tasks>
-      <TaskSqrError Name="MinimizeError">
-        <Map>Position</Map>
-        <Rho>1e2</Rho>
-      </TaskSqrError>
-    </Tasks>
-
-
     <!-- Problem parameters: tolerance and per joint weighting -->
-    <Tolerance>1e-5</Tolerance>
+
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedEndPoseProblem>
 

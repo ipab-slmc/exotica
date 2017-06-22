@@ -40,18 +40,13 @@ namespace exotica
     Object::InstatiateObject(init);
   }
 
-  MotionSolver::MotionSolver() : server_(Server::Instance())
+  MotionSolver::MotionSolver()
   {
   }
 
   void MotionSolver::specifyProblem(PlanningProblem_ptr pointer)
   {
     problem_ = pointer;
-    for (auto& map : problem_->getTaskMaps())
-    {
-      map.second->poses = problem_->poses;
-      map.second->posesJointNames = problem_->posesJointNames;
-    }
   }
 
   std::string MotionSolver::print(std::string prepend)

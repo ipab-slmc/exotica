@@ -34,48 +34,42 @@
 #ifndef UNCONSTRAINEDENDPOSEPROBLEM_H_
 #define UNCONSTRAINEDENDPOSEPROBLEM_H_
 #include <exotica/PlanningProblem.h>
-#include "exotica/Definitions/TaskSqrError.h"
 #include <exotica/UnconstrainedEndPoseProblemInitializer.h>
 
 namespace exotica
 {
-  /**
-   * Unconstrained end-pose problem implementation
-   */
-  class UnconstrainedEndPoseProblem: public PlanningProblem, public Instantiable<UnconstrainedEndPoseProblemInitializer>
-  {
+    /**
+    * Unconstrained end-pose problem implementation
+    */
+    class UnconstrainedEndPoseProblem: public PlanningProblem, public Instantiable<UnconstrainedEndPoseProblemInitializer>
+    {
     public:
-      UnconstrainedEndPoseProblem();
-      virtual ~UnconstrainedEndPoseProblem();
+        UnconstrainedEndPoseProblem();
+        virtual ~UnconstrainedEndPoseProblem();
 
-      virtual void Instantiate(UnconstrainedEndPoseProblemInitializer& init);
+        virtual void Instantiate(UnconstrainedEndPoseProblemInitializer& init);
+        void Update(Eigen::VectorXdRefConst x);
 
-      /**
-       * \brief	Get configuration weight
-       * @return	configuration weight
-       */
-      Eigen::MatrixXd getW();
+        void setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal);
+        void setRho(const std::string & task_name, const double rho);
+        Eigen::VectorXd getGoal(const std::string & task_name);
+        double getRho(const std::string & task_name);
 
-      int getT();
+        Eigen::VectorXd Rho;
+        Eigen::VectorXd y;
+        Eigen::MatrixXd W;
+        Eigen::VectorXd Phi;
+        Eigen::MatrixXd J;
+        Eigen::VectorXd qNominal;
 
-      /**
-       * \brief	Get tolerance
-       * @return	tolerance
-       */
-      double getTau();
-      void setTau(double tau);
-    protected:
-      /**
-       * \brief Derived Initialiser (from XML): PURE VIRTUAL
-       * @param handle The handle to the XML-element describing the Problem Definition
-       * @return Indication of success/failure
-       */
-      Eigen::MatrixXd config_w_;	//Configuration weight
-      double tau_;	// Tolerance
-      int T_;
+        TaskMap_vec Tasks;
+        Eigen::MatrixXi Mapping;
+        int PhiN;
+        int N;
+        int NumTasks;
 
-  };
-  typedef boost::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
+    };
+    typedef boost::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
 }
 
 #endif

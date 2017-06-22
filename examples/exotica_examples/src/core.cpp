@@ -37,11 +37,11 @@ using namespace exotica;
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "ExoticaCoreExampleNode");
-  ROS_INFO_STREAM("Started");
-  ROS_INFO_STREAM("Exotica version: "<<exotica::Version);
-  Setup::printSupportedClasses();
-  ROS_INFO_STREAM("Waiting");
-  ros::spin();
-  Setup::Instance().reset();
+    ros::init(argc, argv, "ExoticaCoreExampleNode");
+    ROS_INFO_STREAM("Started");
+    ROS_INFO_STREAM("Exotica version: "<<exotica::Version);
+    Setup::printSupportedClasses();
+    ROS_INFO_STREAM("Waiting");
+    ros::spin();
+    Setup::Instance().reset();
 }

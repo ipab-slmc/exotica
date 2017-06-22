@@ -13,7 +13,6 @@ AddInitializer(
   IMesh
   EffPosition
   JointLimit
-  SweepFlux
   Distance
   Identity
   SphereCollision
@@ -36,7 +35,6 @@ add_library(${PROJECT_NAME} src/CoM.cpp
                             src/IMesh.cpp
                             src/EffPosition.cpp
                             src/JointLimit.cpp
-                            src/SweepFlux.cpp
                             src/Distance.cpp
                             src/Identity.cpp
                             src/SphereCollision.cpp
@@ -52,3 +50,9 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY include/ DESTINATION include)
+
+if(CATKIN_ENABLE_TESTING)
+    add_executable(test_maps tests/test_maps.cpp)
+    target_link_libraries(test_maps ${PROJECT_NAME} ${catkin_LIBRARIES})
+    install(TARGETS test_maps RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+endif(CATKIN_ENABLE_TESTING)

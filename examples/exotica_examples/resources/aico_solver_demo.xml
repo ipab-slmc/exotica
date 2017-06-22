@@ -20,23 +20,13 @@
     </PlanningScene>
 
     <Maps>
-      <EffPosition Name="AICOSolverDemoMap">
+      <EffPosition Name="Position">
         <Scene>AICOSolverDemoScene</Scene>
         <EndEffector>
-          <Limb Segment="lwr_arm_6_link">
-              <Frame>0 0 0 0 0 0 1</Frame>
-          </Limb>
+          <Frame Link="lwr_arm_6_link" />
         </EndEffector>
       </EffPosition>
     </Maps>
-
-    <Tasks> 
-      <TaskSqrError Name="AICOSolverDemoTask">
-        <Map>AICOSolverDemoMap</Map>
-        <Rho>1e6</Rho>
-        <Goal>0.4 -0.1 0.5</Goal>
-      </TaskSqrError>
-    </Tasks>
    
     <T>100</T>
     <Tau>0.05</Tau>

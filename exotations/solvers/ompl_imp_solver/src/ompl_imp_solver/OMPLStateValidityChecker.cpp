@@ -81,20 +81,7 @@ namespace exotica
         }
       }
 
-      double err;
-      bool terminate;
-      for (TaskTerminationCriterion_ptr goal : prob_->getGoals())
-      {
-        if (goal->object_name_.compare("CoMTask") == 0)
-        {
-          goal->terminate(terminate, err);
-          if (!terminate)
-          {
-            dist = -1;
-            return false;
-          }
-        }
-      }
+      // Check for state validity here
 
     }
 

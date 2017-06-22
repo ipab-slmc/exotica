@@ -37,151 +37,85 @@ REGISTER_TASKMAP_TYPE("Identity", exotica::Identity);
 namespace exotica
 {
   Identity::Identity()
-      : useRef(false)
   {
 
   }
 
-  int Identity::getJointID(std::string& name)
+  void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
   {
-    for (int j = 0; j < scene_->getSolver().getJointNames().size(); j++)
-    {
-      if (scene_->getSolver().getJointNames()[j].compare(name) == 0)
+      if(phi.rows() != jointMap.size()) throw_named("Wrong size of phi!");
+      for(int i=0;i<jointMap.size();i++)
       {
-        return j;
+          phi(i) = x(jointMap[i]) - jointRef(i);
       }
-    }
-    return -1;
   }
 
-  int Identity::getJointIDexternal(std::string& name)
+  void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
   {
-    for (int j = 0; j < posesJointNames->size(); j++)
-    {
-      if ((*posesJointNames)[j].compare(name) == 0)
+      if(phi.rows() != jointMap.size()) throw_named("Wrong size of phi!");
+      if(J.rows() != jointMap.size() || J.cols() != N) throw_named("Wrong size of J! " << N);
+      J.setZero();
+      for(int i=0;i<jointMap.size();i++)
       {
-        return j;
+          phi(i) = x(jointMap[i]) - jointRef(i);
+          J(i, jointMap[i]) = 1.0;
       }
-    }
-    return -1;
   }
 
-  void Identity::initialise(std::string& postureName,
-      std::vector<std::string>& joints, bool skipUnknown)
+  void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot)
   {
-    if (!poses || !posesJointNames)
-    {
-      throw_named("Poses have not been set!");
-    }
-    std::map<std::string, Eigen::VectorXd>::const_iterator pose = poses->find(
-        postureName);
-    if (pose != poses->end())
-    {
-      useRef = true;
-      jointMap.resize(0);
-      jointRef.resize(0);
-      for (int i = 0; i < joints.size(); i++)
+      if(phi.rows() != jointMap.size()) throw_named("Wrong size of phi!");
+      if(J.rows() != jointMap.size() || J.cols() != N) throw_named("Wrong size of J! " << N);
+      if(Jdot.rows() != jointMap.size() || Jdot.cols() != N) throw_named("Wrong size of J! " << N);
+      J.setZero();
+      Jdot.setZero();
+      for(int i=0;i<jointMap.size();i++)
       {
-        int idext = getJointIDexternal(joints[i]);
-        if (idext >= 0)
-        {
-          int id = getJointID(joints[i]);
-          if (id >= 0)
-          {
-            jointMap.push_back(id);
-            jointRef.conservativeResize(jointRef.rows() + 1);
-            jointRef(jointRef.rows() - 1) = pose->second(idext);
-            continue;
-          }
-        }
-        else
-        {
-          if (!skipUnknown)
-          {
-            throw_named("Requesting unknown joint '"<<joints[i]<<"'");
-          }
-        }
+          phi(i) = x(jointMap[i]) - jointRef(i);
+          phidot(i) = x(jointMap[i]+N) - jointRef(i+jointMap.size());
+          J(i, jointMap[i]) = 1.0;
+          Jdot(i, jointMap[i]) = 1.0;
       }
-      if (jointMap.size() == 0)
-      {
-        HIGHLIGHT("No joints have been specified!");
-      }
-    }
-    else
-    {
-      throw_named("Can't find pose '"<<postureName<<"'");
-    }
-  }
-
-  void Identity::update(Eigen::VectorXdRefConst x, const int t)
-  {
-    if (!isRegistered(t))
-    {
-      throw_named("Not fully initialized!");
-    }
-//        std::cout<<"Updating ";
-//        for(int i=0;i<jointMap.size();i++)
-//        	std::cout<<(*posesJointNames)[jointMap[i]]<<" ";
-//        std::cout<<std::endl;
-    if (x.rows() >= PHI.rows())
-    {
-      if (useRef)
-      {
-        if (updateJacobian_)
-        JAC.setZero();
-        for (int i = 0; i < jointMap.size(); i++)
-        {
-          PHI(i) = x(jointMap[i]) - jointRef(i);
-          if (updateJacobian_)
-          {
-            JAC(i, jointMap[i]) = 1.0;
-          }
-        }
-      }
-      else
-      {
-        PHI = x;
-        if (updateJacobian_)
-        {
-          JAC = Eigen::MatrixXd::Identity(x.rows(), x.rows());
-        }
-      }
-    }
-    else
-    {
-      throw_named("Size mismatch "<<x.rows()<<"!="<<PHI.rows());
-    }
   }
 
   void Identity::Instantiate(IdentityInitializer& init)
   {
-      if(init.JointRef.rows()>0)
-      {
-          jointRef = init.JointRef;
-          if(init.JointMap.size()>0)
-          {
-              jointMap = init.JointMap;
-              if(jointMap.size()!=jointRef.rows()) throw_named("Incorrect joint map size!");
-          }
-          else
-          {
-              jointMap.resize(jointRef.rows());
-              for (int i = 0; i < jointRef.rows(); i++)
-                  jointMap[i] = i;
-          }
-          useRef = true;
-      }
+      init_ = init;
   }
 
-  void Identity::taskSpaceDim(int & task_dim)
+  void Identity::assignScene(Scene_ptr scene)
   {
-    if (useRef)
-    {
-      task_dim = jointMap.size();
-    }
-    else
-    {
-      task_dim = scene_->getNumJoints();
-    }
+      scene_ = scene;
+      Initialize();
+  }
+
+  void Identity::Initialize()
+  {
+      N = std::max(scene_->getSolver().getNumJoints(), (int)init_.JointMap.size());
+      if(init_.JointMap.size()>0)
+      {
+          jointMap = init_.JointMap;
+      }
+      else
+      {
+          jointMap.resize(N);
+          for (int i = 0; i < N; i++) jointMap[i] = i;
+      }
+
+      if(init_.JointRef.rows()>0)
+      {
+          jointRef = init_.JointRef;
+          if(jointRef.rows()!=N) throw_named("Invalid joint reference size! Expecting " << N);
+      }
+      else
+      {
+          jointRef = Eigen::VectorXd::Zero(N);
+      }
+
+  }
+
+  int Identity::taskSpaceDim()
+  {
+      return jointMap.size();
   }
 }

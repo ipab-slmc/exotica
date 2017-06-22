@@ -14,7 +14,4 @@
   </node>
 
   <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find exotica_examples)/resources/rviz.rviz" />
-
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="ik_st_pub" />
-
 </launch>

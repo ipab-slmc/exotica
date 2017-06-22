@@ -40,93 +40,50 @@
 
 namespace exotica
 {
-  /**
-   * @brief	Implementation of Interaction Mesh Task Map
-   */
   class IMesh: public TaskMap, public Instantiable<IMeshInitializer>
   {
     public:
-      /**
-       * @brief	Default constructor
-       */
+
       IMesh();
 
       virtual void Instantiate(IMeshInitializer& init);
 
-      /**
-       * @brief	Destructor
-       */
       virtual ~IMesh();
 
-      /**
-       * @brief	Concrete implementation of update method
-       * @param	x	Joint space configuration
-       */
-      virtual void update(Eigen::VectorXdRefConst x, const int t);
+      virtual void assignScene(Scene_ptr scene);
 
-      /**
-       * @brief	Get the task space dimension
-       */
-      virtual void taskSpaceDim(int & task_dim);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      /**
-       * @brief	Set edge weight(s)
-       * @param	i,j		Vertices i, j
-       * @param	weight	Edge weight
-       * @param	weights	Weight matrix
-       * @return	Exotica return type
-       */
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+
+      virtual int taskSpaceDim();
+
       void setWeight(int i, int j, double weight);
       void setWeights(const Eigen::MatrixXd & weights);
       Eigen::MatrixXd getWeights();
 
-      /**
-       * @brief	Compute laplace coordinates of a vertices set
-       * @param	V		3xN matrix of vertices positions
-       * @param	wsum	Array of weight normalisers (out put)
-       * @param	dist	Triangular matrix of distances between vertices (out put)
-       * @return	3xN Laplace coordinates
-       */
       static Eigen::VectorXd computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXdRefConst Weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
 
       void computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
 
       static void computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal, Eigen::MatrixXdRefConst Weights);
 
-      virtual void debug();
+      virtual void debug(Eigen::VectorXdRefConst phi);
       void initDebug(std::string ref);
       void destroyDebug();
+
     protected:
 
-      /** Member Functions **/
-
-      /**
-       * @brief	Compute Jacobian of the laplace coordinates with respect to the joint angle space
-       * @param	q	Joint angles
-       * @return	Jacobian matrix
-       */
-      void computeIMesh(int t);
-
-      /**
-       * @brief	Update newest vertices status
-       * @param	q	Robot joint configuration
-       * @return	Exotica return type
-       */
-      void updateVertices();
-      /** Member Variables **/
-      boost::mutex locker_;	//!<Thread locker
-      bool initialised_;	//!< Initialisation flag
-
-      /** Interaction Mesh Variables **/
-      Eigen::MatrixXd weights_;	//!< Weighting matrix, currently set to ones
+      Eigen::MatrixXd weights_;
 
       int eff_size_;
       bool Debug;
 
       ros::Publisher imesh_mark_pub_;
       visualization_msgs::Marker imesh_mark_;
+      Scene_ptr scene_;
   };
-  typedef boost::shared_ptr<IMesh> IMesh_Ptr;  //!< Task Map smart pointer
+  typedef boost::shared_ptr<IMesh> IMesh_Ptr;
 }
 
 #endif /* IMESH_H_ */

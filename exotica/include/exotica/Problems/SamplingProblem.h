@@ -37,7 +37,6 @@
 #include <exotica/PlanningProblem.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
-#include "exotica/Definitions/TaskTerminationCriterion.h"
 #include <exotica/SamplingProblemInitializer.h>
 
 namespace exotica
@@ -55,10 +54,11 @@ namespace exotica
   {
     public:
       SamplingProblem();
-      virtual
-      ~SamplingProblem();
+      virtual ~SamplingProblem();
 
       virtual void Instantiate(SamplingProblemInitializer& init);
+
+      void Update(Eigen::VectorXdRefConst x);
 
       int getSpaceDim();
 
@@ -67,23 +67,21 @@ namespace exotica
         return update_lock_;
       }
 
-      std::vector<TaskTerminationCriterion_ptr>& getGoals();
       std::vector<double>& getBounds();
       bool isCompoundStateSpace();
       std::string local_planner_config_;
-      EParam<std_msgs::Bool> full_body_plan_;
+      bool full_body_plan_;
 
       SamplingProblemInitializer Parameters;
 
-      virtual void clear(bool keepOriginals = true);
+      void setGoalState(const Eigen::VectorXd & qT, const double eps = std::numeric_limits<double>::epsilon()) {}
+
+      Eigen::VectorXd goal_;
     private:
       boost::mutex update_lock_;
-      std::vector<TaskTerminationCriterion_ptr> goals_;
       std::vector<double> bounds_;
       int space_dim_;
-      SamplingProblem_Type problemType;
       bool compound_;
-      std::vector<TaskTerminationCriterion_ptr> originalGoals_;
 
   };
 

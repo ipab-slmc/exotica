@@ -35,14 +35,12 @@
 
 namespace exotica
 {
-  OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim,
-      const Server_ptr &server, SamplingProblem_ptr &prob)
-      : ob::CompoundStateSpace(), server_(Server::Instance()), prob_(prob)
+  OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob)
+      : ob::CompoundStateSpace(), prob_(prob)
   {
   }
 
-  OMPLStateValidityChecker::OMPLStateValidityChecker(
-      const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob)
+  OMPLStateValidityChecker::OMPLStateValidityChecker(const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob)
       : ob::StateValidityChecker(si), prob_(prob)
   {
     Server_ptr server = Server::Instance();
@@ -85,7 +83,7 @@ namespace exotica
         state, q);
 #endif
     boost::mutex::scoped_lock lock(prob_->getLock());
-    prob_->update(q, 0);
+    prob_->Update(q);
     if (!prob_->getScene()->getCollisionScene()->isStateValid(self_collision_->data, margin_->data))
     {
       dist = -1;

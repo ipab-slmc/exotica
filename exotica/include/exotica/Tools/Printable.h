@@ -30,6 +30,7 @@
 #define HIGHLIGHT_NAMED(name, x)std::cout << "\033[1;32m[EXOTica]:\033[0m \033[35m[" << name <<"]\033[0m \033[36m" << x << "\033[0m\n";
 #define WARNING_NAMED(name, x)	std::cout << "\033[1;32m[EXOTica]:\033[0m \033[35m[" << name <<"]\033[0m \033[33m" << x << "\033[0m\n";
 #define INFO_NAMED(name, x)		std::cout << "\033[1;32m[EXOTica]:\033[0m \033[35m[" << name <<"]\033[0m " << x << "\n";
+#define INFO_PLAIN(x)		std::cout << x << "\n";
 
 class Printable
 {

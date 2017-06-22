@@ -13,10 +13,9 @@ struct TaskVectorEntry
 {
     RotationType type;
     int inId;
-    int outId;
 
     TaskVectorEntry();
-    TaskVectorEntry(int inId_, int outId_, RotationType type_);
+    TaskVectorEntry(int inId_, RotationType type_);
 };
 
 class TaskSpaceVector
@@ -26,6 +25,7 @@ public:
     TaskSpaceVector();
     TaskSpaceVector& operator=(std::initializer_list<double> other);
     Eigen::VectorXd operator-(const TaskSpaceVector& other);
+    void setZero(int N);
 
     Eigen::VectorXd data;
     std::vector<TaskVectorEntry> map;

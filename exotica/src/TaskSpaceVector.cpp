@@ -53,13 +53,11 @@ namespace exotica
         int iOut=0;
         for(const TaskVectorEntry& id : map)
         {
+            if(iIn<id.inId) ret.segment(iOut, id.inId-iIn) = data.segment(iIn, id.inId-iIn) - other.data.segment(iIn, id.inId-iIn);
+            iOut += id.inId-iIn;
+            iIn += id.inId-iIn;
             int len = getRotationTypeLength(id.type);
-            while(iIn<id.inId)
-            {
-                ret(iOut) = data(iIn) - other.data(iIn);
-                iIn++;
-                iOut++;
-            }
+
             KDL::Rotation M1 = getRotation(data.segment(id.inId, len), id.type);
             KDL::Rotation M2 = getRotation(other.data.segment(id.inId, len), id.type);
             KDL::Rotation M = M2.Inverse()*M1;
@@ -70,12 +68,7 @@ namespace exotica
             iOut+=3;
             iIn+=len;
         }
-        while(iIn<data.rows())
-        {
-            ret(iOut) = data(iIn) - other.data(iIn);
-            iIn++;
-            iOut++;
-        }
+        if(iIn<data.rows()) ret.segment(iOut, data.rows()-iIn) = data.segment(iIn, data.rows()-iIn) - other.data.segment(iIn, data.rows()-iIn);
         return ret;
     }
 }

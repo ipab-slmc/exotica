@@ -20,19 +20,20 @@
     </PlanningScene>
 
     <Maps>
-      <EffPosition Name="Position">
-        <Scene>AICOSolverDemoScene</Scene>
+      <EffFrame Name="Frame">
+        <Scene>MyScene</Scene>
+        <Type>RPY</Type>
         <EndEffector>
-          <Frame Link="lwr_arm_6_link" />
+            <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17" BaseOffset="0.4 -0.1 0.5 0 0 0 1" />
         </EndEffector>
-      </EffPosition>
+      </EffFrame>
     </Maps>
    
     <T>100</T>
     <Tau>0.05</Tau>
     <Qrate>1e-10</Qrate>
-    <Hrate>1.0</Hrate>
-    <Wrate>1.0</Wrate>
+    <Hrate>1</Hrate>
+    <Wrate>1</Wrate>
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedTimeIndexedProblem>
 

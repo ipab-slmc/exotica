@@ -56,7 +56,7 @@ namespace exotica
             {
                 KDL::Vector axis(data(0), data(1), data(2));
                 double angle = axis.Norm();
-                if(abs(angle)>1e-10)
+                if(fabs(angle)>1e-10)
                 {
                     return KDL::Rotation::Rot(axis, angle);
                 }

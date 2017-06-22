@@ -60,10 +60,12 @@ void run()
         ros::Rate loop_rate(50.0);
         int t = 0;
         ROS_INFO_STREAM_THROTTLE(0.5, "Publishing states to rviz ...");
+        int PlaybackWaitInterval = 30;
         while (ros::ok())
         {
             int i = 1;
-            if(t==0 || t==solution.rows()-1) i = 30;
+            // Wait 30 steps at the beginning and at the end of the playback for nicer visuals
+            if(t==0 || t==solution.rows()-1) i = PlaybackWaitInterval;
             while(i-->0)
             {
                 any_problem->getScene()->Update(solution.row(t).transpose());

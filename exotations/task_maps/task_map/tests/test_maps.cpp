@@ -169,15 +169,22 @@ void testEffOrientation()
 void testEffFrame()
 {
     HIGHLIGHT("End-effector frame test");
-    Initializer map("exotica/EffFrame",{
-                        {"Name",std::string("Frame")},
-                        {"EndEffector",std::vector<Initializer>({
-                             Initializer("Frame",{{"Link",std::string("endeff")}})
-                                        }) } });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
-    testRandom(problem);
+    std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
 
-    testJacobian(problem);
+    for(std::string type : types)
+    {
+        INFO_PLAIN("Rotation type "<<type);
+        Initializer map("exotica/EffFrame",{
+                            {"Name",std::string("Frame")},
+                            {"Type",type},
+                            {"EndEffector",std::vector<Initializer>({
+                                 Initializer("Frame",{{"Link",std::string("endeff")}})
+                                            }) } });
+        UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+        testRandom(problem);
+
+        testJacobian(problem);
+    }
 }
 
 void testDistance()

@@ -45,11 +45,6 @@
 #include <std_msgs/ColorRGBA.h>
 
 /**
- * \brief A convenience macro for the boost scoped lock
- */
-#define LOCK(x) boost::mutex::scoped_lock(x)
-
-/**
  * \brief A double-wrapper MACRO functionality for generating unique object names: The actual functionality is provided by EX_UNIQ (for 'exotica unique')
  */
 #define EX_CONC(x, y) x ## y

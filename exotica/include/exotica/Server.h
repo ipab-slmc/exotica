@@ -39,7 +39,6 @@
 #include <Eigen/Dense>
 #include <map>
 #include <boost/any.hpp>
-#include <boost/thread/mutex.hpp>
 #include <eigen_conversions/eigen_msg.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float64MultiArray.h>
@@ -86,7 +85,6 @@ namespace exotica
       template<typename T>
       void getParam(const std::string & name, EParam<T> & ptr)
       {
-        LOCK(param_lock_);
         if (params_.find(name) == params_.end())
         {
           WARNING_NAMED(name_,"Param " << name << " does not exist");
@@ -104,7 +102,6 @@ namespace exotica
       template<typename T>
       void setParam(const std::string & name, const EParam<T> & ptr)
       {
-        LOCK(param_lock_);
         if (params_.find(name) == params_.end())
           params_[name] = ptr;
         else
@@ -164,7 +161,6 @@ namespace exotica
       void paramCallback(const boost::shared_ptr<T const> & ptr,
           boost::any & param)
       {
-        LOCK(param_lock_);
         *boost::any_cast<boost::shared_ptr<T>>(param) = *ptr;
       }
 
@@ -184,9 +180,6 @@ namespace exotica
 
       /// \brief	<param_name, param_topic>
       std::map<std::string, std::string> topics_;
-
-      /// \brief	Mutex locker
-      boost::mutex param_lock_;
 
       /// \brief Robot model cache
       std::map<std::string, robot_model::RobotModelPtr> robot_models_;

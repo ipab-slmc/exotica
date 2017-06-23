@@ -35,7 +35,6 @@
 #define SAMPLINGPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
-#include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 #include <exotica/SamplingProblemInitializer.h>
 
@@ -62,11 +61,6 @@ namespace exotica
 
       int getSpaceDim();
 
-      boost::mutex& getLock()
-      {
-        return update_lock_;
-      }
-
       std::vector<double>& getBounds();
       bool isCompoundStateSpace();
       std::string local_planner_config_;
@@ -78,7 +72,6 @@ namespace exotica
 
       Eigen::VectorXd goal_;
     private:
-      boost::mutex update_lock_;
       std::vector<double> bounds_;
       int space_dim_;
       bool compound_;

@@ -73,13 +73,11 @@ namespace exotica
 
   void OMPLBaseSolver::registerTerminationCondition(const ob::PlannerTerminationCondition &ptc)
   {
-    boost::mutex::scoped_lock slock(ptc_lock_);
     ptc_ = &ptc;
   }
 
   void OMPLBaseSolver::unregisterTerminationCondition()
   {
-    boost::mutex::scoped_lock slock(ptc_lock_);
     ptc_ = NULL;
   }
 

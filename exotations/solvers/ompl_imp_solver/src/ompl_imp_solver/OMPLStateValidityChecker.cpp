@@ -66,7 +66,6 @@ namespace exotica
           state, q);
 
     {
-      boost::mutex::scoped_lock lock(prob_->getLock());
       prob_->update(q, 0);
 
 // TODO: Implement this

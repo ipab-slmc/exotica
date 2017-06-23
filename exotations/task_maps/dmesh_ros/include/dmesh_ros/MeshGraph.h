@@ -35,7 +35,6 @@
 
 #include <string>
 #include <eigen_conversions/eigen_msg.h>
-#include <boost/thread/mutex.hpp>
 #include <exotica/Tools.h>
 #include <exotica/MeshVertexArray.h>
 #include <exotica/MeshVertex.h>

@@ -91,14 +91,12 @@ namespace exotica
 
   void GraphManager::extCallback(const exotica::MeshVertexConstPtr & ext)
   {
-    LOCK(lock_);
     graph_->updateExternal(ext);
   }
 
   void GraphManager::extArrCallback(
       const exotica::MeshVertexArrayConstPtr & ext)
   {
-    LOCK(lock_);
     for (int i = 0; i < ext->vertices.size(); i++)
       graph_->updateExternal(ext->vertices[i]);
   }

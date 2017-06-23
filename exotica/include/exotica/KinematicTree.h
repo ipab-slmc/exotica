@@ -33,7 +33,6 @@
 #ifndef KINEMATIC_TREE_H
 #define KINEMATIC_TREE_H
 
-#include <boost/thread/mutex.hpp>
 #include <kdl/tree.hpp>
 #include <kdl/jacobian.hpp>
 #include <kdl_parser/kdl_parser.hpp>

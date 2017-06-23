@@ -41,7 +41,6 @@
 #include <exotica/TaskSpaceVector.h>
 
 #include <Eigen/Dense>            //!< Generally dense manipulations should be enough
-#include <boost/thread/mutex.hpp> //!< The boost thread-library for synchronisation
 #include <string>
 
 /**

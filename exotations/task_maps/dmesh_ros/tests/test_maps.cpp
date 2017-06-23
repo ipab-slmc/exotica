@@ -121,7 +121,7 @@ UnconstrainedEndPoseProblem_ptr setupProbelm(Initializer& map)
                             {"W",W},
                         });
     Server::Instance()->getModel("robot_description",urdf_string,srdf_string);
-    return boost::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::createProblem(problem));
+    return std::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::createProblem(problem));
 }
 
 void testDMesh()

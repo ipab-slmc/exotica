@@ -348,7 +348,7 @@ namespace exotica
       double step();
   };
 
-  typedef boost::shared_ptr<exotica::AICOsolver> AICOsolver_ptr;
+  typedef std::shared_ptr<exotica::AICOsolver> AICOsolver_ptr;
 } /* namespace exotica */
 
 #endif /* AICOSOLVER_H_ */

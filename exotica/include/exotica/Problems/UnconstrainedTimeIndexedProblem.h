@@ -82,7 +82,7 @@ namespace exotica
 
   };
 
-  typedef boost::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;
+  typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;
 }
 
 #endif

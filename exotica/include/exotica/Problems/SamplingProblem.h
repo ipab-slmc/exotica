@@ -35,7 +35,6 @@
 #define SAMPLINGPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
-#include <boost/shared_ptr.hpp>
 #include <exotica/SamplingProblemInitializer.h>
 
 namespace exotica
@@ -78,7 +77,7 @@ namespace exotica
 
   };
 
-  typedef boost::shared_ptr<exotica::SamplingProblem> SamplingProblem_ptr;
+  typedef std::shared_ptr<exotica::SamplingProblem> SamplingProblem_ptr;
 
 }
 

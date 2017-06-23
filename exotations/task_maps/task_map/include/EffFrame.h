@@ -65,7 +65,7 @@ namespace exotica //!< Since this is part of the core library, it will be within
       int bigStride;
       int smallStride;
   };
-  typedef boost::shared_ptr<EffFrame> EffFrame_ptr;  //!< Task Map smart pointer
+  typedef std::shared_ptr<EffFrame> EffFrame_ptr;  //!< Task Map smart pointer
 }
 
 #endif

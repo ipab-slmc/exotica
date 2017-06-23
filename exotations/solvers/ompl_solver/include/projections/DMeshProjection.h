@@ -92,7 +92,7 @@ namespace exotica
       std::vector<std::string> links_;
       std::vector<std::pair<int, int> > dist_index_;
       Scene_ptr scene_;
-      boost::shared_ptr<ob::StateSpace> space_;
+      ob::StateSpacePtr space_;
       bool compound_;
   };
 }

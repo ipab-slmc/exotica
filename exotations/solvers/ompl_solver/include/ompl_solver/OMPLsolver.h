@@ -103,7 +103,7 @@ namespace exotica
       OMPLsolverInitializer parameters_;
   };
 
-  typedef boost::shared_ptr<exotica::OMPLsolver> OMPLsolver_ptr;
+  typedef std::shared_ptr<exotica::OMPLsolver> OMPLsolver_ptr;
 
 } /* namespace exotica */
 

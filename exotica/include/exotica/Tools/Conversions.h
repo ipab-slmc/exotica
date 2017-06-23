@@ -4,7 +4,6 @@
 #include <Eigen/Dense>
 #include <kdl/tree.hpp>
 #include <kdl/jacobian.hpp>
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <exotica/Tools/Exception.h>
 #include <exotica/MeshVertex.h>
@@ -18,11 +17,11 @@ namespace Eigen
 
   /// \brief Convenience wrapper for storing references to sub-matrices/vectors
   template<typename Derived>
-  class Ref_ptr: public boost::shared_ptr<Ref<Derived> >
+  class Ref_ptr: public std::shared_ptr<Ref<Derived> >
   {
     public:
       inline Ref_ptr()
-          : boost::shared_ptr<Ref<Derived> >()
+          : std::shared_ptr<Ref<Derived> >()
       {
 
       }

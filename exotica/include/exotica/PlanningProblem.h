@@ -69,6 +69,6 @@ namespace exotica
     };
 
     typedef Factory<PlanningProblem> PlanningProblem_fac;
-    typedef boost::shared_ptr<PlanningProblem> PlanningProblem_ptr;
+    typedef std::shared_ptr<PlanningProblem> PlanningProblem_ptr;
 }
 #endif

@@ -49,7 +49,7 @@ namespace exotica
       try
       {
         HIGHLIGHT_NAMED(object_name_,"Using ["<<parameters_.Solver<<"]");
-        base_solver_ = OMPLBaseSolver::base_solver_loader.createInstance("ompl_solver/" + parameters_.Solver);
+        base_solver_ = to_std_ptr(OMPLBaseSolver::base_solver_loader.createInstance("ompl_solver/" + parameters_.Solver));
       } catch (pluginlib::PluginlibException& ex)
       {
         throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());
@@ -89,7 +89,7 @@ namespace exotica
 
   {
     MotionSolver::specifyProblem(pointer);
-    prob_ = boost::static_pointer_cast<SamplingProblem>(pointer);
+    prob_ = std::static_pointer_cast<SamplingProblem>(pointer);
     base_solver_->specifyProblem(prob_);
     setGoalState(prob_->goal_);
   }

@@ -57,7 +57,7 @@ namespace exotica //!< Since this is part of the core library, it will be within
 
       virtual int taskSpaceDim();
   };
-  typedef boost::shared_ptr<EffPosition> EffPosition_ptr;  //!< Task Map smart pointer
+  typedef std::shared_ptr<EffPosition> EffPosition_ptr;  //!< Task Map smart pointer
 }
 
 #endif

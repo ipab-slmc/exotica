@@ -54,7 +54,7 @@ namespace exotica //!< Since this is part of the core library, it will be within
 
       virtual int taskSpaceDim();
   };
-  typedef boost::shared_ptr<Distance> Distance_Ptr;
+  typedef std::shared_ptr<Distance> Distance_Ptr;
 }
 
 #endif

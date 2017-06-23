@@ -97,7 +97,7 @@ namespace exotica
 
   //!< Typedefines for some common functionality
   typedef Factory<TaskMap> TaskMap_fac;  //!< Task Map Factory
-  typedef boost::shared_ptr<TaskMap> TaskMap_ptr;  //!< Task Map smart pointer
+  typedef std::shared_ptr<TaskMap> TaskMap_ptr;  //!< Task Map smart pointer
   typedef std::map<std::string, TaskMap_ptr> TaskMap_map; //!< The mapping by name of TaskMaps
   typedef std::vector<TaskMap_ptr> TaskMap_vec;
 }

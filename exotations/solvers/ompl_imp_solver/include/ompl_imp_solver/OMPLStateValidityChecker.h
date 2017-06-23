@@ -37,7 +37,7 @@
 #include <ompl/base/StateValidityChecker.h>
 #include "ompl_solver/OMPLsolver.h"
 #include "exotica/Problems/SamplingProblem.h"
-#include <boost/thread/mutex.hpp>
+
 namespace exotica
 {
 
@@ -57,7 +57,7 @@ namespace exotica
       virtual double clearance(const ompl::base::State *state) const;
     protected:
       exotica::OMPLsolver* sol_;
-      boost::shared_ptr<exotica::SamplingProblem> prob_;
+      std::shared_ptr<exotica::SamplingProblem> prob_;
       bool compound_;
   };
 

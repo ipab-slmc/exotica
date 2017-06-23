@@ -74,7 +74,7 @@ void run()
 
     // Assign the problem to the solver
     any_solver->specifyProblem(any_problem);
-    UnconstrainedEndPoseProblem_ptr my_problem = boost::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
+    UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
     // Create the initial configuration
     Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumJoints());

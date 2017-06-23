@@ -83,7 +83,7 @@ namespace exotica
       visualization_msgs::Marker imesh_mark_;
       Scene_ptr scene_;
   };
-  typedef boost::shared_ptr<IMesh> IMesh_Ptr;
+  typedef std::shared_ptr<IMesh> IMesh_Ptr;
 }
 
 #endif /* IMESH_H_ */

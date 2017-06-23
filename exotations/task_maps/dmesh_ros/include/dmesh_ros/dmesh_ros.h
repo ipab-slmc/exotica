@@ -172,7 +172,7 @@ namespace exotica
 
 
   };
-  typedef boost::shared_ptr<DMeshROS> DMeshROS_Ptr;
+  typedef std::shared_ptr<DMeshROS> DMeshROS_Ptr;
 } //namespace exotica
 
 #endif /* DMESH_ROS_H_ */

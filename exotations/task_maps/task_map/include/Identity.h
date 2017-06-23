@@ -68,6 +68,6 @@ namespace exotica
 
   };
 
-  typedef boost::shared_ptr<exotica::Identity> Identity_ptr;
+  typedef std::shared_ptr<exotica::Identity> Identity_ptr;
 }
 #endif

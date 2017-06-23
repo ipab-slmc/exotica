@@ -113,7 +113,7 @@ namespace exotica
       throw_named("This solver can't use problem of type '" << problem->type() << "'!");
     }
     MotionSolver::specifyProblem(problem);
-    prob_ = boost::static_pointer_cast<UnconstrainedTimeIndexedProblem>(problem);
+    prob_ = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(problem);
 
     T = prob_->T;
     initMessages();

@@ -53,7 +53,7 @@ namespace exotica
       {
       }
 
-      static boost::shared_ptr<Setup> Instance()
+      static std::shared_ptr<Setup> Instance()
       {
         if (!singleton_initialiser_) singleton_initialiser_.reset(new Setup);
         return singleton_initialiser_;
@@ -65,29 +65,29 @@ namespace exotica
       }
 
       static void printSupportedClasses();
-      static boost::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return Instance()->solvers_.createInstance("exotica/"+type);}
-      static boost::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return Instance()->maps_.createInstance("exotica/"+type);}
-      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->problems_.createInstance("exotica/"+type);}
+      static std::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return to_std_ptr(Instance()->solvers_.createInstance("exotica/"+type));}
+      static std::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return to_std_ptr(Instance()->maps_.createInstance("exotica/"+type));}
+      static std::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->problems_.createInstance("exotica/"+type);}
       static std::vector<std::string> getSolvers();
       static std::vector<std::string> getProblems();
       static std::vector<std::string> getMaps();
       static std::vector<std::string> getTasks();
 
-      static boost::shared_ptr<exotica::MotionSolver> createSolver(const Initializer& init)
+      static std::shared_ptr<exotica::MotionSolver> createSolver(const Initializer& init)
       {
-          boost::shared_ptr<exotica::MotionSolver> ret = Instance()->solvers_.createInstance(init.getName());
+          std::shared_ptr<exotica::MotionSolver> ret = to_std_ptr(Instance()->solvers_.createInstance(init.getName()));
           ret->InstantiateInternal(init);
           return ret;
       }
-      static boost::shared_ptr<exotica::TaskMap> createMap(const Initializer& init)
+      static std::shared_ptr<exotica::TaskMap> createMap(const Initializer& init)
       {
-          boost::shared_ptr<exotica::TaskMap> ret = Instance()->maps_.createInstance(init.getName());
+          std::shared_ptr<exotica::TaskMap> ret = to_std_ptr(Instance()->maps_.createInstance(init.getName()));
           ret->InstantiateInternal(init);
           return ret;
       }
-      static boost::shared_ptr<exotica::PlanningProblem> createProblem(const Initializer& init)
+      static std::shared_ptr<exotica::PlanningProblem> createProblem(const Initializer& init)
       {
-          boost::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.createInstance(init.getName());
+          std::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.createInstance(init.getName());
           ret->InstantiateInternal(init);
           return ret;
       }
@@ -100,7 +100,7 @@ namespace exotica
        *        Currently, is an empty constructor definition.
        */
       Setup();
-      static boost::shared_ptr<Setup> singleton_initialiser_;
+      static std::shared_ptr<Setup> singleton_initialiser_;
       ///	\brief	Make sure the singleton does not get copied
       Setup(Setup const&) = delete;
       void operator=(Setup const&) = delete;
@@ -110,7 +110,7 @@ namespace exotica
       PlanningProblem_fac problems_;
   };
 
-  typedef boost::shared_ptr<Setup> Setup_ptr;
+  typedef std::shared_ptr<Setup> Setup_ptr;
 }
 
 #endif

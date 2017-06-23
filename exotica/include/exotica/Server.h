@@ -39,6 +39,7 @@
 #include <Eigen/Dense>
 #include <map>
 #include <boost/any.hpp>
+
 #include <eigen_conversions/eigen_msg.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float64MultiArray.h>
@@ -53,7 +54,7 @@ namespace exotica
 {
   //	EXOTica Parameter type
   template<typename T>
-  using EParam = boost::shared_ptr<T>;
+  using EParam = std::shared_ptr<T>;
 
   //	Implementation of EXOTica Server class
   class Server : public Uncopyable
@@ -63,7 +64,7 @@ namespace exotica
       /*
        * \brief	Get the server
        */
-      static boost::shared_ptr<Server> Instance()
+      static std::shared_ptr<Server> Instance()
       {
         if (!singleton_server_) singleton_server_.reset(new Server);
         return singleton_server_;
@@ -91,7 +92,7 @@ namespace exotica
           listParameters();
           throw_pretty("Can't find parameter '"<<name<<"'");
         }
-        ptr = boost::any_cast<boost::shared_ptr<T>>(params_.at(name));
+        ptr = boost::any_cast<std::shared_ptr<T>>(params_.at(name));
       }
 
       /*
@@ -151,17 +152,17 @@ namespace exotica
        * \brief	Constructor
        */
       Server();
-      static boost::shared_ptr<Server> singleton_server_;
+      static std::shared_ptr<Server> singleton_server_;
       ///	\brief	Make sure the singleton does not get copied
       Server(Server const&) = delete;
       void operator=(Server const&) = delete;
       robot_model::RobotModelPtr loadModel(std::string name, std::string urdf="", std::string srdf="");
 
       template<typename T>
-      void paramCallback(const boost::shared_ptr<T const> & ptr,
+      void paramCallback(const std::shared_ptr<T const> & ptr,
           boost::any & param)
       {
-        *boost::any_cast<boost::shared_ptr<T>>(param) = *ptr;
+        *boost::any_cast<std::shared_ptr<T>>(param) = *ptr;
       }
 
       /// \brief	The name of this server
@@ -185,7 +186,7 @@ namespace exotica
       std::map<std::string, robot_model::RobotModelPtr> robot_models_;
   };
 
-  typedef boost::shared_ptr<Server> Server_ptr;
+  typedef std::shared_ptr<Server> Server_ptr;
 }
 
 #endif /* EXOTICA_INCLUDE_EXOTICA_SERVER_H_ */

@@ -102,7 +102,7 @@ namespace exotica
             throw_named("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
         }
         MotionSolver::specifyProblem(pointer);
-        prob_ = boost::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
+        prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 
         C = Eigen::MatrixXd::Identity(prob_->JN, prob_->JN)*parameters_.C;
         if(parameters_.C==0.0)

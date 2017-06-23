@@ -112,4 +112,10 @@ template<class T> std::shared_ptr<T> to_std_ptr(const boost::shared_ptr<T> &p)
 {
     return std::shared_ptr<T>(p.get(), Holder<boost::shared_ptr<T>>(p));
 }
+
+template<class T> std::shared_ptr<T> to_std_ptr(const std::shared_ptr<T> &p)
+{
+    return p;
+}
+
 #endif

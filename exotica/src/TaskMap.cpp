@@ -32,7 +32,6 @@
 
 #include <exotica/TaskMap.h>
 #include <exotica/PlanningProblem.h>
-#include <boost/algorithm/string.hpp>
 #include <exotica/TaskMapInitializer.h>
 #include <exotica/FrameInitializer.h>
 

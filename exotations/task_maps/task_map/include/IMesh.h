@@ -61,7 +61,7 @@ namespace exotica
        * @brief	Concrete implementation of update method
        * @param	x	Joint space configuration
        */
-      virtual void update(const Eigen::Ref<const Eigen::VectorXd> x, const int t);
+      virtual void update(Eigen::VectorXdRefConst& x, const int t);
 
       virtual void initialiseManual(std::string name, Server_ptr & server,
           const Scene_ptr & scene_ptr, boost::shared_ptr<PlanningProblem> prob,

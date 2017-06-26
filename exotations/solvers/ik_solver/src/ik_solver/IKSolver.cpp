@@ -70,7 +70,7 @@ namespace exotica
       Scalar m_inf, m_sup;
   };
 
-  Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd> & A_)
+  Eigen::MatrixXd inverseSymPosDef(Eigen::MatrixXdRefConst& A_)
   {
       Eigen::MatrixXd Ainv_ = A_;
       double* AA = Ainv_.data();
@@ -257,7 +257,7 @@ namespace exotica
   }
 
   void IKsolver::setGoal(const std::string & task_name,
-      const Eigen::Ref<const Eigen::VectorXd> _goal, int t)
+      Eigen::VectorXdRefConst& _goal, int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
@@ -344,7 +344,7 @@ namespace exotica
     reach_goal_ = goal;
   }
 
-  void IKsolver::Solve(const Eigen::Ref<const Eigen::VectorXd> q0,
+  void IKsolver::Solve(Eigen::VectorXdRefConst& q0,
       Eigen::MatrixXd & solution)
   {
     if (initialised_)
@@ -373,7 +373,7 @@ namespace exotica
     }
   }
 
-  bool IKsolver::Solve(const Eigen::Ref<const Eigen::VectorXd> q0,
+  bool IKsolver::Solve(Eigen::VectorXdRefConst& q0,
       Eigen::Ref<Eigen::MatrixXd> solution, int t)
   {
     if (initialised_)
@@ -436,7 +436,7 @@ namespace exotica
     }
   }
 
-  bool IKsolver::SolveFullSolution(const Eigen::Ref<const Eigen::VectorXd> q0,
+  bool IKsolver::SolveFullSolution(Eigen::VectorXdRefConst& q0,
       Eigen::MatrixXd & solution)
   {
     int t = 0;
@@ -513,7 +513,7 @@ namespace exotica
     }
   }
 
-  void IKsolver::vel_solve(double & err, int t, const Eigen::Ref<const Eigen::VectorXd> q)
+  void IKsolver::vel_solve(double & err, int t, Eigen::VectorXdRefConst& q)
   {
     if (initialised_)
     {

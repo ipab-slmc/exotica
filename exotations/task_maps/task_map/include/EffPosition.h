@@ -54,7 +54,7 @@ namespace exotica //!< Since this is part of the core library, it will be within
       /**
        * \brief Concrete implementation of the update method
        */
-      virtual void update(const Eigen::Ref<const Eigen::VectorXd> x, const int t);
+      virtual void update(Eigen::VectorXdRefConst& x, const int t);
 
       /**
        * \brief Concrete implementation of the task-space size

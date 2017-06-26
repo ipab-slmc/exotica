@@ -511,7 +511,7 @@ bool exotica::KinematicTree::modifySegment(const std::string & name,
 }
 
 bool exotica::KinematicTree::updateConfiguration(
-    const Eigen::Ref<const Eigen::VectorXd> & joint_configuration)
+    Eigen::VectorXdRefConst& joint_configuration)
 {
 //!< Temporaries
   double jnt_angle;

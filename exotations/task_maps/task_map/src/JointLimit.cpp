@@ -112,7 +112,7 @@ namespace exotica
     task_dim = tau_.rows();
   }
 
-  void JointLimit::update(const Eigen::Ref<const Eigen::VectorXd> x, const int t)
+  void JointLimit::update(Eigen::VectorXdRefConst& x, const int t)
   {
     if (!isRegistered(t))
     {

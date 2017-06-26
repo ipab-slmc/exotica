@@ -161,7 +161,7 @@ namespace exotica
       Eigen::VectorXd& vert);
 
   void saveMatrix(std::string file_name,
-      const Eigen::Ref<const Eigen::MatrixXd> mat);
+      Eigen::MatrixXdRefConst& mat);
 
   void getJSON(const rapidjson::Value& a, Eigen::VectorXd& ret);
   void getJSON(const rapidjson::Value& a, double& ret);

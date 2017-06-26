@@ -93,7 +93,7 @@ namespace exotica
        * @param  x  The State-space vector for the robot
        * @return    Should indicate success/otherwise using the Exotica error types
        */
-      virtual void update(const Eigen::Ref<const Eigen::VectorXd> x, const int t) = 0;
+      virtual void update(Eigen::VectorXdRefConst& x, const int t) = 0;
 
       /**
        * @brief registerPhi Registers a memory location for the output of phi at time t

@@ -101,7 +101,7 @@ namespace exotica
        * @param solution This will be filled with the solution in joint space.
        * @return SUCESS if solution has been found, corresponding error code if not.
        */
-      void Solve(const Eigen::Ref<const Eigen::VectorXd> q0, Eigen::MatrixXd & solution);
+      void Solve(Eigen::VectorXdRefConst& q0, Eigen::MatrixXd & solution);
 
       /**
        * \brief Solves the problem
@@ -137,14 +137,14 @@ namespace exotica
        * @param A A symmetric positive definite matrix to be inverted.
        */
       void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
-          const Eigen::Ref<const Eigen::MatrixXd> & A_);
+          Eigen::MatrixXdRefConst& A_);
 
       /**
        * \brief Computes the solution to the linear problem \f$x=Ab\f$ for symmetric positive definite matrix A
        */
       void AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
-          const Eigen::Ref<const Eigen::MatrixXd> & A_,
-          const Eigen::Ref<const Eigen::VectorXd> & b_);
+          Eigen::MatrixXdRefConst& A_,
+          Eigen::VectorXdRefConst& b_);
 
       void getStats(std::vector<SinglePassMeanCoviariance>& q_stat_);
 
@@ -157,7 +157,7 @@ namespace exotica
        * @param   t time step
        */
       virtual void setGoal(const std::string & task_name,
-          const Eigen::Ref<const Eigen::VectorXd> goal, int t = 0);
+          Eigen::VectorXdRefConst& goal, int t = 0);
 
       /**
        * \brief	Set rho
@@ -330,7 +330,7 @@ namespace exotica
        * \f$ \mu_{z_t\rightarrow x_t}(x)=\mathcal{N}[x_t|r_t,R_t] \f$
        */
       void updateTaskMessage(int t,
-          const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_,
+          Eigen::VectorXdRefConst& qhat_t, double tolerance_,
           double maxStepSize = -1.);
       /**
        * \brief Update messages for given time step

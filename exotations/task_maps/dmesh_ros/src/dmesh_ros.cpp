@@ -121,7 +121,7 @@ namespace exotica
     initialised_ = true;
   }
 
-  void DMeshROS::update(const Eigen::Ref<const Eigen::VectorXd> x, const int t)
+  void DMeshROS::update(Eigen::VectorXdRefConst& x, const int t)
   {
     q_size_ = x.rows();
 

@@ -85,7 +85,7 @@ public:
       W = 0.;
     }
 
-    void add(const Eigen::Ref<const Eigen::VectorXd> & x)
+    void add(Eigen::VectorXdRefConst& x)
     {
       if (W == 0.)
       {
@@ -112,8 +112,8 @@ public:
       add(M.W, M.T, M.S);
     }
 
-    void add(double& W_, const Eigen::Ref<const Eigen::VectorXd> & T_,
-        const Eigen::Ref<const Eigen::VectorXd> & S_)
+    void add(double& W_, Eigen::VectorXdRefConst& T_,
+        Eigen::VectorXdRefConst& S_)
     {
       if (W == 0.)
       {
@@ -136,7 +136,7 @@ public:
       W += W_;
     }
 
-    inline void addw(double w, const Eigen::Ref<const Eigen::VectorXd> & x)
+    inline void addw(double w, Eigen::VectorXdRefConst& x)
     {
       if (W == 0.)
       {

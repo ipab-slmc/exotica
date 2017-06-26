@@ -114,7 +114,7 @@ namespace exotica
   }
 
   void AICOsolver::setGoal(const std::string & task_name,
-      const Eigen::Ref<const Eigen::VectorXd> _goal, int t)
+      Eigen::VectorXdRefConst& _goal, int t)
   {
     if (taskIndex.find(task_name) == taskIndex.end())
     {
@@ -251,7 +251,7 @@ namespace exotica
     return false;
   }
 
-  void AICOsolver::Solve(const Eigen::Ref<const Eigen::VectorXd> q0,
+  void AICOsolver::Solve(Eigen::VectorXdRefConst& q0,
       Eigen::MatrixXd & solution)
   {
     std::vector<Eigen::VectorXd> q_init;
@@ -518,7 +518,7 @@ namespace exotica
   }
 
   void AICOsolver::inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
-      const Eigen::Ref<const Eigen::MatrixXd> & A_)
+      Eigen::MatrixXdRefConst& A_)
   {
     Ainv_ = A_;
     double* AA = Ainv_.data();
@@ -540,8 +540,8 @@ namespace exotica
   }
 
   void AICOsolver::AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
-      const Eigen::Ref<const Eigen::MatrixXd> & A_,
-      const Eigen::Ref<const Eigen::VectorXd> & b_)
+      Eigen::MatrixXdRefConst& A_,
+      Eigen::VectorXdRefConst& b_)
   {
     integer n_ = n, m_ = 1;
     integer info;
@@ -628,7 +628,7 @@ namespace exotica
   }
 
   void AICOsolver::updateTaskMessage(int t,
-      const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_,
+      Eigen::VectorXdRefConst& qhat_t, double tolerance_,
       double maxStepSize)
   {
     Eigen::VectorXd diff = qhat_t - qhat[t];

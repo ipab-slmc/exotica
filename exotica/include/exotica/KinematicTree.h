@@ -187,7 +187,7 @@ namespace exotica
        * @return                    True if successful, False if not
        */
       bool updateConfiguration(
-          const Eigen::Ref<const Eigen::VectorXd> & joint_configuration);
+          Eigen::VectorXdRefConst& joint_configuration);
 
       /**
        * \brief Generate the phi vector (forward kinematics for the specified end-effectors) : THREAD-SAFE

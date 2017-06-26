@@ -121,7 +121,7 @@ namespace exotica
        * @param t time step
        * @return  Indication of success TODO
        */
-      void update(const Eigen::Ref<const Eigen::VectorXd> x, const int t);
+      void update(Eigen::VectorXdRefConst& x, const int t);
 
       virtual void reinitialise(rapidjson::Document& document,
           boost::shared_ptr<PlanningProblem> problem);

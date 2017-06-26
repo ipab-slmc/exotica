@@ -240,7 +240,7 @@ namespace exotica
 //		}
   }
 
-  void CollisionScene::update(const Eigen::Ref<const Eigen::VectorXd>& x)
+  void CollisionScene::update(Eigen::VectorXdRefConst& x)
   {
     if (joint_index_.size() != x.rows())
     {
@@ -927,7 +927,7 @@ namespace exotica
     HIGHLIGHT_NAMED(object_name_, "Taskmaps are activated");
   }
 
-  void Scene::update(const Eigen::Ref<const Eigen::VectorXd>& x, const int t)
+  void Scene::update(Eigen::VectorXdRefConst& x, const int t)
   {
     LOCK(lock_);
     if (!initialised_)

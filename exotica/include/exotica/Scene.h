@@ -97,7 +97,7 @@ namespace exotica
        * @param	x		Configuration
        * @return Indication of success
        */
-      void update(const Eigen::Ref<const Eigen::VectorXd>& x);
+      void update(Eigen::VectorXdRefConst& x);
 
       /**
        * \brief	Get closest distance between two objects
@@ -268,7 +268,7 @@ namespace exotica
        * @param	x	System state
        * @return Indication of success
        */
-      virtual void update(const Eigen::Ref<const Eigen::VectorXd>& x, const int t = 0);
+      virtual void update(Eigen::VectorXdRefConst& x, const int t = 0);
 
       /**
        * \brief	Set collision scene

@@ -52,15 +52,15 @@ namespace Eigen
       }
   };
 
-//  /// \brief Reference to sub-vector.
-//  typedef Ref_ptr<Eigen::VectorXd> Ref_ptr<Eigen::VectorXd>;
-//  /// \brief Reference to sub-Matrix.
-//  typedef Ref_ptr<Eigen::MatrixXd> Ref_ptr<Eigen::MatrixXd>;
+  /// \brief Reference to sub-vector.
+  typedef Ref_ptr<VectorXd> VectorXdRef_ptr;
+  /// \brief Reference to sub-Matrix.
+  typedef Ref_ptr<MatrixXd> MatrixXdRef_ptr;
 
-//  typedef Ref<Eigen::VectorXd> VectorXdRef;
-//  typedef const Eigen::Ref<const Eigen::VectorXd>& const Eigen::Ref<const Eigen::VectorXd>;
-//  typedef Ref<Eigen::MatrixXd> Eigen::Ref<Eigen::MatrixXd>;
-//  typedef const Eigen::Ref<const Eigen::MatrixXd>& Ref<const Eigen::MatrixXd>&;
+  typedef Ref<VectorXd> VectorXdRef;
+  typedef const Ref<const VectorXd> VectorXdRefConst;
+  typedef Ref<MatrixXd> MatrixXdRef;
+  typedef const Ref<const MatrixXd> MatrixXdRefConst;
 
   Eigen::VectorXd VectorTransform(double px=0.0, double py=0.0, double pz=0.0, double qx=0.0, double qy=0.0, double qz=0.0, double qw=1.0);
   Eigen::VectorXd IdentityTransform();
@@ -84,7 +84,7 @@ namespace exotica
         return type=="std::vector<exotica::Initializer>";
     }
 
-    KDL::Frame getFrame(const Eigen::Ref<const Eigen::VectorXd> val);
+    KDL::Frame getFrame(Eigen::VectorXdRefConst& val);
 
     bool contains(std::string key, const std::vector<std::string>& vec);
 

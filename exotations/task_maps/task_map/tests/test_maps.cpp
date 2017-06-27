@@ -58,7 +58,7 @@ void testRandom(UnconstrainedEndPoseProblem_ptr problem)
     INFO_PLAIN("Test passed");
 }
 
-void testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eigen::MatrixXdRefConst Jref, UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
+void testValues(Eigen::MatrixXdRefConst& Xref, Eigen::MatrixXdRefConst& Yref, Eigen::MatrixXdRefConst& Jref, UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
 {
     INFO_PLAIN("Testing set points:");
     int N = Xref.cols();

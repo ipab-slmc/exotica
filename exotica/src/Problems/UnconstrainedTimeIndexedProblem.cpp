@@ -94,7 +94,7 @@ namespace exotica
         return tau * (double) T;
     }
 
-    void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
+    void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst& x, int t)
     {
         scene_->Update(x);
         for(int i=0;i<NumTasks;i++)
@@ -105,7 +105,7 @@ namespace exotica
     }
 
 
-    void UnconstrainedTimeIndexedProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal, int t)
+    void UnconstrainedTimeIndexedProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst& goal, int t)
     {
         TaskMap_ptr task = TaskMaps.at(task_name);
         y[t].data.segment(task->Start, task->Length) = goal;

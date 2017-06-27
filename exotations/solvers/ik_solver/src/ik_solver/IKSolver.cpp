@@ -68,7 +68,7 @@ namespace exotica
       Scalar m_inf, m_sup;
     };
 
-    Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd> & A_)
+    Eigen::MatrixXd inverseSymPosDef(Eigen::MatrixXdRefConst& A_)
     {
       Eigen::MatrixXd Ainv_ = A_;
       double* AA = Ainv_.data();
@@ -129,7 +129,7 @@ namespace exotica
         return iterations_;
     }
 
-    void IKsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution)
+    void IKsolver::Solve(Eigen::VectorXdRefConst& q0, Eigen::MatrixXd & solution)
     {
         if(!prob_) throw_named("Solver has not been initialized!");
 
@@ -184,7 +184,7 @@ namespace exotica
         planning_time_ = ros::Duration(ros::Time::now() - start);
     }
 
-    Eigen::MatrixXd IKsolver::PseudoInverse(Eigen::MatrixXdRefConst J)
+    Eigen::MatrixXd IKsolver::PseudoInverse(Eigen::MatrixXdRefConst& J)
     {
         Eigen::MatrixXd Jpinv;
 
@@ -209,7 +209,7 @@ namespace exotica
         return Jpinv;
     }
 
-    void IKsolver::ScaleToStepSize(Eigen::VectorXdRef xd)
+    void IKsolver::ScaleToStepSize(Eigen::Ref<Eigen::VectorXd> xd)
     {
         double max_vel = xd.cwiseAbs().maxCoeff();
         if (max_vel > parameters_.MaxStep)

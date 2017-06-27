@@ -46,7 +46,7 @@ namespace exotica
     {
     }
 
-    void IMesh::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+    void IMesh::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi)
     {
         int M = eff_size_;
 
@@ -64,7 +64,7 @@ namespace exotica
         if(Debug) debug(phi);
     }
 
-    void IMesh::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+    void IMesh::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J)
     {
         int M = eff_size_;
         int N = Kinematics.J[0].data.cols();
@@ -165,7 +165,7 @@ namespace exotica
         scene_ = scene;
     }
 
-    void IMesh::debug(Eigen::VectorXdRefConst phi)
+    void IMesh::debug(Eigen::VectorXdRefConst& phi)
     {
         static int textid = 0;
         {
@@ -250,7 +250,7 @@ namespace exotica
         return 3 * eff_size_;
     }
 
-    Eigen::VectorXd IMesh::computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXdRefConst Weights, Eigen::MatrixXd* dist_ptr, Eigen::VectorXd* wsum_ptr)
+    Eigen::VectorXd IMesh::computeLaplace(Eigen::VectorXdRefConst& EffPhi, Eigen::MatrixXdRefConst& Weights, Eigen::MatrixXd* dist_ptr, Eigen::VectorXd* wsum_ptr)
     {
         int N = EffPhi.rows()/3;
         Eigen::VectorXd Phi = Eigen::VectorXd::Zero(N*3);
@@ -298,7 +298,7 @@ namespace exotica
         return Phi;
     }
 
-    void IMesh::computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal, Eigen::MatrixXdRefConst Weights)
+    void IMesh::computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal, Eigen::MatrixXdRefConst& Weights)
     {
         int N = nodes.size();
         Eigen::VectorXd EffPhi(3*N);

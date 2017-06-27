@@ -130,7 +130,7 @@ namespace exotica
 //		}
   }
 
-  void CollisionScene::update(Eigen::VectorXdRefConst x)
+  void CollisionScene::update(Eigen::VectorXdRefConst& x)
   {
     if (joint_index_.size() != x.rows())
     {
@@ -539,7 +539,7 @@ namespace exotica
       return kinematica_.RequestFrames(Request);
   }
 
-  void Scene::Update(Eigen::VectorXdRefConst x)
+  void Scene::Update(Eigen::VectorXdRefConst& x)
   {
       collision_scene_->update(x);
       kinematica_.Update(x);

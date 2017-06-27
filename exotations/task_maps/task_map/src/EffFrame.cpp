@@ -76,7 +76,7 @@ namespace exotica
         return ret;
     }
 
-    void EffFrame::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+    void EffFrame::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi)
     {
         if(phi.rows() != Kinematics.Phi.rows()*bigStride) throw_named("Wrong size of phi!");
         for(int i=0;i<Kinematics.Phi.rows();i++)
@@ -88,7 +88,7 @@ namespace exotica
         }
     }
 
-    void EffFrame::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+    void EffFrame::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J)
     {
         if(phi.rows() != Kinematics.Phi.rows()*bigStride) throw_named("Wrong size of phi!");
         if(J.rows() != Kinematics.J.rows()*6 || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());

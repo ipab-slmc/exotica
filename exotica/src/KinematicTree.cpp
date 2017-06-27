@@ -258,7 +258,7 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
     return Solution;
 }
 
-void KinematicTree::Update(Eigen::VectorXdRefConst x)
+void KinematicTree::Update(Eigen::VectorXdRefConst& x)
 {
     if(x.rows()!=StateSize) throw_pretty("Wrong state vector size! Got " << x.rows() << " expected " << StateSize);
     UpdateTree(x);
@@ -267,7 +267,7 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
     if(Debug) publishFrames();
 }
 
-void KinematicTree::UpdateTree(Eigen::VectorXdRefConst x)
+void KinematicTree::UpdateTree(Eigen::VectorXdRefConst& x)
 {
     for(int i=0; i<ControlledJoints.size();i++)
     {

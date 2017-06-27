@@ -56,7 +56,7 @@ namespace exotica
 
       virtual void Instantiate(SamplingProblemInitializer& init);
 
-      void Update(Eigen::VectorXdRefConst x);
+      void Update(Eigen::VectorXdRefConst& x);
 
       int getSpaceDim();
 

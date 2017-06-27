@@ -106,13 +106,13 @@ namespace exotica
         if(debug_)  HIGHLIGHT_NAMED("DMeshROS", "Distance Mesh (ROS) has been initialised: Maximum Graph size="<<size_<<", Robot link size="<<robot_size_<<", Unconnected external object size="<<ext_size_);
     }
 
-    void DMeshROS::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+    void DMeshROS::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi)
     {
         if(phi.rows() != task_size_) throw_named("Wrong size of phi!");
         phi = computeLaplace();
     }
 
-    void DMeshROS::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+    void DMeshROS::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J)
     {
         if(phi.rows() != task_size_) throw_named("Wrong size of phi!");
         if(J.rows() != task_size_ || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());

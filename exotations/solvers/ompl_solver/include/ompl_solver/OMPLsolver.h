@@ -63,7 +63,7 @@ namespace exotica
        */
       virtual void specifyProblem(PlanningProblem_ptr pointer);
 
-      void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      void Solve(Eigen::VectorXdRefConst& q0, Eigen::MatrixXd & solution);
 
       /*
        * \brief Get planning problem
@@ -88,7 +88,7 @@ namespace exotica
 
       virtual std::string print(std::string prepend);
 
-      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon());
+      virtual void setGoalState(Eigen::VectorXdRefConst& qT, const double eps = std::numeric_limits<double>::epsilon());
     private:
       SamplingProblem_ptr prob_; //!< Shared pointer to the planning problem.
 

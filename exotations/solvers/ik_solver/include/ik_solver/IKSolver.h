@@ -53,13 +53,13 @@ namespace exotica
 
       virtual void Instantiate(IKsolverInitializer& init);
 
-      virtual void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      virtual void Solve(Eigen::VectorXdRefConst& q0, Eigen::MatrixXd & solution);
 
       virtual void specifyProblem(PlanningProblem_ptr pointer);
 
       UnconstrainedEndPoseProblem_ptr& getProblem();
 
-      Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
+      Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst& J);
 
       double error;
       ros::Duration planning_time_;
@@ -70,9 +70,9 @@ namespace exotica
     private:
       IKsolverInitializer parameters_;
 
-      inline void vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
+      inline void vel_solve(double & err, int t, Eigen::VectorXdRefConst& q);
 
-      void ScaleToStepSize(Eigen::VectorXdRef xd);
+      void ScaleToStepSize(Eigen::Ref<Eigen::VectorXd> xd);
 
       UnconstrainedEndPoseProblem_ptr prob_; // Shared pointer to the planning problem.
 

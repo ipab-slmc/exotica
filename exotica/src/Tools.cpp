@@ -39,7 +39,7 @@
 namespace exotica
 {
 
-    KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type)
+    KDL::Rotation getRotation(Eigen::VectorXdRefConst& data, RotationType type)
     {
         switch(type)
         {
@@ -119,7 +119,7 @@ namespace exotica
     }
 
   void saveMatrix(std::string file_name,
-      const Eigen::Ref<const Eigen::MatrixXd> mat)
+      Eigen::MatrixXdRefConst& mat)
   {
     std::ofstream myfile;
     myfile.open(file_name);

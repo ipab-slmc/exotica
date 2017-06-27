@@ -53,8 +53,8 @@ namespace exotica
       virtual ~UnconstrainedTimeIndexedProblem();
       virtual void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init);
       double getDuration();
-      void Update(Eigen::VectorXdRefConst x, int t);
-      void setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal, int t = 0);
+      void Update(Eigen::VectorXdRefConst& x, int t);
+      void setGoal(const std::string & task_name, Eigen::VectorXdRefConst& goal, int t = 0);
       void setRho(const std::string & task_name, const double rho, int t = 0);
       Eigen::VectorXd getGoal(const std::string & task_name, int t = 0);
       double getRho(const std::string & task_name, int t = 0);

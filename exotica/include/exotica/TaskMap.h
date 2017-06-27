@@ -40,9 +40,6 @@
 #include <exotica/Property.h>
 #include <exotica/TaskSpaceVector.h>
 
-#include <Eigen/Dense>            //!< Generally dense manipulations should be enough
-#include <string>
-
 /**
  * \brief Convenience registrar for the TaskMap Type
  */
@@ -65,11 +62,11 @@ namespace exotica
 
       virtual void assignScene(Scene_ptr scene) {}
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi) = 0;
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) { throw_named("Not implemented"); }
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J) { throw_named("Not implemented"); }
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot) { throw_named("Not implemented"); }
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::Ref<Eigen::VectorXd> phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot) { throw_named("Not implemented"); }
 
       virtual int taskSpaceDim() = 0;
 

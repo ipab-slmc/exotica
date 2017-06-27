@@ -51,9 +51,9 @@ namespace exotica //!< Since this is part of the core library, it will be within
 
       virtual void Instantiate(EffOrientationInitializer& init);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J);
 
       virtual int taskSpaceDim();
 

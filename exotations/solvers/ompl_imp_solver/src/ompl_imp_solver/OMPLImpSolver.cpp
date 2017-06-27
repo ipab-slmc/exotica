@@ -116,7 +116,7 @@ namespace exotica
       ompl_simple_setup_->getPlanner()->params().setParam("range", range_);
   }
 
-  bool OMPLImpSolver::solve(Eigen::VectorXdRefConst &x0, Eigen::MatrixXd &sol)
+  bool OMPLImpSolver::solve(Eigen::VectorXdRefConst& x0, Eigen::MatrixXd &sol)
   {
     ros::Time startTime = ros::Time::now();
     finishedSolving_ = false;
@@ -216,7 +216,7 @@ namespace exotica
     return planner_name_;
   }
 
-  void OMPLImpSolver::setGoalState(Eigen::VectorXdRefConst qT, const double eps)
+  void OMPLImpSolver::setGoalState(Eigen::VectorXdRefConst& qT, const double eps)
   {
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());

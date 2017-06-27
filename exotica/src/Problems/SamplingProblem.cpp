@@ -85,7 +85,7 @@ namespace exotica
       }
   }
 
-  void SamplingProblem::Update(Eigen::VectorXdRefConst x)
+  void SamplingProblem::Update(Eigen::VectorXdRefConst& x)
   {
       scene_->Update(x);
   }

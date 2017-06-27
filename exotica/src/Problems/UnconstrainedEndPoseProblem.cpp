@@ -79,7 +79,7 @@ namespace exotica
         if(init.Goal.rows()==PhiN) y.data = init.Goal;
     }
 
-    void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
+    void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst& x)
     {
         scene_->Update(x);
         for(int i=0;i<NumTasks;i++)
@@ -88,7 +88,7 @@ namespace exotica
         }
     }
 
-    void UnconstrainedEndPoseProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal)
+    void UnconstrainedEndPoseProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst& goal)
     {
         TaskMap_ptr task = TaskMaps.at(task_name);
         if(goal.rows()!=task->Length) throw_named("Invalid goal dimension "<<goal.rows()<<" expected "<<task->Length);

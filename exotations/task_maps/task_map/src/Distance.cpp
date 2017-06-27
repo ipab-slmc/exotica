@@ -41,7 +41,7 @@ namespace exotica
     //!< Empty constructor
   }
 
-    void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+    void Distance::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi)
     {
         if(phi.rows() != Kinematics.Phi.rows()*3) throw_named("Wrong size of phi!");
         for(int i=0;i<Kinematics.Phi.rows();i++)
@@ -50,7 +50,7 @@ namespace exotica
         }
     }
 
-    void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+    void Distance::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J)
     {
         if(phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
         if(J.rows() != Kinematics.J.rows() || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());

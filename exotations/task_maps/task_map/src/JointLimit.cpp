@@ -76,7 +76,7 @@ namespace exotica
         return N;
     }
 
-    void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+    void JointLimit::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi)
     {
         if(phi.rows() != N) throw_named("Wrong size of phi!");
         phi.setZero();
@@ -93,7 +93,7 @@ namespace exotica
         }
     }
 
-    void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+    void JointLimit::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J)
     {
         if(phi.rows() != N) throw_named("Wrong size of phi!");
         if(J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);

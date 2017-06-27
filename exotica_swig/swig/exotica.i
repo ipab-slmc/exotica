@@ -1,5 +1,10 @@
 %module exotica
 
+%feature("valuewrapper") Eigen::Ref;
+%feature("valuewrapper") Eigen::Ref<Eigen::VectorXd>;
+%feature("valuewrapper") Eigen::Ref<Eigen::Matrix<double, -1, -1>>;
+
+
 %eigen_typemaps(Eigen::VectorXd)
 %eigen_typemaps(Eigen::Vector2d)
 %eigen_typemaps(Eigen::Vector3d)
@@ -33,6 +38,7 @@ using namespace exotica;
 %include "exotica/Tools/Uncopyable.h"
 %include "exotica/Version.h"
 %include "exotica/Scene.h"
+%include "exotica/TaskMap.h"
 
 
 

@@ -53,8 +53,8 @@ namespace exotica
       void initialiseBaseSolver(Initializer& init);
       virtual void initialiseSolver(Initializer& init) = 0;
 
-      virtual bool solve(Eigen::VectorXdRefConst x0, Eigen::MatrixXd &sol) = 0;
-      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon()) = 0;
+      virtual bool solve(Eigen::VectorXdRefConst& x0, Eigen::MatrixXd &sol) = 0;
+      virtual void setGoalState(Eigen::VectorXdRefConst& qT, const double eps = std::numeric_limits<double>::epsilon()) = 0;
 
       virtual std::string getPlannerName() = 0;
       double getPlanningTime();

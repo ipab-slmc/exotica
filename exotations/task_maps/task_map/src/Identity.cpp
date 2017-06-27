@@ -41,7 +41,7 @@ namespace exotica
 
   }
 
-  void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+  void Identity::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi)
   {
       if(phi.rows() != jointMap.size()) throw_named("Wrong size of phi!");
       for(int i=0;i<jointMap.size();i++)
@@ -50,7 +50,7 @@ namespace exotica
       }
   }
 
-  void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+  void Identity::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J)
   {
       if(phi.rows() != jointMap.size()) throw_named("Wrong size of phi!");
       if(J.rows() != jointMap.size() || J.cols() != N) throw_named("Wrong size of J! " << N);
@@ -62,7 +62,7 @@ namespace exotica
       }
   }
 
-  void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot)
+  void Identity::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::Ref<Eigen::VectorXd> phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot)
   {
       if(phi.rows() != jointMap.size()) throw_named("Wrong size of phi!");
       if(J.rows() != jointMap.size() || J.cols() != N) throw_named("Wrong size of J! " << N);

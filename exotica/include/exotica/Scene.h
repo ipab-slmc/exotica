@@ -89,7 +89,7 @@ namespace exotica
        * @param	x		Configuration
        * @return Indication of success
        */
-      void update(Eigen::VectorXdRefConst x);
+      void update(Eigen::VectorXdRefConst& x);
 
       /**
        * \brief	Get closest distance between two objects
@@ -231,7 +231,7 @@ namespace exotica
       virtual void Instantiate(SceneInitializer& init);
       std::shared_ptr<KinematicResponse> RequestKinematics(KinematicsRequest& Request);
       std::string getName();
-      virtual void Update(Eigen::VectorXdRefConst x);
+      virtual void Update(Eigen::VectorXdRefConst& x);
       void setCollisionScene(const planning_scene::PlanningSceneConstPtr & scene);
       void setCollisionScene( const moveit_msgs::PlanningSceneConstPtr & scene);
       int getNumJoints();

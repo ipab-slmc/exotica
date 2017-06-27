@@ -63,7 +63,7 @@ namespace exotica
         MATRIX
     };
 
-    KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type);
+    KDL::Rotation getRotation(Eigen::VectorXdRefConst& data, RotationType type);
 
     Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type);
 
@@ -89,7 +89,7 @@ namespace exotica
       Eigen::VectorXd& vert);
 
   void saveMatrix(std::string file_name,
-      const Eigen::Ref<const Eigen::MatrixXd> mat);
+      Eigen::MatrixXdRefConst& mat);
 
   void getText(std::string& txt, KDL::Frame& ret);
 }

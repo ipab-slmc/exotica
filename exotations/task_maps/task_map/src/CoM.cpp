@@ -44,7 +44,7 @@ namespace exotica
     {
     }
 
-    void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+    void CoM::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi)
     {
         if(phi.rows() != dim_) throw_named("Wrong size of phi!");
         phi.setZero();
@@ -78,7 +78,7 @@ namespace exotica
         }
     }
 
-    void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+    void CoM::update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J)
     {
         if(phi.rows() != dim_) throw_named("Wrong size of phi!");
         if(J.rows() != dim_ || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());

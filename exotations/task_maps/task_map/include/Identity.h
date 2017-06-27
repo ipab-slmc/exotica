@@ -52,11 +52,11 @@ namespace exotica
 
       void Initialize();
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot);
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::Ref<Eigen::VectorXd> phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot);
 
       virtual int taskSpaceDim();
 

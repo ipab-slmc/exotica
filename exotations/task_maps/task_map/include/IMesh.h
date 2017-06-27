@@ -52,9 +52,9 @@ namespace exotica
 
       virtual void assignScene(Scene_ptr scene);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+      virtual void update(Eigen::VectorXdRefConst& x, Eigen::Ref<Eigen::VectorXd> phi, Eigen::MatrixXdRef J);
 
       virtual int taskSpaceDim();
 
@@ -62,13 +62,13 @@ namespace exotica
       void setWeights(const Eigen::MatrixXd & weights);
       Eigen::MatrixXd getWeights();
 
-      static Eigen::VectorXd computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXdRefConst Weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
+      static Eigen::VectorXd computeLaplace(Eigen::VectorXdRefConst& EffPhi, Eigen::MatrixXdRefConst& Weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
 
       void computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
 
-      static void computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal, Eigen::MatrixXdRefConst Weights);
+      static void computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal, Eigen::MatrixXdRefConst& Weights);
 
-      virtual void debug(Eigen::VectorXdRefConst phi);
+      virtual void debug(Eigen::VectorXdRefConst& phi);
       void initDebug(std::string ref);
       void destroyDebug();
 

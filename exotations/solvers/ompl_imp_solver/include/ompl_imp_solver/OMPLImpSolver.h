@@ -60,14 +60,14 @@ namespace exotica
        * @param x0      start configuration
        * @param sol     Solution
        */
-      virtual bool solve(Eigen::VectorXdRefConst x0, Eigen::MatrixXd &sol);
+      virtual bool solve(Eigen::VectorXdRefConst& x0, Eigen::MatrixXd &sol);
 
       /*
        * \brief Set goal state to the sampled state space
        * @param qT      Goal state in sampled state space
        * @param eps     Numerical tolerance
        */
-      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon());
+      virtual void setGoalState(Eigen::VectorXdRefConst& qT, const double eps = std::numeric_limits<double>::epsilon());
 
       /*
        * \brief Get the planner's name

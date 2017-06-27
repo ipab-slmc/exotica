@@ -72,7 +72,7 @@ namespace exotica
     return ret;
   }
 
-  void OMPLsolver::Solve(Eigen::VectorXdRefConst q0,
+  void OMPLsolver::Solve(Eigen::VectorXdRefConst& q0,
       Eigen::MatrixXd & solution)
   {
     if (base_solver_->solve(q0, solution))
@@ -103,7 +103,7 @@ namespace exotica
     return planner;
   }
 
-  void OMPLsolver::setGoalState(Eigen::VectorXdRefConst qT, const double eps)
+  void OMPLsolver::setGoalState(Eigen::VectorXdRefConst& qT, const double eps)
   {
     base_solver_->setGoalState(qT, eps);
   }

@@ -180,7 +180,7 @@ namespace exotica
             std::string getRootName();
             BASE_TYPE getBaseType();
             std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
-            void Update(Eigen::VectorXdRefConst x);
+            void Update(Eigen::VectorXdRefConst& x);
             void setJointLimits();
             void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double> & lower, const std::vector<double> & upper);
             std::map<std::string, std::vector<double>> getUsedJointLimits();
@@ -201,7 +201,7 @@ namespace exotica
             void BuildTree(const KDL::Tree & RobotKinematics);
             void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
             int IsControlled(std::shared_ptr<KinematicElement> Joint);
-            void UpdateTree(Eigen::VectorXdRefConst x);
+            void UpdateTree(Eigen::VectorXdRefConst& x);
             void UpdateFK();
             void UpdateJ();
             void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);

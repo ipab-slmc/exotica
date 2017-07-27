@@ -58,6 +58,7 @@ class InitializerBase
 public:
     virtual void check(const Initializer& other) const = 0;
     virtual Initializer getTemplate() const = 0;
+    virtual std::vector<Initializer> getAllTemplates() const = 0;
 };
 
 class InstantiableBase
@@ -66,6 +67,7 @@ public:
     virtual Initializer getInitializerTemplate() = 0;
     virtual void InstantiateInternal(const Initializer& init) = 0;
     virtual void InstantiateBase(const Initializer& init) {}
+    virtual std::vector<Initializer> getAllTemplates() const = 0;
 };
 
 template<class C>
@@ -86,6 +88,10 @@ public:
         return C().getTemplate();
     }
 
+    virtual std::vector<Initializer> getAllTemplates() const
+    {
+        return C().getAllTemplates();
+    }
     virtual void Instantiate(C& init) = 0;
 };
 

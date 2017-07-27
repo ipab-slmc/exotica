@@ -120,19 +120,23 @@ def Construct(Namespace, ClassName, Data,Include):
 #ifndef INITIALIZER_"""+Namespace+"_"+ClassName+"""_H
 #define INITIALIZER_"""+Namespace+"_"+ClassName+"""_H
 
-#include "exotica/Property.h"
+#include <exotica/Property.h>
+namespace exotica
+{
+inline std::vector<Initializer> get"""+Namespace+"""Initializers();
+}
 """
     for i in Include:
         ret+="#include <"+i+".h>\n"
     ret+="""
 
-namespace """ +Namespace+ """
+namespace exotica
 {
 
 class """+ClassName+" : public InitializerBase"+"""
 {
 public:
-    static std::string getContainerName() {return """+"\""+Namespace+"/"+CalssNameOrig+"\""+ """ ;}
+    static std::string getContainerName() {return """+"\"exotica/"+CalssNameOrig+"\""+ """ ;}
 
     """
     if NeedsDefaultConstructor(Data):
@@ -156,6 +160,11 @@ public:
     virtual Initializer getTemplate() const
     {
         return (Initializer)"""+ClassName+"""();
+    }
+
+    virtual std::vector<Initializer> getAllTemplates() const
+    {
+        return get"""+Namespace+"""Initializers();
     }
 
     virtual void check(const Initializer& other) const
@@ -182,7 +191,9 @@ public:
         ret+=Declaration(d)
     ret+="};"+"""
 
-}\n#endif"""
+}
+#include<"""+Namespace+"/"+Namespace+"""InitializersNumerator.h>
+\n#endif"""
     return ret
 
 def ParseLine(line, ln, fn):

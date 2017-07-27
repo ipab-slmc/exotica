@@ -74,7 +74,10 @@ void Initializer::setName(std::string name_)
     name = name_;
 }
 
-
+std::vector<std::string> Initializer::getPropertyNames() const
+{
+    return getKeys(properties);
+}
 
 }
 

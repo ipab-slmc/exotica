@@ -96,7 +96,6 @@ void run()
         while (ros::ok())
         {
             int i = 1;
-            // Wait 30 steps at the beginning and at the end of the playback for nicer visuals
             if(t==0 || t==solution.rows()-1) i = PlaybackWaitInterval;
             while(i-->0)
             {

@@ -65,9 +65,9 @@ namespace exotica
       }
 
       static void printSupportedClasses();
-      static std::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type) {return to_std_ptr(Instance()->solvers_.createInstance("exotica/"+type));}
-      static std::shared_ptr<exotica::TaskMap> createMap(const std::string & type) {return to_std_ptr(Instance()->maps_.createInstance("exotica/"+type));}
-      static std::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type) {return Instance()->problems_.createInstance("exotica/"+type);}
+      static std::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->solvers_.createInstance(prepend?"exotica/":""+type));}
+      static std::shared_ptr<exotica::TaskMap> createMap(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->maps_.createInstance(prepend?"exotica/":""+type));}
+      static std::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type, bool prepend = true) {return Instance()->problems_.createInstance(prepend?"exotica/":""+type);}
       static std::vector<std::string> getSolvers();
       static std::vector<std::string> getProblems();
       static std::vector<std::string> getMaps();

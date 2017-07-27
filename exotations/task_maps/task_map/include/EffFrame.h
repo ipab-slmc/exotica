@@ -1,6 +1,5 @@
 /*
- *  Created on: 15 Jul 2014
- *      Author: Yiming Yang
+ *      Author: Vladimir Ivan
  * 
  * Copyright (c) 2016, University Of Edinburgh 
  * All rights reserved. 
@@ -31,44 +30,42 @@
  *
  */
 
-#ifndef UNCONSTRAINEDENDPOSEPROBLEM_H_
-#define UNCONSTRAINEDENDPOSEPROBLEM_H_
-#include <exotica/PlanningProblem.h>
-#include <exotica/UnconstrainedEndPoseProblemInitializer.h>
+#ifndef EXOTICA_TASKMAP_EFF_FRAME_H
+#define EXOTICA_TASKMAP_EFF_FRAME_H
 
-namespace exotica
+#include <exotica/TaskMap.h>
+#include <task_map/EffFrameInitializer.h>
+
+namespace exotica //!< Since this is part of the core library, it will be within the same namespace
 {
-    /**
-    * Unconstrained end-pose problem implementation
-    */
-    class UnconstrainedEndPoseProblem: public PlanningProblem, public Instantiable<UnconstrainedEndPoseProblemInitializer>
-    {
+  class EffFrame: public TaskMap, public Instantiable<EffFrameInitializer>
+  {
     public:
-        UnconstrainedEndPoseProblem();
-        virtual ~UnconstrainedEndPoseProblem();
+      /**
+       * \brief Default constructor
+       */
+      EffFrame();
+      virtual ~EffFrame()
+      {
+      }
 
-        virtual void Instantiate(UnconstrainedEndPoseProblemInitializer& init);
-        void Update(Eigen::VectorXdRefConst x);
+      virtual void Instantiate(EffFrameInitializer& init);
 
-        void setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal);
-        void setRho(const std::string & task_name, const double rho);
-        Eigen::VectorXd getGoal(const std::string & task_name);
-        double getRho(const std::string & task_name);
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-        Eigen::VectorXd Rho;
-        TaskSpaceVector y;
-        Eigen::MatrixXd W;
-        TaskSpaceVector Phi;
-        Eigen::MatrixXd J;
-        Eigen::VectorXd qNominal;
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-        int PhiN;
-        int JN;
-        int N;
-        int NumTasks;
+      virtual int taskSpaceDim();
 
-    };
-    typedef boost::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
+      virtual int taskSpaceJacobianDim();
+
+      virtual std::vector<TaskVectorEntry> getLieGroupIndices();
+
+      RotationType rotationType;
+      int bigStride;
+      int smallStride;
+  };
+  typedef boost::shared_ptr<EffFrame> EffFrame_ptr;  //!< Task Map smart pointer
 }
 
 #endif

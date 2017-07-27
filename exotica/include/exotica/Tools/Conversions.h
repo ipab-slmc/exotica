@@ -111,6 +111,18 @@ namespace exotica
         return ret;
     }
 
+    template <class Key, class Val>
+    void appendMap(std::map<Key,Val>& orig, const std::map<Key,Val>& extra)
+    {
+        orig.insert(extra.begin(),extra.end());
+    }
+
+    template <class Val>
+    void appendVector(std::vector<Val>& orig, const std::vector<Val>& extra)
+    {
+        orig.insert(orig.end(), extra.begin(),extra.end());
+    }
+
     KDL::Frame getFrame(Eigen::VectorXdRefConst val);
 
     bool contains(std::string key, const std::vector<std::string>& vec);

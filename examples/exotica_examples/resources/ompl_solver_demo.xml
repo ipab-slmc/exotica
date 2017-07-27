@@ -15,7 +15,7 @@
       </Scene>
     </PlanningScene>
 
-    <Goal>-0.134914 -0.229508 -0.124971 1.94267 -1.4921e-17 0.0 0.0</Goal>
+    <Goal>2.16939  0.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
   </SamplingProblem>
 
 </PlannerDemoConfig>

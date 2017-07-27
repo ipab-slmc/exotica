@@ -56,6 +56,7 @@ namespace exotica
       PlanningProblemInitializer init(init_);
 
       TaskMaps.clear();
+      Tasks.clear();
 
       // Create the scene
       scene_.reset(new Scene());
@@ -82,19 +83,22 @@ namespace exotica
 
           Request.Frames.insert(Request.Frames.end(), frames.begin(), frames.end());
           TaskMaps[NewMap->getObjectName()] = NewMap;
+          Tasks.push_back(NewMap);
       }
 
       std::shared_ptr<KinematicResponse> Response = scene_->RequestKinematics(Request);
-      int i=0;
       id=0;
-      for(auto& map : TaskMaps)
+      int idJ=0;
+      for(int i=0; i<Tasks.size(); i++)
       {
-          map.second->Kinematics.Create(Response);
-          map.second->Id = i;
-          map.second->Start = id;
-          map.second->Length = map.second->taskSpaceDim();
-          i++;
-          id += map.second->Length;
+          Tasks[i]->Kinematics.Create(Response);
+          Tasks[i]->Id = i;
+          Tasks[i]->Start = id;
+          Tasks[i]->Length = Tasks[i]->taskSpaceDim();
+          Tasks[i]->StartJ = idJ;
+          Tasks[i]->LengthJ = Tasks[i]->taskSpaceJacobianDim();
+          id += Tasks[i]->Length;
+          idJ += Tasks[i]->LengthJ;
       }
 
       if (init.Maps.size() == 0)
@@ -106,6 +110,11 @@ namespace exotica
   TaskMap_map& PlanningProblem::getTaskMaps()
   {
     return TaskMaps;
+  }
+
+  TaskMap_vec& PlanningProblem::getTasks()
+  {
+      return Tasks;
   }
 
   Scene_ptr PlanningProblem::getScene()

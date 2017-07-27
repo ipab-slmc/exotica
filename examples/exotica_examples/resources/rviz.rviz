@@ -7,9 +7,8 @@ Panels:
         - /Global Options1
         - /Status1
         - /RobotModel1
-        - /PoseArray1
-        - /Marker1
-        - /Marker1/Namespaces1
+        - /TF1
+        - /TF1/Tree1/exotica/world_frame1
       Splitter Ratio: 0.589404
     Tree Height: 1751
   - Class: rviz/Selection
@@ -113,21 +112,64 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Arrow Length: 0.1
-      Class: rviz/PoseArray
-      Color: 255; 25; 0
+    - Class: rviz/TF
       Enabled: true
-      Name: PoseArray
-      Topic: /xsens_debug
-      Unreliable: false
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /InteractionMesh
-      Name: Marker
-      Namespaces:
-        {}
-      Queue Size: 10
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        exotica/Frame0Alwr_arm_6_link:
+          Value: true
+        exotica/Frame0Bworld_frame:
+          Value: true
+        exotica/base:
+          Value: false
+        exotica/lwr_arm_0_link:
+          Value: false
+        exotica/lwr_arm_1_link:
+          Value: false
+        exotica/lwr_arm_2_link:
+          Value: false
+        exotica/lwr_arm_3_link:
+          Value: false
+        exotica/lwr_arm_4_link:
+          Value: false
+        exotica/lwr_arm_5_link:
+          Value: false
+        exotica/lwr_arm_6_link:
+          Value: false
+        exotica/lwr_arm_7_link:
+          Value: false
+        exotica/world_frame:
+          Value: false
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        exotica/world_frame:
+          exotica/Frame0Bworld_frame:
+            exotica/Frame0Alwr_arm_6_link:
+              {}
+          exotica/base:
+            {}
+          exotica/lwr_arm_0_link:
+            {}
+          exotica/lwr_arm_1_link:
+            {}
+          exotica/lwr_arm_2_link:
+            {}
+          exotica/lwr_arm_3_link:
+            {}
+          exotica/lwr_arm_4_link:
+            {}
+          exotica/lwr_arm_5_link:
+            {}
+          exotica/lwr_arm_6_link:
+            {}
+          exotica/lwr_arm_7_link:
+            {}
+      Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
@@ -153,22 +195,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.85509
+      Distance: 3.81298
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.0761497
-        Y: 0.0373956
-        Z: 0.0101348
+        X: 0.0264329
+        Y: -0.0667396
+        Z: 0.139345
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.494797
+      Pitch: 0.589797
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.0472035
+      Yaw: 0.517203
     Saved: ~
 Window Geometry:
   Displays:

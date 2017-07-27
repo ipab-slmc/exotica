@@ -39,6 +39,72 @@
 namespace exotica
 {
 
+    KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type)
+    {
+        switch(type)
+        {
+        case RotationType::QUATERNION:
+            if(data.sum()==0.0) throw_pretty("Invalid quaternion transform!");
+            return KDL::Rotation::Quaternion(data(0), data(1), data(2), data(3));
+        case RotationType::RPY:
+            return KDL::Rotation::RPY(data(0), data(1), data(2));
+        case RotationType::ZYX:
+            return KDL::Rotation::EulerZYX(data(0), data(1), data(2));
+        case RotationType::ZYZ:
+            return KDL::Rotation::EulerZYZ(data(0), data(1), data(2));
+        case RotationType::ANGLE_AXIS:
+            {
+                KDL::Vector axis(data(0), data(1), data(2));
+                double angle = axis.Norm();
+                if(fabs(angle)>1e-10)
+                {
+                    return KDL::Rotation::Rot(axis, angle);
+                }
+                else
+                {
+                    return KDL::Rotation();
+                }
+            }
+        case RotationType::MATRIX:
+            if(data.sum()==0.0) throw_pretty("Invalid matrix transform!");
+            return KDL::Rotation(data(0), data(1), data(2),
+                                 data(3), data(4), data(5),
+                                 data(6), data(7), data(8));
+        }
+        throw_pretty("Unknown rotation represntation type!");
+    }
+
+    Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type)
+    {
+        Eigen::VectorXd ret;
+        switch(type)
+        {
+        case RotationType::QUATERNION:
+            ret.resize(4);
+            data.GetQuaternion(ret(0), ret(1), ret(2), ret(3));
+            return ret;
+        case RotationType::RPY:
+            ret.resize(3);
+            data.GetRPY(ret(0), ret(1), ret(2));
+            return ret;
+        case RotationType::ZYX:
+            ret.resize(3);
+            data.GetEulerZYX(ret(0), ret(1), ret(2));
+            return ret;
+        case RotationType::ZYZ:
+            ret.resize(3);
+            data.GetEulerZYZ(ret(0), ret(1), ret(2));
+            return ret;
+        case RotationType::ANGLE_AXIS:
+            ret = Eigen::Map<const Eigen::Vector3d>(data.GetRot().data);
+            return ret;
+        case RotationType::MATRIX:
+            ret = Eigen::Map<const Eigen::VectorXd>(data.data, 9);
+            return ret;
+        }
+        throw_pretty("Unknown rotation represntation type!");
+    }
+
     std_msgs::ColorRGBA randomColor()
     {
         std_msgs::ColorRGBA ret;

@@ -82,6 +82,7 @@ add_library(${PROJECT_NAME}
   src/Scene.cpp
   src/Property.cpp
   src/KinematicTree.cpp
+  src/TaskSpaceVector.cpp
   src/Tools/Exception.cpp
   src/Tools/Printable.cpp
   src/Tools/Conversions.cpp

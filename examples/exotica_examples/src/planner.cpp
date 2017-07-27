@@ -39,16 +39,13 @@ void run()
             // This sets the precision of all time steps BUT the last one to zero
             // This means we only aim to minimize the task cost in the last time step
             // The rest of the trajectory minimizes the control cost
-            problem->setRho("Position",0.0,t);
+            problem->setRho("Frame",0.0,t);
         }
-        Eigen::VectorXd goal(3);
-        goal << 0.4, -0.1, 0.5;
-        problem->setGoal("Position", goal, problem->T-1);
+        problem->setRho("Frame",1e3,99);
     }
 
     // Create the initial configuration
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(
-                any_problem->getScene()->getNumJoints());
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumJoints());
     Eigen::MatrixXd solution;
     ROS_INFO_STREAM("Calling solve()");
     {
@@ -65,12 +62,17 @@ void run()
         ROS_INFO_STREAM_THROTTLE(0.5, "Publishing states to rviz ...");
         while (ros::ok())
         {
-            any_problem->getScene()->Update(solution.row(t).transpose());
-            any_problem->getScene()->getSolver().publishFrames();
+            int i = 1;
+            if(t==0 || t==solution.rows()-1) i = 30;
+            while(i-->0)
+            {
+                any_problem->getScene()->Update(solution.row(t).transpose());
+                any_problem->getScene()->getSolver().publishFrames();
 
+                ros::spinOnce();
+                loop_rate.sleep();
+            }
             t = t + 1 >= solution.rows() ? 0 : t + 1;
-            ros::spinOnce();
-            loop_rate.sleep();
         }
     }
 

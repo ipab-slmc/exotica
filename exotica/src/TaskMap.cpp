@@ -38,7 +38,7 @@
 namespace exotica
 {
 
-  TaskMap::TaskMap()
+  TaskMap::TaskMap() : Id(-1), Start(-1), Length(-1), StartJ(-1), LengthJ(-1)
   {
 
   }

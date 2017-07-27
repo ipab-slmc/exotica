@@ -61,6 +61,7 @@ namespace exotica
 
       static void Destroy()
       {
+          Server::destroy();
           if (singleton_initialiser_) singleton_initialiser_.reset();
       }
 

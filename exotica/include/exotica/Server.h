@@ -147,6 +147,8 @@ namespace exotica
        * @return	Server name
        */
       std::string getName();
+
+      static void destroy();
     private:
       /*
        * \brief	Constructor

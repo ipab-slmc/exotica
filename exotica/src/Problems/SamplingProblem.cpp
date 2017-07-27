@@ -85,6 +85,11 @@ namespace exotica
       }
   }
 
+  void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
+  {
+      goal_ = qT;
+  }
+
   void SamplingProblem::Update(Eigen::VectorXdRefConst x)
   {
       scene_->Update(x);

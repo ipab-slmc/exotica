@@ -1,7 +1,7 @@
 /*
  *      Author: Vladimir Ivan
  * 
- * Copyright (c) 2016, University Of Edinburgh 
+ * Copyright (c) 2017, University Of Edinburgh
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -67,7 +67,7 @@ namespace exotica //!< Since this is part of the core library, it will be within
       bool debug;
       double eps;
   };
-  typedef boost::shared_ptr<SphereCollision> SphereCollision_ptr;  //!< Task Map smart pointer
+  typedef std::shared_ptr<SphereCollision> SphereCollision_ptr;  //!< Task Map smart pointer
 }
 
 #endif

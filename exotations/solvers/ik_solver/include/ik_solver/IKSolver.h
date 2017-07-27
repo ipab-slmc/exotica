@@ -82,7 +82,7 @@ namespace exotica
       Eigen::MatrixXd Winv;
       int iterations_;
   };
-  typedef boost::shared_ptr<exotica::IKsolver> IKsolver_ptr;
+  typedef std::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }
 
 #endif /* IK_SOLVER_H_ */

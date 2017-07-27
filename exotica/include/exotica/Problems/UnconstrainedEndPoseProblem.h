@@ -68,7 +68,7 @@ namespace exotica
         int NumTasks;
 
     };
-    typedef boost::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
+    typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
 }
 
 #endif

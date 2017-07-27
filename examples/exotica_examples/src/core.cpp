@@ -1,8 +1,7 @@
 /*
- *  Created on: 23 Jul 2014
  *      Author: Vladimir Ivan
  *
- * Copyright (c) 2016, University Of Edinburgh
+ * Copyright (c) 2017, University Of Edinburgh
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

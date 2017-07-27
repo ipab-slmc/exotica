@@ -33,7 +33,7 @@
 #ifndef EXOTICA_OBJECT_FACTORY_H
 #define EXOTICA_OBJECT_FACTORY_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <map>
 #include <typeinfo>
 
@@ -94,12 +94,12 @@ namespace exotica
       }
 
 
-      boost::shared_ptr<BaseClass> createInstance(const std::string & type)
+      std::shared_ptr<BaseClass> createInstance(const std::string & type)
       {
           auto it = type_registry_.find(type);  //!< Attempt to find it
           if (it != type_registry_.end())       //!< If exists
           {
-             return boost::shared_ptr<BaseClass>(it->second());
+             return std::shared_ptr<BaseClass>(it->second());
           }
           else
           {

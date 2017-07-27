@@ -45,11 +45,6 @@
 #include <std_msgs/ColorRGBA.h>
 
 /**
- * \brief A convenience macro for the boost scoped lock
- */
-#define LOCK(x) boost::mutex::scoped_lock(x)
-
-/**
  * \brief A double-wrapper MACRO functionality for generating unique object names: The actual functionality is provided by EX_UNIQ (for 'exotica unique')
  */
 #define EX_CONC(x, y) x ## y
@@ -98,4 +93,29 @@ namespace exotica
 
   void getText(std::string& txt, KDL::Frame& ret);
 }
+
+namespace
+{
+    template<class SharedPointer> struct Holder
+    {
+        SharedPointer p;
+
+        Holder(const SharedPointer &p) : p(p) {}
+        Holder(const Holder &other) : p(other.p) {}
+        Holder(Holder &&other) : p(std::move(other.p)) {}
+
+        void operator () (...) { p.reset(); }
+    };
+}
+
+template<class T> std::shared_ptr<T> to_std_ptr(const boost::shared_ptr<T> &p)
+{
+    return std::shared_ptr<T>(p.get(), Holder<boost::shared_ptr<T>>(p));
+}
+
+template<class T> std::shared_ptr<T> to_std_ptr(const std::shared_ptr<T> &p)
+{
+    return p;
+}
+
 #endif

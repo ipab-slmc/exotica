@@ -38,8 +38,6 @@
 #include "ompl_solver/common.h"
 #include <ompl/geometric/PathSimplifier.h>
 #include <ompl/base/DiscreteMotionValidator.h>
-#include <boost/thread/mutex.hpp>
-#include <boost/shared_ptr.hpp>
 #include <pluginlib/class_loader.h>
 #include <exotica/Property.h>
 
@@ -136,8 +134,6 @@ namespace exotica
 
       /// \brief Planner termination criteria
       const ob::PlannerTerminationCondition *ptc_;
-      /// \brief Planner termination criteria mutex
-      boost::mutex ptc_lock_;
 
       /// \bierf True when the solver finished its work and background threads need to finish.
       bool finishedSolving_;
@@ -154,7 +150,7 @@ namespace exotica
       ros::Duration planning_time_;
 
   };
-  typedef boost::shared_ptr<exotica::OMPLBaseSolver> OMPLBaseSolver_ptr;
+  typedef std::shared_ptr<exotica::OMPLBaseSolver> OMPLBaseSolver_ptr;
 }
 
 #endif /* EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLBASESOLVER_H_ */

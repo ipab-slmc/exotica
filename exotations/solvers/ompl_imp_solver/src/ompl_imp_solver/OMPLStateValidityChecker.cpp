@@ -59,14 +59,23 @@ namespace exotica
   {
     Eigen::VectorXd q(prob_->getSpaceDim());
     if (compound_)
-      boost::static_pointer_cast<OMPLSE3RNStateSpace>(
-          sol_->getOMPLStateSpace())->OMPLStateToEigen(state, q);
+    {
+#ifdef ROS_INDIGO
+        boost::static_pointer_cast<OMPLSE3RNStateSpace>(sol_->getOMPLStateSpace())->OMPLStateToEigen(state, q);
+#elif ROS_KINETIC
+        std::static_pointer_cast<OMPLSE3RNStateSpace>(sol_->getOMPLStateSpace())->OMPLStateToEigen(state, q);
+#endif
+    }
     else
-      boost::static_pointer_cast<OMPLStateSpace>(sol_->getOMPLStateSpace())->copyFromOMPLState(
-          state, q);
+    {
+#ifdef ROS_INDIGO
+        boost::static_pointer_cast<OMPLStateSpace>(sol_->getOMPLStateSpace())->copyFromOMPLState(state, q);
+#elif ROS_KINETIC
+        std::static_pointer_cast<OMPLStateSpace>(sol_->getOMPLStateSpace())->copyFromOMPLState(state, q);
+#endif
+    }
 
     {
-      boost::mutex::scoped_lock lock(prob_->getLock());
       prob_->update(q, 0);
 
 // TODO: Implement this

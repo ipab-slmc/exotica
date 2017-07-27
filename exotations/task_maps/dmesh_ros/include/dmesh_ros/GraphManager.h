@@ -80,9 +80,6 @@ namespace exotica
       //	Initialisation flag
       bool initialised_;
 
-      //	Scoped locker
-      boost::mutex::scoped_lock lock_;
-
       //	For ROS
       //	External object callback
       void extCallback(const exotica::MeshVertexConstPtr & ext);

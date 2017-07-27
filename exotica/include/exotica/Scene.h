@@ -59,7 +59,7 @@
 namespace exotica
 {
   typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
-  typedef std::vector<boost::shared_ptr<fcl::CollisionObject> > fcls_ptr;
+  typedef std::vector<std::shared_ptr<fcl::CollisionObject> > fcls_ptr;
 
 ///	The class of collision scene
   class CollisionScene : public Uncopyable
@@ -219,7 +219,7 @@ namespace exotica
 
   };
 
-  typedef boost::shared_ptr<CollisionScene> CollisionScene_ptr;
+  typedef std::shared_ptr<CollisionScene> CollisionScene_ptr;
 
 ///	The class of EXOTica Scene
   class Scene: public Object, Uncopyable, public Instantiable<SceneInitializer>
@@ -272,7 +272,7 @@ namespace exotica
       bool visual_debug_;
       ros::Publisher ps_pub_;
   };
-  typedef boost::shared_ptr<Scene> Scene_ptr;
+  typedef std::shared_ptr<Scene> Scene_ptr;
 //  typedef std::map<std::string, Scene_ptr> Scene_map;
 
 }	//	namespace exotica

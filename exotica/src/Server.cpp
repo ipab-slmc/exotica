@@ -121,7 +121,6 @@ namespace exotica
 
   bool Server::hasParam(const std::string & name)
   {
-    LOCK(param_lock_);
     if (params_.find(name) == params_.end()) return false;
     return true;
   }

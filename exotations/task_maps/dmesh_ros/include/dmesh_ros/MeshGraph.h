@@ -35,7 +35,6 @@
 
 #include <string>
 #include <eigen_conversions/eigen_msg.h>
-#include <boost/thread/mutex.hpp>
 #include <exotica/Tools.h>
 #include <exotica/MeshVertexArray.h>
 #include <exotica/MeshVertex.h>
@@ -147,7 +146,7 @@ namespace exotica
        * @return	Distance between two vertex, -1 if something wrong
        */
       double distance(const Vertex & other);
-      double distance(const boost::shared_ptr<Vertex> & other);
+      double distance(const std::shared_ptr<Vertex> & other);
       double distance(const Eigen::Vector3d & other);
 
       /**
@@ -199,7 +198,7 @@ namespace exotica
   };
 
 //	Vertex smart pointer
-  typedef boost::shared_ptr<Vertex> VertexPtr;
+  typedef std::shared_ptr<Vertex> VertexPtr;
 
 //	Graph initialiser
   struct GraphProperties
@@ -442,7 +441,7 @@ namespace exotica
   };
 
 //	Graph smart pointer
-  typedef boost::shared_ptr<MeshGraph> MeshGraphPtr;
+  typedef std::shared_ptr<MeshGraph> MeshGraphPtr;
 }	//namespace exotica
 
 #endif /* MESHGRAPH_H_ */

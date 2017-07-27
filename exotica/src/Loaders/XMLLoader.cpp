@@ -5,7 +5,7 @@
 namespace exotica
 {
 
-    boost::shared_ptr<XMLLoader> XMLLoader::instance_ = nullptr;
+    std::shared_ptr<XMLLoader> XMLLoader::instance_ = nullptr;
 
     XMLLoader::XMLLoader()
     {

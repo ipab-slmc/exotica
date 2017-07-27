@@ -60,7 +60,7 @@ namespace exotica
     };
 
     typedef exotica::Factory<exotica::MotionSolver> MotionSolver_fac;
-    typedef boost::shared_ptr<exotica::MotionSolver> MotionSolver_ptr;
+    typedef std::shared_ptr<exotica::MotionSolver> MotionSolver_ptr;
 }
 
 #endif

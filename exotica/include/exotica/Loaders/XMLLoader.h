@@ -9,7 +9,7 @@ namespace exotica
 class XMLLoader
 {
 public:
-    static boost::shared_ptr<XMLLoader> Instance()
+    static std::shared_ptr<XMLLoader> Instance()
     {
       if (!instance_) instance_.reset(new XMLLoader);
       return instance_;
@@ -33,7 +33,7 @@ public:
 
 private:
     XMLLoader();
-    static boost::shared_ptr<XMLLoader> instance_;
+    static std::shared_ptr<XMLLoader> instance_;
 };
 
 }

@@ -92,6 +92,13 @@ namespace exotica
       const Eigen::Ref<const Eigen::MatrixXd> mat);
 
   void getText(std::string& txt, KDL::Frame& ret);
+
+  template<typename T> std::vector<std::string> getKeys(std::map<std::string, T> map)
+  {
+      std::vector<std::string> ret;
+      for(auto& it : map) ret.push_back(it.first);
+      return ret;
+  }
 }
 
 namespace

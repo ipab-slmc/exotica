@@ -75,6 +75,7 @@ namespace exotica
   void OMPLsolver::Solve(Eigen::VectorXdRefConst q0,
       Eigen::MatrixXd & solution)
   {
+    setGoalState(prob_->goal_);
     if (base_solver_->solve(q0, solution))
     {
       HIGHLIGHT("OMPL solving succeeded, planning time "<<base_solver_->getPlanningTime()<<"sec");
@@ -91,7 +92,6 @@ namespace exotica
     MotionSolver::specifyProblem(pointer);
     prob_ = std::static_pointer_cast<SamplingProblem>(pointer);
     base_solver_->specifyProblem(prob_);
-    setGoalState(prob_->goal_);
   }
 
   template<typename T> static ompl::base::PlannerPtr allocatePlanner(

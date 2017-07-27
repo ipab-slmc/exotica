@@ -67,7 +67,7 @@ namespace exotica
 
       SamplingProblemInitializer Parameters;
 
-      void setGoalState(const Eigen::VectorXd & qT, const double eps = std::numeric_limits<double>::epsilon()) {}
+      void setGoalState(Eigen::VectorXdRefConst qT);
 
       Eigen::VectorXd goal_;
     private:

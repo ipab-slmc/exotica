@@ -35,6 +35,8 @@
 #include <boost/algorithm/string.hpp>
 #include <random>
 #include <iostream>
+#include <typeinfo> //!< The RTTI Functionality of C++
+#include <cxxabi.h> //!< The demangler for gcc... this makes this system dependent!
 
 namespace exotica
 {
@@ -197,6 +199,18 @@ namespace exotica
 
       ret.p = KDL::Vector(doubleVector[0],doubleVector[1],doubleVector[2]);
       ret.M = KDL::Rotation::Quaternion(doubleVector[4],doubleVector[5],doubleVector[6],doubleVector[3]);
+  }
+
+  std::string getTypeName(const std::type_info& type)
+  {
+      int status;
+      std::string name;
+      char * temp; //!< We need to store this to free the memory!
+
+      temp = abi::__cxa_demangle(type.name(), 0, 0, &status);
+      name = std::string(temp);
+      free(temp);
+      return name;
   }
 
 }

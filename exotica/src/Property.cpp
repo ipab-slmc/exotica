@@ -15,7 +15,7 @@ bool Property::isSet() const {return !value.empty();}
 bool Property::isStringType() const {return value.type()==typeid(std::string);}
 bool Property::isInitializerVectorType() const {return value.type()==typeid(std::vector<exotica::Initializer>);}
 std::string Property::getName() const {return name;}
-std::string Property::getType() const {return value.type().name();}
+std::string Property::getType() const {return getTypeName(value.type());}
 Property::Property(std::initializer_list<boost::any> val_)
 {
     std::vector<boost::any> val(val_);

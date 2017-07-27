@@ -99,6 +99,8 @@ namespace exotica
       for(auto& it : map) ret.push_back(it.first);
       return ret;
   }
+
+  std::string getTypeName(const std::type_info& type);
 }
 
 namespace

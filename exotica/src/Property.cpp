@@ -6,7 +6,6 @@ namespace exotica
 // //////////////////////////////// Property //////////////////////////////////////
 
 boost::any Property::get() const {return value;}
-template<typename C> void Property::set(const C val) {value = val;}
 Property::Property(std::string prop_name) : name(prop_name), required(true) {}
 Property::Property(std::string prop_name, bool isRequired) : name(prop_name), required(isRequired) {}
 Property::Property(std::string prop_name, bool isRequired, boost::any val) : name(prop_name), required(isRequired) {value = val;}
@@ -67,6 +66,11 @@ bool Initializer::hasProperty(std::string name_) const
 boost::any Initializer::getProperty(std::string name_) const
 {
     return properties.at(name_).get();
+}
+
+void Initializer::setProperty(std::string name_, boost::any value)
+{
+    properties.at(name_).set(value);
 }
 
 void Initializer::setName(std::string name_)

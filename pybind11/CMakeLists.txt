@@ -10,13 +10,14 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 catkin_package(
-  INCLUDE_DIRS pybind11/include ${EIGEN3_INCLUDE_DIR}
+  INCLUDE_DIRS include pybind11/include ${EIGEN3_INCLUDE_DIR}
   LIBRARIES
   CATKIN_DEPENDS
   CFG_EXTRAS pybind.cmake
 )
 
 include_directories(
+  include
   pybind11/include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}

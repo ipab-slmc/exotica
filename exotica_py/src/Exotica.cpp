@@ -410,9 +410,12 @@ PYBIND11_MODULE(exotica_py, module)
     samplingProblem.def("getBounds", &SamplingProblem::getBounds);
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
+    scene.def("Update", &Scene::Update);
+    scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");
+    kinematicTree.def("publishFrames", &KinematicTree::publishFrames);
 
     py::class_<KinematicFrameRequest, std::shared_ptr<KinematicFrameRequest>> kinFrameReq(kin, "KinematicFrameRequest");
     kinFrameReq.def(py::init<std::string, KDL::Frame, std::string, KDL::Frame>());

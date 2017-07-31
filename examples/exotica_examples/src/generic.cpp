@@ -41,11 +41,11 @@ void run()
     // Scene using joint group 'arm'
     Initializer scene("Scene",{{"Name",std::string("MyScene")},{"JointGroup",std::string("arm")}});
     // End-effector task map with two position frames
-    Initializer map("exotica/EffPosition",{
+    Initializer map("exotica/EffFrame",{
                         {"Name",std::string("Position")},
                         {"Scene",std::string("MyScene")},
                         {"EndEffector",std::vector<Initializer>({
-                             Initializer("Frame",{{"Link",std::string("lwr_arm_6_link")}}),
+                             Initializer("Frame",{{"Link",std::string("lwr_arm_6_link")}, {"LinkOffset", Eigen::VectorTransform(0 ,0 ,0 ,0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17)}}),
                          })}});
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
@@ -96,7 +96,7 @@ void run()
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
         my_problem->y = {0.6,
                 -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-                0.5 + sin(t * M_PI * 0.5) * 0.2};
+                0.5 + sin(t * M_PI * 0.5) * 0.2 ,0 ,0 ,0};
 
         // Solve the problem using the IK solver
         any_solver->Solve(q, solution);

@@ -4,7 +4,8 @@ import exotica_py as exo
 import rospkg
 from numpy import array
 from numpy import matrix
-import matplotlib.pyplot as plt
+
+from publish_trajectory import *
 
 def findpkg(pkg):
     return rospkg.RosPack().get_path(pkg)
@@ -16,5 +17,6 @@ solver.specifyProblem(problem)
 
 solution = solver.solve(array([0.0]*7))
 
-plt.plot(solution,'.-')
-plt.show()
+plot(solution)
+
+publishTrajectory(solution, 3.0, problem)

@@ -4,7 +4,7 @@ import exotica_py as exo
 import rospkg
 from numpy import array
 from numpy import matrix
-import matplotlib.pyplot as plt
+
 
 from publish_trajectory import *
 
@@ -25,13 +25,12 @@ for t in range(0,problem.T):
     if t<problem.T/5:
         problem.setRho('Frame',0.0,t)
     else:
-        problem.setRho('Frame',1e4,t)
+        problem.setRho('Frame',1e5,t)
         problem.setGoal('Frame',figureEight(t*problem.tau),t)
 
 solution = solver.solve(array([0.0]*7))
 
-plt.plot(solution,'.-')
-plt.show(False)
+plot(solution)
 
 publishTrajectory(solution, problem.T*problem.tau, problem)
 

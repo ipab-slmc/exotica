@@ -6,6 +6,8 @@ from numpy import array
 from numpy import matrix
 import matplotlib.pyplot as plt
 
+from publish_trajectory import *
+
 import math
 
 def figureEight(t):
@@ -29,4 +31,7 @@ for t in range(0,problem.T):
 solution = solver.solve(array([0.0]*7))
 
 plt.plot(solution,'.-')
-plt.show()
+plt.show(False)
+
+publishTrajectory(solution, problem.T*problem.tau, problem)
+

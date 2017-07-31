@@ -20,20 +20,19 @@
     </PlanningScene>
 
     <Maps>
-      <EffFrame Name="Frame">
+      <EffPosition Name="Frame">
         <Scene>MyScene</Scene>
-        <Type>RPY</Type>
         <EndEffector>
-            <Frame Link="lwr_arm_6_link" BaseOffset="0.6 -0.1 0.5 0 0 0 1" />
+            <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0 0 0 1" BaseOffset="0.6 -0.1 0.5 0 0 0 1" />
         </EndEffector>
-      </EffFrame>
+      </EffPosition>
     </Maps>
    
-    <T>100</T>
-    <Tau>0.05</Tau>
+    <T>400</T>
+    <Tau>0.02</Tau>
     <Qrate>1e-10</Qrate>
     <Hrate>1</Hrate>
-    <Wrate>1e2</Wrate>
+    <Wrate>1e5</Wrate>
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedTimeIndexedProblem>
 

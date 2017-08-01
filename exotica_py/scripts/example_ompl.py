@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 
 import exotica_py as exo
-import rospkg
 from numpy import array
 from numpy import matrix
-
 from publish_trajectory import *
 
-def findpkg(pkg):
-    return rospkg.RosPack().get_path(pkg)
 
-(sol, prob)=exo.Initializers.loadXMLFull(findpkg('exotica_examples')+'/resources/ompl_solver_demo.xml')
+(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica_examples')+'/resources/ompl_solver_demo.xml')
 problem = exo.Setup.createProblem(prob)
 solver = exo.Setup.createSolver(sol)
 solver.specifyProblem(problem)

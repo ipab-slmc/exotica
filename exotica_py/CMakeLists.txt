@@ -3,14 +3,12 @@ project(exotica_py)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  pybind11
+  pybind11 
 )
 
 catkin_package(
-#  INCLUDE_DIRS include
   LIBRARIES exotica_py
   CATKIN_DEPENDS exotica pybind11
-#  DEPENDS system_lib
 )
 
 include_directories(

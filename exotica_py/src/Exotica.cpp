@@ -3,6 +3,45 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
+#include <ros/package.h>
+
+#ifndef PyInt_Check
+bool PyInt_Check(PyObject* value_py) {return PyLong_Check(value_py);}
+#endif
+
+#ifndef PyInt_AsLong
+long PyInt_AsLong(PyObject* value_py) {return PyLong_AsLong(value_py);}
+#endif
+
+bool isPyString(PyObject* value_py)
+{
+#ifndef PyString_Check
+    return PyUnicode_Check(value_py);
+#else
+    return PyString_Check(value_py);
+#endif
+}
+
+std::string pyAsString(PyObject* value_py)
+{
+#ifndef PyString_AsString
+    PyObject* tmp = PyUnicode_AsASCIIString(value_py);
+    std::string ret = std::string(PyBytes_AsString(tmp));
+    Py_DECREF(tmp);
+    return ret;
+#else
+    return std::string(PyString_AsString(PyObject* value));
+#endif
+}
+
+PyObject* stringAsPy(std::string value)
+{
+#ifndef PyString_FromString
+    return PyUnicode_DecodeASCII(value.c_str(),value.size(), "");
+#else
+    return PyString_FromString(value.c_str());
+#endif
+}
 
 using namespace exotica;
 namespace py = pybind11;
@@ -83,14 +122,14 @@ namespace detail {
         {
             if(target.getType()=="std::string")
             {
-                target.set(std::string(PyString_AsString(value_py)));
+                target.set(pyAsString(value_py));
                 return true;
             }
             else if(target.getType()=="int")
             {
-                if(PyString_Check(value_py) || PyUnicode_Check(value_py))
+                if(isPyString(value_py))
                 {
-                    target.set(parseInt(std::string(PyString_AsString(value_py))));
+                    target.set(parseInt(pyAsString(value_py)));
                     return true;
                 }
                 else if(PyInt_Check(value_py))
@@ -101,9 +140,9 @@ namespace detail {
             }
             else if(target.getType()=="long")
             {
-                if(PyString_Check(value_py) || PyUnicode_Check(value_py))
+                if(isPyString(value_py))
                 {
-                    target.set((long)parseInt(std::string(PyString_AsString(value_py))));
+                    target.set((long)parseInt(pyAsString(value_py)));
                     return true;
                 }
                 else if(PyInt_Check(value_py))
@@ -114,9 +153,9 @@ namespace detail {
             }
             else if(target.getType()=="double")
             {
-                if(PyString_Check(value_py) || PyUnicode_Check(value_py))
+                if(isPyString(value_py))
                 {
-                    target.set(parseDouble(std::string(PyString_AsString(value_py))));
+                    target.set(parseDouble(pyAsString(value_py)));
                     return true;
                 }
                 else if(PyFloat_Check(value_py))
@@ -127,9 +166,9 @@ namespace detail {
             }
             else if(target.getType()=="Eigen::Matrix<double, -1, 1, 0, -1, 1>")
             {
-                if(PyString_Check(value_py) || PyUnicode_Check(value_py))
+                if(isPyString(value_py))
                 {
-                    target.set(parseVector(std::string(PyString_AsString(value_py))));
+                    target.set(parseVector(pyAsString(value_py)));
                 }
                 else
                 {
@@ -139,9 +178,9 @@ namespace detail {
             }
             else if(target.getType()=="bool")
             {
-                if(PyString_Check(value_py) || PyUnicode_Check(value_py))
+                if(isPyString(value_py))
                 {
-                    target.set(parseBool(std::string(PyString_AsString(value_py))));
+                    target.set(parseBool(pyAsString(value_py)));
                     return true;
                 }
                 else if(PyBool_Check(value_py))
@@ -210,8 +249,8 @@ namespace detail {
             if(sz<1 || sz>2) return false;
 
             PyObject* name_py = PyTuple_GetItem(source, 0);
-            if(!PyString_Check(name_py)) return false;
-            std::string name(PyString_AsString(name_py));
+            if(!isPyString(name_py)) return false;
+            std::string name = pyAsString(name_py);
 
             ret = Initializer(knownInitializers.at(name));
 
@@ -225,10 +264,10 @@ namespace detail {
 
                 while (PyDict_Next(dict, &pos, &key, &value_py))
                 {
-                     std::string key_str(PyString_AsString(key));
+                     std::string key_str = pyAsString(key);
                      if(ret.properties.find( key_str ) == ret.properties.end())
                      {
-                         ret.addProperty(Property(key_str, false, boost::any(std::string(PyString_AsString(value_py)))));
+                         ret.addProperty(Property(key_str, false, boost::any(pyAsString(value_py))));
                      }
                      else
                      {
@@ -255,7 +294,7 @@ namespace detail {
             {
                 addPropertyToDict(dict, prop.first, prop.second);
             }
-            return PyTuple_Pack(2,PyString_FromString(src.getName().c_str()), dict);
+            return PyTuple_Pack(2,stringAsPy(src.getName()), dict);
         }
 
         static void addPropertyToDict(PyObject* dict, const std::string& name, const Property& prop)
@@ -329,6 +368,7 @@ PYBIND11_MODULE(exotica_py, module)
     setup.def_static("createProblem",&createProblem);
     setup.def_static("printSupportedClasses",&Setup::printSupportedClasses);
     setup.def_static("getInitializers",&Setup::getInitializers);
+    setup.def_static("getPackagePath",&ros::package::getPath);
 
     py::class_<Object, std::shared_ptr<Object>> object(module, "Object");
     object.def("getType", &Object::type, "Object type");

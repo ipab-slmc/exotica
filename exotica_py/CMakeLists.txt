@@ -7,7 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
-  LIBRARIES exotica_py
+  LIBRARIES
   CATKIN_DEPENDS exotica pybind11
 )
 
@@ -16,3 +16,4 @@ include_directories(
 )
 
 pybind_add_module(exotica_py MODULE src/Exotica.cpp)
+install(TARGETS exotica_py LIBRARY DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION})

@@ -5,6 +5,7 @@ add_definitions(-DEXOTICA_DEBUG_MODE)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
+  exotica_py
   geometry_msgs
 )
 
@@ -48,6 +49,9 @@ add_library(${PROJECT_NAME} src/CoM.cpp
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
+
+pybind_add_module(${PROJECT_NAME}_py MODULE src/task_map_py.cpp)
+install(TARGETS ${PROJECT_NAME}_py LIBRARY DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION})
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

@@ -30,7 +30,7 @@
  *
  */
 
-#include "EffPosition.h"
+#include "task_map/EffPosition.h"
 
 REGISTER_TASKMAP_TYPE("EffPosition", exotica::EffPosition);
 

@@ -30,7 +30,7 @@
  *
  */
 
-#include "Identity.h"
+#include "task_map/Identity.h"
 
 REGISTER_TASKMAP_TYPE("Identity", exotica::Identity);
 

@@ -30,7 +30,7 @@
  *
  */
 
-#include "CoM.h"
+#include "task_map/CoM.h"
 
 REGISTER_TASKMAP_TYPE("CoM", exotica::CoM);
 

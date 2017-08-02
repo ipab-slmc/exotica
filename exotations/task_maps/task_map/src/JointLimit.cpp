@@ -30,7 +30,7 @@
  *
  */
 
-#include "JointLimit.h"
+#include "task_map/JointLimit.h"
 
 REGISTER_TASKMAP_TYPE("JointLimit", exotica::JointLimit);
 

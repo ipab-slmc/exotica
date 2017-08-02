@@ -30,7 +30,7 @@
  *
  */
 
-#include "EffOrientation.h"
+#include "task_map/EffOrientation.h"
 
 REGISTER_TASKMAP_TYPE("EffOrientation", exotica::EffOrientation);
 

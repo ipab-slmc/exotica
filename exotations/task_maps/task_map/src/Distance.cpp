@@ -30,7 +30,7 @@
  *
  */
 
-#include "Distance.h"
+#include "task_map/Distance.h"
 
 REGISTER_TASKMAP_TYPE("Distance", exotica::Distance);
 

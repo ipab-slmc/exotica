@@ -53,26 +53,6 @@
 namespace exotica
 {
 
-    enum RotationType
-    {
-        QUATERNION,
-        RPY,
-        ZYX,
-        ZYZ,
-        ANGLE_AXIS,
-        MATRIX
-    };
-
-    KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type);
-
-    Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type);
-
-    inline int getRotationTypeLength(RotationType type)
-    {
-        static int types[] = {4, 3, 3, 3, 3, 9};
-        return types[(int)type];
-    }
-
    /**
    * @brief randomColor Generates random opaque color.
    * @return Random color

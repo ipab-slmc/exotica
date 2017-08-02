@@ -5,38 +5,39 @@
 #include <pybind11/eigen.h>
 #include <ros/package.h>
 
-#ifndef PyInt_Check
-bool PyInt_Check(PyObject* value_py) {return PyLong_Check(value_py);}
+#if PY_MAJOR_VERSION<3
+#define PY_OLDSTANDARD
 #endif
 
-#ifndef PyInt_AsLong
+#ifndef PY_OLDSTANDARD
+bool PyInt_Check(PyObject* value_py) {return PyLong_Check(value_py);}
 long PyInt_AsLong(PyObject* value_py) {return PyLong_AsLong(value_py);}
 #endif
 
 bool isPyString(PyObject* value_py)
 {
-#ifndef PyString_Check
+#ifndef PY_OLDSTANDARD
     return PyUnicode_Check(value_py);
 #else
-    return PyString_Check(value_py);
+    return PyString_Check(value_py) || PyUnicode_Check(value_py);
 #endif
 }
 
 std::string pyAsString(PyObject* value_py)
 {
-#ifndef PyString_AsString
+#ifndef PY_OLDSTANDARD
     PyObject* tmp = PyUnicode_AsASCIIString(value_py);
     std::string ret = std::string(PyBytes_AsString(tmp));
     Py_DECREF(tmp);
     return ret;
 #else
-    return std::string(PyString_AsString(PyObject* value));
+    return std::string(PyString_AsString(value_py));
 #endif
 }
 
 PyObject* stringAsPy(std::string value)
 {
-#ifndef PyString_FromString
+#ifndef PY_OLDSTANDARD
     return PyUnicode_DecodeASCII(value.c_str(),value.size(), "");
 #else
     return PyString_FromString(value.c_str());

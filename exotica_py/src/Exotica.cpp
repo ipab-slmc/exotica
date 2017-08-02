@@ -350,6 +350,7 @@ namespace detail {
     };
 }}
 
+
 PYBIND11_MODULE(exotica_py, module)
 {
     //Setup::Instance();
@@ -376,7 +377,16 @@ PYBIND11_MODULE(exotica_py, module)
     object.def("getName", &Object::getObjectName, "Object name");
     object.def("__repr__", &Object::print, "String representation of the object", py::arg("prepend")=std::string(""));
     object.def_readwrite("namespace", &Object::ns_);
-    object.def_readwrite("debug", &Object::debug_);
+    object.def_readwrite("debugMode", &Object::debug_);
+
+    py::enum_<RotationType>(module, "RotationType")
+        .value("Quaternion", RotationType::QUATERNION)
+        .value("RPY", RotationType::RPY)
+        .value("ZYZ", RotationType::ZYZ)
+        .value("ZYX", RotationType::ZYX)
+        .value("AngleAxis", RotationType::ANGLE_AXIS)
+        .value("Matrix", RotationType::MATRIX)
+        .export_values();
 
     py::class_<TaskMap, std::shared_ptr<TaskMap>, Object> taskMap(module, "TaskMap");
     taskMap.def_readonly("id", &TaskMap::Id);
@@ -470,6 +480,20 @@ PYBIND11_MODULE(exotica_py, module)
     kinFrameReq.def_readwrite("frameAOffset", &KinematicFrameRequest::FrameAOffset);
     kinFrameReq.def_readwrite("frameBLinkName", &KinematicFrameRequest::FrameBLinkName);
     kinFrameReq.def_readwrite("frameBOffset", &KinematicFrameRequest::FrameBOffset);
+
+    py::class_<KDL::Frame> kdlFrame (module, "KDLFrame");
+    kdlFrame.def(py::init());
+    kdlFrame.def("__init__", [](KDL::Frame &me, Eigen::MatrixXd other) {me = getFrameFromMatrix(other);});
+    kdlFrame.def("__init__", [](KDL::Frame &me, Eigen::VectorXd other) {me = getFrame(other);});
+    kdlFrame.def("__repr__", [](KDL::Frame* me){return "KDL::Frame "+toString(*me);});
+    kdlFrame.def("getRPY", [](KDL::Frame* me){return getFrameAsVector(*me, RotationType::RPY);});
+    kdlFrame.def("getZYZ", [](KDL::Frame* me){return getFrameAsVector(*me, RotationType::ZYZ);});
+    kdlFrame.def("getZYX", [](KDL::Frame* me){return getFrameAsVector(*me, RotationType::ZYX);});
+    kdlFrame.def("getAngleAxis", [](KDL::Frame* me){return getFrameAsVector(*me, RotationType::ANGLE_AXIS);});
+    kdlFrame.def("getQuaternion", [](KDL::Frame* me){return getFrameAsVector(*me, RotationType::QUATERNION);});
+    kdlFrame.def("get", [](KDL::Frame* me){return getFrame(*me);});
+    py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
+    py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
 
     module.attr("version") = version();
     module.attr("branch") = branch();

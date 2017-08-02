@@ -385,6 +385,9 @@ PYBIND11_MODULE(exotica_py, module)
     taskMap.def_readonly("startJ", &TaskMap::StartJ);
     taskMap.def_readonly("lengthJ", &TaskMap::LengthJ);
     taskMap.def("getFrames",&TaskMap::GetFrames);
+    taskMap.def("taskSpaceDim", (int (TaskMap::*)()) &TaskMap::taskSpaceDim);
+    taskMap.def("taskSpaceJacobianDim", &TaskMap::taskSpaceJacobianDim);
+    taskMap.def("debug", &TaskMap::debug);
 
     py::class_<TaskSpaceVector, std::shared_ptr<TaskSpaceVector>> taskSpaceVector(module, "TaskSpaceVector");
     taskSpaceVector.def("setZero", &TaskSpaceVector::setZero);

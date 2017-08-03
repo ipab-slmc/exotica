@@ -365,11 +365,11 @@ PYBIND11_MODULE(exotica_py, module)
     setup.def_static("getSolvers", &Setup::getSolvers);
     setup.def_static("getProblems",&Setup::getProblems);
     setup.def_static("getMaps",&Setup::getMaps);
-    setup.def_static("createSolver", &createSolver);
-    setup.def_static("createMap",&createMap);
-    setup.def_static("createProblem",&createProblem);
+    setup.def_static("createSolver", &createSolver, py::return_value_policy::take_ownership);
+    setup.def_static("createMap",&createMap, py::return_value_policy::take_ownership);
+    setup.def_static("createProblem",&createProblem, py::return_value_policy::take_ownership);
     setup.def_static("printSupportedClasses",&Setup::printSupportedClasses);
-    setup.def_static("getInitializers",&Setup::getInitializers);
+    setup.def_static("getInitializers",&Setup::getInitializers, py::return_value_policy::copy);
     setup.def_static("getPackagePath",&ros::package::getPath);
 
     py::class_<Object, std::shared_ptr<Object>> object(module, "Object");
@@ -394,7 +394,7 @@ PYBIND11_MODULE(exotica_py, module)
     taskMap.def_readonly("length", &TaskMap::Length);
     taskMap.def_readonly("startJ", &TaskMap::StartJ);
     taskMap.def_readonly("lengthJ", &TaskMap::LengthJ);
-    taskMap.def("getFrames",&TaskMap::GetFrames);
+    taskMap.def("getFrames",&TaskMap::GetFrames, py::return_value_policy::copy);
     taskMap.def("taskSpaceDim", (int (TaskMap::*)()) &TaskMap::taskSpaceDim);
     taskMap.def("taskSpaceJacobianDim", &TaskMap::taskSpaceJacobianDim);
     taskMap.def("debug", &TaskMap::debug);
@@ -408,11 +408,11 @@ PYBIND11_MODULE(exotica_py, module)
     py::class_<MotionSolver, std::shared_ptr<MotionSolver>, Object> motionSolver(module, "MotionSolver");
     motionSolver.def("specifyProblem", &MotionSolver::specifyProblem, "Assign problem to the solver", py::arg("planningProblem"));
     motionSolver.def("solve", [](std::shared_ptr<MotionSolver> sol, Eigen::VectorXd q0){return Solve(sol, q0);}, "Solve the problem", py::arg("q0"));
-    motionSolver.def("getProblem", &MotionSolver::getProblem);
+    motionSolver.def("getProblem", &MotionSolver::getProblem, py::return_value_policy::reference_internal);
 
     py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object> planningProblem(module, "PlanningProblem");
-    planningProblem.def("getTasks", &PlanningProblem::getTasks);
-    planningProblem.def("getScene", &PlanningProblem::getScene);
+    planningProblem.def("getTasks", &PlanningProblem::getTasks, py::return_value_policy::reference_internal);
+    planningProblem.def("getScene", &PlanningProblem::getScene, py::return_value_policy::reference_internal);
     planningProblem.def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend")=std::string(""));
 
     // Problem types
@@ -465,7 +465,7 @@ PYBIND11_MODULE(exotica_py, module)
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
     scene.def("Update", &Scene::Update);
-    scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference);
+    scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference_internal);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

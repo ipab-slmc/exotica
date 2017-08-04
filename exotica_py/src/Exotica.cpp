@@ -355,10 +355,10 @@ PYBIND11_MODULE(exotica_py, module)
 {
     //Setup::Instance();
 
-    module.doc() = "Exotica Python binding";
+    module.doc() = "Exotica Python wrapper";
 
     int argc = 0;
-    ros::init(argc, nullptr, "ExoticaPyDummyNode");
+    ros::init(argc, nullptr, "exotica_python_node");
 
     py::class_<Setup, std::unique_ptr<Setup, py::nodelete>> setup(module, "Setup");
     setup.def("__init__",[](Setup* instance){instance=Setup::Instance().get();});

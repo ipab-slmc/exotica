@@ -18,7 +18,7 @@ The library itself consists of two major specifications, both of which are abstr
 # Installation
 
 1. [Create a catkin workspace](https://catkin-tools.readthedocs.io/en/latest/quick_start.html#initializing-a-new-workspace) or use an existing workspace. [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) is the preferred build system.
-1. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do).
+1. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone git@github.com:ipab-slmc/exotica.git --recursive``.
 1. ```cd``` into the the cloned directory.
 1. Install dependencies
   1. If running the rosdep for the first time start by running:

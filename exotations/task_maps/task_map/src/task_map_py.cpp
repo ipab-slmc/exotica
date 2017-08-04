@@ -21,7 +21,7 @@ PYBIND11_MODULE(task_map_py, module)
 {
     module.doc() = "Exotica task map definitions";
 
-    py::object taskMap = (py::object) py::module::import("exotica_py").attr("TaskMap");
+    py::module::import("exotica_py");
 
     py::class_<EffFrame, std::shared_ptr<EffFrame>, TaskMap> effFrame (module, "EffFrame");
     effFrame.def_readonly("rotationType", &EffFrame::rotationType);

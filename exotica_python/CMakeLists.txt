@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(exotica_py)
+project(exotica_python)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  pybind11 
+  pybind11
 )
 
 catkin_package(
@@ -15,5 +15,5 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-pybind_add_module(exotica_py MODULE src/Exotica.cpp)
-install(TARGETS exotica_py LIBRARY DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION})
+pybind_add_module(pyexotica MODULE src/Exotica.cpp)
+install(TARGETS pyexotica LIBRARY DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION})

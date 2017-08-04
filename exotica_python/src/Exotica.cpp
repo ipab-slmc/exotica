@@ -351,7 +351,7 @@ namespace detail {
 }}
 
 
-PYBIND11_MODULE(exotica_py, module)
+PYBIND11_MODULE(pyexotica, module)
 {
     //Setup::Instance();
 

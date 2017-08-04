@@ -5,7 +5,7 @@ add_definitions(-DEXOTICA_DEBUG_MODE)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  exotica_py
+  exotica_python
   geometry_msgs
 )
 

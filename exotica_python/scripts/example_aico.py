@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import exotica_py as exo
+import pyexotica as exo
 from numpy import array
 from numpy import matrix
 from publish_trajectory import *

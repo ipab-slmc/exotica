@@ -74,6 +74,34 @@ namespace Eigen
 
 namespace exotica
 {
+    enum RotationType
+    {
+        QUATERNION,
+        RPY,
+        ZYX,
+        ZYZ,
+        ANGLE_AXIS,
+        MATRIX
+    };
+
+    KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type);
+
+    Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type);
+
+    inline int getRotationTypeLength(RotationType type)
+    {
+        static int types[] = {4, 3, 3, 3, 3, 9};
+        return types[(int)type];
+    }
+
+    KDL::Frame getFrame(Eigen::VectorXdRefConst val);
+
+    KDL::Frame getFrameFromMatrix(Eigen::MatrixXdRefConst val);
+
+    Eigen::MatrixXd getFrame(const KDL::Frame& val);
+
+    Eigen::VectorXd getFrameAsVector(const KDL::Frame& val, RotationType type = RotationType::RPY);
+
     typedef Eigen::Array<KDL::Frame,Eigen::Dynamic,1> ArrayFrame;
     typedef Eigen::Array<KDL::Twist,Eigen::Dynamic,1> ArrayTwist;
     typedef Eigen::Array<KDL::Jacobian,Eigen::Dynamic,1> ArrayJacobian;
@@ -121,8 +149,6 @@ namespace exotica
     {
         orig.insert(orig.end(), extra.begin(),extra.end());
     }
-
-    KDL::Frame getFrame(Eigen::VectorXdRefConst val);
 
     bool contains(std::string key, const std::vector<std::string>& vec);
 

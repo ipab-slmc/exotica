@@ -5,6 +5,7 @@ add_definitions(-DEXOTICA_DEBUG_MODE)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
+  exotica_python
   geometry_msgs
 )
 
@@ -33,21 +34,26 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/CoM.cpp
-                            src/IMesh.cpp
-                            src/EffPosition.cpp
-                            src/EffOrientation.cpp
-                            src/EffFrame.cpp
-                            src/JointLimit.cpp
-                            src/Distance.cpp
-                            src/Identity.cpp
-                            src/SphereCollision.cpp
-           )
+set(SOURCES
+    src/CoM.cpp
+    src/IMesh.cpp
+    src/EffPosition.cpp
+    src/EffOrientation.cpp
+    src/EffFrame.cpp
+    src/JointLimit.cpp
+    src/Distance.cpp
+    src/Identity.cpp
+    src/SphereCollision.cpp)
+
+add_library(${PROJECT_NAME} ${SOURCES})
 
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
+
+pybind_add_module(${PROJECT_NAME}_py MODULE src/task_map_py.cpp ${SOURCES})
+install(TARGETS ${PROJECT_NAME}_py LIBRARY DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION})
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

@@ -32,7 +32,7 @@
 
 #include "exotica/Server.h"
 
-exotica::Server_ptr exotica::Server::singleton_server_ = NULL;
+exotica::Server_ptr exotica::Server::singleton_server_ = nullptr;
 namespace exotica
 {
   Server::Server()
@@ -46,6 +46,11 @@ namespace exotica
   Server::~Server()
   {
     sp_.stop();
+  }
+
+  void Server::destroy()
+  {
+      exotica::Server::singleton_server_.reset();
   }
 
   robot_model::RobotModelPtr Server::loadModel(std::string name, std::string urdf, std::string srdf)

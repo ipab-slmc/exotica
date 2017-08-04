@@ -32,6 +32,7 @@
 
 #include <exotica/Setup.h>
 #include <type_traits>
+#include <exotica/Scene.h>
 
 namespace exotica
 {
@@ -57,6 +58,43 @@ namespace exotica
       {
           HIGHLIGHT(" '"<<s<<"'");
       }
+  }
+
+  void appendInit(std::shared_ptr<InstantiableBase> it, std::vector<Initializer>& ret)
+  {
+      std::vector<Initializer> temps = it->getAllTemplates();
+      for(Initializer& i : temps)
+      {
+          bool found = false;
+          for(Initializer& j : ret)
+          {
+              if(i.name==j.name)
+              {
+                  found = true;
+                  break;
+              }
+          }
+          if(!found)
+          {
+              ret.push_back(i);
+          }
+      }
+  }
+
+  std::vector<Initializer> Setup::getInitializers()
+  {
+      std::vector<Initializer> ret = Scene().getAllTemplates();
+      std::vector<std::string> solvers =  Instance()->solvers_.getDeclaredClasses();
+      for(std::string s : solvers)
+      {
+          appendInit(std::static_pointer_cast<InstantiableBase>(createSolver(s, false)), ret);
+      }
+      std::vector<std::string> maps =  Instance()->maps_.getDeclaredClasses();
+      for(std::string s : maps)
+      {
+          appendInit(std::static_pointer_cast<InstantiableBase>(createMap(s, false)), ret);
+      }
+      return ret;
   }
 
   std::vector<std::string> Setup::getSolvers() {return Instance()->solvers_.getDeclaredClasses();}

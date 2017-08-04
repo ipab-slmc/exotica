@@ -33,8 +33,6 @@
 #ifndef EXOTICA_OBJECT_H
 #define EXOTICA_OBJECT_H
 
-#include <typeinfo> //!< The RTTI Functionality of C++
-#include <cxxabi.h> //!< The demangler for gcc... this makes this system dependent!
 #include <string>   //!< C++ type strings
 #include <exotica/Tools.h>
 #include <exotica/Server.h>
@@ -71,14 +69,7 @@ namespace exotica
        */
       inline virtual std::string type()
       {
-        int status;
-        std::string name;
-        char * temp; //!< We need to store this to free the memory!
-
-        temp = abi::__cxa_demangle(typeid(*this).name(), 0, 0, &status);
-        name = std::string(temp);
-        free(temp);
-        return name;
+        return getTypeName(typeid(*this));
       }
 
       std::string getObjectName()

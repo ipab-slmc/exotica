@@ -61,6 +61,7 @@ namespace exotica
 
       static void Destroy()
       {
+          Server::destroy();
           if (singleton_initialiser_) singleton_initialiser_.reset();
       }
 
@@ -71,7 +72,7 @@ namespace exotica
       static std::vector<std::string> getSolvers();
       static std::vector<std::string> getProblems();
       static std::vector<std::string> getMaps();
-      static std::vector<std::string> getTasks();
+      static std::vector<Initializer> getInitializers();
 
       static std::shared_ptr<exotica::MotionSolver> createSolver(const Initializer& init)
       {

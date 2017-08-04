@@ -1,6 +1,7 @@
 #ifndef PROPERTY_H
 #define PROPERTY_H
 
+#include <exotica/Tools.h>
 #include <exotica/Tools/Printable.h>
 #include <exotica/Tools/Exception.h>
 #include <exotica/Tools/Conversions.h>
@@ -18,7 +19,7 @@ class Property
 {
 public:
     boost::any get() const;
-    template<typename C> void set(const C val);
+    template<typename C> void set(const C val) {value = val;}
     Property(std::string prop_name);
     Property(std::string prop_name, bool isRequired);
     Property(std::string prop_name, bool isRequired, boost::any val);
@@ -46,8 +47,9 @@ public:
     void setName(std::string name_);
     void addProperty(const Property& prop);
     boost::any getProperty(std::string name_) const;
+    void setProperty(std::string name_, boost::any);
     bool hasProperty(std::string name_) const;
-
+    std::vector<std::string> getPropertyNames() const;
 
     std::map<std::string, Property> properties;
     std::string name;
@@ -58,6 +60,7 @@ class InitializerBase
 public:
     virtual void check(const Initializer& other) const = 0;
     virtual Initializer getTemplate() const = 0;
+    virtual std::vector<Initializer> getAllTemplates() const = 0;
 };
 
 class InstantiableBase
@@ -66,6 +69,7 @@ public:
     virtual Initializer getInitializerTemplate() = 0;
     virtual void InstantiateInternal(const Initializer& init) = 0;
     virtual void InstantiateBase(const Initializer& init) {}
+    virtual std::vector<Initializer> getAllTemplates() const = 0;
 };
 
 template<class C>
@@ -84,6 +88,11 @@ public:
     virtual Initializer getInitializerTemplate()
     {
         return C().getTemplate();
+    }
+
+    virtual std::vector<Initializer> getAllTemplates() const
+    {
+        return C().getAllTemplates();
     }
 
     virtual void Instantiate(C& init) = 0;

@@ -34,7 +34,7 @@
 
 // Manual initialization requires dependency on specific solvers and task maps:
 #include <ik_solver/IKsolverInitializer.h>
-#include <task_map/EffPositionInitializer.h>
+#include <task_map/EffFrameInitializer.h>
 
 using namespace exotica;
 
@@ -43,8 +43,8 @@ void run()
     // Scene using joint group 'arm'
     SceneInitializer scene("MyScene","arm");
     // End-effector task map with two position frames
-    EffPositionInitializer map("Position","MyScene",false,
-    {FrameInitializer("lwr_arm_6_link")});
+    EffFrameInitializer map("Position","MyScene",false,
+    {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0 ,0 ,0 ,0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
     // Create a task using the map above (goal will be specified later)
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
@@ -87,7 +87,7 @@ void run()
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
         my_problem->y = {0.6,
                 -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-                0.5 + sin(t * M_PI * 0.5) * 0.2};
+                0.5 + sin(t * M_PI * 0.5) * 0.2 ,0 ,0 ,0};
 
         // Solve the problem using the IK solver
         any_solver->Solve(q, solution);

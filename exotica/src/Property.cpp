@@ -6,7 +6,6 @@ namespace exotica
 // //////////////////////////////// Property //////////////////////////////////////
 
 boost::any Property::get() const {return value;}
-template<typename C> void Property::set(const C val) {value = val;}
 Property::Property(std::string prop_name) : name(prop_name), required(true) {}
 Property::Property(std::string prop_name, bool isRequired) : name(prop_name), required(isRequired) {}
 Property::Property(std::string prop_name, bool isRequired, boost::any val) : name(prop_name), required(isRequired) {value = val;}
@@ -15,7 +14,7 @@ bool Property::isSet() const {return !value.empty();}
 bool Property::isStringType() const {return value.type()==typeid(std::string);}
 bool Property::isInitializerVectorType() const {return value.type()==typeid(std::vector<exotica::Initializer>);}
 std::string Property::getName() const {return name;}
-std::string Property::getType() const {return value.type().name();}
+std::string Property::getType() const {return getTypeName(value.type());}
 Property::Property(std::initializer_list<boost::any> val_)
 {
     std::vector<boost::any> val(val_);
@@ -69,12 +68,20 @@ boost::any Initializer::getProperty(std::string name_) const
     return properties.at(name_).get();
 }
 
+void Initializer::setProperty(std::string name_, boost::any value)
+{
+    properties.at(name_).set(value);
+}
+
 void Initializer::setName(std::string name_)
 {
     name = name_;
 }
 
-
+std::vector<std::string> Initializer::getPropertyNames() const
+{
+    return getKeys(properties);
+}
 
 }
 

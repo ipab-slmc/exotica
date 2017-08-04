@@ -30,7 +30,7 @@
  *
  */
 
-#include "SphereCollision.h"
+#include "task_map/SphereCollision.h"
 
 REGISTER_TASKMAP_TYPE("SphereCollision", exotica::SphereCollision);
 

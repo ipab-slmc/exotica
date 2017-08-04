@@ -19,12 +19,12 @@
     </PlanningScene>
     
     <Maps>
-      <EffPosition Name="Position">
+      <EffFrame Name="Position">
         <Scene>MyScene</Scene>
         <EndEffector>
-            <Frame Link="lwr_arm_6_link" />
+            <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17"/>
         </EndEffector>
-      </EffPosition>
+      </EffFrame>
     </Maps>
 
     <!-- Problem parameters: tolerance and per joint weighting -->

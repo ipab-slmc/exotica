@@ -465,6 +465,7 @@ PYBIND11_MODULE(pyexotica, module)
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
     scene.def("Update", &Scene::Update);
+    scene.def("getJointNames", (std::vector<std::string> (Scene::*)()) &Scene::getJointNames);
     scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference_internal);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");

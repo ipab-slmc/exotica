@@ -39,7 +39,6 @@
 #undef large
 #include <lapack/clapack.h>
 
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver)
 

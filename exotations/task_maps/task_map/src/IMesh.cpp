@@ -31,7 +31,6 @@
  */
 
 #include "task_map/IMesh.h"
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 //#define DEBUG_MODE
 REGISTER_TASKMAP_TYPE("IMesh", exotica::IMesh);

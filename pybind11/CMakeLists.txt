@@ -11,33 +11,28 @@ include(CMakePackageConfigHelpers)
 
 file(MAKE_DIRECTORY include)
 catkin_package(
-  INCLUDE_DIRS include pybind11/include ${EIGEN3_INCLUDE_DIR}
-  LIBRARIES
+  INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
+  LIBRARIES ${PYTHON_LIBRARIES}
   CATKIN_DEPENDS
   CFG_EXTRAS pybind.cmake
 )
 
-include_directories(
-  include
-  pybind11/include
-  ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIR}
-  )
-
 set(PYBIND11_HEADERS
   include/pybind11/attr.h
+  include/pybind11/buffer_info.h
   include/pybind11/cast.h
   include/pybind11/chrono.h
   include/pybind11/class_support.h
   include/pybind11/common.h
   include/pybind11/complex.h
   include/pybind11/descr.h
-  include/pybind11/options.h
   include/pybind11/eigen.h
+  include/pybind11/embed.h
   include/pybind11/eval.h
   include/pybind11/functional.h
   include/pybind11/numpy.h
   include/pybind11/operators.h
+  include/pybind11/options.h
   include/pybind11/pybind11.h
   include/pybind11/pytypes.h
   include/pybind11/stl.h
@@ -59,21 +54,11 @@ endforeach()
 set(${PROJECT_NAME}_VERSION ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH})
 message(STATUS "pybind11 v${${PROJECT_NAME}_VERSION}")
 
-
-
 install(FILES ${PYBIND11_HEADERS}
         DESTINATION include/pybind11)
-# GNUInstallDirs "DATADIR" wrong here; CMake search path wants "share".
+
 set(PYBIND11_CMAKECONFIG_INSTALL_DIR "${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/" CACHE STRING "install path for pybind11Config.cmake")
 
-configure_package_config_file(pybind11/tools/${PROJECT_NAME}Config.cmake.in
-                              "${CMAKE_CURRENT_BINARY_DIR}/pybindConfig.cmake"
-                              INSTALL_DESTINATION ${PYBIND11_CMAKECONFIG_INSTALL_DIR})
-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-                                 VERSION ${${PROJECT_NAME}_VERSION}
-                                 COMPATIBILITY AnyNewerVersion)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-              tools/FindPythonLibsNew.cmake
-              tools/pybind11Tools.cmake
+install(FILES pybind11/tools/FindPythonLibsNew.cmake
+              pybind11/tools/pybind11Tools.cmake
         DESTINATION ${PYBIND11_CMAKECONFIG_INSTALL_DIR})

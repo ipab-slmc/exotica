@@ -32,3 +32,10 @@ target_link_libraries(XMLInitialization ${catkin_LIBRARIES})
 
 add_executable(PlannerDemo src/planner.cpp)
 target_link_libraries(PlannerDemo ${catkin_LIBRARIES})
+
+install(TARGETS ManualInitialization GenericInitialization XMLInitialization PlannerDemo ExoticaCore
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(DIRECTORY resources/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/resources)
+install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)

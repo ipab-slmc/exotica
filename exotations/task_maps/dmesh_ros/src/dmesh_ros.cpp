@@ -33,7 +33,6 @@
 #include <dmesh_ros/dmesh_ros.h>
 #include <dmesh_ros/DMeshVertexInitializer.h>
 REGISTER_TASKMAP_TYPE("DMeshROS", exotica::DMeshROS);
-#define XML_CHECK(x) {xmltmp=handle.FirstChildElement(x).ToElement();if (!xmltmp) throw_named("XML element '"<<x<<"' does not exist!");}
 
 namespace exotica
 {

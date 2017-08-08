@@ -80,7 +80,7 @@ namespace exotica
         if(data.rows() != other.data.rows()) throw_pretty("Task space vector sizes do not match!");
         int entrySize = 0;
         for(const TaskVectorEntry& id : map) entrySize += getRotationTypeLength(id.type);
-        Eigen::VectorXd ret(data.rows()+map.size()*3-map.size()*entrySize);
+        Eigen::VectorXd ret(data.rows()+map.size()*3-entrySize);
         int iIn=0;
         int iOut=0;
         for(const TaskVectorEntry& id : map)

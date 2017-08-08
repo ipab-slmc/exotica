@@ -1,7 +1,7 @@
 extend <exotica/PlanningProblem>
 Required int T;
 Required double Tau;
-Required double Qrate;
-Required double Hrate;
-Required double Wrate;
-Required Eigen::VectorXd W;
+Optional double Qrate = 1.0;
+Optional double Hrate = 1.0;
+Optional double Wrate = 1.0;
+Optional Eigen::VectorXd W = Eigen::VectorXd();

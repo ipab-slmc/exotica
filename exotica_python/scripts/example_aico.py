@@ -3,7 +3,7 @@
 import pyexotica as exo
 from numpy import array
 from numpy import matrix
-from publish_trajectory import *
+from pyexotica.publish_trajectory import *
 import math
 
 def figureEight(t):

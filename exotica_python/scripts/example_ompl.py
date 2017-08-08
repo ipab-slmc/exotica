@@ -3,7 +3,7 @@
 import pyexotica as exo
 from numpy import array
 from numpy import matrix
-from publish_trajectory import *
+from pyexotica.publish_trajectory import *
 
 
 (sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica_examples')+'/resources/ompl_solver_demo.xml')

@@ -22,7 +22,8 @@ macro(pybind_add_module target_name other)
     set(PYTHON_LIB_DIR ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION})
     add_custom_command(TARGET ${target_name}
       POST_BUILD
-      COMMAND mkdir -p ${PYTHON_LIB_DIR} && cp $<TARGET_FILE:${target_name}> ${PYTHON_LIB_DIR}/${target_name}.so
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${PYTHON_LIB_DIR}
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target_name}> ${PYTHON_LIB_DIR}/${target_name}.so
       WORKING_DIRECTORY ${CATKIN_DEVEL_PREFIX}
   COMMENT "Copying library files to python directory" )
 

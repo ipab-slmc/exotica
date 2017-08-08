@@ -49,7 +49,7 @@ void run()
     Eigen::VectorXd W(7);
     W << 7,6,5,4,3,2,1;
 
-    UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,W,false,{map});
+    UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,false,{map},W);
     IKsolverInitializer solver("MySolver");
     solver.C = 1e-3;
     solver.MaxIt = 1;

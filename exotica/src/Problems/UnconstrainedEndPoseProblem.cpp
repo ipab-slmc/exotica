@@ -62,12 +62,20 @@ namespace exotica
 
         N = scene_->getNumJoints();
 
-        if(init.W.rows()!=N) throw_named("W dimension mismatch! Expected "<<N<<", got "<<init.W.rows());
-
         Rho = Eigen::VectorXd::Ones(NumTasks);
         y.setZero(PhiN);
         W = Eigen::MatrixXd::Identity(N, N);
-        W.diagonal() = init.W;
+        if(init.W.rows()>0)
+        {
+            if(init.W.rows()==N)
+            {
+                W.diagonal() = init.W;
+            }
+            else
+            {
+                throw_named("W dimension mismatch! Expected "<<N<<", got "<<init.W.rows());
+            }
+        }
         Phi = y;
         J = Eigen::MatrixXd(JN, N);
 

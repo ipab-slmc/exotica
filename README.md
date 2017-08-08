@@ -14,6 +14,7 @@ The library itself consists of two major specifications, both of which are abstr
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/)
 * [rosdep](http://wiki.ros.org/rosdep)
 * [ROS Indigo](http://wiki.ros.org/indigo/Installation/Ubuntu)(```ros-indigo-desktop-full``` is recommended but more minimal versions may be sufficient in conjunction with rosdep)
+* [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) > 3.2.7. We recommend system-installing 3.2.10 or newer, for which we provide a [Debian](http://terminator.robots.inf.ed.ac.uk/apt/libeigen3-dev.deb).
 
 # Installation
 

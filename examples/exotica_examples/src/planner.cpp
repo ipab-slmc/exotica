@@ -83,7 +83,7 @@ void run()
     {
         ros::WallTime start_time = ros::WallTime::now();
         // Solve the problem using the AICO solver
-        any_solver->Solve(q, solution);
+        any_solver->Solve(solution);
         double time = ros::Duration(
                     (ros::WallTime::now() - start_time).toSec()).toSec();
         ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving ("<<time<<"s)");

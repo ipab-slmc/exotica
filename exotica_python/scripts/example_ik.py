@@ -21,7 +21,8 @@ q=array([0.0]*7)
 print('Publishing IK')
 while not is_shutdown():
     problem.setGoal('Position',figureEight(t))
-    q = solver.solve(q)[0]
+    problem.startState = q
+    q = solver.solve()[0]
     publishPose(q, problem)    
     sleep(dt)
     t=t+dt

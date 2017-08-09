@@ -50,7 +50,7 @@ namespace exotica
         virtual ~MotionSolver() {}
         virtual void InstantiateBase(const Initializer& init);
         virtual void specifyProblem(PlanningProblem_ptr pointer);
-        virtual void Solve(Eigen::VectorXdRefConst q0,  Eigen::MatrixXd & solution) = 0;
+        virtual void Solve(Eigen::MatrixXd & solution) = 0;
         PlanningProblem_ptr getProblem() {return problem_;}
         virtual std::string print(std::string prepend);
 

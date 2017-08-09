@@ -104,10 +104,10 @@ void addInitializers(py::module& module)
     inits.def("loadXMLFull", &loadFromXML, "Loads initializer from XML", py::arg("xml"), py::arg("solver_name")=std::string(""), py::arg("problem_name")=std::string(""), py::arg("parseAsXMLString")=false);
 }
 
-Eigen::MatrixXd Solve(std::shared_ptr<MotionSolver> sol, Eigen::VectorXd q0)
+Eigen::MatrixXd Solve(std::shared_ptr<MotionSolver> sol)
 {
     Eigen::MatrixXd ret;
-    sol->Solve(q0, ret);
+    sol->Solve(ret);
     return ret;
 }
 
@@ -407,13 +407,14 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<MotionSolver, std::shared_ptr<MotionSolver>, Object> motionSolver(module, "MotionSolver");
     motionSolver.def("specifyProblem", &MotionSolver::specifyProblem, "Assign problem to the solver", py::arg("planningProblem"));
-    motionSolver.def("solve", [](std::shared_ptr<MotionSolver> sol, Eigen::VectorXd q0){return Solve(sol, q0);}, "Solve the problem", py::arg("q0"));
+    motionSolver.def("solve", [](std::shared_ptr<MotionSolver> sol){return Solve(sol);}, "Solve the problem");
     motionSolver.def("getProblem", &MotionSolver::getProblem, py::return_value_policy::reference_internal);
 
     py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object> planningProblem(module, "PlanningProblem");
     planningProblem.def("getTasks", &PlanningProblem::getTasks, py::return_value_policy::reference_internal);
     planningProblem.def("getScene", &PlanningProblem::getScene, py::return_value_policy::reference_internal);
     planningProblem.def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend")=std::string(""));
+    planningProblem.def_property("startState", &PlanningProblem::getStartState, &PlanningProblem::setStartState);
 
     // Problem types
     py::module prob = module.def_submodule("Problems","Problem types");

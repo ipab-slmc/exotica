@@ -119,8 +119,9 @@ namespace exotica
     initMessages();
   }
 
-  void AICOsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution)
+  void AICOsolver::Solve(Eigen::MatrixXd & solution)
   {
+    Eigen::VectorXd q0 = prob_->applyStartState();
     std::vector<Eigen::VectorXd> q_init;
     q_init.resize(T, Eigen::VectorXd::Zero(q0.rows()));
     for (int i = 0; i < q_init.size(); i++)
@@ -130,6 +131,8 @@ namespace exotica
 
   void AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init, Eigen::MatrixXd & solution)
   {
+    prob_->setStartState(q_init[0]);
+    prob_->applyStartState();
     ros::Time startTime = ros::Time::now();
     ROS_WARN_STREAM("AICO: Setting up the solver");
     updateCount = 0;

@@ -11,7 +11,7 @@ problem = exo.Setup.createProblem(prob)
 solver = exo.Setup.createSolver(sol)
 solver.specifyProblem(problem)
 
-solution = solver.solve(array([0.0]*7))
+solution = solver.solve()
 
 plot(solution)
 

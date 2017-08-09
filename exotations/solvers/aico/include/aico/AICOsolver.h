@@ -100,7 +100,7 @@ namespace exotica
        * @param solution This will be filled with the solution in joint space.
        * @return SUCESS if solution has been found, corresponding error code if not.
        */
-      void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      void Solve(Eigen::MatrixXd & solution);
 
       /**
        * \brief Solves the problem

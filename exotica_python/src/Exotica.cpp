@@ -467,6 +467,11 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("Update", &Scene::Update);
     scene.def("getJointNames", (std::vector<std::string> (Scene::*)()) &Scene::getJointNames);
     scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference_internal);
+    scene.def("getModelJointNames", &Scene::getModelJointNames);
+    scene.def("getModelState", &Scene::getModelState);
+    scene.def("getModelStateMap", &Scene::getModelStateMap);
+    scene.def("setModelState", (void (Scene::*)(Eigen::VectorXdRefConst)) &Scene::setModelState);
+    scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>)) &Scene::setModelState);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

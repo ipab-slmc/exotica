@@ -114,7 +114,7 @@ void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelP
     robot_model::JointModelGroup* group = model->getJointModelGroup(JointGroup);
     if(!group) throw_pretty("Joint group '"<<JointGroup<<"' not defined in the robot model!");
     ControlledJointsNames = group->getVariableNames();
-    ModleJointsNames = model->getVariableNames();
+    ModelJointsNames = model->getVariableNames();
 
     Model = model;
     KDL::Tree RobotKinematics;
@@ -132,6 +132,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
 {
     Tree.clear();
     TreeMap.clear();
+    ModelJointsMap.clear();
 
     // Handle the root joint
     const robot_model::JointModel* RootJoint = Model->getRootJoint();
@@ -161,8 +162,8 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         }
         auto RotW = std::find(ControlledJointsNames.begin(), ControlledJointsNames.end(),RootJoint->getVariableNames()[6]);
         if(RotW!=ControlledJointsNames.end()) ControlledJointsNames.erase(RotW);
-        RotW = std::find(ModleJointsNames.begin(), ModleJointsNames.end(),RootJoint->getVariableNames()[6]);
-        if(RotW!=ModleJointsNames.end()) ModleJointsNames.erase(RotW);
+        RotW = std::find(ModelJointsNames.begin(), ModelJointsNames.end(),RootJoint->getVariableNames()[6]);
+        if(RotW!=ModelJointsNames.end()) ModelJointsNames.erase(RotW);
     }
     else if(RootJoint->getType() ==  robot_model::JointModel::PLANAR)
     {
@@ -182,7 +183,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
 
     AddElement(RobotKinematics.getRootSegment(), *(Tree.end()-1));
 
-    NumJoints = ModleJointsNames.size();
+    NumJoints = ModelJointsNames.size();
     NumControlledJoints = ControlledJointsNames.size();
     if (NumControlledJoints < 1) throw_pretty("No update joints specified!");
     ControlledJoints.resize(NumControlledJoints);
@@ -194,8 +195,10 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         Joint->IsControlled = Joint->ControlId >= 0;
         if(Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
         TreeMap[Joint->Segment.getName()] = Joint;
+        ModelJointsMap[Joint->Segment.getJoint().getName()] = Joint;
         if(Joint->IsControlled) ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
     }
+
     setJointLimits();
 }
 
@@ -447,6 +450,53 @@ std::string KinematicTree::getRootName()
 int KinematicTree::getEffSize()
 {
   return Solution->Frame.size();
+}
+
+
+Eigen::VectorXd KinematicTree::getModelState()
+{
+    Eigen::VectorXd ret(ModelJointsNames.size());
+
+    for(int i=0; i<ModelJointsNames.size(); i++)
+    {
+        ret(i) =  TreeState(ModelJointsMap.at(ModelJointsNames[i])->Id);
+    }
+    return ret;
+}
+
+std::map<std::string, double> KinematicTree::getModelStateMap()
+{
+    std::map<std::string, double> ret;
+    for(std::string& jointName : ModelJointsNames)
+    {
+        ret[jointName] =  TreeState(ModelJointsMap.at(jointName)->Id);
+    }
+    return ret;
+}
+
+void KinematicTree::setModelState(Eigen::VectorXdRefConst x)
+{
+    if(x.rows()!=ModelJointsNames.size()) throw_pretty("Model state vector has wrong size, expected " << ModelJointsNames.size() << " got " << x.rows());
+    for(int i=0; i<ModelJointsNames.size(); i++)
+    {
+        TreeState(ModelJointsMap.at(ModelJointsNames[i])->Id) = x(i);
+    }
+}
+
+void KinematicTree::setModelState(std::map<std::string, double> x)
+{
+    if(x.size()!=ModelJointsNames.size()) throw_pretty("Model state vector has wrong size, expected " << ModelJointsNames.size() << " got " << x.size());
+    for(auto& joint : x)
+    {
+        try
+        {
+            TreeState(ModelJointsMap.at(joint.first)->Id) = joint.second;
+        }
+        catch (const std::out_of_range& e)
+        {
+            throw_pretty("Robot model does not contain joint '"<<joint.first<<"'");
+        }
+    }
 }
 
 }

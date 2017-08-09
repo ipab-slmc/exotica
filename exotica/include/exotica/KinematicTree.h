@@ -193,6 +193,16 @@ namespace exotica
               return ControlledJointsNames;
             }
 
+            std::vector<std::string> getModelJointNames()
+            {
+              return ModelJointsNames;
+            }
+
+            Eigen::VectorXd getModelState();
+            std::map<std::string, double> getModelStateMap();
+            void setModelState(Eigen::VectorXdRefConst x);
+            void setModelState(std::map<std::string, double> x);
+
             std::vector<std::shared_ptr<KinematicElement>> getTree() {return Tree;}
             std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() {return TreeMap;}
             bool Debug;
@@ -217,7 +227,8 @@ namespace exotica
             std::shared_ptr<KinematicElement> Root;
             std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
             std::map<std::string, std::shared_ptr<KinematicElement>> ControlledJointsMap;
-            std::vector<std::string> ModleJointsNames;
+            std::map<std::string, std::shared_ptr<KinematicElement>> ModelJointsMap;
+            std::vector<std::string> ModelJointsNames;
             std::vector<std::string> ControlledJointsNames;
             std::shared_ptr<KinematicResponse> Solution;
             KinematicRequestFlags Flags;

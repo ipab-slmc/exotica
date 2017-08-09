@@ -41,7 +41,6 @@
  \brief Approximate Inference Control */
 
 #include "aico/AICOsolver.h"
-#include <chrono>
 
 REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver)
 
@@ -134,7 +133,7 @@ namespace exotica
   {
     prob_->setStartState(q_init[0]);
     prob_->applyStartState();
-    auto start = std::chrono::high_resolution_clock::now();
+    ros::Time startTime = ros::Time::now();
     ROS_WARN_STREAM("AICO: Setting up the solver");
     updateCount = 0;
     sweep = -1;
@@ -147,7 +146,7 @@ namespace exotica
     initTrajectory(q_init);
     sweep = 0;
     ROS_WARN_STREAM("AICO: Solving");
-    for (int k = 0; k < max_iterations && !(Server::isRos() && !ros::ok()); k++)
+    for (int k = 0; k < max_iterations && ros::ok(); k++)
     {
       d = step();
       if (d < 0)
@@ -162,7 +161,7 @@ namespace exotica
       sol.row(tt) = q[tt];
     }
     solution = sol;
-    planning_time_ = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - start).count();
+    planning_time_ = ros::Time::now() - startTime;
   }
 
   void AICOsolver::initMessages()
@@ -341,7 +340,7 @@ namespace exotica
     }
 
     cost = evaluateTrajectory(b, true);
-    if (cost < 0) throw_named("Invalid cost! "<<cost);
+    if (cost < 0) throw_named("Invalid cost!");
     INFO("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost <<", updates: "<<updateCount);
     rememberOldState();
   }
@@ -559,7 +558,7 @@ namespace exotica
       AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]);
     }
 
-    for (int k = 0; k < maxRelocationIterations && !(Server::isRos() && !ros::ok()); k++)
+    for (int k = 0; k < maxRelocationIterations && ros::ok(); k++)
     {
       if (!((!k && forceRelocation)
           || (b[t] - qhat[t]).array().abs().maxCoeff() > tolerance_)) break;
@@ -596,9 +595,8 @@ namespace exotica
       bool skipUpdate)
   {
     ROS_WARN_STREAM("Evaluating, sweep "<<sweep);
-    auto startTime = std::chrono::high_resolution_clock::now();
-    auto tmpTime = startTime;
-    double dSet, dPre, dUpd, dCtrl, dTask;
+    ros::Time start = ros::Time::now(), tmpTime;
+    ros::Duration dSet, dPre, dUpd, dCtrl, dTask;
     double ret = 0.0;
     double tau = prob_->tau;
     double tau_1 = 1. / tau, tau_2 = tau_1 * tau_1;
@@ -614,30 +612,30 @@ namespace exotica
     {
       q = x;
     }
-    dSet = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count();
+    dSet = ros::Time::now() - start;
     if (preupdateTrajectory_)
     {
       ROS_WARN_STREAM("Pre-update, sweep "<<sweep);
       for (int t = 0; t < T; t++)
       {
-        if (Server::isRos() && !ros::ok()) return -1.0;
+        if (!ros::ok()) return -1.0;
         updateCount++;
         prob_->Update(q[t], t);
       }
     }
-    dPre = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count() - dSet;
+    dPre = ros::Time::now() - start - dSet;
 
     for (int t = 0; t < T; t++)
     {
-      tmpTime = std::chrono::high_resolution_clock::now();
-      if (Server::isRos() && !ros::ok()) return -1.0;
+      tmpTime = ros::Time::now();
+      if (!ros::ok()) return -1.0;
       if (!skipUpdate)
       {
         updateCount++;
         prob_->Update(q[t], t);
       }
-      dUpd += std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - tmpTime).count();
-      tmpTime = std::chrono::high_resolution_clock::now();
+      dUpd += ros::Time::now() - tmpTime;
+      tmpTime = ros::Time::now();
 
       // Control cost
       if (!dynamic)
@@ -671,8 +669,8 @@ namespace exotica
       }
 
       ret += costControl(t);
-      dCtrl += std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - tmpTime).count();
-      tmpTime = std::chrono::high_resolution_clock::now();
+      dCtrl += ros::Time::now() - tmpTime;
+      tmpTime = ros::Time::now();
       // Task cost
       for (int i = 0; i < prob_->NumTasks; i++)
       {
@@ -687,7 +685,7 @@ namespace exotica
                 ret += costTask(t, i);
           }
       }
-      dTask += std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - tmpTime).count();
+      dTask += ros::Time::now() - tmpTime;
     }
     return ret;
   }

@@ -626,6 +626,11 @@ namespace exotica
     kinematica_.setModelState(x);
   }
 
+  Eigen::VectorXd Scene::getControlledState()
+  {
+      return kinematica_.getControlledState();
+  }
+
 }
 //	namespace exotica
 

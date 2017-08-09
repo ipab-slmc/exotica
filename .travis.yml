@@ -23,10 +23,8 @@ install:
 - sudo rosdep init
 - rosdep update
 - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
-- sudo pip install -U catkin_tools
 script:
 - source /opt/ros/indigo/setup.bash
-- echo $PYTHONPATH
 - mkdir -p $CATKIN_WS_SRC
 - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
 - cd $CATKIN_WS_SRC

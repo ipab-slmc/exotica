@@ -18,8 +18,7 @@ install:
 - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
 - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 - sudo apt-get update -qq
-- sudo apt-get install -qq -y python-rosdep python-catkin-tools
-- sudo pip install -U catkin_tools
+- sudo apt-get install -qq -y python-rosdep python-catkin-tools python-catkin-pkg
 - sudo rosdep init
 - rosdep update
 - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO

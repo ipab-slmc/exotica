@@ -195,7 +195,7 @@ namespace exotica
 
             std::vector<std::string> getModelJointNames()
             {
-              return ModleJointsNames;
+              return ModelJointsNames;
             }
 
             Eigen::VectorXd getModelState();
@@ -229,7 +229,7 @@ namespace exotica
             std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
             std::map<std::string, std::shared_ptr<KinematicElement>> ControlledJointsMap;
             std::map<std::string, std::shared_ptr<KinematicElement>> ModelJointsMap;
-            std::vector<std::string> ModleJointsNames;
+            std::vector<std::string> ModelJointsNames;
             std::vector<std::string> ControlledJointsNames;
             std::shared_ptr<KinematicResponse> Solution;
             KinematicRequestFlags Flags;

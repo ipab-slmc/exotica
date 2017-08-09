@@ -202,6 +202,7 @@ namespace exotica
             std::map<std::string, double> getModelStateMap();
             void setModelState(Eigen::VectorXdRefConst x);
             void setModelState(std::map<std::string, double> x);
+            Eigen::VectorXd getControlledState();
 
             std::vector<std::shared_ptr<KinematicElement>> getTree() {return Tree;}
             std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() {return TreeMap;}

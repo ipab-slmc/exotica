@@ -499,4 +499,14 @@ void KinematicTree::setModelState(std::map<std::string, double> x)
     }
 }
 
+Eigen::VectorXd KinematicTree::getControlledState()
+{
+    Eigen::VectorXd x(NumControlledJoints);
+    for(int i=0; i<ControlledJoints.size(); i++)
+    {
+        x(i) = TreeState(ControlledJoints[i]->Id);
+    }
+    return x;
+}
+
 }

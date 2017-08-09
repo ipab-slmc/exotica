@@ -244,6 +244,7 @@ namespace exotica
       std::vector<std::string> getJointNames();
       std::vector<std::string> getModelJointNames();
       Eigen::VectorXd getModelState();
+      Eigen::VectorXd getControlledState();
       std::map<std::string, double> getModelStateMap();
       void setModelState(Eigen::VectorXdRefConst x);
       void setModelState(std::map<std::string, double> x);

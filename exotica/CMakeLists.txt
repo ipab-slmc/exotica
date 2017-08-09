@@ -10,7 +10,6 @@ set(MSG_DEPS
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   message_generation
-  moveit_ros_planning_interface
   moveit_core
   tf
   kdl_parser
@@ -59,7 +58,7 @@ GenInitializers()
 catkin_package(
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp  message_runtime moveit_ros_planning_interface moveit_core tf kdl_parser pluginlib
+  CATKIN_DEPENDS roscpp message_runtime moveit_core tf kdl_parser pluginlib
   CFG_EXTRAS Exotica.cmake AddInitializer.cmake
 )
 

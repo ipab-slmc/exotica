@@ -19,7 +19,6 @@
   <depend>std_msgs</depend>
   <depend>message_generation</depend>
   <depend>message_runtime</depend>
-  <depend>moveit_ros_planning_interface</depend>
   <depend>moveit_core</depend>
   <depend>tf</depend>
   <depend>kdl_parser</depend>

@@ -53,7 +53,7 @@ namespace exotica
 
       virtual void Instantiate(IKsolverInitializer& init);
 
-      virtual void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      virtual void Solve(Eigen::MatrixXd & solution);
 
       virtual void specifyProblem(PlanningProblem_ptr pointer);
 

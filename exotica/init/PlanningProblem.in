@@ -2,3 +2,4 @@ include <exotica/SceneInitializer>
 extend <exotica/Object>
 Required exotica::Initializer PlanningScene; # SceneInitializer
 Optional std::vector<exotica::Initializer> Maps = std::vector<exotica::Initializer>();
+Optional Eigen::VectorXd StartState = Eigen::VectorXd();

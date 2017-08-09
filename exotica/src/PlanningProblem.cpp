@@ -50,6 +50,41 @@ namespace exotica
     return ret;
   }
 
+  Eigen::VectorXd PlanningProblem::applyStartState()
+  {
+      scene_->setModelState(startState);
+      return scene_->getControlledState();
+  }
+
+  void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
+  {
+      if(x.rows()==startState.rows())
+      {
+          startState = x;
+      }
+      else if (x.rows()==scene_->getNumJoints())
+      {
+          std::vector<std::string> jointNames = scene_->getJointNames();
+          std::vector<std::string> modelNames = scene_->getModelJointNames();
+          for(int i=0; i<jointNames.size();i++)
+          {
+              for(int j=0; j<modelNames.size(); j++)
+              {
+                  if(jointNames[i]==modelNames[j]) startState[j] = x(i);
+              }
+          }
+      }
+      else
+      {
+          throw_named("Wrong start state vector size, expected " << startState.rows() << " got " << x.rows());
+      }
+  }
+
+  Eigen::VectorXd PlanningProblem::getStartState()
+  {
+      return startState;
+  }
+
   void PlanningProblem::InstantiateBase(const Initializer& init_)
   {
       Object::InstatiateObject(init_);
@@ -61,6 +96,12 @@ namespace exotica
       // Create the scene
       scene_.reset(new Scene());
       scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
+      startState = Eigen::VectorXd::Zero(scene_->getModelJointNames().size());
+
+      if(init.StartState.rows()>0)
+      {
+          setStartState(init.StartState);
+      }
 
       KinematicsRequest Request;
       Request.Flags = Flags;

@@ -21,7 +21,7 @@ for t in range(0,problem.T):
         problem.setRho('Frame',1e5,t)
         problem.setGoal('Frame',figureEight(t*problem.tau),t)
 
-solution = solver.solve(array([0.0]*7))
+solution = solver.solve()
 
 plot(solution)
 

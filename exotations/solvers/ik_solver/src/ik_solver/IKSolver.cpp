@@ -128,9 +128,10 @@ namespace exotica
         return iterations_;
     }
 
-    void IKsolver::Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution)
+    void IKsolver::Solve(Eigen::MatrixXd & solution)
     {
         if(!prob_) throw_named("Solver has not been initialized!");
+        Eigen::VectorXd q0 = prob_->applyStartState();
 
         ros::Time start = ros::Time::now();
         if (prob_->N != q0.rows()) throw_named("Wrong size q0 size=" << q0.rows() << ", required size="<< prob_->N);

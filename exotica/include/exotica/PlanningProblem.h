@@ -59,12 +59,16 @@ namespace exotica
         TaskMap_vec& getTasks();
         Scene_ptr getScene();
         virtual std::string print(std::string prepend);
+        void setStartState(Eigen::VectorXdRefConst x);
+        Eigen::VectorXd getStartState();
+        Eigen::VectorXd applyStartState();
 
     protected:
         Scene_ptr scene_;
         TaskMap_map TaskMaps;
         TaskMap_vec Tasks;
         KinematicRequestFlags Flags;
+        Eigen::VectorXd startState;
 
     };
 

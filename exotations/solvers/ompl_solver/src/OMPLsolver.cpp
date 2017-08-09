@@ -72,9 +72,9 @@ namespace exotica
     return ret;
   }
 
-  void OMPLsolver::Solve(Eigen::VectorXdRefConst q0,
-      Eigen::MatrixXd & solution)
+  void OMPLsolver::Solve(Eigen::MatrixXd & solution)
   {
+    Eigen::VectorXd q0 = prob_->applyStartState();
     setGoalState(prob_->goal_);
     if (base_solver_->solve(q0, solution))
     {

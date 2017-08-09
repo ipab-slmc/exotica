@@ -63,7 +63,7 @@ namespace exotica
        */
       virtual void specifyProblem(PlanningProblem_ptr pointer);
 
-      void Solve(Eigen::VectorXdRefConst q0, Eigen::MatrixXd & solution);
+      void Solve(Eigen::MatrixXd & solution);
 
       /*
        * \brief Get planning problem

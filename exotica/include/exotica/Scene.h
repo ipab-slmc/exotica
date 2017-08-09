@@ -242,6 +242,11 @@ namespace exotica
       robot_model::RobotModelPtr getRobotModel();
       void getJointNames(std::vector<std::string> & joints);
       std::vector<std::string> getJointNames();
+      std::vector<std::string> getModelJointNames();
+      Eigen::VectorXd getModelState();
+      std::map<std::string, double> getModelStateMap();
+      void setModelState(Eigen::VectorXdRefConst x);
+      void setModelState(std::map<std::string, double> x);
 
       BASE_TYPE getBaseType()
       {

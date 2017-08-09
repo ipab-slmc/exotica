@@ -600,6 +600,32 @@ namespace exotica
   {
     return kinematica_.getJointNames();
   }
+
+  std::vector<std::string> Scene::getModelJointNames()
+  {
+    return kinematica_.getModelJointNames();
+  }
+
+  Eigen::VectorXd Scene::getModelState()
+  {
+    return kinematica_.getModelState();
+  }
+
+  std::map<std::string, double> Scene::getModelStateMap()
+  {
+    return kinematica_.getModelStateMap();
+  }
+
+  void Scene::setModelState(Eigen::VectorXdRefConst x)
+  {
+    kinematica_.setModelState(x);
+  }
+
+  void Scene::setModelState(std::map<std::string, double> x)
+  {
+    kinematica_.setModelState(x);
+  }
+
 }
 //	namespace exotica
 

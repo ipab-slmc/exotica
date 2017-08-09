@@ -132,6 +132,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
 {
     Tree.clear();
     TreeMap.clear();
+    ModelJointsMap.clear();
 
     // Handle the root joint
     const robot_model::JointModel* RootJoint = Model->getRootJoint();
@@ -194,8 +195,10 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         Joint->IsControlled = Joint->ControlId >= 0;
         if(Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
         TreeMap[Joint->Segment.getName()] = Joint;
+        ModelJointsMap[Joint->Segment.getJoint().getName()] = Joint;
         if(Joint->IsControlled) ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
     }
+
     setJointLimits();
 }
 
@@ -447,6 +450,53 @@ std::string KinematicTree::getRootName()
 int KinematicTree::getEffSize()
 {
   return Solution->Frame.size();
+}
+
+
+Eigen::VectorXd KinematicTree::getModelState()
+{
+    Eigen::VectorXd ret(ModleJointsNames.size());
+
+    for(int i=0; i<ModleJointsNames.size(); i++)
+    {
+        ret(i) =  TreeState(ModelJointsMap.at(ModleJointsNames[i])->Id);
+    }
+    return ret;
+}
+
+std::map<std::string, double> KinematicTree::getModelStateMap()
+{
+    std::map<std::string, double> ret;
+    for(std::string& it : ModleJointsNames)
+    {
+        ret[it] =  TreeState(ModelJointsMap.at(it)->Id);
+    }
+    return ret;
+}
+
+void KinematicTree::setModelState(Eigen::VectorXdRefConst x)
+{
+    if(x.rows()!=ModleJointsNames.size()) throw_pretty("Model state vector has wrong size, expected " << ModleJointsNames.size() << " got " << x.rows());
+    for(int i=0; i<ModleJointsNames.size(); i++)
+    {
+        TreeState(ModelJointsMap.at(ModleJointsNames[i])->Id) = x(i);
+    }
+}
+
+void KinematicTree::setModelState(std::map<std::string, double> x)
+{
+    if(x.size()!=ModleJointsNames.size()) throw_pretty("Model state vector has wrong size, expected " << ModleJointsNames.size() << " got " << x.size());
+    for(auto& it : x)
+    {
+        try
+        {
+            TreeState(ModelJointsMap.at(it.first)->Id) = it.second;
+        }
+        catch (const std::out_of_range& e)
+        {
+            throw_pretty("Robot model does not contain joint '"<<it.first<<"'");
+        }
+    }
 }
 
 }

@@ -13,12 +13,15 @@ env:
   - CI_ROS_DISTRO="indigo"
   - secure: "smFIa1qA533FrLwuCW9AtegXk2bs0C2swDJWXWAikCSgET+fpF7DsGXAeE407PeZQBodnG/ZO3BODyE8orNvszBsNlK0QUx68kp8V2fgicg1V/PqlfhhUCNAZlhnI2xas/dZhvl4Ao8rfY1GZlyfms279yJljGdnVFiEyqQzQtiIN/komwpZKT7flTon9RrZ7QK5+N0nHA+17mX9Nl0L7H+pd2h3vBd7Wz4eb5S8O14zeuTcMcxlxJb8WP4W5KvHIwmiWFluhFamedc45LVXhJb0gECm7nNx1Qyrf1MQdRlBlWJ16AaxmHgdmiONQrc0/U7L2zs7aUfedJC9lmxTwCcQSTrdbO27e4nnb4VPptXITtGM2/8yn+m1pQzRNyJbrCcQyRilPPSRfhrQ24oaiingOATH+BCJ/sTkZTB8/9qjcMXkk7zPIMHTjGwonvyot33ftwlLMmu3pwm23dHcTttuEBlAjngDIarWhEFhZwvO6N9/vp478b1RJpFzDUgIZsbZWA3w6JjSkl49jXjLVn9ni5ciIs6rA6jo9MnVlVN9uLqOdJiavLRuakt6B2bzoU8Ghmz8JpcaBdRG2LhLb1HDCFdMehnTmmpcrQoUAgW6mQxJvUt1GV7LsODR1vhCb+zDh30zbCSKDDZQLjiQOMb1DAv7qrnfr+4MDkcxLbk="
 before_install:
-- bash $TRAVIS_BUILD_DIR/.ci/before_install.sh >> /dev/null
-install:
-- export PATH=/usr/bin/:$PATH # work-around Travis PYTHONPATH bug, cf. https://github.com/travis-ci/travis-ci/issues/8048
+- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
 - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 - sudo apt-get update -qq
+install:
+- export PATH=/usr/bin/:$PATH # work-around Travis PYTHONPATH bug, cf. https://github.com/travis-ci/travis-ci/issues/8048
+- bash $TRAVIS_BUILD_DIR/.ci/before_install.sh >> /dev/null
+- sudo apt-get install -qq g++-4.9
+- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
 - sudo apt-get install -qq -y python-rosdep python-catkin-tools python-catkin-pkg
 - sudo rosdep init
 - rosdep update

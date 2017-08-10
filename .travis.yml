@@ -60,6 +60,7 @@ deploy:
     secure: "NY3NXTyIhSMaLqjS3ZhjWtKUSR2Jc/NwmX2jwqRYWRqDn2VsgL+eik3QEq80P9WS5uKsToYpGfivk31U7REVEz4bIcYCZU+F7M6/H/fu58QLmIc5SMTteDPGVGkzlrlMikIn78bxDa2ZFi9GcGZucSmQ+bAv7z2yzQSajtLbF8SonM7JxlO3WTkMoBoJ7uY3Exdb3m+bpUN5BE981NbjBK5JkkrvOpFrR3Wu7Acra2wMCf5Zpxaj2mbx6+cKeTysojfnbjNeonhMGGPF/A6weoG5kJgUzwQChpe3juAhjt+FYYWOGj9sEtz/wOFFC8BWTKK/zd9TZ7qvWGXcRNwJuvmX+iI0KhwtqhVPn5jbRFmBQjci2pFzN24fh7xhi7HRUzaJjvpJOfLcDZhhD8KDmkjKYmMfYlroVKXtpwQEm0Go5B2bBqNA2iuJD7lpAI2iKOdrFZP1Kh4LnFzXxGYr8GAQFnD8kZm3j/GXffgAqBR6Is9QXO66pMFtqT4QcyQuNwHf4fjqREx72nobobJ1o7rDVYTtXCmgS2smEJdAxh5Bkx+0lcw2mQ6iABxRLjAcKZN/ZP3Xu3Wc7uGTDyS439HZ1EdTPjsYA4apTKQmY0sN2e8wUutQUsrmPhnrkH5NA6QopLVQKVznPS6Kx+Ysf0mZZJsSaq8O31SXomzwLgc="
   skip_cleanup: true
   file: "exotica.deb"
+  overwrite: true
   on:
     repo: openhumanoids/exotica
     tags: false

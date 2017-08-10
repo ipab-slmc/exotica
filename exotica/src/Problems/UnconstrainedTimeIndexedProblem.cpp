@@ -116,25 +116,53 @@ namespace exotica
 
     void UnconstrainedTimeIndexedProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal, int t)
     {
+      try
+      {
         TaskMap_ptr task = TaskMaps.at(task_name);
         y[t].data.segment(task->Start, task->Length) = goal;
+      }
+      catch(std::out_of_range& e)
+      {
+          throw_pretty("Cannot set Goal. Task map '"<<task_name<<"' Does not exist.");
+      }
     }
 
     void UnconstrainedTimeIndexedProblem::setRho(const std::string & task_name, const double rho, int t)
     {
+      try
+      {
         TaskMap_ptr task = TaskMaps.at(task_name);
         Rho[t](task->Id) = rho;
+      }
+      catch(std::out_of_range& e)
+      {
+          throw_pretty("Cannot set Rho. Task map '"<<task_name<<"' Does not exist.");
+      }
     }
 
     Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string & task_name, int t)
     {
+      try
+      {
         TaskMap_ptr task = TaskMaps.at(task_name);
         return y[t].data.segment(task->Start, task->Length);
+      }
+      catch(std::out_of_range& e)
+      {
+          throw_pretty("Cannot get Goal. Task map '"<<task_name<<"' Does not exist.");
+      }
     }
 
     double UnconstrainedTimeIndexedProblem::getRho(const std::string & task_name, int t)
     {
+      try
+      {
         TaskMap_ptr task = TaskMaps.at(task_name);
         return Rho[t](task->Id);
+      }
+      catch(std::out_of_range& e)
+      {
+          throw_pretty("Cannot get Rho. Task map '"<<task_name<<"' Does not exist.");
+      }
     }
 }

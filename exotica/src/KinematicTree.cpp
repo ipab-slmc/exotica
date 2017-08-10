@@ -236,12 +236,25 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
         if(request.Frames[i].FrameALinkName=="")
             Solution->Frame[i].FrameA = Root;
         else
-            Solution->Frame[i].FrameA = TreeMap.at(request.Frames[i].FrameALinkName);
-
+            try 
+            {
+                Solution->Frame[i].FrameA = TreeMap.at(request.Frames[i].FrameALinkName);    
+            }
+            catch (const std::out_of_range& e)
+            {
+                throw_pretty("No FrameA link exists named '"<<request.Frames[i].FrameALinkName<<"'");
+            }
         if(request.Frames[i].FrameBLinkName=="")
             Solution->Frame[i].FrameB = Root;
         else
-            Solution->Frame[i].FrameB = TreeMap.at(request.Frames[i].FrameBLinkName);
+            try 
+            {
+                Solution->Frame[i].FrameB = TreeMap.at(request.Frames[i].FrameBLinkName);
+            }
+            catch(const std::out_of_range& e)
+            {
+                throw_pretty("No FrameB link exists named '"<<request.Frames[i].FrameBLinkName<<"'");
+            }
 
         Solution->Frame[i].FrameAOffset = request.Frames[i].FrameAOffset;
         Solution->Frame[i].FrameBOffset = request.Frames[i].FrameBOffset;

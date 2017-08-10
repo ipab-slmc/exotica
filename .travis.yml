@@ -32,11 +32,11 @@ script:
 - cd $CATKIN_WS_SRC
 - catkin_init_workspace
 - cd ..
-- catkin config --init
+- catkin config --init --install
 - catkin build -i
 # Run tests
 - source /opt/ros/indigo/setup.bash
-- source devel/setup.bash
+- source install/setup.bash
 - roscore & # detached core
 - rosrun exotica test_initializers
 - rosrun task_map test_maps

@@ -27,7 +27,7 @@ install:
 - rosdep update
 - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 script:
-- source /opt/ros/indigo/setup.bash
+- source /opt/ros/$CI_ROS_DISTRO/setup.bash
 - mkdir -p $CATKIN_WS_SRC
 - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
 - cd $CATKIN_WS_SRC
@@ -35,8 +35,7 @@ script:
 - cd ..
 - catkin config --init
 - catkin build -i
-after_success:
-  # Run tests
+# Run tests
 - source /opt/ros/indigo/setup.bash
 - source devel/setup.bash
 - rosrun exotica test_initializers

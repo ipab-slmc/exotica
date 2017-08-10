@@ -37,9 +37,6 @@ script:
 # Run tests
 - source /opt/ros/indigo/setup.bash
 - source devel/setup.bash
-- echo $ROS_PACKAGE_PATH
-- which rosrun
-- export PATH=/opt/ros/$CI_ROS_DISTRO/bin:$PATH
 - rosrun exotica test_initializers
 - rosrun task_map test_maps
 before_deploy:

@@ -37,6 +37,7 @@ script:
 # Run tests
 - source /opt/ros/indigo/setup.bash
 - source devel/setup.bash
+- roscore & # detached core
 - rosrun exotica test_initializers
 - rosrun task_map test_maps
 before_deploy:

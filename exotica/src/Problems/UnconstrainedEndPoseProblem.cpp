@@ -96,28 +96,56 @@ namespace exotica
     }
 
     void UnconstrainedEndPoseProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal)
-    {
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        if(goal.rows()!=task->Length) throw_named("Invalid goal dimension "<<goal.rows()<<" expected "<<task->Length);
-        y.data.segment(task->Start, task->Length) = goal;
+    {   
+        try
+        {
+            TaskMap_ptr task = TaskMaps.at(task_name);
+            if(goal.rows()!=task->Length) throw_named("Invalid goal dimension "<<goal.rows()<<" expected "<<task->Length);
+            y.data.segment(task->Start, task->Length) = goal;
+        }
+        catch(std::out_of_range& e)
+        {
+            throw_pretty("Cannot set Goal. Task map '"<<task_name<<"' Does not exist.");
+        }
     }
 
     void UnconstrainedEndPoseProblem::setRho(const std::string & task_name, const double rho)
     {
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        Rho(task->Id) = rho;
+        try
+        {
+            TaskMap_ptr task = TaskMaps.at(task_name);
+            Rho(task->Id) = rho;
+        }
+        catch(std::out_of_range& e)
+        {
+            throw_pretty("Cannot set Rho. Task map '"<<task_name<<"' Does not exist.");
+        }
     }
 
     Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string & task_name)
     {
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        return y.data.segment(task->Start, task->Length);
+        try
+        {
+            TaskMap_ptr task = TaskMaps.at(task_name);
+            return y.data.segment(task->Start, task->Length);
+        }
+        catch(std::out_of_range& e)
+        {
+            throw_pretty("Cannot get Goal. Task map '"<<task_name<<"' Does not exist.");
+        }
     }
 
     double UnconstrainedEndPoseProblem::getRho(const std::string & task_name)
     {
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        return Rho(task->Id);
+        try
+        {
+            TaskMap_ptr task = TaskMaps.at(task_name);
+            return Rho(task->Id);
+        }
+        catch(std::out_of_range& e)
+        {
+            throw_pretty("Cannot get Rho. Task map '"<<task_name<<"' Does not exist.");
+        }
     }
 }
 

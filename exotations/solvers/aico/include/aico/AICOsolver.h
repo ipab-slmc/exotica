@@ -144,7 +144,7 @@ namespace exotica
 
       std::map<std::string, std::pair<int, int> > taskIndex;
       Eigen::VectorXi dim; //!< Task dimension
-      ros::Duration planning_time_;
+      double planning_time_;
 
     protected:
 

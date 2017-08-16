@@ -33,6 +33,7 @@
 
 #include "ompl_imp_solver/OMPLImpSolver.h"
 #include <pluginlib/class_list_macros.h>
+#include <chrono>
 
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/pRRT.h>
@@ -118,7 +119,7 @@ namespace exotica
 
   bool OMPLImpSolver::solve(Eigen::VectorXdRefConst &x0, Eigen::MatrixXd &sol)
   {
-    ros::Time startTime = ros::Time::now();
+    auto startTime = std::chrono::high_resolution_clock::now();
     finishedSolving_ = false;
     ompl::base::ScopedState<> ompl_start_state(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(x0, ompl_start_state.get());
@@ -135,9 +136,9 @@ namespace exotica
       finishedSolving_ = true;
 
       if (!ompl_simple_setup_->haveSolutionPath()) return false;
-      planning_time_ = ros::Time::now() - startTime;
+      planning_time_ = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count();
       getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), sol, ptc);
-      planning_time_ = ros::Time::now() - startTime;
+      planning_time_ = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count();
       postSolve();
       margin_ = init_margin_;
       prob_->Update(Eigen::VectorXd(sol.row(sol.rows() - 1)));
@@ -147,7 +148,7 @@ namespace exotica
     else
     {
       finishedSolving_ = true;
-      planning_time_ = ros::Time::now() - startTime;
+      planning_time_ = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count();
       postSolve();
       return false;
     }
@@ -167,7 +168,7 @@ namespace exotica
 
   void OMPLImpSolver::getSimplifiedPath(og::PathGeometric &pg, Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc)
   {
-    ros::Time start = ros::Time::now();
+    auto start = std::chrono::high_resolution_clock::now();
 
     og::PathSimplifierPtr psf_ = ompl_simple_setup_->getPathSimplifier();
     const ob::SpaceInformationPtr &si = ompl_simple_setup_->getSpaceInformation();
@@ -203,7 +204,7 @@ namespace exotica
     //  unsigned int length = 50;
     pg.interpolate(length);
     convertPath(pg, traj);
-    HIGHLIGHT("Trajectory simplification took "<<ros::Duration(ros::Time::now()-start).toSec()<<" sec. Trajectory length after interpolation = "<<length);
+    HIGHLIGHT("Trajectory simplification took "<<std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - start).count()<<" sec. Trajectory length after interpolation = "<<length);
   }
 
   ompl::base::GoalPtr OMPLImpSolver::constructGoal()

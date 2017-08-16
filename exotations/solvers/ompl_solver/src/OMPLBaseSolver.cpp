@@ -37,7 +37,7 @@ namespace exotica
 
   double OMPLBaseSolver::getPlanningTime()
   {
-    return planning_time_.toSec();
+    return planning_time_;
   }
 
   bool OMPLBaseSolver::preSolve()

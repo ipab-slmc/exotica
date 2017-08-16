@@ -147,7 +147,7 @@ namespace exotica
       /// \brief  Projection components
       std::vector<std::string> projection_components_;
 
-      ros::Duration planning_time_;
+      double planning_time_;
 
   };
   typedef std::shared_ptr<exotica::OMPLBaseSolver> OMPLBaseSolver_ptr;

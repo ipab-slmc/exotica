@@ -67,7 +67,7 @@ namespace exotica
             }
         }
         debug = init.Debug;
-        debug_pub = Server::Instance()->advertise<visualization_msgs::MarkerArray>(ns_ +"/CollisionSpheres", 1, true);
+        debug_pub = Server::advertise<visualization_msgs::MarkerArray>(ns_ +"/CollisionSpheres", 1, true);
     }
 
     double SphereCollision::distance(const KDL::Frame& effA, const KDL::Frame& effB, double rA, double rB)

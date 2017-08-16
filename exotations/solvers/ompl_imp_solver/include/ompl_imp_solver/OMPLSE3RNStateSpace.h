@@ -37,6 +37,7 @@
 #include "ompl_imp_solver/OMPLBaseStateSpace.h"
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
+#include <ompl_imp_solver/OMPLImplementationInitializer.h>
 
 namespace exotica
 {
@@ -72,7 +73,7 @@ namespace exotica
           }
       };
 
-      OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob);
+      OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLImplementationInitializer init);
       virtual unsigned int getDimension() const;
       virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
       virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
@@ -98,11 +99,11 @@ namespace exotica
       const double getSE3StateSpaceRobotationBound() const;
       void setStart(const Eigen::VectorXd &start);
       void setGoal(const Eigen::VectorXd &goal);
-      EParam<exotica::Vector> weights_;
       Eigen::VectorXd start_;
       Eigen::VectorXd goal_;
       double base_dist_;
-      EParam<std_msgs::Float64> rn_bias_percentage_;
+      Eigen::VectorXd weights_;
+      double rn_bias_percentage_;
       ob::RealVectorBounds SO3Bounds_;
       bool useGoal_;
     private:
@@ -115,21 +116,15 @@ namespace exotica
       OMPLSE3RNStateSampler(const ob::StateSpace *space)
           : ob::StateSampler(space)
       {
-        EParam<exotica::Vector> weights =
-            space->as<OMPLSE3RNStateSpace>()->weights_;
-        weightImportance_.resize(weights->data.size());
-        double sum = 0;
-        for (int i = 0; i < weights->data.size(); i++)
-          sum += weights->data[i];
-        for (int i = 0; i < weights->data.size(); i++)
-          weightImportance_[i] = weights->data[i] / sum;
+        weightImportance_ = space->as<OMPLSE3RNStateSpace>()->weights_;
+        weightImportance_ = weightImportance_/weightImportance_.sum();
       }
       virtual void sampleUniform(ob::State *state);
       virtual void sampleUniformNear(ob::State *state, const ob::State *near,
           const double distance);
       virtual void sampleGaussian(ob::State *state, const ob::State * mean,
           const double stdDev);
-      std::vector<double> weightImportance_;
+      Eigen::VectorXd weightImportance_;
   };
 
   class OMPLSE3RNProjection: public ompl::base::ProjectionEvaluator

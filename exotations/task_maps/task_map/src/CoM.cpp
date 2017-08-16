@@ -189,7 +189,7 @@ namespace exotica
 
         com_marker_.header.frame_id = COM_marker_.header.frame_id = scene_->getRootName();
 
-        com_pub_ = Server::Instance()->advertise<visualization_msgs::Marker>(object_name_ + "coms_marker", 1);
-        COM_pub_ = Server::Instance()->advertise<visualization_msgs::Marker>(object_name_ + "COM_marker", 1);
+        com_pub_ = Server::advertise<visualization_msgs::Marker>(object_name_ + "coms_marker", 1);
+        COM_pub_ = Server::advertise<visualization_msgs::Marker>(object_name_ + "COM_marker", 1);
     }
 }

@@ -36,7 +36,7 @@ using namespace exotica;
 
 void run()
 {
-    ros::NodeHandle nhg_;
+    Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
     // Scene using joint group 'arm'
     Initializer scene("Scene",{{"Name",std::string("MyScene")},{"JointGroup",std::string("arm")}});

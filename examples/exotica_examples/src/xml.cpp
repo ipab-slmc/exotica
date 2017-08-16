@@ -37,12 +37,12 @@ using namespace exotica;
 
 void run()
 {
-    ros::NodeHandle nh_("~");
+    Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
     Initializer solver, problem;
 
     std::string file_name;
-    nh_.getParam("ConfigurationFile",file_name);
+    Server::getParam("ConfigurationFile",file_name);
 
     XMLLoader::load(file_name,solver, problem);
 

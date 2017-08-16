@@ -40,6 +40,8 @@ using namespace exotica;
 
 void run()
 {
+    Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
+
     // Scene using joint group 'arm'
     SceneInitializer scene("MyScene","arm");
     // End-effector task map with two position frames

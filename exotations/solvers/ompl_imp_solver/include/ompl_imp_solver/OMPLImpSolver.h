@@ -111,6 +111,8 @@ namespace exotica
       double margin_;
       Eigen::VectorXd qT_;
       int min_traj_length_;
+
+      OMPLImplementationInitializer init_;
     private:
       BASE_TYPE BaseType;
       double init_margin_;

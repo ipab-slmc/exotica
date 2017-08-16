@@ -44,7 +44,7 @@
 #include <set>
 #include <exotica/Tools.h>
 
-#include <tf/transform_broadcaster.h>
+#include <exotica/Server.h>
 #include <tf_conversions/tf_kdl.h>
 
 #define ROOT  -1     //!< The value of the parent for the root segment
@@ -234,7 +234,6 @@ namespace exotica
             std::shared_ptr<KinematicResponse> Solution;
             KinematicRequestFlags Flags;
 
-            tf::TransformBroadcaster debugTF;
             std::vector<tf::StampedTransform> debugTree;
             std::vector<tf::StampedTransform> debugFrames;
     };

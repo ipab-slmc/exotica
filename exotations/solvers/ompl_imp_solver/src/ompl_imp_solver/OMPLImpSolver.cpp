@@ -69,11 +69,11 @@ namespace exotica
 
   void OMPLImpSolver::initialiseSolver(Initializer& init)
   {
-      OMPLImplementationInitializer prop(init);
-      range_ = prop.Range;
-      if(prop.Algorithm!="")
+      init_ = OMPLImplementationInitializer(init);
+      range_ = init_.Range;
+      if(init_.Algorithm!="")
       {
-        algorithm_ = "geometric::"+prop.Algorithm;
+        algorithm_ = "geometric::"+init_.Algorithm;
       }
       object_name_=algorithm_;
 
@@ -88,8 +88,8 @@ namespace exotica
         for (auto &it : known_algorithms_)
           ERROR(it.first);
       }
-      margin_ = prop.Margin;
-      timeout_ = prop.Timeout;
+      margin_ = init_.Margin;
+      timeout_ = init_.Timeout;
   }
 
   void OMPLImpSolver::specifyProblem(const SamplingProblem_ptr &prob)
@@ -97,12 +97,12 @@ namespace exotica
     prob_ = prob;
     BaseType = prob_->getScene()->getBaseType();
     if (BaseType == BASE_TYPE::FIXED)
-      state_space_.reset(new OMPLRNStateSpace(prob_->getSpaceDim(), prob_));
+      state_space_.reset(new OMPLRNStateSpace(prob_->getSpaceDim(), prob_, init_));
     else if (BaseType == BASE_TYPE::FLOATING)
-      state_space_.reset(new OMPLSE3RNStateSpace(prob_->getSpaceDim() - 6, prob_));
+      state_space_.reset(new OMPLSE3RNStateSpace(prob_->getSpaceDim() - 6, prob_, init_));
 
     ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
-    ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
+    ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_, init_)));
     ompl_simple_setup_->setPlannerAllocator(boost::bind(known_algorithms_[algorithm_], _1, "Exotica_" + algorithm_));
 
     std::vector<int> project_vars = { 0, 1 };

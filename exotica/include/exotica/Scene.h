@@ -215,7 +215,6 @@ namespace exotica
 
       std::string scene_name_;
       BASE_TYPE BaseType;
-      EParam<std_msgs::Bool> drake_full_body_;;
 
   };
 

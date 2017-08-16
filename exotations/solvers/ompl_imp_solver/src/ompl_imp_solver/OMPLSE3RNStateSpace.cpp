@@ -34,32 +34,15 @@
 #include <ompl_imp_solver/OMPLSE3RNStateSpace.h>
 namespace exotica
 {
-  OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob)
-      : OMPLBaseStateSpace(dim, prob), realvectordim_(dim), SO3Bounds_(
-          3), useGoal_(false)
+  OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLImplementationInitializer init)
+      : OMPLBaseStateSpace(dim, prob, init), realvectordim_(dim), SO3Bounds_(3)
   {
     setName("OMPLSE3RNCompoundStateSpace");
     addSubspace(ob::StateSpacePtr(new ob::SE3StateSpace()), 10.0);
     addSubspace(ob::StateSpacePtr(new ob::RealVectorStateSpace(dim)), 1.0);
-    weights_.reset(new Vector());
-    weights_->data.resize(dim + 6);
-    for (int i = 0; i < dim + 6; i++)
-      weights_->data[i] = 1;
-    if (Server::Instance()->hasParam(Server::Instance()->getName() + "/SE3RNSpaceWeights"))
-    {
-      EParam<exotica::Vector> tmp;
-      Server::Instance()->getParam(Server::Instance()->getName() + "/SE3RNSpaceWeights", tmp);
-        if (tmp->data.size() == dim + 6)
-        {
-          weights_ = tmp;
-        }
-    }
-    if (Server::Instance()->hasParam(Server::Instance()->getName() + "/SE3RNSpaceRNBias"))
-    {
-        Server::Instance()->getParam(Server::Instance()->getName() + "/SE3RNSpaceRNBias",
-            rn_bias_percentage_);
-      useGoal_ = true;
-    }
+    useGoal_ = init.UseGoalBias;
+    rn_bias_percentage_ = init.GoalBias;
+    weights_ = init.ImportanceWeights;
     unsigned int n = dim + 6;
     if (prob->getBounds().size() == 2 * n)
     {
@@ -178,7 +161,7 @@ namespace exotica
       tmp << rstate->SE3StateSpace().getX(), rstate->SE3StateSpace().getY();
       double percentage = (space->goal_.segment(0, 2) - tmp).norm()
           / space->base_dist_;
-      if (percentage < space->rn_bias_percentage_->data)
+      if (percentage < space->rn_bias_percentage_)
       {
         for (unsigned int i = 0; i < dim; ++i)
           rstate->RealVectorStateSpace().values[i] = rng_.uniformReal(

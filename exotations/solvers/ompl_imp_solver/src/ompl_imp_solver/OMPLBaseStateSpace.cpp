@@ -35,34 +35,20 @@
 
 namespace exotica
 {
-  OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob)
+  OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLImplementationInitializer init)
       : ob::CompoundStateSpace(), prob_(prob)
   {
   }
 
-  OMPLStateValidityChecker::OMPLStateValidityChecker(const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob)
+  OMPLStateValidityChecker::OMPLStateValidityChecker(const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob, OMPLImplementationInitializer init)
       : ob::StateValidityChecker(si), prob_(prob)
   {
     Server_ptr server = Server::Instance();
-    if (server->hasParam(server->getName() + "/SafetyMargin"))
-      server->getParam(server->getName() + "/SafetyMargin", margin_);
-    else
-    {
-      margin_.reset(new std_msgs::Float64());
-      margin_->data = 0.0;
-      server->setParam(server->getName() + "/SafetyMargin", margin_);
-    }
-    if (server->hasParam(server->getName() + "/SelfCollisionCheck"))
-      server->getParam(server->getName() + "/SelfCollisionCheck", self_collision_);
-    else
-    {
-      self_collision_.reset(new std_msgs::Bool());
-      self_collision_->data = false;
-      server->setParam(server->getName() + "/SelfCollisionCheck", self_collision_);
-    }
 
-    HIGHLIGHT_NAMED("OMPLStateValidityChecker",
-        "Safety Margin: " << margin_->data);
+    margin_ = init.Margin;
+    self_collision_ = init.SelfCollisionCheck;
+
+    HIGHLIGHT_NAMED("OMPLStateValidityChecker", "Safety Margin: " << margin_);
   }
 
   bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
@@ -84,7 +70,7 @@ namespace exotica
 #endif
 
     prob_->Update(q);
-    if (!prob_->getScene()->getCollisionScene()->isStateValid(self_collision_->data, margin_->data))
+    if (!prob_->getScene()->getCollisionScene()->isStateValid(self_collision_, margin_))
     {
       dist = -1;
       return false;

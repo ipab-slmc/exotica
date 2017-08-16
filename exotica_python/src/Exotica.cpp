@@ -357,9 +357,6 @@ PYBIND11_MODULE(_pyexotica, module)
 
     module.doc() = "Exotica Python wrapper";
 
-    int argc = 0;
-    ros::init(argc, nullptr, "exotica_python_node");
-
     py::class_<Setup, std::unique_ptr<Setup, py::nodelete>> setup(module, "Setup");
     setup.def("__init__",[](Setup* instance){instance=Setup::Instance().get();});
     setup.def_static("getSolvers", &Setup::getSolvers);
@@ -371,6 +368,7 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("printSupportedClasses",&Setup::printSupportedClasses);
     setup.def_static("getInitializers",&Setup::getInitializers, py::return_value_policy::copy);
     setup.def_static("getPackagePath",&ros::package::getPath);
+    setup.def_static("initRos",[](){int argc = 0; ros::init(argc, nullptr, "exotica_python_node"); Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));});
 
     py::class_<Object, std::shared_ptr<Object>> object(module, "Object");
     object.def("getType", &Object::type, "Object type");

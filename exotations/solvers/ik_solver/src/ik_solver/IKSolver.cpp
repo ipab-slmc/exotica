@@ -32,7 +32,6 @@
  */
 
 #include "ik_solver/IKSolver.h"
-#include <chrono>
 
 #include <lapack/cblas.h>
 #include "f2c.h"
@@ -131,10 +130,11 @@ namespace exotica
 
     void IKsolver::Solve(Eigen::MatrixXd & solution)
     {
+        Timer timer;
+
         if(!prob_) throw_named("Solver has not been initialized!");
         Eigen::VectorXd q0 = prob_->applyStartState();
 
-        auto start = std::chrono::high_resolution_clock::now();
         if (prob_->N != q0.rows()) throw_named("Wrong size q0 size=" << q0.rows() << ", required size="<< prob_->N);
 
         bool UseNullspace = prob_->qNominal.rows()==prob_->N;
@@ -182,7 +182,7 @@ namespace exotica
 
         solution.row(0) = q;
 
-        planning_time_ = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - start).count();
+        planning_time_ = timer.getDuration();
     }
 
     Eigen::MatrixXd IKsolver::PseudoInverse(Eigen::MatrixXdRefConst J)

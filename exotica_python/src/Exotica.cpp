@@ -370,6 +370,11 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("getPackagePath",&ros::package::getPath);
     setup.def_static("initRos",[](){int argc = 0; ros::init(argc, nullptr, "exotica_python_node"); Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));});
 
+    py::class_<Timer, std::shared_ptr<Timer>> timer(module, "Timer");
+    timer.def(py::init());
+    timer.def("reset", &Timer::reset);
+    timer.def("getDuration", &Timer::getDuration);
+
     py::class_<Object, std::shared_ptr<Object>> object(module, "Object");
     object.def("getType", &Object::type, "Object type");
     object.def("getName", &Object::getObjectName, "Object name");

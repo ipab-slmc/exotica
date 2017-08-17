@@ -20,5 +20,5 @@ pybind_add_module(_pyexotica MODULE src/Exotica.cpp)
 catkin_python_setup()
 
 install(TARGETS _pyexotica LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
-catkin_install_python(PROGRAMS scripts/example_aico.py scripts/example_ompl.py scripts/example_ik.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+catkin_install_python(PROGRAMS scripts/example_aico.py scripts/example_ompl.py scripts/example_ik.py scripts/example_ik_noros.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)

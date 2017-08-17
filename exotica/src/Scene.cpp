@@ -85,11 +85,6 @@ namespace exotica
     }
     ps_->setPlanningSceneMsg(*msg.get());
     BaseType = base_type;
-    if (Server::Instance()->hasParam(Server::Instance()->getName() + "/DrakeFullBody"))
-      Server::Instance()->getParam(Server::Instance()->getName() + "/DrakeFullBody",
-          drake_full_body_);
-    else
-      drake_full_body_.reset(new std_msgs::Bool());
       joint_index_.resize(joints.size());
 
       for (std::size_t i = 0;
@@ -154,10 +149,7 @@ namespace exotica
           world_name + "/trans_y", x(1));
       ps_->getCurrentStateNonConst().setVariablePosition(
           world_name + "/trans_z", x(2));
-      KDL::Rotation rot =
-          drake_full_body_->data ?
-              KDL::Rotation::RPY(x(3), x(4), x(5)) :
-              KDL::Rotation::EulerZYX(x(3), x(4), x(5));
+      KDL::Rotation rot = KDL::Rotation::EulerZYX(x(3), x(4), x(5));
       Eigen::VectorXd quat(4);
       rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
       ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_x",
@@ -378,18 +370,6 @@ namespace exotica
     fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
     fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
 
-    //	Bugs for non-mesh obstacles. TODO
-//		KDL::Frame tmp1 = KDL::Frame(KDL::Vector(p1(0), p1(1), p1(2)));
-//		//tmp1 = KDL::Frame(KDL::Vector(c1(0), c1(1), c1(2)))*tmp1.Inverse();
-//		KDL::Frame tmp2 = KDL::Frame(KDL::Vector(p2(0), p2(1), p2(2)));
-//		tmp2 = tmp2 * KDL::Frame(KDL::Vector(c2(0), c2(1), c2(2)));
-//
-//		p1(0)=tmp1.p.data[0];
-//		p1(1)=tmp1.p.data[1];
-//		p1(2)=tmp1.p.data[2];
-//		p2(0)=tmp2.p.data[0];
-//		p2(1)=tmp2.p.data[1];
-//		p2(2)=tmp2.p.data[2];
     norm = p2 - p1;
   }
 
@@ -512,7 +492,14 @@ namespace exotica
       Object::InstatiateObject(init);
       name_ = object_name_;
       kinematica_.Debug = debug_;
-      Server::Instance()->getModel(init.RobotDescription, model_);
+      if(init.URDF=="" || init.SRDF=="")
+      {
+          Server::Instance()->getModel(init.RobotDescription, model_);
+      }
+      else
+      {
+          Server::Instance()->getModel(init.URDF, model_, init.URDF, init.SRDF);
+      }
       kinematica_.Instantiate(init.JointGroup, model_);
       group = model_->getJointModelGroup(init.JointGroup);
 
@@ -520,10 +507,14 @@ namespace exotica
 
       collision_scene_.reset(new CollisionScene(name_));
 
-      if (visual_debug_)
+      if (Server::isRos() && visual_debug_)
       {
-          ps_pub_ = Server::Instance()->advertise<moveit_msgs::PlanningScene>(name_ + "/PlanningScene", 100, true);
+          ps_pub_ = Server::advertise<moveit_msgs::PlanningScene>(name_ + "/PlanningScene", 100, true);
           if(debug_) HIGHLIGHT_NAMED(name_, "Running in debug mode, planning scene will be published to '"<<Server::Instance()->getName()<<"/"<<name_<<"/PlanningScene'");
+      }
+      else
+      {
+          visual_debug_ = false;
       }
       {
           planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
@@ -548,9 +539,12 @@ namespace exotica
 
   void Scene::publishScene()
   {
-    moveit_msgs::PlanningScene msg;
-    collision_scene_->getPlanningScene()->getPlanningSceneMsg(msg);
-    ps_pub_.publish(msg);
+    if(Server::isRos())
+    {
+        moveit_msgs::PlanningScene msg;
+        collision_scene_->getPlanningScene()->getPlanningSceneMsg(msg);
+        ps_pub_.publish(msg);
+    }
   }
 
   void Scene::setCollisionScene(

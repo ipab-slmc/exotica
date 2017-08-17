@@ -62,7 +62,7 @@ namespace exotica
       Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
 
       double error;
-      ros::Duration planning_time_;
+      double planning_time_;
 
       int getMaxIteration();
       int getLastIteration();

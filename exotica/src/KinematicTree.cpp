@@ -308,7 +308,7 @@ void KinematicTree::publishFrames()
         if(i>0) debugTree[i-1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica", element->Segment.getName()));
         i++;
     }
-    debugTF.sendTransform(debugTree);
+    Server::sendTransform(debugTree);
     i = 0;
     for(KinematicFrame&  frame : Solution->Frame)
     {
@@ -319,7 +319,7 @@ void KinematicTree::publishFrames()
         debugFrames[i*2+1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()), tf::resolve("exotica","Frame"+std::to_string(i)+"A"+frame.FrameA->Segment.getName()));
         i++;
     }
-    debugTF.sendTransform(debugFrames);
+    Server::sendTransform(debugFrames);
 }
 
 void KinematicTree::UpdateFK()

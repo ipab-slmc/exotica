@@ -32,25 +32,27 @@
 
 #include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
+#include <thread>
+#include <chrono>
 
 using namespace exotica;
 
 void run()
 {
-    Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
     Initializer solver, problem;
 
-    std::string file_name;
-    Server::getParam("ConfigurationFile",file_name);
+    std::string file_name = ros::package::getPath("exotica_examples")+"/resources/ik_solver_demo.xml";
 
-    XMLLoader::load(file_name,solver, problem);
+    XMLLoader::load(file_name, solver, problem);
 
     HIGHLIGHT_NAMED("XMLnode","Loaded from XML");
 
-    // Initialize
+    UnconstrainedEndPoseProblemInitializer problem_init(problem);
+    problem_init.PlanningScene.addProperty( Property("URDF", false, boost::any(ros::package::getPath("exotica_examples")+"/resources/lwr_simplified.urdf")));
+    problem_init.PlanningScene.addProperty( Property("SRDF", false, boost::any(ros::package::getPath("exotica_examples")+"/resources/lwr_simplified.srdf")));
 
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
+    PlanningProblem_ptr any_problem = Setup::createProblem(problem_init);
     MotionSolver_ptr any_solver = Setup::createSolver(solver);
 
     // Assign the problem to the solver
@@ -66,16 +68,13 @@ void run()
     ROS_INFO_STREAM("Calling solve() in an infinite loop");
 
     double t = 0.0;
-    ros::Rate loop_rate(500.0);
-    ros::WallTime init_time = ros::WallTime::now();
+    double dt = 1.0/20.0;
 
-    while (ros::ok())
+    while (true)
     {
-        ros::WallTime start_time = ros::WallTime::now();
-
         // Update the goal if necessary
         // e.g. figure eight
-        t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
+        t += dt;
         my_problem->y = {0.6,
                 -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
                 0.5 + sin(t * M_PI * 0.5) * 0.2 ,0 ,0 ,0};
@@ -84,29 +83,19 @@ void run()
         my_problem->setStartState(q);
         any_solver->Solve(solution);
 
-        double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
+        HIGHLIGHT("Solution ["<<solution<<"]");
         q = solution.row(0);
 
         my_problem->Update(q);
-        my_problem->getScene()->getSolver().publishFrames();
 
-        ros::spinOnce();
-        loop_rate.sleep();
+        std::this_thread::sleep_for(std::chrono::duration<double>(dt));
     }
-
-    // All classes will be destroyed at this point.
 }
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "ExoticaManualInitializationExampleNode");
     ROS_INFO_STREAM("Started");
 
     // Run demo code
     run();
-
-    // Clean up
-    // Run this only after all the exoica classes have been disposed of!
-    Setup::Destroy();
 }

@@ -38,15 +38,14 @@ using namespace exotica;
 
 void run()
 {
-    ros::NodeHandle nhg_;
-    ros::NodeHandle nh_("~");
+    Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
     Initializer solver, problem;
 
     std::string file_name, solver_name, problem_name;
-    nh_.getParam("ConfigurationFile",file_name);
-    nh_.getParam("Solver",solver_name);
-    nh_.getParam("Problem",problem_name);
+    Server::getParam("ConfigurationFile",file_name);
+    Server::getParam("Solver",solver_name);
+    Server::getParam("Problem",problem_name);
 
     XMLLoader::load(file_name,solver, problem, solver_name, problem_name);
 

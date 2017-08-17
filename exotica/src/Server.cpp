@@ -31,21 +31,30 @@
  */
 
 #include "exotica/Server.h"
+#include <fstream>
 
 exotica::Server_ptr exotica::Server::singleton_server_ = nullptr;
 namespace exotica
 {
-  Server::Server()
-      : nh_("/EXOTicaServer"), name_("EXOTicaServer"), sp_(
-          2)
+
+  RosNode::RosNode(std::shared_ptr<ros::NodeHandle> nh, int numThreads) : nh_(nh), sp_(numThreads)
   {
-    //TODO
-    sp_.start();
+      sp_.start();
+  }
+
+  RosNode::~RosNode()
+  {
+      sp_.stop();
+  }
+
+  Server::Server() : name_("EXOTicaServer"), node_(nullptr)
+  {
+
   }
 
   Server::~Server()
   {
-    sp_.stop();
+
   }
 
   void Server::destroy()
@@ -53,30 +62,63 @@ namespace exotica
       exotica::Server::singleton_server_.reset();
   }
 
+  inline bool exists(const std::string& path)
+  {
+    std::ifstream file(path.c_str());
+    return (bool)file;
+  }
+
+  robot_model::RobotModelPtr loadModelImpl(const std::string& urdf, const std::string & srdf)
+  {
+      rdf_loader::RDFLoader loader(urdf, srdf);
+      const boost::shared_ptr<srdf::Model>& srdf_ = loader.getSRDF() ? loader.getSRDF() : boost::shared_ptr<srdf::Model>(new srdf::Model());
+      if(loader.getURDF())
+      {
+          return robot_model::RobotModelPtr(new robot_model::RobotModel(loader.getURDF(), srdf_));
+      }
+      else
+      {
+          throw_pretty("Can't load robot model from URDF!");
+      }
+  }
+
   robot_model::RobotModelPtr Server::loadModel(std::string name, std::string urdf, std::string srdf)
   {
       robot_model::RobotModelPtr model;
       if (hasParam("RobotDescription"))
       {
-          EParam<std_msgs::String> robot_description_param;
+          std::string robot_description_param;
           getParam("RobotDescription", robot_description_param);
-          ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
-          model = robot_model_loader::RobotModelLoader(robot_description_param->data,false).getModel();
+          ROS_INFO_STREAM("Using robot_description at " << robot_description_param);
+          model = robot_model_loader::RobotModelLoader(robot_description_param,false).getModel();
       }
       else if (hasParam(getName() + "/RobotDescription"))
       {
-          EParam<std_msgs::String> robot_description_param;
+          std::string robot_description_param;
           getParam(getName() + "/RobotDescription", robot_description_param);
-          ROS_INFO_STREAM("Using robot_description at " << robot_description_param->data);
-          model = robot_model_loader::RobotModelLoader(robot_description_param->data,false).getModel();
+          ROS_INFO_STREAM("Using robot_description at " << robot_description_param);
+          model = robot_model_loader::RobotModelLoader(robot_description_param,false).getModel();
       }
-      else if (urdf=="" || srdf=="")
+      else if(urdf=="" || srdf=="")
       {
           model = robot_model_loader::RobotModelLoader(name,false).getModel();
       }
+      else if(exists(urdf) && exists(srdf))
+      {
+          std::string urdf_, srdf_;
+          {
+              std::ifstream t(urdf);
+              urdf_ = std::string((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+          }
+          {
+              std::ifstream t(srdf);
+              srdf_ = std::string((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+          }
+          model = loadModelImpl(urdf_,srdf_);
+      }
       else
       {
-          model = robot_model_loader::RobotModelLoader(robot_model_loader::RobotModelLoader::Options(urdf,srdf)).getModel();
+          model = loadModelImpl(urdf,srdf);
       }
 
       if (model)
@@ -124,19 +166,4 @@ namespace exotica
     return name_;
   }
 
-  bool Server::hasParam(const std::string & name)
-  {
-    if (params_.find(name) == params_.end()) return false;
-    return true;
-  }
-
-  void Server::listParameters()
-  {
-    HIGHLIGHT("************* Parameters *************");
-    for (auto & it : params_)
-    {
-      HIGHLIGHT("Parameter: "<<it.first);
-    }
-    HIGHLIGHT("**************************************");
-  }
 }

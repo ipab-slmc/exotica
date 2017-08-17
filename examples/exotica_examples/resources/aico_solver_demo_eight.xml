@@ -21,7 +21,7 @@
 
     <Maps>
       <EffFrame Name="Frame">
-        <Scene>MyScene</Scene>
+        <Scene>AICOSolverDemoScene</Scene>
         <EndEffector>
             <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17" BaseOffset="0.6 -0.1 0.5 0 0 0 1" />
         </EndEffector>

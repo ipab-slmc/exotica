@@ -94,12 +94,6 @@ namespace exotica
 
       OMPLBaseSolver_ptr base_solver_;
 
-      /// \brief  Indicate if trajectory smoother is required
-      EParam<std_msgs::Bool> smooth_;
-      /// \brief  Maximum step
-      EParam<std_msgs::String> range_;
-      EParam<std_msgs::String> solver_;
-
       OMPLsolverInitializer parameters_;
   };
 

@@ -52,9 +52,19 @@
 #include <tf/transform_listener.h>
 namespace exotica
 {
-  //	EXOTica Parameter type
-  template<typename T>
-  using EParam = std::shared_ptr<T>;
+    class RosNode
+    {
+    public:
+        RosNode() = delete;
+        RosNode(std::shared_ptr<ros::NodeHandle> nh, int numThreads = 2);
+        ~RosNode();
+        inline ros::NodeHandle& getNodeHandle() { return *nh_; }
+        inline tf::TransformBroadcaster& getTF() { return tf_; }
+    protected:
+        std::shared_ptr<ros::NodeHandle> nh_;
+        ros::AsyncSpinner sp_;
+        tf::TransformBroadcaster tf_;
+    };
 
   //	Implementation of EXOTica Server class
   class Server : public Uncopyable
@@ -70,56 +80,6 @@ namespace exotica
         return singleton_server_;
       }
       virtual ~Server();
-
-      /*
-       * \brief	Check if a parameter is exist
-       * @param	name		Parameter name
-       * @return	True if exist, false otherwise
-       */
-      bool hasParam(const std::string & name);
-
-      /*
-       * \brief	Get the latest available parameter
-       * @param	name		Parameter name
-       * @param	ptr			Parameter pointer
-       */
-      template<typename T>
-      void getParam(const std::string & name, EParam<T> & ptr)
-      {
-        if (params_.find(name) == params_.end())
-        {
-          WARNING_NAMED(name_,"Param " << name << " does not exist");
-          listParameters();
-          throw_pretty("Can't find parameter '"<<name<<"'");
-        }
-        ptr = boost::any_cast<std::shared_ptr<T>>(params_.at(name));
-      }
-
-      /*
-       * \brief	Assign new value to the parameter
-       * @param	name		Parameter name
-       * @param	ptr			Pointer to the parameter
-       */
-      template<typename T>
-      void setParam(const std::string & name, const EParam<T> & ptr)
-      {
-        if (params_.find(name) == params_.end())
-          params_[name] = ptr;
-        else
-          params_.at(name) = ptr;
-      }
-
-      /*
-       * \brief	List all parameters
-       */
-      void listParameters();
-
-      template<typename T>
-      ros::Publisher advertise(const std::string &topic, uint32_t queue_size,
-          bool latch = false)
-      {
-        return nh_.advertise<T>(topic, queue_size, latch);
-      }
 
       /*
        * \brief	Check if a robot model exist
@@ -148,6 +108,75 @@ namespace exotica
        */
       std::string getName();
 
+      inline static void InitRos(std::shared_ptr<ros::NodeHandle> nh, int numThreads = 2)
+      {
+          Instance()->node_.reset(new RosNode(nh, numThreads));
+      }
+
+      inline static bool isRos() { return Instance()->node_!=nullptr; }
+
+      inline ros::NodeHandle& getNodeHandle()
+      {
+          if(!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
+          return node_->getNodeHandle();
+      }
+
+      template<typename T> static bool getParam(const std::string& name, T& param)
+      {
+          return Instance()->getNodeHandle().getParam(name, param);
+      }
+
+      inline bool static hasParam(const std::string& name)
+      {
+          if(isRos())
+          {
+              return Instance()->getNodeHandle().hasParam(name);
+          }
+          else
+          {
+              return false;
+          }
+      }
+
+      template<typename T> static ros::Publisher advertise(const std::string &topic, uint32_t queue_size, bool latch=false)
+      {
+          return Instance()->getNodeHandle().advertise<T>(topic, queue_size, latch);
+      }
+
+      template<typename T> static ros::Publisher advertise(const std::string &topic, uint32_t queue_size, const ros::SubscriberStatusCallback &connect_cb, const ros::SubscriberStatusCallback &disconnect_cb=ros::SubscriberStatusCallback(), const ros::VoidConstPtr &tracked_object=ros::VoidConstPtr(), bool latch=false)
+      {
+          return Instance()->getNodeHandle().advertise<T>(topic, queue_size, connect_cb, disconnect_cb, tracked_object, latch);
+      }
+
+      template<typename T> static ros::Publisher advertise(ros::AdvertiseOptions &ops)
+      {
+          return Instance()->getNodeHandle().advertise<T>(ops);
+      }
+
+      static void sendTransform(const tf::StampedTransform &transform)
+      {
+          if(!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
+          Instance()->node_->getTF().sendTransform(transform);
+      }
+
+      static void sendTransform(const std::vector< tf::StampedTransform > &transforms)
+      {
+          if(!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
+          Instance()->node_->getTF().sendTransform(transforms);
+      }
+
+      static void sendTransform(const geometry_msgs::TransformStamped &transform)
+      {
+          if(!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
+          Instance()->node_->getTF().sendTransform(transform);
+      }
+
+      static void sendTransform(const std::vector< geometry_msgs::TransformStamped > &transforms)
+      {
+          if(!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
+          Instance()->node_->getTF().sendTransform(transforms);
+      }
+
       static void destroy();
     private:
       /*
@@ -160,29 +189,10 @@ namespace exotica
       void operator=(Server const&) = delete;
       robot_model::RobotModelPtr loadModel(std::string name, std::string urdf="", std::string srdf="");
 
-      template<typename T>
-      void paramCallback(const std::shared_ptr<T const> & ptr,
-          boost::any & param)
-      {
-        *boost::any_cast<std::shared_ptr<T>>(param) = *ptr;
-      }
-
       /// \brief	The name of this server
       std::string name_;
 
-      /// \brief	ROS node handle
-      ros::NodeHandle nh_;
-
-      ///	\brief	spinner
-      ros::AsyncSpinner sp_;
-
-      std::map<std::string, ros::Subscriber> subs_;
-
-      /// \brief	Parameters map <name, parameter pointer>
-      std::map<std::string, boost::any> params_;
-
-      /// \brief	<param_name, param_topic>
-      std::map<std::string, std::string> topics_;
+      std::shared_ptr<RosNode> node_;
 
       /// \brief Robot model cache
       std::map<std::string, robot_model::RobotModelPtr> robot_models_;

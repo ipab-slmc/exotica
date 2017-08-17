@@ -148,8 +148,11 @@ namespace exotica
 
     void IMesh::Instantiate(IMeshInitializer& init)
     {
-        initDebug(init.ReferenceFrame);
         Debug = init.Debug;
+        if(Debug)
+        {
+            initDebug(init.ReferenceFrame);
+        }
         eff_size_ = Frames.size();
         weights_.setOnes(eff_size_, eff_size_);
         if(init.Weights.rows()==eff_size_*eff_size_)

@@ -153,7 +153,7 @@ namespace exotica
             }
         }
 
-        InitDebug();
+        if(debug_) InitDebug();
     }
 
     void CoM::assignScene(Scene_ptr scene)

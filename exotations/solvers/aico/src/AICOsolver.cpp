@@ -133,7 +133,7 @@ namespace exotica
   {
     prob_->setStartState(q_init[0]);
     prob_->applyStartState();
-    ros::Time startTime = ros::Time::now();
+    Timer timer;
     ROS_WARN_STREAM("AICO: Setting up the solver");
     updateCount = 0;
     sweep = -1;
@@ -146,7 +146,7 @@ namespace exotica
     initTrajectory(q_init);
     sweep = 0;
     ROS_WARN_STREAM("AICO: Solving");
-    for (int k = 0; k < max_iterations && ros::ok(); k++)
+    for (int k = 0; k < max_iterations && !(Server::isRos() && !ros::ok()); k++)
     {
       d = step();
       if (d < 0)
@@ -161,7 +161,7 @@ namespace exotica
       sol.row(tt) = q[tt];
     }
     solution = sol;
-    planning_time_ = ros::Time::now() - startTime;
+    planning_time_ = timer.getDuration();
   }
 
   void AICOsolver::initMessages()
@@ -340,7 +340,7 @@ namespace exotica
     }
 
     cost = evaluateTrajectory(b, true);
-    if (cost < 0) throw_named("Invalid cost!");
+    if (cost < 0) throw_named("Invalid cost! "<<cost);
     INFO("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost <<", updates: "<<updateCount);
     rememberOldState();
   }
@@ -558,7 +558,7 @@ namespace exotica
       AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]);
     }
 
-    for (int k = 0; k < maxRelocationIterations && ros::ok(); k++)
+    for (int k = 0; k < maxRelocationIterations && !(Server::isRos() && !ros::ok()); k++)
     {
       if (!((!k && forceRelocation)
           || (b[t] - qhat[t]).array().abs().maxCoeff() > tolerance_)) break;
@@ -595,8 +595,8 @@ namespace exotica
       bool skipUpdate)
   {
     ROS_WARN_STREAM("Evaluating, sweep "<<sweep);
-    ros::Time start = ros::Time::now(), tmpTime;
-    ros::Duration dSet, dPre, dUpd, dCtrl, dTask;
+    Timer timer;
+    double dSet, dPre, dUpd, dCtrl, dTask;
     double ret = 0.0;
     double tau = prob_->tau;
     double tau_1 = 1. / tau, tau_2 = tau_1 * tau_1;
@@ -612,30 +612,30 @@ namespace exotica
     {
       q = x;
     }
-    dSet = ros::Time::now() - start;
+    dSet = timer.getDuration();
     if (preupdateTrajectory_)
     {
       ROS_WARN_STREAM("Pre-update, sweep "<<sweep);
       for (int t = 0; t < T; t++)
       {
-        if (!ros::ok()) return -1.0;
+        if (Server::isRos() && !ros::ok()) return -1.0;
         updateCount++;
         prob_->Update(q[t], t);
       }
     }
-    dPre = ros::Time::now() - start - dSet;
+    dPre = timer.getDuration();
 
     for (int t = 0; t < T; t++)
     {
-      tmpTime = ros::Time::now();
-      if (!ros::ok()) return -1.0;
+      timer.reset();
+      if (Server::isRos() && !ros::ok()) return -1.0;
       if (!skipUpdate)
       {
         updateCount++;
         prob_->Update(q[t], t);
       }
-      dUpd += ros::Time::now() - tmpTime;
-      tmpTime = ros::Time::now();
+      dUpd += timer.getDuration();
+      timer.reset();
 
       // Control cost
       if (!dynamic)
@@ -669,8 +669,8 @@ namespace exotica
       }
 
       ret += costControl(t);
-      dCtrl += ros::Time::now() - tmpTime;
-      tmpTime = ros::Time::now();
+      dCtrl += timer.getDuration();
+      timer.reset();
       // Task cost
       for (int i = 0; i < prob_->NumTasks; i++)
       {
@@ -685,7 +685,7 @@ namespace exotica
                 ret += costTask(t, i);
           }
       }
-      dTask += ros::Time::now() - tmpTime;
+      dTask += timer.getDuration();
     }
     return ret;
   }

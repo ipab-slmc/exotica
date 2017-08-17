@@ -41,6 +41,7 @@
 #include <exotica/Tools/Uncopyable.h>
 #include <exotica/Tools/Printable.h>
 #include <exotica/Tools/Conversions.h>
+#include <exotica/Tools/Timer.h>
 #include <exotica/Version.h>
 #include <std_msgs/ColorRGBA.h>
 

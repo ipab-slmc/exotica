@@ -32,8 +32,6 @@
 
 #include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
-#include <thread>
-#include <chrono>
 
 using namespace exotica;
 
@@ -72,6 +70,7 @@ void run()
 
     while (true)
     {
+        Timer timer;
         // Update the goal if necessary
         // e.g. figure eight
         t += dt;
@@ -83,12 +82,12 @@ void run()
         my_problem->setStartState(q);
         any_solver->Solve(solution);
 
-        HIGHLIGHT("Solution ["<<solution<<"]");
+        HIGHLIGHT("Finished solving in "<<timer.getDuration()<<"s. Solution ["<<solution<<"]");
         q = solution.row(0);
 
         my_problem->Update(q);
 
-        std::this_thread::sleep_for(std::chrono::duration<double>(dt));
+        exotica::sleep(dt);
     }
 }
 

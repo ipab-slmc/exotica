@@ -22,11 +22,13 @@ dt=1.0/20.0
 t=0.0
 q=array([0.0]*7)
 print('Publishing IK')
+timer = exo.Timer()
 while True:
+    timer.reset()
     problem.setGoal('Position',figureEight(t))
     problem.startState = q
     q = solver.solve()[0]
-    print(q)
+    print('Solution found in '+str(timer.getDuration())+'s '+str(q))
     sleep(dt)
     t=t+dt
 

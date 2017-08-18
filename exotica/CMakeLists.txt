@@ -101,7 +101,7 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY include/ DESTINATION include)
 install(FILES cmake/GenerateInitializers.py cmake/InitializerProjectHeader.h.in DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
-
+install(DIRECTORY resources/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/resources)
 
 ## Testing
 

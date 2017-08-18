@@ -370,6 +370,22 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("getPackagePath",&ros::package::getPath);
     setup.def_static("initRos",[](){int argc = 0; ros::init(argc, nullptr, "exotica_python_node"); Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));});
 
+    py::module tools = module.def_submodule("Tools");
+    tools.def("parsePath", &parsePath);
+    tools.def("parseBool", &parseBool);
+    tools.def("parseDouble", &parseDouble);
+    tools.def("parseVector", &parseVector);
+    tools.def("parseList", &parseList);
+    tools.def("parseInt", &parseInt);
+    tools.def("parseIntList", &parseIntList);
+    tools.def("loadOBJ", [](const std::string& path){ Eigen::VectorXi tri; Eigen::VectorXd vert; loadOBJ(loadFile(path), tri, vert); return py::make_tuple(tri, vert);});
+    tools.def("getText", &getText);
+    tools.def("saveMatrix", &saveMatrix);
+    tools.def("VectorTransform", &Eigen::VectorTransform);
+    tools.def("IdentityTransform", &Eigen::IdentityTransform);
+    tools.def("loadFile", &loadFile);
+    tools.def("exists", &exists);
+
     py::class_<Timer, std::shared_ptr<Timer>> timer(module, "Timer");
     timer.def(py::init());
     timer.def("reset", &Timer::reset);

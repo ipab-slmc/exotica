@@ -83,12 +83,63 @@ bool testXMLInit()
     return true;
 }
 
+bool testRos()
+{
+    // Reser server
+    Server::destroy();
+
+    if(Server::isRos()) throw_pretty("ROS node initialized, but it shouldn't have been!");
+
+    // Fail when ROS node has no been initialized
+    try
+    {
+        Server::Instance()->getNodeHandle();
+        return false;
+    }
+    catch(Exception& e)
+    {
+
+    }
+
+    if(Server::hasParam("/rosdistro")) throw_pretty("ROS param retrieved, but shouldn't have!");
+    try
+    {
+        std::string param;
+        Server::getParam("/rosdistro", param);
+        return false;
+    }
+    catch(Exception& e)
+    {
+
+    }
+
+    // Load robot model into cache from a file
+    Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
+    // Load model from the cache
+    Server::Instance()->getModel("robot_description");
+    // Reset server, deleting the model cache
+    Server::destroy();
+    // Attempt to load model from the empty cache
+    try
+    {
+        // Fails because URDF/SRDF are not specified and ROS node is not running to load model from ROS params.
+        Server::Instance()->getModel("robot_description");
+        return false;
+    }
+    catch(Exception& e)
+    {
+
+    }
+    return true;
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "EXOTica_test_initializers");
     if(!testCore()) exit(2); HIGHLIGHT_NAMED("EXOTica","Core test passed.");
     if(!testGenericInit()) exit(2); HIGHLIGHT_NAMED("EXOTica","Generic initialization test passed.");
     if(!testXMLInit()) exit(2); HIGHLIGHT_NAMED("EXOTica","XML initialization test passed.");
+    testRos(); HIGHLIGHT_NAMED("EXOTica","ROS test passed.");
     Setup::Destroy();
     return 0;
 }

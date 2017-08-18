@@ -92,7 +92,7 @@ namespace exotica
           ROS_INFO_STREAM("Using robot_description at " << robot_description_param);
           model = robot_model_loader::RobotModelLoader(robot_description_param,false).getModel();
       }
-      else if(urdf=="" || srdf=="")
+      else if((urdf=="" || srdf=="") && isRos())
       {
           model = robot_model_loader::RobotModelLoader(name,false).getModel();
       }
@@ -100,7 +100,7 @@ namespace exotica
       {
           model = loadModelImpl(loadFile(urdf),loadFile(srdf));
       }
-      else
+      else if(urdf!="" && srdf!="")
       {
           model = loadModelImpl(urdf,srdf);
       }

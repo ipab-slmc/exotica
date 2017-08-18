@@ -70,7 +70,7 @@ namespace exotica
     }
   }
 
-  void loadOBJ(std::string & data, Eigen::VectorXi& tri,
+  void loadOBJ(const std::string & data, Eigen::VectorXi& tri,
       Eigen::VectorXd& vert)
   {
     std::stringstream ss(data);

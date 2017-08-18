@@ -30,3 +30,7 @@ catkin_install_python(PROGRAMS
     scripts/example_ompl_noros.py
       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+
+if(CATKIN_ENABLE_TESTING)
+    catkin_install_python(PROGRAMS tests/core.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+endif(CATKIN_ENABLE_TESTING)

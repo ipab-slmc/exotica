@@ -31,7 +31,6 @@
  */
 
 #include "exotica/Server.h"
-#include <fstream>
 
 exotica::Server_ptr exotica::Server::singleton_server_ = nullptr;
 namespace exotica
@@ -60,12 +59,6 @@ namespace exotica
   void Server::destroy()
   {
       exotica::Server::singleton_server_.reset();
-  }
-
-  inline bool exists(const std::string& path)
-  {
-    std::ifstream file(path.c_str());
-    return (bool)file;
   }
 
   robot_model::RobotModelPtr loadModelImpl(const std::string& urdf, const std::string & srdf)
@@ -105,16 +98,7 @@ namespace exotica
       }
       else if(exists(urdf) && exists(srdf))
       {
-          std::string urdf_, srdf_;
-          {
-              std::ifstream t(urdf);
-              urdf_ = std::string((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-          }
-          {
-              std::ifstream t(srdf);
-              srdf_ = std::string((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-          }
-          model = loadModelImpl(urdf_,srdf_);
+          model = loadModelImpl(loadFile(urdf),loadFile(srdf));
       }
       else
       {

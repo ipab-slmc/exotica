@@ -82,6 +82,12 @@ namespace exotica
   }
 
   std::string getTypeName(const std::type_info& type);
+
+  std::string parsePath(const std::string& path);
+
+  std::string loadFile(const std::string& path);
+
+  bool exists(const std::string& path);
 }
 
 namespace

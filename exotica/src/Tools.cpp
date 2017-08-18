@@ -37,6 +37,8 @@
 #include <iostream>
 #include <typeinfo> //!< The RTTI Functionality of C++
 #include <cxxabi.h> //!< The demangler for gcc... this makes this system dependent!
+#include <regex>
+#include <ros/package.h>
 
 namespace exotica
 {
@@ -146,4 +148,47 @@ namespace exotica
       return name;
   }
 
+  std::string parsePath(const std::string& path)
+  {
+      std::string ret = path;
+      std::smatch matches;
+      std::regex_search(ret, matches, std::regex("\\{([^\\}]+)\\}"));
+      for(auto& match : matches)
+      {
+          std::string package = match.str();
+          if(package[0]=='{') continue;
+          std::string package_path = ros::package::getPath(package);
+          if(package_path=="") throw_pretty("Unknown package '"<<package<<"'");
+          try
+          {
+              ret = std::regex_replace(ret, std::regex("\\{"+package+"\\}"), package_path, std::regex_constants::match_any);
+          }
+          catch(const std::regex_error& e)
+          {
+              throw_pretty("Package name resolution failed (regex error "<<e.code()<<")");
+          }
+      }
+      return ret;
+  }
+
+  std::string loadFile(const std::string& path)
+  {
+      std::string file_name = parsePath(path);
+      std::ifstream fstream(file_name);
+      if(!fstream) throw_pretty("File does not exist '" << file_name << "'");
+      try
+      {
+          return std::string((std::istreambuf_iterator<char>(fstream)), std::istreambuf_iterator<char>());
+      }
+      catch (const std::ifstream::failure& e)
+      {
+          throw_pretty("Can't read file '"<<file_name<<"'");
+      }
+  }
+
+  bool exists(const std::string& path)
+  {
+    std::ifstream file(parsePath(path));
+    return (bool)file;
+  }
 }

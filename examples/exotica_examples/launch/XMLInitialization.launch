@@ -4,14 +4,12 @@
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
   <arg     if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
 
-  <param name="robot_description" textfile="$(find exotica_examples)/resources/lwr_simplified.urdf" />
-  <param name="robot_description_semantic" textfile="$(find exotica_examples)/resources/lwr_simplified.srdf" />
+  <param name="robot_description" textfile="$(find exotica)/resources/robots/lwr_simplified.urdf" />
+  <param name="robot_description_semantic" textfile="$(find exotica)/resources/robots/lwr_simplified.srdf" />
 
   <node launch-prefix="$(arg launch_prefix)" pkg="exotica_examples" type="XMLInitialization" name="ExoticaXMLInitializationExampleNode" output="screen">
-    <param name="ConfigurationFile" type="string" value="$(find exotica_examples)/resources/ik_solver_demo.xml" />
-    <param name="Solver" type="string" value="MySolver" />
-    <param name="Problem" type="string" value="MyProblem" />
+    <param name="ConfigurationFile" type="string" value="$(find exotica)/resources/configs/ik_solver_demo.xml" />
   </node>
 
-  <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find exotica_examples)/resources/rviz.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find exotica)/resources/rviz.rviz" />
 </launch>

@@ -6,7 +6,7 @@ from numpy import matrix
 from pyexotica.publish_trajectory import *
 
 exo.Setup.initRos()
-(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica_examples')+'/resources/ompl_solver_demo.xml')
+(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica')+'/resources/configs/ompl_solver_demo.xml')
 problem = exo.Setup.createProblem(prob)
 solver = exo.Setup.createSolver(sol)
 solver.specifyProblem(problem)

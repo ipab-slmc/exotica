@@ -40,7 +40,7 @@ void run()
 
     Initializer solver, problem;
 
-    std::string file_name = ros::package::getPath("exotica_examples")+"/resources/ik_solver_demo.xml";
+    std::string file_name = ros::package::getPath("exotica")+"/resources/configs/ik_solver_demo.xml";
 
     XMLLoader::load(file_name, solver, problem);
 

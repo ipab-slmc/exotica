@@ -15,8 +15,8 @@
       <Scene Name="MyScene"> <!-- Kinematic scene -->
         <PlanningMode>Optimization</PlanningMode>
         <JointGroup>arm</JointGroup>
-        <URDF>{exotica_examples}/resources/lwr_simplified.urdf</URDF>
-        <SRDF>{exotica_examples}/resources/lwr_simplified.srdf</SRDF>
+        <URDF>{exotica}/resources/robots/lwr_simplified.urdf</URDF>
+        <SRDF>{exotica}/resources/robots/lwr_simplified.srdf</SRDF>
       </Scene>
     </PlanningScene>
     

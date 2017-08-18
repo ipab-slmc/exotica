@@ -9,7 +9,7 @@ import math
 def figureEight(t):
     return array([0.0, math.sin(t * 2.0 * math.pi * 0.5) * 0.1, math.sin(t * math.pi * 0.5) * 0.2, 0.0, 0.0, 0.0])
 
-(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica_examples')+'/resources/aico_solver_demo_eight.xml')
+(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica')+'/resources/configs/aico_solver_demo_eight.xml')
 problem = exo.Setup.createProblem(prob)
 solver = exo.Setup.createSolver(sol)
 solver.specifyProblem(problem)

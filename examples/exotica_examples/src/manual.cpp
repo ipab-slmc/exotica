@@ -43,7 +43,7 @@ void run()
     Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
     // Scene using joint group 'arm'
-    SceneInitializer scene("MyScene", "arm", false, "", "{exotica_examples}/resources/lwr_simplified.urdf", "{exotica_examples}/resources/lwr_simplified.srdf");
+    SceneInitializer scene("MyScene", "arm", false, "", "{exotica}/resources/robots/lwr_simplified.urdf", "{exotica}/resources/robots/lwr_simplified.srdf");
     // End-effector task map with two position frames
     EffFrameInitializer map("Position","MyScene",false,
     {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0 ,0 ,0 ,0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});

@@ -11,7 +11,7 @@ def figureEight(t):
     return array([0.6, -0.1 + math.sin(t * 2.0 * math.pi * 0.5) * 0.1, 0.5 + math.sin(t * math.pi * 0.5) * 0.2, 0, 0, 0])
 
 exo.Setup.initRos()
-(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica_examples')+'/resources/ik_solver_demo.xml')
+(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica')+'/resources/configs/ik_solver_demo.xml')
 problem = exo.Setup.createProblem(prob)
 solver = exo.Setup.createSolver(sol)
 solver.specifyProblem(problem)

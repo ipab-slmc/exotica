@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     if(!testCore()) exit(2); HIGHLIGHT_NAMED("EXOTica","Core test passed.");
     if(!testGenericInit()) exit(2); HIGHLIGHT_NAMED("EXOTica","Generic initialization test passed.");
     if(!testXMLInit()) exit(2); HIGHLIGHT_NAMED("EXOTica","XML initialization test passed.");
-    testRos(); HIGHLIGHT_NAMED("EXOTica","ROS test passed.");
+    if(!testRos()) exit(2); HIGHLIGHT_NAMED("EXOTica","ROS test passed.");
     Setup::Destroy();
     return 0;
 }

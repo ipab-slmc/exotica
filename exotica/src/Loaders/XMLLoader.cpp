@@ -113,9 +113,10 @@ namespace exotica
         }
         else
         {
-            if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
+            std::string xml = loadFile(file_name);
+            if (xml_file.Parse(xml.c_str(),xml.size()) != tinyxml2::XML_NO_ERROR)
             {
-              throw_pretty("Can't load file!\nFile: '"+file_name+"'");
+              throw_pretty("Can't load file!\nFile: '"+parsePath(file_name)+"'");
             }
         }
 
@@ -140,9 +141,10 @@ namespace exotica
         }
         else
         {
-            if (xml_file.LoadFile(file_name.c_str()) != tinyxml2::XML_NO_ERROR)
+            std::string xml = loadFile(file_name);
+            if (xml_file.Parse(xml.c_str(),xml.size()) != tinyxml2::XML_NO_ERROR)
             {
-              throw_pretty("Can't load file!\nFile: '"+file_name+"'");
+              throw_pretty("Can't load file!\nFile: '"+parsePath(file_name)+"'");
             }
         }
 

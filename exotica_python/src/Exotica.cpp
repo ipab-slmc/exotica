@@ -397,7 +397,6 @@ PYBIND11_MODULE(_pyexotica, module)
     taskMap.def_readonly("length", &TaskMap::Length);
     taskMap.def_readonly("startJ", &TaskMap::StartJ);
     taskMap.def_readonly("lengthJ", &TaskMap::LengthJ);
-    taskMap.def("getFrames",&TaskMap::GetFrames, py::return_value_policy::copy);
     taskMap.def("taskSpaceDim", (int (TaskMap::*)()) &TaskMap::taskSpaceDim);
     taskMap.def("taskSpaceJacobianDim", &TaskMap::taskSpaceJacobianDim);
     taskMap.def("debug", &TaskMap::debug);
@@ -480,16 +479,6 @@ PYBIND11_MODULE(_pyexotica, module)
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");
     kinematicTree.def("publishFrames", &KinematicTree::publishFrames);
-
-    py::class_<KinematicFrameRequest, std::shared_ptr<KinematicFrameRequest>> kinFrameReq(kin, "KinematicFrameRequest");
-    kinFrameReq.def(py::init<std::string, KDL::Frame, std::string, KDL::Frame>());
-    kinFrameReq.def(py::init<std::string, KDL::Frame, std::string>());
-    kinFrameReq.def(py::init<std::string, KDL::Frame>());
-    kinFrameReq.def(py::init<std::string>());
-    kinFrameReq.def_readwrite("frameALinkName", &KinematicFrameRequest::FrameALinkName);
-    kinFrameReq.def_readwrite("frameAOffset", &KinematicFrameRequest::FrameAOffset);
-    kinFrameReq.def_readwrite("frameBLinkName", &KinematicFrameRequest::FrameBLinkName);
-    kinFrameReq.def_readwrite("frameBOffset", &KinematicFrameRequest::FrameBOffset);
 
     py::class_<KDL::Frame> kdlFrame (module, "KDLFrame");
     kdlFrame.def(py::init());

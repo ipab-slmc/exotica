@@ -11,8 +11,7 @@ def figureEight(t):
 
 (sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica_examples')+'/resources/ik_solver_demo.xml')
 # Set UDRF and SRDF file paths (overrides using robot_description)
-prob[1]['PlanningScene'][0][1]['URDF'] = exo.Setup.getPackagePath('exotica_examples')+'/resources/lwr_simplified.urdf'
-prob[1]['PlanningScene'][0][1]['SRDF'] = exo.Setup.getPackagePath('exotica_examples')+'/resources/lwr_simplified.srdf'
+exo.setModel(prob, exo.Setup.getPackagePath('exotica_examples')+'/resources/lwr_simplified.urdf', exo.Setup.getPackagePath('exotica_examples')+'/resources/lwr_simplified.srdf')
 
 problem = exo.Setup.createProblem(prob)
 solver = exo.Setup.createSolver(sol)

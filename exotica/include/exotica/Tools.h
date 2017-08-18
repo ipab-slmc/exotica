@@ -66,7 +66,7 @@ namespace exotica
    * @param tri Returned vertex indices of triangles
    * @param vert Vertex positions
    */
-  void loadOBJ(std::string & data, Eigen::VectorXi& tri,
+  void loadOBJ(const std::string & data, Eigen::VectorXi& tri,
       Eigen::VectorXd& vert);
 
   void saveMatrix(std::string file_name,

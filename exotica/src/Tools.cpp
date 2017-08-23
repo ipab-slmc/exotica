@@ -186,7 +186,7 @@ namespace exotica
       }
   }
 
-  bool exists(const std::string& path)
+  bool pathExists(const std::string& path)
   {
     std::ifstream file(parsePath(path));
     return (bool)file;

@@ -87,7 +87,7 @@ namespace exotica
 
   std::string loadFile(const std::string& path);
 
-  bool exists(const std::string& path);
+  bool pathExists(const std::string& path);
 }
 
 namespace

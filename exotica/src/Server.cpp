@@ -96,7 +96,7 @@ namespace exotica
       {
           model = robot_model_loader::RobotModelLoader(name,false).getModel();
       }
-      else if(exists(urdf) && exists(srdf))
+      else if(pathExists(urdf) && pathExists(srdf))
       {
           model = loadModelImpl(loadFile(urdf),loadFile(srdf));
       }

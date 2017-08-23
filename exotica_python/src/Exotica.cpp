@@ -384,7 +384,7 @@ PYBIND11_MODULE(_pyexotica, module)
     tools.def("VectorTransform", &Eigen::VectorTransform);
     tools.def("IdentityTransform", &Eigen::IdentityTransform);
     tools.def("loadFile", &loadFile);
-    tools.def("exists", &exists);
+    tools.def("pathExists", &pathExists);
 
     py::class_<Timer, std::shared_ptr<Timer>> timer(module, "Timer");
     timer.def(py::init());

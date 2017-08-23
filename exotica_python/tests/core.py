@@ -5,6 +5,7 @@ print('OK')
 
 print('Instanciating Setup...')
 exo.Setup()
+print('OK')
 
 print('Getting solvers...')
 print(exo.Setup().getSolvers())

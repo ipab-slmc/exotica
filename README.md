@@ -10,11 +10,12 @@ The EXOTica library is a generic Optimisation Toolset for Robotics platforms, wr
 The library itself consists of two major specifications, both of which are abstract classes. The first is the Problem Solver which defines the way optimisation should proceed: current implementation include iLQG, AICO, Jacobian pseudo-inverse IK, and a range of sampling based solvers from the [OMPL](http://ompl.kavrakilab.org/) library. The other is the Task Definition which describes the task itself by providing two necessary functions to compute the forward map from Configuration space (say joint angles in IK) to Task space (say end-effector positions in IK). The tasks themselves can describe a complete trajectory. Using the library then involves passing in an initial state and requesting a solution to the problem, which may consist of a single configuration or complete trajectory.
 
 # Prerequisites
-* Ubuntu 14.04
+* Ubuntu 14.04 (16.04 is periodically tested and compiles, not tested on CI yet)
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/)
 * [rosdep](http://wiki.ros.org/rosdep)
-* [ROS Indigo](http://wiki.ros.org/indigo/Installation/Ubuntu)(```ros-indigo-desktop-full``` is recommended but more minimal versions may be sufficient in conjunction with rosdep)
+* [ROS Indigo](http://wiki.ros.org/indigo/Installation/Ubuntu) (```ros-indigo-desktop-full``` is recommended but more minimal versions may be sufficient in conjunction with rosdep)
 * [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) > 3.2.7. We recommend system-installing 3.2.10 or newer, for which we provide a [Debian](http://terminator.robots.inf.ed.ac.uk/apt/libeigen3-dev.deb).
+* gcc > 4.9 -- the 14.04 system-installed 4.8.4 won't work
 
 # Installation
 

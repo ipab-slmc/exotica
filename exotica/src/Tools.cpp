@@ -157,6 +157,7 @@ namespace exotica
       {
           std::string package = match.str();
           if(package[0]=='{') continue;
+          if(package=="") throw_pretty("Empty package name\n"<<path<<"\n"<<ret);
           std::string package_path = ros::package::getPath(package);
           if(package_path=="") throw_pretty("Unknown package '"<<package<<"'");
           try

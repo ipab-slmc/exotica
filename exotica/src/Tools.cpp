@@ -152,12 +152,11 @@ namespace exotica
   {
       std::string ret = path;
       std::smatch matches;
-      std::regex_search(ret, matches, std::regex("\\{([^\\}]+)\\}"));
+      std::regex_search(ret, matches, std::regex("\\{([^\\}]+){1,}\\}"));
       for(auto& match : matches)
       {
           std::string package = match.str();
-          if(package[0]=='{') continue;
-          if(package=="") throw_pretty("Empty package name\n"<<path<<"\n"<<ret);
+          if (package[0] == '{' || package == "") continue;
           std::string package_path = ros::package::getPath(package);
           if(package_path=="") throw_pretty("Unknown package '"<<package<<"'");
           try

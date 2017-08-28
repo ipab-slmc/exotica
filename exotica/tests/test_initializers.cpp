@@ -85,6 +85,16 @@ bool testXMLInit()
 
 bool testRos()
 {
+    {
+        HIGHLIGHT("Parsing EXOTica paths...");
+        std::string path1 = ros::package::getPath("exotica");
+        std::string path2 = parsePath("{exotica}");
+        if(path1!=path2)
+        {
+            HIGHLIGHT("Failed when parsing paths:\n"<<path1<<"\n"<<path2);
+        }
+    }
+
     // Reser server
     Server::destroy();
 
@@ -135,11 +145,11 @@ bool testRos()
 
 int main(int argc, char **argv)
 {
+    if(!testRos()) exit(2); HIGHLIGHT_NAMED("EXOTica","ROS test passed.");
     ros::init(argc, argv, "EXOTica_test_initializers");
     if(!testCore()) exit(2); HIGHLIGHT_NAMED("EXOTica","Core test passed.");
     if(!testGenericInit()) exit(2); HIGHLIGHT_NAMED("EXOTica","Generic initialization test passed.");
     if(!testXMLInit()) exit(2); HIGHLIGHT_NAMED("EXOTica","XML initialization test passed.");
-    if(!testRos()) exit(2); HIGHLIGHT_NAMED("EXOTica","ROS test passed.");
     Setup::Destroy();
     return 0;
 }

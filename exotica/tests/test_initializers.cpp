@@ -89,10 +89,10 @@ bool testRos()
         HIGHLIGHT("Parsing EXOTica paths...");
         std::string path1 = ros::package::getPath("exotica");
         std::string path2 = parsePath("{exotica}");
-        if(path1!=path2)
-        {
-            HIGHLIGHT("Failed when parsing paths:\n"<<path1<<"\n"<<path2);
-        }
+        if (path1 != path2)
+          throw_pretty("Failed when parsing paths:\n"
+                       << path1 << "\n"
+                       << path2);
     }
 
     // Reser server

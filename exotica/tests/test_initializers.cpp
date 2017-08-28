@@ -95,12 +95,12 @@ bool testRos()
                        << path2);
     }
 
-    // Reser server
+    // Reset server
     Server::destroy();
 
     if(Server::isRos()) throw_pretty("ROS node initialized, but it shouldn't have been!");
 
-    // Fail when ROS node has no been initialized
+    // Fail when ROS node has not been initialized
     try
     {
         Server::Instance()->getNodeHandle();

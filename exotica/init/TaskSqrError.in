@@ -1,3 +1,0 @@
-extend <exotica/TaskDefinition>
-Required double Rho;
-Optional Eigen::VectorXd Goal; // If unset, zero is used.

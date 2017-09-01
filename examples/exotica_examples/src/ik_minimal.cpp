@@ -31,70 +31,16 @@
  */
 
 #include <exotica/Exotica.h>
-#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 
 using namespace exotica;
 
-void run()
-{
-
-    Initializer solver, problem;
-
-    std::string file_name = ros::package::getPath("exotica")+"/resources/configs/ik_solver_demo.xml";
-
-    XMLLoader::load(file_name, solver, problem);
-
-    HIGHLIGHT_NAMED("XMLnode","Loaded from XML");
-
-    UnconstrainedEndPoseProblemInitializer problem_init(problem);
-    problem_init.PlanningScene.addProperty( Property("URDF", false, boost::any(ros::package::getPath("exotica_examples")+"/resources/lwr_simplified.urdf")));
-    problem_init.PlanningScene.addProperty( Property("SRDF", false, boost::any(ros::package::getPath("exotica_examples")+"/resources/lwr_simplified.srdf")));
-
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem_init);
-    MotionSolver_ptr any_solver = Setup::createSolver(solver);
-
-    // Assign the problem to the solver
-    any_solver->specifyProblem(any_problem);
-    UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
-
-    // Create the initial configuration
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(my_problem->N);
-    Eigen::MatrixXd solution;
-
-    my_problem->qNominal = q;
-
-    ROS_INFO_STREAM("Calling solve() in an infinite loop");
-
-    double t = 0.0;
-    double dt = 1.0/20.0;
-
-    while (true)
-    {
-        Timer timer;
-        // Update the goal if necessary
-        // e.g. figure eight
-        t += dt;
-        my_problem->y = {0.6,
-                -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-                0.5 + sin(t * M_PI * 0.5) * 0.2 ,0 ,0 ,0};
-
-        // Solve the problem using the IK solver
-        my_problem->setStartState(q);
-        any_solver->Solve(solution);
-
-        HIGHLIGHT("Finished solving in "<<timer.getDuration()<<"s. Solution ["<<solution<<"]");
-        q = solution.row(0);
-
-        my_problem->Update(q);
-
-        exotica::sleep(dt);
-    }
-}
-
 int main(int argc, char **argv)
 {
-    ROS_INFO_STREAM("Started");
+    MotionSolver_ptr solver = XMLLoader::loadSolver("{exotica}/resources/configs/example.xml");
+    Eigen::MatrixXd solution;
 
-    // Run demo code
-    run();
+    Timer timer;
+    solver->Solve(solution);
+
+    HIGHLIGHT("Finished solving in "<<timer.getDuration()<<"s. Solution ["<<solution<<"]");
 }

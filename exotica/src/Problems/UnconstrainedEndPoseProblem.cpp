@@ -79,6 +79,8 @@ namespace exotica
         Phi = y;
         J = Eigen::MatrixXd(JN, N);
 
+        qNominal = init.NominalState;
+
         if(init.Rho.rows()>0 && init.Rho.rows()!=NumTasks) throw_named("Invalide size of Rho (" << init.Rho.rows() << ") expected: "<< NumTasks);
         if(init.Goal.rows()>0 && init.Goal.rows()!=PhiN) throw_named("Invalide size of Rho (" << init.Goal.rows() << ") expected: "<< PhiN);
 

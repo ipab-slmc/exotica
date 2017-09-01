@@ -2,3 +2,4 @@ extend <exotica/PlanningProblem>
 Optional Eigen::VectorXd W = Eigen::VectorXd();
 Optional Eigen::VectorXd Rho = Eigen::VectorXd();
 Optional Eigen::VectorXd Goal = Eigen::VectorXd();
+Optional Eigen::VectorXd NominalState = Eigen::VectorXd();

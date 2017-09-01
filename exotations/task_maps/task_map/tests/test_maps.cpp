@@ -124,7 +124,6 @@ void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
 UnconstrainedEndPoseProblem_ptr setupProbelm(Initializer& map)
 {
     Initializer scene("Scene",{{"Name",std::string("MyScene")},{"JointGroup",std::string("arm")}});
-    map.addProperty(Property("Scene", true, std::string("MyScene")));
     Eigen::VectorXd W(3);W << 3,2,1;
     Initializer problem("exotica/UnconstrainedEndPoseProblem",{
                             {"Name",std::string("MyProblem")},

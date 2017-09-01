@@ -45,7 +45,7 @@ void run()
     // Scene using joint group 'arm'
     SceneInitializer scene("MyScene", "arm", false, "", "{exotica}/resources/robots/lwr_simplified.urdf", "{exotica}/resources/robots/lwr_simplified.srdf");
     // End-effector task map with two position frames
-    EffFrameInitializer map("Position","MyScene",false,
+    EffFrameInitializer map("Position",false,
     {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0 ,0 ,0 ,0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
     // Create a task using the map above (goal will be specified later)
     Eigen::VectorXd W(7);

@@ -47,7 +47,6 @@ void run()
     // End-effector task map with two position frames
     Initializer map("exotica/EffFrame",{
                         {"Name",std::string("Position")},
-                        {"Scene",std::string("MyScene")},
                         {"EndEffector",std::vector<Initializer>({
                              Initializer("Frame",{{"Link",std::string("lwr_arm_6_link")}, {"LinkOffset", Eigen::VectorTransform(0 ,0 ,0 ,0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17)}}),
                          })}});

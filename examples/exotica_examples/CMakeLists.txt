@@ -36,7 +36,7 @@ target_link_libraries(PlannerDemo ${catkin_LIBRARIES})
 add_executable(IK src/ik_minimal.cpp)
 target_link_libraries(IK ${catkin_LIBRARIES})
 
-install(TARGETS ManualInitialization GenericInitialization XMLInitialization PlannerDemo ExoticaCore
+install(TARGETS ManualInitialization GenericInitialization XMLInitialization PlannerDemo ExoticaCore IK
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

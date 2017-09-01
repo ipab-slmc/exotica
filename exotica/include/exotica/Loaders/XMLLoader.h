@@ -2,6 +2,9 @@
 #define XMLLOADER_H
 
 #include <exotica/Property.h>
+#include <exotica/MotionSolver.h>
+#include <exotica/PlanningProblem.h>
+#include <exotica/Setup.h>
 
 namespace exotica
 {
@@ -29,6 +32,16 @@ public:
     static Initializer load(std::string file_name, bool parsePathAsXML=false)
     {
         return Instance()->loadXML(file_name, parsePathAsXML);
+    }
+
+    static std::shared_ptr<exotica::MotionSolver> loadSolver(const std::string& file_name)
+    {
+        Initializer solver, problem;
+        XMLLoader::load(file_name, solver, problem);
+        PlanningProblem_ptr any_problem = Setup::createProblem(problem);
+        MotionSolver_ptr any_solver = Setup::createSolver(solver);
+        any_solver->specifyProblem(any_problem);
+        return any_solver;
     }
 
 private:

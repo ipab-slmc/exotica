@@ -369,6 +369,7 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("getInitializers",&Setup::getInitializers, py::return_value_policy::copy);
     setup.def_static("getPackagePath",&ros::package::getPath);
     setup.def_static("initRos",[](){int argc = 0; ros::init(argc, nullptr, "exotica_python_node"); Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));});
+    setup.def_static("loadSolver", &XMLLoader::loadSolver);
 
     py::module tools = module.def_submodule("Tools");
     tools.def("parsePath", &parsePath);

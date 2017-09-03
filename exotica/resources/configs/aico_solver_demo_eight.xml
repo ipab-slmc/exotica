@@ -14,7 +14,6 @@
 
     <PlanningScene>
       <Scene Name="AICOSolverDemoScene">
-        <PlanningMode>Optimization</PlanningMode>
         <JointGroup>arm</JointGroup>
         <URDF>{exotica}/resources/robots/lwr_simplified.urdf</URDF>
         <SRDF>{exotica}/resources/robots/lwr_simplified.srdf</SRDF>

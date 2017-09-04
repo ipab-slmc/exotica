@@ -527,7 +527,7 @@ namespace exotica
 
       collision_scene_.reset(new CollisionScene(name_));
 
-      if (Server::isRos() && visual_debug_)
+      if (Server::isRos())
       {
           ps_pub_ = Server::advertise<moveit_msgs::PlanningScene>(name_ + "/PlanningScene", 100, true);
           if(debug_) HIGHLIGHT_NAMED(name_, "Running in debug mode, planning scene will be published to '"<<Server::Instance()->getName()<<"/"<<name_<<"/PlanningScene'");

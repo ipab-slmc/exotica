@@ -123,10 +123,9 @@ namespace exotica
       /**
        * \brief	Check if the whole robot is valid given a configuration
        * @param	q		The configuration to check
-       * @param	self	Indicate if self collision check is required
        * @return True, if the state is collision free.
        */
-      bool isStateValid(const Eigen::VectorXd &q, bool self = true);
+      bool isStateValid(const Eigen::VectorXd &q);
 
       /**
        * \brief	Get closest distance between robot link and anyother objects

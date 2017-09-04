@@ -58,7 +58,7 @@ namespace fcl_convert
 namespace exotica
 {
 ///////////////////////////////////////////////////////////////
-///////////////////////	Collision Scene	///////////////////////
+/////////////////////// Collision Scene ///////////////////////
 ///////////////////////////////////////////////////////////////
   CollisionScene::CollisionScene(const std::string & scene_name)
       : compute_dist(true), stateCheckCnt_(0), scene_name_(scene_name)
@@ -274,7 +274,8 @@ namespace exotica
     return dist == 0 ? !res.collision : res.distance > dist;
   }
 
-  bool CollisionScene::isStateValid(const Eigen::VectorXd &q, bool self)
+  // NB: need to check whether this function works as intended
+  bool CollisionScene::isStateValid(const Eigen::VectorXd &q)
   {
     update(q);
     return ps_->isStateValid(ps_->getCurrentState());

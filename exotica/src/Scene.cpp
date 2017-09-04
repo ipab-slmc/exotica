@@ -112,17 +112,17 @@ namespace exotica
   void CollisionScene::updateWorld(
       const moveit_msgs::PlanningSceneWorldConstPtr & world)
   {
-//		for (int i=0;i<world->collision_objects.size();i++)
-//		{
-//			if(trans_world_.find(world->collision_objects[i].id) != trans_world_.end())
-//			{
-//				std::map<std::string, fcls_ptr>::iterator it = trans_world_.find(world->collision_objects[i].id);
-//				for(int j =0;j<it->second.size();j++)
-//				{
-//					it->second[j] = fcl::Transform3f(collision_detection::transform2fcl(world->collision_objects[i].mesh_poses[j]));
-//				}
-//			}
-//		}
+//    for (int i=0;i<world->collision_objects.size();i++)
+//    {
+//      if(trans_world_.find(world->collision_objects[i].id) != trans_world_.end())
+//      {
+//        std::map<std::string, fcls_ptr>::iterator it = trans_world_.find(world->collision_objects[i].id);
+//        for(int j =0;j<it->second.size();j++)
+//        {
+//          it->second[j] = fcl::Transform3f(collision_detection::transform2fcl(world->collision_objects[i].mesh_poses[j]));
+//        }
+//      }
+//    }
   }
 
   void CollisionScene::update(Eigen::VectorXdRefConst x)
@@ -341,7 +341,7 @@ namespace exotica
             {
               if (distance(fcl_link, it.second, req, res, safeDist) < 0)
               {
-//							INDICATE_FAILURE
+//              INDICATE_FAILURE
                 d = -1;
                 return; // WARNING;
               }
@@ -478,7 +478,7 @@ namespace exotica
   }
 
 ///////////////////////////////////////////////////////////////
-///////////////////////	EXOTica Scene	///////////////////////
+/////////////////////// EXOTica Scene ///////////////////////
 ///////////////////////////////////////////////////////////////
 
   Scene::Scene() : name_("Unnamed")
@@ -646,5 +646,5 @@ namespace exotica
   }
 
 }
-//	namespace exotica
+//  namespace exotica
 

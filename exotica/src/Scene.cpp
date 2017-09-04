@@ -296,11 +296,6 @@ namespace exotica
     req.distance = true;
     ps_->checkCollision(req, res, getCurrentState(), *acm_);
 
-    if (res.collision)
-      ROS_ERROR_STREAM("State in collision: " << res.distance);
-    else
-      ROS_INFO_STREAM("State NOT in collision: " << res.distance);
-
     return res.distance;
   }
 

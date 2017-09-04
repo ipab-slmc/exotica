@@ -493,6 +493,10 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("setModelState", (void (Scene::*)(Eigen::VectorXdRefConst)) &Scene::setModelState);
     scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>)) &Scene::setModelState);
 
+    scene.def("getClosestDistance", [](Scene* instance) {
+        return instance->getCollisionScene()->getClosestDistance();
+    });
+
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");
     kinematicTree.def("publishFrames", &KinematicTree::publishFrames);

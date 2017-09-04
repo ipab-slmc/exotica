@@ -281,6 +281,25 @@ namespace exotica
     return ps_->isStateValid(ps_->getCurrentState());
   }
 
+  double CollisionScene::getClosestDistance() {
+    collision_detection::CollisionRequest req;
+    collision_detection::CollisionResult res;
+
+    double selfCollisionDistance, distanceToEnvironment;
+
+    // Check for both self- and world-collisions
+    req.contacts = false;
+    req.distance = true;
+    ps_->checkCollision(req, res, getCurrentState(), *acm_);
+
+    if (res.collision)
+      ROS_ERROR_STREAM("State in collision: " << res.distance);
+    else
+      ROS_INFO_STREAM("State NOT in collision: " << res.distance);
+
+    return res.distance;
+  }
+
   void CollisionScene::getRobotDistance(const std::string & link, bool self,
       double & d, Eigen::Vector3d & p1, Eigen::Vector3d & p2,
       Eigen::Vector3d & norm, Eigen::Vector3d & c1, Eigen::Vector3d & c2,

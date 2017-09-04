@@ -128,14 +128,19 @@ namespace exotica
       bool isStateValid(const Eigen::VectorXd &q);
 
       /**
-       * \brief	Get closest distance between robot link and anyother objects
+       * \brief Check for the closest distance in the planning scene including both self- and world-collisions
+       * @return The closest distance - negative values indicate penetration.
+       */
+      double getClosestDistance();
+
+      /**
+       * \brief	Get closest distance between robot link and any other objects
        * @param	link	Robot link
        * @param	self	Indicate if self collision check is required
        * @param	d		Closest distance
        * @param	p1		Closest distance point on the link
        * @param	p2		Closest distance point on the other object
        * @param	norm	Normal vector on robot link
-       * @return Indication of success
        */
       void getRobotDistance(const std::string & link, bool self, double & d,
           Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm,

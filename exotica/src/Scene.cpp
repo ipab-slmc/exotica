@@ -110,19 +110,23 @@ namespace exotica
   }
 
   void CollisionScene::updateWorld(
-      const moveit_msgs::PlanningSceneWorldConstPtr & world)
-  {
-//    for (int i=0;i<world->collision_objects.size();i++)
-//    {
-//      if(trans_world_.find(world->collision_objects[i].id) != trans_world_.end())
-//      {
-//        std::map<std::string, fcls_ptr>::iterator it = trans_world_.find(world->collision_objects[i].id);
-//        for(int j =0;j<it->second.size();j++)
-//        {
-//          it->second[j] = fcl::Transform3f(collision_detection::transform2fcl(world->collision_objects[i].mesh_poses[j]));
-//        }
-//      }
-//    }
+      const moveit_msgs::PlanningSceneWorldConstPtr& world) {
+    ps_->processPlanningSceneWorldMsg(*world);
+
+    //    for (int i=0;i<world->collision_objects.size();i++)
+    //    {
+    //      if(trans_world_.find(world->collision_objects[i].id) !=
+    //      trans_world_.end())
+    //      {
+    //        std::map<std::string, fcls_ptr>::iterator it =
+    //        trans_world_.find(world->collision_objects[i].id);
+    //        for(int j =0;j<it->second.size();j++)
+    //        {
+    //          it->second[j] =
+    //          fcl::Transform3f(collision_detection::transform2fcl(world->collision_objects[i].mesh_poses[j]));
+    //        }
+    //      }
+    //    }
   }
 
   void CollisionScene::update(Eigen::VectorXdRefConst x)

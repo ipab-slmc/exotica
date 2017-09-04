@@ -527,22 +527,25 @@ namespace exotica
 
       collision_scene_.reset(new CollisionScene(name_));
 
-      if (Server::isRos())
-      {
-          ps_pub_ = Server::advertise<moveit_msgs::PlanningScene>(name_ + "/PlanningScene", 100, true);
-          if(debug_) HIGHLIGHT_NAMED(name_, "Running in debug mode, planning scene will be published to '"<<Server::Instance()->getName()<<"/"<<name_<<"/PlanningScene'");
+      if (Server::isRos()) {
+        ps_pub_ = Server::advertise<moveit_msgs::PlanningScene>(
+            name_ + "/PlanningScene", 100, true);
+        if (debug_)
+          HIGHLIGHT_NAMED(
+              name_,
+              "Running in debug mode, planning scene will be published to '"
+                  << Server::Instance()->getName() << "/" << name_
+                  << "/PlanningScene'");
       }
-      else
-      {
-          visual_debug_ = false;
-      }
+
       {
           planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
           moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
           tmp->getPlanningSceneMsg(*msg.get());
           collision_scene_->initialise(msg, kinematica_.getJointNames(), "", BaseType,model_);
       }
-      if(debug_) INFO_NAMED(name_, "Exotica Scene initialised");
+      
+      if (debug_) INFO_NAMED(name_, "Exotica Scene initialized");
   }
 
   std::shared_ptr<KinematicResponse> Scene::RequestKinematics(KinematicsRequest& Request)
@@ -554,7 +557,7 @@ namespace exotica
   {
       collision_scene_->update(x);
       kinematica_.Update(x);
-      if (visual_debug_) publishScene();
+      if (debug_) publishScene();
   }
 
   void Scene::publishScene()

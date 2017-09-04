@@ -277,8 +277,7 @@ namespace exotica
       ///	The collision scene
       CollisionScene_ptr collision_scene_;
 
-      ///	Visual debug
-      bool visual_debug_;
+      /// Visual debug
       ros::Publisher ps_pub_;
   };
   typedef std::shared_ptr<Scene> Scene_ptr;

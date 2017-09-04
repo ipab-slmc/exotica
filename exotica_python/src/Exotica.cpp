@@ -492,6 +492,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getModelStateMap", &Scene::getModelStateMap);
     scene.def("setModelState", (void (Scene::*)(Eigen::VectorXdRefConst)) &Scene::setModelState);
     scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>)) &Scene::setModelState);
+    scene.def("publishScene", &Scene::publishScene);
     // CollisionScene-related functions exposed via Scene - NB: may change in future    
     scene.def("getClosestDistance", [](Scene* instance) {
         return instance->getCollisionScene()->getClosestDistance();

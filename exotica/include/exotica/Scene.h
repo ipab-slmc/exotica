@@ -168,8 +168,13 @@ namespace exotica
         return fcl_robot_;
       }
 
-      void updateWorld(
-          const moveit_msgs::PlanningSceneWorldConstPtr & world);
+      /**
+       * @brief      Update the internal MoveIt planning scene from a
+       * moveit_msgs::PlanningSceneWorld
+       *
+       * @param[in]  world  moveit_msgs::PlanningSceneWorld
+       */
+      void updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world);
       void getCollisionLinkTranslation(const std::string & name,
           Eigen::Vector3d & translation);
       void getWorldObjectTranslation(const std::string & name,

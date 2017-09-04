@@ -1,4 +1,4 @@
-##EXOTica implementATIONS packages
+## EXOTica implementATIONS packages
 ----------------------------------
 
-A set of packages implementing common optimisation problems on top of the basic EXOTica library.
+A set of packages implementing extensions such as task maps and solvers on top of the basic EXOTica library.

@@ -289,8 +289,6 @@ namespace exotica
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
 
-    double selfCollisionDistance, distanceToEnvironment;
-
     // Check for both self- and world-collisions
     req.contacts = false;
     req.distance = true;

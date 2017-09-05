@@ -554,6 +554,10 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getClosestDistance", [](Scene* instance) {
         return instance->getCollisionScene()->getClosestDistance();
     });
+    scene.def("updateWorld", [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
+        moveit_msgs::PlanningSceneWorldConstPtr myPtr(new moveit_msgs::PlanningSceneWorld(world));
+        instance->getCollisionScene()->updateWorld(myPtr);
+    });
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

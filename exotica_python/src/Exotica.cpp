@@ -496,6 +496,9 @@ PYBIND11_MODULE(_pyexotica, module)
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");
     kinematicTree.def("publishFrames", &KinematicTree::publishFrames);
+    kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);
+    kinematicTree.def("getRootName", &KinematicTree::getRootName);
+    kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
 
     py::class_<KDL::Frame> kdlFrame (module, "KDLFrame");
     kdlFrame.def(py::init());
@@ -508,6 +511,8 @@ PYBIND11_MODULE(_pyexotica, module)
     kdlFrame.def("getAngleAxis", [](KDL::Frame* me){return getFrameAsVector(*me, RotationType::ANGLE_AXIS);});
     kdlFrame.def("getQuaternion", [](KDL::Frame* me){return getFrameAsVector(*me, RotationType::QUATERNION);});
     kdlFrame.def("get", [](KDL::Frame* me){return getFrame(*me);});
+    kdlFrame.def("inverse", (KDL::Frame (KDL::Frame::*)() const) &KDL::Frame::Inverse);
+    kdlFrame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B){return A*B;}, py::is_operator());
     py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
     py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
 

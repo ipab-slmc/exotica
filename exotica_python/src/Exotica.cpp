@@ -49,6 +49,23 @@ namespace py = pybind11;
 
 std::map<std::string, Initializer> knownInitializers;
 
+PyObject* createStringIOObject() {
+#if PY_MAJOR_VERSION <= 2
+  PyObject* module = PyImport_ImportModule("StringIO");
+#else
+  PyObject* module = PyImport_ImportModule("io");
+#endif
+  if (!module) throw_pretty("Can't load StringIO module.");
+  PyObject* cls = PyObject_GetAttrString(module, "StringIO");
+  if (!cls) throw_pretty("Can't load StringIO class.");
+  PyObject* stringio = PyObject_CallObject(cls, NULL);
+  if (!stringio) throw_pretty("Can't create StringIO object.");
+
+  return stringio;
+
+  // Do we need to run Py_DECREF ?
+}
+
 #define ROS_MESSAGE_WRAPPER(MessageType)                                      \
   namespace pybind11 {                                                        \
   namespace detail {                                                          \
@@ -59,37 +76,20 @@ std::map<std::string, Initializer> knownInitializers;
                                                                               \
     bool load(handle src, bool) {                                             \
       PyObject* source = src.ptr();                                           \
-      PyObject* module = PyImport_ImportModule("StringIO");                   \
-      if (!module) throw_pretty("Can't load StringIO module.");               \
-      PyObject* cls = PyObject_GetAttrString(module, "StringIO");             \
-      if (!cls) throw_pretty("Can't load StringIO class.");                   \
-      PyObject* stringio = PyInstance_New(cls, NULL, NULL);                   \
+      PyObject* stringio = createStringIOObject();                            \
       if (!stringio) throw_pretty("Can't create StringIO instance.");         \
       PyObject* result =                                                      \
           PyObject_CallMethod(source, "serialize", "O", stringio);            \
       if (!result) throw_pretty("Can't serialize.");                          \
       result = PyObject_CallMethod(stringio, "getvalue", nullptr);            \
       if (!result) throw_pretty("Can't get buffer.");                         \
-      HIGHLIGHT("Data type: '"                                                \
-                << pyAsString(PyObject_Repr(PyObject_Type(result))) << "'");  \
-      HIGHLIGHT("Is result a byte array?: " << PyByteArray_Check(result));    \
-      HIGHLIGHT("Is result a byte array?: "                                   \
-                << PyByteArray_Check(PyByteArray_FromObject(result)));        \
       char* data = PyByteArray_AsString(PyByteArray_FromObject(result));      \
       int len = PyByteArray_Size(result);                                     \
-      HIGHLIGHT("Buffer Length: " << len);                                    \
-      std::string tmpfck = std::string(data);                                 \
       unsigned char* udata = new unsigned char[len];                          \
-      HIGHLIGHT("STILL ALIVE");                                               \
-      for (int i = 0; i < len;                                                \
-           i++) { /*printf("still: %d %s\n", i, data[i]);*/                   \
+      for (int i = 0; i < len; i++)                                           \
         udata[i] = static_cast<unsigned char>(data[i]);                       \
-      }                                                                       \
-      HIGHLIGHT("Converted");                                                 \
       ros::serialization::IStream stream(udata, len);                         \
-      HIGHLIGHT("Created stream");                                            \
       ros::serialization::deserialize<MessageType>(stream, value);            \
-      HIGHLIGHT("Serialized");                                                \
       delete[] udata;                                                         \
       return !PyErr_Occurred();                                               \
     }                                                                         \

@@ -288,13 +288,21 @@ namespace exotica
   double CollisionScene::getClosestDistance() {
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
+    double selfCollisionDistance, environmentCollisionDistance;
 
-    // Check for both self- and world-collisions
     req.contacts = false;
     req.distance = true;
-    ps_->checkCollision(req, res, getCurrentState(), *acm_);
+    ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
+    selfCollisionDistance = res.distance;
 
-    return res.distance;
+    res.clear();
+    ps_->getCollisionWorld()->checkRobotCollision(
+        req, res, *ps_->getCollisionRobot(), ps_->getCurrentState());
+    environmentCollisionDistance = res.distance;
+
+    return (selfCollisionDistance < environmentCollisionDistance)
+               ? selfCollisionDistance
+               : environmentCollisionDistance;
   }
 
   void CollisionScene::getRobotDistance(const std::string & link, bool self,

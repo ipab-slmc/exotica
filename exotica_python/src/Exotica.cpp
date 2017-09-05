@@ -74,11 +74,10 @@ PyObject* createStringIOObject() {
     PYBIND11_TYPE_CASTER(MessageType, _("genpy.Message"));                    \
                                                                               \
     bool load(handle src, bool) {                                             \
-      PyObject* source = src.ptr();                                           \
       PyObject* stringio = createStringIOObject();                            \
       if (!stringio) throw_pretty("Can't create StringIO instance.");         \
       PyObject* result =                                                      \
-          PyObject_CallMethod(source, "serialize", "O", stringio);            \
+          PyObject_CallMethod(src.ptr(), "serialize", "O", stringio);         \
       if (!result) throw_pretty("Can't serialize.");                          \
       result = PyObject_CallMethod(stringio, "getvalue", nullptr);            \
       if (!result) throw_pretty("Can't get buffer.");                         \
@@ -91,7 +90,6 @@ PyObject* createStringIOObject() {
       ros::serialization::deserialize<MessageType>(stream, value);            \
       delete[] udata;                                                         \
       delete[] data;                                                          \
-      Py_DECREF(source);                                                      \
       Py_DECREF(stringio);                                                    \
       Py_DECREF(result);                                                      \
       return !PyErr_Occurred();                                               \

@@ -60,10 +60,9 @@ PyObject* createStringIOObject() {
   if (!cls) throw_pretty("Can't load StringIO class.");
   PyObject* stringio = PyObject_CallObject(cls, NULL);
   if (!stringio) throw_pretty("Can't create StringIO object.");
-
+  Py_DECREF(module);
+  Py_DECREF(cls);
   return stringio;
-
-  // Do we need to run Py_DECREF ?
 }
 
 #define ROS_MESSAGE_WRAPPER(MessageType)                                      \
@@ -91,6 +90,10 @@ PyObject* createStringIOObject() {
       ros::serialization::IStream stream(udata, len);                         \
       ros::serialization::deserialize<MessageType>(stream, value);            \
       delete[] udata;                                                         \
+      delete[] data;                                                          \
+      Py_DECREF(source);                                                      \
+      Py_DECREF(stringio);                                                    \
+      Py_DECREF(result);                                                      \
       return !PyErr_Occurred();                                               \
     }                                                                         \
                                                                               \

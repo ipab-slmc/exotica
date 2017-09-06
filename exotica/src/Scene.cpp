@@ -278,27 +278,48 @@ namespace exotica
     return dist == 0 ? !res.collision : res.distance > dist;
   }
 
-  // NB: need to check whether this function works as intended
   bool CollisionScene::isStateValid(const Eigen::VectorXd &q)
   {
     update(q);
     return ps_->isStateValid(ps_->getCurrentState());
   }
 
-  double CollisionScene::getClosestDistance() {
+  double CollisionScene::getClosestDistance(bool debug) {
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
     double selfCollisionDistance, environmentCollisionDistance;
 
-    req.contacts = false;
+    if (debug)
+      req.contacts = true;
+    else
+      req.contacts = false;
     req.distance = true;
     ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
     selfCollisionDistance = res.distance;
+
+    if (res.contacts.size() > 0 && debug) {
+      ROS_WARN_STREAM(
+          "Number of Self-Collision Contacts:" << res.contacts.size());
+      for (auto& contactPair : res.contacts) {
+        ROS_WARN_STREAM("Contact between: " << contactPair.first.first
+                                            << " and "
+                                            << contactPair.first.second);
+      }
+    }
 
     res.clear();
     ps_->getCollisionWorld()->checkRobotCollision(
         req, res, *ps_->getCollisionRobot(), ps_->getCurrentState());
     environmentCollisionDistance = res.distance;
+
+    if (res.contacts.size() > 0 && debug) {
+      ROS_WARN_STREAM("Number of Environment Contacts:" << res.contacts.size());
+      for (auto& contactPair : res.contacts) {
+        ROS_WARN_STREAM("Contact between: " << contactPair.first.first
+                                            << " and "
+                                            << contactPair.first.second);
+      }
+    }
 
     return (selfCollisionDistance < environmentCollisionDistance)
                ? selfCollisionDistance

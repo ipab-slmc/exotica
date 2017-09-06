@@ -8,4 +8,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>exotica</depend>
   <depend>pybind11_catkin</depend>
+  <depend>moveit_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>shape_msgs</depend>
 </package>

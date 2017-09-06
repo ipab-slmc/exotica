@@ -104,7 +104,9 @@ PyObject* createStringIOObject() {
   };                                                                          \
   }                                                                           \
   }
+#include <moveit_msgs/PlanningScene.h>
 #include <moveit_msgs/PlanningSceneWorld.h>
+ROS_MESSAGE_WRAPPER(moveit_msgs::PlanningScene);
 ROS_MESSAGE_WRAPPER(moveit_msgs::PlanningSceneWorld);
 
 std::string version()
@@ -551,6 +553,10 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("setModelState", (void (Scene::*)(Eigen::VectorXdRefConst)) &Scene::setModelState);
     scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>)) &Scene::setModelState);
     scene.def("publishScene", &Scene::publishScene);
+    scene.def("setCollisionScene", [](Scene* instance, moveit_msgs::PlanningScene& ps) {
+        moveit_msgs::PlanningSceneConstPtr myPtr(new moveit_msgs::PlanningScene(ps));
+        instance->setCollisionScene(myPtr);
+    });
     // CollisionScene-related functions exposed via Scene - NB: may change in future    
     scene.def("getClosestDistance", [](Scene* instance) {
         return instance->getCollisionScene()->getClosestDistance();

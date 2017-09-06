@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(exotica_python)
 
+# Python2 uses char* and Python3 const char* for arguments so explicit casting
+# of string literals would require define flags. Alternatively, deactivate
+# warnings for now
+add_definitions(-Wno-write-strings)
+
 find_package(catkin REQUIRED COMPONENTS
   exotica
   pybind11_catkin

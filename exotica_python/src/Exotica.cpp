@@ -561,8 +561,8 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getClosestDistance", [](Scene* instance) {
         return instance->getCollisionScene()->getClosestDistance();
     });
-    scene.def("getClosestDistance", [](Scene* instance,bool debug) {
-        return instance->getCollisionScene()->getClosestDistance(debug);
+    scene.def("getClosestDistance", [](Scene* instance, bool selfCheck, bool debug) {
+        return instance->getCollisionScene()->getClosestDistance(selfCheck, debug);
     });
     scene.def("isStateValid", [](Scene* instance) {
         return instance->getCollisionScene()->isStateValid();

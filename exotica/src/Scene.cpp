@@ -291,12 +291,6 @@ namespace exotica
     return dist == 0 ? !res.collision : res.distance > dist;
   }
 
-  bool CollisionScene::isStateValid(const Eigen::VectorXd &q)
-  {
-    update(q);
-    return ps_->isStateValid(ps_->getCurrentState());
-  }
-
   double CollisionScene::getClosestDistance(bool computeSelfCollisionDistance,
                                             bool debug) {
     collision_detection::CollisionRequest req;

@@ -122,18 +122,11 @@ namespace exotica
           double safeDist);
 
       /**
-       * \brief	Check if the whole robot is valid (collision and feasibility)
+       * \brief	Check if the whole robot is valid (collision only)
        * @param	self	Indicate if self collision check is required
        * @return True, if the state is collision free.
        */
       bool isStateValid(bool self = true, double dist = 0);
-
-      /**
-       * \brief	Check if the whole robot is valid given a configuration
-       * @param	q		The configuration to check
-       * @return True, if the state is collision free.
-       */
-      bool isStateValid(const Eigen::VectorXd &q);
 
       /**
        * \brief Check for the closest distance in the planning scene including both self- and world-collisions

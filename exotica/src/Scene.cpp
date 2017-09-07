@@ -284,26 +284,27 @@ namespace exotica
     return ps_->isStateValid(ps_->getCurrentState());
   }
 
-  double CollisionScene::getClosestDistance(bool debug) {
+  double CollisionScene::getClosestDistance(bool computeSelfCollisionDistance,
+                                            bool debug) {
     collision_detection::CollisionRequest req;
     collision_detection::CollisionResult res;
     double selfCollisionDistance, environmentCollisionDistance;
 
-    if (debug)
-      req.contacts = true;
-    else
-      req.contacts = false;
+    req.contacts = debug ? true : false;
     req.distance = true;
-    ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
-    selfCollisionDistance = res.distance;
 
-    if (res.contacts.size() > 0 && debug) {
-      ROS_WARN_STREAM(
-          "Number of Self-Collision Contacts:" << res.contacts.size());
-      for (auto& contactPair : res.contacts) {
-        ROS_WARN_STREAM("Contact between: " << contactPair.first.first
-                                            << " and "
-                                            << contactPair.first.second);
+    if (computeSelfCollisionDistance) {
+      ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
+      selfCollisionDistance = res.distance;
+
+      if (res.contacts.size() > 0 && debug) {
+        ROS_INFO_STREAM(
+            "Number of Self-Collision Contacts: " << res.contacts.size());
+        for (auto& contactPair : res.contacts) {
+          ROS_INFO_STREAM("Contact between: " << contactPair.first.first
+                                              << " and "
+                                              << contactPair.first.second);
+        }
       }
     }
 
@@ -313,17 +314,21 @@ namespace exotica
     environmentCollisionDistance = res.distance;
 
     if (res.contacts.size() > 0 && debug) {
-      ROS_WARN_STREAM("Number of Environment Contacts:" << res.contacts.size());
+      ROS_INFO_STREAM(
+          "Number of Environment Contacts: " << res.contacts.size());
       for (auto& contactPair : res.contacts) {
-        ROS_WARN_STREAM("Contact between: " << contactPair.first.first
+        ROS_INFO_STREAM("Contact between: " << contactPair.first.first
                                             << " and "
                                             << contactPair.first.second);
       }
     }
 
-    return (selfCollisionDistance < environmentCollisionDistance)
-               ? selfCollisionDistance
-               : environmentCollisionDistance;
+    if (!computeSelfCollisionDistance)
+      return environmentCollisionDistance;
+    else
+      return (selfCollisionDistance < environmentCollisionDistance)
+                 ? selfCollisionDistance
+                 : environmentCollisionDistance;
   }
 
   void CollisionScene::getRobotDistance(const std::string & link, bool self,

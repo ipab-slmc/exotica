@@ -131,7 +131,7 @@ namespace exotica
        * \brief Check for the closest distance in the planning scene including both self- and world-collisions
        * @return The closest distance - negative values indicate penetration.
        */
-      double getClosestDistance(bool debug = false);
+      double getClosestDistance(bool computeSelfCollisionDistance = true, bool debug = false);
 
       /**
        * \brief	Get closest distance between robot link and any other objects

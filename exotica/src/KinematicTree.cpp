@@ -498,7 +498,6 @@ void KinematicTree::setModelState(Eigen::VectorXdRefConst x)
 
 void KinematicTree::setModelState(std::map<std::string, double> x)
 {
-    if(x.size()!=ModelJointsNames.size()) throw_pretty("Model state vector has wrong size, expected " << ModelJointsNames.size() << " got " << x.size());
     for(auto& joint : x)
     {
         try

@@ -131,7 +131,8 @@ namespace exotica
     //    }
   }
 
-  void CollisionScene::update(std::string joint, double value) {
+  void CollisionScene::update(std::string joint, double value)
+  {
     try {
       ps_->getCurrentStateNonConst().setVariablePosition(joint, value);
     } catch (const std::exception& ex) {
@@ -676,13 +677,15 @@ namespace exotica
     return kinematica_.getModelStateMap();
   }
 
-  void Scene::setModelState(Eigen::VectorXdRefConst x) {
+  void Scene::setModelState(Eigen::VectorXdRefConst x)
+  {
     // Update Kinematica internal state
     kinematica_.setModelState(x);
 
     // Update Planning Scene State
     int i = 0;
-    for (auto& joint : getModelJointNames()) {
+    for (auto& joint : getModelJointNames())
+    {
       collision_scene_->update(joint, x(i));
       i++;
     }
@@ -695,9 +698,8 @@ namespace exotica
     kinematica_.setModelState(x);
 
     // Update Planning Scene State
-    for (auto& joint : x) {
+    for (auto& joint : x)
       collision_scene_->update(joint.first, joint.second);
-    }
 
     if (debug_) publishScene();
   }

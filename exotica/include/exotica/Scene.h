@@ -231,8 +231,8 @@ namespace exotica
       collision_detection::AllowedCollisionMatrixPtr acm_;
 
       std::string scene_name_;
+      std::string world_joint_ = "";
       BASE_TYPE BaseType;
-
   };
 
   typedef std::shared_ptr<CollisionScene> CollisionScene_ptr;

@@ -542,7 +542,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedEndPoseProblem.def_readonly("y", &UnconstrainedEndPoseProblem::y);
     unconstrainedEndPoseProblem.def_readonly("Phi", &UnconstrainedEndPoseProblem::Phi);
     unconstrainedEndPoseProblem.def_readonly("J", &UnconstrainedEndPoseProblem::J);
-    unconstrainedEndPoseProblem.def_readonly("qNominal", &UnconstrainedEndPoseProblem::qNominal);
+    unconstrainedEndPoseProblem.def_property("qNominal", &UnconstrainedEndPoseProblem::getNominalPose, &UnconstrainedEndPoseProblem::setNominalPose);
     py::class_<SamplingProblem, std::shared_ptr<SamplingProblem>, PlanningProblem> samplingProblem(prob, "SamplingProblem");
     samplingProblem.def("update", &SamplingProblem::Update);
     samplingProblem.def("setGoalState", &SamplingProblem::setGoalState);

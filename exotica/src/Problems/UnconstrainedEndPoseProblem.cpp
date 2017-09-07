@@ -149,5 +149,19 @@ namespace exotica
             throw_pretty("Cannot get Rho. Task map '"<<task_name<<"' does not exist.");
         }
     }
+
+    Eigen::VectorXd UnconstrainedEndPoseProblem::getNominalPose()
+    {
+        return qNominal;
+    }
+
+    void UnconstrainedEndPoseProblem::setNominalPose(Eigen::VectorXdRefConst qNominal_in)
+    {
+      if (qNominal_in.rows() == N)
+        qNominal = qNominal_in;
+      else
+        throw_pretty("Cannot set qNominal - wrong number of rows (expected "
+                     << N << ", received " << qNominal_in.rows() << ").");
+    }
 }
 

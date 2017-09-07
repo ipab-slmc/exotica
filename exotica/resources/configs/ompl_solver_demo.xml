@@ -9,7 +9,7 @@
   <SamplingProblem Name="MyProblem">
 
     <PlanningScene>
-      <Scene Name="OMPLSolverDemoScene">
+      <Scene>
         <!-- Computing distances is enabled by default, disable for a Sampling problem by setting the PlanningMode to speed up Scene updates -->
         <PlanningMode>Sampling</PlanningMode>
         <JointGroup>arm</JointGroup>

@@ -81,8 +81,8 @@ namespace exotica
 
         qNominal = init.NominalState;
 
-        if(init.Rho.rows()>0 && init.Rho.rows()!=NumTasks) throw_named("Invalide size of Rho (" << init.Rho.rows() << ") expected: "<< NumTasks);
-        if(init.Goal.rows()>0 && init.Goal.rows()!=PhiN) throw_named("Invalide size of Rho (" << init.Goal.rows() << ") expected: "<< PhiN);
+        if(init.Rho.rows()>0 && init.Rho.rows()!=NumTasks) throw_named("Invalid size of Rho (" << init.Rho.rows() << ") expected: "<< NumTasks);
+        if(init.Goal.rows()>0 && init.Goal.rows()!=PhiN) throw_named("Invalid size of Rho (" << init.Goal.rows() << ") expected: "<< PhiN);
 
         if(init.Rho.rows()==NumTasks) Rho = init.Rho;
         if(init.Goal.rows()==PhiN) y.data = init.Goal;
@@ -107,7 +107,7 @@ namespace exotica
         }
         catch(std::out_of_range& e)
         {
-            throw_pretty("Cannot set Goal. Task map '"<<task_name<<"' Does not exist.");
+            throw_pretty("Cannot set Goal. Task map '"<<task_name<<"' does not exist.");
         }
     }
 
@@ -120,7 +120,7 @@ namespace exotica
         }
         catch(std::out_of_range& e)
         {
-            throw_pretty("Cannot set Rho. Task map '"<<task_name<<"' Does not exist.");
+            throw_pretty("Cannot set Rho. Task map '"<<task_name<<"' does not exist.");
         }
     }
 
@@ -133,7 +133,7 @@ namespace exotica
         }
         catch(std::out_of_range& e)
         {
-            throw_pretty("Cannot get Goal. Task map '"<<task_name<<"' Does not exist.");
+            throw_pretty("Cannot get Goal. Task map '"<<task_name<<"' does not exist.");
         }
     }
 
@@ -146,7 +146,7 @@ namespace exotica
         }
         catch(std::out_of_range& e)
         {
-            throw_pretty("Cannot get Rho. Task map '"<<task_name<<"' Does not exist.");
+            throw_pretty("Cannot get Rho. Task map '"<<task_name<<"' does not exist.");
         }
     }
 }

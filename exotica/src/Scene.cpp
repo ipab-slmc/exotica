@@ -131,6 +131,16 @@ namespace exotica
     //    }
   }
 
+  void CollisionScene::update(std::string joint, double value) {
+    try {
+      ps_->getCurrentStateNonConst().setVariablePosition(joint, value);
+    } catch (const std::exception& ex) {
+      throw_pretty("Exception while trying to update individual joint '"
+                   << joint << "': " << ex.what());
+    }
+    ps_->getCurrentStateNonConst().update(true);
+  }
+
   void CollisionScene::update(Eigen::VectorXdRefConst x)
   {
     if (joint_index_.size() != x.rows())

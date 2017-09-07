@@ -56,6 +56,11 @@ namespace exotica
       return scene_->getControlledState();
   }
 
+  void PlanningProblem::preupdate()
+  {
+      for (auto& it : TaskMaps) it.second->preupdate();
+  }
+
   void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
   {
       if(x.rows()==startState.rows())

@@ -74,6 +74,7 @@ namespace exotica
 
   void OMPLsolver::Solve(Eigen::MatrixXd & solution)
   {
+    prob_->preupdate();
     Eigen::VectorXd q0 = prob_->applyStartState();
     setGoalState(prob_->goal_);
     if (base_solver_->solve(q0, solution))

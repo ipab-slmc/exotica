@@ -131,6 +131,7 @@ namespace exotica
 
   void AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init, Eigen::MatrixXd & solution)
   {
+    prob_->preupdate();
     prob_->setStartState(q_init[0]);
     prob_->applyStartState();
     Timer timer;

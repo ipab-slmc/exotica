@@ -578,9 +578,6 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("isStateValid", [](Scene* instance, bool self, double dist) {
         return instance->getCollisionScene()->isStateValid(self, dist);
     });
-    scene.def("isStateValid", [](Scene* instance, const Eigen::VectorXd &q) {
-        return instance->getCollisionScene()->isStateValid(q);
-    });
     scene.def("updateWorld", [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
         moveit_msgs::PlanningSceneWorldConstPtr myPtr(new moveit_msgs::PlanningSceneWorld(world));
         instance->getCollisionScene()->updateWorld(myPtr);

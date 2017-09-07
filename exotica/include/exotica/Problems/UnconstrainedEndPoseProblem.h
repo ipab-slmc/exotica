@@ -54,6 +54,8 @@ namespace exotica
         void setRho(const std::string & task_name, const double rho);
         Eigen::VectorXd getGoal(const std::string & task_name);
         double getRho(const std::string & task_name);
+        Eigen::VectorXd getNominalPose();
+        void setNominalPose(Eigen::VectorXdRefConst qNominal_in);
 
         Eigen::VectorXd Rho;
         TaskSpaceVector y;

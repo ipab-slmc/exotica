@@ -468,6 +468,12 @@ PYBIND11_MODULE(_pyexotica, module)
         .value("Matrix", RotationType::MATRIX)
         .export_values();
 
+    py::enum_<BASE_TYPE>(module, "BaseType")
+        .value("Fixed", BASE_TYPE::FIXED)
+        .value("Floating", BASE_TYPE::FLOATING)
+        .value("Planar", BASE_TYPE::PLANAR)
+        .export_values();
+
     py::class_<TaskMap, std::shared_ptr<TaskMap>, Object> taskMap(module, "TaskMap");
     taskMap.def_readonly("id", &TaskMap::Id);
     taskMap.def_readonly("start", &TaskMap::Start);
@@ -545,6 +551,7 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
     scene.def("Update", &Scene::Update);
+    scene.def("getBaseType", &Scene::getBaseType);
     scene.def("getJointNames", (std::vector<std::string> (Scene::*)()) &Scene::getJointNames);
     scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference_internal);
     scene.def("getModelJointNames", &Scene::getModelJointNames);
@@ -588,6 +595,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);
     kinematicTree.def("getRootName", &KinematicTree::getRootName);
     kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
+    kinematicTree.def("getBaseType", &KinematicTree::getBaseType);
 
     py::class_<KDL::Frame> kdlFrame (module, "KDLFrame");
     kdlFrame.def(py::init());

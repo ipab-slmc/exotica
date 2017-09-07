@@ -552,6 +552,7 @@ PYBIND11_MODULE(_pyexotica, module)
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
     scene.def("Update", &Scene::Update);
     scene.def("getBaseType", &Scene::getBaseType);
+    scene.def("getGroupName", &Scene::getGroupName);
     scene.def("getJointNames", (std::vector<std::string> (Scene::*)()) &Scene::getJointNames);
     scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference_internal);
     scene.def("getModelJointNames", &Scene::getModelJointNames);

@@ -676,14 +676,30 @@ namespace exotica
     return kinematica_.getModelStateMap();
   }
 
-  void Scene::setModelState(Eigen::VectorXdRefConst x)
-  {
+  void Scene::setModelState(Eigen::VectorXdRefConst x) {
+    // Update Kinematica internal state
     kinematica_.setModelState(x);
+
+    // Update Planning Scene State
+    int i = 0;
+    for (auto& joint : getModelJointNames()) {
+      collision_scene_->update(joint, x(i));
+      i++;
+    }
+
+    if (debug_) publishScene();
   }
 
-  void Scene::setModelState(std::map<std::string, double> x)
-  {
+  void Scene::setModelState(std::map<std::string, double> x) {
+    // Update Kinematica internal state
     kinematica_.setModelState(x);
+
+    // Update Planning Scene State
+    for (auto& joint : x) {
+      collision_scene_->update(joint.first, joint.second);
+    }
+
+    if (debug_) publishScene();
   }
 
   Eigen::VectorXd Scene::getControlledState()

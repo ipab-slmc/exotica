@@ -86,6 +86,10 @@ namespace exotica
               ps_->getAllowedCollisionMatrix()));
     }
     ps_->setPlanningSceneMsg(*msg.get());
+
+    if (model_->getSRDF()->getVirtualJoints().size() > 0)
+      world_joint_ = model_->getSRDF()->getVirtualJoints()[0].name_;
+
     BaseType = base_type;
       joint_index_.resize(joints.size());
 
@@ -145,10 +149,9 @@ namespace exotica
   void CollisionScene::update(Eigen::VectorXdRefConst x)
   {
     if (joint_index_.size() != x.rows())
-    {
-      throw_pretty(
-          "Size does not match, need vector size of "<<joint_index_.size()<<" but "<<x.rows()<<" is provided");
-    }
+      throw_pretty("Size does not match, need vector size of "
+                   << joint_index_.size() << " but " << x.rows()
+                   << " is provided");
 
     if (BaseType == BASE_TYPE::FIXED)
     {
@@ -158,24 +161,22 @@ namespace exotica
     }
     else if (BaseType == BASE_TYPE::FLOATING)
     {
-      const std::string world_name =
-          ps_->getCurrentStateNonConst().getRobotModel()->getSRDF()->getVirtualJoints()[0].name_;
       ps_->getCurrentStateNonConst().setVariablePosition(
-          world_name + "/trans_x", x(0));
+          world_joint_ + "/trans_x", x(0));
       ps_->getCurrentStateNonConst().setVariablePosition(
-          world_name + "/trans_y", x(1));
+          world_joint_ + "/trans_y", x(1));
       ps_->getCurrentStateNonConst().setVariablePosition(
-          world_name + "/trans_z", x(2));
+          world_joint_ + "/trans_z", x(2));
       KDL::Rotation rot = KDL::Rotation::EulerZYX(x(3), x(4), x(5));
       Eigen::VectorXd quat(4);
       rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_x",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/rot_x",
           quat(0));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_y",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/rot_y",
           quat(1));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_z",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/rot_z",
           quat(2));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/rot_w",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/rot_w",
           quat(3));
       for (std::size_t i = 6; i < joint_index_.size(); i++)
         ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
@@ -183,19 +184,18 @@ namespace exotica
     }
     else if (BaseType == BASE_TYPE::PLANAR)
     {
-      const std::string world_name =
-          ps_->getCurrentStateNonConst().getRobotModel()->getSRDF()->getVirtualJoints()[0].name_;
-      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/x",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/x",
           x(0));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/y",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/y",
           x(1));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_name + "/theta",
+      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/theta",
           x(2));
       for (std::size_t i = 3; i < joint_index_.size(); i++)
         ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
             x(i));
     }
     ps_->getCurrentStateNonConst().update(true);
+
     if (compute_dist)
     {
       for (auto & it : fcl_robot_)

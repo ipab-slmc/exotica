@@ -73,7 +73,7 @@ namespace exotica
           JN += Tasks[i]->LengthJ;
       }
 
-      N = scene_->getNumJoints();
+      N = scene_->getSolver().getNumJoints();
 
       W = Eigen::MatrixXd::Identity(N, N)*W_rate;
       if(init.W.rows()>0)

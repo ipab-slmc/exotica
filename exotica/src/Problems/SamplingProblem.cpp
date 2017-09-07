@@ -40,9 +40,9 @@ namespace exotica
 {
 
   SamplingProblem::SamplingProblem()
-      : space_dim_(0)
   {
     Flags = KIN_FK;
+    N = 0;
   }
 
   SamplingProblem::~SamplingProblem()
@@ -64,7 +64,7 @@ namespace exotica
           local_planner_config_ = init.LocalPlannerConfig;
       }
 
-      space_dim_ = scene_->getNumJoints();
+      N = scene_->getSolver().getNumJoints();
 
       goal_ = init.Goal;
 
@@ -96,7 +96,7 @@ namespace exotica
 
   int SamplingProblem::getSpaceDim()
   {
-    return space_dim_;
+    return N;
   }
 
   bool SamplingProblem::isCompoundStateSpace()

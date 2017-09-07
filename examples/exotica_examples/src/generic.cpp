@@ -80,7 +80,7 @@ void run()
     UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
     // Create the initial configuration
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumJoints());
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->N);
     Eigen::MatrixXd solution;
 
 

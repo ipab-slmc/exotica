@@ -60,7 +60,7 @@ namespace exotica
             JN += Tasks[i]->LengthJ;
         }
 
-        N = scene_->getNumJoints();
+        N = scene_->getSolver().getNumJoints();
 
         Rho = Eigen::VectorXd::Ones(NumTasks);
         y.setZero(PhiN);

@@ -627,11 +627,6 @@ namespace exotica
     collision_scene_->initialise(scene, kinematica_.getJointNames(), "", BaseType,model_);
   }
 
-  int Scene::getNumJoints()
-  {
-    return kinematica_.getNumJoints();
-  }
-
   CollisionScene_ptr & Scene::getCollisionScene()
   {
     return collision_scene_;

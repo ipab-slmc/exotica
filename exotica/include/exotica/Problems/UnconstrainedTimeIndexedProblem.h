@@ -77,7 +77,6 @@ namespace exotica
 
       int PhiN;
       int JN;
-      int N;
       int NumTasks;
 
   };

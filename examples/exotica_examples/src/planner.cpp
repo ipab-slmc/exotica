@@ -76,7 +76,7 @@ void run()
     }
 
     // Create the initial configuration
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumJoints());
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->N);
     Eigen::MatrixXd solution;
     ROS_INFO_STREAM("Calling solve()");
     {

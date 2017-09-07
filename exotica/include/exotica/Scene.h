@@ -250,7 +250,6 @@ namespace exotica
       virtual void Update(Eigen::VectorXdRefConst x);
       void setCollisionScene(const planning_scene::PlanningSceneConstPtr & scene);
       void setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene);
-      int getNumJoints();
       CollisionScene_ptr & getCollisionScene();
       std::string getRootName();
       planning_scene::PlanningScenePtr getPlanningScene();

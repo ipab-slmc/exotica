@@ -62,6 +62,7 @@ namespace exotica
         void setStartState(Eigen::VectorXdRefConst x);
         Eigen::VectorXd getStartState();
         Eigen::VectorXd applyStartState();
+        int N;
 
     protected:
         Scene_ptr scene_;

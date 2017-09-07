@@ -92,6 +92,14 @@ namespace exotica
       void update(Eigen::VectorXdRefConst x);
 
       /**
+       * @brief      Update an individual joint's value in the planning scene
+       *
+       * @param[in]  joint  The joint
+       * @param[in]  value  The value
+       */
+      void update(std::string joint, double value);
+
+      /**
        * \brief	Get closest distance between two objects
        * @param	o1		Name of object 1
        * @param	o2		Name of object 2

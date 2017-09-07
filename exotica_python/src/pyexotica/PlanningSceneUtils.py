@@ -1,6 +1,7 @@
 from moveit_msgs.msg import CollisionObject
 from geometry_msgs.msg import Pose, Point
 from shape_msgs.msg import SolidPrimitive, Plane, Mesh, MeshTriangle
+import pyexotica as exo
 
 try:
     from pyassimp import pyassimp
@@ -52,7 +53,7 @@ def create_box(name, pose, size, frame_id='/world_frame'):
 def create_mesh(name, pose, filename, scale=(1, 1, 1),
                 frame_id='/world_frame'):
     co = CollisionObject()
-    scene = pyassimp.load(filename)
+    scene = pyassimp.load(exo.Tools.parsePath(filename))
     if not scene.meshes or len(scene.meshes) == 0:
         raise Exception("There are no meshes in the file")
     if len(scene.meshes[0].faces) == 0:

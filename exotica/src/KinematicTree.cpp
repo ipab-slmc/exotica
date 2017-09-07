@@ -494,6 +494,10 @@ void KinematicTree::setModelState(Eigen::VectorXdRefConst x)
     {
         TreeState(ModelJointsMap.at(ModelJointsNames[i])->Id) = x(i);
     }
+
+    UpdateFK();
+    if (Flags & KIN_J) UpdateJ();
+    if (Debug) publishFrames();
 }
 
 void KinematicTree::setModelState(std::map<std::string, double> x)
@@ -509,6 +513,10 @@ void KinematicTree::setModelState(std::map<std::string, double> x)
             throw_pretty("Robot model does not contain joint '"<<joint.first<<"'");
         }
     }
+
+    UpdateFK();
+    if (Flags & KIN_J) UpdateJ();
+    if (Debug) publishFrames();
 }
 
 Eigen::VectorXd KinematicTree::getControlledState()

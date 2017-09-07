@@ -577,6 +577,10 @@ PYBIND11_MODULE(_pyexotica, module)
         moveit_msgs::PlanningSceneWorldConstPtr myPtr(new moveit_msgs::PlanningSceneWorld(world));
         instance->getCollisionScene()->updateWorld(myPtr);
     });
+    scene.def("loadScene", &Scene::loadScene);
+    scene.def("loadSceneFile", &Scene::loadSceneFile);
+    scene.def("getScene", &Scene::getScene);
+    scene.def("cleanScene", &Scene::cleanScene);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

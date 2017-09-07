@@ -256,6 +256,7 @@ namespace exotica
       std::map<std::string, double> getModelStateMap();
       void setModelState(Eigen::VectorXdRefConst x);
       void setModelState(std::map<std::string, double> x);
+      std::string getGroupName();
 
       BASE_TYPE getBaseType()
       {
@@ -263,6 +264,10 @@ namespace exotica
       }
 
       void publishScene();
+      void loadScene(const std::string& scene);
+      void loadSceneFile(const std::string& file_name);
+      std::string getScene();
+      void cleanScene();
     private:
       ///	The name of the scene
       std::string name_;

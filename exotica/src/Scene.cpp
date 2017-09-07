@@ -31,6 +31,8 @@
  */
 
 #include "exotica/Scene.h"
+#include <iostream>
+#include <fstream>
 
 namespace fcl_convert
 {
@@ -677,6 +679,35 @@ namespace exotica
   Eigen::VectorXd Scene::getControlledState()
   {
       return kinematica_.getControlledState();
+  }
+
+  std::string Scene::getGroupName()
+  {
+      return group->getName();
+  }
+
+  void Scene::loadScene(const std::string& scene)
+  {
+      std::stringstream ss(scene);
+      getPlanningScene()->loadGeometryFromStream(ss);
+  }
+
+  void Scene::loadSceneFile(const std::string& file_name)
+  {
+      std::ifstream ss(parsePath(file_name));
+      getPlanningScene()->loadGeometryFromStream(ss);
+  }
+
+  std::string Scene::getScene()
+  {
+      std::stringstream ss;
+      getPlanningScene()->saveGeometryToStream(ss);
+      return ss.str();
+  }
+
+  void Scene::cleanScene()
+  {
+      getPlanningScene()->removeAllCollisionObjects();
   }
 
 }

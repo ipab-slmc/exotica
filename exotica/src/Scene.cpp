@@ -407,6 +407,8 @@ namespace exotica
     double selfCollisionDistance, environmentCollisionDistance;
 
     req.contacts = debug ? true : false;
+    req.max_contacts_per_pair = 1;
+    req.max_contacts = 500;
     req.distance = true;
 
     if (computeSelfCollisionDistance) {
@@ -430,12 +432,14 @@ namespace exotica
     environmentCollisionDistance = res.distance;
 
     if (res.contacts.size() > 0 && debug) {
-      ROS_INFO_STREAM(
-          "Number of Environment Contacts: " << res.contacts.size());
+      ROS_INFO_STREAM("Number of Environment ContactMaps "
+                      << res.contacts.size() << " with " << res.contact_count
+                      << " contacts.");
       for (auto& contactPair : res.contacts) {
-        ROS_INFO_STREAM("Contact between: " << contactPair.first.first
-                                            << " and "
-                                            << contactPair.first.second);
+        ROS_INFO_STREAM("Contact between: "
+                        << contactPair.first.first << " and "
+                        << contactPair.first.second << ": "
+                        << contactPair.second[0].depth << " & normal=");
       }
     }
 

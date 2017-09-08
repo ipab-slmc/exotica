@@ -185,6 +185,10 @@ namespace exotica
       int stateCheckCnt_;
     private:
 
+      void reinitializeCollisionRobot();
+      void reinitializeCollisionWorld();
+      void updateCollisionRobot();
+
       /**
        * \brief	Get closest distance between two fcl objects
        * @param	fcl1	FCL object 1

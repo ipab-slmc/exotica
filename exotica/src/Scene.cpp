@@ -113,30 +113,147 @@ namespace exotica
       }
       else
         INFO("Computing distance in Collision scene is Enabled");
+
+    reinitializeCollisionRobot();
+    reinitializeCollisionWorld();
+  }
+
+  void CollisionScene::reinitializeCollisionRobot() {
+    // Reinitialize robot
+    fcl_robot_.clear();
+    geo_robot_.clear();
+    ps_->getCurrentStateNonConst().update(true);
+    const std::vector<const robot_model::LinkModel*>& links =
+        ps_->getCollisionRobot()
+            ->getRobotModel()
+            ->getLinkModelsWithCollisionGeometry();
+    for (std::size_t i = 0; i < links.size(); ++i) {
+      geo_robot_[links[i]->getName()] = geos_ptr(0);
+      fcl_robot_[links[i]->getName()] = fcls_ptr(0);
+      for (std::size_t j = 0; j < links[i]->getShapes().size(); ++j) {
+        shapes::ShapeConstPtr tmp_shape;
+        if (links[i]->getShapes()[j]->type != shapes::MESH)
+          tmp_shape = shapes::ShapeConstPtr(
+              shapes::createMeshFromShape(links[i]->getShapes()[j].get()));
+        else
+          tmp_shape = links[i]->getShapes()[j];
+        if (!tmp_shape || !tmp_shape.get())
+          throw_pretty("Shape could not be extracted");
+
+        collision_detection::FCLGeometryConstPtr g =
+            collision_detection::createCollisionGeometry(tmp_shape, links[i],
+                                                         j);
+        if (g) {
+          geo_robot_.at(links[i]->getName()).push_back(g);
+          fcl::CollisionObject* tmp = new fcl::CollisionObject(
+              g->collision_geometry_,
+              collision_detection::transform2fcl(
+                  ps_->getCurrentState().getCollisionBodyTransform(
+                      g->collision_geometry_data_->ptr.link,
+                      g->collision_geometry_data_->shape_index)));
+          fcl_robot_.at(links[i]->getName())
+              .push_back(std::shared_ptr<fcl::CollisionObject>(tmp));
+
+        } else
+          throw_pretty("Unable to construct collision geometry for link "
+                       << links[i]->getName().c_str());
+      }
+    }
+  }
+
+  void CollisionScene::reinitializeCollisionWorld() {
+    // Reinitialize world
+    fcl_world_.clear();
+    geo_world_.clear();
+    collision_detection::WorldConstPtr tmp_world =
+        ps_->getCollisionWorld()->getWorld();
+    std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
+    if (obj_id_.size() > 0) {
+      for (std::size_t i = 0; i < obj_id_.size(); ++i) {
+        std::size_t index_size =
+            tmp_world->getObject(obj_id_[i])->shapes_.size();
+        fcl_world_[obj_id_[i]] = fcls_ptr(0);
+        geo_world_[obj_id_[i]] = geos_ptr(0);
+        trans_world_[obj_id_[i]] = std::vector<fcl::Transform3f>(0);
+        for (std::size_t j = 0; j < index_size; j++) {
+          shapes::ShapeConstPtr tmp_shape;
+
+          if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type ==
+              shapes::OCTREE) {
+            tmp_world->getObject(obj_id_[i])->shapes_[j]->print();
+            tmp_shape = boost::static_pointer_cast<const shapes::Shape>(
+                tmp_world->getObject(obj_id_[i])->shapes_[j]);
+          } else {
+            if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type !=
+                shapes::MESH) {
+              tmp_shape = shapes::ShapeConstPtr(shapes::createMeshFromShape(
+                  tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
+            } else {
+              tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
+            }
+          }
+
+          if (!tmp_shape || !tmp_shape.get())
+            throw_pretty("Could not extract shape");
+
+          collision_detection::FCLGeometryConstPtr g =
+              collision_detection::createCollisionGeometry(
+                  tmp_shape, tmp_world->getObject(obj_id_[i]).get());
+          geo_world_.at(obj_id_[i]).push_back(g);
+          trans_world_.at(obj_id_[i])
+              .push_back(fcl::Transform3f(collision_detection::transform2fcl(
+                  tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
+          fcl_world_.at(obj_id_[i])
+              .push_back(std::shared_ptr<fcl::CollisionObject>(
+                  new fcl::CollisionObject(
+                      g->collision_geometry_,
+                      collision_detection::transform2fcl(
+                          tmp_world->getObject(obj_id_[i])->shape_poses_[j]))));
+        }
+      }
+    }
+  }
+
+  void CollisionScene::updateCollisionRobot() {
+    for (auto& it : fcl_robot_) {
+      for (std::size_t i = 0; i < it.second.size(); ++i) {
+        collision_detection::CollisionGeometryData* cd =
+            static_cast<collision_detection::CollisionGeometryData*>(
+                it.second[i]->collisionGeometry()->getUserData());
+        it.second[i]->setTransform(collision_detection::transform2fcl(
+            ps_->getCurrentState().getCollisionBodyTransform(cd->ptr.link,
+                                                             cd->shape_index)));
+        it.second[i]->getTransform().transform(
+            it.second[i]->collisionGeometry()->aabb_center);
+      }
+    }
   }
 
   void CollisionScene::updateWorld(
       const moveit_msgs::PlanningSceneWorldConstPtr& world) {
     ps_->processPlanningSceneWorldMsg(*world);
 
-    //    for (int i=0;i<world->collision_objects.size();i++)
-    //    {
-    //      if(trans_world_.find(world->collision_objects[i].id) !=
-    //      trans_world_.end())
-    //      {
-    //        std::map<std::string, fcls_ptr>::iterator it =
-    //        trans_world_.find(world->collision_objects[i].id);
-    //        for(int j =0;j<it->second.size();j++)
-    //        {
-    //          it->second[j] =
-    //          fcl::Transform3f(collision_detection::transform2fcl(world->collision_objects[i].mesh_poses[j]));
-    //        }
-    //      }
-    //    }
+    reinitializeCollisionWorld();
+
+    // NB: this function only updates existing objects, if new ones added won't
+    // work! I.e. it can be the start to differentiate between just MOVED or 
+    // updated and deleted but would need to be expanded, for now just 
+    // reinitialize the whole thing
+    // 
+    // for (int i = 0; i < world->collision_objects.size(); i++) {
+    //   if (trans_world_.find(world->collision_objects[i].id) !=
+    //       trans_world_.end()) {
+    //     std::map<std::string, fcls_ptr>::iterator it =
+    //         trans_world_.find(world->collision_objects[i].id);
+    //     for (int j = 0; j < it->second.size(); j++) {
+    //       it->second[j] = fcl::Transform3f(collision_detection::transform2fcl(
+    //           world->collision_objects[i].mesh_poses[j]));
+    //     }
+    //   }
+    // }
   }
 
-  void CollisionScene::update(std::string joint, double value)
-  {
+  void CollisionScene::update(std::string joint, double value) {
     try {
       ps_->getCurrentStateNonConst().setVariablePosition(joint, value);
     } catch (const std::exception& ex) {
@@ -144,6 +261,10 @@ namespace exotica
                    << joint << "': " << ex.what());
     }
     ps_->getCurrentStateNonConst().update(true);
+
+    // Update FCL robot link
+    if (compute_dist)
+      updateCollisionRobot();
   }
 
   void CollisionScene::update(Eigen::VectorXdRefConst x)
@@ -196,21 +317,9 @@ namespace exotica
     }
     ps_->getCurrentStateNonConst().update(true);
 
+    // Update FCL robot state for collision distance computation
     if (compute_dist)
-    {
-      for (auto & it : fcl_robot_)
-        for (std::size_t i = 0; i < it.second.size(); ++i)
-        {
-          collision_detection::CollisionGeometryData* cd =
-              static_cast<collision_detection::CollisionGeometryData*>(it.second[i]->collisionGeometry()->getUserData());
-          it.second[i]->setTransform(
-              collision_detection::transform2fcl(
-                  ps_->getCurrentState().getCollisionBodyTransform(cd->ptr.link,
-                      cd->shape_index)));
-          it.second[i]->getTransform().transform(
-              it.second[i]->collisionGeometry()->aabb_center);
-        }
-    }
+      updateCollisionRobot();
   }
 
   void CollisionScene::getDistance(const std::string & o1,

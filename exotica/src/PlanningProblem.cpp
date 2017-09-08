@@ -36,7 +36,7 @@
 
 namespace exotica
 {
-  PlanningProblem::PlanningProblem() : Flags(KIN_FK)
+  PlanningProblem::PlanningProblem() : Flags(KIN_FK), N(0)
   {
 
   }
@@ -62,7 +62,7 @@ namespace exotica
       {
           startState = x;
       }
-      else if (x.rows()==scene_->getNumJoints())
+      else if (x.rows()==scene_->getSolver().getNumJoints())
       {
           std::vector<std::string> jointNames = scene_->getJointNames();
           std::vector<std::string> modelNames = scene_->getModelJointNames();

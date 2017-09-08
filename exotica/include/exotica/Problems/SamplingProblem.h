@@ -72,7 +72,6 @@ namespace exotica
       Eigen::VectorXd goal_;
     private:
       std::vector<double> bounds_;
-      int space_dim_;
       bool compound_;
 
   };

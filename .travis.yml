@@ -4,6 +4,8 @@ cache:
 - apt
 - ccache
 language: generic
+python:
+  - "2.7"
 env:
   global:
   - CATKIN_WS=~/catkin_ws
@@ -17,6 +19,7 @@ before_install:
 - sudo apt-get update -qq
 install:
 - export PATH=/usr/bin/:$PATH # work-around Travis PYTHONPATH bug, cf. https://github.com/travis-ci/travis-ci/issues/8048
+- export PYTHONPATH=/usr/lib/python2.7/dist-packages:$PYTHONPATH   # temporary fix for travis-ci/travis-ci#8048
 - bash $TRAVIS_BUILD_DIR/.ci/before_install.sh >> /dev/null
 - sudo apt-get install -qq g++-4.9
 - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90

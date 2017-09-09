@@ -114,8 +114,10 @@ namespace exotica
       else
         INFO("Computing distance in Collision scene is Enabled");
 
-    reinitializeCollisionRobot();
-    reinitializeCollisionWorld();
+    if (compute_dist) {
+      reinitializeCollisionRobot();
+      reinitializeCollisionWorld();
+    }
   }
 
   void CollisionScene::reinitializeCollisionRobot() {
@@ -233,24 +235,8 @@ namespace exotica
       const moveit_msgs::PlanningSceneWorldConstPtr& world) {
     ps_->processPlanningSceneWorldMsg(*world);
 
-    reinitializeCollisionWorld();
-
-    // NB: this function only updates existing objects, if new ones added won't
-    // work! I.e. it can be the start to differentiate between just MOVED or 
-    // updated and deleted but would need to be expanded, for now just 
-    // reinitialize the whole thing
-    // 
-    // for (int i = 0; i < world->collision_objects.size(); i++) {
-    //   if (trans_world_.find(world->collision_objects[i].id) !=
-    //       trans_world_.end()) {
-    //     std::map<std::string, fcls_ptr>::iterator it =
-    //         trans_world_.find(world->collision_objects[i].id);
-    //     for (int j = 0; j < it->second.size(); j++) {
-    //       it->second[j] = fcl::Transform3f(collision_detection::transform2fcl(
-    //           world->collision_objects[i].mesh_poses[j]));
-    //     }
-    //   }
-    // }
+    if (compute_dist)
+      reinitializeCollisionWorld();
   }
 
   void CollisionScene::update(std::string joint, double value) {

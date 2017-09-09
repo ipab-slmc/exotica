@@ -806,12 +806,14 @@ namespace exotica
   {
       std::stringstream ss(scene);
       getPlanningScene()->loadGeometryFromStream(ss);
+      collision_scene_->reinitializeCollisionWorld();
   }
 
   void Scene::loadSceneFile(const std::string& file_name)
   {
       std::ifstream ss(parsePath(file_name));
       getPlanningScene()->loadGeometryFromStream(ss);
+      collision_scene_->reinitializeCollisionWorld();
   }
 
   std::string Scene::getScene()
@@ -824,6 +826,7 @@ namespace exotica
   void Scene::cleanScene()
   {
       getPlanningScene()->removeAllCollisionObjects();
+      collision_scene_->reinitializeCollisionWorld();
   }
 
 }

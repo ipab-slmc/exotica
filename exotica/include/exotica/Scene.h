@@ -169,6 +169,20 @@ namespace exotica
         return fcl_robot_;
       }
 
+      std::vector<std::string> getCollisionWorldLinks() {
+        std::vector<std::string> tmp;
+        for (auto& it : fcl_world_)
+          tmp.push_back(it.first);
+        return tmp;
+      }
+
+      std::vector<std::string> getCollisionRobotLinks() {
+        std::vector<std::string> tmp;
+        for (auto& it : fcl_robot_)
+          tmp.push_back(it.first);
+        return tmp;
+      }
+
       /**
        * @brief      Update the internal MoveIt planning scene from a
        * moveit_msgs::PlanningSceneWorld

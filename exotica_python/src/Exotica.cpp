@@ -582,6 +582,12 @@ PYBIND11_MODULE(_pyexotica, module)
         moveit_msgs::PlanningSceneWorldConstPtr myPtr(new moveit_msgs::PlanningSceneWorld(world));
         instance->getCollisionScene()->updateWorld(myPtr);
     });
+    scene.def("getCollisionRobotLinks", [](Scene* instance) {
+        return instance->getCollisionScene()->getCollisionRobotLinks();
+    });
+    scene.def("getCollisionWorldLinks", [](Scene* instance) {
+        return instance->getCollisionScene()->getCollisionWorldLinks();
+    });
     scene.def("loadScene", &Scene::loadScene);
     scene.def("loadSceneFile", &Scene::loadSceneFile);
     scene.def("getScene", &Scene::getScene);

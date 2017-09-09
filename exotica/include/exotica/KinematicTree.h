@@ -217,7 +217,7 @@ namespace exotica
             void UpdateJ();
             void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);
 
-            BASE_TYPE BaseType;
+            BASE_TYPE ModelBaseType;
             int NumControlledJoints; //!< Number of controlled joints in the joint group.
             int NumJoints; //!< Number of joints of the robot (including floating/plannar base, passive joints and uncontrolled joints).
             int StateSize;

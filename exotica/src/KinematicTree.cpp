@@ -147,12 +147,12 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     if(WorldFrameName == "") throw_pretty("Can't initialize root joint!");
     if(RootJoint->getType()==robot_model::JointModel::FIXED)
     {
-        BaseType = BASE_TYPE::FIXED;
+        ModelBaseType = BASE_TYPE::FIXED;
         Tree.push_back(std::shared_ptr<KinematicElement>(new KinematicElement(Tree.size(), nullptr, KDL::Segment(WorldFrameName, KDL::Joint(RootJoint->getName(), KDL::Joint::None))  )));
     }
     else if(RootJoint->getType() == robot_model::JointModel::FLOATING)
     {
-        BaseType = BASE_TYPE::FLOATING;
+        ModelBaseType = BASE_TYPE::FLOATING;
         Tree.resize(6);
         KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::TransZ, KDL::Joint::RotX, KDL::Joint::RotY, KDL::Joint::RotZ};
         for(int i=0;i<6;i++)
@@ -167,7 +167,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     }
     else if(RootJoint->getType() ==  robot_model::JointModel::PLANAR)
     {
-        BaseType = BASE_TYPE::PLANAR;
+        ModelBaseType = BASE_TYPE::PLANAR;
         Tree.resize(3);
         KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::RotZ};
         for(int i=0;i<3;i++)
@@ -387,7 +387,7 @@ Eigen::MatrixXd KinematicTree::getJointLimits()
 
 exotica::BASE_TYPE KinematicTree::getBaseType()
 {
-  return BaseType;
+  return ModelBaseType;
 }
 
 std::map<std::string, std::vector<double>> KinematicTree::getUsedJointLimits()

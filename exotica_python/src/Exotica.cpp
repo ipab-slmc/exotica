@@ -565,6 +565,11 @@ PYBIND11_MODULE(_pyexotica, module)
         moveit_msgs::PlanningSceneConstPtr myPtr(new moveit_msgs::PlanningScene(ps));
         instance->setCollisionScene(myPtr);
     });
+    scene.def("loadScene", &Scene::loadScene);
+    scene.def("loadSceneFile", &Scene::loadSceneFile);
+    scene.def("getScene", &Scene::getScene);
+    scene.def("cleanScene", &Scene::cleanScene);
+
     // CollisionScene-related functions exposed via Scene - NB: may change in future    
     scene.def("getClosestDistance", [](Scene* instance) {
         return instance->getCollisionScene()->getClosestDistance();
@@ -588,10 +593,17 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getCollisionWorldLinks", [](Scene* instance) {
         return instance->getCollisionScene()->getCollisionWorldLinks();
     });
-    scene.def("loadScene", &Scene::loadScene);
-    scene.def("loadSceneFile", &Scene::loadSceneFile);
-    scene.def("getScene", &Scene::getScene);
-    scene.def("cleanScene", &Scene::cleanScene);
+    scene.def("getRobotDistance", [](Scene* instance, std::string link, bool self, double safeDist) {
+        double d;
+        Eigen::Vector3d p1, p2, norm, c1, c2;
+        instance->getCollisionScene()->getRobotDistance(link, self, d, p1, p2, norm, c1, c2, safeDist);
+        return py::make_tuple(d, norm);
+    });
+    scene.def("getDistance", [](Scene* instance, std::string o1, std::string o2, double safeDist) {
+        double d;
+        instance->getCollisionScene()->getDistance(o1, o2, d, safeDist);
+        return d;
+    });
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

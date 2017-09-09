@@ -540,13 +540,11 @@ namespace exotica
       for (int j = 0; j < fcl2.size(); j++)
       {
         if (fcl1[i] == nullptr)
-        {
           throw_pretty("Object 1 not found!");
-        }
+
         if (fcl2[j] == nullptr)
-        {
           throw_pretty("Object 2 not found!");
-        }
+
         if (fcl2[j]->getAABB().distance(fcl2[j]->getAABB()) < safeDist)
         {
           if (fcl::distance(fcl1[i].get(), fcl2[j].get(), req, tmp) < 0)

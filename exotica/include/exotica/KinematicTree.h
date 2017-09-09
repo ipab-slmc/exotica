@@ -202,7 +202,7 @@ namespace exotica
             BASE_TYPE ModelBaseType;
             BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;
             int NumControlledJoints; //!< Number of controlled joints in the joint group.
-            int NumJoints; //!< Number of joints of the robot (including floating/plannar base, passive joints and uncontrolled joints).
+            int NumJoints; //!< Number of joints of the model (including floating/planar base, passive joints, and uncontrolled joints).
             int StateSize;
             Eigen::VectorXd TreeState;
             robot_model::RobotModelPtr Model;

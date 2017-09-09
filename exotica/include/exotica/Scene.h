@@ -159,11 +159,13 @@ namespace exotica
        */
       planning_scene::PlanningScenePtr getPlanningScene();
 
+      // Potentially deprecated
       inline std::map<std::string, fcls_ptr>& getFCLWorld()
       {
         return fcl_world_;
       }
 
+      // Potentially deprecated
       inline std::map<std::string, fcls_ptr>& getFCLRobot()
       {
         return fcl_robot_;
@@ -197,53 +199,69 @@ namespace exotica
       void getTranslation(const std::string & name,
           Eigen::Vector3d & translation);
       int stateCheckCnt_;
-    private:
-
-      void reinitializeCollisionRobot();
-      void reinitializeCollisionWorld();
-      void updateCollisionRobot();
 
       /**
-       * \brief	Get closest distance between two fcl objects
-       * @param	fcl1	FCL object 1
-       * @param	fcl2	FCL object 2
-       * @param	req		FCL collision request
-       * @param	res		FCL collision result
-       * @return Distance to collision
+       * @brief      Reinitializes the FCL CollisionScene world links. Call this
+       * function if you update the MoveIt planning scene.
        */
-      double distance(const fcls_ptr & fcl1, const fcls_ptr & fcl2,
-          const fcl::DistanceRequest & req, fcl::DistanceResult & res,
-          double safeDist);
-      ///	FCL collision object for the robot
-      std::map<std::string, fcls_ptr> fcl_robot_;
+      void reinitializeCollisionWorld();
 
-      ///	FCL collision object for the world
-      std::map<std::string, fcls_ptr> fcl_world_;
+    private:
+     /**
+      * @brief      Reinitializes the FCL CollisionScene robot links. This
+      * function is automatically called when the scene is initialized via
+      * the initialise() method.
+      */
+     void reinitializeCollisionRobot();
 
-      ///	FCL collision geometry for the robot
-      std::map<std::string, geos_ptr> geo_robot_;
+     /**
+      * @brief      Updates the transforms of the robot links in the FCL
+      * CollisionScene. This function is automatically called by the update()
+      * methods.
+      */
+     void updateCollisionRobot();
 
-      ///	FCL collision geometry for the world
-      std::map<std::string, geos_ptr> geo_world_;
+     /**
+      * \brief Get closest distance between two fcl objects
+      * @param fcl1  FCL object 1
+      * @param fcl2  FCL object 2
+      * @param req   FCL collision request
+      * @param res   FCL collision result
+      * @return Distance to collision
+      */
+     double distance(const fcls_ptr& fcl1, const fcls_ptr& fcl2,
+                     const fcl::DistanceRequest& req, fcl::DistanceResult& res,
+                     double safeDist);
+     /// FCL collision object for the robot
+     std::map<std::string, fcls_ptr> fcl_robot_;
 
-      ///	To correct FCL transform
-      std::map<std::string, std::vector<fcl::Transform3f>> trans_world_;
+     /// FCL collision object for the world
+     std::map<std::string, fcls_ptr> fcl_world_;
 
-      ///	Internal moveit planning scene
-      planning_scene::PlanningScenePtr ps_;
+     /// FCL collision geometry for the robot
+     std::map<std::string, geos_ptr> geo_robot_;
 
-      ///	Joint index in robot state
-      std::vector<int> joint_index_;
+     /// FCL collision geometry for the world
+     std::map<std::string, geos_ptr> geo_world_;
 
-      ///	Indicate if distance computation is required
-      bool compute_dist;
+     /// To correct FCL transform
+     std::map<std::string, std::vector<fcl::Transform3f>> trans_world_;
 
-      ///	The allowed collisiom matrix
-      collision_detection::AllowedCollisionMatrixPtr acm_;
+     /// Internal moveit planning scene
+     planning_scene::PlanningScenePtr ps_;
 
-      std::string scene_name_;
-      std::string world_joint_ = "";
-      BASE_TYPE BaseType;
+     /// Joint index in robot state
+     std::vector<int> joint_index_;
+
+     /// Indicate if distance computation is required
+     bool compute_dist;
+
+     /// The allowed collisiom matrix
+     collision_detection::AllowedCollisionMatrixPtr acm_;
+
+     std::string scene_name_;
+     std::string world_joint_ = "";
+     BASE_TYPE BaseType;
   };
 
   typedef std::shared_ptr<CollisionScene> CollisionScene_ptr;

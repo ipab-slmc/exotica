@@ -179,6 +179,7 @@ namespace exotica
             void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model);
             std::string getRootName();
             BASE_TYPE getModelBaseType();
+            BASE_TYPE getControlledBaseType();
             std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
             void Update(Eigen::VectorXdRefConst x);
             void setJointLimits();
@@ -218,6 +219,7 @@ namespace exotica
             void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);
 
             BASE_TYPE ModelBaseType;
+            BASE_TYPE ControlledBaseType;
             int NumControlledJoints; //!< Number of controlled joints in the joint group.
             int NumJoints; //!< Number of joints of the robot (including floating/plannar base, passive joints and uncontrolled joints).
             int StateSize;

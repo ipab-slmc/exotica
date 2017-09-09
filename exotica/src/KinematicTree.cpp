@@ -385,7 +385,7 @@ Eigen::MatrixXd KinematicTree::getJointLimits()
     return lim;
 }
 
-exotica::BASE_TYPE KinematicTree::getBaseType()
+exotica::BASE_TYPE KinematicTree::getModelBaseType()
 {
   return ModelBaseType;
 }

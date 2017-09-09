@@ -178,7 +178,7 @@ namespace exotica
             ~KinematicTree() {}
             void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model);
             std::string getRootName();
-            BASE_TYPE getBaseType();
+            BASE_TYPE getModelBaseType();
             std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
             void Update(Eigen::VectorXdRefConst x);
             void setJointLimits();

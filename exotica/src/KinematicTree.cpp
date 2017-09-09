@@ -435,7 +435,7 @@ std::map<std::string, std::vector<double>> KinematicTree::getUsedJointLimits()
 void KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
     const std::vector<double> & lower, const std::vector<double> & upper)
 {
-  if (BaseType != BASE_TYPE::FLOATING)
+  if (ControlledBaseType != BASE_TYPE::FLOATING)
   {
     throw_pretty("This is not a floating joint!");
   }
@@ -463,7 +463,7 @@ void KinematicTree::setJointLimits()
 
 ///	Manually defined floating base limits
 ///	Should be done more systematically with robot model class
-  if (BaseType == BASE_TYPE::FLOATING)
+  if (ControlledBaseType == BASE_TYPE::FLOATING)
   {
     ControlledJoints[0]->JointLimits = {-0.05, 0.05};
 
@@ -477,7 +477,7 @@ void KinematicTree::setJointLimits()
 
     ControlledJoints[5]->JointLimits = {-M_PI / 8, M_PI / 8};
   }
-  else if (BaseType == BASE_TYPE::PLANAR)
+  else if (ControlledBaseType == BASE_TYPE::PLANAR)
   {
     ControlledJoints[0]->JointLimits = {-10, 10};
 

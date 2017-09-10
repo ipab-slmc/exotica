@@ -52,12 +52,15 @@ std::map<std::string, Initializer> knownInitializers;
 PyObject* createStringIOObject() {
 #if PY_MAJOR_VERSION <= 2
   PyObject* module = PyImport_ImportModule("StringIO");
-#else
-  PyObject* module = PyImport_ImportModule("io");
-#endif
   if (!module) throw_pretty("Can't load StringIO module.");
   PyObject* cls = PyObject_GetAttrString(module, "StringIO");
   if (!cls) throw_pretty("Can't load StringIO class.");
+#else
+  PyObject* module = PyImport_ImportModule("io");
+  if (!module) throw_pretty("Can't load io module.");
+  PyObject* cls = PyObject_GetAttrString(module, "BytesIO");
+  if (!cls) throw_pretty("Can't load BytesIO class.");
+#endif
   PyObject* stringio = PyObject_CallObject(cls, NULL);
   if (!stringio) throw_pretty("Can't create StringIO object.");
   Py_DECREF(module);

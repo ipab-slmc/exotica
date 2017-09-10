@@ -147,12 +147,12 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     if(WorldFrameName == "") throw_pretty("Can't initialize root joint!");
     if(RootJoint->getType()==robot_model::JointModel::FIXED)
     {
-        BaseType = BASE_TYPE::FIXED;
+        ModelBaseType = BASE_TYPE::FIXED;
         Tree.push_back(std::shared_ptr<KinematicElement>(new KinematicElement(Tree.size(), nullptr, KDL::Segment(WorldFrameName, KDL::Joint(RootJoint->getName(), KDL::Joint::None))  )));
     }
     else if(RootJoint->getType() == robot_model::JointModel::FLOATING)
     {
-        BaseType = BASE_TYPE::FLOATING;
+        ModelBaseType = BASE_TYPE::FLOATING;
         Tree.resize(6);
         KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::TransZ, KDL::Joint::RotX, KDL::Joint::RotY, KDL::Joint::RotZ};
         for(int i=0;i<6;i++)
@@ -167,7 +167,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     }
     else if(RootJoint->getType() ==  robot_model::JointModel::PLANAR)
     {
-        BaseType = BASE_TYPE::PLANAR;
+        ModelBaseType = BASE_TYPE::PLANAR;
         Tree.resize(3);
         KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::RotZ};
         for(int i=0;i<3;i++)
@@ -196,7 +196,21 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         if(Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
         TreeMap[Joint->Segment.getName()] = Joint;
         ModelJointsMap[Joint->Segment.getJoint().getName()] = Joint;
-        if(Joint->IsControlled) ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
+        if (Joint->IsControlled) {
+          ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
+
+          // The ModelBaseType defined above refers to the base type of the
+          // overall robot model - not of the set of controlled joints. E.g. a
+          // floating-base robot can have a scene defined where the
+          // floating-base virtual joint is _not_ part of the planning
+          // group/scene. Thus we need to establish the BaseType of the joint
+          // group, the ControlledBaseType - if a controlled joint corresponds
+          // to a floating base joint, the ControlledBaseType is the same as the
+          // ModelBaseType.
+          if (Joint->Segment.getJoint().getName() ==
+              RootJoint->getName() + "/trans_x")
+            ControlledBaseType = ModelBaseType;
+        }
     }
 
     setJointLimits();
@@ -385,9 +399,14 @@ Eigen::MatrixXd KinematicTree::getJointLimits()
     return lim;
 }
 
-exotica::BASE_TYPE KinematicTree::getBaseType()
+exotica::BASE_TYPE KinematicTree::getModelBaseType()
 {
-  return BaseType;
+  return ModelBaseType;
+}
+
+exotica::BASE_TYPE KinematicTree::getControlledBaseType()
+{
+  return ControlledBaseType;
 }
 
 std::map<std::string, std::vector<double>> KinematicTree::getUsedJointLimits()
@@ -403,7 +422,7 @@ std::map<std::string, std::vector<double>> KinematicTree::getUsedJointLimits()
 void KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
     const std::vector<double> & lower, const std::vector<double> & upper)
 {
-  if (BaseType != BASE_TYPE::FLOATING)
+  if (ControlledBaseType != BASE_TYPE::FLOATING)
   {
     throw_pretty("This is not a floating joint!");
   }
@@ -431,7 +450,7 @@ void KinematicTree::setJointLimits()
 
 ///	Manually defined floating base limits
 ///	Should be done more systematically with robot model class
-  if (BaseType == BASE_TYPE::FLOATING)
+  if (ControlledBaseType == BASE_TYPE::FLOATING)
   {
     ControlledJoints[0]->JointLimits = {-0.05, 0.05};
 
@@ -445,7 +464,7 @@ void KinematicTree::setJointLimits()
 
     ControlledJoints[5]->JointLimits = {-M_PI / 8, M_PI / 8};
   }
-  else if (BaseType == BASE_TYPE::PLANAR)
+  else if (ControlledBaseType == BASE_TYPE::PLANAR)
   {
     ControlledJoints[0]->JointLimits = {-10, 10};
 

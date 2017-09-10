@@ -563,34 +563,7 @@ namespace exotica
 
       collision_scene_.reset(new CollisionScene(name_));
 
-      // The BaseType here refers to the base type used in the current Scene,
-      // not of the overall robot model, e.g. a floating-base robot can have a
-      // scene defined where the floating-base virtual joint is _not_ part of
-      // the planning group/scene
-
-      // Generally assume fixed base, then assess semantic information
-      BaseType = BASE_TYPE::FIXED;
-      // If there is a virtual joint, we need to check in detail whether it is a
-      // planar or floating base
-      if (model_->getSRDF()->getVirtualJoints().size() > 0) {
-        std::string world_joint =
-            model_->getSRDF()->getVirtualJoints()[0].name_;
-        std::vector<std::string> planningGroupJointNames =
-            kinematica_.getJointNames();
-
-        // A floating base in Kinematica always contains trans_x, trans_y,
-        // trans_z, rot_x, rot_y, rot_z (XYZRPY, 6-DoF)
-        if (std::find(
-                planningGroupJointNames.begin(), planningGroupJointNames.end(),
-                world_joint + "/trans_x") != planningGroupJointNames.end())
-          BaseType = BASE_TYPE::FLOATING;
-        // A planar base in Kinematica always contains x, y, theta (3-DoF)
-        else if (std::find(planningGroupJointNames.begin(),
-                           planningGroupJointNames.end(),
-                           world_joint + "/theta") !=
-                 planningGroupJointNames.end())
-          BaseType = BASE_TYPE::PLANAR;
-      }
+      BaseType = kinematica_.getControlledBaseType();
 
       if (Server::isRos()) {
         ps_pub_ = Server::advertise<moveit_msgs::PlanningScene>(

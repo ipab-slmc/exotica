@@ -593,7 +593,8 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);
     kinematicTree.def("getRootName", &KinematicTree::getRootName);
     kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
-    kinematicTree.def("getBaseType", &KinematicTree::getBaseType);
+    kinematicTree.def("getModelBaseType", &KinematicTree::getModelBaseType);
+    kinematicTree.def("getControlledBaseType", &KinematicTree::getControlledBaseType);
 
     py::class_<KDL::Frame> kdlFrame (module, "KDLFrame");
     kdlFrame.def(py::init());

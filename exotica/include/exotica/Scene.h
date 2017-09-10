@@ -149,14 +149,14 @@ namespace exotica
           Eigen::Vector3d & c1, Eigen::Vector3d & c2, double safeDist);
 
       /**
-       * \brief	Get current robot state
-       * @return	Current robot state
+       * \brief Get current robot state
+       * @return  Current robot state
        */
       const robot_state::RobotState& getCurrentState();
 
       /**
-       * \brief	Get the moveit planning scene
-       * @return	Moveit planning scene
+       * \brief Get the moveit planning scene
+       * @return  Moveit planning scene
        */
       planning_scene::PlanningScenePtr getPlanningScene();
 

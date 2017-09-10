@@ -44,6 +44,7 @@
 #include <moveit/collision_detection/collision_world.h>
 #include <moveit/collision_detection_fcl/collision_common.h>
 #include <fcl/broadphase/broadphase.h>
+#include <fcl/narrowphase/narrowphase.h>
 #include <fcl/collision.h>
 #include <fcl/distance.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
@@ -243,6 +244,25 @@ namespace exotica
      double distance(const fcls_ptr& fcl1, const fcls_ptr& fcl2,
                      const fcl::DistanceRequest& req, fcl::DistanceResult& res,
                      double safeDist);
+
+     /**
+      * @brief      Calculates the contact information. If there are multiple
+      * contacts between the two FCL objects, the information of the contact
+      * with the most penetration is returned.
+      *
+      * @param[in]  fcl1               FCL object 1
+      * @param[in]  fcl2               FCL object 2
+      * @param[in]  req                FCL collision request
+      * @param[in]  res                FCL distance result
+      * @param      penetration_depth  Maximum penetration depth
+      * @param      pos                Position of the contact in world frame
+      * @param      norm               Normalized contact normal
+      */
+     void computeContact(const fcls_ptr& fcl1, const fcls_ptr& fcl2,
+                         const fcl::CollisionRequest& req,
+                         fcl::CollisionResult& res, double& penetration_depth,
+                         Eigen::Vector3d& pos, Eigen::Vector3d& norm);
+
      /// FCL collision object for the robot
      std::map<std::string, fcls_ptr> fcl_robot_;
 

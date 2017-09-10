@@ -579,6 +579,44 @@ namespace exotica
     return res.min_distance;
   }
 
+  void CollisionScene::computeContact(
+      const fcls_ptr& fcl1, const fcls_ptr& fcl2,
+      const fcl::CollisionRequest& req, fcl::CollisionResult& res,
+      double& penetration_depth, Eigen::Vector3d& pos, Eigen::Vector3d& norm) {
+    fcl::CollisionResult tmp;
+    penetration_depth = 0;
+    for (int i = 0; i < fcl1.size(); i++) {
+      for (int j = 0; j < fcl2.size(); j++) {
+        if (fcl1[i] == nullptr) throw_pretty("Object 1 not found!");
+        if (fcl2[j] == nullptr) throw_pretty("Object 2 not found!");
+
+        std::size_t num_contacts =
+            fcl::collide(fcl1[i].get(), fcl2[j].get(), req, tmp);
+
+        if (num_contacts == 0) {
+          throw_pretty("Objects are not in contact.");
+        } else {
+          ROS_INFO_STREAM("Objects have " << num_contacts
+                                          << " contact points.");
+
+          // Iterate over contacts and compare maximum penetration
+          for (std::size_t k = 0; k < num_contacts; k++) {
+            auto& contact = tmp.getContact(k);
+            // ROS_INFO_STREAM("Contact #" << k << " has depth of " << contact.penetration_depth);
+            if (contact.penetration_depth > penetration_depth) {
+              penetration_depth = contact.penetration_depth;
+              fcl_convert::fcl2Eigen(contact.normal, norm);
+              fcl_convert::fcl2Eigen(contact.pos, pos);
+              res = tmp;
+              // ROS_INFO_STREAM("New deepest penetration depth: " << penetration_depth);
+            }
+          }
+        }
+        tmp.clear();
+      }
+    }
+  }
+
   const robot_state::RobotState& CollisionScene::getCurrentState()
   {
     return ps_->getCurrentState();

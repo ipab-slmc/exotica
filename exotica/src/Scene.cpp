@@ -539,11 +539,9 @@ namespace exotica
     {
       for (int j = 0; j < fcl2.size(); j++)
       {
-        if (fcl1[i] == nullptr)
-          throw_pretty("Object 1 not found!");
+        if (fcl1[i] == nullptr) throw_pretty("Object 1 not found!");
 
-        if (fcl2[j] == nullptr)
-          throw_pretty("Object 2 not found!");
+        if (fcl2[j] == nullptr) throw_pretty("Object 2 not found!");
 
         if (fcl2[j]->getAABB().distance(fcl2[j]->getAABB()) < safeDist)
         {
@@ -561,19 +559,16 @@ namespace exotica
           }
           else
           {
-            if (tmp.min_distance < res.min_distance)
-            {
-              res = tmp;
-            }
+            // If the current closest distance is less than previous, update the
+            // DistanceResult object
+            if (tmp.min_distance < res.min_distance) res = tmp;
 
-            if (res.min_distance == 0.0) {
-              // The distance request returns 0 i.e. the two FCL objects are in
-              // contact. Now need to do a CollisionRequest in order to obtain the
-              // penetration depth and contact normals. However, we will return
-              // -1 here and have another method penetrationDepth carry out
-              // these computations.
-              return -1;
-            }
+            // The distance request returns 0 i.e. the two FCL objects are in
+            // contact. Now need to do a CollisionRequest in order to obtain the
+            // penetration depth and contact normals. However, we will return
+            // -1 here and have another method penetrationDepth carry out
+            // these computations.
+            if (res.min_distance == 0.0) return -1;
           }
 
           tmp.clear();

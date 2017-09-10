@@ -223,12 +223,14 @@ namespace exotica
      void updateCollisionRobot();
 
      /**
-      * \brief Get closest distance between two fcl objects
+      * \brief Get closest distance between two fcl objects - this is the main
+      * distance computation function called by the other methods. It will
+      * return -1 if the objects are in collision.
       * @param fcl1  FCL object 1
       * @param fcl2  FCL object 2
-      * @param req   FCL collision request
-      * @param res   FCL collision result
-      * @return Distance to collision
+      * @param req   FCL distance request
+      * @param res   FCL distance result
+      * @return Distance to collision (-1 if in collision)
       */
      double distance(const fcls_ptr& fcl1, const fcls_ptr& fcl2,
                      const fcl::DistanceRequest& req, fcl::DistanceResult& res,

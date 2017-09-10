@@ -196,34 +196,21 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         if(Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
         TreeMap[Joint->Segment.getName()] = Joint;
         ModelJointsMap[Joint->Segment.getJoint().getName()] = Joint;
-        if(Joint->IsControlled) ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
-    }
+        if (Joint->IsControlled) {
+          ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
 
-    // The ModelBaseType defined above refers to the base type of the overall
-    // robot model - not of the set of controlled joints. E.g. a floating-
-    // base robot can have a scene defined where the floating-base virtual
-    // joint is _not_ part of the planning group/scene. Thus we need to
-    // establish the BaseTye of the joint group, the ControlledBaseType:
-    //
-    // Generally assume fixed base, then assess semantic information
-    ControlledBaseType = BASE_TYPE::FIXED;
-    // If there is a virtual joint, we need to check in detail whether it is a
-    // planar or floating base
-    if (Model->getSRDF()->getVirtualJoints().size() > 0) {
-      std::string world_joint = Model->getSRDF()->getVirtualJoints()[0].name_;
-
-      // A floating base in KinematicTree always contains trans_x, trans_y,
-      // trans_z, rot_x, rot_y, rot_z (XYZRPY, 6-DoF)
-      if (std::find(ControlledJointsNames.begin(),
-                    ControlledJointsNames.end(),
-                    world_joint + "/trans_x") != ControlledJointsNames.end())
-        ControlledBaseType = BASE_TYPE::FLOATING;
-      // A planar base in Kinematica always contains x, y, theta (3-DoF)
-      else if (std::find(ControlledJointsNames.begin(),
-                         ControlledJointsNames.end(),
-                         world_joint + "/theta") !=
-               ControlledJointsNames.end())
-        ControlledBaseType = BASE_TYPE::PLANAR;
+          // The ModelBaseType defined above refers to the base type of the
+          // overall robot model - not of the set of controlled joints. E.g. a
+          // floating-base robot can have a scene defined where the
+          // floating-base virtual joint is _not_ part of the planning
+          // group/scene. Thus we need to establish the BaseType of the joint
+          // group, the ControlledBaseType - if a controlled joint corresponds
+          // to a floating base joint, the ControlledBaseType is the same as the
+          // ModelBaseType.
+          if (Joint->Segment.getJoint().getName() ==
+              RootJoint->getName() + "/trans_x")
+            ControlledBaseType = ModelBaseType;
+        }
     }
 
     setJointLimits();

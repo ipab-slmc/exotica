@@ -565,7 +565,18 @@ namespace exotica
             {
               res = tmp;
             }
+
+            if (res.min_distance == 0.0) {
+              // The distance request returns 0 i.e. the two FCL objects are in
+              // contact. Now need to do a CollisionRequest in order to obtain the
+              // penetration depth and contact normals. However, we will return
+              // -1 here and have another method penetrationDepth carry out
+              // these computations.
+              return -1;
+            }
           }
+
+          tmp.clear();
         }
       }
     }

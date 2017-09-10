@@ -39,7 +39,7 @@
 #include <exotica/Property.h>
 #include <exotica/SceneInitializer.h>
 
-//	For collision
+//  For collision
 #include <moveit/collision_detection/world.h>
 #include <moveit/collision_detection/collision_world.h>
 #include <moveit/collision_detection_fcl/collision_common.h>
@@ -61,7 +61,7 @@ namespace exotica
   typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
   typedef std::vector<std::shared_ptr<fcl::CollisionObject> > fcls_ptr;
 
-///	The class of collision scene
+/// The class of collision scene
   class CollisionScene : public Uncopyable
   {
     public:
@@ -69,15 +69,15 @@ namespace exotica
       CollisionScene(const std::string & scene_name);
 
       /**
-       * \brief	Destructor
+       * \brief Destructor
        */
       virtual ~CollisionScene();
 
       /**
-       * \brief	Initialisation function
-       * @param	psmsg	Moveit planning scene message
-       * @param	joints	Joint names
-       * @param	mode	Update mode
+       * \brief Initialisation function
+       * @param psmsg Moveit planning scene message
+       * @param joints  Joint names
+       * @param mode  Update mode
        * @return Indication of success
        */
       void initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
@@ -85,8 +85,8 @@ namespace exotica
           BASE_TYPE base_type, robot_model::RobotModelPtr model_);
 
       /**
-       * \brief	Update the robot collision properties
-       * @param	x		Configuration
+       * \brief Update the robot collision properties
+       * @param x   Configuration
        * @return Indication of success
        */
       void update(Eigen::VectorXdRefConst x);
@@ -100,21 +100,22 @@ namespace exotica
       void update(std::string joint, double value);
 
       /**
-       * \brief	Get closest distance between two objects
-       * @param	o1		Name of object 1
-       * @param	o2		Name of object 2
-       * @param	d		Closest distance (-1 if in collision)
+       * \brief Get closest distance between two objects
+       * @param o1    Name of object 1
+       * @param o2    Name of object 2
+       * @param d   Closest distance (-1 if in collision)
        * @return Indication of success
        */
       void getDistance(const std::string & o1, const std::string & o2,
           double& d, double safeDist);
+
       /**
-       * @brief Get closest distance between two objects
-       * @param	o1		Name of object 1
-       * @param	o2		Name of object 2
-       * @param	d		Closest distance (-1 if in collision)
-       * @param	p1		Closest point on o1
-       * @param	p2		Closest point on o2
+       * @brief Get closest distance between two objects.
+       * @param o1    Name of object 1
+       * @param o2    Name of object 2
+       * @param d   Closest distance (-1 if in collision)
+       * @param p1    Closest point on o1
+       * @param p2    Closest point on o2
        * @return Indication of success
        */
       void getDistance(const std::string & o1, const std::string & o2,
@@ -122,8 +123,8 @@ namespace exotica
           double safeDist);
 
       /**
-       * \brief	Check if the whole robot is valid (collision only)
-       * @param	self	Indicate if self collision check is required
+       * \brief Check if the whole robot is valid (collision only)
+       * @param self  Indicate if self collision check is required
        * @return True, if the state is collision free.
        */
       bool isStateValid(bool self = true, double dist = 0);
@@ -266,7 +267,7 @@ namespace exotica
 
   typedef std::shared_ptr<CollisionScene> CollisionScene_ptr;
 
-///	The class of EXOTica Scene
+/// The class of EXOTica Scene
   class Scene: public Object, Uncopyable, public Instantiable<SceneInitializer>
   {
     public:
@@ -305,22 +306,22 @@ namespace exotica
       std::string getScene();
       void cleanScene();
     private:
-      ///	The name of the scene
+      /// The name of the scene
       std::string name_;
 
-      ///	The kinematica tree
+      /// The kinematica tree
       exotica::KinematicTree kinematica_;
 
-      ///	Robot model
+      /// Robot model
       robot_model::RobotModelPtr model_;
 
       ///   Joint group
       robot_model::JointModelGroup* group;
 
-      ///	Robot base type
+      /// Robot base type
       BASE_TYPE BaseType;
 
-      ///	The collision scene
+      /// The collision scene
       CollisionScene_ptr collision_scene_;
 
       /// Visual debug
@@ -329,6 +330,6 @@ namespace exotica
   typedef std::shared_ptr<Scene> Scene_ptr;
 //  typedef std::map<std::string, Scene_ptr> Scene_map;
 
-}	//	namespace exotica
+} //  namespace exotica
 
 #endif /* EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_ */

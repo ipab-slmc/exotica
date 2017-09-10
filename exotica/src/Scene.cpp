@@ -549,6 +549,12 @@ namespace exotica
         {
           if (fcl::distance(fcl1[i].get(), fcl2[j].get(), req, tmp) < 0)
           {
+            throw_pretty(
+                "If this condition is triggered something has changed about "
+                "FCL's distance computation as this was not working in 0.3.4 "
+                "(Trusty). Need to reconsider logic - please open an issue on "
+                "GitHub.");
+
             res = tmp;
             res.min_distance = -1;
             return -1;

@@ -172,17 +172,25 @@ namespace exotica
         return fcl_robot_;
       }
 
+      /**
+       * @brief      Gets the collision world links.
+       *
+       * @return     The collision world links.
+       */
       std::vector<std::string> getCollisionWorldLinks() {
         std::vector<std::string> tmp;
-        for (auto& it : fcl_world_)
-          tmp.push_back(it.first);
+        for (auto& it : fcl_world_) tmp.push_back(it.first);
         return tmp;
       }
 
+      /**
+       * @brief      Gets the collision robot links.
+       *
+       * @return     The collision robot links.
+       */
       std::vector<std::string> getCollisionRobotLinks() {
         std::vector<std::string> tmp;
-        for (auto& it : fcl_robot_)
-          tmp.push_back(it.first);
+        for (auto& it : fcl_robot_) tmp.push_back(it.first);
         return tmp;
       }
 

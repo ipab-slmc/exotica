@@ -308,61 +308,67 @@ namespace exotica
       updateCollisionRobot();
   }
 
-  void CollisionScene::getDistance(const std::string & o1,
-      const std::string & o2, double& d, double safeDist)
-  {
-    fcls_ptr fcl1, fcl2;
-    if (fcl_robot_.find(o1) != fcl_robot_.end())
-      fcl1 = fcl_robot_.at(o1);
-    else if (fcl_world_.find(o1) != fcl_world_.end())
-      fcl1 = fcl_world_.at(o1);
-    else
-    {
-      throw_pretty("Object 1 not found!");
-    }
-    if (fcl_world_.find(o2) != fcl_world_.end())
-      fcl2 = fcl_world_.at(o2);
-    else if (fcl_robot_.find(o2) != fcl_robot_.end())
-      fcl2 = fcl_robot_.at(o2);
-    else
-    {
-      throw_pretty("Object 2 not found!");
-    }
-
-    fcl::DistanceRequest req(false);
-    fcl::DistanceResult res;
-    d = distance(fcl1, fcl2, req, res, safeDist);
+  // Public overload returning only the distance
+  void CollisionScene::getDistance(const std::string& o1, const std::string& o2,
+                                   double& d, double safeDist) {
+    Eigen::Vector3d p1, p2;
+    getDistance(o1, o2, d, false, safeDist, p1, p2);
   }
 
-  void CollisionScene::getDistance(const std::string & o1,
-      const std::string & o2, double& d, Eigen::Vector3d & p1,
-      Eigen::Vector3d & p2, double safeDist)
-  {
+  // Public overload computing the nearest points
+  void CollisionScene::getDistance(const std::string& o1, const std::string& o2,
+                                   double& d, Eigen::Vector3d& p1,
+                                   Eigen::Vector3d& p2, double safeDist) {
+    getDistance(o1, o2, d, true, safeDist, p1, p2);
+  }
+
+  // Private method to private functionality, wrapped via public overloads
+  void CollisionScene::getDistance(const std::string& o1, const std::string& o2,
+                                   double& d,
+                                   const bool calculateContactInformation,
+                                   const double safeDist, Eigen::Vector3d& p1,
+                                   Eigen::Vector3d& p2) {
     fcls_ptr fcl1, fcl2;
     if (fcl_robot_.find(o1) != fcl_robot_.end())
       fcl1 = fcl_robot_.at(o1);
     else if (fcl_world_.find(o1) != fcl_world_.end())
       fcl1 = fcl_world_.at(o1);
     else
-    {
       throw_pretty("Object 1 not found!");
-    }
+
     if (fcl_world_.find(o2) != fcl_world_.end())
       fcl2 = fcl_world_.at(o2);
     else if (fcl_robot_.find(o2) != fcl_robot_.end())
       fcl2 = fcl_robot_.at(o2);
     else
-    {
       throw_pretty("Object 2 not found!");
-    }
 
-    fcl::DistanceRequest req(true);
+    fcl::DistanceRequest req;
+    req.enable_nearest_points = calculateContactInformation;
     fcl::DistanceResult res;
-    if (distance(fcl1, fcl2, req, res, safeDist) >= 0)
-    {
+    d = distance(fcl1, fcl2, req, res, safeDist);
+
+    // distance() returns either a distance > 0 or -1 if in collision
+    if (d > 0) {
       d = res.min_distance;
-      fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
-      fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
+
+      if (calculateContactInformation) {
+        fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
+        fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
+      }
+    } else if (d == -1) {  // If d == -1, we need to compute the contact to get
+                           // a penetration depth
+      fcl::CollisionRequest c_req;
+      c_req.enable_contact = true;
+      c_req.num_max_contacts = 500;
+      fcl::CollisionResult c_res;
+      computeContact(fcl1, fcl2, c_req, c_res, d, p1, p2);
+      d *= -1;
+      // ROS_INFO_STREAM("Penetration depth: "
+      //                 << d << " at world position=" << pos.transpose()
+      //                 << " with contact normal=" << norm.transpose());
+    } else {
+      throw_pretty("We should never end up here. Why?");
     }
   }
 
@@ -384,57 +390,6 @@ namespace exotica
     ps_->getCollisionWorld()->checkRobotCollision(req, res,
         *ps_->getCollisionRobot(), ps_->getCurrentState());
     return dist == 0 ? !res.collision : res.distance > dist;
-  }
-
-  double CollisionScene::getClosestDistance(bool computeSelfCollisionDistance,
-                                            bool debug) {
-    collision_detection::CollisionRequest req;
-    collision_detection::CollisionResult res;
-    double selfCollisionDistance, environmentCollisionDistance;
-
-    req.contacts = debug ? true : false;
-    req.max_contacts_per_pair = 1;
-    req.max_contacts = 500;
-    req.distance = true;
-
-    if (computeSelfCollisionDistance) {
-      ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
-      selfCollisionDistance = res.distance;
-
-      if (res.contacts.size() > 0 && debug) {
-        ROS_INFO_STREAM(
-            "Number of Self-Collision Contacts: " << res.contacts.size());
-        for (auto& contactPair : res.contacts) {
-          ROS_INFO_STREAM("Contact between: " << contactPair.first.first
-                                              << " and "
-                                              << contactPair.first.second);
-        }
-      }
-    }
-
-    res.clear();
-    ps_->getCollisionWorld()->checkRobotCollision(
-        req, res, *ps_->getCollisionRobot(), ps_->getCurrentState());
-    environmentCollisionDistance = res.distance;
-
-    if (res.contacts.size() > 0 && debug) {
-      ROS_INFO_STREAM("Number of Environment ContactMaps "
-                      << res.contacts.size() << " with " << res.contact_count
-                      << " contacts.");
-      for (auto& contactPair : res.contacts) {
-        ROS_INFO_STREAM("Contact between: "
-                        << contactPair.first.first << " and "
-                        << contactPair.first.second << ": "
-                        << contactPair.second[0].depth << " & normal=");
-      }
-    }
-
-    if (!computeSelfCollisionDistance)
-      return environmentCollisionDistance;
-    else
-      return (selfCollisionDistance < environmentCollisionDistance)
-                 ? selfCollisionDistance
-                 : environmentCollisionDistance;
   }
 
   void CollisionScene::getRobotDistance(const std::string & link, bool self,
@@ -607,6 +562,7 @@ namespace exotica
               penetration_depth = contact.penetration_depth;
               fcl_convert::fcl2Eigen(contact.normal, norm);
               fcl_convert::fcl2Eigen(contact.pos, pos);
+              norm = norm.normalized();
               res = tmp;
               // ROS_INFO_STREAM("New deepest penetration depth: " << penetration_depth);
             }

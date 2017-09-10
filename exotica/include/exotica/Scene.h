@@ -101,27 +101,31 @@ namespace exotica
       void update(std::string joint, double value);
 
       /**
-       * \brief Get closest distance between two objects
+       * \brief Get closest distance between two objects.
        * @param o1    Name of object 1
        * @param o2    Name of object 2
-       * @param d   Closest distance (-1 if in collision)
-       * @return Indication of success
+       * @param d   Signed closest distance (negative values indicate
+       * penetration)
        */
-      void getDistance(const std::string & o1, const std::string & o2,
-          double& d, double safeDist);
+      void getDistance(const std::string& o1, const std::string& o2, double& d,
+                       double safeDist = 0.01);
 
       /**
        * @brief Get closest distance between two objects.
-       * @param o1    Name of object 1
-       * @param o2    Name of object 2
-       * @param d   Closest distance (-1 if in collision)
-       * @param p1    Closest point on o1
-       * @param p2    Closest point on o2
-       * @return Indication of success
+       * @param     o1        Name of object 1
+       * @param     o2        Name of object 2
+       * @param     d         Signed closest distance (negative values indicate
+       * penetration)
+       * @param     p1        If not in contact, closest point on o1. If in
+       * contact, position of the contact in world frame.
+       * @param     p2        If not in contact, closest point on o2. If in
+       * contact, normalized contact normal.
+       * @param[in] safeDist  Minimum distance to be considered safe, must be
+       * above 0.
        */
-      void getDistance(const std::string & o1, const std::string & o2,
-          double& d, Eigen::Vector3d & p1, Eigen::Vector3d & p2,
-          double safeDist);
+      void getDistance(const std::string& o1, const std::string& o2, double& d,
+                       Eigen::Vector3d& p1, Eigen::Vector3d& p2,
+                       double safeDist = 0.01);
 
       /**
        * \brief Check if the whole robot is valid (collision only)
@@ -131,23 +135,20 @@ namespace exotica
       bool isStateValid(bool self = true, double dist = 0);
 
       /**
-       * \brief Check for the closest distance in the planning scene including both self- and world-collisions
-       * @return The closest distance - negative values indicate penetration.
+       * \brief Get closest distance between robot link and any other objects.
+       * @param link  Robot link
+       * @param self  Indicate if self collision check is required
+       * @param d   Closest distance. Returns -1 if in collision.
+       * @param p1    Closest distance point on the link
+       * @param p2    Closest distance point on the other object
+       * @param norm  Normal vector on robot link (p2-p1)
+       * @param c1  Center of the AABB of the colliding link
+       * @param c2  Center of the AABB of the other object
        */
-      double getClosestDistance(bool computeSelfCollisionDistance = true, bool debug = false);
-
-      /**
-       * \brief	Get closest distance between robot link and any other objects
-       * @param	link	Robot link
-       * @param	self	Indicate if self collision check is required
-       * @param	d		Closest distance
-       * @param	p1		Closest distance point on the link
-       * @param	p2		Closest distance point on the other object
-       * @param	norm	Normal vector on robot link
-       */
-      void getRobotDistance(const std::string & link, bool self, double & d,
-          Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm,
-          Eigen::Vector3d & c1, Eigen::Vector3d & c2, double safeDist);
+      void getRobotDistance(const std::string& link, bool self, double& d,
+                            Eigen::Vector3d& p1, Eigen::Vector3d& p2,
+                            Eigen::Vector3d& norm, Eigen::Vector3d& c1,
+                            Eigen::Vector3d& c2, double safeDist);
 
       /**
        * \brief Get current robot state
@@ -262,6 +263,29 @@ namespace exotica
                          const fcl::CollisionRequest& req,
                          fcl::CollisionResult& res, double& penetration_depth,
                          Eigen::Vector3d& pos, Eigen::Vector3d& norm);
+
+     /**
+      * @brief      Gets the signed distance between two named objects. This
+      * function is the internal/private wrapper function providing
+      * functionality which is subsequently exposed via different overloads.
+      *
+      * @param[in]  o1                           Name of FCL link 1
+      * @param[in]  o2                           Name of FCL link 2
+      * @param      d                            Signed distance - negative
+      * values indicate penetration
+      * @param[in]  calculateContactInformation  Whether to calculate the
+      * contact information, i.e. contact point and normals.
+      * @param[in]  safeDist                     Safety distance, needs to be
+      * greater than 0.
+      * @param      p1                           Nearest point on link 1 or if
+      * in contact, the position of the contact in world frame.
+      * @param      p2                           Nearest point on link 2 or if
+      * in contact, the normalized contact normal.
+      */
+     void getDistance(const std::string& o1, const std::string& o2, double& d,
+                      const bool calculateContactInformation,
+                      const double safeDist, Eigen::Vector3d& p1,
+                      Eigen::Vector3d& p2);
 
      /// FCL collision object for the robot
      std::map<std::string, fcls_ptr> fcl_robot_;

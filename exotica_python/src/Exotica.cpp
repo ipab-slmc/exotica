@@ -619,9 +619,9 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("loadSceneFile", &Scene::loadSceneFile);
     scene.def("getScene", &Scene::getScene);
     scene.def("getRootName", &Scene::getRootName);
-    scene.def("getRobotRootName", &Scene::getRobotRootName);
 
     scene.def("cleanScene", &Scene::cleanScene);
+    scene.def("getModelRootLinkName", &Scene::getModelRootLinkName);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

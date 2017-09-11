@@ -739,7 +739,7 @@ namespace exotica
     return kinematica_.getRootJointName();
   }
 
-  std::string Scene::getRobotRootName()
+  std::string Scene::getModelRootLinkName()
   {
     return model_->getRootLinkName();
   }

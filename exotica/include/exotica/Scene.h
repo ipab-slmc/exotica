@@ -337,7 +337,7 @@ namespace exotica
       CollisionScene_ptr & getCollisionScene();
       std::string getRootFrameName();
       std::string getRootJointName();
-      std::string getRobotRootName();
+      std::string getModelRootLinkName();
       planning_scene::PlanningScenePtr getPlanningScene();
       exotica::KinematicTree & getSolver();
       robot_model::RobotModelPtr getRobotModel();

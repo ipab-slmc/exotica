@@ -62,7 +62,7 @@ namespace exotica
             return *as<ob::RealVectorStateSpace::StateType>(0);
           }
       };
-      OMPLRNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLImplementationInitializer init);
+      OMPLRNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init);
 
       virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
       virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,

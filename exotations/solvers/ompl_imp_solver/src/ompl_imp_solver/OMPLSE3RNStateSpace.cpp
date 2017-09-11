@@ -34,7 +34,7 @@
 #include <ompl_imp_solver/OMPLSE3RNStateSpace.h>
 namespace exotica
 {
-  OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLImplementationInitializer init)
+  OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init)
       : OMPLBaseStateSpace(dim, prob, init), realvectordim_(dim), SO3Bounds_(3)
   {
     setName("OMPLSE3RNCompoundStateSpace");

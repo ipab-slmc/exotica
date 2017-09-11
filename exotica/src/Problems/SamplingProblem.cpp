@@ -72,12 +72,12 @@ namespace exotica
       std::vector<std::string> jnts;
       scene_->getJointNames(jnts);
 
-      getBounds().resize(jnts.size() * 2);
+      bounds_.resize(jnts.size() * 2);
       std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
       for (int i = 0; i < jnts.size(); i++)
       {
-        getBounds()[i] = joint_limits.at(jnts[i])[0];
-        getBounds()[i + jnts.size()] = joint_limits.at(jnts[i])[1];
+        bounds_[i] = joint_limits.at(jnts[i])[0];
+        bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
       }
   }
 

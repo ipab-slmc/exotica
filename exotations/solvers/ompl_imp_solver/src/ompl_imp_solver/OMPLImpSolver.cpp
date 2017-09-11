@@ -97,9 +97,9 @@ namespace exotica
     prob_ = prob;
     BaseType = prob_->getScene()->getBaseType();
     if (BaseType == BASE_TYPE::FIXED)
-      state_space_.reset(new OMPLRNStateSpace(prob_->getSpaceDim(), prob_, init_));
+      state_space_.reset(new OMPLRNStateSpace(prob_->N, prob_, init_));
     else if (BaseType == BASE_TYPE::FLOATING)
-      state_space_.reset(new OMPLSE3RNStateSpace(prob_->getSpaceDim() - 6, prob_, init_));
+      state_space_.reset(new OMPLSE3RNStateSpace(prob_->N - 6, prob_, init_));
 
     ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_, init_)));
@@ -260,7 +260,20 @@ namespace exotica
     if (!ompl_simple_setup_->getSpaceInformation()->satisfiesBounds(gs.get()))
     {
       state_space_->as<OMPLBaseStateSpace>()->stateDebug(qT);
-      throw_named("Invalid goal state [Invalid joint bounds]\n"<<qT.transpose());
+
+      // Debug state and bounds
+      std::string out_of_bounds_joint_ids = "";
+      for (int i = 0; i < qT.rows(); i++)
+        if (qT(i) < prob_->getBounds()[i] ||
+            qT(i) > prob_->getBounds()[i + qT.rows()])
+          out_of_bounds_joint_ids +=
+              "[j" + std::to_string(i) + "=" + std::to_string(qT(i)) + ", ll=" +
+              std::to_string(prob_->getBounds()[i]) + ", ul=" +
+              std::to_string(prob_->getBounds()[i + qT.rows()]) + "]\n";
+
+      throw_named(
+          "Invalid goal state [Invalid joint bounds for joint indices: \n"
+          << out_of_bounds_joint_ids << "]");
     }
     ompl_simple_setup_->setGoalState(gs, eps);
     margin_ = init_margin_;

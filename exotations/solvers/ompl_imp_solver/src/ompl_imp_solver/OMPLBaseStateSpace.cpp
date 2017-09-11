@@ -60,7 +60,7 @@ namespace exotica
   bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
       double &dist) const
   {
-    Eigen::VectorXd q(prob_->getSpaceDim());
+    Eigen::VectorXd q(prob_->N);
 #ifdef ROS_INDIGO
     boost::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
         state, q);

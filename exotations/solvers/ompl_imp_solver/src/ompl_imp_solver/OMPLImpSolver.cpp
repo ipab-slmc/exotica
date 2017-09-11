@@ -139,7 +139,15 @@ namespace exotica
       getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), sol, ptc);
       planning_time_ = timer.getDuration();
       postSolve();
-      margin_ = init_margin_;
+#ifdef ROS_INDIGO
+        boost::static_pointer_cast<OMPLStateValidityChecker>(
+            ompl_simple_setup_->getStateValidityChecker())
+            ->margin_ = init_margin_;
+#elif ROS_KINETIC
+        std::static_pointer_cast<OMPLStateValidityChecker>(
+            ompl_simple_setup_->getStateValidityChecker())
+            ->margin_ = init_margin_;
+#endif
       prob_->Update(Eigen::VectorXd(sol.row(sol.rows() - 1)));
       prob_->getScene()->publishScene();
       return true;
@@ -220,19 +228,33 @@ namespace exotica
   {
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());
-    init_margin_ = margin_;
+#ifdef ROS_INDIGO
+    double &stateValidityChecker_margin_ =
+        boost::static_pointer_cast<OMPLStateValidityChecker>(
+            ompl_simple_setup_->getStateValidityChecker())
+            ->margin_;
+#elif ROS_KINETIC
+    double &stateValidityChecker_margin_ =
+        std::static_pointer_cast<OMPLStateValidityChecker>(
+            ompl_simple_setup_->getStateValidityChecker())
+            ->margin_;
+#endif
+    init_margin_ = stateValidityChecker_margin_;
     if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
     {
-      ERROR("Invalid goal state [Collision]\n"<<qT.transpose()<<", safety margin = "<<margin_);
+      ERROR("Invalid goal state [Collision]\n"
+            << qT.transpose()
+            << ", safety margin = " << stateValidityChecker_margin_);
       //  Try to reduce safety margin
       bool state_good = false;
-      if (margin_ > 0)
+      if (stateValidityChecker_margin_ > 0)
       {
         unsigned int trial = 0;
-        while (trial < 5)
+        while (trial < 10)
         {
-          margin_ /= 2.0;
-          HIGHLIGHT("Retry with safety margin = "<<margin_);
+          stateValidityChecker_margin_ /= 2.0;
+          HIGHLIGHT(
+              "Retry with safety margin = " << stateValidityChecker_margin_);
           if (ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
           {
             state_good = true;
@@ -244,14 +266,16 @@ namespace exotica
       //  Last try
       if (!state_good)
       {
-        margin_ = 0.0;
-        HIGHLIGHT("Retry with safety margin = "<<margin_);
+        stateValidityChecker_margin_ = 0.0;
+        HIGHLIGHT(
+            "Retry with safety margin = " << stateValidityChecker_margin_);
         if (ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
           state_good = true;
       }
       if (state_good)
       {
-        HIGHLIGHT("Goal state passed collision check with safety margin = "<<margin_);
+        HIGHLIGHT("Goal state passed collision check with safety margin = "
+                  << stateValidityChecker_margin_);
       }
       else
         throw_named("Goal state is not valid!");

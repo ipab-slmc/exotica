@@ -90,6 +90,7 @@ namespace exotica
       }
       margin_ = init_.Margin;
       timeout_ = init_.Timeout;
+      HIGHLIGHT("Planning timeout: " << timeout_);
   }
 
   void OMPLImpSolver::specifyProblem(const SamplingProblem_ptr &prob)

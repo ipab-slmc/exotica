@@ -5,3 +5,4 @@ Optional double Qrate = 1.0;
 Optional double Hrate = 1.0;
 Optional double Wrate = 1.0;
 Optional Eigen::VectorXd W = Eigen::VectorXd();
+Optional Eigen::VectorXd Rho = Eigen::VectorXd();

@@ -13,7 +13,7 @@
   <UnconstrainedTimeIndexedProblem Name="MyProblem">
 
     <PlanningScene>
-      <Scene Name="AICOSolverDemoScene">
+      <Scene>
         <JointGroup>arm</JointGroup>
         <URDF>{exotica}/resources/robots/lwr_simplified.urdf</URDF>
         <SRDF>{exotica}/resources/robots/lwr_simplified.srdf</SRDF>
@@ -22,7 +22,6 @@
 
     <Maps>
       <EffFrame Name="Frame">
-        <Scene>AICOSolverDemoScene</Scene>
         <EndEffector>
             <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17" BaseOffset="0.6 -0.1 0.5 0 0 0 1" />
         </EndEffector>
@@ -36,5 +35,4 @@
     <Wrate>1e4</Wrate>
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedTimeIndexedProblem>
-
 </PlannerDemoConfig>

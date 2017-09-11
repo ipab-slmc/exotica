@@ -90,7 +90,26 @@ namespace exotica
       H = Eigen::MatrixXd::Identity(N, N)*Q_rate;
       Q = Eigen::MatrixXd::Identity(N, N)*H_rate;
 
-      Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
+      if(init.Rho.rows()==0)
+      {
+          Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
+      }
+      else if(init.Rho.rows()==NumTasks)
+      {
+          Rho.assign(T, init.Rho);
+      }
+      else if(init.Rho.rows()==NumTasks*T)
+      {
+          Rho.resize(T);
+          for(int i=0;i<T;i++)
+          {
+              Rho[i] = init.Rho.segment(i*NumTasks,NumTasks);
+          }
+      }
+      else
+      {
+          throw_named("Invalid task weights rho! "<<init.Rho.rows());
+      }
       yref.setZero(PhiN);
       y.assign(T, yref);
       Phi = y;

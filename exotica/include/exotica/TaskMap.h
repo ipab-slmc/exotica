@@ -75,6 +75,8 @@ namespace exotica
 
       virtual int taskSpaceJacobianDim() { return taskSpaceDim();}
 
+      virtual void preupdate() {}
+
       virtual std::vector<TaskVectorEntry> getLieGroupIndices() {return std::vector<TaskVectorEntry>();}
 
       void taskSpaceDim(int & task_dim);

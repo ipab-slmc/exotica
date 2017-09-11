@@ -60,8 +60,6 @@ namespace exotica
             JN += Tasks[i]->LengthJ;
         }
 
-        N = scene_->getSolver().getNumJoints();
-
         Rho = Eigen::VectorXd::Ones(NumTasks);
         y.setZero(PhiN);
         W = Eigen::MatrixXd::Identity(N, N);

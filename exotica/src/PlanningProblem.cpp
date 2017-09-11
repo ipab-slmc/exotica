@@ -56,6 +56,11 @@ namespace exotica
       return scene_->getControlledState();
   }
 
+  void PlanningProblem::preupdate()
+  {
+      for (auto& it : TaskMaps) it.second->preupdate();
+  }
+
   void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
   {
       if(x.rows()==startState.rows())
@@ -97,6 +102,7 @@ namespace exotica
       scene_.reset(new Scene());
       scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
       startState = Eigen::VectorXd::Zero(scene_->getModelJointNames().size());
+      N = scene_->getSolver().getNumJoints();
 
       if(init.StartState.rows()>0)
       {

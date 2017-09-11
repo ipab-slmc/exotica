@@ -158,7 +158,8 @@ namespace exotica
             KinematicTree();
             ~KinematicTree() {}
             void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model);
-            std::string getRootName();
+            std::string getRootFrameName();
+            std::string getRootJointName();
             BASE_TYPE getModelBaseType();
             BASE_TYPE getControlledBaseType();
             std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);

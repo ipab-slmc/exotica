@@ -335,7 +335,8 @@ namespace exotica
       void setCollisionScene(const planning_scene::PlanningSceneConstPtr & scene);
       void setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene);
       CollisionScene_ptr & getCollisionScene();
-      std::string getRootName();
+      std::string getRootFrameName();
+      std::string getRootJointName();
       planning_scene::PlanningScenePtr getPlanningScene();
       exotica::KinematicTree & getSolver();
       robot_model::RobotModelPtr getRobotModel();

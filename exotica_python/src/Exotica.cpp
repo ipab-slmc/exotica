@@ -620,7 +620,8 @@ PYBIND11_MODULE(_pyexotica, module)
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");
     kinematicTree.def("publishFrames", &KinematicTree::publishFrames);
     kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);
-    kinematicTree.def("getRootName", &KinematicTree::getRootName);
+    kinematicTree.def("getRootFrameName", &KinematicTree::getRootFrameName);
+    kinematicTree.def("getRootJointName", &KinematicTree::getRootJointName);
     kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
     kinematicTree.def("getModelBaseType", &KinematicTree::getModelBaseType);
     kinematicTree.def("getControlledBaseType", &KinematicTree::getControlledBaseType);

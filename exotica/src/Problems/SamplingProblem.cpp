@@ -42,7 +42,6 @@ namespace exotica
   SamplingProblem::SamplingProblem()
   {
     Flags = KIN_FK;
-    N = 0;
   }
 
   SamplingProblem::~SamplingProblem()
@@ -63,8 +62,6 @@ namespace exotica
       {
           local_planner_config_ = init.LocalPlannerConfig;
       }
-
-      N = scene_->getSolver().getNumJoints();
 
       goal_ = init.Goal;
 

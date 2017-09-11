@@ -102,6 +102,7 @@ namespace exotica
       scene_.reset(new Scene());
       scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
       startState = Eigen::VectorXd::Zero(scene_->getModelJointNames().size());
+      N = scene_->getSolver().getNumJoints();
 
       if(init.StartState.rows()>0)
       {

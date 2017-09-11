@@ -152,25 +152,6 @@ namespace exotica
       Eigen::Map<ArrayJacobian> JDot;
   };
 
-  struct KinematicElement_t
-  {
-      KDL::Segment segment;  		//!< The actual segment
-      bool needed;//!< Flag to check whether actually needed or not for the FK Computation
-      int parent;   		//!< The parent link (index)
-      bool from_tip; //!< Whether it is connected to the tip of its parent (true) or to its base
-      bool to_tip;//!< Indicates whether we are moving towards the tip (true) or not
-      JointType joint_type;   //!< Type of joint
-      int joint_index; //!< The Joint connecting this limb to its ORIGINAL parent (mapping into the configuration array), if used
-      KDL::Frame tip_pose;     //!< The latest update of the pose w.r.t root
-      KDL::Frame joint_pose; //!< The pose of the base of the joint at the base of this segment (N.B. THIS IS THE POSE OF THE BASE OF THE FULL SEGMENT, from base of joint)
-      Eigen::Vector3d joint_origin; //!< The Joint origin (actual position of joint-axis, in global frame)
-      Eigen::Vector3d joint_axis;	//!< The Joint Axis of rotation (in the global frame)...
-      std::vector<int> child;    		//!< Any child links
-      Eigen::Vector3d com;	//!< Centre of mass
-      std::vector<double> joint_limits_;
-      KDL::Frame offset;
-  };
-
     class KinematicTree : public Uncopyable
     {
     public:
@@ -221,7 +202,7 @@ namespace exotica
             BASE_TYPE ModelBaseType;
             BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;
             int NumControlledJoints; //!< Number of controlled joints in the joint group.
-            int NumJoints; //!< Number of joints of the robot (including floating/plannar base, passive joints and uncontrolled joints).
+            int NumJoints; //!< Number of joints of the model (including floating/planar base, passive joints, and uncontrolled joints).
             int StateSize;
             Eigen::VectorXd TreeState;
             robot_model::RobotModelPtr Model;

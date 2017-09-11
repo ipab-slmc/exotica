@@ -39,11 +39,12 @@
 #include <exotica/Property.h>
 #include <exotica/SceneInitializer.h>
 
-//	For collision
+//  For collision
 #include <moveit/collision_detection/world.h>
 #include <moveit/collision_detection/collision_world.h>
 #include <moveit/collision_detection_fcl/collision_common.h>
 #include <fcl/broadphase/broadphase.h>
+#include <fcl/narrowphase/narrowphase.h>
 #include <fcl/collision.h>
 #include <fcl/distance.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
@@ -61,7 +62,7 @@ namespace exotica
   typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
   typedef std::vector<std::shared_ptr<fcl::CollisionObject> > fcls_ptr;
 
-///	The class of collision scene
+/// The class of collision scene
   class CollisionScene : public Uncopyable
   {
     public:
@@ -69,15 +70,15 @@ namespace exotica
       CollisionScene(const std::string & scene_name);
 
       /**
-       * \brief	Destructor
+       * \brief Destructor
        */
       virtual ~CollisionScene();
 
       /**
-       * \brief	Initialisation function
-       * @param	psmsg	Moveit planning scene message
-       * @param	joints	Joint names
-       * @param	mode	Update mode
+       * \brief Initialisation function
+       * @param psmsg Moveit planning scene message
+       * @param joints  Joint names
+       * @param mode  Update mode
        * @return Indication of success
        */
       void initialise(const moveit_msgs::PlanningSceneConstPtr & psmsg,
@@ -85,8 +86,8 @@ namespace exotica
           BASE_TYPE base_type, robot_model::RobotModelPtr model_);
 
       /**
-       * \brief	Update the robot collision properties
-       * @param	x		Configuration
+       * \brief Update the robot collision properties
+       * @param x   Configuration
        * @return Indication of success
        */
       void update(Eigen::VectorXdRefConst x);
@@ -100,73 +101,99 @@ namespace exotica
       void update(std::string joint, double value);
 
       /**
-       * \brief	Get closest distance between two objects
-       * @param	o1		Name of object 1
-       * @param	o2		Name of object 2
-       * @param	d		Closest distance (-1 if in collision)
-       * @return Indication of success
+       * \brief Get closest distance between two objects.
+       * @param o1    Name of object 1
+       * @param o2    Name of object 2
+       * @param d   Signed closest distance (negative values indicate
+       * penetration)
        */
-      void getDistance(const std::string & o1, const std::string & o2,
-          double& d, double safeDist);
-      /**
-       * @brief Get closest distance between two objects
-       * @param	o1		Name of object 1
-       * @param	o2		Name of object 2
-       * @param	d		Closest distance (-1 if in collision)
-       * @param	p1		Closest point on o1
-       * @param	p2		Closest point on o2
-       * @return Indication of success
-       */
-      void getDistance(const std::string & o1, const std::string & o2,
-          double& d, Eigen::Vector3d & p1, Eigen::Vector3d & p2,
-          double safeDist);
+      void getDistance(const std::string& o1, const std::string& o2, double& d,
+                       double safeDist = 0.01);
 
       /**
-       * \brief	Check if the whole robot is valid (collision only)
-       * @param	self	Indicate if self collision check is required
+       * @brief Get closest distance between two objects.
+       * @param     o1        Name of object 1
+       * @param     o2        Name of object 2
+       * @param     d         Signed closest distance (negative values indicate
+       * penetration)
+       * @param     p1        If not in contact, closest point on o1. If in
+       * contact, position of the contact in world frame.
+       * @param     p2        If not in contact, closest point on o2. If in
+       * contact, normalized contact normal.
+       * @param[in] safeDist  Minimum distance to be considered safe, must be
+       * above 0.
+       */
+      void getDistance(const std::string& o1, const std::string& o2, double& d,
+                       Eigen::Vector3d& p1, Eigen::Vector3d& p2,
+                       double safeDist = 0.01);
+
+      /**
+       * \brief Check if the whole robot is valid (collision only)
+       * @param self  Indicate if self collision check is required
        * @return True, if the state is collision free.
        */
       bool isStateValid(bool self = true, double dist = 0);
 
       /**
-       * \brief Check for the closest distance in the planning scene including both self- and world-collisions
-       * @return The closest distance - negative values indicate penetration.
+       * \brief Get closest distance between robot link and any other objects.
+       * @param link  Robot link
+       * @param self  Indicate if self collision check is required
+       * @param d   Closest distance. Returns -1 if in collision.
+       * @param p1    Closest distance point on the link
+       * @param p2    Closest distance point on the other object
+       * @param norm  Normal vector on robot link (p2-p1)
+       * @param c1  Center of the AABB of the colliding link
+       * @param c2  Center of the AABB of the other object
        */
-      double getClosestDistance(bool computeSelfCollisionDistance = true, bool debug = false);
+      void getRobotDistance(const std::string& link, bool self, double& d,
+                            Eigen::Vector3d& p1, Eigen::Vector3d& p2,
+                            Eigen::Vector3d& norm, Eigen::Vector3d& c1,
+                            Eigen::Vector3d& c2, double safeDist);
 
       /**
-       * \brief	Get closest distance between robot link and any other objects
-       * @param	link	Robot link
-       * @param	self	Indicate if self collision check is required
-       * @param	d		Closest distance
-       * @param	p1		Closest distance point on the link
-       * @param	p2		Closest distance point on the other object
-       * @param	norm	Normal vector on robot link
-       */
-      void getRobotDistance(const std::string & link, bool self, double & d,
-          Eigen::Vector3d & p1, Eigen::Vector3d & p2, Eigen::Vector3d & norm,
-          Eigen::Vector3d & c1, Eigen::Vector3d & c2, double safeDist);
-
-      /**
-       * \brief	Get current robot state
-       * @return	Current robot state
+       * \brief Get current robot state
+       * @return  Current robot state
        */
       const robot_state::RobotState& getCurrentState();
 
       /**
-       * \brief	Get the moveit planning scene
-       * @return	Moveit planning scene
+       * \brief Get the moveit planning scene
+       * @return  Moveit planning scene
        */
       planning_scene::PlanningScenePtr getPlanningScene();
 
+      // Potentially deprecated
       inline std::map<std::string, fcls_ptr>& getFCLWorld()
       {
         return fcl_world_;
       }
 
+      // Potentially deprecated
       inline std::map<std::string, fcls_ptr>& getFCLRobot()
       {
         return fcl_robot_;
+      }
+
+      /**
+       * @brief      Gets the collision world links.
+       *
+       * @return     The collision world links.
+       */
+      std::vector<std::string> getCollisionWorldLinks() {
+        std::vector<std::string> tmp;
+        for (auto& it : fcl_world_) tmp.push_back(it.first);
+        return tmp;
+      }
+
+      /**
+       * @brief      Gets the collision robot links.
+       *
+       * @return     The collision robot links.
+       */
+      std::vector<std::string> getCollisionRobotLinks() {
+        std::vector<std::string> tmp;
+        for (auto& it : fcl_robot_) tmp.push_back(it.first);
+        return tmp;
       }
 
       /**
@@ -183,54 +210,118 @@ namespace exotica
       void getTranslation(const std::string & name,
           Eigen::Vector3d & translation);
       int stateCheckCnt_;
-    private:
 
       /**
-       * \brief	Get closest distance between two fcl objects
-       * @param	fcl1	FCL object 1
-       * @param	fcl2	FCL object 2
-       * @param	req		FCL collision request
-       * @param	res		FCL collision result
-       * @return Distance to collision
+       * @brief      Reinitializes the FCL CollisionScene world links. Call this
+       * function if you update the MoveIt planning scene.
        */
-      double distance(const fcls_ptr & fcl1, const fcls_ptr & fcl2,
-          const fcl::DistanceRequest & req, fcl::DistanceResult & res,
-          double safeDist);
-      ///	FCL collision object for the robot
-      std::map<std::string, fcls_ptr> fcl_robot_;
+      void reinitializeCollisionWorld();
 
-      ///	FCL collision object for the world
-      std::map<std::string, fcls_ptr> fcl_world_;
+    private:
+     /**
+      * @brief      Reinitializes the FCL CollisionScene robot links. This
+      * function is automatically called when the scene is initialized via
+      * the initialise() method.
+      */
+     void reinitializeCollisionRobot();
 
-      ///	FCL collision geometry for the robot
-      std::map<std::string, geos_ptr> geo_robot_;
+     /**
+      * @brief      Updates the transforms of the robot links in the FCL
+      * CollisionScene. This function is automatically called by the update()
+      * methods.
+      */
+     void updateCollisionRobot();
 
-      ///	FCL collision geometry for the world
-      std::map<std::string, geos_ptr> geo_world_;
+     /**
+      * \brief Get closest distance between two fcl objects - this is the main
+      * distance computation function called by the other methods. It will
+      * return -1 if the objects are in collision.
+      * @param fcl1  FCL object 1
+      * @param fcl2  FCL object 2
+      * @param req   FCL distance request
+      * @param res   FCL distance result
+      * @return Distance to collision (-1 if in collision)
+      */
+     double distance(const fcls_ptr& fcl1, const fcls_ptr& fcl2,
+                     const fcl::DistanceRequest& req, fcl::DistanceResult& res,
+                     double safeDist);
 
-      ///	To correct FCL transform
-      std::map<std::string, std::vector<fcl::Transform3f>> trans_world_;
+     /**
+      * @brief      Calculates the contact information. If there are multiple
+      * contacts between the two FCL objects, the information of the contact
+      * with the most penetration is returned.
+      *
+      * @param[in]  fcl1               FCL object 1
+      * @param[in]  fcl2               FCL object 2
+      * @param[in]  req                FCL collision request
+      * @param[in]  res                FCL distance result
+      * @param      penetration_depth  Maximum penetration depth
+      * @param      pos                Position of the contact in world frame
+      * @param      norm               Normalized contact normal
+      */
+     void computeContact(const fcls_ptr& fcl1, const fcls_ptr& fcl2,
+                         const fcl::CollisionRequest& req,
+                         fcl::CollisionResult& res, double& penetration_depth,
+                         Eigen::Vector3d& pos, Eigen::Vector3d& norm);
 
-      ///	Internal moveit planning scene
-      planning_scene::PlanningScenePtr ps_;
+     /**
+      * @brief      Gets the signed distance between two named objects. This
+      * function is the internal/private wrapper function providing
+      * functionality which is subsequently exposed via different overloads.
+      *
+      * @param[in]  o1                           Name of FCL link 1
+      * @param[in]  o2                           Name of FCL link 2
+      * @param      d                            Signed distance - negative
+      * values indicate penetration
+      * @param[in]  calculateContactInformation  Whether to calculate the
+      * contact information, i.e. contact point and normals.
+      * @param[in]  safeDist                     Safety distance, needs to be
+      * greater than 0.
+      * @param      p1                           Nearest point on link 1 or if
+      * in contact, the position of the contact in world frame.
+      * @param      p2                           Nearest point on link 2 or if
+      * in contact, the normalized contact normal.
+      */
+     void getDistance(const std::string& o1, const std::string& o2, double& d,
+                      const bool calculateContactInformation,
+                      const double safeDist, Eigen::Vector3d& p1,
+                      Eigen::Vector3d& p2);
 
-      ///	Joint index in robot state
-      std::vector<int> joint_index_;
+     /// FCL collision object for the robot
+     std::map<std::string, fcls_ptr> fcl_robot_;
 
-      ///	Indicate if distance computation is required
-      bool compute_dist;
+     /// FCL collision object for the world
+     std::map<std::string, fcls_ptr> fcl_world_;
 
-      ///	The allowed collisiom matrix
-      collision_detection::AllowedCollisionMatrixPtr acm_;
+     /// FCL collision geometry for the robot
+     std::map<std::string, geos_ptr> geo_robot_;
 
-      std::string scene_name_;
-      std::string world_joint_ = "";
-      BASE_TYPE BaseType;
+     /// FCL collision geometry for the world
+     std::map<std::string, geos_ptr> geo_world_;
+
+     /// To correct FCL transform
+     std::map<std::string, std::vector<fcl::Transform3f>> trans_world_;
+
+     /// Internal moveit planning scene
+     planning_scene::PlanningScenePtr ps_;
+
+     /// Joint index in robot state
+     std::vector<int> joint_index_;
+
+     /// Indicate if distance computation is required
+     bool compute_dist;
+
+     /// The allowed collisiom matrix
+     collision_detection::AllowedCollisionMatrixPtr acm_;
+
+     std::string scene_name_;
+     std::string world_joint_ = "";
+     BASE_TYPE BaseType;
   };
 
   typedef std::shared_ptr<CollisionScene> CollisionScene_ptr;
 
-///	The class of EXOTica Scene
+/// The class of EXOTica Scene
   class Scene: public Object, Uncopyable, public Instantiable<SceneInitializer>
   {
     public:
@@ -269,22 +360,22 @@ namespace exotica
       std::string getScene();
       void cleanScene();
     private:
-      ///	The name of the scene
+      /// The name of the scene
       std::string name_;
 
-      ///	The kinematica tree
+      /// The kinematica tree
       exotica::KinematicTree kinematica_;
 
-      ///	Robot model
+      /// Robot model
       robot_model::RobotModelPtr model_;
 
       ///   Joint group
       robot_model::JointModelGroup* group;
 
-      ///	Robot base type
+      /// Robot base type
       BASE_TYPE BaseType;
 
-      ///	The collision scene
+      /// The collision scene
       CollisionScene_ptr collision_scene_;
 
       /// Visual debug
@@ -293,6 +384,6 @@ namespace exotica
   typedef std::shared_ptr<Scene> Scene_ptr;
 //  typedef std::map<std::string, Scene_ptr> Scene_map;
 
-}	//	namespace exotica
+} //  namespace exotica
 
 #endif /* EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_ */

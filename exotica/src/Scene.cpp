@@ -113,30 +113,133 @@ namespace exotica
       }
       else
         INFO("Computing distance in Collision scene is Enabled");
+
+    if (compute_dist) {
+      reinitializeCollisionRobot();
+      reinitializeCollisionWorld();
+    }
+  }
+
+  void CollisionScene::reinitializeCollisionRobot() {
+    // Reinitialize robot
+    fcl_robot_.clear();
+    geo_robot_.clear();
+    ps_->getCurrentStateNonConst().update(true);
+    const std::vector<const robot_model::LinkModel*>& links =
+        ps_->getCollisionRobot()
+            ->getRobotModel()
+            ->getLinkModelsWithCollisionGeometry();
+    for (std::size_t i = 0; i < links.size(); ++i) {
+      geo_robot_[links[i]->getName()] = geos_ptr(0);
+      fcl_robot_[links[i]->getName()] = fcls_ptr(0);
+      for (std::size_t j = 0; j < links[i]->getShapes().size(); ++j) {
+        shapes::ShapeConstPtr tmp_shape;
+        if (links[i]->getShapes()[j]->type != shapes::MESH)
+          tmp_shape = shapes::ShapeConstPtr(
+              shapes::createMeshFromShape(links[i]->getShapes()[j].get()));
+        else
+          tmp_shape = links[i]->getShapes()[j];
+        if (!tmp_shape || !tmp_shape.get())
+          throw_pretty("Shape could not be extracted");
+
+        collision_detection::FCLGeometryConstPtr g =
+            collision_detection::createCollisionGeometry(tmp_shape, links[i],
+                                                         j);
+        if (g) {
+          geo_robot_.at(links[i]->getName()).push_back(g);
+          fcl::CollisionObject* tmp = new fcl::CollisionObject(
+              g->collision_geometry_,
+              collision_detection::transform2fcl(
+                  ps_->getCurrentState().getCollisionBodyTransform(
+                      g->collision_geometry_data_->ptr.link,
+                      g->collision_geometry_data_->shape_index)));
+          fcl_robot_.at(links[i]->getName())
+              .push_back(std::shared_ptr<fcl::CollisionObject>(tmp));
+
+        } else
+          throw_pretty("Unable to construct collision geometry for link "
+                       << links[i]->getName().c_str());
+      }
+    }
+  }
+
+  void CollisionScene::reinitializeCollisionWorld() {
+    // Reinitialize world
+    fcl_world_.clear();
+    geo_world_.clear();
+    collision_detection::WorldConstPtr tmp_world =
+        ps_->getCollisionWorld()->getWorld();
+    std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
+    if (obj_id_.size() > 0) {
+      for (std::size_t i = 0; i < obj_id_.size(); ++i) {
+        std::size_t index_size =
+            tmp_world->getObject(obj_id_[i])->shapes_.size();
+        fcl_world_[obj_id_[i]] = fcls_ptr(0);
+        geo_world_[obj_id_[i]] = geos_ptr(0);
+        trans_world_[obj_id_[i]] = std::vector<fcl::Transform3f>(0);
+        for (std::size_t j = 0; j < index_size; j++) {
+          shapes::ShapeConstPtr tmp_shape;
+
+          if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type ==
+              shapes::OCTREE) {
+            tmp_world->getObject(obj_id_[i])->shapes_[j]->print();
+            tmp_shape = boost::static_pointer_cast<const shapes::Shape>(
+                tmp_world->getObject(obj_id_[i])->shapes_[j]);
+          } else {
+            if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type !=
+                shapes::MESH) {
+              tmp_shape = shapes::ShapeConstPtr(shapes::createMeshFromShape(
+                  tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
+            } else {
+              tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
+            }
+          }
+
+          if (!tmp_shape || !tmp_shape.get())
+            throw_pretty("Could not extract shape");
+
+          collision_detection::FCLGeometryConstPtr g =
+              collision_detection::createCollisionGeometry(
+                  tmp_shape, tmp_world->getObject(obj_id_[i]).get());
+          geo_world_.at(obj_id_[i]).push_back(g);
+          trans_world_.at(obj_id_[i])
+              .push_back(fcl::Transform3f(collision_detection::transform2fcl(
+                  tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
+          fcl_world_.at(obj_id_[i])
+              .push_back(std::shared_ptr<fcl::CollisionObject>(
+                  new fcl::CollisionObject(
+                      g->collision_geometry_,
+                      collision_detection::transform2fcl(
+                          tmp_world->getObject(obj_id_[i])->shape_poses_[j]))));
+        }
+      }
+    }
+  }
+
+  void CollisionScene::updateCollisionRobot() {
+    for (auto& it : fcl_robot_) {
+      for (std::size_t i = 0; i < it.second.size(); ++i) {
+        collision_detection::CollisionGeometryData* cd =
+            static_cast<collision_detection::CollisionGeometryData*>(
+                it.second[i]->collisionGeometry()->getUserData());
+        it.second[i]->setTransform(collision_detection::transform2fcl(
+            ps_->getCurrentState().getCollisionBodyTransform(cd->ptr.link,
+                                                             cd->shape_index)));
+        it.second[i]->getTransform().transform(
+            it.second[i]->collisionGeometry()->aabb_center);
+      }
+    }
   }
 
   void CollisionScene::updateWorld(
       const moveit_msgs::PlanningSceneWorldConstPtr& world) {
     ps_->processPlanningSceneWorldMsg(*world);
 
-    //    for (int i=0;i<world->collision_objects.size();i++)
-    //    {
-    //      if(trans_world_.find(world->collision_objects[i].id) !=
-    //      trans_world_.end())
-    //      {
-    //        std::map<std::string, fcls_ptr>::iterator it =
-    //        trans_world_.find(world->collision_objects[i].id);
-    //        for(int j =0;j<it->second.size();j++)
-    //        {
-    //          it->second[j] =
-    //          fcl::Transform3f(collision_detection::transform2fcl(world->collision_objects[i].mesh_poses[j]));
-    //        }
-    //      }
-    //    }
+    if (compute_dist)
+      reinitializeCollisionWorld();
   }
 
-  void CollisionScene::update(std::string joint, double value)
-  {
+  void CollisionScene::update(std::string joint, double value) {
     try {
       ps_->getCurrentStateNonConst().setVariablePosition(joint, value);
     } catch (const std::exception& ex) {
@@ -144,6 +247,10 @@ namespace exotica
                    << joint << "': " << ex.what());
     }
     ps_->getCurrentStateNonConst().update(true);
+
+    // Update FCL robot link
+    if (compute_dist)
+      updateCollisionRobot();
   }
 
   void CollisionScene::update(Eigen::VectorXdRefConst x)
@@ -196,78 +303,72 @@ namespace exotica
     }
     ps_->getCurrentStateNonConst().update(true);
 
+    // Update FCL robot state for collision distance computation
     if (compute_dist)
-    {
-      for (auto & it : fcl_robot_)
-        for (std::size_t i = 0; i < it.second.size(); ++i)
-        {
-          collision_detection::CollisionGeometryData* cd =
-              static_cast<collision_detection::CollisionGeometryData*>(it.second[i]->collisionGeometry()->getUserData());
-          it.second[i]->setTransform(
-              collision_detection::transform2fcl(
-                  ps_->getCurrentState().getCollisionBodyTransform(cd->ptr.link,
-                      cd->shape_index)));
-          it.second[i]->getTransform().transform(
-              it.second[i]->collisionGeometry()->aabb_center);
-        }
-    }
+      updateCollisionRobot();
   }
 
-  void CollisionScene::getDistance(const std::string & o1,
-      const std::string & o2, double& d, double safeDist)
-  {
+  // Public overload returning only the distance
+  void CollisionScene::getDistance(const std::string& o1, const std::string& o2,
+                                   double& d, double safeDist) {
+    Eigen::Vector3d p1, p2;
+    getDistance(o1, o2, d, false, safeDist, p1, p2);
+  }
+
+  // Public overload computing the nearest points
+  void CollisionScene::getDistance(const std::string& o1, const std::string& o2,
+                                   double& d, Eigen::Vector3d& p1,
+                                   Eigen::Vector3d& p2, double safeDist) {
+    getDistance(o1, o2, d, true, safeDist, p1, p2);
+  }
+
+  // Private method to private functionality, wrapped via public overloads
+  void CollisionScene::getDistance(const std::string& o1, const std::string& o2,
+                                   double& d,
+                                   const bool calculateContactInformation,
+                                   const double safeDist, Eigen::Vector3d& p1,
+                                   Eigen::Vector3d& p2) {
     fcls_ptr fcl1, fcl2;
     if (fcl_robot_.find(o1) != fcl_robot_.end())
       fcl1 = fcl_robot_.at(o1);
     else if (fcl_world_.find(o1) != fcl_world_.end())
       fcl1 = fcl_world_.at(o1);
     else
-    {
       throw_pretty("Object 1 not found!");
-    }
+
     if (fcl_world_.find(o2) != fcl_world_.end())
       fcl2 = fcl_world_.at(o2);
     else if (fcl_robot_.find(o2) != fcl_robot_.end())
       fcl2 = fcl_robot_.at(o2);
     else
-    {
       throw_pretty("Object 2 not found!");
-    }
 
-    fcl::DistanceRequest req(false);
+    fcl::DistanceRequest req;
+    req.enable_nearest_points = calculateContactInformation;
     fcl::DistanceResult res;
     d = distance(fcl1, fcl2, req, res, safeDist);
-  }
 
-  void CollisionScene::getDistance(const std::string & o1,
-      const std::string & o2, double& d, Eigen::Vector3d & p1,
-      Eigen::Vector3d & p2, double safeDist)
-  {
-    fcls_ptr fcl1, fcl2;
-    if (fcl_robot_.find(o1) != fcl_robot_.end())
-      fcl1 = fcl_robot_.at(o1);
-    else if (fcl_world_.find(o1) != fcl_world_.end())
-      fcl1 = fcl_world_.at(o1);
-    else
-    {
-      throw_pretty("Object 1 not found!");
-    }
-    if (fcl_world_.find(o2) != fcl_world_.end())
-      fcl2 = fcl_world_.at(o2);
-    else if (fcl_robot_.find(o2) != fcl_robot_.end())
-      fcl2 = fcl_robot_.at(o2);
-    else
-    {
-      throw_pretty("Object 2 not found!");
-    }
-
-    fcl::DistanceRequest req(true);
-    fcl::DistanceResult res;
-    if (distance(fcl1, fcl2, req, res, safeDist) >= 0)
-    {
+    // distance() returns either a distance > 0 or -1 if in collision
+    if (d > 0) {
       d = res.min_distance;
-      fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
-      fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
+
+      if (calculateContactInformation) {
+        fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
+        fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
+      }
+    } else if (d == -1) {  // If d == -1, we need to compute the contact to get
+                           // a penetration depth
+      fcl::CollisionRequest c_req;
+      c_req.enable_contact = true;
+      c_req.num_max_contacts = 500;
+      fcl::CollisionResult c_res;
+      computeContact(fcl1, fcl2, c_req, c_res, d, p1, p2);
+      d *= -1;
+      // ROS_INFO_STREAM("Penetration depth: "
+      //                 << d << " at world position=" << pos.transpose()
+      //                 << " with contact normal=" << norm.transpose());
+    } else {
+      throw_pretty("We should never end up here. Why?");
     }
   }
 
@@ -289,53 +390,6 @@ namespace exotica
     ps_->getCollisionWorld()->checkRobotCollision(req, res,
         *ps_->getCollisionRobot(), ps_->getCurrentState());
     return dist == 0 ? !res.collision : res.distance > dist;
-  }
-
-  double CollisionScene::getClosestDistance(bool computeSelfCollisionDistance,
-                                            bool debug) {
-    collision_detection::CollisionRequest req;
-    collision_detection::CollisionResult res;
-    double selfCollisionDistance, environmentCollisionDistance;
-
-    req.contacts = debug ? true : false;
-    req.distance = true;
-
-    if (computeSelfCollisionDistance) {
-      ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
-      selfCollisionDistance = res.distance;
-
-      if (res.contacts.size() > 0 && debug) {
-        ROS_INFO_STREAM(
-            "Number of Self-Collision Contacts: " << res.contacts.size());
-        for (auto& contactPair : res.contacts) {
-          ROS_INFO_STREAM("Contact between: " << contactPair.first.first
-                                              << " and "
-                                              << contactPair.first.second);
-        }
-      }
-    }
-
-    res.clear();
-    ps_->getCollisionWorld()->checkRobotCollision(
-        req, res, *ps_->getCollisionRobot(), ps_->getCurrentState());
-    environmentCollisionDistance = res.distance;
-
-    if (res.contacts.size() > 0 && debug) {
-      ROS_INFO_STREAM(
-          "Number of Environment Contacts: " << res.contacts.size());
-      for (auto& contactPair : res.contacts) {
-        ROS_INFO_STREAM("Contact between: " << contactPair.first.first
-                                            << " and "
-                                            << contactPair.first.second);
-      }
-    }
-
-    if (!computeSelfCollisionDistance)
-      return environmentCollisionDistance;
-    else
-      return (selfCollisionDistance < environmentCollisionDistance)
-                 ? selfCollisionDistance
-                 : environmentCollisionDistance;
   }
 
   void CollisionScene::getRobotDistance(const std::string & link, bool self,
@@ -440,34 +494,83 @@ namespace exotica
     {
       for (int j = 0; j < fcl2.size(); j++)
       {
-        if (fcl1[i] == nullptr)
-        {
-          throw_pretty("Object 1 not found!");
-        }
-        if (fcl2[j] == nullptr)
-        {
-          throw_pretty("Object 2 not found!");
-        }
+        if (fcl1[i] == nullptr) throw_pretty("Object 1 not found!");
+
+        if (fcl2[j] == nullptr) throw_pretty("Object 2 not found!");
+
         if (fcl2[j]->getAABB().distance(fcl2[j]->getAABB()) < safeDist)
         {
           if (fcl::distance(fcl1[i].get(), fcl2[j].get(), req, tmp) < 0)
           {
+            throw_pretty(
+                "If this condition is triggered something has changed about "
+                "FCL's distance computation as this was not working in 0.3.4 "
+                "(Trusty). Need to reconsider logic - please open an issue on "
+                "GitHub.");
+
             res = tmp;
             res.min_distance = -1;
             return -1;
           }
           else
           {
-            if (tmp.min_distance < res.min_distance)
-            {
-              res = tmp;
-            }
+            // If the current closest distance is less than previous, update the
+            // DistanceResult object
+            if (tmp.min_distance < res.min_distance) res = tmp;
+
+            // The distance request returns 0 i.e. the two FCL objects are in
+            // contact. Now need to do a CollisionRequest in order to obtain the
+            // penetration depth and contact normals. However, we will return
+            // -1 here and have another method penetrationDepth carry out
+            // these computations.
+            if (res.min_distance == 0.0) return -1;
           }
+
+          tmp.clear();
         }
       }
     }
 
     return res.min_distance;
+  }
+
+  void CollisionScene::computeContact(
+      const fcls_ptr& fcl1, const fcls_ptr& fcl2,
+      const fcl::CollisionRequest& req, fcl::CollisionResult& res,
+      double& penetration_depth, Eigen::Vector3d& pos, Eigen::Vector3d& norm) {
+    fcl::CollisionResult tmp;
+    penetration_depth = 0;
+    for (int i = 0; i < fcl1.size(); i++) {
+      for (int j = 0; j < fcl2.size(); j++) {
+        if (fcl1[i] == nullptr) throw_pretty("Object 1 not found!");
+        if (fcl2[j] == nullptr) throw_pretty("Object 2 not found!");
+
+        std::size_t num_contacts =
+            fcl::collide(fcl1[i].get(), fcl2[j].get(), req, tmp);
+
+        if (num_contacts == 0) {
+          throw_pretty("Objects are not in contact.");
+        } else {
+          ROS_INFO_STREAM("Objects have " << num_contacts
+                                          << " contact points.");
+
+          // Iterate over contacts and compare maximum penetration
+          for (std::size_t k = 0; k < num_contacts; k++) {
+            auto& contact = tmp.getContact(k);
+            // ROS_INFO_STREAM("Contact #" << k << " has depth of " << contact.penetration_depth);
+            if (contact.penetration_depth > penetration_depth) {
+              penetration_depth = contact.penetration_depth;
+              fcl_convert::fcl2Eigen(contact.normal, norm);
+              fcl_convert::fcl2Eigen(contact.pos, pos);
+              norm = norm.normalized();
+              res = tmp;
+              // ROS_INFO_STREAM("New deepest penetration depth: " << penetration_depth);
+            }
+          }
+        }
+        tmp.clear();
+      }
+    }
   }
 
   const robot_state::RobotState& CollisionScene::getCurrentState()
@@ -707,12 +810,14 @@ namespace exotica
   {
       std::stringstream ss(scene);
       getPlanningScene()->loadGeometryFromStream(ss);
+      collision_scene_->reinitializeCollisionWorld();
   }
 
   void Scene::loadSceneFile(const std::string& file_name)
   {
       std::ifstream ss(parsePath(file_name));
       getPlanningScene()->loadGeometryFromStream(ss);
+      collision_scene_->reinitializeCollisionWorld();
   }
 
   std::string Scene::getScene()
@@ -725,6 +830,7 @@ namespace exotica
   void Scene::cleanScene()
   {
       getPlanningScene()->removeAllCollisionObjects();
+      collision_scene_->reinitializeCollisionWorld();
   }
 
 }

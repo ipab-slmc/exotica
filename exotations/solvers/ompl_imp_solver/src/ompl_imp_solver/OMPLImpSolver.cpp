@@ -97,9 +97,9 @@ namespace exotica
     prob_ = prob;
     BaseType = prob_->getScene()->getBaseType();
     if (BaseType == BASE_TYPE::FIXED)
-      state_space_.reset(new OMPLRNStateSpace(prob_->getSpaceDim(), prob_, init_));
+      state_space_.reset(new OMPLRNStateSpace(prob_->N, prob_, init_));
     else if (BaseType == BASE_TYPE::FLOATING)
-      state_space_.reset(new OMPLSE3RNStateSpace(prob_->getSpaceDim() - 6, prob_, init_));
+      state_space_.reset(new OMPLSE3RNStateSpace(prob_->N - 6, prob_, init_));
 
     ompl_simple_setup_.reset(new og::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_, init_)));

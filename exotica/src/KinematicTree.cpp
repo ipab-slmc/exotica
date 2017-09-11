@@ -319,7 +319,7 @@ void KinematicTree::publishFrames()
 
         tf::Transform T;
         tf::transformKDLToTF(element->Frame, T);
-        if(i>0) debugTree[i-1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica", element->Segment.getName()));
+        if(i>0) debugTree[i-1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica", element->Segment.getName()));
         i++;
     }
     Server::sendTransform(debugTree);
@@ -328,7 +328,7 @@ void KinematicTree::publishFrames()
     {
         tf::Transform T;
         tf::transformKDLToTF(frame.TempB, T);
-        debugFrames[i*2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootName()), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()));
+        debugFrames[i*2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()));
         tf::transformKDLToTF(frame.TempAB, T);
         debugFrames[i*2+1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()), tf::resolve("exotica","Frame"+std::to_string(i)+"A"+frame.FrameA->Segment.getName()));
         i++;
@@ -474,9 +474,14 @@ void KinematicTree::setJointLimits()
   }
 }
 
-std::string KinematicTree::getRootName()
+std::string KinematicTree::getRootFrameName()
 {
   return Tree[0]->Segment.getName();
+}
+
+std::string KinematicTree::getRootJointName()
+{
+  return Model->getRootJoint()->getName();
 }
 
 int KinematicTree::getEffSize()

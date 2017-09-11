@@ -729,9 +729,14 @@ namespace exotica
     return collision_scene_;
   }
 
-  std::string Scene::getRootName()
+  std::string Scene::getRootFrameName()
   {
-    return kinematica_.getRootName();
+    return kinematica_.getRootFrameName();
+  }
+
+  std::string Scene::getRootJointName()
+  {
+    return kinematica_.getRootJointName();
   }
 
   planning_scene::PlanningScenePtr Scene::getPlanningScene()

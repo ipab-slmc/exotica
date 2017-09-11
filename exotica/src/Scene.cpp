@@ -739,6 +739,11 @@ namespace exotica
     return kinematica_.getRootJointName();
   }
 
+  std::string Scene::getRobotRootName()
+  {
+    return model_->getRootLinkName();
+  }
+
   planning_scene::PlanningScenePtr Scene::getPlanningScene()
   {
     return collision_scene_->getPlanningScene();

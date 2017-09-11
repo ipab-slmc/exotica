@@ -615,6 +615,13 @@ PYBIND11_MODULE(_pyexotica, module)
       }
       return py::make_tuple(d, p1, p2);
     });
+    scene.def("loadScene", &Scene::loadScene);
+    scene.def("loadSceneFile", &Scene::loadSceneFile);
+    scene.def("getScene", &Scene::getScene);
+    scene.def("getRootName", &Scene::getRootName);
+    scene.def("getRobotRootName", &Scene::getRobotRootName);
+
+    scene.def("cleanScene", &Scene::cleanScene);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

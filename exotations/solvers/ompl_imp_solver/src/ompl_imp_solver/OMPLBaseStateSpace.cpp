@@ -48,7 +48,8 @@ namespace exotica
     margin_ = init.Margin;
     self_collision_ = init.SelfCollisionCheck;
 
-    HIGHLIGHT_NAMED("OMPLStateValidityChecker", "Safety Margin: " << margin_);
+    HIGHLIGHT_NAMED("OMPLStateValidityChecker",
+                    "Initial Safety Margin: " << margin_);
   }
 
   bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const

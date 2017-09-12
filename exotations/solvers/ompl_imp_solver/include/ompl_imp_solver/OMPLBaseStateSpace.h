@@ -70,9 +70,10 @@ namespace exotica
       virtual bool isValid(const ompl::base::State *state) const;
 
       virtual bool isValid(const ompl::base::State *state, double &dist) const;
+
+      double margin_;
     protected:
       SamplingProblem_ptr prob_;
-      double margin_;
       bool self_collision_;
   };
 

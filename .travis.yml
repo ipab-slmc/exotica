@@ -64,6 +64,6 @@ deploy:
   file: "exotica.deb"
   overwrite: true
   on:
-    repo: openhumanoids/exotica
+    repo: ipab-slmc/exotica
     tags: false
     branch: master

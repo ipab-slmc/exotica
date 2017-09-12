@@ -39,7 +39,7 @@
 #include <ompl/base/StateValidityChecker.h>
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/ProjectionEvaluator.h>
-#include <ompl_imp_solver/OMPLImplementationInitializer.h>
+#include <ompl_solver/OMPLsolverInitializer.h>
 
 namespace ob = ompl::base;
 namespace exotica
@@ -48,7 +48,7 @@ namespace exotica
   class OMPLBaseStateSpace: public ompl::base::CompoundStateSpace
   {
     public:
-      OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLImplementationInitializer init);
+      OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init);
 
       virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
           ompl::base::State *state) const = 0;
@@ -65,7 +65,7 @@ namespace exotica
   {
     public:
       OMPLStateValidityChecker(const ob::SpaceInformationPtr &si,
-          const SamplingProblem_ptr &prob, OMPLImplementationInitializer init);
+          const SamplingProblem_ptr &prob, OMPLsolverInitializer init);
 
       virtual bool isValid(const ompl::base::State *state) const;
 

@@ -37,7 +37,7 @@
 #include "ompl_imp_solver/OMPLBaseStateSpace.h"
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
-#include <ompl_imp_solver/OMPLImplementationInitializer.h>
+#include <ompl_solver/OMPLsolverInitializer.h>
 
 namespace exotica
 {
@@ -73,7 +73,7 @@ namespace exotica
           }
       };
 
-      OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLImplementationInitializer init);
+      OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init);
       virtual unsigned int getDimension() const;
       virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
       virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,

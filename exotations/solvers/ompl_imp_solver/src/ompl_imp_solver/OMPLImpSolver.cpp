@@ -56,7 +56,7 @@
 #include <ompl/geometric/planners/rrt/RRTstar.h>
 #include <ompl/geometric/planners/rrt/pRRT.h>
 #include <ompl/geometric/planners/stride/STRIDE.h>
-#include <ompl_imp_solver/OMPLImplementationInitializer.h>
+#include <ompl_solver/OMPLsolverInitializer.h>
 
 PLUGINLIB_EXPORT_CLASS(exotica::OMPLImpSolver, exotica::OMPLBaseSolver)
 
@@ -69,7 +69,7 @@ namespace exotica
 
   void OMPLImpSolver::initialiseSolver(Initializer& init)
   {
-      init_ = OMPLImplementationInitializer(init);
+      init_ = OMPLsolverInitializer(init);
       range_ = init_.Range;
       if(init_.Algorithm!="")
       {

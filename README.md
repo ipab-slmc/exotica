@@ -1,4 +1,4 @@
-# EXOTica [![Build Status](https://travis-ci.org/openhumanoids/exotica.svg?branch=master)](https://travis-ci.org/openhumanoids/exotica) [![Analytics](https://ga-beacon.appspot.com/UA-72496975-1/openhumanoids/exotica/?pixel)](https://github.com/igrigorik/ga-beacon)
+# EXOTica [![Build Status](https://travis-ci.org/ipab-slmc/exotica.svg?branch=master)](https://travis-ci.org/ipab-slmc/exotica) [![Analytics](https://ga-beacon.appspot.com/UA-72496975-1/openhumanoids/exotica/?pixel)](https://github.com/igrigorik/ga-beacon)
 
 The EXOTica library is a generic Optimisation Toolset for Robotics platforms, written in C++. Its motivation is to provide a more streamlined process for developing algorithms for such tasks as Inverse-Kinematics and Trajectory Optimisation. Its design advocates:
 

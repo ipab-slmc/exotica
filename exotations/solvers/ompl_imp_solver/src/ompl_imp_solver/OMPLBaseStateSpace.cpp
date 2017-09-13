@@ -70,8 +70,7 @@ namespace exotica
         state, q);
 #endif
 
-    prob_->Update(q);
-    if (!prob_->getScene()->getCollisionScene()->isStateValid(self_collision_, margin_))
+    if (!prob_->isValid(q) || !prob_->getScene()->getCollisionScene()->isStateValid(self_collision_, margin_))
     {
       dist = -1;
       return false;

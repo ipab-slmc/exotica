@@ -43,7 +43,7 @@ namespace exotica
 
     void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
-        if(phi.rows() != Kinematics.Phi.rows()*3) throw_named("Wrong size of phi!");
+        if(phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
         for(int i=0;i<Kinematics.Phi.rows();i++)
         {
             phi(i) = Kinematics.Phi(i).p.Norm();

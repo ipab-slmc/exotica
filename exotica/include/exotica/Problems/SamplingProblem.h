@@ -39,15 +39,6 @@
 
 namespace exotica
 {
-
-  enum SamplingProblem_Type
-  {
-    OMPL_PROBLEM_GOAL = 0,
-    OMPL_PROBLEM_COSTS,
-    OMPL_PROBLEM_GOAL_BIAS,
-    OMPL_PROBLEM_SAMPLING_BIAS
-  };
-
   class SamplingProblem: public PlanningProblem, public Instantiable<SamplingProblemInitializer>
   {
     public:
@@ -57,8 +48,16 @@ namespace exotica
       virtual void Instantiate(SamplingProblemInitializer& init);
 
       void Update(Eigen::VectorXdRefConst x);
+      bool isValid(Eigen::VectorXdRefConst x);
 
       int getSpaceDim();
+
+      void setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal);
+      void setThreshold(const std::string & task_name, Eigen::VectorXdRefConst threshold);
+      void setRho(const std::string & task_name, const double rho);
+      Eigen::VectorXd getGoal(const std::string & task_name);
+      Eigen::VectorXd getThreshold(const std::string & task_name);
+      double getRho(const std::string & task_name);
 
       std::vector<double>& getBounds();
       bool isCompoundStateSpace();
@@ -70,6 +69,17 @@ namespace exotica
       void setGoalState(Eigen::VectorXdRefConst qT);
 
       Eigen::VectorXd goal_;
+      Eigen::VectorXd Rho;
+      TaskSpaceVector y;
+      TaskSpaceVector Phi;
+      Eigen::VectorXd threshold_;
+
+      int PhiN;
+      int JN;
+      int NumTasks;
+      Eigen::MatrixXd S;
+      bool isValid_;
+
     private:
       std::vector<double> bounds_;
       bool compound_;

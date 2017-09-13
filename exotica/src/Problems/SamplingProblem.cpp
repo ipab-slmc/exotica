@@ -79,6 +79,38 @@ namespace exotica
         bounds_[i] = joint_limits.at(jnts[i])[0];
         bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
       }
+
+      NumTasks = Tasks.size();
+      PhiN = 0;
+      JN = 0;
+      for(int i=0;i<NumTasks;i++)
+      {
+          appendVector(y.map, Tasks[i]->getLieGroupIndices());
+          PhiN += Tasks[i]->Length;
+          JN += Tasks[i]->LengthJ;
+      }
+
+      Rho = Eigen::VectorXd::Ones(NumTasks);
+      y.setZero(PhiN);
+      Phi = y;
+      threshold_ = y.data;
+
+      if(init.Rho.rows()>0 && init.Rho.rows()!=NumTasks) throw_named("Invalid size of Rho (" << init.Rho.rows() << ") expected: "<< NumTasks);
+      if(init.TaskGoal.rows()>0 && init.TaskGoal.rows()!=PhiN) throw_named("Invalid size of TaskGoal (" << init.TaskGoal.rows() << ") expected: "<< PhiN);
+      if(init.Threshold.rows()>0 && init.Threshold.rows()!=PhiN) throw_named("Invalid size of Threshold (" << init.Threshold.rows() << ") expected: "<< PhiN);
+
+      if(init.Rho.rows()==NumTasks) Rho = init.Rho;
+      if(init.TaskGoal.rows()==PhiN) y.data = init.TaskGoal;
+      if(init.Threshold.rows()==PhiN) threshold_ = init.Threshold;
+
+      S = Eigen::MatrixXd::Identity(JN, JN);
+      for(TaskMap_ptr task : Tasks)
+      {
+          for(int i=0; i < task->Length; i++)
+          {
+              S(i+task->Start, i+task->Start) = Rho(task->Id);
+          }
+      }
   }
 
   void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
@@ -86,9 +118,19 @@ namespace exotica
       goal_ = qT;
   }
 
-  void SamplingProblem::Update(Eigen::VectorXdRefConst x)
+  bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
   {
       scene_->Update(x);
+      for(int i=0;i<NumTasks;i++)
+      {
+          Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+      }
+      return ((S*(Phi - y)-threshold_).array()<0.0).all();
+  }
+
+  void SamplingProblem::Update(Eigen::VectorXdRefConst x)
+  {
+      isValid(x);
   }
 
   int SamplingProblem::getSpaceDim()

@@ -1,5 +1,8 @@
 extend <exotica/PlanningProblem>
 Required Eigen::VectorXd Goal;
+Optional Eigen::VectorXd Rho = Eigen::VectorXd();
+Optional Eigen::VectorXd TaskGoal = Eigen::VectorXd();
+Optional Eigen::VectorXd Threshold = Eigen::VectorXd();
 Optional std::string LocalPlannerConfig = "";
 Optional Eigen::VectorXd FloatingBaseLowerLimits = Eigen::VectorXd();
 Optional Eigen::VectorXd FloatingBaseUpperLimits = Eigen::VectorXd();

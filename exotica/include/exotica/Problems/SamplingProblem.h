@@ -78,7 +78,6 @@ namespace exotica
       int JN;
       int NumTasks;
       Eigen::MatrixXd S;
-      bool isValid_;
 
     private:
       std::vector<double> bounds_;

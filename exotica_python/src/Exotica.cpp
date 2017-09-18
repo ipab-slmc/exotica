@@ -173,6 +173,12 @@ Eigen::MatrixXd Solve(std::shared_ptr<MotionSolver> sol)
     sol->Solve(ret);
     return ret;
 }
+Eigen::MatrixXd Solve(std::shared_ptr<MotionSolver> sol, const std::vector<Eigen::VectorXd>& q_init)
+{
+    Eigen::MatrixXd ret;
+    sol->Solve(q_init, ret);
+    return ret;
+}
 
 namespace pybind11 {
 namespace detail {
@@ -495,7 +501,14 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<MotionSolver, std::shared_ptr<MotionSolver>, Object> motionSolver(module, "MotionSolver");
     motionSolver.def("specifyProblem", &MotionSolver::specifyProblem, "Assign problem to the solver", py::arg("planningProblem"));
-    motionSolver.def("solve", [](std::shared_ptr<MotionSolver> sol){return Solve(sol);}, "Solve the problem");
+    motionSolver.def(
+        "solve", [](std::shared_ptr<MotionSolver> sol) { return Solve(sol); },
+        "Solve the problem");
+    motionSolver.def(
+        "solve",
+        [](std::shared_ptr<MotionSolver> sol,
+           const std::vector<Eigen::VectorXd>& q_init) { return Solve(sol, q_init); },
+        "Solve the problem");
     motionSolver.def("getProblem", &MotionSolver::getProblem, py::return_value_policy::reference_internal);
 
     py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object> planningProblem(module, "PlanningProblem");

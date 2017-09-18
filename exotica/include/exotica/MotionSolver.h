@@ -51,6 +51,7 @@ namespace exotica
         virtual void InstantiateBase(const Initializer& init);
         virtual void specifyProblem(PlanningProblem_ptr pointer);
         virtual void Solve(Eigen::MatrixXd & solution) = 0;
+        virtual void Solve(const std::vector<Eigen::VectorXd>& init, Eigen::MatrixXd & solution);
         PlanningProblem_ptr getProblem() {return problem_;}
         virtual std::string print(std::string prepend);
 

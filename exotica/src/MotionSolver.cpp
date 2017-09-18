@@ -57,4 +57,10 @@ namespace exotica
     return ret;
   }
 
+  void MotionSolver::Solve(const std::vector<Eigen::VectorXd>& init,
+                           Eigen::MatrixXd& solution) {
+    throw_pretty(
+        "There exists no overload of this function for the current solver, "
+        "i.e. no ability to provide an initial guess.");
+  }
 }

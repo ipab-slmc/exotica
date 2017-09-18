@@ -80,7 +80,7 @@ namespace exotica
         qNominal = init.NominalState;
 
         if(init.Rho.rows()>0 && init.Rho.rows()!=NumTasks) throw_named("Invalid size of Rho (" << init.Rho.rows() << ") expected: "<< NumTasks);
-        if(init.Goal.rows()>0 && init.Goal.rows()!=PhiN) throw_named("Invalid size of Rho (" << init.Goal.rows() << ") expected: "<< PhiN);
+        if(init.Goal.rows()>0 && init.Goal.rows()!=PhiN) throw_named("Invalid size of Goal (" << init.Goal.rows() << ") expected: "<< PhiN);
 
         if(init.Rho.rows()==NumTasks) Rho = init.Rho;
         if(init.Goal.rows()==PhiN) y.data = init.Goal;

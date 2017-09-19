@@ -181,6 +181,7 @@ namespace exotica
               return ModelJointsNames;
             }
 
+            void UpdateModel();
             Eigen::VectorXd getModelState();
             std::map<std::string, double> getModelStateMap();
             void setModelState(Eigen::VectorXdRefConst x);
@@ -208,6 +209,7 @@ namespace exotica
             Eigen::VectorXd TreeState;
             robot_model::RobotModelPtr Model;
             std::vector<std::shared_ptr<KinematicElement>> Tree;
+            std::vector<std::shared_ptr<KinematicElement>> ModelTree;
             std::map<std::string, std::shared_ptr<KinematicElement>> TreeMap;
             std::shared_ptr<KinematicElement> Root;
             std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;

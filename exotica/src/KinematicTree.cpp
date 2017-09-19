@@ -182,21 +182,22 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     }
 
     AddElement(RobotKinematics.getRootSegment(), *(Tree.end()-1));
+    ModelTree = Tree;
+
+    UpdateModel();
 
     NumJoints = ModelJointsNames.size();
     NumControlledJoints = ControlledJointsNames.size();
     if (NumControlledJoints < 1) throw_pretty("No update joints specified!");
     ControlledJoints.resize(NumControlledJoints);
-    Root = Tree[0];
-    TreeState = Eigen::VectorXd::Zero(Tree.size());
     for(std::shared_ptr<KinematicElement> Joint : Tree)
     {
         Joint->ControlId = IsControlled(Joint);
         Joint->IsControlled = Joint->ControlId >= 0;
         if(Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
-        TreeMap[Joint->Segment.getName()] = Joint;
         ModelJointsMap[Joint->Segment.getJoint().getName()] = Joint;
-        if (Joint->IsControlled) {
+        if (Joint->IsControlled)
+        {
           ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
 
           // The ModelBaseType defined above refers to the base type of the
@@ -216,6 +217,16 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     setJointLimits();
 }
 
+void KinematicTree::UpdateModel()
+{
+    Root = Tree[0];
+    TreeState = Eigen::VectorXd::Zero(Tree.size());
+    for(std::shared_ptr<KinematicElement> Joint : Tree)
+    {
+        TreeMap[Joint->Segment.getName()] = Joint;
+    }
+    debugTree.resize(Tree.size()-1);
+}
 void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
 {
     std::shared_ptr<KinematicElement> NewElement(new KinematicElement(Tree.size(), parent, segment->second.segment));

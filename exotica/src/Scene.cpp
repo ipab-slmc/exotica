@@ -33,6 +33,7 @@
 #include "exotica/Scene.h"
 #include <iostream>
 #include <fstream>
+#include <string>
 
 namespace fcl_convert
 {
@@ -717,11 +718,13 @@ namespace exotica
     moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
     scene->getPlanningSceneMsg(*msg.get());
     collision_scene_->initialise(msg, kinematica_.getJointNames(), "", BaseType, model_);
+    updateSceneFrames();
   }
 
   void Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene)
   {
     collision_scene_->initialise(scene, kinematica_.getJointNames(), "", BaseType,model_);
+    updateSceneFrames();
   }
 
   CollisionScene_ptr & Scene::getCollisionScene()
@@ -820,6 +823,7 @@ namespace exotica
   {
       std::stringstream ss(scene);
       getPlanningScene()->loadGeometryFromStream(ss);
+      updateSceneFrames();
       collision_scene_->reinitializeCollisionWorld();
   }
 
@@ -827,6 +831,7 @@ namespace exotica
   {
       std::ifstream ss(parsePath(file_name));
       getPlanningScene()->loadGeometryFromStream(ss);
+      updateSceneFrames();
       collision_scene_->reinitializeCollisionWorld();
   }
 
@@ -840,7 +845,53 @@ namespace exotica
   void Scene::cleanScene()
   {
       getPlanningScene()->removeAllCollisionObjects();
+      updateSceneFrames();
       collision_scene_->reinitializeCollisionWorld();
+  }
+
+  void Scene::updateSceneFrames()
+  {
+      kinematica_.resetModel();
+
+      planning_scene::PlanningScenePtr ps = collision_scene_->getPlanningScene();
+
+      // Add world objects
+      for(auto& object : *ps->getWorld())
+      {
+          if(object.second->shapes_.size())
+          {
+              // Use the first collision shape as the origin of the object
+              Eigen::Affine3d objTransform = object.second->shape_poses_[0];
+              std::string objectName = object.first;
+              kinematica_.AddElement(objectName, objTransform);
+              for(int i=0; i<object.second->shape_poses_.size();i++)
+              {
+                  Eigen::Affine3d trans = objTransform.inverse()*object.second->shape_poses_[i];
+                  kinematica_.AddElement(objectName+"_collision_"+std::to_string(i), trans, objectName, object.second->shapes_[i]);
+              }
+          }
+          else
+          {
+            HIGHLIGHT("Object with no shapes ('"<<object.first<<"')");
+          }
+      }
+
+      // Add robot collision objects
+      ps->getCurrentStateNonConst().update(true);
+      const std::vector<const robot_model::LinkModel*>& links =
+          ps->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
+      for (int i = 0; i < links.size(); ++i)
+      {
+          Eigen::Affine3d objTransform = ps->getCurrentState().getGlobalLinkTransform(links[i]);
+
+          for (int j = 0; j < links[i]->getShapes().size(); ++j)
+          {
+              Eigen::Affine3d trans = objTransform.inverse()*ps->getCurrentState().getCollisionBodyTransform(links[i], j);
+              kinematica_.AddElement(links[i]->getName()+"_collision_"+std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
+          }
+      }
+
+      kinematica_.UpdateModel();
   }
 
 }

@@ -350,6 +350,7 @@ namespace exotica
       void setModelState(Eigen::VectorXdRefConst x);
       void setModelState(std::map<std::string, double> x);
       std::string getGroupName();
+      void updateSceneFrames();
 
       BASE_TYPE getBaseType()
       {

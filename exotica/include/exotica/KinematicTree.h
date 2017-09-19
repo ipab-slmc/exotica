@@ -185,6 +185,7 @@ namespace exotica
             void resetModel();
             void AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr));
             void UpdateModel();
+            void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
 
             Eigen::VectorXd getModelState();
             std::map<std::string, double> getModelStateMap();

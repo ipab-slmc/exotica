@@ -618,6 +618,10 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getRootFrameName", &Scene::getRootFrameName);
     scene.def("getRootJointName", &Scene::getRootJointName);
     scene.def("getModelRootLinkName", &Scene::getModelRootLinkName);
+    scene.def("attachObject", (void (Scene::*)(const std::string&, const std::string&)) &Scene::attachObject);
+    scene.def("attachObject", (void (Scene::*)(const std::string&, const std::string&, const KDL::Frame&)) &Scene::attachObject);
+    scene.def("detachObject", &Scene::detachObject);
+    scene.def("hasAttachedObject", &Scene::hasAttachedObject);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

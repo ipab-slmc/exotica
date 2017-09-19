@@ -321,6 +321,15 @@ namespace exotica
 
   typedef std::shared_ptr<CollisionScene> CollisionScene_ptr;
 
+  struct AttachedObject
+  {
+      AttachedObject() : Parent("") {}
+      AttachedObject(std::string parent) : Parent(parent) {}
+      AttachedObject(std::string parent, KDL::Frame pose) : Parent(parent), Pose(pose) {}
+      std::string Parent;
+      KDL::Frame Pose;
+  };
+
 /// The class of EXOTica Scene
   class Scene: public Object, Uncopyable, public Instantiable<SceneInitializer>
   {
@@ -353,6 +362,10 @@ namespace exotica
 
       /// \brief Updates exotica scene object frames from the MoveIt scene.
       void updateSceneFrames();
+      void attachObject(const std::string& name, const std::string& parent);
+      void attachObject(const std::string& name, const std::string& parent, const KDL::Frame& pose);
+      void detachObject(const std::string& name);
+      bool hasAttachedObject(const std::string& name);
 
       BASE_TYPE getBaseType()
       {
@@ -385,6 +398,8 @@ namespace exotica
 
       /// Visual debug
       ros::Publisher ps_pub_;
+
+      std::map<std::string, AttachedObject> attached_objects_;
   };
   typedef std::shared_ptr<Scene> Scene_ptr;
 //  typedef std::map<std::string, Scene_ptr> Scene_map;

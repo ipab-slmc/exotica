@@ -238,6 +238,38 @@ void KinematicTree::resetModel()
     UpdateModel();
 }
 
+void KinematicTree::changeParent(const std::string& name, const std::string& parent_name, const KDL::Frame& pose, bool relative)
+{
+    if(TreeMap.find(name)==TreeMap.end()) throw_pretty("Attempting to attach unknown frame '"<<name<<"'!");
+    std::shared_ptr<KinematicElement> child = TreeMap.find(name)->second;
+    if(child->Id<ModelTree.size()) throw_pretty("Can't re-attach robot link '"<<name<<"'!");
+    if(child->Shape) throw_pretty("Can't re-attach collision shape without reattaching the object! ('"<<name<<"')");
+    std::shared_ptr<KinematicElement> parent;
+    if(parent_name=="")
+    {
+        if(TreeMap.find(Tree[0]->Segment.getName())==TreeMap.end()) throw_pretty("Attempting to attach to unknown frame '"<<Tree[0]->Segment.getName()<<"'!");
+        parent = TreeMap.find(Tree[0]->Segment.getName())->second;
+    }
+    else
+    {
+        if(TreeMap.find(parent_name)==TreeMap.end()) throw_pretty("Attempting to attach to unknown frame '"<<parent_name<<"'!");
+        parent = TreeMap.find(parent_name)->second;
+    }
+    if(relative)
+    {
+        child->Segment = KDL::Segment(child->Segment.getName(), child->Segment.getJoint(), pose, child->Segment.getInertia());
+    }
+    else
+    {
+        child->Segment = KDL::Segment(child->Segment.getName(), child->Segment.getJoint(), parent->Frame.Inverse()*child->Frame*pose, child->Segment.getInertia());
+    }
+    auto it = std::find(child->Parent->Children.begin(), child->Parent->Children.end(), child);
+    if(it != child->Parent->Children.end())
+        child->Parent->Children.erase(it);
+    child->Parent = parent;
+    parent->Children.push_back(child);
+}
+
 void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape)
 {
     std::shared_ptr<KinematicElement> parent_element;

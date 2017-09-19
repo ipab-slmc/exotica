@@ -862,12 +862,11 @@ namespace exotica
           {
               // Use the first collision shape as the origin of the object
               Eigen::Affine3d objTransform = object.second->shape_poses_[0];
-              std::string objectName = object.first;
-              kinematica_.AddElement(objectName, objTransform);
+              kinematica_.AddElement(object.first, objTransform);
               for(int i=0; i<object.second->shape_poses_.size();i++)
               {
                   Eigen::Affine3d trans = objTransform.inverse()*object.second->shape_poses_[i];
-                  kinematica_.AddElement(objectName+"_collision_"+std::to_string(i), trans, objectName, object.second->shapes_[i]);
+                  kinematica_.AddElement(object.first+"_collision_"+std::to_string(i), trans, object.first, object.second->shapes_[i]);
               }
           }
           else

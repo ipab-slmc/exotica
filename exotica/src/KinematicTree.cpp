@@ -36,6 +36,8 @@
 
 #include <kdl/frames_io.hpp>
 #include <eigen_conversions/eigen_kdl.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <geometric_shapes/shape_operations.h>
 
 #ifdef KIN_DEBUG_MODE
 #include <iostream>
@@ -127,6 +129,12 @@ void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelP
     {
         throw_pretty("Can't load URDF model!");
     }
+
+    if(Server::isRos())
+    {
+        shapes_pub_ = Server::advertise<visualization_msgs::MarkerArray>("/exotica/PlanningScene", 100, true);
+    }
+    debugSceneChanged = true;
 }
 
 void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
@@ -229,6 +237,7 @@ void KinematicTree::UpdateModel()
         TreeMap[Joint->Segment.getName()] = Joint;
     }
     debugTree.resize(Tree.size()-1);
+    debugSceneChanged = true;
 }
 
 void KinematicTree::resetModel()
@@ -236,6 +245,7 @@ void KinematicTree::resetModel()
     Tree = ModelTree;
     CollisionTree.clear();
     UpdateModel();
+    debugSceneChanged = true;
 }
 
 void KinematicTree::changeParent(const std::string& name, const std::string& parent_name, const KDL::Frame& pose, bool relative)
@@ -300,7 +310,8 @@ void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transfo
         CollisionTree.push_back(NewElement);
     }
     Tree.push_back(NewElement);
-    parent_element->Children.push_back(NewElement);
+    parent_emelent->Children.push_back(NewElement);
+    debugSceneChanged = true;
 }
 
 void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
@@ -420,6 +431,27 @@ void KinematicTree::publishFrames()
         i++;
     }
     Server::sendTransform(debugFrames);
+    if(debugSceneChanged)
+    {
+        debugSceneChanged = false;
+        visualization_msgs::MarkerArray msg;
+        for(int i=0; i<Tree.size();i++)
+        {
+            if(Tree[i]->Shape && Tree[i]->Parent->Id>=ModelTree.size())
+            {
+                visualization_msgs::Marker mrk;
+                shapes::constructMarkerFromShape(Tree[i]->Shape.get(), mrk);
+                mrk.action = visualization_msgs::Marker::ADD;
+                mrk.frame_locked = true;
+                mrk.ns = "CollisionObjects";
+                mrk.color.r=mrk.color.g=mrk.color.b=0.5;
+                mrk.color.a=1.0;
+                mrk.header.frame_id = "exotica/"+Tree[i]->Segment.getName();
+                msg.markers.push_back(mrk);
+            }
+        }
+        shapes_pub_.publish(msg);
+    }
 }
 
 void KinematicTree::UpdateFK()

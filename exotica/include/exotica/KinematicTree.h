@@ -230,6 +230,8 @@ namespace exotica
 
             std::vector<tf::StampedTransform> debugTree;
             std::vector<tf::StampedTransform> debugFrames;
+            ros::Publisher shapes_pub_;
+            bool debugSceneChanged;
     };
 
 }

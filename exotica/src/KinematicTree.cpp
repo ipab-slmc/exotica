@@ -35,6 +35,7 @@
 #include <algorithm>
 
 #include <kdl/frames_io.hpp>
+#include <eigen_conversions/eigen_kdl.h>
 
 #ifdef KIN_DEBUG_MODE
 #include <iostream>
@@ -43,7 +44,7 @@
 namespace exotica
 {
 
-KinematicElement::KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id), IsControlled(false), ControlId(-1)
+KinematicElement::KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id), IsControlled(false), ControlId(-1), Shape(nullptr)
 {
 
 }
@@ -214,6 +215,8 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         }
     }
 
+
+
     setJointLimits();
 }
 
@@ -227,6 +230,47 @@ void KinematicTree::UpdateModel()
     }
     debugTree.resize(Tree.size()-1);
 }
+
+void KinematicTree::resetModel()
+{
+    Tree = ModelTree;
+    CollisionTree.clear();
+    UpdateModel();
+}
+
+void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape)
+{
+    std::shared_ptr<KinematicElement> parent_emelent;
+    if(parent=="")
+    {
+        parent_emelent = Tree[0];
+    }
+    else
+    {
+        bool found = false;
+        for(auto element : Tree)
+        {
+            if(element->Segment.getName()==parent)
+            {
+                parent_emelent = element;
+                found = true;
+                break;
+            }
+        }
+        if(!found) throw_pretty("Can't find parent link named '"<<parent<<"'!");
+    }
+    KDL::Frame transformKDL;
+    tf::transformEigenToKDL(transform, transformKDL);
+    std::shared_ptr<KinematicElement> NewElement(new KinematicElement(Tree.size(), parent_emelent, KDL::Segment(name, KDL::Joint(KDL::Joint::None), transformKDL)));
+    if(shape)
+    {
+        NewElement->Shape = shape;
+        CollisionTree.push_back(NewElement);
+    }
+    Tree.push_back(NewElement);
+    parent_emelent->Children.push_back(NewElement);
+}
+
 void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
 {
     std::shared_ptr<KinematicElement> NewElement(new KinematicElement(Tree.size(), parent, segment->second.segment));
@@ -293,7 +337,6 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
         }
     }
 
-    debugTree.resize(Tree.size()-1);
     debugFrames.resize(Solution->Frame.size()*2);
 
     return Solution;

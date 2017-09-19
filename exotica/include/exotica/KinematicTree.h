@@ -112,6 +112,7 @@ namespace exotica
       KDL::Segment Segment;
       KDL::Frame Frame;
       std::vector<double> JointLimits;
+      shapes::ShapeConstPtr Shape;
   };
 
   struct KinematicFrame
@@ -181,7 +182,10 @@ namespace exotica
               return ModelJointsNames;
             }
 
+            void resetModel();
+            void AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr));
             void UpdateModel();
+
             Eigen::VectorXd getModelState();
             std::map<std::string, double> getModelStateMap();
             void setModelState(Eigen::VectorXdRefConst x);
@@ -189,6 +193,7 @@ namespace exotica
             Eigen::VectorXd getControlledState();
 
             std::vector<std::shared_ptr<KinematicElement>> getTree() {return Tree;}
+            std::vector<std::shared_ptr<KinematicElement>> getCollisionTree() {return CollisionTree;}
             std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() {return TreeMap;}
             bool Debug;
 
@@ -201,6 +206,7 @@ namespace exotica
             void UpdateJ();
             void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);
 
+
             BASE_TYPE ModelBaseType;
             BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;
             int NumControlledJoints; //!< Number of controlled joints in the joint group.
@@ -211,6 +217,7 @@ namespace exotica
             std::vector<std::shared_ptr<KinematicElement>> Tree;
             std::vector<std::shared_ptr<KinematicElement>> ModelTree;
             std::map<std::string, std::shared_ptr<KinematicElement>> TreeMap;
+            std::vector<std::shared_ptr<KinematicElement>> CollisionTree;
             std::shared_ptr<KinematicElement> Root;
             std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
             std::map<std::string, std::shared_ptr<KinematicElement>> ControlledJointsMap;

@@ -915,14 +915,7 @@ namespace exotica
 
   bool Scene::hasAttachedObject(const std::string& name)
   {
-      if(attached_objects_.find(name)!=attached_objects_.end())
-      {
-          return true;
-      }
-      else
-      {
-          return false;
-      }
+      return attached_objects_.find(name)!=attached_objects_.end();
   }
 
 }

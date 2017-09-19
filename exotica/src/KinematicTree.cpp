@@ -133,8 +133,8 @@ void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelP
     if(Server::isRos())
     {
         shapes_pub_ = Server::advertise<visualization_msgs::MarkerArray>("/exotica/PlanningScene", 100, true);
+        debugSceneChanged = true;
     }
-    debugSceneChanged = true;
 }
 
 void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
@@ -310,7 +310,7 @@ void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transfo
         CollisionTree.push_back(NewElement);
     }
     Tree.push_back(NewElement);
-    parent_emelent->Children.push_back(NewElement);
+    parent_element->Children.push_back(NewElement);
     debugSceneChanged = true;
 }
 

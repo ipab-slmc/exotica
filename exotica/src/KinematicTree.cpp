@@ -35,6 +35,7 @@
 #include <algorithm>
 
 #include <kdl/frames_io.hpp>
+#include <eigen_conversions/eigen_kdl.h>
 
 #ifdef KIN_DEBUG_MODE
 #include <iostream>
@@ -43,7 +44,7 @@
 namespace exotica
 {
 
-KinematicElement::KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id), IsControlled(false), ControlId(-1)
+KinematicElement::KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id), IsControlled(false), ControlId(-1), Shape(nullptr)
 {
 
 }
@@ -182,21 +183,22 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     }
 
     AddElement(RobotKinematics.getRootSegment(), *(Tree.end()-1));
+    ModelTree = Tree;
+
+    UpdateModel();
 
     NumJoints = ModelJointsNames.size();
     NumControlledJoints = ControlledJointsNames.size();
     if (NumControlledJoints < 1) throw_pretty("No update joints specified!");
     ControlledJoints.resize(NumControlledJoints);
-    Root = Tree[0];
-    TreeState = Eigen::VectorXd::Zero(Tree.size());
     for(std::shared_ptr<KinematicElement> Joint : Tree)
     {
         Joint->ControlId = IsControlled(Joint);
         Joint->IsControlled = Joint->ControlId >= 0;
         if(Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
-        TreeMap[Joint->Segment.getName()] = Joint;
         ModelJointsMap[Joint->Segment.getJoint().getName()] = Joint;
-        if (Joint->IsControlled) {
+        if (Joint->IsControlled)
+        {
           ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
 
           // The ModelBaseType defined above refers to the base type of the
@@ -213,7 +215,60 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         }
     }
 
+
+
     setJointLimits();
+}
+
+void KinematicTree::UpdateModel()
+{
+    Root = Tree[0];
+    TreeState = Eigen::VectorXd::Zero(Tree.size());
+    for(std::shared_ptr<KinematicElement> Joint : Tree)
+    {
+        TreeMap[Joint->Segment.getName()] = Joint;
+    }
+    debugTree.resize(Tree.size()-1);
+}
+
+void KinematicTree::resetModel()
+{
+    Tree = ModelTree;
+    CollisionTree.clear();
+    UpdateModel();
+}
+
+void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape)
+{
+    std::shared_ptr<KinematicElement> parent_element;
+    if(parent=="")
+    {
+        parent_element = Tree[0];
+    }
+    else
+    {
+        bool found = false;
+        for(const auto& element : Tree)
+        {
+            if(element->Segment.getName()==parent)
+            {
+                parent_element = element;
+                found = true;
+                break;
+            }
+        }
+        if(!found) throw_pretty("Can't find parent link named '"<<parent<<"'!");
+    }
+    KDL::Frame transformKDL;
+    tf::transformEigenToKDL(transform, transformKDL);
+    std::shared_ptr<KinematicElement> NewElement(new KinematicElement(Tree.size(), parent_element, KDL::Segment(name, KDL::Joint(KDL::Joint::None), transformKDL)));
+    if(shape)
+    {
+        NewElement->Shape = shape;
+        CollisionTree.push_back(NewElement);
+    }
+    Tree.push_back(NewElement);
+    parent_element->Children.push_back(NewElement);
 }
 
 void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
@@ -282,7 +337,6 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
         }
     }
 
-    debugTree.resize(Tree.size()-1);
     debugFrames.resize(Solution->Frame.size()*2);
 
     return Solution;

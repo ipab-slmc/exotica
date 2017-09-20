@@ -351,6 +351,9 @@ namespace exotica
       void setModelState(std::map<std::string, double> x);
       std::string getGroupName();
 
+      /// \brief Updates exotica scene object frames from the MoveIt scene.
+      void updateSceneFrames();
+
       BASE_TYPE getBaseType()
       {
         return BaseType;

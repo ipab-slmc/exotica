@@ -369,7 +369,7 @@ namespace exotica
       ///
       void attachObject(const std::string& name, const std::string& parent);
       ///
-      /// \brief Attaches existing object to a new parent specifying an offset in the new paren't local frame.
+      /// \brief Attaches existing object to a new parent specifying an offset in the new parent local frame.
       /// \param name Name of the object to attach.
       /// \param parent Name of the new parent frame.
       /// \param pose Relative pose of the attached object in the new parent's local frame.

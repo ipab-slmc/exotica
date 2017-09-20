@@ -278,6 +278,7 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
         child->Parent->Children.erase(it);
     child->Parent = parent;
     parent->Children.push_back(child);
+    debugSceneChanged = true;
 }
 
 void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape)
@@ -410,47 +411,50 @@ void KinematicTree::UpdateTree(Eigen::VectorXdRefConst x)
 
 void KinematicTree::publishFrames()
 {
-    int i = 0;
-    for(std::shared_ptr<KinematicElement> element : Tree)
+    if(Server::isRos())
     {
-
-        tf::Transform T;
-        tf::transformKDLToTF(element->Frame, T);
-        if(i>0) debugTree[i-1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica", element->Segment.getName()));
-        i++;
-    }
-    Server::sendTransform(debugTree);
-    i = 0;
-    for(KinematicFrame&  frame : Solution->Frame)
-    {
-        tf::Transform T;
-        tf::transformKDLToTF(frame.TempB, T);
-        debugFrames[i*2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()));
-        tf::transformKDLToTF(frame.TempAB, T);
-        debugFrames[i*2+1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()), tf::resolve("exotica","Frame"+std::to_string(i)+"A"+frame.FrameA->Segment.getName()));
-        i++;
-    }
-    Server::sendTransform(debugFrames);
-    if(debugSceneChanged)
-    {
-        debugSceneChanged = false;
-        visualization_msgs::MarkerArray msg;
-        for(int i=0; i<Tree.size();i++)
+        int i = 0;
+        for(std::shared_ptr<KinematicElement> element : Tree)
         {
-            if(Tree[i]->Shape && Tree[i]->Parent->Id>=ModelTree.size())
-            {
-                visualization_msgs::Marker mrk;
-                shapes::constructMarkerFromShape(Tree[i]->Shape.get(), mrk);
-                mrk.action = visualization_msgs::Marker::ADD;
-                mrk.frame_locked = true;
-                mrk.ns = "CollisionObjects";
-                mrk.color.r=mrk.color.g=mrk.color.b=0.5;
-                mrk.color.a=1.0;
-                mrk.header.frame_id = "exotica/"+Tree[i]->Segment.getName();
-                msg.markers.push_back(mrk);
-            }
+
+            tf::Transform T;
+            tf::transformKDLToTF(element->Frame, T);
+            if(i>0) debugTree[i-1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica", element->Segment.getName()));
+            i++;
         }
-        shapes_pub_.publish(msg);
+        Server::sendTransform(debugTree);
+        i = 0;
+        for(KinematicFrame&  frame : Solution->Frame)
+        {
+            tf::Transform T;
+            tf::transformKDLToTF(frame.TempB, T);
+            debugFrames[i*2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()));
+            tf::transformKDLToTF(frame.TempAB, T);
+            debugFrames[i*2+1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()), tf::resolve("exotica","Frame"+std::to_string(i)+"A"+frame.FrameA->Segment.getName()));
+            i++;
+        }
+        Server::sendTransform(debugFrames);
+        if(debugSceneChanged)
+        {
+            debugSceneChanged = false;
+            visualization_msgs::MarkerArray msg;
+            for(int i=0; i<Tree.size();i++)
+            {
+                if(Tree[i]->Shape && Tree[i]->Parent->Id>=ModelTree.size())
+                {
+                    visualization_msgs::Marker mrk;
+                    shapes::constructMarkerFromShape(Tree[i]->Shape.get(), mrk);
+                    mrk.action = visualization_msgs::Marker::ADD;
+                    mrk.frame_locked = true;
+                    mrk.ns = "CollisionObjects";
+                    mrk.color.r=mrk.color.g=mrk.color.b=0.5;
+                    mrk.color.a=1.0;
+                    mrk.header.frame_id = "exotica/"+Tree[i]->Segment.getName();
+                    msg.markers.push_back(mrk);
+                }
+            }
+            shapes_pub_.publish(msg);
+        }
     }
 }
 

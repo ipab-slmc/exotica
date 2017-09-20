@@ -362,8 +362,23 @@ namespace exotica
 
       /// \brief Updates exotica scene object frames from the MoveIt scene.
       void updateSceneFrames();
+      ///
+      /// \brief Attaches existing object to a new parent. E.g. attaching a grasping target to the end-effector. The relative transformation will be computed from current object and new parent transformations in the world frame.
+      /// \param name Name of the object to attach.
+      /// \param parent Name of the new parent frame.
+      ///
       void attachObject(const std::string& name, const std::string& parent);
-      void attachObject(const std::string& name, const std::string& parent, const KDL::Frame& pose);
+      ///
+      /// \brief Attaches existing object to a new parent specifying an offset in the new paren't local frame.
+      /// \param name Name of the object to attach.
+      /// \param parent Name of the new parent frame.
+      /// \param pose Relative pose of the attached object in the new parent's local frame.
+      ///
+      void attachObjectLocal(const std::string& name, const std::string& parent, const KDL::Frame& pose);
+      ///
+      /// \brief Detaches an object and leaves it a at its current world location. This effectively attaches the object to the world frame.
+      /// \param name Name of the object to detach.
+      ///
       void detachObject(const std::string& name);
       bool hasAttachedObject(const std::string& name);
 

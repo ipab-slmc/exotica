@@ -899,7 +899,7 @@ namespace exotica
       attached_objects_[name] = AttachedObject(parent);
   }
 
-  void Scene::attachObject(const std::string& name, const std::string& parent, const KDL::Frame& pose)
+  void Scene::attachObjectLocal(const std::string& name, const std::string& parent, const KDL::Frame& pose)
   {
       kinematica_.changeParent(name, parent, pose, true);
       attached_objects_[name] = AttachedObject(parent, pose);

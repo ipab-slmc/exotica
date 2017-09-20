@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /RobotModel1
       Splitter Ratio: 0.589404
     Tree Height: 1695
   - Class: rviz/Selection
@@ -112,7 +111,7 @@ Visualization Manager:
       Visual Enabled: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /exotica/PlanningScene
+      Marker Topic: /exotica/CollisionShapes
       Name: SceneObjects
       Namespaces:
         CollisionObjects: true
@@ -175,5 +174,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 3710
-  X: 110
+  X: 78
   Y: 28

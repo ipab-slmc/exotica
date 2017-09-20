@@ -111,13 +111,14 @@ KinematicTree::KinematicTree() : StateSize(-1), Debug(false)
 
 }
 
-void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelPtr model)
+void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name)
 {
     if (!model) throw_pretty("No robot model provided!");    
     robot_model::JointModelGroup* group = model->getJointModelGroup(JointGroup);
     if(!group) throw_pretty("Joint group '"<<JointGroup<<"' not defined in the robot model!");
     ControlledJointsNames = group->getVariableNames();
     ModelJointsNames = model->getVariableNames();
+    name_ = name;
 
     Model = model;
     KDL::Tree RobotKinematics;
@@ -132,7 +133,7 @@ void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelP
 
     if(Server::isRos())
     {
-        shapes_pub_ = Server::advertise<visualization_msgs::MarkerArray>("/exotica/PlanningScene", 100, true);
+        shapes_pub_ = Server::advertise<visualization_msgs::MarkerArray>(name_+(name_==""?"":"/")+"CollisionShapes", 100, true);
         debugSceneChanged = true;
     }
 }

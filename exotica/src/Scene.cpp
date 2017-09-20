@@ -662,7 +662,7 @@ namespace exotica
       {
           Server::Instance()->getModel(init.URDF, model_, init.URDF, init.SRDF);
       }
-      kinematica_.Instantiate(init.JointGroup, model_);
+      kinematica_.Instantiate(init.JointGroup, model_, name_);
       group = model_->getJointModelGroup(init.JointGroup);
 
       collision_scene_.reset(new CollisionScene(name_));
@@ -671,7 +671,7 @@ namespace exotica
 
       if (Server::isRos()) {
         ps_pub_ = Server::advertise<moveit_msgs::PlanningScene>(
-            name_ + "/PlanningScene", 100, true);
+            name_ +(name_==""?"":"/")+"PlanningScene", 100, true);
         if (debug_)
           HIGHLIGHT_NAMED(
               name_,

@@ -158,7 +158,7 @@ namespace exotica
     public:
             KinematicTree();
             ~KinematicTree() {}
-            void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model);
+            void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name);
             std::string getRootFrameName();
             std::string getRootJointName();
             BASE_TYPE getModelBaseType();
@@ -185,6 +185,7 @@ namespace exotica
             void resetModel();
             void AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr));
             void UpdateModel();
+            void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
 
             Eigen::VectorXd getModelState();
             std::map<std::string, double> getModelStateMap();
@@ -229,6 +230,9 @@ namespace exotica
 
             std::vector<tf::StampedTransform> debugTree;
             std::vector<tf::StampedTransform> debugFrames;
+            ros::Publisher shapes_pub_;
+            bool debugSceneChanged;
+            std::string name_;
     };
 
 }

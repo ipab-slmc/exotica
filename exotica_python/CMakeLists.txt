@@ -33,6 +33,7 @@ catkin_install_python(PROGRAMS
     scripts/example_ik_noros.py
     scripts/example_aico_noros.py
     scripts/example_ompl_noros.py
+    scripts/example_attach.py
       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 

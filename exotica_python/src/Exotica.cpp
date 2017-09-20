@@ -431,7 +431,7 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("printSupportedClasses",&Setup::printSupportedClasses);
     setup.def_static("getInitializers",&Setup::getInitializers, py::return_value_policy::copy);
     setup.def_static("getPackagePath",&ros::package::getPath);
-    setup.def_static("initRos",[](){int argc = 0; ros::init(argc, nullptr, "exotica_python_node"); Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));});
+    setup.def_static("initRos",[](const std::string& name){int argc = 0; ros::init(argc, nullptr, name); Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));}, py::arg("name") = "exotica");
     setup.def_static("loadSolver", &XMLLoader::loadSolver);
 
     py::module tools = module.def_submodule("Tools");
@@ -618,6 +618,10 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getRootFrameName", &Scene::getRootFrameName);
     scene.def("getRootJointName", &Scene::getRootJointName);
     scene.def("getModelRootLinkName", &Scene::getModelRootLinkName);
+    scene.def("attachObject", &Scene::attachObject);
+    scene.def("attachObjectLocal", &Scene::attachObjectLocal);
+    scene.def("detachObject", &Scene::detachObject);
+    scene.def("hasAttachedObject", &Scene::hasAttachedObject);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

@@ -321,6 +321,15 @@ namespace exotica
 
   typedef std::shared_ptr<CollisionScene> CollisionScene_ptr;
 
+  struct AttachedObject
+  {
+      AttachedObject() : Parent("") {}
+      AttachedObject(std::string parent) : Parent(parent) {}
+      AttachedObject(std::string parent, KDL::Frame pose) : Parent(parent), Pose(pose) {}
+      std::string Parent;
+      KDL::Frame Pose;
+  };
+
 /// The class of EXOTica Scene
   class Scene: public Object, Uncopyable, public Instantiable<SceneInitializer>
   {
@@ -353,6 +362,25 @@ namespace exotica
 
       /// \brief Updates exotica scene object frames from the MoveIt scene.
       void updateSceneFrames();
+      ///
+      /// \brief Attaches existing object to a new parent. E.g. attaching a grasping target to the end-effector. The relative transformation will be computed from current object and new parent transformations in the world frame.
+      /// \param name Name of the object to attach.
+      /// \param parent Name of the new parent frame.
+      ///
+      void attachObject(const std::string& name, const std::string& parent);
+      ///
+      /// \brief Attaches existing object to a new parent specifying an offset in the new parent local frame.
+      /// \param name Name of the object to attach.
+      /// \param parent Name of the new parent frame.
+      /// \param pose Relative pose of the attached object in the new parent's local frame.
+      ///
+      void attachObjectLocal(const std::string& name, const std::string& parent, const KDL::Frame& pose);
+      ///
+      /// \brief Detaches an object and leaves it a at its current world location. This effectively attaches the object to the world frame.
+      /// \param name Name of the object to detach.
+      ///
+      void detachObject(const std::string& name);
+      bool hasAttachedObject(const std::string& name);
 
       BASE_TYPE getBaseType()
       {
@@ -385,6 +413,8 @@ namespace exotica
 
       /// Visual debug
       ros::Publisher ps_pub_;
+
+      std::map<std::string, AttachedObject> attached_objects_;
   };
   typedef std::shared_ptr<Scene> Scene_ptr;
 //  typedef std::map<std::string, Scene_ptr> Scene_map;

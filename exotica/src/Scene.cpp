@@ -662,7 +662,7 @@ namespace exotica
       {
           Server::Instance()->getModel(init.URDF, model_, init.URDF, init.SRDF);
       }
-      kinematica_.Instantiate(init.JointGroup, model_);
+      kinematica_.Instantiate(init.JointGroup, model_, name_);
       group = model_->getJointModelGroup(init.JointGroup);
 
       collision_scene_.reset(new CollisionScene(name_));
@@ -671,7 +671,7 @@ namespace exotica
 
       if (Server::isRos()) {
         ps_pub_ = Server::advertise<moveit_msgs::PlanningScene>(
-            name_ + "/PlanningScene", 100, true);
+            name_ +(name_==""?"":"/")+"PlanningScene", 100, true);
         if (debug_)
           HIGHLIGHT_NAMED(
               name_,
@@ -891,6 +891,31 @@ namespace exotica
       }
 
       kinematica_.UpdateModel();
+  }
+
+  void Scene::attachObject(const std::string& name, const std::string& parent)
+  {
+      kinematica_.changeParent(name, parent, KDL::Frame(), false);
+      attached_objects_[name] = AttachedObject(parent);
+  }
+
+  void Scene::attachObjectLocal(const std::string& name, const std::string& parent, const KDL::Frame& pose)
+  {
+      kinematica_.changeParent(name, parent, pose, true);
+      attached_objects_[name] = AttachedObject(parent, pose);
+  }
+
+  void Scene::detachObject(const std::string& name)
+  {
+      if(!hasAttachedObject(name)) throw_pretty("'"<<name<<"' is not attached to the robot!");
+      auto object = attached_objects_.find(name);
+      kinematica_.changeParent(name, "", KDL::Frame(), false);
+      attached_objects_.erase(object);
+  }
+
+  bool Scene::hasAttachedObject(const std::string& name)
+  {
+      return attached_objects_.find(name)!=attached_objects_.end();
   }
 
 }

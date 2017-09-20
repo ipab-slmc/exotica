@@ -36,6 +36,8 @@
 
 #include <kdl/frames_io.hpp>
 #include <eigen_conversions/eigen_kdl.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <geometric_shapes/shape_operations.h>
 
 #ifdef KIN_DEBUG_MODE
 #include <iostream>
@@ -109,13 +111,14 @@ KinematicTree::KinematicTree() : StateSize(-1), Debug(false)
 
 }
 
-void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelPtr model)
+void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name)
 {
     if (!model) throw_pretty("No robot model provided!");    
     robot_model::JointModelGroup* group = model->getJointModelGroup(JointGroup);
     if(!group) throw_pretty("Joint group '"<<JointGroup<<"' not defined in the robot model!");
     ControlledJointsNames = group->getVariableNames();
     ModelJointsNames = model->getVariableNames();
+    name_ = name;
 
     Model = model;
     KDL::Tree RobotKinematics;
@@ -126,6 +129,12 @@ void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelP
     else
     {
         throw_pretty("Can't load URDF model!");
+    }
+
+    if(Server::isRos())
+    {
+        shapes_pub_ = Server::advertise<visualization_msgs::MarkerArray>(name_+(name_==""?"":"/")+"CollisionShapes", 100, true);
+        debugSceneChanged = true;
     }
 }
 
@@ -229,6 +238,7 @@ void KinematicTree::UpdateModel()
         TreeMap[Joint->Segment.getName()] = Joint;
     }
     debugTree.resize(Tree.size()-1);
+    debugSceneChanged = true;
 }
 
 void KinematicTree::resetModel()
@@ -236,6 +246,40 @@ void KinematicTree::resetModel()
     Tree = ModelTree;
     CollisionTree.clear();
     UpdateModel();
+    debugSceneChanged = true;
+}
+
+void KinematicTree::changeParent(const std::string& name, const std::string& parent_name, const KDL::Frame& pose, bool relative)
+{
+    if(TreeMap.find(name)==TreeMap.end()) throw_pretty("Attempting to attach unknown frame '"<<name<<"'!");
+    std::shared_ptr<KinematicElement> child = TreeMap.find(name)->second;
+    if(child->Id<ModelTree.size()) throw_pretty("Can't re-attach robot link '"<<name<<"'!");
+    if(child->Shape) throw_pretty("Can't re-attach collision shape without reattaching the object! ('"<<name<<"')");
+    std::shared_ptr<KinematicElement> parent;
+    if(parent_name=="")
+    {
+        if(TreeMap.find(Tree[0]->Segment.getName())==TreeMap.end()) throw_pretty("Attempting to attach to unknown frame '"<<Tree[0]->Segment.getName()<<"'!");
+        parent = TreeMap.find(Tree[0]->Segment.getName())->second;
+    }
+    else
+    {
+        if(TreeMap.find(parent_name)==TreeMap.end()) throw_pretty("Attempting to attach to unknown frame '"<<parent_name<<"'!");
+        parent = TreeMap.find(parent_name)->second;
+    }
+    if(relative)
+    {
+        child->Segment = KDL::Segment(child->Segment.getName(), child->Segment.getJoint(), pose, child->Segment.getInertia());
+    }
+    else
+    {
+        child->Segment = KDL::Segment(child->Segment.getName(), child->Segment.getJoint(), parent->Frame.Inverse()*child->Frame*pose, child->Segment.getInertia());
+    }
+    auto it = std::find(child->Parent->Children.begin(), child->Parent->Children.end(), child);
+    if(it != child->Parent->Children.end())
+        child->Parent->Children.erase(it);
+    child->Parent = parent;
+    parent->Children.push_back(child);
+    debugSceneChanged = true;
 }
 
 void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape)
@@ -269,6 +313,7 @@ void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transfo
     }
     Tree.push_back(NewElement);
     parent_element->Children.push_back(NewElement);
+    debugSceneChanged = true;
 }
 
 void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
@@ -367,27 +412,51 @@ void KinematicTree::UpdateTree(Eigen::VectorXdRefConst x)
 
 void KinematicTree::publishFrames()
 {
-    int i = 0;
-    for(std::shared_ptr<KinematicElement> element : Tree)
+    if(Server::isRos())
     {
+        int i = 0;
+        for(std::shared_ptr<KinematicElement> element : Tree)
+        {
 
-        tf::Transform T;
-        tf::transformKDLToTF(element->Frame, T);
-        if(i>0) debugTree[i-1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica", element->Segment.getName()));
-        i++;
+            tf::Transform T;
+            tf::transformKDLToTF(element->Frame, T);
+            if(i>0) debugTree[i-1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica", element->Segment.getName()));
+            i++;
+        }
+        Server::sendTransform(debugTree);
+        i = 0;
+        for(KinematicFrame&  frame : Solution->Frame)
+        {
+            tf::Transform T;
+            tf::transformKDLToTF(frame.TempB, T);
+            debugFrames[i*2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()));
+            tf::transformKDLToTF(frame.TempAB, T);
+            debugFrames[i*2+1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()), tf::resolve("exotica","Frame"+std::to_string(i)+"A"+frame.FrameA->Segment.getName()));
+            i++;
+        }
+        Server::sendTransform(debugFrames);
+        if(debugSceneChanged)
+        {
+            debugSceneChanged = false;
+            visualization_msgs::MarkerArray msg;
+            for(int i=0; i<Tree.size();i++)
+            {
+                if(Tree[i]->Shape && Tree[i]->Parent->Id>=ModelTree.size())
+                {
+                    visualization_msgs::Marker mrk;
+                    shapes::constructMarkerFromShape(Tree[i]->Shape.get(), mrk);
+                    mrk.action = visualization_msgs::Marker::ADD;
+                    mrk.frame_locked = true;
+                    mrk.ns = "CollisionObjects";
+                    mrk.color.r=mrk.color.g=mrk.color.b=0.5;
+                    mrk.color.a=1.0;
+                    mrk.header.frame_id = "exotica/"+Tree[i]->Segment.getName();
+                    msg.markers.push_back(mrk);
+                }
+            }
+            shapes_pub_.publish(msg);
+        }
     }
-    Server::sendTransform(debugTree);
-    i = 0;
-    for(KinematicFrame&  frame : Solution->Frame)
-    {
-        tf::Transform T;
-        tf::transformKDLToTF(frame.TempB, T);
-        debugFrames[i*2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica",getRootFrameName()), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()));
-        tf::transformKDLToTF(frame.TempAB, T);
-        debugFrames[i*2+1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica","Frame"+std::to_string(i)+"B"+frame.FrameB->Segment.getName()), tf::resolve("exotica","Frame"+std::to_string(i)+"A"+frame.FrameA->Segment.getName()));
-        i++;
-    }
-    Server::sendTransform(debugFrames);
 }
 
 void KinematicTree::UpdateFK()

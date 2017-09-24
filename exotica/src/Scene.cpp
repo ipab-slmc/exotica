@@ -112,10 +112,9 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
 ///////////////////////////////////////////////////////////////
 /////////////////////// Collision Scene ///////////////////////
 ///////////////////////////////////////////////////////////////
-  CollisionScene::CollisionScene(const std::string & scene_name, robot_model::RobotModelPtr model, const std::string& root_name)
-      : compute_dist(true), root_name_(root_name)
+  CollisionScene::CollisionScene(const std::string& root_name)
+      : root_name_(root_name)
   {
-      HIGHLIGHT("FCL version: "<<FCL_VERSION);
   }
 
   CollisionScene::~CollisionScene()
@@ -491,8 +490,6 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
       group = model_->getJointModelGroup(init.JointGroup);
       ps_.reset(new planning_scene::PlanningScene(model_));
 
-      collision_scene_.reset(new CollisionScene(name_, model_, kinematica_.getRootFrameName()));
-
       BaseType = kinematica_.getControlledBaseType();
 
       if (Server::isRos()) {
@@ -506,6 +503,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
                   << "/PlanningScene'");
       }
 
+      collision_scene_.reset(new CollisionScene(kinematica_.getRootFrameName()));
       collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 
       AllowedCollisionMatrix acm;

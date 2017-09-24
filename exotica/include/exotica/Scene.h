@@ -145,7 +145,7 @@ namespace exotica
           bool Self;
       };
 
-      CollisionScene(const std::string & scene_name, robot_model::RobotModelPtr model, const std::string& root_name);
+      CollisionScene(const std::string& root_name);
 
       /**
        * \brief Destructor

@@ -552,6 +552,19 @@ PYBIND11_MODULE(_pyexotica, module)
     samplingProblem.def("getSpaceDim", &SamplingProblem::getSpaceDim);
     samplingProblem.def("getBounds", &SamplingProblem::getBounds);
 
+    py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "Proxy");
+    proxy.def(py::init());
+    proxy.def_readonly("Contact1", &CollisionProxy::contact1);
+    proxy.def_readonly("Contact2", &CollisionProxy::contact2);
+    proxy.def_readonly("Normal1", &CollisionProxy::normal1);
+    proxy.def_readonly("Normal2", &CollisionProxy::normal2);
+    proxy.def_readonly("Distance", &CollisionProxy::distance);
+    proxy.def_property_readonly("Object1", [](CollisionProxy* instance){ return (instance->e1 && instance->e2)?instance->e1->Segment.getName():std::string("");});
+    proxy.def_property_readonly("Object2", [](CollisionProxy* instance){ return (instance->e1 && instance->e2)?instance->e2->Segment.getName():std::string("");});
+    proxy.def_property_readonly("Transform1", [](CollisionProxy* instance){ return (instance->e1 && instance->e2)?instance->e1->Frame:KDL::Frame();});
+    proxy.def_property_readonly("Transform2", [](CollisionProxy* instance){ return (instance->e1 && instance->e2)?instance->e2->Frame:KDL::Frame();});
+    proxy.def("__repr__", &CollisionProxy::print);
+
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
     scene.def("Update", &Scene::Update);
     scene.def("getBaseType", &Scene::getBaseType);
@@ -572,49 +585,11 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("loadSceneFile", &Scene::loadSceneFile);
     scene.def("getScene", &Scene::getScene);
     scene.def("cleanScene", &Scene::cleanScene);
-
-    // CollisionScene-related functions exposed via Scene - NB: may change in future
-    scene.def("isStateValid", [](Scene* instance) {
-        return instance->getCollisionScene()->isStateValid();
-    });
-    scene.def("isStateValid", [](Scene* instance, bool self, double dist) {
-        return instance->getCollisionScene()->isStateValid(self, dist);
-    });
-    scene.def("updateWorld", [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
-        moveit_msgs::PlanningSceneWorldConstPtr myPtr(new moveit_msgs::PlanningSceneWorld(world));
-        instance->getCollisionScene()->updateWorld(myPtr);
-    });
-    scene.def("getCollisionRobotLinks", [](Scene* instance) {
-        return instance->getCollisionScene()->getCollisionRobotLinks();
-    });
-    scene.def("getCollisionWorldLinks", [](Scene* instance) {
-        return instance->getCollisionScene()->getCollisionWorldLinks();
-    });
-    scene.def("getRobotDistance", [](Scene* instance, std::string link, bool self, double safeDist) {
-        double d;
-        Eigen::Vector3d p1, p2, norm, c1, c2;
-        instance->getCollisionScene()->getRobotDistance(link, self, d, p1, p2, norm, c1, c2, safeDist);
-        return py::make_tuple(d, norm);
-    });
-    scene.def("getDistance", [](Scene* instance, std::string o1, std::string o2,
-                                double safeDist) {
-      double d;
-      instance->getCollisionScene()->getDistance(o1, o2, d, safeDist);
-      return d;
-    });
-    scene.def("getDistance", [](Scene* instance, std::string o1, std::string o2,
-                                double safeDist,
-                                bool computeContactInformation) {
-      double d;
-      Eigen::Vector3d p1 = Eigen::Vector3d::Zero(),
-                      p2 = Eigen::Vector3d::Zero();
-      if (computeContactInformation) {
-        instance->getCollisionScene()->getDistance(o1, o2, d, p1, p2, safeDist);
-      } else {
-        instance->getCollisionScene()->getDistance(o1, o2, d, safeDist);
-      }
-      return py::make_tuple(d, p1, p2);
-    });
+    scene.def("isStateValid", [](Scene* instance, bool self) {return instance->getCollisionScene()->isStateValid(self);}, py::arg("self")=true);
+    scene.def("getCollisionDistance", [](Scene* instance, bool self, bool distances) {return instance->getCollisionScene()->getCollisionDistance(self, distances);}, py::arg("self")=true, py::arg("computeAccurateDistances")=true);
+    scene.def("updateWorld", &Scene::updateWorld);
+    scene.def("getCollisionRobotLinks", [](Scene* instance) {return instance->getCollisionScene()->getCollisionRobotLinks();});
+    scene.def("getCollisionWorldLinks", [](Scene* instance) {return instance->getCollisionScene()->getCollisionWorldLinks();});
     scene.def("getRootFrameName", &Scene::getRootFrameName);
     scene.def("getRootJointName", &Scene::getRootJointName);
     scene.def("getModelRootLinkName", &Scene::getModelRootLinkName);

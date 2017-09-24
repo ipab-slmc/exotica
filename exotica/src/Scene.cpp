@@ -34,6 +34,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <fcl/BVH/BVH_model.h>
+#include <fcl/shape/geometric_shapes.h>
+#include <fcl/octree.h>
 
 namespace fcl_convert
 {
@@ -56,6 +59,11 @@ namespace fcl_convert
     eigen(0) = fcl.data.vs[0];
     eigen(1) = fcl.data.vs[1];
     eigen(2) = fcl.data.vs[2];
+  }
+
+  fcl::Transform3f KDL2fcl(const KDL::Frame& frame)
+  {
+      return fcl::Transform3f(fcl::Matrix3f(frame.M.data[0], frame.M.data[1], frame.M.data[2], frame.M.data[3], frame.M.data[4], frame.M.data[5], frame.M.data[6], frame.M.data[7], frame.M.data[8]), fcl::Vec3f(frame.p.x(), frame.p.y(), frame.p.z()));
   }
 }
 namespace exotica
@@ -104,520 +112,322 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
 ///////////////////////////////////////////////////////////////
 /////////////////////// Collision Scene ///////////////////////
 ///////////////////////////////////////////////////////////////
-  CollisionScene::CollisionScene(const std::string & scene_name)
-      : compute_dist(true), stateCheckCnt_(0), scene_name_(scene_name)
+  CollisionScene::CollisionScene(const std::string & scene_name, robot_model::RobotModelPtr model, const std::string& root_name)
+      : compute_dist(true), ps_(new planning_scene::PlanningScene(model)), root_name_(root_name)
   {
+      HIGHLIGHT("FCL version: "<<FCL_VERSION);
   }
 
   CollisionScene::~CollisionScene()
   {
-    //TODO
   }
 
-  void CollisionScene::initialise(
-      const moveit_msgs::PlanningSceneConstPtr & msg,
-      const std::vector<std::string> & joints, const std::string & mode,
-      BASE_TYPE base_type, robot_model::RobotModelPtr model_)
+  visualization_msgs::Marker CollisionScene::proxyToMarker(const std::vector<CollisionProxy>& proxies)
   {
-    ps_.reset(new planning_scene::PlanningScene(model_));
-
-    if (!acm_)
-    {
-      acm_.reset(
-          new collision_detection::AllowedCollisionMatrix(
-              ps_->getAllowedCollisionMatrix()));
-    }
-    ps_->setPlanningSceneMsg(*msg.get());
-
-    if (model_->getSRDF()->getVirtualJoints().size() > 0)
-      world_joint_ = model_->getSRDF()->getVirtualJoints()[0].name_;
-
-    BaseType = base_type;
-      joint_index_.resize(joints.size());
-
-      for (std::size_t i = 0;
-          i < ps_->getCurrentState().getVariableNames().size(); i++)
+      visualization_msgs::Marker ret;
+      ret.header.frame_id = "exotica/"+root_name_;
+      ret.action = visualization_msgs::Marker::ADD;
+      ret.frame_locked = false;
+      ret.ns = "Proxies";
+      ret.color.a=1.0;
+      ret.id=0;
+      ret.type = visualization_msgs::Marker::LINE_LIST;
+      ret.points.resize(proxies.size()*6);
+      ret.colors.resize(proxies.size()*6);
+      ret.scale.x = 0.005;
+      double normalLength = 0.05;
+      std_msgs::ColorRGBA normal = getColor(0.8,0.8,0.8);
+      std_msgs::ColorRGBA far = getColor(0.5,0.5,0.5);
+      std_msgs::ColorRGBA colliding = getColor(1,0,0);
+      for(int i=0; i<proxies.size();i++)
       {
-        for (std::size_t j = 0; j < joints.size(); j++)
-        {
-          if (ps_->getCurrentState().getVariableNames()[i] == joints[j])
-          {
-            joint_index_[j] = i;
-            break;
-          }
-        }
+          KDL::Vector c1 = proxies[i].e1->Frame*KDL::Vector(proxies[i].contact1(0), proxies[i].contact1(1), proxies[i].contact1(2));
+          KDL::Vector c2 = proxies[i].e2->Frame*KDL::Vector(proxies[i].contact2(0), proxies[i].contact2(1), proxies[i].contact2(2));
+          KDL::Vector n1 = proxies[i].e1->Frame*KDL::Vector(proxies[i].normal1(0), proxies[i].normal1(1), proxies[i].normal1(2));
+          KDL::Vector n2 = proxies[i].e2->Frame*KDL::Vector(proxies[i].normal2(0), proxies[i].normal2(1), proxies[i].normal2(2));
+          tf::pointKDLToMsg(c1, ret.points[i*6]);
+          tf::pointKDLToMsg(c2, ret.points[i*6+1]);
+          tf::pointKDLToMsg(c1, ret.points[i*6+2]);
+          tf::pointKDLToMsg(c1+n1*normalLength, ret.points[i*6+3]);
+          tf::pointKDLToMsg(c2, ret.points[i*6+4]);
+          tf::pointKDLToMsg(c2+n2*normalLength, ret.points[i*6+5]);
+          ret.colors[i*6] = proxies[i].distance>0?far:colliding;
+          ret.colors[i*6+1] = proxies[i].distance>0?far:colliding;
+          ret.colors[i*6+2]=ret.colors[i*6+3]=ret.colors[i*6+4]=ret.colors[i*6+5]=normal;
       }
+      return ret;
+  }
 
-      if (mode.compare("Sampling") == 0)
+  void CollisionScene::updateCollisionObjects(const std::map<std::string, std::shared_ptr<KinematicElement>>& objects)
+  {
+      fcl_objects_.resize(objects.size());
+      int i=0;
+      for(const auto& object : objects)
       {
-        compute_dist = false;
-        INFO("Computing distance in Collision scene is Disabled");
+          std::shared_ptr<fcl::CollisionObject> new_object;
+
+          const auto& cache_entry = fcl_cache_.find(object.first);
+          if(cache_entry == fcl_cache_.end())
+          {
+              new_object = constructFclCollisionObject(object.second);
+              fcl_cache_[object.first] = new_object;
+          }
+          else
+          {
+              new_object = cache_entry->second;
+          }
+          fcl_objects_[i++] = new_object.get();
+      }
+  }
+
+  void CollisionScene::updateCollisionObjectTransforms()
+  {
+      for(fcl::CollisionObject* collision_object : fcl_objects_)
+      {
+          KinematicElement* element = reinterpret_cast<KinematicElement*>(collision_object->getUserData());
+          collision_object->setTransform(fcl_convert::KDL2fcl(element->Frame));
+          collision_object->computeAABB();
+      }
+  }
+
+  // This function was copied from 'moveit_core/collision_detection_fcl/src/collision_common.cpp'
+  std::shared_ptr<fcl::CollisionObject> CollisionScene::constructFclCollisionObject(std::shared_ptr<KinematicElement> element)
+  {
+      // Maybe use cache here?
+
+      shapes::ShapeConstPtr shape = element->Shape;
+      boost::shared_ptr<fcl::CollisionGeometry> geometry;
+      if (shape->type == shapes::PLANE)  // shapes that directly produce CollisionGeometry
+      {
+        // handle cases individually
+        switch (shape->type)
+        {
+          case shapes::PLANE:
+          {
+            const shapes::Plane* p = static_cast<const shapes::Plane*>(shape.get());
+            geometry.reset(new fcl::Plane(p->a, p->b, p->c, p->d));
+          }
+          break;
+          default:
+            break;
+        }
       }
       else
-        INFO("Computing distance in Collision scene is Enabled");
-
-    if (compute_dist) {
-      reinitializeCollisionRobot();
-      reinitializeCollisionWorld();
-    }
-  }
-
-  void CollisionScene::reinitializeCollisionRobot() {
-    // Reinitialize robot
-    fcl_robot_.clear();
-    geo_robot_.clear();
-    ps_->getCurrentStateNonConst().update(true);
-    const std::vector<const robot_model::LinkModel*>& links =
-        ps_->getCollisionRobot()
-            ->getRobotModel()
-            ->getLinkModelsWithCollisionGeometry();
-    for (std::size_t i = 0; i < links.size(); ++i) {
-      geo_robot_[links[i]->getName()] = geos_ptr(0);
-      fcl_robot_[links[i]->getName()] = fcls_ptr(0);
-      for (std::size_t j = 0; j < links[i]->getShapes().size(); ++j) {
-        shapes::ShapeConstPtr tmp_shape;
-        if (links[i]->getShapes()[j]->type != shapes::MESH)
-          tmp_shape = shapes::ShapeConstPtr(
-              shapes::createMeshFromShape(links[i]->getShapes()[j].get()));
-        else
-          tmp_shape = links[i]->getShapes()[j];
-        if (!tmp_shape || !tmp_shape.get())
-          throw_pretty("Shape could not be extracted");
-
-        collision_detection::FCLGeometryConstPtr g =
-            collision_detection::createCollisionGeometry(tmp_shape, links[i],
-                                                         j);
-        if (g) {
-          geo_robot_.at(links[i]->getName()).push_back(g);
-          fcl::CollisionObject* tmp = new fcl::CollisionObject(
-              g->collision_geometry_,
-              collision_detection::transform2fcl(
-                  ps_->getCurrentState().getCollisionBodyTransform(
-                      g->collision_geometry_data_->ptr.link,
-                      g->collision_geometry_data_->shape_index)));
-          fcl_robot_.at(links[i]->getName())
-              .push_back(std::shared_ptr<fcl::CollisionObject>(tmp));
-
-        } else
-          throw_pretty("Unable to construct collision geometry for link "
-                       << links[i]->getName().c_str());
-      }
-    }
-  }
-
-  void CollisionScene::reinitializeCollisionWorld() {
-    // Reinitialize world
-    fcl_world_.clear();
-    geo_world_.clear();
-    collision_detection::WorldConstPtr tmp_world =
-        ps_->getCollisionWorld()->getWorld();
-    std::vector<std::string> obj_id_ = tmp_world->getObjectIds();
-    if (obj_id_.size() > 0) {
-      for (std::size_t i = 0; i < obj_id_.size(); ++i) {
-        std::size_t index_size =
-            tmp_world->getObject(obj_id_[i])->shapes_.size();
-        fcl_world_[obj_id_[i]] = fcls_ptr(0);
-        geo_world_[obj_id_[i]] = geos_ptr(0);
-        trans_world_[obj_id_[i]] = std::vector<fcl::Transform3f>(0);
-        for (std::size_t j = 0; j < index_size; j++) {
-          shapes::ShapeConstPtr tmp_shape;
-
-          if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type ==
-              shapes::OCTREE) {
-            tmp_world->getObject(obj_id_[i])->shapes_[j]->print();
-            tmp_shape = boost::static_pointer_cast<const shapes::Shape>(
-                tmp_world->getObject(obj_id_[i])->shapes_[j]);
-          } else {
-            if (tmp_world->getObject(obj_id_[i])->shapes_[j]->type !=
-                shapes::MESH) {
-              tmp_shape = shapes::ShapeConstPtr(shapes::createMeshFromShape(
-                  tmp_world->getObject(obj_id_[i])->shapes_[j].get()));
-            } else {
-              tmp_shape = tmp_world->getObject(obj_id_[i])->shapes_[j];
-            }
-          }
-
-          if (!tmp_shape || !tmp_shape.get())
-            throw_pretty("Could not extract shape");
-
-          collision_detection::FCLGeometryConstPtr g =
-              collision_detection::createCollisionGeometry(
-                  tmp_shape, tmp_world->getObject(obj_id_[i]).get());
-          geo_world_.at(obj_id_[i]).push_back(g);
-          trans_world_.at(obj_id_[i])
-              .push_back(fcl::Transform3f(collision_detection::transform2fcl(
-                  tmp_world->getObject(obj_id_[i])->shape_poses_[j])));
-          fcl_world_.at(obj_id_[i])
-              .push_back(std::shared_ptr<fcl::CollisionObject>(
-                  new fcl::CollisionObject(
-                      g->collision_geometry_,
-                      collision_detection::transform2fcl(
-                          tmp_world->getObject(obj_id_[i])->shape_poses_[j]))));
-        }
-      }
-    }
-  }
-
-  void CollisionScene::updateCollisionRobot() {
-    for (auto& it : fcl_robot_) {
-      for (std::size_t i = 0; i < it.second.size(); ++i) {
-        collision_detection::CollisionGeometryData* cd =
-            static_cast<collision_detection::CollisionGeometryData*>(
-                it.second[i]->collisionGeometry()->getUserData());
-        it.second[i]->setTransform(collision_detection::transform2fcl(
-            ps_->getCurrentState().getCollisionBodyTransform(cd->ptr.link,
-                                                             cd->shape_index)));
-        it.second[i]->getTransform().transform(
-            it.second[i]->collisionGeometry()->aabb_center);
-      }
-    }
-  }
-
-  void CollisionScene::updateWorld(
-      const moveit_msgs::PlanningSceneWorldConstPtr& world) {
-    ps_->processPlanningSceneWorldMsg(*world);
-
-    if (compute_dist)
-      reinitializeCollisionWorld();
-  }
-
-  void CollisionScene::update(std::string joint, double value) {
-    try {
-      ps_->getCurrentStateNonConst().setVariablePosition(joint, value);
-    } catch (const std::exception& ex) {
-      throw_pretty("Exception while trying to update individual joint '"
-                   << joint << "': " << ex.what());
-    }
-    ps_->getCurrentStateNonConst().update(true);
-
-    // Update FCL robot link
-    if (compute_dist)
-      updateCollisionRobot();
-  }
-
-  void CollisionScene::update(Eigen::VectorXdRefConst x)
-  {
-    if (joint_index_.size() != x.rows())
-      throw_pretty("Size does not match, need vector size of "
-                   << joint_index_.size() << " but " << x.rows()
-                   << " is provided");
-
-    if (BaseType == BASE_TYPE::FIXED)
-    {
-      for (std::size_t i = 0; i < joint_index_.size(); i++)
-        ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
-            x(i));
-    }
-    else if (BaseType == BASE_TYPE::FLOATING)
-    {
-      ps_->getCurrentStateNonConst().setVariablePosition(
-          world_joint_ + "/trans_x", x(0));
-      ps_->getCurrentStateNonConst().setVariablePosition(
-          world_joint_ + "/trans_y", x(1));
-      ps_->getCurrentStateNonConst().setVariablePosition(
-          world_joint_ + "/trans_z", x(2));
-      KDL::Rotation rot = KDL::Rotation::EulerZYX(x(3), x(4), x(5));
-      Eigen::VectorXd quat(4);
-      rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/rot_x",
-          quat(0));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/rot_y",
-          quat(1));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/rot_z",
-          quat(2));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/rot_w",
-          quat(3));
-      for (std::size_t i = 6; i < joint_index_.size(); i++)
-        ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
-            x(i));
-    }
-    else if (BaseType == BASE_TYPE::PLANAR)
-    {
-      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/x",
-          x(0));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/y",
-          x(1));
-      ps_->getCurrentStateNonConst().setVariablePosition(world_joint_ + "/theta",
-          x(2));
-      for (std::size_t i = 3; i < joint_index_.size(); i++)
-        ps_->getCurrentStateNonConst().setVariablePosition(joint_index_[i],
-            x(i));
-    }
-    ps_->getCurrentStateNonConst().update(true);
-
-    // Update FCL robot state for collision distance computation
-    if (compute_dist)
-      updateCollisionRobot();
-  }
-
-  // Public overload returning only the distance
-  void CollisionScene::getDistance(const std::string& o1, const std::string& o2,
-                                   double& d, double safeDist) {
-    Eigen::Vector3d p1, p2;
-    getDistance(o1, o2, d, false, safeDist, p1, p2);
-  }
-
-  // Public overload computing the nearest points
-  void CollisionScene::getDistance(const std::string& o1, const std::string& o2,
-                                   double& d, Eigen::Vector3d& p1,
-                                   Eigen::Vector3d& p2, double safeDist) {
-    getDistance(o1, o2, d, true, safeDist, p1, p2);
-  }
-
-  // Private method to private functionality, wrapped via public overloads
-  void CollisionScene::getDistance(const std::string& o1, const std::string& o2,
-                                   double& d,
-                                   const bool calculateContactInformation,
-                                   const double safeDist, Eigen::Vector3d& p1,
-                                   Eigen::Vector3d& p2) {
-    fcls_ptr fcl1, fcl2;
-    if (fcl_robot_.find(o1) != fcl_robot_.end())
-      fcl1 = fcl_robot_.at(o1);
-    else if (fcl_world_.find(o1) != fcl_world_.end())
-      fcl1 = fcl_world_.at(o1);
-    else
-      throw_pretty("Object 1 not found!");
-
-    if (fcl_world_.find(o2) != fcl_world_.end())
-      fcl2 = fcl_world_.at(o2);
-    else if (fcl_robot_.find(o2) != fcl_robot_.end())
-      fcl2 = fcl_robot_.at(o2);
-    else
-      throw_pretty("Object 2 not found!");
-
-    fcl::DistanceRequest req;
-    req.enable_nearest_points = calculateContactInformation;
-    fcl::DistanceResult res;
-    d = distance(fcl1, fcl2, req, res, safeDist);
-
-    // distance() returns either a distance > 0 or -1 if in collision
-    if (d > 0) {
-      d = res.min_distance;
-
-      if (calculateContactInformation) {
-        fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
-        fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
-      }
-    } else if (d == -1) {  // If d == -1, we need to compute the contact to get
-                           // a penetration depth
-      fcl::CollisionRequest c_req;
-      c_req.enable_contact = true;
-      c_req.num_max_contacts = 500;
-      fcl::CollisionResult c_res;
-      computeContact(fcl1, fcl2, c_req, c_res, d, p1, p2);
-      d *= -1;
-      // ROS_INFO_STREAM("Penetration depth: "
-      //                 << d << " at world position=" << pos.transpose()
-      //                 << " with contact normal=" << norm.transpose());
-    } else {
-      throw_pretty("We should never end up here. Why?");
-    }
-  }
-
-  bool CollisionScene::isStateValid(bool self, double dist)
-  {
-    stateCheckCnt_++;
-    collision_detection::CollisionRequest req;
-    collision_detection::CollisionResult res;
-    if (self)
-    {
-      ps_->checkSelfCollision(req, res, ps_->getCurrentState(), *acm_);
-      if (res.collision)
       {
-        return false;
-      }
-    }
-    req.contacts = false;
-    if (dist > 0) req.distance = true;
-    ps_->getCollisionWorld()->checkRobotCollision(req, res,
-        *ps_->getCollisionRobot(), ps_->getCurrentState());
-    return dist == 0 ? !res.collision : res.distance > dist;
-  }
-
-  void CollisionScene::getRobotDistance(const std::string & link, bool self,
-      double & d, Eigen::Vector3d & p1, Eigen::Vector3d & p2,
-      Eigen::Vector3d & norm, Eigen::Vector3d & c1, Eigen::Vector3d & c2,
-      double safeDist)
-  {
-    fcls_ptr fcl_link;
-    if (fcl_robot_.find(link) != fcl_robot_.end())
-      fcl_link = fcl_robot_.at(link);
-    else
-    {
-      throw_pretty("Link not found!");
-    }
-    d = INFINITY;
-    fcl::DistanceRequest req(true);
-    fcl::DistanceResult res;
-    res.min_distance = INFINITY;
-    {
-      fcl::AABB sumAABB;
-      for (int i = 0; i < fcl_link.size(); i++)
-      {
-        fcl_link[i]->computeAABB();
-        sumAABB += fcl_link[i]->getAABB();
-      }
-      fcl_convert::fcl2Eigen(sumAABB.center(), c1);
-    }
-    if (self)
-    {
-      for (auto & it : fcl_robot_)
-      {
-        collision_detection::AllowedCollision::Type type =
-            collision_detection::AllowedCollision::ALWAYS;
-        if (link.compare(it.first) != 0 && acm_->getEntry(link, it.first, type))
+        switch (shape->type)
         {
-          if (type == collision_detection::AllowedCollision::NEVER)
+          case shapes::SPHERE:
           {
-            ROS_INFO_STREAM_THROTTLE(2,
-                "Checking between "<<link<<" and "<<it.first);
-            for (std::size_t i = 0; i < it.second.size(); i++)
+            const shapes::Sphere* s = static_cast<const shapes::Sphere*>(shape.get());
+            geometry.reset(new fcl::Sphere(s->radius));
+          }
+          break;
+          case shapes::BOX:
+          {
+            const shapes::Box* s = static_cast<const shapes::Box*>(shape.get());
+            const double* size = s->size;
+            geometry.reset(new fcl::Box(size[0], size[1], size[2]));
+          }
+          break;
+          case shapes::CYLINDER:
+          {
+            const shapes::Cylinder* s = static_cast<const shapes::Cylinder*>(shape.get());
+            geometry.reset(new fcl::Cylinder(s->radius, s->length));
+          }
+          break;
+          case shapes::CONE:
+          {
+            const shapes::Cone* s = static_cast<const shapes::Cone*>(shape.get());
+            geometry.reset(new fcl::Cone(s->radius, s->length));
+          }
+          break;
+          case shapes::MESH:
+          {
+            fcl::BVHModel<fcl::OBBRSS>* g = new fcl::BVHModel<fcl::OBBRSS>();
+            const shapes::Mesh* mesh = static_cast<const shapes::Mesh*>(shape.get());
+            if (mesh->vertex_count > 0 && mesh->triangle_count > 0)
             {
-              if (distance(fcl_link, it.second, req, res, safeDist) < 0)
-              {
-//              INDICATE_FAILURE
-                d = -1;
-                return; // WARNING;
-              }
-              else if (res.min_distance < d)
-              {
-                d = res.min_distance;
-                fcl_convert::fcl2Eigen(
-                    it.second[i]->getTransform().transform(
-                        it.second[i]->collisionGeometry()->aabb_center), c2);
-              }
+              std::vector<fcl::Triangle> tri_indices(mesh->triangle_count);
+              for (unsigned int i = 0; i < mesh->triangle_count; ++i)
+                tri_indices[i] =
+                    fcl::Triangle(mesh->triangles[3 * i], mesh->triangles[3 * i + 1], mesh->triangles[3 * i + 2]);
+
+              std::vector<fcl::Vec3f> points(mesh->vertex_count);
+              for (unsigned int i = 0; i < mesh->vertex_count; ++i)
+                points[i] = fcl::Vec3f(mesh->vertices[3 * i], mesh->vertices[3 * i + 1], mesh->vertices[3 * i + 2]);
+
+              g->beginModel();
+              g->addSubModel(points, tri_indices);
+              g->endModel();
             }
+            geometry.reset(g);
           }
-          else
+          break;
+          case shapes::OCTREE:
           {
-            ROS_INFO_STREAM_THROTTLE(2,
-                "Ignoring between "<<link<<" and "<<it.first);
+            const shapes::OcTree* g = static_cast<const shapes::OcTree*>(shape.get());
+            geometry.reset(new fcl::OcTree(g->octree));
           }
+          break;
+          default:
+            throw_pretty("This shape type ("<<((int)shape->type)<<") is not supported using FCL yet");
         }
       }
-    }
+      geometry->computeLocalAABB();
+      geometry->setUserData(reinterpret_cast<void*>(element.get()));
+      std::shared_ptr<fcl::CollisionObject> ret(new fcl::CollisionObject(geometry));
+      ret->setUserData(reinterpret_cast<void*>(element.get()));
 
-    for (auto & it : fcl_world_)
-    {
-      for (int i = 0; i < it.second.size(); i++)
-      {
-        it.second[i]->setTransform(trans_world_.at(it.first)[i]);
-        it.second[i]->computeAABB();
-      }
-
-      for (std::size_t i = 0; i < it.second.size(); i++)
-      {
-        if (distance(fcl_link, it.second, req, res, safeDist) < 0)
-        {
-          d = -1;
-          fcl_convert::fcl2Eigen(it.second[i]->getAABB().center(), c2);
-          return;
-        }
-        else if (res.min_distance < d)
-        {
-          d = res.min_distance;
-          fcl_convert::fcl2Eigen(it.second[i]->getAABB().center(), c2);
-        }
-      }
-    }
-
-    fcl_convert::fcl2Eigen(res.nearest_points[0], p1);
-    fcl_convert::fcl2Eigen(res.nearest_points[1], p2);
-
-    norm = p2 - p1;
+      return ret;
   }
 
-  double CollisionScene::distance(const fcls_ptr & fcl1, const fcls_ptr & fcl2,
-      const fcl::DistanceRequest & req, fcl::DistanceResult & res,
-      double safeDist)
+  bool CollisionScene::isAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionScene* scene)
   {
-    fcl::DistanceResult tmp;
-    for (int i = 0; i < fcl1.size(); i++)
-    {
-      for (int j = 0; j < fcl2.size(); j++)
+      KinematicElement* e1 = reinterpret_cast<KinematicElement*>(o1->getUserData());
+      KinematicElement* e2 = reinterpret_cast<KinematicElement*>(o2->getUserData());
+
+      bool isRobot1 = e1->isRobotLink || e1->ClosestRobotLink;
+      bool isRobot2 = e2->isRobotLink || e2->ClosestRobotLink;
+      // Don't check collisions between world objects
+      if(!isRobot1 && !isRobot2) return false;
+      // Skip self collisions if requested
+      if(isRobot1 && isRobot2 && !self) return false;
+      // Skip collisions between shapes within the same objects
+      if(e1->Parent==e2->Parent) return false;
+      // Skip collisions between bodies attached to the same object
+      if(e1->ClosestRobotLink&&e2->ClosestRobotLink&&e1->ClosestRobotLink==e2->ClosestRobotLink) return false;
+
+      if(isRobot1 && isRobot2)
       {
-        if (fcl1[i] == nullptr) throw_pretty("Object 1 not found!");
-
-        if (fcl2[j] == nullptr) throw_pretty("Object 2 not found!");
-
-        if (fcl2[j]->getAABB().distance(fcl2[j]->getAABB()) < safeDist)
-        {
-          if (fcl::distance(fcl1[i].get(), fcl2[j].get(), req, tmp) < 0)
-          {
-            throw_pretty(
-                "If this condition is triggered something has changed about "
-                "FCL's distance computation as this was not working in 0.3.4 "
-                "(Trusty). Need to reconsider logic - please open an issue on "
-                "GitHub.");
-
-            res = tmp;
-            res.min_distance = -1;
-            return -1;
-          }
-          else
-          {
-            // If the current closest distance is less than previous, update the
-            // DistanceResult object
-            if (tmp.min_distance < res.min_distance) res = tmp;
-
-            // The distance request returns 0 i.e. the two FCL objects are in
-            // contact. Now need to do a CollisionRequest in order to obtain the
-            // penetration depth and contact normals. However, we will return
-            // -1 here and have another method penetrationDepth carry out
-            // these computations.
-            if (res.min_distance == 0.0) return -1;
-          }
-
-          tmp.clear();
-        }
+          const std::string& name1 = e1->ClosestRobotLink?e1->ClosestRobotLink->Segment.getName():e1->Parent->Segment.getName();
+          const std::string& name2 = e2->ClosestRobotLink?e2->ClosestRobotLink->Segment.getName():e2->Parent->Segment.getName();
+          return scene->acm_.getAllowedCollision(name1, name2);
       }
-    }
-
-    return res.min_distance;
+      return true;
   }
 
-  void CollisionScene::computeContact(
-      const fcls_ptr& fcl1, const fcls_ptr& fcl2,
-      const fcl::CollisionRequest& req, fcl::CollisionResult& res,
-      double& penetration_depth, Eigen::Vector3d& pos, Eigen::Vector3d& norm) {
-    fcl::CollisionResult tmp;
-    penetration_depth = 0;
-    for (int i = 0; i < fcl1.size(); i++) {
-      for (int j = 0; j < fcl2.size(); j++) {
-        if (fcl1[i] == nullptr) throw_pretty("Object 1 not found!");
-        if (fcl2[j] == nullptr) throw_pretty("Object 2 not found!");
-
-        std::size_t num_contacts =
-            fcl::collide(fcl1[i].get(), fcl2[j].get(), req, tmp);
-
-        if (num_contacts == 0) {
-          throw_pretty("Objects are not in contact.");
-        } else {
-          ROS_INFO_STREAM("Objects have " << num_contacts
-                                          << " contact points.");
-
-          // Iterate over contacts and compare maximum penetration
-          for (std::size_t k = 0; k < num_contacts; k++) {
-            auto& contact = tmp.getContact(k);
-            // ROS_INFO_STREAM("Contact #" << k << " has depth of " << contact.penetration_depth);
-            if (contact.penetration_depth > penetration_depth) {
-              penetration_depth = contact.penetration_depth;
-              fcl_convert::fcl2Eigen(contact.normal, norm);
-              fcl_convert::fcl2Eigen(contact.pos, pos);
-              norm = norm.normalized();
-              res = tmp;
-              // ROS_INFO_STREAM("New deepest penetration depth: " << penetration_depth);
-            }
-          }
-        }
-        tmp.clear();
-      }
-    }
-  }
-
-  const robot_state::RobotState& CollisionScene::getCurrentState()
+  bool CollisionScene::collisionCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data)
   {
-    return ps_->getCurrentState();
+      CollisionData* data_ = reinterpret_cast<CollisionData*>(data);
+
+      if(!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
+
+      data_->Request.num_max_contacts = 1000;
+      data_->Result.clear();
+      fcl::collide(o1,o2,data_->Request, data_->Result);
+      data_->Done = data_->Result.isCollision();
+      return data_->Done;
+  }
+
+  bool CollisionScene::collisionCallbackDistance(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data, double& dist)
+  {
+      DistanceData* data_ = reinterpret_cast<DistanceData*>(data);
+
+      if(!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
+      data_->Request.enable_nearest_points = false;
+      data_->Result.clear();
+      fcl::distance(o1,o2,data_->Request, data_->Result);
+      int num_contacts = data_->Distance = std::min(data_->Distance, data_->Result.min_distance);
+
+      CollisionProxy p;
+      p.e1 = reinterpret_cast<KinematicElement*>(o1->getUserData());
+      p.e2 = reinterpret_cast<KinematicElement*>(o2->getUserData());
+
+      p.distance = data_->Result.min_distance;
+      fcl_convert::fcl2Eigen(data_->Result.nearest_points[0], p.contact1);
+      fcl_convert::fcl2Eigen(data_->Result.nearest_points[1], p.contact2);
+      p.normal1 = p.contact1.normalized();
+      p.normal2 = p.contact2.normalized();
+      p.distance = (p.contact1-p.contact2).norm();
+      data_->Distance = std::min(data_->Distance, p.distance);
+      data_->Proxies.push_back(p);
+
+      return false;
+  }
+
+  bool CollisionScene::collisionCallbackContacts(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data, double& dist)
+  {
+      ContactData* data_ = reinterpret_cast<ContactData*>(data);
+
+      if(!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
+
+      data_->Request.enable_contact = true;
+      data_->Request.num_max_contacts = 1000;
+      data_->Result.clear();
+      int num_contacts = fcl::collide(o1, o2, data_->Request, data_->Result);
+      CollisionProxy p;
+      p.e1 = reinterpret_cast<KinematicElement*>(o1->getUserData());
+      p.e2 = reinterpret_cast<KinematicElement*>(o2->getUserData());
+
+      if(num_contacts>0)
+      {
+          p.distance = -data_->Result.getContact(0).penetration_depth;
+          for(int i=0; i<num_contacts; i++)
+          {
+              const fcl::Contact& contact = data_->Result.getContact(i);
+              if(p.distance>-contact.penetration_depth)
+              {
+                  p.distance=-contact.penetration_depth;
+                  if(reinterpret_cast<KinematicElement*>(contact.o1->getUserData())==p.e1)
+                  {
+                      fcl_convert::fcl2Eigen(contact.pos, p.contact1);
+                      fcl_convert::fcl2Eigen(contact.normal, p.normal1);
+                      p.normal1.normalize();
+                  }
+                  else if(reinterpret_cast<KinematicElement*>(contact.o2->getUserData())==p.e2)
+                  {
+                      fcl_convert::fcl2Eigen(contact.pos, p.contact2);
+                      fcl_convert::fcl2Eigen(contact.normal, p.normal2);
+                      p.normal2.normalize();
+                  }
+              }
+          }
+      }
+      else
+      {
+          data_->DistanceRequest.enable_nearest_points = true;
+          data_->DistanceRequest.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
+          fcl::distance(o1,o2,data_->DistanceRequest, data_->DistanceResult);
+          fcl_convert::fcl2Eigen(data_->DistanceResult.nearest_points[0], p.contact1);
+          fcl_convert::fcl2Eigen(data_->DistanceResult.nearest_points[1], p.contact2);
+          p.normal1 = p.contact1.normalized();
+          p.normal2 = p.contact2.normalized();
+          p.distance = (p.contact1-p.contact2).norm();
+      }
+      data_->Distance = std::min(data_->Distance, p.distance);
+      data_->Proxies.push_back(p);
+
+      return false;
+  }
+
+  bool CollisionScene::isStateValid(bool self)
+  {
+      std::shared_ptr<fcl::BroadPhaseCollisionManager> manager(new fcl::DynamicAABBTreeCollisionManager());
+      manager->registerObjects(fcl_objects_);
+      CollisionData data(this);
+      data.Self = self;
+      manager->collide(&data, &CollisionScene::collisionCallback);
+      return !data.Result.isCollision();
+  }
+
+  std::vector<CollisionProxy> CollisionScene::getCollisionDistance(bool self, bool computePenetrationDepth)
+  {
+      std::shared_ptr<fcl::BroadPhaseCollisionManager> manager(new fcl::DynamicAABBTreeCollisionManager());
+      manager->registerObjects(fcl_objects_);
+      if(computePenetrationDepth)
+      {
+          ContactData data(this);
+          data.Self = self;
+          manager->distance(&data, &CollisionScene::collisionCallbackContacts);
+          return data.Proxies;
+      }
+      else
+      {
+          DistanceData data(this);
+          data.Self = self;
+          manager->distance(&data, &CollisionScene::collisionCallbackDistance);
+          return data.Proxies;
+      }
   }
 
   planning_scene::PlanningScenePtr CollisionScene::getPlanningScene()
@@ -625,39 +435,17 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
     return ps_;
   }
 
-  void CollisionScene::getCollisionLinkTranslation(const std::string & name,
-      Eigen::Vector3d & translation)
+  Eigen::Vector3d CollisionScene::getTranslation(const std::string & name)
   {
-    if (fcl_robot_.find(name) == fcl_robot_.end()) throw_pretty("Robot not found!");;
-    std::map<std::string, fcls_ptr>::iterator it = fcl_robot_.find(name);
-    fcl::AABB sumAABB;
-    for (int i = 0; i < it->second.size(); i++)
-    {
-      it->second[i]->computeAABB();
-      sumAABB += it->second[i]->getAABB();
-    }
-    fcl_convert::fcl2Eigen(sumAABB.center(), translation);
-  }
-
-  void CollisionScene::getWorldObjectTranslation(const std::string & name,
-      Eigen::Vector3d & translation)
-  {
-    if (fcl_world_.find(name) == fcl_world_.end()) throw_pretty("Robot not found!");;
-    std::map<std::string, fcls_ptr>::iterator it = fcl_world_.find(name);
-    fcl::AABB sumAABB;
-    for (int i = 0; i < it->second.size(); i++)
-    {
-      it->second[i]->computeAABB();
-      sumAABB += it->second[i]->getAABB();
-    }
-    fcl_convert::fcl2Eigen(sumAABB.center(), translation);
-  }
-
-  void CollisionScene::getTranslation(const std::string & name,
-      Eigen::Vector3d & translation)
-  {
-    getCollisionLinkTranslation(name, translation);
-    getWorldObjectTranslation(name, translation);
+      for(fcl::CollisionObject* object : fcl_objects_)
+      {
+          KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
+          if(element->Segment.getName()==name)
+          {
+              return Eigen::Map<Eigen::Vector3d>(element->Frame.p.data);
+          }
+      }
+      throw_pretty("Robot not found!");;
   }
 
 ///////////////////////////////////////////////////////////////
@@ -706,7 +494,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
       kinematica_.Instantiate(init.JointGroup, model_, name_);
       group = model_->getJointModelGroup(init.JointGroup);
 
-      collision_scene_.reset(new CollisionScene(name_));
+      collision_scene_.reset(new CollisionScene(name_, model_, kinematica_.getRootFrameName()));
 
       BaseType = kinematica_.getControlledBaseType();
 
@@ -721,13 +509,25 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
                   << "/PlanningScene'");
       }
 
+      collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+
+      AllowedCollisionMatrix acm;
+      std::vector<std::string> acm_names;
+      collision_scene_->getPlanningScene()->getAllowedCollisionMatrix().getAllEntryNames(acm_names);
+      for(auto& name1 : acm_names)
       {
-          planning_scene::PlanningScenePtr tmp(new planning_scene::PlanningScene(model_));
-          moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
-          tmp->getPlanningSceneMsg(*msg.get());
-          collision_scene_->initialise(msg, kinematica_.getJointNames(), "", BaseType, model_);
+          for(auto& name2 : acm_names)
+          {
+              collision_detection::AllowedCollision::Type type = collision_detection::AllowedCollision::Type::ALWAYS;
+              collision_scene_->getPlanningScene()->getAllowedCollisionMatrix().getAllowedCollision(name1, name2, type);
+              if(type == collision_detection::AllowedCollision::Type::ALWAYS)
+              {
+                  acm.setEntry(name1, name2);
+              }
+          }
       }
-      
+      collision_scene_->setACM(acm);
+
       if (debug_) INFO_NAMED(name_, "Exotica Scene initialized");
   }
 
@@ -738,8 +538,8 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
 
   void Scene::Update(Eigen::VectorXdRefConst x)
   {
-      collision_scene_->update(x);
       kinematica_.Update(x);
+      collision_scene_->updateCollisionObjectTransforms();
       if (debug_) publishScene();
   }
 
@@ -758,14 +558,20 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
   {
     moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
     scene->getPlanningSceneMsg(*msg.get());
-    collision_scene_->initialise(msg, kinematica_.getJointNames(), "", BaseType, model_);
     updateSceneFrames();
+    collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
   void Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene)
   {
-    collision_scene_->initialise(scene, kinematica_.getJointNames(), "", BaseType,model_);
     updateSceneFrames();
+    collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+  }
+
+  void Scene::updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world)
+  {
+      updateSceneFrames();
+      collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
   CollisionScene_ptr & Scene::getCollisionScene()
@@ -828,13 +634,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
     // Update Kinematica internal state
     kinematica_.setModelState(x);
 
-    // Update Planning Scene State
-    int i = 0;
-    for (auto& joint : getModelJointNames())
-    {
-      collision_scene_->update(joint, x(i));
-      i++;
-    }
+    collision_scene_->updateCollisionObjectTransforms();
 
     if (debug_) publishScene();
   }
@@ -843,9 +643,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
     // Update Kinematica internal state
     kinematica_.setModelState(x);
 
-    // Update Planning Scene State
-    for (auto& joint : x)
-      collision_scene_->update(joint.first, joint.second);
+    collision_scene_->updateCollisionObjectTransforms();
 
     if (debug_) publishScene();
   }
@@ -865,7 +663,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
       std::stringstream ss(scene);
       getPlanningScene()->loadGeometryFromStream(ss);
       updateSceneFrames();
-      collision_scene_->reinitializeCollisionWorld();
+      collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
   void Scene::loadSceneFile(const std::string& file_name)
@@ -873,7 +671,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
       std::ifstream ss(parsePath(file_name));
       getPlanningScene()->loadGeometryFromStream(ss);
       updateSceneFrames();
-      collision_scene_->reinitializeCollisionWorld();
+      collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
   std::string Scene::getScene()
@@ -887,7 +685,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
   {
       getPlanningScene()->removeAllCollisionObjects();
       updateSceneFrames();
-      collision_scene_->reinitializeCollisionWorld();
+      collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
   void Scene::updateSceneFrames()

@@ -47,6 +47,8 @@
 #include <exotica/Server.h>
 #include <tf_conversions/tf_kdl.h>
 
+#include <exotica/KinematicElement.h>
+
 #define ROOT  -1     //!< The value of the parent for the root segment
 
 namespace exotica
@@ -98,26 +100,6 @@ namespace exotica
       KinematicsRequest();
       KinematicRequestFlags Flags;
       std::vector<KinematicFrameRequest> Frames; //!< The segments to which the end-effectors are attached
-  };
-
-  class KinematicElement
-  {
-  public:
-      KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment);
-      void updateClosestRobotLink();
-      int Id;
-      int ControlId;
-      bool IsControlled;
-      std::shared_ptr<KinematicElement> Parent;
-      std::vector<std::shared_ptr<KinematicElement>> Children;
-      std::shared_ptr<KinematicElement> ClosestRobotLink;
-      KDL::Segment Segment;
-      KDL::Frame Frame;
-      std::vector<double> JointLimits;
-      shapes::ShapeConstPtr Shape;
-      bool isRobotLink;
-  private:
-      void setChildrenClosestRobotLink(std::shared_ptr<KinematicElement> element);
   };
 
   struct KinematicFrame

@@ -46,36 +46,6 @@
 namespace exotica
 {
 
-KinematicElement::KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id), IsControlled(false), ControlId(-1), Shape(nullptr), isRobotLink(false), ClosestRobotLink(nullptr)
-{
-
-}
-
-void KinematicElement::setChildrenClosestRobotLink(std::shared_ptr<KinematicElement> element)
-{
-    ClosestRobotLink = element;
-    for(auto& child : Children)
-    {
-        child->setChildrenClosestRobotLink(element);
-    }
-}
-
-void KinematicElement::updateClosestRobotLink()
-{
-    std::shared_ptr<KinematicElement> element = Parent;
-    ClosestRobotLink = nullptr;
-    while(element && element->Id>0)
-    {
-        if(element->isRobotLink)
-        {
-            ClosestRobotLink = element;
-            break;
-        }
-        element = element->Parent;
-    }
-    setChildrenClosestRobotLink(ClosestRobotLink);
-}
-
 KinematicResponse::KinematicResponse() : Flags(KIN_FK)
 {
 

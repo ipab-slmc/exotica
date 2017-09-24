@@ -5,6 +5,7 @@
 #include <kdl/segment.hpp>
 #include <kdl/frames.hpp>
 #include <geometric_shapes/shapes.h>
+#include <stack>
 
 class KinematicElement
 {
@@ -27,7 +28,7 @@ public:
             }
             element = element->Parent;
         }
-        setChildrenClosestRobotLink(ClosestRobotLink);
+        setChildrenClosestRobotLink();
     }
 
     int Id;
@@ -42,12 +43,16 @@ public:
     shapes::ShapeConstPtr Shape;
     bool isRobotLink;
 private:
-    void setChildrenClosestRobotLink(std::shared_ptr<KinematicElement> element)
+    inline void setChildrenClosestRobotLink()
     {
-        ClosestRobotLink = element;
-        for(auto& child : Children)
+        std::stack<std::shared_ptr<KinematicElement>> elements;
+        for(auto child : Children) elements.push(child);
+        while(!elements.empty())
         {
-            child->setChildrenClosestRobotLink(element);
+            auto parent = elements.top();
+            elements.pop();
+            parent->ClosestRobotLink = ClosestRobotLink;
+            for(auto child : parent->Children) elements.push(child);
         }
     }
 };

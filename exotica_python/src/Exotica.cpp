@@ -425,6 +425,7 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("getSolvers", &Setup::getSolvers);
     setup.def_static("getProblems",&Setup::getProblems);
     setup.def_static("getMaps",&Setup::getMaps);
+    setup.def_static("getCollisionScenes",&Setup::getCollisionScenes);
     setup.def_static("createSolver", &createSolver, py::return_value_policy::take_ownership);
     setup.def_static("createMap",&createMap, py::return_value_policy::take_ownership);
     setup.def_static("createProblem",&createProblem, py::return_value_policy::take_ownership);

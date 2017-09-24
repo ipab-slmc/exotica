@@ -58,6 +58,12 @@ namespace exotica
       {
           HIGHLIGHT(" '"<<s<<"'");
       }
+      HIGHLIGHT("Registered collision scenes:");
+      std::vector<std::string> scenes =  Instance()->scenes_.getDeclaredClasses();
+      for(std::string s : scenes)
+      {
+          HIGHLIGHT(" '"<<s<<"'");
+      }
   }
 
   void appendInit(std::shared_ptr<InstantiableBase> it, std::vector<Initializer>& ret)
@@ -100,9 +106,10 @@ namespace exotica
   std::vector<std::string> Setup::getSolvers() {return Instance()->solvers_.getDeclaredClasses();}
   std::vector<std::string> Setup::getProblems() {return Instance()->problems_.getDeclaredClasses();}
   std::vector<std::string> Setup::getMaps() {return Instance()->maps_.getDeclaredClasses();}
+  std::vector<std::string> Setup::getCollisionScenes() {return Instance()->scenes_.getDeclaredClasses();}
 
   Setup::Setup() : solvers_("exotica","exotica::MotionSolver"), maps_("exotica","exotica::TaskMap"),
-      problems_(PlanningProblem_fac::Instance())
+      problems_(PlanningProblem_fac::Instance()), scenes_("exotica","exotica::CollisionScene")
   {
 
   }

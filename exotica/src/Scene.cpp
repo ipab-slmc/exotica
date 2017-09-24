@@ -113,7 +113,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
 /////////////////////// Collision Scene ///////////////////////
 ///////////////////////////////////////////////////////////////
   CollisionScene::CollisionScene(const std::string & scene_name, robot_model::RobotModelPtr model, const std::string& root_name)
-      : compute_dist(true), ps_(new planning_scene::PlanningScene(model)), root_name_(root_name)
+      : compute_dist(true), root_name_(root_name)
   {
       HIGHLIGHT("FCL version: "<<FCL_VERSION);
   }
@@ -430,10 +430,6 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
       }
   }
 
-  planning_scene::PlanningScenePtr CollisionScene::getPlanningScene()
-  {
-    return ps_;
-  }
 
   Eigen::Vector3d CollisionScene::getTranslation(const std::string & name)
   {
@@ -493,6 +489,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
       }
       kinematica_.Instantiate(init.JointGroup, model_, name_);
       group = model_->getJointModelGroup(init.JointGroup);
+      ps_.reset(new planning_scene::PlanningScene(model_));
 
       collision_scene_.reset(new CollisionScene(name_, model_, kinematica_.getRootFrameName()));
 
@@ -513,13 +510,13 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
 
       AllowedCollisionMatrix acm;
       std::vector<std::string> acm_names;
-      collision_scene_->getPlanningScene()->getAllowedCollisionMatrix().getAllEntryNames(acm_names);
+      ps_->getAllowedCollisionMatrix().getAllEntryNames(acm_names);
       for(auto& name1 : acm_names)
       {
           for(auto& name2 : acm_names)
           {
               collision_detection::AllowedCollision::Type type = collision_detection::AllowedCollision::Type::ALWAYS;
-              collision_scene_->getPlanningScene()->getAllowedCollisionMatrix().getAllowedCollision(name1, name2, type);
+              ps_->getAllowedCollisionMatrix().getAllowedCollision(name1, name2, type);
               if(type == collision_detection::AllowedCollision::Type::ALWAYS)
               {
                   acm.setEntry(name1, name2);
@@ -548,7 +545,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
     if(Server::isRos())
     {
         moveit_msgs::PlanningScene msg;
-        collision_scene_->getPlanningScene()->getPlanningSceneMsg(msg);
+        ps_->getPlanningSceneMsg(msg);
         ps_pub_.publish(msg);
     }
   }
@@ -559,15 +556,6 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
       {
           proxy_pub_.publish(collision_scene_->proxyToMarker(proxies));
       }
-  }
-
-  void Scene::setCollisionScene(
-      const planning_scene::PlanningSceneConstPtr & scene)
-  {
-    moveit_msgs::PlanningScenePtr msg(new moveit_msgs::PlanningScene());
-    scene->getPlanningSceneMsg(*msg.get());
-    updateSceneFrames();
-    collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
   void Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene)
@@ -604,7 +592,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
 
   planning_scene::PlanningScenePtr Scene::getPlanningScene()
   {
-    return collision_scene_->getPlanningScene();
+    return ps_;
   }
 
   exotica::KinematicTree & Scene::getSolver()
@@ -669,7 +657,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
   void Scene::loadScene(const std::string& scene)
   {
       std::stringstream ss(scene);
-      getPlanningScene()->loadGeometryFromStream(ss);
+      ps_->loadGeometryFromStream(ss);
       updateSceneFrames();
       collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
@@ -677,7 +665,7 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
   void Scene::loadSceneFile(const std::string& file_name)
   {
       std::ifstream ss(parsePath(file_name));
-      getPlanningScene()->loadGeometryFromStream(ss);
+      ps_->loadGeometryFromStream(ss);
       updateSceneFrames();
       collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
@@ -685,13 +673,13 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
   std::string Scene::getScene()
   {
       std::stringstream ss;
-      getPlanningScene()->saveGeometryToStream(ss);
+      ps_->saveGeometryToStream(ss);
       return ss.str();
   }
 
   void Scene::cleanScene()
   {
-      getPlanningScene()->removeAllCollisionObjects();
+      ps_->removeAllCollisionObjects();
       updateSceneFrames();
       collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
@@ -700,10 +688,8 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
   {
       kinematica_.resetModel();
 
-      planning_scene::PlanningScenePtr ps = collision_scene_->getPlanningScene();
-
       // Add world objects
-      for(auto& object : *ps->getWorld())
+      for(auto& object : *ps_->getWorld())
       {
           if(object.second->shapes_.size())
           {
@@ -723,16 +709,16 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
       }
 
       // Add robot collision objects
-      ps->getCurrentStateNonConst().update(true);
+      ps_->getCurrentStateNonConst().update(true);
       const std::vector<const robot_model::LinkModel*>& links =
-          ps->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
+          ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
       for (int i = 0; i < links.size(); ++i)
       {
-          Eigen::Affine3d objTransform = ps->getCurrentState().getGlobalLinkTransform(links[i]);
+          Eigen::Affine3d objTransform = ps_->getCurrentState().getGlobalLinkTransform(links[i]);
 
           for (int j = 0; j < links[i]->getShapes().size(); ++j)
           {
-              Eigen::Affine3d trans = objTransform.inverse()*ps->getCurrentState().getCollisionBodyTransform(links[i], j);
+              Eigen::Affine3d trans = objTransform.inverse()*ps_->getCurrentState().getCollisionBodyTransform(links[i], j);
               kinematica_.AddElement(links[i]->getName()+"_collision_"+std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
           }
       }

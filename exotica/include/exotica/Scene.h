@@ -175,12 +175,6 @@ namespace exotica
       std::vector<CollisionProxy> getCollisionDistance(bool self, bool computePenetrationDepth = true);
 
       /**
-       * \brief Get the moveit planning scene
-       * @return  Moveit planning scene
-       */
-      planning_scene::PlanningScenePtr getPlanningScene();
-
-      /**
        * @brief      Gets the collision world links.
        *
        * @return     The collision world links.
@@ -244,9 +238,6 @@ namespace exotica
 
      std::vector<fcl::CollisionObject*> fcl_objects_;
 
-     /// Internal moveit planning scene
-     planning_scene::PlanningScenePtr ps_;
-
      /// Indicate if distance computation is required
      bool compute_dist;
 
@@ -278,7 +269,6 @@ namespace exotica
       std::shared_ptr<KinematicResponse> RequestKinematics(KinematicsRequest& Request);
       std::string getName();
       virtual void Update(Eigen::VectorXdRefConst x);
-      void setCollisionScene(const planning_scene::PlanningSceneConstPtr & scene);
       void setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene);
       CollisionScene_ptr & getCollisionScene();
       std::string getRootFrameName();
@@ -357,6 +347,9 @@ namespace exotica
 
       /// The collision scene
       CollisionScene_ptr collision_scene_;
+
+      /// Internal moveit planning scene
+      planning_scene::PlanningScenePtr ps_;
 
       /// Visual debug
       ros::Publisher ps_pub_;

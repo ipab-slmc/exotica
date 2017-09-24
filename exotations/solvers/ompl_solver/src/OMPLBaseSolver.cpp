@@ -31,8 +31,6 @@ namespace exotica
   {
     ompl::base::PlannerData data(ompl_simple_setup_->getSpaceInformation());
     ompl_simple_setup_->getPlanner()->getPlannerData(data);
-    int cnt = prob_->getScene()->getCollisionScene()->stateCheckCnt_;
-    prob_->getScene()->getCollisionScene()->stateCheckCnt_ = 0;
   }
 
   double OMPLBaseSolver::getPlanningTime()

@@ -59,6 +59,15 @@ namespace exotica
    * @return Random color
    */
   std_msgs::ColorRGBA randomColor();
+  inline std_msgs::ColorRGBA getColor(double r, double g, double b, double a = 1.0)
+  {
+      std_msgs::ColorRGBA ret;
+      ret.r = r;
+      ret.g = g;
+      ret.b = b;
+      ret.a = 1;
+      return ret;
+  }
 
   /**
    * @brief loadOBJ Loads mesh data from an OBJ file

@@ -121,42 +121,6 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
   {
   }
 
-  visualization_msgs::Marker CollisionScene::proxyToMarker(const std::vector<CollisionProxy>& proxies)
-  {
-      visualization_msgs::Marker ret;
-      ret.header.frame_id = "exotica/"+root_name_;
-      ret.action = visualization_msgs::Marker::ADD;
-      ret.frame_locked = false;
-      ret.ns = "Proxies";
-      ret.color.a=1.0;
-      ret.id=0;
-      ret.type = visualization_msgs::Marker::LINE_LIST;
-      ret.points.resize(proxies.size()*6);
-      ret.colors.resize(proxies.size()*6);
-      ret.scale.x = 0.005;
-      double normalLength = 0.05;
-      std_msgs::ColorRGBA normal = getColor(0.8,0.8,0.8);
-      std_msgs::ColorRGBA far = getColor(0.5,0.5,0.5);
-      std_msgs::ColorRGBA colliding = getColor(1,0,0);
-      for(int i=0; i<proxies.size();i++)
-      {
-          KDL::Vector c1 = proxies[i].e1->Frame*KDL::Vector(proxies[i].contact1(0), proxies[i].contact1(1), proxies[i].contact1(2));
-          KDL::Vector c2 = proxies[i].e2->Frame*KDL::Vector(proxies[i].contact2(0), proxies[i].contact2(1), proxies[i].contact2(2));
-          KDL::Vector n1 = proxies[i].e1->Frame*KDL::Vector(proxies[i].normal1(0), proxies[i].normal1(1), proxies[i].normal1(2));
-          KDL::Vector n2 = proxies[i].e2->Frame*KDL::Vector(proxies[i].normal2(0), proxies[i].normal2(1), proxies[i].normal2(2));
-          tf::pointKDLToMsg(c1, ret.points[i*6]);
-          tf::pointKDLToMsg(c2, ret.points[i*6+1]);
-          tf::pointKDLToMsg(c1, ret.points[i*6+2]);
-          tf::pointKDLToMsg(c1+n1*normalLength, ret.points[i*6+3]);
-          tf::pointKDLToMsg(c2, ret.points[i*6+4]);
-          tf::pointKDLToMsg(c2+n2*normalLength, ret.points[i*6+5]);
-          ret.colors[i*6] = proxies[i].distance>0?far:colliding;
-          ret.colors[i*6+1] = proxies[i].distance>0?far:colliding;
-          ret.colors[i*6+2]=ret.colors[i*6+3]=ret.colors[i*6+4]=ret.colors[i*6+5]=normal;
-      }
-      return ret;
-  }
-
   void CollisionScene::updateCollisionObjects(const std::map<std::string, std::shared_ptr<KinematicElement>>& objects)
   {
       fcl_objects_.resize(objects.size());
@@ -552,8 +516,44 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
   {
       if(Server::isRos())
       {
-          proxy_pub_.publish(collision_scene_->proxyToMarker(proxies));
+          proxy_pub_.publish(proxyToMarker(proxies, kinematica_.getRootFrameName()));
       }
+  }
+
+  visualization_msgs::Marker Scene::proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame)
+  {
+      visualization_msgs::Marker ret;
+      ret.header.frame_id = "exotica/"+frame;
+      ret.action = visualization_msgs::Marker::ADD;
+      ret.frame_locked = false;
+      ret.ns = "Proxies";
+      ret.color.a=1.0;
+      ret.id=0;
+      ret.type = visualization_msgs::Marker::LINE_LIST;
+      ret.points.resize(proxies.size()*6);
+      ret.colors.resize(proxies.size()*6);
+      ret.scale.x = 0.005;
+      double normalLength = 0.05;
+      std_msgs::ColorRGBA normal = getColor(0.8,0.8,0.8);
+      std_msgs::ColorRGBA far = getColor(0.5,0.5,0.5);
+      std_msgs::ColorRGBA colliding = getColor(1,0,0);
+      for(int i=0; i<proxies.size();i++)
+      {
+          KDL::Vector c1 = proxies[i].e1->Frame*KDL::Vector(proxies[i].contact1(0), proxies[i].contact1(1), proxies[i].contact1(2));
+          KDL::Vector c2 = proxies[i].e2->Frame*KDL::Vector(proxies[i].contact2(0), proxies[i].contact2(1), proxies[i].contact2(2));
+          KDL::Vector n1 = proxies[i].e1->Frame*KDL::Vector(proxies[i].normal1(0), proxies[i].normal1(1), proxies[i].normal1(2));
+          KDL::Vector n2 = proxies[i].e2->Frame*KDL::Vector(proxies[i].normal2(0), proxies[i].normal2(1), proxies[i].normal2(2));
+          tf::pointKDLToMsg(c1, ret.points[i*6]);
+          tf::pointKDLToMsg(c2, ret.points[i*6+1]);
+          tf::pointKDLToMsg(c1, ret.points[i*6+2]);
+          tf::pointKDLToMsg(c1+n1*normalLength, ret.points[i*6+3]);
+          tf::pointKDLToMsg(c2, ret.points[i*6+4]);
+          tf::pointKDLToMsg(c2+n2*normalLength, ret.points[i*6+5]);
+          ret.colors[i*6] = proxies[i].distance>0?far:colliding;
+          ret.colors[i*6+1] = proxies[i].distance>0?far:colliding;
+          ret.colors[i*6+2]=ret.colors[i*6+3]=ret.colors[i*6+4]=ret.colors[i*6+5]=normal;
+      }
+      return ret;
   }
 
   void Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene)

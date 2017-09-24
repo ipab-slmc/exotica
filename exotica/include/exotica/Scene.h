@@ -152,8 +152,6 @@ namespace exotica
        */
       virtual ~CollisionScene();
 
-      visualization_msgs::Marker proxyToMarker(const std::vector<CollisionProxy>& proxies);
-
       static bool isAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionScene* scene);
       static bool collisionCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data);
       static bool collisionCallbackDistance(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data, double& dist);
@@ -325,6 +323,7 @@ namespace exotica
 
       void publishScene();
       void publishProxies(const std::vector<CollisionProxy>& proxies);
+      visualization_msgs::Marker proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame);
       void loadScene(const std::string& scene);
       void loadSceneFile(const std::string& file_name);
       std::string getScene();

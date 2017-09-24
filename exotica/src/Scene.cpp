@@ -60,6 +60,47 @@ namespace fcl_convert
 }
 namespace exotica
 {
+
+AllowedCollisionMatrix::AllowedCollisionMatrix()
+{
+
+}
+
+AllowedCollisionMatrix::AllowedCollisionMatrix(const AllowedCollisionMatrix& acm)
+{
+    entries_ = acm.entries_;
+}
+
+void AllowedCollisionMatrix::clear()
+{
+    entries_.clear();
+}
+
+bool AllowedCollisionMatrix::hasEntry(const std::string& name) const
+{
+    return entries_.find(name)==entries_.end();
+}
+
+void AllowedCollisionMatrix::setEntry(const std::string& name1, const std::string& name2)
+{
+    entries_[name1].insert(name2);
+}
+
+void AllowedCollisionMatrix::getAllEntryNames(std::vector<std::string>& names) const
+{
+    names.clear();
+    for(auto& it : entries_)
+    {
+        names.push_back(it.first);
+    }
+}
+bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const std::string& name2) const
+{
+    auto it = entries_.find(name1);
+    if(it==entries_.end()) return true;
+    return it->second.find(name2)==it->second.end();
+}
+
 ///////////////////////////////////////////////////////////////
 /////////////////////// Collision Scene ///////////////////////
 ///////////////////////////////////////////////////////////////

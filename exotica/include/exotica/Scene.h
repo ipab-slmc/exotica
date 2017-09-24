@@ -57,11 +57,53 @@
 
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
+#include <unordered_set>
+#include <unordered_map>
+
 namespace exotica
 {
   typedef std::vector<collision_detection::FCLGeometryConstPtr> geos_ptr;
   typedef std::vector<std::shared_ptr<fcl::CollisionObject> > fcls_ptr;
 
+  class AllowedCollisionMatrix
+  {
+  public:
+      AllowedCollisionMatrix();
+      AllowedCollisionMatrix(const AllowedCollisionMatrix& acm);
+      void clear();
+      bool hasEntry(const std::string& name) const;
+      void setEntry(const std::string& name1, const std::string& name2);
+      void getAllEntryNames(std::vector<std::string>& names) const;
+      bool getAllowedCollision(const std::string& name1, const std::string& name2) const;
+  private:
+      std::unordered_map<std::string, std::unordered_set<std::string>> entries_;
+  };
+
+  struct CollisionProxy
+  {
+      CollisionProxy() : e1(nullptr), e2(nullptr), distance(0) {}
+      KinematicElement* e1;
+      KinematicElement* e2;
+      Eigen::Vector3d contact1;
+      Eigen::Vector3d normal1;
+      Eigen::Vector3d contact2;
+      Eigen::Vector3d normal2;
+      double distance;
+
+      std::string print() const
+      {
+          std::stringstream ss;
+          if(e1 && e2)
+          {
+              ss<<"Proxy: '"<<e1->Segment.getName()<<"' - '"<<e2->Segment.getName()<<"', c1: "<<contact1.transpose()<<" c1: "<<contact2.transpose()<<" d: "<<distance;
+          }
+          else
+          {
+              ss<<"Proxy (empty)";
+          }
+          return ss.str();
+      }
+  };
 /// The class of collision scene
   class CollisionScene : public Uncopyable
   {

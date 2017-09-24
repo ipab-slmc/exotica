@@ -334,6 +334,7 @@ namespace exotica
       }
 
       void publishScene();
+      void publishProxies(const std::vector<CollisionProxy>& proxies);
       void loadScene(const std::string& scene);
       void loadSceneFile(const std::string& file_name);
       std::string getScene();
@@ -359,6 +360,7 @@ namespace exotica
 
       /// Visual debug
       ros::Publisher ps_pub_;
+      ros::Publisher proxy_pub_;
 
       std::map<std::string, AttachedObject> attached_objects_;
   };

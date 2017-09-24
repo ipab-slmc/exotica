@@ -499,8 +499,8 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
       BaseType = kinematica_.getControlledBaseType();
 
       if (Server::isRos()) {
-        ps_pub_ = Server::advertise<moveit_msgs::PlanningScene>(
-            name_ +(name_==""?"":"/")+"PlanningScene", 100, true);
+        ps_pub_ = Server::advertise<moveit_msgs::PlanningScene>(name_ +(name_==""?"":"/")+"PlanningScene", 100, true);
+        proxy_pub_ = Server::advertise<visualization_msgs::Marker>(name_ +(name_==""?"":"/")+"CollisionProxies", 100, true);
         if (debug_)
           HIGHLIGHT_NAMED(
               name_,
@@ -551,6 +551,14 @@ bool AllowedCollisionMatrix::getAllowedCollision(const std::string& name1, const
         collision_scene_->getPlanningScene()->getPlanningSceneMsg(msg);
         ps_pub_.publish(msg);
     }
+  }
+
+  void Scene::publishProxies(const std::vector<CollisionProxy>& proxies)
+  {
+      if(Server::isRos())
+      {
+          proxy_pub_.publish(collision_scene_->proxyToMarker(proxies));
+      }
   }
 
   void Scene::setCollisionScene(

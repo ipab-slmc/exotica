@@ -458,19 +458,67 @@ void KinematicTree::publishFrames()
     }
 }
 
+KDL::Frame KinematicTree::FK(KinematicFrame& frame)
+{
+    frame.TempA = frame.FrameA->Frame * frame.FrameAOffset;
+    frame.TempB = frame.FrameB->Frame * frame.FrameBOffset;
+    frame.TempAB = frame.TempB.Inverse()*frame.TempA;
+    return frame.TempAB;
+}
+
+KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB)
+{
+    KinematicFrame frame;
+    frame.FrameA = elementA;
+    frame.FrameB = elementB;
+    frame.FrameAOffset = offsetA;
+    frame.FrameBOffset = offsetB;
+    return FK(frame);
+}
+
+KDL::Frame KinematicTree::FK(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB)
+{
+    std::string nameA = elementA==""?Root->Segment.getName():elementA;
+    std::string nameB = elementB==""?Root->Segment.getName():elementB;
+    auto A = TreeMap.find(nameA);
+    if(A==TreeMap.end()) throw_pretty("Can't find link '"<<nameA<<"'!");
+    auto B = TreeMap.find(nameB);
+    if(B==TreeMap.end()) throw_pretty("Can't find link '"<<nameB<<"'!");
+    return FK(A->second, offsetA, B->second, offsetB);
+}
+
 void KinematicTree::UpdateFK()
 {
     int i = 0;
     for(KinematicFrame&  frame : Solution->Frame)
     {
-        frame.TempA = frame.FrameA->Frame * frame.FrameAOffset;
-        frame.TempB = frame.FrameB->Frame * frame.FrameBOffset;
-        frame.TempAB = frame.TempB.Inverse()*frame.TempA;
-        Solution->Phi(i) = frame.TempAB;
+        Solution->Phi(i) = FK(frame);
         i++;
     }
 }
 
+Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB)
+{
+    KinematicFrame frame;
+    frame.FrameA = elementA;
+    frame.FrameB = elementB;
+    frame.FrameAOffset = offsetA;
+    frame.FrameBOffset = offsetB;
+    KDL::Jacobian ret(NumControlledJoints);
+    ComputeJ(frame, ret);
+    return ret.data;
+}
+
+Eigen::MatrixXd KinematicTree::Jacobian(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB)
+{
+    std::string nameA = elementA==""?Root->Segment.getName():elementA;
+    std::string nameB = elementB==""?Root->Segment.getName():elementB;
+    auto A = TreeMap.find(nameA);
+    if(A==TreeMap.end()) throw_pretty("Can't find link '"<<nameA<<"'!");
+    auto B = TreeMap.find(nameB);
+    if(B==TreeMap.end()) throw_pretty("Can't find link '"<<nameB<<"'!");
+    return Jacobian(A->second, offsetA, B->second, offsetB);
+}
 
 void KinematicTree::ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J)
 {

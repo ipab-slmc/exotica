@@ -164,7 +164,7 @@ namespace exotica
       ret.points.resize(proxies.size()*6);
       ret.colors.resize(proxies.size()*6);
       ret.scale.x = 0.005;
-      double normalLength = 0.05;
+      double normalLength = 0.01;
       std_msgs::ColorRGBA normal = getColor(0.8,0.8,0.8);
       std_msgs::ColorRGBA far = getColor(0.5,0.5,0.5);
       std_msgs::ColorRGBA colliding = getColor(1,0,0);
@@ -180,8 +180,7 @@ namespace exotica
           tf::pointKDLToMsg(c1+n1*normalLength, ret.points[i*6+3]);
           tf::pointKDLToMsg(c2, ret.points[i*6+4]);
           tf::pointKDLToMsg(c2+n2*normalLength, ret.points[i*6+5]);
-          ret.colors[i*6] = proxies[i].distance>0?far:colliding;
-          ret.colors[i*6+1] = proxies[i].distance>0?far:colliding;
+          ret.colors[i*6] = ret.colors[i*6+1] = proxies[i].distance>0?far:colliding;
           ret.colors[i*6+2]=ret.colors[i*6+3]=ret.colors[i*6+4]=ret.colors[i*6+5]=normal;
       }
       return ret;

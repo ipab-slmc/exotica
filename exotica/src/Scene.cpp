@@ -98,7 +98,7 @@ namespace exotica
                   << "/PlanningScene'");
       }
 
-      collision_scene_ = Setup::createCollisionScene("CollisionSceneFCL");
+      collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
       collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 
       AllowedCollisionMatrix acm;

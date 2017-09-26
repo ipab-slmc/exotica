@@ -250,17 +250,16 @@ bool CollisionSceneFCLLatest::collisionCallbackDistance(fcl::CollisionObjectd* o
     data_->Request.gjk_solver_type = fcl::GST_INDEP;
     data_->Result.clear();
     fcl::distance(o1,o2,data_->Request, data_->Result);
-    data_->Distance = std::min(data_->Distance, (double)data_->Result.min_distance);
 
     CollisionProxy p;
     p.e1 = reinterpret_cast<KinematicElement*>(o1->getUserData());
     p.e2 = reinterpret_cast<KinematicElement*>(o2->getUserData());
 
     p.distance = data_->Result.min_distance;
-    if(true || p.distance>0)
+    if(p.distance>0)
     {
-        KDL::Vector c1 = (p.distance>0?p.e1->Frame:KDL::Frame())*KDL::Vector(data_->Result.nearest_points[0](0), data_->Result.nearest_points[0](1), data_->Result.nearest_points[0](2));
-        KDL::Vector c2 = (p.distance>0?p.e2->Frame:KDL::Frame())*KDL::Vector(data_->Result.nearest_points[1](0), data_->Result.nearest_points[1](1), data_->Result.nearest_points[1](2));
+        KDL::Vector c1 = p.e1->Frame*KDL::Vector(data_->Result.nearest_points[0](0), data_->Result.nearest_points[0](1), data_->Result.nearest_points[0](2));
+        KDL::Vector c2 = p.e2->Frame*KDL::Vector(data_->Result.nearest_points[1](0), data_->Result.nearest_points[1](1), data_->Result.nearest_points[1](2));
         KDL::Vector n1 = c2-c1;
         KDL::Vector n2 = c1-c2;
         n1.Normalize();
@@ -272,28 +271,17 @@ bool CollisionSceneFCLLatest::collisionCallbackDistance(fcl::CollisionObjectd* o
     }
     else
     {
-        fcl::CollisionRequestd req;
-        fcl::CollisionResultd res;
-        req.enable_contact = true;
-        req.num_max_contacts = 2;
-        req.gjk_solver_type = fcl::GST_INDEP;
-        {
-            res.clear();
-            fcl::collide(o1, o2, req, res);
-            const fcl::Contactd& contact = res.getContact(0);
-            p.contact1 = contact.pos;
-            p.normal1 = contact.normal;
-            p.distance = contact.penetration_depth;
-        }
-        {
-            res.clear();
-            fcl::collide(o2, o1, req, res);
-            const fcl::Contactd& contact = res.getContact(0);
-            p.contact2 = contact.pos;
-            p.normal2 = contact.normal;
-            p.distance = contact.penetration_depth;
-        }
-
+        // Contact points are not reliable (FCL bug), use shape centres instead.
+        KDL::Vector c1 = p.e1->Frame.p;
+        KDL::Vector c2 = p.e2->Frame.p;
+        KDL::Vector n1 = c2-c1;
+        KDL::Vector n2 = c1-c2;
+        n1.Normalize();
+        n2.Normalize();
+        tf::vectorKDLToEigen(c1, p.contact1);
+        tf::vectorKDLToEigen(c2, p.contact2);
+        tf::vectorKDLToEigen(n1, p.normal1);
+        tf::vectorKDLToEigen(n2, p.normal2);
     }
     data_->Distance = std::min(data_->Distance, p.distance);
     data_->Proxies.push_back(p);

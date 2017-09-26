@@ -10,6 +10,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>exotica</depend>
   <depend>geometric_shapes</depend>
+  <depend>fcl_catkin</depend>
 
   <export>
     <exotica plugin="${prefix}/exotica_plugins.xml" />

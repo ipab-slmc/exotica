@@ -6,19 +6,17 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   exotica
   geometric_shapes
+  fcl_catkin
 )
-
-find_package(fcl 0.6.0 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES collision_scene_fcl_latest
-  CATKIN_DEPENDS exotica geometric_shapes
+  CATKIN_DEPENDS exotica geometric_shapes fcl_catkin
 )
 
 include_directories(
   include
-  /usr/local/include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -27,7 +25,7 @@ add_library(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-  fcl
+  ${catkin_LIBRARIES}
 )
 
 install(TARGETS ${PROJECT_NAME}

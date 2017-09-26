@@ -137,6 +137,14 @@ namespace exotica
     {
       try
       {
+        if (t >= T || t < -1) {
+          throw_pretty("Requested t="
+                       << t
+                       << " out of range, needs to be 0 =< t < " << T);
+        } else if (t == -1) {
+          t = T - 1;
+        }
+
         TaskMap_ptr task = TaskMaps.at(task_name);
         y[t].data.segment(task->Start, task->Length) = goal;
       }
@@ -150,6 +158,14 @@ namespace exotica
     {
       try
       {
+        if (t >= T || t < -1) {
+          throw_pretty("Requested t="
+                       << t
+                       << " out of range, needs to be 0 =< t < " << T);
+        } else if (t == -1) {
+          t = T - 1;
+        }
+
         TaskMap_ptr task = TaskMaps.at(task_name);
         Rho[t](task->Id) = rho;
       }
@@ -163,6 +179,14 @@ namespace exotica
     {
       try
       {
+        if (t >= T || t < -1) {
+          throw_pretty("Requested t="
+                       << t
+                       << " out of range, needs to be 0 =< t < " << T);
+        } else if (t == -1) {
+          t = T - 1;
+        }
+
         TaskMap_ptr task = TaskMaps.at(task_name);
         return y[t].data.segment(task->Start, task->Length);
       }
@@ -176,6 +200,14 @@ namespace exotica
     {
       try
       {
+        if (t >= T || t < -1) {
+          throw_pretty("Requested t="
+                       << t
+                       << " out of range, needs to be 0 =< t < " << T);
+        } else if (t == -1) {
+          t = T - 1;
+        }
+
         TaskMap_ptr task = TaskMaps.at(task_name);
         return Rho[t](task->Id);
       }

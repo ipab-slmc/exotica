@@ -170,10 +170,10 @@ namespace exotica
       std_msgs::ColorRGBA colliding = getColor(1,0,0);
       for(int i=0; i<proxies.size();i++)
       {
-          KDL::Vector c1 = proxies[i].e1->Frame*KDL::Vector(proxies[i].contact1(0), proxies[i].contact1(1), proxies[i].contact1(2));
-          KDL::Vector c2 = proxies[i].e2->Frame*KDL::Vector(proxies[i].contact2(0), proxies[i].contact2(1), proxies[i].contact2(2));
-          KDL::Vector n1 = proxies[i].e1->Frame.M*KDL::Vector(proxies[i].normal1(0), proxies[i].normal1(1), proxies[i].normal1(2));
-          KDL::Vector n2 = proxies[i].e2->Frame.M*KDL::Vector(proxies[i].normal2(0), proxies[i].normal2(1), proxies[i].normal2(2));
+          KDL::Vector c1 = KDL::Vector(proxies[i].contact1(0), proxies[i].contact1(1), proxies[i].contact1(2));
+          KDL::Vector c2 = KDL::Vector(proxies[i].contact2(0), proxies[i].contact2(1), proxies[i].contact2(2));
+          KDL::Vector n1 = KDL::Vector(proxies[i].normal1(0), proxies[i].normal1(1), proxies[i].normal1(2));
+          KDL::Vector n2 = KDL::Vector(proxies[i].normal2(0), proxies[i].normal2(1), proxies[i].normal2(2));
           tf::pointKDLToMsg(c1, ret.points[i*6]);
           tf::pointKDLToMsg(c2, ret.points[i*6+1]);
           tf::pointKDLToMsg(c1, ret.points[i*6+2]);

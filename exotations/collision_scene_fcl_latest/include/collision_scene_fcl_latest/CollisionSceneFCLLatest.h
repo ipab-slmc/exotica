@@ -48,8 +48,8 @@ public:
     {
         CollisionData(CollisionSceneFCLLatest* scene) : Scene(scene), Done(false), Self(true) {}
 
-        fcl::CollisionRequestf Request;
-        fcl::CollisionResultf Result;
+        fcl::CollisionRequestd Request;
+        fcl::CollisionResultd Result;
         CollisionSceneFCLLatest* Scene;
         bool Done;
         bool Self;
@@ -59,8 +59,8 @@ public:
     {
         DistanceData(CollisionSceneFCLLatest* scene) : Scene(scene), Self(true), Distance{1e300} {}
 
-        fcl::DistanceRequestf Request;
-        fcl::DistanceResultf Result;
+        fcl::DistanceRequestd Request;
+        fcl::DistanceResultd Result;
         CollisionSceneFCLLatest* Scene;
         std::vector<CollisionProxy> Proxies;
         double Distance;
@@ -74,9 +74,9 @@ public:
        */
     virtual ~CollisionSceneFCLLatest();
 
-    static bool isAllowedToCollide(fcl::CollisionObjectf* o1, fcl::CollisionObjectf* o2, bool self, CollisionSceneFCLLatest* scene);
-    static bool collisionCallback(fcl::CollisionObjectf* o1, fcl::CollisionObjectf* o2, void* data);
-    static bool collisionCallbackDistance(fcl::CollisionObjectf* o1, fcl::CollisionObjectf* o2, void* data, float& dist);
+    static bool isAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene);
+    static bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data);
+    static bool collisionCallbackDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data, double& dist);
 
     /**
        * \brief Check if the whole robot is valid (collision only).
@@ -101,7 +101,7 @@ public:
     virtual std::vector<std::string> getCollisionWorldLinks()
     {
         std::vector<std::string> tmp;
-        for (fcl::CollisionObjectf* object : fcl_objects_)
+        for (fcl::CollisionObjectd* object : fcl_objects_)
         {
             KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
             if(!element->ClosestRobotLink)
@@ -120,7 +120,7 @@ public:
     virtual std::vector<std::string> getCollisionRobotLinks()
     {
         std::vector<std::string> tmp;
-        for (fcl::CollisionObjectf* object : fcl_objects_)
+        for (fcl::CollisionObjectd* object : fcl_objects_)
         {
             KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
             if(element->ClosestRobotLink)
@@ -146,11 +146,11 @@ public:
 
 private:
 
-    static std::shared_ptr<fcl::CollisionObjectf> constructFclCollisionObject(std::shared_ptr<KinematicElement> element);
+    static std::shared_ptr<fcl::CollisionObjectd> constructFclCollisionObject(std::shared_ptr<KinematicElement> element);
 
-    std::map<std::string, std::shared_ptr<fcl::CollisionObjectf>> fcl_cache_;
+    std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> fcl_cache_;
 
-    std::vector<fcl::CollisionObjectf*> fcl_objects_;
+    std::vector<fcl::CollisionObjectd*> fcl_objects_;
 };
 
 typedef std::shared_ptr<CollisionSceneFCLLatest> CollisionSceneFCLLatest_ptr;

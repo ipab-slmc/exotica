@@ -32,37 +32,38 @@
 
 #include <collision_scene_fcl_latest/CollisionSceneFCLLatest.h>
 #include <exotica/Factory.h>
+#include <eigen_conversions/eigen_kdl.h>
 
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionSceneFCLLatest)
 
 namespace fcl_convert
 {
-void fcl2Eigen(const fcl::Vector3f & fcl, Eigen::Vector3d & eigen)
+void fcl2Eigen(const fcl::Vector3d & fcl, Eigen::Vector3d & eigen)
 {
     eigen(0) = fcl(0);
     eigen(1) = fcl(1);
     eigen(2) = fcl(2);
 }
 
-void fcl2Eigen(const fcl::Transform3f & fcl, Eigen::Vector3d & eigen)
+void fcl2Eigen(const fcl::Transform3d & fcl, Eigen::Vector3d & eigen)
 {
     eigen(0) = fcl.translation()(0);
     eigen(1) = fcl.translation()(1);
     eigen(2) = fcl.translation()(2);
 }
 
-void fcl2EigenTranslation(const fcl::Vector3f & fcl, Eigen::Vector3d & eigen)
+void fcl2EigenTranslation(const fcl::Vector3d & fcl, Eigen::Vector3d & eigen)
 {
     eigen(0) = fcl(0);
     eigen(1) = fcl(1);
     eigen(2) = fcl(2);
 }
 
-fcl::Transform3f KDL2fcl(const KDL::Frame& frame)
+fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
 {
-    fcl::Transform3f ret;
-    ret.matrix() = exotica::getFrame(frame).topLeftCorner<3,4>().cast<float>();
-    return ret;
+    Eigen::Affine3d ret;
+    tf::transformKDLToEigen(frame, ret);
+    return fcl::Transform3d(ret);
 }
 }
 
@@ -83,7 +84,7 @@ void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string,
     int i=0;
     for(const auto& object : objects)
     {
-        std::shared_ptr<fcl::CollisionObjectf> new_object;
+        std::shared_ptr<fcl::CollisionObjectd> new_object;
 
         const auto& cache_entry = fcl_cache_.find(object.first);
         if(cache_entry == fcl_cache_.end())
@@ -101,7 +102,7 @@ void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string,
 
 void CollisionSceneFCLLatest::updateCollisionObjectTransforms()
 {
-    for(fcl::CollisionObjectf* collision_object : fcl_objects_)
+    for(fcl::CollisionObjectd* collision_object : fcl_objects_)
     {
         KinematicElement* element = reinterpret_cast<KinematicElement*>(collision_object->getUserData());
         collision_object->setTransform(fcl_convert::KDL2fcl(element->Frame));
@@ -110,12 +111,12 @@ void CollisionSceneFCLLatest::updateCollisionObjectTransforms()
 }
 
 // This function was copied from 'moveit_core/collision_detection_fcl/src/collision_common.cpp'
-std::shared_ptr<fcl::CollisionObjectf> CollisionSceneFCLLatest::constructFclCollisionObject(std::shared_ptr<KinematicElement> element)
+std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclCollisionObject(std::shared_ptr<KinematicElement> element)
 {
     // Maybe use cache here?
 
     shapes::ShapeConstPtr shape = element->Shape;
-    std::shared_ptr<fcl::CollisionGeometryf> geometry;
+    std::shared_ptr<fcl::CollisionGeometryd> geometry;
     if (shape->type == shapes::PLANE)  // shapes that directly produce CollisionGeometry
     {
         // handle cases individually
@@ -124,7 +125,7 @@ std::shared_ptr<fcl::CollisionObjectf> CollisionSceneFCLLatest::constructFclColl
         case shapes::PLANE:
         {
             const shapes::Plane* p = static_cast<const shapes::Plane*>(shape.get());
-            geometry.reset(new fcl::Planef(p->a, p->b, p->c, p->d));
+            geometry.reset(new fcl::Planed(p->a, p->b, p->c, p->d));
         }
             break;
         default:
@@ -138,31 +139,31 @@ std::shared_ptr<fcl::CollisionObjectf> CollisionSceneFCLLatest::constructFclColl
         case shapes::SPHERE:
         {
             const shapes::Sphere* s = static_cast<const shapes::Sphere*>(shape.get());
-            geometry.reset(new fcl::Spheref(s->radius));
+            geometry.reset(new fcl::Sphered(s->radius));
         }
             break;
         case shapes::BOX:
         {
             const shapes::Box* s = static_cast<const shapes::Box*>(shape.get());
             const double* size = s->size;
-            geometry.reset(new fcl::Boxf(size[0], size[1], size[2]));
+            geometry.reset(new fcl::Boxd(size[0], size[1], size[2]));
         }
             break;
         case shapes::CYLINDER:
         {
             const shapes::Cylinder* s = static_cast<const shapes::Cylinder*>(shape.get());
-            geometry.reset(new fcl::Cylinderf(s->radius, s->length));
+            geometry.reset(new fcl::Cylinderd(s->radius, s->length));
         }
             break;
         case shapes::CONE:
         {
             const shapes::Cone* s = static_cast<const shapes::Cone*>(shape.get());
-            geometry.reset(new fcl::Conef(s->radius, s->length));
+            geometry.reset(new fcl::Coned(s->radius, s->length));
         }
             break;
         case shapes::MESH:
         {
-            fcl::BVHModel<fcl::OBBRSSf>* g = new fcl::BVHModel<fcl::OBBRSSf>();
+            fcl::BVHModel<fcl::OBBRSSd>* g = new fcl::BVHModel<fcl::OBBRSSd>();
             const shapes::Mesh* mesh = static_cast<const shapes::Mesh*>(shape.get());
             if (mesh->vertex_count > 0 && mesh->triangle_count > 0)
             {
@@ -171,9 +172,9 @@ std::shared_ptr<fcl::CollisionObjectf> CollisionSceneFCLLatest::constructFclColl
                     tri_indices[i] =
                             fcl::Triangle(mesh->triangles[3 * i], mesh->triangles[3 * i + 1], mesh->triangles[3 * i + 2]);
 
-                std::vector<fcl::Vector3f> points(mesh->vertex_count);
+                std::vector<fcl::Vector3d> points(mesh->vertex_count);
                 for (unsigned int i = 0; i < mesh->vertex_count; ++i)
-                    points[i] = fcl::Vector3f(mesh->vertices[3 * i], mesh->vertices[3 * i + 1], mesh->vertices[3 * i + 2]);
+                    points[i] = fcl::Vector3d(mesh->vertices[3 * i], mesh->vertices[3 * i + 1], mesh->vertices[3 * i + 2]);
 
                 g->beginModel();
                 g->addSubModel(points, tri_indices);
@@ -185,7 +186,7 @@ std::shared_ptr<fcl::CollisionObjectf> CollisionSceneFCLLatest::constructFclColl
         case shapes::OCTREE:
         {
             const shapes::OcTree* g = static_cast<const shapes::OcTree*>(shape.get());
-            geometry.reset(new fcl::OcTreef(to_std_ptr(g->octree)));
+            geometry.reset(new fcl::OcTreed(to_std_ptr(g->octree)));
         }
             break;
         default:
@@ -194,13 +195,13 @@ std::shared_ptr<fcl::CollisionObjectf> CollisionSceneFCLLatest::constructFclColl
     }
     geometry->computeLocalAABB();
     geometry->setUserData(reinterpret_cast<void*>(element.get()));
-    std::shared_ptr<fcl::CollisionObjectf> ret(new fcl::CollisionObjectf(geometry));
+    std::shared_ptr<fcl::CollisionObjectd> ret(new fcl::CollisionObjectd(geometry));
     ret->setUserData(reinterpret_cast<void*>(element.get()));
 
     return ret;
 }
 
-bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectf* o1, fcl::CollisionObjectf* o2, bool self, CollisionSceneFCLLatest* scene)
+bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene)
 {
     KinematicElement* e1 = reinterpret_cast<KinematicElement*>(o1->getUserData());
     KinematicElement* e2 = reinterpret_cast<KinematicElement*>(o2->getUserData());
@@ -225,7 +226,7 @@ bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectf* o1, fcl:
     return true;
 }
 
-bool CollisionSceneFCLLatest::collisionCallback(fcl::CollisionObjectf* o1, fcl::CollisionObjectf* o2, void* data)
+bool CollisionSceneFCLLatest::collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data)
 {
     CollisionData* data_ = reinterpret_cast<CollisionData*>(data);
 
@@ -233,18 +234,20 @@ bool CollisionSceneFCLLatest::collisionCallback(fcl::CollisionObjectf* o1, fcl::
 
     data_->Request.num_max_contacts = 1000;
     data_->Result.clear();
-    fcl::collide(o1,o2,data_->Request, data_->Result);
+    fcl::collide(o1, o2, data_->Request, data_->Result);
     data_->Done = data_->Result.isCollision();
     return data_->Done;
 }
 
-bool CollisionSceneFCLLatest::collisionCallbackDistance(fcl::CollisionObjectf* o1, fcl::CollisionObjectf* o2, void* data, float& dist)
+bool CollisionSceneFCLLatest::collisionCallbackDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data, double& dist)
 {
     DistanceData* data_ = reinterpret_cast<DistanceData*>(data);
 
     if(!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
     data_->Request.enable_nearest_points = true;
     data_->Request.enable_signed_distance = true;
+    // GST_LIBCCD produces incorrect contacts. Probably due to incompatible version of libccd.
+    data_->Request.gjk_solver_type = fcl::GST_INDEP;
     data_->Result.clear();
     fcl::distance(o1,o2,data_->Request, data_->Result);
     data_->Distance = std::min(data_->Distance, (double)data_->Result.min_distance);
@@ -254,21 +257,52 @@ bool CollisionSceneFCLLatest::collisionCallbackDistance(fcl::CollisionObjectf* o
     p.e2 = reinterpret_cast<KinematicElement*>(o2->getUserData());
 
     p.distance = data_->Result.min_distance;
-    fcl_convert::fcl2Eigen(data_->Result.nearest_points[0], p.contact1);
-    fcl_convert::fcl2Eigen(data_->Result.nearest_points[1], p.contact2);
-    if(p.contact1(0)!=p.contact1(0)) return false;
-    p.normal1 = p.contact1.normalized();
-    p.normal2 = p.contact2.normalized();
+    if(true || p.distance>0)
+    {
+        KDL::Vector c1 = (p.distance>0?p.e1->Frame:KDL::Frame())*KDL::Vector(data_->Result.nearest_points[0](0), data_->Result.nearest_points[0](1), data_->Result.nearest_points[0](2));
+        KDL::Vector c2 = (p.distance>0?p.e2->Frame:KDL::Frame())*KDL::Vector(data_->Result.nearest_points[1](0), data_->Result.nearest_points[1](1), data_->Result.nearest_points[1](2));
+        KDL::Vector n1 = c2-c1;
+        KDL::Vector n2 = c1-c2;
+        n1.Normalize();
+        n2.Normalize();
+        tf::vectorKDLToEigen(c1, p.contact1);
+        tf::vectorKDLToEigen(c2, p.contact2);
+        tf::vectorKDLToEigen(n1, p.normal1);
+        tf::vectorKDLToEigen(n2, p.normal2);
+    }
+    else
+    {
+        fcl::CollisionRequestd req;
+        fcl::CollisionResultd res;
+        req.enable_contact = true;
+        req.num_max_contacts = 2;
+        req.gjk_solver_type = fcl::GST_INDEP;
+        {
+            res.clear();
+            fcl::collide(o1, o2, req, res);
+            const fcl::Contactd& contact = res.getContact(0);
+            p.contact1 = contact.pos;
+            p.normal1 = contact.normal;
+            p.distance = contact.penetration_depth;
+        }
+        {
+            res.clear();
+            fcl::collide(o2, o1, req, res);
+            const fcl::Contactd& contact = res.getContact(0);
+            p.contact2 = contact.pos;
+            p.normal2 = contact.normal;
+            p.distance = contact.penetration_depth;
+        }
+
+    }
     data_->Distance = std::min(data_->Distance, p.distance);
     data_->Proxies.push_back(p);
-    //HIGHLIGHT(p.e1->Segment.getName()<<" - "<<p.e2->Segment.getName()<<": "<<p.contact1.transpose() << "; " << p.contact2.transpose() << "; " <<p.distance);
-
     return false;
 }
 
 bool CollisionSceneFCLLatest::isStateValid(bool self)
 {
-    std::shared_ptr<fcl::BroadPhaseCollisionManagerf> manager(new fcl::DynamicAABBTreeCollisionManagerf());
+    std::shared_ptr<fcl::BroadPhaseCollisionManagerd> manager(new fcl::DynamicAABBTreeCollisionManagerd());
     manager->registerObjects(fcl_objects_);
     CollisionData data(this);
     data.Self = self;
@@ -278,7 +312,7 @@ bool CollisionSceneFCLLatest::isStateValid(bool self)
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(bool self, bool computePenetrationDepth)
 {
-    std::shared_ptr<fcl::BroadPhaseCollisionManagerf> manager(new fcl::DynamicAABBTreeCollisionManagerf());
+    std::shared_ptr<fcl::BroadPhaseCollisionManagerd> manager(new fcl::DynamicAABBTreeCollisionManagerd());
     manager->registerObjects(fcl_objects_);
     DistanceData data(this);
     data.Self = self;
@@ -288,7 +322,7 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(bool s
 
 Eigen::Vector3d CollisionSceneFCLLatest::getTranslation(const std::string & name)
 {
-    for(fcl::CollisionObjectf* object : fcl_objects_)
+    for(fcl::CollisionObjectd* object : fcl_objects_)
     {
         KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
         if(element->Segment.getName()==name)

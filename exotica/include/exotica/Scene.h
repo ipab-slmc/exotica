@@ -152,6 +152,8 @@ namespace exotica
       ros::Publisher proxy_pub_;
 
       std::map<std::string, AttachedObject> attached_objects_;
+
+      bool force_collision_;
   };
   typedef std::shared_ptr<Scene> Scene_ptr;
 //  typedef std::map<std::string, Scene_ptr> Scene_map;

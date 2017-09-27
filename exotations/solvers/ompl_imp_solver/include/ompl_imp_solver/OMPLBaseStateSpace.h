@@ -74,7 +74,6 @@ namespace exotica
       double margin_;
     protected:
       SamplingProblem_ptr prob_;
-      bool self_collision_;
   };
 
 } /* namespace exotica */

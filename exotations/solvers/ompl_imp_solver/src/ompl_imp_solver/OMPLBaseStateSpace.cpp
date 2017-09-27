@@ -46,7 +46,6 @@ namespace exotica
     Server_ptr server = Server::Instance();
 
     margin_ = init.Margin;
-    self_collision_ = init.SelfCollisionCheck;
 
     HIGHLIGHT_NAMED("OMPLStateValidityChecker",
                     "Initial Safety Margin: " << margin_);
@@ -70,7 +69,7 @@ namespace exotica
         state, q);
 #endif
 
-    if (!prob_->isValid(q) || !prob_->getScene()->getCollisionScene()->isStateValid(self_collision_))
+    if (!prob_->isValid(q))
     {
       dist = -1;
       return false;

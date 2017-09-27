@@ -20,6 +20,7 @@ AddInitializer(
   Identity
   SphereCollision
   Sphere
+  CollisionCheck
 )
 GenInitializers()
 
@@ -43,7 +44,8 @@ set(SOURCES
     src/JointLimit.cpp
     src/Distance.cpp
     src/Identity.cpp
-    src/SphereCollision.cpp)
+    src/SphereCollision.cpp
+    src/CollisionCheck.cpp)
 
 add_library(${PROJECT_NAME} ${SOURCES})
 

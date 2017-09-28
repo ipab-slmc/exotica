@@ -58,6 +58,8 @@ namespace exotica
       void setRho(const std::string & task_name, const double rho, int t = 0);
       Eigen::VectorXd getGoal(const std::string & task_name, int t = 0);
       double getRho(const std::string & task_name, int t = 0);
+      std::vector<Eigen::VectorXd> getInitialTrajectory();
+      void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
 
 
       int T; //!< Number of time steps
@@ -79,6 +81,8 @@ namespace exotica
       int JN;
       int NumTasks;
 
+    private:
+      std::vector<Eigen::VectorXd> InitialTrajectory;
   };
 
   typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;

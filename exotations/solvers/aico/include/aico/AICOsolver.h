@@ -101,14 +101,6 @@ namespace exotica
       void Solve(Eigen::MatrixXd & solution);
 
       /**
-       * \brief Solves the problem
-       * @param q_init Trajectory initialisation.
-       * @param solution Returned solution trajectory as a vector of joint configurations.
-       */
-      void Solve(const std::vector<Eigen::VectorXd>& q_init,
-          Eigen::MatrixXd & solution);
-
-      /**
        * \brief Binds the solver to a specific problem which must be pre-initalised
        * @param pointer Shared pointer to the motion planning problem
        * @return        Successful if the problem is a valid UnconstrainedTimeIndexedProblem

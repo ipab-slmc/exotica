@@ -607,6 +607,12 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("attachObjectLocal", &Scene::attachObjectLocal);
     scene.def("detachObject", &Scene::detachObject);
     scene.def("hasAttachedObject", &Scene::hasAttachedObject);
+    scene.def("fk", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) {return instance->getSolver().FK(e1, o1, e2, o2);});
+    scene.def("fk", [](Scene* instance, const std::string& e1, const std::string& e2) {return instance->getSolver().FK(e1, KDL::Frame(), e2, KDL::Frame());});
+    scene.def("fk", [](Scene* instance, const std::string& e1) {return instance->getSolver().FK(e1, KDL::Frame(), "", KDL::Frame());});
+    scene.def("jacobian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) {return instance->getSolver().Jacobian(e1, o1, e2, o2);});
+    scene.def("jacobian", [](Scene* instance, const std::string& e1, const std::string& e2) {return instance->getSolver().Jacobian(e1, KDL::Frame(), e2, KDL::Frame());});
+    scene.def("jacobian", [](Scene* instance, const std::string& e1) {return instance->getSolver().Jacobian(e1, KDL::Frame(), "", KDL::Frame());});
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

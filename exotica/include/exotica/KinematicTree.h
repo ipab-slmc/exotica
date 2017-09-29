@@ -169,6 +169,12 @@ namespace exotica
               return ModelJointsNames;
             }
 
+            KDL::Frame FK(KinematicFrame& frame);
+            KDL::Frame FK(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB);
+            KDL::Frame FK(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
+            Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB);
+            Eigen::MatrixXd Jacobian(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
+
             void resetModel();
             void AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr));
             void UpdateModel();

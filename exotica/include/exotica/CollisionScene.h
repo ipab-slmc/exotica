@@ -80,19 +80,34 @@ public:
     virtual ~CollisionScene() {}
 
     /**
-       * \brief Check if the whole robot is valid (collision only).
+       * \brief Checks if the whole robot is valid (collision only).
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free..
        */
     virtual bool isStateValid(bool self = true) = 0;
 
     ///
+    /// @brief Checks if two objects are in collision.
+    /// @param o1 Name of object 1.
+    /// @param o2 Name of object 2.
+    /// @return True is the two objects are not colliding.
+    ///
+    virtual bool isCollisionFree(const std::string& o1, const std::string& o2) {throw_pretty("Not implemented!");}
+
+    ///
     /// \brief Computes collision distances.
     /// \param self Indicate if self collision check is required.
-    /// \param computePenetrationDepth If set to true, accurate penetration depth is computed.
-    /// \return Collision proximity objectects for all colliding pairs of objects.
+    /// \return Collision proximity objects for all colliding pairs of shapes.
     ///
-    virtual std::vector<CollisionProxy> getCollisionDistance(bool self, bool computePenetrationDepth = true) {throw_pretty("Not implemented!");}
+    virtual std::vector<CollisionProxy> getCollisionDistance(bool self) {throw_pretty("Not implemented!");}
+
+    ///
+    /// \brief Computes collision distances between two objects.
+    /// \param o1 Name of object 1.
+    /// \param o2 Name of object 2.
+    /// \return Vector of proximity objects.
+    ///
+    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2) {throw_pretty("Not implemented!");}
 
     /**
        * @brief      Gets the collision world links.

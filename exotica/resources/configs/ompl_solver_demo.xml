@@ -10,8 +10,6 @@
 
     <PlanningScene>
       <Scene>
-        <!-- Computing distances is enabled by default, disable for a Sampling problem by setting the PlanningMode to speed up Scene updates -->
-        <PlanningMode>Sampling</PlanningMode>
         <JointGroup>arm</JointGroup>
         <URDF>{exotica}/resources/robots/lwr_simplified.urdf</URDF>
         <SRDF>{exotica}/resources/robots/lwr_simplified.srdf</SRDF>

@@ -107,57 +107,47 @@ void CollisionSceneFCL::updateCollisionObjectTransforms()
 }
 
 // This function was copied from 'moveit_core/collision_detection_fcl/src/collision_common.cpp'
+// https://github.com/ros-planning/moveit/blob/indigo-devel/moveit_core/collision_detection_fcl/src/collision_common.cpp#L512
 std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionObject(std::shared_ptr<KinematicElement> element)
 {
     // Maybe use cache here?
 
     shapes::ShapeConstPtr shape = element->Shape;
     boost::shared_ptr<fcl::CollisionGeometry> geometry;
-    if (shape->type == shapes::PLANE)  // shapes that directly produce CollisionGeometry
+    switch (shape->type)
     {
-        // handle cases individually
-        switch (shape->type)
-        {
-        case shapes::PLANE:
+    case shapes::PLANE:
         {
             const shapes::Plane* p = static_cast<const shapes::Plane*>(shape.get());
             geometry.reset(new fcl::Plane(p->a, p->b, p->c, p->d));
         }
-            break;
-        default:
-            break;
-        }
-    }
-    else
-    {
-        switch (shape->type)
-        {
-        case shapes::SPHERE:
+        break;
+    case shapes::SPHERE:
         {
             const shapes::Sphere* s = static_cast<const shapes::Sphere*>(shape.get());
             geometry.reset(new fcl::Sphere(s->radius));
         }
-            break;
-        case shapes::BOX:
+        break;
+    case shapes::BOX:
         {
             const shapes::Box* s = static_cast<const shapes::Box*>(shape.get());
             const double* size = s->size;
             geometry.reset(new fcl::Box(size[0], size[1], size[2]));
         }
-            break;
-        case shapes::CYLINDER:
+        break;
+    case shapes::CYLINDER:
         {
             const shapes::Cylinder* s = static_cast<const shapes::Cylinder*>(shape.get());
             geometry.reset(new fcl::Cylinder(s->radius, s->length));
         }
-            break;
-        case shapes::CONE:
+        break;
+    case shapes::CONE:
         {
             const shapes::Cone* s = static_cast<const shapes::Cone*>(shape.get());
             geometry.reset(new fcl::Cone(s->radius, s->length));
         }
-            break;
-        case shapes::MESH:
+        break;
+    case shapes::MESH:
         {
             fcl::BVHModel<fcl::OBBRSS>* g = new fcl::BVHModel<fcl::OBBRSS>();
             const shapes::Mesh* mesh = static_cast<const shapes::Mesh*>(shape.get());
@@ -178,16 +168,15 @@ std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionOb
             }
             geometry.reset(g);
         }
-            break;
-        case shapes::OCTREE:
+        break;
+    case shapes::OCTREE:
         {
             const shapes::OcTree* g = static_cast<const shapes::OcTree*>(shape.get());
             geometry.reset(new fcl::OcTree(g->octree));
         }
-            break;
-        default:
-            throw_pretty("This shape type ("<<((int)shape->type)<<") is not supported using FCL yet");
-        }
+        break;
+    default:
+        throw_pretty("This shape type ("<<((int)shape->type)<<") is not supported using FCL yet");
     }
     geometry->computeLocalAABB();
     geometry->setUserData(reinterpret_cast<void*>(element.get()));
@@ -222,17 +211,21 @@ bool CollisionSceneFCL::isAllowedToCollide(fcl::CollisionObject* o1, fcl::Collis
     return true;
 }
 
+void CollisionSceneFCL::checkCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data)
+{
+    data->Request.num_max_contacts = 1000;
+    data->Result.clear();
+    fcl::collide(o1,o2,data->Request, data->Result);
+}
+
 bool CollisionSceneFCL::collisionCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data)
 {
     CollisionData* data_ = reinterpret_cast<CollisionData*>(data);
 
     if(!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
 
-    data_->Request.num_max_contacts = 1000;
-    data_->Result.clear();
-    fcl::collide(o1,o2,data_->Request, data_->Result);
-    data_->Done = data_->Result.isCollision();
-    return data_->Done;
+    checkCollision(o1, o2, data_);
+    return data_->Result.isCollision();
 }
 
 bool CollisionSceneFCL::isStateValid(bool self)
@@ -243,6 +236,30 @@ bool CollisionSceneFCL::isStateValid(bool self)
     data.Self = self;
     manager->collide(&data, &CollisionSceneFCL::collisionCallback);
     return !data.Result.isCollision();
+}
+
+bool CollisionSceneFCL::isCollisionFree(const std::string& o1, const std::string& o2)
+{
+    std::vector<fcl::CollisionObject*> shapes1;
+    std::vector<fcl::CollisionObject*> shapes2;
+    for(fcl::CollisionObject* o : fcl_objects_)
+    {
+        KinematicElement* e = reinterpret_cast<KinematicElement*>(o->getUserData());
+        if(e->Segment.getName()==o1 || e->Parent->Segment.getName()==o1) shapes1.push_back(o);
+        if(e->Segment.getName()==o2 || e->Parent->Segment.getName()==o2) shapes2.push_back(o);
+    }
+    if(shapes1.size()==0) throw_pretty("Can't find object '"<<o1<<"'!");
+    if(shapes2.size()==0) throw_pretty("Can't find object '"<<o2<<"'!");
+    CollisionData data(this);
+    for(fcl::CollisionObject* s1 : shapes1)
+    {
+        for(fcl::CollisionObject* s2 : shapes2)
+        {
+            checkCollision(s1, s2, &data);
+            if(data.Result.isCollision()) return false;
+        }
+    }
+    return true;
 }
 
 Eigen::Vector3d CollisionSceneFCL::getTranslation(const std::string & name)
@@ -257,4 +274,38 @@ Eigen::Vector3d CollisionSceneFCL::getTranslation(const std::string & name)
     }
     throw_pretty("Robot not found!");;
 }
+
+std::vector<std::string> CollisionSceneFCL::getCollisionWorldLinks()
+{
+    std::vector<std::string> tmp;
+    for (fcl::CollisionObject* object : fcl_objects_)
+    {
+        KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
+        if(!element->ClosestRobotLink)
+        {
+            tmp.push_back(element->Segment.getName());
+        }
+    }
+    return tmp;
+}
+
+/**
+   * @brief      Gets the collision robot links.
+   *
+   * @return     The collision robot links.
+   */
+std::vector<std::string> CollisionSceneFCL::getCollisionRobotLinks()
+{
+    std::vector<std::string> tmp;
+    for (fcl::CollisionObject* object : fcl_objects_)
+    {
+        KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
+        if(element->ClosestRobotLink)
+        {
+            tmp.push_back(element->Segment.getName());
+        }
+    }
+    return tmp;
+}
+
 }

@@ -87,7 +87,7 @@ namespace exotica
   {
   public:
       KinematicFrameRequest();
-      KinematicFrameRequest(std::string frameALinkName, KDL::Frame frameAOffset = KDL::Frame(), std::string frameBLinkName = "", KDL::Frame frameBOffset = KDL::Frame());      
+      KinematicFrameRequest(std::string frameALinkName, KDL::Frame frameAOffset = KDL::Frame(), std::string frameBLinkName = "", KDL::Frame frameBOffset = KDL::Frame());
       std::string FrameALinkName;
       KDL::Frame FrameAOffset;
       std::string FrameBLinkName;

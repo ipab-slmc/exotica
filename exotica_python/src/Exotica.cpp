@@ -588,7 +588,9 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getScene", &Scene::getScene);
     scene.def("cleanScene", &Scene::cleanScene);
     scene.def("isStateValid", [](Scene* instance, bool self) {return instance->getCollisionScene()->isStateValid(self);}, py::arg("self")=true);
-    scene.def("getCollisionDistance", [](Scene* instance, bool self, bool distances) {return instance->getCollisionScene()->getCollisionDistance(self, distances);}, py::arg("self")=true, py::arg("computeAccurateDistances")=true);
+    scene.def("isCollisionFree", [](Scene* instance, const std::string& o1, const std::string& o2) {return instance->getCollisionScene()->isCollisionFree(o1, o2);});
+    scene.def("getCollisionDistance", [](Scene* instance, bool self) {return instance->getCollisionScene()->getCollisionDistance(self);}, py::arg("self")=true);
+    scene.def("getCollisionDistance", [](Scene* instance, const std::string& o1, const std::string& o2) {return instance->getCollisionScene()->getCollisionDistance(o1, o2);}, py::arg("Object1"), py::arg("Object2"));
     scene.def("updateWorld", &Scene::updateWorld);
     scene.def("getCollisionRobotLinks", [](Scene* instance) {return instance->getCollisionScene()->getCollisionRobotLinks();});
     scene.def("getCollisionWorldLinks", [](Scene* instance) {return instance->getCollisionScene()->getCollisionWorldLinks();});

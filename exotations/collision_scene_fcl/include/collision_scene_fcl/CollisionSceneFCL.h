@@ -52,12 +52,11 @@ public:
 
     struct CollisionData
     {
-        CollisionData(CollisionSceneFCL* scene) : Scene(scene), Done(false), Self(true) {}
+        CollisionData(CollisionSceneFCL* scene) : Scene(scene), Self(true) {}
 
         fcl::CollisionRequest Request;
         fcl::CollisionResult Result;
         CollisionSceneFCL* Scene;
-        bool Done;
         bool Self;
     };
 
@@ -79,44 +78,19 @@ public:
        * @return True, if the state is collision free..
        */
     virtual bool isStateValid(bool self = true);
+    virtual bool isCollisionFree(const std::string& o1, const std::string& o2);
 
     /**
        * @brief      Gets the collision world links.
-       *
        * @return     The collision world links.
        */
-    virtual std::vector<std::string> getCollisionWorldLinks()
-    {
-        std::vector<std::string> tmp;
-        for (fcl::CollisionObject* object : fcl_objects_)
-        {
-            KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
-            if(!element->ClosestRobotLink)
-            {
-                tmp.push_back(element->Segment.getName());
-            }
-        }
-        return tmp;
-    }
+    virtual std::vector<std::string> getCollisionWorldLinks();
 
     /**
        * @brief      Gets the collision robot links.
-       *
        * @return     The collision robot links.
        */
-    virtual std::vector<std::string> getCollisionRobotLinks()
-    {
-        std::vector<std::string> tmp;
-        for (fcl::CollisionObject* object : fcl_objects_)
-        {
-            KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
-            if(element->ClosestRobotLink)
-            {
-                tmp.push_back(element->Segment.getName());
-            }
-        }
-        return tmp;
-    }
+    virtual std::vector<std::string> getCollisionRobotLinks();
 
     virtual Eigen::Vector3d getTranslation(const std::string & name);
 
@@ -134,6 +108,7 @@ public:
 private:
 
     static std::shared_ptr<fcl::CollisionObject> constructFclCollisionObject(std::shared_ptr<KinematicElement> element);
+    static void checkCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data);
 
     std::map<std::string, std::shared_ptr<fcl::CollisionObject>> fcl_cache_;
 

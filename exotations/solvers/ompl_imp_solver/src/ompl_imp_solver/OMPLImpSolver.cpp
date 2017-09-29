@@ -62,7 +62,7 @@ PLUGINLIB_EXPORT_CLASS(exotica::OMPLImpSolver, exotica::OMPLBaseSolver)
 
 namespace exotica
 {
-  OMPLImpSolver::OMPLImpSolver() : OMPLBaseSolver("OMPLImpSolver"), algorithm_("geometric::RRTConnect"), margin_(0.0)
+  OMPLImpSolver::OMPLImpSolver() : OMPLBaseSolver("OMPLImpSolver"), algorithm_("geometric::RRTConnect")
   {
     object_name_=algorithm_;
   }
@@ -88,7 +88,6 @@ namespace exotica
         for (auto &it : known_algorithms_)
           ERROR(it.first);
       }
-      margin_ = init_.Margin;
       timeout_ = init_.Timeout;
       HIGHLIGHT("Planning timeout: " << timeout_);
   }
@@ -140,15 +139,6 @@ namespace exotica
       getSimplifiedPath(ompl_simple_setup_->getSolutionPath(), sol, ptc);
       planning_time_ = timer.getDuration();
       postSolve();
-#ifdef ROS_INDIGO
-        boost::static_pointer_cast<OMPLStateValidityChecker>(
-            ompl_simple_setup_->getStateValidityChecker())
-            ->margin_ = init_margin_;
-#elif ROS_KINETIC
-        std::static_pointer_cast<OMPLStateValidityChecker>(
-            ompl_simple_setup_->getStateValidityChecker())
-            ->margin_ = init_margin_;
-#endif
       prob_->Update(Eigen::VectorXd(sol.row(sol.rows() - 1)));
       prob_->getScene()->publishScene();
       return true;
@@ -229,56 +219,8 @@ namespace exotica
   {
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());
-#ifdef ROS_INDIGO
-    double &stateValidityChecker_margin_ =
-        boost::static_pointer_cast<OMPLStateValidityChecker>(
-            ompl_simple_setup_->getStateValidityChecker())
-            ->margin_;
-#elif ROS_KINETIC
-    double &stateValidityChecker_margin_ =
-        std::static_pointer_cast<OMPLStateValidityChecker>(
-            ompl_simple_setup_->getStateValidityChecker())
-            ->margin_;
-#endif
-    init_margin_ = stateValidityChecker_margin_;
     if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
     {
-      ERROR("Invalid goal state [Collision]\n"
-            << qT.transpose()
-            << ", safety margin = " << stateValidityChecker_margin_);
-      //  Try to reduce safety margin
-      bool state_good = false;
-      if (stateValidityChecker_margin_ > 0)
-      {
-        unsigned int trial = 0;
-        while (trial < 10)
-        {
-          stateValidityChecker_margin_ /= 2.0;
-          HIGHLIGHT(
-              "Retry with safety margin = " << stateValidityChecker_margin_);
-          if (ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
-          {
-            state_good = true;
-            break;
-          }
-          trial++;
-        }
-      }
-      //  Last try
-      if (!state_good)
-      {
-        stateValidityChecker_margin_ = 0.0;
-        HIGHLIGHT(
-            "Retry with safety margin = " << stateValidityChecker_margin_);
-        if (ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
-          state_good = true;
-      }
-      if (state_good)
-      {
-        HIGHLIGHT("Goal state passed collision check with safety margin = "
-                  << stateValidityChecker_margin_);
-      }
-      else
         throw_named("Goal state is not valid!");
     }
 
@@ -301,7 +243,6 @@ namespace exotica
           << out_of_bounds_joint_ids << "]");
     }
     ompl_simple_setup_->setGoalState(gs, eps);
-    margin_ = init_margin_;
   }
 
   void OMPLImpSolver::registerDefaultPlanners()

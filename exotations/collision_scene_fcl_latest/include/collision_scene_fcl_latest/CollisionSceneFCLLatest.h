@@ -52,6 +52,7 @@ public:
         fcl::CollisionResultd Result;
         CollisionSceneFCLLatest* Scene;
         bool Self;
+        double SafeDistance;
     };
 
     struct DistanceData
@@ -82,8 +83,8 @@ public:
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free..
        */
-    virtual bool isStateValid(bool self = true);
-    virtual bool isCollisionFree(const std::string& o1, const std::string& o2);
+    virtual bool isStateValid(bool self = true, double safe_distance = 0.0);
+    virtual bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0);
 
     ///
     /// \brief Computes collision distances.

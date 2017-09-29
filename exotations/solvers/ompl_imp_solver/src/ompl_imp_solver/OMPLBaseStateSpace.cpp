@@ -44,11 +44,6 @@ namespace exotica
       : ob::StateValidityChecker(si), prob_(prob)
   {
     Server_ptr server = Server::Instance();
-
-    margin_ = init.Margin;
-
-    HIGHLIGHT_NAMED("OMPLStateValidityChecker",
-                    "Initial Safety Margin: " << margin_);
   }
 
   bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const

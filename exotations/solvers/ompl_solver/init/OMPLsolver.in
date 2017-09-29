@@ -2,7 +2,6 @@ extend <exotica/MotionSolver>
 Required std::string Solver;
 Optional std::string Range = "1";
 Optional bool Smooth = true;
-Optional double Margin = 2.0;
 Optional std::string Algorithm = "RRTConnect";
 Optional std::string SamplingSpace = "ConfigurationSpace";
 Optional int MaxGoalSamplingAttempts = 500;

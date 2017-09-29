@@ -84,7 +84,7 @@ public:
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free..
        */
-    virtual bool isStateValid(bool self = true) = 0;
+    virtual bool isStateValid(bool self = true, double safe_distance = 0.0) = 0;
 
     ///
     /// @brief Checks if two objects are in collision.
@@ -92,7 +92,7 @@ public:
     /// @param o2 Name of object 2.
     /// @return True is the two objects are not colliding.
     ///
-    virtual bool isCollisionFree(const std::string& o1, const std::string& o2) {throw_pretty("Not implemented!");}
+    virtual bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) {throw_pretty("Not implemented!");}
 
     ///
     /// \brief Computes collision distances.

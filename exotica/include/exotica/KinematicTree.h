@@ -47,6 +47,8 @@
 #include <exotica/Server.h>
 #include <tf_conversions/tf_kdl.h>
 
+#include <exotica/KinematicElement.h>
+
 #define ROOT  -1     //!< The value of the parent for the root segment
 
 namespace exotica
@@ -98,21 +100,6 @@ namespace exotica
       KinematicsRequest();
       KinematicRequestFlags Flags;
       std::vector<KinematicFrameRequest> Frames; //!< The segments to which the end-effectors are attached
-  };
-
-  class KinematicElement
-  {
-  public:
-      KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment);
-      int Id;
-      int ControlId;
-      bool IsControlled;
-      std::shared_ptr<KinematicElement> Parent;
-      std::vector<std::shared_ptr<KinematicElement>> Children;
-      KDL::Segment Segment;
-      KDL::Frame Frame;
-      std::vector<double> JointLimits;
-      shapes::ShapeConstPtr Shape;
   };
 
   struct KinematicFrame
@@ -194,7 +181,7 @@ namespace exotica
             Eigen::VectorXd getControlledState();
 
             std::vector<std::shared_ptr<KinematicElement>> getTree() {return Tree;}
-            std::vector<std::shared_ptr<KinematicElement>> getCollisionTree() {return CollisionTree;}
+            std::map<std::string, std::shared_ptr<KinematicElement>> getCollisionTreeMap() {return CollisionTreeMap;}
             std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() {return TreeMap;}
             bool Debug;
 
@@ -218,7 +205,7 @@ namespace exotica
             std::vector<std::shared_ptr<KinematicElement>> Tree;
             std::vector<std::shared_ptr<KinematicElement>> ModelTree;
             std::map<std::string, std::shared_ptr<KinematicElement>> TreeMap;
-            std::vector<std::shared_ptr<KinematicElement>> CollisionTree;
+            std::map<std::string, std::shared_ptr<KinematicElement>> CollisionTreeMap;
             std::shared_ptr<KinematicElement> Root;
             std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
             std::map<std::string, std::shared_ptr<KinematicElement>> ControlledJointsMap;

@@ -46,11 +46,6 @@
 namespace exotica
 {
 
-KinematicElement::KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id), IsControlled(false), ControlId(-1), Shape(nullptr)
-{
-
-}
-
 KinematicResponse::KinematicResponse() : Flags(KIN_FK)
 {
 
@@ -202,6 +197,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     ControlledJoints.resize(NumControlledJoints);
     for(std::shared_ptr<KinematicElement> Joint : Tree)
     {
+        Joint->isRobotLink = true;
         Joint->ControlId = IsControlled(Joint);
         Joint->IsControlled = Joint->ControlId >= 0;
         if(Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
@@ -223,8 +219,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
             ControlledBaseType = ModelBaseType;
         }
     }
-
-
+    Tree[0]->isRobotLink = false;
 
     setJointLimits();
 }
@@ -244,7 +239,7 @@ void KinematicTree::UpdateModel()
 void KinematicTree::resetModel()
 {
     Tree = ModelTree;
-    CollisionTree.clear();
+    CollisionTreeMap.clear();
     UpdateModel();
     debugSceneChanged = true;
 }
@@ -266,6 +261,7 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
         if(TreeMap.find(parent_name)==TreeMap.end()) throw_pretty("Attempting to attach to unknown frame '"<<parent_name<<"'!");
         parent = TreeMap.find(parent_name)->second;
     }
+    if(parent->Shape) throw_pretty("Can't attach object to a collision shape object! ('"<<parent_name<<"')");
     if(relative)
     {
         child->Segment = KDL::Segment(child->Segment.getName(), child->Segment.getJoint(), pose, child->Segment.getInertia());
@@ -279,6 +275,7 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
         child->Parent->Children.erase(it);
     child->Parent = parent;
     parent->Children.push_back(child);
+    child->updateClosestRobotLink();
     debugSceneChanged = true;
 }
 
@@ -309,10 +306,11 @@ void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transfo
     if(shape)
     {
         NewElement->Shape = shape;
-        CollisionTree.push_back(NewElement);
+        CollisionTreeMap[NewElement->Segment.getName()] = NewElement;
     }
     Tree.push_back(NewElement);
     parent_element->Children.push_back(NewElement);
+    NewElement->updateClosestRobotLink();
     debugSceneChanged = true;
 }
 
@@ -447,6 +445,7 @@ void KinematicTree::publishFrames()
                     shapes::constructMarkerFromShape(Tree[i]->Shape.get(), mrk);
                     mrk.action = visualization_msgs::Marker::ADD;
                     mrk.frame_locked = true;
+                    mrk.id = i;
                     mrk.ns = "CollisionObjects";
                     mrk.color.r=mrk.color.g=mrk.color.b=0.5;
                     mrk.color.a=1.0;

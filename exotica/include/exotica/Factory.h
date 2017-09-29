@@ -37,7 +37,6 @@
 #include <map>
 #include <typeinfo>
 
-#include "exotica/Server.h"
 #include "exotica/Tools.h"
 #include <pluginlib/class_list_macros.h>
 

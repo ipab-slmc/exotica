@@ -66,12 +66,14 @@ namespace exotica
       }
 
       static void printSupportedClasses();
-      static std::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->solvers_.createInstance(prepend?"exotica/":""+type));}
-      static std::shared_ptr<exotica::TaskMap> createMap(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->maps_.createInstance(prepend?"exotica/":""+type));}
-      static std::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type, bool prepend = true) {return Instance()->problems_.createInstance(prepend?"exotica/":""+type);}
+      static std::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->solvers_.createInstance((prepend?"exotica/":"")+type));}
+      static std::shared_ptr<exotica::TaskMap> createMap(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->maps_.createInstance((prepend?"exotica/":"")+type));}
+      static std::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type, bool prepend = true) {return Instance()->problems_.createInstance((prepend?"exotica/":"")+type);}
+      static std::shared_ptr<exotica::CollisionScene> createCollisionScene(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->scenes_.createInstance((prepend?"exotica/":"")+type));}
       static std::vector<std::string> getSolvers();
       static std::vector<std::string> getProblems();
       static std::vector<std::string> getMaps();
+      static std::vector<std::string> getCollisionScenes();
       static std::vector<Initializer> getInitializers();
 
       static std::shared_ptr<exotica::MotionSolver> createSolver(const Initializer& init)
@@ -108,6 +110,7 @@ namespace exotica
 
       pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
       pluginlib::ClassLoader<exotica::TaskMap> maps_;
+      pluginlib::ClassLoader<exotica::CollisionScene> scenes_;
       PlanningProblem_fac problems_;
   };
 

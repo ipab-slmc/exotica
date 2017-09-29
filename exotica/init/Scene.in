@@ -3,3 +3,4 @@ Required std::string JointGroup;
 Optional std::string RobotDescription = "robot_description";
 Optional std::string URDF = "";
 Optional std::string SRDF = "";
+Optional std::string CollisionScene = "CollisionSceneFCL";

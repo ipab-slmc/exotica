@@ -1,8 +1,7 @@
 /*
- *  Created on: 2 Mar 2016
- *      Author: Yiming Yang
+ *      Author: Vladimir Ivan
  *
- * Copyright (c) 2016, University Of Edinburgh
+ * Copyright (c) 2017, University Of Edinburgh
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,50 +30,42 @@
  *
  */
 
-#include "ompl_imp_solver/OMPLBaseStateSpace.h"
+#include "task_map/CollisionCheck.h"
+
+REGISTER_TASKMAP_TYPE("CollisionCheck", exotica::CollisionCheck);
 
 namespace exotica
 {
-  OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init)
-      : ob::CompoundStateSpace(), prob_(prob)
+  CollisionCheck::CollisionCheck()
   {
+
   }
 
-  OMPLStateValidityChecker::OMPLStateValidityChecker(const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob, OMPLsolverInitializer init)
-      : ob::StateValidityChecker(si), prob_(prob)
+  void CollisionCheck::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
   {
-    Server_ptr server = Server::Instance();
-
-    margin_ = init.Margin;
-
-    HIGHLIGHT_NAMED("OMPLStateValidityChecker",
-                    "Initial Safety Margin: " << margin_);
+      if(phi.rows() != 1) throw_named("Wrong size of phi!");
+      cscene_->updateCollisionObjectTransforms();
+      phi(0) = cscene_->isStateValid(init_.SelfCollision)?-1.0:0.0;
   }
 
-  bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
+  void CollisionCheck::Instantiate(CollisionCheckInitializer& init)
   {
-    double tmp;
-    return isValid(state, tmp);
+      init_ = init;
   }
 
-  bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
-      double &dist) const
+  void CollisionCheck::assignScene(Scene_ptr scene)
   {
-    Eigen::VectorXd q(prob_->N);
-#ifdef ROS_INDIGO
-    boost::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
-        state, q);
-#elif ROS_KINETIC
-    std::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
-        state, q);
-#endif
+      scene_ = scene;
+      Initialize();
+  }
 
-    if (!prob_->isValid(q))
-    {
-      dist = -1;
-      return false;
-    }
-    return true;
+  void CollisionCheck::Initialize()
+  {
+      cscene_ = scene_->getCollisionScene();
+  }
+
+  int CollisionCheck::taskSpaceDim()
+  {
+      return 1;
   }
 }
-

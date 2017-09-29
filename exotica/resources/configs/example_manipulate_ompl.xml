@@ -16,6 +16,10 @@
       </Scene>
     </PlanningScene>
 
+    <Maps>
+      <CollisionCheck Name="Collision" SelfCollision="0" />
+    </Maps>
+
     <Goal>0 0 0 0 0 0 0</Goal>
   </SamplingProblem>
 

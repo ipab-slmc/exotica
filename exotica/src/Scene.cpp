@@ -73,6 +73,7 @@ namespace exotica
       Object::InstatiateObject(init);
       name_ = object_name_;
       kinematica_.Debug = debug_;
+      force_collision_ = init.AlwaysUpdateCollisionScene;
       if(init.URDF=="" || init.SRDF=="")
       {
           Server::Instance()->getModel(init.RobotDescription, model_);
@@ -129,7 +130,7 @@ namespace exotica
   void Scene::Update(Eigen::VectorXdRefConst x)
   {
       kinematica_.Update(x);
-      collision_scene_->updateCollisionObjectTransforms();
+      if(force_collision_) collision_scene_->updateCollisionObjectTransforms();
       if (debug_) publishScene();
   }
 
@@ -258,7 +259,7 @@ namespace exotica
     // Update Kinematica internal state
     kinematica_.setModelState(x);
 
-    collision_scene_->updateCollisionObjectTransforms();
+    if(force_collision_) collision_scene_->updateCollisionObjectTransforms();
 
     if (debug_) publishScene();
   }
@@ -267,7 +268,7 @@ namespace exotica
     // Update Kinematica internal state
     kinematica_.setModelState(x);
 
-    collision_scene_->updateCollisionObjectTransforms();
+    if(force_collision_) collision_scene_->updateCollisionObjectTransforms();
 
     if (debug_) publishScene();
   }

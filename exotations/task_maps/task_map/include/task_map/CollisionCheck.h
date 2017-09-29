@@ -1,8 +1,7 @@
 /*
- *  Created on: 2 Mar 2016
- *      Author: Yiming Yang
+ *      Author: Vladimir Ivan
  *
- * Copyright (c) 2016, University Of Edinburgh
+ * Copyright (c) 2017, University Of Edinburgh
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,50 +30,38 @@
  *
  */
 
-#include "ompl_imp_solver/OMPLBaseStateSpace.h"
+#ifndef EXOTICA_GENERIC_COLLISIONCHECK_H
+#define EXOTICA_GENERIC_COLLISIONCHECK_H
+
+#include <exotica/TaskMap.h>
+#include <task_map/CollisionCheckInitializer.h>
 
 namespace exotica
 {
-  OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init)
-      : ob::CompoundStateSpace(), prob_(prob)
+  class CollisionCheck: public TaskMap, public Instantiable<CollisionCheckInitializer>
   {
-  }
+    public:
+      CollisionCheck();
+      virtual ~CollisionCheck()
+      {
+      }
 
-  OMPLStateValidityChecker::OMPLStateValidityChecker(const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob, OMPLsolverInitializer init)
-      : ob::StateValidityChecker(si), prob_(prob)
-  {
-    Server_ptr server = Server::Instance();
+      virtual void Instantiate(CollisionCheckInitializer& init);
 
-    margin_ = init.Margin;
+      virtual void assignScene(Scene_ptr scene);
 
-    HIGHLIGHT_NAMED("OMPLStateValidityChecker",
-                    "Initial Safety Margin: " << margin_);
-  }
+      void Initialize();
 
-  bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
-  {
-    double tmp;
-    return isValid(state, tmp);
-  }
+      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-  bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
-      double &dist) const
-  {
-    Eigen::VectorXd q(prob_->N);
-#ifdef ROS_INDIGO
-    boost::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
-        state, q);
-#elif ROS_KINETIC
-    std::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
-        state, q);
-#endif
+      virtual int taskSpaceDim();
 
-    if (!prob_->isValid(q))
-    {
-      dist = -1;
-      return false;
-    }
-    return true;
-  }
+      Scene_ptr scene_;
+      CollisionScene_ptr cscene_;
+      CollisionCheckInitializer init_;
+
+  };
+
+  typedef std::shared_ptr<exotica::CollisionCheck> CollisionCheck_ptr;
 }
-
+#endif

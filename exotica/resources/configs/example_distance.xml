@@ -14,6 +14,7 @@
         <URDF>{exotica}/resources/robots/lwr_simplified.urdf</URDF>
         <SRDF>{exotica}/resources/robots/lwr_simplified.srdf</SRDF>
         <CollisionScene>CollisionSceneFCLLatest</CollisionScene>
+        <AlwaysUpdateCollisionScene>1</AlwaysUpdateCollisionScene>
       </Scene>
     </PlanningScene>
 

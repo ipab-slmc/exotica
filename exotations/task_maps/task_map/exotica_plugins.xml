@@ -26,4 +26,7 @@
   <class name="exotica/JointLimit" type="exotica::JointLimit" base_class_type="exotica::TaskMap">
     <description>Joint limits</description>
   </class>
+  <class name="exotica/CollisionCheck" type="exotica::CollisionCheck" base_class_type="exotica::TaskMap">
+    <description>Collision checking</description>
+  </class>
 </library>

@@ -108,14 +108,12 @@ namespace exotica
       std::string algorithm_;
       std::string range_;
       std::string object_name_;
-      double margin_;
       Eigen::VectorXd qT_;
       int min_traj_length_;
 
       OMPLsolverInitializer init_;
     private:
       BASE_TYPE BaseType;
-      double init_margin_;
   };
 }
 

@@ -45,7 +45,7 @@ namespace exotica
   {
       if(phi.rows() != 1) throw_named("Wrong size of phi!");
       cscene_->updateCollisionObjectTransforms();
-      phi(0) = cscene_->isStateValid(init_.SelfCollision)?-1.0:0.0;
+      phi(0) = cscene_->isStateValid(init_.SelfCollision, init_.SafeDistance)?-1.0:0.0;
   }
 
   void CollisionCheck::Instantiate(CollisionCheckInitializer& init)

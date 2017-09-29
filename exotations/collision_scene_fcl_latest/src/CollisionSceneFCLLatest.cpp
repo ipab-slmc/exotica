@@ -199,6 +199,15 @@ void CollisionSceneFCLLatest::checkCollision(fcl::CollisionObjectd* o1, fcl::Col
     data->Request.num_max_contacts = 1000;
     data->Result.clear();
     fcl::collide(o1,o2,data->Request, data->Result);
+    if(data->SafeDistance>0.0 && o1->getAABB().distance(o2->getAABB())<data->SafeDistance)
+    {
+        fcl::DistanceRequestd req;
+        fcl::DistanceResultd res;
+        req.enable_nearest_points = false;
+        fcl::distance(o1, o2, req, res);
+        // Add fake contact when distance is smaller than the safety distance.
+        if(res.min_distance<data->SafeDistance) data->Result.addContact(fcl::Contactd());
+    }
 }
 
 bool CollisionSceneFCLLatest::collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data)
@@ -265,17 +274,18 @@ bool CollisionSceneFCLLatest::collisionCallbackDistance(fcl::CollisionObjectd* o
     return false;
 }
 
-bool CollisionSceneFCLLatest::isStateValid(bool self)
+bool CollisionSceneFCLLatest::isStateValid(bool self, double safe_distance)
 {
     std::shared_ptr<fcl::BroadPhaseCollisionManagerd> manager(new fcl::DynamicAABBTreeCollisionManagerd());
     manager->registerObjects(fcl_objects_);
     CollisionData data(this);
     data.Self = self;
+    data.SafeDistance = safe_distance;
     manager->collide(&data, &CollisionSceneFCLLatest::collisionCallback);
     return !data.Result.isCollision();
 }
 
-bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::string& o2)
+bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance)
 {
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
@@ -288,6 +298,7 @@ bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::
     if(shapes1.size()==0) throw_pretty("Can't find object '"<<o1<<"'!");
     if(shapes2.size()==0) throw_pretty("Can't find object '"<<o2<<"'!");
     CollisionData data(this);
+    data.SafeDistance = safe_distance;
     for(fcl::CollisionObjectd* s1 : shapes1)
     {
         for(fcl::CollisionObjectd* s2 : shapes2)

@@ -130,6 +130,7 @@ namespace exotica
                                               << q_init_in[0].rows());
 
     InitialTrajectory = q_init_in;
+    setStartState(q_init_in[0]);
   }
 
   std::vector<Eigen::VectorXd> UnconstrainedTimeIndexedProblem::getInitialTrajectory() {

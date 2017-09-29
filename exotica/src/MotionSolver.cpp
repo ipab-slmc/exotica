@@ -56,5 +56,4 @@ namespace exotica
     if (problem_) ret += "\n" + problem_->print(prepend + "    ");
     return ret;
   }
-
 }

@@ -495,7 +495,9 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<MotionSolver, std::shared_ptr<MotionSolver>, Object> motionSolver(module, "MotionSolver");
     motionSolver.def("specifyProblem", &MotionSolver::specifyProblem, "Assign problem to the solver", py::arg("planningProblem"));
-    motionSolver.def("solve", [](std::shared_ptr<MotionSolver> sol){return Solve(sol);}, "Solve the problem");
+    motionSolver.def(
+        "solve", [](std::shared_ptr<MotionSolver> sol) { return Solve(sol); },
+        "Solve the problem");
     motionSolver.def("getProblem", &MotionSolver::getProblem, py::return_value_policy::reference_internal);
 
     py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object> planningProblem(module, "PlanningProblem");
@@ -520,6 +522,10 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedTimeIndexedProblem.def_readwrite("W", &UnconstrainedTimeIndexedProblem::W);
     unconstrainedTimeIndexedProblem.def_readwrite("H", &UnconstrainedTimeIndexedProblem::H);
     unconstrainedTimeIndexedProblem.def_readwrite("Q", &UnconstrainedTimeIndexedProblem::Q);
+    unconstrainedTimeIndexedProblem.def_property(
+        "InitialTrajectory",
+        &UnconstrainedTimeIndexedProblem::getInitialTrajectory,
+        &UnconstrainedTimeIndexedProblem::setInitialTrajectory);
     unconstrainedTimeIndexedProblem.def_readonly("T", &UnconstrainedTimeIndexedProblem::T);
     unconstrainedTimeIndexedProblem.def_readonly("PhiN", &UnconstrainedTimeIndexedProblem::PhiN);
     unconstrainedTimeIndexedProblem.def_readonly("JN", &UnconstrainedTimeIndexedProblem::JN);

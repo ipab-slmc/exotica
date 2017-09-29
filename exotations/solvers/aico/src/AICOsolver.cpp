@@ -122,18 +122,22 @@ namespace exotica
   void AICOsolver::Solve(Eigen::MatrixXd & solution)
   {
     Eigen::VectorXd q0 = prob_->applyStartState();
-    std::vector<Eigen::VectorXd> q_init;
-    q_init.resize(T, Eigen::VectorXd::Zero(q0.rows()));
-    for (int i = 0; i < q_init.size(); i++)
-      q_init[i] = q0;
-    Solve(q_init, solution);
-  }
+    std::vector<Eigen::VectorXd> q_init = prob_->getInitialTrajectory();
 
-  void AICOsolver::Solve(const std::vector<Eigen::VectorXd>& q_init, Eigen::MatrixXd & solution)
-  {
+    // If the initial value of the initial trajectory does not equal the start
+    // state, assume that no initial guess is provided and fill the trajectory
+    // with the start state
+    if (!(q0 - q_init[0]).isMuchSmallerThan(1e-6)) {
+      q_init.resize(T, Eigen::VectorXd::Zero(q0.rows()));
+      for (int i = 0; i < q_init.size(); i++) q_init[i] = q0;
+    } else {
+      HIGHLIGHT("AICO::Solve called with initial trajectory guess");
+    }
+
     prob_->preupdate();
     prob_->setStartState(q_init[0]);
     prob_->applyStartState();
+
     Timer timer;
     ROS_WARN_STREAM("AICO: Setting up the solver");
     updateCount = 0;

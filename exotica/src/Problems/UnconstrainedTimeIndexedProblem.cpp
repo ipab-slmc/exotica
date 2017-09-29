@@ -115,6 +115,26 @@ namespace exotica
       Phi = y;
       ydiff.assign(T, Eigen::VectorXd::Zero(JN));
       J.assign(T, Eigen::MatrixXd(JN, N));
+
+      // Set initial trajectory
+      InitialTrajectory.resize(T, getStartState());
+  }
+
+  void UnconstrainedTimeIndexedProblem::setInitialTrajectory(
+      const std::vector<Eigen::VectorXd> q_init_in) {
+    if (q_init_in.size() != T)
+      throw_pretty("Expected initial trajectory of length "
+                   << T << " but got " << q_init_in.size());
+    if (q_init_in[0].rows() != N)
+      throw_pretty("Expected states to have " << N << " rows but got "
+                                              << q_init_in[0].rows());
+
+    InitialTrajectory = q_init_in;
+    setStartState(q_init_in[0]);
+  }
+
+  std::vector<Eigen::VectorXd> UnconstrainedTimeIndexedProblem::getInitialTrajectory() {
+    return InitialTrajectory;
   }
 
     double UnconstrainedTimeIndexedProblem::getDuration()

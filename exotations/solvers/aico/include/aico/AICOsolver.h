@@ -96,20 +96,9 @@ namespace exotica
       virtual ~AICOsolver();
       /**
        * \brief Solves the problem
-       * @param q0 Start state.
-       * @param solution This will be filled with the solution in joint space.
-       * @return SUCESS if solution has been found, corresponding error code if not.
+       * @param solution Returned solution trajectory as a vector of joint configurations.
        */
       void Solve(Eigen::MatrixXd & solution);
-
-      /**
-       * \brief Solves the problem
-       * @param q_init Trajectory initialisation.
-       * @param solution This will be filled with the solution in joint space.
-       * @return SUCESS if solution has been found, corresponding error code if not.
-       */
-      void Solve(const std::vector<Eigen::VectorXd>& q_init,
-          Eigen::MatrixXd & solution);
 
       /**
        * \brief Binds the solver to a specific problem which must be pre-initalised

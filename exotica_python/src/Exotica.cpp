@@ -184,7 +184,7 @@ namespace detail {
 
         bool addPropertyFromDict(Property& target, PyObject* value_py)
         {
-            if(target.getType()=="std::string")
+            if(target.getType()=="std::string" || target.getType()==getTypeName(typeid(std::string)))
             {
                 target.set(pyAsString(value_py));
                 return true;
@@ -363,7 +363,7 @@ namespace detail {
 
         static void addPropertyToDict(PyObject* dict, const std::string& name, const Property& prop)
         {
-            if(prop.getType()=="std::string")
+            if(prop.getType()=="std::string" || prop.getType()==getTypeName(typeid(std::string)))
             {
                 PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<std::string>(prop.get())).ptr());
             }

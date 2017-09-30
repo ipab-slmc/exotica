@@ -6,18 +6,33 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   exotica
   geometric_shapes
-  fcl
 )
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES collision_scene_fcl
-  CATKIN_DEPENDS exotica geometric_shapes fcl
-
-)
+# From Kinetic onwards, system installed FCL is used.
+# No CMake config is provided either, we have to use pkgconfig.
+if ($ENV{ROS_DISTRO} MATCHES "(kinetic|lunar)")
+    find_package(PkgConfig)
+    pkg_check_modules(FCL REQUIRED fcl)
+    catkin_package(
+      INCLUDE_DIRS include
+      LIBRARIES collision_scene_fcl
+      CATKIN_DEPENDS exotica geometric_shapes
+    )
+    add_definitions(-DROS_KINETIC)
+else()
+    find_package(catkin REQUIRED COMPONENTS
+      fcl
+    )
+    catkin_package(
+      INCLUDE_DIRS include
+      LIBRARIES collision_scene_fcl
+      CATKIN_DEPENDS exotica geometric_shapes fcl
+    )
+endif()
 
 include_directories(
   include
+  ${FCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -26,7 +41,7 @@ add_library(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES}
+  ${catkin_LIBRARIES} ${FCL_LIBRARIES}
 )
 
 install(TARGETS ${PROJECT_NAME}

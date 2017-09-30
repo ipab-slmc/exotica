@@ -37,27 +37,6 @@ REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCL", exotica::CollisionSceneFCL)
 
 namespace fcl_convert
 {
-void fcl2Eigen(const fcl::Vec3f & fcl, Eigen::Vector3d & eigen)
-{
-    eigen(0) = fcl.data.vs[0];
-    eigen(1) = fcl.data.vs[1];
-    eigen(2) = fcl.data.vs[2];
-}
-
-void fcl2Eigen(const fcl::Transform3f & fcl, Eigen::Vector3d & eigen)
-{
-    eigen(0) = fcl.getTranslation().data.vs[0];
-    eigen(1) = fcl.getTranslation().data.vs[1];
-    eigen(2) = fcl.getTranslation().data.vs[2];
-}
-
-void fcl2EigenTranslation(const fcl::Vec3f & fcl, Eigen::Vector3d & eigen)
-{
-    eigen(0) = fcl.data.vs[0];
-    eigen(1) = fcl.data.vs[1];
-    eigen(2) = fcl.data.vs[2];
-}
-
 fcl::Transform3f KDL2fcl(const KDL::Frame& frame)
 {
     return fcl::Transform3f(fcl::Matrix3f(frame.M.data[0], frame.M.data[1], frame.M.data[2], frame.M.data[3], frame.M.data[4], frame.M.data[5], frame.M.data[6], frame.M.data[7], frame.M.data[8]), fcl::Vec3f(frame.p.x(), frame.p.y(), frame.p.z()));
@@ -113,7 +92,11 @@ std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionOb
     // Maybe use cache here?
 
     shapes::ShapeConstPtr shape = element->Shape;
+#ifdef ROS_KINETIC
+    std::shared_ptr<fcl::CollisionGeometry> geometry;
+#else
     boost::shared_ptr<fcl::CollisionGeometry> geometry;
+#endif
     switch (shape->type)
     {
     case shapes::PLANE:

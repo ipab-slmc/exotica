@@ -18,7 +18,7 @@ execute_process(
 
 if (${ROS_VERSION} MATCHES "(indigo|jade)")
   add_definitions(-DROS_INDIGO)
-else (${ROS_VERSION} MATCHES "(kinetic|lunar")
+else (${ROS_VERSION} MATCHES "(kinetic|lunar)")
   add_definitions(-DROS_KINETIC)
 endif()
 

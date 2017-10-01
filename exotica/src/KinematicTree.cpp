@@ -153,16 +153,16 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
 
     // Extract Root Inertial
     auto& UrdfRootInertial = Model->getURDF()->getRoot()->inertial;
-    HIGHLIGHT_NAMED("Root Inertial", "Mass: " << UrdfRootInertial->mass);
     HIGHLIGHT_NAMED("Root Inertial",
-                    "CoM: (" << UrdfRootInertial->origin.position.x << ","
+                    "Mass: " << UrdfRootInertial->mass << " - CoM: ("
+                             << UrdfRootInertial->origin.position.x << ","
                              << UrdfRootInertial->origin.position.y << ","
                              << UrdfRootInertial->origin.position.z << ")");
     KDL::Vector RootCoG = KDL::Vector(UrdfRootInertial->origin.position.x,
                                       UrdfRootInertial->origin.position.y,
                                       UrdfRootInertial->origin.position.z);
     // TODO: Note, this does not set the rotational inertia component, i.e. the
-    // mass matrix would be wrong
+    // inertial matrix would be wrong
     KDL::RigidBodyInertia RootInertial(UrdfRootInertial->mass, RootCoG);
 
     if(RootJoint->getType()==robot_model::JointModel::FIXED)
@@ -202,6 +202,16 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     }
 
     AddElement(RobotKinematics.getRootSegment(), *(Tree.end()-1));
+
+    // Set root inertial
+    if (RootJoint->getType() == robot_model::JointModel::FIXED) {
+      Tree[1]->Segment.setInertia(RootInertial);
+    } else if (RootJoint->getType() == robot_model::JointModel::FLOATING) {
+      Tree[6]->Segment.setInertia(RootInertial);
+    } else if (RootJoint->getType() == robot_model::JointModel::PLANAR) {
+      Tree[2]->Segment.setInertia(RootInertial);
+    }
+
     ModelTree = Tree;
 
     UpdateModel();

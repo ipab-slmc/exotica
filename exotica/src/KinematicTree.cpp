@@ -152,18 +152,20 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     if(WorldFrameName == "") throw_pretty("Can't initialize root joint!");
 
     // Extract Root Inertial
+    double RootMass = 0.0;
+    KDL::Vector RootCoG = KDL::Vector::Zero();
     auto& UrdfRootInertial = Model->getURDF()->getRoot()->inertial;
-    HIGHLIGHT_NAMED("Root Inertial",
-                    "Mass: " << UrdfRootInertial->mass << " - CoM: ("
-                             << UrdfRootInertial->origin.position.x << ","
-                             << UrdfRootInertial->origin.position.y << ","
-                             << UrdfRootInertial->origin.position.z << ")");
-    KDL::Vector RootCoG = KDL::Vector(UrdfRootInertial->origin.position.x,
-                                      UrdfRootInertial->origin.position.y,
-                                      UrdfRootInertial->origin.position.z);
+    if (UrdfRootInertial) {
+      RootMass = UrdfRootInertial->mass;
+      RootCoG = KDL::Vector(UrdfRootInertial->origin.position.x,
+                            UrdfRootInertial->origin.position.y,
+                            UrdfRootInertial->origin.position.z);
+      HIGHLIGHT_NAMED("Root Inertial", "Mass: " << RootMass << " - CoM: ("
+                                                << RootCoG << ")");
+    }
     // TODO: Note, this does not set the rotational inertia component, i.e. the
     // inertial matrix would be wrong
-    KDL::RigidBodyInertia RootInertial(UrdfRootInertial->mass, RootCoG);
+    KDL::RigidBodyInertia RootInertial(RootMass, RootCoG);
 
     if(RootJoint->getType()==robot_model::JointModel::FIXED)
     {

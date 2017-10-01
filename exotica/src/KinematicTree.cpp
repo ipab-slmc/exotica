@@ -160,8 +160,9 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
       RootCoG = KDL::Vector(UrdfRootInertial->origin.position.x,
                             UrdfRootInertial->origin.position.y,
                             UrdfRootInertial->origin.position.z);
-      HIGHLIGHT_NAMED("Root Inertial", "Mass: " << RootMass << " - CoM: ("
-                                                << RootCoG << ")");
+      if (Debug)
+        HIGHLIGHT_NAMED("Root Inertial", "Mass: " << RootMass
+                                                  << " kg - CoG: " << RootCoG);
     }
     // TODO: Note, this does not set the rotational inertia component, i.e. the
     // inertial matrix would be wrong
@@ -218,11 +219,13 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
 
     UpdateModel();
 
-    for (int i = 0; i < Tree.size() - 1; i++)
-      HIGHLIGHT_NAMED(
-          "Tree", Tree[i]->Segment.getName()
-                      << ", mass: " << Tree[i]->Segment.getInertia().getMass()
-                      << ", CoM: " << Tree[i]->Segment.getInertia().getCOG());
+    if (Debug) {
+      for (int i = 0; i < Tree.size() - 1; i++)
+        HIGHLIGHT_NAMED(
+            "Tree", Tree[i]->Segment.getName()
+                        << ", mass: " << Tree[i]->Segment.getInertia().getMass()
+                        << ", CoM: " << Tree[i]->Segment.getInertia().getCOG());
+    }
 
     NumJoints = ModelJointsNames.size();
     NumControlledJoints = ControlledJointsNames.size();

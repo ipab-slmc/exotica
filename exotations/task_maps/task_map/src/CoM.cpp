@@ -190,9 +190,12 @@ namespace exotica
         COM_marker_.scale.z = .02;
         COM_marker_.action = visualization_msgs::Marker::ADD;
 
-        com_marker_.header.frame_id = COM_marker_.header.frame_id = scene_->getRootFrameName();
+        com_marker_.header.frame_id = COM_marker_.header.frame_id =
+            "exotica/" + scene_->getRootFrameName();
 
-        com_pub_ = Server::advertise<visualization_msgs::Marker>(object_name_ + "coms_marker", 1);
-        COM_pub_ = Server::advertise<visualization_msgs::Marker>(object_name_ + "COM_marker", 1);
+        com_pub_ = Server::advertise<visualization_msgs::Marker>(
+            object_name_ + "/coms_marker", 1, true);
+        COM_pub_ = Server::advertise<visualization_msgs::Marker>(
+            object_name_ + "/COM_marker", 1, true);
     }
 }

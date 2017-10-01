@@ -211,12 +211,12 @@ namespace exotica
         return ret;
     }
 
-    inline std::vector<std::string> parseList(const std::string value)
+    inline std::vector<std::string> parseList(const std::string& value, char token = ',')
     {
         std::stringstream ss(value);
         std::string item;
         std::vector<std::string> ret;
-        while (std::getline(ss, item, ','))
+        while (std::getline(ss, item, token))
         {
             ret.push_back(trim(item));
         }

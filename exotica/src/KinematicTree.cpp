@@ -334,7 +334,7 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
     debugSceneChanged = true;
 }
 
-void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia)
 {
     std::shared_ptr<KinematicElement> parent_element;
     if(parent=="")
@@ -357,7 +357,7 @@ void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transfo
     }
     KDL::Frame transformKDL;
     tf::transformEigenToKDL(transform, transformKDL);
-    std::shared_ptr<KinematicElement> NewElement(new KinematicElement(Tree.size(), parent_element, KDL::Segment(name, KDL::Joint(KDL::Joint::None), transformKDL)));
+    std::shared_ptr<KinematicElement> NewElement(new KinematicElement(Tree.size(), parent_element, KDL::Segment(name, KDL::Joint(KDL::Joint::None), transformKDL, inertia)));
     if(shape)
     {
         NewElement->Shape = shape;
@@ -366,7 +366,9 @@ void KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transfo
     Tree.push_back(NewElement);
     parent_element->Children.push_back(NewElement);
     NewElement->updateClosestRobotLink();
+    TreeMap[name] = NewElement;
     debugSceneChanged = true;
+    return NewElement;
 }
 
 void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)

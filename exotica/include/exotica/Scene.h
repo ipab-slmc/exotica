@@ -104,6 +104,8 @@ namespace exotica
       void detachObject(const std::string& name);
       bool hasAttachedObject(const std::string& name);
 
+      void addObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool updateCollisionScene = true);
+
 
       /**
        * @brief      Update the internal MoveIt planning scene from a
@@ -121,8 +123,8 @@ namespace exotica
       void publishScene();
       void publishProxies(const std::vector<CollisionProxy>& proxies);
       visualization_msgs::Marker proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame);
-      void loadScene(const std::string& scene);
-      void loadSceneFile(const std::string& file_name);
+      void loadScene(const std::string& scene, bool updaetCollisionScene = true);
+      void loadSceneFile(const std::string& file_name, bool updaetCollisionScene = true);
       std::string getScene();
       void cleanScene();
     private:
@@ -152,6 +154,7 @@ namespace exotica
       ros::Publisher proxy_pub_;
 
       std::map<std::string, AttachedObject> attached_objects_;
+      std::map<std::string, std::shared_ptr<KinematicElement>> custom_links_;
 
       bool force_collision_;
   };

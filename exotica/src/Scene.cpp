@@ -35,6 +35,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <eigen_conversions/eigen_kdl.h>
+#include <exotica/LinkInitializer.h>
 
 namespace exotica
 {
@@ -98,6 +100,20 @@ namespace exotica
                   << Server::Instance()->getName() << "/" << name_
                   << "/PlanningScene'");
       }
+
+      if(init.LoadScene!="")
+      {
+          std::vector<std::string> files = parseList(init.LoadScene, ';');
+          for(const std::string& file : files) loadSceneFile(file, false);
+      }
+
+      for(const exotica::Initializer& linkInit : init.Links)
+      {
+          LinkInitializer link(linkInit);
+          addObject(link.Name, getFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, getFrame(link.CoM).p), false);
+      }
+
+      kinematica_.UpdateModel();
 
       collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
       collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
@@ -283,20 +299,20 @@ namespace exotica
       return group->getName();
   }
 
-  void Scene::loadScene(const std::string& scene)
+  void Scene::loadScene(const std::string& scene, bool updaetCollisionScene)
   {
       std::stringstream ss(scene);
       ps_->loadGeometryFromStream(ss);
       updateSceneFrames();
-      collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+      if(updaetCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
-  void Scene::loadSceneFile(const std::string& file_name)
+  void Scene::loadSceneFile(const std::string& file_name, bool updaetCollisionScene)
   {
       std::ifstream ss(parsePath(file_name));
       ps_->loadGeometryFromStream(ss);
       updateSceneFrames();
-      collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+      if(updaetCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
   std::string Scene::getScene()
@@ -352,7 +368,29 @@ namespace exotica
           }
       }
 
+      for(auto& it : custom_links_)
+      {
+          Eigen::Affine3d pose;
+          tf::transformKDLToEigen(it.second->Segment.getFrameToTip(), pose);
+          it.second = kinematica_.AddElement(it.first, pose,  it.second->Parent->Segment.getName(), it.second->Shape, it.second->Segment.getInertia());
+      }
+
       kinematica_.UpdateModel();
+  }
+
+  void Scene::addObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, bool updateCollisionScene)
+  {
+      const std::map<std::string, std::shared_ptr<KinematicElement>>& links = kinematica_.getTreeMap();
+      if(links.find(name)!=links.end()) throw_pretty("Link '"<<name<<"' already exists in the scene!");
+      std::string parent_name = parent==""?kinematica_.getRootFrameName():parent;
+      if(links.find(parent_name)==links.end()) throw_pretty("Can't find parent '"<<parent_name<<"'!");
+      Eigen::Affine3d pose;
+      tf::transformKDLToEigen(transform, pose);
+      custom_links_[name] = kinematica_.AddElement(name, pose, parent_name, shape, inertia);
+      if(updateCollisionScene)
+      {
+          collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+      }
   }
 
   void Scene::attachObject(const std::string& name, const std::string& parent)

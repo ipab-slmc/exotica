@@ -227,7 +227,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     // GST_LIBCCD produces incorrect contacts. Probably due to incompatible version of libccd.
     data->Request.gjk_solver_type = fcl::GST_INDEP;
     data->Result.clear();
-    fcl::distance(o1,o2,data->Request, data->Result);
+    fcl::distance(o1, o2, data->Request, data->Result);
 
     CollisionProxy p;
     p.e1 = reinterpret_cast<KinematicElement*>(o1->getUserData());

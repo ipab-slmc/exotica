@@ -128,6 +128,9 @@ namespace exotica
 
         if(Frames.size()>0)
         {
+            // if (debug_)
+            //   HIGHLIGHT_NAMED("CoM", "Initialisation with " << Frames.size() << " passed into map.");
+
             mass_.resize(Frames.size());
             for(int i=0; i<Frames.size(); i++)
             {
@@ -145,11 +148,22 @@ namespace exotica
             int N = scene_->getSolver().getTree().size()-1;
             mass_.resize(N);
             Frames.resize(N);
+            // if (debug_)
+            //   HIGHLIGHT_NAMED("CoM", "Initialisation for tree of size "
+            //                              << Frames.size());
             for(int i=0; i<N; i++)
             {
                 Frames[i].FrameALinkName = scene_->getSolver().getTree()[i+1]->Parent->Segment.getName();
                 Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i+1]->Segment.getInertia().getCOG();
                 mass_(i) = scene_->getSolver().getTree()[i+1]->Segment.getInertia().getMass();
+                // if (debug_)
+                //   HIGHLIGHT_NAMED(
+                //       "CoM-Initialize",
+                //       "LinkName: " << Frames[i].FrameALinkName
+                //                    << ", mass: " << mass_(i) << ", CoG: ("
+                //                    << Frames[i].FrameAOffset.p.x() << ", "
+                //                    << Frames[i].FrameAOffset.p.y() << ", "
+                //                    << Frames[i].FrameAOffset.p.z() << ")");
             }
         }
 

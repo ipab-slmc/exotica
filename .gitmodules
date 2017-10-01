@@ -1,3 +1,3 @@
 [submodule "fcl_catkin"]
 	path = fcl_catkin
-	url = https://github.com/wxmerkt/fcl_catkin.git
+	url = https://github.com/ipab-slmc/fcl_catkin.git

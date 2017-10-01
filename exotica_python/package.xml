@@ -11,4 +11,5 @@
   <depend>moveit_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>shape_msgs</depend>
+  <depend>python-matplotlib</depend>
 </package>

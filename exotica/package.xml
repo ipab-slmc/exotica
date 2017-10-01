@@ -25,4 +25,6 @@
   <depend>tf</depend>
   <depend>kdl_parser</depend>
   <depend>pluginlib</depend>
+  <depend>kdl_conversions</depend>
+  <depend>tf_conversions</depend>
 </package>

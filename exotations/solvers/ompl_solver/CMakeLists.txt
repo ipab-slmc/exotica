@@ -11,8 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Boost REQUIRED COMPONENTS system)
 
+file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
 catkin_package(
-  INCLUDE_DIRS include 
+  INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/include
   LIBRARIES ompl_base_solver
   CATKIN_DEPENDS exotica pluginlib ompl
 )

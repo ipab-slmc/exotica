@@ -216,6 +216,12 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
 
     UpdateModel();
 
+    for (int i = 0; i < Tree.size() - 1; i++)
+      HIGHLIGHT_NAMED(
+          "Tree", Tree[i]->Segment.getName()
+                      << ", mass: " << Tree[i]->Segment.getInertia().getMass()
+                      << ", CoM: " << Tree[i]->Segment.getInertia().getCOG());
+
     NumJoints = ModelJointsNames.size();
     NumControlledJoints = ControlledJointsNames.size();
     if (NumControlledJoints < 1) throw_pretty("No update joints specified!");

@@ -153,7 +153,10 @@ namespace exotica
             }
         }
 
-        if(debug_) InitDebug();
+        if (debug_) {
+          InitDebug();
+          HIGHLIGHT_NAMED("CoM", "Total model mass: " << mass_.sum() << " kg");
+        }
     }
 
     void CoM::assignScene(Scene_ptr scene)

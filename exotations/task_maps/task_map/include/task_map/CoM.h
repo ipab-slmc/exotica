@@ -36,8 +36,8 @@
 #include <exotica/TaskMap.h>
 #include <task_map/CoMInitializer.h>
 #include <exotica/KinematicTree.h>
-#include <fstream>
 #include <visualization_msgs/MarkerArray.h>
+
 namespace exotica
 {
   class CoM: public TaskMap, public Instantiable<CoMInitializer>

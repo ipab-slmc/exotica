@@ -221,7 +221,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
 
     UpdateModel();
 
-    if (true) {
+    if (Debug) {
       for (int i = 0; i < Tree.size() - 1; i++)
         HIGHLIGHT_NAMED(
             "Tree", "Joint: " << Tree[i]->Segment.getJoint().getName() << " - Link: " << Tree[i]->Segment.getName()
@@ -242,7 +242,6 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
         ModelJointsMap[Joint->Segment.getJoint().getName()] = Joint;
         if (Joint->IsControlled)
         {
-            // HIGHLIGHT_NAMED("Controlled Joint", "Adding " << Joint->Segment.getJoint().getName());
           ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
 
           // The ModelBaseType defined above refers to the base type of the
@@ -437,7 +436,6 @@ void KinematicTree::UpdateTree(Eigen::VectorXdRefConst x)
 {
     for(int i=0; i<ControlledJoints.size();i++)
     {
-        // HIGHLIGHT_NAMED("Update Tree", ControlledJoints[i]->Segment.getJoint().getName() << " is now " << x(i));
         TreeState(ControlledJoints[i]->Id) = x(i);
     }
     for(std::shared_ptr<KinematicElement> element : Tree)

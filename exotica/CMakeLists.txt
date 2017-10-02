@@ -13,9 +13,9 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_core
   moveit_ros_planning
   tf
+  eigen_conversions
   kdl_parser
   pluginlib
-  kdl_conversions
   tf_conversions
   ${MSG_DEPS}
 )
@@ -61,7 +61,7 @@ GenInitializers()
 catkin_package(
   INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp message_runtime moveit_core moveit_ros_planning tf kdl_parser pluginlib kdl_conversions tf_conversions
+  CATKIN_DEPENDS roscpp message_runtime moveit_core moveit_ros_planning tf kdl_parser pluginlib tf_conversions eigen_conversions
   CFG_EXTRAS Exotica.cmake AddInitializer.cmake
 )
 

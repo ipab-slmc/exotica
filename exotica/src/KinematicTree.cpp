@@ -168,6 +168,7 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     // inertial matrix would be wrong
     KDL::RigidBodyInertia RootInertial(RootMass, RootCoG);
 
+    // Add general world_frame joint
     Tree.push_back(std::shared_ptr<KinematicElement>(new KinematicElement(Tree.size(), nullptr, KDL::Segment(WorldFrameName, KDL::Joint(RootJoint->getName(), KDL::Joint::None)))));
     if(RootJoint->getType()==robot_model::JointModel::FIXED)
     {
@@ -185,13 +186,18 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
             RootJoint->getName() + "/rot_z",
             RootJoint->getName() + "/rot_y",
             RootJoint->getName() + "/rot_x"};
-        for(int i=0;i<6;i++)
-        {
-            Tree[i+1] = std::shared_ptr<KinematicElement>(new KinematicElement(i, Tree[i-1+1], KDL::Segment(floatingBaseVariableNames[i], KDL::Joint(floatingBaseVariableNames[i], types[i]))  ));
-            if(i>0) Tree[i-1+1]->Children.push_back(Tree[i+1]);
-            // Tree[i] = std::shared_ptr<KinematicElement>(new KinematicElement(i, i==0?nullptr:Tree[i-1], KDL::Segment(i==0?WorldFrameName:RootJoint->getVariableNames()[i], KDL::Joint(RootJoint->getVariableNames()[i], types[i]))  ));
-            // if(i>0) Tree[i-1]->Children.push_back(Tree[i]);
+        for (int i = 0; i < 6; i++) {
+          Tree[i + 1] = std::shared_ptr<KinematicElement>(new KinematicElement(
+              i, Tree[i], KDL::Segment(floatingBaseVariableNames[i],
+                                       KDL::Joint(floatingBaseVariableNames[i],
+                                                  types[i]))));
+          if (i > 0) Tree[i]->Children.push_back(Tree[i + 1]);
         }
+
+        // The floating base rotation is defined as xyzw quaternion in the robot
+        // model, but we are following a RPY-fixed axis (YPR rotating axis)
+        // virtual joint convention in exotica - thus delete the rot_w from the
+        // list of joint names
         auto RotW = std::find(ControlledJointsNames.begin(), ControlledJointsNames.end(),RootJoint->getVariableNames()[6]);
         if(RotW!=ControlledJointsNames.end()) ControlledJointsNames.erase(RotW);
         RotW = std::find(ModelJointsNames.begin(), ModelJointsNames.end(),RootJoint->getVariableNames()[6]);
@@ -199,6 +205,8 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     }
     else if(RootJoint->getType() ==  robot_model::JointModel::PLANAR)
     {
+      // TODO: Needs to be verified whether trans_x works or whether we also
+      // need to add a similar virtual joint as for the floating base
         ModelBaseType = BASE_TYPE::PLANAR;
         Tree.resize(3);
         KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::RotZ};

@@ -153,7 +153,6 @@ namespace exotica
                                          << Frames.size());
             for(int i=0; i<N; i++)
             {
-                // HIGHLIGHT_NAMED("Frame Requests", tree[i]->)
                 Frames[i].FrameALinkName = scene_->getSolver().getTree()[i]->Segment.getName();
                 Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i]->Segment.getInertia().getCOG();
                 mass_(i) = scene_->getSolver().getTree()[i]->Segment.getInertia().getMass();

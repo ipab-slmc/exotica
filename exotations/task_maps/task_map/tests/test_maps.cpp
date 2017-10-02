@@ -121,7 +121,7 @@ void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
     INFO_PLAIN("Test passed");
 }
 
-UnconstrainedEndPoseProblem_ptr setupProbelm(Initializer& map)
+UnconstrainedEndPoseProblem_ptr setupProblem(Initializer& map)
 {
     Initializer scene("Scene",{{"Name",std::string("MyScene")},{"JointGroup",std::string("arm")}});
     Eigen::VectorXd W(3);W << 3,2,1;
@@ -143,7 +143,7 @@ void testEffPosition()
                         {"EndEffector",std::vector<Initializer>({
                              Initializer("Frame",{{"Link",std::string("endeff")}})
                                         }) } });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;
@@ -189,7 +189,7 @@ void testEffOrientation()
                             {"EndEffector",std::vector<Initializer>({
                                  Initializer("Frame",{{"Link",std::string("endeff")}})
                                             }) } });
-        UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+        UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         testRandom(problem);
 
         testJacobian(problem);
@@ -210,7 +210,7 @@ void testEffFrame()
                             {"EndEffector",std::vector<Initializer>({
                                  Initializer("Frame",{{"Link",std::string("endeff")}})
                                             }) } });
-        UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+        UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         testRandom(problem);
 
         testJacobian(problem);
@@ -225,7 +225,7 @@ void testDistance()
                         {"EndEffector",std::vector<Initializer>({
                              Initializer("Frame",{{"Link",std::string("endeff")}})
                                         }) } });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;
@@ -253,7 +253,7 @@ void testJointLimit()
     Initializer map("exotica/JointLimit",{
                         {"Name",std::string("JointLimit")},
                         {"SafePercentage", 0.0} });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;
@@ -294,7 +294,7 @@ void testSphereCollision()
                              Initializer("Frame",{{"Link",std::string("base")}, {"Radius", 0.3}, {"Group", std::string("base")}}),
                              Initializer("Frame",{{"Link",std::string("endeff")}, {"Radius", 0.3}, {"Group", std::string("eff")}})
                                         }) } });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;
@@ -320,7 +320,7 @@ void testIdentity()
     Initializer map("exotica/Identity",{
                         {"Name",std::string("Identity")}
                     });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -357,7 +357,7 @@ void testIdentity()
                         {"Name",std::string("Identity")},
                         {"JointRef",std::string("0.5 0.5 0.5")}
                     });
-    problem = setupProbelm(map);
+    problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -394,7 +394,7 @@ void testIdentity()
                         {"Name",std::string("Identity")},
                         {"JointMap",std::string("0")}
                     });
-    problem = setupProbelm(map);
+    problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -423,7 +423,7 @@ void testCoM()
     Initializer map("exotica/CoM",{
                         {"Name",std::string("CoM")},
                         {"EnableZ", true} });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -463,7 +463,7 @@ void testCoM()
                                Initializer("Frame",{{"Link",std::string("link2")}}),
                                Initializer("Frame",{{"Link",std::string("endeff")}})
                                           }) }});
-    problem = setupProbelm(map);
+    problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -499,7 +499,7 @@ void testCoM()
     map = Initializer("exotica/CoM",{
                         {"Name",std::string("CoM")},
                         {"EnableZ", false} });
-    problem = setupProbelm(map);
+    problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -539,7 +539,7 @@ void testIMesh()
                                Initializer("Frame",{{"Link",std::string("endeff")}})
                                           }) }
                          });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;

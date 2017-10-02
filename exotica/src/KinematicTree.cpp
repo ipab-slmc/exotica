@@ -192,15 +192,14 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
     }
     else if(RootJoint->getType() ==  robot_model::JointModel::PLANAR)
     {
-        // TODO NEEDS TO BE FIXED
         ModelBaseType = BASE_TYPE::PLANAR;
-        // Tree.resize(3);
-        // KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::RotZ};
-        // for(int i=0;i<3;i++)
-        // {
-        //     Tree[i] = std::shared_ptr<KinematicElement>(new KinematicElement(i, i==0?nullptr:Tree[i-1], KDL::Segment(i==0?WorldFrameName:RootJoint->getVariableNames()[i], KDL::Joint(RootJoint->getVariableNames()[i], types[i]))  ));
-        //     if(i>0) Tree[i-1]->Children.push_back(Tree[i]);
-        // }
+        Tree.resize(3);
+        KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::RotZ};
+        for(int i=0;i<3;i++)
+        {
+            Tree[i] = std::shared_ptr<KinematicElement>(new KinematicElement(i, i==0?nullptr:Tree[i-1], KDL::Segment(i==0?WorldFrameName:RootJoint->getVariableNames()[i], KDL::Joint(RootJoint->getVariableNames()[i], types[i]))  ));
+            if(i>0) Tree[i-1]->Children.push_back(Tree[i]);
+        }
     }
     else
     {
@@ -209,7 +208,6 @@ void KinematicTree::BuildTree(const KDL::Tree & RobotKinematics)
 
     AddElement(RobotKinematics.getRootSegment(), *(Tree.end()-1));
 
-    // TODO NEEDS TO BE FIXED
     // Set root inertial
     if (RootJoint->getType() == robot_model::JointModel::FIXED) {
       Tree[2]->Segment.setInertia(RootInertial);

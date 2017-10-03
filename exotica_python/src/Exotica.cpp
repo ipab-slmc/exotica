@@ -558,6 +558,9 @@ PYBIND11_MODULE(_pyexotica, module)
     samplingProblem.def("setGoalState", &SamplingProblem::setGoalState);
     samplingProblem.def("getSpaceDim", &SamplingProblem::getSpaceDim);
     samplingProblem.def("getBounds", &SamplingProblem::getBounds);
+    samplingProblem.def_readonly("Rho", &SamplingProblem::Rho);
+    samplingProblem.def_readonly("y", &SamplingProblem::y);
+    samplingProblem.def_readonly("Phi", &SamplingProblem::Phi);
 
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "Proxy");
     proxy.def(py::init());

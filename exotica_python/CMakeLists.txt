@@ -40,5 +40,6 @@ catkin_install_python(PROGRAMS
 install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 
 if(CATKIN_ENABLE_TESTING)
-    catkin_install_python(PROGRAMS tests/core.py tests/runtest.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  FILE(GLOB python_tests "${CMAKE_CURRENT_SOURCE_DIR}/tests/*")
+  catkin_install_python(PROGRAMS ${python_tests} DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 endif(CATKIN_ENABLE_TESTING)

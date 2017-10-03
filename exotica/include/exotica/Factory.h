@@ -37,7 +37,8 @@
 #include <map>
 #include <typeinfo>
 
-#include "exotica/Tools.h"
+#include <exotica/Object.h>
+#include <exotica/Tools.h>
 #include <pluginlib/class_list_macros.h>
 
 /**

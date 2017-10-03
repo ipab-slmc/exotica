@@ -128,6 +128,9 @@ namespace exotica
 
         if(Frames.size()>0)
         {
+            if (debug_)
+              HIGHLIGHT_NAMED("CoM", "Initialisation with " << Frames.size() << " passed into map.");
+
             mass_.resize(Frames.size());
             for(int i=0; i<Frames.size(); i++)
             {
@@ -135,25 +138,39 @@ namespace exotica
                 {
                     throw_named("Requesting CoM frame with base other than root! '" << Frames[i].FrameALinkName << "'");
                 }
+                Frames[i].FrameALinkName = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getName();
                 Frames[i].FrameAOffset.p = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getCOG();
                 mass_(i) = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getMass();
-                Frames[i].FrameALinkName = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Parent->Segment.getName();
             }
         }
         else
         {
-            int N = scene_->getSolver().getTree().size()-1;
+            int N = scene_->getSolver().getTree().size();
             mass_.resize(N);
             Frames.resize(N);
+            if (debug_)
+              HIGHLIGHT_NAMED("CoM", "Initialisation for tree of size "
+                                         << Frames.size());
             for(int i=0; i<N; i++)
             {
-                Frames[i].FrameALinkName = scene_->getSolver().getTree()[i+1]->Parent->Segment.getName();
-                Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i+1]->Segment.getInertia().getCOG();
-                mass_(i) = scene_->getSolver().getTree()[i+1]->Segment.getInertia().getMass();
+                Frames[i].FrameALinkName = scene_->getSolver().getTree()[i]->Segment.getName();
+                Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i]->Segment.getInertia().getCOG();
+                mass_(i) = scene_->getSolver().getTree()[i]->Segment.getInertia().getMass();
+                if (debug_)
+                  HIGHLIGHT_NAMED("CoM-Initialize",
+                                  "FrameALinkName: "
+                                      << Frames[i].FrameALinkName
+                                      << ", mass: " << mass_(i) << ", CoG: ("
+                                      << Frames[i].FrameAOffset.p.x() << ", "
+                                      << Frames[i].FrameAOffset.p.y() << ", "
+                                      << Frames[i].FrameAOffset.p.z() << ")");
             }
         }
 
-        if(debug_) InitDebug();
+        if (debug_) {
+          InitDebug();
+          HIGHLIGHT_NAMED("CoM", "Total model mass: " << mass_.sum() << " kg");
+        }
     }
 
     void CoM::assignScene(Scene_ptr scene)
@@ -187,9 +204,12 @@ namespace exotica
         COM_marker_.scale.z = .02;
         COM_marker_.action = visualization_msgs::Marker::ADD;
 
-        com_marker_.header.frame_id = COM_marker_.header.frame_id = scene_->getRootFrameName();
+        com_marker_.header.frame_id = COM_marker_.header.frame_id =
+            "exotica/" + scene_->getRootFrameName();
 
-        com_pub_ = Server::advertise<visualization_msgs::Marker>(object_name_ + "coms_marker", 1);
-        COM_pub_ = Server::advertise<visualization_msgs::Marker>(object_name_ + "COM_marker", 1);
+        com_pub_ = Server::advertise<visualization_msgs::Marker>(
+            object_name_ + "/coms_marker", 1, true);
+        COM_pub_ = Server::advertise<visualization_msgs::Marker>(
+            object_name_ + "/COM_marker", 1, true);
     }
 }

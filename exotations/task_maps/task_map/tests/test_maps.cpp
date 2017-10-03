@@ -121,7 +121,7 @@ void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
     INFO_PLAIN("Test passed");
 }
 
-UnconstrainedEndPoseProblem_ptr setupProbelm(Initializer& map)
+UnconstrainedEndPoseProblem_ptr setupProblem(Initializer& map)
 {
     Initializer scene("Scene",{{"Name",std::string("MyScene")},{"JointGroup",std::string("arm")}});
     Eigen::VectorXd W(3);W << 3,2,1;
@@ -143,7 +143,7 @@ void testEffPosition()
                         {"EndEffector",std::vector<Initializer>({
                              Initializer("Frame",{{"Link",std::string("endeff")}})
                                         }) } });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;
@@ -189,7 +189,7 @@ void testEffOrientation()
                             {"EndEffector",std::vector<Initializer>({
                                  Initializer("Frame",{{"Link",std::string("endeff")}})
                                             }) } });
-        UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+        UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         testRandom(problem);
 
         testJacobian(problem);
@@ -210,7 +210,7 @@ void testEffFrame()
                             {"EndEffector",std::vector<Initializer>({
                                  Initializer("Frame",{{"Link",std::string("endeff")}})
                                             }) } });
-        UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+        UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         testRandom(problem);
 
         testJacobian(problem);
@@ -225,7 +225,7 @@ void testDistance()
                         {"EndEffector",std::vector<Initializer>({
                              Initializer("Frame",{{"Link",std::string("endeff")}})
                                         }) } });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;
@@ -253,7 +253,7 @@ void testJointLimit()
     Initializer map("exotica/JointLimit",{
                         {"Name",std::string("JointLimit")},
                         {"SafePercentage", 0.0} });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;
@@ -294,7 +294,7 @@ void testSphereCollision()
                              Initializer("Frame",{{"Link",std::string("base")}, {"Radius", 0.3}, {"Group", std::string("base")}}),
                              Initializer("Frame",{{"Link",std::string("endeff")}, {"Radius", 0.3}, {"Group", std::string("eff")}})
                                         }) } });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;
@@ -320,7 +320,7 @@ void testIdentity()
     Initializer map("exotica/Identity",{
                         {"Name",std::string("Identity")}
                     });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -357,7 +357,7 @@ void testIdentity()
                         {"Name",std::string("Identity")},
                         {"JointRef",std::string("0.5 0.5 0.5")}
                     });
-    problem = setupProbelm(map);
+    problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -394,7 +394,7 @@ void testIdentity()
                         {"Name",std::string("Identity")},
                         {"JointMap",std::string("0")}
                     });
-    problem = setupProbelm(map);
+    problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -423,7 +423,7 @@ void testCoM()
     Initializer map("exotica/CoM",{
                         {"Name",std::string("CoM")},
                         {"EnableZ", true} });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -435,22 +435,22 @@ void testCoM()
         Eigen::MatrixXd J(L*M, N);
 
         X << -0.281809, 0.10497, 0.15886, -0.0948483, 0.374775, -0.80072, 0.061616, 0.514588, -0.39141, 0.984457, 0.153942, 0.755228, 0.495619, 0.25782, -0.929158;
-        Y << 0.0175848, -0.00509105, 0.486016, 0.0307139, -0.00292193, 0.477458, 0.0583306, 0.00359865, 0.472741, 0.0204589, 0.0307992, 0.47653, 0.0115533, 0.00624603, 0.478356;
-        J <<      0.00509105, 0.13065, 0.0231829
-                , 0.0175848, -0.0378252, -0.00671179
-                , 0, -0.018307, -0.0065195
-                , 0.00292193, 0.126885, 0.0226639
-                , 0.0307139, -0.012071, -0.0021561
-                , 0, -0.0308526, 0.0103295
-                , -0.00359865, 0.122508, 0.0247635
-                , 0.0583306, 0.00755804, 0.00152776
-                , 0, -0.0584415, -0.00307167
-                , -0.0307992, 0.0700108, 0.00849894
-                , 0.0204589, 0.105396, 0.0127945
-                , 0, -0.036975, -0.0197248
-                , -0.00624603, 0.112912, 0.0172194
-                , 0.0115533, 0.0610432, 0.00930928
-                , 0, -0.0131336, 0.0155509;
+        Y << 0.081112, -0.0234831, 0.924368, 0.0080578, -0.000766568, 0.895465, 0.157569, 0.00972105, 0.897157, 0.117213, 0.176455, 0.846633, -0.0587457, -0.0317596, 0.877501;
+        J <<    0.0234831, 0.455657, 0.200919,
+                0.081112, -0.131919, -0.0581688,
+                0, -0.0844429, -0.0565023,
+                0.000766568, 0.443462, 0.19642,
+                0.0080578, -0.0421882, -0.0186862,
+                0, -0.00809418, 0.0895227,
+                -0.00972105, 0.446309, 0.214617,
+                0.157569, 0.0275346, 0.0132406,
+                0, -0.157868, -0.0266211,
+                -0.176455, 0.219463, 0.0736575,
+                0.117213, 0.330384, 0.110885,
+                0, -0.211838, -0.170949,
+                0.0317596, 0.376061, 0.149235,
+                -0.0587457, 0.203309, 0.0806805,
+                0, 0.0667812, 0.134774;
         testValues(X ,Y ,J ,problem);
     }
     testJacobian(problem);
@@ -463,7 +463,7 @@ void testCoM()
                                Initializer("Frame",{{"Link",std::string("link2")}}),
                                Initializer("Frame",{{"Link",std::string("endeff")}})
                                           }) }});
-    problem = setupProbelm(map);
+    problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -475,22 +475,22 @@ void testCoM()
         Eigen::MatrixXd J(L*M, N);
 
         X << 0.299414, -0.503912, 0.258959, -0.541726, 0.40124, -0.366266, -0.342446, -0.537144, -0.851678, 0.266144, -0.552687, 0.302264, 0.0213719, 0.942931, -0.439916;
-        Y << -0.0923262, -0.0285006, 0.626755, 0.06006, -0.0361428, 0.63607, -0.130665, 0.0465808, 0.584404, -0.100591, -0.0274222, 0.622386, 0.16569, 0.00354166, 0.571605;
-        J <<      0.0285006, 0.192779, 0.0463493
-                , -0.0923262, 0.0595097, 0.0143078
-                , 0, 0.0966251, 0.0121255
-                , 0.0361428, 0.180849, 0.0428148
-                , 0.06006, -0.108831, -0.025765
-                , 0, -0.0700964, -0.00174835
-                , -0.0465808, 0.150148, 0.00852318
-                , -0.130665, -0.0535266, -0.00303844
-                , 0, 0.138719, 0.0491744
-                , 0.0274222, 0.190436, 0.0467349
-                , -0.100591, 0.0519151, 0.0127405
-                , 0, 0.104262, 0.0123907
-                , -0.00354166, 0.146571, 0.0437966
-                , 0.16569, 0.00313299, 0.000936162
-                , 0, -0.165728, -0.0241035;
+        Y << -0.167532, -0.0517162, 0.913823, 0.083533, -0.0502684, 0.931962, -0.3632, 0.129477, 0.693081, -0.17971, -0.048991, 0.907923, 0.314586, 0.00672432, 0.823106;
+        J <<    0.0517162, 0.443188, 0.254921,
+                -0.167532, 0.13681, 0.0786927,
+                0, 0.175333, 0.0666905,
+                0.0502684, 0.412954, 0.235481,
+                0.083533, -0.248507, -0.141708,
+                0, -0.0974919, -0.00961589,
+                -0.129477, 0.228967, 0.0468775,
+                -0.3632, -0.0816248, -0.0167114,
+                0, 0.385588, 0.270459,
+                0.048991, 0.441801, 0.257042,
+                -0.17971, 0.12044, 0.0700725,
+                0, 0.186268, 0.0681488,
+                -0.00672432, 0.373021, 0.240882,
+                0.314586, 0.00797337, 0.00514888,
+                0, -0.314658, -0.132569;
         testValues(X ,Y ,J ,problem);
     }
     testJacobian(problem);
@@ -499,7 +499,7 @@ void testCoM()
     map = Initializer("exotica/CoM",{
                         {"Name",std::string("CoM")},
                         {"EnableZ", false} });
-    problem = setupProbelm(map);
+    problem = setupProblem(map);
     testRandom(problem);
 
     {
@@ -511,17 +511,17 @@ void testCoM()
         Eigen::MatrixXd J(L*M, N);
 
         X << 0.350952, -0.0340994, -0.0361284, -0.390089, 0.424175, -0.634888, 0.243646, -0.918271, -0.172033, 0.391968, 0.347873, 0.27528, -0.305768, -0.630755, 0.218212;
-        Y << -0.00524898, -0.00192169, 0.037987, -0.0156187, -0.108262, -0.0269121, 0.048926, 0.0202239, -0.0728285, 0.0229896;
-        J <<       0.00192169, 0.129, 0.0234183
-                , -0.00524898, 0.0472277, 0.00857361
-                , 0.0156187, 0.117438, 0.0226105
-                , 0.037987, -0.0482857, -0.00929649
-                , 0.0269121, 0.077506, 0.0112141
-                , -0.108262, 0.0192668, 0.00278765
-                , -0.0202239, 0.116502, 0.0187614
-                , 0.048926, 0.0481567, 0.00775516
-                , -0.0229896, 0.108479, 0.0218403
-                , -0.0728285, -0.0342434, -0.00689428;
+        Y << -0.0228141, -0.0083524, 0.0595937, -0.0245025, -0.392081, -0.0974653, 0.200868, 0.0830305, -0.232814, 0.0734919;
+        J <<    0.0083524, 0.453225, 0.202958,
+                -0.0228141, 0.165929, 0.0743046,
+                0.0245025, 0.420734, 0.195957,
+                0.0595937, -0.172988, -0.0805696,
+                0.0974653, 0.254325, 0.0971889,
+                -0.392081, 0.0632213, 0.0241597,
+                -0.0830305, 0.394279, 0.162599,
+                0.200868, 0.162978, 0.0672114,
+                -0.0734919, 0.394649, 0.189283,
+                -0.232814, -0.124578, -0.0597504;
         testValues(X ,Y ,J ,problem);
     }
     testJacobian(problem);
@@ -539,7 +539,7 @@ void testIMesh()
                                Initializer("Frame",{{"Link",std::string("endeff")}})
                                           }) }
                          });
-    UnconstrainedEndPoseProblem_ptr problem = setupProbelm(map);
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
     int N = problem->N;

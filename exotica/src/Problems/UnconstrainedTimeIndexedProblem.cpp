@@ -144,7 +144,7 @@ namespace exotica
 
     void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
     {
-        scene_->Update(x);
+        scene_->Update(x, static_cast<double>(t)*tau);
         for(int i=0;i<NumTasks;i++)
         {
             Tasks[i]->update(x, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));

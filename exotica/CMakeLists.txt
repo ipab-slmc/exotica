@@ -53,7 +53,7 @@ include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 configure_file("src/Version.cpp.in" "${exotica_BINARY_DIR}/generated/Version.cpp" @ONLY)
 
-AddInitializer(TaskMap Object Frame Link MotionSolver PlanningProblem Scene
+AddInitializer(TaskMap Object Frame Link MotionSolver PlanningProblem Scene Trajectory
      UnconstrainedTimeIndexedProblem UnconstrainedEndPoseProblem SamplingProblem)
 GenInitializers()
 
@@ -82,6 +82,7 @@ add_library(${PROJECT_NAME}
   src/Setup.cpp
   src/Server.cpp
   src/Scene.cpp
+  src/Trajectory.cpp
   src/Property.cpp
   src/KinematicTree.cpp
   src/TaskSpaceVector.cpp

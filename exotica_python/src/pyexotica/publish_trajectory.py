@@ -16,8 +16,8 @@ def is_shutdown():
     global trajectoryPlaybackIsShutdown
     return trajectoryPlaybackIsShutdown
 
-def publishPose(q, problem):
-    problem.getScene().Update(q)
+def publishPose(q, problem, t=0.0):
+    problem.getScene().Update(q, t)
     problem.getScene().getSolver().publishFrames()
 
 def publishTrajectory(traj, T, problem):
@@ -25,7 +25,7 @@ def publishTrajectory(traj, T, problem):
     dt = float(T)/float(len(traj))
     t=0
     while not is_shutdown():
-        publishPose(traj[t], problem)
+        publishPose(traj[t], problem, float(t)*dt)
         sleep(dt)
         t=(t+1)%len(traj)
 

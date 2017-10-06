@@ -1,25 +1,16 @@
 #!/usr/bin/env python
 
 import pyexotica as exo
-from numpy import array
-from numpy import matrix
 from pyexotica.publish_trajectory import *
-import math
 
-def figureEight(t):
-    return array([0.0, math.sin(t * 2.0 * math.pi * 0.5) * 0.1, math.sin(t * math.pi * 0.5) * 0.2, 0.0, 0.0, 0.0])
-
-(sol, prob)=exo.Initializers.loadXMLFull('{exotica}/resources/configs/aico_solver_demo_eight.xml')
-problem = exo.Setup.createProblem(prob)
-solver = exo.Setup.createSolver(sol)
-solver.specifyProblem(problem)
+solver=exo.Setup.loadSolver('{exotica}/resources/configs/aico_solver_demo_eight.xml')
+problem = solver.getProblem()
 
 for t in range(0,problem.T):
-    if t<problem.T/5:
+    if float(t)*problem.tau<0.8:
         problem.setRho('Frame',0.0,t)
     else:
         problem.setRho('Frame',1e5,t)
-        problem.setGoal('Frame',figureEight(t*problem.tau),t)
 
 solution = solver.solve()
 

@@ -461,7 +461,7 @@ void KinematicTree::UpdateTree(Eigen::VectorXdRefConst x)
     {
         KDL::Frame ParentFrame;
         if(element->Id>0) ParentFrame = element->Parent->Frame;
-        element->Frame = ParentFrame * element->Segment.pose(TreeState(element->Id));
+        element->Frame = ParentFrame * element->getPose(TreeState(element->Id));
     }
 }
 

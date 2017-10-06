@@ -17,22 +17,29 @@
         <JointGroup>arm</JointGroup>
         <URDF>{exotica}/resources/robots/lwr_simplified.urdf</URDF>
         <SRDF>{exotica}/resources/robots/lwr_simplified.srdf</SRDF>
+        <Links>
+          <Link Name="TargetOffset" Transform="0.6 -0.1 0.5 0 0 0.3"/>
+          <Link Name="Target" Parent="TargetOffset" />
+        </Links>
+        <Trajectories>
+          <Trajectory Link="Target" File="{exotica}/resources/scenes/figure_eight.traj" />
+        </Trajectories>
       </Scene>
     </PlanningScene>
 
     <Maps>
       <EffFrame Name="Frame">
         <EndEffector>
-            <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17" BaseOffset="0.6 -0.1 0.5 0 0 0 1" />
+            <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17" Base="Target" />
         </EndEffector>
       </EffFrame>
     </Maps>
    
-    <T>400</T>
+    <T>233</T>
     <Tau>0.03</Tau>
     <Qrate>1e-10</Qrate>
     <Hrate>1</Hrate>
-    <Wrate>1e4</Wrate>
+    <Wrate>1e3</Wrate>
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedTimeIndexedProblem>
 </PlannerDemoConfig>

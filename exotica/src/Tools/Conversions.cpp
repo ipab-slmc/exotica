@@ -1,4 +1,5 @@
 #include <exotica/Tools/Conversions.h>
+#include <exotica/Tools/Printable.h>
 #include <algorithm>
 
 namespace Eigen

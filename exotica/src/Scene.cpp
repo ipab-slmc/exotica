@@ -325,20 +325,20 @@ namespace exotica
       return group->getName();
   }
 
-  void Scene::loadScene(const std::string& scene, bool updaetCollisionScene)
+  void Scene::loadScene(const std::string& scene, bool updateCollisionScene)
   {
       std::stringstream ss(scene);
       ps_->loadGeometryFromStream(ss);
       updateSceneFrames();
-      if(updaetCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+      if(updateCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
-  void Scene::loadSceneFile(const std::string& file_name, bool updaetCollisionScene)
+  void Scene::loadSceneFile(const std::string& file_name, bool updateCollisionScene)
   {
       std::ifstream ss(parsePath(file_name));
       ps_->loadGeometryFromStream(ss);
       updateSceneFrames();
-      if(updaetCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+      if(updateCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
   std::string Scene::getScene()
@@ -467,14 +467,14 @@ namespace exotica
   std::shared_ptr<Trajectory> Scene::getTrajectory(const std::string& link)
   {
       const auto& it = trajectory_generators_.find(link);
-      if(it==trajectory_generators_.end()) throw_pretty("No trajectory genrator defined for link '"<<link<<"'!");
+      if(it==trajectory_generators_.end()) throw_pretty("No trajectory generator defined for link '"<<link<<"'!");
       return it->second.second;
   }
 
   void Scene::removeTrajectory(const std::string& link)
   {
       const auto& it = trajectory_generators_.find(link);
-      if(it==trajectory_generators_.end()) throw_pretty("No trajectory genrator defined for link '"<<link<<"'!");
+      if(it==trajectory_generators_.end()) throw_pretty("No trajectory generator defined for link '"<<link<<"'!");
       it->second.first->IsTrajectoryGenerated = false;
       trajectory_generators_.erase(it);
   }

@@ -132,8 +132,8 @@ namespace exotica
       void publishScene();
       void publishProxies(const std::vector<CollisionProxy>& proxies);
       visualization_msgs::Marker proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame);
-      void loadScene(const std::string& scene, bool updaetCollisionScene = true);
-      void loadSceneFile(const std::string& file_name, bool updaetCollisionScene = true);
+      void loadScene(const std::string& scene, bool updateCollisionScene = true);
+      void loadSceneFile(const std::string& file_name, bool updateCollisionScene = true);
       std::string getScene();
       void cleanScene();
     private:

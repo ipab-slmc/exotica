@@ -36,6 +36,7 @@ catkin_install_python(PROGRAMS
     scripts/example_attach.py
     scripts/example_distance.py
     scripts/example_fk.py
+    scripts/example_aico_trajectory.py
       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 

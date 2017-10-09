@@ -41,6 +41,7 @@
 #include <exotica/CollisionScene.h>
 #include <moveit_msgs/PlanningScene.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <exotica/Trajectory.h>
 
 namespace exotica
 {
@@ -63,7 +64,7 @@ namespace exotica
       virtual void Instantiate(SceneInitializer& init);
       std::shared_ptr<KinematicResponse> RequestKinematics(KinematicsRequest& Request);
       std::string getName();
-      virtual void Update(Eigen::VectorXdRefConst x);
+      virtual void Update(Eigen::VectorXdRefConst x, double t = 0);
       void setCollisionScene(const moveit_msgs::PlanningSceneConstPtr & scene);
       CollisionScene_ptr & getCollisionScene();
       std::string getRootFrameName();
@@ -78,9 +79,15 @@ namespace exotica
       Eigen::VectorXd getModelState();
       Eigen::VectorXd getControlledState();
       std::map<std::string, double> getModelStateMap();
-      void setModelState(Eigen::VectorXdRefConst x);
-      void setModelState(std::map<std::string, double> x);
+      void setModelState(Eigen::VectorXdRefConst x, double t = 0);
+      void setModelState(std::map<std::string, double> x, double t = 0);
       std::string getGroupName();
+
+      void addTrajectoryFromFile(const std::string& link, const std::string& traj);
+      void addTrajectory(const std::string& link, const std::string& traj);
+      void addTrajectory(const std::string& link, std::shared_ptr<Trajectory> traj);
+      std::shared_ptr<Trajectory> getTrajectory(const std::string& link);
+      void removeTrajectory(const std::string& link);
 
       /// \brief Updates exotica scene object frames from the MoveIt scene.
       void updateSceneFrames();
@@ -104,6 +111,8 @@ namespace exotica
       void detachObject(const std::string& name);
       bool hasAttachedObject(const std::string& name);
 
+      void addObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool updateCollisionScene = true);
+
 
       /**
        * @brief      Update the internal MoveIt planning scene from a
@@ -118,11 +127,13 @@ namespace exotica
         return BaseType;
       }
 
+      void updateTrajectoryGenerators(double t = 0);
+
       void publishScene();
       void publishProxies(const std::vector<CollisionProxy>& proxies);
       visualization_msgs::Marker proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame);
-      void loadScene(const std::string& scene);
-      void loadSceneFile(const std::string& file_name);
+      void loadScene(const std::string& scene, bool updateCollisionScene = true);
+      void loadSceneFile(const std::string& file_name, bool updateCollisionScene = true);
       std::string getScene();
       void cleanScene();
     private:
@@ -151,7 +162,14 @@ namespace exotica
       ros::Publisher ps_pub_;
       ros::Publisher proxy_pub_;
 
+      /// \brief List of attached objects
+      /// These objects will be reattached if the scene gets reloaded.
       std::map<std::string, AttachedObject> attached_objects_;
+
+      /// \brief List of frames/links added on top of robot links and scene objects defined in the MoveIt scene.
+      std::map<std::string, std::shared_ptr<KinematicElement>> custom_links_;
+
+      std::map<std::string, std::pair<std::shared_ptr<KinematicElement>, std::shared_ptr<Trajectory>>> trajectory_generators_;
 
       bool force_collision_;
   };

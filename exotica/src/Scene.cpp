@@ -35,6 +35,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <eigen_conversions/eigen_kdl.h>
+#include <exotica/LinkInitializer.h>
+#include <exotica/TrajectoryInitializer.h>
 
 namespace exotica
 {
@@ -99,6 +102,20 @@ namespace exotica
                   << "/PlanningScene'");
       }
 
+      if(init.LoadScene!="")
+      {
+          std::vector<std::string> files = parseList(init.LoadScene, ';');
+          for(const std::string& file : files) loadSceneFile(file, false);
+      }
+
+      for(const exotica::Initializer& linkInit : init.Links)
+      {
+          LinkInitializer link(linkInit);
+          addObject(link.Name, getFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, getFrame(link.CoM).p), false);
+      }
+
+      kinematica_.UpdateModel();
+
       collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
       collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 
@@ -119,6 +136,19 @@ namespace exotica
       }
       collision_scene_->setACM(acm);
 
+      for(const exotica::Initializer& it : init.Trajectories)
+      {
+          TrajectoryInitializer trajInit(it);
+          if(trajInit.File!="")
+          {
+              addTrajectoryFromFile(trajInit.Link, trajInit.File);
+          }
+          else
+          {
+              addTrajectory(trajInit.Link, trajInit.Trajectory);
+          }
+      }
+
       if (debug_) INFO_NAMED(name_, "Exotica Scene initialized");
   }
 
@@ -127,8 +157,17 @@ namespace exotica
       return kinematica_.RequestFrames(Request);
   }
 
-  void Scene::Update(Eigen::VectorXdRefConst x)
+  void Scene::updateTrajectoryGenerators(double t)
   {
+      for(auto& it : trajectory_generators_)
+      {
+          it.second.first->GeneratedOffset = it.second.second->getPosition(t);
+      }
+  }
+
+  void Scene::Update(Eigen::VectorXdRefConst x, double t)
+  {
+      updateTrajectoryGenerators(t);
       kinematica_.Update(x);
       if(force_collision_) collision_scene_->updateCollisionObjectTransforms();
       if (debug_) publishScene();
@@ -254,8 +293,9 @@ namespace exotica
     return kinematica_.getModelStateMap();
   }
 
-  void Scene::setModelState(Eigen::VectorXdRefConst x)
+  void Scene::setModelState(Eigen::VectorXdRefConst x, double t)
   {
+    updateTrajectoryGenerators(t);
     // Update Kinematica internal state
     kinematica_.setModelState(x);
 
@@ -264,7 +304,9 @@ namespace exotica
     if (debug_) publishScene();
   }
 
-  void Scene::setModelState(std::map<std::string, double> x) {
+  void Scene::setModelState(std::map<std::string, double> x, double t)
+  {
+    updateTrajectoryGenerators(t);
     // Update Kinematica internal state
     kinematica_.setModelState(x);
 
@@ -283,20 +325,20 @@ namespace exotica
       return group->getName();
   }
 
-  void Scene::loadScene(const std::string& scene)
+  void Scene::loadScene(const std::string& scene, bool updateCollisionScene)
   {
       std::stringstream ss(scene);
       ps_->loadGeometryFromStream(ss);
       updateSceneFrames();
-      collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+      if(updateCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
-  void Scene::loadSceneFile(const std::string& file_name)
+  void Scene::loadSceneFile(const std::string& file_name, bool updateCollisionScene)
   {
       std::ifstream ss(parsePath(file_name));
       ps_->loadGeometryFromStream(ss);
       updateSceneFrames();
-      collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+      if(updateCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
   }
 
   std::string Scene::getScene()
@@ -352,7 +394,29 @@ namespace exotica
           }
       }
 
+      for(auto& it : custom_links_)
+      {
+          Eigen::Affine3d pose;
+          tf::transformKDLToEigen(it.second->Segment.getFrameToTip(), pose);
+          it.second = kinematica_.AddElement(it.first, pose,  it.second->Parent->Segment.getName(), it.second->Shape, it.second->Segment.getInertia());
+      }
+
       kinematica_.UpdateModel();
+  }
+
+  void Scene::addObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, bool updateCollisionScene)
+  {
+      const std::map<std::string, std::shared_ptr<KinematicElement>>& links = kinematica_.getTreeMap();
+      if(links.find(name)!=links.end()) throw_pretty("Link '"<<name<<"' already exists in the scene!");
+      std::string parent_name = parent==""?kinematica_.getRootFrameName():parent;
+      if(links.find(parent_name)==links.end()) throw_pretty("Can't find parent '"<<parent_name<<"'!");
+      Eigen::Affine3d pose;
+      tf::transformKDLToEigen(transform, pose);
+      custom_links_[name] = kinematica_.AddElement(name, pose, parent_name, shape, inertia);
+      if(updateCollisionScene)
+      {
+          collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+      }
   }
 
   void Scene::attachObject(const std::string& name, const std::string& parent)
@@ -378,6 +442,41 @@ namespace exotica
   bool Scene::hasAttachedObject(const std::string& name)
   {
       return attached_objects_.find(name)!=attached_objects_.end();
+  }
+
+  void Scene::addTrajectoryFromFile(const std::string& link, const std::string& traj)
+  {
+      addTrajectory(link, loadFile(traj));
+  }
+
+  void Scene::addTrajectory(const std::string& link, const std::string& traj)
+  {
+      addTrajectory(link, std::shared_ptr<Trajectory>(new Trajectory(traj)));
+  }
+
+  void Scene::addTrajectory(const std::string& link, std::shared_ptr<Trajectory> traj)
+  {
+      const auto& tree = kinematica_.getTreeMap();
+      const auto& it = tree.find(link);
+      if(it==tree.end()) throw_pretty("Can't find link '"<<link<<"'!");
+      if(traj->getDuration()==0.0) throw_pretty("The trajectory is empty!");
+      trajectory_generators_[link] = std::pair<std::shared_ptr<KinematicElement>, std::shared_ptr<Trajectory>>(it->second, traj);
+      it->second->IsTrajectoryGenerated = true;
+  }
+
+  std::shared_ptr<Trajectory> Scene::getTrajectory(const std::string& link)
+  {
+      const auto& it = trajectory_generators_.find(link);
+      if(it==trajectory_generators_.end()) throw_pretty("No trajectory generator defined for link '"<<link<<"'!");
+      return it->second.second;
+  }
+
+  void Scene::removeTrajectory(const std::string& link)
+  {
+      const auto& it = trajectory_generators_.find(link);
+      if(it==trajectory_generators_.end()) throw_pretty("No trajectory generator defined for link '"<<link<<"'!");
+      it->second.first->IsTrajectoryGenerated = false;
+      trajectory_generators_.erase(it);
   }
 
 }

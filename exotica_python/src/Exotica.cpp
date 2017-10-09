@@ -450,6 +450,10 @@ PYBIND11_MODULE(_pyexotica, module)
     tools.def("IdentityTransform", &Eigen::IdentityTransform);
     tools.def("loadFile", &loadFile);
     tools.def("pathExists", &pathExists);
+    tools.def("createCompositeTrajectory", [](Eigen::MatrixXdRefConst data, double radius)
+    {
+        return Trajectory(data, radius).toString();
+    }, py::arg("data"), py::arg("maxradius")=1.0);
 
     py::class_<Timer, std::shared_ptr<Timer>> timer(module, "Timer");
     timer.def(py::init());
@@ -576,7 +580,7 @@ PYBIND11_MODULE(_pyexotica, module)
     proxy.def("__repr__", &CollisionProxy::print);
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
-    scene.def("Update", &Scene::Update);
+    scene.def("Update", &Scene::Update, py::arg("x"), py::arg("t")=0.0);
     scene.def("getBaseType", &Scene::getBaseType);
     scene.def("getGroupName", &Scene::getGroupName);
     scene.def("getJointNames", (std::vector<std::string> (Scene::*)()) &Scene::getJointNames);
@@ -584,8 +588,8 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getModelJointNames", &Scene::getModelJointNames);
     scene.def("getModelState", &Scene::getModelState);
     scene.def("getModelStateMap", &Scene::getModelStateMap);
-    scene.def("setModelState", (void (Scene::*)(Eigen::VectorXdRefConst)) &Scene::setModelState);
-    scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>)) &Scene::setModelState);
+    scene.def("setModelState", (void (Scene::*)(Eigen::VectorXdRefConst, double)) &Scene::setModelState, py::arg("x"), py::arg("t")=0.0);
+    scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>, double)) &Scene::setModelState, py::arg("x"), py::arg("t")=0.0);
     scene.def("publishScene", &Scene::publishScene);
     scene.def("publishProxies", &Scene::publishProxies);
     scene.def("setCollisionScene", [](Scene* instance, moveit_msgs::PlanningScene& ps) {
@@ -616,6 +620,10 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("jacobian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) {return instance->getSolver().Jacobian(e1, o1, e2, o2);});
     scene.def("jacobian", [](Scene* instance, const std::string& e1, const std::string& e2) {return instance->getSolver().Jacobian(e1, KDL::Frame(), e2, KDL::Frame());});
     scene.def("jacobian", [](Scene* instance, const std::string& e1) {return instance->getSolver().Jacobian(e1, KDL::Frame(), "", KDL::Frame());});
+    scene.def("addTrajectoryFromFile", &Scene::addTrajectoryFromFile);
+    scene.def("addTrajectory", (void (Scene::*)(const std::string&, const std::string&)) &Scene::addTrajectory);
+    scene.def("getTrajectory", [](Scene* instance, const std::string& link){return instance->getTrajectory(link)->toString();});
+    scene.def("removeTrajectory", &Scene::removeTrajectory);
 
     py::module kin = module.def_submodule("Kinematics","Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

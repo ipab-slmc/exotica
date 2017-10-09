@@ -19,7 +19,6 @@ def handleAttaching(i, x, scene):
 exo.Setup.initRos()
 ik=exo.Setup.loadSolver('{exotica}/resources/configs/example_manipulate_ik.xml')
 ompl=exo.Setup.loadSolver('{exotica}/resources/configs/example_manipulate_ompl.xml')
-ompl.getProblem().getScene().loadSceneFile('{exotica}/resources/scenes/example_manipulate.scene')
 
 # Plan 3 end poses
 ik.getProblem().setRho('Position1', 1)

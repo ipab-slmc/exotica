@@ -12,7 +12,8 @@ class KinematicElement
 public:
     KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) :
         Parent(parent), Segment(segment), Id(id), IsControlled(false),
-        ControlId(-1), Shape(nullptr), isRobotLink(false), ClosestRobotLink(nullptr)
+        ControlId(-1), Shape(nullptr), isRobotLink(false), ClosestRobotLink(nullptr),
+        IsTrajectoryGenerated(false)
     {
     }
     inline void updateClosestRobotLink()
@@ -31,6 +32,18 @@ public:
         setChildrenClosestRobotLink();
     }
 
+    inline KDL::Frame getPose(const double& x)
+    {
+        if(IsTrajectoryGenerated)
+        {
+            return GeneratedOffset;
+        }
+        else
+        {
+            return Segment.pose(x);
+        }
+    }
+
     int Id;
     int ControlId;
     bool IsControlled;
@@ -39,6 +52,8 @@ public:
     std::shared_ptr<KinematicElement> ClosestRobotLink;
     KDL::Segment Segment;
     KDL::Frame Frame;
+    KDL::Frame GeneratedOffset;
+    bool IsTrajectoryGenerated;
     std::vector<double> JointLimits;
     shapes::ShapeConstPtr Shape;
     bool isRobotLink;

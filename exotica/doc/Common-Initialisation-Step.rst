@@ -1,3 +1,6 @@
+Common Initialisation Step
+--------------------------
+
 This is the final step of initialisation before we can use EXOTica to
 solve motion plans.
 

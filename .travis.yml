@@ -27,6 +27,7 @@ install:
 - rosdep update
 - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 - sudo apt-get install -qq -y ros-$CI_ROS_DISTRO-rosbash
+- sudo pip install -U sphinx sphinx_rtd_theme
 script:
 - source /opt/ros/$CI_ROS_DISTRO/setup.bash
 - mkdir -p $CATKIN_WS_SRC

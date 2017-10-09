@@ -34,14 +34,14 @@
 #define EXOTICA_H
 
 //!< Core Library
-#include <exotica/Version.h>
-#include <exotica/Tools.h>
-#include <exotica/Setup.h>
-#include <exotica/PlanningProblem.h>
-#include <exotica/MotionSolver.h>
 #include <exotica/Loaders/XMLLoader.h>
+#include <exotica/MotionSolver.h>
+#include <exotica/PlanningProblem.h>
 #include <exotica/Problems/SamplingProblem.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
+#include <exotica/Setup.h>
+#include <exotica/Tools.h>
+#include <exotica/Version.h>
 
-#endif // EXOTICA_H
+#endif  // EXOTICA_H

@@ -34,136 +34,135 @@
 #ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNSTATESPACE_H_
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLSE3RNSTATESPACE_H_
 
-#include "ompl_imp_solver/OMPLBaseStateSpace.h"
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl_solver/OMPLsolverInitializer.h>
+#include "ompl_imp_solver/OMPLBaseStateSpace.h"
 
 namespace exotica
 {
-  class OMPLSE3RNStateSpace: public OMPLBaseStateSpace
-  {
+class OMPLSE3RNStateSpace : public OMPLBaseStateSpace
+{
+public:
+    class StateType : public ob::CompoundStateSpace::StateType
+    {
     public:
-      class StateType: public ob::CompoundStateSpace::StateType
-      {
-        public:
-          StateType()
-              : CompoundStateSpace::StateType()
-          {
+        StateType()
+            : CompoundStateSpace::StateType()
+        {
+        }
 
-          }
-
-          const ob::RealVectorStateSpace::StateType & RealVectorStateSpace() const
-          {
+        const ob::RealVectorStateSpace::StateType &RealVectorStateSpace() const
+        {
             return *as<ob::RealVectorStateSpace::StateType>(1);
-          }
+        }
 
-          ob::RealVectorStateSpace::StateType & RealVectorStateSpace()
-          {
+        ob::RealVectorStateSpace::StateType &RealVectorStateSpace()
+        {
             return *as<ob::RealVectorStateSpace::StateType>(1);
-          }
+        }
 
-          const ob::SE3StateSpace::StateType & SE3StateSpace() const
-          {
+        const ob::SE3StateSpace::StateType &SE3StateSpace() const
+        {
             return *as<ob::SE3StateSpace::StateType>(0);
-          }
-          ob::SE3StateSpace::StateType & SE3StateSpace()
-          {
+        }
+        ob::SE3StateSpace::StateType &SE3StateSpace()
+        {
             return *as<ob::SE3StateSpace::StateType>(0);
-          }
-      };
+        }
+    };
 
-      OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init);
-      virtual unsigned int getDimension() const;
-      virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-      virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
-          ompl::base::State *state) const;
-      virtual void OMPLToExoticaState(const ompl::base::State *state,
-          Eigen::VectorXd &q) const;
-      virtual void stateDebug(const Eigen::VectorXd &q) const;
-      /*
+    OMPLSE3RNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init);
+    virtual unsigned int getDimension() const;
+    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
+    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
+                                    ompl::base::State *state) const;
+    virtual void OMPLToExoticaState(const ompl::base::State *state,
+                                    Eigen::VectorXd &q) const;
+    virtual void stateDebug(const Eigen::VectorXd &q) const;
+    /*
        * \brief	Set the bounds for upper body configuration
        * @param	bounds		Real vector bounds for upper body
        */
-      void setRealVectorStateSpaceBounds(const ob::RealVectorBounds &bounds);
-      const ob::RealVectorBounds & getRealVectorStateSpaceBounds() const;
+    void setRealVectorStateSpaceBounds(const ob::RealVectorBounds &bounds);
+    const ob::RealVectorBounds &getRealVectorStateSpaceBounds() const;
 
-      /*
+    /*
        * \brief	Set the bounds for pelvis
        * @param	xyz			Pelvis XYZ position bounds
        * @param	dist		Pelvis maximum allowed angle from z-axis
        */
-      void setSE3StateSpaceBounds(const ob::RealVectorBounds &xyz, double dist =
-          0);
-      const ob::RealVectorBounds & getSE3StateSpaceBounds() const;
-      const double getSE3StateSpaceRobotationBound() const;
-      void setStart(const Eigen::VectorXd &start);
-      void setGoal(const Eigen::VectorXd &goal);
-      Eigen::VectorXd start_;
-      Eigen::VectorXd goal_;
-      double base_dist_;
-      Eigen::VectorXd weights_;
-      double rn_bias_percentage_;
-      ob::RealVectorBounds SO3Bounds_;
-      bool useGoal_;
-    private:
-      int realvectordim_;
-  };
+    void setSE3StateSpaceBounds(const ob::RealVectorBounds &xyz, double dist =
+                                                                     0);
+    const ob::RealVectorBounds &getSE3StateSpaceBounds() const;
+    const double getSE3StateSpaceRobotationBound() const;
+    void setStart(const Eigen::VectorXd &start);
+    void setGoal(const Eigen::VectorXd &goal);
+    Eigen::VectorXd start_;
+    Eigen::VectorXd goal_;
+    double base_dist_;
+    Eigen::VectorXd weights_;
+    double rn_bias_percentage_;
+    ob::RealVectorBounds SO3Bounds_;
+    bool useGoal_;
 
-  class OMPLSE3RNStateSampler: public ob::StateSampler
-  {
-    public:
-      OMPLSE3RNStateSampler(const ob::StateSpace *space)
-          : ob::StateSampler(space)
-      {
+private:
+    int realvectordim_;
+};
+
+class OMPLSE3RNStateSampler : public ob::StateSampler
+{
+public:
+    OMPLSE3RNStateSampler(const ob::StateSpace *space)
+        : ob::StateSampler(space)
+    {
         weightImportance_ = space->as<OMPLSE3RNStateSpace>()->weights_;
-        weightImportance_ = weightImportance_/weightImportance_.sum();
-      }
-      virtual void sampleUniform(ob::State *state);
-      virtual void sampleUniformNear(ob::State *state, const ob::State *near,
-          const double distance);
-      virtual void sampleGaussian(ob::State *state, const ob::State * mean,
-          const double stdDev);
-      Eigen::VectorXd weightImportance_;
-  };
+        weightImportance_ = weightImportance_ / weightImportance_.sum();
+    }
+    virtual void sampleUniform(ob::State *state);
+    virtual void sampleUniformNear(ob::State *state, const ob::State *near,
+                                   const double distance);
+    virtual void sampleGaussian(ob::State *state, const ob::State *mean,
+                                const double stdDev);
+    Eigen::VectorXd weightImportance_;
+};
 
-  class OMPLSE3RNProjection: public ompl::base::ProjectionEvaluator
-  {
-    public:
-      OMPLSE3RNProjection(const ompl::base::StateSpacePtr &space,
-          const std::vector<int> & vars)
-          : ompl::base::ProjectionEvaluator(space), variables_(vars)
-      {
+class OMPLSE3RNProjection : public ompl::base::ProjectionEvaluator
+{
+public:
+    OMPLSE3RNProjection(const ompl::base::StateSpacePtr &space,
+                        const std::vector<int> &vars)
+        : ompl::base::ProjectionEvaluator(space), variables_(vars)
+    {
+    }
 
-      }
-
-      ~OMPLSE3RNProjection()
-      {
+    ~OMPLSE3RNProjection()
+    {
         //TODO
-      }
+    }
 
-      virtual unsigned int getDimension(void) const
-      {
+    virtual unsigned int getDimension(void) const
+    {
         return variables_.size();
-      }
+    }
 
-      virtual void defaultCellSizes()
-      {
+    virtual void defaultCellSizes()
+    {
         cellSizes_.clear();
         cellSizes_.resize(variables_.size(), 0.1);
-      }
+    }
 
-      virtual void project(const ompl::base::State *state,
-          ompl::base::EuclideanProjection &projection) const
-      {
+    virtual void project(const ompl::base::State *state,
+                         ompl::base::EuclideanProjection &projection) const
+    {
         for (std::size_t i = 0; i < variables_.size(); ++i)
-          projection(i) =
-              state->as<exotica::OMPLSE3RNStateSpace::StateType>()->RealVectorStateSpace().values[variables_[i]];
-      }
+            projection(i) =
+                state->as<exotica::OMPLSE3RNStateSpace::StateType>()->RealVectorStateSpace().values[variables_[i]];
+    }
 
-    private:
-      std::vector<int> variables_;
-  };
+private:
+    std::vector<int> variables_;
+};
 }
 //	Namespace exotica
 

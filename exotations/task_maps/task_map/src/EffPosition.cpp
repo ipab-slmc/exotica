@@ -36,36 +36,36 @@ REGISTER_TASKMAP_TYPE("EffPosition", exotica::EffPosition);
 
 namespace exotica
 {
-    EffPosition::EffPosition()
-    {
-    }
+EffPosition::EffPosition()
+{
+}
 
-    void EffPosition::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void EffPosition::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+{
+    if (phi.rows() != Kinematics.Phi.rows() * 3) throw_named("Wrong size of phi!");
+    for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        if(phi.rows() != Kinematics.Phi.rows()*3) throw_named("Wrong size of phi!");
-        for(int i=0;i<Kinematics.Phi.rows();i++)
-        {
-            phi(i*3) = Kinematics.Phi(i).p[0];
-            phi(i*3+1) = Kinematics.Phi(i).p[1];
-            phi(i*3+2) = Kinematics.Phi(i).p[2];
-        }
+        phi(i * 3) = Kinematics.Phi(i).p[0];
+        phi(i * 3 + 1) = Kinematics.Phi(i).p[1];
+        phi(i * 3 + 2) = Kinematics.Phi(i).p[2];
     }
+}
 
-    void EffPosition::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void EffPosition::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+{
+    if (phi.rows() != Kinematics.Phi.rows() * 3) throw_named("Wrong size of phi!");
+    if (J.rows() != Kinematics.J.rows() * 3 || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        if(phi.rows() != Kinematics.Phi.rows()*3) throw_named("Wrong size of phi!");
-        if(J.rows() != Kinematics.J.rows()*3 || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
-        for(int i=0;i<Kinematics.Phi.rows();i++)
-        {
-            phi(i*3) = Kinematics.Phi(i).p[0];
-            phi(i*3+1) = Kinematics.Phi(i).p[1];
-            phi(i*3+2) = Kinematics.Phi(i).p[2];
-            J.middleRows(i*3,3) = Kinematics.J[i].data.topRows(3);
-        }
+        phi(i * 3) = Kinematics.Phi(i).p[0];
+        phi(i * 3 + 1) = Kinematics.Phi(i).p[1];
+        phi(i * 3 + 2) = Kinematics.Phi(i).p[2];
+        J.middleRows(i * 3, 3) = Kinematics.J[i].data.topRows(3);
     }
+}
 
-    int EffPosition::taskSpaceDim()
-    {
-        return Kinematics.Phi.rows()*3;
-    }
+int EffPosition::taskSpaceDim()
+{
+    return Kinematics.Phi.rows() * 3;
+}
 }

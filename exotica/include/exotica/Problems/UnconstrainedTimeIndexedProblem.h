@@ -42,50 +42,48 @@
 
 namespace exotica
 {
-
-  /**
+/**
    * \brief Unconstrained time-indexed problem.
    */
-  class UnconstrainedTimeIndexedProblem: public PlanningProblem, public Instantiable<UnconstrainedTimeIndexedProblemInitializer>
-  {
-    public:
-      UnconstrainedTimeIndexedProblem();
-      virtual ~UnconstrainedTimeIndexedProblem();
-      virtual void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init);
-      double getDuration();
-      void Update(Eigen::VectorXdRefConst x, int t);
-      void setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal, int t = 0);
-      void setRho(const std::string & task_name, const double rho, int t = 0);
-      Eigen::VectorXd getGoal(const std::string & task_name, int t = 0);
-      double getRho(const std::string & task_name, int t = 0);
-      std::vector<Eigen::VectorXd> getInitialTrajectory();
-      void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
+class UnconstrainedTimeIndexedProblem : public PlanningProblem, public Instantiable<UnconstrainedTimeIndexedProblemInitializer>
+{
+public:
+    UnconstrainedTimeIndexedProblem();
+    virtual ~UnconstrainedTimeIndexedProblem();
+    virtual void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init);
+    double getDuration();
+    void Update(Eigen::VectorXdRefConst x, int t);
+    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    void setRho(const std::string& task_name, const double rho, int t = 0);
+    Eigen::VectorXd getGoal(const std::string& task_name, int t = 0);
+    double getRho(const std::string& task_name, int t = 0);
+    std::vector<Eigen::VectorXd> getInitialTrajectory();
+    void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
 
+    int T;          //!< Number of time steps
+    double tau;     //!< Time step duration
+    double Q_rate;  //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
+    double H_rate;  //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)
+    double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+    Eigen::MatrixXd W;
+    Eigen::MatrixXd H;
+    Eigen::MatrixXd Q;
 
-      int T; //!< Number of time steps
-      double tau; //!< Time step duration
-      double Q_rate; //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
-      double H_rate; //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)
-      double W_rate; //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
-      Eigen::MatrixXd W;
-      Eigen::MatrixXd H;
-      Eigen::MatrixXd Q;
+    std::vector<Eigen::VectorXd> Rho;
+    std::vector<TaskSpaceVector> y;
+    std::vector<TaskSpaceVector> Phi;
+    std::vector<Eigen::VectorXd> ydiff;
+    std::vector<Eigen::MatrixXd> J;
 
-      std::vector<Eigen::VectorXd> Rho;
-      std::vector<TaskSpaceVector> y;
-      std::vector<TaskSpaceVector> Phi;
-      std::vector<Eigen::VectorXd> ydiff;
-      std::vector<Eigen::MatrixXd> J;
+    int PhiN;
+    int JN;
+    int NumTasks;
 
-      int PhiN;
-      int JN;
-      int NumTasks;
+private:
+    std::vector<Eigen::VectorXd> InitialTrajectory;
+};
 
-    private:
-      std::vector<Eigen::VectorXd> InitialTrajectory;
-  };
-
-  typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;
+typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;
 }
 
 #endif

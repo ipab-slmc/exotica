@@ -38,38 +38,37 @@
 
 namespace exotica
 {
-    /**
+/**
     * Unconstrained end-pose problem implementation
     */
-    class UnconstrainedEndPoseProblem: public PlanningProblem, public Instantiable<UnconstrainedEndPoseProblemInitializer>
-    {
-    public:
-        UnconstrainedEndPoseProblem();
-        virtual ~UnconstrainedEndPoseProblem();
+class UnconstrainedEndPoseProblem : public PlanningProblem, public Instantiable<UnconstrainedEndPoseProblemInitializer>
+{
+public:
+    UnconstrainedEndPoseProblem();
+    virtual ~UnconstrainedEndPoseProblem();
 
-        virtual void Instantiate(UnconstrainedEndPoseProblemInitializer& init);
-        void Update(Eigen::VectorXdRefConst x);
+    virtual void Instantiate(UnconstrainedEndPoseProblemInitializer& init);
+    void Update(Eigen::VectorXdRefConst x);
 
-        void setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal);
-        void setRho(const std::string & task_name, const double rho);
-        Eigen::VectorXd getGoal(const std::string & task_name);
-        double getRho(const std::string & task_name);
-        Eigen::VectorXd getNominalPose();
-        void setNominalPose(Eigen::VectorXdRefConst qNominal_in);
+    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    void setRho(const std::string& task_name, const double rho);
+    Eigen::VectorXd getGoal(const std::string& task_name);
+    double getRho(const std::string& task_name);
+    Eigen::VectorXd getNominalPose();
+    void setNominalPose(Eigen::VectorXdRefConst qNominal_in);
 
-        Eigen::VectorXd Rho;
-        TaskSpaceVector y;
-        Eigen::MatrixXd W;
-        TaskSpaceVector Phi;
-        Eigen::MatrixXd J;
-        Eigen::VectorXd qNominal;
+    Eigen::VectorXd Rho;
+    TaskSpaceVector y;
+    Eigen::MatrixXd W;
+    TaskSpaceVector Phi;
+    Eigen::MatrixXd J;
+    Eigen::VectorXd qNominal;
 
-        int PhiN;
-        int JN;
-        int NumTasks;
-
-    };
-    typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
+    int PhiN;
+    int JN;
+    int NumTasks;
+};
+typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
 }
 
 #endif

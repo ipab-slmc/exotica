@@ -34,81 +34,79 @@
 #ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLRNSTATESPACE_H_
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLRNSTATESPACE_H_
 
-#include "ompl_imp_solver/OMPLBaseStateSpace.h"
-#include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/SpaceInformation.h>
+#include <ompl/base/spaces/RealVectorStateSpace.h>
+#include "ompl_imp_solver/OMPLBaseStateSpace.h"
 
 namespace exotica
 {
-  class OMPLRNStateSpace: public OMPLBaseStateSpace
-  {
+class OMPLRNStateSpace : public OMPLBaseStateSpace
+{
+public:
+    class StateType : public ob::CompoundStateSpace::StateType
+    {
     public:
-      class StateType: public ob::CompoundStateSpace::StateType
-      {
-        public:
-          StateType()
-              : CompoundStateSpace::StateType()
-          {
+        StateType()
+            : CompoundStateSpace::StateType()
+        {
+        }
 
-          }
-
-          const ob::RealVectorStateSpace::StateType & getRNSpace() const
-          {
+        const ob::RealVectorStateSpace::StateType &getRNSpace() const
+        {
             return *as<ob::RealVectorStateSpace::StateType>(0);
-          }
+        }
 
-          ob::RealVectorStateSpace::StateType & getRNSpace()
-          {
+        ob::RealVectorStateSpace::StateType &getRNSpace()
+        {
             return *as<ob::RealVectorStateSpace::StateType>(0);
-          }
-      };
-      OMPLRNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init);
+        }
+    };
+    OMPLRNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init);
 
-      virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-      virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
-          ompl::base::State *state) const;
-      virtual void OMPLToExoticaState(const ompl::base::State *state,
-          Eigen::VectorXd &q) const;
-      virtual void stateDebug(const Eigen::VectorXd &q) const;
-  };
+    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
+    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
+                                    ompl::base::State *state) const;
+    virtual void OMPLToExoticaState(const ompl::base::State *state,
+                                    Eigen::VectorXd &q) const;
+    virtual void stateDebug(const Eigen::VectorXd &q) const;
+};
 
-  class OMPLRNProjection: public ompl::base::ProjectionEvaluator
-  {
-    public:
-      OMPLRNProjection(const ompl::base::StateSpacePtr &space,
-          const std::vector<int> & vars)
-          : ompl::base::ProjectionEvaluator(space), variables_(vars)
-      {
+class OMPLRNProjection : public ompl::base::ProjectionEvaluator
+{
+public:
+    OMPLRNProjection(const ompl::base::StateSpacePtr &space,
+                     const std::vector<int> &vars)
+        : ompl::base::ProjectionEvaluator(space), variables_(vars)
+    {
+    }
 
-      }
-
-      ~OMPLRNProjection()
-      {
+    ~OMPLRNProjection()
+    {
         //TODO
-      }
+    }
 
-      virtual unsigned int getDimension(void) const
-      {
+    virtual unsigned int getDimension(void) const
+    {
         return variables_.size();
-      }
+    }
 
-      virtual void defaultCellSizes()
-      {
+    virtual void defaultCellSizes()
+    {
         cellSizes_.clear();
         cellSizes_.resize(variables_.size(), 0.1);
-      }
+    }
 
-      virtual void project(const ompl::base::State *state,
-          ompl::base::EuclideanProjection &projection) const
-      {
+    virtual void project(const ompl::base::State *state,
+                         ompl::base::EuclideanProjection &projection) const
+    {
         for (std::size_t i = 0; i < variables_.size(); ++i)
-          projection(i) =
-              state->as<exotica::OMPLRNStateSpace::StateType>()->getRNSpace().values[variables_[i]];
-      }
+            projection(i) =
+                state->as<exotica::OMPLRNStateSpace::StateType>()->getRNSpace().values[variables_[i]];
+    }
 
-    private:
-      std::vector<int> variables_;
-  };
+private:
+    std::vector<int> variables_;
+};
 }
 
 #endif /* EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLRNSTATESPACE_H_ */

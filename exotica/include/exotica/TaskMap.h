@@ -33,14 +33,14 @@
 #ifndef EXOTICA_TASK_MAP_H
 #define EXOTICA_TASK_MAP_H
 
-#include <exotica/Object.h>       //!< The EXOTica base class
-#include <exotica/Factory.h>      //!< The Factory template
-#include <exotica/Server.h>
-#include <exotica/Scene.h>
+#include <exotica/Factory.h>  //!< The Factory template
+#include <exotica/Object.h>   //!< The EXOTica base class
 #include <exotica/Property.h>
+#include <exotica/Scene.h>
+#include <exotica/Server.h>
 #include <exotica/TaskSpaceVector.h>
 
-#include <Eigen/Dense>            //!< Generally dense manipulations should be enough
+#include <Eigen/Dense>  //!< Generally dense manipulations should be enough
 #include <string>
 
 /**
@@ -50,57 +50,50 @@
 
 namespace exotica
 {
-  class PlanningProblem;
+class PlanningProblem;
 
-  class TaskMap: public Object, Uncopyable, public virtual InstantiableBase
-  {
-    public:
-      /**
+class TaskMap : public Object, Uncopyable, public virtual InstantiableBase
+{
+public:
+    /**
        * \brief Default Constructor
        */
-      TaskMap();
-      virtual ~TaskMap() { }
+    TaskMap();
+    virtual ~TaskMap() {}
+    virtual void InstantiateBase(const Initializer& init);
 
-      virtual void InstantiateBase(const Initializer& init);
+    virtual void assignScene(Scene_ptr scene) {}
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
 
-      virtual void assignScene(Scene_ptr scene) {}
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) { throw_named("Not implemented"); }
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot) { throw_named("Not implemented"); }
+    virtual int taskSpaceDim() = 0;
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
+    virtual int taskSpaceJacobianDim() { return taskSpaceDim(); }
+    virtual void preupdate() {}
+    virtual std::vector<TaskVectorEntry> getLieGroupIndices() { return std::vector<TaskVectorEntry>(); }
+    void taskSpaceDim(int& task_dim);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) { throw_named("Not implemented"); }
+    virtual std::string print(std::string prepend);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot) { throw_named("Not implemented"); }
+    std::vector<KinematicFrameRequest> GetFrames();
 
-      virtual int taskSpaceDim() = 0;
+    virtual void debug() {}
+    KinematicSolution Kinematics;
+    int Id;
+    int Start;
+    int Length;
+    int StartJ;
+    int LengthJ;
 
-      virtual int taskSpaceJacobianDim() { return taskSpaceDim();}
+protected:
+    std::vector<KinematicFrameRequest> Frames;
+};
 
-      virtual void preupdate() {}
-
-      virtual std::vector<TaskVectorEntry> getLieGroupIndices() {return std::vector<TaskVectorEntry>();}
-
-      void taskSpaceDim(int & task_dim);
-
-      virtual std::string print(std::string prepend);
-
-      std::vector<KinematicFrameRequest> GetFrames();
-
-      virtual void debug() { }
-      KinematicSolution Kinematics;
-      int Id;
-      int Start;
-      int Length;
-      int StartJ;
-      int LengthJ;
-    protected:
-
-      std::vector<KinematicFrameRequest> Frames;
-  };
-
-  //!< Typedefines for some common functionality
-  typedef Factory<TaskMap> TaskMap_fac;  //!< Task Map Factory
-  typedef std::shared_ptr<TaskMap> TaskMap_ptr;  //!< Task Map smart pointer
-  typedef std::map<std::string, TaskMap_ptr> TaskMap_map; //!< The mapping by name of TaskMaps
-  typedef std::vector<TaskMap_ptr> TaskMap_vec;
+//!< Typedefines for some common functionality
+typedef Factory<TaskMap> TaskMap_fac;                    //!< Task Map Factory
+typedef std::shared_ptr<TaskMap> TaskMap_ptr;            //!< Task Map smart pointer
+typedef std::map<std::string, TaskMap_ptr> TaskMap_map;  //!< The mapping by name of TaskMaps
+typedef std::vector<TaskMap_ptr> TaskMap_vec;
 }
 #endif

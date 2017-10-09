@@ -39,36 +39,34 @@ void run()
     Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
     // Scene using joint group 'arm'
-    Initializer scene("Scene",{
-                          {"Name",std::string("MyScene")},
-                          {"JointGroup",std::string("arm")},
-                          {"URDF",std::string("{exotica}/resources/robots/lwr_simplified.urdf")},
-                          {"SRDF",std::string("{exotica}/resources/robots/lwr_simplified.srdf")}});
+    Initializer scene("Scene", {{"Name", std::string("MyScene")},
+                                {"JointGroup", std::string("arm")},
+                                {"URDF", std::string("{exotica}/resources/robots/lwr_simplified.urdf")},
+                                {"SRDF", std::string("{exotica}/resources/robots/lwr_simplified.srdf")}});
     // End-effector task map with two position frames
-    Initializer map("exotica/EffFrame",{
-                        {"Name",std::string("Position")},
-                        {"EndEffector",std::vector<Initializer>({
-                             Initializer("Frame",{{"Link",std::string("lwr_arm_6_link")}, {"LinkOffset", Eigen::VectorTransform(0 ,0 ,0 ,0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17)}}),
-                         })}});
+    Initializer map("exotica/EffFrame", {{"Name", std::string("Position")},
+                                         {"EndEffector", std::vector<Initializer>({
+                                                             Initializer("Frame", {{"Link", std::string("lwr_arm_6_link")}, {"LinkOffset", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17)}}),
+                                                         })}});
     Eigen::VectorXd W(7);
-    W << 7,6,5,4,3,2,1;
+    W << 7, 6, 5, 4, 3, 2, 1;
 
-    Initializer problem("exotica/UnconstrainedEndPoseProblem",{
-                            {"Name",std::string("MyProblem")},
-                            {"PlanningScene",scene},
-                            {"Maps",std::vector<Initializer>({map})},
-                            {"W",W},
-                            {"Tolerance",1e-5},
-                        });
+    Initializer problem("exotica/UnconstrainedEndPoseProblem", {
+                                                                   {"Name", std::string("MyProblem")},
+                                                                   {"PlanningScene", scene},
+                                                                   {"Maps", std::vector<Initializer>({map})},
+                                                                   {"W", W},
+                                                                   {"Tolerance", 1e-5},
+                                                               });
 
-    Initializer solver("exotica/IKsolver",{
-                           {"Name",std::string("MySolver")},
-                           {"MaxIt",1},
-                           {"MaxStep", 0.1},
-                           {"C",1e-3},
-                       });
+    Initializer solver("exotica/IKsolver", {
+                                               {"Name", std::string("MySolver")},
+                                               {"MaxIt", 1},
+                                               {"MaxStep", 0.1},
+                                               {"C", 1e-3},
+                                           });
 
-    HIGHLIGHT_NAMED("GenericLoader","Loaded from a hardcoded generic initializer.");
+    HIGHLIGHT_NAMED("GenericLoader", "Loaded from a hardcoded generic initializer.");
 
     // Initialize
 
@@ -82,7 +80,6 @@ void run()
     // Create the initial configuration
     Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->N);
     Eigen::MatrixXd solution;
-
 
     ROS_INFO_STREAM("Calling solve() in an infinite loop");
 
@@ -98,8 +95,8 @@ void run()
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
         my_problem->y = {0.6,
-                -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-                0.5 + sin(t * M_PI * 0.5) * 0.2 ,0 ,0 ,0};
+                         -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                         0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
 
         // Solve the problem using the IK solver
         my_problem->setStartState(q);
@@ -107,7 +104,7 @@ void run()
 
         double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
         ROS_INFO_STREAM_THROTTLE(0.5,
-                                 "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
+                                 "Finished solving in " << time << "s. Solution [" << solution << "]");
         q = solution.row(solution.rows() - 1);
 
         my_problem->Update(q);

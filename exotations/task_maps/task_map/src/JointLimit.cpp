@@ -36,81 +36,79 @@ REGISTER_TASKMAP_TYPE("JointLimit", exotica::JointLimit);
 
 namespace exotica
 {
-    JointLimit::JointLimit()
-    {
-    }
-
-    JointLimit::~JointLimit()
-    {
-    }
-
-    void JointLimit::Instantiate(JointLimitInitializer& init)
-    {
-        init_ = init;
-    }
-
-    void JointLimit::assignScene(Scene_ptr scene)
-    {
-        scene_ = scene;
-        Initialize();
-    }
-
-    void JointLimit::Initialize()
-    {
-        double percent = init_.SafePercentage;
-
-        std::vector<std::string> jnts = scene_->getJointNames();
-        N = jnts.size();
-        Eigen::MatrixXd limits = scene_->getSolver().getJointLimits();
-        low_limits_ = limits.col(0);
-        high_limits_ = limits.col(1);
-        tau_.resize(N);
-        for (int i = 0; i < N; i++)
-        {
-            tau_(i) = percent * (high_limits_(i) - low_limits_(i))*0.5;
-        }
-    }
-
-    int JointLimit::taskSpaceDim()
-    {
-        return N;
-    }
-
-    void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
-    {
-        if(phi.rows() != N) throw_named("Wrong size of phi!");
-        phi.setZero();
-        for(int i=0;i<N;i++)
-        {
-            if (x(i) < low_limits_(i) + tau_(i))
-            {
-                phi(i) = x(i) - low_limits_(i) - tau_(i);
-            }
-            if (x(i) > high_limits_(i) - tau_(i))
-            {
-                phi(i) = x(i) - high_limits_(i) + tau_(i);
-            }
-        }
-    }
-
-    void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
-    {
-        if(phi.rows() != N) throw_named("Wrong size of phi!");
-        if(J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);
-        phi.setZero();
-        J = Eigen::MatrixXd::Identity(N,N);
-        for(int i=0;i<N;i++)
-        {
-            if (x(i) < low_limits_(i) + tau_(i))
-            {
-                phi(i) = x(i) - low_limits_(i) - tau_(i);
-            }
-            if (x(i) > high_limits_(i) - tau_(i))
-            {
-                phi(i) = x(i) - high_limits_(i) + tau_(i);
-            }
-        }
-    }
-
+JointLimit::JointLimit()
+{
 }
 
+JointLimit::~JointLimit()
+{
+}
+
+void JointLimit::Instantiate(JointLimitInitializer& init)
+{
+    init_ = init;
+}
+
+void JointLimit::assignScene(Scene_ptr scene)
+{
+    scene_ = scene;
+    Initialize();
+}
+
+void JointLimit::Initialize()
+{
+    double percent = init_.SafePercentage;
+
+    std::vector<std::string> jnts = scene_->getJointNames();
+    N = jnts.size();
+    Eigen::MatrixXd limits = scene_->getSolver().getJointLimits();
+    low_limits_ = limits.col(0);
+    high_limits_ = limits.col(1);
+    tau_.resize(N);
+    for (int i = 0; i < N; i++)
+    {
+        tau_(i) = percent * (high_limits_(i) - low_limits_(i)) * 0.5;
+    }
+}
+
+int JointLimit::taskSpaceDim()
+{
+    return N;
+}
+
+void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+{
+    if (phi.rows() != N) throw_named("Wrong size of phi!");
+    phi.setZero();
+    for (int i = 0; i < N; i++)
+    {
+        if (x(i) < low_limits_(i) + tau_(i))
+        {
+            phi(i) = x(i) - low_limits_(i) - tau_(i);
+        }
+        if (x(i) > high_limits_(i) - tau_(i))
+        {
+            phi(i) = x(i) - high_limits_(i) + tau_(i);
+        }
+    }
+}
+
+void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+{
+    if (phi.rows() != N) throw_named("Wrong size of phi!");
+    if (J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);
+    phi.setZero();
+    J = Eigen::MatrixXd::Identity(N, N);
+    for (int i = 0; i < N; i++)
+    {
+        if (x(i) < low_limits_(i) + tau_(i))
+        {
+            phi(i) = x(i) - low_limits_(i) - tau_(i);
+        }
+        if (x(i) > high_limits_(i) - tau_(i))
+        {
+            phi(i) = x(i) - high_limits_(i) + tau_(i);
+        }
+    }
+}
+}

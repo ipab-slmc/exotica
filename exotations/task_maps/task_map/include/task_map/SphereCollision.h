@@ -38,36 +38,34 @@
 #include <task_map/SphereInitializer.h>
 #include <visualization_msgs/Marker.h>
 
-namespace exotica //!< Since this is part of the core library, it will be within the same namespace
+namespace exotica  //!< Since this is part of the core library, it will be within the same namespace
 {
-  class SphereCollision: public TaskMap, public Instantiable<SphereCollisionInitializer>
-  {
-    public:
-      SphereCollision();
-      virtual ~SphereCollision() {}
+class SphereCollision : public TaskMap, public Instantiable<SphereCollisionInitializer>
+{
+public:
+    SphereCollision();
+    virtual ~SphereCollision() {}
+    virtual void Instantiate(SphereCollisionInitializer& init);
 
-      virtual void Instantiate(SphereCollisionInitializer& init);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    virtual int taskSpaceDim();
 
-      virtual int taskSpaceDim();
+protected:
+    double distance(const KDL::Frame& effA, const KDL::Frame& effB, double rA, double rB);
+    Eigen::VectorXd Jacobian(const KDL::Frame& effA, const KDL::Frame& effB, const KDL::Jacobian& jacA, const KDL::Jacobian& jacB, double rA, double rB);
 
-    protected:
+    std::map<std::string, std::vector<int>> groups;
+    std::vector<double> radiuses;
 
-      double distance(const KDL::Frame& effA, const KDL::Frame& effB, double rA, double rB);
-      Eigen::VectorXd Jacobian(const KDL::Frame& effA, const KDL::Frame& effB, const KDL::Jacobian& jacA, const KDL::Jacobian& jacB, double rA, double rB);
-
-      std::map<std::string,std::vector<int>> groups;
-      std::vector<double> radiuses;
-
-      visualization_msgs::MarkerArray debug_msg;
-      ros::Publisher debug_pub;
-      bool debug;
-      double eps;
-  };
-  typedef std::shared_ptr<SphereCollision> SphereCollision_ptr;  //!< Task Map smart pointer
+    visualization_msgs::MarkerArray debug_msg;
+    ros::Publisher debug_pub;
+    bool debug;
+    double eps;
+};
+typedef std::shared_ptr<SphereCollision> SphereCollision_ptr;  //!< Task Map smart pointer
 }
 
 #endif

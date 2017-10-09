@@ -42,11 +42,11 @@ void run()
     Initializer solver, problem;
 
     std::string file_name;
-    Server::getParam("ConfigurationFile",file_name);
+    Server::getParam("ConfigurationFile", file_name);
 
-    XMLLoader::load(file_name,solver, problem);
+    XMLLoader::load(file_name, solver, problem);
 
-    HIGHLIGHT_NAMED("XMLnode","Loaded from XML");
+    HIGHLIGHT_NAMED("XMLnode", "Loaded from XML");
 
     // Initialize
 
@@ -77,15 +77,15 @@ void run()
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
         my_problem->y = {0.6,
-                -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-                0.5 + sin(t * M_PI * 0.5) * 0.2 ,0 ,0 ,0};
+                         -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                         0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
 
         // Solve the problem using the IK solver
         my_problem->setStartState(q);
         any_solver->Solve(solution);
 
         double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
+        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in " << time << "s. Solution [" << solution << "]");
         q = solution.row(0);
 
         my_problem->Update(q);

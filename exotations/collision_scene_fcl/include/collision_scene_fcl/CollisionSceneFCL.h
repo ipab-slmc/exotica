@@ -34,13 +34,13 @@
 #define COLLISIONSCENEFCL_H
 
 #include <exotica/CollisionScene.h>
+#include <fcl/BVH/BVH_model.h>
 #include <fcl/broadphase/broadphase.h>
-#include <fcl/narrowphase/narrowphase.h>
 #include <fcl/collision.h>
 #include <fcl/distance.h>
-#include <fcl/BVH/BVH_model.h>
-#include <fcl/shape/geometric_shapes.h>
+#include <fcl/narrowphase/narrowphase.h>
 #include <fcl/octree.h>
+#include <fcl/shape/geometric_shapes.h>
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 
@@ -49,11 +49,9 @@ namespace exotica
 class CollisionSceneFCL : public CollisionScene
 {
 public:
-
     struct CollisionData
     {
         CollisionData(CollisionSceneFCL* scene) : Scene(scene), Self(true) {}
-
         fcl::CollisionRequest Request;
         fcl::CollisionResult Result;
         CollisionSceneFCL* Scene;
@@ -93,7 +91,7 @@ public:
        */
     virtual std::vector<std::string> getCollisionRobotLinks();
 
-    virtual Eigen::Vector3d getTranslation(const std::string & name);
+    virtual Eigen::Vector3d getTranslation(const std::string& name);
 
     ///
     /// \brief Creates the collision scene from kinematic elements.
@@ -107,7 +105,6 @@ public:
     virtual void updateCollisionObjectTransforms();
 
 private:
-
     static std::shared_ptr<fcl::CollisionObject> constructFclCollisionObject(std::shared_ptr<KinematicElement> element);
     static void checkCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data);
 
@@ -119,4 +116,4 @@ private:
 typedef std::shared_ptr<CollisionSceneFCL> CollisionSceneFCL_ptr;
 }
 
-#endif // COLLISIONSCENEFCL_H
+#endif  // COLLISIONSCENEFCL_H

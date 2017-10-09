@@ -36,41 +36,40 @@ REGISTER_TASKMAP_TYPE("Distance", exotica::Distance);
 
 namespace exotica
 {
-  Distance::Distance()
-  {
+Distance::Distance()
+{
     //!< Empty constructor
-  }
+}
 
-    void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+{
+    if (phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
+    for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        if(phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
-        for(int i=0;i<Kinematics.Phi.rows();i++)
+        phi(i) = Kinematics.Phi(i).p.Norm();
+    }
+}
+
+void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+{
+    if (phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
+    if (J.rows() != Kinematics.J.rows() || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    {
+        phi(i) = Kinematics.Phi(i).p.Norm();
+        for (int j = 0; j < J.cols(); j++)
         {
-            phi(i) = Kinematics.Phi(i).p.Norm();
+            J(i, j) = (Kinematics.Phi(i).p[0] * Kinematics.J[i].data(0, j) + Kinematics.Phi(i).p[1] * Kinematics.J[i].data(1, j) + Kinematics.Phi(i).p[2] * Kinematics.J[i].data(2, j)) / phi(i);
         }
     }
+}
 
-    void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
-    {
-        if(phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
-        if(J.rows() != Kinematics.J.rows() || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
-        for(int i=0;i<Kinematics.Phi.rows();i++)
-        {
-            phi(i) = Kinematics.Phi(i).p.Norm();
-            for (int j = 0; j < J.cols(); j++)
-            {
-                J(i,j) = ( Kinematics.Phi(i).p[0]*Kinematics.J[i].data(0,j) + Kinematics.Phi(i).p[1]*Kinematics.J[i].data(1,j) + Kinematics.Phi(i).p[2]*Kinematics.J[i].data(2,j) ) / phi(i);
-            }
-        }
-    }
+void Distance::Instantiate(DistanceInitializer& init)
+{
+}
 
-    void Distance::Instantiate(DistanceInitializer& init)
-    {
-
-    }
-
-    int Distance::taskSpaceDim()
-    {
-        return Kinematics.Phi.rows();
-    }
+int Distance::taskSpaceDim()
+{
+    return Kinematics.Phi.rows();
+}
 }

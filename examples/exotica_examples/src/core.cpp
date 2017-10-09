@@ -36,6 +36,6 @@ using namespace exotica;
 
 int main(int argc, char **argv)
 {
-    ROS_INFO_STREAM("Exotica version: "<<exotica::Version);
+    ROS_INFO_STREAM("Exotica version: " << exotica::Version);
     Setup::printSupportedClasses();
 }

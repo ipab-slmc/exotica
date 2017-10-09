@@ -36,25 +36,25 @@
 #include <exotica/TaskMap.h>
 #include <task_map/DistanceInitializer.h>
 
-namespace exotica //!< Since this is part of the core library, it will be within the same namespace
+namespace exotica  //!< Since this is part of the core library, it will be within the same namespace
 {
-  class Distance: public TaskMap, public Instantiable<DistanceInitializer>
-  {
-    public:
-      Distance();
-      virtual ~Distance()
-      {
-      }
+class Distance : public TaskMap, public Instantiable<DistanceInitializer>
+{
+public:
+    Distance();
+    virtual ~Distance()
+    {
+    }
 
-       virtual void Instantiate(DistanceInitializer& init);
+    virtual void Instantiate(DistanceInitializer& init);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual int taskSpaceDim();
-  };
-  typedef std::shared_ptr<Distance> Distance_Ptr;
+    virtual int taskSpaceDim();
+};
+typedef std::shared_ptr<Distance> Distance_Ptr;
 }
 
 #endif

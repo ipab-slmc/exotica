@@ -36,37 +36,37 @@
 #include <exotica/TaskMap.h>
 #include <task_map/EffFrameInitializer.h>
 
-namespace exotica //!< Since this is part of the core library, it will be within the same namespace
+namespace exotica  //!< Since this is part of the core library, it will be within the same namespace
 {
-  class EffFrame: public TaskMap, public Instantiable<EffFrameInitializer>
-  {
-    public:
-      /**
+class EffFrame : public TaskMap, public Instantiable<EffFrameInitializer>
+{
+public:
+    /**
        * \brief Default constructor
        */
-      EffFrame();
-      virtual ~EffFrame()
-      {
-      }
+    EffFrame();
+    virtual ~EffFrame()
+    {
+    }
 
-      virtual void Instantiate(EffFrameInitializer& init);
+    virtual void Instantiate(EffFrameInitializer& init);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual int taskSpaceDim();
+    virtual int taskSpaceDim();
 
-      virtual int taskSpaceJacobianDim();
+    virtual int taskSpaceJacobianDim();
 
-      virtual std::vector<TaskVectorEntry> getLieGroupIndices();
+    virtual std::vector<TaskVectorEntry> getLieGroupIndices();
 
-      RotationType rotationType;
-      int bigStride;
-      int smallStride;
-  };
+    RotationType rotationType;
+    int bigStride;
+    int smallStride;
+};
 
-  typedef std::shared_ptr<EffFrame> EffFrame_ptr;  //!< Task Map smart pointer
+typedef std::shared_ptr<EffFrame> EffFrame_ptr;  //!< Task Map smart pointer
 }
 
 #endif

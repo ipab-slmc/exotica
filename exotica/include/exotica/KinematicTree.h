@@ -33,200 +33,203 @@
 #ifndef KINEMATIC_TREE_H
 #define KINEMATIC_TREE_H
 
-#include <kdl/tree.hpp>
-#include <kdl/jacobian.hpp>
-#include <kdl_parser/kdl_parser.hpp>
+#include <exotica/Tools.h>
 #include <moveit/robot_model/robot_model.h>
 #include <Eigen/Eigen>
+#include <kdl/jacobian.hpp>
+#include <kdl/tree.hpp>
+#include <kdl_parser/kdl_parser.hpp>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
-#include <exotica/Tools.h>
 
 #include <exotica/Server.h>
 #include <tf_conversions/tf_kdl.h>
 
 #include <exotica/KinematicElement.h>
 
-#define ROOT  -1     //!< The value of the parent for the root segment
+#define ROOT -1  //!< The value of the parent for the root segment
 
 namespace exotica
 {
+enum BASE_TYPE
+{
+    FIXED = 0,
+    FLOATING = 10,
+    PLANAR = 20
+};
 
-    enum BASE_TYPE
-    {
-      FIXED = 0, FLOATING = 10, PLANAR = 20
-    };
-
-  /**
+/**
    * \brief Defines the two types of supported joints
    */
-  enum JointType
-  {
-    JNT_UNUSED = 0,  //!< Undefined (will not be used)
+enum JointType
+{
+    JNT_UNUSED = 0,     //!< Undefined (will not be used)
     JNT_PRISMATIC = 1,  //!< Prismatic joint
-    JNT_ROTARY = 2   //!< Rotary Joint
-  };
+    JNT_ROTARY = 2      //!< Rotary Joint
+};
 
-  enum KinematicRequestFlags
-  {
-      KIN_FK = 0,
-      KIN_J = 2,
-      KIN_FK_VEL = 4,
-      KIN_J_DOT = 8
-  };
+enum KinematicRequestFlags
+{
+    KIN_FK = 0,
+    KIN_J = 2,
+    KIN_FK_VEL = 4,
+    KIN_J_DOT = 8
+};
 
-  inline KinematicRequestFlags operator|(KinematicRequestFlags a, KinematicRequestFlags b)
-  {return static_cast<KinematicRequestFlags>(static_cast<int>(a) | static_cast<int>(b));}
+inline KinematicRequestFlags operator|(KinematicRequestFlags a, KinematicRequestFlags b)
+{
+    return static_cast<KinematicRequestFlags>(static_cast<int>(a) | static_cast<int>(b));
+}
 
-  inline KinematicRequestFlags operator&(KinematicRequestFlags a, KinematicRequestFlags b)
-  {return static_cast<KinematicRequestFlags>(static_cast<int>(a) & static_cast<int>(b));}
+inline KinematicRequestFlags operator&(KinematicRequestFlags a, KinematicRequestFlags b)
+{
+    return static_cast<KinematicRequestFlags>(static_cast<int>(a) & static_cast<int>(b));
+}
 
-  class KinematicFrameRequest
-  {
-  public:
-      KinematicFrameRequest();
-      KinematicFrameRequest(std::string frameALinkName, KDL::Frame frameAOffset = KDL::Frame(), std::string frameBLinkName = "", KDL::Frame frameBOffset = KDL::Frame());
-      std::string FrameALinkName;
-      KDL::Frame FrameAOffset;
-      std::string FrameBLinkName;
-      KDL::Frame FrameBOffset;
-  };
+class KinematicFrameRequest
+{
+public:
+    KinematicFrameRequest();
+    KinematicFrameRequest(std::string frameALinkName, KDL::Frame frameAOffset = KDL::Frame(), std::string frameBLinkName = "", KDL::Frame frameBOffset = KDL::Frame());
+    std::string FrameALinkName;
+    KDL::Frame FrameAOffset;
+    std::string FrameBLinkName;
+    KDL::Frame FrameBOffset;
+};
 
-  class KinematicsRequest
-  {
-  public:
-      KinematicsRequest();
-      KinematicRequestFlags Flags;
-      std::vector<KinematicFrameRequest> Frames; //!< The segments to which the end-effectors are attached
-  };
+class KinematicsRequest
+{
+public:
+    KinematicsRequest();
+    KinematicRequestFlags Flags;
+    std::vector<KinematicFrameRequest> Frames;  //!< The segments to which the end-effectors are attached
+};
 
-  struct KinematicFrame
-  {
-      std::shared_ptr<KinematicElement> FrameA;
-      KDL::Frame FrameAOffset;
-      std::shared_ptr<KinematicElement> FrameB;
-      KDL::Frame FrameBOffset;
-      KDL::Frame TempAB;
-      KDL::Frame TempA;
-      KDL::Frame TempB;
-  };
+struct KinematicFrame
+{
+    std::shared_ptr<KinematicElement> FrameA;
+    KDL::Frame FrameAOffset;
+    std::shared_ptr<KinematicElement> FrameB;
+    KDL::Frame FrameBOffset;
+    KDL::Frame TempAB;
+    KDL::Frame TempA;
+    KDL::Frame TempB;
+};
 
-  class KinematicResponse
-  {
-  public:
-      KinematicResponse();
-      KinematicResponse(KinematicRequestFlags Flags, int Size, int N=0);
-      KinematicRequestFlags Flags;
-      std::vector<KinematicFrame> Frame;
-      ArrayFrame Phi;
-      ArrayTwist PhiDot;
-      ArrayJacobian J;
-      ArrayJacobian JDot;
-  };
+class KinematicResponse
+{
+public:
+    KinematicResponse();
+    KinematicResponse(KinematicRequestFlags Flags, int Size, int N = 0);
+    KinematicRequestFlags Flags;
+    std::vector<KinematicFrame> Frame;
+    ArrayFrame Phi;
+    ArrayTwist PhiDot;
+    ArrayJacobian J;
+    ArrayJacobian JDot;
+};
 
-  class KinematicSolution
-  {
-  public:
-      KinematicSolution();
-      KinematicSolution(int start, int length);
-      void Create(std::shared_ptr<KinematicResponse> solution);
-      int Start;
-      int Length;
-      Eigen::Map<ArrayFrame> Phi;
-      Eigen::Map<ArrayTwist> PhiDot;
-      Eigen::Map<ArrayJacobian> J;
-      Eigen::Map<ArrayJacobian> JDot;
-  };
+class KinematicSolution
+{
+public:
+    KinematicSolution();
+    KinematicSolution(int start, int length);
+    void Create(std::shared_ptr<KinematicResponse> solution);
+    int Start;
+    int Length;
+    Eigen::Map<ArrayFrame> Phi;
+    Eigen::Map<ArrayTwist> PhiDot;
+    Eigen::Map<ArrayJacobian> J;
+    Eigen::Map<ArrayJacobian> JDot;
+};
 
-    class KinematicTree : public Uncopyable
+class KinematicTree : public Uncopyable
+{
+public:
+    KinematicTree();
+    ~KinematicTree() {}
+    void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name);
+    std::string getRootFrameName();
+    std::string getRootJointName();
+    BASE_TYPE getModelBaseType();
+    BASE_TYPE getControlledBaseType();
+    std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
+    void Update(Eigen::VectorXdRefConst x);
+    void setJointLimits();
+    void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
+    std::map<std::string, std::vector<double>> getUsedJointLimits();
+    int getEffSize();
+    int getNumJoints();
+    void publishFrames();
+    Eigen::MatrixXd getJointLimits();
+    std::vector<std::string> getJointNames()
     {
-    public:
-            KinematicTree();
-            ~KinematicTree() {}
-            void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name);
-            std::string getRootFrameName();
-            std::string getRootJointName();
-            BASE_TYPE getModelBaseType();
-            BASE_TYPE getControlledBaseType();
-            std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
-            void Update(Eigen::VectorXdRefConst x);
-            void setJointLimits();
-            void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double> & lower, const std::vector<double> & upper);
-            std::map<std::string, std::vector<double>> getUsedJointLimits();
-            int getEffSize();
-            int getNumJoints();
-            void publishFrames();
-            Eigen::MatrixXd getJointLimits();
-            std::vector<std::string> getJointNames()
-            {
-              return ControlledJointsNames;
-            }
+        return ControlledJointsNames;
+    }
 
-            std::vector<std::string> getModelJointNames()
-            {
-              return ModelJointsNames;
-            }
+    std::vector<std::string> getModelJointNames()
+    {
+        return ModelJointsNames;
+    }
 
-            KDL::Frame FK(KinematicFrame& frame);
-            KDL::Frame FK(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB);
-            KDL::Frame FK(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
-            Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB);
-            Eigen::MatrixXd Jacobian(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
+    KDL::Frame FK(KinematicFrame& frame);
+    KDL::Frame FK(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB);
+    KDL::Frame FK(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
+    Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB);
+    Eigen::MatrixXd Jacobian(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
 
-            void resetModel();
-            std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero());
-            void UpdateModel();
-            void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
+    void resetModel();
+    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero());
+    void UpdateModel();
+    void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
 
-            Eigen::VectorXd getModelState();
-            std::map<std::string, double> getModelStateMap();
-            void setModelState(Eigen::VectorXdRefConst x);
-            void setModelState(std::map<std::string, double> x);
-            Eigen::VectorXd getControlledState();
+    Eigen::VectorXd getModelState();
+    std::map<std::string, double> getModelStateMap();
+    void setModelState(Eigen::VectorXdRefConst x);
+    void setModelState(std::map<std::string, double> x);
+    Eigen::VectorXd getControlledState();
 
-            std::vector<std::shared_ptr<KinematicElement>> getTree() {return Tree;}
-            std::map<std::string, std::shared_ptr<KinematicElement>> getCollisionTreeMap() {return CollisionTreeMap;}
-            std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() {return TreeMap;}
-            bool Debug;
+    std::vector<std::shared_ptr<KinematicElement>> getTree() { return Tree; }
+    std::map<std::string, std::shared_ptr<KinematicElement>> getCollisionTreeMap() { return CollisionTreeMap; }
+    std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() { return TreeMap; }
+    bool Debug;
 
-    private:
-            void BuildTree(const KDL::Tree & RobotKinematics);
-            void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
-            int IsControlled(std::shared_ptr<KinematicElement> Joint);
-            void UpdateTree(Eigen::VectorXdRefConst x);
-            void UpdateFK();
-            void UpdateJ();
-            void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);
+private:
+    void BuildTree(const KDL::Tree& RobotKinematics);
+    void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
+    int IsControlled(std::shared_ptr<KinematicElement> Joint);
+    void UpdateTree(Eigen::VectorXdRefConst x);
+    void UpdateFK();
+    void UpdateJ();
+    void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);
 
+    BASE_TYPE ModelBaseType;
+    BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;
+    int NumControlledJoints;  //!< Number of controlled joints in the joint group.
+    int NumJoints;            //!< Number of joints of the model (including floating/planar base, passive joints, and uncontrolled joints).
+    int StateSize;
+    Eigen::VectorXd TreeState;
+    robot_model::RobotModelPtr Model;
+    std::vector<std::shared_ptr<KinematicElement>> Tree;
+    std::vector<std::shared_ptr<KinematicElement>> ModelTree;
+    std::map<std::string, std::shared_ptr<KinematicElement>> TreeMap;
+    std::map<std::string, std::shared_ptr<KinematicElement>> CollisionTreeMap;
+    std::shared_ptr<KinematicElement> Root;
+    std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
+    std::map<std::string, std::shared_ptr<KinematicElement>> ControlledJointsMap;
+    std::map<std::string, std::shared_ptr<KinematicElement>> ModelJointsMap;
+    std::vector<std::string> ModelJointsNames;
+    std::vector<std::string> ControlledJointsNames;
+    std::shared_ptr<KinematicResponse> Solution;
+    KinematicRequestFlags Flags;
 
-            BASE_TYPE ModelBaseType;
-            BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;
-            int NumControlledJoints; //!< Number of controlled joints in the joint group.
-            int NumJoints; //!< Number of joints of the model (including floating/planar base, passive joints, and uncontrolled joints).
-            int StateSize;
-            Eigen::VectorXd TreeState;
-            robot_model::RobotModelPtr Model;
-            std::vector<std::shared_ptr<KinematicElement>> Tree;
-            std::vector<std::shared_ptr<KinematicElement>> ModelTree;
-            std::map<std::string, std::shared_ptr<KinematicElement>> TreeMap;
-            std::map<std::string, std::shared_ptr<KinematicElement>> CollisionTreeMap;
-            std::shared_ptr<KinematicElement> Root;
-            std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
-            std::map<std::string, std::shared_ptr<KinematicElement>> ControlledJointsMap;
-            std::map<std::string, std::shared_ptr<KinematicElement>> ModelJointsMap;
-            std::vector<std::string> ModelJointsNames;
-            std::vector<std::string> ControlledJointsNames;
-            std::shared_ptr<KinematicResponse> Solution;
-            KinematicRequestFlags Flags;
-
-            std::vector<tf::StampedTransform> debugTree;
-            std::vector<tf::StampedTransform> debugFrames;
-            ros::Publisher shapes_pub_;
-            bool debugSceneChanged;
-            std::string name_;
-    };
-
+    std::vector<tf::StampedTransform> debugTree;
+    std::vector<tf::StampedTransform> debugFrames;
+    ros::Publisher shapes_pub_;
+    bool debugSceneChanged;
+    std::string name_;
+};
 }
 #endif

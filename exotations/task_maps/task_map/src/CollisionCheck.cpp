@@ -36,36 +36,35 @@ REGISTER_TASKMAP_TYPE("CollisionCheck", exotica::CollisionCheck);
 
 namespace exotica
 {
-  CollisionCheck::CollisionCheck()
-  {
+CollisionCheck::CollisionCheck()
+{
+}
 
-  }
+void CollisionCheck::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+{
+    if (phi.rows() != 1) throw_named("Wrong size of phi!");
+    cscene_->updateCollisionObjectTransforms();
+    phi(0) = cscene_->isStateValid(init_.SelfCollision, init_.SafeDistance) ? -1.0 : 0.0;
+}
 
-  void CollisionCheck::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
-  {
-      if(phi.rows() != 1) throw_named("Wrong size of phi!");
-      cscene_->updateCollisionObjectTransforms();
-      phi(0) = cscene_->isStateValid(init_.SelfCollision, init_.SafeDistance)?-1.0:0.0;
-  }
+void CollisionCheck::Instantiate(CollisionCheckInitializer& init)
+{
+    init_ = init;
+}
 
-  void CollisionCheck::Instantiate(CollisionCheckInitializer& init)
-  {
-      init_ = init;
-  }
+void CollisionCheck::assignScene(Scene_ptr scene)
+{
+    scene_ = scene;
+    Initialize();
+}
 
-  void CollisionCheck::assignScene(Scene_ptr scene)
-  {
-      scene_ = scene;
-      Initialize();
-  }
+void CollisionCheck::Initialize()
+{
+    cscene_ = scene_->getCollisionScene();
+}
 
-  void CollisionCheck::Initialize()
-  {
-      cscene_ = scene_->getCollisionScene();
-  }
-
-  int CollisionCheck::taskSpaceDim()
-  {
-      return 1;
-  }
+int CollisionCheck::taskSpaceDim()
+{
+    return 1;
+}
 }

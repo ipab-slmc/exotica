@@ -33,57 +33,55 @@
 #ifndef IMESH_H_
 #define IMESH_H_
 
-#include <exotica/TaskMap.h>
 #include <exotica/KinematicTree.h>
+#include <exotica/TaskMap.h>
 #include <task_map/IMeshInitializer.h>
 #include <visualization_msgs/Marker.h>
 
 namespace exotica
 {
-  class IMesh: public TaskMap, public Instantiable<IMeshInitializer>
-  {
-    public:
+class IMesh : public TaskMap, public Instantiable<IMeshInitializer>
+{
+public:
+    IMesh();
 
-      IMesh();
+    virtual void Instantiate(IMeshInitializer& init);
 
-      virtual void Instantiate(IMeshInitializer& init);
+    virtual ~IMesh();
 
-      virtual ~IMesh();
+    virtual void assignScene(Scene_ptr scene);
 
-      virtual void assignScene(Scene_ptr scene);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    virtual int taskSpaceDim();
 
-      virtual int taskSpaceDim();
+    void setWeight(int i, int j, double weight);
+    void setWeights(const Eigen::MatrixXd& weights);
+    Eigen::MatrixXd getWeights();
 
-      void setWeight(int i, int j, double weight);
-      void setWeights(const Eigen::MatrixXd & weights);
-      Eigen::MatrixXd getWeights();
+    static Eigen::VectorXd computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXdRefConst Weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
 
-      static Eigen::VectorXd computeLaplace(Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXdRefConst Weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
+    void computeGoalLaplace(const Eigen::VectorXd& x, Eigen::VectorXd& goal);
 
-      void computeGoalLaplace(const Eigen::VectorXd &x, Eigen::VectorXd &goal);
+    static void computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd& goal, Eigen::MatrixXdRefConst Weights);
 
-      static void computeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd &goal, Eigen::MatrixXdRefConst Weights);
+    virtual void debug(Eigen::VectorXdRefConst phi);
+    void initDebug(std::string ref);
+    void destroyDebug();
 
-      virtual void debug(Eigen::VectorXdRefConst phi);
-      void initDebug(std::string ref);
-      void destroyDebug();
+protected:
+    Eigen::MatrixXd weights_;
 
-    protected:
+    int eff_size_;
+    bool Debug;
 
-      Eigen::MatrixXd weights_;
-
-      int eff_size_;
-      bool Debug;
-
-      ros::Publisher imesh_mark_pub_;
-      visualization_msgs::Marker imesh_mark_;
-      Scene_ptr scene_;
-  };
-  typedef std::shared_ptr<IMesh> IMesh_Ptr;
+    ros::Publisher imesh_mark_pub_;
+    visualization_msgs::Marker imesh_mark_;
+    Scene_ptr scene_;
+};
+typedef std::shared_ptr<IMesh> IMesh_Ptr;
 }
 
 #endif /* IMESH_H_ */

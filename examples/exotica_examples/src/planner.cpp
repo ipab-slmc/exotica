@@ -43,13 +43,13 @@ void run()
     Initializer solver, problem;
 
     std::string file_name, solver_name, problem_name;
-    Server::getParam("ConfigurationFile",file_name);
-    Server::getParam("Solver",solver_name);
-    Server::getParam("Problem",problem_name);
+    Server::getParam("ConfigurationFile", file_name);
+    Server::getParam("Solver", solver_name);
+    Server::getParam("Problem", problem_name);
 
-    XMLLoader::load(file_name,solver, problem, solver_name, problem_name);
+    XMLLoader::load(file_name, solver, problem, solver_name, problem_name);
 
-    HIGHLIGHT_NAMED("XMLnode","Loaded from XML");
+    HIGHLIGHT_NAMED("XMLnode", "Loaded from XML");
 
     // Initialize
 
@@ -62,17 +62,17 @@ void run()
     // If necessary, modify the problem after calling sol->specifyProblem()
     // e.g. set different rho:
 
-    if(any_problem->type()=="exotica::UnconstrainedTimeIndexedProblem")
+    if (any_problem->type() == "exotica::UnconstrainedTimeIndexedProblem")
     {
         UnconstrainedTimeIndexedProblem_ptr problem = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(any_problem);
-        for (int t = 0; t < problem->T-1; t++)
+        for (int t = 0; t < problem->T - 1; t++)
         {
             // This sets the precision of all time steps BUT the last one to zero
             // This means we only aim to minimize the task cost in the last time step
             // The rest of the trajectory minimizes the control cost
-            problem->setRho("Frame",0.0,t);
+            problem->setRho("Frame", 0.0, t);
         }
-        problem->setRho("Frame",1e3,99);
+        problem->setRho("Frame", 1e3, 99);
     }
 
     // Create the initial configuration
@@ -84,9 +84,10 @@ void run()
         // Solve the problem using the AICO solver
         any_solver->Solve(solution);
         double time = ros::Duration(
-                    (ros::WallTime::now() - start_time).toSec()).toSec();
-        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving ("<<time<<"s)");
-        ROS_INFO_STREAM_THROTTLE(0.5, "Solution "<<solution.row(solution.rows()-1));
+                          (ros::WallTime::now() - start_time).toSec())
+                          .toSec();
+        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving (" << time << "s)");
+        ROS_INFO_STREAM_THROTTLE(0.5, "Solution " << solution.row(solution.rows() - 1));
 
         ros::Rate loop_rate(50.0);
         int t = 0;
@@ -95,8 +96,8 @@ void run()
         while (ros::ok())
         {
             int i = 1;
-            if(t==0 || t==solution.rows()-1) i = PlaybackWaitInterval;
-            while(i-->0)
+            if (t == 0 || t == solution.rows() - 1) i = PlaybackWaitInterval;
+            while (i-- > 0)
             {
                 any_problem->getScene()->Update(solution.row(t).transpose());
                 any_problem->getScene()->getSolver().publishFrames();
@@ -107,7 +108,6 @@ void run()
             t = t + 1 >= solution.rows() ? 0 : t + 1;
         }
     }
-
 
     // All classes will be destroyed at this point.
 }

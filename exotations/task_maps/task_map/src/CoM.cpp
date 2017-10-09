@@ -36,180 +36,181 @@ REGISTER_TASKMAP_TYPE("CoM", exotica::CoM);
 
 namespace exotica
 {
-    CoM::CoM()
+CoM::CoM()
+{
+}
+
+CoM::~CoM()
+{
+}
+
+void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+{
+    if (phi.rows() != dim_) throw_named("Wrong size of phi!");
+    phi.setZero();
+    double M = mass_.sum();
+    if (M == 0.0) return;
+
+    KDL::Vector com;
+    for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-    }
-
-    CoM::~CoM()
-    {
-    }
-
-    void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
-    {
-        if(phi.rows() != dim_) throw_named("Wrong size of phi!");
-        phi.setZero();
-        double M = mass_.sum();
-        if(M==0.0) return;
-
-        KDL::Vector com;
-        for(int i=0;i<Kinematics.Phi.rows();i++)
-        {
-            com += Kinematics.Phi(i).p*mass_(i);
-            if (debug_)
-            {
-              com_marker_.points[i].x = Kinematics.Phi(i).p[0];
-              com_marker_.points[i].y = Kinematics.Phi(i).p[1];
-              com_marker_.points[i].z = Kinematics.Phi(i).p[2];
-            }
-        }
-
-        com = com / M;
-        for(int i=0;i<dim_;i++) phi(i) = com[i];
-
+        com += Kinematics.Phi(i).p * mass_(i);
         if (debug_)
         {
-          COM_marker_.pose.position.x = phi(0);
-          COM_marker_.pose.position.y = phi(1);
-          COM_marker_.pose.position.z = phi(2);
-
-          COM_marker_.header.stamp = com_marker_.header.stamp = ros::Time::now();
-          com_pub_.publish(com_marker_);
-          COM_pub_.publish(COM_marker_);
+            com_marker_.points[i].x = Kinematics.Phi(i).p[0];
+            com_marker_.points[i].y = Kinematics.Phi(i).p[1];
+            com_marker_.points[i].z = Kinematics.Phi(i).p[2];
         }
     }
 
-    void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
-    {
-        if(phi.rows() != dim_) throw_named("Wrong size of phi!");
-        if(J.rows() != dim_ || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
-        phi.setZero();
-        J.setZero();
-        KDL::Vector com;
-        double M = mass_.sum();
-        if(M==0.0) return;
-        for(int i=0;i<Kinematics.Phi.rows();i++)
-        {
-            com += Kinematics.Phi(i).p*mass_(i);
-            J += mass_(i) / M * Kinematics.J(i).data.topRows(dim_);
-            if (debug_)
-            {
-              com_marker_.points[i].x = Kinematics.Phi(i).p[0];
-              com_marker_.points[i].y = Kinematics.Phi(i).p[1];
-              com_marker_.points[i].z = Kinematics.Phi(i).p[2];
-            }
-        }
-        com =com / M;
-        for(int i=0;i<dim_;i++) phi(i) = com[i];
+    com = com / M;
+    for (int i = 0; i < dim_; i++) phi(i) = com[i];
 
+    if (debug_)
+    {
+        COM_marker_.pose.position.x = phi(0);
+        COM_marker_.pose.position.y = phi(1);
+        COM_marker_.pose.position.z = phi(2);
+
+        COM_marker_.header.stamp = com_marker_.header.stamp = ros::Time::now();
+        com_pub_.publish(com_marker_);
+        COM_pub_.publish(COM_marker_);
+    }
+}
+
+void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+{
+    if (phi.rows() != dim_) throw_named("Wrong size of phi!");
+    if (J.rows() != dim_ || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    phi.setZero();
+    J.setZero();
+    KDL::Vector com;
+    double M = mass_.sum();
+    if (M == 0.0) return;
+    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    {
+        com += Kinematics.Phi(i).p * mass_(i);
+        J += mass_(i) / M * Kinematics.J(i).data.topRows(dim_);
         if (debug_)
         {
-          COM_marker_.pose.position.x = phi(0);
-          COM_marker_.pose.position.y = phi(1);
-          COM_marker_.pose.position.z = phi(2);
-
-          COM_marker_.header.stamp = com_marker_.header.stamp = ros::Time::now();
-          com_pub_.publish(com_marker_);
-          COM_pub_.publish(COM_marker_);
+            com_marker_.points[i].x = Kinematics.Phi(i).p[0];
+            com_marker_.points[i].y = Kinematics.Phi(i).p[1];
+            com_marker_.points[i].z = Kinematics.Phi(i).p[2];
         }
     }
+    com = com / M;
+    for (int i = 0; i < dim_; i++) phi(i) = com[i];
 
-    int CoM::taskSpaceDim()
+    if (debug_)
     {
-        return dim_;
+        COM_marker_.pose.position.x = phi(0);
+        COM_marker_.pose.position.y = phi(1);
+        COM_marker_.pose.position.z = phi(2);
+
+        COM_marker_.header.stamp = com_marker_.header.stamp = ros::Time::now();
+        com_pub_.publish(com_marker_);
+        COM_pub_.publish(COM_marker_);
     }
+}
 
-    void CoM::Initialize()
+int CoM::taskSpaceDim()
+{
+    return dim_;
+}
+
+void CoM::Initialize()
+{
+    enable_z_ = init_.EnableZ;
+    if (enable_z_)
+        dim_ = 3;
+    else
+        dim_ = 2;
+
+    if (Frames.size() > 0)
     {
-        enable_z_ = init_.EnableZ;
-        if (enable_z_)
-          dim_ = 3;
-        else
-          dim_ = 2;
+        if (debug_)
+            HIGHLIGHT_NAMED("CoM", "Initialisation with " << Frames.size() << " passed into map.");
 
-        if(Frames.size()>0)
+        mass_.resize(Frames.size());
+        for (int i = 0; i < Frames.size(); i++)
         {
-            if (debug_)
-              HIGHLIGHT_NAMED("CoM", "Initialisation with " << Frames.size() << " passed into map.");
-
-            mass_.resize(Frames.size());
-            for(int i=0; i<Frames.size(); i++)
+            if (Frames[i].FrameBLinkName != "")
             {
-                if(Frames[i].FrameBLinkName!="")
-                {
-                    throw_named("Requesting CoM frame with base other than root! '" << Frames[i].FrameALinkName << "'");
-                }
-                Frames[i].FrameALinkName = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getName();
-                Frames[i].FrameAOffset.p = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getCOG();
-                mass_(i) = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getMass();
+                throw_named("Requesting CoM frame with base other than root! '" << Frames[i].FrameALinkName << "'");
             }
+            Frames[i].FrameALinkName = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getName();
+            Frames[i].FrameAOffset.p = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getCOG();
+            mass_(i) = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getMass();
         }
-        else
+    }
+    else
+    {
+        int N = scene_->getSolver().getTree().size();
+        mass_.resize(N);
+        Frames.resize(N);
+        if (debug_)
+            HIGHLIGHT_NAMED("CoM", "Initialisation for tree of size "
+                                       << Frames.size());
+        for (int i = 0; i < N; i++)
         {
-            int N = scene_->getSolver().getTree().size();
-            mass_.resize(N);
-            Frames.resize(N);
+            Frames[i].FrameALinkName = scene_->getSolver().getTree()[i]->Segment.getName();
+            Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i]->Segment.getInertia().getCOG();
+            mass_(i) = scene_->getSolver().getTree()[i]->Segment.getInertia().getMass();
             if (debug_)
-              HIGHLIGHT_NAMED("CoM", "Initialisation for tree of size "
-                                         << Frames.size());
-            for(int i=0; i<N; i++)
-            {
-                Frames[i].FrameALinkName = scene_->getSolver().getTree()[i]->Segment.getName();
-                Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i]->Segment.getInertia().getCOG();
-                mass_(i) = scene_->getSolver().getTree()[i]->Segment.getInertia().getMass();
-                if (debug_)
-                  HIGHLIGHT_NAMED("CoM-Initialize",
-                                  "FrameALinkName: "
-                                      << Frames[i].FrameALinkName
-                                      << ", mass: " << mass_(i) << ", CoG: ("
-                                      << Frames[i].FrameAOffset.p.x() << ", "
-                                      << Frames[i].FrameAOffset.p.y() << ", "
-                                      << Frames[i].FrameAOffset.p.z() << ")");
-            }
-        }
-
-        if (debug_) {
-          InitDebug();
-          HIGHLIGHT_NAMED("CoM", "Total model mass: " << mass_.sum() << " kg");
+                HIGHLIGHT_NAMED("CoM-Initialize",
+                                "FrameALinkName: "
+                                    << Frames[i].FrameALinkName
+                                    << ", mass: " << mass_(i) << ", CoG: ("
+                                    << Frames[i].FrameAOffset.p.x() << ", "
+                                    << Frames[i].FrameAOffset.p.y() << ", "
+                                    << Frames[i].FrameAOffset.p.z() << ")");
         }
     }
 
-    void CoM::assignScene(Scene_ptr scene)
+    if (debug_)
     {
-        scene_ = scene;
-        Initialize();
+        InitDebug();
+        HIGHLIGHT_NAMED("CoM", "Total model mass: " << mass_.sum() << " kg");
     }
+}
 
-    void CoM::Instantiate(CoMInitializer& init)
-    {
-        init_ = init;
-    }
+void CoM::assignScene(Scene_ptr scene)
+{
+    scene_ = scene;
+    Initialize();
+}
 
-    void CoM::InitDebug()
-    {
-        com_marker_.points.resize(Frames.size());
-        com_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
-        com_marker_.color.a = .7;
-        com_marker_.color.r = 0.5;
-        com_marker_.color.g = 0;
-        com_marker_.color.b = 0;
-        com_marker_.scale.x = com_marker_.scale.y = com_marker_.scale.z = .02;
-        com_marker_.action = visualization_msgs::Marker::ADD;
+void CoM::Instantiate(CoMInitializer& init)
+{
+    init_ = init;
+}
 
-        COM_marker_.type = visualization_msgs::Marker::CYLINDER;
-        COM_marker_.color.a = 1;
-        COM_marker_.color.r = 1;
-        COM_marker_.color.g = 0;
-        COM_marker_.color.b = 0;
-        COM_marker_.scale.x = COM_marker_.scale.y = .15;
-        COM_marker_.scale.z = .02;
-        COM_marker_.action = visualization_msgs::Marker::ADD;
+void CoM::InitDebug()
+{
+    com_marker_.points.resize(Frames.size());
+    com_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
+    com_marker_.color.a = .7;
+    com_marker_.color.r = 0.5;
+    com_marker_.color.g = 0;
+    com_marker_.color.b = 0;
+    com_marker_.scale.x = com_marker_.scale.y = com_marker_.scale.z = .02;
+    com_marker_.action = visualization_msgs::Marker::ADD;
 
-        com_marker_.header.frame_id = COM_marker_.header.frame_id =
-            "exotica/" + scene_->getRootFrameName();
+    COM_marker_.type = visualization_msgs::Marker::CYLINDER;
+    COM_marker_.color.a = 1;
+    COM_marker_.color.r = 1;
+    COM_marker_.color.g = 0;
+    COM_marker_.color.b = 0;
+    COM_marker_.scale.x = COM_marker_.scale.y = .15;
+    COM_marker_.scale.z = .02;
+    COM_marker_.action = visualization_msgs::Marker::ADD;
 
-        com_pub_ = Server::advertise<visualization_msgs::Marker>(
-            object_name_ + "/coms_marker", 1, true);
-        COM_pub_ = Server::advertise<visualization_msgs::Marker>(
-            object_name_ + "/COM_marker", 1, true);
-    }
+    com_marker_.header.frame_id = COM_marker_.header.frame_id =
+        "exotica/" + scene_->getRootFrameName();
+
+    com_pub_ = Server::advertise<visualization_msgs::Marker>(
+        object_name_ + "/coms_marker", 1, true);
+    COM_pub_ = Server::advertise<visualization_msgs::Marker>(
+        object_name_ + "/COM_marker", 1, true);
+}
 }

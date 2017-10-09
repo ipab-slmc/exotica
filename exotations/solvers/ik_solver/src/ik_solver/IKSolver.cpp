@@ -39,185 +39,185 @@
 #undef large
 #include <lapack/clapack.h>
 
-
 REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver)
 
 namespace exotica
 {
-    IKsolver::IKsolver() : iterations_(-1)
+IKsolver::IKsolver() : iterations_(-1)
+{
+}
+
+IKsolver::~IKsolver()
+{
+}
+
+template <typename Scalar>
+struct CwiseClampOp
+{
+    CwiseClampOp(const Scalar& inf, const Scalar& sup)
+        : m_inf(inf), m_sup(sup)
     {
     }
-
-    IKsolver::~IKsolver()
+    const Scalar operator()(const Scalar& x) const
     {
-
-    }
-
-    template<typename Scalar>
-    struct CwiseClampOp
-    {
-      CwiseClampOp(const Scalar& inf, const Scalar& sup)
-          : m_inf(inf), m_sup(sup)
-      {
-      }
-      const Scalar operator()(const Scalar& x) const
-      {
         return x < m_inf ? m_inf : (x > m_sup ? m_sup : x);
-      }
-      Scalar m_inf, m_sup;
-    };
-
-    Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd> & A_)
-    {
-      Eigen::MatrixXd Ainv_ = A_;
-      double* AA = Ainv_.data();
-      integer info;
-      integer nn = A_.rows();
-      // Compute Cholesky
-      dpotrf_((char*) "L", &nn, AA, &nn, &info);
-      if (info != 0)
-      {
-        throw_pretty("Can't invert matrix. Cholesky decomposition failsed: "<<info<<"\n"<<A_);
-      }
-      // Invert
-      dpotri_((char*) "L", &nn, AA, &nn, &info);
-      if (info != 0)
-      {
-        throw_pretty("Can't invert matrix: "<<info<<"\n"<<A_);
-      }
-      Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
-      return Ainv_;
     }
+    Scalar m_inf, m_sup;
+};
 
-    void IKsolver::Instantiate(IKsolverInitializer& init)
+Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd>& A_)
+{
+    Eigen::MatrixXd Ainv_ = A_;
+    double* AA = Ainv_.data();
+    integer info;
+    integer nn = A_.rows();
+    // Compute Cholesky
+    dpotrf_((char*)"L", &nn, AA, &nn, &info);
+    if (info != 0)
     {
-        parameters_ = init;
+        throw_pretty("Can't invert matrix. Cholesky decomposition failsed: " << info << "\n"
+                                                                             << A_);
     }
-
-    void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
+    // Invert
+    dpotri_((char*)"L", &nn, AA, &nn, &info);
+    if (info != 0)
     {
-        if (pointer->type()!="exotica::UnconstrainedEndPoseProblem")
+        throw_pretty("Can't invert matrix: " << info << "\n"
+                                             << A_);
+    }
+    Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
+    return Ainv_;
+}
+
+void IKsolver::Instantiate(IKsolverInitializer& init)
+{
+    parameters_ = init;
+}
+
+void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
+{
+    if (pointer->type() != "exotica::UnconstrainedEndPoseProblem")
+    {
+        throw_named("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
+    }
+    MotionSolver::specifyProblem(pointer);
+    prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
+
+    C = Eigen::MatrixXd::Identity(prob_->JN, prob_->JN) * parameters_.C;
+    if (parameters_.C == 0.0)
+        Cinv = Eigen::MatrixXd::Zero(prob_->JN, prob_->JN);
+    else
+        Cinv = C.inverse();
+
+    W = prob_->W;
+    Winv = W.inverse();
+}
+
+UnconstrainedEndPoseProblem_ptr& IKsolver::getProblem()
+{
+    return prob_;
+}
+
+int IKsolver::getMaxIteration()
+{
+    return parameters_.MaxIt;
+}
+
+int IKsolver::getLastIteration()
+{
+    return iterations_;
+}
+
+void IKsolver::Solve(Eigen::MatrixXd& solution)
+{
+    Timer timer;
+
+    prob_->preupdate();
+
+    if (!prob_) throw_named("Solver has not been initialized!");
+    Eigen::VectorXd q0 = prob_->applyStartState();
+
+    if (prob_->N != q0.rows()) throw_named("Wrong size q0 size=" << q0.rows() << ", required size=" << prob_->N);
+
+    bool UseNullspace = prob_->qNominal.rows() == prob_->N;
+
+    Eigen::MatrixXd S = Eigen::MatrixXd::Identity(prob_->JN, prob_->JN);
+    for (TaskMap_ptr task : prob_->getTasks())
+    {
+        for (int i = 0; i < task->Length; i++)
         {
-            throw_named("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
+            S(i + task->Start, i + task->Start) = prob_->Rho(task->Id);
         }
-        MotionSolver::specifyProblem(pointer);
-        prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
-
-        C = Eigen::MatrixXd::Identity(prob_->JN, prob_->JN)*parameters_.C;
-        if(parameters_.C==0.0)
-            Cinv = Eigen::MatrixXd::Zero(prob_->JN, prob_->JN);
-        else
-            Cinv = C.inverse();
-
-        W = prob_->W;
-        Winv = W.inverse();
     }
 
-    UnconstrainedEndPoseProblem_ptr& IKsolver::getProblem()
+    solution.resize(1, prob_->N);
+
+    Eigen::VectorXd q = q0;
+    error = INFINITY;
+    int i;
+    for (i = 0; i < parameters_.MaxIt; i++)
     {
-        return prob_;
-    }
+        prob_->Update(q);
+        Eigen::VectorXd yd = S * (prob_->y - prob_->Phi);
 
-    int IKsolver::getMaxIteration()
-    {
-        return parameters_.MaxIt;
-    }
+        error = yd.dot(yd);
 
-    int IKsolver::getLastIteration()
-    {
-        return iterations_;
-    }
-
-    void IKsolver::Solve(Eigen::MatrixXd & solution)
-    {
-        Timer timer;
-
-        prob_->preupdate();
-
-        if(!prob_) throw_named("Solver has not been initialized!");
-        Eigen::VectorXd q0 = prob_->applyStartState();
-
-        if (prob_->N != q0.rows()) throw_named("Wrong size q0 size=" << q0.rows() << ", required size="<< prob_->N);
-
-        bool UseNullspace = prob_->qNominal.rows()==prob_->N;
-
-        Eigen::MatrixXd S = Eigen::MatrixXd::Identity(prob_->JN, prob_->JN);
-        for(TaskMap_ptr task : prob_->getTasks())
+        if (error < parameters_.Tolerance)
         {
-            for(int i=0; i < task->Length; i++)
-            {
-                S(i+task->Start, i+task->Start) = prob_->Rho(task->Id);
-            }
+            break;
         }
 
-        solution.resize(1, prob_->N);
+        Eigen::MatrixXd Jinv = PseudoInverse(S * prob_->J);
+        Eigen::VectorXd qd = Jinv * yd;
+        if (UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * S * prob_->J) * (prob_->qNominal - q);
 
-        Eigen::VectorXd q = q0;
-        error = INFINITY;
-        int i;
-        for (i = 0; i < parameters_.MaxIt; i++)
+        ScaleToStepSize(qd);
+
+        q = q + qd * parameters_.Alpha;
+
+        if (qd.norm() < parameters_.Convergence)
         {
-            prob_->Update(q);
-            Eigen::VectorXd yd = S*(prob_->y - prob_->Phi);
-
-            error = yd.dot(yd);
-
-            if(error < parameters_.Tolerance)
-            {
-                break;
-            }
-
-            Eigen::MatrixXd Jinv = PseudoInverse(S*prob_->J);
-            Eigen::VectorXd qd = Jinv * yd;
-            if(UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv*S*prob_->J)*(prob_->qNominal-q);
-
-            ScaleToStepSize(qd);
-
-            q = q + qd*parameters_.Alpha;
-
-            if(qd.norm()<parameters_.Convergence)
-            {
-                break;
-            }
+            break;
         }
-        iterations_ = i+1;
-
-        solution.row(0) = q;
-
-        planning_time_ = timer.getDuration();
     }
+    iterations_ = i + 1;
 
-    Eigen::MatrixXd IKsolver::PseudoInverse(Eigen::MatrixXdRefConst J)
+    solution.row(0) = q;
+
+    planning_time_ = timer.getDuration();
+}
+
+Eigen::MatrixXd IKsolver::PseudoInverse(Eigen::MatrixXdRefConst J)
+{
+    Eigen::MatrixXd Jpinv;
+
+    if (J.cols() < J.rows())
     {
-        Eigen::MatrixXd Jpinv;
-
-        if(J.cols()<J.rows())
+        //(Jt*C^-1*J+W)^-1*Jt*C^-1
+        if (parameters_.C != 0)
         {
-            //(Jt*C^-1*J+W)^-1*Jt*C^-1
-            if(parameters_.C != 0)
-            {
-                Jpinv = inverseSymPosDef(J.transpose()*Cinv*J + W) * J.transpose() * Cinv;
-            }
-            else
-            {
-                Jpinv = inverseSymPosDef(J.transpose()*J + W) * J.transpose();
-            }
+            Jpinv = inverseSymPosDef(J.transpose() * Cinv * J + W) * J.transpose() * Cinv;
         }
         else
         {
-            //W^-1*Jt(J*W^-1*Jt+C)
-            Jpinv = Winv*J.transpose() * inverseSymPosDef(J*Winv*J.transpose()+C);
+            Jpinv = inverseSymPosDef(J.transpose() * J + W) * J.transpose();
         }
-
-        return Jpinv;
     }
-
-    void IKsolver::ScaleToStepSize(Eigen::VectorXdRef xd)
+    else
     {
-        double max_vel = xd.cwiseAbs().maxCoeff();
-        if (max_vel > parameters_.MaxStep)
-        {
-            xd = xd * parameters_.MaxStep / max_vel;
-        }
+        //W^-1*Jt(J*W^-1*Jt+C)
+        Jpinv = Winv * J.transpose() * inverseSymPosDef(J * Winv * J.transpose() + C);
     }
+
+    return Jpinv;
+}
+
+void IKsolver::ScaleToStepSize(Eigen::VectorXdRef xd)
+{
+    double max_vel = xd.cwiseAbs().maxCoeff();
+    if (max_vel > parameters_.MaxStep)
+    {
+        xd = xd * parameters_.MaxStep / max_vel;
+    }
+}
 }

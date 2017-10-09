@@ -34,20 +34,19 @@
 
 namespace exotica
 {
-  GraphManager::GraphManager()
-      : initialised_(false), nh_("/MeshGraphManager"), graph_(
-          new MeshGraph("MESH_GRAPH"))
-  {
+GraphManager::GraphManager()
+    : initialised_(false), nh_("/MeshGraphManager"), graph_(new MeshGraph("MESH_GRAPH"))
+{
     //TODO
-  }
+}
 
-  GraphManager::~GraphManager()
-  {
+GraphManager::~GraphManager()
+{
     //TODO
-  }
+}
 
-  void GraphManager::initialisation(std::vector<DMeshVertexInitializer>& verts, int size)
-  {
+void GraphManager::initialisation(std::vector<DMeshVertexInitializer>& verts, int size)
+{
     if (verts.size() == 0 || size < verts.size())
     {
         throw_pretty("Mesh Graph Manager: wrong size(link size=" << verts.size() << ", size=" << size << ")\n");
@@ -55,13 +54,13 @@ namespace exotica
     double i_range;
     if (!nh_.getParam("/MeshGraphManager/InteractRange", i_range))
     {
-      throw_pretty("Parameter '/MeshGraphManager/InteractRange' not set!");
+        throw_pretty("Parameter '/MeshGraphManager/InteractRange' not set!");
     }
 
     double eps;
     if (!nh_.getParam("/MeshGraphManager/SafetyThreshold", eps))
     {
-      throw_pretty("Parameter '/MeshGraphManager/SafetyThreshold' not set!");
+        throw_pretty("Parameter '/MeshGraphManager/SafetyThreshold' not set!");
     }
     bool dummy_table = false;
     nh_.getParam("/MeshGraphManager/DummyTable", dummy_table);
@@ -71,38 +70,38 @@ namespace exotica
     std::string topic;
     if (!nh_.getParam("/MeshGraphManager/ExternalTopic", topic))
     {
-      throw_pretty("Parameter '/MeshGraphManager/ExternalTopic' not set!");
+        throw_pretty("Parameter '/MeshGraphManager/ExternalTopic' not set!");
     }
-//		ext_sub_ =
-//				nh_.subscribe<exotica::MeshVertex>(topic, 10, boost::bind(&exotica::GraphManager::extCallback, this, _1));
+    //		ext_sub_ =
+    //				nh_.subscribe<exotica::MeshVertex>(topic, 10, boost::bind(&exotica::GraphManager::extCallback, this, _1));
     ext_arr_sub_ = nh_.subscribe<exotica::MeshVertexArray>(topic, 10,
-        boost::bind(&exotica::GraphManager::extArrCallback, this, _1));
-//		vel_timer_ =
-//				nh_.createTimer(ros::Duration(0.05), boost::bind(&exotica::GraphManager::velTimeCallback, this, _1));
+                                                           boost::bind(&exotica::GraphManager::extArrCallback, this, _1));
+    //		vel_timer_ =
+    //				nh_.createTimer(ros::Duration(0.05), boost::bind(&exotica::GraphManager::velTimeCallback, this, _1));
 
     ROS_INFO("Mesh Graph Manager has been initialised");
     initialised_ = true;
-  }
+}
 
-  MeshGraphPtr GraphManager::getGraph()
-  {
+MeshGraphPtr GraphManager::getGraph()
+{
     return graph_;
-  }
+}
 
-  void GraphManager::extCallback(const exotica::MeshVertexConstPtr & ext)
-  {
+void GraphManager::extCallback(const exotica::MeshVertexConstPtr& ext)
+{
     graph_->updateExternal(ext);
-  }
+}
 
-  void GraphManager::extArrCallback(
-      const exotica::MeshVertexArrayConstPtr & ext)
-  {
+void GraphManager::extArrCallback(
+    const exotica::MeshVertexArrayConstPtr& ext)
+{
     for (int i = 0; i < ext->vertices.size(); i++)
-      graph_->updateExternal(ext->vertices[i]);
-  }
+        graph_->updateExternal(ext->vertices[i]);
+}
 
-  void GraphManager::velTimeCallback(const ros::TimerEvent&)
-  {
+void GraphManager::velTimeCallback(const ros::TimerEvent&)
+{
     graph_->computeVelocity();
-  }
-}	//namespace exotica
+}
+}  //namespace exotica

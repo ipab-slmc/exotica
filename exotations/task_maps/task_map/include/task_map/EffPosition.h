@@ -36,28 +36,27 @@
 #include <exotica/TaskMap.h>
 #include <task_map/EffPositionInitializer.h>
 
-namespace exotica //!< Since this is part of the core library, it will be within the same namespace
+namespace exotica  //!< Since this is part of the core library, it will be within the same namespace
 {
-  class EffPosition: public TaskMap, public Instantiable<EffPositionInitializer>
-  {
-    public:
-      /**
+class EffPosition : public TaskMap, public Instantiable<EffPositionInitializer>
+{
+public:
+    /**
        * \brief Default constructor
        */
-      EffPosition();
-      virtual ~EffPosition()
-      {
-      }
+    EffPosition();
+    virtual ~EffPosition()
+    {
+    }
 
-      virtual void Instantiate(EffPositionInitializer& init) {}
+    virtual void Instantiate(EffPositionInitializer& init) {}
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
-
-      virtual int taskSpaceDim();
-  };
-  typedef std::shared_ptr<EffPosition> EffPosition_ptr;  //!< Task Map smart pointer
+    virtual int taskSpaceDim();
+};
+typedef std::shared_ptr<EffPosition> EffPosition_ptr;  //!< Task Map smart pointer
 }
 
 #endif

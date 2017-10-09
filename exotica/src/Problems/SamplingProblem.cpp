@@ -38,109 +38,108 @@ REGISTER_PROBLEM_TYPE("SamplingProblem", exotica::SamplingProblem)
 
 namespace exotica
 {
-
-  SamplingProblem::SamplingProblem()
-  {
+SamplingProblem::SamplingProblem()
+{
     Flags = KIN_FK;
-  }
+}
 
-  SamplingProblem::~SamplingProblem()
-  {
+SamplingProblem::~SamplingProblem()
+{
     // TODO Auto-generated destructor stub
-  }
+}
 
-  std::vector<double>& SamplingProblem::getBounds()
-  {
+std::vector<double>& SamplingProblem::getBounds()
+{
     return bounds_;
-  }
+}
 
-  void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
-  {
-      Parameters = init;
+void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
+{
+    Parameters = init;
 
-      if(init.LocalPlannerConfig!="")
-      {
-          local_planner_config_ = init.LocalPlannerConfig;
-      }
+    if (init.LocalPlannerConfig != "")
+    {
+        local_planner_config_ = init.LocalPlannerConfig;
+    }
 
-      goal_ = init.Goal;
+    goal_ = init.Goal;
 
-      if (scene_->getBaseType() != exotica::BASE_TYPE::FIXED)
+    if (scene_->getBaseType() != exotica::BASE_TYPE::FIXED)
         compound_ = true;
-      else
+    else
         compound_ = false;
-      std::vector<std::string> jnts;
-      scene_->getJointNames(jnts);
+    std::vector<std::string> jnts;
+    scene_->getJointNames(jnts);
 
-      bounds_.resize(jnts.size() * 2);
-      std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
-      for (int i = 0; i < jnts.size(); i++)
-      {
+    bounds_.resize(jnts.size() * 2);
+    std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
+    for (int i = 0; i < jnts.size(); i++)
+    {
         bounds_[i] = joint_limits.at(jnts[i])[0];
         bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
-      }
+    }
 
-      NumTasks = Tasks.size();
-      PhiN = 0;
-      JN = 0;
-      for(int i=0;i<NumTasks;i++)
-      {
-          appendVector(y.map, Tasks[i]->getLieGroupIndices());
-          PhiN += Tasks[i]->Length;
-          JN += Tasks[i]->LengthJ;
-      }
+    NumTasks = Tasks.size();
+    PhiN = 0;
+    JN = 0;
+    for (int i = 0; i < NumTasks; i++)
+    {
+        appendVector(y.map, Tasks[i]->getLieGroupIndices());
+        PhiN += Tasks[i]->Length;
+        JN += Tasks[i]->LengthJ;
+    }
 
-      Rho = Eigen::VectorXd::Ones(NumTasks);
-      y.setZero(PhiN);
-      Phi = y;
-      threshold_ = y.data;
+    Rho = Eigen::VectorXd::Ones(NumTasks);
+    y.setZero(PhiN);
+    Phi = y;
+    threshold_ = y.data;
 
-      if(init.Rho.rows()>0 && init.Rho.rows()!=NumTasks) throw_named("Invalid size of Rho (" << init.Rho.rows() << ") expected: "<< NumTasks);
-      if(init.TaskGoal.rows()>0 && init.TaskGoal.rows()!=PhiN) throw_named("Invalid size of TaskGoal (" << init.TaskGoal.rows() << ") expected: "<< PhiN);
-      if(init.Threshold.rows()>0 && init.Threshold.rows()!=PhiN) throw_named("Invalid size of Threshold (" << init.Threshold.rows() << ") expected: "<< PhiN);
+    if (init.Rho.rows() > 0 && init.Rho.rows() != NumTasks) throw_named("Invalid size of Rho (" << init.Rho.rows() << ") expected: " << NumTasks);
+    if (init.TaskGoal.rows() > 0 && init.TaskGoal.rows() != PhiN) throw_named("Invalid size of TaskGoal (" << init.TaskGoal.rows() << ") expected: " << PhiN);
+    if (init.Threshold.rows() > 0 && init.Threshold.rows() != PhiN) throw_named("Invalid size of Threshold (" << init.Threshold.rows() << ") expected: " << PhiN);
 
-      if(init.Rho.rows()==NumTasks) Rho = init.Rho;
-      if(init.TaskGoal.rows()==PhiN) y.data = init.TaskGoal;
-      if(init.Threshold.rows()==PhiN) threshold_ = init.Threshold;
+    if (init.Rho.rows() == NumTasks) Rho = init.Rho;
+    if (init.TaskGoal.rows() == PhiN) y.data = init.TaskGoal;
+    if (init.Threshold.rows() == PhiN) threshold_ = init.Threshold;
 
-      S = Eigen::MatrixXd::Identity(JN, JN);
-      for(TaskMap_ptr task : Tasks)
-      {
-          for(int i=0; i < task->Length; i++)
-          {
-              S(i+task->Start, i+task->Start) = Rho(task->Id);
-          }
-      }
-  }
+    S = Eigen::MatrixXd::Identity(JN, JN);
+    for (TaskMap_ptr task : Tasks)
+    {
+        for (int i = 0; i < task->Length; i++)
+        {
+            S(i + task->Start, i + task->Start) = Rho(task->Id);
+        }
+    }
+}
 
-  void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
-  {
-      goal_ = qT;
-  }
+void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
+{
+    goal_ = qT;
+}
 
-  bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
-  {
-      scene_->Update(x);
-      for(int i=0;i<NumTasks;i++)
-      {
-          Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
-      }
-      return ((S*(Phi - y)-threshold_).array()<0.0).all();
-  }
+bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
+{
+    scene_->Update(x);
+    for (int i = 0; i < NumTasks; i++)
+    {
+        Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+    }
+    return ((S * (Phi - y) - threshold_).array() < 0.0).all();
+}
 
-  void SamplingProblem::Update(Eigen::VectorXdRefConst x)
-  {
-      isValid(x);
-  }
+void SamplingProblem::Update(Eigen::VectorXdRefConst x)
+{
+    isValid(x);
+}
 
-  int SamplingProblem::getSpaceDim()
-  {
+int SamplingProblem::getSpaceDim()
+{
     return N;
-  }
+}
 
-  bool SamplingProblem::isCompoundStateSpace()
-  {
+bool SamplingProblem::isCompoundStateSpace()
+{
     return compound_;
-  }
+}
 
 } /* namespace exotica */

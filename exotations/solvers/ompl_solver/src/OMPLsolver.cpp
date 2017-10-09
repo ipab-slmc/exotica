@@ -38,74 +38,75 @@ REGISTER_MOTIONSOLVER_TYPE("OMPLsolver", exotica::OMPLsolver)
 
 namespace exotica
 {
-  OMPLsolver::OMPLsolver()
-  {
+OMPLsolver::OMPLsolver()
+{
+}
 
-  }
-
-  void OMPLsolver::Instantiate(OMPLsolverInitializer& init)
-  {
-      parameters_ = init;
-      try
-      {
-        HIGHLIGHT_NAMED(object_name_,"Using ["<<parameters_.Solver<<"]");
+void OMPLsolver::Instantiate(OMPLsolverInitializer& init)
+{
+    parameters_ = init;
+    try
+    {
+        HIGHLIGHT_NAMED(object_name_, "Using [" << parameters_.Solver << "]");
         base_solver_ = to_std_ptr(OMPLBaseSolver::base_solver_loader.createInstance("ompl_solver/" + parameters_.Solver));
-      } catch (pluginlib::PluginlibException& ex)
-      {
-        throw_named("EXOTica-OMPL plugin failed to load solver "<<parameters_.Solver<<"!\nError: " << ex.what());
-      }
-      Initializer baseInit = (Initializer)init;
-      base_solver_->initialiseBaseSolver(baseInit);
-  }
+    }
+    catch (pluginlib::PluginlibException& ex)
+    {
+        throw_named("EXOTica-OMPL plugin failed to load solver " << parameters_.Solver << "!\nError: " << ex.what());
+    }
+    Initializer baseInit = (Initializer)init;
+    base_solver_->initialiseBaseSolver(baseInit);
+}
 
-  OMPLsolver::~OMPLsolver()
-  {
+OMPLsolver::~OMPLsolver()
+{
     // If this is not empty, your code is bad and you should feel bad!
     // Whoop whoop whoop whoop ...
-  }
+}
 
-  std::string OMPLsolver::print(std::string prepend)
-  {
+std::string OMPLsolver::print(std::string prepend)
+{
     std::string ret = Object::print(prepend);
     ret += "\n" + prepend + "  Goal:";
     if (prob_) ret += "\n" + prob_->print(prepend + "    ");
     return ret;
-  }
+}
 
-  void OMPLsolver::Solve(Eigen::MatrixXd & solution)
-  {
+void OMPLsolver::Solve(Eigen::MatrixXd& solution)
+{
     prob_->preupdate();
     Eigen::VectorXd q0 = prob_->applyStartState();
     setGoalState(prob_->goal_);
     if (base_solver_->solve(q0, solution))
     {
-      HIGHLIGHT("OMPL solving succeeded, planning time "<<base_solver_->getPlanningTime()<<"sec");
+        HIGHLIGHT("OMPL solving succeeded, planning time " << base_solver_->getPlanningTime() << "sec");
     }
     else
     {
-      throw_solve("OMPL solving failed");
+        throw_solve("OMPL solving failed");
     }
-  }
+}
 
-  void OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
+void OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
 
-  {
+{
     MotionSolver::specifyProblem(pointer);
     prob_ = std::static_pointer_cast<SamplingProblem>(pointer);
     base_solver_->specifyProblem(prob_);
-  }
+}
 
-  template<typename T> static ompl::base::PlannerPtr allocatePlanner(
-      const ob::SpaceInformationPtr &si, const std::string &new_name)
-  {
+template <typename T>
+static ompl::base::PlannerPtr allocatePlanner(
+    const ob::SpaceInformationPtr& si, const std::string& new_name)
+{
     ompl::base::PlannerPtr planner(new T(si));
     if (!new_name.empty()) planner->setName(new_name);
     planner->setup();
     return planner;
-  }
+}
 
-  void OMPLsolver::setGoalState(Eigen::VectorXdRefConst qT, const double eps)
-  {
+void OMPLsolver::setGoalState(Eigen::VectorXdRefConst qT, const double eps)
+{
     base_solver_->setGoalState(qT, eps);
-  }
+}
 } /* namespace exotica */

@@ -4,9 +4,13 @@ EXOTica
 
 .. image:: images/EXOTica_logo.png
     :width: 40%
+    :align: right
 
 For home page go
 `here <http://wcms.inf.ed.ac.uk/ipab/slmc/research/EXOTica>`__.
+
+Overview
+========
 
 -  `Home <index.html>`__
 -  `Prerequisites <Prerequisites.html>`__
@@ -39,6 +43,7 @@ For home page go
    Quickstart
    Setting-up-ROSlaunch
    Using-EXOTica
+   Doxygen C++ <./doxygen_cpp/index.html#http://>
 
 
 .. Indices and tables

@@ -1,15 +1,14 @@
+**************************
 Common Initialisation Step
---------------------------
+**************************
 
 This is the final step of initialisation before we can use EXOTica to
 solve motion plans.
 
 In this section we will be using containers we set up in the previous
 initialisation tutorials, so if you have not completed either:
-`XML <https://github.com/openhumanoids/exotica/wiki/XML>`__ (both
-initialisation and parsing steps) or `manual
-initialisation <https://github.com/openhumanoids/exotica/wiki/Manual-Initialisation>`__,
-then go back and do those first.
+`XML <XML.html>`__ (both initialisation and parsing steps) or `manual
+initialisation <Manual-Initialisation.html>`__, then go back and do those first.
 
 If you have done this, the robot properties have been set-up, either by
 XML or hard-coding. The completed initialisers need to be sent to the
@@ -51,4 +50,4 @@ problems later on:
 
 After these steps, EXOTica is fully initialised. We can move on to using
 EXOTica's functionality in the `next
-tutorial <https://github.com/openhumanoids/exotica/wiki/Using-EXOTica>`__.
+tutorial <Using-EXOTica.html>`__.

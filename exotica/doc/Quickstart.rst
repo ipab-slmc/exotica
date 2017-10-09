@@ -1,3 +1,7 @@
+**********
+Quickstart
+**********
+
 Quick IK trajectories without ROS
 =================================
 

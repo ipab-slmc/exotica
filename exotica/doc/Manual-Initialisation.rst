@@ -1,3 +1,7 @@
+*********************
+Manual Initialisation
+*********************
+
 Manual initialisation encapsulates all initialisation and handling of
 EXOTica within your own C++ code, with no external XML files. This could
 be a preferred if your project has been finalised and does not need to

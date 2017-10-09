@@ -54,6 +54,7 @@ before_deploy:
 - git push https://$GITHUBKEY@github.com/ipab-slmc/exotica :refs/tags/$GIT_TAG
 - git tag $GIT_TAG -a -m "Updated tag latest from build $TRAVIS_BUILD_NUMBER" -f
 - git push --quiet --tags https://$GITHUBKEY@github.com/ipab-slmc/exotica $GIT_TAG > /dev/null 2>&1
+after_deploy:
 # Build and deploy documentation
 - bash .ci/build_documentation.sh > /dev/null 2>&1
 - git checkout --orphan gh-pages

@@ -1,4 +1,6 @@
+**************
 Initialisation
+**************
 
 Two primary steps need to be fulfilled when using EXOTica:
 Initialisation and Usage. Initialisation is required to set up the
@@ -40,6 +42,4 @@ source code in the following locations:
     Optional double Alpha = 1.0;
 
 The next step is to use these options in initialising EXOTica, which can
-be done via `XML <https://github.com/openhumanoids/exotica/wiki/XML>`__
-or
-`C++ <https://github.com/openhumanoids/exotica/wiki/Manual-Initialisation>`__.
+be done via `XML <XML.html>`__ or `C++ <Manual-Initialisation.html>`__.

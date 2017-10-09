@@ -1,3 +1,7 @@
+************
+Initializers
+************
+
 Initialization of core components is done via Initializers. An
 initializer is a collection of properties that each objects uses to
 initialize itself. These could be either required or optional. Each core
@@ -41,7 +45,7 @@ and the type used for initialization. You can then use the parameters of
 The property ``init.SafePercentage`` is of type ``double`` and it can be
 directly used as such.
 
-There are two types of initializres: specialized (e.g.
+There are two types of initializers: specialized (e.g.
 ``exotica::JointLimitInitializer``) and generic
 (``exotica::Initializer``). The generic initializer contains a
 collection of loosely typed parameters exploiting the ``boost::any``
@@ -113,7 +117,7 @@ You may want to create initializers for core classes, but can also use
 them for setting up other classes. See ``exotica::OMPLImpSolver`` for an
 example.
 
-Initializing exotica
+Initializing EXOTica
 ====================
 
 EXOTica can now be set up using initializers alone. You can either

@@ -1,3 +1,7 @@
+********************
+Setting up ROSlaunch
+********************
+
 Generic ROSlaunch Structure
 ===========================
 

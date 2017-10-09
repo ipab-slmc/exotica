@@ -1,3 +1,7 @@
+*************
+Using EXOTica
+*************
+
 This part of the tutorial assumes that EXOTica is already initialised
 with a problem and solver fully set up and the problem sent to the
 solver.
@@ -203,5 +207,5 @@ by RVIZ:
             my_problem->getScene()->getSolver().publishFrames();
 
 RVIZ can either be set-up manually or via a
-`ROSlaunch <https://github.com/openhumanoids/exotica/wiki/Setting-up-ROSlaunch>`__
+`ROSlaunch <Setting-up-ROSlaunch.html>`__
 file (recommended).

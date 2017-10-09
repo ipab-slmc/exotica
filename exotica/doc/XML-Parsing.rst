@@ -1,10 +1,10 @@
+***********
 XML Parsing
-===========
+***********
 
 This part of the tutorial assumes that you have completed the previous
 XML initialisation tutorial. If this is not the case, please go
-`back <https://github.com/openhumanoids/exotica/wiki/XML>`__ and
-complete it first.
+`back <XML.html>`__ and complete it first.
 
 In this section, we will create a parser in C++ to handle the XML file
 we created last time.
@@ -71,5 +71,4 @@ The final step now we have all the components is to feed the
 
 From here, the XML loader handles everything and will extract all the
 initialisation parameters from the XML initialisation file. We're now
-ready to move onto the final initialisation
-`step <https://github.com/openhumanoids/exotica/wiki/Common-Initialisation-Step>`__.
+ready to move onto the final initialisation `step <Common-Initialisation-Step.html>`__.

@@ -50,9 +50,16 @@ before_deploy:
 #- export GIT_TAG=build-$TRAVIS_BRANCH-$(date -u "+%Y-%m-%d")-$TRAVIS_BUILD_NUMBER
 - cd $TRAVIS_BUILD_DIR
 - export GIT_TAG=latest
-- git push https://$GITHUBKEY@github.com/openhumanoids/exotica :refs/tags/$GIT_TAG
+- git push https://$GITHUBKEY@github.com/ipab-slmc/exotica :refs/tags/$GIT_TAG
 - git tag $GIT_TAG -a -m "Updated tag latest from build $TRAVIS_BUILD_NUMBER" -f
-- git push --quiet --tags https://$GITHUBKEY@github.com/openhumanoids/exotica $GIT_TAG > /dev/null 2>&1
+- git push --quiet --tags https://$GITHUBKEY@github.com/ipab-slmc/exotica $GIT_TAG > /dev/null 2>&1
+# Build and deploy documentation
+- bash .ci/build_documentation.sh > /dev/null 2>&1
+- git checkout --orphan gh-pages
+- mkdir old ; mv * old/ ; mv old/exotica/doc/_build/html/* . ; rm -rf old ; touch .nojekyll
+- git add --all
+- git commit -m "Update public documentation for $GIT_COMMIT"
+- git push --quiet --force https://$GITHUBKEY@github.com/ipab-slmc/exotica.git gh-pages:gh-pages > /dev/null 2>&1
 branches:
   except:
     - /^build-[0-9a-z\-]*/

@@ -33,48 +33,47 @@
 #ifndef COM_H_
 #define COM_H_
 
+#include <exotica/KinematicTree.h>
 #include <exotica/TaskMap.h>
 #include <task_map/CoMInitializer.h>
-#include <exotica/KinematicTree.h>
 #include <visualization_msgs/MarkerArray.h>
 
 namespace exotica
 {
-  class CoM: public TaskMap, public Instantiable<CoMInitializer>
-  {
-    public:
-      CoM();
-      virtual ~CoM();
+class CoM : public TaskMap, public Instantiable<CoMInitializer>
+{
+public:
+    CoM();
+    virtual ~CoM();
 
-      virtual void Instantiate(CoMInitializer& init);
+    virtual void Instantiate(CoMInitializer& init);
 
-      virtual void assignScene(Scene_ptr scene);
+    virtual void assignScene(Scene_ptr scene);
 
-      void Initialize();
+    void Initialize();
 
-      void InitDebug();
+    void InitDebug();
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual int taskSpaceDim();
+    virtual int taskSpaceDim();
 
-    private:
+private:
+    Eigen::VectorXd mass_;
+    ros::Publisher com_pub_;
+    ros::Publisher COM_pub_;
+    ros::Publisher goal_pub_;
+    visualization_msgs::Marker com_marker_;
+    visualization_msgs::Marker COM_marker_;
+    visualization_msgs::Marker goal_marker_;
+    bool enable_z_;
+    int dim_;
 
-      Eigen::VectorXd mass_;
-      ros::Publisher com_pub_;
-      ros::Publisher COM_pub_;
-      ros::Publisher goal_pub_;
-      visualization_msgs::Marker com_marker_;
-      visualization_msgs::Marker COM_marker_;
-      visualization_msgs::Marker goal_marker_;
-      bool enable_z_;
-      int dim_;
-
-      CoMInitializer init_;
-      Scene_ptr scene_;
-  };
+    CoMInitializer init_;
+    Scene_ptr scene_;
+};
 }
 
 #endif /* COM_H_ */

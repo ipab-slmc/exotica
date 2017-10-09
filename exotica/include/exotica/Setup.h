@@ -33,88 +33,86 @@
 #ifndef EXOTICA_INITIALISER_H
 #define EXOTICA_INITIALISER_H
 
-#include "exotica/Tools.h"
-#include "exotica/Object.h"
+#include <exotica/Property.h>
 #include "exotica/Factory.h"
 #include "exotica/MotionSolver.h"
+#include "exotica/Object.h"
 #include "exotica/PlanningProblem.h"
 #include "exotica/Server.h"
-#include <exotica/Property.h>
+#include "exotica/Tools.h"
 
 #include <pluginlib/class_loader.h>
 
 namespace exotica
 {
-  class Setup: public Object, Uncopyable
-  {
-    public:
+class Setup : public Object, Uncopyable
+{
+public:
+    ~Setup() noexcept
+    {
+    }
 
-      ~Setup() noexcept
-      {
-      }
-
-      static std::shared_ptr<Setup> Instance()
-      {
+    static std::shared_ptr<Setup> Instance()
+    {
         if (!singleton_initialiser_) singleton_initialiser_.reset(new Setup);
         return singleton_initialiser_;
-      }
+    }
 
-      static void Destroy()
-      {
-          Server::destroy();
-          if (singleton_initialiser_) singleton_initialiser_.reset();
-      }
+    static void Destroy()
+    {
+        Server::destroy();
+        if (singleton_initialiser_) singleton_initialiser_.reset();
+    }
 
-      static void printSupportedClasses();
-      static std::shared_ptr<exotica::MotionSolver> createSolver(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->solvers_.createInstance((prepend?"exotica/":"")+type));}
-      static std::shared_ptr<exotica::TaskMap> createMap(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->maps_.createInstance((prepend?"exotica/":"")+type));}
-      static std::shared_ptr<exotica::PlanningProblem> createProblem(const std::string & type, bool prepend = true) {return Instance()->problems_.createInstance((prepend?"exotica/":"")+type);}
-      static std::shared_ptr<exotica::CollisionScene> createCollisionScene(const std::string & type, bool prepend = true) {return to_std_ptr(Instance()->scenes_.createInstance((prepend?"exotica/":"")+type));}
-      static std::vector<std::string> getSolvers();
-      static std::vector<std::string> getProblems();
-      static std::vector<std::string> getMaps();
-      static std::vector<std::string> getCollisionScenes();
-      static std::vector<Initializer> getInitializers();
+    static void printSupportedClasses();
+    static std::shared_ptr<exotica::MotionSolver> createSolver(const std::string& type, bool prepend = true) { return to_std_ptr(Instance()->solvers_.createInstance((prepend ? "exotica/" : "") + type)); }
+    static std::shared_ptr<exotica::TaskMap> createMap(const std::string& type, bool prepend = true) { return to_std_ptr(Instance()->maps_.createInstance((prepend ? "exotica/" : "") + type)); }
+    static std::shared_ptr<exotica::PlanningProblem> createProblem(const std::string& type, bool prepend = true) { return Instance()->problems_.createInstance((prepend ? "exotica/" : "") + type); }
+    static std::shared_ptr<exotica::CollisionScene> createCollisionScene(const std::string& type, bool prepend = true) { return to_std_ptr(Instance()->scenes_.createInstance((prepend ? "exotica/" : "") + type)); }
+    static std::vector<std::string> getSolvers();
+    static std::vector<std::string> getProblems();
+    static std::vector<std::string> getMaps();
+    static std::vector<std::string> getCollisionScenes();
+    static std::vector<Initializer> getInitializers();
 
-      static std::shared_ptr<exotica::MotionSolver> createSolver(const Initializer& init)
-      {
-          std::shared_ptr<exotica::MotionSolver> ret = to_std_ptr(Instance()->solvers_.createInstance(init.getName()));
-          ret->InstantiateInternal(init);
-          return ret;
-      }
-      static std::shared_ptr<exotica::TaskMap> createMap(const Initializer& init)
-      {
-          std::shared_ptr<exotica::TaskMap> ret = to_std_ptr(Instance()->maps_.createInstance(init.getName()));
-          ret->InstantiateInternal(init);
-          return ret;
-      }
-      static std::shared_ptr<exotica::PlanningProblem> createProblem(const Initializer& init)
-      {
-          std::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.createInstance(init.getName());
-          ret->InstantiateInternal(init);
-          return ret;
-      }
+    static std::shared_ptr<exotica::MotionSolver> createSolver(const Initializer& init)
+    {
+        std::shared_ptr<exotica::MotionSolver> ret = to_std_ptr(Instance()->solvers_.createInstance(init.getName()));
+        ret->InstantiateInternal(init);
+        return ret;
+    }
+    static std::shared_ptr<exotica::TaskMap> createMap(const Initializer& init)
+    {
+        std::shared_ptr<exotica::TaskMap> ret = to_std_ptr(Instance()->maps_.createInstance(init.getName()));
+        ret->InstantiateInternal(init);
+        return ret;
+    }
+    static std::shared_ptr<exotica::PlanningProblem> createProblem(const Initializer& init)
+    {
+        std::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.createInstance(init.getName());
+        ret->InstantiateInternal(init);
+        return ret;
+    }
 
-    private:
-
-      /**
+private:
+    /**
        * \brief Default Constructor
        *
        *        Currently, is an empty constructor definition.
        */
-      Setup();
-      static std::shared_ptr<Setup> singleton_initialiser_;
-      ///	\brief	Make sure the singleton does not get copied
-      Setup(Setup const&) = delete;
-      void operator=(Setup const&) = delete;
+    Setup();
+    static std::shared_ptr<Setup> singleton_initialiser_;
+    ///	\brief	Make sure the singleton does not get copied
+    Setup(Setup const&) = delete;
+    void operator=(Setup const&) = delete;
 
-      pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
-      pluginlib::ClassLoader<exotica::TaskMap> maps_;
-      pluginlib::ClassLoader<exotica::CollisionScene> scenes_;
-      PlanningProblem_fac problems_;
-  };
+    pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
+    pluginlib::ClassLoader<exotica::TaskMap> maps_;
+    pluginlib::ClassLoader<exotica::CollisionScene> scenes_;
+    PlanningProblem_fac problems_;
+};
 
-  typedef std::shared_ptr<Setup> Setup_ptr;
+typedef std::shared_ptr<Setup> Setup_ptr;
 }
 
 #endif

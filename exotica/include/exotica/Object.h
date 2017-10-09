@@ -33,66 +33,67 @@
 #ifndef EXOTICA_OBJECT_H
 #define EXOTICA_OBJECT_H
 
-#include <string>   //!< C++ type strings
-#include <exotica/Tools.h>
 #include <exotica/Server.h>
+#include <exotica/Tools.h>
+#include <string>  //!< C++ type strings
 
-#include "exotica/Property.h"
 #include "exotica/ObjectInitializer.h"
+#include "exotica/Property.h"
 
 namespace exotica
 {
-  template<typename BO> class Factory;
+template <typename BO>
+class Factory;
 
-  class Object
-  {
-      template<typename BO> friend class Factory;
-    public:
+class Object
+{
+    template <typename BO>
+    friend class Factory;
 
-      /**
+public:
+    /**
        * \brief Constructor: default
        */
-      Object()
-          : ns_(""),debug_(false)
-      {
+    Object()
+        : ns_(""), debug_(false)
+    {
         //!< Empty constructor
-      }
+    }
 
-      virtual ~Object()
-      {
+    virtual ~Object()
+    {
+    }
 
-      }
-
-      /**
+    /**
        * \brief Type Information wrapper: must be virtual so that it is polymorphic...
        * @return String containing the type of the object
        */
-      inline virtual std::string type()
-      {
+    inline virtual std::string type()
+    {
         return getTypeName(typeid(*this));
-      }
+    }
 
-      std::string getObjectName()
-      {
+    std::string getObjectName()
+    {
         return object_name_;
-      }
+    }
 
-      void InstatiateObject(const Initializer& init)
-      {
-         ObjectInitializer oinit(init);
-         object_name_=oinit.Name;
-         debug_=oinit.Debug;
-      }
+    void InstatiateObject(const Initializer& init)
+    {
+        ObjectInitializer oinit(init);
+        object_name_ = oinit.Name;
+        debug_ = oinit.Debug;
+    }
 
-      virtual std::string print(std::string prepend)
-      {
+    virtual std::string print(std::string prepend)
+    {
         return prepend + "  " + object_name_ + " (" + type() + ")";
-      }
+    }
 
-      //	Namespace, i.e. problem/scene/...etc
-      std::string ns_;
-      std::string object_name_;
-      bool debug_;
-  };
+    //	Namespace, i.e. problem/scene/...etc
+    std::string ns_;
+    std::string object_name_;
+    bool debug_;
+};
 }
 #endif

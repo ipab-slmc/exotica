@@ -33,68 +33,68 @@
 #ifndef GRAPHMANAGER_H_
 #define GRAPHMANAGER_H_
 
-#include <ros/ros.h>
-#include <exotica/Exotica.h>
-#include <dmesh_ros/MeshGraph.h>
 #include <dmesh_ros/DMeshVertexInitializer.h>
+#include <dmesh_ros/MeshGraph.h>
+#include <exotica/Exotica.h>
+#include <ros/ros.h>
 
 namespace exotica
 {
-  /**
+/**
    * \brief	The graph manager manages the graph (environment).
    * The manager handles external objects I/O,
    * i.e. receives objects information from outside, processes them and then send out to dmesh.
    */
-  class GraphManager
-  {
-    public:
-      /**
+class GraphManager
+{
+public:
+    /**
        * \brief	Default constructor
        */
-      GraphManager();
+    GraphManager();
 
-      /**
+    /**
        * \brief	Default destructor
        */
-      ~GraphManager();
+    ~GraphManager();
 
-      /**
+    /**
        * \brief	Initialise the manager
        * @param	links		All the robot links
        * @param	link_types	Link types, real or dummy
        * @param	size		Maximum graph size
        * @return	True if succeeded, false otherwise
        */
-      void initialisation(std::vector<DMeshVertexInitializer>& verts, int size);
+    void initialisation(std::vector<DMeshVertexInitializer>& verts, int size);
 
-      /*
+    /*
        * \brief	Get the graph pointer
        * @return	MeshGraph pointer
        */
-      MeshGraphPtr getGraph();
+    MeshGraphPtr getGraph();
 
-    private:
-      //	The mesh graph
-      MeshGraphPtr graph_;
+private:
+    //	The mesh graph
+    MeshGraphPtr graph_;
 
-      //	Initialisation flag
-      bool initialised_;
+    //	Initialisation flag
+    bool initialised_;
 
-      //	For ROS
-      //	External object callback
-      void extCallback(const exotica::MeshVertexConstPtr & ext);
-      void extArrCallback(const exotica::MeshVertexArrayConstPtr & ext);
+    //	For ROS
+    //	External object callback
+    void extCallback(const exotica::MeshVertexConstPtr& ext);
+    void extArrCallback(const exotica::MeshVertexArrayConstPtr& ext);
 
-      ros::Timer vel_timer_;
-      void velTimeCallback(const ros::TimerEvent&);
+    ros::Timer vel_timer_;
+    void velTimeCallback(const ros::TimerEvent&);
 
-      //	Private node handle
-      ros::NodeHandle nh_;
+    //	Private node handle
+    ros::NodeHandle nh_;
 
-      //	External object subscriber
-      ros::Subscriber ext_sub_;
-      ros::Subscriber ext_arr_sub_;
-  };
-}	//namespace exotica
+    //	External object subscriber
+    ros::Subscriber ext_sub_;
+    ros::Subscriber ext_arr_sub_;
+};
+}  //namespace exotica
 
 #endif /* GRAPHMANAGER_H_ */

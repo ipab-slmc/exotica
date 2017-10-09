@@ -56,13 +56,13 @@ CollisionSceneFCL::~CollisionSceneFCL()
 void CollisionSceneFCL::updateCollisionObjects(const std::map<std::string, std::shared_ptr<KinematicElement>>& objects)
 {
     fcl_objects_.resize(objects.size());
-    int i=0;
-    for(const auto& object : objects)
+    int i = 0;
+    for (const auto& object : objects)
     {
         std::shared_ptr<fcl::CollisionObject> new_object;
 
         const auto& cache_entry = fcl_cache_.find(object.first);
-        if(cache_entry == fcl_cache_.end())
+        if (cache_entry == fcl_cache_.end())
         {
             new_object = constructFclCollisionObject(object.second);
             fcl_cache_[object.first] = new_object;
@@ -77,7 +77,7 @@ void CollisionSceneFCL::updateCollisionObjects(const std::map<std::string, std::
 
 void CollisionSceneFCL::updateCollisionObjectTransforms()
 {
-    for(fcl::CollisionObject* collision_object : fcl_objects_)
+    for (fcl::CollisionObject* collision_object : fcl_objects_)
     {
         KinematicElement* element = reinterpret_cast<KinematicElement*>(collision_object->getUserData());
         collision_object->setTransform(fcl_convert::KDL2fcl(element->Frame));
@@ -99,38 +99,38 @@ std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionOb
 #endif
     switch (shape->type)
     {
-    case shapes::PLANE:
+        case shapes::PLANE:
         {
             const shapes::Plane* p = static_cast<const shapes::Plane*>(shape.get());
             geometry.reset(new fcl::Plane(p->a, p->b, p->c, p->d));
         }
         break;
-    case shapes::SPHERE:
+        case shapes::SPHERE:
         {
             const shapes::Sphere* s = static_cast<const shapes::Sphere*>(shape.get());
             geometry.reset(new fcl::Sphere(s->radius));
         }
         break;
-    case shapes::BOX:
+        case shapes::BOX:
         {
             const shapes::Box* s = static_cast<const shapes::Box*>(shape.get());
             const double* size = s->size;
             geometry.reset(new fcl::Box(size[0], size[1], size[2]));
         }
         break;
-    case shapes::CYLINDER:
+        case shapes::CYLINDER:
         {
             const shapes::Cylinder* s = static_cast<const shapes::Cylinder*>(shape.get());
             geometry.reset(new fcl::Cylinder(s->radius, s->length));
         }
         break;
-    case shapes::CONE:
+        case shapes::CONE:
         {
             const shapes::Cone* s = static_cast<const shapes::Cone*>(shape.get());
             geometry.reset(new fcl::Cone(s->radius, s->length));
         }
         break;
-    case shapes::MESH:
+        case shapes::MESH:
         {
             fcl::BVHModel<fcl::OBBRSS>* g = new fcl::BVHModel<fcl::OBBRSS>();
             const shapes::Mesh* mesh = static_cast<const shapes::Mesh*>(shape.get());
@@ -139,7 +139,7 @@ std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionOb
                 std::vector<fcl::Triangle> tri_indices(mesh->triangle_count);
                 for (unsigned int i = 0; i < mesh->triangle_count; ++i)
                     tri_indices[i] =
-                            fcl::Triangle(mesh->triangles[3 * i], mesh->triangles[3 * i + 1], mesh->triangles[3 * i + 2]);
+                        fcl::Triangle(mesh->triangles[3 * i], mesh->triangles[3 * i + 1], mesh->triangles[3 * i + 2]);
 
                 std::vector<fcl::Vec3f> points(mesh->vertex_count);
                 for (unsigned int i = 0; i < mesh->vertex_count; ++i)
@@ -152,14 +152,14 @@ std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionOb
             geometry.reset(g);
         }
         break;
-    case shapes::OCTREE:
+        case shapes::OCTREE:
         {
             const shapes::OcTree* g = static_cast<const shapes::OcTree*>(shape.get());
             geometry.reset(new fcl::OcTree(g->octree));
         }
         break;
-    default:
-        throw_pretty("This shape type ("<<((int)shape->type)<<") is not supported using FCL yet");
+        default:
+            throw_pretty("This shape type (" << ((int)shape->type) << ") is not supported using FCL yet");
     }
     geometry->computeLocalAABB();
     geometry->setUserData(reinterpret_cast<void*>(element.get()));
@@ -177,18 +177,18 @@ bool CollisionSceneFCL::isAllowedToCollide(fcl::CollisionObject* o1, fcl::Collis
     bool isRobot1 = e1->isRobotLink || e1->ClosestRobotLink;
     bool isRobot2 = e2->isRobotLink || e2->ClosestRobotLink;
     // Don't check collisions between world objects
-    if(!isRobot1 && !isRobot2) return false;
+    if (!isRobot1 && !isRobot2) return false;
     // Skip self collisions if requested
-    if(isRobot1 && isRobot2 && !self) return false;
+    if (isRobot1 && isRobot2 && !self) return false;
     // Skip collisions between shapes within the same objects
-    if(e1->Parent==e2->Parent) return false;
+    if (e1->Parent == e2->Parent) return false;
     // Skip collisions between bodies attached to the same object
-    if(e1->ClosestRobotLink&&e2->ClosestRobotLink&&e1->ClosestRobotLink==e2->ClosestRobotLink) return false;
+    if (e1->ClosestRobotLink && e2->ClosestRobotLink && e1->ClosestRobotLink == e2->ClosestRobotLink) return false;
 
-    if(isRobot1 && isRobot2)
+    if (isRobot1 && isRobot2)
     {
-        const std::string& name1 = e1->ClosestRobotLink?e1->ClosestRobotLink->Segment.getName():e1->Parent->Segment.getName();
-        const std::string& name2 = e2->ClosestRobotLink?e2->ClosestRobotLink->Segment.getName():e2->Parent->Segment.getName();
+        const std::string& name1 = e1->ClosestRobotLink ? e1->ClosestRobotLink->Segment.getName() : e1->Parent->Segment.getName();
+        const std::string& name2 = e2->ClosestRobotLink ? e2->ClosestRobotLink->Segment.getName() : e2->Parent->Segment.getName();
         return scene->acm_.getAllowedCollision(name1, name2);
     }
     return true;
@@ -198,15 +198,15 @@ void CollisionSceneFCL::checkCollision(fcl::CollisionObject* o1, fcl::CollisionO
 {
     data->Request.num_max_contacts = 1000;
     data->Result.clear();
-    fcl::collide(o1,o2,data->Request, data->Result);
-    if(data->SafeDistance>0.0 && o1->getAABB().distance(o2->getAABB())<data->SafeDistance)
+    fcl::collide(o1, o2, data->Request, data->Result);
+    if (data->SafeDistance > 0.0 && o1->getAABB().distance(o2->getAABB()) < data->SafeDistance)
     {
         fcl::DistanceRequest req;
         fcl::DistanceResult res;
         req.enable_nearest_points = false;
         fcl::distance(o1, o2, req, res);
         // Add fake contact when distance is smaller than the safety distance.
-        if(res.min_distance<data->SafeDistance) data->Result.addContact(fcl::Contact());
+        if (res.min_distance < data->SafeDistance) data->Result.addContact(fcl::Contact());
     }
 }
 
@@ -214,7 +214,7 @@ bool CollisionSceneFCL::collisionCallback(fcl::CollisionObject* o1, fcl::Collisi
 {
     CollisionData* data_ = reinterpret_cast<CollisionData*>(data);
 
-    if(!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
+    if (!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
 
     checkCollision(o1, o2, data_);
     return data_->Result.isCollision();
@@ -235,38 +235,39 @@ bool CollisionSceneFCL::isCollisionFree(const std::string& o1, const std::string
 {
     std::vector<fcl::CollisionObject*> shapes1;
     std::vector<fcl::CollisionObject*> shapes2;
-    for(fcl::CollisionObject* o : fcl_objects_)
+    for (fcl::CollisionObject* o : fcl_objects_)
     {
         KinematicElement* e = reinterpret_cast<KinematicElement*>(o->getUserData());
-        if(e->Segment.getName()==o1 || e->Parent->Segment.getName()==o1) shapes1.push_back(o);
-        if(e->Segment.getName()==o2 || e->Parent->Segment.getName()==o2) shapes2.push_back(o);
+        if (e->Segment.getName() == o1 || e->Parent->Segment.getName() == o1) shapes1.push_back(o);
+        if (e->Segment.getName() == o2 || e->Parent->Segment.getName() == o2) shapes2.push_back(o);
     }
-    if(shapes1.size()==0) throw_pretty("Can't find object '"<<o1<<"'!");
-    if(shapes2.size()==0) throw_pretty("Can't find object '"<<o2<<"'!");
+    if (shapes1.size() == 0) throw_pretty("Can't find object '" << o1 << "'!");
+    if (shapes2.size() == 0) throw_pretty("Can't find object '" << o2 << "'!");
     CollisionData data(this);
     data.SafeDistance = safe_distance;
-    for(fcl::CollisionObject* s1 : shapes1)
+    for (fcl::CollisionObject* s1 : shapes1)
     {
-        for(fcl::CollisionObject* s2 : shapes2)
+        for (fcl::CollisionObject* s2 : shapes2)
         {
             checkCollision(s1, s2, &data);
-            if(data.Result.isCollision()) return false;
+            if (data.Result.isCollision()) return false;
         }
     }
     return true;
 }
 
-Eigen::Vector3d CollisionSceneFCL::getTranslation(const std::string & name)
+Eigen::Vector3d CollisionSceneFCL::getTranslation(const std::string& name)
 {
-    for(fcl::CollisionObject* object : fcl_objects_)
+    for (fcl::CollisionObject* object : fcl_objects_)
     {
         KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
-        if(element->Segment.getName()==name)
+        if (element->Segment.getName() == name)
         {
             return Eigen::Map<Eigen::Vector3d>(element->Frame.p.data);
         }
     }
-    throw_pretty("Robot not found!");;
+    throw_pretty("Robot not found!");
+    ;
 }
 
 std::vector<std::string> CollisionSceneFCL::getCollisionWorldLinks()
@@ -275,7 +276,7 @@ std::vector<std::string> CollisionSceneFCL::getCollisionWorldLinks()
     for (fcl::CollisionObject* object : fcl_objects_)
     {
         KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
-        if(!element->ClosestRobotLink)
+        if (!element->ClosestRobotLink)
         {
             tmp.push_back(element->Segment.getName());
         }
@@ -294,12 +295,11 @@ std::vector<std::string> CollisionSceneFCL::getCollisionRobotLinks()
     for (fcl::CollisionObject* object : fcl_objects_)
     {
         KinematicElement* element = reinterpret_cast<KinematicElement*>(object->getUserData());
-        if(element->ClosestRobotLink)
+        if (element->ClosestRobotLink)
         {
             tmp.push_back(element->Segment.getName());
         }
     }
     return tmp;
 }
-
 }

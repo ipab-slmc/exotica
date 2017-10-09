@@ -34,47 +34,46 @@
 #define EXOTICA_MOTION_PLANNING_PROBLEM_H
 
 #include <exotica/Object.h>
-#include <exotica/TaskMap.h>
-#include <exotica/Server.h>
-#include <exotica/Scene.h>
-#include <exotica/Tools.h>
 #include <exotica/Problem.h>
+#include <exotica/Scene.h>
+#include <exotica/Server.h>
+#include <exotica/TaskMap.h>
 #include <exotica/TaskSpaceVector.h>
+#include <exotica/Tools.h>
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 #define REGISTER_PROBLEM_TYPE(TYPE, DERIV) EXOTICA_REGISTER_CORE(exotica::PlanningProblem, TYPE, DERIV)
 
 namespace exotica
 {
-    class PlanningProblem: public Object, Uncopyable, public virtual InstantiableBase
-    {
-    public:
-        PlanningProblem();
-        virtual ~PlanningProblem() {}
-        virtual void InstantiateBase(const Initializer& init);
-        TaskMap_map& getTaskMaps();
-        TaskMap_vec& getTasks();
-        Scene_ptr getScene();
-        virtual std::string print(std::string prepend);
-        void setStartState(Eigen::VectorXdRefConst x);
-        Eigen::VectorXd getStartState();
-        Eigen::VectorXd applyStartState();
-        int N;
-        virtual void preupdate();
+class PlanningProblem : public Object, Uncopyable, public virtual InstantiableBase
+{
+public:
+    PlanningProblem();
+    virtual ~PlanningProblem() {}
+    virtual void InstantiateBase(const Initializer& init);
+    TaskMap_map& getTaskMaps();
+    TaskMap_vec& getTasks();
+    Scene_ptr getScene();
+    virtual std::string print(std::string prepend);
+    void setStartState(Eigen::VectorXdRefConst x);
+    Eigen::VectorXd getStartState();
+    Eigen::VectorXd applyStartState();
+    int N;
+    virtual void preupdate();
 
-    protected:
-        Scene_ptr scene_;
-        TaskMap_map TaskMaps;
-        TaskMap_vec Tasks;
-        KinematicRequestFlags Flags;
-        Eigen::VectorXd startState;
+protected:
+    Scene_ptr scene_;
+    TaskMap_map TaskMaps;
+    TaskMap_vec Tasks;
+    KinematicRequestFlags Flags;
+    Eigen::VectorXd startState;
+};
 
-    };
-
-    typedef Factory<PlanningProblem> PlanningProblem_fac;
-    typedef std::shared_ptr<PlanningProblem> PlanningProblem_ptr;
+typedef Factory<PlanningProblem> PlanningProblem_fac;
+typedef std::shared_ptr<PlanningProblem> PlanningProblem_ptr;
 }
 #endif

@@ -2,23 +2,22 @@
 
 namespace exotica
 {
-
 // //////////////////////////////// Property //////////////////////////////////////
 
-boost::any Property::get() const {return value;}
+boost::any Property::get() const { return value; }
 Property::Property(std::string prop_name) : name(prop_name), required(true) {}
 Property::Property(std::string prop_name, bool isRequired) : name(prop_name), required(isRequired) {}
-Property::Property(std::string prop_name, bool isRequired, boost::any val) : name(prop_name), required(isRequired) {value = val;}
-bool Property::isRequired() const {return required;}
-bool Property::isSet() const {return !value.empty();}
-bool Property::isStringType() const {return value.type()==typeid(std::string);}
-bool Property::isInitializerVectorType() const {return value.type()==typeid(std::vector<exotica::Initializer>);}
-std::string Property::getName() const {return name;}
-std::string Property::getType() const {return getTypeName(value.type());}
+Property::Property(std::string prop_name, bool isRequired, boost::any val) : name(prop_name), required(isRequired) { value = val; }
+bool Property::isRequired() const { return required; }
+bool Property::isSet() const { return !value.empty(); }
+bool Property::isStringType() const { return value.type() == typeid(std::string); }
+bool Property::isInitializerVectorType() const { return value.type() == typeid(std::vector<exotica::Initializer>); }
+std::string Property::getName() const { return name; }
+std::string Property::getType() const { return getTypeName(value.type()); }
 Property::Property(std::initializer_list<boost::any> val_)
 {
     std::vector<boost::any> val(val_);
-    if(val.size()!=2 || val[0].type()!=typeid(std::string)) throw_pretty("Invalid property initialization!");
+    if (val.size() != 2 || val[0].type() != typeid(std::string)) throw_pretty("Invalid property initialization!");
     name = boost::any_cast<std::string>(val[0]);
     value = val[1];
 }
@@ -26,18 +25,17 @@ Property::Property(std::initializer_list<boost::any> val_)
 // //////////////////////////// InitializerBase ///////////////////////////////////
 Initializer::Initializer()
 {
-
 }
 
 Initializer::Initializer(std::string name_) : name(name_)
 {
 }
 
-Initializer::Initializer(std::string name_, std::map<std::string,boost::any> properties_) : name(name_)
+Initializer::Initializer(std::string name_, std::map<std::string, boost::any> properties_) : name(name_)
 {
-    for(auto& prop : properties_)
+    for (auto& prop : properties_)
     {
-        properties.emplace(prop.first,Property(prop.first,true,prop.second));
+        properties.emplace(prop.first, Property(prop.first, true, prop.second));
     }
 }
 
@@ -53,7 +51,7 @@ void Initializer::addProperty(const Property& prop)
 
 bool Initializer::hasProperty(std::string name_) const
 {
-    if(properties.find( name_ ) != properties.end())
+    if (properties.find(name_) != properties.end())
     {
         return true;
     }
@@ -82,7 +80,4 @@ std::vector<std::string> Initializer::getPropertyNames() const
 {
     return getKeys(properties);
 }
-
 }
-
-

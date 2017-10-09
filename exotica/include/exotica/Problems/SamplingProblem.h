@@ -39,54 +39,52 @@
 
 namespace exotica
 {
-  class SamplingProblem: public PlanningProblem, public Instantiable<SamplingProblemInitializer>
-  {
-    public:
-      SamplingProblem();
-      virtual ~SamplingProblem();
+class SamplingProblem : public PlanningProblem, public Instantiable<SamplingProblemInitializer>
+{
+public:
+    SamplingProblem();
+    virtual ~SamplingProblem();
 
-      virtual void Instantiate(SamplingProblemInitializer& init);
+    virtual void Instantiate(SamplingProblemInitializer& init);
 
-      void Update(Eigen::VectorXdRefConst x);
-      bool isValid(Eigen::VectorXdRefConst x);
+    void Update(Eigen::VectorXdRefConst x);
+    bool isValid(Eigen::VectorXdRefConst x);
 
-      int getSpaceDim();
+    int getSpaceDim();
 
-      void setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal);
-      void setThreshold(const std::string & task_name, Eigen::VectorXdRefConst threshold);
-      void setRho(const std::string & task_name, const double rho);
-      Eigen::VectorXd getGoal(const std::string & task_name);
-      Eigen::VectorXd getThreshold(const std::string & task_name);
-      double getRho(const std::string & task_name);
+    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    void setThreshold(const std::string& task_name, Eigen::VectorXdRefConst threshold);
+    void setRho(const std::string& task_name, const double rho);
+    Eigen::VectorXd getGoal(const std::string& task_name);
+    Eigen::VectorXd getThreshold(const std::string& task_name);
+    double getRho(const std::string& task_name);
 
-      std::vector<double>& getBounds();
-      bool isCompoundStateSpace();
-      std::string local_planner_config_;
-      bool full_body_plan_;
+    std::vector<double>& getBounds();
+    bool isCompoundStateSpace();
+    std::string local_planner_config_;
+    bool full_body_plan_;
 
-      SamplingProblemInitializer Parameters;
+    SamplingProblemInitializer Parameters;
 
-      void setGoalState(Eigen::VectorXdRefConst qT);
+    void setGoalState(Eigen::VectorXdRefConst qT);
 
-      Eigen::VectorXd goal_;
-      Eigen::VectorXd Rho;
-      TaskSpaceVector y;
-      TaskSpaceVector Phi;
-      Eigen::VectorXd threshold_;
+    Eigen::VectorXd goal_;
+    Eigen::VectorXd Rho;
+    TaskSpaceVector y;
+    TaskSpaceVector Phi;
+    Eigen::VectorXd threshold_;
 
-      int PhiN;
-      int JN;
-      int NumTasks;
-      Eigen::MatrixXd S;
+    int PhiN;
+    int JN;
+    int NumTasks;
+    Eigen::MatrixXd S;
 
-    private:
-      std::vector<double> bounds_;
-      bool compound_;
+private:
+    std::vector<double> bounds_;
+    bool compound_;
+};
 
-  };
-
-  typedef std::shared_ptr<exotica::SamplingProblem> SamplingProblem_ptr;
-
+typedef std::shared_ptr<exotica::SamplingProblem> SamplingProblem_ptr;
 }
 
 #endif

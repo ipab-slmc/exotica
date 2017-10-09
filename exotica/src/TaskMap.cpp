@@ -30,46 +30,44 @@
  *
  */
 
-#include <exotica/TaskMap.h>
-#include <exotica/PlanningProblem.h>
-#include <exotica/TaskMapInitializer.h>
 #include <exotica/FrameInitializer.h>
+#include <exotica/PlanningProblem.h>
+#include <exotica/TaskMap.h>
+#include <exotica/TaskMapInitializer.h>
 
 namespace exotica
 {
+TaskMap::TaskMap() : Id(-1), Start(-1), Length(-1), StartJ(-1), LengthJ(-1)
+{
+}
 
-  TaskMap::TaskMap() : Id(-1), Start(-1), Length(-1), StartJ(-1), LengthJ(-1)
-  {
-
-  }
-
-  std::string TaskMap::print(std::string prepend)
-  {
+std::string TaskMap::print(std::string prepend)
+{
     std::string ret = Object::print(prepend);
     return ret;
-  }
+}
 
-  void TaskMap::InstantiateBase(const Initializer& init)
-  {
+void TaskMap::InstantiateBase(const Initializer& init)
+{
     Object::InstatiateObject(init);
     TaskMapInitializer MapInitializer(init);
 
     Frames.clear();
 
-    for(Initializer& eff : MapInitializer.EndEffector)
+    for (Initializer& eff : MapInitializer.EndEffector)
     {
         FrameInitializer frame(eff);
         Frames.push_back(KinematicFrameRequest(frame.Link, getFrame(frame.LinkOffset), frame.Base, getFrame(frame.BaseOffset)));
     }
-  }
+}
 
-  std::vector<KinematicFrameRequest> TaskMap::GetFrames()
-  {
-      return Frames;
-  }
+std::vector<KinematicFrameRequest> TaskMap::GetFrames()
+{
+    return Frames;
+}
 
-  void TaskMap::taskSpaceDim(int & task_dim)
-  {
-      task_dim = taskSpaceDim();
-  }
+void TaskMap::taskSpaceDim(int& task_dim)
+{
+    task_dim = taskSpaceDim();
+}
 }

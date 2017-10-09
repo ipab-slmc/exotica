@@ -33,14 +33,13 @@
 #ifndef TASKSPACEVECTOR_H
 #define TASKSPACEVECTOR_H
 
+#include <exotica/Tools.h>
 #include <Eigen/Dense>
 #include <kdl/frames.hpp>
 #include <vector>
-#include <exotica/Tools.h>
 
 namespace exotica
 {
-
 struct TaskVectorEntry
 {
     RotationType type;
@@ -53,7 +52,6 @@ struct TaskVectorEntry
 class TaskSpaceVector
 {
 public:
-
     TaskSpaceVector();
     TaskSpaceVector& operator=(std::initializer_list<double> other);
     Eigen::VectorXd operator-(const TaskSpaceVector& other);
@@ -61,9 +59,7 @@ public:
 
     Eigen::VectorXd data;
     std::vector<TaskVectorEntry> map;
-
 };
-
 }
 
-#endif // TASKSPACEVECTOR_H
+#endif  // TASKSPACEVECTOR_H

@@ -34,145 +34,142 @@
 #define DMESH_ROS_H_
 
 //EXOTica and SYSTEM packages
+#include <dmesh_ros/GraphManager.h>
 #include <exotica/Exotica.h>
 #include <exotica/KinematicTree.h>
-#include <dmesh_ros/GraphManager.h>
-#include <tf/transform_listener.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
+#include <tf/transform_listener.h>
 //ROS packages
-#include <ros/ros.h>
 #include <geometry_msgs/PoseArray.h>
+#include <ros/ros.h>
 
 #include <dmesh_ros/DMeshROSInitializer.h>
 
 namespace exotica
 {
-  /**
+/**
    * \brief	Implementation of distance mesh task map with ROS.
    * Apart from dMesh task map, this task map use exotica and ROS node, msgs, etc.
    * The main improvement is now dMeshROS taking computation, visualisation, and robust into consideration
    * L(d_jl)=K*||p_j-p_l||, K(gain)={PoseGain(kp),ObstacleGain(ko),GoalGain(kg)}
    */
-  class DMeshROS: public TaskMap, public Instantiable<DMeshROSInitializer>
-  {
-    public:
+class DMeshROS : public TaskMap, public Instantiable<DMeshROSInitializer>
+{
+public:
+    DMeshROS();
 
-      DMeshROS();
+    ~DMeshROS();
 
-      ~DMeshROS();
+    virtual void Instantiate(DMeshROSInitializer& init);
 
-      virtual void Instantiate(DMeshROSInitializer& init);
+    virtual void assignScene(Scene_ptr scene);
 
-      virtual void assignScene(Scene_ptr scene);
+    void Initialize();
 
-      void Initialize();
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    virtual int taskSpaceDim();
 
-      virtual int taskSpaceDim();
-
-      /**
+    /**
        * \brief	Get the goal laplace
        * @param	goal	Goal laplace
        */
-      Eigen::VectorXd getGoalLaplace();
+    Eigen::VectorXd getGoalLaplace();
 
-      /**
+    /**
        * \brief	Update external objects
        */
-      void updateExternal(const exotica::MeshVertex & ext);
-      void updateExternal(const exotica::MeshVertexArray & ext);
+    void updateExternal(const exotica::MeshVertex& ext);
+    void updateExternal(const exotica::MeshVertexArray& ext);
 
-      void removeVertex(const std::string & name);
+    void removeVertex(const std::string& name);
 
-      bool hasActiveObstacle();
+    bool hasActiveObstacle();
 
-      //	Graph Manager
-      GraphManager gManager_;
+    //	Graph Manager
+    GraphManager gManager_;
 
-    private:
-      /**
+private:
+    /**
        * \brief	Compute Laplace
        */
-      Eigen::VectorXd computeLaplace();
+    Eigen::VectorXd computeLaplace();
 
-      /**
+    /**
        * \brief	Compute Jacobian
        */
-      Eigen::MatrixXd computeJacobian();
+    Eigen::MatrixXd computeJacobian();
 
-      /**
+    /**
        * \brief	Update the graph from kinematic scene
        */
-      void updateGraphFromKS();
+    void updateGraphFromKS();
 
-      /**
+    /**
        * \brief	Update the graph externally
        * @param	name		Vertex name
        * @param	pose		Vertex position
        */
-      void updateGraphFromExternal(const std::string & name, const Eigen::Vector3d & pose);
+    void updateGraphFromExternal(const std::string& name, const Eigen::Vector3d& pose);
 
-      /**
+    /**
        * \brief	Update the graph from real transform
        */
-      void updateGraphFromTF();
-      /**
+    void updateGraphFromTF();
+    /**
        * \brief	Update the graph from given poses
        * @param	V		The given links' poses
        */
-      void updateGraphFromPoses(const Eigen::Matrix3Xd & V);
+    void updateGraphFromPoses(const Eigen::Matrix3Xd& V);
 
-      std::vector<std::string> links_;
-      std::vector<bool> link_types_;
-      Eigen::VectorXd radius_;
+    std::vector<std::string> links_;
+    std::vector<bool> link_types_;
+    Eigen::VectorXd radius_;
 
-      //	If we want to get real joint state
-      tf::TransformListener listener_;
+    //	If we want to get real joint state
+    tf::TransformListener listener_;
 
-      tf::StampedTransform transform_;
+    tf::StampedTransform transform_;
 
-      //	Maximum graph size
-      int size_;
+    //	Maximum graph size
+    int size_;
 
-      //	Robot links size
-      int robot_size_;
+    //	Robot links size
+    int robot_size_;
 
-      //	External objects size
-      int ext_size_;
+    //	External objects size
+    int ext_size_;
 
-      //	Task space size
-      int task_size_;
+    //	Task space size
+    int task_size_;
 
-      //	Configuration size
-      int q_size_;
+    //	Configuration size
+    int q_size_;
 
-      double kp_;
-      double ko_;
-      double kg_;
+    double kp_;
+    double ko_;
+    double kg_;
 
-      //	Distance matrix
-      Eigen::MatrixXd dist_;
+    //	Distance matrix
+    Eigen::MatrixXd dist_;
 
-      //	True if the obstacle is close
-      std::vector<bool> obs_close_;
+    //	True if the obstacle is close
+    std::vector<bool> obs_close_;
 
-      //	Interact Range
-      double ir_;
+    //	Interact Range
+    double ir_;
 
-      double wo_;
-      double wg_;
+    double wo_;
+    double wg_;
 
-      bool usePose_;
+    bool usePose_;
 
-      DMeshROSInitializer init_;
-      Scene_ptr scene_;
-
-
-  };
-  typedef std::shared_ptr<DMeshROS> DMeshROS_Ptr;
-} //namespace exotica
+    DMeshROSInitializer init_;
+    Scene_ptr scene_;
+};
+typedef std::shared_ptr<DMeshROS> DMeshROS_Ptr;
+}  //namespace exotica
 
 #endif /* DMESH_ROS_H_ */

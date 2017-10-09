@@ -38,42 +38,41 @@
 
 namespace exotica
 {
-  /**
+/**
    * \brief	Implementation of joint limits task map.
    * 			Note: we dont want to always stay at the centre of the joint range,
    * 			be lazy as long as the joint is not too close to the low/high limits
    */
-  class JointLimit: public TaskMap, public Instantiable<JointLimitInitializer>
-  {
-    public:
-      //	Default constructor
-      JointLimit();
-      //	Default destructor
-      ~JointLimit();
+class JointLimit : public TaskMap, public Instantiable<JointLimitInitializer>
+{
+public:
+    //	Default constructor
+    JointLimit();
+    //	Default destructor
+    ~JointLimit();
 
-      virtual void Instantiate(JointLimitInitializer& init);
+    virtual void Instantiate(JointLimitInitializer& init);
 
-      virtual void assignScene(Scene_ptr scene);
+    virtual void assignScene(Scene_ptr scene);
 
-      void Initialize();
+    void Initialize();
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual int taskSpaceDim();
+    virtual int taskSpaceDim();
 
-    private:
-      Eigen::VectorXd low_limits_;	//	Lower joint limits
-      Eigen::VectorXd high_limits_;	//	Higher joint limits
-      Eigen::VectorXd center_;		//	Center of the joint range
-      Eigen::VectorXd tau_;			//	Joint limits tolerance
-      bool initialised_;
-      Scene_ptr scene_;
-      JointLimitInitializer init_;
-      int N;
-
-  };
+private:
+    Eigen::VectorXd low_limits_;   //	Lower joint limits
+    Eigen::VectorXd high_limits_;  //	Higher joint limits
+    Eigen::VectorXd center_;       //	Center of the joint range
+    Eigen::VectorXd tau_;          //	Joint limits tolerance
+    bool initialised_;
+    Scene_ptr scene_;
+    JointLimitInitializer init_;
+    int N;
+};
 }
 
 #endif /* JOINTLIMIT_H_ */

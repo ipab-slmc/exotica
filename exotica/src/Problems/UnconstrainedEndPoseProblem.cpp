@@ -36,130 +36,128 @@
 
 REGISTER_PROBLEM_TYPE("UnconstrainedEndPoseProblem", exotica::UnconstrainedEndPoseProblem)
 
-
 namespace exotica
 {
-    UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
+UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
+{
+    Flags = KIN_FK | KIN_J;
+}
+
+UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
+{
+}
+
+void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
+{
+    NumTasks = Tasks.size();
+    PhiN = 0;
+    JN = 0;
+    for (int i = 0; i < NumTasks; i++)
     {
-        Flags = KIN_FK | KIN_J;
+        appendVector(y.map, Tasks[i]->getLieGroupIndices());
+        PhiN += Tasks[i]->Length;
+        JN += Tasks[i]->LengthJ;
     }
 
-    UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
+    Rho = Eigen::VectorXd::Ones(NumTasks);
+    y.setZero(PhiN);
+    W = Eigen::MatrixXd::Identity(N, N);
+    if (init.W.rows() > 0)
     {
-    }
-
-    void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
-    {
-        NumTasks = Tasks.size();
-        PhiN = 0;
-        JN = 0;
-        for(int i=0;i<NumTasks;i++)
+        if (init.W.rows() == N)
         {
-            appendVector(y.map, Tasks[i]->getLieGroupIndices());
-            PhiN += Tasks[i]->Length;
-            JN += Tasks[i]->LengthJ;
+            W.diagonal() = init.W;
         }
-
-        Rho = Eigen::VectorXd::Ones(NumTasks);
-        y.setZero(PhiN);
-        W = Eigen::MatrixXd::Identity(N, N);
-        if(init.W.rows()>0)
+        else
         {
-            if(init.W.rows()==N)
-            {
-                W.diagonal() = init.W;
-            }
-            else
-            {
-                throw_named("W dimension mismatch! Expected "<<N<<", got "<<init.W.rows());
-            }
-        }
-        Phi = y;
-        J = Eigen::MatrixXd(JN, N);
-
-        qNominal = init.NominalState;
-
-        if(init.Rho.rows()>0 && init.Rho.rows()!=NumTasks) throw_named("Invalid size of Rho (" << init.Rho.rows() << ") expected: "<< NumTasks);
-        if(init.Goal.rows()>0 && init.Goal.rows()!=PhiN) throw_named("Invalid size of Goal (" << init.Goal.rows() << ") expected: "<< PhiN);
-
-        if(init.Rho.rows()==NumTasks) Rho = init.Rho;
-        if(init.Goal.rows()==PhiN) y.data = init.Goal;
-    }
-
-    void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
-    {
-        scene_->Update(x);
-        for(int i=0;i<NumTasks;i++)
-        {
-            Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+            throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
         }
     }
+    Phi = y;
+    J = Eigen::MatrixXd(JN, N);
 
-    void UnconstrainedEndPoseProblem::setGoal(const std::string & task_name, Eigen::VectorXdRefConst goal)
-    {   
-        try
-        {
-            TaskMap_ptr task = TaskMaps.at(task_name);
-            if(goal.rows()!=task->Length) throw_named("Invalid goal dimension "<<goal.rows()<<" expected "<<task->Length);
-            y.data.segment(task->Start, task->Length) = goal;
-        }
-        catch(std::out_of_range& e)
-        {
-            throw_pretty("Cannot set Goal. Task map '"<<task_name<<"' does not exist.");
-        }
-    }
+    qNominal = init.NominalState;
 
-    void UnconstrainedEndPoseProblem::setRho(const std::string & task_name, const double rho)
+    if (init.Rho.rows() > 0 && init.Rho.rows() != NumTasks) throw_named("Invalid size of Rho (" << init.Rho.rows() << ") expected: " << NumTasks);
+    if (init.Goal.rows() > 0 && init.Goal.rows() != PhiN) throw_named("Invalid size of Goal (" << init.Goal.rows() << ") expected: " << PhiN);
+
+    if (init.Rho.rows() == NumTasks) Rho = init.Rho;
+    if (init.Goal.rows() == PhiN) y.data = init.Goal;
+}
+
+void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
+{
+    scene_->Update(x);
+    for (int i = 0; i < NumTasks; i++)
     {
-        try
-        {
-            TaskMap_ptr task = TaskMaps.at(task_name);
-            Rho(task->Id) = rho;
-        }
-        catch(std::out_of_range& e)
-        {
-            throw_pretty("Cannot set Rho. Task map '"<<task_name<<"' does not exist.");
-        }
-    }
-
-    Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string & task_name)
-    {
-        try
-        {
-            TaskMap_ptr task = TaskMaps.at(task_name);
-            return y.data.segment(task->Start, task->Length);
-        }
-        catch(std::out_of_range& e)
-        {
-            throw_pretty("Cannot get Goal. Task map '"<<task_name<<"' does not exist.");
-        }
-    }
-
-    double UnconstrainedEndPoseProblem::getRho(const std::string & task_name)
-    {
-        try
-        {
-            TaskMap_ptr task = TaskMaps.at(task_name);
-            return Rho(task->Id);
-        }
-        catch(std::out_of_range& e)
-        {
-            throw_pretty("Cannot get Rho. Task map '"<<task_name<<"' does not exist.");
-        }
-    }
-
-    Eigen::VectorXd UnconstrainedEndPoseProblem::getNominalPose()
-    {
-        return qNominal;
-    }
-
-    void UnconstrainedEndPoseProblem::setNominalPose(Eigen::VectorXdRefConst qNominal_in)
-    {
-      if (qNominal_in.rows() == N)
-        qNominal = qNominal_in;
-      else
-        throw_pretty("Cannot set qNominal - wrong number of rows (expected "
-                     << N << ", received " << qNominal_in.rows() << ").");
+        Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
 }
 
+void UnconstrainedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
+{
+    try
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        if (goal.rows() != task->Length) throw_named("Invalid goal dimension " << goal.rows() << " expected " << task->Length);
+        y.data.segment(task->Start, task->Length) = goal;
+    }
+    catch (std::out_of_range& e)
+    {
+        throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    }
+}
+
+void UnconstrainedEndPoseProblem::setRho(const std::string& task_name, const double rho)
+{
+    try
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        Rho(task->Id) = rho;
+    }
+    catch (std::out_of_range& e)
+    {
+        throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+    }
+}
+
+Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string& task_name)
+{
+    try
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        return y.data.segment(task->Start, task->Length);
+    }
+    catch (std::out_of_range& e)
+    {
+        throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    }
+}
+
+double UnconstrainedEndPoseProblem::getRho(const std::string& task_name)
+{
+    try
+    {
+        TaskMap_ptr task = TaskMaps.at(task_name);
+        return Rho(task->Id);
+    }
+    catch (std::out_of_range& e)
+    {
+        throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+    }
+}
+
+Eigen::VectorXd UnconstrainedEndPoseProblem::getNominalPose()
+{
+    return qNominal;
+}
+
+void UnconstrainedEndPoseProblem::setNominalPose(Eigen::VectorXdRefConst qNominal_in)
+{
+    if (qNominal_in.rows() == N)
+        qNominal = qNominal_in;
+    else
+        throw_pretty("Cannot set qNominal - wrong number of rows (expected "
+                     << N << ", received " << qNominal_in.rows() << ").");
+}
+}

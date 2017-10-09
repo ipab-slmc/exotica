@@ -38,30 +38,29 @@
 
 namespace exotica
 {
-  class CollisionCheck: public TaskMap, public Instantiable<CollisionCheckInitializer>
-  {
-    public:
-      CollisionCheck();
-      virtual ~CollisionCheck()
-      {
-      }
+class CollisionCheck : public TaskMap, public Instantiable<CollisionCheckInitializer>
+{
+public:
+    CollisionCheck();
+    virtual ~CollisionCheck()
+    {
+    }
 
-      virtual void Instantiate(CollisionCheckInitializer& init);
+    virtual void Instantiate(CollisionCheckInitializer& init);
 
-      virtual void assignScene(Scene_ptr scene);
+    virtual void assignScene(Scene_ptr scene);
 
-      void Initialize();
+    void Initialize();
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual int taskSpaceDim();
+    virtual int taskSpaceDim();
 
-      Scene_ptr scene_;
-      CollisionScene_ptr cscene_;
-      CollisionCheckInitializer init_;
+    Scene_ptr scene_;
+    CollisionScene_ptr cscene_;
+    CollisionCheckInitializer init_;
+};
 
-  };
-
-  typedef std::shared_ptr<exotica::CollisionCheck> CollisionCheck_ptr;
+typedef std::shared_ptr<exotica::CollisionCheck> CollisionCheck_ptr;
 }
 #endif

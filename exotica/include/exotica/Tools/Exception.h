@@ -4,13 +4,27 @@
 #include <exception>
 #include <sstream>
 
-#define throw_pretty(m) {std::stringstream ss; ss<<m; throw exotica::Exception(ss.str(),__FILE__,__PRETTY_FUNCTION__,__LINE__);}
-#define throw_named(m) {std::stringstream ss; ss<<m; throw exotica::Exception(ss.str(),__FILE__,__PRETTY_FUNCTION__,__LINE__,this->object_name_);}
-#define throw_solve(m) {std::stringstream ss; ss<<m; throw exotica::SolveException(ss.str(),__FILE__,__PRETTY_FUNCTION__,__LINE__,this->object_name_);}
+#define throw_pretty(m)                                                              \
+    {                                                                                \
+        std::stringstream ss;                                                        \
+        ss << m;                                                                     \
+        throw exotica::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__); \
+    }
+#define throw_named(m)                                                                                   \
+    {                                                                                                    \
+        std::stringstream ss;                                                                            \
+        ss << m;                                                                                         \
+        throw exotica::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__, this->object_name_); \
+    }
+#define throw_solve(m)                                                                                        \
+    {                                                                                                         \
+        std::stringstream ss;                                                                                 \
+        ss << m;                                                                                              \
+        throw exotica::SolveException(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__, this->object_name_); \
+    }
 
 namespace exotica
 {
-
 class Exception : public std::exception
 {
 public:
@@ -25,14 +39,15 @@ public:
 
     Exception();
     explicit Exception(const std::string &msg, const char *file, const char *func, int line);
-    explicit Exception(const std::string &msg, const char *file, const char *func, int line, const std::string& object);
-    virtual const char* what() const noexcept override;
+    explicit Exception(const std::string &msg, const char *file, const char *func, int line, const std::string &object);
+    virtual const char *what() const noexcept override;
 
     std::string msg_;
     std::string file_;
     std::string func_;
     std::string line_;
     std::string object_;
+
 private:
     static ReportingType reporting_;
 };
@@ -46,9 +61,6 @@ class SolveException : public Exception
 {
     using Exception::Exception;
 };
-
 }
 
-
-
-#endif // EXCEPTION_H
+#endif  // EXCEPTION_H

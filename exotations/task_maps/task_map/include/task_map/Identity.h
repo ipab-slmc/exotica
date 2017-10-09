@@ -38,36 +38,35 @@
 
 namespace exotica
 {
-  class Identity: public TaskMap, public Instantiable<IdentityInitializer>
-  {
-    public:
-      Identity();
-      virtual ~Identity()
-      {
-      }
+class Identity : public TaskMap, public Instantiable<IdentityInitializer>
+{
+public:
+    Identity();
+    virtual ~Identity()
+    {
+    }
 
-      virtual void Instantiate(IdentityInitializer& init);
+    virtual void Instantiate(IdentityInitializer& init);
 
-      virtual void assignScene(Scene_ptr scene);
+    virtual void assignScene(Scene_ptr scene);
 
-      void Initialize();
+    void Initialize();
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot);
 
-      virtual int taskSpaceDim();
+    virtual int taskSpaceDim();
 
-      std::vector<int> jointMap;
-      Eigen::VectorXd jointRef;
-      int N;
-      Scene_ptr scene_;
-      IdentityInitializer init_;
+    std::vector<int> jointMap;
+    Eigen::VectorXd jointRef;
+    int N;
+    Scene_ptr scene_;
+    IdentityInitializer init_;
+};
 
-  };
-
-  typedef std::shared_ptr<exotica::Identity> Identity_ptr;
+typedef std::shared_ptr<exotica::Identity> Identity_ptr;
 }
 #endif

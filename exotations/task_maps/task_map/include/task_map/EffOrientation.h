@@ -36,36 +36,36 @@
 #include <exotica/TaskMap.h>
 #include <task_map/EffOrientationInitializer.h>
 
-namespace exotica //!< Since this is part of the core library, it will be within the same namespace
+namespace exotica  //!< Since this is part of the core library, it will be within the same namespace
 {
-  class EffOrientation: public TaskMap, public Instantiable<EffOrientationInitializer>
-  {
-    public:
-      /**
+class EffOrientation : public TaskMap, public Instantiable<EffOrientationInitializer>
+{
+public:
+    /**
        * \brief Default constructor
        */
-      EffOrientation();
-      virtual ~EffOrientation()
-      {
-      }
+    EffOrientation();
+    virtual ~EffOrientation()
+    {
+    }
 
-      virtual void Instantiate(EffOrientationInitializer& init);
+    virtual void Instantiate(EffOrientationInitializer& init);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
-      virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-      virtual int taskSpaceDim();
+    virtual int taskSpaceDim();
 
-      virtual int taskSpaceJacobianDim();
+    virtual int taskSpaceJacobianDim();
 
-      virtual std::vector<TaskVectorEntry> getLieGroupIndices();
+    virtual std::vector<TaskVectorEntry> getLieGroupIndices();
 
-      RotationType rotationType;
-      int stride;
-  };
-  
-  typedef std::shared_ptr<EffOrientation> EffOrientation_ptr;  //!< Task Map smart pointer
+    RotationType rotationType;
+    int stride;
+};
+
+typedef std::shared_ptr<EffOrientation> EffOrientation_ptr;  //!< Task Map smart pointer
 }
 
 #endif

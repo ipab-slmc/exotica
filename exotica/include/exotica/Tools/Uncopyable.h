@@ -3,17 +3,15 @@
 
 namespace exotica
 {
-
 class Uncopyable
 {
-    public:
-        Uncopyable(){}
-        ~Uncopyable(){}
-    private:
-        Uncopyable(const Uncopyable&);
-        Uncopyable& operator=(const Uncopyable&);
+public:
+    Uncopyable() {}
+    ~Uncopyable() {}
+private:
+    Uncopyable(const Uncopyable&);
+    Uncopyable& operator=(const Uncopyable&);
 };
-
 }
 
-#endif // UNCOPYABLE_H
+#endif  // UNCOPYABLE_H

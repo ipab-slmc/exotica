@@ -31,142 +31,140 @@
  */
 
 #include <exotica/PlanningProblem.h>
-#include <exotica/Setup.h>
 #include <exotica/PlanningProblemInitializer.h>
+#include <exotica/Setup.h>
 
 namespace exotica
 {
-  PlanningProblem::PlanningProblem() : Flags(KIN_FK), N(0)
-  {
+PlanningProblem::PlanningProblem() : Flags(KIN_FK), N(0)
+{
+}
 
-  }
-
-  std::string PlanningProblem::print(std::string prepend)
-  {
+std::string PlanningProblem::print(std::string prepend)
+{
     std::string ret = Object::print(prepend);
     ret += "\n" + prepend + "  Task definitions:";
     for (auto& it : TaskMaps)
-      ret += "\n" + it.second->print(prepend + "    ");
+        ret += "\n" + it.second->print(prepend + "    ");
     return ret;
-  }
+}
 
-  Eigen::VectorXd PlanningProblem::applyStartState()
-  {
-      scene_->setModelState(startState);
-      return scene_->getControlledState();
-  }
+Eigen::VectorXd PlanningProblem::applyStartState()
+{
+    scene_->setModelState(startState);
+    return scene_->getControlledState();
+}
 
-  void PlanningProblem::preupdate()
-  {
-      for (auto& it : TaskMaps) it.second->preupdate();
-  }
+void PlanningProblem::preupdate()
+{
+    for (auto& it : TaskMaps) it.second->preupdate();
+}
 
-  void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
-  {
-      if(x.rows()==startState.rows())
-      {
-          startState = x;
-      }
-      else if (x.rows()==scene_->getSolver().getNumJoints())
-      {
-          std::vector<std::string> jointNames = scene_->getJointNames();
-          std::vector<std::string> modelNames = scene_->getModelJointNames();
-          for(int i=0; i<jointNames.size();i++)
-          {
-              for(int j=0; j<modelNames.size(); j++)
-              {
-                  if(jointNames[i]==modelNames[j]) startState[j] = x(i);
-              }
-          }
-      }
-      else
-      {
-          throw_named("Wrong start state vector size, expected " << startState.rows() << " got " << x.rows());
-      }
-  }
+void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
+{
+    if (x.rows() == startState.rows())
+    {
+        startState = x;
+    }
+    else if (x.rows() == scene_->getSolver().getNumJoints())
+    {
+        std::vector<std::string> jointNames = scene_->getJointNames();
+        std::vector<std::string> modelNames = scene_->getModelJointNames();
+        for (int i = 0; i < jointNames.size(); i++)
+        {
+            for (int j = 0; j < modelNames.size(); j++)
+            {
+                if (jointNames[i] == modelNames[j]) startState[j] = x(i);
+            }
+        }
+    }
+    else
+    {
+        throw_named("Wrong start state vector size, expected " << startState.rows() << " got " << x.rows());
+    }
+}
 
-  Eigen::VectorXd PlanningProblem::getStartState()
-  {
-      return startState;
-  }
+Eigen::VectorXd PlanningProblem::getStartState()
+{
+    return startState;
+}
 
-  void PlanningProblem::InstantiateBase(const Initializer& init_)
-  {
-      Object::InstatiateObject(init_);
-      PlanningProblemInitializer init(init_);
+void PlanningProblem::InstantiateBase(const Initializer& init_)
+{
+    Object::InstatiateObject(init_);
+    PlanningProblemInitializer init(init_);
 
-      TaskMaps.clear();
-      Tasks.clear();
+    TaskMaps.clear();
+    Tasks.clear();
 
-      // Create the scene
-      scene_.reset(new Scene());
-      scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
-      startState = Eigen::VectorXd::Zero(scene_->getModelJointNames().size());
-      N = scene_->getSolver().getNumJoints();
+    // Create the scene
+    scene_.reset(new Scene());
+    scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
+    startState = Eigen::VectorXd::Zero(scene_->getModelJointNames().size());
+    N = scene_->getSolver().getNumJoints();
 
-      if(init.StartState.rows()>0)
-      {
-          setStartState(init.StartState);
-      }
+    if (init.StartState.rows() > 0)
+    {
+        setStartState(init.StartState);
+    }
 
-      KinematicsRequest Request;
-      Request.Flags = Flags;
+    KinematicsRequest Request;
+    Request.Flags = Flags;
 
-      // Create the maps
-      int id=0;      
-      for(const Initializer& MapInitializer : init.Maps)
-      {
-          TaskMap_ptr NewMap = Setup::createMap(MapInitializer);
-          NewMap->assignScene(scene_);
-          NewMap->ns_ = ns_ + "/" + NewMap->getObjectName();
-          if (TaskMaps.find(NewMap->getObjectName()) != TaskMaps.end())
-          {
-              throw_named("Map '"+NewMap->getObjectName()+"' already exists!");
-          }
-          std::vector<KinematicFrameRequest> frames = NewMap->GetFrames();
+    // Create the maps
+    int id = 0;
+    for (const Initializer& MapInitializer : init.Maps)
+    {
+        TaskMap_ptr NewMap = Setup::createMap(MapInitializer);
+        NewMap->assignScene(scene_);
+        NewMap->ns_ = ns_ + "/" + NewMap->getObjectName();
+        if (TaskMaps.find(NewMap->getObjectName()) != TaskMaps.end())
+        {
+            throw_named("Map '" + NewMap->getObjectName() + "' already exists!");
+        }
+        std::vector<KinematicFrameRequest> frames = NewMap->GetFrames();
 
-          NewMap->Kinematics = KinematicSolution(id, frames.size());
-          id += frames.size();
+        NewMap->Kinematics = KinematicSolution(id, frames.size());
+        id += frames.size();
 
-          Request.Frames.insert(Request.Frames.end(), frames.begin(), frames.end());
-          TaskMaps[NewMap->getObjectName()] = NewMap;
-          Tasks.push_back(NewMap);
-      }
+        Request.Frames.insert(Request.Frames.end(), frames.begin(), frames.end());
+        TaskMaps[NewMap->getObjectName()] = NewMap;
+        Tasks.push_back(NewMap);
+    }
 
-      std::shared_ptr<KinematicResponse> Response = scene_->RequestKinematics(Request);
-      id=0;
-      int idJ=0;
-      for(int i=0; i<Tasks.size(); i++)
-      {
-          Tasks[i]->Kinematics.Create(Response);
-          Tasks[i]->Id = i;
-          Tasks[i]->Start = id;
-          Tasks[i]->Length = Tasks[i]->taskSpaceDim();
-          Tasks[i]->StartJ = idJ;
-          Tasks[i]->LengthJ = Tasks[i]->taskSpaceJacobianDim();
-          id += Tasks[i]->Length;
-          idJ += Tasks[i]->LengthJ;
-      }
+    std::shared_ptr<KinematicResponse> Response = scene_->RequestKinematics(Request);
+    id = 0;
+    int idJ = 0;
+    for (int i = 0; i < Tasks.size(); i++)
+    {
+        Tasks[i]->Kinematics.Create(Response);
+        Tasks[i]->Id = i;
+        Tasks[i]->Start = id;
+        Tasks[i]->Length = Tasks[i]->taskSpaceDim();
+        Tasks[i]->StartJ = idJ;
+        Tasks[i]->LengthJ = Tasks[i]->taskSpaceJacobianDim();
+        id += Tasks[i]->Length;
+        idJ += Tasks[i]->LengthJ;
+    }
 
-      if (init.Maps.size() == 0)
-      {
+    if (init.Maps.size() == 0)
+    {
         HIGHLIGHT("No maps were defined!");
-      }
-  }
+    }
+}
 
-  TaskMap_map& PlanningProblem::getTaskMaps()
-  {
+TaskMap_map& PlanningProblem::getTaskMaps()
+{
     return TaskMaps;
-  }
+}
 
-  TaskMap_vec& PlanningProblem::getTasks()
-  {
-      return Tasks;
-  }
+TaskMap_vec& PlanningProblem::getTasks()
+{
+    return Tasks;
+}
 
-  Scene_ptr PlanningProblem::getScene()
-  {
+Scene_ptr PlanningProblem::getScene()
+{
     return scene_;
-  }
-
+}
 }

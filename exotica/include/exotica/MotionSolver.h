@@ -34,33 +34,32 @@
 #define EXOTICA_MOTION_SOLVER_H
 
 #include "exotica/Object.h"
-#include "exotica/TaskMap.h"
 #include "exotica/PlanningProblem.h"
-#include "exotica/Server.h"
 #include "exotica/Property.h"
+#include "exotica/Server.h"
+#include "exotica/TaskMap.h"
 
 #define REGISTER_MOTIONSOLVER_TYPE(TYPE, DERIV) EXOTICA_REGISTER(exotica::MotionSolver, TYPE, DERIV)
 
 namespace exotica
 {
-    class MotionSolver: public Object, Uncopyable, public virtual InstantiableBase
-    {
-    public:
-        MotionSolver();
-        virtual ~MotionSolver() {}
-        virtual void InstantiateBase(const Initializer& init);
-        virtual void specifyProblem(PlanningProblem_ptr pointer);
-        virtual void Solve(Eigen::MatrixXd & solution) = 0;
-        PlanningProblem_ptr getProblem() {return problem_;}
-        virtual std::string print(std::string prepend);
+class MotionSolver : public Object, Uncopyable, public virtual InstantiableBase
+{
+public:
+    MotionSolver();
+    virtual ~MotionSolver() {}
+    virtual void InstantiateBase(const Initializer& init);
+    virtual void specifyProblem(PlanningProblem_ptr pointer);
+    virtual void Solve(Eigen::MatrixXd& solution) = 0;
+    PlanningProblem_ptr getProblem() { return problem_; }
+    virtual std::string print(std::string prepend);
 
-    protected:
+protected:
+    PlanningProblem_ptr problem_;
+};
 
-        PlanningProblem_ptr problem_;
-    };
-
-    typedef exotica::Factory<exotica::MotionSolver> MotionSolver_fac;
-    typedef std::shared_ptr<exotica::MotionSolver> MotionSolver_ptr;
+typedef exotica::Factory<exotica::MotionSolver> MotionSolver_fac;
+typedef std::shared_ptr<exotica::MotionSolver> MotionSolver_ptr;
 }
 
 #endif

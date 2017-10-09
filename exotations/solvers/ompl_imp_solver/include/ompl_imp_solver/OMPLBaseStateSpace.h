@@ -34,46 +34,46 @@
 #ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLBASESTATESPACE_H_
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLBASESTATESPACE_H_
 
-#include <ompl/base/StateSpace.h>
-#include "exotica/Problems/SamplingProblem.h"
-#include <ompl/base/StateValidityChecker.h>
-#include <ompl/base/SpaceInformation.h>
 #include <ompl/base/ProjectionEvaluator.h>
+#include <ompl/base/SpaceInformation.h>
+#include <ompl/base/StateSpace.h>
+#include <ompl/base/StateValidityChecker.h>
 #include <ompl_solver/OMPLsolverInitializer.h>
+#include "exotica/Problems/SamplingProblem.h"
 
 namespace ob = ompl::base;
 namespace exotica
 {
+class OMPLBaseStateSpace : public ompl::base::CompoundStateSpace
+{
+public:
+    OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init);
 
-  class OMPLBaseStateSpace: public ompl::base::CompoundStateSpace
-  {
-    public:
-      OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init);
+    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
+                                    ompl::base::State *state) const = 0;
+    virtual void OMPLToExoticaState(const ompl::base::State *state,
+                                    Eigen::VectorXd &q) const = 0;
 
-      virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
-          ompl::base::State *state) const = 0;
-      virtual void OMPLToExoticaState(const ompl::base::State *state,
-          Eigen::VectorXd &q) const = 0;
+    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const = 0;
+    virtual void stateDebug(const Eigen::VectorXd &q) const = 0;
 
-      virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const = 0;
-      virtual void stateDebug(const Eigen::VectorXd &q) const = 0;
-    protected:
-      SamplingProblem_ptr prob_;
-  };
+protected:
+    SamplingProblem_ptr prob_;
+};
 
-  class OMPLStateValidityChecker: public ompl::base::StateValidityChecker
-  {
-    public:
-      OMPLStateValidityChecker(const ob::SpaceInformationPtr &si,
-          const SamplingProblem_ptr &prob, OMPLsolverInitializer init);
+class OMPLStateValidityChecker : public ompl::base::StateValidityChecker
+{
+public:
+    OMPLStateValidityChecker(const ob::SpaceInformationPtr &si,
+                             const SamplingProblem_ptr &prob, OMPLsolverInitializer init);
 
-      virtual bool isValid(const ompl::base::State *state) const;
+    virtual bool isValid(const ompl::base::State *state) const;
 
-      virtual bool isValid(const ompl::base::State *state, double &dist) const;
+    virtual bool isValid(const ompl::base::State *state, double &dist) const;
 
-    protected:
-      SamplingProblem_ptr prob_;
-  };
+protected:
+    SamplingProblem_ptr prob_;
+};
 
 } /* namespace exotica */
 

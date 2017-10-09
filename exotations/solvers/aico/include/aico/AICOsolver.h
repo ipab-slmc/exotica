@@ -65,15 +65,15 @@
 #ifndef AICOSOLVER_H_
 #define AICOSOLVER_H_
 
+#include <aico/AICOsolverInitializer.h>
+#include <aico/incremental_gaussian.h>
 #include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
-#include <aico/AICOsolverInitializer.h>
-#include <iostream>
 #include <fstream>
-#include <aico/incremental_gaussian.h>
+#include <iostream>
 
-#include "lapack/cblas.h"
 #include "f2c.h"
+#include "lapack/cblas.h"
 #undef small
 #undef large
 #include <lapack/clapack.h>
@@ -84,152 +84,151 @@
 
 namespace exotica
 {
-  /**
+/**
    * \brief Solves motion planning problem using Approximate Inference Control method.
    * \ingroup AICO
    */
-  class AICOsolver: public MotionSolver, public Instantiable<AICOsolverInitializer>
-  {
-    public:
-      AICOsolver();
-      virtual void Instantiate(AICOsolverInitializer& init);
-      virtual ~AICOsolver();
-      /**
+class AICOsolver : public MotionSolver, public Instantiable<AICOsolverInitializer>
+{
+public:
+    AICOsolver();
+    virtual void Instantiate(AICOsolverInitializer& init);
+    virtual ~AICOsolver();
+    /**
        * \brief Solves the problem
        * @param solution Returned solution trajectory as a vector of joint configurations.
        */
-      void Solve(Eigen::MatrixXd & solution);
+    void Solve(Eigen::MatrixXd& solution);
 
-      /**
+    /**
        * \brief Binds the solver to a specific problem which must be pre-initalised
        * @param pointer Shared pointer to the motion planning problem
        * @return        Successful if the problem is a valid UnconstrainedTimeIndexedProblem
        */
-      virtual void specifyProblem(PlanningProblem_ptr pointer);
+    virtual void specifyProblem(PlanningProblem_ptr pointer);
 
-      /**
+    /**
        * \brief Stores costs into a file
        */
-      void saveCosts(std::string file_name);
+    void saveCosts(std::string file_name);
 
-      /**
+    /**
        * \brief Computes an inverse of symmetric positive definite matrix using LAPACK (very fast)
        * @param Ainv Resulting inverted matrix.
        * @param A A symmetric positive definite matrix to be inverted.
        */
-      void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
-          const Eigen::Ref<const Eigen::MatrixXd> & A_);
+    void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
+                          const Eigen::Ref<const Eigen::MatrixXd>& A_);
 
-      /**
+    /**
        * \brief Computes the solution to the linear problem \f$x=Ab\f$ for symmetric positive definite matrix A
        */
-      void AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
-          const Eigen::Ref<const Eigen::MatrixXd> & A_,
-          const Eigen::Ref<const Eigen::VectorXd> & b_);
+    void AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
+                        const Eigen::Ref<const Eigen::MatrixXd>& A_,
+                        const Eigen::Ref<const Eigen::VectorXd>& b_);
 
-      void getStats(std::vector<SinglePassMeanCoviariance>& q_stat_);
+    void getStats(std::vector<SinglePassMeanCoviariance>& q_stat_);
 
-      bool preupdateTrajectory_;
+    bool preupdateTrajectory_;
 
-      std::map<std::string, std::pair<int, int> > taskIndex;
-      Eigen::VectorXi dim; //!< Task dimension
-      double planning_time_;
+    std::map<std::string, std::pair<int, int> > taskIndex;
+    Eigen::VectorXi dim;  //!< Task dimension
+    double planning_time_;
 
-    protected:
-
-      /** \brief Initializes message data.
+protected:
+    /** \brief Initializes message data.
        *  @param q0 Start configuration
        *  @return  Indicates success
        */
-      void initMessages();
+    void initMessages();
 
-      /**
+    /**
        * \brief Initialise AICO messages from an initial trajectory
        * @param q_init Initial trajectory
        * @return  Indicates success
        */
-      void initTrajectory(const std::vector<Eigen::VectorXd>& q_init);
+    void initTrajectory(const std::vector<Eigen::VectorXd>& q_init);
 
-    private:
-      UnconstrainedTimeIndexedProblem_ptr prob_; //!< Shared pointer to the planning problem.
-      double damping; //!< Damping
-      double damping_init; //!< Damping
-      double tolerance; //!< Termination error threshold
-      int max_iterations; //!< Max. number of AICO iterations
-      bool useBwdMsg; //!< Flag for using backward message initialisation
-      Eigen::VectorXd bwdMsg_v; //!< Backward message initialisation mean
-      Eigen::MatrixXd bwdMsg_Vinv; //!< Backward message initialisation covariance
-      bool dynamic; //!< Plan
+private:
+    UnconstrainedTimeIndexedProblem_ptr prob_;  //!< Shared pointer to the planning problem.
+    double damping;                             //!< Damping
+    double damping_init;                        //!< Damping
+    double tolerance;                           //!< Termination error threshold
+    int max_iterations;                         //!< Max. number of AICO iterations
+    bool useBwdMsg;                             //!< Flag for using backward message initialisation
+    Eigen::VectorXd bwdMsg_v;                   //!< Backward message initialisation mean
+    Eigen::MatrixXd bwdMsg_Vinv;                //!< Backward message initialisation covariance
+    bool dynamic;                               //!< Plan
 
-      std::vector<SinglePassMeanCoviariance> q_stat; //!< Cost weigthed normal distribution of configurations across sweeps.
+    std::vector<SinglePassMeanCoviariance> q_stat;  //!< Cost weigthed normal distribution of configurations across sweeps.
 
-      std::vector<Eigen::VectorXd> s; //!< Forward message mean
-      std::vector<Eigen::MatrixXd> Sinv; //!< Forward message covariance inverse
-      std::vector<Eigen::VectorXd> v; //!< Backward message mean
-      std::vector<Eigen::MatrixXd> Vinv; //!< Backward message covariance inverse
-      std::vector<Eigen::VectorXd> r; //!< Task message mean
-      std::vector<Eigen::MatrixXd> R; //!< Task message covariance
-      Eigen::VectorXd rhat; //!< Task message point of linearisation
-      std::vector<Eigen::VectorXd> b; //!< Belief mean
-      std::vector<Eigen::MatrixXd> Binv; //!< Belief covariance inverse
-      std::vector<Eigen::VectorXd> q; //!< Configuration space trajectory
-      std::vector<Eigen::VectorXd> qhat; //!< Point of linearisation
-      Eigen::VectorXd costControl; //!< Control cost for each time step
-      Eigen::MatrixXd costTask; //!< Task cost for each task for each time step
-      std::vector<std::string> taskNames; //!< Task names (only used for printing debug info)
+    std::vector<Eigen::VectorXd> s;      //!< Forward message mean
+    std::vector<Eigen::MatrixXd> Sinv;   //!< Forward message covariance inverse
+    std::vector<Eigen::VectorXd> v;      //!< Backward message mean
+    std::vector<Eigen::MatrixXd> Vinv;   //!< Backward message covariance inverse
+    std::vector<Eigen::VectorXd> r;      //!< Task message mean
+    std::vector<Eigen::MatrixXd> R;      //!< Task message covariance
+    Eigen::VectorXd rhat;                //!< Task message point of linearisation
+    std::vector<Eigen::VectorXd> b;      //!< Belief mean
+    std::vector<Eigen::MatrixXd> Binv;   //!< Belief covariance inverse
+    std::vector<Eigen::VectorXd> q;      //!< Configuration space trajectory
+    std::vector<Eigen::VectorXd> qhat;   //!< Point of linearisation
+    Eigen::VectorXd costControl;         //!< Control cost for each time step
+    Eigen::MatrixXd costTask;            //!< Task cost for each task for each time step
+    std::vector<std::string> taskNames;  //!< Task names (only used for printing debug info)
 
-      std::vector<Eigen::VectorXd> phiBar_old; //!< Task cost mappings (last most optimal value)
-      std::vector<Eigen::MatrixXd> JBar_old; //!< Task cost Jacobians (last most optimal value)
-      Eigen::VectorXi dim_old; //!< Task dimension
+    std::vector<Eigen::VectorXd> phiBar_old;  //!< Task cost mappings (last most optimal value)
+    std::vector<Eigen::MatrixXd> JBar_old;    //!< Task cost Jacobians (last most optimal value)
+    Eigen::VectorXi dim_old;                  //!< Task dimension
 
-      std::vector<Eigen::VectorXd> s_old; //!< Forward message mean (last most optimal value)
-      std::vector<Eigen::MatrixXd> Sinv_old; //!< Forward message covariance inverse (last most optimal value)
-      std::vector<Eigen::VectorXd> v_old; //!< Backward message mean (last most optimal value)
-      std::vector<Eigen::MatrixXd> Vinv_old; //!< Backward message covariance inverse (last most optimal value)
-      std::vector<Eigen::VectorXd> r_old; //!< Task message mean (last most optimal value)
-      std::vector<Eigen::MatrixXd> R_old; //!< Task message covariance (last most optimal value)
-      Eigen::VectorXd rhat_old; //!< Task message point of linearisation (last most optimal value)
-      std::vector<Eigen::VectorXd> b_old; //!< Belief mean (last most optimal value)
-      std::vector<Eigen::MatrixXd> Binv_old; //!< Belief covariance inverse (last most optimal value)
-      std::vector<Eigen::VectorXd> q_old; //!< Configuration space trajectory (last most optimal value)
-      std::vector<Eigen::VectorXd> qhat_old; //!< Point of linearisation (last most optimal value)
-      Eigen::VectorXd costControl_old; //!< Control cost for each time step (last most optimal value)
-      Eigen::MatrixXd costTask_old; //!< Task cost for each task for each time step (last most optimal value)
+    std::vector<Eigen::VectorXd> s_old;     //!< Forward message mean (last most optimal value)
+    std::vector<Eigen::MatrixXd> Sinv_old;  //!< Forward message covariance inverse (last most optimal value)
+    std::vector<Eigen::VectorXd> v_old;     //!< Backward message mean (last most optimal value)
+    std::vector<Eigen::MatrixXd> Vinv_old;  //!< Backward message covariance inverse (last most optimal value)
+    std::vector<Eigen::VectorXd> r_old;     //!< Task message mean (last most optimal value)
+    std::vector<Eigen::MatrixXd> R_old;     //!< Task message covariance (last most optimal value)
+    Eigen::VectorXd rhat_old;               //!< Task message point of linearisation (last most optimal value)
+    std::vector<Eigen::VectorXd> b_old;     //!< Belief mean (last most optimal value)
+    std::vector<Eigen::MatrixXd> Binv_old;  //!< Belief covariance inverse (last most optimal value)
+    std::vector<Eigen::VectorXd> q_old;     //!< Configuration space trajectory (last most optimal value)
+    std::vector<Eigen::VectorXd> qhat_old;  //!< Point of linearisation (last most optimal value)
+    Eigen::VectorXd costControl_old;        //!< Control cost for each time step (last most optimal value)
+    Eigen::MatrixXd costTask_old;           //!< Task cost for each task for each time step (last most optimal value)
 
-      std::vector<Eigen::VectorXd> dampingReference; //!< Damping reference point
-      double cost; //!< cost of MAP trajectory
-      double cost_old; //!< cost of MAP trajectory (last most optimal value)
-      double b_step; //!< Squared configuration space step
+    std::vector<Eigen::VectorXd> dampingReference;  //!< Damping reference point
+    double cost;                                    //!< cost of MAP trajectory
+    double cost_old;                                //!< cost of MAP trajectory (last most optimal value)
+    double b_step;                                  //!< Squared configuration space step
 
-      std::vector<Eigen::MatrixXd> A; //!< State transition matrix
-      std::vector<Eigen::MatrixXd> tA; //!< State transition matrix transpose
-      std::vector<Eigen::MatrixXd> Ainv; //!< State transition matrix inverse
-      std::vector<Eigen::MatrixXd> invtA; //!< State transition matrix transpose inverse
-      std::vector<Eigen::VectorXd> a; //!< State transition drift
-      std::vector<Eigen::MatrixXd> B; //!< Control matrix
-      std::vector<Eigen::MatrixXd> tB; //!< Control matrix transpose
-      std::vector<Eigen::MatrixXd> W; //!< Configuration space weight matrix inverse
-      std::vector<Eigen::MatrixXd> H; //!< Integrated state transition covariance inverse
-      std::vector<Eigen::MatrixXd> Winv; //!< Configuration space weight matrix inverse
-      std::vector<Eigen::MatrixXd> Hinv; //!< Integrated state transition covariance inverse
-      std::vector<Eigen::MatrixXd> Q; //!< State transition covariance
+    std::vector<Eigen::MatrixXd> A;      //!< State transition matrix
+    std::vector<Eigen::MatrixXd> tA;     //!< State transition matrix transpose
+    std::vector<Eigen::MatrixXd> Ainv;   //!< State transition matrix inverse
+    std::vector<Eigen::MatrixXd> invtA;  //!< State transition matrix transpose inverse
+    std::vector<Eigen::VectorXd> a;      //!< State transition drift
+    std::vector<Eigen::MatrixXd> B;      //!< Control matrix
+    std::vector<Eigen::MatrixXd> tB;     //!< Control matrix transpose
+    std::vector<Eigen::MatrixXd> W;      //!< Configuration space weight matrix inverse
+    std::vector<Eigen::MatrixXd> H;      //!< Integrated state transition covariance inverse
+    std::vector<Eigen::MatrixXd> Winv;   //!< Configuration space weight matrix inverse
+    std::vector<Eigen::MatrixXd> Hinv;   //!< Integrated state transition covariance inverse
+    std::vector<Eigen::MatrixXd> Q;      //!< State transition covariance
 
-      int sweep; //!< Sweeps so far
-      enum SweepMode
-      {
+    int sweep;  //!< Sweeps so far
+    enum SweepMode
+    {
         smForwardly = 0,
         smSymmetric,
         smLocalGaussNewton,
         smLocalGaussNewtonDamped
-      };
-      int sweepMode; //!< Sweep mode
-      int T; //!< Number of time steps
-      int n; //!< Configuration space size
-      int updateCount;
+    };
+    int sweepMode;  //!< Sweep mode
+    int T;          //!< Number of time steps
+    int n;          //!< Configuration space size
+    int updateCount;
 
-      Eigen::MatrixXd linSolverTmp;
+    Eigen::MatrixXd linSolverTmp;
 
-      /**
+    /**
        * \brief Updates the forward message at time step $t$
        * @param t Time step
        *
@@ -240,8 +239,8 @@ namespace exotica
        * and
        * \f$ S_t=Q+B_tH^{-1}B_t^{\!\top\!} + A_{t-1}(S_{t-1}^{-1}+R_{t-1})^{-1}A_{t-1}^{\!\top\!} \f$.
        */
-      void updateFwdMessage(int t);
-      /**
+    void updateFwdMessage(int t);
+    /**
        * \brief Updates the backward message at time step $t$
        * @param t Time step
        *
@@ -252,8 +251,8 @@ namespace exotica
        * and
        * \f$ V_t=A_{t}^{-1}[Q+B_tH^{-1}B_t^{\!\top\!} + (V_{t+1}^{-1}+R_{t+1})^{-1}]A_{t}^{-{\!\top\!}} \f$.
        */
-      void updateBwdMessage(int t);
-      /**
+    void updateBwdMessage(int t);
+    /**
        * \brief Updates the task message at time step $t$
        * @param t Time step
        * @param qhat_t Point of linearisation at time step $t$
@@ -263,10 +262,10 @@ namespace exotica
        * Updates the mean and covariance of the task message using:
        * \f$ \mu_{z_t\rightarrow x_t}(x)=\mathcal{N}[x_t|r_t,R_t] \f$
        */
-      void updateTaskMessage(int t,
-          const Eigen::Ref<const Eigen::VectorXd> & qhat_t, double tolerance_,
-          double maxStepSize = -1.);
-      /**
+    void updateTaskMessage(int t,
+                           const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double tolerance_,
+                           double maxStepSize = -1.);
+    /**
        * \brief Update messages for given time step
        * @param t Time step.
        * @param updateFwd Update the forward message.
@@ -276,10 +275,10 @@ namespace exotica
        * @param forceRelocation Set to true to force relocation even when the result is within tolerance.
        * @param maxStepSize Step size for updateTaskMessage.
        */
-      void updateTimeStep(int t, bool updateFwd, bool updateBwd,
-          int maxRelocationIterations, double tolerance_, bool forceRelocation,
-          double maxStepSize = -1.);
-      /**
+    void updateTimeStep(int t, bool updateFwd, bool updateBwd,
+                        int maxRelocationIterations, double tolerance_, bool forceRelocation,
+                        double maxStepSize = -1.);
+    /**
        * \brief Update messages for given time step using the Gauss Newton method
        * @param t Time step.
        * @param updateFwd Update the forward message.
@@ -296,48 +295,48 @@ namespace exotica
        * where the mean and covariance are updated as follows:
        * \f$ b_t(X_t)=\mathcal{N}\left(x_t|(S_t^{-1}+V_t^{-1}+R_t)^{-1}(S_t^{-1}s_t+V_t^{-1}v_t+r_t),S_t^{-1}+V_t^{-1}+R_t \right) \f$.
        */
-      void updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd,
-          int maxRelocationIterations, double tolerance, double maxStepSize =
-              -1.);
-      /**
+    void updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd,
+                                   int maxRelocationIterations, double tolerance, double maxStepSize =
+                                                                                      -1.);
+    /**
        * \brief Computes the cost of the trajectory
        * @param x Trajecotry.
        * @return Cost of the trajectory.
        */
-      double evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
-          bool skipUpdate = false);
-      /**
+    double evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
+                              bool skipUpdate = false);
+    /**
        * \brief Stores the previous state.
        */
-      void rememberOldState();
-      /**
+    void rememberOldState();
+    /**
        * \brief Reverts back to previous state if the cost of the current state is higher.
        */
-      void perhapsUndoStep();
+    void perhapsUndoStep();
 
-      /**
+    /**
        * \brief Returns process transition matrices
        * @param A_ System transition matrix.
        * @param a_ System transition drift vector.
        * @param B_ System control matrix.
        */
-      void getProcess(Eigen::Ref<Eigen::MatrixXd> A_,
-          Eigen::Ref<Eigen::VectorXd> a_, Eigen::Ref<Eigen::MatrixXd> B_);
+    void getProcess(Eigen::Ref<Eigen::MatrixXd> A_,
+                    Eigen::Ref<Eigen::VectorXd> a_, Eigen::Ref<Eigen::MatrixXd> B_);
 
-      /**
+    /**
        * \brief Updates the task cost terms \f$ R, r, \hat{r} \f$ for time step \f$t\f$. UnconstrainedTimeIndexedProblem::update() has to be called before calling this function.
        * @param t Time step to be updated.
        */
-      double getTaskCosts(int t);
+    double getTaskCosts(int t);
 
-      /**
+    /**
        * \brief Compute one step of the AICO algorithm.
        * @return Change in cost of the trajectory.
        */
-      double step();
-  };
+    double step();
+};
 
-  typedef std::shared_ptr<exotica::AICOsolver> AICOsolver_ptr;
+typedef std::shared_ptr<exotica::AICOsolver> AICOsolver_ptr;
 } /* namespace exotica */
 
 #endif /* AICOSOLVER_H_ */

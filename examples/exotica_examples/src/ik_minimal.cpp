@@ -42,5 +42,5 @@ int main(int argc, char **argv)
     Timer timer;
     solver->Solve(solution);
 
-    HIGHLIGHT("Finished solving in "<<timer.getDuration()<<"s. Solution ["<<solution<<"]");
+    HIGHLIGHT("Finished solving in " << timer.getDuration() << "s. Solution [" << solution << "]");
 }

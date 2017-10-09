@@ -39,8 +39,8 @@ Chan, Tony F.; Golub, Gene H.; LeVeque, Randall J. (1979), “Updating Formulae 
 #ifndef SINGLE_PASS_MEAN_COVARIANCE_H
 #define SINGLE_PASS_MEAN_COVARIANCE_H
 
-#include <vector>
 #include <Eigen/Dense>
+#include <vector>
 
 class SinglePassMeanCoviariance
 {
@@ -50,128 +50,129 @@ class SinglePassMeanCoviariance
     Eigen::VectorXd T;
     Eigen::VectorXd dX;
     Eigen::MatrixXd S;
+
 public:
     SinglePassMeanCoviariance()
     {
-      D = 0;
-      D2 = 0;
-      T.resize(0);
-      dX.resize(0);
-      S.resize(0, 0);
+        D = 0;
+        D2 = 0;
+        T.resize(0);
+        dX.resize(0);
+        S.resize(0, 0);
     }
 
     SinglePassMeanCoviariance(int D_)
     {
-      resize(D_);
+        resize(D_);
     }
 
     void resize(int D_)
     {
-      D = D_;
-      D2 = (D_ * (D_ + 1) / 2);
+        D = D_;
+        D2 = (D_ * (D_ + 1) / 2);
 
-      T.resize(D_);
-      dX.resize(D_);
-      S.resize(D_, D_);
+        T.resize(D_);
+        dX.resize(D_);
+        S.resize(D_, D_);
 
-      clear();
+        clear();
     }
 
     void clear()
     {
-      T.setZero();
-      dX.setZero();
-      S.setZero();
-      W = 0.;
+        T.setZero();
+        dX.setZero();
+        S.setZero();
+        W = 0.;
     }
 
-    void add(const Eigen::Ref<const Eigen::VectorXd> & x)
+    void add(const Eigen::Ref<const Eigen::VectorXd>& x)
     {
-      if (W == 0.)
-      {
-        W = 1.;
-        T = x;
-        S.setZero();
-        return;
-      }
-      W += 1.;
-      T += x;
-      double f = 1. / W / (W - 1.);
-      dX = W * x - T;
-      for (int r = 0; r < D; r++)
-      {
-        for (int c = 0; c < D; c++)
+        if (W == 0.)
         {
-          S(r, c) += f * dX(r) * dX(c);
+            W = 1.;
+            T = x;
+            S.setZero();
+            return;
         }
-      }
+        W += 1.;
+        T += x;
+        double f = 1. / W / (W - 1.);
+        dX = W * x - T;
+        for (int r = 0; r < D; r++)
+        {
+            for (int c = 0; c < D; c++)
+            {
+                S(r, c) += f * dX(r) * dX(c);
+            }
+        }
     }
 
     inline void add(SinglePassMeanCoviariance& M)
     {
-      add(M.W, M.T, M.S);
+        add(M.W, M.T, M.S);
     }
 
-    void add(double& W_, const Eigen::Ref<const Eigen::VectorXd> & T_,
-        const Eigen::Ref<const Eigen::VectorXd> & S_)
+    void add(double& W_, const Eigen::Ref<const Eigen::VectorXd>& T_,
+             const Eigen::Ref<const Eigen::VectorXd>& S_)
     {
-      if (W == 0.)
-      {
-        W = W_;
-        T = T_;
-        S = S_;
-        return;
-      }
-      dX = T_ / W_ - T / W;
-
-      double f = W * W_ / (W + W_);
-      for (int r = 0; r < D; r++)
-      {
-        for (int c = 0; c < D; c++)
+        if (W == 0.)
         {
-          S(r, c) += S_(r, c) + f * dX(r) * dX(c);
+            W = W_;
+            T = T_;
+            S = S_;
+            return;
         }
-      }
-      T += T_;
-      W += W_;
+        dX = T_ / W_ - T / W;
+
+        double f = W * W_ / (W + W_);
+        for (int r = 0; r < D; r++)
+        {
+            for (int c = 0; c < D; c++)
+            {
+                S(r, c) += S_(r, c) + f * dX(r) * dX(c);
+            }
+        }
+        T += T_;
+        W += W_;
     }
 
-    inline void addw(double w, const Eigen::Ref<const Eigen::VectorXd> & x)
+    inline void addw(double w, const Eigen::Ref<const Eigen::VectorXd>& x)
     {
-      if (W == 0.)
-      {
-        W = w;
-        T = w * x;
-        S.setZero();
-        return;
-      }
-
-      dX = x - T / W;
-
-      double f = W * w / (W + w);
-      for (int r = 0; r < D; r++)
-      {
-        for (int c = 0; c < D; c++)
+        if (W == 0.)
         {
-          S(r, c) += f * dX(r) * dX(c);
+            W = w;
+            T = w * x;
+            S.setZero();
+            return;
         }
-      }
 
-      T += w * x;
-      W += w;
+        dX = x - T / W;
+
+        double f = W * w / (W + w);
+        for (int r = 0; r < D; r++)
+        {
+            for (int c = 0; c < D; c++)
+            {
+                S(r, c) += f * dX(r) * dX(c);
+            }
+        }
+
+        T += w * x;
+        W += w;
     }
 
     void mean(Eigen::VectorXd& mu)
     {
-      mu = T / W;
+        mu = T / W;
     }
     void cov(Eigen::MatrixXd& sig)
     {
-      sig = S / W;
+        sig = S / W;
     }
     void covp(Eigen::MatrixXd& sig)
     {
-      sig = S / (W - 1.);
+        sig = S / (W - 1.);
     }
 };
 

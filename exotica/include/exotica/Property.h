@@ -2,24 +2,27 @@
 #define PROPERTY_H
 
 #include <exotica/Tools.h>
-#include <exotica/Tools/Printable.h>
-#include <exotica/Tools/Exception.h>
 #include <exotica/Tools/Conversions.h>
-#include <memory>
-#include <map>
-#include <vector>
-#include <typeinfo>
+#include <exotica/Tools/Exception.h>
+#include <exotica/Tools/Printable.h>
 #include <boost/any.hpp>
 #include <initializer_list>
+#include <map>
+#include <memory>
+#include <typeinfo>
+#include <vector>
 
 namespace exotica
 {
-
 class Property
 {
 public:
     boost::any get() const;
-    template<typename C> void set(const C val) {value = val;}
+    template <typename C>
+    void set(const C val)
+    {
+        value = val;
+    }
     Property(std::string prop_name);
     Property(std::string prop_name, bool isRequired);
     Property(std::string prop_name, bool isRequired, boost::any val);
@@ -42,7 +45,7 @@ class Initializer
 public:
     Initializer();
     Initializer(std::string name_);
-    Initializer(std::string name_, std::map<std::string,boost::any> properties_);
+    Initializer(std::string name_, std::map<std::string, boost::any> properties_);
     std::string getName() const;
     void setName(std::string name_);
     void addProperty(const Property& prop);
@@ -72,11 +75,10 @@ public:
     virtual std::vector<Initializer> getAllTemplates() const = 0;
 };
 
-template<class C>
+template <class C>
 class Instantiable : public virtual InstantiableBase
 {
 public:
-
     virtual void InstantiateInternal(const Initializer& init)
     {
         InstantiateBase(init);
@@ -97,7 +99,6 @@ public:
 
     virtual void Instantiate(C& init) = 0;
 };
-
 }
 
-#endif // PROPERTY_H
+#endif  // PROPERTY_H

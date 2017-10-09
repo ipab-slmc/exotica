@@ -37,52 +37,52 @@
 #include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <ik_solver/IKsolverInitializer.h>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 namespace exotica
 {
-  /**
+/**
    * \brief	IK position solver
    */
-  class IKsolver: public MotionSolver, public Instantiable<IKsolverInitializer>
-  {
-    public:
-      IKsolver();
-      virtual ~IKsolver();
+class IKsolver : public MotionSolver, public Instantiable<IKsolverInitializer>
+{
+public:
+    IKsolver();
+    virtual ~IKsolver();
 
-      virtual void Instantiate(IKsolverInitializer& init);
+    virtual void Instantiate(IKsolverInitializer& init);
 
-      virtual void Solve(Eigen::MatrixXd & solution);
+    virtual void Solve(Eigen::MatrixXd& solution);
 
-      virtual void specifyProblem(PlanningProblem_ptr pointer);
+    virtual void specifyProblem(PlanningProblem_ptr pointer);
 
-      UnconstrainedEndPoseProblem_ptr& getProblem();
+    UnconstrainedEndPoseProblem_ptr& getProblem();
 
-      Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
+    Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
 
-      double error;
-      double planning_time_;
+    double error;
+    double planning_time_;
 
-      int getMaxIteration();
-      int getLastIteration();
+    int getMaxIteration();
+    int getLastIteration();
 
-    private:
-      IKsolverInitializer parameters_;
+private:
+    IKsolverInitializer parameters_;
 
-      inline void vel_solve(double & err, int t, Eigen::VectorXdRefConst q);
+    inline void vel_solve(double& err, int t, Eigen::VectorXdRefConst q);
 
-      void ScaleToStepSize(Eigen::VectorXdRef xd);
+    void ScaleToStepSize(Eigen::VectorXdRef xd);
 
-      UnconstrainedEndPoseProblem_ptr prob_; // Shared pointer to the planning problem.
+    UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
 
-      Eigen::MatrixXd Cinv; //!< Weight Matrices
-      Eigen::MatrixXd C;
-      Eigen::MatrixXd W;
-      Eigen::MatrixXd Winv;
-      int iterations_;
-  };
-  typedef std::shared_ptr<exotica::IKsolver> IKsolver_ptr;
+    Eigen::MatrixXd Cinv;  //!< Weight Matrices
+    Eigen::MatrixXd C;
+    Eigen::MatrixXd W;
+    Eigen::MatrixXd Winv;
+    int iterations_;
+};
+typedef std::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }
 
 #endif /* IK_SOLVER_H_ */

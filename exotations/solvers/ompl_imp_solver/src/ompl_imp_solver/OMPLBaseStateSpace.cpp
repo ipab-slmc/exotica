@@ -35,41 +35,38 @@
 
 namespace exotica
 {
-  OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init)
-      : ob::CompoundStateSpace(), prob_(prob)
-  {
-  }
+OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init)
+    : ob::CompoundStateSpace(), prob_(prob)
+{
+}
 
-  OMPLStateValidityChecker::OMPLStateValidityChecker(const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob, OMPLsolverInitializer init)
-      : ob::StateValidityChecker(si), prob_(prob)
-  {
+OMPLStateValidityChecker::OMPLStateValidityChecker(const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob, OMPLsolverInitializer init)
+    : ob::StateValidityChecker(si), prob_(prob)
+{
     Server_ptr server = Server::Instance();
-  }
+}
 
-  bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
-  {
+bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
+{
     double tmp;
     return isValid(state, tmp);
-  }
+}
 
-  bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
-      double &dist) const
-  {
+bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
+                                       double &dist) const
+{
     Eigen::VectorXd q(prob_->N);
 #ifdef ROS_INDIGO
-    boost::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
-        state, q);
+    boost::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
 #elif ROS_KINETIC
-    std::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(
-        state, q);
+    std::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
 #endif
 
     if (!prob_->isValid(q))
     {
-      dist = -1;
-      return false;
+        dist = -1;
+        return false;
     }
     return true;
-  }
 }
-
+}

@@ -36,73 +36,72 @@ REGISTER_TASKMAP_TYPE("EffOrientation", exotica::EffOrientation);
 
 namespace exotica
 {
+EffOrientation::EffOrientation() : rotationType(RotationType::RPY)
+{
+}
 
-    EffOrientation::EffOrientation() : rotationType(RotationType::RPY)
+void EffOrientation::Instantiate(EffOrientationInitializer& init)
+{
+    if (init.Type == "Quaternion")
     {
+        rotationType = RotationType::QUATERNION;
     }
+    else if (init.Type == "ZYX")
+    {
+        rotationType = RotationType::ZYX;
+    }
+    else if (init.Type == "ZYZ")
+    {
+        rotationType = RotationType::ZYZ;
+    }
+    else if (init.Type == "AngleAxis")
+    {
+        rotationType = RotationType::ANGLE_AXIS;
+    }
+    else if (init.Type == "Matrix")
+    {
+        rotationType = RotationType::MATRIX;
+    }
+    stride = getRotationTypeLength(rotationType);
+}
 
-    void EffOrientation::Instantiate(EffOrientationInitializer& init)
+std::vector<TaskVectorEntry> EffOrientation::getLieGroupIndices()
+{
+    std::vector<TaskVectorEntry> ret;
+    for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        if(init.Type == "Quaternion")
-        {
-            rotationType = RotationType::QUATERNION;
-        }
-        else if(init.Type == "ZYX")
-        {
-            rotationType = RotationType::ZYX;
-        }
-        else if(init.Type == "ZYZ")
-        {
-            rotationType = RotationType::ZYZ;
-        }
-        else if(init.Type == "AngleAxis")
-        {
-            rotationType = RotationType::ANGLE_AXIS;
-        }
-        else if(init.Type == "Matrix")
-        {
-            rotationType = RotationType::MATRIX;
-        }
-        stride = getRotationTypeLength(rotationType);
+        ret.push_back(TaskVectorEntry(Start + i * stride, rotationType));
     }
+    return ret;
+}
 
-    std::vector<TaskVectorEntry> EffOrientation::getLieGroupIndices()
+void EffOrientation::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+{
+    if (phi.rows() != Kinematics.Phi.rows() * stride) throw_named("Wrong size of phi!");
+    for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        std::vector<TaskVectorEntry> ret;
-        for(int i=0;i<Kinematics.Phi.rows();i++)
-        {
-            ret.push_back(TaskVectorEntry(Start + i*stride, rotationType));
-        }
-        return ret;
+        phi.segment(i * stride, stride) = setRotation(Kinematics.Phi(i).M, rotationType);
     }
+}
 
-    void EffOrientation::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void EffOrientation::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+{
+    if (phi.rows() != Kinematics.Phi.rows() * stride) throw_named("Wrong size of phi!");
+    if (J.rows() != Kinematics.J.rows() * 3 || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        if(phi.rows() != Kinematics.Phi.rows()*stride) throw_named("Wrong size of phi!");
-        for(int i=0;i<Kinematics.Phi.rows();i++)
-        {
-            phi.segment(i*stride, stride) = setRotation(Kinematics.Phi(i).M, rotationType);
-        }
+        phi.segment(i * stride, stride) = setRotation(Kinematics.Phi(i).M, rotationType);
+        J.middleRows(i * 3, 3) = Kinematics.J[i].data.bottomRows(3);
     }
+}
 
-    void EffOrientation::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
-    {
-        if(phi.rows() != Kinematics.Phi.rows()*stride) throw_named("Wrong size of phi!");
-        if(J.rows() != Kinematics.J.rows()*3 || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
-        for(int i=0;i<Kinematics.Phi.rows();i++)
-        {
-            phi.segment(i*stride, stride) = setRotation(Kinematics.Phi(i).M, rotationType);
-            J.middleRows(i*3,3) = Kinematics.J[i].data.bottomRows(3);
-        }
-    }
+int EffOrientation::taskSpaceDim()
+{
+    return Kinematics.Phi.rows() * stride;
+}
 
-    int EffOrientation::taskSpaceDim()
-    {
-        return Kinematics.Phi.rows()*stride;
-    }
-
-    int EffOrientation::taskSpaceJacobianDim()
-    {
-        return Kinematics.Phi.rows() * 3;
-    }
+int EffOrientation::taskSpaceJacobianDim()
+{
+    return Kinematics.Phi.rows() * 3;
+}
 }

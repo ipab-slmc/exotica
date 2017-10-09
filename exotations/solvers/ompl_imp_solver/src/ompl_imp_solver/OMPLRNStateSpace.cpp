@@ -35,9 +35,9 @@
 
 namespace exotica
 {
-  OMPLRNStateSpace::OMPLRNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init)
-      : OMPLBaseStateSpace(dim, prob, init)
-  {
+OMPLRNStateSpace::OMPLRNStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init)
+    : OMPLBaseStateSpace(dim, prob, init)
+{
     setName("OMPLRNStateSpace");
     addSubspace(
         ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)),
@@ -45,50 +45,49 @@ namespace exotica
     ompl::base::RealVectorBounds bounds(dim);
     for (int i = 0; i < dim; i++)
     {
-      bounds.setHigh(i, prob->getBounds()[i + dim]);
-      bounds.setLow(i, prob->getBounds()[i]);
+        bounds.setHigh(i, prob->getBounds()[i + dim]);
+        bounds.setLow(i, prob->getBounds()[i]);
     }
     getSubspace(0)->as<ob::RealVectorStateSpace>()->setBounds(bounds);
     lock();
-  }
-
-  ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler() const
-  {
-    return CompoundStateSpace::allocDefaultStateSampler();
-  }
-
-  void OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
-      ompl::base::State *state) const
-  {
-    if (!state)
-    {
-      throw_pretty("Invalid state!");
-    }
-    if (q.rows() != (int) getDimension())
-    {
-      throw_pretty(
-          "State vector ("<<q.rows()<<") and internal state ("<<(int)getDimension()<<") dimension disagree");
-    }
-    memcpy(state->as<OMPLRNStateSpace::StateType>()->getRNSpace().values,
-        q.data(), sizeof(double) * q.rows());
-  }
-
-  void OMPLRNStateSpace::OMPLToExoticaState(const ompl::base::State *state,
-      Eigen::VectorXd &q) const
-  {
-    if (!state)
-    {
-      throw_pretty("Invalid state!");
-    }
-    if (q.rows() != (int) getDimension()) q.resize((int) getDimension());
-    memcpy(q.data(),
-        state->as<OMPLRNStateSpace::StateType>()->getRNSpace().values,
-        sizeof(double) * q.rows());
-  }
-
-  void OMPLRNStateSpace::stateDebug(const Eigen::VectorXd &q) const
-  {
-    //  TODO
-  }
 }
 
+ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler() const
+{
+    return CompoundStateSpace::allocDefaultStateSampler();
+}
+
+void OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
+                                          ompl::base::State *state) const
+{
+    if (!state)
+    {
+        throw_pretty("Invalid state!");
+    }
+    if (q.rows() != (int)getDimension())
+    {
+        throw_pretty(
+            "State vector (" << q.rows() << ") and internal state (" << (int)getDimension() << ") dimension disagree");
+    }
+    memcpy(state->as<OMPLRNStateSpace::StateType>()->getRNSpace().values,
+           q.data(), sizeof(double) * q.rows());
+}
+
+void OMPLRNStateSpace::OMPLToExoticaState(const ompl::base::State *state,
+                                          Eigen::VectorXd &q) const
+{
+    if (!state)
+    {
+        throw_pretty("Invalid state!");
+    }
+    if (q.rows() != (int)getDimension()) q.resize((int)getDimension());
+    memcpy(q.data(),
+           state->as<OMPLRNStateSpace::StateType>()->getRNSpace().values,
+           sizeof(double) * q.rows());
+}
+
+void OMPLRNStateSpace::stateDebug(const Eigen::VectorXd &q) const
+{
+    //  TODO
+}
+}

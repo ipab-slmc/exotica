@@ -36,68 +36,69 @@
 
 #include <exotica/MotionSolver.h>
 #include <ompl_solver/OMPLsolverInitializer.h>
-#include "ompl_solver/OMPLBaseSolver.h"
 #include <ros/package.h>
 #include <fstream>
+#include "ompl_solver/OMPLBaseSolver.h"
 
 #define REGISTER_OMPL_SOLVER_TYPE(TYPE, DERIV) EXOTICA_REGISTER(std::string, exotica::MotionSolver, TYPE, DERIV)
 
 namespace exotica
 {
-  class OMPLsolver: public MotionSolver, Instantiable<OMPLsolverInitializer>
-  {
-    public:
-      OMPLsolver();
+class OMPLsolver : public MotionSolver, Instantiable<OMPLsolverInitializer>
+{
+public:
+    OMPLsolver();
 
-      virtual void Instantiate(OMPLsolverInitializer& init);
+    virtual void Instantiate(OMPLsolverInitializer& init);
 
-      /*
+    /*
        * \breif Default destructor
        */
-      virtual ~OMPLsolver();
+    virtual ~OMPLsolver();
 
-      /**
+    /**
        * \brief Binds the solver to a specific problem which must be pre-initalised
        * @param pointer Shared pointer to the motion planning problem
        * @return        Successful if the problem is a valid AICOProblem
        */
-      virtual void specifyProblem(PlanningProblem_ptr pointer);
+    virtual void specifyProblem(PlanningProblem_ptr pointer);
 
-      void Solve(Eigen::MatrixXd & solution);
+    void Solve(Eigen::MatrixXd& solution);
 
-      /*
+    /*
        * \brief Get planning problem
        */
-      const SamplingProblem_ptr getProblem() const
-      {
+    const SamplingProblem_ptr getProblem() const
+    {
         return prob_;
-      }
+    }
 
-      /*
+    /*
        * \brief Get planning algorithm
        */
-      const std::string getAlgorithm()
-      {
+    const std::string getAlgorithm()
+    {
         return base_solver_->getPlannerName();
-      }
+    }
 
-      const OMPLBaseSolver_ptr getOMPLSolver()
-      {
+    const OMPLBaseSolver_ptr getOMPLSolver()
+    {
         return base_solver_;
-      }
+    }
 
-      virtual std::string print(std::string prepend);
+    virtual std::string print(std::string prepend);
 
-      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon());
-    private:
-      SamplingProblem_ptr prob_; //!< Shared pointer to the planning problem.
+    virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon());
 
-      OMPLBaseSolver_ptr base_solver_;
+private:
+    SamplingProblem_ptr prob_;  //!< Shared pointer to the planning problem.
 
-      OMPLsolverInitializer parameters_;
-  };
+    OMPLBaseSolver_ptr base_solver_;
 
-  typedef std::shared_ptr<exotica::OMPLsolver> OMPLsolver_ptr;
+    OMPLsolverInitializer parameters_;
+};
+
+typedef std::shared_ptr<exotica::OMPLsolver> OMPLsolver_ptr;
 
 } /* namespace exotica */
 

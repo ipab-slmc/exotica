@@ -33,8 +33,8 @@
 #ifndef EXOTICA_OBJECT_FACTORY_H
 #define EXOTICA_OBJECT_FACTORY_H
 
-#include <memory>
 #include <map>
+#include <memory>
 #include <typeinfo>
 
 #include <exotica/Object.h>
@@ -48,111 +48,110 @@
  * @param TYPE    The name to identify the class (should be of type IDENT)
  * @param DERIV   The Derived Class type (should inherit from BASE)
  */
-#define EXOTICA_REGISTER(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) ("exotica/" TYPE, [] () -> BASE * { return new DERIV(); }, #BASE ); \
+#define EXOTICA_REGISTER(BASE, TYPE, DERIV)                                                                                              \
+    static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__)("exotica/" TYPE, []() -> BASE* { return new DERIV(); }, #BASE); \
     PLUGINLIB_EXPORT_CLASS(DERIV, BASE)
 
-#define EXOTICA_REGISTER_CORE(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__) ("exotica/" TYPE, [] () -> BASE * { return new DERIV(); }, #BASE );
-
+#define EXOTICA_REGISTER_CORE(BASE, TYPE, DERIV) static exotica::Registrar<BASE> EX_UNIQ(object_registrar_, __LINE__)("exotica/" TYPE, []() -> BASE* { return new DERIV(); }, #BASE);
 
 namespace exotica
 {
-  template<typename BaseClass> class Registrar;
-  /**
+template <typename BaseClass>
+class Registrar;
+/**
    * \brief Templated Object factory for Default-constructible classes. The Factory is itself a singleton.
    * @param BaseClass  The Base Object type
    */
-  template<class BaseClass>
-  class Factory: public Object
-  {
-    public:
-      friend class Registrar<BaseClass>;
-      /**
+template <class BaseClass>
+class Factory : public Object
+{
+public:
+    friend class Registrar<BaseClass>;
+    /**
        * \brief Singleton implementation: returns a reference to a singleton instance of the instantiated class
        */
-      static Factory<BaseClass> & Instance(void)
-      {
-        static Factory<BaseClass> factory_; //!< Declared static so will only be created once
-        return factory_;    //!< At other times, just return the reference to it
-      }
-      ;
+    static Factory<BaseClass>& Instance(void)
+    {
+        static Factory<BaseClass> factory_;  //!< Declared static so will only be created once
+        return factory_;                     //!< At other times, just return the reference to it
+    };
 
-      /**
+    /**
        * \brief Registers a new derived class type
        * @param type[in]    The name of the class (string): must be a unique identifier
        * @param creator[in] A pointer to the creator function
        */
-      void registerType(const std::string & type, BaseClass * (*creator_function)())
-      {
-        if (type_registry_.find(type) == type_registry_.end()) //!< If it does not already exist
+    void registerType(const std::string& type, BaseClass* (*creator_function)())
+    {
+        if (type_registry_.find(type) == type_registry_.end())  //!< If it does not already exist
         {
-          type_registry_[type] = creator_function;
+            type_registry_[type] = creator_function;
         }
-        else //!< I.e. it exists, then cannot re-create it!
+        else  //!< I.e. it exists, then cannot re-create it!
         {
-          throw_pretty("Trying to register already existing type '"<<type<<"'!");
+            throw_pretty("Trying to register already existing type '" << type << "'!");
         }
-      }
+    }
 
+    std::shared_ptr<BaseClass> createInstance(const std::string& type)
+    {
+        auto it = type_registry_.find(type);  //!< Attempt to find it
+        if (it != type_registry_.end())       //!< If exists
+        {
+            return std::shared_ptr<BaseClass>(it->second());
+        }
+        else
+        {
+            throw_pretty("This factory does not recognize type '" << type << "' (" + base_type_ + ")");
+        }
+    }
 
-      std::shared_ptr<BaseClass> createInstance(const std::string & type)
-      {
-          auto it = type_registry_.find(type);  //!< Attempt to find it
-          if (it != type_registry_.end())       //!< If exists
-          {
-             return std::shared_ptr<BaseClass>(it->second());
-          }
-          else
-          {
-            throw_pretty("This factory does not recognize type '"<< type << "' ("+base_type_+")");
-          }
-      }
-
-      /**
+    /**
        * \brief Lists the valid implementations which are available and registered
        */
-      std::vector<std::string> getDeclaredClasses()
-      {
+    std::vector<std::string> getDeclaredClasses()
+    {
         std::vector<std::string> DeclaredClasses;
         for (auto it = type_registry_.begin(); it != type_registry_.end(); it++)
         {
-          DeclaredClasses.push_back(it->first);
+            DeclaredClasses.push_back(it->first);
         }
         return DeclaredClasses;
-      }
+    }
 
-    private:
-      /**
+private:
+    /**
        * \brief Private Constructor
        */
-      inline explicit Factory<BaseClass>()
-      {
-      }
+    inline explicit Factory<BaseClass>()
+    {
+    }
 
-      /** The Map containing the register of the different types of classes **/
-      std::map<std::string, BaseClass * (*)()> type_registry_;
-      std::string base_type_;
-  };
+    /** The Map containing the register of the different types of classes **/
+    std::map<std::string, BaseClass* (*)()> type_registry_;
+    std::string base_type_;
+};
 
-  /**
+/**
    * \brief Registration Class for the object type: Also templated:
    * @param I   The Identifier type (typically string)
    * @param BaseClass  The Base object type (required for the sake of the singleton factory)
    */
-  template<typename BaseClass>
-  class Registrar
-  {
-    public:
-      /**
+template <typename BaseClass>
+class Registrar
+{
+public:
+    /**
        * \brief Public Constructor which is only used to register the new task type
        * @param name      The name for the new class type
        * @param creator   The creator function for the DERIVED class type but which returns a pointer to the base-class type!
        */
-      Registrar(const std::string & name, BaseClass * (*creator)(), const std::string& base_type)
-      {
+    Registrar(const std::string& name, BaseClass* (*creator)(), const std::string& base_type)
+    {
         Factory<BaseClass>::Instance().base_type_ = base_type;
         Factory<BaseClass>::Instance().registerType(name, creator);
-      }
-  };
+    }
+};
 }
 
 #endif

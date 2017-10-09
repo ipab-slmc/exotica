@@ -45,19 +45,19 @@ void run()
     // Scene using joint group 'arm'
     SceneInitializer scene("MyScene", "arm", false, "", "{exotica}/resources/robots/lwr_simplified.urdf", "{exotica}/resources/robots/lwr_simplified.srdf");
     // End-effector task map with two position frames
-    EffFrameInitializer map("Position",false,
-    {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0 ,0 ,0 ,0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
+    EffFrameInitializer map("Position", false,
+                            {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
     // Create a task using the map above (goal will be specified later)
     Eigen::VectorXd W(7);
-    W << 7,6,5,4,3,2,1;
+    W << 7, 6, 5, 4, 3, 2, 1;
 
-    UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,false,{map},W);
+    UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
     IKsolverInitializer solver("MySolver");
     solver.C = 1e-3;
     solver.MaxIt = 1;
     solver.MaxStep = 0.1;
 
-    HIGHLIGHT_NAMED("ManualLoader","Loaded from a hardcoded specialized initializer.");
+    HIGHLIGHT_NAMED("ManualLoader", "Loaded from a hardcoded specialized initializer.");
 
     // Initialize
 
@@ -68,11 +68,9 @@ void run()
     any_solver->specifyProblem(any_problem);
     UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
-
     // Create the initial configuration
     Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->N);
     Eigen::MatrixXd solution;
-
 
     ROS_INFO_STREAM("Calling solve() in an infinite loop");
 
@@ -88,15 +86,15 @@ void run()
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
         my_problem->y = {0.6,
-                -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-                0.5 + sin(t * M_PI * 0.5) * 0.2 ,0 ,0 ,0};
+                         -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                         0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
 
         // Solve the problem using the IK solver
         my_problem->setStartState(q);
         any_solver->Solve(solution);
 
         double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
+        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in " << time << "s. Solution [" << solution << "]");
         q = solution.row(solution.rows() - 1);
 
         my_problem->Update(q);

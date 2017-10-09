@@ -34,87 +34,89 @@
 #ifndef EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLIMPSOLVER_H_
 #define EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLIMPSOLVER_H_
 
-#include "ompl_solver/OMPLBaseSolver.h"
+#include <exotica/Property.h>
+#include <pluginlib/class_loader.h>
 #include "ompl_imp_solver/OMPLRNStateSpace.h"
 #include "ompl_imp_solver/OMPLSE3RNStateSpace.h"
-#include <pluginlib/class_loader.h>
-#include <exotica/Property.h>
+#include "ompl_solver/OMPLBaseSolver.h"
 
 namespace exotica
 {
-  /*
+/*
    * The implementation of basic EXOTica-OMPL solver
    */
-  class OMPLImpSolver: public OMPLBaseSolver
-  {
-    public:
-      /*
+class OMPLImpSolver : public OMPLBaseSolver
+{
+public:
+    /*
        * \brief Default constructor
        */
-      OMPLImpSolver();
+    OMPLImpSolver();
 
-      virtual void initialiseSolver(Initializer& init);
+    virtual void initialiseSolver(Initializer &init);
 
-      /*
+    /*
        * \brief Solve function
        * @param x0      start configuration
        * @param sol     Solution
        */
-      virtual bool solve(Eigen::VectorXdRefConst x0, Eigen::MatrixXd &sol);
+    virtual bool solve(Eigen::VectorXdRefConst x0, Eigen::MatrixXd &sol);
 
-      /*
+    /*
        * \brief Set goal state to the sampled state space
        * @param qT      Goal state in sampled state space
        * @param eps     Numerical tolerance
        */
-      virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon());
+    virtual void setGoalState(Eigen::VectorXdRefConst qT, const double eps = std::numeric_limits<double>::epsilon());
 
-      /*
+    /*
        * \brief Get the planner's name
        * @return  Planner's name
        */
-      virtual std::string getPlannerName();
+    virtual std::string getPlannerName();
 
-      /*
+    /*
        * \brief Assign exotica problem to this solver
        * @param prob    EXOTica Planning Problem pointer
        */
-      virtual void specifyProblem(const SamplingProblem_ptr &prob);
-    protected:
-      /*
+    virtual void specifyProblem(const SamplingProblem_ptr &prob);
+
+protected:
+    /*
        * \brief Register default ompl planning algorithms
        */
-      virtual void registerDefaultPlanners();
+    virtual void registerDefaultPlanners();
 
-      /*
+    /*
        * \brief Allocate state space sampler
        */
-      ompl::base::StateSamplerPtr allocStateSampler(const ompl::base::StateSpace *ss);
+    ompl::base::StateSamplerPtr allocStateSampler(const ompl::base::StateSpace *ss);
 
-      /*
+    /*
        * \biref Converts OMPL trajectory into Eigen Matrix
        * @param pg      OMPL trajectory
        * @param traj    Eigen Matrix trajectory
        */
-      virtual void convertPath(const og::PathGeometric &pg, Eigen::MatrixXd & traj);
+    virtual void convertPath(const og::PathGeometric &pg, Eigen::MatrixXd &traj);
 
-      /*
+    /*
        * \brief Simplifying the trajectory
        * @param pg      OMPL geometric path
        * @param
        */
-      virtual void getSimplifiedPath(og::PathGeometric &pg, Eigen::MatrixXd & traj, ob::PlannerTerminationCondition &ptc);
-      virtual ompl::base::GoalPtr constructGoal();
-      std::string algorithm_;
-      std::string range_;
-      std::string object_name_;
-      Eigen::VectorXd qT_;
-      int min_traj_length_;
+    virtual void getSimplifiedPath(og::PathGeometric &pg, Eigen::MatrixXd &traj, ob::PlannerTerminationCondition &ptc);
+    virtual ompl::base::GoalPtr constructGoal();
+    std::string algorithm_;
+    std::string range_;
+    std::string object_name_;
+    Eigen::VectorXd qT_;
+    int min_traj_length_;
 
-      OMPLsolverInitializer init_;
-    private:
-      BASE_TYPE BaseType;
-  };
+    OMPLsolverInitializer init_;
+
+private:
+    BASE_TYPE BaseType;
+};
 }
 
 #endif /* EXOTICA_EXOTATIONS_SOLVERS_OMPL_SOLVER_INCLUDE_OMPL_SOLVER_OMPLIMPSOLVER_H_ */

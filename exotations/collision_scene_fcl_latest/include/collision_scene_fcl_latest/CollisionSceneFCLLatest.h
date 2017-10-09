@@ -43,11 +43,9 @@ namespace exotica
 class CollisionSceneFCLLatest : public CollisionScene
 {
 public:
-
     struct CollisionData
     {
         CollisionData(CollisionSceneFCLLatest* scene) : Scene(scene), Self(true) {}
-
         fcl::CollisionRequestd Request;
         fcl::CollisionResultd Result;
         CollisionSceneFCLLatest* Scene;
@@ -58,7 +56,6 @@ public:
     struct DistanceData
     {
         DistanceData(CollisionSceneFCLLatest* scene) : Scene(scene), Self(true), Distance{1e300} {}
-
         fcl::DistanceRequestd Request;
         fcl::DistanceResultd Result;
         CollisionSceneFCLLatest* Scene;
@@ -109,7 +106,7 @@ public:
        */
     virtual std::vector<std::string> getCollisionRobotLinks();
 
-    virtual Eigen::Vector3d getTranslation(const std::string & name);
+    virtual Eigen::Vector3d getTranslation(const std::string& name);
 
     ///
     /// \brief Creates the collision scene from kinematic elements.
@@ -123,7 +120,6 @@ public:
     virtual void updateCollisionObjectTransforms();
 
 private:
-
     static std::shared_ptr<fcl::CollisionObjectd> constructFclCollisionObject(std::shared_ptr<KinematicElement> element);
     static void checkCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data);
     static void computeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data);
@@ -136,4 +132,4 @@ private:
 typedef std::shared_ptr<CollisionSceneFCLLatest> CollisionSceneFCLLatest_ptr;
 }
 
-#endif // CollisionSceneFCLLatest_H
+#endif  // CollisionSceneFCLLatest_H

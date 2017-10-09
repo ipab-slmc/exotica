@@ -7,4 +7,4 @@ extern const char Version[];
 extern const char Branch[];
 }
 
-#endif // VERSION_H
+#endif  // VERSION_H

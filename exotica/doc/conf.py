@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 extensions = ['sphinx.ext.imgmath',
-    'sphinx.ext.githubpages', 'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.napoleon']
+              'sphinx.ext.githubpages',
+              'sphinx.ext.autodoc',
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.napoleon']
 
 autosummary_generate = True
 
@@ -37,7 +38,6 @@ html_context = {'show_source': False}
 # html_static_path = ['_static']
 
 html_extra_path = ['doxygen_cpp']
-
 
 
 # -- Options for HTMLHelp output ------------------------------------------

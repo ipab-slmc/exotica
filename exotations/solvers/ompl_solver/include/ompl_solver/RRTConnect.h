@@ -10,14 +10,16 @@
 
 #include <ompl_solver/ompl_solver.h>
 
-namespace exotica {
-class RRTConnect: public OMPLsolver, Instantiable<RRTConnectInitializer> {
+namespace exotica
+{
+class RRTConnect : public OMPLsolver, Instantiable<RRTConnectInitializer>
+{
 public:
-	RRTConnect();
+    RRTConnect();
 
-	virtual ~RRTConnect();
+    virtual ~RRTConnect();
 
-	virtual void Instantiate(RRTConnectInitializer& init);
+    virtual void Instantiate(RRTConnectInitializer& init);
 };
 }
 

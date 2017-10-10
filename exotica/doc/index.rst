@@ -43,6 +43,7 @@ Overview
    Quickstart
    Setting-up-ROSlaunch
    Using-EXOTica
+   Code-Formatting
    Doxygen C++ <./doxygen_cpp/index.html#http://>
 
 

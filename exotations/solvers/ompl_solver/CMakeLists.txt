@@ -1,24 +1,19 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ompl_solver)
 
-add_definitions(-DEXOTICA_DEBUG_MODE)
 find_package(OMPL REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
-  pluginlib
 )
 
-find_package(Boost REQUIRED COMPONENTS system)
-
-file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
 catkin_package(
-  INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/include
-  LIBRARIES ompl_base_solver
-  CATKIN_DEPENDS exotica pluginlib ompl
+  INCLUDE_DIRS include
+  LIBRARIES ompl_solver
+  CATKIN_DEPENDS exotica ompl
 )
 
-AddInitializer(OMPLsolver)
+AddInitializer(OMPLsolver RRTConnect)
 GenInitializers()
 
 include_directories(
@@ -28,34 +23,22 @@ include_directories(
   SYSTEM
 )
 
-link_directories(${catkin_LIBRARY_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
-link_directories(${OMPL_LIBRARY_DIRS})
-
-add_library(ompl_base_solver
-   src/OMPLBaseSolver.cpp
-)
-
-target_link_libraries(ompl_base_solver
-   ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES}
-)
-
-install(TARGETS ompl_base_solver
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-install(DIRECTORY include/ DESTINATION include)
+link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OMPL_LIBRARY_DIRS})
 
 add_library(ompl_solver
-   src/OMPLsolver.cpp
+  src/ompl_solver/ompl_exo.cpp
+  src/ompl_solver/ompl_solver.cpp
+  src/ompl_solver/RRTConnect.cpp
+)
+target_link_libraries(ompl_solver
+  ${catkin_LIBRARIES} ${OMPL_LIBRARIES}
 )
 
-target_link_libraries(ompl_solver
-   ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${OMPL_LIBRARIES} ompl_base_solver
-)
 add_dependencies(ompl_solver ompl_solver_initializers)
 
 install(TARGETS ompl_solver
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(FILES exotica_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+

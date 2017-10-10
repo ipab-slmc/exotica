@@ -1,0 +1,17 @@
+<launch>
+
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg     if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
+
+  <param name="robot_description" textfile="$(find exotica)/resources/robots/lwr_simplified.urdf" />
+  <param name="robot_description_semantic" textfile="$(find exotica)/resources/robots/lwr_simplified.srdf" />
+
+  <node launch-prefix="$(arg launch_prefix)" pkg="exotica_examples" type="PlannerDemo" name="OMPLPlannerDemoExampleNode" output="screen" >
+    <param name="ConfigurationFile" type="string" value="$(find exotica)/resources/configs/ompl_solver_demo.xml" />
+    <param name="Solver" type="string" value="MySolver" />
+    <param name="Problem" type="string" value="MyProblem" />
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find exotica)/resources/rviz.rviz" />
+</launch>

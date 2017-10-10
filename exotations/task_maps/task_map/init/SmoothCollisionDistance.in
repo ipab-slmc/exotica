@@ -1,0 +1,4 @@
+extend <exotica/TaskMap>
+Optional bool SelfCollision = false;
+Optional double Margin = 0.1;
+Optional bool Linear = false;

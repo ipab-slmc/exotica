@@ -39,6 +39,8 @@ AddInitializer(
   joint_jerk_backward_difference
   look_at
   manipulability
+
+  SmoothCollisionDistance
 )
 GenInitializers()
 
@@ -81,6 +83,8 @@ set(SOURCES
     src/joint_jerk_backward_difference.cpp
     src/look_at.cpp
     src/manipulability.cpp
+
+    src/SmoothCollisionDistance.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

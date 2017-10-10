@@ -23,6 +23,7 @@ install:
 - sudo apt-get install -qq g++-4.9
 - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
 - sudo apt-get install -qq -y python-rosdep python-catkin-tools python-catkin-pkg
+- sudo apt-get install -qq -y doxygen
 - sudo rosdep init
 - rosdep update
 - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO

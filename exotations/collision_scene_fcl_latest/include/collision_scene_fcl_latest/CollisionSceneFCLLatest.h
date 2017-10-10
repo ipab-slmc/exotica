@@ -34,6 +34,7 @@
 #define CollisionSceneFCLLatest_H
 
 #include <exotica/CollisionScene.h>
+#include <exotica/Tools/Conversions.h>
 #include <fcl/fcl.h>
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
@@ -121,13 +122,13 @@ public:
     virtual void updateCollisionObjectTransforms();
 
 private:
-    static std::shared_ptr<fcl::CollisionObjectd> constructFclCollisionObject(std::shared_ptr<KinematicElement> element);
+    std::shared_ptr<fcl::CollisionObjectd> constructFclCollisionObject(int i, std::shared_ptr<KinematicElement> element);
     static void checkCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data);
     static void computeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data);
 
     std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> fcl_cache_;
-
     std::vector<fcl::CollisionObjectd*> fcl_objects_;
+    std::vector<std::shared_ptr<KinematicElement>> kinematic_elements_;
 };
 
 typedef std::shared_ptr<CollisionSceneFCLLatest> CollisionSceneFCLLatest_ptr;

@@ -45,8 +45,8 @@ private:
 struct CollisionProxy
 {
     CollisionProxy() : e1(nullptr), e2(nullptr), distance(0) {}
-    KinematicElement* e1;
-    KinematicElement* e2;
+    std::shared_ptr<KinematicElement> e1;
+    std::shared_ptr<KinematicElement> e2;
     Eigen::Vector3d contact1;
     Eigen::Vector3d normal1;
     Eigen::Vector3d contact2;

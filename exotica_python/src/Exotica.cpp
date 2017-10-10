@@ -603,8 +603,8 @@ PYBIND11_MODULE(_pyexotica, module)
         moveit_msgs::PlanningSceneConstPtr myPtr(new moveit_msgs::PlanningScene(ps));
         instance->setCollisionScene(myPtr);
     });
-    scene.def("loadScene", &Scene::loadScene);
-    scene.def("loadSceneFile", &Scene::loadSceneFile);
+    scene.def("loadScene", &Scene::loadScene, py::arg("sceneString"), py::arg("updateCollisionScene") = true);
+    scene.def("loadSceneFile", &Scene::loadSceneFile, py::arg("fileName"), py::arg("updateCollisionScene") = true);
     scene.def("getScene", &Scene::getScene);
     scene.def("cleanScene", &Scene::cleanScene);
     scene.def("isStateValid", [](Scene* instance, bool self, double safe_distance) { return instance->getCollisionScene()->isStateValid(self, safe_distance); }, py::arg("self") = true, py::arg("SafeDistance") = 0.0);

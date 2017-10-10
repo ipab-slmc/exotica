@@ -69,28 +69,29 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                 const double& d = phi(i);
 
                 // Jacobian
-                // J.row(i) = minDistance * Kinematics.J(i).data;
-                // J.row(i);
+                KDL::Frame arel = KDL::Frame(proxy.e1->Frame.Inverse(KDL::Vector(
+                    proxy.contact1(0), proxy.contact1(1), proxy.contact1(2))));
+                KDL::Frame brel = KDL::Frame(proxy.e2->Frame.Inverse(KDL::Vector(
+                    proxy.contact2(0), proxy.contact2(1), proxy.contact2(2))));
 
-                KDL::Vector arel = Kinematics.Phi(i).Inverse(KDL::Vector(
-                    proxy.contact1(0), proxy.contact1(1), proxy.contact1(2)));
-                KDL::Vector brel = Kinematics.Phi(i).Inverse(KDL::Vector(
-                    proxy.contact2(0), proxy.contact2(1), proxy.contact2(2)));
-
-                // dnormal.referTo(proxy.normal1.p, 3);
-                // dnormal.reshape(1, 3);
-                // if (!linear) {
-                //   jacobian(J, a->body->index, &arel); // relative jacobian, pose in
-                //   link
-                //   grad -= (2. * d) / margin * (dnormal * J);
-                //   jacobian(J, b->body->index, &brel);
-                //   grad += (2. * d) / margin * (dnormal * J);
-                // } else {
-                //   jacobian(J, a->body->index, &arel);
-                //   grad -= 1 / margin * (dnormal * J);
-                //   jacobian(J, b->body->index, &brel);
-                //   grad += 1 / margin * (dnormal * J);
-                // }
+                if (!linear_)
+                {
+                    Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+                        proxy.e1, arel, nullptr, KDL::Frame());
+                    J.row(i) -= (2. * d) / margin_ * (proxy.normal1.transpose() * tmpJ);
+                    tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
+                                                        KDL::Frame());
+                    J.row(i) += (2. * d) / margin_ * (proxy.normal1.transpose() * tmpJ);
+                }
+                else
+                {
+                    Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+                        proxy.e1, arel, nullptr, KDL::Frame());
+                    J.row(i) -= 1 / margin_ * (proxy.normal1.transpose() * tmpJ);
+                    tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
+                                                        KDL::Frame());
+                    J.row(i) += 1 / margin_ * (proxy.normal1.transpose() * tmpJ);
+                }
             }
         }
     }
@@ -127,11 +128,12 @@ void SmoothCollisionDistance::Initialize()
             robotKinematicElements.push_back(element);
         }
 
-        if (debug_)
-            HIGHLIGHT_NAMED("Smooth Collision Distance",
-                            "Joint=" << element->Segment.getJoint().getName()
-                                     << " - Child Link=" << element->Segment.getName()
-                                     << " - Controlled: " << isControlled);
+        // if (debug_)
+        //   HIGHLIGHT_NAMED("Smooth Collision Distance",
+        //                   "Joint=" << element->Segment.getJoint().getName()
+        //                            << " - Child Link=" <<
+        //                            element->Segment.getName()
+        //                            << " - Controlled: " << isControlled);
     }
 
     dim_ = static_cast<int>(scene_->getSolver().getJointNames().size());

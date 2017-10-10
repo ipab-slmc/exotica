@@ -43,7 +43,11 @@ Overview
    Quickstart
    Setting-up-ROSlaunch
    Using-EXOTica
+   Documentation
+   Code-Formatting
    Doxygen C++ <./doxygen_cpp/index.html#http://>
+
+.. Python-API
 
 
 .. Indices and tables

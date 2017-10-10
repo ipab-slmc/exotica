@@ -52,6 +52,9 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                                      Eigen::MatrixXdRef J)
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
+    if (!scene_->alwaysUpdatesCollisionScene())
+        cscene_->updateCollisionObjectTransforms();
+
     phi.setZero();
     J.setZero();
 

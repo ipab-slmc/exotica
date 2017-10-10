@@ -586,7 +586,7 @@ KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> elementA, const K
 {
     KinematicFrame frame;
     frame.FrameA = elementA;
-    frame.FrameB = elementB;
+    frame.FrameB = (elementB == nullptr) ? Root : elementB;
     frame.FrameAOffset = offsetA;
     frame.FrameBOffset = offsetB;
     return FK(frame);
@@ -617,7 +617,7 @@ Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> elemen
 {
     KinematicFrame frame;
     frame.FrameA = elementA;
-    frame.FrameB = elementB;
+    frame.FrameB = (elementB == nullptr) ? Root : elementB;
     frame.FrameAOffset = offsetA;
     frame.FrameBOffset = offsetB;
     KDL::Jacobian ret(NumControlledJoints);

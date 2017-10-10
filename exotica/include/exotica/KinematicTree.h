@@ -186,6 +186,7 @@ public:
     void AddEnvironmentElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
     void UpdateModel();
     void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
+    int IsControlled(std::shared_ptr<KinematicElement> Joint);
 
     Eigen::VectorXd getModelState();
     std::map<std::string, double> getModelStateMap();
@@ -205,7 +206,6 @@ public:
 private:
     void BuildTree(const KDL::Tree& RobotKinematics);
     void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
-    int IsControlled(std::shared_ptr<KinematicElement> Joint);
     void UpdateTree();
     void UpdateFK();
     void UpdateJ();

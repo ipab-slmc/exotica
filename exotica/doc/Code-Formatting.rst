@@ -2,7 +2,7 @@
 Code Formatting
 ***************
 
-We use ``clang-format-3.8`` to automatically format source files and headers _prior_ to committing any files. The format is specified in the ``.clang-format`` file provided in the root of the repository.
+We use ``clang-format-3.8`` to automatically format source files and headers *prior* to committing any files. The format is specified in the ``.clang-format`` file provided in the root of the repository.
 
 You can install ``clang-format-3.8`` e.g. via your package managers:
 

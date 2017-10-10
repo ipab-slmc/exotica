@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 extensions = ['sphinx.ext.imgmath',
-    'sphinx.ext.githubpages']
+    'sphinx.ext.githubpages', 'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon']
+
+autosummary_generate = True
 
 templates_path = ['_templates']
 source_suffix = ['.rst', '.md']
@@ -13,7 +18,7 @@ author = u'Vladimir Ivan, Yiming Yang, Wolfgang Merkt, Michael Camilleri, Sethu 
 # The short X.Y version.
 version = u'5.0'
 # The full version, including alpha/beta/rc tags.
-release = u'beta1'
+release = u'5.0-beta1'
 
 language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

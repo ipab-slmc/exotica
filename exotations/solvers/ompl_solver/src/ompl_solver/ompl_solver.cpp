@@ -35,6 +35,12 @@ void OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
 
     ompl_simple_setup_->getSpaceInformation()->setup();
     ompl_simple_setup_->setup();
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
+        ompl_simple_setup_->getPlanner()->params().setParam("range",
+                                                            init_.Range);
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("goal_bias"))
+        ompl_simple_setup_->getPlanner()->params().setParam("goal_bias",
+                                                            init_.GoalBias);
 }
 
 void OMPLsolver::preSolve()

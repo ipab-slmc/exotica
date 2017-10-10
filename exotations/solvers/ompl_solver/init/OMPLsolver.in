@@ -1,3 +1,9 @@
 extend <exotica/MotionSolver>
 Optional bool Smooth = true;
 Optional double Timeout = 60.0;
+Optional bool SelfCollisionCheck = false;
+Optional std::string Range = "1";
+Optional bool UseGoalBias = false;
+Optional std::string GoalBias = "0.05";
+Optional int MaxGoalSamplingAttempts = 500;
+Optional Eigen::VectorXd ImportanceWeights = Eigen::VectorXd();

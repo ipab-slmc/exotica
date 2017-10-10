@@ -13,7 +13,7 @@ catkin_package(
   CATKIN_DEPENDS exotica ompl
 )
 
-AddInitializer(OMPLsolver RRTConnect)
+AddInitializer(OMPLsolver)
 GenInitializers()
 
 include_directories(
@@ -28,7 +28,7 @@ link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OMPL_LIBRARY_DIR
 add_library(ompl_solver
   src/ompl_solver/ompl_exo.cpp
   src/ompl_solver/ompl_solver.cpp
-  src/ompl_solver/RRTConnect.cpp
+  src/ompl_solver/ompl_native_solvers.cpp
 )
 target_link_libraries(ompl_solver
   ${catkin_LIBRARIES} ${OMPL_LIBRARIES}

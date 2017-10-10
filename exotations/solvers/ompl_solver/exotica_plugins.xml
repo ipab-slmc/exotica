@@ -1,5 +1,14 @@
 <library path="lib/libompl_solver">
+  <class name="exotica/RRT" type="exotica::RRT" base_class_type="exotica::MotionSolver">
+    <description>RRT</description>
+  </class>
   <class name="exotica/RRTConnect" type="exotica::RRTConnect" base_class_type="exotica::MotionSolver">
-    <description>The RRTConnect</description>
+    <description>RRTConnect</description>
+  </class>
+  <class name="exotica/PRM" type="exotica::PRM" base_class_type="exotica::MotionSolver">
+    <description>Probabilistic Roadmap</description>
+  </class>
+  <class name="exotica/SBL" type="exotica::SBL" base_class_type="exotica::MotionSolver">
+    <description>Single-Query Bi-Directional Probabilistic Roadmap with Lazy Collision Checking</description>
   </class>
 </library>

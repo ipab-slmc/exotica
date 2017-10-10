@@ -9,7 +9,6 @@
 #define INCLUDE_OMPL_OMPL_SOLVER_H_
 
 #include <exotica/MotionSolver.h>
-#include <ompl_solver/OMPLsolverInitializer.h>
 #include <ompl_solver/ompl_exo.h>
 
 typedef boost::function<

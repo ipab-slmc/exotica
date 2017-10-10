@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.12)
 project(task_map)
-
-add_definitions(-DEXOTICA_DEBUG_MODE)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica

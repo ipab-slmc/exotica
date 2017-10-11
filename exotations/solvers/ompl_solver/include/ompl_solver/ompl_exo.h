@@ -18,11 +18,12 @@
 
 namespace exotica
 {
-class OMPLBaseStateSpace : public ompl::base::CompoundStateSpace
+class OMPLStateSpace : public ompl::base::CompoundStateSpace
 {
 public:
-    OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob,
-                       OMPLsolverInitializer init);
+    OMPLStateSpace(SamplingProblem_ptr &prob) : ompl::base::CompoundStateSpace(), prob_(prob)
+    {
+    }
 
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
                                     ompl::base::State *state) const = 0;
@@ -50,7 +51,7 @@ protected:
     SamplingProblem_ptr prob_;
 };
 
-class OMPLRNStateSpace : public OMPLBaseStateSpace
+class OMPLRNStateSpace : public OMPLStateSpace
 {
 public:
     class StateType : public ompl::base::CompoundStateSpace::StateType

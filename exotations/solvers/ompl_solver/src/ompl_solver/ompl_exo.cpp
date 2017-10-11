@@ -7,15 +7,13 @@
 
 #include <ompl_solver/ompl_exo.h>
 
+//PLUGINLIB_EXPORT_CLASS(exotica::OMPLRNStateSpace, exotica::OMPLStateSpace)
+
 namespace exotica
 {
-OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim,
-                                       SamplingProblem_ptr &prob, OMPLsolverInitializer init) : ompl::base::CompoundStateSpace(), prob_(prob)
-{
-}
-
 OMPLStateValidityChecker::OMPLStateValidityChecker(
-    const ompl::base::SpaceInformationPtr &si, const SamplingProblem_ptr &prob) : ompl::base::StateValidityChecker(si), prob_(prob)
+    const ompl::base::SpaceInformationPtr &si,
+    const SamplingProblem_ptr &prob) : ompl::base::StateValidityChecker(si), prob_(prob)
 {
 }
 
@@ -33,7 +31,7 @@ bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
 #ifdef ROS_KINETIC
     std::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
 #else
-    boost::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
+    boost::static_pointer_cast<OMPLStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
 #endif
 
     if (!prob_->isValid(q))
@@ -45,7 +43,7 @@ bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
 }
 
 OMPLRNStateSpace::OMPLRNStateSpace(unsigned int dim, SamplingProblem_ptr &prob,
-                                   OMPLsolverInitializer init) : OMPLBaseStateSpace(dim, prob, init)
+                                   OMPLsolverInitializer init) : OMPLStateSpace(prob)
 {
     setName("OMPLRNStateSpace");
     addSubspace(

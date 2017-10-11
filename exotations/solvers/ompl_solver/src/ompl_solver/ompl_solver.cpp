@@ -24,7 +24,6 @@ void OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
     prob_ = std::static_pointer_cast<SamplingProblem>(pointer);
 
     state_space_.reset(new OMPLRNStateSpace(prob_->N, prob_, init_));
-
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(
         ompl::base::StateValidityCheckerPtr(
@@ -71,7 +70,7 @@ void OMPLsolver::postSolve()
 void OMPLsolver::setGoalState(const Eigen::VectorXd &qT, const double eps)
 {
     ompl::base::ScopedState<> gs(state_space_);
-    state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(qT, gs.get());
+    state_space_->as<OMPLStateSpace>()->ExoticaToOMPLState(qT, gs.get());
     if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
     {
         throw_named("Goal state is not valid!");
@@ -79,7 +78,7 @@ void OMPLsolver::setGoalState(const Eigen::VectorXd &qT, const double eps)
 
     if (!ompl_simple_setup_->getSpaceInformation()->satisfiesBounds(gs.get()))
     {
-        state_space_->as<OMPLBaseStateSpace>()->stateDebug(qT);
+        state_space_->as<OMPLStateSpace>()->stateDebug(qT);
 
         // Debug state and bounds
         std::string out_of_bounds_joint_ids = "";
@@ -142,7 +141,7 @@ void OMPLsolver::getPath(Eigen::MatrixXd &traj,
 
     for (int i = 0; i < (int)pg.getStateCount(); ++i)
     {
-        state_space_->as<OMPLBaseStateSpace>()->OMPLToExoticaState(
+        state_space_->as<OMPLStateSpace>()->OMPLToExoticaState(
             pg.getState(i), tmp);
         traj.row(i) = tmp;
     }
@@ -155,8 +154,8 @@ void OMPLsolver::Solve(Eigen::MatrixXd &solution)
     setGoalState(prob_->goal_);
 
     ompl::base::ScopedState<> ompl_start_state(state_space_);
-    state_space_->as<OMPLBaseStateSpace>()->ExoticaToOMPLState(q0,
-                                                               ompl_start_state.get());
+    state_space_->as<OMPLStateSpace>()->ExoticaToOMPLState(q0,
+                                                           ompl_start_state.get());
     ompl_simple_setup_->setStartState(ompl_start_state);
 
     preSolve();

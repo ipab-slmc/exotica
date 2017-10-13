@@ -13,6 +13,8 @@
 #include <ompl/base/StateSpace.h>
 #include <ompl/base/StateValidityChecker.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
+#include <ompl/base/spaces/SE2StateSpace.h>
+#include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl_solver/OMPLsolverInitializer.h>
 
@@ -71,8 +73,88 @@ public:
             return *as<ompl::base::RealVectorStateSpace::StateType>(0);
         }
     };
-    OMPLRNStateSpace(unsigned int dim, SamplingProblem_ptr &prob,
+    OMPLRNStateSpace(SamplingProblem_ptr &prob,
                      OMPLsolverInitializer init);
+
+    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
+    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
+                                    ompl::base::State *state) const;
+    virtual void OMPLToExoticaState(const ompl::base::State *state,
+                                    Eigen::VectorXd &q) const;
+    virtual void stateDebug(const Eigen::VectorXd &q) const;
+};
+
+class OMPLSE3RNStateSpace : public OMPLStateSpace
+{
+public:
+    class StateType : public ompl::base::CompoundStateSpace::StateType
+    {
+    public:
+        StateType() : CompoundStateSpace::StateType()
+        {
+        }
+
+        const ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace() const
+        {
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
+        }
+
+        ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace()
+        {
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
+        }
+
+        const ompl::base::SE3StateSpace::StateType &SE3StateSpace() const
+        {
+            return *as<ompl::base::SE3StateSpace::StateType>(0);
+        }
+        ompl::base::SE3StateSpace::StateType &SE3StateSpace()
+        {
+            return *as<ompl::base::SE3StateSpace::StateType>(0);
+        }
+    };
+    OMPLSE3RNStateSpace(SamplingProblem_ptr &prob,
+                        OMPLsolverInitializer init);
+
+    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
+    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,
+                                    ompl::base::State *state) const;
+    virtual void OMPLToExoticaState(const ompl::base::State *state,
+                                    Eigen::VectorXd &q) const;
+    virtual void stateDebug(const Eigen::VectorXd &q) const;
+};
+
+class OMPLSE2RNStateSpace : public OMPLStateSpace
+{
+public:
+    class StateType : public ompl::base::CompoundStateSpace::StateType
+    {
+    public:
+        StateType() : CompoundStateSpace::StateType()
+        {
+        }
+
+        const ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace() const
+        {
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
+        }
+
+        ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace()
+        {
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
+        }
+
+        const ompl::base::SE2StateSpace::StateType &SE2StateSpace() const
+        {
+            return *as<ompl::base::SE2StateSpace::StateType>(0);
+        }
+        ompl::base::SE2StateSpace::StateType &SE2StateSpace()
+        {
+            return *as<ompl::base::SE2StateSpace::StateType>(0);
+        }
+    };
+    OMPLSE2RNStateSpace(SamplingProblem_ptr &prob,
+                        OMPLsolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q,

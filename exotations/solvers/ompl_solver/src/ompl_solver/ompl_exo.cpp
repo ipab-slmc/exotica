@@ -42,10 +42,11 @@ bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
     return true;
 }
 
-OMPLRNStateSpace::OMPLRNStateSpace(unsigned int dim, SamplingProblem_ptr &prob,
+OMPLRNStateSpace::OMPLRNStateSpace(SamplingProblem_ptr &prob,
                                    OMPLsolverInitializer init) : OMPLStateSpace(prob)
 {
     setName("OMPLRNStateSpace");
+    unsigned int dim = prob->N;
     addSubspace(
         ompl::base::StateSpacePtr(
             new ompl::base::RealVectorStateSpace(dim)),
@@ -98,5 +99,170 @@ void OMPLRNStateSpace::OMPLToExoticaState(const ompl::base::State *state,
 void OMPLRNStateSpace::stateDebug(const Eigen::VectorXd &q) const
 {
     //  TODO
+}
+
+OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLsolverInitializer init) : OMPLStateSpace(prob)
+{
+    setName("OMPLSE3RNStateSpace");
+    unsigned int dim = prob->N;
+    addSubspace(ompl::base::StateSpacePtr(new ompl::base::SE3StateSpace()),
+                1.0);
+    addSubspace(
+        ompl::base::StateSpacePtr(
+            new ompl::base::RealVectorStateSpace(dim - 6)),
+        1.0);
+
+    unsigned int n = dim;
+    if (prob->getBounds().size() == 2 * n)
+    {
+        ompl::base::RealVectorBounds RNbounds(dim - 6);
+        ompl::base::RealVectorBounds SE3bounds(3);
+
+        for (int i = 0; i < 3; i++)
+        {
+            SE3bounds.setHigh(i, prob->getBounds()[i + n]);
+            SE3bounds.setLow(i, prob->getBounds()[i]);
+        }
+
+        getSubspace(0)->as<ompl::base::SE3StateSpace>()->setBounds(SE3bounds);
+        for (int i = 6; i < n; i++)
+        {
+            RNbounds.setHigh(i - 6, prob->getBounds()[i + n]);
+            RNbounds.setLow(i - 6, prob->getBounds()[i]);
+        }
+        getSubspace(1)->as<ompl::base::RealVectorStateSpace>()->setBounds(
+            RNbounds);
+    }
+    else
+    {
+        ERROR(
+            "State space bounds were not specified!\n"
+            << prob->getBounds().size() << " " << n);
+    }
+    lock();
+}
+
+ompl::base::StateSamplerPtr OMPLSE3RNStateSpace::allocDefaultStateSampler() const
+{
+    return CompoundStateSpace::allocDefaultStateSampler();
+}
+
+void OMPLSE3RNStateSpace::stateDebug(const Eigen::VectorXd &q) const
+{
+    //  TODO
+}
+
+void OMPLSE3RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
+                                             ompl::base::State *state) const
+{
+    OMPLSE3RNStateSpace::StateType *statetype =
+        static_cast<OMPLSE3RNStateSpace::StateType *>(state);
+    statetype->SE3StateSpace().setXYZ(q(0), q(1), q(2));
+    KDL::Rotation tmp = KDL::Rotation::RPY(q(3), q(4), q(5));
+    tmp.GetQuaternion(statetype->SE3StateSpace().rotation().x,
+                      statetype->SE3StateSpace().rotation().y,
+                      statetype->SE3StateSpace().rotation().z,
+                      statetype->SE3StateSpace().rotation().w);
+
+    memcpy(statetype->RealVectorStateSpace().values,
+           q.segment(6, q.rows() - 6).data(), sizeof(double) * (q.rows() - 6));
+}
+
+void OMPLSE3RNStateSpace::OMPLToExoticaState(
+    const ompl::base::State *state, Eigen::VectorXd &q) const
+{
+    q.setZero(getDimension());
+    const OMPLSE3RNStateSpace::StateType *statetype =
+        static_cast<const OMPLSE3RNStateSpace::StateType *>(state);
+    memcpy(q.segment(6, q.rows() - 6).data(),
+           statetype->RealVectorStateSpace().values,
+           sizeof(double) * (q.rows() - 6));
+    q(0) = statetype->SE3StateSpace().getX();
+    q(1) = statetype->SE3StateSpace().getY();
+    q(2) = statetype->SE3StateSpace().getZ();
+
+    KDL::Rotation tmp = KDL::Rotation::Quaternion(
+        statetype->SE3StateSpace().rotation().x,
+        statetype->SE3StateSpace().rotation().y,
+        statetype->SE3StateSpace().rotation().z,
+        statetype->SE3StateSpace().rotation().w);
+    tmp.GetRPY(q(3), q(4), q(5));
+}
+
+OMPLSE2RNStateSpace::OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLsolverInitializer init) : OMPLStateSpace(prob)
+{
+    setName("OMPLSE2RNStateSpace");
+    unsigned int dim = prob->N;
+    addSubspace(ompl::base::StateSpacePtr(new ompl::base::SE2StateSpace()),
+                1.0);
+    addSubspace(
+        ompl::base::StateSpacePtr(
+            new ompl::base::RealVectorStateSpace(dim - 3)),
+        1.0);
+
+    unsigned int n = dim;
+    if (prob->getBounds().size() == 2 * n)
+    {
+        ompl::base::RealVectorBounds RNbounds(dim - 3);
+        ompl::base::RealVectorBounds SE2bounds(2);
+
+        for (int i = 0; i < 2; i++)
+        {
+            SE2bounds.setHigh(i, prob->getBounds()[i + n]);
+            SE2bounds.setLow(i, prob->getBounds()[i]);
+        }
+
+        getSubspace(0)->as<ompl::base::SE3StateSpace>()->setBounds(SE2bounds);
+        for (int i = 3; i < n; i++)
+        {
+            RNbounds.setHigh(i - 3, prob->getBounds()[i + n]);
+            RNbounds.setLow(i - 3, prob->getBounds()[i]);
+        }
+        getSubspace(1)->as<ompl::base::RealVectorStateSpace>()->setBounds(
+            RNbounds);
+    }
+    else
+    {
+        ERROR(
+            "State space bounds were not specified!\n"
+            << prob->getBounds().size() << " " << n);
+    }
+    lock();
+}
+
+ompl::base::StateSamplerPtr OMPLSE2RNStateSpace::allocDefaultStateSampler() const
+{
+    return CompoundStateSpace::allocDefaultStateSampler();
+}
+
+void OMPLSE2RNStateSpace::stateDebug(const Eigen::VectorXd &q) const
+{
+    //  TODO
+}
+
+void OMPLSE2RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q,
+                                             ompl::base::State *state) const
+{
+    OMPLSE2RNStateSpace::StateType *statetype =
+        static_cast<OMPLSE2RNStateSpace::StateType *>(state);
+    statetype->SE2StateSpace().setXY(q(0), q(1));
+    statetype->SE2StateSpace().setYaw(q(2));
+
+    memcpy(statetype->RealVectorStateSpace().values,
+           q.segment(3, q.rows() - 3).data(), sizeof(double) * (q.rows() - 3));
+}
+
+void OMPLSE2RNStateSpace::OMPLToExoticaState(
+    const ompl::base::State *state, Eigen::VectorXd &q) const
+{
+    q.setZero(getDimension());
+    const OMPLSE2RNStateSpace::StateType *statetype =
+        static_cast<const OMPLSE2RNStateSpace::StateType *>(state);
+    memcpy(q.segment(3, q.rows() - 3).data(),
+           statetype->RealVectorStateSpace().values,
+           sizeof(double) * (q.rows() - 3));
+    q(0) = statetype->SE2StateSpace().getX();
+    q(1) = statetype->SE2StateSpace().getY();
+    q(2) = statetype->SE2StateSpace().getYaw();
 }
 }

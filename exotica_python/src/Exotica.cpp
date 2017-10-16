@@ -599,10 +599,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>, double)) & Scene::setModelState, py::arg("x"), py::arg("t") = 0.0);
     scene.def("publishScene", &Scene::publishScene);
     scene.def("publishProxies", &Scene::publishProxies);
-    scene.def("setCollisionScene", [](Scene* instance, moveit_msgs::PlanningScene& ps) {
-        moveit_msgs::PlanningSceneConstPtr myPtr(new moveit_msgs::PlanningScene(ps));
-        instance->setCollisionScene(myPtr);
-    });
+    scene.def("setCollisionScene", &Scene::setCollisionScene);
     scene.def("loadScene", &Scene::loadScene, py::arg("sceneString"), py::arg("updateCollisionScene") = true);
     scene.def("loadSceneFile", &Scene::loadSceneFile, py::arg("fileName"), py::arg("updateCollisionScene") = true);
     scene.def("getScene", &Scene::getScene);

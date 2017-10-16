@@ -233,6 +233,7 @@ void Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr& scene)
 
 void Scene::updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world)
 {
+    ps_->processPlanningSceneWorldMsg(*world);
     updateSceneFrames();
     collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 }

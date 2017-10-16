@@ -616,7 +616,12 @@ PYBIND11_MODULE(_pyexotica, module)
                   return instance->getCollisionScene()->getCollisionDistance(o1);
               },
               py::arg("Object1"));
-    scene.def("updateWorld", &Scene::updateWorld);
+    scene.def("updateWorld",
+              [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
+                moveit_msgs::PlanningSceneWorldConstPtr myPtr(
+                    new moveit_msgs::PlanningSceneWorld(world));
+                instance->updateWorld(myPtr);
+              });
     scene.def("getCollisionRobotLinks", [](Scene* instance) { return instance->getCollisionScene()->getCollisionRobotLinks(); });
     scene.def("getCollisionWorldLinks", [](Scene* instance) { return instance->getCollisionScene()->getCollisionWorldLinks(); });
     scene.def("getRootFrameName", &Scene::getRootFrameName);

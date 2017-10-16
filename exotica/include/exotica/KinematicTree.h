@@ -200,7 +200,7 @@ private:
     void BuildTree(const KDL::Tree& RobotKinematics);
     void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
     int IsControlled(std::shared_ptr<KinematicElement> Joint);
-    void UpdateTree(Eigen::VectorXdRefConst x);
+    void UpdateTree();
     void UpdateFK();
     void UpdateJ();
     void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);

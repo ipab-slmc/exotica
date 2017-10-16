@@ -172,6 +172,11 @@ private:
     std::map<std::string, std::pair<std::shared_ptr<KinematicElement>, std::shared_ptr<Trajectory>>> trajectory_generators_;
 
     bool force_collision_;
+
+    /**
+     * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.
+     */
+    void updateMoveItPlanningScene();
 };
 typedef std::shared_ptr<Scene> Scene_ptr;
 //  typedef std::map<std::string, Scene_ptr> Scene_map;

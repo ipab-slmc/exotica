@@ -172,12 +172,54 @@ void Scene::Update(Eigen::VectorXdRefConst x, double t)
     if (debug_) publishScene();
 }
 
+void Scene::updateMoveItPlanningScene()
+{
+    std::map<std::string, double> modelState = getModelStateMap();
+    for (const auto& joint : modelState)
+    {
+        try
+        {
+            ps_->getCurrentStateNonConst().setVariablePosition(joint.first, joint.second);
+        }
+        catch (const std::out_of_range& e)
+        {
+            HIGHLIGHT("Could not find Kinematica joint name in MoveIt: " + joint.first);
+        }
+    }
+
+    // The floating base joint in MoveIt uses quaternion, while Kinematica uses
+    // RPY [but using rot_x, rot_y, and rot_z as joint names]. Thus, we need to
+    // fix the orientation of the virtual floating base by extracting the RPY
+    // values, converting them to quaternion, and then updating the planning
+    // scene.
+    if (kinematica_.getModelBaseType() == BASE_TYPE::FLOATING)
+    {
+        KDL::Rotation rot = KDL::Rotation::RPY(modelState[kinematica_.getRootJointName() + "/rot_x"], modelState[kinematica_.getRootJointName() + "/rot_y"], modelState[kinematica_.getRootJointName() + "/rot_z"]);
+        Eigen::VectorXd quat(4);
+        rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
+        ps_->getCurrentStateNonConst().setVariablePosition(
+            kinematica_.getRootJointName() + "/rot_x", quat(0));
+        ps_->getCurrentStateNonConst().setVariablePosition(
+            kinematica_.getRootJointName() + "/rot_y", quat(1));
+        ps_->getCurrentStateNonConst().setVariablePosition(
+            kinematica_.getRootJointName() + "/rot_z", quat(2));
+        ps_->getCurrentStateNonConst().setVariablePosition(
+            kinematica_.getRootJointName() + "/rot_w", quat(3));
+    }
+}
+
 void Scene::publishScene()
 {
     if (Server::isRos())
     {
+        // Update the joint positions in the PlanningScene from Kinematica - we do
+        // not do this on every Update() as it is only required when publishing
+        // the scene and would take unnecessary time otherwise.
+        updateMoveItPlanningScene();
+
         moveit_msgs::PlanningScene msg;
         ps_->getPlanningSceneMsg(msg);
+
         ps_pub_.publish(msg);
     }
 }
@@ -299,7 +341,6 @@ void Scene::setModelState(Eigen::VectorXdRefConst x, double t)
     kinematica_.setModelState(x);
 
     if (force_collision_) collision_scene_->updateCollisionObjectTransforms();
-
     if (debug_) publishScene();
 }
 

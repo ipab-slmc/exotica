@@ -343,6 +343,54 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const 
     return data.Proxies;
 }
 
+std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
+    const std::string& o1)
+{
+    std::vector<fcl::CollisionObjectd*> shapes1;
+    std::vector<fcl::CollisionObjectd*> shapes2;
+    DistanceData data(this);
+
+    // Iterate over all fcl_objects_ to find all collision links that belong to
+    // object o1
+    for (fcl::CollisionObjectd* o : fcl_objects_)
+    {
+        KinematicElement* e = reinterpret_cast<KinematicElement*>(o->getUserData());
+        if (e->Segment.getName() == o1 || e->Parent->Segment.getName() == o1)
+            shapes1.push_back(o);
+    }
+
+    // Iterate over all fcl_objects_ to find all objects o1 is allowed to collide
+    // with
+    for (fcl::CollisionObjectd* o : fcl_objects_)
+    {
+        KinematicElement* e = reinterpret_cast<KinematicElement*>(o->getUserData());
+        // Collision Object does not belong to o1
+        if (e->Segment.getName() != o1 || e->Parent->Segment.getName() != o1)
+        {
+            bool allowedToCollide = false;
+            for (fcl::CollisionObjectd* o1_shape : shapes1)
+                if (isAllowedToCollide(o1_shape, o, data.Self, data.Scene))
+                    allowedToCollide = true;
+
+            if (allowedToCollide) shapes2.push_back(o);
+        }
+    }
+
+    if (shapes1.size() == 0) throw_pretty("Can't find object '" << o1 << "'!");
+    if (shapes2.size() == 0)
+        throw_pretty("Can't find any objects '" << o1
+                                                << "' is allowed to collide with!");
+
+    for (fcl::CollisionObjectd* s1 : shapes1)
+    {
+        for (fcl::CollisionObjectd* s2 : shapes2)
+        {
+            computeDistance(s1, s2, &data);
+        }
+    }
+    return data.Proxies;
+}
+
 Eigen::Vector3d CollisionSceneFCLLatest::getTranslation(const std::string& name)
 {
     for (fcl::CollisionObjectd* object : fcl_objects_)

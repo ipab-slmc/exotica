@@ -91,6 +91,7 @@ public:
     ///
     virtual std::vector<CollisionProxy> getCollisionDistance(bool self);
     virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2);
+    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1);
 
     /**
        * @brief      Gets the collision world links.

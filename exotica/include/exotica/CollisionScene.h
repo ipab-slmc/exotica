@@ -104,6 +104,13 @@ public:
     ///
     virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2) { throw_pretty("Not implemented!"); }
     /**
+   * @brief      Gets the closest distance of any collision object which is
+   * allowed to collide with any collision object related to object o1.
+   * @param[in]  o1    Name of object 1.
+   * @return     Vector of proximity objects.
+   */
+    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1) { throw_pretty("Not implemented!"); }
+    /**
        * @brief      Gets the collision world links.
        * @return     The collision world links.
        */

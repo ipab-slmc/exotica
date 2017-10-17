@@ -267,14 +267,16 @@ visualization_msgs::Marker Scene::proxyToMarker(const std::vector<CollisionProxy
     return ret;
 }
 
-void Scene::setCollisionScene(const moveit_msgs::PlanningSceneConstPtr& scene)
+void Scene::setCollisionScene(const moveit_msgs::PlanningScene& scene)
 {
+    ps_->usePlanningSceneMsg(scene);
     updateSceneFrames();
     collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 }
 
 void Scene::updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world)
 {
+    ps_->processPlanningSceneWorldMsg(*world);
     updateSceneFrames();
     collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 }

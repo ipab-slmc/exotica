@@ -60,16 +60,6 @@ enum BASE_TYPE
     PLANAR = 20
 };
 
-/**
-   * \brief Defines the two types of supported joints
-   */
-enum JointType
-{
-    JNT_UNUSED = 0,     //!< Undefined (will not be used)
-    JNT_PRISMATIC = 1,  //!< Prismatic joint
-    JNT_ROTARY = 2      //!< Rotary Joint
-};
-
 enum KinematicRequestFlags
 {
     KIN_FK = 0,

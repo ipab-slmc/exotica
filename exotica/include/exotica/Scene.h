@@ -65,7 +65,7 @@ public:
     std::shared_ptr<KinematicResponse> RequestKinematics(KinematicsRequest& Request);
     std::string getName();
     virtual void Update(Eigen::VectorXdRefConst x, double t = 0);
-    void setCollisionScene(const moveit_msgs::PlanningSceneConstPtr& scene);
+    void setCollisionScene(const moveit_msgs::PlanningScene& scene);
     CollisionScene_ptr& getCollisionScene();
     std::string getRootFrameName();
     std::string getRootJointName();

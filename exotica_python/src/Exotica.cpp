@@ -599,19 +599,26 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>, double)) & Scene::setModelState, py::arg("x"), py::arg("t") = 0.0);
     scene.def("publishScene", &Scene::publishScene);
     scene.def("publishProxies", &Scene::publishProxies);
-    scene.def("setCollisionScene", [](Scene* instance, moveit_msgs::PlanningScene& ps) {
-        moveit_msgs::PlanningSceneConstPtr myPtr(new moveit_msgs::PlanningScene(ps));
-        instance->setCollisionScene(myPtr);
-    });
-    scene.def("loadScene", &Scene::loadScene);
-    scene.def("loadSceneFile", &Scene::loadSceneFile);
+    scene.def("setCollisionScene", &Scene::setCollisionScene);
+    scene.def("loadScene", &Scene::loadScene, py::arg("sceneString"), py::arg("updateCollisionScene") = true);
+    scene.def("loadSceneFile", &Scene::loadSceneFile, py::arg("fileName"), py::arg("updateCollisionScene") = true);
     scene.def("getScene", &Scene::getScene);
     scene.def("cleanScene", &Scene::cleanScene);
     scene.def("isStateValid", [](Scene* instance, bool self, double safe_distance) { return instance->getCollisionScene()->isStateValid(self, safe_distance); }, py::arg("self") = true, py::arg("SafeDistance") = 0.0);
     scene.def("isCollisionFree", [](Scene* instance, const std::string& o1, const std::string& o2, double safe_distance) { return instance->getCollisionScene()->isCollisionFree(o1, o2, safe_distance); }, py::arg("Object1"), py::arg("Object2"), py::arg("SafeDistance") = 0.0);
     scene.def("getCollisionDistance", [](Scene* instance, bool self) { return instance->getCollisionScene()->getCollisionDistance(self); }, py::arg("self") = true);
     scene.def("getCollisionDistance", [](Scene* instance, const std::string& o1, const std::string& o2) { return instance->getCollisionScene()->getCollisionDistance(o1, o2); }, py::arg("Object1"), py::arg("Object2"));
-    scene.def("updateWorld", &Scene::updateWorld);
+    scene.def("getCollisionDistance",
+              [](Scene* instance, const std::string& o1) {
+                  return instance->getCollisionScene()->getCollisionDistance(o1);
+              },
+              py::arg("Object1"));
+    scene.def("updateWorld",
+              [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
+                moveit_msgs::PlanningSceneWorldConstPtr myPtr(
+                    new moveit_msgs::PlanningSceneWorld(world));
+                instance->updateWorld(myPtr);
+              });
     scene.def("getCollisionRobotLinks", [](Scene* instance) { return instance->getCollisionScene()->getCollisionRobotLinks(); });
     scene.def("getCollisionWorldLinks", [](Scene* instance) { return instance->getCollisionScene()->getCollisionWorldLinks(); });
     scene.def("getRootFrameName", &Scene::getRootFrameName);

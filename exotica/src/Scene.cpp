@@ -115,6 +115,7 @@ void Scene::Instantiate(SceneInitializer& init)
 
 
     collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
+    collision_scene_->setAlwaysExternallyUpdatedCollisionScene(force_collision_);
     updateSceneFrames();
     collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 

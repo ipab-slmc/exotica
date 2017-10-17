@@ -130,6 +130,11 @@ public:
         acm_ = acm;
     }
 
+    inline void setAlwaysExternallyUpdatedCollisionScene(const bool& value)
+    {
+        alwaysExternallyUpdatedCollisionScene_ = value;
+    }
+
     ///
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
@@ -144,6 +149,9 @@ public:
 protected:
     /// The allowed collision matrix
     AllowedCollisionMatrix acm_;
+
+    /// Whether the collision scene is automatically updated - if not, update on queries
+    bool alwaysExternallyUpdatedCollisionScene_ = false;
 };
 
 typedef exotica::Factory<exotica::CollisionScene> CollisionScene_fac;

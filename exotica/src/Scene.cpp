@@ -113,7 +113,6 @@ void Scene::Instantiate(SceneInitializer& init)
         addObject(link.Name, getFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, getFrame(link.CoM).p), false);
     }
 
-    kinematica_.UpdateModel();
 
     collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
     updateSceneFrames();

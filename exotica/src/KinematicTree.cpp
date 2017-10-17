@@ -447,18 +447,18 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
 void KinematicTree::Update(Eigen::VectorXdRefConst x)
 {
     if (x.rows() != StateSize) throw_pretty("Wrong state vector size! Got " << x.rows() << " expected " << StateSize);
-    UpdateTree(x);
+
+    for (int i = 0; i < ControlledJoints.size(); i++)
+        TreeState(ControlledJoints[i]->Id) = x(i);
+
+    UpdateTree();
     UpdateFK();
     if (Flags & KIN_J) UpdateJ();
     if (Debug) publishFrames();
 }
 
-void KinematicTree::UpdateTree(Eigen::VectorXdRefConst x)
+void KinematicTree::UpdateTree()
 {
-    for (int i = 0; i < ControlledJoints.size(); i++)
-    {
-        TreeState(ControlledJoints[i]->Id) = x(i);
-    }
     for (std::shared_ptr<KinematicElement> element : Tree)
     {
         KDL::Frame ParentFrame;
@@ -744,7 +744,7 @@ void KinematicTree::setModelState(Eigen::VectorXdRefConst x)
     {
         TreeState(ModelJointsMap.at(ModelJointsNames[i])->Id) = x(i);
     }
-
+    UpdateTree();
     UpdateFK();
     if (Flags & KIN_J) UpdateJ();
     if (Debug) publishFrames();
@@ -763,7 +763,7 @@ void KinematicTree::setModelState(std::map<std::string, double> x)
             throw_pretty("Robot model does not contain joint '" << joint.first << "'");
         }
     }
-
+    UpdateTree();
     UpdateFK();
     if (Flags & KIN_J) UpdateJ();
     if (Debug) publishFrames();

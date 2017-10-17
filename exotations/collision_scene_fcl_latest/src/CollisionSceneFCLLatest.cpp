@@ -69,7 +69,7 @@ void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string,
         // TODO: There is currently a bug with the caching causing proxies not
         // to update. The correct fix would be to update the user data, for now
         // disable use of the cache.
-        if (true) // (cache_entry == fcl_cache_.end())
+        if (true)  // (cache_entry == fcl_cache_.end())
         {
             new_object = constructFclCollisionObject(object.second);
             fcl_cache_[object.first] = new_object;

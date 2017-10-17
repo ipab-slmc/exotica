@@ -200,6 +200,7 @@ bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectd* o1, fcl:
 void CollisionSceneFCLLatest::checkCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data)
 {
     data->Request.num_max_contacts = 1000;
+    data->Request.gjk_solver_type = fcl::GST_INDEP;  // CCD returns wrong points
     data->Result.clear();
     fcl::collide(o1, o2, data->Request, data->Result);
     if (data->SafeDistance > 0.0 && o1->getAABB().distance(o2->getAABB()) < data->SafeDistance)

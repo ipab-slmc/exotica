@@ -30,6 +30,7 @@ public:
             names.push_back(it.first);
         }
     }
+    inline size_t getNumberOfEntries() const { return entries_.size(); }
     inline bool getAllowedCollision(const std::string& name1, const std::string& name2) const
     {
         auto it = entries_.find(name1);
@@ -141,7 +142,7 @@ public:
     virtual void updateCollisionObjectTransforms() = 0;
 
 protected:
-    /// The allowed collisiom matrix
+    /// The allowed collision matrix
     AllowedCollisionMatrix acm_;
 };
 

@@ -6,7 +6,11 @@ import subprocess
 import os
 import sys
 
-tests = ['core.py', 'valkyrie_com.py']
+tests = ['core.py',
+         'valkyrie_com.py' #,
+        # 'valkyrie_collision_check_fcl_default.py',
+        # 'valkyrie_collision_check_fcl_latest.py'
+        ]
 
 for test in tests:
     process=subprocess.Popen(['rosrun', 'exotica_python', test],stdout=subprocess.PIPE, stderr=subprocess.PIPE)

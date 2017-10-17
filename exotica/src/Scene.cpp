@@ -113,8 +113,8 @@ void Scene::Instantiate(SceneInitializer& init)
         addObject(link.Name, getFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, getFrame(link.CoM).p), false);
     }
 
-
     collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
+    collision_scene_->setAlwaysExternallyUpdatedCollisionScene(force_collision_);
     updateSceneFrames();
     collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 
@@ -147,7 +147,6 @@ void Scene::Instantiate(SceneInitializer& init)
             addTrajectory(trajInit.Link, trajInit.Trajectory);
         }
     }
-
 
     if (debug_) INFO_NAMED(name_, "Exotica Scene initialized");
 }
@@ -354,7 +353,6 @@ void Scene::setModelState(std::map<std::string, double> x, double t)
     kinematica_.setModelState(x);
 
     if (force_collision_) collision_scene_->updateCollisionObjectTransforms();
-
     if (debug_) publishScene();
 }
 

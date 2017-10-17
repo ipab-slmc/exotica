@@ -43,7 +43,7 @@ CollisionCheck::CollisionCheck()
 void CollisionCheck::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != 1) throw_named("Wrong size of phi!");
-    cscene_->updateCollisionObjectTransforms();
+    if (!scene_->alwaysUpdatesCollisionScene()) cscene_->updateCollisionObjectTransforms();
     phi(0) = cscene_->isStateValid(init_.SelfCollision, init_.SafeDistance) ? -1.0 : 0.0;
 }
 

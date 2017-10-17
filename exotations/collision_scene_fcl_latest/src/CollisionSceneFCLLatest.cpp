@@ -69,7 +69,7 @@ void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string,
         // TODO: There is currently a bug with the caching causing proxies not
         // to update. The correct fix would be to update the user data, for now
         // disable use of the cache.
-        if (true) // (cache_entry == fcl_cache_.end())
+        if (true)  // (cache_entry == fcl_cache_.end())
         {
             new_object = constructFclCollisionObject(object.second);
             fcl_cache_[object.first] = new_object;
@@ -200,6 +200,7 @@ bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectd* o1, fcl:
 void CollisionSceneFCLLatest::checkCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data)
 {
     data->Request.num_max_contacts = 1000;
+    data->Request.gjk_solver_type = fcl::GST_INDEP;  // CCD returns wrong points
     data->Result.clear();
     fcl::collide(o1, o2, data->Request, data->Result);
     if (data->SafeDistance > 0.0 && o1->getAABB().distance(o2->getAABB()) < data->SafeDistance)
@@ -239,8 +240,20 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     p.distance = data->Result.min_distance;
     if (p.distance > 0)
     {
-        KDL::Vector c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-        KDL::Vector c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        // FCL uses world coordinates for meshes while local coordinates are used
+        // for primitive shapes - thus, we need to work around this.
+        // Cf. https://github.com/flexible-collision-library/fcl/issues/171
+        KDL::Vector c1, c2;
+        if (p.e1->Shape->type == shapes::ShapeType::MESH)
+            c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+        else
+            c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+
+        if (p.e2->Shape->type == shapes::ShapeType::MESH)
+            c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        else
+            c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+
         KDL::Vector n1 = c2 - c1;
         KDL::Vector n2 = c1 - c2;
         n1.Normalize();
@@ -279,6 +292,8 @@ bool CollisionSceneFCLLatest::collisionCallbackDistance(fcl::CollisionObjectd* o
 
 bool CollisionSceneFCLLatest::isStateValid(bool self, double safe_distance)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::shared_ptr<fcl::BroadPhaseCollisionManagerd> manager(new fcl::DynamicAABBTreeCollisionManagerd());
     manager->registerObjects(fcl_objects_);
     CollisionData data(this);
@@ -290,6 +305,8 @@ bool CollisionSceneFCLLatest::isStateValid(bool self, double safe_distance)
 
 bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
     for (fcl::CollisionObjectd* o : fcl_objects_)
@@ -315,6 +332,8 @@ bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(bool self)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::shared_ptr<fcl::BroadPhaseCollisionManagerd> manager(new fcl::DynamicAABBTreeCollisionManagerd());
     manager->registerObjects(fcl_objects_);
     DistanceData data(this);
@@ -325,6 +344,8 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(bool s
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const std::string& o1, const std::string& o2)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
     for (fcl::CollisionObjectd* o : fcl_objects_)
@@ -349,6 +370,8 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
     const std::string& o1)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
     DistanceData data(this);

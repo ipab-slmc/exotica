@@ -240,8 +240,21 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     p.distance = data->Result.min_distance;
     if (p.distance > 0)
     {
-        KDL::Vector c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-        KDL::Vector c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        KDL::Vector c1, c2;
+        if (data->Request.gjk_solver_type == fcl::GST_LIBCCD)
+        {
+            KDL::Vector c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+            KDL::Vector c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        }
+        else if (data->Request.gjk_solver_type == fcl::GST_INDEP)
+        {
+            c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+            c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        }
+        else
+        {
+            throw_pretty("Unknown solver type");
+        }
         KDL::Vector n1 = c2 - c1;
         KDL::Vector n2 = c1 - c2;
         n1.Normalize();

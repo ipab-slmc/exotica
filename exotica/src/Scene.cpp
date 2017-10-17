@@ -116,6 +116,7 @@ void Scene::Instantiate(SceneInitializer& init)
     kinematica_.UpdateModel();
 
     collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
+    updateSceneFrames();
     collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 
     AllowedCollisionMatrix acm;
@@ -147,6 +148,7 @@ void Scene::Instantiate(SceneInitializer& init)
             addTrajectory(trajInit.Link, trajInit.Trajectory);
         }
     }
+
 
     if (debug_) INFO_NAMED(name_, "Exotica Scene initialized");
 }

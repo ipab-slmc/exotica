@@ -222,6 +222,8 @@ bool CollisionSceneFCL::collisionCallback(fcl::CollisionObject* o1, fcl::Collisi
 
 bool CollisionSceneFCL::isStateValid(bool self, double safe_distance)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::shared_ptr<fcl::BroadPhaseCollisionManager> manager(new fcl::DynamicAABBTreeCollisionManager());
     manager->registerObjects(fcl_objects_);
     CollisionData data(this);
@@ -233,6 +235,8 @@ bool CollisionSceneFCL::isStateValid(bool self, double safe_distance)
 
 bool CollisionSceneFCL::isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::vector<fcl::CollisionObject*> shapes1;
     std::vector<fcl::CollisionObject*> shapes2;
     for (fcl::CollisionObject* o : fcl_objects_)

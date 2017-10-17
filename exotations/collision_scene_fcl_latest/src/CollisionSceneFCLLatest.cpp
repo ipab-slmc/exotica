@@ -279,6 +279,8 @@ bool CollisionSceneFCLLatest::collisionCallbackDistance(fcl::CollisionObjectd* o
 
 bool CollisionSceneFCLLatest::isStateValid(bool self, double safe_distance)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::shared_ptr<fcl::BroadPhaseCollisionManagerd> manager(new fcl::DynamicAABBTreeCollisionManagerd());
     manager->registerObjects(fcl_objects_);
     CollisionData data(this);
@@ -290,6 +292,8 @@ bool CollisionSceneFCLLatest::isStateValid(bool self, double safe_distance)
 
 bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
     for (fcl::CollisionObjectd* o : fcl_objects_)
@@ -315,6 +319,8 @@ bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(bool self)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::shared_ptr<fcl::BroadPhaseCollisionManagerd> manager(new fcl::DynamicAABBTreeCollisionManagerd());
     manager->registerObjects(fcl_objects_);
     DistanceData data(this);
@@ -325,6 +331,8 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(bool s
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const std::string& o1, const std::string& o2)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
     for (fcl::CollisionObjectd* o : fcl_objects_)
@@ -349,6 +357,8 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
     const std::string& o1)
 {
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
     DistanceData data(this);

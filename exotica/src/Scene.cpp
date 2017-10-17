@@ -148,7 +148,6 @@ void Scene::Instantiate(SceneInitializer& init)
         }
     }
 
-
     if (debug_) INFO_NAMED(name_, "Exotica Scene initialized");
 }
 
@@ -354,7 +353,6 @@ void Scene::setModelState(std::map<std::string, double> x, double t)
     kinematica_.setModelState(x);
 
     if (force_collision_) collision_scene_->updateCollisionObjectTransforms();
-
     if (debug_) publishScene();
 }
 

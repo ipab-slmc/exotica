@@ -1,8 +1,0 @@
-extend <ompl_solver/OMPLsolver>
-Optional std::string Algorithm = "RRTConnect";
-Optional std::string SamplingSpace = "ConfigurationSpace";
-Optional int MaxGoalSamplingAttempts = 500;
-Optional double Timeout = 60.0;
-Optional bool UseGoalBias = false;
-Optional double GoalBias = 0.5;
-Optional Eigen::VectorXd ImportanceWeights = Eigen::VectorXd();

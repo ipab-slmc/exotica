@@ -271,8 +271,8 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
             // group, the ControlledBaseType - if a controlled joint corresponds
             // to a floating base joint, the ControlledBaseType is the same as the
             // ModelBaseType.
-            if (Joint->Segment.getJoint().getName() ==
-                RootJoint->getName() + "/trans_x")
+            if (Joint->Segment.getJoint().getName().find(
+                    RootJoint->getName()) != std::string::npos)
                 ControlledBaseType = ModelBaseType;
         }
     }

@@ -1,15 +1,16 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
 
-  <RRTConnect Name="MySolver" />
+  <RRTConnect Name="MySolver">
+  </RRTConnect>
 
   <SamplingProblem Name="MyProblem">
 
     <PlanningScene>
       <Scene>
-        <JointGroup>arm</JointGroup>
+        <JointGroup>arm_freebase</JointGroup>
         <URDF>{exotica}/resources/robots/lwr_simplified.urdf</URDF>
-        <SRDF>{exotica}/resources/robots/lwr_simplified.srdf</SRDF>
+        <SRDF>{exotica}/resources/robots/lwr_simplified_freebase.srdf</SRDF>
       </Scene>
     </PlanningScene>
 
@@ -24,7 +25,7 @@
     <TaskGoal>0.42</TaskGoal>
     <Rho>-1</Rho>
 
-    <Goal>2.16939  0.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
+    <Goal>2 0 0.5 2.16939  0.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
   </SamplingProblem>
 
 </PlannerDemoConfig>

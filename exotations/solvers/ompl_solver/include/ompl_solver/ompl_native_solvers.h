@@ -1,8 +1,8 @@
 /*
- *  Created on: 2 Mar 2016
+ *  Created on: 10 Oct 2017
  *      Author: Yiming Yang
  *
- * Copyright (c) 2016, University Of Edinburgh
+ * Copyright (c) 2017, University Of Edinburgh
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,42 +31,33 @@
  *
  */
 
-#include "ompl_imp_solver/OMPLBaseStateSpace.h"
+#ifndef INCLUDE_OMPL_SOLVER_OMPL_NATIVE_SOLVERS_H_
+#define INCLUDE_OMPL_SOLVER_OMPL_NATIVE_SOLVERS_H_
+
+#include <ompl_solver/ompl_solver.h>
 
 namespace exotica
 {
-OMPLBaseStateSpace::OMPLBaseStateSpace(unsigned int dim, SamplingProblem_ptr &prob, OMPLsolverInitializer init)
-    : ob::CompoundStateSpace(), prob_(prob)
+class RRT : public OMPLsolver, Instantiable<RRTInitializer>
 {
+public:
+    RRT();
+    virtual void Instantiate(RRTInitializer& init);
+};
+
+class RRTConnect : public OMPLsolver, Instantiable<RRTConnectInitializer>
+{
+public:
+    RRTConnect();
+    virtual void Instantiate(RRTConnectInitializer& init);
+};
+
+class PRM : public OMPLsolver, Instantiable<PRMInitializer>
+{
+public:
+    PRM();
+    virtual void Instantiate(PRMInitializer& init);
+};
 }
 
-OMPLStateValidityChecker::OMPLStateValidityChecker(const ob::SpaceInformationPtr &si, const SamplingProblem_ptr &prob, OMPLsolverInitializer init)
-    : ob::StateValidityChecker(si), prob_(prob)
-{
-    Server_ptr server = Server::Instance();
-}
-
-bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
-{
-    double tmp;
-    return isValid(state, tmp);
-}
-
-bool OMPLStateValidityChecker::isValid(const ompl::base::State *state,
-                                       double &dist) const
-{
-    Eigen::VectorXd q(prob_->N);
-#ifdef ROS_INDIGO
-    boost::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
-#elif ROS_KINETIC
-    std::static_pointer_cast<OMPLBaseStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
-#endif
-
-    if (!prob_->isValid(q))
-    {
-        dist = -1;
-        return false;
-    }
-    return true;
-}
-}
+#endif /* INCLUDE_OMPL_SOLVER_OMPL_NATIVE_SOLVERS_H_ */

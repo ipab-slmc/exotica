@@ -438,8 +438,10 @@ void Scene::updateSceneFrames()
     for (auto& it : custom_links_)
     {
         Eigen::Affine3d pose;
-        tf::transformKDLToEigen(it.second->Segment.getFrameToTip(), pose);
-        it.second = kinematica_.AddElement(it.first, pose, it.second->Parent->Segment.getName(), it.second->Shape, it.second->Segment.getInertia());
+        tf::transformKDLToEigen(it->Segment.getFrameToTip(), pose);
+        const auto& temp = it;
+        it = kinematica_.AddElement(it->Segment.getName(), pose, it->Parent->Segment.getName(), it->Shape, it->Segment.getInertia());
+        it->IsControlled = temp->IsControlled;
     }
 
     kinematica_.UpdateModel();
@@ -453,7 +455,7 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     if (links.find(parent_name) == links.end()) throw_pretty("Can't find parent '" << parent_name << "'!");
     Eigen::Affine3d pose;
     tf::transformKDLToEigen(transform, pose);
-    custom_links_[name] = kinematica_.AddElement(name, pose, parent_name, shape, inertia);
+    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape, inertia));
     if (updateCollisionScene)
     {
         collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());

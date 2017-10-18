@@ -323,7 +323,13 @@ public:
         if (!isPyString(name_py)) return false;
         std::string name = pyAsString(name_py);
 
-        ret = Initializer(knownInitializers.at(name));
+        const auto& it = knownInitializers.find(name);
+        if(it==knownInitializers.end())
+        {
+            HIGHLIGHT("Unknown initializer type '" << name << "'");
+            return false;
+        }
+        ret = Initializer(it->second);
 
         if (sz == 2)
         {

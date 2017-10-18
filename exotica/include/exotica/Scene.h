@@ -172,7 +172,7 @@ private:
     std::map<std::string, AttachedObject> attached_objects_;
 
     /// \brief List of frames/links added on top of robot links and scene objects defined in the MoveIt scene.
-    std::map<std::string, std::shared_ptr<KinematicElement>> custom_links_;
+    std::vector<std::shared_ptr<KinematicElement>> custom_links_;
 
     std::map<std::string, std::pair<std::shared_ptr<KinematicElement>, std::shared_ptr<Trajectory>>> trajectory_generators_;
 

@@ -76,7 +76,8 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
     Phi = y;
     J = Eigen::MatrixXd(JN, N);
 
-    qNominal = init.NominalState;
+    if (init.NominalState.rows() > 0 && init.NominalState.rows() != N) throw_named("Invalid size of NominalState (" << init.NominalState.rows() << "), expected: " << N);
+    if (init.NominalState.rows() == N) qNominal = init.NominalState;
 
     if (init.Rho.rows() > 0 && init.Rho.rows() != NumTasks) throw_named("Invalid size of Rho (" << init.Rho.rows() << ") expected: " << NumTasks);
     if (init.Goal.rows() > 0 && init.Goal.rows() != PhiN) throw_named("Invalid size of Goal (" << init.Goal.rows() << ") expected: " << PhiN);

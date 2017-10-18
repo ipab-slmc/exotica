@@ -71,7 +71,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
         JN += Tasks[i]->LengthJ;
     }
 
-    N = scene_->getSolver().getNumJoints();
+    N = scene_->getSolver().getNumControlledJoints();
 
     W = Eigen::MatrixXd::Identity(N, N) * W_rate;
     if (init.W.rows() > 0)

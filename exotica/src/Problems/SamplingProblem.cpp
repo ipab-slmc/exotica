@@ -114,6 +114,8 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
 
 void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
 {
+    if (qT.rows() != N)
+        throw_pretty("Dimensionality of goal state wrong: Got " << qT.rows() << ", expected " << N);
     goal_ = qT;
 }
 

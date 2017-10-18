@@ -90,9 +90,14 @@ void KinematicSolution::Create(std::shared_ptr<KinematicResponse> solution)
     if (solution->Flags & KIN_J_DOT) new (&JDot) Eigen::Map<ArrayJacobian>(solution->JDot.data() + Start, Length);
 }
 
-int KinematicTree::getNumJoints()
+int KinematicTree::getNumControlledJoints()
 {
     return NumControlledJoints;
+}
+
+int KinematicTree::getNumModelJoints()
+{
+    return NumJoints;
 }
 
 KinematicTree::KinematicTree() : StateSize(-1), Debug(false)
@@ -617,7 +622,7 @@ void KinematicTree::UpdateJ()
 
 Eigen::MatrixXd KinematicTree::getJointLimits()
 {
-    Eigen::MatrixXd lim(getNumJoints(), 2);
+    Eigen::MatrixXd lim(getNumControlledJoints(), 2);
     for (int i = 0; i < ControlledJoints.size(); i++)
     {
         lim(i, 0) = ControlledJoints[i]->JointLimits[0];

@@ -38,25 +38,25 @@
 
 namespace exotica
 {
-class RRT : public OMPLsolver, Instantiable<OMPLsolverInitializer>
+class RRT : public OMPLsolver, Instantiable<RRTInitializer>
 {
 public:
     RRT();
-    virtual void Instantiate(OMPLsolverInitializer& init);
+    virtual void Instantiate(RRTInitializer& init);
 };
 
-class RRTConnect : public OMPLsolver, Instantiable<OMPLsolverInitializer>
+class RRTConnect : public OMPLsolver, Instantiable<RRTConnectInitializer>
 {
 public:
     RRTConnect();
-    virtual void Instantiate(OMPLsolverInitializer& init);
+    virtual void Instantiate(RRTConnectInitializer& init);
 };
 
-class PRM : public OMPLsolver, Instantiable<OMPLsolverInitializer>
+class PRM : public OMPLsolver, Instantiable<PRMInitializer>
 {
 public:
     PRM();
-    virtual void Instantiate(OMPLsolverInitializer& init);
+    virtual void Instantiate(PRMInitializer& init);
 };
 }
 

@@ -46,9 +46,9 @@ RRT::RRT()
 {
 }
 
-void RRT::Instantiate(OMPLsolverInitializer& init)
+void RRT::Instantiate(RRTInitializer& init)
 {
-    init_ = init;
+    init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_RRT";
     planner_allocator_ = boost::bind(
         &allocatePlanner<ompl::geometric::RRT>, _1, _2);
@@ -58,9 +58,9 @@ RRTConnect::RRTConnect()
 {
 }
 
-void RRTConnect::Instantiate(OMPLsolverInitializer& init)
+void RRTConnect::Instantiate(RRTConnectInitializer& init)
 {
-    init_ = init;
+    init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_RRTConnect";
     planner_allocator_ = boost::bind(
         &allocatePlanner<ompl::geometric::RRTConnect>, _1, _2);
@@ -70,9 +70,9 @@ PRM::PRM()
 {
 }
 
-void PRM::Instantiate(OMPLsolverInitializer& init)
+void PRM::Instantiate(PRMInitializer& init)
 {
-    init_ = init;
+    init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_PRM";
     planner_allocator_ = boost::bind(
         &allocatePlanner<ompl::geometric::PRM>, _1, _2);

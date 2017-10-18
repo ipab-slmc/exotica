@@ -66,7 +66,7 @@ void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
     {
         startState = x;
     }
-    else if (x.rows() == scene_->getSolver().getNumJoints())
+    else if (x.rows() == scene_->getSolver().getNumControlledJoints())
     {
         std::vector<std::string> jointNames = scene_->getJointNames();
         std::vector<std::string> modelNames = scene_->getModelJointNames();
@@ -101,7 +101,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     scene_.reset(new Scene());
     scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
     startState = Eigen::VectorXd::Zero(scene_->getModelJointNames().size());
-    N = scene_->getSolver().getNumJoints();
+    N = scene_->getSolver().getNumControlledJoints();
 
     if (init.StartState.rows() > 0)
     {

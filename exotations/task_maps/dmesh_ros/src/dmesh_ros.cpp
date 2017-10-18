@@ -57,7 +57,7 @@ void DMeshROS::assignScene(Scene_ptr scene)
 
 void DMeshROS::Initialize()
 {
-    q_size_ = scene_->getSolver().getNumJoints();
+    q_size_ = scene_->getSolver().getNumControlledJoints();
     if (init_.Size > 0)
     {
         size_ = init_.Size;

@@ -17,7 +17,7 @@ complete:
 
         // Continued from initialisation
         // Create the initial configuration
-        Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumJoints());
+        Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumControlledJoints());
         Eigen::MatrixXd solution;
 
 
@@ -64,10 +64,10 @@ into the solver. Here we initialise the joints to zero angles:
 
 .. code:: c++
 
-        Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumJoints());
+        Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumControlledJoints());
 
 Here we use the kinematic description of the robot to determine the size
-of the vector (``any_problem->getScene()->getNumJoints()``). This vector
+of the vector (``any_problem->getScene()->getNumControlledJoints()``). This vector
 can naturally be changed to whatever joint configuration is required for
 your motion planning purposes. for example, after instantiating ``q``:
 

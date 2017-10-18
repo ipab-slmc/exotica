@@ -90,7 +90,7 @@ void Identity::assignScene(Scene_ptr scene)
 
 void Identity::Initialize()
 {
-    N = std::max(scene_->getSolver().getNumJoints(), (int)init_.JointMap.size());
+    N = std::max(scene_->getSolver().getNumControlledJoints(), (int)init_.JointMap.size());
     if (init_.JointMap.size() > 0)
     {
         jointMap = init_.JointMap;

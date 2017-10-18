@@ -41,3 +41,19 @@ install(TARGETS ManualInitialization GenericInitialization XMLInitialization Pla
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+install(DIRECTORY resources/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/resources)
+FILE(GLOB python_examples "${CMAKE_CURRENT_SOURCE_DIR}/scripts/*")
+catkin_install_python(PROGRAMS ${python_examples} DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+if(CATKIN_ENABLE_TESTING)
+    add_executable(test_maps tests/test_maps.cpp)
+    target_link_libraries(test_maps ${catkin_LIBRARIES})
+    install(TARGETS test_maps RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+    add_executable(test_initializers tests/test_initializers.cpp)
+    target_link_libraries(test_initializers ${catkin_LIBRARIES})
+    install(TARGETS test_initializers RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+    FILE(GLOB python_tests "${CMAKE_CURRENT_SOURCE_DIR}/tests/*")
+    catkin_install_python(PROGRAMS ${python_tests} DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+endif(CATKIN_ENABLE_TESTING)

@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<ExampleConfig>
+
+<IKsolver Name="MySolver">
+  <MaxIt>100</MaxIt>
+  <MaxStep>0.1</MaxStep>
+  <Tolerance>1e-5</Tolerance>
+  <Alpha>1.0</Alpha>
+  <C>1e-3</C>
+</IKsolver>
+
+<UnconstrainedEndPoseProblem Name="ExampleProblem">
+  <PlanningScene>
+    <Scene>
+      <JointGroup>arm</JointGroup>
+      <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+      <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+    </Scene>
+  </PlanningScene>
+  <Maps>
+    <EffFrame Name="Position1">
+      <Type>RPY</Type>
+      <EndEffector>
+          <Frame Link="lwr_arm_6_link" BaseOffset="0.6 -0.3 0.5 0 0 0 1" LinkOffset="0 0 0.2 0.7071067811865476 0  0.7071067811865475 0"/>
+      </EndEffector>
+    </EffFrame>
+    <EffFrame Name="Position2">
+      <Type>RPY</Type>
+      <EndEffector>
+          <Frame Link="lwr_arm_6_link" BaseOffset="0.6 0.3 0.5 0 0 0 1" LinkOffset="0 0 0.2 0.7071067811865476 0  0.7071067811865475 0"/>
+      </EndEffector>
+    </EffFrame>
+  </Maps>
+  <W> 7 6 5 4 3 2 1 </W>
+  <StartState>0 0 0 0 0 0 0</StartState>
+  <NominalState>0 0 0 0 0 0 0</NominalState>
+</UnconstrainedEndPoseProblem>
+
+</ExampleConfig>

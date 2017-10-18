@@ -25,22 +25,3 @@ pybind_add_module(_pyexotica MODULE src/Exotica.cpp)
 catkin_python_setup()
 
 install(TARGETS _pyexotica LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
-catkin_install_python(PROGRAMS
-    scripts/example.py
-    scripts/example_aico.py
-    scripts/example_ompl.py
-    scripts/example_ik.py
-    scripts/example_ik_noros.py
-    scripts/example_aico_noros.py
-    scripts/example_ompl_noros.py
-    scripts/example_attach.py
-    scripts/example_distance.py
-    scripts/example_fk.py
-    scripts/example_aico_trajectory.py
-      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
-
-if(CATKIN_ENABLE_TESTING)
-  FILE(GLOB python_tests "${CMAKE_CURRENT_SOURCE_DIR}/tests/*")
-  catkin_install_python(PROGRAMS ${python_tests} DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-endif(CATKIN_ENABLE_TESTING)

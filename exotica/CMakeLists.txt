@@ -104,12 +104,4 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY include/ DESTINATION include)
 install(FILES cmake/GenerateInitializers.py cmake/InitializerProjectHeader.h.in DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
-install(DIRECTORY resources/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/resources)
 
-## Testing
-
-if(CATKIN_ENABLE_TESTING)
-    add_executable(test_initializers tests/test_initializers.cpp)
-    target_link_libraries(test_initializers ${PROJECT_NAME} ${catkin_LIBRARIES})
-    install(TARGETS test_initializers RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-endif(CATKIN_ENABLE_TESTING)

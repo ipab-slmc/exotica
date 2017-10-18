@@ -62,8 +62,4 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY include/ DESTINATION include)
 install(FILES exotica_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-if(CATKIN_ENABLE_TESTING)
-    add_executable(test_maps tests/test_maps.cpp)
-    target_link_libraries(test_maps ${PROJECT_NAME} ${catkin_LIBRARIES})
-    install(TARGETS test_maps RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-endif(CATKIN_ENABLE_TESTING)
+

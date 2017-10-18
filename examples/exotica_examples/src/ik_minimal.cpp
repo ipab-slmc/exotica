@@ -36,11 +36,14 @@ using namespace exotica;
 
 int main(int argc, char **argv)
 {
-    MotionSolver_ptr solver = XMLLoader::loadSolver("{exotica}/resources/configs/example.xml");
-    Eigen::MatrixXd solution;
+    {
+        MotionSolver_ptr solver = XMLLoader::loadSolver("{exotica_examples}/resources/configs/example.xml");
+        Eigen::MatrixXd solution;
 
-    Timer timer;
-    solver->Solve(solution);
+        Timer timer;
+        solver->Solve(solution);
 
-    HIGHLIGHT("Finished solving in " << timer.getDuration() << "s. Solution [" << solution << "]");
+        HIGHLIGHT("Finished solving in " << timer.getDuration() << "s. Solution [" << solution << "]");
+    }
+    Setup::Destroy();
 }

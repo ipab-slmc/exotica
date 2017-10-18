@@ -41,7 +41,7 @@ install:
 - cd ..
 script:
 - catkin config --init --install
-- catkin build -i
+- catkin build -i -j4
 # Run tests
 - source /opt/ros/indigo/setup.bash
 - source install/setup.bash

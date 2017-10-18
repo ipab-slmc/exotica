@@ -35,6 +35,7 @@ script:
 - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
 - cd $CATKIN_WS_SRC
 - git clone --depth 1 https://github.com/openhumanoids/val_description.git # could also get from SRCSIM PPA
+- rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 - catkin_init_workspace
 - cd ..
 - catkin config --init --install

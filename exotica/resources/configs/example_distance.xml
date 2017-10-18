@@ -1,10 +1,7 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
 
-  <OMPLsolver Name="MySolver">
-    <Algorithm>RRTConnect</Algorithm>
-    <Solver>OMPLImpSolver</Solver>
-  </OMPLsolver>
+  <RRTConnect Name="MySolver" />
 
   <SamplingProblem Name="MyProblem">
 

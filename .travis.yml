@@ -44,9 +44,7 @@ script:
 - source /opt/ros/indigo/setup.bash
 - source install/setup.bash
 - roscore & # detached core
-- rosrun exotica test_initializers
-- rosrun task_map test_maps
-- rosrun exotica_python runtest.py
+- rosrun exotica_examples runtest.py
 before_deploy:
 - bash $TRAVIS_BUILD_DIR/.ci/after_success.sh
 - git config --global user.email "builds@travis-ci.com"

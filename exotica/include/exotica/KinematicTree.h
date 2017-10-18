@@ -151,7 +151,8 @@ public:
     void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
     std::map<std::string, std::vector<double>> getUsedJointLimits();
     int getEffSize();
-    int getNumJoints();
+    int getNumJoints(); // to be renamed
+    int getNumModelJoints();
     void publishFrames();
     Eigen::MatrixXd getJointLimits();
     std::vector<std::string> getJointNames()

@@ -33,6 +33,7 @@
 #ifndef CollisionSceneFCLLatest_H
 #define CollisionSceneFCLLatest_H
 
+#include <eigen_conversions/eigen_kdl.h>
 #include <exotica/CollisionScene.h>
 #include <exotica/Tools/Conversions.h>
 #include <fcl/fcl.h>

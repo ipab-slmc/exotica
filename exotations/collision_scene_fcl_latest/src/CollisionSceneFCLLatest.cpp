@@ -31,7 +31,6 @@
  */
 
 #include <collision_scene_fcl_latest/CollisionSceneFCLLatest.h>
-#include <eigen_conversions/eigen_kdl.h>
 #include <exotica/Factory.h>
 
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionSceneFCLLatest)

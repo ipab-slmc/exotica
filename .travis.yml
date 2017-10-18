@@ -16,6 +16,9 @@ before_install:
 - sudo add-apt-repository -y ppa:libccd-debs/ppa
 - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
 - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+- sudo sh -c 'echo "deb http://srcsim.gazebosim.org/src trusty main" \ > /etc/apt/sources.list.d/src-latest.list'
+- wget -O - http://srcsim.gazebosim.org/src/src.key | sudo apt-key add -
+- wget -O - https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
 - sudo apt-get update -qq
 install:
 - export PATH=/usr/bin/:$PATH # work-around Travis PYTHONPATH bug, cf. https://github.com/travis-ci/travis-ci/issues/8048
@@ -27,17 +30,16 @@ install:
 - sudo rosdep init
 - rosdep update
 - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
-- sudo apt-get install -qq -y ros-$CI_ROS_DISTRO-rosbash
+- sudo apt-get install -qq -y ros-$CI_ROS_DISTRO-rosbash val-description
 - sudo pip install -U sphinx sphinx_rtd_theme
-script:
 - source /opt/ros/$CI_ROS_DISTRO/setup.bash
 - mkdir -p $CATKIN_WS_SRC
 - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
 - cd $CATKIN_WS_SRC
-- git clone --depth 1 https://github.com/openhumanoids/val_description.git # could also get from SRCSIM PPA
 - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 - catkin_init_workspace
 - cd ..
+script:
 - catkin config --init --install
 - catkin build -i
 # Run tests

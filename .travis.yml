@@ -3,7 +3,7 @@ sudo: required
 dist: trusty
 cache:
 - apt
-#- ccache
+- ccache
 language: generic
 env:
   global:
@@ -29,15 +29,17 @@ install:
 - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 - sudo apt-get install -qq -y ros-$CI_ROS_DISTRO-rosbash
 - sudo pip install -U sphinx sphinx_rtd_theme
-script:
 - source /opt/ros/$CI_ROS_DISTRO/setup.bash
 - mkdir -p $CATKIN_WS_SRC
 - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
 - cd $CATKIN_WS_SRC
+- git clone https://github.com/wxmerkt/oh_val_description.git
+- rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 - catkin_init_workspace
 - cd ..
+script:
 - catkin config --init --install
-- catkin build -i
+- catkin build -i -j4
 # Run tests
 - source /opt/ros/indigo/setup.bash
 - source install/setup.bash

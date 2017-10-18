@@ -324,7 +324,7 @@ public:
         std::string name = pyAsString(name_py);
 
         const auto& it = knownInitializers.find(name);
-        if(it==knownInitializers.end())
+        if (it == knownInitializers.end())
         {
             HIGHLIGHT("Unknown initializer type '" << name << "'");
             return false;

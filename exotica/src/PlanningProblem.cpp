@@ -62,7 +62,7 @@ void PlanningProblem::preupdate()
 
 void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
 {
-    if (x.rows() == startState.rows())
+    if (x.rows() == scene_->getSolver().getNumModelJoints())
     {
         startState = x;
     }
@@ -80,7 +80,7 @@ void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
     }
     else
     {
-        throw_named("Wrong start state vector size, expected " << startState.rows() << " got " << x.rows());
+        throw_named("Wrong start state vector size, expected " << scene_->getSolver().getNumModelJoints() << ", got " << x.rows());
     }
 }
 

@@ -243,6 +243,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
     ModelTree = Tree;
 
     UpdateModel();
+    TreeState.setZero();
 
     if (Debug)
     {
@@ -289,7 +290,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
 void KinematicTree::UpdateModel()
 {
     Root = Tree[0];
-    TreeState = Eigen::VectorXd::Zero(Tree.size());
+    TreeState.conservativeResize(Tree.size());
     for (std::shared_ptr<KinematicElement> Joint : Tree)
     {
         TreeMap[Joint->Segment.getName()] = Joint;

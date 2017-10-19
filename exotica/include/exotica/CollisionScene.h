@@ -130,11 +130,13 @@ public:
         acm_ = acm;
     }
 
+    inline bool getAlwaysExternallyUpdatedCollisionScene() { return alwaysExternallyUpdatedCollisionScene_; }
     inline void setAlwaysExternallyUpdatedCollisionScene(const bool& value)
     {
         alwaysExternallyUpdatedCollisionScene_ = value;
     }
 
+    inline double getRobotLinkScale() { return robotLinkScale_; }
     inline void setRobotLinkScale(const double& scale)
     {
         if (scale < 0.0)
@@ -142,6 +144,7 @@ public:
         robotLinkScale_ = scale;
     }
 
+    inline double getWorldLinkScale() { return worldLinkScale_; }
     inline void setWorldLinkScale(const double& scale)
     {
         if (scale < 0.0)
@@ -149,6 +152,7 @@ public:
         worldLinkScale_ = scale;
     }
 
+    inline double getRobotLinkPadding() { return robotLinkPadding_; }
     inline void setRobotLinkPadding(const double& padding)
     {
         if (padding < 0.0)
@@ -156,6 +160,7 @@ public:
         robotLinkPadding_ = padding;
     }
 
+    inline double getWorldLinkPadding() { return worldLinkPadding_; }
     inline void setWorldLinkPadding(const double& padding)
     {
         if (padding < 0.0)

@@ -123,7 +123,7 @@ public:
     virtual void updateCollisionObjectTransforms();
 
 private:
-    std::shared_ptr<fcl::CollisionObjectd> constructFclCollisionObject(int i, std::shared_ptr<KinematicElement> element);
+    std::shared_ptr<fcl::CollisionObjectd> constructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
     static void checkCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data);
     static void computeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data);
 

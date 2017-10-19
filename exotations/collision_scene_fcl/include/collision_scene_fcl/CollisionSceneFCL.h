@@ -106,7 +106,7 @@ public:
     virtual void updateCollisionObjectTransforms();
 
 private:
-    std::shared_ptr<fcl::CollisionObject> constructFclCollisionObject(int i, std::shared_ptr<KinematicElement> element);
+    std::shared_ptr<fcl::CollisionObject> constructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
     static void checkCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data);
 
     std::map<std::string, std::shared_ptr<fcl::CollisionObject>> fcl_cache_;

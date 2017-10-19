@@ -60,7 +60,7 @@ void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string,
 {
     kinematic_elements_ = MapToVec(objects);
     fcl_objects_.resize(objects.size());
-    int i = 0;
+    long i = 0;
     for (const auto& object : objects)
     {
         std::shared_ptr<fcl::CollisionObjectd> new_object;
@@ -94,7 +94,7 @@ void CollisionSceneFCLLatest::updateCollisionObjectTransforms()
 
 // This function was copied from 'moveit_core/collision_detection_fcl/src/collision_common.cpp'
 // https://github.com/ros-planning/moveit/blob/kinetic-devel/moveit_core/collision_detection_fcl/src/collision_common.cpp#L520
-std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclCollisionObject(int i, std::shared_ptr<KinematicElement> element)
+std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element)
 {
     // Maybe use cache here?
 

@@ -34,6 +34,7 @@
 #define COLLISIONSCENEFCL_H
 
 #include <exotica/CollisionScene.h>
+#include <exotica/Tools/Conversions.h>
 #include <fcl/BVH/BVH_model.h>
 #include <fcl/broadphase/broadphase.h>
 #include <fcl/collision.h>
@@ -105,12 +106,13 @@ public:
     virtual void updateCollisionObjectTransforms();
 
 private:
-    static std::shared_ptr<fcl::CollisionObject> constructFclCollisionObject(std::shared_ptr<KinematicElement> element);
+    std::shared_ptr<fcl::CollisionObject> constructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
     static void checkCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data);
 
     std::map<std::string, std::shared_ptr<fcl::CollisionObject>> fcl_cache_;
 
     std::vector<fcl::CollisionObject*> fcl_objects_;
+    std::vector<std::shared_ptr<KinematicElement>> kinematic_elements_;
 };
 
 typedef std::shared_ptr<CollisionSceneFCL> CollisionSceneFCL_ptr;

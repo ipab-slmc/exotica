@@ -121,6 +121,8 @@ public:
        */
     void updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world);
 
+    void updateCollisionObjects();
+
     BASE_TYPE getBaseType()
     {
         return BaseType;

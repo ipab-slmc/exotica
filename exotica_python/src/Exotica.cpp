@@ -598,6 +598,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getGroupName", &Scene::getGroupName);
     scene.def("getJointNames", (std::vector<std::string> (Scene::*)()) & Scene::getJointNames);
     scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference_internal);
+    scene.def("getCollisionScene", &Scene::getCollisionScene, py::return_value_policy::reference_internal);
     scene.def("getModelJointNames", &Scene::getModelJointNames);
     scene.def("getModelState", &Scene::getModelState);
     scene.def("getModelStateMap", &Scene::getModelStateMap);
@@ -625,6 +626,7 @@ PYBIND11_MODULE(_pyexotica, module)
                       new moveit_msgs::PlanningSceneWorld(world));
                   instance->updateWorld(myPtr);
               });
+    scene.def("updateCollisionObjects", &Scene::updateCollisionObjects);
     scene.def("getCollisionRobotLinks", [](Scene* instance) { return instance->getCollisionScene()->getCollisionRobotLinks(); });
     scene.def("getCollisionWorldLinks", [](Scene* instance) { return instance->getCollisionScene()->getCollisionWorldLinks(); });
     scene.def("getRootFrameName", &Scene::getRootFrameName);
@@ -644,6 +646,15 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("addTrajectory", (void (Scene::*)(const std::string&, const std::string&)) & Scene::addTrajectory);
     scene.def("getTrajectory", [](Scene* instance, const std::string& link) { return instance->getTrajectory(link)->toString(); });
     scene.def("removeTrajectory", &Scene::removeTrajectory);
+
+    py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collisionScene(module, "CollisionScene");
+    // TODO: expose isStateValid, isCollisionFree, getCollisionDistance, getCollisionWorldLinks, getCollisionRobotLinks, getTranslation
+    collisionScene.def_property("alwaysExternallyUpdatedCollisionScene", &CollisionScene::getAlwaysExternallyUpdatedCollisionScene, &CollisionScene::setAlwaysExternallyUpdatedCollisionScene);
+    collisionScene.def_property("robotLinkScale", &CollisionScene::getRobotLinkScale, &CollisionScene::setRobotLinkScale);
+    collisionScene.def_property("worldLinkScale", &CollisionScene::getWorldLinkScale, &CollisionScene::setWorldLinkScale);
+    collisionScene.def_property("robotLinkPadding", &CollisionScene::getRobotLinkPadding, &CollisionScene::setRobotLinkPadding);
+    collisionScene.def_property("worldLinkPadding", &CollisionScene::getWorldLinkPadding, &CollisionScene::setWorldLinkPadding);
+    collisionScene.def("updateCollisionObjectTransforms", &CollisionScene::updateCollisionObjectTransforms);
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

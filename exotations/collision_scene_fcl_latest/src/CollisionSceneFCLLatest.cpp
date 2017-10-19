@@ -99,6 +99,27 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
     // Maybe use cache here?
 
     shapes::ShapeConstPtr shape = element->Shape;
+
+    // Apply scaling and padding
+    if (element->isRobotLink || element->ClosestRobotLink)
+    {
+        if (robotLinkScale_ != 1.0 || robotLinkPadding_ > 0.0)
+        {
+            shapes::ShapePtr scaled_shape(shape->clone());
+            scaled_shape->scaleAndPadd(robotLinkScale_, robotLinkPadding_);
+            shape = scaled_shape;
+        }
+    }
+    else
+    {
+        if (worldLinkScale_ != 1.0 || worldLinkPadding_ > 0.0)
+        {
+            shapes::ShapePtr scaled_shape(shape->clone());
+            scaled_shape->scaleAndPadd(worldLinkScale_, worldLinkPadding_);
+            shape = scaled_shape;
+        }
+    }
+
     std::shared_ptr<fcl::CollisionGeometryd> geometry;
     switch (shape->type)
     {

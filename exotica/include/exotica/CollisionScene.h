@@ -130,9 +130,42 @@ public:
         acm_ = acm;
     }
 
+    inline bool getAlwaysExternallyUpdatedCollisionScene() { return alwaysExternallyUpdatedCollisionScene_; }
     inline void setAlwaysExternallyUpdatedCollisionScene(const bool& value)
     {
         alwaysExternallyUpdatedCollisionScene_ = value;
+    }
+
+    inline double getRobotLinkScale() { return robotLinkScale_; }
+    inline void setRobotLinkScale(const double& scale)
+    {
+        if (scale < 0.0)
+            throw_pretty("Link scaling needs to be greater than or equal to 0");
+        robotLinkScale_ = scale;
+    }
+
+    inline double getWorldLinkScale() { return worldLinkScale_; }
+    inline void setWorldLinkScale(const double& scale)
+    {
+        if (scale < 0.0)
+            throw_pretty("Link scaling needs to be greater than or equal to 0");
+        worldLinkScale_ = scale;
+    }
+
+    inline double getRobotLinkPadding() { return robotLinkPadding_; }
+    inline void setRobotLinkPadding(const double& padding)
+    {
+        if (padding < 0.0)
+            HIGHLIGHT_NAMED("setRobotLinkPadding", "Generally, padding should be positive.");
+        robotLinkPadding_ = padding;
+    }
+
+    inline double getWorldLinkPadding() { return worldLinkPadding_; }
+    inline void setWorldLinkPadding(const double& padding)
+    {
+        if (padding < 0.0)
+            HIGHLIGHT_NAMED("setRobotLinkPadding", "Generally, padding should be positive.");
+        worldLinkPadding_ = padding;
     }
 
     ///
@@ -152,6 +185,18 @@ protected:
 
     /// Whether the collision scene is automatically updated - if not, update on queries
     bool alwaysExternallyUpdatedCollisionScene_ = false;
+
+    /// Robot link scaling
+    double robotLinkScale_ = 1.0;
+
+    /// World link scaling
+    double worldLinkScale_ = 1.0;
+
+    /// Robot link padding
+    double robotLinkPadding_ = 0.0;
+
+    /// World link padding
+    double worldLinkPadding_ = 0.0;
 };
 
 typedef exotica::Factory<exotica::CollisionScene> CollisionScene_fac;

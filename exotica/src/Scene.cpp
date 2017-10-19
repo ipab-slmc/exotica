@@ -116,7 +116,7 @@ void Scene::Instantiate(SceneInitializer& init)
     collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
     collision_scene_->setAlwaysExternallyUpdatedCollisionScene(force_collision_);
     updateSceneFrames();
-    collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+    updateCollisionObjects();
 
     AllowedCollisionMatrix acm;
     std::vector<std::string> acm_names;
@@ -271,13 +271,18 @@ void Scene::setCollisionScene(const moveit_msgs::PlanningScene& scene)
 {
     ps_->usePlanningSceneMsg(scene);
     updateSceneFrames();
-    collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+    updateCollisionObjects();
 }
 
 void Scene::updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world)
 {
     ps_->processPlanningSceneWorldMsg(*world);
     updateSceneFrames();
+    updateCollisionObjects();
+}
+
+void Scene::updateCollisionObjects()
+{
     collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
 }
 
@@ -371,7 +376,7 @@ void Scene::loadScene(const std::string& scene, bool updateCollisionScene)
     std::stringstream ss(scene);
     ps_->loadGeometryFromStream(ss);
     updateSceneFrames();
-    if (updateCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+    if (updateCollisionScene) updateCollisionObjects();
 }
 
 void Scene::loadSceneFile(const std::string& file_name, bool updateCollisionScene)
@@ -379,7 +384,7 @@ void Scene::loadSceneFile(const std::string& file_name, bool updateCollisionScen
     std::ifstream ss(parsePath(file_name));
     ps_->loadGeometryFromStream(ss);
     updateSceneFrames();
-    if (updateCollisionScene) collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+    if (updateCollisionScene) updateCollisionObjects();
 }
 
 std::string Scene::getScene()
@@ -393,7 +398,7 @@ void Scene::cleanScene()
 {
     ps_->removeAllCollisionObjects();
     updateSceneFrames();
-    collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
+    updateCollisionObjects();
 }
 
 void Scene::updateSceneFrames()
@@ -456,10 +461,7 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     Eigen::Affine3d pose;
     tf::transformKDLToEigen(transform, pose);
     custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape, inertia));
-    if (updateCollisionScene)
-    {
-        collision_scene_->updateCollisionObjects(kinematica_.getCollisionTreeMap());
-    }
+    if (updateCollisionScene) updateCollisionObjects();
 }
 
 void Scene::attachObject(const std::string& name, const std::string& parent)

@@ -144,6 +144,15 @@ double UnconstrainedTimeIndexedProblem::getDuration()
 
 void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
+
     scene_->Update(x, static_cast<double>(t) * tau);
     for (int i = 0; i < NumTasks; i++)
     {

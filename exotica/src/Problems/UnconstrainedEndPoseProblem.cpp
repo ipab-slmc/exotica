@@ -91,7 +91,15 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
     scene_->Update(x);
     for (int i = 0; i < NumTasks; i++)
     {
-        Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+        if (Rho(i) != 0)
+        {
+            Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+        }
+        else
+        {
+            Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length).setZero();
+            J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ).setZero();
+        }
     }
 }
 

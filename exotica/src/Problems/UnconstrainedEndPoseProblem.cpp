@@ -84,6 +84,31 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
 
     if (init.Rho.rows() == NumTasks) Rho = init.Rho;
     if (init.Goal.rows() == PhiN) y.data = init.Goal;
+
+    S = Eigen::MatrixXd::Identity(JN, JN);
+    ydiff = Eigen::VectorXd::Zero(JN);
+}
+
+void UnconstrainedEndPoseProblem::preupdate()
+{
+    PlanningProblem::preupdate();
+    for (TaskMap_ptr task : Tasks)
+    {
+        for (int i = 0; i < task->Length; i++)
+        {
+            S(i + task->Start, i + task->Start) = Rho(task->Id);
+        }
+    }
+}
+
+double UnconstrainedEndPoseProblem::getScalarCost()
+{
+    return ydiff.transpose()*S*ydiff;
+}
+
+Eigen::VectorXd UnconstrainedEndPoseProblem::getScalarJacobian()
+{
+    return J.transpose()*S*ydiff*2.0;
 }
 
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
@@ -94,6 +119,7 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
         if (Rho(i) != 0)
             Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
+    ydiff = Phi - y;
 }
 
 void UnconstrainedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)

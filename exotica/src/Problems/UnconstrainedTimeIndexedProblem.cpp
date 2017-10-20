@@ -113,9 +113,25 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     Phi = y;
     ydiff.assign(T, Eigen::VectorXd::Zero(JN));
     J.assign(T, Eigen::MatrixXd(JN, N));
+    S.assign(T, Eigen::MatrixXd::Identity(JN, JN));
 
     // Set initial trajectory
     InitialTrajectory.resize(T, getStartState());
+}
+
+void UnconstrainedTimeIndexedProblem::preupdate()
+{
+    PlanningProblem::preupdate();
+    for(int t; t=0; t<T)
+    {
+        for (TaskMap_ptr task : Tasks)
+        {
+            for (int i = 0; i < task->Length; i++)
+            {
+                S[t](i + task->Start, i + task->Start) = Rho[t](task->Id);
+            }
+        }
+    }
 }
 
 void UnconstrainedTimeIndexedProblem::setInitialTrajectory(
@@ -161,6 +177,16 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
             Tasks[i]->update(x, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
     ydiff[t] = y[t] - Phi[t];
+}
+
+double UnconstrainedTimeIndexedProblem::getScalarCost(int t)
+{
+    return ydiff[t].transpose()*S[t]*ydiff[t];
+}
+
+Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarJacobian(int t)
+{
+    return J[t].transpose()*S[t]*ydiff[t]*2.0;
 }
 
 void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)

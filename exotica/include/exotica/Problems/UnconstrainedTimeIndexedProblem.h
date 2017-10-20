@@ -59,6 +59,10 @@ public:
     double getRho(const std::string& task_name, int t = 0);
     std::vector<Eigen::VectorXd> getInitialTrajectory();
     void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
+    virtual void preupdate();
+
+    double getScalarCost(int t);
+    Eigen::VectorXd getScalarJacobian(int t);
 
     int T;          //!< Number of time steps
     double tau;     //!< Time step duration
@@ -74,6 +78,7 @@ public:
     std::vector<TaskSpaceVector> Phi;
     std::vector<Eigen::VectorXd> ydiff;
     std::vector<Eigen::MatrixXd> J;
+    std::vector<Eigen::MatrixXd> S;
 
     int PhiN;
     int JN;

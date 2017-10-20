@@ -164,7 +164,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
 
         ScaleToStepSize(qd);
 
-        q = q + qd * parameters_.Alpha;
+        q = q - qd * parameters_.Alpha;
 
         if (qd.norm() < parameters_.Convergence)
         {

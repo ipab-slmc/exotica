@@ -64,7 +64,8 @@ private:
     std::vector<std::string> robotLinks;
     std::vector<std::shared_ptr<KinematicElement>> robotKinematicElements;
     // std::vector<CollisionProxy> closestDistances;
-    double margin_ = 0.0;
+    double robot_margin_ = 0.0;
+    double world_margin_ = 0.0;
     bool linear_ = false;
 
     unsigned int dim_;

@@ -62,10 +62,12 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
             cscene_->getCollisionDistance(robotLinks[i]);
         for (const auto& proxy : proxies)
         {
-            if (proxy.distance < margin_)
+            bool isRobotToRobot = (proxy.e1->isRobotLink || proxy.e1->ClosestRobotLink) && (proxy.e2->isRobotLink || proxy.e2->ClosestRobotLink);
+            double& margin = isRobotToRobot ? robot_margin_ : world_margin_;
+            if (proxy.distance < margin)
             {
                 // Cost
-                phi(i) += std::pow((1 - proxy.distance / margin_), linear_ ? 1 : 2);
+                phi(i) += std::pow((1 - proxy.distance / margin), linear_ ? 1 : 2);
                 const double& d = phi(i);
 
                 // Jacobian
@@ -78,19 +80,19 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                 {
                     Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
                         proxy.e1, arel, nullptr, KDL::Frame());
-                    J.row(i) -= (2. * d) / margin_ * (proxy.normal1.transpose() * tmpJ);
+                    J.row(i) -= (2. * d) / margin * (proxy.normal1.transpose() * tmpJ);
                     tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
                                                         KDL::Frame());
-                    J.row(i) += (2. * d) / margin_ * (proxy.normal1.transpose() * tmpJ);
+                    J.row(i) += (2. * d) / margin * (proxy.normal1.transpose() * tmpJ);
                 }
                 else
                 {
                     Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
                         proxy.e1, arel, nullptr, KDL::Frame());
-                    J.row(i) -= 1 / margin_ * (proxy.normal1.transpose() * tmpJ);
+                    J.row(i) -= 1 / margin * (proxy.normal1.transpose() * tmpJ);
                     tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
                                                         KDL::Frame());
-                    J.row(i) += 1 / margin_ * (proxy.normal1.transpose() * tmpJ);
+                    J.row(i) += 1 / margin * (proxy.normal1.transpose() * tmpJ);
                 }
             }
         }
@@ -112,11 +114,13 @@ void SmoothCollisionDistance::assignScene(Scene_ptr scene)
 void SmoothCollisionDistance::Initialize()
 {
     cscene_ = scene_->getCollisionScene();
-    margin_ = init_.Margin;
+    world_margin_ = init_.WorldMargin;
+    robot_margin_ = init_.RobotMargin;
+
     linear_ = init_.Linear;
 
     HIGHLIGHT_NAMED("Smooth Collision Distance",
-                    "Margin: " << margin_ << "\t Linear: " << linear_);
+                    "World Margin: " << world_margin_ << "Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
 
     // Get names of all controlled joints and their corresponding child links
     for (const auto& element : scene_->getSolver().getTree())

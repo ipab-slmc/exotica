@@ -1,3 +1,4 @@
 extend <exotica/TaskMap>
-Optional double Margin = 0.2;
+Optional double WorldMargin = 0.1;
+Optional double RobotMargin = 0.1;
 Optional bool Linear = false;

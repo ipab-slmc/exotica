@@ -158,14 +158,7 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
     {
         // Only update TaskMap if Rho is not 0
         if (Rho[t](i) != 0)
-        {
             Tasks[i]->update(x, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
-        }
-        else
-        {
-            Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length).setZero();
-            J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ).setZero();
-        }
     }
     ydiff[t] = y[t] - Phi[t];
 }

@@ -125,13 +125,7 @@ bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
     for (int i = 0; i < NumTasks; i++)
     {
         if (Rho(i) != 0)
-        {
             Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
-        }
-        else
-        {
-            Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length).setZero();
-        }
     }
     return ((S * (Phi - y) - threshold_).array() < 0.0).all();
 }

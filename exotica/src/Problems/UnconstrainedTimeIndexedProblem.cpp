@@ -122,7 +122,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
 void UnconstrainedTimeIndexedProblem::preupdate()
 {
     PlanningProblem::preupdate();
-    for(int t; t=0; t<T)
+    for(int t=0; t<T; t++)
     {
         for (TaskMap_ptr task : Tasks)
         {

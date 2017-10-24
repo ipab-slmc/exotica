@@ -124,7 +124,8 @@ bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
     scene_->Update(x);
     for (int i = 0; i < NumTasks; i++)
     {
-        Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+        if (Rho(i) != 0)
+            Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
     }
     return ((S * (Phi - y) - threshold_).array() < 0.0).all();
 }

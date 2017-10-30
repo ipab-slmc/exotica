@@ -676,6 +676,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kdlFrame.def("getZYX", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYX); });
     kdlFrame.def("getAngleAxis", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ANGLE_AXIS); });
     kdlFrame.def("getQuaternion", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::QUATERNION); });
+    kdlFrame.def("getTranslation", [](KDL::Frame* me) { Eigen::Vector3d tmp; for (int i = 0; i < 3; i++) { tmp[i] = me->p.data[i]; } return tmp; });
     kdlFrame.def("get", [](KDL::Frame* me) { return getFrame(*me); });
     kdlFrame.def("inverse", (KDL::Frame (KDL::Frame::*)() const) & KDL::Frame::Inverse);
     kdlFrame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());

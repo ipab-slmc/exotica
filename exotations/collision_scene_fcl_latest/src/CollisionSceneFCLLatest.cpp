@@ -521,6 +521,17 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
     return data.Proxies;
 }
 
+std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const std::vector<std::string>& objects)
+{
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
+    std::vector<CollisionProxy> proxies;
+    for (const auto& o1 : objects)
+        appendVector(proxies, getCollisionDistance(o1));
+
+    return proxies;
+}
+
 Eigen::Vector3d CollisionSceneFCLLatest::getTranslation(const std::string& name)
 {
     for (fcl::CollisionObjectd* object : fcl_objects_)

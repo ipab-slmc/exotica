@@ -159,10 +159,18 @@ public:
     {
         return ControlledJointsNames;
     }
+    std::vector<std::string> getControlledLinkNames()
+    {
+        return ControlledLinkNames;
+    }
 
     std::vector<std::string> getModelJointNames()
     {
         return ModelJointsNames;
+    }
+    std::vector<std::string> getModelLinkNames()
+    {
+        return ControlledLinkNames;
     }
 
     Eigen::VectorXd getControlledLinkMass();
@@ -216,6 +224,8 @@ private:
     std::map<std::string, std::shared_ptr<KinematicElement>> ModelJointsMap;
     std::vector<std::string> ModelJointsNames;
     std::vector<std::string> ControlledJointsNames;
+    std::vector<std::string> ModelLinkNames;
+    std::vector<std::string> ControlledLinkNames;
     std::shared_ptr<KinematicResponse> Solution;
     KinematicRequestFlags Flags;
 

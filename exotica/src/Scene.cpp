@@ -336,6 +336,16 @@ std::vector<std::string> Scene::getJointNames()
     return kinematica_.getJointNames();
 }
 
+std::vector<std::string> Scene::getControlledLinkNames()
+{
+    return kinematica_.getControlledLinkNames();
+}
+
+std::vector<std::string> Scene::getModelLinkNames()
+{
+    return kinematica_.getModelLinkNames();
+}
+
 std::vector<std::string> Scene::getModelJointNames()
 {
     return kinematica_.getModelJointNames();

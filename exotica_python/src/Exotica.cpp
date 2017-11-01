@@ -615,6 +615,8 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getBaseType", &Scene::getBaseType);
     scene.def("getGroupName", &Scene::getGroupName);
     scene.def("getJointNames", (std::vector<std::string> (Scene::*)()) & Scene::getJointNames);
+    scene.def("getControlledLinkNames", &Scene::getControlledLinkNames);
+    scene.def("getModelLinkNames", &Scene::getModelLinkNames);
     scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference_internal);
     scene.def("getCollisionScene", &Scene::getCollisionScene, py::return_value_policy::reference_internal);
     scene.def("getModelJointNames", &Scene::getModelJointNames);

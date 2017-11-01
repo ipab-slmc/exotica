@@ -641,6 +641,11 @@ PYBIND11_MODULE(_pyexotica, module)
                   return instance->getCollisionScene()->getCollisionDistance(o1);
               },
               py::arg("Object1"));
+    scene.def("getCollisionDistance",
+              [](Scene* instance, const std::vector<std::string>& objects) {
+                  return instance->getCollisionScene()->getCollisionDistance(objects);
+              },
+              py::arg("Objects"));
     scene.def("updateWorld",
               [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
                   moveit_msgs::PlanningSceneWorldConstPtr myPtr(

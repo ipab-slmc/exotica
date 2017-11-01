@@ -296,6 +296,7 @@ void KinematicTree::UpdateModel()
         TreeMap[Joint->Segment.getName()] = Joint;
     }
     debugTree.resize(Tree.size() - 1);
+    UpdateTree();
     debugSceneChanged = true;
 }
 

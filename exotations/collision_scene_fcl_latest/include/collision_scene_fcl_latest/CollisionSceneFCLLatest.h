@@ -57,7 +57,7 @@ public:
 
     struct DistanceData
     {
-        DistanceData(CollisionSceneFCLLatest* scene) : Scene(scene), Self(true), Distance{1e300} {}
+        DistanceData(CollisionSceneFCLLatest* scene) : Scene(scene), Self(true), Distance(1e300) {}
         fcl::DistanceRequestd Request;
         fcl::DistanceResultd Result;
         CollisionSceneFCLLatest* Scene;

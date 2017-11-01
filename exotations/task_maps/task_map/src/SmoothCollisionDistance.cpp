@@ -78,15 +78,20 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
 
                 if (!linear_)
                 {
+                    // Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+                    //     proxy.e1, arel, nullptr, KDL::Frame());
                     Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
-                        proxy.e1, arel, nullptr, KDL::Frame());
+                        nullptr, KDL::Frame(), proxy.e1, arel);
                     J.row(i) -= (2. * d) / margin * (proxy.normal1.transpose() * tmpJ);
-                    tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
-                                                        KDL::Frame());
+                    // tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
+                    //                                     KDL::Frame());
+                    tmpJ = scene_->getSolver().Jacobian(nullptr,
+                                                        KDL::Frame(), proxy.e2, brel);
                     J.row(i) += (2. * d) / margin * (proxy.normal1.transpose() * tmpJ);
                 }
                 else
                 {
+                    throw_pretty("Noooooo");
                     Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
                         proxy.e1, arel, nullptr, KDL::Frame());
                     J.row(i) -= 1 / margin * (proxy.normal1.transpose() * tmpJ);
@@ -120,7 +125,7 @@ void SmoothCollisionDistance::Initialize()
     linear_ = init_.Linear;
 
     HIGHLIGHT_NAMED("Smooth Collision Distance",
-                    "World Margin: " << world_margin_ << "Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
+                    "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
 
     // Get names of all controlled joints and their corresponding child links
     for (const auto& element : scene_->getSolver().getTree())

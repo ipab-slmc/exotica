@@ -172,7 +172,8 @@ public:
     Eigen::MatrixXd Jacobian(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
 
     void resetModel();
-    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero());
+    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const std_msgs::ColorRGBA& colorMsg);
+    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0));
     void UpdateModel();
     void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
 

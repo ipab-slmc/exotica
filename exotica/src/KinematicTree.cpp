@@ -342,7 +342,13 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
     debugSceneChanged = true;
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const std_msgs::ColorRGBA& colorMsg)
+{
+    Eigen::Vector4d color = Eigen::Vector4d(colorMsg.r, colorMsg.g, colorMsg.b, colorMsg.a);
+    AddElement(name, transform, parent, shape, KDL::RigidBodyInertia::Zero(), color);
+}
+
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color)
 {
     std::shared_ptr<KinematicElement> parent_element;
     if (parent == "")
@@ -370,6 +376,9 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
     {
         NewElement->Shape = shape;
         CollisionTreeMap[NewElement->Segment.getName()] = NewElement;
+
+        // Set color if set. If all zeros, default to preset (grey).
+        if (color != Eigen::Vector4d::Zero()) NewElement->Color = color;
     }
     Tree.push_back(NewElement);
     parent_element->Children.push_back(NewElement);
@@ -511,8 +520,7 @@ void KinematicTree::publishFrames()
                     mrk.frame_locked = true;
                     mrk.id = i;
                     mrk.ns = "CollisionObjects";
-                    mrk.color.r = mrk.color.g = mrk.color.b = 0.5;
-                    mrk.color.a = 1.0;
+                    mrk.color = getColor(Tree[i]->Color);
                     mrk.header.frame_id = "exotica/" + Tree[i]->Segment.getName();
                     msg.markers.push_back(mrk);
                 }

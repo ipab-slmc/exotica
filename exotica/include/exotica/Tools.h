@@ -68,6 +68,16 @@ inline std_msgs::ColorRGBA getColor(double r, double g, double b, double a = 1.0
     return ret;
 }
 
+inline std_msgs::ColorRGBA getColor(Eigen::Vector4d rgba)
+{
+    std_msgs::ColorRGBA ret;
+    ret.r = rgba(0);
+    ret.g = rgba(1);
+    ret.b = rgba(2);
+    ret.a = rgba(3);
+    return ret;
+}
+
 /**
    * @brief loadOBJ Loads mesh data from an OBJ file
    * @param file_name File name

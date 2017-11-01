@@ -64,7 +64,7 @@ inline std_msgs::ColorRGBA getColor(double r, double g, double b, double a = 1.0
     ret.r = r;
     ret.g = g;
     ret.b = b;
-    ret.a = 1;
+    ret.a = a;
     return ret;
 }
 

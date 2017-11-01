@@ -80,7 +80,7 @@ public:
     /**
        * \brief Check if the whole robot is valid (collision only).
        * @param self Indicate if self collision check is required.
-       * @return True, if the state is collision free..
+       * @return True, if the state is collision free.
        */
     virtual bool isStateValid(bool self = true, double safe_distance = 0.0);
     virtual bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0);
@@ -88,8 +88,7 @@ public:
     ///
     /// \brief Computes collision distances.
     /// \param self Indicate if self collision check is required.
-    /// \param computePenetrationDepth If set to true, accurate penetration depth is computed.
-    /// \return Collision proximity objectects for all colliding pairs of objects.
+    /// \return Collision proximity objects for all colliding pairs of objects.
     ///
     virtual std::vector<CollisionProxy> getCollisionDistance(bool self);
     virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2);

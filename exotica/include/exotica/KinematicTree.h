@@ -165,6 +165,8 @@ public:
         return ModelJointsNames;
     }
 
+    Eigen::VectorXd getControlledLinkMass();
+
     KDL::Frame FK(KinematicFrame& frame);
     KDL::Frame FK(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB);
     KDL::Frame FK(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);

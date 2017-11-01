@@ -472,9 +472,9 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const 
 }
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
-    const std::string& o1)
+    const std::string& o1, bool disableCollisionSceneUpdate)
 {
-    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+    if (!alwaysExternallyUpdatedCollisionScene_ && !disableCollisionSceneUpdate) updateCollisionObjectTransforms();
 
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
@@ -527,7 +527,7 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const 
 
     std::vector<CollisionProxy> proxies;
     for (const auto& o1 : objects)
-        appendVector(proxies, getCollisionDistance(o1));
+        appendVector(proxies, getCollisionDistance(o1, true));
 
     return proxies;
 }

@@ -606,6 +606,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getModelStateMap", &Scene::getModelStateMap);
     scene.def("setModelState", (void (Scene::*)(Eigen::VectorXdRefConst, double)) & Scene::setModelState, py::arg("x"), py::arg("t") = 0.0);
     scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>, double)) & Scene::setModelState, py::arg("x"), py::arg("t") = 0.0);
+    scene.def("getControlledState", &Scene::getControlledState);
     scene.def("publishScene", &Scene::publishScene);
     scene.def("publishProxies", &Scene::publishProxies);
     scene.def("setCollisionScene", &Scene::setCollisionScene);

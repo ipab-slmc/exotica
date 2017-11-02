@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<robot name="planar_2d">
+    <link name="base_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 .05"/>
+            <geometry>
+                <cylinder length=".1" radius=".02"/>
+            </geometry>
+            <material name="Red">
+                <color rgba="1.0 0.0 0.0 1.0"/>
+            </material>
+        </visual>
+    </link>
+    <link name="link1">
+        <visual>
+            <origin rpy="0 1.57079 0" xyz="0.0635635 0 0"/>
+            <geometry>
+                <cylinder length="0.127127" radius=".01905"/>
+            </geometry>
+            <material name="Cyan">
+                <color rgba="0 1.0 1.0 1.0"/>
+            </material>
+        </visual>
+    </link>
+    <link name="link2">
+        <visual>
+            <origin rpy="0 1.57079 0" xyz="0.0733425 0 0"/>
+            <geometry>
+                <cylinder length="0.146685" radius="0.01905"/>
+            </geometry>
+            <material name="Cyan">
+                <color rgba="0 1.0 1.0 1.0"/>
+            </material>
+        </visual>
+    </link>
+    <link name="link3">
+        <visual>
+            <origin rpy="0 1.57079 0" xyz="0.0733425 0 0"/>
+            <geometry>
+                <cylinder length="0.146685" radius="0.01905"/>
+            </geometry>
+            <material name="Cyan">
+                <color rgba="0 1.0 1.0 1.0"/>
+            </material>
+        </visual>
+    </link>
+    <link name="link4" />
+    <joint name="joint1" type="revolute">
+        <parent link="base_link"/>
+        <child link="link1"/>
+        <origin rpy="0 0 0" xyz="0 0 .05"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="100" lower="-2.96705972839" upper="2.96705972839" velocity="1.91986217719" />
+    </joint>
+    <joint name="joint2" type="revolute">
+        <parent link="link1"/>
+        <child link="link2"/>
+        <origin rpy="0 0 0" xyz="0.127127 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="100" lower="-2.96705972839" upper="2.96705972839" velocity="1.91986217719" />
+    </joint>
+    <joint name="joint3" type="revolute">
+        <parent link="link2"/>
+        <child link="link3"/>
+        <origin rpy="0 0 0" xyz="0.146685 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="100" lower="-2.96705972839" upper="2.96705972839" velocity="1.91986217719" />
+    </joint>
+    <joint name="end_effector" type="fixed">
+        <parent link="link3"/>
+        <child link="link4"/>
+        <origin rpy="0 0 0" xyz="0.146685 0 0"/>
+    </joint>
+</robot>

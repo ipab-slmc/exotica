@@ -2,3 +2,4 @@ extend <exotica/TaskMap>
 Optional double WorldMargin = 0.1;
 Optional double RobotMargin = 0.1;
 Optional bool Linear = false;
+Optional bool CheckSelfCollision = true;

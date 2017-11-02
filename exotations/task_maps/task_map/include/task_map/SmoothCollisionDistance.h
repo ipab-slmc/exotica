@@ -61,14 +61,13 @@ public:
     virtual int taskSpaceDim();
 
 private:
-    std::vector<std::string> robotLinks;
-    std::vector<std::shared_ptr<KinematicElement>> robotKinematicElements;
-    // std::vector<CollisionProxy> closestDistances;
+    std::vector<std::string> robotLinks_;
     double robot_margin_ = 0.0;
     double world_margin_ = 0.0;
     bool linear_ = false;
+    bool check_self_collision_ = true;
 
-    unsigned int dim_;
+    unsigned int dim_ = 1;
     Scene_ptr scene_;
     CollisionScene_ptr cscene_;
     SmoothCollisionDistanceInitializer init_;

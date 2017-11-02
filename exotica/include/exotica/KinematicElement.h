@@ -54,6 +54,7 @@ public:
     std::vector<double> JointLimits;
     shapes::ShapeConstPtr Shape;
     bool isRobotLink;
+    Eigen::Vector4d Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0);
 
 private:
     inline void setChildrenClosestRobotLink()

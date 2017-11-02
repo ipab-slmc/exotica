@@ -416,7 +416,10 @@ void Scene::updateSceneFrames()
             for (int i = 0; i < object.second->shape_poses_.size(); i++)
             {
                 Eigen::Affine3d trans = objTransform.inverse() * object.second->shape_poses_[i];
-                kinematica_.AddElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i]);
+                if (ps_->hasObjectColor(object.first))
+                    kinematica_.AddElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i], ps_->getObjectColor(object.first));
+                else
+                    kinematica_.AddElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i]);
             }
         }
         else

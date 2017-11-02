@@ -305,6 +305,16 @@ void KinematicTree::resetModel()
     CollisionTreeMap.clear();
     UpdateModel();
     debugSceneChanged = true;
+
+    // Remove all CollisionShapes
+    if (Server::isRos())
+    {
+        visualization_msgs::MarkerArray msg;
+        visualization_msgs::Marker mrk;
+        mrk.action = 3;  // visualization_msgs::Marker::DELETEALL; // NB: enum only defined in ROS-J and newer, functionality still there
+        msg.markers.push_back(mrk);
+        shapes_pub_.publish(msg);
+    }
 }
 
 void KinematicTree::changeParent(const std::string& name, const std::string& parent_name, const KDL::Frame& pose, bool relative)

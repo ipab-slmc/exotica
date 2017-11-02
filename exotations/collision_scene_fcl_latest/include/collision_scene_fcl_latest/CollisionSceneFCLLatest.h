@@ -92,8 +92,8 @@ public:
     ///
     virtual std::vector<CollisionProxy> getCollisionDistance(bool self);
     virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2);
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, bool disableCollisionSceneUpdate = false);
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::vector<std::string>& objects);
+    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true, const bool& disableCollisionSceneUpdate = false);
+    virtual std::vector<CollisionProxy> getCollisionDistance(const std::vector<std::string>& objects, const bool& self = true);
 
     /**
        * @brief      Gets the collision world links.

@@ -472,13 +472,14 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const 
 }
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
-    const std::string& o1, bool disableCollisionSceneUpdate)
+    const std::string& o1, const bool& self, const bool& disableCollisionSceneUpdate)
 {
     if (!alwaysExternallyUpdatedCollisionScene_ && !disableCollisionSceneUpdate) updateCollisionObjectTransforms();
 
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
     DistanceData data(this);
+    data.Self = self;
 
     // Iterate over all fcl_objects_ to find all collision links that belong to
     // object o1
@@ -521,13 +522,13 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
     return data.Proxies;
 }
 
-std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const std::vector<std::string>& objects)
+std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const std::vector<std::string>& objects, const bool& self)
 {
     if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
 
     std::vector<CollisionProxy> proxies;
     for (const auto& o1 : objects)
-        appendVector(proxies, getCollisionDistance(o1, true));
+        appendVector(proxies, getCollisionDistance(o1, self, true));
 
     return proxies;
 }

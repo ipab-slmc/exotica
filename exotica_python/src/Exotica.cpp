@@ -637,15 +637,15 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getCollisionDistance", [](Scene* instance, bool self) { return instance->getCollisionScene()->getCollisionDistance(self); }, py::arg("self") = true);
     scene.def("getCollisionDistance", [](Scene* instance, const std::string& o1, const std::string& o2) { return instance->getCollisionScene()->getCollisionDistance(o1, o2); }, py::arg("Object1"), py::arg("Object2"));
     scene.def("getCollisionDistance",
-              [](Scene* instance, const std::string& o1) {
-                  return instance->getCollisionScene()->getCollisionDistance(o1);
+              [](Scene* instance, const std::string& o1, const bool& self) {
+                  return instance->getCollisionScene()->getCollisionDistance(o1, self);
               },
-              py::arg("Object1"));
+              py::arg("Object1"), py::arg("self") = true);
     scene.def("getCollisionDistance",
-              [](Scene* instance, const std::vector<std::string>& objects) {
-                  return instance->getCollisionScene()->getCollisionDistance(objects);
+              [](Scene* instance, const std::vector<std::string>& objects, const bool& self) {
+                  return instance->getCollisionScene()->getCollisionDistance(objects, self);
               },
-              py::arg("Objects"));
+              py::arg("objects"), py::arg("self") = true);
     scene.def("updateWorld",
               [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
                   moveit_msgs::PlanningSceneWorldConstPtr myPtr(

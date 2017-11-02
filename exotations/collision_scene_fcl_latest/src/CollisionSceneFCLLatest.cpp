@@ -471,6 +471,11 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const 
     return data.Proxies;
 }
 
+std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const std::string& o1, const bool& self)
+{
+    return getCollisionDistance(o1, self, false);
+}
+
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
     const std::string& o1, const bool& self, const bool& disableCollisionSceneUpdate)
 {

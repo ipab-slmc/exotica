@@ -99,10 +99,10 @@ public:
 
 struct KinematicFrame
 {
-    std::shared_ptr<KinematicElement> FrameA;
-    KDL::Frame FrameAOffset;
-    std::shared_ptr<KinematicElement> FrameB;
-    KDL::Frame FrameBOffset;
+    std::shared_ptr<KinematicElement> FrameA = nullptr;
+    KDL::Frame FrameAOffset = KDL::Frame();
+    std::shared_ptr<KinematicElement> FrameB = nullptr;
+    KDL::Frame FrameBOffset = KDL::Frame();
     KDL::Frame TempAB;
     KDL::Frame TempA;
     KDL::Frame TempB;
@@ -194,7 +194,7 @@ private:
     void UpdateTree();
     void UpdateFK();
     void UpdateJ();
-    void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);
+    void ComputeJ(KinematicFrame& frame, KDL::Jacobian& J);
 
     BASE_TYPE ModelBaseType;
     BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;

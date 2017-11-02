@@ -575,6 +575,8 @@ PYBIND11_MODULE(_pyexotica, module)
     samplingProblem.def("setGoalState", &SamplingProblem::setGoalState);
     samplingProblem.def("getSpaceDim", &SamplingProblem::getSpaceDim);
     samplingProblem.def("getBounds", &SamplingProblem::getBounds);
+    samplingProblem.def_readonly("N", &SamplingProblem::N);
+    samplingProblem.def_readonly("NumTasks", &SamplingProblem::NumTasks);
     samplingProblem.def_readonly("Rho", &SamplingProblem::Rho);
     samplingProblem.def_readonly("y", &SamplingProblem::y);
     samplingProblem.def_readonly("Phi", &SamplingProblem::Phi);
@@ -604,6 +606,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getModelStateMap", &Scene::getModelStateMap);
     scene.def("setModelState", (void (Scene::*)(Eigen::VectorXdRefConst, double)) & Scene::setModelState, py::arg("x"), py::arg("t") = 0.0);
     scene.def("setModelStateMap", (void (Scene::*)(std::map<std::string, double>, double)) & Scene::setModelState, py::arg("x"), py::arg("t") = 0.0);
+    scene.def("getControlledState", &Scene::getControlledState);
     scene.def("publishScene", &Scene::publishScene);
     scene.def("publishProxies", &Scene::publishProxies);
     scene.def("setCollisionScene", &Scene::setCollisionScene);
@@ -665,6 +668,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
     kinematicTree.def("getModelBaseType", &KinematicTree::getModelBaseType);
     kinematicTree.def("getControlledBaseType", &KinematicTree::getControlledBaseType);
+    kinematicTree.def("getControlledLinkMass", &KinematicTree::getControlledLinkMass);
 
     py::class_<KDL::Frame> kdlFrame(module, "KDLFrame");
     kdlFrame.def(py::init());

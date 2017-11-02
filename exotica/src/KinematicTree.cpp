@@ -792,4 +792,14 @@ Eigen::VectorXd KinematicTree::getControlledState()
     }
     return x;
 }
+
+Eigen::VectorXd KinematicTree::getControlledLinkMass()
+{
+    Eigen::VectorXd x(NumControlledJoints);
+    for (int i = 0; i < ControlledJoints.size(); i++)
+    {
+        x(i) = ControlledJoints[i]->Segment.getInertia().getMass();
+    }
+    return x;
+}
 }

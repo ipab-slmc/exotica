@@ -260,15 +260,6 @@ inline std::vector<bool> parseBoolList(const std::string value)
     if (ret.size() == 0) throw_pretty("Empty vector!");
     return ret;
 }
-
-void vectorExoticaToEigen(const exotica::Vector& exotica,
-                          Eigen::VectorXd& eigen);
-void vectorEigenToExotica(Eigen::VectorXd eigen,
-                          exotica::Vector& exotica);
-void matrixExoticaToEigen(const exotica::Matrix& exotica,
-                          Eigen::MatrixXd& eigen);
-void matrixEigenToExotica(const Eigen::MatrixXd& eigen,
-                          exotica::Matrix& exotica);
 }
 
 #endif  // CONVERSIONS_H

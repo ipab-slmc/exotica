@@ -99,10 +99,10 @@ public:
 
 struct KinematicFrame
 {
-    std::shared_ptr<KinematicElement> FrameA = nullptr;
-    KDL::Frame FrameAOffset = KDL::Frame();
-    std::shared_ptr<KinematicElement> FrameB = nullptr;
-    KDL::Frame FrameBOffset = KDL::Frame();
+    std::shared_ptr<KinematicElement> FrameA;
+    KDL::Frame FrameAOffset;
+    std::shared_ptr<KinematicElement> FrameB;
+    KDL::Frame FrameBOffset;
     KDL::Frame TempAB;
     KDL::Frame TempA;
     KDL::Frame TempB;

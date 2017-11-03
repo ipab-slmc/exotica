@@ -692,6 +692,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getModelBaseType", &KinematicTree::getModelBaseType);
     kinematicTree.def("getControlledBaseType", &KinematicTree::getControlledBaseType);
     kinematicTree.def("getControlledLinkMass", &KinematicTree::getControlledLinkMass);
+    kinematicTree.def("getCollisionObjectTypes", &KinematicTree::getCollisionObjectTypes);
 
     py::class_<KDL::Frame> kdlFrame(module, "KDLFrame");
     kdlFrame.def(py::init());
@@ -709,6 +710,16 @@ PYBIND11_MODULE(_pyexotica, module)
     kdlFrame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());
     py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
     py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
+
+    py::enum_<shapes::ShapeType>(module, "ShapeType")
+        .value("UnknownShape", shapes::ShapeType::UNKNOWN_SHAPE)
+        .value("Sphere", shapes::ShapeType::SPHERE)
+        .value("Cylinder", shapes::ShapeType::CYLINDER)
+        .value("Cone", shapes::ShapeType::CONE)
+        .value("Box", shapes::ShapeType::BOX)
+        .value("Plane", shapes::ShapeType::PLANE)
+        .value("Mesh", shapes::ShapeType::MESH)
+        .value("Octree", shapes::ShapeType::OCTREE);
 
     module.attr("version") = version();
     module.attr("branch") = branch();

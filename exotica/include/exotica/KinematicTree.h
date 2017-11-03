@@ -198,6 +198,8 @@ public:
     std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() { return TreeMap; }
     bool Debug;
 
+    std::map<std::string, shapes::ShapeType> getCollisionObjectTypes();
+
 private:
     void BuildTree(const KDL::Tree& RobotKinematics);
     void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);

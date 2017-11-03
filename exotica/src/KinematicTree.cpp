@@ -818,4 +818,14 @@ Eigen::VectorXd KinematicTree::getControlledLinkMass()
     }
     return x;
 }
+
+std::map<std::string, shapes::ShapeType> KinematicTree::getCollisionObjectTypes()
+{
+    std::map<std::string, shapes::ShapeType> ret;
+    for (const auto& element : CollisionTreeMap)
+    {
+        ret[element.second->Segment.getName()] = element.second->Shape->type;
+    }
+    return ret;
+}
 }

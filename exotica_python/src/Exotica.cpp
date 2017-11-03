@@ -522,11 +522,6 @@ PYBIND11_MODULE(_pyexotica, module)
     py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
 
     py::class_<TaskMap, std::shared_ptr<TaskMap>, Object> taskMap(module, "TaskMap");
-    taskMap.def_readonly("id", &TaskMap::Id);
-    taskMap.def_readonly("start", &TaskMap::Start);
-    taskMap.def_readonly("length", &TaskMap::Length);
-    taskMap.def_readonly("startJ", &TaskMap::StartJ);
-    taskMap.def_readonly("lengthJ", &TaskMap::LengthJ);
     taskMap.def("taskSpaceDim", (int (TaskMap::*)()) & TaskMap::taskSpaceDim);
     taskMap.def("taskSpaceJacobianDim", &TaskMap::taskSpaceJacobianDim);
     taskMap.def("debug", &TaskMap::debug);

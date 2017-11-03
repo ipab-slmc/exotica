@@ -59,7 +59,7 @@ public:
 
     virtual int taskSpaceJacobianDim();
 
-    virtual std::vector<TaskVectorEntry> getLieGroupIndices();
+    virtual std::vector<TaskVectorEntry> getLieGroupIndices(int storageIndex = 0);
 
     RotationType rotationType;
     int bigStride;

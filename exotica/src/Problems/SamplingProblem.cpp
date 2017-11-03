@@ -85,8 +85,8 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     for (int i = 0; i < NumTasks; i++)
     {
         appendVector(y.map, Tasks[i]->getLieGroupIndices());
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
+        PhiN += Tasks[i]->Indexing[0]->Length;
+        JN += Tasks[i]->Indexing[0]->LengthJ;
     }
 
     Rho = Eigen::VectorXd::Ones(NumTasks);
@@ -105,9 +105,9 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     S = Eigen::MatrixXd::Identity(JN, JN);
     for (TaskMap_ptr task : Tasks)
     {
-        for (int i = 0; i < task->Length; i++)
+        for (int i = 0; i < task->Indexing[0]->Length; i++)
         {
-            S(i + task->Start, i + task->Start) = Rho(task->Id);
+            S(i + task->Indexing[0]->Start, i + task->Indexing[0]->Start) = Rho(task->Indexing[0]->Id);
         }
     }
 
@@ -127,7 +127,7 @@ bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
     for (int i = 0; i < NumTasks; i++)
     {
         if (Rho(i) != 0)
-            Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+            Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Indexing[0]->Start, Tasks[i]->Indexing[0]->Length));
     }
     numberOfProblemUpdates++;
     return ((S * (Phi - y) - threshold_).array() < 0.0).all();

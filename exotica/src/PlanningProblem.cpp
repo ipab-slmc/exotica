@@ -145,19 +145,13 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     }
 
     std::shared_ptr<KinematicResponse> Response = scene_->RequestKinematics(Request);
-    id = 0;
-    int idJ = 0;
+
     for (int i = 0; i < Tasks.size(); i++)
     {
         Tasks[i]->Kinematics.Create(Response);
-        Tasks[i]->Id = i;
-        Tasks[i]->Start = id;
-        Tasks[i]->Length = Tasks[i]->taskSpaceDim();
-        Tasks[i]->StartJ = idJ;
-        Tasks[i]->LengthJ = Tasks[i]->taskSpaceJacobianDim();
-        id += Tasks[i]->Length;
-        idJ += Tasks[i]->LengthJ;
     }
+
+    TaskIndexing::fromTasks(Tasks);
 
     if (init.Maps.size() == 0)
     {

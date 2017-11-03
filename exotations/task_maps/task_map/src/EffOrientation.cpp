@@ -65,12 +65,12 @@ void EffOrientation::Instantiate(EffOrientationInitializer& init)
     stride = getRotationTypeLength(rotationType);
 }
 
-std::vector<TaskVectorEntry> EffOrientation::getLieGroupIndices()
+std::vector<TaskVectorEntry> EffOrientation::getLieGroupIndices(int storageIndex)
 {
     std::vector<TaskVectorEntry> ret;
     for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        ret.push_back(TaskVectorEntry(Start + i * stride, rotationType));
+        ret.push_back(TaskVectorEntry(Indexing[storageIndex]->Start + i * stride, rotationType));
     }
     return ret;
 }

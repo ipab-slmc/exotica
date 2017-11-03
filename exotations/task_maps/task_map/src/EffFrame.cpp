@@ -66,12 +66,12 @@ void EffFrame::Instantiate(EffFrameInitializer& init)
     bigStride = smallStride + 3;
 }
 
-std::vector<TaskVectorEntry> EffFrame::getLieGroupIndices()
+std::vector<TaskVectorEntry> EffFrame::getLieGroupIndices(int storageIndex)
 {
     std::vector<TaskVectorEntry> ret;
     for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        ret.push_back(TaskVectorEntry(Start + i * bigStride + 3, rotationType));
+        ret.push_back(TaskVectorEntry(Indexing[storageIndex]->Start + i * bigStride + 3, rotationType));
     }
     return ret;
 }

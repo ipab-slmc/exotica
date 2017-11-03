@@ -357,12 +357,6 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
     debugSceneChanged = true;
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const std_msgs::ColorRGBA& colorMsg)
-{
-    Eigen::Vector4d color = Eigen::Vector4d(colorMsg.r, colorMsg.g, colorMsg.b, colorMsg.a);
-    AddElement(name, transform, parent, shape, KDL::RigidBodyInertia::Zero(), color);
-}
-
 std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color)
 {
     std::shared_ptr<KinematicElement> parent_element;

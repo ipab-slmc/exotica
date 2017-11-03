@@ -603,9 +603,10 @@ Eigen::MatrixXd KinematicTree::Jacobian(const std::string& elementA, const KDL::
     return Jacobian(A->second, offsetA, B->second, offsetB);
 }
 
-void KinematicTree::ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J)
+void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& J)
 {
     J.data.setZero();
+    KDL::Frame tmp = FK(frame);  // Create temporary offset frames
     std::shared_ptr<KinematicElement> it = frame.FrameA;
     while (it != nullptr)
     {
@@ -633,7 +634,7 @@ void KinematicTree::ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J)
 void KinematicTree::UpdateJ()
 {
     int i = 0;
-    for (const KinematicFrame& frame : Solution->Frame)
+    for (KinematicFrame& frame : Solution->Frame)
     {
         ComputeJ(frame, Solution->J(i));
         i++;

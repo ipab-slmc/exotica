@@ -197,7 +197,7 @@ private:
     void UpdateTree();
     void UpdateFK();
     void UpdateJ();
-    void ComputeJ(const KinematicFrame& frame, KDL::Jacobian& J);
+    void ComputeJ(KinematicFrame& frame, KDL::Jacobian& J);
 
     BASE_TYPE ModelBaseType;
     BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;

@@ -72,8 +72,8 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     for (int i = 0; i < NumTasks; i++)
     {
         appendVector(yref.map, Tasks[i]->getLieGroupIndices());
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
+        PhiN += Tasks[i]->Indexing[0]->Length;
+        JN += Tasks[i]->Indexing[0]->LengthJ;
     }
 
     N = scene_->getSolver().getNumControlledJoints();
@@ -150,9 +150,9 @@ void UnconstrainedTimeIndexedProblem::preupdate()
     {
         for (TaskMap_ptr task : Tasks)
         {
-            for (int i = 0; i < task->Length; i++)
+            for (int i = 0; i < task->Indexing[0]->Length; i++)
             {
-                S[t](i + task->Start, i + task->Start) = Rho[t](task->Id);
+                S[t](i + task->Indexing[0]->Start, i + task->Indexing[0]->Start) = Rho[t](task->Indexing[0]->Id);
             }
         }
     }
@@ -201,7 +201,7 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
     {
         // Only update TaskMap if Rho is not 0
         if (Rho[t](i) != 0)
-            Tasks[i]->update(x_in, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+            Tasks[i]->update(x_in, Phi[t].data.segment(Tasks[i]->Indexing[0]->Start, Tasks[i]->Indexing[0]->Length), J[t].middleRows(Tasks[i]->Indexing[0]->StartJ, Tasks[i]->Indexing[0]->LengthJ));
     }
     ydiff[t] = Phi[t] - y[t];
 
@@ -279,7 +279,7 @@ void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eige
         }
 
         TaskMap_ptr task = TaskMaps.at(task_name);
-        y[t].data.segment(task->Start, task->Length) = goal;
+        y[t].data.segment(task->Indexing[0]->Start, task->Indexing[0]->Length) = goal;
     }
     catch (std::out_of_range& e)
     {
@@ -303,7 +303,7 @@ void UnconstrainedTimeIndexedProblem::setRho(const std::string& task_name, const
         }
 
         TaskMap_ptr task = TaskMaps.at(task_name);
-        Rho[t](task->Id) = rho;
+        Rho[t](task->Indexing[0]->Id) = rho;
     }
     catch (std::out_of_range& e)
     {
@@ -327,7 +327,7 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string& task
         }
 
         TaskMap_ptr task = TaskMaps.at(task_name);
-        return y[t].data.segment(task->Start, task->Length);
+        return y[t].data.segment(task->Indexing[0]->Start, task->Indexing[0]->Length);
     }
     catch (std::out_of_range& e)
     {
@@ -351,7 +351,7 @@ double UnconstrainedTimeIndexedProblem::getRho(const std::string& task_name, int
         }
 
         TaskMap_ptr task = TaskMaps.at(task_name);
-        return Rho[t](task->Id);
+        return Rho[t](task->Indexing[0]->Id);
     }
     catch (std::out_of_range& e)
     {

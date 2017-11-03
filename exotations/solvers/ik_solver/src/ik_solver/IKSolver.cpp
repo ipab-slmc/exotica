@@ -160,7 +160,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
 
         Eigen::MatrixXd Jinv = PseudoInverse(prob_->S * prob_->J);
         Eigen::VectorXd qd = Jinv * yd;
-        if (UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * prob_->S * prob_->J) * (prob_->qNominal - q);
+        if (UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * prob_->S * prob_->J) * (q - prob_->qNominal);
 
         ScaleToStepSize(qd);
 

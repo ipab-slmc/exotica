@@ -170,6 +170,8 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
     }
 
     scene_->Update(x, static_cast<double>(t) * tau);
+    Phi[t].setZero(PhiN);
+    J[t].setZero();
     for (int i = 0; i < NumTasks; i++)
     {
         // Only update TaskMap if Rho is not 0

@@ -114,6 +114,8 @@ Eigen::VectorXd UnconstrainedEndPoseProblem::getScalarJacobian()
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x);
+    Phi.setZero(PhiN);
+    J.setZero();
     for (int i = 0; i < NumTasks; i++)
     {
         if (Rho(i) != 0)

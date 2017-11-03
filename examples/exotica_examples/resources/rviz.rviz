@@ -114,14 +114,14 @@ Visualization Manager:
       Marker Topic: /exotica/CollisionShapes
       Name: SceneObjects
       Namespaces:
-        CollisionObjects: true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Fixed Frame: exotica/world_frame
-    Frame Rate: 100
+    Frame Rate: 30
   Name: root
   Tools:
     - Class: rviz/Interact

@@ -130,7 +130,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Fixed Frame: exotica/world_frame
-    Frame Rate: 100
+    Frame Rate: 30
   Name: root
   Tools:
     - Class: rviz/Interact
@@ -162,10 +162,10 @@ Visualization Manager:
         Z: 0.658301
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.484798
+      Pitch: 0.269798
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.64594
+      Yaw: 1.98094
     Saved: ~
 Window Geometry:
   Displays:

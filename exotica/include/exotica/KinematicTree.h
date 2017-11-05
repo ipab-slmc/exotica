@@ -170,7 +170,7 @@ public:
     }
     std::vector<std::string> getModelLinkNames()
     {
-        return ControlledLinkNames;
+        return ModelLinkNames;
     }
 
     Eigen::VectorXd getControlledLinkMass();

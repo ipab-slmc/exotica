@@ -58,7 +58,7 @@ struct CollisionProxy
         std::stringstream ss;
         if (e1 && e2)
         {
-            ss << "Proxy: '" << e1->Segment.getName() << "' - '" << e2->Segment.getName() << "', c1: " << contact1.transpose() << " c1: " << contact2.transpose() << " d: " << distance;
+            ss << "Proxy: '" << e1->Segment.getName() << "' - '" << e2->Segment.getName() << "', c1: " << contact1.transpose() << " c2: " << contact2.transpose() << " d: " << distance;
         }
         else
         {

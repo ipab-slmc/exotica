@@ -250,9 +250,29 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     data->Request.enable_nearest_points = true;
     data->Request.enable_signed_distance = true;  // Added in FCL 0.6.0
     // GST_LIBCCD produces incorrect contacts. Probably due to incompatible version of libccd.
+    // However, FCL code comments suggest INDEP producing incorrect contact points, cf.
+    // https://github.com/flexible-collision-library/fcl/blob/master/test/test_fcl_signed_distance.cpp#L85-L86
+    // data->Request.gjk_solver_type = fcl::GST_LIBCCD;
     data->Request.gjk_solver_type = fcl::GST_INDEP;
     data->Result.clear();
-    fcl::distance(o1, o2, data->Request, data->Result);
+
+    // Nearest point calculation is broken when o1 is a primitive and o2 a mesh,
+    // works however for o1 being a mesh and o2 being a primitive. Due to this,
+    // we will flip the order of o1 and o2 in the request and then later on swap
+    // the contact points and normals.
+    // Cf. Issue #184:
+    // https://github.com/ipab-slmc/exotica/issues/184#issuecomment-341916457
+    bool flipO1AndO2 = false;
+    if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH)
+    {
+        // HIGHLIGHT_NAMED("CollisionSceneFCLLatest", "Flipping o1 and o2");
+        flipO1AndO2 = true;
+        fcl::distance(o2, o1, data->Request, data->Result);
+    }
+    else
+    {
+        fcl::distance(o1, o2, data->Request, data->Result);
+    }
 
     CollisionProxy p;
     p.e1 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())];
@@ -265,15 +285,51 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         // for primitive shapes - thus, we need to work around this.
         // Cf. https://github.com/flexible-collision-library/fcl/issues/171
         KDL::Vector c1, c2;
-        if (p.e1->Shape->type == shapes::ShapeType::MESH)
-            c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-        else
-            c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
 
-        if (p.e2->Shape->type == shapes::ShapeType::MESH)
+        // Case 1: Mesh vs Mesh - already in world frame
+        if (p.e1->Shape->type == shapes::ShapeType::MESH && p.e2->Shape->type == shapes::ShapeType::MESH)
+        {
+            c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
             c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-        else
+        }
+        // Case 2: Primitive vs Primitive - convert from both local frames to world frame
+        else if (p.e1->Shape->type != shapes::ShapeType::MESH && p.e2->Shape->type != shapes::ShapeType::MESH)
+        {
+            c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
             c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        }
+        // Case 3: Primitive vs Mesh - primitive returned in flipped local frame (tbc), mesh returned in global frame
+        else if (p.e1->Shape->type != shapes::ShapeType::MESH && p.e2->Shape->type == shapes::ShapeType::MESH)
+        {
+            // Flipping contacts is a workaround for issue #184
+            // Cf. https://github.com/ipab-slmc/exotica/issues/184#issuecomment-341916457
+            if (!flipO1AndO2)
+                throw_pretty("We got the broken case but aren't flipping, why?");
+            // Not e1 and e2 are swapped, i.e. c1 on e2, c2 on e1
+            c1 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+            c2 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        }
+        // Case 4: Mesh vs Primitive - both are returned in the local frame (works with both LIBCCD and INDEP)
+        else if (p.e1->Shape->type == shapes::ShapeType::MESH && p.e2->Shape->type != shapes::ShapeType::MESH)
+        {
+            c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+            c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        }
+        // Unknown case - what's up?
+        else
+        {
+            throw_pretty("e1: " << p.e1->Shape->type << " vs e2: " << p.e2->Shape->type);
+        }
+
+        if (flipO1AndO2)
+        {
+            // Flipping contacts is a workaround for issue #184
+            // Cf. https://github.com/ipab-slmc/exotica/issues/184#issuecomment-341916457
+            KDL::Vector tmp_c1 = KDL::Vector(c1);
+            KDL::Vector tmp_c2 = KDL::Vector(c2);
+            c1 = tmp_c2;
+            c2 = tmp_c1;
+        }
 
         KDL::Vector n1 = c2 - c1;
         KDL::Vector n2 = c1 - c2;

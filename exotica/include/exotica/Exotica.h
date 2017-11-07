@@ -38,6 +38,7 @@
 #include <exotica/MotionSolver.h>
 #include <exotica/PlanningProblem.h>
 #include <exotica/Problems/SamplingProblem.h>
+#include <exotica/Problems/TimeIndexedSamplingProblem.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 #include <exotica/Setup.h>

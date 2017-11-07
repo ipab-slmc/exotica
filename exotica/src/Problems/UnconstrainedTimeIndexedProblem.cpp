@@ -183,11 +183,27 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
 
 double UnconstrainedTimeIndexedProblem::getScalarCost(int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     return ydiff[t].transpose()*S[t]*ydiff[t];
 }
 
 Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarJacobian(int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     return J[t].transpose()*S[t]*ydiff[t]*2.0;
 }
 

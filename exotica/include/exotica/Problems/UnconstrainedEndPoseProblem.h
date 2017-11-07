@@ -38,6 +38,23 @@
 
 namespace exotica
 {
+
+class EndPoseTask : public Task
+{
+public:
+    EndPoseTask();
+    virtual void initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi);
+    void updateS();
+    void update(const TaskSpaceVector& Phi, Eigen::MatrixXdRefConst J);
+
+    Eigen::VectorXd Rho;
+    TaskSpaceVector y;
+    Eigen::VectorXd ydiff;
+    TaskSpaceVector Phi;
+    Eigen::MatrixXd J;
+    Eigen::MatrixXd S;
+};
+
 /**
     * Unconstrained end-pose problem implementation
     */
@@ -61,17 +78,12 @@ public:
     double getScalarCost();
     Eigen::VectorXd getScalarJacobian();
 
-    TaskMap_map CostMap;
-    TaskMap_vec CostVec;
+    EndPoseTask Cost;
 
-    Eigen::VectorXd Rho;
-    TaskSpaceVector y;
-    Eigen::VectorXd ydiff;
     Eigen::MatrixXd W;
     TaskSpaceVector Phi;
     Eigen::MatrixXd J;
     Eigen::VectorXd qNominal;
-    Eigen::MatrixXd S;
 
     int PhiN;
     int JN;

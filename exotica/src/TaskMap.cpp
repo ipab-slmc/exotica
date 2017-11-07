@@ -51,6 +51,7 @@ void TaskMap::InstantiateBase(const Initializer& init)
 {
     Object::InstatiateObject(init);
     TaskMapInitializer MapInitializer(init);
+    isUsed = true;
 
     Frames.clear();
 

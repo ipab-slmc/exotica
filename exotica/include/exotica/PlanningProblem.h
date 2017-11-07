@@ -51,7 +51,35 @@
 
 namespace exotica
 {
-class PlanningProblem : public Object, Uncopyable, public virtual InstantiableBase
+
+class PlanningProblem;
+
+struct TaskIndexing
+{
+    int Id;
+    int Start;
+    int Length;
+    int StartJ;
+    int LengthJ;
+};
+
+class Task
+{
+public:
+    Task();
+
+    virtual void initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& phi);
+
+    TaskMap_map TaskMaps;
+    TaskMap_vec Tasks;
+    std::vector<TaskIndexing> Indexing;
+
+    int PhiN;
+    int JN;
+    int NumTasks;
+};
+
+class PlanningProblem : public Object, Uncopyable, public virtual InstantiableBase, public std::enable_shared_from_this<PlanningProblem>
 {
 public:
     PlanningProblem();

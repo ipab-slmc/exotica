@@ -96,4 +96,14 @@ Eigen::VectorXd TaskSpaceVector::operator-(const TaskSpaceVector& other)
     if (iIn < data.rows()) ret.segment(iOut, data.rows() - iIn) = data.segment(iIn, data.rows() - iIn) - other.data.segment(iIn, data.rows() - iIn);
     return ret;
 }
+
+std::vector<TaskVectorEntry> TaskVectorEntry::reindex(const std::vector<TaskVectorEntry>& map, int oldStart, int newStart)
+{
+    std::vector<TaskVectorEntry> ret = map;
+    for (TaskVectorEntry& id : ret)
+    {
+        id.inId = id.inId-oldStart+newStart;
+    }
+    return ret;
+}
 }

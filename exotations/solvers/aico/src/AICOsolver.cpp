@@ -504,8 +504,8 @@ double AICOsolver::getTaskCosts(int t)
                 Jt = prob_->J[t].middleRows(start, len).transpose();
                 C += prec * (prob_->ydiff[t].segment(start, len)).squaredNorm();
                 R[t] += prec * Jt * prob_->J[t].middleRows(start, len);
-                r[t] += prec * Jt * (prob_->ydiff[t].segment(start, len) + prob_->J[t].middleRows(start, len) * qhat[t]);
-                rhat[t] += prec * (prob_->ydiff[t].segment(start, len) + prob_->J[t].middleRows(start, len) * qhat[t]).squaredNorm();
+                r[t] += prec * Jt * (-prob_->ydiff[t].segment(start, len) + prob_->J[t].middleRows(start, len) * qhat[t]);
+                rhat[t] += prec * (-prob_->ydiff[t].segment(start, len) + prob_->J[t].middleRows(start, len) * qhat[t]).squaredNorm();
             }
         }
     }
@@ -527,8 +527,8 @@ double AICOsolver::getTaskCosts(int t)
                 Jt = prob_->J[t].middleRows(start, len).transpose();
                 C += prec * (prob_->ydiff[t].segment(start, len)).squaredNorm();
                 R[t].topLeftCorner(n2, n2) += prec * Jt * prob_->J[t].middleRows(start, len);
-                r[t].head(n2) += prec * Jt * (prob_->ydiff[t].segment(start, len) + prob_->J[t].middleRows(start, len) * qhat[t]);
-                rhat[t] += prec * (prob_->ydiff[t].segment(start, len) + prob_->J[t].middleRows(start, len) * qhat[t]).squaredNorm();
+                r[t].head(n2) += prec * Jt * (-prob_->ydiff[t].segment(start, len) + prob_->J[t].middleRows(start, len) * qhat[t]);
+                rhat[t] += prec * (-prob_->ydiff[t].segment(start, len) + prob_->J[t].middleRows(start, len) * qhat[t]).squaredNorm();
             }
         }
     }

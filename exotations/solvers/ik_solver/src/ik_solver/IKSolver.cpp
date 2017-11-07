@@ -141,15 +141,6 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
 
     bool UseNullspace = prob_->qNominal.rows() == prob_->N;
 
-    Eigen::MatrixXd S = Eigen::MatrixXd::Identity(prob_->JN, prob_->JN);
-    for (TaskMap_ptr task : prob_->getTasks())
-    {
-        for (int i = 0; i < task->Length; i++)
-        {
-            S(i + task->Start, i + task->Start) = prob_->Rho(task->Id);
-        }
-    }
-
     solution.resize(1, prob_->N);
 
     Eigen::VectorXd q = q0;
@@ -158,7 +149,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
     for (i = 0; i < parameters_.MaxIt; i++)
     {
         prob_->Update(q);
-        Eigen::VectorXd yd = S * (prob_->y - prob_->Phi);
+        Eigen::VectorXd yd = prob_->S * prob_->ydiff;
 
         error = yd.dot(yd);
 
@@ -167,13 +158,13 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        Eigen::MatrixXd Jinv = PseudoInverse(S * prob_->J);
+        Eigen::MatrixXd Jinv = PseudoInverse(prob_->S * prob_->J);
         Eigen::VectorXd qd = Jinv * yd;
-        if (UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * S * prob_->J) * (prob_->qNominal - q);
+        if (UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * prob_->S * prob_->J) * (q - prob_->qNominal);
 
         ScaleToStepSize(qd);
 
-        q = q + qd * parameters_.Alpha;
+        q = q - qd * parameters_.Alpha;
 
         if (qd.norm() < parameters_.Convergence)
         {

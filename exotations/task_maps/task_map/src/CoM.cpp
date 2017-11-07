@@ -47,7 +47,6 @@ CoM::~CoM()
 void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
-    phi.setZero();
     double M = mass_.sum();
     if (M == 0.0) return;
 
@@ -82,7 +81,6 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
     if (J.rows() != dim_ || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
-    phi.setZero();
     J.setZero();
     KDL::Vector com;
     double M = mass_.sum();

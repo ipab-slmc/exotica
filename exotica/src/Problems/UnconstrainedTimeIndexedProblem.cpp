@@ -113,9 +113,25 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     Phi = y;
     ydiff.assign(T, Eigen::VectorXd::Zero(JN));
     J.assign(T, Eigen::MatrixXd(JN, N));
+    S.assign(T, Eigen::MatrixXd::Identity(JN, JN));
 
     // Set initial trajectory
     InitialTrajectory.resize(T, getStartState());
+}
+
+void UnconstrainedTimeIndexedProblem::preupdate()
+{
+    PlanningProblem::preupdate();
+    for(int t=0; t<T; t++)
+    {
+        for (TaskMap_ptr task : Tasks)
+        {
+            for (int i = 0; i < task->Length; i++)
+            {
+                S[t](i + task->Start, i + task->Start) = Rho[t](task->Id);
+            }
+        }
+    }
 }
 
 void UnconstrainedTimeIndexedProblem::setInitialTrajectory(
@@ -154,13 +170,41 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
     }
 
     scene_->Update(x, static_cast<double>(t) * tau);
+    Phi[t].setZero(PhiN);
+    J[t].setZero();
     for (int i = 0; i < NumTasks; i++)
     {
         // Only update TaskMap if Rho is not 0
         if (Rho[t](i) != 0)
             Tasks[i]->update(x, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
-    ydiff[t] = y[t] - Phi[t];
+    ydiff[t] = Phi[t] - y[t];
+}
+
+double UnconstrainedTimeIndexedProblem::getScalarCost(int t)
+{
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
+    return ydiff[t].transpose()*S[t]*ydiff[t];
+}
+
+Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarJacobian(int t)
+{
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
+    return J[t].transpose()*S[t]*ydiff[t]*2.0;
 }
 
 void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)

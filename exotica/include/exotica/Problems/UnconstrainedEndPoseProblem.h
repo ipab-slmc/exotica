@@ -56,13 +56,19 @@ public:
     double getRho(const std::string& task_name);
     Eigen::VectorXd getNominalPose();
     void setNominalPose(Eigen::VectorXdRefConst qNominal_in);
+    virtual void preupdate();
+
+    double getScalarCost();
+    Eigen::VectorXd getScalarJacobian();
 
     Eigen::VectorXd Rho;
     TaskSpaceVector y;
+    Eigen::VectorXd ydiff;
     Eigen::MatrixXd W;
     TaskSpaceVector Phi;
     Eigen::MatrixXd J;
     Eigen::VectorXd qNominal;
+    Eigen::MatrixXd S;
 
     int PhiN;
     int JN;

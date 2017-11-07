@@ -85,6 +85,7 @@ public:
     int Length;
     int StartJ;
     int LengthJ;
+    bool isUsed;
 
 protected:
     std::vector<KinematicFrameRequest> Frames;

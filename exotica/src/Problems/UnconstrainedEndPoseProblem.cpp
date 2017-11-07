@@ -39,6 +39,75 @@ REGISTER_PROBLEM_TYPE("UnconstrainedEndPoseProblem", exotica::UnconstrainedEndPo
 
 namespace exotica
 {
+
+EndPoseTask::EndPoseTask()
+{
+
+}
+
+void EndPoseTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
+{
+    Task::initialize(inits, prob, Phi);
+    y=Phi;
+    y.setZero(PhiN);
+    Rho = Eigen::VectorXd::Ones(NumTasks);
+    J = Eigen::MatrixXd(JN, prob->N);
+    S = Eigen::MatrixXd::Identity(JN, JN);
+    ydiff = Eigen::VectorXd::Zero(JN);
+
+    for(int i=0; i<NumTasks; i++)
+    {
+        TaskInitializer task(inits[i]);
+        if(task.Goal.rows()==0)
+        {
+            // Keep zero goal
+        }
+        else if(task.Goal.rows()==Tasks[i]->Length)
+        {
+            y.data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal;
+        }
+        else
+        {
+            throw_pretty("Invalid task goal size! Expecting "<<Tasks[i]->Length<<" got "<<task.Goal.rows());
+        }
+        if(task.Rho.rows()==0)
+        {
+            Rho(i) = 1.0;
+        }
+        else if(task.Rho.rows()==1)
+        {
+            Rho(i) = task.Rho(0);
+        }
+        else
+        {
+            throw_pretty("Invalid task Rho size! Expecting 1 got "<<task.Rho.rows());
+        }
+    }
+}
+
+void EndPoseTask::updateS()
+{
+    for (const TaskIndexing& task : Indexing)
+    {
+        for (int i = 0; i < task.Length; i++)
+        {
+            S(i + task.Start, i + task.Start) = Rho(task.Id);
+            if(Rho(task.Id)>0.0) Tasks[task.Id]->isUsed = true;
+        }
+    }
+}
+
+void EndPoseTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ)
+{
+    for (const TaskIndexing& task : Indexing)
+    {
+        Phi.data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        J.middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
+    }
+    ydiff = Phi - y;
+}
+
+
 UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
 {
     Flags = KIN_FK | KIN_J;
@@ -50,14 +119,7 @@ UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
 
 void UnconstrainedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
 {
-    for(const exotica::Initializer& init : inits)
-    {
-        TaskInitializer task(init);
-        auto it = TaskMaps.find(task.Task);
-        if(it == TaskMaps.end()) throw_named("Task map '"<<task.Task<<"' has not been defined!");
-        CostMap[task.Task] = it->second;
-        CostVec.push_back(it->second);
-    }
+
 }
 
 void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
@@ -67,13 +129,11 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
     JN = 0;
     for (int i = 0; i < NumTasks; i++)
     {
-        appendVector(y.map, Tasks[i]->getLieGroupIndices());
+        appendVector(Phi.map, Tasks[i]->getLieGroupIndices());
         PhiN += Tasks[i]->Length;
         JN += Tasks[i]->LengthJ;
     }
-
-    Rho = Eigen::VectorXd::Ones(NumTasks);
-    y.setZero(PhiN);
+    Phi.setZero(PhiN);
     W = Eigen::MatrixXd::Identity(N, N);
     if (init.W.rows() > 0)
     {
@@ -86,44 +146,30 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
             throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
         }
     }
-    Phi = y;
     J = Eigen::MatrixXd(JN, N);
 
     if (init.NominalState.rows() > 0 && init.NominalState.rows() != N) throw_named("Invalid size of NominalState (" << init.NominalState.rows() << "), expected: " << N);
     if (init.NominalState.rows() == N) qNominal = init.NominalState;
-
-    if (init.Rho.rows() > 0 && init.Rho.rows() != NumTasks) throw_named("Invalid size of Rho (" << init.Rho.rows() << ") expected: " << NumTasks);
-    if (init.Goal.rows() > 0 && init.Goal.rows() != PhiN) throw_named("Invalid size of Goal (" << init.Goal.rows() << ") expected: " << PhiN);
-
-    if (init.Rho.rows() == NumTasks) Rho = init.Rho;
-    if (init.Goal.rows() == PhiN) y.data = init.Goal;
-
-    S = Eigen::MatrixXd::Identity(JN, JN);
-    ydiff = Eigen::VectorXd::Zero(JN);
-
-    applyStartState(false);
+    TaskSpaceVector dummy;
+    Cost.initialize(init.Cost, shared_from_this(), dummy);
+    applyStartState();
 }
 
 void UnconstrainedEndPoseProblem::preupdate()
 {
     PlanningProblem::preupdate();
-    for (TaskMap_ptr task : Tasks)
-    {
-        for (int i = 0; i < task->Length; i++)
-        {
-            S(i + task->Start, i + task->Start) = Rho(task->Id);
-        }
-    }
+    for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
+    Cost.updateS();
 }
 
 double UnconstrainedEndPoseProblem::getScalarCost()
 {
-    return ydiff.transpose() * S * ydiff;
+    return Cost.ydiff.transpose()*Cost.S*Cost.ydiff;
 }
 
 Eigen::VectorXd UnconstrainedEndPoseProblem::getScalarJacobian()
 {
-    return J.transpose() * S * ydiff * 2.0;
+    return Cost.J.transpose()*Cost.S*Cost.ydiff*2.0;
 }
 
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
@@ -131,66 +177,62 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
     scene_->Update(x);
     Phi.setZero(PhiN);
     J.setZero();
-    for (int i = 0; i < NumTasks; i++)
+    for (int i = 0; i < Tasks.size(); i++)
     {
-        if (Rho(i) != 0)
+        if (Tasks[i]->isUsed)
             Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
-    ydiff = Phi - y;
-    numberOfProblemUpdates++;
+    Cost.update(Phi, J);
 }
 
 void UnconstrainedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    try
+    for (int i=0; i<Cost.Indexing.size(); i++)
     {
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        if (goal.rows() != task->Length) throw_named("Invalid goal dimension " << goal.rows() << " expected " << task->Length);
-        y.data.segment(task->Start, task->Length) = goal;
+        if(Cost.Tasks[i]->getObjectName()==task_name)
+        {
+            Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
+            return;
+        }
     }
-    catch (std::out_of_range& e)
-    {
-        throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
-    }
+    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
 void UnconstrainedEndPoseProblem::setRho(const std::string& task_name, const double rho)
 {
-    try
+    for (int i=0; i<Cost.Indexing.size(); i++)
     {
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        Rho(task->Id) = rho;
+        if(Cost.Tasks[i]->getObjectName()==task_name)
+        {
+            Cost.Rho(Cost.Indexing[i].Id) = rho;
+            return;
+        }
     }
-    catch (std::out_of_range& e)
-    {
-        throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
-    }
+    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
 }
 
 Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string& task_name)
 {
-    try
+    for (int i=0; i<Cost.Indexing.size(); i++)
     {
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        return y.data.segment(task->Start, task->Length);
+        if(Cost.Tasks[i]->getObjectName()==task_name)
+        {
+            return Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+        }
     }
-    catch (std::out_of_range& e)
-    {
-        throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
-    }
+    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
 double UnconstrainedEndPoseProblem::getRho(const std::string& task_name)
-{
-    try
+{    
+    for (int i=0; i<Cost.Indexing.size(); i++)
     {
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        return Rho(task->Id);
+        if(Cost.Tasks[i]->getObjectName()==task_name)
+        {
+            return Cost.Rho(Cost.Indexing[i].Id);
+        }
     }
-    catch (std::out_of_range& e)
-    {
-        throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
-    }
+    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
 
 Eigen::VectorXd UnconstrainedEndPoseProblem::getNominalPose()

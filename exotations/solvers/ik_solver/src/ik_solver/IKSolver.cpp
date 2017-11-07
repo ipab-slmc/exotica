@@ -149,7 +149,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
     for (i = 0; i < parameters_.MaxIt; i++)
     {
         prob_->Update(q);
-        Eigen::VectorXd yd = prob_->S * prob_->ydiff;
+        Eigen::VectorXd yd = prob_->Cost.S * prob_->Cost.ydiff;
 
         error = yd.dot(yd);
 
@@ -158,9 +158,9 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        Eigen::MatrixXd Jinv = PseudoInverse(prob_->S * prob_->J);
+        Eigen::MatrixXd Jinv = PseudoInverse(prob_->Cost.S * prob_->Cost.J);
         Eigen::VectorXd qd = Jinv * yd;
-        if (UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * prob_->S * prob_->J) * (q - prob_->qNominal);
+        if (UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * prob_->Cost.S * prob_->J) * (q - prob_->qNominal);
 
         ScaleToStepSize(qd);
 

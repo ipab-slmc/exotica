@@ -47,6 +47,7 @@ struct TaskVectorEntry
 
     TaskVectorEntry();
     TaskVectorEntry(int inId_, RotationType type_);
+    static std::vector<TaskVectorEntry> reindex(const std::vector<TaskVectorEntry>& map, int oldStart, int newStart);
 };
 
 class TaskSpaceVector

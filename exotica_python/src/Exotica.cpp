@@ -603,8 +603,6 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedEndPoseProblem.def_readonly("JN", &UnconstrainedEndPoseProblem::JN);
     unconstrainedEndPoseProblem.def_readonly("N", &UnconstrainedEndPoseProblem::N);
     unconstrainedEndPoseProblem.def_readonly("NumTasks", &UnconstrainedEndPoseProblem::NumTasks);
-    unconstrainedEndPoseProblem.def_readonly("Rho", &UnconstrainedEndPoseProblem::Rho);
-    unconstrainedEndPoseProblem.def_readonly("y", &UnconstrainedEndPoseProblem::y);
     unconstrainedEndPoseProblem.def_readonly("Phi", &UnconstrainedEndPoseProblem::Phi);
     unconstrainedEndPoseProblem.def_readonly("J", &UnconstrainedEndPoseProblem::J);
     unconstrainedEndPoseProblem.def_property("qNominal", &UnconstrainedEndPoseProblem::getNominalPose, &UnconstrainedEndPoseProblem::setNominalPose);

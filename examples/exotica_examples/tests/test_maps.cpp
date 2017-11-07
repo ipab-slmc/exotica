@@ -68,7 +68,7 @@ void testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eige
     for (int i = 0; i < L; i++)
     {
         Eigen::VectorXd x = Xref.row(i);
-        TaskSpaceVector y = problem->y;
+        TaskSpaceVector y = problem->Cost.y;
         y.data = Yref.row(i);
         Eigen::MatrixXd J = Jref.middleRows(i * M, M);
         problem->Update(x);
@@ -129,12 +129,14 @@ void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
 UnconstrainedEndPoseProblem_ptr setupProblem(Initializer& map)
 {
     Initializer scene("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}});
+    Initializer cost("exotica/Task", {{"Task", std::string("MyTask")}});
     Eigen::VectorXd W(3);
     W << 3, 2, 1;
     Initializer problem("exotica/UnconstrainedEndPoseProblem", {
                                                                    {"Name", std::string("MyProblem")},
                                                                    {"PlanningScene", scene},
                                                                    {"Maps", std::vector<Initializer>({map})},
+                                                                   {"Cost", std::vector<Initializer>({cost})},
                                                                    {"W", W},
                                                                });
     Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
@@ -144,7 +146,7 @@ UnconstrainedEndPoseProblem_ptr setupProblem(Initializer& map)
 void testEffPosition()
 {
     HIGHLIGHT("End-effector position test");
-    Initializer map("exotica/EffPosition", {{"Name", std::string("Position")},
+    Initializer map("exotica/EffPosition", {{"Name", std::string("MyTask")},
                                             {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
     UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
@@ -172,7 +174,7 @@ void testEffOrientation()
     for (std::string type : types)
     {
         INFO_PLAIN("Rotation type " << type);
-        Initializer map("exotica/EffOrientation", {{"Name", std::string("Orientation")},
+        Initializer map("exotica/EffOrientation", {{"Name", std::string("MyTask")},
                                                    {"Type", type},
                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
@@ -190,7 +192,7 @@ void testEffFrame()
     for (std::string type : types)
     {
         INFO_PLAIN("Rotation type " << type);
-        Initializer map("exotica/EffFrame", {{"Name", std::string("Frame")},
+        Initializer map("exotica/EffFrame", {{"Name", std::string("MyTask")},
                                              {"Type", type},
                                              {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
@@ -203,7 +205,7 @@ void testEffFrame()
 void testDistance()
 {
     HIGHLIGHT("Distance test");
-    Initializer map("exotica/Distance", {{"Name", std::string("Distance")},
+    Initializer map("exotica/Distance", {{"Name", std::string("MyTask")},
                                          {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
     UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
@@ -230,7 +232,7 @@ void testDistance()
 void testJointLimit()
 {
     HIGHLIGHT("Joint limit test");
-    Initializer map("exotica/JointLimit", {{"Name", std::string("JointLimit")},
+    Initializer map("exotica/JointLimit", {{"Name", std::string("MyTask")},
                                            {"SafePercentage", 0.0}});
     UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
@@ -265,7 +267,7 @@ void testJointLimit()
 void testSphereCollision()
 {
     HIGHLIGHT("Sphere collision test");
-    Initializer map("exotica/SphereCollision", {{"Name", std::string("SphereCollision")},
+    Initializer map("exotica/SphereCollision", {{"Name", std::string("MyTask")},
                                                 {"Precision", 1e-2},
                                                 {"ReferenceFrame", std::string("base")},
                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}, {"Radius", 0.3}, {"Group", std::string("base")}}),
@@ -293,7 +295,7 @@ void testSphereCollision()
 void testIdentity()
 {
     HIGHLIGHT("Identity test");
-    Initializer map("exotica/Identity", {{"Name", std::string("Identity")}});
+    Initializer map("exotica/Identity", {{"Name", std::string("MyTask")}});
     UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 
@@ -327,7 +329,7 @@ void testIdentity()
     testJacobian(problem);
 
     HIGHLIGHT("Identity test with reference");
-    map = Initializer("exotica/Identity", {{"Name", std::string("Identity")},
+    map = Initializer("exotica/Identity", {{"Name", std::string("MyTask")},
                                            {"JointRef", std::string("0.5 0.5 0.5")}});
     problem = setupProblem(map);
     testRandom(problem);
@@ -362,7 +364,7 @@ void testIdentity()
     testJacobian(problem);
 
     HIGHLIGHT("Identity test with subset of joints");
-    map = Initializer("exotica/Identity", {{"Name", std::string("Identity")},
+    map = Initializer("exotica/Identity", {{"Name", std::string("MyTask")},
                                            {"JointMap", std::string("0")}});
     problem = setupProblem(map);
     testRandom(problem);
@@ -390,7 +392,7 @@ void testIdentity()
 void testCoM()
 {
     HIGHLIGHT("CoM test");
-    Initializer map("exotica/CoM", {{"Name", std::string("CoM")},
+    Initializer map("exotica/CoM", {{"Name", std::string("MyTask")},
                                     {"EnableZ", true}});
     UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
@@ -425,7 +427,7 @@ void testCoM()
     testJacobian(problem);
 
     HIGHLIGHT("CoM test with a subset of links");
-    map = Initializer("exotica/CoM", {{"Name", std::string("CoM")},
+    map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
                                       {"EnableZ", true},
                                       {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("link2")}}),
                                                                                 Initializer("Frame", {{"Link", std::string("endeff")}})})}});
@@ -462,7 +464,7 @@ void testCoM()
     testJacobian(problem);
 
     HIGHLIGHT("CoM test with projection on XY plane");
-    map = Initializer("exotica/CoM", {{"Name", std::string("CoM")},
+    map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
                                       {"EnableZ", false}});
     problem = setupProblem(map);
     testRandom(problem);
@@ -495,7 +497,7 @@ void testCoM()
 void testIMesh()
 {
     HIGHLIGHT("Interaction mesh test");
-    Initializer map("exotica/IMesh", {{"Name", std::string("IMesh")},
+    Initializer map("exotica/IMesh", {{"Name", std::string("MyTask")},
                                       {"ReferenceFrame", std::string("base")},
                                       {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}}),
                                                                                 Initializer("Frame", {{"Link", std::string("link2")}}),

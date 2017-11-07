@@ -35,6 +35,7 @@
 // Manual initialization requires dependency on specific solvers and task maps:
 #include <ik_solver/IKsolverInitializer.h>
 #include <task_map/EffFrameInitializer.h>
+#include <exotica/TaskInitializer.h>
 
 using namespace exotica;
 
@@ -47,11 +48,15 @@ void run()
     // End-effector task map with two position frames
     EffFrameInitializer map("Position", false,
                             {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
+    // Cost terms
+    TaskInitializer cost("Position");
     // Create a task using the map above (goal will be specified later)
     Eigen::VectorXd W(7);
     W << 7, 6, 5, 4, 3, 2, 1;
+    Eigen::VectorXd startState = Eigen::VectorXd::Zero(7);
+    Eigen::VectorXd nominalState = Eigen::VectorXd::Zero(7);
 
-    UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
+    UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, startState, {cost}, W, nominalState);
     IKsolverInitializer solver("MySolver");
     solver.C = 1e-3;
     solver.MaxIt = 1;
@@ -85,7 +90,7 @@ void run()
         // Update the goal if necessary
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-        my_problem->y = {0.6,
+        my_problem->Cost.y = {0.6,
                          -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
                          0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
 

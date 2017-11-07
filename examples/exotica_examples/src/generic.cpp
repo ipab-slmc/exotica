@@ -48,15 +48,21 @@ void run()
                                          {"EndEffector", std::vector<Initializer>({
                                                              Initializer("Frame", {{"Link", std::string("lwr_arm_6_link")}, {"LinkOffset", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17)}}),
                                                          })}});
+    Initializer cost("exotica/Task", {{"Task", std::string("Position")}});
     Eigen::VectorXd W(7);
     W << 7, 6, 5, 4, 3, 2, 1;
+    Eigen::VectorXd startState = Eigen::VectorXd::Zero(7);
+    Eigen::VectorXd nominalState = Eigen::VectorXd::Zero(7);
 
     Initializer problem("exotica/UnconstrainedEndPoseProblem", {
                                                                    {"Name", std::string("MyProblem")},
                                                                    {"PlanningScene", scene},
                                                                    {"Maps", std::vector<Initializer>({map})},
+                                                                   {"Cost", std::vector<Initializer>({cost})},
                                                                    {"W", W},
                                                                    {"Tolerance", 1e-5},
+                                                                   {"StartState", startState},
+                                                                   {"NominalState", nominalState},
                                                                });
 
     Initializer solver("exotica/IKsolver", {
@@ -94,7 +100,7 @@ void run()
         // Update the goal if necessary
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-        my_problem->y = {0.6,
+        my_problem->Cost.y = {0.6,
                          -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
                          0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
 

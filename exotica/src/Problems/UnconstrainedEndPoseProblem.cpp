@@ -33,6 +33,7 @@
 
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/Setup.h>
+#include <exotica/TaskInitializer.h>
 
 REGISTER_PROBLEM_TYPE("UnconstrainedEndPoseProblem", exotica::UnconstrainedEndPoseProblem)
 
@@ -45,6 +46,18 @@ UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
 
 UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
 {
+}
+
+void UnconstrainedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
+{
+    for(const exotica::Initializer& init : inits)
+    {
+        TaskInitializer task(init);
+        auto it = TaskMaps.find(task.Task);
+        if(it == TaskMaps.end()) throw_named("Task map '"<<task.Task<<"' has not been defined!");
+        CostMap[task.Task] = it->second;
+        CostVec.push_back(it->second);
+    }
 }
 
 void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)

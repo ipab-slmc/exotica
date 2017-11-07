@@ -61,6 +61,9 @@ public:
     double getScalarCost();
     Eigen::VectorXd getScalarJacobian();
 
+    TaskMap_map CostMap;
+    TaskMap_vec CostVec;
+
     Eigen::VectorXd Rho;
     TaskSpaceVector y;
     Eigen::VectorXd ydiff;
@@ -73,6 +76,8 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
+protected:
+    void initTaskTerms(const std::vector<exotica::Initializer>& inits);
 };
 typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
 }

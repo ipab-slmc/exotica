@@ -51,21 +51,6 @@
 namespace exotica
 {
 class PlanningProblem;
-class TaskMap;
-class TaskIndexing;
-
-class TaskIndexing
-{
-public:
-    TaskIndexing() : Id(-1), Start(-1), Length(-1), StartJ(-1), LengthJ(-1) {}
-    int Id;
-    int Start;
-    int Length;
-    int StartJ;
-    int LengthJ;
-
-    static std::vector<std::shared_ptr<TaskIndexing>> fromTasks(std::vector<std::shared_ptr<TaskMap>> tasks, int storageIndex = 0);
-};
 
 class TaskMap : public Object, Uncopyable, public virtual InstantiableBase
 {
@@ -86,7 +71,7 @@ public:
 
     virtual int taskSpaceJacobianDim() { return taskSpaceDim(); }
     virtual void preupdate() {}
-    virtual std::vector<TaskVectorEntry> getLieGroupIndices(int storageIndex = 0) { return std::vector<TaskVectorEntry>(); }
+    virtual std::vector<TaskVectorEntry> getLieGroupIndices() { return std::vector<TaskVectorEntry>(); }
     void taskSpaceDim(int& task_dim);
 
     virtual std::string print(std::string prepend);
@@ -95,7 +80,11 @@ public:
 
     virtual void debug() {}
     KinematicSolution Kinematics;
-    std::vector<std::shared_ptr<TaskIndexing>> Indexing;
+    int Id;
+    int Start;
+    int Length;
+    int StartJ;
+    int LengthJ;
 
 protected:
     std::vector<KinematicFrameRequest> Frames;

@@ -37,34 +37,7 @@
 
 namespace exotica
 {
-
-std::vector<std::shared_ptr<TaskIndexing>> TaskIndexing::fromTasks(std::vector<TaskMap_ptr> tasks, int storageIndex)
-{
-    int id = 0;
-    int idJ = 0;
-    std::vector<std::shared_ptr<TaskIndexing>> ret(tasks.size());
-    for (int i = 0; i < tasks.size(); i++)
-    {
-        ret[i] = std::shared_ptr<TaskIndexing>(new TaskIndexing());
-        ret[i]->Id = i;
-        ret[i]->Start = id;
-        ret[i]->Length = tasks[i]->taskSpaceDim();
-        ret[i]->StartJ = idJ;
-        ret[i]->LengthJ = tasks[i]->taskSpaceJacobianDim();
-        if(tasks[i]->Indexing.size()<=storageIndex)
-        {
-            auto temp = tasks[i]->Indexing;
-            tasks[i]->Indexing.resize(storageIndex+1);
-            for(int j=0; j<temp.size(); j++) tasks[i]->Indexing[j] = temp[j];
-        }
-        tasks[i]->Indexing[storageIndex] = ret[i];
-        id += ret[i]->Length;
-        idJ += ret[i]->LengthJ;
-    }
-    return ret;
-}
-
-TaskMap::TaskMap()
+TaskMap::TaskMap() : Id(-1), Start(-1), Length(-1), StartJ(-1), LengthJ(-1)
 {
 }
 

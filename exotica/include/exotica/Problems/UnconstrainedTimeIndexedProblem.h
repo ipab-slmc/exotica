@@ -42,6 +42,23 @@
 
 namespace exotica
 {
+class TimeIndexedTask : public Task
+{
+public:
+    TimeIndexedTask();
+    virtual void initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi);
+    void updateS();
+    void update(const TaskSpaceVector& Phi, Eigen::MatrixXdRefConst J, int t);
+
+    std::vector<Eigen::VectorXd> Rho;
+    std::vector<TaskSpaceVector> y;
+    std::vector<Eigen::VectorXd> ydiff;
+    std::vector<TaskSpaceVector> Phi;
+    std::vector<Eigen::MatrixXd> J;
+    std::vector<Eigen::MatrixXd> S;
+    int T;
+};
+
 /**
    * \brief Unconstrained time-indexed problem.
    */
@@ -73,6 +90,7 @@ public:
     Eigen::VectorXd getScalarTransitionJacobian(int t);
 
     double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
+    TimeIndexedTask Cost;
     double Q_rate;  //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
     double H_rate;  //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)
     double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
@@ -80,12 +98,8 @@ public:
     Eigen::MatrixXd H;
     Eigen::MatrixXd Q;
 
-    std::vector<Eigen::VectorXd> Rho;
-    std::vector<TaskSpaceVector> y;
     std::vector<TaskSpaceVector> Phi;
-    std::vector<Eigen::VectorXd> ydiff;
     std::vector<Eigen::MatrixXd> J;
-    std::vector<Eigen::MatrixXd> S;
 
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)

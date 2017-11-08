@@ -34,6 +34,10 @@
         </EndEffector>
       </EffFrame>
     </Maps>
+
+    <Cost>
+      <Task Task="Frame"/>
+    </Cost>
    
     <T>233</T>
     <Tau>0.03</Tau>

@@ -38,6 +38,85 @@ REGISTER_PROBLEM_TYPE("UnconstrainedTimeIndexedProblem", exotica::UnconstrainedT
 
 namespace exotica
 {
+
+TimeIndexedTask::TimeIndexedTask()
+{
+
+}
+
+void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
+{
+    Task::initialize(inits, prob, phi);
+    T=std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->T;
+    phi.setZero(PhiN);
+    Phi.assign(T, phi);
+    y=Phi;
+    Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
+    J.assign(T, Eigen::MatrixXd(JN, prob->N));
+    S.assign(T, Eigen::MatrixXd::Identity(JN, JN));
+    ydiff.assign(T, Eigen::VectorXd::Zero(JN));
+
+    for(int i=0; i<NumTasks; i++)
+    {
+        TaskInitializer task(inits[i]);
+        if(task.Goal.rows()==0)
+        {
+            // Keep zero goal
+        }
+        else if(task.Goal.rows()==Tasks[i]->Length*T)
+        {
+            for(int t=0; t<T; t++)
+            {
+                y[t].data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal.segment(t*Tasks[i]->Length, Tasks[i]->Length);
+            }
+        }
+        else
+        {
+            throw_pretty("Invalid task goal size! Expecting "<<Tasks[i]->Length<<" got "<<task.Goal.rows());
+        }
+        if(task.Rho.rows()==0)
+        {
+            // Keeo ones
+        }
+        else if(task.Rho.rows()==T)
+        {
+            for(int t=0; t<T; t++)
+            {
+                Rho[t](i) = task.Rho(t);
+            }
+        }
+        else
+        {
+            throw_pretty("Invalid task Rho size! Expecting 1 got "<<task.Rho.rows());
+        }
+    }
+}
+
+void TimeIndexedTask::updateS()
+{
+    for(int t=0; t<T; t++)
+    {
+        for (const TaskIndexing& task : Indexing)
+        {
+            for (int i = 0; i < task.Length; i++)
+            {
+                S[t](i + task.Start, i + task.Start) = Rho[t](task.Id);
+                if(Rho[t](task.Id)>0.0) Tasks[task.Id]->isUsed = true;
+            }
+        }
+    }
+}
+
+void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ, int t)
+{
+    for (const TaskIndexing& task : Indexing)
+    {
+        Phi[t].data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        J[t].middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
+    }
+    ydiff[t] = Phi[t] - y[t];
+}
+
 UnconstrainedTimeIndexedProblem::UnconstrainedTimeIndexedProblem()
     : T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
 {
@@ -93,37 +172,17 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     H = Eigen::MatrixXd::Identity(N, N) * Q_rate;
     Q = Eigen::MatrixXd::Identity(N, N) * H_rate;
 
-    if (init_.Rho.rows() == 0)
-    {
-        Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
-    }
-    else if (init_.Rho.rows() == NumTasks)
-    {
-        Rho.assign(T, init_.Rho);
-    }
-    else if (init_.Rho.rows() == NumTasks * T)
-    {
-        Rho.resize(T);
-        for (int i = 0; i < T; i++)
-        {
-            Rho[i] = init_.Rho.segment(i * NumTasks, NumTasks);
-        }
-    }
-    else
-    {
-        throw_named("Invalid task weights rho! " << init_.Rho.rows());
-    }
     yref.setZero(PhiN);
-    y.assign(T, yref);
-    Phi = y;
-    ydiff.assign(T, Eigen::VectorXd::Zero(JN));
+    Phi.assign(T, yref);
     J.assign(T, Eigen::MatrixXd(JN, N));
-    S.assign(T, Eigen::MatrixXd::Identity(JN, JN));
     x.assign(T, Eigen::VectorXd::Zero(JN));
     xdiff.assign(T, Eigen::VectorXd::Zero(JN));
 
-    // Set initial trajectory with current state
+    // Set initial trajectory
     InitialTrajectory.resize(T, scene_->getControlledState());
+
+    TaskSpaceVector dummy;
+    Cost.initialize(init.Cost, shared_from_this(), dummy);
 }
 
 void UnconstrainedTimeIndexedProblem::setT(int T_in)
@@ -146,16 +205,8 @@ void UnconstrainedTimeIndexedProblem::setTau(double tau_in)
 void UnconstrainedTimeIndexedProblem::preupdate()
 {
     PlanningProblem::preupdate();
-    for (int t = 0; t < T; t++)
-    {
-        for (TaskMap_ptr task : Tasks)
-        {
-            for (int i = 0; i < task->Length; i++)
-            {
-                S[t](i + task->Start, i + task->Start) = Rho[t](task->Id);
-            }
-        }
-    }
+    for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
+    Cost.updateS();
 }
 
 void UnconstrainedTimeIndexedProblem::setInitialTrajectory(
@@ -200,11 +251,10 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
     for (int i = 0; i < NumTasks; i++)
     {
         // Only update TaskMap if Rho is not 0
-        if (Rho[t](i) != 0)
+        if (Tasks[i]->isUsed)
             Tasks[i]->update(x_in, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
-    ydiff[t] = Phi[t] - y[t];
-
+    Cost.update(Phi[t], J[t], t);
     // NB: The transition cost for the 0-th time step is set to 0 in the initialiser.
     if (t > 0) xdiff[t] = x[t] - x[t - 1];
 
@@ -221,7 +271,7 @@ double UnconstrainedTimeIndexedProblem::getScalarTaskCost(int t)
     {
         t = T - 1;
     }
-    return ct * ydiff[t].transpose() * S[t] * ydiff[t];
+    return ct * Cost.ydiff[t].transpose() * Cost.S[t] * Cost.ydiff[t];
 }
 
 Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarTaskJacobian(int t)
@@ -234,7 +284,7 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarTaskJacobian(int t)
     {
         t = T - 1;
     }
-    return J[t].transpose() * S[t] * ydiff[t] * 2.0 * ct;
+    return Cost.J[t].transpose() * Cost.S[t] * Cost.ydiff[t] * 2.0 * ct;
 }
 
 double UnconstrainedTimeIndexedProblem::getScalarTransitionCost(int t)
@@ -265,97 +315,51 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian(int
 
 void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    try
+    for (int i=0; i<Cost.Indexing.size(); i++)
     {
-        if (t >= T || t < -1)
+        if(Cost.Tasks[i]->getObjectName()==task_name)
         {
-            throw_pretty("Requested t="
-                         << t
-                         << " out of range, needs to be 0 =< t < " << T);
+            Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
+            return;
         }
-        else if (t == -1)
-        {
-            t = T - 1;
-        }
-
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        y[t].data.segment(task->Start, task->Length) = goal;
     }
-    catch (std::out_of_range& e)
-    {
-        throw_pretty("Cannot set Goal. Task map '" << task_name << "' Does not exist.");
-    }
+    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
 void UnconstrainedTimeIndexedProblem::setRho(const std::string& task_name, const double rho, int t)
 {
-    try
+    for (int i=0; i<Cost.Indexing.size(); i++)
     {
-        if (t >= T || t < -1)
+        if(Cost.Tasks[i]->getObjectName()==task_name)
         {
-            throw_pretty("Requested t="
-                         << t
-                         << " out of range, needs to be 0 =< t < " << T);
+            Cost.Rho[t](Cost.Indexing[i].Id) = rho;
+            return;
         }
-        else if (t == -1)
-        {
-            t = T - 1;
-        }
-
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        Rho[t](task->Id) = rho;
     }
-    catch (std::out_of_range& e)
-    {
-        throw_pretty("Cannot set Rho. Task map '" << task_name << "' Does not exist.");
-    }
+    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
 }
 
 Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string& task_name, int t)
 {
-    try
+    for (int i=0; i<Cost.Indexing.size(); i++)
     {
-        if (t >= T || t < -1)
+        if(Cost.Tasks[i]->getObjectName()==task_name)
         {
-            throw_pretty("Requested t="
-                         << t
-                         << " out of range, needs to be 0 =< t < " << T);
+            return Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
         }
-        else if (t == -1)
-        {
-            t = T - 1;
-        }
-
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        return y[t].data.segment(task->Start, task->Length);
     }
-    catch (std::out_of_range& e)
-    {
-        throw_pretty("Cannot get Goal. Task map '" << task_name << "' Does not exist.");
-    }
+    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
 double UnconstrainedTimeIndexedProblem::getRho(const std::string& task_name, int t)
 {
-    try
+    for (int i=0; i<Cost.Indexing.size(); i++)
     {
-        if (t >= T || t < -1)
+        if(Cost.Tasks[i]->getObjectName()==task_name)
         {
-            throw_pretty("Requested t="
-                         << t
-                         << " out of range, needs to be 0 =< t < " << T);
+            return Cost.Rho[t](Cost.Indexing[i].Id);
         }
-        else if (t == -1)
-        {
-            t = T - 1;
-        }
-
-        TaskMap_ptr task = TaskMaps.at(task_name);
-        return Rho[t](task->Id);
     }
-    catch (std::out_of_range& e)
-    {
-        throw_pretty("Cannot get Rho. Task map '" << task_name << "' Does not exist.");
-    }
+    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
 }

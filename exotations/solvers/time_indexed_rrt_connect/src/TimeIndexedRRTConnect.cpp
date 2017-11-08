@@ -222,7 +222,10 @@ void TimeIndexedRRTConnect::getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTe
     const int n1 = states.size() - 1;
     for (int i = 0; i < n1; ++i)
         length += si->getStateSpace()->validSegmentCount(states[i], states[i + 1]);
+
+    ompl_simple_setup_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->setSubspaceWeight(0, 0);
     pg.interpolate(length);
+    ompl_simple_setup_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->setSubspaceWeight(0, 1);
 
     traj.resize(pg.getStateCount(), prob_->getSpaceDim());
     Eigen::VectorXd tmp(prob_->getSpaceDim());

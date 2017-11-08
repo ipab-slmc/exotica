@@ -36,24 +36,10 @@
 
 #include <exotica/PlanningProblem.h>
 #include <exotica/SamplingProblemInitializer.h>
+#include <exotica/Tasks.h>
 
 namespace exotica
 {
-
-class SamplingTask : public Task
-{
-public:
-    SamplingTask();
-    virtual void initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi);
-    void updateS();
-    void update(const TaskSpaceVector& Phi);
-
-    Eigen::VectorXd Rho;
-    TaskSpaceVector y;
-    Eigen::VectorXd ydiff;
-    TaskSpaceVector Phi;
-    Eigen::MatrixXd S;
-};
 
 class SamplingProblem : public PlanningProblem, public Instantiable<SamplingProblemInitializer>
 {

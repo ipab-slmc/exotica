@@ -39,26 +39,10 @@
 
 #include <exotica/PlanningProblem.h>
 #include <exotica/UnconstrainedTimeIndexedProblemInitializer.h>
+#include <exotica/Tasks.h>
 
 namespace exotica
 {
-class TimeIndexedTask : public Task
-{
-public:
-    TimeIndexedTask();
-    virtual void initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi);
-    void updateS();
-    void update(const TaskSpaceVector& Phi, Eigen::MatrixXdRefConst J, int t);
-
-    std::vector<Eigen::VectorXd> Rho;
-    std::vector<TaskSpaceVector> y;
-    std::vector<Eigen::VectorXd> ydiff;
-    std::vector<TaskSpaceVector> Phi;
-    std::vector<Eigen::MatrixXd> J;
-    std::vector<Eigen::MatrixXd> S;
-    int T;
-};
-
 /**
    * \brief Unconstrained time-indexed problem.
    */

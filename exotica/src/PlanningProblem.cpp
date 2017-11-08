@@ -38,40 +38,6 @@
 namespace exotica
 {
 
-Task::Task()
-{
-
-}
-
-void Task::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
-{
-    for(const exotica::Initializer& init : inits)
-    {
-        TaskInitializer task(init);
-        auto it = prob->getTaskMaps().find(task.Task);
-        if(it == prob->getTaskMaps().end()) throw_pretty("Task map '"<<task.Task<<"' has not been defined!");
-        TaskMaps[task.Task] = it->second;
-        Tasks.push_back(it->second);
-        it->second->isUsed = true;
-    }
-    NumTasks = Tasks.size();
-    PhiN = 0;
-    JN = 0;
-    Indexing.resize(Tasks.size());
-    for (int i = 0; i < NumTasks; i++)
-    {
-        Indexing[i].Id = i;
-        Indexing[i].Start = PhiN;
-        Indexing[i].Length = Tasks[i]->Length;
-        Indexing[i].StartJ = JN;
-        Indexing[i].LengthJ = Tasks[i]->LengthJ;
-        appendVector(phi.map, TaskVectorEntry::reindex(Tasks[i]->getLieGroupIndices(), Tasks[i]->Start, Indexing[i].Start));
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
-    }
-    phi.setZero(PhiN);
-}
-
 PlanningProblem::PlanningProblem() : Flags(KIN_FK), N(0)
 {
 }

@@ -35,26 +35,10 @@
 #define UNCONSTRAINEDENDPOSEPROBLEM_H_
 #include <exotica/PlanningProblem.h>
 #include <exotica/UnconstrainedEndPoseProblemInitializer.h>
+#include <exotica/Tasks.h>
 
 namespace exotica
 {
-
-class EndPoseTask : public Task
-{
-public:
-    EndPoseTask();
-    virtual void initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi);
-    void updateS();
-    void update(const TaskSpaceVector& Phi, Eigen::MatrixXdRefConst J);
-
-    Eigen::VectorXd Rho;
-    TaskSpaceVector y;
-    Eigen::VectorXd ydiff;
-    TaskSpaceVector Phi;
-    Eigen::MatrixXd J;
-    Eigen::MatrixXd S;
-};
-
 /**
     * Unconstrained end-pose problem implementation
     */

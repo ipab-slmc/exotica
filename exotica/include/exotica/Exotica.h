@@ -41,6 +41,8 @@
 #include <exotica/Problems/TimeIndexedSamplingProblem.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
+#include <exotica/Problems/EndPoseProblem.h>
+#include <exotica/Problems/TimeIndexedProblem.h>
 #include <exotica/Setup.h>
 #include <exotica/Tools.h>
 #include <exotica/Version.h>

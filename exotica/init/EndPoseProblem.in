@@ -1,0 +1,5 @@
+extend <exotica/PlanningProblem>
+Optional std::vector<exotica::Initializer> Cost = std::vector<exotica::Initializer>();
+Optional std::vector<exotica::Initializer> Inequality = std::vector<exotica::Initializer>();
+Optional std::vector<exotica::Initializer> Equality = std::vector<exotica::Initializer>();
+Optional Eigen::VectorXd W = Eigen::VectorXd();

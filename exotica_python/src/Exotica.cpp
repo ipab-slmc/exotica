@@ -612,8 +612,6 @@ PYBIND11_MODULE(_pyexotica, module)
     samplingProblem.def("getBounds", &SamplingProblem::getBounds);
     samplingProblem.def_readonly("N", &SamplingProblem::N);
     samplingProblem.def_readonly("NumTasks", &SamplingProblem::NumTasks);
-    samplingProblem.def_readonly("Rho", &SamplingProblem::Rho);
-    samplingProblem.def_readonly("y", &SamplingProblem::y);
     samplingProblem.def_readonly("Phi", &SamplingProblem::Phi);
     py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> timeIndexedSamplingProblem(prob, "TimeIndexedSamplingProblem");
     timeIndexedSamplingProblem.def("update", &TimeIndexedSamplingProblem::Update);

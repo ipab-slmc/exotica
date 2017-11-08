@@ -583,10 +583,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedTimeIndexedProblem.def_readonly("JN", &UnconstrainedTimeIndexedProblem::JN);
     unconstrainedTimeIndexedProblem.def_readonly("N", &UnconstrainedTimeIndexedProblem::N);
     unconstrainedTimeIndexedProblem.def_readonly("NumTasks", &UnconstrainedTimeIndexedProblem::NumTasks);
-    unconstrainedTimeIndexedProblem.def_readonly("Rho", &UnconstrainedTimeIndexedProblem::Rho);
-    unconstrainedTimeIndexedProblem.def_readonly("y", &UnconstrainedTimeIndexedProblem::y);
     unconstrainedTimeIndexedProblem.def_readonly("Phi", &UnconstrainedTimeIndexedProblem::Phi);
-    unconstrainedTimeIndexedProblem.def_readonly("ydiff", &UnconstrainedTimeIndexedProblem::ydiff);
     unconstrainedTimeIndexedProblem.def_readonly("J", &UnconstrainedTimeIndexedProblem::J);
     unconstrainedTimeIndexedProblem.def("getScalarTaskCost", &UnconstrainedTimeIndexedProblem::getScalarTaskCost);
     unconstrainedTimeIndexedProblem.def("getScalarTaskJacobian", &UnconstrainedTimeIndexedProblem::getScalarTaskJacobian);

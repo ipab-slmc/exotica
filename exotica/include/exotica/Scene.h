@@ -135,8 +135,10 @@ public:
     void publishScene();
     void publishProxies(const std::vector<CollisionProxy>& proxies);
     visualization_msgs::Marker proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame);
-    void loadScene(const std::string& scene, bool updateCollisionScene = true);
-    void loadSceneFile(const std::string& file_name, bool updateCollisionScene = true);
+    void loadScene(const std::string& scene, const Eigen::Affine3d& offset = Eigen::Affine3d::Identity(), bool updateCollisionScene = true);
+    void loadScene(const std::string& scene, const KDL::Frame& offset = KDL::Frame(), bool updateCollisionScene = true);
+    void loadSceneFile(const std::string& file_name, const Eigen::Affine3d& offset = Eigen::Affine3d::Identity(), bool updateCollisionScene = true);
+    void loadSceneFile(const std::string& file_name, const KDL::Frame& offset = KDL::Frame(), bool updateCollisionScene = true);
     std::string getScene();
     void cleanScene();
 
@@ -186,6 +188,8 @@ private:
      * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.
      */
     void updateMoveItPlanningScene();
+
+    void loadSceneFromStringStream(std::istream& in, const Eigen::Affine3d& offset, bool updateCollisionScene);
 };
 typedef std::shared_ptr<Scene> Scene_ptr;
 //  typedef std::map<std::string, Scene_ptr> Scene_map;

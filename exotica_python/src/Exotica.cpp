@@ -495,6 +495,23 @@ PYBIND11_MODULE(_pyexotica, module)
         .value("Planar", BASE_TYPE::PLANAR)
         .export_values();
 
+    py::class_<KDL::Frame> kdlFrame(module, "KDLFrame");
+    kdlFrame.def(py::init());
+    kdlFrame.def("__init__", [](KDL::Frame& me, Eigen::MatrixXd other) { me = getFrameFromMatrix(other); });
+    kdlFrame.def("__init__", [](KDL::Frame& me, Eigen::VectorXd other) { me = getFrame(other); });
+    kdlFrame.def("__repr__", [](KDL::Frame* me) { return "KDL::Frame " + toString(*me); });
+    kdlFrame.def("getRPY", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::RPY); });
+    kdlFrame.def("getZYZ", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYZ); });
+    kdlFrame.def("getZYX", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYX); });
+    kdlFrame.def("getAngleAxis", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ANGLE_AXIS); });
+    kdlFrame.def("getQuaternion", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::QUATERNION); });
+    kdlFrame.def("getTranslation", [](KDL::Frame* me) { Eigen::Vector3d tmp; for (int i = 0; i < 3; i++) { tmp[i] = me->p.data[i]; } return tmp; });
+    kdlFrame.def("get", [](KDL::Frame* me) { return getFrame(*me); });
+    kdlFrame.def("inverse", (KDL::Frame (KDL::Frame::*)() const) & KDL::Frame::Inverse);
+    kdlFrame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());
+    py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
+    py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
+
     py::class_<TaskMap, std::shared_ptr<TaskMap>, Object> taskMap(module, "TaskMap");
     taskMap.def_readonly("id", &TaskMap::Id);
     taskMap.def_readonly("start", &TaskMap::Start);
@@ -628,8 +645,16 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("publishScene", &Scene::publishScene);
     scene.def("publishProxies", &Scene::publishProxies);
     scene.def("setCollisionScene", &Scene::setCollisionScene);
-    scene.def("loadScene", &Scene::loadScene, py::arg("sceneString"), py::arg("updateCollisionScene") = true);
-    scene.def("loadSceneFile", &Scene::loadSceneFile, py::arg("fileName"), py::arg("updateCollisionScene") = true);
+    scene.def("loadScene",
+              (void (Scene::*)(const std::string&, const KDL::Frame&, bool)) & Scene::loadScene,
+              py::arg("sceneString"),
+              py::arg("offsetTransform") = kdlFrame(),
+              py::arg("updateCollisionScene") = true);
+    scene.def("loadSceneFile",
+              (void (Scene::*)(const std::string&, const KDL::Frame&, bool)) & Scene::loadSceneFile,
+              py::arg("fileName"),
+              py::arg("offsetTransform") = kdlFrame(),
+              py::arg("updateCollisionScene") = true);
     scene.def("getScene", &Scene::getScene);
     scene.def("cleanScene", &Scene::cleanScene);
     scene.def("isStateValid", [](Scene* instance, bool self, double safe_distance) { return instance->getCollisionScene()->isStateValid(self, safe_distance); }, py::arg("self") = true, py::arg("SafeDistance") = 0.0);
@@ -694,23 +719,6 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getControlledLinkMass", &KinematicTree::getControlledLinkMass);
     kinematicTree.def("getCollisionObjectTypes", &KinematicTree::getCollisionObjectTypes);
 
-    py::class_<KDL::Frame> kdlFrame(module, "KDLFrame");
-    kdlFrame.def(py::init());
-    kdlFrame.def("__init__", [](KDL::Frame& me, Eigen::MatrixXd other) { me = getFrameFromMatrix(other); });
-    kdlFrame.def("__init__", [](KDL::Frame& me, Eigen::VectorXd other) { me = getFrame(other); });
-    kdlFrame.def("__repr__", [](KDL::Frame* me) { return "KDL::Frame " + toString(*me); });
-    kdlFrame.def("getRPY", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::RPY); });
-    kdlFrame.def("getZYZ", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYZ); });
-    kdlFrame.def("getZYX", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYX); });
-    kdlFrame.def("getAngleAxis", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ANGLE_AXIS); });
-    kdlFrame.def("getQuaternion", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::QUATERNION); });
-    kdlFrame.def("getTranslation", [](KDL::Frame* me) { Eigen::Vector3d tmp; for (int i = 0; i < 3; i++) { tmp[i] = me->p.data[i]; } return tmp; });
-    kdlFrame.def("get", [](KDL::Frame* me) { return getFrame(*me); });
-    kdlFrame.def("inverse", (KDL::Frame (KDL::Frame::*)() const) & KDL::Frame::Inverse);
-    kdlFrame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());
-    py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
-    py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
-
     py::enum_<shapes::ShapeType>(module, "ShapeType")
         .value("UnknownShape", shapes::ShapeType::UNKNOWN_SHAPE)
         .value("Sphere", shapes::ShapeType::SPHERE)
@@ -719,7 +727,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .value("Box", shapes::ShapeType::BOX)
         .value("Plane", shapes::ShapeType::PLANE)
         .value("Mesh", shapes::ShapeType::MESH)
-        .value("Octree", shapes::ShapeType::OCTREE);
+        .value("Octree", shapes::ShapeType::OCTREE)
+        .export_values();
 
     module.attr("version") = version();
     module.attr("branch") = branch();

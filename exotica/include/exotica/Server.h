@@ -125,6 +125,12 @@ public:
         return Instance()->getNodeHandle().getParam(name, param);
     }
 
+    template <typename T>
+    static void setParam(const std::string &name, T &param)
+    {
+        Instance()->getNodeHandle().setParam(name, param);
+    }
+
     inline bool static hasParam(const std::string &name)
     {
         if (isRos())

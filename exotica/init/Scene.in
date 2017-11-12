@@ -3,6 +3,7 @@ Required std::string JointGroup;
 Optional std::string RobotDescription = "robot_description";
 Optional std::string URDF = "";
 Optional std::string SRDF = "";
+Optional bool SetRobotDescriptionRosParams = false;  // to be used in conjunction with URDF or SRDF to set the robot_description and robot_description_semantic from the files/string in URDF/SRDF
 Optional std::string CollisionScene = "CollisionSceneFCL";
 Optional bool AlwaysUpdateCollisionScene = false;
 Optional std::string LoadScene = "";

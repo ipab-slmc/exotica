@@ -87,6 +87,16 @@ void Scene::Instantiate(SceneInitializer& init)
     group = model_->getJointModelGroup(init.JointGroup);
     ps_.reset(new planning_scene::PlanningScene(model_));
 
+    // Write URDF/SRDF to ROS param server
+    if (Server::isRos() && init.SetRobotDescriptionRosParams && init.URDF != "" && init.SRDF != "")
+    {
+        if (debug_) HIGHLIGHT_NAMED(name_, "Setting robot_description and robot_description_semantic from URDF and SRDF initializers");
+        std::string urdf_string = pathExists(init.URDF) ? loadFile(init.URDF) : init.URDF;
+        std::string srdf_string = pathExists(init.SRDF) ? loadFile(init.SRDF) : init.SRDF;
+        Server::setParam("/robot_description", urdf_string);
+        Server::setParam("/robot_description_semantic", srdf_string);
+    }
+
     BaseType = kinematica_.getControlledBaseType();
 
     if (Server::isRos())

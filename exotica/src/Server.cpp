@@ -93,10 +93,12 @@ robot_model::RobotModelPtr Server::loadModel(std::string name, std::string urdf,
     {
         model = robot_model_loader::RobotModelLoader(name, false).getModel();
     }
+    // URDF and SRDF are meant to be read from files
     else if (pathExists(urdf) && pathExists(srdf))
     {
         model = loadModelImpl(loadFile(urdf), loadFile(srdf));
     }
+    // URDF and SRDF are passed in as strings
     else if (urdf != "" && srdf != "")
     {
         model = loadModelImpl(urdf, srdf);

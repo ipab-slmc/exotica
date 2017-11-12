@@ -33,15 +33,23 @@
 #ifndef EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_
 #define EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_
 
-#include <exotica/CollisionScene.h>
-#include <exotica/Property.h>
-#include <exotica/SceneInitializer.h>
-#include <exotica/Trajectory.h>
+#include <eigen_conversions/eigen_kdl.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit_msgs/PlanningScene.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+
+#include <exotica/LinkInitializer.h>
+#include <exotica/SceneInitializer.h>
+#include <exotica/TrajectoryInitializer.h>
+
+#include "exotica/CollisionScene.h"
 #include "exotica/KinematicTree.h"
 #include "exotica/Object.h"
+#include "exotica/Property.h"
 #include "exotica/Server.h"
+#include "exotica/Trajectory.h"
 
 namespace exotica
 {

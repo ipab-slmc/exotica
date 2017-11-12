@@ -31,13 +31,7 @@
  */
 
 #include "exotica/Scene.h"
-#include <eigen_conversions/eigen_kdl.h>
-#include <exotica/LinkInitializer.h>
-#include <exotica/Setup.h>
-#include <exotica/TrajectoryInitializer.h>
-#include <fstream>
-#include <iostream>
-#include <string>
+#include "exotica/Setup.h"
 
 namespace exotica
 {

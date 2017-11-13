@@ -29,6 +29,16 @@ def publishTrajectory(traj, T, problem):
         sleep(dt)
         t=(t+1)%len(traj)
 
+def publishTimeIndexedTrajectory(traj, Ts, problem):
+    print('Playing back trajectory '+str(len(Ts))+' states in '+str(Ts[len(Ts)-1]))
+    idx=0
+
+    while not is_shutdown():
+        for i in range(1, len(Ts)-1):
+            if not is_shutdown():
+                publishPose(traj[i], problem, Ts[i])
+                sleep(Ts[i]-Ts[i-1])
+
 def plot(solution):
     print('Plotting the solution')
     plt.plot(solution,'.-')

@@ -13,4 +13,6 @@ solver.specifyProblem(problem)
 
 solution = solver.solve()
 
-publishTrajectory(solution, 3.0, problem)
+Ts = solution[:,0]
+solution = solution[:,1:]
+publishTimeIndexedTrajectory(solution, Ts, problem)

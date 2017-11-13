@@ -1,7 +1,10 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
 
-  <TimeIndexedRRTConnect Name="MySolver" />
+  <TimeIndexedRRTConnect Name="MySolver">
+    <Timeout>5</Timeout>
+    <AddTimeIntoSolution>1</AddTimeIntoSolution>
+  </TimeIndexedRRTConnect>
 
   <TimeIndexedSamplingProblem Name="MyProblem">
     <T>3</T>

@@ -2,3 +2,4 @@ extend <exotica/MotionSolver>
 Optional bool Smooth = true;
 Optional double Timeout = 60.0;
 Optional std::string Range = "1";
+Optional bool AddTimeIntoSolution = false;

@@ -103,12 +103,12 @@ void UnconstrainedEndPoseProblem::preupdate()
 
 double UnconstrainedEndPoseProblem::getScalarCost()
 {
-    return ydiff.transpose()*S*ydiff;
+    return ydiff.transpose() * S * ydiff;
 }
 
 Eigen::VectorXd UnconstrainedEndPoseProblem::getScalarJacobian()
 {
-    return J.transpose()*S*ydiff*2.0;
+    return J.transpose() * S * ydiff * 2.0;
 }
 
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)

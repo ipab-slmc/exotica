@@ -1,0 +1,5 @@
+<library path="lib/libtime_indexed_rrt_connect">
+  <class name="exotica/TimeIndexedRRTConnect" type="exotica::TimeIndexedRRTConnect" base_class_type="exotica::MotionSolver">
+    <description>The Time Indexed RRTConnect solver</description>
+  </class>
+</library>

@@ -122,7 +122,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
 void UnconstrainedTimeIndexedProblem::preupdate()
 {
     PlanningProblem::preupdate();
-    for(int t=0; t<T; t++)
+    for (int t = 0; t < T; t++)
     {
         for (TaskMap_ptr task : Tasks)
         {
@@ -191,7 +191,7 @@ double UnconstrainedTimeIndexedProblem::getScalarCost(int t)
     {
         t = T - 1;
     }
-    return ydiff[t].transpose()*S[t]*ydiff[t];
+    return ydiff[t].transpose() * S[t] * ydiff[t];
 }
 
 Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarJacobian(int t)
@@ -204,7 +204,7 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarJacobian(int t)
     {
         t = T - 1;
     }
-    return J[t].transpose()*S[t]*ydiff[t]*2.0;
+    return J[t].transpose() * S[t] * ydiff[t] * 2.0;
 }
 
 void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)

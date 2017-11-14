@@ -584,6 +584,16 @@ PYBIND11_MODULE(_pyexotica, module)
     samplingProblem.def_readonly("Rho", &SamplingProblem::Rho);
     samplingProblem.def_readonly("y", &SamplingProblem::y);
     samplingProblem.def_readonly("Phi", &SamplingProblem::Phi);
+    py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> timeIndexedSamplingProblem(prob, "TimeIndexedSamplingProblem");
+    timeIndexedSamplingProblem.def("update", &TimeIndexedSamplingProblem::Update);
+    timeIndexedSamplingProblem.def("setGoalState", &TimeIndexedSamplingProblem::setGoalState);
+    timeIndexedSamplingProblem.def("getSpaceDim", &TimeIndexedSamplingProblem::getSpaceDim);
+    timeIndexedSamplingProblem.def("getBounds", &TimeIndexedSamplingProblem::getBounds);
+    timeIndexedSamplingProblem.def_readonly("N", &TimeIndexedSamplingProblem::N);
+    timeIndexedSamplingProblem.def_readonly("NumTasks", &TimeIndexedSamplingProblem::NumTasks);
+    timeIndexedSamplingProblem.def_readonly("Rho", &TimeIndexedSamplingProblem::Rho);
+    timeIndexedSamplingProblem.def_readonly("y", &TimeIndexedSamplingProblem::y);
+    timeIndexedSamplingProblem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
 
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "Proxy");
     proxy.def(py::init());

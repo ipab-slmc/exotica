@@ -1,5 +1,7 @@
 # EXOTica [![Build Status](https://travis-ci.org/ipab-slmc/exotica.svg?branch=master)](https://travis-ci.org/ipab-slmc/exotica) [![Analytics](https://ga-beacon.appspot.com/UA-72496975-1/openhumanoids/exotica/?pixel)](https://github.com/igrigorik/ga-beacon)
 
+[Documentation](http://ipab-slmc.github.io/exotica/) - [C++ Doxygen](http://ipab-slmc.github.io/exotica/doxygen_cpp/)
+
 The EXOTica library is a generic Optimisation Toolset for Robotics platforms, written in C++. Its motivation is to provide a more streamlined process for developing algorithms for such tasks as Inverse-Kinematics and Trajectory Optimisation. Its design advocates:
 
  * Modularity: The library is developed in a modular manner making use of C++’s object-oriented features (such as polymorphism). This allows users to define their own components and ’plug them into’ the existing framework. The end-effect is that an engineer need not implement a whole system whenever he needs to change a component, but rather can re-implement the specific functionality and as long as he follows certain guidelines, retain the use of the other modules.

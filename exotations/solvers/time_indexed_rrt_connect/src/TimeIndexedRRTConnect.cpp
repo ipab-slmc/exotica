@@ -283,10 +283,17 @@ void OMPLTimeIndexedRRTConnect::setup()
     tools::SelfConfig sc(si_, getName());
     sc.configurePlannerRange(maxDistance_);
 
+#ifdef ROS_KINETIC
+    if (!tStart_)
+        tStart_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
+    if (!tGoal_)
+        tGoal_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
+#else
     if (!tStart_)
         tStart_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(si_->getStateSpace()));
     if (!tGoal_)
         tGoal_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(si_->getStateSpace()));
+#endif
     tStart_->setDistanceFunction(boost::bind(&OMPLTimeIndexedRRTConnect::reverseTimeDistance, this, _1, _2));
     tGoal_->setDistanceFunction(boost::bind(&OMPLTimeIndexedRRTConnect::forwardTimeDistance, this, _1, _2));
 }

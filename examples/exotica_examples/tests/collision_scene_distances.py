@@ -7,7 +7,7 @@ import numpy as np
 exo.Setup.initRos()
 
 PENETRATING_DISTANCE_ATOL = 1e-2
-publishProxies = True
+publishProxies = False
 
 def getProblemInitializer(collisionScene, URDF):
     return ('exotica/UnconstrainedEndPoseProblem',
@@ -16,7 +16,7 @@ def getProblemInitializer(collisionScene, URDF):
                                 {'CollisionScene': collisionScene,
                                  'JointGroup': 'group1',
                                  'Name': 'TestScene',
-                                 'Debug': '1',
+                                 'Debug': '0',
                                  'SRDF': '{exotica_examples}/tests/resources/A_vs_B.srdf',
                                  'SetRobotDescriptionRosParams': '1',
                                  'URDF': URDF})]})
@@ -588,12 +588,6 @@ def testMeshVsMeshPenetrating(collisionScene):
     print('Mesh_vs_Mesh_Penetrating: Distance, Contact Points, Normals: PASSED')
 
 
-
-# MeshBoxDistance
-# MeshBoxPenetrating
-# MeshCylinderDistance
-# MeshCylinderPenetrating
-
 #########################################
 
 for collisionScene in ['CollisionSceneFCLLatest']:
@@ -619,4 +613,7 @@ for collisionScene in ['CollisionSceneFCLLatest']:
     #testMeshVsMeshPenetrating(collisionScene)    # BROKEN with libccd
 
 time.sleep(1)
+
+print('>>SUCCESS<<')
+
 exit(0)

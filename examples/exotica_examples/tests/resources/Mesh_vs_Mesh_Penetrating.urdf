@@ -19,6 +19,7 @@
     <visual>
       <geometry>
         <mesh filename="package://exotica_examples/tests/resources/uvsphere.obj"/>
+        <!-- <mesh filename="package://exotica_examples/tests/resources/cube.obj"/> -->
       </geometry>
       <origin rpy="0 0 0" xyz="0.8 0 0"/>
       <material name="green"/>

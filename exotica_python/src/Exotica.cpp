@@ -586,7 +586,10 @@ PYBIND11_MODULE(_pyexotica, module)
     samplingProblem.def_readonly("Phi", &SamplingProblem::Phi);
     py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> timeIndexedSamplingProblem(prob, "TimeIndexedSamplingProblem");
     timeIndexedSamplingProblem.def("update", &TimeIndexedSamplingProblem::Update);
+    timeIndexedSamplingProblem.def("setStartState", &TimeIndexedSamplingProblem::setStartState);
+    timeIndexedSamplingProblem.def("setStartTime", &TimeIndexedSamplingProblem::setStartTime);
     timeIndexedSamplingProblem.def("setGoalState", &TimeIndexedSamplingProblem::setGoalState);
+    timeIndexedSamplingProblem.def("setGoalTime", &TimeIndexedSamplingProblem::setGoalTime);
     timeIndexedSamplingProblem.def("getSpaceDim", &TimeIndexedSamplingProblem::getSpaceDim);
     timeIndexedSamplingProblem.def("getBounds", &TimeIndexedSamplingProblem::getBounds);
     timeIndexedSamplingProblem.def_readonly("N", &TimeIndexedSamplingProblem::N);

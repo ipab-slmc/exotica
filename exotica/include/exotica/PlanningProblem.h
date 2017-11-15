@@ -61,7 +61,7 @@ public:
     virtual std::string print(std::string prepend);
     void setStartState(Eigen::VectorXdRefConst x);
     Eigen::VectorXd getStartState();
-    Eigen::VectorXd applyStartState();
+    virtual Eigen::VectorXd applyStartState();
     int N;
     virtual void preupdate();
 

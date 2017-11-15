@@ -58,6 +58,9 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     Parameters = init;
     goal_ = init.Goal;
     T_ = init.T;
+    T_start_ = 0;
+    T_goal_ = init.T;
+    vel_limits_ = init.JointVelocityLimits;
     std::vector<std::string> jnts;
     scene_->getJointNames(jnts);
 
@@ -102,11 +105,27 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     }
 }
 
+Eigen::VectorXd TimeIndexedSamplingProblem::applyStartState()
+{
+    scene_->setModelState(startState, T_start_);
+    return scene_->getControlledState();
+}
+
 void TimeIndexedSamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
 {
     if (qT.rows() != N)
         throw_pretty("Dimensionality of goal state wrong: Got " << qT.rows() << ", expected " << N);
     goal_ = qT;
+}
+
+void TimeIndexedSamplingProblem::setStartTime(double t)
+{
+    T_start_ = t;
+}
+
+void TimeIndexedSamplingProblem::setGoalTime(double t)
+{
+    T_goal_ = t;
 }
 
 bool TimeIndexedSamplingProblem::isValid(Eigen::VectorXdRefConst x, double t)

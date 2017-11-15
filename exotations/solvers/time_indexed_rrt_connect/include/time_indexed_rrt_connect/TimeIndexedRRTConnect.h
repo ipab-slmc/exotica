@@ -258,14 +258,8 @@ protected:
 
     bool correctTime(const Motion *a, Motion *b, bool reverse, bool &changed) const
     {
-        bool reverse_ = reverse_check_ ? !reverse : reverse;
-        Eigen::VectorXd max_vel = Eigen::VectorXd::Ones(7);
-        double dist = si_->distance(a->state, b->state);
-        const OMPLTimeIndexedRNStateSpace::StateType *sa = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(a->state);
-        OMPLTimeIndexedRNStateSpace::StateType *sb = static_cast<OMPLTimeIndexedRNStateSpace::StateType *>(b->state);
-        double ta = sa->getTime().position, tb = sb->getTime().position;
-        if ((reverse_ && tb > ta) || (!reverse_ && ta > tb))
-            return false;
+        Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
+        double ta, tb;
         Eigen::VectorXd qa, qb;
         si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(a->state, qa, ta);
         si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(b->state, qb, tb);
@@ -273,12 +267,13 @@ protected:
         double min_dt = (diff.array() / max_vel.array()).maxCoeff();
         if (fabs(tb - ta) < min_dt)
         {
-            tb = ta + (reverse_ ? -min_dt : min_dt);
+            if (reverse_check_) return false;
+            tb = ta + (reverse ? -min_dt : min_dt);
             changed = true;
         }
         else
             changed = false;
-        if (tb <= 0 || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->T_)
+        if (tb < si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->T_start_ || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->T_goal_)
             return false;
         si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(qb, tb, b->state);
         return true;

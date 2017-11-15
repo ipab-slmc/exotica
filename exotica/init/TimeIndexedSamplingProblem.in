@@ -1,2 +1,3 @@
 extend <exotica/SamplingProblem>
+Required Eigen::VectorXd JointVelocityLimits;
 Optional double T = 1.0;

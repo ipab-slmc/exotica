@@ -13,7 +13,8 @@ cpptests = ['test_initializers',
 pytests = ['core.py',
          'valkyrie_com.py',
          'valkyrie_collision_check_fcl_default.py',
-         'valkyrie_collision_check_fcl_latest.py'
+         'valkyrie_collision_check_fcl_latest.py',
+         'collision_scene_distances.py'
         ]
 
 for test in cpptests:

@@ -63,10 +63,15 @@ public:
 
     TimeIndexedSamplingProblemInitializer Parameters;
 
+    Eigen::VectorXd getGoalState();
+    double getGoalTime();
     void setGoalState(Eigen::VectorXdRefConst qT);
+    void setGoalTime(double t);
 
     Eigen::VectorXd goal_;
-    double T_;
+    double T;
+    double tGoal;
+    Eigen::VectorXd vel_limits_;
     Eigen::VectorXd Rho;
     TaskSpaceVector y;
     TaskSpaceVector Phi;

@@ -51,7 +51,7 @@ OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProb
     }
     getSubspace(0)->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::TimeStateSpace), 1.0);
-    getSubspace(1)->as<ompl::base::TimeStateSpace>()->setBounds(0, prob_->T_);
+    getSubspace(1)->as<ompl::base::TimeStateSpace>()->setBounds(0, prob_->T);
     lock();
 }
 
@@ -234,6 +234,8 @@ void TimeIndexedRRTConnect::getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTe
     {
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(i), tmp, ts(i));
         traj.row(i).tail(prob_->getSpaceDim()) = tmp;
+        //        if (i > 0)
+        //            HIGHLIGHT(i << " t=" << ts(i) << " max vel=" << (traj.row(i).tail(prob_->getSpaceDim()) - traj.row(i - 1).tail(prob_->getSpaceDim())).cwiseAbs().maxCoeff() / (ts(i) - ts(i - 1)));
     }
     if (init_.AddTimeIntoSolution)
         traj.col(0) = ts;
@@ -243,10 +245,10 @@ void TimeIndexedRRTConnect::Solve(Eigen::MatrixXd &solution)
 {
     prob_->preupdate();
     Eigen::VectorXd q0 = prob_->applyStartState();
-    setGoalState(prob_->goal_, prob_->T_);
+    setGoalState(prob_->goal_, prob_->tGoal);
 
     ompl::base::ScopedState<> ompl_start_state(state_space_);
-    state_space_->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(q0, 0, ompl_start_state.get());
+    state_space_->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(q0, prob_->tStart, ompl_start_state.get());
     ompl_simple_setup_->setStartState(ompl_start_state);
 
     preSolve();
@@ -334,8 +336,8 @@ OMPLTimeIndexedRRTConnect::GrowState OMPLTimeIndexedRRTConnect::growTree(TreeDat
     Motion *nmotion = tree->nearest(rmotion);
 
     bool changed = false;
-    //	if (!correctTime(nmotion, rmotion, !tgi.start, changed))
-    //		return TRAPPED;
+    if (!correctTime(nmotion, rmotion, !tgi.start, changed))
+        return TRAPPED;
 
     /* assume we can reach the state we go towards */
     bool reach = !changed;

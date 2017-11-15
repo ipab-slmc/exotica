@@ -523,6 +523,7 @@ PYBIND11_MODULE(_pyexotica, module)
     planningProblem.def("getScene", &PlanningProblem::getScene, py::return_value_policy::reference_internal);
     planningProblem.def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend") = std::string(""));
     planningProblem.def_property("startState", &PlanningProblem::getStartState, &PlanningProblem::setStartState);
+    planningProblem.def_property("startTime", &PlanningProblem::getStartTime, &PlanningProblem::setStartTime);
 
     // Problem types
     py::module prob = module.def_submodule("Problems", "Problem types");
@@ -586,9 +587,10 @@ PYBIND11_MODULE(_pyexotica, module)
     samplingProblem.def_readonly("Phi", &SamplingProblem::Phi);
     py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> timeIndexedSamplingProblem(prob, "TimeIndexedSamplingProblem");
     timeIndexedSamplingProblem.def("update", &TimeIndexedSamplingProblem::Update);
-    timeIndexedSamplingProblem.def("setGoalState", &TimeIndexedSamplingProblem::setGoalState);
     timeIndexedSamplingProblem.def("getSpaceDim", &TimeIndexedSamplingProblem::getSpaceDim);
     timeIndexedSamplingProblem.def("getBounds", &TimeIndexedSamplingProblem::getBounds);
+    timeIndexedSamplingProblem.def_property("goalState", &TimeIndexedSamplingProblem::getGoalState, &TimeIndexedSamplingProblem::setGoalState);
+    timeIndexedSamplingProblem.def_property("goalTime", &TimeIndexedSamplingProblem::getGoalTime, &TimeIndexedSamplingProblem::setGoalTime);
     timeIndexedSamplingProblem.def_readonly("N", &TimeIndexedSamplingProblem::N);
     timeIndexedSamplingProblem.def_readonly("NumTasks", &TimeIndexedSamplingProblem::NumTasks);
     timeIndexedSamplingProblem.def_readonly("Rho", &TimeIndexedSamplingProblem::Rho);

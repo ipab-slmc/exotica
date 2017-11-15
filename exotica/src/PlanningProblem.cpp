@@ -51,7 +51,7 @@ std::string PlanningProblem::print(std::string prepend)
 
 Eigen::VectorXd PlanningProblem::applyStartState()
 {
-    scene_->setModelState(startState);
+    scene_->setModelState(startState, tStart);
     return scene_->getControlledState();
 }
 
@@ -89,6 +89,16 @@ Eigen::VectorXd PlanningProblem::getStartState()
     return startState;
 }
 
+void PlanningProblem::setStartTime(double t)
+{
+    tStart = t;
+}
+
+double PlanningProblem::getStartTime()
+{
+    return tStart;
+}
+
 void PlanningProblem::InstantiateBase(const Initializer& init_)
 {
     Object::InstatiateObject(init_);
@@ -107,6 +117,8 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     {
         setStartState(init.StartState);
     }
+    if (init.StartTime < 0)
+        throw_named("Invalid start time " << init.StartTime) else tStart = init.StartTime;
 
     KinematicsRequest Request;
     Request.Flags = Flags;

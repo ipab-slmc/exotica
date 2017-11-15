@@ -46,7 +46,6 @@ public:
     virtual ~TimeIndexedSamplingProblem();
 
     virtual void Instantiate(TimeIndexedSamplingProblemInitializer& init);
-    virtual Eigen::VectorXd applyStartState();
 
     void Update(Eigen::VectorXdRefConst x, double t);
     bool isValid(Eigen::VectorXdRefConst x, double t);
@@ -64,14 +63,14 @@ public:
 
     TimeIndexedSamplingProblemInitializer Parameters;
 
-    void setStartTime(double t);
+    Eigen::VectorXd getGoalState();
+    double getGoalTime();
     void setGoalState(Eigen::VectorXdRefConst qT);
     void setGoalTime(double t);
 
     Eigen::VectorXd goal_;
-    double T_;
-    double T_start_;
-    double T_goal_;
+    double T;
+    double tGoal;
     Eigen::VectorXd vel_limits_;
     Eigen::VectorXd Rho;
     TaskSpaceVector y;

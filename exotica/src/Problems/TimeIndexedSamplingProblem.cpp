@@ -57,10 +57,17 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
 {
     Parameters = init;
     goal_ = init.Goal;
-    T_ = init.T;
-    T_start_ = 0;
-    T_goal_ = init.T;
+    if (goal_.rows() != N)
+        throw_named("Dimension mismatch: problem N=" << N << ", but goal state has dimension " << goal_.rows());
+    T = init.T;
+    if (T < 0)
+        throw_named("Invalid problem duration T: " << T);
+    tGoal = init.GoalTime;
+    if (tGoal > T)
+        throw_named("Invalid goal time tGoal= " << tGoal << ">T_(" << T << ")");
     vel_limits_ = init.JointVelocityLimits;
+    if (vel_limits_.rows() != N)
+        throw_named("Dimension mismatch: problem N=" << N << ", but joint velocity limits has dimension " << vel_limits_.rows());
     std::vector<std::string> jnts;
     scene_->getJointNames(jnts);
 
@@ -105,10 +112,14 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     }
 }
 
-Eigen::VectorXd TimeIndexedSamplingProblem::applyStartState()
+Eigen::VectorXd TimeIndexedSamplingProblem::getGoalState()
 {
-    scene_->setModelState(startState, T_start_);
-    return scene_->getControlledState();
+    return goal_;
+}
+
+double TimeIndexedSamplingProblem::getGoalTime()
+{
+    return tGoal;
 }
 
 void TimeIndexedSamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
@@ -118,14 +129,9 @@ void TimeIndexedSamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
     goal_ = qT;
 }
 
-void TimeIndexedSamplingProblem::setStartTime(double t)
-{
-    T_start_ = t;
-}
-
 void TimeIndexedSamplingProblem::setGoalTime(double t)
 {
-    T_goal_ = t;
+    tGoal = t;
 }
 
 bool TimeIndexedSamplingProblem::isValid(Eigen::VectorXdRefConst x, double t)

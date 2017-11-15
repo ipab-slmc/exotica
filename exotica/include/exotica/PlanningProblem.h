@@ -60,9 +60,12 @@ public:
     Scene_ptr getScene();
     virtual std::string print(std::string prepend);
     void setStartState(Eigen::VectorXdRefConst x);
+    void setStartTime(double t);
     Eigen::VectorXd getStartState();
-    virtual Eigen::VectorXd applyStartState();
+    double getStartTime();
+    Eigen::VectorXd applyStartState();
     int N;
+    double tStart;
     virtual void preupdate();
 
 protected:

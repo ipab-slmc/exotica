@@ -54,6 +54,8 @@ if(CATKIN_ENABLE_TESTING)
     target_link_libraries(test_initializers ${catkin_LIBRARIES})
     install(TARGETS test_initializers RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-    FILE(GLOB python_tests "${CMAKE_CURRENT_SOURCE_DIR}/tests/*")
+    FILE(GLOB python_tests "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.py")
     catkin_install_python(PROGRAMS ${python_tests} DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+    install(DIRECTORY tests/resources/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/tests/resources)
 endif(CATKIN_ENABLE_TESTING)

@@ -253,13 +253,17 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     // However, FCL code comments suggest INDEP producing incorrect contact points, cf.
     // https://github.com/flexible-collision-library/fcl/blob/master/test/test_fcl_signed_distance.cpp#L85-L86
 
-    // INDEP better for primitives, CCD better for when there's a mesh
-    if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
+    // INDEP better for primitives, CCD better for when there's a mesh --
+    // however contact points appear better with libccd as well according to
+    // unit test
+    if (false)  //(o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
     {
+        // HIGHLIGHT("Using INDEP");
         data->Request.gjk_solver_type = fcl::GST_INDEP;
     }
     else
     {
+        // HIGHLIGHT("Using LIBCCD");
         data->Request.gjk_solver_type = fcl::GST_LIBCCD;
     }
 
@@ -308,6 +312,10 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     else if (p.e1->Shape->type != shapes::ShapeType::MESH && p.e2->Shape->type != shapes::ShapeType::MESH)
     {
         // Use shape centres as nearest point when in penetration - otherwise use the nearest point.
+        // INDEP has a further caveat when in penetration: it will return the
+        // exact touch location as the contact point - not the point of maximum
+        // penetration. This contact point will be in world frame, while the
+        // closest point is in local frame.
         if (p.distance > 0)
         {
             c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
@@ -315,8 +323,24 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         }
         else
         {
-            c1 = p.e1->Frame.p;
-            c2 = p.e2->Frame.p;
+            // Again, we need to distinguish between the two different solvers
+            if (data->Request.gjk_solver_type == fcl::GST_INDEP)
+            {
+                // The contact point is accurate but it is not the point of deepest penetration
+                // WITH INDEP:
+                // c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+                // c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+
+                // SHAPE CENTRES:
+                c1 = p.e1->Frame.p;
+                c2 = p.e2->Frame.p;
+            }
+            else
+            {
+                // WITH LIBCCD:
+                c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+                c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+            }
         }
     }
     // Case 3: Primitive vs Mesh - primitive returned in flipped local frame (tbc), mesh returned in global frame

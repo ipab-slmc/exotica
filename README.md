@@ -13,8 +13,8 @@ The library itself consists of two major specifications, both of which are abstr
 
 # Prerequisites
 * Ubuntu 14.04 (16.04 is periodically tested and compiles, not tested on CI yet)
-* [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/)
-* [rosdep](http://wiki.ros.org/rosdep)
+* [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
+* [rosdep](http://wiki.ros.org/rosdep) 
 * [ROS Indigo](http://wiki.ros.org/indigo/Installation/Ubuntu) (```ros-indigo-desktop-full``` is recommended but more minimal versions may be sufficient in conjunction with rosdep)
 * [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) > 3.2.7. We recommend system-installing 3.2.10 or newer, for which we provide a [Debian](http://terminator.robots.inf.ed.ac.uk/apt/libeigen3-dev.deb).
 * gcc > 4.9 -- the 14.04 system-installed 4.8.4 won't work
@@ -27,7 +27,7 @@ The library itself consists of two major specifications, both of which are abstr
 1. Install dependencies
   1. If running the rosdep for the first time start by running:
      ```sudo rosdep init```
-  1. ```rosdep update ; rosdep check --from-paths ./ -s -i ```
+  1. ```rosdep update ; rosdep install --from-paths ./ -s -i ```
 1. Compile the code ```catkin build -s```.
 1. Source the config file (ideally inside ```~/.bashrc```): ```source path_to_workspace/devel/setup.bash```. You may have to source the config file from your installspace if your workspace is configured for installation.
 

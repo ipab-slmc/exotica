@@ -34,6 +34,8 @@
 #ifndef TIME_INDEXED_RRT_CONNECT_TIMEINDEXEDRRTCONNECT_H_
 #define TIME_INDEXED_RRT_CONNECT_TIMEINDEXEDRRTCONNECT_H_
 
+#include <memory>
+
 #include <exotica/Problems/TimeIndexedSamplingProblem.h>
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/StateSpace.h>

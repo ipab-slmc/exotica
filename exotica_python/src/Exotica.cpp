@@ -615,6 +615,8 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getBaseType", &Scene::getBaseType);
     scene.def("getGroupName", &Scene::getGroupName);
     scene.def("getJointNames", (std::vector<std::string> (Scene::*)()) & Scene::getJointNames);
+    scene.def("getControlledLinkNames", &Scene::getControlledLinkNames);
+    scene.def("getModelLinkNames", &Scene::getModelLinkNames);
     scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference_internal);
     scene.def("getCollisionScene", &Scene::getCollisionScene, py::return_value_policy::reference_internal);
     scene.def("getModelJointNames", &Scene::getModelJointNames);
@@ -635,10 +637,15 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getCollisionDistance", [](Scene* instance, bool self) { return instance->getCollisionScene()->getCollisionDistance(self); }, py::arg("self") = true);
     scene.def("getCollisionDistance", [](Scene* instance, const std::string& o1, const std::string& o2) { return instance->getCollisionScene()->getCollisionDistance(o1, o2); }, py::arg("Object1"), py::arg("Object2"));
     scene.def("getCollisionDistance",
-              [](Scene* instance, const std::string& o1) {
-                  return instance->getCollisionScene()->getCollisionDistance(o1);
+              [](Scene* instance, const std::string& o1, const bool& self) {
+                  return instance->getCollisionScene()->getCollisionDistance(o1, self);
               },
-              py::arg("Object1"));
+              py::arg("Object1"), py::arg("self") = true);
+    scene.def("getCollisionDistance",
+              [](Scene* instance, const std::vector<std::string>& objects, const bool& self) {
+                  return instance->getCollisionScene()->getCollisionDistance(objects, self);
+              },
+              py::arg("objects"), py::arg("self") = true);
     scene.def("updateWorld",
               [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
                   moveit_msgs::PlanningSceneWorldConstPtr myPtr(
@@ -685,6 +692,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getModelBaseType", &KinematicTree::getModelBaseType);
     kinematicTree.def("getControlledBaseType", &KinematicTree::getControlledBaseType);
     kinematicTree.def("getControlledLinkMass", &KinematicTree::getControlledLinkMass);
+    kinematicTree.def("getCollisionObjectTypes", &KinematicTree::getCollisionObjectTypes);
 
     py::class_<KDL::Frame> kdlFrame(module, "KDLFrame");
     kdlFrame.def(py::init());
@@ -702,6 +710,16 @@ PYBIND11_MODULE(_pyexotica, module)
     kdlFrame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());
     py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
     py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
+
+    py::enum_<shapes::ShapeType>(module, "ShapeType")
+        .value("UnknownShape", shapes::ShapeType::UNKNOWN_SHAPE)
+        .value("Sphere", shapes::ShapeType::SPHERE)
+        .value("Cylinder", shapes::ShapeType::CYLINDER)
+        .value("Cone", shapes::ShapeType::CONE)
+        .value("Box", shapes::ShapeType::BOX)
+        .value("Plane", shapes::ShapeType::PLANE)
+        .value("Mesh", shapes::ShapeType::MESH)
+        .value("Octree", shapes::ShapeType::OCTREE);
 
     module.attr("version") = version();
     module.attr("branch") = branch();

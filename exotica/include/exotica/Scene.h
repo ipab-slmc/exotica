@@ -76,8 +76,10 @@ public:
     void getJointNames(std::vector<std::string>& joints);
     std::vector<std::string> getJointNames();
     std::vector<std::string> getModelJointNames();
-    Eigen::VectorXd getModelState();
+    std::vector<std::string> getControlledLinkNames();
+    std::vector<std::string> getModelLinkNames();
     Eigen::VectorXd getControlledState();
+    Eigen::VectorXd getModelState();
     std::map<std::string, double> getModelStateMap();
     void setModelState(Eigen::VectorXdRefConst x, double t = 0);
     void setModelState(std::map<std::string, double> x, double t = 0);

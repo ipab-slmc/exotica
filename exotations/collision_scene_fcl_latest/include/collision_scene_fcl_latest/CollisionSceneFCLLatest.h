@@ -92,7 +92,8 @@ public:
     ///
     virtual std::vector<CollisionProxy> getCollisionDistance(bool self);
     virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2);
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1);
+    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true);
+    virtual std::vector<CollisionProxy> getCollisionDistance(const std::vector<std::string>& objects, const bool& self = true);
 
     /**
        * @brief      Gets the collision world links.
@@ -125,6 +126,8 @@ private:
     std::shared_ptr<fcl::CollisionObjectd> constructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
     static void checkCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data);
     static void computeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data);
+
+    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true, const bool& disableCollisionSceneUpdate = false);
 
     std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> fcl_cache_;
     std::vector<fcl::CollisionObjectd*> fcl_objects_;

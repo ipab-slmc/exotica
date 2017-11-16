@@ -159,10 +159,18 @@ public:
     {
         return ControlledJointsNames;
     }
+    std::vector<std::string> getControlledLinkNames()
+    {
+        return ControlledLinkNames;
+    }
 
     std::vector<std::string> getModelJointNames()
     {
         return ModelJointsNames;
+    }
+    std::vector<std::string> getModelLinkNames()
+    {
+        return ModelLinkNames;
     }
 
     Eigen::VectorXd getControlledLinkMass();
@@ -174,7 +182,6 @@ public:
     Eigen::MatrixXd Jacobian(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
 
     void resetModel();
-    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const std_msgs::ColorRGBA& colorMsg);
     std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0));
     void UpdateModel();
     void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
@@ -189,6 +196,8 @@ public:
     std::map<std::string, std::shared_ptr<KinematicElement>> getCollisionTreeMap() { return CollisionTreeMap; }
     std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() { return TreeMap; }
     bool Debug;
+
+    std::map<std::string, shapes::ShapeType> getCollisionObjectTypes();
 
 private:
     void BuildTree(const KDL::Tree& RobotKinematics);
@@ -216,6 +225,8 @@ private:
     std::map<std::string, std::shared_ptr<KinematicElement>> ModelJointsMap;
     std::vector<std::string> ModelJointsNames;
     std::vector<std::string> ControlledJointsNames;
+    std::vector<std::string> ModelLinkNames;
+    std::vector<std::string> ControlledLinkNames;
     std::shared_ptr<KinematicResponse> Solution;
     KinematicRequestFlags Flags;
 

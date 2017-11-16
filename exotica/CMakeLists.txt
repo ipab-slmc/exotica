@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.12)
 project(exotica)
 
 set(MSG_DEPS
@@ -19,8 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf_conversions
   ${MSG_DEPS}
 )
-
-find_package(Boost REQUIRED COMPONENTS python signals)
+find_package(Boost REQUIRED COMPONENTS signals)
 
 set(MSG_FILES
   MeshVertex.msg

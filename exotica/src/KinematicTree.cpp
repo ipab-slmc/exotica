@@ -136,6 +136,8 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
     Tree.clear();
     TreeMap.clear();
     ModelJointsMap.clear();
+    ModelLinkNames.clear();
+    ControlledLinkNames.clear();
 
     // Handle the root joint
     const robot_model::JointModel* RootJoint = Model->getRootJoint();
@@ -263,11 +265,13 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
         Joint->isRobotLink = true;
         Joint->ControlId = IsControlled(Joint);
         Joint->IsControlled = Joint->ControlId >= 0;
-        if (Joint->IsControlled) ControlledJoints[Joint->ControlId] = Joint;
         ModelJointsMap[Joint->Segment.getJoint().getName()] = Joint;
+        ModelLinkNames.push_back(Joint->Segment.getName());
         if (Joint->IsControlled)
         {
+            ControlledJoints[Joint->ControlId] = Joint;
             ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
+            ControlledLinkNames.push_back(Joint->Segment.getName());
 
             // The ModelBaseType defined above refers to the base type of the
             // overall robot model - not of the set of controlled joints. E.g. a
@@ -351,12 +355,6 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
     parent->Children.push_back(child);
     child->updateClosestRobotLink();
     debugSceneChanged = true;
-}
-
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const std_msgs::ColorRGBA& colorMsg)
-{
-    Eigen::Vector4d color = Eigen::Vector4d(colorMsg.r, colorMsg.g, colorMsg.b, colorMsg.a);
-    AddElement(name, transform, parent, shape, KDL::RigidBodyInertia::Zero(), color);
 }
 
 std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color)
@@ -813,5 +811,15 @@ Eigen::VectorXd KinematicTree::getControlledLinkMass()
         x(i) = ControlledJoints[i]->Segment.getInertia().getMass();
     }
     return x;
+}
+
+std::map<std::string, shapes::ShapeType> KinematicTree::getCollisionObjectTypes()
+{
+    std::map<std::string, shapes::ShapeType> ret;
+    for (const auto& element : CollisionTreeMap)
+    {
+        ret[element.second->Segment.getName()] = element.second->Shape->type;
+    }
+    return ret;
 }
 }

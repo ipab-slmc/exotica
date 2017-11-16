@@ -53,46 +53,40 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
     J.setZero();
 
     // Get all world collision links, then iterate through them
+    std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robotLinks_, check_self_collision_);
+    double& d = phi(0);
+    for (const auto& proxy : proxies)
     {
-        std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robotLinks_, check_self_collision_);
-        double& d = phi(0);
-        for (const auto& proxy : proxies)
+        bool isRobotToRobot = (proxy.e1->isRobotLink || proxy.e1->ClosestRobotLink) && (proxy.e2->isRobotLink || proxy.e2->ClosestRobotLink);
+        double& margin = isRobotToRobot ? robot_margin_ : world_margin_;
+        if (proxy.distance < margin)
         {
-            bool isRobotToRobot = (proxy.e1->isRobotLink || proxy.e1->ClosestRobotLink) && (proxy.e2->isRobotLink || proxy.e2->ClosestRobotLink);
-            double& margin = isRobotToRobot ? robot_margin_ : world_margin_;
-            if (proxy.distance < margin)
+            // Cost
+            d += std::pow((1. - proxy.distance / margin), linear_ ? 1 : 2);
+
+            // Jacobian
+            KDL::Frame arel = KDL::Frame(proxy.e1->Frame.Inverse(KDL::Vector(
+                proxy.contact1(0), proxy.contact1(1), proxy.contact1(2))));
+            KDL::Frame brel = KDL::Frame(proxy.e2->Frame.Inverse(KDL::Vector(
+                proxy.contact2(0), proxy.contact2(1), proxy.contact2(2))));
+
+            if (!linear_)
             {
-                // Cost
-                d += std::pow((1. - proxy.distance / margin), linear_ ? 1 : 2);
-
-                // Jacobian
-                KDL::Frame arel = KDL::Frame(proxy.e1->Frame.Inverse(KDL::Vector(
-                    proxy.contact1(0), proxy.contact1(1), proxy.contact1(2))));
-                KDL::Frame brel = KDL::Frame(proxy.e2->Frame.Inverse(KDL::Vector(
-                    proxy.contact2(0), proxy.contact2(1), proxy.contact2(2))));
-
-                // HIGHLIGHT_NAMED("A-Rel", arel.p);
-                // HIGHLIGHT_NAMED("B-Rel", brel.p);
-
-                if (!linear_)
-                {
-                    Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
-                        proxy.e1, arel, nullptr, KDL::Frame());
-                    J -= (2. * d) / margin * (proxy.normal1.transpose() * tmpJ);
-                    tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
-                                                        KDL::Frame());
-                    J += (2. * d) / margin * (proxy.normal1.transpose() * tmpJ);
-                }
-                else
-                {
-                    throw_pretty("Noooooo");
-                    Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
-                        proxy.e1, arel, nullptr, KDL::Frame());
-                    J -= 1 / margin * (proxy.normal1.transpose() * tmpJ);
-                    tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
-                                                        KDL::Frame());
-                    J += 1 / margin * (proxy.normal1.transpose() * tmpJ);
-                }
+                Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+                    proxy.e1, arel, nullptr, KDL::Frame());
+                J += (2. / (margin*margin)) * (proxy.normal1.transpose() * tmpJ);
+                tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
+                                                    KDL::Frame());
+                J -= (2. / (margin*margin)) * (proxy.normal1.transpose() * tmpJ);
+            }
+            else
+            {
+                Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+                    proxy.e1, arel, nullptr, KDL::Frame());
+                J += 1 / margin * (proxy.normal1.transpose() * tmpJ);
+                tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
+                                                    KDL::Frame());
+                J -= 1 / margin * (proxy.normal1.transpose() * tmpJ);
             }
         }
     }

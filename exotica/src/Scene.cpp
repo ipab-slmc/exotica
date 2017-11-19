@@ -31,13 +31,7 @@
  */
 
 #include "exotica/Scene.h"
-#include <eigen_conversions/eigen_kdl.h>
-#include <exotica/LinkInitializer.h>
-#include <exotica/Setup.h>
-#include <exotica/TrajectoryInitializer.h>
-#include <fstream>
-#include <iostream>
-#include <string>
+#include "exotica/Setup.h"
 
 namespace exotica
 {
@@ -111,10 +105,11 @@ void Scene::Instantiate(SceneInitializer& init)
                     << "/PlanningScene'");
     }
 
+    // Note: Using the LoadScene initializer does not support custom offsets/poses, assumes Identity transform to world_frame
     if (init.LoadScene != "")
     {
         std::vector<std::string> files = parseList(init.LoadScene, ';');
-        for (const std::string& file : files) loadSceneFile(file, false);
+        for (const std::string& file : files) loadSceneFile(file, Eigen::Affine3d::Identity(), false);
     }
 
     for (const exotica::Initializer& linkInit : init.Links)
@@ -391,18 +386,35 @@ std::string Scene::getGroupName()
     return group->getName();
 }
 
-void Scene::loadScene(const std::string& scene, bool updateCollisionScene)
+void Scene::loadScene(const std::string& scene, const KDL::Frame& offset, bool updateCollisionScene)
 {
-    std::stringstream ss(scene);
-    ps_->loadGeometryFromStream(ss);
-    updateSceneFrames();
-    if (updateCollisionScene) updateCollisionObjects();
+    Eigen::Affine3d tmp_offset;
+    tf::transformKDLToEigen(offset, tmp_offset);
+    loadScene(scene, tmp_offset, updateCollisionScene);
 }
 
-void Scene::loadSceneFile(const std::string& file_name, bool updateCollisionScene)
+void Scene::loadScene(const std::string& scene, const Eigen::Affine3d& offset, bool updateCollisionScene)
+{
+    std::stringstream ss(scene);
+    loadSceneFromStringStream(ss, offset, updateCollisionScene);
+}
+
+void Scene::loadSceneFile(const std::string& file_name, const KDL::Frame& offset, bool updateCollisionScene)
+{
+    Eigen::Affine3d tmp_offset;
+    tf::transformKDLToEigen(offset, tmp_offset);
+    loadSceneFile(file_name, tmp_offset, updateCollisionScene);
+}
+
+void Scene::loadSceneFile(const std::string& file_name, const Eigen::Affine3d& offset, bool updateCollisionScene)
 {
     std::ifstream ss(parsePath(file_name));
-    ps_->loadGeometryFromStream(ss);
+    loadSceneFromStringStream(ss, offset, updateCollisionScene);
+}
+
+void Scene::loadSceneFromStringStream(std::istream& in, const Eigen::Affine3d& offset, bool updateCollisionScene)
+{
+    ps_->loadGeometryFromStream(in, offset);
     updateSceneFrames();
     if (updateCollisionScene) updateCollisionObjects();
 }

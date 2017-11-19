@@ -33,15 +33,23 @@
 #ifndef EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_
 #define EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_
 
-#include <exotica/CollisionScene.h>
-#include <exotica/Property.h>
-#include <exotica/SceneInitializer.h>
-#include <exotica/Trajectory.h>
+#include <eigen_conversions/eigen_kdl.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit_msgs/PlanningScene.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+
+#include <exotica/LinkInitializer.h>
+#include <exotica/SceneInitializer.h>
+#include <exotica/TrajectoryInitializer.h>
+
+#include "exotica/CollisionScene.h"
 #include "exotica/KinematicTree.h"
 #include "exotica/Object.h"
+#include "exotica/Property.h"
 #include "exotica/Server.h"
+#include "exotica/Trajectory.h"
 
 namespace exotica
 {
@@ -135,8 +143,10 @@ public:
     void publishScene();
     void publishProxies(const std::vector<CollisionProxy>& proxies);
     visualization_msgs::Marker proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame);
-    void loadScene(const std::string& scene, bool updateCollisionScene = true);
-    void loadSceneFile(const std::string& file_name, bool updateCollisionScene = true);
+    void loadScene(const std::string& scene, const Eigen::Affine3d& offset = Eigen::Affine3d::Identity(), bool updateCollisionScene = true);
+    void loadScene(const std::string& scene, const KDL::Frame& offset = KDL::Frame(), bool updateCollisionScene = true);
+    void loadSceneFile(const std::string& file_name, const Eigen::Affine3d& offset = Eigen::Affine3d::Identity(), bool updateCollisionScene = true);
+    void loadSceneFile(const std::string& file_name, const KDL::Frame& offset = KDL::Frame(), bool updateCollisionScene = true);
     std::string getScene();
     void cleanScene();
 
@@ -186,6 +196,8 @@ private:
      * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.
      */
     void updateMoveItPlanningScene();
+
+    void loadSceneFromStringStream(std::istream& in, const Eigen::Affine3d& offset, bool updateCollisionScene);
 };
 typedef std::shared_ptr<Scene> Scene_ptr;
 //  typedef std::map<std::string, Scene_ptr> Scene_map;

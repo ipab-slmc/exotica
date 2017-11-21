@@ -255,11 +255,17 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
 
     // INDEP better for primitives, CCD better for when there's a mesh --
     // however contact points appear better with libccd as well according to
-    // unit test
-    if (false)  //(o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
+    // unit test. When at distance, INDEP better for primitives, but in
+    // penetration LIBCCD required.
+    if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
     {
+        fcl::CollisionRequestd tmp_req;
+        fcl::CollisionResultd tmp_res;
+        tmp_req.num_max_contacts = 1;
+        tmp_req.gjk_solver_type = fcl::GST_INDEP;
+        fcl::collide(o1, o2, tmp_req, tmp_res);
+        data->Request.gjk_solver_type = tmp_res.isCollision() ? fcl::GST_LIBCCD : fcl::GST_INDEP;
         // HIGHLIGHT("Using INDEP");
-        data->Request.gjk_solver_type = fcl::GST_INDEP;
     }
     else
     {

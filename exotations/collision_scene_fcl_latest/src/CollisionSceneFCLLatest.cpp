@@ -402,6 +402,14 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         c2 = tmp_c1;
     }
 
+    // Check if NaN
+    if (std::isnan(c1(0)) || std::isnan(c1(1)) || std::isnan(c1(0)) || std::isnan(c2(0)) || std::isnan(c2(1)) || std::isnan(c2(0)))
+    {
+        HIGHLIGHT_NAMED("computeDistance",
+                        "Contact1 between " << p.e1->Segment.getName() << " and " << p.e2->Segment.getName() << " contains NaN"
+                                            << ", where ShapeType1: " << p.e1->Shape->type << " and ShapeType2: " << p.e2->Shape->type << " and distance: " << p.distance << "");
+    }
+
     KDL::Vector n1 = c2 - c1;
     KDL::Vector n2 = c1 - c2;
     n1.Normalize();

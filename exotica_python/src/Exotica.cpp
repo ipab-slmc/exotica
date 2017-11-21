@@ -541,6 +541,8 @@ PYBIND11_MODULE(_pyexotica, module)
     planningProblem.def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend") = std::string(""));
     planningProblem.def_property("startState", &PlanningProblem::getStartState, &PlanningProblem::setStartState);
     planningProblem.def_property("startTime", &PlanningProblem::getStartTime, &PlanningProblem::setStartTime);
+    planningProblem.def("getNumberOfProblemUpdates", &PlanningProblem::getNumberOfProblemUpdates);
+    planningProblem.def("resetNumberOfProblemUpdates", &PlanningProblem::resetNumberOfProblemUpdates);
 
     // Problem types
     py::module prob = module.def_submodule("Problems", "Problem types");

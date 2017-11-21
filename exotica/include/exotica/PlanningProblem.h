@@ -67,13 +67,15 @@ public:
     int N;
     double tStart;
     virtual void preupdate();
-
+    unsigned int getNumberOfProblemUpdates() { return numberOfProblemUpdates; }
+    void resetNumberOfProblemUpdates() { numberOfProblemUpdates = 0; }
 protected:
     Scene_ptr scene_;
     TaskMap_map TaskMaps;
     TaskMap_vec Tasks;
     KinematicRequestFlags Flags;
     Eigen::VectorXd startState;
+    unsigned int numberOfProblemUpdates = 0;  // Stores number of times the problem has been updated
 };
 
 typedef Factory<PlanningProblem> PlanningProblem_fac;

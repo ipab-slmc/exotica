@@ -133,6 +133,7 @@ bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
 void SamplingProblem::Update(Eigen::VectorXdRefConst x)
 {
     isValid(x);
+    numberOfProblemUpdates++;
 }
 
 int SamplingProblem::getSpaceDim()

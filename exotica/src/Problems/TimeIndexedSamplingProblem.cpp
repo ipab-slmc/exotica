@@ -148,6 +148,7 @@ bool TimeIndexedSamplingProblem::isValid(Eigen::VectorXdRefConst x, double t)
 void TimeIndexedSamplingProblem::Update(Eigen::VectorXdRefConst x, double t)
 {
     isValid(x, t);
+    numberOfProblemUpdates++;
 }
 
 int TimeIndexedSamplingProblem::getSpaceDim()

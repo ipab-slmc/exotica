@@ -179,6 +179,7 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
             Tasks[i]->update(x, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
     ydiff[t] = Phi[t] - y[t];
+    numberOfProblemUpdates++;
 }
 
 double UnconstrainedTimeIndexedProblem::getScalarCost(int t)

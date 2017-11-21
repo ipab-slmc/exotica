@@ -74,10 +74,10 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
             {
                 Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
                     proxy.e1, arel, nullptr, KDL::Frame());
-                J += (2. / (margin*margin)) * (proxy.normal1.transpose() * tmpJ);
+                J += (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ);
                 tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
                                                     KDL::Frame());
-                J -= (2. / (margin*margin)) * (proxy.normal1.transpose() * tmpJ);
+                J -= (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ);
             }
             else
             {

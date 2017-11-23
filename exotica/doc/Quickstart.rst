@@ -81,7 +81,7 @@ In the example, the goal is set to follow the shape of a figure of 8, defined ea
 
 Where goal values are set to arbitrary coordinates.
 
-The task map named `Position` is set in the XML setup file for this example. We look at specifying this [here-add link](add link).
+The task map named `Position` is set in the XML setup file for this example. We look more at task maps in the task maps tutorial.
 
 Interpreting Output
 ~~~~~~~~~~~~~~~~~~~
@@ -99,12 +99,12 @@ When we run the script using `python example_ik_noros.py`, we see the following 
 
 This shows us the robot model we are using and then displays the joint angles for each of the 7 joints on our example robot after the time it took to solve the problem.
 
-Depending on how you setup your [XML Initialiser - add link](add link) file, this will either display the joint angles that will the arm to reach only the goal state or a sequence of angles for each joint which represents the motion plan from initial to goal states.
+Depending on how you setup your XML Initialiser file, this will either display the joint angles that will the arm to reach only the goal state or a sequence of angles for each joint which represents the motion plan from initial to goal states.
 
 Problem and Solution Setup 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To prepare EXOTica for solving motion plans, we must first specify what problem we want to solve (e.g. end pose problem, optimisation problem) and which solver we will use to solve it (e.g. end pose problems be solved by the IKSolver, optimisation problems can be solved by the AICOSolver). These are explained in more detail [here - add link](add link); but now the basics will be shown:
+To prepare EXOTica for solving motion plans, we must first specify what problem we want to solve (e.g. end pose problem, optimisation problem) and which solver we will use to solve it (e.g. end pose problems be solved by the IKSolver, optimisation problems can be solved by the AICOSolver). The basics will be explained below:
 
 .. code:: python
 	(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica')+'/resources/configs/ik_solver_demo.xml')
@@ -120,7 +120,7 @@ First, we load the XML file
 	(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica')+'/resources/configs/ik_solver_demo.xml')
 
 
-which contains a description of the robot, the problem and solver we are using as well as any [task maps - add link](add link). The `exo.Initializers.loadXMLFull` command returns the details of the problem and solver, which then need to be sent to EXOTica:
+which contains a description of the robot, the problem and solver we are using as well as any task maps. The `exo.Initializers.loadXMLFull` command returns the details of the problem and solver, which then need to be sent to EXOTica:
 
 .. code:: python
 	problem = exo.Setup.createProblem(prob)
@@ -135,14 +135,14 @@ The last step in this setup is to send the problem to the solver:
 
 This sends the robot information, task maps and all other problem information to the solver to be used in computing the motion plan.
 
-We will look at the XML initialisation file in the [next tutorial - add link](add link).
+With this information you are now able to experiment with the example code to familiarise yourself with how these functions effect the action of EXOTIca.
 
 Quick IK trajectories with ROS
 ==============================
 
 The ROS demo script works in exactly the same way as the non-ROS script shown above, but with the addition of the motion plan being published to a ROS topic for visualisation in RVIZ.
 
-For this part of the tutorial, we'll be looking at the [example_ik.py](https://github.com/ipab-slmc/exotica/blob/master/exotica_python/scripts/example_ik.py) script.
+For this part of the tutorial, we'll be looking at the 'example_ik.py<https://github.com/ipab-slmc/exotica/blob/master/exotica_python/scripts/example_ik.py>'_ script.
 
 For details on setting initial joint angles and goal states - see the section above. This section will focus on the additional functionality which allows visualisation in RVIZ.
 
@@ -184,10 +184,8 @@ Code
 Visualisation
 ~~~~~~~~~~~~~
 
-In the code we see the function `put code here`. This is a native function in EXOTica which publishes ROS [TF - add link to ROS TF messages](add link) messages to the "add topic name" topic. 
+In the code we see the function `put code here`. This is a native function in EXOTica which publishes 'ROS TF<http://docs.ros.org/api/geometry_msgs/html/msg/Transform.html>'_  messages to RViz. 
 
-By opening RVIZ and subscribing to the topic, we will be able to visualise the example arm moving through its motion plan as represented by the TF frames. 
+By opening RVIZ and subscribing to the appropriate topic, we will be able to visualise the example arm moving through its motion plan as represented by the TF frames. 
 
 *Remember to run roscore before running the script*
-
-We subscribe to the "add topic name" topic and set the fixed frame to "add fixed frame name"

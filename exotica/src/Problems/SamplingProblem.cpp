@@ -127,13 +127,13 @@ bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
         if (Rho(i) != 0)
             Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
     }
+    numberOfProblemUpdates++;
     return ((S * (Phi - y) - threshold_).array() < 0.0).all();
 }
 
 void SamplingProblem::Update(Eigen::VectorXdRefConst x)
 {
     isValid(x);
-    numberOfProblemUpdates++;
 }
 
 int SamplingProblem::getSpaceDim()

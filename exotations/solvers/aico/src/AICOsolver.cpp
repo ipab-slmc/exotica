@@ -117,6 +117,8 @@ void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
 
 void AICOsolver::Solve(Eigen::MatrixXd& solution)
 {
+    prob_->resetCostEvolution(max_iterations);
+
     Eigen::VectorXd q0 = prob_->applyStartState();
     std::vector<Eigen::VectorXd> q_init = prob_->getInitialTrajectory();
 
@@ -743,6 +745,7 @@ double AICOsolver::step()
     dampingReference = b;
     // q is set inside of evaluateTrajectory() function
     cost = evaluateTrajectory(b);
+    prob_->setCostEvolution(sweep, cost);
     HIGHLIGHT("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
     if (cost < 0) return -1.0;
 

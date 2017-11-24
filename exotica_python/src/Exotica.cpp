@@ -543,6 +543,7 @@ PYBIND11_MODULE(_pyexotica, module)
     planningProblem.def_property("startTime", &PlanningProblem::getStartTime, &PlanningProblem::setStartTime);
     planningProblem.def("getNumberOfProblemUpdates", &PlanningProblem::getNumberOfProblemUpdates);
     planningProblem.def("resetNumberOfProblemUpdates", &PlanningProblem::resetNumberOfProblemUpdates);
+    planningProblem.def("getCostEvolution", &PlanningProblem::getCostEvolution);
 
     // Problem types
     py::module prob = module.def_submodule("Problems", "Problem types");

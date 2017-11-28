@@ -67,13 +67,19 @@ public:
     int N;
     double tStart;
     virtual void preupdate();
-
+    unsigned int getNumberOfProblemUpdates() { return numberOfProblemUpdates; }
+    void resetNumberOfProblemUpdates() { numberOfProblemUpdates = 0; }
+    std::vector<double> getCostEvolution() { return costEvolution; }
+    void resetCostEvolution(unsigned int size) { costEvolution.resize(size, NAN); }
+    void setCostEvolution(unsigned int index, double value) { costEvolution[index] = value; }
 protected:
     Scene_ptr scene_;
     TaskMap_map TaskMaps;
     TaskMap_vec Tasks;
     KinematicRequestFlags Flags;
     Eigen::VectorXd startState;
+    unsigned int numberOfProblemUpdates = 0;  // Stores number of times the problem has been updated
+    std::vector<double> costEvolution;
 };
 
 typedef Factory<PlanningProblem> PlanningProblem_fac;

@@ -541,6 +541,9 @@ PYBIND11_MODULE(_pyexotica, module)
     planningProblem.def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend") = std::string(""));
     planningProblem.def_property("startState", &PlanningProblem::getStartState, &PlanningProblem::setStartState);
     planningProblem.def_property("startTime", &PlanningProblem::getStartTime, &PlanningProblem::setStartTime);
+    planningProblem.def("getNumberOfProblemUpdates", &PlanningProblem::getNumberOfProblemUpdates);
+    planningProblem.def("resetNumberOfProblemUpdates", &PlanningProblem::resetNumberOfProblemUpdates);
+    planningProblem.def("getCostEvolution", &PlanningProblem::getCostEvolution);
 
     // Problem types
     py::module prob = module.def_submodule("Problems", "Problem types");
@@ -709,6 +712,7 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");
+    kinematicTree.def_readwrite("debugMode", &KinematicTree::Debug);
     kinematicTree.def("publishFrames", &KinematicTree::publishFrames);
     kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);
     kinematicTree.def("getRootFrameName", &KinematicTree::getRootFrameName);

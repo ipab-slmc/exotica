@@ -575,8 +575,10 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedTimeIndexedProblem.def_readonly("Phi", &UnconstrainedTimeIndexedProblem::Phi);
     unconstrainedTimeIndexedProblem.def_readonly("ydiff", &UnconstrainedTimeIndexedProblem::ydiff);
     unconstrainedTimeIndexedProblem.def_readonly("J", &UnconstrainedTimeIndexedProblem::J);
-    unconstrainedTimeIndexedProblem.def("getScalarCost", &UnconstrainedTimeIndexedProblem::getScalarCost);
-    unconstrainedTimeIndexedProblem.def("getScalarJacobian", &UnconstrainedTimeIndexedProblem::getScalarJacobian);
+    unconstrainedTimeIndexedProblem.def("getScalarTaskCost", &UnconstrainedTimeIndexedProblem::getScalarTaskCost);
+    unconstrainedTimeIndexedProblem.def("getScalarTaskJacobian", &UnconstrainedTimeIndexedProblem::getScalarTaskJacobian);
+    unconstrainedTimeIndexedProblem.def("getScalarTransitionCost", &UnconstrainedTimeIndexedProblem::getScalarTransitionCost);
+    unconstrainedTimeIndexedProblem.def("getScalarTransitionJacobian", &UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian);
     py::class_<UnconstrainedEndPoseProblem, std::shared_ptr<UnconstrainedEndPoseProblem>, PlanningProblem> unconstrainedEndPoseProblem(prob, "UnconstrainedEndPoseProblem");
     unconstrainedEndPoseProblem.def("update", &UnconstrainedEndPoseProblem::Update);
     unconstrainedEndPoseProblem.def("setGoal", &UnconstrainedEndPoseProblem::setGoal);

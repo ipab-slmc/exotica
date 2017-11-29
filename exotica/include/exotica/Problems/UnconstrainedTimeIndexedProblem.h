@@ -52,7 +52,7 @@ public:
     virtual ~UnconstrainedTimeIndexedProblem();
     virtual void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init);
     double getDuration();
-    void Update(Eigen::VectorXdRefConst x, int t);
+    void Update(Eigen::VectorXdRefConst x_in, int t);
     void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
     void setRho(const std::string& task_name, const double rho, int t = 0);
     Eigen::VectorXd getGoal(const std::string& task_name, int t = 0);
@@ -61,8 +61,10 @@ public:
     void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
     virtual void preupdate();
 
-    double getScalarCost(int t);
-    Eigen::VectorXd getScalarJacobian(int t);
+    double getScalarTaskCost(int t);
+    Eigen::VectorXd getScalarTaskJacobian(int t);
+    double getScalarTransitionCost(int t);
+    Eigen::VectorXd getScalarTransitionJacobian(int t);
 
     int T;          //!< Number of time steps
     double tau;     //!< Time step duration
@@ -80,12 +82,16 @@ public:
     std::vector<Eigen::MatrixXd> J;
     std::vector<Eigen::MatrixXd> S;
 
+    std::vector<Eigen::VectorXd> x;  // current internal problem state
+    std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
+
     int PhiN;
     int JN;
     int NumTasks;
 
 private:
     std::vector<Eigen::VectorXd> InitialTrajectory;
+    double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
 };
 
 typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;

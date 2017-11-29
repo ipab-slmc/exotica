@@ -41,6 +41,8 @@
 #include <exotica/TaskSpaceVector.h>
 #include <exotica/Tools.h>
 
+#include <algorithm>
+#include <limits>
 #include <map>
 #include <string>
 #include <vector>
@@ -69,26 +71,11 @@ public:
     virtual void preupdate();
     unsigned int getNumberOfProblemUpdates() { return numberOfProblemUpdates; }
     void resetNumberOfProblemUpdates() { numberOfProblemUpdates = 0; }
-    std::vector<double> getCostEvolution() { return costEvolution; }
-    double getCostEvolution(int index) {
-        if (index > -1 && index < costEvolution.size()) {
-            return costEvolution[index];
-        } else if (index == -1) {
-            return costEvolution[costEvolution.size() - 1];
-        } else {
-            throw_pretty("Out of range");
-        }
-    }
-    void resetCostEvolution(unsigned int size) { costEvolution.resize(size, NAN); }
-    void setCostEvolution(int index, double value) {
-        if (index > -1 && index < costEvolution.size()) {
-            costEvolution[index] = value;
-        } else if (index == -1) {
-            costEvolution[costEvolution.size() - 1] = value;
-        } else {
-            throw_pretty("Out of range: " << index << " where length=" << costEvolution.size());
-        }
-    }
+    std::vector<double> getCostEvolution();
+    double getCostEvolution(int index);
+    void resetCostEvolution(unsigned int size);
+    void setCostEvolution(int index, double value);
+
 protected:
     Scene_ptr scene_;
     TaskMap_map TaskMaps;

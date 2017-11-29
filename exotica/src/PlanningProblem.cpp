@@ -179,4 +179,52 @@ Scene_ptr PlanningProblem::getScene()
 {
     return scene_;
 }
+
+std::vector<double> PlanningProblem::getCostEvolution()
+{
+    // Find first NAN and resize vector
+    size_t position = 0;
+    for (position = 0; position < costEvolution.size(); position++)
+        if (std::isnan(costEvolution[position])) break;
+    costEvolution.resize(position);
+    return costEvolution;
+}
+
+double PlanningProblem::getCostEvolution(int index)
+{
+    if (index > -1 && index < costEvolution.size())
+    {
+        return costEvolution[index];
+    }
+    else if (index == -1)
+    {
+        return costEvolution[costEvolution.size() - 1];
+    }
+    else
+    {
+        throw_pretty("Out of range");
+    }
+}
+
+void PlanningProblem::resetCostEvolution(unsigned int size)
+{
+    costEvolution.resize(size);
+    costEvolution.assign(size, std::numeric_limits<double>::quiet_NaN());
+}
+
+void PlanningProblem::setCostEvolution(int index, double value)
+{
+    if (index > -1 && index < costEvolution.size())
+    {
+        costEvolution[index] = value;
+    }
+    else if (index == -1)
+    {
+        costEvolution[costEvolution.size() - 1] = value;
+    }
+    else
+    {
+        throw_pretty("Out of range: " << index << " where length=" << costEvolution.size());
+    }
+}
 }

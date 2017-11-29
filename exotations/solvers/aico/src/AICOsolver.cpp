@@ -135,7 +135,7 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
     prob_->applyStartState();
 
     Timer timer;
-    ROS_WARN_STREAM("AICO: Setting up the solver");
+    if (debug_) ROS_WARN_STREAM("AICO: Setting up the solver");
     updateCount = 0;
     sweep = -1;
     damping = damping_init;
@@ -146,7 +146,7 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
     }
     initTrajectory(q_init);
     sweep = 0;
-    ROS_WARN_STREAM("AICO: Solving");
+    if (debug_) ROS_WARN_STREAM("AICO: Solving");
     for (int k = 0; k < max_iterations && !(Server::isRos() && !ros::ok()); k++)
     {
         d = step();
@@ -584,7 +584,7 @@ void AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd,
 double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
                                       bool skipUpdate)
 {
-    ROS_WARN_STREAM("Evaluating, sweep " << sweep);
+    if (debug_) ROS_WARN_STREAM("Evaluating, sweep " << sweep);
     Timer timer;
     double dSet, dPre, dUpd, dCtrl, dTask;
     // double tau = prob_->tau;
@@ -604,7 +604,7 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
     dSet = timer.getDuration();
     if (preupdateTrajectory_)
     {
-        ROS_WARN_STREAM("Pre-update, sweep " << sweep);
+        if (debug_) ROS_WARN_STREAM("Pre-update, sweep " << sweep);
         for (int t = 0; t < T; t++)
         {
             if (Server::isRos() && !ros::ok()) return -1.0;
@@ -722,7 +722,7 @@ double AICOsolver::step()
     // q is set inside of evaluateTrajectory() function
     cost = evaluateTrajectory(b);
     prob_->setCostEvolution(sweep, cost);
-    HIGHLIGHT("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
+    if (debug_) HIGHLIGHT("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
     if (cost < 0) return -1.0;
 
     if (sweep && damping) perhapsUndoStep();

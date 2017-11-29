@@ -30,35 +30,35 @@
  *
  */
 
-#include <exotica/Problems/EndPoseProblem.h>
+#include <exotica/Problems/BoundedEndPoseProblem.h>
 #include <exotica/Setup.h>
 #include <exotica/TaskInitializer.h>
 
-REGISTER_PROBLEM_TYPE("EndPoseProblem", exotica::EndPoseProblem)
+REGISTER_PROBLEM_TYPE("BoundedEndPoseProblem", exotica::BoundedEndPoseProblem)
 
 namespace exotica
 {
 
-EndPoseProblem::EndPoseProblem()
+BoundedEndPoseProblem::BoundedEndPoseProblem()
 {
     Flags = KIN_FK | KIN_J;
 }
 
-EndPoseProblem::~EndPoseProblem()
+BoundedEndPoseProblem::~BoundedEndPoseProblem()
 {
 }
 
-void EndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
+void BoundedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
 {
 
 }
 
-std::vector<double>& EndPoseProblem::getBounds()
+std::vector<double>& BoundedEndPoseProblem::getBounds()
 {
     return bounds_;
 }
 
-void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
+void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
 {
     NumTasks = Tasks.size();
     PhiN = 0;
@@ -95,8 +95,6 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
         bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
     }
 
-    useBounds = init.UseBounds;
-
     if(init.LowerBound.rows()==N)
     {
         for (int i = 0; i < jnts.size(); i++) bounds_[i] = init.LowerBound(i);
@@ -116,30 +114,26 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
 
     TaskSpaceVector dummy;
     Cost.initialize(init.Cost, shared_from_this(), dummy);
-    Inequality.initialize(init.Inequality, shared_from_this(), dummy);
-    Equality.initialize(init.Equality, shared_from_this(), dummy);
 }
 
-void EndPoseProblem::preupdate()
+void BoundedEndPoseProblem::preupdate()
 {
     PlanningProblem::preupdate();
     for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
     Cost.updateS();
-    Inequality.updateS();
-    Equality.updateS();
 }
 
-double EndPoseProblem::getScalarCost()
+double BoundedEndPoseProblem::getScalarCost()
 {
     return Cost.ydiff.transpose()*Cost.S*Cost.ydiff;
 }
 
-Eigen::VectorXd EndPoseProblem::getScalarJacobian()
+Eigen::VectorXd BoundedEndPoseProblem::getScalarJacobian()
 {
     return Cost.J.transpose()*Cost.S*Cost.ydiff*2.0;
 }
 
-void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
+void BoundedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x);
     Phi.setZero(PhiN);
@@ -150,11 +144,9 @@ void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
             Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
     Cost.update(Phi, J);
-    Inequality.update(Phi, J);
-    Equality.update(Phi, J);
 }
 
-void EndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
+void BoundedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
     for (int i=0; i<Cost.Indexing.size(); i++)
     {
@@ -167,7 +159,7 @@ void EndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefCon
     throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void EndPoseProblem::setRho(const std::string& task_name, const double rho)
+void BoundedEndPoseProblem::setRho(const std::string& task_name, const double rho)
 {
     for (int i=0; i<Cost.Indexing.size(); i++)
     {
@@ -180,7 +172,7 @@ void EndPoseProblem::setRho(const std::string& task_name, const double rho)
     throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd EndPoseProblem::getGoal(const std::string& task_name)
+Eigen::VectorXd BoundedEndPoseProblem::getGoal(const std::string& task_name)
 {
     for (int i=0; i<Cost.Indexing.size(); i++)
     {
@@ -192,7 +184,7 @@ Eigen::VectorXd EndPoseProblem::getGoal(const std::string& task_name)
     throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double EndPoseProblem::getRho(const std::string& task_name)
+double BoundedEndPoseProblem::getRho(const std::string& task_name)
 {    
     for (int i=0; i<Cost.Indexing.size(); i++)
     {
@@ -203,106 +195,5 @@ double EndPoseProblem::getRho(const std::string& task_name)
     }
     throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
-
-void EndPoseProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
-{
-    for (int i=0; i<Equality.Indexing.size(); i++)
-    {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
-        {
-            Equality.y.data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length) = goal;
-            return;
-        }
-    }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
-}
-
-void EndPoseProblem::setRhoEQ(const std::string& task_name, const double rho)
-{
-    for (int i=0; i<Equality.Indexing.size(); i++)
-    {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
-        {
-            Equality.Rho(Equality.Indexing[i].Id) = rho;
-            return;
-        }
-    }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
-}
-
-Eigen::VectorXd EndPoseProblem::getGoalEQ(const std::string& task_name)
-{
-    for (int i=0; i<Equality.Indexing.size(); i++)
-    {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
-        {
-            return Equality.y.data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length);
-        }
-    }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
-}
-
-double EndPoseProblem::getRhoEQ(const std::string& task_name)
-{
-    for (int i=0; i<Equality.Indexing.size(); i++)
-    {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
-        {
-            return Equality.Rho(Equality.Indexing[i].Id);
-        }
-    }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
-}
-
-void EndPoseProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
-{
-    for (int i=0; i<Inequality.Indexing.size(); i++)
-    {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
-        {
-            Inequality.y.data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length) = goal;
-            return;
-        }
-    }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
-}
-
-void EndPoseProblem::setRhoNEQ(const std::string& task_name, const double rho)
-{
-    for (int i=0; i<Inequality.Indexing.size(); i++)
-    {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
-        {
-            Inequality.Rho(Inequality.Indexing[i].Id) = rho;
-            return;
-        }
-    }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
-}
-
-Eigen::VectorXd EndPoseProblem::getGoalNEQ(const std::string& task_name)
-{
-    for (int i=0; i<Inequality.Indexing.size(); i++)
-    {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
-        {
-            return Inequality.y.data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length);
-        }
-    }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
-}
-
-double EndPoseProblem::getRhoNEQ(const std::string& task_name)
-{
-    for (int i=0; i<Inequality.Indexing.size(); i++)
-    {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
-        {
-            return Inequality.Rho(Inequality.Indexing[i].Id);
-        }
-    }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
-}
-
 
 }

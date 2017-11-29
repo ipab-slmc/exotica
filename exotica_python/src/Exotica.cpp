@@ -620,6 +620,31 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedProblem.def_readonly("J", &TimeIndexedProblem::J);
     timeIndexedProblem.def("getScalarCost", &TimeIndexedProblem::getScalarCost);
     timeIndexedProblem.def("getScalarJacobian", &TimeIndexedProblem::getScalarJacobian);
+    timeIndexedProblem.def("getBounds", &TimeIndexedProblem::getBounds);
+    py::class_<BoundedTimeIndexedProblem, std::shared_ptr<BoundedTimeIndexedProblem>, PlanningProblem> boundedTimeIndexedProblem(prob, "BoundedTimeIndexedProblem");
+    boundedTimeIndexedProblem.def("getDuration", &BoundedTimeIndexedProblem::getDuration);
+    boundedTimeIndexedProblem.def("update", &BoundedTimeIndexedProblem::Update);
+    boundedTimeIndexedProblem.def("setGoal", &BoundedTimeIndexedProblem::setGoal);
+    boundedTimeIndexedProblem.def("setRho", &BoundedTimeIndexedProblem::setRho);
+    boundedTimeIndexedProblem.def("getGoal", &BoundedTimeIndexedProblem::getGoal);
+    boundedTimeIndexedProblem.def("getRho", &BoundedTimeIndexedProblem::getRho);
+    boundedTimeIndexedProblem.def_readwrite("tau", &BoundedTimeIndexedProblem::tau);
+    boundedTimeIndexedProblem.def_readwrite("W_rate", &BoundedTimeIndexedProblem::W_rate);
+    boundedTimeIndexedProblem.def_readwrite("W", &BoundedTimeIndexedProblem::W);
+    boundedTimeIndexedProblem.def_property(
+        "InitialTrajectory",
+        &BoundedTimeIndexedProblem::getInitialTrajectory,
+        &BoundedTimeIndexedProblem::setInitialTrajectory);
+    boundedTimeIndexedProblem.def_readonly("T", &BoundedTimeIndexedProblem::T);
+    boundedTimeIndexedProblem.def_readonly("PhiN", &BoundedTimeIndexedProblem::PhiN);
+    boundedTimeIndexedProblem.def_readonly("JN", &BoundedTimeIndexedProblem::JN);
+    boundedTimeIndexedProblem.def_readonly("N", &BoundedTimeIndexedProblem::N);
+    boundedTimeIndexedProblem.def_readonly("NumTasks", &BoundedTimeIndexedProblem::NumTasks);
+    boundedTimeIndexedProblem.def_readonly("Phi", &BoundedTimeIndexedProblem::Phi);
+    boundedTimeIndexedProblem.def_readonly("J", &BoundedTimeIndexedProblem::J);
+    boundedTimeIndexedProblem.def("getScalarCost", &BoundedTimeIndexedProblem::getScalarCost);
+    boundedTimeIndexedProblem.def("getScalarJacobian", &BoundedTimeIndexedProblem::getScalarJacobian);
+    boundedTimeIndexedProblem.def("getBounds", &BoundedTimeIndexedProblem::getBounds);
     py::class_<UnconstrainedEndPoseProblem, std::shared_ptr<UnconstrainedEndPoseProblem>, PlanningProblem> unconstrainedEndPoseProblem(prob, "UnconstrainedEndPoseProblem");
     unconstrainedEndPoseProblem.def("update", &UnconstrainedEndPoseProblem::Update);
     unconstrainedEndPoseProblem.def("setGoal", &UnconstrainedEndPoseProblem::setGoal);
@@ -659,6 +684,23 @@ PYBIND11_MODULE(_pyexotica, module)
     endPoseProblem.def_readonly("J", &EndPoseProblem::J);
     endPoseProblem.def("getScalarCost", &EndPoseProblem::getScalarCost);
     endPoseProblem.def("getScalarJacobian", &EndPoseProblem::getScalarJacobian);
+    endPoseProblem.def("getBounds", &EndPoseProblem::getBounds);
+    py::class_<BoundedEndPoseProblem, std::shared_ptr<BoundedEndPoseProblem>, PlanningProblem> boundedEndPoseProblem(prob, "BoundedEndPoseProblem");
+    boundedEndPoseProblem.def("update", &BoundedEndPoseProblem::Update);
+    boundedEndPoseProblem.def("setGoal", &BoundedEndPoseProblem::setGoal);
+    boundedEndPoseProblem.def("setRho", &BoundedEndPoseProblem::setRho);
+    boundedEndPoseProblem.def("getGoal", &BoundedEndPoseProblem::getGoal);
+    boundedEndPoseProblem.def("getRho", &BoundedEndPoseProblem::getRho);
+    boundedEndPoseProblem.def_readwrite("W", &BoundedEndPoseProblem::W);
+    boundedEndPoseProblem.def_readonly("PhiN", &BoundedEndPoseProblem::PhiN);
+    boundedEndPoseProblem.def_readonly("JN", &BoundedEndPoseProblem::JN);
+    boundedEndPoseProblem.def_readonly("N", &BoundedEndPoseProblem::N);
+    boundedEndPoseProblem.def_readonly("NumTasks", &BoundedEndPoseProblem::NumTasks);
+    boundedEndPoseProblem.def_readonly("Phi", &BoundedEndPoseProblem::Phi);
+    boundedEndPoseProblem.def_readonly("J", &BoundedEndPoseProblem::J);
+    boundedEndPoseProblem.def("getScalarCost", &BoundedEndPoseProblem::getScalarCost);
+    boundedEndPoseProblem.def("getScalarJacobian", &BoundedEndPoseProblem::getScalarJacobian);
+    boundedEndPoseProblem.def("getBounds", &BoundedEndPoseProblem::getBounds);
     py::class_<SamplingProblem, std::shared_ptr<SamplingProblem>, PlanningProblem> samplingProblem(prob, "SamplingProblem");
     samplingProblem.def("update", &SamplingProblem::Update);
     samplingProblem.def("setGoalState", &SamplingProblem::setGoalState);

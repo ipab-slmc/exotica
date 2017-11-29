@@ -43,6 +43,8 @@
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 #include <exotica/Problems/EndPoseProblem.h>
 #include <exotica/Problems/TimeIndexedProblem.h>
+#include <exotica/Problems/BoundedEndPoseProblem.h>
+#include <exotica/Problems/BoundedTimeIndexedProblem.h>
 #include <exotica/Setup.h>
 #include <exotica/Tools.h>
 #include <exotica/Version.h>

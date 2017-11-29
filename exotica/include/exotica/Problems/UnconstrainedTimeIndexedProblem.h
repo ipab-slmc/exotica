@@ -68,6 +68,7 @@ public:
 
     int T;          //!< Number of time steps
     double tau;     //!< Time step duration
+    double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
     double Q_rate;  //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
     double H_rate;  //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)
     double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
@@ -82,7 +83,7 @@ public:
     std::vector<Eigen::MatrixXd> J;
     std::vector<Eigen::MatrixXd> S;
 
-    std::vector<Eigen::VectorXd> x;  // current internal problem state
+    std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
     int PhiN;
@@ -91,7 +92,6 @@ public:
 
 private:
     std::vector<Eigen::VectorXd> InitialTrajectory;
-    double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
 };
 
 typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;

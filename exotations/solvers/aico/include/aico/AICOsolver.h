@@ -174,7 +174,7 @@ private:
     std::vector<Eigen::VectorXd> q;      //!< Configuration space trajectory
     std::vector<Eigen::VectorXd> qhat;   //!< Point of linearisation
     Eigen::VectorXd costControl;         //!< Control cost for each time step
-    Eigen::MatrixXd costTask;            //!< Task cost for each task for each time step
+    Eigen::VectorXd costTask;            //!< Task cost for each task for each time step
     std::vector<std::string> taskNames;  //!< Task names (only used for printing debug info)
 
     std::vector<Eigen::VectorXd> phiBar_old;  //!< Task cost mappings (last most optimal value)

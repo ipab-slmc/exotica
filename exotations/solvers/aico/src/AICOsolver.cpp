@@ -71,17 +71,12 @@ void AICOsolver::saveCosts(std::string file_name)
 {
     std::ofstream myfile;
     myfile.open(file_name.c_str());
-    myfile << "Control";
-    for (auto s : taskNames)
-        myfile << " " << s;
+    myfile << "Control Task";
     for (int t = 0; t < T; t++)
     {
         myfile << "\n"
                << costControl(t);
-        for (int i = 0; i < costTask.cols(); i++)
-        {
-            myfile << " " << costTask(t, i);
-        }
+        myfile << " " << costTask(t);
     }
     myfile.close();
 }
@@ -272,7 +267,7 @@ void AICOsolver::initMessages()
 
     costControl.resize(T);
     costControl.setZero();
-    costTask.resize(T, prob_->NumTasks);
+    costTask.resize(T);
     costTask.setZero();
 
     q_stat.resize(T);
@@ -592,9 +587,8 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
     ROS_WARN_STREAM("Evaluating, sweep " << sweep);
     Timer timer;
     double dSet, dPre, dUpd, dCtrl, dTask;
-    double ret = 0.0;
-    double tau = prob_->tau;
-    double tau_1 = 1. / tau, tau_2 = tau_1 * tau_1;
+    // double tau = prob_->tau;
+    // double tau_1 = 1. / tau, tau_2 = tau_1 * tau_1;
     int n2 = n / 2;
     Eigen::VectorXd vv;
 
@@ -635,53 +629,35 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
         // Control cost
         if (!dynamic)
         {
-            if (t == 0)
-            {
-                costControl(t) = 0.0;
-            }
-            else
-            {
-                vv = q[t] - q[t - 1];
-                costControl(t) = vv.transpose() * W[t] * vv;
-            }
+            costControl(t) = prob_->getScalarTransitionCost(t);
         }
         else
         {
-            if (t < T - 1 && t > 0)
-            {
-                // For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t-1]-2.0*q[t])-F;
-                vv = tau_2 * (q[t + 1] + q[t - 1] - 2.0 * q[t]);
-                costControl(t) = vv.transpose() * H[t] * vv;
-            }
-            else if (t == 0)
-            {
-                // For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t])-F;
-                vv = tau_2 * (q[t + 1] + q[t]);
-                costControl(t) = vv.transpose() * H[t] * vv;
-            }
-            else
-                costControl(t) = 0.0;
+            throw_pretty("Not supported at the moment");
+            // if (t < T - 1 && t > 0)
+            // {
+            //     // For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t-1]-2.0*q[t])-F;
+            //     vv = tau_2 * (q[t + 1] + q[t - 1] - 2.0 * q[t]);
+            //     costControl(t) = vv.transpose() * H[t] * vv;
+            // }
+            // else if (t == 0)
+            // {
+            //     // For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t])-F;
+            //     vv = tau_2 * (q[t + 1] + q[t]);
+            //     costControl(t) = vv.transpose() * H[t] * vv;
+            // }
+            // else
+            //     costControl(t) = 0.0;
         }
 
-        ret += costControl(t);
         dCtrl += timer.getDuration();
         timer.reset();
         // Task cost
-        for (int i = 0; i < prob_->NumTasks; i++)
-        {
-            // Position cost
-            double prec = prob_->Rho[t](i);
-            if (prec > 0)
-            {
-                int start = prob_->getTasks()[i]->StartJ;
-                int len = prob_->getTasks()[i]->LengthJ;
-                costTask(t, i) = prec * (prob_->ydiff[t].segment(start, len)).squaredNorm();
-                ret += costTask(t, i);
-            }
-        }
+        costTask(t) = prob_->getScalarTaskCost(t);
         dTask += timer.getDuration();
     }
-    return ret;
+
+    return costControl.sum() + costTask.sum();
 }
 
 double AICOsolver::step()

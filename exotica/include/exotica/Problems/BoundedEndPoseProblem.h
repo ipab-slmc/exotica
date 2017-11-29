@@ -30,61 +30,50 @@
  *
  */
 
-#ifndef SAMPLINGPROBLEM_H_
-#define SAMPLINGPROBLEM_H_
-
+#ifndef BOUNDEDENDPOSEPROBLEM_H_
+#define BOUNDEDENDPOSEPROBLEM_H_
 #include <exotica/PlanningProblem.h>
-#include <exotica/SamplingProblemInitializer.h>
+#include <exotica/BoundedEndPoseProblemInitializer.h>
 #include <exotica/Tasks.h>
 
 namespace exotica
 {
-
-class SamplingProblem : public PlanningProblem, public Instantiable<SamplingProblemInitializer>
+/**
+    * Bound constrained end-pose problem implementation
+    */
+class BoundedEndPoseProblem : public PlanningProblem, public Instantiable<BoundedEndPoseProblemInitializer>
 {
 public:
-    SamplingProblem();
-    virtual ~SamplingProblem();
+    BoundedEndPoseProblem();
+    virtual ~BoundedEndPoseProblem();
 
-    virtual void Instantiate(SamplingProblemInitializer& init);
-
+    virtual void Instantiate(BoundedEndPoseProblemInitializer& init);
     void Update(Eigen::VectorXdRefConst x);
-    bool isValid(Eigen::VectorXdRefConst x);
-    virtual void preupdate();
-
-    int getSpaceDim();
 
     void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setThreshold(const std::string& task_name, Eigen::VectorXdRefConst threshold);
     void setRho(const std::string& task_name, const double rho);
     Eigen::VectorXd getGoal(const std::string& task_name);
-    Eigen::VectorXd getThreshold(const std::string& task_name);
     double getRho(const std::string& task_name);
-
+    virtual void preupdate();
     std::vector<double>& getBounds();
-    bool isCompoundStateSpace();
-    std::string local_planner_config_;
-    bool full_body_plan_;
 
-    SamplingProblemInitializer Parameters;
+    double getScalarCost();
+    Eigen::VectorXd getScalarJacobian();
 
-    void setGoalState(Eigen::VectorXdRefConst qT);
+    EndPoseTask Cost;
 
-    Eigen::VectorXd goal_;
+    Eigen::MatrixXd W;
     TaskSpaceVector Phi;
-    SamplingTask Constraint;
+    Eigen::MatrixXd J;
 
     int PhiN;
     int JN;
     int NumTasks;
-    Eigen::MatrixXd S;
-
-private:
+protected:
+    void initTaskTerms(const std::vector<exotica::Initializer>& inits);
     std::vector<double> bounds_;
-    bool compound_;
 };
-
-typedef std::shared_ptr<exotica::SamplingProblem> SamplingProblem_ptr;
+typedef std::shared_ptr<exotica::BoundedEndPoseProblem> BoundedEndPoseProblem_ptr;
 }
 
 #endif

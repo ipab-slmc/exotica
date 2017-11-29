@@ -54,7 +54,7 @@ configure_file("src/Version.cpp.in" "${exotica_BINARY_DIR}/generated/Version.cpp
 
 AddInitializer(TaskMap Object Frame Link MotionSolver PlanningProblem Scene Trajectory
      UnconstrainedTimeIndexedProblem UnconstrainedEndPoseProblem SamplingProblem TimeIndexedSamplingProblem Task
-     TimeIndexedProblem EndPoseProblem)
+     TimeIndexedProblem EndPoseProblem BoundedTimeIndexedProblem BoundedEndPoseProblem)
 GenInitializers()
 
 ## catkin specific configuration ##
@@ -95,6 +95,8 @@ add_library(${PROJECT_NAME}
   src/Problems/UnconstrainedEndPoseProblem.cpp
   src/Problems/TimeIndexedProblem.cpp
   src/Problems/EndPoseProblem.cpp
+  src/Problems/BoundedTimeIndexedProblem.cpp
+  src/Problems/BoundedEndPoseProblem.cpp
   src/Problems/SamplingProblem.cpp
   src/Problems/TimeIndexedSamplingProblem.cpp
   ${exotica_BINARY_DIR}/generated/Version.cpp)

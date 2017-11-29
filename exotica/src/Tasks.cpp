@@ -175,7 +175,7 @@ void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits,
         }
         if(task.Rho.rows()==0)
         {
-            // Keeo ones
+            // Keep ones
         }
         else if(task.Rho.rows()==T)
         {

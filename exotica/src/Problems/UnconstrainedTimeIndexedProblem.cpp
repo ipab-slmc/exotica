@@ -119,7 +119,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     xdiff.assign(T, Eigen::VectorXd::Zero(JN));
 
     // Set initial trajectory
-    InitialTrajectory.resize(T, getStartState());
+    InitialTrajectory.resize(T, applyStartState());
 }
 
 void UnconstrainedTimeIndexedProblem::preupdate()

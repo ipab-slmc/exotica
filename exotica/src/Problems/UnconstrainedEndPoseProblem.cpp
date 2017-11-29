@@ -87,6 +87,8 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
 
     S = Eigen::MatrixXd::Identity(JN, JN);
     ydiff = Eigen::VectorXd::Zero(JN);
+
+    applyStartState();
 }
 
 void UnconstrainedEndPoseProblem::preupdate()

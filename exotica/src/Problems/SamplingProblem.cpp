@@ -110,6 +110,8 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
             S(i + task->Start, i + task->Start) = Rho(task->Id);
         }
     }
+
+    applyStartState();
 }
 
 void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)

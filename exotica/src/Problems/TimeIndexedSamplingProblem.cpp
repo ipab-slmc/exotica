@@ -110,6 +110,8 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
             S(i + task->Start, i + task->Start) = Rho(task->Id);
         }
     }
+
+    applyStartState();
 }
 
 Eigen::VectorXd TimeIndexedSamplingProblem::getGoalState()

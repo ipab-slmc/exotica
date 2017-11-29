@@ -496,8 +496,8 @@ double AICOsolver::getTaskCosts(int t)
             prec = prob_->Rho[t](i);
             if (prec > 0)
             {
-                int start = prob_->getTasks()[i]->StartJ;
-                int len = prob_->getTasks()[i]->LengthJ;
+                int& start = prob_->getTasks()[i]->StartJ;
+                int& len = prob_->getTasks()[i]->LengthJ;
                 Jt = prob_->J[t].middleRows(start, len).transpose();
                 C += prec * (prob_->ydiff[t].segment(start, len)).squaredNorm();
                 R[t] += prec * Jt * prob_->J[t].middleRows(start, len);
@@ -519,8 +519,8 @@ double AICOsolver::getTaskCosts(int t)
             prec = prob_->Rho[t](i);
             if (prec > 0)
             {
-                int start = prob_->getTasks()[i]->StartJ;
-                int len = prob_->getTasks()[i]->LengthJ;
+                int& start = prob_->getTasks()[i]->StartJ;
+                int& len = prob_->getTasks()[i]->LengthJ;
                 Jt = prob_->J[t].middleRows(start, len).transpose();
                 C += prec * (prob_->ydiff[t].segment(start, len)).squaredNorm();
                 R[t].topLeftCorner(n2, n2) += prec * Jt * prob_->J[t].middleRows(start, len);
@@ -529,7 +529,7 @@ double AICOsolver::getTaskCosts(int t)
             }
         }
     }
-    return C;
+    return prob_->ct * C;
 }
 
 void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,

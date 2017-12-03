@@ -59,6 +59,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     Q_rate = init.Qrate;
     H_rate = init.Hrate;
     W_rate = init.Wrate;
+    ct = 1.0 / tau / T;
 
     NumTasks = Tasks.size();
     PhiN = 0;
@@ -114,9 +115,11 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     ydiff.assign(T, Eigen::VectorXd::Zero(JN));
     J.assign(T, Eigen::MatrixXd(JN, N));
     S.assign(T, Eigen::MatrixXd::Identity(JN, JN));
+    x.assign(T, Eigen::VectorXd::Zero(JN));
+    xdiff.assign(T, Eigen::VectorXd::Zero(JN));
 
     // Set initial trajectory
-    InitialTrajectory.resize(T, getStartState());
+    InitialTrajectory.resize(T, applyStartState());
 }
 
 void UnconstrainedTimeIndexedProblem::preupdate()
@@ -158,7 +161,7 @@ double UnconstrainedTimeIndexedProblem::getDuration()
     return tau * (double)T;
 }
 
-void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
+void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 {
     if (t >= T || t < -1)
     {
@@ -169,20 +172,25 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
         t = T - 1;
     }
 
-    scene_->Update(x, static_cast<double>(t) * tau);
+    x[t] = x_in;
+    scene_->Update(x_in, static_cast<double>(t) * tau);
     Phi[t].setZero(PhiN);
     J[t].setZero();
     for (int i = 0; i < NumTasks; i++)
     {
         // Only update TaskMap if Rho is not 0
         if (Rho[t](i) != 0)
-            Tasks[i]->update(x, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+            Tasks[i]->update(x_in, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
     ydiff[t] = Phi[t] - y[t];
+
+    // NB: The transition cost for the 0-th time step is set to 0 in the initialiser.
+    if (t > 0) xdiff[t] = x[t] - x[t - 1];
+
     numberOfProblemUpdates++;
 }
 
-double UnconstrainedTimeIndexedProblem::getScalarCost(int t)
+double UnconstrainedTimeIndexedProblem::getScalarTaskCost(int t)
 {
     if (t >= T || t < -1)
     {
@@ -192,10 +200,10 @@ double UnconstrainedTimeIndexedProblem::getScalarCost(int t)
     {
         t = T - 1;
     }
-    return ydiff[t].transpose() * S[t] * ydiff[t];
+    return ct * ydiff[t].transpose() * S[t] * ydiff[t];
 }
 
-Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarJacobian(int t)
+Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarTaskJacobian(int t)
 {
     if (t >= T || t < -1)
     {
@@ -205,7 +213,33 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarJacobian(int t)
     {
         t = T - 1;
     }
-    return J[t].transpose() * S[t] * ydiff[t] * 2.0;
+    return J[t].transpose() * S[t] * ydiff[t] * 2.0 * ct;
+}
+
+double UnconstrainedTimeIndexedProblem::getScalarTransitionCost(int t)
+{
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
+    return ct * xdiff[t].transpose() * W * xdiff[t];
+}
+
+Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian(int t)
+{
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
+    return 2.0 * ct * W * xdiff[t];
 }
 
 void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)

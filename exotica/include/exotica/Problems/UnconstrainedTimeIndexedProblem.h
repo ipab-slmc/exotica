@@ -52,7 +52,7 @@ public:
     virtual ~UnconstrainedTimeIndexedProblem();
     virtual void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init);
     double getDuration();
-    void Update(Eigen::VectorXdRefConst x, int t);
+    void Update(Eigen::VectorXdRefConst x_in, int t);
     void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
     void setRho(const std::string& task_name, const double rho, int t = 0);
     Eigen::VectorXd getGoal(const std::string& task_name, int t = 0);
@@ -61,11 +61,14 @@ public:
     void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
     virtual void preupdate();
 
-    double getScalarCost(int t);
-    Eigen::VectorXd getScalarJacobian(int t);
+    double getScalarTaskCost(int t);
+    Eigen::VectorXd getScalarTaskJacobian(int t);
+    double getScalarTransitionCost(int t);
+    Eigen::VectorXd getScalarTransitionJacobian(int t);
 
     int T;          //!< Number of time steps
     double tau;     //!< Time step duration
+    double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
     double Q_rate;  //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
     double H_rate;  //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)
     double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
@@ -79,6 +82,9 @@ public:
     std::vector<Eigen::VectorXd> ydiff;
     std::vector<Eigen::MatrixXd> J;
     std::vector<Eigen::MatrixXd> S;
+
+    std::vector<Eigen::VectorXd> x;      // current internal problem state
+    std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
     int PhiN;
     int JN;

@@ -1,47 +1,49 @@
-#!/usr/bin/env python
-
 from time import sleep
 import matplotlib.pyplot as plt
 import signal
 
-trajectoryPlaybackIsShutdown = False
 
 def sigIntHandler(signal, frame):
-    global trajectoryPlaybackIsShutdown
-    trajectoryPlaybackIsShutdown = True
     raise KeyboardInterrupt
 
-def is_shutdown():
-    signal.signal(signal.SIGINT, sigIntHandler)
-    global trajectoryPlaybackIsShutdown
-    return trajectoryPlaybackIsShutdown
 
 def publishPose(q, problem, t=0.0):
     problem.getScene().Update(q, t)
     problem.getScene().getSolver().publishFrames()
 
+
 def publishTrajectory(traj, T, problem):
+    signal.signal(signal.SIGINT, sigIntHandler)
     print('Playing back trajectory '+str(T)+'s')
     dt = float(T)/float(len(traj))
-    t=0
-    while not is_shutdown():
-        publishPose(traj[t], problem, float(t)*dt)
-        sleep(dt)
-        t=(t+1)%len(traj)
+    t = 0
+    while True:
+        try:
+            publishPose(traj[t], problem, float(t)*dt)
+            sleep(dt)
+            t = (t+1) % len(traj)
+        except KeyboardInterrupt:
+            break
+
 
 def publishTimeIndexedTrajectory(traj, Ts, problem, once=False):
-    print('Playing back trajectory '+str(len(Ts))+' states in '+str(Ts[len(Ts)-1]))
-    idx=0
+    signal.signal(signal.SIGINT, sigIntHandler)
+    print('Playing back trajectory '+str(len(Ts)) +
+          ' states in '+str(Ts[len(Ts)-1]))
+    idx = 0
 
-    while not is_shutdown():
-        for i in range(1, len(Ts)-1):
-            if not is_shutdown():
+    while True:
+        try:
+            for i in range(1, len(Ts)-1):
                 publishPose(traj[i], problem, Ts[i])
                 sleep(Ts[i]-Ts[i-1])
-        if once:
+            if once:
+                break
+        except KeyboardInterrupt:
             break
+
 
 def plot(solution):
     print('Plotting the solution')
-    plt.plot(solution,'.-')
+    plt.plot(solution, '.-')
     plt.show()

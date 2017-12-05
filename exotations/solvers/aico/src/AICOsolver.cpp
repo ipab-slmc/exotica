@@ -111,6 +111,9 @@ void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
 
 void AICOsolver::Solve(Eigen::MatrixXd& solution)
 {
+    // Check if the trajectory length has changed, if so update the messages.
+    if (prob_->getT() != lastT) initMessages();
+
     prob_->resetCostEvolution(max_iterations);
 
     Eigen::VectorXd q0 = prob_->applyStartState();
@@ -274,6 +277,9 @@ void AICOsolver::initMessages()
     {
         q_stat[t].resize(n);
     }
+
+    // Set lastT to the problem T
+    lastT = prob_->getT();
 }
 
 void AICOsolver::getProcess(Eigen::Ref<Eigen::MatrixXd> A_,

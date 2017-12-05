@@ -213,6 +213,8 @@ private:
     std::vector<Eigen::MatrixXd> Hinv;   //!< Integrated state transition covariance inverse
     std::vector<Eigen::MatrixXd> Q;      //!< State transition covariance
 
+    int lastT;  //!< T the last time initMessages was called.
+
     int sweep;  //!< Sweeps so far
     enum SweepMode
     {

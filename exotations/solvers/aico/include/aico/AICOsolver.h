@@ -222,7 +222,6 @@ private:
         smLocalGaussNewtonDamped
     };
     int sweepMode;  //!< Sweep mode
-    int T;          //!< Number of time steps
     int n;          //!< Configuration space size
     int updateCount;
 

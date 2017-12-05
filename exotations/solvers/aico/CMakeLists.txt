@@ -22,7 +22,6 @@ include_directories(
   include
   SYSTEM
   ${catkin_INCLUDE_DIRS}
-  ${LAPACK_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library

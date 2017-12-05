@@ -439,7 +439,6 @@ public:
 PYBIND11_MODULE(_pyexotica, module)
 {
     //Setup::Instance();
-
     module.doc() = "Exotica Python wrapper";
 
     py::class_<Setup, std::unique_ptr<Setup, py::nodelete>> setup(module, "Setup");

@@ -93,7 +93,7 @@ public:
     int NumTasks;
 
 private:
-    int T;          //!< Number of time steps
+    int T;  //!< Number of time steps
 
     std::vector<Eigen::VectorXd> InitialTrajectory;
     UnconstrainedTimeIndexedProblemInitializer init_;

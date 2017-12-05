@@ -57,7 +57,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
 
 void UnconstrainedTimeIndexedProblem::reinitializeVariables()
 {
-    HIGHLIGHT_NAMED("UnconstrainedTimeIndexedProblem", "Reinitialize variables with T=" << T);
+    if (debug_) HIGHLIGHT_NAMED("UnconstrainedTimeIndexedProblem", "Initialize problem with T=" << T);
 
     tau = init_.Tau;
     Q_rate = init_.Qrate;

@@ -565,7 +565,7 @@ PYBIND11_MODULE(_pyexotica, module)
         "InitialTrajectory",
         &UnconstrainedTimeIndexedProblem::getInitialTrajectory,
         &UnconstrainedTimeIndexedProblem::setInitialTrajectory);
-    unconstrainedTimeIndexedProblem.def_readonly("T", &UnconstrainedTimeIndexedProblem::T);
+    unconstrainedTimeIndexedProblem.def_property("T", &UnconstrainedTimeIndexedProblem::getT, &UnconstrainedTimeIndexedProblem::setT);
     unconstrainedTimeIndexedProblem.def_readonly("PhiN", &UnconstrainedTimeIndexedProblem::PhiN);
     unconstrainedTimeIndexedProblem.def_readonly("JN", &UnconstrainedTimeIndexedProblem::JN);
     unconstrainedTimeIndexedProblem.def_readonly("N", &UnconstrainedTimeIndexedProblem::N);

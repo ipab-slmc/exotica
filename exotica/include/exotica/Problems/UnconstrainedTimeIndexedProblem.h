@@ -64,12 +64,14 @@ public:
     int getT() const { return T; }
     void setT(int T_in);
 
+    double getTau() const { return tau; }
+    void setTau(double tau_in);
+
     double getScalarTaskCost(int t);
     Eigen::VectorXd getScalarTaskJacobian(int t);
     double getScalarTransitionCost(int t);
     Eigen::VectorXd getScalarTransitionJacobian(int t);
 
-    double tau;     //!< Time step duration
     double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
     double Q_rate;  //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
     double H_rate;  //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)
@@ -93,7 +95,8 @@ public:
     int NumTasks;
 
 private:
-    int T;  //!< Number of time steps
+    int T;       //!< Number of time steps
+    double tau;  //!< Time step duration
 
     std::vector<Eigen::VectorXd> InitialTrajectory;
     UnconstrainedTimeIndexedProblemInitializer init_;

@@ -554,7 +554,9 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedTimeIndexedProblem.def("setRho", &UnconstrainedTimeIndexedProblem::setRho);
     unconstrainedTimeIndexedProblem.def("getGoal", &UnconstrainedTimeIndexedProblem::getGoal);
     unconstrainedTimeIndexedProblem.def("getRho", &UnconstrainedTimeIndexedProblem::getRho);
-    unconstrainedTimeIndexedProblem.def_readwrite("tau", &UnconstrainedTimeIndexedProblem::tau);
+    unconstrainedTimeIndexedProblem.def_property("tau",
+                                                 &UnconstrainedTimeIndexedProblem::getTau,
+                                                 &UnconstrainedTimeIndexedProblem::setTau);
     unconstrainedTimeIndexedProblem.def_readwrite("Q_rate", &UnconstrainedTimeIndexedProblem::Q_rate);
     unconstrainedTimeIndexedProblem.def_readwrite("H_rate", &UnconstrainedTimeIndexedProblem::H_rate);
     unconstrainedTimeIndexedProblem.def_readwrite("W_rate", &UnconstrainedTimeIndexedProblem::W_rate);
@@ -565,7 +567,9 @@ PYBIND11_MODULE(_pyexotica, module)
         "InitialTrajectory",
         &UnconstrainedTimeIndexedProblem::getInitialTrajectory,
         &UnconstrainedTimeIndexedProblem::setInitialTrajectory);
-    unconstrainedTimeIndexedProblem.def_property("T", &UnconstrainedTimeIndexedProblem::getT, &UnconstrainedTimeIndexedProblem::setT);
+    unconstrainedTimeIndexedProblem.def_property("T",
+                                                 &UnconstrainedTimeIndexedProblem::getT,
+                                                 &UnconstrainedTimeIndexedProblem::setT);
     unconstrainedTimeIndexedProblem.def_readonly("PhiN", &UnconstrainedTimeIndexedProblem::PhiN);
     unconstrainedTimeIndexedProblem.def_readonly("JN", &UnconstrainedTimeIndexedProblem::JN);
     unconstrainedTimeIndexedProblem.def_readonly("N", &UnconstrainedTimeIndexedProblem::N);

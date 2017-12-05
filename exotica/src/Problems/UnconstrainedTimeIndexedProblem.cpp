@@ -59,11 +59,10 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
 {
     if (debug_) HIGHLIGHT_NAMED("UnconstrainedTimeIndexedProblem", "Initialize problem with T=" << T);
 
-    tau = init_.Tau;
+    setTau(init_.Tau);
     Q_rate = init_.Qrate;
     H_rate = init_.Hrate;
     W_rate = init_.Wrate;
-    ct = 1.0 / tau / T;
 
     NumTasks = Tasks.size();
     PhiN = 0;
@@ -134,6 +133,13 @@ void UnconstrainedTimeIndexedProblem::setT(int T_in)
     }
     T = T_in;
     reinitializeVariables();
+}
+
+void UnconstrainedTimeIndexedProblem::setTau(double tau_in)
+{
+    if (tau_in <= 0.) throw_pretty("tau is expected to be greater than 0. (tau=" << tau_in << ")");
+    tau = tau_in;
+    ct = 1.0 / tau / T;
 }
 
 void UnconstrainedTimeIndexedProblem::preupdate()

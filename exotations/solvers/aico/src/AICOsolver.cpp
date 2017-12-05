@@ -287,7 +287,7 @@ void AICOsolver::getProcess(Eigen::Ref<Eigen::MatrixXd> A_,
     }
     else
     {
-        double tau = prob_->tau;
+        double tau = prob_->getTau();
         int n2 = n / 2;
         A_ = Eigen::MatrixXd::Identity(n, n);
         B_ = Eigen::MatrixXd::Zero(n, n2);

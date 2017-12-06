@@ -50,16 +50,19 @@ UnconstrainedTimeIndexedProblem::~UnconstrainedTimeIndexedProblem()
 
 void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProblemInitializer& init)
 {
-    T = init.T;
-    if (T <= 2)
-    {
-        throw_named("Invalid number of timesteps: " << T);
-    }
-    tau = init.Tau;
-    Q_rate = init.Qrate;
-    H_rate = init.Hrate;
-    W_rate = init.Wrate;
-    ct = 1.0 / tau / T;
+    init_ = init;
+    setT(init_.T);
+    reinitializeVariables();
+}
+
+void UnconstrainedTimeIndexedProblem::reinitializeVariables()
+{
+    if (debug_) HIGHLIGHT_NAMED("UnconstrainedTimeIndexedProblem", "Initialize problem with T=" << T);
+
+    setTau(init_.Tau);
+    Q_rate = init_.Qrate;
+    H_rate = init_.Hrate;
+    W_rate = init_.Wrate;
 
     NumTasks = Tasks.size();
     PhiN = 0;
@@ -75,39 +78,39 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     N = scene_->getSolver().getNumControlledJoints();
 
     W = Eigen::MatrixXd::Identity(N, N) * W_rate;
-    if (init.W.rows() > 0)
+    if (init_.W.rows() > 0)
     {
-        if (init.W.rows() == N)
+        if (init_.W.rows() == N)
         {
-            W.diagonal() = init.W * W_rate;
+            W.diagonal() = init_.W * W_rate;
         }
         else
         {
-            throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
+            throw_named("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
         }
     }
     H = Eigen::MatrixXd::Identity(N, N) * Q_rate;
     Q = Eigen::MatrixXd::Identity(N, N) * H_rate;
 
-    if (init.Rho.rows() == 0)
+    if (init_.Rho.rows() == 0)
     {
         Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
     }
-    else if (init.Rho.rows() == NumTasks)
+    else if (init_.Rho.rows() == NumTasks)
     {
-        Rho.assign(T, init.Rho);
+        Rho.assign(T, init_.Rho);
     }
-    else if (init.Rho.rows() == NumTasks * T)
+    else if (init_.Rho.rows() == NumTasks * T)
     {
         Rho.resize(T);
         for (int i = 0; i < T; i++)
         {
-            Rho[i] = init.Rho.segment(i * NumTasks, NumTasks);
+            Rho[i] = init_.Rho.segment(i * NumTasks, NumTasks);
         }
     }
     else
     {
-        throw_named("Invalid task weights rho! " << init.Rho.rows());
+        throw_named("Invalid task weights rho! " << init_.Rho.rows());
     }
     yref.setZero(PhiN);
     y.assign(T, yref);
@@ -120,6 +123,23 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
 
     // Set initial trajectory
     InitialTrajectory.resize(T, applyStartState());
+}
+
+void UnconstrainedTimeIndexedProblem::setT(int T_in)
+{
+    if (T_in <= 2)
+    {
+        throw_named("Invalid number of timesteps: " << T_in);
+    }
+    T = T_in;
+    reinitializeVariables();
+}
+
+void UnconstrainedTimeIndexedProblem::setTau(double tau_in)
+{
+    if (tau_in <= 0.) throw_pretty("tau is expected to be greater than 0. (tau=" << tau_in << ")");
+    tau = tau_in;
+    ct = 1.0 / tau / T;
 }
 
 void UnconstrainedTimeIndexedProblem::preupdate()

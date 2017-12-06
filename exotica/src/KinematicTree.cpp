@@ -33,6 +33,7 @@
 #include "exotica/KinematicTree.h"
 #include <moveit/robot_model/robot_model.h>
 #include <algorithm>
+#include <queue>
 
 #include <eigen_conversions/eigen_kdl.h>
 #include <geometric_shapes/shape_operations.h>
@@ -483,11 +484,24 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
 
 void KinematicTree::UpdateTree()
 {
-    for (std::shared_ptr<KinematicElement> element : Tree)
+    std::queue<std::shared_ptr<KinematicElement>> elements;
+    elements.push(Tree[0]);
+    while (elements.size()>0)
     {
-        KDL::Frame ParentFrame;
-        if (element->Id > 0) ParentFrame = element->Parent->Frame;
-        element->Frame = ParentFrame * element->getPose(TreeState(element->Id));
+        std::shared_ptr<KinematicElement> element = elements.front();
+        elements.pop();
+        if (element->Id > 0)
+        {
+            element->Frame = element->Parent->Frame * element->getPose(TreeState(element->Id));
+        }
+        else
+        {
+            element->Frame = KDL::Frame();
+        }
+        for (std::shared_ptr<KinematicElement> child : element->Children)
+        {
+            elements.push(child);
+        }
     }
 }
 

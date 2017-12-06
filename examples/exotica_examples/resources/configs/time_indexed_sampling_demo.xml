@@ -25,6 +25,7 @@
     <Maps>
       <CollisionCheck Name="Collision" SelfCollision="1" />
     </Maps>
+    <JointVelocityLimits>1 1 1 1 1 1 1</JointVelocityLimits>
     <Goal>2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
   </TimeIndexedSamplingProblem>
 

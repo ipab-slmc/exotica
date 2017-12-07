@@ -40,13 +40,13 @@ for i in range(0,3):
 
 # Playback
 dt=0.03
-while not is_shutdown():
-    for i in range(0,len(solution)):
-        handleAttaching(i, start_pose[i], ompl.getProblem().getScene())
-        for t in range(0,len(solution[i])):
-            publishPose(solution[i][t], ompl.getProblem())
-            sleep(dt)
-            if is_shutdown():
-                break
-        if is_shutdown():
-            break
+signal.signal(signal.SIGINT, sigIntHandler)
+while True:
+    try:
+        for i in range(0,len(solution)):
+            handleAttaching(i, start_pose[i], ompl.getProblem().getScene())
+            for t in range(0,len(solution[i])):
+                publishPose(solution[i][t], ompl.getProblem())
+                sleep(dt)
+    except KeyboardInterrupt:
+        break

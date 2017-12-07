@@ -20,11 +20,15 @@ dt=0.002
 t=0.0
 q=array([0.0]*7)
 print('Publishing IK')
-while not is_shutdown():
-    problem.setGoal('Position',figureEight(t))
-    problem.startState = q
-    q = solver.solve()[0]
-    publishPose(q, problem)    
-    sleep(dt)
-    t=t+dt
+signal.signal(signal.SIGINT, sigIntHandler)
+while True:
+    try:
+        problem.setGoal('Position',figureEight(t))
+        problem.startState = q
+        q = solver.solve()[0]
+        publishPose(q, problem)
+        sleep(dt)
+        t=t+dt
+    except KeyboardInterrupt:
+        break
 

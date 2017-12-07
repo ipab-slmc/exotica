@@ -486,7 +486,7 @@ void KinematicTree::UpdateTree()
 {
     std::queue<std::shared_ptr<KinematicElement>> elements;
     elements.push(Tree[0]);
-    while (elements.size()>0)
+    while (elements.size() > 0)
     {
         std::shared_ptr<KinematicElement> element = elements.front();
         elements.pop();

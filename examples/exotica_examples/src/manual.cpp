@@ -56,7 +56,7 @@ void run()
     Eigen::VectorXd startState = Eigen::VectorXd::Zero(7);
     Eigen::VectorXd nominalState = Eigen::VectorXd::Zero(7);
 
-    UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, startState, {cost}, W, nominalState);
+    UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, startState, 0.0, {cost}, W, nominalState);
     IKsolverInitializer solver("MySolver");
     solver.C = 1e-3;
     solver.MaxIt = 1;

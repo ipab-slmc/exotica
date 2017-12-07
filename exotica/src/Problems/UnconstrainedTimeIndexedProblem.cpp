@@ -103,7 +103,7 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     InitialTrajectory.resize(T, scene_->getControlledState());
 
     TaskSpaceVector dummy;
-    Cost.initialize(init.Cost, shared_from_this(), dummy);
+    Cost.initialize(init_.Cost, shared_from_this(), dummy);
 }
 
 void UnconstrainedTimeIndexedProblem::setT(int T_in)

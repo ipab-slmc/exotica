@@ -77,7 +77,6 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
-    Eigen::MatrixXd S;
 
 private:
     std::vector<double> bounds_;

@@ -36,6 +36,7 @@
 
 #include <exotica/PlanningProblem.h>
 #include <exotica/TimeIndexedSamplingProblemInitializer.h>
+#include <exotica/Tasks.h>
 
 namespace exotica
 {
@@ -68,19 +69,16 @@ public:
     void setGoalState(Eigen::VectorXdRefConst qT);
     void setGoalTime(double t);
 
-    Eigen::VectorXd goal_;
     double T;
     double tGoal;
     Eigen::VectorXd vel_limits_;
-    Eigen::VectorXd Rho;
-    TaskSpaceVector y;
+    Eigen::VectorXd goal_;
     TaskSpaceVector Phi;
-    Eigen::VectorXd threshold_;
+    SamplingTask Constraint;
 
     int PhiN;
     int JN;
     int NumTasks;
-    Eigen::MatrixXd S;
 
 private:
     std::vector<double> bounds_;

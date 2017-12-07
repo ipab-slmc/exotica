@@ -628,14 +628,18 @@ PYBIND11_MODULE(_pyexotica, module)
     boundedTimeIndexedProblem.def("setRho", &BoundedTimeIndexedProblem::setRho);
     boundedTimeIndexedProblem.def("getGoal", &BoundedTimeIndexedProblem::getGoal);
     boundedTimeIndexedProblem.def("getRho", &BoundedTimeIndexedProblem::getRho);
-    boundedTimeIndexedProblem.def_readwrite("tau", &BoundedTimeIndexedProblem::tau);
+    boundedTimeIndexedProblem.def_property("tau",
+                                                 &BoundedTimeIndexedProblem::getTau,
+                                                 &BoundedTimeIndexedProblem::setTau);
     boundedTimeIndexedProblem.def_readwrite("W_rate", &BoundedTimeIndexedProblem::W_rate);
     boundedTimeIndexedProblem.def_readwrite("W", &BoundedTimeIndexedProblem::W);
     boundedTimeIndexedProblem.def_property(
         "InitialTrajectory",
         &BoundedTimeIndexedProblem::getInitialTrajectory,
         &BoundedTimeIndexedProblem::setInitialTrajectory);
-    boundedTimeIndexedProblem.def_readonly("T", &BoundedTimeIndexedProblem::T);
+    boundedTimeIndexedProblem.def_property("T",
+                                                 &BoundedTimeIndexedProblem::getT,
+                                                 &BoundedTimeIndexedProblem::setT);
     boundedTimeIndexedProblem.def_readonly("PhiN", &BoundedTimeIndexedProblem::PhiN);
     boundedTimeIndexedProblem.def_readonly("JN", &BoundedTimeIndexedProblem::JN);
     boundedTimeIndexedProblem.def_readonly("N", &BoundedTimeIndexedProblem::N);
@@ -717,8 +721,6 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedSamplingProblem.def_property("goalTime", &TimeIndexedSamplingProblem::getGoalTime, &TimeIndexedSamplingProblem::setGoalTime);
     timeIndexedSamplingProblem.def_readonly("N", &TimeIndexedSamplingProblem::N);
     timeIndexedSamplingProblem.def_readonly("NumTasks", &TimeIndexedSamplingProblem::NumTasks);
-    timeIndexedSamplingProblem.def_readonly("Rho", &TimeIndexedSamplingProblem::Rho);
-    timeIndexedSamplingProblem.def_readonly("y", &TimeIndexedSamplingProblem::y);
     timeIndexedSamplingProblem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
 
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "Proxy");

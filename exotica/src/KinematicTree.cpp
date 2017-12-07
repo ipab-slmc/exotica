@@ -194,7 +194,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
                 i, Tree[i], KDL::Segment(floatingBaseVariableNames[i],
                                          KDL::Joint(floatingBaseVariableNames[i],
                                                     types[i]))));
-            if (i > 0) Tree[i]->Children.push_back(Tree[i + 1]);
+            Tree[i]->Children.push_back(Tree[i + 1]);
         }
 
         // The floating base rotation is defined as xyzw quaternion in the robot
@@ -219,7 +219,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
                 KDL::Segment(
                     RootJoint->getVariableNames()[i],
                     KDL::Joint(RootJoint->getVariableNames()[i], types[i]))));
-            if (i > 0) Tree[i]->Children.push_back(Tree[i + 1]);
+            Tree[i]->Children.push_back(Tree[i + 1]);
         }
     }
     else

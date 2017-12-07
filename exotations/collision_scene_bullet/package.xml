@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>collision_scene_bullet</name>
+  <version>0.0.0</version>
+  <description>The collision checking using the Bullet library.</description>
+  <maintainer email="w.merkt+oss@gmail.com">Wolfgang Merkt</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>exotica</depend>
+  <depend>geometric_shapes</depend>
+  <depend>bullet</depend>
+
+  <export>
+    <exotica plugin="${prefix}/exotica_plugins.xml" />
+  </export>
+</package>

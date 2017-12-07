@@ -496,7 +496,7 @@ void KinematicTree::UpdateTree()
         }
         else
         {
-            element->Frame = KDL::Frame();
+            element->Frame = element->getPose(TreeState(element->Id));
         }
         for (std::shared_ptr<KinematicElement> child : element->Children)
         {

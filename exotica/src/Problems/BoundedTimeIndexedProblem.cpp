@@ -104,6 +104,23 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
         bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
     }
 
+    if(init.LowerBound.rows()==N)
+    {
+        for (int i = 0; i < jnts.size(); i++) bounds_[i] = init.LowerBound(i);
+    }
+    else if(init.LowerBound.rows()!=0)
+    {
+        throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.LowerBound.rows());
+    }
+    if(init.UpperBound.rows()==N)
+    {
+        for (int i = 0; i < jnts.size(); i++) bounds_[i + N] = init.UpperBound(i);
+    }
+    else if(init.UpperBound.rows()!=0)
+    {
+        throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.UpperBound.rows());
+    }
+
     // Set initial trajectory
     InitialTrajectory.resize(T, getStartState());
 

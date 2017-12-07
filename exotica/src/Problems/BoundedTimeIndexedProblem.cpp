@@ -55,43 +55,12 @@ std::vector<double>& BoundedTimeIndexedProblem::getBounds()
 
 void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer& init)
 {
+    init_ = init;
     T = init.T;
     if (T <= 2)
     {
         throw_named("Invalid number of timesteps: " << T);
     }
-    tau = init.Tau;
-    W_rate = init.Wrate;
-
-    NumTasks = Tasks.size();
-    PhiN = 0;
-    JN = 0;
-    TaskSpaceVector yref;
-    for (int i = 0; i < NumTasks; i++)
-    {
-        appendVector(yref.map, Tasks[i]->getLieGroupIndices());
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
-    }
-
-    N = scene_->getSolver().getNumControlledJoints();
-
-    W = Eigen::MatrixXd::Identity(N, N) * W_rate;
-    if (init.W.rows() > 0)
-    {
-        if (init.W.rows() == N)
-        {
-            W.diagonal() = init.W * W_rate;
-        }
-        else
-        {
-            throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
-        }
-    }
-
-    yref.setZero(PhiN);
-    Phi.assign(T, yref);
-    J.assign(T, Eigen::MatrixXd(JN, N));
 
     std::vector<std::string> jnts;
     scene_->getJointNames(jnts);
@@ -121,11 +90,7 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
         throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.UpperBound.rows());
     }
 
-    // Set initial trajectory
-    InitialTrajectory.resize(T, getStartState());
-
-    TaskSpaceVector dummy;
-    Cost.initialize(init.Cost, shared_from_this(), dummy);
+    reinitializeVariables();
 }
 
 void BoundedTimeIndexedProblem::preupdate()
@@ -256,6 +221,69 @@ double BoundedTimeIndexedProblem::getRho(const std::string& task_name, int t)
         }
     }
     throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+}
+
+void BoundedTimeIndexedProblem::setT(int T_in)
+{
+    if (T_in <= 2)
+    {
+        throw_named("Invalid number of timesteps: " << T_in);
+    }
+    T = T_in;
+    reinitializeVariables();
+}
+
+void BoundedTimeIndexedProblem::setTau(double tau_in)
+{
+    if (tau_in <= 0.) throw_pretty("tau is expected to be greater than 0. (tau=" << tau_in << ")");
+    tau = tau_in;
+    ct = 1.0 / tau / T;
+}
+
+void BoundedTimeIndexedProblem::reinitializeVariables()
+{
+    if (debug_) HIGHLIGHT_NAMED("BoundedTimeIndexedProblem", "Initialize problem with T=" << T);
+
+    setTau(init_.Tau);
+    W_rate = init_.Wrate;
+
+    NumTasks = Tasks.size();
+    PhiN = 0;
+    JN = 0;
+    TaskSpaceVector yref;
+    for (int i = 0; i < NumTasks; i++)
+    {
+        appendVector(yref.map, Tasks[i]->getLieGroupIndices());
+        PhiN += Tasks[i]->Length;
+        JN += Tasks[i]->LengthJ;
+    }
+
+    N = scene_->getSolver().getNumControlledJoints();
+
+    W = Eigen::MatrixXd::Identity(N, N) * W_rate;
+    if (init_.W.rows() > 0)
+    {
+        if (init_.W.rows() == N)
+        {
+            W.diagonal() = init_.W * W_rate;
+        }
+        else
+        {
+            throw_named("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
+        }
+    }
+
+    yref.setZero(PhiN);
+    Phi.assign(T, yref);
+    J.assign(T, Eigen::MatrixXd(JN, N));
+    x.assign(T, Eigen::VectorXd::Zero(JN));
+    xdiff.assign(T, Eigen::VectorXd::Zero(JN));
+
+    // Set initial trajectory
+    InitialTrajectory.resize(T, getStartState());
+
+    TaskSpaceVector dummy;
+    Cost.initialize(init_.Cost, shared_from_this(), dummy);
 }
 
 }

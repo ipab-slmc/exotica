@@ -146,7 +146,7 @@ TimeIndexedTask::TimeIndexedTask()
 void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
 {
     Task::initialize(inits, prob, phi);
-    T=std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->T;
+    T=std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->getT();
     phi.setZero(PhiN);
     Phi.assign(T, phi);
     y=Phi;
@@ -171,7 +171,7 @@ void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits,
         }
         else
         {
-            throw_pretty("Invalid task goal size! Expecting "<<Tasks[i]->Length<<" got "<<task.Goal.rows());
+            throw_pretty("Invalid task goal size! Expecting "<<Tasks[i]->Length*T<<" got "<<task.Goal.rows());
         }
         if(task.Rho.rows()==0)
         {
@@ -186,7 +186,7 @@ void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits,
         }
         else
         {
-            throw_pretty("Invalid task Rho size! Expecting 1 got "<<task.Rho.rows());
+            throw_pretty("Invalid task Rho size! Expecting "<<T<<" got "<<task.Rho.rows());
         }
     }
 }

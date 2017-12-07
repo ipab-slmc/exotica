@@ -59,26 +59,39 @@ public:
     double getRho(const std::string& task_name, int t = 0);
     std::vector<double>& getBounds();
 
+    int getT() const { return T; }
+    void setT(int T_in);
+
+    double getTau() const { return tau; }
+    void setTau(double tau_in);
+
     double getScalarCost(int t);
     Eigen::VectorXd getScalarJacobian(int t);
 
+    double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask Cost;
 
-    int T;          //!< Number of time steps
-    double tau;     //!< Time step duration
     double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
     Eigen::MatrixXd W;
 
     std::vector<TaskSpaceVector> Phi;
     std::vector<Eigen::MatrixXd> J;
 
+    std::vector<Eigen::VectorXd> x;      // current internal problem state
+    std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
+
     int PhiN;
     int JN;
     int NumTasks;
 
 private:
+    int T;          //!< Number of time steps
+    double tau;     //!< Time step duration
+
     std::vector<Eigen::VectorXd> InitialTrajectory;
     std::vector<double> bounds_;
+    BoundedTimeIndexedProblemInitializer init_;
+    void reinitializeVariables();
 };
 
 typedef std::shared_ptr<exotica::BoundedTimeIndexedProblem> BoundedTimeIndexedProblem_ptr;

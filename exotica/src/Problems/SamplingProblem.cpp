@@ -111,7 +111,7 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
         }
     }
 
-    applyStartState();
+    applyStartState(false);
 }
 
 void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)

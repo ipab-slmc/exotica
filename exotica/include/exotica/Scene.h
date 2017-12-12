@@ -89,8 +89,8 @@ public:
     Eigen::VectorXd getControlledState();
     Eigen::VectorXd getModelState();
     std::map<std::string, double> getModelStateMap();
-    void setModelState(Eigen::VectorXdRefConst x, double t = 0);
-    void setModelState(std::map<std::string, double> x, double t = 0);
+    void setModelState(Eigen::VectorXdRefConst x, double t = 0, bool updateTraj = true);
+    void setModelState(std::map<std::string, double> x, double t = 0, bool updateTraj = true);
     std::string getGroupName();
 
     void addTrajectoryFromFile(const std::string& link, const std::string& traj);

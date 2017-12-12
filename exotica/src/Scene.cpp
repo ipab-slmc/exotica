@@ -356,9 +356,9 @@ std::map<std::string, double> Scene::getModelStateMap()
     return kinematica_.getModelStateMap();
 }
 
-void Scene::setModelState(Eigen::VectorXdRefConst x, double t)
+void Scene::setModelState(Eigen::VectorXdRefConst x, double t, bool updateTraj)
 {
-    updateTrajectoryGenerators(t);
+    if(updateTraj) updateTrajectoryGenerators(t);
     // Update Kinematica internal state
     kinematica_.setModelState(x);
 
@@ -366,9 +366,9 @@ void Scene::setModelState(Eigen::VectorXdRefConst x, double t)
     if (debug_) publishScene();
 }
 
-void Scene::setModelState(std::map<std::string, double> x, double t)
+void Scene::setModelState(std::map<std::string, double> x, double t, bool updateTraj)
 {
-    updateTrajectoryGenerators(t);
+    if(updateTraj) updateTrajectoryGenerators(t);
     // Update Kinematica internal state
     kinematica_.setModelState(x);
 

@@ -65,7 +65,7 @@ public:
     void setStartTime(double t);
     Eigen::VectorXd getStartState();
     double getStartTime();
-    Eigen::VectorXd applyStartState();
+    Eigen::VectorXd applyStartState(bool updateTraj = true);
     int N;
     double tStart;
     virtual void preupdate();

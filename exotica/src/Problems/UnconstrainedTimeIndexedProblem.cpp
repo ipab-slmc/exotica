@@ -122,7 +122,7 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     xdiff.assign(T, Eigen::VectorXd::Zero(JN));
 
     // Set initial trajectory
-    InitialTrajectory.resize(T, applyStartState());
+    InitialTrajectory.resize(T, applyStartState(false));
 }
 
 void UnconstrainedTimeIndexedProblem::setT(int T_in)

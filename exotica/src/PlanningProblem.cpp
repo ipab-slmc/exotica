@@ -49,9 +49,9 @@ std::string PlanningProblem::print(std::string prepend)
     return ret;
 }
 
-Eigen::VectorXd PlanningProblem::applyStartState()
+Eigen::VectorXd PlanningProblem::applyStartState(bool updateTraj)
 {
-    scene_->setModelState(startState, tStart);
+    scene_->setModelState(startState, tStart, updateTraj);
     return scene_->getControlledState();
 }
 

@@ -111,7 +111,7 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
         }
     }
 
-    applyStartState();
+    applyStartState(false);
 }
 
 Eigen::VectorXd TimeIndexedSamplingProblem::getGoalState()

@@ -349,9 +349,9 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
     {
         child->Segment = KDL::Segment(child->Segment.getName(), child->Segment.getJoint(), parent->Frame.Inverse() * child->Frame * pose, child->Segment.getInertia());
     }
-    auto it = std::find(child->Parent->Children.begin(), child->Parent->Children.end(), child);
-    if (it != child->Parent->Children.end())
-        child->Parent->Children.erase(it);
+    auto it = std::find(child->Parent.lock()->Children.begin(), child->Parent.lock()->Children.end(), child);
+    if (it != child->Parent.lock()->Children.end())
+        child->Parent.lock()->Children.erase(it);
     child->Parent = parent;
     parent->Children.push_back(child);
     child->updateClosestRobotLink();
@@ -492,7 +492,7 @@ void KinematicTree::UpdateTree()
         elements.pop();
         if (element->Id > 0)
         {
-            element->Frame = element->Parent->Frame * element->getPose(TreeState(element->Id));
+            element->Frame = element->Parent.lock()->Frame * element->getPose(TreeState(element->Id));
         }
         else
         {
@@ -535,7 +535,7 @@ void KinematicTree::publishFrames()
             visualization_msgs::MarkerArray msg;
             for (int i = 0; i < Tree.size(); i++)
             {
-                if (Tree[i]->Shape && Tree[i]->Parent->Id >= ModelTree.size())
+                if (Tree[i]->Shape && Tree[i]->Parent.lock()->Id >= ModelTree.size())
                 {
                     visualization_msgs::Marker mrk;
                     shapes::constructMarkerFromShape(Tree[i]->Shape.get(), mrk);
@@ -625,10 +625,10 @@ void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& J)
         if (it->IsControlled)
         {
             KDL::Frame SegmentReference;
-            if (it->Parent != nullptr) SegmentReference = it->Parent->Frame;
+            if (it->Parent.lock() != nullptr) SegmentReference = it->Parent.lock()->Frame;
             J.setColumn(it->ControlId, frame.TempB.M.Inverse() * (SegmentReference.M * it->Segment.twist(TreeState(it->Id), 1.0)).RefPoint(frame.TempA.p - it->Frame.p));
         }
-        it = it->Parent;
+        it = it->Parent.lock();
     }
     it = frame.FrameB;
     while (it != nullptr)
@@ -636,10 +636,10 @@ void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& J)
         if (it->IsControlled)
         {
             KDL::Frame SegmentReference;
-            if (it->Parent != nullptr) SegmentReference = it->Parent->Frame;
+            if (it->Parent.lock() != nullptr) SegmentReference = it->Parent.lock()->Frame;
             J.setColumn(it->ControlId, J.getColumn(it->ControlId) - (frame.TempB.M.Inverse() * (SegmentReference.M * it->Segment.twist(TreeState(it->Id), 1.0)).RefPoint(frame.TempA.p - it->Frame.p)));
         }
-        it = it->Parent;
+        it = it->Parent.lock();
     }
 }
 

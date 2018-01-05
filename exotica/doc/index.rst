@@ -13,6 +13,7 @@ Overview
 ========
 
 -  `Home <index.html>`__
+-  `Installation <Installation.html>`_
 -  `Prerequisites <Prerequisites.html>`__
 -  `Quick Start: Python <Quickstart.html>`__
 -  `Initialisation <https://github.com/openhumanoids/exotica/wiki/Initialisation>`__
@@ -33,6 +34,7 @@ Overview
    :maxdepth: 2
    :caption: Contents:
 
+   Installation
    Prerequisites
    Initialisation
    Initializers

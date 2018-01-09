@@ -371,7 +371,11 @@ public:
         {
             addPropertyToDict(dict, prop.first, prop.second);
         }
-        return PyTuple_Pack(2, stringAsPy(src.getName()), dict);
+        PyObject* name = stringAsPy(src.getName());
+        PyObject* tup = PyTuple_Pack(2, name, dict);
+        Py_DECREF(dict);
+        Py_DECREF(name);
+        return tup;
     }
 
     static void addPropertyToDict(PyObject* dict, const std::string& name, const Property& prop)
@@ -402,16 +406,21 @@ public:
         }
         else if (prop.getType() == "exotica::Initializer")
         {
-            PyDict_SetItemString(dict, name.c_str(), InitializerToTuple(boost::any_cast<Initializer>(prop.get())));
+            PyObject* init = InitializerToTuple(boost::any_cast<Initializer>(prop.get()));
+            PyDict_SetItemString(dict, name.c_str(), init);
+            Py_DECREF(init);
         }
         else if (prop.isInitializerVectorType())
         {
             PyObject* vec = PyList_New(0);
             for (Initializer& i : boost::any_cast<std::vector<Initializer>>(prop.get()))
             {
-                PyList_Append(vec, InitializerToTuple(i));
+                PyObject* init = InitializerToTuple(i);
+                PyList_Append(vec, init);
+                Py_DECREF(init);
             }
             PyDict_SetItemString(dict, name.c_str(), vec);
+            Py_DECREF(vec);
         }
         else
         {

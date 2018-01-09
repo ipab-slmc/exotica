@@ -98,7 +98,7 @@ std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionOb
     shapes::ShapeConstPtr shape = element->Shape;
 
     // Apply scaling and padding
-    if (element->isRobotLink || element->ClosestRobotLink)
+    if (element->isRobotLink || element->ClosestRobotLink.lock())
     {
         if (robotLinkScale_ != 1.0 || robotLinkPadding_ > 0.0)
         {
@@ -199,21 +199,21 @@ bool CollisionSceneFCL::isAllowedToCollide(fcl::CollisionObject* o1, fcl::Collis
     std::shared_ptr<KinematicElement> e1 = scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())];
     std::shared_ptr<KinematicElement> e2 = scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())];
 
-    bool isRobot1 = e1->isRobotLink || e1->ClosestRobotLink;
-    bool isRobot2 = e2->isRobotLink || e2->ClosestRobotLink;
+    bool isRobot1 = e1->isRobotLink || e1->ClosestRobotLink.lock();
+    bool isRobot2 = e2->isRobotLink || e2->ClosestRobotLink.lock();
     // Don't check collisions between world objects
     if (!isRobot1 && !isRobot2) return false;
     // Skip self collisions if requested
     if (isRobot1 && isRobot2 && !self) return false;
     // Skip collisions between shapes within the same objects
-    if (e1->Parent == e2->Parent) return false;
+    if (e1->Parent.lock() == e2->Parent.lock()) return false;
     // Skip collisions between bodies attached to the same object
-    if (e1->ClosestRobotLink && e2->ClosestRobotLink && e1->ClosestRobotLink == e2->ClosestRobotLink) return false;
+    if (e1->ClosestRobotLink.lock() && e2->ClosestRobotLink.lock() && e1->ClosestRobotLink.lock() == e2->ClosestRobotLink.lock()) return false;
 
     if (isRobot1 && isRobot2)
     {
-        const std::string& name1 = e1->ClosestRobotLink ? e1->ClosestRobotLink->Segment.getName() : e1->Parent->Segment.getName();
-        const std::string& name2 = e2->ClosestRobotLink ? e2->ClosestRobotLink->Segment.getName() : e2->Parent->Segment.getName();
+        const std::string& name1 = e1->ClosestRobotLink.lock() ? e1->ClosestRobotLink.lock()->Segment.getName() : e1->Parent.lock()->Segment.getName();
+        const std::string& name2 = e2->ClosestRobotLink.lock() ? e2->ClosestRobotLink.lock()->Segment.getName() : e2->Parent.lock()->Segment.getName();
         return scene->acm_.getAllowedCollision(name1, name2);
     }
     return true;
@@ -267,8 +267,8 @@ bool CollisionSceneFCL::isCollisionFree(const std::string& o1, const std::string
     for (fcl::CollisionObject* o : fcl_objects_)
     {
         std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())];
-        if (e->Segment.getName() == o1 || e->Parent->Segment.getName() == o1) shapes1.push_back(o);
-        if (e->Segment.getName() == o2 || e->Parent->Segment.getName() == o2) shapes2.push_back(o);
+        if (e->Segment.getName() == o1 || e->Parent.lock()->Segment.getName() == o1) shapes1.push_back(o);
+        if (e->Segment.getName() == o2 || e->Parent.lock()->Segment.getName() == o2) shapes2.push_back(o);
     }
     if (shapes1.size() == 0) throw_pretty("Can't find object '" << o1 << "'!");
     if (shapes2.size() == 0) throw_pretty("Can't find object '" << o2 << "'!");
@@ -305,7 +305,7 @@ std::vector<std::string> CollisionSceneFCL::getCollisionWorldLinks()
     for (fcl::CollisionObject* object : fcl_objects_)
     {
         std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(object->getUserData())];
-        if (!element->ClosestRobotLink)
+        if (!element->ClosestRobotLink.lock())
         {
             tmp.push_back(element->Segment.getName());
         }
@@ -324,7 +324,7 @@ std::vector<std::string> CollisionSceneFCL::getCollisionRobotLinks()
     for (fcl::CollisionObject* object : fcl_objects_)
     {
         std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(object->getUserData())];
-        if (element->ClosestRobotLink)
+        if (element->ClosestRobotLink.lock())
         {
             tmp.push_back(element->Segment.getName());
         }

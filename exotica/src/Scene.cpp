@@ -486,7 +486,7 @@ void Scene::updateSceneFrames()
         Eigen::Affine3d pose;
         tf::transformKDLToEigen(it->Segment.getFrameToTip(), pose);
         const auto& temp = it;
-        it = kinematica_.AddElement(it->Segment.getName(), pose, it->Parent->Segment.getName(), it->Shape, it->Segment.getInertia());
+        it = kinematica_.AddElement(it->Segment.getName(), pose, it->Parent.lock()->Segment.getName(), it->Shape, it->Segment.getInertia());
         it->IsControlled = temp->IsControlled;
     }
 

@@ -10,13 +10,13 @@
 class KinematicElement
 {
 public:
-    KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id), IsControlled(false), ControlId(-1), Shape(nullptr), isRobotLink(false), ClosestRobotLink(nullptr), IsTrajectoryGenerated(false)
+    KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id), IsControlled(false), ControlId(-1), Shape(nullptr), isRobotLink(false), ClosestRobotLink(std::shared_ptr<KinematicElement>(nullptr)), IsTrajectoryGenerated(false)
     {
     }
     inline void updateClosestRobotLink()
     {
-        std::shared_ptr<KinematicElement> element = Parent;
-        ClosestRobotLink = nullptr;
+        std::shared_ptr<KinematicElement> element = Parent.lock();
+        ClosestRobotLink = std::shared_ptr<KinematicElement>(nullptr);
         while (element && element->Id > 0)
         {
             if (element->isRobotLink)
@@ -24,7 +24,7 @@ public:
                 ClosestRobotLink = element;
                 break;
             }
-            element = element->Parent;
+            element = element->Parent.lock();
         }
         setChildrenClosestRobotLink();
     }
@@ -44,9 +44,9 @@ public:
     int Id;
     int ControlId;
     bool IsControlled;
-    std::shared_ptr<KinematicElement> Parent;
+    std::weak_ptr<KinematicElement> Parent;
     std::vector<std::shared_ptr<KinematicElement>> Children;
-    std::shared_ptr<KinematicElement> ClosestRobotLink;
+    std::weak_ptr<KinematicElement> ClosestRobotLink;
     KDL::Segment Segment;
     KDL::Frame Frame;
     KDL::Frame GeneratedOffset;

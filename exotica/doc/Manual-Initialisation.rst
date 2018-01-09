@@ -3,46 +3,44 @@ Manual Initialisation
 *********************
 
 Manual initialisation encapsulates all initialisation and handling of
-EXOTica within your own C++ code, with no external XML files. This could
-be a preferred if your project has been finalised and does not need to
-be changed or if you prefer to have all your EXOTica code in one place.
+EXOTica within C++ or python  code, with no external XML files. This could
+be a preferred if your project has been finalised or if you prefer to have all your EXOTica code in one place.
 
 In this tutorial, we will use the example of manual initialisation for
-the UnconstrainedEndPoseProblem found in the ``exotica_examples``
-`here <https://github.com/openhumanoids/exotica/blob/master/examples/exotica_examples/src/manual.cpp>`__:
+the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/manual.cpp>`__:
 
 .. code:: c++
 
-    #include <exotica/Exotica.h>
+        #include <exotica/Exotica.h>
 
-    // Manual initialization requires dependency on specific solvers and task maps:
-    #include <ik_solver/IKsolverInitializer.h>
-    #include <task_map/EffPositionInitializer.h>
+        // Manual initialization requires dependency on specific solvers and task maps:
+        #include <ik_solver/IKsolverInitializer.h>
+        #include <task_map/EffFrameInitializer.h>
 
-    using namespace exotica;
+        using namespace exotica;
 
-    void run()
-    {
+        void run()
+        {
+        Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
+
         // Scene using joint group 'arm'
-        SceneInitializer scene("MyScene","arm");
-
+        SceneInitializer scene("MyScene", "arm", false, "", "{exotica_examples}/resources/robots/lwr_simplified.urdf", "{exotica_examples}/resources/robots/lwr_simplified.srdf");
         // End-effector task map with two position frames
-        EffPositionInitializer map("Position","MyScene",false,
-        {FrameInitializer("lwr_arm_6_link")});
-
+        EffFrameInitializer map("Position", false,
+                                {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
         // Create a task using the map above (goal will be specified later)
         Eigen::VectorXd W(7);
-        W << 7,6,5,4,3,2,1;
+        W << 7, 6, 5, 4, 3, 2, 1;
 
-        UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,W,false,{map});
+        UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
         IKsolverInitializer solver("MySolver");
         solver.C = 1e-3;
         solver.MaxIt = 1;
         solver.MaxStep = 0.1;
     ...
 
-The Code Explained
-------------------
+Code Explained
+--------------
 
 Include Initialisers
 ~~~~~~~~~~~~~~~~~~~~
@@ -64,97 +62,79 @@ Currently available solvers are:
     #include <aico/AICOsolverInitializer.h>
     #include <ik_solver/IKsolverInitializer.h>
 
-Once we have included the correct initialisers, we must initialise the:
-\* ``scene`` \* ``map`` \* ``task`` \* ``problem`` \* ``solver``
+Once we have included the correct initialisers, we must initialise:
+* ``scene`` 
+* ``map`` 
+* ``problem`` 
+* ``solver``
 
 Scene Initialisation
 ~~~~~~~~~~~~~~~~~~~~
 
-When initialising the scene, we create an instance of the
-``SceneInitializer``, which here we assign the name ``scene``.
+When initialising the scene, we instantiate a ``SceneInitializer``, 
+which here name ``scene``.
 
 .. code:: c++
 
         // Scene using joint group 'arm'
-        SceneInitializer scene("MyScene","arm");
+        SceneInitializer scene("MyScene", "arm", false, "", "{exotica_examples}/resources/robots/lwr_simplified.urdf", "{exotica_examples}/resources/robots/lwr_simplified.srdf");
 
-We must also pass in two arguments during initialisation: the name of
-the scene (to be used later) and the name of the joint group specified
-in the SRDF file.
-`Here <https://github.com/openhumanoids/exotica/blob/master/examples/exotica_examples/resources/lwr_simplified.srdf>`__
-in the example SRDF we see:
+We must also pass in our initialisation arguments seen in the `Scene Initializer <https://github.com/ipab-slmc/exotica/blob/master/exotica/init/Scene.in>`__ file:
 
 .. code:: xml
 
-    <group name="arm">
+        Required std::string Name;
+        Optional bool Debug = false;
+        Required std::string JointGroup;
+        Optional std::string RobotDescription = "robot_description";
+        Optional std::string URDF = "";
+        Optional std::string SRDF = "";
+        Optional bool SetRobotDescriptionRosParams = false;  // to be used in conjunction with URDF or SRDF to set the robot_description and robot_description_semantic from the files/string in URDF/SRDF
+        Optional std::string CollisionScene = "CollisionSceneFCL";
+        Optional bool AlwaysUpdateCollisionScene = false;
+        Optional std::string LoadScene = "";
+        Optional std::vector<exotica::Initializer> Links = std::vector<exotica::Initializer>();
+        Optional std::vector<exotica::Initializer> Trajectories = std::vector<exotica::Initializer>();
 
-The name given in this file must match the one that is passed into the
-scene initialiser. This will direct EXOTica to the dimensions of the arm
-used for motion planning.
+Here we use the parameters: 
+* name of the scene ("MyScene") 
+* name of the joint group ("arm") which is specified in the `SRDF <https://github.com/openhumanoids/exotica/blob/master/examples/exotica_examples/resources/lwr_simplified.srdf>`__ file.
+* Debug argument ("false")
+* RobotDescription ("")
+* URDF (name of URDF file)
+* SRDF (name of SRDF file)
+
 
 Map Initialisation
 ~~~~~~~~~~~~~~~~~~
 
-Maps are initialised in the same way as scenes. Here we name the
-``EffPositionInitializer`` ``map`` and a we call the map by the name
-``"Position"``.
+Maps refers to the ``task maps`` of a problem, they provide a mapping from configuration space to task space
+which are useful for fulfilling several tasks, such as specifying goals and avoiding obstacles. 
+You can read more about task maps in a `later section <Task_maps.html>`__ . 
 
-.. code:: c++
+For now we are only interested in reaching an end effector goal, so we will use the ``EffFrame`` task map, 
+which allows us specify the name of the end effector from the URDF file, which will be the focus when we 
+try to reach a an end effector goal, as we are doing here. 
 
-        // End-effector task map with a position frame
-        EffPositionInitializer map("Position","MyScene",false,
-        {FrameInitializer("lwr_arm_6_link")});
+.. code:: xml
 
-From here, the map initialiser also requires a ``scene``, a debug
-argument and an end-effector link.
+        EffFrameInitializer map("Position", false,
+                                {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
 
-We provide the ``scene`` to the map using the name of the scene we
-created in the previous block. In this tutorial we used the name
-``"MyScene"``, so this is what we will pass to the ``map``.
+Here we create an EffFrameInitializer with the name "map". We again give the initialiser a name - "Position", which will be used to refer
+to the map later. Then we give the standard debug argument (here it is false); then to initialise the frame we use the ``FrameInitializer``
+initialiser to give the name of the end effector link (Must be the same name as the link in the URDF file). Then we can add an optional 
+offset argument. 
 
-Next, we'll set the ``debug argument``; this can be true or false
-depending on your preference.
+*NOTE - the name of the end effector link must match that in the URDF
+and SRDF files*
 
-Finally, we must set the end effector link by wrapping it within a
-``FrameInitializer``. The name of the end effector that is supplied must
-be the name of a link within the URDF file.
+Problem Initialisation
+~~~~~~~~~~~~~~~~~~~~~~
 
-When we plug in the name of the end-effector ``"lwr_arm_6_link"`` from
-our example URDF file, we have:
-
-.. code:: c++
-
-    {FrameInitializer("lwr_arm_6_link")}
-
-Task
-~~~~
-
-*This needs to be rewritten* To create a task, we must assign a weight
-to each DOF to denote its relative movement cost. This is done by
-providing a vector of weights ``W`` which tends to be filled in
-descending order based on the DOF:
-
-.. code:: c++
-
-        Eigen::VectorXd W(7);
-        W << 7,6,5,4,3,2,1;
-
-As an example, if we had a 3 DOF robot, the weights ``W`` would be set
-at:
-
-.. code:: c++
-
-        Eigen::VectorXd W(3);
-        W << 3,2,1;
-
-This weight vector will be sent to the problem in the next step.
-
-Problem
-~~~~~~~
-
-In the steps up to this point, we have created generated the components
+In the steps up to this point, we have generated the components
 which make up a problem. Now we can move onto initialising a problem
-using these parts.
+itself using these parts.
 
 In this example we are interested in setting up a
 ``UnconstrainedEndPoseProblem``, so we use the
@@ -164,20 +144,28 @@ be used and so on. But here we have our current problem initialiser:
 
 .. code:: c++
 
-        UnconstrainedEndPoseProblemInitializer problem("MyProblem",scene,W,false,{map});
+        UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
 
-into which we pass: \* a name for the problem ``"MyProblem"`` (which we
-will use later) \* the ``scene`` initialiser we created earlier (the not
-simply the name of the scene) \* the weight vector ``W`` \* a debug
-argument. Here we set it to ``false`` \* the ``map`` initialiser (must
-be contained in curly braces ``{}``)
+into which we pass: 
+* a name for the problem ``"MyProblem"`` (which we will use later) 
+* the ``scene`` initialiser we created earlier (the name of the holder, not the name of the scene) 
+* a debug argument. Here we set it to ``false`` 
+* the ``map`` initialiser (must be contained in curly braces ``{}``)
+* the weight vector ``W`` 
+
+Later we will see in more detail that we can send multiple maps to the problem initialiser, all
+contained within the curly braces e.g. ``{map,joint_limit_map,obs_avoid_map}`` with a map initialiser
+for each of the variables inside the braces.
+
+The ``W`` vector weights the joints of your robot according to the cost of moving each one. 
+This vector must be the same size as the number of the number of DOF of your robot. 
 
 Solver
 ~~~~~~
 
 That's the problem set up, now to do the same for the solver. For the
 problem we have used in the tutorial (``UnconstrainedEndPoseProblem``),
-the IK solver is the most appropriate solver, so that is the solver we
+the IK solver is the most appropriate solver, so this is the solver we
 will set up:
 
 .. code:: c++
@@ -202,13 +190,13 @@ are seen below:
 
 .. code:: xml
 
-    extend <exotica/MotionSolver>
-    Optional double Tolerance = 1e-5;
-    Optional double Convergence = 0.0;
-    Optional int MaxIt = 50;
-    Optional double MaxStep = 0.02;
-    Optional double C = 0.0;
-    Optional double Alpha = 1.0;
+        extend <exotica/MotionSolver>
+        Optional double Tolerance = 1e-5;
+        Optional double Convergence = 0.0;
+        Optional int MaxIt = 50;
+        Optional double MaxStep = 0.02;
+        Optional double C = 0.0;
+        Optional double Alpha = 1.0;
 
 All selections in the ``IKSolver`` are optional. By referring back to
 the example code, you see that we decided to set 3 of the options for
@@ -226,7 +214,7 @@ options, as some may be required. Again, these can be found in:
 
 ``exotica/exotations/solvers/<SolverName>/init/<SolverName>.in``
 
-We now almost have a fully initialised hard-coded script. We can now
+We now almost have a fully initialised motion solver. We can now
 move onto the common initialisation step between hard-coded and XML
 initialisation
 `here <https://github.com/openhumanoids/exotica/wiki/Common-Initialisation-Step>`__.

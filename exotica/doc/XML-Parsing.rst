@@ -10,7 +10,7 @@ In this section, we will create a parser in C++ to handle the XML file
 we created last time.
 
 This snippet of code shows how this is implemented in the
-`XML.cpp <https://github.com/openhumanoids/exotica/blob/master/examples/exotica_examples/src/xml.cpp#L1-L15>`__
+`XML.cpp <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/xml.cpp>`__
 file in the EXOTica examples:
 
 .. code:: c++
@@ -22,53 +22,38 @@ file in the EXOTica examples:
 
     void run()
     {
-        ros::NodeHandle nh_("~");
+        Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
         Initializer solver, problem;
 
         std::string file_name;
-        nh_.getParam("ConfigurationFile",file_name);
+        Server::getParam("ConfigurationFile", file_name);
 
-    XMLLoader::load(file_name,solver, problem);
+        XMLLoader::load(file_name, solver, problem);
+
+    HIGHLIGHT_NAMED("XMLnode", "Loaded from XML");
     ...
 
 Code Explained
 --------------
 
-Within this run function, we have the ``ros::nodehandle`` ``nh_``. We'll
-use this to direct the parser to the XML file using ``ROS Params`` in
-the ROSLaunch file [link to ROSLaunch section].
+Firstly we use the exotica ``Server`` class to initialise the ROS node we will be using from now on.
+This ``Server`` class will handle a lot of our ROS dealings from here on. 
 
-First, we'll need some blank initialisers for the parser to fill and
-somewhere to store the name of the XML ``file_name``:
+We next get the filename of the ``Configuration File`` we need to parse. This argument is the name
+of the XML file which we set up previously, which will have been specified in the roslaunch file under 
+the parameter name ``ConfigurationFile``. 
 
-.. code:: c++
 
-    Initializer solver, problem;
+We will look at setting up our roslaunch files in more detail `later <Setting-up-ROSlaunch.html>`__.
 
-    std::string file_name;
-
-Now to grab the file name of the XML file from the ROSLaunch file. In
-this example we have used the name ``ConfigurationFile`` e.g.:
-
-.. code:: xml
-
-    <param name="ConfigurationFile" type="string" value="$(find exotica_examples)/resources/ik_solver_demo.xml" />
-
-so we'll extract the value under this parameter and assign it to the
-``file_name`` string using the ``ros::NodeHandle nh_``:
-
-.. code:: c++
-
-    nh_.getParam("ConfigurationFile",file_name);
-
-The final step now we have all the components is to feed the
-``file_name`` and empty initialisers into the XML loader:
+Now we have the file name and have created some initialisers in which to hold the ``solver`` and the ``problem``,
+we can now do the actual XML loading. This is done with the XMLLoader:
 
 .. code:: c++
 
     XMLLoader::load(file_name,solver, problem);
 
-From here, the XML loader handles everything and will extract all the
-initialisation parameters from the XML initialisation file. We're now
-ready to move onto the final initialisation `step <Common-Initialisation-Step.html>`__.
+To which we pass the filename which we filled earlier and the two empty initialisers. When these initialisers
+are returned they contain the initialisation details which we input in the XML file. These are now ready for the 
+next `step <Common-Initialisation-Step.html>`__ which is common to the XML and coded initialisation methods. 

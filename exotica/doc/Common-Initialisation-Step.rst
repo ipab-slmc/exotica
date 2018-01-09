@@ -10,13 +10,13 @@ initialisation tutorials, so if you have not completed either:
 `XML <XML.html>`__ (both initialisation and parsing steps) or `manual
 initialisation <Manual-Initialisation.html>`__, then go back and do those first.
 
-If you have done this, the robot properties have been set-up, either by
-XML or hard-coding. The completed initialisers need to be sent to the
+If you have done this, the robot properties have been set-up, either through
+XML or within your c++ or python code. The completed initialisers now need to be sent to the
 appropriate places and the problem sent to the solver.
 
-In both our XML and hard-coded initialisers, we instantiated a problem
+In both our XML and coded initialisers, we instantiated a problem
 initialiser in the 'problem' variable and the solver in the 'solver'
-variable. These are now to be sent to generic problem and solver
+variable. These now need to be sent to generic problem and solver
 holders:
 
 .. code:: c++
@@ -31,6 +31,7 @@ holders:
         // Assign the problem to the solver
         any_solver->specifyProblem(any_problem);
         UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
+
         ....
 
 Once we have the problem in a generic holder pointer ("any\_problem"),

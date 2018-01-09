@@ -4,96 +4,95 @@ XML Initialisation
 This section of the tutorial will demonstrate how to initialise EXOTica
 using XML and the related C++ code that is needed to parse the XML file.
 We will be using the XML file under the
-`IK\_Solver <https://github.com/openhumanoids/exotica/blob/master/examples/exotica_examples/resources/ik_solver_demo.xml>`__
+`IK\_Solver <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/configs/ik_solver_demo.xml>`__
 file and is shown below:
 
 .. code:: xml
 
-    <?xml version="1.0" ?>
-    <IKSolverDemoConfig>
+  <?xml version="1.0" ?>
+  <IKSolverDemoConfig>
 
-      <IKsolver Name="MySolver">   <!-- Motion solver definition -->
-        <MaxIt>1</MaxIt>
-        <MaxStep>0.1</MaxStep>
-        <Tolerance>1e-5</Tolerance>
-        <Alpha>1.0</Alpha>
-        <C>1e-3</C>
-      </IKsolver>
+    <IKsolver Name="MySolver">
+      <MaxIt>1</MaxIt>
+      <MaxStep>0.1</MaxStep>
+      <Tolerance>1e-5</Tolerance>
+      <Alpha>1.0</Alpha>
+      <C>1e-3</C>
+    </IKsolver>
 
-      <UnconstrainedEndPoseProblem Name="MyProblem"> <!-- Problem definition -->
+    <UnconstrainedEndPoseProblem Name="MyProblem">
 
-        <PlanningScene>
-          <Scene Name="MyScene"> <!-- Kinematic scene -->
-            <PlanningMode>Optimization</PlanningMode>
-            <JointGroup>arm</JointGroup>
-          </Scene>
-        </PlanningScene>
-        
-        <Maps>
-          <EffPosition Name="Position">
-            <Scene>MyScene</Scene>
-            <EndEffector>
-                <Frame Link="lwr_arm_6_link" />
-            </EndEffector>
-          </EffPosition>
-        </Maps>
+      <PlanningScene>
+        <Scene>
+          <JointGroup>arm</JointGroup>
+          <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+          <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+        </Scene>
+      </PlanningScene>
+      
+      <Maps>
+        <EffFrame Name="Position">
+          <EndEffector>
+              <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17"/>
+          </EndEffector>
+        </EffFrame>
+      </Maps>
+      <StartState>0 0 0 0 0 0 0</StartState>
+      <NominalState>0 0 0 0 0 0 0</NominalState>
+      <W> 7 6 5 4 3 2 1 </W>
+    </UnconstrainedEndPoseProblem>
 
-        <!-- Problem parameters: tolerance and per joint weighting -->
+  </IKSolverDemoConfig>
 
-        <W> 7 6 5 4 3 2 1 </W>
-      </UnconstrainedEndPoseProblem>
-
-    </IKSolverDemoConfig>
 
 Code Explained
 --------------
 
-| As seen above: \* the ``IKSolver`` is initialised first \* its
-  parameters (e.g. ``MaxIt``,\ ``MaxStep``) are set
-| \* a problem (``UnconstrainedEndPoseProblem``) is specified and the
-  necessary parameters are input. - Within the problem, a ``scene`` and
-  a ``map`` are initialised in addition to the problem parameters. -
-  \*\*(A task map needs to be initialised in most problems, but not in
-  the Sampling Problem)
+In the code we see:
+* the initialisation of the ``IKSolver`` and its parameters (e.g. ``MaxIt``,\ ``MaxStep``) set
+* a problem (``UnconstrainedEndPoseProblem``) is specified and  necessary parameters input. 
+- Within the problem, a ``PlanningScene`` and ``Maps`` are initialised in addition to the problem parameters. 
+
+Let's look a little more closely into the solver and problem setup.
+
 
 Solver Setup
 ~~~~~~~~~~~~
 
 The solver is initialised by identifying the solver and giving it a name
-(to be used later): ``<IKsolver Name="MySolver">`` Solver options are
-then specified:
+(which will be used later); here we use the name "MySolver" : ``<IKsolver Name="MySolver">`` 
+Solver options are then specified:
 
 .. code:: xml
 
-        <MaxIt>1</MaxIt>
-        <MaxStep>0.1</MaxStep>
-        <Tolerance>1e-5</Tolerance>
-        <Alpha>1.0</Alpha>
-        <C>1e-3</C>
+      <MaxIt>1</MaxIt>
+      <MaxStep>0.1</MaxStep>
+      <Tolerance>1e-5</Tolerance>
+      <Alpha>1.0</Alpha>
+      <C>1e-3</C>
 
-The options associated with each solver can be found in the init files
-(detailed on the `previous
-page <https://github.com/openhumanoids/exotica/wiki/Initialisation>`__)
+The parameters in this case are optional, but each solver has its own 
+set of initialisation parameters, as detailed on the `previous page <Initialisation.html>`__
 and the function of each can be found in the literature.
 
 Problem Setup
 ~~~~~~~~~~~~~
 
 Initialisation of the problem is wrapped in the XML tag named after the
-problem. Here we have the ``UnconstrainedEndPoseProblem`` (examples
-covered later: ``SamplingProblem``,\ ``UnconstrainedTimeIndexProblem``).
+solver. Here we use the ``UnconstrainedEndPoseProblem``.
 
-Inside this problem, we have the: \* ``PlanningScene`` \* ``Maps`` \*
-``W``.
+Inside this problem, we have the: 
+* ``PlanningScene`` 
+* ``Maps`` 
+* Solver Parameters (e.g. ``StartState``, ``NominalState`` ``W``).
 
 Planning Scene
 ^^^^^^^^^^^^^^
 
-A ``PlanningScene`` always contains a ``Scene`` with a name (e.g.
-``MyScene``), a ``PlanningMode`` and a ``JointGroup``. This joint group
-corresponds to the planning group which was specified within the
-`SRDF <https://github.com/openhumanoids/exotica/blob/master/examples/exotica_examples/resources/lwr_simplified.srdf#L12>`__
-file, the part we are interested in is detailed below:
+A ``PlanningScene`` always contains:
+ * `URDF <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.urdf>`__
+ * `SRDF <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.srdf>`__
+ * ``JointGroup`` which corresponds to the planning group specified in the SRDF file, the part we are interested in is detailed below:
 
 .. code:: xml
 
@@ -115,34 +114,43 @@ using.
 Maps
 ^^^^
 
-When setting up ``Maps`` , the name of the scene you set up earlier is
-passed in:
+Maps refers to the ``task maps`` of a problem, they provide a mapping from configuration space to task space
+which are useful for fulfilling several tasks, such as specifying goals and avoiding obstacles. 
+You can read more about task maps in a `later section <Task_maps.html>`__ . 
+
+For now we are only interested in reaching an end effector goal, so we will use the ``EffFrame`` task map, 
+which allows us specify the name of the end effector from the URDF file, which will be the focus when we 
+try to reach a an end effector goal, as we are doing here. 
 
 .. code:: xml
 
-        <Scene>MyScene</Scene>
+      <Maps>
+        <EffFrame Name="Position">
+          <EndEffector>
+              <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17"/>
+          </EndEffector>
+        </EffFrame>
+      </Maps>
 
-as well as an initialiser to direct EXOTica to the EndEffector link:
+This specifies the maps we are using in the problem. Here we use only EffFrame, but you can add multiple task maps between the ``Maps`` tags. 
 
-.. code:: xml
-
-            <EndEffector>
-                <Frame Link="lwr_arm_6_link" />
-            </EndEffector>
+Within the EffFrame initialisation, we give the map a name, we specify the name of the link be be considered as the end effector as well as an optional offset distance. 
 
 *NOTE - the name of the end effector link must match that in the URDF
 and SRDF files*
 
-Weighting
-^^^^^^^^^
+Problem Parameters
+^^^^^^^^^^^^^^^^^^
 
-Finally, we must set up the task ``W``. This simply consists of a vector
-of descending order weights based on the number of DOF in your robot
-(e.g. for a 3 DOF robot: ``<W> 3 2 1 </W>``)
+Finally, we setup the parameters of this problem. Parameters vary for each problem, but here we see the parameters ``W``, ``StartState`` and ``NominalState``, which
+we set to the appropriate values. More information about these parameters can be found in the EXOTica chapter. 
+
+The ``W`` vector weights the joints of your robot according to the cost of moving each one. 
+This vector must be the same size as the number of the number of DOF of your robot. 
 
 Next Step
 ~~~~~~~~~
 
 Now the XML initialisation has been completed, we can begin parsing it
 to be used in EXOTica in the `next
-step <https://github.com/openhumanoids/exotica/wiki/XML-Parsing>`__.
+step <XML-Parsing.html>`__.

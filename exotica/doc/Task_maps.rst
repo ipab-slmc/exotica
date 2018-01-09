@@ -2,14 +2,21 @@
 Task Maps
 **********
 
-Task maps form the basis of all Problems in EXOTica; they provide a mapping from configuration space to task space. A problem can contain one or many task maps. For example, if the problem requires the effector to reach a goal position with no concern for orientation we might use the end-effector position task map: `EffPosition`, which informs EXOTIca that this is what you require. Whereas if we are only concerned with orientation, we would use the 'EffOrientation' map. If we care about both position and orientation we can send BOTH the 'EffPosition' AND the 'EffOrientation' task maps to the problem or we can use the 'EffFrame' task map, which contains both positional and orientation mapping. 
+Task maps form the basis of all Problems in EXOTica; they provide a mapping from configuration space to task space. A problem can contain one or many task maps. 
+For example, if the problem requires the effector to reach a goal position with no concern for orientation we might use the end-effector position task map: 
+`EffPosition`. Whereas if we are only concerned with orientation, we would use the 'EffOrientation' map. If we care about both position and orientation we can 
+send BOTH the 'EffPosition' AND the 'EffOrientation' task maps to the problem or we can use the 'EffFrame' task map, which contains both positional and orientation mapping. 
 
-The ability to specify multiple task maps enables a wide range of customization for each problem. As well as being able to specify what frame and joint is of interest, we can add collision detection arguments, joint limit constraints or centre of mass location among others individually or collectively to problems.
+The ability to specify multiple task maps enables a wide range of customization for each problem. As well as being able to specify what frame and joint is of interest, 
+we can add collision detection arguments, joint limit constraints or centre of mass location among others individually or collectively to problems.
 
 In this tutorial we explain each of the task maps and detail the input arguments needed to instantiate the task maps.
 
-Initialising task maps 
-=================================
+Initialising task maps
+======================
+
+Each task map needs to be initialised first, this sets up the task map and specifies any important parameters. After initialisation we can send the the task map to 
+the problem. 
 
 CoM: Specify the CoM for a link
 Initialisation:  
@@ -87,10 +94,59 @@ Initialisation:
 
     ( std::string Link_, double Radius_, Eigen::VectorXd LinkOffset_ =  Eigen::IdentityTransform(), std::string Base_ =  "", Eigen::VectorXd BaseOffset_ =  Eigen::IdentityTransform(), std::string Group_ =  "default")
 
-SphereCollision: Used in collision detection. Groups of spheres (seen in previous bullet point) are attached to the robot and environment. Spheres within the same group will not detect collisions within the same group, but collisions between 
+SphereCollision: Used in collision detection. Groups of spheres (seen in previous bullet point) are attached to the robot and environment. 
+Spheres within the same group will not detect collisions within each other , but collisions between different groups are detected.
 
 Initialisation: 
 
 .. code:: cpp
 
     ( std::string Name_, double Precision_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string ReferenceFrame_ =  "/world", double Alpha_ =  1.0)
+
+
+Using Task Maps
+===============
+
+Once we've chosen and initialised the task maps we're interested in they need to be sent to the problem. The problem then informs the solver that these things must be taken into
+consideration when producing a motion plan. Each problem can handle one of many task maps. Let's look at how we send these to the problem. 
+
+Cpp
+~~~
+
+In the snippet below, we see that we have created a task map named ``map`` , which is an end effector frame map. We send this to the problem in the appropriate argument place using 
+the curly brackets ``{map}``. In this snippet we assume you have already created a ``scene`` and ``W`` initialiser:
+
+.. code:: cpp
+
+    EffFrameInitializer map("Position", false,
+                            {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
+
+    UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
+
+By placing multiple map variable names inside these curly brackets, we can specify several maps to be sent to the same problem (this sets joint limits for the 
+`LWR_simplified <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.urdf>`__  arm in the examples):
+
+.. code:: cpp
+
+    void get_joint_limits(std::vector<Initializer> joint_store)
+    {
+        joint_store.push_back({EffFrameInitializer("Position",false,{FrameInitializer("lwr_arm_0_link")})});
+        joint_store.push_back({EffFrameInitializer("Position",false,{FrameInitializer("lwr_arm_1_link")})});
+        joint_store.push_back({EffFrameInitializer("Position",false,{FrameInitializer("lwr_arm_2_link")})});
+        joint_store.push_back({EffFrameInitializer("Position",false,{FrameInitializer("lwr_arm_3_link")})});
+        joint_store.push_back({EffFrameInitializer("Position",false,{FrameInitializer("lwr_arm_4_link")})});
+        joint_store.push_back({EffFrameInitializer("Position",false,{FrameInitializer("lwr_arm_5_link")})});
+        joint_store.push_back({EffFrameInitializer("Position",false,{FrameInitializer("lwr_arm_6_link")})});
+    }
+
+    std::vector<Initializer> joint_store;
+        get_joint_limits(joint_store);
+
+    JointLimitInitializer joint_map("joint_limits",false,joint_store,90.0);
+
+    EffFrameInitializer eff_map("Position", false,
+                            {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
+
+    UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {eff_map,joint_map}, W);
+
+Further task maps can then be added in the same way. These can now be sent to the solver. 

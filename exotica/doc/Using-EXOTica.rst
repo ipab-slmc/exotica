@@ -2,14 +2,13 @@
 Using EXOTica
 *************
 
-This part of the tutorial assumes that EXOTica is already initialised
-with a problem and solver fully set up and the problem sent to the
-solver.
+This part of the tutorial assumes that you have completed the previous 
+step. We will work off the same code and get on with soling some motion 
+plans.
 
-From here we can begin to use EXOTica to solve problems and produce
-motion plans. We will continue to use the exotica example found in
-``manual.cpp`` as a reference, starting after initialisation is
-complete:
+We will continue to use the exotica example found in
+``manual.cpp`` as a reference, starting after we sent the problem to 
+the solver:
 
 .. code:: c++
 
@@ -91,34 +90,32 @@ Now we have a starting point and something to hold the trajectory, we
 need somewhere to go. It's time to set the goal.
 
 Methods of goal setting vary according to the problem and your
-requirements. Two methods exist for the IK\_solver. The method used in
-the tutorial specifies the goal for all IK\_solver task maps by setting
+requirements. Two methods exist for the IK_solver. The method used in
+the tutorial specifies the goal for all IK_solver task maps by setting
 the ``y`` value to the desired goal:
 
-.. code:: c++
+.. code:: cpp
 
             my_problem->y << 0.6,  // X Position
                             -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1, // Y Position
                              0.5 + sin(t * M_PI * 0.5) * 0.2; // Z Position
 
-    NOTE: To set the goal for an individual map, use the ``setGoal()``
-    function. This requires the name of the task map and a Eigen vector
-    containing the Cartesian coordinates of the goal:
+NOTE: To set the goal for an individual map, use the ``setGoal()``
+function. This requires the name of the task map and a Eigen vector
+containing the Cartesian coordinates of the goal:
 
-\`\`\`C++ Eigen::VectorXd goal(3);
+.. code:: cpp
 
-::
+    Eigen::VectorXd goal(3);
 
     goal << 0.6,0.8,0.5;
 
     my_problem->setGoal("Position",goal);
 
-\`\`\` > See more about goal setting in the individual problem pages.
-
 Now the initial joint positions have been set, we have the solution
 container and have set the goal, we are ready to solve the problem using
 the ``any_solver`` container in which we stored the generic solver in
-earlier and passing the initial joint states ``q`` and the trajectory
+earlier, passing the initial joint states ``q`` and the trajectory
 holder:
 
 .. code:: c++
@@ -134,7 +131,7 @@ Now we have a solution to our problem. But what does it look like?
 
     [ INFO] [1501240815.111167097]: Finished solving in 3.085e-05s. Solution [  -0.109557   -0.653855  -0.0687444     1.28515 1.06079e-17           0           0]
 
-When using the IK\_solver, as in this tutorial and we set the MaxIt to a
+When using the IK_solver, as in this tutorial and we set the MaxIt to a
 high number, we get single solutions to the IK problem, as shown above.
 This is a print out of the kind of thing you would see if you run this
 tutorial. This is a vector of angles, one entry for each joint in our

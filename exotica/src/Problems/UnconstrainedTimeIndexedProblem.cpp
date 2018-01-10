@@ -52,6 +52,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
 {
     init_ = init;
     setT(init_.T);
+    applyStartState(false);
     reinitializeVariables();
 }
 
@@ -121,8 +122,8 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     x.assign(T, Eigen::VectorXd::Zero(JN));
     xdiff.assign(T, Eigen::VectorXd::Zero(JN));
 
-    // Set initial trajectory
-    InitialTrajectory.resize(T, applyStartState(false));
+    // Set initial trajectory with current state
+    InitialTrajectory.resize(T, scene_->getControlledState());
 }
 
 void UnconstrainedTimeIndexedProblem::setT(int T_in)

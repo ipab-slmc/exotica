@@ -5,10 +5,10 @@ Setting up ROSlaunch
 Generic ROSlaunch Structure
 ===========================
 
-Using ROSlaunch to launch your EXOTica script makes directing locating
-your URDF and SRDF scripts easier.
+Using ROSlaunch to launch your EXOTica script makes locating
+your URDF and SRDF files and keeping everything together much easier.
 
-As we can see in the roslaunch file for the manually initialised example
+As we can see in the roslaunch file for the manually initialized example
 `here <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/launch/CppInitManual.launch>`__
 and seen below, there are a few essential elements to constructing an EXOTica
 ROSlaunch file.
@@ -105,7 +105,7 @@ file:
 XML Parameters
 ==============
 
-When initialising with XML, ROSlaunch needs to broadcast a ROSparam 
+When initializing with XML, ROSlaunch needs to broadcast a ROSparam 
 specifying the name of the configuration file (Here we're looking at the `XML launch file <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/launch/CppInitManual.launch>`__):
 
 .. code:: xml
@@ -114,6 +114,6 @@ specifying the name of the configuration file (Here we're looking at the `XML la
         <param name="ConfigurationFile" type="string" value="$(find exotica_examples)/resources/configs/ik_solver_demo.xml" />
     </node>
 
-Which will then be read by the XML initialiser in your script. Simply
+Which will then be read by the XML initializer in your script. Simply
 change the value of the ``ConfigurationFile`` parameter to set the
 filename.

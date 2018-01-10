@@ -3,7 +3,7 @@ Using EXOTica
 *************
 
 This part of the tutorial assumes that you have completed the previous 
-step. We will work off the same code and get on with soling some motion 
+step. We will work off the same code and get on with solving some motion 
 plans.
 
 We will continue to use the exotica example found in
@@ -14,7 +14,7 @@ the solver:
 
         ...
 
-        // Continued from initialisation
+        // Continued from initialization
         // Create the initial configuration
         Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumControlledJoints());
         Eigen::MatrixXd solution;
@@ -59,13 +59,13 @@ Code Explained
 --------------
 
 Firstly, we must set up a vector of initial joint variables to be fed
-into the solver. Here we initialise the joints to zero angles:
+into the solver. Here we initialize the joints to zero angles:
 
 .. code:: c++
 
         Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumControlledJoints());
 
-Here we use the kinematic description of the robot to determine the size
+Using the robot description to determine the size
 of the vector (``any_problem->getScene()->getNumControlledJoints()``). This vector
 can naturally be changed to whatever joint configuration is required for
 your motion planning purposes. for example, after instantiating ``q``:
@@ -79,7 +79,7 @@ solver later.
 
 When we do call the solver, we will get the motion plan back as an
 n\*DOF matrix, where n is the number of steps along the trajectory. A
-dynamically sized matrix container will need to be created to hold this.
+dynamic matrix container will need to be created to hold this.
 This is created in the next line:
 
 .. code:: c++
@@ -131,23 +131,25 @@ Now we have a solution to our problem. But what does it look like?
 
     [ INFO] [1501240815.111167097]: Finished solving in 3.085e-05s. Solution [  -0.109557   -0.653855  -0.0687444     1.28515 1.06079e-17           0           0]
 
-When using the IK_solver, as in this tutorial and we set the MaxIt to a
-high number, we get single solutions to the IK problem, as shown above.
-This is a print out of the kind of thing you would see if you run this
-tutorial. This is a vector of angles, one entry for each joint in our
+When using the IK_solver as in this tutorial and we set the ``MaxIt`` to a
+low number, we get single step solution to the IK problem, as shown above -
+this is what you would expect to see if you run this code;
+it shows a vector of angles, one column  for each joint in our
 robot. Each entry a joint configuration in radians, which will result in
-the end effector reaching the desired target.
+the end effector reaching the desired target. The rows of the output
+represent the positional steps each joint must pass through to reach 
+the end effector goal. When using a higher ``MaxIt`` setting, the number 
+of rows in your motion plan would likely increase. 
 
 When using other problems or a different configuration of the
 ``UnconstrainedEndPoseProblem``, trajectories will start to look a
-little more substantial. The matrix below shows the format of a solution
+little more substantial. The output below shows the format of a solution
 after being solved by the ``OMPLSolver``. Note that this solution was
 computed for a 6DOF robot and thus contains 6 columns. The first row
 represents the initial joint configuration, which here we set to zeros.
 The final row shows the configuration of the robot which allows the
 end-effector to reach the goal. The intermediate rows are the positional
-configurations that transfer the arm from start to end. The number of
-rows will be dependent on the distance travelled by the arm.
+configurations that transfer the arm from start to end.
 
 ::
 
@@ -182,15 +184,13 @@ EXOTica has the functionality to visualize this in RVIZ, so you can see
 your plan in action. The parts of the example code we are yet to mention
 deals with this and we'll go through it now.
 
-Once we have our solution we can move there, which means our new initial
-configuration the next time we solve the problem will be the same as the
-goal configuration of this one, so we set it as such:
+As we cycle through our motion plan, we can update the joint states:
 
 .. code:: c++
 
             q = solution.row(solution.rows() - 1);
 
-and we send this to the problem:
+and we send them to the problem:
 
 .. code:: c++
 
@@ -205,4 +205,4 @@ by RVIZ:
 
 RVIZ can either be set-up manually or via a
 `ROSlaunch <Setting-up-ROSlaunch.html>`__
-file (recommended).
+file.

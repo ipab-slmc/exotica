@@ -13,7 +13,7 @@ To run this code and start producing motion plans, start roscore then run:
     rosrun exotica_examples IK
 
 
-This will produce the following result in the terminal:
+This will produce a result similar to the following in the terminal:
 
 .. code:: shell
 
@@ -27,7 +27,7 @@ This will produce the following result in the terminal:
     ...
 
 
-This shows us the robot model we are using and then displays the joint angles for each of the 7 joints on our example robot after the time it took to solve the problem.
+This displays the joint angles for each of the 7 joints on our example robot after the time it took to solve the problem.
 
 Code
 ~~~~
@@ -70,7 +70,7 @@ After including the Exotica header file and setting the namespace, we enter the 
 
 This sets up our motion planning solver and gets the problem ready to be solved. To the solver we assign the contents of an XML 
 file, which is parsed by Exotica (``XMLLoader::loadSolver("{exotica_examples}/resources/configs/example.xml")``). 
-We will look in more detail into XML initialisation in a later tutorial, but for now we will go through some basics. 
+We will look in more detail into XML initialization in a later tutorial, but for now we will go through some basics. 
 
 The XML file from which the parser loads is `included <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/configs/example.xml>`_ 
 in the ``exotica_examples`` folder. We can see a copy of it below:

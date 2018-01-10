@@ -1,7 +1,7 @@
-XML Initialisation
+XML Initialization
 ==================
 
-This section of the tutorial will demonstrate how to initialise EXOTica
+This section of the tutorial will demonstrate how to initialize EXOTica
 using XML and the related C++ code that is needed to parse the XML file.
 We will be using the XML file under the
 `IK\_Solver <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/configs/ik_solver_demo.xml>`__
@@ -49,9 +49,9 @@ Code Explained
 --------------
 
 In the code we see:
-* the initialisation of the ``IKSolver`` and its parameters (e.g. ``MaxIt``,\ ``MaxStep``) set
+* the initialization of the ``IKSolver`` and its parameters (e.g. ``MaxIt``,\ ``MaxStep``) set
 * a problem (``UnconstrainedEndPoseProblem``) is specified and  necessary parameters input. 
-- Within the problem, a ``PlanningScene`` and ``Maps`` are initialised in addition to the problem parameters. 
+- Within the problem, a ``PlanningScene`` and ``Maps`` are initialized in addition to the problem parameters. 
 
 Let's look a little more closely into the solver and problem setup.
 
@@ -59,7 +59,7 @@ Let's look a little more closely into the solver and problem setup.
 Solver Setup
 ~~~~~~~~~~~~
 
-The solver is initialised by identifying the solver and giving it a name
+The solver is initialized by identifying the solver and giving it a name
 (which will be used later); here we use the name "MySolver" : ``<IKsolver Name="MySolver">`` 
 Solver options are then specified:
 
@@ -72,13 +72,13 @@ Solver options are then specified:
       <C>1e-3</C>
 
 The parameters in this case are optional, but each solver has its own 
-set of initialisation parameters, as detailed on the `previous page <Initialisation.html>`__
+set of initialization parameters, as detailed on the `previous page <Initialisation.html>`__
 and the function of each can be found in the literature.
 
 Problem Setup
 ~~~~~~~~~~~~~
 
-Initialisation of the problem is wrapped in the XML tag named after the
+Initialization of the problem is wrapped in the XML tag named after the
 solver. Here we use the ``UnconstrainedEndPoseProblem``.
 
 Inside this problem, we have the: 

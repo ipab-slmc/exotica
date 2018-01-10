@@ -12,14 +12,14 @@ we can add collision detection arguments, joint limit constraints or centre of m
 
 In this tutorial we explain each of the task maps and detail the input arguments needed to instantiate the task maps.
 
-Initialising task maps
+Initializing task maps
 ======================
 
-Each task map needs to be initialised first, this sets up the task map and specifies any important parameters. After initialisation we can send the the task map to 
+Each task map needs to be initialized first, this sets up the task map and specifies any important parameters. After initialization we can send the the task map to 
 the problem. 
 
 CoM: Specify the CoM for a link
-Initialisation:  
+Initialization:  
 
 .. code:: cpp
 	
@@ -28,7 +28,7 @@ Initialisation:
 
 Distance: Returns the distance between two frames, either an end effector frame or a point frame.
 
-Initialisation:
+Initialization:
 
 .. code:: cpp
 
@@ -38,7 +38,7 @@ Initialisation:
 
 EffOrientation: specifies an end effector orientation in task space
 
-Initialisation: 
+Initialization: 
 
 .. code:: cpp
 
@@ -47,7 +47,7 @@ Initialisation:
 
 EffPosition: specifies an end effector position in task space
 
-Initialisation: 
+Initialization: 
 
 .. code:: cpp
 
@@ -55,7 +55,7 @@ Initialisation:
 
 EffFrame: specifies an end effector pose in task space
 
-Initialisation: 
+Initialization: 
 
 .. code:: cpp
 
@@ -64,7 +64,7 @@ Initialisation:
 
 IMesh: See http://homepages.inf.ed.ac.uk/svijayak/publications/ivan-IJRR2013.pdf for details about iMesh
 
-Initialisation: 
+Initialization: 
 
 .. code:: cpp
 
@@ -72,7 +72,7 @@ Initialisation:
 
 Identity: the position of a joint. Useful if you want to avoid a certain position. 
 
-Initialisation: 
+Initialization: 
 
 .. code:: cpp
 
@@ -80,7 +80,7 @@ Initialisation:
 
 JointLimit: map to keep joints away from limits. Use options to set penalties for nearing joint limits
 
-Initialisation: 
+Initialization: 
 
 .. code:: cpp
 
@@ -88,7 +88,7 @@ Initialisation:
 
 Sphere: Initiates a sphere object in relation to a named link with an offset - acts as a primitive for collision SphereCollision
 
-Initialisation: 
+Initialization: 
 
 .. code:: cpp
 
@@ -97,7 +97,7 @@ Initialisation:
 SphereCollision: Used in collision detection. Groups of spheres (seen in previous bullet point) are attached to the robot and environment. 
 Spheres within the same group will not detect collisions within each other , but collisions between different groups are detected.
 
-Initialisation: 
+Initialization: 
 
 .. code:: cpp
 
@@ -107,14 +107,14 @@ Initialisation:
 Using Task Maps
 ===============
 
-Once we've chosen and initialised the task maps we're interested in they need to be sent to the problem. The problem then informs the solver that these things must be taken into
+Once we've chosen and initialized the task maps we're interested in they need to be sent to the problem. The problem then informs the solver that these things must be taken into
 consideration when producing a motion plan. Each problem can handle one of many task maps. Let's look at how we send these to the problem. 
 
 Cpp
 ~~~
 
 In the snippet below, we see that we have created a task map named ``map`` , which is an end effector frame map. We send this to the problem in the appropriate argument place using 
-the curly brackets ``{map}``. In this snippet we assume you have already created a ``scene`` and ``W`` initialiser:
+the curly brackets ``{map}``. In this snippet we assume you have already created a ``scene`` and ``W`` initializer:
 
 .. code:: cpp
 

@@ -1,22 +1,22 @@
 **************
-Initialisation
+initialization
 **************
 
-Now we have installed and set up EXOTica, we can now look at solving motion plans. 
-To do this, we must first initialise the solver. EXOTica can be added to a new or existing project;
-here we will start with a new project. 
+Now we have installed and set up EXOTica, we begin looking at solving motion plans. 
+To do this, we must first initialize our problems and solvers. 
+EXOTica can be added to a new or existing project; here we will start with a new project. 
 
 Two primary steps need to be fulfilled when using EXOTica:
-Initialisation and Usage. Initialisation is required to set up the
-problem and the solver. The usage is where the problem is solved and the resulting motion plan is
-used/processed.
+initialization and Usage. initialization is required to set up the
+problem and the solver. The usage is where the problem is solved.
 
-The solving and usage of EXOTica is taken care of in your python or cpp code you can initialise your problem here too, or this can be done via a separate XML file. XML tends to be preferred, 
-as it keeps your code clean and can be changed more easily.
+The solving and usage of EXOTica is taken care of in your python or cpp code. 
+You can initialize your problem here too, or this can be done via a separate XML file. 
+XML tends to be preferred, as it keeps your code clean and can be changed more easily.
 We will look at how to achieve each of these in the next section, but first take note of 
-where the initialisers are stored.
+where the initializers are stored.
 
-Initialisation options for all problems and solvers can be found in the
+initialization options for all problems and solvers can be found in the
 source code in the following locations:
 
 ::
@@ -28,9 +28,9 @@ source code in the following locations:
 
 These ``.in`` files are laid out as follows:
 
-When we look at a problem initialiser such as UnconstrainedEndPoseProblem initialiser 
+When we look at a problem initializer such as UnconstrainedEndPoseProblem initializer 
 (exotica/exotica/init/UnconstrainedEndPoseProblem.in), we see a list of parameters 
-that can be set when we initialise the problem. 
+that can be set when we initialize the problem. 
 
 .. code:: xml
 
@@ -43,9 +43,9 @@ that can be set when we initialise the problem.
     Optional Eigen::VectorXd NominalState = Eigen::VectorXd();
 
 In this case, all the parameters are optional and will have default values assigned to them. 
-We can change these parameters during initialisation if required. 
+We can change these parameters during initialization if required. 
 
-All problem initialisers also extend the ``exotica/PlanningProblem`` initialiser, which adds extra
+All problem initializers also extend the ``exotica/PlanningProblem`` initializer, which adds extra
 parameters. This is seen below:
 
 .. code:: xml
@@ -57,10 +57,10 @@ parameters. This is seen below:
     Optional Eigen::VectorXd StartState = Eigen::VectorXd();
     Optional double StartTime = 0;
 
-This requries us to specify as scene in which the solver will operate, as well as start states and
-task maps (which we will look at in a later section). In all, after extending both the 
-PlanningSceneInitializer and the Object initialiser (which takes a name and debug argument), 
-the whole initialiser for our UnconstrainedEndPoseProblem looks like this: 
+This requires us to specify as scene in which the solver will operate, as well as start states and
+task maps (which we will look at later). In all, after extending both the 
+PlanningSceneInitializer and the Object initializer (which takes a name and debug argument), 
+the whole initializer for our UnconstrainedEndPoseProblem looks like this: 
 
 .. code:: xml
 
@@ -75,8 +75,8 @@ the whole initialiser for our UnconstrainedEndPoseProblem looks like this:
     Optional Eigen::VectorXd Goal = Eigen::VectorXd();
     Optional Eigen::VectorXd NominalState = Eigen::VectorXd();
 
-This shows us that the very least that is required to initialise a problem is a name for the problem
+This shows us that the very least that is required to initialize a problem is a name for the problem
 and the name of the scene that the problem operates in. Other problems are also laid out in a similar fashion. The optional elements offer a powerful customisation tool for out motion planner. 
 
-Now we have seen the layout of the initialisers, the next step is to use these options in initialising EXOTica, 
-which can be done via `XML <XML.html>`__ or `C++ <Manual-Initialisation.html>`__. We will first look at XML initialisation.
+Now we have seen the layout of the initializers, the next step is to use these options in initializing EXOTica, 
+which can be done via `XML <XML.html>`__ or `C++ <Manual-Initialisation.html>`__. We will first look at XML initialization.

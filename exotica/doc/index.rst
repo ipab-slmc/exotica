@@ -19,15 +19,15 @@ Overview
 -  `Quick Start: C++ <Quickstart-cpp.html>`__
 -  `Setting up Problems and Solvers <Setting-up-problems-and-solvers.html>`__
 -  `Using EXOTica <Using-EXOTica.html>`_ 
--  `Initialisation <Initialisation.html>`__
+-  `Initialization <Initialisation.html>`__
 
    -  XML
 
-      -  `XML Initialisation <XML.html>`__
+      -  `XML Initialization <XML.html>`__
       -  `XML Parsing <XML-Parsing.html>`__
 
-   -  `Manual Initialisation <Manual-Initialisation.html>`__
-   -  `Common Initialisation Step <Common-Initialisation-Step.html>`__
+   -  `Manual Initialization <Manual-Initialisation.html>`__
+   -  `Common Initialization Step <Common-Initialisation-Step.html>`__
 -  `Task Maps <Task_maps.html>`_ 
 -  `Setting up ROSlaunch <Setting-up-ROSlaunch.html>`__
 

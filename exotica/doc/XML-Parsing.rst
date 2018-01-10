@@ -3,11 +3,12 @@ XML Parsing
 ***********
 
 This part of the tutorial assumes that you have completed the previous
-XML initialisation tutorial. If this is not the case, please go
+XML initialization tutorial. If this is not the case, please go
 `back <XML.html>`__ and complete it first.
 
 In this section, we will create a parser in C++ to handle the XML file
-we created last time.
+we created last time. For Python, the procedure is very similar - refer
+to the `Python examples <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/scripts/example_aico_noros.py>`_ .
 
 This snippet of code shows how this is implemented in the
 `XML.cpp <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/xml.cpp>`__
@@ -37,7 +38,7 @@ file in the EXOTica examples:
 Code Explained
 --------------
 
-Firstly we use the exotica ``Server`` class to initialise the ROS node we will be using from now on.
+Firstly we use the exotica ``Server`` class to initialize the ROS node we will be using from now on.
 This ``Server`` class will handle a lot of our ROS dealings from here on. 
 
 We next get the filename of the ``Configuration File`` we need to parse. This argument is the name
@@ -47,13 +48,13 @@ the parameter name ``ConfigurationFile``.
 
 We will look at setting up our roslaunch files in more detail `later <Setting-up-ROSlaunch.html>`__.
 
-Now we have the file name and have created some initialisers in which to hold the ``solver`` and the ``problem``,
+Now we have the file name and have created some initializers in which to hold the ``solver`` and the ``problem``,
 we can now do the actual XML loading. This is done with the XMLLoader:
 
 .. code:: c++
 
     XMLLoader::load(file_name,solver, problem);
 
-To which we pass the filename which we filled earlier and the two empty initialisers. When these initialisers
-are returned they contain the initialisation details which we input in the XML file. These are now ready for the 
-next `step <Common-Initialisation-Step.html>`__ which is common to the XML and coded initialisation methods. 
+To which we pass the filename which we filled earlier and the two empty initializers. When these initializers
+are returned they contain the initialization details which we input in the XML file. These are now ready for the 
+next `step <Common-Initialisation-Step.html>`__ which is common to the XML and coded initialization methods. 

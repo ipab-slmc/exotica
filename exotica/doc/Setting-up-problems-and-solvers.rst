@@ -14,7 +14,7 @@ For this tutorial, we will use the `manual.cpp <https://github.com/ipab-slmc/exo
 example file as a guide. The code is displayed below. 
 
 
-.. code:: cpp
+.. code-block:: cpp
 
     #include <exotica/Exotica.h>
 
@@ -117,7 +117,7 @@ In this tutorial we will be setting up an ``UnconstrainedEndPoseProblem`` and
 solving it using an IKSolver using the ``EffFrame`` task map. To do this we 
 need to include the correct header files:
 
-.. code:: cpp
+.. code-block:: cpp
 
     #include <exotica/Exotica.h>
 
@@ -139,7 +139,7 @@ ROS can either be set up manually or you can use the EXOTica Server.
 
 To use the EXOTica Server, it needs to be setup using the ``InitRos``:
 
-.. code:: cpp 
+.. code-block:: cpp
 
     Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
@@ -152,7 +152,7 @@ To construct a problem, we first need a ``Scene``, a ``map`` and parameters.
 
 Here we set up the Scene:
 
-.. code:: cpp 
+.. code-block:: cpp
 
     // Scene using joint group 'arm'
     SceneInitializer scene("MyScene", "arm", false, "", "{exotica_examples}/resources/robots/lwr_simplified.urdf", "
@@ -174,7 +174,7 @@ EffOrientationInitializer or both, using the EffFrameInitializer. Let's try the
 EffFrame map, where specify a goal for both the position and orientation of the 
 end effector
 
-.. code:: cpp
+.. code-block:: cpp
 
     EffFrameInitializer map("Position", false, {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
 
@@ -192,7 +192,7 @@ Problem and Solver Initialization
 Now we have the Scene and Map(s) (multiple maps can be added) initialized, we can set up the 
 problem. First we need to create an initializer:
 
-.. code:: cpp 
+.. code-block:: cpp
 
  UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
 
@@ -204,7 +204,7 @@ each joint).
 We can then create the initializer for the solver. To do this, we can simply name ("solver") and 
 create an initializer, give the solver itself a name ("MySolver") then set the parameters later: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     IKsolverInitializer solver("MySolver");
     solver.C = 1e-3;
@@ -218,7 +218,7 @@ details of each solver's options.
 The next step is to send the problem and solver to the Planning and Motion Solver pointer
 containers. Here use the name of the initializer, not the names of the problems and solvers.
 
-.. code:: cpp
+.. code-block:: cpp
 
     PlanningProblem_ptr any_problem = Setup::createProblem(problem);
     MotionSolver_ptr any_solver = Setup::createSolver(solver);
@@ -230,7 +230,7 @@ We now have our problem set up, containing all the information about the robot, 
 and we have a solver setup, waiting to solve some motion plans, but they don't know about
 each other. Let's now send the problem to the solver:
 
-.. code:: cpp
+.. code-block:: cpp
 
     any_solver->specifyProblem(any_problem);
     UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
@@ -238,13 +238,13 @@ each other. Let's now send the problem to the solver:
 When sending the problem to the solver, we use the pointers we created in the last step, named: "any_problem" and 
 "any_solver": 
 
-.. code:: cpp
+.. code-block:: cpp
 
     any_solver->specifyProblem(any_problem);
 
 Finally, we pop the problem back into a specific problem pointer to be used later:
 
-.. code:: cpp
+.. code-block:: cpp
 
     UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 

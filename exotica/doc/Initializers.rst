@@ -21,7 +21,7 @@ A core class is a class derived from ``MotionSolver``,
 be valid, it also have to inherit from ``Instantiable<>`` templated
 class, e.g.:
 
-.. code:: cpp
+.. code-block:: cpp
 
     class JointLimit: public TaskMap, public Instantiable<JointLimitInitializer>
     {
@@ -34,7 +34,7 @@ In the case above, ``JointLimitInitializer`` is the template parameter
 and the type used for initialization. You can then use the parameters of
 ``JointLimitInitializer`` to initialize the ``JointLimit`` class:
 
-.. code:: cpp
+.. code-block:: cpp
 
     void JointLimit::Instantiate(JointLimitInitializer& init)
     {
@@ -92,7 +92,7 @@ Compiling initializers
 To compile a package defining new initializers, add the following lines
 to your CMakeLists.txt:
 
-.. code:: cmake
+.. code-block:: cmake
 
     project(MyProjectName)
 

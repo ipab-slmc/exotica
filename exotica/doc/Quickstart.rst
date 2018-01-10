@@ -10,7 +10,7 @@ For this quick tutorial we'll be using the `example\_ik\_noros.py <https://githu
 Code
 ~~~~
 
-.. code:: python
+.. code-block:: python
 
 	#!/usr/bin/env python
 	print('Start')
@@ -50,13 +50,13 @@ Setting Start Position
 
 Here, `q` is the starting configuration of the robot which is passed to the solver. Here we set all joints to an initial 0 position:
 
-.. code:: python
+.. code-block:: python
 
 	q=array([0.0]*7)
 
 To alter the start position, specify a 1*n vector of initial joint angles, where n is the number of DOF. `q` will remain the vector of joint angles whose values will be replaced with the solution when we call the solve function: 
 
-.. code:: python
+.. code-block:: python
 
 	q = solver.solve()[0]
 
@@ -66,7 +66,7 @@ Setting the Goal
 
 The goal is set using the problem's setGoal function:
 
-.. code:: python
+.. code-block:: python
 
 	problem.setGoal('Position',figureEight(t))
 
@@ -75,7 +75,7 @@ Two arguments need to be passed into the function: the name of the task map, whi
 
 In the example, the goal is set to follow the shape of a figure of 8, defined earlier in the script. This works by calling solve on a loop. To set a fixed goal, we might see the following:
 
-.. code:: python
+.. code-block:: python
 
 	goal = array([0.5,0.2,0.3,0.1,0.8,0.5])
 	problem.setGoal('Position',goal)
@@ -106,7 +106,7 @@ Problem and Solution Setup
 
 To prepare EXOTica for solving motion plans, we must first specify what problem we want to solve (e.g. end pose problem, optimisation problem) and which solver we will use to solve it (e.g. end pose problems be solved by the IKSolver, optimisation problems can be solved by the AICOSolver). The basics will be explained below:
 
-.. code:: python
+.. code-block:: python
 
 	(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica')+'/resources/configs/ik_solver_demo.xml')
 	problem = exo.Setup.createProblem(prob)
@@ -116,14 +116,14 @@ To prepare EXOTica for solving motion plans, we must first specify what problem 
 
 First, we load the XML file
 
-.. code:: python
+.. code-block:: python
 
 	(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica')+'/resources/configs/ik_solver_demo.xml')
 
 
 which contains a description of the robot, the problem and solver we are using as well as any task maps. The `exo.Initializers.loadXMLFull` command returns the details of the problem and solver, which then need to be sent to EXOTica:
 
-.. code:: python
+.. code-block:: python
 
 	problem = exo.Setup.createProblem(prob)
 	solver = exo.Setup.createSolver(sol)
@@ -132,7 +132,7 @@ These form the basis of the way we set the goal and solve the problem later on i
 
 The last step in this setup is to send the problem to the solver: 
 
-.. code:: python
+.. code-block:: python
 
 	solver.specifyProblem(problem)
 
@@ -152,7 +152,7 @@ For details on setting initial joint angles and goal states - see the section ab
 Code
 ~~~~
 
-.. code:: python
+.. code-block:: python
 
 	#!/usr/bin/env python
 

@@ -9,7 +9,7 @@ be preferred if your project has been finalized or if you prefer to have all you
 In this tutorial, we will use the example of manual initialization for
 the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/manual.cpp>`__:
 
-.. code:: c++
+.. code-block:: c++
 
         #include <exotica/Exotica.h>
 
@@ -56,7 +56,7 @@ respectively.
 
 Currently available solvers are:
 
-.. code:: c++
+.. code-block:: c++
 
     #include <ompl_solver/OMPLsolverInitializer.h>
     #include <aico/AICOsolverInitializer.h>
@@ -74,14 +74,14 @@ Scene Initialization
 When initializing the scene, we instantiate a ``SceneInitializer``, 
 which here name ``scene``.
 
-.. code:: c++
+.. code-block:: c++
 
         // Scene using joint group 'arm'
         SceneInitializer scene("MyScene", "arm", false, "", "{exotica_examples}/resources/robots/lwr_simplified.urdf", "{exotica_examples}/resources/robots/lwr_simplified.srdf");
 
 We must also pass in our initialization arguments seen in the `Scene Initializer <https://github.com/ipab-slmc/exotica/blob/master/exotica/init/Scene.in>`__ file:
 
-.. code:: xml
+.. code-block:: xml
 
         Required std::string Name;
         Optional bool Debug = false;
@@ -116,7 +116,7 @@ For now we are only interested in reaching an end effector goal, so we will use 
 which allows us specify the name of the end effector from the URDF file, which will be the focus when we 
 try to reach a an end effector goal, as we are doing here. 
 
-.. code:: xml
+.. code-block:: xml
 
         EffFrameInitializer map("Position", false,
                                 {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
@@ -142,7 +142,7 @@ In this example we are interested in setting up a
 is a ``SamplingProblem``, then the ``SamplingProblemInitializer`` would
 be used and so on. But here we have our current problem initialiser:
 
-.. code:: c++
+.. code-block:: c++
 
         UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
 
@@ -168,7 +168,7 @@ problem we have used in the tutorial (``UnconstrainedEndPoseProblem``),
 the IK solver is the most appropriate solver, so this is the solver we
 will set up:
 
-.. code:: c++
+.. code-block:: c++
 
         IKsolverInitializer solver("MySolver");
         solver.C = 1e-3;
@@ -188,7 +188,7 @@ parameters for the solver, some required and some optional. Since we
 have used the ``IKSolver`` in the tutorial, the options for this solver
 are seen below:
 
-.. code:: xml
+.. code-block:: xml
 
         extend <exotica/MotionSolver>
         Optional double Tolerance = 1e-5;
@@ -202,7 +202,7 @@ All selections in the ``IKSolver`` are optional. By referring back to
 the example code, you see that we decided to set 3 of the options for
 this solver:
 
-.. code:: c++
+.. code-block:: c++
 
         solver.C = 1e-3;
         solver.MaxIt = 1;

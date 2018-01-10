@@ -31,7 +31,7 @@ Add the following lines to the CMakeLists.txt file of any package that uses EXOT
 In the ``find_package(catkin REQUIRED COMPONENTS)`` section, 
 add 
 
-.. code:: xml
+.. code-block:: xml
 
     find_package(catkin REQUIRED COMPONENTS)
         exotica
@@ -39,6 +39,6 @@ add
 
 Also, add the following to ``package.xml``:
 
-.. code:: xml
+.. code-block:: xml
 
     <depend>task_map</depend>

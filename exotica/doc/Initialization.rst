@@ -32,7 +32,7 @@ When we look at a problem initializer such as UnconstrainedEndPoseProblem initia
 (exotica/exotica/init/UnconstrainedEndPoseProblem.in), we see a list of parameters 
 that can be set when we initialize the problem. 
 
-.. code:: xml
+.. code-block:: xml
 
     <!--UnconstrainedEndPoseProblem init options--> 
 
@@ -48,7 +48,7 @@ We can change these parameters during initialization if required.
 All problem initializers also extend the ``exotica/PlanningProblem`` initializer, which adds extra
 parameters. This is seen below:
 
-.. code:: xml
+.. code-block:: xml
 
     include <exotica/SceneInitializer>
     extend <exotica/Object>
@@ -62,7 +62,7 @@ task maps (which we will look at later). In all, after extending both the
 PlanningSceneInitializer and the Object initializer (which takes a name and debug argument), 
 the whole initializer for our UnconstrainedEndPoseProblem looks like this: 
 
-.. code:: xml
+.. code-block:: xml
 
     Required std::string Name;
     Optional bool Debug = false;

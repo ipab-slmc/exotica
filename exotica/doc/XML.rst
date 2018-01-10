@@ -7,7 +7,7 @@ We will be using the XML file under the
 `IK\_Solver <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/configs/ik_solver_demo.xml>`__
 file and is shown below:
 
-.. code:: xml
+.. code-block:: xml
 
   <?xml version="1.0" ?>
   <IKSolverDemoConfig>
@@ -63,7 +63,7 @@ The solver is initialized by identifying the solver and giving it a name
 (which will be used later); here we use the name "MySolver" : ``<IKsolver Name="MySolver">`` 
 Solver options are then specified:
 
-.. code:: xml
+.. code-block:: xml
 
       <MaxIt>1</MaxIt>
       <MaxStep>0.1</MaxStep>
@@ -94,7 +94,7 @@ A ``PlanningScene`` always contains:
  * `SRDF <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.srdf>`__
  * ``JointGroup`` which corresponds to the planning group specified in the SRDF file, the part we are interested in is detailed below:
 
-.. code:: xml
+.. code-block:: xml
 
         ...
         <group name="arm">
@@ -104,7 +104,7 @@ A ``PlanningScene`` always contains:
 
 We will use this ``group name`` for our initialisation:
 
-.. code:: xml
+.. code-block:: xml
 
         <JointGroup>arm</JointGroup>
 
@@ -122,7 +122,7 @@ For now we are only interested in reaching an end effector goal, so we will use 
 which allows us specify the name of the end effector from the URDF file, which will be the focus when we 
 try to reach a an end effector goal, as we are doing here. 
 
-.. code:: xml
+.. code-block:: xml
 
       <Maps>
         <EffFrame Name="Position">

@@ -21,7 +21,7 @@ the problem.
 CoM: Specify the CoM for a link
 Initialization:  
 
-.. code:: cpp
+.. code-block:: cpp
 	
     (std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), bool EnableZ_ =  true)
 
@@ -30,7 +30,7 @@ Distance: Returns the distance between two frames, either an end effector frame 
 
 Initialization:
 
-.. code:: cpp
+.. code-block:: cpp
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>())
 
@@ -40,7 +40,7 @@ EffOrientation: specifies an end effector orientation in task space
 
 Initialization: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string 	Type_ =  "RPY")
 
@@ -49,7 +49,7 @@ EffPosition: specifies an end effector position in task space
 
 Initialization: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>())
 
@@ -57,7 +57,7 @@ EffFrame: specifies an end effector pose in task space
 
 Initialization: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string Type_ =  "RPY")
 
@@ -66,7 +66,7 @@ IMesh: See http://homepages.inf.ed.ac.uk/svijayak/publications/ivan-IJRR2013.pdf
 
 Initialization: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string ReferenceFrame_ =  "/world", Eigen::VectorXd Weights_ =  Eigen::VectorXd())
 
@@ -74,7 +74,7 @@ Identity: the position of a joint. Useful if you want to avoid a certain positio
 
 Initialization: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), Eigen::VectorXd JointRef_={}, std::vector<int> JointMap_={})
 
@@ -82,7 +82,7 @@ JointLimit: map to keep joints away from limits. Use options to set penalties fo
 
 Initialization: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), double SafePercentage_ =  0.0, std::string RobotDescription_ =  "robot_description")
 
@@ -90,7 +90,7 @@ Sphere: Initiates a sphere object in relation to a named link with an offset - a
 
 Initialization: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     ( std::string Link_, double Radius_, Eigen::VectorXd LinkOffset_ =  Eigen::IdentityTransform(), std::string Base_ =  "", Eigen::VectorXd BaseOffset_ =  Eigen::IdentityTransform(), std::string Group_ =  "default")
 
@@ -99,7 +99,7 @@ Spheres within the same group will not detect collisions within each other , but
 
 Initialization: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     ( std::string Name_, double Precision_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string ReferenceFrame_ =  "/world", double Alpha_ =  1.0)
 
@@ -116,7 +116,7 @@ Cpp
 In the snippet below, we see that we have created a task map named ``map`` , which is an end effector frame map. We send this to the problem in the appropriate argument place using 
 the curly brackets ``{map}``. In this snippet we assume you have already created a ``scene`` and ``W`` initializer:
 
-.. code:: cpp
+.. code-block:: cpp
 
     EffFrameInitializer map("Position", false,
                             {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
@@ -126,7 +126,7 @@ the curly brackets ``{map}``. In this snippet we assume you have already created
 By placing multiple map variable names inside these curly brackets, we can specify several maps to be sent to the same problem (this sets joint limits for the 
 `LWR_simplified <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.urdf>`__  arm in the examples):
 
-.. code:: cpp
+.. code-block:: cpp
 
     void get_joint_limits(std::vector<Initializer> joint_store)
     {

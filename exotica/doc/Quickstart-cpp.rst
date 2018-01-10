@@ -8,14 +8,14 @@ in the examples folder. This uses the lwr_simplified robot in the examples.
 
 To run this code and start producing motion plans, start roscore then run:
 
-.. code:: shell
+.. code-block:: shell
 
     rosrun exotica_examples IK
 
 
 This will produce a result similar to the following in the terminal:
 
-.. code:: shell
+.. code-block:: shell
 
     [ INFO] [1505929027.003072480]: Loading robot model 'lwr'...
     
@@ -36,7 +36,7 @@ Now that we have executed the example and seen the result, let's look at what ha
 `ik_minimal.cpp <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/ik_minimal.cpp>`_ example. 
 This is shown below:
 
-.. code:: cpp
+.. code-block:: cpp
 
     #include <exotica/Exotica.h>
 
@@ -62,7 +62,7 @@ Code Explained
 
 After including the Exotica header file and setting the namespace, we enter the main function and instantiate a MotionSolver_ptr: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     ...
     MotionSolver_ptr solver = XMLLoader::loadSolver("{exotica_examples}/resources/configs/example.xml");
@@ -75,7 +75,7 @@ We will look in more detail into XML initialization in a later tutorial, but for
 The XML file from which the parser loads is `included <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/configs/example.xml>`_ 
 in the ``exotica_examples`` folder. We can see a copy of it below:
 
-.. code:: xml
+.. code-block:: xml
 
     <?xml version="1.0" ?>
     <ExampleConfig>
@@ -121,7 +121,7 @@ more task maps to the problem.
 
 After we have loaded the solver, we can solve the problem and display the result: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     solver->Solve(solution);
 

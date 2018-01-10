@@ -10,7 +10,7 @@ We will continue to use the exotica example found in
 ``manual.cpp`` as a reference, starting after we sent the problem to 
 the solver:
 
-.. code:: c++
+.. code-block:: c++
 
         ...
 
@@ -61,7 +61,7 @@ Code Explained
 Firstly, we must set up a vector of initial joint variables to be fed
 into the solver. Here we initialize the joints to zero angles:
 
-.. code:: c++
+.. code-block:: c++
 
         Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumControlledJoints());
 
@@ -70,7 +70,7 @@ of the vector (``any_problem->getScene()->getNumControlledJoints()``). This vect
 can naturally be changed to whatever joint configuration is required for
 your motion planning purposes. for example, after instantiating ``q``:
 
-.. code:: c++
+.. code-block:: c++
 
     q << joint_start[0],joint_start[1],joint_start[2],joint_start[3],joint_start[4],joint_start[5],joint_start[6];
 
@@ -82,7 +82,7 @@ n\*DOF matrix, where n is the number of steps along the trajectory. A
 dynamic matrix container will need to be created to hold this.
 This is created in the next line:
 
-.. code:: c++
+.. code-block:: c++
 
     Eigen::MatrixXd solution;
 
@@ -94,7 +94,7 @@ requirements. Two methods exist for the IK_solver. The method used in
 the tutorial specifies the goal for all IK_solver task maps by setting
 the ``y`` value to the desired goal:
 
-.. code:: cpp
+.. code-block:: cpp
 
             my_problem->y << 0.6,  // X Position
                             -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1, // Y Position
@@ -104,7 +104,7 @@ NOTE: To set the goal for an individual map, use the ``setGoal()``
 function. This requires the name of the task map and a Eigen vector
 containing the Cartesian coordinates of the goal:
 
-.. code:: cpp
+.. code-block:: cpp
 
     Eigen::VectorXd goal(3);
 
@@ -118,7 +118,7 @@ the ``any_solver`` container in which we stored the generic solver in
 earlier, passing the initial joint states ``q`` and the trajectory
 holder:
 
-.. code:: c++
+.. code-block:: c++
 
         any_solver->Solve(q, solution);
 
@@ -127,7 +127,7 @@ Solution Format
 
 Now we have a solution to our problem. But what does it look like?
 
-.. code:: shell
+.. code-block:: shell
 
     [ INFO] [1501240815.111167097]: Finished solving in 3.085e-05s. Solution [  -0.109557   -0.653855  -0.0687444     1.28515 1.06079e-17           0           0]
 
@@ -186,20 +186,20 @@ deals with this and we'll go through it now.
 
 As we cycle through our motion plan, we can update the joint states:
 
-.. code:: c++
+.. code-block:: c++
 
             q = solution.row(solution.rows() - 1);
 
 and we send them to the problem:
 
-.. code:: c++
+.. code-block:: c++
 
             my_problem->Update(q);
 
 Now we can publish those frames to the /joint\_states topic to be read
 by RVIZ:
 
-.. code:: c++
+.. code-block:: c++
 
             my_problem->getScene()->getSolver().publishFrames();
 

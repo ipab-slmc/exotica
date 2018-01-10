@@ -29,7 +29,7 @@ Demos
 Have a look at ``examples/exotica_examples``.
 If you have sourced the workspace correctly you should be able to run any of the demos:
 
-.. code:: bash
+.. code-block:: bash
 
 	roslaunch exotica_examples Core.launch
 	roslaunch exotica_examples AICOplanner.launch

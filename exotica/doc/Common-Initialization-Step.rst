@@ -18,7 +18,7 @@ In both our XML and manually coded initializers, we created a problem
 initializer in the 'problem' variable and the solver in the 'solver'
 variable. These now need to be sent to generic problem and solver holders:
 
-.. code:: c++
+.. code-block:: c++
 
         //... continued from XML or hardcoded initialization
 
@@ -36,7 +36,7 @@ variable. These now need to be sent to generic problem and solver holders:
 Once we have the problem in a generic holder pointer ("any\_problem"),
 we can send it to the solver ("any\_solver").
 
-.. code:: c++
+.. code-block:: c++
 
         any_solver->specifyProblem(any_problem);
 
@@ -44,7 +44,7 @@ Then use the generic problem holder to create a specific problem for our
 purposes - this will allow us to access the specific properties of these
 problems later on:
 
-.. code:: c++
+.. code-block:: c++
 
         UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 

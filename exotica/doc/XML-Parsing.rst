@@ -14,7 +14,7 @@ This snippet of code shows how this is implemented in the
 `XML.cpp <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/xml.cpp>`__
 file in the EXOTica examples:
 
-.. code:: c++
+.. code-block:: c++
 
     #include <exotica/Exotica.h>
     #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
@@ -51,7 +51,7 @@ We will look at setting up our roslaunch files in more detail `later <Setting-up
 Now we have the file name and have created some initializers in which to hold the ``solver`` and the ``problem``,
 we can now do the actual XML loading. This is done with the XMLLoader:
 
-.. code:: c++
+.. code-block:: c++
 
     XMLLoader::load(file_name,solver, problem);
 

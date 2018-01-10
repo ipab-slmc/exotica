@@ -38,12 +38,12 @@ Overview
 
    Installation
    Prerequisites
-   Initialisation
+   Initialization
    Initializers
    XML
    XML-Parsing
-   Manual-Initialisation
-   Common-Initialisation-Step
+   Manual-Initialization
+   Common-Initialization-Step
    Quickstart
    Quickstart-cpp
    Setting-up-problems-and-solvers

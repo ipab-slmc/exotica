@@ -1,22 +1,22 @@
 **************
-initialization
+Initialization
 **************
 
-Now we have installed and set up EXOTica, we begin looking at solving motion plans. 
+Now that we have installed and set up EXOTica, we begin looking at solving motion plans. 
 To do this, we must first initialize our problems and solvers. 
 EXOTica can be added to a new or existing project; here we will start with a new project. 
 
 Two primary steps need to be fulfilled when using EXOTica:
-initialization and Usage. initialization is required to set up the
+Initialization and Usage. Initialization is required to set up the
 problem and the solver. The usage is where the problem is solved.
 
-The solving and usage of EXOTica is taken care of in your python or cpp code. 
+The solving and usage of EXOTica is taken care of in your Python or C++ code. 
 You can initialize your problem here too, or this can be done via a separate XML file. 
-XML tends to be preferred, as it keeps your code clean and can be changed more easily.
+XML tends to be preferred, as it keeps your code clean and can be changed more easily without requiring recompilation (in the case of C++).
 We will look at how to achieve each of these in the next section, but first take note of 
 where the initializers are stored.
 
-initialization options for all problems and solvers can be found in the
+Initialization options for all problems and solvers can be found in the
 source code in the following locations:
 
 ::

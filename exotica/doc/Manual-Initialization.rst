@@ -1,12 +1,12 @@
 *********************
-Manual Initialisation
+Manual Initialization
 *********************
 
-Manual initialisation encapsulates all initialisation and handling of
-EXOTica within C++ or python  code, with no external XML files. This could
-be a preferred if your project has been finalised or if you prefer to have all your EXOTica code in one place.
+Manual initialization encapsulates all initialisation and handling of
+EXOTica within C++ or Python code, with no external XML files. This could
+be preferred if your project has been finalized or if you prefer to have all your EXOTica code in one place.
 
-In this tutorial, we will use the example of manual initialisation for
+In this tutorial, we will use the example of manual initialization for
 the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/manual.cpp>`__:
 
 .. code:: c++
@@ -42,14 +42,14 @@ the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.c
 Code Explained
 --------------
 
-Include Initialisers
+Include Initializers
 ~~~~~~~~~~~~~~~~~~~~
 
 At the top of the script, two initialiser header files are included: one
 for the ``ik_solver/IKsolverInitializer.h`` and one for
-``task_map/EffPositionInitializer.h``.
+``task_map/EffPositionInitializer.h``. These are generated from the ``.in`` files during the compilation/build phase.
 
-When initialising manually, the appropriate initialisers must be
+When initializing manually, the appropriate initializers must be
 included for both the task map and the solver. These are stored in the
 ``exotations`` directory under ``task_maps`` and ``solvers``
 respectively.
@@ -62,16 +62,16 @@ Currently available solvers are:
     #include <aico/AICOsolverInitializer.h>
     #include <ik_solver/IKsolverInitializer.h>
 
-Once we have included the correct initialisers, we must initialise:
+Once we have included the correct initializers, we must initialise:
 * ``scene`` 
 * ``map`` 
 * ``problem`` 
 * ``solver``
 
-Scene Initialisation
+Scene Initialization
 ~~~~~~~~~~~~~~~~~~~~
 
-When initialising the scene, we instantiate a ``SceneInitializer``, 
+When initializing the scene, we instantiate a ``SceneInitializer``, 
 which here name ``scene``.
 
 .. code:: c++
@@ -79,7 +79,7 @@ which here name ``scene``.
         // Scene using joint group 'arm'
         SceneInitializer scene("MyScene", "arm", false, "", "{exotica_examples}/resources/robots/lwr_simplified.urdf", "{exotica_examples}/resources/robots/lwr_simplified.srdf");
 
-We must also pass in our initialisation arguments seen in the `Scene Initializer <https://github.com/ipab-slmc/exotica/blob/master/exotica/init/Scene.in>`__ file:
+We must also pass in our initialization arguments seen in the `Scene Initializer <https://github.com/ipab-slmc/exotica/blob/master/exotica/init/Scene.in>`__ file:
 
 .. code:: xml
 
@@ -105,7 +105,7 @@ Here we use the parameters:
 * SRDF (name of SRDF file)
 
 
-Map Initialisation
+Map Initialization
 ~~~~~~~~~~~~~~~~~~
 
 Maps refers to the ``task maps`` of a problem, they provide a mapping from configuration space to task space
@@ -129,7 +129,7 @@ offset argument.
 *NOTE - the name of the end effector link must match that in the URDF
 and SRDF files*
 
-Problem Initialisation
+Problem Initialization
 ~~~~~~~~~~~~~~~~~~~~~~
 
 In the steps up to this point, we have generated the components
@@ -214,7 +214,7 @@ options, as some may be required. Again, these can be found in:
 
 ``exotica/exotations/solvers/<SolverName>/init/<SolverName>.in``
 
-We now almost have a fully initialised motion solver. We can now
-move onto the common initialisation step between hard-coded and XML
-initialisation
+We now almost have a fully initialized motion solver. We can now
+move onto the common initialization step between hard-coded and XML
+initialization
 `here <https://github.com/openhumanoids/exotica/wiki/Common-Initialisation-Step>`__.

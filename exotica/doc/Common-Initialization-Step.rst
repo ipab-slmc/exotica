@@ -11,13 +11,12 @@ initialization tutorials, so if you have not completed either:
 initialisation <Manual-Initialisation.html>`__, then go back and do those first.
 
 If you have done this, the robot properties have been set-up, either through
-XML or within your C++ or python code. The completed initializers now need to be sent to the
+XML or within your C++ or Python code. The completed initializers now need to be sent to the
 appropriate places and the problem sent to the solver.
 
-In both our XML and coded initializers, we made a problem
+In both our XML and manually coded initializers, we created a problem
 initializer in the 'problem' variable and the solver in the 'solver'
-variable. These now need to be sent to generic problem and solver
-holders:
+variable. These now need to be sent to generic problem and solver holders:
 
 .. code:: c++
 

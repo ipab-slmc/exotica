@@ -9,16 +9,17 @@ EXOTica
 For home page go
 `here <http://wcms.inf.ed.ac.uk/ipab/slmc/research/EXOTica>`__.
 
+
 Overview
 ========
 
--  `Home <index.html>`__
 -  `Installation <Installation.html>`_
--  `Requirements <Prerequisites.html>`__
--  `Quick Start: Python <Quickstart.html>`__
+-  `Quick Start: Python <Quickstart-python.html>`__
 -  `Quick Start: C++ <Quickstart-cpp.html>`__
 -  `Setting up Problems and Solvers <Setting-up-problems-and-solvers.html>`__
 -  `Using EXOTica <Using-EXOTica.html>`_ 
+
+-  `Requirements <Prerequisites.html>`__
 -  `Initialization <Initialisation.html>`__
 
    -  XML
@@ -32,28 +33,51 @@ Overview
 -  `Setting up ROSlaunch <Setting-up-ROSlaunch.html>`__
 
 
+Setup
+=====
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    Installation
+
+Basics
+======
+
+In this section we'll explore the basics of setting up and using 
+EXOTica with the included KUKA LWR_Simplified robot.
+
+.. toctree::
+   :maxdepth: 2
+
+   Quickstart-python
+   Quickstart-cpp
+   Setting-up-problems-and-solvers
+   Using-EXOTica
+
+
+Advanced
+========
+
+With the advanced section, we look at different methods of initializing
+EXOTica and using it with your own robot. 
+
+.. toctree::
+   :maxdepth: 2
+
    Prerequisites
    Initialization
-   Initializers
    XML
    XML-Parsing
    Manual-Initialization
    Common-Initialization-Step
-   Quickstart
-   Quickstart-cpp
-   Setting-up-problems-and-solvers
-   Task_maps
    Setting-up-ROSlaunch
-   Using-EXOTica
-   Python-API
-   Documentation
+   Task_maps
+   Initializers
    Code-Formatting
+   Python-API
    Doxygen C++ <./doxygen_cpp/index.html#http://>
+   Documentation
 
 
 .. Indices and tables

@@ -18,7 +18,11 @@ Initializing task maps
 Each task map needs to be initialized first, this sets up the task map and specifies any important parameters. After initialization we can send the the task map to 
 the problem. 
 
-CoM: Specify the CoM for a link
+CoM 
+---
+
+Specify the CoM for a link
+
 Initialization:  
 
 .. code-block:: cpp
@@ -26,7 +30,10 @@ Initialization:
     (std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), bool EnableZ_ =  true)
 
 
-Distance: Returns the distance between two frames, either an end effector frame or a point frame.
+Distance
+--------
+
+Returns the distance between two frames, either an end effector frame or a point frame.
 
 Initialization:
 
@@ -36,7 +43,10 @@ Initialization:
 
 
 
-EffOrientation: specifies an end effector orientation in task space
+EffOrientation
+--------------
+
+Specifies an end effector orientation in task space
 
 Initialization: 
 
@@ -45,7 +55,10 @@ Initialization:
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string 	Type_ =  "RPY")
 
 
-EffPosition: specifies an end effector position in task space
+EffPosition
+-----------
+
+Specifies an end effector position in task space
 
 Initialization: 
 
@@ -53,7 +66,10 @@ Initialization:
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>())
 
-EffFrame: specifies an end effector pose in task space
+EffFrame
+--------
+
+Specifies an end effector pose in task space
 
 Initialization: 
 
@@ -62,7 +78,10 @@ Initialization:
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string Type_ =  "RPY")
 
 
-IMesh: See http://homepages.inf.ed.ac.uk/svijayak/publications/ivan-IJRR2013.pdf for details about iMesh
+IMesh
+-----
+
+See http://homepages.inf.ed.ac.uk/svijayak/publications/ivan-IJRR2013.pdf for details about iMesh
 
 Initialization: 
 
@@ -70,7 +89,10 @@ Initialization:
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string ReferenceFrame_ =  "/world", Eigen::VectorXd Weights_ =  Eigen::VectorXd())
 
-Identity: the position of a joint. Useful if you want to avoid a certain position. 
+Identity
+--------
+
+The position of a joint. Useful if you want to avoid a certain position. 
 
 Initialization: 
 
@@ -78,7 +100,10 @@ Initialization:
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), Eigen::VectorXd JointRef_={}, std::vector<int> JointMap_={})
 
-JointLimit: map to keep joints away from limits. Use options to set penalties for nearing joint limits
+JointLimit
+----------
+
+Map to keep joints away from limits. Use options to set penalties for nearing joint limits
 
 Initialization: 
 
@@ -86,7 +111,10 @@ Initialization:
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), double SafePercentage_ =  0.0, std::string RobotDescription_ =  "robot_description")
 
-Sphere: Initiates a sphere object in relation to a named link with an offset - acts as a primitive for collision SphereCollision
+Sphere
+------
+
+Initiates a sphere object in relation to a named link with an offset - acts as a primitive for collision SphereCollision
 
 Initialization: 
 
@@ -94,7 +122,10 @@ Initialization:
 
     ( std::string Link_, double Radius_, Eigen::VectorXd LinkOffset_ =  Eigen::IdentityTransform(), std::string Base_ =  "", Eigen::VectorXd BaseOffset_ =  Eigen::IdentityTransform(), std::string Group_ =  "default")
 
-SphereCollision: Used in collision detection. Groups of spheres (seen in previous bullet point) are attached to the robot and environment. 
+SphereCollision
+---------------
+
+Used in collision detection. Groups of spheres (seen in previous bullet point) are attached to the robot and environment. 
 Spheres within the same group will not detect collisions within each other , but collisions between different groups are detected.
 
 Initialization: 
@@ -111,7 +142,7 @@ Once we've chosen and initialized the task maps we're interested in they need to
 consideration when producing a motion plan. Each problem can handle one of many task maps. Let's look at how we send these to the problem. 
 
 Cpp
-~~~
+---
 
 In the snippet below, we see that we have created a task map named ``map`` , which is an end effector frame map. We send this to the problem in the appropriate argument place using 
 the curly brackets ``{map}``. In this snippet we assume you have already created a ``scene`` and ``W`` initializer:

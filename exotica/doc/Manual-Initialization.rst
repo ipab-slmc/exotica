@@ -39,11 +39,10 @@ the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.c
         solver.MaxStep = 0.1;
     ...
 
-Code Explained
---------------
+.. rubric:: CODE EXPLAINED
 
-Include Initializers
-~~~~~~~~~~~~~~~~~~~~
+Initializer Headers
+===================
 
 At the top of the script, two initialiser header files are included: one
 for the ``ik_solver/IKsolverInitializer.h`` and one for
@@ -69,7 +68,7 @@ Once we have included the correct initializers, we must initialise:
 * ``solver``
 
 Scene Initialization
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 When initializing the scene, we instantiate a ``SceneInitializer``, 
 which here name ``scene``.
@@ -106,7 +105,7 @@ Here we use the parameters:
 
 
 Map Initialization
-~~~~~~~~~~~~~~~~~~
+==================
 
 Maps refers to the ``task maps`` of a problem, they provide a mapping from configuration space to task space
 which are useful for fulfilling several tasks, such as specifying goals and avoiding obstacles. 
@@ -130,7 +129,7 @@ offset argument.
 and SRDF files*
 
 Problem Initialization
-~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 In the steps up to this point, we have generated the components
 which make up a problem. Now we can move onto initialising a problem
@@ -161,7 +160,7 @@ The ``W`` vector weights the joints of your robot according to the cost of movin
 This vector must be the same size as the number of the number of DOF of your robot. 
 
 Solver
-~~~~~~
+======
 
 That's the problem set up, now to do the same for the solver. For the
 problem we have used in the tutorial (``UnconstrainedEndPoseProblem``),
@@ -181,7 +180,7 @@ during initialisation, we give the solver a name we we can refer to it
 later; here we call the solver ``"MySolver"``
 
 Solver Options
-^^^^^^^^^^^^^^
+==============
 
 After setting up the solver, there are some options to fill in to set
 parameters for the solver, some required and some optional. Since we

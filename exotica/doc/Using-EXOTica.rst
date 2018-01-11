@@ -55,8 +55,10 @@ the solver:
     }
     ...
 
-Code Explained
---------------
+.. rubric:: CODE EXPLAINED
+
+Setting Start Position
+======================
 
 Firstly, we must set up a vector of initial joint variables to be fed
 into the solver. Here we initialize the joints to zero angles:
@@ -77,6 +79,9 @@ your motion planning purposes. for example, after instantiating ``q``:
 and so on. This init joint configuration vector will be sent to the
 solver later.
 
+Solution Container
+==================
+
 When we do call the solver, we will get the motion plan back as an
 n\*DOF matrix, where n is the number of steps along the trajectory. A
 dynamic matrix container will need to be created to hold this.
@@ -88,6 +93,9 @@ This is created in the next line:
 
 Now we have a starting point and something to hold the trajectory, we
 need somewhere to go. It's time to set the goal.
+
+Goal Setting
+============
 
 Methods of goal setting vary according to the problem and your
 requirements. Two methods exist for the IK_solver. The method used in
@@ -118,12 +126,15 @@ the ``any_solver`` container in which we stored the generic solver in
 earlier, passing the initial joint states ``q`` and the trajectory
 holder:
 
+Solving Problems
+================
+
 .. code-block:: c++
 
         any_solver->Solve(q, solution);
 
 Solution Format
-^^^^^^^^^^^^^^^
+===============
 
 Now we have a solution to our problem. But what does it look like?
 
@@ -177,7 +188,7 @@ configurations that transfer the arm from start to end.
          2.69458      0.12463   -0.0878005     -1.54029     -1.28334e-16   1.63042e-322 ]
 
 Publishing to RVIZ
-~~~~~~~~~~~~~~~~~~
+==================
 
 We've set up or problem, solver and the rest and got our motion plan.
 EXOTica has the functionality to visualize this in RVIZ, so you can see

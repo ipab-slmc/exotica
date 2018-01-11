@@ -107,11 +107,10 @@ example file as a guide. The code is displayed below.
     }
 
 
-Code Explained
---------------
+.. rubric:: CODE EXPLAINED
 
 Including Solvers and Task Maps 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===============================
 
 In this tutorial we will be setting up an ``UnconstrainedEndPoseProblem`` and 
 solving it using an IKSolver using the ``EffFrame`` task map. To do this we 
@@ -132,8 +131,8 @@ include the ``IKsolverInitializer`` and ``EffFrameInitializer``.
 To use other solvers and task maps just include the appropriate headers in the same 
 format. 
 
-ROS Setup
-~~~~~~~~~
+ROS Initialization
+==================
 
 ROS can either be set up manually or you can use the EXOTica Server. 
 
@@ -146,7 +145,7 @@ To use the EXOTica Server, it needs to be setup using the ``InitRos``:
 Where we provide a name for the ROS node (here we give the name "~")
 
 Scene Setup
-~~~~~~~~~~~
+===========
 
 To construct a problem, we first need a ``Scene``, a ``map`` and parameters. 
 
@@ -163,7 +162,7 @@ which is the same name as the group in the SRDF file. This is followed by the de
 robot description and the path to the URDF file. 
 
 Map Setup
-~~~~~~~~~
+=========
 
 Next up for the problem setup is the map setup. Here we are interested solving 
 an end effector planning problem, so we require an end effector mapping. 
@@ -187,7 +186,7 @@ Where we pass in:
     - Optional offset from that link 
 
 Problem and Solver Initialization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=================================
 
 Now we have the Scene and Map(s) (multiple maps can be added) initialized, we can set up the 
 problem. First we need to create an initializer:
@@ -224,7 +223,7 @@ containers. Here use the name of the initializer, not the names of the problems 
     MotionSolver_ptr any_solver = Setup::createSolver(solver);
 
 Sending Problem to Solvers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
 
 We now have our problem set up, containing all the information about the robot, task etc. 
 and we have a solver setup, waiting to solve some motion plans, but they don't know about

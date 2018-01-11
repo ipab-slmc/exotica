@@ -5,6 +5,8 @@ Quickstart: Cpp
 For this quick tutorial, we will be using the `ik_minimal.cpp <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/ik_minimal.cpp>`_
 in the examples folder. This uses the lwr_simplified robot in the examples. 
 
+Running Example Code 
+====================
 
 To run this code and start producing motion plans, start roscore then run:
 
@@ -12,8 +14,13 @@ To run this code and start producing motion plans, start roscore then run:
 
     rosrun exotica_examples IK
 
+Other demos have associated roslaunch files. See the `demos <Installation.html>`_ 
+section for more information. 
 
-This will produce a result similar to the following in the terminal:
+Expected output
+===============
+
+Running the code will produce a result similar to the following in the terminal:
 
 .. code-block:: shell
 
@@ -26,11 +33,9 @@ This will produce a result similar to the following in the terminal:
     Finished solving in 0.000178323s Solution [-0.01107742 -0.07860809  0.0059596   0.1926337   0.00494248 -0.07840889 0.]
     ...
 
+.. rubric:: CODE
 
 This displays the joint angles for each of the 7 joints on our example robot after the time it took to solve the problem.
-
-Code
-~~~~
 
 Now that we have executed the example and seen the result, let's look at what happening in the code. Here we are using the 
 `ik_minimal.cpp <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/ik_minimal.cpp>`_ example. 
@@ -57,8 +62,10 @@ This is shown below:
     }
 
 
-Code Explained 
-~~~~~~~~~~~~~~
+.. rubric:: CODE EXPLAINED
+
+Quick Solver Setup
+==================
 
 After including the Exotica header file and setting the namespace, we enter the main function and instantiate a MotionSolver_ptr: 
 
@@ -71,6 +78,9 @@ After including the Exotica header file and setting the namespace, we enter the 
 This sets up our motion planning solver and gets the problem ready to be solved. To the solver we assign the contents of an XML 
 file, which is parsed by Exotica (``XMLLoader::loadSolver("{exotica_examples}/resources/configs/example.xml")``). 
 We will look in more detail into XML initialization in a later tutorial, but for now we will go through some basics. 
+
+Quick XML Initialization
+========================
 
 The XML file from which the parser loads is `included <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/configs/example.xml>`_ 
 in the ``exotica_examples`` folder. We can see a copy of it below:
@@ -118,6 +128,9 @@ Changing the XML tags will alter the behaviour of the motion planner when we run
 
 As we move further into the tutorials, we will see the effects of altering various properties and adding 
 more task maps to the problem. 
+
+Solving Motion Plan
+===================
 
 After we have loaded the solver, we can solve the problem and display the result: 
 

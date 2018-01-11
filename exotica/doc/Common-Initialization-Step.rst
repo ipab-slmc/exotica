@@ -33,12 +33,18 @@ variable. These now need to be sent to generic problem and solver holders:
 
         ....
 
+Sending Problems to Solvers
+===========================
+
 Once we have the problem in a generic holder pointer ("any\_problem"),
 we can send it to the solver ("any\_solver").
 
 .. code-block:: c++
 
         any_solver->specifyProblem(any_problem);
+
+Problem Pointer Setup
+=====================
 
 Then use the generic problem holder to create a specific problem for our
 purposes - this will allow us to access the specific properties of these

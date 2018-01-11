@@ -35,8 +35,10 @@ file in the EXOTica examples:
     HIGHLIGHT_NAMED("XMLnode", "Loaded from XML");
     ...
 
-Code Explained
---------------
+.. rubric:: CODE EXPLAINED
+
+EXOTica Server
+==============
 
 Firstly we use the exotica ``Server`` class to initialize the ROS node we will be using from now on.
 This ``Server`` class will handle a lot of our ROS dealings from here on. 
@@ -47,6 +49,9 @@ the parameter name ``ConfigurationFile``.
 
 
 We will look at setting up our roslaunch files in more detail `later <Setting-up-ROSlaunch.html>`__.
+
+XML Loader
+==========
 
 Now we have the file name and have created some initializers in which to hold the ``solver`` and the ``problem``,
 we can now do the actual XML loading. This is done with the XMLLoader:

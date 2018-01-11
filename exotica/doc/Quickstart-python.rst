@@ -7,8 +7,7 @@ Quick IK trajectories without ROS
 
 For this quick tutorial we'll be using the `example\_ik\_noros.py <https://github.com/ipab-slmc/exotica/blob/master/exotica_python/scripts/example_ik_noros.py>`_ script to generate some simple trajectories.
 
-Code
-~~~~
+.. rubric:: CODE
 
 .. code-block:: python
 
@@ -42,11 +41,10 @@ Code
 		sleep(dt)
 	t=t+dt
 
-Code explained
-~~~~~~~~~~~~~~
+.. rubric:: CODE EXPLAINED
 
 Setting Start Position
-~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 Here, `q` is the starting configuration of the robot which is passed to the solver. Here we set all joints to an initial 0 position:
 
@@ -62,7 +60,7 @@ To alter the start position, specify a 1*n vector of initial joint angles, where
 
 
 Setting the Goal 
-~~~~~~~~~~~~~~~~
+================
 
 The goal is set using the problem's setGoal function:
 
@@ -84,8 +82,8 @@ Where goal values are set to arbitrary coordinates.
 
 The task map named `Position` is set in the XML setup file for this example. We look more at task maps in the task maps tutorial.
 
-Interpreting Output
-~~~~~~~~~~~~~~~~~~~
+Expected Output
+===============
 
 When we run the script using `python example_ik_noros.py`, we see the following result in the terminal:
 
@@ -102,7 +100,7 @@ This shows us the robot model we are using and then displays the joint angles fo
 
 
 Problem and Solution Setup 
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
 
 To prepare EXOTica for solving motion plans, we must first specify what problem we want to solve (e.g. end pose problem, optimisation problem) and which solver we will use to solve it (e.g. end pose problems be solved by the IKSolver, optimisation problems can be solved by the AICOSolver). The basics will be explained below:
 
@@ -149,8 +147,7 @@ For this part of the tutorial, we'll be looking at the 'example_ik.py<https://gi
 
 For details on setting initial joint angles and goal states - see the section above. This section will focus on the additional functionality which allows visualisation in RVIZ.
 
-Code
-~~~~
+.. rubric:: CODE
 
 .. code-block:: python
 
@@ -184,8 +181,8 @@ Code
 		sleep(dt)
 	t=t+dt
 
-Visualisation
-~~~~~~~~~~~~~
+Visualization
+=============
 
 In the code we see the function `put code here`. This is a native function in EXOTica which publishes 'ROS TF<http://docs.ros.org/api/geometry_msgs/html/msg/Transform.html>'_  messages to RViz. 
 

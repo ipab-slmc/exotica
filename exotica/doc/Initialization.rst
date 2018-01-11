@@ -16,6 +16,9 @@ XML tends to be preferred, as it keeps your code clean and can be changed more e
 We will look at how to achieve each of these in the next section, but first take note of 
 where the initializers are stored.
 
+Finding Initializers
+====================
+
 Initialization options for all problems and solvers can be found in the
 source code in the following locations:
 
@@ -25,6 +28,8 @@ source code in the following locations:
 
     Solvers: exotica/exotations/solvers/<SolverName>/init/<SolverName>.in
    
+Initializer Layout
+==================
 
 These ``.in`` files are laid out as follows:
 
@@ -32,7 +37,7 @@ When we look at a problem initializer such as UnconstrainedEndPoseProblem initia
 (exotica/exotica/init/UnconstrainedEndPoseProblem.in), we see a list of parameters 
 that can be set when we initialize the problem. 
 
-.. code-block:: xml
+.. code-block:: shell
 
     <!--UnconstrainedEndPoseProblem init options--> 
 
@@ -48,7 +53,7 @@ We can change these parameters during initialization if required.
 All problem initializers also extend the ``exotica/PlanningProblem`` initializer, which adds extra
 parameters. This is seen below:
 
-.. code-block:: xml
+.. code-block:: shell
 
     include <exotica/SceneInitializer>
     extend <exotica/Object>

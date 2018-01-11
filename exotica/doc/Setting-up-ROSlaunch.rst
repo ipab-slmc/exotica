@@ -29,11 +29,10 @@ ROSlaunch file.
     <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find exotica_examples)/resources/rviz.rviz" />
     </launch>
 
-Code Explained
---------------
+.. rubric:: CODE EXPLAINED
 
 Debug Param
-~~~~~~~~~~~
+===========
 
 EXOTica looks for the "debug" rosparam. Here we set the default
 value to false. This can be changed according to your needs.
@@ -56,7 +55,7 @@ Finally, we specify the debug terminal to be launched. Here we use
 xterm, but can be changed accordingly.
 
 URDF and SRDF specification
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===========================
 
 In the example launch file, we see two parameters specified:
 ``robot_description`` and ``robot_description_semantic``. These are the
@@ -75,7 +74,7 @@ absolute file name can also be used ``"file:///home/username/path/path/robot_nam
 though this is not recommended 
 
 Specify EXOTica code location
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=============================
 
 We must then direct the ROSlaunch file to EXOTica code that we made
 earlier in the tutorial.
@@ -93,7 +92,7 @@ assigned to it in the ``CMakeLists.txt`` file. Here, we saved it under
 Finally, give your code a rosnode name; here we use "ExoticaManualInitializationExampleNode"
 
 Starting RVIZ
-~~~~~~~~~~~~~
+=============
 
 We can also start RVIZ from here and direct it to a specific .rviz save
 file:

@@ -14,19 +14,21 @@ Overview
 
 -  `Home <index.html>`__
 -  `Installation <Installation.html>`_
--  `Prerequisites <Prerequisites.html>`__
+-  `Requirements <Prerequisites.html>`__
 -  `Quick Start: Python <Quickstart.html>`__
--  `Initialisation <https://github.com/openhumanoids/exotica/wiki/Initialisation>`__
+-  `Quick Start: C++ <Quickstart-cpp.html>`__
+-  `Setting up Problems and Solvers <Setting-up-problems-and-solvers.html>`__
+-  `Using EXOTica <Using-EXOTica.html>`_ 
+-  `Initialization <Initialisation.html>`__
 
    -  XML
 
-      -  `XML Initialisation <XML.html>`__
+      -  `XML Initialization <XML.html>`__
       -  `XML Parsing <XML-Parsing.html>`__
 
-   -  `Manual Initialisation <Manual-Initialisation.html>`__
-   -  `Common Initialisation Step <Common-Initialisation-Step.html>`__
-
--  `Using EXOTica <Using-EXOTica.html>`__
+   -  `Manual Initialization <Manual-Initialisation.html>`__
+   -  `Common Initialization Step <Common-Initialisation-Step.html>`__
+-  `Task Maps <Task_maps.html>`_ 
 -  `Setting up ROSlaunch <Setting-up-ROSlaunch.html>`__
 
 
@@ -36,13 +38,16 @@ Overview
 
    Installation
    Prerequisites
-   Initialisation
+   Initialization
    Initializers
    XML
    XML-Parsing
-   Manual-Initialisation
-   Common-Initialisation-Step
+   Manual-Initialization
+   Common-Initialization-Step
    Quickstart
+   Quickstart-cpp
+   Setting-up-problems-and-solvers
+   Task_maps
    Setting-up-ROSlaunch
    Using-EXOTica
    Python-API

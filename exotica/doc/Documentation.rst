@@ -6,7 +6,7 @@ Our documentation is built using `Sphinx <http://www.sphinx-doc.org>`_.
 
 In order to build the documentation offline, you require the ``sphinx`` and ``sphinx_rtd_theme`` packages to be installed on your machine:
 
-.. code:: bash
+.. code-block:: bash
 
     sudo pip install -U sphinx sphinx_rtd_theme
 

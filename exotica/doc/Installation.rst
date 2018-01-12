@@ -23,6 +23,25 @@ Installation
 5. Compile the code ``catkin build -s``.
 6. Source the config file (ideally inside ``~/.bashrc``): ``source path_to_workspace/devel/setup.bash``. You may have to source the config file from your install-space if your workspace is configured for installation.
 
+CMakeLists.txt & package.xml
+============================
+
+Add the following lines to the CMakeLists.txt file of any package that uses EXOTica. 
+In the ``find_package(catkin REQUIRED COMPONENTS)`` section, 
+add 
+
+.. code-block:: xml
+
+    find_package(catkin REQUIRED COMPONENTS)
+        exotica
+        task_map
+
+Also, add the following to ``package.xml``:
+
+.. code-block:: xml
+
+    <depend>task_map</depend>
+
 Demos
 =====
 

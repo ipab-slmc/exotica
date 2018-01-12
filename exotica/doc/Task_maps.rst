@@ -141,7 +141,7 @@ Using Task Maps
 Once we've chosen and initialized the task maps we're interested in they need to be sent to the problem. The problem then informs the solver that these things must be taken into
 consideration when producing a motion plan. Each problem can handle one of many task maps. Let's look at how we send these to the problem. 
 
-Cpp
+C++
 ---
 
 In the snippet below, we see that we have created a task map named ``map`` , which is an end effector frame map. We send this to the problem in the appropriate argument place using 

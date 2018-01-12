@@ -5,7 +5,7 @@ Quickstart: Python
 Quick IK trajectories without ROS
 =================================
 
-For this quick tutorial we'll be using the `example\_ik\_noros.py <https://github.com/ipab-slmc/exotica/blob/master/exotica_python/scripts/example_ik_noros.py>`_ script to generate some simple trajectories.
+For this quick tutorial we'll be using the `example\_ik\_noros.py <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/scripts/example_ik_noros.py>`_ script to generate some simple trajectories.
 
 .. rubric:: CODE
 
@@ -106,7 +106,7 @@ To prepare EXOTica for solving motion plans, we must first specify what problem 
 
 .. code-block:: python
 
-	(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica')+'/resources/configs/ik_solver_demo.xml')
+	(sol, prob)=exo.Initializers.loadXMLFull('{exotica_examples}/resources/configs/ik_solver_demo.xml')
 	problem = exo.Setup.createProblem(prob)
 	solver = exo.Setup.createSolver(sol)
 	solver.specifyProblem(problem)
@@ -116,7 +116,7 @@ First, we load the XML file
 
 .. code-block:: python
 
-	(sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica')+'/resources/configs/ik_solver_demo.xml')
+	(sol, prob)=exo.Initializers.loadXMLFull('{exotica_examples}/resources/configs/ik_solver_demo.xml')
 
 
 which contains a description of the robot, the problem and solver we are using as well as any task maps. The `exo.Initializers.loadXMLFull` command returns the details of the problem and solver, which then need to be sent to EXOTica:
@@ -138,12 +138,25 @@ This sends the robot information, task maps and all other problem information to
 
 With this information you are now able to experiment with the example code to familiarise yourself with how these functions effect the action of EXOTIca.
 
+Alternative Python Initialization
+=================================
+
+Instead of using the ``loadXMLFull`` method for initialization, we can use the ``loadSolver`` method. For example:
+
+.. code-block:: python
+
+	solver=exo.Setup.loadSolver('{exotica_examples}/resources/configs/aico_solver_demo_eight.xml')
+	problem = solver.getProblem()
+
+which loads both the solver and problem from the XML in one method. We then extract the problem 
+from the solver. 
+
 Quick IK trajectories with ROS
 ==============================
 
 The ROS demo script works in exactly the same way as the non-ROS script shown above, but with the addition of the motion plan being published to a ROS topic for visualisation in RVIZ.
 
-For this part of the tutorial, we'll be looking at the 'example_ik.py<https://github.com/ipab-slmc/exotica/blob/master/exotica_python/scripts/example_ik.py>'_ script.
+For this part of the tutorial, we'll be looking at the 'example_ik.py<https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/scripts/example_ik.py>'_ script.
 
 For details on setting initial joint angles and goal states - see the section above. This section will focus on the additional functionality which allows visualisation in RVIZ.
 

@@ -19,7 +19,7 @@ Overview
 -  `Setting up Problems and Solvers <Setting-up-problems-and-solvers.html>`__
 -  `Using EXOTica <Using-EXOTica.html>`_ 
 
--  `Requirements <Prerequisites.html>`__
+-  `Additional File Requirements <Prerequisites.html>`__
 -  `Initialization <Initialisation.html>`__
 
    -  XML
@@ -72,13 +72,27 @@ EXOTica and using it with your own robot.
    Manual-Initialization
    Common-Initialization-Step
    Setting-up-ROSlaunch
-   Task_maps
+
+
+Core Components/Concepts
+========================
+
+.. toctree::
+   :maxdepth: 2
+
    Initializers
+   Task_maps
+
+Additional Information and APIs
+===============================
+
+.. toctree::
+   :maxdepth: 2
+
    Code-Formatting
    Python-API
    Doxygen C++ <./doxygen_cpp/index.html#http://>
-   Documentation
-
+   Documentation    
 
 .. Indices and tables
     ==================

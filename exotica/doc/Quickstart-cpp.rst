@@ -1,5 +1,5 @@
 ******************
-Quickstart: Cpp
+Quickstart: C++
 ******************
 
 For this quick tutorial, we will be using the `ik_minimal.cpp <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/ik_minimal.cpp>`_

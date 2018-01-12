@@ -19,7 +19,7 @@ Overview
 -  `Setting up Problems and Solvers <Setting-up-problems-and-solvers.html>`__
 -  `Using EXOTica <Using-EXOTica.html>`_ 
 
--  `Additional File Requirements <Prerequisites.html>`__
+-  `Getting Started With Your Own Robot <Getting-Started-With-Your-Own-Robot.html>`__
 -  `Initialization <Initialisation.html>`__
 
    -  XML
@@ -65,7 +65,7 @@ EXOTica and using it with your own robot.
 .. toctree::
    :maxdepth: 2
 
-   Prerequisites
+   Getting-Started-With-Your-Own-Robot
    Initialization
    XML
    XML-Parsing

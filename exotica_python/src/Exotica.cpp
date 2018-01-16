@@ -605,8 +605,8 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedProblem.def("getGoalNEQ", &TimeIndexedProblem::getGoalNEQ);
     timeIndexedProblem.def("getRhoNEQ", &TimeIndexedProblem::getRhoNEQ);
     timeIndexedProblem.def_property("tau",
-                                     &TimeIndexedProblem::getTau,
-                                     &TimeIndexedProblem::setTau);
+                                    &TimeIndexedProblem::getTau,
+                                    &TimeIndexedProblem::setTau);
     timeIndexedProblem.def_readwrite("W_rate", &TimeIndexedProblem::W_rate);
     timeIndexedProblem.def_readwrite("W", &TimeIndexedProblem::W);
     timeIndexedProblem.def_property(
@@ -614,8 +614,8 @@ PYBIND11_MODULE(_pyexotica, module)
         &TimeIndexedProblem::getInitialTrajectory,
         &TimeIndexedProblem::setInitialTrajectory);
     timeIndexedProblem.def_property("T",
-                                     &TimeIndexedProblem::getT,
-                                     &TimeIndexedProblem::setT);
+                                    &TimeIndexedProblem::getT,
+                                    &TimeIndexedProblem::setT);
     timeIndexedProblem.def_readonly("PhiN", &TimeIndexedProblem::PhiN);
     timeIndexedProblem.def_readonly("JN", &TimeIndexedProblem::JN);
     timeIndexedProblem.def_readonly("N", &TimeIndexedProblem::N);
@@ -635,8 +635,8 @@ PYBIND11_MODULE(_pyexotica, module)
     boundedTimeIndexedProblem.def("getGoal", &BoundedTimeIndexedProblem::getGoal);
     boundedTimeIndexedProblem.def("getRho", &BoundedTimeIndexedProblem::getRho);
     boundedTimeIndexedProblem.def_property("tau",
-                                                 &BoundedTimeIndexedProblem::getTau,
-                                                 &BoundedTimeIndexedProblem::setTau);
+                                           &BoundedTimeIndexedProblem::getTau,
+                                           &BoundedTimeIndexedProblem::setTau);
     boundedTimeIndexedProblem.def_readwrite("W_rate", &BoundedTimeIndexedProblem::W_rate);
     boundedTimeIndexedProblem.def_readwrite("W", &BoundedTimeIndexedProblem::W);
     boundedTimeIndexedProblem.def_property(
@@ -644,8 +644,8 @@ PYBIND11_MODULE(_pyexotica, module)
         &BoundedTimeIndexedProblem::getInitialTrajectory,
         &BoundedTimeIndexedProblem::setInitialTrajectory);
     boundedTimeIndexedProblem.def_property("T",
-                                                 &BoundedTimeIndexedProblem::getT,
-                                                 &BoundedTimeIndexedProblem::setT);
+                                           &BoundedTimeIndexedProblem::getT,
+                                           &BoundedTimeIndexedProblem::setT);
     boundedTimeIndexedProblem.def_readonly("PhiN", &BoundedTimeIndexedProblem::PhiN);
     boundedTimeIndexedProblem.def_readonly("JN", &BoundedTimeIndexedProblem::JN);
     boundedTimeIndexedProblem.def_readonly("N", &BoundedTimeIndexedProblem::N);

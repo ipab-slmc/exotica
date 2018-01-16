@@ -37,7 +37,6 @@ REGISTER_PROBLEM_TYPE("BoundedTimeIndexedProblem", exotica::BoundedTimeIndexedPr
 
 namespace exotica
 {
-
 BoundedTimeIndexedProblem::BoundedTimeIndexedProblem()
     : T(0), tau(0), W_rate(0)
 {
@@ -69,21 +68,21 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
         bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
     }
 
-    if(init.LowerBound.rows()==N)
+    if (init.LowerBound.rows() == N)
     {
         for (int i = 0; i < jnts.size(); i++) bounds_[i] = init.LowerBound(i);
     }
-    else if(init.LowerBound.rows()!=0)
+    else if (init.LowerBound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.LowerBound.rows());
+        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.LowerBound.rows());
     }
-    if(init.UpperBound.rows()==N)
+    if (init.UpperBound.rows() == N)
     {
         for (int i = 0; i < jnts.size(); i++) bounds_[i + N] = init.UpperBound(i);
     }
-    else if(init.UpperBound.rows()!=0)
+    else if (init.UpperBound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.UpperBound.rows());
+        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 }
 
@@ -195,9 +194,9 @@ Eigen::VectorXd BoundedTimeIndexedProblem::getScalarTransitionJacobian(int t)
 
 void BoundedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
             return;
@@ -208,9 +207,9 @@ void BoundedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::Vec
 
 void BoundedTimeIndexedProblem::setRho(const std::string& task_name, const double rho, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho[t](Cost.Indexing[i].Id) = rho;
             return;
@@ -221,9 +220,9 @@ void BoundedTimeIndexedProblem::setRho(const std::string& task_name, const doubl
 
 Eigen::VectorXd BoundedTimeIndexedProblem::getGoal(const std::string& task_name, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
         }
@@ -233,9 +232,9 @@ Eigen::VectorXd BoundedTimeIndexedProblem::getGoal(const std::string& task_name,
 
 double BoundedTimeIndexedProblem::getRho(const std::string& task_name, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.Rho[t](Cost.Indexing[i].Id);
         }
@@ -306,5 +305,4 @@ void BoundedTimeIndexedProblem::reinitializeVariables()
     Cost.initialize(init_.Cost, shared_from_this(), dummy);
     applyStartState(false);
 }
-
 }

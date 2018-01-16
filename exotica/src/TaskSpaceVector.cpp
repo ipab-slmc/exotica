@@ -102,7 +102,7 @@ std::vector<TaskVectorEntry> TaskVectorEntry::reindex(const std::vector<TaskVect
     std::vector<TaskVectorEntry> ret = map;
     for (TaskVectorEntry& id : ret)
     {
-        id.inId = id.inId-oldStart+newStart;
+        id.inId = id.inId - oldStart + newStart;
     }
     return ret;
 }

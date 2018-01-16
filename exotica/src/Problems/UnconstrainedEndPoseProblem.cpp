@@ -38,7 +38,6 @@ REGISTER_PROBLEM_TYPE("UnconstrainedEndPoseProblem", exotica::UnconstrainedEndPo
 
 namespace exotica
 {
-
 UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
 {
     Flags = KIN_FK | KIN_J;
@@ -50,7 +49,6 @@ UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem()
 
 void UnconstrainedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
 {
-
 }
 
 void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
@@ -95,12 +93,12 @@ void UnconstrainedEndPoseProblem::preupdate()
 
 double UnconstrainedEndPoseProblem::getScalarCost()
 {
-    return Cost.ydiff.transpose()*Cost.S*Cost.ydiff;
+    return Cost.ydiff.transpose() * Cost.S * Cost.ydiff;
 }
 
 Eigen::VectorXd UnconstrainedEndPoseProblem::getScalarJacobian()
 {
-    return Cost.J.transpose()*Cost.S*Cost.ydiff*2.0;
+    return Cost.J.transpose() * Cost.S * Cost.ydiff * 2.0;
 }
 
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
@@ -118,9 +116,9 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 
 void UnconstrainedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
             return;
@@ -131,9 +129,9 @@ void UnconstrainedEndPoseProblem::setGoal(const std::string& task_name, Eigen::V
 
 void UnconstrainedEndPoseProblem::setRho(const std::string& task_name, const double rho)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho(Cost.Indexing[i].Id) = rho;
             return;
@@ -144,9 +142,9 @@ void UnconstrainedEndPoseProblem::setRho(const std::string& task_name, const dou
 
 Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string& task_name)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
         }
@@ -155,10 +153,10 @@ Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string& task_nam
 }
 
 double UnconstrainedEndPoseProblem::getRho(const std::string& task_name)
-{    
-    for (int i=0; i<Cost.Indexing.size(); i++)
+{
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.Rho(Cost.Indexing[i].Id);
         }

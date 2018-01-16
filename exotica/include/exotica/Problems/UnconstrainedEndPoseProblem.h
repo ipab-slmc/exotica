@@ -33,8 +33,8 @@
 #ifndef UNCONSTRAINEDENDPOSEPROBLEM_H_
 #define UNCONSTRAINEDENDPOSEPROBLEM_H_
 #include <exotica/PlanningProblem.h>
-#include <exotica/UnconstrainedEndPoseProblemInitializer.h>
 #include <exotica/Tasks.h>
+#include <exotica/UnconstrainedEndPoseProblemInitializer.h>
 
 namespace exotica
 {
@@ -71,6 +71,7 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
+
 protected:
     void initTaskTerms(const std::vector<exotica::Initializer>& inits);
 };

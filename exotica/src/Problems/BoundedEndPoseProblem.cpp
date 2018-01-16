@@ -38,7 +38,6 @@ REGISTER_PROBLEM_TYPE("BoundedEndPoseProblem", exotica::BoundedEndPoseProblem)
 
 namespace exotica
 {
-
 BoundedEndPoseProblem::BoundedEndPoseProblem()
 {
     Flags = KIN_FK | KIN_J;
@@ -50,7 +49,6 @@ BoundedEndPoseProblem::~BoundedEndPoseProblem()
 
 void BoundedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
 {
-
 }
 
 std::vector<double>& BoundedEndPoseProblem::getBounds()
@@ -95,21 +93,21 @@ void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
         bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
     }
 
-    if(init.LowerBound.rows()==N)
+    if (init.LowerBound.rows() == N)
     {
         for (int i = 0; i < jnts.size(); i++) bounds_[i] = init.LowerBound(i);
     }
-    else if(init.LowerBound.rows()!=0)
+    else if (init.LowerBound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.LowerBound.rows());
+        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.LowerBound.rows());
     }
-    if(init.UpperBound.rows()==N)
+    if (init.UpperBound.rows() == N)
     {
         for (int i = 0; i < jnts.size(); i++) bounds_[i + N] = init.UpperBound(i);
     }
-    else if(init.UpperBound.rows()!=0)
+    else if (init.UpperBound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.UpperBound.rows());
+        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 
     TaskSpaceVector dummy;
@@ -126,12 +124,12 @@ void BoundedEndPoseProblem::preupdate()
 
 double BoundedEndPoseProblem::getScalarCost()
 {
-    return Cost.ydiff.transpose()*Cost.S*Cost.ydiff;
+    return Cost.ydiff.transpose() * Cost.S * Cost.ydiff;
 }
 
 Eigen::VectorXd BoundedEndPoseProblem::getScalarJacobian()
 {
-    return Cost.J.transpose()*Cost.S*Cost.ydiff*2.0;
+    return Cost.J.transpose() * Cost.S * Cost.ydiff * 2.0;
 }
 
 void BoundedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
@@ -149,9 +147,9 @@ void BoundedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 
 void BoundedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
             return;
@@ -162,9 +160,9 @@ void BoundedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorX
 
 void BoundedEndPoseProblem::setRho(const std::string& task_name, const double rho)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho(Cost.Indexing[i].Id) = rho;
             return;
@@ -175,9 +173,9 @@ void BoundedEndPoseProblem::setRho(const std::string& task_name, const double rh
 
 Eigen::VectorXd BoundedEndPoseProblem::getGoal(const std::string& task_name)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
         }
@@ -186,15 +184,14 @@ Eigen::VectorXd BoundedEndPoseProblem::getGoal(const std::string& task_name)
 }
 
 double BoundedEndPoseProblem::getRho(const std::string& task_name)
-{    
-    for (int i=0; i<Cost.Indexing.size(); i++)
+{
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.Rho(Cost.Indexing[i].Id);
         }
     }
     throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
-
 }

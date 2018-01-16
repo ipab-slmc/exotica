@@ -33,9 +33,9 @@
 #include <exotica/Exotica.h>
 
 // Manual initialization requires dependency on specific solvers and task maps:
+#include <exotica/TaskInitializer.h>
 #include <ik_solver/IKsolverInitializer.h>
 #include <task_map/EffFrameInitializer.h>
-#include <exotica/TaskInitializer.h>
 
 using namespace exotica;
 
@@ -91,8 +91,8 @@ void run()
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
         my_problem->Cost.y = {0.6,
-                         -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-                         0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
+                              -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                              0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
 
         // Solve the problem using the IK solver
         my_problem->setStartState(q);

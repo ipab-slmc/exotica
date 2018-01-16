@@ -34,8 +34,8 @@
 #define TIMEINDEXEDPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
-#include <exotica/TimeIndexedProblemInitializer.h>
 #include <exotica/Tasks.h>
+#include <exotica/TimeIndexedProblemInitializer.h>
 
 namespace exotica
 {
@@ -78,7 +78,7 @@ public:
     double getScalarTransitionCost(int t);
     Eigen::VectorXd getScalarTransitionJacobian(int t);
 
-    double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
+    double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask Cost;
     TimeIndexedTask Inequality;
     TimeIndexedTask Equality;
@@ -92,15 +92,14 @@ public:
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
-
     int PhiN;
     int JN;
     int NumTasks;
     bool useBounds;
 
 private:
-    int T;          //!< Number of time steps
-    double tau;     //!< Time step duration
+    int T;       //!< Number of time steps
+    double tau;  //!< Time step duration
 
     std::vector<Eigen::VectorXd> InitialTrajectory;
     std::vector<double> bounds_;

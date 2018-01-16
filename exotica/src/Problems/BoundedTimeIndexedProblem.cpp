@@ -56,11 +56,7 @@ std::vector<double>& BoundedTimeIndexedProblem::getBounds()
 void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer& init)
 {
     init_ = init;
-    T = init.T;
-    if (T <= 2)
-    {
-        throw_named("Invalid number of timesteps: " << T);
-    }
+    setT(init_.T);
 
     std::vector<std::string> jnts;
     scene_->getJointNames(jnts);
@@ -89,8 +85,6 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
     {
         throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.UpperBound.rows());
     }
-
-    reinitializeVariables();
 }
 
 void BoundedTimeIndexedProblem::preupdate()
@@ -147,7 +141,7 @@ void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
     Cost.update(Phi[t], J[t], t);
 }
 
-double BoundedTimeIndexedProblem::getScalarCost(int t)
+double BoundedTimeIndexedProblem::getScalarTaskCost(int t)
 {
     if (t >= T || t < -1)
     {
@@ -157,10 +151,10 @@ double BoundedTimeIndexedProblem::getScalarCost(int t)
     {
         t = T - 1;
     }
-    return Cost.ydiff[t].transpose()*Cost.S[t]*Cost.ydiff[t];
+    return ct * Cost.ydiff[t].transpose() * Cost.S[t] * Cost.ydiff[t];
 }
 
-Eigen::VectorXd BoundedTimeIndexedProblem::getScalarJacobian(int t)
+Eigen::VectorXd BoundedTimeIndexedProblem::getScalarTaskJacobian(int t)
 {
     if (t >= T || t < -1)
     {
@@ -170,7 +164,33 @@ Eigen::VectorXd BoundedTimeIndexedProblem::getScalarJacobian(int t)
     {
         t = T - 1;
     }
-    return Cost.J[t].transpose()*Cost.S[t]*Cost.ydiff[t]*2.0;
+    return Cost.J[t].transpose() * Cost.S[t] * Cost.ydiff[t] * 2.0 * ct;
+}
+
+double BoundedTimeIndexedProblem::getScalarTransitionCost(int t)
+{
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
+    return ct * xdiff[t].transpose() * W * xdiff[t];
+}
+
+Eigen::VectorXd BoundedTimeIndexedProblem::getScalarTransitionJacobian(int t)
+{
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
+    return 2.0 * ct * W * xdiff[t];
 }
 
 void BoundedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
@@ -280,7 +300,7 @@ void BoundedTimeIndexedProblem::reinitializeVariables()
     xdiff.assign(T, Eigen::VectorXd::Zero(JN));
 
     // Set initial trajectory
-    InitialTrajectory.resize(T, getStartState());
+    InitialTrajectory.resize(T, applyStartState());
 
     TaskSpaceVector dummy;
     Cost.initialize(init_.Cost, shared_from_this(), dummy);

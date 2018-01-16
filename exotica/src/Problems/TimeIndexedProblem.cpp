@@ -56,6 +56,7 @@ std::vector<double>& TimeIndexedProblem::getBounds()
 void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
 {
     init_ = init;
+    applyStartState(false);
     setT(init_.T);
 
     std::vector<std::string> jnts;
@@ -113,7 +114,7 @@ void TimeIndexedProblem::reinitializeVariables()
     J.assign(T, Eigen::MatrixXd(JN, N));
 
     // Set initial trajectory
-    InitialTrajectory.resize(T, applyStartState());
+    InitialTrajectory.resize(T, scene_->getControlledState());
 
     TaskSpaceVector dummy;
     Cost.initialize(init_.Cost, shared_from_this(), dummy);

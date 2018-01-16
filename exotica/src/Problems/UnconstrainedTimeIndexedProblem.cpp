@@ -53,7 +53,6 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     init_ = init;
     setT(init_.T);
     applyStartState(false);
-    reinitializeVariables();
 }
 
 void UnconstrainedTimeIndexedProblem::reinitializeVariables()

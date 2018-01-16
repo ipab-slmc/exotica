@@ -114,6 +114,7 @@ void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
 
     TaskSpaceVector dummy;
     Cost.initialize(init.Cost, shared_from_this(), dummy);
+    applyStartState(false);
 }
 
 void BoundedEndPoseProblem::preupdate()

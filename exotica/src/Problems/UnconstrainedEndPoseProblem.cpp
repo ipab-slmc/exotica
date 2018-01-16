@@ -83,7 +83,7 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
     if (init.NominalState.rows() == N) qNominal = init.NominalState;
     TaskSpaceVector dummy;
     Cost.initialize(init.Cost, shared_from_this(), dummy);
-    applyStartState();
+    applyStartState(false);
 }
 
 void UnconstrainedEndPoseProblem::preupdate()

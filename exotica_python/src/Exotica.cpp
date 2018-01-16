@@ -604,22 +604,28 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedProblem.def("setRhoNEQ", &TimeIndexedProblem::setRhoNEQ);
     timeIndexedProblem.def("getGoalNEQ", &TimeIndexedProblem::getGoalNEQ);
     timeIndexedProblem.def("getRhoNEQ", &TimeIndexedProblem::getRhoNEQ);
-    timeIndexedProblem.def_readwrite("tau", &TimeIndexedProblem::tau);
+    timeIndexedProblem.def_property("tau",
+                                     &TimeIndexedProblem::getTau,
+                                     &TimeIndexedProblem::setTau);
     timeIndexedProblem.def_readwrite("W_rate", &TimeIndexedProblem::W_rate);
     timeIndexedProblem.def_readwrite("W", &TimeIndexedProblem::W);
     timeIndexedProblem.def_property(
         "InitialTrajectory",
         &TimeIndexedProblem::getInitialTrajectory,
         &TimeIndexedProblem::setInitialTrajectory);
-    timeIndexedProblem.def_readonly("T", &TimeIndexedProblem::T);
+    timeIndexedProblem.def_property("T",
+                                     &TimeIndexedProblem::getT,
+                                     &TimeIndexedProblem::setT);
     timeIndexedProblem.def_readonly("PhiN", &TimeIndexedProblem::PhiN);
     timeIndexedProblem.def_readonly("JN", &TimeIndexedProblem::JN);
     timeIndexedProblem.def_readonly("N", &TimeIndexedProblem::N);
     timeIndexedProblem.def_readonly("NumTasks", &TimeIndexedProblem::NumTasks);
     timeIndexedProblem.def_readonly("Phi", &TimeIndexedProblem::Phi);
     timeIndexedProblem.def_readonly("J", &TimeIndexedProblem::J);
-    timeIndexedProblem.def("getScalarCost", &TimeIndexedProblem::getScalarCost);
-    timeIndexedProblem.def("getScalarJacobian", &TimeIndexedProblem::getScalarJacobian);
+    timeIndexedProblem.def("getScalarTaskCost", &TimeIndexedProblem::getScalarTaskCost);
+    timeIndexedProblem.def("getScalarTaskJacobian", &TimeIndexedProblem::getScalarTaskJacobian);
+    timeIndexedProblem.def("getScalarTransitionCost", &TimeIndexedProblem::getScalarTransitionCost);
+    timeIndexedProblem.def("getScalarTransitionJacobian", &TimeIndexedProblem::getScalarTransitionJacobian);
     timeIndexedProblem.def("getBounds", &TimeIndexedProblem::getBounds);
     py::class_<BoundedTimeIndexedProblem, std::shared_ptr<BoundedTimeIndexedProblem>, PlanningProblem> boundedTimeIndexedProblem(prob, "BoundedTimeIndexedProblem");
     boundedTimeIndexedProblem.def("getDuration", &BoundedTimeIndexedProblem::getDuration);
@@ -646,8 +652,10 @@ PYBIND11_MODULE(_pyexotica, module)
     boundedTimeIndexedProblem.def_readonly("NumTasks", &BoundedTimeIndexedProblem::NumTasks);
     boundedTimeIndexedProblem.def_readonly("Phi", &BoundedTimeIndexedProblem::Phi);
     boundedTimeIndexedProblem.def_readonly("J", &BoundedTimeIndexedProblem::J);
-    boundedTimeIndexedProblem.def("getScalarCost", &BoundedTimeIndexedProblem::getScalarCost);
-    boundedTimeIndexedProblem.def("getScalarJacobian", &BoundedTimeIndexedProblem::getScalarJacobian);
+    boundedTimeIndexedProblem.def("getScalarTaskCost", &BoundedTimeIndexedProblem::getScalarTaskCost);
+    boundedTimeIndexedProblem.def("getScalarTaskJacobian", &BoundedTimeIndexedProblem::getScalarTaskJacobian);
+    boundedTimeIndexedProblem.def("getScalarTransitionCost", &BoundedTimeIndexedProblem::getScalarTransitionCost);
+    boundedTimeIndexedProblem.def("getScalarTransitionJacobian", &BoundedTimeIndexedProblem::getScalarTransitionJacobian);
     boundedTimeIndexedProblem.def("getBounds", &BoundedTimeIndexedProblem::getBounds);
     py::class_<UnconstrainedEndPoseProblem, std::shared_ptr<UnconstrainedEndPoseProblem>, PlanningProblem> unconstrainedEndPoseProblem(prob, "UnconstrainedEndPoseProblem");
     unconstrainedEndPoseProblem.def("update", &UnconstrainedEndPoseProblem::Update);

@@ -55,13 +55,32 @@ std::vector<double>& TimeIndexedProblem::getBounds()
 
 void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
 {
-    T = init.T;
+    init_ = init;
+    setT(init_.T);
+
+    std::vector<std::string> jnts;
+    scene_->getJointNames(jnts);
+
+    bounds_.resize(jnts.size() * 2);
+    std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
+    for (int i = 0; i < jnts.size(); i++)
+    {
+        bounds_[i] = joint_limits.at(jnts[i])[0];
+        bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
+    }
+
+    useBounds = init.UseBounds;
+}
+
+void TimeIndexedProblem::reinitializeVariables()
+{
+    T = init_.T;
     if (T <= 2)
     {
         throw_named("Invalid number of timesteps: " << T);
     }
-    tau = init.Tau;
-    W_rate = init.Wrate;
+    tau = init_.Tau;
+    W_rate = init_.Wrate;
 
     NumTasks = Tasks.size();
     PhiN = 0;
@@ -77,15 +96,15 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     N = scene_->getSolver().getNumControlledJoints();
 
     W = Eigen::MatrixXd::Identity(N, N) * W_rate;
-    if (init.W.rows() > 0)
+    if (init_.W.rows() > 0)
     {
-        if (init.W.rows() == N)
+        if (init_.W.rows() == N)
         {
-            W.diagonal() = init.W * W_rate;
+            W.diagonal() = init_.W * W_rate;
         }
         else
         {
-            throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
+            throw_named("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
         }
     }
 
@@ -93,26 +112,30 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     Phi.assign(T, yref);
     J.assign(T, Eigen::MatrixXd(JN, N));
 
-    std::vector<std::string> jnts;
-    scene_->getJointNames(jnts);
-
-    bounds_.resize(jnts.size() * 2);
-    std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
-    for (int i = 0; i < jnts.size(); i++)
-    {
-        bounds_[i] = joint_limits.at(jnts[i])[0];
-        bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
-    }
-
-    useBounds = init.UseBounds;
-
     // Set initial trajectory
-    InitialTrajectory.resize(T, getStartState());
+    InitialTrajectory.resize(T, applyStartState());
 
     TaskSpaceVector dummy;
-    Cost.initialize(init.Cost, shared_from_this(), dummy);
-    Inequality.initialize(init.Inequality, shared_from_this(), dummy);
-    Equality.initialize(init.Equality, shared_from_this(), dummy);
+    Cost.initialize(init_.Cost, shared_from_this(), dummy);
+    Inequality.initialize(init_.Inequality, shared_from_this(), dummy);
+    Equality.initialize(init_.Equality, shared_from_this(), dummy);
+}
+
+void TimeIndexedProblem::setT(int T_in)
+{
+    if (T_in <= 2)
+    {
+        throw_named("Invalid number of timesteps: " << T_in);
+    }
+    T = T_in;
+    reinitializeVariables();
+}
+
+void TimeIndexedProblem::setTau(double tau_in)
+{
+    if (tau_in <= 0.) throw_pretty("tau is expected to be greater than 0. (tau=" << tau_in << ")");
+    tau = tau_in;
+    ct = 1.0 / tau / T;
 }
 
 void TimeIndexedProblem::preupdate()
@@ -173,7 +196,7 @@ void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
     Equality.update(Phi[t], J[t], t);
 }
 
-double TimeIndexedProblem::getScalarCost(int t)
+double TimeIndexedProblem::getScalarTaskCost(int t)
 {
     if (t >= T || t < -1)
     {
@@ -183,10 +206,10 @@ double TimeIndexedProblem::getScalarCost(int t)
     {
         t = T - 1;
     }
-    return Cost.ydiff[t].transpose()*Cost.S[t]*Cost.ydiff[t];
+    return ct * Cost.ydiff[t].transpose() * Cost.S[t] * Cost.ydiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::getScalarJacobian(int t)
+Eigen::VectorXd TimeIndexedProblem::getScalarTaskJacobian(int t)
 {
     if (t >= T || t < -1)
     {
@@ -196,7 +219,33 @@ Eigen::VectorXd TimeIndexedProblem::getScalarJacobian(int t)
     {
         t = T - 1;
     }
-    return Cost.J[t].transpose()*Cost.S[t]*Cost.ydiff[t]*2.0;
+    return Cost.J[t].transpose() * Cost.S[t] * Cost.ydiff[t] * 2.0 * ct;
+}
+
+double TimeIndexedProblem::getScalarTransitionCost(int t)
+{
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
+    return ct * xdiff[t].transpose() * W * xdiff[t];
+}
+
+Eigen::VectorXd TimeIndexedProblem::getScalarTransitionJacobian(int t)
+{
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
+    return 2.0 * ct * W * xdiff[t];
 }
 
 void TimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)

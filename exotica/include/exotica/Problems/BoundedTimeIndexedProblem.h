@@ -65,8 +65,10 @@ public:
     double getTau() const { return tau; }
     void setTau(double tau_in);
 
-    double getScalarCost(int t);
-    Eigen::VectorXd getScalarJacobian(int t);
+    double getScalarTaskCost(int t);
+    Eigen::VectorXd getScalarTaskJacobian(int t);
+    double getScalarTransitionCost(int t);
+    Eigen::VectorXd getScalarTransitionJacobian(int t);
 
     double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask Cost;

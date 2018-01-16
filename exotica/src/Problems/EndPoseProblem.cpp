@@ -118,6 +118,7 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
     Cost.initialize(init.Cost, shared_from_this(), dummy);
     Inequality.initialize(init.Inequality, shared_from_this(), dummy);
     Equality.initialize(init.Equality, shared_from_this(), dummy);
+    applyStartState(false);
 }
 
 void EndPoseProblem::preupdate()

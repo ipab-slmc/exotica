@@ -300,10 +300,11 @@ void BoundedTimeIndexedProblem::reinitializeVariables()
     xdiff.assign(T, Eigen::VectorXd::Zero(JN));
 
     // Set initial trajectory
-    InitialTrajectory.resize(T, applyStartState());
+    InitialTrajectory.resize(T, scene_->getControlledState());
 
     TaskSpaceVector dummy;
     Cost.initialize(init_.Cost, shared_from_this(), dummy);
+    applyStartState(false);
 }
 
 }

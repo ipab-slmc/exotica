@@ -91,7 +91,7 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     Phi.setZero(PhiN);
     TaskSpaceVector dummy;
     Constraint.initialize(init.Constraint, shared_from_this(), dummy);
-    applyStartState();
+    applyStartState(false);
 }
 
 void SamplingProblem::preupdate()

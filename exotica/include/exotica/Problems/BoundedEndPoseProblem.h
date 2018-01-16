@@ -32,9 +32,10 @@
 
 #ifndef BOUNDEDENDPOSEPROBLEM_H_
 #define BOUNDEDENDPOSEPROBLEM_H_
-#include <exotica/BoundedEndPoseProblemInitializer.h>
 #include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
+
+#include <exotica/BoundedEndPoseProblemInitializer.h>
 
 namespace exotica
 {

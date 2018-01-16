@@ -34,6 +34,7 @@
 #define UNCONSTRAINEDENDPOSEPROBLEM_H_
 #include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
+
 #include <exotica/UnconstrainedEndPoseProblemInitializer.h>
 
 namespace exotica

@@ -32,10 +32,10 @@
 
 #ifndef BOUNDEDTIMEINDEXEDPROBLEM_H_
 #define BOUNDEDTIMEINDEXEDPROBLEM_H_
-
-#include <exotica/BoundedTimeIndexedProblemInitializer.h>
 #include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
+
+#include <exotica/BoundedTimeIndexedProblemInitializer.h>
 
 namespace exotica
 {

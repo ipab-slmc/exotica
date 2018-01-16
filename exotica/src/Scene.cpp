@@ -30,8 +30,8 @@
  *
  */
 
-#include "exotica/Scene.h"
-#include "exotica/Setup.h"
+#include <exotica/Scene.h>
+#include <exotica/Setup.h>
 
 namespace exotica
 {

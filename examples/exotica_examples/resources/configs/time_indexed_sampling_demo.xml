@@ -18,13 +18,18 @@
           <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_moving_obstacle.traj" />
         </Trajectories>
         <CollisionScene>CollisionSceneFCL</CollisionScene>
-        <AlwaysUpdateCollisionScene>1</AlwaysUpdateCollisionScene>
+        <AlwaysUpdateCollisionScene>0</AlwaysUpdateCollisionScene>
       </Scene>
     </PlanningScene>
 
     <Maps>
       <CollisionCheck Name="Collision" SelfCollision="1" />
     </Maps>
+
+    <Constraint>
+      <Task Task="Collision"/>
+    </Constraint>
+
     <JointVelocityLimits>1 1 1 1 1 1 1</JointVelocityLimits>
     <Goal>2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
   </TimeIndexedSamplingProblem>

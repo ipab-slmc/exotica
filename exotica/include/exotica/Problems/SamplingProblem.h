@@ -39,7 +39,6 @@
 
 namespace exotica
 {
-
 class SamplingProblem : public PlanningProblem, public Instantiable<SamplingProblemInitializer>
 {
 public:

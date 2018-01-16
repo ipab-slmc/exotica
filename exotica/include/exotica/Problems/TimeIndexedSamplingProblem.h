@@ -35,8 +35,8 @@
 #define INCLUDE_EXOTICA_PROBLEMS_TIMEINDEXEDSAMPLINGPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
-#include <exotica/TimeIndexedSamplingProblemInitializer.h>
 #include <exotica/Tasks.h>
+#include <exotica/TimeIndexedSamplingProblemInitializer.h>
 
 namespace exotica
 {

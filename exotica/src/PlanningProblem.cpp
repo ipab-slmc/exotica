@@ -37,7 +37,6 @@
 
 namespace exotica
 {
-
 PlanningProblem::PlanningProblem() : Flags(KIN_FK), N(0)
 {
 }

@@ -37,7 +37,6 @@ REGISTER_PROBLEM_TYPE("SamplingProblem", exotica::SamplingProblem)
 
 namespace exotica
 {
-
 SamplingProblem::SamplingProblem()
 {
     Flags = KIN_FK;

@@ -32,8 +32,8 @@
 
 #ifndef BOUNDEDENDPOSEPROBLEM_H_
 #define BOUNDEDENDPOSEPROBLEM_H_
-#include <exotica/PlanningProblem.h>
 #include <exotica/BoundedEndPoseProblemInitializer.h>
+#include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
 
 namespace exotica
@@ -69,6 +69,7 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
+
 protected:
     void initTaskTerms(const std::vector<exotica::Initializer>& inits);
     std::vector<double> bounds_;

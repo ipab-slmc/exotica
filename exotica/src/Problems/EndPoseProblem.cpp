@@ -38,7 +38,6 @@ REGISTER_PROBLEM_TYPE("EndPoseProblem", exotica::EndPoseProblem)
 
 namespace exotica
 {
-
 EndPoseProblem::EndPoseProblem()
 {
     Flags = KIN_FK | KIN_J;
@@ -50,7 +49,6 @@ EndPoseProblem::~EndPoseProblem()
 
 void EndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
 {
-
 }
 
 std::vector<double>& EndPoseProblem::getBounds()
@@ -97,21 +95,21 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
 
     useBounds = init.UseBounds;
 
-    if(init.LowerBound.rows()==N)
+    if (init.LowerBound.rows() == N)
     {
         for (int i = 0; i < jnts.size(); i++) bounds_[i] = init.LowerBound(i);
     }
-    else if(init.LowerBound.rows()!=0)
+    else if (init.LowerBound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.LowerBound.rows());
+        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.LowerBound.rows());
     }
-    if(init.UpperBound.rows()==N)
+    if (init.UpperBound.rows() == N)
     {
         for (int i = 0; i < jnts.size(); i++) bounds_[i + N] = init.UpperBound(i);
     }
-    else if(init.UpperBound.rows()!=0)
+    else if (init.UpperBound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected "<<N<<" got "<<init.UpperBound.rows());
+        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 
     TaskSpaceVector dummy;
@@ -132,12 +130,12 @@ void EndPoseProblem::preupdate()
 
 double EndPoseProblem::getScalarCost()
 {
-    return Cost.ydiff.transpose()*Cost.S*Cost.ydiff;
+    return Cost.ydiff.transpose() * Cost.S * Cost.ydiff;
 }
 
 Eigen::VectorXd EndPoseProblem::getScalarJacobian()
 {
-    return Cost.J.transpose()*Cost.S*Cost.ydiff*2.0;
+    return Cost.J.transpose() * Cost.S * Cost.ydiff * 2.0;
 }
 
 void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
@@ -157,9 +155,9 @@ void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
 
 void EndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
             return;
@@ -170,9 +168,9 @@ void EndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefCon
 
 void EndPoseProblem::setRho(const std::string& task_name, const double rho)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho(Cost.Indexing[i].Id) = rho;
             return;
@@ -183,9 +181,9 @@ void EndPoseProblem::setRho(const std::string& task_name, const double rho)
 
 Eigen::VectorXd EndPoseProblem::getGoal(const std::string& task_name)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
         }
@@ -194,10 +192,10 @@ Eigen::VectorXd EndPoseProblem::getGoal(const std::string& task_name)
 }
 
 double EndPoseProblem::getRho(const std::string& task_name)
-{    
-    for (int i=0; i<Cost.Indexing.size(); i++)
+{
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.Rho(Cost.Indexing[i].Id);
         }
@@ -207,9 +205,9 @@ double EndPoseProblem::getRho(const std::string& task_name)
 
 void EndPoseProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i=0; i<Equality.Indexing.size(); i++)
+    for (int i = 0; i < Equality.Indexing.size(); i++)
     {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
+        if (Equality.Tasks[i]->getObjectName() == task_name)
         {
             Equality.y.data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length) = goal;
             return;
@@ -220,9 +218,9 @@ void EndPoseProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefC
 
 void EndPoseProblem::setRhoEQ(const std::string& task_name, const double rho)
 {
-    for (int i=0; i<Equality.Indexing.size(); i++)
+    for (int i = 0; i < Equality.Indexing.size(); i++)
     {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
+        if (Equality.Tasks[i]->getObjectName() == task_name)
         {
             Equality.Rho(Equality.Indexing[i].Id) = rho;
             return;
@@ -233,9 +231,9 @@ void EndPoseProblem::setRhoEQ(const std::string& task_name, const double rho)
 
 Eigen::VectorXd EndPoseProblem::getGoalEQ(const std::string& task_name)
 {
-    for (int i=0; i<Equality.Indexing.size(); i++)
+    for (int i = 0; i < Equality.Indexing.size(); i++)
     {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
+        if (Equality.Tasks[i]->getObjectName() == task_name)
         {
             return Equality.y.data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length);
         }
@@ -245,9 +243,9 @@ Eigen::VectorXd EndPoseProblem::getGoalEQ(const std::string& task_name)
 
 double EndPoseProblem::getRhoEQ(const std::string& task_name)
 {
-    for (int i=0; i<Equality.Indexing.size(); i++)
+    for (int i = 0; i < Equality.Indexing.size(); i++)
     {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
+        if (Equality.Tasks[i]->getObjectName() == task_name)
         {
             return Equality.Rho(Equality.Indexing[i].Id);
         }
@@ -257,9 +255,9 @@ double EndPoseProblem::getRhoEQ(const std::string& task_name)
 
 void EndPoseProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i=0; i<Inequality.Indexing.size(); i++)
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
             Inequality.y.data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length) = goal;
             return;
@@ -270,9 +268,9 @@ void EndPoseProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRef
 
 void EndPoseProblem::setRhoNEQ(const std::string& task_name, const double rho)
 {
-    for (int i=0; i<Inequality.Indexing.size(); i++)
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
             Inequality.Rho(Inequality.Indexing[i].Id) = rho;
             return;
@@ -283,9 +281,9 @@ void EndPoseProblem::setRhoNEQ(const std::string& task_name, const double rho)
 
 Eigen::VectorXd EndPoseProblem::getGoalNEQ(const std::string& task_name)
 {
-    for (int i=0; i<Inequality.Indexing.size(); i++)
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
             return Inequality.y.data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length);
         }
@@ -295,15 +293,13 @@ Eigen::VectorXd EndPoseProblem::getGoalNEQ(const std::string& task_name)
 
 double EndPoseProblem::getRhoNEQ(const std::string& task_name)
 {
-    for (int i=0; i<Inequality.Indexing.size(); i++)
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
             return Inequality.Rho(Inequality.Indexing[i].Id);
         }
     }
     throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
-
-
 }

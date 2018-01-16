@@ -77,8 +77,8 @@ void run()
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
         my_problem->Cost.y = {0.6,
-                         -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-                         0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
+                              -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                              0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
 
         // Solve the problem using the IK solver
         my_problem->setStartState(q);

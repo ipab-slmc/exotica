@@ -37,7 +37,6 @@ REGISTER_PROBLEM_TYPE("TimeIndexedProblem", exotica::TimeIndexedProblem)
 
 namespace exotica
 {
-
 TimeIndexedProblem::TimeIndexedProblem()
     : T(0), tau(0), W_rate(0)
 {
@@ -251,9 +250,9 @@ Eigen::VectorXd TimeIndexedProblem::getScalarTransitionJacobian(int t)
 
 void TimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
             return;
@@ -264,9 +263,9 @@ void TimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRe
 
 void TimeIndexedProblem::setRho(const std::string& task_name, const double rho, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho[t](Cost.Indexing[i].Id) = rho;
             return;
@@ -277,9 +276,9 @@ void TimeIndexedProblem::setRho(const std::string& task_name, const double rho, 
 
 Eigen::VectorXd TimeIndexedProblem::getGoal(const std::string& task_name, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
         }
@@ -289,9 +288,9 @@ Eigen::VectorXd TimeIndexedProblem::getGoal(const std::string& task_name, int t)
 
 double TimeIndexedProblem::getRho(const std::string& task_name, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.Rho[t](Cost.Indexing[i].Id);
         }
@@ -301,9 +300,9 @@ double TimeIndexedProblem::getRho(const std::string& task_name, int t)
 
 void TimeIndexedProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    for (int i=0; i<Equality.Indexing.size(); i++)
+    for (int i = 0; i < Equality.Indexing.size(); i++)
     {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
+        if (Equality.Tasks[i]->getObjectName() == task_name)
         {
             Equality.y[t].data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length) = goal;
             return;
@@ -314,9 +313,9 @@ void TimeIndexedProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXd
 
 void TimeIndexedProblem::setRhoEQ(const std::string& task_name, const double rho, int t)
 {
-    for (int i=0; i<Equality.Indexing.size(); i++)
+    for (int i = 0; i < Equality.Indexing.size(); i++)
     {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
+        if (Equality.Tasks[i]->getObjectName() == task_name)
         {
             Equality.Rho[t](Equality.Indexing[i].Id) = rho;
             return;
@@ -327,9 +326,9 @@ void TimeIndexedProblem::setRhoEQ(const std::string& task_name, const double rho
 
 Eigen::VectorXd TimeIndexedProblem::getGoalEQ(const std::string& task_name, int t)
 {
-    for (int i=0; i<Equality.Indexing.size(); i++)
+    for (int i = 0; i < Equality.Indexing.size(); i++)
     {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
+        if (Equality.Tasks[i]->getObjectName() == task_name)
         {
             return Equality.y[t].data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length);
         }
@@ -339,9 +338,9 @@ Eigen::VectorXd TimeIndexedProblem::getGoalEQ(const std::string& task_name, int 
 
 double TimeIndexedProblem::getRhoEQ(const std::string& task_name, int t)
 {
-    for (int i=0; i<Equality.Indexing.size(); i++)
+    for (int i = 0; i < Equality.Indexing.size(); i++)
     {
-        if(Equality.Tasks[i]->getObjectName()==task_name)
+        if (Equality.Tasks[i]->getObjectName() == task_name)
         {
             return Equality.Rho[t](Equality.Indexing[i].Id);
         }
@@ -351,9 +350,9 @@ double TimeIndexedProblem::getRhoEQ(const std::string& task_name, int t)
 
 void TimeIndexedProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    for (int i=0; i<Inequality.Indexing.size(); i++)
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
             Inequality.y[t].data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length) = goal;
             return;
@@ -364,9 +363,9 @@ void TimeIndexedProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorX
 
 void TimeIndexedProblem::setRhoNEQ(const std::string& task_name, const double rho, int t)
 {
-    for (int i=0; i<Inequality.Indexing.size(); i++)
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
             Inequality.Rho[t](Inequality.Indexing[i].Id) = rho;
             return;
@@ -377,9 +376,9 @@ void TimeIndexedProblem::setRhoNEQ(const std::string& task_name, const double rh
 
 Eigen::VectorXd TimeIndexedProblem::getGoalNEQ(const std::string& task_name, int t)
 {
-    for (int i=0; i<Inequality.Indexing.size(); i++)
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
             return Inequality.y[t].data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length);
         }
@@ -389,9 +388,9 @@ Eigen::VectorXd TimeIndexedProblem::getGoalNEQ(const std::string& task_name, int
 
 double TimeIndexedProblem::getRhoNEQ(const std::string& task_name, int t)
 {
-    for (int i=0; i<Inequality.Indexing.size(); i++)
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
-        if(Inequality.Tasks[i]->getObjectName()==task_name)
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
             return Inequality.Rho[t](Inequality.Indexing[i].Id);
         }

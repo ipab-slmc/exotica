@@ -34,8 +34,8 @@
 #define UNCONSTRAINETIMEINDEXEDPROBLEM_H_
 
 #include <exotica/PlanningProblem.h>
-#include <exotica/UnconstrainedTimeIndexedProblemInitializer.h>
 #include <exotica/Tasks.h>
+#include <exotica/UnconstrainedTimeIndexedProblemInitializer.h>
 
 namespace exotica
 {
@@ -69,7 +69,7 @@ public:
     double getScalarTransitionCost(int t);
     Eigen::VectorXd getScalarTransitionJacobian(int t);
 
-    double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
+    double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask Cost;
     double Q_rate;  //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
     double H_rate;  //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)

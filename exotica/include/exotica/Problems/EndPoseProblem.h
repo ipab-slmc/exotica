@@ -32,8 +32,8 @@
 
 #ifndef ENDPOSEPROBLEM_H_
 #define ENDPOSEPROBLEM_H_
-#include <exotica/PlanningProblem.h>
 #include <exotica/EndPoseProblemInitializer.h>
+#include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
 
 namespace exotica

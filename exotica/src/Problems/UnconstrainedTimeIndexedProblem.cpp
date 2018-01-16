@@ -37,7 +37,6 @@ REGISTER_PROBLEM_TYPE("UnconstrainedTimeIndexedProblem", exotica::UnconstrainedT
 
 namespace exotica
 {
-
 UnconstrainedTimeIndexedProblem::UnconstrainedTimeIndexedProblem()
     : T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
 {
@@ -235,9 +234,9 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian(int
 
 void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
             return;
@@ -248,9 +247,9 @@ void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eige
 
 void UnconstrainedTimeIndexedProblem::setRho(const std::string& task_name, const double rho, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho[t](Cost.Indexing[i].Id) = rho;
             return;
@@ -261,9 +260,9 @@ void UnconstrainedTimeIndexedProblem::setRho(const std::string& task_name, const
 
 Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string& task_name, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
         }
@@ -273,9 +272,9 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string& task
 
 double UnconstrainedTimeIndexedProblem::getRho(const std::string& task_name, int t)
 {
-    for (int i=0; i<Cost.Indexing.size(); i++)
+    for (int i = 0; i < Cost.Indexing.size(); i++)
     {
-        if(Cost.Tasks[i]->getObjectName()==task_name)
+        if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             return Cost.Rho[t](Cost.Indexing[i].Id);
         }

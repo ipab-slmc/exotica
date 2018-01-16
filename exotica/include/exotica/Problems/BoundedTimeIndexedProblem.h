@@ -33,8 +33,8 @@
 #ifndef BOUNDEDTIMEINDEXEDPROBLEM_H_
 #define BOUNDEDTIMEINDEXEDPROBLEM_H_
 
-#include <exotica/PlanningProblem.h>
 #include <exotica/BoundedTimeIndexedProblemInitializer.h>
+#include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
 
 namespace exotica
@@ -70,7 +70,7 @@ public:
     double getScalarTransitionCost(int t);
     Eigen::VectorXd getScalarTransitionJacobian(int t);
 
-    double ct;      //!< Normalisation of scalar cost and Jacobian over trajectory length
+    double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask Cost;
 
     double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
@@ -87,8 +87,8 @@ public:
     int NumTasks;
 
 private:
-    int T;          //!< Number of time steps
-    double tau;     //!< Time step duration
+    int T;       //!< Number of time steps
+    double tau;  //!< Time step duration
 
     std::vector<Eigen::VectorXd> InitialTrajectory;
     std::vector<double> bounds_;

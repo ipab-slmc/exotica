@@ -30,25 +30,23 @@
  *
  */
 
-#include <exotica/Tasks.h>
-#include <exotica/TaskInitializer.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
+#include <exotica/TaskInitializer.h>
+#include <exotica/Tasks.h>
 
 namespace exotica
 {
-
 Task::Task()
 {
-
 }
 
 void Task::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
 {
-    for(const exotica::Initializer& init : inits)
+    for (const exotica::Initializer& init : inits)
     {
         TaskInitializer task(init);
         auto it = prob->getTaskMaps().find(task.Task);
-        if(it == prob->getTaskMaps().end()) throw_pretty("Task map '"<<task.Task<<"' has not been defined!");
+        if (it == prob->getTaskMaps().end()) throw_pretty("Task map '" << task.Task << "' has not been defined!");
         TaskMaps[task.Task] = it->second;
         Tasks.push_back(it->second);
         it->second->isUsed = true;
@@ -73,45 +71,44 @@ void Task::initialize(const std::vector<exotica::Initializer>& inits, PlanningPr
 
 EndPoseTask::EndPoseTask()
 {
-
 }
 
 void EndPoseTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
 {
     Task::initialize(inits, prob, Phi);
-    y=Phi;
+    y = Phi;
     y.setZero(PhiN);
     Rho = Eigen::VectorXd::Ones(NumTasks);
     J = Eigen::MatrixXd(JN, prob->N);
     S = Eigen::MatrixXd::Identity(JN, JN);
     ydiff = Eigen::VectorXd::Zero(JN);
 
-    for(int i=0; i<NumTasks; i++)
+    for (int i = 0; i < NumTasks; i++)
     {
         TaskInitializer task(inits[i]);
-        if(task.Goal.rows()==0)
+        if (task.Goal.rows() == 0)
         {
             // Keep zero goal
         }
-        else if(task.Goal.rows()==Tasks[i]->Length)
+        else if (task.Goal.rows() == Tasks[i]->Length)
         {
             y.data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal;
         }
         else
         {
-            throw_pretty("Invalid task goal size! Expecting "<<Tasks[i]->Length<<" got "<<task.Goal.rows());
+            throw_pretty("Invalid task goal size! Expecting " << Tasks[i]->Length << " got " << task.Goal.rows());
         }
-        if(task.Rho.rows()==0)
+        if (task.Rho.rows() == 0)
         {
             Rho(i) = 1.0;
         }
-        else if(task.Rho.rows()==1)
+        else if (task.Rho.rows() == 1)
         {
             Rho(i) = task.Rho(0);
         }
         else
         {
-            throw_pretty("Invalid task Rho size! Expecting 1 got "<<task.Rho.rows());
+            throw_pretty("Invalid task Rho size! Expecting 1 got " << task.Rho.rows());
         }
     }
 }
@@ -123,7 +120,7 @@ void EndPoseTask::updateS()
         for (int i = 0; i < task.Length; i++)
         {
             S(i + task.Start, i + task.Start) = Rho(task.Id);
-            if(Rho(task.Id)>0.0) Tasks[task.Id]->isUsed = true;
+            if (Rho(task.Id) > 0.0) Tasks[task.Id]->isUsed = true;
         }
     }
 }
@@ -140,67 +137,66 @@ void EndPoseTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst 
 
 TimeIndexedTask::TimeIndexedTask()
 {
-
 }
 
 void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
 {
     Task::initialize(inits, prob, phi);
-    T=std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->getT();
+    T = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->getT();
     phi.setZero(PhiN);
     Phi.assign(T, phi);
-    y=Phi;
+    y = Phi;
     Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
     J.assign(T, Eigen::MatrixXd(JN, prob->N));
     S.assign(T, Eigen::MatrixXd::Identity(JN, JN));
     ydiff.assign(T, Eigen::VectorXd::Zero(JN));
 
-    for(int i=0; i<NumTasks; i++)
+    for (int i = 0; i < NumTasks; i++)
     {
         TaskInitializer task(inits[i]);
-        if(task.Goal.rows()==0)
+        if (task.Goal.rows() == 0)
         {
             // Keep zero goal
         }
-        else if(task.Goal.rows()==Tasks[i]->Length*T)
+        else if (task.Goal.rows() == Tasks[i]->Length * T)
         {
-            for(int t=0; t<T; t++)
+            for (int t = 0; t < T; t++)
             {
-                y[t].data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal.segment(t*Tasks[i]->Length, Tasks[i]->Length);
+                y[t].data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal.segment(t * Tasks[i]->Length, Tasks[i]->Length);
             }
         }
         else
         {
-            throw_pretty("Invalid task goal size! Expecting "<<Tasks[i]->Length*T<<" got "<<task.Goal.rows());
+            throw_pretty("Invalid task goal size! Expecting " << Tasks[i]->Length * T << " got " << task.Goal.rows());
         }
-        if(task.Rho.rows()==0)
+        if (task.Rho.rows() == 0)
         {
             // Keep ones
         }
-        else if(task.Rho.rows()==T)
+        else if (task.Rho.rows() == T)
         {
-            for(int t=0; t<T; t++)
+            for (int t = 0; t < T; t++)
             {
                 Rho[t](i) = task.Rho(t);
             }
         }
         else
         {
-            throw_pretty("Invalid task Rho size! Expecting "<<T<<" got "<<task.Rho.rows());
+            throw_pretty("Invalid task Rho size! Expecting " << T << " got " << task.Rho.rows());
         }
     }
 }
 
 void TimeIndexedTask::updateS()
 {
-    for(int t=0; t<T; t++)
+    for (int t = 0; t < T; t++)
     {
         for (const TaskIndexing& task : Indexing)
         {
             for (int i = 0; i < task.Length; i++)
             {
                 S[t](i + task.Start, i + task.Start) = Rho[t](task.Id);
-                if(Rho[t](task.Id)>0.0) Tasks[task.Id]->isUsed = true;
+                if (Rho[t](task.Id) > 0.0) Tasks[task.Id]->isUsed = true;
             }
         }
     }
@@ -218,44 +214,43 @@ void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefCo
 
 SamplingTask::SamplingTask()
 {
-
 }
 
 void SamplingTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
 {
     Task::initialize(inits, prob, Phi);
-    y=Phi;
+    y = Phi;
     y.setZero(PhiN);
     Rho = Eigen::VectorXd::Ones(NumTasks);
     S = Eigen::MatrixXd::Identity(JN, JN);
     ydiff = Eigen::VectorXd::Zero(JN);
 
-    for(int i=0; i<NumTasks; i++)
+    for (int i = 0; i < NumTasks; i++)
     {
         TaskInitializer task(inits[i]);
-        if(task.Goal.rows()==0)
+        if (task.Goal.rows() == 0)
         {
             // Keep zero goal
         }
-        else if(task.Goal.rows()==Tasks[i]->Length)
+        else if (task.Goal.rows() == Tasks[i]->Length)
         {
             y.data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal;
         }
         else
         {
-            throw_pretty("Invalid task goal size! Expecting "<<Tasks[i]->Length<<" got "<<task.Goal.rows());
+            throw_pretty("Invalid task goal size! Expecting " << Tasks[i]->Length << " got " << task.Goal.rows());
         }
-        if(task.Rho.rows()==0)
+        if (task.Rho.rows() == 0)
         {
             Rho(i) = 1.0;
         }
-        else if(task.Rho.rows()==1)
+        else if (task.Rho.rows() == 1)
         {
             Rho(i) = task.Rho(0);
         }
         else
         {
-            throw_pretty("Invalid task Rho size! Expecting 1 got "<<task.Rho.rows());
+            throw_pretty("Invalid task Rho size! Expecting 1 got " << task.Rho.rows());
         }
     }
 }
@@ -267,7 +262,7 @@ void SamplingTask::updateS()
         for (int i = 0; i < task.Length; i++)
         {
             S(i + task.Start, i + task.Start) = Rho(task.Id);
-            if(Rho(task.Id)!=0.0) Tasks[task.Id]->isUsed = true;
+            if (Rho(task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
         }
     }
 }
@@ -280,5 +275,4 @@ void SamplingTask::update(const TaskSpaceVector& bigPhi)
     }
     ydiff = Phi - y;
 }
-
 }

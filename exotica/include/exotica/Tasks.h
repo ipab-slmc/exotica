@@ -39,14 +39,14 @@ class Task;
 #ifndef EXOTICA_TASKS_H
 #define EXOTICA_TASKS_H
 
-#include <memory>
+#include <Eigen/Dense>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <Eigen/Dense>
 
-#include <exotica/Property.h>
 #include <exotica/PlanningProblem.h>
+#include <exotica/Property.h>
 #include <exotica/TaskMap.h>
 #include <exotica/TaskSpaceVector.h>
 #include <exotica/Tools/Conversions.h>
@@ -125,7 +125,6 @@ public:
     TaskSpaceVector Phi;
     Eigen::MatrixXd S;
 };
-
 }
 
 #endif

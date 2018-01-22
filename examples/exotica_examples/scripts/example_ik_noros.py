@@ -23,7 +23,8 @@ timer = exo.Timer()
 while True:
     try:
         timer.reset()
-        problem.setGoal('Position',figureEight(t))
+        goal = figureEight(t)
+        problem.setGoal('Position',goal)
         problem.startState = q
         q = solver.solve()[0]
         print('Solution found in '+str(timer.getDuration())+'s '+str(q))

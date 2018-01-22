@@ -438,7 +438,7 @@ void Scene::updateSceneFrames()
     kinematica_.resetModel();
 
     // Add world objects
-    for (auto& object : *ps_->getWorld())
+    for (const auto& object : *ps_->getWorld())
     {
         if (object.second->shapes_.size())
         {

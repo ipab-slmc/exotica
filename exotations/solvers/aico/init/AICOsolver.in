@@ -1,5 +1,5 @@
 extend <exotica/MotionSolver>
-Required std::string SweepMode;
+Required std::string SweepMode; // Forwardly, Symmetric, LocalGaussNewton, LocalGaussNewtonDamped
 Required int MaxIterations;
 Required double Tolerance;
 Required double Damping;

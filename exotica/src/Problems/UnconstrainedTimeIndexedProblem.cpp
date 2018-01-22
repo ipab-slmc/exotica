@@ -52,6 +52,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     init_ = init;
     setT(init_.T);
     applyStartState(false);
+    reinitializeVariables();
 }
 
 void UnconstrainedTimeIndexedProblem::reinitializeVariables()
@@ -94,10 +95,10 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     yref.setZero(PhiN);
     Phi.assign(T, yref);
     J.assign(T, Eigen::MatrixXd(JN, N));
-    x.assign(T, Eigen::VectorXd::Zero(JN));
-    xdiff.assign(T, Eigen::VectorXd::Zero(JN));
+    x.assign(T, Eigen::VectorXd::Zero(N));
+    xdiff.assign(T, Eigen::VectorXd::Zero(N));
 
-    // Set initial trajectory
+    // Set initial trajectory with current state
     InitialTrajectory.resize(T, scene_->getControlledState());
 
     TaskSpaceVector dummy;
@@ -215,6 +216,10 @@ double UnconstrainedTimeIndexedProblem::getScalarTransitionCost(int t)
     else if (t == -1)
     {
         t = T - 1;
+    }
+    else if (t == 0)
+    {
+        return 0;
     }
     return ct * xdiff[t].transpose() * W * xdiff[t];
 }

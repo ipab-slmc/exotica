@@ -11,7 +11,7 @@ sc.loadSceneFile('{exotica_examples}/resources/scenes/example_distance.scene')
 
 dt=0.01
 t=0.0
-signal.signal(signal.SIGINT, sigIntHandler)
+
 while True:
     try:
         sc.Update([math.sin(t/2.0)*0.5]*7)

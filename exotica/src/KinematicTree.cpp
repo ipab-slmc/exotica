@@ -171,7 +171,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
     KDL::RigidBodyInertia RootInertial(RootMass, RootCoG);
 
     // Add general world_frame joint
-    Tree.push_back(std::shared_ptr<KinematicElement>(new KinematicElement(Tree.size(), nullptr, KDL::Segment(WorldFrameName, KDL::Joint(RootJoint->getName(), KDL::Joint::None)))));
+    Tree.push_back(std::make_shared<KinematicElement>(Tree.size(), nullptr, KDL::Segment(WorldFrameName, KDL::Joint(RootJoint->getName(), KDL::Joint::None))));
     if (RootJoint->getType() == robot_model::JointModel::FIXED)
     {
         ModelBaseType = BASE_TYPE::FIXED;
@@ -190,10 +190,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
             RootJoint->getName() + "/rot_x"};
         for (int i = 0; i < 6; i++)
         {
-            Tree[i + 1] = std::shared_ptr<KinematicElement>(new KinematicElement(
-                i, Tree[i], KDL::Segment(floatingBaseVariableNames[i],
-                                         KDL::Joint(floatingBaseVariableNames[i],
-                                                    types[i]))));
+            Tree[i + 1] = std::make_shared<KinematicElement>(i, Tree[i], KDL::Segment(floatingBaseVariableNames[i], KDL::Joint(floatingBaseVariableNames[i], types[i])));
             Tree[i]->Children.push_back(Tree[i + 1]);
         }
 
@@ -214,11 +211,11 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
                                          KDL::Joint::RotZ};
         for (int i = 0; i < 3; i++)
         {
-            Tree[i + 1] = std::shared_ptr<KinematicElement>(new KinematicElement(
+            Tree[i + 1] = std::make_shared<KinematicElement>(
                 i, Tree[i],
                 KDL::Segment(
                     RootJoint->getVariableNames()[i],
-                    KDL::Joint(RootJoint->getVariableNames()[i], types[i]))));
+                    KDL::Joint(RootJoint->getVariableNames()[i], types[i])));
             Tree[i]->Children.push_back(Tree[i + 1]);
         }
     }
@@ -381,7 +378,7 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
     }
     KDL::Frame transformKDL;
     tf::transformEigenToKDL(transform, transformKDL);
-    std::shared_ptr<KinematicElement> NewElement(new KinematicElement(Tree.size(), parent_element, KDL::Segment(name, KDL::Joint(KDL::Joint::None), transformKDL, inertia)));
+    std::shared_ptr<KinematicElement> NewElement = std::make_shared<KinematicElement>(Tree.size(), parent_element, KDL::Segment(name, KDL::Joint(KDL::Joint::None), transformKDL, inertia));
     if (shape)
     {
         NewElement->Shape = shape;
@@ -400,7 +397,7 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
 
 void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
 {
-    std::shared_ptr<KinematicElement> NewElement(new KinematicElement(Tree.size(), parent, segment->second.segment));
+    std::shared_ptr<KinematicElement> NewElement = std::make_shared<KinematicElement>(Tree.size(), parent, segment->second.segment);
     Tree.push_back(NewElement);
     if (parent) parent->Children.push_back(NewElement);
     for (KDL::SegmentMap::const_iterator child : segment->second.children)

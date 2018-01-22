@@ -38,8 +38,7 @@ REGISTER_MOTIONSOLVER_TYPE("TimeIndexedRRTConnect", exotica::TimeIndexedRRTConne
 
 namespace exotica
 {
-OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblem_ptr &prob, TimeIndexedRRTConnectInitializer init)
-    : ompl::base::CompoundStateSpace(), prob_(prob)
+OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblem_ptr &prob, TimeIndexedRRTConnectInitializer init) : ompl::base::CompoundStateSpace(), prob_(prob)
 {
     setName("OMPLTimeIndexedRNStateSpace");
     unsigned int dim = prob->N;
@@ -77,8 +76,7 @@ void OMPLTimeIndexedRNStateSpace::stateDebug(const Eigen::VectorXd &q) const
 {
 }
 
-OMPLTimeIndexedStateValidityChecker::OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const TimeIndexedSamplingProblem_ptr &prob)
-    : ompl::base::StateValidityChecker(si), prob_(prob)
+OMPLTimeIndexedStateValidityChecker::OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const TimeIndexedSamplingProblem_ptr &prob) : ompl::base::StateValidityChecker(si), prob_(prob)
 {
 }
 
@@ -255,8 +253,7 @@ void TimeIndexedRRTConnect::Solve(Eigen::MatrixXd &solution)
     postSolve();
 }
 
-OMPLTimeIndexedRRTConnect::OMPLTimeIndexedRRTConnect(const base::SpaceInformationPtr &si)
-    : base::Planner(si, "OMPLTimeIndexedRRTConnect")
+OMPLTimeIndexedRRTConnect::OMPLTimeIndexedRRTConnect(const base::SpaceInformationPtr &si) : base::Planner(si, "OMPLTimeIndexedRRTConnect")
 {
     specs_.recognizedGoal = base::GOAL_SAMPLEABLE_REGION;
     specs_.directed = true;

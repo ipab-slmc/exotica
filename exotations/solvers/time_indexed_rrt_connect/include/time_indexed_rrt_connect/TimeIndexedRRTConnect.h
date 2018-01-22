@@ -184,15 +184,13 @@ protected:
     class Motion
     {
     public:
-        Motion()
-            : root(NULL), state(NULL), parent(NULL)
+        Motion() : root(NULL), state(NULL), parent(NULL)
         {
             parent = NULL;
             state = NULL;
         }
 
-        Motion(const base::SpaceInformationPtr &si)
-            : root(NULL), state(si->allocState()), parent(NULL)
+        Motion(const base::SpaceInformationPtr &si) : root(NULL), state(si->allocState()), parent(NULL)
         {
         }
 

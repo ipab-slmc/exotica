@@ -8,6 +8,7 @@
 
   <TimeIndexedSamplingProblem Name="MyProblem">
     <T>3</T>
+    <GoalTime>3</GoalTime>
     <PlanningScene>
       <Scene>
         <JointGroup>arm</JointGroup>
@@ -30,7 +31,7 @@
       <Task Task="Collision"/>
     </Constraint>
 
-    <JointVelocityLimits>1 1 1 1 1 1 1</JointVelocityLimits>
+    <JointVelocityLimits>2 2 2 2 2 2 2</JointVelocityLimits>
     <Goal>2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
   </TimeIndexedSamplingProblem>
 

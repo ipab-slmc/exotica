@@ -122,8 +122,7 @@ protected:
     static ompl::base::PlannerPtr allocatePlanner(const ompl::base::SpaceInformationPtr &si, const std::string &new_name)
     {
         ompl::base::PlannerPtr planner(new T(si));
-        if (!new_name.empty())
-            planner->setName(new_name);
+        if (!new_name.empty()) planner->setName(new_name);
         return planner;
     }
 
@@ -156,9 +155,9 @@ public:
 
     /** \brief Set the range the planner is supposed to use.
 
-	 This parameter greatly influences the runtime of the
-	 algorithm. It represents the maximum length of a
-	 motion to be added in the tree of motions. */
+       This parameter greatly influences the runtime of the
+       algorithm. It represents the maximum length of a
+       motion to be added in the tree of motions. */
     void setRange(double distance)
     {
         maxDistance_ = distance;
@@ -185,13 +184,15 @@ protected:
     class Motion
     {
     public:
-        Motion() : root(NULL), state(NULL), parent(NULL)
+        Motion()
+            : root(NULL), state(NULL), parent(NULL)
         {
             parent = NULL;
             state = NULL;
         }
 
-        Motion(const base::SpaceInformationPtr &si) : root(NULL), state(si->allocState()), parent(NULL)
+        Motion(const base::SpaceInformationPtr &si)
+            : root(NULL), state(si->allocState()), parent(NULL)
         {
         }
 
@@ -238,23 +239,39 @@ protected:
 
     double forwardTimeDistance(const Motion *a, const Motion *b) const
     {
+        Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
+
         const OMPLTimeIndexedRNStateSpace::StateType *sa = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(a->state);
         const OMPLTimeIndexedRNStateSpace::StateType *sb = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(b->state);
 
-        double ta = sa->getTime().position, tb = sb->getTime().position;
-        if ((reverse_check_ && tb < ta) || (!reverse_check_ && tb > ta))
-            return 1e10;
+        double ta, tb;
+        Eigen::VectorXd qa, qb;
+        si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(a->state, qa, ta);
+        si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(b->state, qb, tb);
+
+        if (tb < ta) return 1e10;
+        Eigen::VectorXd diff = (qb - qa).cwiseAbs();
+        double min_dt = (diff.array() / max_vel.array()).maxCoeff();
+        if (fabs(tb - ta) < min_dt) return 1e10;
         return si_->distance(a->state, b->state);
     }
 
     double reverseTimeDistance(const Motion *a, const Motion *b) const
     {
+        Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
+
         const OMPLTimeIndexedRNStateSpace::StateType *sa = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(a->state);
         const OMPLTimeIndexedRNStateSpace::StateType *sb = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(b->state);
 
-        double ta = sa->getTime().position, tb = sb->getTime().position;
-        if ((reverse_check_ && tb > ta) || (!reverse_check_ && tb < ta))
-            return 1e10;
+        double ta, tb;
+        Eigen::VectorXd qa, qb;
+        si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(a->state, qa, ta);
+        si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(b->state, qb, tb);
+
+        if (tb > ta) return 1e10;
+        Eigen::VectorXd diff = (qb - qa).cwiseAbs();
+        double min_dt = (diff.array() / max_vel.array()).maxCoeff();
+        if (fabs(tb - ta) < min_dt) return 1e10;
         return si_->distance(a->state, b->state);
     }
 
@@ -275,8 +292,7 @@ protected:
         }
         else
             changed = false;
-        if (tb < si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->tStart || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->tGoal)
-            return false;
+        if (tb < si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->tStart || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->tGoal) return false;
         si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(qb, tb, b->state);
         return true;
     }

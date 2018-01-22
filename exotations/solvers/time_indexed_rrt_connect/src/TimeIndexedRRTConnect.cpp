@@ -125,10 +125,7 @@ void TimeIndexedRRTConnect::specifyProblem(PlanningProblem_ptr pointer)
 {
     MotionSolver::specifyProblem(pointer);
     prob_ = std::static_pointer_cast<TimeIndexedSamplingProblem>(pointer);
-    if (prob_->getScene()->getBaseType() == BASE_TYPE::FIXED)
-        state_space_.reset(new OMPLTimeIndexedRNStateSpace(prob_, init_));
-    else
-        throw_named("Unsupported base type " << prob_->getScene()->getBaseType() << ", the time indexed solver can only solve for fixed base robots");
+    state_space_.reset(new OMPLTimeIndexedRNStateSpace(prob_, init_));
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLTimeIndexedStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
     ompl_simple_setup_->setPlannerAllocator(boost::bind(planner_allocator_, _1, "Exotica_" + algorithm_));

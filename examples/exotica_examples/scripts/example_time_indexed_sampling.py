@@ -15,6 +15,6 @@ solution = solver.solve()
 
 Ts = solution[:,0]
 solution = solution[:,1:]
-print(Ts)
-print(solution)
+#print(Ts)
+#print(solution)
 publishTimeIndexedTrajectory(solution, Ts, problem)

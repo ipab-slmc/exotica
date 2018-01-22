@@ -19,7 +19,7 @@ t=0.0
 q=array([0.0]*7)
 print('Publishing IK')
 timer = exo.Timer()
-signal.signal(signal.SIGINT, sigIntHandler)
+
 while True:
     try:
         timer.reset()

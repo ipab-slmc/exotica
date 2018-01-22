@@ -11,9 +11,9 @@
     <GoalTime>3</GoalTime>
     <PlanningScene>
       <Scene>
-        <JointGroup>arm</JointGroup>
+        <JointGroup>arm_freebase</JointGroup>
         <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
-        <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+        <SRDF>{exotica_examples}/resources/robots/lwr_simplified_freebase.srdf</SRDF>
         <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
         <Trajectories>
           <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_moving_obstacle.traj" />
@@ -31,8 +31,8 @@
       <Task Task="Collision"/>
     </Constraint>
 
-    <JointVelocityLimits>2 2 2 2 2 2 2</JointVelocityLimits>
-    <Goal>2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
+    <JointVelocityLimits>2 2 2 2 2 2 2 2 2 2</JointVelocityLimits>
+    <Goal>0 0 0 2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
   </TimeIndexedSamplingProblem>
 
 </PlannerDemoConfig>

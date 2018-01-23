@@ -58,7 +58,10 @@ CollisionSceneFCLLatest::~CollisionSceneFCLLatest()
 
 void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects)
 {
+    kinematic_elements_.clear();
     kinematic_elements_ = MapToVec(objects);
+    // Delete fcl_objects_
+    for (size_t i = 0; i < fcl_objects_.size(); i++) delete fcl_objects_[i];
     fcl_objects_.resize(objects.size());
     long i = 0;
     for (const auto& object : objects)

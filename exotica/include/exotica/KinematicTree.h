@@ -183,6 +183,7 @@ public:
 
     void resetModel();
     std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0));
+    void AddEnvironmentElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0));
     void UpdateModel();
     void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
 
@@ -217,6 +218,7 @@ private:
     robot_model::RobotModelPtr Model;
     std::vector<std::weak_ptr<KinematicElement>> Tree;
     std::vector<std::shared_ptr<KinematicElement>> ModelTree;
+    std::vector<std::shared_ptr<KinematicElement>> EnvironmentTree;
     std::map<std::string, std::weak_ptr<KinematicElement>> TreeMap;
     std::map<std::string, std::weak_ptr<KinematicElement>> CollisionTreeMap;
     std::shared_ptr<KinematicElement> Root;

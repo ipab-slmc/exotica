@@ -312,6 +312,7 @@ void KinematicTree::resetModel()
     }
     CollisionTreeMap.clear();
     TreeMap.clear();
+    EnvironmentTree.clear();
 
     // Addresses #225 - need to remove all children of the parent link which are not part of the model (e.g. custom links)
     for (auto& child : Root->Children)
@@ -376,6 +377,12 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
     parent->Children.push_back(child);
     child->updateClosestRobotLink();
     debugSceneChanged = true;
+}
+
+void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color)
+{
+    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color);
+    EnvironmentTree.push_back(element);
 }
 
 std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color)

@@ -98,13 +98,13 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     x.assign(T, Eigen::VectorXd::Zero(N));
     xdiff.assign(T, Eigen::VectorXd::Zero(N));
 
-    preupdate();
-
     // Set initial trajectory with current state
     InitialTrajectory.resize(T, scene_->getControlledState());
 
     TaskSpaceVector dummy;
     Cost.initialize(init_.Cost, shared_from_this(), dummy);
+
+    preupdate();
 }
 
 void UnconstrainedTimeIndexedProblem::setT(int T_in)

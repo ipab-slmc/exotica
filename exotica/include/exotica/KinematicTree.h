@@ -220,7 +220,7 @@ private:
     std::map<std::string, std::weak_ptr<KinematicElement>> TreeMap;
     std::map<std::string, std::weak_ptr<KinematicElement>> CollisionTreeMap;
     std::shared_ptr<KinematicElement> Root;
-    std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
+    std::vector<std::weak_ptr<KinematicElement>> ControlledJoints;
     std::map<std::string, std::shared_ptr<KinematicElement>> ControlledJointsMap;
     std::map<std::string, std::shared_ptr<KinematicElement>> ModelJointsMap;
     std::vector<std::string> ModelJointsNames;

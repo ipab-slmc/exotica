@@ -494,7 +494,7 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
     if (x.rows() != StateSize) throw_pretty("Wrong state vector size! Got " << x.rows() << " expected " << StateSize);
 
     for (int i = 0; i < ControlledJoints.size(); i++)
-        TreeState(ControlledJoints[i]->Id) = x(i);
+        TreeState(ControlledJoints[i].lock()->Id) = x(i);
 
     UpdateTree();
     UpdateFK();
@@ -678,8 +678,8 @@ Eigen::MatrixXd KinematicTree::getJointLimits()
     Eigen::MatrixXd lim(getNumControlledJoints(), 2);
     for (int i = 0; i < ControlledJoints.size(); i++)
     {
-        lim(i, 0) = ControlledJoints[i]->JointLimits[0];
-        lim(i, 1) = ControlledJoints[i]->JointLimits[1];
+        lim(i, 0) = ControlledJoints[i].lock()->JointLimits[0];
+        lim(i, 1) = ControlledJoints[i].lock()->JointLimits[1];
     }
     return lim;
 }
@@ -697,9 +697,9 @@ exotica::BASE_TYPE KinematicTree::getControlledBaseType()
 std::map<std::string, std::vector<double>> KinematicTree::getUsedJointLimits()
 {
     std::map<std::string, std::vector<double>> limits;
-    for (std::shared_ptr<KinematicElement> it : ControlledJoints)
+    for (auto it : ControlledJoints)
     {
-        limits[it->Segment.getJoint().getName()] = it->JointLimits;
+        limits[it.lock()->Segment.getJoint().getName()] = it.lock()->JointLimits;
     }
     return limits;
 }
@@ -717,7 +717,7 @@ void KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
     }
     for (int i = 0; i < 6; i++)
     {
-        ControlledJoints[i]->JointLimits = {lower[i], upper[i]};
+        ControlledJoints[i].lock()->JointLimits = {lower[i], upper[i]};
     }
 }
 void KinematicTree::setJointLimits()
@@ -729,7 +729,7 @@ void KinematicTree::setJointLimits()
         if (ControlledJointsMap.find(vars[i]) != ControlledJointsMap.end())
         {
             int index = ControlledJointsMap.at(vars[i])->ControlId;
-            ControlledJoints[index]->JointLimits = {Model->getVariableBounds(vars[i]).min_position_, Model->getVariableBounds(vars[i]).max_position_};
+            ControlledJoints[index].lock()->JointLimits = {Model->getVariableBounds(vars[i]).min_position_, Model->getVariableBounds(vars[i]).max_position_};
         }
     }
 
@@ -737,25 +737,25 @@ void KinematicTree::setJointLimits()
     ///	Should be done more systematically with robot model class
     if (ControlledBaseType == BASE_TYPE::FLOATING)
     {
-        ControlledJoints[0]->JointLimits = {-0.05, 0.05};
+        ControlledJoints[0].lock()->JointLimits = {-0.05, 0.05};
 
-        ControlledJoints[1]->JointLimits = {-0.05, 0.05};
+        ControlledJoints[1].lock()->JointLimits = {-0.05, 0.05};
 
-        ControlledJoints[2]->JointLimits = {0.875, 1.075};
+        ControlledJoints[2].lock()->JointLimits = {0.875, 1.075};
 
-        ControlledJoints[3]->JointLimits = {-0.087 / 2, 0.087 / 2};
+        ControlledJoints[3].lock()->JointLimits = {-0.087 / 2, 0.087 / 2};
 
-        ControlledJoints[4]->JointLimits = {-0.087 / 2, 0.2617 / 2};
+        ControlledJoints[4].lock()->JointLimits = {-0.087 / 2, 0.2617 / 2};
 
-        ControlledJoints[5]->JointLimits = {-M_PI / 8, M_PI / 8};
+        ControlledJoints[5].lock()->JointLimits = {-M_PI / 8, M_PI / 8};
     }
     else if (ControlledBaseType == BASE_TYPE::PLANAR)
     {
-        ControlledJoints[0]->JointLimits = {-10, 10};
+        ControlledJoints[0].lock()->JointLimits = {-10, 10};
 
-        ControlledJoints[1]->JointLimits = {-10, 10};
+        ControlledJoints[1].lock()->JointLimits = {-10, 10};
 
-        ControlledJoints[2]->JointLimits = {-1.57, 1.57};
+        ControlledJoints[2].lock()->JointLimits = {-1.57, 1.57};
     }
 }
 
@@ -832,7 +832,7 @@ Eigen::VectorXd KinematicTree::getControlledState()
     Eigen::VectorXd x(NumControlledJoints);
     for (int i = 0; i < ControlledJoints.size(); i++)
     {
-        x(i) = TreeState(ControlledJoints[i]->Id);
+        x(i) = TreeState(ControlledJoints[i].lock()->Id);
     }
     return x;
 }
@@ -842,7 +842,7 @@ Eigen::VectorXd KinematicTree::getControlledLinkMass()
     Eigen::VectorXd x(NumControlledJoints);
     for (int i = 0; i < ControlledJoints.size(); i++)
     {
-        x(i) = ControlledJoints[i]->Segment.getInertia().getMass();
+        x(i) = ControlledJoints[i].lock()->Segment.getInertia().getMass();
     }
     return x;
 }

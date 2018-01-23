@@ -56,13 +56,14 @@ CollisionSceneFCL::~CollisionSceneFCL()
 void CollisionSceneFCL::updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects)
 {
     kinematic_elements_ = MapToVec(objects);
+    fcl_cache_.clear();
     fcl_objects_.resize(objects.size());
     long i = 0;
     for (const auto& object : objects)
     {
         std::shared_ptr<fcl::CollisionObject> new_object;
 
-        const auto& cache_entry = fcl_cache_.find(object.first);
+        // const auto& cache_entry = fcl_cache_.find(object.first);
         // TODO: There is currently a bug with the caching causing proxies not
         // to update. The correct fix would be to update the user data, for now
         // disable use of the cache.
@@ -71,10 +72,10 @@ void CollisionSceneFCL::updateCollisionObjects(const std::map<std::string, std::
             new_object = constructFclCollisionObject(i, object.second.lock());
             fcl_cache_[object.first] = new_object;
         }
-        else
-        {
-            new_object = cache_entry->second;
-        }
+        // else
+        // {
+        //     new_object = cache_entry->second;
+        // }
         fcl_objects_[i++] = new_object.get();
     }
 }
@@ -84,6 +85,10 @@ void CollisionSceneFCL::updateCollisionObjectTransforms()
     for (fcl::CollisionObject* collision_object : fcl_objects_)
     {
         std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(collision_object->getUserData())].lock();
+        if (!element)
+        {
+            throw_pretty("Expired pointer, this should not happen - make sure to call updateCollisionObjects() after updateSceneFrames()");
+        }
         collision_object->setTransform(fcl_convert::KDL2fcl(element->Frame));
         collision_object->computeAABB();
     }
@@ -296,7 +301,6 @@ Eigen::Vector3d CollisionSceneFCL::getTranslation(const std::string& name)
         }
     }
     throw_pretty("Robot not found!");
-    ;
 }
 
 std::vector<std::string> CollisionSceneFCL::getCollisionWorldLinks()

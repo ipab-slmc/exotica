@@ -136,9 +136,9 @@ void CoM::Initialize()
             {
                 throw_named("Requesting CoM frame with base other than root! '" << Frames[i].FrameALinkName << "'");
             }
-            Frames[i].FrameALinkName = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getName();
-            Frames[i].FrameAOffset.p = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getCOG();
-            mass_(i) = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName]->Segment.getInertia().getMass();
+            Frames[i].FrameALinkName = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getName();
+            Frames[i].FrameAOffset.p = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getInertia().getCOG();
+            mass_(i) = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getInertia().getMass();
         }
     }
     else
@@ -151,9 +151,9 @@ void CoM::Initialize()
                                        << Frames.size());
         for (int i = 0; i < N; i++)
         {
-            Frames[i].FrameALinkName = scene_->getSolver().getTree()[i]->Segment.getName();
-            Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i]->Segment.getInertia().getCOG();
-            mass_(i) = scene_->getSolver().getTree()[i]->Segment.getInertia().getMass();
+            Frames[i].FrameALinkName = scene_->getSolver().getTree()[i].lock()->Segment.getName();
+            Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i].lock()->Segment.getInertia().getCOG();
+            mass_(i) = scene_->getSolver().getTree()[i].lock()->Segment.getInertia().getMass();
             if (debug_)
                 HIGHLIGHT_NAMED("CoM-Initialize",
                                 "FrameALinkName: "

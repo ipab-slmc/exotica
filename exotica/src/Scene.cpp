@@ -446,11 +446,11 @@ void Scene::updateSceneFrames()
             Eigen::Affine3d objTransform = object.second->shape_poses_[0];
 
             // Look up if object exists in tree, otherwise create it
-            const std::map<std::string, std::shared_ptr<KinematicElement>>& links = kinematica_.getTreeMap();
-            if (links.find(object.first) == links.end())
-            {
+            const std::map<std::string, std::weak_ptr<KinematicElement>>& links = kinematica_.getTreeMap();
+            // if (links.find(object.first) == links.end())
+            // {
                 kinematica_.AddElement(object.first, objTransform);
-            }
+            // }
 
             for (int i = 0; i < object.second->shape_poses_.size(); i++)
             {
@@ -502,7 +502,7 @@ void Scene::updateSceneFrames()
 
 void Scene::addObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, bool updateCollisionScene)
 {
-    const std::map<std::string, std::shared_ptr<KinematicElement>>& links = kinematica_.getTreeMap();
+    const std::map<std::string, std::weak_ptr<KinematicElement>>& links = kinematica_.getTreeMap();
     if (links.find(name) != links.end()) throw_pretty("Link '" << name << "' already exists in the scene!");
     std::string parent_name = parent == "" ? kinematica_.getRootFrameName() : parent;
     if (links.find(parent_name) == links.end()) throw_pretty("Can't find parent '" << parent_name << "'!");
@@ -553,8 +553,8 @@ void Scene::addTrajectory(const std::string& link, std::shared_ptr<Trajectory> t
     const auto& it = tree.find(link);
     if (it == tree.end()) throw_pretty("Can't find link '" << link << "'!");
     if (traj->getDuration() == 0.0) throw_pretty("The trajectory is empty!");
-    trajectory_generators_[link] = std::pair<std::shared_ptr<KinematicElement>, std::shared_ptr<Trajectory>>(it->second, traj);
-    it->second->IsTrajectoryGenerated = true;
+    trajectory_generators_[link] = std::pair<std::shared_ptr<KinematicElement>, std::shared_ptr<Trajectory>>(it->second.lock(), traj);
+    it->second.lock()->IsTrajectoryGenerated = true;
 }
 
 std::shared_ptr<Trajectory> Scene::getTrajectory(const std::string& link)

@@ -99,9 +99,9 @@ public:
 
 struct KinematicFrame
 {
-    std::shared_ptr<KinematicElement> FrameA;
+    std::weak_ptr<KinematicElement> FrameA;
     KDL::Frame FrameAOffset;
-    std::shared_ptr<KinematicElement> FrameB;
+    std::weak_ptr<KinematicElement> FrameB;
     KDL::Frame FrameBOffset;
     KDL::Frame TempAB;
     KDL::Frame TempA;
@@ -192,9 +192,9 @@ public:
     void setModelState(std::map<std::string, double> x);
     Eigen::VectorXd getControlledState();
 
-    std::vector<std::shared_ptr<KinematicElement>> getTree() { return Tree; }
-    std::map<std::string, std::shared_ptr<KinematicElement>> getCollisionTreeMap() { return CollisionTreeMap; }
-    std::map<std::string, std::shared_ptr<KinematicElement>> getTreeMap() { return TreeMap; }
+    std::vector<std::weak_ptr<KinematicElement>> getTree() { return Tree; }
+    std::map<std::string, std::weak_ptr<KinematicElement>> getCollisionTreeMap() { return CollisionTreeMap; }
+    std::map<std::string, std::weak_ptr<KinematicElement>> getTreeMap() { return TreeMap; }
     bool Debug;
 
     std::map<std::string, shapes::ShapeType> getCollisionObjectTypes();
@@ -215,10 +215,10 @@ private:
     int StateSize;
     Eigen::VectorXd TreeState;
     robot_model::RobotModelPtr Model;
-    std::vector<std::shared_ptr<KinematicElement>> Tree;
+    std::vector<std::weak_ptr<KinematicElement>> Tree;
     std::vector<std::shared_ptr<KinematicElement>> ModelTree;
-    std::map<std::string, std::shared_ptr<KinematicElement>> TreeMap;
-    std::map<std::string, std::shared_ptr<KinematicElement>> CollisionTreeMap;
+    std::map<std::string, std::weak_ptr<KinematicElement>> TreeMap;
+    std::map<std::string, std::weak_ptr<KinematicElement>> CollisionTreeMap;
     std::shared_ptr<KinematicElement> Root;
     std::vector<std::shared_ptr<KinematicElement>> ControlledJoints;
     std::map<std::string, std::shared_ptr<KinematicElement>> ControlledJointsMap;

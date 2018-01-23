@@ -304,6 +304,28 @@ void KinematicTree::UpdateModel()
 
 void KinematicTree::resetModel()
 {
+    // Addresses #210 - need to remove all children of the parent link which are not part of the model (e.g. custom links)
+    for (auto& child : Root->Children)
+    {
+        std::cout << child->Segment.getName() << ": Number of references: " << child.use_count() << std::endl;
+        if (!child->isRobotLink && !child->IsControlled && !child->ClosestRobotLink)
+        {
+            auto it = TreeMap.find(child->Segment.getName());
+            if (it != TreeMap.end())
+            {
+                TreeMap.erase(it);
+            }
+
+            auto it2 = std::find(Tree[0]->Children.begin(), Tree[0]->Children.end(), child);
+            if (it2 != Tree[0]->Children.end())
+            {
+                Root->Children.erase(it2);
+            }
+            child->Children.clear();
+        }
+        std::cout << child->Segment.getName() << ": AFTER Number of references: " << child.use_count() << std::endl;
+    }
+
     Tree = ModelTree;
     CollisionTreeMap.clear();
     UpdateModel();

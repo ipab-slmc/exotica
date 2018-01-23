@@ -56,7 +56,7 @@ CollisionSceneFCLLatest::~CollisionSceneFCLLatest()
 {
 }
 
-void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string, std::shared_ptr<KinematicElement>>& objects)
+void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects)
 {
     kinematic_elements_ = MapToVec(objects);
     fcl_objects_.resize(objects.size());
@@ -71,7 +71,7 @@ void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string,
         // disable use of the cache.
         if (true)  // (cache_entry == fcl_cache_.end())
         {
-            new_object = constructFclCollisionObject(i, object.second);
+            new_object = constructFclCollisionObject(i, object.second.lock());
             fcl_cache_[object.first] = new_object;
         }
         else
@@ -86,7 +86,7 @@ void CollisionSceneFCLLatest::updateCollisionObjectTransforms()
 {
     for (fcl::CollisionObjectd* collision_object : fcl_objects_)
     {
-        std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(collision_object->getUserData())];
+        std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(collision_object->getUserData())].lock();
         collision_object->setTransform(fcl_convert::KDL2fcl(element->Frame));
         collision_object->computeAABB();
     }
@@ -195,8 +195,8 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
 
 bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene)
 {
-    std::shared_ptr<KinematicElement> e1 = scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())];
-    std::shared_ptr<KinematicElement> e2 = scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())];
+    std::shared_ptr<KinematicElement> e1 = scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
+    std::shared_ptr<KinematicElement> e2 = scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
 
     bool isRobot1 = e1->isRobotLink || e1->ClosestRobotLink.lock();
     bool isRobot2 = e2->isRobotLink || e2->ClosestRobotLink.lock();
@@ -294,8 +294,8 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     }
 
     CollisionProxy p;
-    p.e1 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())];
-    p.e2 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())];
+    p.e1 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
+    p.e2 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
 
     p.distance = data->Result.min_distance;
 
@@ -453,7 +453,7 @@ bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::
     std::vector<fcl::CollisionObjectd*> shapes2;
     for (fcl::CollisionObjectd* o : fcl_objects_)
     {
-        std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())];
+        std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())].lock();
         if (e->Segment.getName() == o1 || e->Parent.lock()->Segment.getName() == o1) shapes1.push_back(o);
         if (e->Segment.getName() == o2 || e->Parent.lock()->Segment.getName() == o2) shapes2.push_back(o);
     }
@@ -492,7 +492,7 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const 
     std::vector<fcl::CollisionObjectd*> shapes2;
     for (fcl::CollisionObjectd* o : fcl_objects_)
     {
-        std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())];
+        std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())].lock();
         if (e->Segment.getName() == o1 || e->Parent.lock()->Segment.getName() == o1) shapes1.push_back(o);
         if (e->Segment.getName() == o2 || e->Parent.lock()->Segment.getName() == o2) shapes2.push_back(o);
     }
@@ -528,7 +528,7 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
     // object o1
     for (fcl::CollisionObjectd* o : fcl_objects_)
     {
-        std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())];
+        std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())].lock();
         if (e->Segment.getName() == o1 || e->Parent.lock()->Segment.getName() == o1)
             shapes1.push_back(o);
     }
@@ -537,7 +537,7 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
     // with
     for (fcl::CollisionObjectd* o : fcl_objects_)
     {
-        std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())];
+        std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())].lock();
         // Collision Object does not belong to o1
         if (e->Segment.getName() != o1 || e->Parent.lock()->Segment.getName() != o1)
         {
@@ -580,7 +580,7 @@ Eigen::Vector3d CollisionSceneFCLLatest::getTranslation(const std::string& name)
 {
     for (fcl::CollisionObjectd* object : fcl_objects_)
     {
-        std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(object->getUserData())];
+        std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(object->getUserData())].lock();
         if (element->Segment.getName() == name)
         {
             return Eigen::Map<Eigen::Vector3d>(element->Frame.p.data);
@@ -595,7 +595,7 @@ std::vector<std::string> CollisionSceneFCLLatest::getCollisionWorldLinks()
     std::vector<std::string> tmp;
     for (fcl::CollisionObjectd* object : fcl_objects_)
     {
-        std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(object->getUserData())];
+        std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(object->getUserData())].lock();
         if (!element->ClosestRobotLink.lock())
         {
             tmp.push_back(element->Segment.getName());
@@ -614,7 +614,7 @@ std::vector<std::string> CollisionSceneFCLLatest::getCollisionRobotLinks()
     std::vector<std::string> tmp;
     for (fcl::CollisionObjectd* object : fcl_objects_)
     {
-        std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(object->getUserData())];
+        std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(object->getUserData())].lock();
         if (element->ClosestRobotLink.lock())
         {
             tmp.push_back(element->Segment.getName());

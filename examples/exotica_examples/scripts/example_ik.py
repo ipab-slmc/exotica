@@ -23,7 +23,8 @@ print('Publishing IK')
 
 while True:
     try:
-        problem.setGoal('Position',figureEight(t))
+        goal=figureEight(t)
+        problem.setGoal('Position',goal)
         problem.startState = q
         q = solver.solve()[0]
         publishPose(q, problem)

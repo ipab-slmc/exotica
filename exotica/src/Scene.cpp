@@ -476,12 +476,12 @@ void Scene::updateSceneFrames()
 
         for (int j = 0; j < links[i]->getShapes().size(); ++j)
         {
-            // Workaround for issue #172
-            // To disable collisions with visual tags, we define a sphere of radius 0 which we will ignore here
-            // This is in contrast to IHMC's convention where a sphere of radius 0 in the SDF is a desired contact point
-            if (links[i]->getShapes()[j]->type == shapes::ShapeType::SPHERE)
-                if (static_cast<const shapes::Sphere*>(links[i]->getShapes()[j].get())->radius == 0.0)
-                    continue;
+            // // Workaround for issue #172
+            // // To disable collisions with visual tags, we define a sphere of radius 0 which we will ignore here
+            // // This is in contrast to IHMC's convention where a sphere of radius 0 in the SDF is a desired contact point
+            // if (links[i]->getShapes()[j]->type == shapes::ShapeType::SPHERE)
+            //     if (static_cast<const shapes::Sphere*>(links[i]->getShapes()[j].get())->radius == 0.0)
+            //         continue;
 
             Eigen::Affine3d trans = objTransform.inverse() * ps_->getCurrentState().getCollisionBodyTransform(links[i], j);
             kinematica_.AddEnvironmentElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);

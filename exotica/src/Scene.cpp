@@ -50,7 +50,6 @@ Scene::Scene(const std::string& name) : name_(name)
 
 Scene::~Scene()
 {
-    //TODO
 }
 
 robot_model::RobotModelPtr Scene::getRobotModel()
@@ -444,13 +443,7 @@ void Scene::updateSceneFrames()
         {
             // Use the first collision shape as the origin of the object
             Eigen::Affine3d objTransform = object.second->shape_poses_[0];
-
-            // Look up if object exists in tree, otherwise create it
-            const std::map<std::string, std::weak_ptr<KinematicElement>>& links = kinematica_.getTreeMap();
-            // if (links.find(object.first) == links.end())
-            // {
-                kinematica_.AddElement(object.first, objTransform);
-            // }
+            kinematica_.AddEnvironmentElement(object.first, objTransform);
 
             for (int i = 0; i < object.second->shape_poses_.size(); i++)
             {
@@ -459,11 +452,11 @@ void Scene::updateSceneFrames()
                 {
                     auto colorMsg = ps_->getObjectColor(object.first);
                     Eigen::Vector4d color = Eigen::Vector4d(colorMsg.r, colorMsg.g, colorMsg.b, colorMsg.a);
-                    kinematica_.AddElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i], KDL::RigidBodyInertia::Zero(), color);
+                    kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i], KDL::RigidBodyInertia::Zero(), color);
                 }
                 else
                 {
-                    kinematica_.AddElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i]);
+                    kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i]);
                 }
             }
         }
@@ -483,11 +476,19 @@ void Scene::updateSceneFrames()
 
         for (int j = 0; j < links[i]->getShapes().size(); ++j)
         {
+            // Workaround for issue #172
+            // To disable collisions with visual tags, we define a sphere of radius 0 which we will ignore here
+            // This is in contrast to IHMC's convention where a sphere of radius 0 in the SDF is a desired contact point
+            if (links[i]->getShapes()[j]->type == shapes::ShapeType::SPHERE)
+                if (static_cast<const shapes::Sphere*>(links[i]->getShapes()[j].get())->radius == 0.0)
+                    continue;
+
             Eigen::Affine3d trans = objTransform.inverse() * ps_->getCurrentState().getCollisionBodyTransform(links[i], j);
-            kinematica_.AddElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
+            kinematica_.AddEnvironmentElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
         }
     }
 
+    // TODO #225: This may still contain a memory leak
     for (auto& it : custom_links_)
     {
         Eigen::Affine3d pose;

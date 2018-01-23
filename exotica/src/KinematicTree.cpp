@@ -305,31 +305,11 @@ void KinematicTree::UpdateModel()
 
 void KinematicTree::resetModel()
 {
-    Tree.clear();
-    for (auto element : ModelTree)
-    {
-        Tree.push_back(element);
-    }
     CollisionTreeMap.clear();
     TreeMap.clear();
     EnvironmentTree.clear();
-
-    // Addresses #225 - need to remove all children of the parent link which are not part of the model (e.g. custom links)
-    for (auto& child : Root->Children)
-    {
-        // std::cout << child->Segment.getName() << ": Number of references: " << child.use_count() << std::endl;
-        if (!child->isRobotLink && !child->IsControlled && !child->ClosestRobotLink.lock())
-        {
-            auto it = std::find(Root->Children.begin(), Root->Children.end(), child);
-            if (it != Root->Children.end())
-            {
-                Root->Children.erase(it);
-            }
-            child->Children.clear();
-        }
-        // std::cout << child->Segment.getName() << ": AFTER Number of references: " << child.use_count() << std::endl;
-    }
-
+    Tree.clear();
+    for (auto element : ModelTree) Tree.push_back(element);
     UpdateModel();
     debugSceneChanged = true;
 
@@ -370,9 +350,21 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
     {
         child->Segment = KDL::Segment(child->Segment.getName(), child->Segment.getJoint(), parent->Frame.Inverse() * child->Frame * pose, child->Segment.getInertia());
     }
-    auto it = std::find(child->Parent.lock()->Children.begin(), child->Parent.lock()->Children.end(), child);
-    if (it != child->Parent.lock()->Children.end())
-        child->Parent.lock()->Children.erase(it);
+
+    // Iterate over Parent's children to find child and then remove it
+    for (auto it = child->Parent.lock()->Children.begin(); it != child->Parent.lock()->Children.end();)
+    {
+        std::shared_ptr<KinematicElement> childOfParent = it->lock();
+        if (childOfParent == child)
+        {
+            child->Parent.lock()->Children.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
     child->Parent = parent;
     parent->Children.push_back(child);
     child->updateClosestRobotLink();
@@ -511,21 +503,25 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
 
 void KinematicTree::UpdateTree()
 {
-    std::queue<std::weak_ptr<KinematicElement>> elements;
+    std::queue<std::shared_ptr<KinematicElement>> elements;
     elements.push(Root);
+    Root->removeExpiredChildren();
     while (elements.size() > 0)
     {
         auto element = elements.front();
         elements.pop();
-        if (element.lock()->Id > 0)
+        // If the element is an expired child (weak_ptr), continue
+        if (!element) continue;
+        if (element->Id > 0)
         {
-            element.lock()->Frame = element.lock()->Parent.lock()->Frame * element.lock()->getPose(TreeState(element.lock()->Id));
+            element->Frame = element->Parent.lock()->Frame * element->getPose(TreeState(element->Id));
         }
         else
         {
-            element.lock()->Frame = element.lock()->getPose(TreeState(element.lock()->Id));
+            element->Frame = element->getPose(TreeState(element->Id));
         }
-        for (std::weak_ptr<KinematicElement> child : element.lock()->Children)
+        element->removeExpiredChildren();
+        for (std::weak_ptr<KinematicElement> child : element->Children)
         {
             elements.push(child.lock());
         }

@@ -444,7 +444,14 @@ void Scene::updateSceneFrames()
         {
             // Use the first collision shape as the origin of the object
             Eigen::Affine3d objTransform = object.second->shape_poses_[0];
-            kinematica_.AddElement(object.first, objTransform);
+
+            // Look up if object exists in tree, otherwise create it
+            const std::map<std::string, std::shared_ptr<KinematicElement>>& links = kinematica_.getTreeMap();
+            if (links.find(object.first) == links.end())
+            {
+                kinematica_.AddElement(object.first, objTransform);
+            }
+
             for (int i = 0; i < object.second->shape_poses_.size(); i++)
             {
                 Eigen::Affine3d trans = objTransform.inverse() * object.second->shape_poses_[i];

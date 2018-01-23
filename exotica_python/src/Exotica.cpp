@@ -814,6 +814,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("addTrajectory", (void (Scene::*)(const std::string&, const std::string&)) & Scene::addTrajectory);
     scene.def("getTrajectory", [](Scene* instance, const std::string& link) { return instance->getTrajectory(link)->toString(); });
     scene.def("removeTrajectory", &Scene::removeTrajectory);
+    scene.def("updateSceneFrames", &Scene::updateSceneFrames);
 
     py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collisionScene(module, "CollisionScene");
     // TODO: expose isStateValid, isCollisionFree, getCollisionDistance, getCollisionWorldLinks, getCollisionRobotLinks, getTranslation

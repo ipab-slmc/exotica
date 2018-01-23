@@ -58,17 +58,15 @@ CollisionSceneFCLLatest::~CollisionSceneFCLLatest()
 
 void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects)
 {
-    kinematic_elements_.clear();
     kinematic_elements_ = MapToVec(objects);
-    // Delete fcl_objects_
-    for (size_t i = 0; i < fcl_objects_.size(); i++) delete fcl_objects_[i];
+    fcl_cache_.clear();
     fcl_objects_.resize(objects.size());
     long i = 0;
     for (const auto& object : objects)
     {
         std::shared_ptr<fcl::CollisionObjectd> new_object;
 
-        const auto& cache_entry = fcl_cache_.find(object.first);
+        // const auto& cache_entry = fcl_cache_.find(object.first);
         // TODO: There is currently a bug with the caching causing proxies not
         // to update. The correct fix would be to update the user data, for now
         // disable use of the cache.
@@ -77,10 +75,10 @@ void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string,
             new_object = constructFclCollisionObject(i, object.second.lock());
             fcl_cache_[object.first] = new_object;
         }
-        else
-        {
-            new_object = cache_entry->second;
-        }
+        // else
+        // {
+        //     new_object = cache_entry->second;
+        // }
         fcl_objects_[i++] = new_object.get();
     }
 }
@@ -90,6 +88,10 @@ void CollisionSceneFCLLatest::updateCollisionObjectTransforms()
     for (fcl::CollisionObjectd* collision_object : fcl_objects_)
     {
         std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(collision_object->getUserData())].lock();
+        if (!element)
+        {
+            throw_pretty("Expired pointer, this should not happen - make sure to call updateCollisionObjects() after updateSceneFrames()");
+        }
         collision_object->setTransform(fcl_convert::KDL2fcl(element->Frame));
         collision_object->computeAABB();
     }

@@ -14,6 +14,16 @@ public:
     {
     }
 
+    ~KinematicElement()
+    {
+        // Remove from parent to avoid expired pointers
+        std::shared_ptr<KinematicElement> myParent = Parent.lock();
+        if (myParent)
+        {
+            myParent->removeExpiredChildren();
+        }
+    }
+
     inline void updateClosestRobotLink()
     {
         std::shared_ptr<KinematicElement> element = Parent.lock();

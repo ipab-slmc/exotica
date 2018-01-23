@@ -728,7 +728,8 @@ void KinematicTree::setJointLimits()
     {
         if (ControlledJointsMap.find(vars[i]) != ControlledJointsMap.end())
         {
-            int index = ControlledJointsMap.at(vars[i])->ControlId;
+            auto& ControlledJoint = ControlledJointsMap.at(vars[i]);
+            int index = ControlledJoint.lock()->ControlId;
             ControlledJoints[index].lock()->JointLimits = {Model->getVariableBounds(vars[i]).min_position_, Model->getVariableBounds(vars[i]).max_position_};
         }
     }
@@ -780,7 +781,7 @@ Eigen::VectorXd KinematicTree::getModelState()
 
     for (int i = 0; i < ModelJointsNames.size(); i++)
     {
-        ret(i) = TreeState(ModelJointsMap.at(ModelJointsNames[i])->Id);
+        ret(i) = TreeState(ModelJointsMap.at(ModelJointsNames[i]).lock()->Id);
     }
     return ret;
 }
@@ -790,7 +791,7 @@ std::map<std::string, double> KinematicTree::getModelStateMap()
     std::map<std::string, double> ret;
     for (std::string& jointName : ModelJointsNames)
     {
-        ret[jointName] = TreeState(ModelJointsMap.at(jointName)->Id);
+        ret[jointName] = TreeState(ModelJointsMap.at(jointName).lock()->Id);
     }
     return ret;
 }
@@ -800,7 +801,7 @@ void KinematicTree::setModelState(Eigen::VectorXdRefConst x)
     if (x.rows() != ModelJointsNames.size()) throw_pretty("Model state vector has wrong size, expected " << ModelJointsNames.size() << " got " << x.rows());
     for (int i = 0; i < ModelJointsNames.size(); i++)
     {
-        TreeState(ModelJointsMap.at(ModelJointsNames[i])->Id) = x(i);
+        TreeState(ModelJointsMap.at(ModelJointsNames[i]).lock()->Id) = x(i);
     }
     UpdateTree();
     UpdateFK();
@@ -814,7 +815,7 @@ void KinematicTree::setModelState(std::map<std::string, double> x)
     {
         try
         {
-            TreeState(ModelJointsMap.at(joint.first)->Id) = joint.second;
+            TreeState(ModelJointsMap.at(joint.first).lock()->Id) = joint.second;
         }
         catch (const std::out_of_range& e)
         {

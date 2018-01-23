@@ -238,10 +238,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
         ModelTree[4]->Segment.setInertia(RootInertial);
     }
 
-    for (auto element : ModelTree)
-    {
-        Tree.push_back(element);
-    }
+    for (auto element : ModelTree) Tree.push_back(element);
 
     UpdateModel();
     TreeState.setZero();
@@ -294,9 +291,9 @@ void KinematicTree::UpdateModel()
 {
     Root = Tree[0].lock();
     TreeState.conservativeResize(Tree.size());
-    for (std::shared_ptr<KinematicElement> Joint : ModelTree)
+    for (std::weak_ptr<KinematicElement> Joint : Tree)
     {
-        TreeMap[Joint->Segment.getName()] = Joint;
+        TreeMap[Joint.lock()->Segment.getName()] = Joint.lock();
     }
     debugTree.resize(Tree.size() - 1);
     UpdateTree();
@@ -308,8 +305,7 @@ void KinematicTree::resetModel()
     CollisionTreeMap.clear();
     TreeMap.clear();
     EnvironmentTree.clear();
-    Tree.clear();
-    for (auto element : ModelTree) Tree.push_back(element);
+    Tree.resize(ModelTree.size());
     UpdateModel();
     debugSceneChanged = true;
 
@@ -510,8 +506,6 @@ void KinematicTree::UpdateTree()
     {
         auto element = elements.front();
         elements.pop();
-        // If the element is an expired child (weak_ptr), continue
-        if (!element) continue;
         if (element->Id > 0)
         {
             element->Frame = element->Parent.lock()->Frame * element->getPose(TreeState(element->Id));

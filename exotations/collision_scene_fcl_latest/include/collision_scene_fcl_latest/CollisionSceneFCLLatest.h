@@ -115,7 +115,7 @@ public:
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
     ///
-    virtual void updateCollisionObjects(const std::map<std::string, std::shared_ptr<KinematicElement>>& objects);
+    virtual void updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects);
 
     ///
     /// \brief Updates collision object transformations from the kinematic tree.
@@ -131,7 +131,7 @@ private:
 
     std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> fcl_cache_;
     std::vector<fcl::CollisionObjectd*> fcl_objects_;
-    std::vector<std::shared_ptr<KinematicElement>> kinematic_elements_;
+    std::vector<std::weak_ptr<KinematicElement>> kinematic_elements_;
 };
 
 typedef std::shared_ptr<CollisionSceneFCLLatest> CollisionSceneFCLLatest_ptr;

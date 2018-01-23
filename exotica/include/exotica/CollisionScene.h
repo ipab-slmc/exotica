@@ -179,7 +179,7 @@ public:
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
     ///
-    virtual void updateCollisionObjects(const std::map<std::string, std::shared_ptr<KinematicElement>>& objects) = 0;
+    virtual void updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects) = 0;
 
     ///
     /// \brief Updates collision object transformations from the kinematic tree.

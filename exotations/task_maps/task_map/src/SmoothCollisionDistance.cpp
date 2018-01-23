@@ -57,7 +57,7 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
     double& d = phi(0);
     for (const auto& proxy : proxies)
     {
-        bool isRobotToRobot = (proxy.e1->isRobotLink || proxy.e1->ClosestRobotLink) && (proxy.e2->isRobotLink || proxy.e2->ClosestRobotLink);
+        bool isRobotToRobot = (proxy.e1->isRobotLink || proxy.e1->ClosestRobotLink.lock()) && (proxy.e2->isRobotLink || proxy.e2->ClosestRobotLink.lock());
         double& margin = isRobotToRobot ? robot_margin_ : world_margin_;
         if (proxy.distance < margin)
         {

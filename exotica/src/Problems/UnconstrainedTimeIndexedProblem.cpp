@@ -241,6 +241,14 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian(int
 
 void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -254,6 +262,14 @@ void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eige
 
 void UnconstrainedTimeIndexedProblem::setRho(const std::string& task_name, const double rho, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -267,6 +283,14 @@ void UnconstrainedTimeIndexedProblem::setRho(const std::string& task_name, const
 
 Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -279,6 +303,14 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string& task
 
 double UnconstrainedTimeIndexedProblem::getRho(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)

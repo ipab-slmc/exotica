@@ -56,6 +56,7 @@ public:
     int ControlId;
     bool IsControlled;
     std::weak_ptr<KinematicElement> Parent;
+    std::string ParentName;
     std::vector<std::weak_ptr<KinematicElement>> Children;
     std::weak_ptr<KinematicElement> ClosestRobotLink;
     KDL::Segment Segment;

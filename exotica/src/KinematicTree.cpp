@@ -362,18 +362,19 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
     }
 
     child->Parent = parent;
+    child->ParentName = parent->Segment.getName();
     parent->Children.push_back(child);
     child->updateClosestRobotLink();
     debugSceneChanged = true;
 }
 
-void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color)
+void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
 {
-    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color);
+    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color, isControlled);
     EnvironmentTree.push_back(element);
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
 {
     std::shared_ptr<KinematicElement> parent_element;
     if (parent == "")
@@ -405,6 +406,8 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
         // Set color if set. If all zeros, default to preset (grey).
         if (color != Eigen::Vector4d::Zero()) NewElement->Color = color;
     }
+    NewElement->ParentName = parent;
+    NewElement->IsControlled = isControlled;
     Tree.push_back(NewElement);
     parent_element->Children.push_back(NewElement);
     NewElement->updateClosestRobotLink();

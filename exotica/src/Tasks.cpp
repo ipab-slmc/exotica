@@ -49,6 +49,7 @@ void Task::initialize(const std::vector<exotica::Initializer>& inits, PlanningPr
         if (it == prob->getTaskMaps().end()) throw_pretty("Task map '" << task.Task << "' has not been defined!");
         TaskMaps[task.Task] = it->second;
         Tasks.push_back(it->second);
+        TaskInitializers.push_back(task);
         it->second->isUsed = true;
     }
     NumTasks = Tasks.size();
@@ -142,8 +143,41 @@ TimeIndexedTask::TimeIndexedTask()
 void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
 {
     Task::initialize(inits, prob, phi);
-    T = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->getT();
     phi.setZero(PhiN);
+
+    T = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->getT();  // NB: Issue #227 - This cast into the UnconstrainedTimeIndexedProblem type is an assumption!
+    reinitializeVariables(T, prob);
+}
+
+void TimeIndexedTask::updateS()
+{
+    for (int t = 0; t < T; t++)
+    {
+        for (const TaskIndexing& task : Indexing)
+        {
+            for (int i = 0; i < task.Length; i++)
+            {
+                S[t](i + task.Start, i + task.Start) = Rho[t](task.Id);
+                if (Rho[t](task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
+            }
+        }
+    }
+}
+
+void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ, int t)
+{
+    for (const TaskIndexing& task : Indexing)
+    {
+        Phi[t].data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        J[t].middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
+    }
+    ydiff[t] = Phi[t] - y[t];
+}
+
+void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob)
+{
+    T = T_in;
+    const TaskSpaceVector& phi = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->TaskPhi;
     Phi.assign(T, phi);
     y = Phi;
     Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
@@ -151,9 +185,11 @@ void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits,
     S.assign(T, Eigen::MatrixXd::Identity(JN, JN));
     ydiff.assign(T, Eigen::VectorXd::Zero(JN));
 
+    if (NumTasks != TaskInitializers.size()) throw_pretty("Number of tasks does not match internal number of tasks!");
     for (int i = 0; i < NumTasks; i++)
     {
-        TaskInitializer task(inits[i]);
+        TaskInitializer& task = TaskInitializers[i];
+        HIGHLIGHT("Reinitialize Task=" << task.Task << " - #" << i);
         if (task.Goal.rows() == 0)
         {
             // Keep zero goal
@@ -185,31 +221,6 @@ void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits,
             throw_pretty("Invalid task Rho size! Expecting " << T << " got " << task.Rho.rows());
         }
     }
-}
-
-void TimeIndexedTask::updateS()
-{
-    for (int t = 0; t < T; t++)
-    {
-        for (const TaskIndexing& task : Indexing)
-        {
-            for (int i = 0; i < task.Length; i++)
-            {
-                S[t](i + task.Start, i + task.Start) = Rho[t](task.Id);
-                if (Rho[t](task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
-            }
-        }
-    }
-}
-
-void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ, int t)
-{
-    for (const TaskIndexing& task : Indexing)
-    {
-        Phi[t].data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
-        J[t].middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
-    }
-    ydiff[t] = Phi[t] - y[t];
 }
 
 SamplingTask::SamplingTask()

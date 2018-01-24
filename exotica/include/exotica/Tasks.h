@@ -76,6 +76,8 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
+protected:
+    std::vector<TaskInitializer> TaskInitializers;
 };
 
 class TimeIndexedTask : public Task
@@ -85,6 +87,7 @@ public:
     virtual void initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& phi);
     void updateS();
     void update(const TaskSpaceVector& Phi, Eigen::MatrixXdRefConst J, int t);
+    void reinitializeVariables(int T, std::shared_ptr<PlanningProblem> prob);
 
     std::vector<Eigen::VectorXd> Rho;
     std::vector<TaskSpaceVector> y;

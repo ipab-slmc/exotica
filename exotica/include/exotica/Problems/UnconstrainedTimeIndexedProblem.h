@@ -87,6 +87,7 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
+    TaskSpaceVector TaskPhi;  // passed to the TimeIndexedTask, needs to be kept for reinitialisation
 
 private:
     int T;       //!< Number of time steps
@@ -95,6 +96,7 @@ private:
     std::vector<Eigen::VectorXd> InitialTrajectory;
     UnconstrainedTimeIndexedProblemInitializer init_;
     void reinitializeVariables();
+    TaskSpaceVector yref;  //!< Stores task Phi reference value, to be assigned to Phi
 };
 
 typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;

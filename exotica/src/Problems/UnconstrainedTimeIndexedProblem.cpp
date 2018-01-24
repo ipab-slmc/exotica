@@ -50,16 +50,7 @@ UnconstrainedTimeIndexedProblem::~UnconstrainedTimeIndexedProblem()
 void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProblemInitializer& init)
 {
     init_ = init;
-    setT(init_.T);
-    applyStartState(false);
-    reinitializeVariables();
-}
 
-void UnconstrainedTimeIndexedProblem::reinitializeVariables()
-{
-    if (debug_) HIGHLIGHT_NAMED("UnconstrainedTimeIndexedProblem", "Initialize problem with T=" << T);
-
-    setTau(init_.Tau);
     Q_rate = init_.Qrate;
     H_rate = init_.Hrate;
     W_rate = init_.Wrate;
@@ -67,13 +58,13 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     NumTasks = Tasks.size();
     PhiN = 0;
     JN = 0;
-    TaskSpaceVector yref;
     for (int i = 0; i < NumTasks; i++)
     {
         appendVector(yref.map, Tasks[i]->getLieGroupIndices());
         PhiN += Tasks[i]->Length;
         JN += Tasks[i]->LengthJ;
     }
+    yref.setZero(PhiN);
 
     N = scene_->getSolver().getNumControlledJoints();
 
@@ -92,7 +83,19 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     H = Eigen::MatrixXd::Identity(N, N) * Q_rate;
     Q = Eigen::MatrixXd::Identity(N, N) * H_rate;
 
-    yref.setZero(PhiN);
+    Cost.initialize(init_.Cost, shared_from_this(), TaskPhi);
+
+    T = init_.T;
+    applyStartState(false);
+    reinitializeVariables();
+}
+
+void UnconstrainedTimeIndexedProblem::reinitializeVariables()
+{
+    if (debug_) HIGHLIGHT_NAMED("UnconstrainedTimeIndexedProblem", "Initialize problem with T=" << T);
+
+    setTau(init_.Tau);
+
     Phi.assign(T, yref);
     J.assign(T, Eigen::MatrixXd(JN, N));
     x.assign(T, Eigen::VectorXd::Zero(N));
@@ -101,9 +104,7 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     // Set initial trajectory with current state
     InitialTrajectory.resize(T, scene_->getControlledState());
 
-    TaskSpaceVector dummy;
-    Cost.initialize(init_.Cost, shared_from_this(), dummy);
-
+    Cost.reinitializeVariables(T, shared_from_this());
     preupdate();
 }
 

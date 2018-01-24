@@ -237,7 +237,7 @@ protected:
 
     double forwardTimeDistance(const Motion *a, const Motion *b) const
     {
-        Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
+        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
 
         const OMPLTimeIndexedRNStateSpace::StateType *sa = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(a->state);
         const OMPLTimeIndexedRNStateSpace::StateType *sb = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(b->state);
@@ -256,7 +256,7 @@ protected:
 
     double reverseTimeDistance(const Motion *a, const Motion *b) const
     {
-        Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
+        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
 
         const OMPLTimeIndexedRNStateSpace::StateType *sa = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(a->state);
         const OMPLTimeIndexedRNStateSpace::StateType *sb = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(b->state);

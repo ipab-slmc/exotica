@@ -27,6 +27,7 @@ memory_usage_intermediate = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 print(">>> Intermediate:", " - Memory Usage Intermediate:",
       memory_usage_intermediate)
 
+print(">>> LEAK:", memory_usage_intermediate - memory_usage_before)
 assert (memory_usage_intermediate - memory_usage_before) == 0
 
 print(">>> updateSceneFrames 10000 times")
@@ -40,7 +41,7 @@ e = time.time()
 memory_usage_after = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 print(">>> After:", e-s, " - Memory Usage After:", memory_usage_after)
 
+print(">>> LEAK:", memory_usage_after - memory_usage_before)
 assert (memory_usage_after - memory_usage_before) == 0
-print(">>> LEAK:", memory_usage_after-memory_usage_before)
 
 print('>>SUCCESS<<')

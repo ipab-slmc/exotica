@@ -854,4 +854,13 @@ std::map<std::string, shapes::ShapeType> KinematicTree::getCollisionObjectTypes(
     }
     return ret;
 }
+
+bool KinematicTree::doesLinkWithNameExist(std::string name)
+{
+    // Check whether it exists in TreeMap, which should encompass both EnvironmentTree and ModelTree
+    if (TreeMap.find(name) != TreeMap.end())
+        return true;
+    else
+        return false;
+}
 }

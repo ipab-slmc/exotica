@@ -143,7 +143,7 @@ void CoM::Initialize()
     }
     else
     {
-        int N = scene_->getSolver().getTree().size();
+        int N = scene_->getSolver().getModelTree().size();
         mass_.resize(N);
         Frames.resize(N);
         if (debug_)
@@ -151,9 +151,9 @@ void CoM::Initialize()
                                        << Frames.size());
         for (int i = 0; i < N; i++)
         {
-            Frames[i].FrameALinkName = scene_->getSolver().getTree()[i].lock()->Segment.getName();
-            Frames[i].FrameAOffset.p = scene_->getSolver().getTree()[i].lock()->Segment.getInertia().getCOG();
-            mass_(i) = scene_->getSolver().getTree()[i].lock()->Segment.getInertia().getMass();
+            Frames[i].FrameALinkName = scene_->getSolver().getModelTree()[i]->Segment.getName();
+            Frames[i].FrameAOffset.p = scene_->getSolver().getModelTree()[i]->Segment.getInertia().getCOG();
+            mass_(i) = scene_->getSolver().getModelTree()[i]->Segment.getInertia().getMass();
             if (debug_)
                 HIGHLIGHT_NAMED("CoM-Initialize",
                                 "FrameALinkName: "

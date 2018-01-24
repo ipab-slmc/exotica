@@ -126,6 +126,8 @@ void CoM::Initialize()
 
     if (Frames.size() > 0)
     {
+        // NB: This may break if it's an environment frame (#230)
+        HIGHLIGHT_NAMED("CoM", "!!! WARNING !!! This may be broken and cause a segfault if you update the scene after initialisation as the weak_ptr in getTreeMap() expire!");
         if (debug_)
             HIGHLIGHT_NAMED("CoM", "Initialisation with " << Frames.size() << " passed into map.");
 

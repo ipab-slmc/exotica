@@ -197,6 +197,7 @@ public:
     std::vector<std::shared_ptr<KinematicElement>> getModelTree() { return ModelTree; }
     std::map<std::string, std::weak_ptr<KinematicElement>> getTreeMap() { return TreeMap; }
     std::map<std::string, std::weak_ptr<KinematicElement>> getCollisionTreeMap() { return CollisionTreeMap; }
+    bool doesLinkWithNameExist(std::string name);  //!< Checks whether a link with this name exists in any of the trees
     bool Debug;
 
     std::map<std::string, shapes::ShapeType> getCollisionObjectTypes();

@@ -488,14 +488,11 @@ void Scene::updateSceneFrames()
         }
     }
 
-    // TODO #225: This may still contain a memory leak
     for (auto& it : custom_links_)
     {
         Eigen::Affine3d pose;
         tf::transformKDLToEigen(it->Segment.getFrameToTip(), pose);
-        const auto& temp = it;
-        it = kinematica_.AddElement(it->Segment.getName(), pose, it->Parent.lock()->Segment.getName(), it->Shape, it->Segment.getInertia());
-        it->IsControlled = temp->IsControlled;
+        it = kinematica_.AddElement(it->Segment.getName(), pose, it->ParentName, it->Shape, it->Segment.getInertia(), Eigen::Vector4d::Zero(), it->IsControlled);
     }
 
     kinematica_.UpdateModel();
@@ -503,10 +500,9 @@ void Scene::updateSceneFrames()
 
 void Scene::addObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, bool updateCollisionScene)
 {
-    const std::map<std::string, std::weak_ptr<KinematicElement>>& links = kinematica_.getTreeMap();
-    if (links.find(name) != links.end()) throw_pretty("Link '" << name << "' already exists in the scene!");
-    std::string parent_name = parent == "" ? kinematica_.getRootFrameName() : parent;
-    if (links.find(parent_name) == links.end()) throw_pretty("Can't find parent '" << parent_name << "'!");
+    if (kinematica_.doesLinkWithNameExist(name)) throw_pretty("Link '" << name << "' already exists in the scene!");
+    std::string parent_name = (parent == "") ? kinematica_.getRootFrameName() : parent;
+    if (!kinematica_.doesLinkWithNameExist(parent_name)) throw_pretty("Can't find parent '" << parent_name << "'!");
     Eigen::Affine3d pose;
     tf::transformKDLToEigen(transform, pose);
     custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape, inertia));

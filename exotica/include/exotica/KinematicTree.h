@@ -194,8 +194,9 @@ public:
     Eigen::VectorXd getControlledState();
 
     std::vector<std::weak_ptr<KinematicElement>> getTree() { return Tree; }
-    std::map<std::string, std::weak_ptr<KinematicElement>> getCollisionTreeMap() { return CollisionTreeMap; }
+    std::vector<std::shared_ptr<KinematicElement>> getModelTree() { return ModelTree; }
     std::map<std::string, std::weak_ptr<KinematicElement>> getTreeMap() { return TreeMap; }
+    std::map<std::string, std::weak_ptr<KinematicElement>> getCollisionTreeMap() { return CollisionTreeMap; }
     bool Debug;
 
     std::map<std::string, shapes::ShapeType> getCollisionObjectTypes();

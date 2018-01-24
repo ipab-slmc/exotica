@@ -52,6 +52,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     init_ = init;
     setT(init_.T);
     applyStartState(false);
+    reinitializeVariables();
 }
 
 void UnconstrainedTimeIndexedProblem::reinitializeVariables()
@@ -94,14 +95,16 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     yref.setZero(PhiN);
     Phi.assign(T, yref);
     J.assign(T, Eigen::MatrixXd(JN, N));
-    x.assign(T, Eigen::VectorXd::Zero(JN));
-    xdiff.assign(T, Eigen::VectorXd::Zero(JN));
+    x.assign(T, Eigen::VectorXd::Zero(N));
+    xdiff.assign(T, Eigen::VectorXd::Zero(N));
 
-    // Set initial trajectory
+    // Set initial trajectory with current state
     InitialTrajectory.resize(T, scene_->getControlledState());
 
     TaskSpaceVector dummy;
     Cost.initialize(init_.Cost, shared_from_this(), dummy);
+
+    preupdate();
 }
 
 void UnconstrainedTimeIndexedProblem::setT(int T_in)
@@ -216,6 +219,10 @@ double UnconstrainedTimeIndexedProblem::getScalarTransitionCost(int t)
     {
         t = T - 1;
     }
+    else if (t == 0)
+    {
+        return 0;
+    }
     return ct * xdiff[t].transpose() * W * xdiff[t];
 }
 
@@ -234,6 +241,14 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian(int
 
 void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -247,6 +262,14 @@ void UnconstrainedTimeIndexedProblem::setGoal(const std::string& task_name, Eige
 
 void UnconstrainedTimeIndexedProblem::setRho(const std::string& task_name, const double rho, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -260,6 +283,14 @@ void UnconstrainedTimeIndexedProblem::setRho(const std::string& task_name, const
 
 Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -272,6 +303,14 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::getGoal(const std::string& task
 
 double UnconstrainedTimeIndexedProblem::getRho(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)

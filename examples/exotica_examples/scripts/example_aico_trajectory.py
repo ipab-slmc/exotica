@@ -9,9 +9,9 @@ problem = solver.getProblem()
 
 for t in range(0,problem.T):
     if float(t)*problem.tau<0.8:
-        problem.setRho('FrameB',0.0,t)
+        problem.setRho('Frame',0.0,t)
     else:
-        problem.setRho('FrameB',1e5,t)
+        problem.setRho('Frame',1e5,t)
 
 solution = solver.solve()
 

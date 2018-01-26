@@ -189,7 +189,6 @@ void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob)
     for (int i = 0; i < NumTasks; i++)
     {
         TaskInitializer& task = TaskInitializers[i];
-        HIGHLIGHT("Reinitialize Task=" << task.Task << " - #" << i);
         if (task.Goal.rows() == 0)
         {
             // Keep zero goal

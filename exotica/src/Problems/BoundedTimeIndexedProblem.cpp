@@ -302,8 +302,8 @@ void BoundedTimeIndexedProblem::reinitializeVariables()
     // Set initial trajectory
     InitialTrajectory.resize(T, scene_->getControlledState());
 
-    TaskSpaceVector dummy;
-    Cost.initialize(init_.Cost, shared_from_this(), dummy);
+    Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
+    Cost.reinitializeVariables(T, shared_from_this(), CostPhi);
     applyStartState(false);
 }
 }

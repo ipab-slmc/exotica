@@ -115,10 +115,12 @@ void TimeIndexedProblem::reinitializeVariables()
     // Set initial trajectory
     InitialTrajectory.resize(T, scene_->getControlledState());
 
-    TaskSpaceVector dummy;
-    Cost.initialize(init_.Cost, shared_from_this(), dummy);
-    Inequality.initialize(init_.Inequality, shared_from_this(), dummy);
-    Equality.initialize(init_.Equality, shared_from_this(), dummy);
+    Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
+    Inequality.initialize(init_.Inequality, shared_from_this(), InequalityPhi);
+    Equality.initialize(init_.Equality, shared_from_this(), EqualityPhi);
+    Cost.reinitializeVariables(T, shared_from_this(), CostPhi);
+    Inequality.reinitializeVariables(T, shared_from_this(), InequalityPhi);
+    Equality.reinitializeVariables(T, shared_from_this(), EqualityPhi);
 }
 
 void TimeIndexedProblem::setT(int T_in)

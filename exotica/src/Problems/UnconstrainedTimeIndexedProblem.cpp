@@ -83,7 +83,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     H = Eigen::MatrixXd::Identity(N, N) * Q_rate;
     Q = Eigen::MatrixXd::Identity(N, N) * H_rate;
 
-    Cost.initialize(init_.Cost, shared_from_this(), TaskPhi);
+    Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
 
     T = init_.T;
     applyStartState(false);
@@ -104,7 +104,7 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     // Set initial trajectory with current state
     InitialTrajectory.resize(T, scene_->getControlledState());
 
-    Cost.reinitializeVariables(T, shared_from_this());
+    Cost.reinitializeVariables(T, shared_from_this(), CostPhi);
     preupdate();
 }
 

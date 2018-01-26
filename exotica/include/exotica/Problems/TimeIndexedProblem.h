@@ -83,6 +83,10 @@ public:
     TimeIndexedTask Inequality;
     TimeIndexedTask Equality;
 
+    TaskSpaceVector CostPhi;
+    TaskSpaceVector InequalityPhi;
+    TaskSpaceVector EqualityPhi;
+
     double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
     Eigen::MatrixXd W;
 

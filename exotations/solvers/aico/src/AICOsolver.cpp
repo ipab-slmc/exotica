@@ -503,9 +503,9 @@ double AICOsolver::getTaskCosts(int t)
             {
                 int start = prob_->Cost.Indexing[i].StartJ;
                 int len = prob_->Cost.Indexing[i].LengthJ;
-                Jt = prob_->J[t].middleRows(start, len).transpose();
+                Jt = prob_->Cost.J[t].middleRows(start, len).transpose();
                 C += prec * (prob_->Cost.ydiff[t].segment(start, len)).squaredNorm();
-                R[t] += prec * Jt * prob_->J[t].middleRows(start, len);
+                R[t] += prec * Jt * prob_->Cost.J[t].middleRows(start, len);
                 r[t] += prec * Jt * (-prob_->Cost.ydiff[t].segment(start, len) + prob_->Cost.J[t].middleRows(start, len) * qhat[t]);
                 rhat[t] += prec * (-prob_->Cost.ydiff[t].segment(start, len) + prob_->Cost.J[t].middleRows(start, len) * qhat[t]).squaredNorm();
             }

@@ -216,6 +216,8 @@ private:
     int lastT;  //!< T the last time initMessages was called.
 
     int sweep;  //!< Sweeps so far
+    int bestSweep;
+    int bestSweep_old;
     enum SweepMode
     {
         smForwardly = 0,

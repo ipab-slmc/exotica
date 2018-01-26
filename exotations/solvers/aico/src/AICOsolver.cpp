@@ -111,10 +111,11 @@ void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
 
 void AICOsolver::Solve(Eigen::MatrixXd& solution)
 {
+    prob_->preupdate();
+    prob_->resetCostEvolution(max_iterations);
+
     // Check if the trajectory length has changed, if so update the messages.
     if (prob_->getT() != lastT) initMessages();
-
-    prob_->resetCostEvolution(max_iterations);
 
     Eigen::VectorXd q0 = prob_->applyStartState();
     std::vector<Eigen::VectorXd> q_init = prob_->getInitialTrajectory();
@@ -131,10 +132,6 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
     {
         HIGHLIGHT("AICO::Solve called with initial trajectory guess");
     }
-
-    prob_->preupdate();
-    prob_->setStartState(q_init[0]);
-    prob_->applyStartState();
 
     Timer timer;
     if (debug_) ROS_WARN_STREAM("AICO: Setting up the solver");
@@ -321,11 +318,8 @@ void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
     dampingReference[0] = q_init[0];
     b[0] = q_init[0];
     s[0] = q_init[0];
-    rememberOldState();
     int n2 = n / 2;
     b = q_init;
-    for (int i = 0; i < q.size(); i++)
-        q.at(i) = b.at(i).head(n2);
     s = b;
     for (int t = 1; t < prob_->getT(); t++)
     {
@@ -347,7 +341,7 @@ void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
 
     cost = evaluateTrajectory(b, true);
     if (cost < 0) throw_named("Invalid cost! " << cost);
-    INFO("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << ", updates: " << updateCount);
+    if(debug_) HIGHLIGHT("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << ", updates: " << updateCount);
     rememberOldState();
 }
 
@@ -729,7 +723,7 @@ double AICOsolver::step()
     prob_->setCostEvolution(sweep, cost);
     if (debug_) HIGHLIGHT("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
     if (cost < 0) return -1.0;
-
+    bestSweep = sweep;
     if (sweep && damping) perhapsUndoStep();
     sweep++;
     return b_step;
@@ -753,6 +747,7 @@ void AICOsolver::rememberOldState()
     costControl_old = costControl;
     costTask_old = costTask;
     dim_old = dim;
+    bestSweep_old = bestSweep;
 }
 
 void AICOsolver::perhapsUndoStep()
@@ -777,6 +772,7 @@ void AICOsolver::perhapsUndoStep()
         costControl = costControl_old;
         costTask = costTask_old;
         dim = dim_old;
+        bestSweep = bestSweep_old;
         if (preupdateTrajectory_)
         {
             for (int t = 0; t < prob_->getT(); t++)
@@ -785,7 +781,7 @@ void AICOsolver::perhapsUndoStep()
                 prob_->Update(q[t], t);
             }
         }
-        INFO("Reverting to previous step");
+        if (debug_) HIGHLIGHT("Reverting to previous step ("<<bestSweep<<")");
     }
     else
     {

@@ -129,6 +129,7 @@ bool TimeIndexedSamplingProblem::isValid(Eigen::VectorXdRefConst x, double t)
             Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
     }
     Constraint.update(Phi);
+    numberOfProblemUpdates++;
     return ((Constraint.S * Constraint.ydiff).array() < 0.0).all();
 }
 

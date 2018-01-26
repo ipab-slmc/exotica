@@ -194,6 +194,7 @@ void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
     Cost.update(Phi[t], J[t], t);
     Inequality.update(Phi[t], J[t], t);
     Equality.update(Phi[t], J[t], t);
+    numberOfProblemUpdates++;
 }
 
 double TimeIndexedProblem::getScalarTaskCost(int t)

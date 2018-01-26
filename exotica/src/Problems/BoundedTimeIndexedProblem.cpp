@@ -138,6 +138,7 @@ void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
             Tasks[i]->update(x, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
     Cost.update(Phi[t], J[t], t);
+    numberOfProblemUpdates++;
 }
 
 double BoundedTimeIndexedProblem::getScalarTaskCost(int t)

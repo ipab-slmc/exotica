@@ -112,6 +112,7 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
             Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
     }
     Cost.update(Phi, J);
+    numberOfProblemUpdates++;
 }
 
 void UnconstrainedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)

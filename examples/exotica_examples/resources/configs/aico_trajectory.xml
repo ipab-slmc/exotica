@@ -28,12 +28,7 @@
     </PlanningScene>
 
     <Maps>
-      <EffFrame Name="FrameA">
-        <EndEffector>
-            <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0.7071 0  0.7071 0" Base="Target" />
-        </EndEffector>
-      </EffFrame>
-      <EffFrame Name="FrameB">
+      <EffFrame Name="Frame">
         <EndEffector>
             <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0.7071 0  0.7071 0" Base="Target" />
         </EndEffector>
@@ -41,7 +36,7 @@
     </Maps>
 
     <Cost>
-      <Task Task="FrameB"/>
+      <Task Task="Frame"/>
     </Cost>
    
     <T>233</T>

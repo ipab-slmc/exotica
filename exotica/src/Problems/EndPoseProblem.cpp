@@ -151,6 +151,7 @@ void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
     Cost.update(Phi, J);
     Inequality.update(Phi, J);
     Equality.update(Phi, J);
+    numberOfProblemUpdates++;
 }
 
 void EndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)

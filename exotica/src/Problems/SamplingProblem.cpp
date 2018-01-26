@@ -116,6 +116,7 @@ bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
             Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
     }
     Constraint.update(Phi);
+    numberOfProblemUpdates++;
     return ((Constraint.S * Constraint.ydiff).array() < 0.0).all();
 }
 

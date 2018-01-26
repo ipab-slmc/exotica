@@ -344,7 +344,7 @@ void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
 
     cost = evaluateTrajectory(b, true);
     if (cost < 0) throw_named("Invalid cost! " << cost);
-    if(debug_) HIGHLIGHT("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << ", updates: " << updateCount);
+    if (debug_) HIGHLIGHT("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << ", updates: " << updateCount);
     rememberOldState();
 }
 
@@ -784,7 +784,7 @@ void AICOsolver::perhapsUndoStep()
                 prob_->Update(q[t], t);
             }
         }
-        if (debug_) HIGHLIGHT("Reverting to previous step ("<<bestSweep<<")");
+        if (debug_) HIGHLIGHT("Reverting to previous step (" << bestSweep << ")");
     }
     else
     {

@@ -16,7 +16,8 @@ for t in range(0,problem.T):
         problem.setRho('Frame',0.0,t)
     else:
         problem.setRho('Frame',1e5,t)
-        problem.setGoal('Frame',figureEight(t*problem.tau),t)
+        goal=figureEight(t*problem.tau)
+        problem.setGoal('Frame',goal,t)
 
 solution = solver.solve()
 

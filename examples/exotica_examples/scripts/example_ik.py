@@ -20,10 +20,11 @@ dt=0.002
 t=0.0
 q=array([0.0]*7)
 print('Publishing IK')
-signal.signal(signal.SIGINT, sigIntHandler)
+
 while True:
     try:
-        problem.setGoal('Position',figureEight(t))
+        goal=figureEight(t)
+        problem.setGoal('Position',goal)
         problem.startState = q
         q = solver.solve()[0]
         publishPose(q, problem)

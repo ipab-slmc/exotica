@@ -40,7 +40,7 @@ for i in range(0,3):
 
 # Playback
 dt=0.03
-signal.signal(signal.SIGINT, sigIntHandler)
+
 while True:
     try:
         for i in range(0,len(solution)):

@@ -133,6 +133,9 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
         HIGHLIGHT("AICO::Solve called with initial trajectory guess");
     }
 
+    prob_->setStartState(q_init[0]);
+    prob_->applyStartState();
+
     Timer timer;
     if (debug_) ROS_WARN_STREAM("AICO: Setting up the solver");
     updateCount = 0;

@@ -87,7 +87,8 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
-    TaskSpaceVector TaskPhi;  // passed to the TimeIndexedTask, needs to be kept for reinitialisation
+
+    TaskSpaceVector CostPhi;  // passed to the TimeIndexedTask, needs to be kept for reinitialisation
 
 private:
     int T;       //!< Number of time steps

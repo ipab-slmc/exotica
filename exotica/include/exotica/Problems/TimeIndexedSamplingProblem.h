@@ -76,6 +76,8 @@ public:
     TaskSpaceVector Phi;
     SamplingTask Constraint;
 
+    TaskSpaceVector ConstraintPhi;
+
     int PhiN;
     int JN;
     int NumTasks;

@@ -92,8 +92,7 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     }
     Phi.setZero(PhiN);
 
-    TaskSpaceVector dummy;
-    Constraint.initialize(init.Constraint, shared_from_this(), dummy);
+    Constraint.initialize(init.Constraint, shared_from_this(), ConstraintPhi);
 
     applyStartState(false);
 }

@@ -30,7 +30,6 @@
  *
  */
 
-#include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 #include <exotica/TaskInitializer.h>
 #include <exotica/Tasks.h>
 
@@ -50,7 +49,6 @@ void Task::initialize(const std::vector<exotica::Initializer>& inits, PlanningPr
         TaskMaps[task.Task] = it->second;
         Tasks.push_back(it->second);
         TaskInitializers.push_back(task);
-        it->second->isUsed = true;
     }
     NumTasks = Tasks.size();
     PhiN = 0;
@@ -63,6 +61,7 @@ void Task::initialize(const std::vector<exotica::Initializer>& inits, PlanningPr
         Indexing[i].Length = Tasks[i]->Length;
         Indexing[i].StartJ = JN;
         Indexing[i].LengthJ = Tasks[i]->LengthJ;
+
         appendVector(phi.map, TaskVectorEntry::reindex(Tasks[i]->getLieGroupIndices(), Tasks[i]->Start, Indexing[i].Start));
         PhiN += Tasks[i]->Length;
         JN += Tasks[i]->LengthJ;
@@ -144,9 +143,6 @@ void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits,
 {
     Task::initialize(inits, prob, phi);
     phi.setZero(PhiN);
-
-    T = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->getT();  // NB: Issue #227 - This cast into the UnconstrainedTimeIndexedProblem type is an assumption!
-    reinitializeVariables(T, prob);
 }
 
 void TimeIndexedTask::updateS()
@@ -174,10 +170,9 @@ void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefCo
     ydiff[t] = Phi[t] - y[t];
 }
 
-void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob)
+void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob, const TaskSpaceVector& phi)
 {
     T = T_in;
-    const TaskSpaceVector& phi = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(prob)->TaskPhi;
     Phi.assign(T, phi);
     y = Phi;
     Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));

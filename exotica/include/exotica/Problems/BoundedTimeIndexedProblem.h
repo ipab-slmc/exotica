@@ -73,6 +73,8 @@ public:
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask Cost;
 
+    TaskSpaceVector CostPhi;
+
     double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
     Eigen::MatrixXd W;
 

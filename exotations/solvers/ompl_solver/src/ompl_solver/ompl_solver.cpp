@@ -75,6 +75,11 @@ void OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
     }
 }
 
+int OMPLsolver::getRandomSeed()
+{
+    return ompl::RNG::getSeed();
+}
+
 void OMPLsolver::preSolve()
 {
     // clear previously computed solutions

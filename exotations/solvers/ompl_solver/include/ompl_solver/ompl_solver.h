@@ -51,6 +51,8 @@ public:
     virtual void Solve(Eigen::MatrixXd &solution);
     virtual void specifyProblem(PlanningProblem_ptr pointer);
 
+    int getRandomSeed();
+
 protected:
     template <typename T>
     static ompl::base::PlannerPtr allocatePlanner(const ompl::base::SpaceInformationPtr &si, const std::string &new_name)

@@ -4,3 +4,4 @@ Optional double Timeout = 60.0;
 Optional std::string Range = "1";
 Optional bool UseGoalBias = false;
 Optional std::string GoalBias = "0.05";
+Optional int RandomSeed = -1;  // Only set if not -1

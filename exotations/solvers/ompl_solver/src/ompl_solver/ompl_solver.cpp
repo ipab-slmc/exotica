@@ -31,6 +31,7 @@
  *
  */
 
+#include <ompl/util/RandomNumbers.h>
 #include <ompl_solver/ompl_solver.h>
 
 namespace exotica
@@ -66,6 +67,12 @@ void OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
         ompl_simple_setup_->getPlanner()->params().setParam("range", init_.Range);
     if (ompl_simple_setup_->getPlanner()->params().hasParam("goal_bias"))
         ompl_simple_setup_->getPlanner()->params().setParam("goal_bias", init_.GoalBias);
+
+    if (init_.RandomSeed != -1)
+    {
+        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.RandomSeed);
+        ompl::RNG::setSeed(init_.RandomSeed);
+    }
 }
 
 void OMPLsolver::preSolve()

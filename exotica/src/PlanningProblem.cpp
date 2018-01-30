@@ -181,25 +181,28 @@ Scene_ptr PlanningProblem::getScene()
     return scene_;
 }
 
-std::vector<double> PlanningProblem::getCostEvolution()
+std::pair<std::vector<double>,std::vector<double>> PlanningProblem::getCostEvolution()
 {
-    // Find first NAN and resize vector
-    size_t position = 0;
-    for (position = 0; position < costEvolution.size(); position++)
-        if (std::isnan(costEvolution[position])) break;
-    costEvolution.resize(position);
-    return costEvolution;
+    std::pair<std::vector<double>,std::vector<double>> ret;
+    for (size_t position = 0; position < costEvolution.size(); position++)
+    {
+        if (std::isnan(costEvolution[position].second)) break;
+        double time_point = std::chrono::duration_cast<std::chrono::duration<double>>(costEvolution[position].first - costEvolution[0].first).count();
+        ret.first.push_back(time_point);
+        ret.second.push_back(costEvolution[position].second);
+    }
+    return ret;
 }
 
 double PlanningProblem::getCostEvolution(int index)
 {
     if (index > -1 && index < costEvolution.size())
     {
-        return costEvolution[index];
+        return costEvolution[index].second;
     }
     else if (index == -1)
     {
-        return costEvolution[costEvolution.size() - 1];
+        return costEvolution[costEvolution.size() - 1].second;
     }
     else
     {
@@ -210,18 +213,20 @@ double PlanningProblem::getCostEvolution(int index)
 void PlanningProblem::resetCostEvolution(unsigned int size)
 {
     costEvolution.resize(size);
-    costEvolution.assign(size, std::numeric_limits<double>::quiet_NaN());
+    costEvolution.assign(size, std::make_pair<std::chrono::high_resolution_clock::time_point, double>(std::chrono::high_resolution_clock::now(), std::numeric_limits<double>::quiet_NaN()));
 }
 
 void PlanningProblem::setCostEvolution(int index, double value)
 {
     if (index > -1 && index < costEvolution.size())
     {
-        costEvolution[index] = value;
+        costEvolution[index].first = std::chrono::high_resolution_clock::now();
+        costEvolution[index].second = value;
     }
     else if (index == -1)
     {
-        costEvolution[costEvolution.size() - 1] = value;
+        costEvolution[costEvolution.size() - 1].first = std::chrono::high_resolution_clock::now();
+        costEvolution[costEvolution.size() - 1].second = value;
     }
     else
     {

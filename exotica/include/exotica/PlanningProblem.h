@@ -47,9 +47,11 @@
 #include <exotica/Tools.h>
 
 #include <algorithm>
+#include <chrono>
 #include <limits>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define REGISTER_PROBLEM_TYPE(TYPE, DERIV) EXOTICA_REGISTER_CORE(exotica::PlanningProblem, TYPE, DERIV)
@@ -76,7 +78,7 @@ public:
     virtual void preupdate();
     unsigned int getNumberOfProblemUpdates() { return numberOfProblemUpdates; }
     void resetNumberOfProblemUpdates() { numberOfProblemUpdates = 0; }
-    std::vector<double> getCostEvolution();
+    std::pair<std::vector<double>,std::vector<double>> getCostEvolution();
     double getCostEvolution(int index);
     void resetCostEvolution(unsigned int size);
     void setCostEvolution(int index, double value);
@@ -88,7 +90,7 @@ protected:
     KinematicRequestFlags Flags;
     Eigen::VectorXd startState;
     unsigned int numberOfProblemUpdates = 0;  // Stores number of times the problem has been updated
-    std::vector<double> costEvolution;
+    std::vector<std::pair<std::chrono::high_resolution_clock::time_point, double>> costEvolution;
 };
 
 typedef Factory<PlanningProblem> PlanningProblem_fac;

@@ -181,9 +181,9 @@ Scene_ptr PlanningProblem::getScene()
     return scene_;
 }
 
-std::pair<std::vector<double>,std::vector<double>> PlanningProblem::getCostEvolution()
+std::pair<std::vector<double>, std::vector<double>> PlanningProblem::getCostEvolution()
 {
-    std::pair<std::vector<double>,std::vector<double>> ret;
+    std::pair<std::vector<double>, std::vector<double>> ret;
     for (size_t position = 0; position < costEvolution.size(); position++)
     {
         if (std::isnan(costEvolution[position].second)) break;

@@ -31,6 +31,7 @@
  *
  */
 
+#include <ompl/util/RandomNumbers.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <time_indexed_rrt_connect/TimeIndexedRRTConnect.h>
 
@@ -118,6 +119,12 @@ void TimeIndexedRRTConnect::Instantiate(TimeIndexedRRTConnectInitializer &init)
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_TimeIndexedRRTConnect";
     planner_allocator_ = boost::bind(&allocatePlanner<OMPLTimeIndexedRRTConnect>, _1, _2);
+
+    if (init_.RandomSeed != -1)
+    {
+        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.RandomSeed);
+        ompl::RNG::setSeed(init_.RandomSeed);
+    }
 }
 
 void TimeIndexedRRTConnect::specifyProblem(PlanningProblem_ptr pointer)

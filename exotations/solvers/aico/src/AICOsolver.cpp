@@ -343,6 +343,7 @@ void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
     }
 
     cost = evaluateTrajectory(b, true);
+    prob_->setCostEvolution(sweep + 1, cost);
     if (cost < 0) throw_named("Invalid cost! " << cost);
     if (debug_) HIGHLIGHT("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << ", updates: " << updateCount);
     rememberOldState();
@@ -723,7 +724,7 @@ double AICOsolver::step()
     dampingReference = b;
     // q is set inside of evaluateTrajectory() function
     cost = evaluateTrajectory(b);
-    prob_->setCostEvolution(sweep, cost);
+    prob_->setCostEvolution(sweep + 1, cost);
     if (debug_) HIGHLIGHT("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
     if (cost < 0) return -1.0;
     bestSweep = sweep;
@@ -785,6 +786,7 @@ void AICOsolver::perhapsUndoStep()
             }
         }
         if (debug_) HIGHLIGHT("Reverting to previous step (" << bestSweep << ")");
+        prob_->setCostEvolution(sweep + 1, cost);
     }
     else
     {

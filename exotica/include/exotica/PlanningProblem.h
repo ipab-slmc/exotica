@@ -78,7 +78,7 @@ public:
     virtual void preupdate();
     unsigned int getNumberOfProblemUpdates() { return numberOfProblemUpdates; }
     void resetNumberOfProblemUpdates() { numberOfProblemUpdates = 0; }
-    std::pair<std::vector<double>,std::vector<double>> getCostEvolution();
+    std::pair<std::vector<double>, std::vector<double>> getCostEvolution();
     double getCostEvolution(int index);
     void resetCostEvolution(unsigned int size);
     void setCostEvolution(int index, double value);

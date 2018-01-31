@@ -550,7 +550,7 @@ double AICOsolver::step()
     if (debug_) HIGHLIGHT("Sweep: " << (sweep + 1) << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
     if (cost < 0) return -1.0;
     bestSweep = sweep;
-    if (sweep && damping) perhapsUndoStep();
+    if (damping) perhapsUndoStep();
     sweep++;
     prob_->setCostEvolution(sweep, cost);
     return b_step;

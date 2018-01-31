@@ -1,6 +1,6 @@
 extend <exotica/MotionSolver>
 Optional std::string SweepMode = "Symmetric"; // Forwardly, Symmetric, LocalGaussNewton, LocalGaussNewtonDamped
 Optional int MaxIterations = 100;
-Optional double Tolerance = 1e-5;
+Optional double Tolerance = 1e-5; // This relates to the minimal change in configuration values between two sweeps
 Optional double Damping = 0.01;
 Optional bool UseBackwardMessage = false;

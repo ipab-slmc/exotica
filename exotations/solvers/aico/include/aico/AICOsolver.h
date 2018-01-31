@@ -158,7 +158,6 @@ private:
     bool useBwdMsg;                             //!< Flag for using backward message initialisation
     Eigen::VectorXd bwdMsg_v;                   //!< Backward message initialisation mean
     Eigen::MatrixXd bwdMsg_Vinv;                //!< Backward message initialisation covariance
-    bool dynamic;                               //!< Plan
 
     std::vector<SinglePassMeanCoviariance> q_stat;  //!< Cost weigthed normal distribution of configurations across sweeps.
 
@@ -176,10 +175,6 @@ private:
     Eigen::VectorXd costControl;         //!< Control cost for each time step
     Eigen::VectorXd costTask;            //!< Task cost for each task for each time step
     std::vector<std::string> taskNames;  //!< Task names (only used for printing debug info)
-
-    std::vector<Eigen::VectorXd> phiBar_old;  //!< Task cost mappings (last most optimal value)
-    std::vector<Eigen::MatrixXd> JBar_old;    //!< Task cost Jacobians (last most optimal value)
-    Eigen::VectorXi dim_old;                  //!< Task dimension
 
     std::vector<Eigen::VectorXd> s_old;     //!< Forward message mean (last most optimal value)
     std::vector<Eigen::MatrixXd> Sinv_old;  //!< Forward message covariance inverse (last most optimal value)
@@ -199,19 +194,10 @@ private:
     double cost;                                    //!< cost of MAP trajectory
     double cost_old;                                //!< cost of MAP trajectory (last most optimal value)
     double b_step;                                  //!< Squared configuration space step
+    double b_step_old;
 
-    std::vector<Eigen::MatrixXd> A;      //!< State transition matrix
-    std::vector<Eigen::MatrixXd> tA;     //!< State transition matrix transpose
-    std::vector<Eigen::MatrixXd> Ainv;   //!< State transition matrix inverse
-    std::vector<Eigen::MatrixXd> invtA;  //!< State transition matrix transpose inverse
-    std::vector<Eigen::VectorXd> a;      //!< State transition drift
-    std::vector<Eigen::MatrixXd> B;      //!< Control matrix
-    std::vector<Eigen::MatrixXd> tB;     //!< Control matrix transpose
-    std::vector<Eigen::MatrixXd> W;      //!< Configuration space weight matrix inverse
-    std::vector<Eigen::MatrixXd> H;      //!< Integrated state transition covariance inverse
-    std::vector<Eigen::MatrixXd> Winv;   //!< Configuration space weight matrix inverse
-    std::vector<Eigen::MatrixXd> Hinv;   //!< Integrated state transition covariance inverse
-    std::vector<Eigen::MatrixXd> Q;      //!< State transition covariance
+    Eigen::MatrixXd W;      //!< Configuration space weight matrix inverse
+    Eigen::MatrixXd Winv;   //!< Configuration space weight matrix inverse
 
     int lastT;  //!< T the last time initMessages was called.
 

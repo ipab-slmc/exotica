@@ -453,12 +453,11 @@ void AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd,
 double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
                                       bool skipUpdate)
 {
-    if (debug_) ROS_WARN_STREAM("Evaluating, sweep " << sweep);
+    if (debug_) ROS_WARN_STREAM("Evaluating, sweep " << (sweep + 1));
     Timer timer;
-    double dSet, dPre, dUpd, dCtrl, dTask;
+    double dSet, dUpd, dCtrl, dTask;
 
     q = x;
-
     dSet = timer.getDuration();
 
     for (int t = 0; t < prob_->getT(); t++)
@@ -505,12 +504,12 @@ double AICOsolver::step()
             }
             break;
         case smSymmetric:
-            //ROS_WARN_STREAM("Updating forward, sweep "<<sweep);
+            // ROS_WARN_STREAM("Updating forward, sweep "<<sweep);
             for (t = 1; t < prob_->getT(); t++)
             {
                 updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.);  //relocate once on fwd & bwd Sweep
             }
-            //ROS_WARN_STREAM("Updating backward, sweep "<<sweep);
+            // ROS_WARN_STREAM("Updating backward, sweep "<<sweep);
             for (t = prob_->getT() - 2; t >= 0; t--)
             {
                 updateTimeStep(t, false, true, (sweep ? 1 : 0), tolerance, false, 1.);
@@ -548,7 +547,7 @@ double AICOsolver::step()
     dampingReference = b;
     // q is set inside of evaluateTrajectory() function
     cost = evaluateTrajectory(b);
-    if (debug_) HIGHLIGHT("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
+    if (debug_) HIGHLIGHT("Sweep: " << (sweep + 1) << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
     if (cost < 0) return -1.0;
     bestSweep = sweep;
     if (sweep && damping) perhapsUndoStep();
@@ -602,7 +601,6 @@ void AICOsolver::perhapsUndoStep()
         bestSweep = bestSweep_old;
         b_step = b_step_old;
         if (debug_) HIGHLIGHT("Reverting to previous step (" << bestSweep << ")");
-        prob_->setCostEvolution(sweep + 1, cost);
     }
     else
     {

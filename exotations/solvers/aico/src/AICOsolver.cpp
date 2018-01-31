@@ -501,17 +501,23 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
     q = x;
     dSet = timer.getDuration();
 
-    for (int t = 0; t < prob_->getT(); t++)
+    // Perform update / roll-out
+    if (!skipUpdate)
     {
-        timer.reset();
-        if (Server::isRos() && !ros::ok()) return -1.0;
-        if (!skipUpdate)
+        for (int t = 0; t < prob_->getT(); t++)
         {
             updateCount++;
             prob_->Update(q[t], t);
         }
-        dUpd += timer.getDuration();
+    }
+    dUpd += timer.getDuration();
+    timer.reset();
+    if (debug_ && !skipUpdate) HIGHLIGHT("Roll-out took: " << dUpd);
+
+    for (int t = 0; t < prob_->getT(); t++)
+    {
         timer.reset();
+        if (Server::isRos() && !ros::ok()) return -1.0;
 
         // Control cost
         costControl(t) = prob_->getScalarTransitionCost(t);

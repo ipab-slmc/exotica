@@ -129,8 +129,6 @@ public:
 
     void getStats(std::vector<SinglePassMeanCoviariance>& q_stat_);
 
-    bool preupdateTrajectory_;
-
     std::map<std::string, std::pair<int, int> > taskIndex;
     Eigen::VectorXi dim;  //!< Task dimension
     double planning_time_;
@@ -202,8 +200,8 @@ private:
     int lastT;  //!< T the last time initMessages was called.
 
     int sweep;  //!< Sweeps so far
-    int bestSweep;
-    int bestSweep_old;
+    int bestSweep = 0;
+    int bestSweep_old = 0;
     enum SweepMode
     {
         smForwardly = 0,

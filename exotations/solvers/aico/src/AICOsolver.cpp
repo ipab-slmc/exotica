@@ -81,7 +81,7 @@ void AICOsolver::saveCosts(std::string file_name)
 }
 
 AICOsolver::AICOsolver()
-    : damping(0.01), tolerance(1e-2), max_iterations(100), useBwdMsg(false), bwdMsg_v(), bwdMsg_Vinv(), s(), Sinv(), v(), Vinv(), r(), R(), rhat(), b(), Binv(), q(), qhat(), s_old(), Sinv_old(), v_old(), Vinv_old(), r_old(), R_old(), rhat_old(), b_old(), Binv_old(), q_old(), qhat_old(), dampingReference(), cost(0.0), cost_old(0.0), b_step(0.0), Winv(), sweep(0), sweepMode(0), W(), n(0), updateCount(0), damping_init(0.0), preupdateTrajectory_(false), q_stat()
+    : damping(0.01), tolerance(1e-2), max_iterations(100), useBwdMsg(false), bwdMsg_v(), bwdMsg_Vinv(), s(), Sinv(), v(), Vinv(), r(), R(), rhat(), b(), Binv(), q(), qhat(), s_old(), Sinv_old(), v_old(), Vinv_old(), r_old(), R_old(), rhat_old(), b_old(), Binv_old(), q_old(), qhat_old(), dampingReference(), cost(0.0), cost_old(0.0), b_step(0.0), Winv(), sweep(0), sweepMode(0), W(), n(0), updateCount(0), damping_init(0.0), q_stat()
 {
 }
 
@@ -460,17 +460,6 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
     q = x;
 
     dSet = timer.getDuration();
-    if (preupdateTrajectory_)
-    {
-        if (debug_) ROS_WARN_STREAM("Pre-update, sweep " << sweep);
-        for (int t = 0; t < prob_->getT(); t++)
-        {
-            if (Server::isRos() && !ros::ok()) return -1.0;
-            updateCount++;
-            prob_->Update(q[t], t);
-        }
-    }
-    dPre = timer.getDuration();
 
     for (int t = 0; t < prob_->getT(); t++)
     {
@@ -612,14 +601,6 @@ void AICOsolver::perhapsUndoStep()
         costTask = costTask_old;
         bestSweep = bestSweep_old;
         b_step = b_step_old;
-        if (preupdateTrajectory_)
-        {
-            for (int t = 0; t < prob_->getT(); t++)
-            {
-                updateCount++;
-                prob_->Update(q[t], t);
-            }
-        }
         if (debug_) HIGHLIGHT("Reverting to previous step (" << bestSweep << ")");
         prob_->setCostEvolution(sweep + 1, cost);
     }

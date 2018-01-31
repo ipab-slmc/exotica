@@ -64,7 +64,6 @@ void AICOsolver::Instantiate(AICOsolverInitializer& init)
     tolerance = init.Tolerance;
     damping_init = init.Damping;
     useBwdMsg = init.UseBackwardMessage;
-    dynamic = init.Dynamic;
 }
 
 void AICOsolver::saveCosts(std::string file_name)
@@ -82,7 +81,14 @@ void AICOsolver::saveCosts(std::string file_name)
 }
 
 AICOsolver::AICOsolver()
-    : damping(0.01), tolerance(1e-2), max_iterations(100), useBwdMsg(false), bwdMsg_v(), bwdMsg_Vinv(), s(), Sinv(), v(), Vinv(), r(), R(), rhat(), b(), Binv(), q(), qhat(), s_old(), Sinv_old(), v_old(), Vinv_old(), r_old(), R_old(), rhat_old(), b_old(), Binv_old(), q_old(), qhat_old(), dampingReference(), cost(0.0), cost_old(0.0), b_step(0.0), A(), tA(), Ainv(), invtA(), a(), B(), tB(), Winv(), Hinv(), Q(), sweep(0), sweepMode(0), W(), H(), dynamic(false), n(0), updateCount(0), damping_init(0.0), preupdateTrajectory_(false), q_stat()
+    : damping(0.01), tolerance(1e-2), max_iterations(100), useBwdMsg(false),
+      bwdMsg_v(), bwdMsg_Vinv(), s(), Sinv(), v(), Vinv(), r(), R(), rhat(),
+      b(), Binv(), q(), qhat(), s_old(), Sinv_old(), v_old(), Vinv_old(), r_old(),
+      R_old(), rhat_old(), b_old(), Binv_old(), q_old(), qhat_old(),
+      dampingReference(), cost(0.0), cost_old(0.0), b_step(0.0),
+      Winv(), sweep(0), sweepMode(0), W(),
+      n(0), updateCount(0), damping_init(0.0),
+      preupdateTrajectory_(false), q_stat()
 {
 }
 
@@ -112,10 +118,7 @@ void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
 void AICOsolver::Solve(Eigen::MatrixXd& solution)
 {
     prob_->preupdate();
-    prob_->resetCostEvolution(max_iterations);
-
-    // Check if the trajectory length has changed, if so update the messages.
-    if (prob_->getT() != lastT) initMessages();
+    prob_->resetCostEvolution(max_iterations+1);
 
     Eigen::VectorXd q0 = prob_->applyStartState();
     std::vector<Eigen::VectorXd> q_init = prob_->getInitialTrajectory();
@@ -135,6 +138,9 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
 
     prob_->setStartState(q_init[0]);
     prob_->applyStartState();
+
+    // Check if the trajectory length has changed, if so update the messages.
+    if (prob_->getT() != lastT) initMessages();
 
     Timer timer;
     if (debug_) ROS_WARN_STREAM("AICO: Setting up the solver");
@@ -172,20 +178,9 @@ void AICOsolver::initMessages()
     if (prob_ == nullptr) throw_named("Problem definition is a NULL pointer!");
     // TODO: Issue #4
     n = prob_->N;
-    int n2 = n / 2;
-    if (dynamic)
+    if (n < 1)
     {
-        if (n < 2)
-        {
-            throw_named("State dimension is too small: n=" << n);
-        }
-    }
-    else
-    {
-        if (n < 1)
-        {
-            throw_named("State dimension is too small: n=" << n);
-        }
+        throw_named("State dimension is too small: n=" << n);
     }
     if (prob_->getT() < 2)
     {
@@ -201,8 +196,8 @@ void AICOsolver::initMessages()
     {
         if (bwdMsg_v.rows() == n && bwdMsg_Vinv.rows() == n && bwdMsg_Vinv.cols() == n)
         {
-            v[prob_->getT()] = bwdMsg_v;
-            Vinv[prob_->getT()] = bwdMsg_Vinv;
+            v[prob_->getT()-1] = bwdMsg_v;
+            Vinv[prob_->getT()-1] = bwdMsg_Vinv;
         }
         else
         {
@@ -221,50 +216,17 @@ void AICOsolver::initMessages()
     qhat.assign(prob_->getT(), Eigen::VectorXd::Zero(n));
     linSolverTmp.resize(n, n);
     {
-        if (dynamic)
+
+        q = b;
+        if (prob_->W.rows() != n)
         {
-            q.resize(prob_->getT());
-            for (int i = 0; i < q.size(); i++)
-                q.at(i) = b.at(i).head(n2);
-            if (prob_->W.rows() != n2)
-            {
-                throw_named(prob_->W.rows() << "!=" << n2);
-            }
+            throw_named(prob_->W.rows() << "!=" << n);
         }
-        else
-        {
-            q = b;
-            if (prob_->W.rows() != n)
-            {
-                throw_named(prob_->W.rows() << "!=" << n);
-            }
-        }
-        // All the process parameters are assumed to be constant throughout the trajectory.
-        // This is possible for a pseudo-dynamic system.
-        // A dynamic system would have to update these based on forces acting on the system.
-        Eigen::MatrixXd A_(n, n), B_(dynamic ? n2 : n, dynamic ? n2 : n), tB_,
-            tA_, Ainv_, invtA_;
-        Eigen::VectorXd a_(n);
-        getProcess(A_, a_, B_);
-        tB_ = B_.transpose();
-        tA_ = A_.transpose();
-        Ainv_ = A_.inverse();
-        invtA_ = Ainv_.transpose();
-        B.assign(prob_->getT(), B_);
-        tB.assign(prob_->getT(), tB_);
-        A.assign(prob_->getT(), A_);
-        tA.assign(prob_->getT(), tA_);
-        Ainv.assign(prob_->getT(), Ainv_);
-        invtA.assign(prob_->getT(), invtA_);
-        a.assign(prob_->getT(), a_);
     }
     {
         // Set constant W,Win,H,Hinv
-        W.assign(prob_->getT(), prob_->W);
-        Winv.assign(prob_->getT(), prob_->W.inverse());
-        H.assign(prob_->getT(), prob_->H);
-        Hinv.assign(prob_->getT(), prob_->H.inverse());
-        Q.assign(prob_->getT(), prob_->Q);
+        W = prob_->W;
+        Winv = W.inverse();
     }
 
     costControl.resize(prob_->getT());
@@ -285,30 +247,9 @@ void AICOsolver::initMessages()
 void AICOsolver::getProcess(Eigen::Ref<Eigen::MatrixXd> A_,
                             Eigen::Ref<Eigen::VectorXd> a_, Eigen::Ref<Eigen::MatrixXd> B_)
 {
-    if (!dynamic)
-    {
-        A_ = Eigen::MatrixXd::Identity(n, n);
-        B_ = Eigen::MatrixXd::Identity(n, n);
-        a_ = Eigen::VectorXd::Zero(n);
-    }
-    else
-    {
-        double tau = prob_->getTau();
-        int n2 = n / 2;
-        A_ = Eigen::MatrixXd::Identity(n, n);
-        B_ = Eigen::MatrixXd::Zero(n, n2);
-        a_ = Eigen::VectorXd::Zero(n);
-
-        // Assuming pseudo dynamic process (M is identity matrix and F is zero vector)
-        Eigen::MatrixXd Minv = Eigen::MatrixXd::Identity(n2, n2);
-        Eigen::VectorXd F = Eigen::VectorXd::Zero(n2);
-
-        A_.topRightCorner(n2, n2).diagonal().setConstant(tau);
-        B_.topLeftCorner(n2, n2) = Minv * (tau * tau * 0.5);
-        B_.bottomLeftCorner(n2, n2) = Minv * tau;
-        a_.head(n2) = Minv * F * (tau * tau * 0.5);
-        a_.tail(n2) = Minv * F * tau;
-    }
+    A_ = Eigen::MatrixXd::Identity(n, n);
+    B_ = Eigen::MatrixXd::Identity(n, n);
+    a_ = Eigen::VectorXd::Zero(n);
 }
 
 void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
@@ -317,33 +258,30 @@ void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
     {
         throw_named("Incorrect number of timesteps provided!");
     }
-    qhat[0] = q_init[0];
-    dampingReference[0] = q_init[0];
-    b[0] = q_init[0];
-    s[0] = q_init[0];
-    int n2 = n / 2;
+    qhat = q_init;
+    q = q_init;
+    dampingReference = q_init;
     b = q_init;
-    s = b;
+    s = q_init;
+    v = q_init;
     for (int t = 1; t < prob_->getT(); t++)
     {
         Sinv.at(t).setZero();
         Sinv.at(t).diagonal().setConstant(damping);
     }
-    v = b;
     for (int t = 0; t < prob_->getT(); t++)
     {
         Vinv.at(t).setZero();
         Vinv.at(t).diagonal().setConstant(damping);
     }
-    dampingReference = b;
     for (int t = 0; t < prob_->getT(); t++)
     {
         // Compute task message reference
-        updateTaskMessage(t, b.at(t), 0.0);
+        updateTaskMessage(t, b[t], 0.0);
     }
 
     cost = evaluateTrajectory(b, true);
-    prob_->setCostEvolution(sweep + 1, cost);
+    prob_->setCostEvolution(0, cost);
     if (cost < 0) throw_named("Invalid cost! " << cost);
     if (debug_) HIGHLIGHT("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << ", updates: " << updateCount);
     rememberOldState();
@@ -393,69 +331,33 @@ void AICOsolver::AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
 void AICOsolver::updateFwdMessage(int t)
 {
     Eigen::MatrixXd barS(n, n), St;
-    if (dynamic)
-    {
-        inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]);
-        St = Q[t - 1] + B[t - 1] * Hinv[t - 1] * tB[t - 1] + A[t - 1] * barS * tA[t - 1];
-        s[t] = a[t - 1] + A[t - 1] * (barS * (Sinv[t - 1] * s[t - 1] + r[t - 1]));
-        inverseSymPosDef(Sinv[t], St);
-    }
-    else
-    {
-        inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]);
-        s[t] = barS * (Sinv[t - 1] * s[t - 1] + r[t - 1]);
-        St = Winv[t - 1] + barS;
-        inverseSymPosDef(Sinv[t], St);
-    }
+    inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]);
+    s[t] = barS * (Sinv[t - 1] * s[t - 1] + r[t - 1]);
+    St = Winv + barS;
+    inverseSymPosDef(Sinv[t], St);
 }
 
 void AICOsolver::updateBwdMessage(int t)
 {
     Eigen::MatrixXd barV(n, n), Vt;
-    if (dynamic)
+    if (t < prob_->getT() - 1)
     {
-        if (t < prob_->getT() - 1)
-        {
-            inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]);
-            Vt = Ainv[t] * (Q[t] + B[t] * Hinv[t] * tB[t] + barV) * invtA[t];
-            v[t] = Ainv[t] * (-a[t] + barV * (Vinv[t + 1] * v[t + 1] + r[t + 1]));
-            inverseSymPosDef(Vinv[t], Vt);
-        }
-        if (t == prob_->getT() - 1)
-        {
-            if (!useBwdMsg)
-            {
-                v[t] = b[t];
-                Vinv[t].diagonal().setConstant(1e-4);
-            }
-            else
-            {
-                v[prob_->getT() - 1] = bwdMsg_v;
-                Vinv[prob_->getT() - 1] = bwdMsg_Vinv;
-            }
-        }
+        inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]);
+        v[t] = barV * (Vinv[t + 1] * v[t + 1] + r[t + 1]);
+        Vt = Winv + barV;
+        inverseSymPosDef(Vinv[t], Vt);
     }
-    else
+    if (t == prob_->getT() - 1)
     {
-        if (t < prob_->getT() - 1)
+        if (!useBwdMsg)
         {
-            inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]);
-            v[t] = barV * (Vinv[t + 1] * v[t + 1] + r[t + 1]);
-            Vt = Winv[t] + barV;
-            inverseSymPosDef(Vinv[t], Vt);
+            v[t] = b[t];
+            Vinv[t].diagonal().setConstant(1);
         }
-        if (t == prob_->getT() - 1)
+        else
         {
-            if (!useBwdMsg)
-            {
-                v[t] = b[t];
-                Vinv[t].diagonal().setConstant(1e-0);
-            }
-            else
-            {
-                v[prob_->getT() - 1] = bwdMsg_v;
-                Vinv[prob_->getT() - 1] = bwdMsg_Vinv;
-            }
+            v[prob_->getT() - 1] = bwdMsg_v;
+            Vinv[prob_->getT() - 1] = bwdMsg_Vinv;
         }
     }
 }
@@ -476,60 +378,32 @@ void AICOsolver::updateTaskMessage(int t,
         qhat[t] = qhat_t;
     }
 
-    prob_->Update(dynamic ? qhat[t].head(n / 2) : qhat[t], t);
+    prob_->Update(qhat[t], t);
     updateCount++;
     double c = getTaskCosts(t);
     q_stat[t].addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
-
-    // If using fully dynamic system, update Q, Hinv and process variables here.
 }
 
 double AICOsolver::getTaskCosts(int t)
 {
     double C = 0;
-    if (!dynamic)
+    Eigen::MatrixXd Jt;
+    double prec;
+    rhat[t] = 0;
+    R[t].setZero();
+    r[t].setZero();
+    for (int i = 0; i < prob_->getTasks().size(); i++)
     {
-        Eigen::MatrixXd Jt;
-        double prec;
-        rhat[t] = 0;
-        R[t].setZero();
-        r[t].setZero();
-        for (int i = 0; i < prob_->getTasks().size(); i++)
+        prec = prob_->Cost.Rho[t](i);
+        if (prec > 0)
         {
-            prec = prob_->Cost.Rho[t](i);
-            if (prec > 0)
-            {
-                int start = prob_->Cost.Indexing[i].StartJ;
-                int len = prob_->Cost.Indexing[i].LengthJ;
-                Jt = prob_->Cost.J[t].middleRows(start, len).transpose();
-                C += prec * (prob_->Cost.ydiff[t].segment(start, len)).squaredNorm();
-                R[t] += prec * Jt * prob_->Cost.J[t].middleRows(start, len);
-                r[t] += prec * Jt * (-prob_->Cost.ydiff[t].segment(start, len) + prob_->Cost.J[t].middleRows(start, len) * qhat[t]);
-                rhat[t] += prec * (-prob_->Cost.ydiff[t].segment(start, len) + prob_->Cost.J[t].middleRows(start, len) * qhat[t]).squaredNorm();
-            }
-        }
-    }
-    else
-    {
-        Eigen::MatrixXd Jt;
-        int n2 = n / 2;
-        double prec;
-        rhat[t] = 0;
-        R[t].setZero();
-        r[t].setZero();
-        for (int i = 0; i < prob_->getTasks().size(); i++)
-        {
-            prec = prob_->Cost.Rho[t](i);
-            if (prec > 0)
-            {
-                int start = prob_->Cost.Indexing[i].StartJ;
-                int len = prob_->Cost.Indexing[i].LengthJ;
-                Jt = prob_->Cost.J[t].middleRows(start, len).transpose();
-                C += prec * (prob_->Cost.ydiff[t].segment(start, len)).squaredNorm();
-                R[t].topLeftCorner(n2, n2) += prec * Jt * prob_->Cost.J[t].middleRows(start, len);
-                r[t].head(n2) += prec * Jt * (-prob_->Cost.ydiff[t].segment(start, len) + prob_->Cost.J[t].middleRows(start, len) * qhat[t]);
-                rhat[t] += prec * (-prob_->Cost.ydiff[t].segment(start, len) + prob_->Cost.J[t].middleRows(start, len) * qhat[t]).squaredNorm();
-            }
+            int start = prob_->Cost.Indexing[i].StartJ;
+            int len = prob_->Cost.Indexing[i].LengthJ;
+            Jt = prob_->Cost.J[t].middleRows(start, len).transpose();
+            C += prec * (prob_->Cost.ydiff[t].segment(start, len)).squaredNorm();
+            R[t] += prec * Jt * prob_->Cost.J[t].middleRows(start, len);
+            r[t] += prec * Jt * (-prob_->Cost.ydiff[t].segment(start, len) + prob_->Cost.J[t].middleRows(start, len) * qhat[t]);
+            rhat[t] += prec * (-prob_->Cost.ydiff[t].segment(start, len) + prob_->Cost.J[t].middleRows(start, len) * qhat[t]).squaredNorm();
         }
     }
     return prob_->ct * C;
@@ -590,20 +464,9 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
     if (debug_) ROS_WARN_STREAM("Evaluating, sweep " << sweep);
     Timer timer;
     double dSet, dPre, dUpd, dCtrl, dTask;
-    // double tau = prob_->tau;
-    // double tau_1 = 1. / tau, tau_2 = tau_1 * tau_1;
-    int n2 = n / 2;
-    Eigen::VectorXd vv;
 
-    if (dynamic)
-    {
-        for (int i = 0; i < q.size(); i++)
-            q.at(i) = x.at(i).head(n2);
-    }
-    else
-    {
-        q = x;
-    }
+    q = x;
+
     dSet = timer.getDuration();
     if (preupdateTrajectory_)
     {
@@ -630,28 +493,8 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
         timer.reset();
 
         // Control cost
-        if (!dynamic)
-        {
-            costControl(t) = prob_->getScalarTransitionCost(t);
-        }
-        else
-        {
-            throw_pretty("Not supported at the moment");
-            // if (t < prob_->getT() - 1 && t > 0)
-            // {
-            //     // For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t-1]-2.0*q[t])-F;
-            //     vv = tau_2 * (q[t + 1] + q[t - 1] - 2.0 * q[t]);
-            //     costControl(t) = vv.transpose() * H[t] * vv;
-            // }
-            // else if (t == 0)
-            // {
-            //     // For fully dynamic system use: v=tau_2*M*(q[t+1]+q[t])-F;
-            //     vv = tau_2 * (q[t + 1] + q[t]);
-            //     costControl(t) = vv.transpose() * H[t] * vv;
-            // }
-            // else
-            //     costControl(t) = 0.0;
-        }
+        costControl(t) = prob_->getScalarTransitionCost(t);
+
 
         dCtrl += timer.getDuration();
         timer.reset();
@@ -660,7 +503,8 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
         dTask += timer.getDuration();
     }
 
-    return costControl.sum() + costTask.sum();
+    cost = costControl.sum() + costTask.sum();
+    return cost;
 }
 
 double AICOsolver::step()
@@ -724,12 +568,12 @@ double AICOsolver::step()
     dampingReference = b;
     // q is set inside of evaluateTrajectory() function
     cost = evaluateTrajectory(b);
-    prob_->setCostEvolution(sweep + 1, cost);
     if (debug_) HIGHLIGHT("Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
     if (cost < 0) return -1.0;
     bestSweep = sweep;
     if (sweep && damping) perhapsUndoStep();
     sweep++;
+    prob_->setCostEvolution(sweep, cost);
     return b_step;
 }
 
@@ -750,8 +594,8 @@ void AICOsolver::rememberOldState()
     cost_old = cost;
     costControl_old = costControl;
     costTask_old = costTask;
-    dim_old = dim;
     bestSweep_old = bestSweep;
+    b_step_old= b_step;
 }
 
 void AICOsolver::perhapsUndoStep()
@@ -775,8 +619,8 @@ void AICOsolver::perhapsUndoStep()
         dampingReference = b_old;
         costControl = costControl_old;
         costTask = costTask_old;
-        dim = dim_old;
         bestSweep = bestSweep_old;
+        b_step = b_step_old;
         if (preupdateTrajectory_)
         {
             for (int t = 0; t < prob_->getT(); t++)

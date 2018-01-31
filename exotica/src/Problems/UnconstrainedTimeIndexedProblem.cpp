@@ -38,7 +38,7 @@ REGISTER_PROBLEM_TYPE("UnconstrainedTimeIndexedProblem", exotica::UnconstrainedT
 namespace exotica
 {
 UnconstrainedTimeIndexedProblem::UnconstrainedTimeIndexedProblem()
-    : T(0), tau(0), Q_rate(0), W_rate(0), H_rate(0)
+    : T(0), tau(0), W_rate(0)
 {
     Flags = KIN_FK | KIN_J;
 }
@@ -51,8 +51,6 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
 {
     init_ = init;
 
-    Q_rate = init_.Qrate;
-    H_rate = init_.Hrate;
     W_rate = init_.Wrate;
 
     NumTasks = Tasks.size();
@@ -80,8 +78,6 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
             throw_named("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
         }
     }
-    H = Eigen::MatrixXd::Identity(N, N) * Q_rate;
-    Q = Eigen::MatrixXd::Identity(N, N) * H_rate;
 
     Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
 

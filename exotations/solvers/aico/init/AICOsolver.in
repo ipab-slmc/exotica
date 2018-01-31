@@ -4,4 +4,3 @@ Optional int MaxIterations = 100;
 Optional double Tolerance = 1e-5;
 Optional double Damping = 0.01;
 Optional bool UseBackwardMessage = false;
-Optional bool Dynamic = false;

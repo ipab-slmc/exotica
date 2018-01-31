@@ -71,12 +71,8 @@ public:
 
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask Cost;
-    double Q_rate;  //!< System transition error covariance multipler (per unit time) (constant throughout the trajectory)
-    double H_rate;  //!< Control error covariance multipler (per unit time) (constant throughout the trajectory)
     double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
     Eigen::MatrixXd W;
-    Eigen::MatrixXd H;
-    Eigen::MatrixXd Q;
 
     std::vector<TaskSpaceVector> Phi;
     std::vector<Eigen::MatrixXd> J;

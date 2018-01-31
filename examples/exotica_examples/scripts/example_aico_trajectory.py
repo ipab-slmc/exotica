@@ -12,12 +12,10 @@ for t in range(0,problem.T):
         problem.setRho('Frame',0.0,t)
     else:
         problem.setRho('Frame',1e5,t)
-tt=exo.Timer()
+
 solution = solver.solve()
-print(tt.getDuration())
-cost=problem.getCostEvolution()
-plot(cost)
-#plot(solution)
+
+plot(solution)
 
 publishTrajectory(solution, problem.T*problem.tau, problem)
 

@@ -159,8 +159,8 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
     // with the start state
     if (!(q0 - q_init[0]).isMuchSmallerThan(1e-6))
     {
-        q_init.resize(prob_->getT(), Eigen::VectorXd::Zero(q0.rows()));
-        for (int i = 0; i < q_init.size(); i++) q_init[i] = q0;
+        HIGHLIGHT("AICO::Solve cold-started");
+        q_init.assign(prob_->getT(), q0);
     }
     else
     {
@@ -316,7 +316,7 @@ void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
     cost = evaluateTrajectory(b, true);  // The problem will be updated via updateTaskMessage, i.e. do not update on this roll-out
     prob_->setCostEvolution(0, cost);
     if (cost < 0) throw_named("Invalid cost! " << cost);
-    if (debug_) HIGHLIGHT("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << ", updates: " << updateCount);
+    if (debug_) HIGHLIGHT("Initial cost, updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost);
     rememberOldState();
 }
 

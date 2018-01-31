@@ -155,7 +155,11 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
         {
             throw_named("Negative step size!");
         }
-        if (k && d < tolerance) break;
+        if (k > 1 && d < tolerance)
+        {
+            if (debug_) HIGHLIGHT("Satisfied tolerance\tk=" << k << "\td=" << d << "\ttolerance=" << tolerance);
+            break;
+        }
     }
     Eigen::MatrixXd sol(prob_->getT(), n);
     for (int tt = 0; tt < prob_->getT(); tt++)

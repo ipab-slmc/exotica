@@ -117,7 +117,7 @@ double BoundedTimeIndexedProblem::getDuration()
     return tau * (double)T;
 }
 
-void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
+void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 {
     if (t >= T || t < -1)
     {
@@ -128,16 +128,43 @@ void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x, int t)
         t = T - 1;
     }
 
-    scene_->Update(x, static_cast<double>(t) * tau);
+    x[t] = x_in;
+    scene_->Update(x_in, static_cast<double>(t) * tau);
     Phi[t].setZero(PhiN);
-    J[t].setZero();
+    if(Flags&KIN_J) J[t].setZero();
+    if(Flags&KIN_J_DOT) for(int i=0;i<JN;i++) H[t](i).setZero();
     for (int i = 0; i < NumTasks; i++)
     {
         // Only update TaskMap if Rho is not 0
         if (Tasks[i]->isUsed)
-            Tasks[i]->update(x, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+        {
+            if(Flags&KIN_J_DOT)
+            {
+                Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H[t].segment(Tasks[i]->Start, Tasks[i]->Length));
+            }
+            else if(Flags&KIN_J)
+            {
+                Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+            }
+            else
+            {
+                Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length));
+            }
+        }
     }
-    Cost.update(Phi[t], J[t], t);
+    if(Flags&KIN_J_DOT)
+    {
+        Cost.update(Phi[t], J[t], H[t], t);
+    }
+    else if(Flags&KIN_J)
+    {
+        Cost.update(Phi[t], J[t], t);
+    }
+    else
+    {
+        Cost.update(Phi[t], t);
+    }
+    if (t > 0) xdiff[t] = x[t] - x[t - 1];
     numberOfProblemUpdates++;
 }
 
@@ -213,6 +240,7 @@ void BoundedTimeIndexedProblem::setRho(const std::string& task_name, const doubl
         if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho[t](Cost.Indexing[i].Id) = rho;
+            preupdate();
             return;
         }
     }
@@ -295,9 +323,15 @@ void BoundedTimeIndexedProblem::reinitializeVariables()
 
     yref.setZero(PhiN);
     Phi.assign(T, yref);
-    J.assign(T, Eigen::MatrixXd(JN, N));
+    if(Flags&KIN_J) J.assign(T, Eigen::MatrixXd(JN, N));
     x.assign(T, Eigen::VectorXd::Zero(JN));
     xdiff.assign(T, Eigen::VectorXd::Zero(JN));
+    if(Flags&KIN_J_DOT)
+    {
+        Hessian Htmp;
+        Htmp.setConstant(JN, Eigen::MatrixXd::Zero(N,N));
+        H.assign(T, Htmp);
+    }
 
     // Set initial trajectory
     InitialTrajectory.resize(T, scene_->getControlledState());
@@ -305,5 +339,6 @@ void BoundedTimeIndexedProblem::reinitializeVariables()
     Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
     Cost.reinitializeVariables(T, shared_from_this(), CostPhi);
     applyStartState(false);
+    preupdate();
 }
 }

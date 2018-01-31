@@ -95,6 +95,7 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     Constraint.initialize(init.Constraint, shared_from_this(), ConstraintPhi);
 
     applyStartState(false);
+    preupdate();
 }
 
 Eigen::VectorXd TimeIndexedSamplingProblem::getGoalState()
@@ -130,6 +131,13 @@ bool TimeIndexedSamplingProblem::isValid(Eigen::VectorXdRefConst x, double t)
     Constraint.update(Phi);
     numberOfProblemUpdates++;
     return ((Constraint.S * Constraint.ydiff).array() < 0.0).all();
+}
+
+void TimeIndexedSamplingProblem::preupdate()
+{
+    PlanningProblem::preupdate();
+    for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
+    Constraint.updateS();
 }
 
 void TimeIndexedSamplingProblem::Update(Eigen::VectorXdRefConst x, double t)

@@ -91,6 +91,7 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     TaskSpaceVector dummy;
     Constraint.initialize(init.Constraint, shared_from_this(), dummy);
     applyStartState(false);
+    preupdate();
 }
 
 void SamplingProblem::preupdate()

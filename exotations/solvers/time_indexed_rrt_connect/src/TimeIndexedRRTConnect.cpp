@@ -239,7 +239,6 @@ void TimeIndexedRRTConnect::getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTe
 
 void TimeIndexedRRTConnect::Solve(Eigen::MatrixXd &solution)
 {
-    prob_->preupdate();
     Eigen::VectorXd q0 = prob_->applyStartState();
     setGoalState(prob_->goal_, prob_->tGoal);
 

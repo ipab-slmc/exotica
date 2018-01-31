@@ -102,12 +102,18 @@ Eigen::VectorXd getFrameAsVector(const KDL::Frame& val, RotationType type = Rota
 typedef Eigen::Array<KDL::Frame, Eigen::Dynamic, 1> ArrayFrame;
 typedef Eigen::Array<KDL::Twist, Eigen::Dynamic, 1> ArrayTwist;
 typedef Eigen::Array<KDL::Jacobian, Eigen::Dynamic, 1> ArrayJacobian;
+typedef Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1> Hessian;
+typedef Eigen::Array<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>, Eigen::Dynamic, 1> ArrayHessian;
 typedef Eigen::Ref<Eigen::Array<KDL::Frame, Eigen::Dynamic, 1>> ArrayFrameRef;
 typedef Eigen::Ref<Eigen::Array<KDL::Twist, Eigen::Dynamic, 1>> ArrayTwistRef;
 typedef Eigen::Ref<Eigen::Array<KDL::Jacobian, Eigen::Dynamic, 1>> ArrayJacobianRef;
+typedef Eigen::Ref<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>> HessianRef;
+typedef Eigen::Ref<Eigen::Array<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>, Eigen::Dynamic, 1>> ArrayHessianRef;
 typedef const Eigen::Ref<Eigen::Array<KDL::Frame, Eigen::Dynamic, 1>>& ArrayFrameRefConst;
 typedef const Eigen::Ref<Eigen::Array<KDL::Twist, Eigen::Dynamic, 1>>& ArrayTwistRefConst;
 typedef const Eigen::Ref<Eigen::Array<KDL::Jacobian, Eigen::Dynamic, 1>>& ArrayJacobianRefConst;
+typedef const Eigen::Ref<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>> HessianRefConst;
+typedef const Eigen::Ref<Eigen::Array<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>, Eigen::Dynamic, 1>> ArrayHessianRefConst;
 
 inline bool IsContainerType(std::string type)
 {

@@ -64,9 +64,8 @@ public:
 
     virtual void assignScene(Scene_ptr scene) {}
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
-
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) { throw_named("Not implemented"); }
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot) { throw_named("Not implemented"); }
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, HessianRef H);
     virtual int taskSpaceDim() = 0;
 
     virtual int taskSpaceJacobianDim() { return taskSpaceDim(); }

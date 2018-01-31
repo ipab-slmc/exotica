@@ -50,6 +50,7 @@ public:
 
     void Update(Eigen::VectorXdRefConst x, double t);
     bool isValid(Eigen::VectorXdRefConst x, double t);
+    virtual void preupdate();
 
     int getSpaceDim();
 

@@ -181,7 +181,6 @@ void OMPLsolver::getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCo
 
 void OMPLsolver::Solve(Eigen::MatrixXd &solution)
 {
-    prob_->preupdate();
     Eigen::VectorXd q0 = prob_->applyStartState();
     setGoalState(prob_->goal_);
 

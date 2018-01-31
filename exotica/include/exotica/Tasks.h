@@ -76,7 +76,6 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
-
 protected:
     std::vector<TaskInitializer> TaskInitializers;
 };
@@ -87,13 +86,16 @@ public:
     TimeIndexedTask();
     virtual void initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& phi);
     void updateS();
+    void update(const TaskSpaceVector& Phi, Eigen::MatrixXdRefConst J, HessianRefConst H, int t);
     void update(const TaskSpaceVector& Phi, Eigen::MatrixXdRefConst J, int t);
+    void update(const TaskSpaceVector& Phi, int t);
     void reinitializeVariables(int T, std::shared_ptr<PlanningProblem> prob, const TaskSpaceVector& phi);
 
     std::vector<Eigen::VectorXd> Rho;
     std::vector<TaskSpaceVector> y;
     std::vector<Eigen::VectorXd> ydiff;
     std::vector<TaskSpaceVector> Phi;
+    std::vector<Hessian> H;
     std::vector<Eigen::MatrixXd> J;
     std::vector<Eigen::MatrixXd> S;
     int T;
@@ -105,13 +107,16 @@ public:
     EndPoseTask();
     virtual void initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& phi);
     void updateS();
+    void update(const TaskSpaceVector& Phi, Eigen::MatrixXdRefConst J, HessianRefConst H);
     void update(const TaskSpaceVector& Phi, Eigen::MatrixXdRefConst J);
+    void update(const TaskSpaceVector& Phi);
 
     Eigen::VectorXd Rho;
     TaskSpaceVector y;
     Eigen::VectorXd ydiff;
     TaskSpaceVector Phi;
     Eigen::MatrixXd J;
+    Hessian H;
     Eigen::MatrixXd S;
 };
 

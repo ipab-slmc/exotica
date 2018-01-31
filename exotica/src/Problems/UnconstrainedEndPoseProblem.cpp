@@ -75,13 +75,15 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
             throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
         }
     }
-    J = Eigen::MatrixXd(JN, N);
+    if(Flags&KIN_J) J = Eigen::MatrixXd(JN, N);
+    if(Flags&KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(N,N));
 
     if (init.NominalState.rows() > 0 && init.NominalState.rows() != N) throw_named("Invalid size of NominalState (" << init.NominalState.rows() << "), expected: " << N);
     if (init.NominalState.rows() == N) qNominal = init.NominalState;
     TaskSpaceVector dummy;
     Cost.initialize(init.Cost, shared_from_this(), dummy);
     applyStartState(false);
+    preupdate();
 }
 
 void UnconstrainedEndPoseProblem::preupdate()
@@ -105,13 +107,38 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x);
     Phi.setZero(PhiN);
-    J.setZero();
+    if(Flags&KIN_J) J.setZero();
+    if(Flags&KIN_J_DOT) for(int i=0;i<JN;i++) H(i).setZero();
     for (int i = 0; i < Tasks.size(); i++)
     {
         if (Tasks[i]->isUsed)
-            Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+        {
+            if(Flags&KIN_J_DOT)
+            {
+                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H.segment(Tasks[i]->Start, Tasks[i]->Length));
+            }
+            else if(Flags&KIN_J)
+            {
+                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+            }
+            else
+            {
+                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+            }
+        }
     }
-    Cost.update(Phi, J);
+    if(Flags&KIN_J_DOT)
+    {
+        Cost.update(Phi, J, H);
+    }
+    else if(Flags&KIN_J)
+    {
+        Cost.update(Phi, J);
+    }
+    else
+    {
+        Cost.update(Phi);
+    }
     numberOfProblemUpdates++;
 }
 
@@ -135,6 +162,7 @@ void UnconstrainedEndPoseProblem::setRho(const std::string& task_name, const dou
         if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho(Cost.Indexing[i].Id) = rho;
+            preupdate();
             return;
         }
     }

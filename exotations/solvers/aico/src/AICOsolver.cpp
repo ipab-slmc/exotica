@@ -81,14 +81,7 @@ void AICOsolver::saveCosts(std::string file_name)
 }
 
 AICOsolver::AICOsolver()
-    : damping(0.01), tolerance(1e-2), max_iterations(100), useBwdMsg(false),
-      bwdMsg_v(), bwdMsg_Vinv(), s(), Sinv(), v(), Vinv(), r(), R(), rhat(),
-      b(), Binv(), q(), qhat(), s_old(), Sinv_old(), v_old(), Vinv_old(), r_old(),
-      R_old(), rhat_old(), b_old(), Binv_old(), q_old(), qhat_old(),
-      dampingReference(), cost(0.0), cost_old(0.0), b_step(0.0),
-      Winv(), sweep(0), sweepMode(0), W(),
-      n(0), updateCount(0), damping_init(0.0),
-      preupdateTrajectory_(false), q_stat()
+    : damping(0.01), tolerance(1e-2), max_iterations(100), useBwdMsg(false), bwdMsg_v(), bwdMsg_Vinv(), s(), Sinv(), v(), Vinv(), r(), R(), rhat(), b(), Binv(), q(), qhat(), s_old(), Sinv_old(), v_old(), Vinv_old(), r_old(), R_old(), rhat_old(), b_old(), Binv_old(), q_old(), qhat_old(), dampingReference(), cost(0.0), cost_old(0.0), b_step(0.0), Winv(), sweep(0), sweepMode(0), W(), n(0), updateCount(0), damping_init(0.0), preupdateTrajectory_(false), q_stat()
 {
 }
 
@@ -118,7 +111,7 @@ void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
 void AICOsolver::Solve(Eigen::MatrixXd& solution)
 {
     prob_->preupdate();
-    prob_->resetCostEvolution(max_iterations+1);
+    prob_->resetCostEvolution(max_iterations + 1);
 
     Eigen::VectorXd q0 = prob_->applyStartState();
     std::vector<Eigen::VectorXd> q_init = prob_->getInitialTrajectory();
@@ -196,8 +189,8 @@ void AICOsolver::initMessages()
     {
         if (bwdMsg_v.rows() == n && bwdMsg_Vinv.rows() == n && bwdMsg_Vinv.cols() == n)
         {
-            v[prob_->getT()-1] = bwdMsg_v;
-            Vinv[prob_->getT()-1] = bwdMsg_Vinv;
+            v[prob_->getT() - 1] = bwdMsg_v;
+            Vinv[prob_->getT() - 1] = bwdMsg_Vinv;
         }
         else
         {
@@ -216,7 +209,6 @@ void AICOsolver::initMessages()
     qhat.assign(prob_->getT(), Eigen::VectorXd::Zero(n));
     linSolverTmp.resize(n, n);
     {
-
         q = b;
         if (prob_->W.rows() != n)
         {
@@ -495,7 +487,6 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
         // Control cost
         costControl(t) = prob_->getScalarTransitionCost(t);
 
-
         dCtrl += timer.getDuration();
         timer.reset();
         // Task cost
@@ -595,7 +586,7 @@ void AICOsolver::rememberOldState()
     costControl_old = costControl;
     costTask_old = costTask;
     bestSweep_old = bestSweep;
-    b_step_old= b_step;
+    b_step_old = b_step;
 }
 
 void AICOsolver::perhapsUndoStep()

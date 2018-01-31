@@ -196,8 +196,8 @@ private:
     double b_step;                                  //!< Squared configuration space step
     double b_step_old;
 
-    Eigen::MatrixXd W;      //!< Configuration space weight matrix inverse
-    Eigen::MatrixXd Winv;   //!< Configuration space weight matrix inverse
+    Eigen::MatrixXd W;     //!< Configuration space weight matrix inverse
+    Eigen::MatrixXd Winv;  //!< Configuration space weight matrix inverse
 
     int lastT;  //!< T the last time initMessages was called.
 

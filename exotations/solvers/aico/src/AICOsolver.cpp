@@ -545,7 +545,7 @@ double AICOsolver::step()
             {
                 updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.);  //relocate once on fwd Sweep
             }
-            for (t = prob_->getT() - 2; t >= 0; t--)
+            for (t = prob_->getT() - 2; t > 0; t--)
             {
                 updateTimeStep(t, false, true, 0, tolerance, false, 1.);  //...not on bwd Sweep
             }
@@ -557,7 +557,7 @@ double AICOsolver::step()
                 updateTimeStep(t, true, false, 1, tolerance, !sweep, 1.);  //relocate once on fwd & bwd Sweep
             }
             // ROS_WARN_STREAM("Updating backward, sweep "<<sweep);
-            for (t = prob_->getT() - 2; t >= 0; t--)
+            for (t = prob_->getT() - 2; t > 0; t--)
             {
                 updateTimeStep(t, false, true, (sweep ? 1 : 0), tolerance, false, 1.);
             }
@@ -567,7 +567,7 @@ double AICOsolver::step()
             {
                 updateTimeStep(t, true, false, (sweep ? 5 : 1), tolerance, !sweep, 1.);  //relocate iteratively on
             }
-            for (t = prob_->getT() - 2; t >= 0; t--)
+            for (t = prob_->getT() - 2; t > 0; t--)
             {
                 updateTimeStep(t, false, true, (sweep ? 5 : 0), tolerance, false, 1.);  //...fwd & bwd Sweep
             }
@@ -578,7 +578,7 @@ double AICOsolver::step()
                 updateTimeStepGaussNewton(t, true, false, (sweep ? 5 : 1),
                                           tolerance, 1.);  //GaussNewton in fwd & bwd Sweep
             }
-            for (t = prob_->getT() - 2; t >= 0; t--)
+            for (t = prob_->getT() - 2; t > 0; t--)
             {
                 updateTimeStep(t, false, true, (sweep ? 5 : 0), tolerance, false, 1.);
             }

@@ -210,7 +210,6 @@ private:
         smLocalGaussNewtonDamped
     };
     int sweepMode;  //!< Sweep mode
-    int n;          //!< Configuration space size
     int updateCount;
 
     Eigen::MatrixXd linSolverTmp;

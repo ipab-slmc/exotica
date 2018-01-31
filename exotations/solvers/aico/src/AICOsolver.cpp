@@ -81,7 +81,45 @@ void AICOsolver::saveCosts(std::string file_name)
 }
 
 AICOsolver::AICOsolver()
-    : damping(0.01), tolerance(1e-2), max_iterations(100), useBwdMsg(false), bwdMsg_v(), bwdMsg_Vinv(), s(), Sinv(), v(), Vinv(), r(), R(), rhat(), b(), Binv(), q(), qhat(), s_old(), Sinv_old(), v_old(), Vinv_old(), r_old(), R_old(), rhat_old(), b_old(), Binv_old(), q_old(), qhat_old(), dampingReference(), cost(0.0), cost_old(0.0), b_step(0.0), Winv(), sweep(0), sweepMode(0), W(), n(0), updateCount(0), damping_init(0.0), q_stat()
+    : damping(0.01),
+      tolerance(1e-2),
+      max_iterations(100),
+      useBwdMsg(false),
+      bwdMsg_v(),
+      bwdMsg_Vinv(),
+      s(),
+      Sinv(),
+      v(),
+      Vinv(),
+      r(),
+      R(),
+      rhat(),
+      b(),
+      Binv(),
+      q(),
+      qhat(),
+      s_old(),
+      Sinv_old(),
+      v_old(),
+      Vinv_old(),
+      r_old(),
+      R_old(),
+      rhat_old(),
+      b_old(),
+      Binv_old(),
+      q_old(),
+      qhat_old(),
+      dampingReference(),
+      cost(0.0),
+      cost_old(0.0),
+      b_step(0.0),
+      Winv(),
+      sweep(0),
+      sweepMode(0),
+      W(),
+      updateCount(0),
+      damping_init(0.0),
+      q_stat()
 {
 }
 
@@ -161,7 +199,7 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
     }
-    Eigen::MatrixXd sol(prob_->getT(), n);
+    Eigen::MatrixXd sol(prob_->getT(), prob_->N);
     for (int tt = 0; tt < prob_->getT(); tt++)
     {
         sol.row(tt) = q[tt];
@@ -173,25 +211,24 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
 void AICOsolver::initMessages()
 {
     if (prob_ == nullptr) throw_named("Problem definition is a NULL pointer!");
-    // TODO: Issue #4
-    n = prob_->N;
-    if (n < 1)
+
+    if (prob_->N < 1)
     {
-        throw_named("State dimension is too small: n=" << n);
+        throw_named("State dimension is too small: n=" << prob_->N);
     }
     if (prob_->getT() < 2)
     {
         throw_named("Number of time steps is too small: T=" << prob_->getT());
     }
 
-    s.assign(prob_->getT(), Eigen::VectorXd::Zero(n));
-    Sinv.assign(prob_->getT(), Eigen::MatrixXd::Zero(n, n));
+    s.assign(prob_->getT(), Eigen::VectorXd::Zero(prob_->N));
+    Sinv.assign(prob_->getT(), Eigen::MatrixXd::Zero(prob_->N, prob_->N));
     Sinv[0].diagonal().setConstant(1e10);
-    v.assign(prob_->getT(), Eigen::VectorXd::Zero(n));
-    Vinv.assign(prob_->getT(), Eigen::MatrixXd::Zero(n, n));
+    v.assign(prob_->getT(), Eigen::VectorXd::Zero(prob_->N));
+    Vinv.assign(prob_->getT(), Eigen::MatrixXd::Zero(prob_->N, prob_->N));
     if (useBwdMsg)
     {
-        if (bwdMsg_v.rows() == n && bwdMsg_Vinv.rows() == n && bwdMsg_Vinv.cols() == n)
+        if (bwdMsg_v.rows() == prob_->N && bwdMsg_Vinv.rows() == prob_->N && bwdMsg_Vinv.cols() == prob_->N)
         {
             v[prob_->getT() - 1] = bwdMsg_v;
             Vinv[prob_->getT() - 1] = bwdMsg_Vinv;
@@ -202,21 +239,21 @@ void AICOsolver::initMessages()
             WARNING("Backward message initialisation skipped, matrices have incorrect dimensions.");
         }
     }
-    b.assign(prob_->getT(), Eigen::VectorXd::Zero(n));
-    dampingReference.assign(prob_->getT(), Eigen::VectorXd::Zero(n));
-    Binv.assign(prob_->getT(), Eigen::MatrixXd::Zero(n, n));
+    b.assign(prob_->getT(), Eigen::VectorXd::Zero(prob_->N));
+    dampingReference.assign(prob_->getT(), Eigen::VectorXd::Zero(prob_->N));
+    Binv.assign(prob_->getT(), Eigen::MatrixXd::Zero(prob_->N, prob_->N));
     Binv[0].setIdentity();
     Binv[0] = Binv[0] * 1e10;
-    r.assign(prob_->getT(), Eigen::VectorXd::Zero(n));
-    R.assign(prob_->getT(), Eigen::MatrixXd::Zero(n, n));
+    r.assign(prob_->getT(), Eigen::VectorXd::Zero(prob_->N));
+    R.assign(prob_->getT(), Eigen::MatrixXd::Zero(prob_->N, prob_->N));
     rhat = Eigen::VectorXd::Zero(prob_->getT());
-    qhat.assign(prob_->getT(), Eigen::VectorXd::Zero(n));
-    linSolverTmp.resize(n, n);
+    qhat.assign(prob_->getT(), Eigen::VectorXd::Zero(prob_->N));
+    linSolverTmp.resize(prob_->N, prob_->N);
     {
         q = b;
-        if (prob_->W.rows() != n)
+        if (prob_->W.rows() != prob_->N)
         {
-            throw_named(prob_->W.rows() << "!=" << n);
+            throw_named(prob_->W.rows() << "!=" << prob_->N);
         }
     }
     {
@@ -233,7 +270,7 @@ void AICOsolver::initMessages()
     q_stat.resize(prob_->getT());
     for (int t = 0; t < prob_->getT(); t++)
     {
-        q_stat[t].resize(n);
+        q_stat[t].resize(prob_->N);
     }
 
     // Set lastT to the problem T
@@ -243,9 +280,9 @@ void AICOsolver::initMessages()
 void AICOsolver::getProcess(Eigen::Ref<Eigen::MatrixXd> A_,
                             Eigen::Ref<Eigen::VectorXd> a_, Eigen::Ref<Eigen::MatrixXd> B_)
 {
-    A_ = Eigen::MatrixXd::Identity(n, n);
-    B_ = Eigen::MatrixXd::Identity(n, n);
-    a_ = Eigen::VectorXd::Zero(n);
+    A_ = Eigen::MatrixXd::Identity(prob_->N, prob_->N);
+    B_ = Eigen::MatrixXd::Identity(prob_->N, prob_->N);
+    a_ = Eigen::VectorXd::Zero(prob_->N);
 }
 
 void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
@@ -310,7 +347,7 @@ void AICOsolver::AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
                                 const Eigen::Ref<const Eigen::MatrixXd>& A_,
                                 const Eigen::Ref<const Eigen::VectorXd>& b_)
 {
-    integer n_ = n, m_ = 1;
+    integer n_ = prob_->N, m_ = 1;
     integer info;
     linSolverTmp = A_;
     x_ = b_;
@@ -326,7 +363,7 @@ void AICOsolver::AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
 
 void AICOsolver::updateFwdMessage(int t)
 {
-    Eigen::MatrixXd barS(n, n), St;
+    Eigen::MatrixXd barS(prob_->N, prob_->N), St;
     inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]);
     s[t] = barS * (Sinv[t - 1] * s[t - 1] + r[t - 1]);
     St = Winv + barS;
@@ -335,7 +372,7 @@ void AICOsolver::updateFwdMessage(int t)
 
 void AICOsolver::updateBwdMessage(int t)
 {
-    Eigen::MatrixXd barV(n, n), Vt;
+    Eigen::MatrixXd barV(prob_->N, prob_->N), Vt;
     if (t < prob_->getT() - 1)
     {
         inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]);
@@ -414,7 +451,7 @@ void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
 
     if (damping)
     {
-        Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(n, n) * damping;
+        Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
         AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * dampingReference[t]);
     }
     else
@@ -435,7 +472,7 @@ void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
 
         if (damping)
         {
-            Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(n, n) * damping;
+            Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
             AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * dampingReference[t]);
         }
         else

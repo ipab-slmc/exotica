@@ -276,7 +276,7 @@ void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
         updateTaskMessage(t, b[t], 0.0);
     }
 
-    cost = evaluateTrajectory(b, true);
+    cost = evaluateTrajectory(b, true);  // The problem will be updated via updateTaskMessage, i.e. do not update on this roll-out
     prob_->setCostEvolution(0, cost);
     if (cost < 0) throw_named("Invalid cost! " << cost);
     if (debug_) HIGHLIGHT("Initial cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << ", updates: " << updateCount);

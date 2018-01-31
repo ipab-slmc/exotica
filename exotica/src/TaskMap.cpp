@@ -71,4 +71,15 @@ void TaskMap::taskSpaceDim(int& task_dim)
 {
     task_dim = taskSpaceDim();
 }
+
+void TaskMap::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, HessianRef H)
+{
+    update(x, phi, J);
+    H.resize(taskSpaceDim());
+    for(int i=0;i<taskSpaceDim();i++)
+    {
+        H(i)=J.row(i).transpose()*J.row(i);
+    }
+}
+
 }

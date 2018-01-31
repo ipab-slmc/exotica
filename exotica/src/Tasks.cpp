@@ -53,6 +53,7 @@ void Task::initialize(const std::vector<exotica::Initializer>& inits, PlanningPr
     NumTasks = Tasks.size();
     PhiN = 0;
     JN = 0;
+    phi.map.resize(0);
     Indexing.resize(Tasks.size());
     for (int i = 0; i < NumTasks; i++)
     {
@@ -79,7 +80,8 @@ void EndPoseTask::initialize(const std::vector<exotica::Initializer>& inits, Pla
     y = Phi;
     y.setZero(PhiN);
     Rho = Eigen::VectorXd::Ones(NumTasks);
-    J = Eigen::MatrixXd(JN, prob->N);
+    if(prob->getFlags() & KIN_J) J = Eigen::MatrixXd(JN, prob->N);
+    if(prob->getFlags() & KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(prob->N,prob->N));
     S = Eigen::MatrixXd::Identity(JN, JN);
     ydiff = Eigen::VectorXd::Zero(JN);
 
@@ -117,12 +119,23 @@ void EndPoseTask::updateS()
 {
     for (const TaskIndexing& task : Indexing)
     {
-        for (int i = 0; i < task.Length; i++)
+        for (int i = 0; i < task.LengthJ; i++)
         {
             S(i + task.Start, i + task.Start) = Rho(task.Id);
-            if (Rho(task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
         }
+        if (Rho(task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
     }
+}
+
+void EndPoseTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ, HessianRefConst bigH)
+{
+    for (const TaskIndexing& task : Indexing)
+    {
+        Phi.data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        J.middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
+        H.segment(task.Start, task.Length) = bigH.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+    }
+    ydiff = Phi - y;
 }
 
 void EndPoseTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ)
@@ -131,6 +144,15 @@ void EndPoseTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst 
     {
         Phi.data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
         J.middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
+    }
+    ydiff = Phi - y;
+}
+
+void EndPoseTask::update(const TaskSpaceVector& bigPhi)
+{
+    for (const TaskIndexing& task : Indexing)
+    {
+        Phi.data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
     }
     ydiff = Phi - y;
 }
@@ -151,13 +173,24 @@ void TimeIndexedTask::updateS()
     {
         for (const TaskIndexing& task : Indexing)
         {
-            for (int i = 0; i < task.Length; i++)
+            for (int i = 0; i < task.LengthJ; i++)
             {
                 S[t](i + task.Start, i + task.Start) = Rho[t](task.Id);
-                if (Rho[t](task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
             }
+            if (Rho[t](task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
         }
     }
+}
+
+void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ, HessianRefConst bigH, int t)
+{
+    for (const TaskIndexing& task : Indexing)
+    {
+        Phi[t].data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        J[t].middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
+        H[t].segment(task.Start, task.Length) = bigH.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+    }
+    ydiff[t] = Phi[t] - y[t];
 }
 
 void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ, int t)
@@ -170,13 +203,28 @@ void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefCo
     ydiff[t] = Phi[t] - y[t];
 }
 
+void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, int t)
+{
+    for (const TaskIndexing& task : Indexing)
+    {
+        Phi[t].data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+    }
+    ydiff[t] = Phi[t] - y[t];
+}
+
 void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob, const TaskSpaceVector& phi)
 {
     T = T_in;
     Phi.assign(T, phi);
     y = Phi;
     Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
-    J.assign(T, Eigen::MatrixXd(JN, prob->N));
+    if(prob->getFlags() & KIN_J)J.assign(T, Eigen::MatrixXd(JN, prob->N));
+    if(prob->getFlags() & KIN_J_DOT)
+    {
+        Hessian Htmp;
+        Htmp.setConstant(JN, Eigen::MatrixXd::Zero(prob->N,prob->N));
+        H.assign(T, Htmp);
+    }
     S.assign(T, Eigen::MatrixXd::Identity(JN, JN));
     ydiff.assign(T, Eigen::VectorXd::Zero(JN));
 
@@ -264,11 +312,11 @@ void SamplingTask::updateS()
 {
     for (const TaskIndexing& task : Indexing)
     {
-        for (int i = 0; i < task.Length; i++)
+        for (int i = 0; i < task.LengthJ; i++)
         {
             S(i + task.Start, i + task.Start) = Rho(task.Id);
-            if (Rho(task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
         }
+        if (Rho(task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
     }
 }
 

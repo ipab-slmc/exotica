@@ -80,7 +80,8 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
             throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
         }
     }
-    J = Eigen::MatrixXd(JN, N);
+    if(Flags&KIN_J) J = Eigen::MatrixXd(JN, N);
+    if(Flags&KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(N,N));
 
     std::vector<std::string> jnts;
     scene_->getJointNames(jnts);
@@ -117,6 +118,7 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
     Inequality.initialize(init.Inequality, shared_from_this(), dummy);
     Equality.initialize(init.Equality, shared_from_this(), dummy);
     applyStartState(false);
+    preupdate();
 }
 
 void EndPoseProblem::preupdate()
@@ -142,15 +144,44 @@ void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x);
     Phi.setZero(PhiN);
-    J.setZero();
+    if(Flags&KIN_J) J.setZero();
+    if(Flags&KIN_J_DOT) for(int i=0;i<JN;i++) H(i).setZero();
     for (int i = 0; i < Tasks.size(); i++)
     {
         if (Tasks[i]->isUsed)
-            Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+        {
+            if(Flags&KIN_J_DOT)
+            {
+                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H.segment(Tasks[i]->Start, Tasks[i]->Length));
+            }
+            else if(Flags&KIN_J)
+            {
+                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+            }
+            else
+            {
+                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+            }
+        }
     }
-    Cost.update(Phi, J);
-    Inequality.update(Phi, J);
-    Equality.update(Phi, J);
+    if(Flags&KIN_J_DOT)
+    {
+        Cost.update(Phi, J, H);
+        Inequality.update(Phi, J, H);
+        Equality.update(Phi, J, H);
+    }
+    else if(Flags&KIN_J)
+    {
+        Cost.update(Phi, J);
+        Inequality.update(Phi, J);
+        Equality.update(Phi, J);
+    }
+    else
+    {
+        Cost.update(Phi);
+        Inequality.update(Phi);
+        Equality.update(Phi);
+    }
     numberOfProblemUpdates++;
 }
 
@@ -174,6 +205,7 @@ void EndPoseProblem::setRho(const std::string& task_name, const double rho)
         if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho(Cost.Indexing[i].Id) = rho;
+            preupdate();
             return;
         }
     }
@@ -224,6 +256,7 @@ void EndPoseProblem::setRhoEQ(const std::string& task_name, const double rho)
         if (Equality.Tasks[i]->getObjectName() == task_name)
         {
             Equality.Rho(Equality.Indexing[i].Id) = rho;
+            preupdate();
             return;
         }
     }
@@ -274,6 +307,7 @@ void EndPoseProblem::setRhoNEQ(const std::string& task_name, const double rho)
         if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
             Inequality.Rho(Inequality.Indexing[i].Id) = rho;
+            preupdate();
             return;
         }
     }

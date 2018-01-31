@@ -148,7 +148,6 @@ void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
 
 void AICOsolver::Solve(Eigen::MatrixXd& solution)
 {
-    prob_->preupdate();
     prob_->resetCostEvolution(max_iterations + 1);
 
     Eigen::VectorXd q0 = prob_->applyStartState();

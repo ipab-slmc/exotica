@@ -93,9 +93,15 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     setTau(init_.Tau);
 
     Phi.assign(T, yref);
-    J.assign(T, Eigen::MatrixXd(JN, N));
+    if(Flags&KIN_J) J.assign(T, Eigen::MatrixXd(JN, N));
     x.assign(T, Eigen::VectorXd::Zero(N));
     xdiff.assign(T, Eigen::VectorXd::Zero(N));
+    if(Flags&KIN_J_DOT)
+    {
+        Hessian Htmp;
+        Htmp.setConstant(JN, Eigen::MatrixXd::Zero(N,N));
+        H.assign(T, Htmp);
+    }
 
     // Set initial trajectory with current state
     InitialTrajectory.resize(T, scene_->getControlledState());
@@ -165,16 +171,42 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
 
     x[t] = x_in;
     scene_->Update(x_in, static_cast<double>(t) * tau);
+
     Phi[t].setZero(PhiN);
-    J[t].setZero();
+    if(Flags&KIN_J) J[t].setZero();
+    if(Flags&KIN_J_DOT) for(int i=0;i<JN;i++) H[t](i).setZero();
     for (int i = 0; i < NumTasks; i++)
     {
         // Only update TaskMap if Rho is not 0
         if (Tasks[i]->isUsed)
-            Tasks[i]->update(x_in, Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+        {
+            if(Flags&KIN_J_DOT)
+            {
+                Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H[t].segment(Tasks[i]->Start, Tasks[i]->Length));
+            }
+            else if(Flags&KIN_J)
+            {
+                Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+            }
+            else
+            {
+                Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length));
+            }
+        }
     }
-    Cost.update(Phi[t], J[t], t);
-    // NB: The transition cost for the 0-th time step is set to 0 in the initialiser.
+    if(Flags&KIN_J_DOT)
+    {
+        Cost.update(Phi[t], J[t], H[t], t);
+    }
+    else if(Flags&KIN_J)
+    {
+        Cost.update(Phi[t], J[t], t);
+    }
+    else
+    {
+        Cost.update(Phi[t], t);
+    }
+
     if (t > 0) xdiff[t] = x[t] - x[t - 1];
 
     numberOfProblemUpdates++;
@@ -272,6 +304,7 @@ void UnconstrainedTimeIndexedProblem::setRho(const std::string& task_name, const
         if (Cost.Tasks[i]->getObjectName() == task_name)
         {
             Cost.Rho[t](Cost.Indexing[i].Id) = rho;
+            preupdate();
             return;
         }
     }

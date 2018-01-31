@@ -76,6 +76,7 @@ public:
 
     std::vector<TaskSpaceVector> Phi;
     std::vector<Eigen::MatrixXd> J;
+    std::vector<Hessian> H;
 
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)

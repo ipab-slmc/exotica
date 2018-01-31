@@ -132,8 +132,6 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
 {
     Timer timer;
 
-    prob_->preupdate();
-
     if (!prob_) throw_named("Solver has not been initialized!");
     Eigen::VectorXd q0 = prob_->applyStartState();
 

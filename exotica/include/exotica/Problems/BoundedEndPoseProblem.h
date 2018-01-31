@@ -65,6 +65,7 @@ public:
 
     Eigen::MatrixXd W;
     TaskSpaceVector Phi;
+    Hessian H;
     Eigen::MatrixXd J;
 
     int PhiN;

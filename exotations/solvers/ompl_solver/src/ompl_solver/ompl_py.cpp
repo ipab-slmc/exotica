@@ -26,5 +26,4 @@ PYBIND11_MODULE(ompl_solver_py, module)
     prm.def("edgeCount", &PRM::edgeCount);
     prm.def("milestoneCount", &PRM::milestoneCount);
     prm.def_property("multiQuery", &PRM::isMultiQuery, &PRM::setMultiQuery);
-
 }

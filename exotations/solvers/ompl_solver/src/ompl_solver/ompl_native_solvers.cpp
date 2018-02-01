@@ -130,5 +130,4 @@ void PRM::setMultiQuery(bool val)
 {
     multiQuery = val;
 }
-
 }

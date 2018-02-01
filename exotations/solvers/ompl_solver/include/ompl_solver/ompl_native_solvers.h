@@ -66,7 +66,6 @@ public:
     int milestoneCount();
     bool isMultiQuery();
     void setMultiQuery(bool val);
-
 };
 }
 

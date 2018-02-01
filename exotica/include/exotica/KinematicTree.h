@@ -210,6 +210,8 @@ private:
     void UpdateFK();
     void UpdateJ();
     void ComputeJ(KinematicFrame& frame, KDL::Jacobian& J);
+    void ComputeJdot(KDL::Jacobian& J, KDL::Jacobian& JDot);
+    void UpdateJdot();
 
     BASE_TYPE ModelBaseType;
     BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;

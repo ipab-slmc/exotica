@@ -121,17 +121,17 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     if (init.StartTime < 0)
         throw_named("Invalid start time " << init.StartTime) else tStart = init.StartTime;
 
-    switch(init.DerivativeOrder)
+    switch (init.DerivativeOrder)
     {
-    case 0:
-        Flags = KIN_FK;
-        break;
-    case 1:
-        Flags = KIN_FK | KIN_J;
-        break;
-    case 2:
-        Flags = KIN_FK | KIN_J | KIN_J_DOT;
-        break;
+        case 0:
+            Flags = KIN_FK;
+            break;
+        case 1:
+            Flags = KIN_FK | KIN_J;
+            break;
+        case 2:
+            Flags = KIN_FK | KIN_J | KIN_J_DOT;
+            break;
     }
 
     KinematicsRequest Request;

@@ -76,10 +76,9 @@ void TaskMap::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::M
 {
     update(x, phi, J);
     H.resize(taskSpaceDim());
-    for(int i=0;i<taskSpaceDim();i++)
+    for (int i = 0; i < taskSpaceDim(); i++)
     {
-        H(i)=J.row(i).transpose()*J.row(i);
+        H(i) = J.row(i).transpose() * J.row(i);
     }
 }
-
 }

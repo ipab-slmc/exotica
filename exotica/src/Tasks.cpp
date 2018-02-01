@@ -80,8 +80,8 @@ void EndPoseTask::initialize(const std::vector<exotica::Initializer>& inits, Pla
     y = Phi;
     y.setZero(PhiN);
     Rho = Eigen::VectorXd::Ones(NumTasks);
-    if(prob->getFlags() & KIN_J) J = Eigen::MatrixXd(JN, prob->N);
-    if(prob->getFlags() & KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(prob->N,prob->N));
+    if (prob->getFlags() & KIN_J) J = Eigen::MatrixXd(JN, prob->N);
+    if (prob->getFlags() & KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(prob->N, prob->N));
     S = Eigen::MatrixXd::Identity(JN, JN);
     ydiff = Eigen::VectorXd::Zero(JN);
 
@@ -218,11 +218,11 @@ void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob, 
     Phi.assign(T, phi);
     y = Phi;
     Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
-    if(prob->getFlags() & KIN_J)J.assign(T, Eigen::MatrixXd(JN, prob->N));
-    if(prob->getFlags() & KIN_J_DOT)
+    if (prob->getFlags() & KIN_J) J.assign(T, Eigen::MatrixXd(JN, prob->N));
+    if (prob->getFlags() & KIN_J_DOT)
     {
         Hessian Htmp;
-        Htmp.setConstant(JN, Eigen::MatrixXd::Zero(prob->N,prob->N));
+        Htmp.setConstant(JN, Eigen::MatrixXd::Zero(prob->N, prob->N));
         H.assign(T, Htmp);
     }
     S.assign(T, Eigen::MatrixXd::Identity(JN, JN));

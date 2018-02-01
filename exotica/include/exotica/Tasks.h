@@ -76,6 +76,7 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
+
 protected:
     std::vector<TaskInitializer> TaskInitializers;
 };

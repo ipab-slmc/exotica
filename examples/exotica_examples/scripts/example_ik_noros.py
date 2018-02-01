@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 print('Start')
+import signal
 import pyexotica as exo
+from pyexotica.publish_trajectory import sigIntHandler
 from numpy import array
 from numpy import matrix
 import math

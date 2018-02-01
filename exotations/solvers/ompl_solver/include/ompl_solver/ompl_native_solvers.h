@@ -61,7 +61,7 @@ public:
     void expandRoadmap(double t);
     void clear();
     void clearQuery();
-    void Setup();
+    void setup();
     int edgeCount();
     int milestoneCount();
     bool isMultiQuery();

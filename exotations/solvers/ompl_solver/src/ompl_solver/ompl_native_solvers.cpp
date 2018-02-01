@@ -103,7 +103,7 @@ void PRM::clearQuery()
     prm->clearQuery();
 }
 
-void PRM::Setup()
+void PRM::setup()
 {
     ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
     prm->setup();

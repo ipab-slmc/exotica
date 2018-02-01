@@ -93,13 +93,13 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     setTau(init_.Tau);
 
     Phi.assign(T, yref);
-    if(Flags&KIN_J) J.assign(T, Eigen::MatrixXd(JN, N));
+    if (Flags & KIN_J) J.assign(T, Eigen::MatrixXd(JN, N));
     x.assign(T, Eigen::VectorXd::Zero(N));
     xdiff.assign(T, Eigen::VectorXd::Zero(N));
-    if(Flags&KIN_J_DOT)
+    if (Flags & KIN_J_DOT)
     {
         Hessian Htmp;
-        Htmp.setConstant(JN, Eigen::MatrixXd::Zero(N,N));
+        Htmp.setConstant(JN, Eigen::MatrixXd::Zero(N, N));
         H.assign(T, Htmp);
     }
 
@@ -173,18 +173,19 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
     scene_->Update(x_in, static_cast<double>(t) * tau);
 
     Phi[t].setZero(PhiN);
-    if(Flags&KIN_J) J[t].setZero();
-    if(Flags&KIN_J_DOT) for(int i=0;i<JN;i++) H[t](i).setZero();
+    if (Flags & KIN_J) J[t].setZero();
+    if (Flags & KIN_J_DOT)
+        for (int i = 0; i < JN; i++) H[t](i).setZero();
     for (int i = 0; i < NumTasks; i++)
     {
         // Only update TaskMap if Rho is not 0
         if (Tasks[i]->isUsed)
         {
-            if(Flags&KIN_J_DOT)
+            if (Flags & KIN_J_DOT)
             {
                 Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H[t].segment(Tasks[i]->Start, Tasks[i]->Length));
             }
-            else if(Flags&KIN_J)
+            else if (Flags & KIN_J)
             {
                 Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
             }
@@ -194,11 +195,11 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
             }
         }
     }
-    if(Flags&KIN_J_DOT)
+    if (Flags & KIN_J_DOT)
     {
         Cost.update(Phi[t], J[t], H[t], t);
     }
-    else if(Flags&KIN_J)
+    else if (Flags & KIN_J)
     {
         Cost.update(Phi[t], J[t], t);
     }

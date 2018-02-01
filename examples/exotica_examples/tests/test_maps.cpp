@@ -130,7 +130,7 @@ UnconstrainedEndPoseProblem_ptr setupProblem(Initializer& map)
 {
     Initializer scene("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}});
     Initializer cost("exotica/Task", {{"Task", std::string("MyTask")}});
-    Eigen::VectorXd W = Eigen::Vector3d(3,2,1);
+    Eigen::VectorXd W = Eigen::Vector3d(3, 2, 1);
     Initializer problem("exotica/UnconstrainedEndPoseProblem", {
                                                                    {"Name", std::string("MyProblem")},
                                                                    {"PlanningScene", scene},

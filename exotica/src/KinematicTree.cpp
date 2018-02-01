@@ -638,7 +638,7 @@ Eigen::MatrixXd KinematicTree::Jacobian(const std::string& elementA, const KDL::
 
 void KinematicTree::ComputeJdot(KDL::Jacobian& J, KDL::Jacobian& JDot)
 {
-    JDot.data.setZero(J.rows(),J.columns());
+    JDot.data.setZero(J.rows(), J.columns());
     for (int i = 0; i < J.columns(); i++)
     {
         KDL::Twist tmp;

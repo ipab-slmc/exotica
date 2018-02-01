@@ -75,8 +75,8 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
             throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
         }
     }
-    if(Flags&KIN_J) J = Eigen::MatrixXd(JN, N);
-    if(Flags&KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(N,N));
+    if (Flags & KIN_J) J = Eigen::MatrixXd(JN, N);
+    if (Flags & KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(N, N));
 
     if (init.NominalState.rows() > 0 && init.NominalState.rows() != N) throw_named("Invalid size of NominalState (" << init.NominalState.rows() << "), expected: " << N);
     if (init.NominalState.rows() == N) qNominal = init.NominalState;
@@ -107,17 +107,18 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x);
     Phi.setZero(PhiN);
-    if(Flags&KIN_J) J.setZero();
-    if(Flags&KIN_J_DOT) for(int i=0;i<JN;i++) H(i).setZero();
+    if (Flags & KIN_J) J.setZero();
+    if (Flags & KIN_J_DOT)
+        for (int i = 0; i < JN; i++) H(i).setZero();
     for (int i = 0; i < Tasks.size(); i++)
     {
         if (Tasks[i]->isUsed)
         {
-            if(Flags&KIN_J_DOT)
+            if (Flags & KIN_J_DOT)
             {
                 Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H.segment(Tasks[i]->Start, Tasks[i]->Length));
             }
-            else if(Flags&KIN_J)
+            else if (Flags & KIN_J)
             {
                 Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
             }
@@ -127,11 +128,11 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
             }
         }
     }
-    if(Flags&KIN_J_DOT)
+    if (Flags & KIN_J_DOT)
     {
         Cost.update(Phi, J, H);
     }
-    else if(Flags&KIN_J)
+    else if (Flags & KIN_J)
     {
         Cost.update(Phi, J);
     }

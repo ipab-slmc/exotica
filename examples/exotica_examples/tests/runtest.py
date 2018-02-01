@@ -7,7 +7,7 @@ import os
 import sys
 
 cpptests = ['test_initializers',
-         'test_maps'
+         'test_maps', 'test_problems'
         ]
 
 pytests = ['core.py',

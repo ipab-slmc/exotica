@@ -155,16 +155,19 @@ void Scene::Instantiate(SceneInitializer& init)
     if (debug_) INFO_NAMED(name_, "Exotica Scene initialized");
 }
 
-std::shared_ptr<KinematicResponse> Scene::RequestKinematics(KinematicsRequest& Request)
+void Scene::requestKinematics(KinematicsRequest& request, std::function<void(std::weak_ptr<KinematicResponse>)> callback)
 {
-    return kinematica_.RequestFrames(Request);
+    kinematicRequest = request;
+    kinematicRequestCallback = callback;
+    kinematicSolution = kinematica_.RequestFrames(kinematicRequest);
+    kinematicRequestCallback(kinematicSolution);
 }
 
 void Scene::updateTrajectoryGenerators(double t)
 {
     for (auto& it : trajectory_generators_)
     {
-        it.second.first->GeneratedOffset = it.second.second->getPosition(t);
+        it.second.first.lock()->GeneratedOffset = it.second.second->getPosition(t);
     }
 }
 
@@ -496,6 +499,12 @@ void Scene::updateSceneFrames()
     }
 
     kinematica_.UpdateModel();
+
+    if (kinematicRequestCallback)
+    {
+        kinematicSolution = kinematica_.RequestFrames(kinematicRequest);
+        kinematicRequestCallback(kinematicSolution);
+    }
 }
 
 void Scene::addObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, bool updateCollisionScene)
@@ -550,7 +559,7 @@ void Scene::addTrajectory(const std::string& link, std::shared_ptr<Trajectory> t
     const auto& it = tree.find(link);
     if (it == tree.end()) throw_pretty("Can't find link '" << link << "'!");
     if (traj->getDuration() == 0.0) throw_pretty("The trajectory is empty!");
-    trajectory_generators_[link] = std::pair<std::shared_ptr<KinematicElement>, std::shared_ptr<Trajectory>>(it->second.lock(), traj);
+    trajectory_generators_[link] = std::pair<std::weak_ptr<KinematicElement>, std::shared_ptr<Trajectory>>(it->second, traj);
     it->second.lock()->IsTrajectoryGenerated = true;
 }
 
@@ -565,7 +574,7 @@ void Scene::removeTrajectory(const std::string& link)
 {
     const auto& it = trajectory_generators_.find(link);
     if (it == trajectory_generators_.end()) throw_pretty("No trajectory generator defined for link '" << link << "'!");
-    it->second.first->IsTrajectoryGenerated = false;
+    it->second.first.lock()->IsTrajectoryGenerated = false;
     trajectory_generators_.erase(it);
 }
 }

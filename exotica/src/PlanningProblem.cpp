@@ -158,12 +158,11 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
         Tasks.push_back(NewMap);
     }
 
-    std::shared_ptr<KinematicResponse> Response = scene_->RequestKinematics(Request);
+    scene_->requestKinematics(Request, std::bind(&PlanningProblem::updateTaskKinematics, this, std::placeholders::_1));
     id = 0;
     int idJ = 0;
     for (int i = 0; i < Tasks.size(); i++)
     {
-        Tasks[i]->Kinematics.Create(Response);
         Tasks[i]->Id = i;
         Tasks[i]->Start = id;
         Tasks[i]->Length = Tasks[i]->taskSpaceDim();
@@ -177,6 +176,12 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     {
         HIGHLIGHT("No maps were defined!");
     }
+}
+
+void PlanningProblem::updateTaskKinematics(std::weak_ptr<KinematicResponse> response)
+{
+    for (auto task : Tasks)
+        task->Kinematics.Create(response.lock());
 }
 
 TaskMap_map& PlanningProblem::getTaskMaps()

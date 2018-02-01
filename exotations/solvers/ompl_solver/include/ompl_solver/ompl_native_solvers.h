@@ -67,6 +67,20 @@ public:
     bool isMultiQuery();
     void setMultiQuery(bool val);
 };
+
+class LazyPRM : public OMPLsolver, Instantiable<LazyPRMInitializer>
+{
+public:
+    LazyPRM();
+    virtual void Instantiate(LazyPRMInitializer& init);
+    void clear();
+    void clearQuery();
+    void setup();
+    int edgeCount();
+    int milestoneCount();
+    bool isMultiQuery();
+    void setMultiQuery(bool val);
+};
 }
 
 #endif /* INCLUDE_OMPL_SOLVER_OMPL_NATIVE_SOLVERS_H_ */

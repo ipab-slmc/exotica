@@ -8,4 +8,7 @@
   <class name="exotica/PRM" type="exotica::PRM" base_class_type="exotica::MotionSolver">
     <description>Probabilistic Roadmap</description>
   </class>
+  <class name="exotica/LazyPRM" type="exotica::LazyPRM" base_class_type="exotica::MotionSolver">
+    <description>Probabilistic Roadmap</description>
+  </class>
 </library>

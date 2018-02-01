@@ -31,6 +31,7 @@
  *
  */
 
+#include <ompl/geometric/planners/prm/LazyPRM.h>
 #include <ompl/geometric/planners/prm/PRM.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
@@ -39,6 +40,7 @@
 REGISTER_MOTIONSOLVER_TYPE("RRT", exotica::RRT)
 REGISTER_MOTIONSOLVER_TYPE("RRTConnect", exotica::RRTConnect)
 REGISTER_MOTIONSOLVER_TYPE("PRM", exotica::PRM)
+REGISTER_MOTIONSOLVER_TYPE("LazyPRM", exotica::LazyPRM)
 
 namespace exotica
 {
@@ -94,6 +96,7 @@ void PRM::expandRoadmap(double t)
 void PRM::clear()
 {
     ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
+    ompl_simple_setup_->getPlanner()->setProblemDefinition(ompl_simple_setup_->getProblemDefinition());
     prm->clear();
 }
 
@@ -127,6 +130,59 @@ bool PRM::isMultiQuery()
 }
 
 void PRM::setMultiQuery(bool val)
+{
+    multiQuery = val;
+}
+
+LazyPRM::LazyPRM()
+{
+}
+
+void LazyPRM::Instantiate(LazyPRMInitializer& init)
+{
+    init_ = static_cast<Initializer>(init);
+    algorithm_ = "Exotica_LazyPRM";
+    planner_allocator_ = boost::bind(
+        &allocatePlanner<ompl::geometric::LazyPRM>, _1, _2);
+    multiQuery = init.MultiQuery;
+}
+
+void LazyPRM::clear()
+{
+    ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
+    prm->clear();
+}
+
+void LazyPRM::clearQuery()
+{
+    ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
+    prm->clearQuery();
+}
+
+void LazyPRM::setup()
+{
+    ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
+    prm->setup();
+}
+
+int LazyPRM::edgeCount()
+{
+    ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
+    return prm->edgeCount();
+}
+
+int LazyPRM::milestoneCount()
+{
+    ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
+    return prm->milestoneCount();
+}
+
+bool LazyPRM::isMultiQuery()
+{
+    return multiQuery;
+}
+
+void LazyPRM::setMultiQuery(bool val)
 {
     multiQuery = val;
 }

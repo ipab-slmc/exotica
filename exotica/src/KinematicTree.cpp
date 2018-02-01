@@ -443,7 +443,7 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
     Solution.reset(new KinematicResponse(Flags, request.Frames.size(), NumControlledJoints));
 
     StateSize = NumControlledJoints;
-    if (((Flags & KIN_FK_VEL) || (Flags & KIN_J_DOT))) StateSize = NumControlledJoints * 2;
+    if (((Flags & KIN_FK_VEL) || (Flags & KIN_J_DOT))) StateSize = NumControlledJoints;
 
     for (int i = 0; i < request.Frames.size(); i++)
     {
@@ -497,6 +497,7 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
     UpdateTree();
     UpdateFK();
     if (Flags & KIN_J) UpdateJ();
+    if (Flags & KIN_J && Flags & KIN_J_DOT) UpdateJdot();
     if (Debug) publishFrames();
 }
 
@@ -635,6 +636,41 @@ Eigen::MatrixXd KinematicTree::Jacobian(const std::string& elementA, const KDL::
     return Jacobian(A->second.lock(), offsetA, B->second.lock(), offsetB);
 }
 
+void KinematicTree::ComputeJdot(KDL::Jacobian& J, KDL::Jacobian& JDot)
+{
+    JDot.data.setZero(J.rows(),J.columns());
+    for (int i = 0; i < J.columns(); i++)
+    {
+        KDL::Twist tmp;
+        for (int j = 0; j < J.columns(); j++)
+        {
+            KDL::Twist jac_i_ = J.getColumn(i);
+            KDL::Twist jac_j_ = J.getColumn(j);
+            KDL::Twist t_djdq_;
+
+            if (j < i)
+            {
+                t_djdq_.vel = jac_j_.rot * jac_i_.vel;
+                t_djdq_.rot = jac_j_.rot * jac_i_.rot;
+            }
+            else if (j > i)
+            {
+                KDL::SetToZero(t_djdq_.rot);
+                t_djdq_.vel = -jac_j_.vel * jac_i_.rot;
+            }
+            else if (j == i)
+            {
+                // ref (40)
+                KDL::SetToZero(t_djdq_.rot);
+                t_djdq_.vel = jac_i_.rot * jac_i_.vel;
+            }
+
+            tmp += t_djdq_;
+        }
+        JDot.setColumn(i, tmp);
+    }
+}
+
 void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& J)
 {
     J.data.setZero();
@@ -669,6 +705,16 @@ void KinematicTree::UpdateJ()
     for (KinematicFrame& frame : Solution->Frame)
     {
         ComputeJ(frame, Solution->J(i));
+        i++;
+    }
+}
+
+void KinematicTree::UpdateJdot()
+{
+    int i = 0;
+    for (KinematicFrame& frame : Solution->Frame)
+    {
+        ComputeJdot(Solution->J(i), Solution->JDot(i));
         i++;
     }
 }

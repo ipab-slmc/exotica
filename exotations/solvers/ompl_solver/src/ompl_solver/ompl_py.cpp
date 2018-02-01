@@ -26,4 +26,12 @@ PYBIND11_MODULE(ompl_solver_py, module)
     prm.def("edgeCount", &PRM::edgeCount);
     prm.def("milestoneCount", &PRM::milestoneCount);
     prm.def_property("multiQuery", &PRM::isMultiQuery, &PRM::setMultiQuery);
+
+    py::class_<LazyPRM, std::shared_ptr<LazyPRM>, MotionSolver> lprm(module, "LazyPRM");
+    lprm.def("clear", &LazyPRM::clear);
+    lprm.def("clearQuery", &LazyPRM::clearQuery);
+    lprm.def("setup", &LazyPRM::setup);
+    lprm.def("edgeCount", &LazyPRM::edgeCount);
+    lprm.def("milestoneCount", &LazyPRM::milestoneCount);
+    lprm.def_property("multiQuery", &LazyPRM::isMultiQuery, &LazyPRM::setMultiQuery);
 }

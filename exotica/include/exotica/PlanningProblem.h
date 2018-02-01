@@ -84,6 +84,8 @@ public:
     void setCostEvolution(int index, double value);
     KinematicRequestFlags getFlags() { return Flags; }
 protected:
+    void updateTaskKinematics(std::weak_ptr<KinematicResponse> response);
+
     Scene_ptr scene_;
     TaskMap_map TaskMaps;
     TaskMap_vec Tasks;

@@ -37,6 +37,7 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit_msgs/PlanningScene.h>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <string>
 
@@ -70,7 +71,7 @@ public:
     Scene();
     virtual ~Scene();
     virtual void Instantiate(SceneInitializer& init);
-    std::shared_ptr<KinematicResponse> RequestKinematics(KinematicsRequest& Request);
+    void requestKinematics(KinematicsRequest& Request, std::function<void(std::weak_ptr<KinematicResponse>)> callback);
     std::string getName();
     virtual void Update(Eigen::VectorXdRefConst x, double t = 0);
     void setCollisionScene(const moveit_msgs::PlanningScene& scene);
@@ -188,9 +189,13 @@ private:
     /// \brief List of frames/links added on top of robot links and scene objects defined in the MoveIt scene.
     std::vector<std::shared_ptr<KinematicElement>> custom_links_;
 
-    std::map<std::string, std::pair<std::shared_ptr<KinematicElement>, std::shared_ptr<Trajectory>>> trajectory_generators_;
+    std::map<std::string, std::pair<std::weak_ptr<KinematicElement>, std::shared_ptr<Trajectory>>> trajectory_generators_;
 
     bool force_collision_;
+
+    KinematicsRequest kinematicRequest;
+    std::shared_ptr<KinematicResponse> kinematicSolution;
+    std::function<void(std::weak_ptr<KinematicResponse>)> kinematicRequestCallback;
 
     /**
      * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.

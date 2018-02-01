@@ -82,6 +82,7 @@ public:
     double getCostEvolution(int index);
     void resetCostEvolution(unsigned int size);
     void setCostEvolution(int index, double value);
+    KinematicRequestFlags getFlags() { return Flags; }
 
 protected:
     Scene_ptr scene_;

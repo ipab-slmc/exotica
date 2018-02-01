@@ -83,7 +83,7 @@ int OMPLsolver::getRandomSeed()
 void OMPLsolver::preSolve()
 {
     // clear previously computed solutions
-    if(!multiQuery)
+    if (!multiQuery)
     {
         ompl_simple_setup_->getProblemDefinition()->clearSolutionPaths();
         const ompl::base::PlannerPtr planner = ompl_simple_setup_->getPlanner();

@@ -57,6 +57,16 @@ class PRM : public OMPLsolver, Instantiable<PRMInitializer>
 public:
     PRM();
     virtual void Instantiate(PRMInitializer& init);
+    void growRoadmap(double t);
+    void expandRoadmap(double t);
+    void clear();
+    void clearQuery();
+    void Setup();
+    int edgeCount();
+    int milestoneCount();
+    bool isMultiQuery();
+    void setMultiQuery(bool val);
+
 };
 }
 

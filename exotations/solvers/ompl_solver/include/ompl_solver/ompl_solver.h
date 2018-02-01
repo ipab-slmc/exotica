@@ -39,6 +39,24 @@
 
 typedef boost::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
 
+#ifdef ROS_KINETIC
+template<class T, class T1>
+std::shared_ptr<T> ompl_cast(std::shared_ptr<T1> ptr)
+{
+    return std::static_pointer_cast<T>(ptr);
+}
+template<class T>
+using ompl_ptr = std::shared_ptr<T>;
+#else
+template<class T, class T1>
+boost::shared_ptr<T> ompl_cast(boost::shared_ptr<T1> ptr)
+{
+    return boost::static_pointer_cast<T>(ptr);
+}
+template<class T>
+using ompl_ptr = boost::shared_ptr<T>;
+#endif
+
 namespace exotica
 {
 class OMPLsolver : public MotionSolver
@@ -73,6 +91,7 @@ protected:
     ompl::base::StateSpacePtr state_space_;
     ConfiguredPlannerAllocator planner_allocator_;
     std::string algorithm_;
+    bool multiQuery;
 };
 }
 

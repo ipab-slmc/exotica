@@ -18,5 +18,13 @@ PYBIND11_MODULE(ompl_solver_py, module)
     py::class_<RRT, std::shared_ptr<RRT>, MotionSolver> rrt(module, "RRT");
     py::class_<RRTConnect, std::shared_ptr<RRTConnect>, MotionSolver> rrtcon(module, "RRTConnect");
     py::class_<PRM, std::shared_ptr<PRM>, MotionSolver> prm(module, "PRM");
+    prm.def("growRoadmap",&PRM::growRoadmap);
+    prm.def("expandRoadmap",&PRM::expandRoadmap);
+    prm.def("clear",&PRM::clear);
+    prm.def("clearQuery",&PRM::clearQuery);
+    prm.def("Setup",&PRM::Setup);
+    prm.def("edgeCount",&PRM::edgeCount);
+    prm.def("milestoneCount",&PRM::milestoneCount);
+    prm.def_property("multiQuery", &PRM::isMultiQuery, &PRM::setMultiQuery);
 
 }

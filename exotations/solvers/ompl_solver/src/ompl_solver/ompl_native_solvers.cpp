@@ -76,5 +76,59 @@ void PRM::Instantiate(PRMInitializer& init)
     algorithm_ = "Exotica_PRM";
     planner_allocator_ = boost::bind(
         &allocatePlanner<ompl::geometric::PRM>, _1, _2);
+    multiQuery = init.MultiQuery;
 }
+
+void PRM::growRoadmap(double t)
+{
+    ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
+    prm->growRoadmap(t);
+}
+
+void PRM::expandRoadmap(double t)
+{
+    ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
+    prm->expandRoadmap(t);
+}
+
+void PRM::clear()
+{
+    ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
+    prm->clear();
+}
+
+void PRM::clearQuery()
+{
+    ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
+    prm->clearQuery();
+}
+
+void PRM::Setup()
+{
+    ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
+    prm->setup();
+}
+
+int PRM::edgeCount()
+{
+    ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
+    return prm->edgeCount();
+}
+
+int PRM::milestoneCount()
+{
+    ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
+    return prm->milestoneCount();
+}
+
+bool PRM::isMultiQuery()
+{
+    return multiQuery;
+}
+
+void PRM::setMultiQuery(bool val)
+{
+    multiQuery = val;
+}
+
 }

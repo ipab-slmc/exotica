@@ -36,7 +36,7 @@
 
 namespace exotica
 {
-OMPLsolver::OMPLsolver()
+OMPLsolver::OMPLsolver() : multiQuery(false)
 {
 }
 
@@ -83,12 +83,15 @@ int OMPLsolver::getRandomSeed()
 void OMPLsolver::preSolve()
 {
     // clear previously computed solutions
-    ompl_simple_setup_->getProblemDefinition()->clearSolutionPaths();
-    const ompl::base::PlannerPtr planner = ompl_simple_setup_->getPlanner();
-    if (planner)
-        planner->clear();
+    if(!multiQuery)
+    {
+        ompl_simple_setup_->getProblemDefinition()->clearSolutionPaths();
+        const ompl::base::PlannerPtr planner = ompl_simple_setup_->getPlanner();
+        if (planner)
+            planner->clear();
+        ompl_simple_setup_->getPlanner()->setProblemDefinition(ompl_simple_setup_->getProblemDefinition());
+    }
     ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
-    ompl_simple_setup_->getPlanner()->setProblemDefinition(ompl_simple_setup_->getProblemDefinition());
 }
 
 void OMPLsolver::postSolve()

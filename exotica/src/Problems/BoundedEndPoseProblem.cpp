@@ -51,7 +51,7 @@ void BoundedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer
 {
 }
 
-std::vector<double>& BoundedEndPoseProblem::getBounds()
+Eigen::MatrixXd& BoundedEndPoseProblem::getBounds()
 {
     return bounds_;
 }
@@ -82,20 +82,10 @@ void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
     }
     J = Eigen::MatrixXd(JN, N);
 
-    std::vector<std::string> jnts;
-    scene_->getJointNames(jnts);
-
-    bounds_.resize(jnts.size() * 2);
-    std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
-    for (int i = 0; i < jnts.size(); i++)
-    {
-        bounds_[i] = joint_limits.at(jnts[i])[0];
-        bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
-    }
-
+    bounds_ = scene_->getSolver().getJointLimits();
     if (init.LowerBound.rows() == N)
     {
-        for (int i = 0; i < jnts.size(); i++) bounds_[i] = init.LowerBound(i);
+        bounds_.col(0) = init.LowerBound;
     }
     else if (init.LowerBound.rows() != 0)
     {
@@ -103,7 +93,7 @@ void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
     }
     if (init.UpperBound.rows() == N)
     {
-        for (int i = 0; i < jnts.size(); i++) bounds_[i + N] = init.UpperBound(i);
+        bounds_.col(1) = init.UpperBound;
     }
     else if (init.UpperBound.rows() != 0)
     {

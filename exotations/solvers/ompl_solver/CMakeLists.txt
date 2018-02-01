@@ -5,6 +5,7 @@ find_package(OMPL REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
+  exotica_python
 )
 
 if ($ENV{ROS_DISTRO} MATCHES "(kinetic|lunar)")
@@ -39,6 +40,10 @@ target_link_libraries(ompl_solver
 )
 
 add_dependencies(ompl_solver ompl_solver_initializers)
+
+pybind_add_module(${PROJECT_NAME}_py MODULE src/ompl_solver/ompl_py.cpp ${SOURCES})
+install(TARGETS ${PROJECT_NAME}_py LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
+
 
 install(TARGETS ompl_solver
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

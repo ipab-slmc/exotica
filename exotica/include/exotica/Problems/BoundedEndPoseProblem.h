@@ -56,7 +56,7 @@ public:
     Eigen::VectorXd getGoal(const std::string& task_name);
     double getRho(const std::string& task_name);
     virtual void preupdate();
-    std::vector<double>& getBounds();
+    Eigen::MatrixXd& getBounds();
 
     double getScalarCost();
     Eigen::VectorXd getScalarJacobian();
@@ -73,7 +73,7 @@ public:
 
 protected:
     void initTaskTerms(const std::vector<exotica::Initializer>& inits);
-    std::vector<double> bounds_;
+    Eigen::MatrixXd bounds_;
 };
 typedef std::shared_ptr<exotica::BoundedEndPoseProblem> BoundedEndPoseProblem_ptr;
 }

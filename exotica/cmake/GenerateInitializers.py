@@ -125,10 +125,6 @@ namespace exotica
 {
 inline std::vector<Initializer> get"""+Namespace+"""Initializers();
 }
-"""
-    for i in Include:
-        ret+="#include <"+i+".h>\n"
-    ret+="""
 
 namespace exotica
 {
@@ -193,6 +189,11 @@ public:
 
 }
 #include<"""+Namespace+"/"+Namespace+"""InitializersNumerator.h>
+
+"""
+    for i in Include:
+        ret+="#include <"+i+".h>\n"
+    ret+="""
 \n#endif"""
     return ret
 

@@ -71,7 +71,7 @@ public:
     Scene();
     virtual ~Scene();
     virtual void Instantiate(SceneInitializer& init);
-    void requestKinematics(KinematicsRequest& Request, std::function<void(std::weak_ptr<KinematicResponse>)> callback);
+    void requestKinematics(KinematicsRequest& Request, std::function<void(std::shared_ptr<KinematicResponse>)> callback);
     std::string getName();
     virtual void Update(Eigen::VectorXdRefConst x, double t = 0);
     void setCollisionScene(const moveit_msgs::PlanningScene& scene);
@@ -195,7 +195,8 @@ private:
 
     KinematicsRequest kinematicRequest;
     std::shared_ptr<KinematicResponse> kinematicSolution;
-    std::function<void(std::weak_ptr<KinematicResponse>)> kinematicRequestCallback;
+    std::function<void(std::shared_ptr<KinematicResponse>)> kinematicRequestCallback;
+    bool requestNeedsUpdating;
 
     /**
      * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.

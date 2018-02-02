@@ -178,10 +178,10 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     }
 }
 
-void PlanningProblem::updateTaskKinematics(std::weak_ptr<KinematicResponse> response)
+void PlanningProblem::updateTaskKinematics(std::shared_ptr<KinematicResponse> response)
 {
     for (auto task : Tasks)
-        task->Kinematics.Create(response.lock());
+        task->Kinematics.Create(response);
 }
 
 TaskMap_map& PlanningProblem::getTaskMaps()

@@ -43,7 +43,7 @@ Scene::Scene() : name_("Unnamed")
 {
 }
 
-Scene::Scene(const std::string& name) : name_(name)
+Scene::Scene(const std::string& name) : name_(name), requestNeedsUpdating(false)
 {
     object_name_ = name_;
 }
@@ -155,12 +155,13 @@ void Scene::Instantiate(SceneInitializer& init)
     if (debug_) INFO_NAMED(name_, "Exotica Scene initialized");
 }
 
-void Scene::requestKinematics(KinematicsRequest& request, std::function<void(std::weak_ptr<KinematicResponse>)> callback)
+void Scene::requestKinematics(KinematicsRequest& request, std::function<void(std::shared_ptr<KinematicResponse>)> callback)
 {
     kinematicRequest = request;
     kinematicRequestCallback = callback;
     kinematicSolution = kinematica_.RequestFrames(kinematicRequest);
     kinematicRequestCallback(kinematicSolution);
+    requestNeedsUpdating = false;
 }
 
 void Scene::updateTrajectoryGenerators(double t)
@@ -173,6 +174,13 @@ void Scene::updateTrajectoryGenerators(double t)
 
 void Scene::Update(Eigen::VectorXdRefConst x, double t)
 {
+    if (requestNeedsUpdating && kinematicRequestCallback)
+    {
+        kinematicSolution = kinematica_.RequestFrames(kinematicRequest);
+        kinematicRequestCallback(kinematicSolution);
+        requestNeedsUpdating = false;
+    }
+
     updateTrajectoryGenerators(t);
     kinematica_.Update(x);
     if (force_collision_) collision_scene_->updateCollisionObjectTransforms();
@@ -498,13 +506,16 @@ void Scene::updateSceneFrames()
         it = kinematica_.AddElement(it->Segment.getName(), pose, it->ParentName, it->Shape, it->Segment.getInertia(), Eigen::Vector4d::Zero(), it->IsControlled);
     }
 
+    auto trajCopy = trajectory_generators_;
+    trajectory_generators_.clear();
+    for (auto& traj : trajCopy)
+    {
+        addTrajectory(traj.first, traj.second.second);
+    }
+
     kinematica_.UpdateModel();
 
-    if (kinematicRequestCallback)
-    {
-        kinematicSolution = kinematica_.RequestFrames(kinematicRequest);
-        kinematicRequestCallback(kinematicSolution);
-    }
+    requestNeedsUpdating = true;
 }
 
 void Scene::addObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, bool updateCollisionScene)

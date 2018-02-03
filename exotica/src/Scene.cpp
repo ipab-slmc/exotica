@@ -415,7 +415,7 @@ void Scene::loadSceneFile(const std::string& file_name, const KDL::Frame& offset
 void Scene::loadSceneFile(const std::string& file_name, const Eigen::Affine3d& offset, bool updateCollisionScene)
 {
     std::ifstream ss(parsePath(file_name));
-    if(!ss.is_open()) throw_pretty("Cant read file '"<<parsePath(file_name)<<"'!");
+    if (!ss.is_open()) throw_pretty("Cant read file '" << parsePath(file_name) << "'!");
     loadSceneFromStringStream(ss, offset, updateCollisionScene);
 }
 
@@ -456,7 +456,7 @@ void Scene::updateInternalFrames(bool updateRequest)
 
     kinematica_.UpdateModel();
 
-    if(updateRequest)
+    if (updateRequest)
     {
         kinematicSolution = kinematica_.RequestFrames(kinematicRequest);
         kinematicRequestCallback(kinematicSolution);

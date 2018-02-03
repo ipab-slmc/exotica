@@ -15,6 +15,7 @@ pytests = ['core.py',
          'valkyrie_collision_check_fcl_default.py',
          'valkyrie_collision_check_fcl_latest.py',
          'collision_scene_distances.py',
+         'scene_creation.py'
          #'issue225_kinematictree_memory_leak.py'
         ]
 

@@ -151,6 +151,8 @@ public:
     std::string getScene();
     void cleanScene();
 
+    void updateInternalFrames(bool updateRequest = true);
+
     /**
      * @brief      Whether the collision scene transforms get updated on every scene update.
      * @return     Whether collision scene transforms are force updated on every scene update.

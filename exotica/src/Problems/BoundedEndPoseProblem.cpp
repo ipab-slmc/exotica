@@ -126,7 +126,7 @@ Eigen::VectorXd BoundedEndPoseProblem::getScalarJacobian()
 
 void BoundedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
-    scene_->Update(x);
+    scene_->Update(x, tStart);
     Phi.setZero(PhiN);
     if (Flags & KIN_J) J.setZero();
     if (Flags & KIN_J_DOT)

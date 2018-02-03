@@ -120,7 +120,7 @@ void Scene::Instantiate(SceneInitializer& init)
     collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
     collision_scene_->setAlwaysExternallyUpdatedCollisionScene(force_collision_);
     updateSceneFrames();
-    updateCollisionObjects();
+    updateInternalFrames(false);
 
     AllowedCollisionMatrix acm;
     std::vector<std::string> acm_names;
@@ -176,9 +176,7 @@ void Scene::Update(Eigen::VectorXdRefConst x, double t)
 {
     if (requestNeedsUpdating && kinematicRequestCallback)
     {
-        kinematicSolution = kinematica_.RequestFrames(kinematicRequest);
-        kinematicRequestCallback(kinematicSolution);
-        requestNeedsUpdating = false;
+        updateInternalFrames();
     }
 
     updateTrajectoryGenerators(t);
@@ -286,14 +284,12 @@ void Scene::setCollisionScene(const moveit_msgs::PlanningScene& scene)
 {
     ps_->usePlanningSceneMsg(scene);
     updateSceneFrames();
-    updateCollisionObjects();
 }
 
 void Scene::updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world)
 {
     ps_->processPlanningSceneWorldMsg(*world);
     updateSceneFrames();
-    updateCollisionObjects();
 }
 
 void Scene::updateCollisionObjects()
@@ -419,6 +415,7 @@ void Scene::loadSceneFile(const std::string& file_name, const KDL::Frame& offset
 void Scene::loadSceneFile(const std::string& file_name, const Eigen::Affine3d& offset, bool updateCollisionScene)
 {
     std::ifstream ss(parsePath(file_name));
+    if(!ss.is_open()) throw_pretty("Cant read file '"<<parsePath(file_name)<<"'!");
     loadSceneFromStringStream(ss, offset, updateCollisionScene);
 }
 
@@ -426,7 +423,6 @@ void Scene::loadSceneFromStringStream(std::istream& in, const Eigen::Affine3d& o
 {
     ps_->loadGeometryFromStream(in, offset);
     updateSceneFrames();
-    if (updateCollisionScene) updateCollisionObjects();
 }
 
 std::string Scene::getScene()
@@ -440,7 +436,35 @@ void Scene::cleanScene()
 {
     ps_->removeAllCollisionObjects();
     updateSceneFrames();
+}
+
+void Scene::updateInternalFrames(bool updateRequest)
+{
+    for (auto& it : custom_links_)
+    {
+        Eigen::Affine3d pose;
+        tf::transformKDLToEigen(it->Segment.getFrameToTip(), pose);
+        it = kinematica_.AddElement(it->Segment.getName(), pose, it->ParentName, it->Shape, it->Segment.getInertia(), Eigen::Vector4d::Zero(), it->IsControlled);
+    }
+
+    auto trajCopy = trajectory_generators_;
+    trajectory_generators_.clear();
+    for (auto& traj : trajCopy)
+    {
+        addTrajectory(traj.first, traj.second.second);
+    }
+
+    kinematica_.UpdateModel();
+
+    if(updateRequest)
+    {
+        kinematicSolution = kinematica_.RequestFrames(kinematicRequest);
+        kinematicRequestCallback(kinematicSolution);
+    }
+
     updateCollisionObjects();
+
+    requestNeedsUpdating = false;
 }
 
 void Scene::updateSceneFrames()
@@ -497,20 +521,6 @@ void Scene::updateSceneFrames()
             Eigen::Affine3d trans = objTransform.inverse() * ps_->getCurrentState().getCollisionBodyTransform(links[i], j);
             kinematica_.AddEnvironmentElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
         }
-    }
-
-    for (auto& it : custom_links_)
-    {
-        Eigen::Affine3d pose;
-        tf::transformKDLToEigen(it->Segment.getFrameToTip(), pose);
-        it = kinematica_.AddElement(it->Segment.getName(), pose, it->ParentName, it->Shape, it->Segment.getInertia(), Eigen::Vector4d::Zero(), it->IsControlled);
-    }
-
-    auto trajCopy = trajectory_generators_;
-    trajectory_generators_.clear();
-    for (auto& traj : trajCopy)
-    {
-        addTrajectory(traj.first, traj.second.second);
     }
 
     kinematica_.UpdateModel();

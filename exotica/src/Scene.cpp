@@ -33,8 +33,8 @@
 #include <exotica/Scene.h>
 #include <exotica/Setup.h>
 
-#include <exotica/LinkInitializer.h>
 #include <exotica/AttachLinkInitializer.h>
+#include <exotica/LinkInitializer.h>
 #include <exotica/TrajectoryInitializer.h>
 
 namespace exotica
@@ -129,7 +129,7 @@ void Scene::Instantiate(SceneInitializer& init)
     for (const exotica::Initializer& linkInit : init.AttachLinks)
     {
         AttachLinkInitializer link(linkInit);
-        if(link.Local)
+        if (link.Local)
         {
             attachObjectLocal(link.Name, link.Parent, getFrame(link.Transform));
         }

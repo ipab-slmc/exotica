@@ -57,6 +57,7 @@ AddInitializer(
   Object
   Frame
   Link
+  AttachLink
   MotionSolver
   PlanningProblem
   Scene

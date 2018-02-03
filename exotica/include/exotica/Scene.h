@@ -41,9 +41,7 @@
 #include <iostream>
 #include <string>
 
-#include <exotica/LinkInitializer.h>
 #include <exotica/SceneInitializer.h>
-#include <exotica/TrajectoryInitializer.h>
 
 #include "exotica/CollisionScene.h"
 #include "exotica/KinematicTree.h"

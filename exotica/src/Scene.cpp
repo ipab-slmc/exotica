@@ -471,6 +471,11 @@ void Scene::updateInternalFrames(bool updateRequest)
         addTrajectory(traj.first, traj.second.second);
     }
 
+    for (auto& link : attached_objects_)
+    {
+        attachObjectLocal(link.first, link.second.Parent, link.second.Pose);
+    }
+
     kinematica_.UpdateModel();
 
     if (updateRequest)

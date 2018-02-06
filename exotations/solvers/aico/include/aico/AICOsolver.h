@@ -151,13 +151,18 @@ private:
     UnconstrainedTimeIndexedProblem_ptr prob_;  //!< Shared pointer to the planning problem.
     double damping;                             //!< Damping
     double damping_init;                        //!< Damping
-    double tolerance;                           //!< Termination error threshold
+    double update_tolerance;                    //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
+    double step_tolerance;                      //!< Relative step tolerance (termination criterion)
+    double function_tolerance;                  //!< Relative function tolerance/first-order optimality criterion
     int max_iterations;                         //!< Max. number of AICO iterations
+    int max_backtrack_iterations;               //!< Max. number of sweeps without improvement before terminating (= line-search)
     bool useBwdMsg;                             //!< Flag for using backward message initialisation
     Eigen::VectorXd bwdMsg_v;                   //!< Backward message initialisation mean
     Eigen::MatrixXd bwdMsg_Vinv;                //!< Backward message initialisation covariance
+    bool sweepImprovedCost;                     //!< Whether the last sweep improved the cost (for backtrack iterations count)
+    int iterationCount;                         //!< Iteration counter
 
-    std::vector<SinglePassMeanCoviariance> q_stat;  //!< Cost weigthed normal distribution of configurations across sweeps.
+    std::vector<SinglePassMeanCoviariance> q_stat;  //!< Cost weighted normal distribution of configurations across sweeps.
 
     std::vector<Eigen::VectorXd> s;      //!< Forward message mean
     std::vector<Eigen::MatrixXd> Sinv;   //!< Forward message covariance inverse
@@ -191,6 +196,7 @@ private:
     std::vector<Eigen::VectorXd> dampingReference;  //!< Damping reference point
     double cost;                                    //!< cost of MAP trajectory
     double cost_old;                                //!< cost of MAP trajectory (last most optimal value)
+    double cost_prev;                               //!< previous iteration cost
     double b_step;                                  //!< Squared configuration space step
     double b_step_old;
 

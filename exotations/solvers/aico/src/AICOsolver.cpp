@@ -62,7 +62,7 @@ void AICOsolver::Instantiate(AICOsolverInitializer& init)
     }
     max_iterations = init.MaxIterations;
     max_backtrack_iterations = init.MaxBacktrackIterations;
-    update_tolerance = init.UpdateTolerance;
+    minimum_step_tolerance = init.MinStep;
     step_tolerance = init.StepTolerance;
     function_tolerance = init.FunctionTolerance;
     damping_init = init.Damping;
@@ -85,7 +85,7 @@ void AICOsolver::saveCosts(std::string file_name)
 
 AICOsolver::AICOsolver()
     : damping(0.01),
-      update_tolerance(1e-5),
+      minimum_step_tolerance(1e-5),
       step_tolerance(1e-5),
       function_tolerance(1e-5),
       max_iterations(100),
@@ -232,9 +232,9 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
                 // TODO(#257): TODO(#256): move to Eigen::MatrixXd to make this easier to compute, in the meantime use old check
                 //
                 // TODO(#256): OLD TOLERANCE CHECK - TODO REMOVE
-                if (d < update_tolerance)
+                if (d < minimum_step_tolerance)
                 {
-                    if (debug_) HIGHLIGHT("Satisfied tolerance\titer=" << iterationCount << "\td=" << d << "\tupdate_tolerance=" << update_tolerance);
+                    if (debug_) HIGHLIGHT("Satisfied tolerance\titer=" << iterationCount << "\td=" << d << "\tminimum_step_tolerance=" << minimum_step_tolerance);
                     prob_->terminationCriterion = TerminationCriterion::StepTolerance;
                     break;
                 }
@@ -457,11 +457,11 @@ void AICOsolver::updateBwdMessage(int t)
 }
 
 void AICOsolver::updateTaskMessage(int t,
-                                   const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double update_tolerance,
+                                   const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double minimum_step_tolerance,
                                    double maxStepSize)
 {
     Eigen::VectorXd diff = qhat_t - qhat[t];
-    if ((diff.array().abs().maxCoeff() < update_tolerance)) return;
+    if ((diff.array().abs().maxCoeff() < minimum_step_tolerance)) return;
     double nrm = diff.norm();
     if (maxStepSize > 0. && nrm > maxStepSize)
     {
@@ -504,7 +504,7 @@ double AICOsolver::getTaskCosts(int t)
 }
 
 void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
-                                int maxRelocationIterations, double update_tolerance, bool forceRelocation,
+                                int maxRelocationIterations, double minimum_step_tolerance, bool forceRelocation,
                                 double maxStepSize)
 {
     if (updateFwd) updateFwdMessage(t);
@@ -523,7 +523,7 @@ void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
 
     for (int k = 0; k < maxRelocationIterations && !(Server::isRos() && !ros::ok()); k++)
     {
-        if (!((!k && forceRelocation) || (b[t] - qhat[t]).array().abs().maxCoeff() > update_tolerance)) break;
+        if (!((!k && forceRelocation) || (b[t] - qhat[t]).array().abs().maxCoeff() > minimum_step_tolerance)) break;
 
         updateTaskMessage(t, b.at(t), 0., maxStepSize);
 
@@ -545,7 +545,7 @@ void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
 }
 
 void AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd,
-                                           bool updateBwd, int maxRelocationIterations, double update_tolerance,
+                                           bool updateBwd, int maxRelocationIterations, double minimum_step_tolerance,
                                            double maxStepSize)
 {
     // TODO: implement updateTimeStepGaussNewton
@@ -604,44 +604,44 @@ double AICOsolver::step()
         case smForwardly:
             for (t = 1; t < prob_->getT(); t++)
             {
-                updateTimeStep(t, true, false, 1, update_tolerance, !iterationCount, 1.);  //relocate once on fwd Sweep
+                updateTimeStep(t, true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd Sweep
             }
             for (t = prob_->getT() - 2; t > 0; t--)
             {
-                updateTimeStep(t, false, true, 0, update_tolerance, false, 1.);  //...not on bwd Sweep
+                updateTimeStep(t, false, true, 0, minimum_step_tolerance, false, 1.);  //...not on bwd Sweep
             }
             break;
         case smSymmetric:
             // ROS_WARN_STREAM("Updating forward, iterationCount "<<iterationCount);
             for (t = 1; t < prob_->getT(); t++)
             {
-                updateTimeStep(t, true, false, 1, update_tolerance, !iterationCount, 1.);  //relocate once on fwd & bwd Sweep
+                updateTimeStep(t, true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd & bwd Sweep
             }
             // ROS_WARN_STREAM("Updating backward, iterationCount "<<iterationCount);
             for (t = prob_->getT() - 2; t > 0; t--)
             {
-                updateTimeStep(t, false, true, (iterationCount ? 1 : 0), update_tolerance, false, 1.);
+                updateTimeStep(t, false, true, (iterationCount ? 1 : 0), minimum_step_tolerance, false, 1.);
             }
             break;
         case smLocalGaussNewton:
             for (t = 1; t < prob_->getT(); t++)
             {
-                updateTimeStep(t, true, false, (iterationCount ? 5 : 1), update_tolerance, !iterationCount, 1.);  //relocate iteratively on
+                updateTimeStep(t, true, false, (iterationCount ? 5 : 1), minimum_step_tolerance, !iterationCount, 1.);  //relocate iteratively on
             }
             for (t = prob_->getT() - 2; t > 0; t--)
             {
-                updateTimeStep(t, false, true, (iterationCount ? 5 : 0), update_tolerance, false, 1.);  //...fwd & bwd Sweep
+                updateTimeStep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);  //...fwd & bwd Sweep
             }
             break;
         case smLocalGaussNewtonDamped:
             for (t = 1; t < prob_->getT(); t++)
             {
                 updateTimeStepGaussNewton(t, true, false, (iterationCount ? 5 : 1),
-                                          update_tolerance, 1.);  //GaussNewton in fwd & bwd Sweep
+                                          minimum_step_tolerance, 1.);  //GaussNewton in fwd & bwd Sweep
             }
             for (t = prob_->getT() - 2; t > 0; t--)
             {
-                updateTimeStep(t, false, true, (iterationCount ? 5 : 0), update_tolerance, false, 1.);
+                updateTimeStep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);
             }
             break;
         default:

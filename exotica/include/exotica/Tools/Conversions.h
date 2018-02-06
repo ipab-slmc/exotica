@@ -71,7 +71,7 @@ Eigen::VectorXd IdentityTransform();
 
 namespace exotica
 {
-enum RotationType
+enum class RotationType
 {
     QUATERNION,
     RPY,

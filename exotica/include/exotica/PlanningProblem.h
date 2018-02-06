@@ -30,11 +30,6 @@
  *
  */
 
-// namespace exotica
-// {
-// class PlanningProblem;
-// }
-
 #ifndef EXOTICA_MOTION_PLANNING_PROBLEM_H
 #define EXOTICA_MOTION_PLANNING_PROBLEM_H
 

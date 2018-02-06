@@ -381,6 +381,11 @@ std::map<std::string, double> Scene::getModelStateMap()
 
 void Scene::setModelState(Eigen::VectorXdRefConst x, double t, bool updateTraj)
 {
+    if (requestNeedsUpdating && kinematicRequestCallback)
+    {
+        updateInternalFrames();
+    }
+
     if (updateTraj) updateTrajectoryGenerators(t);
     // Update Kinematica internal state
     kinematica_.setModelState(x);
@@ -391,6 +396,11 @@ void Scene::setModelState(Eigen::VectorXdRefConst x, double t, bool updateTraj)
 
 void Scene::setModelState(std::map<std::string, double> x, double t, bool updateTraj)
 {
+    if (requestNeedsUpdating && kinematicRequestCallback)
+    {
+        updateInternalFrames();
+    }
+
     if (updateTraj) updateTrajectoryGenerators(t);
     // Update Kinematica internal state
     kinematica_.setModelState(x);

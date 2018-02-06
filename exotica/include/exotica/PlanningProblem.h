@@ -58,6 +58,20 @@
 
 namespace exotica
 {
+enum class TerminationCriterion
+{
+    NotStarted = -1,
+    // Continue = 0,
+    IterationLimit,
+    BacktrackIterationLimit,
+    StepTolerance,
+    FunctionTolerance,
+    GradientTolerance,
+    Divergence,
+    UserDefined
+    // Condition,
+};
+
 class PlanningProblem : public Object, Uncopyable, public virtual InstantiableBase, public std::enable_shared_from_this<PlanningProblem>
 {
 public:
@@ -75,6 +89,7 @@ public:
     Eigen::VectorXd applyStartState(bool updateTraj = true);
     int N;
     double tStart;
+    TerminationCriterion terminationCriterion;
     virtual void preupdate();
     unsigned int getNumberOfProblemUpdates() { return numberOfProblemUpdates; }
     void resetNumberOfProblemUpdates() { numberOfProblemUpdates = 0; }

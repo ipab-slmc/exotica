@@ -489,6 +489,17 @@ PYBIND11_MODULE(_pyexotica, module)
     object.def_readwrite("namespace", &Object::ns_);
     object.def_readwrite("debugMode", &Object::debug_);
 
+    py::enum_<TerminationCriterion>(module, "TerminationCriterion")
+        .value("NotStarted", TerminationCriterion::NotStarted)
+        .value("IterationLimit", TerminationCriterion::IterationLimit)
+        .value("BacktrackIterationLimit", TerminationCriterion::BacktrackIterationLimit)
+        .value("StepTolerance", TerminationCriterion::StepTolerance)
+        .value("FunctionTolerance", TerminationCriterion::FunctionTolerance)
+        .value("GradientTolerance", TerminationCriterion::GradientTolerance)
+        .value("Divergence", TerminationCriterion::Divergence)
+        .value("UserDefined", TerminationCriterion::UserDefined)
+        .export_values();
+
     py::enum_<RotationType>(module, "RotationType")
         .value("Quaternion", RotationType::QUATERNION)
         .value("RPY", RotationType::RPY)

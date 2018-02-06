@@ -151,7 +151,7 @@ private:
     UnconstrainedTimeIndexedProblem_ptr prob_;  //!< Shared pointer to the planning problem.
     double damping;                             //!< Damping
     double damping_init;                        //!< Damping
-    double update_tolerance;                    //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
+    double minimum_step_tolerance;              //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
     double step_tolerance;                      //!< Relative step tolerance (termination criterion)
     double function_tolerance;                  //!< Relative function tolerance/first-order optimality criterion
     int max_iterations;                         //!< Max. number of AICO iterations

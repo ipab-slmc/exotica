@@ -17,6 +17,9 @@ PYBIND11_MODULE(ompl_solver_py, module)
 
     py::class_<RRT, std::shared_ptr<RRT>, MotionSolver> rrt(module, "RRT");
     py::class_<RRTConnect, std::shared_ptr<RRTConnect>, MotionSolver> rrtcon(module, "RRTConnect");
+    py::class_<EST, std::shared_ptr<EST>, MotionSolver> est(module, "EST");
+    py::class_<KPIECE, std::shared_ptr<KPIECE>, MotionSolver> kpiece(module, "KPIECE");
+    py::class_<BKPIECE, std::shared_ptr<BKPIECE>, MotionSolver> bkpiece(module, "BKPIECE");
     py::class_<PRM, std::shared_ptr<PRM>, MotionSolver> prm(module, "PRM");
     prm.def("growRoadmap", &PRM::growRoadmap);
     prm.def("expandRoadmap", &PRM::expandRoadmap);

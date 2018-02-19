@@ -52,6 +52,27 @@ public:
     virtual void Instantiate(RRTConnectInitializer& init);
 };
 
+class EST : public OMPLsolver, Instantiable<ESTInitializer>
+{
+public:
+    EST();
+    virtual void Instantiate(ESTInitializer& init);
+};
+
+class KPIECE : public OMPLsolver, Instantiable<KPIECEInitializer>
+{
+public:
+    KPIECE();
+    virtual void Instantiate(KPIECEInitializer& init);
+};
+
+class BKPIECE : public OMPLsolver, Instantiable<BKPIECEInitializer>
+{
+public:
+    BKPIECE();
+    virtual void Instantiate(BKPIECEInitializer& init);
+};
+
 class PRM : public OMPLsolver, Instantiable<PRMInitializer>
 {
 public:

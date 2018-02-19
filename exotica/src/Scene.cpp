@@ -242,15 +242,7 @@ void Scene::publishScene()
 {
     if (Server::isRos())
     {
-        // Update the joint positions in the PlanningScene from Kinematica - we do
-        // not do this on every Update() as it is only required when publishing
-        // the scene and would take unnecessary time otherwise.
-        updateMoveItPlanningScene();
-
-        moveit_msgs::PlanningScene msg;
-        ps_->getPlanningSceneMsg(msg);
-
-        ps_pub_.publish(msg);
+        ps_pub_.publish(getPlanningSceneMsg());
     }
 }
 
@@ -334,9 +326,66 @@ std::string Scene::getModelRootLinkName()
     return model_->getRootLinkName();
 }
 
-planning_scene::PlanningScenePtr Scene::getPlanningScene()
+moveit_msgs::PlanningScene Scene::getPlanningSceneMsg()
 {
-    return ps_;
+    // Update the joint positions in the PlanningScene from Kinematica - we do
+    // not do this on every Update() as it is only required when publishing
+    // the scene and would take unnecessary time otherwise.
+    updateMoveItPlanningScene();
+
+    moveit_msgs::PlanningScene msg;
+    ps_->getPlanningSceneMsg(msg);
+
+    // The robot link paddings and scales are applied in the CollisionScene
+    // and are not propagated back to the internal MoveIt PlanningScene. Here
+    // we set them in the message that is being returned.
+    msg.link_padding.clear();
+    msg.link_scale.clear();
+    for (auto robot_link : msg.robot_state.joint_state.name)
+    {
+        moveit_msgs::LinkPadding padding;
+        padding.link_name = robot_link;
+        padding.padding = collision_scene_->getRobotLinkPadding();
+        msg.link_padding.push_back(padding);
+
+        moveit_msgs::LinkScale scale;
+        scale.link_name = robot_link;
+        scale.scale = collision_scene_->getRobotLinkScale();
+        msg.link_scale.push_back(scale);
+    }
+
+    // As we cannot apply world link scalings in the message itself, we need to
+    // manually scale the objects.
+    // TODO(wxm): Recreate as updated poses won't be reflected (e.g. trajectories)
+    if (collision_scene_->getWorldLinkScale() != 1.0 || collision_scene_->getWorldLinkPadding() > 0.0)
+    {
+        for (auto it : msg.world.collision_objects)
+        {
+            // Primitives
+            for (auto primitive : it.primitives)
+            {
+                shapes::ShapePtr tmp(shapes::constructShapeFromMsg(primitive));
+                tmp->scaleAndPadd(collision_scene_->getWorldLinkScale(), collision_scene_->getWorldLinkPadding());
+                shapes::ShapeMsg tmp_msg;
+                shapes::constructMsgFromShape(const_cast<shapes::Shape*>(tmp.get()), tmp_msg);
+                primitive = boost::get<shape_msgs::SolidPrimitive>(tmp_msg);
+            }
+
+            // Meshes
+            for (auto mesh : it.meshes)
+            {
+                shapes::ShapePtr tmp(shapes::constructShapeFromMsg(mesh));
+                tmp->scaleAndPadd(collision_scene_->getWorldLinkScale(), collision_scene_->getWorldLinkPadding());
+                shapes::ShapeMsg tmp_msg;
+                shapes::constructMsgFromShape(const_cast<shapes::Shape*>(tmp.get()), tmp_msg);
+                mesh = boost::get<shape_msgs::Mesh>(tmp_msg);
+            }
+
+            // NB: Scaling and padding does not apply to planes
+        }
+    }
+
+    return msg;
 }
 
 exotica::KinematicTree& Scene::getSolver()

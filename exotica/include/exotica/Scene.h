@@ -41,6 +41,10 @@
 #include <iostream>
 #include <string>
 
+#include <geometric_shapes/mesh_operations.h>
+#include <geometric_shapes/shape_operations.h>
+#include <geometric_shapes/shapes.h>
+
 #include <exotica/SceneInitializer.h>
 
 #include "exotica/CollisionScene.h"
@@ -77,7 +81,7 @@ public:
     std::string getRootFrameName();
     std::string getRootJointName();
     std::string getModelRootLinkName();
-    planning_scene::PlanningScenePtr getPlanningScene();
+    moveit_msgs::PlanningScene getPlanningSceneMsg();
     exotica::KinematicTree& getSolver();
     robot_model::RobotModelPtr getRobotModel();
     void getJointNames(std::vector<std::string>& joints);

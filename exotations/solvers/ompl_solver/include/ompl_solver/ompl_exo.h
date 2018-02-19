@@ -177,6 +177,115 @@ public:
     virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
     virtual void stateDebug(const Eigen::VectorXd &q) const;
 };
+
+class OMPLRNProjection : public ompl::base::ProjectionEvaluator
+{
+public:
+    OMPLRNProjection(const ompl::base::StateSpacePtr &space,
+                     const std::vector<int> &vars)
+        : ompl::base::ProjectionEvaluator(space), variables_(vars)
+    {
+    }
+
+    ~OMPLRNProjection()
+    {
+    }
+
+    virtual unsigned int getDimension(void) const
+    {
+        return variables_.size();
+    }
+
+    virtual void defaultCellSizes()
+    {
+        cellSizes_.clear();
+        cellSizes_.resize(variables_.size(), 0.1);
+    }
+
+    virtual void project(const ompl::base::State *state,
+                         ompl::base::EuclideanProjection &projection) const
+    {
+        for (std::size_t i = 0; i < variables_.size(); ++i)
+            projection(i) =
+                state->as<exotica::OMPLRNStateSpace::StateType>()->getRNSpace().values[variables_[i]];
+    }
+
+private:
+    std::vector<int> variables_;
+};
+
+class OMPLSE3RNProjection : public ompl::base::ProjectionEvaluator
+{
+public:
+    OMPLSE3RNProjection(const ompl::base::StateSpacePtr &space,
+                        const std::vector<int> &vars)
+        : ompl::base::ProjectionEvaluator(space), variables_(vars)
+    {
+    }
+
+    ~OMPLSE3RNProjection()
+    {
+    }
+
+    virtual unsigned int getDimension(void) const
+    {
+        return variables_.size();
+    }
+
+    virtual void defaultCellSizes()
+    {
+        cellSizes_.clear();
+        cellSizes_.resize(variables_.size(), 0.1);
+    }
+
+    virtual void project(const ompl::base::State *state,
+                         ompl::base::EuclideanProjection &projection) const
+    {
+        for (std::size_t i = 0; i < variables_.size(); ++i)
+            projection(i) =
+                state->as<exotica::OMPLSE3RNStateSpace::StateType>()->RealVectorStateSpace().values[variables_[i]];
+    }
+
+private:
+    std::vector<int> variables_;
+};
+
+class OMPLSE2RNProjection : public ompl::base::ProjectionEvaluator
+{
+public:
+    OMPLSE2RNProjection(const ompl::base::StateSpacePtr &space,
+                        const std::vector<int> &vars)
+        : ompl::base::ProjectionEvaluator(space), variables_(vars)
+    {
+    }
+
+    ~OMPLSE2RNProjection()
+    {
+    }
+
+    virtual unsigned int getDimension(void) const
+    {
+        return variables_.size();
+    }
+
+    virtual void defaultCellSizes()
+    {
+        cellSizes_.clear();
+        cellSizes_.resize(variables_.size(), 0.1);
+    }
+
+    virtual void project(const ompl::base::State *state,
+                         ompl::base::EuclideanProjection &projection) const
+    {
+        for (std::size_t i = 0; i < variables_.size(); ++i)
+            projection(i) =
+                state->as<exotica::OMPLSE2RNStateSpace::StateType>()->RealVectorStateSpace().values[variables_[i]];
+    }
+
+private:
+    std::vector<int> variables_;
+};
+
 } /* namespace exotica */
 
 #endif /* INCLUDE_OMPL_OMPL_EXO_H_ */

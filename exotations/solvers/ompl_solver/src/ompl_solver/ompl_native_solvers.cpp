@@ -35,12 +35,18 @@
 #include <ompl/geometric/planners/prm/PRM.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
+#include <ompl/geometric/planners/est/EST.h>
+#include <ompl/geometric/planners/kpiece/KPIECE1.h>
+#include <ompl/geometric/planners/kpiece/BKPIECE1.h>
 #include <ompl_solver/ompl_native_solvers.h>
 
 REGISTER_MOTIONSOLVER_TYPE("RRT", exotica::RRT)
 REGISTER_MOTIONSOLVER_TYPE("RRTConnect", exotica::RRTConnect)
 REGISTER_MOTIONSOLVER_TYPE("PRM", exotica::PRM)
 REGISTER_MOTIONSOLVER_TYPE("LazyPRM", exotica::LazyPRM)
+REGISTER_MOTIONSOLVER_TYPE("EST", exotica::EST)
+REGISTER_MOTIONSOLVER_TYPE("KPIECE", exotica::KPIECE)
+REGISTER_MOTIONSOLVER_TYPE("BKPIECE", exotica::BKPIECE)
 
 namespace exotica
 {
@@ -66,6 +72,42 @@ void RRTConnect::Instantiate(RRTConnectInitializer& init)
     algorithm_ = "Exotica_RRTConnect";
     planner_allocator_ = boost::bind(
         &allocatePlanner<ompl::geometric::RRTConnect>, _1, _2);
+}
+
+EST::EST()
+{
+}
+
+void EST::Instantiate(ESTInitializer& init)
+{
+    init_ = static_cast<Initializer>(init);
+    algorithm_ = "Exotica_EST";
+    planner_allocator_ = boost::bind(
+        &allocatePlanner<ompl::geometric::EST>, _1, _2);
+}
+
+KPIECE::KPIECE()
+{
+}
+
+void KPIECE::Instantiate(KPIECEInitializer& init)
+{
+    init_ = static_cast<Initializer>(init);
+    algorithm_ = "Exotica_KPIECE";
+    planner_allocator_ = boost::bind(
+        &allocatePlanner<ompl::geometric::KPIECE1>, _1, _2);
+}
+
+BKPIECE::BKPIECE()
+{
+}
+
+void BKPIECE::Instantiate(BKPIECEInitializer& init)
+{
+    init_ = static_cast<Initializer>(init);
+    algorithm_ = "Exotica_BKPIECE";
+    planner_allocator_ = boost::bind(
+        &allocatePlanner<ompl::geometric::BKPIECE1>, _1, _2);
 }
 
 PRM::PRM()

@@ -5,6 +5,15 @@
   <class name="exotica/RRTConnect" type="exotica::RRTConnect" base_class_type="exotica::MotionSolver">
     <description>RRTConnect</description>
   </class>
+  <class name="exotica/EST" type="exotica::EST" base_class_type="exotica::MotionSolver">
+    <description>RRT</description>
+  </class>
+  <class name="exotica/KPIECE" type="exotica::KPIECE" base_class_type="exotica::MotionSolver">
+    <description>RRT</description>
+  </class>
+  <class name="exotica/BKPIECE" type="exotica::BKPIECE" base_class_type="exotica::MotionSolver">
+    <description>RRT</description>
+  </class>
   <class name="exotica/PRM" type="exotica::PRM" base_class_type="exotica::MotionSolver">
     <description>Probabilistic Roadmap</description>
   </class>

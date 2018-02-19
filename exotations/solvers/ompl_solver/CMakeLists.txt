@@ -18,7 +18,7 @@ catkin_package(
   CATKIN_DEPENDS exotica ompl
 )
 
-AddInitializer(OMPLsolver RRT RRTConnect PRM LazyPRM)
+AddInitializer(OMPLsolver RRT RRTConnect PRM LazyPRM EST KPIECE BKPIECE)
 GenInitializers()
 
 include_directories(

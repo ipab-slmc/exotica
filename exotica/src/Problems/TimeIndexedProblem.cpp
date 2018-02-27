@@ -47,7 +47,7 @@ TimeIndexedProblem::~TimeIndexedProblem()
 {
 }
 
-std::vector<double>& TimeIndexedProblem::getBounds()
+Eigen::MatrixXd& TimeIndexedProblem::getBounds()
 {
     return bounds_;
 }
@@ -58,15 +58,22 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     applyStartState(false);
     setT(init_.T);
 
-    std::vector<std::string> jnts;
-    scene_->getJointNames(jnts);
-
-    bounds_.resize(jnts.size() * 2);
-    std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
-    for (int i = 0; i < jnts.size(); i++)
+    bounds_ = scene_->getSolver().getJointLimits();
+    if (init.LowerBound.rows() == N)
     {
-        bounds_[i] = joint_limits.at(jnts[i])[0];
-        bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
+        bounds_.col(0) = init.LowerBound;
+    }
+    else if (init.LowerBound.rows() != 0)
+    {
+        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.LowerBound.rows());
+    }
+    if (init.UpperBound.rows() == N)
+    {
+        bounds_.col(1) = init.UpperBound;
+    }
+    else if (init.UpperBound.rows() != 0)
+    {
+        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 
     useBounds = init.UseBounds;
@@ -290,6 +297,26 @@ Eigen::VectorXd TimeIndexedProblem::getScalarTransitionJacobian(int t)
         t = T - 1;
     }
     return 2.0 * ct * W * xdiff[t];
+}
+
+Eigen::VectorXd TimeIndexedProblem::getEquality(int t)
+{
+    return Equality.S[t] * Equality.ydiff[t];
+}
+
+Eigen::MatrixXd TimeIndexedProblem::getEqualityJacobian(int t)
+{
+    return Equality.S[t] * Equality.J[t];
+}
+
+Eigen::VectorXd TimeIndexedProblem::getInequality(int t)
+{
+    return Inequality.S[t] * Inequality.ydiff[t];
+}
+
+Eigen::MatrixXd TimeIndexedProblem::getInequalityJacobian(int t)
+{
+    return Inequality.S[t] * Inequality.J[t];
 }
 
 void TimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)

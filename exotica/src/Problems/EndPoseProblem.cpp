@@ -51,7 +51,7 @@ void EndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& init
 {
 }
 
-std::vector<double>& EndPoseProblem::getBounds()
+Eigen::MatrixXd& EndPoseProblem::getBounds()
 {
     return bounds_;
 }
@@ -86,19 +86,10 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
     std::vector<std::string> jnts;
     scene_->getJointNames(jnts);
 
-    bounds_.resize(jnts.size() * 2);
-    std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
-    for (int i = 0; i < jnts.size(); i++)
-    {
-        bounds_[i] = joint_limits.at(jnts[i])[0];
-        bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
-    }
-
-    useBounds = init.UseBounds;
-
+    bounds_ = scene_->getSolver().getJointLimits();
     if (init.LowerBound.rows() == N)
     {
-        for (int i = 0; i < jnts.size(); i++) bounds_[i] = init.LowerBound(i);
+        bounds_.col(0) = init.LowerBound;
     }
     else if (init.LowerBound.rows() != 0)
     {
@@ -106,12 +97,14 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
     }
     if (init.UpperBound.rows() == N)
     {
-        for (int i = 0; i < jnts.size(); i++) bounds_[i + N] = init.UpperBound(i);
+        bounds_.col(1) = init.UpperBound;
     }
     else if (init.UpperBound.rows() != 0)
     {
         throw_named("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
+
+    useBounds = init.UseBounds;
 
     TaskSpaceVector dummy;
     Cost.initialize(init.Cost, shared_from_this(), dummy);
@@ -138,6 +131,26 @@ double EndPoseProblem::getScalarCost()
 Eigen::VectorXd EndPoseProblem::getScalarJacobian()
 {
     return Cost.J.transpose() * Cost.S * Cost.ydiff * 2.0;
+}
+
+Eigen::VectorXd EndPoseProblem::getEquality()
+{
+    return Equality.S * Equality.ydiff;
+}
+
+Eigen::MatrixXd EndPoseProblem::getEqualityJacobian()
+{
+    return Equality.S * Equality.J;
+}
+
+Eigen::VectorXd EndPoseProblem::getInequality()
+{
+    return Inequality.S * Inequality.ydiff;
+}
+
+Eigen::MatrixXd EndPoseProblem::getInequalityJacobian()
+{
+    return Inequality.S * Inequality.J;
 }
 
 void EndPoseProblem::Update(Eigen::VectorXdRefConst x)

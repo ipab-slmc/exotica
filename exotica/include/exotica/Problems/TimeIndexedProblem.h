@@ -65,7 +65,7 @@ public:
     void setRhoNEQ(const std::string& task_name, const double rho, int t = 0);
     Eigen::VectorXd getGoalNEQ(const std::string& task_name, int t = 0);
     double getRhoNEQ(const std::string& task_name, int t = 0);
-    std::vector<double>& getBounds();
+    Eigen::MatrixXd& getBounds();
 
     int getT() const { return T; }
     void setT(int T_in);
@@ -77,6 +77,11 @@ public:
     Eigen::VectorXd getScalarTaskJacobian(int t);
     double getScalarTransitionCost(int t);
     Eigen::VectorXd getScalarTransitionJacobian(int t);
+
+    Eigen::VectorXd getEquality(int t);
+    Eigen::MatrixXd getEqualityJacobian(int t);
+    Eigen::VectorXd getInequality(int t);
+    Eigen::MatrixXd getInequalityJacobian(int t);
 
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask Cost;
@@ -107,7 +112,7 @@ private:
     double tau;  //!< Time step duration
 
     std::vector<Eigen::VectorXd> InitialTrajectory;
-    std::vector<double> bounds_;
+    Eigen::MatrixXd bounds_;
     TimeIndexedProblemInitializer init_;
     void reinitializeVariables();
 };

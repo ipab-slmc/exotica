@@ -58,6 +58,22 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     applyStartState(false);
     setT(init_.T);
 
+    N = scene_->getSolver().getNumControlledJoints();
+
+    W_rate = init_.Wrate;
+    W = Eigen::MatrixXd::Identity(N, N) * W_rate;
+    if (init_.W.rows() > 0)
+    {
+        if (init_.W.rows() == N)
+        {
+            W.diagonal() = init_.W * W_rate;
+        }
+        else
+        {
+            throw_named("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
+        }
+    }
+
     bounds_ = scene_->getSolver().getJointLimits();
     if (init.LowerBound.rows() == N)
     {
@@ -77,17 +93,15 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     }
 
     useBounds = init.UseBounds;
+
+    reinitializeVariables();
 }
 
 void TimeIndexedProblem::reinitializeVariables()
 {
-    T = init_.T;
-    if (T <= 2)
-    {
-        throw_named("Invalid number of timesteps: " << T);
-    }
-    tau = init_.Tau;
-    W_rate = init_.Wrate;
+    if (debug_) HIGHLIGHT_NAMED("UnconstrainedTimeIndexedProblem", "Initialize problem with T=" << T);
+
+    setTau(init_.Tau);
 
     NumTasks = Tasks.size();
     PhiN = 0;
@@ -100,23 +114,9 @@ void TimeIndexedProblem::reinitializeVariables()
         JN += Tasks[i]->LengthJ;
     }
 
-    N = scene_->getSolver().getNumControlledJoints();
-
-    W = Eigen::MatrixXd::Identity(N, N) * W_rate;
-    if (init_.W.rows() > 0)
-    {
-        if (init_.W.rows() == N)
-        {
-            W.diagonal() = init_.W * W_rate;
-        }
-        else
-        {
-            throw_named("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
-        }
-    }
-
     yref.setZero(PhiN);
     Phi.assign(T, yref);
+
     if (Flags & KIN_J) J.assign(T, Eigen::MatrixXd(JN, N));
     x.assign(T, Eigen::VectorXd::Zero(N));
     xdiff.assign(T, Eigen::VectorXd::Zero(N));
@@ -301,26 +301,66 @@ Eigen::VectorXd TimeIndexedProblem::getScalarTransitionJacobian(int t)
 
 Eigen::VectorXd TimeIndexedProblem::getEquality(int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     return Equality.S[t] * Equality.ydiff[t];
 }
 
 Eigen::MatrixXd TimeIndexedProblem::getEqualityJacobian(int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     return Equality.S[t] * Equality.J[t];
 }
 
 Eigen::VectorXd TimeIndexedProblem::getInequality(int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     return Inequality.S[t] * Inequality.ydiff[t];
 }
 
 Eigen::MatrixXd TimeIndexedProblem::getInequalityJacobian(int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     return Inequality.S[t] * Inequality.J[t];
 }
 
 void TimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -334,6 +374,14 @@ void TimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRe
 
 void TimeIndexedProblem::setRho(const std::string& task_name, const double rho, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -348,6 +396,14 @@ void TimeIndexedProblem::setRho(const std::string& task_name, const double rho, 
 
 Eigen::VectorXd TimeIndexedProblem::getGoal(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -360,6 +416,14 @@ Eigen::VectorXd TimeIndexedProblem::getGoal(const std::string& task_name, int t)
 
 double TimeIndexedProblem::getRho(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
@@ -372,6 +436,14 @@ double TimeIndexedProblem::getRho(const std::string& task_name, int t)
 
 void TimeIndexedProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Equality.Indexing.size(); i++)
     {
         if (Equality.Tasks[i]->getObjectName() == task_name)
@@ -385,6 +457,14 @@ void TimeIndexedProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXd
 
 void TimeIndexedProblem::setRhoEQ(const std::string& task_name, const double rho, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Equality.Indexing.size(); i++)
     {
         if (Equality.Tasks[i]->getObjectName() == task_name)
@@ -399,6 +479,14 @@ void TimeIndexedProblem::setRhoEQ(const std::string& task_name, const double rho
 
 Eigen::VectorXd TimeIndexedProblem::getGoalEQ(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Equality.Indexing.size(); i++)
     {
         if (Equality.Tasks[i]->getObjectName() == task_name)
@@ -411,6 +499,14 @@ Eigen::VectorXd TimeIndexedProblem::getGoalEQ(const std::string& task_name, int 
 
 double TimeIndexedProblem::getRhoEQ(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Equality.Indexing.size(); i++)
     {
         if (Equality.Tasks[i]->getObjectName() == task_name)
@@ -423,6 +519,14 @@ double TimeIndexedProblem::getRhoEQ(const std::string& task_name, int t)
 
 void TimeIndexedProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
         if (Inequality.Tasks[i]->getObjectName() == task_name)
@@ -436,6 +540,14 @@ void TimeIndexedProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorX
 
 void TimeIndexedProblem::setRhoNEQ(const std::string& task_name, const double rho, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
         if (Inequality.Tasks[i]->getObjectName() == task_name)
@@ -450,6 +562,14 @@ void TimeIndexedProblem::setRhoNEQ(const std::string& task_name, const double rh
 
 Eigen::VectorXd TimeIndexedProblem::getGoalNEQ(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
         if (Inequality.Tasks[i]->getObjectName() == task_name)
@@ -462,6 +582,14 @@ Eigen::VectorXd TimeIndexedProblem::getGoalNEQ(const std::string& task_name, int
 
 double TimeIndexedProblem::getRhoNEQ(const std::string& task_name, int t)
 {
+    if (t >= T || t < -1)
+    {
+        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t == -1)
+    {
+        t = T - 1;
+    }
     for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
         if (Inequality.Tasks[i]->getObjectName() == task_name)

@@ -220,6 +220,7 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
             {
                 if (debug_) HIGHLIGHT("Maximum backtrack iterations reached, exiting.");
                 prob_->terminationCriterion = TerminationCriterion::BacktrackIterationLimit;
+                break;
             }
 
             // Check convergence if

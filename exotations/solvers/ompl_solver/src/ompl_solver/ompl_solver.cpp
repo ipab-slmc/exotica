@@ -61,13 +61,13 @@ void OMPLsolver::specifyProblem(PlanningProblem_ptr pointer)
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
     ompl_simple_setup_->setPlannerAllocator(boost::bind(planner_allocator_, _1, "Exotica_" + algorithm_));
 
-    if(init_.Projection.rows()>0)
+    if (init_.Projection.rows() > 0)
     {
         std::vector<int> project_vars(init_.Projection.rows());
-        for(int i=0; i<init_.Projection.rows(); i++)
+        for (int i = 0; i < init_.Projection.rows(); i++)
         {
-            project_vars[i]=(int)init_.Projection(i);
-            if(project_vars[i]<0 || project_vars[i]>=prob_->N) throw_named("Invalid projection index! "<<project_vars[i]);
+            project_vars[i] = (int)init_.Projection(i);
+            if (project_vars[i] < 0 || project_vars[i] >= prob_->N) throw_named("Invalid projection index! " << project_vars[i]);
         }
         if (prob_->getScene()->getBaseType() == BASE_TYPE::FIXED)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLRNProjection(state_space_, project_vars)));

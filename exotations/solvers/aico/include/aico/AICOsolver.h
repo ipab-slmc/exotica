@@ -131,7 +131,6 @@ public:
 
     std::map<std::string, std::pair<int, int> > taskIndex;
     Eigen::VectorXi dim;  //!< Task dimension
-    double planning_time_;
 
 protected:
     /** \brief Initializes message data.
@@ -154,7 +153,6 @@ private:
     double minimum_step_tolerance;              //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
     double step_tolerance;                      //!< Relative step tolerance (termination criterion)
     double function_tolerance;                  //!< Relative function tolerance/first-order optimality criterion
-    int max_iterations;                         //!< Max. number of AICO iterations
     int max_backtrack_iterations;               //!< Max. number of sweeps without improvement before terminating (= line-search)
     bool useBwdMsg;                             //!< Flag for using backward message initialisation
     Eigen::VectorXd bwdMsg_v;                   //!< Backward message initialisation mean

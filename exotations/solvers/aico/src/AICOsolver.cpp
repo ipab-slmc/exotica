@@ -60,7 +60,7 @@ void AICOsolver::Instantiate(AICOsolverInitializer& init)
     {
         throw_named("Unknown sweep mode '" << init.SweepMode << "'");
     }
-    max_iterations = init.MaxIterations;
+    setNumberOfMaxIterations(init.MaxIterations);
     max_backtrack_iterations = init.MaxBacktrackIterations;
     minimum_step_tolerance = init.MinStep;
     step_tolerance = init.StepTolerance;
@@ -88,7 +88,6 @@ AICOsolver::AICOsolver()
       minimum_step_tolerance(1e-5),
       step_tolerance(1e-5),
       function_tolerance(1e-5),
-      max_iterations(100),
       max_backtrack_iterations(10),
       useBwdMsg(false),
       bwdMsg_v(),
@@ -155,8 +154,9 @@ void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
 
 void AICOsolver::Solve(Eigen::MatrixXd& solution)
 {
-    prob_->resetCostEvolution(max_iterations + 1);
+    prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
     prob_->terminationCriterion = TerminationCriterion::NotStarted;
+    planning_time_ = -1;
 
     Eigen::VectorXd q0 = prob_->applyStartState();
     std::vector<Eigen::VectorXd> q_init = prob_->getInitialTrajectory();
@@ -196,7 +196,7 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
     // Reset sweep and iteration count
     sweep = 0;
     iterationCount = 0;
-    while (iterationCount < max_iterations)
+    while (iterationCount < getNumberOfMaxIterations())
     {
         // Check whether user interrupted (Ctrl+C)
         if (Server::isRos() && !ros::ok())
@@ -254,7 +254,7 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
     }
 
     // Check whether maximum iteration count was reached
-    if (iterationCount == max_iterations)
+    if (iterationCount == getNumberOfMaxIterations())
     {
         HIGHLIGHT("Maximum iterations reached");
         prob_->terminationCriterion = TerminationCriterion::IterationLimit;

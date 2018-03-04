@@ -550,6 +550,8 @@ PYBIND11_MODULE(_pyexotica, module)
     taskSpaceVector.def("__repr__", [](TaskSpaceVector* instance) { return ((std::ostringstream&)(std::ostringstream("") << "TaskSpaceVector (" << instance->data.transpose() << ")")).str(); });
 
     py::class_<MotionSolver, std::shared_ptr<MotionSolver>, Object> motionSolver(module, "MotionSolver");
+    motionSolver.def_property("maxIterations", &MotionSolver::getNumberOfMaxIterations, &MotionSolver::setNumberOfMaxIterations);
+    motionSolver.def("getPlanningTime", &MotionSolver::getPlanningTime);
     motionSolver.def("specifyProblem", &MotionSolver::specifyProblem, "Assign problem to the solver", py::arg("planningProblem"));
     motionSolver.def(
         "solve", [](std::shared_ptr<MotionSolver> sol) { return Solve(sol); },

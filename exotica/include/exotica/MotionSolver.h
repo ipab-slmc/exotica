@@ -53,9 +53,17 @@ public:
     virtual void Solve(Eigen::MatrixXd& solution) = 0;
     PlanningProblem_ptr getProblem() { return problem_; }
     virtual std::string print(std::string prepend);
-
+    void setNumberOfMaxIterations(int maxIter)
+    {
+        HIGHLIGHT_NAMED("MotionSolver", "Setting maximum iterations to " << maxIter << " (was " << maxIterations_ << ")");
+        maxIterations_ = maxIter;
+    }
+    int getNumberOfMaxIterations() { return maxIterations_; }
+    double getPlanningTime() { return planning_time_; }
 protected:
     PlanningProblem_ptr problem_;
+    double planning_time_ = -1;
+    int maxIterations_ = 100;
 };
 
 typedef exotica::Factory<exotica::MotionSolver> MotionSolver_fac;

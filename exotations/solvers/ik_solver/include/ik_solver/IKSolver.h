@@ -59,12 +59,6 @@ public:
 
     UnconstrainedEndPoseProblem_ptr& getProblem();
 
-    Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
-
-    double error;
-    double planning_time_;
-
-    int getMaxIteration();
     int getLastIteration();
 
 private:
@@ -72,6 +66,7 @@ private:
 
     inline void vel_solve(double& err, int t, Eigen::VectorXdRefConst q);
 
+    Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
     void ScaleToStepSize(Eigen::VectorXdRef xd);
 
     UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
@@ -81,6 +76,7 @@ private:
     Eigen::MatrixXd W;
     Eigen::MatrixXd Winv;
     int iterations_;
+    double error;
 };
 typedef std::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }

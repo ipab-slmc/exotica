@@ -92,6 +92,7 @@ Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd>& A_)
 void IKsolver::Instantiate(IKsolverInitializer& init)
 {
     parameters_ = init;
+    setNumberOfMaxIterations(init.MaxIt);
 }
 
 void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
@@ -118,11 +119,6 @@ UnconstrainedEndPoseProblem_ptr& IKsolver::getProblem()
     return prob_;
 }
 
-int IKsolver::getMaxIteration()
-{
-    return parameters_.MaxIt;
-}
-
 int IKsolver::getLastIteration()
 {
     return iterations_;
@@ -144,7 +140,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
     Eigen::VectorXd q = q0;
     error = INFINITY;
     int i;
-    for (i = 0; i < parameters_.MaxIt; i++)
+    for (i = 0; i < getNumberOfMaxIterations(); i++)
     {
         prob_->Update(q);
         Eigen::VectorXd yd = prob_->Cost.S * prob_->Cost.ydiff;

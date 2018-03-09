@@ -508,6 +508,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kdlFrame.def(py::init());
     kdlFrame.def("__init__", [](KDL::Frame& me, Eigen::MatrixXd other) { me = getFrameFromMatrix(other); });
     kdlFrame.def("__init__", [](KDL::Frame& me, Eigen::VectorXd other) { me = getFrame(other); });
+    kdlFrame.def("__init__", [](KDL::Frame& me, const KDL::Frame& other) { me = other; });
     kdlFrame.def("__repr__", [](KDL::Frame* me) { return "KDL::Frame " + toString(*me); });
     kdlFrame.def("getRPY", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::RPY); });
     kdlFrame.def("getZYZ", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYZ); });
@@ -811,6 +812,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getTrajectory", [](Scene* instance, const std::string& link) { return instance->getTrajectory(link)->toString(); });
     scene.def("removeTrajectory", &Scene::removeTrajectory);
     scene.def("updateSceneFrames", &Scene::updateSceneFrames);
+    scene.def("updateInternalFrames", &Scene::updateInternalFrames, py::arg("updateRequest") = true);
 
     py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collisionScene(module, "CollisionScene");
     // TODO: expose isStateValid, isCollisionFree, getCollisionDistance, getCollisionWorldLinks, getCollisionRobotLinks, getTranslation

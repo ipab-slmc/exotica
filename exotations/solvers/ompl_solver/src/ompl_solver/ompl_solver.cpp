@@ -183,7 +183,7 @@ void OMPLsolver::getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCo
     const int n1 = states.size() - 1;
     for (int i = 0; i < n1; ++i)
         length += si->getStateSpace()->validSegmentCount(states[i], states[i + 1]);
-    pg.interpolate(length);
+    pg.interpolate(int(length*init_.SmoothnessFactor));
 
     traj.resize(pg.getStateCount(), prob_->getSpaceDim());
     Eigen::VectorXd tmp(prob_->getSpaceDim());

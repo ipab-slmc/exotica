@@ -1,5 +1,6 @@
 extend <exotica/MotionSolver>
 Optional bool Smooth = true;
+Optional double SmoothnessFactor = 1.0;
 Optional double Timeout = 60.0;
 Optional std::string Range = "1";
 Optional bool UseGoalBias = false;

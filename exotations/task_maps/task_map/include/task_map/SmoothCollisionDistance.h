@@ -71,6 +71,8 @@ private:
     Scene_ptr scene_;
     CollisionScene_ptr cscene_;
     SmoothCollisionDistanceInitializer init_;
+
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
 
 typedef std::shared_ptr<exotica::SmoothCollisionDistance>

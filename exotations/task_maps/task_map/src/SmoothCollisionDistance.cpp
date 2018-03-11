@@ -41,7 +41,10 @@ SmoothCollisionDistance::SmoothCollisionDistance() {}
 void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                                      Eigen::VectorXdRef phi)
 {
-    throw_pretty("I didn't implement that yet");
+    if (phi.rows() != dim_) throw_named("Wrong size of phi!");
+    phi.setZero();
+    Eigen::MatrixXd J;
+    update(x, phi, J, false);
 }
 
 void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
@@ -52,6 +55,14 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
     phi.setZero();
     J.setZero();
 
+    update(x, phi, J, true);
+}
+
+void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
+                                     Eigen::VectorXdRef phi,
+                                     Eigen::MatrixXdRef J,
+                                     bool updateJacobian)
+{
     // Get all world collision links, then iterate through them
     std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robotLinks_, check_self_collision_);
     double& d = phi(0);
@@ -64,29 +75,32 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
             // Cost
             d += std::pow((1. - proxy.distance / margin), linear_ ? 1 : 2);
 
-            // Jacobian
-            KDL::Frame arel = KDL::Frame(proxy.e1->Frame.Inverse(KDL::Vector(
-                proxy.contact1(0), proxy.contact1(1), proxy.contact1(2))));
-            KDL::Frame brel = KDL::Frame(proxy.e2->Frame.Inverse(KDL::Vector(
-                proxy.contact2(0), proxy.contact2(1), proxy.contact2(2))));
+            if (updateJacobian)
+            {
+                // Jacobian
+                KDL::Frame arel = KDL::Frame(proxy.e1->Frame.Inverse(KDL::Vector(
+                    proxy.contact1(0), proxy.contact1(1), proxy.contact1(2))));
+                KDL::Frame brel = KDL::Frame(proxy.e2->Frame.Inverse(KDL::Vector(
+                    proxy.contact2(0), proxy.contact2(1), proxy.contact2(2))));
 
-            if (!linear_)
-            {
-                Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
-                    proxy.e1, arel, nullptr, KDL::Frame());
-                J += (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ);
-                tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
-                                                    KDL::Frame());
-                J -= (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ);
-            }
-            else
-            {
-                Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
-                    proxy.e1, arel, nullptr, KDL::Frame());
-                J += 1 / margin * (proxy.normal1.transpose() * tmpJ);
-                tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
-                                                    KDL::Frame());
-                J -= 1 / margin * (proxy.normal1.transpose() * tmpJ);
+                if (!linear_)
+                {
+                    Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+                        proxy.e1, arel, nullptr, KDL::Frame());
+                    J += (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ);
+                    tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
+                                                        KDL::Frame());
+                    J -= (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ);
+                }
+                else
+                {
+                    Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+                        proxy.e1, arel, nullptr, KDL::Frame());
+                    J += 1 / margin * (proxy.normal1.transpose() * tmpJ);
+                    tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
+                                                        KDL::Frame());
+                    J -= 1 / margin * (proxy.normal1.transpose() * tmpJ);
+                }
             }
         }
     }

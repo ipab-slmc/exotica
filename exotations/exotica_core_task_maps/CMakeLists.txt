@@ -41,6 +41,7 @@ AddInitializer(
   manipulability
 
   SmoothCollisionDistance
+  SumOfPenetrations
 )
 GenInitializers()
 
@@ -85,6 +86,7 @@ set(SOURCES
     src/manipulability.cpp
 
     src/SmoothCollisionDistance.cpp
+    src/SumOfPenetrations.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

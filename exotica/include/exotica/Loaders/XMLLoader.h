@@ -43,6 +43,20 @@ public:
         return any_solver;
     }
 
+    static std::shared_ptr<exotica::MotionSolver> loadSolverStandalone(const std::string& file_name)
+    {
+        Initializer solver = XMLLoader::load(file_name);
+        MotionSolver_ptr any_solver = Setup::createSolver(solver);
+        return any_solver;
+    }
+
+    static std::shared_ptr<exotica::PlanningProblem> loadProblem(const std::string& file_name)
+    {
+        Initializer problem = XMLLoader::load(file_name);
+        PlanningProblem_ptr any_problem = Setup::createProblem(problem);
+        return any_problem;
+    }
+
 private:
     XMLLoader();
     static std::shared_ptr<XMLLoader> instance_;

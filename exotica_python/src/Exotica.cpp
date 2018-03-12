@@ -484,6 +484,8 @@ PYBIND11_MODULE(_pyexotica, module)
                      },
                      py::arg("name") = "exotica", py::arg("anonymous") = false);
     setup.def_static("loadSolver", &XMLLoader::loadSolver);
+    setup.def_static("loadSolverStandalone", &XMLLoader::loadSolverStandalone);
+    setup.def_static("loadProblem", &XMLLoader::loadProblem);
 
     py::module tools = module.def_submodule("Tools");
     tools.def("parsePath", &parsePath);

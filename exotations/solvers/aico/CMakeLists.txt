@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.12)
 project(aico)
 
 ## Find catkin macros and libraries
@@ -9,7 +9,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(LAPACK REQUIRED)
 
-AddInitializer(AICOsolver)
+AddInitializer(
+  AICOsolver
+  BayesianIK
+)
 GenInitializers()
 
 catkin_package(
@@ -28,6 +31,7 @@ include_directories(
 add_library(aico
   src/MathOperations.cpp
   src/AICOsolver.cpp
+  src/BayesianIK.cpp
 )
 
 ## Specify libraries to link a library or executable target against

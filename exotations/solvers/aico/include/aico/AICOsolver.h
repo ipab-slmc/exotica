@@ -105,9 +105,6 @@ public:
 
     void getStats(std::vector<SinglePassMeanCoviariance>& q_stat_);
 
-    std::map<std::string, std::pair<int, int> > taskIndex;
-    Eigen::VectorXi dim;  //!< Task dimension
-
 protected:
     /** \brief Initializes message data.
        *  @param q0 Start configuration
@@ -138,20 +135,19 @@ private:
 
     std::vector<SinglePassMeanCoviariance> q_stat;  //!< Cost weighted normal distribution of configurations across sweeps.
 
-    std::vector<Eigen::VectorXd> s;      //!< Forward message mean
-    std::vector<Eigen::MatrixXd> Sinv;   //!< Forward message covariance inverse
-    std::vector<Eigen::VectorXd> v;      //!< Backward message mean
-    std::vector<Eigen::MatrixXd> Vinv;   //!< Backward message covariance inverse
-    std::vector<Eigen::VectorXd> r;      //!< Task message mean
-    std::vector<Eigen::MatrixXd> R;      //!< Task message covariance
-    Eigen::VectorXd rhat;                //!< Task message point of linearisation
-    std::vector<Eigen::VectorXd> b;      //!< Belief mean
-    std::vector<Eigen::MatrixXd> Binv;   //!< Belief covariance inverse
-    std::vector<Eigen::VectorXd> q;      //!< Configuration space trajectory
-    std::vector<Eigen::VectorXd> qhat;   //!< Point of linearisation
-    Eigen::VectorXd costControl;         //!< Control cost for each time step
-    Eigen::VectorXd costTask;            //!< Task cost for each task for each time step
-    std::vector<std::string> taskNames;  //!< Task names (only used for printing debug info)
+    std::vector<Eigen::VectorXd> s;     //!< Forward message mean
+    std::vector<Eigen::MatrixXd> Sinv;  //!< Forward message covariance inverse
+    std::vector<Eigen::VectorXd> v;     //!< Backward message mean
+    std::vector<Eigen::MatrixXd> Vinv;  //!< Backward message covariance inverse
+    std::vector<Eigen::VectorXd> r;     //!< Task message mean
+    std::vector<Eigen::MatrixXd> R;     //!< Task message covariance
+    Eigen::VectorXd rhat;               //!< Task message point of linearisation
+    std::vector<Eigen::VectorXd> b;     //!< Belief mean
+    std::vector<Eigen::MatrixXd> Binv;  //!< Belief covariance inverse
+    std::vector<Eigen::VectorXd> q;     //!< Configuration space trajectory
+    std::vector<Eigen::VectorXd> qhat;  //!< Point of linearisation
+    Eigen::VectorXd costControl;        //!< Control cost for each time step
+    Eigen::VectorXd costTask;           //!< Task cost for each task for each time step
 
     std::vector<Eigen::VectorXd> s_old;     //!< Forward message mean (last most optimal value)
     std::vector<Eigen::MatrixXd> Sinv_old;  //!< Forward message covariance inverse (last most optimal value)
@@ -279,15 +275,6 @@ private:
        * \brief Reverts back to previous state if the cost of the current state is higher.
        */
     void perhapsUndoStep();
-
-    /**
-       * \brief Returns process transition matrices
-       * @param A_ System transition matrix.
-       * @param a_ System transition drift vector.
-       * @param B_ System control matrix.
-       */
-    void getProcess(Eigen::Ref<Eigen::MatrixXd> A_,
-                    Eigen::Ref<Eigen::VectorXd> a_, Eigen::Ref<Eigen::MatrixXd> B_);
 
     /**
        * \brief Updates the task cost terms \f$ R, r, \hat{r} \f$ for time step \f$t\f$. UnconstrainedTimeIndexedProblem::update() has to be called before calling this function.

@@ -66,21 +66,12 @@
 #define AICOSOLVER_H_
 
 #include <aico/AICOsolverInitializer.h>
+#include <aico/MathOperations.h>
 #include <aico/incremental_gaussian.h>
 #include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 #include <fstream>
 #include <iostream>
-
-#include "f2c.h"
-#include "lapack/cblas.h"
-#undef small
-#undef large
-#include <lapack/clapack.h>
-#undef double
-#undef max
-#undef min
-#undef abs
 
 namespace exotica
 {
@@ -111,21 +102,6 @@ public:
        * \brief Stores costs into a file
        */
     void saveCosts(std::string file_name);
-
-    /**
-       * \brief Computes an inverse of symmetric positive definite matrix using LAPACK (very fast)
-       * @param Ainv Resulting inverted matrix.
-       * @param A A symmetric positive definite matrix to be inverted.
-       */
-    void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
-                          const Eigen::Ref<const Eigen::MatrixXd>& A_);
-
-    /**
-       * \brief Computes the solution to the linear problem \f$x=Ab\f$ for symmetric positive definite matrix A
-       */
-    void AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
-                        const Eigen::Ref<const Eigen::MatrixXd>& A_,
-                        const Eigen::Ref<const Eigen::VectorXd>& b_);
 
     void getStats(std::vector<SinglePassMeanCoviariance>& q_stat_);
 

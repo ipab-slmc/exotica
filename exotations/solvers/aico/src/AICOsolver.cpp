@@ -382,47 +382,6 @@ void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
     rememberOldState();
 }
 
-void AICOsolver::inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
-                                  const Eigen::Ref<const Eigen::MatrixXd>& A_)
-{
-    Ainv_ = A_;
-    double* AA = Ainv_.data();
-    integer info;
-    integer nn = A_.rows();
-    // Compute Cholesky
-    dpotrf_((char*)"L", &nn, AA, &nn, &info);
-    if (info != 0)
-    {
-        throw_named("Cholesky decomposition error: " << info << "\n"
-                                                     << A_);
-    }
-    // Invert
-    dpotri_((char*)"L", &nn, AA, &nn, &info);
-    if (info != 0)
-    {
-        throw_named("Matrix inversion error: " << info);
-    }
-    Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
-}
-
-void AICOsolver::AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
-                                const Eigen::Ref<const Eigen::MatrixXd>& A_,
-                                const Eigen::Ref<const Eigen::VectorXd>& b_)
-{
-    integer n_ = prob_->N, m_ = 1;
-    integer info;
-    linSolverTmp = A_;
-    x_ = b_;
-    double* AA = linSolverTmp.data();
-    double* xx = x_.data();
-    dposv_((char*)"L", &n_, &m_, AA, &n_, xx, &n_, &info);
-    if (info != 0)
-    {
-        throw_named("Linear solver error: " << info << "\nA:\n"
-                                            << A_ << "\nb: " << b_.transpose() << "\nx: " << x_.transpose());
-    }
-}
-
 void AICOsolver::updateFwdMessage(int t)
 {
     Eigen::MatrixXd barS(prob_->N, prob_->N), St;
@@ -514,12 +473,12 @@ void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
     if (damping)
     {
         Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
-        AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * dampingReference[t]);
+        AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * dampingReference[t], linSolverTmp, prob_->N);
     }
     else
     {
         Binv[t] = Sinv[t] + Vinv[t] + R[t];
-        AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]);
+        AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t], linSolverTmp, prob_->N);
     }
 
     for (int k = 0; k < maxRelocationIterations && !(Server::isRos() && !ros::ok()); k++)
@@ -535,12 +494,12 @@ void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
         if (damping)
         {
             Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
-            AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * dampingReference[t]);
+            AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * dampingReference[t], linSolverTmp, prob_->N);
         }
         else
         {
             Binv[t] = Sinv[t] + Vinv[t] + R[t];
-            AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]);
+            AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t], linSolverTmp, prob_->N);
         }
     }
 }

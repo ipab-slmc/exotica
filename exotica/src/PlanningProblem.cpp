@@ -236,7 +236,6 @@ void PlanningProblem::resetCostEvolution(unsigned int size)
 
 void PlanningProblem::setCostEvolution(int index, double value)
 {
-    // HIGHLIGHT_NAMED("PlanningProblem::setCostEvolution", "Update index=" << index << " with value=" << value);
     if (index > -1 && index < costEvolution.size())
     {
         costEvolution[index].first = std::chrono::high_resolution_clock::now();

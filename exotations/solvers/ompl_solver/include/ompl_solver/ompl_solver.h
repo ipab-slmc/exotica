@@ -59,6 +59,7 @@ using ompl_ptr = boost::shared_ptr<T>;
 
 namespace exotica
 {
+template <class ProblemType>
 class OMPLsolver : public MotionSolver
 {
 public:
@@ -86,7 +87,7 @@ protected:
     void postSolve();
     void getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc);
     OMPLsolverInitializer init_;
-    SamplingProblem_ptr prob_;
+    std::shared_ptr<ProblemType> prob_;
     ompl::geometric::SimpleSetupPtr ompl_simple_setup_;
     ompl::base::StateSpacePtr state_space_;
     ConfiguredPlannerAllocator planner_allocator_;

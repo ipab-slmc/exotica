@@ -71,6 +71,8 @@ void SumOfPenetrations::update(Eigen::VectorXdRefConst x,
                                Eigen::MatrixXdRef J)
 {
     throw_pretty("Not implemented");
+    // J.setZero();
+    // update(x, phi);
 }
 
 void SumOfPenetrations::Instantiate(
@@ -96,7 +98,10 @@ void SumOfPenetrations::Initialize()
                     "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_);
 
     // Get names of all controlled joints and their corresponding child links
-    robotLinks_ = scene_->getModelLinkNames();
+    robotLinks_ = scene_->getControlledLinkNames();
+    // std::cout << "Robot links: ";
+    // for (auto& link : robotLinks_) std::cout << link << ", ";
+    // std::cout << std::endl;
 }
 
 int SumOfPenetrations::taskSpaceDim() { return dim_; }

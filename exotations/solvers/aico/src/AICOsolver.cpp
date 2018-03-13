@@ -338,14 +338,6 @@ void AICOsolver::initMessages()
     lastT = prob_->getT();
 }
 
-void AICOsolver::getProcess(Eigen::Ref<Eigen::MatrixXd> A_,
-                            Eigen::Ref<Eigen::VectorXd> a_, Eigen::Ref<Eigen::MatrixXd> B_)
-{
-    A_ = Eigen::MatrixXd::Identity(prob_->N, prob_->N);
-    B_ = Eigen::MatrixXd::Identity(prob_->N, prob_->N);
-    a_ = Eigen::VectorXd::Zero(prob_->N);
-}
-
 void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
 {
     if (q_init.size() != prob_->getT())
@@ -687,5 +679,4 @@ void AICOsolver::perhapsUndoStep()
         damping /= 5.;
     }
 }
-
 } /* namespace exotica */

@@ -26,6 +26,7 @@ include_directories(
 
 ## Declare a cpp library
 add_library(aico
+  src/MathOperations.cpp
   src/AICOsolver.cpp
 )
 

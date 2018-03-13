@@ -566,6 +566,7 @@ void KinematicTree::publishFrames()
                     mrk.ns = "CollisionObjects";
                     mrk.color = getColor(Tree[i].lock()->Color);
                     mrk.header.frame_id = "exotica/" + Tree[i].lock()->Segment.getName();
+                    mrk.pose.orientation.w = 1.0;
                     msg.markers.push_back(mrk);
                 }
             }

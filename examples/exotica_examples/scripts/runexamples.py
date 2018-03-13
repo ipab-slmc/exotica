@@ -20,6 +20,7 @@ roslaunch = ['CppCore',
              'PythonPlanAICO',
              'PythonPlanAICOTrajectory',
              'PythonPlanIK',
+             'PythonPlanBayesianIK',
              'PythonPlanOMPL',
             ]
 

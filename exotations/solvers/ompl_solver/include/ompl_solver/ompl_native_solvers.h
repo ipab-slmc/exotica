@@ -38,42 +38,42 @@
 
 namespace exotica
 {
-class RRT : public OMPLsolver, Instantiable<RRTInitializer>
+class RRT : public OMPLsolver<SamplingProblem>, Instantiable<RRTInitializer>
 {
 public:
     RRT();
     virtual void Instantiate(RRTInitializer& init);
 };
 
-class RRTConnect : public OMPLsolver, Instantiable<RRTConnectInitializer>
+class RRTConnect : public OMPLsolver<SamplingProblem>, Instantiable<RRTConnectInitializer>
 {
 public:
     RRTConnect();
     virtual void Instantiate(RRTConnectInitializer& init);
 };
 
-class EST : public OMPLsolver, Instantiable<ESTInitializer>
+class EST : public OMPLsolver<SamplingProblem>, Instantiable<ESTInitializer>
 {
 public:
     EST();
     virtual void Instantiate(ESTInitializer& init);
 };
 
-class KPIECE : public OMPLsolver, Instantiable<KPIECEInitializer>
+class KPIECE : public OMPLsolver<SamplingProblem>, Instantiable<KPIECEInitializer>
 {
 public:
     KPIECE();
     virtual void Instantiate(KPIECEInitializer& init);
 };
 
-class BKPIECE : public OMPLsolver, Instantiable<BKPIECEInitializer>
+class BKPIECE : public OMPLsolver<SamplingProblem>, Instantiable<BKPIECEInitializer>
 {
 public:
     BKPIECE();
     virtual void Instantiate(BKPIECEInitializer& init);
 };
 
-class PRM : public OMPLsolver, Instantiable<PRMInitializer>
+class PRM : public OMPLsolver<SamplingProblem>, Instantiable<PRMInitializer>
 {
 public:
     PRM();
@@ -89,7 +89,7 @@ public:
     void setMultiQuery(bool val);
 };
 
-class LazyPRM : public OMPLsolver, Instantiable<LazyPRMInitializer>
+class LazyPRM : public OMPLsolver<SamplingProblem>, Instantiable<LazyPRMInitializer>
 {
 public:
     LazyPRM();

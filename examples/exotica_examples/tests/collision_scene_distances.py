@@ -102,6 +102,31 @@ def testSphereVsBoxDistance(collisionScene):
     print('PrimitiveSphere_vs_PrimitiveBox_Distance: Distance, Contact Points, Normals: PASSED')
 
 
+def testSphereVsBoxTouching(collisionScene):
+    PrimitiveSphere_vs_PrimitiveBox_Touching = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_PrimitiveBox_Touching.urdf')
+    prob = exo.Setup.createProblem(PrimitiveSphere_vs_PrimitiveBox_Touching)
+    prob.update(np.zeros(prob.N,))
+    scene = prob.getScene()
+
+    assert(scene.isStateValid(True) == False)
+    print('PrimitiveSphere_vs_PrimitiveBox_Touching: isStateValid(True): PASSED')
+
+    p = scene.getCollisionDistance("A", "B")
+    print(p)
+    debugPublish(p, scene)
+    assert(len(p) == 1)
+    assert(np.isclose(p[0].Distance, 0.))
+    expectedContact1 = np.array([0.5, 0, 0])
+    expectedContact2 = np.array([-1, 0, 0])
+    expectedNormal1 = np.array([-1, 0, 0])
+    expectedNormal2 = np.array([1, 0, 0])
+    assert(np.isclose(p[0].Contact1, expectedContact1, atol=AFAR_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Contact2, expectedContact2, atol=AFAR_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=AFAR_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=AFAR_DISTANCE_ATOL).all())
+    print('PrimitiveSphere_vs_PrimitiveBox_Touching: Distance, Contact Points, Normals: PASSED')
+
+
 def testSphereVsBoxPenetrating(collisionScene):
     PrimitiveSphere_vs_PrimitiveBox_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_PrimitiveBox_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_PrimitiveBox_Penetrating)
@@ -273,6 +298,31 @@ def testBoxVsBoxDistance(collisionScene):
     assert(np.isclose(p[0].Normal1, expectedNormal1, atol=AFAR_DISTANCE_ATOL).all())
     assert(np.isclose(p[0].Normal2, expectedNormal2, atol=AFAR_DISTANCE_ATOL).all())
     print('PrimitiveBox_vs_PrimitiveBox_Distance: Distance, Contact Points, Normals: PASSED')
+
+
+def testBoxVsBoxTouching(collisionScene):
+    PrimitiveBox_vs_PrimitiveBox_Touching = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveBox_vs_PrimitiveBox_Touching.urdf')
+    prob = exo.Setup.createProblem(PrimitiveBox_vs_PrimitiveBox_Touching)
+    prob.update(np.zeros(prob.N,))
+    scene = prob.getScene()
+
+    assert(scene.isStateValid(True) == False)
+    print('PrimitiveBox_vs_PrimitiveBox_Touching: isStateValid(True): PASSED')
+
+    p = scene.getCollisionDistance("A", "B")
+    print(p)
+    debugPublish(p, scene)
+    assert(len(p) == 1)
+    assert(np.isclose(p[0].Distance, 0.))
+    expectedContact1 = np.array([0.5, 0, 0])
+    expectedContact2 = np.array([-0.5, 0, 0])
+    expectedNormal1 = np.array([-1, 0, 0])
+    expectedNormal2 = np.array([1, 0, 0])
+    assert(np.isclose(p[0].Contact1, expectedContact1).all())
+    assert(np.isclose(p[0].Contact2, expectedContact2).all())
+    assert(np.isclose(p[0].Normal1, expectedNormal1).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2).all())
+    print('PrimitiveBox_vs_PrimitiveBox_Touching: Distance, Contact Points, Normals: PASSED')
 
 
 def testBoxVsBoxPenetrating(collisionScene):
@@ -598,12 +648,14 @@ for collisionScene in ['CollisionSceneFCLLatest']:
     testSphereVsSphereDistance(collisionScene)
     testSphereVsSpherePenetrating(collisionScene)
     testSphereVsBoxDistance(collisionScene)
+    testSphereVsBoxTouching(collisionScene)
     testSphereVsBoxPenetrating(collisionScene)
     testSphereVsCylinderDistance(collisionScene)
     testSphereVsCylinderPenetrating(collisionScene)
     testSphereVsMeshDistance(collisionScene)  # includes mesh vs sphere
     #testSphereVsMeshPenetrating(collisionScene)   # BROKEN with libccd
     testBoxVsBoxDistance(collisionScene)
+    testBoxVsBoxTouching(collisionScene)
     testBoxVsBoxPenetrating(collisionScene)
     testBoxVsCylinderDistance(collisionScene)
     testBoxVsCylinderPenetrating(collisionScene)

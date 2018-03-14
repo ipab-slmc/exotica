@@ -2,4 +2,4 @@
 cd exotica
 doxygen
 cd doc
-make html
+make html || true

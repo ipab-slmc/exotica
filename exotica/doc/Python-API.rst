@@ -14,3 +14,8 @@ By default, the Python bindings will be compiled for 2.7. In order to build for 
    :undoc-members:
    :imported-members:
    :show-inheritance:
+
+.. automodule:: ompl_solver_py
+   :members:
+   :undoc-members:
+   :show-inheritance:

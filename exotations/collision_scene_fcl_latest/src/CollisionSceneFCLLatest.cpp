@@ -274,8 +274,8 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     }
     else
     {
-        // HIGHLIGHT("Using LIBCCD");
         data->Request.gjk_solver_type = fcl::GST_LIBCCD;
+        // HIGHLIGHT("Using LIBCCD");
     }
 
     data->Result.clear();
@@ -346,11 +346,25 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
                 c1 = p.e1->Frame.p;
                 c2 = p.e2->Frame.p;
             }
+            // Only LIBCCD can compute contact points on the surface of a
+            // sphere, i.e. if in collision and either of the two objects is a
+            // sphere we need to use LIBCCD.
+            // Cf.
+            // https://github.com/flexible-collision-library/fcl/blob/master/test/test_fcl_signed_distance.cpp#L85-L86
             else
             {
                 // WITH LIBCCD:
-                c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-                c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+                // If touching, use shape centres OF THE OTHER SHAPE
+                if (p.distance == 0)
+                {
+                    c1 = p.e2->Frame.p;
+                    c2 = p.e1->Frame.p;
+                }
+                else
+                {
+                    c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+                    c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+                }
             }
         }
     }
@@ -408,11 +422,27 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     }
 
     // Check if NaN
-    if (std::isnan(c1(0)) || std::isnan(c1(1)) || std::isnan(c1(0)) || std::isnan(c2(0)) || std::isnan(c2(1)) || std::isnan(c2(0)))
+    if (std::isnan(c1(0)) || std::isnan(c1(1)) || std::isnan(c1(2)) || std::isnan(c2(0)) || std::isnan(c2(1)) || std::isnan(c2(2)))
     {
-        HIGHLIGHT_NAMED("computeDistance",
-                        "Contact1 between " << p.e1->Segment.getName() << " and " << p.e2->Segment.getName() << " contains NaN"
-                                            << ", where ShapeType1: " << p.e1->Shape->type << " and ShapeType2: " << p.e2->Shape->type << " and distance: " << p.distance << "");
+        // LIBCCD queries require unreasonably high tolerances, i.e. we may not
+        // be able to compute contacts because one of those borderline cases.
+        // Hence, when we encounter a NaN for a _sphere_, we will replace it
+        // with the shape centre.
+        if (data->Request.gjk_solver_type == fcl::GST_LIBCCD)
+        {
+            // To avoid downstream issues, replace contact point with shape centre
+            if ((std::isnan(c1(0)) || std::isnan(c1(1)) || std::isnan(c1(2))) && p.e1->Shape->type == shapes::ShapeType::SPHERE) c1 = p.e1->Frame.p;
+            if ((std::isnan(c2(0)) || std::isnan(c2(1)) || std::isnan(c2(2))) && p.e2->Shape->type == shapes::ShapeType::SPHERE) c2 = p.e1->Frame.p;
+        }
+        else
+        {
+            // TODO(#277): Any other NaN is a serious issue which we should investigate separately, so display helpful error message:
+            HIGHLIGHT_NAMED("computeDistance",
+                            "Contact1 between " << p.e1->Segment.getName() << " and " << p.e2->Segment.getName() << " contains NaN"
+                                                << ", where ShapeType1: " << p.e1->Shape->type << " and ShapeType2: " << p.e2->Shape->type << " and distance: " << p.distance << " and solver: " << data->Request.gjk_solver_type);
+            HIGHLIGHT("c1:" << data->Result.nearest_points[0](0) << "," << data->Result.nearest_points[0](1) << "," << data->Result.nearest_points[0](2));
+            HIGHLIGHT("c2:" << data->Result.nearest_points[1](0) << "," << data->Result.nearest_points[1](1) << "," << data->Result.nearest_points[1](2));
+        }
     }
 
     KDL::Vector n1 = c2 - c1;

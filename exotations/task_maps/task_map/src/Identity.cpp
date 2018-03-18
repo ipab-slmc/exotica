@@ -104,11 +104,11 @@ void Identity::Initialize()
     if (init_.JointRef.rows() > 0)
     {
         jointRef = init_.JointRef;
-        if (jointRef.rows() != N) throw_named("Invalid joint reference size! Expecting " << N);
+        if (jointRef.rows() != jointMap.size()) throw_named("Invalid joint reference size! Expecting " << jointMap.size());
     }
     else
     {
-        jointRef = Eigen::VectorXd::Zero(N);
+        jointRef = Eigen::VectorXd::Zero(jointMap.size());
     }
 }
 

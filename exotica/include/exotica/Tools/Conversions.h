@@ -229,13 +229,13 @@ inline std::vector<std::string> parseList(const std::string& value, char token =
 
 inline std::vector<int> parseIntList(const std::string value)
 {
-    std::istringstream text_parser(value);
     std::stringstream ss(value);
     std::string item;
     std::vector<int> ret;
-    while (std::getline(ss, item, ','))
+    while (std::getline(ss, item, ' '))
     {
         int tmp;
+        std::istringstream text_parser(item);
         text_parser >> tmp;
         if ((text_parser.fail() || text_parser.bad()))
         {
@@ -249,13 +249,13 @@ inline std::vector<int> parseIntList(const std::string value)
 
 inline std::vector<bool> parseBoolList(const std::string value)
 {
-    std::istringstream text_parser(value);
     std::stringstream ss(value);
     std::string item;
     std::vector<bool> ret;
-    while (std::getline(ss, item, ','))
+    while (std::getline(ss, item, ' '))
     {
         bool tmp;
+        std::istringstream text_parser(item);
         text_parser >> tmp;
         if ((text_parser.fail() || text_parser.bad()))
         {

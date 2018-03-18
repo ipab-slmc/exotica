@@ -208,7 +208,7 @@ template <class ProblemType>
 void OMPLsolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 {
     Eigen::VectorXd q0 = prob_->applyStartState();
-    setGoalState(prob_->goal_);
+    setGoalState(prob_->goal_, init_.Epsilon);
 
     ompl::base::ScopedState<> ompl_start_state(state_space_);
     state_space_->as<OMPLStateSpace>()->ExoticaToOMPLState(q0, ompl_start_state.get());

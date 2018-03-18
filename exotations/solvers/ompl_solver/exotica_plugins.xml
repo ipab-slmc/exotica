@@ -20,4 +20,10 @@
   <class name="exotica/LazyPRM" type="exotica::LazyPRM" base_class_type="exotica::MotionSolver">
     <description>Probabilistic Roadmap</description>
   </class>
+  <class name="exotica/RRTStar" type="exotica::RRTStar" base_class_type="exotica::MotionSolver">
+    <description>RRTStar</description>
+  </class>
+  <class name="exotica/LBTRRT" type="exotica::LBTRRT" base_class_type="exotica::MotionSolver">
+    <description>LBTRRT</description>
+  </class>
 </library>

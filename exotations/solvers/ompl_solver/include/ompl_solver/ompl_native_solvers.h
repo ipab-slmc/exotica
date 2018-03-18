@@ -102,6 +102,20 @@ public:
     bool isMultiQuery();
     void setMultiQuery(bool val);
 };
+
+class RRTStar : public OMPLsolver<SamplingProblem>, Instantiable<RRTStarInitializer>
+{
+public:
+    RRTStar();
+    virtual void Instantiate(RRTStarInitializer& init);
+};
+
+class LBTRRT : public OMPLsolver<SamplingProblem>, Instantiable<LBTRRTInitializer>
+{
+public:
+    LBTRRT();
+    virtual void Instantiate(LBTRRTInitializer& init);
+};
 }
 
 #endif /* INCLUDE_OMPL_SOLVER_OMPL_NATIVE_SOLVERS_H_ */

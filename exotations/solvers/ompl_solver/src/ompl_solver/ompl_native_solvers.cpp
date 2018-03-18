@@ -38,6 +38,10 @@
 #include <ompl/geometric/planners/prm/PRM.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
+#include <ompl/geometric/planners/rrt/RRTstar.h>
+#include <ompl/geometric/planners/rrt/LBTRRT.h>
+#include <ompl/geometric/planners/prm/PRMstar.h>
+#include <ompl/geometric/planners/cforest/CForest.h>
 #include <ompl_solver/ompl_native_solvers.h>
 
 REGISTER_MOTIONSOLVER_TYPE("RRT", exotica::RRT)
@@ -47,9 +51,35 @@ REGISTER_MOTIONSOLVER_TYPE("LazyPRM", exotica::LazyPRM)
 REGISTER_MOTIONSOLVER_TYPE("EST", exotica::EST)
 REGISTER_MOTIONSOLVER_TYPE("KPIECE", exotica::KPIECE)
 REGISTER_MOTIONSOLVER_TYPE("BKPIECE", exotica::BKPIECE)
+REGISTER_MOTIONSOLVER_TYPE("RRTStar", exotica::RRTStar)
+REGISTER_MOTIONSOLVER_TYPE("LBTRRT", exotica::LBTRRT)
 
 namespace exotica
 {
+RRTStar::RRTStar()
+{
+}
+
+void RRTStar::Instantiate(RRTStarInitializer& init)
+{
+    init_ = static_cast<Initializer>(init);
+    algorithm_ = "Exotica_RRTStar";
+    planner_allocator_ = boost::bind(
+        &allocatePlanner<ompl::geometric::RRTstar>, _1, _2);
+}
+
+LBTRRT::LBTRRT()
+{
+}
+
+void LBTRRT::Instantiate(LBTRRTInitializer& init)
+{
+    init_ = static_cast<Initializer>(init);
+    algorithm_ = "Exotica_LBTRRT";
+    planner_allocator_ = boost::bind(
+        &allocatePlanner<ompl::geometric::LBTRRT>, _1, _2);
+}
+
 RRT::RRT()
 {
 }

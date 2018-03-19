@@ -943,6 +943,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getControlledBaseType", &KinematicTree::getControlledBaseType);
     kinematicTree.def("getControlledLinkMass", &KinematicTree::getControlledLinkMass);
     kinematicTree.def("getCollisionObjectTypes", &KinematicTree::getCollisionObjectTypes);
+    kinematicTree.def("getRandomControlledState", &KinematicTree::getRandomControlledState);
 
     py::enum_<shapes::ShapeType>(module, "ShapeType")
         .value("UnknownShape", shapes::ShapeType::UNKNOWN_SHAPE)

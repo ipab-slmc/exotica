@@ -40,6 +40,7 @@
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 #include <map>
+#include <random>
 #include <set>
 #include <string>
 #include <vector>
@@ -203,6 +204,12 @@ public:
     bool Debug;
 
     std::map<std::string, shapes::ShapeType> getCollisionObjectTypes();
+
+    // Random state generation
+    std::random_device rd;
+    std::mt19937 generator_;
+    std::vector<std::uniform_real_distribution<double>> random_state_distributions_;
+    Eigen::VectorXd getRandomControlledState();
 
 private:
     void BuildTree(const KDL::Tree& RobotKinematics);

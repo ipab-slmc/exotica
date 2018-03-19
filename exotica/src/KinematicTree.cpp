@@ -286,6 +286,15 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
     ModelTree[0]->isRobotLink = false;
 
     setJointLimits();
+
+    // Create random distributions for state sampling
+    generator_ = std::mt19937(rd());
+    random_state_distributions_.clear();
+    Eigen::MatrixXd jointLimits = getJointLimits();
+    for (unsigned int i = 0; i < NumControlledJoints; i++)
+    {
+        random_state_distributions_.push_back(std::uniform_real_distribution<double>(jointLimits(i, 0), jointLimits(i, 1)));
+    }
 }
 
 void KinematicTree::UpdateModel()
@@ -799,6 +808,16 @@ std::map<std::string, std::vector<double>> KinematicTree::getUsedJointLimits()
         limits[it.lock()->Segment.getJoint().getName()] = it.lock()->JointLimits;
     }
     return limits;
+}
+
+Eigen::VectorXd KinematicTree::getRandomControlledState()
+{
+    Eigen::VectorXd q_rand(NumControlledJoints);
+    for (unsigned int i = 0; i < NumControlledJoints; i++)
+    {
+        q_rand(i) = random_state_distributions_[i](generator_);
+    }
+    return q_rand;
 }
 
 void KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(

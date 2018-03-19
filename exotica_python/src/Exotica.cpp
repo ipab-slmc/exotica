@@ -459,16 +459,16 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<Setup, std::unique_ptr<Setup, py::nodelete>> setup(module, "Setup");
     setup.def("__init__", [](Setup* instance) { instance = Setup::Instance().get(); });
-    setup.def_static("getSolvers", &Setup::getSolvers);
-    setup.def_static("getProblems", &Setup::getProblems);
-    setup.def_static("getMaps", &Setup::getMaps);
-    setup.def_static("getCollisionScenes", &Setup::getCollisionScenes);
-    setup.def_static("createSolver", &createSolver, py::return_value_policy::take_ownership);
-    setup.def_static("createMap", &createMap, py::return_value_policy::take_ownership);
-    setup.def_static("createProblem", &createProblem, py::return_value_policy::take_ownership);
-    setup.def_static("printSupportedClasses", &Setup::printSupportedClasses);
-    setup.def_static("getInitializers", &Setup::getInitializers, py::return_value_policy::copy);
-    setup.def_static("getPackagePath", &ros::package::getPath);
+    setup.def_static("getSolvers", &Setup::getSolvers, "Returns a list of available solvers.");
+    setup.def_static("getProblems", &Setup::getProblems, "Returns a list of available problems.");
+    setup.def_static("getMaps", &Setup::getMaps, "Returns a list of available task maps.");
+    setup.def_static("getCollisionScenes", &Setup::getCollisionScenes, "Returns a list of available collision scene plug-ins.");
+    setup.def_static("createSolver", &createSolver, py::return_value_policy::take_ownership);    // "Creates an instance of the solver identified by name parameter.", py::arg("solverType"), py::arg("prependExoticaNamespace"));
+    setup.def_static("createProblem", &createProblem, py::return_value_policy::take_ownership);  // "Creates an instance of the problem identified by name parameter.", py::arg("problemType"), py::arg("prependExoticaNamespace"));
+    setup.def_static("createMap", &createMap, py::return_value_policy::take_ownership);          // "Creates an instance of the task map identified by name parameter.", py::arg("taskmapType"), py::arg("prependExoticaNamespace"));
+    setup.def_static("printSupportedClasses", &Setup::printSupportedClasses, "Print a list of available plug-ins sorted by class.");
+    setup.def_static("getInitializers", &Setup::getInitializers, py::return_value_policy::copy, "Returns a list of available initializers with all available parameters/arguments.");
+    setup.def_static("getPackagePath", &ros::package::getPath, "ROS package path resolution.");
     setup.def_static("initRos",
                      [](const std::string& name, const bool& anonymous) {
                          int argc = 0;
@@ -482,10 +482,11 @@ PYBIND11_MODULE(_pyexotica, module)
                          }
                          Server::InitRos(std::make_shared<ros::NodeHandle>("~"));
                      },
+                     "Initializes an internal ROS node for publishing debug information from Exotica (i.e., activates ROS features). Options are setting the name and whether to spawn an anonymous node.",
                      py::arg("name") = "exotica", py::arg("anonymous") = false);
-    setup.def_static("loadSolver", &XMLLoader::loadSolver);
-    setup.def_static("loadSolverStandalone", &XMLLoader::loadSolverStandalone);
-    setup.def_static("loadProblem", &XMLLoader::loadProblem);
+    setup.def_static("loadSolver", &XMLLoader::loadSolver, "Instantiate solver and problem from an XML file containing both a solver and problem initializer.", py::arg("filepath"));
+    setup.def_static("loadSolverStandalone", &XMLLoader::loadSolverStandalone, "Instantiate only a solver from an XML file containing solely a solver initializer.", py::arg("filepath"));
+    setup.def_static("loadProblem", &XMLLoader::loadProblem, "Instantiate only a problem from an XML file containing solely a problem initializer.", py::arg("filepath"));
 
     py::module tools = module.def_submodule("Tools");
     tools.def("parsePath", &parsePath);

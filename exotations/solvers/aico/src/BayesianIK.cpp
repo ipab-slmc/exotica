@@ -104,10 +104,10 @@ BayesianIK::BayesianIK()
       b_step(0.0),
       Winv(),
       sweep(0),
-      sweepMode(0),
+      sweepMode(smSymmetric),
       W(),
       updateCount(0),
-      damping_init(0.0)
+      damping_init(100.0)
 // q_stat()
 {
 }
@@ -523,7 +523,6 @@ void BayesianIK::rememberOldState()
     q_old = q;
     qhat_old = qhat;
     cost_old = cost;
-
 
     bestSweep_old = bestSweep;
     b_step_old = b_step;

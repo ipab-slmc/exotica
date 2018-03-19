@@ -161,17 +161,17 @@ void BayesianIK::Solve(Eigen::MatrixXd& solution)
             throw_named("Negative step size!");
         }
 
+        // 0. Check maximum backtrack iterations
+        if (sweep >= max_backtrack_iterations)
+        {
+            if (debug_) HIGHLIGHT("Maximum backtrack iterations reached, exiting.");
+            prob_->terminationCriterion = TerminationCriterion::BacktrackIterationLimit;
+            break;
+        }
+
         // Check stopping criteria
         if (iterationCount > 1)
         {
-            // 0. Check maximum backtrack iterations
-            if (damping && sweep >= max_backtrack_iterations)
-            {
-                if (debug_) HIGHLIGHT("Maximum backtrack iterations reached, exiting.");
-                prob_->terminationCriterion = TerminationCriterion::BacktrackIterationLimit;
-                break;
-            }
-
             // Check convergence if
             //    a) damping is on and the iteration has concluded (the sweep improved the cost)
             //    b) damping is off [each sweep equals one iteration]

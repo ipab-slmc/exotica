@@ -191,6 +191,7 @@ void Scene::updateTrajectoryGenerators(double t)
 
 void Scene::Update(Eigen::VectorXdRefConst x, double t)
 {
+    lastT = t;
     if (requestNeedsUpdating && kinematicRequestCallback)
     {
         updateInternalFrames();

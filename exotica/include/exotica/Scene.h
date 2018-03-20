@@ -95,6 +95,7 @@ public:
     void setModelState(Eigen::VectorXdRefConst x, double t = 0, bool updateTraj = true);
     void setModelState(std::map<std::string, double> x, double t = 0, bool updateTraj = true);
     std::string getGroupName();
+    double getLastT() { return lastT; }
 
     void addTrajectoryFromFile(const std::string& link, const std::string& traj);
     void addTrajectory(const std::string& link, const std::string& traj);
@@ -203,6 +204,8 @@ private:
     std::shared_ptr<KinematicResponse> kinematicSolution;
     std::function<void(std::shared_ptr<KinematicResponse>)> kinematicRequestCallback;
     bool requestNeedsUpdating;
+
+    double lastT;
 
     /**
      * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.

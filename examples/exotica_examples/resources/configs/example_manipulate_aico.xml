@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+
+  <AICOsolver Name="MySolver" Debug="0" MaxBacktrackIterations="100" StepTolerance="1e-12" FunctionTolerance="1e-12" Damping="1e6"/>
+
+  <UnconstrainedTimeIndexedProblem Name="MyProblem">
+
+    <PlanningScene>
+      <Scene>
+        <JointGroup>arm</JointGroup>
+        <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+        <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+        <LoadScene>{exotica_examples}/resources/scenes/example_manipulate.scene</LoadScene>
+      </Scene>
+    </PlanningScene>
+
+    <Maps>
+      <CollisionFallback Name="Collision" />
+      <Identity Name="Pose" />
+    </Maps>
+
+    <Cost>
+      <Task Task="Collision"/>
+      <Task Task="Pose"/>
+    </Cost>
+    <T>10</T>
+    <Tau>0.03</Tau>
+    <Wrate>1e0</Wrate>
+    <W> 7 6 5 4 3 2 1 </W>
+  </UnconstrainedTimeIndexedProblem>
+
+</PlannerDemoConfig>

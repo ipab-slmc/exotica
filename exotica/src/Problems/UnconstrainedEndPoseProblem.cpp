@@ -207,4 +207,16 @@ void UnconstrainedEndPoseProblem::setNominalPose(Eigen::VectorXdRefConst qNomina
         throw_pretty("Cannot set qNominal - wrong number of rows (expected "
                      << N << ", received " << qNominal_in.rows() << ").");
 }
+
+int UnconstrainedEndPoseProblem::getTaskId(const std::string& task_name)
+{
+    for (int i = 0; i < Cost.Indexing.size(); i++)
+    {
+        if (Cost.Tasks[i]->getObjectName() == task_name)
+        {
+            return i;
+        }
+    }
+    throw_pretty("Cannot get task. Task map '" << task_name << "' does not exist.");
+}
 }

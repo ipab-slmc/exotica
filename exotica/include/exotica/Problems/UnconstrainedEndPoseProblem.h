@@ -74,6 +74,8 @@ public:
     int JN;
     int NumTasks;
 
+    int getTaskId(const std::string& task_name);
+
 protected:
     void initTaskTerms(const std::vector<exotica::Initializer>& inits);
 };

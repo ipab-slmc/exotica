@@ -99,16 +99,15 @@ BayesianIK::BayesianIK()
       qhat_old(),
       dampingReference(),
       cost(0.0),
-      cost_old(0.0),
+      cost_old(std::numeric_limits<double>::max()),
       cost_prev(std::numeric_limits<double>::max()),
       b_step(0.0),
       Winv(),
       sweep(0),
-      sweepMode(smSymmetric),
+      sweepMode(0),
       W(),
       updateCount(0),
       damping_init(100.0)
-// q_stat()
 {
 }
 

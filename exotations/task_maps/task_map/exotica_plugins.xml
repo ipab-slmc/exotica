@@ -29,4 +29,7 @@
   <class name="exotica/CollisionCheck" type="exotica::CollisionCheck" base_class_type="exotica::TaskMap">
     <description>Collision checking</description>
   </class>
+  <class name="exotica/CollisionFallback" type="exotica::CollisionFallback" base_class_type="exotica::TaskMap">
+    <description>Collision checking</description>
+  </class>
 </library>

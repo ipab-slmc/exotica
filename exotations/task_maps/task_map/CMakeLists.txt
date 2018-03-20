@@ -19,6 +19,7 @@ AddInitializer(
   SphereCollision
   Sphere
   CollisionCheck
+  CollisionFallback
 )
 GenInitializers()
 
@@ -43,7 +44,8 @@ set(SOURCES
     src/Distance.cpp
     src/Identity.cpp
     src/SphereCollision.cpp
-    src/CollisionCheck.cpp)
+    src/CollisionCheck.cpp
+    src/CollisionFallback.cpp)
 
 add_library(${PROJECT_NAME} ${SOURCES})
 

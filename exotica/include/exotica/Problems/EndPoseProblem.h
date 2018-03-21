@@ -50,6 +50,7 @@ public:
 
     virtual void Instantiate(EndPoseProblemInitializer& init);
     void Update(Eigen::VectorXdRefConst x);
+    bool isValid();
 
     void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
     void setRho(const std::string& task_name, const double rho);
@@ -90,6 +91,7 @@ public:
 protected:
     void initTaskTerms(const std::vector<exotica::Initializer>& inits);
     Eigen::MatrixXd bounds_;
+    EndPoseProblemInitializer init_;
 };
 typedef std::shared_ptr<exotica::EndPoseProblem> EndPoseProblem_ptr;
 }

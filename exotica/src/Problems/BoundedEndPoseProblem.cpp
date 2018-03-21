@@ -214,4 +214,14 @@ double BoundedEndPoseProblem::getRho(const std::string& task_name)
     }
     throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
+
+bool BoundedEndPoseProblem::isValid()
+{
+    Eigen::VectorXd x = scene_->getSolver().getControlledState();
+    for (unsigned int i = 0; i < N; i++)
+    {
+        if (x(i) < bounds_(i, 0) || x(i) > bounds_(i, 1)) return false;
+    }
+    return true;
+}
 }

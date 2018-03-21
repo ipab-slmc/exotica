@@ -520,7 +520,11 @@ void Scene::updateInternalFrames(bool updateRequest)
     {
         Eigen::Affine3d pose;
         tf::transformKDLToEigen(it->Segment.getFrameToTip(), pose);
+        std::string shapeResourcePath = it->ShapeResourcePath;
+        Eigen::Vector3d scale = it->Scale;
         it = kinematica_.AddElement(it->Segment.getName(), pose, it->ParentName, it->Shape, it->Segment.getInertia(), Eigen::Vector4d::Zero(), it->IsControlled);
+        it->ShapeResourcePath = shapeResourcePath;
+        it->Scale = scale;
     }
 
     auto trajCopy = trajectory_generators_;
@@ -617,6 +621,17 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     Eigen::Affine3d pose;
     tf::transformKDLToEigen(transform, pose);
     custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape, inertia));
+    if (updateCollisionScene) updateCollisionObjects();
+}
+
+void Scene::addObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shapeResourcePath, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, bool updateCollisionScene)
+{
+    if (kinematica_.doesLinkWithNameExist(name)) throw_pretty("Link '" << name << "' already exists in the scene!");
+    std::string parent_name = (parent == "") ? kinematica_.getRootFrameName() : parent;
+    if (!kinematica_.doesLinkWithNameExist(parent_name)) throw_pretty("Can't find parent '" << parent_name << "'!");
+    Eigen::Affine3d pose;
+    tf::transformKDLToEigen(transform, pose);
+    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shapeResourcePath, scale, inertia));
     if (updateCollisionScene) updateCollisionObjects();
 }
 

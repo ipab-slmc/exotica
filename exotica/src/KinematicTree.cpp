@@ -37,6 +37,7 @@
 #include <queue>
 
 #include <eigen_conversions/eigen_kdl.h>
+#include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <kdl/frames_io.hpp>
@@ -374,6 +375,36 @@ void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Affine
     EnvironmentTree.push_back(element);
 }
 
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, const std::string& shapeResourcePath, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
+{
+    std::string shapePath(shapeResourcePath);
+    if (shapePath == "")
+    {
+        throw_pretty("Shape path cannot be empty!");
+    }
+    // Exotica package path resolution
+    else if (shapePath.substr(0, 1) == "{")
+    {
+        shapePath = "file://" + parsePath(shapePath);
+    }
+    // ROS resource path resolution
+    else if (shapePath.substr(0, 10) == "package://" || shapePath.substr(0, 8) == "file:///")
+    {
+    }
+    else
+    {
+        throw_pretty("Path cannot be resolved.");
+    }
+
+    shapes::ShapePtr shape;
+    shape.reset(shapes::createMeshFromResource(shapePath, scale));
+    shapes::ShapeConstPtr tmp_shape(shape);
+    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, tmp_shape, inertia, color, isControlled);
+    element->ShapeResourcePath = shapePath;
+    element->Scale = scale;
+    return element;
+}
+
 std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
 {
     std::shared_ptr<KinematicElement> parent_element;
@@ -556,6 +587,7 @@ void KinematicTree::publishFrames()
             visualization_msgs::MarkerArray msg;
             for (int i = 0; i < Tree.size(); i++)
             {
+                // TODO: This is an incorrect check - we may have shapes that are attached to rootFrame
                 if (Tree[i].lock()->Shape && Tree[i].lock()->Parent.lock()->Id >= ModelTree.size())
                 {
                     visualization_msgs::Marker mrk;
@@ -567,6 +599,24 @@ void KinematicTree::publishFrames()
                     mrk.color = getColor(Tree[i].lock()->Color);
                     mrk.header.frame_id = "exotica/" + Tree[i].lock()->Segment.getName();
                     mrk.pose.orientation.w = 1.0;
+                    msg.markers.push_back(mrk);
+                }
+                else if (Tree[i].lock()->ShapeResourcePath != "")
+                {
+                    visualization_msgs::Marker mrk;
+                    mrk.action = visualization_msgs::Marker::ADD;
+                    mrk.frame_locked = true;
+                    mrk.id = i;
+                    mrk.ns = "CollisionObjects";
+                    mrk.color = getColor(Tree[i].lock()->Color);
+                    mrk.header.frame_id = "exotica/" + Tree[i].lock()->Segment.getName();
+                    mrk.pose.orientation.w = 1.0;
+                    mrk.type = visualization_msgs::Marker::MESH_RESOURCE;
+                    mrk.mesh_resource = Tree[i].lock()->ShapeResourcePath;
+                    mrk.mesh_use_embedded_materials = true;
+                    mrk.scale.x = Tree[i].lock()->Scale(0);
+                    mrk.scale.y = Tree[i].lock()->Scale(1);
+                    mrk.scale.z = Tree[i].lock()->Scale(2);
                     msg.markers.push_back(mrk);
                 }
             }

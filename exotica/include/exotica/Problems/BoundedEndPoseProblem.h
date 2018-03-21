@@ -58,6 +58,8 @@ public:
     virtual void preupdate();
     Eigen::MatrixXd& getBounds();
 
+    bool isValid();
+
     double getScalarCost();
     Eigen::VectorXd getScalarJacobian();
 

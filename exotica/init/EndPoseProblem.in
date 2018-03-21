@@ -6,3 +6,5 @@ Optional Eigen::VectorXd W = Eigen::VectorXd();
 Optional Eigen::VectorXd LowerBound = Eigen::VectorXd();
 Optional Eigen::VectorXd UpperBound = Eigen::VectorXd();
 Optional bool UseBounds = true;
+Optional double InequalityFeasibilityTolerance = 1e-12;
+Optional double EqualityFeasibilityTolerance = 1e-6;

@@ -93,6 +93,7 @@ public:
     void resetCostEvolution(unsigned int size);
     void setCostEvolution(int index, double value);
     KinematicRequestFlags getFlags() { return Flags; }
+    virtual bool isValid() { throw_named("Not implemented"); };
 protected:
     void updateTaskKinematics(std::shared_ptr<KinematicResponse> response);
 

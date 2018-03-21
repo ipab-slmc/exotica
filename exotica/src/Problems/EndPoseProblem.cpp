@@ -58,6 +58,7 @@ Eigen::MatrixXd& EndPoseProblem::getBounds()
 
 void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
 {
+    init_ = init;
     NumTasks = Tasks.size();
     PhiN = 0;
     JN = 0;
@@ -350,5 +351,40 @@ double EndPoseProblem::getRhoNEQ(const std::string& task_name)
         }
     }
     throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+}
+
+bool EndPoseProblem::isValid()
+{
+    Eigen::VectorXd x = scene_->getSolver().getControlledState();
+
+    // Check joint limits
+    for (unsigned int i = 0; i < N; i++)
+    {
+        if (x(i) < bounds_(i, 0) || x(i) > bounds_(i, 1)) return false;
+    }
+
+    bool succeeded = true;
+
+    // Check inequality constraints
+    if (getInequality().rows() > 0)
+    {
+        if (getInequality().maxCoeff() > init_.InequalityFeasibilityTolerance)
+        {
+            if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::isValid", "Violated inequality constraints: " << getInequality().transpose());
+            succeeded = false;
+        }
+    }
+
+    // Check equality constraints
+    if (getEquality().rows() > 0)
+    {
+        if (getEquality().norm() > init_.EqualityFeasibilityTolerance)
+        {
+            if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::isValid", "Violated equality constraints: " << getEquality().norm());
+            succeeded = false;
+        }
+    }
+
+    return succeeded;
 }
 }

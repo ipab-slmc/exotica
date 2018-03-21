@@ -636,6 +636,7 @@ PYBIND11_MODULE(_pyexotica, module)
     planningProblem.def("getNumberOfProblemUpdates", &PlanningProblem::getNumberOfProblemUpdates);
     planningProblem.def("resetNumberOfProblemUpdates", &PlanningProblem::resetNumberOfProblemUpdates);
     planningProblem.def("getCostEvolution", (std::pair<std::vector<double>, std::vector<double>> (PlanningProblem::*)()) & PlanningProblem::getCostEvolution);
+    planningProblem.def("isValid", &PlanningProblem::isValid);
 
     // Problem types
     py::module prob = module.def_submodule("Problems", "Problem types");

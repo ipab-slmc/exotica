@@ -65,6 +65,8 @@ public:
     bool IsTrajectoryGenerated;
     std::vector<double> JointLimits;
     shapes::ShapeConstPtr Shape;
+    std::string ShapeResourcePath = "";
+    Eigen::Vector3d Scale = Eigen::Vector3d::Ones();
     bool isRobotLink;
     Eigen::Vector4d Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0);
 

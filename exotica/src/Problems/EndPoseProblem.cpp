@@ -134,6 +134,18 @@ Eigen::VectorXd EndPoseProblem::getScalarJacobian()
     return Cost.J.transpose() * Cost.S * Cost.ydiff * 2.0;
 }
 
+double EndPoseProblem::getScalarTaskCost(const std::string& task_name)
+{
+    for (int i = 0; i < Cost.Indexing.size(); i++)
+    {
+        if (Cost.Tasks[i]->getObjectName() == task_name)
+        {
+            return Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length).transpose() * Cost.Rho(Cost.Indexing[i].Id) * Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+        }
+    }
+    throw_pretty("Cannot get scalar task cost. Task map '" << task_name << "' does not exist.");
+}
+
 Eigen::VectorXd EndPoseProblem::getEquality()
 {
     return Equality.S * Equality.ydiff;

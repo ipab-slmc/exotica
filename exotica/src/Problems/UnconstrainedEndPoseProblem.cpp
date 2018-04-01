@@ -103,6 +103,18 @@ Eigen::VectorXd UnconstrainedEndPoseProblem::getScalarJacobian()
     return Cost.J.transpose() * Cost.S * Cost.ydiff * 2.0;
 }
 
+double UnconstrainedEndPoseProblem::getScalarTaskCost(const std::string& task_name)
+{
+    for (int i = 0; i < Cost.Indexing.size(); i++)
+    {
+        if (Cost.Tasks[i]->getObjectName() == task_name)
+        {
+            return Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length).transpose() * Cost.Rho(Cost.Indexing[i].Id) * Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+        }
+    }
+    throw_pretty("Cannot get scalar task cost. Task map '" << task_name << "' does not exist.");
+}
+
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x, tStart);

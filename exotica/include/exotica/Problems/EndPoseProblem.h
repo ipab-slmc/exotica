@@ -69,6 +69,7 @@ public:
 
     double getScalarCost();
     Eigen::VectorXd getScalarJacobian();
+    double getScalarTaskCost(const std::string& task_name);
     Eigen::VectorXd getEquality();
     Eigen::MatrixXd getEqualityJacobian();
     Eigen::VectorXd getInequality();

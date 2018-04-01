@@ -759,6 +759,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedEndPoseProblem.def_property("qNominal", &UnconstrainedEndPoseProblem::getNominalPose, &UnconstrainedEndPoseProblem::setNominalPose);
     unconstrainedEndPoseProblem.def("getScalarCost", &UnconstrainedEndPoseProblem::getScalarCost);
     unconstrainedEndPoseProblem.def("getScalarJacobian", &UnconstrainedEndPoseProblem::getScalarJacobian);
+    unconstrainedEndPoseProblem.def("getScalarTaskCost", &UnconstrainedEndPoseProblem::getScalarTaskCost);
     unconstrainedEndPoseProblem.def_readonly("Cost", &UnconstrainedEndPoseProblem::Cost);
 
     py::class_<EndPoseProblem, std::shared_ptr<EndPoseProblem>, PlanningProblem> endPoseProblem(prob, "EndPoseProblem");
@@ -784,6 +785,7 @@ PYBIND11_MODULE(_pyexotica, module)
     endPoseProblem.def_readonly("J", &EndPoseProblem::J);
     endPoseProblem.def("getScalarCost", &EndPoseProblem::getScalarCost);
     endPoseProblem.def("getScalarJacobian", &EndPoseProblem::getScalarJacobian);
+    endPoseProblem.def("getScalarTaskCost", &EndPoseProblem::getScalarTaskCost);
     endPoseProblem.def("getBounds", &EndPoseProblem::getBounds);
     endPoseProblem.def_readonly("Cost", &EndPoseProblem::Cost);
     endPoseProblem.def_readonly("Inequality", &EndPoseProblem::Inequality);
@@ -804,6 +806,7 @@ PYBIND11_MODULE(_pyexotica, module)
     boundedEndPoseProblem.def_readonly("J", &BoundedEndPoseProblem::J);
     boundedEndPoseProblem.def("getScalarCost", &BoundedEndPoseProblem::getScalarCost);
     boundedEndPoseProblem.def("getScalarJacobian", &BoundedEndPoseProblem::getScalarJacobian);
+    boundedEndPoseProblem.def("getScalarTaskCost", &BoundedEndPoseProblem::getScalarTaskCost);
     boundedEndPoseProblem.def("getBounds", &BoundedEndPoseProblem::getBounds);
     boundedEndPoseProblem.def_readonly("Cost", &BoundedEndPoseProblem::Cost);
 

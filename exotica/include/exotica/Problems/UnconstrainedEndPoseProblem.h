@@ -62,6 +62,8 @@ public:
     double getScalarCost();
     Eigen::VectorXd getScalarJacobian();
 
+    double getScalarTaskCost(const std::string& task_name);
+
     EndPoseTask Cost;
 
     Eigen::MatrixXd W;

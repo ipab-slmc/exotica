@@ -1,3 +1,9 @@
 [submodule "fcl_catkin"]
 	path = fcl_catkin
 	url = https://github.com/ipab-slmc/fcl_catkin.git
+[submodule "eigen_catkin"]
+	path = eigen_catkin
+	url = https://github.com/ethz-asl/eigen_catkin.git
+[submodule "catkin_simple"]
+	path = catkin_simple
+	url = https://github.com/catkin/catkin_simple.git

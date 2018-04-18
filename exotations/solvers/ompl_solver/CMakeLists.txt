@@ -6,6 +6,7 @@ find_package(OMPL REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   exotica
   exotica_python
+  eigen_catkin
 )
 
 if ($ENV{ROS_DISTRO} MATCHES "(kinetic|lunar)")

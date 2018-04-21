@@ -1,1 +1,2 @@
 extend <ompl_solver/OMPLsolver>
+Optional double Epsilon = 0.01;

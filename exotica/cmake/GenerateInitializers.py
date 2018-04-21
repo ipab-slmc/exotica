@@ -314,8 +314,12 @@ def CollectExtensions(Input,SearchDirs,Content,ClassName):
       for d in content['Data']:
           cls = ContainsData(d['Type'],d['Name'],Content['Data'])
           if cls:
-              eprint("Property '"+d['Type']+" "+d['Name']+" in "+Input+" hides the parent's ("+cls+") property with the same id.")
-              sys.exit(2)
+              for e in Content['Data']:
+                if e['Name'] == d['Name']:
+                  # print('Overwriting default:', e['Value'], 'with', d['Value'])
+                  e['Value'] = d['Value']
+              # eprint("Property '"+d['Type']+" "+d['Name']+" in "+Input+" hides the parent's ("+cls+") property with the same id.")
+              # sys.exit(2)
           else:
               d['Class']=ClassName
               Content['Data'].append(d)

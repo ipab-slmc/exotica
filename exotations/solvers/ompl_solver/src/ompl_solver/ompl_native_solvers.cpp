@@ -31,17 +31,17 @@
  *
  */
 
+#include <ompl/geometric/planners/cforest/CForest.h>
 #include <ompl/geometric/planners/est/EST.h>
 #include <ompl/geometric/planners/kpiece/BKPIECE1.h>
 #include <ompl/geometric/planners/kpiece/KPIECE1.h>
 #include <ompl/geometric/planners/prm/LazyPRM.h>
 #include <ompl/geometric/planners/prm/PRM.h>
+#include <ompl/geometric/planners/prm/PRMstar.h>
+#include <ompl/geometric/planners/rrt/LBTRRT.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>
-#include <ompl/geometric/planners/rrt/LBTRRT.h>
-#include <ompl/geometric/planners/prm/PRMstar.h>
-#include <ompl/geometric/planners/cforest/CForest.h>
 #include <ompl_solver/ompl_native_solvers.h>
 
 REGISTER_MOTIONSOLVER_TYPE("RRT", exotica::RRT)

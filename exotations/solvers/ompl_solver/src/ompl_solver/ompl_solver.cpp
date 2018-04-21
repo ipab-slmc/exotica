@@ -36,7 +36,6 @@
 
 namespace exotica
 {
-
 template <class ProblemType>
 OMPLsolver<ProblemType>::OMPLsolver() : multiQuery(false)
 {
@@ -225,5 +224,4 @@ void OMPLsolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 }
 
 template class OMPLsolver<SamplingProblem>;
-
 }

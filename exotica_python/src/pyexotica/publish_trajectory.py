@@ -1,3 +1,4 @@
+from __future__ import print_function
 from time import sleep
 import matplotlib.pyplot as plt
 import signal
@@ -13,6 +14,9 @@ def publishPose(q, problem, t=0.0):
 
 
 def publishTrajectory(traj, T, problem):
+    if len(traj) == 0:
+        print("Trajectory has zero elements")
+        raise
     signal.signal(signal.SIGINT, sigIntHandler)
     print('Playing back trajectory '+str(T)+'s')
     dt = float(T)/float(len(traj))
@@ -27,6 +31,9 @@ def publishTrajectory(traj, T, problem):
 
 
 def publishTimeIndexedTrajectory(traj, Ts, problem, once=False):
+    if len(traj) == 0:
+        print("Trajectory has zero elements")
+        raise
     signal.signal(signal.SIGINT, sigIntHandler)
     print('Playing back trajectory '+str(len(Ts)) +
           ' states in '+str(Ts[len(Ts)-1]))

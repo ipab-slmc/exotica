@@ -13,6 +13,9 @@
   <url type="website">https://github.com/openhumanoids/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>eigen_catkin</build_depend>
+
   <depend>exotica</depend>
   <depend>exotica_python</depend>
   <depend>geometry_msgs</depend>

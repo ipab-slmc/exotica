@@ -9,6 +9,7 @@ add_definitions(-Wno-write-strings)
 find_package(catkin REQUIRED COMPONENTS
   exotica
   pybind11_catkin
+  eigen_catkin
 )
 
 catkin_package(

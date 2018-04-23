@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
   exotica_python
   geometry_msgs
+  eigen_catkin
 )
 
 AddInitializer(

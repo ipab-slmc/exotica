@@ -6,6 +6,9 @@
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>eigen_catkin</build_depend>
+
   <depend>exotica</depend>
   <depend>pybind11_catkin</depend>
   <depend>moveit_msgs</depend>

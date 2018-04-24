@@ -40,7 +40,7 @@ example file as a guide. The code is displayed below.
         UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
         IKsolverInitializer solver("MySolver");
         solver.C = 1e-3;
-        solver.MaxIt = 1;
+        solver.MaxIterations = 1;
         solver.MaxStep = 0.1;
 
         HIGHLIGHT_NAMED("ManualLoader", "Loaded from a hardcoded specialized initializer.");
@@ -207,7 +207,7 @@ create an initializer, give the solver itself a name ("MySolver") then set the p
 
     IKsolverInitializer solver("MySolver");
     solver.C = 1e-3;
-    solver.MaxIt = 1;
+    solver.MaxIterations = 1;
     solver.MaxStep = 0.1;
 
 or parameters can be set in arguments to the initializer. See 

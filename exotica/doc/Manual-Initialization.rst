@@ -35,7 +35,7 @@ the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.c
         UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
         IKsolverInitializer solver("MySolver");
         solver.C = 1e-3;
-        solver.MaxIt = 1;
+        solver.MaxIterations = 1;
         solver.MaxStep = 0.1;
     ...
 
@@ -171,7 +171,7 @@ will set up:
 
         IKsolverInitializer solver("MySolver");
         solver.C = 1e-3;
-        solver.MaxIt = 1;
+        solver.MaxIterations = 1;
         solver.MaxStep = 0.1;
 
 Again, we have an initialiser for the solver (``IKsolverInitializer``)
@@ -192,7 +192,7 @@ are seen below:
         extend <exotica/MotionSolver>
         Optional double Tolerance = 1e-5;
         Optional double Convergence = 0.0;
-        Optional int MaxIt = 50;
+        Optional int MaxIterations = 50;
         Optional double MaxStep = 0.02;
         Optional double C = 0.0;
         Optional double Alpha = 1.0;
@@ -204,7 +204,7 @@ this solver:
 .. code-block:: c++
 
         solver.C = 1e-3;
-        solver.MaxIt = 1;
+        solver.MaxIterations = 1;
         solver.MaxStep = 0.1;
 
 This method is extensible to all the options in all the solvers. Before

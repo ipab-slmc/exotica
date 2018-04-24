@@ -59,7 +59,7 @@ void run()
     UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, startState, 0.0, -1, {cost}, W, nominalState);
     IKsolverInitializer solver("MySolver");
     solver.C = 1e-3;
-    solver.MaxIt = 1;
+    solver.MaxIterations = 1;
     solver.MaxStep = 0.1;
 
     HIGHLIGHT_NAMED("ManualLoader", "Loaded from a hardcoded specialized initializer.");

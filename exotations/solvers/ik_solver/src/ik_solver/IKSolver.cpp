@@ -92,7 +92,7 @@ Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd>& A_)
 void IKsolver::Instantiate(IKsolverInitializer& init)
 {
     parameters_ = init;
-    setNumberOfMaxIterations(init.MaxIt);
+    setNumberOfMaxIterations(init.MaxIterations);
 }
 
 void IKsolver::specifyProblem(PlanningProblem_ptr pointer)

@@ -91,7 +91,7 @@ in the ``exotica_examples`` folder. We can see a copy of it below:
     <ExampleConfig>
 
     <IKsolver Name="MySolver">
-    <MaxIt>100</MaxIt>
+    <MaxIterations>100</MaxIterations>
     <MaxStep>0.1</MaxStep>
     <Tolerance>1e-5</Tolerance>
     <Alpha>1.0</Alpha>

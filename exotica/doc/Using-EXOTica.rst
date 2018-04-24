@@ -142,14 +142,14 @@ Now we have a solution to our problem. But what does it look like?
 
     [ INFO] [1501240815.111167097]: Finished solving in 3.085e-05s. Solution [  -0.109557   -0.653855  -0.0687444     1.28515 1.06079e-17           0           0]
 
-When using the IK_solver as in this tutorial and we set the ``MaxIt`` to a
+When using the IK_solver as in this tutorial and we set the ``MaxIterations`` to a
 low number, we get single step solution to the IK problem, as shown above -
 this is what you would expect to see if you run this code;
 it shows a vector of angles, one column  for each joint in our
 robot. Each entry a joint configuration in radians, which will result in
 the end effector reaching the desired target. The rows of the output
 represent the positional steps each joint must pass through to reach 
-the end effector goal. When using a higher ``MaxIt`` setting, the number 
+the end effector goal. When using a higher ``MaxIterations`` setting, the number 
 of rows in your motion plan would likely increase. 
 
 When using other problems or a different configuration of the

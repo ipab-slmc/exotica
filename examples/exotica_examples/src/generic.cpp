@@ -67,7 +67,7 @@ void run()
 
     Initializer solver("exotica/IKsolver", {
                                                {"Name", std::string("MySolver")},
-                                               {"MaxIt", 1},
+                                               {"MaxIterations", 1},
                                                {"MaxStep", 0.1},
                                                {"C", 1e-3},
                                            });

@@ -2,7 +2,7 @@
 <IKSolverDemoConfig>
 
   <IKsolver Name="MySolver">
-    <MaxIt>1</MaxIt>
+    <MaxIterations>1</MaxIterations>
     <MaxStep>0.1</MaxStep>
     <Tolerance>1e-5</Tolerance>
     <Alpha>1.0</Alpha>

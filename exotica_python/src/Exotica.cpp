@@ -555,6 +555,44 @@ PYBIND11_MODULE(_pyexotica, module)
     taskMap.def("taskSpaceJacobianDim", &TaskMap::taskSpaceJacobianDim);
     taskMap.def("debug", &TaskMap::debug);
 
+    py::class_<TimeIndexedTask, std::shared_ptr<TimeIndexedTask>> timeIndexedTask(module, "TimeIndexedTask");
+    timeIndexedTask.def_readonly("PhiN", &TimeIndexedTask::PhiN);
+    timeIndexedTask.def_readonly("JN", &TimeIndexedTask::JN);
+    timeIndexedTask.def_readonly("NumTasks", &TimeIndexedTask::NumTasks);
+    timeIndexedTask.def_readonly("y", &TimeIndexedTask::y);
+    timeIndexedTask.def_readonly("ydiff", &TimeIndexedTask::ydiff);
+    timeIndexedTask.def_readonly("Phi", &TimeIndexedTask::Phi);
+    // timeIndexedTask.def_readonly("H", &TimeIndexedTask::H);
+    timeIndexedTask.def_readonly("J", &TimeIndexedTask::J);
+    timeIndexedTask.def_readonly("S", &TimeIndexedTask::S);
+    timeIndexedTask.def_readonly("T", &TimeIndexedTask::T);
+    timeIndexedTask.def_readonly("Tasks", &TimeIndexedTask::Tasks);
+    timeIndexedTask.def_readonly("TaskMaps", &TimeIndexedTask::TaskMaps);
+
+    py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>> endPoseTask(module, "EndPoseTask");
+    endPoseTask.def_readonly("PhiN", &EndPoseTask::PhiN);
+    endPoseTask.def_readonly("JN", &EndPoseTask::JN);
+    endPoseTask.def_readonly("NumTasks", &EndPoseTask::NumTasks);
+    endPoseTask.def_readonly("y", &EndPoseTask::y);
+    endPoseTask.def_readonly("ydiff", &EndPoseTask::ydiff);
+    endPoseTask.def_readonly("Phi", &EndPoseTask::Phi);
+    // endPoseTask.def_readonly("H", &EndPoseTask::H);
+    endPoseTask.def_readonly("J", &EndPoseTask::J);
+    endPoseTask.def_readonly("S", &EndPoseTask::S);
+    endPoseTask.def_readonly("Tasks", &EndPoseTask::Tasks);
+    endPoseTask.def_readonly("TaskMaps", &EndPoseTask::TaskMaps);
+
+    py::class_<SamplingTask, std::shared_ptr<SamplingTask>> samplingTask(module, "SamplingTask");
+    samplingTask.def_readonly("PhiN", &SamplingTask::PhiN);
+    samplingTask.def_readonly("JN", &SamplingTask::JN);
+    samplingTask.def_readonly("NumTasks", &SamplingTask::NumTasks);
+    samplingTask.def_readonly("y", &SamplingTask::y);
+    samplingTask.def_readonly("ydiff", &SamplingTask::ydiff);
+    samplingTask.def_readonly("Phi", &SamplingTask::Phi);
+    samplingTask.def_readonly("S", &SamplingTask::S);
+    samplingTask.def_readonly("Tasks", &SamplingTask::Tasks);
+    samplingTask.def_readonly("TaskMaps", &SamplingTask::TaskMaps);
+
     py::class_<TaskSpaceVector, std::shared_ptr<TaskSpaceVector>> taskSpaceVector(module, "TaskSpaceVector");
     taskSpaceVector.def("setZero", &TaskSpaceVector::setZero);
     taskSpaceVector.def_readwrite("data", &TaskSpaceVector::data);

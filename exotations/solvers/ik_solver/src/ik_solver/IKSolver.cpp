@@ -126,6 +126,8 @@ int IKsolver::getLastIteration()
 
 void IKsolver::Solve(Eigen::MatrixXd& solution)
 {
+    prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
+
     Timer timer;
 
     if (!prob_) throw_named("Solver has not been initialized!");
@@ -145,7 +147,9 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
         prob_->Update(q);
         Eigen::VectorXd yd = prob_->Cost.S * prob_->Cost.ydiff;
 
-        error = yd.dot(yd);
+        error = prob_->getScalarCost();
+
+        prob_->setCostEvolution(i, error);
 
         if (error < parameters_.Tolerance)
         {

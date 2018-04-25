@@ -620,6 +620,7 @@ PYBIND11_MODULE(_pyexotica, module)
 
     // Problem types
     py::module prob = module.def_submodule("Problems", "Problem types");
+
     py::class_<UnconstrainedTimeIndexedProblem, std::shared_ptr<UnconstrainedTimeIndexedProblem>, PlanningProblem> unconstrainedTimeIndexedProblem(prob, "UnconstrainedTimeIndexedProblem");
     unconstrainedTimeIndexedProblem.def("getDuration", &UnconstrainedTimeIndexedProblem::getDuration);
     unconstrainedTimeIndexedProblem.def("update", &UnconstrainedTimeIndexedProblem::Update);
@@ -649,6 +650,8 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedTimeIndexedProblem.def("getScalarTaskJacobian", &UnconstrainedTimeIndexedProblem::getScalarTaskJacobian);
     unconstrainedTimeIndexedProblem.def("getScalarTransitionCost", &UnconstrainedTimeIndexedProblem::getScalarTransitionCost);
     unconstrainedTimeIndexedProblem.def("getScalarTransitionJacobian", &UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian);
+    unconstrainedTimeIndexedProblem.def_readonly("Cost", &UnconstrainedTimeIndexedProblem::Cost);
+
     py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> timeIndexedProblem(prob, "TimeIndexedProblem");
     timeIndexedProblem.def("getDuration", &TimeIndexedProblem::getDuration);
     timeIndexedProblem.def("update", &TimeIndexedProblem::Update);
@@ -687,6 +690,10 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedProblem.def("getScalarTransitionCost", &TimeIndexedProblem::getScalarTransitionCost);
     timeIndexedProblem.def("getScalarTransitionJacobian", &TimeIndexedProblem::getScalarTransitionJacobian);
     timeIndexedProblem.def("getBounds", &TimeIndexedProblem::getBounds);
+    timeIndexedProblem.def_readonly("Cost", &TimeIndexedProblem::Cost);
+    timeIndexedProblem.def_readonly("Inequality", &TimeIndexedProblem::Inequality);
+    timeIndexedProblem.def_readonly("Equality", &TimeIndexedProblem::Equality);
+
     py::class_<BoundedTimeIndexedProblem, std::shared_ptr<BoundedTimeIndexedProblem>, PlanningProblem> boundedTimeIndexedProblem(prob, "BoundedTimeIndexedProblem");
     boundedTimeIndexedProblem.def("getDuration", &BoundedTimeIndexedProblem::getDuration);
     boundedTimeIndexedProblem.def("update", &BoundedTimeIndexedProblem::Update);
@@ -717,6 +724,8 @@ PYBIND11_MODULE(_pyexotica, module)
     boundedTimeIndexedProblem.def("getScalarTransitionCost", &BoundedTimeIndexedProblem::getScalarTransitionCost);
     boundedTimeIndexedProblem.def("getScalarTransitionJacobian", &BoundedTimeIndexedProblem::getScalarTransitionJacobian);
     boundedTimeIndexedProblem.def("getBounds", &BoundedTimeIndexedProblem::getBounds);
+    boundedTimeIndexedProblem.def_readonly("Cost", &BoundedTimeIndexedProblem::Cost);
+
     py::class_<UnconstrainedEndPoseProblem, std::shared_ptr<UnconstrainedEndPoseProblem>, PlanningProblem> unconstrainedEndPoseProblem(prob, "UnconstrainedEndPoseProblem");
     unconstrainedEndPoseProblem.def("update", &UnconstrainedEndPoseProblem::Update);
     unconstrainedEndPoseProblem.def("setGoal", &UnconstrainedEndPoseProblem::setGoal);
@@ -733,6 +742,8 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedEndPoseProblem.def_property("qNominal", &UnconstrainedEndPoseProblem::getNominalPose, &UnconstrainedEndPoseProblem::setNominalPose);
     unconstrainedEndPoseProblem.def("getScalarCost", &UnconstrainedEndPoseProblem::getScalarCost);
     unconstrainedEndPoseProblem.def("getScalarJacobian", &UnconstrainedEndPoseProblem::getScalarJacobian);
+    unconstrainedEndPoseProblem.def_readonly("Cost", &UnconstrainedEndPoseProblem::Cost);
+
     py::class_<EndPoseProblem, std::shared_ptr<EndPoseProblem>, PlanningProblem> endPoseProblem(prob, "EndPoseProblem");
     endPoseProblem.def("update", &EndPoseProblem::Update);
     endPoseProblem.def("setGoal", &EndPoseProblem::setGoal);
@@ -757,6 +768,10 @@ PYBIND11_MODULE(_pyexotica, module)
     endPoseProblem.def("getScalarCost", &EndPoseProblem::getScalarCost);
     endPoseProblem.def("getScalarJacobian", &EndPoseProblem::getScalarJacobian);
     endPoseProblem.def("getBounds", &EndPoseProblem::getBounds);
+    endPoseProblem.def_readonly("Cost", &EndPoseProblem::Cost);
+    endPoseProblem.def_readonly("Inequality", &EndPoseProblem::Inequality);
+    endPoseProblem.def_readonly("Equality", &EndPoseProblem::Equality);
+
     py::class_<BoundedEndPoseProblem, std::shared_ptr<BoundedEndPoseProblem>, PlanningProblem> boundedEndPoseProblem(prob, "BoundedEndPoseProblem");
     boundedEndPoseProblem.def("update", &BoundedEndPoseProblem::Update);
     boundedEndPoseProblem.def("setGoal", &BoundedEndPoseProblem::setGoal);
@@ -773,6 +788,8 @@ PYBIND11_MODULE(_pyexotica, module)
     boundedEndPoseProblem.def("getScalarCost", &BoundedEndPoseProblem::getScalarCost);
     boundedEndPoseProblem.def("getScalarJacobian", &BoundedEndPoseProblem::getScalarJacobian);
     boundedEndPoseProblem.def("getBounds", &BoundedEndPoseProblem::getBounds);
+    boundedEndPoseProblem.def_readonly("Cost", &BoundedEndPoseProblem::Cost);
+
     py::class_<SamplingProblem, std::shared_ptr<SamplingProblem>, PlanningProblem> samplingProblem(prob, "SamplingProblem");
     samplingProblem.def("update", &SamplingProblem::Update);
     samplingProblem.def("setGoalState", &SamplingProblem::setGoalState);
@@ -781,6 +798,8 @@ PYBIND11_MODULE(_pyexotica, module)
     samplingProblem.def_readonly("N", &SamplingProblem::N);
     samplingProblem.def_readonly("NumTasks", &SamplingProblem::NumTasks);
     samplingProblem.def_readonly("Phi", &SamplingProblem::Phi);
+    samplingProblem.def_readonly("Constraint", &SamplingProblem::Constraint);
+
     py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> timeIndexedSamplingProblem(prob, "TimeIndexedSamplingProblem");
     timeIndexedSamplingProblem.def("update", &TimeIndexedSamplingProblem::Update);
     timeIndexedSamplingProblem.def("getSpaceDim", &TimeIndexedSamplingProblem::getSpaceDim);
@@ -790,6 +809,7 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedSamplingProblem.def_readonly("N", &TimeIndexedSamplingProblem::N);
     timeIndexedSamplingProblem.def_readonly("NumTasks", &TimeIndexedSamplingProblem::NumTasks);
     timeIndexedSamplingProblem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
+    timeIndexedSamplingProblem.def_readonly("Constraint", &TimeIndexedSamplingProblem::Constraint);
 
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "Proxy");
     proxy.def(py::init());

@@ -55,7 +55,7 @@ public:
     virtual std::string print(std::string prepend);
     void setNumberOfMaxIterations(int maxIter)
     {
-        HIGHLIGHT_NAMED("MotionSolver", "Setting maximum iterations to " << maxIter << " (was " << maxIterations_ << ")");
+        if(debug_) HIGHLIGHT_NAMED("MotionSolver", "Setting maximum iterations to " << maxIter << " (was " << maxIterations_ << ")");
         maxIterations_ = maxIter;
     }
     int getNumberOfMaxIterations() { return maxIterations_; }

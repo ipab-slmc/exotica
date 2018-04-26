@@ -198,6 +198,10 @@ public:
     return ret
 
 def ParseLine(line, ln, fn):
+    # ignore lines with comments, otherwise comments including ';' will not be recognised
+    if line.startswith("//"):
+        return None
+
     last = line.find(";")
     if last>=0:
         line=line[0:last].strip()

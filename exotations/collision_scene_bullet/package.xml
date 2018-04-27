@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>collision_scene_bullet</name>
+  <version>0.0.0</version>
+  <description>The collision_scene_bullet package</description>
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>bullet</depend>
+  <depend>exotica</depend>
+  <depend>geometric_shapes</depend>
+
+  <export>
+    <exotica plugin="${prefix}/exotica_plugins.xml" />
+  </export>
+</package>

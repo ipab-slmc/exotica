@@ -1,0 +1,5 @@
+<library path="lib/libcollision_scene_bullet">
+  <class name="exotica/CollisionSceneBullet" type="exotica::CollisionSceneBullet" base_class_type="exotica::CollisionScene">
+    <description>Bullet collision scene</description>
+  </class>
+</library>

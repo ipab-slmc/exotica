@@ -5,6 +5,9 @@
   <class name="exotica/Distance" type="exotica::Distance" base_class_type="exotica::TaskMap">
     <description>Distance</description>
   </class>
+  <class name="exotica/Point2Line" type="exotica::Point2Line" base_class_type="exotica::TaskMap">
+    <description>Point to line distance</description>
+  </class>
   <class name="exotica/EffPosition" type="exotica::EffPosition" base_class_type="exotica::TaskMap">
     <description>End-effector position (3D)</description>
   </class>

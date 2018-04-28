@@ -1,7 +1,7 @@
 /*
- *      Author: Michael Camilleri
+ *      Author: Christian Rauch
  *
- * Copyright (c) 2016, University Of Edinburgh
+ * Copyright (c) 2018, University Of Edinburgh
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,44 +30,37 @@
  *
  */
 
-#ifndef EXOTICA_MOTION_SOLVER_H
-#define EXOTICA_MOTION_SOLVER_H
+#pragma once
 
-#include "exotica/Object.h"
-#include "exotica/PlanningProblem.h"
-#include "exotica/Property.h"
-#include "exotica/Server.h"
-#include "exotica/TaskMap.h"
+#include <exotica/TaskMap.h>
+#include <task_map/Point2LineInitializer.h>
 
-#define REGISTER_MOTIONSOLVER_TYPE(TYPE, DERIV) EXOTICA_REGISTER(exotica::MotionSolver, TYPE, DERIV)
-
-namespace exotica
-{
-class MotionSolver : public Object, Uncopyable, public virtual InstantiableBase
-{
+namespace exotica  {
+class Point2Line : public TaskMap, public Instantiable<Point2LineInitializer> {
 public:
-    MotionSolver();
-    virtual ~MotionSolver() {}
-    virtual void InstantiateBase(const Initializer& init);
-    virtual void specifyProblem(PlanningProblem_ptr pointer);
-    virtual void Solve(Eigen::MatrixXd& solution) = 0;
-    PlanningProblem_ptr getProblem() { return problem_; }
-    virtual std::string print(std::string prepend);
-    void setNumberOfMaxIterations(int maxIter)
-    {
-        if (debug_) HIGHLIGHT_NAMED("MotionSolver", "Setting maximum iterations to " << maxIter << " (was " << maxIterations_ << ")");
-        maxIterations_ = maxIter;
-    }
-    int getNumberOfMaxIterations() { return maxIterations_; }
-    double getPlanningTime() { return planning_time_; }
-protected:
-    PlanningProblem_ptr problem_;
-    double planning_time_ = -1;
-    int maxIterations_ = 100;
+    Point2Line();
+
+    virtual ~Point2Line() { }
+
+    virtual void Instantiate(Point2LineInitializer& init);
+
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
+
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+
+    virtual int taskSpaceDim();
+
+private:
+    Eigen::Vector3d line;   //<! point that defines the end of the line relative to the starting point
+    // Eigen::VectorXd point;  //<! point in link frame
+    // Eigen::VectorXd start;  //<! start point in base frame
+    // Eigen::VectorXd end;    //<! end point in base frame
+    bool infinite;          //<! true: consider the line from 'start' to 'end' as segment
+                            //<! false: consider the vector from 'start' to 'end' as direction of line
+
+    static Eigen::Vector3d distance(const Eigen::Vector3d &point, const Eigen::Vector3d &line, const bool infinite, const bool dbg);
 };
 
-typedef exotica::Factory<exotica::MotionSolver> MotionSolver_fac;
-typedef std::shared_ptr<exotica::MotionSolver> MotionSolver_ptr;
-}
+typedef std::shared_ptr<Point2Line> Point2Line_Ptr;
 
-#endif
+} // namespace exotica

@@ -15,6 +15,7 @@ AddInitializer(
   EffFrame
   JointLimit
   Distance
+  Point2Line
   Identity
   SphereCollision
   Sphere
@@ -41,6 +42,7 @@ set(SOURCES
     src/EffFrame.cpp
     src/JointLimit.cpp
     src/Distance.cpp
+    src/Point2Line.cpp
     src/Identity.cpp
     src/SphereCollision.cpp
     src/CollisionCheck.cpp)

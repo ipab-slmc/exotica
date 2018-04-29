@@ -52,17 +52,30 @@ void CollisionFallback::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi
     if (phi.rows() != 1) throw_named("Wrong size of phi!");
     if (!scene_->alwaysUpdatesCollisionScene()) cscene_->updateCollisionObjectTransforms();
     double t = scene_->getLastT();
+    auto valid = lastValid.find(t);
+    auto invalid = lastInvalid.find(t);
     if(cscene_->isStateValid(init_.SelfCollision, init_.SafeDistance))
     {
-        lastValid[t] = x;
-        phi(0) = 0.0;
+        //if( valid == lastValid.end())
+            lastValid[t] = x;
     }
     else
     {
-        if( lastValid.find(t) == lastValid.end()) throw_named("No collision free initial trajectory/pose provided!");
-        phi(0) = 1;
+        if( valid == lastValid.end()) throw_named("No collision free initial trajectory/pose provided!");
+        lastInvalid[t] = x;
+        invalid = lastInvalid.find(t);
     }
-    J = (x - lastValid[t]).transpose();
+    if( invalid == lastInvalid.end())
+    {
+        phi(0) = 0.0;
+        J.setOnes();
+    }
+    else
+    {
+        phi(0) = (invalid->second-valid->second).dot(x-valid->second)/(invalid->second-valid->second).norm();
+        phi(0) = phi(0)<0.0?0.0:phi(0);
+        J=(invalid->second-valid->second).transpose()/(invalid->second-valid->second).norm();
+    }
 }
 
 void CollisionFallback::Instantiate(CollisionFallbackInitializer& init)

@@ -61,6 +61,7 @@ public:
     CollisionScene_ptr cscene_;
     CollisionFallbackInitializer init_;
     std::map<double, Eigen::VectorXd> lastValid;
+    std::map<double, Eigen::VectorXd> lastInvalid;
 };
 
 typedef std::shared_ptr<exotica::CollisionFallback> CollisionFallback_ptr;

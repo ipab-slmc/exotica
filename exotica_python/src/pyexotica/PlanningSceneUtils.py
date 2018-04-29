@@ -11,6 +11,20 @@ except:
     except:
         raise Exception("Failed to import pyassimp")
 
+def isCollisionFreePose(q, problem, t=0):
+    problem.getScene().Update(q, t)
+    return problem.getScene().isStateValid()
+
+def isCollisionFreeTrajectory(solution, problem, T=[]):
+    if len(T)>0:
+        for t in range(0,len(solution)):
+            if not isCollisionFreePose(solution[t], problem, T[t]):
+                return False;
+    else:
+        for t in range(0,len(solution)):
+            if not isCollisionFreePose(solution[t], problem, 0.0):
+                return False;
+    return True
 
 def create_pose(position, orientation, frame='/world_frame'):
     pose = Pose()

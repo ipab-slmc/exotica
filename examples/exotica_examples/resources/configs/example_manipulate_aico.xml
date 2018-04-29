@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
 
-  <AICOsolver Name="MySolver" Debug="0" MaxBacktrackIterations="100" StepTolerance="1e-12" FunctionTolerance="1e-12" Damping="1e6"/>
+  <AICOsolver Name="MySolver" Debug="0" MaxBacktrackIterations="100" StepTolerance="1e-15" FunctionTolerance="1e-15" Damping="1e8"/>
 
   <UnconstrainedTimeIndexedProblem Name="MyProblem">
 
@@ -25,7 +25,7 @@
     </Cost>
     <T>10</T>
     <Tau>0.03</Tau>
-    <Wrate>1e0</Wrate>
+    <Wrate>1e3</Wrate>
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedTimeIndexedProblem>
 

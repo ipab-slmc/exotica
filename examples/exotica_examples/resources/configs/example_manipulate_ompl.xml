@@ -1,8 +1,7 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
 
-  <RRTConnect Name="MySolver">
-  </RRTConnect>
+  <PRM Name="MySolver" RandomSeed="1" />
 
   <SamplingProblem Name="MyProblem">
 

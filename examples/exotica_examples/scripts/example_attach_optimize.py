@@ -2,6 +2,7 @@
 
 import pyexotica as exo
 from pyexotica.publish_trajectory import *
+from pyexotica.PlanningSceneUtils import *
 import numpy as np
 
 def handleAttaching(i, x, scene):
@@ -60,6 +61,7 @@ for i in range(0,3):
     handleAttaching(i, start_pose[i], ompl.getProblem().getScene())
     handleAttaching2(i, start_pose[i], aico.getProblem().getScene(), ompl.getProblem().getScene())
     sol = ompl.solve().tolist()
+    #solution.append(sol)
 
     T=len(sol)
     aico.getProblem().T = T
@@ -67,13 +69,17 @@ for i in range(0,3):
     for t in range(T):
         aico.getProblem().setGoal('Pose', sol[t], t)
         aico.getProblem().setRho('Pose', 0, t)
-        aico.getProblem().setRho('Collision', 1e5, t)
+        aico.getProblem().setRho('Collision', 1e9, t)
         aico.getProblem().update(sol[-1],t)
     aico.getProblem().setRho('Collision', 0, -1)
     aico.getProblem().setRho('Pose', 1e3, -1)
 
+    coll=isCollisionFreeTrajectory(sol,ompl.getProblem())
     sol = aico.solve().tolist()
     solution.append(sol)
+    print('Trajectory '+str(i)+' OMPL collision free: '+str(coll))
+    coll=isCollisionFreeTrajectory(sol,aico.getProblem())
+    print('Trajectory '+str(i)+' AICO collision free: '+str(coll))
 
 # Playback
 dt=0.03
@@ -81,9 +87,9 @@ signal.signal(signal.SIGINT, sigIntHandler)
 while True:
     try:
         for i in range(0,len(solution)):
-            handleAttaching(i, start_pose[i], ompl.getProblem().getScene())
+            handleAttaching(i, start_pose[i], aico.getProblem().getScene())
             for t in range(0,len(solution[i])):
-                publishPose(solution[i][t], ompl.getProblem())
+                publishPose(solution[i][t], aico.getProblem())
                 sleep(dt)
     except KeyboardInterrupt:
         break

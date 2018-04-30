@@ -191,8 +191,7 @@ inline Eigen::Vector3d parseVector3(const std::string value)
     text_parser >> temp_entry;
     while (!(text_parser.fail() || text_parser.bad()))
     {
-        ++i;
-        ret(i - 1) = temp_entry;
+        ret(i++) = temp_entry;
         text_parser >> temp_entry;
     }
     if (i == 0) throw_pretty("Empty vector!");

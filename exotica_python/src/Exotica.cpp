@@ -247,6 +247,18 @@ public:
             }
             return true;
         }
+        else if (target.getType() == "Eigen::Matrix<double, 3, 1, 0, 3, 1>")
+        {
+            if (isPyString(value_py))
+            {
+                target.set(parseVector3(pyAsString(value_py)));
+            }
+            else
+            {
+                target.set(py::cast<Eigen::Vector3d>(value_py));
+            }
+            return true;
+        }
         else if (target.getType() == "bool")
         {
             if (isPyString(value_py))
@@ -399,6 +411,10 @@ public:
         else if (prop.getType() == "Eigen::Matrix<double, -1, 1, 0, -1, 1>")
         {
             PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<Eigen::VectorXd>(prop.get())).ptr());
+        }
+        else if (prop.getType() == "Eigen::Matrix<double, 3, 1, 0, 3, 1>")
+        {
+            PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<Eigen::Vector3d>(prop.get())).ptr());
         }
         else if (prop.getType() == "bool")
         {

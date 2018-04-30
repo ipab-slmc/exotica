@@ -180,6 +180,25 @@ inline Eigen::VectorXd parseVector(const std::string value)
     return ret;
 }
 
+inline Eigen::Vector3d parseVector3(const std::string value)
+{
+    Eigen::Vector3d ret;
+    double temp_entry;
+    int i = 0;
+
+    std::istringstream text_parser(value);
+
+    text_parser >> temp_entry;
+    while (!(text_parser.fail() || text_parser.bad()))
+    {
+        ++i;
+        ret(i - 1) = temp_entry;
+        text_parser >> temp_entry;
+    }
+    if (i == 0) throw_pretty("Empty vector!");
+    return ret;
+}
+
 inline bool parseBool(const std::string value)
 {
     bool ret;

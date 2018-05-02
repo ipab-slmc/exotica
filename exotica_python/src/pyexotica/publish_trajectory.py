@@ -27,7 +27,8 @@ def publishTrajectory(traj, T, problem):
             sleep(dt)
             t = (t+1) % len(traj)
         except KeyboardInterrupt:
-            break
+            return False
+    return True
 
 
 def publishTimeIndexedTrajectory(traj, Ts, problem, once=False):
@@ -47,7 +48,8 @@ def publishTimeIndexedTrajectory(traj, Ts, problem, once=False):
             if once:
                 break
         except KeyboardInterrupt:
-            break
+            return False
+    return True
 
 
 def plot(solution):

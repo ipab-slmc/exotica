@@ -37,16 +37,10 @@ public:
         ObjectName = 16
     };
 
-    Exception();
-    explicit Exception(const std::string &msg, const char *file, const char *func, int line);
-    explicit Exception(const std::string &msg, const char *file, const char *func, int line, const std::string &object);
-    virtual const char *what() const noexcept override;
+    explicit Exception(const std::string &msg, const char *file, const char *func, int line, const std::string &object = std::string());
+    virtual const char *what() const noexcept;
 
     std::string msg_;
-    std::string file_;
-    std::string func_;
-    std::string line_;
-    std::string object_;
 
 private:
     static ReportingType reporting_;

@@ -1,5 +1,9 @@
 extend <exotica/MotionSolver>
 Optional bool Smooth = true;
+Optional int SimplifyTryCnt = 10;
+Optional int SimplifyInterpolationLength = 20;
+Optional double RangeRatio = 0.33; // Set to 1.0 will do maximum simplification
+Optional double SnapToVertex = 0.005; // Set to 1.0 will do maximum simplification
 Optional double SmoothnessFactor = 1.0;
 Optional double Timeout = 60.0;
 Optional std::string Range = "1";

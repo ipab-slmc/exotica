@@ -162,26 +162,30 @@ void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::Planner
     ompl::geometric::PathGeometric pg = ompl_simple_setup_->getSolutionPath();
     if (init_.Smooth)
     {
-        bool tryMore = false;
-        if (ptc == false)
-            tryMore = psf_->reduceVertices(pg);
-        if (ptc == false)
-            psf_->collapseCloseVertices(pg);
+        bool tryMore = true;
         int times = 0;
-        while (times < 10 && tryMore && ptc == false)
+        while (times < init_.SimplifyTryCnt && tryMore && ptc == false)
         {
-            tryMore = psf_->reduceVertices(pg);
+            if(times > 0)
+                pg.interpolate(init_.SimplifyInterpolationLength);
+            tryMore = psf_->reduceVertices(pg, 0, 0, init_.RangeRatio);
             times++;
         }
         if (si->getStateSpace()->isMetricSpace())
         {
             if (ptc == false)
-                tryMore = psf_->shortcutPath(pg);
+            {
+                if(times > 0)
+                    pg.interpolate(init_.SimplifyInterpolationLength);
+                tryMore = psf_->shortcutPath(pg, 0 ,0, init_.RangeRatio, init_.SnapToVertex);
+            }
             else
                 tryMore = false;
-            while (times < 10 && tryMore && ptc == false)
+            while (times < init_.SimplifyTryCnt && tryMore && ptc == false)
             {
-                tryMore = psf_->shortcutPath(pg);
+                if(times > 0)
+                    pg.interpolate(init_.SimplifyInterpolationLength);
+                tryMore = psf_->shortcutPath(pg, 0, 0, init_.RangeRatio, init_.SnapToVertex);
                 times++;
             }
         }

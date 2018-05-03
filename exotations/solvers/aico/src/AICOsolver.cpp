@@ -527,7 +527,7 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
     timer.reset();
     if (debug_ && !skipUpdate) HIGHLIGHT("Roll-out took: " << dUpd);
 
-    for (int t = 0; t < prob_->getT(); t++)
+    for (int t = 1; t < prob_->getT(); t++)
     {
         timer.reset();
         if (Server::isRos() && !ros::ok()) return -1.0;

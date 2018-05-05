@@ -55,7 +55,6 @@ std::vector<double>& BoundedTimeIndexedProblem::getBounds()
 void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer& init)
 {
     init_ = init;
-    setT(init_.T);
 
     std::vector<std::string> jnts;
     scene_->getJointNames(jnts);
@@ -84,6 +83,12 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
     {
         throw_named("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
+
+    Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
+
+    T = init_.T;
+    applyStartState(false);
+    reinitializeVariables();
 }
 
 void BoundedTimeIndexedProblem::preupdate()
@@ -337,7 +342,6 @@ void BoundedTimeIndexedProblem::reinitializeVariables()
     // Set initial trajectory
     InitialTrajectory.resize(T, scene_->getControlledState());
 
-    Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
     Cost.reinitializeVariables(T, shared_from_this(), CostPhi);
     applyStartState(false);
     preupdate();

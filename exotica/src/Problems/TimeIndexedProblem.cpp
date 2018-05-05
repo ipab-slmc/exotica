@@ -55,8 +55,6 @@ Eigen::MatrixXd& TimeIndexedProblem::getBounds()
 void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
 {
     init_ = init;
-    applyStartState(false);
-    setT(init_.T);
 
     N = scene_->getSolver().getNumControlledJoints();
 
@@ -94,6 +92,12 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
 
     useBounds = init.UseBounds;
 
+    Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
+    Inequality.initialize(init_.Inequality, shared_from_this(), InequalityPhi);
+    Equality.initialize(init_.Equality, shared_from_this(), EqualityPhi);
+
+    T = init_.T;
+    applyStartState(false);
     reinitializeVariables();
 }
 
@@ -130,9 +134,6 @@ void TimeIndexedProblem::reinitializeVariables()
     // Set initial trajectory
     InitialTrajectory.resize(T, scene_->getControlledState());
 
-    Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
-    Inequality.initialize(init_.Inequality, shared_from_this(), InequalityPhi);
-    Equality.initialize(init_.Equality, shared_from_this(), EqualityPhi);
     Cost.reinitializeVariables(T, shared_from_this(), CostPhi);
     Inequality.reinitializeVariables(T, shared_from_this(), InequalityPhi);
     Equality.reinitializeVariables(T, shared_from_this(), EqualityPhi);

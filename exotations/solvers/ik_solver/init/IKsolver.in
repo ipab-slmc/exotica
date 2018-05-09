@@ -1,7 +1,6 @@
 extend <exotica/MotionSolver>
 Optional double Tolerance = 1e-5;
 Optional double Convergence = 0.0;
-Optional int MaxIterations = 50;
 Optional double MaxStep = 0.02;
 Optional double C = 0.0;
 Optional double Alpha = 1.0;

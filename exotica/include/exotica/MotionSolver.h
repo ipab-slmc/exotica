@@ -55,6 +55,7 @@ public:
     virtual std::string print(std::string prepend);
     void setNumberOfMaxIterations(int maxIter)
     {
+        if (maxIter < 1) throw_pretty("Number of maximum iterations needs to be greater than 0.");
         if (debug_) HIGHLIGHT_NAMED("MotionSolver", "Setting maximum iterations to " << maxIter << " (was " << maxIterations_ << ")");
         maxIterations_ = maxIter;
     }

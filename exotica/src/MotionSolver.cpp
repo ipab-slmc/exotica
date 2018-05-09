@@ -31,12 +31,14 @@
  */
 
 #include "exotica/MotionSolver.h"
+#include "exotica/MotionSolverInitializer.h"
 
 namespace exotica
 {
 void MotionSolver::InstantiateBase(const Initializer& init)
 {
     Object::InstatiateObject(init);
+    setNumberOfMaxIterations(MotionSolverInitializer(init).MaxIterations);
 }
 
 MotionSolver::MotionSolver()

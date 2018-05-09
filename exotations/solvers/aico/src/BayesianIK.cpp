@@ -57,7 +57,6 @@ void BayesianIK::Instantiate(BayesianIKInitializer& init)
     {
         throw_named("Unknown sweep mode '" << init.SweepMode << "'");
     }
-    setNumberOfMaxIterations(init.MaxIterations);
     max_backtrack_iterations = init.MaxBacktrackIterations;
     minimum_step_tolerance = init.MinStep;
     step_tolerance = init.StepTolerance;

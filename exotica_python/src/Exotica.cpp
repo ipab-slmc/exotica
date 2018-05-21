@@ -710,7 +710,9 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedProblem.def("getScalarTransitionCost", &TimeIndexedProblem::getScalarTransitionCost);
     timeIndexedProblem.def("getScalarTransitionJacobian", &TimeIndexedProblem::getScalarTransitionJacobian);
     timeIndexedProblem.def("getEquality", &TimeIndexedProblem::getEquality);
+    timeIndexedProblem.def("getEqualityJacobian", &TimeIndexedProblem::getEqualityJacobian);
     timeIndexedProblem.def("getInequality", &TimeIndexedProblem::getInequality);
+    timeIndexedProblem.def("getInequalityJacobian", &TimeIndexedProblem::getInequalityJacobian);
     timeIndexedProblem.def("getBounds", &TimeIndexedProblem::getBounds);
     timeIndexedProblem.def_readonly("Cost", &TimeIndexedProblem::Cost);
     timeIndexedProblem.def_readonly("Inequality", &TimeIndexedProblem::Inequality);

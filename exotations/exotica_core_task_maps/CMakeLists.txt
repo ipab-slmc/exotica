@@ -42,6 +42,7 @@ AddInitializer(
 
   SmoothCollisionDistance
   SumOfPenetrations
+  CollisionDistance
 )
 GenInitializers()
 
@@ -87,6 +88,7 @@ set(SOURCES
 
     src/SmoothCollisionDistance.cpp
     src/SumOfPenetrations.cpp
+    src/CollisionDistance.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

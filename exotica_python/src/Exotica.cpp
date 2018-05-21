@@ -791,6 +791,10 @@ PYBIND11_MODULE(_pyexotica, module)
     endPoseProblem.def("getScalarCost", &EndPoseProblem::getScalarCost);
     endPoseProblem.def("getScalarJacobian", &EndPoseProblem::getScalarJacobian);
     endPoseProblem.def("getScalarTaskCost", &EndPoseProblem::getScalarTaskCost);
+    endPoseProblem.def("getEquality", &EndPoseProblem::getEquality);
+    endPoseProblem.def("getEqualityJacobian", &EndPoseProblem::getEqualityJacobian);
+    endPoseProblem.def("getInequality", &EndPoseProblem::getInequality);
+    endPoseProblem.def("getInequalityJacobian", &EndPoseProblem::getInequalityJacobian);
     endPoseProblem.def("getBounds", &EndPoseProblem::getBounds);
     endPoseProblem.def_readonly("Cost", &EndPoseProblem::Cost);
     endPoseProblem.def_readonly("Inequality", &EndPoseProblem::Inequality);

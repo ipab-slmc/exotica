@@ -72,6 +72,12 @@ public:
 
     int getRandomSeed();
 
+    // StateSpace related methods exposed via solver
+    double getMaximumExtent() { return state_space_->getMaximumExtent(); }
+    double getLongestValidSegmentLength() { return state_space_->getLongestValidSegmentLength(); }
+    void setLongestValidSegmentFraction(double segmentFraction) { state_space_->setLongestValidSegmentFraction(segmentFraction); }
+    void setValidSegmentCountFactor(unsigned int factor) { state_space_->setValidSegmentCountFactor(factor); }
+    unsigned int getValidSegmentCountFactor() const { return state_space_->getValidSegmentCountFactor(); }
 protected:
     template <typename T>
     static ompl::base::PlannerPtr allocatePlanner(const ompl::base::SpaceInformationPtr &si, const std::string &new_name)

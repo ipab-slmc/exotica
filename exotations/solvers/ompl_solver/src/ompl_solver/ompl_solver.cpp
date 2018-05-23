@@ -62,7 +62,7 @@ void OMPLsolver<ProblemType>::specifyProblem(PlanningProblem_ptr pointer)
         throw_named("Unsupported base type " << prob_->getScene()->getBaseType());
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
-    ompl_simple_setup_->setPlannerAllocator(boost::bind(planner_allocator_, _1, "Exotica_" + algorithm_));
+    ompl_simple_setup_->setPlannerAllocator(boost::bind(planner_allocator_, _1, algorithm_));
 
     if (init_.Projection.rows() > 0)
     {

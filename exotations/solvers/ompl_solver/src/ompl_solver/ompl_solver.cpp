@@ -164,14 +164,14 @@ void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::Planner
     {
         bool tryMore = true;
         int times = 0;
-        while (times < init_.SimplifyTryCnt && tryMore && ptc == false)
+        while (init_.ReduceVertices && times < init_.SimplifyTryCnt && tryMore && ptc == false)
         {
             if (times > 0)
                 pg.interpolate(init_.SimplifyInterpolationLength);
             tryMore = psf_->reduceVertices(pg, 0, 0, init_.RangeRatio);
             times++;
         }
-        if (si->getStateSpace()->isMetricSpace())
+        if (init_.ShortcutPath && si->getStateSpace()->isMetricSpace())
         {
             if (ptc == false)
             {

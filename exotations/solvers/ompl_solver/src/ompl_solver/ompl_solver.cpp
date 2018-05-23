@@ -172,14 +172,7 @@ void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::Planner
         }
         if (init_.ShortcutPath && si->getStateSpace()->isMetricSpace())
         {
-            if (ptc == false)
-            {
-                if (times > 0)
-                    pg.interpolate(init_.SimplifyInterpolationLength);
-                tryMore = psf_->shortcutPath(pg, 0, 0, init_.RangeRatio, init_.SnapToVertex);
-            }
-            else
-                tryMore = false;
+            times = 0;
             while (times < init_.SimplifyTryCnt && tryMore && ptc == false)
             {
                 pg.interpolate(init_.SimplifyInterpolationLength);

@@ -104,6 +104,18 @@ void RRTConnect::Instantiate(RRTConnectInitializer& init)
         &allocatePlanner<ompl::geometric::RRTConnect>, _1, _2);
 }
 
+void RRTConnect::setRange(double range)
+{
+    ompl_ptr<ompl::geometric::RRTConnect> rrtcon = ompl_cast<ompl::geometric::RRTConnect>(ompl_simple_setup_->getPlanner());
+    rrtcon->setRange(range);
+}
+
+double RRTConnect::getRange()
+{
+    ompl_ptr<ompl::geometric::RRTConnect> rrtcon = ompl_cast<ompl::geometric::RRTConnect>(ompl_simple_setup_->getPlanner());
+    return rrtcon->getRange();
+}
+
 EST::EST()
 {
 }

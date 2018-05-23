@@ -50,6 +50,8 @@ class RRTConnect : public OMPLsolver<SamplingProblem>, Instantiable<RRTConnectIn
 public:
     RRTConnect();
     virtual void Instantiate(RRTConnectInitializer& init);
+    void setRange(double range);
+    double getRange();
 };
 
 class EST : public OMPLsolver<SamplingProblem>, Instantiable<ESTInitializer>

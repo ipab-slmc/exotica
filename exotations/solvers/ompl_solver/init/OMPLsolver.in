@@ -1,9 +1,9 @@
 extend <exotica/MotionSolver>
 Optional bool Smooth = true;
-Optional int SimplifyTryCnt = 10;
-Optional int SimplifyInterpolationLength = 20;
-Optional double RangeRatio = 0.33; // Set to 1.0 will do maximum simplification
-Optional double SnapToVertex = 0.005; // Set to 1.0 will do maximum simplification
+Optional int SimplifyTryCnt = 10; // [reduceVertices/shortcutPath] Number of attempts to reduce vertices and shortcut path. Both will be attempted the given number of tasks, and the latter only if it is a metric state space.
+Optional int SimplifyInterpolationLength = 20; // [reduceVertices/shortcutPath] Interpolation after the first attempt.
+Optional double RangeRatio = 0.33; // [reduceVertices/shortcutPath] Between 0.0-1.0, how far to attempt to connect vertices. Set to 1.0 for maximum simplification.
+Optional double SnapToVertex = 0.005; // [shortcutPath] Set to 1.0 will do maximum simplification.
 Optional double SmoothnessFactor = 1.0;
 Optional double Timeout = 60.0;
 Optional std::string Range = "1";

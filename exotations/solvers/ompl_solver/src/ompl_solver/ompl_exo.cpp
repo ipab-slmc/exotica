@@ -75,6 +75,7 @@ OMPLRNStateSpace::OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLsolverInitiali
         bounds.setLow(i, prob->getBounds()[i]);
     }
     getSubspace(0)->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
+    setLongestValidSegmentFraction(init.LongestValidSegmentFraction);
     lock();
 }
 
@@ -144,6 +145,7 @@ OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLsolverIn
         ERROR("State space bounds were not specified!\n"
               << prob->getBounds().size() << " " << n);
     }
+    setLongestValidSegmentFraction(init.LongestValidSegmentFraction);
     lock();
 }
 
@@ -212,6 +214,7 @@ OMPLSE2RNStateSpace::OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLsolverIn
         ERROR("State space bounds were not specified!\n"
               << prob->getBounds().size() << " " << n);
     }
+    setLongestValidSegmentFraction(init.LongestValidSegmentFraction);
     lock();
 }
 

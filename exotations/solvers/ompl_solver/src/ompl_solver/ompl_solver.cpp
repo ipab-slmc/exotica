@@ -166,8 +166,7 @@ void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::Planner
         int times = 0;
         while (init_.ReduceVertices && times < init_.SimplifyTryCnt && tryMore && ptc == false)
         {
-            if (times > 0)
-                pg.interpolate(init_.SimplifyInterpolationLength);
+            pg.interpolate(init_.SimplifyInterpolationLength);
             tryMore = psf_->reduceVertices(pg, 0, 0, init_.RangeRatio);
             times++;
         }
@@ -183,8 +182,7 @@ void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::Planner
                 tryMore = false;
             while (times < init_.SimplifyTryCnt && tryMore && ptc == false)
             {
-                if (times > 0)
-                    pg.interpolate(init_.SimplifyInterpolationLength);
+                pg.interpolate(init_.SimplifyInterpolationLength);
                 tryMore = psf_->shortcutPath(pg, 0, 0, init_.RangeRatio, init_.SnapToVertex);
                 times++;
             }

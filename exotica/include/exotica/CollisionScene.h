@@ -194,6 +194,8 @@ public:
     ///
     virtual void updateCollisionObjectTransforms() = 0;
 
+    bool replaceCylindersWithCapsules = false;
+
 protected:
     /// The allowed collision matrix
     AllowedCollisionMatrix acm_;

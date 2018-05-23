@@ -150,7 +150,14 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
         case shapes::CYLINDER:
         {
             const shapes::Cylinder* s = static_cast<const shapes::Cylinder*>(shape.get());
-            geometry.reset(new fcl::Cylinderd(s->radius, s->length));
+            if (!replaceCylindersWithCapsules)
+            {
+                geometry.reset(new fcl::Cylinderd(s->radius, s->length));
+            }
+            else
+            {
+                geometry.reset(new fcl::Capsuled(s->radius, s->length - 2 * s->radius));
+            }
         }
         break;
         case shapes::CONE:

@@ -293,12 +293,14 @@ void Scene::setCollisionScene(const moveit_msgs::PlanningScene& scene)
 {
     ps_->usePlanningSceneMsg(scene);
     updateSceneFrames();
+    updateInternalFrames();
 }
 
 void Scene::updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world)
 {
     ps_->processPlanningSceneWorldMsg(*world);
     updateSceneFrames();
+    updateInternalFrames();
 }
 
 void Scene::updateCollisionObjects()
@@ -499,19 +501,23 @@ void Scene::loadSceneFromStringStream(std::istream& in, const Eigen::Affine3d& o
 {
     ps_->loadGeometryFromStream(in, offset);
     updateSceneFrames();
+    updateInternalFrames();
 }
 
 std::string Scene::getScene()
 {
     std::stringstream ss;
     ps_->saveGeometryToStream(ss);
+    // TODO: include all custom environment scene objects
     return ss.str();
 }
 
 void Scene::cleanScene()
 {
     ps_->removeAllCollisionObjects();
+    // TODO: remove all custom environment scene objects
     updateSceneFrames();
+    updateInternalFrames();
 }
 
 void Scene::updateInternalFrames(bool updateRequest)
@@ -632,6 +638,8 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     Eigen::Affine3d pose;
     tf::transformKDLToEigen(transform, pose);
     custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shapeResourcePath, scale, inertia));
+    updateSceneFrames();
+    updateInternalFrames();
     if (updateCollisionScene) updateCollisionObjects();
 }
 

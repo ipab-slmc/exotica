@@ -501,7 +501,7 @@ void Scene::loadSceneFromStringStream(std::istream& in, const Eigen::Affine3d& o
 {
     ps_->loadGeometryFromStream(in, offset);
     updateSceneFrames();
-    updateInternalFrames();
+    if (updateCollisionScene) updateInternalFrames();
 }
 
 std::string Scene::getScene()

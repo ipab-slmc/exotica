@@ -928,6 +928,7 @@ PYBIND11_MODULE(_pyexotica, module)
               py::arg("shapeResourcePath"),
               py::arg("scale") = Eigen::Vector3d::Ones(),
               py::arg("updateCollisionScene") = true);
+    scene.def("removeObject", &Scene::removeObject);
 
     py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collisionScene(module, "CollisionScene");
     // TODO: expose isStateValid, isCollisionFree, getCollisionDistance, getCollisionWorldLinks, getCollisionRobotLinks, getTranslation

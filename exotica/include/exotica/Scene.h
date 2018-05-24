@@ -127,6 +127,7 @@ public:
     void addObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool updateCollisionScene = true);
 
     void addObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", const std::string& shapeResourcePath = "", Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool updateCollisionScene = true);
+    void removeObject(const std::string& name);
 
     /**
        * @brief      Update the internal MoveIt planning scene from a

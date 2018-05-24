@@ -635,6 +635,26 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     if (updateCollisionScene) updateCollisionObjects();
 }
 
+void Scene::removeObject(const std::string& name)
+{
+    auto it = std::begin(custom_links_);
+    while (it != std::end(custom_links_))
+    {
+        if ((*it)->Segment.getName() == name)
+        {
+            custom_links_.erase(it);
+            updateSceneFrames();
+            updateInternalFrames();
+            return;
+        }
+        else
+        {
+            ++it;
+        }
+    }
+    throw_pretty("Link " << name << " not removed as it cannot be found.");
+}
+
 void Scene::attachObject(const std::string& name, const std::string& parent)
 {
     kinematica_.changeParent(name, parent, KDL::Frame(), false);

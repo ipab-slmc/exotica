@@ -243,9 +243,16 @@ void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob, 
                 y[t].data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal.segment(t * Tasks[i]->Length, Tasks[i]->Length);
             }
         }
+        else if (task.Goal.rows() == Tasks[i]->Length)
+        {
+            for (int t = 0; t < T; t++)
+            {
+                y[t].data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal.segment(Tasks[i]->Length, Tasks[i]->Length);
+            }
+        }
         else
         {
-            throw_pretty("Invalid task goal size! Expecting " << Tasks[i]->Length * T << " got " << task.Goal.rows());
+            throw_pretty("Invalid task goal size! Expecting " << Tasks[i]->Length * T << " (or 1) and got " << task.Goal.rows());
         }
         if (task.Rho.rows() == 0)
         {
@@ -258,9 +265,16 @@ void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob, 
                 Rho[t](i) = task.Rho(t);
             }
         }
+        else if (task.Rho.rows() == 1)
+        {
+            for (int t = 0; t < T; t++)
+            {
+                Rho[t](i) = task.Rho(0);
+            }
+        }
         else
         {
-            throw_pretty("Invalid task Rho size! Expecting " << T << " got " << task.Rho.rows());
+            throw_pretty("Invalid task Rho size! Expecting " << T << " (or 1) and got " << task.Rho.rows());
         }
     }
 }

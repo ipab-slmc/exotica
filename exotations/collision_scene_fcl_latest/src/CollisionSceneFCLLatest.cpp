@@ -306,22 +306,29 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     // Cf. Issue #184:
     // https://github.com/ipab-slmc/exotica/issues/184#issuecomment-341916457
     bool flipO1AndO2 = false;
+    double min_dist;
     if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH)
     {
         // HIGHLIGHT_NAMED("CollisionSceneFCLLatest", "Flipping o1 and o2");
         flipO1AndO2 = true;
-        fcl::distance(o2, o1, data->Request, data->Result);
+        min_dist = fcl::distance(o2, o1, data->Request, data->Result);
     }
     else
     {
-        fcl::distance(o1, o2, data->Request, data->Result);
+        min_dist = fcl::distance(o1, o2, data->Request, data->Result);
     }
 
     CollisionProxy p;
     p.e1 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
     p.e2 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
 
-    p.distance = data->Result.min_distance;
+    // If -1 is returned, the distance query is not supported for the pair of objects.
+    if (min_dist == -1)
+    {
+        throw_pretty("Distance query not supported: min_dist=" << min_dist << ", Result.min_distance=" << data->Result.min_distance << " and types: "
+                                                               << "e1 (" << p.e1->Segment.getName() << "): " << p.e1->Shape->type << " vs e2 (" << p.e2->Segment.getName() << "): " << p.e2->Shape->type);
+    }
+    p.distance = min_dist;
 
     // FCL uses world coordinates for meshes while local coordinates are used
     // for primitive shapes - thus, we need to work around this.

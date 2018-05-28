@@ -150,12 +150,14 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
         case shapes::CYLINDER:
         {
             const shapes::Cylinder* s = static_cast<const shapes::Cylinder*>(shape.get());
-            if (!replaceCylindersWithCapsules)
+            bool degenerateCapsule = (s->length <= 2 * s->radius);
+            if (!replaceCylindersWithCapsules || degenerateCapsule)
             {
                 geometry.reset(new fcl::Cylinderd(s->radius, s->length));
             }
             else
             {
+                // TODO: handle degenerate cases, i.e. where 2*radius >= length
                 geometry.reset(new fcl::Capsuled(s->radius, s->length - 2 * s->radius));
             }
         }

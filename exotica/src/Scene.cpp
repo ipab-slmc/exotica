@@ -517,7 +517,6 @@ void Scene::cleanScene()
     ps_->removeAllCollisionObjects();
     // TODO: remove all custom environment scene objects
     updateSceneFrames();
-    updateInternalFrames();
 }
 
 void Scene::updateInternalFrames(bool updateRequest)

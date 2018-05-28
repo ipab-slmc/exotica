@@ -61,9 +61,12 @@ public:
 
     virtual int taskSpaceDim();
 
+    std::vector<CollisionProxy> getCollisionProxies() { return closestProxies_; }
+
 private:
     std::vector<std::string> robotLinks_;
     bool check_self_collision_ = true;
+    std::vector<CollisionProxy> closestProxies_;
 
     unsigned int dim_;
     Scene_ptr scene_;

@@ -603,4 +603,45 @@ double TimeIndexedProblem::getRhoNEQ(const std::string& task_name, int t)
     }
     throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
+
+bool TimeIndexedProblem::isValid()
+{
+    bool succeeded = true;
+
+    // Check for every state
+    for (unsigned int t = 0; t < T; t++)
+    {
+        // Check joint limits
+        for (unsigned int i = 0; i < N; i++)
+        {
+            if (x[t](i) < bounds_(i, 0) || x[t](i) > bounds_(i, 1))
+            {
+                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::isValid", "State at timestep " << t << " is out of bounds");
+                succeeded = false;
+            }
+        }
+
+        // Check inequality constraints
+        if (getInequality(t).rows() > 0)
+        {
+            if (getInequality(t).maxCoeff() > init_.InequalityFeasibilityTolerance)
+            {
+                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::isValid", "Violated inequality constraints at timestep " << t << ": " << getInequality(t).transpose());
+                succeeded = false;
+            }
+        }
+
+        // Check equality constraints
+        if (getEquality(t).rows() > 0)
+        {
+            if (getEquality(t).norm() > init_.EqualityFeasibilityTolerance)
+            {
+                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::isValid", "Violated equality constraints at timestep " << t << ": " << getEquality(t).norm());
+                succeeded = false;
+            }
+        }
+    }
+
+    return succeeded;
+}
 }

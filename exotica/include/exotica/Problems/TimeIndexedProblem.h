@@ -50,6 +50,7 @@ public:
     virtual void Instantiate(TimeIndexedProblemInitializer& init);
     double getDuration();
     void Update(Eigen::VectorXdRefConst x, int t);
+    bool isValid();
     std::vector<Eigen::VectorXd> getInitialTrajectory();
     void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
     virtual void preupdate();

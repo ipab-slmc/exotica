@@ -323,13 +323,13 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     KDL::Vector c1, c2;
 
     // Case 1: Mesh vs Mesh - already in world frame
-    if (p.e1->Shape->type == shapes::ShapeType::MESH && p.e2->Shape->type == shapes::ShapeType::MESH)
+    if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH)
     {
         c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
         c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
     }
     // Case 2: Primitive vs Primitive - convert from both local frames to world frame
-    else if (p.e1->Shape->type != shapes::ShapeType::MESH && p.e2->Shape->type != shapes::ShapeType::MESH)
+    else if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
     {
         // Use shape centres as nearest point when in penetration - otherwise use the nearest point.
         // INDEP has a further caveat when in penetration: it will return the
@@ -378,7 +378,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         }
     }
     // Case 3: Primitive vs Mesh - primitive returned in flipped local frame (tbc), mesh returned in global frame
-    else if (p.e1->Shape->type != shapes::ShapeType::MESH && p.e2->Shape->type == shapes::ShapeType::MESH)
+    else if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH)
     {
         // Flipping contacts is a workaround for issue #184
         // Cf. https://github.com/ipab-slmc/exotica/issues/184#issuecomment-341916457
@@ -399,7 +399,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         }
     }
     // Case 4: Mesh vs Primitive - both are returned in the local frame (works with both LIBCCD and INDEP)
-    else if (p.e1->Shape->type == shapes::ShapeType::MESH && p.e2->Shape->type != shapes::ShapeType::MESH)
+    else if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
     {
         // e1 is mesh, i.e. nearest points are fine
         c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));

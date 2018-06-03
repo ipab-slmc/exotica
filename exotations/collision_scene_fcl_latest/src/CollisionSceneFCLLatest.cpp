@@ -271,6 +271,87 @@ bool CollisionSceneFCLLatest::collisionCallback(fcl::CollisionObjectd* o1, fcl::
 
 void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data)
 {
+    // Setup proxy.
+    CollisionProxy p;
+    p.e1 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
+    p.e2 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
+
+    // New logic as of May 2018:
+    //  - Use LIBCCD as comment in Drake suggests it is more reliable now.
+    //  - If in collision, use first contact of the collide callback.
+    //  - If not in collision, run distance query.
+
+    // Step 0: Run collision check:
+    fcl::CollisionRequestd tmp_req;
+    fcl::CollisionResultd tmp_res;
+    tmp_req.num_max_contacts = 1;
+    tmp_req.enable_contact = true;
+    // The following comment is copied from Drake: https://github.com/RobotLocomotion/drake/blob/0aa7f713eb029fea7d47109992762ed6d8d1d457/geometry/proximity_engine.cc
+    // NOTE: As of 5/1/2018 the GJK implementation of Libccd appears to be
+    // superior to FCL's "independent" implementation. Furthermore, libccd
+    // appears to behave badly if its gjk tolerance is much tighter than
+    // 2e-12. Until this changes, we explicitly specify these parameters rather
+    // than relying on FCL's defaults.
+    tmp_req.gjk_tolerance = 2e-12;
+    tmp_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
+    fcl::collide(o1, o2, tmp_req, tmp_res);
+
+    // Step 1: If in collision, extract contact point.
+    if (tmp_res.isCollision())
+    {
+        // Logic below from Drake (!)
+        std::vector<fcl::Contactd> contacts;
+        tmp_res.getContacts(contacts);
+        if (!contacts.empty())
+        {
+            const fcl::Contactd& contact{contacts[0]};
+            //  By convention, Drake requires the contact normal to point out of B and
+            //  into A. FCL uses the opposite convention.
+            fcl::Vector3d drake_normal = -contact.normal;
+
+            // Signed distance is negative when penetration depth is positive.
+            double signed_distance = -contact.penetration_depth;
+
+            if (signed_distance > 0) throw_pretty("In collision but positive signed distance?");
+
+            // FCL returns a single contact point, but PointPair expects two, one on
+            // the surface of body A (Ac) and one on the surface of body B (Bc).
+            // Choose points along the line defined by the contact point and normal,
+            // equi-distant to the contact point. Recall that signed_distance is
+            // strictly non-positive, so signed_distance * drake_normal points out of
+            // A and into B.
+            const fcl::Vector3d p_WAc{contact.pos + 0.5 * signed_distance * drake_normal};
+            const fcl::Vector3d p_WBc{contact.pos - 0.5 * signed_distance * drake_normal};
+
+            // HIGHLIGHT("Normal: " << contact.normal[0] << "," << contact.normal[1] << "," << contact.normal[2]);
+            // HIGHLIGHT("p_WAc: " << p_WAc[0] << "," << p_WAc[1] << "," << p_WAc[2]);
+            // HIGHLIGHT("p_WBc: " << p_WBc[0] << "," << p_WBc[1] << "," << p_WBc[2]);
+
+            p.distance = signed_distance;
+            p.normal1 = -contact.normal;
+            p.normal2 = contact.normal;
+
+            // KDL::Vector c1 = p.e1->Frame * KDL::Vector(p_WAc(0), p_WAc(1), p_WAc(2));
+            // KDL::Vector c2 = p.e2->Frame * KDL::Vector(p_WBc(0), p_WBc(1), p_WBc(2));
+            KDL::Vector c1 = KDL::Vector(p_WAc(0), p_WAc(1), p_WAc(2));
+            KDL::Vector c2 = KDL::Vector(p_WBc(0), p_WBc(1), p_WBc(2));
+            tf::vectorKDLToEigen(c1, p.contact1);
+            tf::vectorKDLToEigen(c2, p.contact2);
+
+            data->Distance = std::min(data->Distance, p.distance);
+            data->Proxies.push_back(p);
+
+            return;
+        }
+        else
+        {
+            throw_pretty("In contact but did not return any contact points.");
+        }
+    }
+
+    // Step 2: If not in collision, run old distance logic.
+    //---------------------- OLD BELOW
+
     data->Request.enable_nearest_points = true;
     data->Request.enable_signed_distance = true;  // Added in FCL 0.6.0
     // GST_LIBCCD produces incorrect contacts. Probably due to incompatible version of libccd.
@@ -286,9 +367,20 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         fcl::CollisionRequestd tmp_req;
         fcl::CollisionResultd tmp_res;
         tmp_req.num_max_contacts = 1;
-        tmp_req.gjk_solver_type = fcl::GST_INDEP;
+        // tmp_req.enable_contact = true;
+        // The following comment is copied from Drake: https://github.com/RobotLocomotion/drake/blob/0aa7f713eb029fea7d47109992762ed6d8d1d457/geometry/proximity_engine.cc
+        // NOTE: As of 5/1/2018 the GJK implementation of Libccd appears to be
+        // superior to FCL's "independent" implementation. Furthermore, libccd
+        // appears to behave badly if its gjk tolerance is much tighter than
+        // 2e-12. Until this changes, we explicitly specify these parameters rather
+        // than relying on FCL's defaults.
+        tmp_req.gjk_tolerance = 2e-12;
+        tmp_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
         fcl::collide(o1, o2, tmp_req, tmp_res);
+
         data->Request.gjk_solver_type = tmp_res.isCollision() ? fcl::GST_LIBCCD : fcl::GST_INDEP;
+        data->Request.distance_tolerance = 1e-6;  // As in FCL test
+
         // HIGHLIGHT("Using INDEP");
     }
     else
@@ -317,10 +409,6 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     {
         min_dist = fcl::distance(o1, o2, data->Request, data->Result);
     }
-
-    CollisionProxy p;
-    p.e1 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
-    p.e2 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
 
     // If -1 is returned, the distance query is not supported for the pair of objects.
     if (min_dist == -1)
@@ -365,12 +453,12 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             {
                 // The contact point is accurate but it is not the point of deepest penetration
                 // WITH INDEP:
-                // c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-                // c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+                c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+                c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
 
                 // SHAPE CENTRES:
-                c1 = p.e1->Frame.p;
-                c2 = p.e2->Frame.p;
+                // c1 = p.e1->Frame.p;
+                // c2 = p.e2->Frame.p;
             }
             // Only LIBCCD can compute contact points on the surface of a
             // sphere, i.e. if in collision and either of the two objects is a
@@ -381,7 +469,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             {
                 // WITH LIBCCD:
                 // If touching, use shape centres OF THE OTHER SHAPE
-                if (p.distance == 0)
+                if (p.distance == 0)  // use std::abs or near
                 {
                     c1 = p.e2->Frame.p;
                     c2 = p.e1->Frame.p;
@@ -456,6 +544,9 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         // with the shape centre.
         if (data->Request.gjk_solver_type == fcl::GST_LIBCCD)
         {
+            HIGHLIGHT_NAMED("computeDistanceLibCCD",
+                            "Contact1 between " << p.e1->Segment.getName() << " and " << p.e2->Segment.getName() << " contains NaN"
+                                                << ", where ShapeType1: " << p.e1->Shape->type << " and ShapeType2: " << p.e2->Shape->type << " and distance: " << p.distance << " and solver: " << data->Request.gjk_solver_type);
             // To avoid downstream issues, replace contact point with shape centre
             if ((std::isnan(c1(0)) || std::isnan(c1(1)) || std::isnan(c1(2))) && p.e1->Shape->type == shapes::ShapeType::SPHERE) c1 = p.e1->Frame.p;
             if ((std::isnan(c2(0)) || std::isnan(c2(1)) || std::isnan(c2(2))) && p.e2->Shape->type == shapes::ShapeType::SPHERE) c2 = p.e1->Frame.p;

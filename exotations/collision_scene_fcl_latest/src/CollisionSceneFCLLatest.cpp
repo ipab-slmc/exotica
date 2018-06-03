@@ -105,6 +105,16 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
 
     shapes::ShapeConstPtr shape = element->Shape;
 
+    // Replace primitive shapes with meshes if desired (e.g. if primitives are unstable)
+    if (replacePrimitiveShapesWithMeshes_)
+    {
+        if (shape->type != shapes::MESH || shape->type != shapes::OCTREE)
+        {
+            shapes::ShapePtr mesh_shape((shapes::Shape*)shapes::createMeshFromShape(shape->clone()));
+            shape = mesh_shape;
+        }
+    }
+
     // Apply scaling and padding
     if (element->isRobotLink || element->ClosestRobotLink.lock())
     {

@@ -6,6 +6,7 @@ Optional std::string SRDF = "";
 Optional bool SetRobotDescriptionRosParams = false;  // to be used in conjunction with URDF or SRDF to set the robot_description and robot_description_semantic from the files/string in URDF/SRDF
 Optional std::string CollisionScene = "CollisionSceneFCL";
 Optional bool AlwaysUpdateCollisionScene = false;
+Optional bool ReplacePrimitiveShapesWithMeshes = false;
 Optional bool ReplaceCylindersWithCapsules = false;
 Optional std::string LoadScene = "";
 Optional std::vector<exotica::Initializer> Links = std::vector<exotica::Initializer>();

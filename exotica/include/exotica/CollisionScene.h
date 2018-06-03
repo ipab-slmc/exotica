@@ -221,6 +221,12 @@ public:
         worldLinkPadding_ = padding;
     }
 
+    inline bool getReplacePrimitiveShapesWithMeshes() { return replacePrimitiveShapesWithMeshes_; }
+    inline void setReplacePrimitiveShapesWithMeshes(const bool& value)
+    {
+        replacePrimitiveShapesWithMeshes_ = value;
+    }
+
     ///
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
@@ -252,6 +258,9 @@ protected:
 
     /// World link padding
     double worldLinkPadding_ = 0.0;
+
+    /// Replace primitive shapes with meshes internally (e.g. when primitive shape algorithms are brittle, i.e. in FCL)
+    bool replacePrimitiveShapesWithMeshes_ = false;
 };
 
 typedef exotica::Factory<exotica::CollisionScene> CollisionScene_fac;

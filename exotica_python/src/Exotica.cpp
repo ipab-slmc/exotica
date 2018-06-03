@@ -950,6 +950,7 @@ PYBIND11_MODULE(_pyexotica, module)
     py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collisionScene(module, "CollisionScene");
     // TODO: expose isStateValid, isCollisionFree, getCollisionDistance, getCollisionWorldLinks, getCollisionRobotLinks, getTranslation
     collisionScene.def_property("alwaysExternallyUpdatedCollisionScene", &CollisionScene::getAlwaysExternallyUpdatedCollisionScene, &CollisionScene::setAlwaysExternallyUpdatedCollisionScene);
+    collisionScene.def_property("replacePrimitiveShapesWithMeshes", &CollisionScene::getReplacePrimitiveShapesWithMeshes, &CollisionScene::setReplacePrimitiveShapesWithMeshes);
     collisionScene.def_readwrite("replaceCylindersWithCapsules", &CollisionScene::replaceCylindersWithCapsules);
     collisionScene.def_property("robotLinkScale", &CollisionScene::getRobotLinkScale, &CollisionScene::setRobotLinkScale);
     collisionScene.def_property("worldLinkScale", &CollisionScene::getWorldLinkScale, &CollisionScene::setWorldLinkScale);

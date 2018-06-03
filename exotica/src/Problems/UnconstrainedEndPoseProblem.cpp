@@ -161,6 +161,7 @@ void UnconstrainedEndPoseProblem::setGoal(const std::string& task_name, Eigen::V
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
         {
+            if (goal.rows() != Cost.Indexing[i].Length) throw_pretty("Expected length of " << Cost.Indexing[i].Length << " and got " << goal.rows());
             Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
             return;
         }

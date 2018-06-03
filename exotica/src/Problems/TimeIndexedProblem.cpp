@@ -366,6 +366,7 @@ void TimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRe
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
         {
+            if (goal.rows() != Cost.Indexing[i].Length) throw_pretty("Expected length of " << Cost.Indexing[i].Length << " and got " << goal.rows());
             Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
             return;
         }
@@ -449,6 +450,7 @@ void TimeIndexedProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXd
     {
         if (Equality.Tasks[i]->getObjectName() == task_name)
         {
+            if (goal.rows() != Equality.Indexing[i].Length) throw_pretty("Expected length of " << Equality.Indexing[i].Length << " and got " << goal.rows());
             Equality.y[t].data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length) = goal;
             return;
         }
@@ -532,6 +534,7 @@ void TimeIndexedProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorX
     {
         if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
+            if (goal.rows() != Inequality.Indexing[i].Length) throw_pretty("Expected length of " << Inequality.Indexing[i].Length << " and got " << goal.rows());
             Inequality.y[t].data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length) = goal;
             return;
         }

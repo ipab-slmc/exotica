@@ -218,6 +218,7 @@ void EndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefCon
     {
         if (Cost.Tasks[i]->getObjectName() == task_name)
         {
+            if (goal.rows() != Cost.Indexing[i].Length) throw_pretty("Expected length of " << Cost.Indexing[i].Length << " and got " << goal.rows());
             Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
             return;
         }
@@ -269,6 +270,7 @@ void EndPoseProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefC
     {
         if (Equality.Tasks[i]->getObjectName() == task_name)
         {
+            if (goal.rows() != Equality.Indexing[i].Length) throw_pretty("Expected length of " << Equality.Indexing[i].Length << " and got " << goal.rows());
             Equality.y.data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length) = goal;
             return;
         }
@@ -320,6 +322,7 @@ void EndPoseProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRef
     {
         if (Inequality.Tasks[i]->getObjectName() == task_name)
         {
+            if (goal.rows() != Inequality.Indexing[i].Length) throw_pretty("Expected length of " << Inequality.Indexing[i].Length << " and got " << goal.rows());
             Inequality.y.data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length) = goal;
             return;
         }

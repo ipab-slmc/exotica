@@ -920,7 +920,6 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getTrajectory", [](Scene* instance, const std::string& link) { return instance->getTrajectory(link)->toString(); });
     scene.def("removeTrajectory", &Scene::removeTrajectory);
     scene.def("updateSceneFrames", &Scene::updateSceneFrames);
-    scene.def("updateInternalFrames", &Scene::updateInternalFrames, py::arg("updateRequest") = true);
     scene.def("addObject", [](Scene* instance, const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shapeResourcePath, Eigen::Vector3d scale, bool updateCollisionScene) { instance->addObject(name, transform, parent, shapeResourcePath, scale, KDL::RigidBodyInertia::Zero(), updateCollisionScene); },
               py::arg("name"),
               py::arg("transform") = KDL::Frame(),

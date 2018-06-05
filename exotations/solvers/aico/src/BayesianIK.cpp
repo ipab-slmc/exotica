@@ -349,13 +349,13 @@ double BayesianIK::getTaskCosts()
     rhat = 0;
     R.setZero();
     r.setZero();
-    for (int i = 0; i < prob_->getTasks().size(); i++)
+    for (int i = 0; i < prob_->Cost.NumTasks; i++)
     {
         prec = prob_->Cost.Rho(i);
         if (prec > 0)
         {
-            int start = prob_->Cost.Indexing[i].StartJ;
-            int len = prob_->Cost.Indexing[i].LengthJ;
+            const int& start = prob_->Cost.Indexing[i].StartJ;
+            const int& len = prob_->Cost.Indexing[i].LengthJ;
             Jt = prob_->Cost.J.middleRows(start, len).transpose();
             C += prec * (prob_->Cost.ydiff.segment(start, len)).squaredNorm();
             R += prec * Jt * prob_->Cost.J.middleRows(start, len);

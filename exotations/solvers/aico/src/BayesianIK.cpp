@@ -203,7 +203,7 @@ void BayesianIK::Solve(Eigen::MatrixXd& solution)
     // Check whether maximum iteration count was reached
     if (iterationCount == getNumberOfMaxIterations())
     {
-        HIGHLIGHT("Maximum iterations reached");
+        if (debug_) HIGHLIGHT("Maximum iterations reached");
         prob_->terminationCriterion = TerminationCriterion::IterationLimit;
     }
 

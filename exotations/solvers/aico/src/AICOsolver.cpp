@@ -437,7 +437,7 @@ double AICOsolver::getTaskCosts(int t)
     rhat[t] = 0;
     R[t].setZero();
     r[t].setZero();
-    for (int i = 0; i < prob_->getTasks().size(); i++)
+    for (int i = 0; i < prob_->Cost.NumTasks; i++)
     {
         prec = prob_->Cost.Rho[t](i);
         if (prec > 0)

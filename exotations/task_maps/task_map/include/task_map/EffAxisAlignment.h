@@ -61,6 +61,7 @@ public:
 
 private:
     EffAxisAlignmentInitializer init_;
+    unsigned int NumberOfFrames;
     unsigned int N;
     Scene_ptr scene_;
     void Initialize();

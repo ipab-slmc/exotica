@@ -66,7 +66,7 @@ private:
     Scene_ptr scene_;
     void Initialize();
 
-    Eigen::Vector3d axis_, dir_;
+    Eigen::Matrix3Xd axis_, dir_;
     Eigen::Vector3d linkPositionInBase_, linkAxisPositionInBase_;
 };
 

@@ -47,16 +47,72 @@ void EffAxisAlignment::Instantiate(EffAxisAlignmentInitializer& init)
 
 void EffAxisAlignment::Initialize()
 {
-    axis_ = init_.Axis;
-    dir_ = init_.Direction;
     N = scene_->getSolver().getNumControlledJoints();
-
     NumberOfFrames = Frames.size();
+    axis_.resize(3, NumberOfFrames);
+    dir_.resize(3, NumberOfFrames);
+
+    if (init_.Axis.size() > 0)
+    {
+        if (init_.Axis.size() == 3)
+        {
+            double axis_length = init_.Axis.norm();
+            for (unsigned int i = 0; i < NumberOfFrames; i++)
+            {
+                axis_.col(i) = init_.Axis / axis_length;
+            }
+        }
+        else if (init_.Axis.size() == 3 * NumberOfFrames)
+        {
+            for (unsigned int i = 0; i < NumberOfFrames; i++)
+            {
+                double axis_length = init_.Axis.segment(3 * i, 3).norm();
+                axis_.col(i) = init_.Axis.segment(3 * i, 3) / axis_length;
+            }
+        }
+        else
+        {
+            throw_pretty("Size of Axis needs to be three or the number of frames times three, got " << init_.Axis.size());
+        }
+    }
+    else
+    {
+        for (unsigned int i = 0; i < NumberOfFrames; i++) axis_.col(i) = Eigen::Vector3d(0, 0, 1);
+    }
+
+    if (init_.Direction.size() > 0)
+    {
+        if (init_.Direction.size() == 3)
+        {
+            double dir_length = init_.Direction.norm();
+            for (unsigned int i = 0; i < NumberOfFrames; i++)
+            {
+                dir_.col(i) = init_.Direction / dir_length;
+            }
+        }
+        else if (init_.Direction.size() == 3 * NumberOfFrames)
+        {
+            for (unsigned int i = 0; i < NumberOfFrames; i++)
+            {
+                double dir_length = init_.Direction.segment(3 * i, 3).norm();
+                dir_.col(i) = init_.Direction.segment(3 * i, 3) / dir_length;
+            }
+        }
+        else
+        {
+            throw_pretty("Size of Direction needs to be three or the number of frames times three, got " << init_.Direction.size());
+        }
+    }
+    else
+    {
+        for (unsigned int i = 0; i < NumberOfFrames; i++) dir_.col(i) = Eigen::Vector3d(0, 0, 1);
+    }
+
     Frames.resize(2 * NumberOfFrames);
     for (unsigned int i = 0; i < NumberOfFrames; i++)
     {
         Frames[i + NumberOfFrames].FrameALinkName = Frames[i].FrameALinkName;
-        Frames[i + NumberOfFrames].FrameAOffset.p = KDL::Vector(axis_(0), axis_(1), axis_(2));
+        Frames[i + NumberOfFrames].FrameAOffset.p = KDL::Vector(axis_.col(i)(0), axis_.col(i)(1), axis_.col(i)(2));
     }
 
     for (unsigned int i = 0; i < Frames.size(); i++)
@@ -88,7 +144,7 @@ void EffAxisAlignment::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
         tf::vectorKDLToEigen(Kinematics.Phi(i + NumberOfFrames).p, linkAxisPositionInBase_);
 
         Eigen::Vector3d axisInBase = linkAxisPositionInBase_ - linkPositionInBase_;
-        phi(i) = axisInBase.dot(dir_) - 1.0;
+        phi(i) = axisInBase.dot(dir_.col(i)) - 1.0;
     }
 }
 
@@ -105,8 +161,8 @@ void EffAxisAlignment::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi,
         Eigen::Vector3d axisInBase = linkAxisPositionInBase_ - linkPositionInBase_;
         Eigen::MatrixXd axisInBaseJacobian = Kinematics.J[i + NumberOfFrames].data.block(0, 0, 3, N) - Kinematics.J[i].data.block(0, 0, 3, N);
 
-        phi(i) = axisInBase.dot(dir_) - 1.0;
-        J.row(i) = dir_.transpose() * axisInBaseJacobian;
+        phi(i) = axisInBase.dot(dir_.col(i)) - 1.0;
+        J.row(i) = dir_.col(i).transpose() * axisInBaseJacobian;
     }
 }
 

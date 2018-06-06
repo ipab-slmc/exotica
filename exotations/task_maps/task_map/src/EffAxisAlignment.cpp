@@ -51,12 +51,14 @@ void EffAxisAlignment::Initialize()
     dir_ = init_.Direction;
     N = scene_->getSolver().getNumControlledJoints();
 
-    if (Frames.size() > 1)
-        throw_pretty("Currently only a single axis alignment per task map is supported (" << Frames.size() << " frames provided).");
+    NumberOfFrames = Frames.size();
+    Frames.resize(2 * NumberOfFrames);
+    for (unsigned int i = 0; i < NumberOfFrames; i++)
+    {
+        Frames[i + NumberOfFrames].FrameALinkName = Frames[i].FrameALinkName;
+        Frames[i + NumberOfFrames].FrameAOffset.p = KDL::Vector(axis_(0), axis_(1), axis_(2));
+    }
 
-    Frames.resize(2);
-    Frames[1].FrameALinkName = Frames[0].FrameALinkName;
-    Frames[1].FrameAOffset.p = KDL::Vector(axis_(0), axis_(1), axis_(2));
     for (unsigned int i = 0; i < Frames.size(); i++)
     {
         if (debug_)
@@ -78,32 +80,38 @@ void EffAxisAlignment::assignScene(Scene_ptr scene)
 
 void EffAxisAlignment::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != 1) throw_named("Wrong size of phi!");
+    if (phi.rows() != NumberOfFrames) throw_named("Wrong size of phi!");
 
-    tf::vectorKDLToEigen(Kinematics.Phi(0).p, linkPositionInBase_);
-    tf::vectorKDLToEigen(Kinematics.Phi(1).p, linkAxisPositionInBase_);
+    for (unsigned int i = 0; i < NumberOfFrames; i++)
+    {
+        tf::vectorKDLToEigen(Kinematics.Phi(i).p, linkPositionInBase_);
+        tf::vectorKDLToEigen(Kinematics.Phi(i + NumberOfFrames).p, linkAxisPositionInBase_);
 
-    Eigen::Vector3d axisInBase = linkAxisPositionInBase_ - linkPositionInBase_;
-    phi(0) = axisInBase.dot(dir_) - 1.0;
+        Eigen::Vector3d axisInBase = linkAxisPositionInBase_ - linkPositionInBase_;
+        phi(i) = axisInBase.dot(dir_) - 1.0;
+    }
 }
 
 void EffAxisAlignment::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
-    if (phi.rows() != 1) throw_named("Wrong size of phi!");
-    if (J.rows() != 1 || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    if (phi.rows() != NumberOfFrames) throw_named("Wrong size of phi!");
+    if (J.rows() != NumberOfFrames || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
 
-    tf::vectorKDLToEigen(Kinematics.Phi(0).p, linkPositionInBase_);
-    tf::vectorKDLToEigen(Kinematics.Phi(1).p, linkAxisPositionInBase_);
+    for (unsigned int i = 0; i < NumberOfFrames; i++)
+    {
+        tf::vectorKDLToEigen(Kinematics.Phi(i).p, linkPositionInBase_);
+        tf::vectorKDLToEigen(Kinematics.Phi(i + NumberOfFrames).p, linkAxisPositionInBase_);
 
-    Eigen::Vector3d axisInBase = linkAxisPositionInBase_ - linkPositionInBase_;
-    Eigen::MatrixXd axisInBaseJacobian = Kinematics.J[1].data.block(0, 0, 3, N) - Kinematics.J[0].data.block(0, 0, 3, N);
+        Eigen::Vector3d axisInBase = linkAxisPositionInBase_ - linkPositionInBase_;
+        Eigen::MatrixXd axisInBaseJacobian = Kinematics.J[i + NumberOfFrames].data.block(0, 0, 3, N) - Kinematics.J[i].data.block(0, 0, 3, N);
 
-    phi(0) = axisInBase.dot(dir_) - 1.0;
-    J = dir_.transpose() * axisInBaseJacobian;
+        phi(i) = axisInBase.dot(dir_) - 1.0;
+        J.row(i) = dir_.transpose() * axisInBaseJacobian;
+    }
 }
 
 int EffAxisAlignment::taskSpaceDim()
 {
-    return 1;
+    return NumberOfFrames;
 }
 }

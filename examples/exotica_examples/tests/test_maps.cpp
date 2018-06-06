@@ -183,6 +183,20 @@ void testEffOrientation()
     }
 }
 
+void testEffAxisAlignment()
+{
+    HIGHLIGHT("End-effector axis alignment test");
+
+    Initializer map("exotica/EffAxisAlignment", {{"Name", std::string("MyTask")},
+                                                 {"Axis", std::string("1 0 0")},
+                                                 {"Direction", std::string("0 0 1")},
+                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
+    testRandom(problem);
+
+    testJacobian(problem);
+}
+
 void testEffFrame()
 {
     HIGHLIGHT("End-effector frame test");
@@ -574,6 +588,7 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "EXOTica_test_maps");
     testEffPosition();
     testEffOrientation();
+    testEffAxisAlignment();
     testEffFrame();
     testDistance();
     testJointLimit();

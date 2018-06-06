@@ -1,3 +1,3 @@
 extend <exotica/TaskMap>
-Optional Eigen::Vector3d Axis = Eigen::Vector3d(0, 0, 1);
-Optional Eigen::Vector3d Direction = Eigen::Vector3d(0, 0, 1);
+Optional Eigen::VectorXd Axis;
+Optional Eigen::VectorXd Direction;

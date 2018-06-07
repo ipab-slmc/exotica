@@ -60,6 +60,12 @@ public:
 
     virtual int taskSpaceDim();
 
+    void setDirection(const std::string& frame_name, const Eigen::Vector3d& dir_in);
+    Eigen::Vector3d getDirection(const std::string& frame_name);
+
+    void setAxis(const std::string& frame_name, const Eigen::Vector3d& axis_in);
+    Eigen::Vector3d getAxis(const std::string& frame_name);
+
 private:
     EffAxisAlignmentInitializer init_;
     unsigned int NumberOfFrames;

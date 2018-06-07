@@ -35,6 +35,7 @@
 
 #include <exotica/TaskMap.h>
 #include <task_map/EffAxisAlignmentInitializer.h>
+#include <task_map/FrameWithAxisAndDirectionInitializer.h>
 
 namespace exotica  //!< Since this is part of the core library, it will be within the same namespace
 {

@@ -6,6 +6,7 @@
 
 #include <task_map/CoM.h>
 #include <task_map/Distance.h>
+#include <task_map/EffAxisAlignment.h>
 #include <task_map/EffFrame.h>
 #include <task_map/EffOrientation.h>
 #include <task_map/EffPosition.h>
@@ -30,6 +31,12 @@ PYBIND11_MODULE(task_map_py, module)
 
     py::class_<EffOrientation, std::shared_ptr<EffOrientation>, TaskMap> effOrientation(module, "EffOrientation");
     effOrientation.def_readonly("rotationType", &EffOrientation::rotationType);
+
+    py::class_<EffAxisAlignment, std::shared_ptr<EffAxisAlignment>, TaskMap> effAxisAlignment(module, "EffAxisAlignment");
+    effAxisAlignment.def("getAxis", &EffAxisAlignment::getAxis);
+    effAxisAlignment.def("setAxis", &EffAxisAlignment::setAxis);
+    effAxisAlignment.def("getDirection", &EffAxisAlignment::getDirection);
+    effAxisAlignment.def("setDirection", &EffAxisAlignment::setDirection);
 
     py::class_<CoM, std::shared_ptr<CoM>, TaskMap> com(module, "CoM");
 

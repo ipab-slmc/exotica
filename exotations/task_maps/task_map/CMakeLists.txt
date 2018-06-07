@@ -13,6 +13,7 @@ AddInitializer(
   EffPosition
   EffOrientation
   EffFrame
+  FrameWithAxisAndDirection
   EffAxisAlignment
   JointLimit
   Distance

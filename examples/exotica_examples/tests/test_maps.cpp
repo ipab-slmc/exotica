@@ -188,9 +188,7 @@ void testEffAxisAlignment()
     HIGHLIGHT("End-effector axis alignment test");
 
     Initializer map("exotica/EffAxisAlignment", {{"Name", std::string("MyTask")},
-                                                 {"Axis", std::string("1 0 0")},
-                                                 {"Direction", std::string("0 0 1")},
-                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"Axis", std::string("1 0 0")}, {"Direction", std::string("0 0 1")}})})}});
     UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
     testRandom(problem);
 

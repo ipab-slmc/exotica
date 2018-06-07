@@ -1,0 +1,3 @@
+extend <exotica/Frame>
+Optional Eigen::VectorXd Axis = Eigen::Array3d(1,0,0);
+Optional Eigen::VectorXd Direction = Eigen::Array3d(1,0,0);

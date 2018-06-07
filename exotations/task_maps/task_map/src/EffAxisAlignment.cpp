@@ -126,4 +126,57 @@ int EffAxisAlignment::taskSpaceDim()
 {
     return NumberOfFrames;
 }
+
+Eigen::Vector3d EffAxisAlignment::getDirection(const std::string& frame_name)
+{
+    for (unsigned int i = 0; i < NumberOfFrames; i++)
+    {
+        if (Frames[i].FrameALinkName == frame_name)
+        {
+            return dir_.col(i);
+        }
+    }
+    throw_pretty("Direction for frame with name " << frame_name << " could not be found.");
+}
+
+void EffAxisAlignment::setDirection(const std::string& frame_name, const Eigen::Vector3d& dir_in)
+{
+    for (unsigned int i = 0; i < NumberOfFrames; i++)
+    {
+        if (Frames[i].FrameALinkName == frame_name)
+        {
+            double dir_length = dir_in.norm();
+            dir_.col(i) = dir_in / dir_length;
+            return;
+        }
+    }
+    throw_pretty("Could not find frame with name " << frame_name << ".");
+}
+
+Eigen::Vector3d EffAxisAlignment::getAxis(const std::string& frame_name)
+{
+    for (unsigned int i = 0; i < NumberOfFrames; i++)
+    {
+        if (Frames[i].FrameALinkName == frame_name)
+        {
+            return axis_.col(i);
+        }
+    }
+    throw_pretty("Axis for frame with name " << frame_name << " could not be found.");
+}
+
+void EffAxisAlignment::setAxis(const std::string& frame_name, const Eigen::Vector3d& axis_in)
+{
+    for (unsigned int i = 0; i < NumberOfFrames; i++)
+    {
+        if (Frames[i].FrameALinkName == frame_name)
+        {
+            double axis_length = axis_in.norm();
+            axis_.col(i) = axis_in / axis_length;
+            Frames[i + NumberOfFrames].FrameAOffset.p = KDL::Vector(axis_.col(i)(0), axis_.col(i)(1), axis_.col(i)(2));
+            return;
+        }
+    }
+    throw_pretty("Could not find frame with name " << frame_name << ".");
+}
 }

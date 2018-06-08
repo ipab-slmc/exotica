@@ -67,6 +67,13 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x,
     for (unsigned int i = 0; i < dim_; i++)
     {
         std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robotLinks_[i], check_self_collision_);  //, false);
+        if (proxies.size() == 0)
+        {
+            phi(i) = 0;
+            J.row(i).setZero();
+            continue;
+        }
+
         CollisionProxy& closest_proxy = closestProxies_[i];
         closest_proxy.distance = std::numeric_limits<double>::max();
         for (const auto& tmp_proxy : proxies)

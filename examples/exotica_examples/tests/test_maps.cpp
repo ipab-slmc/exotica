@@ -174,9 +174,9 @@ void testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, 
     INFO_PLAIN("Test passed");
 }
 
-UnconstrainedEndPoseProblem_ptr setupProblem(Initializer& map)
+UnconstrainedEndPoseProblem_ptr setupProblem(Initializer& map, std::string CollisionScene = "CollisionSceneFCL")
 {
-    Initializer scene("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}});
+    Initializer scene("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}, {"CollisionScene", std::string(CollisionScene)}});
     Initializer cost("exotica/Task", {{"Task", std::string("MyTask")}});
     Eigen::VectorXd W = Eigen::Vector3d(3, 2, 1);
     Initializer problem("exotica/UnconstrainedEndPoseProblem", {

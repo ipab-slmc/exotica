@@ -92,7 +92,7 @@ void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen
 
 void Point2Line::Instantiate(Point2LineInitializer &init)
 {
-    line = init.EndPoint - Eigen::Map<Eigen::Vector3d>(Frames[0].FrameBOffset.p.data);
+    line = init.EndPoint - Eigen::Map<const Eigen::Vector3d>(Frames[0].FrameBOffset.p.data);
     infinite = init.infinite;
 }
 

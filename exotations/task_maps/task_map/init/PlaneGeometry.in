@@ -1,0 +1,2 @@
+Optional Eigen::Vector3d Origin = Eigen::Vector3d::Zero();
+Optional Eigen::Vector3d Normal = Eigen::Vector3d::UnitZ();

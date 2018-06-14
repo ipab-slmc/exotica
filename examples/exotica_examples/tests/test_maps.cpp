@@ -581,6 +581,20 @@ void testIMesh()
     testJacobian(problem);
 }
 
+void testPoint2Plane()
+{
+    HIGHLIGHT("Point2Plane Test");
+    Initializer map("exotica/Point2Plane", {{"Name", std::string("MyTask")},
+                                            {"EndPoint", std::string("1 2 3")},
+                                            {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})},
+                                            {"Plane", Initializer("Plane", {{"Origin", std::string("1 2 3")}, {"Normal", std::string("1 1 0")}})}});
+    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
+    testRandom(problem);
+    // TODO: Add testValues
+
+    testJacobian(problem);
+}
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "EXOTica_test_maps");
@@ -594,6 +608,7 @@ int main(int argc, char** argv)
     testIdentity();
     testCoM();
     testIMesh();
+    testPoint2Plane();
     Setup::Destroy();
     return 0;
 }

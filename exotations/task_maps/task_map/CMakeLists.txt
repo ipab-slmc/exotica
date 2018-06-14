@@ -22,6 +22,8 @@ AddInitializer(
   SphereCollision
   Sphere
   CollisionCheck
+  PlaneGeometry
+  Point2Plane
 )
 GenInitializers()
 
@@ -46,6 +48,7 @@ set(SOURCES
     src/JointLimit.cpp
     src/Distance.cpp
     src/Point2Line.cpp
+    src/Point2Plane.cpp
     src/Identity.cpp
     src/SphereCollision.cpp
     src/CollisionCheck.cpp)

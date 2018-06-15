@@ -943,6 +943,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def_readwrite("debugMode", &KinematicTree::Debug);
     kinematicTree.def("publishFrames", &KinematicTree::publishFrames);
     kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);
+    kinematicTree.def("setFloatingBaseLimitsPosXYZEulerZYX", &KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX);
     kinematicTree.def("getRootFrameName", &KinematicTree::getRootFrameName);
     kinematicTree.def("getRootJointName", &KinematicTree::getRootJointName);
     kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);

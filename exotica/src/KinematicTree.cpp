@@ -288,6 +288,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
     setJointLimits();
 
     // Create random distributions for state sampling
+    // TODO(wxm): Update when joint limits for floating base are changed!
     generator_ = std::mt19937(rd());
     random_state_distributions_.clear();
     Eigen::MatrixXd jointLimits = getJointLimits();

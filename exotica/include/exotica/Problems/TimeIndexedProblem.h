@@ -66,7 +66,7 @@ public:
     void setRhoNEQ(const std::string& task_name, const double rho, int t = 0);
     Eigen::VectorXd getGoalNEQ(const std::string& task_name, int t = 0);
     double getRhoNEQ(const std::string& task_name, int t = 0);
-    Eigen::MatrixXd& getBounds();
+    Eigen::MatrixXdRef getBounds();
 
     int getT() const { return T; }
     void setT(int T_in);
@@ -113,7 +113,6 @@ private:
     double tau;  //!< Time step duration
 
     std::vector<Eigen::VectorXd> InitialTrajectory;
-    Eigen::MatrixXd bounds_;
     TimeIndexedProblemInitializer init_;
     void reinitializeVariables();
 };

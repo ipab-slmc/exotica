@@ -65,7 +65,7 @@ public:
     Eigen::VectorXd getGoalNEQ(const std::string& task_name);
     double getRhoNEQ(const std::string& task_name);
     virtual void preupdate();
-    Eigen::MatrixXd& getBounds();
+    Eigen::MatrixXdRef getBounds();
 
     double getScalarCost();
     Eigen::VectorXd getScalarJacobian();
@@ -90,9 +90,9 @@ public:
     bool useBounds;
 
     EndPoseProblemInitializer init_;
+
 protected:
     void initTaskTerms(const std::vector<exotica::Initializer>& inits);
-    Eigen::MatrixXd bounds_;
 };
 typedef std::shared_ptr<exotica::EndPoseProblem> EndPoseProblem_ptr;
 }

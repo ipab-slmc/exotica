@@ -48,9 +48,19 @@ TimeIndexedSamplingProblem::~TimeIndexedSamplingProblem()
     // TODO Auto-generated destructor stub
 }
 
-std::vector<double>& TimeIndexedSamplingProblem::getBounds()
+std::vector<double> TimeIndexedSamplingProblem::getBounds()
 {
-    return bounds_;
+    std::vector<double> bounds;
+    Eigen::MatrixXdRef jointLimits = scene_->getSolver().getJointLimits();
+
+    bounds.resize(2 * N);
+    for (unsigned int i = 0; i < N; i++)
+    {
+        bounds[i] = jointLimits(i, 0);
+        bounds[i + N] = jointLimits(i, 1);
+    }
+
+    return bounds;
 }
 
 void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializer& init)
@@ -70,16 +80,6 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     vel_limits_ = init.JointVelocityLimits;
     if (vel_limits_.rows() != N)
         throw_named("Dimension mismatch: problem N=" << N << ", but joint velocity limits has dimension " << vel_limits_.rows());
-    std::vector<std::string> jnts;
-    scene_->getJointNames(jnts);
-
-    bounds_.resize(jnts.size() * 2);
-    std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
-    for (int i = 0; i < jnts.size(); i++)
-    {
-        bounds_[i] = joint_limits.at(jnts[i])[0];
-        bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
-    }
 
     NumTasks = Tasks.size();
     PhiN = 0;

@@ -148,14 +148,16 @@ public:
     BASE_TYPE getControlledBaseType();
     std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
     void Update(Eigen::VectorXdRefConst x);
-    void setJointLimits();
+    void resetJointLimits();
+    Eigen::MatrixXdRef getJointLimits();
+    void setJointLimitsLower(Eigen::VectorXdRefConst lower_in);
+    void setJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
     void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
     std::map<std::string, std::vector<double>> getUsedJointLimits();
     int getEffSize();
     int getNumControlledJoints();
     int getNumModelJoints();
     void publishFrames();
-    Eigen::MatrixXd getJointLimits();
     std::vector<std::string> getJointNames()
     {
         return ControlledJointsNames;
@@ -206,9 +208,6 @@ public:
     std::map<std::string, shapes::ShapeType> getCollisionObjectTypes();
 
     // Random state generation
-    std::random_device rd;
-    std::mt19937 generator_;
-    std::vector<std::uniform_real_distribution<double>> random_state_distributions_;
     Eigen::VectorXd getRandomControlledState();
 
 private:
@@ -220,6 +219,15 @@ private:
     void ComputeJ(KinematicFrame& frame, KDL::Jacobian& J);
     void ComputeJdot(KDL::Jacobian& J, KDL::Jacobian& JDot);
     void UpdateJdot();
+
+    // Joint limits
+    Eigen::MatrixXd jointLimits_;
+    void updateJointLimits();
+
+    // Random state generation
+    std::random_device rd;
+    std::mt19937 generator_;
+    std::vector<std::uniform_real_distribution<double>> random_state_distributions_;
 
     BASE_TYPE ModelBaseType;
     BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;

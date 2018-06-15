@@ -94,7 +94,7 @@ void EndPoseTask::initialize(const std::vector<exotica::Initializer>& inits, Pla
         }
         else if (task.Goal.rows() == Tasks[i]->Length)
         {
-            y.data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal;
+            y.data.segment(Indexing[i].Start, Indexing[i].Length) = task.Goal;
         }
         else
         {
@@ -240,14 +240,14 @@ void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob, 
         {
             for (int t = 0; t < T; t++)
             {
-                y[t].data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal.segment(t * Tasks[i]->Length, Tasks[i]->Length);
+                y[t].data.segment(Indexing[i].Start, Indexing[i].Length) = task.Goal.segment(t * Tasks[i]->Length, Tasks[i]->Length);
             }
         }
         else if (task.Goal.rows() == Tasks[i]->Length)
         {
             for (int t = 0; t < T; t++)
             {
-                y[t].data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal.segment(Tasks[i]->Length, Tasks[i]->Length);
+                y[t].data.segment(Indexing[i].Start, Indexing[i].Length) = task.Goal.segment(Tasks[i]->Length, Tasks[i]->Length);
             }
         }
         else
@@ -301,7 +301,7 @@ void SamplingTask::initialize(const std::vector<exotica::Initializer>& inits, Pl
         }
         else if (task.Goal.rows() == Tasks[i]->Length)
         {
-            y.data.segment(Tasks[i]->Start, Tasks[i]->Length) = task.Goal;
+            y.data.segment(Indexing[i].Start, Indexing[i].Length) = task.Goal;
         }
         else
         {

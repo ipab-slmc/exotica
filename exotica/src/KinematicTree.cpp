@@ -285,17 +285,10 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
     }
     ModelTree[0]->isRobotLink = false;
 
-    setJointLimits();
+    resetJointLimits();
 
     // Create random distributions for state sampling
-    // TODO(wxm): Update when joint limits for floating base are changed!
     generator_ = std::mt19937(rd());
-    random_state_distributions_.clear();
-    Eigen::MatrixXd jointLimits = getJointLimits();
-    for (unsigned int i = 0; i < NumControlledJoints; i++)
-    {
-        random_state_distributions_.push_back(std::uniform_real_distribution<double>(jointLimits(i, 0), jointLimits(i, 1)));
-    }
 }
 
 void KinematicTree::UpdateModel()
@@ -780,15 +773,9 @@ void KinematicTree::UpdateJdot()
     }
 }
 
-Eigen::MatrixXd KinematicTree::getJointLimits()
+Eigen::MatrixXdRef KinematicTree::getJointLimits()
 {
-    Eigen::MatrixXd lim(getNumControlledJoints(), 2);
-    for (int i = 0; i < ControlledJoints.size(); i++)
-    {
-        lim(i, 0) = ControlledJoints[i].lock()->JointLimits[0];
-        lim(i, 1) = ControlledJoints[i].lock()->JointLimits[1];
-    }
-    return lim;
+    return jointLimits_;
 }
 
 exotica::BASE_TYPE KinematicTree::getModelBaseType()
@@ -821,6 +808,40 @@ Eigen::VectorXd KinematicTree::getRandomControlledState()
     return q_rand;
 }
 
+void KinematicTree::setJointLimitsLower(Eigen::VectorXdRefConst lower_in)
+{
+    if (lower_in.rows() == NumControlledJoints)
+    {
+        for (unsigned int i = 0; i < NumControlledJoints; i++)
+        {
+            ControlledJoints[i].lock()->JointLimits[0] = lower_in(i);
+        }
+    }
+    else
+    {
+        throw_pretty("Got " << lower_in.rows() << " but " << NumControlledJoints << " expected.");
+    }
+
+    updateJointLimits();
+}
+
+void KinematicTree::setJointLimitsUpper(Eigen::VectorXdRefConst upper_in)
+{
+    if (upper_in.rows() == NumControlledJoints)
+    {
+        for (unsigned int i = 0; i < NumControlledJoints; i++)
+        {
+            ControlledJoints[i].lock()->JointLimits[1] = upper_in(i);
+        }
+    }
+    else
+    {
+        throw_pretty("Got " << upper_in.rows() << " but " << NumControlledJoints << " expected.");
+    }
+
+    updateJointLimits();
+}
+
 void KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
     const std::vector<double>& lower, const std::vector<double>& upper)
 {
@@ -836,10 +857,12 @@ void KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
     {
         ControlledJoints[i].lock()->JointLimits = {lower[i], upper[i]};
     }
+
+    updateJointLimits();
 }
-void KinematicTree::setJointLimits()
+
+void KinematicTree::resetJointLimits()
 {
-    srdf::Model::VirtualJoint virtual_joint = Model->getSRDF()->getVirtualJoints()[0];
     std::vector<std::string> vars = Model->getVariableNames();
     for (int i = 0; i < vars.size(); i++)
     {
@@ -856,24 +879,36 @@ void KinematicTree::setJointLimits()
     if (ControlledBaseType == BASE_TYPE::FLOATING)
     {
         ControlledJoints[0].lock()->JointLimits = {-0.05, 0.05};
-
         ControlledJoints[1].lock()->JointLimits = {-0.05, 0.05};
-
         ControlledJoints[2].lock()->JointLimits = {0.875, 1.075};
-
         ControlledJoints[3].lock()->JointLimits = {-0.087 / 2, 0.087 / 2};
-
         ControlledJoints[4].lock()->JointLimits = {-0.087 / 2, 0.2617 / 2};
-
         ControlledJoints[5].lock()->JointLimits = {-M_PI / 8, M_PI / 8};
     }
     else if (ControlledBaseType == BASE_TYPE::PLANAR)
     {
         ControlledJoints[0].lock()->JointLimits = {-10, 10};
-
         ControlledJoints[1].lock()->JointLimits = {-10, 10};
-
         ControlledJoints[2].lock()->JointLimits = {-1.57, 1.57};
+    }
+
+    updateJointLimits();
+}
+
+void KinematicTree::updateJointLimits()
+{
+    jointLimits_ = Eigen::MatrixXd::Zero(getNumControlledJoints(), 2);
+    for (int i = 0; i < ControlledJoints.size(); i++)
+    {
+        jointLimits_(i, 0) = ControlledJoints[i].lock()->JointLimits[0];
+        jointLimits_(i, 1) = ControlledJoints[i].lock()->JointLimits[1];
+    }
+
+    // Update random state distributions for generating random controlled states
+    random_state_distributions_.clear();
+    for (unsigned int i = 0; i < NumControlledJoints; i++)
+    {
+        random_state_distributions_.push_back(std::uniform_real_distribution<double>(jointLimits_(i, 0), jointLimits_(i, 1)));
     }
 }
 

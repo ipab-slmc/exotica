@@ -60,7 +60,7 @@ public:
     Eigen::VectorXd getThreshold(const std::string& task_name);
     double getRho(const std::string& task_name);
 
-    std::vector<double>& getBounds();
+    std::vector<double> getBounds();
     bool isCompoundStateSpace();
     std::string local_planner_config_;
     bool full_body_plan_;
@@ -78,7 +78,6 @@ public:
     int NumTasks;
 
 private:
-    std::vector<double> bounds_;
     bool compound_;
 };
 

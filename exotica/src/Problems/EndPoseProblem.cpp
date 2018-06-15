@@ -51,9 +51,9 @@ void EndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& init
 {
 }
 
-Eigen::MatrixXd& EndPoseProblem::getBounds()
+Eigen::MatrixXdRef EndPoseProblem::getBounds()
 {
-    return bounds_;
+    return scene_->getSolver().getJointLimits();
 }
 
 void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
@@ -84,13 +84,9 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
     if (Flags & KIN_J) J = Eigen::MatrixXd(JN, N);
     if (Flags & KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(N, N));
 
-    std::vector<std::string> jnts;
-    scene_->getJointNames(jnts);
-
-    bounds_ = scene_->getSolver().getJointLimits();
     if (init.LowerBound.rows() == N)
     {
-        bounds_.col(0) = init.LowerBound;
+        scene_->getSolver().setJointLimitsLower(init.LowerBound);
     }
     else if (init.LowerBound.rows() != 0)
     {
@@ -98,7 +94,7 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
     }
     if (init.UpperBound.rows() == N)
     {
-        bounds_.col(1) = init.UpperBound;
+        scene_->getSolver().setJointLimitsUpper(init.UpperBound);
     }
     else if (init.UpperBound.rows() != 0)
     {
@@ -371,11 +367,12 @@ double EndPoseProblem::getRhoNEQ(const std::string& task_name)
 bool EndPoseProblem::isValid()
 {
     Eigen::VectorXd x = scene_->getSolver().getControlledState();
+    Eigen::MatrixXdRef bounds = scene_->getSolver().getJointLimits();
 
     // Check joint limits
     for (unsigned int i = 0; i < N; i++)
     {
-        if (x(i) < bounds_(i, 0) || x(i) > bounds_(i, 1)) return false;
+        if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1)) return false;
     }
 
     bool succeeded = true;

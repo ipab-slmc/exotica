@@ -47,9 +47,9 @@ TimeIndexedProblem::~TimeIndexedProblem()
 {
 }
 
-Eigen::MatrixXd& TimeIndexedProblem::getBounds()
+Eigen::MatrixXdRef TimeIndexedProblem::getBounds()
 {
-    return bounds_;
+    return scene_->getSolver().getJointLimits();
 }
 
 void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
@@ -72,10 +72,9 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
         }
     }
 
-    bounds_ = scene_->getSolver().getJointLimits();
     if (init.LowerBound.rows() == N)
     {
-        bounds_.col(0) = init.LowerBound;
+        scene_->getSolver().setJointLimitsLower(init.LowerBound);
     }
     else if (init.LowerBound.rows() != 0)
     {
@@ -83,7 +82,7 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     }
     if (init.UpperBound.rows() == N)
     {
-        bounds_.col(1) = init.UpperBound;
+        scene_->getSolver().setJointLimitsUpper(init.UpperBound);
     }
     else if (init.UpperBound.rows() != 0)
     {
@@ -607,6 +606,7 @@ double TimeIndexedProblem::getRhoNEQ(const std::string& task_name, int t)
 bool TimeIndexedProblem::isValid()
 {
     bool succeeded = true;
+    Eigen::MatrixXdRef bounds = scene_->getSolver().getJointLimits();
 
     // Check for every state
     for (unsigned int t = 0; t < T; t++)
@@ -614,7 +614,7 @@ bool TimeIndexedProblem::isValid()
         // Check joint limits
         for (unsigned int i = 0; i < N; i++)
         {
-            if (x[t](i) < bounds_(i, 0) || x[t](i) > bounds_(i, 1))
+            if (x[t](i) < bounds(i, 0) || x[t](i) > bounds(i, 1))
             {
                 if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::isValid", "State at timestep " << t << " is out of bounds");
                 succeeded = false;

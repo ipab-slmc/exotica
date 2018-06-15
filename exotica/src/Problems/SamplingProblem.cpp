@@ -47,9 +47,19 @@ SamplingProblem::~SamplingProblem()
     // TODO Auto-generated destructor stub
 }
 
-std::vector<double>& SamplingProblem::getBounds()
+std::vector<double> SamplingProblem::getBounds()
 {
-    return bounds_;
+    std::vector<double> bounds;
+    Eigen::MatrixXdRef jointLimits = scene_->getSolver().getJointLimits();
+
+    bounds.resize(2 * N);
+    for (unsigned int i = 0; i < N; i++)
+    {
+        bounds[i] = jointLimits(i, 0);
+        bounds[i + N] = jointLimits(i, 1);
+    }
+
+    return bounds;
 }
 
 void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
@@ -67,16 +77,6 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
         compound_ = true;
     else
         compound_ = false;
-    std::vector<std::string> jnts;
-    scene_->getJointNames(jnts);
-
-    bounds_.resize(jnts.size() * 2);
-    std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
-    for (int i = 0; i < jnts.size(); i++)
-    {
-        bounds_[i] = joint_limits.at(jnts[i])[0];
-        bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
-    }
 
     NumTasks = Tasks.size();
     PhiN = 0;

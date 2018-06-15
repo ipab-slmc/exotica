@@ -942,11 +942,8 @@ PYBIND11_MODULE(_pyexotica, module)
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");
     kinematicTree.def_readwrite("debugMode", &KinematicTree::Debug);
     kinematicTree.def("publishFrames", &KinematicTree::publishFrames);
-    kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);
-    kinematicTree.def("setFloatingBaseLimitsPosXYZEulerZYX", &KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX);
     kinematicTree.def("getRootFrameName", &KinematicTree::getRootFrameName);
     kinematicTree.def("getRootJointName", &KinematicTree::getRootJointName);
-    kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
     kinematicTree.def("getModelBaseType", &KinematicTree::getModelBaseType);
     kinematicTree.def("getControlledBaseType", &KinematicTree::getControlledBaseType);
     kinematicTree.def("getControlledLinkMass", &KinematicTree::getControlledLinkMass);
@@ -954,6 +951,14 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getRandomControlledState", &KinematicTree::getRandomControlledState);
     kinematicTree.def("getNumModelJoints", &KinematicTree::getNumModelJoints);
     kinematicTree.def("getNumControlledJoints", &KinematicTree::getNumControlledJoints);
+
+    // Joint Limits
+    kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);
+    kinematicTree.def("resetJointLimits", &KinematicTree::resetJointLimits);
+    kinematicTree.def("setJointLimitsLower", &KinematicTree::setJointLimitsLower);
+    kinematicTree.def("setJointLimitsUpper", &KinematicTree::setJointLimitsUpper);
+    kinematicTree.def("setFloatingBaseLimitsPosXYZEulerZYX", &KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX);
+    kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
 
     py::enum_<shapes::ShapeType>(module, "ShapeType")
         .value("UnknownShape", shapes::ShapeType::UNKNOWN_SHAPE)

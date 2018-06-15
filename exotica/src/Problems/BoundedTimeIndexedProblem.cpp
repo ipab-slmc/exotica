@@ -47,29 +47,18 @@ BoundedTimeIndexedProblem::~BoundedTimeIndexedProblem()
 {
 }
 
-std::vector<double>& BoundedTimeIndexedProblem::getBounds()
+Eigen::MatrixXdRef BoundedTimeIndexedProblem::getBounds()
 {
-    return bounds_;
+    return scene_->getSolver().getJointLimits();
 }
 
 void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer& init)
 {
     init_ = init;
 
-    std::vector<std::string> jnts;
-    scene_->getJointNames(jnts);
-
-    bounds_.resize(jnts.size() * 2);
-    std::map<std::string, std::vector<double>> joint_limits = scene_->getSolver().getUsedJointLimits();
-    for (int i = 0; i < jnts.size(); i++)
-    {
-        bounds_[i] = joint_limits.at(jnts[i])[0];
-        bounds_[i + jnts.size()] = joint_limits.at(jnts[i])[1];
-    }
-
     if (init.LowerBound.rows() == N)
     {
-        for (int i = 0; i < jnts.size(); i++) bounds_[i] = init.LowerBound(i);
+        scene_->getSolver().setJointLimitsLower(init.LowerBound);
     }
     else if (init.LowerBound.rows() != 0)
     {
@@ -77,7 +66,7 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
     }
     if (init.UpperBound.rows() == N)
     {
-        for (int i = 0; i < jnts.size(); i++) bounds_[i + N] = init.UpperBound(i);
+        scene_->getSolver().setJointLimitsUpper(init.UpperBound);
     }
     else if (init.UpperBound.rows() != 0)
     {

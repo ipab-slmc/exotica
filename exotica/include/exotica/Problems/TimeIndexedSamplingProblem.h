@@ -61,7 +61,7 @@ public:
     Eigen::VectorXd getThreshold(const std::string& task_name);
     double getRho(const std::string& task_name);
 
-    std::vector<double>& getBounds();
+    std::vector<double> getBounds();
 
     TimeIndexedSamplingProblemInitializer Parameters;
 
@@ -84,7 +84,6 @@ public:
     int NumTasks;
 
 private:
-    std::vector<double> bounds_;
 };
 
 typedef std::shared_ptr<exotica::TimeIndexedSamplingProblem> TimeIndexedSamplingProblem_ptr;

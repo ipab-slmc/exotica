@@ -57,7 +57,7 @@ public:
     void setRho(const std::string& task_name, const double rho, int t = 0);
     Eigen::VectorXd getGoal(const std::string& task_name, int t = 0);
     double getRho(const std::string& task_name, int t = 0);
-    std::vector<double>& getBounds();
+    Eigen::MatrixXdRef getBounds();
 
     int getT() const { return T; }
     void setT(int T_in);
@@ -94,7 +94,6 @@ private:
     double tau;  //!< Time step duration
 
     std::vector<Eigen::VectorXd> InitialTrajectory;
-    std::vector<double> bounds_;
     BoundedTimeIndexedProblemInitializer init_;
     void reinitializeVariables();
 };

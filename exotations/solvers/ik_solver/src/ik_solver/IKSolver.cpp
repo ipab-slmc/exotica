@@ -75,13 +75,15 @@ Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd>& A_)
     dpotrf_((char*)"L", &nn, AA, &nn, &info);
     if (info != 0)
     {
-        throw_pretty("Can't invert matrix. Cholesky decomposition failed: " << info << std::endl << A_);
+        throw_pretty("Can't invert matrix. Cholesky decomposition failed: " << info << std::endl
+                                                                            << A_);
     }
     // Invert
     dpotri_((char*)"L", &nn, AA, &nn, &info);
     if (info != 0)
     {
-        throw_pretty("Can't invert matrix: " << info << std::endl << A_);
+        throw_pretty("Can't invert matrix: " << info << std::endl
+                                             << A_);
     }
     Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
     return Ainv_;

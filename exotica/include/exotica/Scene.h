@@ -204,7 +204,6 @@ private:
     bool requestNeedsUpdating;
     void updateInternalFrames(bool updateRequest = true);
 
-
     /**
      * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.
      */

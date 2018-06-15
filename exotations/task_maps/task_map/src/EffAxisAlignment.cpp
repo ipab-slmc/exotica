@@ -58,28 +58,21 @@ void EffAxisAlignment::Initialize()
     for (unsigned int i = 0; i < NumberOfFrames; i++)
     {
         FrameWithAxisAndDirectionInitializer frame(init_.EndEffector[i]);
+        axis_.col(i) = frame.Axis.normalized();
+        dir_.col(i) = frame.Direction.normalized();
 
-        double axis_length = frame.Axis.norm();
-        axis_.col(i) = frame.Axis / axis_length;
-
-        double dir_length = frame.Direction.norm();
-        dir_.col(i) = frame.Direction / dir_length;
-
-        Frames[i + NumberOfFrames].FrameALinkName = Frames[i].FrameALinkName;
-        Frames[i + NumberOfFrames].FrameAOffset.p = KDL::Vector(axis_.col(i)(0), axis_.col(i)(1), axis_.col(i)(2));
+        Frames[i + NumberOfFrames] = Frames[i];
+        tf::vectorEigenToKDL(axis_.col(i), Frames[i + NumberOfFrames].FrameAOffset.p);
     }
 
     if (debug_)
     {
-        for (unsigned int i = 0; i < Frames.size(); i++)
+        for (unsigned int i = 0; i < NumberOfFrames; i++)
         {
             HIGHLIGHT_NAMED("EffAxisAlignment",
-                            "FrameALinkName: "
-                                << Frames[i].FrameALinkName
-                                << ", offset: ("
-                                << Frames[i].FrameAOffset.p.x() << ", "
-                                << Frames[i].FrameAOffset.p.y() << ", "
-                                << Frames[i].FrameAOffset.p.z() << ")");
+                            "Frame " << Frames[i].FrameALinkName << ":"
+                                     << "\tAxis=" << axis_.col(i).transpose()
+                                     << "\tDirection=" << dir_.col(i).transpose());
         }
     }
 }
@@ -145,8 +138,7 @@ void EffAxisAlignment::setDirection(const std::string& frame_name, const Eigen::
     {
         if (Frames[i].FrameALinkName == frame_name)
         {
-            double dir_length = dir_in.norm();
-            dir_.col(i) = dir_in / dir_length;
+            dir_.col(i) = dir_in.normalized();
             return;
         }
     }
@@ -171,9 +163,8 @@ void EffAxisAlignment::setAxis(const std::string& frame_name, const Eigen::Vecto
     {
         if (Frames[i].FrameALinkName == frame_name)
         {
-            double axis_length = axis_in.norm();
-            axis_.col(i) = axis_in / axis_length;
-            Frames[i + NumberOfFrames].FrameAOffset.p = KDL::Vector(axis_.col(i)(0), axis_.col(i)(1), axis_.col(i)(2));
+            axis_.col(i) = axis_in.normalized();
+            tf::vectorEigenToKDL(axis_.col(i), Frames[i + NumberOfFrames].FrameAOffset.p);
             return;
         }
     }

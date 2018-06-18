@@ -78,7 +78,13 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x,
         closest_proxy.distance = std::numeric_limits<double>::max();
         for (const auto& tmp_proxy : proxies)
         {
-            if (tmp_proxy.distance < closest_proxy.distance) closest_proxy = tmp_proxy;
+            const bool isRobotToRobot = (tmp_proxy.e1->isRobotLink || tmp_proxy.e1->ClosestRobotLink.lock()) && (tmp_proxy.e2->isRobotLink || tmp_proxy.e2->ClosestRobotLink.lock());
+            const double& margin = isRobotToRobot ? robot_margin_ : world_margin_;
+            if ((tmp_proxy.distance - margin) < closest_proxy.distance)
+            {
+                closest_proxy = tmp_proxy;
+                closest_proxy.distance -= margin;
+            }
         }
 
         phi(i) = closest_proxy.distance;
@@ -116,12 +122,20 @@ void CollisionDistance::Initialize()
 {
     cscene_ = scene_->getCollisionScene();
     check_self_collision_ = init_.CheckSelfCollision;
+    world_margin_ = init_.WorldMargin;
+    robot_margin_ = init_.RobotMargin;
 
     // Get names of all controlled joints and their corresponding child links
     robotLinks_ = scene_->getControlledLinkNames();
     dim_ = static_cast<unsigned int>(robotLinks_.size());
     closestProxies_.assign(dim_, CollisionProxy());
-    if (debug_) HIGHLIGHT_NAMED("Collision Distance", "Dimension: " << dim_ << " - CheckSelfCollision: " << check_self_collision_);
+    if (debug_)
+    {
+        HIGHLIGHT_NAMED("Collision Distance", "Dimension: " << dim_
+                                                            << " - CheckSelfCollision: " << check_self_collision_
+                                                            << "World Margin: " << world_margin_
+                                                            << " Robot Margin: " << robot_margin_);
+    }
 }
 
 int CollisionDistance::taskSpaceDim() { return dim_; }

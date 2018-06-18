@@ -65,6 +65,8 @@ public:
 private:
     std::vector<std::string> robotLinks_;
     bool check_self_collision_ = true;
+    double robot_margin_;
+    double world_margin_;
     std::vector<CollisionProxy> closestProxies_;
 
     unsigned int dim_;

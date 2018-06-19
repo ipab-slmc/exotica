@@ -122,7 +122,8 @@ std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionOb
         }
     }
 
-#ifdef ROS_KINETIC
+// Uses `std::shared_ptr` if ROS version >= ROS_KINETIC
+#if ROS_VERSION_MINIMUM(1, 12, 0)
     std::shared_ptr<fcl::CollisionGeometry> geometry;
 #else
     boost::shared_ptr<fcl::CollisionGeometry> geometry;

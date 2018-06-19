@@ -91,7 +91,7 @@ bool OMPLTimeIndexedStateValidityChecker::isValid(const ompl::base::State *state
 {
     Eigen::VectorXd q(prob_->N);
     double t;
-#ifdef ROS_KINETIC
+#if ROS_VERSION_MINIMUM(1, 12, 0) // if ROS version >= ROS_KINETIC
     std::static_pointer_cast<OMPLTimeIndexedRNStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q, t);
 #else
     boost::static_pointer_cast<OMPLTimeIndexedRNStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q, t);
@@ -158,10 +158,10 @@ void TimeIndexedRRTConnect::postSolve()
     ompl_simple_setup_->clearStartStates();
     int v = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getValidMotionCount();
     int iv = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getInvalidMotionCount();
-    logDebug("There were %d valid motions and %d invalid motions.", v, iv);
+    CONSOLE_BRIDGE_logDebug("There were %d valid motions and %d invalid motions.", v, iv);
 
     if (ompl_simple_setup_->getProblemDefinition()->hasApproximateSolution())
-        logWarn("Computed solution is approximate");
+        CONSOLE_BRIDGE_logWarn("Computed solution is approximate");
 }
 
 void TimeIndexedRRTConnect::setGoalState(const Eigen::VectorXd &qT, const double t, const double eps)
@@ -278,7 +278,7 @@ void OMPLTimeIndexedRRTConnect::setup()
     tools::SelfConfig sc(si_, getName());
     sc.configurePlannerRange(maxDistance_);
 
-#ifdef ROS_KINETIC
+#if ROS_VERSION_MINIMUM(1, 12, 0) // if ROS version >= ROS_KINETIC
     if (!tStart_) tStart_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
     if (!tGoal_) tGoal_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
 #else

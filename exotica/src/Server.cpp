@@ -61,7 +61,7 @@ void Server::destroy()
 robot_model::RobotModelPtr loadModelImpl(const std::string& urdf, const std::string& srdf)
 {
     rdf_loader::RDFLoader loader(urdf, srdf);
-    const boost::shared_ptr<srdf::Model>& srdf_ = loader.getSRDF() ? loader.getSRDF() : boost::shared_ptr<srdf::Model>(new srdf::Model());
+    const std::shared_ptr<srdf::Model>& srdf_ = loader.getSRDF() ? loader.getSRDF() : std::shared_ptr<srdf::Model>(new srdf::Model());
     if (loader.getURDF())
     {
         return robot_model::RobotModelPtr(new robot_model::RobotModel(loader.getURDF(), srdf_));

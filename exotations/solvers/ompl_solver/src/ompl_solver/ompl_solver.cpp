@@ -121,10 +121,10 @@ void OMPLsolver<ProblemType>::postSolve()
     ompl_simple_setup_->clearStartStates();
     int v = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getValidMotionCount();
     int iv = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getInvalidMotionCount();
-    logDebug("There were %d valid motions and %d invalid motions.", v, iv);
+    CONSOLE_BRIDGE_logDebug("There were %d valid motions and %d invalid motions.", v, iv);
 
     if (ompl_simple_setup_->getProblemDefinition()->hasApproximateSolution())
-        logWarn("Computed solution is approximate");
+        CONSOLE_BRIDGE_logWarn("Computed solution is approximate");
 }
 
 template <class ProblemType>

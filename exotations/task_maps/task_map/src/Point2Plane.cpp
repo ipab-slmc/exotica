@@ -42,6 +42,16 @@ Point2Plane::Point2Plane()
 
 void Point2Plane::Instantiate(Point2PlaneInitializer& init)
 {
+    if (debug_ && Server::isRos())
+    {
+        debug_pub_ = Server::advertise<visualization_msgs::MarkerArray>(
+            object_name_ + "/planes", 1, true);
+    }
+}
+
+void Point2Plane::assignScene(Scene_ptr scene)
+{
+    scene_ = scene;
 }
 
 void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
@@ -53,6 +63,8 @@ void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
         const auto& point = Eigen::Map<const Eigen::Vector3d>(Kinematics.Phi(i).p.data);
         phi(i) = Eigen::Vector3d::UnitZ().dot(point);
     }
+
+    if (debug_ && Server::isRos()) publishDebug();
 }
 
 void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
@@ -74,10 +86,42 @@ void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
             J(i, j) = Eigen::Vector3d::UnitZ().dot(dpoint);
         }
     }
+
+    if (debug_ && Server::isRos()) publishDebug();
 }
 
 int Point2Plane::taskSpaceDim()
 {
     return Kinematics.Phi.rows();
 }
+
+void Point2Plane::publishDebug()
+{
+    visualization_msgs::MarkerArray msg;
+
+    for (unsigned int i = 0; i < Kinematics.Phi.rows(); i++)
+    {
+        visualization_msgs::Marker plane;
+
+        plane.header.frame_id = Frames[i].FrameBLinkName == "" ? "exotica/" + scene_->getRootFrameName() : Frames[i].FrameBLinkName;
+        plane.ns = Frames[i].FrameALinkName;
+        plane.id = i;
+        plane.type = plane.CUBE;
+        plane.action = plane.ADD;
+        plane.frame_locked = true;
+        plane.color.g = 1.0;
+        plane.color.a = 0.8;
+        tf::poseKDLToMsg(Frames[i].FrameBOffset, plane.pose);
+
+        plane.scale.x = 10;
+        plane.scale.y = 10;
+        plane.scale.z = 0.01;
+        plane.pose.position.z -= (plane.scale.z / 2);
+
+        msg.markers.push_back(plane);
+    }
+
+    debug_pub_.publish(msg);
+}
+
 }  // namespace exotica

@@ -34,6 +34,7 @@
 
 #include <exotica/TaskMap.h>
 #include <task_map/Point2PlaneInitializer.h>
+#include <visualization_msgs/MarkerArray.h>
 
 namespace exotica
 {
@@ -44,6 +45,7 @@ public:
 
     virtual ~Point2Plane() {}
     virtual void Instantiate(Point2PlaneInitializer &init);
+    virtual void assignScene(Scene_ptr scene);
 
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
@@ -52,6 +54,10 @@ public:
     virtual int taskSpaceDim();
 
 private:
+    Scene_ptr scene_;
+
+    void publishDebug();
+    ros::Publisher debug_pub_;
 };
 
 typedef std::shared_ptr<Point2Plane> Point2Plane_Ptr;

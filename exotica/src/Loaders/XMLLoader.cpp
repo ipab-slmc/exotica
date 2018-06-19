@@ -105,7 +105,7 @@ Initializer XMLLoader::loadXML(std::string file_name, bool parsePathAsXML)
     tinyxml2::XMLDocument xml_file;
     if (parsePathAsXML)
     {
-        if (xml_file.Parse(file_name.c_str(), file_name.size()) == tinyxml2::XML_SUCCESS)
+        if (xml_file.Parse(file_name.c_str(), file_name.size()) != tinyxml2::XML_SUCCESS)
         {
             throw_pretty("Can't load file!\nFile: '" + file_name + "'");
         }
@@ -113,7 +113,7 @@ Initializer XMLLoader::loadXML(std::string file_name, bool parsePathAsXML)
     else
     {
         std::string xml = loadFile(file_name);
-        if (xml_file.Parse(xml.c_str(), xml.size()) == tinyxml2::XML_SUCCESS)
+        if (xml_file.Parse(xml.c_str(), xml.size()) != tinyxml2::XML_SUCCESS)
         {
             throw_pretty("Can't load file!\nFile: '" + parsePath(file_name) + "'");
         }
@@ -133,7 +133,7 @@ void XMLLoader::loadXML(std::string file_name, Initializer& solver, Initializer&
     tinyxml2::XMLDocument xml_file;
     if (parsePathAsXML)
     {
-        if (xml_file.Parse(file_name.c_str(), file_name.size()) == tinyxml2::XML_SUCCESS)
+        if (xml_file.Parse(file_name.c_str(), file_name.size()) != tinyxml2::XML_SUCCESS)
         {
             throw_pretty("Can't load file!\nFile: '" + file_name + "'");
         }
@@ -141,7 +141,7 @@ void XMLLoader::loadXML(std::string file_name, Initializer& solver, Initializer&
     else
     {
         std::string xml = loadFile(file_name);
-        if (xml_file.Parse(xml.c_str(), xml.size()) == tinyxml2::XML_SUCCESS)
+        if (xml_file.Parse(xml.c_str(), xml.size()) != tinyxml2::XML_SUCCESS)
         {
             throw_pretty("Can't load file!\nFile: '" + parsePath(file_name) + "'");
         }

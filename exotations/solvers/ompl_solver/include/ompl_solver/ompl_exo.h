@@ -44,6 +44,12 @@
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl_solver/OMPLsolverInitializer.h>
 
+#if OMPL_VERSION_VALUE >= 1004000  // Version greater than 1.4.0
+typedef Eigen::Ref<Eigen::VectorXd> OMPLProjection;
+#else  // All other versions
+typedef ompl::base::EuclideanProjection& OMPLProjection;
+#endif
+
 namespace exotica
 {
 class OMPLStateSpace : public ompl::base::CompoundStateSpace
@@ -203,7 +209,7 @@ public:
     }
 
     virtual void project(const ompl::base::State *state,
-                         ompl::base::EuclideanProjection &projection) const
+                         OMPLProjection projection) const
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =
@@ -239,7 +245,7 @@ public:
     }
 
     virtual void project(const ompl::base::State *state,
-                         ompl::base::EuclideanProjection &projection) const
+                         OMPLProjection projection) const
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =
@@ -275,7 +281,7 @@ public:
     }
 
     virtual void project(const ompl::base::State *state,
-                         ompl::base::EuclideanProjection &projection) const
+                         OMPLProjection projection) const
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =

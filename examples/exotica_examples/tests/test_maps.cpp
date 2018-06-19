@@ -583,16 +583,25 @@ void testIMesh()
 
 void testPoint2Plane()
 {
-    HIGHLIGHT("Point2Plane Test");
-    Initializer map("exotica/Point2Plane", {{"Name", std::string("MyTask")},
-                                            {"EndPoint", std::string("1 2 3")},
-                                            {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})},
-                                            {"Plane", Initializer("Plane", {{"Origin", std::string("1 2 3")}, {"Normal", std::string("1 1 0")}})}});
-    UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
-    testRandom(problem);
-    // TODO: Add testValues
+    {
+        HIGHLIGHT("Point2Plane Test - Align with world");
+        Initializer map("exotica/Point2Plane", {{"Name", std::string("MyTask")},
+                                                {"EndPoint", std::string("1 2 3")},
+                                                {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+        UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
+        testRandom(problem);
+        testJacobian(problem);
+    }
 
-    testJacobian(problem);
+    {
+        HIGHLIGHT("Point2Plane Test - Align with world with rotation");
+        Initializer map("exotica/Point2Plane", {{"Name", std::string("MyTask")},
+                                                {"EndPoint", std::string("1 2 3")},
+                                                {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"BaseOffset", std::string("0.1 0.1 0.1 0.7071 0 0.7071 0")}})})}});
+        UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
+        testRandom(problem);
+        testJacobian(problem);
+    }
 }
 
 int main(int argc, char** argv)

@@ -22,7 +22,6 @@ AddInitializer(
   SphereCollision
   Sphere
   CollisionCheck
-  PlaneGeometry
   Point2Plane
 )
 GenInitializers()

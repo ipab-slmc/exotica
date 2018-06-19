@@ -6,4 +6,4 @@ extend <exotica/TaskMap>
 // string Base           > name of frame in which line is defined
 // VectorXd BaseOffset   > starting point of line in Base frame
 
-Required exotica::Initializer Plane;
+// The frame of each Link in the given vector of EndEffectors will be aligned with the plane defined by the origin of the Base frame and its UnitZ-normal.

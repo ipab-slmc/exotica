@@ -42,15 +42,6 @@ Point2Plane::Point2Plane()
 
 void Point2Plane::Instantiate(Point2PlaneInitializer& init)
 {
-    // We are using the Hessian Normal Form representation of a plane, cf.:
-    // http://mathworld.wolfram.com/HessianNormalForm.html
-    auto plane = PlaneGeometryInitializer(init.Plane);
-    normal_ = plane.Normal / plane.Normal.norm();
-    origin_ = plane.Origin;
-
-    if (debug_) HIGHLIGHT_NAMED("Point2Plane", "Plane Origin: " << origin_.transpose() << " and Normal: " << normal_.transpose());
-
-    // TODO(wxm): If debug and ROS, set up publisher
 }
 
 void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
@@ -60,7 +51,7 @@ void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
         const auto& point = Eigen::Map<const Eigen::Vector3d>(Kinematics.Phi(i).p.data);
-        phi(i) = std::abs(normal_.dot(point - origin_));
+        phi(i) = Eigen::Vector3d::UnitZ().dot(point);
     }
 }
 
@@ -74,16 +65,13 @@ void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
         const auto& point = Eigen::Map<const Eigen::Vector3d>(Kinematics.Phi(i).p.data);
-        double signed_distance = normal_.dot(point - origin_);
-        phi(i) = std::abs(signed_distance);
 
-        // Direction from point to plane is following the vector from the point to the closest point on the plane, i.e.:
-        Eigen::Vector3d projected_point = point - signed_distance * normal_;
-        Eigen::Vector3d projection_dir = projected_point - point;
+        phi(i) = Eigen::Vector3d::UnitZ().dot(point);
 
         for (int j = 0; j < J.cols(); j++)
         {
-            J(i, j) = -projection_dir.dot(Eigen::Map<const Eigen::Vector3d>(Kinematics.J[i].getColumn(j).vel.data)) / phi(i);
+            const auto& dpoint = Eigen::Map<const Eigen::Vector3d>(Kinematics.J[i].getColumn(j).vel.data);
+            J(i, j) = Eigen::Vector3d::UnitZ().dot(dpoint);
         }
     }
 }

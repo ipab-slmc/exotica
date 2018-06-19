@@ -33,7 +33,6 @@
 #pragma once
 
 #include <exotica/TaskMap.h>
-#include <task_map/PlaneGeometryInitializer.h>
 #include <task_map/Point2PlaneInitializer.h>
 
 namespace exotica
@@ -53,9 +52,6 @@ public:
     virtual int taskSpaceDim();
 
 private:
-    // NB: We are using the Hessian form to specify a plane
-    Eigen::Vector3d origin_;  //<! point that defines a point on the plane
-    Eigen::Vector3d normal_;  //<! point in link frame
 };
 
 typedef std::shared_ptr<Point2Plane> Point2Plane_Ptr;

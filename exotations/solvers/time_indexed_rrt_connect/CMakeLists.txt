@@ -7,10 +7,6 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
 )
 
-if($ENV{ROS_DISTRO} MATCHES "(kinetic|lunar)")
-  add_definitions(-DROS_KINETIC)
-endif()
-
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES time_indexed_rrt_connect

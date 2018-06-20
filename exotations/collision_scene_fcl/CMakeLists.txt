@@ -14,12 +14,6 @@ catkin_package(
   CATKIN_DEPENDS exotica geometric_shapes
 )
 
-# FCL 0.5.0 used in kinetic breaks the API.
-# The ROS_KINETIC flag takes care of that in our code.
-if ($ENV{ROS_DISTRO} MATCHES "(kinetic|lunar)")
-    add_definitions(-DROS_KINETIC)
-endif()
-
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}

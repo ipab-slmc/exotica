@@ -8,10 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
   exotica_python
 )
 
-if ($ENV{ROS_DISTRO} MATCHES "(kinetic|lunar)")
-    add_definitions(-DROS_KINETIC)
-endif()
-
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ompl_solver

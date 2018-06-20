@@ -31,7 +31,6 @@ ExternalProject_Add_Step(
 )
 
 
-file(MAKE_DIRECTORY include)
 file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
 
 set(pybind11_INCLUDE_DIRS include)

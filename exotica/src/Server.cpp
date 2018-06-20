@@ -61,7 +61,11 @@ void Server::destroy()
 robot_model::RobotModelPtr loadModelImpl(const std::string& urdf, const std::string& srdf)
 {
     rdf_loader::RDFLoader loader(urdf, srdf);
+#if ROS_VERSION_MINIMUM(1, 14, 0) // if ROS version >= ROS_MELODIC
     const std::shared_ptr<srdf::Model>& srdf_ = loader.getSRDF() ? loader.getSRDF() : std::shared_ptr<srdf::Model>(new srdf::Model());
+#else
+    const boost::shared_ptr<srdf::Model>& srdf_ = loader.getSRDF() ? loader.getSRDF() : boost::shared_ptr<srdf::Model>(new srdf::Model());
+#endif
     if (loader.getURDF())
     {
         return robot_model::RobotModelPtr(new robot_model::RobotModel(loader.getURDF(), srdf_));

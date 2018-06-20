@@ -1,0 +1,4 @@
+- git:
+    local-name: val_description
+    uri: https://github.com/wxmerkt/oh_val_description.git
+    version: master

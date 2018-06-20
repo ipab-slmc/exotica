@@ -1,67 +1,99 @@
-sudo: required
-dist: xenial
-cache:
-- apt
-language: cpp
+# This config file for Travis CI utilizes ros-industrial/industrial_ci package.
+# For more info for the package, see https://github.com/ros-industrial/industrial_ci/blob/master/README.rst
+services:
+  - docker
+language: generic
 env:
   global:
-  - CATKIN_WS=~/catkin_ws
-  - CATKIN_WS_SRC=${CATKIN_WS}/src
-  - CI_ROS_DISTRO="kinetic"
-  - secure: "hq/S+hFDH44PBWcskCANx2Qli+KE8n8b5a5e+IR5T81j6b/NW8WW9Tx02vQjS8KFHcVNHFd9UcCCiKZrsFqs/GbGjBcRknGTGfslesBzZ2B/eXwR1B6dcG4dnN9xLIZw3j8s+i0JoMn1d3Hx/LJgmXVLdgKp0zrLeYDJCkwJ084nAfe3hgizyqL1JMn9xWIyklpR+qi0KVEeu6aV3w18HpDz87NRG42IRiBtLynTPl39y3H+UQNUKtI9gkIb6fuOQY7e5bK9CcJInQl6RDIWK93BPIzPMrDfzpfej93cP/eyvKbBdmzx6hJRI2qrrEXzY7Aj3gB6W26cQU1A9BoWrRD+pbqC6/EcO8/8LKfyXNj4RWiKkrnUAMMZ48LgLQULVLSEP8PB/KoH0EKB2cm98Tu7DimYUznsyVXfkpMMBj0CDG0Nbi3QiS7j0AcN1ngJkIdn8A64pRHKX/waDLdOPGqnezK5UUqhWrqNwoed8emCxsBvGkbUNL/fsnMtdYThzLvW2b6cMHa1O3brhjVpDLbvieFs/0OBMz02lSlVNE0H6ADJJYiPCF1QHi//D+Dqt1B9ZgwMv3ZfD7xTSdxYFAlcLa1YRKeiDdFMXmz3lxl0IPZLk2Ub4/ScbPzXtidsAnffZoiXZBhGCcHywy/hHLcT/mO3a61hiiwgLujkPcY="
-before_install:
-- sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-- wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-- sudo apt-get update -qq
+    - ROS_PARALLEL_JOBS="-j4"
+    - secure: "hq/S+hFDH44PBWcskCANx2Qli+KE8n8b5a5e+IR5T81j6b/NW8WW9Tx02vQjS8KFHcVNHFd9UcCCiKZrsFqs/GbGjBcRknGTGfslesBzZ2B/eXwR1B6dcG4dnN9xLIZw3j8s+i0JoMn1d3Hx/LJgmXVLdgKp0zrLeYDJCkwJ084nAfe3hgizyqL1JMn9xWIyklpR+qi0KVEeu6aV3w18HpDz87NRG42IRiBtLynTPl39y3H+UQNUKtI9gkIb6fuOQY7e5bK9CcJInQl6RDIWK93BPIzPMrDfzpfej93cP/eyvKbBdmzx6hJRI2qrrEXzY7Aj3gB6W26cQU1A9BoWrRD+pbqC6/EcO8/8LKfyXNj4RWiKkrnUAMMZ48LgLQULVLSEP8PB/KoH0EKB2cm98Tu7DimYUznsyVXfkpMMBj0CDG0Nbi3QiS7j0AcN1ngJkIdn8A64pRHKX/waDLdOPGqnezK5UUqhWrqNwoed8emCxsBvGkbUNL/fsnMtdYThzLvW2b6cMHa1O3brhjVpDLbvieFs/0OBMz02lSlVNE0H6ADJJYiPCF1QHi//D+Dqt1B9ZgwMv3ZfD7xTSdxYFAlcLa1YRKeiDdFMXmz3lxl0IPZLk2Ub4/ScbPzXtidsAnffZoiXZBhGCcHywy/hHLcT/mO3a61hiiwgLujkPcY="
+  matrix:
+    - ROS_DISTRO="kinetic"  ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu UPSTREAM_WORKSPACE=file ROSINSTALL_FILENAME=.rosinstall
+    # - ROS_DISTRO="kinetic"  ROS_REPOSITORY_PATH=http://packages.ros.org/ros-shadow-fixed/ubuntu
+    # - ROS_DISTRO="kinetic"  PRERELEASE=true
+    - ROS_DISTRO="melodic"  ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu UPSTREAM_WORKSPACE=file ROSINSTALL_FILENAME=.rosinstall.melodic
+    # - ROS_DISTRO="melodic"  ROS_REPOSITORY_PATH=http://packages.ros.org/ros-shadow-fixed/ubuntu
+    # - ROS_DISTRO="melodic"  PRERELEASE=true UPSTREAM_WORKSPACE=file ROSINSTALL_FILENAME=exotica.rosinstall
+# matrix:
+#   allow_failures:
+#     - env: ROS_DISTRO="indigo" PRERELEASE=true  # Run docker-based ROS prerelease test http://wiki.ros.org/bloom/Tutorials/PrereleaseTest Because we might not want to run prerelease test for all PRs, it's omitted from pass-fail criteria.
 install:
-- sudo apt-get install -qq -y g++ python-rosdep python-catkin-tools python-catkin-pkg doxygen >> /dev/null
-- mkdir -p $CATKIN_WS_SRC
-- ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
-- cd $CATKIN_WS_SRC
-- git clone https://github.com/wxmerkt/oh_val_description.git
-- cd ..
-- sudo rosdep init
-- rosdep update && rosdep install --from-paths ./src -i -y --rosdistro $CI_ROS_DISTRO
-- sudo apt-get install -qq -y ros-$CI_ROS_DISTRO-rosbash
-- sudo pip install -U sphinx sphinx_rtd_theme
-- source /opt/ros/$CI_ROS_DISTRO/setup.bash
+  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config
 script:
-- catkin config --init --install
-- catkin build -i -j4
-# Run tests
-- source /opt/ros/$CI_ROS_DISTRO/setup.bash
-- source install/setup.bash
-- catkin run_tests
-before_deploy:
-- bash $TRAVIS_BUILD_DIR/.ci/after_success.sh
-- git config --global user.email "builds@travis-ci.com"
-- git config --global user.name "Travis CI"
-#- export GIT_TAG=build-$TRAVIS_BRANCH-$(date -u "+%Y-%m-%d")-$TRAVIS_BUILD_NUMBER
-- cd $TRAVIS_BUILD_DIR
-- export GIT_TAG=latest
-- git push https://$GITHUBKEY@github.com/ipab-slmc/exotica :refs/tags/$GIT_TAG
-- git tag $GIT_TAG -a -m "Updated tag latest from build $TRAVIS_BUILD_NUMBER" -f
-- git push --quiet --tags https://$GITHUBKEY@github.com/ipab-slmc/exotica $GIT_TAG > /dev/null 2>&1
-after_deploy:
-# Build and deploy documentation
-- bash .ci/build_documentation.sh > /dev/null 2>&1
-- git checkout --orphan gh-pages
-- mkdir old ; mv * old/ ; mv old/exotica/doc/_build/html/* . ; rm -rf old ; touch .nojekyll ; rm -rf .ci ; rm .clang-format .travis.yml .gitmodules .gitignore
-- git add --all
-- git commit -m "Update public documentation for $GIT_COMMIT"
-- git push --quiet --force https://$GITHUBKEY@github.com/ipab-slmc/exotica.git gh-pages:gh-pages > /dev/null 2>&1
-branches:
-  except:
-    - /^build-[0-9a-z\-]*/
-    - /^latest*/
-deploy:
-  provider: releases
-  api_key:
-    secure: "NY3NXTyIhSMaLqjS3ZhjWtKUSR2Jc/NwmX2jwqRYWRqDn2VsgL+eik3QEq80P9WS5uKsToYpGfivk31U7REVEz4bIcYCZU+F7M6/H/fu58QLmIc5SMTteDPGVGkzlrlMikIn78bxDa2ZFi9GcGZucSmQ+bAv7z2yzQSajtLbF8SonM7JxlO3WTkMoBoJ7uY3Exdb3m+bpUN5BE981NbjBK5JkkrvOpFrR3Wu7Acra2wMCf5Zpxaj2mbx6+cKeTysojfnbjNeonhMGGPF/A6weoG5kJgUzwQChpe3juAhjt+FYYWOGj9sEtz/wOFFC8BWTKK/zd9TZ7qvWGXcRNwJuvmX+iI0KhwtqhVPn5jbRFmBQjci2pFzN24fh7xhi7HRUzaJjvpJOfLcDZhhD8KDmkjKYmMfYlroVKXtpwQEm0Go5B2bBqNA2iuJD7lpAI2iKOdrFZP1Kh4LnFzXxGYr8GAQFnD8kZm3j/GXffgAqBR6Is9QXO66pMFtqT4QcyQuNwHf4fjqREx72nobobJ1o7rDVYTtXCmgS2smEJdAxh5Bkx+0lcw2mQ6iABxRLjAcKZN/ZP3Xu3Wc7uGTDyS439HZ1EdTPjsYA4apTKQmY0sN2e8wUutQUsrmPhnrkH5NA6QopLVQKVznPS6Kx+Ysf0mZZJsSaq8O31SXomzwLgc="
-  skip_cleanup: true
-  file: "exotica.deb"
-  overwrite: true
-  on:
-    repo: ipab-slmc/exotica
-    tags: false
-    branch: master
+  - .ci_config/travis.sh
+
+# cache:
+# - apt
+# # - ccache
+# env:
+#   global:
+#   - CATKIN_WS=~/catkin_ws
+#   - CATKIN_WS_SRC=${CATKIN_WS}/src
+#   - CI_ROS_DISTRO="indigo"
+# before_install:
+# - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+# - sudo add-apt-repository -y ppa:libccd-debs/ppa
+# - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
+# - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+# - sudo apt-get update -qq
+# install:
+# - export PATH=/usr/bin/:$PATH # work-around Travis PYTHONPATH bug, cf. https://github.com/travis-ci/travis-ci/issues/8048
+# - bash $TRAVIS_BUILD_DIR/.ci/before_install.sh >> /dev/null
+# - sudo apt-get install -qq g++-4.9
+# - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
+# - sudo apt-get install -qq -y python-rosdep python-catkin-tools python-catkin-pkg
+# - sudo apt-get install -qq -y doxygen
+# - sudo rosdep init
+# - rosdep update
+# - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
+# - sudo apt-get install -qq -y ros-$CI_ROS_DISTRO-rosbash
+# - sudo pip install -U sphinx sphinx_rtd_theme
+# - source /opt/ros/$CI_ROS_DISTRO/setup.bash
+# - mkdir -p $CATKIN_WS_SRC
+# - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
+# - cd $CATKIN_WS_SRC
+# - git clone https://github.com/wxmerkt/oh_val_description.git
+# - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
+# - catkin_init_workspace
+# - cd ..
+# script:
+# - catkin config --init --install
+# - catkin build -i -j4
+# # Run tests
+# - source /opt/ros/indigo/setup.bash
+# - source install/setup.bash
+# - roscore & # detached core
+# - rosrun exotica_examples runtest.py
+# before_deploy:
+# - bash $TRAVIS_BUILD_DIR/.ci/after_success.sh
+# - git config --global user.email "builds@travis-ci.com"
+# - git config --global user.name "Travis CI"
+# #- export GIT_TAG=build-$TRAVIS_BRANCH-$(date -u "+%Y-%m-%d")-$TRAVIS_BUILD_NUMBER
+# - cd $TRAVIS_BUILD_DIR
+# - export GIT_TAG=latest
+# - git push https://$GITHUBKEY@github.com/ipab-slmc/exotica :refs/tags/$GIT_TAG
+# - git tag $GIT_TAG -a -m "Updated tag latest from build $TRAVIS_BUILD_NUMBER" -f
+# - git push --quiet --tags https://$GITHUBKEY@github.com/ipab-slmc/exotica $GIT_TAG > /dev/null 2>&1
+# after_deploy:
+# # Build and deploy documentation
+# - bash .ci/build_documentation.sh > /dev/null 2>&1
+# - git checkout --orphan gh-pages
+# - mkdir old ; mv * old/ ; mv old/exotica/doc/_build/html/* . ; rm -rf old ; touch .nojekyll ; rm -rf .ci ; rm .clang-format .travis.yml .gitmodules .gitignore
+# - git add --all
+# - git commit -m "Update public documentation for $GIT_COMMIT"
+# - git push --quiet --force https://$GITHUBKEY@github.com/ipab-slmc/exotica.git gh-pages:gh-pages > /dev/null 2>&1
+# branches:
+#   except:
+#     - /^build-[0-9a-z\-]*/
+#     - /^latest*/
+# deploy:
+#   provider: releases
+#   api_key:
+#     secure: "NY3NXTyIhSMaLqjS3ZhjWtKUSR2Jc/NwmX2jwqRYWRqDn2VsgL+eik3QEq80P9WS5uKsToYpGfivk31U7REVEz4bIcYCZU+F7M6/H/fu58QLmIc5SMTteDPGVGkzlrlMikIn78bxDa2ZFi9GcGZucSmQ+bAv7z2yzQSajtLbF8SonM7JxlO3WTkMoBoJ7uY3Exdb3m+bpUN5BE981NbjBK5JkkrvOpFrR3Wu7Acra2wMCf5Zpxaj2mbx6+cKeTysojfnbjNeonhMGGPF/A6weoG5kJgUzwQChpe3juAhjt+FYYWOGj9sEtz/wOFFC8BWTKK/zd9TZ7qvWGXcRNwJuvmX+iI0KhwtqhVPn5jbRFmBQjci2pFzN24fh7xhi7HRUzaJjvpJOfLcDZhhD8KDmkjKYmMfYlroVKXtpwQEm0Go5B2bBqNA2iuJD7lpAI2iKOdrFZP1Kh4LnFzXxGYr8GAQFnD8kZm3j/GXffgAqBR6Is9QXO66pMFtqT4QcyQuNwHf4fjqREx72nobobJ1o7rDVYTtXCmgS2smEJdAxh5Bkx+0lcw2mQ6iABxRLjAcKZN/ZP3Xu3Wc7uGTDyS439HZ1EdTPjsYA4apTKQmY0sN2e8wUutQUsrmPhnrkH5NA6QopLVQKVznPS6Kx+Ysf0mZZJsSaq8O31SXomzwLgc="
+#   skip_cleanup: true
+#   file: "exotica.deb"
+#   overwrite: true
+#   on:
+#     repo: ipab-slmc/exotica
+#     tags: false
+#     branch: master

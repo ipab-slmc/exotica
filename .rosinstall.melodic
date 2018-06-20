@@ -1,0 +1,8 @@
+- git:
+    local-name: pybind11_catkin
+    uri: https://github.com/ipab-slmc/pybind11_catkin.git
+    version: master
+- git:
+    local-name: val_description
+    uri: https://github.com/wxmerkt/oh_val_description.git
+    version: master

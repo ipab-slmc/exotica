@@ -31,12 +31,10 @@ ExternalProject_Add_Step(
 )
 
 
-file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
-
 set(pybind11_INCLUDE_DIRS include)
 
 catkin_package(
-  INCLUDE_DIRS ${CATKIN_DEVEL_PREFIX}/include include ${EIGEN3_INCLUDE_DIR}
+  INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
   LIBRARIES ${PYTHON_LIBRARIES}
   CATKIN_DEPENDS
   CFG_EXTRAS pybind.cmake

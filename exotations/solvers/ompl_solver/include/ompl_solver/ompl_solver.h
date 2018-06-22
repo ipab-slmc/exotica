@@ -39,7 +39,7 @@
 
 typedef boost::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
 
-#if ROS_VERSION_MINIMUM(1, 12, 0) // if ROS version >= ROS_KINETIC
+#if ROS_VERSION_MINIMUM(1, 12, 0)  // if ROS version >= ROS_KINETIC
 template <class T, class T1>
 std::shared_ptr<T> ompl_cast(std::shared_ptr<T1> ptr)
 {

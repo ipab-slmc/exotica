@@ -614,7 +614,7 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<TaskSpaceVector, std::shared_ptr<TaskSpaceVector>> taskSpaceVector(module, "TaskSpaceVector");
     taskSpaceVector.def("setZero", &TaskSpaceVector::setZero);
-    taskSpaceVector.def_readwrite("data", &TaskSpaceVector::data);
+    taskSpaceVector.def_readonly("data", &TaskSpaceVector::data);
     taskSpaceVector.def("__sub__", &TaskSpaceVector::operator-, py::is_operator());
     taskSpaceVector.def("__repr__", [](TaskSpaceVector* instance) { return ((std::ostringstream&)(std::ostringstream("") << "TaskSpaceVector (" << instance->data.transpose() << ")")).str(); });
 

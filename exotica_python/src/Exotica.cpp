@@ -651,7 +651,6 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedTimeIndexedProblem.def_property("tau",
                                                  &UnconstrainedTimeIndexedProblem::getTau,
                                                  &UnconstrainedTimeIndexedProblem::setTau);
-    unconstrainedTimeIndexedProblem.def_readwrite("W_rate", &UnconstrainedTimeIndexedProblem::W_rate);
     unconstrainedTimeIndexedProblem.def_readwrite("W", &UnconstrainedTimeIndexedProblem::W);
     unconstrainedTimeIndexedProblem.def_property(
         "InitialTrajectory",
@@ -690,7 +689,6 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedProblem.def_property("tau",
                                     &TimeIndexedProblem::getTau,
                                     &TimeIndexedProblem::setTau);
-    timeIndexedProblem.def_readwrite("W_rate", &TimeIndexedProblem::W_rate);
     timeIndexedProblem.def_readwrite("W", &TimeIndexedProblem::W);
     timeIndexedProblem.def_property(
         "InitialTrajectory",
@@ -726,7 +724,6 @@ PYBIND11_MODULE(_pyexotica, module)
     boundedTimeIndexedProblem.def_property("tau",
                                            &BoundedTimeIndexedProblem::getTau,
                                            &BoundedTimeIndexedProblem::setTau);
-    boundedTimeIndexedProblem.def_readwrite("W_rate", &BoundedTimeIndexedProblem::W_rate);
     boundedTimeIndexedProblem.def_readwrite("W", &BoundedTimeIndexedProblem::W);
     boundedTimeIndexedProblem.def_property(
         "InitialTrajectory",

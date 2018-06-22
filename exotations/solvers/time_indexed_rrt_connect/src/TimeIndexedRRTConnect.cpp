@@ -91,7 +91,7 @@ bool OMPLTimeIndexedStateValidityChecker::isValid(const ompl::base::State *state
 {
     Eigen::VectorXd q(prob_->N);
     double t;
-#if ROS_VERSION_MINIMUM(1, 12, 0) // if ROS version >= ROS_KINETIC
+#if ROS_VERSION_MINIMUM(1, 12, 0)  // if ROS version >= ROS_KINETIC
     std::static_pointer_cast<OMPLTimeIndexedRNStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q, t);
 #else
     boost::static_pointer_cast<OMPLTimeIndexedRNStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q, t);
@@ -278,7 +278,7 @@ void OMPLTimeIndexedRRTConnect::setup()
     tools::SelfConfig sc(si_, getName());
     sc.configurePlannerRange(maxDistance_);
 
-#if ROS_VERSION_MINIMUM(1, 12, 0) // if ROS version >= ROS_KINETIC
+#if ROS_VERSION_MINIMUM(1, 12, 0)  // if ROS version >= ROS_KINETIC
     if (!tStart_) tStart_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
     if (!tGoal_) tGoal_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
 #else

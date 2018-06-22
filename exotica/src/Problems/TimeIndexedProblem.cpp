@@ -96,6 +96,7 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     Equality.initialize(init_.Equality, shared_from_this(), EqualityPhi);
 
     T = init_.T;
+    qdot_max = init_.JointVelocityLimit;
     applyStartState(false);
     reinitializeVariables();
 }
@@ -154,6 +155,7 @@ void TimeIndexedProblem::setTau(double tau_in)
     if (tau_in <= 0.) throw_pretty("tau is expected to be greater than 0. (tau=" << tau_in << ")");
     tau = tau_in;
     ct = 1.0 / tau / T;
+    xdiff_max = qdot_max * tau;
 }
 
 void TimeIndexedProblem::preupdate()

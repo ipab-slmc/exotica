@@ -689,6 +689,7 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedProblem.def_property("tau",
                                     &TimeIndexedProblem::getTau,
                                     &TimeIndexedProblem::setTau);
+    timeIndexedProblem.def_property("qDot_max", &TimeIndexedProblem::getJointVelocityLimit, &TimeIndexedProblem::setJointVelocityLimit);
     timeIndexedProblem.def_readwrite("W", &TimeIndexedProblem::W);
     timeIndexedProblem.def_property(
         "InitialTrajectory",

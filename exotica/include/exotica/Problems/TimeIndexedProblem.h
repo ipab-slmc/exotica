@@ -108,9 +108,19 @@ public:
     int NumTasks;
     bool useBounds;
 
+    double getJointVelocityLimit() { return qdot_max; }
+    void setJointVelocityLimit(double qdot_max_in)
+    {
+        qdot_max = qdot_max_in;
+        xdiff_max = qdot_max * tau;
+    }
+
 private:
     int T;       //!< Number of time steps
     double tau;  //!< Time step duration
+
+    double qdot_max;   //!< Joint velocity limit (rad/s)
+    double xdiff_max;  //!< Maximum change in the variables in a single timestep tau. Gets set/updated via setTau().
 
     std::vector<Eigen::VectorXd> InitialTrajectory;
     TimeIndexedProblemInitializer init_;

@@ -504,7 +504,6 @@ void testCoM()
     }
     testJacobian(problem);
 
-
     HIGHLIGHT("CoM test with attached object");
     map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
                                       {"EnableZ", true}});

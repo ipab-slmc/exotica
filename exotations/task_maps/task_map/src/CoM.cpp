@@ -84,7 +84,7 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
     J.setZero();
     KDL::Vector com;
 
-    if(Frames.size() > 0)
+    if (Frames.size() > 0)
     {
         double M = mass_.sum();
         if (M == 0.0) return;
@@ -103,15 +103,15 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
     }
     else
     {
-        if(debug_) com_marker_.points.resize(0);
+        if (debug_) com_marker_.points.resize(0);
         double M = 0.0;
         for (std::weak_ptr<KinematicElement> welement : scene_->getSolver().getTree())
         {
             std::shared_ptr<KinematicElement> element = welement.lock();
-            if (element->isRobotLink || element->ClosestRobotLink.lock()) // Only for robot links and attached objects
+            if (element->isRobotLink || element->ClosestRobotLink.lock())  // Only for robot links and attached objects
             {
                 double mass = element->Segment.getInertia().getMass();
-                if (mass>0)
+                if (mass > 0)
                 {
                     KDL::Frame cog = KDL::Frame(element->Segment.getInertia().getCOG());
                     KDL::Frame com_local = scene_->getSolver().FK(element, cog, nullptr, KDL::Frame());
@@ -119,7 +119,7 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
                     com += com_local.p * mass;
                     J += Jcom_local.topRows(dim_) * mass;
                     M += mass;
-                    if(debug_)
+                    if (debug_)
                     {
                         geometry_msgs::Point pt;
                         pt.x = com_local.p[0];

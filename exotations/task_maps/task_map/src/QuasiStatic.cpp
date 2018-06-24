@@ -111,7 +111,7 @@ void potential(double& phi, Eigen::VectorXdRef J, Eigen::VectorXdRefConst A, Eig
             double C_ = A_.col(i).dot(B)+A.dot(B_.col(i)) - A_.col(i).dot(P)-A.dot(P_.col(i)) + B_.col(i).dot(P)+B.dot(P_.col(i)) - 2*B_.col(i).dot(B);
             double D_ = -A_.col(i).dot(B)-A.dot(B_.col(i)) - A_.col(i).dot(P)-A.dot(P_.col(i)) + B_.col(i).dot(P)+B.dot(P_.col(i)) + 2*A_.col(i).dot(A);
             double E_ = cross(A_.col(i),B)+cross(A,B_.col(i)) - cross(A_.col(i),P)-cross(A,P_.col(i)) + cross(B_.col(i),P)+cross(B,P_.col(i));
-            J(i) = ((E_*C/E/E + C_/E)/(C*C/E/E+1)-(E_*D/E/E + D_/E)/(D*D/E/E+1))/E-E_/E*phi;
+            J(i) = ((C_/E - E_*C/E/E)/(C*C/E/E+1)-(D_/E - E_*D/E/E)/(D*D/E/E+1))/E- E_/E*phi;
         }
     }
 }
@@ -310,15 +310,15 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     {
         if(wnd<0.5)
         {
-            phi(0)=-sqrt(-n/pot);
+            phi(0)=sqrt(-n/pot);
             J.row(0) = potJ*(n/(2*pot*pot*phi(0)));
         }
         else
         {
             if(!init_.PositiveOnly)
             {
-                phi(0)=sqrt(-n/pot);
-                J.row(0) = -potJ*(n/(2*pot*pot*phi(0)));
+                phi(0)=-sqrt(-n/pot);
+                J.row(0) = potJ*(n/(2*pot*pot*phi(0)));
             }
         }
     }

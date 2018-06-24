@@ -22,6 +22,13 @@ q=problem.startState
 print('Publishing IK')
 signal.signal(signal.SIGINT, sigIntHandler)
 pose=[0]*20;
+stability=None
+for task in problem.getTasks():
+    if task.getName()=='Stability':
+        stability=task
+        break
+if not stability:
+    quit(2)
 while True:
     try:
         problem.setGoal('CoM',com(tick.getDuration()))
@@ -29,7 +36,10 @@ while True:
         pose[13]=-math.sin(tick.getDuration() * 0.25 * math.pi)*0.8;
         problem.setGoal('Pose',pose)
         problem.startState = q
+        stability.debugMode=False
         q = solver.solve()[0]
+        stability.debugMode=True
+        problem.update(q)
         publishPose(q, problem)
     except KeyboardInterrupt:
         break

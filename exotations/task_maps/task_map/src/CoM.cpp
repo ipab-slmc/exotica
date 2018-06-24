@@ -80,23 +80,60 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
-    if (J.rows() != dim_ || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    if (J.rows() != dim_ || J.cols() != x.rows()) throw_named("Wrong size of J! " << x.rows());
     J.setZero();
     KDL::Vector com;
-    double M = mass_.sum();
-    if (M == 0.0) return;
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+
+    if(Frames.size() > 0)
     {
-        com += Kinematics.Phi(i).p * mass_(i);
-        J += mass_(i) / M * Kinematics.J(i).data.topRows(dim_);
-        if (debug_)
+        double M = mass_.sum();
+        if (M == 0.0) return;
+        for (int i = 0; i < Kinematics.Phi.rows(); i++)
         {
-            com_marker_.points[i].x = Kinematics.Phi(i).p[0];
-            com_marker_.points[i].y = Kinematics.Phi(i).p[1];
-            com_marker_.points[i].z = Kinematics.Phi(i).p[2];
+            com += Kinematics.Phi(i).p * mass_(i);
+            J += mass_(i) / M * Kinematics.J(i).data.topRows(dim_);
+            if (debug_)
+            {
+                com_marker_.points[i].x = Kinematics.Phi(i).p[0];
+                com_marker_.points[i].y = Kinematics.Phi(i).p[1];
+                com_marker_.points[i].z = Kinematics.Phi(i).p[2];
+            }
         }
+        com = com / M;
     }
-    com = com / M;
+    else
+    {
+        if(debug_) com_marker_.points.resize(0);
+        double M = 0.0;
+        for (std::weak_ptr<KinematicElement> welement : scene_->getSolver().getTree())
+        {
+            std::shared_ptr<KinematicElement> element = welement.lock();
+            if (element->isRobotLink || element->ClosestRobotLink.lock()) // Only for robot links and attached objects
+            {
+                double mass = element->Segment.getInertia().getMass();
+                if (mass>0)
+                {
+                    KDL::Frame cog = KDL::Frame(element->Segment.getInertia().getCOG());
+                    KDL::Frame com_local = scene_->getSolver().FK(element, cog, nullptr, KDL::Frame());
+                    Eigen::MatrixXd Jcom_local = scene_->getSolver().Jacobian(element, cog, nullptr, KDL::Frame());
+                    com += com_local.p * mass;
+                    J += Jcom_local.topRows(dim_) * mass;
+                    M += mass;
+                    if(debug_)
+                    {
+                        geometry_msgs::Point pt;
+                        pt.x = com_local.p[0];
+                        pt.y = com_local.p[1];
+                        pt.z = com_local.p[2];
+                        com_marker_.points.push_back(pt);
+                    }
+                }
+            }
+        }
+        if (M == 0.0) return;
+        com = com / M;
+        J = J / M;
+    }
     for (int i = 0; i < dim_; i++) phi(i) = com[i];
 
     if (debug_)
@@ -141,29 +178,6 @@ void CoM::Initialize()
             Frames[i].FrameALinkName = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getName();
             Frames[i].FrameAOffset.p = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getInertia().getCOG();
             mass_(i) = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getInertia().getMass();
-        }
-    }
-    else
-    {
-        int N = scene_->getSolver().getModelTree().size();
-        mass_.resize(N);
-        Frames.resize(N);
-        if (debug_)
-            HIGHLIGHT_NAMED("CoM", "Initialisation for tree of size "
-                                       << Frames.size());
-        for (int i = 0; i < N; i++)
-        {
-            Frames[i].FrameALinkName = scene_->getSolver().getModelTree()[i]->Segment.getName();
-            Frames[i].FrameAOffset.p = scene_->getSolver().getModelTree()[i]->Segment.getInertia().getCOG();
-            mass_(i) = scene_->getSolver().getModelTree()[i]->Segment.getInertia().getMass();
-            if (debug_)
-                HIGHLIGHT_NAMED("CoM-Initialize",
-                                "FrameALinkName: "
-                                    << Frames[i].FrameALinkName
-                                    << ", mass: " << mass_(i) << ", CoG: ("
-                                    << Frames[i].FrameAOffset.p.x() << ", "
-                                    << Frames[i].FrameAOffset.p.y() << ", "
-                                    << Frames[i].FrameAOffset.p.z() << ")");
         }
     }
 

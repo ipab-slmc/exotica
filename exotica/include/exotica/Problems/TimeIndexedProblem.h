@@ -114,6 +114,7 @@ public:
         qdot_max = qdot_max_in;
         xdiff_max = qdot_max * tau;
     }
+    double getXdiffMax() { return xdiff_max; }
 
 private:
     int T;       //!< Number of time steps

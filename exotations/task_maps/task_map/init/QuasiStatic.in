@@ -1,0 +1,2 @@
+extend <exotica/TaskMap>
+Optional bool PositiveOnly = true;

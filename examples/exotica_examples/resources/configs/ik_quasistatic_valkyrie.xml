@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <ExoticaWholeBodyIKConfig>
-  <!--<BayesianIK Name="IK" MaxIterations="20" MaxBacktrackIterations="5" MinStep="1e-5" FunctionTolerance="1e-5" StepTolerance="1e-5"/>-->
-  <IKsolver Name="MySolver">
+  <!--<BayesianIK Name="Bayesian" MaxIterations="20" MaxBacktrackIterations="10" />-->
+  <IKsolver Name="IK">
     <MaxIterations>100</MaxIterations>
     <MaxStep>0.1</MaxStep>
     <Tolerance>1e-8</Tolerance>
-    <Alpha>0.01</Alpha>
-    <C>1e-4</C>
+    <Alpha>0.05</Alpha>
+    <C>1e-3</C>
   </IKsolver>
   
   <UnconstrainedEndPoseProblem>
@@ -56,7 +56,7 @@
     </Maps>
     <Cost>
       <Task Task="CoM" Rho="1e-1"/>
-      <Task Task="Stability" Rho="1e0"/>
+      <Task Task="Stability" Rho="1e1"/>
       <Task Task="FootPosition" Rho="1e3"/>
       <Task Task="StraightBack" Rho="1e0"/>
       <Task Task="Pose" Rho="1e3"/>

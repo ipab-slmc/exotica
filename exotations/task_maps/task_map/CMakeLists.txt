@@ -24,6 +24,7 @@ AddInitializer(
   Sphere
   CollisionCheck
   Point2Plane
+  QuasiStatic
 )
 GenInitializers()
 
@@ -52,10 +53,10 @@ set(SOURCES
     src/Point2Plane.cpp
     src/Identity.cpp
     src/SphereCollision.cpp
-    src/CollisionCheck.cpp)
+    src/CollisionCheck.cpp
+    src/QuasiStatic.cpp)
 
 add_library(${PROJECT_NAME} ${SOURCES})
-
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 

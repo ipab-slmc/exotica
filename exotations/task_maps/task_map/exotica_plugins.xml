@@ -41,4 +41,7 @@
   <class name="exotica/CollisionCheck" type="exotica::CollisionCheck" base_class_type="exotica::TaskMap">
     <description>Collision checking</description>
   </class>
+  <class name="exotica/QuasiStatic" type="exotica::QuasiStatic" base_class_type="exotica::TaskMap">
+    <description>Plannar quasi static cost/constraint</description>
+  </class>
 </library>

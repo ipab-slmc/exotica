@@ -94,7 +94,7 @@ void Identity::Initialize()
     if (init_.JointMap.rows() > 0)
     {
         jointMap.resize(init_.JointMap.rows());
-        for(int i=0;i<init_.JointMap.rows();i++)
+        for (int i = 0; i < init_.JointMap.rows(); i++)
         {
             jointMap[i] = init_.JointMap(i);
         }

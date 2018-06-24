@@ -736,15 +736,14 @@ void testQuasiStatic()
 {
     {
         HIGHLIGHT("QuasiStatic test inside capped");
-        Initializer map("exotica/QuasiStatic", {{"Name", std::string("MyTask")},
-                                                {"PositiveOnly", true},
-                                        {"EndEffector", std::vector<Initializer>({
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-1 1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-1 -1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("1 -1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("1 1 0")} })
-                                         })},
-                                        });
+        Initializer map("exotica/QuasiStatic", {
+                                                   {"Name", std::string("MyTask")},
+                                                   {"PositiveOnly", true},
+                                                   {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-1 1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-1 -1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("1 -1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("1 1 0")}})})},
+                                               });
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         testRandom(problem);
         testJacobian(problem);
@@ -752,15 +751,14 @@ void testQuasiStatic()
 
     {
         HIGHLIGHT("QuasiStatic test outside capped");
-        Initializer map("exotica/QuasiStatic", {{"Name", std::string("MyTask")},
-                                                {"PositiveOnly", true},
-                                        {"EndEffector", std::vector<Initializer>({
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 -1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")} })
-                                         })},
-                                        });
+        Initializer map("exotica/QuasiStatic", {
+                                                   {"Name", std::string("MyTask")},
+                                                   {"PositiveOnly", true},
+                                                   {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 -1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")}})})},
+                                               });
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         testRandom(problem);
         testJacobian(problem);
@@ -768,15 +766,14 @@ void testQuasiStatic()
 
     {
         HIGHLIGHT("QuasiStatic test inside");
-        Initializer map("exotica/QuasiStatic", {{"Name", std::string("MyTask")},
-                                                {"PositiveOnly", false},
-                                        {"EndEffector", std::vector<Initializer>({
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-1 1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-1 -1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("1 -1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("1 1 0")} })
-                                         })},
-                                        });
+        Initializer map("exotica/QuasiStatic", {
+                                                   {"Name", std::string("MyTask")},
+                                                   {"PositiveOnly", false},
+                                                   {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-1 1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-1 -1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("1 -1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("1 1 0")}})})},
+                                               });
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         testRandom(problem);
         testJacobian(problem);
@@ -784,15 +781,14 @@ void testQuasiStatic()
 
     {
         HIGHLIGHT("QuasiStatic test outside");
-        Initializer map("exotica/QuasiStatic", {{"Name", std::string("MyTask")},
-                                                {"PositiveOnly", false},
-                                        {"EndEffector", std::vector<Initializer>({
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 -1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")} }),
-                                         Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")} })
-                                         })},
-                                        });
+        Initializer map("exotica/QuasiStatic", {
+                                                   {"Name", std::string("MyTask")},
+                                                   {"PositiveOnly", false},
+                                                   {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 -1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")}})})},
+                                               });
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         testRandom(problem);
         testJacobian(problem);

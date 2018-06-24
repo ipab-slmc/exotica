@@ -1,18 +1,16 @@
 #ifndef CONVEXHULL_H
 #define CONVEXHULL_H
 
-#include "exotica/Tools.h"
 #include "Eigen/Dense"
+#include "exotica/Tools.h"
 
 namespace exotica
 {
-
 double lineDist2D(Eigen::VectorXdRefConst p1, Eigen::VectorXdRefConst p2, Eigen::VectorXdRefConst p)
 {
     return (p(1) - p1(1)) * (p2(0) - p1(0)) -
            (p2(1) - p1(1)) * (p(0) - p1(0));
 }
-
 
 std::list<int> quickHull(Eigen::MatrixXdRefConst points, std::list<int>& halfPoints, int p1, int p2)
 {
@@ -22,7 +20,7 @@ std::list<int> quickHull(Eigen::MatrixXdRefConst points, std::list<int>& halfPoi
     for (int i : halfPoints)
     {
         double d = lineDist2D(points.row(p1), points.row(p2), points.row(i));
-        if (d>0.0)
+        if (d > 0.0)
         {
             newHalfPoints.push_back(i);
         }
@@ -49,7 +47,7 @@ std::list<int> quickHull(Eigen::MatrixXdRefConst points, std::list<int>& halfPoi
 
 std::list<int> convexHull2D(Eigen::MatrixXdRefConst points)
 {
-    if (points.cols()!=2) throw_pretty("Input must contain 2D points!");
+    if (points.cols() != 2) throw_pretty("Input must contain 2D points!");
 
     int n = points.rows();
 
@@ -58,17 +56,17 @@ std::list<int> convexHull2D(Eigen::MatrixXdRefConst points)
 
     if (n < 3)
     {
-        for(int i=0; i<n; i++) hull.push_back(i);
+        for (int i = 0; i < n; i++) hull.push_back(i);
     }
     else
     {
         int min_x = 0, max_x = 0;
         halfPoints.push_back(0);
-        for (int i=1; i<n; i++)
+        for (int i = 1; i < n; i++)
         {
-            if (points(i,0) < points(min_x,0))
+            if (points(i, 0) < points(min_x, 0))
                 min_x = i;
-            if (points(i,0) > points(max_x,0))
+            if (points(i, 0) > points(max_x, 0))
                 max_x = i;
             halfPoints.push_back(i);
         }
@@ -77,9 +75,6 @@ std::list<int> convexHull2D(Eigen::MatrixXdRefConst points)
     }
     return hull;
 }
-
-
-
 }
 
-#endif // CONVEXHULL_H
+#endif  // CONVEXHULL_H

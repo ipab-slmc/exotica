@@ -31,14 +31,13 @@
  */
 
 #include "task_map/QuasiStatic.h"
-#include "task_map/ConvexHull.h"
 #include <math.h>
+#include "task_map/ConvexHull.h"
 
 REGISTER_TASKMAP_TYPE("QuasiStatic", exotica::QuasiStatic);
 
 namespace exotica
 {
-
 constexpr double eps = 1e-6;
 
 QuasiStatic::QuasiStatic()
@@ -57,7 +56,7 @@ QuasiStatic::~QuasiStatic()
 ///
 double cross(Eigen::VectorXdRefConst a, Eigen::VectorXdRefConst b)
 {
-    return a(0)*b(1)-a(1)*b(0);
+    return a(0) * b(1) - a(1) * b(0);
 }
 
 ///
@@ -71,14 +70,14 @@ void potential(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B
 {
     double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
     double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
-    double E = cross(A,B) - cross(A,P) + cross(B,P);
-    if (fabs(E)<=eps)
+    double E = cross(A, B) - cross(A, P) + cross(B, P);
+    if (fabs(E) <= eps)
     {
-        phi=0.0;
+        phi = 0.0;
     }
     else
     {
-        phi = (atan(C/E)-atan(D/E))/E;
+        phi = (atan(C / E) - atan(D / E)) / E;
     }
 }
 
@@ -97,21 +96,21 @@ void potential(double& phi, Eigen::VectorXdRef J, Eigen::VectorXdRefConst A, Eig
 {
     double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
     double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
-    double E = cross(A,B) - cross(A,P) + cross(B,P);
-    if (fabs(E)<=eps)
+    double E = cross(A, B) - cross(A, P) + cross(B, P);
+    if (fabs(E) <= eps)
     {
-        phi=0.0;
+        phi = 0.0;
         J.setZero();
     }
     else
     {
-        phi = (atan(C/E)-atan(D/E))/E;
-        for(int i=0; i<J.rows(); i++)
+        phi = (atan(C / E) - atan(D / E)) / E;
+        for (int i = 0; i < J.rows(); i++)
         {
-            double C_ = A_.col(i).dot(B)+A.dot(B_.col(i)) - A_.col(i).dot(P)-A.dot(P_.col(i)) + B_.col(i).dot(P)+B.dot(P_.col(i)) - 2*B_.col(i).dot(B);
-            double D_ = -A_.col(i).dot(B)-A.dot(B_.col(i)) - A_.col(i).dot(P)-A.dot(P_.col(i)) + B_.col(i).dot(P)+B.dot(P_.col(i)) + 2*A_.col(i).dot(A);
-            double E_ = cross(A_.col(i),B)+cross(A,B_.col(i)) - cross(A_.col(i),P)-cross(A,P_.col(i)) + cross(B_.col(i),P)+cross(B,P_.col(i));
-            J(i) = ((C_/E - E_*C/E/E)/(C*C/E/E+1)-(D_/E - E_*D/E/E)/(D*D/E/E+1))/E- E_/E*phi;
+            double C_ = A_.col(i).dot(B) + A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) - 2 * B_.col(i).dot(B);
+            double D_ = -A_.col(i).dot(B) - A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) + 2 * A_.col(i).dot(A);
+            double E_ = cross(A_.col(i), B) + cross(A, B_.col(i)) - cross(A_.col(i), P) - cross(A, P_.col(i)) + cross(B_.col(i), P) + cross(B, P_.col(i));
+            J(i) = ((C_ / E - E_ * C / E / E) / (C * C / E / E + 1) - (D_ / E - E_ * D / E / E) / (D * D / E / E + 1)) / E - E_ / E * phi;
         }
     }
 }
@@ -125,9 +124,9 @@ void potential(double& phi, Eigen::VectorXdRef J, Eigen::VectorXdRefConst A, Eig
 ///
 void winding(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P)
 {
-    double C = cross(A-P,B-P);
-    double D = (A-P).dot(B-P);
-    phi = atan2(C,D)/2.0/M_PI;
+    double C = cross(A - P, B - P);
+    double D = (A - P).dot(B - P);
+    phi = atan2(C, D) / 2.0 / M_PI;
 }
 
 ///
@@ -143,14 +142,14 @@ void winding(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, 
 ///
 void winding(double& phi, Eigen::VectorXdRef J, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
 {
-    double C = cross(A-P,B-P);
-    double D = (A-P).dot(B-P);
-    phi = atan2(C,D)/2.0/M_PI;
-    for(int i=0; i<J.rows(); i++)
+    double C = cross(A - P, B - P);
+    double D = (A - P).dot(B - P);
+    phi = atan2(C, D) / 2.0 / M_PI;
+    for (int i = 0; i < J.rows(); i++)
     {
-        double C_ = cross(A_.col(i)-P_.col(i),B-P)+cross(A-P,B_.col(i)-P_.col(i));
-        double D_ = (A_.col(i)-P_.col(i)).dot(B-P) + (A-P).dot(B_.col(i)-P_.col(i));
-        J(i) = (C_*D-C*D_)/(C*C+D*D)/2.0/M_PI;
+        double C_ = cross(A_.col(i) - P_.col(i), B - P) + cross(A - P, B_.col(i) - P_.col(i));
+        double D_ = (A_.col(i) - P_.col(i)).dot(B - P) + (A - P).dot(B_.col(i) - P_.col(i));
+        J(i) = (C_ * D - C * D_) / (C * C + D * D) / 2.0 / M_PI;
     }
 }
 
@@ -163,10 +162,10 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     for (std::weak_ptr<KinematicElement> welement : scene_->getSolver().getTree())
     {
         std::shared_ptr<KinematicElement> element = welement.lock();
-        if (element->isRobotLink || element->ClosestRobotLink.lock()) // Only for robot links and attached objects
+        if (element->isRobotLink || element->ClosestRobotLink.lock())  // Only for robot links and attached objects
         {
             double mass = element->Segment.getInertia().getMass();
-            if (mass>0)
+            if (mass > 0)
             {
                 KDL::Frame cog = KDL::Frame(element->Segment.getInertia().getCOG());
                 KDL::Frame com_local = scene_->getSolver().FK(element, cog, nullptr, KDL::Frame());
@@ -181,43 +180,41 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     com(0) = KDLcom[0];
     com(1) = KDLcom[1];
 
-
-
-    Eigen::MatrixXd supports(Kinematics.Phi.rows(),2);
+    Eigen::MatrixXd supports(Kinematics.Phi.rows(), 2);
     for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        supports(i,0) = Kinematics.Phi(i).p[0];
-        supports(i,1) = Kinematics.Phi(i).p[1];
+        supports(i, 0) = Kinematics.Phi(i).p[0];
+        supports(i, 1) = Kinematics.Phi(i).p[1];
     }
 
     std::list<int> hull = convexHull2D(supports);
 
     double n = hull.size();
     double wnd = 0.0;
-    double pot=0.0;
+    double pot = 0.0;
     double tmp;
-    for (std::list<int>::iterator it=hull.begin(); it != hull.end(); )
+    for (std::list<int>::iterator it = hull.begin(); it != hull.end();)
     {
         int a = *it;
-        int b = ++it==hull.end()?*hull.begin():*(it);
+        int b = ++it == hull.end() ? *hull.begin() : *(it);
         potential(tmp, supports.row(a), supports.row(b), com);
-        pot+=tmp;
+        pot += tmp;
         winding(tmp, supports.row(a), supports.row(b), com);
-        wnd+=tmp;
+        wnd += tmp;
     }
-    wnd=fabs(wnd);
+    wnd = fabs(wnd);
 
-    if(pot<eps)
+    if (pot < eps)
     {
-        if(wnd<0.5)
+        if (wnd < 0.5)
         {
-            phi(0)=-sqrt(-n/pot);
+            phi(0) = -sqrt(-n / pot);
         }
         else
         {
-            if(!init_.PositiveOnly)
+            if (!init_.PositiveOnly)
             {
-                phi(0)=sqrt(-n/pot);
+                phi(0) = sqrt(-n / pot);
             }
         }
     }
@@ -228,12 +225,12 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
         debug_msg.markers[0].pose.position.y = com(1);
         debug_msg.markers[0].pose.position.z = 0.0;
 
-        debug_msg.markers[1].points.resize(hull.size()+1);
-        int ii=0;
-        for(int i : hull)
+        debug_msg.markers[1].points.resize(hull.size() + 1);
+        int ii = 0;
+        for (int i : hull)
         {
-            debug_msg.markers[1].points[ii].x = supports(i,0);
-            debug_msg.markers[1].points[ii].y = supports(i,1);
+            debug_msg.markers[1].points[ii].x = supports(i, 0);
+            debug_msg.markers[1].points[ii].y = supports(i, 1);
             debug_msg.markers[1].points[ii++].z = 0.0;
         }
         debug_msg.markers[1].points[hull.size()] = debug_msg.markers[1].points[0];
@@ -254,10 +251,10 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     for (std::weak_ptr<KinematicElement> welement : scene_->getSolver().getTree())
     {
         std::shared_ptr<KinematicElement> element = welement.lock();
-        if (element->isRobotLink || element->ClosestRobotLink.lock()) // Only for robot links and attached objects
+        if (element->isRobotLink || element->ClosestRobotLink.lock())  // Only for robot links and attached objects
         {
             double mass = element->Segment.getInertia().getMass();
-            if (mass>0)
+            if (mass > 0)
             {
                 KDL::Frame cog = KDL::Frame(element->Segment.getInertia().getCOG());
                 KDL::Frame com_local = scene_->getSolver().FK(element, cog, nullptr, KDL::Frame());
@@ -275,50 +272,48 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     com(1) = KDLcom[1];
     Jcom = Jcom / M;
 
-
-
-    Eigen::MatrixXd supports(Kinematics.Phi.rows(),2);
-    Eigen::MatrixXd supportsJ(Kinematics.Phi.rows()*2,x.rows());
+    Eigen::MatrixXd supports(Kinematics.Phi.rows(), 2);
+    Eigen::MatrixXd supportsJ(Kinematics.Phi.rows() * 2, x.rows());
     for (int i = 0; i < Kinematics.Phi.rows(); i++)
     {
-        supports(i,0) = Kinematics.Phi(i).p[0];
-        supports(i,1) = Kinematics.Phi(i).p[1];
-        supportsJ.middleRows(i*2, 2) = Kinematics.J(i).data.topRows(2);
+        supports(i, 0) = Kinematics.Phi(i).p[0];
+        supports(i, 1) = Kinematics.Phi(i).p[1];
+        supportsJ.middleRows(i * 2, 2) = Kinematics.J(i).data.topRows(2);
     }
 
     std::list<int> hull = convexHull2D(supports);
 
     double n = hull.size();
     double wnd = 0.0;
-    double pot=0.0;
-    Eigen::VectorXd potJ=J.row(0);
+    double pot = 0.0;
+    Eigen::VectorXd potJ = J.row(0);
     double tmp;
-    Eigen::VectorXd tmpJ=J.row(0);
-    for (std::list<int>::iterator it=hull.begin(); it != hull.end(); )
+    Eigen::VectorXd tmpJ = J.row(0);
+    for (std::list<int>::iterator it = hull.begin(); it != hull.end();)
     {
         int a = *it;
-        int b = ++it==hull.end()?*hull.begin():*(it);
-        potential(tmp, tmpJ, supports.row(a), supports.row(b), com, supportsJ.middleRows(a*2,2), supportsJ.middleRows(b*2,2), Jcom);
-        pot+=tmp;
-        potJ+=tmpJ;
+        int b = ++it == hull.end() ? *hull.begin() : *(it);
+        potential(tmp, tmpJ, supports.row(a), supports.row(b), com, supportsJ.middleRows(a * 2, 2), supportsJ.middleRows(b * 2, 2), Jcom);
+        pot += tmp;
+        potJ += tmpJ;
         winding(tmp, supports.row(a), supports.row(b), com);
-        wnd+=tmp;
+        wnd += tmp;
     }
-    wnd=fabs(wnd);
+    wnd = fabs(wnd);
 
-    if(pot<eps)
+    if (pot < eps)
     {
-        if(wnd<0.5)
+        if (wnd < 0.5)
         {
-            phi(0)=sqrt(-n/pot);
-            J.row(0) = potJ*(n/(2*pot*pot*phi(0)));
+            phi(0) = sqrt(-n / pot);
+            J.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
         }
         else
         {
-            if(!init_.PositiveOnly)
+            if (!init_.PositiveOnly)
             {
-                phi(0)=-sqrt(-n/pot);
-                J.row(0) = potJ*(n/(2*pot*pot*phi(0)));
+                phi(0) = -sqrt(-n / pot);
+                J.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
             }
         }
     }
@@ -329,12 +324,12 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
         debug_msg.markers[0].pose.position.y = com(1);
         debug_msg.markers[0].pose.position.z = 0.0;
 
-        debug_msg.markers[1].points.resize(hull.size()+1);
-        int ii=0;
-        for(int i : hull)
+        debug_msg.markers[1].points.resize(hull.size() + 1);
+        int ii = 0;
+        for (int i : hull)
         {
-            debug_msg.markers[1].points[ii].x = supports(i,0);
-            debug_msg.markers[1].points[ii].y = supports(i,1);
+            debug_msg.markers[1].points[ii].x = supports(i, 0);
+            debug_msg.markers[1].points[ii].y = supports(i, 1);
             debug_msg.markers[1].points[ii++].z = 0.0;
         }
         debug_msg.markers[1].points[hull.size()] = debug_msg.markers[1].points[0];
@@ -392,5 +387,4 @@ void QuasiStatic::Instantiate(QuasiStaticInitializer& init)
 {
     init_ = init;
 }
-
 }

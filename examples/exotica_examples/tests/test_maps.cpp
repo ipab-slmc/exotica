@@ -503,6 +503,44 @@ void testCoM()
         testValues(X, Y, J, problem);
     }
     testJacobian(problem);
+
+
+    HIGHLIGHT("CoM test with attached object");
+    map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
+                                      {"EnableZ", true}});
+    problem = setupProblem(map);
+
+    problem->getScene()->addObject("Payload", KDL::Frame(), "", shapes::ShapeConstPtr(nullptr), KDL::RigidBodyInertia(0.5));
+    problem->getScene()->attachObjectLocal("Payload", "endeff", KDL::Frame());
+    testRandom(problem);
+    {
+        int N = problem->N;
+        int M = problem->PhiN;
+        int L = 5;
+        Eigen::MatrixXd X(L, N);
+        Eigen::MatrixXd Y(L, M);
+        Eigen::MatrixXd J(L * M, N);
+
+        X << 0.792099, -0.891848, -0.781543, 0.877611, 0.29783, 0.452939, 0.988809, 0.86931, 0.270667, -0.201327, -0.925895, 0.0373103, 0.0433417, 0.560965, -0.682102;
+        Y << -0.391939, -0.397228, 0.608195, 0.197788, 0.238097, 0.977105, 0.289066, 0.439301, 0.781316, -0.4839, 0.0987601, 0.836551, 0.122905, 0.00533025, 1.02823;
+        J << 0.397228, 0.111109, -0.0232142,
+            -0.391939, 0.112608, -0.0235274,
+            0, 0.558038, 0.32103,
+            -0.238097, 0.336815, 0.150781,
+            0.197788, 0.405457, 0.181509,
+            0, -0.309533, -0.220165,
+            -0.439301, 0.182119, 0.0740843,
+            0.289066, 0.276772, 0.112588,
+            0, -0.525875, -0.293238,
+            -0.0987601, 0.378744, 0.199373,
+            -0.4839, -0.0772987, -0.0406905,
+            0, 0.493875, 0.250495,
+            -0.00533025, 0.577691, 0.320061,
+            0.122905, 0.0250538, 0.0138807,
+            0, -0.123021, 0.0389986;
+        testValues(X, Y, J, problem);
+    }
+    testJacobian(problem);
 }
 
 void testIMesh()

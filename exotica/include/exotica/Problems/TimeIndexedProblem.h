@@ -126,6 +126,8 @@ private:
     std::vector<Eigen::VectorXd> InitialTrajectory;
     TimeIndexedProblemInitializer init_;
     void reinitializeVariables();
+
+    std::vector<std::shared_ptr<KinematicResponse>> KinematicSolutions;
 };
 
 typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblem_ptr;

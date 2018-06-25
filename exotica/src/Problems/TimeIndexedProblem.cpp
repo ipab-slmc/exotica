@@ -165,6 +165,12 @@ void TimeIndexedProblem::preupdate()
     Cost.updateS();
     Inequality.updateS();
     Equality.updateS();
+
+    // Create a new set of kinematic solutions with the size of the trajectory
+    // based on the lastest KinematicResponse in order to reflect model state
+    // updates etc.
+    KinematicSolutions.clear();
+    KinematicSolutions.resize(T, std::make_shared<KinematicResponse>(*scene_->getSolver().getKinematicResponse()));
 }
 
 void TimeIndexedProblem::setInitialTrajectory(
@@ -203,6 +209,24 @@ void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
     }
 
     x[t] = x_in;
+
+    // Set the corresponding KinematicResponse for KinematicTree in order to
+    // have Kinematics elements updated based in x_in.
+    scene_->getSolver().setKinematicResponse(KinematicSolutions[t]);
+
+    // Pass the corresponding number of relevant task kinematics to the TaskMaps
+    // via the PlanningProblem::updateMultipleTaskKinematics method. For now we
+    // support passing _two_ timesteps - this can be easily changed later on.
+    std::vector<std::shared_ptr<KinematicResponse>> kinematics_solutions;
+    kinematics_solutions.push_back(KinematicSolutions[t]);
+
+    // If the current timestep is 0, pass the 0th timestep's response twice.
+    // Otherwise pass the (t-1)th response.
+    kinematics_solutions.push_back((t == 0) ? KinematicSolutions[t] : KinematicSolutions[t - 1]);
+
+    // Actually update the tasks' kinematics mappings.
+    PlanningProblem::updateMultipleTaskKinematics(kinematics_solutions);
+
     scene_->Update(x_in, static_cast<double>(t) * tau);
     Phi[t].setZero(PhiN);
     if (Flags & KIN_J) J[t].setZero();

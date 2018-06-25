@@ -10,7 +10,7 @@ set(PYBIND_SRC ${CMAKE_BINARY_DIR}/pybind11_src)
 ExternalProject_Add(
   pybind11
   GIT_REPOSITORY "https://github.com/pybind/pybind11.git"
-  GIT_TAG "391c75447da13ef44cc2e119e005c0aeee442862"
+  GIT_TAG "v2.2.3"
 
   UPDATE_COMMAND ""
   PATCH_COMMAND ""

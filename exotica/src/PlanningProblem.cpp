@@ -150,15 +150,15 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
         }
         std::vector<KinematicFrameRequest> frames = NewMap->GetFrames();
 
-        NewMap->Kinematics = KinematicSolution(id, frames.size());
+        NewMap->Kinematics[0] = KinematicSolution(id, frames.size());
         id += frames.size();
 
         Request.Frames.insert(Request.Frames.end(), frames.begin(), frames.end());
         TaskMaps[NewMap->getObjectName()] = NewMap;
         Tasks.push_back(NewMap);
     }
-
     scene_->requestKinematics(Request, std::bind(&PlanningProblem::updateTaskKinematics, this, std::placeholders::_1));
+
     id = 0;
     int idJ = 0;
     for (int i = 0; i < Tasks.size(); i++)
@@ -181,7 +181,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
 void PlanningProblem::updateTaskKinematics(std::shared_ptr<KinematicResponse> response)
 {
     for (auto task : Tasks)
-        task->Kinematics.Create(response);
+        task->Kinematics[0].Create(response);
 }
 
 TaskMap_map& PlanningProblem::getTaskMaps()

@@ -89,8 +89,8 @@ void EffAxisAlignment::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
     for (unsigned int i = 0; i < NumberOfFrames; i++)
     {
-        tf::vectorKDLToEigen(Kinematics.Phi(i).p, linkPositionInBase_);
-        tf::vectorKDLToEigen(Kinematics.Phi(i + NumberOfFrames).p, linkAxisPositionInBase_);
+        tf::vectorKDLToEigen(Kinematics[0].Phi(i).p, linkPositionInBase_);
+        tf::vectorKDLToEigen(Kinematics[0].Phi(i + NumberOfFrames).p, linkAxisPositionInBase_);
 
         Eigen::Vector3d axisInBase = linkAxisPositionInBase_ - linkPositionInBase_;
         phi(i) = axisInBase.dot(dir_.col(i)) - 1.0;
@@ -100,15 +100,15 @@ void EffAxisAlignment::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 void EffAxisAlignment::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
     if (phi.rows() != NumberOfFrames) throw_named("Wrong size of phi!");
-    if (J.rows() != NumberOfFrames || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    if (J.rows() != NumberOfFrames || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
 
     for (unsigned int i = 0; i < NumberOfFrames; i++)
     {
-        tf::vectorKDLToEigen(Kinematics.Phi(i).p, linkPositionInBase_);
-        tf::vectorKDLToEigen(Kinematics.Phi(i + NumberOfFrames).p, linkAxisPositionInBase_);
+        tf::vectorKDLToEigen(Kinematics[0].Phi(i).p, linkPositionInBase_);
+        tf::vectorKDLToEigen(Kinematics[0].Phi(i + NumberOfFrames).p, linkAxisPositionInBase_);
 
         Eigen::Vector3d axisInBase = linkAxisPositionInBase_ - linkPositionInBase_;
-        Eigen::MatrixXd axisInBaseJacobian = Kinematics.J[i + NumberOfFrames].data.block(0, 0, 3, N) - Kinematics.J[i].data.block(0, 0, 3, N);
+        Eigen::MatrixXd axisInBaseJacobian = Kinematics[0].J[i + NumberOfFrames].data.block(0, 0, 3, N) - Kinematics[0].J[i].data.block(0, 0, 3, N);
 
         phi(i) = axisInBase.dot(dir_.col(i)) - 1.0;
         J.row(i) = dir_.col(i).transpose() * axisInBaseJacobian;

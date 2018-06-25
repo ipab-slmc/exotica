@@ -111,7 +111,7 @@ void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
                 {
                     int i = A->second[ii];
                     int j = B->second[jj];
-                    phi(phiI) += distance(Kinematics.Phi(i), Kinematics.Phi(j), radiuses[i], radiuses[j]);
+                    phi(phiI) += distance(Kinematics[0].Phi(i), Kinematics[0].Phi(j), radiuses[i], radiuses[j]);
                 }
             }
             phiI++;
@@ -122,9 +122,9 @@ void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
         for (int i = 0; i < debug_msg.markers.size(); i++)
         {
-            debug_msg.markers[i].pose.position.x = Kinematics.Phi(i).p[0];
-            debug_msg.markers[i].pose.position.y = Kinematics.Phi(i).p[1];
-            debug_msg.markers[i].pose.position.z = Kinematics.Phi(i).p[2];
+            debug_msg.markers[i].pose.position.x = Kinematics[0].Phi(i).p[0];
+            debug_msg.markers[i].pose.position.y = Kinematics[0].Phi(i).p[1];
+            debug_msg.markers[i].pose.position.z = Kinematics[0].Phi(i).p[2];
         }
         debug_pub.publish(debug_msg);
     }
@@ -133,7 +133,7 @@ void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
     if (phi.rows() != taskSpaceDim()) throw_named("Wrong size of phi!");
-    if (J.rows() != taskSpaceDim() || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    if (J.rows() != taskSpaceDim() || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
     phi.setZero();
     J.setZero();
 
@@ -150,8 +150,8 @@ void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, 
                 {
                     int i = A->second[ii];
                     int j = B->second[jj];
-                    phi(phiI) += distance(Kinematics.Phi(i), Kinematics.Phi(j), radiuses[i], radiuses[j]);
-                    J.row(phiI) += Jacobian(Kinematics.Phi(i), Kinematics.Phi(j), Kinematics.J(i), Kinematics.J(j), radiuses[i], radiuses[j]);
+                    phi(phiI) += distance(Kinematics[0].Phi(i), Kinematics[0].Phi(j), radiuses[i], radiuses[j]);
+                    J.row(phiI) += Jacobian(Kinematics[0].Phi(i), Kinematics[0].Phi(j), Kinematics[0].J(i), Kinematics[0].J(j), radiuses[i], radiuses[j]);
                 }
             }
             phiI++;
@@ -162,9 +162,9 @@ void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, 
     {
         for (int i = 0; i < debug_msg.markers.size(); i++)
         {
-            debug_msg.markers[i].pose.position.x = Kinematics.Phi(i).p[0];
-            debug_msg.markers[i].pose.position.y = Kinematics.Phi(i).p[1];
-            debug_msg.markers[i].pose.position.z = Kinematics.Phi(i).p[2];
+            debug_msg.markers[i].pose.position.x = Kinematics[0].Phi(i).p[0];
+            debug_msg.markers[i].pose.position.y = Kinematics[0].Phi(i).p[1];
+            debug_msg.markers[i].pose.position.z = Kinematics[0].Phi(i).p[2];
         }
         debug_pub.publish(debug_msg);
     }

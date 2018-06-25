@@ -68,7 +68,7 @@ void EffOrientation::Instantiate(EffOrientationInitializer& init)
 std::vector<TaskVectorEntry> EffOrientation::getLieGroupIndices()
 {
     std::vector<TaskVectorEntry> ret;
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
         ret.push_back(TaskVectorEntry(Start + i * stride, rotationType));
     }
@@ -77,31 +77,31 @@ std::vector<TaskVectorEntry> EffOrientation::getLieGroupIndices()
 
 void EffOrientation::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != Kinematics.Phi.rows() * stride) throw_named("Wrong size of phi!");
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    if (phi.rows() != Kinematics[0].Phi.rows() * stride) throw_named("Wrong size of phi!");
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        phi.segment(i * stride, stride) = setRotation(Kinematics.Phi(i).M, rotationType);
+        phi.segment(i * stride, stride) = setRotation(Kinematics[0].Phi(i).M, rotationType);
     }
 }
 
 void EffOrientation::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
-    if (phi.rows() != Kinematics.Phi.rows() * stride) throw_named("Wrong size of phi!");
-    if (J.rows() != Kinematics.J.rows() * 3 || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    if (phi.rows() != Kinematics[0].Phi.rows() * stride) throw_named("Wrong size of phi!");
+    if (J.rows() != Kinematics[0].J.rows() * 3 || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        phi.segment(i * stride, stride) = setRotation(Kinematics.Phi(i).M, rotationType);
-        J.middleRows(i * 3, 3) = Kinematics.J[i].data.bottomRows(3);
+        phi.segment(i * stride, stride) = setRotation(Kinematics[0].Phi(i).M, rotationType);
+        J.middleRows(i * 3, 3) = Kinematics[0].J[i].data.bottomRows(3);
     }
 }
 
 int EffOrientation::taskSpaceDim()
 {
-    return Kinematics.Phi.rows() * stride;
+    return Kinematics[0].Phi.rows() * stride;
 }
 
 int EffOrientation::taskSpaceJacobianDim()
 {
-    return Kinematics.Phi.rows() * 3;
+    return Kinematics[0].Phi.rows() * 3;
 }
 }

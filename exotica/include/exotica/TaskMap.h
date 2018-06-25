@@ -78,7 +78,7 @@ public:
     std::vector<KinematicFrameRequest> GetFrames();
 
     virtual void debug() {}
-    KinematicSolution Kinematics;
+    std::vector<KinematicSolution> Kinematics;
     int Id;
     int Start;
     int Length;

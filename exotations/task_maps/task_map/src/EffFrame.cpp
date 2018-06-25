@@ -69,7 +69,7 @@ void EffFrame::Instantiate(EffFrameInitializer& init)
 std::vector<TaskVectorEntry> EffFrame::getLieGroupIndices()
 {
     std::vector<TaskVectorEntry> ret;
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
         ret.push_back(TaskVectorEntry(Start + i * bigStride + 3, rotationType));
     }
@@ -78,37 +78,37 @@ std::vector<TaskVectorEntry> EffFrame::getLieGroupIndices()
 
 void EffFrame::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != Kinematics.Phi.rows() * bigStride) throw_named("Wrong size of phi!");
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    if (phi.rows() != Kinematics[0].Phi.rows() * bigStride) throw_named("Wrong size of phi!");
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        phi(i * bigStride) = Kinematics.Phi(i).p[0];
-        phi(i * bigStride + 1) = Kinematics.Phi(i).p[1];
-        phi(i * bigStride + 2) = Kinematics.Phi(i).p[2];
-        phi.segment(i * bigStride + 3, smallStride) = setRotation(Kinematics.Phi(i).M, rotationType);
+        phi(i * bigStride) = Kinematics[0].Phi(i).p[0];
+        phi(i * bigStride + 1) = Kinematics[0].Phi(i).p[1];
+        phi(i * bigStride + 2) = Kinematics[0].Phi(i).p[2];
+        phi.segment(i * bigStride + 3, smallStride) = setRotation(Kinematics[0].Phi(i).M, rotationType);
     }
 }
 
 void EffFrame::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
-    if (phi.rows() != Kinematics.Phi.rows() * bigStride) throw_named("Wrong size of phi!");
-    if (J.rows() != Kinematics.J.rows() * 6 || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    if (phi.rows() != Kinematics[0].Phi.rows() * bigStride) throw_named("Wrong size of phi!");
+    if (J.rows() != Kinematics[0].J.rows() * 6 || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        phi(i * bigStride) = Kinematics.Phi(i).p[0];
-        phi(i * bigStride + 1) = Kinematics.Phi(i).p[1];
-        phi(i * bigStride + 2) = Kinematics.Phi(i).p[2];
-        phi.segment(i * bigStride + 3, smallStride) = setRotation(Kinematics.Phi(i).M, rotationType);
-        J.middleRows(i * 6, 6) = Kinematics.J[i].data;
+        phi(i * bigStride) = Kinematics[0].Phi(i).p[0];
+        phi(i * bigStride + 1) = Kinematics[0].Phi(i).p[1];
+        phi(i * bigStride + 2) = Kinematics[0].Phi(i).p[2];
+        phi.segment(i * bigStride + 3, smallStride) = setRotation(Kinematics[0].Phi(i).M, rotationType);
+        J.middleRows(i * 6, 6) = Kinematics[0].J[i].data;
     }
 }
 
 int EffFrame::taskSpaceDim()
 {
-    return Kinematics.Phi.rows() * bigStride;
+    return Kinematics[0].Phi.rows() * bigStride;
 }
 
 int EffFrame::taskSpaceJacobianDim()
 {
-    return Kinematics.Phi.rows() * 6;
+    return Kinematics[0].Phi.rows() * 6;
 }
 }

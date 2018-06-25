@@ -109,6 +109,11 @@ struct KinematicFrame
     KDL::Frame TempB;
 };
 
+/**
+ * @brief      The KinematicResponse is the container to keep kinematic update
+ * data. The corresponding KinematicSolution is created from and indexes into a
+ * KinematicResponse.
+ */
 class KinematicResponse
 {
 public:
@@ -122,6 +127,9 @@ public:
     ArrayJacobian JDot;
 };
 
+/**
+ * @brief      The KinematicSolution is created from - and maps into - a KinematicResponse.
+ */
 class KinematicSolution
 {
 public:

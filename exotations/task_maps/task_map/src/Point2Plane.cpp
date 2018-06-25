@@ -56,11 +56,11 @@ void Point2Plane::assignScene(Scene_ptr scene)
 
 void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
+    if (phi.rows() != Kinematics[0].Phi.rows()) throw_named("Wrong size of phi!");
 
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        const auto& point = Eigen::Map<const Eigen::Vector3d>(Kinematics.Phi(i).p.data);
+        const auto& point = Eigen::Map<const Eigen::Vector3d>(Kinematics[0].Phi(i).p.data);
         phi(i) = Eigen::Vector3d::UnitZ().dot(point);
     }
 
@@ -69,20 +69,20 @@ void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
 void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
-    if (phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
-    if (J.rows() != Kinematics.J.rows() || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    if (phi.rows() != Kinematics[0].Phi.rows()) throw_named("Wrong size of phi!");
+    if (J.rows() != Kinematics[0].J.rows() || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
 
     J.setZero();
 
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        const auto& point = Eigen::Map<const Eigen::Vector3d>(Kinematics.Phi(i).p.data);
+        const auto& point = Eigen::Map<const Eigen::Vector3d>(Kinematics[0].Phi(i).p.data);
 
         phi(i) = Eigen::Vector3d::UnitZ().dot(point);
 
         for (int j = 0; j < J.cols(); j++)
         {
-            const auto& dpoint = Eigen::Map<const Eigen::Vector3d>(Kinematics.J[i].getColumn(j).vel.data);
+            const auto& dpoint = Eigen::Map<const Eigen::Vector3d>(Kinematics[0].J[i].getColumn(j).vel.data);
             J(i, j) = Eigen::Vector3d::UnitZ().dot(dpoint);
         }
     }
@@ -92,14 +92,14 @@ void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
 
 int Point2Plane::taskSpaceDim()
 {
-    return Kinematics.Phi.rows();
+    return Kinematics[0].Phi.rows();
 }
 
 void Point2Plane::publishDebug()
 {
     visualization_msgs::MarkerArray msg;
 
-    for (unsigned int i = 0; i < Kinematics.Phi.rows(); i++)
+    for (unsigned int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
         visualization_msgs::Marker plane;
 

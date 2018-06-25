@@ -65,27 +65,27 @@ Eigen::Vector3d Point2Line::distance(const Eigen::Vector3d &point, const Eigen::
 Point2Line::Point2Line() {}
 void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
+    if (phi.rows() != Kinematics[0].Phi.rows()) throw_named("Wrong size of phi!");
 
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        phi(i) = distance(Eigen::Map<const Eigen::Vector3d>(Kinematics.Phi(i).p.data), line, infinite, debug_).norm();
+        phi(i) = distance(Eigen::Map<const Eigen::Vector3d>(Kinematics[0].Phi(i).p.data), line, infinite, debug_).norm();
     }
 }
 
 void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
-    if (phi.rows() != Kinematics.Phi.rows()) throw_named("Wrong size of phi!");
-    if (J.rows() != Kinematics.J.rows() || J.cols() != Kinematics.J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics.J(0).data.cols());
+    if (phi.rows() != Kinematics[0].Phi.rows()) throw_named("Wrong size of phi!");
+    if (J.rows() != Kinematics[0].J.rows() || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
 
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
         // direction from point to line
-        const Eigen::Vector3d dv = distance(Eigen::Map<const Eigen::Vector3d>(Kinematics.Phi(i).p.data), line, infinite, debug_);
+        const Eigen::Vector3d dv = distance(Eigen::Map<const Eigen::Vector3d>(Kinematics[0].Phi(i).p.data), line, infinite, debug_);
         phi(i) = dv.norm();
         for (int j = 0; j < J.cols(); j++)
         {
-            J(i, j) = -dv.dot(Eigen::Map<const Eigen::Vector3d>(Kinematics.J[i].getColumn(j).vel.data)) / dv.norm();
+            J(i, j) = -dv.dot(Eigen::Map<const Eigen::Vector3d>(Kinematics[0].J[i].getColumn(j).vel.data)) / dv.norm();
         }
     }
 }
@@ -98,6 +98,6 @@ void Point2Line::Instantiate(Point2LineInitializer &init)
 
 int Point2Line::taskSpaceDim()
 {
-    return Kinematics.Phi.rows();
+    return Kinematics[0].Phi.rows();
 }
 }  // namespace exotica

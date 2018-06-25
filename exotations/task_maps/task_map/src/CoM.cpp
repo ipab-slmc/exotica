@@ -51,14 +51,14 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     if (M == 0.0) return;
 
     KDL::Vector com;
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        com += Kinematics.Phi(i).p * mass_(i);
+        com += Kinematics[0].Phi(i).p * mass_(i);
         if (debug_)
         {
-            com_marker_.points[i].x = Kinematics.Phi(i).p[0];
-            com_marker_.points[i].y = Kinematics.Phi(i).p[1];
-            com_marker_.points[i].z = Kinematics.Phi(i).p[2];
+            com_marker_.points[i].x = Kinematics[0].Phi(i).p[0];
+            com_marker_.points[i].y = Kinematics[0].Phi(i).p[1];
+            com_marker_.points[i].z = Kinematics[0].Phi(i).p[2];
         }
     }
 
@@ -88,15 +88,15 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
     {
         double M = mass_.sum();
         if (M == 0.0) return;
-        for (int i = 0; i < Kinematics.Phi.rows(); i++)
+        for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
         {
-            com += Kinematics.Phi(i).p * mass_(i);
-            J += mass_(i) / M * Kinematics.J(i).data.topRows(dim_);
+            com += Kinematics[0].Phi(i).p * mass_(i);
+            J += mass_(i) / M * Kinematics[0].J(i).data.topRows(dim_);
             if (debug_)
             {
-                com_marker_.points[i].x = Kinematics.Phi(i).p[0];
-                com_marker_.points[i].y = Kinematics.Phi(i).p[1];
-                com_marker_.points[i].z = Kinematics.Phi(i).p[2];
+                com_marker_.points[i].x = Kinematics[0].Phi(i).p[0];
+                com_marker_.points[i].y = Kinematics[0].Phi(i).p[1];
+                com_marker_.points[i].z = Kinematics[0].Phi(i).p[2];
             }
         }
         com = com / M;

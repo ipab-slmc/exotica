@@ -39,6 +39,7 @@ namespace exotica
 {
 TaskMap::TaskMap() : Id(-1), Start(-1), Length(-1), StartJ(-1), LengthJ(-1)
 {
+    Kinematics.resize(1);
 }
 
 std::string TaskMap::print(std::string prepend)

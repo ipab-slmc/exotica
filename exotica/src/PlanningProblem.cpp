@@ -184,6 +184,21 @@ void PlanningProblem::updateTaskKinematics(std::shared_ptr<KinematicResponse> re
         task->Kinematics[0].Create(response);
 }
 
+void PlanningProblem::updateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses)
+{
+    for (auto task : Tasks)
+    {
+        if (task->Kinematics.size() > responses.size())
+        {
+            throw_named(responses.size() << " responses provided but task " << task->getObjectName() << " requires " << task->Kinematics.size());
+        }
+
+        for (size_t i = 0; i < task->Kinematics.size(); i++)
+        {
+            task->Kinematics[i].Create(responses[i]);
+        }
+    }
+}
 TaskMap_map& PlanningProblem::getTaskMaps()
 {
     return TaskMaps;

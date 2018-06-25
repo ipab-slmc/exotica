@@ -96,6 +96,7 @@ public:
     virtual bool isValid() { throw_named("Not implemented"); };
 protected:
     void updateTaskKinematics(std::shared_ptr<KinematicResponse> response);
+    void updateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses);
 
     Scene_ptr scene_;
     TaskMap_map TaskMaps;

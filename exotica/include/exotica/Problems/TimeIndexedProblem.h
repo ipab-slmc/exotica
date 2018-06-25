@@ -93,8 +93,7 @@ public:
     TaskSpaceVector InequalityPhi;
     TaskSpaceVector EqualityPhi;
 
-    double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
-    Eigen::MatrixXd W;
+    Eigen::MatrixXd W;  // TODO(wxm): Make private and add getter and setter (#209)
 
     std::vector<TaskSpaceVector> Phi;
     std::vector<Eigen::MatrixXd> J;
@@ -115,13 +114,14 @@ public:
         xdiff_max = qdot_max * tau;
     }
     double getXdiffMax() { return xdiff_max; }
-
 private:
     int T;       //!< Number of time steps
     double tau;  //!< Time step duration
 
     double qdot_max;   //!< Joint velocity limit (rad/s)
     double xdiff_max;  //!< Maximum change in the variables in a single timestep tau. Gets set/updated via setTau().
+
+    double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
 
     std::vector<Eigen::VectorXd> InitialTrajectory;
     TimeIndexedProblemInitializer init_;

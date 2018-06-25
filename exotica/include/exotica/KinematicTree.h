@@ -218,6 +218,8 @@ public:
     // Random state generation
     Eigen::VectorXd getRandomControlledState();
 
+    void setKinematicResponse(std::shared_ptr<KinematicResponse> response_in) { Solution = response_in; }
+    std::shared_ptr<KinematicResponse> getKinematicResponse() { return Solution; }
 private:
     void BuildTree(const KDL::Tree& RobotKinematics);
     void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);

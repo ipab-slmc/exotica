@@ -212,7 +212,6 @@ private:
     void loadSceneFromStringStream(std::istream& in, const Eigen::Affine3d& offset, bool updateCollisionScene);
 };
 typedef std::shared_ptr<Scene> Scene_ptr;
-//  typedef std::map<std::string, Scene_ptr> Scene_map;
 
 }  //  namespace exotica
 

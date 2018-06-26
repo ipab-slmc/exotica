@@ -170,7 +170,8 @@ void TimeIndexedProblem::preupdate()
     // based on the lastest KinematicResponse in order to reflect model state
     // updates etc.
     KinematicSolutions.clear();
-    KinematicSolutions.resize(T, std::make_shared<KinematicResponse>(*scene_->getSolver().getKinematicResponse()));
+    KinematicSolutions.resize(T);
+    for (unsigned int i = 0; i < T; i++) KinematicSolutions[i] = std::make_shared<KinematicResponse>(*scene_->getSolver().getKinematicResponse());
 }
 
 void TimeIndexedProblem::setInitialTrajectory(

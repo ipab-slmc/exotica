@@ -86,6 +86,7 @@ public:
 
     TaskSpaceVector CostPhi;  // passed to the TimeIndexedTask, needs to be kept for reinitialisation
 
+    std::vector<std::shared_ptr<KinematicResponse>> getKinematicSolutions() { return KinematicSolutions; }
 private:
     int T;       //!< Number of time steps
     double tau;  //!< Time step duration

@@ -670,6 +670,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrainedTimeIndexedProblem.def("getScalarTransitionCost", &UnconstrainedTimeIndexedProblem::getScalarTransitionCost);
     unconstrainedTimeIndexedProblem.def("getScalarTransitionJacobian", &UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian);
     unconstrainedTimeIndexedProblem.def_readonly("Cost", &UnconstrainedTimeIndexedProblem::Cost);
+    unconstrainedTimeIndexedProblem.def_property_readonly("KinematicSolutions", &UnconstrainedTimeIndexedProblem::getKinematicSolutions);
 
     py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> timeIndexedProblem(prob, "TimeIndexedProblem");
     timeIndexedProblem.def("getDuration", &TimeIndexedProblem::getDuration);
@@ -957,6 +958,19 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("setJointLimitsUpper", &KinematicTree::setJointLimitsUpper);
     kinematicTree.def("setFloatingBaseLimitsPosXYZEulerZYX", &KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX);
     kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
+
+    // TODO: KinematicRequestFlags
+
+    // TODO: KinematicFrame
+
+    // KinematicResponse
+    py::class_<KinematicResponse, std::shared_ptr<KinematicResponse>> kinematicResponse(kin, "KinematicResponse");
+    kinematicResponse.def_property_readonly("Phi", [](KinematicResponse* instance) {
+        std::vector<KDL::Frame> vec;
+        for (unsigned int i = 0; i < instance->Phi.cols(); i++)
+            vec.push_back(instance->Phi(i));
+        return vec;
+    });
 
     py::enum_<shapes::ShapeType>(module, "ShapeType")
         .value("UnknownShape", shapes::ShapeType::UNKNOWN_SHAPE)

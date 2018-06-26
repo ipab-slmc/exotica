@@ -150,7 +150,8 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
         }
         std::vector<KinematicFrameRequest> frames = NewMap->GetFrames();
 
-        NewMap->Kinematics[0] = KinematicSolution(id, frames.size());
+        for (size_t i = 0; i < NewMap->Kinematics.size(); i++)
+            NewMap->Kinematics[i] = KinematicSolution(id, frames.size());
         id += frames.size();
 
         Request.Frames.insert(Request.Frames.end(), frames.begin(), frames.end());

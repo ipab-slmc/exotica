@@ -6,4 +6,5 @@ extend <exotica/TaskMap>
 // VectorXd BaseOffset   > starting point of line in Base frame
 
 Required Eigen::Vector3d EndPoint;  // point in 'Base' frame that defines the end of the line segment
-Optional bool infinite = true;      // true: interpret 'EndPoint' as the direction of an infinite line
+Optional bool Infinite = true;      // true: interpret 'EndPoint' as the direction of an infinite line
+Optional bool Visualise = false;    // true: publish points and lines as visualization_msgs/MarkerArray

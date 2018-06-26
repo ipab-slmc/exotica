@@ -109,7 +109,7 @@ void testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eige
     INFO_PLAIN("Test passed");
 }
 
-void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
+void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5, double h = 1e-5)
 {
     INFO_PLAIN("Testing Jacobian:");
     for (int j = 0; j < NUM_TRIALS; j++)
@@ -123,9 +123,42 @@ void testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
         for (int i = 0; i < problem->N; i++)
         {
             Eigen::VectorXd x = x0;
-            x(i) += eps;
+            x(i) += h;
             problem->Update(x);
-            J.col(i) = (problem->Phi - y0) / eps;
+            J.col(i) = (problem->Phi - y0) / h;
+        }
+        double errJ = (J - J0).norm();
+        if (errJ > eps)
+        {
+            HIGHLIGHT("x: " << x0.transpose());
+            HIGHLIGHT("J*:\n"
+                      << J);
+            HIGHLIGHT("J:\n"
+                      << J0);
+            throw_pretty("Jacobian error out of bounds: " << errJ);
+        }
+    }
+    INFO_PLAIN("Test passed");
+}
+
+template <class T>
+void testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-5, double h = 1e-5)
+{
+    INFO_PLAIN("Testing Jacobian:");
+    for (int tr = 0; tr < NUM_TRIALS; tr++)
+    {
+        Eigen::VectorXd x0(problem->N);
+        x0.setRandom();
+        problem->Update(x0, t);
+        TaskSpaceVector y0 = task.Phi[t];
+        Eigen::MatrixXd J0 = task.J[t];
+        Eigen::MatrixXd J = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
+        for (int i = 0; i < problem->N; i++)
+        {
+            Eigen::VectorXd x = x0;
+            x(i) += h;
+            problem->Update(x, t);
+            J.col(i) = (task.Phi[t] - y0) / h;
         }
         double errJ = (J - J0).norm();
         if (errJ > eps)
@@ -246,6 +279,28 @@ void testEffFrame()
         testRandom(problem);
 
         testJacobian(problem);
+    }
+}
+
+void testEffVelocity()
+{
+    HIGHLIGHT("End-effector velocity test");
+
+    Initializer map("exotica/EffVelocity", {{"Name", std::string("MyTask")},
+                                            {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+    UnconstrainedTimeIndexedProblem_ptr problem = setupTimeIndexedProblem(map);
+    testRandom(problem);
+
+    for (int t = 0; t < problem->getT(); t++)
+    {
+        Eigen::VectorXd x(problem->N);
+        x.setRandom();
+        problem->Update(x, t);
+    }
+
+    for (int t = 0; t < problem->getT(); t++)
+    {
+        testJacobianTimeIndexed(problem, problem->Cost, t, 1e-4);
     }
 }
 
@@ -684,6 +739,7 @@ int main(int argc, char** argv)
     testEffOrientation();
     testEffAxisAlignment();
     testEffFrame();
+    testEffVelocity();
     testDistance();
     testJointLimit();
     testSphereCollision();

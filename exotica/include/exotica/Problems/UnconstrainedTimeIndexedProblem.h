@@ -71,7 +71,6 @@ public:
 
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask Cost;
-    double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
     Eigen::MatrixXd W;
 
     std::vector<TaskSpaceVector> Phi;
@@ -91,10 +90,14 @@ private:
     int T;       //!< Number of time steps
     double tau;  //!< Time step duration
 
+    double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+
     std::vector<Eigen::VectorXd> InitialTrajectory;
     UnconstrainedTimeIndexedProblemInitializer init_;
     void reinitializeVariables();
     TaskSpaceVector yref;  //!< Stores task Phi reference value, to be assigned to Phi
+
+    std::vector<std::shared_ptr<KinematicResponse>> KinematicSolutions;
 };
 
 typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;

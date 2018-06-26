@@ -153,6 +153,7 @@ void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
 
 void AICOsolver::Solve(Eigen::MatrixXd& solution)
 {
+    prob_->preupdate();
     prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
     prob_->terminationCriterion = TerminationCriterion::NotStarted;
     planning_time_ = -1;

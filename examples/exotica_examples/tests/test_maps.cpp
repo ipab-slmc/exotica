@@ -59,6 +59,21 @@ void testRandom(UnconstrainedEndPoseProblem_ptr problem)
     INFO_PLAIN("Test passed");
 }
 
+void testRandom(UnconstrainedTimeIndexedProblem_ptr problem)
+{
+    Eigen::MatrixXd x(3, problem->getT());
+    INFO_PLAIN("Testing random configurations:")
+    for (int i = 0; i < NUM_TRIALS; i++)
+    {
+        x.setRandom();
+        for (int t = 0; t < problem->getT(); t++)
+        {
+            problem->Update(x.col(t), t);
+        }
+    }
+    INFO_PLAIN("Test passed");
+}
+
 void testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eigen::MatrixXdRefConst Jref, UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
 {
     INFO_PLAIN("Testing set points:");
@@ -140,6 +155,27 @@ UnconstrainedEndPoseProblem_ptr setupProblem(Initializer& map)
                                                                });
     Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
     return std::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::createProblem(problem));
+}
+
+UnconstrainedTimeIndexedProblem_ptr setupTimeIndexedProblem(Initializer& map)
+{
+    Initializer scene("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}});
+    Initializer cost("exotica/Task", {{"Task", std::string("MyTask")}});
+    Eigen::VectorXd W = Eigen::Vector3d(3, 2, 1);
+
+    Initializer problem("exotica/UnconstrainedTimeIndexedProblem", {{"Name", std::string("MyProblem")},
+                                                                    {"PlanningScene", scene},
+                                                                    {"Maps", std::vector<Initializer>({map})},
+                                                                    {"Cost", std::vector<Initializer>({cost})},
+                                                                    {"W", W},
+                                                                    {"T", std::string("10")},
+                                                                    {"Tau", std::string("0.05")}});
+    Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
+
+    UnconstrainedTimeIndexedProblem_ptr problem_ptr = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::createProblem(problem));
+    problem_ptr->preupdate();
+
+    return problem_ptr;
 }
 
 void testEffPosition()

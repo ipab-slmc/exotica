@@ -458,7 +458,7 @@ PYBIND11_MODULE(_pyexotica, module)
     module.doc() = "Exotica Python wrapper";
 
     py::class_<Setup, std::unique_ptr<Setup, py::nodelete>> setup(module, "Setup");
-    setup.def("__init__", [](Setup* instance) { instance = Setup::Instance().get(); });
+    setup.def(py::init([]() { return Setup::Instance().get(); }));
     setup.def_static("getSolvers", &Setup::getSolvers, "Returns a list of available solvers.");
     setup.def_static("getProblems", &Setup::getProblems, "Returns a list of available problems.");
     setup.def_static("getMaps", &Setup::getMaps, "Returns a list of available task maps.");
@@ -548,9 +548,9 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<KDL::Frame> kdlFrame(module, "KDLFrame");
     kdlFrame.def(py::init());
-    kdlFrame.def("__init__", [](KDL::Frame& me, Eigen::MatrixXd other) { me = getFrameFromMatrix(other); });
-    kdlFrame.def("__init__", [](KDL::Frame& me, Eigen::VectorXd other) { me = getFrame(other); });
-    kdlFrame.def("__init__", [](KDL::Frame& me, const KDL::Frame& other) { me = other; });
+    kdlFrame.def(py::init([](Eigen::MatrixXd other) { return getFrameFromMatrix(other); }));
+    kdlFrame.def(py::init([](Eigen::VectorXd other) { return getFrame(other); }));
+    kdlFrame.def(py::init([](const KDL::Frame& other) { return KDL::Frame(other); }));
     kdlFrame.def("__repr__", [](KDL::Frame* me) { return "KDL::Frame " + toString(*me); });
     kdlFrame.def("getRPY", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::RPY); });
     kdlFrame.def("getZYZ", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYZ); });

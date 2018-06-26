@@ -15,6 +15,7 @@ AddInitializer(
   EffFrame
   FrameWithAxisAndDirection
   EffAxisAlignment
+  EffVelocity
   JointLimit
   Distance
   Point2Line
@@ -44,6 +45,7 @@ set(SOURCES
     src/EffOrientation.cpp
     src/EffFrame.cpp
     src/EffAxisAlignment.cpp
+    src/EffVelocity.cpp
     src/JointLimit.cpp
     src/Distance.cpp
     src/Point2Line.cpp

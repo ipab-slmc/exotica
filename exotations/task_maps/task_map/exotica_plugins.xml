@@ -23,6 +23,9 @@
   <class name="exotica/EffAxisAlignment" type="exotica::EffAxisAlignment" base_class_type="exotica::TaskMap">
     <description>End-effector axis alignment</description>
   </class>
+  <class name="exotica/EffVelocity" type="exotica::EffVelocity" base_class_type="exotica::TaskMap">
+    <description>End-effector velocity (requires time-indexed problems)</description>
+  </class>
   <class name="exotica/SphereCollision" type="exotica::SphereCollision" base_class_type="exotica::TaskMap">
     <description>Sphere collision avoidance</description>
   </class>

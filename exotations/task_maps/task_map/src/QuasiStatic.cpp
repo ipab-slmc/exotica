@@ -180,11 +180,11 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     com(0) = KDLcom[0];
     com(1) = KDLcom[1];
 
-    Eigen::MatrixXd supports(Kinematics.Phi.rows(), 2);
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    Eigen::MatrixXd supports(Kinematics[0].Phi.rows(), 2);
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        supports(i, 0) = Kinematics.Phi(i).p[0];
-        supports(i, 1) = Kinematics.Phi(i).p[1];
+        supports(i, 0) = Kinematics[0].Phi(i).p[0];
+        supports(i, 1) = Kinematics[0].Phi(i).p[1];
     }
 
     std::list<int> hull = convexHull2D(supports);
@@ -272,13 +272,13 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     com(1) = KDLcom[1];
     Jcom = Jcom / M;
 
-    Eigen::MatrixXd supports(Kinematics.Phi.rows(), 2);
-    Eigen::MatrixXd supportsJ(Kinematics.Phi.rows() * 2, x.rows());
-    for (int i = 0; i < Kinematics.Phi.rows(); i++)
+    Eigen::MatrixXd supports(Kinematics[0].Phi.rows(), 2);
+    Eigen::MatrixXd supportsJ(Kinematics[0].Phi.rows() * 2, x.rows());
+    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
     {
-        supports(i, 0) = Kinematics.Phi(i).p[0];
-        supports(i, 1) = Kinematics.Phi(i).p[1];
-        supportsJ.middleRows(i * 2, 2) = Kinematics.J(i).data.topRows(2);
+        supports(i, 0) = Kinematics[0].Phi(i).p[0];
+        supports(i, 1) = Kinematics[0].Phi(i).p[1];
+        supportsJ.middleRows(i * 2, 2) = Kinematics[0].J(i).data.topRows(2);
     }
 
     std::list<int> hull = convexHull2D(supports);

@@ -42,6 +42,31 @@ private:
     std::unordered_map<std::string, std::unordered_set<std::string>> entries_;
 };
 
+struct ContinuousCollisionProxy
+{
+    ContinuousCollisionProxy() : e1(nullptr), e2(nullptr), in_collision(false), time_of_contact(-1) {}
+    std::shared_ptr<KinematicElement> e1;
+    std::shared_ptr<KinematicElement> e2;
+    KDL::Frame contact_tf1;
+    KDL::Frame contact_tf2;
+    bool in_collision;
+    double time_of_contact;
+
+    inline std::string print() const
+    {
+        std::stringstream ss;
+        if (e1 && e2)
+        {
+            ss << "ContinuousCollisionProxy: '" << e1->Segment.getName() << "' - '" << e2->Segment.getName() << " in_collision: " << in_collision << " time_of_contact " << time_of_contact;
+        }
+        else
+        {
+            ss << "ContinuousCollisionProxy (empty)";
+        }
+        return ss.str();
+    }
+};
+
 struct CollisionProxy
 {
     CollisionProxy() : e1(nullptr), e2(nullptr), distance(0), inCollision(false), timeOfContact(-1) {}
@@ -150,9 +175,9 @@ public:
      * @param[in]  tf2_beg  The beginning transform for o2.
      * @param[in]  tf2_end  The end transform for o2.
      *
-     * @return     CollisionProxy.
+     * @return     ContinuousCollisionProxy.
      */
-    virtual CollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) { throw_pretty("Not implemented!"); }
+    virtual ContinuousCollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) { throw_pretty("Not implemented!"); }
     virtual Eigen::Vector3d getTranslation(const std::string& name) = 0;
 
     inline void setACM(const AllowedCollisionMatrix& acm)

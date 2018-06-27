@@ -842,20 +842,30 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedSamplingProblem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
     timeIndexedSamplingProblem.def_readonly("Constraint", &TimeIndexedSamplingProblem::Constraint);
 
-    py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "Proxy");
+    py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "CollisionProxy");
     proxy.def(py::init());
     proxy.def_readonly("Contact1", &CollisionProxy::contact1);
     proxy.def_readonly("Contact2", &CollisionProxy::contact2);
     proxy.def_readonly("Normal1", &CollisionProxy::normal1);
     proxy.def_readonly("Normal2", &CollisionProxy::normal2);
     proxy.def_readonly("Distance", &CollisionProxy::distance);
-    proxy.def_readonly("InCollision", &CollisionProxy::inCollision);
-    proxy.def_readonly("TimeOfContact", &CollisionProxy::timeOfContact);
     proxy.def_property_readonly("Object1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Segment.getName() : std::string(""); });
     proxy.def_property_readonly("Object2", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Segment.getName() : std::string(""); });
     proxy.def_property_readonly("Transform1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Frame : KDL::Frame(); });
     proxy.def_property_readonly("Transform2", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Frame : KDL::Frame(); });
     proxy.def("__repr__", &CollisionProxy::print);
+
+    py::class_<ContinuousCollisionProxy, std::shared_ptr<ContinuousCollisionProxy>> continuous_proxy(module, "ContinuousCollisionProxy");
+    continuous_proxy.def(py::init());
+    continuous_proxy.def_readonly("ContactTransform1", &ContinuousCollisionProxy::contact_tf1);
+    continuous_proxy.def_readonly("ContactTransform2", &ContinuousCollisionProxy::contact_tf2);
+    continuous_proxy.def_readonly("InCollision", &ContinuousCollisionProxy::in_collision);
+    continuous_proxy.def_readonly("TimeOfContact", &ContinuousCollisionProxy::time_of_contact);
+    continuous_proxy.def_property_readonly("Object1", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Segment.getName() : std::string(""); });
+    continuous_proxy.def_property_readonly("Object2", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Segment.getName() : std::string(""); });
+    continuous_proxy.def_property_readonly("Transform1", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Frame : KDL::Frame(); });
+    continuous_proxy.def_property_readonly("Transform2", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Frame : KDL::Frame(); });
+    continuous_proxy.def("__repr__", &ContinuousCollisionProxy::print);
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
     scene.def("Update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
@@ -946,9 +956,7 @@ PYBIND11_MODULE(_pyexotica, module)
     collisionScene.def_property("robotLinkPadding", &CollisionScene::getRobotLinkPadding, &CollisionScene::setRobotLinkPadding);
     collisionScene.def_property("worldLinkPadding", &CollisionScene::getWorldLinkPadding, &CollisionScene::setWorldLinkPadding);
     collisionScene.def("updateCollisionObjectTransforms", &CollisionScene::updateCollisionObjectTransforms);
-
-    // Continuous collision check
-    collisionScene.def("continuousCollisionCheck", &CollisionScene::updateCollisionObjectTransforms);
+    collisionScene.def("continuousCollisionCheck", &CollisionScene::continuousCollisionCheck);
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

@@ -106,9 +106,9 @@ public:
      * @param[in]  tf2_beg  The beginning transform for o2.
      * @param[in]  tf2_end  The end transform for o2.
      *
-     * @return     CollisionProxy.
+     * @return     ContinuousCollisionProxy.
      */
-    virtual CollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end);
+    virtual ContinuousCollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end);
 
     /**
        * @brief      Gets the collision world links.

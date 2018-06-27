@@ -289,10 +289,11 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     Eigen::VectorXd potJ = J.row(0);
     double tmp;
     Eigen::VectorXd tmpJ = J.row(0);
-    for (std::list<int>::iterator it = hull.begin(); it != hull.end();)
+    for (std::list<int>::iterator it = hull.begin(); it != hull.end(); it++)
     {
         int a = *it;
-        int b = ++it == hull.end() ? *hull.begin() : *(it);
+        int b = (it == hull.end()) ? *hull.begin() : *(std::next(it));
+        b = a;
         potential(tmp, tmpJ, supports.row(a), supports.row(b), com, supportsJ.middleRows(a * 2, 2), supportsJ.middleRows(b * 2, 2), Jcom);
         pot += tmp;
         potJ += tmpJ;

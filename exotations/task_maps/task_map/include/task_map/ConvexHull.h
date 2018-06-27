@@ -20,7 +20,7 @@ std::list<int> quickHull(Eigen::MatrixXdRefConst points, std::list<int>& halfPoi
     for (int i : halfPoints)
     {
         double d = lineDist2D(points.row(p1), points.row(p2), points.row(i));
-        if (d > 0.0)
+        if (d >= 0.0)
         {
             newHalfPoints.push_back(i);
         }

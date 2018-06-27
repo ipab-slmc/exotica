@@ -44,7 +44,7 @@ private:
 
 struct CollisionProxy
 {
-    CollisionProxy() : e1(nullptr), e2(nullptr), distance(0) {}
+    CollisionProxy() : e1(nullptr), e2(nullptr), distance(0), inCollision(false), timeOfContact(-1) {}
     std::shared_ptr<KinematicElement> e1;
     std::shared_ptr<KinematicElement> e2;
     Eigen::Vector3d contact1;
@@ -52,13 +52,15 @@ struct CollisionProxy
     Eigen::Vector3d contact2;
     Eigen::Vector3d normal2;
     double distance;
+    bool inCollision;
+    double timeOfContact;
 
     inline std::string print() const
     {
         std::stringstream ss;
         if (e1 && e2)
         {
-            ss << "Proxy: '" << e1->Segment.getName() << "' - '" << e2->Segment.getName() << "', c1: " << contact1.transpose() << " c2: " << contact2.transpose() << " n1: " << normal1.transpose() << " n2: " << normal2.transpose() << " d: " << distance;
+            ss << "Proxy: '" << e1->Segment.getName() << "' - '" << e2->Segment.getName() << "', c1: " << contact1.transpose() << " c2: " << contact2.transpose() << " n1: " << normal1.transpose() << " n2: " << normal2.transpose() << " d: " << distance << " inCollision: " << inCollision << " timeOfContact " << timeOfContact;
         }
         else
         {
@@ -138,6 +140,19 @@ public:
        */
     virtual std::vector<std::string> getCollisionRobotLinks() = 0;
 
+    /**
+     * @brief      Performs a continuous collision check between two objects with a linear interpolation between two given 
+     *
+     * @param[in]  o1       The first collision object, by name.
+     * @param[in]  tf1_beg  The beginning transform for o1.
+     * @param[in]  tf1_end  The end transform for o1.
+     * @param[in]  o2       The second collision object, by name.
+     * @param[in]  tf2_beg  The beginning transform for o2.
+     * @param[in]  tf2_end  The end transform for o2.
+     *
+     * @return     CollisionProxy.
+     */
+    virtual CollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) { throw_pretty("Not implemented!"); }
     virtual Eigen::Vector3d getTranslation(const std::string& name) = 0;
 
     inline void setACM(const AllowedCollisionMatrix& acm)

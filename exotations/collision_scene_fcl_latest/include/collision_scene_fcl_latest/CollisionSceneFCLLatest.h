@@ -97,6 +97,20 @@ public:
     virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true, const bool& disableCollisionSceneUpdate = false);
 
     /**
+     * @brief      Performs a continuous collision check between two objects with a linear interpolation between two given 
+     *
+     * @param[in]  o1       The first collision object, by name.
+     * @param[in]  tf1_beg  The beginning transform for o1.
+     * @param[in]  tf1_end  The end transform for o1.
+     * @param[in]  o2       The second collision object, by name.
+     * @param[in]  tf2_beg  The beginning transform for o2.
+     * @param[in]  tf2_end  The end transform for o2.
+     *
+     * @return     CollisionProxy.
+     */
+    virtual CollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end);
+
+    /**
        * @brief      Gets the collision world links.
        *
        * @return     The collision world links.

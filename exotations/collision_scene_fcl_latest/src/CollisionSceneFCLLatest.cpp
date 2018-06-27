@@ -157,7 +157,6 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
             }
             else
             {
-                // TODO: handle degenerate cases, i.e. where 2*radius >= length
                 geometry.reset(new fcl::Capsuled(s->radius, s->length - 2 * s->radius));
             }
         }

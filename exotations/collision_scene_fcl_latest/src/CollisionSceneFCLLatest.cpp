@@ -665,4 +665,55 @@ std::vector<std::string> CollisionSceneFCLLatest::getCollisionRobotLinks()
     }
     return tmp;
 }
+
+CollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
+    const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end,
+    const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end)
+{
+    HIGHLIGHT_NAMED("continuousCollisionCheck", o1 << " vs " << o2);
+
+    if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
+
+    std::shared_ptr<const fcl::CollisionGeometryd> shape1 = nullptr;
+    std::shared_ptr<const fcl::CollisionGeometryd> shape2 = nullptr;
+
+    for (fcl::CollisionObjectd* o : fcl_objects_)
+    {
+        std::shared_ptr<KinematicElement> e = kinematic_elements_[reinterpret_cast<long>(o->getUserData())].lock();
+        if (e->Segment.getName() == o1)
+        {
+            shape1 = o->collisionGeometry();
+        }
+
+        if (e->Segment.getName() == o2)
+        {
+            shape2 = o->collisionGeometry();
+        }
+    }
+
+    if (shape1 == nullptr) throw_pretty("o1 not found.");
+    if (shape2 == nullptr) throw_pretty("o2 not found.");
+
+    // CollisionData data(this);
+    // bool allowedToCollide = isAllowedToCollide(shape1, shape2, data.Self, data.Scene);
+
+    fcl::ContinuousCollisionRequestd request = fcl::ContinuousCollisionRequestd();
+    request.ccd_motion_type = fcl::CCDM_LINEAR;
+    request.ccd_solver_type = fcl::CCDC_CONSERVATIVE_ADVANCEMENT;
+
+    fcl::ContinuousCollisionResultd result;
+
+    double cc_out = fcl::continuousCollide(
+        shape1.get(), fcl_convert::KDL2fcl(tf1_beg), fcl_convert::KDL2fcl(tf1_end),
+        shape2.get(), fcl_convert::KDL2fcl(tf2_beg), fcl_convert::KDL2fcl(tf2_end),
+        request, result);
+
+    HIGHLIGHT_NAMED("cc_out", cc_out);
+    HIGHLIGHT_NAMED("ContinuousCollisionResult", "is_collide: " << result.is_collide << " time_of_contact: " << result.time_of_contact << " contact_tf1: " << result.contact_tf1.translation().transpose() << " contact_tf2: " << result.contact_tf2.translation().transpose());
+
+    // TODO: if !allowedToCollide reset is_collide;
+
+    CollisionProxy ret;
+    return ret;
+}
 }

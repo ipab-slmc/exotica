@@ -69,7 +69,7 @@ struct ContinuousCollisionProxy
 
 struct CollisionProxy
 {
-    CollisionProxy() : e1(nullptr), e2(nullptr), distance(0), inCollision(false), timeOfContact(-1) {}
+    CollisionProxy() : e1(nullptr), e2(nullptr), distance(0) {}
     std::shared_ptr<KinematicElement> e1;
     std::shared_ptr<KinematicElement> e2;
     Eigen::Vector3d contact1;
@@ -77,15 +77,13 @@ struct CollisionProxy
     Eigen::Vector3d contact2;
     Eigen::Vector3d normal2;
     double distance;
-    bool inCollision;
-    double timeOfContact;
 
     inline std::string print() const
     {
         std::stringstream ss;
         if (e1 && e2)
         {
-            ss << "Proxy: '" << e1->Segment.getName() << "' - '" << e2->Segment.getName() << "', c1: " << contact1.transpose() << " c2: " << contact2.transpose() << " n1: " << normal1.transpose() << " n2: " << normal2.transpose() << " d: " << distance << " inCollision: " << inCollision << " timeOfContact " << timeOfContact;
+            ss << "Proxy: '" << e1->Segment.getName() << "' - '" << e2->Segment.getName() << "', c1: " << contact1.transpose() << " c2: " << contact2.transpose() << " n1: " << normal1.transpose() << " n2: " << normal2.transpose() << " d: " << distance;
         }
         else
         {

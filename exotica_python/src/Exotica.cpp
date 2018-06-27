@@ -849,6 +849,8 @@ PYBIND11_MODULE(_pyexotica, module)
     proxy.def_readonly("Normal1", &CollisionProxy::normal1);
     proxy.def_readonly("Normal2", &CollisionProxy::normal2);
     proxy.def_readonly("Distance", &CollisionProxy::distance);
+    proxy.def_readonly("InCollision", &CollisionProxy::inCollision);
+    proxy.def_readonly("TimeOfContact", &CollisionProxy::timeOfContact);
     proxy.def_property_readonly("Object1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Segment.getName() : std::string(""); });
     proxy.def_property_readonly("Object2", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Segment.getName() : std::string(""); });
     proxy.def_property_readonly("Transform1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Frame : KDL::Frame(); });
@@ -944,6 +946,9 @@ PYBIND11_MODULE(_pyexotica, module)
     collisionScene.def_property("robotLinkPadding", &CollisionScene::getRobotLinkPadding, &CollisionScene::setRobotLinkPadding);
     collisionScene.def_property("worldLinkPadding", &CollisionScene::getWorldLinkPadding, &CollisionScene::setWorldLinkPadding);
     collisionScene.def("updateCollisionObjectTransforms", &CollisionScene::updateCollisionObjectTransforms);
+
+    // Continuous collision check
+    collisionScene.def("continuousCollisionCheck", &CollisionScene::updateCollisionObjectTransforms);
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

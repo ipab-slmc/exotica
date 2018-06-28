@@ -111,3 +111,4 @@ Ogre.log
 **/doc/*.synctex.gz
 **/doc/*.toc
 *.out
+.vscode/

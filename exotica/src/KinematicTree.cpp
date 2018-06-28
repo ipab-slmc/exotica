@@ -471,6 +471,25 @@ int KinematicTree::IsControlled(std::shared_ptr<KinematicElement> Joint)
     return -1;
 }
 
+int KinematicTree::IsControlled(std::string jointName)
+{
+    for (int i = 0; i < ControlledJointsNames.size(); i++)
+    {
+        if (ControlledJointsNames[i] == jointName) return i;
+    }
+    return -1;
+}
+
+int KinematicTree::IsControlledLink(std::string linkName)
+{
+    for (int i = 0; i < ControlledJoints.size(); i++)
+    {
+        auto joint = ControlledJoints[i].lock();
+        if (joint->Segment.getName() == linkName) return i;
+    }
+    return -1;
+}
+
 std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const KinematicsRequest& request)
 {
     Flags = request.Flags;

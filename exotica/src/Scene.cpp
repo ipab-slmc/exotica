@@ -599,9 +599,24 @@ void Scene::updateSceneFrames()
     ps_->getCurrentStateNonConst().update(true);
     const std::vector<const robot_model::LinkModel*>& links =
         ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
+    bool lastControlledJointId = -1;
+    std::string lastControlledLinkName;
     for (int i = 0; i < links.size(); ++i)
     {
         Eigen::Affine3d objTransform = ps_->getCurrentState().getGlobalLinkTransform(links[i]);
+
+        int jointId = getSolver().IsControlledLink(links[i]->getName());
+        if (jointId != -1)
+        {
+            HIGHLIGHT_NAMED(links[i], "jointId=" << jointId << ", lastControlledJointId=" << lastControlledJointId);
+
+            if (jointId != lastControlledJointId)
+            {
+                HIGHLIGHT("Last lastControlledJointId was " << lastControlledJointId << " now setting it to " << jointId);
+                lastControlledLinkName = links[i]->getName();
+                lastControlledJointId = jointId;
+            }
+        }
 
         for (int j = 0; j < links[i]->getShapes().size(); ++j)
         {
@@ -614,6 +629,14 @@ void Scene::updateSceneFrames()
 
             Eigen::Affine3d trans = objTransform.inverse() * ps_->getCurrentState().getCollisionBodyTransform(links[i], j);
             kinematica_.AddEnvironmentElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
+
+            // Set up mappings
+            modelLink_to_collisionLink_map_[links[i]->getName()].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
+
+            if (lastControlledLinkName != "")
+            {
+                controlledLink_to_collisionLink_map_[lastControlledLinkName].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
+            }
         }
     }
 

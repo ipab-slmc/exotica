@@ -962,6 +962,8 @@ PYBIND11_MODULE(_pyexotica, module)
               py::arg("scale") = Eigen::Vector3d::Ones(),
               py::arg("updateCollisionScene") = true);
     scene.def("removeObject", &Scene::removeObject);
+    scene.def_property_readonly("modelLinkToCollisionLinkMap", &Scene::getModelLinkToCollisionLinkMap);
+    scene.def_property_readonly("controlledLinkToCollisionLinkMap", &Scene::getControlledLinkToCollisionLinkMap);
 
     py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collisionScene(module, "CollisionScene");
     // TODO: expose isStateValid, isCollisionFree, getCollisionDistance, getCollisionWorldLinks, getCollisionRobotLinks, getTranslation

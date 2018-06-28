@@ -161,6 +161,16 @@ public:
      * @return     Whether collision scene transforms are force updated on every scene update.
      */
     bool alwaysUpdatesCollisionScene() { return force_collision_; }
+    /**
+     * @brief      Returns a map between a model link name and the names of associated collision links.
+     * @return     Map between model links and all associated collision links.
+     */
+    std::map<std::string, std::vector<std::string>> getModelLinkToCollisionLinkMap() { return modelLink_to_collisionLink_map_; };
+    /**
+     * @brief      Returns a map between controlled robot link names and associated collision link names. Here we consider all fixed links between controlled links as belonging to the previous controlled link (as if the collision links had been fused).
+     * @return     Map between controlled links and associated collision links.
+     */
+    std::map<std::string, std::vector<std::string>> getControlledLinkToCollisionLinkMap() { return controlledLink_to_collisionLink_map_; };
 private:
     /// The name of the scene
     std::string name_;
@@ -197,6 +207,12 @@ private:
     std::map<std::string, std::pair<std::weak_ptr<KinematicElement>, std::shared_ptr<Trajectory>>> trajectory_generators_;
 
     bool force_collision_;
+
+    /// \brief Mapping between model link names and collision links.
+    std::map<std::string, std::vector<std::string>> modelLink_to_collisionLink_map_;
+
+    /// \brief Mapping between controlled link name and collision links
+    std::map<std::string, std::vector<std::string>> controlledLink_to_collisionLink_map_;
 
     KinematicsRequest kinematicRequest;
     std::shared_ptr<KinematicResponse> kinematicSolution;

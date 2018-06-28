@@ -66,7 +66,7 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x,
     // For all robot links: Get all collision distances, sort by distance, and process the closest.
     for (unsigned int i = 0; i < dim_; i++)
     {
-        std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robotLinks_[i], check_self_collision_);  //, false);
+        std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(scene_->getControlledLinkToCollisionLinkMap()[robotLinks_[i]], check_self_collision_);  //, false);
         if (proxies.size() == 0)
         {
             phi(i) = 0;

@@ -161,6 +161,12 @@ public:
         return Instance()->getNodeHandle().advertise<T>(ops);
     }
 
+    template <typename T>
+    static ros::ServiceClient serviceClient(const std::string &service_name, bool persistent = false)
+    {
+        return Instance()->serviceClient<T>(service_name, persistent);
+    }
+
     static void sendTransform(const tf::StampedTransform &transform)
     {
         if (!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");

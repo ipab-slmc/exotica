@@ -599,7 +599,7 @@ void Scene::updateSceneFrames()
     ps_->getCurrentStateNonConst().update(true);
     const std::vector<const robot_model::LinkModel*>& links =
         ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
-    bool lastControlledJointId = -1;
+    int lastControlledJointId = -1;
     std::string lastControlledLinkName;
     for (int i = 0; i < links.size(); ++i)
     {
@@ -608,9 +608,9 @@ void Scene::updateSceneFrames()
         int jointId = getSolver().IsControlledLink(links[i]->getName());
         if (jointId != -1)
         {
-            HIGHLIGHT_NAMED(links[i], "jointId=" << jointId << ", lastControlledJointId=" << lastControlledJointId);
+            HIGHLIGHT_NAMED(links[i]->getName(), "jointId=" << jointId << ", lastControlledJointId=" << lastControlledJointId);
 
-            if (jointId != lastControlledJointId)
+            if (lastControlledJointId != jointId)
             {
                 HIGHLIGHT("Last lastControlledJointId was " << lastControlledJointId << " now setting it to " << jointId);
                 lastControlledLinkName = links[i]->getName();

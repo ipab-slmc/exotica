@@ -545,7 +545,7 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
 {
     if (x.rows() != StateSize) throw_pretty("Wrong state vector size! Got " << x.rows() << " expected " << StateSize);
 
-    for (int i = 0; i < ControlledJoints.size(); i++)
+    for (int i = 0; i < NumControlledJoints; i++)
         TreeState(ControlledJoints[i].lock()->Id) = x(i);
 
     UpdateTree();
@@ -913,7 +913,7 @@ void KinematicTree::resetJointLimits()
 void KinematicTree::updateJointLimits()
 {
     jointLimits_.setZero();
-    for (int i = 0; i < ControlledJoints.size(); i++)
+    for (int i = 0; i < NumControlledJoints; i++)
     {
         jointLimits_(i, 0) = ControlledJoints[i].lock()->JointLimits[0];
         jointLimits_(i, 1) = ControlledJoints[i].lock()->JointLimits[1];

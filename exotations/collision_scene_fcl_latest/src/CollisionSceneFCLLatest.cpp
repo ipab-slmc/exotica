@@ -350,8 +350,6 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     }
 
     // Step 2: If not in collision, run old distance logic.
-    //---------------------- OLD BELOW
-
     data->Request.enable_nearest_points = true;
     data->Request.enable_signed_distance = true;  // Added in FCL 0.6.0
     // GST_LIBCCD produces incorrect contacts. Probably due to incompatible version of libccd.
@@ -410,13 +408,15 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         min_dist = fcl::distance(o1, o2, data->Request, data->Result);
     }
 
-    // If -1 is returned, the distance query is not supported for the pair of objects.
+    // If -1 is returned, the returned query is a touching contact.
+    bool touching_contact = false;
+    p.distance = min_dist;
+
     if (min_dist == -1)
     {
-        throw_pretty("Distance query not supported: min_dist=" << min_dist << ", Result.min_distance=" << data->Result.min_distance << " and types: "
-                                                               << "e1 (" << p.e1->Segment.getName() << "): " << p.e1->Shape->type << " vs e2 (" << p.e2->Segment.getName() << "): " << p.e2->Shape->type);
+        touching_contact = true;
+        p.distance = 0.0;
     }
-    p.distance = min_dist;
 
     // FCL uses world coordinates for meshes while local coordinates are used
     // for primitive shapes - thus, we need to work around this.

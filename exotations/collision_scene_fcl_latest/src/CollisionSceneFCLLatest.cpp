@@ -286,7 +286,9 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     fcl::CollisionResultd tmp_res;
     tmp_req.num_max_contacts = 1;
     tmp_req.enable_contact = true;
-    // The following comment is copied from Drake: https://github.com/RobotLocomotion/drake/blob/0aa7f713eb029fea7d47109992762ed6d8d1d457/geometry/proximity_engine.cc
+
+    // The following comment and Step 1 code is copied from Drake (BSD license):
+    // https://github.com/RobotLocomotion/drake/blob/0aa7f713eb029fea7d47109992762ed6d8d1d457/geometry/proximity_engine.cc
     // NOTE: As of 5/1/2018 the GJK implementation of Libccd appears to be
     // superior to FCL's "independent" implementation. Furthermore, libccd
     // appears to behave badly if its gjk tolerance is much tighter than
@@ -304,10 +306,11 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         tmp_res.getContacts(contacts);
         if (!contacts.empty())
         {
+            HIGHLIGHT("In collision, we got a contact!")
             const fcl::Contactd& contact{contacts[0]};
             //  By convention, Drake requires the contact normal to point out of B and
             //  into A. FCL uses the opposite convention.
-            fcl::Vector3d drake_normal = -contact.normal;
+            fcl::Vector3d normal = -contact.normal;
 
             // Signed distance is negative when penetration depth is positive.
             double signed_distance = -contact.penetration_depth;
@@ -318,10 +321,10 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             // the surface of body A (Ac) and one on the surface of body B (Bc).
             // Choose points along the line defined by the contact point and normal,
             // equi-distant to the contact point. Recall that signed_distance is
-            // strictly non-positive, so signed_distance * drake_normal points out of
+            // strictly non-positive, so signed_distance * normal points out of
             // A and into B.
-            const fcl::Vector3d p_WAc{contact.pos + 0.5 * signed_distance * drake_normal};
-            const fcl::Vector3d p_WBc{contact.pos - 0.5 * signed_distance * drake_normal};
+            const fcl::Vector3d p_WAc{contact.pos + 0.5 * signed_distance * normal};
+            const fcl::Vector3d p_WBc{contact.pos - 0.5 * signed_distance * normal};
 
             // HIGHLIGHT("Normal: " << contact.normal[0] << "," << contact.normal[1] << "," << contact.normal[2]);
             // HIGHLIGHT("p_WAc: " << p_WAc[0] << "," << p_WAc[1] << "," << p_WAc[2]);
@@ -331,8 +334,6 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             p.normal1 = -contact.normal;
             p.normal2 = contact.normal;
 
-            // KDL::Vector c1 = p.e1->Frame * KDL::Vector(p_WAc(0), p_WAc(1), p_WAc(2));
-            // KDL::Vector c2 = p.e2->Frame * KDL::Vector(p_WBc(0), p_WBc(1), p_WBc(2));
             KDL::Vector c1 = KDL::Vector(p_WAc(0), p_WAc(1), p_WAc(2));
             KDL::Vector c2 = KDL::Vector(p_WBc(0), p_WBc(1), p_WBc(2));
             tf::vectorKDLToEigen(c1, p.contact1);
@@ -360,31 +361,16 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     // however contact points appear better with libccd as well according to
     // unit test. When at distance, INDEP better for primitives, but in
     // penetration LIBCCD required.
+    // Cf. https://github.com/flexible-collision-library/fcl/blob/master/include/fcl/narrowphase/distance_request.h#L57-L92
     if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
     {
-        fcl::CollisionRequestd tmp_req;
-        fcl::CollisionResultd tmp_res;
-        tmp_req.num_max_contacts = 1;
-        // tmp_req.enable_contact = true;
-        // The following comment is copied from Drake: https://github.com/RobotLocomotion/drake/blob/0aa7f713eb029fea7d47109992762ed6d8d1d457/geometry/proximity_engine.cc
-        // NOTE: As of 5/1/2018 the GJK implementation of Libccd appears to be
-        // superior to FCL's "independent" implementation. Furthermore, libccd
-        // appears to behave badly if its gjk tolerance is much tighter than
-        // 2e-12. Until this changes, we explicitly specify these parameters rather
-        // than relying on FCL's defaults.
-        tmp_req.gjk_tolerance = 2e-12;
-        tmp_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
-        fcl::collide(o1, o2, tmp_req, tmp_res);
-
-        data->Request.gjk_solver_type = tmp_res.isCollision() ? fcl::GST_LIBCCD : fcl::GST_INDEP;
-        data->Request.distance_tolerance = 1e-6;  // As in FCL test
-
-        // HIGHLIGHT("Using INDEP");
+        data->Request.gjk_solver_type = fcl::GST_INDEP;
+        HIGHLIGHT("Using INDEP");
     }
     else
     {
         data->Request.gjk_solver_type = fcl::GST_LIBCCD;
-        // HIGHLIGHT("Using LIBCCD");
+        HIGHLIGHT("Using LIBCCD");
     }
 
     data->Result.clear();
@@ -516,6 +502,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         }
         else
         {
+            throw_pretty("Should not be called anymore.");
             c2 = p.e2->Frame.p;
         }
     }
@@ -562,12 +549,21 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         }
     }
 
+    tf::vectorKDLToEigen(c1, p.contact1);
+    tf::vectorKDLToEigen(c2, p.contact2);
+
+    // On touching contact, the normal would be ill-defined. Thus, use the shape centre of the opposite shape as a proxy contact.
+    if (touching_contact)
+    {
+        HIGHLIGHT("Touching contact!");
+        c1 = p.e2->Frame.p;
+        c2 = p.e1->Frame.p;
+    }
+
     KDL::Vector n1 = c2 - c1;
     KDL::Vector n2 = c1 - c2;
     n1.Normalize();
     n2.Normalize();
-    tf::vectorKDLToEigen(c1, p.contact1);
-    tf::vectorKDLToEigen(c2, p.contact2);
     tf::vectorKDLToEigen(n1, p.normal1);
     tf::vectorKDLToEigen(n2, p.normal2);
 

@@ -365,12 +365,12 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
     {
         data->Request.gjk_solver_type = fcl::GST_INDEP;
-        HIGHLIGHT("Using INDEP");
+        // HIGHLIGHT("Using INDEP");
     }
     else
     {
         data->Request.gjk_solver_type = fcl::GST_LIBCCD;
-        HIGHLIGHT("Using LIBCCD");
+        // HIGHLIGHT("Using LIBCCD");
     }
 
     data->Result.clear();
@@ -422,7 +422,6 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     // Case 2: Primitive vs Primitive - convert from both local frames to world frame
     else if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
     {
-        // Use shape centres as nearest point when in penetration - otherwise use the nearest point.
         // INDEP has a further caveat when in penetration: it will return the
         // exact touch location as the contact point - not the point of maximum
         // penetration. This contact point will be in world frame, while the
@@ -434,6 +433,8 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         }
         else
         {
+            if (!touching_contact) throw_pretty("This should not be called any longer.");
+
             // Again, we need to distinguish between the two different solvers
             if (data->Request.gjk_solver_type == fcl::GST_INDEP)
             {
@@ -441,10 +442,6 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
                 // WITH INDEP:
                 c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
                 c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-
-                // SHAPE CENTRES:
-                // c1 = p.e1->Frame.p;
-                // c2 = p.e2->Frame.p;
             }
             // Only LIBCCD can compute contact points on the surface of a
             // sphere, i.e. if in collision and either of the two objects is a
@@ -454,17 +451,8 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             else
             {
                 // WITH LIBCCD:
-                // If touching, use shape centres OF THE OTHER SHAPE
-                if (p.distance == 0)  // use std::abs or near
-                {
-                    c1 = p.e2->Frame.p;
-                    c2 = p.e1->Frame.p;
-                }
-                else
-                {
-                    c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-                    c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-                }
+                c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+                c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
             }
         }
     }

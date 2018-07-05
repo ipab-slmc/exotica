@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 import pyexotica as exo
 import math
 import time
@@ -72,10 +71,10 @@ def testSphereVsSpherePenetrating(collisionScene):
     expectedContact2 = np.array([-0.2, 0, 0])
     expectedNormal1 = np.array([-1, 0, 0])
     expectedNormal2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].Contact1, expectedContact1, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Contact2, expectedContact2, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=PENETRATING_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Contact1, expectedContact1).all())
+    assert(np.isclose(p[0].Contact2, expectedContact2).all())
+    assert(np.isclose(p[0].Normal1, expectedNormal1).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2).all())
     print('PrimitiveSphere_vs_PrimitiveSphere_Penetrating: Distance, Contact Points, Normals: PASSED')
 
 
@@ -145,10 +144,10 @@ def testSphereVsBoxPenetrating(collisionScene):
     expectedContact2 = np.array([-0.2, 0, 0])
     expectedNormal1 = np.array([-1, 0, 0])
     expectedNormal2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].Contact1, expectedContact1, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Contact2, expectedContact2, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=PENETRATING_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Contact1, expectedContact1).all())
+    assert(np.isclose(p[0].Contact2, expectedContact2).all())
+    assert(np.isclose(p[0].Normal1, expectedNormal1).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2).all())
     print('PrimitiveSphere_vs_PrimitiveBox_Penetrating: Distance, Contact Points, Normals: PASSED')
 
 
@@ -193,10 +192,10 @@ def testSphereVsCylinderPenetrating(collisionScene):
     expectedContact2 = np.array([-0.2, 0, 0])
     expectedNormal1 = np.array([-1, 0, 0])
     expectedNormal2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].Contact1, expectedContact1, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Contact2, expectedContact2, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=PENETRATING_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Contact1, expectedContact1).all())
+    assert(np.isclose(p[0].Contact2, expectedContact2).all())
+    assert(np.isclose(p[0].Normal1, expectedNormal1).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2).all())
     print('PrimitiveSphere_vs_PrimitiveCylinder_Penetrating: Distance, Contact Points, Normals: PASSED')
 
 
@@ -391,10 +390,10 @@ def testBoxVsCylinderPenetrating(collisionScene):
     expectedContact2 = np.array([-0.1, 0, 0])
     expectedNormal1 = np.array([-1, 0, 0])
     expectedNormal2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].Contact1, expectedContact1, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Contact2, expectedContact2, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=1.5*PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=1.5*PENETRATING_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Contact1, expectedContact1).all())
+    assert(np.isclose(p[0].Contact2, expectedContact2).all())
+    assert(np.isclose(p[0].Normal1, expectedNormal1).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2).all())
     print('PrimitiveBox_vs_PrimitiveCylinder_Penetrating: Distance, Contact Points, Normals: PASSED')
 
 
@@ -513,10 +512,10 @@ def testCylinderVsCylinderPenetrating(collisionScene):
     expectedContact2 = np.array([-0.1, 0, 0])
     expectedNormal1 = np.array([-1, 0, 0])
     expectedNormal2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].Contact1, expectedContact1, atol=1.5*PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Contact2, expectedContact2, atol=1.5*PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=1.5*PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=1.5*PENETRATING_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Contact1, expectedContact1).all())
+    assert(np.isclose(p[0].Contact2, expectedContact2).all())
+    assert(np.isclose(p[0].Normal1, expectedNormal1).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2).all())
     print('PrimitiveCylinder_vs_PrimitiveCylinder_Penetrating: Distance, Contact Points, Normals: PASSED')
 
 
@@ -611,10 +610,10 @@ def testMeshVsMeshDistance(collisionScene):
     expectedContact2 = np.array([0.5, 0, 0])
     expectedNormal1 = np.array([1, 0, 0])
     expectedNormal2 = np.array([-1, 0, 0])
-    assert(np.isclose(p[0].Contact1, expectedContact1, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Contact2, expectedContact2, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=PENETRATING_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=PENETRATING_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Contact1, expectedContact1).all())
+    assert(np.isclose(p[0].Contact2, expectedContact2).all())
+    assert(np.isclose(p[0].Normal1, expectedNormal1).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2).all())
     print('Mesh_vs_Mesh_Distance: Distance, Contact Points, Normals: PASSED')
 
 

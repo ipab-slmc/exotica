@@ -306,7 +306,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         tmp_res.getContacts(contacts);
         if (!contacts.empty())
         {
-            HIGHLIGHT("In collision, we got a contact!")
+            // HIGHLIGHT("In collision, we got a contact: " << p.e1->Segment.getName() << " vs " << p.e2->Segment.getName());
             const fcl::Contactd& contact{contacts[0]};
             //  By convention, Drake requires the contact normal to point out of B and
             //  into A. FCL uses the opposite convention.
@@ -543,7 +543,6 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     // On touching contact, the normal would be ill-defined. Thus, use the shape centre of the opposite shape as a proxy contact.
     if (touching_contact)
     {
-        HIGHLIGHT("Touching contact!");
         c1 = p.e2->Frame.p;
         c2 = p.e1->Frame.p;
     }

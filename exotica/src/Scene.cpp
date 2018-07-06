@@ -608,11 +608,8 @@ void Scene::updateSceneFrames()
         int jointId = getSolver().IsControlledLink(links[i]->getName());
         if (jointId != -1)
         {
-            HIGHLIGHT_NAMED(links[i]->getName(), "jointId=" << jointId << ", lastControlledJointId=" << lastControlledJointId);
-
             if (lastControlledJointId != jointId)
             {
-                HIGHLIGHT("Last lastControlledJointId was " << lastControlledJointId << " now setting it to " << jointId);
                 lastControlledLinkName = links[i]->getName();
                 lastControlledJointId = jointId;
             }

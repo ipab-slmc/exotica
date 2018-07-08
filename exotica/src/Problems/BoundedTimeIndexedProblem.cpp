@@ -47,7 +47,7 @@ BoundedTimeIndexedProblem::~BoundedTimeIndexedProblem()
 {
 }
 
-Eigen::MatrixXdRef BoundedTimeIndexedProblem::getBounds()
+Eigen::MatrixXd BoundedTimeIndexedProblem::getBounds() const
 {
     return scene_->getSolver().getJointLimits();
 }

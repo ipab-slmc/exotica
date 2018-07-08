@@ -50,7 +50,7 @@ SamplingProblem::~SamplingProblem()
 std::vector<double> SamplingProblem::getBounds()
 {
     std::vector<double> bounds;
-    Eigen::MatrixXdRef jointLimits = scene_->getSolver().getJointLimits();
+    auto jointLimits = scene_->getSolver().getJointLimits();
 
     bounds.resize(2 * N);
     for (unsigned int i = 0; i < N; i++)

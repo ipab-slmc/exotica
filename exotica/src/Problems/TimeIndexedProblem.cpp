@@ -47,7 +47,7 @@ TimeIndexedProblem::~TimeIndexedProblem()
 {
 }
 
-Eigen::MatrixXdRef TimeIndexedProblem::getBounds()
+Eigen::MatrixXd TimeIndexedProblem::getBounds() const
 {
     return scene_->getSolver().getJointLimits();
 }
@@ -633,7 +633,7 @@ double TimeIndexedProblem::getRhoNEQ(const std::string& task_name, int t)
 bool TimeIndexedProblem::isValid()
 {
     bool succeeded = true;
-    Eigen::MatrixXdRef bounds = scene_->getSolver().getJointLimits();
+    auto bounds = scene_->getSolver().getJointLimits();
 
     // Check for every state
     for (unsigned int t = 0; t < T; t++)

@@ -157,7 +157,7 @@ public:
     std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
     void Update(Eigen::VectorXdRefConst x);
     void resetJointLimits();
-    Eigen::MatrixXdRef getJointLimits();
+    Eigen::MatrixXd getJointLimits() const { return jointLimits_; }
     void setJointLimitsLower(Eigen::VectorXdRefConst lower_in);
     void setJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
     void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);

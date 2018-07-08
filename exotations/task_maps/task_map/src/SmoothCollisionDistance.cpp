@@ -66,6 +66,8 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                                      Eigen::MatrixXdRef J,
                                      bool updateJacobian)
 {
+    // Get all world collision links, then iterate through them
+    std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robotLinks_, check_self_collision_);
     double& d = phi(0);
     for (const auto& link : robotLinks_)
     {

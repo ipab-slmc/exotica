@@ -35,9 +35,10 @@ target_link_libraries(ompl_solver
   ${catkin_LIBRARIES} ${OMPL_LIBRARIES}
 )
 
-add_dependencies(ompl_solver ompl_solver_initializers)
+add_dependencies(ompl_solver ${PROJECT_NAME}_initializers)
 
 pybind_add_module(${PROJECT_NAME}_py MODULE src/ompl_solver/ompl_py.cpp ${SOURCES})
+add_dependencies(${PROJECT_NAME}_py ompl_solver ${PROJECT_NAME}_initializers)
 install(TARGETS ${PROJECT_NAME}_py LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
 

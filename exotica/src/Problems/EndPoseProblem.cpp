@@ -51,7 +51,7 @@ void EndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& init
 {
 }
 
-Eigen::MatrixXdRef EndPoseProblem::getBounds()
+Eigen::MatrixXd EndPoseProblem::getBounds() const
 {
     return scene_->getSolver().getJointLimits();
 }
@@ -367,7 +367,7 @@ double EndPoseProblem::getRhoNEQ(const std::string& task_name)
 bool EndPoseProblem::isValid()
 {
     Eigen::VectorXd x = scene_->getSolver().getControlledState();
-    Eigen::MatrixXdRef bounds = scene_->getSolver().getJointLimits();
+    auto bounds = scene_->getSolver().getJointLimits();
 
     // Check joint limits
     for (unsigned int i = 0; i < N; i++)

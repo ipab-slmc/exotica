@@ -65,7 +65,7 @@ public:
     Eigen::VectorXd getGoalNEQ(const std::string& task_name);
     double getRhoNEQ(const std::string& task_name);
     virtual void preupdate();
-    Eigen::MatrixXdRef getBounds();
+    Eigen::MatrixXd getBounds() const;
 
     double getScalarCost();
     Eigen::VectorXd getScalarJacobian();

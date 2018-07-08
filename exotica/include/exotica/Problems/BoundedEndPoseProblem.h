@@ -56,7 +56,7 @@ public:
     Eigen::VectorXd getGoal(const std::string& task_name);
     double getRho(const std::string& task_name);
     virtual void preupdate();
-    Eigen::MatrixXdRef getBounds();
+    Eigen::MatrixXd getBounds() const;
 
     bool isValid();
 

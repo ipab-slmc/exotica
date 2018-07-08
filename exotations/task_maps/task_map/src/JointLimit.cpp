@@ -59,14 +59,18 @@ void JointLimit::Initialize()
 {
     double percent = init_.SafePercentage;
 
-    std::vector<std::string> jnts = scene_->getJointNames();
-    N = jnts.size();
+    N = scene_->getSolver().getNumControlledJoints();
+
+    // TODO: Strictly speaking this is incorrect as joint limits can be changed during runtime.
     Eigen::MatrixXd limits = scene_->getSolver().getJointLimits();
-    low_limits_ = limits.col(0);
-    high_limits_ = limits.col(1);
+
+    low_limits_.resize(N);
+    high_limits_.resize(N);
     tau_.resize(N);
     for (int i = 0; i < N; i++)
     {
+        low_limits_(i) = limits(i, 0);
+        high_limits_(i) = limits(i, 1);
         tau_(i) = percent * (high_limits_(i) - low_limits_(i)) * 0.5;
     }
 }

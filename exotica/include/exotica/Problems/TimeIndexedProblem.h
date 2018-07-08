@@ -66,7 +66,7 @@ public:
     void setRhoNEQ(const std::string& task_name, const double rho, int t = 0);
     Eigen::VectorXd getGoalNEQ(const std::string& task_name, int t = 0);
     double getRhoNEQ(const std::string& task_name, int t = 0);
-    Eigen::MatrixXdRef getBounds();
+    Eigen::MatrixXd getBounds() const;
 
     int getT() const { return T; }
     void setT(int T_in);

@@ -51,7 +51,7 @@ void BoundedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer
 {
 }
 
-Eigen::MatrixXdRef BoundedEndPoseProblem::getBounds()
+Eigen::MatrixXd BoundedEndPoseProblem::getBounds() const
 {
     return scene_->getSolver().getJointLimits();
 }
@@ -230,7 +230,7 @@ double BoundedEndPoseProblem::getRho(const std::string& task_name)
 bool BoundedEndPoseProblem::isValid()
 {
     Eigen::VectorXd x = scene_->getSolver().getControlledState();
-    Eigen::MatrixXdRef bounds = scene_->getSolver().getJointLimits();
+    auto bounds = scene_->getSolver().getJointLimits();
     for (unsigned int i = 0; i < N; i++)
     {
         if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1)) return false;

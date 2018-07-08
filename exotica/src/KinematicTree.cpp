@@ -285,6 +285,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
     }
     ModelTree[0]->isRobotLink = false;
 
+    jointLimits_ = Eigen::MatrixXd::Zero(NumControlledJoints, 2);
     resetJointLimits();
 
     // Create random distributions for state sampling
@@ -773,11 +774,6 @@ void KinematicTree::UpdateJdot()
     }
 }
 
-Eigen::MatrixXdRef KinematicTree::getJointLimits()
-{
-    return jointLimits_;
-}
-
 exotica::BASE_TYPE KinematicTree::getModelBaseType()
 {
     return ModelBaseType;
@@ -897,7 +893,7 @@ void KinematicTree::resetJointLimits()
 
 void KinematicTree::updateJointLimits()
 {
-    jointLimits_ = Eigen::MatrixXd::Zero(getNumControlledJoints(), 2);
+    jointLimits_.setZero();
     for (int i = 0; i < ControlledJoints.size(); i++)
     {
         jointLimits_(i, 0) = ControlledJoints[i].lock()->JointLimits[0];

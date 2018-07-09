@@ -38,7 +38,7 @@ REGISTER_TASKMAP_TYPE("QuasiStatic", exotica::QuasiStatic);
 
 namespace exotica
 {
-constexpr double eps = 1e-6;
+constexpr double eps = 1e-8;
 
 QuasiStatic::QuasiStatic()
 {
@@ -97,7 +97,7 @@ void potential(double& phi, Eigen::VectorXdRef J, Eigen::VectorXdRefConst A, Eig
     double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
     double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
     double E = cross(A, B) - cross(A, P) + cross(B, P);
-    if (fabs(E) <= eps)
+    if (fabs(E) < eps)
     {
         phi = 0.0;
         J.setZero();
@@ -197,9 +197,9 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
         int a = *it;
         int b = ++it == hull.end() ? *hull.begin() : *(it);
-        potential(tmp, supports.row(a), supports.row(b), com);
+        potential(tmp, supports.row(a).transpose(), supports.row(b).transpose(), com);
         pot += tmp;
-        winding(tmp, supports.row(a), supports.row(b), com);
+        winding(tmp, supports.row(a).transpose(), supports.row(b).transpose(), com);
         wnd += tmp;
     }
     wnd = fabs(wnd);
@@ -292,17 +292,16 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     for (std::list<int>::iterator it = hull.begin(); it != hull.end(); it++)
     {
         int a = *it;
-        int b = (it == hull.end()) ? *hull.begin() : *(std::next(it));
-        b = a;
-        potential(tmp, tmpJ, supports.row(a), supports.row(b), com, supportsJ.middleRows(a * 2, 2), supportsJ.middleRows(b * 2, 2), Jcom);
+        int b = (std::next(it) == hull.end()) ? *hull.begin() : *(std::next(it));
+        potential(tmp, tmpJ, supports.row(a).transpose(), supports.row(b).transpose(), com, supportsJ.middleRows(a * 2, 2), supportsJ.middleRows(b * 2, 2), Jcom);
         pot += tmp;
         potJ += tmpJ;
-        winding(tmp, supports.row(a), supports.row(b), com);
+        winding(tmp, supports.row(a).transpose(), supports.row(b).transpose(), com);
         wnd += tmp;
     }
     wnd = fabs(wnd);
 
-    if (pot < eps)
+    if (fabs(pot) > eps)
     {
         if (wnd < 0.5)
         {
@@ -331,9 +330,10 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
         {
             debug_msg.markers[1].points[ii].x = supports(i, 0);
             debug_msg.markers[1].points[ii].y = supports(i, 1);
-            debug_msg.markers[1].points[ii++].z = 0.0;
+            debug_msg.markers[1].points[ii].z = 0.0;
+            ii++;
         }
-        debug_msg.markers[1].points[hull.size()] = debug_msg.markers[1].points[0];
+        debug_msg.markers[1].points[ii] = debug_msg.markers[1].points[0];
 
         debug_pub.publish(debug_msg);
     }

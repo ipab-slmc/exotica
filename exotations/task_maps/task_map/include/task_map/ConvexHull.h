@@ -6,10 +6,13 @@
 
 namespace exotica
 {
-double lineDist2D(Eigen::VectorXdRefConst p1, Eigen::VectorXdRefConst p2, Eigen::VectorXdRefConst p)
+
+///
+/// \brief detDiff2d Computes the 2D determinant (analogous to a 2D cross product) of a two vectors defined by P_1P_2 and P_1P.
+///
+double detDiff2d(Eigen::VectorXdRefConst p1, Eigen::VectorXdRefConst p2, Eigen::VectorXdRefConst p)
 {
-    return (p(1) - p1(1)) * (p2(0) - p1(0)) -
-           (p2(1) - p1(1)) * (p(0) - p1(0));
+    return (p(1) - p1(1)) * (p2(0) - p1(0)) - (p2(1) - p1(1)) * (p(0) - p1(0));
 }
 
 std::list<int> quickHull(Eigen::MatrixXdRefConst points, std::list<int>& halfPoints, int p1, int p2)
@@ -19,7 +22,7 @@ std::list<int> quickHull(Eigen::MatrixXdRefConst points, std::list<int>& halfPoi
     std::list<int> newHalfPoints;
     for (int i : halfPoints)
     {
-        double d = lineDist2D(points.row(p1), points.row(p2), points.row(i));
+        double d = detDiff2d(points.row(p1).transpose(), points.row(p2).transpose(), points.row(i).transpose());
         if (d >= 0.0)
         {
             newHalfPoints.push_back(i);

@@ -47,7 +47,7 @@ namespace exotica
 {
 CollisionSceneFCL::CollisionSceneFCL()
 {
-    HIGHLIGHT_NAMED("CollisionSceneFCL", "FCL version: " << FCL_VERSION);
+    // HIGHLIGHT_NAMED("CollisionSceneFCL", "FCL version: " << FCL_VERSION);
 }
 
 CollisionSceneFCL::~CollisionSceneFCL()

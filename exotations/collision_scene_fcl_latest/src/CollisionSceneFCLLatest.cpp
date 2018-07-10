@@ -47,13 +47,14 @@ fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
 
 namespace exotica
 {
-CollisionSceneFCLLatest::CollisionSceneFCLLatest()
-{
-    HIGHLIGHT_NAMED("CollisionSceneFCLLatest", "FCL version: " << FCL_VERSION);
-}
-
+CollisionSceneFCLLatest::CollisionSceneFCLLatest() {}
 CollisionSceneFCLLatest::~CollisionSceneFCLLatest()
 {
+}
+
+void CollisionSceneFCLLatest::setup()
+{
+    if (debug_) HIGHLIGHT_NAMED("CollisionSceneFCL", "FCL version: " << FCL_VERSION);
 }
 
 void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects)

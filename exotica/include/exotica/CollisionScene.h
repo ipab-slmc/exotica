@@ -103,6 +103,10 @@ public:
        */
     virtual ~CollisionScene() {}
     /**
+     * @brief setup additional construction that requires initialiser parameter
+     */
+    virtual void setup() {}
+    /**
        * \brief Checks if the whole robot is valid (collision only).
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free..
@@ -239,6 +243,8 @@ public:
     virtual void updateCollisionObjectTransforms() = 0;
 
     bool replaceCylindersWithCapsules = false;
+
+    bool debug_ = false;
 
 protected:
     /// The allowed collision matrix

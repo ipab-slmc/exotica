@@ -67,6 +67,8 @@ public:
        */
     virtual ~CollisionSceneFCL();
 
+    void setup();
+
     static bool isAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionSceneFCL* scene);
     static bool collisionCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data);
     static bool collisionCallbackDistance(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data, double& dist);

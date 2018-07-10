@@ -259,6 +259,18 @@ public:
             }
             return true;
         }
+        else if (target.getType() == getTypeName(typeid(std::vector<int>)))
+        {
+            if (isPyString(value_py))
+            {
+                target.set(parseIntList(pyAsString(value_py)));
+            }
+            else
+            {
+                target.set(py::cast<std::vector<int>>(value_py));
+            }
+            return true;
+        }
         else if (target.getType() == "bool")
         {
             if (isPyString(value_py))
@@ -415,6 +427,10 @@ public:
         else if (prop.getType() == "Eigen::Matrix<double, 3, 1, 0, 3, 1>")
         {
             PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<Eigen::Vector3d>(prop.get())).ptr());
+        }
+        else if (prop.getType() == getTypeName(typeid(std::vector<int>)))
+        {
+            PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<std::vector<int>>(prop.get())).ptr());
         }
         else if (prop.getType() == "bool")
         {

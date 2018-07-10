@@ -121,6 +121,16 @@ void Scene::Instantiate(SceneInitializer& init)
         addObject(link.Name, getFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, getFrame(link.CoM).p), false);
     }
 
+    // Check list of links to exclude from CollisionScene
+    if (init.RobotLinksToExcludeFromCollisionScene.size() > 0)
+    {
+        for (const auto& link : init.RobotLinksToExcludeFromCollisionScene)
+        {
+            robotLinksToExcludeFromCollisionScene_.insert(link);
+            if (debug_) HIGHLIGHT_NAMED("RobotLinksToExcludeFromCollisionScene", link);
+        }
+    }
+
     collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
     collision_scene_->debug_ = this->debug_;
     collision_scene_->setup();
@@ -603,6 +613,12 @@ void Scene::updateSceneFrames()
     std::string lastControlledLinkName;
     for (int i = 0; i < links.size(); ++i)
     {
+        // Check whether link is excluded from collision checking
+        if (robotLinksToExcludeFromCollisionScene_.find(links[i]->getName()) != robotLinksToExcludeFromCollisionScene_.end())
+        {
+            continue;
+        }
+
         Eigen::Affine3d objTransform = ps_->getCurrentState().getGlobalLinkTransform(links[i]);
 
         int jointId = getSolver().IsControlledLink(links[i]->getName());

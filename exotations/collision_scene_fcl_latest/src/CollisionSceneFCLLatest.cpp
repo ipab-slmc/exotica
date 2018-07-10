@@ -685,10 +685,8 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
         }
     }
 
-    if (shapes1.size() == 0) return data.Proxies;  //throw_pretty("Can't find object '" << o1 << "'!");
-
     // There are no objects o1 is allowed to collide with, return the empty proxies vector
-    if (shapes2.size() == 0) return data.Proxies;
+    if (shapes1.size() == 0 || shapes2.size() == 0) return data.Proxies;
 
     for (fcl::CollisionObjectd* s1 : shapes1)
     {

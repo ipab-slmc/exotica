@@ -164,7 +164,7 @@ public:
     template <typename T>
     static ros::ServiceClient serviceClient(const std::string &service_name, bool persistent = false)
     {
-        return Instance()->serviceClient<T>(service_name, persistent);
+        return Instance()->getNodeHandle().serviceClient<T>(service_name, persistent);
     }
 
     static void sendTransform(const tf::StampedTransform &transform)

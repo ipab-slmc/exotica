@@ -103,7 +103,7 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
 
 void TimeIndexedProblem::reinitializeVariables()
 {
-    if (debug_) HIGHLIGHT_NAMED("UnconstrainedTimeIndexedProblem", "Initialize problem with T=" << T);
+    if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem", "Initialize problem with T=" << T);
 
     setTau(init_.Tau);
 

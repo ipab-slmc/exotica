@@ -49,7 +49,7 @@ namespace exotica
 {
 CollisionSceneFCLLatest::CollisionSceneFCLLatest()
 {
-    // HIGHLIGHT_NAMED("CollisionSceneFCLLatest", "FCL version: " << FCL_VERSION);
+    if (debug_) HIGHLIGHT_NAMED("CollisionSceneFCLLatest", "FCL version: " << FCL_VERSION);
 }
 
 CollisionSceneFCLLatest::~CollisionSceneFCLLatest()

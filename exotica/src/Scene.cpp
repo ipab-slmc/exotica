@@ -122,6 +122,7 @@ void Scene::Instantiate(SceneInitializer& init)
     }
 
     collision_scene_ = Setup::createCollisionScene(init.CollisionScene);
+    collision_scene_->debug_ = this->debug_;
     collision_scene_->setAlwaysExternallyUpdatedCollisionScene(force_collision_);
     collision_scene_->replaceCylindersWithCapsules = init.ReplaceCylindersWithCapsules;
     updateSceneFrames();

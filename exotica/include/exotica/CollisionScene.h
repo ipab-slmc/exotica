@@ -234,6 +234,8 @@ public:
 
     bool replaceCylindersWithCapsules = false;
 
+    bool debug_ = false;
+
 protected:
     /// The allowed collision matrix
     AllowedCollisionMatrix acm_;

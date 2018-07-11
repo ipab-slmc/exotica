@@ -362,7 +362,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     // unit test. When at distance, INDEP better for primitives, but in
     // penetration LIBCCD required.
     // Cf. https://github.com/flexible-collision-library/fcl/blob/master/include/fcl/narrowphase/distance_request.h#L57-L92
-    if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
+    if (false) //o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
     {
         data->Request.gjk_solver_type = fcl::GST_INDEP;
         // HIGHLIGHT("Using INDEP");
@@ -398,7 +398,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     bool touching_contact = false;
     p.distance = min_dist;
 
-    if (min_dist == -1)
+    if (min_dist == -1 || std::abs(min_dist) < 1e-9)
     {
         touching_contact = true;
         p.distance = 0.0;

@@ -37,7 +37,7 @@ REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionScene
 
 namespace fcl_convert
 {
-fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
+inline fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
 {
     Eigen::Affine3d ret;
     tf::transformKDLToEigen(frame, ret);

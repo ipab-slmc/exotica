@@ -245,7 +245,7 @@ bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectd* o1, fcl:
 void CollisionSceneFCLLatest::checkCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data)
 {
     data->Request.num_max_contacts = 1000;
-    data->Request.gjk_solver_type = fcl::GST_INDEP;  // CCD returns wrong points
+    data->Request.gjk_solver_type = fcl::GST_LIBCCD;
     data->Result.clear();
     fcl::collide(o1, o2, data->Request, data->Result);
     if (data->SafeDistance > 0.0 && o1->getAABB().distance(o2->getAABB()) < data->SafeDistance)
@@ -433,7 +433,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         }
         else
         {
-            if (!touching_contact) throw_pretty("This should not be called any longer.");
+            // if (!touching_contact) throw_pretty("This should not be called any longer.");
 
             // Again, we need to distinguish between the two different solvers
             if (data->Request.gjk_solver_type == fcl::GST_INDEP)

@@ -704,7 +704,7 @@ void Scene::removeObject(const std::string& name)
 
 void Scene::attachObject(const std::string& name, const std::string& parent)
 {
-    kinematica_.changeParent(name, parent, KDL::Frame(), false);
+    kinematica_.changeParent(name, parent, KDL::Frame::Identity(), false);
     attached_objects_[name] = AttachedObject(parent);
 }
 
@@ -718,7 +718,7 @@ void Scene::detachObject(const std::string& name)
 {
     if (!hasAttachedObject(name)) throw_pretty("'" << name << "' is not attached to the robot!");
     auto object = attached_objects_.find(name);
-    kinematica_.changeParent(name, "", KDL::Frame(), false);
+    kinematica_.changeParent(name, "", KDL::Frame::Identity(), false);
     attached_objects_.erase(object);
 }
 

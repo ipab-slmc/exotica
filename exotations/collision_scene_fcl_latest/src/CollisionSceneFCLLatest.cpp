@@ -362,7 +362,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     // unit test. When at distance, INDEP better for primitives, but in
     // penetration LIBCCD required.
     // Cf. https://github.com/flexible-collision-library/fcl/blob/master/include/fcl/narrowphase/distance_request.h#L57-L92
-    if (false) //o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
+    if (false)  //o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
     {
         data->Request.gjk_solver_type = fcl::GST_INDEP;
         // HIGHLIGHT("Using INDEP");
@@ -769,6 +769,18 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end,
     const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end)
 {
+    Eigen::Isometry3d tf1_beg_eigen, tf1_end_eigen, tf2_beg_eigen, tf2_end_eigen;
+    tf::transformKDLToEigen(tf1_beg, tf1_beg_eigen);
+    tf::transformKDLToEigen(tf1_end, tf1_end_eigen);
+    tf::transformKDLToEigen(tf2_beg, tf2_beg_eigen);
+    tf::transformKDLToEigen(tf2_end, tf2_end_eigen);
+    return continuousCollisionCheck(o1, tf1_beg_eigen, tf1_end_eigen, o2, tf2_beg_eigen, tf2_end_eigen);
+}
+
+ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
+    const std::string& o1, const Eigen::Isometry3d& tf1_beg, const Eigen::Isometry3d& tf1_end,
+    const std::string& o2, const Eigen::Isometry3d& tf2_beg, const Eigen::Isometry3d& tf2_end)
+{
     ContinuousCollisionProxy ret;
 
     if (!alwaysExternallyUpdatedCollisionScene_) updateCollisionObjectTransforms();
@@ -800,8 +812,11 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
 
     fcl::ContinuousCollisionRequestd request = fcl::ContinuousCollisionRequestd();
 
-    // request.num_max_iterations = 100;  // default 10
-    // request.toc_err = 1e-5;  // default 1e-4
+    request.num_max_iterations = 100;  // default 10
+    request.toc_err = 1e-5;            // default 1e-4
+
+    // GST_LIBCCD, GST_INDEP
+    // request.gjk_solver_type = fcl::GST_INDEP;
 
     // CCDM_TRANS, CCDM_LINEAR, CCDM_SCREW, CCDM_SPLINE
     // request.ccd_motion_type = fcl::CCDM_TRANS;
@@ -811,22 +826,26 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     // Cf. https://github.com/flexible-collision-library/fcl/issues/120
     // request.ccd_solver_type = fcl::CCDC_NAIVE;
 
-    // GST_LIBCCD, GST_INDEP
-    // request.gjk_solver_type = fcl::GST_INDEP;
+    // If both are primitives, let's use conservative advancement
+    if (shape1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && shape2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
+    {
+        request.ccd_solver_type = fcl::CCDC_CONSERVATIVE_ADVANCEMENT;
+    }
+    request.gjk_solver_type = fcl::GST_LIBCCD;
 
     fcl::ContinuousCollisionResultd result;
 
     double time_of_contact = fcl::continuousCollide(
-        shape1->collisionGeometry().get(), fcl_convert::KDL2fcl(tf1_beg), fcl_convert::KDL2fcl(tf1_end),
-        shape2->collisionGeometry().get(), fcl_convert::KDL2fcl(tf2_beg), fcl_convert::KDL2fcl(tf2_end),
+        shape1->collisionGeometry().get(), fcl::Transform3d(tf1_beg), fcl::Transform3d(tf1_end),
+        shape2->collisionGeometry().get(), fcl::Transform3d(tf2_beg), fcl::Transform3d(tf2_end),
         request, result);
 
     // HIGHLIGHT_NAMED("ContinuousCollisionResult", "return=" << time_of_contact << " is_collide: " << result.is_collide << " time_of_contact: " << result.time_of_contact << " contact_tf1: " << result.contact_tf1.translation().transpose() << " contact_tf2: " << result.contact_tf2.translation().transpose());
 
     ret.in_collision = allowedToCollide ? result.is_collide : false;
     ret.time_of_contact = result.time_of_contact;
-    tf::transformEigenToKDL(static_cast<Eigen::Affine3d>(result.contact_tf1), ret.contact_tf1);
-    tf::transformEigenToKDL(static_cast<Eigen::Affine3d>(result.contact_tf2), ret.contact_tf2);
+    tf::transformEigenToKDL(static_cast<Eigen::Isometry3d>(result.contact_tf1), ret.contact_tf1);
+    tf::transformEigenToKDL(static_cast<Eigen::Isometry3d>(result.contact_tf2), ret.contact_tf2);
 
     return ret;
 }

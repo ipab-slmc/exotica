@@ -815,10 +815,10 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     // request.ccd_solver_type = fcl::CCDC_NAIVE;
 
     // If both are primitives, let's use conservative advancement
-    if (shape1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && shape2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
-    {
-        request.ccd_solver_type = fcl::CCDC_CONSERVATIVE_ADVANCEMENT;
-    }
+    // if (shape1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && shape2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
+    // {
+    //     request.ccd_solver_type = fcl::CCDC_CONSERVATIVE_ADVANCEMENT;
+    // }
 
     fcl::ContinuousCollisionResultd result;
 

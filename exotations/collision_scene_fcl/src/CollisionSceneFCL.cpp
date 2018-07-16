@@ -328,11 +328,20 @@ std::vector<std::string> CollisionSceneFCL::getCollisionWorldLinks()
     return tmp;
 }
 
-/**
-   * @brief      Gets the collision robot links.
-   *
-   * @return     The collision robot links.
-   */
+std::vector<std::shared_ptr<KinematicElement>> CollisionSceneFCL::getCollisionWorldLinkElements()
+{
+    std::vector<std::shared_ptr<KinematicElement>> tmp;
+    for (fcl::CollisionObject* object : fcl_objects_)
+    {
+        std::shared_ptr<KinematicElement> element = kinematic_elements_[reinterpret_cast<long>(object->getUserData())].lock();
+        if (!element->ClosestRobotLink.lock())
+        {
+            tmp.push_back(element);
+        }
+    }
+    return tmp;
+}
+
 std::vector<std::string> CollisionSceneFCL::getCollisionRobotLinks()
 {
     std::vector<std::string> tmp;

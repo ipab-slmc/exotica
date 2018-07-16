@@ -167,6 +167,11 @@ public:
      */
     std::map<std::string, std::vector<std::string>> getModelLinkToCollisionLinkMap() { return modelLink_to_collisionLink_map_; };
     /**
+     * @brief      Returns a map between a model link name and the KinematicElement of associated collision links.
+     * @return     Map between model links and all the KinematicElements of the associated collision links.
+     */
+    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> getModelLinkToCollisionElementMap() { return modelLink_to_collisionElement_map_; };
+    /**
      * @brief      Returns a map between controlled robot link names and associated collision link names. Here we consider all fixed links between controlled links as belonging to the previous controlled link (as if the collision links had been fused).
      * @return     Map between controlled links and associated collision links.
      */
@@ -210,6 +215,7 @@ private:
 
     /// \brief Mapping between model link names and collision links.
     std::map<std::string, std::vector<std::string>> modelLink_to_collisionLink_map_;
+    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> modelLink_to_collisionElement_map_;
 
     /// \brief Mapping between controlled link name and collision links
     std::map<std::string, std::vector<std::string>> controlledLink_to_collisionLink_map_;

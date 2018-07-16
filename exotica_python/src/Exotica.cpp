@@ -973,7 +973,7 @@ PYBIND11_MODULE(_pyexotica, module)
     collisionScene.def_property("robotLinkPadding", &CollisionScene::getRobotLinkPadding, &CollisionScene::setRobotLinkPadding);
     collisionScene.def_property("worldLinkPadding", &CollisionScene::getWorldLinkPadding, &CollisionScene::setWorldLinkPadding);
     collisionScene.def("updateCollisionObjectTransforms", &CollisionScene::updateCollisionObjectTransforms);
-    collisionScene.def("continuousCollisionCheck", &CollisionScene::continuousCollisionCheck);
+    collisionScene.def("continuousCollisionCheck", (ContinuousCollisionProxy (CollisionScene::*)(const std::string&, const KDL::Frame&, const KDL::Frame&, const std::string&, const KDL::Frame&, const KDL::Frame&)) & CollisionScene::continuousCollisionCheck);
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

@@ -611,6 +611,9 @@ void Scene::updateSceneFrames()
         ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
     int lastControlledJointId = -1;
     std::string lastControlledLinkName;
+    modelLink_to_collisionLink_map_.clear();
+    modelLink_to_collisionElement_map_.clear();
+    controlledLink_to_collisionLink_map_.clear();
     for (int i = 0; i < links.size(); ++i)
     {
         // Check whether link is excluded from collision checking
@@ -641,7 +644,8 @@ void Scene::updateSceneFrames()
             //         continue;
 
             Eigen::Affine3d trans = objTransform.inverse() * ps_->getCurrentState().getCollisionBodyTransform(links[i], j);
-            kinematica_.AddEnvironmentElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
+            std::shared_ptr<KinematicElement> element = kinematica_.AddElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
+            modelLink_to_collisionElement_map_[links[i]->getName()].push_back(element);
 
             // Set up mappings
             modelLink_to_collisionLink_map_[links[i]->getName()].push_back(links[i]->getName() + "_collision_" + std::to_string(j));

@@ -16,7 +16,7 @@ std::string toString(const KDL::Frame& s)
 
 std::string toString(const Eigen::Isometry3d& s)
 {
-    Eigen::Quaterniond quat(s.rotation());
+    Eigen::Quaterniond quat(s.linear());
     return "([" + std::to_string(s.translation().x()) + " " + std::to_string(s.translation().y()) + " " + std::to_string(s.translation().z()) + "] [" + std::to_string(quat.x()) + " " + std::to_string(quat.y()) + " " + std::to_string(quat.z()) + " " + std::to_string(quat.w()) + "])";
 }
 

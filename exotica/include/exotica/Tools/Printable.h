@@ -1,6 +1,7 @@
 #ifndef PRINTABLE_H
 #define PRINTABLE_H
 
+#include <Eigen/Geometry>
 #include <iostream>
 #include <kdl/frames.hpp>
 #include <map>
@@ -57,5 +58,9 @@ std::ostream& operator<<(std::ostream& os, const std::map<I, T>& s)
 }
 
 std::string toString(const KDL::Frame& s);
+
+std::string toString(const Eigen::Isometry3d& s);
+
+std::string toString(const Eigen::Affine3d& s);
 
 #endif  // PRINTABLE_H

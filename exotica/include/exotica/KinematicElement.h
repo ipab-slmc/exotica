@@ -10,7 +10,7 @@
 class KinematicElement
 {
 public:
-    KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id), IsControlled(false), ControlId(-1), Shape(nullptr), isRobotLink(false), ClosestRobotLink(std::shared_ptr<KinematicElement>(nullptr)), IsTrajectoryGenerated(false)
+    KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id)
     {
     }
 
@@ -53,21 +53,21 @@ public:
     }
 
     int Id;
-    int ControlId;
-    bool IsControlled;
+    int ControlId = -1;
+    bool IsControlled = false;
     std::weak_ptr<KinematicElement> Parent;
     std::string ParentName;
     std::vector<std::weak_ptr<KinematicElement>> Children;
-    std::weak_ptr<KinematicElement> ClosestRobotLink;
-    KDL::Segment Segment;
-    KDL::Frame Frame;
-    KDL::Frame GeneratedOffset;
-    bool IsTrajectoryGenerated;
+    std::weak_ptr<KinematicElement> ClosestRobotLink = std::shared_ptr<KinematicElement>(nullptr);
+    KDL::Segment Segment = KDL::Segment();
+    KDL::Frame Frame = KDL::Frame::Identity();
+    KDL::Frame GeneratedOffset = KDL::Frame::Identity();
+    bool IsTrajectoryGenerated = false;
     std::vector<double> JointLimits;
-    shapes::ShapeConstPtr Shape;
+    shapes::ShapeConstPtr Shape = nullptr;
     std::string ShapeResourcePath = "";
     Eigen::Vector3d Scale = Eigen::Vector3d::Ones();
-    bool isRobotLink;
+    bool isRobotLink = false;
     Eigen::Vector4d Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0);
 
     inline void removeExpiredChildren()

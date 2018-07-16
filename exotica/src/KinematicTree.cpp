@@ -564,10 +564,12 @@ void KinematicTree::UpdateTree()
     {
         auto element = elements.front();
         elements.pop();
+        // Elements with Id > 0 have parent links.
         if (element->Id > 0)
         {
             element->Frame = element->Parent.lock()->Frame * element->getPose(TreeState(element->Id));
         }
+        // Root of tree.
         else
         {
             element->Frame = element->getPose(TreeState(element->Id));

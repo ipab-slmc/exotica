@@ -80,6 +80,7 @@ public:
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
+    bool isValid() { return true; }
     int PhiN;
     int JN;
     int NumTasks;

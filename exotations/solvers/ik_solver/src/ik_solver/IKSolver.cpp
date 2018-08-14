@@ -112,7 +112,7 @@ void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
     W = prob_->W;
     Winv = W.inverse();
 
-    if(parameters_.Alpha.size()!=1 && prob_->N!=parameters_.Alpha.size())
+    if (parameters_.Alpha.size() != 1 && prob_->N != parameters_.Alpha.size())
         throw_named("Alpha must have length of 1 or N.");
 }
 
@@ -165,10 +165,12 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
 
         ScaleToStepSize(qd);
 
-        if(parameters_.Alpha.size()==1) {
+        if (parameters_.Alpha.size() == 1)
+        {
             q -= qd * parameters_.Alpha[0];
         }
-        else {
+        else
+        {
             q -= qd.cwiseProduct(parameters_.Alpha);
         }
 

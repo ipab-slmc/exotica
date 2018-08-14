@@ -6,7 +6,6 @@
 
 namespace exotica
 {
-
 ///
 /// \brief detDiff2d Computes the 2D determinant (analogous to a 2D cross product) of a two vectors defined by P_1P_2 and P_1P.
 ///

@@ -218,7 +218,7 @@ def testSphereVsMeshDistance(collisionScene):
     expectedNormal2 = np.array([-1, 0, 0])
 
     p = scene.getCollisionDistance("A", "B")
-    print(p) # qqq
+    print(p)
     debugPublish(p, scene)
     assert(len(p) == 1)
     assert(np.isclose(p[0].Distance, expectedDistance))
@@ -666,11 +666,11 @@ for collisionScene in ['CollisionSceneFCLLatest']:
     testBoxVsBoxPenetrating(collisionScene)
     testBoxVsCylinderDistance(collisionScene)
     testBoxVsCylinderPenetrating(collisionScene)
-    # testBoxVsMeshDistance(collisionScene)  # includes mesh vs box (appears to be flipped now?)
+    testBoxVsMeshDistance(collisionScene)  # includes mesh vs box (appears to be flipped now?)
     # testBoxVsMeshPenetrating(collisionScene)   # BROKEN with libccd (reports 0 distance)
     testCylinderVsCylinderDistance(collisionScene)
     testCylinderVsCylinderPenetrating(collisionScene)
-    # testCylinderVsMeshDistance(collisionScene)  # includes mesh vs cylinder (appears to be flipped now?)
+    testCylinderVsMeshDistance(collisionScene)  # includes mesh vs cylinder (appears to be flipped now?)
     # testCylinderVsMeshPenetrating(collisionScene)   # BROKEN with libccd (reports 0 distance)
     testMeshVsMeshDistance(collisionScene)
     # testMeshVsMeshPenetrating(collisionScene)    # BROKEN with libccd (very inaccurate distance)

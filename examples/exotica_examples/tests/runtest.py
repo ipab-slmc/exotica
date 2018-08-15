@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # This is a workaround for liburdf.so throwing an exception and killing
 # the process on exit in ROS Indigo.
+from __future__ import print_function
 
 import subprocess
 import os
@@ -29,6 +30,7 @@ for test in cpptests:
         os._exit(1)
 
 for test in pytests:
+    print(">>> Starting test", test)
     process=subprocess.Popen(['rosrun', 'exotica_examples', test],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = process.stdout.readlines()
     print(''.join(output))

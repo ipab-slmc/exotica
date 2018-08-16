@@ -74,9 +74,9 @@ def Parser(Type):
     elif Type=='std::vector<Initializer>' or Type=='std::vector<exotica::Initializer>':
         return "boost::any_cast<std::vector<exotica::Initializer>>(prop.get())"
     elif Type=='Eigen::VectorXd':
-        parser= "parseVector"
+        parser= "parseVector<double,Eigen::Dynamic>"
     elif Type=='Eigen::Vector3d':
-        parser= "parseVector3"
+        parser= "parseVector<double,3>"
     elif Type=='bool':
         parser= "parseBool"
     elif Type=='double':

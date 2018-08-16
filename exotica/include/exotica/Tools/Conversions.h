@@ -161,40 +161,50 @@ inline std::string trim(const std::string& s)
     return std::string(wsfront, std::find_if_not(s.rbegin(), std::string::const_reverse_iterator(wsfront), [](int c) { return std::isspace(c); }).base());
 }
 
-inline Eigen::VectorXd parseVector(const std::string value)
+template <typename T>
+T to_number(const std::string& val)
 {
-    Eigen::VectorXd ret;
-    double temp_entry;
-    int i = 0;
-
-    std::istringstream text_parser(value);
-
-    text_parser >> temp_entry;
-    while (!(text_parser.fail() || text_parser.bad()))
-    {
-        ret.conservativeResize(++i);
-        ret(i - 1) = temp_entry;
-        text_parser >> temp_entry;
-    }
-    if (i == 0) throw_pretty("Empty vector!");
-    return ret;
+    throw std::runtime_error("conversion not implemented!");
 }
 
-inline Eigen::Vector3d parseVector3(const std::string value)
+template <>
+inline float to_number<float>(const std::string& val)
 {
-    Eigen::Vector3d ret;
-    double temp_entry;
+    return std::stof(val);
+}
+
+template <>
+inline double to_number<double>(const std::string& val)
+{
+    return std::stod(val);
+}
+
+template <typename T, const int S>  // Eigen::Vector<S><T>
+inline Eigen::Matrix<T, S, 1> parseVector(const std::string value)
+{
+    Eigen::Matrix<T, S, 1> ret;
+    std::string temp_entry;
     int i = 0;
 
     std::istringstream text_parser(value);
 
-    text_parser >> temp_entry;
-    while (!(text_parser.fail() || text_parser.bad()))
+    while (text_parser >> temp_entry)
     {
-        ret(i++) = temp_entry;
-        text_parser >> temp_entry;
+        ret.conservativeResize(++i);
+        try
+        {
+            ret[i - 1] = to_number<T>(temp_entry);
+        }
+        catch (std::invalid_argument)
+        {
+            ret[i - 1] = std::numeric_limits<T>::quiet_NaN();
+        }
     }
     if (i == 0) throw_pretty("Empty vector!");
+    if (S != Eigen::Dynamic && S != i)
+    {
+        throw_pretty("Wrong vector size! Requested: " + std::to_string(S) + ", Provided: " + std::to_string(i));
+    }
     return ret;
 }
 

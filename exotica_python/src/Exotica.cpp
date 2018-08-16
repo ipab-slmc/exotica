@@ -239,7 +239,7 @@ public:
         {
             if (isPyString(value_py))
             {
-                target.set(parseVector(pyAsString(value_py)));
+                target.set(parseVector<double, Eigen::Dynamic>(pyAsString(value_py)));
             }
             else
             {
@@ -251,7 +251,7 @@ public:
         {
             if (isPyString(value_py))
             {
-                target.set(parseVector3(pyAsString(value_py)));
+                target.set(parseVector<double, 3>(pyAsString(value_py)));
             }
             else
             {
@@ -508,7 +508,7 @@ PYBIND11_MODULE(_pyexotica, module)
     tools.def("parsePath", &parsePath);
     tools.def("parseBool", &parseBool);
     tools.def("parseDouble", &parseDouble);
-    tools.def("parseVector", &parseVector);
+    tools.def("parseVector", &parseVector<double, Eigen::Dynamic>);
     tools.def("parseList", &parseList);
     tools.def("parseInt", &parseInt);
     tools.def("parseIntList", &parseIntList);

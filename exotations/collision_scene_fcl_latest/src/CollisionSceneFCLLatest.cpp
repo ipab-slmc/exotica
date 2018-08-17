@@ -39,7 +39,7 @@ namespace fcl_convert
 {
 inline fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
 {
-    Eigen::Affine3d ret;
+    Eigen::Isometry3d ret;
     tf::transformKDLToEigen(frame, ret);
     return fcl::Transform3d(ret);
 }
@@ -276,15 +276,15 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     p.e1 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
     p.e2 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
 
-    // New logic as of May 2018:
+    // New logic as of August 2018:
     //  - Use LIBCCD as comment in Drake suggests it is more reliable now.
-    //  - If in collision, use first contact of the collide callback.
+    //  - If in collision, use the deepest contact of the collide callback.
     //  - If not in collision, run distance query.
 
     // Step 0: Run collision check:
     fcl::CollisionRequestd tmp_req;
     fcl::CollisionResultd tmp_res;
-    tmp_req.num_max_contacts = 1;
+    tmp_req.num_max_contacts = 1000;
     tmp_req.enable_contact = true;
 
     // The following comment and Step 1 code is copied from Drake (BSD license):
@@ -296,18 +296,36 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     // than relying on FCL's defaults.
     tmp_req.gjk_tolerance = 2e-12;
     tmp_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
+
     fcl::collide(o1, o2, tmp_req, tmp_res);
 
     // Step 1: If in collision, extract contact point.
     if (tmp_res.isCollision())
     {
-        // Logic below from Drake (!)
+        // TODO: Issue #364: https://github.com/ipab-slmc/exotica/issues/364
+        // As of 0.5.94, this does not work for primitive-vs-mesh (but does for mesh-vs-primitive):
+        if ((o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH) || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM) || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH))
+        {
+            HIGHLIGHT_NAMED("WARNING", "As of 0.5.94, this function does not work for primitive-vs-mesh and vice versa. Do not expect the contact points or distances to be accurate at all.");
+        }
+
+        // Some of the logic below is copied from Drake
         std::vector<fcl::Contactd> contacts;
         tmp_res.getContacts(contacts);
         if (!contacts.empty())
         {
-            // HIGHLIGHT("In collision, we got a contact: " << p.e1->Segment.getName() << " vs " << p.e2->Segment.getName());
-            const fcl::Contactd& contact{contacts[0]};
+            size_t deepest_penetration_depth_index = -1;
+            double deepest_penetration_depth = -1;
+            for (size_t i = 0; i < contacts.size(); i++)
+            {
+                if (contacts[i].penetration_depth > deepest_penetration_depth)
+                {
+                    deepest_penetration_depth = contacts[i].penetration_depth;
+                    deepest_penetration_depth_index = i;
+                }
+            }
+
+            const fcl::Contactd& contact = tmp_res.getContact(deepest_penetration_depth_index);
             //  By convention, Drake requires the contact normal to point out of B and
             //  into A. FCL uses the opposite convention.
             fcl::Vector3d normal = -contact.normal;
@@ -315,7 +333,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             // Signed distance is negative when penetration depth is positive.
             double signed_distance = -contact.penetration_depth;
 
-            if (signed_distance > 0) throw_pretty("In collision but positive signed distance?");
+            if (signed_distance > 0) throw_pretty("In collision but positive signed distance? " << signed_distance);
 
             // FCL returns a single contact point, but PointPair expects two, one on
             // the surface of body A (Ac) and one on the surface of body B (Bc).
@@ -325,10 +343,6 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             // A and into B.
             const fcl::Vector3d p_WAc{contact.pos + 0.5 * signed_distance * normal};
             const fcl::Vector3d p_WBc{contact.pos - 0.5 * signed_distance * normal};
-
-            // HIGHLIGHT("Normal: " << contact.normal[0] << "," << contact.normal[1] << "," << contact.normal[2]);
-            // HIGHLIGHT("p_WAc: " << p_WAc[0] << "," << p_WAc[1] << "," << p_WAc[2]);
-            // HIGHLIGHT("p_WBc: " << p_WBc[0] << "," << p_WBc[1] << "," << p_WBc[2]);
 
             p.distance = signed_distance;
             p.normal1 = -contact.normal;
@@ -346,57 +360,27 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         }
         else
         {
-            throw_pretty("In contact but did not return any contact points.");
+            throw_pretty("[This should not happen] In contact but did not return any contact points.");
         }
     }
 
     // Step 2: If not in collision, run old distance logic.
     data->Request.enable_nearest_points = true;
-    data->Request.enable_signed_distance = true;  // Added in FCL 0.6.0
-    // GST_LIBCCD produces incorrect contacts. Probably due to incompatible version of libccd.
-    // However, FCL code comments suggest INDEP producing incorrect contact points, cf.
-    // https://github.com/flexible-collision-library/fcl/blob/master/test/test_fcl_signed_distance.cpp#L85-L86
-
-    // INDEP better for primitives, CCD better for when there's a mesh --
-    // however contact points appear better with libccd as well according to
-    // unit test. When at distance, INDEP better for primitives, but in
-    // penetration LIBCCD required.
-    // Cf. https://github.com/flexible-collision-library/fcl/blob/master/include/fcl/narrowphase/distance_request.h#L57-L92
-    if (false)  //o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
-    {
-        data->Request.gjk_solver_type = fcl::GST_INDEP;
-        // HIGHLIGHT("Using INDEP");
-    }
-    else
-    {
-        data->Request.gjk_solver_type = fcl::GST_LIBCCD;
-        // HIGHLIGHT("Using LIBCCD");
-    }
-
+    data->Request.enable_signed_distance = true;  // Added in FCL 0.6.0 (i.e., >0.5.90)
+    data->Request.distance_tolerance = 1e-6;
+    data->Request.gjk_solver_type = fcl::GST_LIBCCD;
     data->Result.clear();
 
-    // Nearest point calculation is broken when o1 is a primitive and o2 a mesh,
-    // works however for o1 being a mesh and o2 being a primitive. Due to this,
-    // we will flip the order of o1 and o2 in the request and then later on swap
-    // the contact points and normals.
-    // Cf. Issue #184:
-    // https://github.com/ipab-slmc/exotica/issues/184#issuecomment-341916457
-    bool flipO1AndO2 = false;
-    double min_dist;
-    if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH)
-    {
-        // HIGHLIGHT_NAMED("CollisionSceneFCLLatest", "Flipping o1 and o2");
-        flipO1AndO2 = true;
-        min_dist = fcl::distance(o2, o1, data->Request, data->Result);
-    }
-    else
-    {
-        min_dist = fcl::distance(o1, o2, data->Request, data->Result);
-    }
+    double min_dist = fcl::distance(o1, o2, data->Request, data->Result);
 
-    // If -1 is returned, the returned query is a touching contact.
+    // If -1 is returned, the returned query is a touching contact (or not implemented).
     bool touching_contact = false;
     p.distance = min_dist;
+    if (min_dist != data->Result.min_distance)
+    {
+        // This can mean this has not been implemented and results may be arbitrary.
+        HIGHLIGHT_NAMED("Discrepancy", min_dist << " vs " << data->Result.min_distance);
+    }
 
     if (min_dist == -1 || std::abs(min_dist) < 1e-9)
     {
@@ -404,110 +388,21 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         p.distance = 0.0;
     }
 
-    // FCL uses world coordinates for meshes while local coordinates are used
-    // for primitive shapes - thus, we need to work around this.
-    // Cf. https://github.com/flexible-collision-library/fcl/issues/171
-    //
-    // Additionally, when in penetration (distance < 0), for meshes, contact
-    // points are reasonably accurate. Contact points for primitives are not
-    // reliable (FCL bug), use shape centres instead.
     KDL::Vector c1, c2;
 
-    // Case 1: Mesh vs Mesh - already in world frame
-    if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH)
+    // We need some special treatise here, cf. https://github.com/flexible-collision-library/fcl/issues/171#issuecomment-413368821
+    // Case 3: Primitive vs Mesh - both returned in local frame, and additionally swapped.
+    if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH)
+    {
+        // NOTE! The nearest points are in the wrong order now
+        c1 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        c2 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+    }
+    // The default case that, in theory, should work for all cases.
+    else
     {
         c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
         c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-    }
-    // Case 2: Primitive vs Primitive - convert from both local frames to world frame
-    else if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
-    {
-        // INDEP has a further caveat when in penetration: it will return the
-        // exact touch location as the contact point - not the point of maximum
-        // penetration. This contact point will be in world frame, while the
-        // closest point is in local frame.
-        if (p.distance > 0)
-        {
-            c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-            c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-        }
-        else
-        {
-            // if (!touching_contact) throw_pretty("This should not be called any longer.");
-
-            // Again, we need to distinguish between the two different solvers
-            if (data->Request.gjk_solver_type == fcl::GST_INDEP)
-            {
-                // The contact point is accurate but it is not the point of deepest penetration
-                // WITH INDEP:
-                c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-                c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-            }
-            // Only LIBCCD can compute contact points on the surface of a
-            // sphere, i.e. if in collision and either of the two objects is a
-            // sphere we need to use LIBCCD.
-            // Cf.
-            // https://github.com/flexible-collision-library/fcl/blob/master/test/test_fcl_signed_distance.cpp#L85-L86
-            else
-            {
-                // WITH LIBCCD:
-                c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-                c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-            }
-        }
-    }
-    // Case 3: Primitive vs Mesh - primitive returned in flipped local frame (tbc), mesh returned in global frame
-    else if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH)
-    {
-        // Flipping contacts is a workaround for issue #184
-        // Cf. https://github.com/ipab-slmc/exotica/issues/184#issuecomment-341916457
-        if (!flipO1AndO2) throw_pretty("We got the broken case but aren't flipping, why?");
-
-        // Note: e1 and e2 are swapped, i.e. c1 on e2, c2 on e1
-        // e2 is a mesh, always fine
-        c1 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-
-        // e1 is a primitive, i.e. use shape centres as nearest point when in penetration
-        if (p.distance > 0)
-        {
-            c2 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-        }
-        else
-        {
-            c2 = p.e1->Frame.p;
-        }
-    }
-    // Case 4: Mesh vs Primitive - both are returned in the local frame (works with both LIBCCD and INDEP)
-    else if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
-    {
-        // e1 is mesh, i.e. nearest points are fine
-        c1 = p.e1->Frame * KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-
-        // e2 is a primitive, i.e. use shape centres as nearest point when in penetration
-        if (p.distance > 0)
-        {
-            c2 = p.e2->Frame * KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-        }
-        else
-        {
-            throw_pretty("Should not be called anymore.");
-            c2 = p.e2->Frame.p;
-        }
-    }
-    // Unknown case - what's up?
-    else
-    {
-        throw_pretty("e1: " << p.e1->Shape->type << " vs e2: " << p.e2->Shape->type);
-    }
-
-    if (flipO1AndO2)
-    {
-        // Flipping contacts is a workaround for issue #184
-        // Cf. https://github.com/ipab-slmc/exotica/issues/184#issuecomment-341916457
-        KDL::Vector tmp_c1 = KDL::Vector(c1);
-        KDL::Vector tmp_c2 = KDL::Vector(c2);
-        c1 = tmp_c2;
-        c2 = tmp_c1;
     }
 
     // Check if NaN

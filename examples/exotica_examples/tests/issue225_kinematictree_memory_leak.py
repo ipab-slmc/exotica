@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import time
 import resource
 import numpy as np
@@ -17,7 +18,7 @@ memory_usage_before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 print(">>> Before:", e-s, " - Memory Usage Before:", memory_usage_before)
 
 print(">>> Loading and cleaning scene 500 times")
-for _ in range(500):
+for _ in xrange(500):
     ompl.getProblem().update(np.zeros(7,))
     sc.cleanScene()
     sc.loadSceneFile(
@@ -31,7 +32,7 @@ print(">>> LEAK:", memory_usage_intermediate - memory_usage_before)
 assert (memory_usage_intermediate - memory_usage_before) == 0
 
 print(">>> updateSceneFrames 10000 times")
-for _ in range(10000):
+for _ in xrange(10000):
     sc.updateSceneFrames()
     sc.updateCollisionObjects()
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 import pyexotica as exo
 import math
 import time
@@ -7,8 +6,9 @@ import numpy as np
 
 exo.Setup.initRos()
 
-PENETRATING_DISTANCE_ATOL = 1e-2
+PENETRATING_DISTANCE_ATOL = 1e-6
 AFAR_DISTANCE_ATOL = 1e-3
+CLOSE_DISTANCE_ATOL = 1e-6
 publishProxies = False
 
 def getProblemInitializer(collisionScene, URDF):
@@ -117,8 +117,8 @@ def testSphereVsBoxTouching(collisionScene):
     debugPublish(p, scene)
     assert(len(p) == 1)
     assert(np.isclose(p[0].Distance, 0.))
-    expectedContact1 = np.array([0.5, 0, 0])
-    expectedContact2 = np.array([-1, 0, 0])
+    expectedContact1 = np.array([0, 0, 0])
+    expectedContact2 = np.array([0, 0, 0])
     expectedNormal1 = np.array([-1, 0, 0])
     expectedNormal2 = np.array([1, 0, 0])
     assert(np.isclose(p[0].Contact1, expectedContact1, atol=AFAR_DISTANCE_ATOL).all())
@@ -291,13 +291,11 @@ def testBoxVsBoxDistance(collisionScene):
     expectedContact2 = np.array([0.5, 0, 0])
     expectedNormal1 = np.array([1, 0, 0])
     expectedNormal2 = np.array([-1, 0, 0])
-    # print(p) # Center of face problem!
-    # assert(np.isclose(p[0].Contact1, expectedContact1, atol=AFAR_DISTANCE_ATOL).all())
-    # assert(np.isclose(p[0].Contact2, expectedContact2, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Contact1[0], expectedContact1[0], atol=AFAR_DISTANCE_ATOL)) # TODO: face center issue
-    assert(np.isclose(p[0].Contact2[0], expectedContact2[0], atol=AFAR_DISTANCE_ATOL)) # TODO: face center issue
-    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=AFAR_DISTANCE_ATOL).all())
+    print(p)
+    assert(np.isclose(p[0].Contact1[0], expectedContact1[0], atol=CLOSE_DISTANCE_ATOL))
+    assert(np.isclose(p[0].Contact2[0], expectedContact2[0], atol=CLOSE_DISTANCE_ATOL))
+    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=CLOSE_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=CLOSE_DISTANCE_ATOL).all())
     print('PrimitiveBox_vs_PrimitiveBox_Distance: Distance, Contact Points, Normals: PASSED')
 
 
@@ -311,16 +309,17 @@ def testBoxVsBoxTouching(collisionScene):
     print('PrimitiveBox_vs_PrimitiveBox_Touching: isStateValid(True): PASSED')
 
     p = scene.getCollisionDistance("A", "B")
-    print(p)
     debugPublish(p, scene)
     assert(len(p) == 1)
     assert(np.isclose(p[0].Distance, 0.))
-    expectedContact1 = np.array([0.5, 0, 0])
-    expectedContact2 = np.array([-0.5, 0, 0])
+    expectedContact1 = np.array([0, 0, 0])
+    expectedContact2 = np.array([0, 0, 0])
     expectedNormal1 = np.array([-1, 0, 0])
     expectedNormal2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].Contact1, expectedContact1).all())
-    assert(np.isclose(p[0].Contact2, expectedContact2).all())
+    assert(np.isclose(p[0].Contact1-p[0].Contact2, np.zeros((3,1))).all())
+    # Only check x-axis as this is face to face contact and thus undefined where y and z are.
+    assert(np.isclose(p[0].Contact1[0], expectedContact1[0]))
+    assert(np.isclose(p[0].Contact2[0], expectedContact2[0]))
     assert(np.isclose(p[0].Normal1, expectedNormal1).all())
     assert(np.isclose(p[0].Normal2, expectedNormal2).all())
     print('PrimitiveBox_vs_PrimitiveBox_Touching: Distance, Contact Points, Normals: PASSED')
@@ -343,8 +342,9 @@ def testBoxVsBoxPenetrating(collisionScene):
     expectedContact2 = np.array([-0.1, 0, 0])
     expectedNormal1 = np.array([-1, 0, 0])
     expectedNormal2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].Contact1, expectedContact1).all())
-    assert(np.isclose(p[0].Contact2, expectedContact2).all())
+    # Only test the x-component for the contacts as the faces are parallel.
+    assert(np.isclose(p[0].Contact1[0], expectedContact1[0]))
+    assert(np.isclose(p[0].Contact2[0], expectedContact2[0]))
     assert(np.isclose(p[0].Normal1, expectedNormal1).all())
     assert(np.isclose(p[0].Normal2, expectedNormal2).all())
     print('PrimitiveBox_vs_PrimitiveBox_Penetrating: Distance, Contact Points, Normals: PASSED')
@@ -611,10 +611,10 @@ def testMeshVsMeshDistance(collisionScene):
     expectedContact2 = np.array([0.5, 0, 0])
     expectedNormal1 = np.array([1, 0, 0])
     expectedNormal2 = np.array([-1, 0, 0])
-    assert(np.isclose(p[0].Contact1, expectedContact1).all())
-    assert(np.isclose(p[0].Contact2, expectedContact2).all())
-    assert(np.isclose(p[0].Normal1, expectedNormal1).all())
-    assert(np.isclose(p[0].Normal2, expectedNormal2).all())
+    assert(np.isclose(p[0].Contact1, expectedContact1, atol=CLOSE_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Contact2, expectedContact2, atol=CLOSE_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Normal1, expectedNormal1, atol=CLOSE_DISTANCE_ATOL).all())
+    assert(np.isclose(p[0].Normal2, expectedNormal2, atol=CLOSE_DISTANCE_ATOL).all())
     print('Mesh_vs_Mesh_Distance: Distance, Contact Points, Normals: PASSED')
 
 

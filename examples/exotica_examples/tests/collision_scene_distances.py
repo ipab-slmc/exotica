@@ -67,7 +67,6 @@ def testSphereVsSpherePenetrating(collisionScene):
 
     p = scene.getCollisionDistance("A", "B")
     debugPublish(p, scene)
-    print(p)
     assert(len(p) == 1)
     assert(np.isclose(p[0].Distance, -.4, atol=PENETRATING_DISTANCE_ATOL))
     expectedContact1 = np.array([0.2, 0, 0])
@@ -115,7 +114,6 @@ def testSphereVsBoxTouching(collisionScene):
     print('PrimitiveSphere_vs_PrimitiveBox_Touching: isStateValid(True): PASSED')
 
     p = scene.getCollisionDistance("A", "B")
-    print(p)
     debugPublish(p, scene)
     assert(len(p) == 1)
     assert(np.isclose(p[0].Distance, 0.))
@@ -252,7 +250,7 @@ def testSphereVsMeshPenetrating(collisionScene):
 
     p = scene.getCollisionDistance("A", "B")
     debugPublish(p, scene)
-    print(p) # qqq
+    print(p)
     expectedContact1 = np.array([0.2, 0, 0])
     expectedContact2 = np.array([-0.2, 0, 0])
     expectedNormal1 = np.array([-1, 0, 0])

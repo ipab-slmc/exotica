@@ -651,6 +651,7 @@ def testMeshVsMeshPenetrating(collisionScene):
 
 #########################################
 
+# Cf. Issue #364 for tracking deactivated tests.
 for collisionScene in ['CollisionSceneFCLLatest']:
     testSphereVsSphereDistance(collisionScene)
     testSphereVsSpherePenetrating(collisionScene)
@@ -660,18 +661,18 @@ for collisionScene in ['CollisionSceneFCLLatest']:
     testSphereVsCylinderDistance(collisionScene)
     testSphereVsCylinderPenetrating(collisionScene)
     # testSphereVsMeshDistance(collisionScene)  # includes mesh vs sphere (distance OK, points not)
-    # testSphereVsMeshPenetrating(collisionScene)   # BROKEN with libccd
+    # testSphereVsMeshPenetrating(collisionScene)   # BROKEN with libccd (not implemented)
     testBoxVsBoxDistance(collisionScene)
     testBoxVsBoxTouching(collisionScene)
     testBoxVsBoxPenetrating(collisionScene)
     testBoxVsCylinderDistance(collisionScene)
     testBoxVsCylinderPenetrating(collisionScene)
-    testBoxVsMeshDistance(collisionScene)  # includes mesh vs box (appears to be flipped now?)
-    # testBoxVsMeshPenetrating(collisionScene)   # BROKEN with libccd (reports 0 distance)
+    testBoxVsMeshDistance(collisionScene)  # includes mesh vs box
+    # testBoxVsMeshPenetrating(collisionScene)   # BROKEN with libccd (not implemented)
     testCylinderVsCylinderDistance(collisionScene)
     testCylinderVsCylinderPenetrating(collisionScene)
-    testCylinderVsMeshDistance(collisionScene)  # includes mesh vs cylinder (appears to be flipped now?)
-    # testCylinderVsMeshPenetrating(collisionScene)   # BROKEN with libccd (reports 0 distance)
+    testCylinderVsMeshDistance(collisionScene)  # includes mesh vs cylinder
+    # testCylinderVsMeshPenetrating(collisionScene)   # BROKEN with libccd (not implemented)
     testMeshVsMeshDistance(collisionScene)
     # testMeshVsMeshPenetrating(collisionScene)    # BROKEN with libccd (very inaccurate distance)
 

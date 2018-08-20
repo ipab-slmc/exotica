@@ -75,6 +75,8 @@ public:
 
     void setup();
 
+    bool isAllowedToCollide(std::string o1, std::string o2, bool self);
+
     static bool isAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene);
     static bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data);
     static bool collisionCallbackDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data, double& dist);

@@ -217,6 +217,40 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
     return ret;
 }
 
+bool CollisionSceneFCLLatest::isAllowedToCollide(std::string o1, std::string o2, bool self)
+{
+    std::shared_ptr<KinematicElement> e1, e2;
+
+    for (size_t i = 0; i < kinematic_elements_.size(); i++)
+    {
+        std::shared_ptr<KinematicElement> tmp = kinematic_elements_[i].lock();
+        if (tmp->Segment.getName() == o1) e1 = tmp;
+        if (tmp->Segment.getName() == o2) e2 = tmp;
+    }
+
+    if (!e1) throw_pretty("o1 is not a valid collision link:" << o1);
+    if (!e2) throw_pretty("o2 is not a valid collision link:" << o2);
+
+    bool isRobot1 = e1->isRobotLink || e1->ClosestRobotLink.lock();
+    bool isRobot2 = e2->isRobotLink || e2->ClosestRobotLink.lock();
+    // Don't check collisions between world objects
+    if (!isRobot1 && !isRobot2) return false;
+    // Skip self collisions if requested
+    if (isRobot1 && isRobot2 && !self) return false;
+    // Skip collisions between shapes within the same objects
+    if (e1->Parent.lock() == e2->Parent.lock()) return false;
+    // Skip collisions between bodies attached to the same object
+    if (e1->ClosestRobotLink.lock() && e2->ClosestRobotLink.lock() && e1->ClosestRobotLink.lock() == e2->ClosestRobotLink.lock()) return false;
+
+    if (isRobot1 && isRobot2)
+    {
+        const std::string& name1 = e1->ClosestRobotLink.lock() ? e1->ClosestRobotLink.lock()->Segment.getName() : e1->Parent.lock()->Segment.getName();
+        const std::string& name2 = e2->ClosestRobotLink.lock() ? e2->ClosestRobotLink.lock()->Segment.getName() : e2->Parent.lock()->Segment.getName();
+        return acm_.getAllowedCollision(name1, name2);
+    }
+    return true;
+}
+
 bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene)
 {
     std::shared_ptr<KinematicElement> e1 = scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();

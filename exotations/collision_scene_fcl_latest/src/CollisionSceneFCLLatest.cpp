@@ -727,6 +727,13 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     CollisionData data(this);
     bool allowedToCollide = isAllowedToCollide(shape1, shape2, data.Self, data.Scene);
 
+    if (!allowedToCollide)
+    {
+        ret.in_collision = false;
+        ret.time_of_contact = 1.0;
+        return ret;
+    }
+
     fcl::ContinuousCollisionRequestd request = fcl::ContinuousCollisionRequestd();
 
     // request.num_max_iterations = 100;  // default 10
@@ -750,7 +757,6 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     // }
 
     fcl::ContinuousCollisionResultd result;
-
     double time_of_contact = fcl::continuousCollide(
         shape1->collisionGeometry().get(), fcl_convert::KDL2fcl(tf1_beg), fcl_convert::KDL2fcl(tf1_end),
         shape2->collisionGeometry().get(), fcl_convert::KDL2fcl(tf2_beg), fcl_convert::KDL2fcl(tf2_end),

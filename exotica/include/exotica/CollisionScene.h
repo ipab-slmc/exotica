@@ -107,6 +107,15 @@ public:
      */
     virtual void setup() {}
     /**
+     * @brief Returns whether two links are allowed to collide.
+     * 
+     * @param o1 
+     * @param o2 
+     * @return true The two objects are allowed to collide.
+     * @return false The two objects are excluded, e.g., by an ACM.
+     */
+    virtual bool isAllowedToCollide(std::string o1, std::string o2, bool self) { throw_pretty("Not implemented!"); }
+    /**
        * \brief Checks if the whole robot is valid (collision only).
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free..

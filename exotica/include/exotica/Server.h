@@ -143,22 +143,16 @@ public:
         }
     }
 
-    template <typename T>
-    static ros::Publisher advertise(const std::string &topic, uint32_t queue_size, bool latch = false)
+    template <typename T, typename... Args>
+    static ros::Publisher advertise(Args &&... args)
     {
-        return Instance()->getNodeHandle().advertise<T>(topic, queue_size, latch);
+        return Instance()->getNodeHandle().advertise<T>(std::forward<Args>(args)...);
     }
 
-    template <typename T>
-    static ros::Publisher advertise(const std::string &topic, uint32_t queue_size, const ros::SubscriberStatusCallback &connect_cb, const ros::SubscriberStatusCallback &disconnect_cb = ros::SubscriberStatusCallback(), const ros::VoidConstPtr &tracked_object = ros::VoidConstPtr(), bool latch = false)
+    template <typename T, typename... Args>
+    static ros::Subscriber subscribe(Args &&... args)
     {
-        return Instance()->getNodeHandle().advertise<T>(topic, queue_size, connect_cb, disconnect_cb, tracked_object, latch);
-    }
-
-    template <typename T>
-    static ros::Publisher advertise(ros::AdvertiseOptions &ops)
-    {
-        return Instance()->getNodeHandle().advertise<T>(ops);
+        return Instance()->getNodeHandle().subscribe<T>(std::forward<Args>(args)...);
     }
 
     template <typename T>

@@ -113,10 +113,10 @@ public:
     }
 
     inline static bool isRos() { return Instance()->node_ != nullptr; }
-    inline ros::NodeHandle &getNodeHandle()
+    inline static ros::NodeHandle &getNodeHandle()
     {
         if (!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
-        return node_->getNodeHandle();
+        return Instance()->node_->getNodeHandle();
     }
 
     template <typename T>

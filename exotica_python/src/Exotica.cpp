@@ -662,6 +662,8 @@ PYBIND11_MODULE(_pyexotica, module)
     motionSolver.def(
         "solve", [](std::shared_ptr<MotionSolver> sol) { return Solve(sol); },
         "Solve the problem");
+    motionSolver.def("solve", [](MotionSolver& solver, Eigen::MatrixXd& solution) -> Eigen::MatrixXd& {solver.Solve(solution); return solution; },
+                     "Solve the problem", py::arg("start state"));
     motionSolver.def("getProblem", &MotionSolver::getProblem, py::return_value_policy::reference_internal);
 
     py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object> planningProblem(module, "PlanningProblem");

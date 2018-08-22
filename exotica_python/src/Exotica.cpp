@@ -271,6 +271,18 @@ public:
             }
             return true;
         }
+        else if (target.getType() == getTypeName(typeid(std::vector<std::string>)))
+        {
+            if (isPyString(value_py))
+            {
+                target.set(parseList(pyAsString(value_py)));
+            }
+            else
+            {
+                target.set(py::cast<std::vector<std::string>>(value_py));
+            }
+            return true;
+        }
         else if (target.getType() == "bool")
         {
             if (isPyString(value_py))
@@ -431,6 +443,10 @@ public:
         else if (prop.getType() == getTypeName(typeid(std::vector<int>)))
         {
             PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<std::vector<int>>(prop.get())).ptr());
+        }
+        else if (prop.getType() == getTypeName(typeid(std::vector<std::string>)))
+        {
+            PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<std::vector<std::string>>(prop.get())).ptr());
         }
         else if (prop.getType() == "bool")
         {

@@ -90,6 +90,7 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     Phi.setZero(PhiN);
     TaskSpaceVector dummy;
     Constraint.initialize(init.Constraint, shared_from_this(), dummy);
+    Constraint.Tolerance = init.ConstraintTolerance;
     applyStartState(false);
     preupdate();
 }

@@ -183,7 +183,7 @@ bool TimeIndexedSamplingProblem::isValid(Eigen::VectorXdRefConst x, double t)
     }
     Constraint.update(Phi);
     numberOfProblemUpdates++;
-    return ((Constraint.S * Constraint.ydiff).array() < 0.0).all();
+    return ((Constraint.S * Constraint.ydiff).array().abs() <= 0.0).all();
 }
 
 void TimeIndexedSamplingProblem::preupdate()

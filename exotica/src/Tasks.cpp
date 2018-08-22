@@ -341,5 +341,8 @@ void SamplingTask::update(const TaskSpaceVector& bigPhi)
         Phi.data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
     }
     ydiff = Phi - y;
+
+    for (unsigned int i = 0; i < ydiff.size(); i++)
+        if (std::abs(ydiff[i]) < Tolerance) ydiff[i] = 0.0;
 }
 }

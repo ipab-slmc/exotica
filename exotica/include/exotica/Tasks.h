@@ -76,6 +76,7 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
+    double Tolerance = 0.0;  // To avoid numerical issues consider all values below this as 0.0.
 
 protected:
     std::vector<TaskInitializer> TaskInitializers;

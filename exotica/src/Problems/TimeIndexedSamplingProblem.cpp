@@ -93,6 +93,7 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     Phi.setZero(PhiN);
 
     Constraint.initialize(init.Constraint, shared_from_this(), ConstraintPhi);
+    Constraint.Tolerance = init.ConstraintTolerance;
 
     applyStartState(false);
     preupdate();

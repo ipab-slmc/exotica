@@ -119,7 +119,7 @@ bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
     }
     Constraint.update(Phi);
     numberOfProblemUpdates++;
-    return ((Constraint.S * Constraint.ydiff).array() < 0.0).all();
+    return ((Constraint.S * Constraint.ydiff).array().abs() <= 0.0).all();
 }
 
 void SamplingProblem::Update(Eigen::VectorXdRefConst x)

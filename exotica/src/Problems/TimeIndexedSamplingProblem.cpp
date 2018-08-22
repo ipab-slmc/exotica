@@ -120,6 +120,58 @@ void TimeIndexedSamplingProblem::setGoalTime(double t)
     tGoal = t;
 }
 
+void TimeIndexedSamplingProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
+{
+    for (int i = 0; i < Constraint.Indexing.size(); i++)
+    {
+        if (Constraint.Tasks[i]->getObjectName() == task_name)
+        {
+            if (goal.rows() != Constraint.Indexing[i].Length) throw_pretty("Expected length of " << Constraint.Indexing[i].Length << " and got " << goal.rows());
+            Constraint.y.data.segment(Constraint.Indexing[i].Start, Constraint.Indexing[i].Length) = goal;
+            return;
+        }
+    }
+    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+}
+
+void TimeIndexedSamplingProblem::setRho(const std::string& task_name, const double rho)
+{
+    for (int i = 0; i < Constraint.Indexing.size(); i++)
+    {
+        if (Constraint.Tasks[i]->getObjectName() == task_name)
+        {
+            Constraint.Rho(Constraint.Indexing[i].Id) = rho;
+            preupdate();
+            return;
+        }
+    }
+    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+}
+
+Eigen::VectorXd TimeIndexedSamplingProblem::getGoal(const std::string& task_name)
+{
+    for (int i = 0; i < Constraint.Indexing.size(); i++)
+    {
+        if (Constraint.Tasks[i]->getObjectName() == task_name)
+        {
+            return Constraint.y.data.segment(Constraint.Indexing[i].Start, Constraint.Indexing[i].Length);
+        }
+    }
+    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+}
+
+double TimeIndexedSamplingProblem::getRho(const std::string& task_name)
+{
+    for (int i = 0; i < Constraint.Indexing.size(); i++)
+    {
+        if (Constraint.Tasks[i]->getObjectName() == task_name)
+        {
+            return Constraint.Rho(Constraint.Indexing[i].Id);
+        }
+    }
+    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+}
+
 bool TimeIndexedSamplingProblem::isValid(Eigen::VectorXdRefConst x, double t)
 {
     scene_->Update(x, t);

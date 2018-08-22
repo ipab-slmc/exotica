@@ -862,6 +862,10 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedSamplingProblem.def_readonly("NumTasks", &TimeIndexedSamplingProblem::NumTasks);
     timeIndexedSamplingProblem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
     timeIndexedSamplingProblem.def_readonly("Constraint", &TimeIndexedSamplingProblem::Constraint);
+    timeIndexedSamplingProblem.def("setGoal", &TimeIndexedSamplingProblem::setGoal);
+    timeIndexedSamplingProblem.def("setRho", &TimeIndexedSamplingProblem::setRho);
+    timeIndexedSamplingProblem.def("getGoal", &TimeIndexedSamplingProblem::getGoal);
+    timeIndexedSamplingProblem.def("getRho", &TimeIndexedSamplingProblem::getRho);
 
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "CollisionProxy");
     proxy.def(py::init());

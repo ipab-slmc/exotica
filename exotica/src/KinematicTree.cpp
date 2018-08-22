@@ -125,7 +125,7 @@ void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelP
 
     if (Server::isRos())
     {
-        shapes_pub_ = Server::advertise<visualization_msgs::MarkerArray>(name_ + (name_ == "" ? "" : "/") + "CollisionShapes", 100, true);
+        shapes_pub_ = Server::advertise<visualization_msgs::MarkerArray>(name_ + (name_ == "" ? "" : "/") + "CollisionShapes", 1, true);
         debugSceneChanged = true;
     }
 }

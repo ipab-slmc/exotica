@@ -2,4 +2,3 @@ extend <exotica/SamplingProblem>
 Required Eigen::VectorXd JointVelocityLimits;
 Optional double T = 1.0;
 Optional double GoalTime = -1.0; # If goal time is not defined in xml, it will be set to T
-Optional double ConstraintTolerance = 0.0;  // To avoid numerical issues, e.g., in sampling tasks, consider (and set) zero if below this threshold.

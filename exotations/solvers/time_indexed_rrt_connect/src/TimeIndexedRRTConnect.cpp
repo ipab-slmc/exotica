@@ -240,7 +240,7 @@ void TimeIndexedRRTConnect::getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTe
 void TimeIndexedRRTConnect::Solve(Eigen::MatrixXd &solution)
 {
     Eigen::VectorXd q0 = prob_->applyStartState();
-    setGoalState(prob_->goal_, prob_->tGoal);
+    setGoalState(prob_->getGoalState(), prob_->getGoalTime());
 
     ompl::base::ScopedState<> ompl_start_state(state_space_);
     state_space_->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(q0, prob_->tStart, ompl_start_state.get());

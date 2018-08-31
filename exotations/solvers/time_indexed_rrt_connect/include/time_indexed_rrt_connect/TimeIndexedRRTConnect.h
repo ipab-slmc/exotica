@@ -290,7 +290,7 @@ protected:
         }
         else
             changed = false;
-        if (tb < si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->tStart || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->tGoal) return false;
+        if (tb < si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->tStart || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->getGoalTime()) return false;
         si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(qb, tb, b->state);
         return true;
     }

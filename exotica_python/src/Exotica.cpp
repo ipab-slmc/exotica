@@ -870,11 +870,16 @@ PYBIND11_MODULE(_pyexotica, module)
     timeIndexedSamplingProblem.def_readonly("N", &TimeIndexedSamplingProblem::N);
     timeIndexedSamplingProblem.def_readonly("NumTasks", &TimeIndexedSamplingProblem::NumTasks);
     timeIndexedSamplingProblem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
-    timeIndexedSamplingProblem.def_readonly("Constraint", &TimeIndexedSamplingProblem::Constraint);
-    timeIndexedSamplingProblem.def("setGoal", &TimeIndexedSamplingProblem::setGoal);
-    timeIndexedSamplingProblem.def("setRho", &TimeIndexedSamplingProblem::setRho);
-    timeIndexedSamplingProblem.def("getGoal", &TimeIndexedSamplingProblem::getGoal);
-    timeIndexedSamplingProblem.def("getRho", &TimeIndexedSamplingProblem::getRho);
+    timeIndexedSamplingProblem.def_readonly("Inequality", &TimeIndexedSamplingProblem::Inequality);
+    timeIndexedSamplingProblem.def_readonly("Equality", &TimeIndexedSamplingProblem::Equality);
+    timeIndexedSamplingProblem.def("setGoalEQ", &TimeIndexedSamplingProblem::setGoalEQ);
+    timeIndexedSamplingProblem.def("setRhoEQ", &TimeIndexedSamplingProblem::setRhoEQ);
+    timeIndexedSamplingProblem.def("getGoalEQ", &TimeIndexedSamplingProblem::getGoalEQ);
+    timeIndexedSamplingProblem.def("getRhoEQ", &TimeIndexedSamplingProblem::getRhoEQ);
+    timeIndexedSamplingProblem.def("setGoalNEQ", &TimeIndexedSamplingProblem::setGoalNEQ);
+    timeIndexedSamplingProblem.def("setRhoNEQ", &TimeIndexedSamplingProblem::setRhoNEQ);
+    timeIndexedSamplingProblem.def("getGoalNEQ", &TimeIndexedSamplingProblem::getGoalNEQ);
+    timeIndexedSamplingProblem.def("getRhoNEQ", &TimeIndexedSamplingProblem::getRhoNEQ);
 
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "CollisionProxy");
     proxy.def(py::init());

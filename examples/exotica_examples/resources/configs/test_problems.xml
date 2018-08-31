@@ -80,10 +80,11 @@
         </Distance>
     </Maps>
 
-    <Constraint>
+    <Inequality>
         <Task Task="Distance" Rho="-1" Goal="0.42"/>
-    </Constraint>
+    </Inequality>
 
+    <ConstraintTolerance>1e-12</ConstraintTolerance>
     <Goal>2.16939  0.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
 </SamplingProblem>
 
@@ -104,9 +105,9 @@
         <CollisionCheck Name="Collision" SelfCollision="1" />
     </Maps>
 
-    <Constraint>
+    <Equality>
         <Task Task="Collision"/>
-    </Constraint>
+    </Equality>
 
     <T>3</T>
     <GoalTime>3</GoalTime>

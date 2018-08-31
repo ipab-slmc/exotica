@@ -54,12 +54,15 @@ public:
 
     int getSpaceDim();
 
-    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setThreshold(const std::string& task_name, Eigen::VectorXdRefConst threshold);
-    void setRho(const std::string& task_name, const double rho);
-    Eigen::VectorXd getGoal(const std::string& task_name);
-    Eigen::VectorXd getThreshold(const std::string& task_name);
-    double getRho(const std::string& task_name);
+    void setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd getGoalEQ(const std::string& task_name);
+    void setRhoEQ(const std::string& task_name, const double rho);
+    double getRhoEQ(const std::string& task_name);
+
+    void setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd getGoalNEQ(const std::string& task_name);
+    void setRhoNEQ(const std::string& task_name, const double rho);
+    double getRhoNEQ(const std::string& task_name);
 
     std::vector<double> getBounds();
 
@@ -71,11 +74,10 @@ public:
     void setGoalTime(double t);
 
     double T;
-    double tGoal;
     Eigen::VectorXd vel_limits_;
-    Eigen::VectorXd goal_;
     TaskSpaceVector Phi;
-    SamplingTask Constraint;
+    SamplingTask Inequality;
+    SamplingTask Equality;
 
     TaskSpaceVector ConstraintPhi;
 
@@ -84,6 +86,8 @@ public:
     int NumTasks;
 
 private:
+    double tGoal;
+    Eigen::VectorXd goal_;
 };
 
 typedef std::shared_ptr<exotica::TimeIndexedSamplingProblem> TimeIndexedSamplingProblem_ptr;

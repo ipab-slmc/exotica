@@ -34,7 +34,7 @@ start_pose = [[0]*len(goal_pose[0]),goal_pose[0],goal_pose[1]]
 solution = []
 for i in range(0,3):
     ompl.getProblem().startState = start_pose[i]
-    ompl.getProblem().setGoalState(goal_pose[i])
+    ompl.getProblem().goalState = goal_pose[i]
     handleAttaching(i, start_pose[i], ompl.getProblem().getScene())
     solution.append(ompl.solve().tolist())
 

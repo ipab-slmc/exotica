@@ -43,6 +43,9 @@ memory_usage_after = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 print(">>> After:", e-s, " - Memory Usage After:", memory_usage_after)
 
 print(">>> LEAK:", memory_usage_after - memory_usage_before)
+time.sleep(0.5)
 assert (memory_usage_after - memory_usage_before) == 0
+
+time.sleep(1)
 
 print('>>SUCCESS<<')

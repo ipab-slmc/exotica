@@ -44,7 +44,6 @@ SamplingProblem::SamplingProblem()
 
 SamplingProblem::~SamplingProblem()
 {
-    // TODO Auto-generated destructor stub
 }
 
 std::vector<double> SamplingProblem::getBounds()
@@ -89,8 +88,10 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     }
     Phi.setZero(PhiN);
     TaskSpaceVector dummy;
-    Constraint.initialize(init.Constraint, shared_from_this(), dummy);
-    Constraint.Tolerance = init.ConstraintTolerance;
+    Inequality.initialize(init.Inequality, shared_from_this(), dummy);
+    Inequality.Tolerance = init.ConstraintTolerance;
+    Equality.initialize(init.Equality, shared_from_this(), dummy);
+    Equality.Tolerance = init.ConstraintTolerance;
     applyStartState(false);
     preupdate();
 }
@@ -99,7 +100,8 @@ void SamplingProblem::preupdate()
 {
     PlanningProblem::preupdate();
     for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
-    Constraint.updateS();
+    Inequality.updateS();
+    Equality.updateS();
 }
 
 void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
@@ -107,6 +109,110 @@ void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
     if (qT.rows() != N)
         throw_pretty("Dimensionality of goal state wrong: Got " << qT.rows() << ", expected " << N);
     goal_ = qT;
+}
+
+void SamplingProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
+{
+    for (int i = 0; i < Equality.Indexing.size(); i++)
+    {
+        if (Equality.Tasks[i]->getObjectName() == task_name)
+        {
+            if (goal.rows() != Equality.Indexing[i].Length) throw_pretty("Expected length of " << Equality.Indexing[i].Length << " and got " << goal.rows());
+            Equality.y.data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length) = goal;
+            return;
+        }
+    }
+    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+}
+
+void SamplingProblem::setRhoEQ(const std::string& task_name, const double rho)
+{
+    for (int i = 0; i < Equality.Indexing.size(); i++)
+    {
+        if (Equality.Tasks[i]->getObjectName() == task_name)
+        {
+            Equality.Rho(Equality.Indexing[i].Id) = rho;
+            preupdate();
+            return;
+        }
+    }
+    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+}
+
+Eigen::VectorXd SamplingProblem::getGoalEQ(const std::string& task_name)
+{
+    for (int i = 0; i < Equality.Indexing.size(); i++)
+    {
+        if (Equality.Tasks[i]->getObjectName() == task_name)
+        {
+            return Equality.y.data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length);
+        }
+    }
+    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+}
+
+double SamplingProblem::getRhoEQ(const std::string& task_name)
+{
+    for (int i = 0; i < Equality.Indexing.size(); i++)
+    {
+        if (Equality.Tasks[i]->getObjectName() == task_name)
+        {
+            return Equality.Rho(Equality.Indexing[i].Id);
+        }
+    }
+    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+}
+
+void SamplingProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
+{
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    {
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        {
+            if (goal.rows() != Inequality.Indexing[i].Length) throw_pretty("Expected length of " << Inequality.Indexing[i].Length << " and got " << goal.rows());
+            Inequality.y.data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length) = goal;
+            return;
+        }
+    }
+    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+}
+
+void SamplingProblem::setRhoNEQ(const std::string& task_name, const double rho)
+{
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    {
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        {
+            Inequality.Rho(Inequality.Indexing[i].Id) = rho;
+            preupdate();
+            return;
+        }
+    }
+    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+}
+
+Eigen::VectorXd SamplingProblem::getGoalNEQ(const std::string& task_name)
+{
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    {
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        {
+            return Inequality.y.data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length);
+        }
+    }
+    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+}
+
+double SamplingProblem::getRhoNEQ(const std::string& task_name)
+{
+    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    {
+        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        {
+            return Inequality.Rho(Inequality.Indexing[i].Id);
+        }
+    }
+    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
 
 bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
@@ -117,9 +223,14 @@ bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
         if (Tasks[i]->isUsed)
             Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
     }
-    Constraint.update(Phi);
+    Inequality.update(Phi);
+    Equality.update(Phi);
     numberOfProblemUpdates++;
-    return ((Constraint.S * Constraint.ydiff).array().abs() <= 0.0).all();
+
+    bool inequality_is_valid = ((Inequality.S * Inequality.ydiff).array() <= 0.0).all();
+    bool equality_is_valid = ((Equality.S * Equality.ydiff).array().abs() == 0.0).all();
+
+    return (inequality_is_valid && equality_is_valid);
 }
 
 void SamplingProblem::Update(Eigen::VectorXdRefConst x)

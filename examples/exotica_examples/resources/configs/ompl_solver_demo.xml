@@ -21,9 +21,9 @@
       </Distance>
     </Maps>
 
-    <Constraint>
+    <Inequality>
       <Task Task="Distance" Rho="-1" Goal="0.42"/>
-    </Constraint>
+    </Inequality>
 
     <Goal>2.16939  0.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
   </SamplingProblem>

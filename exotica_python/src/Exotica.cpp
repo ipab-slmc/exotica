@@ -844,7 +844,6 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<SamplingProblem, std::shared_ptr<SamplingProblem>, PlanningProblem> samplingProblem(prob, "SamplingProblem");
     samplingProblem.def("update", &SamplingProblem::Update);
-    samplingProblem.def("setGoalState", &SamplingProblem::setGoalState);  // To be deprecated
     samplingProblem.def_property("goalState", &SamplingProblem::getGoalState, &SamplingProblem::setGoalState);
     samplingProblem.def("getSpaceDim", &SamplingProblem::getSpaceDim);
     samplingProblem.def("getBounds", &SamplingProblem::getBounds);

@@ -53,31 +53,37 @@ public:
 
     int getSpaceDim();
 
-    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setThreshold(const std::string& task_name, Eigen::VectorXdRefConst threshold);
-    void setRho(const std::string& task_name, const double rho);
-    Eigen::VectorXd getGoal(const std::string& task_name);
-    Eigen::VectorXd getThreshold(const std::string& task_name);
-    double getRho(const std::string& task_name);
+    void setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd getGoalEQ(const std::string& task_name);
+    void setRhoEQ(const std::string& task_name, const double rho);
+    double getRhoEQ(const std::string& task_name);
+
+    void setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd getGoalNEQ(const std::string& task_name);
+    void setRhoNEQ(const std::string& task_name, const double rho);
+    double getRhoNEQ(const std::string& task_name);
 
     std::vector<double> getBounds();
     bool isCompoundStateSpace();
+
+    // TODO(wxm): Implement or remove in clean-up (left-over from constrained sampling, ROBIO 2016)
     std::string local_planner_config_;
     bool full_body_plan_;
 
     SamplingProblemInitializer Parameters;
 
     void setGoalState(Eigen::VectorXdRefConst qT);
-
-    Eigen::VectorXd goal_;
+    const Eigen::VectorXd& getGoalState() { return goal_; }
     TaskSpaceVector Phi;
-    SamplingTask Constraint;
+    SamplingTask Inequality;
+    SamplingTask Equality;
 
     int PhiN;
     int JN;
     int NumTasks;
 
 private:
+    Eigen::VectorXd goal_;
     bool compound_;
 };
 

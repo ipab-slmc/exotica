@@ -23,9 +23,9 @@
       <CollisionCheck Name="Collision" SelfCollision="0" />
     </Maps>
 
-    <Constraint>
+    <Equality>
       <Task Task="Collision"/>
-    </Constraint>
+    </Equality>
 
 
     <Goal>0 0 0 0 0 0 0</Goal>

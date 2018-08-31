@@ -844,13 +844,23 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<SamplingProblem, std::shared_ptr<SamplingProblem>, PlanningProblem> samplingProblem(prob, "SamplingProblem");
     samplingProblem.def("update", &SamplingProblem::Update);
-    samplingProblem.def("setGoalState", &SamplingProblem::setGoalState);
+    samplingProblem.def("setGoalState", &SamplingProblem::setGoalState);  // To be deprecated
+    samplingProblem.def_property("goalState", &SamplingProblem::getGoalState, &SamplingProblem::setGoalState);
     samplingProblem.def("getSpaceDim", &SamplingProblem::getSpaceDim);
     samplingProblem.def("getBounds", &SamplingProblem::getBounds);
     samplingProblem.def_readonly("N", &SamplingProblem::N);
     samplingProblem.def_readonly("NumTasks", &SamplingProblem::NumTasks);
     samplingProblem.def_readonly("Phi", &SamplingProblem::Phi);
-    samplingProblem.def_readonly("Constraint", &SamplingProblem::Constraint);
+    samplingProblem.def_readonly("Inequality", &SamplingProblem::Inequality);
+    samplingProblem.def_readonly("Equality", &SamplingProblem::Equality);
+    samplingProblem.def("setGoalEQ", &SamplingProblem::setGoalEQ);
+    samplingProblem.def("setRhoEQ", &SamplingProblem::setRhoEQ);
+    samplingProblem.def("getGoalEQ", &SamplingProblem::getGoalEQ);
+    samplingProblem.def("getRhoEQ", &SamplingProblem::getRhoEQ);
+    samplingProblem.def("setGoalNEQ", &SamplingProblem::setGoalNEQ);
+    samplingProblem.def("setRhoNEQ", &SamplingProblem::setRhoNEQ);
+    samplingProblem.def("getGoalNEQ", &SamplingProblem::getGoalNEQ);
+    samplingProblem.def("getRhoNEQ", &SamplingProblem::getRhoNEQ);
 
     py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> timeIndexedSamplingProblem(prob, "TimeIndexedSamplingProblem");
     timeIndexedSamplingProblem.def("update", &TimeIndexedSamplingProblem::Update);

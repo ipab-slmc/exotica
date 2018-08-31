@@ -21,9 +21,9 @@
         <CollisionCheck Name="Collision" SelfCollision="1" />
     </Maps>
 
-    <Constraint>
+    <Equality>
         <Task Task="Collision"/>
-    </Constraint>
+    </Equality>
 
     <Goal>2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
   </SamplingProblem>

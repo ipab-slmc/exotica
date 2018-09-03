@@ -99,6 +99,8 @@ Eigen::MatrixXd getFrame(const KDL::Frame& val);
 
 Eigen::VectorXd getFrameAsVector(const KDL::Frame& val, RotationType type = RotationType::RPY);
 
+Eigen::VectorXd getRotationAsVector(const KDL::Frame& val, RotationType type);
+
 typedef Eigen::Array<KDL::Frame, Eigen::Dynamic, 1> ArrayFrame;
 typedef Eigen::Array<KDL::Twist, Eigen::Dynamic, 1> ArrayTwist;
 typedef Eigen::Array<KDL::Jacobian, Eigen::Dynamic, 1> ArrayJacobian;

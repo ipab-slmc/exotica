@@ -77,6 +77,11 @@ Eigen::VectorXd getFrameAsVector(const KDL::Frame& val, RotationType type)
     return ret;
 }
 
+Eigen::VectorXd getRotationAsVector(const KDL::Frame& val, RotationType type)
+{
+    return getFrameAsVector(val, type).tail(getRotationTypeLength(type));
+}
+
 KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type)
 {
     switch (type)

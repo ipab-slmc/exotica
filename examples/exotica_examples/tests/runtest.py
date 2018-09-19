@@ -18,7 +18,7 @@ pytests = ['core.py',
          'collision_scene_distances.py',
          'test_continuous_collision_check.py',
          'scene_creation.py',
-         'issue225_kinematictree_memory_leak.py'
+         # 'issue225_kinematictree_memory_leak.py'  # Deactivated until CI is on Kinetic
         ]
 
 for test in cpptests:

@@ -1,9 +1,7 @@
 #ifndef CONVERSIONS_H
 #define CONVERSIONS_H
 
-#include <exotica/MeshVertex.h>
 #include <exotica/Tools/Exception.h>
-#include <exotica/Vector.h>
 #include <Eigen/Dense>
 #include <kdl/jacobian.hpp>
 #include <kdl/tree.hpp>

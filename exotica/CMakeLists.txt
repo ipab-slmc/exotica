@@ -1,15 +1,9 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(exotica)
 
-set(MSG_DEPS
-  geometry_msgs
-  std_msgs
-)
-
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  message_generation
   moveit_core
   moveit_ros_planning
   tf
@@ -17,27 +11,10 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_parser
   pluginlib
   tf_conversions
-  ${MSG_DEPS}
+  geometry_msgs
+  std_msgs
 )
 find_package(Boost REQUIRED COMPONENTS signals)
-
-set(MSG_FILES
-  MeshVertex.msg
-  MeshVertexArray.msg
-  Vector.msg
-)
-
-add_message_files(
-  DIRECTORY
-  FILES
-  ${MSG_FILES}
-)
-
-generate_messages(
-  DEPENDENCIES
-  ${MSG_DEPS}
-)
-
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -115,7 +92,7 @@ add_library(${PROJECT_NAME}
   ${exotica_BINARY_DIR}/generated/Version.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_initializers)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

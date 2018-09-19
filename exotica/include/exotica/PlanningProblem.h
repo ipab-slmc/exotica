@@ -34,7 +34,6 @@
 #define EXOTICA_MOTION_PLANNING_PROBLEM_H
 
 #include <exotica/Object.h>
-#include <exotica/Problem.h>
 #include <exotica/Scene.h>
 #include <exotica/Server.h>
 #include <exotica/TaskMap.h>

@@ -2,7 +2,6 @@
 #define CONVERSIONS_H
 
 #include <exotica/MeshVertex.h>
-#include <exotica/StringList.h>
 #include <exotica/Tools/Exception.h>
 #include <exotica/Vector.h>
 #include <Eigen/Dense>

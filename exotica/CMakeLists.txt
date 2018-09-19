@@ -24,9 +24,7 @@ find_package(Boost REQUIRED COMPONENTS signals)
 set(MSG_FILES
   MeshVertex.msg
   MeshVertexArray.msg
-  StringList.msg
   Vector.msg
-  Problem.msg
 )
 
 add_message_files(

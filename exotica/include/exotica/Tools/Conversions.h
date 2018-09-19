@@ -1,8 +1,6 @@
 #ifndef CONVERSIONS_H
 #define CONVERSIONS_H
 
-#include <exotica/BoolList.h>
-#include <exotica/Matrix.h>
 #include <exotica/MeshVertex.h>
 #include <exotica/StringList.h>
 #include <exotica/Tools/Exception.h>

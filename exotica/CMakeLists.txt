@@ -25,9 +25,7 @@ set(MSG_FILES
   MeshVertex.msg
   MeshVertexArray.msg
   StringList.msg
-  BoolList.msg
   Vector.msg
-  Matrix.msg
   Problem.msg
 )
 

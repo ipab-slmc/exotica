@@ -1,11 +1,13 @@
 #ifndef CONVERSIONS_H
 #define CONVERSIONS_H
 
+#include <memory>
+#include <vector>
+
 #include <exotica/Tools/Exception.h>
 #include <Eigen/Dense>
 #include <kdl/jacobian.hpp>
 #include <kdl/tree.hpp>
-#include <vector>
 
 namespace Eigen
 {

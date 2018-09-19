@@ -5,7 +5,7 @@ import resource
 import numpy as np
 import pyexotica as exo
 
-print(">>>>>>>>>>>>> Issue #225 Memory Leak")
+print(">>>>>>>>>>>>> Issue #225 Memory Leak", flush=True)
 
 ompl = exo.Setup.loadSolver(
     '{exotica_examples}/resources/configs/example_distance.xml')
@@ -15,9 +15,9 @@ s = time.time()
 ompl.getProblem().update(np.zeros(7,))
 e = time.time()
 memory_usage_before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-print(">>> Before:", e-s, " - Memory Usage Before:", memory_usage_before)
+print(">>> Before:", e-s, " - Memory Usage Before:", memory_usage_before, flush=True)
 
-print(">>> Loading and cleaning scene 500 times")
+print(">>> Loading and cleaning scene 500 times", flush=True)
 for _ in xrange(500):
     ompl.getProblem().update(np.zeros(7,))
     sc.cleanScene()
@@ -26,12 +26,12 @@ for _ in xrange(500):
 
 memory_usage_intermediate = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 print(">>> Intermediate:", " - Memory Usage Intermediate:",
-      memory_usage_intermediate)
+      memory_usage_intermediate, flush=True)
 
-print(">>> LEAK:", memory_usage_intermediate - memory_usage_before)
+print(">>> LEAK:", memory_usage_intermediate - memory_usage_before, flush=True)
 assert (memory_usage_intermediate - memory_usage_before) == 0
 
-print(">>> updateSceneFrames 10000 times")
+print(">>> updateSceneFrames 10000 times", flush=True)
 for _ in xrange(10000):
     sc.updateSceneFrames()
     sc.updateCollisionObjects()
@@ -40,12 +40,10 @@ s = time.time()
 ompl.getProblem().update(np.ones(7,))
 e = time.time()
 memory_usage_after = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-print(">>> After:", e-s, " - Memory Usage After:", memory_usage_after)
+print(">>> After:", e-s, " - Memory Usage After:", memory_usage_after, flush=True)
 
-print(">>> LEAK:", memory_usage_after - memory_usage_before)
-time.sleep(0.5)
+print(">>> LEAK:", memory_usage_after - memory_usage_before, flush=True)
 assert (memory_usage_after - memory_usage_before) == 0
 
-time.sleep(1)
 
 print('>>SUCCESS<<')

@@ -7,6 +7,24 @@ using namespace exotica;
 #define CREATE_PROBLEM(X, I) std::shared_ptr<X> problem = createProblem<X>(#X, I);
 #define NUM_TRIALS 100
 
+// workaround for "error: ambiguous overload for ‘operator-’" that appear in newer Eigen versions
+#if EIGEN_VERSION_AT_LEAST(3, 3, 0)
+Hessian operator-(const Hessian& A, const Hessian& B)
+{
+    if (A.rows() != B.rows())
+    {
+        throw std::runtime_error("Hessian dimension mismatch");
+    }
+
+    Hessian ret(A.rows());
+    for (size_t i = 0; i < A.rows(); i++)
+    {
+        ret[i] = A[i] - B[i];
+    }
+    return ret;
+}
+#endif
+
 template <class T>
 std::shared_ptr<T> createProblem(const std::string& name, int derivative)
 {

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(time_indexed_rrt_connect)
 
-find_package(OMPL REQUIRED)
+find_package(ompl REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
@@ -10,7 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES time_indexed_rrt_connect
-  CATKIN_DEPENDS exotica ompl
+  CATKIN_DEPENDS exotica
+  DEPENDS ompl
 )
 
 AddInitializer(TimeIndexedRRTConnect)

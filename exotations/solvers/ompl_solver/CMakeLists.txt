@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ompl_solver)
 
-find_package(OMPL REQUIRED)
+find_package(ompl REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
@@ -11,7 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ompl_solver
-  CATKIN_DEPENDS exotica ompl
+  CATKIN_DEPENDS exotica
+  DEPENDS ompl
 )
 
 AddInitializer(OMPLsolver RRT RRTConnect PRM LazyPRM EST KPIECE BKPIECE RRTStar LBTRRT)

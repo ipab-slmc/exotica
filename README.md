@@ -11,26 +11,32 @@ The EXOTica library is a generic Optimisation Toolset for Robotics platforms, wr
 The library itself consists of two major specifications, both of which are abstract classes. The first is the *Motion Solver* which defines the way optimisation should proceed: current implementation include AICO, Jacobian pseudo-inverse IK, and a range of sampling-based solvers from the [OMPL](http://ompl.kavrakilab.org/) library. The other is the *Task Definition* which describes the task itself by providing two necessary functions to compute the forward map from Configuration space (say joint angles in IK) to Task space (say end-effector positions in IK). The tasks themselves can describe a complete trajectory. Using the library then involves passing in an initial state and requesting a solution to the problem, which may consist of a single configuration or complete trajectory.
 
 # Prerequisites
-* Ubuntu 14.04 or 16.04 (16.04 not covered by continuous integration)
+* Ubuntu 16.04 with ROS Kinetic (primary and tested with continuous integration). Ubuntu 18.04 with ROS Melodic works (more details below) but is not officially supported or covered by continuous integration.
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
 * [rosdep](http://wiki.ros.org/rosdep)
 * [ROS](http://wiki.ros.org/Installation) (```ros-[release]-desktop``` is recommended but more minimal versions work in conjunction with rosdep)
 * ``moveit-ros-planning-interface``
-* [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) >3.2.7. On Ubuntu 14.04, we recommend system-installing 3.2.10 or newer, for which we provide a [Debian](http://terminator.robots.inf.ed.ac.uk/apt/libeigen3-dev.deb). On Ubuntu 16.04, you can use the system-provided ``libeigen3-dev`` package.
+
+## ROS Indigo (Ubuntu 14.04)
+We retired support for ROS Indigo in September 2018. For using 14.04, a number of manual changes are required - and the latest supported version is ``last_version_with_trusty_indigo_support``.
+* For Eigen, we recommend system-installing 3.2.10 or newer, for which we provide a [Debian](http://terminator.robots.inf.ed.ac.uk/apt/libeigen3-dev.deb).
 * gcc >[4.9](https://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-on-ubuntu) -- the 14.04 system-installed 4.8.4 won't work. On Ubuntu 16.04, you can use the system-provided gcc/g++.
-* ``pybind11_catkin``, which can be installed from Debians on Indigo and Kinetic (``ros-[release]-pybind11-catkin``). For other ROS versions, please clone into your source directory from [here](https://github.com/ipab-slmc/pybind11_catkin).
+
+## ROS Melodic
+These workarounds are currently required on ROS Melodic:
+* Please clone ``pybind11_catkin`` into your source directory from [here](https://github.com/ipab-slmc/pybind11_catkin).
 
 # Installation
 
 1. [Create a catkin workspace](https://catkin-tools.readthedocs.io/en/latest/quick_start.html#initializing-a-new-workspace) or use an existing workspace. [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) is the preferred build system.
-1. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone git@github.com:ipab-slmc/exotica.git --recursive``.
-1. ```cd``` into the the cloned directory.
-1. Install dependencies
-  1. If running the rosdep for the first time start by running:
+2. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone git@github.com:ipab-slmc/exotica.git --recursive``.
+3. ```cd``` into the the cloned directory.
+4. Install dependencies
+  1. If running rosdep for the first time start by running:
      ```sudo rosdep init```
-  1. ```rosdep update ; rosdep install --from-paths ./ -iy ```
-1. Compile the code ```catkin build -s```.
-1. Source the config file (ideally inside ```~/.bashrc```): ```source path_to_workspace/devel/setup.bash```. You may have to source the config file from your installspace if your workspace is configured for installation.
+  2. ```rosdep update ; rosdep install --from-paths ./ -iy ```
+5. Compile the code ```catkin build -s```.
+6. Source the config file (ideally inside ```~/.bashrc```): ```source path_to_workspace/devel/setup.bash```. You may have to source the config file from your installspace if your workspace is configured for installation.
 
 # Demos
 Have a look at ```examples/exotica_examples```.

@@ -18,8 +18,6 @@
         <Trajectories>
           <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_moving_obstacle.traj" />
         </Trajectories>
-        <CollisionScene>CollisionSceneFCLLatest</CollisionScene>
-        <AlwaysUpdateCollisionScene>0</AlwaysUpdateCollisionScene>
       </Scene>
     </PlanningScene>
 
@@ -27,9 +25,9 @@
       <CollisionCheck Name="Collision" SelfCollision="1" />
     </Maps>
 
-    <Constraint>
+    <Equality>
       <Task Task="Collision"/>
-    </Constraint>
+    </Equality>
 
     <JointVelocityLimits>2 2 2 2 2 2 2 2 2 2</JointVelocityLimits>
     <Goal>0 0 0 2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>

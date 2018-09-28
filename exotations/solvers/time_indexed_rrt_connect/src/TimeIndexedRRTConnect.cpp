@@ -162,6 +162,7 @@ void TimeIndexedRRTConnect::postSolve()
 
     if (ompl_simple_setup_->getProblemDefinition()->hasApproximateSolution())
         CONSOLE_BRIDGE_logWarn("Computed solution is approximate");
+    ptc_.reset();
 }
 
 void TimeIndexedRRTConnect::setGoalState(const Eigen::VectorXd &qT, const double t, const double eps)
@@ -220,10 +221,20 @@ void TimeIndexedRRTConnect::getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTe
     }
     std::vector<ompl::base::State *> &states = pg.getStates();
     unsigned int length = 0;
-    const int n1 = states.size() - 1;
-    for (int i = 0; i < n1; ++i)
-        length += si->getStateSpace()->validSegmentCount(states[i], states[i + 1]);
 
+    if (init_.TrajectoryPointsPerSecond <= 0)
+    {
+        const int n1 = states.size() - 1;
+        for (int i = 0; i < n1; ++i)
+            length += si->getStateSpace()->validSegmentCount(states[i], states[i + 1]);
+    }
+    else{
+        double tstart, tgoal;
+        Eigen::VectorXd qs,qg;
+        state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(0), qs, tstart);
+        state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(states.size()-1), qg, tgoal);
+        length = (tgoal-tstart)*init_.TrajectoryPointsPerSecond;
+    }
     pg.interpolate(length);
 
     traj.resize(pg.getStateCount(), init_.AddTimeIntoSolution ? prob_->getSpaceDim() + 1 : prob_->getSpaceDim());
@@ -248,12 +259,18 @@ void TimeIndexedRRTConnect::Solve(Eigen::MatrixXd &solution)
 
     preSolve();
     ompl::time::point start = ompl::time::now();
-    ompl::base::PlannerTerminationCondition ptc = ompl::base::timedPlannerTerminationCondition(init_.Timeout - ompl::time::seconds(ompl::time::now() - start));
-    if (ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION && ompl_simple_setup_->haveSolutionPath())
+    if (!ptc_)
+    	ptc_.reset(new ompl::base::PlannerTerminationCondition(ompl::base::timedPlannerTerminationCondition(init_.Timeout - ompl::time::seconds(ompl::time::now() - start))));
+    if (ompl_simple_setup_->solve(*ptc_) == ompl::base::PlannerStatus::EXACT_SOLUTION && ompl_simple_setup_->haveSolutionPath())
     {
-        getPath(solution, ptc);
+        getPath(solution, *ptc_);
     }
     postSolve();
+}
+
+void TimeIndexedRRTConnect::setPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc)
+{
+    ptc_ = ptc;
 }
 
 OMPLTimeIndexedRRTConnect::OMPLTimeIndexedRRTConnect(const base::SpaceInformationPtr &si) : base::Planner(si, "OMPLTimeIndexedRRTConnect")

@@ -5,3 +5,4 @@ Optional std::string Range = "1";
 Optional bool AddTimeIntoSolution = false;
 Optional double ValidityCheckResolution = 0.01;
 Optional int RandomSeed = -1;  // Sets random seed unless -1
+Optional int TrajectoryPointsPerSecond = 0;

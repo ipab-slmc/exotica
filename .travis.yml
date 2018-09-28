@@ -1,9 +1,8 @@
-group: deprecated-2017Q3
 sudo: required
 dist: xenial
 cache:
 - apt
-language: generic
+language: cpp
 env:
   global:
   - CATKIN_WS=~/catkin_ws
@@ -15,14 +14,9 @@ before_install:
 - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 - sudo apt-get update -qq
 install:
-- export PATH=/usr/bin/:$PATH # work-around Travis PYTHONPATH bug, cf. https://github.com/travis-ci/travis-ci/issues/8048
-- bash $TRAVIS_BUILD_DIR/.ci/before_install.sh >> /dev/null
-- sudo apt-get install -qq g++
-- sudo apt-get install -qq -y python-rosdep python-catkin-tools python-catkin-pkg
-- sudo apt-get install -qq -y doxygen
+- sudo apt-get install -qq -y g++ python-rosdep python-catkin-tools python-catkin-pkg doxygen >> /dev/null
 - sudo rosdep init
-- rosdep update
-- rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
+- rosdep update && rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 - sudo apt-get install -qq -y ros-$CI_ROS_DISTRO-rosbash
 - sudo pip install -U sphinx sphinx_rtd_theme
 - source /opt/ros/$CI_ROS_DISTRO/setup.bash

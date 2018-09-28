@@ -14,7 +14,7 @@ Version: '"$VERSION"'
 Architecture: all
 Maintainer: IPAB-SLMC, The University of Edinburgh
 Priority: optional
-Homepage: http://github.com/openhumanoids/exotica
+Homepage: http://github.com/ipab-slmc/exotica
 Description: This is a preliminary debian package for EXOTica.
  Please note that this file is for build-server purposes only where dependencies are manually satisified. It will likely be broken on other systems.
 ' > ~/create_deb/DEBIAN/control

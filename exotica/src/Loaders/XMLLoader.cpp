@@ -1,6 +1,6 @@
 #include <exotica/Loaders/XMLLoader.h>
 #include <exotica/Setup.h>
-#include <tinyxml2/tinyxml2.h>
+#include <tinyxml2.h>
 
 namespace exotica
 {

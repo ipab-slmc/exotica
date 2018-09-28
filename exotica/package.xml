@@ -15,6 +15,7 @@
   <url type="website">https://github.com/ipab-slmc/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>cmake_modules</build_depend>
 
   <depend>roscpp</depend>
   <depend>geometry_msgs</depend>
@@ -27,4 +28,6 @@
   <depend>pluginlib</depend>
   <depend>eigen_conversions</depend>
   <depend>tf_conversions</depend>
+  <depend>tinyxml2</depend>
+
 </package>

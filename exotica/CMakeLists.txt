@@ -3,6 +3,7 @@ project(exotica)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
+  cmake_modules
   roscpp
   moveit_core
   moveit_ros_planning
@@ -15,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 find_package(Boost REQUIRED COMPONENTS signals)
+
+find_package(TinyXML2 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -53,6 +56,7 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp message_runtime moveit_core moveit_ros_planning tf kdl_parser pluginlib tf_conversions eigen_conversions
   CFG_EXTRAS Exotica.cmake AddInitializer.cmake
+  DEPENDS TinyXML2
 )
 
 ## Build ##
@@ -61,11 +65,11 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
+  ${TinyXML2_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME}
   src/TaskMap.cpp
-  src/Loaders/tinyxml2.cpp
   src/Tools.cpp
   src/PlanningProblem.cpp
   src/MotionSolver.cpp
@@ -90,7 +94,7 @@ add_library(${PROJECT_NAME}
   src/Problems/SamplingProblem.cpp
   src/Problems/TimeIndexedSamplingProblem.cpp
   ${exotica_BINARY_DIR}/generated/Version.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 

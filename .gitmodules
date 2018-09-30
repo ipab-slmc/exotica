@@ -1,6 +1,0 @@
-[submodule "fcl_catkin"]
-	path = fcl_catkin
-	url = https://github.com/ipab-slmc/fcl_catkin.git
-[submodule "pybind11_catkin"]
-	path = pybind11_catkin
-	url = https://github.com/ipab-slmc/pybind11_catkin.git

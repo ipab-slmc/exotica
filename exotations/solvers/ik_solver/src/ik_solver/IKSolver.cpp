@@ -133,7 +133,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
     Timer timer;
 
     if (!prob_) throw_named("Solver has not been initialized!");
-    const Eigen::VectorXd q0 = prob_->applyStartState();
+    const Eigen::VectorXd q0 = (solution.cols() == prob_->N) ? solution.row(0) : prob_->applyStartState();
 
     if (prob_->N != q0.rows()) throw_named("Wrong size q0 size=" << q0.rows() << ", required size=" << prob_->N);
 

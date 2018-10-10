@@ -15,3 +15,4 @@ Optional std::string GoalBias = "0.05";
 Optional int RandomSeed = -1;  // Only set if not -1
 Optional Eigen::VectorXd Projection = Eigen::VectorXd();
 Optional double Epsilon = 0.0;
+Optional int FinalInterpolationLength = 0;

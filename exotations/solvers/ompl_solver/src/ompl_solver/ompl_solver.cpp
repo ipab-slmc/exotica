@@ -183,9 +183,14 @@ void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::Planner
     }
     std::vector<ompl::base::State *> &states = pg.getStates();
     unsigned int length = 0;
-    const int n1 = states.size() - 1;
-    for (int i = 0; i < n1; ++i)
-        length += si->getStateSpace()->validSegmentCount(states[i], states[i + 1]);
+    if(init_.FinalInterpolationLength > 3)
+        length = init_.FinalInterpolationLength;
+    else
+    {
+        const int n1 = states.size() - 1;
+        for (int i = 0; i < n1; ++i)
+            length += si->getStateSpace()->validSegmentCount(states[i], states[i + 1]);
+    }
     pg.interpolate(int(length * init_.SmoothnessFactor));
 
     traj.resize(pg.getStateCount(), prob_->getSpaceDim());

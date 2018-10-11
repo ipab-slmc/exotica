@@ -103,9 +103,9 @@ void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
     MotionSolver::specifyProblem(pointer);
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 
-    C = Eigen::MatrixXd::Identity(prob_->JN, prob_->JN) * parameters_.C;
+    C = Eigen::MatrixXd::Identity(prob_->Cost.JN, prob_->Cost.JN) * parameters_.C;
     if (parameters_.C == 0.0)
-        Cinv = Eigen::MatrixXd::Zero(prob_->JN, prob_->JN);
+        Cinv = Eigen::MatrixXd::Zero(prob_->Cost.JN, prob_->Cost.JN);
     else
         Cinv = C.inverse();
 

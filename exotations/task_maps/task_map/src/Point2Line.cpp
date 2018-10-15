@@ -91,9 +91,18 @@ void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen
         // direction from point to line
         const Eigen::Vector3d dv = direction(p);
         phi.segment<3>(i * 3) = dv;
-        for (int j = 0; j < J.cols(); j++)
+
+        if ((dv + p - line_start).norm() < std::numeric_limits<double>::epsilon())
         {
-            J.middleRows<3>(i * 3).col(j) = Kinematics[0].J[i].data.topRows<3>().col(j).dot(line / line.squaredNorm()) * line - Kinematics[0].J[i].data.topRows<3>().col(j);
+            // clipped (t=0) case
+            J.middleRows<3>(i * 3) = -Kinematics[0].J[i].data.topRows<3>();
+        }
+        else
+        {
+            for (int j = 0; j < J.cols(); j++)
+            {
+                J.middleRows<3>(i * 3).col(j) = Kinematics[0].J[i].data.topRows<3>().col(j).dot(line / line.squaredNorm()) * line - Kinematics[0].J[i].data.topRows<3>().col(j);
+            }
         }
 
         // visualisation of point, line and their distance

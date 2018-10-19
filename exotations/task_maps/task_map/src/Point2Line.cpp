@@ -93,7 +93,7 @@ void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen
         phi.segment<3>(i * 3) = dv;
         for (int j = 0; j < J.cols(); j++)
         {
-            J.middleRows<3>(i * 3).col(j) = Kinematics[0].J[i].data.topRows<3>().col(j).dot(line/line.squaredNorm()) * line - Kinematics[0].J[i].data.topRows<3>().col(j);
+            J.middleRows<3>(i * 3).col(j) = Kinematics[0].J[i].data.topRows<3>().col(j).dot(line / line.squaredNorm()) * line - Kinematics[0].J[i].data.topRows<3>().col(j);
         }
 
         // visualisation of point, line and their distance

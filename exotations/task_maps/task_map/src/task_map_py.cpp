@@ -50,6 +50,11 @@ PYBIND11_MODULE(task_map_py, module)
     py::class_<IMesh, std::shared_ptr<IMesh>, TaskMap> iMesh(module, "IMesh");
     iMesh.def_property("W", &IMesh::getWeights, &IMesh::setWeights);
     iMesh.def("setWeight", &IMesh::setWeight);
+    iMesh.def_static("computeGoalLaplace", [](const std::vector<KDL::Frame>& nodes, Eigen::MatrixXdRefConst Weights) {
+        Eigen::VectorXd goal;
+        IMesh::computeGoalLaplace(nodes, goal, Weights);
+        return goal;
+    });
     iMesh.def_static("computeLaplace", [](Eigen::VectorXdRefConst EffPhi, Eigen::MatrixXdRefConst Weights) { return IMesh::computeLaplace(EffPhi, Weights); });
 
     py::class_<JointLimit, std::shared_ptr<JointLimit>, TaskMap> jointLimit(module, "JointLimit");

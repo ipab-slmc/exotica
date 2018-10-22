@@ -69,6 +69,40 @@
         <joint name="rightWristRoll" />
         <joint name="rightWristPitch" />
     </group>
+    <group name="whole_body_fixed">
+        <joint name="leftHipYaw" />
+        <joint name="leftHipRoll" />
+        <joint name="leftHipPitch" />
+        <joint name="leftKneePitch" />
+        <joint name="leftAnklePitch" />
+        <joint name="leftAnkleRoll" />
+        <joint name="rightHipYaw" />
+        <joint name="rightHipRoll" />
+        <joint name="rightHipPitch" />
+        <joint name="rightKneePitch" />
+        <joint name="rightAnklePitch" />
+        <joint name="rightAnkleRoll" />
+        <joint name="torsoYaw" />
+        <joint name="torsoPitch" />
+        <joint name="torsoRoll" />
+        <joint name="leftShoulderPitch" />
+        <joint name="leftShoulderRoll" />
+        <joint name="leftShoulderYaw" />
+        <joint name="leftElbowPitch" />
+        <joint name="leftForearmYaw" />
+        <joint name="leftWristRoll" />
+        <joint name="leftWristPitch" />
+        <joint name="lowerNeckPitch" />
+        <joint name="neckYaw" />
+        <joint name="upperNeckPitch" />
+        <joint name="rightShoulderPitch" />
+        <joint name="rightShoulderRoll" />
+        <joint name="rightShoulderYaw" />
+        <joint name="rightElbowPitch" />
+        <joint name="rightForearmYaw" />
+        <joint name="rightWristRoll" />
+        <joint name="rightWristPitch" />
+    </group>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="world_joint" type="floating" parent_frame="world_frame" child_link="pelvis" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->

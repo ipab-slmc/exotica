@@ -88,9 +88,19 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
         throw_named("Invalid goal time tGoal= " << tGoal << ">T_(" << T << ")");
     if (tGoal == -1.0)
         tGoal = T;
-    vel_limits_ = init.JointVelocityLimits;
-    if (vel_limits_.rows() != N)
+
+    if (init.JointVelocityLimits.size() == N)
+    {
+        vel_limits_ = init.JointVelocityLimits;
+    }
+    else if (init.JointVelocityLimits.size() == 1)
+    {
+        vel_limits_ = init.JointVelocityLimits(0) * Eigen::VectorXd::Ones(N);
+    }
+    else
+    {
         throw_named("Dimension mismatch: problem N=" << N << ", but joint velocity limits has dimension " << vel_limits_.rows());
+    }
 
     NumTasks = Tasks.size();
     PhiN = 0;

@@ -17,9 +17,9 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(Boost REQUIRED COMPONENTS signals)
 
-find_package(TinyXML2 REQUIRED)
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+find_package(TinyXML2 REQUIRED)
 
 include(Exotica)
 include(AddInitializer)

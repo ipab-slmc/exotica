@@ -11,18 +11,19 @@ The EXOTica library is a generic Optimisation Toolset for Robotics platforms, wr
 The library itself consists of two major specifications, both of which are abstract classes. The first is the *Motion Solver* which defines the way optimisation should proceed: current implementation include AICO, Jacobian pseudo-inverse IK, and a range of sampling-based solvers from the [OMPL](http://ompl.kavrakilab.org/) library. The other is the *Task Definition* which describes the task itself by providing two necessary functions to compute the forward map from Configuration space (say joint angles in IK) to Task space (say end-effector positions in IK). The tasks themselves can describe a complete trajectory. Using the library then involves passing in an initial state and requesting a solution to the problem, which may consist of a single configuration or complete trajectory.
 
 # Prerequisites
-* Ubuntu 16.04 with ROS Kinetic (primary and tested with continuous integration). Ubuntu 18.04 with ROS Melodic works (more details below) but is not officially supported or covered by continuous integration.
+* Ubuntu 16.04 with ROS Kinetic (primary and tested with continuous integration). Ubuntu 14.04/ROS Indigo and Ubuntu 18.04/ROS Melodic work (more details below) but are not officially supported or covered by continuous integration.
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
 * [rosdep](http://wiki.ros.org/rosdep)
 * [ROS](http://wiki.ros.org/Installation) (```ros-[release]-desktop``` is recommended but more minimal versions work in conjunction with rosdep)
 * ``moveit-ros-planning-interface``
 
 ## ROS Indigo (Ubuntu 14.04)
-We retired support for ROS Indigo in September 2018. For using 14.04, a number of manual changes are required - and the latest supported version is ``last_version_with_trusty_indigo_support``.
+We retired support for ROS Indigo in September 2018. For using 14.04, a number of manual changes are required:
 * For Eigen, we recommend system-installing 3.2.10 or newer, for which we provide a [Debian](http://terminator.robots.inf.ed.ac.uk/apt/libeigen3-dev.deb).
 * gcc >[4.9](https://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-on-ubuntu) -- the 14.04 system-installed 4.8.4 won't work. On Ubuntu 16.04, you can use the system-provided gcc/g++.
+* For compiling ``fcl_catkin``, you need to add a PPA for ``libccd-dev``.
 
-## ROS Melodic
+## ROS Melodic (Ubuntu 18.04)
 These workarounds are currently required on ROS Melodic:
 * Please clone ``pybind11_catkin`` into your source directory from [here](https://github.com/ipab-slmc/pybind11_catkin).
 

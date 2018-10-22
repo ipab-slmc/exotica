@@ -40,10 +40,6 @@ CoM::CoM()
 {
 }
 
-CoM::~CoM()
-{
-}
-
 void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");

@@ -66,9 +66,20 @@ std::vector<double> TimeIndexedSamplingProblem::getBounds()
 void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializer& init)
 {
     Parameters = init;
-    goal_ = init.Goal;
-    if (goal_.rows() != N)
+
+    if (init.Goal.size() == N)
+    {
+        goal_ = init.Goal;
+    }
+    else if (init.Goal.size() == 0)
+    {
+        goal_ = Eigen::VectorXd::Zero(N);
+    }
+    else
+    {
         throw_named("Dimension mismatch: problem N=" << N << ", but goal state has dimension " << goal_.rows());
+    }
+
     T = init.T;
     if (T < 0)
         throw_named("Invalid problem duration T: " << T);

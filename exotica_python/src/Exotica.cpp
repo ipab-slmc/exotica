@@ -187,6 +187,14 @@ void setJointsFixed(KinematicTree& tree, const std::set<std::string> joints)
     }
 }
 
+void setLinksFixed(KinematicTree& tree, const std::set<std::string> links)
+{
+    for (auto & [ name, joint ] : tree.getModelJointsMap())
+    {
+        joint.lock()->IsControlled = (joint.lock()->ControlId != -1) && !bool(links.count(joint.lock()->Segment.getName()));
+    }
+}
+
 namespace pybind11
 {
 namespace detail
@@ -1039,6 +1047,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getNumModelJoints", &KinematicTree::getNumModelJoints);
     kinematicTree.def("getNumControlledJoints", &KinematicTree::getNumControlledJoints);
     kinematicTree.def("setJointsFixed", &setJointsFixed);
+    kinematicTree.def("setLinksFixed", &setLinksFixed);
 
     // Joint Limits
     kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);

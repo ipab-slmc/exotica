@@ -179,19 +179,19 @@ Eigen::MatrixXd Solve(std::shared_ptr<MotionSolver> sol)
     return ret;
 }
 
-void setJointsFixed(KinematicTree& tree, const std::set<std::string> joints)
+void setJointsControlled(KinematicTree& tree, const std::set<std::string>& joints, const bool negate = false)
 {
     for (auto & [ name, joint ] : tree.getModelJointsMap())
     {
-        joint.lock()->IsControlled = (joint.lock()->ControlId != -1) && !bool(joints.count(name));
+        joint.lock()->IsControlled = (joint.lock()->ControlId != -1) && (negate ^ bool(joints.count(name)));
     }
 }
 
-void setLinksFixed(KinematicTree& tree, const std::set<std::string> links)
+void setLinksControlled(KinematicTree& tree, const std::set<std::string>& links, const bool negate = false)
 {
     for (auto & [ name, joint ] : tree.getModelJointsMap())
     {
-        joint.lock()->IsControlled = (joint.lock()->ControlId != -1) && !bool(links.count(joint.lock()->Segment.getName()));
+        joint.lock()->IsControlled = (joint.lock()->ControlId != -1) && (negate ^ bool(links.count(joint.lock()->Segment.getName())));
     }
 }
 
@@ -1046,8 +1046,10 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getRandomControlledState", &KinematicTree::getRandomControlledState);
     kinematicTree.def("getNumModelJoints", &KinematicTree::getNumModelJoints);
     kinematicTree.def("getNumControlledJoints", &KinematicTree::getNumControlledJoints);
-    kinematicTree.def("setJointsFixed", &setJointsFixed);
-    kinematicTree.def("setLinksFixed", &setLinksFixed);
+    kinematicTree.def("setJointsControlled", [](KinematicTree& tree, const std::set<std::string>& joints) { return setJointsControlled(tree, joints, false); });
+    kinematicTree.def("setLinksControlled", [](KinematicTree& tree, const std::set<std::string>& links) { return setLinksControlled(tree, links, false); });
+    kinematicTree.def("setJointsFixed", [](KinematicTree& tree, const std::set<std::string>& joints) { return setJointsControlled(tree, joints, true); });
+    kinematicTree.def("setLinksFixed", [](KinematicTree& tree, const std::set<std::string>& links) { return setLinksControlled(tree, links, true); });
 
     // Joint Limits
     kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);

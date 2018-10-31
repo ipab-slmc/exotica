@@ -179,6 +179,14 @@ Eigen::MatrixXd Solve(std::shared_ptr<MotionSolver> sol)
     return ret;
 }
 
+void setJointsFixed(KinematicTree& tree, const std::set<std::string> joints)
+{
+    for (auto & [ name, joint ] : tree.getModelJointsMap())
+    {
+        joint.lock()->IsControlled = (joint.lock()->ControlId != -1) && !bool(joints.count(name));
+    }
+}
+
 namespace pybind11
 {
 namespace detail
@@ -1030,6 +1038,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("getRandomControlledState", &KinematicTree::getRandomControlledState);
     kinematicTree.def("getNumModelJoints", &KinematicTree::getNumModelJoints);
     kinematicTree.def("getNumControlledJoints", &KinematicTree::getNumControlledJoints);
+    kinematicTree.def("setJointsFixed", &setJointsFixed);
 
     // Joint Limits
     kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);

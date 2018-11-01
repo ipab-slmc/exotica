@@ -57,13 +57,11 @@ set(SOURCES
     src/QuasiStatic.cpp)
 
 add_library(${PROJECT_NAME} ${SOURCES})
-
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 pybind_add_module(${PROJECT_NAME}_py MODULE src/task_map_py.cpp ${SOURCES})
-install(TARGETS ${PROJECT_NAME}_py LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
+add_dependencies(${PROJECT_NAME}_py ${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 ## Install
 install(TARGETS ${PROJECT_NAME}
@@ -71,5 +69,4 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY include/ DESTINATION include)
 install(FILES exotica_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
-
+install(TARGETS ${PROJECT_NAME}_py LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})

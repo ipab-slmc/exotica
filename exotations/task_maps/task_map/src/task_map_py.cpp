@@ -12,7 +12,10 @@
 #include <task_map/EffPosition.h>
 #include <task_map/IMesh.h>
 #include <task_map/Identity.h>
+#include <task_map/JointAccelerationBackwardDifference.h>
+#include <task_map/JointJerkBackwardDifference.h>
 #include <task_map/JointLimit.h>
+#include <task_map/JointVelocityBackwardDifference.h>
 #include <task_map/Point2Line.h>
 #include <task_map/SphereCollision.h>
 
@@ -41,6 +44,15 @@ PYBIND11_MODULE(task_map_py, module)
 
     py::class_<Point2Line, std::shared_ptr<Point2Line>, TaskMap> point2Line(module, "Point2Line");
     point2Line.def_property("endPoint", &Point2Line::getEndPoint, &Point2Line::setEndPoint);
+
+    py::class_<JointVelocityBackwardDifference, std::shared_ptr<JointVelocityBackwardDifference>, TaskMap> jointVelocityBackwardDifference(module, "JointVelocityBackwardDifference");
+    jointVelocityBackwardDifference.def("setPrevJointState", &JointVelocityBackwardDifference::setPrevJointState);
+
+    py::class_<JointAccelerationBackwardDifference, std::shared_ptr<JointAccelerationBackwardDifference>, TaskMap> jointAccelerationBackwardDifference(module, "JointAccelerationBackwardDifference");
+    jointAccelerationBackwardDifference.def("setPrevJointState", &JointAccelerationBackwardDifference::setPrevJointState);
+
+    py::class_<JointJerkBackwardDifference, std::shared_ptr<JointJerkBackwardDifference>, TaskMap> jointJerkBackwardDifference(module, "JointJerkBackwardDifference");
+    jointJerkBackwardDifference.def("setPrevJointState", &JointJerkBackwardDifference::setPrevJointState);
 
     py::class_<CoM, std::shared_ptr<CoM>, TaskMap> com(module, "CoM");
 

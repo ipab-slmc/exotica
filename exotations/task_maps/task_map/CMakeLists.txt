@@ -26,6 +26,9 @@ AddInitializer(
   CollisionCheck
   Point2Plane
   QuasiStatic
+  JointVelocityBackwardDifference
+  JointAccelerationBackwardDifference
+  JointJerkBackwardDifference
 )
 GenInitializers()
 
@@ -56,7 +59,11 @@ set(SOURCES
     src/Identity.cpp
     src/SphereCollision.cpp
     src/CollisionCheck.cpp
-    src/QuasiStatic.cpp)
+    src/QuasiStatic.cpp
+    src/JointVelocityBackwardDifference.cpp
+    src/JointAccelerationBackwardDifference.cpp
+    src/JointJerkBackwardDifference.cpp
+)
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})

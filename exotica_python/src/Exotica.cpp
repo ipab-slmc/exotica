@@ -666,6 +666,7 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object> planningProblem(module, "PlanningProblem");
     planningProblem.def("getTasks", &PlanningProblem::getTasks, py::return_value_policy::reference_internal);
+    planningProblem.def("getTaskMaps", &PlanningProblem::getTaskMaps, py::return_value_policy::reference_internal);
     planningProblem.def("getScene", &PlanningProblem::getScene, py::return_value_policy::reference_internal);
     planningProblem.def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend") = std::string(""));
     planningProblem.def_property("startState", &PlanningProblem::getStartState, &PlanningProblem::setStartState);

@@ -47,4 +47,16 @@
   <class name="exotica/QuasiStatic" type="exotica::QuasiStatic" base_class_type="exotica::TaskMap">
     <description>Plannar quasi static cost/constraint</description>
   </class>
+  <class name="exotica/JointVelocityBackwardDifference" type="exotica::JointVelocityBackwardDifference" base_class_type="exotica::TaskMap">
+    <description>Smooths joint velocities by penalizing an approximated first order time derivative of joint state using backward differencing. Task
+    map for use with single-step/EndPose problems only.</description>
+  </class>
+  <class name="exotica/JointAccelerationBackwardDifference" type="exotica::JointAccelerationBackwardDifference" base_class_type="exotica::TaskMap">
+    <description>Smooths joint accelerations by penalizing an approximated second order time derivative of joint state using backward differencing. Task
+    map for use with single-step/EndPose problems only.</description>
+  </class>
+  <class name="exotica/JointJerkBackwardDifference" type="exotica::JointJerkBackwardDifference" base_class_type="exotica::TaskMap">
+    <description>Smooths joint jerks by penalizing an approximated third order time derivative of joint state using backward differencing. Task
+    map for use with single-step/EndPose problems only.</description>
+  </class>
 </library>

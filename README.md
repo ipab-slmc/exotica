@@ -26,6 +26,7 @@ We retired support for ROS Indigo in September 2018. For using 14.04, a number o
 ## ROS Melodic (Ubuntu 18.04)
 These workarounds are currently required on ROS Melodic:
 * Please clone ``pybind11_catkin`` into your source directory from [here](https://github.com/ipab-slmc/pybind11_catkin).
+* `$ sudo apt-get install ros-melodic-fcl-catkin`.
 
 # Installation
 

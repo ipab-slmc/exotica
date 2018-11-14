@@ -49,6 +49,8 @@ public:
 
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
+  void setEndPoint(Eigen::Vector3d point);
+
     virtual int taskSpaceDim();
 
 private:

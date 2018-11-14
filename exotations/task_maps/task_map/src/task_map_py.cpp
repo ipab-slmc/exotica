@@ -14,6 +14,7 @@
 #include <task_map/Identity.h>
 #include <task_map/JointLimit.h>
 #include <task_map/SphereCollision.h>
+#include <task_map/Point2Line.hpp>
 
 using namespace exotica;
 namespace py = pybind11;
@@ -37,6 +38,9 @@ PYBIND11_MODULE(task_map_py, module)
     effAxisAlignment.def("setAxis", &EffAxisAlignment::setAxis);
     effAxisAlignment.def("getDirection", &EffAxisAlignment::getDirection);
     effAxisAlignment.def("setDirection", &EffAxisAlignment::setDirection);
+
+    py::class_<Point2Line, std::shared_ptr<Point2Line>, TaskMap> point2Line(module, "Point2Line");
+    point2Line.def("setEndPoint", &Point2Line::setEndPoint);
 
     py::class_<CoM, std::shared_ptr<CoM>, TaskMap> com(module, "CoM");
 

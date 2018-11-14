@@ -71,6 +71,11 @@ Eigen::Vector3d Point2Line::direction(const Eigen::Vector3d &point)
     return dv;
 }
 
+  void Point2Line::setEndPoint(Eigen::Vector3d point) {
+    line_end = point;
+    line = line_end - line_start;
+  }
+
 void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != Kinematics[0].Phi.rows() * 3) throw_named("Wrong size of phi!");

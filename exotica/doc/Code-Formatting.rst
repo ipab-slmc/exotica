@@ -14,4 +14,4 @@ In order to format your changes prior to committing, please run the following fr
 
 .. code-block:: bash
 
-    find -name '*.cpp' -o -name '*.h' | xargs clang-format-3.8 -style=file -i
+    find -name '*.cpp' -name '*.h' -o -name '*.hpp' | xargs clang-format-3.8 -style=file -i

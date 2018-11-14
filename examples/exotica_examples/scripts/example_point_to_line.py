@@ -2,7 +2,8 @@
 import rospy
 import numpy as np
 import pyexotica as exo
-from pyexotica.publish_trajectory import *
+import signal
+from pyexotica.publish_trajectory import publishPose, sigIntHandler
 import task_map_py
 from sensor_msgs.msg import Joy, JointState
 from visualization_msgs.msg import Marker
@@ -27,7 +28,6 @@ def MarkerMsg(p):
     marker.header.frame_id='exotica/world_frame'
     for i, d in enumerate(['x', 'y', 'z']):
         setattr(marker.pose.position, d, p[i])
-        setattr(marker.pose.orientation, d, 0.0)
         setattr(marker.scale, d, 0.15)
     marker.pose.orientation.w=1.0
     marker.color=green
@@ -37,7 +37,6 @@ class Example(object):
 
     def __init__(self):
 
-        exo.Setup.initRos()
         self.solver = exo.Setup.loadSolver('{exotica_examples}/resources/configs/point_to_line.xml')
         self.problem = self.solver.getProblem()
         self.q=np.array([0.0]*7)        
@@ -45,11 +44,11 @@ class Example(object):
         self.p = INIT_POSITION
 
         self.pub = {}
-        self.pub['marker']=rospy.Publisher('/POINT', Marker, queue_size=1)
-        self.pub['joint_state'] = rospy.Publisher('/joint_states', JointState, queue_size=1)
+        self.pub['marker']=rospy.Publisher('teleop_point', Marker, queue_size=1)
+        self.pub['joint_state'] = rospy.Publisher('joint_states', JointState, queue_size=1)
 
         self.sub={}
-        self.sub['joy'] = rospy.Subscriber('/joy', Joy, self.callback)
+        self.sub['joy'] = rospy.Subscriber('joy', Joy, self.callback)
         self.joy = None
         
     def callback(self, msg):
@@ -90,6 +89,7 @@ class Example(object):
 
 if __name__=='__main__':
     rospy.init_node('example_point_to_line_node')
+    exo.Setup.initRos()
     rospy.Timer(rospy.Duration(DT), Example().update)
     signal.signal(signal.SIGINT, sigIntHandler)
     rospy.spin()

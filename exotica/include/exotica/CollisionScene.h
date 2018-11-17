@@ -52,6 +52,11 @@ struct ContinuousCollisionProxy
     bool in_collision;
     double time_of_contact;
 
+    // Contact information, filled in if in continuous contact:
+    double penetration_depth = 0.0;
+    Eigen::Vector3d contact_normal;
+    Eigen::Vector3d contact_pos;  // In world frame
+
     inline std::string print() const
     {
         std::stringstream ss;

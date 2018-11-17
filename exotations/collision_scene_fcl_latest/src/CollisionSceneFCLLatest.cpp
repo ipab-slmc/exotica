@@ -763,6 +763,28 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
 
     ret.in_collision = allowedToCollide ? result.is_collide : false;
     ret.time_of_contact = result.time_of_contact;
+
+    // If in contact, compute contact point
+    if (ret.in_collision)
+    {
+        fcl::CollisionRequestd contact_req;
+        contact_req.enable_contact = true;
+        fcl::CollisionResultd contact_res;
+        size_t num_contacts = fcl::collide(shape1->collisionGeometry().get(), result.contact_tf1, shape2->collisionGeometry().get(), result.contact_tf2, contact_req, contact_res);
+        if (num_contacts > 0)
+        {
+            auto contact = contact_res.getContact(0);
+            ret.penetration_depth = contact.penetration_depth;
+            ret.contact_pos = contact.pos;
+            ret.contact_normal = contact.normal;
+            // HIGHLIGHT_NAMED("In collision, contacts", num_contacts << "penetration=" << ret.penetration_depth << ", pos: " << ret.contact_pos.transpose());
+        }
+        else
+        {
+            throw_pretty("What's up?");
+        }
+    }
+
     tf::transformEigenToKDL(static_cast<Eigen::Affine3d>(result.contact_tf1), ret.contact_tf1);
     tf::transformEigenToKDL(static_cast<Eigen::Affine3d>(result.contact_tf2), ret.contact_tf2);
 

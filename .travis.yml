@@ -11,6 +11,7 @@ env:
     - ROS_DISTRO="kinetic"  ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu UPSTREAM_WORKSPACE=file ROSINSTALL_FILENAME=.rosinstall
     # - ROS_DISTRO="kinetic"  ROS_REPOSITORY_PATH=http://packages.ros.org/ros-shadow-fixed/ubuntu
     # - ROS_DISTRO="kinetic"  PRERELEASE=true
+    - ROS_DISTRO="kinetic" CLANG_FORMAT_CHECK=file
     - ROS_DISTRO="melodic"  ROS_REPOSITORY_PATH=http://packages.ros.org/ros/ubuntu UPSTREAM_WORKSPACE=file ROSINSTALL_FILENAME=.rosinstall.melodic
     # - ROS_DISTRO="melodic"  ROS_REPOSITORY_PATH=http://packages.ros.org/ros-shadow-fixed/ubuntu
     # - ROS_DISTRO="melodic"  PRERELEASE=true UPSTREAM_WORKSPACE=file ROSINSTALL_FILENAME=exotica.rosinstall

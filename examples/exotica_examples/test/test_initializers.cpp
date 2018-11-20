@@ -33,24 +33,29 @@
 #include <exotica/Exotica.h>
 #include <gtest/gtest.h>
 
-
 // Extend testing printout //////////////////////
 
 namespace testing
 {
- namespace internal
- {
-  enum GTestColor {
-      COLOR_DEFAULT,
-      COLOR_RED,
-      COLOR_GREEN,
-      COLOR_YELLOW
-  };
+namespace internal
+{
+enum GTestColor
+{
+    COLOR_DEFAULT,
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_YELLOW
+};
 
-  extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
- }
+extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
 }
-#define PRINTF(...)  do { testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__); } while(0)
+}
+#define PRINTF(...)                                                                        \
+    do                                                                                     \
+    {                                                                                      \
+        testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); \
+        testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__);    \
+    } while (0)
 
 // C++ stream interface
 class TestCout : public std::stringstream
@@ -58,11 +63,11 @@ class TestCout : public std::stringstream
 public:
     ~TestCout()
     {
-        PRINTF("%s\n",str().c_str());
+        PRINTF("%s\n", str().c_str());
     }
 };
 
-#define TEST_COUT  TestCout()
+#define TEST_COUT TestCout()
 
 //////////////////////////////////////////////
 
@@ -138,8 +143,8 @@ bool testRos()
         std::string path2 = parsePath("{exotica}");
         if (path1 != path2)
             ADD_FAILURE() << "Failed when parsing paths:\n"
-                         << path1 << "\n"
-                         << path2;
+                          << path1 << "\n"
+                          << path2;
     }
 
     // Reset server
@@ -193,7 +198,7 @@ TEST(ExoticaTestInitializers, testRos)
     {
         EXPECT_TRUE(testRos());
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -207,7 +212,7 @@ TEST(ExoticaTestInitializers, testCore)
         EXPECT_TRUE(testCore());
         Setup::Destroy();
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -219,7 +224,7 @@ TEST(ExoticaTestInitializers, testGenericInit)
     {
         EXPECT_TRUE(testGenericInit());
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -231,7 +236,7 @@ TEST(ExoticaTestInitializers, testXMLInit)
     {
         EXPECT_TRUE(testXMLInit());
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }

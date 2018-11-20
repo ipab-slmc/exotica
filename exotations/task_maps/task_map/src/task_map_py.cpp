@@ -15,6 +15,7 @@
 #include <task_map/JointLimit.h>
 #include <task_map/Point2Line.h>
 #include <task_map/SphereCollision.h>
+#include <task_map/Point2Point.h>
 
 using namespace exotica;
 namespace py = pybind11;
@@ -41,6 +42,10 @@ PYBIND11_MODULE(task_map_py, module)
 
     py::class_<Point2Line, std::shared_ptr<Point2Line>, TaskMap> point2Line(module, "Point2Line");
     point2Line.def_property("endPoint", &Point2Line::getEndPoint, &Point2Line::setEndPoint);
+
+    py::class_<Point2Point, std::shared_ptr<Point2Point>, TaskMap> point2Point(module, "Point2Point");
+    point2Point.def("getPoint", &Point2Point::getPoint);
+    point2Point.def("setPoint", &Point2Point::setPoint);
 
     py::class_<CoM, std::shared_ptr<CoM>, TaskMap> com(module, "CoM");
 

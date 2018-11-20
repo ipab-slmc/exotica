@@ -1,0 +1,3 @@
+extend <exotica/TaskMap>
+
+Required Eigen::Vector3d Point; # The point for the end-effector to point at in the base frame.

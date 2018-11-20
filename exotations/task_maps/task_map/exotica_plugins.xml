@@ -47,4 +47,7 @@
   <class name="exotica/QuasiStatic" type="exotica::QuasiStatic" base_class_type="exotica::TaskMap">
     <description>Plannar quasi static cost/constraint</description>
   </class>
+  <class name="exotica/Point2Point" type="exotica::Point2Point" base_class_type="exotica::TaskMap">
+    <description>Points end-effector at a given point.</description>
+  </class>
 </library>

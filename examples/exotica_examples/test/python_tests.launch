@@ -1,0 +1,9 @@
+<launch>
+  <test test-name="core" pkg="exotica_examples" type="test_core.py" />
+  <test test-name="scene_creation" pkg="exotica_examples" type="test_scene_creation.py" />
+  <test test-name="collision_scene_distances" pkg="exotica_examples" type="test_collision_scene_distances.py" />
+  <test test-name="valkyrie_com" pkg="exotica_examples" type="test_valkyrie_com.py" />
+  <test test-name="valkyrie_collision_check_fcl_default" pkg="exotica_examples" type="test_valkyrie_collision_check_fcl_default.py" />
+  <test test-name="valkyrie_collision_check_fcl_latest" pkg="exotica_examples" type="test_valkyrie_collision_check_fcl_latest.py" />
+  <test test-name="test_continuous_collision_check" pkg="exotica_examples" type="test_continuous_collision_check.py" />
+</launch>

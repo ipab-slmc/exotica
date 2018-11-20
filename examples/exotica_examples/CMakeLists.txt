@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   ik_solver
   task_map
+  rostest
 )
 
 catkin_package(
@@ -45,21 +46,17 @@ install(DIRECTORY resources/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/res
 FILE(GLOB python_examples "${CMAKE_CURRENT_SOURCE_DIR}/scripts/*")
 catkin_install_python(PROGRAMS ${python_examples} DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-if(CATKIN_ENABLE_TESTING)
-    add_executable(test_maps tests/test_maps.cpp)
-    target_link_libraries(test_maps ${catkin_LIBRARIES})
-    install(TARGETS test_maps RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+if (CATKIN_ENABLE_TESTING)
 
-    add_executable(test_initializers tests/test_initializers.cpp)
+  catkin_add_gtest(test_initializers test/test_initializers.cpp)
+  if(TARGET test_initializers)
     target_link_libraries(test_initializers ${catkin_LIBRARIES})
-    install(TARGETS test_initializers RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  endif()
 
-    add_executable(test_problems tests/test_problems.cpp)
+  catkin_add_gtest(test_problems test/test_problems.cpp)
+  if(TARGET test_problems)
     target_link_libraries(test_problems ${catkin_LIBRARIES})
-    install(TARGETS test_problems RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  endif()
 
-    FILE(GLOB python_tests "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.py")
-    catkin_install_python(PROGRAMS ${python_tests} DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-    install(DIRECTORY tests/resources/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/tests/resources)
-endif(CATKIN_ENABLE_TESTING)
+  add_rostest(test/python_tests.launch)
+endif()

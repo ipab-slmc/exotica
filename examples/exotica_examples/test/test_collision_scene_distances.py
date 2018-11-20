@@ -5,6 +5,11 @@ import math
 import time
 import numpy as np
 
+PKG = 'exotica_examples'
+import roslib; roslib.load_manifest(PKG)  # This line is not needed with Catkin.
+
+import unittest
+
 exo.Setup.initRos()
 
 PENETRATING_DISTANCE_ATOL = 1e-6
@@ -20,7 +25,7 @@ def getProblemInitializer(collisionScene, URDF):
                                  'JointGroup': 'group1',
                                  'Name': 'TestScene',
                                  'Debug': '0',
-                                 'SRDF': '{exotica_examples}/tests/resources/A_vs_B.srdf',
+                                 'SRDF': '{exotica_examples}/test/resources/A_vs_B.srdf',
                                  'SetRobotDescriptionRosParams': '1',
                                  'URDF': URDF})]})
 
@@ -33,7 +38,7 @@ def debugPublish(p, scene):
 
 
 def testSphereVsSphereDistance(collisionScene):
-    PrimitiveSphere_vs_PrimitiveSphere_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_PrimitiveSphere_Distance.urdf')
+    PrimitiveSphere_vs_PrimitiveSphere_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveSphere_vs_PrimitiveSphere_Distance.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_PrimitiveSphere_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -57,7 +62,7 @@ def testSphereVsSphereDistance(collisionScene):
 
 
 def testSphereVsSpherePenetrating(collisionScene):
-    PrimitiveSphere_vs_PrimitiveSphere_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_PrimitiveSphere_Penetrating.urdf')
+    PrimitiveSphere_vs_PrimitiveSphere_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveSphere_vs_PrimitiveSphere_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_PrimitiveSphere_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -81,7 +86,7 @@ def testSphereVsSpherePenetrating(collisionScene):
 
 
 def testSphereVsBoxDistance(collisionScene):
-    PrimitiveSphere_vs_PrimitiveBox_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_PrimitiveBox_Distance.urdf')
+    PrimitiveSphere_vs_PrimitiveBox_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveSphere_vs_PrimitiveBox_Distance.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_PrimitiveBox_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -105,7 +110,7 @@ def testSphereVsBoxDistance(collisionScene):
 
 
 def testSphereVsBoxTouching(collisionScene):
-    PrimitiveSphere_vs_PrimitiveBox_Touching = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_PrimitiveBox_Touching.urdf')
+    PrimitiveSphere_vs_PrimitiveBox_Touching = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveSphere_vs_PrimitiveBox_Touching.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_PrimitiveBox_Touching)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -129,7 +134,7 @@ def testSphereVsBoxTouching(collisionScene):
 
 
 def testSphereVsBoxPenetrating(collisionScene):
-    PrimitiveSphere_vs_PrimitiveBox_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_PrimitiveBox_Penetrating.urdf')
+    PrimitiveSphere_vs_PrimitiveBox_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveSphere_vs_PrimitiveBox_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_PrimitiveBox_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -153,7 +158,7 @@ def testSphereVsBoxPenetrating(collisionScene):
 
 
 def testSphereVsCylinderDistance(collisionScene):
-    PrimitiveSphere_vs_PrimitiveCylinder_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_PrimitiveCylinder_Distance.urdf')
+    PrimitiveSphere_vs_PrimitiveCylinder_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveSphere_vs_PrimitiveCylinder_Distance.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_PrimitiveCylinder_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -177,7 +182,7 @@ def testSphereVsCylinderDistance(collisionScene):
 
 
 def testSphereVsCylinderPenetrating(collisionScene):
-    PrimitiveSphere_vs_PrimitiveCylinder_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_PrimitiveCylinder_Penetrating.urdf')
+    PrimitiveSphere_vs_PrimitiveCylinder_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveSphere_vs_PrimitiveCylinder_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_PrimitiveCylinder_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -201,7 +206,7 @@ def testSphereVsCylinderPenetrating(collisionScene):
 
 
 def testSphereVsMeshDistance(collisionScene):
-    PrimitiveSphere_vs_Mesh_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_Mesh_Distance.urdf')
+    PrimitiveSphere_vs_Mesh_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveSphere_vs_Mesh_Distance.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_Mesh_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -240,7 +245,7 @@ def testSphereVsMeshDistance(collisionScene):
 
 
 def testSphereVsMeshPenetrating(collisionScene):
-    PrimitiveSphere_vs_Mesh_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveSphere_vs_Mesh_Penetrating.urdf')
+    PrimitiveSphere_vs_Mesh_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveSphere_vs_Mesh_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveSphere_vs_Mesh_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -277,7 +282,7 @@ def testSphereVsMeshPenetrating(collisionScene):
 
 
 def testBoxVsBoxDistance(collisionScene):
-    PrimitiveBox_vs_PrimitiveBox_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveBox_vs_PrimitiveBox_Distance.urdf')
+    PrimitiveBox_vs_PrimitiveBox_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveBox_vs_PrimitiveBox_Distance.urdf')
     prob = exo.Setup.createProblem(PrimitiveBox_vs_PrimitiveBox_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -302,7 +307,7 @@ def testBoxVsBoxDistance(collisionScene):
 
 
 def testBoxVsBoxTouching(collisionScene):
-    PrimitiveBox_vs_PrimitiveBox_Touching = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveBox_vs_PrimitiveBox_Touching.urdf')
+    PrimitiveBox_vs_PrimitiveBox_Touching = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveBox_vs_PrimitiveBox_Touching.urdf')
     prob = exo.Setup.createProblem(PrimitiveBox_vs_PrimitiveBox_Touching)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -328,7 +333,7 @@ def testBoxVsBoxTouching(collisionScene):
 
 
 def testBoxVsBoxPenetrating(collisionScene):
-    PrimitiveBox_vs_PrimitiveBox_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveBox_vs_PrimitiveBox_Penetrating.urdf')
+    PrimitiveBox_vs_PrimitiveBox_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveBox_vs_PrimitiveBox_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveBox_vs_PrimitiveBox_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -353,7 +358,7 @@ def testBoxVsBoxPenetrating(collisionScene):
 
 
 def testBoxVsCylinderDistance(collisionScene):
-    PrimitiveBox_vs_PrimitiveCylinder_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveBox_vs_PrimitiveCylinder_Distance.urdf')
+    PrimitiveBox_vs_PrimitiveCylinder_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveBox_vs_PrimitiveCylinder_Distance.urdf')
     prob = exo.Setup.createProblem(PrimitiveBox_vs_PrimitiveCylinder_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -377,7 +382,7 @@ def testBoxVsCylinderDistance(collisionScene):
 
 
 def testBoxVsCylinderPenetrating(collisionScene):
-    PrimitiveBox_vs_PrimitiveCylinder_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveBox_vs_PrimitiveCylinder_Penetrating.urdf')
+    PrimitiveBox_vs_PrimitiveCylinder_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveBox_vs_PrimitiveCylinder_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveBox_vs_PrimitiveCylinder_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -401,7 +406,7 @@ def testBoxVsCylinderPenetrating(collisionScene):
 
 
 def testBoxVsMeshDistance(collisionScene):
-    PrimitiveBox_vs_Mesh_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveBox_vs_Mesh_Distance.urdf')
+    PrimitiveBox_vs_Mesh_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveBox_vs_Mesh_Distance.urdf')
     prob = exo.Setup.createProblem(PrimitiveBox_vs_Mesh_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -438,7 +443,7 @@ def testBoxVsMeshDistance(collisionScene):
 
 
 def testBoxVsMeshPenetrating(collisionScene):
-    PrimitiveBox_vs_Mesh_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveBox_vs_Mesh_Penetrating.urdf')
+    PrimitiveBox_vs_Mesh_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveBox_vs_Mesh_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveBox_vs_Mesh_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -476,7 +481,7 @@ def testBoxVsMeshPenetrating(collisionScene):
 
 
 def testCylinderVsCylinderDistance(collisionScene):
-    PrimitiveCylinder_vs_PrimitiveCylinder_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveCylinder_vs_PrimitiveCylinder_Distance.urdf')
+    PrimitiveCylinder_vs_PrimitiveCylinder_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveCylinder_vs_PrimitiveCylinder_Distance.urdf')
     prob = exo.Setup.createProblem(PrimitiveCylinder_vs_PrimitiveCylinder_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -500,7 +505,7 @@ def testCylinderVsCylinderDistance(collisionScene):
 
 
 def testCylinderVsCylinderPenetrating(collisionScene):
-    PrimitiveCylinder_vs_PrimitiveCylinder_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveCylinder_vs_PrimitiveCylinder_Penetrating.urdf')
+    PrimitiveCylinder_vs_PrimitiveCylinder_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveCylinder_vs_PrimitiveCylinder_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveCylinder_vs_PrimitiveCylinder_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -524,7 +529,7 @@ def testCylinderVsCylinderPenetrating(collisionScene):
 
 
 def testCylinderVsMeshDistance(collisionScene):
-    PrimitiveCylinder_vs_Mesh_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveCylinder_vs_Mesh_Distance.urdf')
+    PrimitiveCylinder_vs_Mesh_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveCylinder_vs_Mesh_Distance.urdf')
     prob = exo.Setup.createProblem(PrimitiveCylinder_vs_Mesh_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -561,7 +566,7 @@ def testCylinderVsMeshDistance(collisionScene):
 
 
 def testCylinderVsMeshPenetrating(collisionScene):
-    PrimitiveCylinder_vs_Mesh_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/PrimitiveCylinder_vs_Mesh_Penetrating.urdf')
+    PrimitiveCylinder_vs_Mesh_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/PrimitiveCylinder_vs_Mesh_Penetrating.urdf')
     prob = exo.Setup.createProblem(PrimitiveCylinder_vs_Mesh_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -599,7 +604,7 @@ def testCylinderVsMeshPenetrating(collisionScene):
 
 
 def testMeshVsMeshDistance(collisionScene):
-    Mesh_vs_Mesh_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/Mesh_vs_Mesh_Distance.urdf')
+    Mesh_vs_Mesh_Distance = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/Mesh_vs_Mesh_Distance.urdf')
     prob = exo.Setup.createProblem(Mesh_vs_Mesh_Distance)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -623,7 +628,7 @@ def testMeshVsMeshDistance(collisionScene):
 
 
 def testMeshVsMeshPenetrating(collisionScene):
-    Mesh_vs_Mesh_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/tests/resources/Mesh_vs_Mesh_Penetrating.urdf')
+    Mesh_vs_Mesh_Penetrating = getProblemInitializer(collisionScene, '{exotica_examples}/test/resources/Mesh_vs_Mesh_Penetrating.urdf')
     prob = exo.Setup.createProblem(Mesh_vs_Mesh_Penetrating)
     prob.update(np.zeros(prob.N,))
     scene = prob.getScene()
@@ -650,30 +655,74 @@ def testMeshVsMeshPenetrating(collisionScene):
 #########################################
 
 # Cf. Issue #364 for tracking deactivated tests.
-for collisionScene in ['CollisionSceneFCLLatest']:
-    testSphereVsSphereDistance(collisionScene)
-    testSphereVsSpherePenetrating(collisionScene)
-    testSphereVsBoxDistance(collisionScene)
-    testSphereVsBoxTouching(collisionScene)
-    testSphereVsBoxPenetrating(collisionScene)
-    testSphereVsCylinderDistance(collisionScene)
-    testSphereVsCylinderPenetrating(collisionScene)
-    # testSphereVsMeshDistance(collisionScene)  # includes mesh vs sphere (distance OK, points not)
-    # testSphereVsMeshPenetrating(collisionScene)   # BROKEN with libccd (not implemented)
-    testBoxVsBoxDistance(collisionScene)
-    testBoxVsBoxTouching(collisionScene)
-    testBoxVsBoxPenetrating(collisionScene)
-    testBoxVsCylinderDistance(collisionScene)
-    testBoxVsCylinderPenetrating(collisionScene)
-    testBoxVsMeshDistance(collisionScene)  # includes mesh vs box
-    # testBoxVsMeshPenetrating(collisionScene)   # BROKEN with libccd (not implemented)
-    testCylinderVsCylinderDistance(collisionScene)
-    testCylinderVsCylinderPenetrating(collisionScene)
-    testCylinderVsMeshDistance(collisionScene)  # includes mesh vs cylinder
-    # testCylinderVsMeshPenetrating(collisionScene)   # BROKEN with libccd (not implemented)
-    testMeshVsMeshDistance(collisionScene)
-    # testMeshVsMeshPenetrating(collisionScene)    # BROKEN with libccd (very inaccurate distance)
+class TestClass(unittest.TestCase):
+    collisionScene = 'CollisionSceneFCLLatest'
+    def test_testSphereVsSphereDistance(self):
+        testSphereVsSphereDistance(TestClass.collisionScene)
 
-print('>>SUCCESS<<')
+    def test_testSphereVsSpherePenetrating(self):
+        testSphereVsSpherePenetrating(TestClass.collisionScene)
 
-exit(0)
+    def test_testSphereVsBoxDistance(self):
+        testSphereVsBoxDistance(TestClass.collisionScene)
+
+    def test_testSphereVsBoxTouching(self):
+        testSphereVsBoxTouching(TestClass.collisionScene)
+
+    def test_testSphereVsBoxPenetrating(self):
+        testSphereVsBoxPenetrating(TestClass.collisionScene)
+
+    def test_testSphereVsCylinderDistance(self):
+        testSphereVsCylinderDistance(TestClass.collisionScene)
+
+    def test_testSphereVsCylinderPenetrating(self):
+        testSphereVsCylinderPenetrating(TestClass.collisionScene)
+
+#     def test_testSphereVsMeshDistance(self):
+#         testSphereVsMeshDistance(TestClass.collisionScene)  # includes mesh vs sphere (distance OK, points not)
+
+#     def test_testSphereVsMeshPenetrating(self):
+#         testSphereVsMeshPenetrating(TestClass.collisionScene)   # BROKEN with libccd (not implemented)
+
+    def test_testBoxVsBoxDistance(self):
+        testBoxVsBoxDistance(TestClass.collisionScene)
+
+    def test_testBoxVsBoxTouching(self):
+        testBoxVsBoxTouching(TestClass.collisionScene)
+
+    def test_testBoxVsBoxPenetrating(self):
+        testBoxVsBoxPenetrating(TestClass.collisionScene)
+
+    def test_testBoxVsCylinderDistance(self):
+        testBoxVsCylinderDistance(TestClass.collisionScene)
+
+    def test_testBoxVsCylinderPenetrating(self):
+        testBoxVsCylinderPenetrating(TestClass.collisionScene)
+
+    def test_testBoxVsMeshDistance(self):
+        testBoxVsMeshDistance(TestClass.collisionScene)  # includes mesh vs box
+
+#     def test_testBoxVsMeshPenetrating(self):
+#         testBoxVsMeshPenetrating(collisionScene)   # BROKEN with libccd (not implemented)
+
+    def test_testCylinderVsCylinderDistance(self):
+        testCylinderVsCylinderDistance(TestClass.collisionScene)
+
+    def test_testCylinderVsCylinderPenetrating(self):
+        testCylinderVsCylinderPenetrating(TestClass.collisionScene)
+
+    def test_testCylinderVsMeshDistance(self):
+        testCylinderVsMeshDistance(TestClass.collisionScene)  # includes mesh vs cylinder
+
+#     def test_testCylinderVsMeshPenetrating(self):
+#         testCylinderVsMeshPenetrating(collisionScene)   # BROKEN with libccd (not implemented)
+
+    def test_testMeshVsMeshDistance(self):
+        testMeshVsMeshDistance(TestClass.collisionScene)
+
+#     def test_testMeshVsMeshPenetrating(self):
+#         testMeshVsMeshPenetrating(collisionScene)    # BROKEN with libccd (very inaccurate distance)
+
+if __name__ == '__main__':
+    import rostest
+    rostest.rosrun(PKG, 'TestCollisionSceneDistance', TestClass)

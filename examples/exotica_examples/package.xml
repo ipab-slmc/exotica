@@ -18,4 +18,6 @@
   <depend>task_map</depend>
   <depend>robot_state_publisher</depend>
   <depend>rviz</depend>
+  <build_depend>rostest</build_depend>
+  <test_depend>val_description</test_depend>
 </package>

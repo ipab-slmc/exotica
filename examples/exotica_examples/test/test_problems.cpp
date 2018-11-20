@@ -1,4 +1,38 @@
 #include <exotica/Exotica.h>
+#include <gtest/gtest.h>
+
+// Extend testing printout //////////////////////
+
+namespace testing
+{
+ namespace internal
+ {
+  enum GTestColor {
+      COLOR_DEFAULT,
+      COLOR_RED,
+      COLOR_GREEN,
+      COLOR_YELLOW
+  };
+
+  extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
+ }
+}
+#define PRINTF(...)  do { testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__); } while(0)
+
+// C++ stream interface
+class TestCout : public std::stringstream
+{
+public:
+    ~TestCout()
+    {
+        PRINTF("%s\n",str().c_str());
+    }
+};
+
+#define TEST_COUT  TestCout()
+
+//////////////////////////////////////////////
+
 
 using namespace exotica;
 #include <string>
@@ -28,20 +62,20 @@ Hessian operator-(const Hessian& A, const Hessian& B)
 template <class T>
 std::shared_ptr<T> createProblem(const std::string& name, int derivative)
 {
-    HIGHLIGHT("Creating " << name << " with derivatives " << derivative);
+    TEST_COUT << "Creating " << name << " with derivatives " << derivative;
     Initializer dummy;
     Initializer init;
-    XMLLoader::load("{exotica_examples}/resources/configs/test_problems.xml", dummy, init, "Dummy", name);
+    XMLLoader::load("{exotica_examples}/test/resources/test_problems.xml", dummy, init, "Dummy", name);
     init.addProperty(Property("DerivativeOrder", false, derivative));
     std::shared_ptr<T> ret = std::static_pointer_cast<T>(Setup::createProblem(init));
-    INFO_PLAIN("Problem loaded");
+    TEST_COUT << "Problem loaded";
     return ret;
 }
 
 template <class T>
-void testJacobianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double eps = 1e-5)
+void testJacobianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double eps = 1e-4, double h = 1e-5)
 {
-    INFO_PLAIN("Testing Jacobian:");
+    TEST_COUT << "Testing Jacobian:";
     for (int tr = 0; tr < NUM_TRIALS; tr++)
     {
         Eigen::VectorXd x0(problem->N);
@@ -53,28 +87,28 @@ void testJacobianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double e
         for (int i = 0; i < problem->N; i++)
         {
             Eigen::VectorXd x = x0;
-            x(i) += eps;
+            x(i) += h;
             problem->Update(x);
-            J.col(i) = (task.Phi - y0) / eps;
+            J.col(i) = (task.Phi - y0) / h;
         }
         double errJ = (J - J0).norm();
         if (errJ > eps)
         {
-            HIGHLIGHT("x: " << x0.transpose());
-            HIGHLIGHT("J*:\n"
-                      << J);
-            HIGHLIGHT("J:\n"
-                      << J0);
-            throw_pretty("Jacobian error out of bounds: " << errJ);
+            TEST_COUT << "x: " << x0.transpose();
+            TEST_COUT << "J*:\n"
+                      << J;
+            TEST_COUT << "J:\n"
+                      << J0;
+            ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
         }
     }
-    INFO_PLAIN("Test passed");
+    TEST_COUT << "Test passed";
 }
 
 template <class T>
-void testHessianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double eps = 1e-5)
+void testHessianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double eps = 1e-4, double h = 1e-5)
 {
-    INFO_PLAIN("Testing Hessian:");
+    TEST_COUT << "Testing Hessian:";
     for (int tr = 0; tr < NUM_TRIALS; tr++)
     {
         Eigen::VectorXd x0(problem->N);
@@ -92,12 +126,12 @@ void testHessianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double ep
         for (int i = 0; i < problem->N; i++)
         {
             Eigen::VectorXd x = x0;
-            x(i) += eps;
+            x(i) += h;
             problem->Update(x);
             Eigen::MatrixXd Ji = task.J;
             for (int k = 0; k < task.JN; k++)
             {
-                H(k).row(i) = (Ji.row(k) - J0.row(k)) / eps;
+                H(k).row(i) = (Ji.row(k) - J0.row(k)) / h;
             }
         }
         Hessian dH = H - H0;
@@ -110,23 +144,23 @@ void testHessianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double ep
         {
             for (int i = 0; i < dH.rows(); i++)
             {
-                HIGHLIGHT("Computed:\n"
-                          << H0(i));
-                HIGHLIGHT("FD:\n"
-                          << H(i));
-                HIGHLIGHT("Diff:\n"
-                          << dH(i));
+                TEST_COUT << "Computed:\n"
+                          << H0(i);
+                TEST_COUT << "FD:\n"
+                          << H(i);
+                TEST_COUT << "Diff:\n"
+                          << dH(i);
             }
-            throw_pretty("Hessian error out of bounds: " << errH);
+            ADD_FAILURE() << "Hessian error out of bounds: " << errH;
         }
     }
-    INFO_PLAIN("Test passed");
+    TEST_COUT << "Test passed";
 }
 
 template <class T>
-void testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-5)
+void testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-4, double h = 1e-5)
 {
-    INFO_PLAIN("Testing Jacobian:");
+    TEST_COUT << "Testing Jacobian:";
     for (int tr = 0; tr < NUM_TRIALS; tr++)
     {
         Eigen::VectorXd x0(problem->N);
@@ -138,28 +172,28 @@ void testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, 
         for (int i = 0; i < problem->N; i++)
         {
             Eigen::VectorXd x = x0;
-            x(i) += eps;
+            x(i) += h;
             problem->Update(x, t);
-            J.col(i) = (task.Phi[t] - y0) / eps;
+            J.col(i) = (task.Phi[t] - y0) / h;
         }
         double errJ = (J - J0).norm();
         if (errJ > eps)
         {
-            HIGHLIGHT("x: " << x0.transpose());
-            HIGHLIGHT("J*:\n"
-                      << J);
-            HIGHLIGHT("J:\n"
-                      << J0);
-            throw_pretty("Jacobian error out of bounds: " << errJ);
+            TEST_COUT << "x: " << x0.transpose();
+            TEST_COUT << "J*:\n"
+                      << J;
+            TEST_COUT << "J:\n"
+                      << J0;
+            ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
         }
     }
-    INFO_PLAIN("Test passed");
+    TEST_COUT << "Test passed";
 }
 
 template <class T>
-void testHessianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-5)
+void testHessianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-4, double h = 1e-5)
 {
-    INFO_PLAIN("Testing Hessian:");
+    TEST_COUT << "Testing Hessian:";
     for (int tr = 0; tr < NUM_TRIALS; tr++)
     {
         Eigen::VectorXd x0(problem->N);
@@ -177,12 +211,12 @@ void testHessianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, i
         for (int i = 0; i < problem->N; i++)
         {
             Eigen::VectorXd x = x0;
-            x(i) += eps;
+            x(i) += h;
             problem->Update(x, t);
             Eigen::MatrixXd Ji = task.J[t];
             for (int k = 0; k < task.JN; k++)
             {
-                H(k).row(i) = (Ji.row(k) - J0.row(k)) / eps;
+                H(k).row(i) = (Ji.row(k) - J0.row(k)) / h;
             }
         }
         Hessian dH = H - H0;
@@ -195,21 +229,22 @@ void testHessianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, i
         {
             for (int i = 0; i < dH.rows(); i++)
             {
-                HIGHLIGHT("Computed:\n"
-                          << H0(i));
-                HIGHLIGHT("FD:\n"
-                          << H(i));
-                HIGHLIGHT("Diff:\n"
-                          << dH(i));
+                TEST_COUT << "Computed:\n"
+                          << H0(i);
+                TEST_COUT << "FD:\n"
+                          << H(i);
+                TEST_COUT << "Diff:\n"
+                          << dH(i);
             }
-            throw_pretty("Hessian error out of bounds: " << errH);
+            ADD_FAILURE() << "Hessian error out of bounds: " << errH;
         }
     }
-    INFO_PLAIN("Test passed");
+    TEST_COUT << "Test passed";
 }
 
-int main(int argc, char** argv)
+TEST(ExoticaProblems, UnconstrainedEndPoseProblem)
 {
+    try
     {
         std::vector<Eigen::VectorXd> X(3);
         std::vector<Eigen::MatrixXd> J(3);
@@ -217,11 +252,11 @@ int main(int argc, char** argv)
         {
             CREATE_PROBLEM(UnconstrainedEndPoseProblem, d);
             Eigen::VectorXd x = problem->getStartState();
-            INFO_PLAIN("Testing problem update");
+            TEST_COUT << "Testing problem update";
             problem->Update(x);
-            INFO_PLAIN("Test passed");
+            TEST_COUT << "Test passed";
             X[d] = problem->Cost.ydiff;
-            INFO_PLAIN("Testing cost");
+            TEST_COUT << "Testing cost";
             if (d > 0)
             {
                 J[d] = problem->Cost.J;
@@ -233,10 +268,19 @@ int main(int argc, char** argv)
             }
         }
         if (!(X[0] == X[1] && X[1] == X[2]))
-            throw_pretty("Cost FK is inconsistent!");
+            ADD_FAILURE() << "Cost FK is inconsistent!";
         if (!(J[1] == J[2]))
-            throw_pretty("Cost Jacobians are inconsistent!");
+            ADD_FAILURE() << "Cost Jacobians are inconsistent!";
     }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+TEST(ExoticaProblems, BoundedEndPoseProblem)
+{
+    try
     {
         std::vector<Eigen::VectorXd> X(3);
         std::vector<Eigen::MatrixXd> J(3);
@@ -244,11 +288,11 @@ int main(int argc, char** argv)
         {
             CREATE_PROBLEM(BoundedEndPoseProblem, d);
             Eigen::VectorXd x = problem->getStartState();
-            INFO_PLAIN("Testing problem update");
+            TEST_COUT << "Testing problem update";
             problem->Update(x);
-            INFO_PLAIN("Test passed");
+            TEST_COUT << "Test passed";
             X[d] = problem->Cost.ydiff;
-            INFO_PLAIN("Testing cost");
+            TEST_COUT << "Testing cost";
             if (d > 0)
             {
                 J[d] = problem->Cost.J;
@@ -260,10 +304,19 @@ int main(int argc, char** argv)
             }
         }
         if (!(X[0] == X[1] && X[1] == X[2]))
-            throw_pretty("Cost FK is inconsistent!");
+            ADD_FAILURE() << "Cost FK is inconsistent!";
         if (!(J[1] == J[2]))
-            throw_pretty("Cost Jacobians are inconsistent!");
+            ADD_FAILURE() << "Cost Jacobians are inconsistent!";
     }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+TEST(ExoticaProblems, EndPoseProblem)
+{
+    try
     {
         std::vector<Eigen::VectorXd> X(9);
         std::vector<Eigen::MatrixXd> J(9);
@@ -271,11 +324,11 @@ int main(int argc, char** argv)
         {
             CREATE_PROBLEM(EndPoseProblem, d);
             Eigen::VectorXd x = problem->getStartState();
-            INFO_PLAIN("Testing problem update");
+            TEST_COUT << "Testing problem update";
             problem->Update(x);
-            INFO_PLAIN("Test passed");
+            TEST_COUT << "Test passed";
             {
-                INFO_PLAIN("Testing cost");
+                TEST_COUT << "Testing cost";
                 X[d] = problem->Cost.ydiff;
                 if (d > 0)
                 {
@@ -289,7 +342,7 @@ int main(int argc, char** argv)
             }
             problem->Update(x);
             {
-                INFO_PLAIN("Testing equality");
+                TEST_COUT << "Testing equality";
                 X[d + 3] = problem->Equality.ydiff;
                 if (d > 0)
                 {
@@ -303,7 +356,7 @@ int main(int argc, char** argv)
             }
             problem->Update(x);
             {
-                INFO_PLAIN("Testing inequality");
+                TEST_COUT << "Testing inequality";
                 X[d + 6] = problem->Inequality.ydiff;
                 if (d > 0)
                 {
@@ -317,19 +370,27 @@ int main(int argc, char** argv)
             }
         }
         if (!(X[0] == X[1] && X[1] == X[2]))
-            throw_pretty("Cost FK is inconsistent!");
+            ADD_FAILURE() << "Cost FK is inconsistent!";
         if (!(J[1] == J[2]))
-            throw_pretty("Cost Jacobians are inconsistent!");
+            ADD_FAILURE() << "Cost Jacobians are inconsistent!";
         if (!(X[3] == X[4] && X[4] == X[5]))
-            throw_pretty("Equality FK is inconsistent!");
+            ADD_FAILURE() << "Equality FK is inconsistent!";
         if (!(J[4] == J[5]))
-            throw_pretty("Equality Jacobians are inconsistent!");
+            ADD_FAILURE() << "Equality Jacobians are inconsistent!";
         if (!(X[6] == X[7] && X[7] == X[8]))
-            throw_pretty("Inequality FK is inconsistent!");
+            ADD_FAILURE() << "Inequality FK is inconsistent!";
         if (!(J[7] == J[8]))
-            throw_pretty("Inequality Jacobians are inconsistent!");
+            ADD_FAILURE() << "Inequality Jacobians are inconsistent!";
     }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
 
+TEST(ExoticaProblems, UnconstrainedTimeIndexedProblem)
+{
+    try
     {
         int T;
         {
@@ -344,11 +405,11 @@ int main(int argc, char** argv)
             {
                 CREATE_PROBLEM(UnconstrainedTimeIndexedProblem, d);
                 Eigen::VectorXd x = problem->getStartState();
-                INFO_PLAIN("Testing problem update");
+                TEST_COUT << "Testing problem update";
                 problem->Update(x, t);
-                INFO_PLAIN("Test passed");
+                TEST_COUT << "Test passed";
                 X[d] = problem->Cost.ydiff[t];
-                INFO_PLAIN("Testing cost");
+                TEST_COUT << "Testing cost";
                 if (d > 0)
                 {
                     J[d] = problem->Cost.J[t];
@@ -360,12 +421,20 @@ int main(int argc, char** argv)
                 }
             }
             if (!(X[0] == X[1] && X[1] == X[2]))
-                throw_pretty("Cost FK is inconsistent!");
+                ADD_FAILURE() << "Cost FK is inconsistent!";
             if (!(J[1] == J[2]))
-                throw_pretty("Cost Jacobians are inconsistent!");
+                ADD_FAILURE() << "Cost Jacobians are inconsistent!";
         }
     }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
 
+TEST(ExoticaProblems, BoundedTimeIndexedProblem)
+{
+    try
     {
         int T;
         {
@@ -380,11 +449,11 @@ int main(int argc, char** argv)
             {
                 CREATE_PROBLEM(BoundedTimeIndexedProblem, d);
                 Eigen::VectorXd x = problem->getStartState();
-                INFO_PLAIN("Testing problem update");
+                TEST_COUT << "Testing problem update";
                 problem->Update(x, t);
-                INFO_PLAIN("Test passed");
+                TEST_COUT << "Test passed";
                 X[d] = problem->Cost.ydiff[t];
-                INFO_PLAIN("Testing cost");
+                TEST_COUT << "Testing cost";
                 if (d > 0)
                 {
                     J[d] = problem->Cost.J[t];
@@ -396,12 +465,20 @@ int main(int argc, char** argv)
                 }
             }
             if (!(X[0] == X[1] && X[1] == X[2]))
-                throw_pretty("Cost FK is inconsistent!");
+                ADD_FAILURE() << "Cost FK is inconsistent!";
             if (!(J[1] == J[2]))
-                throw_pretty("Cost Jacobians are inconsistent!");
+                ADD_FAILURE() << "Cost Jacobians are inconsistent!";
         }
     }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
 
+TEST(ExoticaProblems, TimeIndexedProblem)
+{
+    try
     {
         int T;
         {
@@ -416,11 +493,11 @@ int main(int argc, char** argv)
             {
                 CREATE_PROBLEM(TimeIndexedProblem, d);
                 Eigen::VectorXd x = problem->getStartState();
-                INFO_PLAIN("Testing problem update");
+                TEST_COUT << "Testing problem update";
                 problem->Update(x, t);
-                INFO_PLAIN("Test passed");
+                TEST_COUT << "Test passed";
                 {
-                    INFO_PLAIN("Testing cost");
+                    TEST_COUT << "Testing cost";
                     X[d] = problem->Cost.ydiff[t];
                     if (d > 0)
                     {
@@ -434,7 +511,7 @@ int main(int argc, char** argv)
                 }
                 problem->Update(x, t);
                 {
-                    INFO_PLAIN("Testing equality");
+                    TEST_COUT << "Testing equality";
                     X[d + 3] = problem->Equality.ydiff[t];
                     if (d > 0)
                     {
@@ -448,7 +525,7 @@ int main(int argc, char** argv)
                 }
                 problem->Update(x, t);
                 {
-                    INFO_PLAIN("Testing inequality");
+                    TEST_COUT << "Testing inequality";
                     X[d + 6] = problem->Inequality.ydiff[t];
                     if (d > 0)
                     {
@@ -462,39 +539,63 @@ int main(int argc, char** argv)
                 }
             }
             if (!(X[0] == X[1] && X[1] == X[2]))
-                throw_pretty("Cost FK is inconsistent!");
+                ADD_FAILURE() << "Cost FK is inconsistent!";
             if (!(J[1] == J[2]))
-                throw_pretty("Cost Jacobians are inconsistent!");
+                ADD_FAILURE() << "Cost Jacobians are inconsistent!";
             if (!(X[3] == X[4] && X[4] == X[5]))
-                throw_pretty("Equality FK is inconsistent!");
+                ADD_FAILURE() << "Equality FK is inconsistent!";
             if (!(J[4] == J[5]))
-                throw_pretty("Equality Jacobians are inconsistent!");
+                ADD_FAILURE() << "Equality Jacobians are inconsistent!";
             if (!(X[6] == X[7] && X[7] == X[8]))
-                throw_pretty("Inequality FK is inconsistent!");
+                ADD_FAILURE() << "Inequality FK is inconsistent!";
             if (!(J[7] == J[8]))
-                throw_pretty("Inequality Jacobians are inconsistent!");
+                ADD_FAILURE() << "Inequality Jacobians are inconsistent!";
         }
     }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
 
+TEST(ExoticaProblems, SamplingProblem)
+{
+    try
     {
         CREATE_PROBLEM(SamplingProblem, 0);
         Eigen::VectorXd x = problem->getStartState();
-        INFO_PLAIN("Testing problem update");
+        TEST_COUT << "Testing problem update";
         problem->Update(x);
-        INFO_PLAIN("Test passed");
-        INFO_PLAIN("Testing valid state");
-        if (!problem->isValid(x)) throw_pretty("Start state is invalid!");
-        INFO_PLAIN("Test passed");
+        TEST_COUT << "Testing valid state";
+        if (!problem->isValid(x)) ADD_FAILURE() << "Start state is invalid!";
     }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+TEST(ExoticaProblems, TimeIndexedSamplingProblem)
+{
+    try
     {
         CREATE_PROBLEM(TimeIndexedSamplingProblem, 0);
         Eigen::VectorXd x = problem->getStartState();
-        INFO_PLAIN("Testing problem update");
+        TEST_COUT << "Testing problem update";
         problem->Update(x, 0.0);
-        INFO_PLAIN("Test passed");
-        INFO_PLAIN("Testing valid state");
-        if (!problem->isValid(x, 0.0)) throw_pretty("Start state is invalid!");
-        INFO_PLAIN("Test passed");
+        TEST_COUT << "Testing valid state";
+        if (!problem->isValid(x, 0.0)) ADD_FAILURE() << "Start state is invalid!";
     }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+int main(int argc, char** argv)
+{
+    testing::InitGoogleTest(&argc, argv);
+    int ret = RUN_ALL_TESTS();
     Setup::Destroy();
+    return ret;
 }

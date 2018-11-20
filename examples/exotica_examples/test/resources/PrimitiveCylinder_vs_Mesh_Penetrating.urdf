@@ -9,18 +9,18 @@
   <link name="A">
     <visual>
       <geometry>
-        <mesh filename="package://exotica_examples/tests/resources/cube.obj"/>
+        <cylinder radius=".5" length="3" />
       </geometry>
-      <origin rpy="0.0 0 0" xyz="-1.5 0 0"/>
+      <origin rpy="0.0 0 0" xyz="-0.4 0 0"/>
       <material name="blue"/>
     </visual>
   </link>
   <link name="B">
     <visual>
       <geometry>
-        <mesh filename="package://exotica_examples/tests/resources/uvsphere.obj"/>
+        <mesh filename="package://exotica_examples/test/resources/uvsphere.obj"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="1.5 0 0"/>
+      <origin rpy="0 0 0" xyz="0.9 0 0"/>
       <material name="green"/>
     </visual>
   </link>

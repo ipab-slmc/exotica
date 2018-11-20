@@ -1,7 +1,7 @@
 /*
  *      Author: Vladimir Ivan
  *
- * Copyright (c) 2017, University Of Edinburgh
+ * Copyright (c) 2018, University Of Edinburgh
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,27 +31,64 @@
  */
 
 #include <exotica/Exotica.h>
+#include <gtest/gtest.h>
+
+
+// Extend testing printout //////////////////////
+
+namespace testing
+{
+ namespace internal
+ {
+  enum GTestColor {
+      COLOR_DEFAULT,
+      COLOR_RED,
+      COLOR_GREEN,
+      COLOR_YELLOW
+  };
+
+  extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
+ }
+}
+#define PRINTF(...)  do { testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__); } while(0)
+
+// C++ stream interface
+class TestCout : public std::stringstream
+{
+public:
+    ~TestCout()
+    {
+        PRINTF("%s\n",str().c_str());
+    }
+};
+
+#define TEST_COUT  TestCout()
+
+//////////////////////////////////////////////
 
 using namespace exotica;
 
 std::string urdf_string = "<robot name=\"test_robot\"><link name=\"base\"><visual><geometry><cylinder length=\"0.3\" radius=\"0.2\"/></geometry><origin xyz=\"0 0 0.15\"/></visual></link><link name=\"link1\"> <visual><geometry><cylinder length=\"0.15\" radius=\"0.05\"/></geometry><origin xyz=\"0 0 0.075\"/></visual> </link><link name=\"link2\"><visual><geometry><cylinder length=\"0.35\" radius=\"0.05\"/></geometry><origin xyz=\"0 0 0.175\"/></visual> </link><link name=\"link3\"><visual><geometry><cylinder length=\"0.45\" radius=\"0.05\"/></geometry><origin xyz=\"0 0 0.225\"/></visual></link><link name=\"endeff\"><visual><geometry><cylinder length=\"0.05\" radius=\"0.1\"/></geometry><origin xyz=\"0 0 -0.025\"/></visual></link><joint name=\"joint1\" type=\"continuous\"><parent link=\"base\"/><child link=\"link1\"/><origin xyz=\"0 0 0.3\" rpy=\"0 0 0\" /><axis xyz=\"0 0 1\" /></joint><joint name=\"joint2\" type=\"continuous\"><parent link=\"link1\"/><child link=\"link2\"/><origin xyz=\"0 0 0.15\" rpy=\"0 0 0\" /><axis xyz=\"0 1 0\" /></joint><joint name=\"joint3\" type=\"continuous\"><parent link=\"link2\"/><child link=\"link3\"/><origin xyz=\"0 0 0.35\" rpy=\"0 0 0\" /><axis xyz=\"0 1 0\" /></joint><joint name=\"joint4\" type=\"fixed\"><parent link=\"link3\"/><child link=\"endeff\"/><origin xyz=\"0 0 0.45\" rpy=\"0 0 0\" /></joint></robot>";
 std::string srdf_string = "<robot name=\"test_robot\"><group name=\"arm\"><chain base_link=\"base\" tip_link=\"endeff\" /></group><virtual_joint name=\"world_joint\" type=\"fixed\" parent_frame=\"world_frame\" child_link=\"base\" /><group_state name=\"zero\" group=\"arm\"><joint name=\"joint1\" value=\"0\" /><joint name=\"joint2\" value=\"0.3\" /><joint name=\"joint3\" value=\"0.55\" /></group_state><disable_collisions link1=\"base\" link2=\"link1\" reason=\"Adjacent\" /><disable_collisions link1=\"endeff\" link2=\"link3\" reason=\"Adjacent\" /><disable_collisions link1=\"link1\" link2=\"link2\" reason=\"Adjacent\" /><disable_collisions link1=\"link2\" link2=\"link3\" reason=\"Adjacent\" /></robot>";
 
+int argc_;
+char** argv_;
+
 bool testCore()
 {
     if (Setup::getSolvers().size() == 0)
     {
-        HIGHLIGHT_NAMED("EXOTica", "Failed to find any solvers.");
+        ADD_FAILURE() << "Failed to find any solvers.";
         return false;
     }
     if (Setup::getProblems().size() == 0)
     {
-        HIGHLIGHT_NAMED("EXOTica", "Failed to find any problems.");
+        ADD_FAILURE() << "Failed to find any problems.";
         return false;
     }
     if (Setup::getMaps().size() == 0)
     {
-        HIGHLIGHT_NAMED("EXOTica", "Failed to find any maps.");
+        ADD_FAILURE() << "Failed to find any maps.";
         return false;
     }
     return true;
@@ -96,13 +133,13 @@ bool testXMLInit()
 bool testRos()
 {
     {
-        HIGHLIGHT("Parsing EXOTica paths...");
+        TEST_COUT << "Parsing EXOTica paths...";
         std::string path1 = ros::package::getPath("exotica");
         std::string path2 = parsePath("{exotica}");
         if (path1 != path2)
-            throw_pretty("Failed when parsing paths:\n"
+            ADD_FAILURE() << "Failed when parsing paths:\n"
                          << path1 << "\n"
-                         << path2);
+                         << path2;
     }
 
     // Reset server
@@ -150,17 +187,61 @@ bool testRos()
     return true;
 }
 
+TEST(ExoticaTestInitializers, testRos)
+{
+    try
+    {
+        EXPECT_TRUE(testRos());
+    }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+TEST(ExoticaTestInitializers, testCore)
+{
+    try
+    {
+        ros::init(argc_, argv_, "EXOTica_test_initializers");
+        EXPECT_TRUE(testCore());
+        Setup::Destroy();
+    }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+TEST(ExoticaTestInitializers, testGenericInit)
+{
+    try
+    {
+        EXPECT_TRUE(testGenericInit());
+    }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+TEST(ExoticaTestInitializers, testXMLInit)
+{
+    try
+    {
+        EXPECT_TRUE(testXMLInit());
+    }
+    catch(...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
 int main(int argc, char** argv)
 {
-    if (!testRos()) exit(2);
-    HIGHLIGHT_NAMED("EXOTica", "ROS test passed.");
-    ros::init(argc, argv, "EXOTica_test_initializers");
-    if (!testCore()) exit(2);
-    HIGHLIGHT_NAMED("EXOTica", "Core test passed.");
-    if (!testGenericInit()) exit(2);
-    HIGHLIGHT_NAMED("EXOTica", "Generic initialization test passed.");
-    if (!testXMLInit()) exit(2);
-    HIGHLIGHT_NAMED("EXOTica", "XML initialization test passed.");
-    Setup::Destroy();
-    return 0;
+    testing::InitGoogleTest(&argc, argv);
+    argc_ = argc;
+    argv_ = argv;
+    int ret = RUN_ALL_TESTS();
+    return ret;
 }

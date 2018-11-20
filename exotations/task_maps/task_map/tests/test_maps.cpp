@@ -33,24 +33,29 @@
 #include <exotica/Exotica.h>
 #include <gtest/gtest.h>
 
-
 // Extend testing printout //////////////////////
 
 namespace testing
 {
- namespace internal
- {
-  enum GTestColor {
-      COLOR_DEFAULT,
-      COLOR_RED,
-      COLOR_GREEN,
-      COLOR_YELLOW
-  };
+namespace internal
+{
+enum GTestColor
+{
+    COLOR_DEFAULT,
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_YELLOW
+};
 
-  extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
- }
+extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
 }
-#define PRINTF(...)  do { testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__); } while(0)
+}
+#define PRINTF(...)                                                                        \
+    do                                                                                     \
+    {                                                                                      \
+        testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); \
+        testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__);    \
+    } while (0)
 
 // C++ stream interface
 class TestCout : public std::stringstream
@@ -58,11 +63,11 @@ class TestCout : public std::stringstream
 public:
     ~TestCout()
     {
-        PRINTF("%s\n",str().c_str());
+        PRINTF("%s\n", str().c_str());
     }
 };
 
-#define TEST_COUT  TestCout()
+#define TEST_COUT TestCout()
 
 //////////////////////////////////////////////
 
@@ -86,7 +91,8 @@ bool testRandom(UnconstrainedEndPoseProblem_ptr problem)
         {
             TEST_COUT << "x = " << x.transpose();
             TEST_COUT << "y = " << problem->Phi.data.transpose();
-            TEST_COUT << "J = \n" << problem->J;
+            TEST_COUT << "J = \n"
+                      << problem->J;
         }
     }
     return true;
@@ -131,8 +137,10 @@ bool testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eige
         if (errJ > eps)
         {
             TEST_COUT << "x: " << x.transpose();
-            TEST_COUT << "J*:\n" << J;
-            TEST_COUT << "J:\n" << problem->J;
+            TEST_COUT << "J*:\n"
+                      << J;
+            TEST_COUT << "J:\n"
+                      << problem->J;
             ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
         }
     }
@@ -162,8 +170,10 @@ bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5, do
         if (errJ > eps)
         {
             TEST_COUT << "x: " << x0.transpose();
-            TEST_COUT << "J*:\n" << J;
-            TEST_COUT << "J:\n" << J0;
+            TEST_COUT << "J*:\n"
+                      << J;
+            TEST_COUT << "J:\n"
+                      << J0;
             ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
         }
     }
@@ -193,8 +203,10 @@ bool testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, 
         if (errJ > eps)
         {
             TEST_COUT << "x: " << x0.transpose();
-            TEST_COUT << "J*:\n" << J;
-            TEST_COUT << "J:\n" << J0;
+            TEST_COUT << "J*:\n"
+                      << J;
+            TEST_COUT << "J:\n"
+                      << J0;
             ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
         }
     }
@@ -266,7 +278,7 @@ TEST(ExoticaTaskMaps, testEffPosition)
 
         EXPECT_TRUE(testJacobian(problem));
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -281,20 +293,20 @@ TEST(ExoticaTaskMaps, testEffOrientation)
         std::vector<double> eps = {1e-4, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5};
         // TODO: Quaterion doens't pass the test with precision 1e-5. Investigate why.
 
-        for (int i=0; i<types.size(); i++)
+        for (int i = 0; i < types.size(); i++)
         {
             std::string type = types[i];
             TEST_COUT << "Rotation type " << type;
             Initializer map("exotica/EffOrientation", {{"Name", std::string("MyTask")},
-                                                    {"Type", type},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+                                                       {"Type", type},
+                                                       {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
 
             EXPECT_TRUE(testJacobian(problem, eps[i]));
         }
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -307,13 +319,13 @@ TEST(ExoticaTaskMaps, testEffAxisAlignment)
         TEST_COUT << "End-effector axis alignment test";
 
         Initializer map("exotica/EffAxisAlignment", {{"Name", std::string("MyTask")},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"Axis", std::string("1 0 0")}, {"Direction", std::string("0 0 1")}})})}});
+                                                     {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"Axis", std::string("1 0 0")}, {"Direction", std::string("0 0 1")}})})}});
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         EXPECT_TRUE(testRandom(problem));
 
         EXPECT_TRUE(testJacobian(problem));
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -328,20 +340,20 @@ TEST(ExoticaTaskMaps, testEffFrame)
         std::vector<double> eps = {1e-4, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5};
         // TODO: Quaterion doens't pass the test with precision 1e-5. Investigate why.
 
-        for (int i=0; i<types.size(); i++)
+        for (int i = 0; i < types.size(); i++)
         {
             std::string type = types[i];
             TEST_COUT << "Rotation type " << type;
             Initializer map("exotica/EffFrame", {{"Name", std::string("MyTask")},
-                                                {"Type", type},
-                                                {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+                                                 {"Type", type},
+                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
 
             EXPECT_TRUE(testJacobian(problem, eps[i]));
         }
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -370,7 +382,7 @@ TEST(ExoticaTaskMaps, testEffVelocity)
             EXPECT_TRUE(testJacobianTimeIndexed(problem, problem->Cost, t, 1e-4));
         }
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -382,7 +394,7 @@ TEST(ExoticaTaskMaps, testDistance)
     {
         TEST_COUT << "Distance test";
         Initializer map("exotica/Distance", {{"Name", std::string("MyTask")},
-                                            {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+                                             {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         EXPECT_TRUE(testRandom(problem));
 
@@ -404,7 +416,7 @@ TEST(ExoticaTaskMaps, testDistance)
 
         EXPECT_TRUE(testJacobian(problem));
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -416,7 +428,7 @@ TEST(ExoticaTaskMaps, testJointLimit)
     {
         TEST_COUT << "Joint limit test";
         Initializer map("exotica/JointLimit", {{"Name", std::string("MyTask")},
-                                            {"SafePercentage", 0.0}});
+                                               {"SafePercentage", 0.0}});
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         EXPECT_TRUE(testRandom(problem));
 
@@ -446,7 +458,7 @@ TEST(ExoticaTaskMaps, testJointLimit)
             0, 0, 1;
         EXPECT_TRUE(testValues(X, Y, J, problem));
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -461,7 +473,7 @@ TEST(ExoticaTaskMaps, testSphereCollision)
                                                     {"Precision", 1e-2},
                                                     {"ReferenceFrame", std::string("base")},
                                                     {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}, {"Radius", 0.3}, {"Group", std::string("base")}}),
-                                                                                            Initializer("Frame", {{"Link", std::string("endeff")}, {"Radius", 0.3}, {"Group", std::string("eff")}})})}});
+                                                                                              Initializer("Frame", {{"Link", std::string("endeff")}, {"Radius", 0.3}, {"Group", std::string("eff")}})})}});
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         EXPECT_TRUE(testRandom(problem));
 
@@ -481,7 +493,7 @@ TEST(ExoticaTaskMaps, testSphereCollision)
             0, -0.270171, -0.430172;
         EXPECT_TRUE(testValues(X, Y, J, problem));
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -527,7 +539,7 @@ TEST(ExoticaTaskMaps, testIdentity)
 
         TEST_COUT << "Identity test with reference";
         map = Initializer("exotica/Identity", {{"Name", std::string("MyTask")},
-                                            {"JointRef", std::string("0.5 0.5 0.5")}});
+                                               {"JointRef", std::string("0.5 0.5 0.5")}});
         problem = setupProblem(map);
         EXPECT_TRUE(testRandom(problem));
 
@@ -562,7 +574,7 @@ TEST(ExoticaTaskMaps, testIdentity)
 
         TEST_COUT << "Identity test with subset of joints";
         map = Initializer("exotica/Identity", {{"Name", std::string("MyTask")},
-                                            {"JointMap", std::string("0")}});
+                                               {"JointMap", std::string("0")}});
         problem = setupProblem(map);
         EXPECT_TRUE(testRandom(problem));
 
@@ -585,7 +597,7 @@ TEST(ExoticaTaskMaps, testIdentity)
         }
         EXPECT_TRUE(testJacobian(problem));
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -632,8 +644,8 @@ TEST(ExoticaTaskMaps, testCoM)
 
         TEST_COUT << "CoM test with a subset of links";
         map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
-                                        {"EnableZ", true},
-                                        {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("link2")}}),
+                                          {"EnableZ", true},
+                                          {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("link2")}}),
                                                                                     Initializer("Frame", {{"Link", std::string("endeff")}})})}});
         problem = setupProblem(map);
         EXPECT_TRUE(testRandom(problem));
@@ -669,7 +681,7 @@ TEST(ExoticaTaskMaps, testCoM)
 
         TEST_COUT << "CoM test with projection on XY plane";
         map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
-                                        {"EnableZ", false}});
+                                          {"EnableZ", false}});
         problem = setupProblem(map);
         EXPECT_TRUE(testRandom(problem));
 
@@ -699,7 +711,7 @@ TEST(ExoticaTaskMaps, testCoM)
 
         TEST_COUT << "CoM test with attached object";
         map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
-                                        {"EnableZ", true}});
+                                          {"EnableZ", true}});
         problem = setupProblem(map);
 
         problem->getScene()->addObject("Payload", KDL::Frame(), "", shapes::ShapeConstPtr(nullptr), KDL::RigidBodyInertia(0.5));
@@ -734,7 +746,7 @@ TEST(ExoticaTaskMaps, testCoM)
         }
         EXPECT_TRUE(testJacobian(problem));
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -746,8 +758,8 @@ TEST(ExoticaTaskMaps, testIMesh)
     {
         TEST_COUT << "Interaction mesh test";
         Initializer map("exotica/IMesh", {{"Name", std::string("MyTask")},
-                                        {"ReferenceFrame", std::string("base")},
-                                        {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}}),
+                                          {"ReferenceFrame", std::string("base")},
+                                          {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}}),
                                                                                     Initializer("Frame", {{"Link", std::string("link2")}}),
                                                                                     Initializer("Frame", {{"Link", std::string("endeff")}})})}});
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
@@ -817,7 +829,7 @@ TEST(ExoticaTaskMaps, testIMesh)
         EXPECT_TRUE(testValues(X, Y, J, problem));
         EXPECT_TRUE(testJacobian(problem));
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -829,20 +841,20 @@ TEST(ExoticaTaskMaps, testPoint2Line)
     {
         TEST_COUT << "Point2Line Test";
         Initializer map("exotica/Point2Line", {{"Name", std::string("MyTask")},
-                                            // {"EndPoint", std::string("0.5 0.5 1")},
-                                            {"EndPoint", std::string("0.5 0.5 0")},
-                                            {"EndEffector", std::vector<Initializer>(
-                                                                {Initializer("Frame", {{"Link", std::string("endeff")},
-                                                                                        {"LinkOffset", std::string("0.5 0 0.5")},
-                                                                                        {"Base", std::string("base")},
-                                                                                        {"BaseOffset", std::string("0.5 0.5 0")}})})}});
+                                               // {"EndPoint", std::string("0.5 0.5 1")},
+                                               {"EndPoint", std::string("0.5 0.5 0")},
+                                               {"EndEffector", std::vector<Initializer>(
+                                                                   {Initializer("Frame", {{"Link", std::string("endeff")},
+                                                                                          {"LinkOffset", std::string("0.5 0 0.5")},
+                                                                                          {"Base", std::string("base")},
+                                                                                          {"BaseOffset", std::string("0.5 0.5 0")}})})}});
         UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
         EXPECT_TRUE(testRandom(problem));
         // TODO: Add testValues
 
         EXPECT_TRUE(testJacobian(problem));
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -872,7 +884,7 @@ TEST(ExoticaTaskMaps, testPoint2Plane)
             EXPECT_TRUE(testJacobian(problem));
         }
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -885,13 +897,13 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
         {
             TEST_COUT << "QuasiStatic test inside capped";
             Initializer map("exotica/QuasiStatic", {
-                                                    {"Name", std::string("MyTask")},
-                                                    {"PositiveOnly", true},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-3 3 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-3 -3 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 -3 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 3 0")}})})},
-                                                });
+                                                       {"Name", std::string("MyTask")},
+                                                       {"PositiveOnly", true},
+                                                       {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-3 3 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-3 -3 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 -3 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 3 0")}})})},
+                                                   });
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
             EXPECT_TRUE(testJacobian(problem));
@@ -900,13 +912,13 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
         {
             TEST_COUT << "QuasiStatic test outside capped";
             Initializer map("exotica/QuasiStatic", {
-                                                    {"Name", std::string("MyTask")},
-                                                    {"PositiveOnly", true},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 1 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 -1 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")}})})},
-                                                });
+                                                       {"Name", std::string("MyTask")},
+                                                       {"PositiveOnly", true},
+                                                       {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 1 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 -1 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")}})})},
+                                                   });
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
             EXPECT_TRUE(testJacobian(problem));
@@ -915,13 +927,13 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
         {
             TEST_COUT << "QuasiStatic test inside";
             Initializer map("exotica/QuasiStatic", {
-                                                    {"Name", std::string("MyTask")},
-                                                    {"PositiveOnly", false},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-3 3 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-3 -3 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 -3 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 3 0")}})})},
-                                                });
+                                                       {"Name", std::string("MyTask")},
+                                                       {"PositiveOnly", false},
+                                                       {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-3 3 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-3 -3 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 -3 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 3 0")}})})},
+                                                   });
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
             EXPECT_TRUE(testJacobian(problem));
@@ -930,19 +942,19 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
         {
             TEST_COUT << "QuasiStatic test outside";
             Initializer map("exotica/QuasiStatic", {
-                                                    {"Name", std::string("MyTask")},
-                                                    {"PositiveOnly", false},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 1 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 -1 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")}}),
-                                                                                                Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")}})})},
-                                                });
+                                                       {"Name", std::string("MyTask")},
+                                                       {"PositiveOnly", false},
+                                                       {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 1 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-11 -1 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")}}),
+                                                                                                 Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")}})})},
+                                                   });
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
             EXPECT_TRUE(testJacobian(problem));
         }
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }

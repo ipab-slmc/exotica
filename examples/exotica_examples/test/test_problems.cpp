@@ -5,19 +5,25 @@
 
 namespace testing
 {
- namespace internal
- {
-  enum GTestColor {
-      COLOR_DEFAULT,
-      COLOR_RED,
-      COLOR_GREEN,
-      COLOR_YELLOW
-  };
+namespace internal
+{
+enum GTestColor
+{
+    COLOR_DEFAULT,
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_YELLOW
+};
 
-  extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
- }
+extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
 }
-#define PRINTF(...)  do { testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__); } while(0)
+}
+#define PRINTF(...)                                                                        \
+    do                                                                                     \
+    {                                                                                      \
+        testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); \
+        testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__);    \
+    } while (0)
 
 // C++ stream interface
 class TestCout : public std::stringstream
@@ -25,14 +31,13 @@ class TestCout : public std::stringstream
 public:
     ~TestCout()
     {
-        PRINTF("%s\n",str().c_str());
+        PRINTF("%s\n", str().c_str());
     }
 };
 
-#define TEST_COUT  TestCout()
+#define TEST_COUT TestCout()
 
 //////////////////////////////////////////////
-
 
 using namespace exotica;
 #include <string>
@@ -272,7 +277,7 @@ TEST(ExoticaProblems, UnconstrainedEndPoseProblem)
         if (!(J[1] == J[2]))
             ADD_FAILURE() << "Cost Jacobians are inconsistent!";
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -308,7 +313,7 @@ TEST(ExoticaProblems, BoundedEndPoseProblem)
         if (!(J[1] == J[2]))
             ADD_FAILURE() << "Cost Jacobians are inconsistent!";
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -382,7 +387,7 @@ TEST(ExoticaProblems, EndPoseProblem)
         if (!(J[7] == J[8]))
             ADD_FAILURE() << "Inequality Jacobians are inconsistent!";
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -426,7 +431,7 @@ TEST(ExoticaProblems, UnconstrainedTimeIndexedProblem)
                 ADD_FAILURE() << "Cost Jacobians are inconsistent!";
         }
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -470,7 +475,7 @@ TEST(ExoticaProblems, BoundedTimeIndexedProblem)
                 ADD_FAILURE() << "Cost Jacobians are inconsistent!";
         }
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -552,7 +557,7 @@ TEST(ExoticaProblems, TimeIndexedProblem)
                 ADD_FAILURE() << "Inequality Jacobians are inconsistent!";
         }
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -569,7 +574,7 @@ TEST(ExoticaProblems, SamplingProblem)
         TEST_COUT << "Testing valid state";
         if (!problem->isValid(x)) ADD_FAILURE() << "Start state is invalid!";
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }
@@ -586,7 +591,7 @@ TEST(ExoticaProblems, TimeIndexedSamplingProblem)
         TEST_COUT << "Testing valid state";
         if (!problem->isValid(x, 0.0)) ADD_FAILURE() << "Start state is invalid!";
     }
-    catch(...)
+    catch (...)
     {
         ADD_FAILURE() << "Uncaught exception!";
     }

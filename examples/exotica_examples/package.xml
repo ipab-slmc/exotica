@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>exotica_examples</name>
-  <version>4.0.0</version>
-  <description>The exotica_examples package</description>
+  <version>5.0.0</version>
+  <description>Package containing examples and system tests for EXOTica.</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
 
   <license>BSD</license>
-
-  <url type="website">https://github.com/openhumanoids/exotica</url>
+  <url type="website">https://github.com/ipab-slmc/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>exotica</depend>
@@ -16,8 +16,8 @@
   <depend>sensor_msgs</depend>
   <depend>ik_solver</depend>
   <depend>task_map</depend>
-  <depend>robot_state_publisher</depend>
-  <depend>rviz</depend>
-  <build_depend>rostest</build_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <test_depend>rostest</test_depend>
   <test_depend>val_description</test_depend>
 </package>

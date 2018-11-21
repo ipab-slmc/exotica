@@ -13,7 +13,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 project = u'EXOTica'
-copyright = u'2017, Vladimir Ivan, Yiming Yang, Wolfgang Merkt, Michael Camilleri, Sethu Vijayakumar - and contributors'
+copyright = u'2018, Vladimir Ivan, Yiming Yang, Wolfgang Merkt, Michael Camilleri, Sethu Vijayakumar - and contributors'
 author = u'Vladimir Ivan, Yiming Yang, Wolfgang Merkt, Michael Camilleri, Sethu Vijayakumar - and contributors'
 
 # The short X.Y version.
@@ -22,7 +22,7 @@ version = u'5.0'
 release = u'5.0-beta1'
 
 language = None
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'Doxyfile']
 pygments_style = 'sphinx'
 todo_include_todos = False
 

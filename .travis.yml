@@ -33,8 +33,7 @@ script:
 # Run tests
 - source /opt/ros/$CI_ROS_DISTRO/setup.bash
 - source install/setup.bash
-- roscore & # detached core
-- rosrun exotica_examples runtest.py
+- catkin run_tests
 before_deploy:
 - bash $TRAVIS_BUILD_DIR/.ci/after_success.sh
 - git config --global user.email "builds@travis-ci.com"

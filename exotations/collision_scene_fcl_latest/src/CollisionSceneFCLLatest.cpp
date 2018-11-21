@@ -101,35 +101,30 @@ void CollisionSceneFCLLatest::updateCollisionObjectTransforms()
 // and then modified for use in EXOTica.
 std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclCollisionObject(long kinematic_element_id, std::shared_ptr<KinematicElement> element)
 {
-    shapes::ShapeConstPtr shape = element->Shape;
+    shapes::ShapePtr shape(element->Shape->clone());
 
     // Apply scaling and padding
     if (element->isRobotLink || element->ClosestRobotLink.lock())
     {
         if (robotLinkScale_ != 1.0 || robotLinkPadding_ > 0.0)
         {
-            shapes::ShapePtr scaled_shape(shape->clone());
-            scaled_shape->scaleAndPadd(robotLinkScale_, robotLinkPadding_);
-            shape = scaled_shape;
+            shape->scaleAndPadd(robotLinkScale_, robotLinkPadding_);
         }
     }
     else
     {
         if (worldLinkScale_ != 1.0 || worldLinkPadding_ > 0.0)
         {
-            shapes::ShapePtr scaled_shape(shape->clone());
-            scaled_shape->scaleAndPadd(worldLinkScale_, worldLinkPadding_);
-            shape = scaled_shape;
+            shape->scaleAndPadd(worldLinkScale_, worldLinkPadding_);
         }
     }
 
     // Replace primitive shapes with meshes if desired (e.g. if primitives are unstable)
     if (replacePrimitiveShapesWithMeshes_)
     {
-        if (shape->type != shapes::MESH || shape->type != shapes::OCTREE)
+        if (static_cast<int>(shape->type) < 6)  // The regular enum type comparisons start to fail at times :/
         {
-            shapes::ShapePtr mesh_shape((shapes::Shape*)shapes::createMeshFromShape(shape->clone()));
-            shape = mesh_shape;
+            shape.reset(reinterpret_cast<shapes::Shape*>(shapes::createMeshFromShape(shape.get())));
         }
     }
 
@@ -335,7 +330,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     {
         // TODO: Issue #364: https://github.com/ipab-slmc/exotica/issues/364
         // As of 0.5.94, this does not work for primitive-vs-mesh (but does for mesh-vs-primitive):
-        if ((o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH) || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM) || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH))
+        if ((o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH) || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)) // || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH))
         {
             HIGHLIGHT_NAMED("WARNING", "As of 0.5.94, this function does not work for primitive-vs-mesh and vice versa. Do not expect the contact points or distances to be accurate at all.");
         }

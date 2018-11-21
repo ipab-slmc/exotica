@@ -189,9 +189,9 @@ void setJointsControlled(KinematicTree& tree, const std::set<std::string>& joint
 
 void setLinksControlled(KinematicTree& tree, const std::set<std::string>& links, const bool negate = false)
 {
-    for (auto & [ name, joint ] : tree.getModelJointsMap())
+    for (auto & [ name, link ] : tree.getTreeMap())
     {
-        joint.lock()->IsControlled = (joint.lock()->ControlId != -1) && (negate ^ bool(links.count(joint.lock()->Segment.getName())));
+        link.lock()->IsControlled = (link.lock()->ControlId != -1) && (negate ^ bool(links.count(name)));
     }
 }
 

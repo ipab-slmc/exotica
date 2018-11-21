@@ -1,5 +1,4 @@
 #!/bin/bash
-cd exotica
+cd exotica/doc
 doxygen
-cd doc
 make html || true

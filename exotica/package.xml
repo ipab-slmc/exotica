@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>exotica</name>
-  <version>4.0.0</version>
+  <version>5.0.0</version>
   <description>The Extensible Optimization Toolset (EXOTica) is a library for defining problems for robot motion planning.</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
-  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
-  <author email="mcamnadur@gmail.com">Michael Camilleri</author>
-  <author email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</author>
+  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+  <author>Michael Camilleri</author>
 
   <license>BSD</license>
 
@@ -30,4 +29,7 @@
   <depend>tf_conversions</depend>
   <depend>tinyxml2</depend>
 
+  <doc_depend>doxygen</doc_depend>
+  <doc_depend>python-sphinx</doc_depend>
+  <doc_depend>python-sphinx-rtd-theme</doc_depend>
 </package>

@@ -15,18 +15,17 @@ before_install:
 - sudo apt-get update -qq
 install:
 - sudo apt-get install -qq -y g++ python-rosdep python-catkin-tools python-catkin-pkg doxygen >> /dev/null
-- sudo rosdep init
-- rosdep update && rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
-- sudo apt-get install -qq -y ros-$CI_ROS_DISTRO-rosbash
-- sudo pip install -U sphinx sphinx_rtd_theme
-- source /opt/ros/$CI_ROS_DISTRO/setup.bash
 - mkdir -p $CATKIN_WS_SRC
 - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
 - cd $CATKIN_WS_SRC
 - git clone https://github.com/wxmerkt/oh_val_description.git
-- rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 - catkin_init_workspace
 - cd ..
+- sudo rosdep init
+- rosdep update && rosdep install --from-paths ./src -i -y --rosdistro $CI_ROS_DISTRO
+- sudo apt-get install -qq -y ros-$CI_ROS_DISTRO-rosbash
+- sudo pip install -U sphinx sphinx_rtd_theme
+- source /opt/ros/$CI_ROS_DISTRO/setup.bash
 script:
 - catkin config --init --install
 - catkin build -i -j4

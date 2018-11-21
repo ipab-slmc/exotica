@@ -19,7 +19,6 @@ install:
 - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
 - cd $CATKIN_WS_SRC
 - git clone https://github.com/wxmerkt/oh_val_description.git
-- catkin_init_workspace
 - cd ..
 - sudo rosdep init
 - rosdep update && rosdep install --from-paths ./src -i -y --rosdistro $CI_ROS_DISTRO

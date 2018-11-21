@@ -67,7 +67,7 @@ private:
     bool linear_ = false;
     bool check_self_collision_ = true;
 
-    unsigned int dim_ = 1;
+    const unsigned int dim_ = 1;
     Scene_ptr scene_;
     CollisionScene_ptr cscene_;
     SmoothCollisionDistanceInitializer init_;
@@ -75,7 +75,6 @@ private:
     void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
 
-typedef std::shared_ptr<exotica::SmoothCollisionDistance>
-    SmoothCollisionDistance_ptr;
+typedef std::shared_ptr<exotica::SmoothCollisionDistance> SmoothCollisionDistance_ptr;
 }
 #endif

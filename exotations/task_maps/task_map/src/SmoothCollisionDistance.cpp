@@ -52,12 +52,8 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                                      Eigen::MatrixXdRef J)
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
-    if (!scene_->alwaysUpdatesCollisionScene())
-        cscene_->updateCollisionObjectTransforms();
-
     phi.setZero();
     J.setZero();
-
     update(x, phi, J, true);
 }
 
@@ -66,9 +62,11 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                                      Eigen::MatrixXdRef J,
                                      bool updateJacobian)
 {
-    // Get all world collision links, then iterate through them
-    std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robotLinks_, check_self_collision_);
+    if (!scene_->alwaysUpdatesCollisionScene())
+        cscene_->updateCollisionObjectTransforms();
+
     double& d = phi(0);
+
     for (const auto& link : robotLinks_)
     {
         // Get all world collision links, then iterate through them
@@ -79,6 +77,7 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
         {
             bool isRobotToRobot = (proxy.e1->isRobotLink || proxy.e1->ClosestRobotLink.lock()) && (proxy.e2->isRobotLink || proxy.e2->ClosestRobotLink.lock());
             double& margin = isRobotToRobot ? robot_margin_ : world_margin_;
+
             if (proxy.distance < margin)
             {
                 // Cost

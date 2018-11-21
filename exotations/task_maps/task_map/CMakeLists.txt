@@ -58,10 +58,10 @@ set(SOURCES
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 pybind_add_module(${PROJECT_NAME}_py MODULE src/task_map_py.cpp ${SOURCES})
-add_dependencies(${PROJECT_NAME}_py ${PROJECT_NAME} ${PROJECT_NAME}_initializers)
+add_dependencies(${PROJECT_NAME}_py ${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 ## Install
 install(TARGETS ${PROJECT_NAME}
@@ -71,9 +71,8 @@ install(DIRECTORY include/ DESTINATION include)
 install(FILES exotica_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(TARGETS ${PROJECT_NAME}_py LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
-if (CATKIN_ENABLE_TESTING)
+if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(test_maps tests/test_maps.cpp)
-  if(TARGET test_maps)
-    target_link_libraries(test_maps ${catkin_LIBRARIES})
-  endif()
+  target_link_libraries(test_maps ${catkin_LIBRARIES})
+  add_dependencies(test_maps ${catkin_EXPORTED_TARGETS})
 endif()

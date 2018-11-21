@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>task_map</name>
-  <version>3.0.0</version>
-  <description>A package for defining new task maps</description>
+  <version>5.0.0</version>
+  <description>Common taskmaps provided with EXOTica.</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
   <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
-  <author email="mcamnadur@gmail.com">Michael Camilleri</author>
+  <author>Michael Camilleri</author>
 
   <license>BSD</license>
-
-  <url type="website">https://github.com/openhumanoids/exotica</url>
+  <url type="website">https://github.com/ipab-slmc/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>exotica</depend>

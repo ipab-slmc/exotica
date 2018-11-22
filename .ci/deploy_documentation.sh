@@ -6,7 +6,7 @@ if [ `lsb_release -c -s` = "xenial" ]; then
         GIT_COMMIT = `git rev-parse HEAD`
         /bin/bash ./build_documentation.sh > /dev/null 2>&1
         git checkout --orphan gh-pages
-        mkdir old ; mv * old/ ; mv old/exotica/doc/_build/html/* . ; rm -rf old ; touch .nojekyll ; rm -rf .ci ; rm .clang-format .travis.yml .gitmodules .gitignore
+        mkdir old ; mv * old/ ; mv old/exotica/doc/_build/html/* . ; rm -rf old ; touch .nojekyll ; rm -rf .ci ; rm .clang-format .travis.yml .gitmodules .gitignore .rosinstall*
         # Check if user configured email and name
         GIT_CONFIG_CHECK = `git config --list --global`
         if [[ $GIT_CONFIG_CHECK != *"user.email"* ]]; then

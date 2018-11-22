@@ -11,11 +11,10 @@ The EXOTica library is a generic Optimisation Toolset for Robotics platforms, wr
 The library itself consists of two major specifications, both of which are abstract classes. The first is the *Motion Solver* which defines the way optimisation should proceed: current implementation include AICO, Jacobian pseudo-inverse IK, and a range of sampling-based solvers from the [OMPL](http://ompl.kavrakilab.org/) library. The other is the *Task Definition* which describes the task itself by providing two necessary functions to compute the forward map from Configuration space (say joint angles in IK) to Task space (say end-effector positions in IK). The tasks themselves can describe a complete trajectory. Using the library then involves passing in an initial state and requesting a solution to the problem, which may consist of a single configuration or complete trajectory.
 
 # Prerequisites
-* Ubuntu 16.04 with ROS Kinetic (primary and tested with continuous integration). Ubuntu 14.04/ROS Indigo and Ubuntu 18.04/ROS Melodic work (more details below) but are not officially supported or covered by continuous integration.
+* Ubuntu 16.04 with ROS Kinetic or Ubuntu 18.04 with ROS Melodic. Ubuntu 14.04 with ROS Indigo may continue to work but is not officially supported or covered by continuous integration any longer.
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
 * [rosdep](http://wiki.ros.org/rosdep)
 * [ROS](http://wiki.ros.org/Installation) (```ros-[release]-desktop``` is recommended but more minimal versions work in conjunction with rosdep)
-* ``moveit-ros-planning-interface``
 
 ## ROS Indigo (Ubuntu 14.04)
 We retired support for ROS Indigo in September 2018. For using 14.04, a number of manual changes are required:
@@ -30,7 +29,7 @@ These workarounds are currently required on ROS Melodic:
 # Installation
 
 1. [Create a catkin workspace](https://catkin-tools.readthedocs.io/en/latest/quick_start.html#initializing-a-new-workspace) or use an existing workspace. [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) is the preferred build system.
-2. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone git@github.com:ipab-slmc/exotica.git --recursive``.
+2. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone git@github.com:ipab-slmc/exotica.git``.
 3. ```cd``` into the the cloned directory.
 4. Install dependencies
   1. If running rosdep for the first time start by running:

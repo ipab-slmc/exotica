@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build and deploy documentation
-if [ `lsb_release -c -s` = "xenial" ]; then
-    if [ "${TRAVIS_BRANCH}" = "master" ]; then
+if [ "${ROS_DISTRO}" == "kinetic" ]; then
+    if [ "${TRAVIS_BRANCH}" == "master" ]; then
         GIT_COMMIT=`git rev-parse HEAD`
         echo "Building documentation for commit $GIT_COMMIT"
         /bin/bash ./.ci/build_documentation.sh > /dev/null 2>&1

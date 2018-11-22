@@ -4,7 +4,7 @@ set -e
 if [ `lsb_release -c -s` = "xenial" ]; then
     if [ "${TRAVIS_BRANCH}" = "master" ]; then
         GIT_COMMIT = `git rev-parse HEAD`
-        /bin/bash ./build_documentation.sh > /dev/null 2>&1
+        /bin/bash ./.ci/build_documentation.sh > /dev/null 2>&1
         git checkout --orphan gh-pages
         mkdir old ; mv * old/ ; mv old/exotica/doc/_build/html/* . ; rm -rf old ; touch .nojekyll ; rm -rf .ci ; rm .clang-format .travis.yml .gitmodules .gitignore .rosinstall*
         # Check if user configured email and name

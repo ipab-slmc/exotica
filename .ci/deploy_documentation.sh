@@ -1,6 +1,5 @@
 #!/bin/bash
 # Build and deploy documentation
-set -e
 if [ `lsb_release -c -s` = "xenial" ]; then
     if [ "${TRAVIS_BRANCH}" = "master" ]; then
         GIT_COMMIT=`git rev-parse HEAD`

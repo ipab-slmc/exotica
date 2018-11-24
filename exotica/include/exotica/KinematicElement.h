@@ -10,7 +10,7 @@
 class KinematicElement
 {
 public:
-    KinematicElement(int id, std::shared_ptr<KinematicElement> parent, KDL::Segment segment) : Parent(parent), Segment(segment), Id(id)
+    KinematicElement(int id, std::shared_ptr<KinematicElement> parent, const KDL::Segment& segment) : Parent(parent), Segment(segment), Id(id)
     {
     }
 

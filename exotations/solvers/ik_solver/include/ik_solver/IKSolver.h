@@ -59,12 +59,8 @@ public:
 
     UnconstrainedEndPoseProblem_ptr& getProblem();
 
-    int getLastIteration();
-
 private:
     IKsolverInitializer parameters_;
-
-    inline void vel_solve(double& err, int t, Eigen::VectorXdRefConst q);
 
     Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
     void ScaleToStepSize(Eigen::VectorXdRef xd);
@@ -75,7 +71,6 @@ private:
     Eigen::MatrixXd C;
     Eigen::MatrixXd W;
     Eigen::MatrixXd Winv;
-    int iterations_;
     double error;
 };
 typedef std::shared_ptr<exotica::IKsolver> IKsolver_ptr;

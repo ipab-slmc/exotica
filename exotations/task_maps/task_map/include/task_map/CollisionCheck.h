@@ -1,7 +1,7 @@
 /*
  *      Author: Vladimir Ivan
  *
- * Copyright (c) 2017, University Of Edinburgh
+ * Copyright (c) 2017, University of Edinburgh
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

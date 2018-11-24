@@ -2,7 +2,7 @@
  *  Created on: 15 Jul 2014
  *      Author: Yiming Yang
  * 
- * Copyright (c) 2016, University Of Edinburgh 
+ * Copyright (c) 2016, University of Edinburgh
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without 

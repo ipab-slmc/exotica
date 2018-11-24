@@ -8,7 +8,7 @@
  *  Original code available at http://ipvs.informatik.uni-stuttgart.de/mlr/marc/source-code/index.html
  *
  * 
- * Copyright (c) 2018, University Of Edinburgh 
+ * Copyright (c) 2018, University of Edinburgh
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without 

@@ -43,7 +43,7 @@ REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver)
 
 namespace exotica
 {
-IKsolver::IKsolver() : iterations_(-1)
+IKsolver::IKsolver()
 {
 }
 
@@ -121,11 +121,6 @@ UnconstrainedEndPoseProblem_ptr& IKsolver::getProblem()
     return prob_;
 }
 
-int IKsolver::getLastIteration()
-{
-    return iterations_;
-}
-
 void IKsolver::Solve(Eigen::MatrixXd& solution)
 {
     prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
@@ -143,8 +138,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
 
     Eigen::VectorXd q = q0;
     error = INFINITY;
-    int i;
-    for (i = 0; i < getNumberOfMaxIterations(); i++)
+    for (int i = 0; i < getNumberOfMaxIterations(); i++)
     {
         prob_->Update(q);
         Eigen::VectorXd yd = prob_->Cost.S * prob_->Cost.ydiff;
@@ -155,13 +149,16 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
 
         if (error < parameters_.Tolerance)
         {
-            if (debug_) HIGHLIGHT_NAMED("IKsolver", "Reached tolerance (" << error << " < " << parameters_.Tolerance << ")");
+            if (debug_)
+                HIGHLIGHT_NAMED("IKsolver", "Reached tolerance (" << error << " < " << parameters_.Tolerance << ")");
             break;
         }
 
         Eigen::MatrixXd Jinv = PseudoInverse(prob_->Cost.S * prob_->Cost.J);
         Eigen::VectorXd qd = Jinv * yd;
-        if (UseNullspace) qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * prob_->Cost.S * prob_->J) * (q - prob_->qNominal);
+        if (UseNullspace)
+            qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * prob_->Cost.S * prob_->J) *
+                  (q - prob_->qNominal);
 
         ScaleToStepSize(qd);
 
@@ -176,11 +173,12 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
 
         if (qd.norm() < parameters_.Convergence)
         {
-            if (debug_) HIGHLIGHT_NAMED("IKsolver", "Reached convergence (" << qd.norm() << " < " << parameters_.Convergence << ")");
+            if (debug_)
+                HIGHLIGHT_NAMED("IKsolver", "Reached convergence (" << qd.norm() << " < " << parameters_.Convergence
+                                                                    << ")");
             break;
         }
     }
-    iterations_ = i + 1;
 
     solution.row(0) = q;
 

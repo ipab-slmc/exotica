@@ -133,11 +133,7 @@ void AICOsolver::getStats(std::vector<SinglePassMeanCoviariance>& q_stat_)
     q_stat_ = q_stat;
 }
 
-AICOsolver::~AICOsolver()
-{
-    // If this is not empty, your code is bad and you should feel bad!
-    // Whoop whoop whoop whoop ...
-}
+AICOsolver::~AICOsolver() = default;
 
 void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
 {

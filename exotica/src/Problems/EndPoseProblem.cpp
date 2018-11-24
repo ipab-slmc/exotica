@@ -43,9 +43,7 @@ EndPoseProblem::EndPoseProblem()
     Flags = KIN_FK | KIN_J;
 }
 
-EndPoseProblem::~EndPoseProblem()
-{
-}
+EndPoseProblem::~EndPoseProblem() = default;
 
 void EndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
 {

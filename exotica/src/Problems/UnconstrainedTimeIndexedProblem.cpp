@@ -43,9 +43,7 @@ UnconstrainedTimeIndexedProblem::UnconstrainedTimeIndexedProblem()
     Flags = KIN_FK | KIN_J;
 }
 
-UnconstrainedTimeIndexedProblem::~UnconstrainedTimeIndexedProblem()
-{
-}
+UnconstrainedTimeIndexedProblem::~UnconstrainedTimeIndexedProblem() = default;
 
 void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProblemInitializer& init)
 {

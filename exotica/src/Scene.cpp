@@ -52,9 +52,7 @@ Scene::Scene(const std::string& name) : name_(name), requestNeedsUpdating(false)
     object_name_ = name_;
 }
 
-Scene::~Scene()
-{
-}
+Scene::~Scene() = default;
 
 robot_model::RobotModelPtr Scene::getRobotModel()
 {

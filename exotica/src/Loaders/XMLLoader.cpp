@@ -6,9 +6,7 @@ namespace exotica
 {
 std::shared_ptr<XMLLoader> XMLLoader::instance_ = nullptr;
 
-XMLLoader::XMLLoader()
-{
-}
+XMLLoader::XMLLoader() = default;
 
 bool parseXML(tinyxml2::XMLHandle& tag, Initializer& parent, const std::string& prefix);
 

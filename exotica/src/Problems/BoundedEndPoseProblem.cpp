@@ -43,9 +43,7 @@ BoundedEndPoseProblem::BoundedEndPoseProblem()
     Flags = KIN_FK | KIN_J;
 }
 
-BoundedEndPoseProblem::~BoundedEndPoseProblem()
-{
-}
+BoundedEndPoseProblem::~BoundedEndPoseProblem() = default;
 
 void BoundedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
 {

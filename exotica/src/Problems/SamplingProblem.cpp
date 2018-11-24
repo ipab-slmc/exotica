@@ -42,9 +42,7 @@ SamplingProblem::SamplingProblem()
     Flags = KIN_FK;
 }
 
-SamplingProblem::~SamplingProblem()
-{
-}
+SamplingProblem::~SamplingProblem() = default;
 
 std::vector<double> SamplingProblem::getBounds()
 {

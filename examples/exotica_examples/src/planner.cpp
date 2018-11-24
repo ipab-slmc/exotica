@@ -40,21 +40,21 @@ void run()
 {
     Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
-    Initializer solver, problem;
+    Initializer solver_initializer, problem_initializer;
 
     std::string file_name, solver_name, problem_name;
     Server::getParam("ConfigurationFile", file_name);
     Server::getParam("Solver", solver_name);
     Server::getParam("Problem", problem_name);
 
-    XMLLoader::load(file_name, solver, problem, solver_name, problem_name);
+    XMLLoader::load(file_name, solver_initializer, problem_initializer, solver_name, problem_name);
 
     HIGHLIGHT_NAMED("XMLnode", "Loaded from XML");
 
     // Initialize
 
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
-    MotionSolver_ptr any_solver = Setup::createSolver(solver);
+    PlanningProblem_ptr any_problem = Setup::createProblem(problem_initializer);
+    MotionSolver_ptr any_solver = Setup::createSolver(solver_initializer);
 
     // Assign the problem to the solver
     any_solver->specifyProblem(any_problem);

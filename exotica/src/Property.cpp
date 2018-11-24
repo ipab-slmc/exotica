@@ -51,14 +51,7 @@ void Initializer::addProperty(const Property& prop)
 
 bool Initializer::hasProperty(std::string name_) const
 {
-    if (properties.find(name_) != properties.end())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return properties.find(name_) != properties.end();
 }
 
 boost::any Initializer::getProperty(std::string name_) const

@@ -81,10 +81,7 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
         throw_named("Dimension mismatch: problem N=" << N << ", but goal state has dimension " << goal_.rows());
     }
 
-    if (scene_->getBaseType() != exotica::BASE_TYPE::FIXED)
-        compound_ = true;
-    else
-        compound_ = false;
+    compound_ = scene_->getBaseType() != exotica::BASE_TYPE::FIXED;
 
     NumTasks = Tasks.size();
     PhiN = 0;

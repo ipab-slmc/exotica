@@ -25,7 +25,7 @@ KDL::Frame getFrame(Eigen::VectorXdRefConst val)
         case 7:
         {
             double norm = val.tail(4).norm();
-            if (!(norm > 0.0)) throw_pretty("Invalid quaternion!");
+            if (norm <= 0.0) throw_pretty("Invalid quaternion!");
             return KDL::Frame(KDL::Rotation::Quaternion(val(3) / norm, val(4) / norm, val(5) / norm, val(6) / norm), KDL::Vector(val(0), val(1), val(2)));
         }
         case 6:

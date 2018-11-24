@@ -228,7 +228,7 @@ double BoundedEndPoseProblem::getRho(const std::string& task_name)
 bool BoundedEndPoseProblem::isValid()
 {
     Eigen::VectorXd x = scene_->getSolver().getControlledState();
-    auto bounds = scene_->getSolver().getJointLimits();
+    Eigen::MatrixXd bounds = scene_->getSolver().getJointLimits();
     for (unsigned int i = 0; i < N; i++)
     {
         if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1)) return false;

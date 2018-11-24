@@ -586,26 +586,31 @@ void KinematicTree::publishFrames()
 {
     if (Server::isRos())
     {
-        int i = 0;
-        for (std::weak_ptr<KinematicElement> element : Tree)
+        // Step 1: Publish frames for every element in the tree.
         {
-            tf::Transform T;
-            tf::transformKDLToTF(element.lock()->Frame, T);
-            if (i > 0) debugTree[i - 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", getRootFrameName()), tf::resolve("exotica", element.lock()->Segment.getName()));
-            i++;
+            int i = 0;
+            for (std::weak_ptr<KinematicElement> element : Tree)
+            {
+                tf::Transform T;
+                tf::transformKDLToTF(element.lock()->Frame, T);
+                if (i > 0) debugTree[i - 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", getRootFrameName()), tf::resolve("exotica", element.lock()->Segment.getName()));
+                i++;
+            }
+            Server::sendTransform(debugTree);
+            i = 0;
+            for (KinematicFrame& frame : Solution->Frame)
+            {
+                tf::Transform T;
+                tf::transformKDLToTF(frame.TempB, T);
+                debugFrames[i * 2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", getRootFrameName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.FrameB.lock()->Segment.getName()));
+                tf::transformKDLToTF(frame.TempAB, T);
+                debugFrames[i * 2 + 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.FrameB.lock()->Segment.getName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "A" + frame.FrameA.lock()->Segment.getName()));
+                i++;
+            }
+            Server::sendTransform(debugFrames);
         }
-        Server::sendTransform(debugTree);
-        i = 0;
-        for (KinematicFrame& frame : Solution->Frame)
-        {
-            tf::Transform T;
-            tf::transformKDLToTF(frame.TempB, T);
-            debugFrames[i * 2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", getRootFrameName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.FrameB.lock()->Segment.getName()));
-            tf::transformKDLToTF(frame.TempAB, T);
-            debugFrames[i * 2 + 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.FrameB.lock()->Segment.getName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "A" + frame.FrameA.lock()->Segment.getName()));
-            i++;
-        }
-        Server::sendTransform(debugFrames);
+
+        // Step 2: Publish visualisation markers for non-robot-model elements in the tree.
         if (debugSceneChanged)
         {
             debugSceneChanged = false;

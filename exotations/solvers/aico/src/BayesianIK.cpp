@@ -298,25 +298,16 @@ void BayesianIK::updateFwdMessage()
 void BayesianIK::updateBwdMessage()
 {
     Eigen::MatrixXd barV(prob_->N, prob_->N), Vt;
-    // if (t < prob_->getT() - 1)
-    // {
-    //     inverseSymPosDef(barV, Vinv[t + 1] + R[t + 1]);
-    //     v[t] = barV * (Vinv[t + 1] * v[t + 1] + r[t + 1]);
-    //     Vt = Winv + barV;
-    //     inverseSymPosDef(Vinv[t], Vt);
-    // }
-    if (true)
+
+    if (!useBwdMsg)
     {
-        if (!useBwdMsg)
-        {
-            v = b;
-            Vinv.diagonal().setConstant(1);
-        }
-        else
-        {
-            v = bwdMsg_v;
-            Vinv = bwdMsg_Vinv;
-        }
+        v = b;
+        Vinv.diagonal().setConstant(1);
+    }
+    else
+    {
+        v = bwdMsg_v;
+        Vinv = bwdMsg_Vinv;
     }
 }
 

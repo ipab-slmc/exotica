@@ -52,8 +52,6 @@ public:
 
     void Initialize();
 
-    void InitDebug();
-
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);

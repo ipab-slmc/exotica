@@ -290,7 +290,7 @@ inline std::vector<bool> parseBoolList(const std::string value)
         }
         ret.push_back(tmp);
     }
-    if (ret.size() == 0) throw_pretty("Empty vector!");
+    if (ret.empty()) throw_pretty("Empty vector!");
     return ret;
 }
 }

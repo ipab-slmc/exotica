@@ -163,7 +163,7 @@ void XMLLoader::loadXML(std::string file_name, Initializer& solver, Initializer&
     }
     bool foundSolver = false;
     bool foundProblem = false;
-    if (solver_name == "" || solver_name == "")
+    if (solver_name.empty() || solver_name == "")
     {
         for (Initializer& i : initializers)
         {

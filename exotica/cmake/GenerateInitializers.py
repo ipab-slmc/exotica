@@ -25,7 +25,7 @@ def ConstructorList(Data):
     return ret
 
 def DefaultValue(Data):
-    if Data['Value']==None:
+    if Data['Value'] is None:
         return ""
     elif Data['Value']=='{}':
         return ""
@@ -238,10 +238,10 @@ def ParseLine(line, ln, fn):
     value = None
     type = ""
     name = ""
-    if required==False:
+    if not required:
         eq = line.find("=")
         if eq==-1:
-            eq=last;
+            eq=last
             value = '{}'
         else:
             value = line[eq+1:last]

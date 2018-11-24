@@ -181,7 +181,7 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
     updateCount = 0;
     damping = damping_init;
     double d;
-    if (!(prob_->getT() > 0))
+    if (prob_->getT() <= 0)
     {
         throw_named("Problem has not been initialized properly: T=0!");
     }

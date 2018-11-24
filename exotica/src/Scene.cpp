@@ -136,6 +136,10 @@ void Scene::Instantiate(SceneInitializer& init)
     collision_scene_->setup();
     collision_scene_->setAlwaysExternallyUpdatedCollisionScene(force_collision_);
     collision_scene_->setReplacePrimitiveShapesWithMeshes(init.ReplacePrimitiveShapesWithMeshes);
+    collision_scene_->setWorldLinkPadding(init.WorldLinkPadding);
+    collision_scene_->setRobotLinkPadding(init.RobotLinkPadding);
+    collision_scene_->setWorldLinkScale(init.WorldLinkScale);
+    collision_scene_->setRobotLinkScale(init.RobotLinkScale);
     collision_scene_->replaceCylindersWithCapsules = init.ReplaceCylindersWithCapsules;
     updateSceneFrames();
     updateInternalFrames(false);

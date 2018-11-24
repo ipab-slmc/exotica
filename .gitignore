@@ -111,4 +111,9 @@ Ogre.log
 **/doc/*.synctex.gz
 **/doc/*.toc
 *.out
+
+# IDE configs
 .vscode/
+cmake-build-debug/
+.idea/
+CMakeLists.txt

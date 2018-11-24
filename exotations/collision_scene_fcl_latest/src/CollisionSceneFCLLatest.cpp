@@ -762,7 +762,7 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     // If in contact, compute contact point
     if (ret.in_collision)
     {
-        fcl::CollisionRequestd contact_req;
+        /*fcl::CollisionRequestd contact_req;
         contact_req.enable_contact = true;
         fcl::CollisionResultd contact_res;
         size_t num_contacts = fcl::collide(shape1->collisionGeometry().get(), result.contact_tf1, shape2->collisionGeometry().get(), result.contact_tf2, contact_req, contact_res);
@@ -777,7 +777,7 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
         else
         {
             throw_pretty("What's up?");
-        }
+        }*/
     }
 
     tf::transformEigenToKDL(static_cast<Eigen::Affine3d>(result.contact_tf1), ret.contact_tf1);

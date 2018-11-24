@@ -43,9 +43,7 @@ BoundedTimeIndexedProblem::BoundedTimeIndexedProblem()
     Flags = KIN_FK | KIN_J;
 }
 
-BoundedTimeIndexedProblem::~BoundedTimeIndexedProblem()
-{
-}
+BoundedTimeIndexedProblem::~BoundedTimeIndexedProblem() = default;
 
 Eigen::MatrixXd BoundedTimeIndexedProblem::getBounds() const
 {

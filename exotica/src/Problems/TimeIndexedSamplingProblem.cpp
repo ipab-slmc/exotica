@@ -43,10 +43,7 @@ TimeIndexedSamplingProblem::TimeIndexedSamplingProblem()
     Flags = KIN_FK;
 }
 
-TimeIndexedSamplingProblem::~TimeIndexedSamplingProblem()
-{
-    // TODO Auto-generated destructor stub
-}
+TimeIndexedSamplingProblem::~TimeIndexedSamplingProblem() = default;
 
 std::vector<double> TimeIndexedSamplingProblem::getBounds()
 {

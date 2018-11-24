@@ -6,8 +6,10 @@ namespace exotica
 class Uncopyable
 {
 public:
-    Uncopyable() {}
-    ~Uncopyable() {}
+    Uncopyable() = default;
+
+    ~Uncopyable() = default;
+
 private:
     Uncopyable(const Uncopyable&);
     Uncopyable& operator=(const Uncopyable&);

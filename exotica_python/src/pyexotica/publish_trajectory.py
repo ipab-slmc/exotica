@@ -28,8 +28,6 @@ def publishTrajectory(traj, T, problem):
             t = (t+1) % len(traj)
         except KeyboardInterrupt:
             return False
-    return True
-
 
 def publishTimeIndexedTrajectory(traj, Ts, problem, once=False):
     if len(traj) == 0:
@@ -38,7 +36,6 @@ def publishTimeIndexedTrajectory(traj, Ts, problem, once=False):
     signal.signal(signal.SIGINT, sigIntHandler)
     print('Playing back trajectory '+str(len(Ts)) +
           ' states in '+str(Ts[len(Ts)-1]))
-    idx = 0
 
     while True:
         try:

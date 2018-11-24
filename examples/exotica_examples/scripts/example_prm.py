@@ -2,8 +2,7 @@
 
 import pyexotica as exo
 import ompl_solver_py as ompl
-from numpy import array
-from numpy import matrix
+import numpy as np
 from pyexotica.publish_trajectory import *
 
 exo.Setup.initRos()
@@ -15,7 +14,8 @@ prm=exo.Setup.loadSolver('{exotica_examples}/resources/configs/example_prm.xml')
 # Grow roadmap for 1s
 prm.growRoadmap(1)
 
-for i in range(10):
+solution = None
+for i in xrange(10):
     # Solve
     solution = prm.solve()
 

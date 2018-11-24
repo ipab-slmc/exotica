@@ -40,7 +40,7 @@ results = {}
 def sigIntHandler(sig, frame):
     global isStopping
     global process
-    if not isStopping and process != None:
+    if not isStopping and process is not None:
         isStopping = True
         process.send_signal(sig)
     else:

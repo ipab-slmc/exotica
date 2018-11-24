@@ -19,8 +19,8 @@ def testScene(problemName, cleanScene=False):
     print('Updating the scene ...')
     if cleanScene:
         problem.getScene().cleanScene()
-        problem.getScene().loadSceneFile('{exotica_examples}/resources/scenes/example_moving_obstacle.scene');
-    problem.getScene().loadSceneFile('{exotica_examples}/resources/scenes/example_distance.scene');
+        problem.getScene().loadSceneFile('{exotica_examples}/resources/scenes/example_moving_obstacle.scene')
+    problem.getScene().loadSceneFile('{exotica_examples}/resources/scenes/example_distance.scene')
     print('Solving with updated scene ...')
 
     problem.update(problem.startState)

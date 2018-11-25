@@ -567,7 +567,14 @@ void KinematicTree::UpdateTree()
         // Elements with Id > 0 have parent links.
         if (element->Id > 0)
         {
-            element->Frame = element->Parent.lock()->Frame * element->getPose(TreeState(element->Id));
+            if (element->Segment.getJoint().getType() != KDL::Joint::JointType::None)
+            {
+                element->Frame = element->Parent.lock()->Frame * element->getPose(TreeState(element->Id));
+            }
+            else
+            {
+                element->Frame = element->Parent.lock()->Frame * element->getPose();
+            }
         }
         // Root of tree.
         else

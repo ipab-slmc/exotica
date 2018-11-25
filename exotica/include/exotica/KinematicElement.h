@@ -40,7 +40,7 @@ public:
         setChildrenClosestRobotLink();
     }
 
-    inline KDL::Frame getPose(const double& x)
+    inline KDL::Frame getPose(const double& x = 0.0)
     {
         if (IsTrajectoryGenerated)
         {

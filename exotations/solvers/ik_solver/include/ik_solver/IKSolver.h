@@ -57,8 +57,6 @@ public:
 
     virtual void specifyProblem(PlanningProblem_ptr pointer);
 
-    UnconstrainedEndPoseProblem_ptr& getProblem();
-
 private:
     IKsolverInitializer parameters_;
 

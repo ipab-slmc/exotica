@@ -116,11 +116,6 @@ void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
         throw_named("Alpha must have length of 1 or N.");
 }
 
-UnconstrainedEndPoseProblem_ptr& IKsolver::getProblem()
-{
-    return prob_;
-}
-
 void IKsolver::Solve(Eigen::MatrixXd& solution)
 {
     prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);

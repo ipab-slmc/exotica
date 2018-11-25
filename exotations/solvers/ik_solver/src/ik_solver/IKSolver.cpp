@@ -43,27 +43,9 @@ REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver)
 
 namespace exotica
 {
-IKsolver::IKsolver()
-{
-}
+IKsolver::IKsolver() = default;
 
-IKsolver::~IKsolver()
-{
-}
-
-template <typename Scalar>
-struct CwiseClampOp
-{
-    CwiseClampOp(const Scalar& inf, const Scalar& sup)
-        : m_inf(inf), m_sup(sup)
-    {
-    }
-    const Scalar operator()(const Scalar& x) const
-    {
-        return x < m_inf ? m_inf : (x > m_sup ? m_sup : x);
-    }
-    Scalar m_inf, m_sup;
-};
+IKsolver::~IKsolver() = default;
 
 Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd>& A_)
 {

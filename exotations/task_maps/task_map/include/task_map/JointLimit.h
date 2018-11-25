@@ -66,9 +66,7 @@ public:
 private:
     Eigen::VectorXd low_limits_;   //	Lower joint limits
     Eigen::VectorXd high_limits_;  //	Higher joint limits
-    Eigen::VectorXd center_;       //	Center of the joint range
     Eigen::VectorXd tau_;          //	Joint limits tolerance
-    bool initialised_;
     Scene_ptr scene_;
     JointLimitInitializer init_;
     int N;

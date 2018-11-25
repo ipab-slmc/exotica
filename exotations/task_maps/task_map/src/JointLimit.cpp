@@ -36,13 +36,9 @@ REGISTER_TASKMAP_TYPE("JointLimit", exotica::JointLimit);
 
 namespace exotica
 {
-JointLimit::JointLimit()
-{
-}
+JointLimit::JointLimit() = default;
 
-JointLimit::~JointLimit()
-{
-}
+JointLimit::~JointLimit() = default;
 
 void JointLimit::Instantiate(JointLimitInitializer& init)
 {

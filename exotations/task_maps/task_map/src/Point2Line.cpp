@@ -188,7 +188,7 @@ void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen
             }
             pub_marker.publish(ma);
             {
-                visualization_msgs::MarkerArray ma;
+                ma.markers.clear();
                 visualization_msgs::Marker mt;
                 mt.header.stamp = t;
                 mt.frame_locked = true;

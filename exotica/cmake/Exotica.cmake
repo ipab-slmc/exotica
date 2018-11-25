@@ -3,10 +3,6 @@ cmake_minimum_required(VERSION 2.8.3)
 message(STATUS "Compiling using c++ 11 (required by EXOTica)")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Only allows RelWithDebInfo" FORCE)
-SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE} CACHE STRING "RelWithDebInfo" FORCE)
-message(STATUS "Forcing build type ${CMAKE_BUILD_TYPE} (required by EXOTica)")
-
 if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/Ref.h")
    message(STATUS "Eigen found")
 elseif(IS_DIRECTORY $ENV{DRC_BASE})

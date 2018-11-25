@@ -148,10 +148,4 @@ Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type)
             throw_pretty("Unknown rotation representation type!");
     }
 }
-
-bool contains(std::string key, const std::vector<std::string>& vec)
-{
-    if (std::find(vec.begin(), vec.end(), key) == vec.end()) return false;
-    return true;
-}
 }

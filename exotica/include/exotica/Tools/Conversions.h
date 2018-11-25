@@ -152,8 +152,6 @@ void appendVector(std::vector<Val>& orig, const std::vector<Val>& extra)
     orig.insert(orig.end(), extra.begin(), extra.end());
 }
 
-bool contains(std::string key, const std::vector<std::string>& vec);
-
 inline std::string trim(const std::string& s)
 {
     auto wsfront = std::find_if_not(s.begin(), s.end(), [](int c) { return std::isspace(c); });

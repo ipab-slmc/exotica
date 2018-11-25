@@ -454,11 +454,11 @@ TEST(ExoticaProblems, BoundedTimeIndexedProblem)
             {
                 CREATE_PROBLEM(BoundedTimeIndexedProblem, d);
                 Eigen::VectorXd x = problem->getStartState();
-                TEST_COUT << "Testing problem update";
+                TEST_COUT << "BoundedTimeIndexedProblem: Testing problem update";
                 problem->Update(x, t);
-                TEST_COUT << "Test passed";
+                TEST_COUT << "BoundedTimeIndexedProblem::Update(x): Test passed";
                 X[d] = problem->Cost.ydiff[t];
-                TEST_COUT << "Testing cost";
+                TEST_COUT << "BoundedTimeIndexedProblem: Testing cost";
                 if (d > 0)
                 {
                     J[d] = problem->Cost.J[t];
@@ -469,10 +469,10 @@ TEST(ExoticaProblems, BoundedTimeIndexedProblem)
                     }
                 }
             }
-            if (!(X[0] == X[1] && X[1] == X[2]))
-                ADD_FAILURE() << "Cost FK is inconsistent!";
-            if (!(J[1] == J[2]))
-                ADD_FAILURE() << "Cost Jacobians are inconsistent!";
+            if (!(X[0].isApprox(X[1]) && X[1].isApprox(X[2])))
+                ADD_FAILURE() << "BoundedTimeIndexedProblem: Cost value computation is inconsistent!";
+            if (!(J[1].isApprox(J[2])))
+                ADD_FAILURE() << "BoundedTimeIndexedProblem: Cost Jacobians are inconsistent!";
         }
     }
     catch (...)

@@ -144,8 +144,9 @@ Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type)
         case RotationType::MATRIX:
             ret = Eigen::Map<const Eigen::VectorXd>(data.data, 9);
             return ret;
+        default:
+            throw_pretty("Unknown rotation representation type!");
     }
-    throw_pretty("Unknown rotation represntation type!");
 }
 
 bool contains(std::string key, const std::vector<std::string>& vec)

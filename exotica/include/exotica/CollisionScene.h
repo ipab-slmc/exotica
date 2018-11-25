@@ -119,7 +119,7 @@ public:
      * @return true The two objects are allowed to collide.
      * @return false The two objects are excluded, e.g., by an ACM.
      */
-    virtual bool isAllowedToCollide(std::string o1, std::string o2, bool self) { throw_pretty("Not implemented!"); }
+    virtual bool isAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) { throw_pretty("Not implemented!"); }
     /**
        * \brief Checks if the whole robot is valid (collision only).
        * @param self Indicate if self collision check is required.

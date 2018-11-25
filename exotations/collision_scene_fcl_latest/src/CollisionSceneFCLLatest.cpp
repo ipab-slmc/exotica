@@ -218,13 +218,13 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
     return ret;
 }
 
-bool CollisionSceneFCLLatest::isAllowedToCollide(std::string o1, std::string o2, bool self)
+bool CollisionSceneFCLLatest::isAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self)
 {
     std::shared_ptr<KinematicElement> e1, e2;
 
-    for (size_t i = 0; i < kinematic_elements_.size(); i++)
+    for (auto kinematic_element : kinematic_elements_)
     {
-        std::shared_ptr<KinematicElement> tmp = kinematic_elements_[i].lock();
+        std::shared_ptr<KinematicElement> tmp = kinematic_element.lock();
         if (tmp->Segment.getName() == o1) e1 = tmp;
         if (tmp->Segment.getName() == o2) e2 = tmp;
     }

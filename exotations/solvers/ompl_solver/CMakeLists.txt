@@ -9,10 +9,9 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ompl_solver
+  INCLUDE_DIRS include ${OMPL_INCLUDE_DIRS}
+  LIBRARIES ompl_solver ${OMPL_LIBRARIES}
   CATKIN_DEPENDS exotica
-  DEPENDS ompl
 )
 
 AddInitializer(OMPLsolver RRT RRTConnect PRM LazyPRM EST KPIECE BKPIECE RRTStar LBTRRT)

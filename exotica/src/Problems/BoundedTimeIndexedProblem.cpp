@@ -318,8 +318,8 @@ void BoundedTimeIndexedProblem::reinitializeVariables()
     yref.setZero(PhiN);
     Phi.assign(T, yref);
     if (Flags & KIN_J) J.assign(T, Eigen::MatrixXd(JN, N));
-    x.assign(T, Eigen::VectorXd::Zero(JN));
-    xdiff.assign(T, Eigen::VectorXd::Zero(JN));
+    x.assign(T, Eigen::VectorXd::Zero(N));
+    xdiff.assign(T, Eigen::VectorXd::Zero(N));
     if (Flags & KIN_J_DOT)
     {
         Hessian Htmp;

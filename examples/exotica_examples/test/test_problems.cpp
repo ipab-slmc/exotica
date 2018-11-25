@@ -324,16 +324,16 @@ TEST(ExoticaProblems, EndPoseProblem)
     try
     {
         std::vector<Eigen::VectorXd> X(9);
-        std::vector<Eigen::MatrixXd> J(9);
+        std::vector<Eigen::MatrixXd> J(6);  // Memory layout: {0,1 => Cost, 2,3 => Eq., 4,5 => Neq.}
         for (int d = 0; d < 3; d++)
         {
             CREATE_PROBLEM(EndPoseProblem, d);
             Eigen::VectorXd x = problem->getStartState();
-            TEST_COUT << "Testing problem update";
+            TEST_COUT << "EndPoseProblem: Testing problem update";
             problem->Update(x);
-            TEST_COUT << "Test passed";
+            TEST_COUT << "EndPoseProblem::Update() - Test passed";
             {
-                TEST_COUT << "Testing cost";
+                TEST_COUT << "EndPoseProblem: Testing cost";
                 X[d] = problem->Cost.ydiff;
                 if (d > 0)
                 {
@@ -347,11 +347,11 @@ TEST(ExoticaProblems, EndPoseProblem)
             }
             problem->Update(x);
             {
-                TEST_COUT << "Testing equality";
+                TEST_COUT << "EndPoseProblem: Testing equality";
                 X[d + 3] = problem->Equality.ydiff;
                 if (d > 0)
                 {
-                    J[d + 3] = problem->Equality.J;
+                    J[d + 1] = problem->Equality.J;
                     testJacobianEndPose(problem, problem->Equality);
                     if (d > 1)
                     {
@@ -361,11 +361,11 @@ TEST(ExoticaProblems, EndPoseProblem)
             }
             problem->Update(x);
             {
-                TEST_COUT << "Testing inequality";
+                TEST_COUT << "EndPoseProblem: Testing inequality";
                 X[d + 6] = problem->Inequality.ydiff;
                 if (d > 0)
                 {
-                    J[d + 6] = problem->Inequality.J;
+                    J[d + 3] = problem->Inequality.J;
                     testJacobianEndPose(problem, problem->Inequality);
                     if (d > 1)
                     {
@@ -375,17 +375,17 @@ TEST(ExoticaProblems, EndPoseProblem)
             }
         }
         if (!(X[0] == X[1] && X[1] == X[2]))
-            ADD_FAILURE() << "Cost FK is inconsistent!";
-        if (!(J[1] == J[2]))
-            ADD_FAILURE() << "Cost Jacobians are inconsistent!";
+            ADD_FAILURE() << "EndPoseProblem: Cost value computation is inconsistent!";
+        if (!(J[0] == J[1]))
+            ADD_FAILURE() << "EndPoseProblem: Cost Jacobians are inconsistent!";
         if (!(X[3] == X[4] && X[4] == X[5]))
-            ADD_FAILURE() << "Equality FK is inconsistent!";
-        if (!(J[4] == J[5]))
-            ADD_FAILURE() << "Equality Jacobians are inconsistent!";
+            ADD_FAILURE() << "EndPoseProblem: Equality value computation is inconsistent!";
+        if (!(J[2] == J[3]))
+            ADD_FAILURE() << "EndPoseProblem: Equality Jacobians are inconsistent!";
         if (!(X[6] == X[7] && X[7] == X[8]))
-            ADD_FAILURE() << "Inequality FK is inconsistent!";
-        if (!(J[7] == J[8]))
-            ADD_FAILURE() << "Inequality Jacobians are inconsistent!";
+            ADD_FAILURE() << "EndPoseProblem: Inequality value computation is inconsistent!";
+        if (!(J[4] == J[5]))
+            ADD_FAILURE() << "EndPoseProblem: Inequality Jacobians are inconsistent!";
     }
     catch (...)
     {

@@ -8,10 +8,9 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES time_indexed_rrt_connect
+  INCLUDE_DIRS include ${OMPL_INCLUDE_DIRS}
+  LIBRARIES time_indexed_rrt_connect ${OMPL_LIBRARIES}
   CATKIN_DEPENDS exotica
-  DEPENDS ompl
 )
 
 AddInitializer(TimeIndexedRRTConnect)

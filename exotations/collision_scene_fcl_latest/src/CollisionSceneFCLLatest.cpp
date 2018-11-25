@@ -98,9 +98,10 @@ void CollisionSceneFCLLatest::updateCollisionObjectTransforms()
     }
 }
 
-// This function was copied from 'moveit_core/collision_detection_fcl/src/collision_common.cpp'
+// This function was originally copied from 'moveit_core/collision_detection_fcl/src/collision_common.cpp'
 // https://github.com/ros-planning/moveit/blob/kinetic-devel/moveit_core/collision_detection_fcl/src/collision_common.cpp#L520
-std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element)
+// and then modified for use in EXOTica.
+std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclCollisionObject(long kinematic_element_id, std::shared_ptr<KinematicElement> element)
 {
     // Maybe use cache here?
 
@@ -141,26 +142,26 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
     {
         case shapes::PLANE:
         {
-            const shapes::Plane* p = static_cast<const shapes::Plane*>(shape.get());
+            auto p = dynamic_cast<const shapes::Plane*>(shape.get());
             geometry.reset(new fcl::Planed(p->a, p->b, p->c, p->d));
         }
         break;
         case shapes::SPHERE:
         {
-            const shapes::Sphere* s = static_cast<const shapes::Sphere*>(shape.get());
+            auto s = dynamic_cast<const shapes::Sphere*>(shape.get());
             geometry.reset(new fcl::Sphered(s->radius));
         }
         break;
         case shapes::BOX:
         {
-            const shapes::Box* s = static_cast<const shapes::Box*>(shape.get());
+            auto s = dynamic_cast<const shapes::Box*>(shape.get());
             const double* size = s->size;
             geometry.reset(new fcl::Boxd(size[0], size[1], size[2]));
         }
         break;
         case shapes::CYLINDER:
         {
-            const shapes::Cylinder* s = static_cast<const shapes::Cylinder*>(shape.get());
+            auto s = dynamic_cast<const shapes::Cylinder*>(shape.get());
             bool degenerateCapsule = (s->length <= 2 * s->radius);
             if (!replaceCylindersWithCapsules || degenerateCapsule)
             {
@@ -174,23 +175,23 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
         break;
         case shapes::CONE:
         {
-            const shapes::Cone* s = static_cast<const shapes::Cone*>(shape.get());
+            auto s = dynamic_cast<const shapes::Cone*>(shape.get());
             geometry.reset(new fcl::Coned(s->radius, s->length));
         }
         break;
         case shapes::MESH:
         {
-            fcl::BVHModel<fcl::OBBRSSd>* g = new fcl::BVHModel<fcl::OBBRSSd>();
-            const shapes::Mesh* mesh = static_cast<const shapes::Mesh*>(shape.get());
+            auto g = new fcl::BVHModel<fcl::OBBRSSd>();
+            auto mesh = dynamic_cast<const shapes::Mesh*>(shape.get());
             if (mesh->vertex_count > 0 && mesh->triangle_count > 0)
             {
                 std::vector<fcl::Triangle> tri_indices(mesh->triangle_count);
-                for (unsigned int i = 0; i < mesh->triangle_count; ++i)
+                for (int i = 0; i < mesh->triangle_count; ++i)
                     tri_indices[i] =
                         fcl::Triangle(mesh->triangles[3 * i], mesh->triangles[3 * i + 1], mesh->triangles[3 * i + 2]);
 
                 std::vector<fcl::Vector3d> points(mesh->vertex_count);
-                for (unsigned int i = 0; i < mesh->vertex_count; ++i)
+                for (int i = 0; i < mesh->vertex_count; ++i)
                     points[i] = fcl::Vector3d(mesh->vertices[3 * i], mesh->vertices[3 * i + 1], mesh->vertices[3 * i + 2]);
 
                 g->beginModel();
@@ -202,7 +203,7 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
         break;
         case shapes::OCTREE:
         {
-            const shapes::OcTree* g = static_cast<const shapes::OcTree*>(shape.get());
+            auto g = dynamic_cast<const shapes::OcTree*>(shape.get());
             geometry.reset(new fcl::OcTreed(to_std_ptr(g->octree)));
         }
         break;
@@ -210,9 +211,9 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclColl
             throw_pretty("This shape type (" << ((int)shape->type) << ") is not supported using FCL yet");
     }
     geometry->computeLocalAABB();
-    geometry->setUserData(reinterpret_cast<void*>(i));
+    geometry->setUserData(reinterpret_cast<void*>(kinematic_element_id));
     std::shared_ptr<fcl::CollisionObjectd> ret(new fcl::CollisionObjectd(geometry));
-    ret->setUserData(reinterpret_cast<void*>(i));
+    ret->setUserData(reinterpret_cast<void*>(kinematic_element_id));
 
     return ret;
 }

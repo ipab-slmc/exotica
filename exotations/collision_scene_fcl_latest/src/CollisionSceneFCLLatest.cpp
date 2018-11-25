@@ -47,10 +47,8 @@ inline fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
 
 namespace exotica
 {
-CollisionSceneFCLLatest::CollisionSceneFCLLatest() {}
-CollisionSceneFCLLatest::~CollisionSceneFCLLatest()
-{
-}
+CollisionSceneFCLLatest::CollisionSceneFCLLatest() = default;
+CollisionSceneFCLLatest::~CollisionSceneFCLLatest() = default;
 
 void CollisionSceneFCLLatest::setup()
 {
@@ -71,11 +69,11 @@ void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string,
         // TODO: There is currently a bug with the caching causing proxies not
         // to update. The correct fix would be to update the user data, for now
         // disable use of the cache.
-        if (true)  // (cache_entry == fcl_cache_.end())
-        {
-            new_object = constructFclCollisionObject(i, object.second.lock());
-            fcl_cache_[object.first] = new_object;
-        }
+        // if (true)  // (cache_entry == fcl_cache_.end())
+        // {
+        new_object = constructFclCollisionObject(i, object.second.lock());
+        fcl_cache_[object.first] = new_object;
+        // }
         // else
         // {
         //     new_object = cache_entry->second;
@@ -103,8 +101,6 @@ void CollisionSceneFCLLatest::updateCollisionObjectTransforms()
 // and then modified for use in EXOTica.
 std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclCollisionObject(long kinematic_element_id, std::shared_ptr<KinematicElement> element)
 {
-    // Maybe use cache here?
-
     shapes::ShapeConstPtr shape = element->Shape;
 
     // Apply scaling and padding

@@ -38,6 +38,9 @@
   <class name="exotica/JointLimit" type="exotica::JointLimit" base_class_type="exotica::TaskMap">
     <description>Joint limits</description>
   </class>
+  <class name="exotica/JointVelocityLimit" type="exotica::JointVelocityLimit" base_class_type="exotica::TaskMap">
+    <description>Joint velocity limits (only works on time-indexed problems; penalises within percentage bound of velocity limit). Velocity limits can be set on a per joint basis.</description>
+  </class>
   <class name="exotica/CollisionCheck" type="exotica::CollisionCheck" base_class_type="exotica::TaskMap">
     <description>Collision checking</description>
   </class>

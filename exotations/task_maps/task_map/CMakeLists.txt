@@ -17,6 +17,7 @@ AddInitializer(
   EffAxisAlignment
   EffVelocity
   JointLimit
+  JointVelocityLimit
   Distance
   Point2Line
   Identity
@@ -48,6 +49,7 @@ set(SOURCES
     src/EffAxisAlignment.cpp
     src/EffVelocity.cpp
     src/JointLimit.cpp
+    src/JointVelocityLimit.cpp
     src/Distance.cpp
     src/Point2Line.cpp
     src/Point2Plane.cpp

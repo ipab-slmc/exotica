@@ -1,3 +1,2 @@
 extend <exotica/TaskMap>
 Optional double SafePercentage = 0.0;
-Optional std::string RobotDescription = "robot_description";

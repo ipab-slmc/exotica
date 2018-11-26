@@ -64,7 +64,6 @@ private:
     double dt_;               //! Timestep between subsequent time-steps (in s)
     Eigen::VectorXd limits_;  //! Joint velocity limits (absolute, in rads/s)
     Eigen::VectorXd tau_;     //! Joint velocity limits tolerance
-    Scene_ptr scene_;
     JointVelocityLimitInitializer init_;
     int N;
 };

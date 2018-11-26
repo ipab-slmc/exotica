@@ -68,7 +68,6 @@ private:
     bool check_self_collision_ = true;
 
     const unsigned int dim_ = 1;
-    Scene_ptr scene_;
     CollisionScene_ptr cscene_;
     SmoothCollisionDistanceInitializer init_;
 

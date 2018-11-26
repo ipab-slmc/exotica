@@ -95,20 +95,10 @@ void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
 void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
-    if (phi.rows() != N) throw_named("Wrong size of phi!");
-    if (J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);
     phi.setZero();
+    update(x, phi);
+
+    if (J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);
     J = Eigen::MatrixXd::Identity(N, N);
-    for (int i = 0; i < N; i++)
-    {
-        if (x(i) < low_limits_(i) + tau_(i))
-        {
-            phi(i) = x(i) - low_limits_(i) - tau_(i);
-        }
-        if (x(i) > high_limits_(i) - tau_(i))
-        {
-            phi(i) = x(i) - high_limits_(i) + tau_(i);
-        }
-    }
 }
 }

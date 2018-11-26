@@ -50,8 +50,6 @@
 
 #include <exotica/KinematicElement.h>
 
-#define ROOT -1  //!< The value of the parent for the root segment
-
 namespace exotica
 {
 enum BASE_TYPE

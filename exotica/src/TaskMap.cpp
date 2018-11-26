@@ -71,11 +71,6 @@ std::vector<KinematicFrameRequest> TaskMap::GetFrames()
     return Frames;
 }
 
-void TaskMap::taskSpaceDim(int& task_dim)
-{
-    task_dim = taskSpaceDim();
-}
-
 void TaskMap::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
     if (J.rows() != taskSpaceDim() && J.cols() != x.rows())

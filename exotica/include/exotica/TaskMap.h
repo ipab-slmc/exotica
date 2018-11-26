@@ -37,7 +37,6 @@
 #include <exotica/Object.h>   //!< The EXOTica base class
 #include <exotica/Property.h>
 #include <exotica/Scene.h>
-#include <exotica/Server.h>
 #include <exotica/TaskSpaceVector.h>
 
 #include <Eigen/Dense>  //!< Generally dense manipulations should be enough
@@ -50,19 +49,14 @@
 
 namespace exotica
 {
-class PlanningProblem;
-
 class TaskMap : public Object, Uncopyable, public virtual InstantiableBase
 {
 public:
-    /**
-       * \brief Default Constructor
-       */
     TaskMap();
-    virtual ~TaskMap() {}
+    virtual ~TaskMap();
     virtual void InstantiateBase(const Initializer& init);
 
-    virtual void assignScene(Scene_ptr scene) {}
+    virtual void assignScene(Scene_ptr scene);
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) { throw_named("Not implemented"); }
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, HessianRef H);
@@ -78,16 +72,17 @@ public:
     std::vector<KinematicFrameRequest> GetFrames();
 
     virtual void debug() {}
-    std::vector<KinematicSolution> Kinematics;
-    int Id;
-    int Start;
-    int Length;
-    int StartJ;
-    int LengthJ;
-    bool isUsed;
+    std::vector<KinematicSolution> Kinematics = std::vector<KinematicSolution>(1);
+    int Id = -1;
+    int Start = -1;
+    int Length = -1;
+    int StartJ = -1;
+    int LengthJ = -1;
+    bool isUsed = false;
 
 protected:
     std::vector<KinematicFrameRequest> Frames;
+    Scene_ptr scene_ = nullptr;
 };
 
 //!< Typedefines for some common functionality

@@ -30,16 +30,19 @@
  *
  */
 
-#include <exotica/FrameInitializer.h>
-#include <exotica/PlanningProblem.h>
 #include <exotica/TaskMap.h>
+
+#include <exotica/FrameInitializer.h>
 #include <exotica/TaskMapInitializer.h>
 
 namespace exotica
 {
-TaskMap::TaskMap() : Id(-1), Start(-1), Length(-1), StartJ(-1), LengthJ(-1)
+TaskMap::TaskMap() = default;
+TaskMap::~TaskMap() = default;
+
+void TaskMap::assignScene(Scene_ptr scene)
 {
-    Kinematics.resize(1);
+    scene_ = scene;
 }
 
 std::string TaskMap::print(std::string prepend)

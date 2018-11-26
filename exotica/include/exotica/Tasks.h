@@ -30,12 +30,6 @@
  *
  */
 
-namespace exotica
-{
-struct TaskIndexing;
-class Task;
-}
-
 #ifndef EXOTICA_TASKS_H
 #define EXOTICA_TASKS_H
 

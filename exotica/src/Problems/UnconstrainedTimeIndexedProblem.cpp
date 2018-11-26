@@ -183,7 +183,7 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
     // Pass the corresponding number of relevant task kinematics to the TaskMaps
     // via the PlanningProblem::updateMultipleTaskKinematics method. For now we
     // support passing _two_ timesteps - this can be easily changed later on.
-    std::vector<std::shared_ptr<KinematicResponse>> kinematics_solutions { KinematicSolutions[t] };
+    std::vector<std::shared_ptr<KinematicResponse>> kinematics_solutions{KinematicSolutions[t]};
 
     // If the current timestep is 0, pass the 0th timestep's response twice.
     // Otherwise pass the (t-1)th response.

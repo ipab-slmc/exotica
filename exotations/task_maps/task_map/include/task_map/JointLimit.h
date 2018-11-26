@@ -47,7 +47,6 @@ class JointLimit : public TaskMap, public Instantiable<JointLimitInitializer>
 {
 public:
     JointLimit();
-    ~JointLimit();
 
     virtual void Instantiate(JointLimitInitializer& init);
 

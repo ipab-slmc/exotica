@@ -41,13 +41,7 @@ namespace exotica  //!< Since this is part of the core library, it will be withi
 class EffPosition : public TaskMap, public Instantiable<EffPositionInitializer>
 {
 public:
-    /**
-       * \brief Default constructor
-       */
     EffPosition();
-    virtual ~EffPosition()
-    {
-    }
 
     virtual void Instantiate(EffPositionInitializer& init) {}
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);

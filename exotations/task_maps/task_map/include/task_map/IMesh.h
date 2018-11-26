@@ -47,8 +47,6 @@ public:
 
     virtual void Instantiate(IMeshInitializer& init);
 
-    virtual ~IMesh();
-
     virtual void assignScene(Scene_ptr scene);
 
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
@@ -74,7 +72,7 @@ public:
 protected:
     Eigen::MatrixXd weights_;
 
-    int eff_size_;
+    int eff_size_ = 0;
     bool Debug;
 
     ros::Publisher imesh_mark_pub_;

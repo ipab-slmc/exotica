@@ -38,8 +38,6 @@ namespace exotica
 {
 JointLimit::JointLimit() = default;
 
-JointLimit::~JointLimit() = default;
-
 void JointLimit::Instantiate(JointLimitInitializer& init)
 {
     init_ = init;

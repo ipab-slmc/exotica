@@ -36,9 +36,7 @@ REGISTER_TASKMAP_TYPE("Point2Plane", exotica::Point2Plane);
 
 namespace exotica
 {
-Point2Plane::Point2Plane()
-{
-}
+Point2Plane::Point2Plane() = default;
 
 void Point2Plane::Instantiate(Point2PlaneInitializer& init)
 {
@@ -47,11 +45,6 @@ void Point2Plane::Instantiate(Point2PlaneInitializer& init)
         debug_pub_ = Server::advertise<visualization_msgs::MarkerArray>(
             object_name_ + "/planes", 1, true);
     }
-}
-
-void Point2Plane::assignScene(Scene_ptr scene)
-{
-    scene_ = scene;
 }
 
 void Point2Plane::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)

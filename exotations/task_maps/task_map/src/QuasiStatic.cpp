@@ -40,13 +40,7 @@ namespace exotica
 {
 constexpr double eps = 1e-8;
 
-QuasiStatic::QuasiStatic()
-{
-}
-
-QuasiStatic::~QuasiStatic()
-{
-}
+QuasiStatic::QuasiStatic() = default;
 
 ///
 /// \brief cross 2D cross product (z coordinate of a 3D cross product of 2 vectors on a xy plane).

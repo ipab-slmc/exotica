@@ -42,9 +42,6 @@ class Identity : public TaskMap, public Instantiable<IdentityInitializer>
 {
 public:
     Identity();
-    virtual ~Identity()
-    {
-    }
 
     virtual void Instantiate(IdentityInitializer& init);
 

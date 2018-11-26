@@ -36,6 +36,8 @@ REGISTER_TASKMAP_TYPE("Point2Line", exotica::Point2Line);
 
 namespace exotica
 {
+Point2Line::Point2Line() = default;
+
 Eigen::Vector3d Point2Line::direction(const Eigen::Vector3d &point)
 {
     // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html

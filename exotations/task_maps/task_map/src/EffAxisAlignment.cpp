@@ -36,9 +36,7 @@ REGISTER_TASKMAP_TYPE("EffAxisAlignment", exotica::EffAxisAlignment);
 
 namespace exotica
 {
-EffAxisAlignment::EffAxisAlignment()
-{
-}
+EffAxisAlignment::EffAxisAlignment() = default;
 
 void EffAxisAlignment::Instantiate(EffAxisAlignmentInitializer& init)
 {

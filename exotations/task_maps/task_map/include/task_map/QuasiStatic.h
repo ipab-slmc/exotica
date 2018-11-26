@@ -44,7 +44,6 @@ class QuasiStatic : public TaskMap, public Instantiable<QuasiStaticInitializer>
 {
 public:
     QuasiStatic();
-    virtual ~QuasiStatic();
 
     virtual void Instantiate(QuasiStaticInitializer& init);
 

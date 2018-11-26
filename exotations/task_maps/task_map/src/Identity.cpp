@@ -36,9 +36,7 @@ REGISTER_TASKMAP_TYPE("Identity", exotica::Identity);
 
 namespace exotica
 {
-Identity::Identity()
-{
-}
+Identity::Identity() = default;
 
 void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {

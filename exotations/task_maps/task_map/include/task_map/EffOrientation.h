@@ -41,13 +41,7 @@ namespace exotica  //!< Since this is part of the core library, it will be withi
 class EffOrientation : public TaskMap, public Instantiable<EffOrientationInitializer>
 {
 public:
-    /**
-       * \brief Default constructor
-       */
     EffOrientation();
-    virtual ~EffOrientation()
-    {
-    }
 
     virtual void Instantiate(EffOrientationInitializer& init);
 

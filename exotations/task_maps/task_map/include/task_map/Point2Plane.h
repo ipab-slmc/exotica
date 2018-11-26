@@ -43,9 +43,7 @@ class Point2Plane : public TaskMap, public Instantiable<Point2PlaneInitializer>
 public:
     Point2Plane();
 
-    virtual ~Point2Plane() {}
     virtual void Instantiate(Point2PlaneInitializer &init);
-    virtual void assignScene(Scene_ptr scene);
 
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
 

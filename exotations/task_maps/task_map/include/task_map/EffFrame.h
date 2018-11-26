@@ -41,13 +41,7 @@ namespace exotica  //!< Since this is part of the core library, it will be withi
 class EffFrame : public TaskMap, public Instantiable<EffFrameInitializer>
 {
 public:
-    /**
-       * \brief Default constructor
-       */
     EffFrame();
-    virtual ~EffFrame()
-    {
-    }
 
     virtual void Instantiate(EffFrameInitializer& init);
 

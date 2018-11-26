@@ -46,9 +46,6 @@ public:
        * \brief Default constructor
        */
     EffAxisAlignment();
-    virtual ~EffAxisAlignment()
-    {
-    }
 
     virtual void Instantiate(EffAxisAlignmentInitializer& init);
 

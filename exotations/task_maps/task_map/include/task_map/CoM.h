@@ -74,7 +74,6 @@ private:
     int dim_;
 
     CoMInitializer init_;
-    Scene_ptr scene_;
 };
 }
 

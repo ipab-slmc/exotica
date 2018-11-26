@@ -56,7 +56,6 @@ public:
 
     virtual int taskSpaceDim();
 
-    Scene_ptr scene_;
     CollisionScene_ptr cscene_;
     CollisionCheckInitializer init_;
 };

@@ -46,9 +46,7 @@ namespace exotica
 class JointLimit : public TaskMap, public Instantiable<JointLimitInitializer>
 {
 public:
-    //	Default constructor
     JointLimit();
-    //	Default destructor
     ~JointLimit();
 
     virtual void Instantiate(JointLimitInitializer& init);
@@ -67,7 +65,6 @@ private:
     Eigen::VectorXd low_limits_;   //	Lower joint limits
     Eigen::VectorXd high_limits_;  //	Higher joint limits
     Eigen::VectorXd tau_;          //	Joint limits tolerance
-    Scene_ptr scene_;
     JointLimitInitializer init_;
     int N;
 };

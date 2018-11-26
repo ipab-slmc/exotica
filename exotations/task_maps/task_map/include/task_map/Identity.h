@@ -63,7 +63,6 @@ public:
     std::vector<int> jointMap;
     Eigen::VectorXd jointRef;
     int N;
-    Scene_ptr scene_;
     IdentityInitializer init_;
 };
 

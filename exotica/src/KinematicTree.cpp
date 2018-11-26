@@ -58,6 +58,7 @@ KinematicResponse::KinematicResponse(KinematicRequestFlags flags, int size, int 
     Jzero.data.setZero();
     if (Flags & KIN_J) J = ArrayJacobian::Constant(size, Jzero);
     if (Flags & KIN_J_DOT) JDot = ArrayJacobian::Constant(size, Jzero);
+    X.setZero(n);
 }
 
 KinematicsRequest::KinematicsRequest() : Flags(KIN_FK)
@@ -72,11 +73,11 @@ KinematicFrameRequest::KinematicFrameRequest(std::string frameALinkName, KDL::Fr
 {
 }
 
-KinematicSolution::KinematicSolution() : Start(-1), Length(-1), Phi(nullptr, 0), PhiDot(nullptr, 0), J(nullptr, 0), JDot(nullptr, 0)
+KinematicSolution::KinematicSolution() : Start(-1), Length(-1), Phi(nullptr, 0), PhiDot(nullptr, 0), J(nullptr, 0), JDot(nullptr, 0), X(nullptr, 0)
 {
 }
 
-KinematicSolution::KinematicSolution(int start, int length) : Start(start), Length(length), Phi(nullptr, 0), PhiDot(nullptr, 0), J(nullptr, 0), JDot(nullptr, 0)
+KinematicSolution::KinematicSolution(int start, int length) : Start(start), Length(length), Phi(nullptr, 0), PhiDot(nullptr, 0), J(nullptr, 0), JDot(nullptr, 0), X(nullptr, 0)
 {
 }
 
@@ -84,6 +85,7 @@ void KinematicSolution::Create(std::shared_ptr<KinematicResponse> solution)
 {
     if (Start < 0 || Length < 0) throw_pretty("Kinematic solution was not initialized!");
     new (&Phi) Eigen::Map<ArrayFrame>(solution->Phi.data() + Start, Length);
+    new (&X) Eigen::Map<Eigen::VectorXd>(solution->X.data(), solution->X.rows());
     if (solution->Flags & KIN_FK_VEL) new (&PhiDot) Eigen::Map<ArrayTwist>(solution->PhiDot.data() + Start, Length);
     if (solution->Flags & KIN_J) new (&J) Eigen::Map<ArrayJacobian>(solution->J.data() + Start, Length);
     if (solution->Flags & KIN_J_DOT) new (&JDot) Eigen::Map<ArrayJacobian>(solution->JDot.data() + Start, Length);
@@ -547,6 +549,9 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
 
     for (int i = 0; i < NumControlledJoints; i++)
         TreeState(ControlledJoints[i].lock()->Id) = x(i);
+
+    // Store the updated state in the KinematicResponse (Solution)
+    Solution->X = x;
 
     UpdateTree();
     UpdateFK();

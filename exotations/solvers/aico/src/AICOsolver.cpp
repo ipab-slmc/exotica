@@ -160,14 +160,14 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
     // If the initial value of the initial trajectory does not equal the start
     // state, assume that no initial guess is provided and fill the trajectory
     // with the start state
-    if (!(q0 - q_init[0]).isMuchSmallerThan(1e-6))
+    if (!q0.isApprox(q_init[0]))
     {
-        HIGHLIGHT("AICO::Solve cold-started");
+        if (debug_) HIGHLIGHT("AICO::Solve cold-started");
         q_init.assign(prob_->getT(), q0);
     }
     else
     {
-        HIGHLIGHT("AICO::Solve called with initial trajectory guess");
+        if (debug_) HIGHLIGHT("AICO::Solve called with initial trajectory guess");
     }
 
     prob_->setStartState(q_init[0]);

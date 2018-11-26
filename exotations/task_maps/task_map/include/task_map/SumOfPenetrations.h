@@ -67,7 +67,6 @@ private:
     bool check_self_collision_ = true;
 
     unsigned int dim_ = 1;
-    Scene_ptr scene_;
     CollisionScene_ptr cscene_;
     SumOfPenetrationsInitializer init_;
 };

@@ -54,8 +54,6 @@ public:
     virtual int taskSpaceDim();
 
 private:
-    Scene_ptr scene_;
-
     void publishDebug();
     ros::Publisher debug_pub_;
 };

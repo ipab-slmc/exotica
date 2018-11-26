@@ -60,7 +60,6 @@ public:
 
 private:
     QuasiStaticInitializer init_;
-    Scene_ptr scene_;
     visualization_msgs::MarkerArray debug_msg;
     ros::Publisher debug_pub;
 };

@@ -79,7 +79,6 @@ protected:
 
     ros::Publisher imesh_mark_pub_;
     visualization_msgs::Marker imesh_mark_;
-    Scene_ptr scene_;
 };
 typedef std::shared_ptr<IMesh> IMesh_Ptr;
 }

@@ -70,7 +70,6 @@ private:
     std::vector<CollisionProxy> closestProxies_;
 
     unsigned int dim_;
-    Scene_ptr scene_;
     CollisionScene_ptr cscene_;
     CollisionDistanceInitializer init_;
 

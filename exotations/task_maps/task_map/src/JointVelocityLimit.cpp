@@ -86,6 +86,7 @@ void JointVelocityLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef ph
     if (phi.rows() != N) throw_named("Wrong size of phi!");
     if (!x.isApprox(Kinematics[0].X)) throw_named("The internal Kinematics.X and passed state reference x do not match!");
 
+    phi.setZero();
     Eigen::VectorXd x_diff = (1 / dt_) * (Kinematics[0].X - Kinematics[1].X);
     for (int i = 0; i < N; i++)
     {
@@ -106,6 +107,9 @@ void JointVelocityLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef ph
 {
     if (J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);
     update(x, phi);
-    J = Eigen::MatrixXd::Identity(N, N);
+    J = (1 / dt_) * Eigen::MatrixXd::Identity(N, N);
+    for (int i = 0; i < N; i++)
+        if (phi(i) == 0.0)
+            J(i, i) = 0.0;
 }
 }

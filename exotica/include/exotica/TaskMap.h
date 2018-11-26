@@ -58,7 +58,7 @@ public:
 
     virtual void assignScene(Scene_ptr scene);
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) { throw_named("Not implemented"); }
+    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, HessianRef H);
     virtual int taskSpaceDim() = 0;
 

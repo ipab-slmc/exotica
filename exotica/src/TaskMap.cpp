@@ -76,6 +76,31 @@ void TaskMap::taskSpaceDim(int& task_dim)
     task_dim = taskSpaceDim();
 }
 
+void TaskMap::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+{
+    if (J.rows() != taskSpaceDim() && J.cols() != x.rows())
+        throw_named("Jacobian dimension mismatch!");
+
+    // Store original x (needs to be reset later).
+    Eigen::VectorXd x_original(x);
+    update(x_original, phi);
+    Eigen::VectorXd phi_original(phi);
+
+    // Backward finite differencing.
+    const double h = 1e-6;
+    Eigen::VectorXd x_tmp;
+    for (int i = 0; i < taskSpaceDim(); i++)
+    {
+        x_tmp = x;
+        x_tmp(i) -= h;
+        update(x_tmp, phi);
+        J.row(i) = (1 / h) * (phi_original - phi);
+    }
+
+    // Finally, reset with original value again.
+    update(x_original, phi);
+}
+
 void TaskMap::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, HessianRef H)
 {
     update(x, phi, J);

@@ -181,7 +181,7 @@ bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5, do
 }
 
 template <class T>
-bool testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-5, double h = 1e-5)
+bool testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-5, double h = 1e-6)
 {
     TEST_COUT << "Testing Jacobian:";
     for (int tr = 0; tr < NUM_TRIALS; tr++)
@@ -203,6 +203,7 @@ bool testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, 
         if (errJ > eps)
         {
             TEST_COUT << "x: " << x0.transpose();
+            TEST_COUT << "Phi: " << task.Phi[t].data.transpose();
             TEST_COUT << "J*:\n"
                       << J;
             TEST_COUT << "J:\n"

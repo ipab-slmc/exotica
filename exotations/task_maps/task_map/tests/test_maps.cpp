@@ -465,6 +465,69 @@ TEST(ExoticaTaskMaps, testJointLimit)
     }
 }
 
+TEST(ExoticaTaskMaps, testJointVelocityLimit)
+{
+    try
+    {
+        TEST_COUT << "JointVelocityLimit test";
+
+        std::vector<Initializer> maps;
+
+        // Test default
+        {
+            Eigen::VectorXd qd_max = Eigen::VectorXd::Ones(1);
+            Initializer map("exotica/JointVelocityLimit", {{"Name", std::string("MyTask")},
+                                                           {"dt", 0.1},
+                                                           {"MaximumJointVelocity", qd_max},
+                                                           {"SafePercentage", 0.0}});
+            maps.emplace_back(map);
+        }
+
+        // Test safe percentage
+        {
+            Eigen::VectorXd qd_max = Eigen::VectorXd::Ones(1);
+            Initializer map("exotica/JointVelocityLimit", {{"Name", std::string("MyTask")},
+                                                           {"dt", 0.1},
+                                                           {"MaximumJointVelocity", qd_max},
+                                                           {"SafePercentage", 0.1}});
+            maps.emplace_back(map);
+        }
+
+        // Test different joint velocity initialisations (vector 1, vector N)
+        {
+            UnconstrainedTimeIndexedProblem_ptr problem = setupTimeIndexedProblem(maps[0]);
+            Eigen::VectorXd qd_max = Eigen::VectorXd::Ones(problem->N);
+            Initializer map("exotica/JointVelocityLimit", {{"Name", std::string("MyTask")},
+                                                           {"dt", 0.1},
+                                                           {"MaximumJointVelocity", qd_max},
+                                                           {"SafePercentage", 0.0}});
+            maps.emplace_back(map);
+        }
+
+        for (auto map : maps)
+        {
+            UnconstrainedTimeIndexedProblem_ptr problem = setupTimeIndexedProblem(map);
+            EXPECT_TRUE(testRandom(problem));
+
+            for (int t = 0; t < problem->getT(); t++)
+            {
+                Eigen::VectorXd x(problem->N);
+                x.setRandom();
+                problem->Update(x, t);
+            }
+
+            for (int t = 0; t < problem->getT(); t++)
+            {
+                EXPECT_TRUE(testJacobianTimeIndexed(problem, problem->Cost, t, 1e-4));
+            }
+        }
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "JointVelocityLimit: Uncaught exception!";
+    }
+}
+
 TEST(ExoticaTaskMaps, testSphereCollision)
 {
     try

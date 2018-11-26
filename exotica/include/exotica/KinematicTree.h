@@ -121,6 +121,7 @@ public:
     KinematicResponse(KinematicRequestFlags Flags, int Size, int N = 0);
     KinematicRequestFlags Flags;
     std::vector<KinematicFrame> Frame;
+    Eigen::VectorXd X;
     ArrayFrame Phi;
     ArrayTwist PhiDot;
     ArrayJacobian J;
@@ -138,6 +139,7 @@ public:
     void Create(std::shared_ptr<KinematicResponse> solution);
     int Start;
     int Length;
+    Eigen::Map<Eigen::VectorXd> X;
     Eigen::Map<ArrayFrame> Phi;
     Eigen::Map<ArrayTwist> PhiDot;
     Eigen::Map<ArrayJacobian> J;
@@ -148,7 +150,7 @@ class KinematicTree : public Uncopyable
 {
 public:
     KinematicTree();
-    ~KinematicTree() {}
+    ~KinematicTree() = default;
     void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name);
     std::string getRootFrameName();
     std::string getRootJointName();

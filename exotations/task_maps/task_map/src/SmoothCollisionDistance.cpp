@@ -37,7 +37,8 @@ REGISTER_TASKMAP_TYPE("SmoothCollisionDistance",
 
 namespace exotica
 {
-SmoothCollisionDistance::SmoothCollisionDistance() {}
+SmoothCollisionDistance::SmoothCollisionDistance() = default;
+
 void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                                      Eigen::VectorXdRef phi)
 {

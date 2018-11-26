@@ -71,6 +71,8 @@ void JointVelocityLimit::Initialize()
         throw_named("Maximum joint velocity vector needs to be either of size 1 or N, but got " << init_.MaximumJointVelocity.rows());
 
     tau_ = percent * limits_;
+
+    if (debug_) HIGHLIGHT_NAMED("JointVelocityLimit", "dt=" << dt_ << ", q̇_max=" << limits_.transpose() << ", τ=" << tau_.transpose());
 }
 
 int JointVelocityLimit::taskSpaceDim()
@@ -84,16 +86,18 @@ void JointVelocityLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef ph
     if (phi.rows() != N) throw_named("Wrong size of phi!");
     if (!x.isApprox(Kinematics[0].X)) throw_named("The internal Kinematics.X and passed state reference x do not match!");
 
-    Eigen::VectorXd x_diff = (1 / dt_) * (Kinematics[1].X - Kinematics[0].X);
+    Eigen::VectorXd x_diff = (1 / dt_) * (Kinematics[0].X - Kinematics[1].X);
     for (int i = 0; i < N; i++)
     {
         if (x_diff(i) < -limits_(i) + tau_(i))
         {
             phi(i) = x_diff(i) + limits_(i) - tau_(i);
+            if (debug_) HIGHLIGHT_NAMED("JointVelocityLimit", "Lower limit exceeded (joint=" << i << "): " << x_diff(i) << " < (-" << limits_(i) << "+" << tau_(i) << ")");
         }
         if (x_diff(i) > limits_(i) - tau_(i))
         {
             phi(i) = x_diff(i) - limits_(i) + tau_(i);
+            if (debug_) HIGHLIGHT_NAMED("JointVelocityLimit", "Upper limit exceeded (joint=" << i << "): " << x_diff(i) << " > (" << limits_(i) << "-" << tau_(i) << ")");
         }
     }
 }

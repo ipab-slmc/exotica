@@ -34,13 +34,12 @@
 
 namespace exotica
 {
-Visualization::Visualization(Scene_ptr scene)
+Visualization::Visualization(Scene_ptr scene) : scene_(scene)
 {
-    scene_ = scene;
+    HIGHLIGHT_NAMED("Visualization", "Initialising visualizer");
     Initialize();
-
-    HIGHLIGHT_NAMED("Visualization", "Initializing visualization");
 }
+Visualization::~Visualization() = default;
 
 void Visualization::Initialize()
 {
@@ -55,7 +54,7 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
     if (!Server::isRos()) return;
 
     if (trajectory.cols() != scene_->getSolver().getNumControlledJoints())
-        throw_named("Number of DoFs in trajectory does not match number of controlled joints of robot.");
+        throw_pretty("Number of DoFs in trajectory does not match number of controlled joints of robot.");
 
     moveit_msgs::DisplayTrajectory traj_msg;
     traj_msg.model_id = scene_->getRobotModel()->getName();

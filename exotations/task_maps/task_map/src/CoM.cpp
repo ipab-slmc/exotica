@@ -37,6 +37,7 @@ REGISTER_TASKMAP_TYPE("CoM", exotica::CoM);
 namespace exotica
 {
 CoM::CoM() = default;
+CoM::~CoM() = default;
 
 void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {

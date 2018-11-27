@@ -37,6 +37,7 @@ REGISTER_TASKMAP_TYPE("Point2Plane", exotica::Point2Plane);
 namespace exotica
 {
 Point2Plane::Point2Plane() = default;
+Point2Plane::~Point2Plane() = default;
 
 void Point2Plane::Instantiate(Point2PlaneInitializer& init)
 {

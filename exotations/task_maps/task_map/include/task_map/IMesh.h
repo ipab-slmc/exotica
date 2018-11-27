@@ -44,6 +44,7 @@ class IMesh : public TaskMap, public Instantiable<IMeshInitializer>
 {
 public:
     IMesh();
+    virtual ~IMesh();
 
     virtual void Instantiate(IMeshInitializer& init);
 

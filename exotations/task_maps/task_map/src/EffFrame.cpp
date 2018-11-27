@@ -40,6 +40,8 @@ EffFrame::EffFrame() : rotationType(RotationType::RPY)
 {
 }
 
+EffFrame::~EffFrame() = default;
+
 void EffFrame::Instantiate(EffFrameInitializer& init)
 {
     if (init.Type == "Quaternion")

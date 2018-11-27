@@ -42,10 +42,8 @@ namespace exotica  //!< Since this is part of the core library, it will be withi
 class EffAxisAlignment : public TaskMap, public Instantiable<EffAxisAlignmentInitializer>
 {
 public:
-    /**
-       * \brief Default constructor
-       */
     EffAxisAlignment();
+    virtual ~EffAxisAlignment();
 
     virtual void Instantiate(EffAxisAlignmentInitializer& init);
 

@@ -37,6 +37,7 @@ REGISTER_TASKMAP_TYPE("CollisionCheck", exotica::CollisionCheck);
 namespace exotica
 {
 CollisionCheck::CollisionCheck() = default;
+CollisionCheck::~CollisionCheck() = default;
 
 void CollisionCheck::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {

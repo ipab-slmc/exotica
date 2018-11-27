@@ -37,6 +37,7 @@ REGISTER_TASKMAP_TYPE("Distance", exotica::Distance);
 namespace exotica
 {
 Distance::Distance() = default;
+Distance::~Distance() = default;
 
 void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {

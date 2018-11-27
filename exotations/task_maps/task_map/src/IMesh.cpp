@@ -38,6 +38,7 @@ REGISTER_TASKMAP_TYPE("IMesh", exotica::IMesh);
 namespace exotica
 {
 IMesh::IMesh() = default;
+IMesh::~IMesh() = default;
 
 void IMesh::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {

@@ -70,8 +70,6 @@ protected:
 class Server : public Uncopyable
 {
 public:
-    virtual ~Server();
-
     /*
        * \brief	Get the server
        */
@@ -80,6 +78,14 @@ public:
         if (!singleton_server_) singleton_server_.reset(new Server);
         return singleton_server_;
     }
+    virtual ~Server();
+
+    /*
+       * \brief	Check if a robot model exist
+       * @param	path	Robot model name
+       * @return	True if exist, false otherwise
+       */
+    bool hasModel(const std::string &path);
 
     /*
        * \brief	Get robot model
@@ -182,6 +188,9 @@ public:
     static void destroy();
 
 private:
+    /*
+       * \brief	Constructor
+       */
     Server();
     static std::shared_ptr<Server> singleton_server_;
     ///	\brief	Make sure the singleton does not get copied
@@ -190,9 +199,9 @@ private:
     robot_model::RobotModelPtr loadModel(std::string name, std::string urdf = "", std::string srdf = "");
 
     /// \brief	The name of this server
-    std::string name_ = "EXOTicaServer";
+    std::string name_;
 
-    std::shared_ptr<RosNode> node_ = std::make_shared<RosNode>(nullptr);
+    std::shared_ptr<RosNode> node_;
 
     /// \brief Robot model cache
     std::map<std::string, robot_model::RobotModelPtr> robot_models_;

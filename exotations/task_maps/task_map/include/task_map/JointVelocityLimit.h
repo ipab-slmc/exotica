@@ -46,6 +46,7 @@ class JointVelocityLimit : public TaskMap, public Instantiable<JointVelocityLimi
 {
 public:
     JointVelocityLimit();
+    virtual ~JointVelocityLimit();
 
     virtual void Instantiate(JointVelocityLimitInitializer& init);
 

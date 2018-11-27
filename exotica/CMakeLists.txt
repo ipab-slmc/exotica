@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   moveit_core
   moveit_ros_planning
+  moveit_msgs
   tf
   eigen_conversions
   kdl_parser
@@ -75,6 +76,7 @@ add_library(${PROJECT_NAME}
   src/MotionSolver.cpp
   src/Setup.cpp
   src/Server.cpp
+  src/Visualization.cpp
   src/Scene.cpp
   src/Trajectory.cpp
   src/Property.cpp
@@ -93,7 +95,8 @@ add_library(${PROJECT_NAME}
   src/Problems/BoundedEndPoseProblem.cpp
   src/Problems/SamplingProblem.cpp
   src/Problems/TimeIndexedSamplingProblem.cpp
-  ${exotica_BINARY_DIR}/generated/Version.cpp)
+  ${exotica_BINARY_DIR}/generated/Version.cpp
+)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 

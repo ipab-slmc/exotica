@@ -46,6 +46,8 @@ class SumOfPenetrations
 {
 public:
     SumOfPenetrations();
+    virtual ~SumOfPenetrations();
+
     virtual void Instantiate(SumOfPenetrationsInitializer& init);
 
     virtual void assignScene(Scene_ptr scene);

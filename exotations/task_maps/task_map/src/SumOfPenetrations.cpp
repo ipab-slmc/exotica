@@ -38,6 +38,7 @@ REGISTER_TASKMAP_TYPE("SumOfPenetrations",
 namespace exotica
 {
 SumOfPenetrations::SumOfPenetrations() = default;
+SumOfPenetrations::~SumOfPenetrations() = default;
 
 void SumOfPenetrations::update(Eigen::VectorXdRefConst x,
                                Eigen::VectorXdRef phi)

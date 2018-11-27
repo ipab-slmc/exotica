@@ -30,7 +30,7 @@ class Example(object):
         
 
         # Setup EXOtica
-        self.solver=exo.Setup.loadSolver('{exotica_examples}/resources/configs/example_eff_axis_alignment.xml')
+        self.solver = exo.Setup.loadSolver('{exotica_examples}/resources/configs/example_eff_axis_alignment.xml')
         self.problem = self.solver.getProblem()
 
         # Setup ROS
@@ -38,7 +38,7 @@ class Example(object):
         self.pub['joint_state'] = rospy.Publisher('/joint_states', JointState, queue_size=1)
         self.pub['eff_state'] = rospy.Publisher('/eff_state', FloatArray, queue_size=1)
 
-        self.sub={}
+        self.sub = {}
         self.sub['joy'] = rospy.Subscriber('/joy', Joy, self.callback)
         
     def callback(self, msg):

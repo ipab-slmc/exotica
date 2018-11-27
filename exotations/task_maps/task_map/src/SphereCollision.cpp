@@ -37,6 +37,7 @@ REGISTER_TASKMAP_TYPE("SphereCollision", exotica::SphereCollision);
 namespace exotica
 {
 SphereCollision::SphereCollision() = default;
+SphereCollision::~SphereCollision() = default;
 
 void SphereCollision::Instantiate(SphereCollisionInitializer& init)
 {

@@ -40,6 +40,8 @@ EffOrientation::EffOrientation() : rotationType(RotationType::RPY)
 {
 }
 
+EffOrientation::~EffOrientation() = default;
+
 void EffOrientation::Instantiate(EffOrientationInitializer& init)
 {
     if (init.Type == "Quaternion")

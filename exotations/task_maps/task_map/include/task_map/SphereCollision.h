@@ -44,6 +44,8 @@ class SphereCollision : public TaskMap, public Instantiable<SphereCollisionIniti
 {
 public:
     SphereCollision();
+    virtual ~SphereCollision();
+
     virtual void Instantiate(SphereCollisionInitializer& init);
 
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);

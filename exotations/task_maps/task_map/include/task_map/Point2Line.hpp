@@ -41,6 +41,8 @@ class Point2Line : public TaskMap, public Instantiable<Point2LineInitializer>
 {
 public:
     Point2Line();
+    virtual ~Point2Line();
+
     virtual void Instantiate(Point2LineInitializer& init);
 
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);

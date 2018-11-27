@@ -41,6 +41,8 @@ EffVelocity::EffVelocity()
     Kinematics.resize(2);
 }
 
+EffVelocity::~EffVelocity() = default;
+
 void EffVelocity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (Kinematics.size() != 2) throw_named("Wrong size of Kinematics - requires 2, but got " << Kinematics.size());

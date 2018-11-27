@@ -42,6 +42,7 @@ class Distance : public TaskMap, public Instantiable<DistanceInitializer>
 {
 public:
     Distance();
+    virtual ~Distance();
 
     virtual void Instantiate(DistanceInitializer& init);
 

@@ -42,6 +42,7 @@ class CollisionCheck : public TaskMap, public Instantiable<CollisionCheckInitial
 {
 public:
     CollisionCheck();
+    virtual ~CollisionCheck();
 
     virtual void Instantiate(CollisionCheckInitializer& init);
 

@@ -44,6 +44,7 @@ class CoM : public TaskMap, public Instantiable<CoMInitializer>
 {
 public:
     CoM();
+    virtual ~CoM();
 
     virtual void Instantiate(CoMInitializer& init);
 

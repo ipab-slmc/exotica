@@ -37,6 +37,7 @@ REGISTER_TASKMAP_TYPE("EffPosition", exotica::EffPosition);
 namespace exotica
 {
 EffPosition::EffPosition() = default;
+EffPosition::~EffPosition() = default;
 
 void EffPosition::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {

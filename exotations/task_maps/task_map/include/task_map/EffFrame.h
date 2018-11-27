@@ -42,6 +42,7 @@ class EffFrame : public TaskMap, public Instantiable<EffFrameInitializer>
 {
 public:
     EffFrame();
+    virtual ~EffFrame();
 
     virtual void Instantiate(EffFrameInitializer& init);
 

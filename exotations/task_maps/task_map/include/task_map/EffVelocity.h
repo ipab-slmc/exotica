@@ -42,6 +42,7 @@ class EffVelocity : public TaskMap, public Instantiable<EffVelocityInitializer>
 {
 public:
     EffVelocity();
+    virtual ~EffVelocity();
 
     virtual void Instantiate(EffVelocityInitializer& init);
 

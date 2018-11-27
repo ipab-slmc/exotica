@@ -42,6 +42,7 @@ class EffOrientation : public TaskMap, public Instantiable<EffOrientationInitial
 {
 public:
     EffOrientation();
+    virtual ~EffOrientation();
 
     virtual void Instantiate(EffOrientationInitializer& init);
 

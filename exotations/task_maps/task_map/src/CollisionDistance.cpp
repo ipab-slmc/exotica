@@ -37,6 +37,7 @@ REGISTER_TASKMAP_TYPE("CollisionDistance", exotica::CollisionDistance);
 namespace exotica
 {
 CollisionDistance::CollisionDistance() = default;
+CollisionDistance::~CollisionDistance() = default;
 
 void CollisionDistance::update(Eigen::VectorXdRefConst x,
                                Eigen::VectorXdRef phi)

@@ -49,21 +49,18 @@ public:
     virtual ~JointVelocityLimit();
 
     virtual void Instantiate(JointVelocityLimitInitializer& init);
-
     virtual void assignScene(Scene_ptr scene);
-
     void Initialize();
 
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
-
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
     virtual int taskSpaceDim();
 
 private:
-    double dt_;               //! Timestep between subsequent time-steps (in s)
-    Eigen::VectorXd limits_;  //! Joint velocity limits (absolute, in rads/s)
-    Eigen::VectorXd tau_;     //! Joint velocity limits tolerance
+    double dt_ = 0.1;                                    //! Timestep between subsequent time-steps (in s)
+    Eigen::VectorXd limits_ = Eigen::VectorXd::Zero(1);  //! Joint velocity limits (absolute, in rads/s)
+    Eigen::VectorXd tau_ = Eigen::VectorXd::Zero(1);     //! Joint velocity limits tolerance
     JointVelocityLimitInitializer init_;
     int N;
 };

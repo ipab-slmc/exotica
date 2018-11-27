@@ -16,9 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 find_package(Boost REQUIRED COMPONENTS signals)
+find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
 find_package(TinyXML2 REQUIRED)
 
 include(Exotica)
@@ -52,11 +52,11 @@ GenInitializers()
 
 ## catkin specific configuration ##
 catkin_package(
-  INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${Boost_INCLUDE_DIRS}
+  INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${Boost_INCLUDE_DIRS} ${TinyXML2_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp message_runtime moveit_core moveit_ros_planning tf kdl_parser pluginlib tf_conversions eigen_conversions
   CFG_EXTRAS Exotica.cmake AddInitializer.cmake
-  DEPENDS TinyXML2
+  DEPENDS TinyXML2 Eigen3
 )
 
 ## Build ##
@@ -95,7 +95,6 @@ add_library(${PROJECT_NAME}
   src/Problems/TimeIndexedSamplingProblem.cpp
   ${exotica_BINARY_DIR}/generated/Version.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})
-
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 ## Install
@@ -105,4 +104,3 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY cmake/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
 install(FILES cmake/GenerateInitializers.py cmake/InitializerProjectHeader.h.in DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
-

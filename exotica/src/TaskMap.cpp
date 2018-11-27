@@ -77,13 +77,6 @@ void TaskMap::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::M
     Eigen::VectorXd x_original(x);
     update(x_original, phi);
 
-    // Do not run finite differencing if phi is zero.
-    if (phi.isApprox(Eigen::VectorXd::Zero(taskSpaceDim())))
-    {
-        J.setZero();
-        return;
-    }
-
     // Backward finite differencing.
     constexpr double h = 1e-6;
     Eigen::VectorXd x_tmp;

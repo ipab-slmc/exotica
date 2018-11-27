@@ -44,9 +44,7 @@
 
 namespace exotica
 {
-KinematicResponse::KinematicResponse() : Flags(KIN_FK)
-{
-}
+KinematicResponse::KinematicResponse() = default;
 
 KinematicResponse::KinematicResponse(KinematicRequestFlags flags, int size, int n)
 {
@@ -61,23 +59,17 @@ KinematicResponse::KinematicResponse(KinematicRequestFlags flags, int size, int 
     X.setZero(n);
 }
 
-KinematicsRequest::KinematicsRequest() : Flags(KIN_FK)
-{
-}
+KinematicsRequest::KinematicsRequest() = default;
 
-KinematicFrameRequest::KinematicFrameRequest()
-{
-}
+KinematicFrameRequest::KinematicFrameRequest() = default;
 
 KinematicFrameRequest::KinematicFrameRequest(std::string frameALinkName, KDL::Frame frameAOffset, std::string frameBLinkName, KDL::Frame frameBOffset) : FrameALinkName(frameALinkName), FrameAOffset(frameAOffset), FrameBLinkName(frameBLinkName), FrameBOffset(frameBOffset)
 {
 }
 
-KinematicSolution::KinematicSolution() : Start(-1), Length(-1), Phi(nullptr, 0), PhiDot(nullptr, 0), J(nullptr, 0), JDot(nullptr, 0), X(nullptr, 0)
-{
-}
+KinematicSolution::KinematicSolution() = default;
 
-KinematicSolution::KinematicSolution(int start, int length) : Start(start), Length(length), Phi(nullptr, 0), PhiDot(nullptr, 0), J(nullptr, 0), JDot(nullptr, 0), X(nullptr, 0)
+KinematicSolution::KinematicSolution(int start, int length) : Start(start), Length(length)
 {
 }
 
@@ -101,9 +93,7 @@ int KinematicTree::getNumModelJoints()
     return NumJoints;
 }
 
-KinematicTree::KinematicTree() : StateSize(-1), Debug(false)
-{
-}
+KinematicTree::KinematicTree() = default;
 
 void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name)
 {

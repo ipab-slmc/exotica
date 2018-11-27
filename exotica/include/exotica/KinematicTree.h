@@ -92,7 +92,7 @@ class KinematicsRequest
 {
 public:
     KinematicsRequest();
-    KinematicRequestFlags Flags;
+    KinematicRequestFlags Flags = KinematicRequestFlags::KIN_FK;
     std::vector<KinematicFrameRequest> Frames;  //!< The segments to which the end-effectors are attached
 };
 
@@ -117,7 +117,7 @@ class KinematicResponse
 public:
     KinematicResponse();
     KinematicResponse(KinematicRequestFlags Flags, int Size, int N = 0);
-    KinematicRequestFlags Flags;
+    KinematicRequestFlags Flags = KinematicRequestFlags::KIN_FK;
     std::vector<KinematicFrame> Frame;
     Eigen::VectorXd X;
     ArrayFrame Phi;
@@ -135,13 +135,13 @@ public:
     KinematicSolution();
     KinematicSolution(int start, int length);
     void Create(std::shared_ptr<KinematicResponse> solution);
-    int Start;
-    int Length;
-    Eigen::Map<Eigen::VectorXd> X;
-    Eigen::Map<ArrayFrame> Phi;
-    Eigen::Map<ArrayTwist> PhiDot;
-    Eigen::Map<ArrayJacobian> J;
-    Eigen::Map<ArrayJacobian> JDot;
+    int Start = -1;
+    int Length = -1;
+    Eigen::Map<Eigen::VectorXd> X{nullptr, 0};
+    Eigen::Map<ArrayFrame> Phi{nullptr, 0};
+    Eigen::Map<ArrayTwist> PhiDot{nullptr, 0};
+    Eigen::Map<ArrayJacobian> J{nullptr, 0};
+    Eigen::Map<ArrayJacobian> JDot{nullptr, 0};
 };
 
 class KinematicTree : public Uncopyable
@@ -213,7 +213,7 @@ public:
     std::map<std::string, std::weak_ptr<KinematicElement>> getTreeMap() { return TreeMap; }
     std::map<std::string, std::weak_ptr<KinematicElement>> getCollisionTreeMap() { return CollisionTreeMap; }
     bool doesLinkWithNameExist(std::string name);  //!< Checks whether a link with this name exists in any of the trees
-    bool Debug;
+    bool Debug = false;
 
     std::map<std::string, shapes::ShapeType> getCollisionObjectTypes();
 
@@ -245,7 +245,7 @@ private:
     BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;
     int NumControlledJoints;  //!< Number of controlled joints in the joint group.
     int NumJoints;            //!< Number of joints of the model (including floating/planar base, passive joints, and uncontrolled joints).
-    int StateSize;
+    int StateSize = -1;
     Eigen::VectorXd TreeState;
     robot_model::RobotModelPtr Model;
     std::vector<std::weak_ptr<KinematicElement>> Tree;

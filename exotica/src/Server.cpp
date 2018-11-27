@@ -45,8 +45,13 @@ RosNode::~RosNode()
     sp_.stop();
 }
 
-Server::Server() = default;
-Server::~Server() = default;
+Server::Server() : name_("EXOTicaServer"), node_(nullptr)
+{
+}
+
+Server::~Server()
+{
+}
 
 void Server::destroy()
 {
@@ -136,6 +141,11 @@ robot_model::RobotModelConstPtr Server::getModel(std::string path, std::string u
     {
         return loadModel(path, urdf, srdf);
     }
+}
+
+bool Server::hasModel(const std::string& path)
+{
+    return robot_models_.find(path) != robot_models_.end();
 }
 
 std::string Server::getName()

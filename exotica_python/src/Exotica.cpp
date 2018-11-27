@@ -1,4 +1,5 @@
 #include <exotica/Exotica.h>
+#include <exotica/Visualization.h>
 #undef NDEBUG
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -1057,6 +1058,10 @@ PYBIND11_MODULE(_pyexotica, module)
     collisionScene.def_property("worldLinkPadding", &CollisionScene::getWorldLinkPadding, &CollisionScene::setWorldLinkPadding);
     collisionScene.def("updateCollisionObjectTransforms", &CollisionScene::updateCollisionObjectTransforms);
     collisionScene.def("continuousCollisionCheck", &CollisionScene::continuousCollisionCheck);
+
+    py::class_<Visualization> visualization(module, "Visualization");
+    visualization.def(py::init<Scene_ptr>());
+    visualization.def("displayTrajectory", &Visualization::displayTrajectory);
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");

@@ -46,6 +46,8 @@ class SmoothCollisionDistance
 {
 public:
     SmoothCollisionDistance();
+    virtual ~SmoothCollisionDistance();
+
     virtual void Instantiate(SmoothCollisionDistanceInitializer& init);
 
     virtual void assignScene(Scene_ptr scene);

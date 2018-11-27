@@ -47,6 +47,8 @@ class CollisionDistance
 {
 public:
     CollisionDistance();
+    virtual ~CollisionDistance();
+
     virtual void Instantiate(CollisionDistanceInitializer& init);
 
     virtual void assignScene(Scene_ptr scene);

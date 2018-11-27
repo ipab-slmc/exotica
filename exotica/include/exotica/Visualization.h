@@ -33,7 +33,6 @@
 #ifndef EXOTICA_VISUALIZATION_H_
 #define EXOTICA_VISUALIZATION_H_
 
-#include <exotica/Object.h>
 #include <exotica/Scene.h>
 #include <exotica/Server.h>
 #include <exotica/Tools/Uncopyable.h>
@@ -41,12 +40,12 @@
 
 namespace exotica
 {
-class Visualization : public Object, Uncopyable
+class Visualization : public Uncopyable
 {
 public:
     Visualization(Scene_ptr scene);
+    virtual ~Visualization();
 
-    //    void assignScene(Scene_ptr scene);
     void Initialize();
 
     void displayTrajectory(Eigen::MatrixXdRefConst trajectory);

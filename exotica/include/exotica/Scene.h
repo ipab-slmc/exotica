@@ -58,10 +58,10 @@ namespace exotica
 {
 struct AttachedObject
 {
-    AttachedObject() : Parent("") {}
+    AttachedObject() = default;
     AttachedObject(std::string parent) : Parent(parent) {}
     AttachedObject(std::string parent, KDL::Frame pose) : Parent(parent), Pose(pose) {}
-    std::string Parent;
+    std::string Parent = "";
     KDL::Frame Pose;
 };
 
@@ -178,7 +178,7 @@ public:
     std::map<std::string, std::vector<std::string>> getControlledLinkToCollisionLinkMap() { return controlledLink_to_collisionLink_map_; };
 private:
     /// The name of the scene
-    std::string name_;
+    std::string name_ = "Unnamed";
 
     /// The kinematica tree
     exotica::KinematicTree kinematica_;

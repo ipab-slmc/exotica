@@ -41,6 +41,8 @@ JointVelocityLimit::JointVelocityLimit()
     Kinematics.resize(2);  // Request kinematics for current x_t and x_{t-1}
 }
 
+JointVelocityLimit::~JointVelocityLimit() = default;
+
 void JointVelocityLimit::Instantiate(JointVelocityLimitInitializer& init)
 {
     init_ = init;

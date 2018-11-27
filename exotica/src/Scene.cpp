@@ -43,9 +43,7 @@ namespace exotica
 /////////////////////// EXOTica Scene ///////////////////////
 ///////////////////////////////////////////////////////////////
 
-Scene::Scene() : name_("Unnamed")
-{
-}
+Scene::Scene() = default;
 
 Scene::Scene(const std::string& name) : name_(name), requestNeedsUpdating(false)
 {

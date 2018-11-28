@@ -131,7 +131,7 @@ void SamplingProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRef
     throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void SamplingProblem::setRhoEQ(const std::string& task_name, const double rho)
+void SamplingProblem::setRhoEQ(const std::string& task_name, const double& rho)
 {
     for (int i = 0; i < Equality.Indexing.size(); i++)
     {
@@ -183,7 +183,7 @@ void SamplingProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRe
     throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void SamplingProblem::setRhoNEQ(const std::string& task_name, const double rho)
+void SamplingProblem::setRhoNEQ(const std::string& task_name, const double& rho)
 {
     for (int i = 0; i < Inequality.Indexing.size(); i++)
     {

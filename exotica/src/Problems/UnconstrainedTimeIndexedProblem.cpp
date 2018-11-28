@@ -108,7 +108,7 @@ void UnconstrainedTimeIndexedProblem::reinitializeVariables()
     preupdate();
 }
 
-void UnconstrainedTimeIndexedProblem::setT(int T_in)
+void UnconstrainedTimeIndexedProblem::setT(const int& T_in)
 {
     if (T_in <= 2)
     {
@@ -118,7 +118,7 @@ void UnconstrainedTimeIndexedProblem::setT(int T_in)
     reinitializeVariables();
 }
 
-void UnconstrainedTimeIndexedProblem::setTau(double tau_in)
+void UnconstrainedTimeIndexedProblem::setTau(const double& tau_in)
 {
     if (tau_in <= 0.) throw_pretty("tau is expected to be greater than 0. (tau=" << tau_in << ")");
     tau = tau_in;
@@ -139,8 +139,7 @@ void UnconstrainedTimeIndexedProblem::preupdate()
     for (unsigned int i = 0; i < T; i++) KinematicSolutions[i] = std::make_shared<KinematicResponse>(*scene_->getSolver().getKinematicResponse());
 }
 
-void UnconstrainedTimeIndexedProblem::setInitialTrajectory(
-    const std::vector<Eigen::VectorXd> q_init_in)
+void UnconstrainedTimeIndexedProblem::setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
 {
     if (q_init_in.size() != T)
         throw_pretty("Expected initial trajectory of length "

@@ -53,15 +53,15 @@ public:
     bool isValid();
 
     void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setRho(const std::string& task_name, const double rho);
+    void setRho(const std::string& task_name, const double& rho);
     Eigen::VectorXd getGoal(const std::string& task_name);
     double getRho(const std::string& task_name);
     void setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setRhoEQ(const std::string& task_name, const double rho);
+    void setRhoEQ(const std::string& task_name, const double& rho);
     Eigen::VectorXd getGoalEQ(const std::string& task_name);
     double getRhoEQ(const std::string& task_name);
     void setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setRhoNEQ(const std::string& task_name, const double rho);
+    void setRhoNEQ(const std::string& task_name, const double& rho);
     Eigen::VectorXd getGoalNEQ(const std::string& task_name);
     double getRhoNEQ(const std::string& task_name);
     virtual void preupdate();

@@ -35,6 +35,7 @@
 
 #include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
+
 #include <exotica/UnconstrainedTimeIndexedProblemInitializer.h>
 
 namespace exotica
@@ -55,14 +56,14 @@ public:
     Eigen::VectorXd getGoal(const std::string& task_name, int t = 0);
     double getRho(const std::string& task_name, int t = 0);
     std::vector<Eigen::VectorXd> getInitialTrajectory();
-    void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
+    void setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
     virtual void preupdate();
 
     int getT() const { return T; }
-    void setT(int T_in);
+    void setT(const int& T_in);
 
     double getTau() const { return tau; }
-    void setTau(double tau_in);
+    void setTau(const double& tau_in);
 
     double getScalarTaskCost(int t);
     Eigen::VectorXd getScalarTaskJacobian(int t);

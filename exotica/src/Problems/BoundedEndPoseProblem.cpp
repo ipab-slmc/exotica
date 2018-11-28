@@ -187,7 +187,7 @@ void BoundedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorX
     throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void BoundedEndPoseProblem::setRho(const std::string& task_name, const double rho)
+void BoundedEndPoseProblem::setRho(const std::string& task_name, const double& rho)
 {
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {

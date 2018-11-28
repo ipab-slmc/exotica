@@ -71,7 +71,12 @@ Eigen::Vector3d Point2Line::direction(const Eigen::Vector3d &point)
     return dv;
 }
 
-void Point2Line::setEndPoint(Eigen::Vector3d point)
+Eigen::Vector3d Point2Line::getEndPoint()
+{
+    return line_end;
+}
+
+void Point2Line::setEndPoint(const Eigen::Vector3d& point)
 {
     line_end = point;
     line = line_end - line_start;

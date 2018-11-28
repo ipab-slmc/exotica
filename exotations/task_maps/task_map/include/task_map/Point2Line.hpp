@@ -30,7 +30,8 @@
  *
  */
 
-#pragma once
+#ifndef POINT2LINE_H_
+#define POINT2LINE_H_
 
 #include <exotica/TaskMap.h>
 #include <task_map/Point2LineInitializer.h>
@@ -40,6 +41,7 @@ namespace exotica
 class Point2Line : public TaskMap, public Instantiable<Point2LineInitializer>
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Point2Line();
     virtual ~Point2Line();
 
@@ -49,7 +51,8 @@ public:
 
     virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
 
-    void setEndPoint(Eigen::Vector3d point);
+    Eigen::Vector3d getEndPoint();
+    void setEndPoint(const Eigen::Vector3d& point);
 
     virtual int taskSpaceDim();
 
@@ -79,3 +82,5 @@ private:
 typedef std::shared_ptr<Point2Line> Point2Line_Ptr;
 
 }  // namespace exotica
+
+#endif /* POINT2LINE_H_ */

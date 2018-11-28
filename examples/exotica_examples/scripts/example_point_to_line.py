@@ -71,7 +71,7 @@ class Example(object):
 
         p = self.p + DAMP * np.array([dx, dy, dz])
 
-        self.problem.getTaskMaps()['p2l'].setEndPoint(p)
+        self.problem.getTaskMaps()['p2l'].endPoint = p
         self.problem.startState = self.q
 
         # Solve

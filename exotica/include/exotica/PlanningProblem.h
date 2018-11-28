@@ -33,13 +33,6 @@
 #ifndef EXOTICA_MOTION_PLANNING_PROBLEM_H
 #define EXOTICA_MOTION_PLANNING_PROBLEM_H
 
-#include <exotica/Object.h>
-#include <exotica/Scene.h>
-#include <exotica/Server.h>
-#include <exotica/TaskMap.h>
-#include <exotica/TaskSpaceVector.h>
-#include <exotica/Tools.h>
-
 #include <algorithm>
 #include <chrono>
 #include <limits>
@@ -47,6 +40,13 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <exotica/Object.h>
+#include <exotica/Scene.h>
+#include <exotica/Server.h>
+#include <exotica/TaskMap.h>
+#include <exotica/TaskSpaceVector.h>
+#include <exotica/Tools.h>
 
 #define REGISTER_PROBLEM_TYPE(TYPE, DERIV) EXOTICA_REGISTER_CORE(exotica::PlanningProblem, TYPE, DERIV)
 
@@ -70,7 +70,7 @@ class PlanningProblem : public Object, Uncopyable, public virtual InstantiableBa
 {
 public:
     PlanningProblem();
-    virtual ~PlanningProblem() {}
+    virtual ~PlanningProblem() = default;
     virtual void InstantiateBase(const Initializer& init);
     TaskMap_map& getTaskMaps();
     TaskMap_vec& getTasks();

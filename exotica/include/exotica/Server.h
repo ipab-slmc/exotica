@@ -33,23 +33,17 @@
 #ifndef EXOTICA_INCLUDE_EXOTICA_SERVER_H_
 #define EXOTICA_INCLUDE_EXOTICA_SERVER_H_
 
-#include <ros/ros.h>
-#include <Eigen/Dense>
-#include <boost/any.hpp>
 #include <map>
 #include <typeinfo>
-#include "Tools.h"
 
-#include <eigen_conversions/eigen_msg.h>
-#include <exotica/Tools.h>
+#include <boost/any.hpp>
+
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/Float64MultiArray.h>
-#include <std_msgs/Int64.h>
-#include <std_msgs/String.h>
+#include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
+
+#include <exotica/Tools.h>
+
 namespace exotica
 {
 class RosNode

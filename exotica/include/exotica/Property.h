@@ -1,16 +1,17 @@
 #ifndef PROPERTY_H
 #define PROPERTY_H
 
-#include <exotica/Tools.h>
-#include <exotica/Tools/Conversions.h>
-#include <exotica/Tools/Exception.h>
-#include <exotica/Tools/Printable.h>
 #include <boost/any.hpp>
 #include <initializer_list>
 #include <map>
 #include <memory>
 #include <typeinfo>
 #include <vector>
+
+#include <exotica/Tools.h>
+#include <exotica/Tools/Conversions.h>
+#include <exotica/Tools/Exception.h>
+#include <exotica/Tools/Printable.h>
 
 namespace exotica
 {

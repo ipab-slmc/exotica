@@ -291,8 +291,6 @@ TEST(ExoticaTaskMaps, testEffOrientation)
     {
         TEST_COUT << "End-effector orientation test";
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
-        std::vector<double> eps = {1e-4, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5};
-        // TODO: Quaterion doens't pass the test with precision 1e-5. Investigate why.
 
         for (int i = 0; i < types.size(); i++)
         {
@@ -304,7 +302,7 @@ TEST(ExoticaTaskMaps, testEffOrientation)
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
 
-            EXPECT_TRUE(testJacobian(problem, eps[i]));
+            EXPECT_TRUE(testJacobian(problem));
         }
     }
     catch (...)
@@ -338,8 +336,6 @@ TEST(ExoticaTaskMaps, testEffFrame)
     {
         TEST_COUT << "End-effector frame test";
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
-        std::vector<double> eps = {1e-4, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5};
-        // TODO: Quaterion doens't pass the test with precision 1e-5. Investigate why.
 
         for (int i = 0; i < types.size(); i++)
         {
@@ -351,7 +347,7 @@ TEST(ExoticaTaskMaps, testEffFrame)
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
 
-            EXPECT_TRUE(testJacobian(problem, eps[i]));
+            EXPECT_TRUE(testJacobian(problem));
         }
     }
     catch (...)

@@ -30,7 +30,7 @@
  *
  */
 
-#include "task_map/Point2Line.hpp"
+#include "task_map/Point2Line.h"
 
 REGISTER_TASKMAP_TYPE("Point2Line", exotica::Point2Line);
 

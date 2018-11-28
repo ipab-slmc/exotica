@@ -35,6 +35,7 @@
 
 #include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
+
 #include <exotica/TimeIndexedProblemInitializer.h>
 
 namespace exotica
@@ -52,7 +53,7 @@ public:
     void Update(Eigen::VectorXdRefConst x, int t);
     bool isValid();
     std::vector<Eigen::VectorXd> getInitialTrajectory();
-    void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
+    void setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
     virtual void preupdate();
     void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
     void setRho(const std::string& task_name, const double rho, int t = 0);
@@ -69,10 +70,10 @@ public:
     Eigen::MatrixXd getBounds() const;
 
     int getT() const { return T; }
-    void setT(int T_in);
+    void setT(const int& T_in);
 
     double getTau() const { return tau; }
-    void setTau(double tau_in);
+    void setTau(const double& tau_in);
 
     double getScalarTaskCost(int t);
     Eigen::VectorXd getScalarTaskJacobian(int t);
@@ -108,7 +109,7 @@ public:
     bool useBounds;
 
     double getJointVelocityLimit() { return qdot_max; }
-    void setJointVelocityLimit(double qdot_max_in)
+    void setJointVelocityLimit(const double& qdot_max_in)
     {
         qdot_max = qdot_max_in;
         xdiff_max = qdot_max * tau;

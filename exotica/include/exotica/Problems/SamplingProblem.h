@@ -55,15 +55,15 @@ public:
 
     void setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
     Eigen::VectorXd getGoalEQ(const std::string& task_name);
-    void setRhoEQ(const std::string& task_name, const double rho);
+    void setRhoEQ(const std::string& task_name, const double& rho);
     double getRhoEQ(const std::string& task_name);
 
     void setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
     Eigen::VectorXd getGoalNEQ(const std::string& task_name);
-    void setRhoNEQ(const std::string& task_name, const double rho);
+    void setRhoNEQ(const std::string& task_name, const double& rho);
     double getRhoNEQ(const std::string& task_name);
 
-    std::vector<double> getBounds();
+    std::vector<double> getBounds();  // TODO: Upgrade to Eigen::MatrixXd
     bool isCompoundStateSpace();
 
     // TODO(wxm): Implement or remove in clean-up (left-over from constrained sampling, ROBIO 2016)
@@ -73,7 +73,7 @@ public:
     SamplingProblemInitializer Parameters;
 
     void setGoalState(Eigen::VectorXdRefConst qT);
-    const Eigen::VectorXd& getGoalState() { return goal_; }
+    const Eigen::VectorXd& getGoalState() const { return goal_; }
     TaskSpaceVector Phi;
     SamplingTask Inequality;
     SamplingTask Equality;

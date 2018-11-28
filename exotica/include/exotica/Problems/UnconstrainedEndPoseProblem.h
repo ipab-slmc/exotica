@@ -32,6 +32,7 @@
 
 #ifndef UNCONSTRAINEDENDPOSEPROBLEM_H_
 #define UNCONSTRAINEDENDPOSEPROBLEM_H_
+
 #include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
 
@@ -52,7 +53,7 @@ public:
     void Update(Eigen::VectorXdRefConst x);
 
     void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setRho(const std::string& task_name, const double rho);
+    void setRho(const std::string& task_name, const double& rho);
     Eigen::VectorXd getGoal(const std::string& task_name);
     double getRho(const std::string& task_name);
     Eigen::VectorXd getNominalPose();

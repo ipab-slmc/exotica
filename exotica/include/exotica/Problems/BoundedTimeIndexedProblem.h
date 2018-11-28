@@ -32,6 +32,7 @@
 
 #ifndef BOUNDEDTIMEINDEXEDPROBLEM_H_
 #define BOUNDEDTIMEINDEXEDPROBLEM_H_
+
 #include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
 
@@ -51,7 +52,7 @@ public:
     double getDuration();
     void Update(Eigen::VectorXdRefConst x, int t);
     std::vector<Eigen::VectorXd> getInitialTrajectory();
-    void setInitialTrajectory(const std::vector<Eigen::VectorXd> q_init_in);
+    void setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
     virtual void preupdate();
     void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
     void setRho(const std::string& task_name, const double rho, int t = 0);
@@ -60,10 +61,10 @@ public:
     Eigen::MatrixXd getBounds() const;
 
     int getT() const { return T; }
-    void setT(int T_in);
+    void setT(const int& T_in);
 
     double getTau() const { return tau; }
-    void setTau(double tau_in);
+    void setTau(const double& tau_in);
 
     double getScalarTaskCost(int t);
     Eigen::VectorXd getScalarTaskJacobian(int t);
@@ -71,8 +72,8 @@ public:
     Eigen::VectorXd getScalarTransitionJacobian(int t);
 
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
-    TimeIndexedTask Cost;
 
+    TimeIndexedTask Cost;
     TaskSpaceVector CostPhi;
 
     double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)

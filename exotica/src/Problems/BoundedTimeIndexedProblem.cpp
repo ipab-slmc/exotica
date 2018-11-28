@@ -86,7 +86,7 @@ void BoundedTimeIndexedProblem::preupdate()
 }
 
 void BoundedTimeIndexedProblem::setInitialTrajectory(
-    const std::vector<Eigen::VectorXd> q_init_in)
+    const std::vector<Eigen::VectorXd>& q_init_in)
 {
     if (q_init_in.size() != T)
         throw_pretty("Expected initial trajectory of length "
@@ -265,7 +265,7 @@ double BoundedTimeIndexedProblem::getRho(const std::string& task_name, int t)
     throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
 
-void BoundedTimeIndexedProblem::setT(int T_in)
+void BoundedTimeIndexedProblem::setT(const int& T_in)
 {
     if (T_in <= 2)
     {
@@ -275,7 +275,7 @@ void BoundedTimeIndexedProblem::setT(int T_in)
     reinitializeVariables();
 }
 
-void BoundedTimeIndexedProblem::setTau(double tau_in)
+void BoundedTimeIndexedProblem::setTau(const double& tau_in)
 {
     if (tau_in <= 0.) throw_pretty("tau is expected to be greater than 0. (tau=" << tau_in << ")");
     tau = tau_in;

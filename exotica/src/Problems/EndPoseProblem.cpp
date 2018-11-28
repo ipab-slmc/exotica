@@ -220,7 +220,7 @@ void EndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefCon
     throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void EndPoseProblem::setRho(const std::string& task_name, const double rho)
+void EndPoseProblem::setRho(const std::string& task_name, const double& rho)
 {
     for (int i = 0; i < Cost.Indexing.size(); i++)
     {
@@ -272,7 +272,7 @@ void EndPoseProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefC
     throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void EndPoseProblem::setRhoEQ(const std::string& task_name, const double rho)
+void EndPoseProblem::setRhoEQ(const std::string& task_name, const double& rho)
 {
     for (int i = 0; i < Equality.Indexing.size(); i++)
     {
@@ -324,7 +324,7 @@ void EndPoseProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRef
     throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void EndPoseProblem::setRhoNEQ(const std::string& task_name, const double rho)
+void EndPoseProblem::setRhoNEQ(const std::string& task_name, const double& rho)
 {
     for (int i = 0; i < Inequality.Indexing.size(); i++)
     {

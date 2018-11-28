@@ -136,7 +136,7 @@ void TimeIndexedSamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
     goal_ = qT;
 }
 
-void TimeIndexedSamplingProblem::setGoalTime(double t)
+void TimeIndexedSamplingProblem::setGoalTime(const double& t)
 {
     tGoal = t;
 }
@@ -155,7 +155,7 @@ void TimeIndexedSamplingProblem::setGoalEQ(const std::string& task_name, Eigen::
     throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void TimeIndexedSamplingProblem::setRhoEQ(const std::string& task_name, const double rho)
+void TimeIndexedSamplingProblem::setRhoEQ(const std::string& task_name, const double& rho)
 {
     for (int i = 0; i < Equality.Indexing.size(); i++)
     {
@@ -207,7 +207,7 @@ void TimeIndexedSamplingProblem::setGoalNEQ(const std::string& task_name, Eigen:
     throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void TimeIndexedSamplingProblem::setRhoNEQ(const std::string& task_name, const double rho)
+void TimeIndexedSamplingProblem::setRhoNEQ(const std::string& task_name, const double& rho)
 {
     for (int i = 0; i < Inequality.Indexing.size(); i++)
     {
@@ -245,7 +245,7 @@ double TimeIndexedSamplingProblem::getRhoNEQ(const std::string& task_name)
     throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
 }
 
-bool TimeIndexedSamplingProblem::isValid(Eigen::VectorXdRefConst x, double t)
+bool TimeIndexedSamplingProblem::isValid(Eigen::VectorXdRefConst x, const double& t)
 {
     scene_->Update(x, t);
     for (int i = 0; i < NumTasks; i++)
@@ -271,7 +271,7 @@ void TimeIndexedSamplingProblem::preupdate()
     Equality.updateS();
 }
 
-void TimeIndexedSamplingProblem::Update(Eigen::VectorXdRefConst x, double t)
+void TimeIndexedSamplingProblem::Update(Eigen::VectorXdRefConst x, const double& t)
 {
     isValid(x, t);
     numberOfProblemUpdates++;

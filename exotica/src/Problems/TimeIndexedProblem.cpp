@@ -138,7 +138,7 @@ void TimeIndexedProblem::reinitializeVariables()
     preupdate();
 }
 
-void TimeIndexedProblem::setT(int T_in)
+void TimeIndexedProblem::setT(const int& T_in)
 {
     if (T_in <= 2)
     {
@@ -148,7 +148,7 @@ void TimeIndexedProblem::setT(int T_in)
     reinitializeVariables();
 }
 
-void TimeIndexedProblem::setTau(double tau_in)
+void TimeIndexedProblem::setTau(const double& tau_in)
 {
     if (tau_in <= 0.) throw_pretty("tau is expected to be greater than 0. (tau=" << tau_in << ")");
     tau = tau_in;
@@ -169,11 +169,10 @@ void TimeIndexedProblem::preupdate()
     // updates etc.
     KinematicSolutions.clear();
     KinematicSolutions.resize(T);
-    for (unsigned int i = 0; i < T; i++) KinematicSolutions[i] = std::make_shared<KinematicResponse>(*scene_->getSolver().getKinematicResponse());
+    for (int i = 0; i < T; i++) KinematicSolutions[i] = std::make_shared<KinematicResponse>(*scene_->getSolver().getKinematicResponse());
 }
 
-void TimeIndexedProblem::setInitialTrajectory(
-    const std::vector<Eigen::VectorXd> q_init_in)
+void TimeIndexedProblem::setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
 {
     if (q_init_in.size() != T)
         throw_pretty("Expected initial trajectory of length "
@@ -193,7 +192,7 @@ std::vector<Eigen::VectorXd> TimeIndexedProblem::getInitialTrajectory()
 
 double TimeIndexedProblem::getDuration()
 {
-    return tau * (double)T;
+    return tau * static_cast<double>(T);
 }
 
 void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)

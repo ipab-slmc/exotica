@@ -1,5 +1,4 @@
 /*
- *  Created on: 7 Nov 2017
  *      Author: Yiming Yang
  *
  * Copyright (c) 2017, University of Edinburgh
@@ -36,6 +35,7 @@
 
 #include <exotica/PlanningProblem.h>
 #include <exotica/Tasks.h>
+
 #include <exotica/TimeIndexedSamplingProblemInitializer.h>
 
 namespace exotica
@@ -48,20 +48,20 @@ public:
 
     virtual void Instantiate(TimeIndexedSamplingProblemInitializer& init);
 
-    void Update(Eigen::VectorXdRefConst x, double t);
-    bool isValid(Eigen::VectorXdRefConst x, double t);
+    void Update(Eigen::VectorXdRefConst x, const double& t);
+    bool isValid(Eigen::VectorXdRefConst x, const double& t);
     virtual void preupdate();
 
     int getSpaceDim();
 
     void setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
     Eigen::VectorXd getGoalEQ(const std::string& task_name);
-    void setRhoEQ(const std::string& task_name, const double rho);
+    void setRhoEQ(const std::string& task_name, const double& rho);
     double getRhoEQ(const std::string& task_name);
 
     void setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
     Eigen::VectorXd getGoalNEQ(const std::string& task_name);
-    void setRhoNEQ(const std::string& task_name, const double rho);
+    void setRhoNEQ(const std::string& task_name, const double& rho);
     double getRhoNEQ(const std::string& task_name);
 
     std::vector<double> getBounds();
@@ -71,8 +71,9 @@ public:
     Eigen::VectorXd getGoalState();
     double getGoalTime();
     void setGoalState(Eigen::VectorXdRefConst qT);
-    void setGoalTime(double t);
+    void setGoalTime(const double& t);
 
+    // TODO(wxm): Make private and expose getter/setter where required.
     double T;
     Eigen::VectorXd vel_limits_;
     TaskSpaceVector Phi;

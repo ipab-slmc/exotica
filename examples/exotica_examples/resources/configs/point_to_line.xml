@@ -18,12 +18,12 @@
         <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
       </Scene>
     </PlanningScene>
-    
+
     <Maps>
-      <Point2Line Name="p2l" EndPoint = "0.75 0 0.5" Infinite="true" Visualise="true">
+      <Point2Line Name="p2l" EndPoint="0.75 0 0.5" Infinite="true" Visualise="true">
         <EndEffector>
           <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071 0  0.7071 0"/>
-	  <Frame Link="lwr_arm_6_link" LinkOffset="0 0 1"/> 
+          <Frame Link="lwr_arm_6_link" LinkOffset="0 0 1"/>
         </EndEffector>
       </Point2Line>
     </Maps>

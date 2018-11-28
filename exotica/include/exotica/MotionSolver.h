@@ -47,7 +47,7 @@ class MotionSolver : public Object, Uncopyable, public virtual InstantiableBase
 {
 public:
     MotionSolver();
-    virtual ~MotionSolver() {}
+    virtual ~MotionSolver() = default;
     virtual void InstantiateBase(const Initializer& init);
     virtual void specifyProblem(PlanningProblem_ptr pointer);
     virtual void Solve(Eigen::MatrixXd& solution) = 0;

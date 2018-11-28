@@ -45,7 +45,6 @@ BoundedEndPoseProblem::BoundedEndPoseProblem()
 
 BoundedEndPoseProblem::~BoundedEndPoseProblem() = default;
 
-
 Eigen::MatrixXd BoundedEndPoseProblem::getBounds() const
 {
     return scene_->getSolver().getJointLimits();

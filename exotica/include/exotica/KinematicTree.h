@@ -33,22 +33,22 @@
 #ifndef KINEMATIC_TREE_H
 #define KINEMATIC_TREE_H
 
-#include <exotica/Tools.h>
-#include <moveit/robot_model/robot_model.h>
-#include <Eigen/Eigen>
-#include <kdl/jacobian.hpp>
-#include <kdl/tree.hpp>
-#include <kdl_parser/kdl_parser.hpp>
 #include <map>
 #include <random>
 #include <set>
 #include <string>
 #include <vector>
 
-#include <exotica/Server.h>
+#include <moveit/robot_model/robot_model.h>
 #include <tf_conversions/tf_kdl.h>
+#include <Eigen/Eigen>
+#include <kdl/jacobian.hpp>
+#include <kdl/tree.hpp>
+#include <kdl_parser/kdl_parser.hpp>
 
 #include <exotica/KinematicElement.h>
+#include <exotica/Server.h>
+#include <exotica/Tools.h>
 
 namespace exotica
 {
@@ -148,7 +148,7 @@ class KinematicTree : public Uncopyable
 {
 public:
     KinematicTree();
-    ~KinematicTree() = default;
+    virtual ~KinematicTree() = default;
     void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name);
     std::string getRootFrameName();
     std::string getRootJointName();

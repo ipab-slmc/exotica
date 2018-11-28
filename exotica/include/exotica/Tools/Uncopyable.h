@@ -7,7 +7,6 @@ class Uncopyable
 {
 public:
     Uncopyable() = default;
-
     ~Uncopyable() = default;
 
 private:

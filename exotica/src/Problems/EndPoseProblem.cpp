@@ -45,10 +45,6 @@ EndPoseProblem::EndPoseProblem()
 
 EndPoseProblem::~EndPoseProblem() = default;
 
-void EndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
-{
-}
-
 Eigen::MatrixXd EndPoseProblem::getBounds() const
 {
     return scene_->getSolver().getJointLimits();

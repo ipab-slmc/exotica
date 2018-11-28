@@ -75,9 +75,6 @@ public:
     int PhiN;
     int JN;
     int NumTasks;
-
-protected:
-    void initTaskTerms(const std::vector<exotica::Initializer>& inits);
 };
 typedef std::shared_ptr<exotica::BoundedEndPoseProblem> BoundedEndPoseProblem_ptr;
 }

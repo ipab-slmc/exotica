@@ -45,9 +45,6 @@ BoundedEndPoseProblem::BoundedEndPoseProblem()
 
 BoundedEndPoseProblem::~BoundedEndPoseProblem() = default;
 
-void BoundedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
-{
-}
 
 Eigen::MatrixXd BoundedEndPoseProblem::getBounds() const
 {

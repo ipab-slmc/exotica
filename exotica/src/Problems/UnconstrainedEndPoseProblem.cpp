@@ -32,7 +32,6 @@
 
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/Setup.h>
-#include <exotica/TaskInitializer.h>
 
 REGISTER_PROBLEM_TYPE("UnconstrainedEndPoseProblem", exotica::UnconstrainedEndPoseProblem)
 
@@ -44,10 +43,6 @@ UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
 }
 
 UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem() = default;
-
-void UnconstrainedEndPoseProblem::initTaskTerms(const std::vector<exotica::Initializer>& inits)
-{
-}
 
 void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
 {

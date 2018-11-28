@@ -90,9 +90,6 @@ public:
     bool useBounds;
 
     EndPoseProblemInitializer init_;
-
-protected:
-    void initTaskTerms(const std::vector<exotica::Initializer>& inits);
 };
 typedef std::shared_ptr<exotica::EndPoseProblem> EndPoseProblem_ptr;
 }

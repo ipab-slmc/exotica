@@ -56,7 +56,7 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp message_runtime moveit_core moveit_ros_planning tf kdl_parser pluginlib tf_conversions eigen_conversions
   CFG_EXTRAS Exotica.cmake AddInitializer.cmake
-  DEPENDS TinyXML2 Eigen3
+  DEPENDS TinyXML2
 )
 
 ## Build ##

@@ -152,6 +152,7 @@ public:
     void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name);
     std::string getRootFrameName();
     std::string getRootJointName();
+    robot_model::RobotModelPtr getRobotModel();
     BASE_TYPE getModelBaseType();
     BASE_TYPE getControlledBaseType();
     std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
@@ -162,7 +163,6 @@ public:
     void setJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
     void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
     std::map<std::string, std::vector<double>> getUsedJointLimits();
-    int getEffSize();
     int getNumControlledJoints();
     int getNumModelJoints();
     void publishFrames();
@@ -193,9 +193,9 @@ public:
     Eigen::MatrixXd Jacobian(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
 
     void resetModel();
-    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
-    void AddEnvironmentElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
-    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, const std::string& shapeResourcePath, Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
+    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
+    void AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
+    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shapeResourcePath, Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
     void UpdateModel();
     void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
     int IsControlled(std::shared_ptr<KinematicElement> Joint);
@@ -248,6 +248,7 @@ private:
     int StateSize = -1;
     Eigen::VectorXd TreeState;
     robot_model::RobotModelPtr Model;
+    std::string root_joint_name_ = "";
     std::vector<std::weak_ptr<KinematicElement>> Tree;
     std::vector<std::shared_ptr<KinematicElement>> ModelTree;
     std::vector<std::shared_ptr<KinematicElement>> EnvironmentTree;

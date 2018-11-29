@@ -128,7 +128,7 @@ AICOsolver::AICOsolver()
 {
 }
 
-void AICOsolver::getStats(std::vector<SinglePassMeanCoviariance>& q_stat_)
+void AICOsolver::getStats(std::vector<SinglePassMeanCovariance>& q_stat_)
 {
     q_stat_ = q_stat;
 }

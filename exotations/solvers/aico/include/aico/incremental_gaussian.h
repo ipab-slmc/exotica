@@ -42,26 +42,19 @@ Chan, Tony F.; Golub, Gene H.; LeVeque, Randall J. (1979), “Updating Formulae 
 #include <Eigen/Dense>
 #include <vector>
 
-class SinglePassMeanCoviariance
+class SinglePassMeanCovariance
 {
-    int D;
-    int D2;
-    double W;
-    Eigen::VectorXd T;
-    Eigen::VectorXd dX;
-    Eigen::MatrixXd S;
+private:
+    int D = 0;
+    double W = 0;
+    Eigen::VectorXd T = Eigen::VectorXd(0);
+    Eigen::VectorXd dX = Eigen::VectorXd(0);
+    Eigen::MatrixXd S = Eigen::MatrixXd(0, 0);
 
 public:
-    SinglePassMeanCoviariance()
-    {
-        D = 0;
-        D2 = 0;
-        T.resize(0);
-        dX.resize(0);
-        S.resize(0, 0);
-    }
+    SinglePassMeanCovariance() = default;
 
-    SinglePassMeanCoviariance(int D_)
+    SinglePassMeanCovariance(int D_)
     {
         resize(D_);
     }
@@ -69,7 +62,6 @@ public:
     void resize(int D_)
     {
         D = D_;
-        D2 = (D_ * (D_ + 1) / 2);
 
         T.resize(D_);
         dX.resize(D_);
@@ -108,7 +100,7 @@ public:
         }
     }
 
-    inline void add(SinglePassMeanCoviariance& M)
+    inline void add(SinglePassMeanCovariance& M)
     {
         add(M.W, M.T, M.S);
     }

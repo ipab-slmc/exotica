@@ -103,7 +103,7 @@ public:
        */
     void saveCosts(std::string file_name);
 
-    void getStats(std::vector<SinglePassMeanCoviariance>& q_stat_);
+    void getStats(std::vector<SinglePassMeanCovariance>& q_stat_);
 
 protected:
     /** \brief Initializes message data.
@@ -133,7 +133,7 @@ private:
     bool sweepImprovedCost;                     //!< Whether the last sweep improved the cost (for backtrack iterations count)
     int iterationCount;                         //!< Iteration counter
 
-    std::vector<SinglePassMeanCoviariance> q_stat;  //!< Cost weighted normal distribution of configurations across sweeps.
+    std::vector<SinglePassMeanCovariance> q_stat;  //!< Cost weighted normal distribution of configurations across sweeps.
 
     std::vector<Eigen::VectorXd> s;     //!< Forward message mean
     std::vector<Eigen::MatrixXd> Sinv;  //!< Forward message covariance inverse

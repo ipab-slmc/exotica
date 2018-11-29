@@ -80,10 +80,8 @@ public:
     CollisionScene_ptr& getCollisionScene();
     std::string getRootFrameName();
     std::string getRootJointName();
-    std::string getModelRootLinkName();
     moveit_msgs::PlanningScene getPlanningSceneMsg();
     exotica::KinematicTree& getSolver();
-    robot_model::RobotModelPtr getRobotModel();
     void getJointNames(std::vector<std::string>& joints);
     std::vector<std::string> getJointNames();
     std::vector<std::string> getModelJointNames();
@@ -149,9 +147,9 @@ public:
     void publishScene();
     void publishProxies(const std::vector<CollisionProxy>& proxies);
     visualization_msgs::Marker proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame);
-    void loadScene(const std::string& scene, const Eigen::Affine3d& offset = Eigen::Affine3d::Identity(), bool updateCollisionScene = true);
+    void loadScene(const std::string& scene, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity(), bool updateCollisionScene = true);
     void loadScene(const std::string& scene, const KDL::Frame& offset = KDL::Frame(), bool updateCollisionScene = true);
-    void loadSceneFile(const std::string& file_name, const Eigen::Affine3d& offset = Eigen::Affine3d::Identity(), bool updateCollisionScene = true);
+    void loadSceneFile(const std::string& file_name, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity(), bool updateCollisionScene = true);
     void loadSceneFile(const std::string& file_name, const KDL::Frame& offset = KDL::Frame(), bool updateCollisionScene = true);
     std::string getScene();
     void cleanScene();
@@ -183,9 +181,6 @@ private:
     /// The kinematica tree
     exotica::KinematicTree kinematica_;
 
-    /// Robot model
-    robot_model::RobotModelPtr model_;
-
     ///   Joint group
     robot_model::JointModelGroup* group;
 
@@ -195,7 +190,7 @@ private:
     /// The collision scene
     CollisionScene_ptr collision_scene_;
 
-    /// Internal moveit planning scene
+    /// Internal MoveIt planning scene
     planning_scene::PlanningScenePtr ps_;
 
     /// Visual debug
@@ -234,7 +229,7 @@ private:
      */
     void updateMoveItPlanningScene();
 
-    void loadSceneFromStringStream(std::istream& in, const Eigen::Affine3d& offset, bool updateCollisionScene);
+    void loadSceneFromStringStream(std::istream& in, const Eigen::Isometry3d& offset, bool updateCollisionScene);
 };
 typedef std::shared_ptr<Scene> Scene_ptr;
 

@@ -979,7 +979,6 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("getCollisionWorldLinks", [](Scene* instance) { return instance->getCollisionScene()->getCollisionWorldLinks(); });
     scene.def("getRootFrameName", &Scene::getRootFrameName);
     scene.def("getRootJointName", &Scene::getRootJointName);
-    scene.def("getModelRootLinkName", &Scene::getModelRootLinkName);
     scene.def("attachObject", &Scene::attachObject);
     scene.def("attachObjectLocal", &Scene::attachObjectLocal);
     scene.def("detachObject", &Scene::detachObject);

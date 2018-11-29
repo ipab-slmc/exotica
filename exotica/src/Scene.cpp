@@ -52,11 +52,6 @@ Scene::Scene(const std::string& name) : name_(name), requestNeedsUpdating(false)
 
 Scene::~Scene() = default;
 
-robot_model::RobotModelPtr Scene::getRobotModel()
-{
-    return model_;
-}
-
 std::string Scene::getName()
 {
     return name_;
@@ -68,17 +63,18 @@ void Scene::Instantiate(SceneInitializer& init)
     name_ = object_name_;
     kinematica_.Debug = debug_;
     force_collision_ = init.AlwaysUpdateCollisionScene;
+    robot_model::RobotModelPtr model;
     if (init.URDF == "" || init.SRDF == "")
     {
-        Server::Instance()->getModel(init.RobotDescription, model_);
+        Server::Instance()->getModel(init.RobotDescription, model);
     }
     else
     {
-        Server::Instance()->getModel(init.URDF, model_, init.URDF, init.SRDF);
+        Server::Instance()->getModel(init.URDF, model, init.URDF, init.SRDF);
     }
-    kinematica_.Instantiate(init.JointGroup, model_, name_);
-    group = model_->getJointModelGroup(init.JointGroup);
-    ps_.reset(new planning_scene::PlanningScene(model_));
+    kinematica_.Instantiate(init.JointGroup, model, name_);
+    group = model->getJointModelGroup(init.JointGroup);
+    ps_.reset(new planning_scene::PlanningScene(model));
 
     // Write URDF/SRDF to ROS param server
     if (Server::isRos() && init.SetRobotDescriptionRosParams && init.URDF != "" && init.SRDF != "")
@@ -108,7 +104,7 @@ void Scene::Instantiate(SceneInitializer& init)
     if (init.LoadScene != "")
     {
         std::vector<std::string> files = parseList(init.LoadScene, ';');
-        for (const std::string& file : files) loadSceneFile(file, Eigen::Affine3d::Identity(), false);
+        for (const std::string& file : files) loadSceneFile(file, Eigen::Isometry3d::Identity(), false);
     }
 
     for (const exotica::Initializer& linkInit : init.Links)
@@ -337,11 +333,6 @@ std::string Scene::getRootJointName()
     return kinematica_.getRootJointName();
 }
 
-std::string Scene::getModelRootLinkName()
-{
-    return model_->getRootLinkName();
-}
-
 moveit_msgs::PlanningScene Scene::getPlanningSceneMsg()
 {
     // Update the joint positions in the PlanningScene from Kinematica - we do
@@ -486,12 +477,12 @@ std::string Scene::getGroupName()
 
 void Scene::loadScene(const std::string& scene, const KDL::Frame& offset, bool updateCollisionScene)
 {
-    Eigen::Affine3d tmp_offset;
+    Eigen::Isometry3d tmp_offset;
     tf::transformKDLToEigen(offset, tmp_offset);
     loadScene(scene, tmp_offset, updateCollisionScene);
 }
 
-void Scene::loadScene(const std::string& scene, const Eigen::Affine3d& offset, bool updateCollisionScene)
+void Scene::loadScene(const std::string& scene, const Eigen::Isometry3d& offset, bool updateCollisionScene)
 {
     std::stringstream ss(scene);
     loadSceneFromStringStream(ss, offset, updateCollisionScene);
@@ -499,21 +490,21 @@ void Scene::loadScene(const std::string& scene, const Eigen::Affine3d& offset, b
 
 void Scene::loadSceneFile(const std::string& file_name, const KDL::Frame& offset, bool updateCollisionScene)
 {
-    Eigen::Affine3d tmp_offset;
+    Eigen::Isometry3d tmp_offset;
     tf::transformKDLToEigen(offset, tmp_offset);
     loadSceneFile(file_name, tmp_offset, updateCollisionScene);
 }
 
-void Scene::loadSceneFile(const std::string& file_name, const Eigen::Affine3d& offset, bool updateCollisionScene)
+void Scene::loadSceneFile(const std::string& file_name, const Eigen::Isometry3d& offset, bool updateCollisionScene)
 {
     std::ifstream ss(parsePath(file_name));
     if (!ss.is_open()) throw_pretty("Cant read file '" << parsePath(file_name) << "'!");
     loadSceneFromStringStream(ss, offset, updateCollisionScene);
 }
 
-void Scene::loadSceneFromStringStream(std::istream& in, const Eigen::Affine3d& offset, bool updateCollisionScene)
+void Scene::loadSceneFromStringStream(std::istream& in, const Eigen::Isometry3d& offset, bool updateCollisionScene)
 {
-    ps_->loadGeometryFromStream(in, offset);
+    ps_->loadGeometryFromStream(in, Eigen::Affine3d(offset));
     updateSceneFrames();
     if (updateCollisionScene) updateInternalFrames();
 }
@@ -537,7 +528,7 @@ void Scene::updateInternalFrames(bool updateRequest)
 {
     for (auto& it : custom_links_)
     {
-        Eigen::Affine3d pose;
+        Eigen::Isometry3d pose;
         tf::transformKDLToEigen(it->Segment.getFrameToTip(), pose);
         std::string shapeResourcePath = it->ShapeResourcePath;
         Eigen::Vector3d scale = it->Scale;
@@ -581,12 +572,17 @@ void Scene::updateSceneFrames()
         if (object.second->shapes_.size())
         {
             // Use the first collision shape as the origin of the object
-            Eigen::Affine3d objTransform = object.second->shape_poses_[0];
+            Eigen::Isometry3d objTransform;
+            objTransform.translation() = object.second->shape_poses_[0].translation();
+            objTransform.linear() = object.second->shape_poses_[0].rotation();
             kinematica_.AddEnvironmentElement(object.first, objTransform);
 
             for (int i = 0; i < object.second->shape_poses_.size(); i++)
             {
-                Eigen::Affine3d trans = objTransform.inverse() * object.second->shape_poses_[i];
+                Eigen::Isometry3d shapeTransform;
+                shapeTransform.translation() = object.second->shape_poses_[i].translation();
+                shapeTransform.linear() = object.second->shape_poses_[i].rotation();
+                Eigen::Isometry3d trans = objTransform.inverse() * shapeTransform;
                 if (ps_->hasObjectColor(object.first))
                 {
                     auto colorMsg = ps_->getObjectColor(object.first);
@@ -622,7 +618,9 @@ void Scene::updateSceneFrames()
             continue;
         }
 
-        Eigen::Affine3d objTransform = ps_->getCurrentState().getGlobalLinkTransform(links[i]);
+        Eigen::Isometry3d objTransform;
+        objTransform.translation() = ps_->getCurrentState().getGlobalLinkTransform(links[i]).translation();
+        objTransform.linear() = ps_->getCurrentState().getGlobalLinkTransform(links[i]).rotation();
 
         int jointId = getSolver().IsControlledLink(links[i]->getName());
         if (jointId != -1)
@@ -643,7 +641,12 @@ void Scene::updateSceneFrames()
             //     if (static_cast<const shapes::Sphere*>(links[i]->getShapes()[j].get())->radius == 0.0)
             //         continue;
 
-            Eigen::Affine3d trans = objTransform.inverse() * ps_->getCurrentState().getCollisionBodyTransform(links[i], j);
+            Eigen::Affine3d collisionBodyTransform_affine = ps_->getCurrentState().getCollisionBodyTransform(links[i], j);
+            Eigen::Isometry3d collisionBodyTransform;
+            collisionBodyTransform.translation() = collisionBodyTransform_affine.translation();
+            collisionBodyTransform.linear() = collisionBodyTransform_affine.rotation();
+            Eigen::Isometry3d trans = objTransform.inverse(Eigen::Isometry) * collisionBodyTransform;
+
             std::shared_ptr<KinematicElement> element = kinematica_.AddElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
             modelLink_to_collisionElement_map_[links[i]->getName()].push_back(element);
 
@@ -667,7 +670,7 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     if (kinematica_.doesLinkWithNameExist(name)) throw_pretty("Link '" << name << "' already exists in the scene!");
     std::string parent_name = (parent == "") ? kinematica_.getRootFrameName() : parent;
     if (!kinematica_.doesLinkWithNameExist(parent_name)) throw_pretty("Can't find parent '" << parent_name << "'!");
-    Eigen::Affine3d pose;
+    Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
     custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape, inertia));
     if (updateCollisionScene) updateCollisionObjects();
@@ -678,7 +681,7 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     if (kinematica_.doesLinkWithNameExist(name)) throw_pretty("Link '" << name << "' already exists in the scene!");
     std::string parent_name = (parent == "") ? kinematica_.getRootFrameName() : parent;
     if (!kinematica_.doesLinkWithNameExist(parent_name)) throw_pretty("Can't find parent '" << parent_name << "'!");
-    Eigen::Affine3d pose;
+    Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
     custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shapeResourcePath, scale, inertia));
     updateSceneFrames();

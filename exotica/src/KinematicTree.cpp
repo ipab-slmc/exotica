@@ -30,17 +30,18 @@
  *
  */
 
-#include "exotica/KinematicTree.h"
-#include <moveit/robot_model/robot_model.h>
 #include <algorithm>
 #include <iostream>
 #include <queue>
 
+#include <moveit/robot_model/robot_model.h>
 #include <eigen_conversions/eigen_kdl.h>
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <kdl/frames_io.hpp>
+
+#include <exotica/KinematicTree.h>
 
 namespace exotica
 {
@@ -133,6 +134,7 @@ void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
 
     // Handle the root joint
     const robot_model::JointModel* RootJoint = Model->getRootJoint();
+    root_joint_name_ = RootJoint->getName();
     std::string WorldFrameName;
     for (const srdf::Model::VirtualJoint& s : Model->getSRDF()->getVirtualJoints())
     {
@@ -365,13 +367,13 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
     debugSceneChanged = true;
 }
 
-void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
+void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
 {
     std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color, isControlled);
     EnvironmentTree.push_back(element);
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, const std::string& shapeResourcePath, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shapeResourcePath, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
 {
     std::string shapePath(shapeResourcePath);
     if (shapePath == "")
@@ -401,7 +403,7 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
     return element;
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Affine3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
 {
     std::shared_ptr<KinematicElement> parent_element;
     if (parent == "")
@@ -822,6 +824,11 @@ std::map<std::string, std::vector<double>> KinematicTree::getUsedJointLimits()
     return limits;
 }
 
+robot_model::RobotModelPtr KinematicTree::getRobotModel()
+{
+    return Model;
+}
+
 Eigen::VectorXd KinematicTree::getRandomControlledState()
 {
     Eigen::VectorXd q_rand(NumControlledJoints);
@@ -943,12 +950,7 @@ std::string KinematicTree::getRootFrameName()
 
 std::string KinematicTree::getRootJointName()
 {
-    return Model->getRootJoint()->getName();
-}
-
-int KinematicTree::getEffSize()
-{
-    return Solution->Frame.size();
+    return root_joint_name_;
 }
 
 Eigen::VectorXd KinematicTree::getModelState()

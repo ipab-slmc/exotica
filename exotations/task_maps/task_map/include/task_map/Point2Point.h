@@ -38,13 +38,11 @@
 
 namespace exotica
 {
-  class Point2Point : public TaskMap, public Instantiable<Point2PointInitializer>
-  {
-  public:
-  
+class Point2Point : public TaskMap, public Instantiable<Point2PointInitializer>
+{
+public:
     Point2Point();
     virtual ~Point2Point() {}
-    
     virtual void Instantiate(Point2PointInitializer& init);
 
     virtual void assignScene(Scene_ptr scene);
@@ -56,13 +54,12 @@ namespace exotica
     virtual int taskSpaceDim();
 
     void setPoint(Eigen::Vector3d point);
-    
+
     Eigen::Vector3d getPoint();
 
     void Initialize();
-    
-  private:
 
+private:
     Eigen::Vector3d point_;
 
     unsigned int N;
@@ -78,11 +75,9 @@ namespace exotica
     Eigen::Vector3d getApproachVector(double roll, double pitch, double yaw);
 
     Eigen::Matrix3d getApproachVectorJacobian(double roll, double pitch, double yaw);
+};
 
-
-  };
-
-  typedef std::shared_ptr<Point2Point> Point2Point_ptr;
+typedef std::shared_ptr<Point2Point> Point2Point_ptr;
 
 }  // namespace exotica
 

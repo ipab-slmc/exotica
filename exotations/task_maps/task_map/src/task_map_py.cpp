@@ -14,8 +14,8 @@
 #include <task_map/Identity.h>
 #include <task_map/JointLimit.h>
 #include <task_map/Point2Line.h>
-#include <task_map/SphereCollision.h>
 #include <task_map/Point2Point.h>
+#include <task_map/SphereCollision.h>
 
 using namespace exotica;
 namespace py = pybind11;

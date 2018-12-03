@@ -122,7 +122,7 @@ Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type)
     Eigen::VectorXd ret;
     switch (type)
     {
-        case RotationType::QUATERNION:            
+        case RotationType::QUATERNION:
             ret = Eigen::Quaterniond(Eigen::Map<const Eigen::Matrix3d>(&data.data[0]).transpose()).coeffs();
             return ret;
         case RotationType::RPY:

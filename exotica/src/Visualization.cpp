@@ -57,7 +57,7 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
         throw_pretty("Number of DoFs in trajectory does not match number of controlled joints of robot.");
 
     moveit_msgs::DisplayTrajectory traj_msg;
-    traj_msg.model_id = scene_->getRobotModel()->getName();
+    traj_msg.model_id = scene_->getSolver().getRobotModel()->getName();
 
     // TODO:
     //   http://docs.ros.org/melodic/api/moveit_msgs/html/msg/DisplayTrajectory.html

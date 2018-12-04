@@ -74,14 +74,14 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
     switch (scene_->getSolver().getControlledBaseType())
     {
         case BASE_TYPE::FIXED:
-            HIGHLIGHT("Fixed base, no offset");
+            // HIGHLIGHT("Fixed base, no offset");
             break;
         case BASE_TYPE::PLANAR:
-            HIGHLIGHT("Planar, offset 3");
+            // HIGHLIGHT("Planar, offset 3");
             base_offset = 3;
             break;
         case BASE_TYPE::FLOATING:
-            HIGHLIGHT("Floating, offset 6");
+            // HIGHLIGHT("Floating, offset 6");
             base_offset = 6;
             break;
         default:

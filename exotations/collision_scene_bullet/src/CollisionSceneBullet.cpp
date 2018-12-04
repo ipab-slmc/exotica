@@ -62,7 +62,7 @@ CollisionSceneBullet::CollisionSceneBullet()
     bt_broadphase.reset(new btDbvtBroadphase());
     bt_collision_world.reset(new btCollisionWorld(bt_dispatcher.get(), bt_broadphase.get(), bt_collision_configuration.get()));
 
-    HIGHLIGHT_NAMED("CollisionSceneBullet", "Using Bullet collision checker");
+    HIGHLIGHT_NAMED("CollisionSceneBullet", "Using Bullet collision checker (version " <<  btGetVersion() << ")");
 }
 
 CollisionSceneBullet::~CollisionSceneBullet() = default;

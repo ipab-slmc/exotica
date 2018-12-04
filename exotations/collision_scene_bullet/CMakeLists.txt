@@ -3,15 +3,11 @@ project(collision_scene_bullet)
 
 add_compile_options(-std=c++11)
 
-# find_package(catkin REQUIRED COMPONENTS bullet3_ros)
-# message(WARNING ${catkin_INCLUDE_DIRS})
-find_package(Bullet REQUIRED)
+find_package(Bullet REQUIRED COMPONENTS Collision LinearMath)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
   geometric_shapes
-  # bullet3_ros
-  # bullet3_catkin
 )
 
 catkin_package(

@@ -8,8 +8,7 @@
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <!-- <depend>bullet3_ros</depend> -->
-  <!-- <depend>bullet3_catkin</depend> -->
+  <depend>bullet</depend>
   <depend>exotica</depend>
   <depend>geometric_shapes</depend>
 

@@ -717,7 +717,7 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     if (shape2 == nullptr) throw_pretty("o2 not found.");
 
     CollisionData data(this);
-    bool allowedToCollide = isAllowedToCollide(shape1, shape2, data.Self, data.Scene);
+    const bool allowedToCollide = isAllowedToCollide(shape1, shape2, data.Self, data.Scene);
 
     if (!allowedToCollide)
     {
@@ -762,22 +762,32 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     // If in contact, compute contact point
     if (ret.in_collision)
     {
-        /*fcl::CollisionRequestd contact_req;
+        fcl::CollisionRequestd contact_req;
         contact_req.enable_contact = true;
+        contact_req.num_max_contacts = 1000;
         fcl::CollisionResultd contact_res;
         size_t num_contacts = fcl::collide(shape1->collisionGeometry().get(), result.contact_tf1, shape2->collisionGeometry().get(), result.contact_tf2, contact_req, contact_res);
         if (num_contacts > 0)
         {
-            auto contact = contact_res.getContact(0);
-            ret.penetration_depth = contact.penetration_depth;
-            ret.contact_pos = contact.pos;
-            ret.contact_normal = contact.normal;
-            // HIGHLIGHT_NAMED("In collision, contacts", num_contacts << "penetration=" << ret.penetration_depth << ", pos: " << ret.contact_pos.transpose());
+            std::vector<fcl::Contactd> contacts;
+            contact_res.getContacts(contacts);
+            ret.penetration_depth = std::numeric_limits<double>::min();
+            for (const auto& contact : contacts)
+            {
+                if (contact.penetration_depth > ret.penetration_depth)
+                {
+                    ret.penetration_depth = contact.penetration_depth;
+                    ret.contact_pos = contact.pos;
+                    ret.contact_normal = contact.normal;
+                }
+            }
+
+            // HIGHLIGHT_NAMED("In collision, contacts: ", num_contacts << ", penetration=" << ret.penetration_depth << ", pos: " << ret.contact_pos.transpose());
         }
         else
         {
             throw_pretty("What's up?");
-        }*/
+        }
     }
 
     tf::transformEigenToKDL(static_cast<Eigen::Affine3d>(result.contact_tf1), ret.contact_tf1);

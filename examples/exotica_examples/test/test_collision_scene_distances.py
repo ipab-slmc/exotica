@@ -656,7 +656,7 @@ def testMeshVsMeshPenetrating(collisionScene):
 
 # Cf. Issue #364 for tracking deactivated tests.
 class TestClass(unittest.TestCase):
-    collisionScene = 'CollisionSceneFCLLatest'
+    collisionScene = 'CollisionSceneBullet'
     def test_testSphereVsSphereDistance(self):
         testSphereVsSphereDistance(TestClass.collisionScene)
 

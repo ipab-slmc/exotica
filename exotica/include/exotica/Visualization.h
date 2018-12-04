@@ -36,6 +36,7 @@
 #include <exotica/Scene.h>
 #include <exotica/Server.h>
 #include <exotica/Tools/Uncopyable.h>
+#include <geometry_msgs/Transform.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 
 namespace exotica

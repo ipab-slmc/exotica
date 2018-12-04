@@ -3,36 +3,35 @@ project(collision_scene_bullet)
 
 add_compile_options(-std=c++11)
 
-find_package(PkgConfig REQUIRED)
-
-set(bullet_FOUND 0)
-pkg_check_modules(bullet REQUIRED bullet)
+# find_package(catkin REQUIRED COMPONENTS bullet3_ros)
+# message(WARNING ${catkin_INCLUDE_DIRS})
+find_package(Bullet REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
   geometric_shapes
+  # bullet3_ros
+  # bullet3_catkin
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES collision_scene_bullet
   CATKIN_DEPENDS exotica geometric_shapes
-  DEPENDS bullet
 )
 
 include_directories(
-  include ${bullet_INCLUDE_DIRS}
-  ${bullet_INCLUDE_DIRS}
+  include
   ${catkin_INCLUDE_DIRS}
+  ${BULLET_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME}
   src/CollisionSceneBullet.cpp
 )
-
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
-  ${bullet_LIBRARIES}
+  ${BULLET_LIBRARIES}
 )
 
 install(TARGETS ${PROJECT_NAME}

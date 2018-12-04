@@ -1,7 +1,7 @@
 /*
- *      Author: Vladimir Ivan
+ *      Author: Wolfgang Merkt, Vladimir Ivan
  *
- * Copyright (c) 2018, University Of Edinburgh
+ * Copyright (c) 2018, Wolfgang Merkt, University of Edinburgh
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,15 @@
  *
  */
 
-#ifndef COLLISIONSCENEFCL_H
-#define COLLISIONSCENEFCL_H
+#ifndef COLLISIONSCENE_BULLET_H_
+#define COLLISIONSCENE_BULLET_H_
 
 #include <exotica/CollisionScene.h>
 #include <exotica/Tools/Conversions.h>
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 
+#include <bullet/BulletCollision/Gimpact/btTriangleShapeEx.h>
 #include <bullet/btBulletCollisionCommon.h>
 
 namespace exotica
@@ -45,11 +46,10 @@ namespace exotica
 class CollisionSceneBullet : public CollisionScene
 {
 public:
-
     struct CollisionData : public btCollisionWorld::ContactResultCallback
     {
         bool isColliding = false;
-        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap,int partId0,int index0,const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
+        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1)
         {
             isColliding = true;
         }
@@ -58,26 +58,17 @@ public:
     class btExoticaCollisionConfiguration : public btDefaultCollisionConfiguration
     {
     public:
-        btExoticaCollisionConfiguration(CollisionSceneBullet* scene, const btDefaultCollisionConstructionInfo &constructionInfo=btDefaultCollisionConstructionInfo()) :
-            btDefaultCollisionConfiguration(constructionInfo), scene_(scene)
+        btExoticaCollisionConfiguration(CollisionSceneBullet* scene, const btDefaultCollisionConstructionInfo& constructionInfo = btDefaultCollisionConstructionInfo()) : btDefaultCollisionConfiguration(constructionInfo), scene_(scene)
         {
-
         }
 
-        virtual ~btExoticaCollisionConfiguration()
-        {
-
-        }
+        virtual ~btExoticaCollisionConfiguration() = default;
 
         CollisionSceneBullet* scene_;
         bool self;
     };
 
     CollisionSceneBullet();
-
-    /**
-       * \brief Destructor
-       */
     virtual ~CollisionSceneBullet();
 
     /**
@@ -103,6 +94,7 @@ public:
 
     virtual Eigen::Vector3d getTranslation(const std::string& name);
 
+    virtual std::vector<std::shared_ptr<KinematicElement>> getCollisionWorldLinkElements() {}
     ///
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
@@ -115,7 +107,7 @@ public:
     virtual void updateCollisionObjectTransforms();
 
 private:
-    std::shared_ptr<btCollisionObject> constructBulletCollisionObject(long i, std::shared_ptr<KinematicElement> element);
+    std::shared_ptr<btCollisionObject> constructBulletCollisionObject(long kinematic_element_id, std::shared_ptr<KinematicElement> element);
     std::vector<std::weak_ptr<KinematicElement>> kinematic_elements_;
 
     std::unique_ptr<btCollisionConfiguration> bt_collision_configuration;
@@ -125,10 +117,9 @@ private:
 
     std::map<std::string, std::shared_ptr<btCollisionObject>> objects_;
     std::vector<std::shared_ptr<btCollisionShape>> shapes_;
-    std::vector<std::shared_ptr<btTriangleMesh>> meshes_;
 };
 
 typedef std::shared_ptr<CollisionSceneBullet> CollisionSceneBullet_ptr;
 }
 
-#endif  // COLLISIONSCENEFCL_H
+#endif  // COLLISIONSCENE_BULLET_H_

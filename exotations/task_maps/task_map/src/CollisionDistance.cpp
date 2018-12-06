@@ -44,7 +44,7 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x,
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
     phi.setZero();
-    Eigen::MatrixXd J;
+    Eigen::MatrixXd J(dim_, dim_);
     update(x, phi, J, false);
 }
 

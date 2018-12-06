@@ -45,7 +45,7 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
     phi.setZero();
-    Eigen::MatrixXd J;
+    Eigen::MatrixXd J(dim_, robotLinks_.size());
     update(x, phi, J, false);
 }
 
@@ -97,19 +97,19 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                     {
                         Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
                             proxy.e1, arel, nullptr, KDL::Frame());
-                        J += (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ);
+                        J += (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ.topRows<3>());
                         tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
                                                             KDL::Frame());
-                        J -= (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ);
+                        J -= (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ.topRows<3>());
                     }
                     else
                     {
                         Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
                             proxy.e1, arel, nullptr, KDL::Frame());
-                        J += 1 / margin * (proxy.normal1.transpose() * tmpJ);
+                        J += 1 / margin * (proxy.normal1.transpose() * tmpJ.topRows<3>());
                         tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
                                                             KDL::Frame());
-                        J -= 1 / margin * (proxy.normal1.transpose() * tmpJ);
+                        J -= 1 / margin * (proxy.normal1.transpose() * tmpJ.topRows<3>());
                     }
                 }
             }

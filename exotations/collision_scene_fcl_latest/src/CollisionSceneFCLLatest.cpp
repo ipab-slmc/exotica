@@ -344,9 +344,9 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             double deepest_penetration_depth = -1;
             for (size_t i = 0; i < contacts.size(); i++)
             {
-                if (contacts[i].penetration_depth > deepest_penetration_depth)
+                if (std::abs(contacts[i].penetration_depth) > deepest_penetration_depth)
                 {
-                    deepest_penetration_depth = contacts[i].penetration_depth;
+                    deepest_penetration_depth = std::abs(contacts[i].penetration_depth);
                     deepest_penetration_depth_index = i;
                 }
             }
@@ -357,7 +357,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             fcl::Vector3d normal = -contact.normal;
 
             // Signed distance is negative when penetration depth is positive.
-            double signed_distance = -contact.penetration_depth;
+            double signed_distance = -std::abs(contact.penetration_depth);
 
             if (signed_distance > 0) throw_pretty("In collision but positive signed distance? " << signed_distance);
 

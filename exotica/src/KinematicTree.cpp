@@ -668,6 +668,7 @@ KDL::Frame KinematicTree::FK(KinematicFrame& frame)
 
 KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB)
 {
+    if (!elementA) throw_pretty("The pointer to KinematicElement A is dead.");
     KinematicFrame frame;
     frame.FrameA = elementA;
     frame.FrameB = (elementB == nullptr) ? Root : elementB;
@@ -699,6 +700,7 @@ void KinematicTree::UpdateFK()
 
 Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB)
 {
+    if (!elementA) throw_pretty("The pointer to KinematicElement A is dead.");
     KinematicFrame frame;
     frame.FrameA = elementA;
     frame.FrameB = (elementB == nullptr) ? Root : elementB;

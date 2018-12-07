@@ -603,33 +603,32 @@ PYBIND11_MODULE(_pyexotica, module)
     py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
 
     py::class_<KDL::Vector>(module, "KDLVector")
-            .def(py::init())
-            .def(py::init<double, double, double>(),
-                 py::arg("x") = 0,
-                 py::arg("y") = 0,
-                 py::arg("z") = 0)
-            .def("x", [](KDL::Vector& v)->double&{ return v[0]; })
-            .def("y", [](KDL::Vector& v)->double&{ return v[1]; })
-            .def("z", [](KDL::Vector& v)->double&{ return v[2]; })
-            .def_static("Zero", &KDL::Vector::Zero);
+        .def(py::init())
+        .def(py::init<double, double, double>(),
+             py::arg("x") = 0,
+             py::arg("y") = 0,
+             py::arg("z") = 0)
+        .def("x", [](KDL::Vector& v) -> double& { return v[0]; })
+        .def("y", [](KDL::Vector& v) -> double& { return v[1]; })
+        .def("z", [](KDL::Vector& v) -> double& { return v[2]; })
+        .def_static("Zero", &KDL::Vector::Zero);
 
     py::class_<KDL::RotationalInertia>(module, "KDLRotationalInertia")
-            .def(py::init<double, double, double, double, double, double>(),
-                 py::arg("Ixx") = 0,
-                 py::arg("Iyy") = 0,
-                 py::arg("Izz") = 0,
-                 py::arg("Ixy") = 0,
-                 py::arg("Ixz") = 0,
-                 py::arg("Iyz") = 0)
-            .def_static("Zero", &KDL::RotationalInertia::Zero);
+        .def(py::init<double, double, double, double, double, double>(),
+             py::arg("Ixx") = 0,
+             py::arg("Iyy") = 0,
+             py::arg("Izz") = 0,
+             py::arg("Ixy") = 0,
+             py::arg("Ixz") = 0,
+             py::arg("Iyz") = 0)
+        .def_static("Zero", &KDL::RotationalInertia::Zero);
 
     py::class_<KDL::RigidBodyInertia>(module, "KDLRigidBodyInertia")
-            .def(py::init<double, KDL::Vector&, KDL::RotationalInertia&>(),
-                 py::arg("m") = 0,
-                 py::arg("oc") = KDL::Vector::Zero(),
-                 py::arg("Ic") = KDL::RotationalInertia::Zero())
-            .def_static("Zero", &KDL::RigidBodyInertia::Zero);
-
+        .def(py::init<double, KDL::Vector&, KDL::RotationalInertia&>(),
+             py::arg("m") = 0,
+             py::arg("oc") = KDL::Vector::Zero(),
+             py::arg("Ic") = KDL::RotationalInertia::Zero())
+        .def_static("Zero", &KDL::RigidBodyInertia::Zero);
 
     py::class_<TaskMap, std::shared_ptr<TaskMap>, Object> taskMap(module, "TaskMap");
     taskMap.def_readonly("id", &TaskMap::Id);
@@ -1031,7 +1030,7 @@ PYBIND11_MODULE(_pyexotica, module)
               py::arg("shapeResourcePath"),
               py::arg("scale") = Eigen::Vector3d::Ones(),
               py::arg("updateCollisionScene") = true);
-    scene.def("addObject", (void(Scene::*)(const std::string&, const KDL::Frame&, const std::string&, shapes::ShapeConstPtr, const KDL::RigidBodyInertia&, bool)) &Scene::addObject,
+    scene.def("addObject", (void (Scene::*)(const std::string&, const KDL::Frame&, const std::string&, shapes::ShapeConstPtr, const KDL::RigidBodyInertia&, bool)) & Scene::addObject,
               py::arg("name"),
               py::arg("transform") = KDL::Frame(),
               py::arg("parent") = std::string(),
@@ -1094,51 +1093,51 @@ PYBIND11_MODULE(_pyexotica, module)
 
     // shape base class
     py::class_<shapes::Shape, shapes::ShapePtr>(module, "Shape")
-            .def("scale", &shapes::Shape::scale)
-            .def("padd", &shapes::Shape::padd)
-            .def("scaleAndPadd", &shapes::Shape::scaleAndPadd)
-            .def("isFixed", &shapes::Shape::isFixed)
-            .def_readwrite("type", &shapes::Shape::type);
+        .def("scale", &shapes::Shape::scale)
+        .def("padd", &shapes::Shape::padd)
+        .def("scaleAndPadd", &shapes::Shape::scaleAndPadd)
+        .def("isFixed", &shapes::Shape::isFixed)
+        .def_readwrite("type", &shapes::Shape::type);
 
     py::class_<shapes::Sphere, shapes::Shape, std::shared_ptr<shapes::Sphere>>(module, "Sphere")
-            .def(py::init())
-            .def(py::init<double>())
-            .def_readonly_static("name", &shapes::Sphere::STRING_NAME)
-            .def("scaleAndPadd", &shapes::Sphere::scaleAndPadd)
-            .def_readwrite("radius", &shapes::Sphere::radius);
+        .def(py::init())
+        .def(py::init<double>())
+        .def_readonly_static("name", &shapes::Sphere::STRING_NAME)
+        .def("scaleAndPadd", &shapes::Sphere::scaleAndPadd)
+        .def_readwrite("radius", &shapes::Sphere::radius);
 
     py::class_<shapes::Cylinder, shapes::Shape, std::shared_ptr<shapes::Cylinder>>(module, "Cylinder")
-            .def(py::init())
-            .def(py::init<double, double>())
-            .def_readonly_static("name", &shapes::Cylinder::STRING_NAME)
-            .def("scaleAndPadd", &shapes::Cylinder::scaleAndPadd)
-            .def_readwrite("radius", &shapes::Cylinder::radius)
-            .def_readwrite("length", &shapes::Cylinder::length);
+        .def(py::init())
+        .def(py::init<double, double>())
+        .def_readonly_static("name", &shapes::Cylinder::STRING_NAME)
+        .def("scaleAndPadd", &shapes::Cylinder::scaleAndPadd)
+        .def_readwrite("radius", &shapes::Cylinder::radius)
+        .def_readwrite("length", &shapes::Cylinder::length);
 
     py::class_<shapes::Cone, shapes::Shape, std::shared_ptr<shapes::Cone>>(module, "Cone")
-            .def(py::init())
-            .def(py::init<double, double>())
-            .def_readonly_static("name", &shapes::Cone::STRING_NAME)
-            .def("scaleAndPadd", &shapes::Cone::scaleAndPadd)
-            .def_readwrite("radius", &shapes::Cone::radius)
-            .def_readwrite("length", &shapes::Cone::length);
+        .def(py::init())
+        .def(py::init<double, double>())
+        .def_readonly_static("name", &shapes::Cone::STRING_NAME)
+        .def("scaleAndPadd", &shapes::Cone::scaleAndPadd)
+        .def_readwrite("radius", &shapes::Cone::radius)
+        .def_readwrite("length", &shapes::Cone::length);
 
     py::class_<shapes::Box, shapes::Shape, std::shared_ptr<shapes::Box>>(module, "Box")
-            .def(py::init())
-            .def(py::init<double, double, double>())
-            .def_readonly_static("name", &shapes::Box::STRING_NAME)
-            .def("scaleAndPadd", &shapes::Box::scaleAndPadd);
+        .def(py::init())
+        .def(py::init<double, double, double>())
+        .def_readonly_static("name", &shapes::Box::STRING_NAME)
+        .def("scaleAndPadd", &shapes::Box::scaleAndPadd);
 
     py::class_<shapes::Plane, shapes::Shape, std::shared_ptr<shapes::Plane>>(module, "Plane")
-            .def(py::init())
-            .def(py::init<double, double, double, double>())
-            .def_readonly_static("name", &shapes::Plane::STRING_NAME)
-            .def("scaleAndPadd", &shapes::Plane::scaleAndPadd)
-            .def("isFixed", &shapes::Plane::isFixed)
-            .def_readwrite("a", &shapes::Plane::a)
-            .def_readwrite("b", &shapes::Plane::b)
-            .def_readwrite("c", &shapes::Plane::c)
-            .def_readwrite("d", &shapes::Plane::d);
+        .def(py::init())
+        .def(py::init<double, double, double, double>())
+        .def_readonly_static("name", &shapes::Plane::STRING_NAME)
+        .def("scaleAndPadd", &shapes::Plane::scaleAndPadd)
+        .def("isFixed", &shapes::Plane::isFixed)
+        .def_readwrite("a", &shapes::Plane::a)
+        .def_readwrite("b", &shapes::Plane::b)
+        .def_readwrite("c", &shapes::Plane::c)
+        .def_readwrite("d", &shapes::Plane::d);
 
     py::enum_<shapes::ShapeType>(module, "ShapeType")
         .value("UNKNOWN_SHAPE", shapes::ShapeType::UNKNOWN_SHAPE)

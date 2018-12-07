@@ -598,6 +598,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kdlFrame.def("getFrame", [](KDL::Frame* me) { return getFrame(*me); });
     kdlFrame.def("inverse", (KDL::Frame(KDL::Frame::*)() const) & KDL::Frame::Inverse);
     kdlFrame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());
+    kdlFrame.def_readwrite("p", &KDL::Frame::p);
     py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
     py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
 

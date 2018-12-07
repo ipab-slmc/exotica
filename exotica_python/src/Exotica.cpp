@@ -1030,6 +1030,13 @@ PYBIND11_MODULE(_pyexotica, module)
               py::arg("shapeResourcePath"),
               py::arg("scale") = Eigen::Vector3d::Ones(),
               py::arg("updateCollisionScene") = true);
+    scene.def("addObject", (void(Scene::*)(const std::string&, const KDL::Frame&, const std::string&, shapes::ShapeConstPtr, const KDL::RigidBodyInertia&, bool)) &Scene::addObject,
+              py::arg("name"),
+              py::arg("transform") = KDL::Frame(),
+              py::arg("parent") = std::string(),
+              py::arg("shape"),
+              py::arg("inertia") = KDL::RigidBodyInertia::Zero(),
+              py::arg("updateCollisionScene") = true);
     scene.def("removeObject", &Scene::removeObject);
     scene.def_property_readonly("modelLinkToCollisionLinkMap", &Scene::getModelLinkToCollisionLinkMap);
     scene.def_property_readonly("controlledLinkToCollisionLinkMap", &Scene::getControlledLinkToCollisionLinkMap);

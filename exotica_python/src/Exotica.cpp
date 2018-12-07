@@ -601,6 +601,35 @@ PYBIND11_MODULE(_pyexotica, module)
     py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
     py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
 
+    py::class_<KDL::Vector>(module, "KDLVector")
+            .def(py::init())
+            .def(py::init<double, double, double>(),
+                 py::arg("x") = 0,
+                 py::arg("y") = 0,
+                 py::arg("z") = 0)
+            .def("x", [](KDL::Vector& v)->double&{ return v[0]; })
+            .def("y", [](KDL::Vector& v)->double&{ return v[1]; })
+            .def("z", [](KDL::Vector& v)->double&{ return v[2]; })
+            .def_static("Zero", &KDL::Vector::Zero);
+
+    py::class_<KDL::RotationalInertia>(module, "KDLRotationalInertia")
+            .def(py::init<double, double, double, double, double, double>(),
+                 py::arg("Ixx") = 0,
+                 py::arg("Iyy") = 0,
+                 py::arg("Izz") = 0,
+                 py::arg("Ixy") = 0,
+                 py::arg("Ixz") = 0,
+                 py::arg("Iyz") = 0)
+            .def_static("Zero", &KDL::RotationalInertia::Zero);
+
+    py::class_<KDL::RigidBodyInertia>(module, "KDLRigidBodyInertia")
+            .def(py::init<double, KDL::Vector&, KDL::RotationalInertia&>(),
+                 py::arg("m") = 0,
+                 py::arg("oc") = KDL::Vector::Zero(),
+                 py::arg("Ic") = KDL::RotationalInertia::Zero())
+            .def_static("Zero", &KDL::RigidBodyInertia::Zero);
+
+
     py::class_<TaskMap, std::shared_ptr<TaskMap>, Object> taskMap(module, "TaskMap");
     taskMap.def_readonly("id", &TaskMap::Id);
     taskMap.def_readonly("start", &TaskMap::Start);

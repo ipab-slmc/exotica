@@ -621,8 +621,7 @@ void KinematicTree::publishFrames()
             visualization_msgs::MarkerArray msg;
             for (int i = 0; i < Tree.size(); i++)
             {
-                // TODO: This is an incorrect check - we may have shapes that are attached to rootFrame
-                if (Tree[i].lock()->Shape && Tree[i].lock()->Parent.lock()->Id >= ModelTree.size())
+                if (Tree[i].lock()->Shape)
                 {
                     visualization_msgs::Marker mrk;
                     shapes::constructMarkerFromShape(Tree[i].lock()->Shape.get(), mrk);

@@ -1081,6 +1081,57 @@ PYBIND11_MODULE(_pyexotica, module)
         return vec;
     });
 
+    ////////////////////////////////////////////////////////////////////////////
+    /// Shapes
+
+    // shape base class
+    py::class_<shapes::Shape, shapes::ShapePtr>(module, "Shape")
+            .def("scale", &shapes::Shape::scale)
+            .def("padd", &shapes::Shape::padd)
+            .def("scaleAndPadd", &shapes::Shape::scaleAndPadd)
+            .def("isFixed", &shapes::Shape::isFixed)
+            .def_readwrite("type", &shapes::Shape::type);
+
+    py::class_<shapes::Sphere, shapes::Shape, std::shared_ptr<shapes::Sphere>>(module, "Sphere")
+            .def(py::init())
+            .def(py::init<double>())
+            .def_readonly_static("name", &shapes::Sphere::STRING_NAME)
+            .def("scaleAndPadd", &shapes::Sphere::scaleAndPadd)
+            .def_readwrite("radius", &shapes::Sphere::radius);
+
+    py::class_<shapes::Cylinder, shapes::Shape, std::shared_ptr<shapes::Cylinder>>(module, "Cylinder")
+            .def(py::init())
+            .def(py::init<double, double>())
+            .def_readonly_static("name", &shapes::Cylinder::STRING_NAME)
+            .def("scaleAndPadd", &shapes::Cylinder::scaleAndPadd)
+            .def_readwrite("radius", &shapes::Cylinder::radius)
+            .def_readwrite("length", &shapes::Cylinder::length);
+
+    py::class_<shapes::Cone, shapes::Shape, std::shared_ptr<shapes::Cone>>(module, "Cone")
+            .def(py::init())
+            .def(py::init<double, double>())
+            .def_readonly_static("name", &shapes::Cone::STRING_NAME)
+            .def("scaleAndPadd", &shapes::Cone::scaleAndPadd)
+            .def_readwrite("radius", &shapes::Cone::radius)
+            .def_readwrite("length", &shapes::Cone::length);
+
+    py::class_<shapes::Box, shapes::Shape, std::shared_ptr<shapes::Box>>(module, "Box")
+            .def(py::init())
+            .def(py::init<double, double, double>())
+            .def_readonly_static("name", &shapes::Box::STRING_NAME)
+            .def("scaleAndPadd", &shapes::Box::scaleAndPadd);
+
+    py::class_<shapes::Plane, shapes::Shape, std::shared_ptr<shapes::Plane>>(module, "Plane")
+            .def(py::init())
+            .def(py::init<double, double, double, double>())
+            .def_readonly_static("name", &shapes::Plane::STRING_NAME)
+            .def("scaleAndPadd", &shapes::Plane::scaleAndPadd)
+            .def("isFixed", &shapes::Plane::isFixed)
+            .def_readwrite("a", &shapes::Plane::a)
+            .def_readwrite("b", &shapes::Plane::b)
+            .def_readwrite("c", &shapes::Plane::c)
+            .def_readwrite("d", &shapes::Plane::d);
+
     py::enum_<shapes::ShapeType>(module, "ShapeType")
         .value("UNKNOWN_SHAPE", shapes::ShapeType::UNKNOWN_SHAPE)
         .value("SPHERE", shapes::ShapeType::SPHERE)

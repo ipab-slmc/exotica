@@ -1082,14 +1082,14 @@ PYBIND11_MODULE(_pyexotica, module)
     });
 
     py::enum_<shapes::ShapeType>(module, "ShapeType")
-        .value("UnknownShape", shapes::ShapeType::UNKNOWN_SHAPE)
-        .value("Sphere", shapes::ShapeType::SPHERE)
-        .value("Cylinder", shapes::ShapeType::CYLINDER)
-        .value("Cone", shapes::ShapeType::CONE)
-        .value("Box", shapes::ShapeType::BOX)
-        .value("Plane", shapes::ShapeType::PLANE)
-        .value("Mesh", shapes::ShapeType::MESH)
-        .value("Octree", shapes::ShapeType::OCTREE)
+        .value("UNKNOWN_SHAPE", shapes::ShapeType::UNKNOWN_SHAPE)
+        .value("SPHERE", shapes::ShapeType::SPHERE)
+        .value("CYLINDER", shapes::ShapeType::CYLINDER)
+        .value("CONE", shapes::ShapeType::CONE)
+        .value("BOX", shapes::ShapeType::BOX)
+        .value("PLANE", shapes::ShapeType::PLANE)
+        .value("MESH", shapes::ShapeType::MESH)
+        .value("OCTREE", shapes::ShapeType::OCTREE)
         .export_values();
 
     module.attr("version") = version();

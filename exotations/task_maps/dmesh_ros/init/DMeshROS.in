@@ -1,6 +1,0 @@
-extend <exotica/TaskMap>
-Required double PoseGain;
-Required double ObstacleGain;
-Required double GoalGain;
-Required bool UsePose;
-Optional int Size = -1;

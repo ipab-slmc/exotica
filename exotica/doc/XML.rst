@@ -13,13 +13,13 @@ file and is shown below:
   <?xml version="1.0" ?>
   <IKSolverDemoConfig>
 
-    <IKsolver Name="MySolver">
+    <IKSolver Name="MySolver">
       <MaxIterations>1</MaxIterations>
       <MaxStep>0.1</MaxStep>
       <Tolerance>1e-5</Tolerance>
       <Alpha>1.0</Alpha>
       <C>1e-3</C>
-    </IKsolver>
+    </IKSolver>
 
     <UnconstrainedEndPoseProblem Name="MyProblem">
 
@@ -60,7 +60,7 @@ Solver Setup
 ============
 
 The solver is initialized by identifying the solver and giving it a name
-(which will be used later); here we use the name "MySolver" : ``<IKsolver Name="MySolver">`` 
+(which will be used later); here we use the name "MySolver" : ``<IKSolver Name="MySolver">`` 
 Solver options are then specified:
 
 .. code-block:: xml

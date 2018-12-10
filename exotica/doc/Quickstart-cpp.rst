@@ -90,13 +90,13 @@ in the ``exotica_examples`` folder. We can see a copy of it below:
     <?xml version="1.0" ?>
     <ExampleConfig>
 
-    <IKsolver Name="MySolver">
+    <IKSolver Name="MySolver">
     <MaxIterations>100</MaxIterations>
     <MaxStep>0.1</MaxStep>
     <Tolerance>1e-5</Tolerance>
     <Alpha>1.0</Alpha>
     <C>1e-3</C>
-    </IKsolver>
+    </IKSolver>
 
     <UnconstrainedEndPoseProblem Name="ExampleProblem">
     <PlanningScene>

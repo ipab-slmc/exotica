@@ -504,7 +504,12 @@ void Scene::loadSceneFile(const std::string& file_name, const Eigen::Isometry3d&
 
 void Scene::loadSceneFromStringStream(std::istream& in, const Eigen::Isometry3d& offset, bool updateCollisionScene)
 {
+#if ROS_VERSION_MINIMUM(1, 14, 0)  // if ROS version >= ROS_MELODIC
+    ps_->loadGeometryFromStream(in, offset);
+#else
     ps_->loadGeometryFromStream(in, Eigen::Affine3d(offset));
+#endif
+
     updateSceneFrames();
     if (updateCollisionScene) updateInternalFrames();
 }

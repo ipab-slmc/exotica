@@ -42,7 +42,7 @@
 
 #include <iostream>
 
-#include <exotica/Exotica.h>
+#include <exotica/MotionSolver.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 
 #include <exotica_aico_solver/incremental_gaussian.h>
@@ -60,8 +60,9 @@ class BayesianIKSolver : public MotionSolver, public Instantiable<BayesianIKSolv
 {
 public:
     BayesianIKSolver();
-    virtual void Instantiate(BayesianIKSolverInitializer& init);
+    void Instantiate(BayesianIKSolverInitializer& init) override;
     virtual ~BayesianIKSolver();
+
     /**
        * \brief Solves the problem
        * @param solution Returned end pose solution.
@@ -73,21 +74,21 @@ public:
        * @param pointer Shared pointer to the motion planning problem
        * @return        Successful if the problem is a valid UnconstrainedEndPoseProblem
        */
-    virtual void specifyProblem(PlanningProblem_ptr pointer);
+    void specifyProblem(PlanningProblem_ptr pointer) override;
 
 protected:
     /** \brief Initializes message data.
        *  @param q0 Start configuration
        *  @return  Indicates success
        */
-    void initMessages();
+    void InitMessages();
 
     /**
        * \brief Initialise AICO messages from an initial trajectory
        * @param q_init Initial trajectory
        * @return  Indicates success
        */
-    void initTrajectory(const Eigen::VectorXd& q_init);
+    void InitTrajectory(const Eigen::VectorXd& q_init);
 
 private:
     UnconstrainedEndPoseProblem_ptr prob_;  //!< Shared pointer to the planning problem.
@@ -162,7 +163,7 @@ private:
        * and
        * \f$ S_t=Q+B_tH^{-1}B_t^{\!\top\!} + A_{t-1}(S_{t-1}^{-1}+R_{t-1})^{-1}A_{t-1}^{\!\top\!} \f$.
        */
-    void updateFwdMessage();
+    void UpdateFwdMessage();
     /**
        * \brief Updates the backward message
        *
@@ -173,7 +174,7 @@ private:
        * and
        * \f$ V_t=A_{t}^{-1}[Q+B_tH^{-1}B_t^{\!\top\!} + (V_{t+1}^{-1}+R_{t+1})^{-1}]A_{t}^{-{\!\top\!}} \f$.
        */
-    void updateBwdMessage();
+    void UpdateBwdMessage();
     /**
        * \brief Updates the task message
        * @param qhat_t Point of linearisation at time step $t$
@@ -183,7 +184,7 @@ private:
        * Updates the mean and covariance of the task message using:
        * \f$ \mu_{z_t\rightarrow x_t}(x)=\mathcal{N}[x_t|r_t,R_t] \f$
        */
-    void updateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double tolerance_,
+    void UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double tolerance_,
                            double maxStepSize = -1.);
     /**
        * \brief Update messages for given time step
@@ -193,9 +194,9 @@ private:
        * @param maxRelocationIterations Maximum number of relocation while searching for a good linearisation point
        * @param tolerance_ Tolerance for for stopping the search.
        * @param forceRelocation Set to true to force relocation even when the result is within tolerance.
-       * @param maxStepSize Step size for updateTaskMessage.
+       * @param maxStepSize Step size for UpdateTaskMessage.
        */
-    void updateTimeStep(bool updateFwd, bool updateBwd,
+    void UpdateTimestep(bool updateFwd, bool updateBwd,
                         int maxRelocationIterations, double tolerance_, bool forceRelocation,
                         double maxStepSize = -1.);
     /**
@@ -205,7 +206,7 @@ private:
        * @param updateBwd Update the backward message.
        * @param maxRelocationIterations Maximum number of relocation while searching for a good linearisation point
        * @param tolerance Tolerance for for stopping the search.
-       * @param maxStepSize Step size for updateTaskMessage.
+       * @param maxStepSize Step size for UpdateTaskMessage.
        *
        * First, the messages \f$ \mu_{x_{t-1}\rightarrow x_t}(x)=\mathcal{N}(x_t|s_t,S_t) \f$,
        * \f$ \mu_{x_{t+1}\rightarrow x_t}(x)=\mathcal{N}(x_t|v_t,V_t) \f$ and
@@ -215,7 +216,7 @@ private:
        * where the mean and covariance are updated as follows:
        * \f$ b_t(X_t)=\mathcal{N}\left(x_t|(S_t^{-1}+V_t^{-1}+R_t)^{-1}(S_t^{-1}s_t+V_t^{-1}v_t+r_t),S_t^{-1}+V_t^{-1}+R_t \right) \f$.
        */
-    void updateTimeStepGaussNewton(bool updateFwd, bool updateBwd,
+    void UpdateTimestepGaussNewton(bool updateFwd, bool updateBwd,
                                    int maxRelocationIterations, double tolerance, double maxStepSize =
                                                                                       -1.);
     /**
@@ -223,29 +224,28 @@ private:
        * @param x Trajecotry.
        * @return Cost of the trajectory.
        */
-    double evaluateTrajectory(const Eigen::VectorXd& x, bool skipUpdate = false);
+    double EvaluateTrajectory(const Eigen::VectorXd& x, bool skipUpdate = false);
     /**
        * \brief Stores the previous state.
        */
-    void rememberOldState();
+    void RememberOldState();
+
     /**
        * \brief Reverts back to previous state if the cost of the current state is higher.
        */
-    void perhapsUndoStep();
+    void PerhapsUndoStep();
 
     /**
        * \brief Updates the task cost terms \f$ R, r, \hat{r} \f$. UnconstrainedEndPoseProblem::update() has to be called before calling this function.
        */
-    double getTaskCosts();
+    double GetTaskCosts();
 
     /**
        * \brief Compute one step of the AICO algorithm.
        * @return Change in cost of the trajectory.
        */
-    double step();
+    double Step();
 };
-
-typedef std::shared_ptr<exotica::BayesianIKSolver> BayesianIK_ptr;
 } /* namespace exotica */
 
 #endif /* EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H_ */

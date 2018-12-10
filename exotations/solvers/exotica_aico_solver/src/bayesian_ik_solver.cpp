@@ -120,7 +120,7 @@ void BayesianIKSolver::specifyProblem(PlanningProblem_ptr problem)
     MotionSolver::specifyProblem(problem);
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(problem);
 
-    initMessages();
+    InitMessages();
 }
 
 void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
@@ -137,7 +137,7 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
     damping = damping_init;
     double d;
     iterationCount = -1;
-    initTrajectory(q0);
+    InitTrajectory(q0);
     if (debug_) ROS_WARN_STREAM("BayesianIKSolver: Solving");
 
     // Reset sweep and iteration count
@@ -153,7 +153,7 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        d = step();
+        d = Step();
         if (d < 0)
         {
             throw_named("Negative step size!");
@@ -212,7 +212,7 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
     planning_time_ = timer.getDuration();
 }
 
-void BayesianIKSolver::initMessages()
+void BayesianIKSolver::InitMessages()
 {
     if (prob_ == nullptr) throw_named("Problem definition is a NULL pointer!");
 
@@ -262,7 +262,7 @@ void BayesianIKSolver::initMessages()
     }
 }
 
-void BayesianIKSolver::initTrajectory(const Eigen::VectorXd& q_init)
+void BayesianIKSolver::InitTrajectory(const Eigen::VectorXd& q_init)
 {
     qhat = q_init;
     q = q_init;
@@ -276,17 +276,17 @@ void BayesianIKSolver::initTrajectory(const Eigen::VectorXd& q_init)
     Vinv.diagonal().setConstant(damping);
 
     // Compute task message reference
-    updateTaskMessage(b, 0.0);
+    UpdateTaskMessage(b, 0.0);
 
-    cost = evaluateTrajectory(b, true);  // The problem will be updated via updateTaskMessage, i.e. do not update on this roll-out
+    cost = EvaluateTrajectory(b, true);  // The problem will be updated via UpdateTaskMessage, i.e. do not update on this roll-out
     cost_prev = cost;
     prob_->setCostEvolution(0, cost);
     if (cost < 0) throw_named("Invalid cost! " << cost);
     if (debug_) HIGHLIGHT("Initial cost, updates: " << updateCount << ", cost: " << cost);
-    rememberOldState();
+    RememberOldState();
 }
 
-void BayesianIKSolver::updateFwdMessage()
+void BayesianIKSolver::UpdateFwdMessage()
 {
     Eigen::MatrixXd barS(prob_->N, prob_->N), St;
     inverseSymPosDef(barS, Sinv + R);
@@ -295,7 +295,7 @@ void BayesianIKSolver::updateFwdMessage()
     inverseSymPosDef(Sinv, St);
 }
 
-void BayesianIKSolver::updateBwdMessage()
+void BayesianIKSolver::UpdateBwdMessage()
 {
     Eigen::MatrixXd barV(prob_->N, prob_->N), Vt;
 
@@ -311,7 +311,7 @@ void BayesianIKSolver::updateBwdMessage()
     }
 }
 
-void BayesianIKSolver::updateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double minimum_step_tolerance,
+void BayesianIKSolver::UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double minimum_step_tolerance,
                                          double maxStepSize)
 {
     Eigen::VectorXd diff = qhat_t - qhat;
@@ -328,11 +328,11 @@ void BayesianIKSolver::updateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>
 
     prob_->Update(qhat);
     updateCount++;
-    double c = getTaskCosts();
+    double c = GetTaskCosts();
     // q_stat.addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
 }
 
-double BayesianIKSolver::getTaskCosts()
+double BayesianIKSolver::GetTaskCosts()
 {
     double C = 0;
     Eigen::MatrixXd Jt;
@@ -357,12 +357,12 @@ double BayesianIKSolver::getTaskCosts()
     return C;
 }
 
-void BayesianIKSolver::updateTimeStep(bool updateFwd, bool updateBwd,
+void BayesianIKSolver::UpdateTimestep(bool updateFwd, bool updateBwd,
                                       int maxRelocationIterations, double minimum_step_tolerance, bool forceRelocation,
                                       double maxStepSize)
 {
-    if (updateFwd) updateFwdMessage();
-    if (updateBwd) updateBwdMessage();
+    if (updateFwd) UpdateFwdMessage();
+    if (updateBwd) UpdateBwdMessage();
 
     if (damping)
     {
@@ -379,11 +379,11 @@ void BayesianIKSolver::updateTimeStep(bool updateFwd, bool updateBwd,
     {
         if (!((!k && forceRelocation) || (b - qhat).array().abs().maxCoeff() > minimum_step_tolerance)) break;
 
-        updateTaskMessage(b, 0., maxStepSize);
+        UpdateTaskMessage(b, 0., maxStepSize);
 
         //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
-        if (updateFwd) updateFwdMessage();
-        if (updateBwd) updateBwdMessage();
+        if (updateFwd) UpdateFwdMessage();
+        if (updateBwd) UpdateBwdMessage();
 
         if (damping)
         {
@@ -398,15 +398,15 @@ void BayesianIKSolver::updateTimeStep(bool updateFwd, bool updateBwd,
     }
 }
 
-void BayesianIKSolver::updateTimeStepGaussNewton(bool updateFwd,
+void BayesianIKSolver::UpdateTimestepGaussNewton(bool updateFwd,
                                                  bool updateBwd, int maxRelocationIterations, double minimum_step_tolerance,
                                                  double maxStepSize)
 {
-    // TODO: implement updateTimeStepGaussNewton
+    // TODO: implement UpdateTimestepGaussNewton
     throw_named("Not implemented yet!");
 }
 
-double BayesianIKSolver::evaluateTrajectory(const Eigen::VectorXd& x, bool skipUpdate)
+double BayesianIKSolver::EvaluateTrajectory(const Eigen::VectorXd& x, bool skipUpdate)
 {
     if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iterationCount << ", sweep " << sweep);
     q = x;
@@ -422,53 +422,53 @@ double BayesianIKSolver::evaluateTrajectory(const Eigen::VectorXd& x, bool skipU
     return prob_->getScalarCost();
 }
 
-double BayesianIKSolver::step()
+double BayesianIKSolver::Step()
 {
-    rememberOldState();
+    RememberOldState();
     switch (sweepMode)
     {
         //NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
         case smForwardly:
             // for (t = 1; t < prob_->getT(); t++)
             // {
-            updateTimeStep(true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd Sweep
+            UpdateTimestep(true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd Sweep
             // }
             // for (t = prob_->getT() - 2; t > 0; t--)
             // {
-            updateTimeStep(false, true, 0, minimum_step_tolerance, false, 1.);  //...not on bwd Sweep
+            UpdateTimestep(false, true, 0, minimum_step_tolerance, false, 1.);  //...not on bwd Sweep
             // }
             break;
         case smSymmetric:
             // ROS_WARN_STREAM("Updating forward, iterationCount "<<iterationCount);
             // for (t = 1; t < prob_->getT(); t++)
             // {
-            updateTimeStep(true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd & bwd Sweep
+            UpdateTimestep(true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd & bwd Sweep
             // }
             // ROS_WARN_STREAM("Updating backward, iterationCount "<<iterationCount);
             // for (t = prob_->getT() - 2; t > 0; t--)
             // {
-            updateTimeStep(false, true, (iterationCount ? 1 : 0), minimum_step_tolerance, false, 1.);
+            UpdateTimestep(false, true, (iterationCount ? 1 : 0), minimum_step_tolerance, false, 1.);
             // }
             break;
         case smLocalGaussNewton:
             // for (t = 1; t < prob_->getT(); t++)
             // {
-            //     updateTimeStep(t, true, false, (iterationCount ? 5 : 1), minimum_step_tolerance, !iterationCount, 1.);  //relocate iteratively on
+            //     UpdateTimestep(t, true, false, (iterationCount ? 5 : 1), minimum_step_tolerance, !iterationCount, 1.);  //relocate iteratively on
             // }
             // for (t = prob_->getT() - 2; t > 0; t--)
             // {
-            //     updateTimeStep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);  //...fwd & bwd Sweep
+            //     UpdateTimestep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);  //...fwd & bwd Sweep
             // }
             break;
         case smLocalGaussNewtonDamped:
             // for (t = 1; t < prob_->getT(); t++)
             // {
-            //     updateTimeStepGaussNewton(t, true, false, (iterationCount ? 5 : 1),
+            //     UpdateTimestepGaussNewton(t, true, false, (iterationCount ? 5 : 1),
             //                               minimum_step_tolerance, 1.);  //GaussNewton in fwd & bwd Sweep
             // }
             // for (t = prob_->getT() - 2; t > 0; t--)
             // {
-            //     updateTimeStep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);
+            //     UpdateTimestep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);
             // }
             break;
         default:
@@ -476,14 +476,14 @@ double BayesianIKSolver::step()
     }
     b_step = std::max((b_old - b).array().abs().maxCoeff(), 0.0);
     dampingReference = b;
-    // q is set inside of evaluateTrajectory() function
-    cost = evaluateTrajectory(b);
+    // q is set inside of EvaluateTrajectory() function
+    cost = EvaluateTrajectory(b);
     if (debug_) HIGHLIGHT("Iteration: " << iterationCount << ", Sweep: " << sweep << ", updates: " << updateCount << ", cost: " << cost << " (dq=" << b_step << ", damping=" << damping << ")");
     if (cost < 0) return -1.0;
     bestSweep = sweep;
 
     // If damping (similar to line-search) is being used, consider reverting this step
-    if (damping) perhapsUndoStep();
+    if (damping) PerhapsUndoStep();
 
     sweep++;
     if (sweepImprovedCost)
@@ -497,7 +497,7 @@ double BayesianIKSolver::step()
     return b_step;
 }
 
-void BayesianIKSolver::rememberOldState()
+void BayesianIKSolver::RememberOldState()
 {
     s_old = s;
     Sinv_old = Sinv;
@@ -517,7 +517,7 @@ void BayesianIKSolver::rememberOldState()
     b_step_old = b_step;
 }
 
-void BayesianIKSolver::perhapsUndoStep()
+void BayesianIKSolver::PerhapsUndoStep()
 {
     if (cost > cost_old)
     {

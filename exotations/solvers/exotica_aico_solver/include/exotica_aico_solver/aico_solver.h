@@ -68,7 +68,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <exotica/Exotica.h>
+#include <exotica/MotionSolver.h>
 #include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 
 #include <exotica_aico_solver/incremental_gaussian.h>
@@ -86,8 +86,9 @@ class AICOSolver : public MotionSolver, public Instantiable<AICOSolverInitialize
 {
 public:
     AICOSolver();
-    virtual void Instantiate(AICOSolverInitializer& init);
+    void Instantiate(AICOSolverInitializer& init) override;
     virtual ~AICOSolver();
+
     /**
        * \brief Solves the problem
        * @param solution Returned solution trajectory as a vector of joint configurations.
@@ -99,28 +100,21 @@ public:
        * @param pointer Shared pointer to the motion planning problem
        * @return        Successful if the problem is a valid UnconstrainedTimeIndexedProblem
        */
-    virtual void specifyProblem(PlanningProblem_ptr pointer);
-
-    /**
-       * \brief Stores costs into a file
-       */
-    void saveCosts(std::string file_name);
-
-    void getStats(std::vector<SinglePassMeanCovariance>& q_stat_);
+    void specifyProblem(PlanningProblem_ptr pointer) override;
 
 protected:
     /** \brief Initializes message data.
        *  @param q0 Start configuration
        *  @return  Indicates success
        */
-    void initMessages();
+    void InitMessages();
 
     /**
        * \brief Initialise AICO messages from an initial trajectory
        * @param q_init Initial trajectory
        * @return  Indicates success
        */
-    void initTrajectory(const std::vector<Eigen::VectorXd>& q_init);
+    void InitTrajectory(const std::vector<Eigen::VectorXd>& q_init);
 
 private:
     UnconstrainedTimeIndexedProblem_ptr prob_;  //!< Shared pointer to the planning problem.
@@ -176,7 +170,7 @@ private:
     Eigen::MatrixXd W;     //!< Configuration space weight matrix inverse
     Eigen::MatrixXd Winv;  //!< Configuration space weight matrix inverse
 
-    int lastT;  //!< T the last time initMessages was called.
+    int lastT;  //!< T the last time InitMessages was called.
 
     int sweep;  //!< Sweeps so far
     int bestSweep = 0;
@@ -204,7 +198,7 @@ private:
        * and
        * \f$ S_t=Q+B_tH^{-1}B_t^{\!\top\!} + A_{t-1}(S_{t-1}^{-1}+R_{t-1})^{-1}A_{t-1}^{\!\top\!} \f$.
        */
-    void updateFwdMessage(int t);
+    void UpdateFwdMessage(int t);
     /**
        * \brief Updates the backward message at time step $t$
        * @param t Time step
@@ -216,7 +210,7 @@ private:
        * and
        * \f$ V_t=A_{t}^{-1}[Q+B_tH^{-1}B_t^{\!\top\!} + (V_{t+1}^{-1}+R_{t+1})^{-1}]A_{t}^{-{\!\top\!}} \f$.
        */
-    void updateBwdMessage(int t);
+    void UpdateBwdMessage(int t);
     /**
        * \brief Updates the task message at time step $t$
        * @param t Time step
@@ -227,7 +221,7 @@ private:
        * Updates the mean and covariance of the task message using:
        * \f$ \mu_{z_t\rightarrow x_t}(x)=\mathcal{N}[x_t|r_t,R_t] \f$
        */
-    void updateTaskMessage(int t,
+    void UpdateTaskMessage(int t,
                            const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double tolerance_,
                            double maxStepSize = -1.);
     /**
@@ -238,9 +232,9 @@ private:
        * @param maxRelocationIterations Maximum number of relocation while searching for a good linearisation point
        * @param tolerance_ Tolerance for for stopping the search.
        * @param forceRelocation Set to true to force relocation even when the result is within tolerance.
-       * @param maxStepSize Step size for updateTaskMessage.
+       * @param maxStepSize Step size for UpdateTaskMessage.
        */
-    void updateTimeStep(int t, bool updateFwd, bool updateBwd,
+    void UpdateTimestep(int t, bool updateFwd, bool updateBwd,
                         int maxRelocationIterations, double tolerance_, bool forceRelocation,
                         double maxStepSize = -1.);
     /**
@@ -250,7 +244,7 @@ private:
        * @param updateBwd Update the backward message.
        * @param maxRelocationIterations Maximum number of relocation while searching for a good linearisation point
        * @param tolerance Tolerance for for stopping the search.
-       * @param maxStepSize Step size for updateTaskMessage.
+       * @param maxStepSize Step size for UpdateTaskMessage.
        *
        * First, the messages \f$ \mu_{x_{t-1}\rightarrow x_t}(x)=\mathcal{N}(x_t|s_t,S_t) \f$,
        * \f$ \mu_{x_{t+1}\rightarrow x_t}(x)=\mathcal{N}(x_t|v_t,V_t) \f$ and
@@ -260,39 +254,38 @@ private:
        * where the mean and covariance are updated as follows:
        * \f$ b_t(X_t)=\mathcal{N}\left(x_t|(S_t^{-1}+V_t^{-1}+R_t)^{-1}(S_t^{-1}s_t+V_t^{-1}v_t+r_t),S_t^{-1}+V_t^{-1}+R_t \right) \f$.
        */
-    void updateTimeStepGaussNewton(int t, bool updateFwd, bool updateBwd,
+    void UpdateTimestepGaussNewton(int t, bool updateFwd, bool updateBwd,
                                    int maxRelocationIterations, double tolerance, double maxStepSize =
                                                                                       -1.);
     /**
        * \brief Computes the cost of the trajectory
-       * @param x Trajecotry.
+       * @param x Trajectory.
        * @return Cost of the trajectory.
        */
-    double evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
+    double EvaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
                               bool skipUpdate = false);
     /**
        * \brief Stores the previous state.
        */
-    void rememberOldState();
+    void RememberOldState();
+
     /**
        * \brief Reverts back to previous state if the cost of the current state is higher.
        */
-    void perhapsUndoStep();
+    void PerhapsUndoStep();
 
     /**
        * \brief Updates the task cost terms \f$ R, r, \hat{r} \f$ for time step \f$t\f$. UnconstrainedTimeIndexedProblem::update() has to be called before calling this function.
        * @param t Time step to be updated.
        */
-    double getTaskCosts(int t);
+    double GetTaskCosts(int t);
 
     /**
        * \brief Compute one step of the AICO algorithm.
        * @return Change in cost of the trajectory.
        */
-    double step();
+    double Step();
 };
-
-typedef std::shared_ptr<exotica::AICOSolver> AICOSolver_ptr;
 } /* namespace exotica */
 
 #endif /* EXOTICA_AICO_SOLVER_AICO_SOLVER_H_ */

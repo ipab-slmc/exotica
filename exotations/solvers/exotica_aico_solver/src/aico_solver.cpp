@@ -36,7 +36,7 @@
  *
  */
 
-/** \file AICOSolver.h
+/** \file aico_solver.h
  \brief Approximate Inference Control */
 
 #include <exotica_aico_solver/aico_solver.h>
@@ -66,20 +66,6 @@ void AICOSolver::Instantiate(AICOSolverInitializer& init)
     function_tolerance = init.FunctionTolerance;
     damping_init = init.Damping;
     useBwdMsg = init.UseBackwardMessage;
-}
-
-void AICOSolver::saveCosts(std::string file_name)
-{
-    std::ofstream myfile;
-    myfile.open(file_name.c_str());
-    myfile << "Control Task";
-    for (int t = 0; t < prob_->getT(); t++)
-    {
-        myfile << "\n"
-               << costControl(t);
-        myfile << " " << costTask(t);
-    }
-    myfile.close();
 }
 
 AICOSolver::AICOSolver()
@@ -128,11 +114,6 @@ AICOSolver::AICOSolver()
 {
 }
 
-void AICOSolver::getStats(std::vector<SinglePassMeanCovariance>& q_stat_)
-{
-    q_stat_ = q_stat;
-}
-
 AICOSolver::~AICOSolver() = default;
 
 void AICOSolver::specifyProblem(PlanningProblem_ptr problem)
@@ -144,7 +125,7 @@ void AICOSolver::specifyProblem(PlanningProblem_ptr problem)
     MotionSolver::specifyProblem(problem);
     prob_ = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(problem);
 
-    initMessages();
+    InitMessages();
 }
 
 void AICOSolver::Solve(Eigen::MatrixXd& solution)
@@ -174,7 +155,7 @@ void AICOSolver::Solve(Eigen::MatrixXd& solution)
     prob_->applyStartState();
 
     // Check if the trajectory length has changed, if so update the messages.
-    if (prob_->getT() != lastT) initMessages();
+    if (prob_->getT() != lastT) InitMessages();
 
     Timer timer;
     if (debug_) ROS_WARN_STREAM("AICO: Setting up the solver");
@@ -186,7 +167,7 @@ void AICOSolver::Solve(Eigen::MatrixXd& solution)
         throw_named("Problem has not been initialized properly: T=0!");
     }
     iterationCount = -1;
-    initTrajectory(q_init);
+    InitTrajectory(q_init);
     if (debug_) ROS_WARN_STREAM("AICO: Solving");
 
     // Reset sweep and iteration count
@@ -202,7 +183,7 @@ void AICOSolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        d = step();
+        d = Step();
         if (d < 0)
         {
             throw_named("Negative step size!");
@@ -265,7 +246,7 @@ void AICOSolver::Solve(Eigen::MatrixXd& solution)
     planning_time_ = timer.getDuration();
 }
 
-void AICOSolver::initMessages()
+void AICOSolver::InitMessages()
 {
     if (prob_ == nullptr) throw_named("Problem definition is a NULL pointer!");
 
@@ -334,7 +315,7 @@ void AICOSolver::initMessages()
     lastT = prob_->getT();
 }
 
-void AICOSolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
+void AICOSolver::InitTrajectory(const std::vector<Eigen::VectorXd>& q_init)
 {
     if (q_init.size() != prob_->getT())
     {
@@ -359,18 +340,18 @@ void AICOSolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
     for (int t = 0; t < prob_->getT(); t++)
     {
         // Compute task message reference
-        updateTaskMessage(t, b[t], 0.0);
+        UpdateTaskMessage(t, b[t], 0.0);
     }
 
-    cost = evaluateTrajectory(b, true);  // The problem will be updated via updateTaskMessage, i.e. do not update on this roll-out
+    cost = EvaluateTrajectory(b, true);  // The problem will be updated via UpdateTaskMessage, i.e. do not update on this roll-out
     cost_prev = cost;
     prob_->setCostEvolution(0, cost);
     if (cost < 0) throw_named("Invalid cost! " << cost);
     if (debug_) HIGHLIGHT("Initial cost, updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost);
-    rememberOldState();
+    RememberOldState();
 }
 
-void AICOSolver::updateFwdMessage(int t)
+void AICOSolver::UpdateFwdMessage(int t)
 {
     Eigen::MatrixXd barS(prob_->N, prob_->N), St;
     inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]);
@@ -379,7 +360,7 @@ void AICOSolver::updateFwdMessage(int t)
     inverseSymPosDef(Sinv[t], St);
 }
 
-void AICOSolver::updateBwdMessage(int t)
+void AICOSolver::UpdateBwdMessage(int t)
 {
     Eigen::MatrixXd barV(prob_->N, prob_->N), Vt;
     if (t < prob_->getT() - 1)
@@ -404,7 +385,7 @@ void AICOSolver::updateBwdMessage(int t)
     }
 }
 
-void AICOSolver::updateTaskMessage(int t,
+void AICOSolver::UpdateTaskMessage(int t,
                                    const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double minimum_step_tolerance,
                                    double maxStepSize)
 {
@@ -422,11 +403,11 @@ void AICOSolver::updateTaskMessage(int t,
 
     prob_->Update(qhat[t], t);
     updateCount++;
-    double c = getTaskCosts(t);
+    double c = GetTaskCosts(t);
     q_stat[t].addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
 }
 
-double AICOSolver::getTaskCosts(int t)
+double AICOSolver::GetTaskCosts(int t)
 {
     double C = 0;
     Eigen::MatrixXd Jt;
@@ -451,12 +432,12 @@ double AICOSolver::getTaskCosts(int t)
     return prob_->ct * C;
 }
 
-void AICOSolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
+void AICOSolver::UpdateTimestep(int t, bool updateFwd, bool updateBwd,
                                 int maxRelocationIterations, double minimum_step_tolerance, bool forceRelocation,
                                 double maxStepSize)
 {
-    if (updateFwd) updateFwdMessage(t);
-    if (updateBwd) updateBwdMessage(t);
+    if (updateFwd) UpdateFwdMessage(t);
+    if (updateBwd) UpdateBwdMessage(t);
 
     if (damping)
     {
@@ -473,11 +454,11 @@ void AICOSolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
     {
         if (!((!k && forceRelocation) || (b[t] - qhat[t]).array().abs().maxCoeff() > minimum_step_tolerance)) break;
 
-        updateTaskMessage(t, b.at(t), 0., maxStepSize);
+        UpdateTaskMessage(t, b.at(t), 0., maxStepSize);
 
         //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
-        if (updateFwd) updateFwdMessage(t);
-        if (updateBwd) updateBwdMessage(t);
+        if (updateFwd) UpdateFwdMessage(t);
+        if (updateBwd) UpdateBwdMessage(t);
 
         if (damping)
         {
@@ -492,15 +473,15 @@ void AICOSolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
     }
 }
 
-void AICOSolver::updateTimeStepGaussNewton(int t, bool updateFwd,
+void AICOSolver::UpdateTimestepGaussNewton(int t, bool updateFwd,
                                            bool updateBwd, int maxRelocationIterations, double minimum_step_tolerance,
                                            double maxStepSize)
 {
-    // TODO: implement updateTimeStepGaussNewton
+    // TODO: implement UpdateTimestepGaussNewton
     throw_named("Not implemented yet!");
 }
 
-double AICOSolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
+double AICOSolver::EvaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
                                       bool skipUpdate)
 {
     if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iterationCount << ", sweep " << sweep);
@@ -542,9 +523,9 @@ double AICOSolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
     return cost;
 }
 
-double AICOSolver::step()
+double AICOSolver::Step()
 {
-    rememberOldState();
+    RememberOldState();
     int t;
     switch (sweepMode)
     {
@@ -552,44 +533,44 @@ double AICOSolver::step()
         case smForwardly:
             for (t = 1; t < prob_->getT(); t++)
             {
-                updateTimeStep(t, true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd Sweep
+                UpdateTimestep(t, true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd Sweep
             }
             for (t = prob_->getT() - 2; t > 0; t--)
             {
-                updateTimeStep(t, false, true, 0, minimum_step_tolerance, false, 1.);  //...not on bwd Sweep
+                UpdateTimestep(t, false, true, 0, minimum_step_tolerance, false, 1.);  //...not on bwd Sweep
             }
             break;
         case smSymmetric:
             // ROS_WARN_STREAM("Updating forward, iterationCount "<<iterationCount);
             for (t = 1; t < prob_->getT(); t++)
             {
-                updateTimeStep(t, true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd & bwd Sweep
+                UpdateTimestep(t, true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd & bwd Sweep
             }
             // ROS_WARN_STREAM("Updating backward, iterationCount "<<iterationCount);
             for (t = prob_->getT() - 2; t > 0; t--)
             {
-                updateTimeStep(t, false, true, (iterationCount ? 1 : 0), minimum_step_tolerance, false, 1.);
+                UpdateTimestep(t, false, true, (iterationCount ? 1 : 0), minimum_step_tolerance, false, 1.);
             }
             break;
         case smLocalGaussNewton:
             for (t = 1; t < prob_->getT(); t++)
             {
-                updateTimeStep(t, true, false, (iterationCount ? 5 : 1), minimum_step_tolerance, !iterationCount, 1.);  //relocate iteratively on
+                UpdateTimestep(t, true, false, (iterationCount ? 5 : 1), minimum_step_tolerance, !iterationCount, 1.);  //relocate iteratively on
             }
             for (t = prob_->getT() - 2; t > 0; t--)
             {
-                updateTimeStep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);  //...fwd & bwd Sweep
+                UpdateTimestep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);  //...fwd & bwd Sweep
             }
             break;
         case smLocalGaussNewtonDamped:
             for (t = 1; t < prob_->getT(); t++)
             {
-                updateTimeStepGaussNewton(t, true, false, (iterationCount ? 5 : 1),
+                UpdateTimestepGaussNewton(t, true, false, (iterationCount ? 5 : 1),
                                           minimum_step_tolerance, 1.);  //GaussNewton in fwd & bwd Sweep
             }
             for (t = prob_->getT() - 2; t > 0; t--)
             {
-                updateTimeStep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);
+                UpdateTimestep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);
             }
             break;
         default:
@@ -601,14 +582,14 @@ double AICOSolver::step()
         b_step = std::max((b_old[t] - b[t]).array().abs().maxCoeff(), b_step);
     }
     dampingReference = b;
-    // q is set inside of evaluateTrajectory() function
-    cost = evaluateTrajectory(b);
+    // q is set inside of EvaluateTrajectory() function
+    cost = EvaluateTrajectory(b);
     if (debug_) HIGHLIGHT("Iteration: " << iterationCount << ", Sweep: " << sweep << ", updates: " << updateCount << ", cost(ctrl/task/total): " << costControl.sum() << "/" << costTask.sum() << "/" << cost << " (dq=" << b_step << ", damping=" << damping << ")");
     if (cost < 0) return -1.0;
     bestSweep = sweep;
 
     // If damping (similar to line-search) is being used, consider reverting this step
-    if (damping) perhapsUndoStep();
+    if (damping) PerhapsUndoStep();
 
     sweep++;
     if (sweepImprovedCost)
@@ -622,7 +603,7 @@ double AICOSolver::step()
     return b_step;
 }
 
-void AICOSolver::rememberOldState()
+void AICOSolver::RememberOldState()
 {
     s_old = s;
     Sinv_old = Sinv;
@@ -643,7 +624,7 @@ void AICOSolver::rememberOldState()
     b_step_old = b_step;
 }
 
-void AICOSolver::perhapsUndoStep()
+void AICOSolver::PerhapsUndoStep()
 {
     if (cost > cost_old)
     {

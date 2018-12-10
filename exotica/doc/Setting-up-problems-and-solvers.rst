@@ -19,7 +19,7 @@ example file as a guide. The code is displayed below.
     #include <exotica/Exotica.h>
 
     // Manual initialization requires dependency on specific solvers and task maps:
-    #include <ik_solver/IKsolverInitializer.h>
+    #include <exotica_ik_solver/IKSolverInitializer.h>
     #include <task_map/EffFrameInitializer.h>
 
     using namespace exotica;
@@ -38,7 +38,7 @@ example file as a guide. The code is displayed below.
         W << 7, 6, 5, 4, 3, 2, 1;
 
         UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
-        IKsolverInitializer solver("MySolver");
+        IKSolverInitializer solver("MySolver");
         solver.C = 1e-3;
         solver.MaxIterations = 1;
         solver.MaxStep = 0.1;
@@ -121,12 +121,12 @@ need to include the correct header files:
     #include <exotica/Exotica.h>
 
     // Manual initialization requires dependency on specific solvers and task maps:
-    #include <ik_solver/IKsolverInitializer.h>
+    #include <exotica_ik_solver/IKSolverInitializer.h>
     #include <task_map/EffFrameInitializer.h>
 
 
 Problem definitions are handled in the ``exotica/Exotica.h`` header, so we only need to 
-include the ``IKsolverInitializer`` and ``EffFrameInitializer``. 
+include the ``IKSolverInitializer`` and ``EffFrameInitializer``. 
 
 To use other solvers and task maps just include the appropriate headers in the same 
 format. 
@@ -205,7 +205,7 @@ create an initializer, give the solver itself a name ("MySolver") then set the p
 
 .. code-block:: cpp
 
-    IKsolverInitializer solver("MySolver");
+    IKSolverInitializer solver("MySolver");
     solver.C = 1e-3;
     solver.MaxIterations = 1;
     solver.MaxStep = 0.1;

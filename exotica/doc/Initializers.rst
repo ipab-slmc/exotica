@@ -103,7 +103,7 @@ to your CMakeLists.txt:
     )
 
     # Add all names of defined initializers (excluding the *.in extension)
-    AddInitializer(IKsolver)
+    AddInitializer(IKSolver)
 
     # Generate initializers
     GenInitializers()

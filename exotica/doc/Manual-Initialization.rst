@@ -14,7 +14,7 @@ the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.c
         #include <exotica/Exotica.h>
 
         // Manual initialization requires dependency on specific solvers and task maps:
-        #include <ik_solver/IKsolverInitializer.h>
+        #include <exotica_ik_solver/IKSolverInitializer.h>
         #include <task_map/EffFrameInitializer.h>
 
         using namespace exotica;
@@ -33,7 +33,7 @@ the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.c
         W << 7, 6, 5, 4, 3, 2, 1;
 
         UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
-        IKsolverInitializer solver("MySolver");
+        IKSolverInitializer solver("MySolver");
         solver.C = 1e-3;
         solver.MaxIterations = 1;
         solver.MaxStep = 0.1;
@@ -45,7 +45,7 @@ Initializer Headers
 ===================
 
 At the top of the script, two initialiser header files are included: one
-for the ``ik_solver/IKsolverInitializer.h`` and one for
+for the ``exotica_ik_solver/IKSolverInitializer.h`` and one for
 ``task_map/EffPositionInitializer.h``. These are generated from the ``.in`` files during the compilation/build phase.
 
 When initializing manually, the appropriate initializers must be
@@ -59,7 +59,7 @@ Currently available solvers are:
 
     #include <ompl_solver/OMPLsolverInitializer.h>
     #include <exotica_aico_solver/AICOSolverInitializer.h>
-    #include <ik_solver/IKsolverInitializer.h>
+    #include <exotica_ik_solver/IKSolverInitializer.h>
 
 Once we have included the correct initializers, we must initialise:
 * ``scene`` 
@@ -169,12 +169,12 @@ will set up:
 
 .. code-block:: c++
 
-        IKsolverInitializer solver("MySolver");
+        IKSolverInitializer solver("MySolver");
         solver.C = 1e-3;
         solver.MaxIterations = 1;
         solver.MaxStep = 0.1;
 
-Again, we have an initialiser for the solver (``IKsolverInitializer``)
+Again, we have an initialiser for the solver (``IKSolverInitializer``)
 and we instantiate to a container, which here we call ``solver``. Also
 during initialisation, we give the solver a name we we can refer to it
 later; here we call the solver ``"MySolver"``

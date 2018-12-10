@@ -34,26 +34,22 @@
 
 namespace exotica
 {
-TaskVectorEntry::TaskVectorEntry(int inId_, RotationType type_) : inId(inId_), type(type_)
+TaskVectorEntry::TaskVectorEntry(int inId_in, RotationType type_in) : inId(inId_in), type(type_in)
 {
 }
 
-TaskVectorEntry::TaskVectorEntry() : inId(0), type(RotationType::RPY)
-{
-}
+TaskVectorEntry::TaskVectorEntry() = default;
 
-TaskSpaceVector::TaskSpaceVector()
-{
-}
+TaskSpaceVector::TaskSpaceVector() = default;
+TaskSpaceVector::~TaskSpaceVector() = default;
 
 TaskSpaceVector& TaskSpaceVector::operator=(std::initializer_list<double> other)
 {
     if (other.size() != data.rows()) throw_pretty("Wrong initializer size: " << other.size() << " expecting " << data.rows());
     int i = 0;
-    for (double val : other)
+    for (const double& val : other)
     {
-        data(i) = val;
-        i++;
+        data(i++) = val;
     }
     return *this;
 }
@@ -63,7 +59,7 @@ void TaskSpaceVector::setZero(int N)
     data = Eigen::VectorXd::Zero(N);
     for (const TaskVectorEntry& id : map)
     {
-        int len = getRotationTypeLength(id.type);
+        const int len = getRotationTypeLength(id.type);
         data.segment(id.inId, len) = setRotation(KDL::Rotation(), id.type);
     }
 }

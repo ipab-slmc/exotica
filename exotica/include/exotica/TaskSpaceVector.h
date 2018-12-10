@@ -42,8 +42,8 @@ namespace exotica
 {
 struct TaskVectorEntry
 {
-    RotationType type;
-    int inId;
+    RotationType type = RotationType::RPY;
+    int inId = 0;
 
     TaskVectorEntry();
     TaskVectorEntry(int inId_, RotationType type_);
@@ -54,6 +54,7 @@ class TaskSpaceVector
 {
 public:
     TaskSpaceVector();
+    ~TaskSpaceVector();
     TaskSpaceVector& operator=(std::initializer_list<double> other);
     Eigen::VectorXd operator-(const TaskSpaceVector& other);
     void setZero(int N);

@@ -114,7 +114,7 @@ KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type)
                                  data(3), data(4), data(5),
                                  data(6), data(7), data(8));
     }
-    throw_pretty("Unknown rotation represntation type!");
+    throw_pretty("Unknown rotation representation type!");
 }
 
 Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type)

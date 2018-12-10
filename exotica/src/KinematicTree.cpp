@@ -621,7 +621,7 @@ void KinematicTree::publishFrames()
             visualization_msgs::MarkerArray msg;
             for (int i = 0; i < Tree.size(); i++)
             {
-                if (Tree[i].lock()->Shape)
+                if (Tree[i].lock()->Shape && (!Tree[i].lock()->ClosestRobotLink.lock() || !Tree[i].lock()->ClosestRobotLink.lock()->isRobotLink))
                 {
                     visualization_msgs::Marker mrk;
                     shapes::constructMarkerFromShape(Tree[i].lock()->Shape.get(), mrk);

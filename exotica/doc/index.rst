@@ -90,6 +90,7 @@ Additional Information and APIs
    :maxdepth: 2
 
    Code-Formatting
+   Styleguide-and-Naming-Convention
    Python-API
    Doxygen C++ <./doxygen_cpp/index.html#http://>
    Documentation    

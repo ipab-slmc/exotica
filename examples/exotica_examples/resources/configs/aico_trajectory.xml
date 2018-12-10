@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
 
-  <AICOsolver Name="MySolver" Debug="1" />
+  <AICOSolver Name="MySolver" Debug="1" />
 
   <UnconstrainedTimeIndexedProblem Name="MyProblem">
 

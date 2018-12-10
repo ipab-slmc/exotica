@@ -34,7 +34,7 @@
 
 // Manual initialization requires dependency on specific solvers and task maps:
 #include <exotica/TaskInitializer.h>
-#include <ik_solver/IKsolverInitializer.h>
+#include <exotica_ik_solver/IKSolverInitializer.h>
 #include <task_map/EffFrameInitializer.h>
 
 using namespace exotica;
@@ -57,7 +57,7 @@ void run()
     Eigen::VectorXd nominalState = Eigen::VectorXd::Zero(7);
 
     UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, startState, 0.0, -1, {cost}, W, nominalState);
-    IKsolverInitializer solver("MySolver");
+    IKSolverInitializer solver("MySolver");
     solver.C = 1e-3;
     solver.MaxIterations = 1;
     solver.MaxStep = 0.1;

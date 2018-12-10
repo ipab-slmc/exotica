@@ -113,7 +113,7 @@ bool testGenericInit()
                                                                    {"Maps", std::vector<Initializer>({map})},
                                                                    {"W", W},
                                                                });
-    Initializer solver("exotica/IKsolver", {
+    Initializer solver("exotica/IKSolver", {
                                                {"Name", std::string("MySolver")},
                                                {"MaxIterations", 1},
                                                {"MaxStep", 0.1},
@@ -127,7 +127,7 @@ bool testGenericInit()
 
 bool testXMLInit()
 {
-    std::string XMLstring = "<IKSolverDemoConfig><IKsolver Name=\"MySolver\"><MaxIterations>1</MaxIterations><MaxStep>0.1</MaxStep><C>1e-3</C></IKsolver><UnconstrainedEndPoseProblem Name=\"MyProblem\"><PlanningScene><Scene Name=\"MyScene\"><JointGroup>arm</JointGroup></Scene></PlanningScene><Maps><EffPosition Name=\"Position\"><Scene>MyScene</Scene><EndEffector><Frame Link=\"endeff\" /></EndEffector></EffPosition></Maps><W> 3 2 1 </W></UnconstrainedEndPoseProblem></IKSolverDemoConfig>";
+    std::string XMLstring = "<IKSolverDemoConfig><IKSolver Name=\"MySolver\"><MaxIterations>1</MaxIterations><MaxStep>0.1</MaxStep><C>1e-3</C></IKSolver><UnconstrainedEndPoseProblem Name=\"MyProblem\"><PlanningScene><Scene Name=\"MyScene\"><JointGroup>arm</JointGroup></Scene></PlanningScene><Maps><EffPosition Name=\"Position\"><Scene>MyScene</Scene><EndEffector><Frame Link=\"endeff\" /></EndEffector></EffPosition></Maps><W> 3 2 1 </W></UnconstrainedEndPoseProblem></IKSolverDemoConfig>";
     Initializer solver, problem;
     XMLLoader::load(XMLstring, solver, problem, "", "", true);
     PlanningProblem_ptr any_problem = Setup::createProblem(problem);

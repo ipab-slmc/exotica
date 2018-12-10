@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <IKConfig>
 
-  <IKsolver Name="IK" C="1e-3"/>
+  <IKSolver Name="IK" C="1e-3"/>
 
   <UnconstrainedEndPoseProblem Name="FigureEightTracking">
 

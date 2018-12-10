@@ -65,7 +65,7 @@ void run()
                                                                    {"NominalState", nominalState},
                                                                });
 
-    Initializer solver("exotica/IKsolver", {
+    Initializer solver("exotica/IKSolver", {
                                                {"Name", std::string("MySolver")},
                                                {"MaxIterations", 1},
                                                {"MaxStep", 0.1},

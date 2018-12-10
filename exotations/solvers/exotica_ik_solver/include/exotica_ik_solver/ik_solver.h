@@ -1,7 +1,4 @@
-/*
- *  Created on: 15 Jul 2014
- *      Author: Yiming Yang
- * 
+/* 
  * Copyright (c) 2016, University of Edinburgh
  * All rights reserved. 
  * 
@@ -31,47 +28,47 @@
  *
  */
 
-#ifndef IK_SOLVER_H_
-#define IK_SOLVER_H_
+#ifndef EXOTICA_IK_SOLVER_IK_SOLVER_H_
+#define EXOTICA_IK_SOLVER_IK_SOLVER_H_
 
-#include <exotica/Exotica.h>
-#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
-#include <ik_solver/IKsolverInitializer.h>
 #include <fstream>
 #include <iostream>
+
+#include <exotica/MotionSolver.h>
+#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
+
+#include <exotica_ik_solver/IKSolverInitializer.h>
 
 namespace exotica
 {
 /**
-   * \brief	IK position solver
-   */
-class IKsolver : public MotionSolver, public Instantiable<IKsolverInitializer>
+ * \brief	IK position solver
+ */
+class IKSolver : public MotionSolver, public Instantiable<IKSolverInitializer>
 {
 public:
-    IKsolver();
-    virtual ~IKsolver();
+    IKSolver();
+    virtual ~IKSolver();
 
-    virtual void Instantiate(IKsolverInitializer& init);
+    void Instantiate(IKSolverInitializer& init) override;
 
-    virtual void Solve(Eigen::MatrixXd& solution);
+    void Solve(Eigen::MatrixXd& solution) override;
 
-    virtual void specifyProblem(PlanningProblem_ptr pointer);
+    void specifyProblem(PlanningProblem_ptr pointer) override;
 
 private:
-    IKsolverInitializer parameters_;
+    IKSolverInitializer parameters_;
 
     Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
     void ScaleToStepSize(Eigen::VectorXdRef xd);
 
     UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
 
-    Eigen::MatrixXd Cinv;  //!< Weight Matrices
-    Eigen::MatrixXd C;
-    Eigen::MatrixXd W;
-    Eigen::MatrixXd Winv;
-    double error;
+    Eigen::MatrixXd Cinv_;  //!< Weight Matrices
+    Eigen::MatrixXd C_;
+    Eigen::MatrixXd W_;
+    Eigen::MatrixXd Winv_;
 };
-typedef std::shared_ptr<exotica::IKsolver> IKsolver_ptr;
 }
 
-#endif /* IK_SOLVER_H_ */
+#endif /* EXOTICA_IK_SOLVER_IK_SOLVER_H_ */

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <SceneTestingConfig>
 
-    <IKsolver Name="DummySolver"/>
+    <IKSolver Name="DummySolver"/>
 
     <UnconstrainedEndPoseProblem Name="FullProblem">
 

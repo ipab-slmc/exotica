@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <TestConfig>
 
-<IKsolver Name="Dummy" />
+<IKSolver Name="Dummy" />
 
 <UnconstrainedEndPoseProblem Name="UnconstrainedEndPoseProblem">
     <PlanningScene>

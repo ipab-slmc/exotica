@@ -3,8 +3,8 @@ project(exotica_examples)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica
+  exotica_ik_solver
   sensor_msgs
-  ik_solver
   task_map
 )
 
@@ -56,7 +56,7 @@ if(CATKIN_ENABLE_TESTING)
   find_package(catkin REQUIRED COMPONENTS
     exotica
     sensor_msgs
-    ik_solver
+    exotica_ik_solver
     task_map
     rostest
   )

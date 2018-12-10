@@ -14,6 +14,7 @@
   <depend>exotica</depend>
   <depend>exotica_python</depend>
   <depend>exotica_aico_solver</depend>
+  <depend>exotica_ik_solver</depend>
   <depend>sensor_msgs</depend>
   <depend>ik_solver</depend>
   <depend>task_map</depend>

@@ -113,7 +113,7 @@ bool testRandom(UnconstrainedTimeIndexedProblem_ptr problem)
     return true;
 }
 
-bool testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eigen::MatrixXdRefConst Jref, UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5)
+bool testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eigen::MatrixXdRefConst Jref, UnconstrainedEndPoseProblem_ptr problem, const double eps = 1e-5)
 {
     TEST_COUT << "Testing set points:";
     int N = Xref.cols();
@@ -148,14 +148,11 @@ bool testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eige
     return true;
 }
 
-// Cf. https://www.rose-hulman.edu/~bryan/lottamath/diffgrad.pdf => "best h approx 1e-8"
-// and https://scicomp.stackexchange.com/questions/14355/choosing-epsilons
-bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1.e-4)
+bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, const double eps = 1e-5)
 {
-    constexpr double eps_double = std::numeric_limits<double>::epsilon();
-    constexpr double h = 2. * std::sqrt(eps_double);  // For first-order finite differencing
+    constexpr double h = 1e-5;
 
-    TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps << ", eps_double=" << eps_double;
+    TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
     for (int j = 0; j < NUM_TRIALS; j++)
     {
         Eigen::VectorXd x0(problem->N);
@@ -186,12 +183,11 @@ bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1.e-4)
 }
 
 template <class T>
-bool testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-5)
+bool testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, const double eps = 1e-5)
 {
-    constexpr double eps_double = std::numeric_limits<double>::epsilon();
-    constexpr double h = 2. * std::sqrt(eps_double);  // For first-order finite differencing
+    constexpr double h = 1e-5;
 
-    TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps << ", eps_double=" << eps_double;
+    TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
     for (int tr = 0; tr < NUM_TRIALS; tr++)
     {
         Eigen::VectorXd x0(problem->N);
@@ -310,7 +306,7 @@ TEST(ExoticaTaskMaps, testEffOrientation)
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
 
-            EXPECT_TRUE(testJacobian(problem));
+            EXPECT_TRUE(testJacobian(problem, 1e-4));  // TODO: Investigate why we need such loose tolerances here!
         }
     }
     catch (...)
@@ -355,7 +351,7 @@ TEST(ExoticaTaskMaps, testEffFrame)
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
 
-            EXPECT_TRUE(testJacobian(problem));
+            EXPECT_TRUE(testJacobian(problem, 1e-4));  // TODO: Investigate why we need such loose tolerances here!
         }
     }
     catch (...)

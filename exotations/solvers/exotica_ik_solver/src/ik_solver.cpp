@@ -1,7 +1,4 @@
 /*
- *  Created on: 15 Jul 2014
- *      Author: Yiming Yang
- * 
  * Copyright (c) 2016, University of Edinburgh
  * All rights reserved. 
  * 
@@ -31,7 +28,7 @@
  *
  */
 
-#include "ik_solver/IKSolver.h"
+#include <exotica_ik_solver/ik_solver.h>
 
 #include <lapack/cblas.h>
 #include "f2c.h"
@@ -39,13 +36,13 @@
 #undef large
 #include <lapack/clapack.h>
 
-REGISTER_MOTIONSOLVER_TYPE("IKsolver", exotica::IKsolver)
+REGISTER_MOTIONSOLVER_TYPE("IKSolver", exotica::IKSolver)
 
 namespace exotica
 {
-IKsolver::IKsolver() = default;
+IKSolver::IKSolver() = default;
 
-IKsolver::~IKsolver() = default;
+IKSolver::~IKSolver() = default;
 
 Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd>& A_)
 {
@@ -71,34 +68,34 @@ Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd>& A_)
     return Ainv_;
 }
 
-void IKsolver::Instantiate(IKsolverInitializer& init)
+void IKSolver::Instantiate(IKSolverInitializer& init)
 {
     parameters_ = init;
 }
 
-void IKsolver::specifyProblem(PlanningProblem_ptr pointer)
+void IKSolver::specifyProblem(PlanningProblem_ptr pointer)
 {
     if (pointer->type() != "exotica::UnconstrainedEndPoseProblem")
     {
-        throw_named("This IKsolver can't solve problem of type '" << pointer->type() << "'!");
+        throw_named("This IKSolver can't solve problem of type '" << pointer->type() << "'!");
     }
     MotionSolver::specifyProblem(pointer);
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 
-    C = Eigen::MatrixXd::Identity(prob_->Cost.JN, prob_->Cost.JN) * parameters_.C;
+    C_ = Eigen::MatrixXd::Identity(prob_->Cost.JN, prob_->Cost.JN) * parameters_.C;
     if (parameters_.C == 0.0)
-        Cinv = Eigen::MatrixXd::Zero(prob_->Cost.JN, prob_->Cost.JN);
+        Cinv_ = Eigen::MatrixXd::Zero(prob_->Cost.JN, prob_->Cost.JN);
     else
-        Cinv = C.inverse();
+        Cinv_ = C_.inverse();
 
-    W = prob_->W;
-    Winv = W.inverse();
+    W_ = prob_->W;
+    Winv_ = W_.inverse();
 
     if (parameters_.Alpha.size() != 1 && prob_->N != parameters_.Alpha.size())
         throw_named("Alpha must have length of 1 or N.");
 }
 
-void IKsolver::Solve(Eigen::MatrixXd& solution)
+void IKSolver::Solve(Eigen::MatrixXd& solution)
 {
     prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
 
@@ -114,7 +111,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
     solution.resize(1, prob_->N);
 
     Eigen::VectorXd q = q0;
-    error = INFINITY;
+    double error = INFINITY;
     for (int i = 0; i < getNumberOfMaxIterations(); i++)
     {
         prob_->Update(q);
@@ -127,7 +124,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
         if (error < parameters_.Tolerance)
         {
             if (debug_)
-                HIGHLIGHT_NAMED("IKsolver", "Reached tolerance (" << error << " < " << parameters_.Tolerance << ")");
+                HIGHLIGHT_NAMED("IKSolver", "Reached tolerance (" << error << " < " << parameters_.Tolerance << ")");
             break;
         }
 
@@ -151,7 +148,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
         if (qd.norm() < parameters_.Convergence)
         {
             if (debug_)
-                HIGHLIGHT_NAMED("IKsolver", "Reached convergence (" << qd.norm() << " < " << parameters_.Convergence
+                HIGHLIGHT_NAMED("IKSolver", "Reached convergence (" << qd.norm() << " < " << parameters_.Convergence
                                                                     << ")");
             break;
         }
@@ -162,7 +159,7 @@ void IKsolver::Solve(Eigen::MatrixXd& solution)
     planning_time_ = timer.getDuration();
 }
 
-Eigen::MatrixXd IKsolver::PseudoInverse(Eigen::MatrixXdRefConst J)
+Eigen::MatrixXd IKSolver::PseudoInverse(Eigen::MatrixXdRefConst J)
 {
     Eigen::MatrixXd Jpinv;
 
@@ -171,23 +168,23 @@ Eigen::MatrixXd IKsolver::PseudoInverse(Eigen::MatrixXdRefConst J)
         //(Jt*C^-1*J+W)^-1*Jt*C^-1
         if (parameters_.C != 0)
         {
-            Jpinv = inverseSymPosDef(J.transpose() * Cinv * J + W) * J.transpose() * Cinv;
+            Jpinv = inverseSymPosDef(J.transpose() * Cinv_ * J + W_) * J.transpose() * Cinv_;
         }
         else
         {
-            Jpinv = inverseSymPosDef(J.transpose() * J + W) * J.transpose();
+            Jpinv = inverseSymPosDef(J.transpose() * J + W_) * J.transpose();
         }
     }
     else
     {
         //W^-1*Jt(J*W^-1*Jt+C)
-        Jpinv = Winv * J.transpose() * inverseSymPosDef(J * Winv * J.transpose() + C);
+        Jpinv = Winv_ * J.transpose() * inverseSymPosDef(J * Winv_ * J.transpose() + C_);
     }
 
     return Jpinv;
 }
 
-void IKsolver::ScaleToStepSize(Eigen::VectorXdRef xd)
+void IKSolver::ScaleToStepSize(Eigen::VectorXdRef xd)
 {
     double max_vel = xd.cwiseAbs().maxCoeff();
     if (max_vel > parameters_.MaxStep)

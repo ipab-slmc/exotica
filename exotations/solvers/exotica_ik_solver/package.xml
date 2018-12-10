@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<package>
-  <name>ik_solver</name>
+<package format="2">
+  <name>exotica_ik_solver</name>
   <version>5.0.0</version>
-  <description>The ik_solver package</description>
+  <description>Pseudo-inverse unconstrained end-pose solver</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
   <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
@@ -12,12 +12,12 @@
   <license>BSD</license>
 
   <url type="website">https://github.com/ipab-slmc/exotica</url>
+  <url type="bugtracker">https://github.com/ipab-slmc/exotica/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>exotica</build_depend>
-  <build_depend>f2c</build_depend>
-  <build_depend>liblapack-dev</build_depend>
-  <run_depend>exotica</run_depend>
+  <depend>exotica</depend>
+  <depend>f2c</depend>
+  <depend>depend-dev</depend>
 
   <export>
     <exotica plugin="${prefix}/exotica_plugins.xml" />

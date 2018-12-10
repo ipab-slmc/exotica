@@ -150,7 +150,7 @@ bool testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eige
 
 bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, const double eps = 1e-5)
 {
-    constexpr double h = 1e-5;
+    constexpr double h = 1e-6;
 
     TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
     for (int j = 0; j < NUM_TRIALS; j++)
@@ -185,7 +185,7 @@ bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, const double eps = 1e
 template <class T>
 bool testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, const double eps = 1e-5)
 {
-    constexpr double h = 1e-5;
+    constexpr double h = 1e-6;
 
     TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
     for (int tr = 0; tr < NUM_TRIALS; tr++)
@@ -295,6 +295,8 @@ TEST(ExoticaTaskMaps, testEffOrientation)
     {
         TEST_COUT << "End-effector orientation test";
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
+        std::vector<double> eps = {1e-4, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5};
+        // TODO: Quaternion doens't pass the test with precision 1e-5. Investigate why.
 
         for (int i = 0; i < types.size(); i++)
         {
@@ -306,7 +308,7 @@ TEST(ExoticaTaskMaps, testEffOrientation)
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
 
-            EXPECT_TRUE(testJacobian(problem, 1e-4));  // TODO: Investigate why we need such loose tolerances here!
+            EXPECT_TRUE(testJacobian(problem, eps[i]));  // TODO: Investigate why we need such loose tolerances here!
         }
     }
     catch (...)
@@ -340,6 +342,8 @@ TEST(ExoticaTaskMaps, testEffFrame)
     {
         TEST_COUT << "End-effector frame test";
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
+        std::vector<double> eps = {1e-4, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5};
+        // TODO: Quaternion doens't pass the test with precision 1e-5. Investigate why.
 
         for (int i = 0; i < types.size(); i++)
         {
@@ -351,7 +355,7 @@ TEST(ExoticaTaskMaps, testEffFrame)
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
 
-            EXPECT_TRUE(testJacobian(problem, 1e-4));  // TODO: Investigate why we need such loose tolerances here!
+            EXPECT_TRUE(testJacobian(problem, eps[i]));  // TODO: Investigate why we need such loose tolerances here!
         }
     }
     catch (...)

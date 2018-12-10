@@ -1,8 +1,0 @@
-<library path="lib/libaico">
-  <class name="exotica/AICOsolver" type="exotica::AICOsolver" base_class_type="exotica::MotionSolver">
-    <description>AICO solver</description>
-  </class>
-  <class name="exotica/BayesianIK" type="exotica::BayesianIK" base_class_type="exotica::MotionSolver">
-    <description>Bayesian Unconstrained Endpose Solver</description>
-  </class>
-</library>

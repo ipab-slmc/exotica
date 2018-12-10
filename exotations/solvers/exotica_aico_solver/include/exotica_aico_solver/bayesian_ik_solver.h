@@ -37,15 +37,18 @@
  *
  */
 
-#ifndef BAYESIAN_IK_H_
-#define BAYESIAN_IK_H_
+#ifndef EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H_
+#define EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H_
 
-#include <aico/BayesianIKInitializer.h>
-#include <aico/MathOperations.h>
-#include <aico/incremental_gaussian.h>
+#include <iostream>
+
 #include <exotica/Exotica.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
-#include <iostream>
+
+#include <exotica_aico_solver/incremental_gaussian.h>
+#include <exotica_aico_solver/math_operations.h>
+
+#include <exotica_aico_solver/BayesianIKSolverInitializer.h>
 
 namespace exotica
 {
@@ -53,12 +56,12 @@ namespace exotica
    * \brief Solves motion planning problem using Approximate Inference Control method.
    * \ingroup AICO
    */
-class BayesianIK : public MotionSolver, public Instantiable<BayesianIKInitializer>
+class BayesianIKSolver : public MotionSolver, public Instantiable<BayesianIKSolverInitializer>
 {
 public:
-    BayesianIK();
-    virtual void Instantiate(BayesianIKInitializer& init);
-    virtual ~BayesianIK();
+    BayesianIKSolver();
+    virtual void Instantiate(BayesianIKSolverInitializer& init);
+    virtual ~BayesianIKSolver();
     /**
        * \brief Solves the problem
        * @param solution Returned end pose solution.
@@ -242,7 +245,7 @@ private:
     double step();
 };
 
-typedef std::shared_ptr<exotica::BayesianIK> BayesianIK_ptr;
+typedef std::shared_ptr<exotica::BayesianIKSolver> BayesianIK_ptr;
 } /* namespace exotica */
 
-#endif /* BAYESIAN_IK_H_ */
+#endif /* EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H_ */

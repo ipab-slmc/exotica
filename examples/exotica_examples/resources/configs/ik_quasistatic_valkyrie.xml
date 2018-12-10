@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <ExoticaWholeBodyIKConfig>
-  <!--<BayesianIK Name="Bayesian" MaxIterations="10" MaxBacktrackIterations="10" />-->
+  <!--<BayesianIKSolver Name="Bayesian" MaxIterations="10" MaxBacktrackIterations="10" />-->
   <IKsolver Name="IK">
     <MaxIterations>10</MaxIterations>
     <MaxStep>0.1</MaxStep>

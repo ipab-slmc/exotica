@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <IKSolverDemoConfig>
-  <BayesianIK Name="MySolver" />
+  <BayesianIKSolver Name="MySolver" />
 
   <UnconstrainedEndPoseProblem Name="MyProblem">
     <PlanningScene>

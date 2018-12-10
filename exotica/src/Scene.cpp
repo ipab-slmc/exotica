@@ -689,6 +689,15 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     if (updateCollisionScene) updateCollisionObjects();
 }
 
+void Scene::addObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const bool updateCollisionScene)
+{
+    Eigen::Isometry3d pose;
+    tf::transformKDLToEigen(transform, pose);
+    ps_->getWorldNonConst()->addToObject(name, shape, pose);
+    updateSceneFrames();
+    if (updateCollisionScene) updateInternalFrames();
+}
+
 void Scene::removeObject(const std::string& name)
 {
     auto it = std::begin(custom_links_);

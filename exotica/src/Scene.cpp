@@ -235,16 +235,11 @@ void Scene::updateMoveItPlanningScene()
     if (kinematica_.getModelBaseType() == BASE_TYPE::FLOATING)
     {
         KDL::Rotation rot = KDL::Rotation::RPY(modelState[kinematica_.getRootJointName() + "/rot_x"], modelState[kinematica_.getRootJointName() + "/rot_y"], modelState[kinematica_.getRootJointName() + "/rot_z"]);
-        Eigen::VectorXd quat(4);
-        rot.GetQuaternion(quat(0), quat(1), quat(2), quat(3));
-        ps_->getCurrentStateNonConst().setVariablePosition(
-            kinematica_.getRootJointName() + "/rot_x", quat(0));
-        ps_->getCurrentStateNonConst().setVariablePosition(
-            kinematica_.getRootJointName() + "/rot_y", quat(1));
-        ps_->getCurrentStateNonConst().setVariablePosition(
-            kinematica_.getRootJointName() + "/rot_z", quat(2));
-        ps_->getCurrentStateNonConst().setVariablePosition(
-            kinematica_.getRootJointName() + "/rot_w", quat(3));
+        Eigen::Quaterniond quat(Eigen::Map<const Eigen::Matrix3d>(rot.data).transpose());
+        ps_->getCurrentStateNonConst().setVariablePosition(kinematica_.getRootJointName() + "/rot_x", quat.x());
+        ps_->getCurrentStateNonConst().setVariablePosition(kinematica_.getRootJointName() + "/rot_y", quat.y());
+        ps_->getCurrentStateNonConst().setVariablePosition(kinematica_.getRootJointName() + "/rot_z", quat.z());
+        ps_->getCurrentStateNonConst().setVariablePosition(kinematica_.getRootJointName() + "/rot_w", quat.w());
     }
 }
 

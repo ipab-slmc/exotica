@@ -58,7 +58,7 @@ Currently available solvers are:
 .. code-block:: c++
 
     #include <ompl_solver/OMPLsolverInitializer.h>
-    #include <aico/AICOsolverInitializer.h>
+    #include <exotica_aico_solver/AICOSolverInitializer.h>
     #include <ik_solver/IKsolverInitializer.h>
 
 Once we have included the correct initializers, we must initialise:

@@ -36,13 +36,13 @@
  *
  */
 
-#include "aico/BayesianIK.h"
+#include <exotica_aico_solver/bayesian_ik_solver.h>
 
-REGISTER_MOTIONSOLVER_TYPE("BayesianIK", exotica::BayesianIK)
+REGISTER_MOTIONSOLVER_TYPE("BayesianIKSolver", exotica::BayesianIKSolver)
 
 namespace exotica
 {
-void BayesianIK::Instantiate(BayesianIKInitializer& init)
+void BayesianIKSolver::Instantiate(BayesianIKSolverInitializer& init)
 {
     std::string mode = init.SweepMode;
     if (mode == "Forwardly")
@@ -65,7 +65,7 @@ void BayesianIK::Instantiate(BayesianIKInitializer& init)
     useBwdMsg = init.UseBackwardMessage;
 }
 
-BayesianIK::BayesianIK()
+BayesianIKSolver::BayesianIKSolver()
     : damping(0.01),
       minimum_step_tolerance(1e-5),
       step_tolerance(1e-5),
@@ -110,8 +110,8 @@ BayesianIK::BayesianIK()
 {
 }
 
-BayesianIK::~BayesianIK() {}
-void BayesianIK::specifyProblem(PlanningProblem_ptr problem)
+BayesianIKSolver::~BayesianIKSolver() {}
+void BayesianIKSolver::specifyProblem(PlanningProblem_ptr problem)
 {
     if (problem->type() != "exotica::UnconstrainedEndPoseProblem")
     {
@@ -123,7 +123,7 @@ void BayesianIK::specifyProblem(PlanningProblem_ptr problem)
     initMessages();
 }
 
-void BayesianIK::Solve(Eigen::MatrixXd& solution)
+void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
 {
     prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
     prob_->terminationCriterion = TerminationCriterion::NotStarted;
@@ -132,13 +132,13 @@ void BayesianIK::Solve(Eigen::MatrixXd& solution)
     Eigen::VectorXd q0 = prob_->applyStartState();
 
     Timer timer;
-    if (debug_) ROS_WARN_STREAM("BayesianIK: Setting up the solver");
+    if (debug_) ROS_WARN_STREAM("BayesianIKSolver: Setting up the solver");
     updateCount = 0;
     damping = damping_init;
     double d;
     iterationCount = -1;
     initTrajectory(q0);
-    if (debug_) ROS_WARN_STREAM("BayesianIK: Solving");
+    if (debug_) ROS_WARN_STREAM("BayesianIKSolver: Solving");
 
     // Reset sweep and iteration count
     sweep = 0;
@@ -212,7 +212,7 @@ void BayesianIK::Solve(Eigen::MatrixXd& solution)
     planning_time_ = timer.getDuration();
 }
 
-void BayesianIK::initMessages()
+void BayesianIKSolver::initMessages()
 {
     if (prob_ == nullptr) throw_named("Problem definition is a NULL pointer!");
 
@@ -262,7 +262,7 @@ void BayesianIK::initMessages()
     }
 }
 
-void BayesianIK::initTrajectory(const Eigen::VectorXd& q_init)
+void BayesianIKSolver::initTrajectory(const Eigen::VectorXd& q_init)
 {
     qhat = q_init;
     q = q_init;
@@ -286,7 +286,7 @@ void BayesianIK::initTrajectory(const Eigen::VectorXd& q_init)
     rememberOldState();
 }
 
-void BayesianIK::updateFwdMessage()
+void BayesianIKSolver::updateFwdMessage()
 {
     Eigen::MatrixXd barS(prob_->N, prob_->N), St;
     inverseSymPosDef(barS, Sinv + R);
@@ -295,7 +295,7 @@ void BayesianIK::updateFwdMessage()
     inverseSymPosDef(Sinv, St);
 }
 
-void BayesianIK::updateBwdMessage()
+void BayesianIKSolver::updateBwdMessage()
 {
     Eigen::MatrixXd barV(prob_->N, prob_->N), Vt;
 
@@ -311,8 +311,8 @@ void BayesianIK::updateBwdMessage()
     }
 }
 
-void BayesianIK::updateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double minimum_step_tolerance,
-                                   double maxStepSize)
+void BayesianIKSolver::updateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double minimum_step_tolerance,
+                                         double maxStepSize)
 {
     Eigen::VectorXd diff = qhat_t - qhat;
     if ((diff.array().abs().maxCoeff() < minimum_step_tolerance)) return;
@@ -332,7 +332,7 @@ void BayesianIK::updateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat
     // q_stat.addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
 }
 
-double BayesianIK::getTaskCosts()
+double BayesianIKSolver::getTaskCosts()
 {
     double C = 0;
     Eigen::MatrixXd Jt;
@@ -357,9 +357,9 @@ double BayesianIK::getTaskCosts()
     return C;
 }
 
-void BayesianIK::updateTimeStep(bool updateFwd, bool updateBwd,
-                                int maxRelocationIterations, double minimum_step_tolerance, bool forceRelocation,
-                                double maxStepSize)
+void BayesianIKSolver::updateTimeStep(bool updateFwd, bool updateBwd,
+                                      int maxRelocationIterations, double minimum_step_tolerance, bool forceRelocation,
+                                      double maxStepSize)
 {
     if (updateFwd) updateFwdMessage();
     if (updateBwd) updateBwdMessage();
@@ -398,15 +398,15 @@ void BayesianIK::updateTimeStep(bool updateFwd, bool updateBwd,
     }
 }
 
-void BayesianIK::updateTimeStepGaussNewton(bool updateFwd,
-                                           bool updateBwd, int maxRelocationIterations, double minimum_step_tolerance,
-                                           double maxStepSize)
+void BayesianIKSolver::updateTimeStepGaussNewton(bool updateFwd,
+                                                 bool updateBwd, int maxRelocationIterations, double minimum_step_tolerance,
+                                                 double maxStepSize)
 {
     // TODO: implement updateTimeStepGaussNewton
     throw_named("Not implemented yet!");
 }
 
-double BayesianIK::evaluateTrajectory(const Eigen::VectorXd& x, bool skipUpdate)
+double BayesianIKSolver::evaluateTrajectory(const Eigen::VectorXd& x, bool skipUpdate)
 {
     if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iterationCount << ", sweep " << sweep);
     q = x;
@@ -422,7 +422,7 @@ double BayesianIK::evaluateTrajectory(const Eigen::VectorXd& x, bool skipUpdate)
     return prob_->getScalarCost();
 }
 
-double BayesianIK::step()
+double BayesianIKSolver::step()
 {
     rememberOldState();
     switch (sweepMode)
@@ -497,7 +497,7 @@ double BayesianIK::step()
     return b_step;
 }
 
-void BayesianIK::rememberOldState()
+void BayesianIKSolver::rememberOldState()
 {
     s_old = s;
     Sinv_old = Sinv;
@@ -517,7 +517,7 @@ void BayesianIK::rememberOldState()
     b_step_old = b_step;
 }
 
-void BayesianIK::perhapsUndoStep()
+void BayesianIKSolver::perhapsUndoStep()
 {
     if (cost > cost_old)
     {

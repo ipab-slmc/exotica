@@ -36,16 +36,16 @@
  *
  */
 
-/** \file AICOsolver.h
+/** \file AICOSolver.h
  \brief Approximate Inference Control */
 
-#include "aico/AICOsolver.h"
+#include <exotica_aico_solver/aico_solver.h>
 
-REGISTER_MOTIONSOLVER_TYPE("AICOsolver", exotica::AICOsolver)
+REGISTER_MOTIONSOLVER_TYPE("AICOSolver", exotica::AICOSolver)
 
 namespace exotica
 {
-void AICOsolver::Instantiate(AICOsolverInitializer& init)
+void AICOSolver::Instantiate(AICOSolverInitializer& init)
 {
     std::string mode = init.SweepMode;
     if (mode == "Forwardly")
@@ -68,7 +68,7 @@ void AICOsolver::Instantiate(AICOsolverInitializer& init)
     useBwdMsg = init.UseBackwardMessage;
 }
 
-void AICOsolver::saveCosts(std::string file_name)
+void AICOSolver::saveCosts(std::string file_name)
 {
     std::ofstream myfile;
     myfile.open(file_name.c_str());
@@ -82,7 +82,7 @@ void AICOsolver::saveCosts(std::string file_name)
     myfile.close();
 }
 
-AICOsolver::AICOsolver()
+AICOSolver::AICOSolver()
     : damping(0.01),
       minimum_step_tolerance(1e-5),
       step_tolerance(1e-5),
@@ -128,14 +128,14 @@ AICOsolver::AICOsolver()
 {
 }
 
-void AICOsolver::getStats(std::vector<SinglePassMeanCovariance>& q_stat_)
+void AICOSolver::getStats(std::vector<SinglePassMeanCovariance>& q_stat_)
 {
     q_stat_ = q_stat;
 }
 
-AICOsolver::~AICOsolver() = default;
+AICOSolver::~AICOSolver() = default;
 
-void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
+void AICOSolver::specifyProblem(PlanningProblem_ptr problem)
 {
     if (problem->type() != "exotica::UnconstrainedTimeIndexedProblem")
     {
@@ -147,7 +147,7 @@ void AICOsolver::specifyProblem(PlanningProblem_ptr problem)
     initMessages();
 }
 
-void AICOsolver::Solve(Eigen::MatrixXd& solution)
+void AICOSolver::Solve(Eigen::MatrixXd& solution)
 {
     prob_->preupdate();
     prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
@@ -265,7 +265,7 @@ void AICOsolver::Solve(Eigen::MatrixXd& solution)
     planning_time_ = timer.getDuration();
 }
 
-void AICOsolver::initMessages()
+void AICOSolver::initMessages()
 {
     if (prob_ == nullptr) throw_named("Problem definition is a NULL pointer!");
 
@@ -334,7 +334,7 @@ void AICOsolver::initMessages()
     lastT = prob_->getT();
 }
 
-void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
+void AICOSolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
 {
     if (q_init.size() != prob_->getT())
     {
@@ -370,7 +370,7 @@ void AICOsolver::initTrajectory(const std::vector<Eigen::VectorXd>& q_init)
     rememberOldState();
 }
 
-void AICOsolver::updateFwdMessage(int t)
+void AICOSolver::updateFwdMessage(int t)
 {
     Eigen::MatrixXd barS(prob_->N, prob_->N), St;
     inverseSymPosDef(barS, Sinv[t - 1] + R[t - 1]);
@@ -379,7 +379,7 @@ void AICOsolver::updateFwdMessage(int t)
     inverseSymPosDef(Sinv[t], St);
 }
 
-void AICOsolver::updateBwdMessage(int t)
+void AICOSolver::updateBwdMessage(int t)
 {
     Eigen::MatrixXd barV(prob_->N, prob_->N), Vt;
     if (t < prob_->getT() - 1)
@@ -404,7 +404,7 @@ void AICOsolver::updateBwdMessage(int t)
     }
 }
 
-void AICOsolver::updateTaskMessage(int t,
+void AICOSolver::updateTaskMessage(int t,
                                    const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double minimum_step_tolerance,
                                    double maxStepSize)
 {
@@ -426,7 +426,7 @@ void AICOsolver::updateTaskMessage(int t,
     q_stat[t].addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
 }
 
-double AICOsolver::getTaskCosts(int t)
+double AICOSolver::getTaskCosts(int t)
 {
     double C = 0;
     Eigen::MatrixXd Jt;
@@ -451,7 +451,7 @@ double AICOsolver::getTaskCosts(int t)
     return prob_->ct * C;
 }
 
-void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
+void AICOSolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
                                 int maxRelocationIterations, double minimum_step_tolerance, bool forceRelocation,
                                 double maxStepSize)
 {
@@ -492,7 +492,7 @@ void AICOsolver::updateTimeStep(int t, bool updateFwd, bool updateBwd,
     }
 }
 
-void AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd,
+void AICOSolver::updateTimeStepGaussNewton(int t, bool updateFwd,
                                            bool updateBwd, int maxRelocationIterations, double minimum_step_tolerance,
                                            double maxStepSize)
 {
@@ -500,7 +500,7 @@ void AICOsolver::updateTimeStepGaussNewton(int t, bool updateFwd,
     throw_named("Not implemented yet!");
 }
 
-double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
+double AICOSolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
                                       bool skipUpdate)
 {
     if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iterationCount << ", sweep " << sweep);
@@ -542,7 +542,7 @@ double AICOsolver::evaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
     return cost;
 }
 
-double AICOsolver::step()
+double AICOSolver::step()
 {
     rememberOldState();
     int t;
@@ -622,7 +622,7 @@ double AICOsolver::step()
     return b_step;
 }
 
-void AICOsolver::rememberOldState()
+void AICOSolver::rememberOldState()
 {
     s_old = s;
     Sinv_old = Sinv;
@@ -643,7 +643,7 @@ void AICOsolver::rememberOldState()
     b_step_old = b_step;
 }
 
-void AICOsolver::perhapsUndoStep()
+void AICOSolver::perhapsUndoStep()
 {
     if (cost > cost_old)
     {

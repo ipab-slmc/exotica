@@ -37,29 +37,32 @@
  *
  */
 
-#ifndef MATH_OPERATIONS_H_
-#define MATH_OPERATIONS_H_
-
-#include <exotica/Exotica.h>
-#include "f2c.h"
-#include "lapack/cblas.h"
-#undef small
-#undef large
-#include <lapack/clapack.h>
-#undef double
-#undef max
-#undef min
-#undef abs
+#include <exotica_aico_solver/math_operations.h>
 
 namespace exotica
 {
-/**
- * \brief Computes an inverse of symmetric positive definite matrix using LAPACK (very fast)
- * @param Ainv Resulting inverted matrix.
- * @param A A symmetric positive definite matrix to be inverted.
- */
 void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
-                      const Eigen::Ref<const Eigen::MatrixXd>& A_);
+                      const Eigen::Ref<const Eigen::MatrixXd>& A_)
+{
+    Ainv_ = A_;
+    double* AA = Ainv_.data();
+    integer info;
+    integer nn = A_.rows();
+    // Compute Cholesky
+    dpotrf_((char*)"L", &nn, AA, &nn, &info);
+    if (info != 0)
+    {
+        throw_pretty("Cholesky decomposition error: " << info << "\n"
+                                                      << A_);
+    }
+    // Invert
+    dpotri_((char*)"L", &nn, AA, &nn, &info);
+    if (info != 0)
+    {
+        throw_pretty("Matrix inversion error: " << info);
+    }
+    Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
+}
 
 /**
  * \brief Computes the solution to the linear problem \f$x=Ab\f$ for symmetric positive definite matrix A
@@ -68,7 +71,19 @@ void AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
                     const Eigen::Ref<const Eigen::MatrixXd>& A_,
                     const Eigen::Ref<const Eigen::VectorXd>& b_,
                     Eigen::MatrixXd& linSolverTmp,
-                    int n_in);
+                    int n_in)
+{
+    integer n_ = n_in, m_ = 1;
+    integer info;
+    linSolverTmp = A_;
+    x_ = b_;
+    double* AA = linSolverTmp.data();
+    double* xx = x_.data();
+    dposv_((char*)"L", &n_, &m_, AA, &n_, xx, &n_, &info);
+    if (info != 0)
+    {
+        throw_pretty("Linear solver error: " << info << "\nA:\n"
+                                             << A_ << "\nb: " << b_.transpose() << "\nx: " << x_.transpose());
+    }
 }
-
-#endif  // MATH_OPERATIONS_H_
+}

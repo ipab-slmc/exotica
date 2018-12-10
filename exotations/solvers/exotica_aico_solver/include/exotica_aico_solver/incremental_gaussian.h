@@ -36,8 +36,8 @@ The algorithm is based on the paper :
 Chan, Tony F.; Golub, Gene H.; LeVeque, Randall J. (1979), “Updating Formulae and a Pairwise Algorithm for Computing Sample Variances.”, Technical Report STAN-CS-79-773, Department of Computer Science, Stanford University.
 */
 
-#ifndef SINGLE_PASS_MEAN_COVARIANCE_H
-#define SINGLE_PASS_MEAN_COVARIANCE_H
+#ifndef EXOTICA_AICO_SOLVER_INCREMENTAL_GAUSSIAN_H_
+#define EXOTICA_AICO_SOLVER_INCREMENTAL_GAUSSIAN_H_
 
 #include <Eigen/Dense>
 #include <vector>
@@ -168,4 +168,4 @@ public:
     }
 };
 
-#endif
+#endif /* EXOTICA_AICO_SOLVER_INCREMENTAL_GAUSSIAN_H_ */

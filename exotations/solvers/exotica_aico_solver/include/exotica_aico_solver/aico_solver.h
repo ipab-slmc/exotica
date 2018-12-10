@@ -59,19 +59,22 @@
  * @}
  */
 
-/** \file AICOsolver.h
+/** \file aico_solver.h
  \brief Approximate Inference Control */
 
-#ifndef AICOSOLVER_H_
-#define AICOSOLVER_H_
+#ifndef EXOTICA_AICO_SOLVER_AICO_SOLVER_H_
+#define EXOTICA_AICO_SOLVER_AICO_SOLVER_H_
 
-#include <aico/AICOsolverInitializer.h>
-#include <aico/MathOperations.h>
-#include <aico/incremental_gaussian.h>
-#include <exotica/Exotica.h>
-#include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
 #include <fstream>
 #include <iostream>
+
+#include <exotica/Exotica.h>
+#include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
+
+#include <exotica_aico_solver/incremental_gaussian.h>
+#include <exotica_aico_solver/math_operations.h>
+
+#include <exotica_aico_solver/AICOSolverInitializer.h>
 
 namespace exotica
 {
@@ -79,12 +82,12 @@ namespace exotica
    * \brief Solves motion planning problem using Approximate Inference Control method.
    * \ingroup AICO
    */
-class AICOsolver : public MotionSolver, public Instantiable<AICOsolverInitializer>
+class AICOSolver : public MotionSolver, public Instantiable<AICOSolverInitializer>
 {
 public:
-    AICOsolver();
-    virtual void Instantiate(AICOsolverInitializer& init);
-    virtual ~AICOsolver();
+    AICOSolver();
+    virtual void Instantiate(AICOSolverInitializer& init);
+    virtual ~AICOSolver();
     /**
        * \brief Solves the problem
        * @param solution Returned solution trajectory as a vector of joint configurations.
@@ -289,7 +292,7 @@ private:
     double step();
 };
 
-typedef std::shared_ptr<exotica::AICOsolver> AICOsolver_ptr;
+typedef std::shared_ptr<exotica::AICOSolver> AICOSolver_ptr;
 } /* namespace exotica */
 
-#endif /* AICOSOLVER_H_ */
+#endif /* EXOTICA_AICO_SOLVER_AICO_SOLVER_H_ */

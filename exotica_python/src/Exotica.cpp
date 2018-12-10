@@ -1037,6 +1037,11 @@ PYBIND11_MODULE(_pyexotica, module)
               py::arg("shape"),
               py::arg("inertia") = KDL::RigidBodyInertia::Zero(),
               py::arg("updateCollisionScene") = true);
+    scene.def("addObjectToEnvironment", &Scene::addObjectToEnvironment,
+              py::arg("name"),
+              py::arg("transform") = KDL::Frame(),
+              py::arg("shape"),
+              py::arg("updateCollisionScene") = true);
     scene.def("removeObject", &Scene::removeObject);
     scene.def_property_readonly("modelLinkToCollisionLinkMap", &Scene::getModelLinkToCollisionLinkMap);
     scene.def_property_readonly("controlledLinkToCollisionLinkMap", &Scene::getControlledLinkToCollisionLinkMap);

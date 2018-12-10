@@ -148,20 +148,25 @@ bool testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eige
     return true;
 }
 
-bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5, double h = 1e-5)
+// Cf. https://www.rose-hulman.edu/~bryan/lottamath/diffgrad.pdf => "best h approx 1e-8"
+// and https://scicomp.stackexchange.com/questions/14355/choosing-epsilons
+bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1.e-4)
 {
-    TEST_COUT << "Testing Jacobian:";
+    constexpr double eps_double = std::numeric_limits<double>::epsilon();
+    constexpr double h = 2. * std::sqrt(eps_double);  // For first-order finite differencing
+
+    TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps << ", eps_double=" << eps_double;
     for (int j = 0; j < NUM_TRIALS; j++)
     {
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0);
-        TaskSpaceVector y0 = problem->Phi;
-        Eigen::MatrixXd J0 = problem->J;
+        const TaskSpaceVector y0(problem->Phi);
+        const Eigen::MatrixXd J0(problem->J);
         Eigen::MatrixXd J = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
         for (int i = 0; i < problem->N; i++)
         {
-            Eigen::VectorXd x = x0;
+            Eigen::VectorXd x(x0);
             x(i) += h;
             problem->Update(x);
             J.col(i) = (problem->Phi - y0) / h;
@@ -181,9 +186,12 @@ bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, double eps = 1e-5, do
 }
 
 template <class T>
-bool testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-5, double h = 1e-6)
+bool testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-5)
 {
-    TEST_COUT << "Testing Jacobian:";
+    constexpr double eps_double = std::numeric_limits<double>::epsilon();
+    constexpr double h = 2. * std::sqrt(eps_double);  // For first-order finite differencing
+
+    TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps << ", eps_double=" << eps_double;
     for (int tr = 0; tr < NUM_TRIALS; tr++)
     {
         Eigen::VectorXd x0(problem->N);

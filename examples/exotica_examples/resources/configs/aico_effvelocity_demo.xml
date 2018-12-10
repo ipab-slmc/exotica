@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
-  <AICOsolver Name="MySolver" Debug="1" Damping="100" MaxBacktrackIterations="500" />
+  <AICOSolver Name="MySolver" Debug="1" Damping="100" MaxBacktrackIterations="500" />
 
   <UnconstrainedTimeIndexedProblem Name="MyProblem">
     <PlanningScene>

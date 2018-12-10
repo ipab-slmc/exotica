@@ -77,7 +77,7 @@ Eigen::VectorXd TaskSpaceVector::operator-(const TaskSpaceVector& other)
         if (iIn < id.inId) ret.segment(iOut, id.inId - iIn) = data.segment(iIn, id.inId - iIn) - other.data.segment(iIn, id.inId - iIn);
         iOut += id.inId - iIn;
         iIn += id.inId - iIn;
-        int len = getRotationTypeLength(id.type);
+        const int len = getRotationTypeLength(id.type);
 
         KDL::Rotation M1 = getRotation(data.segment(id.inId, len), id.type);
         KDL::Rotation M2 = getRotation(other.data.segment(id.inId, len), id.type);

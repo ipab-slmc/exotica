@@ -4,6 +4,7 @@ extensions = ['sphinx.ext.pngmath',
               'sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               'sphinx.ext.autosummary',
+              'sphinx.ext.autosectionlabel',
               'sphinx.ext.napoleon']
 
 autosummary_generate = True

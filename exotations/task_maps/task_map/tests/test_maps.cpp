@@ -150,7 +150,7 @@ bool testValues(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eige
 
 bool testJacobian(UnconstrainedEndPoseProblem_ptr problem, const double eps = 1e-5)
 {
-    constexpr double h = 1e-6;
+    constexpr double h = 1e-5;  // NB: Not, this differs from the h for the time-indexed Jacobian
 
     TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
     for (int j = 0; j < NUM_TRIALS; j++)

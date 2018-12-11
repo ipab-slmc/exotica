@@ -57,7 +57,7 @@ Currently available solvers are:
 
 .. code-block:: c++
 
-    #include <ompl_solver/OMPLsolverInitializer.h>
+    #include <exotica_ompl_solver/OMPLSolverInitializer.h>
     #include <exotica_aico_solver/AICOSolverInitializer.h>
     #include <exotica_ik_solver/IKSolverInitializer.h>
 

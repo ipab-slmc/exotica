@@ -30,11 +30,12 @@
  *
  */
 
-#ifndef COLLISIONSCENEFCL_H
-#define COLLISIONSCENEFCL_H
+#ifndef EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_
+#define EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_
 
 #include <exotica/CollisionScene.h>
 #include <exotica/Tools/Conversions.h>
+
 #include <fcl/BVH/BVH_model.h>
 #include <fcl/broadphase/broadphase.h>
 #include <fcl/collision.h>
@@ -42,6 +43,7 @@
 #include <fcl/narrowphase/narrowphase.h>
 #include <fcl/octree.h>
 #include <fcl/shape/geometric_shapes.h>
+
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 
@@ -52,78 +54,70 @@ class CollisionSceneFCL : public CollisionScene
 public:
     struct CollisionData
     {
-        CollisionData(CollisionSceneFCL* scene) : Scene(scene), Self(true) {}
-        fcl::CollisionRequest Request;
-        fcl::CollisionResult Result;
-        CollisionSceneFCL* Scene;
-        bool Self;
-        double SafeDistance;
+        CollisionData(CollisionSceneFCL* scene) : scene(scene) {}
+        fcl::CollisionRequest request;
+        fcl::CollisionResult result;
+        CollisionSceneFCL* scene;
+        bool self = true;
+        double safe_distance;
     };
 
     CollisionSceneFCL();
-
-    /**
-       * \brief Destructor
-       */
     virtual ~CollisionSceneFCL();
 
-    void setup();
+    void setup() override;
 
-    static bool isAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionSceneFCL* scene);
-    static bool collisionCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data);
-    static bool collisionCallbackDistance(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data, double& dist);
-    static bool collisionCallbackContacts(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data, double& dist);
+    static bool IsAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionSceneFCL* scene);
+    static bool CollisionCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data);
 
     /**
        * \brief Check if the whole robot is valid (collision only).
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free..
        */
-    virtual bool isStateValid(bool self = true, double safe_distance = 0.0);
-    virtual bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0);
+    bool isStateValid(bool self = true, double safe_distance = 0.0) override;
+    bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) override;
 
     /**
        * @brief      Gets the collision world links.
        * @return     The collision world links.
        */
-    virtual std::vector<std::string> getCollisionWorldLinks();
+    std::vector<std::string> getCollisionWorldLinks() override;
 
     /**
       * @brief      Gets the KinematicElements associated with the collision world links.
       * @return     The KinematicElements associated with the collision world links.
       */
-    virtual std::vector<std::shared_ptr<KinematicElement>> getCollisionWorldLinkElements();
+    std::vector<std::shared_ptr<KinematicElement>> getCollisionWorldLinkElements() override;
 
     /**
        * @brief      Gets the collision robot links.
        * @return     The collision robot links.
        */
-    virtual std::vector<std::string> getCollisionRobotLinks();
+    std::vector<std::string> getCollisionRobotLinks() override;
 
-    virtual Eigen::Vector3d getTranslation(const std::string& name);
+    Eigen::Vector3d getTranslation(const std::string& name) override;
 
     ///
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
     ///
-    virtual void updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects);
+    void updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects) override;
 
     ///
     /// \brief Updates collision object transformations from the kinematic tree.
     ///
-    virtual void updateCollisionObjectTransforms();
+    void updateCollisionObjectTransforms() override;
 
 private:
-    std::shared_ptr<fcl::CollisionObject> constructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
-    static void checkCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data);
+    std::shared_ptr<fcl::CollisionObject> ConstructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
+    static void CheckCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data);
 
     std::map<std::string, std::shared_ptr<fcl::CollisionObject>> fcl_cache_;
 
     std::vector<fcl::CollisionObject*> fcl_objects_;
     std::vector<std::weak_ptr<KinematicElement>> kinematic_elements_;
 };
-
-typedef std::shared_ptr<CollisionSceneFCL> CollisionSceneFCL_ptr;
 }
 
-#endif  // COLLISIONSCENEFCL_H
+#endif  // EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_

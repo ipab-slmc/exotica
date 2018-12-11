@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(collision_scene_fcl)
+project(exotica_collision_scene_fcl)
 
 add_compile_options(-std=c++11)
 
@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES collision_scene_fcl
+  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS exotica geometric_shapes
 )
 
@@ -20,7 +20,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  src/CollisionSceneFCL.cpp
+  src/collision_scene_fcl.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -16,7 +16,6 @@
   <depend>exotica_aico_solver</depend>
   <depend>exotica_ik_solver</depend>
   <depend>sensor_msgs</depend>
-  <depend>ik_solver</depend>
   <depend>task_map</depend>
   <exec_depend>exotica_time_indexed_rrt_connect_solver</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>

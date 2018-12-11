@@ -1,5 +1,5 @@
 /*
- *      Author: Vladimir Ivan
+ *      Author: Vladimir Ivan, Wolfgang Merkt
  *
  * Copyright (c) 2017, University of Edinburgh
  * All rights reserved.
@@ -30,8 +30,8 @@
  *
  */
 
-#include <collision_scene_fcl_latest/CollisionSceneFCLLatest.h>
 #include <exotica/Factory.h>
+#include <exotica_collision_scene_fcl_latest/collision_scene_fcl_latest.h>
 
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionSceneFCLLatest)
 
@@ -71,7 +71,7 @@ void CollisionSceneFCLLatest::updateCollisionObjects(const std::map<std::string,
         // disable use of the cache.
         // if (true)  // (cache_entry == fcl_cache_.end())
         // {
-        new_object = constructFclCollisionObject(i, object.second.lock());
+        new_object = ConstructFclCollisionObject(i, object.second.lock());
         fcl_cache_[object.first] = new_object;
         // }
         // else
@@ -99,7 +99,7 @@ void CollisionSceneFCLLatest::updateCollisionObjectTransforms()
 // This function was originally copied from 'moveit_core/collision_detection_fcl/src/collision_common.cpp'
 // https://github.com/ros-planning/moveit/blob/kinetic-devel/moveit_core/collision_detection_fcl/src/collision_common.cpp#L520
 // and then modified for use in EXOTica.
-std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::constructFclCollisionObject(long kinematic_element_id, std::shared_ptr<KinematicElement> element)
+std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::ConstructFclCollisionObject(long kinematic_element_id, std::shared_ptr<KinematicElement> element)
 {
     shapes::ShapePtr shape(element->Shape->clone());
 
@@ -243,7 +243,7 @@ bool CollisionSceneFCLLatest::isAllowedToCollide(const std::string& o1, const st
     return true;
 }
 
-bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene)
+bool CollisionSceneFCLLatest::IsAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene)
 {
     std::shared_ptr<KinematicElement> e1 = scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
     std::shared_ptr<KinematicElement> e2 = scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
@@ -268,39 +268,39 @@ bool CollisionSceneFCLLatest::isAllowedToCollide(fcl::CollisionObjectd* o1, fcl:
     return true;
 }
 
-void CollisionSceneFCLLatest::checkCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data)
+void CollisionSceneFCLLatest::CheckCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data)
 {
-    data->Request.num_max_contacts = 1000;
-    data->Request.gjk_solver_type = fcl::GST_LIBCCD;
-    data->Result.clear();
-    fcl::collide(o1, o2, data->Request, data->Result);
-    if (data->SafeDistance > 0.0 && o1->getAABB().distance(o2->getAABB()) < data->SafeDistance)
+    data->request.num_max_contacts = 1000;
+    data->request.gjk_solver_type = fcl::GST_LIBCCD;
+    data->result.clear();
+    fcl::collide(o1, o2, data->request, data->result);
+    if (data->safe_distance > 0.0 && o1->getAABB().distance(o2->getAABB()) < data->safe_distance)
     {
         fcl::DistanceRequestd req;
         fcl::DistanceResultd res;
         req.enable_nearest_points = false;
         fcl::distance(o1, o2, req, res);
         // Add fake contact when distance is smaller than the safety distance.
-        if (res.min_distance < data->SafeDistance) data->Result.addContact(fcl::Contactd());
+        if (res.min_distance < data->safe_distance) data->result.addContact(fcl::Contactd());
     }
 }
 
-bool CollisionSceneFCLLatest::collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data)
+bool CollisionSceneFCLLatest::CollisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data)
 {
     CollisionData* data_ = reinterpret_cast<CollisionData*>(data);
 
-    if (!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
+    if (!IsAllowedToCollide(o1, o2, data_->self, data_->scene)) return false;
 
-    checkCollision(o1, o2, data_);
-    return data_->Result.isCollision();
+    CheckCollision(o1, o2, data_);
+    return data_->result.isCollision();
 }
 
-void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data)
+void CollisionSceneFCLLatest::ComputeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data)
 {
     // Setup proxy.
     CollisionProxy p;
-    p.e1 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
-    p.e2 = data->Scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
+    p.e1 = data->scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
+    p.e2 = data->scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
 
     // New logic as of August 2018:
     //  - Use LIBCCD as comment in Drake suggests it is more reliable now.
@@ -380,7 +380,7 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
             tf::vectorKDLToEigen(c2, p.contact2);
 
             data->Distance = std::min(data->Distance, p.distance);
-            data->Proxies.push_back(p);
+            data->proxies.push_back(p);
 
             return;
         }
@@ -391,21 +391,21 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     }
 
     // Step 2: If not in collision, run old distance logic.
-    data->Request.enable_nearest_points = true;
-    data->Request.enable_signed_distance = true;  // Added in FCL 0.6.0 (i.e., >0.5.90)
-    data->Request.distance_tolerance = 1e-6;
-    data->Request.gjk_solver_type = fcl::GST_LIBCCD;
-    data->Result.clear();
+    data->request.enable_nearest_points = true;
+    data->request.enable_signed_distance = true;  // Added in FCL 0.6.0 (i.e., >0.5.90)
+    data->request.distance_tolerance = 1e-6;
+    data->request.gjk_solver_type = fcl::GST_LIBCCD;
+    data->result.clear();
 
-    double min_dist = fcl::distance(o1, o2, data->Request, data->Result);
+    double min_dist = fcl::distance(o1, o2, data->request, data->result);
 
     // If -1 is returned, the returned query is a touching contact (or not implemented).
     bool touching_contact = false;
     p.distance = min_dist;
-    if (min_dist != data->Result.min_distance)
+    if (min_dist != data->result.min_distance)
     {
         // This can mean this has not been implemented and results may be arbitrary.
-        HIGHLIGHT_NAMED("Discrepancy", min_dist << " vs " << data->Result.min_distance);
+        HIGHLIGHT_NAMED("Discrepancy", min_dist << " vs " << data->result.min_distance);
     }
 
     if (min_dist == -1 || std::abs(min_dist) < 1e-9)
@@ -421,14 +421,14 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     if (o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH)
     {
         // NOTE! The nearest points are in the wrong order now
-        c1 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
-        c2 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
+        c1 = KDL::Vector(data->result.nearest_points[1](0), data->result.nearest_points[1](1), data->result.nearest_points[1](2));
+        c2 = KDL::Vector(data->result.nearest_points[0](0), data->result.nearest_points[0](1), data->result.nearest_points[0](2));
     }
     // The default case that, in theory, should work for all cases.
     else
     {
-        c1 = KDL::Vector(data->Result.nearest_points[0](0), data->Result.nearest_points[0](1), data->Result.nearest_points[0](2));
-        c2 = KDL::Vector(data->Result.nearest_points[1](0), data->Result.nearest_points[1](1), data->Result.nearest_points[1](2));
+        c1 = KDL::Vector(data->result.nearest_points[0](0), data->result.nearest_points[0](1), data->result.nearest_points[0](2));
+        c2 = KDL::Vector(data->result.nearest_points[1](0), data->result.nearest_points[1](1), data->result.nearest_points[1](2));
     }
 
     // Check if NaN
@@ -438,11 +438,11 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         // be able to compute contacts because one of those borderline cases.
         // Hence, when we encounter a NaN for a _sphere_, we will replace it
         // with the shape centre.
-        if (data->Request.gjk_solver_type == fcl::GST_LIBCCD)
+        if (data->request.gjk_solver_type == fcl::GST_LIBCCD)
         {
             HIGHLIGHT_NAMED("computeDistanceLibCCD",
                             "Contact1 between " << p.e1->Segment.getName() << " and " << p.e2->Segment.getName() << " contains NaN"
-                                                << ", where ShapeType1: " << p.e1->Shape->type << " and ShapeType2: " << p.e2->Shape->type << " and distance: " << p.distance << " and solver: " << data->Request.gjk_solver_type);
+                                                << ", where ShapeType1: " << p.e1->Shape->type << " and ShapeType2: " << p.e2->Shape->type << " and distance: " << p.distance << " and solver: " << data->request.gjk_solver_type);
             // To avoid downstream issues, replace contact point with shape centre
             if ((std::isnan(c1(0)) || std::isnan(c1(1)) || std::isnan(c1(2))) && p.e1->Shape->type == shapes::ShapeType::SPHERE) c1 = p.e1->Frame.p;
             if ((std::isnan(c2(0)) || std::isnan(c2(1)) || std::isnan(c2(2))) && p.e2->Shape->type == shapes::ShapeType::SPHERE) c2 = p.e1->Frame.p;
@@ -450,11 +450,11 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
         else
         {
             // TODO(#277): Any other NaN is a serious issue which we should investigate separately, so display helpful error message:
-            HIGHLIGHT_NAMED("computeDistance",
+            HIGHLIGHT_NAMED("ComputeDistance",
                             "Contact1 between " << p.e1->Segment.getName() << " and " << p.e2->Segment.getName() << " contains NaN"
-                                                << ", where ShapeType1: " << p.e1->Shape->type << " and ShapeType2: " << p.e2->Shape->type << " and distance: " << p.distance << " and solver: " << data->Request.gjk_solver_type);
-            HIGHLIGHT("c1:" << data->Result.nearest_points[0](0) << "," << data->Result.nearest_points[0](1) << "," << data->Result.nearest_points[0](2));
-            HIGHLIGHT("c2:" << data->Result.nearest_points[1](0) << "," << data->Result.nearest_points[1](1) << "," << data->Result.nearest_points[1](2));
+                                                << ", where ShapeType1: " << p.e1->Shape->type << " and ShapeType2: " << p.e2->Shape->type << " and distance: " << p.distance << " and solver: " << data->request.gjk_solver_type);
+            HIGHLIGHT("c1:" << data->result.nearest_points[0](0) << "," << data->result.nearest_points[0](1) << "," << data->result.nearest_points[0](2));
+            HIGHLIGHT("c2:" << data->result.nearest_points[1](0) << "," << data->result.nearest_points[1](1) << "," << data->result.nearest_points[1](2));
         }
     }
 
@@ -476,15 +476,15 @@ void CollisionSceneFCLLatest::computeDistance(fcl::CollisionObjectd* o1, fcl::Co
     tf::vectorKDLToEigen(n2, p.normal2);
 
     data->Distance = std::min(data->Distance, p.distance);
-    data->Proxies.push_back(p);
+    data->proxies.push_back(p);
 }
 
-bool CollisionSceneFCLLatest::collisionCallbackDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data, double& dist)
+bool CollisionSceneFCLLatest::CollisionCallbackDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data, double& dist)
 {
     DistanceData* data_ = reinterpret_cast<DistanceData*>(data);
 
-    if (!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
-    computeDistance(o1, o2, data_);
+    if (!IsAllowedToCollide(o1, o2, data_->self, data_->scene)) return false;
+    ComputeDistance(o1, o2, data_);
     return false;
 }
 
@@ -495,10 +495,10 @@ bool CollisionSceneFCLLatest::isStateValid(bool self, double safe_distance)
     std::shared_ptr<fcl::BroadPhaseCollisionManagerd> manager(new fcl::DynamicAABBTreeCollisionManagerd());
     manager->registerObjects(fcl_objects_);
     CollisionData data(this);
-    data.Self = self;
-    data.SafeDistance = safe_distance;
-    manager->collide(&data, &CollisionSceneFCLLatest::collisionCallback);
-    return !data.Result.isCollision();
+    data.self = self;
+    data.safe_distance = safe_distance;
+    manager->collide(&data, &CollisionSceneFCLLatest::CollisionCallback);
+    return !data.result.isCollision();
 }
 
 bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance)
@@ -516,13 +516,13 @@ bool CollisionSceneFCLLatest::isCollisionFree(const std::string& o1, const std::
     if (shapes1.size() == 0) throw_pretty("Can't find object '" << o1 << "'!");
     if (shapes2.size() == 0) throw_pretty("Can't find object '" << o2 << "'!");
     CollisionData data(this);
-    data.SafeDistance = safe_distance;
+    data.safe_distance = safe_distance;
     for (fcl::CollisionObjectd* s1 : shapes1)
     {
         for (fcl::CollisionObjectd* s2 : shapes2)
         {
-            checkCollision(s1, s2, &data);
-            if (data.Result.isCollision()) return false;
+            CheckCollision(s1, s2, &data);
+            if (data.result.isCollision()) return false;
         }
     }
     return true;
@@ -535,9 +535,9 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(bool s
     std::shared_ptr<fcl::BroadPhaseCollisionManagerd> manager(new fcl::DynamicAABBTreeCollisionManagerd());
     manager->registerObjects(fcl_objects_);
     DistanceData data(this);
-    data.Self = self;
-    manager->distance(&data, &CollisionSceneFCLLatest::collisionCallbackDistance);
-    return data.Proxies;
+    data.self = self;
+    manager->distance(&data, &CollisionSceneFCLLatest::CollisionCallbackDistance);
+    return data.proxies;
 }
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const std::string& o1, const std::string& o2)
@@ -559,10 +559,10 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const 
     {
         for (fcl::CollisionObjectd* s2 : shapes2)
         {
-            computeDistance(s1, s2, &data);
+            ComputeDistance(s1, s2, &data);
         }
     }
-    return data.Proxies;
+    return data.proxies;
 }
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const std::string& o1, const bool& self)
@@ -578,7 +578,7 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
     std::vector<fcl::CollisionObjectd*> shapes1;
     std::vector<fcl::CollisionObjectd*> shapes2;
     DistanceData data(this);
-    data.Self = self;
+    data.self = self;
 
     // Iterate over all fcl_objects_ to find all collision links that belong to
     // object o1
@@ -599,7 +599,7 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
         {
             bool allowedToCollide = false;
             for (fcl::CollisionObjectd* o1_shape : shapes1)
-                if (isAllowedToCollide(o1_shape, o, data.Self, data.Scene))
+                if (IsAllowedToCollide(o1_shape, o, data.self, data.scene))
                     allowedToCollide = true;
 
             if (allowedToCollide) shapes2.push_back(o);
@@ -607,16 +607,16 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(
     }
 
     // There are no objects o1 is allowed to collide with, return the empty proxies vector
-    if (shapes1.size() == 0 || shapes2.size() == 0) return data.Proxies;
+    if (shapes1.size() == 0 || shapes2.size() == 0) return data.proxies;
 
     for (fcl::CollisionObjectd* s1 : shapes1)
     {
         for (fcl::CollisionObjectd* s2 : shapes2)
         {
-            computeDistance(s1, s2, &data);
+            ComputeDistance(s1, s2, &data);
         }
     }
-    return data.Proxies;
+    return data.proxies;
 }
 
 std::vector<CollisionProxy> CollisionSceneFCLLatest::getCollisionDistance(const std::vector<std::string>& objects, const bool& self)
@@ -717,7 +717,7 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     if (shape2 == nullptr) throw_pretty("o2 not found.");
 
     CollisionData data(this);
-    const bool allowedToCollide = isAllowedToCollide(shape1, shape2, data.Self, data.Scene);
+    const bool allowedToCollide = IsAllowedToCollide(shape1, shape2, data.self, data.scene);
 
     if (!allowedToCollide)
     {

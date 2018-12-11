@@ -1,5 +1,5 @@
 /*
- *      Author: Vladimir Ivan
+ *      Author: Vladimir Ivan, Wolfgang Merkt
  *
  * Copyright (c) 2017, University of Edinburgh
  * All rights reserved.
@@ -30,13 +30,17 @@
  *
  */
 
-#ifndef CollisionSceneFCLLatest_H
-#define CollisionSceneFCLLatest_H
+#ifndef EXOTICA_COLLISION_SCENE_FCL_LATEST_COLLISION_SCENE_FCL_LATEST_H_
+#define EXOTICA_COLLISION_SCENE_FCL_LATEST_COLLISION_SCENE_FCL_LATEST_H_
 
-#include <eigen_conversions/eigen_kdl.h>
+#include <iostream>
+
 #include <exotica/CollisionScene.h>
 #include <exotica/Tools/Conversions.h>
-#include <fcl/fcl.h>
+
+#include <fcl/fcl.h>  // FCL 0.6 as provided by fcl_catkin
+
+#include <eigen_conversions/eigen_kdl.h>
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 
@@ -47,58 +51,54 @@ class CollisionSceneFCLLatest : public CollisionScene
 public:
     struct CollisionData
     {
-        CollisionData(CollisionSceneFCLLatest* scene) : Scene(scene), Self(true) {}
-        fcl::CollisionRequestd Request;
-        fcl::CollisionResultd Result;
-        CollisionSceneFCLLatest* Scene;
-        bool Self;
-        double SafeDistance;
+        CollisionData(CollisionSceneFCLLatest* scene) : scene(scene) {}
+        fcl::CollisionRequestd request;
+        fcl::CollisionResultd result;
+        CollisionSceneFCLLatest* scene;
+        bool self = true;
+        double safe_distance;
     };
 
     struct DistanceData
     {
-        DistanceData(CollisionSceneFCLLatest* scene) : Scene(scene), Self(true), Distance(1e300) {}
-        fcl::DistanceRequestd Request;
-        fcl::DistanceResultd Result;
-        CollisionSceneFCLLatest* Scene;
-        std::vector<CollisionProxy> Proxies;
-        double Distance;
-        bool Self;
+        DistanceData(CollisionSceneFCLLatest* scene) : scene(scene) {}
+        fcl::DistanceRequestd request;
+        fcl::DistanceResultd result;
+        CollisionSceneFCLLatest* scene;
+        std::vector<CollisionProxy> proxies;
+        double Distance = 1e300;
+        bool self = true;
     };
 
     CollisionSceneFCLLatest();
-
-    /**
-       * \brief Destructor
-       */
     virtual ~CollisionSceneFCLLatest();
 
-    void setup();
+    void setup() override;
 
-    bool isAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self);
+    bool isAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) override;
 
-    static bool isAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene);
-    static bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data);
-    static bool collisionCallbackDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data, double& dist);
+    static bool IsAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene);
+    static bool CollisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data);
+    static bool CollisionCallbackDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data, double& dist);
 
     /**
        * \brief Check if the whole robot is valid (collision only).
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free.
        */
-    virtual bool isStateValid(bool self = true, double safe_distance = 0.0);
-    virtual bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0);
+    bool isStateValid(bool self = true, double safe_distance = 0.0) override;
+    bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) override;
 
     ///
     /// \brief Computes collision distances.
     /// \param self Indicate if self collision check is required.
     /// \return Collision proximity objects for all colliding pairs of objects.
     ///
-    virtual std::vector<CollisionProxy> getCollisionDistance(bool self);
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2);
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true);
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::vector<std::string>& objects, const bool& self = true);
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true, const bool& disableCollisionSceneUpdate = false);
+    std::vector<CollisionProxy> getCollisionDistance(bool self) override;
+    std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2) override;
+    std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true) override;
+    std::vector<CollisionProxy> getCollisionDistance(const std::vector<std::string>& objects, const bool& self = true) override;
+    std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true, const bool& disableCollisionSceneUpdate = false) override;
 
     /**
      * @brief      Performs a continuous collision check between two objects with a linear interpolation between two given 
@@ -112,52 +112,50 @@ public:
      *
      * @return     ContinuousCollisionProxy.
      */
-    virtual ContinuousCollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end);
+    ContinuousCollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) override;
 
     /**
        * @brief      Gets the collision world links.
        *
        * @return     The collision world links.
        */
-    virtual std::vector<std::string> getCollisionWorldLinks();
+    std::vector<std::string> getCollisionWorldLinks() override;
 
     /**
       * @brief      Gets the KinematicElements associated with the collision world links.
       * @return     The KinematicElements associated with the collision world links.
       */
-    virtual std::vector<std::shared_ptr<KinematicElement>> getCollisionWorldLinkElements();
+    std::vector<std::shared_ptr<KinematicElement>> getCollisionWorldLinkElements() override;
 
     /**
        * @brief      Gets the collision robot links.
        *
        * @return     The collision robot links.
        */
-    virtual std::vector<std::string> getCollisionRobotLinks();
+    std::vector<std::string> getCollisionRobotLinks() override;
 
-    virtual Eigen::Vector3d getTranslation(const std::string& name);
+    Eigen::Vector3d getTranslation(const std::string& name) override;
 
     ///
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
     ///
-    virtual void updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects);
+    void updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects) override;
 
     ///
     /// \brief Updates collision object transformations from the kinematic tree.
     ///
-    virtual void updateCollisionObjectTransforms();
+    void updateCollisionObjectTransforms() override;
 
 private:
-    std::shared_ptr<fcl::CollisionObjectd> constructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
-    static void checkCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data);
-    static void computeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data);
+    std::shared_ptr<fcl::CollisionObjectd> ConstructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
+    static void CheckCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data);
+    static void ComputeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data);
 
     std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> fcl_cache_;
     std::vector<fcl::CollisionObjectd*> fcl_objects_;
     std::vector<std::weak_ptr<KinematicElement>> kinematic_elements_;
 };
-
-typedef std::shared_ptr<CollisionSceneFCLLatest> CollisionSceneFCLLatest_ptr;
 }
 
-#endif  // CollisionSceneFCLLatest_H
+#endif  // EXOTICA_COLLISION_SCENE_FCL_LATEST_COLLISION_SCENE_FCL_LATEST_H_

@@ -486,10 +486,8 @@ double AICOSolver::EvaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
 {
     if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iteration_count_ << ", sweep_ " << sweep_);
     Timer timer;
-    double dSet, dUpd, dCtrl, dTask;
 
     q = x;
-    dSet = timer.getDuration();
 
     // Perform update / roll-out
     if (!skip_update)
@@ -500,23 +498,17 @@ double AICOSolver::EvaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
             prob_->Update(q[t], t);
         }
     }
-    dUpd += timer.getDuration();
-    timer.reset();
-    if (debug_ && !skip_update) HIGHLIGHT("Roll-out took: " << dUpd);
+    if (debug_ && !skip_update) HIGHLIGHT("Roll-out took: " << timer.getDuration());
 
     for (int t = 1; t < prob_->getT(); t++)
     {
-        timer.reset();
         if (Server::isRos() && !ros::ok()) return -1.0;
 
         // Control cost
         cost_control_(t) = prob_->getScalarTransitionCost(t);
 
-        dCtrl += timer.getDuration();
-        timer.reset();
         // Task cost
         cost_task_(t) = prob_->getScalarTaskCost(t);
-        dTask += timer.getDuration();
     }
 
     cost_ = cost_control_.sum() + cost_task_.sum();

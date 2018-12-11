@@ -31,11 +31,11 @@
  *
  */
 
-#ifndef INCLUDE_OMPL_OMPL_SOLVER_H_
-#define INCLUDE_OMPL_OMPL_SOLVER_H_
+#ifndef EXOTICA_OMPL_SOLVER_OMPL_SOLVER_H_
+#define EXOTICA_OMPL_SOLVER_OMPL_SOLVER_H_
 
 #include <exotica/MotionSolver.h>
-#include <ompl_solver/ompl_exo.h>
+#include <exotica_ompl_solver/ompl_exo.h>
 
 typedef boost::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
 
@@ -60,27 +60,27 @@ using ompl_ptr = boost::shared_ptr<T>;
 namespace exotica
 {
 template <class ProblemType>
-class OMPLsolver : public MotionSolver
+class OMPLSolver : public MotionSolver
 {
 public:
-    OMPLsolver();
+    OMPLSolver();
+    virtual ~OMPLSolver();
 
-    virtual ~OMPLsolver();
+    void Solve(Eigen::MatrixXd &solution) override;
+    void specifyProblem(PlanningProblem_ptr pointer) override;
 
-    virtual void Solve(Eigen::MatrixXd &solution);
-    virtual void specifyProblem(PlanningProblem_ptr pointer);
-
-    int getRandomSeed();
+    int GetRandomSeed() const;
 
     // StateSpace related methods exposed via solver
-    double getMaximumExtent() { return state_space_->getMaximumExtent(); }
-    double getLongestValidSegmentLength() { return state_space_->getLongestValidSegmentLength(); }
-    void setLongestValidSegmentFraction(double segmentFraction) { state_space_->setLongestValidSegmentFraction(segmentFraction); }
-    void setValidSegmentCountFactor(unsigned int factor) { state_space_->setValidSegmentCountFactor(factor); }
-    unsigned int getValidSegmentCountFactor() const { return state_space_->getValidSegmentCountFactor(); }
+    double GetMaximumExtent() const { return state_space_->getMaximumExtent(); }
+    double GetLongestValidSegmentLength() const { return state_space_->getLongestValidSegmentLength(); }
+    void SetLongestValidSegmentFraction(double segmentFraction) { state_space_->setLongestValidSegmentFraction(segmentFraction); }
+    void SetValidSegmentCountFactor(unsigned int factor) { state_space_->setValidSegmentCountFactor(factor); }
+    unsigned int GetValidSegmentCountFactor() const { return state_space_->getValidSegmentCountFactor(); }
+
 protected:
     template <typename T>
-    static ompl::base::PlannerPtr allocatePlanner(const ompl::base::SpaceInformationPtr &si, const std::string &new_name)
+    static ompl::base::PlannerPtr AllocatePlanner(const ompl::base::SpaceInformationPtr &si, const std::string &new_name)
     {
         ompl::base::PlannerPtr planner(new T(si));
         if (!new_name.empty())
@@ -88,18 +88,18 @@ protected:
         return planner;
     }
 
-    void setGoalState(const Eigen::VectorXd &qT, const double eps = 0);
-    void preSolve();
-    void postSolve();
-    void getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc);
-    OMPLsolverInitializer init_;
+    void SetGoalState(Eigen::VectorXdRefConst qT, const double eps = 0);
+    void PreSolve();
+    void PostSolve();
+    void GetPath(Eigen::MatrixXdRef traj, ompl::base::PlannerTerminationCondition &ptc);
+    OMPLSolverInitializer init_;
     std::shared_ptr<ProblemType> prob_;
     ompl::geometric::SimpleSetupPtr ompl_simple_setup_;
     ompl::base::StateSpacePtr state_space_;
     ConfiguredPlannerAllocator planner_allocator_;
     std::string algorithm_;
-    bool multiQuery;
+    bool multi_query_ = false;
 };
 }
 
-#endif /* INCLUDE_OMPL_OMPL_SOLVER_H_ */
+#endif /* EXOTICA_OMPL_SOLVER_OMPL_SOLVER_H_ */

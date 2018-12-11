@@ -31,10 +31,11 @@
  *
  */
 
-#ifndef INCLUDE_OMPL_OMPL_EXO_H_
-#define INCLUDE_OMPL_OMPL_EXO_H_
+#ifndef EXOTICA_OMPL_SOLVER_OMPL_EXO_H_
+#define EXOTICA_OMPL_SOLVER_OMPL_EXO_H_
 
 #include <exotica/Problems/SamplingProblem.h>
+
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/StateSpace.h>
 #include <ompl/base/StateValidityChecker.h>
@@ -42,7 +43,8 @@
 #include <ompl/base/spaces/SE2StateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/geometric/SimpleSetup.h>
-#include <ompl_solver/OMPLsolverInitializer.h>
+
+#include <exotica_ompl_solver/OMPLSolverInitializer.h>
 
 #if OMPL_VERSION_VALUE >= 1004000  // Version greater than 1.4.0
 typedef Eigen::Ref<Eigen::VectorXd> OMPLProjection;
@@ -102,7 +104,7 @@ public:
             return *as<ompl::base::RealVectorStateSpace::StateType>(0);
         }
     };
-    OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLsolverInitializer init);
+    OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
@@ -139,7 +141,7 @@ public:
             return *as<ompl::base::SE3StateSpace::StateType>(0);
         }
     };
-    OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLsolverInitializer init);
+    OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
@@ -176,7 +178,7 @@ public:
             return *as<ompl::base::SE2StateSpace::StateType>(0);
         }
     };
-    OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLsolverInitializer init);
+    OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
@@ -294,4 +296,4 @@ private:
 
 } /* namespace exotica */
 
-#endif /* INCLUDE_OMPL_OMPL_EXO_H_ */
+#endif /* EXOTICA_OMPL_SOLVER_OMPL_EXO_H_ */

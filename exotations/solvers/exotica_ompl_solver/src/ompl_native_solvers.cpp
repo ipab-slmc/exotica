@@ -42,7 +42,8 @@
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>
-#include <ompl_solver/ompl_native_solvers.h>
+
+#include <exotica_ompl_solver/ompl_native_solvers.h>
 
 REGISTER_MOTIONSOLVER_TYPE("RRT", exotica::RRT)
 REGISTER_MOTIONSOLVER_TYPE("RRTConnect", exotica::RRTConnect)
@@ -56,218 +57,191 @@ REGISTER_MOTIONSOLVER_TYPE("LBTRRT", exotica::LBTRRT)
 
 namespace exotica
 {
-RRTStar::RRTStar()
-{
-}
+RRTStar::RRTStar() = default;
 
 void RRTStar::Instantiate(RRTStarInitializer& init)
 {
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_RRTStar";
-    planner_allocator_ = boost::bind(
-        &allocatePlanner<ompl::geometric::RRTstar>, _1, _2);
+    planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::RRTstar>, _1, _2);
 }
 
-LBTRRT::LBTRRT()
-{
-}
+LBTRRT::LBTRRT() = default;
 
 void LBTRRT::Instantiate(LBTRRTInitializer& init)
 {
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_LBTRRT";
-    planner_allocator_ = boost::bind(
-        &allocatePlanner<ompl::geometric::LBTRRT>, _1, _2);
+    planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::LBTRRT>, _1, _2);
 }
 
-RRT::RRT()
-{
-}
+RRT::RRT() = default;
 
 void RRT::Instantiate(RRTInitializer& init)
 {
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_RRT";
-    planner_allocator_ = boost::bind(
-        &allocatePlanner<ompl::geometric::RRT>, _1, _2);
+    planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::RRT>, _1, _2);
 }
 
-RRTConnect::RRTConnect()
-{
-}
+RRTConnect::RRTConnect() = default;
 
 void RRTConnect::Instantiate(RRTConnectInitializer& init)
 {
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_RRTConnect";
-    planner_allocator_ = boost::bind(
-        &allocatePlanner<ompl::geometric::RRTConnect>, _1, _2);
+    planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::RRTConnect>, _1, _2);
 }
 
-void RRTConnect::setRange(double range)
+void RRTConnect::SetRange(double range)
 {
     ompl_ptr<ompl::geometric::RRTConnect> rrtcon = ompl_cast<ompl::geometric::RRTConnect>(ompl_simple_setup_->getPlanner());
     rrtcon->setRange(range);
 }
 
-double RRTConnect::getRange()
+double RRTConnect::GetRange()
 {
     ompl_ptr<ompl::geometric::RRTConnect> rrtcon = ompl_cast<ompl::geometric::RRTConnect>(ompl_simple_setup_->getPlanner());
     return rrtcon->getRange();
 }
 
-EST::EST()
-{
-}
+EST::EST() = default;
 
 void EST::Instantiate(ESTInitializer& init)
 {
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_EST";
-    planner_allocator_ = boost::bind(
-        &allocatePlanner<ompl::geometric::EST>, _1, _2);
+    planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::EST>, _1, _2);
 }
 
-KPIECE::KPIECE()
-{
-}
+KPIECE::KPIECE() = default;
 
 void KPIECE::Instantiate(KPIECEInitializer& init)
 {
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_KPIECE";
-    planner_allocator_ = boost::bind(
-        &allocatePlanner<ompl::geometric::KPIECE1>, _1, _2);
+    planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::KPIECE1>, _1, _2);
 }
 
-BKPIECE::BKPIECE()
-{
-}
+BKPIECE::BKPIECE() = default;
 
 void BKPIECE::Instantiate(BKPIECEInitializer& init)
 {
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_BKPIECE";
-    planner_allocator_ = boost::bind(
-        &allocatePlanner<ompl::geometric::BKPIECE1>, _1, _2);
+    planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::BKPIECE1>, _1, _2);
 }
 
-PRM::PRM()
-{
-}
+PRM::PRM() = default;
 
 void PRM::Instantiate(PRMInitializer& init)
 {
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_PRM";
-    planner_allocator_ = boost::bind(
-        &allocatePlanner<ompl::geometric::PRM>, _1, _2);
-    multiQuery = init.MultiQuery;
+    planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::PRM>, _1, _2);
+    multi_query_ = init.MultiQuery;
 }
 
-void PRM::growRoadmap(double t)
+void PRM::GrowRoadmap(double t)
 {
     ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
     prm->growRoadmap(t);
 }
 
-void PRM::expandRoadmap(double t)
+void PRM::ExpandRoadmap(double t)
 {
     ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
     prm->expandRoadmap(t);
 }
 
-void PRM::clear()
+void PRM::Clear()
 {
     ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
     ompl_simple_setup_->getPlanner()->setProblemDefinition(ompl_simple_setup_->getProblemDefinition());
     prm->clear();
 }
 
-void PRM::clearQuery()
+void PRM::ClearQuery()
 {
     ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
     prm->clearQuery();
 }
 
-void PRM::setup()
+void PRM::Setup()
 {
     ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
     prm->setup();
 }
 
-int PRM::edgeCount()
+int PRM::EdgeCount()
 {
     ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
     return prm->edgeCount();
 }
 
-int PRM::milestoneCount()
+int PRM::MilestoneCount()
 {
     ompl_ptr<ompl::geometric::PRM> prm = ompl_cast<ompl::geometric::PRM>(ompl_simple_setup_->getPlanner());
     return prm->milestoneCount();
 }
 
-bool PRM::isMultiQuery()
+bool PRM::IsMultiQuery() const
 {
-    return multiQuery;
+    return multi_query_;
 }
 
-void PRM::setMultiQuery(bool val)
+void PRM::SetMultiQuery(bool val)
 {
-    multiQuery = val;
+    multi_query_ = val;
 }
 
-LazyPRM::LazyPRM()
-{
-}
+LazyPRM::LazyPRM() = default;
 
 void LazyPRM::Instantiate(LazyPRMInitializer& init)
 {
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_LazyPRM";
-    planner_allocator_ = boost::bind(
-        &allocatePlanner<ompl::geometric::LazyPRM>, _1, _2);
-    multiQuery = init.MultiQuery;
+    planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::LazyPRM>, _1, _2);
+    multi_query_ = init.MultiQuery;
 }
 
-void LazyPRM::clear()
+void LazyPRM::Clear()
 {
     ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
     prm->clear();
 }
 
-void LazyPRM::clearQuery()
+void LazyPRM::ClearQuery()
 {
     ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
     prm->clearQuery();
 }
 
-void LazyPRM::setup()
+void LazyPRM::Setup()
 {
     ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
     prm->setup();
 }
 
-int LazyPRM::edgeCount()
+int LazyPRM::EdgeCount()
 {
     ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
     return prm->edgeCount();
 }
 
-int LazyPRM::milestoneCount()
+int LazyPRM::MilestoneCount()
 {
     ompl_ptr<ompl::geometric::LazyPRM> prm = ompl_cast<ompl::geometric::LazyPRM>(ompl_simple_setup_->getPlanner());
     return prm->milestoneCount();
 }
 
-bool LazyPRM::isMultiQuery()
+bool LazyPRM::IsMultiQuery() const
 {
-    return multiQuery;
+    return multi_query_;
 }
 
-void LazyPRM::setMultiQuery(bool val)
+void LazyPRM::SetMultiQuery(bool val)
 {
-    multiQuery = val;
+    multi_query_ = val;
 }
 }

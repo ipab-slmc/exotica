@@ -183,7 +183,7 @@ void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::Planner
     }
     std::vector<ompl::base::State *> &states = pg.getStates();
     unsigned int length = 0;
-    if(init_.FinalInterpolationLength > 3)
+    if (init_.FinalInterpolationLength > 3)
         length = init_.FinalInterpolationLength;
     else
     {

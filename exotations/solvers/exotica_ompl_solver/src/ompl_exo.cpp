@@ -31,7 +31,7 @@
  *
  */
 
-#include <ompl_solver/ompl_exo.h>
+#include <exotica_ompl_solver/ompl_exo.h>
 
 namespace exotica
 {
@@ -63,7 +63,7 @@ bool OMPLStateValidityChecker::isValid(const ompl::base::State *state, double &d
     return true;
 }
 
-OMPLRNStateSpace::OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLsolverInitializer init) : OMPLStateSpace(prob)
+OMPLRNStateSpace::OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob)
 {
     setName("OMPLRNStateSpace");
     unsigned int dim = prob->N;
@@ -113,7 +113,7 @@ void OMPLRNStateSpace::stateDebug(const Eigen::VectorXd &q) const
     //  TODO
 }
 
-OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLsolverInitializer init) : OMPLStateSpace(prob)
+OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob)
 {
     setName("OMPLSE3RNStateSpace");
     unsigned int dim = prob->N;
@@ -182,7 +182,7 @@ void OMPLSE3RNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eig
     tmp.GetRPY(q(3), q(4), q(5));
 }
 
-OMPLSE2RNStateSpace::OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLsolverInitializer init) : OMPLStateSpace(prob)
+OMPLSE2RNStateSpace::OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob)
 {
     setName("OMPLSE2RNStateSpace");
     unsigned int dim = prob->N;

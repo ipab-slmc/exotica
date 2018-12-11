@@ -1,4 +1,4 @@
-<library path="lib/libompl_solver">
+<library path="lib/libexotica_ompl_solver">
   <class name="exotica/RRT" type="exotica::RRT" base_class_type="exotica::MotionSolver">
     <description>RRT</description>
   </class>

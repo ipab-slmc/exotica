@@ -31,24 +31,19 @@
  *
  */
 
+#include <exotica_ompl_solver/ompl_solver.h>
 #include <ompl/util/RandomNumbers.h>
-#include <ompl_solver/ompl_solver.h>
 
 namespace exotica
 {
 template <class ProblemType>
-OMPLsolver<ProblemType>::OMPLsolver() : multiQuery(false)
-{
-}
+OMPLSolver<ProblemType>::OMPLSolver() = default;
 
 template <class ProblemType>
-OMPLsolver<ProblemType>::~OMPLsolver()
-{
-}
+OMPLSolver<ProblemType>::~OMPLSolver() = default;
 
 template <class ProblemType>
-void OMPLsolver<ProblemType>::specifyProblem(PlanningProblem_ptr pointer)
-
+void OMPLSolver<ProblemType>::specifyProblem(PlanningProblem_ptr pointer)
 {
     MotionSolver::specifyProblem(pointer);
     prob_ = std::static_pointer_cast<ProblemType>(pointer);
@@ -95,16 +90,16 @@ void OMPLsolver<ProblemType>::specifyProblem(PlanningProblem_ptr pointer)
 }
 
 template <class ProblemType>
-int OMPLsolver<ProblemType>::getRandomSeed()
+int OMPLSolver<ProblemType>::GetRandomSeed() const
 {
     return ompl::RNG::getSeed();
 }
 
 template <class ProblemType>
-void OMPLsolver<ProblemType>::preSolve()
+void OMPLSolver<ProblemType>::PreSolve()
 {
-    // clear previously computed solutions
-    if (!multiQuery)
+    // Clear previously computed solutions
+    if (!multi_query_)
     {
         ompl_simple_setup_->getProblemDefinition()->clearSolutionPaths();
         const ompl::base::PlannerPtr planner = ompl_simple_setup_->getPlanner();
@@ -116,7 +111,7 @@ void OMPLsolver<ProblemType>::preSolve()
 }
 
 template <class ProblemType>
-void OMPLsolver<ProblemType>::postSolve()
+void OMPLSolver<ProblemType>::PostSolve()
 {
     ompl_simple_setup_->clearStartStates();
     int v = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getValidMotionCount();
@@ -128,7 +123,7 @@ void OMPLsolver<ProblemType>::postSolve()
 }
 
 template <class ProblemType>
-void OMPLsolver<ProblemType>::setGoalState(const Eigen::VectorXd &qT, const double eps)
+void OMPLSolver<ProblemType>::SetGoalState(Eigen::VectorXdRefConst qT, const double eps)
 {
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLStateSpace>()->ExoticaToOMPLState(qT, gs.get());
@@ -143,7 +138,7 @@ void OMPLsolver<ProblemType>::setGoalState(const Eigen::VectorXd &qT, const doub
 
         // Debug state and bounds
         std::string out_of_bounds_joint_ids = "";
-        for (int i = 0; i < qT.rows(); i++)
+        for (int i = 0; i < qT.rows(); ++i)
             if (qT(i) < prob_->getBounds()[i] || qT(i) > prob_->getBounds()[i + qT.rows()])
                 out_of_bounds_joint_ids += "[j" + std::to_string(i) + "=" + std::to_string(qT(i)) + ", ll=" + std::to_string(prob_->getBounds()[i]) + ", ul=" + std::to_string(prob_->getBounds()[i + qT.rows()]) + "]\n";
 
@@ -154,29 +149,29 @@ void OMPLsolver<ProblemType>::setGoalState(const Eigen::VectorXd &qT, const doub
 }
 
 template <class ProblemType>
-void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc)
+void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXdRef traj, ompl::base::PlannerTerminationCondition &ptc)
 {
-    ompl::geometric::PathSimplifierPtr psf_ = ompl_simple_setup_->getPathSimplifier();
+    ompl::geometric::PathSimplifierPtr psf = ompl_simple_setup_->getPathSimplifier();
     const ompl::base::SpaceInformationPtr &si = ompl_simple_setup_->getSpaceInformation();
 
     ompl::geometric::PathGeometric pg = ompl_simple_setup_->getSolutionPath();
     if (init_.Smooth)
     {
-        bool tryMore = true;
+        bool try_more = true;
         int times = 0;
-        while (init_.ReduceVertices && times < init_.SimplifyTryCnt && tryMore && ptc == false)
+        while (init_.ReduceVertices && times < init_.SimplifyTryCnt && try_more && ptc == false)
         {
             pg.interpolate(init_.SimplifyInterpolationLength);
-            tryMore = psf_->reduceVertices(pg, 0, 0, init_.RangeRatio);
+            try_more = psf->reduceVertices(pg, 0, 0, init_.RangeRatio);
             times++;
         }
         if (init_.ShortcutPath && si->getStateSpace()->isMetricSpace())
         {
             times = 0;
-            while (times < init_.SimplifyTryCnt && tryMore && ptc == false)
+            while (times < init_.SimplifyTryCnt && try_more && ptc == false)
             {
                 pg.interpolate(init_.SimplifyInterpolationLength);
-                tryMore = psf_->shortcutPath(pg, 0, 0, init_.RangeRatio, init_.SnapToVertex);
+                try_more = psf->shortcutPath(pg, 0, 0, init_.RangeRatio, init_.SnapToVertex);
                 times++;
             }
         }
@@ -184,7 +179,9 @@ void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::Planner
     std::vector<ompl::base::State *> &states = pg.getStates();
     unsigned int length = 0;
     if (init_.FinalInterpolationLength > 3)
+    {
         length = init_.FinalInterpolationLength;
+    }
     else
     {
         const int n1 = states.size() - 1;
@@ -196,32 +193,32 @@ void OMPLsolver<ProblemType>::getPath(Eigen::MatrixXd &traj, ompl::base::Planner
     traj.resize(pg.getStateCount(), prob_->getSpaceDim());
     Eigen::VectorXd tmp(prob_->getSpaceDim());
 
-    for (int i = 0; i < (int)pg.getStateCount(); ++i)
+    for (int i = 0; i < static_cast<int>(pg.getStateCount()); ++i)
     {
         state_space_->as<OMPLStateSpace>()->OMPLToExoticaState(pg.getState(i), tmp);
-        traj.row(i) = tmp;
+        traj.row(i) = tmp.transpose();
     }
 }
 
 template <class ProblemType>
-void OMPLsolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
+void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 {
     Eigen::VectorXd q0 = prob_->applyStartState();
-    setGoalState(prob_->getGoalState(), init_.Epsilon);
+    SetGoalState(prob_->getGoalState(), init_.Epsilon);
 
     ompl::base::ScopedState<> ompl_start_state(state_space_);
     state_space_->as<OMPLStateSpace>()->ExoticaToOMPLState(q0, ompl_start_state.get());
     ompl_simple_setup_->setStartState(ompl_start_state);
 
-    preSolve();
+    PreSolve();
     ompl::time::point start = ompl::time::now();
     ompl::base::PlannerTerminationCondition ptc = ompl::base::timedPlannerTerminationCondition(init_.Timeout - ompl::time::seconds(ompl::time::now() - start));
     if (ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION && ompl_simple_setup_->haveSolutionPath())
     {
-        getPath(solution, ptc);
+        GetPath(solution, ptc);
     }
-    postSolve();
+    PostSolve();
 }
 
-template class OMPLsolver<SamplingProblem>;
+template class OMPLSolver<SamplingProblem>;
 }

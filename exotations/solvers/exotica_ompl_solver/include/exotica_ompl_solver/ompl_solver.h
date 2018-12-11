@@ -77,7 +77,6 @@ public:
     void SetLongestValidSegmentFraction(double segmentFraction) { state_space_->setLongestValidSegmentFraction(segmentFraction); }
     void SetValidSegmentCountFactor(unsigned int factor) { state_space_->setValidSegmentCountFactor(factor); }
     unsigned int GetValidSegmentCountFactor() const { return state_space_->getValidSegmentCountFactor(); }
-
 protected:
     template <typename T>
     static ompl::base::PlannerPtr AllocatePlanner(const ompl::base::SpaceInformationPtr &si, const std::string &new_name)

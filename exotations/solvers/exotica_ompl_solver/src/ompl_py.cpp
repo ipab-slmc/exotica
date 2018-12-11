@@ -9,7 +9,7 @@
 using namespace exotica;
 namespace py = pybind11;
 
-PYBIND11_MODULE(ompl_solver_py, module)
+PYBIND11_MODULE(exotica_ompl_solver_py, module)
 {
     module.doc() = "Exotica wrapper of OMPL solvers";
 

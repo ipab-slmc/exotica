@@ -54,7 +54,7 @@ class CollisionSceneFCL : public CollisionScene
 public:
     struct CollisionData
     {
-        CollisionData(CollisionSceneFCL* scene) : scene(scene) {}
+        CollisionData(CollisionSceneFCL* scene_in) : scene(scene_in) {}
         fcl::CollisionRequest request;
         fcl::CollisionResult result;
         CollisionSceneFCL* scene;

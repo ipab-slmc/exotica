@@ -1,7 +1,4 @@
 /*
- *  Created on: 7 Nov 2017
- *      Author: Yiming Yang
- *
  * Copyright (c) 2017, University of Edinburgh
  * All rights reserved.
  *
@@ -31,9 +28,9 @@
  *
  */
 
+#include <exotica_time_indexed_rrt_connect_solver/time_indexed_rrt_connect.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/util/RandomNumbers.h>
-#include <time_indexed_rrt_connect/TimeIndexedRRTConnect.h>
 
 REGISTER_MOTIONSOLVER_TYPE("TimeIndexedRRTConnect", exotica::TimeIndexedRRTConnect)
 
@@ -106,13 +103,8 @@ bool OMPLTimeIndexedStateValidityChecker::isValid(const ompl::base::State *state
 }
 
 // The solver
-TimeIndexedRRTConnect::TimeIndexedRRTConnect()
-{
-}
-
-TimeIndexedRRTConnect::~TimeIndexedRRTConnect()
-{
-}
+TimeIndexedRRTConnect::TimeIndexedRRTConnect() = default;
+TimeIndexedRRTConnect::~TimeIndexedRRTConnect() = default;
 
 void TimeIndexedRRTConnect::Instantiate(TimeIndexedRRTConnectInitializer &init)
 {
@@ -269,7 +261,7 @@ void TimeIndexedRRTConnect::Solve(Eigen::MatrixXd &solution)
     postSolve();
 }
 
-void TimeIndexedRRTConnect::setPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc)
+void TimeIndexedRRTConnect::SetPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc)
 {
     ptc_ = ptc;
 }

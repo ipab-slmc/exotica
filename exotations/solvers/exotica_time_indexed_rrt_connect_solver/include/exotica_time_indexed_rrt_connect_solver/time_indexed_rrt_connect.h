@@ -1,7 +1,4 @@
 /*
- *  Created on: 7 Nov 2017
- *      Author: Yiming Yang
- *
  * Copyright (c) 2017, University of Edinburgh
  * All rights reserved.
  *
@@ -31,12 +28,14 @@
  *
  */
 
-#ifndef TIME_INDEXED_RRT_CONNECT_TIMEINDEXEDRRTCONNECT_H_
-#define TIME_INDEXED_RRT_CONNECT_TIMEINDEXEDRRTCONNECT_H_
+#ifndef TIME_INDEXED_RRT_CONNECT_SOLVER_TIME_INDEXED_RRT_CONNECT_H_
+#define TIME_INDEXED_RRT_CONNECT_SOLVER_TIME_INDEXED_RRT_CONNECT_H_
 
 #include <memory>
 
+#include <exotica/MotionSolver.h>
 #include <exotica/Problems/TimeIndexedSamplingProblem.h>
+
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/StateSpace.h>
 #include <ompl/base/StateValidityChecker.h>
@@ -45,9 +44,8 @@
 #include <ompl/base/spaces/TimeStateSpace.h>
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl/tools/config/SelfConfig.h>
-#include <time_indexed_rrt_connect/TimeIndexedRRTConnectInitializer.h>
 
-#include <exotica/MotionSolver.h>
+#include <exotica_time_indexed_rrt_connect_solver/TimeIndexedRRTConnectInitializer.h>
 
 namespace exotica
 {
@@ -116,7 +114,7 @@ public:
     virtual void Instantiate(TimeIndexedRRTConnectInitializer &init);
     virtual void Solve(Eigen::MatrixXd &solution);
     virtual void specifyProblem(PlanningProblem_ptr pointer);
-    void setPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc);
+    void SetPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc);
 
 protected:
     template <typename T>
@@ -149,11 +147,11 @@ public:
 
     virtual ~OMPLTimeIndexedRRTConnect();
 
-    virtual void getPlannerData(base::PlannerData &data) const;
+    void getPlannerData(base::PlannerData &data) const override;
 
-    virtual base::PlannerStatus solve(const base::PlannerTerminationCondition &ptc);
+    base::PlannerStatus solve(const base::PlannerTerminationCondition &ptc) override;
 
-    virtual void clear();
+    void clear() override;
 
     /** \brief Set the range the planner is supposed to use.
 
@@ -186,23 +184,17 @@ protected:
     class Motion
     {
     public:
-        Motion() : root(NULL), state(NULL), parent(NULL)
-        {
-            parent = NULL;
-            state = NULL;
-        }
+        Motion() = default;
 
-        Motion(const base::SpaceInformationPtr &si) : root(NULL), state(si->allocState()), parent(NULL)
+        Motion(const base::SpaceInformationPtr &si) : state(si->allocState())
         {
         }
 
-        ~Motion()
-        {
-        }
+        ~Motion() = default;
 
-        const base::State *root;
-        base::State *state;
-        Motion *parent;
+        const base::State *root = NULL;
+        base::State *state = NULL;
+        Motion *parent = NULL;
     };
 
     /** \brief A nearest-neighbor datastructure representing a tree of motions */
@@ -321,4 +313,4 @@ protected:
     bool reverse_check_;
 };
 }
-#endif /* TIME_INDEXED_RRT_CONNECT_TIMEINDEXEDRRTCONNECT_H_ */
+#endif /* TIME_INDEXED_RRT_CONNECT_SOLVER_TIME_INDEXED_RRT_CONNECT_H_ */

@@ -274,7 +274,7 @@ OMPLTimeIndexedRRTConnect::OMPLTimeIndexedRRTConnect(const base::SpaceInformatio
     maxDistance_ = 0.0;
 
     Planner::declareParam<double>("range", this, &OMPLTimeIndexedRRTConnect::setRange, &OMPLTimeIndexedRRTConnect::getRange, "0.:1.:10000.");
-    connectionPoint_ = std::make_pair<base::State *, base::State *>(NULL, NULL);
+    connectionPoint_ = std::make_pair<base::State *, base::State *>(nullptr, nullptr);
 }
 
 OMPLTimeIndexedRRTConnect::~OMPLTimeIndexedRRTConnect()
@@ -333,7 +333,7 @@ void OMPLTimeIndexedRRTConnect::clear()
     freeMemory();
     if (tStart_) tStart_->clear();
     if (tGoal_) tGoal_->clear();
-    connectionPoint_ = std::make_pair<base::State *, base::State *>(NULL, NULL);
+    connectionPoint_ = std::make_pair<base::State *, base::State *>(nullptr, nullptr);
 }
 
 OMPLTimeIndexedRRTConnect::GrowState OMPLTimeIndexedRRTConnect::growTree(TreeData &tree, TreeGrowingInfo &tgi, Motion *rmotion)
@@ -486,7 +486,7 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
             if (gsc == REACHED && goal->isStartGoalPairValid(startMotion->root, goalMotion->root))
             {
                 // it must be the case that either the start tree or the goal tree has made some progress
-                // so one of the parents is not NULL. We go one step 'back' to avoid having a duplicate state
+                // so one of the parents is not nullptr. We go one step 'back' to avoid having a duplicate state
                 // on the solution path
                 if (startMotion->parent)
                     startMotion = startMotion->parent;
@@ -498,7 +498,7 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
                 /* construct the solution path */
                 Motion *solution = startMotion;
                 std::vector<Motion *> mpath1;
-                while (solution != NULL)
+                while (solution != nullptr)
                 {
                     mpath1.push_back(solution);
                     solution = solution->parent;
@@ -506,7 +506,7 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
 
                 solution = goalMotion;
                 std::vector<Motion *> mpath2;
-                while (solution != NULL)
+                while (solution != nullptr)
                 {
                     mpath2.push_back(solution);
                     solution = solution->parent;
@@ -543,7 +543,7 @@ void OMPLTimeIndexedRRTConnect::getPlannerData(base::PlannerData &data) const
 
     for (unsigned int i = 0; i < motions.size(); ++i)
     {
-        if (motions[i]->parent == NULL)
+        if (motions[i]->parent == nullptr)
             data.addStartVertex(base::PlannerDataVertex(motions[i]->state, 1));
         else
         {
@@ -556,7 +556,7 @@ void OMPLTimeIndexedRRTConnect::getPlannerData(base::PlannerData &data) const
 
     for (unsigned int i = 0; i < motions.size(); ++i)
     {
-        if (motions[i]->parent == NULL)
+        if (motions[i]->parent == nullptr)
             data.addGoalVertex(base::PlannerDataVertex(motions[i]->state, 2));
         else
         {

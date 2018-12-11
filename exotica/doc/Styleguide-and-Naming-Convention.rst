@@ -53,7 +53,7 @@ Where the Google style guide leaves multiple options, here are our choices:
 - Use ``override`` instead of ``virtual`` when overriding a function in a child class.
 - Order output parameters after inputs if returning values via arguments.
 - Avoid boost.
-- Always use C++11.
+- Always use C++11/C++14.
 - Type names: ``CamelCasedWithFirstCapitalLetter``
 - Variable names: ``with_underscores``
 - Member variables: ``with_underscores_and_trailing_underscore_``

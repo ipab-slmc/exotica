@@ -192,9 +192,9 @@ protected:
 
         ~Motion() = default;
 
-        const base::State *root = NULL;
-        base::State *state = NULL;
-        Motion *parent = NULL;
+        const base::State *root = nullptr;
+        base::State *state = nullptr;
+        Motion *parent = nullptr;
     };
 
     /** \brief A nearest-neighbor datastructure representing a tree of motions */

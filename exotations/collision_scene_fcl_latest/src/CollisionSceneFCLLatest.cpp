@@ -728,25 +728,27 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
 
     fcl::ContinuousCollisionRequestd request = fcl::ContinuousCollisionRequestd();
 
-    // request.num_max_iterations = 100;  // default 10
-    // request.toc_err = 1e-5;            // default 1e-4
+#ifdef CONTINUOUS_COLLISION_USE_ADVANCED_SETTINGS
+    request.num_max_iterations = 100;  // default 10
+    request.toc_err = 1e-5;            // default 1e-4
 
     // GST_LIBCCD, GST_INDEP
-    // request.gjk_solver_type = fcl::GST_INDEP;
+    request.gjk_solver_type = fcl::GST_INDEP;
 
     // CCDM_TRANS, CCDM_LINEAR, CCDM_SCREW, CCDM_SPLINE
-    // request.ccd_motion_type = fcl::CCDM_TRANS;
+    request.ccd_motion_type = fcl::CCDM_TRANS;
 
     // CCDC_NAIVE, CCDC_CONSERVATIVE_ADVANCEMENT, CCDC_RAY_SHOOTING, CCDC_POLYNOMIAL_SOLVER
     // As of 2018-06-27, only CCDC_NAIVE appears to work reliably on both primitives and meshes.
     // Cf. https://github.com/flexible-collision-library/fcl/issues/120
-    // request.ccd_solver_type = fcl::CCDC_NAIVE;
+    request.ccd_solver_type = fcl::CCDC_NAIVE;
 
     // If both are primitives, let's use conservative advancement
-    // if (shape1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && shape2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
-    // {
-    //     request.ccd_solver_type = fcl::CCDC_CONSERVATIVE_ADVANCEMENT;
-    // }
+    if (shape1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && shape2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
+    {
+        request.ccd_solver_type = fcl::CCDC_CONSERVATIVE_ADVANCEMENT;
+    }
+#endif
 
     fcl::ContinuousCollisionResultd result;
     double time_of_contact = fcl::continuousCollide(
@@ -754,7 +756,9 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
         shape2->collisionGeometry().get(), fcl_convert::KDL2fcl(tf2_beg), fcl_convert::KDL2fcl(tf2_end),
         request, result);
 
-    // HIGHLIGHT_NAMED("ContinuousCollisionResult", "return=" << time_of_contact << " is_collide: " << result.is_collide << " time_of_contact: " << result.time_of_contact << " contact_tf1: " << result.contact_tf1.translation().transpose() << " contact_tf2: " << result.contact_tf2.translation().transpose());
+#ifdef CONTINUOUS_COLLISION_DEBUG
+    HIGHLIGHT_NAMED("ContinuousCollisionResult", "return=" << time_of_contact << " is_collide: " << result.is_collide << " time_of_contact: " << result.time_of_contact << " contact_tf1: " << result.contact_tf1.translation().transpose() << " contact_tf2: " << result.contact_tf2.translation().transpose());
+#endif
 
     ret.in_collision = result.is_collide;
     ret.time_of_contact = result.time_of_contact;
@@ -762,21 +766,22 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
     // If in contact, compute contact point
     if (ret.in_collision)
     {
-        // // Run distance query
-        // fcl::DistanceRequestd distance_req;
-        // fcl::DistanceResultd distance_res;
-        // distance_req.enable_nearest_points = true;
-        // distance_req.enable_signed_distance = true;
-        // // distance_req.distance_tolerance = 1e-6;
-        // distance_req.gjk_solver_type = fcl::GST_LIBCCD;
-        // // distance_res.clear();
+#if 0
+        // Run distance query
+        fcl::DistanceRequestd distance_req;
+        fcl::DistanceResultd distance_res;
+        distance_req.enable_nearest_points = true;
+        distance_req.enable_signed_distance = true;
+        // distance_req.distance_tolerance = 1e-6;
+        distance_req.gjk_solver_type = fcl::GST_LIBCCD;
+        // distance_res.clear();
 
-        // double min_dist = fcl::distance(shape1, shape2, distance_req, distance_res);
+        double min_dist = fcl::distance(shape1, shape2, distance_req, distance_res);
 
-        // ret.penetration_depth = distance_res.min_distance;
-        // ret.contact_pos = distance_res.nearest_points[0];
-        // ret.contact_normal = (distance_res.nearest_points[1] - distance_res.nearest_points[0]).normalized();
-
+        ret.penetration_depth = distance_res.min_distance;
+        ret.contact_pos = distance_res.nearest_points[0];
+        ret.contact_normal = (distance_res.nearest_points[1] - distance_res.nearest_points[0]).normalized();
+#else
         fcl::CollisionRequestd contact_req;
         contact_req.enable_contact = true;
         contact_req.num_max_contacts = 1000;
@@ -798,15 +803,16 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::continuousCollisionCheck(
                     ret.contact_normal = -contact.normal;
                 }
             }
-
-            // HIGHLIGHT_NAMED("In collision, contacts: ", num_contacts << ", penetration=" << ret.penetration_depth << ", pos: " << ret.contact_pos.transpose());
+#ifdef CONTINUOUS_COLLISION_DEBUG
+            HIGHLIGHT_NAMED("In collision, contacts: ", num_contacts << ", penetration=" << ret.penetration_depth << ", pos: " << ret.contact_pos.transpose());
+#endif
         }
         else
         {
             ret.penetration_depth = 0.0;
             ret.in_collision = false;
-            // throw_pretty("What's up?");
         }
+#endif
     }
 
     tf::transformEigenToKDL(static_cast<Eigen::Isometry3d>(result.contact_tf1), ret.contact_tf1);

@@ -429,47 +429,21 @@ double BayesianIKSolver::Step()
     {
         //NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
         case FORWARD:
-            // for (t = 1; t < prob_->getT(); t++)
-            // {
             UpdateTimestep(true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd Sweep
-            // }
-            // for (t = prob_->getT() - 2; t > 0; t--)
-            // {
-            UpdateTimestep(false, true, 0, minimum_step_tolerance_, false, 1.);  //...not on bwd Sweep
-            // }
+            UpdateTimestep(false, true, 0, minimum_step_tolerance_, false, 1.);              //...not on bwd Sweep
             break;
         case SYMMETRIC:
-            // ROS_WARN_STREAM("Updating forward, iteration_count_ "<<iteration_count_);
-            // for (t = 1; t < prob_->getT(); t++)
-            // {
             UpdateTimestep(true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd & bwd Sweep
-            // }
-            // ROS_WARN_STREAM("Updating backward, iteration_count_ "<<iteration_count_);
-            // for (t = prob_->getT() - 2; t > 0; t--)
-            // {
             UpdateTimestep(false, true, (iteration_count_ ? 1 : 0), minimum_step_tolerance_, false, 1.);
-            // }
             break;
         case LOCAL_GAUSS_NEWTON:
-            // for (t = 1; t < prob_->getT(); t++)
-            // {
             //     UpdateTimestep(t, true, false, (iteration_count_ ? 5 : 1), minimum_step_tolerance_, !iteration_count_, 1.);  //relocate iteratively on
-            // }
-            // for (t = prob_->getT() - 2; t > 0; t--)
-            // {
             //     UpdateTimestep(t, false, true, (iteration_count_ ? 5 : 0), minimum_step_tolerance_, false, 1.);  //...fwd & bwd Sweep
-            // }
             break;
         case LOCAL_GAUSS_NEWTON_DAMPED:
-            // for (t = 1; t < prob_->getT(); t++)
-            // {
             //     UpdateTimestepGaussNewton(t, true, false, (iteration_count_ ? 5 : 1),
             //                               minimum_step_tolerance_, 1.);  //GaussNewton in fwd & bwd Sweep
-            // }
-            // for (t = prob_->getT() - 2; t > 0; t--)
-            // {
             //     UpdateTimestep(t, false, true, (iteration_count_ ? 5 : 0), minimum_step_tolerance_, false, 1.);
-            // }
             break;
         default:
             throw_named("non-existing Sweep mode");

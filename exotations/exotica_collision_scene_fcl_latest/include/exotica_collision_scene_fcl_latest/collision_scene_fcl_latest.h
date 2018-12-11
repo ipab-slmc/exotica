@@ -51,7 +51,7 @@ class CollisionSceneFCLLatest : public CollisionScene
 public:
     struct CollisionData
     {
-        CollisionData(CollisionSceneFCLLatest* scene) : scene(scene) {}
+        CollisionData(CollisionSceneFCLLatest* scene_in) : scene(scene_in) {}
         fcl::CollisionRequestd request;
         fcl::CollisionResultd result;
         CollisionSceneFCLLatest* scene;
@@ -61,7 +61,7 @@ public:
 
     struct DistanceData
     {
-        DistanceData(CollisionSceneFCLLatest* scene) : scene(scene) {}
+        DistanceData(CollisionSceneFCLLatest* scene_in) : scene(scene_in) {}
         fcl::DistanceRequestd request;
         fcl::DistanceResultd result;
         CollisionSceneFCLLatest* scene;

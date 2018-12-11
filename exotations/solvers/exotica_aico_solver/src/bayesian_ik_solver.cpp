@@ -46,34 +46,34 @@ void BayesianIKSolver::Instantiate(BayesianIKSolverInitializer& init)
 {
     std::string mode = init.SweepMode;
     if (mode == "Forwardly")
-        sweepMode = smForwardly;
+        sweep_mode_ = FORWARD;
     else if (mode == "Symmetric")
-        sweepMode = smSymmetric;
+        sweep_mode_ = SYMMETRIC;
     else if (mode == "LocalGaussNewton")
-        sweepMode = smLocalGaussNewton;
+        sweep_mode_ = LOCAL_GAUSS_NEWTON;
     else if (mode == "LocalGaussNewtonDamped")
-        sweepMode = smLocalGaussNewtonDamped;
+        sweep_mode_ = LOCAL_GAUSS_NEWTON_DAMPED;
     else
     {
         throw_named("Unknown sweep mode '" << init.SweepMode << "'");
     }
-    max_backtrack_iterations = init.MaxBacktrackIterations;
-    minimum_step_tolerance = init.MinStep;
-    step_tolerance = init.StepTolerance;
-    function_tolerance = init.FunctionTolerance;
-    damping_init = init.Damping;
-    useBwdMsg = init.UseBackwardMessage;
+    max_backtrack_iterations_ = init.MaxBacktrackIterations;
+    minimum_step_tolerance_ = init.MinStep;
+    step_tolerance_ = init.StepTolerance;
+    function_tolerance_ = init.FunctionTolerance;
+    damping_init_ = init.Damping;
+    use_bwd_msg_ = init.UseBackwardMessage;
 }
 
 BayesianIKSolver::BayesianIKSolver()
     : damping(0.01),
-      minimum_step_tolerance(1e-5),
-      step_tolerance(1e-5),
-      function_tolerance(1e-5),
-      max_backtrack_iterations(10),
-      useBwdMsg(false),
-      bwdMsg_v(),
-      bwdMsg_Vinv(),
+      minimum_step_tolerance_(1e-5),
+      step_tolerance_(1e-5),
+      function_tolerance_(1e-5),
+      max_backtrack_iterations_(10),
+      use_bwd_msg_(false),
+      bwd_msg_v_(),
+      bwd_msg_Vinv_(),
       s(),
       Sinv(),
       v(),
@@ -96,17 +96,17 @@ BayesianIKSolver::BayesianIKSolver()
       Binv_old(),
       q_old(),
       qhat_old(),
-      dampingReference(),
-      cost(0.0),
-      cost_old(std::numeric_limits<double>::max()),
-      cost_prev(std::numeric_limits<double>::max()),
-      b_step(0.0),
+      damping_reference_(),
+      cost_(0.0),
+      cost_old_(std::numeric_limits<double>::max()),
+      cost_prev_(std::numeric_limits<double>::max()),
+      b_step_(0.0),
       Winv(),
-      sweep(0),
-      sweepMode(0),
+      sweep_(0),
+      sweep_mode_(0),
       W(),
-      updateCount(0),
-      damping_init(100.0)
+      update_count_(0),
+      damping_init_(100.0)
 {
 }
 
@@ -133,17 +133,17 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
 
     Timer timer;
     if (debug_) ROS_WARN_STREAM("BayesianIKSolver: Setting up the solver");
-    updateCount = 0;
-    damping = damping_init;
+    update_count_ = 0;
+    damping = damping_init_;
     double d;
-    iterationCount = -1;
+    iteration_count_ = -1;
     InitTrajectory(q0);
     if (debug_) ROS_WARN_STREAM("BayesianIKSolver: Solving");
 
     // Reset sweep and iteration count
-    sweep = 0;
-    iterationCount = 0;
-    while (iterationCount < getNumberOfMaxIterations())
+    sweep_ = 0;
+    iteration_count_ = 0;
+    while (iteration_count_ < getNumberOfMaxIterations())
     {
         // Check whether user interrupted (Ctrl+C)
         if (Server::isRos() && !ros::ok())
@@ -160,7 +160,7 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // 0. Check maximum backtrack iterations
-        if (sweep >= max_backtrack_iterations)
+        if (sweep_ >= max_backtrack_iterations_)
         {
             if (debug_) HIGHLIGHT("Maximum backtrack iterations reached, exiting.");
             prob_->terminationCriterion = TerminationCriterion::BacktrackIterationLimit;
@@ -168,40 +168,40 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // Check stopping criteria
-        if (iterationCount > 1)
+        if (iteration_count_ > 1)
         {
             // Check convergence if
             //    a) damping is on and the iteration has concluded (the sweep improved the cost)
             //    b) damping is off [each sweep equals one iteration]
-            if (damping && sweepImprovedCost || !damping)
+            if (damping && sweep_improved_cost_ || !damping)
             {
                 // 1. Check step tolerance
                 // || x_t-x_t-1 || <= stepTolerance * max(1, || x_t ||)
                 // TODO(#257): TODO(#256): move to Eigen::MatrixXd to make this easier to compute, in the meantime use old check
                 //
                 // TODO(#256): OLD TOLERANCE CHECK - TODO REMOVE
-                if (d < minimum_step_tolerance)
+                if (d < minimum_step_tolerance_)
                 {
-                    if (debug_) HIGHLIGHT("Satisfied tolerance\titer=" << iterationCount << "\td=" << d << "\tminimum_step_tolerance=" << minimum_step_tolerance);
+                    if (debug_) HIGHLIGHT("Satisfied tolerance\titer=" << iteration_count_ << "\td=" << d << "\tminimum_step_tolerance=" << minimum_step_tolerance_);
                     prob_->terminationCriterion = TerminationCriterion::StepTolerance;
                     break;
                 }
 
                 // 2. Check function tolerance
                 // (f_t-1 - f_t) <= functionTolerance * max(1, abs(f_t))
-                if ((cost_prev - cost) <= function_tolerance * std::max(1.0, std::abs(cost)))
+                if ((cost_prev_ - cost_) <= function_tolerance_ * std::max(1.0, std::abs(cost_)))
                 {
-                    if (debug_) HIGHLIGHT("Function tolerance achieved: " << (cost_prev - cost) << " <= " << function_tolerance * std::max(1.0, std::abs(cost)));
+                    if (debug_) HIGHLIGHT("Function tolerance achieved: " << (cost_prev_ - cost_) << " <= " << function_tolerance_ * std::max(1.0, std::abs(cost_)));
                     prob_->terminationCriterion = TerminationCriterion::FunctionTolerance;
                     break;
                 }
-                cost_prev = cost;
+                cost_prev_ = cost_;
             }
         }
     }
 
     // Check whether maximum iteration count was reached
-    if (iterationCount == getNumberOfMaxIterations())
+    if (iteration_count_ == getNumberOfMaxIterations())
     {
         if (debug_) HIGHLIGHT("Maximum iterations reached");
         prob_->terminationCriterion = TerminationCriterion::IterationLimit;
@@ -225,21 +225,21 @@ void BayesianIKSolver::InitMessages()
     Sinv = Eigen::MatrixXd::Zero(prob_->N, prob_->N);
     v = Eigen::VectorXd::Zero(prob_->N);
     Vinv = Eigen::MatrixXd::Zero(prob_->N, prob_->N);
-    // if (useBwdMsg)
+    // if (use_bwd_msg_)
     // {
-    //     if (bwdMsg_v.rows() == prob_->N && bwdMsg_Vinv.rows() == prob_->N && bwdMsg_Vinv.cols() == prob_->N)
+    //     if (bwd_msg_v_.rows() == prob_->N && bwd_msg_Vinv_.rows() == prob_->N && bwd_msg_Vinv_.cols() == prob_->N)
     //     {
-    //         v[prob_->getT() - 1] = bwdMsg_v;
-    //         Vinv[prob_->getT() - 1] = bwdMsg_Vinv;
+    //         v[prob_->getT() - 1] = bwd_msg_v_;
+    //         Vinv[prob_->getT() - 1] = bwd_msg_Vinv_;
     //     }
     //     else
     //     {
-    //         useBwdMsg = false;
+    //         use_bwd_msg_ = false;
     //         WARNING("Backward message initialisation skipped, matrices have incorrect dimensions.");
     //     }
     // }
     b = Eigen::VectorXd::Zero(prob_->N);
-    dampingReference = Eigen::VectorXd::Zero(prob_->N);
+    damping_reference_ = Eigen::VectorXd::Zero(prob_->N);
     Binv = Eigen::MatrixXd::Zero(prob_->N, prob_->N);
     // Binv[0].setIdentity();
     // Binv[0] = Binv[0] * 1e10;
@@ -247,7 +247,7 @@ void BayesianIKSolver::InitMessages()
     R = Eigen::MatrixXd::Zero(prob_->N, prob_->N);
     rhat = 0;
     qhat = Eigen::VectorXd::Zero(prob_->N);
-    linSolverTmp.resize(prob_->N, prob_->N);
+    lin_solver_tmp_.resize(prob_->N, prob_->N);
     {
         q = b;
         if (prob_->W.rows() != prob_->N)
@@ -266,7 +266,7 @@ void BayesianIKSolver::InitTrajectory(const Eigen::VectorXd& q_init)
 {
     qhat = q_init;
     q = q_init;
-    dampingReference = q_init;
+    damping_reference_ = q_init;
     b = q_init;
     s = q_init;
     v = q_init;
@@ -278,11 +278,11 @@ void BayesianIKSolver::InitTrajectory(const Eigen::VectorXd& q_init)
     // Compute task message reference
     UpdateTaskMessage(b, 0.0);
 
-    cost = EvaluateTrajectory(b, true);  // The problem will be updated via UpdateTaskMessage, i.e. do not update on this roll-out
-    cost_prev = cost;
-    prob_->setCostEvolution(0, cost);
-    if (cost < 0) throw_named("Invalid cost! " << cost);
-    if (debug_) HIGHLIGHT("Initial cost, updates: " << updateCount << ", cost: " << cost);
+    cost_ = EvaluateTrajectory(b, true);  // The problem will be updated via UpdateTaskMessage, i.e. do not update on this roll-out
+    cost_prev_ = cost_;
+    prob_->setCostEvolution(0, cost_);
+    if (cost_ < 0) throw_named("Invalid cost! " << cost_);
+    if (debug_) HIGHLIGHT("Initial cost, updates: " << update_count_ << ", cost: " << cost_);
     RememberOldState();
 }
 
@@ -299,27 +299,27 @@ void BayesianIKSolver::UpdateBwdMessage()
 {
     Eigen::MatrixXd barV(prob_->N, prob_->N), Vt;
 
-    if (!useBwdMsg)
+    if (!use_bwd_msg_)
     {
         v = b;
         Vinv.diagonal().setConstant(1);
     }
     else
     {
-        v = bwdMsg_v;
-        Vinv = bwdMsg_Vinv;
+        v = bwd_msg_v_;
+        Vinv = bwd_msg_Vinv_;
     }
 }
 
-void BayesianIKSolver::UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double minimum_step_tolerance,
-                                         double maxStepSize)
+void BayesianIKSolver::UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double tolerance,
+                                         double max_step_size)
 {
     Eigen::VectorXd diff = qhat_t - qhat;
-    if ((diff.array().abs().maxCoeff() < minimum_step_tolerance)) return;
+    if ((diff.array().abs().maxCoeff() < tolerance)) return;
     double nrm = diff.norm();
-    if (maxStepSize > 0. && nrm > maxStepSize)
+    if (max_step_size > 0. && nrm > max_step_size)
     {
-        qhat += diff * (maxStepSize / nrm);
+        qhat += diff * (max_step_size / nrm);
     }
     else
     {
@@ -327,9 +327,9 @@ void BayesianIKSolver::UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>
     }
 
     prob_->Update(qhat);
-    updateCount++;
+    update_count_++;
     double c = GetTaskCosts();
-    // q_stat.addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
+    // q_stat_.addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
 }
 
 double BayesianIKSolver::GetTaskCosts()
@@ -357,64 +357,64 @@ double BayesianIKSolver::GetTaskCosts()
     return C;
 }
 
-void BayesianIKSolver::UpdateTimestep(bool updateFwd, bool updateBwd,
-                                      int maxRelocationIterations, double minimum_step_tolerance, bool forceRelocation,
-                                      double maxStepSize)
+void BayesianIKSolver::UpdateTimestep(bool update_fwd, bool update_bwd,
+                                      int max_relocation_iterations, double tolerance, bool force_relocation,
+                                      double max_step_size)
 {
-    if (updateFwd) UpdateFwdMessage();
-    if (updateBwd) UpdateBwdMessage();
+    if (update_fwd) UpdateFwdMessage();
+    if (update_bwd) UpdateBwdMessage();
 
     if (damping)
     {
         Binv = Sinv + Vinv + R + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
-        AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * dampingReference, linSolverTmp, prob_->N);
+        AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * damping_reference_, lin_solver_tmp_, prob_->N);
     }
     else
     {
         Binv = Sinv + Vinv + R;
-        AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r, linSolverTmp, prob_->N);
+        AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r, lin_solver_tmp_, prob_->N);
     }
 
-    for (int k = 0; k < maxRelocationIterations && !(Server::isRos() && !ros::ok()); k++)
+    for (int k = 0; k < max_relocation_iterations && !(Server::isRos() && !ros::ok()); k++)
     {
-        if (!((!k && forceRelocation) || (b - qhat).array().abs().maxCoeff() > minimum_step_tolerance)) break;
+        if (!((!k && force_relocation) || (b - qhat).array().abs().maxCoeff() > tolerance)) break;
 
-        UpdateTaskMessage(b, 0., maxStepSize);
+        UpdateTaskMessage(b, 0., max_step_size);
 
         //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
-        if (updateFwd) UpdateFwdMessage();
-        if (updateBwd) UpdateBwdMessage();
+        if (update_fwd) UpdateFwdMessage();
+        if (update_bwd) UpdateBwdMessage();
 
         if (damping)
         {
             Binv = Sinv + Vinv + R + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
-            AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * dampingReference, linSolverTmp, prob_->N);
+            AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * damping_reference_, lin_solver_tmp_, prob_->N);
         }
         else
         {
             Binv = Sinv + Vinv + R;
-            AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r, linSolverTmp, prob_->N);
+            AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r, lin_solver_tmp_, prob_->N);
         }
     }
 }
 
-void BayesianIKSolver::UpdateTimestepGaussNewton(bool updateFwd,
-                                                 bool updateBwd, int maxRelocationIterations, double minimum_step_tolerance,
-                                                 double maxStepSize)
+void BayesianIKSolver::UpdateTimestepGaussNewton(bool update_fwd,
+                                                 bool update_bwd, int max_relocation_iterations, double tolerance,
+                                                 double max_step_size)
 {
     // TODO: implement UpdateTimestepGaussNewton
     throw_named("Not implemented yet!");
 }
 
-double BayesianIKSolver::EvaluateTrajectory(const Eigen::VectorXd& x, bool skipUpdate)
+double BayesianIKSolver::EvaluateTrajectory(const Eigen::VectorXd& x, bool skip_update)
 {
-    if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iterationCount << ", sweep " << sweep);
+    if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iteration_count_ << ", sweep_ " << sweep_);
     q = x;
 
     // Perform update / roll-out
-    if (!skipUpdate)
+    if (!skip_update)
     {
-        updateCount++;
+        update_count_++;
         prob_->Update(q);
     }
 
@@ -425,76 +425,76 @@ double BayesianIKSolver::EvaluateTrajectory(const Eigen::VectorXd& x, bool skipU
 double BayesianIKSolver::Step()
 {
     RememberOldState();
-    switch (sweepMode)
+    switch (sweep_mode_)
     {
         //NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
-        case smForwardly:
+        case FORWARD:
             // for (t = 1; t < prob_->getT(); t++)
             // {
-            UpdateTimestep(true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd Sweep
+            UpdateTimestep(true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd Sweep
             // }
             // for (t = prob_->getT() - 2; t > 0; t--)
             // {
-            UpdateTimestep(false, true, 0, minimum_step_tolerance, false, 1.);  //...not on bwd Sweep
+            UpdateTimestep(false, true, 0, minimum_step_tolerance_, false, 1.);  //...not on bwd Sweep
             // }
             break;
-        case smSymmetric:
-            // ROS_WARN_STREAM("Updating forward, iterationCount "<<iterationCount);
+        case SYMMETRIC:
+            // ROS_WARN_STREAM("Updating forward, iteration_count_ "<<iteration_count_);
             // for (t = 1; t < prob_->getT(); t++)
             // {
-            UpdateTimestep(true, false, 1, minimum_step_tolerance, !iterationCount, 1.);  //relocate once on fwd & bwd Sweep
+            UpdateTimestep(true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd & bwd Sweep
             // }
-            // ROS_WARN_STREAM("Updating backward, iterationCount "<<iterationCount);
+            // ROS_WARN_STREAM("Updating backward, iteration_count_ "<<iteration_count_);
             // for (t = prob_->getT() - 2; t > 0; t--)
             // {
-            UpdateTimestep(false, true, (iterationCount ? 1 : 0), minimum_step_tolerance, false, 1.);
+            UpdateTimestep(false, true, (iteration_count_ ? 1 : 0), minimum_step_tolerance_, false, 1.);
             // }
             break;
-        case smLocalGaussNewton:
+        case LOCAL_GAUSS_NEWTON:
             // for (t = 1; t < prob_->getT(); t++)
             // {
-            //     UpdateTimestep(t, true, false, (iterationCount ? 5 : 1), minimum_step_tolerance, !iterationCount, 1.);  //relocate iteratively on
+            //     UpdateTimestep(t, true, false, (iteration_count_ ? 5 : 1), minimum_step_tolerance_, !iteration_count_, 1.);  //relocate iteratively on
             // }
             // for (t = prob_->getT() - 2; t > 0; t--)
             // {
-            //     UpdateTimestep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);  //...fwd & bwd Sweep
+            //     UpdateTimestep(t, false, true, (iteration_count_ ? 5 : 0), minimum_step_tolerance_, false, 1.);  //...fwd & bwd Sweep
             // }
             break;
-        case smLocalGaussNewtonDamped:
+        case LOCAL_GAUSS_NEWTON_DAMPED:
             // for (t = 1; t < prob_->getT(); t++)
             // {
-            //     UpdateTimestepGaussNewton(t, true, false, (iterationCount ? 5 : 1),
-            //                               minimum_step_tolerance, 1.);  //GaussNewton in fwd & bwd Sweep
+            //     UpdateTimestepGaussNewton(t, true, false, (iteration_count_ ? 5 : 1),
+            //                               minimum_step_tolerance_, 1.);  //GaussNewton in fwd & bwd Sweep
             // }
             // for (t = prob_->getT() - 2; t > 0; t--)
             // {
-            //     UpdateTimestep(t, false, true, (iterationCount ? 5 : 0), minimum_step_tolerance, false, 1.);
+            //     UpdateTimestep(t, false, true, (iteration_count_ ? 5 : 0), minimum_step_tolerance_, false, 1.);
             // }
             break;
         default:
             throw_named("non-existing Sweep mode");
     }
-    b_step = std::max((b_old - b).array().abs().maxCoeff(), 0.0);
-    dampingReference = b;
+    b_step_ = std::max((b_old - b).array().abs().maxCoeff(), 0.0);
+    damping_reference_ = b;
     // q is set inside of EvaluateTrajectory() function
-    cost = EvaluateTrajectory(b);
-    if (debug_) HIGHLIGHT("Iteration: " << iterationCount << ", Sweep: " << sweep << ", updates: " << updateCount << ", cost: " << cost << " (dq=" << b_step << ", damping=" << damping << ")");
-    if (cost < 0) return -1.0;
-    bestSweep = sweep;
+    cost_ = EvaluateTrajectory(b);
+    if (debug_) HIGHLIGHT("Iteration: " << iteration_count_ << ", Sweep: " << sweep_ << ", updates: " << update_count_ << ", cost: " << cost_ << " (dq=" << b_step_ << ", damping=" << damping << ")");
+    if (cost_ < 0) return -1.0;
+    best_sweep_ = sweep_;
 
     // If damping (similar to line-search) is being used, consider reverting this step
     if (damping) PerhapsUndoStep();
 
-    sweep++;
-    if (sweepImprovedCost)
+    sweep_++;
+    if (sweep_improved_cost_)
     {
         // HIGHLIGHT("Sweep improved cost, increasing iteration count and resetting sweep count");
-        iterationCount++;
-        sweep = 0;
-        prob_->setCostEvolution(iterationCount, cost);
+        iteration_count_++;
+        sweep_ = 0;
+        prob_->setCostEvolution(iteration_count_, cost_);
     }
 
-    return b_step;
+    return b_step_;
 }
 
 void BayesianIKSolver::RememberOldState()
@@ -511,17 +511,17 @@ void BayesianIKSolver::RememberOldState()
     r_old = r;
     q_old = q;
     qhat_old = qhat;
-    cost_old = cost;
+    cost_old_ = cost_;
 
-    bestSweep_old = bestSweep;
-    b_step_old = b_step;
+    best_sweep_old_ = best_sweep_;
+    b_step_old_ = b_step_;
 }
 
 void BayesianIKSolver::PerhapsUndoStep()
 {
-    if (cost > cost_old)
+    if (cost_ > cost_old_)
     {
-        sweepImprovedCost = false;
+        sweep_improved_cost_ = false;
         damping *= 10.;
         s = s_old;
         Sinv = Sinv_old;
@@ -535,15 +535,15 @@ void BayesianIKSolver::PerhapsUndoStep()
         r = r_old;
         q = q_old;
         qhat = qhat_old;
-        cost = cost_old;
-        dampingReference = b_old;
-        bestSweep = bestSweep_old;
-        b_step = b_step_old;
-        if (debug_) HIGHLIGHT("Reverting to previous line-search step (" << bestSweep << ")");
+        cost_ = cost_old_;
+        damping_reference_ = b_old;
+        best_sweep_ = best_sweep_old_;
+        b_step_ = b_step_old_;
+        if (debug_) HIGHLIGHT("Reverting to previous line-search step (" << best_sweep_ << ")");
     }
     else
     {
-        sweepImprovedCost = true;
+        sweep_improved_cost_ = true;
         damping /= 5.;
     }
 }

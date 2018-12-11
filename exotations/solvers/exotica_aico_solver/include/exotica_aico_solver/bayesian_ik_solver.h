@@ -93,16 +93,16 @@ protected:
 private:
     UnconstrainedEndPoseProblem_ptr prob_;  //!< Shared pointer to the planning problem.
     double damping;                         //!< Damping
-    double damping_init;                    //!< Damping
-    double minimum_step_tolerance;          //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
-    double step_tolerance;                  //!< Relative step tolerance (termination criterion)
-    double function_tolerance;              //!< Relative function tolerance/first-order optimality criterion
-    int max_backtrack_iterations;           //!< Max. number of sweeps without improvement before terminating (= line-search)
-    bool useBwdMsg;                         //!< Flag for using backward message initialisation
-    Eigen::VectorXd bwdMsg_v;               //!< Backward message initialisation mean
-    Eigen::MatrixXd bwdMsg_Vinv;            //!< Backward message initialisation covariance
-    bool sweepImprovedCost;                 //!< Whether the last sweep improved the cost (for backtrack iterations count)
-    int iterationCount;                     //!< Iteration counter
+    double damping_init_;                   //!< Damping
+    double minimum_step_tolerance_;         //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
+    double step_tolerance_;                 //!< Relative step tolerance (termination criterion)
+    double function_tolerance_;             //!< Relative function tolerance/first-order optimality criterion
+    int max_backtrack_iterations_;          //!< Max. number of sweeps without improvement before terminating (= line-search)
+    bool use_bwd_msg_;                      //!< Flag for using backward message initialisation
+    Eigen::VectorXd bwd_msg_v_;             //!< Backward message initialisation mean
+    Eigen::MatrixXd bwd_msg_Vinv_;          //!< Backward message initialisation covariance
+    bool sweep_improved_cost_;              //!< Whether the last sweep improved the cost (for backtrack iterations count)
+    int iteration_count_;                   //!< Iteration counter
 
     Eigen::VectorXd s;     //!< Forward message mean
     Eigen::MatrixXd Sinv;  //!< Forward message covariance inverse
@@ -128,30 +128,30 @@ private:
     Eigen::VectorXd q_old;     //!< Configuration space trajectory (last most optimal value)
     Eigen::VectorXd qhat_old;  //!< Point of linearisation (last most optimal value)
 
-    Eigen::VectorXd dampingReference;  //!< Damping reference point
-    double cost;                       //!< cost of MAP trajectory
-    double cost_old;                   //!< cost of MAP trajectory (last most optimal value)
-    double cost_prev;                  //!< previous iteration cost
-    double b_step;                     //!< Squared configuration space step
-    double b_step_old;
+    Eigen::VectorXd damping_reference_;  //!< Damping reference point
+    double cost_;                        //!< cost of MAP trajectory
+    double cost_old_;                    //!< cost of MAP trajectory (last most optimal value)
+    double cost_prev_;                   //!< previous iteration cost
+    double b_step_;                      //!< Squared configuration space step
+    double b_step_old_;
 
     Eigen::MatrixXd W;     //!< Configuration space weight matrix inverse
     Eigen::MatrixXd Winv;  //!< Configuration space weight matrix inverse
 
-    int sweep;  //!< Sweeps so far
-    int bestSweep = 0;
-    int bestSweep_old = 0;
+    int sweep_;  //!< Sweeps so far
+    int best_sweep_ = 0;
+    int best_sweep_old_ = 0;
     enum SweepMode
     {
-        smForwardly = 0,
-        smSymmetric,
-        smLocalGaussNewton,
-        smLocalGaussNewtonDamped
+        FORWARD = 0,
+        SYMMETRIC,
+        LOCAL_GAUSS_NEWTON,
+        LOCAL_GAUSS_NEWTON_DAMPED
     };
-    int sweepMode;  //!< Sweep mode
-    int updateCount;
+    int sweep_mode_;  //!< Sweep mode
+    int update_count_;
 
-    Eigen::MatrixXd linSolverTmp;
+    Eigen::MatrixXd lin_solver_tmp_;
 
     /**
        * \brief Updates the forward message
@@ -178,35 +178,35 @@ private:
     /**
        * \brief Updates the task message
        * @param qhat_t Point of linearisation at time step $t$
-       * @param tolerance_ Lazy update tolerance (only update the task message if the state changed more than this value)
-       * @param maxStepSize If step size >0, cap the motion at this step to the step size.
+       * @param tolerance Lazy update tolerance (only update the task message if the state changed more than this value)
+       * @param max_step_size If step size >0, cap the motion at this step to the step size.
        *
        * Updates the mean and covariance of the task message using:
        * \f$ \mu_{z_t\rightarrow x_t}(x)=\mathcal{N}[x_t|r_t,R_t] \f$
        */
-    void UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double tolerance_,
-                           double maxStepSize = -1.);
+    void UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>& qhat_t, double tolerance,
+                           double max_step_size = -1.);
     /**
        * \brief Update messages for given time step
        * @param t Time step.
-       * @param updateFwd Update the forward message.
-       * @param updateBwd Update the backward message.
-       * @param maxRelocationIterations Maximum number of relocation while searching for a good linearisation point
-       * @param tolerance_ Tolerance for for stopping the search.
-       * @param forceRelocation Set to true to force relocation even when the result is within tolerance.
-       * @param maxStepSize Step size for UpdateTaskMessage.
+       * @param update_fwd Update the forward message.
+       * @param update_bwd Update the backward message.
+       * @param max_relocation_iterations Maximum number of relocation while searching for a good linearisation point
+       * @param tolerance Tolerance for for stopping the search.
+       * @param force_relocation Set to true to force relocation even when the result is within tolerance.
+       * @param max_step_size Step size for UpdateTaskMessage.
        */
-    void UpdateTimestep(bool updateFwd, bool updateBwd,
-                        int maxRelocationIterations, double tolerance_, bool forceRelocation,
-                        double maxStepSize = -1.);
+    void UpdateTimestep(bool update_fwd, bool update_bwd,
+                        int max_relocation_iterations, double tolerance, bool force_relocation,
+                        double max_step_size = -1.);
     /**
        * \brief Update messages for given time step using the Gauss Newton method
        * @param t Time step.
-       * @param updateFwd Update the forward message.
-       * @param updateBwd Update the backward message.
-       * @param maxRelocationIterations Maximum number of relocation while searching for a good linearisation point
+       * @param update_fwd Update the forward message.
+       * @param update_bwd Update the backward message.
+       * @param max_relocation_iterations Maximum number of relocation while searching for a good linearisation point
        * @param tolerance Tolerance for for stopping the search.
-       * @param maxStepSize Step size for UpdateTaskMessage.
+       * @param max_step_size Step size for UpdateTaskMessage.
        *
        * First, the messages \f$ \mu_{x_{t-1}\rightarrow x_t}(x)=\mathcal{N}(x_t|s_t,S_t) \f$,
        * \f$ \mu_{x_{t+1}\rightarrow x_t}(x)=\mathcal{N}(x_t|v_t,V_t) \f$ and
@@ -216,15 +216,14 @@ private:
        * where the mean and covariance are updated as follows:
        * \f$ b_t(X_t)=\mathcal{N}\left(x_t|(S_t^{-1}+V_t^{-1}+R_t)^{-1}(S_t^{-1}s_t+V_t^{-1}v_t+r_t),S_t^{-1}+V_t^{-1}+R_t \right) \f$.
        */
-    void UpdateTimestepGaussNewton(bool updateFwd, bool updateBwd,
-                                   int maxRelocationIterations, double tolerance, double maxStepSize =
-                                                                                      -1.);
+    void UpdateTimestepGaussNewton(bool update_fwd, bool update_bwd,
+                                   int max_relocation_iterations, double tolerance, double max_step_size = -1.);
     /**
        * \brief Computes the cost of the trajectory
        * @param x Trajecotry.
        * @return Cost of the trajectory.
        */
-    double EvaluateTrajectory(const Eigen::VectorXd& x, bool skipUpdate = false);
+    double EvaluateTrajectory(const Eigen::VectorXd& x, bool skip_update = false);
     /**
        * \brief Stores the previous state.
        */

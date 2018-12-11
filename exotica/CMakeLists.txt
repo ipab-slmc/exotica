@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(exotica)
 
+set(CMAKE_CXX_STANDARD 11)
+
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules

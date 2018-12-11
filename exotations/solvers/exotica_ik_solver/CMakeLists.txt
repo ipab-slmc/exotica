@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(exotica_ik_solver)
 
+set(CMAKE_CXX_STANDARD 11)
+
 find_package(catkin REQUIRED COMPONENTS
   exotica
 )

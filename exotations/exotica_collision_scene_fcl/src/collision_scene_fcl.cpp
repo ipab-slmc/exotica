@@ -30,8 +30,8 @@
  *
  */
 
-#include <collision_scene_fcl/CollisionSceneFCL.h>
 #include <exotica/Factory.h>
+#include <exotica_collision_scene_fcl/collision_scene_fcl.h>
 
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCL", exotica::CollisionSceneFCL)
 
@@ -45,10 +45,8 @@ fcl::Transform3f KDL2fcl(const KDL::Frame& frame)
 
 namespace exotica
 {
-CollisionSceneFCL::CollisionSceneFCL() {}
-CollisionSceneFCL::~CollisionSceneFCL()
-{
-}
+CollisionSceneFCL::CollisionSceneFCL() = default;
+CollisionSceneFCL::~CollisionSceneFCL() = default;
 
 void CollisionSceneFCL::setup()
 {
@@ -71,7 +69,7 @@ void CollisionSceneFCL::updateCollisionObjects(const std::map<std::string, std::
         // disable use of the cache.
         // if (true)  // (cache_entry == fcl_cache_.end())
         //{
-        new_object = constructFclCollisionObject(i, object.second.lock());
+        new_object = ConstructFclCollisionObject(i, object.second.lock());
         fcl_cache_[object.first] = new_object;
         //}
         // else
@@ -98,7 +96,7 @@ void CollisionSceneFCL::updateCollisionObjectTransforms()
 
 // This function was copied from 'moveit_core/collision_detection_fcl/src/collision_common.cpp'
 // https://github.com/ros-planning/moveit/blob/indigo-devel/moveit_core/collision_detection_fcl/src/collision_common.cpp#L512
-std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionObject(long kinematic_element_id, std::shared_ptr<KinematicElement> element)
+std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::ConstructFclCollisionObject(long kinematic_element_id, std::shared_ptr<KinematicElement> element)
 {
     shapes::ShapeConstPtr shape = element->Shape;
 
@@ -208,7 +206,7 @@ std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::constructFclCollisionOb
     return ret;
 }
 
-bool CollisionSceneFCL::isAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionSceneFCL* scene)
+bool CollisionSceneFCL::IsAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionSceneFCL* scene)
 {
     std::shared_ptr<KinematicElement> e1 = scene->kinematic_elements_[reinterpret_cast<long>(o1->getUserData())].lock();
     std::shared_ptr<KinematicElement> e2 = scene->kinematic_elements_[reinterpret_cast<long>(o2->getUserData())].lock();
@@ -233,30 +231,30 @@ bool CollisionSceneFCL::isAllowedToCollide(fcl::CollisionObject* o1, fcl::Collis
     return true;
 }
 
-void CollisionSceneFCL::checkCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data)
+void CollisionSceneFCL::CheckCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data)
 {
-    data->Request.num_max_contacts = 1000;
-    data->Result.clear();
-    fcl::collide(o1, o2, data->Request, data->Result);
-    if (data->SafeDistance > 0.0 && o1->getAABB().distance(o2->getAABB()) < data->SafeDistance)
+    data->request.num_max_contacts = 1000;
+    data->result.clear();
+    fcl::collide(o1, o2, data->request, data->result);
+    if (data->safe_distance > 0.0 && o1->getAABB().distance(o2->getAABB()) < data->safe_distance)
     {
         fcl::DistanceRequest req;
         fcl::DistanceResult res;
         req.enable_nearest_points = false;
         fcl::distance(o1, o2, req, res);
         // Add fake contact when distance is smaller than the safety distance.
-        if (res.min_distance < data->SafeDistance) data->Result.addContact(fcl::Contact());
+        if (res.min_distance < data->safe_distance) data->result.addContact(fcl::Contact());
     }
 }
 
-bool CollisionSceneFCL::collisionCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data)
+bool CollisionSceneFCL::CollisionCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data)
 {
     CollisionData* data_ = reinterpret_cast<CollisionData*>(data);
 
-    if (!isAllowedToCollide(o1, o2, data_->Self, data_->Scene)) return false;
+    if (!IsAllowedToCollide(o1, o2, data_->self, data_->scene)) return false;
 
-    checkCollision(o1, o2, data_);
-    return data_->Result.isCollision();
+    CheckCollision(o1, o2, data_);
+    return data_->result.isCollision();
 }
 
 bool CollisionSceneFCL::isStateValid(bool self, double safe_distance)
@@ -266,10 +264,10 @@ bool CollisionSceneFCL::isStateValid(bool self, double safe_distance)
     std::shared_ptr<fcl::BroadPhaseCollisionManager> manager(new fcl::DynamicAABBTreeCollisionManager());
     manager->registerObjects(fcl_objects_);
     CollisionData data(this);
-    data.Self = self;
-    data.SafeDistance = safe_distance;
-    manager->collide(&data, &CollisionSceneFCL::collisionCallback);
-    return !data.Result.isCollision();
+    data.self = self;
+    data.safe_distance = safe_distance;
+    manager->collide(&data, &CollisionSceneFCL::CollisionCallback);
+    return !data.result.isCollision();
 }
 
 bool CollisionSceneFCL::isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance)
@@ -287,13 +285,13 @@ bool CollisionSceneFCL::isCollisionFree(const std::string& o1, const std::string
     if (shapes1.size() == 0) throw_pretty("Can't find object '" << o1 << "'!");
     if (shapes2.size() == 0) throw_pretty("Can't find object '" << o2 << "'!");
     CollisionData data(this);
-    data.SafeDistance = safe_distance;
+    data.safe_distance = safe_distance;
     for (fcl::CollisionObject* s1 : shapes1)
     {
         for (fcl::CollisionObject* s2 : shapes2)
         {
-            checkCollision(s1, s2, &data);
-            if (data.Result.isCollision()) return false;
+            CheckCollision(s1, s2, &data);
+            if (data.result.isCollision()) return false;
         }
     }
     return true;

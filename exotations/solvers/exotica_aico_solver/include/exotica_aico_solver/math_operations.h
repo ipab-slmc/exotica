@@ -59,16 +59,16 @@ namespace exotica
  * @param Ainv Resulting inverted matrix.
  * @param A A symmetric positive definite matrix to be inverted.
  */
-void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv_,
-                      const Eigen::Ref<const Eigen::MatrixXd>& A_);
+void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv,
+                      const Eigen::Ref<const Eigen::MatrixXd>& A);
 
 /**
  * \brief Computes the solution to the linear problem \f$x=Ab\f$ for symmetric positive definite matrix A
  */
-void AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x_,
-                    const Eigen::Ref<const Eigen::MatrixXd>& A_,
-                    const Eigen::Ref<const Eigen::VectorXd>& b_,
-                    Eigen::MatrixXd& linSolverTmp,
+void AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x,
+                    const Eigen::Ref<const Eigen::MatrixXd>& A,
+                    const Eigen::Ref<const Eigen::VectorXd>& b,
+                    Eigen::MatrixXd& lin_solver_tmp,
                     int n_in);
 }
 

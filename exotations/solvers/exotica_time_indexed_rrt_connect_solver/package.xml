@@ -1,12 +1,11 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>time_indexed_rrt_connect</name>
-  <version>1.0.0</version>
-  <description>The Time Indexed RRTConnect Solver</description>
+  <name>exotica_time_indexed_rrt_connect_solver</name>
+  <version>5.0.0</version>
+  <description>Time-Indexed RRT-Connect solver (Humanoids 2018)</description>
   <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
 
   <license>BSD</license>
-
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>exotica</depend>

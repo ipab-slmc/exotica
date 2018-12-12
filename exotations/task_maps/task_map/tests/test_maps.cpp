@@ -33,6 +33,10 @@
 #include <exotica/Exotica.h>
 #include <gtest/gtest.h>
 
+#include <task_map/JointAccelerationBackwardDifference.h>
+#include <task_map/JointJerkBackwardDifference.h>
+#include <task_map/JointVelocityBackwardDifference.h>
+
 // Extend testing printout //////////////////////
 
 namespace testing
@@ -1018,6 +1022,50 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
             EXPECT_TRUE(testRandom(problem));
             EXPECT_TRUE(testJacobian(problem));
+        }
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+TEST(ExoticaTaskMaps, testJointSmoothingBackwardDifference)
+{
+    try
+    {
+        std::vector<std::string> joint_smoothing_taskmaps = {"JointVelocityBackwardDifference", "JointAccelerationBackwardDifference", "JointJerkBackwardDifference"};
+        for (const auto& smoothing_task : joint_smoothing_taskmaps)
+        {
+            {
+                TEST_COUT << smoothing_task + " Test - test default initialisation";
+                Initializer map("exotica/" + smoothing_task, {{"Name", std::string("MyTask")}, {"dt", 0.01}});
+                UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
+                EXPECT_TRUE(testRandom(problem));
+                EXPECT_TRUE(testJacobian(problem));
+            }
+
+            {
+                TEST_COUT << smoothing_task + " Test - test SetPreviousJointState initialisation";
+                Initializer map("exotica/" + smoothing_task, {{"Name", std::string("MyTask")}, {"dt", 0.01}});
+                UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
+                Eigen::VectorXd q_rand(problem->N);
+                q_rand.setRandom();
+                if (smoothing_task == "JointVelocityBackwardDifference")
+                {
+                    std::shared_ptr<TaskMap> my_task = problem->getTaskMaps()["MyTask"];
+                    std::shared_ptr<JointVelocityBackwardDifference> joint_velocity_smoothing_task = std::static_pointer_cast<JointVelocityBackwardDifference>(my_task);
+                    joint_velocity_smoothing_task->SetPreviousJointState(q_rand);
+                }
+                else if (smoothing_task == "JointAccelerationBackwardDifference")
+                {
+                }
+                else if (smoothing_task == "JointJerkBackwardDifference")
+                {
+                }
+                EXPECT_TRUE(testRandom(problem));
+                EXPECT_TRUE(testJacobian(problem));
+            }
         }
     }
     catch (...)

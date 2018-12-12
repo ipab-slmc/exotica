@@ -52,22 +52,13 @@ void JointLimit::assignScene(Scene_ptr scene)
 
 void JointLimit::Initialize()
 {
-    double percent = init_.SafePercentage;
+    percent = init_.SafePercentage;
 
     N = scene_->getSolver().getNumControlledJoints();
-
-    // TODO: Strictly speaking this is incorrect as joint limits can be changed during runtime.
-    Eigen::MatrixXd limits = scene_->getSolver().getJointLimits();
 
     low_limits_.resize(N);
     high_limits_.resize(N);
     tau_.resize(N);
-    for (int i = 0; i < N; i++)
-    {
-        low_limits_(i) = limits(i, 0);
-        high_limits_(i) = limits(i, 1);
-        tau_(i) = percent * (high_limits_(i) - low_limits_(i)) * 0.5;
-    }
 }
 
 int JointLimit::taskSpaceDim()
@@ -79,6 +70,16 @@ void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != N) throw_named("Wrong size of phi!");
     phi.setZero();
+
+    const Eigen::MatrixXd limits = scene_->getSolver().getJointLimits();
+
+    for (int i = 0; i < N; i++)
+    {
+        low_limits_(i) = limits(i, 0);
+        high_limits_(i) = limits(i, 1);
+        tau_(i) = percent * (high_limits_(i) - low_limits_(i)) * 0.5;
+    }
+
     for (int i = 0; i < N; i++)
     {
         if (x(i) < low_limits_(i) + tau_(i))

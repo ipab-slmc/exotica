@@ -55,10 +55,6 @@ void JointLimit::Initialize()
     safe_percentage_ = init_.SafePercentage;
 
     N = scene_->getSolver().getNumControlledJoints();
-
-    low_limits_.resize(N);
-    high_limits_.resize(N);
-    tau_.resize(N);
 }
 
 int JointLimit::taskSpaceDim()
@@ -72,25 +68,14 @@ void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     phi.setZero();
 
     const Eigen::MatrixXd limits = scene_->getSolver().getJointLimits();
+    const Eigen::VectorXd& low_limits = limits.col(0);
+    const Eigen::VectorXd& high_limits = limits.col(1);
+    const Eigen::VectorXd tau = 0.5 * safe_percentage_ * (high_limits - low_limits);
 
-    for (int i = 0; i < N; i++)
-    {
-        low_limits_(i) = limits(i, 0);
-        high_limits_(i) = limits(i, 1);
-        tau_(i) = safe_percentage_ * (high_limits_(i) - low_limits_(i)) * 0.5;
-    }
-
-    for (int i = 0; i < N; i++)
-    {
-        if (x(i) < low_limits_(i) + tau_(i))
-        {
-            phi(i) = x(i) - low_limits_(i) - tau_(i);
-        }
-        if (x(i) > high_limits_(i) - tau_(i))
-        {
-            phi(i) = x(i) - high_limits_(i) + tau_(i);
-        }
-    }
+    // apply lower bounds
+    phi = (x.array() < (low_limits + tau).array()).select(x - low_limits - tau, phi);
+    // apply higher bounds
+    phi = (x.array() > (high_limits - tau).array()).select(x - high_limits + tau, phi);
 }
 
 void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)

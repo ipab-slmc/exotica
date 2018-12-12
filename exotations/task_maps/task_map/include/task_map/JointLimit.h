@@ -65,7 +65,7 @@ private:
     Eigen::VectorXd low_limits_;   //	Lower joint limits
     Eigen::VectorXd high_limits_;  //	Higher joint limits
     Eigen::VectorXd tau_;          //	Joint limits tolerance
-    double percent;
+    double safe_percentage_;
     JointLimitInitializer init_;
     int N;
 };

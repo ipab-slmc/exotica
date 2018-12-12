@@ -52,7 +52,7 @@ void JointLimit::assignScene(Scene_ptr scene)
 
 void JointLimit::Initialize()
 {
-    percent = init_.SafePercentage;
+    safe_percentage_ = init_.SafePercentage;
 
     N = scene_->getSolver().getNumControlledJoints();
 
@@ -77,7 +77,7 @@ void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
         low_limits_(i) = limits(i, 0);
         high_limits_(i) = limits(i, 1);
-        tau_(i) = percent * (high_limits_(i) - low_limits_(i)) * 0.5;
+        tau_(i) = safe_percentage_ * (high_limits_(i) - low_limits_(i)) * 0.5;
     }
 
     for (int i = 0; i < N; i++)

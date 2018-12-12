@@ -691,6 +691,10 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
 
 void Scene::addObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const bool updateCollisionScene)
 {
+    if (kinematica_.hasModelLink(name))
+    {
+        throw std::runtime_error("link '" + name + "' already exists in kinematic tree");
+    }
     Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
     ps_->getWorldNonConst()->addToObject(name, shape, pose);

@@ -183,6 +183,7 @@ public:
     {
         return ModelLinkNames;
     }
+    bool hasModelLink(const std::string& link);
 
     Eigen::VectorXd getControlledLinkMass();
 

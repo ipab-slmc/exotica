@@ -46,13 +46,13 @@ PYBIND11_MODULE(task_map_py, module)
     point2Line.def_property("endPoint", &Point2Line::getEndPoint, &Point2Line::setEndPoint);
 
     py::class_<JointVelocityBackwardDifference, std::shared_ptr<JointVelocityBackwardDifference>, TaskMap> jointVelocityBackwardDifference(module, "JointVelocityBackwardDifference");
-    jointVelocityBackwardDifference.def("setPrevJointState", &JointVelocityBackwardDifference::setPrevJointState);
+    jointVelocityBackwardDifference.def("set_previous_joint_state", &JointVelocityBackwardDifference::SetPreviousJointState);
 
     py::class_<JointAccelerationBackwardDifference, std::shared_ptr<JointAccelerationBackwardDifference>, TaskMap> jointAccelerationBackwardDifference(module, "JointAccelerationBackwardDifference");
-    jointAccelerationBackwardDifference.def("setPrevJointState", &JointAccelerationBackwardDifference::setPrevJointState);
+    jointAccelerationBackwardDifference.def("set_previous_joint_state", &JointAccelerationBackwardDifference::SetPreviousJointState);
 
     py::class_<JointJerkBackwardDifference, std::shared_ptr<JointJerkBackwardDifference>, TaskMap> jointJerkBackwardDifference(module, "JointJerkBackwardDifference");
-    jointJerkBackwardDifference.def("setPrevJointState", &JointJerkBackwardDifference::setPrevJointState);
+    jointJerkBackwardDifference.def("set_previous_joint_state", &JointJerkBackwardDifference::SetPreviousJointState);
 
     py::class_<CoM, std::shared_ptr<CoM>, TaskMap> com(module, "CoM");
 

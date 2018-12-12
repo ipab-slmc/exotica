@@ -46,6 +46,13 @@ void JointAccelerationBackwardDifference::assignScene(Scene_ptr scene)
     // Get ndof
     N_ = scene_->getSolver().getNumControlledJoints();
 
+    // Set binomial cooeficient parameters
+    backward_difference_params_ << -2, 1;
+
+    // Frequency
+    if (init_.dt <= 0) throw_pretty("dt cannot be smaller than or equal to 0.");
+    dt_inv_ = 1 / init_.dt;
+
     // Init each col of q_ with start state
     q_.resize(N_, 2);
     if (init_.StartState.rows() == 0)
@@ -62,9 +69,6 @@ void JointAccelerationBackwardDifference::assignScene(Scene_ptr scene)
         throw_pretty("Wrong size for StartState!");
     }
 
-    // Set binomial cooeficient parameters
-    backward_difference_params_ << -2, 1;
-
     // Init qbd_
     qbd_ = q_ * backward_difference_params_;
 
@@ -77,7 +81,7 @@ void JointAccelerationBackwardDifference::Instantiate(JointAccelerationBackwardD
     init_ = init;
 }
 
-void JointAccelerationBackwardDifference::setPrevJointState(Eigen::VectorXdRefConst joint_state)
+void JointAccelerationBackwardDifference::SetPreviousJointState(Eigen::VectorXdRefConst joint_state)
 {
     // Input check
     if (joint_state.rows() != N_) throw_named("Wrong size for joint_state!");
@@ -96,7 +100,7 @@ void JointAccelerationBackwardDifference::update(Eigen::VectorXdRefConst x, Eige
     if (phi.rows() != N_) throw_named("Wrong size of phi!");
 
     // Estimate second time derivative
-    phi = x + qbd_;
+    phi = dt_inv_ * (x + qbd_);
 }
 
 void JointAccelerationBackwardDifference::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
@@ -106,8 +110,8 @@ void JointAccelerationBackwardDifference::update(Eigen::VectorXdRefConst x, Eige
     if (J.rows() != N_ || J.cols() != N_) throw_named("Wrong size of J! " << N_);
 
     // Estimate second time derivative and set Jacobian to identity matrix
-    phi = x + qbd_;
-    J = I_;
+    phi = dt_inv_ * (x + qbd_);
+    J = dt_inv_ * I_;
 }
 
 int JointAccelerationBackwardDifference::taskSpaceDim()

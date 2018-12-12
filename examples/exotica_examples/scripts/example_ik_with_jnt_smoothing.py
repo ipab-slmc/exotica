@@ -28,7 +28,7 @@ class Example(object):
     def __init__(self):
 
         # Set init variables
-        self.q=np.array([0.0]*7)
+        self.q = np.array([0.0] * 7)
         self.joy = None
         self.eff = np.array([0.6, -0.1, 0.5, 0, 0, 0])
 
@@ -38,7 +38,7 @@ class Example(object):
         self.task_maps = self.problem.getTaskMaps()
         
         # Setup ros subscriber
-        self.sub={}
+        self.sub = {}
         self.sub['joy'] = rospy.Subscriber('joy', Joy, self.callback)
         
     def callback(self, msg):
@@ -59,8 +59,7 @@ class Example(object):
                 eff[i] = self.eff[i]
 
         # Set eff goal 
-        self.problem.setGoal('Position', eff)
-        #self.problem.getScene().attachObjectLocal('Goal', '', exo.KDLFrame(eff))
+        self.problem.getScene().attachObjectLocal('Goal', '', exo.KDLFrame(eff))
                 
         # Setup problem
         if self.joy.buttons[0]:
@@ -76,7 +75,7 @@ class Example(object):
         self.problem.startState = self.q
         for name in SMOOTHING_TASK_MAPS:
             self.problem.setRho(name, Rho_Smoothing)
-            self.task_maps[name].setPrevJointState(self.q)
+            self.task_maps[name].set_previous_joint_state(self.q)
 
         # Solve and publish
         q = self.solver.solve()[0]

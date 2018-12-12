@@ -56,23 +56,23 @@ class JointAccelerationBackwardDifference : public TaskMap, public Instantiable<
 public:
     JointAccelerationBackwardDifference();
     virtual ~JointAccelerationBackwardDifference();
-    virtual void assignScene(Scene_ptr scene);
-    virtual void Instantiate(JointAccelerationBackwardDifferenceInitializer& init);
+    void assignScene(Scene_ptr scene) override;
+    void Instantiate(JointAccelerationBackwardDifferenceInitializer& init) override;
 
     /** \brief Logs previous joint state.
      *
-     *  setPrevJointState must be called after solve is called in a Python/C++ script is called 
+     *  SetPreviousJointState must be called after solve is called in a Python/C++ script is called 
      *  to ensure the time-derivatives are appropriately approximated. 
      *  Each previous joint state is pushed back by collumn and the given joint_state is placed
      *  in q_.col(0). 
      *  Finally, we compute the new qbd_.
      * 
      */
-    void setPrevJointState(Eigen::VectorXdRefConst joint_state);
+    void SetPreviousJointState(Eigen::VectorXdRefConst joint_state);
 
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
-    virtual int taskSpaceDim();
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
+    int taskSpaceDim() override;
 
 private:
     JointAccelerationBackwardDifferenceInitializer init_;  //<! Task map initializer.
@@ -80,11 +80,10 @@ private:
     int N_;                                                //!< Number of dofs for robot.
     Eigen::Vector2d backward_difference_params_;           //<! Binomial cooeficient parameters.
     Eigen::MatrixXd q_;                                    //!< Log of previous two joint states.
-    Eigen::VectorXd qbd_;                                  //!< x+qbd_ is a simplifed estiamte of the thrird time derivative.
+    Eigen::VectorXd qbd_;                                  //!< x+qbd_ is a simplifed estimate of the second time derivative.
     Eigen::MatrixXd I_;                                    //!< Identity matrix.
+    double dt_inv_;                                        //!< Frequency (1/dt)
 };
-
-typedef std::shared_ptr<JointAccelerationBackwardDifference> JointAccelerationBackwardDifference_ptr;  //!< Task Map smart pointer.
 }
 
 #endif /* JOINT_ACCELERATION_BACKWARD_DIFFERENCE_H_ */

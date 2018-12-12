@@ -906,20 +906,22 @@ void KinematicTree::resetJointLimits()
 
     ///	Manually defined floating base limits
     ///	Should be done more systematically with robot model class
+    constexpr double inf = std::numeric_limits<double>::infinity();
+    constexpr double pi = std::atan(1) * 4;
     if (ControlledBaseType == BASE_TYPE::FLOATING)
     {
-        ControlledJoints[0].lock()->JointLimits = {-0.05, 0.05};
-        ControlledJoints[1].lock()->JointLimits = {-0.05, 0.05};
-        ControlledJoints[2].lock()->JointLimits = {0.875, 1.075};
-        ControlledJoints[3].lock()->JointLimits = {-0.087 / 2, 0.087 / 2};
-        ControlledJoints[4].lock()->JointLimits = {-0.087 / 2, 0.2617 / 2};
-        ControlledJoints[5].lock()->JointLimits = {-M_PI / 8, M_PI / 8};
+        ControlledJoints[0].lock()->JointLimits = {-inf, inf};
+        ControlledJoints[1].lock()->JointLimits = {-inf, inf};
+        ControlledJoints[2].lock()->JointLimits = {-inf, inf};
+        ControlledJoints[3].lock()->JointLimits = {-pi, pi};
+        ControlledJoints[4].lock()->JointLimits = {-pi, pi};
+        ControlledJoints[5].lock()->JointLimits = {-pi, pi};
     }
     else if (ControlledBaseType == BASE_TYPE::PLANAR)
     {
-        ControlledJoints[0].lock()->JointLimits = {-10, 10};
-        ControlledJoints[1].lock()->JointLimits = {-10, 10};
-        ControlledJoints[2].lock()->JointLimits = {-1.57, 1.57};
+        ControlledJoints[0].lock()->JointLimits = {-inf, inf};
+        ControlledJoints[1].lock()->JointLimits = {-inf, inf};
+        ControlledJoints[2].lock()->JointLimits = {-pi, pi};
     }
 
     updateJointLimits();

@@ -46,7 +46,7 @@ void JointAccelerationBackwardDifference::assignScene(Scene_ptr scene)
     // Get ndof
     N_ = scene_->getSolver().getNumControlledJoints();
 
-    // Set binomial cooeficient parameters
+    // Set binomial coefficient parameters
     backward_difference_params_ << -2, 1;
 
     // Frequency

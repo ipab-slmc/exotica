@@ -82,6 +82,6 @@ install(TARGETS ${PROJECT_NAME}_py LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DE
 
 if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(test_maps tests/test_maps.cpp)
-  target_link_libraries(test_maps ${catkin_LIBRARIES} ${PROJECT_NAME})
+  target_link_libraries(test_maps ${catkin_LIBRARIES})
   add_dependencies(test_maps ${catkin_EXPORTED_TARGETS})
 endif()

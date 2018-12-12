@@ -1059,9 +1059,15 @@ TEST(ExoticaTaskMaps, testJointSmoothingBackwardDifference)
                 }
                 else if (smoothing_task == "JointAccelerationBackwardDifference")
                 {
+                    std::shared_ptr<TaskMap> my_task = problem->getTaskMaps()["MyTask"];
+                    std::shared_ptr<JointAccelerationBackwardDifference> joint_acceleration_smoothing_task = std::static_pointer_cast<JointAccelerationBackwardDifference>(my_task);
+                    joint_acceleration_smoothing_task->SetPreviousJointState(q_rand);
                 }
                 else if (smoothing_task == "JointJerkBackwardDifference")
                 {
+                    std::shared_ptr<TaskMap> my_task = problem->getTaskMaps()["MyTask"];
+                    std::shared_ptr<JointJerkBackwardDifference> joint_jerk_smoothing_task = std::static_pointer_cast<JointJerkBackwardDifference>(my_task);
+                    joint_jerk_smoothing_task->SetPreviousJointState(q_rand);
                 }
                 EXPECT_TRUE(testRandom(problem));
                 EXPECT_TRUE(testJacobian(problem));

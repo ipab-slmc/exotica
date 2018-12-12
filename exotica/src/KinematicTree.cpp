@@ -1015,6 +1015,11 @@ Eigen::VectorXd KinematicTree::getControlledState()
     return x;
 }
 
+bool KinematicTree::hasModelLink(const std::string& link)
+{
+    return std::find(std::begin(ModelLinkNames), std::end(ModelLinkNames), link) != std::end(ModelLinkNames);
+}
+
 Eigen::VectorXd KinematicTree::getControlledLinkMass()
 {
     Eigen::VectorXd x(NumControlledJoints);

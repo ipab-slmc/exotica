@@ -1102,7 +1102,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("padd", &shapes::Shape::padd)
         .def("scaleAndPadd", &shapes::Shape::scaleAndPadd)
         .def("isFixed", &shapes::Shape::isFixed)
-        .def_readwrite("type", &shapes::Shape::type);
+        .def_readonly("type", &shapes::Shape::type);
 
     py::class_<shapes::Sphere, shapes::Shape, std::shared_ptr<shapes::Sphere>>(module, "Sphere")
         .def(py::init())

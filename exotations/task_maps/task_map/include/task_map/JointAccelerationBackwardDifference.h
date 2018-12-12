@@ -63,7 +63,7 @@ public:
      *
      *  SetPreviousJointState must be called after solve is called in a Python/C++ script is called 
      *  to ensure the time-derivatives are appropriately approximated. 
-     *  Each previous joint state is pushed back by collumn and the given joint_state is placed
+     *  Each previous joint state is pushed back by column and the given joint_state is placed
      *  in q_.col(0). 
      *  Finally, we compute the new qbd_.
      * 

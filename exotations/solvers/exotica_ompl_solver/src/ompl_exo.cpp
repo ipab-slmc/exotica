@@ -63,9 +63,18 @@ bool OMPLStateValidityChecker::isValid(const ompl::base::State *state, double &d
     return true;
 }
 
-OMPLRNStateSpace::OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob)
+OMPLRNStateSpace::OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob, init)
 {
     setName("OMPLRNStateSpace");
+}
+
+ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler() const
+{
+    return CompoundStateSpace::allocDefaultStateSampler();
+}
+
+void OMPLRNStateSpace::setBounds(SamplingProblem_ptr &prob)
+{
     unsigned int dim = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)), 1.0);
     ompl::base::RealVectorBounds bounds(dim);
@@ -75,13 +84,8 @@ OMPLRNStateSpace::OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitiali
         bounds.setLow(i, prob->getBounds()[i]);
     }
     getSubspace(0)->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
-    setLongestValidSegmentFraction(init.LongestValidSegmentFraction);
+    setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
-}
-
-ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler() const
-{
-    return CompoundStateSpace::allocDefaultStateSampler();
 }
 
 void OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const
@@ -113,9 +117,18 @@ void OMPLRNStateSpace::stateDebug(const Eigen::VectorXd &q) const
     //  TODO
 }
 
-OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob)
+OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob, init)
 {
     setName("OMPLSE3RNStateSpace");
+}
+
+ompl::base::StateSamplerPtr OMPLSE3RNStateSpace::allocDefaultStateSampler() const
+{
+    return CompoundStateSpace::allocDefaultStateSampler();
+}
+
+void OMPLSE3RNStateSpace::setBounds(SamplingProblem_ptr &prob)
+{
     unsigned int dim = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::SE3StateSpace()), 1.0);
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim - 6)), 1.0);
@@ -145,13 +158,8 @@ OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverIn
         ERROR("State space bounds were not specified!\n"
               << prob->getBounds().size() << " " << n);
     }
-    setLongestValidSegmentFraction(init.LongestValidSegmentFraction);
+    setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
-}
-
-ompl::base::StateSamplerPtr OMPLSE3RNStateSpace::allocDefaultStateSampler() const
-{
-    return CompoundStateSpace::allocDefaultStateSampler();
 }
 
 void OMPLSE3RNStateSpace::stateDebug(const Eigen::VectorXd &q) const
@@ -182,9 +190,18 @@ void OMPLSE3RNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eig
     tmp.GetRPY(q(3), q(4), q(5));
 }
 
-OMPLSE2RNStateSpace::OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob)
+OMPLSE2RNStateSpace::OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob, init)
 {
     setName("OMPLSE2RNStateSpace");
+}
+
+ompl::base::StateSamplerPtr OMPLSE2RNStateSpace::allocDefaultStateSampler() const
+{
+    return CompoundStateSpace::allocDefaultStateSampler();
+}
+
+void OMPLSE2RNStateSpace::setBounds(SamplingProblem_ptr &prob)
+{
     unsigned int dim = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::SE2StateSpace()), 1.0);
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim - 3)), 1.0);
@@ -214,13 +231,8 @@ OMPLSE2RNStateSpace::OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverIn
         ERROR("State space bounds were not specified!\n"
               << prob->getBounds().size() << " " << n);
     }
-    setLongestValidSegmentFraction(init.LongestValidSegmentFraction);
+    setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
-}
-
-ompl::base::StateSamplerPtr OMPLSE2RNStateSpace::allocDefaultStateSampler() const
-{
-    return CompoundStateSpace::allocDefaultStateSampler();
 }
 
 void OMPLSE2RNStateSpace::stateDebug(const Eigen::VectorXd &q) const

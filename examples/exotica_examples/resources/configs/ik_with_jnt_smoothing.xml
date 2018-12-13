@@ -44,7 +44,7 @@
     </Maps>
 
     <Cost>
-      <Task Task="Position" Rho="1e3"/>
+      <Task Task="Position" Rho="1e2"/>
       <Task Task="JointVel" Rho="1"/>
       <Task Task="JointAcc" Rho="1"/>
       <Task Task="JointJerk" Rho="1"/>

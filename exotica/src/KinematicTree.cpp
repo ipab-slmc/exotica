@@ -891,6 +891,25 @@ void KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
     updateJointLimits();
 }
 
+void KinematicTree::setPlanarBaseLimitsPosXYEulerZ(
+    const std::vector<double>& lower, const std::vector<double>& upper)
+{
+    if (ControlledBaseType != BASE_TYPE::PLANAR)
+    {
+        throw_pretty("This is not a planar joint!");
+    }
+    if (lower.size() != 3 || upper.size() != 3)
+    {
+        throw_pretty("Wrong limit data size!");
+    }
+    for (int i = 0; i < 3; i++)
+    {
+        ControlledJoints[i].lock()->JointLimits = {lower[i], upper[i]};
+    }
+
+    updateJointLimits();
+}
+
 void KinematicTree::resetJointLimits()
 {
     std::vector<std::string> vars = Model->getVariableNames();

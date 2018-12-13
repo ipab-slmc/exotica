@@ -162,6 +162,7 @@ public:
     void setJointLimitsLower(Eigen::VectorXdRefConst lower_in);
     void setJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
     void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
+    void setPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper);
     std::map<std::string, std::vector<double>> getUsedJointLimits();
     int getNumControlledJoints();
     int getNumModelJoints();

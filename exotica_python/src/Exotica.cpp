@@ -1078,6 +1078,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematicTree.def("setJointLimitsLower", &KinematicTree::setJointLimitsLower);
     kinematicTree.def("setJointLimitsUpper", &KinematicTree::setJointLimitsUpper);
     kinematicTree.def("setFloatingBaseLimitsPosXYZEulerZYX", &KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX);
+    kinematicTree.def("setPlanarBaseLimitsPosXYEulerZ", &KinematicTree::setPlanarBaseLimitsPosXYEulerZ);
     kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
 
     // TODO: KinematicRequestFlags

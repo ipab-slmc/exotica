@@ -57,10 +57,11 @@ namespace exotica
 class OMPLStateSpace : public ompl::base::CompoundStateSpace
 {
 public:
-    OMPLStateSpace(SamplingProblem_ptr &prob) : ompl::base::CompoundStateSpace(), prob_(prob)
+    OMPLStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : ompl::base::CompoundStateSpace(), prob_(prob), init_(init)
     {
     }
 
+    virtual void setBounds(SamplingProblem_ptr &prob) = 0;
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const = 0;
     virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const = 0;
 
@@ -69,6 +70,7 @@ public:
 
 protected:
     SamplingProblem_ptr prob_;
+    OMPLSolverInitializer init_;
 };
 
 class OMPLStateValidityChecker : public ompl::base::StateValidityChecker
@@ -107,6 +109,7 @@ public:
     OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
+    virtual void setBounds(SamplingProblem_ptr &prob);
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
     virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
     virtual void stateDebug(const Eigen::VectorXd &q) const;
@@ -144,6 +147,7 @@ public:
     OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
+    virtual void setBounds(SamplingProblem_ptr &prob);
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
     virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
     virtual void stateDebug(const Eigen::VectorXd &q) const;
@@ -181,6 +185,7 @@ public:
     OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
+    virtual void setBounds(SamplingProblem_ptr &prob);
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
     virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
     virtual void stateDebug(const Eigen::VectorXd &q) const;

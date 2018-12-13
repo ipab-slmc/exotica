@@ -74,19 +74,6 @@ void OMPLSolver<ProblemType>::specifyProblem(PlanningProblem_ptr pointer)
         else if (prob_->getScene()->getBaseType() == BASE_TYPE::FLOATING)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLSE3RNProjection(state_space_, project_vars)));
     }
-
-    ompl_simple_setup_->getSpaceInformation()->setup();
-    ompl_simple_setup_->setup();
-    if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
-        ompl_simple_setup_->getPlanner()->params().setParam("range", init_.Range);
-    if (ompl_simple_setup_->getPlanner()->params().hasParam("goal_bias"))
-        ompl_simple_setup_->getPlanner()->params().setParam("goal_bias", init_.GoalBias);
-
-    if (init_.RandomSeed != -1)
-    {
-        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.RandomSeed);
-        ompl::RNG::setSeed(init_.RandomSeed);
-    }
 }
 
 template <class ProblemType>
@@ -204,9 +191,28 @@ template <class ProblemType>
 void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 {
     Eigen::VectorXd q0 = prob_->applyStartState();
+
+    state_space_->as<OMPLStateSpace>()->setBounds(prob_);
+
+    ompl_simple_setup_->getSpaceInformation()->setup();
+
+    ompl_simple_setup_->setup();
+
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
+        ompl_simple_setup_->getPlanner()->params().setParam("range", init_.Range);
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("goal_bias"))
+        ompl_simple_setup_->getPlanner()->params().setParam("goal_bias", init_.GoalBias);
+
+    if (init_.RandomSeed != -1)
+    {
+        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.RandomSeed);
+        ompl::RNG::setSeed(init_.RandomSeed);
+    }
+
     SetGoalState(prob_->getGoalState(), init_.Epsilon);
 
     ompl::base::ScopedState<> ompl_start_state(state_space_);
+
     state_space_->as<OMPLStateSpace>()->ExoticaToOMPLState(q0, ompl_start_state.get());
     ompl_simple_setup_->setStartState(ompl_start_state);
 

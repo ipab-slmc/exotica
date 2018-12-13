@@ -149,7 +149,7 @@ void OMPLSolver<ProblemType>::SetGoalState(Eigen::VectorXdRefConst qT, const dou
 }
 
 template <class ProblemType>
-void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXdRef traj, ompl::base::PlannerTerminationCondition &ptc)
+void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc)
 {
     ompl::geometric::PathSimplifierPtr psf = ompl_simple_setup_->getPathSimplifier();
     const ompl::base::SpaceInformationPtr &si = ompl_simple_setup_->getSpaceInformation();

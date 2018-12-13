@@ -90,7 +90,7 @@ protected:
     void SetGoalState(Eigen::VectorXdRefConst qT, const double eps = 0);
     void PreSolve();
     void PostSolve();
-    void GetPath(Eigen::MatrixXdRef traj, ompl::base::PlannerTerminationCondition &ptc);
+    void GetPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc);
     OMPLSolverInitializer init_;
     std::shared_ptr<ProblemType> prob_;
     ompl::geometric::SimpleSetupPtr ompl_simple_setup_;

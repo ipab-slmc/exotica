@@ -192,6 +192,22 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 {
     Eigen::VectorXd q0 = prob_->applyStartState();
 
+    // check joint limits
+    const std::vector<double> bounds = prob_->getBounds();
+    for (const double l : bounds)
+    {
+        if (!std::isfinite(l))
+        {
+            std::cerr << "Detected non-finite joint limits:" << std::endl;
+            const size_t nlim = bounds.size() / 2;
+            for (uint i = 0; i < nlim; i++)
+            {
+                std::cout << bounds[i] << ", " << bounds[nlim + i] << std::endl;
+            }
+            throw std::runtime_error("All joint limits need to be finite!");
+        }
+    }
+
     state_space_->as<OMPLStateSpace>()->setBounds(prob_);
 
     ompl_simple_setup_->getSpaceInformation()->setup();

@@ -1,20 +1,20 @@
 #include <exotica/MotionSolver.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
-#include <exotica_lm_solver/LMSolverInitializer.h>
+#include <exotica_levenberg_marquardt_solver/LevenbergMarquardtSolverInitializer.h>
 
 namespace exotica
 {
-class LevenbergMarquardt : public MotionSolver, public Instantiable<LMSolverInitializer>
+class LevenbergMarquardtSolver : public MotionSolver, public Instantiable<LevenbergMarquardtSolverInitializer>
 {
 public:
-    virtual void Instantiate(LMSolverInitializer& init);
+    virtual void Instantiate(LevenbergMarquardtSolverInitializer& init);
 
     virtual void Solve(Eigen::MatrixXd& solution);
 
     virtual void specifyProblem(PlanningProblem_ptr pointer);
 
 private:
-    LMSolverInitializer parameters_;
+    LevenbergMarquardtSolverInitializer parameters_;
 
     UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
 
@@ -23,14 +23,14 @@ private:
     int iterations_ = -1;
 };
 
-REGISTER_MOTIONSOLVER_TYPE("LMSolver", exotica::LevenbergMarquardt)
+REGISTER_MOTIONSOLVER_TYPE("LevenbergMarquardtSolverSolver", exotica::LevenbergMarquardtSolver)
 
-void LevenbergMarquardt::Instantiate(LMSolverInitializer& init) { parameters_ = init; }
-void LevenbergMarquardt::specifyProblem(PlanningProblem_ptr pointer)
+void LevenbergMarquardtSolver::Instantiate(LevenbergMarquardtSolverInitializer& init) { parameters_ = init; }
+void LevenbergMarquardtSolver::specifyProblem(PlanningProblem_ptr pointer)
 {
     if (pointer->type() != "exotica::UnconstrainedEndPoseProblem")
     {
-        throw_named("This LevenbergMarquardt can't solve problem of type '" << pointer->type() << "'!");
+        throw_named("This LevenbergMarquardtSolver can't solve problem of type '" << pointer->type() << "'!");
     }
 
     MotionSolver::specifyProblem(pointer);
@@ -42,7 +42,7 @@ void LevenbergMarquardt::specifyProblem(PlanningProblem_ptr pointer)
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 }
 
-void LevenbergMarquardt::Solve(Eigen::MatrixXd& solution)
+void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
 {
     prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
 

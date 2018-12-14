@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(exotica_lm_solver)
+project(exotica_levenberg_marquardt_solver)
 
 find_package(catkin REQUIRED COMPONENTS exotica)
 
 find_package(Eigen3 REQUIRED)
 
-AddInitializer(LMSolver)
+AddInitializer(LevenbergMarquardtSolver)
 GenInitializers()
 
 catkin_package(
@@ -15,7 +15,7 @@ catkin_package(
 
 include_directories(${catkin_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} src/LevenbergMarquardt.cpp)
+add_library(${PROJECT_NAME} src/LevenbergMarquardtSolver.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 

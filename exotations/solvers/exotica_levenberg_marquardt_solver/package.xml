@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>exotica_lm_solver</name>
+  <name>exotica_levenberg_marquardt_solver</name>
   <version>1.0.1</version>
   <description>A Levenberg-Marquardt solver for EXOTica</description>
 

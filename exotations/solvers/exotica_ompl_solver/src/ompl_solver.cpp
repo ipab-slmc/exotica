@@ -208,7 +208,10 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
         }
     }
 
-    state_space_->as<OMPLStateSpace>()->setBounds(prob_);
+    if (!state_space_->as<OMPLStateSpace>()->isLocked())
+    {
+        state_space_->as<OMPLStateSpace>()->setBounds(prob_);
+    }
 
     ompl_simple_setup_->getSpaceInformation()->setup();
 

@@ -44,16 +44,17 @@ public:
     LookAt();
     virtual ~LookAt();
 
-    virtual void Instantiate(LookAtInitializer& init);
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
+    void Instantiate(LookAtInitializer &init) override;
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
 
     Eigen::Vector3d getLookAtTarget();
 
-    virtual int taskSpaceDim();
-};
+    int taskSpaceDim() override;
 
-typedef std::shared_ptr<LookAt> LookAt_Ptr;
+ private:
+    int n_end_effs_; //<! Number of end-effectors. 
+};
 
 }  // namespace exotica
 

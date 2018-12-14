@@ -16,19 +16,19 @@
         <JointGroup>arm</JointGroup>
         <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
         <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
-	<Links>
-	  <Link Name="EffPoint" Parent="lwr_arm_6_link" Transform="0 0 1"/>
-	  <Link Name="LookAtTarget" Transform="1 1 2"/>
-	</Links>
+        <Links>
+          <Link Name="EffPoint" Parent="lwr_arm_6_link" Transform="0 0 1"/>
+          <Link Name="LookAtTarget" Transform="1 1 2"/>
+        </Links>
       </Scene>
     </PlanningScene>
     
     <Maps>
       <LookAt Name="LookAt">
         <EndEffector>
-	  <Frame Link="EffPoint" Base="lwr_arm_6_link"/>
-	  <Frame Link="LookAtTarget" Base="lwr_arm_6_link"/>
-	  <Frame Link="LookAtTarget"/>
+          <Frame Link="EffPoint" Base="lwr_arm_6_link"/>
+          <Frame Link="LookAtTarget" Base="lwr_arm_6_link"/>
+          <Frame Link="LookAtTarget"/>
         </EndEffector>
       </LookAt>
     </Maps>

@@ -3,7 +3,12 @@ project(exotica_levenberg_marquardt_solver)
 
 find_package(catkin REQUIRED COMPONENTS exotica)
 
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 3.3 QUIET)
+
+if(NOT TARGET Eigen3::Eigen)
+    message(WARNING "The Levenberg-Marquardt solver requires at least Eigen version 3.3.")
+    return()
+endif()
 
 AddInitializer(LevenbergMarquardtSolver)
 GenInitializers()

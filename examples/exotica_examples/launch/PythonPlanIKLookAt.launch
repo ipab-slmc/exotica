@@ -1,0 +1,18 @@
+<launch>
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args python" />
+
+  <param name="robot_description" textfile="$(find exotica_examples)/resources/robots/lwr_simplified.urdf" />
+  <param name="robot_description_semantic" textfile="$(find exotica_examples)/resources/robots/lwr_simplified.srdf" />
+
+  <node respawn="true" pkg="joy" type="joy_node" name="joy_node">
+    <param name="dev" type="string" value="/dev/input/js0" />
+    <param name="deadzone" value="0.12" />
+    <param name="autorepeat_rate" value="120.0"/>
+  </node>
+
+  <node launch-prefix="$(arg launch_prefix)" pkg="exotica_examples" type="example_ik_lookat.py" name="IKPlannerPythonExampleNode" output="screen" />
+
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find exotica_examples)/resources/rviz-lookat.rviz" />
+</launch>

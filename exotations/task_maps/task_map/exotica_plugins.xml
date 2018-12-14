@@ -56,4 +56,7 @@
   <class name="exotica/JointJerkBackwardDifference" type="exotica::JointJerkBackwardDifference" base_class_type="exotica::TaskMap">
     <description>Smooths joint jerks by penalizing an approximated third order time derivative of joint state using backward differencing. Task map for use with single-step/EndPose problems only.</description>
   </class>
+  <class name="exotica/LookAt" type="exotica::LookAt" base_class_type="exotica::TaskMap">
+    <description>Looks at a target point by penalizing the vector which defines the orthogonal projection onto a defined line in the end-effector frame.</description>
+  </class>
 </library>

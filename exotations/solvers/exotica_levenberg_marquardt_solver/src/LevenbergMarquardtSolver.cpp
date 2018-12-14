@@ -18,7 +18,7 @@ private:
 
     UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
 
-    double lambda = 0;  // damping factor
+    double lambda_ = 0;  // damping factor
 
     int iterations_ = -1;
 };
@@ -56,7 +56,7 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
 
     solution.resize(1, prob_->N);
 
-    lambda = parameters_.Damping;  // initial damping
+    lambda_ = parameters_.Damping;  // initial damping
 
     const Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->Cost.J.cols(), prob_->Cost.J.cols());
     Eigen::MatrixXd J;
@@ -87,16 +87,16 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
             if (error < error_prev)
             {
                 // success, error decreased: decrease damping
-                lambda = lambda / 10.0;
+                lambda_ = lambda_ / 10.0;
             }
             else
             {
                 // failure, error increased: increase damping
-                lambda = lambda * 10.0;
+                lambda_ = lambda_ * 10.0;
             }
         }
 
-        if (debug_) HIGHLIGHT_NAMED("Levenberg-Marquardt", "damping: " << lambda);
+        if (debug_) HIGHLIGHT_NAMED("Levenberg-Marquardt", "damping: " << lambda_);
 
         Eigen::MatrixXd M;
         if (parameters_.ScaleProblem == "none")
@@ -112,7 +112,7 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
             throw std::runtime_error("no ScaleProblem of type " + parameters_.ScaleProblem);
         }
 
-        qd = (J.transpose() * J + lambda * M).completeOrthogonalDecomposition().solve(J.transpose() * yd);
+        qd = (J.transpose() * J + lambda_ * M).completeOrthogonalDecomposition().solve(J.transpose() * yd);
 
         if (parameters_.Alpha.size() == 1)
         {

@@ -29,6 +29,7 @@ AddInitializer(
   JointVelocityBackwardDifference
   JointAccelerationBackwardDifference
   JointJerkBackwardDifference
+  LookAt
 )
 GenInitializers()
 
@@ -63,6 +64,7 @@ set(SOURCES
     src/JointVelocityBackwardDifference.cpp
     src/JointAccelerationBackwardDifference.cpp
     src/JointJerkBackwardDifference.cpp
+    src/LookAt.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

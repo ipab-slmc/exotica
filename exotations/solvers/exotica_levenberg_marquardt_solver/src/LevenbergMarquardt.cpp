@@ -1,11 +1,11 @@
-#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica/MotionSolver.h>
+#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 #include <exotica_lm_solver/LMSolverInitializer.h>
 
-
-namespace exotica {
-
-class LevenbergMarquardt : public MotionSolver, public Instantiable<LMSolverInitializer> {
+namespace exotica
+{
+class LevenbergMarquardt : public MotionSolver, public Instantiable<LMSolverInitializer>
+{
 public:
     virtual void Instantiate(LMSolverInitializer& init);
 
@@ -26,9 +26,10 @@ private:
 REGISTER_MOTIONSOLVER_TYPE("LMSolver", exotica::LevenbergMarquardt)
 
 void LevenbergMarquardt::Instantiate(LMSolverInitializer& init) { parameters_ = init; }
-
-void LevenbergMarquardt::specifyProblem(PlanningProblem_ptr pointer) {
-    if (pointer->type() != "exotica::UnconstrainedEndPoseProblem") {
+void LevenbergMarquardt::specifyProblem(PlanningProblem_ptr pointer)
+{
+    if (pointer->type() != "exotica::UnconstrainedEndPoseProblem")
+    {
         throw_named("This LevenbergMarquardt can't solve problem of type '" << pointer->type() << "'!");
     }
 
@@ -41,7 +42,8 @@ void LevenbergMarquardt::specifyProblem(PlanningProblem_ptr pointer) {
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 }
 
-void LevenbergMarquardt::Solve(Eigen::MatrixXd& solution) {
+void LevenbergMarquardt::Solve(Eigen::MatrixXd& solution)
+{
     prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
 
     Timer timer;
@@ -54,7 +56,7 @@ void LevenbergMarquardt::Solve(Eigen::MatrixXd& solution) {
 
     solution.resize(1, prob_->N);
 
-    lambda = parameters_.Damping;   // initial damping
+    lambda = parameters_.Damping;  // initial damping
 
     const Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->Cost.J.cols(), prob_->Cost.J.cols());
     Eigen::MatrixXd J;
@@ -64,7 +66,8 @@ void LevenbergMarquardt::Solve(Eigen::MatrixXd& solution) {
     double error_prev = std::numeric_limits<double>::infinity();
     Eigen::VectorXd yd;
     Eigen::VectorXd qd;
-    for(size_t i = 0; i < getNumberOfMaxIterations(); iterations_=++i) {
+    for (size_t i = 0; i < getNumberOfMaxIterations(); iterations_ = ++i)
+    {
         prob_->Update(q);
 
         yd = prob_->Cost.S * prob_->Cost.ydiff;
@@ -75,44 +78,53 @@ void LevenbergMarquardt::Solve(Eigen::MatrixXd& solution) {
 
         prob_->setCostEvolution(i, error);
 
-        J = prob_->Cost.S*prob_->Cost.J;
+        J = prob_->Cost.S * prob_->Cost.J;
 
         // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13
 
-        if(i>0) {
-            if(error < error_prev) {
+        if (i > 0)
+        {
+            if (error < error_prev)
+            {
                 // success, error decreased: decrease damping
                 lambda = lambda / 10.0;
             }
-            else {
+            else
+            {
                 // failure, error increased: increase damping
                 lambda = lambda * 10.0;
             }
         }
 
-        if(debug_) HIGHLIGHT_NAMED("Levenberg-Marquardt", "damping: " << lambda);
+        if (debug_) HIGHLIGHT_NAMED("Levenberg-Marquardt", "damping: " << lambda);
 
         Eigen::MatrixXd M;
-        if(parameters_.ScaleProblem=="none") {
+        if (parameters_.ScaleProblem == "none")
+        {
             M = I;
         }
-        else if(parameters_.ScaleProblem=="Jacobian") {
-            M = (J.transpose()*J).diagonal().asDiagonal();
+        else if (parameters_.ScaleProblem == "Jacobian")
+        {
+            M = (J.transpose() * J).diagonal().asDiagonal();
         }
-        else {
-            throw std::runtime_error("no ScaleProblem of type "+parameters_.ScaleProblem);
+        else
+        {
+            throw std::runtime_error("no ScaleProblem of type " + parameters_.ScaleProblem);
         }
 
-        qd = (J.transpose()*J + lambda*M).completeOrthogonalDecomposition().solve(J.transpose()*yd);
+        qd = (J.transpose() * J + lambda * M).completeOrthogonalDecomposition().solve(J.transpose() * yd);
 
-        if (parameters_.Alpha.size() == 1) {
+        if (parameters_.Alpha.size() == 1)
+        {
             q -= qd * parameters_.Alpha[0];
         }
-        else {
+        else
+        {
             q -= qd.cwiseProduct(parameters_.Alpha);
         }
 
-        if (qd.norm() < parameters_.Convergence) {
+        if (qd.norm() < parameters_.Convergence)
+        {
             if (debug_) HIGHLIGHT_NAMED("Levenberg-Marquardt", "Reached convergence (" << qd.norm() << " < " << parameters_.Convergence << ")");
             break;
         }
@@ -123,4 +135,4 @@ void LevenbergMarquardt::Solve(Eigen::MatrixXd& solution) {
     planning_time_ = timer.getDuration();
 }
 
-}   // namespace exotica
+}  // namespace exotica

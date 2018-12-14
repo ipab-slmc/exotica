@@ -19,8 +19,6 @@ private:
     UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
 
     double lambda_ = 0;  // damping factor
-
-    int iterations_ = -1;
 };
 
 REGISTER_MOTIONSOLVER_TYPE("LevenbergMarquardtSolverSolver", exotica::LevenbergMarquardtSolver)
@@ -66,7 +64,7 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
     double error_prev = std::numeric_limits<double>::infinity();
     Eigen::VectorXd yd;
     Eigen::VectorXd qd;
-    for (size_t i = 0; i < getNumberOfMaxIterations(); iterations_ = ++i)
+    for (size_t i = 0; i < getNumberOfMaxIterations(); i++)
     {
         prob_->Update(q);
 

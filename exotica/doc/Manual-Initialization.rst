@@ -97,7 +97,7 @@ We must also pass in our initialization arguments seen in the `Scene Initializer
 
 Here we use the parameters: 
 * name of the scene ("MyScene") 
-* name of the joint group ("arm") which is specified in the `SRDF <https://github.com/openhumanoids/exotica/blob/master/examples/exotica_examples/resources/lwr_simplified.srdf>`__ file.
+* name of the joint group ("arm") which is specified in the `SRDF <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.srdf>`__ file.
 * Debug argument ("false")
 * RobotDescription ("")
 * URDF (name of URDF file)
@@ -216,4 +216,4 @@ options, as some may be required. Again, these can be found in:
 We now almost have a fully initialized motion solver. We can now
 move onto the common initialization step between hard-coded and XML
 initialization
-`here <https://github.com/openhumanoids/exotica/wiki/Common-Initialisation-Step>`__.
+`here <Common-Initialization-Step.html>`__.

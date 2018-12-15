@@ -1,4 +1,4 @@
-# EXOTica [![Build Status](https://travis-ci.org/ipab-slmc/exotica.svg?branch=master)](https://travis-ci.org/ipab-slmc/exotica) [![Analytics](https://ga-beacon.appspot.com/UA-72496975-1/openhumanoids/exotica/?pixel)](https://github.com/igrigorik/ga-beacon)
+# EXOTica [![Build Status](https://travis-ci.org/ipab-slmc/exotica.svg?branch=master)](https://travis-ci.org/ipab-slmc/exotica) [![Analytics](https://ga-beacon.appspot.com/UA-72496975-1/ipab-slmc/exotica/?pixel)](https://github.com/igrigorik/ga-beacon)
 
 [Documentation](http://ipab-slmc.github.io/exotica/) - [C++ Doxygen](http://ipab-slmc.github.io/exotica/doxygen_cpp/) - [Python Documentation](https://ipab-slmc.github.io/exotica/Python-API.html)
 

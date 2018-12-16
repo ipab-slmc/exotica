@@ -121,7 +121,7 @@ void EndPoseTask::updateS()
     {
         for (int i = 0; i < task.LengthJ; i++)
         {
-            S(i + task.Start, i + task.Start) = Rho(task.Id);
+            S(i + task.StartJ, i + task.StartJ) = Rho(task.Id);
         }
         if (Rho(task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
     }
@@ -175,7 +175,7 @@ void TimeIndexedTask::updateS()
         {
             for (int i = 0; i < task.LengthJ; i++)
             {
-                S[t](i + task.Start, i + task.Start) = Rho[t](task.Id);
+                S[t](i + task.StartJ, i + task.StartJ) = Rho[t](task.Id);
             }
             if (Rho[t](task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
         }
@@ -328,7 +328,7 @@ void SamplingTask::updateS()
     {
         for (int i = 0; i < task.LengthJ; i++)
         {
-            S(i + task.Start, i + task.Start) = Rho(task.Id);
+            S(i + task.StartJ, i + task.StartJ) = Rho(task.Id);
         }
         if (Rho(task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
     }

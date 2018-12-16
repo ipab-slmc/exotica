@@ -240,7 +240,21 @@ UnconstrainedEndPoseProblem_ptr setupProblem(Initializer& map, std::string Colli
                                                                    {"W", W},
                                                                });
     Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
-    return std::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::createProblem(problem));
+
+    UnconstrainedEndPoseProblem_ptr problem_ptr = std::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::createProblem(problem));
+
+    // Create and test a problem with multiple cost terms
+    problem = Initializer("exotica/UnconstrainedEndPoseProblem", {
+                                                                     {"Name", std::string("MyProblem")},
+                                                                     {"PlanningScene", scene},
+                                                                     {"Maps", std::vector<Initializer>({map})},
+                                                                     {"Cost", std::vector<Initializer>({cost, cost, cost})},
+                                                                     {"W", W},
+                                                                 });
+
+    testRandom(std::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::createProblem(problem)));
+
+    return problem_ptr;
 }
 
 UnconstrainedTimeIndexedProblem_ptr setupTimeIndexedProblem(Initializer& map)
@@ -259,7 +273,17 @@ UnconstrainedTimeIndexedProblem_ptr setupTimeIndexedProblem(Initializer& map)
     Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
 
     UnconstrainedTimeIndexedProblem_ptr problem_ptr = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::createProblem(problem));
-    problem_ptr->preupdate();
+
+    // Create and test a problem with multiple cost terms
+    problem = Initializer("exotica/UnconstrainedTimeIndexedProblem", {{"Name", std::string("MyProblem")},
+                                                                      {"PlanningScene", scene},
+                                                                      {"Maps", std::vector<Initializer>({map})},
+                                                                      {"Cost", std::vector<Initializer>({cost, cost, cost})},
+                                                                      {"W", W},
+                                                                      {"T", std::string("10")},
+                                                                      {"Tau", std::string("0.05")}});
+
+    testRandom(std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::createProblem(problem)));
 
     return problem_ptr;
 }
@@ -300,6 +324,7 @@ TEST(ExoticaTaskMaps, testEffOrientation)
     {
         TEST_COUT << "End-effector orientation test";
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
+        std::vector<double> eps = {1.1e-5, 1e-5, 1e-5, 1.1e-5, 1e-5, 1e-5};
 
         for (int i = 0; i < types.size(); i++)
         {
@@ -309,9 +334,10 @@ TEST(ExoticaTaskMaps, testEffOrientation)
                                                        {"Type", type},
                                                        {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
             UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
+
             EXPECT_TRUE(testRandom(problem));
 
-            EXPECT_TRUE(testJacobian(problem));
+            EXPECT_TRUE(testJacobian(problem, eps[i]));
         }
     }
     catch (...)
@@ -345,7 +371,7 @@ TEST(ExoticaTaskMaps, testEffFrame)
     {
         TEST_COUT << "End-effector frame test";
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
-        std::vector<double> eps = {1.1e-5, 1e-5, 1e-5, 1e-5, 1e-5, 1e-5};
+        std::vector<double> eps = {1.1e-5, 1e-5, 1e-5, 1.1e-5, 1e-5, 1e-5};
         // TODO: Quaternion does not pass the test with precision 1e-5. Investigate why.
 
         for (int i = 0; i < types.size(); i++)

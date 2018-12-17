@@ -63,7 +63,7 @@ bool OMPLStateValidityChecker::isValid(const ompl::base::State *state, double &d
     return true;
 }
 
-OMPLRNStateSpace::OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob, init)
+OMPLRNStateSpace::OMPLRNStateSpace(OMPLSolverInitializer init) : OMPLStateSpace(init)
 {
     setName("OMPLRNStateSpace");
 }
@@ -117,7 +117,7 @@ void OMPLRNStateSpace::stateDebug(const Eigen::VectorXd &q) const
     //  TODO
 }
 
-OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob, init)
+OMPLSE3RNStateSpace::OMPLSE3RNStateSpace(OMPLSolverInitializer init) : OMPLStateSpace(init)
 {
     setName("OMPLSE3RNStateSpace");
 }
@@ -190,7 +190,7 @@ void OMPLSE3RNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eig
     tmp.GetRPY(q(3), q(4), q(5));
 }
 
-OMPLSE2RNStateSpace::OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : OMPLStateSpace(prob, init)
+OMPLSE2RNStateSpace::OMPLSE2RNStateSpace(OMPLSolverInitializer init) : OMPLStateSpace(init)
 {
     setName("OMPLSE2RNStateSpace");
 }

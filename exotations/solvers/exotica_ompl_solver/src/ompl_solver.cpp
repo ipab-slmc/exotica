@@ -211,6 +211,11 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
     if (!state_space_->as<OMPLStateSpace>()->isLocked())
     {
         state_space_->as<OMPLStateSpace>()->setBounds(prob_);
+        bounds_ = prob_->getBounds();
+    }
+    else if (!bounds_.empty() && bounds_ != prob_->getBounds())
+    {
+        throw_pretty("Cannot set new bounds on locked state space!");
     }
 
     ompl_simple_setup_->getSpaceInformation()->setup();

@@ -98,6 +98,7 @@ protected:
     ConfiguredPlannerAllocator planner_allocator_;
     std::string algorithm_;
     bool multi_query_ = false;
+    std::vector<double> bounds_;  // original bounds for locked state space
 };
 }
 

@@ -38,7 +38,6 @@
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit/robot_model/robot_model.h>
-#include <visualization_msgs/MarkerArray.h>
 #include <kdl/frames_io.hpp>
 
 #include <exotica/KinematicTree.h>
@@ -311,11 +310,8 @@ void KinematicTree::resetModel()
     // Remove all CollisionShapes
     if (Server::isRos())
     {
-        visualization_msgs::MarkerArray msg;
-        visualization_msgs::Marker mrk;
-        mrk.action = 3;  // visualization_msgs::Marker::DELETEALL; // NB: enum only defined in ROS-J and newer, functionality still there
-        msg.markers.push_back(mrk);
-        shapes_pub_.publish(msg);
+        marker_array_msg_.markers.emplace_back();
+        marker_array_msg_.markers.end()->action = 3;  // visualization_msgs::Marker::DELETEALL; // NB: enum only defined in ROS-J and newer, functionality still there
     }
 }
 
@@ -618,7 +614,7 @@ void KinematicTree::publishFrames()
         if (debugSceneChanged)
         {
             debugSceneChanged = false;
-            visualization_msgs::MarkerArray msg;
+            marker_array_msg_.markers.clear();
             for (int i = 0; i < Tree.size(); i++)
             {
                 if (Tree[i].lock()->Shape && (!Tree[i].lock()->ClosestRobotLink.lock() || !Tree[i].lock()->ClosestRobotLink.lock()->isRobotLink))
@@ -632,7 +628,7 @@ void KinematicTree::publishFrames()
                     mrk.color = getColor(Tree[i].lock()->Color);
                     mrk.header.frame_id = "exotica/" + Tree[i].lock()->Segment.getName();
                     mrk.pose.orientation.w = 1.0;
-                    msg.markers.push_back(mrk);
+                    marker_array_msg_.markers.push_back(mrk);
                 }
                 else if (Tree[i].lock()->ShapeResourcePath != "")
                 {
@@ -650,10 +646,10 @@ void KinematicTree::publishFrames()
                     mrk.scale.x = Tree[i].lock()->Scale(0);
                     mrk.scale.y = Tree[i].lock()->Scale(1);
                     mrk.scale.z = Tree[i].lock()->Scale(2);
-                    msg.markers.push_back(mrk);
+                    marker_array_msg_.markers.push_back(mrk);
                 }
             }
-            shapes_pub_.publish(msg);
+            shapes_pub_.publish(marker_array_msg_);
         }
     }
 }

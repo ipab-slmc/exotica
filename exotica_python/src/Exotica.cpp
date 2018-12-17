@@ -982,21 +982,21 @@ PYBIND11_MODULE(_pyexotica, module)
               py::arg("updateCollisionScene") = true);
     scene.def("getScene", &Scene::getScene);
     scene.def("cleanScene", &Scene::cleanScene);
-    scene.def("isStateValid", [](Scene* instance, bool self, double safe_distance) { return instance->getCollisionScene()->isStateValid(self, safe_distance); }, py::arg("self") = true, py::arg("SafeDistance") = 0.0);
+    scene.def("isStateValid", [](Scene* instance, bool self, double safe_distance) { return instance->getCollisionScene()->isStateValid(self, safe_distance); }, py::arg("check_self_collision") = true, py::arg("SafeDistance") = 0.0);
     scene.def("isCollisionFree", [](Scene* instance, const std::string& o1, const std::string& o2, double safe_distance) { return instance->getCollisionScene()->isCollisionFree(o1, o2, safe_distance); }, py::arg("Object1"), py::arg("Object2"), py::arg("SafeDistance") = 0.0);
-    scene.def("isAllowedToCollide", [](Scene* instance, const std::string& o1, const std::string& o2, bool self) { return instance->getCollisionScene()->isAllowedToCollide(o1, o2, self); }, py::arg("Object1"), py::arg("Object2"), py::arg("self") = true);
-    scene.def("getCollisionDistance", [](Scene* instance, bool self) { return instance->getCollisionScene()->getCollisionDistance(self); }, py::arg("self") = true);
+    scene.def("isAllowedToCollide", [](Scene* instance, const std::string& o1, const std::string& o2, bool self) { return instance->getCollisionScene()->isAllowedToCollide(o1, o2, self); }, py::arg("Object1"), py::arg("Object2"), py::arg("check_self_collision") = true);
+    scene.def("getCollisionDistance", [](Scene* instance, bool self) { return instance->getCollisionScene()->getCollisionDistance(self); }, py::arg("check_self_collision") = true);
     scene.def("getCollisionDistance", [](Scene* instance, const std::string& o1, const std::string& o2) { return instance->getCollisionScene()->getCollisionDistance(o1, o2); }, py::arg("Object1"), py::arg("Object2"));
     scene.def("getCollisionDistance",
               [](Scene* instance, const std::string& o1, const bool& self) {
                   return instance->getCollisionScene()->getCollisionDistance(o1, self);
               },
-              py::arg("Object1"), py::arg("self") = true);
+              py::arg("Object1"), py::arg("check_self_collision") = true);
     scene.def("getCollisionDistance",
               [](Scene* instance, const std::vector<std::string>& objects, const bool& self) {
                   return instance->getCollisionScene()->getCollisionDistance(objects, self);
               },
-              py::arg("objects"), py::arg("self") = true);
+              py::arg("objects"), py::arg("check_self_collision") = true);
     scene.def("updateWorld",
               [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
                   moveit_msgs::PlanningSceneWorldConstPtr myPtr(

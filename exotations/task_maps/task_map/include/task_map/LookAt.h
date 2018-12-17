@@ -40,6 +40,24 @@ namespace exotica
 {
 class LookAt : public TaskMap, public Instantiable<LookAtInitializer>
 {
+/** \brief Points end-effector to look at a given target.
+ *
+ * Looks at a target point by penalizing the vector which defines the orthogonal projection onto a defined line in the end-effector frame.
+ * 
+ * \image latex EXO_ROOT/exotations/task_maps/task_map/doc/image/lookat.eps "LookAt task map." width=2in
+ * 
+ * Given the point \f$p\f$ (the point to look at) defined in the end-effector space the task map is expressed by 
+ * \f[
+ *   \Phi = \vec{d}
+ * \f]
+ * where \f$\vec{d}:=p - a\f$ where \f$a\f$ is the orthogonal projection onto the line \f$L\f$ given by 
+ * \f[
+ *   L:=\{\alpha c : \alpha\in\mathbb{R}\}
+ * \f]
+ * and \f$c\f$ is some fixed point in the end-effector frame.
+ * 
+ * The LookAt task map can handle a goal for each end-effector. Three frames must be defined in the .xml for every goal. 
+ */
 public:
     LookAt();
     virtual ~LookAt();
@@ -53,7 +71,8 @@ public:
     int taskSpaceDim() override;
 
  private:
-    int n_end_effs_; //<! Number of end-effectors. 
+    int n_end_effs_; //<! Number of end-effectors.
+    int n_; //<! Dimension of the task space. 
 };
 
 }  // namespace exotica

@@ -12,28 +12,28 @@ from visualization_msgs.msg import Marker
 from std_msgs.msg import ColorRGBA as Color
 
 GREEN = Color()
-GREEN.r=0.0
-GREEN.g=1.0
-GREEN.b=0.0
-GREEN.a=1.0
+GREEN.r = 0.0
+GREEN.g = 1.0
+GREEN.b = 0.0
+GREEN.a = 1.0
 
 DT = 1.0/100.0 # 100 HZ
 DAMP = 0.005
 
 def MarkerMsg(p):
     marker = Marker()
-    marker.type=marker.SPHERE
-    marker.id=0
-    marker.action=marker.ADD
-    marker.header.frame_id='exotica/world_frame'
+    marker.type = marker.SPHERE
+    marker.id = 0
+    marker.action = marker.ADD
+    marker.header.frame_id = 'exotica/world_frame'
     marker.pose.position.x = p[0]
     marker.pose.position.y = p[1]
     marker.pose.position.z = p[2]
     marker.scale.x = 0.1
     marker.scale.y = 0.1
     marker.scale.z = 0.1
-    marker.pose.orientation.w=1.0
-    marker.color=GREEN
+    marker.pose.orientation.w = 1.0
+    marker.color = GREEN
     return marker
 
 class Example(object):

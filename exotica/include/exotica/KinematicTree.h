@@ -41,6 +41,7 @@
 
 #include <moveit/robot_model/robot_model.h>
 #include <tf_conversions/tf_kdl.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <Eigen/Eigen>
 #include <kdl/jacobian.hpp>
 #include <kdl/tree.hpp>
@@ -271,6 +272,7 @@ private:
     std::vector<tf::StampedTransform> debugFrames;
     ros::Publisher shapes_pub_;
     bool debugSceneChanged;
+    visualization_msgs::MarkerArray marker_array_msg_;
     std::string name_;
 };
 }

@@ -106,10 +106,12 @@ void LookAt::Instantiate(LookAtInitializer &init)
 
   // Init private variables
   n_end_effs_ = Frames.size() / 3;
+  n_ = Frames.size();
+  
 }
 
 int LookAt::taskSpaceDim()
 {
-    return 3*n_end_effs_;
+    return n_;
 }
 }  // namespace exotica

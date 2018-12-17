@@ -48,11 +48,11 @@ void OMPLSolver<ProblemType>::specifyProblem(PlanningProblem_ptr pointer)
     MotionSolver::specifyProblem(pointer);
     prob_ = std::static_pointer_cast<ProblemType>(pointer);
     if (prob_->getScene()->getBaseType() == BASE_TYPE::FIXED)
-        state_space_.reset(new OMPLRNStateSpace(prob_, init_));
+        state_space_.reset(new OMPLRNStateSpace(init_));
     else if (prob_->getScene()->getBaseType() == BASE_TYPE::PLANAR)
-        state_space_.reset(new OMPLSE2RNStateSpace(prob_, init_));
+        state_space_.reset(new OMPLSE2RNStateSpace(init_));
     else if (prob_->getScene()->getBaseType() == BASE_TYPE::FLOATING)
-        state_space_.reset(new OMPLSE3RNStateSpace(prob_, init_));
+        state_space_.reset(new OMPLSE3RNStateSpace(init_));
     else
         throw_named("Unsupported base type " << prob_->getScene()->getBaseType());
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));

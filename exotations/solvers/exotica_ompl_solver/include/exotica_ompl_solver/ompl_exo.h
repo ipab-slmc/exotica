@@ -57,7 +57,7 @@ namespace exotica
 class OMPLStateSpace : public ompl::base::CompoundStateSpace
 {
 public:
-    OMPLStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init) : ompl::base::CompoundStateSpace(), prob_(prob), init_(init)
+    OMPLStateSpace(OMPLSolverInitializer init) : ompl::base::CompoundStateSpace(), init_(init)
     {
     }
 
@@ -69,7 +69,6 @@ public:
     virtual void stateDebug(const Eigen::VectorXd &q) const = 0;
 
 protected:
-    SamplingProblem_ptr prob_;
     OMPLSolverInitializer init_;
 };
 
@@ -106,7 +105,7 @@ public:
             return *as<ompl::base::RealVectorStateSpace::StateType>(0);
         }
     };
-    OMPLRNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init);
+    OMPLRNStateSpace(OMPLSolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
     virtual void setBounds(SamplingProblem_ptr &prob);
@@ -144,7 +143,7 @@ public:
             return *as<ompl::base::SE3StateSpace::StateType>(0);
         }
     };
-    OMPLSE3RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init);
+    OMPLSE3RNStateSpace(OMPLSolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
     virtual void setBounds(SamplingProblem_ptr &prob);
@@ -182,7 +181,7 @@ public:
             return *as<ompl::base::SE2StateSpace::StateType>(0);
         }
     };
-    OMPLSE2RNStateSpace(SamplingProblem_ptr &prob, OMPLSolverInitializer init);
+    OMPLSE2RNStateSpace(OMPLSolverInitializer init);
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
     virtual void setBounds(SamplingProblem_ptr &prob);

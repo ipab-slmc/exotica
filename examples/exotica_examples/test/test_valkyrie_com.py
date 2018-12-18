@@ -8,9 +8,9 @@ import unittest
 
 class TestClass(unittest.TestCase):
     def setUp(self):
-        (_, self.ik_prob) = exo.Initializers.loadXMLFull(
+        (_, self.ik_prob) = exo.Initializers.load_xml_full(
             '{exotica_examples}/test/resources/test_com_valkyrie.xml')
-        self.ik_problem = exo.Setup.createProblem(self.ik_prob)
+        self.ik_problem = exo.Setup.create_problem(self.ik_prob)
 
     def test_zeros(self):
         # Test with zeros

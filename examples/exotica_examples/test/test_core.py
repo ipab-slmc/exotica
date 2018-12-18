@@ -26,11 +26,11 @@ def TestROS():
 
 def TestLoadXML():
     global exo
-    (sol, prob)=exo.Initializers.loadXMLFull(exo.Setup.getPackagePath('exotica_examples')+'/resources/configs/ik_solver_demo.xml')
-    (sol, prob)=exo.Initializers.loadXMLFull('{exotica_examples}/resources/configs/ik_solver_demo.xml')
-    problem = exo.Setup.createProblem(prob)
-    solver = exo.Setup.createSolver(sol)
-    solver.specifyProblem(problem)
+    (sol, prob)=exo.Initializers.load_xml_full(exo.Setup.getPackagePath('exotica_examples')+'/resources/configs/ik_solver_demo.xml')
+    (sol, prob)=exo.Initializers.load_xml_full('{exotica_examples}/resources/configs/ik_solver_demo.xml')
+    problem = exo.Setup.create_problem(prob)
+    solver = exo.Setup.create_solver(sol)
+    solver.specify_problem(problem)
     solver.solve()
 
 class TestClass(unittest.TestCase):

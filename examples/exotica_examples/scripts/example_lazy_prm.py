@@ -4,12 +4,13 @@ import pyexotica as exo
 import exotica_ompl_solver_py as ompl
 from numpy import array
 from numpy import matrix
-from pyexotica.publish_trajectory import publishTrajectory
+from pyexotica.publish_trajectory import publish_trajectory
 
-exo.Setup.initRos()
-prm = exo.Setup.loadSolver('{exotica_examples}/resources/configs/example_lazy_prm.xml')
+exo.Setup.init_ros()
+prm = exo.Setup.load_solver(
+    '{exotica_examples}/resources/configs/example_lazy_prm.xml')
 # This LazyPRM has been setup for multi-query operation.
-# You have to call prm.clearQuery() between runs.
+# You have to call prm.clear_query() between runs.
 # Call prm.clear() to discard the roadmap.
 
 for i in range(10):
@@ -17,6 +18,6 @@ for i in range(10):
     solution = prm.solve()
 
     # Clear previous start/goal
-    prm.clearQuery()
+    prm.clear_query()
 
-publishTrajectory(solution, 3.0, prm.getProblem())
+publish_trajectory(solution, 3.0, prm.get_problem())

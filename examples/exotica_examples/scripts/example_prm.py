@@ -3,16 +3,17 @@
 import pyexotica as exo
 import exotica_ompl_solver_py as ompl
 import numpy as np
-from pyexotica.publish_trajectory import publishTrajectory
+from pyexotica.publish_trajectory import publish_trajectory
 
-exo.Setup.initRos()
-prm = exo.Setup.loadSolver('{exotica_examples}/resources/configs/example_prm.xml')
+exo.Setup.init_ros()
+prm = exo.Setup.load_solver(
+    '{exotica_examples}/resources/configs/example_prm.xml')
 # This PRM has been setup for multi-query operation.
-# You have to call prm.clearQuery() between runs.
+# You have to call prm.clear_query() between runs.
 # Call prm.clear() to discard the roadmap.
 
 # Grow roadmap for 1s
-prm.growRoadmap(1)
+prm.grow_roadmap(1)
 
 solution = None
 for i in xrange(10):
@@ -20,8 +21,8 @@ for i in xrange(10):
     solution = prm.solve()
 
     # Grow the roadmap some more
-    prm.growRoadmap(1)
+    prm.grow_roadmap(1)
     # Clear previous start/goal
-    prm.clearQuery()
+    prm.clear_query()
 
-publishTrajectory(solution, 3.0, prm.getProblem())
+publish_trajectory(solution, 3.0, prm.get_problem())

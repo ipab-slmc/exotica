@@ -3,7 +3,7 @@ import rospy
 import numpy as np
 import pyexotica as exo
 import signal
-from pyexotica.publish_trajectory import publishPose, sigIntHandler
+from pyexotica.publish_trajectory import publish_pose, sig_int_handler
 import task_map_py
 from sensor_msgs.msg import Joy, JointState
 from visualization_msgs.msg import Marker
@@ -39,9 +39,9 @@ class Example(object):
 
     def __init__(self):
 
-        self.solver = exo.Setup.loadSolver(
+        self.solver = exo.Setup.load_solver(
             '{exotica_examples}/resources/configs/point_to_line.xml')
-        self.problem = self.solver.getProblem()
+        self.problem = self.solver.get_problem()
         self.q = np.array([0.0]*7)
 
         self.p = INIT_POSITION
@@ -71,12 +71,12 @@ class Example(object):
 
         p = self.p + DAMP * np.array([dx, dy, dz])
 
-        self.problem.getTaskMaps()['p2l'].endPoint = p
-        self.problem.startState = self.q
+        self.problem.get_task_maps()['p2l'].endPoint = p
+        self.problem.start_state = self.q
 
         # Solve
         q = self.solver.solve()[0]
-        publishPose(q, self.problem)
+        publish_pose(q, self.problem)
 
         # Pack/publish joint state
         msg_joint_state = JointState()
@@ -96,7 +96,7 @@ class Example(object):
 
 if __name__ == '__main__':
     rospy.init_node('example_point_to_line_node')
-    exo.Setup.initRos()
+    exo.Setup.init_ros()
     rospy.Timer(rospy.Duration(DT), Example().update)
-    signal.signal(signal.SIGINT, sigIntHandler)
+    signal.signal(signal.SIGINT, sig_int_handler)
     rospy.spin()

@@ -565,7 +565,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kdl_frame.def("get_translation_and_angle_axis", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ANGLE_AXIS); });
     kdl_frame.def("get_translation_and_quaternion", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::QUATERNION); });
     kdl_frame.def("get_frame", [](KDL::Frame* me) { return getFrame(*me); });
-    kdl_frame.def("inverse", (KDL::Frame (KDL::Frame::*)() const) & KDL::Frame::Inverse);
+    kdl_frame.def("inverse", (KDL::Frame(KDL::Frame::*)() const) & KDL::Frame::Inverse);
     kdl_frame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());
     kdl_frame.def_readwrite("p", &KDL::Frame::p);
     py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
@@ -674,7 +674,7 @@ PYBIND11_MODULE(_pyexotica, module)
     planning_problem.def_property("start_time", &PlanningProblem::getStartTime, &PlanningProblem::setStartTime);
     planning_problem.def("get_number_of_problem_updates", &PlanningProblem::getNumberOfProblemUpdates);
     planning_problem.def("reset_number_of_problem_updates", &PlanningProblem::resetNumberOfProblemUpdates);
-    planning_problem.def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>> (PlanningProblem::*)()) & PlanningProblem::getCostEvolution);
+    planning_problem.def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)()) & PlanningProblem::getCostEvolution);
     planning_problem.def("is_valid", &PlanningProblem::isValid);
 
     // Problem types
@@ -907,7 +907,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
     scene.def("get_base_type", &Scene::getBaseType);
     scene.def("get_group_name", &Scene::getGroupName);
-    scene.def("get_joint_names", (std::vector<std::string> (Scene::*)()) & Scene::getJointNames);
+    scene.def("get_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::getJointNames);
     scene.def("get_controlled_link_names", &Scene::getControlledLinkNames);
     scene.def("get_model_link_names", &Scene::getModelLinkNames);
     scene.def("get_solver", &Scene::getSolver, py::return_value_policy::reference_internal);

@@ -54,7 +54,7 @@ void JointLimit::Initialize()
 {
     safe_percentage_ = init_.SafePercentage;
 
-    N = scene_->getSolver().getNumControlledJoints();
+    N = scene_->getKinematicTree().getNumControlledJoints();
 }
 
 int JointLimit::taskSpaceDim()
@@ -67,7 +67,7 @@ void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     if (phi.rows() != N) throw_named("Wrong size of phi!");
     phi.setZero();
 
-    const Eigen::MatrixXd limits = scene_->getSolver().getJointLimits();
+    const Eigen::MatrixXd limits = scene_->getKinematicTree().getJointLimits();
     const Eigen::VectorXd& low_limits = limits.col(0);
     const Eigen::VectorXd& high_limits = limits.col(1);
     const Eigen::VectorXd tau = 0.5 * safe_percentage_ * (high_limits - low_limits);

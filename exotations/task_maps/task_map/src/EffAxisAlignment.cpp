@@ -46,7 +46,7 @@ void EffAxisAlignment::Instantiate(EffAxisAlignmentInitializer& init)
 
 void EffAxisAlignment::Initialize()
 {
-    N = scene_->getSolver().getNumControlledJoints();
+    N = scene_->getKinematicTree().getNumControlledJoints();
 
     NumberOfFrames = init_.EndEffector.size();
     if (debug_) HIGHLIGHT_NAMED("EffAxisAlignment", "Number of EndEffectors: " << NumberOfFrames);

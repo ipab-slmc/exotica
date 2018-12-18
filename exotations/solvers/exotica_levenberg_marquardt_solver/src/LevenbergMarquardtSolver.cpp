@@ -110,7 +110,7 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
             throw std::runtime_error("no ScaleProblem of type " + parameters_.ScaleProblem);
         }
 
-#if EIGEN_VERSION_AT_LEAST(3,3,0)
+#if EIGEN_VERSION_AT_LEAST(3, 3, 0)
         qd = (J.transpose() * J + lambda_ * M).completeOrthogonalDecomposition().solve(J.transpose() * yd);
 #else
         qd = (J.transpose() * J + lambda_ * M).colPivHouseholderQr().solve(J.transpose() * yd);

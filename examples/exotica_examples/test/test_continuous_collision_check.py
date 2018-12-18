@@ -10,11 +10,11 @@ import roslib; roslib.load_manifest(PKG)  # This line is not needed with Catkin.
 
 import unittest
 
-def getProblemInitializer(collisionScene, URDF):
+def get_problem_initializer(collision_scene, URDF):
     return ('exotica/UnconstrainedEndPoseProblem',
             {'Name': 'TestProblem',
              'PlanningScene': [('exotica/Scene',
-                                {'CollisionScene': collisionScene,
+                                {'CollisionScene': collision_scene,
                                  'JointGroup': 'group1',
                                  'Name': 'TestScene',
                                  'Debug': '0',
@@ -23,28 +23,28 @@ def getProblemInitializer(collisionScene, URDF):
                                  'URDF': URDF})]})
 
 class TestClass(unittest.TestCase):
-    def test_collsion(self):
-        collisionScene = "CollisionSceneFCLLatest"
+    def test_continuous_collision(self):
+        collision_scene = "CollisionSceneFCLLatest"
 
         urdfs_to_test = ['{exotica_examples}/test/resources/PrimitiveSphere_vs_PrimitiveSphere_Distance.urdf', '{exotica_examples}/test/resources/Mesh_vs_Mesh_Distance.urdf']
 
         for urdf in urdfs_to_test:
             print("Testing", urdf)
             
-            initializer = getProblemInitializer(collisionScene, urdf)
+            initializer = get_problem_initializer(collision_scene, urdf)
             prob = exo.Setup.create_problem(initializer)
             prob.update(np.zeros(prob.N,))
             scene = prob.get_scene()
-            cs = scene.getCollisionScene()
+            cs = scene.get_collision_scene()
 
             # Should collide at -2
-            p = cs.continuousCollisionCheck(
+            p = cs.continuous_collision_check(
                     "A_collision_0", exo.KDLFrame([-3., 0.0, 0.0]), exo.KDLFrame([-1.0, 0.0, 0.0]),
                     "B_collision_0", exo.KDLFrame([0, 0, 0]), exo.KDLFrame([0, 0, 0]))
-            assert(p.InCollision == True)
-            assert((p.TimeOfContact - 0.5) < 0.1)
-            assert(np.isclose(p.ContactTransform1.getTranslation(), np.array([-2, 0, 0]), atol=0.15).all())
-            assert(np.isclose(p.ContactTransform2.getTranslation(), np.array([0, 0, 0])).all())
+            assert(p.in_collision == True)
+            assert((p.time_of_contact - 0.5) < 0.1)
+            assert(np.isclose(p.contact_transform_1.get_translation(), np.array([-2, 0, 0]), atol=0.15).all())
+            assert(np.isclose(p.contact_transform_2.get_translation(), np.array([0, 0, 0])).all())
             print(p)
 
 if __name__ == '__main__':

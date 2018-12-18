@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 
+import roslib
+import unittest
 import pyexotica as exo
 PKG = 'exotica_examples'
-import roslib; roslib.load_manifest(PKG)  # This line is not needed with Catkin.
+roslib.load_manifest(PKG)  # This line is not needed with Catkin.
 
-import unittest
 
-def testScene(problemName, cleanScene=False):
-    print('Loading '+problemName)
-    (sol, prob)=exo.Initializers.load_xml_full('{exotica_examples}/test/resources/test_scene.xml', problem_name=problemName)
+def test_scene(problem_name, clean_scene=False):
+    print('Loading '+problem_name)
+    (sol, prob) = exo.Initializers.load_xml_full(
+        '{exotica_examples}/test/resources/test_scene.xml', problem_name=problem_name)
     problem = exo.Setup.create_problem(prob)
     solver = exo.Setup.create_solver(sol)
     solver.specify_problem(problem)
@@ -17,60 +19,64 @@ def testScene(problemName, cleanScene=False):
     problem.update(problem.start_state)
 
     print('Updating the scene ...')
-    if cleanScene:
-        problem.get_scene().cleanScene()
-        problem.get_scene().loadSceneFile('{exotica_examples}/resources/scenes/example_moving_obstacle.scene')
-    problem.get_scene().loadSceneFile('{exotica_examples}/resources/scenes/example_distance.scene')
+    if clean_scene:
+        problem.get_scene().clean_scene()
+        problem.get_scene().load_scene_file(
+            '{exotica_examples}/resources/scenes/example_moving_obstacle.scene')
+    problem.get_scene().load_scene_file(
+        '{exotica_examples}/resources/scenes/example_distance.scene')
     print('Solving with updated scene ...')
 
     problem.update(problem.start_state)
     print('Done')
 
+
 class TestClass(unittest.TestCase):
     def test_MinimalProblem(self):
-        testScene('MinimalProblem')
-        
+        test_scene('MinimalProblem')
+
     def test_TrajectoryProblem(self):
-        testScene('TrajectoryProblem')
+        test_scene('TrajectoryProblem')
 
     def test_CollisionProblem(self):
-        testScene('CollisionProblem')
+        test_scene('CollisionProblem')
 
     def test_CustomLink1Problem(self):
-        testScene('CustomLink1Problem')
+        test_scene('CustomLink1Problem')
 
     def test_CustomLink2Problem(self):
-        testScene('CustomLink2Problem')
+        test_scene('CustomLink2Problem')
 
     def test_CustomLink3Problem(self):
-        testScene('CustomLink3Problem')
+        test_scene('CustomLink3Problem')
 
     def test_FullProblem(self):
-        testScene('FullProblem')
+        test_scene('FullProblem')
 
     def test_clean_MinimalProblem(self):
-        testScene('MinimalProblem', True)
+        test_scene('MinimalProblem', True)
 
     def test_clean_MinimalProblem(self):
-        testScene('MinimalProblem', True)
+        test_scene('MinimalProblem', True)
 
     def test_clean_TrajectoryProblem(self):
-        testScene('TrajectoryProblem', True)
+        test_scene('TrajectoryProblem', True)
 
     def test_clean_CollisionProblem(self):
-        testScene('CollisionProblem', True)
+        test_scene('CollisionProblem', True)
 
     def test_clean_CustomLink1Problem(self):
-        testScene('CustomLink1Problem', True)
+        test_scene('CustomLink1Problem', True)
 
     def test_clean_CustomLink2Problem(self):
-        testScene('CustomLink2Problem', True)
+        test_scene('CustomLink2Problem', True)
 
     def test_clean_CustomLink3Problem(self):
-        testScene('CustomLink3Problem', True)
+        test_scene('CustomLink3Problem', True)
 
     def test_clean_FullProblem(self):
-        testScene('FullProblem', True)
+        test_scene('FullProblem', True)
+
 
 if __name__ == '__main__':
     import rostest

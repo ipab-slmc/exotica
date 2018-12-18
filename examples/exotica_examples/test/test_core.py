@@ -1,37 +1,45 @@
 #!/usr/bin/env python
-PKG = 'exotica_examples'
-import roslib; roslib.load_manifest(PKG)  # This line is not needed with Catkin.
-
+import roslib
 import unittest
+PKG = 'exotica_examples'
+roslib.load_manifest(PKG)  # This line is not needed with Catkin.
+
 
 def TestImport():
     global exo
     import pyexotica as exo
 
+
 def TestSetup():
     global exo
     exo.Setup()
 
+
 def TestGetters():
     global exo
-    print(exo.Setup().getSolvers())
-    print(exo.Setup().getProblems())
-    print(exo.Setup().getMaps())
-    exo.Setup().getInitializers()
-    print(exo.Setup().getPackagePath('exotica_python'))
+    print(exo.Setup().get_solvers())
+    print(exo.Setup().get_problems())
+    print(exo.Setup().get_maps())
+    exo.Setup().get_initializers()
+    print(exo.Setup().get_package_path('exotica_python'))
+
 
 def TestROS():
     global exo
-    exo.Setup().initRos()
+    exo.Setup().init_ros()
+
 
 def TestLoadXML():
     global exo
-    (sol, prob)=exo.Initializers.load_xml_full(exo.Setup.getPackagePath('exotica_examples')+'/resources/configs/ik_solver_demo.xml')
-    (sol, prob)=exo.Initializers.load_xml_full('{exotica_examples}/resources/configs/ik_solver_demo.xml')
+    (sol, prob) = exo.Initializers.load_xml_full(exo.Setup.get_package_path(
+        'exotica_examples')+'/resources/configs/ik_solver_demo.xml')
+    (sol, prob) = exo.Initializers.load_xml_full(
+        '{exotica_examples}/resources/configs/ik_solver_demo.xml')
     problem = exo.Setup.create_problem(prob)
     solver = exo.Setup.create_solver(sol)
     solver.specify_problem(problem)
     solver.solve()
+
 
 class TestClass(unittest.TestCase):
     def test_1_import(self):
@@ -48,6 +56,7 @@ class TestClass(unittest.TestCase):
 
     def test_5_xml(self):
         TestLoadXML()
+
 
 if __name__ == '__main__':
     import rostest

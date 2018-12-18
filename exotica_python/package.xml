@@ -13,4 +13,5 @@
   <depend>geometry_msgs</depend>
   <depend>shape_msgs</depend>
   <depend>python-matplotlib</depend>
+  <depend>python-pyassimp</depend>
 </package>

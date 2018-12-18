@@ -18,7 +18,7 @@ while True:
     try:
         sc.update([math.sin(t/2.0)*0.5]*7)
         p = sc.get_collision_distance(False)
-        sc.get_solver().publish_frames()
+        sc.get_kinematic_tree().publish_frames()
         sc.publish_proxies(p)
         t = t+dt
         sleep(dt)

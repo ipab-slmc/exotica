@@ -9,7 +9,7 @@ from time import sleep
 def publish_pose(q, problem, t=0):
     '''Custom pose publishing to force update the task map debug marker publishing'''
     problem.update(q, t)
-    problem.get_scene().get_solver().publish_frames()
+    problem.get_scene().get_kinematic_tree().publish_frames()
 
 
 def publish_trajectory(traj, T, problem):

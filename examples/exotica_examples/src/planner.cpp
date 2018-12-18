@@ -100,7 +100,7 @@ void run()
             while (i-- > 0)
             {
                 any_problem->getScene()->Update(solution.row(t).transpose());
-                any_problem->getScene()->getSolver().publishFrames();
+                any_problem->getScene()->getKinematicTree().publishFrames();
 
                 ros::spinOnce();
                 loop_rate.sleep();

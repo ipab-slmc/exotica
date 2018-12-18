@@ -32,7 +32,7 @@ def get_problem_initializer(collision_scene, URDF):
 
 def debug_publish(p, scene):
     if PUBLISH_PROXIES:
-        scene.get_solver().publish_frames()
+        scene.get_kinematic_tree().publish_frames()
         scene.publish_proxies(p)
         time.sleep(.5)
 

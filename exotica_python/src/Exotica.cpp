@@ -599,52 +599,52 @@ PYBIND11_MODULE(_pyexotica, module)
              py::arg("Ic") = KDL::RotationalInertia::Zero())
         .def_static("Zero", &KDL::RigidBodyInertia::Zero);
 
-    py::class_<TaskMap, std::shared_ptr<TaskMap>, Object> task_map(module, "TaskMap");
-    task_map.def_readonly("id", &TaskMap::Id);
-    task_map.def_readonly("start", &TaskMap::Start);
-    task_map.def_readonly("length", &TaskMap::Length);
-    task_map.def_readonly("startJ", &TaskMap::StartJ);
-    task_map.def_readonly("lengthJ", &TaskMap::LengthJ);
-    task_map.def("task_space_dim", (int (TaskMap::*)()) & TaskMap::taskSpaceDim);
-    task_map.def("task_Space_jacobian_dim", &TaskMap::taskSpaceJacobianDim);
+    py::class_<TaskMap, std::shared_ptr<TaskMap>, Object>(module, "TaskMap")
+        .def_readonly("id", &TaskMap::Id)
+        .def_readonly("start", &TaskMap::Start)
+        .def_readonly("length", &TaskMap::Length)
+        .def_readonly("startJ", &TaskMap::StartJ)
+        .def_readonly("lengthJ", &TaskMap::LengthJ)
+        .def("task_space_dim", (int (TaskMap::*)()) & TaskMap::taskSpaceDim)
+        .def("task_Space_jacobian_dim", &TaskMap::taskSpaceJacobianDim);
 
-    py::class_<TimeIndexedTask, std::shared_ptr<TimeIndexedTask>> time_indexed_task(module, "TimeIndexedTask");
-    time_indexed_task.def_readonly("PhiN", &TimeIndexedTask::PhiN);
-    time_indexed_task.def_readonly("JN", &TimeIndexedTask::JN);
-    time_indexed_task.def_readonly("num_tasks", &TimeIndexedTask::NumTasks);
-    time_indexed_task.def_readonly("y", &TimeIndexedTask::y);
-    time_indexed_task.def_readonly("ydiff", &TimeIndexedTask::ydiff);
-    time_indexed_task.def_readonly("Phi", &TimeIndexedTask::Phi);
-    // time_indexed_task.def_readonly("H", &TimeIndexedTask::H);
-    time_indexed_task.def_readonly("J", &TimeIndexedTask::J);
-    time_indexed_task.def_readonly("S", &TimeIndexedTask::S);
-    time_indexed_task.def_readonly("T", &TimeIndexedTask::T);
-    time_indexed_task.def_readonly("Tasks", &TimeIndexedTask::Tasks);
-    time_indexed_task.def_readonly("TaskMaps", &TimeIndexedTask::TaskMaps);
+    py::class_<TimeIndexedTask, std::shared_ptr<TimeIndexedTask>>(module, "TimeIndexedTask")
+        .def_readonly("PhiN", &TimeIndexedTask::PhiN)
+        .def_readonly("JN", &TimeIndexedTask::JN)
+        .def_readonly("num_tasks", &TimeIndexedTask::NumTasks)
+        .def_readonly("y", &TimeIndexedTask::y)
+        .def_readonly("ydiff", &TimeIndexedTask::ydiff)
+        .def_readonly("Phi", &TimeIndexedTask::Phi)
+        // .def_readonly("H", &TimeIndexedTask::H)
+        .def_readonly("J", &TimeIndexedTask::J)
+        .def_readonly("S", &TimeIndexedTask::S)
+        .def_readonly("T", &TimeIndexedTask::T)
+        .def_readonly("tasks", &TimeIndexedTask::Tasks)
+        .def_readonly("task_maps", &TimeIndexedTask::TaskMaps);
 
-    py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>> end_pose_task(module, "EndPoseTask");
-    end_pose_task.def_readonly("PhiN", &EndPoseTask::PhiN);
-    end_pose_task.def_readonly("JN", &EndPoseTask::JN);
-    end_pose_task.def_readonly("num_tasks", &EndPoseTask::NumTasks);
-    end_pose_task.def_readonly("y", &EndPoseTask::y);
-    end_pose_task.def_readonly("ydiff", &EndPoseTask::ydiff);
-    end_pose_task.def_readonly("Phi", &EndPoseTask::Phi);
-    // end_pose_task.def_readonly("H", &EndPoseTask::H);
-    end_pose_task.def_readonly("J", &EndPoseTask::J);
-    end_pose_task.def_readonly("S", &EndPoseTask::S);
-    end_pose_task.def_readonly("Tasks", &EndPoseTask::Tasks);
-    end_pose_task.def_readonly("TaskMaps", &EndPoseTask::TaskMaps);
+    py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>>(module, "EndPoseTask")
+        .def_readonly("PhiN", &EndPoseTask::PhiN)
+        .def_readonly("JN", &EndPoseTask::JN)
+        .def_readonly("num_tasks", &EndPoseTask::NumTasks)
+        .def_readonly("y", &EndPoseTask::y)
+        .def_readonly("ydiff", &EndPoseTask::ydiff)
+        .def_readonly("Phi", &EndPoseTask::Phi)
+        // .def_readonly("H", &EndPoseTask::H)
+        .def_readonly("J", &EndPoseTask::J)
+        .def_readonly("S", &EndPoseTask::S)
+        .def_readonly("tasks", &EndPoseTask::Tasks)
+        .def_readonly("task_maps", &EndPoseTask::TaskMaps);
 
-    py::class_<SamplingTask, std::shared_ptr<SamplingTask>> sampling_task(module, "SamplingTask");
-    sampling_task.def_readonly("PhiN", &SamplingTask::PhiN);
-    sampling_task.def_readonly("JN", &SamplingTask::JN);
-    sampling_task.def_readonly("num_tasks", &SamplingTask::NumTasks);
-    sampling_task.def_readonly("y", &SamplingTask::y);
-    sampling_task.def_readonly("ydiff", &SamplingTask::ydiff);
-    sampling_task.def_readonly("Phi", &SamplingTask::Phi);
-    sampling_task.def_readonly("S", &SamplingTask::S);
-    sampling_task.def_readonly("Tasks", &SamplingTask::Tasks);
-    sampling_task.def_readonly("TaskMaps", &SamplingTask::TaskMaps);
+    py::class_<SamplingTask, std::shared_ptr<SamplingTask>>(module, "SamplingTask")
+        .def_readonly("PhiN", &SamplingTask::PhiN)
+        .def_readonly("JN", &SamplingTask::JN)
+        .def_readonly("num_tasks", &SamplingTask::NumTasks)
+        .def_readonly("y", &SamplingTask::y)
+        .def_readonly("ydiff", &SamplingTask::ydiff)
+        .def_readonly("Phi", &SamplingTask::Phi)
+        .def_readonly("S", &SamplingTask::S)
+        .def_readonly("tasks", &SamplingTask::Tasks)
+        .def_readonly("task_maps", &SamplingTask::TaskMaps);
 
     py::class_<TaskSpaceVector, std::shared_ptr<TaskSpaceVector>> task_space_vector(module, "TaskSpaceVector");
     task_space_vector.def("set_zero", &TaskSpaceVector::setZero);
@@ -665,17 +665,17 @@ PYBIND11_MODULE(_pyexotica, module)
         "Solve the problem");
     motion_solver.def("get_problem", &MotionSolver::getProblem, py::return_value_policy::reference_internal);
 
-    py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object> planning_problem(module, "PlanningProblem");
-    planning_problem.def("get_tasks", &PlanningProblem::getTasks, py::return_value_policy::reference_internal);
-    planning_problem.def("get_task_maps", &PlanningProblem::getTaskMaps, py::return_value_policy::reference_internal);
-    planning_problem.def("get_scene", &PlanningProblem::getScene, py::return_value_policy::reference_internal);
-    planning_problem.def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend") = std::string(""));
-    planning_problem.def_property("start_state", &PlanningProblem::getStartState, &PlanningProblem::setStartState);
-    planning_problem.def_property("start_time", &PlanningProblem::getStartTime, &PlanningProblem::setStartTime);
-    planning_problem.def("get_number_of_problem_updates", &PlanningProblem::getNumberOfProblemUpdates);
-    planning_problem.def("reset_number_of_problem_updates", &PlanningProblem::resetNumberOfProblemUpdates);
-    planning_problem.def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)()) & PlanningProblem::getCostEvolution);
-    planning_problem.def("is_valid", &PlanningProblem::isValid);
+    py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object>(module, "PlanningProblem")
+        .def("get_tasks", &PlanningProblem::getTasks, py::return_value_policy::reference_internal)
+        .def("get_task_maps", &PlanningProblem::getTaskMaps, py::return_value_policy::reference_internal)
+        .def("get_scene", &PlanningProblem::getScene, py::return_value_policy::reference_internal)
+        .def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend") = std::string(""))
+        .def_property("start_state", &PlanningProblem::getStartState, &PlanningProblem::setStartState)
+        .def_property("start_time", &PlanningProblem::getStartTime, &PlanningProblem::setStartTime)
+        .def("get_number_of_problem_updates", &PlanningProblem::getNumberOfProblemUpdates)
+        .def("reset_number_of_problem_updates", &PlanningProblem::resetNumberOfProblemUpdates)
+        .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)()) & PlanningProblem::getCostEvolution)
+        .def("is_valid", &PlanningProblem::isValid);
 
     // Problem types
     py::module prob = module.def_submodule("Problems", "Problem types");
@@ -701,7 +701,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_time_indexed_problem.def("get_scalar_task_jacobian", &UnconstrainedTimeIndexedProblem::getScalarTaskJacobian);
     unconstrained_time_indexed_problem.def("get_scalar_transition_cost", &UnconstrainedTimeIndexedProblem::getScalarTransitionCost);
     unconstrained_time_indexed_problem.def("get_scalar_transition_jacobian", &UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian);
-    unconstrained_time_indexed_problem.def_readonly("Cost", &UnconstrainedTimeIndexedProblem::Cost);
+    unconstrained_time_indexed_problem.def_readonly("cost", &UnconstrainedTimeIndexedProblem::Cost);
     unconstrained_time_indexed_problem.def_property_readonly("kinematic_solutions", &UnconstrainedTimeIndexedProblem::getKinematicSolutions);
 
     py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> time_indexed_problem(prob, "TimeIndexedProblem");
@@ -739,9 +739,9 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def("get_inequality", &TimeIndexedProblem::getInequality);
     time_indexed_problem.def("get_inequality_jacobian", &TimeIndexedProblem::getInequalityJacobian);
     time_indexed_problem.def("get_bounds", &TimeIndexedProblem::getBounds);
-    time_indexed_problem.def_readonly("Cost", &TimeIndexedProblem::Cost);
-    time_indexed_problem.def_readonly("Inequality", &TimeIndexedProblem::Inequality);
-    time_indexed_problem.def_readonly("Equality", &TimeIndexedProblem::Equality);
+    time_indexed_problem.def_readonly("cost", &TimeIndexedProblem::Cost);
+    time_indexed_problem.def_readonly("inequality", &TimeIndexedProblem::Inequality);
+    time_indexed_problem.def_readonly("equality", &TimeIndexedProblem::Equality);
 
     py::class_<BoundedTimeIndexedProblem, std::shared_ptr<BoundedTimeIndexedProblem>, PlanningProblem> bounded_time_indexed_problem(prob, "BoundedTimeIndexedProblem");
     bounded_time_indexed_problem.def("get_duration", &BoundedTimeIndexedProblem::getDuration);
@@ -765,7 +765,7 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_time_indexed_problem.def("get_scalar_transition_cost", &BoundedTimeIndexedProblem::getScalarTransitionCost);
     bounded_time_indexed_problem.def("get_scalar_transition_jacobian", &BoundedTimeIndexedProblem::getScalarTransitionJacobian);
     bounded_time_indexed_problem.def("get_bounds", &BoundedTimeIndexedProblem::getBounds);
-    bounded_time_indexed_problem.def_readonly("Cost", &BoundedTimeIndexedProblem::Cost);
+    bounded_time_indexed_problem.def_readonly("cost", &BoundedTimeIndexedProblem::Cost);
 
     py::class_<UnconstrainedEndPoseProblem, std::shared_ptr<UnconstrainedEndPoseProblem>, PlanningProblem> unconstrained_end_pose_problem(prob, "UnconstrainedEndPoseProblem");
     unconstrained_end_pose_problem.def("update", &UnconstrainedEndPoseProblem::Update);
@@ -785,7 +785,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_end_pose_problem.def("get_scalar_cost", &UnconstrainedEndPoseProblem::getScalarCost);
     unconstrained_end_pose_problem.def("get_scalar_jacobian", &UnconstrainedEndPoseProblem::getScalarJacobian);
     unconstrained_end_pose_problem.def("get_scalar_task_cost", &UnconstrainedEndPoseProblem::getScalarTaskCost);
-    unconstrained_end_pose_problem.def_readonly("Cost", &UnconstrainedEndPoseProblem::Cost);
+    unconstrained_end_pose_problem.def_readonly("cost", &UnconstrainedEndPoseProblem::Cost);
 
     py::class_<EndPoseProblem, std::shared_ptr<EndPoseProblem>, PlanningProblem> end_pose_problem(prob, "EndPoseProblem");
     end_pose_problem.def("update", &EndPoseProblem::Update);
@@ -816,9 +816,9 @@ PYBIND11_MODULE(_pyexotica, module)
     end_pose_problem.def("get_inequality", &EndPoseProblem::getInequality);
     end_pose_problem.def("get_inequality_jacobian", &EndPoseProblem::getInequalityJacobian);
     end_pose_problem.def("get_bounds", &EndPoseProblem::getBounds);
-    end_pose_problem.def_readonly("Cost", &EndPoseProblem::Cost);
-    end_pose_problem.def_readonly("Inequality", &EndPoseProblem::Inequality);
-    end_pose_problem.def_readonly("Equality", &EndPoseProblem::Equality);
+    end_pose_problem.def_readonly("cost", &EndPoseProblem::Cost);
+    end_pose_problem.def_readonly("inequality", &EndPoseProblem::Inequality);
+    end_pose_problem.def_readonly("equality", &EndPoseProblem::Equality);
 
     py::class_<BoundedEndPoseProblem, std::shared_ptr<BoundedEndPoseProblem>, PlanningProblem> bounded_end_pose_problem(prob, "BoundedEndPoseProblem");
     bounded_end_pose_problem.def("update", &BoundedEndPoseProblem::Update);
@@ -837,7 +837,7 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_end_pose_problem.def("get_scalar_jacobian", &BoundedEndPoseProblem::getScalarJacobian);
     bounded_end_pose_problem.def("get_scalar_task_cost", &BoundedEndPoseProblem::getScalarTaskCost);
     bounded_end_pose_problem.def("get_bounds", &BoundedEndPoseProblem::getBounds);
-    bounded_end_pose_problem.def_readonly("Cost", &BoundedEndPoseProblem::Cost);
+    bounded_end_pose_problem.def_readonly("cost", &BoundedEndPoseProblem::Cost);
 
     py::class_<SamplingProblem, std::shared_ptr<SamplingProblem>, PlanningProblem> sampling_problem(prob, "SamplingProblem");
     sampling_problem.def("update", &SamplingProblem::Update);
@@ -847,8 +847,8 @@ PYBIND11_MODULE(_pyexotica, module)
     sampling_problem.def_readonly("N", &SamplingProblem::N);
     sampling_problem.def_readonly("num_tasks", &SamplingProblem::NumTasks);
     sampling_problem.def_readonly("Phi", &SamplingProblem::Phi);
-    sampling_problem.def_readonly("Inequality", &SamplingProblem::Inequality);
-    sampling_problem.def_readonly("Equality", &SamplingProblem::Equality);
+    sampling_problem.def_readonly("inequality", &SamplingProblem::Inequality);
+    sampling_problem.def_readonly("equality", &SamplingProblem::Equality);
     sampling_problem.def("set_goal_eq", &SamplingProblem::setGoalEQ);
     sampling_problem.def("set_rho_eq", &SamplingProblem::setRhoEQ);
     sampling_problem.def("get_goal_eq", &SamplingProblem::getGoalEQ);
@@ -867,8 +867,8 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def_readonly("N", &TimeIndexedSamplingProblem::N);
     time_indexed_sampling_problem.def_readonly("num_tasks", &TimeIndexedSamplingProblem::NumTasks);
     time_indexed_sampling_problem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
-    time_indexed_sampling_problem.def_readonly("Inequality", &TimeIndexedSamplingProblem::Inequality);
-    time_indexed_sampling_problem.def_readonly("Equality", &TimeIndexedSamplingProblem::Equality);
+    time_indexed_sampling_problem.def_readonly("inequality", &TimeIndexedSamplingProblem::Inequality);
+    time_indexed_sampling_problem.def_readonly("equality", &TimeIndexedSamplingProblem::Equality);
     time_indexed_sampling_problem.def("set_goal_eq", &TimeIndexedSamplingProblem::setGoalEQ);
     time_indexed_sampling_problem.def("set_rho_eq", &TimeIndexedSamplingProblem::setRhoEQ);
     time_indexed_sampling_problem.def("get_goal_eq", &TimeIndexedSamplingProblem::getGoalEQ);

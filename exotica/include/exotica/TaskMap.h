@@ -69,7 +69,6 @@ public:
 
     std::vector<KinematicFrameRequest> GetFrames();
 
-    virtual void debug() {}
     std::vector<KinematicSolution> Kinematics = std::vector<KinematicSolution>(1);
     int Id = -1;
     int Start = -1;

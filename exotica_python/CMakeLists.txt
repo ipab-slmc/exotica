@@ -17,7 +17,7 @@ catkin_package(
 )
 
 include_directories(${catkin_INCLUDE_DIRS})
-pybind_add_module(_pyexotica MODULE src/Exotica.cpp)
+pybind_add_module(_pyexotica MODULE src/pyexotica.cpp)
 target_link_libraries(_pyexotica PRIVATE ${catkin_LIBRARIES})
 
 catkin_python_setup()

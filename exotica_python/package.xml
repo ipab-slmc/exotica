@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>exotica_python</name>
-  <version>0.0.0</version>
+  <version>5.0.0</version>
   <description>Python bindings for EXOTica</description>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>

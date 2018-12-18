@@ -70,4 +70,6 @@ if(CATKIN_ENABLE_TESTING)
   add_dependencies(test_problems ${catkin_EXPORTED_TARGETS})
 
   add_rostest(test/python_tests.launch)
+
+  catkin_add_nosetests(test/run_tests.py)
 endif()

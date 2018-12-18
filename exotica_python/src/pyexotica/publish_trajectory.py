@@ -1,47 +1,51 @@
-from __future__ import print_function
+from __future__ import print_function, division
 from time import sleep
 import matplotlib.pyplot as plt
 import signal
 
+__all__ = ["sig_int_handler", "publish_pose", "publish_trajectory",
+           "publish_time_indexed_trajectory", "plot"]
 
-def sigIntHandler(signal, frame):
+
+def sig_int_handler(signal, frame):
     raise KeyboardInterrupt
 
 
-def publishPose(q, problem, t=0.0):
-    problem.getScene().Update(q, t)
-    problem.getScene().getSolver().publishFrames()
+def publish_pose(q, problem, t=0.0):
+    problem.get_scene().update(q, t)
+    problem.get_scene().get_solver().publish_frames()
 
 
-def publishTrajectory(traj, T, problem):
+def publish_trajectory(traj, T, problem):
     if len(traj) == 0:
         print("Trajectory has zero elements")
         raise
-    signal.signal(signal.SIGINT, sigIntHandler)
-    print('Playing back trajectory '+str(T)+'s')
-    dt = float(T)/float(len(traj))
+    signal.signal(signal.SIGINT, sig_int_handler)
+    print('Playing back trajectory ' + str(T) + 's')
+    dt = float(T) / float(len(traj))
     t = 0
     while True:
         try:
-            publishPose(traj[t], problem, float(t)*dt)
+            publish_pose(traj[t], problem, float(t) * dt)
             sleep(dt)
-            t = (t+1) % len(traj)
+            t = (t + 1) % len(traj)
         except KeyboardInterrupt:
             return False
 
-def publishTimeIndexedTrajectory(traj, Ts, problem, once=False):
+
+def publish_time_indexed_trajectory(traj, Ts, problem, once=False):
     if len(traj) == 0:
         print("Trajectory has zero elements")
         raise
-    signal.signal(signal.SIGINT, sigIntHandler)
-    print('Playing back trajectory '+str(len(Ts)) +
-          ' states in '+str(Ts[len(Ts)-1]))
+    signal.signal(signal.SIGINT, sig_int_handler)
+    print('Playing back trajectory ' + str(len(Ts)) +
+          ' states in ' + str(Ts[len(Ts) - 1]))
 
     while True:
         try:
-            for i in range(1, len(Ts)-1):
-                publishPose(traj[i], problem, Ts[i])
-                sleep(Ts[i]-Ts[i-1])
+            for i in range(1, len(Ts) - 1):
+                publish_pose(traj[i], problem, Ts[i])
+                sleep(Ts[i] - Ts[i-1])
             if once:
                 break
         except KeyboardInterrupt:

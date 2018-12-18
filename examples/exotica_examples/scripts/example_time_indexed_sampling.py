@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 
 import pyexotica as exo
-from numpy import array
-from numpy import matrix
 from pyexotica.publish_trajectory import *
 
-exo.Setup.initRos()
-(sol, prob)=exo.Initializers.loadXMLFull('{exotica_examples}/resources/configs/time_indexed_sampling_demo.xml')
-problem = exo.Setup.createProblem(prob)
-solver = exo.Setup.createSolver(sol)
-solver.specifyProblem(problem)
+exo.Setup.init_ros()
+(sol, prob) = exo.Initializers.load_xml_full(
+    '{exotica_examples}/resources/configs/time_indexed_sampling_demo.xml')
+problem = exo.Setup.create_problem(prob)
+solver = exo.Setup.create_solver(sol)
+solver.specify_problem(problem)
 
 solution = solver.solve()
-
-Ts = solution[:,0]
-solution = solution[:,1:]
-#print(Ts)
-#print(solution)
-publishTimeIndexedTrajectory(solution, Ts, problem)
+Ts = solution[:, 0]
+solution = solution[:, 1:]
+# print(Ts)
+# print(solution)
+publish_time_indexed_trajectory(solution, Ts, problem)

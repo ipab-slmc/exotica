@@ -5,21 +5,22 @@ from pyexotica.publish_trajectory import *
 from numpy import array
 import math
 
-def figureEight(t):
+
+def figure_eight(t):
     return array([0.0, math.sin(t * 2.0 * math.pi * 0.5) * 0.1, math.sin(t * math.pi * 0.5) * 0.2, 0.0, 0.0, 0.0])
 
-solver=exo.Setup.loadSolver('{exotica_examples}/resources/configs/aico_solver_demo_eight.xml')
-problem = solver.getProblem()
 
-for t in range(0,problem.T):
-    if t<problem.T/5:
-        problem.setRho('Frame',0.0,t)
+solver = exo.Setup.load_solver(
+    '{exotica_examples}/resources/configs/aico_solver_demo_eight.xml')
+problem = solver.get_problem()
+
+for t in range(0, problem.T):
+    if t < problem.T/5:
+        problem.set_rho('Frame', 0.0, t)
     else:
-        problem.setRho('Frame',1e5,t)
-        problem.setGoal('Frame',figureEight(t*problem.tau),t)
+        problem.set_rho('Frame', 1e5, t)
+        problem.set_goal('Frame', figure_eight(t*problem.tau), t)
 
 solution = solver.solve()
 
 plot(solution)
-
-

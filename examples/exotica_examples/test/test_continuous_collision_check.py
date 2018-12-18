@@ -32,9 +32,9 @@ class TestClass(unittest.TestCase):
             print("Testing", urdf)
             
             initializer = getProblemInitializer(collisionScene, urdf)
-            prob = exo.Setup.createProblem(initializer)
+            prob = exo.Setup.create_problem(initializer)
             prob.update(np.zeros(prob.N,))
-            scene = prob.getScene()
+            scene = prob.get_scene()
             cs = scene.getCollisionScene()
 
             # Should collide at -2

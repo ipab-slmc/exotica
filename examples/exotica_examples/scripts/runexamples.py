@@ -22,7 +22,7 @@ roslaunch = ['CppCore',
              'PythonPlanIK',
              'PythonPlanBayesianIK',
              'PythonPlanOMPL',
-            ]
+             ]
 
 rosrun = ['example.py',
           'example_aico_noros.py',
@@ -31,13 +31,14 @@ rosrun = ['example.py',
           'example_ompl_noros.py',
           'example.py',
           'IK',
-         ]
+          ]
 
 process = None
 isStopping = False
 results = {}
 
-def sigIntHandler(sig, frame):
+
+def sig_int_handler(sig, frame):
     global isStopping
     global process
     if not isStopping and process is not None:
@@ -46,13 +47,15 @@ def sigIntHandler(sig, frame):
     else:
         raise KeyboardInterrupt
 
-signal.signal(signal.SIGINT, sigIntHandler)
+
+signal.signal(signal.SIGINT, sig_int_handler)
 
 for example in rosrun:
     print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\nRunning '+example+'\n')
     isStopping = False
-    process=subprocess.Popen(['rosrun', 'exotica_examples', example],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    while process.poll()==None:
+    process = subprocess.Popen(
+        ['rosrun', 'exotica_examples', example], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    while process.poll() == None:
         print(process.stdout.readline())
         sys.stdout.flush()
     print(process.stderr.read())
@@ -61,8 +64,9 @@ for example in rosrun:
 for example in roslaunch:
     print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\nRunning '+example+'\n')
     isStopping = False
-    process=subprocess.Popen(['roslaunch', 'exotica_examples', example+'.launch'],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    while process.poll()==None:
+    process = subprocess.Popen(['roslaunch', 'exotica_examples', example +
+                                '.launch'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    while process.poll() == None:
         print(process.stdout.readline())
         sys.stdout.flush()
     print(process.stderr.read())

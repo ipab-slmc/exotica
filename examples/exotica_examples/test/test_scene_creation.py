@@ -8,22 +8,22 @@ import unittest
 
 def testScene(problemName, cleanScene=False):
     print('Loading '+problemName)
-    (sol, prob)=exo.Initializers.loadXMLFull('{exotica_examples}/test/resources/test_scene.xml', problem_name=problemName)
-    problem = exo.Setup.createProblem(prob)
-    solver = exo.Setup.createSolver(sol)
-    solver.specifyProblem(problem)
+    (sol, prob)=exo.Initializers.load_xml_full('{exotica_examples}/test/resources/test_scene.xml', problem_name=problemName)
+    problem = exo.Setup.create_problem(prob)
+    solver = exo.Setup.create_solver(sol)
+    solver.specify_problem(problem)
 
     print('Solving original scene ...')
-    problem.update(problem.startState)
+    problem.update(problem.start_state)
 
     print('Updating the scene ...')
     if cleanScene:
-        problem.getScene().cleanScene()
-        problem.getScene().loadSceneFile('{exotica_examples}/resources/scenes/example_moving_obstacle.scene')
-    problem.getScene().loadSceneFile('{exotica_examples}/resources/scenes/example_distance.scene')
+        problem.get_scene().cleanScene()
+        problem.get_scene().loadSceneFile('{exotica_examples}/resources/scenes/example_moving_obstacle.scene')
+    problem.get_scene().loadSceneFile('{exotica_examples}/resources/scenes/example_distance.scene')
     print('Solving with updated scene ...')
 
-    problem.update(problem.startState)
+    problem.update(problem.start_state)
     print('Done')
 
 class TestClass(unittest.TestCase):

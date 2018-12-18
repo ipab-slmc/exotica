@@ -10,11 +10,11 @@ import unittest
 class TestClass(unittest.TestCase):
     def test_collsion(self):
         # Latest FCL
-        (_, ik_prob) = exo.Initializers.loadXMLFull(
+        (_, ik_prob) = exo.Initializers.load_xml_full(
             '{exotica_examples}/test/resources/test_valkyrie_collisionscene_fcl_latest.xml')
-        ik_problem = exo.Setup.createProblem(ik_prob)
+        ik_problem = exo.Setup.create_problem(ik_prob)
         ik_problem.update(np.zeros(ik_problem.N,))
-        ik_scene = ik_problem.getScene()
+        ik_scene = ik_problem.get_scene()
 
         # Check number of collision robot links
         assert (len(ik_scene.getCollisionRobotLinks()) == 84)

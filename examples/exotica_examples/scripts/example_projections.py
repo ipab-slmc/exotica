@@ -2,13 +2,12 @@
 
 import pyexotica as exo
 import exotica_ompl_solver_py as ompl
-from numpy import array
-from numpy import matrix
-from pyexotica.publish_trajectory import publishTrajectory
+from pyexotica.publish_trajectory import publish_trajectory
 
-exo.Setup.initRos()
-solver = exo.Setup.loadSolver('{exotica_examples}/resources/configs/example_projections.xml')
+exo.Setup.init_ros()
+solver = exo.Setup.load_solver(
+    '{exotica_examples}/resources/configs/example_projections.xml')
 
 solution = solver.solve()
 
-publishTrajectory(solution, 3.0, solver.getProblem())
+publish_trajectory(solution, 3.0, solver.get_problem())

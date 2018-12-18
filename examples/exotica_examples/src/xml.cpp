@@ -89,7 +89,7 @@ void run()
         q = solution.row(0);
 
         my_problem->Update(q);
-        my_problem->getScene()->getSolver().publishFrames();
+        my_problem->getScene()->getKinematicTree().publishFrames();
 
         ros::spinOnce();
         loop_rate.sleep();

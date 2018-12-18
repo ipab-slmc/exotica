@@ -310,8 +310,9 @@ void KinematicTree::resetModel()
     // Remove all CollisionShapes
     if (Server::isRos())
     {
-        marker_array_msg_.markers.emplace_back();
-        marker_array_msg_.markers.end()->action = 3;  // visualization_msgs::Marker::DELETEALL; // NB: enum only defined in ROS-J and newer, functionality still there
+        visualization_msgs::Marker mrk;
+        mrk.action = 3;  // visualization_msgs::Marker::DELETEALL; // NB: enum only defined in ROS-J and newer, functionality still there
+        marker_array_msg_.markers.push_back(mrk);
     }
 }
 

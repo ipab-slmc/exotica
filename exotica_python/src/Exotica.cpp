@@ -15,7 +15,7 @@ bool PyInt_Check(PyObject* value_py) { return PyLong_Check(value_py); }
 long PyInt_AsLong(PyObject* value_py) { return PyLong_AsLong(value_py); }
 #endif
 
-bool isPyString(PyObject* value_py)
+bool IsPyString(PyObject* value_py)
 {
 #ifndef PY_OLDSTANDARD
     return PyUnicode_Check(value_py);
@@ -24,7 +24,7 @@ bool isPyString(PyObject* value_py)
 #endif
 }
 
-std::string pyAsString(PyObject* value_py)
+std::string PyAsStdString(PyObject* value_py)
 {
 #ifndef PY_OLDSTANDARD
     PyObject* tmp = PyUnicode_AsASCIIString(value_py);
@@ -36,7 +36,7 @@ std::string pyAsString(PyObject* value_py)
 #endif
 }
 
-PyObject* stringAsPy(std::string value)
+PyObject* StdStringAsPy(std::string value)
 {
 #ifndef PY_OLDSTANDARD
     return PyUnicode_DecodeASCII(value.c_str(), value.size(), "");
@@ -50,7 +50,7 @@ namespace py = pybind11;
 
 std::map<std::string, Initializer> knownInitializers;
 
-PyObject* createStringIOObject()
+PyObject* CreateStringIOObject()
 {
 #if PY_MAJOR_VERSION <= 2
     PyObject* module = PyImport_ImportModule("StringIO");
@@ -83,7 +83,7 @@ PyObject* createStringIOObject()
                                                                                 \
         bool load(handle src, bool)                                             \
         {                                                                       \
-            PyObject* stringio = createStringIOObject();                        \
+            PyObject* stringio = CreateStringIOObject();                        \
             if (!stringio) throw_pretty("Can't create StringIO instance.");     \
             PyObject* result =                                                  \
                 PyObject_CallMethod(src.ptr(), "serialize", "O", stringio);     \
@@ -119,65 +119,33 @@ PyObject* createStringIOObject()
 ROS_MESSAGE_WRAPPER(moveit_msgs::PlanningScene);
 ROS_MESSAGE_WRAPPER(moveit_msgs::PlanningSceneWorld);
 
-std::string version()
-{
-    return std::string(exotica::Version);
-}
-
-std::string branch()
-{
-    return std::string(exotica::Branch);
-}
-
-std::shared_ptr<exotica::MotionSolver> createSolver(const Initializer& init)
-{
-    return Setup::createSolver(init);
-}
-
-std::shared_ptr<exotica::TaskMap> createMap(const Initializer& init)
-{
-    return Setup::createMap(init);
-}
-
-std::shared_ptr<exotica::PlanningProblem> createProblem(const Initializer& init)
-{
-    return Setup::createProblem(init);
-}
-
-Initializer createInitializer(const Initializer& init)
+Initializer CreateInitializer(const Initializer& init)
 {
     return Initializer(init);
 }
 
-std::pair<Initializer, Initializer> loadFromXML(std::string file_name, const std::string& solver_name = "", const std::string& problem_name = "", bool parsePathAsXML = false)
+std::pair<Initializer, Initializer> LoadFromXML(std::string file_name, const std::string& solver_name = "", const std::string& problem_name = "", bool parsePathAsXML = false)
 {
     Initializer solver, problem;
     XMLLoader::load(file_name, solver, problem, solver_name, problem_name, parsePathAsXML);
     return std::pair<Initializer, Initializer>(solver, problem);
 }
 
-void addInitializers(py::module& module)
+void AddInitializers(py::module& module)
 {
     py::module inits = module.def_submodule("Initializers", "Initializers for core EXOTica classes.");
-    inits.def("Initializer", &createInitializer);
+    inits.def("Initializer", &CreateInitializer);
     std::vector<Initializer> initializers = Setup::getInitializers();
     for (Initializer& i : initializers)
     {
         std::string full_name = i.getName();
         std::string name = full_name.substr(8);
-        knownInitializers[full_name] = createInitializer(i);
-        inits.def((name + "Initializer").c_str(), [i]() { return createInitializer(i); }, (name + "Initializer constructor.").c_str());
+        knownInitializers[full_name] = CreateInitializer(i);
+        inits.def((name + "Initializer").c_str(), [i]() { return CreateInitializer(i); }, (name + "Initializer constructor.").c_str());
     }
 
     inits.def("loadXML", (Initializer(*)(std::string, bool)) & XMLLoader::load, "Loads initializer from XML", py::arg("xml"), py::arg("parseAsXMLString") = false);
-    inits.def("loadXMLFull", &loadFromXML, "Loads initializer from XML", py::arg("xml"), py::arg("solver_name") = std::string(""), py::arg("problem_name") = std::string(""), py::arg("parseAsXMLString") = false);
-}
-
-Eigen::MatrixXd Solve(std::shared_ptr<MotionSolver> sol)
-{
-    Eigen::MatrixXd ret;
-    sol->Solve(ret);
-    return ret;
+    inits.def("loadXMLFull", &LoadFromXML, "Loads initializer from XML", py::arg("xml"), py::arg("solver_name") = std::string(""), py::arg("problem_name") = std::string(""), py::arg("parseAsXMLString") = false);
 }
 
 namespace pybind11
@@ -194,14 +162,14 @@ public:
     {
         if (target.getType() == "std::string" || target.getType() == getTypeName(typeid(std::string)))
         {
-            target.set(pyAsString(value_py));
+            target.set(PyAsStdString(value_py));
             return true;
         }
         else if (target.getType() == "int")
         {
-            if (isPyString(value_py))
+            if (IsPyString(value_py))
             {
-                target.set(parseInt(pyAsString(value_py)));
+                target.set(parseInt(PyAsStdString(value_py)));
                 return true;
             }
             else if (PyInt_Check(value_py))
@@ -212,9 +180,9 @@ public:
         }
         else if (target.getType() == "long")
         {
-            if (isPyString(value_py))
+            if (IsPyString(value_py))
             {
-                target.set((long)parseInt(pyAsString(value_py)));
+                target.set((long)parseInt(PyAsStdString(value_py)));
                 return true;
             }
             else if (PyInt_Check(value_py))
@@ -225,9 +193,9 @@ public:
         }
         else if (target.getType() == "double")
         {
-            if (isPyString(value_py))
+            if (IsPyString(value_py))
             {
-                target.set(parseDouble(pyAsString(value_py)));
+                target.set(parseDouble(PyAsStdString(value_py)));
                 return true;
             }
             else if (PyFloat_Check(value_py))
@@ -238,9 +206,9 @@ public:
         }
         else if (target.getType() == "Eigen::Matrix<double, -1, 1, 0, -1, 1>")
         {
-            if (isPyString(value_py))
+            if (IsPyString(value_py))
             {
-                target.set(parseVector<double, Eigen::Dynamic>(pyAsString(value_py)));
+                target.set(parseVector<double, Eigen::Dynamic>(PyAsStdString(value_py)));
             }
             else
             {
@@ -250,9 +218,9 @@ public:
         }
         else if (target.getType() == "Eigen::Matrix<double, 3, 1, 0, 3, 1>")
         {
-            if (isPyString(value_py))
+            if (IsPyString(value_py))
             {
-                target.set(parseVector<double, 3>(pyAsString(value_py)));
+                target.set(parseVector<double, 3>(PyAsStdString(value_py)));
             }
             else
             {
@@ -262,9 +230,9 @@ public:
         }
         else if (target.getType() == getTypeName(typeid(std::vector<int>)))
         {
-            if (isPyString(value_py))
+            if (IsPyString(value_py))
             {
-                target.set(parseIntList(pyAsString(value_py)));
+                target.set(parseIntList(PyAsStdString(value_py)));
             }
             else
             {
@@ -274,9 +242,9 @@ public:
         }
         else if (target.getType() == getTypeName(typeid(std::vector<std::string>)))
         {
-            if (isPyString(value_py))
+            if (IsPyString(value_py))
             {
-                target.set(parseList(pyAsString(value_py)));
+                target.set(parseList(PyAsStdString(value_py)));
             }
             else
             {
@@ -286,9 +254,9 @@ public:
         }
         else if (target.getType() == "bool")
         {
-            if (isPyString(value_py))
+            if (IsPyString(value_py))
             {
-                target.set(parseBool(pyAsString(value_py)));
+                target.set(parseBool(PyAsStdString(value_py)));
                 return true;
             }
             else if (PyBool_Check(value_py))
@@ -357,8 +325,8 @@ public:
         if (sz < 1 || sz > 2) return false;
 
         PyObject* name_py = PyTuple_GetItem(source, 0);
-        if (!isPyString(name_py)) return false;
-        std::string name = pyAsString(name_py);
+        if (!IsPyString(name_py)) return false;
+        std::string name = PyAsStdString(name_py);
 
         const auto& it = knownInitializers.find(name);
         if (it == knownInitializers.end())
@@ -378,10 +346,10 @@ public:
 
             while (PyDict_Next(dict, &pos, &key, &value_py))
             {
-                std::string key_str = pyAsString(key);
+                std::string key_str = PyAsStdString(key);
                 if (ret.properties.find(key_str) == ret.properties.end())
                 {
-                    ret.addProperty(Property(key_str, false, boost::any(pyAsString(value_py))));
+                    ret.addProperty(Property(key_str, false, boost::any(PyAsStdString(value_py))));
                 }
                 else
                 {
@@ -408,7 +376,7 @@ public:
         {
             addPropertyToDict(dict, prop.first, prop.second);
         }
-        PyObject* name = stringAsPy(src.getName());
+        PyObject* name = StdStringAsPy(src.getName());
         PyObject* tup = PyTuple_Pack(2, name, dict);
         Py_DECREF(dict);
         Py_DECREF(name);
@@ -496,9 +464,9 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("getProblems", &Setup::getProblems, "Returns a list of available problems.");
     setup.def_static("getMaps", &Setup::getMaps, "Returns a list of available task maps.");
     setup.def_static("getCollisionScenes", &Setup::getCollisionScenes, "Returns a list of available collision scene plug-ins.");
-    setup.def_static("createSolver", &createSolver, py::return_value_policy::take_ownership);    // "Creates an instance of the solver identified by name parameter.", py::arg("solverType"), py::arg("prependExoticaNamespace"));
-    setup.def_static("createProblem", &createProblem, py::return_value_policy::take_ownership);  // "Creates an instance of the problem identified by name parameter.", py::arg("problemType"), py::arg("prependExoticaNamespace"));
-    setup.def_static("createMap", &createMap, py::return_value_policy::take_ownership);          // "Creates an instance of the task map identified by name parameter.", py::arg("taskmapType"), py::arg("prependExoticaNamespace"));
+    setup.def_static("createSolver", [](const Initializer& init) { return Setup::createSolver(init); }, py::return_value_policy::take_ownership);    // "Creates an instance of the solver identified by name parameter.", py::arg("solverType"), py::arg("prependExoticaNamespace"));
+    setup.def_static("createProblem", [](const Initializer& init) { return Setup::createProblem(init); }, py::return_value_policy::take_ownership);  // "Creates an instance of the problem identified by name parameter.", py::arg("problemType"), py::arg("prependExoticaNamespace"));
+    setup.def_static("createMap", [](const Initializer& init) { return Setup::createMap(init); }, py::return_value_policy::take_ownership);          // "Creates an instance of the task map identified by name parameter.", py::arg("taskmapType"), py::arg("prependExoticaNamespace"));
     setup.def_static("printSupportedClasses", &Setup::printSupportedClasses, "Print a list of available plug-ins sorted by class.");
     setup.def_static("getInitializers", &Setup::getInitializers, py::return_value_policy::copy, "Returns a list of available initializers with all available parameters/arguments.");
     setup.def_static("getPackagePath", &ros::package::getPath, "ROS package path resolution.");
@@ -579,27 +547,27 @@ PYBIND11_MODULE(_pyexotica, module)
         .value("Planar", BASE_TYPE::PLANAR)
         .export_values();
 
-    py::class_<KDL::Frame> kdlFrame(module, "KDLFrame");
-    kdlFrame.def(py::init());
-    kdlFrame.def(py::init([](Eigen::MatrixXd other) { return getFrameFromMatrix(other); }));
-    kdlFrame.def(py::init([](Eigen::VectorXd other) { return getFrame(other); }));
-    kdlFrame.def(py::init([](const KDL::Frame& other) { return KDL::Frame(other); }));
-    kdlFrame.def("__repr__", [](KDL::Frame* me) { return "KDL::Frame " + toString(*me); });
-    kdlFrame.def("getRPY", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::RPY); });
-    kdlFrame.def("getZYZ", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::ZYZ); });
-    kdlFrame.def("getZYX", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::ZYX); });
-    kdlFrame.def("getAngleAxis", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::ANGLE_AXIS); });
-    kdlFrame.def("getQuaternion", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::QUATERNION); });
-    kdlFrame.def("getTranslation", [](KDL::Frame* me) { Eigen::Vector3d tmp; for (int i = 0; i < 3; i++) { tmp[i] = me->p.data[i]; } return tmp; });
-    kdlFrame.def("getTranslationAndRPY", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::RPY); });
-    kdlFrame.def("getTranslationAndZYZ", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYZ); });
-    kdlFrame.def("getTranslationAndZYX", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYX); });
-    kdlFrame.def("getTranslationAndAngleAxis", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ANGLE_AXIS); });
-    kdlFrame.def("getTranslationAndQuaternion", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::QUATERNION); });
-    kdlFrame.def("getFrame", [](KDL::Frame* me) { return getFrame(*me); });
-    kdlFrame.def("inverse", (KDL::Frame(KDL::Frame::*)() const) & KDL::Frame::Inverse);
-    kdlFrame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());
-    kdlFrame.def_readwrite("p", &KDL::Frame::p);
+    py::class_<KDL::Frame> kdl_frame(module, "KDLFrame");
+    kdl_frame.def(py::init());
+    kdl_frame.def(py::init([](Eigen::MatrixXd other) { return getFrameFromMatrix(other); }));
+    kdl_frame.def(py::init([](Eigen::VectorXd other) { return getFrame(other); }));
+    kdl_frame.def(py::init([](const KDL::Frame& other) { return KDL::Frame(other); }));
+    kdl_frame.def("__repr__", [](KDL::Frame* me) { return "KDL::Frame " + toString(*me); });
+    kdl_frame.def("getRPY", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::RPY); });
+    kdl_frame.def("getZYZ", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::ZYZ); });
+    kdl_frame.def("getZYX", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::ZYX); });
+    kdl_frame.def("getAngleAxis", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::ANGLE_AXIS); });
+    kdl_frame.def("getQuaternion", [](KDL::Frame* me) { return getRotationAsVector(*me, RotationType::QUATERNION); });
+    kdl_frame.def("getTranslation", [](KDL::Frame* me) { Eigen::Vector3d tmp; for (int i = 0; i < 3; i++) { tmp[i] = me->p.data[i]; } return tmp; });
+    kdl_frame.def("getTranslationAndRPY", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::RPY); });
+    kdl_frame.def("getTranslationAndZYZ", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYZ); });
+    kdl_frame.def("getTranslationAndZYX", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ZYX); });
+    kdl_frame.def("getTranslationAndAngleAxis", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::ANGLE_AXIS); });
+    kdl_frame.def("getTranslationAndQuaternion", [](KDL::Frame* me) { return getFrameAsVector(*me, RotationType::QUATERNION); });
+    kdl_frame.def("getFrame", [](KDL::Frame* me) { return getFrame(*me); });
+    kdl_frame.def("inverse", (KDL::Frame (KDL::Frame::*)() const) & KDL::Frame::Inverse);
+    kdl_frame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());
+    kdl_frame.def_readwrite("p", &KDL::Frame::p);
     py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
     py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
 
@@ -631,333 +599,337 @@ PYBIND11_MODULE(_pyexotica, module)
              py::arg("Ic") = KDL::RotationalInertia::Zero())
         .def_static("Zero", &KDL::RigidBodyInertia::Zero);
 
-    py::class_<TaskMap, std::shared_ptr<TaskMap>, Object> taskMap(module, "TaskMap");
-    taskMap.def_readonly("id", &TaskMap::Id);
-    taskMap.def_readonly("start", &TaskMap::Start);
-    taskMap.def_readonly("length", &TaskMap::Length);
-    taskMap.def_readonly("startJ", &TaskMap::StartJ);
-    taskMap.def_readonly("lengthJ", &TaskMap::LengthJ);
-    taskMap.def("taskSpaceDim", (int (TaskMap::*)()) & TaskMap::taskSpaceDim);
-    taskMap.def("taskSpaceJacobianDim", &TaskMap::taskSpaceJacobianDim);
-    taskMap.def("debug", &TaskMap::debug);
+    py::class_<TaskMap, std::shared_ptr<TaskMap>, Object> task_map(module, "TaskMap");
+    task_map.def_readonly("id", &TaskMap::Id);
+    task_map.def_readonly("start", &TaskMap::Start);
+    task_map.def_readonly("length", &TaskMap::Length);
+    task_map.def_readonly("startJ", &TaskMap::StartJ);
+    task_map.def_readonly("lengthJ", &TaskMap::LengthJ);
+    task_map.def("taskSpaceDim", (int (TaskMap::*)()) & TaskMap::taskSpaceDim);
+    task_map.def("taskSpaceJacobianDim", &TaskMap::taskSpaceJacobianDim);
+    task_map.def("debug", &TaskMap::debug);
 
-    py::class_<TimeIndexedTask, std::shared_ptr<TimeIndexedTask>> timeIndexedTask(module, "TimeIndexedTask");
-    timeIndexedTask.def_readonly("PhiN", &TimeIndexedTask::PhiN);
-    timeIndexedTask.def_readonly("JN", &TimeIndexedTask::JN);
-    timeIndexedTask.def_readonly("NumTasks", &TimeIndexedTask::NumTasks);
-    timeIndexedTask.def_readonly("y", &TimeIndexedTask::y);
-    timeIndexedTask.def_readonly("ydiff", &TimeIndexedTask::ydiff);
-    timeIndexedTask.def_readonly("Phi", &TimeIndexedTask::Phi);
-    // timeIndexedTask.def_readonly("H", &TimeIndexedTask::H);
-    timeIndexedTask.def_readonly("J", &TimeIndexedTask::J);
-    timeIndexedTask.def_readonly("S", &TimeIndexedTask::S);
-    timeIndexedTask.def_readonly("T", &TimeIndexedTask::T);
-    timeIndexedTask.def_readonly("Tasks", &TimeIndexedTask::Tasks);
-    timeIndexedTask.def_readonly("TaskMaps", &TimeIndexedTask::TaskMaps);
+    py::class_<TimeIndexedTask, std::shared_ptr<TimeIndexedTask>> time_indexed_task(module, "TimeIndexedTask");
+    time_indexed_task.def_readonly("PhiN", &TimeIndexedTask::PhiN);
+    time_indexed_task.def_readonly("JN", &TimeIndexedTask::JN);
+    time_indexed_task.def_readonly("NumTasks", &TimeIndexedTask::NumTasks);
+    time_indexed_task.def_readonly("y", &TimeIndexedTask::y);
+    time_indexed_task.def_readonly("ydiff", &TimeIndexedTask::ydiff);
+    time_indexed_task.def_readonly("Phi", &TimeIndexedTask::Phi);
+    // time_indexed_task.def_readonly("H", &TimeIndexedTask::H);
+    time_indexed_task.def_readonly("J", &TimeIndexedTask::J);
+    time_indexed_task.def_readonly("S", &TimeIndexedTask::S);
+    time_indexed_task.def_readonly("T", &TimeIndexedTask::T);
+    time_indexed_task.def_readonly("Tasks", &TimeIndexedTask::Tasks);
+    time_indexed_task.def_readonly("TaskMaps", &TimeIndexedTask::TaskMaps);
 
-    py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>> endPoseTask(module, "EndPoseTask");
-    endPoseTask.def_readonly("PhiN", &EndPoseTask::PhiN);
-    endPoseTask.def_readonly("JN", &EndPoseTask::JN);
-    endPoseTask.def_readonly("NumTasks", &EndPoseTask::NumTasks);
-    endPoseTask.def_readonly("y", &EndPoseTask::y);
-    endPoseTask.def_readonly("ydiff", &EndPoseTask::ydiff);
-    endPoseTask.def_readonly("Phi", &EndPoseTask::Phi);
-    // endPoseTask.def_readonly("H", &EndPoseTask::H);
-    endPoseTask.def_readonly("J", &EndPoseTask::J);
-    endPoseTask.def_readonly("S", &EndPoseTask::S);
-    endPoseTask.def_readonly("Tasks", &EndPoseTask::Tasks);
-    endPoseTask.def_readonly("TaskMaps", &EndPoseTask::TaskMaps);
+    py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>> end_pose_task(module, "EndPoseTask");
+    end_pose_task.def_readonly("PhiN", &EndPoseTask::PhiN);
+    end_pose_task.def_readonly("JN", &EndPoseTask::JN);
+    end_pose_task.def_readonly("NumTasks", &EndPoseTask::NumTasks);
+    end_pose_task.def_readonly("y", &EndPoseTask::y);
+    end_pose_task.def_readonly("ydiff", &EndPoseTask::ydiff);
+    end_pose_task.def_readonly("Phi", &EndPoseTask::Phi);
+    // end_pose_task.def_readonly("H", &EndPoseTask::H);
+    end_pose_task.def_readonly("J", &EndPoseTask::J);
+    end_pose_task.def_readonly("S", &EndPoseTask::S);
+    end_pose_task.def_readonly("Tasks", &EndPoseTask::Tasks);
+    end_pose_task.def_readonly("TaskMaps", &EndPoseTask::TaskMaps);
 
-    py::class_<SamplingTask, std::shared_ptr<SamplingTask>> samplingTask(module, "SamplingTask");
-    samplingTask.def_readonly("PhiN", &SamplingTask::PhiN);
-    samplingTask.def_readonly("JN", &SamplingTask::JN);
-    samplingTask.def_readonly("NumTasks", &SamplingTask::NumTasks);
-    samplingTask.def_readonly("y", &SamplingTask::y);
-    samplingTask.def_readonly("ydiff", &SamplingTask::ydiff);
-    samplingTask.def_readonly("Phi", &SamplingTask::Phi);
-    samplingTask.def_readonly("S", &SamplingTask::S);
-    samplingTask.def_readonly("Tasks", &SamplingTask::Tasks);
-    samplingTask.def_readonly("TaskMaps", &SamplingTask::TaskMaps);
+    py::class_<SamplingTask, std::shared_ptr<SamplingTask>> sampling_task(module, "SamplingTask");
+    sampling_task.def_readonly("PhiN", &SamplingTask::PhiN);
+    sampling_task.def_readonly("JN", &SamplingTask::JN);
+    sampling_task.def_readonly("NumTasks", &SamplingTask::NumTasks);
+    sampling_task.def_readonly("y", &SamplingTask::y);
+    sampling_task.def_readonly("ydiff", &SamplingTask::ydiff);
+    sampling_task.def_readonly("Phi", &SamplingTask::Phi);
+    sampling_task.def_readonly("S", &SamplingTask::S);
+    sampling_task.def_readonly("Tasks", &SamplingTask::Tasks);
+    sampling_task.def_readonly("TaskMaps", &SamplingTask::TaskMaps);
 
-    py::class_<TaskSpaceVector, std::shared_ptr<TaskSpaceVector>> taskSpaceVector(module, "TaskSpaceVector");
-    taskSpaceVector.def("setZero", &TaskSpaceVector::setZero);
-    taskSpaceVector.def_readonly("data", &TaskSpaceVector::data);
-    taskSpaceVector.def("__sub__", &TaskSpaceVector::operator-, py::is_operator());
-    taskSpaceVector.def("__repr__", [](TaskSpaceVector* instance) { return ((std::ostringstream&)(std::ostringstream("") << "TaskSpaceVector (" << instance->data.transpose() << ")")).str(); });
+    py::class_<TaskSpaceVector, std::shared_ptr<TaskSpaceVector>> task_space_vector(module, "TaskSpaceVector");
+    task_space_vector.def("setZero", &TaskSpaceVector::setZero);
+    task_space_vector.def_readonly("data", &TaskSpaceVector::data);
+    task_space_vector.def("__sub__", &TaskSpaceVector::operator-, py::is_operator());
+    task_space_vector.def("__repr__", [](TaskSpaceVector* instance) { return ((std::ostringstream&)(std::ostringstream("") << "TaskSpaceVector (" << instance->data.transpose() << ")")).str(); });
 
-    py::class_<MotionSolver, std::shared_ptr<MotionSolver>, Object> motionSolver(module, "MotionSolver");
-    motionSolver.def_property("maxIterations", &MotionSolver::getNumberOfMaxIterations, &MotionSolver::setNumberOfMaxIterations);
-    motionSolver.def("getPlanningTime", &MotionSolver::getPlanningTime);
-    motionSolver.def("specifyProblem", &MotionSolver::specifyProblem, "Assign problem to the solver", py::arg("planningProblem"));
-    motionSolver.def(
-        "solve", [](std::shared_ptr<MotionSolver> sol) { return Solve(sol); },
+    py::class_<MotionSolver, std::shared_ptr<MotionSolver>, Object> motion_solver(module, "MotionSolver");
+    motion_solver.def_property("maxIterations", &MotionSolver::getNumberOfMaxIterations, &MotionSolver::setNumberOfMaxIterations);
+    motion_solver.def("getPlanningTime", &MotionSolver::getPlanningTime);
+    motion_solver.def("specifyProblem", &MotionSolver::specifyProblem, "Assign problem to the solver", py::arg("planning_problem"));
+    motion_solver.def(
+        "solve", [](std::shared_ptr<MotionSolver> sol) {
+            Eigen::MatrixXd ret;
+            sol->Solve(ret);
+            return ret;
+        },
         "Solve the problem");
-    motionSolver.def("getProblem", &MotionSolver::getProblem, py::return_value_policy::reference_internal);
+    motion_solver.def("getProblem", &MotionSolver::getProblem, py::return_value_policy::reference_internal);
 
-    py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object> planningProblem(module, "PlanningProblem");
-    planningProblem.def("getTasks", &PlanningProblem::getTasks, py::return_value_policy::reference_internal);
-    planningProblem.def("getTaskMaps", &PlanningProblem::getTaskMaps, py::return_value_policy::reference_internal);
-    planningProblem.def("getScene", &PlanningProblem::getScene, py::return_value_policy::reference_internal);
-    planningProblem.def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend") = std::string(""));
-    planningProblem.def_property("startState", &PlanningProblem::getStartState, &PlanningProblem::setStartState);
-    planningProblem.def_property("startTime", &PlanningProblem::getStartTime, &PlanningProblem::setStartTime);
-    planningProblem.def("getNumberOfProblemUpdates", &PlanningProblem::getNumberOfProblemUpdates);
-    planningProblem.def("resetNumberOfProblemUpdates", &PlanningProblem::resetNumberOfProblemUpdates);
-    planningProblem.def("getCostEvolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)()) & PlanningProblem::getCostEvolution);
-    planningProblem.def("isValid", &PlanningProblem::isValid);
+    py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object> planning_problem(module, "PlanningProblem");
+    planning_problem.def("getTasks", &PlanningProblem::getTasks, py::return_value_policy::reference_internal);
+    planning_problem.def("getTaskMaps", &PlanningProblem::getTaskMaps, py::return_value_policy::reference_internal);
+    planning_problem.def("getScene", &PlanningProblem::getScene, py::return_value_policy::reference_internal);
+    planning_problem.def("__repr__", &PlanningProblem::print, "String representation of the object", py::arg("prepend") = std::string(""));
+    planning_problem.def_property("startState", &PlanningProblem::getStartState, &PlanningProblem::setStartState);
+    planning_problem.def_property("startTime", &PlanningProblem::getStartTime, &PlanningProblem::setStartTime);
+    planning_problem.def("getNumberOfProblemUpdates", &PlanningProblem::getNumberOfProblemUpdates);
+    planning_problem.def("resetNumberOfProblemUpdates", &PlanningProblem::resetNumberOfProblemUpdates);
+    planning_problem.def("getCostEvolution", (std::pair<std::vector<double>, std::vector<double>> (PlanningProblem::*)()) & PlanningProblem::getCostEvolution);
+    planning_problem.def("isValid", &PlanningProblem::isValid);
 
     // Problem types
     py::module prob = module.def_submodule("Problems", "Problem types");
 
-    py::class_<UnconstrainedTimeIndexedProblem, std::shared_ptr<UnconstrainedTimeIndexedProblem>, PlanningProblem> unconstrainedTimeIndexedProblem(prob, "UnconstrainedTimeIndexedProblem");
-    unconstrainedTimeIndexedProblem.def("getDuration", &UnconstrainedTimeIndexedProblem::getDuration);
-    unconstrainedTimeIndexedProblem.def("update", &UnconstrainedTimeIndexedProblem::Update);
-    unconstrainedTimeIndexedProblem.def("setGoal", &UnconstrainedTimeIndexedProblem::setGoal);
-    unconstrainedTimeIndexedProblem.def("setRho", &UnconstrainedTimeIndexedProblem::setRho);
-    unconstrainedTimeIndexedProblem.def("getGoal", &UnconstrainedTimeIndexedProblem::getGoal);
-    unconstrainedTimeIndexedProblem.def("getRho", &UnconstrainedTimeIndexedProblem::getRho);
-    unconstrainedTimeIndexedProblem.def_property("tau",
-                                                 &UnconstrainedTimeIndexedProblem::getTau,
-                                                 &UnconstrainedTimeIndexedProblem::setTau);
-    unconstrainedTimeIndexedProblem.def_readwrite("W", &UnconstrainedTimeIndexedProblem::W);
-    unconstrainedTimeIndexedProblem.def_property(
+    py::class_<UnconstrainedTimeIndexedProblem, std::shared_ptr<UnconstrainedTimeIndexedProblem>, PlanningProblem> unconstrained_time_indexed_problem(prob, "UnconstrainedTimeIndexedProblem");
+    unconstrained_time_indexed_problem.def("getDuration", &UnconstrainedTimeIndexedProblem::getDuration);
+    unconstrained_time_indexed_problem.def("update", &UnconstrainedTimeIndexedProblem::Update);
+    unconstrained_time_indexed_problem.def("setGoal", &UnconstrainedTimeIndexedProblem::setGoal);
+    unconstrained_time_indexed_problem.def("setRho", &UnconstrainedTimeIndexedProblem::setRho);
+    unconstrained_time_indexed_problem.def("getGoal", &UnconstrainedTimeIndexedProblem::getGoal);
+    unconstrained_time_indexed_problem.def("getRho", &UnconstrainedTimeIndexedProblem::getRho);
+    unconstrained_time_indexed_problem.def_property("tau",
+                                                    &UnconstrainedTimeIndexedProblem::getTau,
+                                                    &UnconstrainedTimeIndexedProblem::setTau);
+    unconstrained_time_indexed_problem.def_readwrite("W", &UnconstrainedTimeIndexedProblem::W);
+    unconstrained_time_indexed_problem.def_property(
         "InitialTrajectory",
         &UnconstrainedTimeIndexedProblem::getInitialTrajectory,
         &UnconstrainedTimeIndexedProblem::setInitialTrajectory);
-    unconstrainedTimeIndexedProblem.def_property("T",
-                                                 &UnconstrainedTimeIndexedProblem::getT,
-                                                 &UnconstrainedTimeIndexedProblem::setT);
-    unconstrainedTimeIndexedProblem.def_readonly("PhiN", &UnconstrainedTimeIndexedProblem::PhiN);
-    unconstrainedTimeIndexedProblem.def_readonly("JN", &UnconstrainedTimeIndexedProblem::JN);
-    unconstrainedTimeIndexedProblem.def_readonly("N", &UnconstrainedTimeIndexedProblem::N);
-    unconstrainedTimeIndexedProblem.def_readonly("NumTasks", &UnconstrainedTimeIndexedProblem::NumTasks);
-    unconstrainedTimeIndexedProblem.def_readonly("Phi", &UnconstrainedTimeIndexedProblem::Phi);
-    unconstrainedTimeIndexedProblem.def_readonly("J", &UnconstrainedTimeIndexedProblem::J);
-    unconstrainedTimeIndexedProblem.def("getScalarTaskCost", &UnconstrainedTimeIndexedProblem::getScalarTaskCost);
-    unconstrainedTimeIndexedProblem.def("getScalarTaskJacobian", &UnconstrainedTimeIndexedProblem::getScalarTaskJacobian);
-    unconstrainedTimeIndexedProblem.def("getScalarTransitionCost", &UnconstrainedTimeIndexedProblem::getScalarTransitionCost);
-    unconstrainedTimeIndexedProblem.def("getScalarTransitionJacobian", &UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian);
-    unconstrainedTimeIndexedProblem.def_readonly("Cost", &UnconstrainedTimeIndexedProblem::Cost);
-    unconstrainedTimeIndexedProblem.def_property_readonly("KinematicSolutions", &UnconstrainedTimeIndexedProblem::getKinematicSolutions);
+    unconstrained_time_indexed_problem.def_property("T",
+                                                    &UnconstrainedTimeIndexedProblem::getT,
+                                                    &UnconstrainedTimeIndexedProblem::setT);
+    unconstrained_time_indexed_problem.def_readonly("PhiN", &UnconstrainedTimeIndexedProblem::PhiN);
+    unconstrained_time_indexed_problem.def_readonly("JN", &UnconstrainedTimeIndexedProblem::JN);
+    unconstrained_time_indexed_problem.def_readonly("N", &UnconstrainedTimeIndexedProblem::N);
+    unconstrained_time_indexed_problem.def_readonly("NumTasks", &UnconstrainedTimeIndexedProblem::NumTasks);
+    unconstrained_time_indexed_problem.def_readonly("Phi", &UnconstrainedTimeIndexedProblem::Phi);
+    unconstrained_time_indexed_problem.def_readonly("J", &UnconstrainedTimeIndexedProblem::J);
+    unconstrained_time_indexed_problem.def("getScalarTaskCost", &UnconstrainedTimeIndexedProblem::getScalarTaskCost);
+    unconstrained_time_indexed_problem.def("getScalarTaskJacobian", &UnconstrainedTimeIndexedProblem::getScalarTaskJacobian);
+    unconstrained_time_indexed_problem.def("getScalarTransitionCost", &UnconstrainedTimeIndexedProblem::getScalarTransitionCost);
+    unconstrained_time_indexed_problem.def("getScalarTransitionJacobian", &UnconstrainedTimeIndexedProblem::getScalarTransitionJacobian);
+    unconstrained_time_indexed_problem.def_readonly("Cost", &UnconstrainedTimeIndexedProblem::Cost);
+    unconstrained_time_indexed_problem.def_property_readonly("KinematicSolutions", &UnconstrainedTimeIndexedProblem::getKinematicSolutions);
 
-    py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> timeIndexedProblem(prob, "TimeIndexedProblem");
-    timeIndexedProblem.def("getDuration", &TimeIndexedProblem::getDuration);
-    timeIndexedProblem.def("update", &TimeIndexedProblem::Update);
-    timeIndexedProblem.def("setGoal", &TimeIndexedProblem::setGoal);
-    timeIndexedProblem.def("setRho", &TimeIndexedProblem::setRho);
-    timeIndexedProblem.def("getGoal", &TimeIndexedProblem::getGoal);
-    timeIndexedProblem.def("getRho", &TimeIndexedProblem::getRho);
-    timeIndexedProblem.def("setGoalEQ", &TimeIndexedProblem::setGoalEQ);
-    timeIndexedProblem.def("setRhoEQ", &TimeIndexedProblem::setRhoEQ);
-    timeIndexedProblem.def("getGoalEQ", &TimeIndexedProblem::getGoalEQ);
-    timeIndexedProblem.def("getRhoEQ", &TimeIndexedProblem::getRhoEQ);
-    timeIndexedProblem.def("setGoalNEQ", &TimeIndexedProblem::setGoalNEQ);
-    timeIndexedProblem.def("setRhoNEQ", &TimeIndexedProblem::setRhoNEQ);
-    timeIndexedProblem.def("getGoalNEQ", &TimeIndexedProblem::getGoalNEQ);
-    timeIndexedProblem.def("getRhoNEQ", &TimeIndexedProblem::getRhoNEQ);
-    timeIndexedProblem.def_property("tau",
-                                    &TimeIndexedProblem::getTau,
-                                    &TimeIndexedProblem::setTau);
-    timeIndexedProblem.def_property("qDot_max", &TimeIndexedProblem::getJointVelocityLimit, &TimeIndexedProblem::setJointVelocityLimit);
-    timeIndexedProblem.def_readwrite("W", &TimeIndexedProblem::W);
-    timeIndexedProblem.def_property(
+    py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> time_indexed_problem(prob, "TimeIndexedProblem");
+    time_indexed_problem.def("getDuration", &TimeIndexedProblem::getDuration);
+    time_indexed_problem.def("update", &TimeIndexedProblem::Update);
+    time_indexed_problem.def("setGoal", &TimeIndexedProblem::setGoal);
+    time_indexed_problem.def("setRho", &TimeIndexedProblem::setRho);
+    time_indexed_problem.def("getGoal", &TimeIndexedProblem::getGoal);
+    time_indexed_problem.def("getRho", &TimeIndexedProblem::getRho);
+    time_indexed_problem.def("setGoalEQ", &TimeIndexedProblem::setGoalEQ);
+    time_indexed_problem.def("setRhoEQ", &TimeIndexedProblem::setRhoEQ);
+    time_indexed_problem.def("getGoalEQ", &TimeIndexedProblem::getGoalEQ);
+    time_indexed_problem.def("getRhoEQ", &TimeIndexedProblem::getRhoEQ);
+    time_indexed_problem.def("setGoalNEQ", &TimeIndexedProblem::setGoalNEQ);
+    time_indexed_problem.def("setRhoNEQ", &TimeIndexedProblem::setRhoNEQ);
+    time_indexed_problem.def("getGoalNEQ", &TimeIndexedProblem::getGoalNEQ);
+    time_indexed_problem.def("getRhoNEQ", &TimeIndexedProblem::getRhoNEQ);
+    time_indexed_problem.def_property("tau",
+                                      &TimeIndexedProblem::getTau,
+                                      &TimeIndexedProblem::setTau);
+    time_indexed_problem.def_property("qDot_max", &TimeIndexedProblem::getJointVelocityLimit, &TimeIndexedProblem::setJointVelocityLimit);
+    time_indexed_problem.def_readwrite("W", &TimeIndexedProblem::W);
+    time_indexed_problem.def_property(
         "InitialTrajectory",
         &TimeIndexedProblem::getInitialTrajectory,
         &TimeIndexedProblem::setInitialTrajectory);
-    timeIndexedProblem.def_property("T",
-                                    &TimeIndexedProblem::getT,
-                                    &TimeIndexedProblem::setT);
-    timeIndexedProblem.def_readonly("PhiN", &TimeIndexedProblem::PhiN);
-    timeIndexedProblem.def_readonly("JN", &TimeIndexedProblem::JN);
-    timeIndexedProblem.def_readonly("N", &TimeIndexedProblem::N);
-    timeIndexedProblem.def_readonly("NumTasks", &TimeIndexedProblem::NumTasks);
-    timeIndexedProblem.def_readonly("Phi", &TimeIndexedProblem::Phi);
-    timeIndexedProblem.def_readonly("J", &TimeIndexedProblem::J);
-    timeIndexedProblem.def("getScalarTaskCost", &TimeIndexedProblem::getScalarTaskCost);
-    timeIndexedProblem.def("getScalarTaskJacobian", &TimeIndexedProblem::getScalarTaskJacobian);
-    timeIndexedProblem.def("getScalarTransitionCost", &TimeIndexedProblem::getScalarTransitionCost);
-    timeIndexedProblem.def("getScalarTransitionJacobian", &TimeIndexedProblem::getScalarTransitionJacobian);
-    timeIndexedProblem.def("getEquality", &TimeIndexedProblem::getEquality);
-    timeIndexedProblem.def("getEqualityJacobian", &TimeIndexedProblem::getEqualityJacobian);
-    timeIndexedProblem.def("getInequality", &TimeIndexedProblem::getInequality);
-    timeIndexedProblem.def("getInequalityJacobian", &TimeIndexedProblem::getInequalityJacobian);
-    timeIndexedProblem.def("getBounds", &TimeIndexedProblem::getBounds);
-    timeIndexedProblem.def_readonly("Cost", &TimeIndexedProblem::Cost);
-    timeIndexedProblem.def_readonly("Inequality", &TimeIndexedProblem::Inequality);
-    timeIndexedProblem.def_readonly("Equality", &TimeIndexedProblem::Equality);
+    time_indexed_problem.def_property("T",
+                                      &TimeIndexedProblem::getT,
+                                      &TimeIndexedProblem::setT);
+    time_indexed_problem.def_readonly("PhiN", &TimeIndexedProblem::PhiN);
+    time_indexed_problem.def_readonly("JN", &TimeIndexedProblem::JN);
+    time_indexed_problem.def_readonly("N", &TimeIndexedProblem::N);
+    time_indexed_problem.def_readonly("NumTasks", &TimeIndexedProblem::NumTasks);
+    time_indexed_problem.def_readonly("Phi", &TimeIndexedProblem::Phi);
+    time_indexed_problem.def_readonly("J", &TimeIndexedProblem::J);
+    time_indexed_problem.def("getScalarTaskCost", &TimeIndexedProblem::getScalarTaskCost);
+    time_indexed_problem.def("getScalarTaskJacobian", &TimeIndexedProblem::getScalarTaskJacobian);
+    time_indexed_problem.def("getScalarTransitionCost", &TimeIndexedProblem::getScalarTransitionCost);
+    time_indexed_problem.def("getScalarTransitionJacobian", &TimeIndexedProblem::getScalarTransitionJacobian);
+    time_indexed_problem.def("getEquality", &TimeIndexedProblem::getEquality);
+    time_indexed_problem.def("getEqualityJacobian", &TimeIndexedProblem::getEqualityJacobian);
+    time_indexed_problem.def("getInequality", &TimeIndexedProblem::getInequality);
+    time_indexed_problem.def("getInequalityJacobian", &TimeIndexedProblem::getInequalityJacobian);
+    time_indexed_problem.def("getBounds", &TimeIndexedProblem::getBounds);
+    time_indexed_problem.def_readonly("Cost", &TimeIndexedProblem::Cost);
+    time_indexed_problem.def_readonly("Inequality", &TimeIndexedProblem::Inequality);
+    time_indexed_problem.def_readonly("Equality", &TimeIndexedProblem::Equality);
 
-    py::class_<BoundedTimeIndexedProblem, std::shared_ptr<BoundedTimeIndexedProblem>, PlanningProblem> boundedTimeIndexedProblem(prob, "BoundedTimeIndexedProblem");
-    boundedTimeIndexedProblem.def("getDuration", &BoundedTimeIndexedProblem::getDuration);
-    boundedTimeIndexedProblem.def("update", &BoundedTimeIndexedProblem::Update);
-    boundedTimeIndexedProblem.def("setGoal", &BoundedTimeIndexedProblem::setGoal);
-    boundedTimeIndexedProblem.def("setRho", &BoundedTimeIndexedProblem::setRho);
-    boundedTimeIndexedProblem.def("getGoal", &BoundedTimeIndexedProblem::getGoal);
-    boundedTimeIndexedProblem.def("getRho", &BoundedTimeIndexedProblem::getRho);
-    boundedTimeIndexedProblem.def_property("tau",
-                                           &BoundedTimeIndexedProblem::getTau,
-                                           &BoundedTimeIndexedProblem::setTau);
-    boundedTimeIndexedProblem.def_readwrite("W", &BoundedTimeIndexedProblem::W);
-    boundedTimeIndexedProblem.def_property(
+    py::class_<BoundedTimeIndexedProblem, std::shared_ptr<BoundedTimeIndexedProblem>, PlanningProblem> bounded_time_indexed_problem(prob, "BoundedTimeIndexedProblem");
+    bounded_time_indexed_problem.def("getDuration", &BoundedTimeIndexedProblem::getDuration);
+    bounded_time_indexed_problem.def("update", &BoundedTimeIndexedProblem::Update);
+    bounded_time_indexed_problem.def("setGoal", &BoundedTimeIndexedProblem::setGoal);
+    bounded_time_indexed_problem.def("setRho", &BoundedTimeIndexedProblem::setRho);
+    bounded_time_indexed_problem.def("getGoal", &BoundedTimeIndexedProblem::getGoal);
+    bounded_time_indexed_problem.def("getRho", &BoundedTimeIndexedProblem::getRho);
+    bounded_time_indexed_problem.def_property("tau",
+                                              &BoundedTimeIndexedProblem::getTau,
+                                              &BoundedTimeIndexedProblem::setTau);
+    bounded_time_indexed_problem.def_readwrite("W", &BoundedTimeIndexedProblem::W);
+    bounded_time_indexed_problem.def_property(
         "InitialTrajectory",
         &BoundedTimeIndexedProblem::getInitialTrajectory,
         &BoundedTimeIndexedProblem::setInitialTrajectory);
-    boundedTimeIndexedProblem.def_property("T",
-                                           &BoundedTimeIndexedProblem::getT,
-                                           &BoundedTimeIndexedProblem::setT);
-    boundedTimeIndexedProblem.def_readonly("PhiN", &BoundedTimeIndexedProblem::PhiN);
-    boundedTimeIndexedProblem.def_readonly("JN", &BoundedTimeIndexedProblem::JN);
-    boundedTimeIndexedProblem.def_readonly("N", &BoundedTimeIndexedProblem::N);
-    boundedTimeIndexedProblem.def_readonly("NumTasks", &BoundedTimeIndexedProblem::NumTasks);
-    boundedTimeIndexedProblem.def_readonly("Phi", &BoundedTimeIndexedProblem::Phi);
-    boundedTimeIndexedProblem.def_readonly("J", &BoundedTimeIndexedProblem::J);
-    boundedTimeIndexedProblem.def("getScalarTaskCost", &BoundedTimeIndexedProblem::getScalarTaskCost);
-    boundedTimeIndexedProblem.def("getScalarTaskJacobian", &BoundedTimeIndexedProblem::getScalarTaskJacobian);
-    boundedTimeIndexedProblem.def("getScalarTransitionCost", &BoundedTimeIndexedProblem::getScalarTransitionCost);
-    boundedTimeIndexedProblem.def("getScalarTransitionJacobian", &BoundedTimeIndexedProblem::getScalarTransitionJacobian);
-    boundedTimeIndexedProblem.def("getBounds", &BoundedTimeIndexedProblem::getBounds);
-    boundedTimeIndexedProblem.def_readonly("Cost", &BoundedTimeIndexedProblem::Cost);
+    bounded_time_indexed_problem.def_property("T",
+                                              &BoundedTimeIndexedProblem::getT,
+                                              &BoundedTimeIndexedProblem::setT);
+    bounded_time_indexed_problem.def_readonly("PhiN", &BoundedTimeIndexedProblem::PhiN);
+    bounded_time_indexed_problem.def_readonly("JN", &BoundedTimeIndexedProblem::JN);
+    bounded_time_indexed_problem.def_readonly("N", &BoundedTimeIndexedProblem::N);
+    bounded_time_indexed_problem.def_readonly("NumTasks", &BoundedTimeIndexedProblem::NumTasks);
+    bounded_time_indexed_problem.def_readonly("Phi", &BoundedTimeIndexedProblem::Phi);
+    bounded_time_indexed_problem.def_readonly("J", &BoundedTimeIndexedProblem::J);
+    bounded_time_indexed_problem.def("getScalarTaskCost", &BoundedTimeIndexedProblem::getScalarTaskCost);
+    bounded_time_indexed_problem.def("getScalarTaskJacobian", &BoundedTimeIndexedProblem::getScalarTaskJacobian);
+    bounded_time_indexed_problem.def("getScalarTransitionCost", &BoundedTimeIndexedProblem::getScalarTransitionCost);
+    bounded_time_indexed_problem.def("getScalarTransitionJacobian", &BoundedTimeIndexedProblem::getScalarTransitionJacobian);
+    bounded_time_indexed_problem.def("getBounds", &BoundedTimeIndexedProblem::getBounds);
+    bounded_time_indexed_problem.def_readonly("Cost", &BoundedTimeIndexedProblem::Cost);
 
-    py::class_<UnconstrainedEndPoseProblem, std::shared_ptr<UnconstrainedEndPoseProblem>, PlanningProblem> unconstrainedEndPoseProblem(prob, "UnconstrainedEndPoseProblem");
-    unconstrainedEndPoseProblem.def("update", &UnconstrainedEndPoseProblem::Update);
-    unconstrainedEndPoseProblem.def("setGoal", &UnconstrainedEndPoseProblem::setGoal);
-    unconstrainedEndPoseProblem.def("setRho", &UnconstrainedEndPoseProblem::setRho);
-    unconstrainedEndPoseProblem.def("getGoal", &UnconstrainedEndPoseProblem::getGoal);
-    unconstrainedEndPoseProblem.def("getRho", &UnconstrainedEndPoseProblem::getRho);
-    unconstrainedEndPoseProblem.def_readwrite("W", &UnconstrainedEndPoseProblem::W);
-    unconstrainedEndPoseProblem.def_readonly("PhiN", &UnconstrainedEndPoseProblem::PhiN);
-    unconstrainedEndPoseProblem.def_readonly("JN", &UnconstrainedEndPoseProblem::JN);
-    unconstrainedEndPoseProblem.def_readonly("N", &UnconstrainedEndPoseProblem::N);
-    unconstrainedEndPoseProblem.def_readonly("NumTasks", &UnconstrainedEndPoseProblem::NumTasks);
-    unconstrainedEndPoseProblem.def_readonly("Phi", &UnconstrainedEndPoseProblem::Phi);
-    unconstrainedEndPoseProblem.def_readonly("J", &UnconstrainedEndPoseProblem::J);
-    unconstrainedEndPoseProblem.def_property_readonly("ydiff", [](UnconstrainedEndPoseProblem* prob) { return prob->Cost.ydiff; });
-    unconstrainedEndPoseProblem.def_property("qNominal", &UnconstrainedEndPoseProblem::getNominalPose, &UnconstrainedEndPoseProblem::setNominalPose);
-    unconstrainedEndPoseProblem.def("getScalarCost", &UnconstrainedEndPoseProblem::getScalarCost);
-    unconstrainedEndPoseProblem.def("getScalarJacobian", &UnconstrainedEndPoseProblem::getScalarJacobian);
-    unconstrainedEndPoseProblem.def("getScalarTaskCost", &UnconstrainedEndPoseProblem::getScalarTaskCost);
-    unconstrainedEndPoseProblem.def_readonly("Cost", &UnconstrainedEndPoseProblem::Cost);
+    py::class_<UnconstrainedEndPoseProblem, std::shared_ptr<UnconstrainedEndPoseProblem>, PlanningProblem> unconstrained_end_pose_problem(prob, "UnconstrainedEndPoseProblem");
+    unconstrained_end_pose_problem.def("update", &UnconstrainedEndPoseProblem::Update);
+    unconstrained_end_pose_problem.def("setGoal", &UnconstrainedEndPoseProblem::setGoal);
+    unconstrained_end_pose_problem.def("setRho", &UnconstrainedEndPoseProblem::setRho);
+    unconstrained_end_pose_problem.def("getGoal", &UnconstrainedEndPoseProblem::getGoal);
+    unconstrained_end_pose_problem.def("getRho", &UnconstrainedEndPoseProblem::getRho);
+    unconstrained_end_pose_problem.def_readwrite("W", &UnconstrainedEndPoseProblem::W);
+    unconstrained_end_pose_problem.def_readonly("PhiN", &UnconstrainedEndPoseProblem::PhiN);
+    unconstrained_end_pose_problem.def_readonly("JN", &UnconstrainedEndPoseProblem::JN);
+    unconstrained_end_pose_problem.def_readonly("N", &UnconstrainedEndPoseProblem::N);
+    unconstrained_end_pose_problem.def_readonly("NumTasks", &UnconstrainedEndPoseProblem::NumTasks);
+    unconstrained_end_pose_problem.def_readonly("Phi", &UnconstrainedEndPoseProblem::Phi);
+    unconstrained_end_pose_problem.def_readonly("J", &UnconstrainedEndPoseProblem::J);
+    unconstrained_end_pose_problem.def_property_readonly("ydiff", [](UnconstrainedEndPoseProblem* prob) { return prob->Cost.ydiff; });
+    unconstrained_end_pose_problem.def_property("qNominal", &UnconstrainedEndPoseProblem::getNominalPose, &UnconstrainedEndPoseProblem::setNominalPose);
+    unconstrained_end_pose_problem.def("getScalarCost", &UnconstrainedEndPoseProblem::getScalarCost);
+    unconstrained_end_pose_problem.def("getScalarJacobian", &UnconstrainedEndPoseProblem::getScalarJacobian);
+    unconstrained_end_pose_problem.def("getScalarTaskCost", &UnconstrainedEndPoseProblem::getScalarTaskCost);
+    unconstrained_end_pose_problem.def_readonly("Cost", &UnconstrainedEndPoseProblem::Cost);
 
-    py::class_<EndPoseProblem, std::shared_ptr<EndPoseProblem>, PlanningProblem> endPoseProblem(prob, "EndPoseProblem");
-    endPoseProblem.def("update", &EndPoseProblem::Update);
-    endPoseProblem.def("setGoal", &EndPoseProblem::setGoal);
-    endPoseProblem.def("setRho", &EndPoseProblem::setRho);
-    endPoseProblem.def("getGoal", &EndPoseProblem::getGoal);
-    endPoseProblem.def("getRho", &EndPoseProblem::getRho);
-    endPoseProblem.def("setGoalEQ", &EndPoseProblem::setGoalEQ);
-    endPoseProblem.def("setRhoEQ", &EndPoseProblem::setRhoEQ);
-    endPoseProblem.def("getGoalEQ", &EndPoseProblem::getGoalEQ);
-    endPoseProblem.def("getRhoEQ", &EndPoseProblem::getRhoEQ);
-    endPoseProblem.def("setGoalNEQ", &EndPoseProblem::setGoalNEQ);
-    endPoseProblem.def("setRhoNEQ", &EndPoseProblem::setRhoNEQ);
-    endPoseProblem.def("getGoalNEQ", &EndPoseProblem::getGoalNEQ);
-    endPoseProblem.def("getRhoNEQ", &EndPoseProblem::getRhoNEQ);
-    endPoseProblem.def_readwrite("W", &EndPoseProblem::W);
-    endPoseProblem.def_readonly("PhiN", &EndPoseProblem::PhiN);
-    endPoseProblem.def_readonly("JN", &EndPoseProblem::JN);
-    endPoseProblem.def_readonly("N", &EndPoseProblem::N);
-    endPoseProblem.def_readonly("NumTasks", &EndPoseProblem::NumTasks);
-    endPoseProblem.def_readonly("Phi", &EndPoseProblem::Phi);
-    endPoseProblem.def_readonly("J", &EndPoseProblem::J);
-    endPoseProblem.def("getScalarCost", &EndPoseProblem::getScalarCost);
-    endPoseProblem.def("getScalarJacobian", &EndPoseProblem::getScalarJacobian);
-    endPoseProblem.def("getScalarTaskCost", &EndPoseProblem::getScalarTaskCost);
-    endPoseProblem.def("getEquality", &EndPoseProblem::getEquality);
-    endPoseProblem.def("getEqualityJacobian", &EndPoseProblem::getEqualityJacobian);
-    endPoseProblem.def("getInequality", &EndPoseProblem::getInequality);
-    endPoseProblem.def("getInequalityJacobian", &EndPoseProblem::getInequalityJacobian);
-    endPoseProblem.def("getBounds", &EndPoseProblem::getBounds);
-    endPoseProblem.def_readonly("Cost", &EndPoseProblem::Cost);
-    endPoseProblem.def_readonly("Inequality", &EndPoseProblem::Inequality);
-    endPoseProblem.def_readonly("Equality", &EndPoseProblem::Equality);
+    py::class_<EndPoseProblem, std::shared_ptr<EndPoseProblem>, PlanningProblem> end_pose_problem(prob, "EndPoseProblem");
+    end_pose_problem.def("update", &EndPoseProblem::Update);
+    end_pose_problem.def("setGoal", &EndPoseProblem::setGoal);
+    end_pose_problem.def("setRho", &EndPoseProblem::setRho);
+    end_pose_problem.def("getGoal", &EndPoseProblem::getGoal);
+    end_pose_problem.def("getRho", &EndPoseProblem::getRho);
+    end_pose_problem.def("setGoalEQ", &EndPoseProblem::setGoalEQ);
+    end_pose_problem.def("setRhoEQ", &EndPoseProblem::setRhoEQ);
+    end_pose_problem.def("getGoalEQ", &EndPoseProblem::getGoalEQ);
+    end_pose_problem.def("getRhoEQ", &EndPoseProblem::getRhoEQ);
+    end_pose_problem.def("setGoalNEQ", &EndPoseProblem::setGoalNEQ);
+    end_pose_problem.def("setRhoNEQ", &EndPoseProblem::setRhoNEQ);
+    end_pose_problem.def("getGoalNEQ", &EndPoseProblem::getGoalNEQ);
+    end_pose_problem.def("getRhoNEQ", &EndPoseProblem::getRhoNEQ);
+    end_pose_problem.def_readwrite("W", &EndPoseProblem::W);
+    end_pose_problem.def_readonly("PhiN", &EndPoseProblem::PhiN);
+    end_pose_problem.def_readonly("JN", &EndPoseProblem::JN);
+    end_pose_problem.def_readonly("N", &EndPoseProblem::N);
+    end_pose_problem.def_readonly("NumTasks", &EndPoseProblem::NumTasks);
+    end_pose_problem.def_readonly("Phi", &EndPoseProblem::Phi);
+    end_pose_problem.def_readonly("J", &EndPoseProblem::J);
+    end_pose_problem.def("getScalarCost", &EndPoseProblem::getScalarCost);
+    end_pose_problem.def("getScalarJacobian", &EndPoseProblem::getScalarJacobian);
+    end_pose_problem.def("getScalarTaskCost", &EndPoseProblem::getScalarTaskCost);
+    end_pose_problem.def("getEquality", &EndPoseProblem::getEquality);
+    end_pose_problem.def("getEqualityJacobian", &EndPoseProblem::getEqualityJacobian);
+    end_pose_problem.def("getInequality", &EndPoseProblem::getInequality);
+    end_pose_problem.def("getInequalityJacobian", &EndPoseProblem::getInequalityJacobian);
+    end_pose_problem.def("getBounds", &EndPoseProblem::getBounds);
+    end_pose_problem.def_readonly("Cost", &EndPoseProblem::Cost);
+    end_pose_problem.def_readonly("Inequality", &EndPoseProblem::Inequality);
+    end_pose_problem.def_readonly("Equality", &EndPoseProblem::Equality);
 
-    py::class_<BoundedEndPoseProblem, std::shared_ptr<BoundedEndPoseProblem>, PlanningProblem> boundedEndPoseProblem(prob, "BoundedEndPoseProblem");
-    boundedEndPoseProblem.def("update", &BoundedEndPoseProblem::Update);
-    boundedEndPoseProblem.def("setGoal", &BoundedEndPoseProblem::setGoal);
-    boundedEndPoseProblem.def("setRho", &BoundedEndPoseProblem::setRho);
-    boundedEndPoseProblem.def("getGoal", &BoundedEndPoseProblem::getGoal);
-    boundedEndPoseProblem.def("getRho", &BoundedEndPoseProblem::getRho);
-    boundedEndPoseProblem.def_readwrite("W", &BoundedEndPoseProblem::W);
-    boundedEndPoseProblem.def_readonly("PhiN", &BoundedEndPoseProblem::PhiN);
-    boundedEndPoseProblem.def_readonly("JN", &BoundedEndPoseProblem::JN);
-    boundedEndPoseProblem.def_readonly("N", &BoundedEndPoseProblem::N);
-    boundedEndPoseProblem.def_readonly("NumTasks", &BoundedEndPoseProblem::NumTasks);
-    boundedEndPoseProblem.def_readonly("Phi", &BoundedEndPoseProblem::Phi);
-    boundedEndPoseProblem.def_readonly("J", &BoundedEndPoseProblem::J);
-    boundedEndPoseProblem.def("getScalarCost", &BoundedEndPoseProblem::getScalarCost);
-    boundedEndPoseProblem.def("getScalarJacobian", &BoundedEndPoseProblem::getScalarJacobian);
-    boundedEndPoseProblem.def("getScalarTaskCost", &BoundedEndPoseProblem::getScalarTaskCost);
-    boundedEndPoseProblem.def("getBounds", &BoundedEndPoseProblem::getBounds);
-    boundedEndPoseProblem.def_readonly("Cost", &BoundedEndPoseProblem::Cost);
+    py::class_<BoundedEndPoseProblem, std::shared_ptr<BoundedEndPoseProblem>, PlanningProblem> bounded_end_pose_problem(prob, "BoundedEndPoseProblem");
+    bounded_end_pose_problem.def("update", &BoundedEndPoseProblem::Update);
+    bounded_end_pose_problem.def("setGoal", &BoundedEndPoseProblem::setGoal);
+    bounded_end_pose_problem.def("setRho", &BoundedEndPoseProblem::setRho);
+    bounded_end_pose_problem.def("getGoal", &BoundedEndPoseProblem::getGoal);
+    bounded_end_pose_problem.def("getRho", &BoundedEndPoseProblem::getRho);
+    bounded_end_pose_problem.def_readwrite("W", &BoundedEndPoseProblem::W);
+    bounded_end_pose_problem.def_readonly("PhiN", &BoundedEndPoseProblem::PhiN);
+    bounded_end_pose_problem.def_readonly("JN", &BoundedEndPoseProblem::JN);
+    bounded_end_pose_problem.def_readonly("N", &BoundedEndPoseProblem::N);
+    bounded_end_pose_problem.def_readonly("NumTasks", &BoundedEndPoseProblem::NumTasks);
+    bounded_end_pose_problem.def_readonly("Phi", &BoundedEndPoseProblem::Phi);
+    bounded_end_pose_problem.def_readonly("J", &BoundedEndPoseProblem::J);
+    bounded_end_pose_problem.def("getScalarCost", &BoundedEndPoseProblem::getScalarCost);
+    bounded_end_pose_problem.def("getScalarJacobian", &BoundedEndPoseProblem::getScalarJacobian);
+    bounded_end_pose_problem.def("getScalarTaskCost", &BoundedEndPoseProblem::getScalarTaskCost);
+    bounded_end_pose_problem.def("getBounds", &BoundedEndPoseProblem::getBounds);
+    bounded_end_pose_problem.def_readonly("Cost", &BoundedEndPoseProblem::Cost);
 
-    py::class_<SamplingProblem, std::shared_ptr<SamplingProblem>, PlanningProblem> samplingProblem(prob, "SamplingProblem");
-    samplingProblem.def("update", &SamplingProblem::Update);
-    samplingProblem.def_property("goalState", &SamplingProblem::getGoalState, &SamplingProblem::setGoalState);
-    samplingProblem.def("getSpaceDim", &SamplingProblem::getSpaceDim);
-    samplingProblem.def("getBounds", &SamplingProblem::getBounds);
-    samplingProblem.def_readonly("N", &SamplingProblem::N);
-    samplingProblem.def_readonly("NumTasks", &SamplingProblem::NumTasks);
-    samplingProblem.def_readonly("Phi", &SamplingProblem::Phi);
-    samplingProblem.def_readonly("Inequality", &SamplingProblem::Inequality);
-    samplingProblem.def_readonly("Equality", &SamplingProblem::Equality);
-    samplingProblem.def("setGoalEQ", &SamplingProblem::setGoalEQ);
-    samplingProblem.def("setRhoEQ", &SamplingProblem::setRhoEQ);
-    samplingProblem.def("getGoalEQ", &SamplingProblem::getGoalEQ);
-    samplingProblem.def("getRhoEQ", &SamplingProblem::getRhoEQ);
-    samplingProblem.def("setGoalNEQ", &SamplingProblem::setGoalNEQ);
-    samplingProblem.def("setRhoNEQ", &SamplingProblem::setRhoNEQ);
-    samplingProblem.def("getGoalNEQ", &SamplingProblem::getGoalNEQ);
-    samplingProblem.def("getRhoNEQ", &SamplingProblem::getRhoNEQ);
+    py::class_<SamplingProblem, std::shared_ptr<SamplingProblem>, PlanningProblem> sampling_problem(prob, "SamplingProblem");
+    sampling_problem.def("update", &SamplingProblem::Update);
+    sampling_problem.def_property("goalState", &SamplingProblem::getGoalState, &SamplingProblem::setGoalState);
+    sampling_problem.def("getSpaceDim", &SamplingProblem::getSpaceDim);
+    sampling_problem.def("getBounds", &SamplingProblem::getBounds);
+    sampling_problem.def_readonly("N", &SamplingProblem::N);
+    sampling_problem.def_readonly("NumTasks", &SamplingProblem::NumTasks);
+    sampling_problem.def_readonly("Phi", &SamplingProblem::Phi);
+    sampling_problem.def_readonly("Inequality", &SamplingProblem::Inequality);
+    sampling_problem.def_readonly("Equality", &SamplingProblem::Equality);
+    sampling_problem.def("setGoalEQ", &SamplingProblem::setGoalEQ);
+    sampling_problem.def("setRhoEQ", &SamplingProblem::setRhoEQ);
+    sampling_problem.def("getGoalEQ", &SamplingProblem::getGoalEQ);
+    sampling_problem.def("getRhoEQ", &SamplingProblem::getRhoEQ);
+    sampling_problem.def("setGoalNEQ", &SamplingProblem::setGoalNEQ);
+    sampling_problem.def("setRhoNEQ", &SamplingProblem::setRhoNEQ);
+    sampling_problem.def("getGoalNEQ", &SamplingProblem::getGoalNEQ);
+    sampling_problem.def("getRhoNEQ", &SamplingProblem::getRhoNEQ);
 
-    py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> timeIndexedSamplingProblem(prob, "TimeIndexedSamplingProblem");
-    timeIndexedSamplingProblem.def("update", &TimeIndexedSamplingProblem::Update);
-    timeIndexedSamplingProblem.def("getSpaceDim", &TimeIndexedSamplingProblem::getSpaceDim);
-    timeIndexedSamplingProblem.def("getBounds", &TimeIndexedSamplingProblem::getBounds);
-    timeIndexedSamplingProblem.def_property("goalState", &TimeIndexedSamplingProblem::getGoalState, &TimeIndexedSamplingProblem::setGoalState);
-    timeIndexedSamplingProblem.def_property("goalTime", &TimeIndexedSamplingProblem::getGoalTime, &TimeIndexedSamplingProblem::setGoalTime);
-    timeIndexedSamplingProblem.def_readonly("N", &TimeIndexedSamplingProblem::N);
-    timeIndexedSamplingProblem.def_readonly("NumTasks", &TimeIndexedSamplingProblem::NumTasks);
-    timeIndexedSamplingProblem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
-    timeIndexedSamplingProblem.def_readonly("Inequality", &TimeIndexedSamplingProblem::Inequality);
-    timeIndexedSamplingProblem.def_readonly("Equality", &TimeIndexedSamplingProblem::Equality);
-    timeIndexedSamplingProblem.def("setGoalEQ", &TimeIndexedSamplingProblem::setGoalEQ);
-    timeIndexedSamplingProblem.def("setRhoEQ", &TimeIndexedSamplingProblem::setRhoEQ);
-    timeIndexedSamplingProblem.def("getGoalEQ", &TimeIndexedSamplingProblem::getGoalEQ);
-    timeIndexedSamplingProblem.def("getRhoEQ", &TimeIndexedSamplingProblem::getRhoEQ);
-    timeIndexedSamplingProblem.def("setGoalNEQ", &TimeIndexedSamplingProblem::setGoalNEQ);
-    timeIndexedSamplingProblem.def("setRhoNEQ", &TimeIndexedSamplingProblem::setRhoNEQ);
-    timeIndexedSamplingProblem.def("getGoalNEQ", &TimeIndexedSamplingProblem::getGoalNEQ);
-    timeIndexedSamplingProblem.def("getRhoNEQ", &TimeIndexedSamplingProblem::getRhoNEQ);
+    py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> time_indexed_sampling_problem(prob, "TimeIndexedSamplingProblem");
+    time_indexed_sampling_problem.def("update", &TimeIndexedSamplingProblem::Update);
+    time_indexed_sampling_problem.def("getSpaceDim", &TimeIndexedSamplingProblem::getSpaceDim);
+    time_indexed_sampling_problem.def("getBounds", &TimeIndexedSamplingProblem::getBounds);
+    time_indexed_sampling_problem.def_property("goalState", &TimeIndexedSamplingProblem::getGoalState, &TimeIndexedSamplingProblem::setGoalState);
+    time_indexed_sampling_problem.def_property("goalTime", &TimeIndexedSamplingProblem::getGoalTime, &TimeIndexedSamplingProblem::setGoalTime);
+    time_indexed_sampling_problem.def_readonly("N", &TimeIndexedSamplingProblem::N);
+    time_indexed_sampling_problem.def_readonly("NumTasks", &TimeIndexedSamplingProblem::NumTasks);
+    time_indexed_sampling_problem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
+    time_indexed_sampling_problem.def_readonly("Inequality", &TimeIndexedSamplingProblem::Inequality);
+    time_indexed_sampling_problem.def_readonly("Equality", &TimeIndexedSamplingProblem::Equality);
+    time_indexed_sampling_problem.def("setGoalEQ", &TimeIndexedSamplingProblem::setGoalEQ);
+    time_indexed_sampling_problem.def("setRhoEQ", &TimeIndexedSamplingProblem::setRhoEQ);
+    time_indexed_sampling_problem.def("getGoalEQ", &TimeIndexedSamplingProblem::getGoalEQ);
+    time_indexed_sampling_problem.def("getRhoEQ", &TimeIndexedSamplingProblem::getRhoEQ);
+    time_indexed_sampling_problem.def("setGoalNEQ", &TimeIndexedSamplingProblem::setGoalNEQ);
+    time_indexed_sampling_problem.def("setRhoNEQ", &TimeIndexedSamplingProblem::setRhoNEQ);
+    time_indexed_sampling_problem.def("getGoalNEQ", &TimeIndexedSamplingProblem::getGoalNEQ);
+    time_indexed_sampling_problem.def("getRhoNEQ", &TimeIndexedSamplingProblem::getRhoNEQ);
 
-    py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> proxy(module, "CollisionProxy");
-    proxy.def(py::init());
-    proxy.def_readonly("Contact1", &CollisionProxy::contact1);
-    proxy.def_readonly("Contact2", &CollisionProxy::contact2);
-    proxy.def_readonly("Normal1", &CollisionProxy::normal1);
-    proxy.def_readonly("Normal2", &CollisionProxy::normal2);
-    proxy.def_readonly("Distance", &CollisionProxy::distance);
-    proxy.def_property_readonly("Object1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Segment.getName() : std::string(""); });
-    proxy.def_property_readonly("Object2", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Segment.getName() : std::string(""); });
-    proxy.def_property_readonly("Transform1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Frame : KDL::Frame(); });
-    proxy.def_property_readonly("Transform2", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Frame : KDL::Frame(); });
-    proxy.def("__repr__", &CollisionProxy::print);
+    py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> collision_proxy(module, "CollisionProxy");
+    collision_proxy.def(py::init());
+    collision_proxy.def_readonly("Contact1", &CollisionProxy::contact1);
+    collision_proxy.def_readonly("Contact2", &CollisionProxy::contact2);
+    collision_proxy.def_readonly("Normal1", &CollisionProxy::normal1);
+    collision_proxy.def_readonly("Normal2", &CollisionProxy::normal2);
+    collision_proxy.def_readonly("Distance", &CollisionProxy::distance);
+    collision_proxy.def_property_readonly("Object1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Segment.getName() : std::string(""); });
+    collision_proxy.def_property_readonly("Object2", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Segment.getName() : std::string(""); });
+    collision_proxy.def_property_readonly("Transform1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Frame : KDL::Frame(); });
+    collision_proxy.def_property_readonly("Transform2", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Frame : KDL::Frame(); });
+    collision_proxy.def("__repr__", &CollisionProxy::print);
 
-    py::class_<ContinuousCollisionProxy, std::shared_ptr<ContinuousCollisionProxy>> continuous_proxy(module, "ContinuousCollisionProxy");
-    continuous_proxy.def(py::init());
-    continuous_proxy.def_readonly("ContactTransform1", &ContinuousCollisionProxy::contact_tf1);
-    continuous_proxy.def_readonly("ContactTransform2", &ContinuousCollisionProxy::contact_tf2);
-    continuous_proxy.def_readonly("InCollision", &ContinuousCollisionProxy::in_collision);
-    continuous_proxy.def_readonly("TimeOfContact", &ContinuousCollisionProxy::time_of_contact);
-    continuous_proxy.def_property_readonly("Object1", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Segment.getName() : std::string(""); });
-    continuous_proxy.def_property_readonly("Object2", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Segment.getName() : std::string(""); });
-    continuous_proxy.def_property_readonly("Transform1", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Frame : KDL::Frame(); });
-    continuous_proxy.def_property_readonly("Transform2", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Frame : KDL::Frame(); });
-    continuous_proxy.def("__repr__", &ContinuousCollisionProxy::print);
+    py::class_<ContinuousCollisionProxy, std::shared_ptr<ContinuousCollisionProxy>> continuous_collision_proxy(module, "ContinuousCollisionProxy");
+    continuous_collision_proxy.def(py::init());
+    continuous_collision_proxy.def_readonly("ContactTransform1", &ContinuousCollisionProxy::contact_tf1);
+    continuous_collision_proxy.def_readonly("ContactTransform2", &ContinuousCollisionProxy::contact_tf2);
+    continuous_collision_proxy.def_readonly("InCollision", &ContinuousCollisionProxy::in_collision);
+    continuous_collision_proxy.def_readonly("TimeOfContact", &ContinuousCollisionProxy::time_of_contact);
+    continuous_collision_proxy.def_property_readonly("Object1", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Segment.getName() : std::string(""); });
+    continuous_collision_proxy.def_property_readonly("Object2", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Segment.getName() : std::string(""); });
+    continuous_collision_proxy.def_property_readonly("Transform1", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->Frame : KDL::Frame(); });
+    continuous_collision_proxy.def_property_readonly("Transform2", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->Frame : KDL::Frame(); });
+    continuous_collision_proxy.def("__repr__", &ContinuousCollisionProxy::print);
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
     scene.def("Update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
     scene.def("getBaseType", &Scene::getBaseType);
     scene.def("getGroupName", &Scene::getGroupName);
-    scene.def("getJointNames", (std::vector<std::string>(Scene::*)()) & Scene::getJointNames);
+    scene.def("getJointNames", (std::vector<std::string> (Scene::*)()) & Scene::getJointNames);
     scene.def("getControlledLinkNames", &Scene::getControlledLinkNames);
     scene.def("getModelLinkNames", &Scene::getModelLinkNames);
     scene.def("getSolver", &Scene::getSolver, py::return_value_policy::reference_internal);
@@ -974,12 +946,12 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("loadScene",
               (void (Scene::*)(const std::string&, const KDL::Frame&, bool)) & Scene::loadScene,
               py::arg("sceneString"),
-              py::arg("offsetTransform") = kdlFrame(),
+              py::arg("offsetTransform") = kdl_frame(),
               py::arg("updateCollisionScene") = true);
     scene.def("loadSceneFile",
               (void (Scene::*)(const std::string&, const KDL::Frame&, bool)) & Scene::loadSceneFile,
               py::arg("fileName"),
-              py::arg("offsetTransform") = kdlFrame(),
+              py::arg("offsetTransform") = kdl_frame(),
               py::arg("updateCollisionScene") = true);
     scene.def("getScene", &Scene::getScene);
     scene.def("cleanScene", &Scene::cleanScene);
@@ -1047,52 +1019,52 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def_property_readonly("modelLinkToCollisionLinkMap", &Scene::getModelLinkToCollisionLinkMap);
     scene.def_property_readonly("controlledLinkToCollisionLinkMap", &Scene::getControlledLinkToCollisionLinkMap);
 
-    py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collisionScene(module, "CollisionScene");
+    py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collision_scene(module, "CollisionScene");
     // TODO: expose isStateValid, isCollisionFree, getCollisionDistance, getCollisionWorldLinks, getCollisionRobotLinks, getTranslation
-    collisionScene.def_property("alwaysExternallyUpdatedCollisionScene", &CollisionScene::getAlwaysExternallyUpdatedCollisionScene, &CollisionScene::setAlwaysExternallyUpdatedCollisionScene);
-    collisionScene.def_property("replacePrimitiveShapesWithMeshes", &CollisionScene::getReplacePrimitiveShapesWithMeshes, &CollisionScene::setReplacePrimitiveShapesWithMeshes);
-    collisionScene.def_readwrite("replaceCylindersWithCapsules", &CollisionScene::replaceCylindersWithCapsules);
-    collisionScene.def_property("robotLinkScale", &CollisionScene::getRobotLinkScale, &CollisionScene::setRobotLinkScale);
-    collisionScene.def_property("worldLinkScale", &CollisionScene::getWorldLinkScale, &CollisionScene::setWorldLinkScale);
-    collisionScene.def_property("robotLinkPadding", &CollisionScene::getRobotLinkPadding, &CollisionScene::setRobotLinkPadding);
-    collisionScene.def_property("worldLinkPadding", &CollisionScene::getWorldLinkPadding, &CollisionScene::setWorldLinkPadding);
-    collisionScene.def("updateCollisionObjectTransforms", &CollisionScene::updateCollisionObjectTransforms);
-    collisionScene.def("continuousCollisionCheck", &CollisionScene::continuousCollisionCheck);
+    collision_scene.def_property("alwaysExternallyUpdatedCollisionScene", &CollisionScene::getAlwaysExternallyUpdatedCollisionScene, &CollisionScene::setAlwaysExternallyUpdatedCollisionScene);
+    collision_scene.def_property("replacePrimitiveShapesWithMeshes", &CollisionScene::getReplacePrimitiveShapesWithMeshes, &CollisionScene::setReplacePrimitiveShapesWithMeshes);
+    collision_scene.def_readwrite("replaceCylindersWithCapsules", &CollisionScene::replaceCylindersWithCapsules);
+    collision_scene.def_property("robotLinkScale", &CollisionScene::getRobotLinkScale, &CollisionScene::setRobotLinkScale);
+    collision_scene.def_property("worldLinkScale", &CollisionScene::getWorldLinkScale, &CollisionScene::setWorldLinkScale);
+    collision_scene.def_property("robotLinkPadding", &CollisionScene::getRobotLinkPadding, &CollisionScene::setRobotLinkPadding);
+    collision_scene.def_property("worldLinkPadding", &CollisionScene::getWorldLinkPadding, &CollisionScene::setWorldLinkPadding);
+    collision_scene.def("updateCollisionObjectTransforms", &CollisionScene::updateCollisionObjectTransforms);
+    collision_scene.def("continuousCollisionCheck", &CollisionScene::continuousCollisionCheck);
 
     py::class_<Visualization> visualization(module, "Visualization");
     visualization.def(py::init<Scene_ptr>());
     visualization.def("displayTrajectory", &Visualization::displayTrajectory);
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
-    py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematicTree(kin, "KinematicTree");
-    kinematicTree.def_readwrite("debugMode", &KinematicTree::Debug);
-    kinematicTree.def("publishFrames", &KinematicTree::publishFrames);
-    kinematicTree.def("getRootFrameName", &KinematicTree::getRootFrameName);
-    kinematicTree.def("getRootJointName", &KinematicTree::getRootJointName);
-    kinematicTree.def("getModelBaseType", &KinematicTree::getModelBaseType);
-    kinematicTree.def("getControlledBaseType", &KinematicTree::getControlledBaseType);
-    kinematicTree.def("getControlledLinkMass", &KinematicTree::getControlledLinkMass);
-    kinematicTree.def("getCollisionObjectTypes", &KinematicTree::getCollisionObjectTypes);
-    kinematicTree.def("getRandomControlledState", &KinematicTree::getRandomControlledState);
-    kinematicTree.def("getNumModelJoints", &KinematicTree::getNumModelJoints);
-    kinematicTree.def("getNumControlledJoints", &KinematicTree::getNumControlledJoints);
+    py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematic_tree(kin, "KinematicTree");
+    kinematic_tree.def_readwrite("debugMode", &KinematicTree::Debug);
+    kinematic_tree.def("publishFrames", &KinematicTree::publishFrames);
+    kinematic_tree.def("getRootFrameName", &KinematicTree::getRootFrameName);
+    kinematic_tree.def("getRootJointName", &KinematicTree::getRootJointName);
+    kinematic_tree.def("getModelBaseType", &KinematicTree::getModelBaseType);
+    kinematic_tree.def("getControlledBaseType", &KinematicTree::getControlledBaseType);
+    kinematic_tree.def("getControlledLinkMass", &KinematicTree::getControlledLinkMass);
+    kinematic_tree.def("getCollisionObjectTypes", &KinematicTree::getCollisionObjectTypes);
+    kinematic_tree.def("getRandomControlledState", &KinematicTree::getRandomControlledState);
+    kinematic_tree.def("getNumModelJoints", &KinematicTree::getNumModelJoints);
+    kinematic_tree.def("getNumControlledJoints", &KinematicTree::getNumControlledJoints);
 
     // Joint Limits
-    kinematicTree.def("getJointLimits", &KinematicTree::getJointLimits);
-    kinematicTree.def("resetJointLimits", &KinematicTree::resetJointLimits);
-    kinematicTree.def("setJointLimitsLower", &KinematicTree::setJointLimitsLower);
-    kinematicTree.def("setJointLimitsUpper", &KinematicTree::setJointLimitsUpper);
-    kinematicTree.def("setFloatingBaseLimitsPosXYZEulerZYX", &KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX);
-    kinematicTree.def("setPlanarBaseLimitsPosXYEulerZ", &KinematicTree::setPlanarBaseLimitsPosXYEulerZ);
-    kinematicTree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
+    kinematic_tree.def("getJointLimits", &KinematicTree::getJointLimits);
+    kinematic_tree.def("resetJointLimits", &KinematicTree::resetJointLimits);
+    kinematic_tree.def("setJointLimitsLower", &KinematicTree::setJointLimitsLower);
+    kinematic_tree.def("setJointLimitsUpper", &KinematicTree::setJointLimitsUpper);
+    kinematic_tree.def("setFloatingBaseLimitsPosXYZEulerZYX", &KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX);
+    kinematic_tree.def("setPlanarBaseLimitsPosXYEulerZ", &KinematicTree::setPlanarBaseLimitsPosXYEulerZ);
+    kinematic_tree.def("getUsedJointLimits", &KinematicTree::getUsedJointLimits);
 
     // TODO: KinematicRequestFlags
 
     // TODO: KinematicFrame
 
     // KinematicResponse
-    py::class_<KinematicResponse, std::shared_ptr<KinematicResponse>> kinematicResponse(kin, "KinematicResponse");
-    kinematicResponse.def_property_readonly("Phi", [](KinematicResponse* instance) {
+    py::class_<KinematicResponse, std::shared_ptr<KinematicResponse>> kinematic_response(kin, "KinematicResponse");
+    kinematic_response.def_property_readonly("Phi", [](KinematicResponse* instance) {
         std::vector<KDL::Frame> vec;
         for (unsigned int i = 0; i < instance->Phi.cols(); i++)
             vec.push_back(instance->Phi(i));
@@ -1161,10 +1133,10 @@ PYBIND11_MODULE(_pyexotica, module)
         .value("OCTREE", shapes::ShapeType::OCTREE)
         .export_values();
 
-    module.attr("version") = version();
-    module.attr("branch") = branch();
+    module.attr("version") = std::string(exotica::Version);
+    module.attr("branch") = std::string(exotica::Branch);
 
-    addInitializers(module);
+    AddInitializers(module);
 
     auto cleanup_exotica = []() {
         Setup::Destroy();

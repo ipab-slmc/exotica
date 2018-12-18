@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <IKSolverDemoConfig>
-  <LevenbergMarquardtSolver Name="MySolver" />
+  <LevenbergMarquardtSolver Name="MySolver" Damping="0.01" />
 
   <UnconstrainedEndPoseProblem Name="MyProblem">
     <PlanningScene>

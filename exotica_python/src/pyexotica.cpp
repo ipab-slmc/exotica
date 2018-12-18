@@ -599,6 +599,21 @@ PYBIND11_MODULE(_pyexotica, module)
              py::arg("Ic") = KDL::RotationalInertia::Zero())
         .def_static("Zero", &KDL::RigidBodyInertia::Zero);
 
+    py::class_<std_msgs::ColorRGBA>(module, "msgColorRGBA")
+        .def(py::init())
+        .def(py::init([](float r, float g, float b, float a) {
+            std_msgs::ColorRGBA c;
+            c.r = r;
+            c.g = g;
+            c.b = b;
+            c.a = a;
+            return c;
+        }))
+        .def_readwrite("r", &std_msgs::ColorRGBA::r)
+        .def_readwrite("g", &std_msgs::ColorRGBA::g)
+        .def_readwrite("b", &std_msgs::ColorRGBA::b)
+        .def_readwrite("a", &std_msgs::ColorRGBA::a);
+
     py::class_<TaskMap, std::shared_ptr<TaskMap>, Object>(module, "TaskMap")
         .def_readonly("id", &TaskMap::Id)
         .def_readonly("start", &TaskMap::Start)
@@ -992,6 +1007,7 @@ PYBIND11_MODULE(_pyexotica, module)
               py::arg("name"),
               py::arg("transform") = KDL::Frame(),
               py::arg("shape"),
+              py::arg("colour") = std_msgs::ColorRGBA(),
               py::arg("update_collision_scene") = true);
     scene.def("remove_object", &Scene::removeObject);
     scene.def_property_readonly("model_link_to_collision_link_map", &Scene::getModelLinkToCollisionLinkMap);

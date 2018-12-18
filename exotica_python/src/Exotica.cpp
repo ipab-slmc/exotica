@@ -144,8 +144,8 @@ void AddInitializers(py::module& module)
         inits.def((name + "Initializer").c_str(), [i]() { return CreateInitializer(i); }, (name + "Initializer constructor.").c_str());
     }
 
-    inits.def("loadXML", (Initializer(*)(std::string, bool)) & XMLLoader::load, "Loads initializer from XML", py::arg("xml"), py::arg("parseAsXMLString") = false);
-    inits.def("loadXMLFull", &LoadFromXML, "Loads initializer from XML", py::arg("xml"), py::arg("solver_name") = std::string(""), py::arg("problem_name") = std::string(""), py::arg("parseAsXMLString") = false);
+    inits.def("load_xml", (Initializer(*)(std::string, bool)) & XMLLoader::load, "Loads initializer from XML", py::arg("xml"), py::arg("parseAsXMLString") = false);
+    inits.def("load_xml_full", &LoadFromXML, "Loads initializer from XML", py::arg("xml"), py::arg("solver_name") = std::string(""), py::arg("problem_name") = std::string(""), py::arg("parseAsXMLString") = false);
 }
 
 namespace pybind11

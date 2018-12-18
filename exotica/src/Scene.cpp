@@ -390,7 +390,7 @@ moveit_msgs::PlanningScene Scene::getPlanningSceneMsg()
     return msg;
 }
 
-exotica::KinematicTree& Scene::getSolver()
+exotica::KinematicTree& Scene::getKinematicTree()
 {
     return kinematica_;
 }
@@ -622,7 +622,7 @@ void Scene::updateSceneFrames()
         objTransform.translation() = ps_->getCurrentState().getGlobalLinkTransform(links[i]).translation();
         objTransform.linear() = ps_->getCurrentState().getGlobalLinkTransform(links[i]).rotation();
 
-        int jointId = getSolver().IsControlledLink(links[i]->getName());
+        int jointId = getKinematicTree().IsControlledLink(links[i]->getName());
         if (jointId != -1)
         {
             if (lastControlledJointId != jointId)

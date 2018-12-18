@@ -47,7 +47,7 @@ BoundedEndPoseProblem::~BoundedEndPoseProblem() = default;
 
 Eigen::MatrixXd BoundedEndPoseProblem::getBounds() const
 {
-    return scene_->getSolver().getJointLimits();
+    return scene_->getKinematicTree().getJointLimits();
 }
 
 void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
@@ -79,7 +79,7 @@ void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
 
     if (init.LowerBound.rows() == N)
     {
-        scene_->getSolver().setJointLimitsLower(init.LowerBound);
+        scene_->getKinematicTree().setJointLimitsLower(init.LowerBound);
     }
     else if (init.LowerBound.rows() != 0)
     {
@@ -87,7 +87,7 @@ void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
     }
     if (init.UpperBound.rows() == N)
     {
-        scene_->getSolver().setJointLimitsUpper(init.UpperBound);
+        scene_->getKinematicTree().setJointLimitsUpper(init.UpperBound);
     }
     else if (init.UpperBound.rows() != 0)
     {
@@ -223,8 +223,8 @@ double BoundedEndPoseProblem::getRho(const std::string& task_name)
 
 bool BoundedEndPoseProblem::isValid()
 {
-    Eigen::VectorXd x = scene_->getSolver().getControlledState();
-    Eigen::MatrixXd bounds = scene_->getSolver().getJointLimits();
+    Eigen::VectorXd x = scene_->getKinematicTree().getControlledState();
+    Eigen::MatrixXd bounds = scene_->getKinematicTree().getJointLimits();
     for (unsigned int i = 0; i < N; i++)
     {
         if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1)) return false;

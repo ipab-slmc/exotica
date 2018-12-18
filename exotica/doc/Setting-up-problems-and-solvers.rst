@@ -84,7 +84,7 @@ example file as a guide. The code is displayed below.
             q = solution.row(solution.rows() - 1);
 
             my_problem->Update(q);
-            my_problem->getScene()->getSolver().publishFrames();
+            my_problem->getScene()->getKinematicTree().publishFrames();
 
             ros::spinOnce();
             loop_rate.sleep();

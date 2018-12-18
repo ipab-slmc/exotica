@@ -47,7 +47,7 @@ EndPoseProblem::~EndPoseProblem() = default;
 
 Eigen::MatrixXd EndPoseProblem::getBounds() const
 {
-    return scene_->getSolver().getJointLimits();
+    return scene_->getKinematicTree().getJointLimits();
 }
 
 void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
@@ -80,7 +80,7 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
 
     if (init.LowerBound.rows() == N)
     {
-        scene_->getSolver().setJointLimitsLower(init.LowerBound);
+        scene_->getKinematicTree().setJointLimitsLower(init.LowerBound);
     }
     else if (init.LowerBound.rows() != 0)
     {
@@ -88,7 +88,7 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
     }
     if (init.UpperBound.rows() == N)
     {
-        scene_->getSolver().setJointLimitsUpper(init.UpperBound);
+        scene_->getKinematicTree().setJointLimitsUpper(init.UpperBound);
     }
     else if (init.UpperBound.rows() != 0)
     {
@@ -360,8 +360,8 @@ double EndPoseProblem::getRhoNEQ(const std::string& task_name)
 
 bool EndPoseProblem::isValid()
 {
-    Eigen::VectorXd x = scene_->getSolver().getControlledState();
-    auto bounds = scene_->getSolver().getJointLimits();
+    Eigen::VectorXd x = scene_->getKinematicTree().getControlledState();
+    auto bounds = scene_->getKinematicTree().getJointLimits();
 
     // Check joint limits
     for (unsigned int i = 0; i < N; i++)

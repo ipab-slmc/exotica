@@ -81,7 +81,7 @@ public:
     std::string getRootFrameName();
     std::string getRootJointName();
     moveit_msgs::PlanningScene getPlanningSceneMsg();
-    exotica::KinematicTree& getSolver();
+    exotica::KinematicTree& getKinematicTree();
     void getJointNames(std::vector<std::string>& joints);
     std::vector<std::string> getJointNames();
     std::vector<std::string> getModelJointNames();

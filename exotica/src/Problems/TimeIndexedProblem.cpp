@@ -47,14 +47,14 @@ TimeIndexedProblem::~TimeIndexedProblem() = default;
 
 Eigen::MatrixXd TimeIndexedProblem::getBounds() const
 {
-    return scene_->getSolver().getJointLimits();
+    return scene_->getKinematicTree().getJointLimits();
 }
 
 void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
 {
     init_ = init;
 
-    N = scene_->getSolver().getNumControlledJoints();
+    N = scene_->getKinematicTree().getNumControlledJoints();
 
     W_rate = init_.Wrate;
     W = Eigen::MatrixXd::Identity(N, N) * W_rate;
@@ -72,7 +72,7 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
 
     if (init.LowerBound.rows() == N)
     {
-        scene_->getSolver().setJointLimitsLower(init.LowerBound);
+        scene_->getKinematicTree().setJointLimitsLower(init.LowerBound);
     }
     else if (init.LowerBound.rows() != 0)
     {
@@ -80,7 +80,7 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     }
     if (init.UpperBound.rows() == N)
     {
-        scene_->getSolver().setJointLimitsUpper(init.UpperBound);
+        scene_->getKinematicTree().setJointLimitsUpper(init.UpperBound);
     }
     else if (init.UpperBound.rows() != 0)
     {
@@ -169,7 +169,7 @@ void TimeIndexedProblem::preupdate()
     // updates etc.
     KinematicSolutions.clear();
     KinematicSolutions.resize(T);
-    for (int i = 0; i < T; i++) KinematicSolutions[i] = std::make_shared<KinematicResponse>(*scene_->getSolver().getKinematicResponse());
+    for (int i = 0; i < T; i++) KinematicSolutions[i] = std::make_shared<KinematicResponse>(*scene_->getKinematicTree().getKinematicResponse());
 }
 
 void TimeIndexedProblem::setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
@@ -210,7 +210,7 @@ void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
-    scene_->getSolver().setKinematicResponse(KinematicSolutions[t]);
+    scene_->getKinematicTree().setKinematicResponse(KinematicSolutions[t]);
 
     // Pass the corresponding number of relevant task kinematics to the TaskMaps
     // via the PlanningProblem::updateMultipleTaskKinematics method. For now we
@@ -629,7 +629,7 @@ double TimeIndexedProblem::getRhoNEQ(const std::string& task_name, int t)
 bool TimeIndexedProblem::isValid()
 {
     bool succeeded = true;
-    auto bounds = scene_->getSolver().getJointLimits();
+    auto bounds = scene_->getKinematicTree().getJointLimits();
 
     // Check for every state
     for (unsigned int t = 0; t < T; t++)

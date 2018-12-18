@@ -47,7 +47,7 @@ BoundedTimeIndexedProblem::~BoundedTimeIndexedProblem() = default;
 
 Eigen::MatrixXd BoundedTimeIndexedProblem::getBounds() const
 {
-    return scene_->getSolver().getJointLimits();
+    return scene_->getKinematicTree().getJointLimits();
 }
 
 void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer& init)
@@ -56,7 +56,7 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
 
     if (init.LowerBound.rows() == N)
     {
-        scene_->getSolver().setJointLimitsLower(init.LowerBound);
+        scene_->getKinematicTree().setJointLimitsLower(init.LowerBound);
     }
     else if (init.LowerBound.rows() != 0)
     {
@@ -64,7 +64,7 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
     }
     if (init.UpperBound.rows() == N)
     {
-        scene_->getSolver().setJointLimitsUpper(init.UpperBound);
+        scene_->getKinematicTree().setJointLimitsUpper(init.UpperBound);
     }
     else if (init.UpperBound.rows() != 0)
     {
@@ -300,7 +300,7 @@ void BoundedTimeIndexedProblem::reinitializeVariables()
         JN += Tasks[i]->LengthJ;
     }
 
-    N = scene_->getSolver().getNumControlledJoints();
+    N = scene_->getKinematicTree().getNumControlledJoints();
 
     W = Eigen::MatrixXd::Identity(N, N) * W_rate;
     if (init_.W.rows() > 0)

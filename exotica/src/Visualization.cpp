@@ -57,11 +57,11 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
 
     if (!Server::isRos()) return;
 
-    if (trajectory.cols() != scene_->getSolver().getNumControlledJoints())
-        throw_pretty("Number of DoFs in trajectory does not match number of controlled joints of robot. Got " << trajectory.cols() << " but expected " << scene_->getSolver().getNumControlledJoints());
+    if (trajectory.cols() != scene_->getKinematicTree().getNumControlledJoints())
+        throw_pretty("Number of DoFs in trajectory does not match number of controlled joints of robot. Got " << trajectory.cols() << " but expected " << scene_->getKinematicTree().getNumControlledJoints());
 
     moveit_msgs::DisplayTrajectory traj_msg;
-    traj_msg.model_id = scene_->getSolver().getRobotModel()->getName();
+    traj_msg.model_id = scene_->getKinematicTree().getRobotModel()->getName();
 
     const int num_trajectory_points = trajectory.rows();
 
@@ -71,7 +71,7 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
 
     // Floating base support
     int base_offset = 0;
-    switch (scene_->getSolver().getControlledBaseType())
+    switch (scene_->getKinematicTree().getControlledBaseType())
     {
         case BASE_TYPE::FIXED:
             // HIGHLIGHT("Fixed base, no offset");
@@ -89,10 +89,10 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
     }
 
     // Insert floating base if not a fixed-base controlled robot
-    if (scene_->getSolver().getControlledBaseType() != BASE_TYPE::FIXED)
+    if (scene_->getKinematicTree().getControlledBaseType() != BASE_TYPE::FIXED)
     {
         traj_msg.trajectory[0].multi_dof_joint_trajectory.header.frame_id = scene_->getRootFrameName();
-        traj_msg.trajectory[0].multi_dof_joint_trajectory.joint_names.push_back(scene_->getSolver().getRootJointName());
+        traj_msg.trajectory[0].multi_dof_joint_trajectory.joint_names.push_back(scene_->getKinematicTree().getRootJointName());
         traj_msg.trajectory[0].multi_dof_joint_trajectory.points.resize(num_trajectory_points);
 
         geometry_msgs::Transform base_transform;
@@ -102,12 +102,12 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
             base_transform.translation.x = trajectory(i, 0);
             base_transform.translation.y = trajectory(i, 1);
 
-            if (scene_->getSolver().getControlledBaseType() == BASE_TYPE::FLOATING)
+            if (scene_->getKinematicTree().getControlledBaseType() == BASE_TYPE::FLOATING)
             {
                 base_transform.translation.z = trajectory(i, 2);
                 quat = Eigen::AngleAxisd(trajectory(i, 3), Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(trajectory(i, 4), Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(trajectory(i, 5), Eigen::Vector3d::UnitZ());
             }
-            else if (scene_->getSolver().getControlledBaseType() == BASE_TYPE::PLANAR)
+            else if (scene_->getKinematicTree().getControlledBaseType() == BASE_TYPE::PLANAR)
             {
                 base_transform.translation.z = 0.0;  // TODO: Technically: trans_z
                 quat = Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(trajectory(i, 2), Eigen::Vector3d::UnitZ());
@@ -127,7 +127,7 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
     traj_msg.trajectory_start.joint_state.header.frame_id = scene_->getRootFrameName();
 
     // Insert all starting joint states - including the floating base
-    auto model_state_map = scene_->getSolver().getModelStateMap();
+    auto model_state_map = scene_->getKinematicTree().getModelStateMap();
     for (const auto& pair : model_state_map)
     {
         // Only push back if not part of the floating base - i.e., the joint name includes the root frame name.
@@ -143,7 +143,7 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
     traj_msg.trajectory[0].joint_trajectory.points.resize(num_trajectory_points);
     traj_msg.trajectory[0].joint_trajectory.joint_names.resize(num_actuated_joints_without_base);
     for (int i = 0; i < num_actuated_joints_without_base; i++)
-        traj_msg.trajectory[0].joint_trajectory.joint_names[i] = scene_->getSolver().getJointNames()[base_offset + i];
+        traj_msg.trajectory[0].joint_trajectory.joint_names[i] = scene_->getKinematicTree().getJointNames()[base_offset + i];
 
     // Insert actuated joints without base
     for (int i = 0; i < num_trajectory_points; i++)

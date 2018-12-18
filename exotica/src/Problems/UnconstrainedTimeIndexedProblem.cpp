@@ -62,7 +62,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     }
     yref.setZero(PhiN);
 
-    N = scene_->getSolver().getNumControlledJoints();
+    N = scene_->getKinematicTree().getNumControlledJoints();
 
     W = Eigen::MatrixXd::Identity(N, N) * W_rate;
     if (init_.W.rows() > 0)
@@ -136,7 +136,7 @@ void UnconstrainedTimeIndexedProblem::preupdate()
     // updates etc.
     KinematicSolutions.clear();
     KinematicSolutions.resize(T);
-    for (unsigned int i = 0; i < T; i++) KinematicSolutions[i] = std::make_shared<KinematicResponse>(*scene_->getSolver().getKinematicResponse());
+    for (unsigned int i = 0; i < T; i++) KinematicSolutions[i] = std::make_shared<KinematicResponse>(*scene_->getKinematicTree().getKinematicResponse());
 }
 
 void UnconstrainedTimeIndexedProblem::setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
@@ -177,7 +177,7 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
 
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
-    scene_->getSolver().setKinematicResponse(KinematicSolutions[t]);
+    scene_->getKinematicTree().setKinematicResponse(KinematicSolutions[t]);
 
     // Pass the corresponding number of relevant task kinematics to the TaskMaps
     // via the PlanningProblem::updateMultipleTaskKinematics method. For now we

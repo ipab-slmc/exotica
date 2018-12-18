@@ -63,11 +63,11 @@ void PlanningProblem::preupdate()
 
 void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
 {
-    if (x.rows() == scene_->getSolver().getNumModelJoints())
+    if (x.rows() == scene_->getKinematicTree().getNumModelJoints())
     {
         startState = x;
     }
-    else if (x.rows() == scene_->getSolver().getNumControlledJoints())
+    else if (x.rows() == scene_->getKinematicTree().getNumControlledJoints())
     {
         std::vector<std::string> jointNames = scene_->getJointNames();
         std::vector<std::string> modelNames = scene_->getModelJointNames();
@@ -81,7 +81,7 @@ void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
     }
     else
     {
-        throw_named("Wrong start state vector size, expected " << scene_->getSolver().getNumModelJoints() << ", got " << x.rows());
+        throw_named("Wrong start state vector size, expected " << scene_->getKinematicTree().getNumModelJoints() << ", got " << x.rows());
     }
 }
 
@@ -112,7 +112,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     scene_.reset(new Scene());
     scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
     startState = Eigen::VectorXd::Zero(scene_->getModelJointNames().size());
-    N = scene_->getSolver().getNumControlledJoints();
+    N = scene_->getKinematicTree().getNumControlledJoints();
 
     if (init.StartState.rows() > 0)
     {

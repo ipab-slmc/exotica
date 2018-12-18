@@ -48,7 +48,7 @@ TimeIndexedSamplingProblem::~TimeIndexedSamplingProblem() = default;
 std::vector<double> TimeIndexedSamplingProblem::getBounds()
 {
     std::vector<double> bounds;
-    auto jointLimits = scene_->getSolver().getJointLimits();
+    auto jointLimits = scene_->getKinematicTree().getJointLimits();
 
     bounds.resize(2 * N);
     for (unsigned int i = 0; i < N; i++)

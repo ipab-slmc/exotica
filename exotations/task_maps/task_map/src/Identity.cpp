@@ -89,7 +89,7 @@ void Identity::assignScene(Scene_ptr scene)
 
 void Identity::Initialize()
 {
-    N = scene_->getSolver().getNumControlledJoints();
+    N = scene_->getKinematicTree().getNumControlledJoints();
     if (init_.JointMap.rows() > 0)
     {
         jointMap.resize(init_.JointMap.rows());

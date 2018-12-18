@@ -58,7 +58,7 @@ void JointVelocityLimit::Initialize()
 {
     double percent = static_cast<double>(init_.SafePercentage);
 
-    N = scene_->getSolver().getNumControlledJoints();
+    N = scene_->getKinematicTree().getNumControlledJoints();
     dt_ = std::abs(init_.dt);
     if (dt_ == 0.0)
         throw_named("Timestep dt needs to be greater than 0");

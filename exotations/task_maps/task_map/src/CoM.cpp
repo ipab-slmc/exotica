@@ -100,7 +100,7 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
     {
         if (debug_) com_marker_.points.resize(0);
         double M = 0.0;
-        for (std::weak_ptr<KinematicElement> welement : scene_->getSolver().getTree())
+        for (std::weak_ptr<KinematicElement> welement : scene_->getKinematicTree().getTree())
         {
             std::shared_ptr<KinematicElement> element = welement.lock();
             if (element->isRobotLink || element->ClosestRobotLink.lock())  // Only for robot links and attached objects
@@ -109,8 +109,8 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
                 if (mass > 0)
                 {
                     KDL::Frame cog = KDL::Frame(element->Segment.getInertia().getCOG());
-                    KDL::Frame com_local = scene_->getSolver().FK(element, cog, nullptr, KDL::Frame());
-                    Eigen::MatrixXd Jcom_local = scene_->getSolver().Jacobian(element, cog, nullptr, KDL::Frame());
+                    KDL::Frame com_local = scene_->getKinematicTree().FK(element, cog, nullptr, KDL::Frame());
+                    Eigen::MatrixXd Jcom_local = scene_->getKinematicTree().Jacobian(element, cog, nullptr, KDL::Frame());
                     com += com_local.p * mass;
                     J += Jcom_local.topRows(dim_) * mass;
                     M += mass;
@@ -170,9 +170,9 @@ void CoM::Initialize()
             {
                 throw_named("Requesting CoM frame with base other than root! '" << Frames[i].FrameALinkName << "'");
             }
-            Frames[i].FrameALinkName = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getName();
-            Frames[i].FrameAOffset.p = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getInertia().getCOG();
-            mass_(i) = scene_->getSolver().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getInertia().getMass();
+            Frames[i].FrameALinkName = scene_->getKinematicTree().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getName();
+            Frames[i].FrameAOffset.p = scene_->getKinematicTree().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getInertia().getCOG();
+            mass_(i) = scene_->getKinematicTree().getTreeMap()[Frames[i].FrameALinkName].lock()->Segment.getInertia().getMass();
         }
     }
 

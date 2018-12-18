@@ -44,7 +44,7 @@ void JointJerkBackwardDifference::assignScene(Scene_ptr scene)
     scene_ = scene;
 
     // Get ndof
-    N_ = scene_->getSolver().getNumControlledJoints();
+    N_ = scene_->getKinematicTree().getNumControlledJoints();
 
     // Set binomial coefficient parameters.
     backward_difference_params_ << -3, 3, -1;

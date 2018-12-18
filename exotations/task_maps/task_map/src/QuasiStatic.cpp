@@ -154,7 +154,7 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     phi(0) = 0.0;
     KDL::Vector KDLcom;
     double M = 0.0;
-    for (std::weak_ptr<KinematicElement> welement : scene_->getSolver().getTree())
+    for (std::weak_ptr<KinematicElement> welement : scene_->getKinematicTree().getTree())
     {
         std::shared_ptr<KinematicElement> element = welement.lock();
         if (element->isRobotLink || element->ClosestRobotLink.lock())  // Only for robot links and attached objects
@@ -163,7 +163,7 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
             if (mass > 0)
             {
                 KDL::Frame cog = KDL::Frame(element->Segment.getInertia().getCOG());
-                KDL::Frame com_local = scene_->getSolver().FK(element, cog, nullptr, KDL::Frame());
+                KDL::Frame com_local = scene_->getKinematicTree().FK(element, cog, nullptr, KDL::Frame());
                 KDLcom += com_local.p * mass;
                 M += mass;
             }
@@ -243,7 +243,7 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     Eigen::MatrixXd Jcom = Eigen::MatrixXd::Zero(2, J.cols());
     KDL::Vector KDLcom;
     double M = 0.0;
-    for (std::weak_ptr<KinematicElement> welement : scene_->getSolver().getTree())
+    for (std::weak_ptr<KinematicElement> welement : scene_->getKinematicTree().getTree())
     {
         std::shared_ptr<KinematicElement> element = welement.lock();
         if (element->isRobotLink || element->ClosestRobotLink.lock())  // Only for robot links and attached objects
@@ -252,8 +252,8 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
             if (mass > 0)
             {
                 KDL::Frame cog = KDL::Frame(element->Segment.getInertia().getCOG());
-                KDL::Frame com_local = scene_->getSolver().FK(element, cog, nullptr, KDL::Frame());
-                Eigen::MatrixXd Jcom_local = scene_->getSolver().Jacobian(element, cog, nullptr, KDL::Frame());
+                KDL::Frame com_local = scene_->getKinematicTree().FK(element, cog, nullptr, KDL::Frame());
+                Eigen::MatrixXd Jcom_local = scene_->getKinematicTree().Jacobian(element, cog, nullptr, KDL::Frame());
                 KDLcom += com_local.p * mass;
                 Jcom += Jcom_local.topRows(2) * mass;
                 M += mass;

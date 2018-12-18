@@ -13,7 +13,7 @@ def sig_int_handler(signal, frame):
 
 def publish_pose(q, problem, t=0.0):
     problem.get_scene().update(q, t)
-    problem.get_scene().get_solver().publish_frames()
+    problem.get_scene().get_kinematic_tree().publish_frames()
 
 
 def publish_trajectory(traj, T, problem):

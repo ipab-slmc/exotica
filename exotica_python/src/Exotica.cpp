@@ -910,7 +910,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("get_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::getJointNames);
     scene.def("get_controlled_link_names", &Scene::getControlledLinkNames);
     scene.def("get_model_link_names", &Scene::getModelLinkNames);
-    scene.def("get_solver", &Scene::getSolver, py::return_value_policy::reference_internal);
+    scene.def("get_kinematic_tree", &Scene::getKinematicTree, py::return_value_policy::reference_internal);
     scene.def("get_collision_scene", &Scene::getCollisionScene, py::return_value_policy::reference_internal);
     scene.def("get_model_joint_names", &Scene::getModelJointNames);
     scene.def("get_model_state", &Scene::getModelState);
@@ -963,12 +963,12 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("attach_object_local", &Scene::attachObjectLocal);
     scene.def("detach_object", &Scene::detachObject);
     scene.def("has_attached_object", &Scene::hasAttachedObject);
-    scene.def("fk", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->getSolver().FK(e1, o1, e2, o2); });
-    scene.def("fk", [](Scene* instance, const std::string& e1, const std::string& e2) { return instance->getSolver().FK(e1, KDL::Frame(), e2, KDL::Frame()); });
-    scene.def("fk", [](Scene* instance, const std::string& e1) { return instance->getSolver().FK(e1, KDL::Frame(), "", KDL::Frame()); });
-    scene.def("jacobian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->getSolver().Jacobian(e1, o1, e2, o2); });
-    scene.def("jacobian", [](Scene* instance, const std::string& e1, const std::string& e2) { return instance->getSolver().Jacobian(e1, KDL::Frame(), e2, KDL::Frame()); });
-    scene.def("jacobian", [](Scene* instance, const std::string& e1) { return instance->getSolver().Jacobian(e1, KDL::Frame(), "", KDL::Frame()); });
+    scene.def("fk", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->getKinematicTree().FK(e1, o1, e2, o2); });
+    scene.def("fk", [](Scene* instance, const std::string& e1, const std::string& e2) { return instance->getKinematicTree().FK(e1, KDL::Frame(), e2, KDL::Frame()); });
+    scene.def("fk", [](Scene* instance, const std::string& e1) { return instance->getKinematicTree().FK(e1, KDL::Frame(), "", KDL::Frame()); });
+    scene.def("jacobian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->getKinematicTree().Jacobian(e1, o1, e2, o2); });
+    scene.def("jacobian", [](Scene* instance, const std::string& e1, const std::string& e2) { return instance->getKinematicTree().Jacobian(e1, KDL::Frame(), e2, KDL::Frame()); });
+    scene.def("jacobian", [](Scene* instance, const std::string& e1) { return instance->getKinematicTree().Jacobian(e1, KDL::Frame(), "", KDL::Frame()); });
     scene.def("add_trajectory_from_file", &Scene::addTrajectoryFromFile);
     scene.def("add_trajectory", (void (Scene::*)(const std::string&, const std::string&)) & Scene::addTrajectory);
     scene.def("get_trajectory", [](Scene* instance, const std::string& link) { return instance->getTrajectory(link)->toString(); });

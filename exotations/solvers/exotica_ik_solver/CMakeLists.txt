@@ -5,8 +5,6 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
 )
 
-find_package(LAPACK REQUIRED)
-
 AddInitializer(IKSolver)
 GenInitializers()
 
@@ -14,7 +12,6 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS exotica
-  DEPENDS LAPACK
 )
 
 include_directories(
@@ -23,7 +20,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME} src/ik_solver.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 install(TARGETS ${PROJECT_NAME}

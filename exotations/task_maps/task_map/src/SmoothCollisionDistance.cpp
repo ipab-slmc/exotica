@@ -95,20 +95,20 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
 
                     if (!linear_)
                     {
-                        Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+                        Eigen::MatrixXd tmpJ = scene_->getKinematicTree().Jacobian(
                             proxy.e1, arel, nullptr, KDL::Frame());
                         J += (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ.topRows<3>());
-                        tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
-                                                            KDL::Frame());
+                        tmpJ = scene_->getKinematicTree().Jacobian(proxy.e2, brel, nullptr,
+                                                                   KDL::Frame());
                         J -= (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ.topRows<3>());
                     }
                     else
                     {
-                        Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+                        Eigen::MatrixXd tmpJ = scene_->getKinematicTree().Jacobian(
                             proxy.e1, arel, nullptr, KDL::Frame());
                         J += 1 / margin * (proxy.normal1.transpose() * tmpJ.topRows<3>());
-                        tmpJ = scene_->getSolver().Jacobian(proxy.e2, brel, nullptr,
-                                                            KDL::Frame());
+                        tmpJ = scene_->getKinematicTree().Jacobian(proxy.e2, brel, nullptr,
+                                                                   KDL::Frame());
                         J -= 1 / margin * (proxy.normal1.transpose() * tmpJ.topRows<3>());
                     }
                 }

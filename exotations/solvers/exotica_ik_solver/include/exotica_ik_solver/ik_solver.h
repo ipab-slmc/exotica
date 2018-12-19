@@ -31,9 +31,6 @@
 #ifndef EXOTICA_IK_SOLVER_IK_SOLVER_H_
 #define EXOTICA_IK_SOLVER_IK_SOLVER_H_
 
-#include <fstream>
-#include <iostream>
-
 #include <exotica/MotionSolver.h>
 #include <exotica/Problems/UnconstrainedEndPoseProblem.h>
 
@@ -59,15 +56,12 @@ public:
 private:
     IKSolverInitializer parameters_;
 
-    Eigen::MatrixXd PseudoInverse(Eigen::MatrixXdRefConst J);
     void ScaleToStepSize(Eigen::VectorXdRef xd);
 
     UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
 
-    Eigen::MatrixXd Cinv_;  //!< Weight Matrices
-    Eigen::MatrixXd C_;
-    Eigen::MatrixXd W_;
-    Eigen::MatrixXd Winv_;
+    Eigen::MatrixXd C_;  //!< \brief Regularisation (use values from interval <0, 1))
+    Eigen::MatrixXd W_;  //!< \brief Jointspace weighting
 };
 }
 

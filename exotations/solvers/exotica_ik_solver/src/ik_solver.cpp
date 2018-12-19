@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, University of Edinburgh
+ * Copyright (c) 2018, University of Edinburgh
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -30,12 +30,6 @@
 
 #include <exotica_ik_solver/ik_solver.h>
 
-#include <lapack/cblas.h>
-#include "f2c.h"
-#undef small
-#undef large
-#include <lapack/clapack.h>
-
 REGISTER_MOTIONSOLVER_TYPE("IKSolver", exotica::IKSolver)
 
 namespace exotica
@@ -43,30 +37,6 @@ namespace exotica
 IKSolver::IKSolver() = default;
 
 IKSolver::~IKSolver() = default;
-
-Eigen::MatrixXd inverseSymPosDef(const Eigen::Ref<const Eigen::MatrixXd>& A_)
-{
-    Eigen::MatrixXd Ainv_ = A_;
-    double* AA = Ainv_.data();
-    integer info;
-    integer nn = A_.rows();
-    // Compute Cholesky
-    dpotrf_((char*)"L", &nn, AA, &nn, &info);
-    if (info != 0)
-    {
-        throw_pretty("Can't invert matrix. Cholesky decomposition failed: " << info << std::endl
-                                                                            << A_);
-    }
-    // Invert
-    dpotri_((char*)"L", &nn, AA, &nn, &info);
-    if (info != 0)
-    {
-        throw_pretty("Can't invert matrix: " << info << std::endl
-                                             << A_);
-    }
-    Ainv_.triangularView<Eigen::Upper>() = Ainv_.transpose();
-    return Ainv_;
-}
 
 void IKSolver::Instantiate(IKSolverInitializer& init)
 {
@@ -82,14 +52,10 @@ void IKSolver::specifyProblem(PlanningProblem_ptr pointer)
     MotionSolver::specifyProblem(pointer);
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 
+    if (parameters_.C < 0 || parameters_.C >= 1.0)
+        throw_named("C must be from interval <0, 1)!");
     C_ = Eigen::MatrixXd::Identity(prob_->Cost.JN, prob_->Cost.JN) * parameters_.C;
-    if (parameters_.C == 0.0)
-        Cinv_ = Eigen::MatrixXd::Zero(prob_->Cost.JN, prob_->Cost.JN);
-    else
-        Cinv_ = C_.inverse();
-
     W_ = prob_->W;
-    Winv_ = W_.inverse();
 
     if (parameters_.Alpha.size() != 1 && prob_->N != parameters_.Alpha.size())
         throw_named("Alpha must have length of 1 or N.");
@@ -106,16 +72,33 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
 
     if (prob_->N != q0.rows()) throw_named("Wrong size q0 size=" << q0.rows() << ", required size=" << prob_->N);
 
-    const bool UseNullspace = prob_->qNominal.rows() == prob_->N;
+    Eigen::VectorXd qd, qNominal;
+    bool UseNullspace = false;
+    if (prob_->qNominal.rows() == prob_->N)
+    {
+        qNominal = prob_->qNominal;
+        UseNullspace = true;
+    }
+    else
+    {
+        qNominal = q0;
+    }
 
     solution.resize(1, prob_->N);
 
     Eigen::VectorXd q = q0;
     double error = INFINITY;
+    double C = C_(0, 0);
+    Eigen::VectorXd yd;
+    Eigen::MatrixXd J;
+    if (C > 0)
+    {
+        yd = Eigen::VectorXd(prob_->JN + prob_->N);
+        J = Eigen::MatrixXd(prob_->JN + prob_->N, prob_->N);
+    }
     for (int i = 0; i < getNumberOfMaxIterations(); i++)
     {
         prob_->Update(q);
-        Eigen::VectorXd yd = prob_->Cost.S * prob_->Cost.ydiff;
 
         error = prob_->getScalarCost();
 
@@ -128,11 +111,24 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        Eigen::MatrixXd Jinv = PseudoInverse(prob_->Cost.S * prob_->Cost.J);
-        Eigen::VectorXd qd = Jinv * yd;
-        if (UseNullspace)
-            qd += (Eigen::MatrixXd::Identity(prob_->N, prob_->N) - Jinv * prob_->Cost.S * prob_->J) *
-                  (q - prob_->qNominal);
+        if (C > 0)
+        {
+            yd.head(prob_->JN) = prob_->Cost.S * prob_->Cost.ydiff;
+            yd.tail(prob_->N) = q - qNominal;
+            J.topRows(prob_->JN) = prob_->Cost.S * prob_->Cost.J * W_ * (1.0 - C);
+            J.bottomRows(prob_->N) = C_;
+        }
+        else
+        {
+            yd = prob_->Cost.S * prob_->Cost.ydiff;
+            J = prob_->Cost.S * prob_->Cost.J * W_;
+        }
+
+#if EIGEN_VERSION_AT_LEAST(3, 3, 0)
+        qd = J.completeOrthogonalDecomposition().solve(yd);
+#else
+        qd = J.householderQr().solve(yd);
+#endif
 
         ScaleToStepSize(qd);
 
@@ -157,31 +153,6 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
     solution.row(0) = q;
 
     planning_time_ = timer.getDuration();
-}
-
-Eigen::MatrixXd IKSolver::PseudoInverse(Eigen::MatrixXdRefConst J)
-{
-    Eigen::MatrixXd Jpinv;
-
-    if (J.cols() < J.rows())
-    {
-        //(Jt*C^-1*J+W)^-1*Jt*C^-1
-        if (parameters_.C != 0)
-        {
-            Jpinv = inverseSymPosDef(J.transpose() * Cinv_ * J + W_) * J.transpose() * Cinv_;
-        }
-        else
-        {
-            Jpinv = inverseSymPosDef(J.transpose() * J + W_) * J.transpose();
-        }
-    }
-    else
-    {
-        //W^-1*Jt(J*W^-1*Jt+C)
-        Jpinv = Winv_ * J.transpose() * inverseSymPosDef(J * Winv_ * J.transpose() + C_);
-    }
-
-    return Jpinv;
 }
 
 void IKSolver::ScaleToStepSize(Eigen::VectorXdRef xd)

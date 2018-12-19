@@ -1,4 +1,4 @@
 - git:
-    local-name: val_description
-    uri: https://github.com/wxmerkt/oh_val_description.git
+    local-name: exotica_val_description
+    uri: https://github.com/ipab-slmc/exotica_val_description.git
     version: master

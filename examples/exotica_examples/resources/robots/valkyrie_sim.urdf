@@ -42,13 +42,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/pelvis/pelvis.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/pelvis/pelvis.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/pelvis/pelvis.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/pelvis/pelvis.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -61,13 +61,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/torso/torsoyaw.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/torso/torsoyaw.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/torso/torsoyaw.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/torso/torsoyaw.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -80,13 +80,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/torso/torsopitch.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/torso/torsopitch.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/torso/torsopitch.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/torso/torsopitch.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -99,13 +99,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/torso/torso.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/torso/torso.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/torso/torso.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/torso/torso.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -157,13 +157,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/head/neckj1.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/head/neckj1.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/head/neckj1.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/head/neckj1.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -176,13 +176,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/head/neckj2.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/head/neckj2.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/head/neckj2.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/head/neckj2.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -195,13 +195,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/head/head_multisense_no_visor.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/head/head_multisense_no_visor.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/head/head_multisense_no_visor.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/head/head_multisense_no_visor.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -253,13 +253,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj1_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj1_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -272,13 +272,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj2_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj2_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -291,13 +291,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj3_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj3_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -310,13 +310,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj4_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj4_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj4_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj4_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -381,13 +381,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj5_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj5_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj5_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj5_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -400,13 +400,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj6_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj6_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj6_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj6_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -419,13 +419,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/palm_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/palm_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/palm_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/palm_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -477,13 +477,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj1_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj1_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -496,13 +496,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj2_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj2_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -515,13 +515,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj3_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj3_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -534,13 +534,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj4_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj4_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj4_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj4_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -589,13 +589,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj1_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj1_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -608,13 +608,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj2_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj2_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -627,13 +627,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj3_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj3_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -673,13 +673,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej1_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej1_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -692,13 +692,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej2_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej2_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -711,13 +711,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej3_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej3_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -757,13 +757,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj1_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj1_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -776,13 +776,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj2_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj2_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -795,13 +795,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj3_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj3_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -841,13 +841,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj1_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj1_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -860,13 +860,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj2_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj2_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -879,13 +879,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj3_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj3_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -898,13 +898,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj4_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj4_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj4_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj4_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -969,13 +969,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj5_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj5_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj5_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj5_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -988,13 +988,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj6_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj6_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/aj6_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/aj6_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1007,13 +1007,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/palm_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/palm_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/arms/palm_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/arms/palm_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1065,13 +1065,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj1_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj1_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1084,13 +1084,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj2_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj2_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1103,13 +1103,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj3_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj3_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1122,13 +1122,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj4_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj4_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/thumbj4_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/thumbj4_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1177,13 +1177,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj1_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj1_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1196,13 +1196,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj2_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj2_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1215,13 +1215,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj3_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/indexj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/indexj3_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1261,13 +1261,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej1_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej1_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1280,13 +1280,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej2_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej2_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1299,13 +1299,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej3_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/middlej3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/middlej3_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1345,13 +1345,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj1_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj1_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1364,13 +1364,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj2_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj2_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1383,13 +1383,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj3_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/fingers/pinkyj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/fingers/pinkyj3_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1429,13 +1429,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj1_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj1_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj1_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1448,13 +1448,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj2_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj2_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj2_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1467,13 +1467,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj3_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj3_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj3_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1486,13 +1486,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj4_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj4_right.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj4_right.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj4_right.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1505,13 +1505,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj5.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj5.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj5.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj5.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1524,7 +1524,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/foot.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/foot.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
@@ -1717,13 +1717,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj1_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj1_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj1_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1736,13 +1736,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj2_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj2_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj2_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1755,13 +1755,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj3_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj3_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj3_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1774,13 +1774,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj4_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj4_left.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj4_left.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj4_left.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1793,13 +1793,13 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj5.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj5.dae"/>
       </geometry>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/lj5.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/lj5.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -1812,7 +1812,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/legs/foot.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/legs/foot.dae"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
@@ -2631,7 +2631,7 @@
     <!--     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://val_description/model/meshes/multisense/head.dae" />
+        <mesh filename="package://exotica_val_description/model/meshes/multisense/head.dae" />
       </geometry>
       <material name="">
         <color rgba="0.9098 0.44314 0.031373 1" />
@@ -2661,7 +2661,7 @@
       <!--origin xyz="0.045 -0.001163 -0.08809" rpy="-0.314 0 0" /-->
       <origin rpy="-0.314 0 0" xyz="0.045 -0.0261018277 -0.08342369"/>
       <geometry>
-        <mesh filename="package://val_description/model/meshes/multisense/head_camera.dae"/>
+        <mesh filename="package://exotica_val_description/model/meshes/multisense/head_camera.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.72941 0.35686 0.023529 1"/>

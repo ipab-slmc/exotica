@@ -26,9 +26,9 @@
     <Maps>
       <LookAt Name="LookAt">
         <EndEffector>
-          <Frame Link="EffPoint" Base="lwr_arm_6_link"/>
-          <Frame Link="LookAtTarget" Base="lwr_arm_6_link"/>
-          <Frame Link="LookAtTarget"/>
+          <Frame Link="EffPoint" Base="lwr_arm_6_link"/><!-- EndEffector #0 => Frame on robot to orient -->
+          <Frame Link="LookAtTarget" Base="lwr_arm_6_link"/><!-- EndEffector #1 => Target to look at, in relative frame of EffPoint -->
+          <Frame Link="LookAtTarget"/><!-- EndEffector #2 => Target to look at, in world frame (convenience frame) -->
         </EndEffector>
       </LookAt>
     </Maps>
@@ -41,5 +41,4 @@
     <NominalState>0 0 0 0 0 0 0</NominalState>
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedEndPoseProblem>
-
 </IKSolverDemoConfig>

@@ -1108,6 +1108,36 @@ TEST(ExoticaTaskMaps, testJointSmoothingBackwardDifference)
     }
 }
 
+TEST(ExoticaTaskMaps, testLookAt)
+{
+    try
+    {
+        {
+            TEST_COUT << "LookAt";
+
+            // Custom links
+            std::vector<Initializer> custom_links({Initializer("Link", {{"Name", std::string("EffPoint")},
+                                                                        {"Parent", std::string("endeff")},
+                                                                        {"Transform", std::string("0 0 1")}}),
+                                                   Initializer("Link", {{"Name", std::string("LookAtTarget")},
+                                                                        {"Transform", std::string("1 1 2")}})});
+
+            // Setup taskmap
+            Initializer map("exotica/LookAt", {{"Name", std::string("MyTask")},
+                                               {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("EffPoint")}, {"Base", std::string("endeff")}}),
+                                                                                         Initializer("Frame", {{"Link", std::string("LookAtTarget")}, {"Base", std::string("endeff")}}),
+                                                                                         Initializer("Frame", {{"Link", std::string("LookAtTarget")}, {"Base", std::string("")}})})}});
+            UnconstrainedEndPoseProblem_ptr problem = setupProblem(map, "", custom_links);
+            EXPECT_TRUE(testRandom(problem));
+            EXPECT_TRUE(testJacobian(problem, 2e-5));
+        }
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
 int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);

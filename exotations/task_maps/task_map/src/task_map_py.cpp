@@ -44,7 +44,7 @@ PYBIND11_MODULE(task_map_py, module)
     effAxisAlignment.def("setDirection", &EffAxisAlignment::setDirection);
 
     py::class_<LookAt, std::shared_ptr<LookAt>, TaskMap> lookAt(module, "LookAt");
-    lookAt.def("getLookAtTarget", &LookAt::getLookAtTarget);
+    lookAt.def("getLookAtTargetInWorld", &LookAt::getLookAtTargetInWorld);
 
     py::class_<Point2Line, std::shared_ptr<Point2Line>, TaskMap> point2Line(module, "Point2Line");
     point2Line.def_property("endPoint", &Point2Line::getEndPoint, &Point2Line::setEndPoint);

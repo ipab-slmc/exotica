@@ -38,13 +38,21 @@
 
 namespace exotica
 {
-class LookAt : public TaskMap, public Instantiable<LookAtInitializer>
-{
-/** \brief Points end-effector to look at a given target.
+/** 
+ * \class LookAt
+ * 
+ * \ingroup TaskMap
+ * 
+ * \brief Points end-effector to look at a given target.
  *
  * Looks at a target point by penalizing the vector which defines the orthogonal projection onto a defined line in the end-effector frame.
  * 
- * \image latex EXO_ROOT/exotations/task_maps/task_map/doc/image/lookat.eps "LookAt task map." width=2in
+ * The task map relies on defining three frames for each target to be looked at:
+ *   - (0) the EffPoint in the end-effector frame (use in task map)
+ *   - (1) the LookAtTarget in the end-effector frame (use in task map)
+ *   - (2) the LookAtTarget in the world frame (use by user to easily return target in world coordinates - can be retrieved via getLookAtTargetInWorld)
+ * 
+ * \image html taskmap_lookat.png "LookAt task map." width=500px
  * 
  * Given the point \f$p\f$ (the point to look at) defined in the end-effector space the task map is expressed by 
  * \f[
@@ -58,21 +66,23 @@ class LookAt : public TaskMap, public Instantiable<LookAtInitializer>
  * 
  * The LookAt task map can handle a goal for each end-effector. Three frames must be defined in the .xml for every goal. 
  */
+class LookAt : public TaskMap, public Instantiable<LookAtInitializer>
+{
 public:
     LookAt();
     virtual ~LookAt();
 
-    void Instantiate(LookAtInitializer &init) override;
+    void Instantiate(LookAtInitializer& init) override;
     void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
 
-    Eigen::Vector3d getLookAtTarget();
+    Eigen::Vector3d getLookAtTargetInWorld(const int& i);
 
     int taskSpaceDim() override;
 
- private:
-    int n_end_effs_; //<! Number of end-effectors.
-    int n_; //<! Dimension of the task space. 
+private:
+    int n_end_effs_;  ///< Number of end-effectors.
+    int n_;           ///< Dimension of the task space.
 };
 
 }  // namespace exotica

@@ -39,75 +39,81 @@ namespace exotica
 LookAt::LookAt() = default;
 LookAt::~LookAt() = default;
 
-Eigen::Vector3d LookAt::getLookAtTarget()
+Eigen::Vector3d LookAt::getLookAtTargetInWorld(const int& i)
 {
-    return Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(2).p.data);
+    if (i >= n_end_effs_ || i < 0) throw_pretty("Out of bounds, got " << i << " but expected less than " << n_end_effs_);
+    return Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(n_end_effs_ * i + 2).p.data);
 }
 
 void LookAt::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-  if (phi.rows() != taskSpaceDim()) throw_named("Wrong size of phi!");
+    if (phi.rows() != taskSpaceDim()) throw_named("Wrong size of phi!");
 
-    for (int i = 0; i<n_end_effs_; i++) {
-	
-    int ii=i*n_end_effs_;
+    for (int i = 0; i < n_end_effs_; i++)
+    {
+        const int end_effector_id = i * n_end_effs_;
 
-    // Get EffPoint and LookAtTarget
-    Eigen::Vector3d c = Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(ii).p.data);  // EffPoint | Eff frame
-    Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(ii+1).p.data);  // LookAtTarget | Eff frame
+        // Get EffPoint and LookAtTarget
+        Eigen::Vector3d c = Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(end_effector_id).p.data);      // EffPoint | Eff frame
+        Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(end_effector_id + 1).p.data);  // LookAtTarget | Eff frame
 
-    // Compute orthogonal orthogonal projection a onto line e->c
-    double alpha = p.dot(c) / c.squaredNorm();
-    Eigen::Vector3d a = alpha * c;
+        // Compute orthogonal orthogonal projection a onto line e->c
+        double alpha = p.dot(c) / c.squaredNorm();
+        Eigen::Vector3d a = alpha * c;
 
-    // Set phi
-    phi.segment<3>(ii) = a - p;
-
-  }
+        // Set phi
+        phi.segment<3>(end_effector_id) = a - p;
+    }
 }
 
 void LookAt::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
-  if (phi.rows() != taskSpaceDim()) throw_named("Wrong size of phi!");
-  if (J.rows() != taskSpaceDim() || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
+    if (phi.rows() != taskSpaceDim()) throw_named("Wrong size of phi!");
+    if (J.rows() != taskSpaceDim() || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
 
-  for (int i = 0; i<n_end_effs_; i++) {
-
-    int ii=i*n_end_effs_;
-    int jj=ii+1;
-
-    // Get EffPoint and LookAtTarget
-    Eigen::Vector3d c = Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(ii).p.data);  // EffPoint | Eff frame
-    Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(jj).p.data);  // LookAtTarget | Eff frame
-
-    // Compute orthogonal orthogonal projection a onto line e->c
-    double c_squared_norm = c.squaredNorm();
-    double alpha = p.dot(c) / c_squared_norm;
-    Eigen::Vector3d a = alpha * c;
-
-    // Set phi
-    phi.segment<3>(ii) = a - p;
-
-    // Compute J
-    for (int j = 0; j < J.cols(); ++j)
+    for (int i = 0; i < n_end_effs_; ++i)
     {
-        Eigen::Vector3d pd = Kinematics[0].J[jj].data.topRows<3>().col(j);
-        double alphad = c.dot(pd) / c_squared_norm;
-        J.middleRows<3>(ii).col(j) = alphad * c - pd;
-    }
+        const int end_effector_id = i * n_end_effs_;
 
-  }
+        // Get EffPoint and LookAtTarget
+        Eigen::Vector3d c = Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(end_effector_id).p.data);      // EffPoint | Eff frame
+        Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(Kinematics[0].Phi(end_effector_id + 1).p.data);  // LookAtTarget | Eff frame
+
+        // Compute orthogonal orthogonal projection a onto line e->c
+        double c_squared_norm = c.squaredNorm();
+        double alpha = p.dot(c) / c_squared_norm;
+        Eigen::Vector3d a = alpha * c;
+
+        // Set phi
+        phi.segment<3>(end_effector_id) = a - p;
+
+        // Compute J
+        for (int j = 0; j < J.cols(); ++j)
+        {
+            Eigen::Vector3d pd = Kinematics[0].J[end_effector_id + 1].data.topRows<3>().col(j);
+            double alphad = c.dot(pd) / c_squared_norm;
+            J.middleRows<3>(end_effector_id).col(j) = alphad * c - pd;
+        }
+    }
 }
 
-void LookAt::Instantiate(LookAtInitializer &init)
+void LookAt::Instantiate(LookAtInitializer& init)
 {
-  // Error check
-  if ( Frames.size() % 3 != 0) throw_named("Three frames are required for each end-effector!");
+    // Error check
+    if (Frames.size() % 3 != 0) throw_named("Three frames are required for each end-effector!");
 
-  // Init private variables
-  n_end_effs_ = Frames.size() / 3;
-  n_ = Frames.size();
-  
+    // Init private variables
+    n_end_effs_ = Frames.size() / 3;
+    n_ = Frames.size();
+
+    // Verify that the second and third frames are the same
+    for (int i = 0; i < n_end_effs_; ++i)
+    {
+        if (Frames[i + 1].FrameALinkName != Frames[i + 2].FrameALinkName)
+        {
+            throw_pretty("The second and third links (LookAtTarget) need to be the same! Got: " << Frames[i + 1].FrameALinkName << " and " << Frames[i + 2].FrameALinkName);
+        }
+    }
 }
 
 int LookAt::taskSpaceDim()

@@ -63,7 +63,7 @@ class Example(object):
         if self.joy is None: return
 
         # Get look_at_target
-        look_at_target = self.problem.getTaskMaps()['LookAt'].getLookAtTarget()
+        look_at_target = self.problem.getTaskMaps()['LookAt'].getLookAtTargetInWorld()
 
         # Update point position
         dx = self.joy.axes[4]

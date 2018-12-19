@@ -99,11 +99,11 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x,
             KDL::Frame brel = KDL::Frame(closest_proxy.e2->Frame.Inverse(KDL::Vector(
                 closest_proxy.contact2(0), closest_proxy.contact2(1), closest_proxy.contact2(2))));
 
-            Eigen::MatrixXd tmpJ = scene_->getSolver().Jacobian(
+            Eigen::MatrixXd tmpJ = scene_->getKinematicTree().Jacobian(
                 closest_proxy.e1, arel, nullptr, KDL::Frame());
             J.row(i) += (closest_proxy.normal1.transpose() * tmpJ);
-            tmpJ = scene_->getSolver().Jacobian(closest_proxy.e2, brel, nullptr,
-                                                KDL::Frame());
+            tmpJ = scene_->getKinematicTree().Jacobian(closest_proxy.e2, brel, nullptr,
+                                                       KDL::Frame());
             J.row(i) -= (closest_proxy.normal1.transpose() * tmpJ);
         }
     }

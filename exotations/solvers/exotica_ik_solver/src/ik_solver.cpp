@@ -72,31 +72,29 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
 
     if (prob_->N != q0.rows()) throw_named("Wrong size q0 size=" << q0.rows() << ", required size=" << prob_->N);
 
-    Eigen::VectorXd qd, qNominal;
-    bool UseNullspace = false;
+    Eigen::VectorXd qd, q_nominal;
     if (prob_->qNominal.rows() == prob_->N)
     {
-        qNominal = prob_->qNominal;
-        UseNullspace = true;
+        q_nominal = prob_->qNominal;
     }
     else
     {
-        qNominal = q0;
+        q_nominal = q0;
     }
 
     solution.resize(1, prob_->N);
 
     Eigen::VectorXd q = q0;
-    double error = INFINITY;
-    double C = C_(0, 0);
+    double error = std::numeric_limits<double>::infinity();
+    bool is_regularised = C_(0, 0) > 0.0;
     Eigen::VectorXd yd;
     Eigen::MatrixXd J;
-    if (C > 0)
+    if (is_regularised)
     {
         yd = Eigen::VectorXd(prob_->JN + prob_->N);
         J = Eigen::MatrixXd(prob_->JN + prob_->N, prob_->N);
     }
-    for (int i = 0; i < getNumberOfMaxIterations(); i++)
+    for (int i = 0; i < getNumberOfMaxIterations(); ++i)
     {
         prob_->Update(q);
 
@@ -111,11 +109,11 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        if (C > 0)
+        if (is_regularised)
         {
             yd.head(prob_->JN) = prob_->Cost.S * prob_->Cost.ydiff;
-            yd.tail(prob_->N) = q - qNominal;
-            J.topRows(prob_->JN) = prob_->Cost.S * prob_->Cost.J * W_ * (1.0 - C);
+            yd.tail(prob_->N) = q - q_nominal;
+            J.topRows(prob_->JN) = prob_->Cost.S * prob_->Cost.J * W_ * (1.0 - C_(0, 0));
             J.bottomRows(prob_->N) = C_;
         }
         else
@@ -127,7 +125,7 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
 #if EIGEN_VERSION_AT_LEAST(3, 3, 0)
         qd = J.completeOrthogonalDecomposition().solve(yd);
 #else
-        qd = J.householderQr().solve(yd);
+        qd = J.colPivHouseholderQr().solve(yd);
 #endif
 
         ScaleToStepSize(qd);

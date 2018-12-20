@@ -68,8 +68,6 @@ void run()
     Initializer solver("exotica/IKSolver", {
                                                {"Name", std::string("MySolver")},
                                                {"MaxIterations", 1},
-                                               {"MaxStep", 0.1},
-                                               {"C", 1e-3},
                                            });
 
     HIGHLIGHT_NAMED("GenericLoader", "Loaded from a hardcoded generic initializer.");

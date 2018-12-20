@@ -30,6 +30,8 @@
     </Equality>
 
     <JointVelocityLimits>2 2 2 2 2 2 2 2 2 2</JointVelocityLimits>
+    <FloatingBaseLowerLimits>-10 -10 0</FloatingBaseLowerLimits>
+    <FloatingBaseUpperLimits> 10  10 3.1415</FloatingBaseUpperLimits>
     <Goal>0 0 0 2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
   </TimeIndexedSamplingProblem>
 

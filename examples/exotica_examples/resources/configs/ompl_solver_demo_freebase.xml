@@ -27,6 +27,9 @@
     </Inequality>
 
     <Goal>2 0 0.5 2.16939  0.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
+
+    <FloatingBaseLowerLimits>-10 -10 0</FloatingBaseLowerLimits>
+    <FloatingBaseUpperLimits> 10  10 3.1415</FloatingBaseUpperLimits>
   </SamplingProblem>
 
 </PlannerDemoConfig>

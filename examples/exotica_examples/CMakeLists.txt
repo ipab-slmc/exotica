@@ -5,7 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
   exotica_ik_solver
   sensor_msgs
-  task_map
+  exotica_core_task_maps
 )
 
 catkin_package()
@@ -57,7 +57,7 @@ if(CATKIN_ENABLE_TESTING)
     exotica
     sensor_msgs
     exotica_ik_solver
-    task_map
+    exotica_core_task_maps
     rostest
   )
 

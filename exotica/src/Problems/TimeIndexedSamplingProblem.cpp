@@ -116,6 +116,27 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     Equality.Tolerance = init.ConstraintTolerance;
 
     applyStartState(false);
+
+    if (scene_->getBaseType() != exotica::BASE_TYPE::FIXED && init.FloatingBaseLowerLimits.rows() > 0 && init.FloatingBaseUpperLimits.rows() > 0)
+    {
+        if (scene_->getBaseType() == exotica::BASE_TYPE::FLOATING && init.FloatingBaseLowerLimits.rows() == 6 && init.FloatingBaseUpperLimits.rows() == 6)
+        {
+            scene_->getKinematicTree().setFloatingBaseLimitsPosXYZEulerZYX(
+                std::vector<double>(init.FloatingBaseLowerLimits.data(), init.FloatingBaseLowerLimits.data() + init.FloatingBaseLowerLimits.size()),
+                std::vector<double>(init.FloatingBaseUpperLimits.data(), init.FloatingBaseUpperLimits.data() + init.FloatingBaseUpperLimits.size()));
+        }
+        else if (scene_->getBaseType() == exotica::BASE_TYPE::PLANAR && init.FloatingBaseLowerLimits.rows() == 3 && init.FloatingBaseUpperLimits.rows() == 3)
+        {
+            scene_->getKinematicTree().setPlanarBaseLimitsPosXYEulerZ(
+                std::vector<double>(init.FloatingBaseLowerLimits.data(), init.FloatingBaseLowerLimits.data() + init.FloatingBaseLowerLimits.size()),
+                std::vector<double>(init.FloatingBaseUpperLimits.data(), init.FloatingBaseUpperLimits.data() + init.FloatingBaseUpperLimits.size()));
+        }
+        else
+        {
+            throw_named("Invalid base limits!");
+        }
+    }
+
     preupdate();
 }
 

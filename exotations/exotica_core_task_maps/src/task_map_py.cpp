@@ -5,8 +5,6 @@
 #include <pybind11/stl.h>
 
 #include <exotica_core_task_maps/CoM.h>
-#include <exotica_core_task_maps/collision_distance.h>
-#include <exotica_core_task_maps/continuous_collision.h>
 #include <exotica_core_task_maps/distance.h>
 #include <exotica_core_task_maps/eff_axis_alignment.h>
 #include <exotica_core_task_maps/eff_frame.h>
@@ -84,11 +82,4 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
     py::class_<JointLimit, std::shared_ptr<JointLimit>, TaskMap>(module, "JointLimit");
 
     py::class_<SphereCollision, std::shared_ptr<SphereCollision>, TaskMap>(module, "SphereCollision");
-
-    py::class_<CollisionDistance, std::shared_ptr<CollisionDistance>, TaskMap>(module, "CollisionDistance")
-        .def("get_collision_proxies", &CollisionDistance::get_collision_proxies);
-
-    py::class_<ContinuousCollision, std::shared_ptr<ContinuousCollision>, TaskMap>(module, "ContinuousCollision")
-        .def("get_collision_proxies", &ContinuousCollision::get_collision_proxies)
-        .def("update_collision_objects", &ContinuousCollision::update_collision_objects);
 }

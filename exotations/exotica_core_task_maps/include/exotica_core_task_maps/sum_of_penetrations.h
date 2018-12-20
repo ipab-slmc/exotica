@@ -30,39 +30,34 @@
  *
  */
 
-#ifndef SUM_OF_PENETRATIONS_H_
-#define SUM_OF_PENETRATIONS_H_
+#ifndef EXOTICA_CORE_TASK_MAPS_SUM_OF_PENETRATIONS_H_
+#define EXOTICA_CORE_TASK_MAPS_SUM_OF_PENETRATIONS_H_
 
-#include <exotica/TaskMap.h>
-#include <task_map/SumOfPenetrationsInitializer.h>
 #include <algorithm>
 #include <cmath>
 
+#include <exotica/TaskMap.h>
+#include <exotica_core_task_maps/SumOfPenetrationsInitializer.h>
+
 namespace exotica
 {
-class SumOfPenetrations
-    : public TaskMap,
-      public Instantiable<SumOfPenetrationsInitializer>
+class SumOfPenetrations : public TaskMap, public Instantiable<SumOfPenetrationsInitializer>
 {
 public:
     SumOfPenetrations();
     virtual ~SumOfPenetrations();
 
-    virtual void Instantiate(SumOfPenetrationsInitializer& init);
+    void Instantiate(SumOfPenetrationsInitializer& init) override;
+    void assignScene(Scene_ptr scene) override;
 
-    virtual void assignScene(Scene_ptr scene);
-
-    void Initialize();
-
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
-
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi,
-                        Eigen::MatrixXdRef J);
-
-    virtual int taskSpaceDim();
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
+    int taskSpaceDim() override;
 
 private:
-    std::vector<std::string> robotLinks_;
+    void initialize();
+
+    std::vector<std::string> robot_links_;
     double robot_margin_ = 0.0;
     double world_margin_ = 0.0;
     bool check_self_collision_ = true;
@@ -71,8 +66,6 @@ private:
     CollisionScene_ptr cscene_;
     SumOfPenetrationsInitializer init_;
 };
-
-typedef std::shared_ptr<exotica::SumOfPenetrations>
-    SumOfPenetrations_ptr;
 }
-#endif
+
+#endif  // EXOTICA_CORE_TASK_MAPS_SUM_OF_PENETRATIONS_H_

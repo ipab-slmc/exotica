@@ -30,10 +30,9 @@
  *
  */
 
-#include "task_map/SumOfPenetrations.h"
+#include "exotica_core_task_maps/sum_of_penetrations.h"
 
-REGISTER_TASKMAP_TYPE("SumOfPenetrations",
-                      exotica::SumOfPenetrations);
+REGISTER_TASKMAP_TYPE("SumOfPenetrations", exotica::SumOfPenetrations);
 
 namespace exotica
 {
@@ -48,7 +47,7 @@ void SumOfPenetrations::update(Eigen::VectorXdRefConst x,
     Eigen::MatrixXd J;
 
     // Get all world collision links, then iterate through them
-    std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robotLinks_, check_self_collision_);
+    std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robot_links_, check_self_collision_);
     double& d = phi(0);
     for (const auto& proxy : proxies)
     {
@@ -86,10 +85,10 @@ void SumOfPenetrations::Instantiate(
 void SumOfPenetrations::assignScene(Scene_ptr scene)
 {
     scene_ = scene;
-    Initialize();
+    initialize();
 }
 
-void SumOfPenetrations::Initialize()
+void SumOfPenetrations::initialize()
 {
     cscene_ = scene_->getCollisionScene();
     world_margin_ = init_.WorldMargin;
@@ -100,9 +99,9 @@ void SumOfPenetrations::Initialize()
                     "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_);
 
     // Get names of all controlled joints and their corresponding child links
-    robotLinks_ = scene_->getControlledLinkNames();
+    robot_links_ = scene_->getControlledLinkNames();
     // std::cout << "Robot links: ";
-    // for (auto& link : robotLinks_) std::cout << link << ", ";
+    // for (auto& link : robot_links_) std::cout << link << ", ";
     // std::cout << std::endl;
 }
 

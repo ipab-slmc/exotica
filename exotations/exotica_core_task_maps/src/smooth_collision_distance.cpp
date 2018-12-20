@@ -30,10 +30,9 @@
  *
  */
 
-#include "task_map/SmoothCollisionDistance.h"
+#include "exotica_core_task_maps/smooth_collision_distance.h"
 
-REGISTER_TASKMAP_TYPE("SmoothCollisionDistance",
-                      exotica::SmoothCollisionDistance);
+REGISTER_TASKMAP_TYPE("SmoothCollisionDistance", exotica::SmoothCollisionDistance);
 
 namespace exotica
 {
@@ -45,7 +44,7 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
     phi.setZero();
-    Eigen::MatrixXd J(dim_, robotLinks_.size());
+    Eigen::MatrixXd J(dim_, robot_links_.size());
     update(x, phi, J, false);
 }
 
@@ -69,7 +68,7 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
 
     double& d = phi(0);
 
-    for (const auto& link : robotLinks_)
+    for (const auto& link : robot_links_)
     {
         // Get all world collision links, then iterate through them
         // std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(scene_->getControlledLinkToCollisionLinkMap()[link], check_self_collision_);
@@ -126,10 +125,10 @@ void SmoothCollisionDistance::Instantiate(
 void SmoothCollisionDistance::assignScene(Scene_ptr scene)
 {
     scene_ = scene;
-    Initialize();
+    initialize();
 }
 
-void SmoothCollisionDistance::Initialize()
+void SmoothCollisionDistance::initialize()
 {
     cscene_ = scene_->getCollisionScene();
     world_margin_ = init_.WorldMargin;
@@ -141,7 +140,7 @@ void SmoothCollisionDistance::Initialize()
                     "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
 
     // Get names of all controlled joints and their corresponding child links
-    robotLinks_ = scene_->getControlledLinkNames();
+    robot_links_ = scene_->getControlledLinkNames();
 }
 
 int SmoothCollisionDistance::taskSpaceDim() { return dim_; }

@@ -30,39 +30,34 @@
  *
  */
 
-#ifndef SMOOTH_COLLISION_DISTANCE_H
-#define SMOOTH_COLLISION_DISTANCE_H
+#ifndef EXOTICA_CORE_TASK_MAPS_SMOOTH_COLLISION_DISTANCE_H_
+#define EXOTICA_CORE_TASK_MAPS_SMOOTH_COLLISION_DISTANCE_H_
 
 #include <exotica/TaskMap.h>
-#include <task_map/SmoothCollisionDistanceInitializer.h>
+#include <exotica_core_task_maps/SmoothCollisionDistanceInitializer.h>
 #include <algorithm>
 #include <cmath>
 
 namespace exotica
 {
-class SmoothCollisionDistance
-    : public TaskMap,
-      public Instantiable<SmoothCollisionDistanceInitializer>
+class SmoothCollisionDistance : public TaskMap, public Instantiable<SmoothCollisionDistanceInitializer>
 {
 public:
     SmoothCollisionDistance();
     virtual ~SmoothCollisionDistance();
 
-    virtual void Instantiate(SmoothCollisionDistanceInitializer& init);
+    void Instantiate(SmoothCollisionDistanceInitializer& init) override;
+    void assignScene(Scene_ptr scene) override;
 
-    virtual void assignScene(Scene_ptr scene);
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
 
-    void Initialize();
-
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
-
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi,
-                        Eigen::MatrixXdRef J);
-
-    virtual int taskSpaceDim();
+    int taskSpaceDim() override;
 
 private:
-    std::vector<std::string> robotLinks_;
+    void initialize();
+
+    std::vector<std::string> robot_links_;
     double robot_margin_ = 0.0;
     double world_margin_ = 0.0;
     bool linear_ = false;
@@ -74,7 +69,6 @@ private:
 
     void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
-
-typedef std::shared_ptr<exotica::SmoothCollisionDistance> SmoothCollisionDistance_ptr;
 }
-#endif
+
+#endif  // EXOTICA_CORE_TASK_MAPS_SMOOTH_COLLISION_DISTANCE_H_

@@ -57,11 +57,11 @@ private:
     void initialize_debug();
 
     Eigen::VectorXd mass_;
+    ros::Publisher com_links_pub_;
     ros::Publisher com_pub_;
-    ros::Publisher COM_pub_;
     ros::Publisher goal_pub_;
+    visualization_msgs::Marker com_links_marker_;
     visualization_msgs::Marker com_marker_;
-    visualization_msgs::Marker COM_marker_;
     visualization_msgs::Marker goal_marker_;
     bool enable_z_;
     int dim_;

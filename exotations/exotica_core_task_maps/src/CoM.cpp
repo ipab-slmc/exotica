@@ -51,9 +51,9 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
         com += Kinematics[0].Phi(i).p * mass_(i);
         if (debug_)
         {
-            com_marker_.points[i].x = Kinematics[0].Phi(i).p[0];
-            com_marker_.points[i].y = Kinematics[0].Phi(i).p[1];
-            com_marker_.points[i].z = Kinematics[0].Phi(i).p[2];
+            com_links_marker_.points[i].x = Kinematics[0].Phi(i).p[0];
+            com_links_marker_.points[i].y = Kinematics[0].Phi(i).p[1];
+            com_links_marker_.points[i].z = Kinematics[0].Phi(i).p[2];
         }
     }
 
@@ -62,13 +62,13 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
     if (debug_)
     {
-        COM_marker_.pose.position.x = phi(0);
-        COM_marker_.pose.position.y = phi(1);
-        COM_marker_.pose.position.z = phi(2);
+        com_marker_.pose.position.x = phi(0);
+        com_marker_.pose.position.y = phi(1);
+        com_marker_.pose.position.z = phi(2);
 
-        COM_marker_.header.stamp = com_marker_.header.stamp = ros::Time::now();
+        com_marker_.header.stamp = com_links_marker_.header.stamp = ros::Time::now();
+        com_links_pub_.publish(com_links_marker_);
         com_pub_.publish(com_marker_);
-        COM_pub_.publish(COM_marker_);
     }
 }
 
@@ -89,16 +89,16 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
             J += mass_(i) / M * Kinematics[0].J(i).data.topRows(dim_);
             if (debug_)
             {
-                com_marker_.points[i].x = Kinematics[0].Phi(i).p[0];
-                com_marker_.points[i].y = Kinematics[0].Phi(i).p[1];
-                com_marker_.points[i].z = Kinematics[0].Phi(i).p[2];
+                com_links_marker_.points[i].x = Kinematics[0].Phi(i).p[0];
+                com_links_marker_.points[i].y = Kinematics[0].Phi(i).p[1];
+                com_links_marker_.points[i].z = Kinematics[0].Phi(i).p[2];
             }
         }
         com = com / M;
     }
     else
     {
-        if (debug_) com_marker_.points.resize(0);
+        if (debug_) com_links_marker_.points.resize(0);
         double M = 0.0;
         for (std::weak_ptr<KinematicElement> welement : scene_->getKinematicTree().getTree())
         {
@@ -120,7 +120,7 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
                         pt.x = com_local.p[0];
                         pt.y = com_local.p[1];
                         pt.z = com_local.p[2];
-                        com_marker_.points.push_back(pt);
+                        com_links_marker_.points.push_back(pt);
                     }
                 }
             }
@@ -133,13 +133,13 @@ void CoM::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Matri
 
     if (debug_)
     {
-        COM_marker_.pose.position.x = phi(0);
-        COM_marker_.pose.position.y = phi(1);
-        COM_marker_.pose.position.z = phi(2);
+        com_marker_.pose.position.x = phi(0);
+        com_marker_.pose.position.y = phi(1);
+        com_marker_.pose.position.z = phi(2);
 
-        COM_marker_.header.stamp = com_marker_.header.stamp = ros::Time::now();
+        com_marker_.header.stamp = com_links_marker_.header.stamp = ros::Time::now();
+        com_links_pub_.publish(com_links_marker_);
         com_pub_.publish(com_marker_);
-        COM_pub_.publish(COM_marker_);
     }
 }
 
@@ -196,30 +196,28 @@ void CoM::Instantiate(CoMInitializer& init)
 
 void CoM::initialize_debug()
 {
-    com_marker_.points.resize(Frames.size());
-    com_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
-    com_marker_.color.a = .7;
-    com_marker_.color.r = 0.5;
+    com_links_marker_.points.resize(Frames.size());
+    com_links_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
+    com_links_marker_.color.a = .7;
+    com_links_marker_.color.r = 0.5;
+    com_links_marker_.color.g = 0;
+    com_links_marker_.color.b = 0;
+    com_links_marker_.scale.x = com_links_marker_.scale.y = com_links_marker_.scale.z = .02;
+    com_links_marker_.action = visualization_msgs::Marker::ADD;
+
+    com_marker_.type = visualization_msgs::Marker::CYLINDER;
+    com_marker_.color.a = 1;
+    com_marker_.color.r = 1;
     com_marker_.color.g = 0;
     com_marker_.color.b = 0;
-    com_marker_.scale.x = com_marker_.scale.y = com_marker_.scale.z = .02;
+    com_marker_.scale.x = com_marker_.scale.y = .15;
+    com_marker_.scale.z = .02;
     com_marker_.action = visualization_msgs::Marker::ADD;
 
-    COM_marker_.type = visualization_msgs::Marker::CYLINDER;
-    COM_marker_.color.a = 1;
-    COM_marker_.color.r = 1;
-    COM_marker_.color.g = 0;
-    COM_marker_.color.b = 0;
-    COM_marker_.scale.x = COM_marker_.scale.y = .15;
-    COM_marker_.scale.z = .02;
-    COM_marker_.action = visualization_msgs::Marker::ADD;
-
-    com_marker_.header.frame_id = COM_marker_.header.frame_id =
+    com_links_marker_.header.frame_id = com_marker_.header.frame_id =
         "exotica/" + scene_->getRootFrameName();
 
-    com_pub_ = Server::advertise<visualization_msgs::Marker>(
-        object_name_ + "/coms_marker", 1, true);
-    COM_pub_ = Server::advertise<visualization_msgs::Marker>(
-        object_name_ + "/COM_marker", 1, true);
+    com_links_pub_ = Server::advertise<visualization_msgs::Marker>(object_name_ + "/com_links_marker", 1, true);
+    com_pub_ = Server::advertise<visualization_msgs::Marker>(object_name_ + "/com_marker", 1, true);
 }
 }

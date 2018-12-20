@@ -207,6 +207,13 @@ public:
 
     Eigen::VectorXd getModelState();
     std::map<std::string, double> getModelStateMap();
+    /**
+     * @brief getKinematicChain get list of joints in a kinematic chain
+     * @param begin link name from which the chain starts
+     * @param end link name at which the chain ends
+     * @return list joints between begin and end
+     */
+    std::vector<std::string> getKinematicChain(const std::string& begin, const std::string& end);
     void setModelState(Eigen::VectorXdRefConst x);
     void setModelState(std::map<std::string, double> x);
     Eigen::VectorXd getControlledState();

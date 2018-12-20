@@ -993,6 +993,34 @@ std::map<std::string, double> KinematicTree::getModelStateMap()
     return ret;
 }
 
+std::vector<std::string> KinematicTree::getKinematicChain(const std::string& begin, const std::string& end)
+{
+    // check existence of requested links
+    for (const std::string& l : {begin, end})
+    {
+        if (!TreeMap.count(l))
+        {
+            throw_pretty("Link '" + l + "' does not exist.");
+        }
+    }
+
+    // get chain in reverse order, end...begin
+    std::vector<std::string> chain;
+    for (std::weak_ptr<KinematicElement> l = TreeMap.at(end);
+         l.lock()->Segment.getName() != begin;
+         l = l.lock()->Parent, chain.push_back(l.lock()->Segment.getJoint().getName()))
+    {
+        if (l.lock()->Parent.lock() == nullptr)
+        {
+            throw_pretty("There is no connection between '" + begin + "' and '" + end + "'!");
+        }
+    }
+
+    // return vector in order, begin...end
+    std::reverse(chain.begin(), chain.end());
+    return chain;
+}
+
 void KinematicTree::setModelState(Eigen::VectorXdRefConst x)
 {
     if (x.rows() != ModelJointsNames.size()) throw_pretty("Model state vector has wrong size, expected " << ModelJointsNames.size() << " got " << x.rows());

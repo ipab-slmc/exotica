@@ -79,16 +79,15 @@ set(SOURCES
     src/joint_pose.cpp
     src/sphere_collision.cpp
     src/collision_check.cpp
+    src/collision_distance.cpp
+    src/smooth_collision_distance.cpp
+    src/sum_of_penetrations.cpp
     src/quasi_static.cpp
     src/joint_velocity_backward_difference.cpp
     src/joint_acceleration_backward_difference.cpp
     src/joint_jerk_backward_difference.cpp
     src/look_at.cpp
     src/manipulability.cpp
-
-    src/SmoothCollisionDistance.cpp
-    src/SumOfPenetrations.cpp
-    src/CollisionDistance.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

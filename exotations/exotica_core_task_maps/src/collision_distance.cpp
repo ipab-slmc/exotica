@@ -30,7 +30,7 @@
  *
  */
 
-#include "task_map/CollisionDistance.h"
+#include "exotica_core_task_maps/collision_distance.h"
 
 REGISTER_TASKMAP_TYPE("CollisionDistance", exotica::CollisionDistance);
 
@@ -39,8 +39,7 @@ namespace exotica
 CollisionDistance::CollisionDistance() = default;
 CollisionDistance::~CollisionDistance() = default;
 
-void CollisionDistance::update(Eigen::VectorXdRefConst x,
-                               Eigen::VectorXdRef phi)
+void CollisionDistance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
     phi.setZero();
@@ -48,9 +47,7 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x,
     update(x, phi, J, false);
 }
 
-void CollisionDistance::update(Eigen::VectorXdRefConst x,
-                               Eigen::VectorXdRef phi,
-                               Eigen::MatrixXdRef J)
+void CollisionDistance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
     if (phi.rows() != dim_) throw_named("Wrong size of phi!");
     phi.setZero();
@@ -58,18 +55,15 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x,
     update(x, phi, J, true);
 }
 
-void CollisionDistance::update(Eigen::VectorXdRefConst x,
-                               Eigen::VectorXdRef phi,
-                               Eigen::MatrixXdRef J,
-                               bool updateJacobian)
+void CollisionDistance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian)
 {
     cscene_->updateCollisionObjectTransforms();
 
     // For all robot links: Get all collision distances, sort by distance, and process the closest.
-    for (unsigned int i = 0; i < dim_; i++)
+    for (int i = 0; i < dim_; ++i)
     {
-        // std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(scene_->getControlledLinkToCollisionLinkMap()[robotLinks_[i]], check_self_collision_);  //, false);
-        std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robotLinks_[i], check_self_collision_);
+        // std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(scene_->getControlledLinkToCollisionLinkMap()[robot_links_[i]], check_self_collision_);  //, false);
+        std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robot_links_[i], check_self_collision_);
         if (proxies.size() == 0)
         {
             phi(i) = 0;
@@ -77,7 +71,7 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x,
             continue;
         }
 
-        CollisionProxy& closest_proxy = closestProxies_[i];
+        CollisionProxy& closest_proxy = closest_proxies_[i];
         closest_proxy.distance = std::numeric_limits<double>::max();
         for (const auto& tmp_proxy : proxies)
         {
@@ -109,8 +103,7 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x,
     }
 }
 
-void CollisionDistance::Instantiate(
-    CollisionDistanceInitializer& init)
+void CollisionDistance::Instantiate(CollisionDistanceInitializer& init)
 {
     init_ = init;
 }
@@ -118,10 +111,10 @@ void CollisionDistance::Instantiate(
 void CollisionDistance::assignScene(Scene_ptr scene)
 {
     scene_ = scene;
-    Initialize();
+    initialize();
 }
 
-void CollisionDistance::Initialize()
+void CollisionDistance::initialize()
 {
     cscene_ = scene_->getCollisionScene();
     check_self_collision_ = init_.CheckSelfCollision;
@@ -129,9 +122,9 @@ void CollisionDistance::Initialize()
     robot_margin_ = init_.RobotMargin;
 
     // Get names of all controlled joints and their corresponding child links
-    robotLinks_ = scene_->getControlledLinkNames();
-    dim_ = static_cast<unsigned int>(robotLinks_.size());
-    closestProxies_.assign(dim_, CollisionProxy());
+    robot_links_ = scene_->getControlledLinkNames();
+    dim_ = static_cast<unsigned int>(robot_links_.size());
+    closest_proxies_.assign(dim_, CollisionProxy());
     if (debug_)
     {
         HIGHLIGHT_NAMED("Collision Distance", "Dimension: " << dim_

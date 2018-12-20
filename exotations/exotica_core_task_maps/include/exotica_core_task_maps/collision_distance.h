@@ -30,45 +30,40 @@
  *
  */
 
-#ifndef COLLISION_DISTANCE_H
-#define COLLISION_DISTANCE_H
+#ifndef EXOTICA_CORE_TASK_MAPS_COLLISION_DISTANCE_H_
+#define EXOTICA_CORE_TASK_MAPS_COLLISION_DISTANCE_H_
 
-#include <exotica/TaskMap.h>
-#include <task_map/CollisionDistanceInitializer.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
 
+#include <exotica/TaskMap.h>
+#include <exotica_core_task_maps/CollisionDistanceInitializer.h>
+
 namespace exotica
 {
-class CollisionDistance
-    : public TaskMap,
-      public Instantiable<CollisionDistanceInitializer>
+class CollisionDistance : public TaskMap, public Instantiable<CollisionDistanceInitializer>
 {
 public:
     CollisionDistance();
     virtual ~CollisionDistance();
 
-    virtual void Instantiate(CollisionDistanceInitializer& init);
+    void Instantiate(CollisionDistanceInitializer& init) override;
+    void assignScene(Scene_ptr scene) override;
 
-    virtual void assignScene(Scene_ptr scene);
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
+    int taskSpaceDim() override;
 
-    void Initialize();
-
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi);
-
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi,
-                        Eigen::MatrixXdRef J);
-
-    virtual int taskSpaceDim();
-
-    std::vector<CollisionProxy> getCollisionProxies() { return closestProxies_; }
+    std::vector<CollisionProxy> get_collision_proxies() { return closest_proxies_; }
 private:
-    std::vector<std::string> robotLinks_;
+    void initialize();
+
+    std::vector<std::string> robot_links_;
     bool check_self_collision_ = true;
     double robot_margin_;
     double world_margin_;
-    std::vector<CollisionProxy> closestProxies_;
+    std::vector<CollisionProxy> closest_proxies_;
 
     unsigned int dim_;
     CollisionScene_ptr cscene_;
@@ -76,7 +71,5 @@ private:
 
     void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
-
-typedef std::shared_ptr<exotica::CollisionDistance> CollisionDistance_ptr;
 }
-#endif
+#endif  // EXOTICA_CORE_TASK_MAPS_COLLISION_DISTANCE_H_

@@ -35,7 +35,7 @@
 // Manual initialization requires dependency on specific solvers and task maps:
 #include <exotica/TaskInitializer.h>
 #include <exotica_ik_solver/IKSolverInitializer.h>
-#include <task_map/EffFrameInitializer.h>
+#include <exotica_core_task_maps/EffFrameInitializer.h>
 
 using namespace exotica;
 

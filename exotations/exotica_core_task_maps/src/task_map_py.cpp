@@ -25,7 +25,7 @@
 using namespace exotica;
 namespace py = pybind11;
 
-PYBIND11_MODULE(task_map_py, module)
+PYBIND11_MODULE(exotica_core_task_maps_py, module)
 {
     module.doc() = "Exotica task map definitions";
 

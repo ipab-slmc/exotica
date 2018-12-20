@@ -689,7 +689,7 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     if (updateCollisionScene) updateCollisionObjects();
 }
 
-void Scene::addObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const std_msgs::ColorRGBA& colour, const bool updateCollisionScene)
+void Scene::addObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const Eigen::Vector4d& colour, const bool updateCollisionScene)
 {
     if (kinematica_.hasModelLink(name))
     {
@@ -698,7 +698,7 @@ void Scene::addObjectToEnvironment(const std::string& name, const KDL::Frame& tr
     Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
     ps_->getWorldNonConst()->addToObject(name, shape, pose);
-    ps_->setObjectColor(name, colour);
+    ps_->setObjectColor(name, getColor(colour));
     updateSceneFrames();
     if (updateCollisionScene) updateInternalFrames();
 }

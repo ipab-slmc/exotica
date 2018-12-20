@@ -976,9 +976,9 @@ TEST(ExoticaTaskMaps, testPoint2Plane)
             Initializer map("exotica/Point2Plane", {{"Name", std::string("MyTask")},
                                                     {"EndPoint", std::string("1 2 3")},
                                                     {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"BaseOffset", std::string("0.1 0.1 0.1 0.7071 0 0.7071 0")}})})}});
-            UnconstrainedEndPoseProblem_ptr problem = setupProblem(map);
-            EXPECT_TRUE(testRandom(problem));
-            EXPECT_TRUE(testJacobian(problem));
+            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+            EXPECT_TRUE(test_random(problem));
+            EXPECT_TRUE(test_jacobian(problem));
         }
     }
     catch (...)

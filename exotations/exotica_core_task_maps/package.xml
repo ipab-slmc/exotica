@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>exotica_core_task_maps</name>
+  <version>5.0.0</version>
+  <description>Common taskmaps provided with EXOTica.</description>
+
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+  <author>Michael Camilleri</author>
+
+  <license>BSD</license>
+  <url type="website">https://github.com/ipab-slmc/exotica</url>
+  <url type="bugtracker">https://github.com/ipab-slmc/exotica/issues</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>exotica</depend>
+  <depend>exotica_python</depend>
+  <depend>geometry_msgs</depend>
+
+  <export>
+    <exotica plugin="${prefix}/exotica_plugins.xml" />
+  </export>
+</package>

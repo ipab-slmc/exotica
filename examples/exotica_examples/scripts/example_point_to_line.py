@@ -4,7 +4,7 @@ import numpy as np
 import pyexotica as exo
 import signal
 from pyexotica.publish_trajectory import publish_pose, sig_int_handler
-import task_map_py
+import exotica_core_task_maps_py
 from sensor_msgs.msg import Joy, JointState
 from visualization_msgs.msg import Marker
 from std_msgs.msg import ColorRGBA as Color
@@ -71,7 +71,7 @@ class Example(object):
 
         p = self.p + DAMP * np.array([dx, dy, dz])
 
-        self.problem.get_task_maps()['p2l'].endPoint = p
+        self.problem.get_task_maps()['p2l'].end_point = p
         self.problem.start_state = self.q
 
         # Solve

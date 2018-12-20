@@ -126,7 +126,7 @@ public:
 
     void addObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", const std::string& shapeResourcePath = "", Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool updateCollisionScene = true);
 
-    void addObjectToEnvironment(const std::string& name, const KDL::Frame& transform = KDL::Frame(), shapes::ShapeConstPtr shape = nullptr, const std_msgs::ColorRGBA& colour = std_msgs::ColorRGBA(), const bool updateCollisionScene = true);
+    void addObjectToEnvironment(const std::string& name, const KDL::Frame& transform = KDL::Frame(), shapes::ShapeConstPtr shape = nullptr, const Eigen::Vector4d& colour = Eigen::Vector4d(), const bool updateCollisionScene = true);
 
     void removeObject(const std::string& name);
 

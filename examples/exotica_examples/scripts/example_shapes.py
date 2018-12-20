@@ -10,10 +10,10 @@ if __name__ == '__main__':
 
     # colours are given in tuples (red, green, blue, alpha) in range 0.0...1.0
     alpha = 1.0
-    black = exo.msgColorRGBA(0, 0, 0, alpha)
-    white = exo.msgColorRGBA(1, 1, 1, alpha)
-    green = exo.msgColorRGBA(0, 1, 0, alpha)
-    orange = exo.msgColorRGBA(1, 0.5, 0, alpha)
+    black = (0, 0, 0, alpha)
+    white = (1, 1, 1, alpha)
+    green = (0, 1, 0, alpha)
+    orange = (1, 0.5, 0, alpha)
 
     solver.get_problem().get_scene().add_object_to_environment(
                 name="plane", colour=green, shape=exo.Box(2, 2, 0.01))

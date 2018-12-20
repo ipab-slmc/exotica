@@ -5,7 +5,7 @@ import numpy as np
 import signal
 from pyexotica.publish_trajectory import publishPose, sigIntHandler
 from time import sleep
-import task_map_py
+import exotica_core_task_maps_py
 from sensor_msgs.msg import Joy, JointState
 from std_msgs.msg import Float64MultiArray as FloatArray
 from visualization_msgs.msg import Marker

@@ -4,7 +4,7 @@ import pyexotica as exo
 import numpy as np
 import signal
 from pyexotica.publish_trajectory import publish_pose, sig_int_handler
-import task_map_py
+import exotica_core_task_maps_py
 from sensor_msgs.msg import Joy, JointState
 from std_msgs.msg import Float64MultiArray as FloatArray
 
@@ -72,7 +72,7 @@ class Example(object):
 
         # Setup problem
         self.problem.set_goal('Position', eff[:3])
-        self.problem.get_task_maps()['Direction'].setDirection(
+        self.problem.get_task_maps()['Direction'].set_direction(
             'lwr_arm_6_link', direction)
         self.problem.start_state = self.q
 

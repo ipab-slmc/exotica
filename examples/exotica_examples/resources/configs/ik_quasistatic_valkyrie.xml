@@ -3,10 +3,6 @@
   <!--<BayesianIKSolver Name="Bayesian" MaxIterations="10" MaxBacktrackIterations="10" />-->
   <IKSolver Name="IK">
     <MaxIterations>10</MaxIterations>
-    <MaxStep>0.1</MaxStep>
-    <Tolerance>1e-8</Tolerance>
-    <Alpha>0.1</Alpha>
-    <C>1e-3</C>
   </IKSolver>
 
   <UnconstrainedEndPoseProblem>

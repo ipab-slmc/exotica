@@ -38,9 +38,19 @@
 
 namespace exotica
 {
-/**
- * \brief	IK position solver
- */
+///
+/// \brief	IK position solver
+/// The solver constructs and solves a linear program of the following form:
+/// \f[
+///   (SJW)x=y
+/// \f]
+/// Where S is a diagonal matrix of task scaling factors Rho for each task, J is the Jacobian, W is a diagonal matrix 
+/// of the joint space weights.
+///
+/// When regularisation term C is used, it gets appended to the Jacobian and distance to the nominal pose is appended 
+/// to the y vector. For more details see:
+/// https://github.com/ipab-slmc/exotica/pull/465#issuecomment-449021817
+///
 class IKSolver : public MotionSolver, public Instantiable<IKSolverInitializer>
 {
 public:
@@ -56,7 +66,7 @@ public:
 private:
     IKSolverInitializer parameters_;
 
-    void ScaleToStepSize(Eigen::VectorXdRef xd);
+    void ScaleToStepSize(Eigen::VectorXdRef xd); //!< \brief Scale the state change vector so that the largest dimension is max. step or smaller.
 
     UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
 

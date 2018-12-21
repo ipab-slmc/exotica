@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+from __future__ import print_function
+import pyexotica as exo
+from pyexotica.publish_trajectory import *
+
+solver = exo.Setup.load_solver(
+    '{exotica_examples}/resources/configs/example_ompl_freebase.xml')
+
+print("joint limits:\n" +
+      str(solver.get_problem().get_scene().get_kinematic_tree().get_joint_limits()))
+
+solution = solver.solve()
+
+plot(solution)

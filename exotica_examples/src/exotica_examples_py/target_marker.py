@@ -5,6 +5,8 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 import PyKDL as kdl
 import pyexotica as exo
 
+__all__ = ['TargetMarker']
+
 def list_to_pose(p):
     if len(p) == 3:
         return Pose(Point(x = p[0], y = p[1], z = p[2]), Quaternion(x = 0, y = 0, z = 0, w = 1))

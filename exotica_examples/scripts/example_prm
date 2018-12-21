@@ -13,7 +13,7 @@ prm = exo.Setup.load_solver(
 # Call prm.clear() to discard the roadmap.
 
 # Temporary fix: call solve() to setup the OMPL problem,
-# otherwise grow_roadmap() worn't work.
+# otherwise grow_roadmap() worn't work (issue #456).
 solution = prm.solve()
 prm.clear()
 

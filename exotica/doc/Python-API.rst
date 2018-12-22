@@ -18,3 +18,8 @@ By default, the Python bindings will be compiled for 2.7. In order to build for 
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. automodule:: exotica_core_task_maps_py
+   :members:
+   :undoc-members:
+   :show-inheritance:

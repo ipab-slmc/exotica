@@ -992,7 +992,7 @@ PYBIND11_MODULE(_pyexotica, module)
               py::arg("name"),
               py::arg("transform") = KDL::Frame(),
               py::arg("shape"),
-              py::arg("colour") = Eigen::Vector4d(),
+              py::arg("colour") = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0),
               py::arg("update_collision_scene") = true);
     scene.def("remove_object", &Scene::removeObject);
     scene.def_property_readonly("model_link_to_collision_link_map", &Scene::getModelLinkToCollisionLinkMap);

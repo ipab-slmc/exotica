@@ -689,7 +689,7 @@ void Scene::addObject(const std::string& name, const KDL::Frame& transform, cons
     if (updateCollisionScene) updateCollisionObjects();
 }
 
-void Scene::addObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const Eigen::Vector4d& colour, const bool updateCollisionScene)
+void Scene::addObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const Eigen::Vector4d& colour, const bool& updateCollisionScene)
 {
     if (kinematica_.hasModelLink(name))
     {

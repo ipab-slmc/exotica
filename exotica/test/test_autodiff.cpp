@@ -29,15 +29,18 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <gtest/gtest.h>
+#include <Eigen/Dense>
+
+#if EIGEN_VERSION_AT_LEAST(3, 3, 0)
+// Autodiff is only supported with Eigen 3.3.0 or higher
+
 #include <exotica/Tools/autodiff_chain_hessian.h>
 #include <exotica/Tools/autodiff_chain_hessian_sparse.h>
 #include <exotica/Tools/autodiff_chain_jacobian.h>
 #include <exotica/Tools/autodiff_chain_jacobian_sparse.h>
 #include <exotica/Tools/finitediff_chain_hessian.h>
 #include <exotica/Tools/finitediff_chain_jacobian.h>
-#include <Eigen/Dense>
-
-#include <gtest/gtest.h>
 
 #include <iostream>
 
@@ -778,6 +781,8 @@ TEST(AutoDiffHessianSparse, HessianComputationTemplatedMatrix)
 {
     TestHessiansSparse<Eigen::AutoDiffChainHessianSparse, TestStaticTrait>();
 }
+
+#endif
 
 int main(int argc, char **argv)
 {

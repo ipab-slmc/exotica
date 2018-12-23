@@ -8,9 +8,17 @@
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Added support for SparseVector DerType
+// Modification on lines 23, 552-585, 739-755, 806-819
 
 #ifndef EIGEN_AUTODIFF_SCALAR_H
 #define EIGEN_AUTODIFF_SCALAR_H
+
+enum
+{
+    AUTODIFF_IS_SUPPORTED_ONLY_WITH_EIGEN_3_3_0_OR_ABOVE = 666
+};
+
+EIGEN_STATIC_ASSERT(EIGEN_VERSION_AT_LEAST(3, 3, 0), AUTODIFF_IS_SUPPORTED_ONLY_WITH_EIGEN_3_3_0_OR_ABOVE)
 
 #include <Eigen/SparseCore>
 

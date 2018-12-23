@@ -33,8 +33,8 @@
 #ifndef EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_
 #define EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_
 
-#include <exotica/CollisionScene.h>
-#include <exotica/Tools/Conversions.h>
+#include <exotica_core/collision_scene.h>
+#include <exotica_core/tools/conversions.h>
 
 #include <fcl/BVH/BVH_model.h>
 #include <fcl/broadphase/broadphase.h>

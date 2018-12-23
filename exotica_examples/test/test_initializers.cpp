@@ -30,7 +30,7 @@
  *
  */
 
-#include <exotica/Exotica.h>
+#include <exotica_core/exotica_core.h>
 #include <gtest/gtest.h>
 
 // Extend testing printout //////////////////////
@@ -139,8 +139,8 @@ bool testRos()
 {
     {
         TEST_COUT << "Parsing EXOTica paths...";
-        std::string path1 = ros::package::getPath("exotica");
-        std::string path2 = parsePath("{exotica}");
+        std::string path1 = ros::package::getPath("exotica_core");
+        std::string path2 = parsePath("{exotica_core}");
         if (path1 != path2)
             ADD_FAILURE() << "Failed when parsing paths:\n"
                           << path1 << "\n"

@@ -42,8 +42,8 @@
 
 #include <iostream>
 
-#include <exotica/MotionSolver.h>
-#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
+#include <exotica_core/motion_solver.h>
+#include <exotica_core/problems/unconstrained_end_pose_problem.h>
 
 #include <exotica_aico_solver/incremental_gaussian.h>
 #include <exotica_aico_solver/math_operations.h>

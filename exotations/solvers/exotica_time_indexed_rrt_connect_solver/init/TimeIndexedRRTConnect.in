@@ -1,4 +1,4 @@
-extend <exotica/MotionSolver>
+extend <exotica_core/MotionSolver>
 Optional bool Smooth = true;
 Optional double Timeout = 60.0;
 Optional std::string Range = "1";

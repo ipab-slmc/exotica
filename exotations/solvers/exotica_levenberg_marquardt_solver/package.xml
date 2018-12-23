@@ -10,10 +10,10 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>exotica</depend>
+  <depend>exotica_core</depend>
   <depend>eigen</depend>
 
   <export>
-    <exotica plugin="${prefix}/exotica_plugins.xml" />
+    <exotica_core plugin="${prefix}/exotica_plugins.xml" />
   </export>
 </package>

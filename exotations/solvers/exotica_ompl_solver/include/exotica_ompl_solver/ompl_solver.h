@@ -34,7 +34,7 @@
 #ifndef EXOTICA_OMPL_SOLVER_OMPL_SOLVER_H_
 #define EXOTICA_OMPL_SOLVER_OMPL_SOLVER_H_
 
-#include <exotica/MotionSolver.h>
+#include <exotica_core/motion_solver.h>
 #include <exotica_ompl_solver/ompl_exo.h>
 
 typedef boost::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;

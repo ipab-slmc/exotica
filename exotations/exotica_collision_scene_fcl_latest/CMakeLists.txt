@@ -3,12 +3,12 @@ project(exotica_collision_scene_fcl_latest)
 
 add_compile_options(-std=c++11)
 
-find_package(catkin REQUIRED COMPONENTS exotica fcl_catkin geometric_shapes)
+find_package(catkin REQUIRED COMPONENTS exotica_core fcl_catkin geometric_shapes)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS exotica fcl_catkin geometric_shapes
+  CATKIN_DEPENDS exotica_core fcl_catkin geometric_shapes
 )
 
 include_directories(

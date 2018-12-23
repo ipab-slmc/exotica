@@ -4,14 +4,14 @@ project(exotica_ompl_solver)
 find_package(ompl REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
-  exotica
+  exotica_core
   exotica_python
 )
 
 catkin_package(
   INCLUDE_DIRS include ${OMPL_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME} ${OMPL_LIBRARIES}
-  CATKIN_DEPENDS exotica
+  CATKIN_DEPENDS exotica_core
 )
 
 AddInitializer(OMPLSolver RRT RRTConnect PRM LazyPRM EST KPIECE BKPIECE RRTStar LBTRRT)

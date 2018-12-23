@@ -30,12 +30,12 @@
  *
  */
 
-#include <exotica/Exotica.h>
+#include <exotica_core/exotica_core.h>
 
 using namespace exotica;
 
 int main(int argc, char **argv)
 {
-    HIGHLIGHT("Exotica version: " << exotica::Version);
+    HIGHLIGHT("Exotica version: " << exotica::version);
     Setup::printSupportedClasses();
 }

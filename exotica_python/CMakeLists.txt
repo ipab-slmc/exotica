@@ -7,13 +7,13 @@ project(exotica_python)
 add_definitions(-Wno-write-strings)
 
 find_package(catkin REQUIRED COMPONENTS
-  exotica
+  exotica_core
   pybind11_catkin
 )
 
 catkin_package(
   LIBRARIES
-  CATKIN_DEPENDS exotica pybind11_catkin
+  CATKIN_DEPENDS exotica_core pybind11_catkin
 )
 
 include_directories(${catkin_INCLUDE_DIRS})

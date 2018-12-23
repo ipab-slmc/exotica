@@ -1,0 +1,21 @@
+
+#ifndef INITIALIZEPROJECTHEADER_H_${PROJECT_NAME}
+#define INITIALIZEPROJECTHEADER_H_${PROJECT_NAME}
+
+#include<exotica_core/property.h>
+${_InitializerClassesIncludes}
+
+namespace exotica
+{
+
+inline std::vector<Initializer> get${PROJECT_NAME}Initializers()
+{
+    std::vector<Initializer> ret;
+    ${_InitializerClassesInit}
+
+    return ret;
+}
+
+}
+
+#endif

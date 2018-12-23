@@ -1,4 +1,4 @@
-extend <exotica/TaskMap>
+extend <exotica_core/TaskMap>
 Required double Precision;
 Optional std::string ReferenceFrame = "/world";
 Optional double Alpha = 1.0;

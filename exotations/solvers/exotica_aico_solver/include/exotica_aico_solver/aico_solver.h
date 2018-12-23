@@ -64,8 +64,8 @@
 
 #include <iostream>
 
-#include <exotica/MotionSolver.h>
-#include <exotica/Problems/UnconstrainedTimeIndexedProblem.h>
+#include <exotica_core/motion_solver.h>
+#include <exotica_core/problems/unconstrained_time_indexed_problem.h>
 
 #include <exotica_aico_solver/incremental_gaussian.h>
 #include <exotica_aico_solver/math_operations.h>

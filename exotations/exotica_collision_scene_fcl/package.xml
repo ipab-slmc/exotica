@@ -9,11 +9,12 @@
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>exotica</depend>
+  <depend>exotica_core</depend>
   <depend>geometric_shapes</depend>
   <depend>libfcl-dev</depend>
+  <depend>roscpp</depend>
 
   <export>
-    <exotica plugin="${prefix}/exotica_plugins.xml" />
+    <exotica_core plugin="${prefix}/exotica_plugins.xml" />
   </export>
 </package>

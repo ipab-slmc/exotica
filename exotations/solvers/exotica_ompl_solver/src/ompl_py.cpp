@@ -1,4 +1,4 @@
-#include <exotica/Exotica.h>  // TODO: be more selective
+#include <exotica_core/exotica_core.h>  // TODO: be more selective
 #undef NDEBUG
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>

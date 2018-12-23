@@ -1,2 +1,2 @@
-extend <exotica/TaskMap>
+extend <exotica_core/TaskMap>
 Optional std::string Type = "RPY";

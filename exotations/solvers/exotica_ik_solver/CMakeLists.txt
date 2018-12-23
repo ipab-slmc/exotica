@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(exotica_ik_solver)
 
 find_package(catkin REQUIRED COMPONENTS
-  exotica
+exotica_core
 )
 
 AddInitializer(IKSolver)
@@ -11,7 +11,7 @@ GenInitializers()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS exotica
+  CATKIN_DEPENDS exotica_core
 )
 
 include_directories(

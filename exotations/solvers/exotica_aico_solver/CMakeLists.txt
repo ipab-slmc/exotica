@@ -3,7 +3,7 @@ project(exotica_aico_solver)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-  exotica
+  exotica_core
 )
 
 AddInitializer(
@@ -16,7 +16,7 @@ GenInitializers()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS exotica
+  CATKIN_DEPENDS exotica_core
 )
 
 include_directories(

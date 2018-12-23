@@ -1,5 +1,5 @@
-#include <exotica/Exotica.h>
-#include <exotica/Visualization.h>
+#include <exotica_core/exotica_core.h>
+#include <exotica_core/visualization.h>
 #undef NDEBUG
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -1113,8 +1113,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .value("OCTREE", shapes::ShapeType::OCTREE)
         .export_values();
 
-    module.attr("version") = std::string(exotica::Version);
-    module.attr("branch") = std::string(exotica::Branch);
+    module.attr("version") = std::string(exotica::version);
+    module.attr("branch") = std::string(exotica::branch);
 
     AddInitializers(module);
 

@@ -1,6 +1,0 @@
-extend <exotica/PlanningProblem>
-Required int T;
-Required double Tau;
-Optional double Wrate = 1.0;
-Optional Eigen::VectorXd W = Eigen::VectorXd();
-Optional std::vector<exotica::Initializer> Cost = std::vector<exotica::Initializer>();

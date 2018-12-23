@@ -1,0 +1,3 @@
+include <exotica_core/FrameInitializer>
+extend <exotica_core/Object>
+Optional std::vector<exotica::Initializer> EndEffector = std::vector<exotica::Initializer>(); # FrameInitializer

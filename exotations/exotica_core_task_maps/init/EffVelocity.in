@@ -1,1 +1,1 @@
-extend <exotica/TaskMap>
+extend <exotica_core/TaskMap>

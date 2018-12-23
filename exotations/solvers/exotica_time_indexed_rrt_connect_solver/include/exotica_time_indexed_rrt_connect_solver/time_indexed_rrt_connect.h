@@ -33,8 +33,8 @@
 
 #include <memory>
 
-#include <exotica/MotionSolver.h>
-#include <exotica/Problems/TimeIndexedSamplingProblem.h>
+#include <exotica_core/motion_solver.h>
+#include <exotica_core/problems/time_indexed_sampling_problem.h>
 
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/StateSpace.h>

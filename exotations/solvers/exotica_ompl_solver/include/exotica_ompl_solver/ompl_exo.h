@@ -34,7 +34,7 @@
 #ifndef EXOTICA_OMPL_SOLVER_OMPL_EXO_H_
 #define EXOTICA_OMPL_SOLVER_OMPL_EXO_H_
 
-#include <exotica/Problems/SamplingProblem.h>
+#include <exotica_core/problems/sampling_problem.h>
 
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/StateSpace.h>

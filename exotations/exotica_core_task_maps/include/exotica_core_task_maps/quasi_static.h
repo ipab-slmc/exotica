@@ -33,8 +33,8 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_QUASI_STATIC_H_
 #define EXOTICA_CORE_TASK_MAPS_QUASI_STATIC_H_
 
-#include <exotica/KinematicTree.h>
-#include <exotica/TaskMap.h>
+#include <exotica_core/kinematic_tree.h>
+#include <exotica_core/task_map.h>
 #include <exotica_core_task_maps/QuasiStaticInitializer.h>
 #include <visualization_msgs/MarkerArray.h>
 

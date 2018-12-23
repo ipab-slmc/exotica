@@ -31,8 +31,8 @@
 #ifndef EXOTICA_IK_SOLVER_IK_SOLVER_H_
 #define EXOTICA_IK_SOLVER_IK_SOLVER_H_
 
-#include <exotica/MotionSolver.h>
-#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
+#include <exotica_core/motion_solver.h>
+#include <exotica_core/problems/unconstrained_end_pose_problem.h>
 
 #include <exotica_ik_solver/IKSolverInitializer.h>
 

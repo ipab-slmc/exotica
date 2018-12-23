@@ -43,14 +43,13 @@ Have a look at ```examples/exotica_examples```.
 If you have sourced the workspace correctly you should be able to run any of the demos:
 
 ```
-roslaunch exotica_examples CppCore.launch
-roslaunch exotica_examples CppPlanAICO.launch
-roslaunch exotica_examples CppPlanOMPL.launch
-roslaunch exotica_examples CppInitGeneric.launch
-roslaunch exotica_examples CppInitManual.launch
-roslaunch exotica_examples CppInitXML.launch
-roslaunch exotica_examples PythonAttachDemo.launch
-roslaunch exotica_examples PythonCollisionDistance.launch
+roslaunch exotica_examples cpp_ik_minimal.launch
+roslaunch exotica_examples cpp_core.launch
+roslaunch exotica_examples cpp_aico.launch
+roslaunch exotica_examples python_ompl.launch
+roslaunch exotica_examples python_attach.launch
+roslaunch exotica_examples python_collision_distance.launch
+roslaunch exotica_examples python_sphere_collision.launch
 ```
 
 # Publications

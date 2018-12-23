@@ -151,8 +151,6 @@ private:
     int sweep_mode_;  //!< Sweep mode
     int update_count_;
 
-    Eigen::MatrixXd lin_solver_tmp_;
-
     /**
        * \brief Updates the forward message
        *

@@ -286,7 +286,6 @@ void AICOSolver::InitMessages()
     R.assign(prob_->getT(), Eigen::MatrixXd::Zero(prob_->N, prob_->N));
     rhat = Eigen::VectorXd::Zero(prob_->getT());
     qhat.assign(prob_->getT(), Eigen::VectorXd::Zero(prob_->N));
-    lin_solver_tmp_.resize(prob_->N, prob_->N);
     {
         q = b;
         if (prob_->W.rows() != prob_->N)
@@ -442,12 +441,12 @@ void AICOSolver::UpdateTimestep(int t, bool update_fwd, bool update_bwd,
     if (damping)
     {
         Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
-        AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * damping_reference_[t], lin_solver_tmp_, prob_->N);
+        AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * damping_reference_[t]);
     }
     else
     {
         Binv[t] = Sinv[t] + Vinv[t] + R[t];
-        AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t], lin_solver_tmp_, prob_->N);
+        AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]);
     }
 
     for (int k = 0; k < max_relocation_iterations && !(Server::isRos() && !ros::ok()); k++)
@@ -463,12 +462,12 @@ void AICOSolver::UpdateTimestep(int t, bool update_fwd, bool update_bwd,
         if (damping)
         {
             Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
-            AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * damping_reference_[t], lin_solver_tmp_, prob_->N);
+            AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * damping_reference_[t]);
         }
         else
         {
             Binv[t] = Sinv[t] + Vinv[t] + R[t];
-            AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t], lin_solver_tmp_, prob_->N);
+            AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t]);
         }
     }
 }

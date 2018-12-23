@@ -6,9 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
   exotica
 )
 
-## System dependencies are found with CMake's conventions
-find_package(LAPACK REQUIRED)
-
 AddInitializer(
   ApproximateInferenceSolver
   AICOSolver
@@ -20,7 +17,6 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS exotica
-  DEPENDS LAPACK
 )
 
 include_directories(
@@ -29,13 +25,11 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  src/math_operations.cpp
   src/aico_solver.cpp
   src/bayesian_ik_solver.cpp
 )
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
-  ${LAPACK_LIBRARIES}
 )
 add_dependencies(${PROJECT_NAME}
   ${PROJECT_NAME}_initializers

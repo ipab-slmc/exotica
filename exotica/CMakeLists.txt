@@ -107,3 +107,9 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY cmake/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
 install(FILES cmake/GenerateInitializers.py cmake/InitializerProjectHeader.h.in DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
+
+if(CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(test_autodiff test/test_autodiff.cpp)
+  target_link_libraries(test_autodiff ${catkin_LIBRARIES} ${PROJECT_NAME})
+  add_dependencies(test_autodiff ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+endif()

@@ -12,16 +12,18 @@ AddInitializer(LevenbergMarquardtSolver)
 GenInitializers()
 
 catkin_package(
+    INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
     CATKIN_DEPENDS exotica
 )
-include_directories(${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} src/LevenbergMarquardtSolver.cpp)
+add_library(${PROJECT_NAME} src/levenberg_marquardt_solver.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(DIRECTORY include/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(FILES exotica_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

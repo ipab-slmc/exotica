@@ -1,28 +1,9 @@
-#include <exotica/MotionSolver.h>
-#include <exotica/Problems/UnconstrainedEndPoseProblem.h>
-#include <exotica_levenberg_marquardt_solver/LevenbergMarquardtSolverInitializer.h>
-
-namespace exotica
-{
-class LevenbergMarquardtSolver : public MotionSolver, public Instantiable<LevenbergMarquardtSolverInitializer>
-{
-public:
-    void Instantiate(LevenbergMarquardtSolverInitializer& init) override;
-
-    void Solve(Eigen::MatrixXd& solution) override;
-
-    void specifyProblem(PlanningProblem_ptr pointer) override;
-
-private:
-    LevenbergMarquardtSolverInitializer parameters_;
-
-    UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
-
-    double lambda_ = 0;  // damping factor
-};
+#include "exotica_levenberg_marquardt_solver/levenberg_marquardt_solver.h"
 
 REGISTER_MOTIONSOLVER_TYPE("LevenbergMarquardtSolverSolver", exotica::LevenbergMarquardtSolver)
 
+namespace exotica
+{
 void LevenbergMarquardtSolver::Instantiate(LevenbergMarquardtSolverInitializer& init) { parameters_ = init; }
 void LevenbergMarquardtSolver::specifyProblem(PlanningProblem_ptr pointer)
 {

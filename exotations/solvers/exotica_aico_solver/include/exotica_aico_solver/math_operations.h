@@ -50,8 +50,8 @@ namespace exotica
  * @param Ainv Resulting inverted matrix (using Cholesky factorization).
  * @param A A symmetric positive definite matrix to be inverted.
  */
-static inline void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv,
-                                    const Eigen::Ref<const Eigen::MatrixXd>& A)
+template<typename T1, typename T2>
+static inline void inverseSymPosDef(T1& Ainv, const T2& A)
 {
     Ainv = A.llt().solve(Eigen::MatrixXd::Identity(A.rows(), A.cols()));
 }
@@ -59,9 +59,8 @@ static inline void inverseSymPosDef(Eigen::Ref<Eigen::MatrixXd> Ainv,
 /**
  * \brief Computes the solution to the linear problem \f$x=Ab\f$ for symmetric positive definite matrix A
  */
-static inline void AinvBSymPosDef(Eigen::Ref<Eigen::VectorXd> x,
-                                  const Eigen::Ref<const Eigen::MatrixXd>& A,
-                                  const Eigen::Ref<const Eigen::VectorXd>& b)
+template<typename T1, typename T2, typename T3>
+static inline void AinvBSymPosDef(T1& x, const T2& A, const T3& b)
 {
     x = A.llt().solve(b);
 }

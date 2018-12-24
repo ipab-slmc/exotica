@@ -14,8 +14,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>exotica</depend>
-  <depend>liblapack-dev</depend>
-  <depend>f2c</depend>
 
   <export>
     <exotica plugin="${prefix}/exotica_plugins.xml" />

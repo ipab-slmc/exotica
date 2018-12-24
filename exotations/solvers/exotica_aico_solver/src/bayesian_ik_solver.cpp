@@ -247,7 +247,6 @@ void BayesianIKSolver::InitMessages()
     R = Eigen::MatrixXd::Zero(prob_->N, prob_->N);
     rhat = 0;
     qhat = Eigen::VectorXd::Zero(prob_->N);
-    lin_solver_tmp_.resize(prob_->N, prob_->N);
     {
         q = b;
         if (prob_->W.rows() != prob_->N)
@@ -367,12 +366,12 @@ void BayesianIKSolver::UpdateTimestep(bool update_fwd, bool update_bwd,
     if (damping)
     {
         Binv = Sinv + Vinv + R + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
-        AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * damping_reference_, lin_solver_tmp_, prob_->N);
+        AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * damping_reference_);
     }
     else
     {
         Binv = Sinv + Vinv + R;
-        AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r, lin_solver_tmp_, prob_->N);
+        AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r);
     }
 
     for (int k = 0; k < max_relocation_iterations && !(Server::isRos() && !ros::ok()); k++)
@@ -388,12 +387,12 @@ void BayesianIKSolver::UpdateTimestep(bool update_fwd, bool update_bwd,
         if (damping)
         {
             Binv = Sinv + Vinv + R + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
-            AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * damping_reference_, lin_solver_tmp_, prob_->N);
+            AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * damping_reference_);
         }
         else
         {
             Binv = Sinv + Vinv + R;
-            AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r, lin_solver_tmp_, prob_->N);
+            AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r);
         }
     }
 }

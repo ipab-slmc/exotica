@@ -84,12 +84,12 @@ PyObject* CreateStringIOObject()
         bool load(handle src, bool)                                             \
         {                                                                       \
             PyObject* stringio = CreateStringIOObject();                        \
-            if (!stringio) ThrowPretty("Can't create StringIO instance.");     \
+            if (!stringio) ThrowPretty("Can't create StringIO instance.");      \
             PyObject* result =                                                  \
                 PyObject_CallMethod(src.ptr(), "serialize", "O", stringio);     \
-            if (!result) ThrowPretty("Can't serialize.");                      \
+            if (!result) ThrowPretty("Can't serialize.");                       \
             result = PyObject_CallMethod(stringio, "getvalue", nullptr);        \
-            if (!result) ThrowPretty("Can't get buffer.");                     \
+            if (!result) ThrowPretty("Can't get buffer.");                      \
             char* data = PyByteArray_AsString(PyByteArray_FromObject(result));  \
             int len = PyByteArray_Size(result);                                 \
             unsigned char* udata = new unsigned char[len];                      \
@@ -108,8 +108,8 @@ PyObject* CreateStringIOObject()
                            return_value_policy /* policy /, handle / parent */) \
         {                                                                       \
             ros::message_traits::DataType<MessageType::Type> type;              \
-            ThrowPretty("Can't create python object from message of type '"    \
-                         << type.value() << "'!");                              \
+            ThrowPretty("Can't create python object from message of type '"     \
+                        << type.value() << "'!");                               \
         }                                                                       \
     };                                                                          \
     }                                                                           \

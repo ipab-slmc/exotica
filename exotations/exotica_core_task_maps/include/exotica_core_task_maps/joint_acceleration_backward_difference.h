@@ -75,7 +75,7 @@ public:
 
 private:
     JointAccelerationBackwardDifferenceInitializer init_;  ///< Task map initializer.
-    ScenePtr scene_;                                      ///< Scene pointer.
+    ScenePtr scene_;                                       ///< Scene pointer.
     int N_;                                                ///< Number of dofs for robot.
     Eigen::Vector2d backward_difference_params_;           ///< Binomial cooeficient parameters.
     Eigen::MatrixXd q_;                                    ///< Log of previous two joint states.

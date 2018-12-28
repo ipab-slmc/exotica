@@ -77,7 +77,6 @@ public:
     int length_phi;
     int length_jacobian;
     int num_tasks;
-
 };
 typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblemPtr;
 }

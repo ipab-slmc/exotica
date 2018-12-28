@@ -234,7 +234,6 @@ private:
     std::shared_ptr<KinematicResponse> kinematic_solution_;
     std::function<void(std::shared_ptr<KinematicResponse>)> kinematic_request_callback_;
     bool request_needs_updating_;
-
 };
 
 typedef std::shared_ptr<Scene> ScenePtr;

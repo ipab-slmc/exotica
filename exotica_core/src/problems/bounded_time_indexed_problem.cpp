@@ -90,10 +90,10 @@ void BoundedTimeIndexedProblem::SetInitialTrajectory(
 {
     if (q_parametersin.size() != T_)
         ThrowPretty("Expected initial trajectory of length "
-                     << T_ << " but got " << q_parametersin.size());
+                    << T_ << " but got " << q_parametersin.size());
     if (q_parametersin[0].rows() != N)
         ThrowPretty("Expected states to have " << N << " rows but got "
-                                                << q_parametersin[0].rows());
+                                               << q_parametersin[0].rows());
 
     initial_trajectory_ = q_parametersin;
     SetStartState(q_parametersin[0]);

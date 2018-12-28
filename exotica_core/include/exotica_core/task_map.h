@@ -83,7 +83,7 @@ protected:
 };
 
 //!< Typedefines for some common functionality
-typedef std::shared_ptr<TaskMap> TaskMapPtr;            //!< Task Map smart pointer
+typedef std::shared_ptr<TaskMap> TaskMapPtr;           //!< Task Map smart pointer
 typedef std::map<std::string, TaskMapPtr> TaskMapMap;  //!< The mapping by name of TaskMaps
 typedef std::vector<TaskMapPtr> TaskMapVec;
 }

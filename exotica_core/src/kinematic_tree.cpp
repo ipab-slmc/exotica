@@ -152,8 +152,8 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     {
         root_mass = urdf_root_inertial->mass;
         root_cog = KDL::Vector(urdf_root_inertial->origin.position.x,
-                              urdf_root_inertial->origin.position.y,
-                              urdf_root_inertial->origin.position.z);
+                               urdf_root_inertial->origin.position.y,
+                               urdf_root_inertial->origin.position.z);
         if (debug)
             HIGHLIGHT_NAMED("Root Inertial", "Mass: " << root_mass
                                                       << " kg - CoG: " << root_cog);

@@ -211,7 +211,7 @@ void UnconstrainedEndPoseProblem::SetNominalPose(Eigen::VectorXdRefConst qNomina
         q_nominal = qNominal_in;
     else
         ThrowPretty("Cannot set q_nominal - wrong number of rows (expected "
-                     << N << ", received " << qNominal_in.rows() << ").");
+                    << N << ", received " << qNominal_in.rows() << ").");
 }
 
 int UnconstrainedEndPoseProblem::GetTaskId(const std::string& task_name)

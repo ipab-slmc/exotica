@@ -92,7 +92,6 @@ public:
         xxdiff_max_ = q_dot_max_ * tau_;
     }
     double GetXdiffMax() { return xxdiff_max_; }
-
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask cost;
     TimeIndexedTask inequality;

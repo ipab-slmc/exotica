@@ -60,6 +60,7 @@ public:
     Eigen::Vector3d GetAxis(const std::string& frame_name);
 
     int N;
+
 private:
     void Initialize();
 

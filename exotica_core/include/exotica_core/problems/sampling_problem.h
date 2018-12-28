@@ -48,7 +48,7 @@ public:
     virtual void Instantiate(SamplingProblemInitializer& init);
 
     void Update(Eigen::VectorXdRefConst x);
-    bool IsValid(Eigen::VectorXdRefConst x); // Not overriding on purpose
+    bool IsValid(Eigen::VectorXdRefConst x);  // Not overriding on purpose
     void PreUpdate() override;
 
     int GetSpaceDim();
@@ -68,7 +68,6 @@ public:
 
     void SetGoalState(Eigen::VectorXdRefConst qT);
     const Eigen::VectorXd& GetGoalState() const { return goal_; }
-
     TaskSpaceVector phi;
     SamplingTask inequality;
     SamplingTask equality;

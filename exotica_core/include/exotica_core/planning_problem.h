@@ -90,7 +90,6 @@ public:
     void SetCostEvolution(int index, double value);
     KinematicRequestFlags GetFlags() { return flags_; }
     virtual bool IsValid() { ThrowNamed("Not implemented"); };
-
     int N;
     double t_start;
     TerminationCriterion termination_criterion;

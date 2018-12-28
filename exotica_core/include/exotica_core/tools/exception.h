@@ -4,13 +4,13 @@
 #include <exception>
 #include <sstream>
 
-#define ThrowPretty(m)                                                              \
+#define ThrowPretty(m)                                                               \
     {                                                                                \
         std::stringstream ss;                                                        \
         ss << m;                                                                     \
         throw exotica::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__); \
     }
-#define ThrowNamed(m)                                                                                   \
+#define ThrowNamed(m)                                                                                    \
     {                                                                                                    \
         std::stringstream ss;                                                                            \
         ss << m;                                                                                         \

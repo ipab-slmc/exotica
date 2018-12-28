@@ -176,10 +176,10 @@ void TimeIndexedProblem::SetInitialTrajectory(const std::vector<Eigen::VectorXd>
 {
     if (q_init_in.size() != T_)
         ThrowPretty("Expected initial trajectory of length "
-                     << T_ << " but got " << q_init_in.size());
+                    << T_ << " but got " << q_init_in.size());
     if (q_init_in[0].rows() != N)
         ThrowPretty("Expected states to have " << N << " rows but got "
-                                                << q_init_in[0].rows());
+                                               << q_init_in[0].rows());
 
     initial_trajectory_ = q_init_in;
     SetStartState(q_init_in[0]);

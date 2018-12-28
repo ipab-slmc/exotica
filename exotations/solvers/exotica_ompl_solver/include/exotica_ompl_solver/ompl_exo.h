@@ -215,7 +215,7 @@ public:
     }
 
     void project(const ompl::base::State *state,
-                         OMPLProjection projection) const override
+                 OMPLProjection projection) const override
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =
@@ -251,7 +251,7 @@ public:
     }
 
     void project(const ompl::base::State *state,
-                         OMPLProjection projection) const override
+                 OMPLProjection projection) const override
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =
@@ -287,7 +287,7 @@ public:
     }
 
     void project(const ompl::base::State *state,
-                         OMPLProjection projection) const override
+                 OMPLProjection projection) const override
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =

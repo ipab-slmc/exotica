@@ -49,7 +49,7 @@ public:
     virtual void Instantiate(TimeIndexedSamplingProblemInitializer& init);
 
     void Update(Eigen::VectorXdRefConst x, const double& t);
-    bool IsValid(Eigen::VectorXdRefConst x, const double& t); // Not overriding on purpose
+    bool IsValid(Eigen::VectorXdRefConst x, const double& t);  // Not overriding on purpose
     void PreUpdate() override;
 
     int GetSpaceDim();

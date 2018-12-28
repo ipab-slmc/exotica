@@ -74,9 +74,9 @@ void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
         if (phi(i) != 0.0)
         {
             jacobian.row(i) = ((p_t(0) - p_t_prev(0)) * kinematics[0].jacobian[i].data.row(0) +
-                        (p_t(1) - p_t_prev(1)) * kinematics[0].jacobian[i].data.row(1) +
-                        (p_t(2) - p_t_prev(2)) * kinematics[0].jacobian[i].data.row(2)) /
-                       phi(i);
+                               (p_t(1) - p_t_prev(1)) * kinematics[0].jacobian[i].data.row(1) +
+                               (p_t(2) - p_t_prev(2)) * kinematics[0].jacobian[i].data.row(2)) /
+                              phi(i);
         }
     }
 }

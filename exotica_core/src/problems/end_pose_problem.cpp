@@ -34,8 +34,6 @@
 #include <exotica_core/setup.h>
 #include <exotica_core/task_initializer.h>
 
-#include <exotica_core/TaskInitializer.h>
-
 REGISTER_PROBLEM_TYPE("EndPoseProblem", exotica::EndPoseProblem)
 
 namespace exotica

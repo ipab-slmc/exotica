@@ -71,7 +71,6 @@ public:
     Eigen::VectorXd GetScalarTransitionJacobian(int t);
 
     std::vector<std::shared_ptr<KinematicResponse>> GetKinematicSolutions() { return kinematic_solutions_; }
-
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask cost;
     Eigen::MatrixXd W;
@@ -83,7 +82,7 @@ public:
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
-    bool IsValid()  override { return true; }
+    bool IsValid() override { return true; }
     int length_phi;
     int length_jacobian;
     int num_tasks;

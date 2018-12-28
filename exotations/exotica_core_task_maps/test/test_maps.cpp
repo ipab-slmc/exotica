@@ -706,7 +706,7 @@ TEST(ExoticaTaskMaps, testCoM)
     {
         TEST_COUT << "CoM test";
         Initializer map("exotica/CenterOfMass", {{"Name", std::string("MyTask")},
-                                        {"EnableZ", true}});
+                                                 {"EnableZ", true}});
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
@@ -741,9 +741,9 @@ TEST(ExoticaTaskMaps, testCoM)
 
         TEST_COUT << "CoM test with a subset of links";
         map = Initializer("exotica/CenterOfMass", {{"Name", std::string("MyTask")},
-                                          {"EnableZ", true},
-                                          {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("link2")}}),
-                                                                                    Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+                                                   {"EnableZ", true},
+                                                   {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("link2")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("endeff")}})})}});
         problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
@@ -778,7 +778,7 @@ TEST(ExoticaTaskMaps, testCoM)
 
         TEST_COUT << "CoM test with projection on XY plane";
         map = Initializer("exotica/CenterOfMass", {{"Name", std::string("MyTask")},
-                                          {"EnableZ", false}});
+                                                   {"EnableZ", false}});
         problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
@@ -808,7 +808,7 @@ TEST(ExoticaTaskMaps, testCoM)
 
         TEST_COUT << "CoM test with attached object";
         map = Initializer("exotica/CenterOfMass", {{"Name", std::string("MyTask")},
-                                          {"EnableZ", true}});
+                                                   {"EnableZ", true}});
         problem = setup_problem(map);
 
         problem->GetScene()->AddObject("Payload", KDL::Frame(), "", shapes::ShapeConstPtr(nullptr), KDL::RigidBodyInertia(0.5));
@@ -938,13 +938,13 @@ TEST(ExoticaTaskMaps, testPoint2Line)
     {
         TEST_COUT << "PointToLine Test";
         Initializer map("exotica/PointToLine", {{"Name", std::string("MyTask")},
-                                               // {"EndPoint", std::string("0.5 0.5 1")},
-                                               {"EndPoint", std::string("0.5 0.5 0")},
-                                               {"EndEffector", std::vector<Initializer>(
-                                                                   {Initializer("Frame", {{"Link", std::string("endeff")},
-                                                                                          {"LinkOffset", std::string("0.5 0 0.5")},
-                                                                                          {"Base", std::string("base")},
-                                                                                          {"BaseOffset", std::string("0.5 0.5 0")}})})}});
+                                                // {"EndPoint", std::string("0.5 0.5 1")},
+                                                {"EndPoint", std::string("0.5 0.5 0")},
+                                                {"EndEffector", std::vector<Initializer>(
+                                                                    {Initializer("Frame", {{"Link", std::string("endeff")},
+                                                                                           {"LinkOffset", std::string("0.5 0 0.5")},
+                                                                                           {"Base", std::string("base")},
+                                                                                           {"BaseOffset", std::string("0.5 0.5 0")}})})}});
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
         // TODO: Add test_values
@@ -964,8 +964,8 @@ TEST(ExoticaTaskMaps, testPoint2Plane)
         {
             TEST_COUT << "PointToPlane Test - Align with world";
             Initializer map("exotica/PointToPlane", {{"Name", std::string("MyTask")},
-                                                    {"EndPoint", std::string("1 2 3")},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+                                                     {"EndPoint", std::string("1 2 3")},
+                                                     {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
             UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
@@ -974,8 +974,8 @@ TEST(ExoticaTaskMaps, testPoint2Plane)
         {
             TEST_COUT << "PointToPlane Test - Align with world with rotation";
             Initializer map("exotica/PointToPlane", {{"Name", std::string("MyTask")},
-                                                    {"EndPoint", std::string("1 2 3")},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"BaseOffset", std::string("0.1 0.1 0.1 0.7071 0 0.7071 0")}})})}});
+                                                     {"EndPoint", std::string("1 2 3")},
+                                                     {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"BaseOffset", std::string("0.1 0.1 0.1 0.7071 0 0.7071 0")}})})}});
             UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));

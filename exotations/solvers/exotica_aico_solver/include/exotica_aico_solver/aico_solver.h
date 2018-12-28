@@ -114,17 +114,17 @@ protected:
 
 private:
     UnconstrainedTimeIndexedProblemPtr prob_;  //!< Shared pointer to the planning problem.
-    double damping;                             //!< Damping
-    double damping_init_;                       //!< Damping
+    double damping;                            //!< Damping
+    double damping_init_;                      //!< Damping
     double minimum_step_tolerance;             //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
     double step_tolerance;                     //!< Relative step tolerance (termination criterion)
     double function_tolerance;                 //!< Relative function tolerance/first-order optimality criterion
-    int max_backtrack_iterations_;              //!< Max. number of sweeps without improvement before terminating (= line-search)
-    bool use_bwd_msg_;                          //!< Flag for using backward message initialisation
-    Eigen::VectorXd bwd_msg_v_;                 //!< Backward message initialisation mean
-    Eigen::MatrixXd bwd_msg_Vinv_;              //!< Backward message initialisation covariance
-    bool sweep_improved_cost_;                  //!< Whether the last sweep improved the cost (for backtrack iterations count)
-    int iteration_count_;                       //!< Iteration counter
+    int max_backtrack_iterations_;             //!< Max. number of sweeps without improvement before terminating (= line-search)
+    bool use_bwd_msg_;                         //!< Flag for using backward message initialisation
+    Eigen::VectorXd bwd_msg_v_;                //!< Backward message initialisation mean
+    Eigen::MatrixXd bwd_msg_Vinv_;             //!< Backward message initialisation covariance
+    bool sweep_improved_cost_;                 //!< Whether the last sweep improved the cost (for backtrack iterations count)
+    int iteration_count_;                      //!< Iteration counter
 
     std::vector<SinglePassMeanCovariance> q_stat_;  //!< Cost weighted normal distribution of configurations across sweeps.
 

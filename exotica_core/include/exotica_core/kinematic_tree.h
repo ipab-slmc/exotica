@@ -228,9 +228,8 @@ public:
 
     void SetKinematicResponse(std::shared_ptr<KinematicResponse> response_in) { solution_ = response_in; }
     std::shared_ptr<KinematicResponse> GetKinematicResponse() { return solution_; }
-
     bool debug = false;
-    
+
 private:
     void BuildTree(const KDL::Tree& RobotKinematics);
     void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
@@ -253,7 +252,7 @@ private:
     BaseType model_base_type_;
     BaseType controlled_base_type_ = BaseType::FIXED;
     int num_controlled_joints_;  //!< Number of controlled joints in the joint group.
-    int num_joints_;            //!< Number of joints of the model (including floating/planar base, passive joints, and uncontrolled joints).
+    int num_joints_;             //!< Number of joints of the model (including floating/planar base, passive joints, and uncontrolled joints).
     int state_size_ = -1;
     Eigen::VectorXd tree_state_;
     robot_model::RobotModelPtr model_;

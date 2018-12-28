@@ -30,8 +30,8 @@
  *
  */
 
-#include <exotica_core/factory.h>
 #include <exotica_collision_scene_fcl/collision_scene_fcl.h>
+#include <exotica_core/factory.h>
 #include <ros/ros.h>
 
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCL", exotica::CollisionSceneFCL)

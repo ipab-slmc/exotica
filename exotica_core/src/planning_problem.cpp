@@ -30,10 +30,10 @@
  *
  */
 
-#include <exotica_core/planning_problem.h>
 #include <exotica_core/PlanningProblemInitializer.h>
-#include <exotica_core/setup.h>
 #include <exotica_core/TaskMapInitializer.h>
+#include <exotica_core/planning_problem.h>
+#include <exotica_core/setup.h>
 
 namespace exotica
 {

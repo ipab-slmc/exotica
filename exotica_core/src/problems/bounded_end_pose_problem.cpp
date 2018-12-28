@@ -30,9 +30,9 @@
  *
  */
 
+#include <exotica_core/TaskInitializer.h>
 #include <exotica_core/problems/bounded_end_pose_problem.h>
 #include <exotica_core/setup.h>
-#include <exotica_core/TaskInitializer.h>
 
 REGISTER_PROBLEM_TYPE("BoundedEndPoseProblem", exotica::BoundedEndPoseProblem)
 

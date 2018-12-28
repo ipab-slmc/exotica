@@ -33,8 +33,8 @@
 #ifndef SAMPLINGPROBLEM_H_
 #define SAMPLINGPROBLEM_H_
 
-#include <exotica_core/planning_problem.h>
 #include <exotica_core/SamplingProblemInitializer.h>
+#include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
 namespace exotica

@@ -33,11 +33,11 @@
 #ifndef EXOTICA_INITIALISER_H
 #define EXOTICA_INITIALISER_H
 
-#include <exotica_core/property.h>
 #include <exotica_core/factory.h>
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/object.h>
 #include <exotica_core/planning_problem.h>
+#include <exotica_core/property.h>
 #include <exotica_core/server.h>
 #include <exotica_core/tools.h>
 

@@ -26,45 +26,45 @@ Trajectory::Trajectory(const std::string& data)
             data_(i, j) = val;
         }
     }
-    constructFromData(data_, radius_);
+    ConstructFromData(data_, radius_);
 }
 
 Trajectory::Trajectory(Eigen::MatrixXdRefConst data, double radius)
 {
-    constructFromData(data, radius);
+    ConstructFromData(data, radius);
 }
 
-KDL::Frame Trajectory::getPosition(double t)
+KDL::Frame Trajectory::GetPosition(double t)
 {
     return trajectory_->Pos(t);
 }
 
-KDL::Twist Trajectory::getVelocity(double t)
+KDL::Twist Trajectory::GetVelocity(double t)
 {
     return trajectory_->Vel(t);
 }
 
-KDL::Twist Trajectory::getAcceleration(double t)
+KDL::Twist Trajectory::GetAcceleration(double t)
 {
     return trajectory_->Acc(t);
 }
 
-double Trajectory::getDuration()
+double Trajectory::GetDuration()
 {
     return trajectory_->Duration();
 }
 
-Eigen::MatrixXd Trajectory::getData()
+Eigen::MatrixXd Trajectory::GetData()
 {
     return data_;
 }
 
-double Trajectory::getRadius()
+double Trajectory::GetRadius()
 {
     return radius_;
 }
 
-std::string Trajectory::toString()
+std::string Trajectory::ToString()
 {
     std::ostringstream ss;
     ss << radius_ << "\n";
@@ -73,16 +73,16 @@ std::string Trajectory::toString()
     return ss.str();
 }
 
-void Trajectory::constructFromData(Eigen::MatrixXdRefConst data, double radius)
+void Trajectory::ConstructFromData(Eigen::MatrixXdRefConst data, double radius)
 {
-    if (!(data.cols() == 4 || data.cols() == 7 || data.cols() == 8) || data.rows() < 2) throw_pretty("Invalid trajectory data size!");
+    if (!(data.cols() == 4 || data.cols() == 7 || data.cols() == 8) || data.rows() < 2) ThrowPretty("Invalid trajectory data size!");
     trajectory_.reset(new KDL::Trajectory_Composite());
     for (int i = 0; i < data.rows() - 1; i++)
     {
-        KDL::Frame f1 = getFrame(data.row(i).tail(data.cols() - 1).transpose());
-        KDL::Frame f2 = getFrame(data.row(i + 1).tail(data.cols() - 1).transpose());
+        KDL::Frame f1 = GetFrame(data.row(i).tail(data.cols() - 1).transpose());
+        KDL::Frame f2 = GetFrame(data.row(i + 1).tail(data.cols() - 1).transpose());
         double dt = data(i + 1, 0) - data(i, 0);
-        if (dt <= 0) throw_pretty("Time indices must be monotonically increasing! " << i << " (" << dt << ")");
+        if (dt <= 0) ThrowPretty("Time indices must be monotonically increasing! " << i << " (" << dt << ")");
         if (KDL::Equal(f1, f2, 1e-6))
         {
             trajectory_->Add(new KDL::Trajectory_Stationary(dt, f1));

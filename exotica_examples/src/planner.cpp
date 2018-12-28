@@ -42,34 +42,34 @@ void run()
     Initializer solver_initializer, problem_initializer;
 
     std::string file_name;
-    Server::getParam("ConfigurationFile", file_name);
+    Server::GetParam("ConfigurationFile", file_name);
 
-    XMLLoader::load(file_name, solver_initializer, problem_initializer);
+    XMLLoader::Load(file_name, solver_initializer, problem_initializer);
 
     HIGHLIGHT_NAMED("XMLnode", "Loaded from XML");
 
     // Initialize
 
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem_initializer);
-    MotionSolver_ptr any_solver = Setup::createSolver(solver_initializer);
+    PlanningProblemPtr any_problem = Setup::CreateProblem(problem_initializer);
+    MotionSolverPtr any_solver = Setup::CreateSolver(solver_initializer);
 
     // Assign the problem to the solver
-    any_solver->specifyProblem(any_problem);
+    any_solver->SpecifyProblem(any_problem);
 
-    // If necessary, modify the problem after calling sol->specifyProblem()
+    // If necessary, modify the problem after calling sol->SpecifyProblem()
     // e.g. set different rho:
 
     if (any_problem->type() == "exotica::UnconstrainedTimeIndexedProblem")
     {
-        UnconstrainedTimeIndexedProblem_ptr problem = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(any_problem);
-        for (int t = 0; t < problem->getT() - 1; t++)
+        UnconstrainedTimeIndexedProblemPtr problem = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(any_problem);
+        for (int t = 0; t < problem->GetT() - 1; t++)
         {
             // This sets the precision of all time steps BUT the last one to zero
             // This means we only aim to minimize the task cost in the last time step
             // The rest of the trajectory minimizes the control cost
-            problem->setRho("Frame", 0.0, t);
+            problem->SetRho("Frame", 0.0, t);
         }
-        problem->setRho("Frame", 1e3, 99);
+        problem->SetRho("Frame", 1e3, 99);
     }
 
     // Create the initial configuration
@@ -93,8 +93,8 @@ void run()
             if (t == 0 || t == solution.rows() - 1) i = PlaybackWaitInterval;
             while (i-- > 0)
             {
-                any_problem->getScene()->Update(solution.row(t).transpose());
-                any_problem->getScene()->getKinematicTree().publishFrames();
+                any_problem->GetScene()->Update(solution.row(t).transpose());
+                any_problem->GetScene()->GetKinematicTree().PublishFrames();
 
                 ros::spinOnce();
                 loop_rate.sleep();

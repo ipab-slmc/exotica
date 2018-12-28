@@ -39,25 +39,25 @@ namespace exotica
 Distance::Distance() = default;
 Distance::~Distance() = default;
 
-void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void Distance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != Kinematics[0].Phi.rows()) throw_named("Wrong size of phi!");
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    if (phi.rows() != kinematics[0].phi.rows()) ThrowNamed("Wrong size of phi!");
+    for (int i = 0; i < kinematics[0].phi.rows(); i++)
     {
-        phi(i) = Kinematics[0].Phi(i).p.Norm();
+        phi(i) = kinematics[0].phi(i).p.Norm();
     }
 }
 
-void Distance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void Distance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != Kinematics[0].Phi.rows()) throw_named("Wrong size of phi!");
-    if (J.rows() != Kinematics[0].J.rows() || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    if (phi.rows() != kinematics[0].phi.rows()) ThrowNamed("Wrong size of phi!");
+    if (jacobian.rows() != kinematics[0].jacobian.rows() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
+    for (int i = 0; i < kinematics[0].phi.rows(); i++)
     {
-        phi(i) = Kinematics[0].Phi(i).p.Norm();
-        for (int j = 0; j < J.cols(); j++)
+        phi(i) = kinematics[0].phi(i).p.Norm();
+        for (int j = 0; j < jacobian.cols(); j++)
         {
-            J(i, j) = (Kinematics[0].Phi(i).p[0] * Kinematics[0].J[i].data(0, j) + Kinematics[0].Phi(i).p[1] * Kinematics[0].J[i].data(1, j) + Kinematics[0].Phi(i).p[2] * Kinematics[0].J[i].data(2, j)) / phi(i);
+            jacobian(i, j) = (kinematics[0].phi(i).p[0] * kinematics[0].jacobian[i].data(0, j) + kinematics[0].phi(i).p[1] * kinematics[0].jacobian[i].data(1, j) + kinematics[0].phi(i).p[2] * kinematics[0].jacobian[i].data(2, j)) / phi(i);
         }
     }
 }
@@ -66,8 +66,8 @@ void Distance::Instantiate(DistanceInitializer& init)
 {
 }
 
-int Distance::taskSpaceDim()
+int Distance::TaskSpaceDim()
 {
-    return Kinematics[0].Phi.rows();
+    return kinematics[0].phi.rows();
 }
 }

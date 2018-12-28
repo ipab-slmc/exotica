@@ -1,0 +1,6 @@
+class CollisionCheck
+
+extend <exotica_core/task_map>
+
+Optional bool SelfCollision = false;
+Optional double SafeDistance = 0.0;

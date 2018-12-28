@@ -34,7 +34,7 @@
 #define EXOTICA_CORE_TASK_MAPS_JOINT_ACCELERATION_BACKWARD_DIFFERENCE_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/JointAccelerationBackwardDifferenceInitializer.h>
+#include <exotica_core_task_maps/joint_acceleration_backward_difference_initializer.h>
 
 namespace exotica
 {
@@ -55,27 +55,27 @@ class JointAccelerationBackwardDifference : public TaskMap, public Instantiable<
 public:
     JointAccelerationBackwardDifference();
     virtual ~JointAccelerationBackwardDifference();
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
     void Instantiate(JointAccelerationBackwardDifferenceInitializer& init) override;
 
     /** \brief Logs previous joint state.
      *
-     *  set_previous_joint_state must be called after solve is called in a Python/C++ script is called 
+     *  SetPreviousJointState must be called after solve is called in a Python/C++ script is called 
      *  to ensure the time-derivatives are appropriately approximated. 
      *  Each previous joint state is pushed back by column and the given joint_state is placed
      *  in q_.col(0). 
      *  Finally, we compute the new qbd_.
      * 
      */
-    void set_previous_joint_state(Eigen::VectorXdRefConst joint_state);
+    void SetPreviousJointState(Eigen::VectorXdRefConst joint_state);
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
 
 private:
     JointAccelerationBackwardDifferenceInitializer init_;  ///< Task map initializer.
-    Scene_ptr scene_;                                      ///< Scene pointer.
+    ScenePtr scene_;                                      ///< Scene pointer.
     int N_;                                                ///< Number of dofs for robot.
     Eigen::Vector2d backward_difference_params_;           ///< Binomial cooeficient parameters.
     Eigen::MatrixXd q_;                                    ///< Log of previous two joint states.

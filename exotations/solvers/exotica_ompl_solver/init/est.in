@@ -1,0 +1,3 @@
+class ESTSolver
+
+extend <exotica_ompl_solver/ompl_solver>

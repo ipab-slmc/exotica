@@ -9,28 +9,28 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 AddInitializer(
-  CoM
-  IMesh
-  EffPosition
-  EffOrientation
-  EffFrame
-  FrameWithAxisAndDirection
-  EffAxisAlignment
-  EffVelocity
-  JointLimit
-  JointVelocityLimit
-  Distance
-  Point2Line
-  Identity
-  SphereCollision
-  Sphere
-  CollisionCheck
-  Point2Plane
-  QuasiStatic
-  JointVelocityBackwardDifference
-  JointAccelerationBackwardDifference
-  JointJerkBackwardDifference
-  LookAt
+  center_of_mass
+  interaction_mesh
+  eff_position
+  eff_orientation
+  eff_frame
+  frame_with_axis_and_direction
+  eff_axis_alignment
+  eff_velocity
+  joint_limit
+  joint_velocity_limit
+  distance
+  point_to_line
+  identity
+  sphere_collision
+  sphere
+  collision_check
+  point_to_plane
+  quasi_static
+  joint_velocity_backward_difference
+  joint_acceleration_backward_difference
+  joint_jerk_backward_difference
+  look_at
 )
 GenInitializers()
 
@@ -46,7 +46,7 @@ include_directories(
 )
 
 set(SOURCES
-    src/CoM.cpp
+    src/center_of_mass.cpp
     src/interaction_mesh.cpp
     src/eff_position.cpp
     src/eff_orientation.cpp

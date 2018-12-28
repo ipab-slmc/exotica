@@ -34,8 +34,8 @@
 #define EXOTICA_CORE_TASK_MAPS_EFF_AXIS_ALIGNMENT_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/EffAxisAlignmentInitializer.h>
-#include <exotica_core_task_maps/FrameWithAxisAndDirectionInitializer.h>
+#include <exotica_core_task_maps/eff_axis_alignment_initializer.h>
+#include <exotica_core_task_maps/frame_with_axis_and_direction_initializer.h>
 
 namespace exotica
 {
@@ -46,24 +46,25 @@ public:
     virtual ~EffAxisAlignment();
 
     void Instantiate(EffAxisAlignmentInitializer& init) override;
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
 
-    int taskSpaceDim() override;
+    int TaskSpaceDim() override;
 
-    void set_direction(const std::string& frame_name, const Eigen::Vector3d& dir_in);
-    Eigen::Vector3d get_direction(const std::string& frame_name);
+    void SetDirection(const std::string& frame_name, const Eigen::Vector3d& dir_in);
+    Eigen::Vector3d GetDirection(const std::string& frame_name);
 
-    void set_axis(const std::string& frame_name, const Eigen::Vector3d& axis_in);
-    Eigen::Vector3d get_axis(const std::string& frame_name);
+    void SetAxis(const std::string& frame_name, const Eigen::Vector3d& axis_in);
+    Eigen::Vector3d GetAxis(const std::string& frame_name);
 
+    int N;
 private:
+    void Initialize();
+
     EffAxisAlignmentInitializer init_;
-    unsigned int n_frames_;
-    unsigned int N;
-    void initialize();
+    int n_frames_;
 
     Eigen::Matrix3Xd axis_, dir_;
     Eigen::Vector3d link_position_in_base_, link_axis_position_in_base_;

@@ -54,11 +54,11 @@
 namespace exotica
 {
 /**
-   * @brief randomColor Generates random opaque color.
+   * @brief RandomColor Generates random opaque color.
    * @return Random color
    */
-std_msgs::ColorRGBA randomColor();
-inline std_msgs::ColorRGBA getColor(double r, double g, double b, double a = 1.0)
+std_msgs::ColorRGBA RandomColor();
+inline std_msgs::ColorRGBA GetColor(double r, double g, double b, double a = 1.0)
 {
     std_msgs::ColorRGBA ret;
     ret.r = r;
@@ -68,7 +68,7 @@ inline std_msgs::ColorRGBA getColor(double r, double g, double b, double a = 1.0
     return ret;
 }
 
-inline std_msgs::ColorRGBA getColor(Eigen::Vector4d rgba)
+inline std_msgs::ColorRGBA GetColor(Eigen::Vector4d rgba)
 {
     std_msgs::ColorRGBA ret;
     ret.r = rgba(0);
@@ -79,18 +79,18 @@ inline std_msgs::ColorRGBA getColor(Eigen::Vector4d rgba)
 }
 
 /**
-   * @brief loadOBJ Loads mesh data from an OBJ file
+   * @brief LoadOBJ Loads mesh data from an OBJ file
    * @param file_name File name
    * @param tri Returned vertex indices of triangles
    * @param vert Vertex positions
    */
-void loadOBJ(const std::string& data, Eigen::VectorXi& tri,
+void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
              Eigen::VectorXd& vert);
 
-void saveMatrix(std::string file_name,
+void SaveMatrix(std::string file_name,
                 const Eigen::Ref<const Eigen::MatrixXd> mat);
 
-void getText(std::string& txt, KDL::Frame& ret);
+void GetText(std::string& txt, KDL::Frame& ret);
 
 template <typename T>
 std::vector<std::string> getKeys(std::map<std::string, T> map)
@@ -100,13 +100,13 @@ std::vector<std::string> getKeys(std::map<std::string, T> map)
     return ret;
 }
 
-std::string getTypeName(const std::type_info& type);
+std::string GetTypeName(const std::type_info& type);
 
-std::string parsePath(const std::string& path);
+std::string ParsePath(const std::string& path);
 
-std::string loadFile(const std::string& path);
+std::string LoadFile(const std::string& path);
 
-bool pathExists(const std::string& path);
+bool PathExists(const std::string& path);
 }
 
 namespace
@@ -124,13 +124,13 @@ struct Holder
 }
 
 template <class T>
-std::shared_ptr<T> to_std_ptr(const boost::shared_ptr<T>& p)
+std::shared_ptr<T> ToStdPtr(const boost::shared_ptr<T>& p)
 {
     return std::shared_ptr<T>(p.get(), Holder<boost::shared_ptr<T>>(p));
 }
 
 template <class T>
-std::shared_ptr<T> to_std_ptr(const std::shared_ptr<T>& p)
+std::shared_ptr<T> ToStdPtr(const std::shared_ptr<T>& p)
 {
     return p;
 }

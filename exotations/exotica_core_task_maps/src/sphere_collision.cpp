@@ -41,24 +41,24 @@ SphereCollision::~SphereCollision() = default;
 
 void SphereCollision::Instantiate(SphereCollisionInitializer& init)
 {
-    eps_ = 1.0 / init.Precision;
-    for (int i = 0; i < init.EndEffector.size(); i++)
+    eps_ = 1.0 / init.precision;
+    for (int i = 0; i < init.end_effector.size(); i++)
     {
-        SphereInitializer sphere(init.EndEffector[i]);
-        groups_[sphere.Group].push_back(i);
-        radiuses_.push_back(sphere.Radius);
+        SphereInitializer sphere(init.end_effector[i]);
+        groups_[sphere.group].push_back(i);
+        radiuses_.push_back(sphere.radius);
         visualization_msgs::Marker mrk;
         mrk.action = visualization_msgs::Marker::ADD;
-        mrk.header.frame_id = init.ReferenceFrame;
+        mrk.header.frame_id = init.reference_frame;
         mrk.id = i;
         mrk.type = visualization_msgs::Marker::SPHERE;
-        mrk.scale.x = mrk.scale.y = mrk.scale.z = sphere.Radius * 2;
+        mrk.scale.x = mrk.scale.y = mrk.scale.z = sphere.radius * 2;
         debug_msg_.markers.push_back(mrk);
     }
     for (auto& it : groups_)
     {
-        std_msgs::ColorRGBA col = randomColor();
-        col.a = init.Alpha;
+        std_msgs::ColorRGBA col = RandomColor();
+        col.a = init.alpha;
         for (int i : it.second)
         {
             debug_msg_.markers[i].color = col;
@@ -68,11 +68,11 @@ void SphereCollision::Instantiate(SphereCollisionInitializer& init)
 
     if (debug_)
     {
-        debug_pub_ = Server::advertise<visualization_msgs::MarkerArray>(ns_ + "/CollisionSpheres", 1, true);
+        debug_pub_ = Server::Advertise<visualization_msgs::MarkerArray>(ns_ + "/CollisionSpheres", 1, true);
     }
 }
 
-double SphereCollision::distance(const KDL::Frame& eff_A, const KDL::Frame& eff_B, double r_A, double r_B)
+double SphereCollision::Distance(const KDL::Frame& eff_A, const KDL::Frame& eff_B, double r_A, double r_B)
 {
     return 1.0 / (1.0 + exp(5.0 * eps_ * ((eff_A.p - eff_B.p).Norm() - r_A - r_B)));
 }
@@ -92,9 +92,9 @@ Eigen::VectorXd SphereCollision::Jacobian(const KDL::Frame& eff_A, const KDL::Fr
     return ret;
 }
 
-void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != taskSpaceDim()) throw_named("Wrong size of phi!");
+    if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
     phi.setZero();
 
     auto Aend = groups_.end()--;
@@ -110,7 +110,7 @@ void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
                 {
                     int i = A->second[ii];
                     int j = B->second[jj];
-                    phi(phiI) += distance(Kinematics[0].Phi(i), Kinematics[0].Phi(j), radiuses_[i], radiuses_[j]);
+                    phi(phiI) += Distance(kinematics[0].phi(i), kinematics[0].phi(j), radiuses_[i], radiuses_[j]);
                 }
             }
             phiI++;
@@ -121,20 +121,20 @@ void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
         for (int i = 0; i < debug_msg_.markers.size(); i++)
         {
-            debug_msg_.markers[i].pose.position.x = Kinematics[0].Phi(i).p[0];
-            debug_msg_.markers[i].pose.position.y = Kinematics[0].Phi(i).p[1];
-            debug_msg_.markers[i].pose.position.z = Kinematics[0].Phi(i).p[2];
+            debug_msg_.markers[i].pose.position.x = kinematics[0].phi(i).p[0];
+            debug_msg_.markers[i].pose.position.y = kinematics[0].phi(i).p[1];
+            debug_msg_.markers[i].pose.position.z = kinematics[0].phi(i).p[2];
         }
         debug_pub_.publish(debug_msg_);
     }
 }
 
-void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != taskSpaceDim()) throw_named("Wrong size of phi!");
-    if (J.rows() != taskSpaceDim() || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
+    if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
+    if (jacobian.rows() != TaskSpaceDim() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     phi.setZero();
-    J.setZero();
+    jacobian.setZero();
 
     auto Aend = groups_.end()--;
     auto Bend = groups_.end();
@@ -149,8 +149,8 @@ void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, 
                 {
                     int i = A->second[ii];
                     int j = B->second[jj];
-                    phi(phiI) += distance(Kinematics[0].Phi(i), Kinematics[0].Phi(j), radiuses_[i], radiuses_[j]);
-                    J.row(phiI) += Jacobian(Kinematics[0].Phi(i), Kinematics[0].Phi(j), Kinematics[0].J(i), Kinematics[0].J(j), radiuses_[i], radiuses_[j]);
+                    phi(phiI) += Distance(kinematics[0].phi(i), kinematics[0].phi(j), radiuses_[i], radiuses_[j]);
+                    jacobian.row(phiI) += Jacobian(kinematics[0].phi(i), kinematics[0].phi(j), kinematics[0].jacobian(i), kinematics[0].jacobian(j), radiuses_[i], radiuses_[j]);
                 }
             }
             phiI++;
@@ -161,15 +161,15 @@ void SphereCollision::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, 
     {
         for (int i = 0; i < debug_msg_.markers.size(); i++)
         {
-            debug_msg_.markers[i].pose.position.x = Kinematics[0].Phi(i).p[0];
-            debug_msg_.markers[i].pose.position.y = Kinematics[0].Phi(i).p[1];
-            debug_msg_.markers[i].pose.position.z = Kinematics[0].Phi(i).p[2];
+            debug_msg_.markers[i].pose.position.x = kinematics[0].phi(i).p[0];
+            debug_msg_.markers[i].pose.position.y = kinematics[0].phi(i).p[1];
+            debug_msg_.markers[i].pose.position.z = kinematics[0].phi(i).p[2];
         }
         debug_pub_.publish(debug_msg_);
     }
 }
 
-int SphereCollision::taskSpaceDim()
+int SphereCollision::TaskSpaceDim()
 {
     return groups_.size() * (groups_.size() - 1) / 2;
 }

@@ -39,21 +39,21 @@
 namespace exotica
 {
 ///
-/// \brief det_diff_2d Computes the 2D determinant (analogous to a 2D cross product) of a two vectors defined by P_1P_2 and P_1P.
+/// \brief DetDiff2D Computes the 2D determinant (analogous to a 2D cross product) of a two vectors defined by P_1P_2 and P_1P.
 ///
-double det_diff_2d(Eigen::VectorXdRefConst p1, Eigen::VectorXdRefConst p2, Eigen::VectorXdRefConst p)
+double DetDiff2D(Eigen::VectorXdRefConst p1, Eigen::VectorXdRefConst p2, Eigen::VectorXdRefConst p)
 {
     return (p(1) - p1(1)) * (p2(0) - p1(0)) - (p2(1) - p1(1)) * (p(0) - p1(0));
 }
 
-std::list<int> quick_hull(Eigen::MatrixXdRefConst points, std::list<int>& half_points, int p1, int p2)
+std::list<int> QuickHull(Eigen::MatrixXdRefConst points, std::list<int>& half_points, int p1, int p2)
 {
     int ind = -1;
     double max_dist = 0;
     std::list<int> new_half_points;
     for (const int& i : half_points)
     {
-        double d = det_diff_2d(points.row(p1).transpose(), points.row(p2).transpose(), points.row(i).transpose());
+        double d = DetDiff2D(points.row(p1).transpose(), points.row(p2).transpose(), points.row(i).transpose());
         if (d >= 0.0)
         {
             new_half_points.push_back(i);
@@ -72,16 +72,16 @@ std::list<int> quick_hull(Eigen::MatrixXdRefConst points, std::list<int>& half_p
     }
     else
     {
-        hull.splice(hull.begin(), quick_hull(points, new_half_points, p1, ind));
-        hull.splice(hull.end(), quick_hull(points, new_half_points, ind, p2));
+        hull.splice(hull.begin(), QuickHull(points, new_half_points, p1, ind));
+        hull.splice(hull.end(), QuickHull(points, new_half_points, ind, p2));
     }
 
     return hull;
 }
 
-std::list<int> convex_hull_2d(Eigen::MatrixXdRefConst points)
+std::list<int> ConvexHull2D(Eigen::MatrixXdRefConst points)
 {
-    if (points.cols() != 2) throw_pretty("Input must contain 2D points!");
+    if (points.cols() != 2) ThrowPretty("Input must contain 2D points!");
 
     int n = points.rows();
 
@@ -103,8 +103,8 @@ std::list<int> convex_hull_2d(Eigen::MatrixXdRefConst points)
                 max_x = i;
             half_points.push_back(i);
         }
-        hull.splice(hull.begin(), quick_hull(points, half_points, min_x, max_x));
-        hull.splice(hull.end(), quick_hull(points, half_points, max_x, min_x));
+        hull.splice(hull.begin(), QuickHull(points, half_points, min_x, max_x));
+        hull.splice(hull.end(), QuickHull(points, half_points, max_x, min_x));
     }
 
     return hull;

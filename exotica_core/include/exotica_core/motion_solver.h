@@ -49,25 +49,24 @@ public:
     MotionSolver();
     virtual ~MotionSolver() = default;
     virtual void InstantiateBase(const Initializer& init);
-    virtual void specifyProblem(PlanningProblem_ptr pointer);
+    virtual void SpecifyProblem(PlanningProblemPtr pointer);
     virtual void Solve(Eigen::MatrixXd& solution) = 0;
-    PlanningProblem_ptr getProblem() { return problem_; }
-    virtual std::string print(std::string prepend);
-    void setNumberOfMaxIterations(int maxIter)
+    PlanningProblemPtr GetProblem() { return problem_; }
+    virtual std::string Print(std::string prepend);
+    void SetNumberOfMaxIterations(int max_iter)
     {
-        if (maxIter < 1) throw_pretty("Number of maximum iterations needs to be greater than 0.");
-        maxIterations_ = maxIter;
+        if (max_iter < 1) ThrowPretty("Number of maximum iterations needs to be greater than 0.");
+        max_iterations_ = max_iter;
     }
-    int getNumberOfMaxIterations() { return maxIterations_; }
-    double getPlanningTime() { return planning_time_; }
+    int GetNumberOfMaxIterations() { return max_iterations_; }
+    double GetPlanningTime() { return planning_time_; }
 protected:
-    PlanningProblem_ptr problem_;
+    PlanningProblemPtr problem_;
     double planning_time_ = -1;
-    int maxIterations_ = 100;
+    int max_iterations_ = 100;
 };
 
-typedef exotica::Factory<exotica::MotionSolver> MotionSolver_fac;
-typedef std::shared_ptr<exotica::MotionSolver> MotionSolver_ptr;
+typedef std::shared_ptr<exotica::MotionSolver> MotionSolverPtr;
 }
 
 #endif

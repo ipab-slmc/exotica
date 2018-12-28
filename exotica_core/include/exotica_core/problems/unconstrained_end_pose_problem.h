@@ -36,7 +36,7 @@
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
-#include <exotica_core/UnconstrainedEndPoseProblemInitializer.h>
+#include <exotica_core/unconstrained_end_pose_problem_initializer.h>
 
 namespace exotica
 {
@@ -52,34 +52,34 @@ public:
     virtual void Instantiate(UnconstrainedEndPoseProblemInitializer& init);
     void Update(Eigen::VectorXdRefConst x);
 
-    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setRho(const std::string& task_name, const double& rho);
-    Eigen::VectorXd getGoal(const std::string& task_name);
-    double getRho(const std::string& task_name);
-    Eigen::VectorXd getNominalPose();
-    void setNominalPose(Eigen::VectorXdRefConst qNominal_in);
-    virtual void preupdate();
+    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    void SetRho(const std::string& task_name, const double& rho);
+    Eigen::VectorXd GetGoal(const std::string& task_name);
+    double GetRho(const std::string& task_name);
+    Eigen::VectorXd GetNominalPose();
+    void SetNominalPose(Eigen::VectorXdRefConst qNominal_in);
+    void PreUpdate() override;
+    int GetTaskId(const std::string& task_name);
 
-    double getScalarCost();
-    Eigen::VectorXd getScalarJacobian();
+    double GetScalarCost();
+    Eigen::VectorXd GetScalarJacobian();
 
-    double getScalarTaskCost(const std::string& task_name);
+    double GetScalarTaskCost(const std::string& task_name);
 
-    EndPoseTask Cost;
+    EndPoseTask cost;
 
     Eigen::MatrixXd W;
-    TaskSpaceVector Phi;
-    Eigen::MatrixXd J;
-    Hessian H;
-    Eigen::VectorXd qNominal;
+    TaskSpaceVector phi;
+    Eigen::MatrixXd jacobian;
+    Hessian hessian;
+    Eigen::VectorXd q_nominal;
 
-    int PhiN;
-    int JN;
-    int NumTasks;
+    int length_phi;
+    int length_jacobian;
+    int num_tasks;
 
-    int getTaskId(const std::string& task_name);
 };
-typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblem_ptr;
+typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblemPtr;
 }
 
 #endif

@@ -1,3 +1,0 @@
-extend <exotica_core/TaskMap>
-Optional bool SelfCollision = false;
-Optional double SafeDistance = 0.0;

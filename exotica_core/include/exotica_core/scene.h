@@ -52,17 +52,17 @@
 #include "exotica_core/server.h"
 #include "exotica_core/trajectory.h"
 
-#include <exotica_core/SceneInitializer.h>
+#include <exotica_core/scene_initializer.h>
 
 namespace exotica
 {
 struct AttachedObject
 {
     AttachedObject() = default;
-    AttachedObject(std::string parent) : Parent(parent) {}
-    AttachedObject(std::string parent, KDL::Frame pose) : Parent(parent), Pose(pose) {}
-    std::string Parent = "";
-    KDL::Frame Pose;
+    AttachedObject(std::string _parent) : parent(_parent) {}
+    AttachedObject(std::string _parent, KDL::Frame _pose) : parent(_parent), pose(_pose) {}
+    std::string parent = "";
+    KDL::Frame pose;
 };
 
 /// The class of EXOTica Scene
@@ -73,62 +73,62 @@ public:
     Scene();
     virtual ~Scene();
     virtual void Instantiate(SceneInitializer& init);
-    void requestKinematics(KinematicsRequest& Request, std::function<void(std::shared_ptr<KinematicResponse>)> callback);
-    std::string getName();
+    void RequestKinematics(KinematicsRequest& request, std::function<void(std::shared_ptr<KinematicResponse>)> callback);
+    std::string GetName();
     virtual void Update(Eigen::VectorXdRefConst x, double t = 0);
-    void setCollisionScene(const moveit_msgs::PlanningScene& scene);
-    CollisionScene_ptr& getCollisionScene();
-    std::string getRootFrameName();
-    std::string getRootJointName();
-    moveit_msgs::PlanningScene getPlanningSceneMsg();
-    exotica::KinematicTree& getKinematicTree();
-    void getJointNames(std::vector<std::string>& joints);
-    std::vector<std::string> getJointNames();
-    std::vector<std::string> getModelJointNames();
-    std::vector<std::string> getControlledLinkNames();
-    std::vector<std::string> getModelLinkNames();
-    Eigen::VectorXd getControlledState();
-    Eigen::VectorXd getModelState();
-    std::map<std::string, double> getModelStateMap();
-    void setModelState(Eigen::VectorXdRefConst x, double t = 0, bool updateTraj = true);
-    void setModelState(std::map<std::string, double> x, double t = 0, bool updateTraj = true);
-    std::string getGroupName();
+    void SetCollisionScene(const moveit_msgs::PlanningScene& scene);
+    CollisionScenePtr& GetCollisionScene();
+    std::string GetRootFrameName();
+    std::string GetRootJointName();
+    moveit_msgs::PlanningScene GetPlanningSceneMsg();
+    exotica::KinematicTree& GetKinematicTree();
+    void GetJointNames(std::vector<std::string>& joints);
+    std::vector<std::string> GetJointNames();
+    std::vector<std::string> GetModelJointNames();
+    std::vector<std::string> GetControlledLinkNames();
+    std::vector<std::string> GetModelLinkNames();
+    Eigen::VectorXd GetControlledState();
+    Eigen::VectorXd GetModelState();
+    std::map<std::string, double> GetModelStateMap();
+    void SetModelState(Eigen::VectorXdRefConst x, double t = 0, bool update_traj = true);
+    void SetModelState(std::map<std::string, double> x, double t = 0, bool update_traj = true);
+    std::string GetGroupName();
 
-    void addTrajectoryFromFile(const std::string& link, const std::string& traj);
-    void addTrajectory(const std::string& link, const std::string& traj);
-    void addTrajectory(const std::string& link, std::shared_ptr<Trajectory> traj);
-    std::shared_ptr<Trajectory> getTrajectory(const std::string& link);
-    void removeTrajectory(const std::string& link);
+    void AddTrajectoryFromFile(const std::string& link, const std::string& traj);
+    void AddTrajectory(const std::string& link, const std::string& traj);
+    void AddTrajectory(const std::string& link, std::shared_ptr<Trajectory> traj);
+    std::shared_ptr<Trajectory> GetTrajectory(const std::string& link);
+    void RemoveTrajectory(const std::string& link);
 
     /// \brief Updates exotica scene object frames from the MoveIt scene.
-    void updateSceneFrames();
+    void UpdateSceneFrames();
     ///
     /// \brief Attaches existing object to a new parent. E.g. attaching a grasping target to the end-effector. The relative transformation will be computed from current object and new parent transformations in the world frame.
     /// \param name Name of the object to attach.
     /// \param parent Name of the new parent frame.
     ///
-    void attachObject(const std::string& name, const std::string& parent);
+    void AttachObject(const std::string& name, const std::string& parent);
     ///
     /// \brief Attaches existing object to a new parent specifying an offset in the new parent local frame.
     /// \param name Name of the object to attach.
     /// \param parent Name of the new parent frame.
     /// \param pose Relative pose of the attached object in the new parent's local frame.
     ///
-    void attachObjectLocal(const std::string& name, const std::string& parent, const KDL::Frame& pose);
+    void AttachObjectLocal(const std::string& name, const std::string& parent, const KDL::Frame& pose);
     ///
     /// \brief Detaches an object and leaves it a at its current world location. This effectively attaches the object to the world frame.
     /// \param name Name of the object to detach.
     ///
-    void detachObject(const std::string& name);
-    bool hasAttachedObject(const std::string& name);
+    void DetachObject(const std::string& name);
+    bool HasAttachedObject(const std::string& name);
 
-    void addObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool updateCollisionScene = true);
+    void AddObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool update_collision_scene = true);
 
-    void addObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", const std::string& shapeResourcePath = "", Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool updateCollisionScene = true);
+    void AddObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", const std::string& shape_resource_path = "", Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool update_collision_scene = true);
 
-    void addObjectToEnvironment(const std::string& name, const KDL::Frame& transform = KDL::Frame(), shapes::ShapeConstPtr shape = nullptr, const Eigen::Vector4d& colour = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const bool& updateCollisionScene = true);
+    void AddObjectToEnvironment(const std::string& name, const KDL::Frame& transform = KDL::Frame(), shapes::ShapeConstPtr shape = nullptr, const Eigen::Vector4d& colour = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const bool& update_collision_scene = true);
 
-    void removeObject(const std::string& name);
+    void RemoveObject(const std::string& name);
 
     /**
        * @brief      Update the internal MoveIt planning scene from a
@@ -136,48 +136,57 @@ public:
        *
        * @param[in]  world  moveit_msgs::PlanningSceneWorld
        */
-    void updateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world);
+    void UpdateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world);
 
-    void updateCollisionObjects();
+    void UpdateCollisionObjects();
 
-    BASE_TYPE getBaseType()
+    BaseType GetBaseType()
     {
-        return BaseType;
+        return base_type_;
     }
 
-    void updateTrajectoryGenerators(double t = 0);
+    void UpdateTrajectoryGenerators(double t = 0);
 
-    void publishScene();
-    void publishProxies(const std::vector<CollisionProxy>& proxies);
-    visualization_msgs::Marker proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame);
-    void loadScene(const std::string& scene, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity(), bool updateCollisionScene = true);
-    void loadScene(const std::string& scene, const KDL::Frame& offset = KDL::Frame(), bool updateCollisionScene = true);
-    void loadSceneFile(const std::string& file_name, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity(), bool updateCollisionScene = true);
-    void loadSceneFile(const std::string& file_name, const KDL::Frame& offset = KDL::Frame(), bool updateCollisionScene = true);
-    std::string getScene();
-    void cleanScene();
+    void PublishScene();
+    void PublishProxies(const std::vector<CollisionProxy>& proxies);
+    visualization_msgs::Marker ProxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame);
+    void LoadScene(const std::string& scene, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity(), bool update_collision_scene = true);
+    void LoadScene(const std::string& scene, const KDL::Frame& offset = KDL::Frame(), bool update_collision_scene = true);
+    void LoadSceneFile(const std::string& file_name, const Eigen::Isometry3d& offset = Eigen::Isometry3d::Identity(), bool update_collision_scene = true);
+    void LoadSceneFile(const std::string& file_name, const KDL::Frame& offset = KDL::Frame(), bool update_collision_scene = true);
+    std::string GetScene();
+    void CleanScene();
 
     /**
      * @brief      Whether the collision scene transforms get updated on every scene update.
      * @return     Whether collision scene transforms are force updated on every scene update.
      */
-    bool alwaysUpdatesCollisionScene() { return force_collision_; }
+    bool AlwaysUpdatesCollisionScene() { return force_collision_; }
     /**
      * @brief      Returns a map between a model link name and the names of associated collision links.
      * @return     Map between model links and all associated collision links.
      */
-    std::map<std::string, std::vector<std::string>> getModelLinkToCollisionLinkMap() { return modelLink_to_collisionLink_map_; };
+    std::map<std::string, std::vector<std::string>> GetModelLinkToCollisionLinkMap() { return modelLink_to_collisionLink_map_; };
     /**
      * @brief      Returns a map between a model link name and the KinematicElement of associated collision links.
      * @return     Map between model links and all the KinematicElements of the associated collision links.
      */
-    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> getModelLinkToCollisionElementMap() { return modelLink_to_collisionElement_map_; };
+    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> GetModelLinkToCollisionElementMap() { return modelLink_to_collisionElement_map_; };
     /**
      * @brief      Returns a map between controlled robot link names and associated collision link names. Here we consider all fixed links between controlled links as belonging to the previous controlled link (as if the collision links had been fused).
      * @return     Map between controlled links and associated collision links.
      */
-    std::map<std::string, std::vector<std::string>> getControlledLinkToCollisionLinkMap() { return controlledLink_to_collisionLink_map_; };
+    std::map<std::string, std::vector<std::string>> GetControlledLinkToCollisionLinkMap() { return controlledLink_to_collisionLink_map_; };
 private:
+    void UpdateInternalFrames(bool update_request = true);
+
+    /**
+     * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.
+     */
+    void UpdateMoveItPlanningScene();
+
+    void LoadSceneFromStringStream(std::istream& in, const Eigen::Isometry3d& offset, bool update_collision_scene);
+
     /// The name of the scene
     std::string name_ = "Unnamed";
 
@@ -188,10 +197,10 @@ private:
     robot_model::JointModelGroup* group;
 
     /// Robot base type
-    BASE_TYPE BaseType;
+    BaseType base_type_;
 
     /// The collision scene
-    CollisionScene_ptr collision_scene_;
+    CollisionScenePtr collision_scene_;
 
     /// Internal MoveIt planning scene
     planning_scene::PlanningScenePtr ps_;
@@ -221,20 +230,14 @@ private:
     /// \brief List of links to be excluded from the collision scene
     std::set<std::string> robotLinksToExcludeFromCollisionScene_;
 
-    KinematicsRequest kinematicRequest;
-    std::shared_ptr<KinematicResponse> kinematicSolution;
-    std::function<void(std::shared_ptr<KinematicResponse>)> kinematicRequestCallback;
-    bool requestNeedsUpdating;
-    void updateInternalFrames(bool updateRequest = true);
+    KinematicsRequest kinematic_equest_;
+    std::shared_ptr<KinematicResponse> kinematic_solution_;
+    std::function<void(std::shared_ptr<KinematicResponse>)> kinematic_request_callback_;
+    bool request_needs_updating_;
 
-    /**
-     * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.
-     */
-    void updateMoveItPlanningScene();
-
-    void loadSceneFromStringStream(std::istream& in, const Eigen::Isometry3d& offset, bool updateCollisionScene);
 };
-typedef std::shared_ptr<Scene> Scene_ptr;
+
+typedef std::shared_ptr<Scene> ScenePtr;
 
 }  //  namespace exotica
 

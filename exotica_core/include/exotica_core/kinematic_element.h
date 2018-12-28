@@ -10,88 +10,88 @@
 class KinematicElement
 {
 public:
-    KinematicElement(int id, std::shared_ptr<KinematicElement> parent, const KDL::Segment& segment) : Parent(parent), Segment(segment), Id(id)
+    KinematicElement(int _id, std::shared_ptr<KinematicElement> _parent, const KDL::Segment& _segment) : parent(_parent), segment(_segment), id(_id)
     {
     }
 
     ~KinematicElement()
     {
         // Remove from parent to avoid expired pointers
-        std::shared_ptr<KinematicElement> myParent = Parent.lock();
-        if (myParent)
+        std::shared_ptr<KinematicElement> my_parent = parent.lock();
+        if (my_parent)
         {
-            myParent->removeExpiredChildren();
+            my_parent->RemoveExpiredChildren();
         }
     }
 
-    inline void updateClosestRobotLink()
+    inline void UpdateClosestRobotLink()
     {
-        std::shared_ptr<KinematicElement> element = Parent.lock();
-        ClosestRobotLink = std::shared_ptr<KinematicElement>(nullptr);
-        while (element && element->Id > 0)
+        std::shared_ptr<KinematicElement> element = parent.lock();
+        closest_robot_link = std::shared_ptr<KinematicElement>(nullptr);
+        while (element && element->id > 0)
         {
-            if (element->isRobotLink)
+            if (element->is_robot_link)
             {
-                ClosestRobotLink = element;
+                closest_robot_link = element;
                 break;
             }
-            element = element->Parent.lock();
+            element = element->parent.lock();
         }
-        setChildrenClosestRobotLink();
+        SetChildrenClosestRobotLink();
     }
 
-    inline KDL::Frame getPose(const double& x = 0.0)
+    inline KDL::Frame GetPose(const double& x = 0.0)
     {
-        if (IsTrajectoryGenerated)
+        if (is_trajectory_generated)
         {
-            return GeneratedOffset;
+            return generated_offset;
         }
         else
         {
-            return Segment.pose(x);
+            return segment.pose(x);
         }
     }
 
-    int Id;
-    int ControlId = -1;
-    bool IsControlled = false;
-    std::weak_ptr<KinematicElement> Parent;
-    std::string ParentName;
-    std::vector<std::weak_ptr<KinematicElement>> Children;
-    std::weak_ptr<KinematicElement> ClosestRobotLink = std::shared_ptr<KinematicElement>(nullptr);
-    KDL::Segment Segment = KDL::Segment();
-    KDL::Frame Frame = KDL::Frame::Identity();
-    KDL::Frame GeneratedOffset = KDL::Frame::Identity();
-    bool IsTrajectoryGenerated = false;
-    std::vector<double> JointLimits;
-    shapes::ShapeConstPtr Shape = nullptr;
-    std::string ShapeResourcePath = "";
-    Eigen::Vector3d Scale = Eigen::Vector3d::Ones();
-    bool isRobotLink = false;
-    Eigen::Vector4d Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0);
-
-    inline void removeExpiredChildren()
+    inline void RemoveExpiredChildren()
     {
-        for (size_t i = 0; i < Children.size(); i++)
+        for (size_t i = 0; i < children.size(); i++)
         {
-            if (Children[i].expired())
+            if (children[i].expired())
             {
-                Children.erase(Children.begin() + i);
+                children.erase(children.begin() + i);
             }
         }
     }
 
+    int id;
+    int control_id = -1;
+    bool is_controlled = false;
+    std::weak_ptr<KinematicElement> parent;
+    std::string parent_name;
+    std::vector<std::weak_ptr<KinematicElement>> children;
+    std::weak_ptr<KinematicElement> closest_robot_link = std::shared_ptr<KinematicElement>(nullptr);
+    KDL::Segment segment = KDL::Segment();
+    KDL::Frame frame = KDL::Frame::Identity();
+    KDL::Frame generated_offset = KDL::Frame::Identity();
+    bool is_trajectory_generated = false;
+    std::vector<double> joint_limits;
+    shapes::ShapeConstPtr shape = nullptr;
+    std::string shape_resource_path = "";
+    Eigen::Vector3d scale = Eigen::Vector3d::Ones();
+    bool is_robot_link = false;
+    Eigen::Vector4d color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0);
+
 private:
-    inline void setChildrenClosestRobotLink()
+    inline void SetChildrenClosestRobotLink()
     {
         std::stack<std::shared_ptr<KinematicElement>> elements;
-        for (auto child : Children) elements.push(child.lock());
+        for (auto child : children) elements.push(child.lock());
         while (!elements.empty())
         {
             auto parent = elements.top();
             elements.pop();
-            parent->ClosestRobotLink = ClosestRobotLink;
-            for (auto child : parent->Children) elements.push(child.lock());
+            parent->closest_robot_link = closest_robot_link;
+            for (auto child : parent->children) elements.push(child.lock());
         }
     }
 };

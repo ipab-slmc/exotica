@@ -30,9 +30,9 @@
  *
  */
 
-#include <exotica_core/TaskInitializer.h>
 #include <exotica_core/problems/bounded_end_pose_problem.h>
 #include <exotica_core/setup.h>
+#include <exotica_core/task_initializer.h>
 
 REGISTER_PROBLEM_TYPE("BoundedEndPoseProblem", exotica::BoundedEndPoseProblem)
 
@@ -40,191 +40,191 @@ namespace exotica
 {
 BoundedEndPoseProblem::BoundedEndPoseProblem()
 {
-    Flags = KIN_FK | KIN_J;
+    flags_ = KIN_FK | KIN_J;
 }
 
 BoundedEndPoseProblem::~BoundedEndPoseProblem() = default;
 
-Eigen::MatrixXd BoundedEndPoseProblem::getBounds() const
+Eigen::MatrixXd BoundedEndPoseProblem::GetBounds() const
 {
-    return scene_->getKinematicTree().getJointLimits();
+    return scene_->GetKinematicTree().GetJointLimits();
 }
 
 void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
 {
-    NumTasks = Tasks.size();
-    PhiN = 0;
-    JN = 0;
-    for (int i = 0; i < NumTasks; i++)
+    num_tasks = tasks_.size();
+    length_phi = 0;
+    length_jacobian = 0;
+    for (int i = 0; i < num_tasks; i++)
     {
-        appendVector(Phi.map, Tasks[i]->getLieGroupIndices());
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
+        AppendVector(phi.map, tasks_[i]->GetLieGroupIndices());
+        length_phi += tasks_[i]->length;
+        length_jacobian += tasks_[i]->length_jacobian;
     }
-    Phi.setZero(PhiN);
+    phi.SetZero(length_phi);
     W = Eigen::MatrixXd::Identity(N, N);
-    if (init.W.rows() > 0)
+    if (init.w.rows() > 0)
     {
-        if (init.W.rows() == N)
+        if (init.w.rows() == N)
         {
-            W.diagonal() = init.W;
+            W.diagonal() = init.w;
         }
         else
         {
-            throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init.w.rows());
         }
     }
-    if (Flags & KIN_J) J = Eigen::MatrixXd(JN, N);
-    if (Flags & KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(N, N));
+    if (flags_ & KIN_J) jacobian = Eigen::MatrixXd(length_jacobian, N);
+    if (flags_ & KIN_J_DOT) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
 
-    if (init.LowerBound.rows() == N)
+    if (init.lower_bound.rows() == N)
     {
-        scene_->getKinematicTree().setJointLimitsLower(init.LowerBound);
+        scene_->GetKinematicTree().SetJointLimitsLower(init.lower_bound);
     }
-    else if (init.LowerBound.rows() != 0)
+    else if (init.lower_bound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.LowerBound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.lower_bound.rows());
     }
-    if (init.UpperBound.rows() == N)
+    if (init.upper_bound.rows() == N)
     {
-        scene_->getKinematicTree().setJointLimitsUpper(init.UpperBound);
+        scene_->GetKinematicTree().SetJointLimitsUpper(init.upper_bound);
     }
-    else if (init.UpperBound.rows() != 0)
+    else if (init.upper_bound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.upper_bound.rows());
     }
 
     TaskSpaceVector dummy;
-    Cost.initialize(init.Cost, shared_from_this(), dummy);
-    applyStartState(false);
-    preupdate();
+    cost.Initialize(init.cost, shared_from_this(), dummy);
+    ApplyStartState(false);
+    PreUpdate();
 }
 
-void BoundedEndPoseProblem::preupdate()
+void BoundedEndPoseProblem::PreUpdate()
 {
-    PlanningProblem::preupdate();
-    for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
-    Cost.updateS();
+    PlanningProblem::PreUpdate();
+    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    cost.UpdateS();
 }
 
-double BoundedEndPoseProblem::getScalarCost()
+double BoundedEndPoseProblem::GetScalarCost()
 {
-    return Cost.ydiff.transpose() * Cost.S * Cost.ydiff;
+    return cost.ydiff.transpose() * cost.S * cost.ydiff;
 }
 
-Eigen::VectorXd BoundedEndPoseProblem::getScalarJacobian()
+Eigen::VectorXd BoundedEndPoseProblem::GetScalarJacobian()
 {
-    return Cost.J.transpose() * Cost.S * Cost.ydiff * 2.0;
+    return cost.jacobian.transpose() * cost.S * cost.ydiff * 2.0;
 }
 
-double BoundedEndPoseProblem::getScalarTaskCost(const std::string& task_name)
+double BoundedEndPoseProblem::GetScalarTaskCost(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length).transpose() * Cost.Rho(Cost.Indexing[i].Id) * Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+            return cost.ydiff.segment(cost.indexing[i].start, cost.indexing[i].length).transpose() * cost.rho(cost.indexing[i].id) * cost.ydiff.segment(cost.indexing[i].start, cost.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get scalar task cost. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get scalar task cost. Task map '" << task_name << "' does not exist.");
 }
 
 void BoundedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
-    scene_->Update(x, tStart);
-    Phi.setZero(PhiN);
-    if (Flags & KIN_J) J.setZero();
-    if (Flags & KIN_J_DOT)
-        for (int i = 0; i < JN; i++) H(i).setZero();
-    for (int i = 0; i < Tasks.size(); i++)
+    scene_->Update(x, t_start);
+    phi.SetZero(length_phi);
+    if (flags_ & KIN_J) jacobian.setZero();
+    if (flags_ & KIN_J_DOT)
+        for (int i = 0; i < length_jacobian; i++) hessian(i).setZero();
+    for (int i = 0; i < tasks_.size(); i++)
     {
-        if (Tasks[i]->isUsed)
+        if (tasks_[i]->is_used)
         {
-            if (Flags & KIN_J_DOT)
+            if (flags_ & KIN_J_DOT)
             {
-                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H.segment(Tasks[i]->Start, Tasks[i]->Length));
+                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start, tasks_[i]->length));
             }
-            else if (Flags & KIN_J)
+            else if (flags_ & KIN_J)
             {
-                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
-    if (Flags & KIN_J_DOT)
+    if (flags_ & KIN_J_DOT)
     {
-        Cost.update(Phi, J, H);
+        cost.Update(phi, jacobian, hessian);
     }
-    else if (Flags & KIN_J)
+    else if (flags_ & KIN_J)
     {
-        Cost.update(Phi, J);
+        cost.Update(phi, jacobian);
     }
     else
     {
-        Cost.update(Phi);
+        cost.Update(phi);
     }
-    numberOfProblemUpdates++;
+    number_of_problem_updates_++;
 }
 
-void BoundedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
+void BoundedEndPoseProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            if (goal.rows() != Cost.Indexing[i].Length) throw_pretty("Expected length of " << Cost.Indexing[i].Length << " and got " << goal.rows());
-            Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
+            if (goal.rows() != cost.indexing[i].length) ThrowPretty("Expected length of " << cost.indexing[i].length << " and got " << goal.rows());
+            cost.y.data.segment(cost.indexing[i].start, cost.indexing[i].length) = goal;
             return;
         }
     }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void BoundedEndPoseProblem::setRho(const std::string& task_name, const double& rho)
+void BoundedEndPoseProblem::SetRho(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            Cost.Rho(Cost.Indexing[i].Id) = rho;
-            preupdate();
+            cost.rho(cost.indexing[i].id) = rho;
+            PreUpdate();
             return;
         }
     }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd BoundedEndPoseProblem::getGoal(const std::string& task_name)
+Eigen::VectorXd BoundedEndPoseProblem::GetGoal(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+            return cost.y.data.segment(cost.indexing[i].start, cost.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double BoundedEndPoseProblem::getRho(const std::string& task_name)
+double BoundedEndPoseProblem::GetRho(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.Rho(Cost.Indexing[i].Id);
+            return cost.rho(cost.indexing[i].id);
         }
     }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-bool BoundedEndPoseProblem::isValid()
+bool BoundedEndPoseProblem::IsValid()
 {
-    Eigen::VectorXd x = scene_->getKinematicTree().getControlledState();
-    Eigen::MatrixXd bounds = scene_->getKinematicTree().getJointLimits();
+    Eigen::VectorXd x = scene_->GetKinematicTree().GetControlledState();
+    Eigen::MatrixXd bounds = scene_->GetKinematicTree().GetJointLimits();
     for (unsigned int i = 0; i < N; i++)
     {
         if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1)) return false;

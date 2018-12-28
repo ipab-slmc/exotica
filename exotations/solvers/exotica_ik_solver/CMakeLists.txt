@@ -5,7 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   exotica_core
 )
 
-AddInitializer(IKSolver)
+AddInitializer(ik_solver)
 GenInitializers()
 
 catkin_package(

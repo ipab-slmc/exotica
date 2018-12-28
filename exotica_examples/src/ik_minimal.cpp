@@ -37,13 +37,13 @@ using namespace exotica;
 int main(int argc, char **argv)
 {
     {
-        MotionSolver_ptr solver = XMLLoader::loadSolver("{exotica_examples}/resources/configs/example_ik.xml");
+        MotionSolverPtr solver = XMLLoader::LoadSolver("{exotica_examples}/resources/configs/example_ik.xml");
         Eigen::MatrixXd solution;
 
         Timer timer;
         solver->Solve(solution);
 
-        HIGHLIGHT("Finished solving in " << timer.getDuration() << "s. Solution [" << solution << "]");
+        HIGHLIGHT("Finished solving in " << timer.GetDuration() << "s. Solution [" << solution << "]");
     }
     Setup::Destroy();
 }

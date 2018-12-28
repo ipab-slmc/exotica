@@ -38,7 +38,7 @@
 class Printable
 {
 public:
-    virtual void print(std::ostream& os) const = 0;
+    virtual void Print(std::ostream& os) const = 0;
 };
 
 std::ostream& operator<<(std::ostream& os, const Printable& s);
@@ -57,10 +57,10 @@ std::ostream& operator<<(std::ostream& os, const std::map<I, T>& s)
     return os;
 }
 
-std::string toString(const KDL::Frame& s);
+std::string ToString(const KDL::Frame& s);
 
-std::string toString(const Eigen::Isometry3d& s);
+std::string ToString(const Eigen::Isometry3d& s);
 
-std::string toString(const Eigen::Affine3d& s);
+std::string ToString(const Eigen::Affine3d& s);
 
 #endif  // PRINTABLE_H

@@ -18,62 +18,62 @@ namespace exotica
 class Property
 {
 public:
-    boost::any get() const;
+    boost::any Get() const;
     template <typename C>
-    void set(const C val)
+    void Set(const C val)
     {
-        value = val;
+        value_ = val;
     }
     Property(std::string prop_name);
-    Property(std::string prop_name, bool isRequired);
-    Property(std::string prop_name, bool isRequired, boost::any val);
+    Property(std::string prop_name, bool is_required);
+    Property(std::string prop_name, bool is_required, boost::any val);
     Property(std::initializer_list<boost::any> val);
-    bool isRequired() const;
-    bool isSet() const;
-    bool isStringType() const;
-    bool isInitializerVectorType() const;
-    std::string getName() const;
-    std::string getType() const;
+    bool IsRequired() const;
+    bool IsSet() const;
+    bool IsStringType() const;
+    bool IsInitializerVectorType() const;
+    std::string GetName() const;
+    std::string GetType() const;
 
 private:
-    boost::any value;
-    bool required;
-    std::string name;
+    boost::any value_;
+    bool required_;
+    std::string name_;
 };
 
 class Initializer
 {
 public:
     Initializer();
-    Initializer(std::string name_);
-    Initializer(std::string name_, std::map<std::string, boost::any> properties_);
-    std::string getName() const;
-    void setName(std::string name_);
-    void addProperty(const Property& prop);
-    boost::any getProperty(std::string name_) const;
-    void setProperty(std::string name_, boost::any);
-    bool hasProperty(std::string name_) const;
-    std::vector<std::string> getPropertyNames() const;
+    Initializer(std::string name);
+    Initializer(std::string name, std::map<std::string, boost::any> properties);
+    std::string GetName() const;
+    void SetName(std::string name);
+    void AddProperty(const Property& prop);
+    boost::any GetProperty(std::string name) const;
+    void SetProperty(std::string name, boost::any);
+    bool HasProperty(std::string name) const;
+    std::vector<std::string> GetPropertyNames() const;
 
-    std::map<std::string, Property> properties;
-    std::string name;
+    std::map<std::string, Property> properties_;
+    std::string name_;
 };
 
 class InitializerBase
 {
 public:
-    virtual void check(const Initializer& other) const = 0;
-    virtual Initializer getTemplate() const = 0;
-    virtual std::vector<Initializer> getAllTemplates() const = 0;
+    virtual void Check(const Initializer& other) const = 0;
+    virtual Initializer GetTemplate() const = 0;
+    virtual std::vector<Initializer> GetAllTemplates() const = 0;
 };
 
 class InstantiableBase
 {
 public:
-    virtual Initializer getInitializerTemplate() = 0;
+    virtual Initializer GetInitializerTemplate() = 0;
     virtual void InstantiateInternal(const Initializer& init) = 0;
     virtual void InstantiateBase(const Initializer& init) {}
-    virtual std::vector<Initializer> getAllTemplates() const = 0;
+    virtual std::vector<Initializer> GetAllTemplates() const = 0;
 };
 
 template <class C>
@@ -84,18 +84,18 @@ public:
     {
         InstantiateBase(init);
         C tmp(init);
-        tmp.check(init);
+        tmp.Check(init);
         Instantiate(tmp);
     }
 
-    virtual Initializer getInitializerTemplate()
+    virtual Initializer GetInitializerTemplate()
     {
-        return C().getTemplate();
+        return C().GetTemplate();
     }
 
-    virtual std::vector<Initializer> getAllTemplates() const
+    virtual std::vector<Initializer> GetAllTemplates() const
     {
-        return C().getAllTemplates();
+        return C().GetAllTemplates();
     }
 
     virtual void Instantiate(C& init) = 0;

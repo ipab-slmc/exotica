@@ -34,7 +34,7 @@
 
 namespace exotica
 {
-Visualization::Visualization(Scene_ptr scene) : scene_(scene)
+Visualization::Visualization(ScenePtr scene) : scene_(scene)
 {
     HIGHLIGHT_NAMED("Visualization", "Initialising visualizer");
     Initialize();
@@ -43,56 +43,56 @@ Visualization::~Visualization() = default;
 
 void Visualization::Initialize()
 {
-    if (Server::isRos())
+    if (Server::IsRos())
     {
-        trajectory_pub_ = Server::advertise<moveit_msgs::DisplayTrajectory>(scene_->getName() + (scene_->getName().empty() ? "" : "/") + "Trajectory", 1, true);
+        trajectory_pub_ = Server::Advertise<moveit_msgs::DisplayTrajectory>(scene_->GetName() + (scene_->GetName().empty() ? "" : "/") + "Trajectory", 1, true);
     }
 }
 
-void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
+void Visualization::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory)
 {
     // TODO: Correctly handle dt for time_from_start
     // TODO:
     //   http://docs.ros.org/melodic/api/moveit_msgs/html/msg/DisplayTrajectory.html
 
-    if (!Server::isRos()) return;
+    if (!Server::IsRos()) return;
 
-    if (trajectory.cols() != scene_->getKinematicTree().getNumControlledJoints())
-        throw_pretty("Number of DoFs in trajectory does not match number of controlled joints of robot. Got " << trajectory.cols() << " but expected " << scene_->getKinematicTree().getNumControlledJoints());
+    if (trajectory.cols() != scene_->GetKinematicTree().GetNumControlledJoints())
+        ThrowPretty("Number of DoFs in trajectory does not match number of controlled joints of robot. Got " << trajectory.cols() << " but expected " << scene_->GetKinematicTree().GetNumControlledJoints());
 
     moveit_msgs::DisplayTrajectory traj_msg;
-    traj_msg.model_id = scene_->getKinematicTree().getRobotModel()->getName();
+    traj_msg.model_id = scene_->GetKinematicTree().GetRobotModel()->getName();
 
     const int num_trajectory_points = trajectory.rows();
 
     traj_msg.trajectory.resize(1);
-    traj_msg.trajectory[0].joint_trajectory.header.frame_id = scene_->getRootFrameName();
+    traj_msg.trajectory[0].joint_trajectory.header.frame_id = scene_->GetRootFrameName();
     traj_msg.trajectory[0].joint_trajectory.header.stamp = ros::Time::now();
 
     // Floating base support
     int base_offset = 0;
-    switch (scene_->getKinematicTree().getControlledBaseType())
+    switch (scene_->GetKinematicTree().GetControlledBaseType())
     {
-        case BASE_TYPE::FIXED:
+        case BaseType::FIXED:
             // HIGHLIGHT("Fixed base, no offset");
             break;
-        case BASE_TYPE::PLANAR:
+        case BaseType::PLANAR:
             // HIGHLIGHT("Planar, offset 3");
             base_offset = 3;
             break;
-        case BASE_TYPE::FLOATING:
+        case BaseType::FLOATING:
             // HIGHLIGHT("Floating, offset 6");
             base_offset = 6;
             break;
         default:
-            throw_pretty("Unknown base type.");
+            ThrowPretty("Unknown base type.");
     }
 
     // Insert floating base if not a fixed-base controlled robot
-    if (scene_->getKinematicTree().getControlledBaseType() != BASE_TYPE::FIXED)
+    if (scene_->GetKinematicTree().GetControlledBaseType() != BaseType::FIXED)
     {
-        traj_msg.trajectory[0].multi_dof_joint_trajectory.header.frame_id = scene_->getRootFrameName();
-        traj_msg.trajectory[0].multi_dof_joint_trajectory.joint_names.push_back(scene_->getKinematicTree().getRootJointName());
+        traj_msg.trajectory[0].multi_dof_joint_trajectory.header.frame_id = scene_->GetRootFrameName();
+        traj_msg.trajectory[0].multi_dof_joint_trajectory.joint_names.push_back(scene_->GetKinematicTree().GetRootJointName());
         traj_msg.trajectory[0].multi_dof_joint_trajectory.points.resize(num_trajectory_points);
 
         geometry_msgs::Transform base_transform;
@@ -102,12 +102,12 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
             base_transform.translation.x = trajectory(i, 0);
             base_transform.translation.y = trajectory(i, 1);
 
-            if (scene_->getKinematicTree().getControlledBaseType() == BASE_TYPE::FLOATING)
+            if (scene_->GetKinematicTree().GetControlledBaseType() == BaseType::FLOATING)
             {
                 base_transform.translation.z = trajectory(i, 2);
                 quat = Eigen::AngleAxisd(trajectory(i, 3), Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(trajectory(i, 4), Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(trajectory(i, 5), Eigen::Vector3d::UnitZ());
             }
-            else if (scene_->getKinematicTree().getControlledBaseType() == BASE_TYPE::PLANAR)
+            else if (scene_->GetKinematicTree().GetControlledBaseType() == BaseType::PLANAR)
             {
                 base_transform.translation.z = 0.0;  // TODO: Technically: trans_z
                 quat = Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(trajectory(i, 2), Eigen::Vector3d::UnitZ());
@@ -124,14 +124,14 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
 
     // Handle unactuated joints, i.e., joints whose values are not part of the trajectory:
     // TODO: How to handle unactuated floating-base?
-    traj_msg.trajectory_start.joint_state.header.frame_id = scene_->getRootFrameName();
+    traj_msg.trajectory_start.joint_state.header.frame_id = scene_->GetRootFrameName();
 
     // Insert all starting joint states - including the floating base
-    auto model_state_map = scene_->getKinematicTree().getModelStateMap();
+    auto model_state_map = scene_->GetKinematicTree().GetModelStateMap();
     for (const auto& pair : model_state_map)
     {
         // Only push back if not part of the floating base - i.e., the joint name includes the root frame name.
-        if (pair.first.find(scene_->getRootFrameName()) == std::string::npos)
+        if (pair.first.find(scene_->GetRootFrameName()) == std::string::npos)
         {
             traj_msg.trajectory_start.joint_state.name.push_back(pair.first);
             traj_msg.trajectory_start.joint_state.position.push_back(pair.second);
@@ -143,7 +143,7 @@ void Visualization::displayTrajectory(Eigen::MatrixXdRefConst trajectory)
     traj_msg.trajectory[0].joint_trajectory.points.resize(num_trajectory_points);
     traj_msg.trajectory[0].joint_trajectory.joint_names.resize(num_actuated_joints_without_base);
     for (int i = 0; i < num_actuated_joints_without_base; i++)
-        traj_msg.trajectory[0].joint_trajectory.joint_names[i] = scene_->getKinematicTree().getJointNames()[base_offset + i];
+        traj_msg.trajectory[0].joint_trajectory.joint_names[i] = scene_->GetKinematicTree().GetJointNames()[base_offset + i];
 
     // Insert actuated joints without base
     for (int i = 0; i < num_trajectory_points; i++)

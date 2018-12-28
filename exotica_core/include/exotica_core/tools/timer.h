@@ -6,7 +6,7 @@
 
 namespace exotica
 {
-inline void sleep(double t)
+inline void Sleep(double t)
 {
     std::this_thread::sleep_for(std::chrono::duration<double>(t));
 }
@@ -14,22 +14,22 @@ inline void sleep(double t)
 class Timer
 {
 public:
-    Timer() : startTime_(std::chrono::high_resolution_clock::now())
+    Timer() : start_time_(std::chrono::high_resolution_clock::now())
     {
     }
 
-    inline void reset()
+    inline void Reset()
     {
-        startTime_ = std::chrono::high_resolution_clock::now();
+        start_time_ = std::chrono::high_resolution_clock::now();
     }
 
-    inline double getDuration()
+    inline double GetDuration()
     {
-        return std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime_).count();
+        return std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - start_time_).count();
     }
 
 private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> startTime_;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;
 };
 }
 

@@ -70,7 +70,7 @@
 #include <exotica_aico_solver/incremental_gaussian.h>
 #include <exotica_aico_solver/math_operations.h>
 
-#include <exotica_aico_solver/AICOSolverInitializer.h>
+#include <exotica_aico_solver/aico_solver_initializer.h>
 
 namespace exotica
 {
@@ -96,7 +96,7 @@ public:
        * @param pointer Shared pointer to the motion planning problem
        * @return        Successful if the problem is a valid UnconstrainedTimeIndexedProblem
        */
-    void specifyProblem(PlanningProblem_ptr pointer) override;
+    void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 protected:
     /** \brief Initializes message data.
@@ -113,12 +113,12 @@ protected:
     void InitTrajectory(const std::vector<Eigen::VectorXd>& q_init);
 
 private:
-    UnconstrainedTimeIndexedProblem_ptr prob_;  //!< Shared pointer to the planning problem.
+    UnconstrainedTimeIndexedProblemPtr prob_;  //!< Shared pointer to the planning problem.
     double damping;                             //!< Damping
     double damping_init_;                       //!< Damping
-    double minimum_step_tolerance_;             //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
-    double step_tolerance_;                     //!< Relative step tolerance (termination criterion)
-    double function_tolerance_;                 //!< Relative function tolerance/first-order optimality criterion
+    double minimum_step_tolerance;             //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
+    double step_tolerance;                     //!< Relative step tolerance (termination criterion)
+    double function_tolerance;                 //!< Relative function tolerance/first-order optimality criterion
     int max_backtrack_iterations_;              //!< Max. number of sweeps without improvement before terminating (= line-search)
     bool use_bwd_msg_;                          //!< Flag for using backward message initialisation
     Eigen::VectorXd bwd_msg_v_;                 //!< Backward message initialisation mean
@@ -267,7 +267,7 @@ private:
     void PerhapsUndoStep();
 
     /**
-       * \brief Updates the task cost terms \f$ R, r, \hat{r} \f$ for time step \f$t\f$. UnconstrainedTimeIndexedProblem::update() has to be called before calling this function.
+       * \brief Updates the task cost terms \f$ R, r, \hat{r} \f$ for time step \f$t\f$. UnconstrainedTimeIndexedProblem::Update() has to be called before calling this function.
        * @param t Time step to be updated.
        */
     double GetTaskCosts(int t);

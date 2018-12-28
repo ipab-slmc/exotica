@@ -60,36 +60,36 @@ public:
 
     static void Destroy()
     {
-        Server::destroy();
+        Server::Destroy();
         if (singleton_initialiser_) singleton_initialiser_.reset();
     }
 
-    static void printSupportedClasses();
-    static std::shared_ptr<exotica::MotionSolver> createSolver(const std::string& type, bool prepend = true) { return to_std_ptr(Instance()->solvers_.createInstance((prepend ? "exotica/" : "") + type)); }
-    static std::shared_ptr<exotica::TaskMap> createMap(const std::string& type, bool prepend = true) { return to_std_ptr(Instance()->maps_.createInstance((prepend ? "exotica/" : "") + type)); }
-    static std::shared_ptr<exotica::PlanningProblem> createProblem(const std::string& type, bool prepend = true) { return Instance()->problems_.createInstance((prepend ? "exotica/" : "") + type); }
-    static std::shared_ptr<exotica::CollisionScene> createCollisionScene(const std::string& type, bool prepend = true) { return to_std_ptr(Instance()->scenes_.createInstance((prepend ? "exotica/" : "") + type)); }
-    static std::vector<std::string> getSolvers();
-    static std::vector<std::string> getProblems();
-    static std::vector<std::string> getMaps();
-    static std::vector<std::string> getCollisionScenes();
-    static std::vector<Initializer> getInitializers();
+    static void PrintSupportedClasses();
+    static std::shared_ptr<exotica::MotionSolver> CreateSolver(const std::string& type, bool prepend = true) { return ToStdPtr(Instance()->solvers_.createInstance((prepend ? "exotica/" : "") + type)); }
+    static std::shared_ptr<exotica::TaskMap> CreateMap(const std::string& type, bool prepend = true) { return ToStdPtr(Instance()->maps_.createInstance((prepend ? "exotica/" : "") + type)); }
+    static std::shared_ptr<exotica::PlanningProblem> CreateProblem(const std::string& type, bool prepend = true) { return Instance()->problems_.CreateInstance((prepend ? "exotica/" : "") + type); }
+    static std::shared_ptr<exotica::CollisionScene> CreateCollisionScene(const std::string& type, bool prepend = true) { return ToStdPtr(Instance()->scenes_.createInstance((prepend ? "exotica/" : "") + type)); }
+    static std::vector<std::string> GetSolvers();
+    static std::vector<std::string> GetProblems();
+    static std::vector<std::string> GetMaps();
+    static std::vector<std::string> GetCollisionScenes();
+    static std::vector<Initializer> GetInitializers();
 
-    static std::shared_ptr<exotica::MotionSolver> createSolver(const Initializer& init)
+    static std::shared_ptr<exotica::MotionSolver> CreateSolver(const Initializer& init)
     {
-        std::shared_ptr<exotica::MotionSolver> ret = to_std_ptr(Instance()->solvers_.createInstance(init.getName()));
+        std::shared_ptr<exotica::MotionSolver> ret = ToStdPtr(Instance()->solvers_.createInstance(init.GetName()));
         ret->InstantiateInternal(init);
         return ret;
     }
-    static std::shared_ptr<exotica::TaskMap> createMap(const Initializer& init)
+    static std::shared_ptr<exotica::TaskMap> CreateMap(const Initializer& init)
     {
-        std::shared_ptr<exotica::TaskMap> ret = to_std_ptr(Instance()->maps_.createInstance(init.getName()));
+        std::shared_ptr<exotica::TaskMap> ret = ToStdPtr(Instance()->maps_.createInstance(init.GetName()));
         ret->InstantiateInternal(init);
         return ret;
     }
-    static std::shared_ptr<exotica::PlanningProblem> createProblem(const Initializer& init)
+    static std::shared_ptr<exotica::PlanningProblem> CreateProblem(const Initializer& init)
     {
-        std::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.createInstance(init.getName());
+        std::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.CreateInstance(init.GetName());
         ret->InstantiateInternal(init);
         return ret;
     }
@@ -109,10 +109,10 @@ private:
     pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
     pluginlib::ClassLoader<exotica::TaskMap> maps_;
     pluginlib::ClassLoader<exotica::CollisionScene> scenes_;
-    PlanningProblem_fac problems_;
+    PlanningProblemFac problems_;
 };
 
-typedef std::shared_ptr<Setup> Setup_ptr;
+typedef std::shared_ptr<Setup> SetupPtr;
 }
 
 #endif

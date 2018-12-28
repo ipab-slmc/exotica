@@ -31,30 +31,30 @@
  */
 
 #include "exotica_core/motion_solver.h"
-#include "exotica_core/MotionSolverInitializer.h"
+#include "exotica_core/motion_solver_initializer.h"
 
 namespace exotica
 {
 void MotionSolver::InstantiateBase(const Initializer& init)
 {
     Object::InstatiateObject(init);
-    setNumberOfMaxIterations(MotionSolverInitializer(init).MaxIterations);
+    SetNumberOfMaxIterations(MotionSolverInitializer(init).max_iterations);
 }
 
 MotionSolver::MotionSolver()
 {
 }
 
-void MotionSolver::specifyProblem(PlanningProblem_ptr pointer)
+void MotionSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     problem_ = pointer;
 }
 
-std::string MotionSolver::print(std::string prepend)
+std::string MotionSolver::Print(std::string prepend)
 {
-    std::string ret = Object::print(prepend);
+    std::string ret = Object::Print(prepend);
     ret += "\n" + prepend + "  Problem:";
-    if (problem_) ret += "\n" + problem_->print(prepend + "    ");
+    if (problem_) ret += "\n" + problem_->Print(prepend + "    ");
     return ret;
 }
 }

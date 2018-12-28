@@ -38,44 +38,44 @@ namespace exotica
 {
 EffVelocity::EffVelocity()
 {
-    Kinematics.resize(2);
+    kinematics.resize(2);
 }
 
 EffVelocity::~EffVelocity() = default;
 
-void EffVelocity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Kinematics.size() != 2) throw_named("Wrong size of Kinematics - requires 2, but got " << Kinematics.size());
-    if (phi.rows() != Kinematics[0].Phi.rows()) throw_named("Wrong size of phi!");
+    if (kinematics.size() != 2) ThrowNamed("Wrong size of kinematics - requires 2, but got " << kinematics.size());
+    if (phi.rows() != kinematics[0].phi.rows()) ThrowNamed("Wrong size of phi!");
 
     Eigen::Vector3d p_t, p_t_prev;
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    for (int i = 0; i < kinematics[0].phi.rows(); i++)
     {
-        tf::vectorKDLToEigen(Kinematics[0].Phi(i).p, p_t);
-        tf::vectorKDLToEigen(Kinematics[1].Phi(i).p, p_t_prev);
+        tf::vectorKDLToEigen(kinematics[0].phi(i).p, p_t);
+        tf::vectorKDLToEigen(kinematics[1].phi(i).p, p_t_prev);
         phi(i) = (p_t_prev - p_t).norm();
     }
 }
 
-void EffVelocity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Kinematics.size() != 2) throw_named("Wrong size of Kinematics - requires 2, but got " << Kinematics.size());
-    if (phi.rows() != Kinematics[0].Phi.rows()) throw_named("Wrong size of phi!");
-    if (J.rows() != Kinematics[0].J.rows() || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
+    if (kinematics.size() != 2) ThrowNamed("Wrong size of kinematics - requires 2, but got " << kinematics.size());
+    if (phi.rows() != kinematics[0].phi.rows()) ThrowNamed("Wrong size of phi!");
+    if (jacobian.rows() != kinematics[0].jacobian.rows() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
-    J.setZero();
+    jacobian.setZero();
     Eigen::Vector3d p_t, p_t_prev;
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    for (int i = 0; i < kinematics[0].phi.rows(); i++)
     {
-        tf::vectorKDLToEigen(Kinematics[0].Phi(i).p, p_t);
-        tf::vectorKDLToEigen(Kinematics[1].Phi(i).p, p_t_prev);
+        tf::vectorKDLToEigen(kinematics[0].phi(i).p, p_t);
+        tf::vectorKDLToEigen(kinematics[1].phi(i).p, p_t_prev);
         phi(i) = (p_t - p_t_prev).norm();
 
         if (phi(i) != 0.0)
         {
-            J.row(i) = ((p_t(0) - p_t_prev(0)) * Kinematics[0].J[i].data.row(0) +
-                        (p_t(1) - p_t_prev(1)) * Kinematics[0].J[i].data.row(1) +
-                        (p_t(2) - p_t_prev(2)) * Kinematics[0].J[i].data.row(2)) /
+            jacobian.row(i) = ((p_t(0) - p_t_prev(0)) * kinematics[0].jacobian[i].data.row(0) +
+                        (p_t(1) - p_t_prev(1)) * kinematics[0].jacobian[i].data.row(1) +
+                        (p_t(2) - p_t_prev(2)) * kinematics[0].jacobian[i].data.row(2)) /
                        phi(i);
         }
     }
@@ -85,8 +85,8 @@ void EffVelocity::Instantiate(EffVelocityInitializer& init)
 {
 }
 
-int EffVelocity::taskSpaceDim()
+int EffVelocity::TaskSpaceDim()
 {
-    return Kinematics[0].Phi.rows();
+    return kinematics[0].phi.rows();
 }
 }

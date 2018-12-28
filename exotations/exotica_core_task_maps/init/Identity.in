@@ -1,3 +1,0 @@
-extend <exotica_core/TaskMap>
-Optional Eigen::VectorXd JointRef;
-Optional Eigen::VectorXd JointMap;

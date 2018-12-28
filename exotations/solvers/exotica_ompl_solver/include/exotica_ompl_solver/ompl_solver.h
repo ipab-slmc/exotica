@@ -67,7 +67,7 @@ public:
     virtual ~OMPLSolver();
 
     void Solve(Eigen::MatrixXd &solution) override;
-    void specifyProblem(PlanningProblem_ptr pointer) override;
+    void SpecifyProblem(PlanningProblemPtr pointer) override;
 
     int GetRandomSeed() const;
 

@@ -43,35 +43,35 @@ template <class ProblemType>
 OMPLSolver<ProblemType>::~OMPLSolver() = default;
 
 template <class ProblemType>
-void OMPLSolver<ProblemType>::specifyProblem(PlanningProblem_ptr pointer)
+void OMPLSolver<ProblemType>::SpecifyProblem(PlanningProblemPtr pointer)
 {
-    MotionSolver::specifyProblem(pointer);
+    MotionSolver::SpecifyProblem(pointer);
     prob_ = std::static_pointer_cast<ProblemType>(pointer);
-    if (prob_->getScene()->getBaseType() == BASE_TYPE::FIXED)
+    if (prob_->GetScene()->GetBaseType() == BaseType::FIXED)
         state_space_.reset(new OMPLRNStateSpace(init_));
-    else if (prob_->getScene()->getBaseType() == BASE_TYPE::PLANAR)
+    else if (prob_->GetScene()->GetBaseType() == BaseType::PLANAR)
         state_space_.reset(new OMPLSE2RNStateSpace(init_));
-    else if (prob_->getScene()->getBaseType() == BASE_TYPE::FLOATING)
+    else if (prob_->GetScene()->GetBaseType() == BaseType::FLOATING)
         state_space_.reset(new OMPLSE3RNStateSpace(init_));
     else
-        throw_named("Unsupported base type " << prob_->getScene()->getBaseType());
+        ThrowNamed("Unsupported base type " << prob_->GetScene()->GetBaseType());
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
     ompl_simple_setup_->setPlannerAllocator(boost::bind(planner_allocator_, _1, algorithm_));
 
-    if (init_.Projection.rows() > 0)
+    if (init_.projection.rows() > 0)
     {
-        std::vector<int> project_vars(init_.Projection.rows());
-        for (int i = 0; i < init_.Projection.rows(); i++)
+        std::vector<int> project_vars(init_.projection.rows());
+        for (int i = 0; i < init_.projection.rows(); i++)
         {
-            project_vars[i] = (int)init_.Projection(i);
-            if (project_vars[i] < 0 || project_vars[i] >= prob_->N) throw_named("Invalid projection index! " << project_vars[i]);
+            project_vars[i] = (int)init_.projection(i);
+            if (project_vars[i] < 0 || project_vars[i] >= prob_->N) ThrowNamed("Invalid projection index! " << project_vars[i]);
         }
-        if (prob_->getScene()->getBaseType() == BASE_TYPE::FIXED)
+        if (prob_->GetScene()->GetBaseType() == BaseType::FIXED)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLRNProjection(state_space_, project_vars)));
-        else if (prob_->getScene()->getBaseType() == BASE_TYPE::PLANAR)
+        else if (prob_->GetScene()->GetBaseType() == BaseType::PLANAR)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLSE2RNProjection(state_space_, project_vars)));
-        else if (prob_->getScene()->getBaseType() == BASE_TYPE::FLOATING)
+        else if (prob_->GetScene()->GetBaseType() == BaseType::FLOATING)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLSE3RNProjection(state_space_, project_vars)));
     }
 }
@@ -116,20 +116,20 @@ void OMPLSolver<ProblemType>::SetGoalState(Eigen::VectorXdRefConst qT, const dou
     state_space_->as<OMPLStateSpace>()->ExoticaToOMPLState(qT, gs.get());
     if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
     {
-        throw_named("Goal state is not valid!");
+        ThrowNamed("Goal state is not valid!");
     }
 
     if (!ompl_simple_setup_->getSpaceInformation()->satisfiesBounds(gs.get()))
     {
-        state_space_->as<OMPLStateSpace>()->stateDebug(qT);
+        state_space_->as<OMPLStateSpace>()->StateDebug(qT);
 
         // Debug state and bounds
         std::string out_of_bounds_joint_ids = "";
         for (int i = 0; i < qT.rows(); ++i)
-            if (qT(i) < prob_->getBounds()[i] || qT(i) > prob_->getBounds()[i + qT.rows()])
-                out_of_bounds_joint_ids += "[j" + std::to_string(i) + "=" + std::to_string(qT(i)) + ", ll=" + std::to_string(prob_->getBounds()[i]) + ", ul=" + std::to_string(prob_->getBounds()[i + qT.rows()]) + "]\n";
+            if (qT(i) < prob_->GetBounds()[i] || qT(i) > prob_->GetBounds()[i + qT.rows()])
+                out_of_bounds_joint_ids += "[j" + std::to_string(i) + "=" + std::to_string(qT(i)) + ", ll=" + std::to_string(prob_->GetBounds()[i]) + ", ul=" + std::to_string(prob_->GetBounds()[i + qT.rows()]) + "]\n";
 
-        throw_named("Invalid goal state [Invalid joint bounds for joint indices: \n"
+        ThrowNamed("Invalid goal state [Invalid joint bounds for joint indices: \n"
                     << out_of_bounds_joint_ids << "]");
     }
     ompl_simple_setup_->setGoalState(gs, eps);
@@ -142,32 +142,32 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
     const ompl::base::SpaceInformationPtr &si = ompl_simple_setup_->getSpaceInformation();
 
     ompl::geometric::PathGeometric pg = ompl_simple_setup_->getSolutionPath();
-    if (init_.Smooth)
+    if (init_.smooth)
     {
         bool try_more = true;
         int times = 0;
-        while (init_.ReduceVertices && times < init_.SimplifyTryCnt && try_more && ptc == false)
+        while (init_.reduce_vertices && times < init_.simplify_try_cnt && try_more && ptc == false)
         {
-            pg.interpolate(init_.SimplifyInterpolationLength);
-            try_more = psf->reduceVertices(pg, 0, 0, init_.RangeRatio);
+            pg.interpolate(init_.simplify_interpolation_length);
+            try_more = psf->reduceVertices(pg, 0, 0, init_.range_ratio);
             times++;
         }
-        if (init_.ShortcutPath && si->getStateSpace()->isMetricSpace())
+        if (init_.shortcut_path && si->getStateSpace()->isMetricSpace())
         {
             times = 0;
-            while (times < init_.SimplifyTryCnt && try_more && ptc == false)
+            while (times < init_.simplify_try_cnt && try_more && ptc == false)
             {
-                pg.interpolate(init_.SimplifyInterpolationLength);
-                try_more = psf->shortcutPath(pg, 0, 0, init_.RangeRatio, init_.SnapToVertex);
+                pg.interpolate(init_.simplify_interpolation_length);
+                try_more = psf->shortcutPath(pg, 0, 0, init_.range_ratio, init_.snap_to_vertex);
                 times++;
             }
         }
     }
     std::vector<ompl::base::State *> &states = pg.getStates();
     unsigned int length = 0;
-    if (init_.FinalInterpolationLength > 3)
+    if (init_.final_interpolation_length > 3)
     {
-        length = init_.FinalInterpolationLength;
+        length = init_.final_interpolation_length;
     }
     else
     {
@@ -175,10 +175,10 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
         for (int i = 0; i < n1; ++i)
             length += si->getStateSpace()->validSegmentCount(states[i], states[i + 1]);
     }
-    pg.interpolate(int(length * init_.SmoothnessFactor));
+    pg.interpolate(int(length * init_.smoothness_factor));
 
-    traj.resize(pg.getStateCount(), prob_->getSpaceDim());
-    Eigen::VectorXd tmp(prob_->getSpaceDim());
+    traj.resize(pg.getStateCount(), prob_->GetSpaceDim());
+    Eigen::VectorXd tmp(prob_->GetSpaceDim());
 
     for (int i = 0; i < static_cast<int>(pg.getStateCount()); ++i)
     {
@@ -190,10 +190,10 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
 template <class ProblemType>
 void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 {
-    Eigen::VectorXd q0 = prob_->applyStartState();
+    Eigen::VectorXd q0 = prob_->ApplyStartState();
 
     // check joint limits
-    const std::vector<double> bounds = prob_->getBounds();
+    const std::vector<double> bounds = prob_->GetBounds();
     for (const double l : bounds)
     {
         if (!std::isfinite(l))
@@ -210,12 +210,12 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 
     if (!state_space_->as<OMPLStateSpace>()->isLocked())
     {
-        state_space_->as<OMPLStateSpace>()->setBounds(prob_);
-        bounds_ = prob_->getBounds();
+        state_space_->as<OMPLStateSpace>()->SetBounds(prob_);
+        bounds_ = prob_->GetBounds();
     }
-    else if (!bounds_.empty() && bounds_ != prob_->getBounds())
+    else if (!bounds_.empty() && bounds_ != prob_->GetBounds())
     {
-        throw_pretty("Cannot set new bounds on locked state space!");
+        ThrowPretty("Cannot set new bounds on locked state space!");
     }
 
     ompl_simple_setup_->getSpaceInformation()->setup();
@@ -223,17 +223,17 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
     ompl_simple_setup_->setup();
 
     if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
-        ompl_simple_setup_->getPlanner()->params().setParam("range", init_.Range);
+        ompl_simple_setup_->getPlanner()->params().setParam("range", init_.range);
     if (ompl_simple_setup_->getPlanner()->params().hasParam("goal_bias"))
-        ompl_simple_setup_->getPlanner()->params().setParam("goal_bias", init_.GoalBias);
+        ompl_simple_setup_->getPlanner()->params().setParam("goal_bias", init_.goal_bias);
 
-    if (init_.RandomSeed != -1)
+    if (init_.random_seed != -1)
     {
-        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.RandomSeed);
-        ompl::RNG::setSeed(init_.RandomSeed);
+        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.random_seed);
+        ompl::RNG::setSeed(init_.random_seed);
     }
 
-    SetGoalState(prob_->getGoalState(), init_.Epsilon);
+    SetGoalState(prob_->GetGoalState(), init_.epsilon);
 
     ompl::base::ScopedState<> ompl_start_state(state_space_);
 
@@ -242,7 +242,7 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 
     PreSolve();
     ompl::time::point start = ompl::time::now();
-    ompl::base::PlannerTerminationCondition ptc = ompl::base::timedPlannerTerminationCondition(init_.Timeout - ompl::time::seconds(ompl::time::now() - start));
+    ompl::base::PlannerTerminationCondition ptc = ompl::base::timedPlannerTerminationCondition(init_.timeout - ompl::time::seconds(ompl::time::now() - start));
     if (ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION && ompl_simple_setup_->haveSolutionPath())
     {
         GetPath(solution, ptc);

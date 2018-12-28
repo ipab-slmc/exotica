@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <PRMConfig>
 
-  <BKPIECE Name="ProjectionSolver" Projection="0 3"/>
+  <BKPIECESolver Name="ProjectionSolver" Projection="0 3"/>
 
   <SamplingProblem Name="ReachingProblem">
 

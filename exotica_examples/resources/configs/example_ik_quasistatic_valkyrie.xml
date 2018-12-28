@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
 <ExoticaWholeBodyIKConfig>
-  <!--<BayesianIKSolver Name="Bayesian" MaxIterations="10" MaxBacktrackIterations="10" />-->
   <IKSolver Name="IK">
     <MaxIterations>10</MaxIterations>
     <MaxStep>0.05</MaxStep>
@@ -16,7 +15,7 @@
       </Scene>
     </PlanningScene>
     <Maps>
-      <!--<CoM Name="CoM"/>-->
+      <!--<CenterOfMass Name="CoM"/>-->
       <EffPosition Name="CoM">
         <EndEffector>
           <Frame Link="pelvis"/>

@@ -34,8 +34,8 @@
 #define EXOTICA_CORE_TASK_MAPS_SPHERE_COLLISION_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/SphereCollisionInitializer.h>
-#include <exotica_core_task_maps/SphereInitializer.h>
+#include <exotica_core_task_maps/sphere_collision_initializer.h>
+#include <exotica_core_task_maps/sphere_initializer.h>
 #include <visualization_msgs/Marker.h>
 
 namespace exotica
@@ -47,12 +47,12 @@ public:
     virtual ~SphereCollision();
 
     void Instantiate(SphereCollisionInitializer& init) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
 
 private:
-    double distance(const KDL::Frame& eff_A, const KDL::Frame& eff_B, double r_A, double r_B);
+    double Distance(const KDL::Frame& eff_A, const KDL::Frame& eff_B, double r_A, double r_B);
     Eigen::VectorXd Jacobian(const KDL::Frame& eff_A, const KDL::Frame& eff_B, const KDL::Jacobian& jacA, const KDL::Jacobian& jacB, double r_A, double r_B);
 
     std::map<std::string, std::vector<int>> groups_;

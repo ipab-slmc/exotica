@@ -1,0 +1,10 @@
+class LevenbergMarquardtSolver
+
+extend <exotica_core/motion_solver>
+
+Optional double Convergence = 0.0;
+Optional double Damping = 0;
+Optional Eigen::VectorXd Alpha = Eigen::VectorXd::Ones(1);
+// ScaleProblem: direction of damping
+// "none": diagonal 1 matrix (Identity), "Jacobian": diagonal of Hessian approximation
+Optional std::string ScaleProblem = "none"; // "none" or "Jacobian"

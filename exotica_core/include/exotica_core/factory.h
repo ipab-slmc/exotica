@@ -81,7 +81,7 @@ public:
        * @param type[in]    The name of the class (string): must be a unique identifier
        * @param creator[in] A pointer to the creator function
        */
-    void registerType(const std::string& type, BaseClass* (*creator_function)())
+    void RegisterType(const std::string& type, BaseClass* (*creator_function)())
     {
         if (type_registry_.find(type) == type_registry_.end())  //!< If it does not already exist
         {
@@ -89,11 +89,11 @@ public:
         }
         else  //!< I.e. it exists, then cannot re-create it!
         {
-            throw_pretty("Trying to register already existing type '" << type << "'!");
+            ThrowPretty("Trying to register already existing type '" << type << "'!");
         }
     }
 
-    std::shared_ptr<BaseClass> createInstance(const std::string& type)
+    std::shared_ptr<BaseClass> CreateInstance(const std::string& type)
     {
         auto it = type_registry_.find(type);  //!< Attempt to find it
         if (it != type_registry_.end())       //!< If exists
@@ -102,14 +102,14 @@ public:
         }
         else
         {
-            throw_pretty("This factory does not recognize type '" << type << "' (" + base_type_ + ")");
+            ThrowPretty("This factory does not recognize type '" << type << "' (" + base_type_ + ")");
         }
     }
 
     /**
        * \brief Lists the valid implementations which are available and registered
        */
-    std::vector<std::string> getDeclaredClasses()
+    std::vector<std::string> GetDeclaredClasses()
     {
         std::vector<std::string> DeclaredClasses;
         for (auto it = type_registry_.begin(); it != type_registry_.end(); it++)
@@ -149,7 +149,7 @@ public:
     Registrar(const std::string& name, BaseClass* (*creator)(), const std::string& base_type)
     {
         Factory<BaseClass>::Instance().base_type_ = base_type;
-        Factory<BaseClass>::Instance().registerType(name, creator);
+        Factory<BaseClass>::Instance().RegisterType(name, creator);
     }
 };
 }

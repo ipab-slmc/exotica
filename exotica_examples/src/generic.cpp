@@ -51,8 +51,8 @@ void run()
     Initializer cost("exotica/Task", {{"Task", std::string("Position")}});
     Eigen::VectorXd W(7);
     W << 7, 6, 5, 4, 3, 2, 1;
-    Eigen::VectorXd startState = Eigen::VectorXd::Zero(7);
-    Eigen::VectorXd nominalState = Eigen::VectorXd::Zero(7);
+    Eigen::VectorXd start_state = Eigen::VectorXd::Zero(7);
+    Eigen::VectorXd nominal_state = Eigen::VectorXd::Zero(7);
 
     Initializer problem("exotica/UnconstrainedEndPoseProblem", {
                                                                    {"Name", std::string("MyProblem")},
@@ -61,8 +61,8 @@ void run()
                                                                    {"Cost", std::vector<Initializer>({cost})},
                                                                    {"W", W},
                                                                    {"Tolerance", 1e-5},
-                                                                   {"StartState", startState},
-                                                                   {"NominalState", nominalState},
+                                                                   {"StartState", start_state},
+                                                                   {"NominalState", nominal_state},
                                                                });
 
     Initializer solver("exotica/IKSolver", {
@@ -74,12 +74,12 @@ void run()
 
     // Initialize
 
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
-    MotionSolver_ptr any_solver = Setup::createSolver(solver);
+    PlanningProblemPtr any_problem = Setup::CreateProblem(problem);
+    MotionSolverPtr any_solver = Setup::CreateSolver(solver);
 
     // Assign the problem to the solver
-    any_solver->specifyProblem(any_problem);
-    UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
+    any_solver->SpecifyProblem(any_problem);
+    UnconstrainedEndPoseProblemPtr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
     // Create the initial configuration
     Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->N);
@@ -98,19 +98,19 @@ void run()
         // Update the goal if necessary
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-        my_problem->Cost.y = {0.6,
+        my_problem->cost.y = {0.6,
                               -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
                               0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
 
         // Solve the problem using the IK solver
-        my_problem->setStartState(q);
+        my_problem->SetStartState(q);
         any_solver->Solve(solution);
 
         double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
         q = solution.row(solution.rows() - 1);
 
         my_problem->Update(q);
-        my_problem->getScene()->getKinematicTree().publishFrames();
+        my_problem->GetScene()->GetKinematicTree().PublishFrames();
 
         ros::spinOnce();
         loop_rate.sleep();

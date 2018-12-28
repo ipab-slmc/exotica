@@ -36,7 +36,7 @@
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
-#include <exotica_core/TimeIndexedProblemInitializer.h>
+#include <exotica_core/time_indexed_problem_initializer.h>
 
 namespace exotica
 {
@@ -48,90 +48,92 @@ class TimeIndexedProblem : public PlanningProblem, public Instantiable<TimeIndex
 public:
     TimeIndexedProblem();
     virtual ~TimeIndexedProblem();
-    virtual void Instantiate(TimeIndexedProblemInitializer& init);
-    double getDuration();
+    void Instantiate(TimeIndexedProblemInitializer& init) override;
+    double GetDuration();
     void Update(Eigen::VectorXdRefConst x, int t);
-    bool isValid();
-    std::vector<Eigen::VectorXd> getInitialTrajectory();
-    void setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
-    virtual void preupdate();
-    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
-    void setRho(const std::string& task_name, const double rho, int t = 0);
-    Eigen::VectorXd getGoal(const std::string& task_name, int t = 0);
-    double getRho(const std::string& task_name, int t = 0);
-    void setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
-    void setRhoEQ(const std::string& task_name, const double rho, int t = 0);
-    Eigen::VectorXd getGoalEQ(const std::string& task_name, int t = 0);
-    double getRhoEQ(const std::string& task_name, int t = 0);
-    void setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
-    void setRhoNEQ(const std::string& task_name, const double rho, int t = 0);
-    Eigen::VectorXd getGoalNEQ(const std::string& task_name, int t = 0);
-    double getRhoNEQ(const std::string& task_name, int t = 0);
-    Eigen::MatrixXd getBounds() const;
+    bool IsValid() override;
+    std::vector<Eigen::VectorXd> GetInitialTrajectory();
+    void SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
+    void PreUpdate() override;
+    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    void SetRho(const std::string& task_name, const double rho, int t = 0);
+    Eigen::VectorXd GetGoal(const std::string& task_name, int t = 0);
+    double GetRho(const std::string& task_name, int t = 0);
+    void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    void SetRhoEQ(const std::string& task_name, const double rho, int t = 0);
+    Eigen::VectorXd GetGoalEQ(const std::string& task_name, int t = 0);
+    double GetRhoEQ(const std::string& task_name, int t = 0);
+    void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0);
+    Eigen::VectorXd GetGoalNEQ(const std::string& task_name, int t = 0);
+    double GetRhoNEQ(const std::string& task_name, int t = 0);
+    Eigen::MatrixXd GetBounds() const;
 
-    int getT() const { return T; }
-    void setT(const int& T_in);
+    int GetT() const { return T_; }
+    void SetT(const int& T_in);
 
-    double getTau() const { return tau; }
-    void setTau(const double& tau_in);
+    double GetTau() const { return tau_; }
+    void SetTau(const double& tau_in);
 
-    double getScalarTaskCost(int t);
-    Eigen::VectorXd getScalarTaskJacobian(int t);
-    double getScalarTransitionCost(int t);
-    Eigen::VectorXd getScalarTransitionJacobian(int t);
+    double GetScalarTaskCost(int t);
+    Eigen::VectorXd GetScalarTaskJacobian(int t);
+    double GetScalarTransitionCost(int t);
+    Eigen::VectorXd GetScalarTransitionJacobian(int t);
 
-    Eigen::VectorXd getEquality(int t);
-    Eigen::MatrixXd getEqualityJacobian(int t);
-    Eigen::VectorXd getInequality(int t);
-    Eigen::MatrixXd getInequalityJacobian(int t);
+    Eigen::VectorXd GetEquality(int t);
+    Eigen::MatrixXd GetEqualityJacobian(int t);
+    Eigen::VectorXd GetInequality(int t);
+    Eigen::MatrixXd GetInequalityJacobian(int t);
+
+    double GetJointVelocityLimit() { return q_dot_max_; }
+    void SetJointVelocityLimit(const double& qdot_max_in)
+    {
+        q_dot_max_ = qdot_max_in;
+        xxdiff_max_ = q_dot_max_ * tau_;
+    }
+    double GetXdiffMax() { return xxdiff_max_; }
 
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
-    TimeIndexedTask Cost;
-    TimeIndexedTask Inequality;
-    TimeIndexedTask Equality;
+    TimeIndexedTask cost;
+    TimeIndexedTask inequality;
+    TimeIndexedTask equality;
 
-    TaskSpaceVector CostPhi;
-    TaskSpaceVector InequalityPhi;
-    TaskSpaceVector EqualityPhi;
+    TaskSpaceVector cost_phi;
+    TaskSpaceVector inequality_phi;
+    TaskSpaceVector equality_phi;
 
     Eigen::MatrixXd W;  // TODO(wxm): Make private and add getter and setter (#209)
 
-    std::vector<TaskSpaceVector> Phi;
-    std::vector<Eigen::MatrixXd> J;
-    std::vector<Hessian> H;
+    std::vector<TaskSpaceVector> phi;
+    std::vector<Eigen::MatrixXd> jacobian;
+    std::vector<Hessian> hessian;
 
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
-    int PhiN;
-    int JN;
-    int NumTasks;
-    bool useBounds;
+    int length_phi;
+    int length_jacobian;
+    int num_tasks;
+    bool use_bounds;
 
-    double getJointVelocityLimit() { return qdot_max; }
-    void setJointVelocityLimit(const double& qdot_max_in)
-    {
-        qdot_max = qdot_max_in;
-        xdiff_max = qdot_max * tau;
-    }
-    double getXdiffMax() { return xdiff_max; }
 private:
-    int T;       //!< Number of time steps
-    double tau;  //!< Time step duration
+    void ReinitializeVariables();
 
-    double qdot_max;   //!< Joint velocity limit (rad/s)
-    double xdiff_max;  //!< Maximum change in the variables in a single timestep tau. Gets set/updated via setTau().
+    int T_;       //!< Number of time steps
+    double tau_;  //!< Time step duration
 
-    double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+    double q_dot_max_;   //!< Joint velocity limit (rad/s)
+    double xxdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
 
-    std::vector<Eigen::VectorXd> InitialTrajectory;
+    double w_rate_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+
+    std::vector<Eigen::VectorXd> initial_trajectory_;
     TimeIndexedProblemInitializer init_;
-    void reinitializeVariables();
 
-    std::vector<std::shared_ptr<KinematicResponse>> KinematicSolutions;
+    std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
 };
 
-typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblem_ptr;
+typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblemPtr;
 }
 
 #endif

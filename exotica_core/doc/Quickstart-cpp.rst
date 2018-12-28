@@ -56,7 +56,7 @@ This is shown below:
             Timer timer;
             solver->Solve(solution);
 
-            HIGHLIGHT("Finished solving in " << timer.getDuration() << "s. Solution [" << solution << "]");
+            HIGHLIGHT("Finished solving in " << timer.GetDuration() << "s. Solution [" << solution << "]");
         }
         Setup::Destroy();
     }
@@ -138,7 +138,7 @@ After we have loaded the solver, we can solve the problem and display the result
 
     solver->Solve(solution);
 
-    HIGHLIGHT("Finished solving in " << timer.getDuration() << "s. Solution [" << solution << "]");
+    HIGHLIGHT("Finished solving in " << timer.GetDuration() << "s. Solution [" << solution << "]");
 
 ``solver`` is the name of the motion solver which we instantiated earlier. After creating it, 
 solving is trivial; simply use ``solver->Solve(solution);``, passing in the ``Eigen::MatrixXd solution;`` 

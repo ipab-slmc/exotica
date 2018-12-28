@@ -30,7 +30,7 @@
  *
  */
 
-#include <exotica_core/TaskInitializer.h>
+#include <exotica_core/task_initializer.h>
 #include <exotica_core/tasks.h>
 
 namespace exotica
@@ -39,242 +39,242 @@ Task::Task()
 {
 }
 
-void Task::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
+void Task::Initialize(const std::vector<exotica::Initializer>& inits, PlanningProblemPtr prob, TaskSpaceVector& phi)
 {
     for (const exotica::Initializer& init : inits)
     {
         TaskInitializer task(init);
-        auto it = prob->getTaskMaps().find(task.Task);
-        if (it == prob->getTaskMaps().end()) throw_pretty("Task map '" << task.Task << "' has not been defined!");
-        TaskMaps[task.Task] = it->second;
-        Tasks.push_back(it->second);
-        TaskInitializers.push_back(task);
+        auto it = prob->GetTaskMaps().find(task.task);
+        if (it == prob->GetTaskMaps().end()) ThrowPretty("Task map '" << task.task << "' has not been defined!");
+        task_maps[task.task] = it->second;
+        tasks.push_back(it->second);
+        task_initializers_.push_back(task);
     }
-    NumTasks = Tasks.size();
-    PhiN = 0;
-    JN = 0;
+    num_tasks = tasks.size();
+    length_phi = 0;
+    length_jacobian = 0;
     phi.map.resize(0);
-    Indexing.resize(Tasks.size());
-    for (int i = 0; i < NumTasks; i++)
+    indexing.resize(tasks.size());
+    for (int i = 0; i < num_tasks; i++)
     {
-        Indexing[i].Id = i;
-        Indexing[i].Start = PhiN;
-        Indexing[i].Length = Tasks[i]->Length;
-        Indexing[i].StartJ = JN;
-        Indexing[i].LengthJ = Tasks[i]->LengthJ;
+        indexing[i].id = i;
+        indexing[i].start = length_phi;
+        indexing[i].length = tasks[i]->length;
+        indexing[i].start_jacobian = length_jacobian;
+        indexing[i].length_jacobian = tasks[i]->length_jacobian;
 
-        appendVector(phi.map, TaskVectorEntry::reindex(Tasks[i]->getLieGroupIndices(), Tasks[i]->Start, Indexing[i].Start));
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
+        AppendVector(phi.map, TaskVectorEntry::reindex(tasks[i]->GetLieGroupIndices(), tasks[i]->start, indexing[i].start));
+        length_phi += tasks[i]->length;
+        length_jacobian += tasks[i]->length_jacobian;
     }
-    phi.setZero(PhiN);
+    phi.SetZero(length_phi);
 }
 
 EndPoseTask::EndPoseTask()
 {
 }
 
-void EndPoseTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
+void EndPoseTask::Initialize(const std::vector<exotica::Initializer>& inits, PlanningProblemPtr prob, TaskSpaceVector& unused)
 {
-    Task::initialize(inits, prob, Phi);
-    y = Phi;
-    y.setZero(PhiN);
-    Rho = Eigen::VectorXd::Ones(NumTasks);
-    if (prob->getFlags() & KIN_J) J = Eigen::MatrixXd(JN, prob->N);
-    if (prob->getFlags() & KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(prob->N, prob->N));
-    S = Eigen::MatrixXd::Identity(JN, JN);
-    ydiff = Eigen::VectorXd::Zero(JN);
+    Task::Initialize(inits, prob, phi);
+    y = phi;
+    y.SetZero(length_phi);
+    rho = Eigen::VectorXd::Ones(num_tasks);
+    if (prob->GetFlags() & KIN_J) jacobian = Eigen::MatrixXd(length_jacobian, prob->N);
+    if (prob->GetFlags() & KIN_J_DOT) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(prob->N, prob->N));
+    S = Eigen::MatrixXd::Identity(length_jacobian, length_jacobian);
+    ydiff = Eigen::VectorXd::Zero(length_jacobian);
 
-    for (int i = 0; i < NumTasks; i++)
+    for (int i = 0; i < num_tasks; i++)
     {
         TaskInitializer task(inits[i]);
-        if (task.Goal.rows() == 0)
+        if (task.goal.rows() == 0)
         {
             // Keep zero goal
         }
-        else if (task.Goal.rows() == Tasks[i]->Length)
+        else if (task.goal.rows() == tasks[i]->length)
         {
-            y.data.segment(Indexing[i].Start, Indexing[i].Length) = task.Goal;
+            y.data.segment(indexing[i].start, indexing[i].length) = task.goal;
         }
         else
         {
-            throw_pretty("Invalid task goal size! Expecting " << Tasks[i]->Length << " got " << task.Goal.rows());
+            ThrowPretty("Invalid task goal size! Expecting " << tasks[i]->length << " got " << task.goal.rows());
         }
-        if (task.Rho.rows() == 0)
+        if (task.rho.rows() == 0)
         {
-            Rho(i) = 1.0;
+            rho(i) = 1.0;
         }
-        else if (task.Rho.rows() == 1)
+        else if (task.rho.rows() == 1)
         {
-            Rho(i) = task.Rho(0);
+            rho(i) = task.rho(0);
         }
         else
         {
-            throw_pretty("Invalid task Rho size! Expecting 1 got " << task.Rho.rows());
+            ThrowPretty("Invalid task rho size! Expecting 1 got " << task.rho.rows());
         }
     }
 }
 
-void EndPoseTask::updateS()
+void EndPoseTask::UpdateS()
 {
-    for (const TaskIndexing& task : Indexing)
+    for (const TaskIndexing& task : indexing)
     {
-        for (int i = 0; i < task.LengthJ; i++)
+        for (int i = 0; i < task.length_jacobian; i++)
         {
-            S(i + task.StartJ, i + task.StartJ) = Rho(task.Id);
+            S(i + task.start_jacobian, i + task.start_jacobian) = rho(task.id);
         }
-        if (Rho(task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
+        if (rho(task.id) != 0.0) tasks[task.id]->is_used = true;
     }
 }
 
-void EndPoseTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ, HessianRefConst bigH)
+void EndPoseTask::Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j, HessianRefConst big_h)
 {
-    for (const TaskIndexing& task : Indexing)
+    for (const TaskIndexing& task : indexing)
     {
-        Phi.data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
-        J.middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
-        H.segment(task.Start, task.Length) = bigH.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        phi.data.segment(task.start, task.length) = big_phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
+        jacobian.middleRows(task.start_jacobian, task.length_jacobian) = big_j.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
+        hessian.segment(task.start, task.length) = big_h.segment(tasks[task.id]->start, tasks[task.id]->length);
     }
-    ydiff = Phi - y;
+    ydiff = phi - y;
 }
 
-void EndPoseTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ)
+void EndPoseTask::Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j)
 {
-    for (const TaskIndexing& task : Indexing)
+    for (const TaskIndexing& task : indexing)
     {
-        Phi.data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
-        J.middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
+        phi.data.segment(task.start, task.length) = big_phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
+        jacobian.middleRows(task.start_jacobian, task.length_jacobian) = big_j.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
     }
-    ydiff = Phi - y;
+    ydiff = phi - y;
 }
 
-void EndPoseTask::update(const TaskSpaceVector& bigPhi)
+void EndPoseTask::Update(const TaskSpaceVector& big_phi)
 {
-    for (const TaskIndexing& task : Indexing)
+    for (const TaskIndexing& task : indexing)
     {
-        Phi.data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        phi.data.segment(task.start, task.length) = big_phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
     }
-    ydiff = Phi - y;
+    ydiff = phi - y;
 }
 
 TimeIndexedTask::TimeIndexedTask()
 {
 }
 
-void TimeIndexedTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
+void TimeIndexedTask::Initialize(const std::vector<exotica::Initializer>& inits, PlanningProblemPtr prob, TaskSpaceVector& phi)
 {
-    Task::initialize(inits, prob, phi);
-    phi.setZero(PhiN);
+    Task::Initialize(inits, prob, phi);
+    phi.SetZero(length_phi);
 }
 
-void TimeIndexedTask::updateS()
+void TimeIndexedTask::UpdateS()
 {
     for (int t = 0; t < T; t++)
     {
-        for (const TaskIndexing& task : Indexing)
+        for (const TaskIndexing& task : indexing)
         {
-            for (int i = 0; i < task.LengthJ; i++)
+            for (int i = 0; i < task.length_jacobian; i++)
             {
-                S[t](i + task.StartJ, i + task.StartJ) = Rho[t](task.Id);
+                S[t](i + task.start_jacobian, i + task.start_jacobian) = rho[t](task.id);
             }
-            if (Rho[t](task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
+            if (rho[t](task.id) != 0.0) tasks[task.id]->is_used = true;
         }
     }
 }
 
-void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ, HessianRefConst bigH, int t)
+void TimeIndexedTask::Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j, HessianRefConst big_h, int t)
 {
-    for (const TaskIndexing& task : Indexing)
+    for (const TaskIndexing& task : indexing)
     {
-        Phi[t].data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
-        J[t].middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
-        H[t].segment(task.Start, task.Length) = bigH.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        phi[t].data.segment(task.start, task.length) = big_phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
+        jacobian[t].middleRows(task.start_jacobian, task.length_jacobian) = big_j.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
+        hessian[t].segment(task.start, task.length) = big_h.segment(tasks[task.id]->start, tasks[task.id]->length);
     }
-    ydiff[t] = Phi[t] - y[t];
+    ydiff[t] = phi[t] - y[t];
 }
 
-void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, Eigen::MatrixXdRefConst bigJ, int t)
+void TimeIndexedTask::Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j, int t)
 {
-    for (const TaskIndexing& task : Indexing)
+    for (const TaskIndexing& task : indexing)
     {
-        Phi[t].data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
-        J[t].middleRows(task.StartJ, task.LengthJ) = bigJ.middleRows(Tasks[task.Id]->StartJ, Tasks[task.Id]->LengthJ);
+        phi[t].data.segment(task.start, task.length) = big_phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
+        jacobian[t].middleRows(task.start_jacobian, task.length_jacobian) = big_j.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
     }
-    ydiff[t] = Phi[t] - y[t];
+    ydiff[t] = phi[t] - y[t];
 }
 
-void TimeIndexedTask::update(const TaskSpaceVector& bigPhi, int t)
+void TimeIndexedTask::Update(const TaskSpaceVector& big_phi, int t)
 {
-    for (const TaskIndexing& task : Indexing)
+    for (const TaskIndexing& task : indexing)
     {
-        Phi[t].data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        phi[t].data.segment(task.start, task.length) = big_phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
     }
-    ydiff[t] = Phi[t] - y[t];
+    ydiff[t] = phi[t] - y[t];
 }
 
-void TimeIndexedTask::reinitializeVariables(int T_in, PlanningProblem_ptr prob, const TaskSpaceVector& phi)
+void TimeIndexedTask::ReinitializeVariables(int _T, PlanningProblemPtr _prob, const TaskSpaceVector& phi_in)
 {
-    T = T_in;
-    Phi.assign(T, phi);
-    y = Phi;
-    Rho.assign(T, Eigen::VectorXd::Ones(NumTasks));
-    if (prob->getFlags() & KIN_J) J.assign(T, Eigen::MatrixXd(JN, prob->N));
-    if (prob->getFlags() & KIN_J_DOT)
+    T = _T;
+    phi.assign(_T, phi_in);
+    y = phi;
+    rho.assign(T, Eigen::VectorXd::Ones(num_tasks));
+    if (_prob->GetFlags() & KIN_J) jacobian.assign(T, Eigen::MatrixXd(length_jacobian, _prob->N));
+    if (_prob->GetFlags() & KIN_J_DOT)
     {
         Hessian Htmp;
-        Htmp.setConstant(JN, Eigen::MatrixXd::Zero(prob->N, prob->N));
-        H.assign(T, Htmp);
+        Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(_prob->N, _prob->N));
+        hessian.assign(T, Htmp);
     }
-    S.assign(T, Eigen::MatrixXd::Identity(JN, JN));
-    ydiff.assign(T, Eigen::VectorXd::Zero(JN));
+    S.assign(T, Eigen::MatrixXd::Identity(length_jacobian, length_jacobian));
+    ydiff.assign(T, Eigen::VectorXd::Zero(length_jacobian));
 
-    if (NumTasks != TaskInitializers.size()) throw_pretty("Number of tasks does not match internal number of tasks!");
-    for (int i = 0; i < NumTasks; i++)
+    if (num_tasks != task_initializers_.size()) ThrowPretty("Number of tasks does not match internal number of tasks!");
+    for (int i = 0; i < num_tasks; i++)
     {
-        TaskInitializer& task = TaskInitializers[i];
-        if (task.Goal.rows() == 0)
+        TaskInitializer& task = task_initializers_[i];
+        if (task.goal.rows() == 0)
         {
             // Keep zero goal
         }
-        else if (task.Goal.rows() == Tasks[i]->Length * T)
+        else if (task.goal.rows() == tasks[i]->length * T)
         {
             for (int t = 0; t < T; t++)
             {
-                y[t].data.segment(Indexing[i].Start, Indexing[i].Length) = task.Goal.segment(t * Tasks[i]->Length, Tasks[i]->Length);
+                y[t].data.segment(indexing[i].start, indexing[i].length) = task.goal.segment(t * tasks[i]->length, tasks[i]->length);
             }
         }
-        else if (task.Goal.rows() == Tasks[i]->Length)
+        else if (task.goal.rows() == tasks[i]->length)
         {
             for (int t = 0; t < T; t++)
             {
-                y[t].data.segment(Indexing[i].Start, Indexing[i].Length) = task.Goal.segment(Tasks[i]->Length, Tasks[i]->Length);
+                y[t].data.segment(indexing[i].start, indexing[i].length) = task.goal.segment(tasks[i]->length, tasks[i]->length);
             }
         }
         else
         {
-            throw_pretty("Invalid task goal size! Expecting " << Tasks[i]->Length * T << " (or 1) and got " << task.Goal.rows());
+            ThrowPretty("Invalid task goal size! Expecting " << tasks[i]->length * T << " (or 1) and got " << task.goal.rows());
         }
-        if (task.Rho.rows() == 0)
+        if (task.rho.rows() == 0)
         {
             // Keep ones
         }
-        else if (task.Rho.rows() == T)
+        else if (task.rho.rows() == T)
         {
             for (int t = 0; t < T; t++)
             {
-                Rho[t](i) = task.Rho(t);
+                rho[t](i) = task.rho(t);
             }
         }
-        else if (task.Rho.rows() == 1)
+        else if (task.rho.rows() == 1)
         {
             for (int t = 0; t < T; t++)
             {
-                Rho[t](i) = task.Rho(0);
+                rho[t](i) = task.rho(0);
             }
         }
         else
         {
-            throw_pretty("Invalid task Rho size! Expecting " << T << " (or 1) and got " << task.Rho.rows());
+            ThrowPretty("Invalid task rho size! Expecting " << T << " (or 1) and got " << task.rho.rows());
         }
     }
 }
@@ -283,66 +283,66 @@ SamplingTask::SamplingTask()
 {
 }
 
-void SamplingTask::initialize(const std::vector<exotica::Initializer>& inits, PlanningProblem_ptr prob, TaskSpaceVector& phi)
+void SamplingTask::Initialize(const std::vector<exotica::Initializer>& inits, PlanningProblemPtr prob, TaskSpaceVector& unused)
 {
-    Task::initialize(inits, prob, Phi);
-    y = Phi;
-    y.setZero(PhiN);
-    Rho = Eigen::VectorXd::Ones(NumTasks);
-    S = Eigen::MatrixXd::Identity(JN, JN);
-    ydiff = Eigen::VectorXd::Zero(JN);
+    Task::Initialize(inits, prob, phi);
+    y = phi;
+    y.SetZero(length_phi);
+    rho = Eigen::VectorXd::Ones(num_tasks);
+    S = Eigen::MatrixXd::Identity(length_jacobian, length_jacobian);
+    ydiff = Eigen::VectorXd::Zero(length_jacobian);
 
-    for (int i = 0; i < NumTasks; i++)
+    for (int i = 0; i < num_tasks; i++)
     {
         TaskInitializer task(inits[i]);
-        if (task.Goal.rows() == 0)
+        if (task.goal.rows() == 0)
         {
             // Keep zero goal
         }
-        else if (task.Goal.rows() == Tasks[i]->Length)
+        else if (task.goal.rows() == tasks[i]->length)
         {
-            y.data.segment(Indexing[i].Start, Indexing[i].Length) = task.Goal;
+            y.data.segment(indexing[i].start, indexing[i].length) = task.goal;
         }
         else
         {
-            throw_pretty("Invalid task goal size! Expecting " << Tasks[i]->Length << " got " << task.Goal.rows());
+            ThrowPretty("Invalid task goal size! Expecting " << tasks[i]->length << " got " << task.goal.rows());
         }
-        if (task.Rho.rows() == 0)
+        if (task.rho.rows() == 0)
         {
-            Rho(i) = 1.0;
+            rho(i) = 1.0;
         }
-        else if (task.Rho.rows() == 1)
+        else if (task.rho.rows() == 1)
         {
-            Rho(i) = task.Rho(0);
+            rho(i) = task.rho(0);
         }
         else
         {
-            throw_pretty("Invalid task Rho size! Expecting 1 got " << task.Rho.rows());
+            ThrowPretty("Invalid task rho size! Expecting 1 got " << task.rho.rows());
         }
     }
 }
 
-void SamplingTask::updateS()
+void SamplingTask::UpdateS()
 {
-    for (const TaskIndexing& task : Indexing)
+    for (const TaskIndexing& task : indexing)
     {
-        for (int i = 0; i < task.LengthJ; i++)
+        for (int i = 0; i < task.length_jacobian; i++)
         {
-            S(i + task.StartJ, i + task.StartJ) = Rho(task.Id);
+            S(i + task.start_jacobian, i + task.start_jacobian) = rho(task.id);
         }
-        if (Rho(task.Id) != 0.0) Tasks[task.Id]->isUsed = true;
+        if (rho(task.id) != 0.0) tasks[task.id]->is_used = true;
     }
 }
 
-void SamplingTask::update(const TaskSpaceVector& bigPhi)
+void SamplingTask::Update(const TaskSpaceVector& big_phi)
 {
-    for (const TaskIndexing& task : Indexing)
+    for (const TaskIndexing& task : indexing)
     {
-        Phi.data.segment(task.Start, task.Length) = bigPhi.data.segment(Tasks[task.Id]->Start, Tasks[task.Id]->Length);
+        phi.data.segment(task.start, task.length) = big_phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
     }
-    ydiff = Phi - y;
+    ydiff = phi - y;
 
     for (unsigned int i = 0; i < ydiff.size(); i++)
-        if (std::abs(ydiff[i]) < Tolerance) ydiff[i] = 0.0;
+        if (std::abs(ydiff[i]) < tolerance) ydiff[i] = 0.0;
 }
 }

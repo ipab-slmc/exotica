@@ -4,7 +4,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <exotica_core_task_maps/CoM.h>
+#include <exotica_core_task_maps/center_of_mass.h>
 #include <exotica_core_task_maps/distance.h>
 #include <exotica_core_task_maps/eff_axis_alignment.h>
 #include <exotica_core_task_maps/eff_frame.h>
@@ -38,27 +38,27 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
         .def_readonly("rotation_type", &EffOrientation::rotation_type_);
 
     py::class_<EffAxisAlignment, std::shared_ptr<EffAxisAlignment>, TaskMap>(module, "EffAxisAlignment")
-        .def("get_axis", &EffAxisAlignment::get_axis)
-        .def("set_axis", &EffAxisAlignment::set_axis)
-        .def("get_direction", &EffAxisAlignment::get_direction)
-        .def("set_direction", &EffAxisAlignment::set_direction);
+        .def("get_axis", &EffAxisAlignment::GetAxis)
+        .def("set_axis", &EffAxisAlignment::SetAxis)
+        .def("get_direction", &EffAxisAlignment::GetDirection)
+        .def("set_direction", &EffAxisAlignment::SetDirection);
 
     py::class_<LookAt, std::shared_ptr<LookAt>, TaskMap>(module, "LookAt")
         .def("get_look_at_target_in_world", &LookAt::get_look_at_target_in_world);
 
-    py::class_<Point2Line, std::shared_ptr<Point2Line>, TaskMap>(module, "Point2Line")
-        .def_property("end_point", &Point2Line::getEndPoint, &Point2Line::setEndPoint);
+    py::class_<PointToLine, std::shared_ptr<PointToLine>, TaskMap>(module, "PointToLine")
+        .def_property("end_point", &PointToLine::GetEndPoint, &PointToLine::SetEndPoint);
 
     py::class_<JointVelocityBackwardDifference, std::shared_ptr<JointVelocityBackwardDifference>, TaskMap>(module, "JointVelocityBackwardDifference")
-        .def("set_previous_joint_state", &JointVelocityBackwardDifference::set_previous_joint_state);
+        .def("set_previous_joint_state", &JointVelocityBackwardDifference::SetPreviousJointState);
 
     py::class_<JointAccelerationBackwardDifference, std::shared_ptr<JointAccelerationBackwardDifference>, TaskMap>(module, "JointAccelerationBackwardDifference")
-        .def("set_previous_joint_state", &JointAccelerationBackwardDifference::set_previous_joint_state);
+        .def("set_previous_joint_state", &JointAccelerationBackwardDifference::SetPreviousJointState);
 
     py::class_<JointJerkBackwardDifference, std::shared_ptr<JointJerkBackwardDifference>, TaskMap>(module, "JointJerkBackwardDifference")
-        .def("set_previous_joint_state", &JointJerkBackwardDifference::set_previous_joint_state);
+        .def("set_previous_joint_state", &JointJerkBackwardDifference::SetPreviousJointState);
 
-    py::class_<CoM, std::shared_ptr<CoM>, TaskMap>(module, "CoM");
+    py::class_<CenterOfMass, std::shared_ptr<CenterOfMass>, TaskMap>(module, "CenterOfMass");
 
     py::class_<Distance, std::shared_ptr<Distance>, TaskMap>(module, "Distance");
 
@@ -68,15 +68,15 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
         .def_readwrite("joint_ref", &Identity::joint_ref_);
 
     py::class_<IMesh, std::shared_ptr<IMesh>, TaskMap>(module, "IMesh")
-        .def_property("W", &IMesh::get_weights, &IMesh::set_weights)
-        .def("set_weight", &IMesh::set_weight)
+        .def_property("W", &IMesh::GetWeights, &IMesh::SetWeights)
+        .def("SetWeight", &IMesh::SetWeight)
         .def_static("compute_goal_laplace", [](const std::vector<KDL::Frame>& nodes, Eigen::MatrixXdRefConst weights) {
             Eigen::VectorXd goal;
-            IMesh::compute_goal_laplace(nodes, goal, weights);
+            IMesh::ComputeGoalLaplace(nodes, goal, weights);
             return goal;
         })
         .def_static("compute_laplace", [](Eigen::VectorXdRefConst eff_phi, Eigen::MatrixXdRefConst weights) {
-            return IMesh::compute_laplace(eff_phi, weights);
+            return IMesh::ComputeLaplace(eff_phi, weights);
         });
 
     py::class_<JointLimit, std::shared_ptr<JointLimit>, TaskMap>(module, "JointLimit");

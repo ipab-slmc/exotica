@@ -44,15 +44,15 @@ namespace exotica
 class Visualization : public Uncopyable
 {
 public:
-    Visualization(Scene_ptr scene);
+    Visualization(ScenePtr scene);
     virtual ~Visualization();
 
     void Initialize();
 
-    void displayTrajectory(Eigen::MatrixXdRefConst trajectory);
+    void DisplayTrajectory(Eigen::MatrixXdRefConst trajectory);
 
 private:
-    Scene_ptr scene_ = std::make_shared<Scene>(nullptr);
+    ScenePtr scene_ = std::make_shared<Scene>(nullptr);
     ros::Publisher trajectory_pub_;
 };
 }

@@ -38,48 +38,48 @@
 
 namespace exotica
 {
-class RRT : public OMPLSolver<SamplingProblem>, Instantiable<RRTInitializer>
+class RRTSolver : public OMPLSolver<SamplingProblem>, Instantiable<RRTSolverInitializer>
 {
 public:
-    RRT();
-    void Instantiate(RRTInitializer& init) override;
+    RRTSolver();
+    void Instantiate(RRTSolverInitializer& init) override;
 };
 
-class RRTConnect : public OMPLSolver<SamplingProblem>, Instantiable<RRTConnectInitializer>
+class RRTConnectSolver : public OMPLSolver<SamplingProblem>, Instantiable<RRTConnectSolverInitializer>
 {
 public:
-    RRTConnect();
-    void Instantiate(RRTConnectInitializer& init) override;
+    RRTConnectSolver();
+    void Instantiate(RRTConnectSolverInitializer& init) override;
     void SetRange(double range);
     double GetRange();
 };
 
-class EST : public OMPLSolver<SamplingProblem>, Instantiable<ESTInitializer>
+class ESTSolver : public OMPLSolver<SamplingProblem>, Instantiable<ESTSolverInitializer>
 {
 public:
-    EST();
-    void Instantiate(ESTInitializer& init) override;
+    ESTSolver();
+    void Instantiate(ESTSolverInitializer& init) override;
 };
 
-class KPIECE : public OMPLSolver<SamplingProblem>, Instantiable<KPIECEInitializer>
+class KPIECESolver : public OMPLSolver<SamplingProblem>, Instantiable<KPIECESolverInitializer>
 {
 public:
-    KPIECE();
-    void Instantiate(KPIECEInitializer& init) override;
+    KPIECESolver();
+    void Instantiate(KPIECESolverInitializer& init) override;
 };
 
-class BKPIECE : public OMPLSolver<SamplingProblem>, Instantiable<BKPIECEInitializer>
+class BKPIECESolver : public OMPLSolver<SamplingProblem>, Instantiable<BKPIECESolverInitializer>
 {
 public:
-    BKPIECE();
-    void Instantiate(BKPIECEInitializer& init) override;
+    BKPIECESolver();
+    void Instantiate(BKPIECESolverInitializer& init) override;
 };
 
-class PRM : public OMPLSolver<SamplingProblem>, Instantiable<PRMInitializer>
+class PRMSolver : public OMPLSolver<SamplingProblem>, Instantiable<PRMSolverInitializer>
 {
 public:
-    PRM();
-    void Instantiate(PRMInitializer& init) override;
+    PRMSolver();
+    void Instantiate(PRMSolverInitializer& init) override;
     void GrowRoadmap(double t);
     void ExpandRoadmap(double t);
     void Clear();
@@ -91,11 +91,11 @@ public:
     void SetMultiQuery(bool val);
 };
 
-class LazyPRM : public OMPLSolver<SamplingProblem>, Instantiable<LazyPRMInitializer>
+class LazyPRMSolver : public OMPLSolver<SamplingProblem>, Instantiable<LazyPRMSolverInitializer>
 {
 public:
-    LazyPRM();
-    void Instantiate(LazyPRMInitializer& init) override;
+    LazyPRMSolver();
+    void Instantiate(LazyPRMSolverInitializer& init) override;
     void Clear();
     void ClearQuery();
     void Setup();
@@ -105,18 +105,18 @@ public:
     void SetMultiQuery(bool val);
 };
 
-class RRTStar : public OMPLSolver<SamplingProblem>, Instantiable<RRTStarInitializer>
+class RRTStarSolver : public OMPLSolver<SamplingProblem>, Instantiable<RRTStarSolverInitializer>
 {
 public:
-    RRTStar();
-    void Instantiate(RRTStarInitializer& init) override;
+    RRTStarSolver();
+    void Instantiate(RRTStarSolverInitializer& init) override;
 };
 
-class LBTRRT : public OMPLSolver<SamplingProblem>, Instantiable<LBTRRTInitializer>
+class LBTRRTSolver : public OMPLSolver<SamplingProblem>, Instantiable<LBTRRTSolverInitializer>
 {
 public:
-    LBTRRT();
-    void Instantiate(LBTRRTInitializer& init) override;
+    LBTRRTSolver();
+    void Instantiate(LBTRRTSolverInitializer& init) override;
 };
 }
 

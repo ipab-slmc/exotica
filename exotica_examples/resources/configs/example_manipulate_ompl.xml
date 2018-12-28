@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
 
-  <PRM Name="MySolver">
+  <PRMSolver Name="MySolver">
     <SimplifyTryCnt>10</SimplifyTryCnt>
     <SimplifyInterpolationLength>50</SimplifyInterpolationLength>
     <RangeRatio>1.0</RangeRatio>
     <SnapToVertex>1.0</SnapToVertex>
-  </PRM>
+  </PRMSolver>
 
   <SamplingProblem Name="MyProblem">
 

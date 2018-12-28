@@ -34,7 +34,7 @@
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/problems/unconstrained_end_pose_problem.h>
 
-#include <exotica_ik_solver/IKSolverInitializer.h>
+#include <exotica_ik_solver/ik_solver_initializer.h>
 
 namespace exotica
 {
@@ -44,7 +44,7 @@ namespace exotica
 /// \f[
 ///   (SJW)x=y
 /// \f]
-/// Where S is a diagonal matrix of task scaling factors Rho for each task, J is the Jacobian, W is a diagonal matrix
+/// Where S is a diagonal matrix of task scaling factors Rho for each task, jacobian is the Jacobian, W is a diagonal matrix
 /// of the joint space weights.
 ///
 /// When regularisation term C is used, it gets appended to the Jacobian and distance to the nominal pose is appended
@@ -61,14 +61,14 @@ public:
 
     void Solve(Eigen::MatrixXd& solution) override;
 
-    void specifyProblem(PlanningProblem_ptr pointer) override;
+    void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 private:
     IKSolverInitializer parameters_;
 
     void ScaleToStepSize(Eigen::VectorXdRef xd);  //!< \brief Scale the state change vector so that the largest dimension is max. step or smaller.
 
-    UnconstrainedEndPoseProblem_ptr prob_;  // Shared pointer to the planning problem.
+    UnconstrainedEndPoseProblemPtr prob_;  // Shared pointer to the planning problem.
 
     Eigen::MatrixXd C_;  //!< \brief Regularisation (use values from interval <0, 1))
     Eigen::MatrixXd W_;  //!< \brief Jointspace weighting

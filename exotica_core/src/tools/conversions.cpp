@@ -18,14 +18,14 @@ Eigen::VectorXd IdentityTransform()
 
 namespace exotica
 {
-KDL::Frame getFrame(Eigen::VectorXdRefConst val)
+KDL::Frame GetFrame(Eigen::VectorXdRefConst val)
 {
     switch (val.rows())
     {
         case 7:
         {
             double norm = val.tail(4).norm();
-            if (norm <= 0.0) throw_pretty("Invalid quaternion!");
+            if (norm <= 0.0) ThrowPretty("Invalid quaternion!");
             return KDL::Frame(KDL::Rotation::Quaternion(val(3) / norm, val(4) / norm, val(5) / norm, val(6) / norm), KDL::Vector(val(0), val(1), val(2)));
         }
         case 6:
@@ -33,16 +33,16 @@ KDL::Frame getFrame(Eigen::VectorXdRefConst val)
         case 3:
             return KDL::Frame(KDL::Vector(val(0), val(1), val(2)));
         default:
-            throw_pretty("Eigen vector has incorrect length! (" + std::to_string(val.rows()) + ")");
+            ThrowPretty("Eigen vector has incorrect length! (" + std::to_string(val.rows()) + ")");
     }
 }
 
-KDL::Frame getFrameFromMatrix(Eigen::MatrixXdRefConst val)
+KDL::Frame GetFrameFromMatrix(Eigen::MatrixXdRefConst val)
 {
     switch (val.cols())
     {
         case 1:
-            return getFrame(val);
+            return GetFrame(val);
         case 4:
             switch (val.rows())
             {
@@ -50,14 +50,14 @@ KDL::Frame getFrameFromMatrix(Eigen::MatrixXdRefConst val)
                 case 4:
                     return KDL::Frame(KDL::Rotation(val(0, 0), val(0, 1), val(0, 2), val(1, 0), val(1, 1), val(1, 2), val(2, 0), val(2, 1), val(2, 2)), KDL::Vector(val(0, 3), val(1, 3), val(2, 3)));
                 default:
-                    throw_pretty("Eigen matrix has incorrect number of rows! (" + std::to_string(val.rows()) + ")");
+                    ThrowPretty("Eigen matrix has incorrect number of rows! (" + std::to_string(val.rows()) + ")");
             }
         default:
-            throw_pretty("Eigen matrix has incorrect number of columns! (" + std::to_string(val.cols()) + ")");
+            ThrowPretty("Eigen matrix has incorrect number of columns! (" + std::to_string(val.cols()) + ")");
     }
 }
 
-Eigen::MatrixXd getFrame(const KDL::Frame& val)
+Eigen::MatrixXd GetFrame(const KDL::Frame& val)
 {
     Eigen::MatrixXd ret = Eigen::MatrixXd::Identity(4, 4);
     ret(0, 3) = val.p(0);
@@ -67,27 +67,27 @@ Eigen::MatrixXd getFrame(const KDL::Frame& val)
     return ret;
 }
 
-Eigen::VectorXd getFrameAsVector(const KDL::Frame& val, RotationType type)
+Eigen::VectorXd GetFrameAsVector(const KDL::Frame& val, RotationType type)
 {
-    Eigen::VectorXd ret(3 + getRotationTypeLength(type));
+    Eigen::VectorXd ret(3 + GetRotationTypeLength(type));
     ret(0) = val.p[0];
     ret(1) = val.p[1];
     ret(2) = val.p[2];
-    ret.segment(3, getRotationTypeLength(type)) = setRotation(val.M, type);
+    ret.segment(3, GetRotationTypeLength(type)) = SetRotation(val.M, type);
     return ret;
 }
 
-Eigen::VectorXd getRotationAsVector(const KDL::Frame& val, RotationType type)
+Eigen::VectorXd GetRotationAsVector(const KDL::Frame& val, RotationType type)
 {
-    return getFrameAsVector(val, type).tail(getRotationTypeLength(type));
+    return GetFrameAsVector(val, type).tail(GetRotationTypeLength(type));
 }
 
-KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type)
+KDL::Rotation GetRotation(Eigen::VectorXdRefConst data, RotationType type)
 {
     switch (type)
     {
         case RotationType::QUATERNION:
-            if (data.sum() == 0.0) throw_pretty("Invalid quaternion transform!");
+            if (data.sum() == 0.0) ThrowPretty("Invalid quaternion transform!");
             return KDL::Rotation::Quaternion(data(0), data(1), data(2), data(3));
         case RotationType::RPY:
             return KDL::Rotation::RPY(data(0), data(1), data(2));
@@ -109,15 +109,15 @@ KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type)
             }
         }
         case RotationType::MATRIX:
-            if (data.sum() == 0.0) throw_pretty("Invalid matrix transform!");
+            if (data.sum() == 0.0) ThrowPretty("Invalid matrix transform!");
             return KDL::Rotation(data(0), data(1), data(2),
                                  data(3), data(4), data(5),
                                  data(6), data(7), data(8));
     }
-    throw_pretty("Unknown rotation representation type!");
+    ThrowPretty("Unknown rotation representation type!");
 }
 
-Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type)
+Eigen::VectorXd SetRotation(const KDL::Rotation& data, RotationType type)
 {
     Eigen::VectorXd ret;
     switch (type)
@@ -144,7 +144,7 @@ Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type)
             ret = Eigen::Map<const Eigen::VectorXd>(data.data, 9);
             return ret;
         default:
-            throw_pretty("Unknown rotation representation type!");
+            ThrowPretty("Unknown rotation representation type!");
     }
 }
 }

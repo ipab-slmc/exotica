@@ -45,7 +45,7 @@
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl/tools/config/SelfConfig.h>
 
-#include <exotica_time_indexed_rrt_connect_solver/TimeIndexedRRTConnectInitializer.h>
+#include <exotica_time_indexed_rrt_connect_solver/time_indexed_rrt_connect_initializer.h>
 
 namespace exotica
 {
@@ -79,12 +79,12 @@ public:
             return *as<ompl::base::TimeStateSpace::StateType>(1);
         }
     };
-    OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblem_ptr &prob, TimeIndexedRRTConnectInitializer init);
+    OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblem_ptr &prob, TimeIndexedRRTConnectSolverInitializer init);
 
-    ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
+    ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
     void ExoticaToOMPLState(const Eigen::VectorXd &q, const double &t, ompl::base::State *state) const;
     void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q, double &t) const;
-    void stateDebug(const Eigen::VectorXd &q) const;
+    void StateDebug(const Eigen::VectorXd &q) const;
 
     TimeIndexedSamplingProblem_ptr prob_;
 };
@@ -94,9 +94,9 @@ class OMPLTimeIndexedStateValidityChecker : public ompl::base::StateValidityChec
 public:
     OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const TimeIndexedSamplingProblem_ptr &prob);
 
-    virtual bool isValid(const ompl::base::State *state) const;
+    bool isValid(const ompl::base::State *state) const override;
 
-    virtual bool isValid(const ompl::base::State *state, double &dist) const;
+    bool isValid(const ompl::base::State *state, double &dist) const override;
 
 protected:
     TimeIndexedSamplingProblem_ptr prob_;
@@ -104,16 +104,16 @@ protected:
 
 typedef boost::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
 
-class TimeIndexedRRTConnect : public MotionSolver, Instantiable<TimeIndexedRRTConnectInitializer>
+class TimeIndexedRRTConnectSolver : public MotionSolver, Instantiable<TimeIndexedRRTConnectSolverInitializer>
 {
 public:
-    TimeIndexedRRTConnect();
+    TimeIndexedRRTConnectSolver();
 
-    virtual ~TimeIndexedRRTConnect();
+    virtual ~TimeIndexedRRTConnectSolver();
 
-    virtual void Instantiate(TimeIndexedRRTConnectInitializer &init);
-    virtual void Solve(Eigen::MatrixXd &solution);
-    virtual void specifyProblem(PlanningProblem_ptr pointer);
+    void Instantiate(TimeIndexedRRTConnectSolverInitializer &init) override;
+    void Solve(Eigen::MatrixXd &solution) override;
+    void SpecifyProblem(PlanningProblemPtr pointer) override;
     void SetPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc);
 
 protected:
@@ -125,11 +125,12 @@ protected:
         return planner;
     }
 
-    void setGoalState(const Eigen::VectorXd &qT, const double t, const double eps = 0);
-    void preSolve();
-    void postSolve();
-    void getPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc);
-    TimeIndexedRRTConnectInitializer init_;
+    void SetGoalState(const Eigen::VectorXd &qT, const double t, const double eps = 0);
+    void PreSolve();
+    void PostSolve();
+    void GetPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc);
+    
+    TimeIndexedRRTConnectSolverInitializer init_;
     TimeIndexedSamplingProblem_ptr prob_;
     ompl::geometric::SimpleSetupPtr ompl_simple_setup_;
     ompl::base::StateSpacePtr state_space_;
@@ -231,7 +232,7 @@ protected:
 
     double forwardTimeDistance(const Motion *a, const Motion *b) const
     {
-        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
+        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits;
 
         const OMPLTimeIndexedRNStateSpace::StateType *sa = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(a->state);
         const OMPLTimeIndexedRNStateSpace::StateType *sb = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(b->state);
@@ -250,7 +251,7 @@ protected:
 
     double reverseTimeDistance(const Motion *a, const Motion *b) const
     {
-        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
+        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits;
 
         const OMPLTimeIndexedRNStateSpace::StateType *sa = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(a->state);
         const OMPLTimeIndexedRNStateSpace::StateType *sb = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(b->state);
@@ -269,7 +270,7 @@ protected:
 
     bool correctTime(const Motion *a, Motion *b, bool reverse, bool &changed) const
     {
-        Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits_;
+        Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits;
         double ta, tb;
         Eigen::VectorXd qa, qb;
         si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(a->state, qa, ta);
@@ -284,7 +285,7 @@ protected:
         }
         else
             changed = false;
-        if (tb < si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->tStart || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->getGoalTime()) return false;
+        if (tb < si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->t_start || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetGoalTime()) return false;
         si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(qb, tb, b->state);
         return true;
     }

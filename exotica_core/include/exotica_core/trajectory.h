@@ -27,16 +27,16 @@ public:
     Trajectory(const std::string& data);
     Trajectory(Eigen::MatrixXdRefConst data, double radius = 1.0);
     ~Trajectory() {}
-    KDL::Frame getPosition(double t);
-    KDL::Twist getVelocity(double t);
-    KDL::Twist getAcceleration(double t);
-    double getDuration();
-    Eigen::MatrixXd getData();
-    double getRadius();
-    std::string toString();
+    KDL::Frame GetPosition(double t);
+    KDL::Twist GetVelocity(double t);
+    KDL::Twist GetAcceleration(double t);
+    double GetDuration();
+    Eigen::MatrixXd GetData();
+    double GetRadius();
+    std::string ToString();
 
 protected:
-    void constructFromData(Eigen::MatrixXdRefConst data, double radius);
+    void ConstructFromData(Eigen::MatrixXdRefConst data, double radius);
     double radius_;
     Eigen::MatrixXd data_;
     std::shared_ptr<KDL::Trajectory_Composite> trajectory_;

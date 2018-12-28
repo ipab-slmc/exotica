@@ -65,7 +65,7 @@ public:
     CollisionSceneFCL();
     virtual ~CollisionSceneFCL();
 
-    void setup() override;
+    void Setup() override;
 
     static bool IsAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionSceneFCL* scene);
     static bool CollisionCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* data);
@@ -75,39 +75,39 @@ public:
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free..
        */
-    bool isStateValid(bool self = true, double safe_distance = 0.0) override;
-    bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) override;
+    bool IsStateValid(bool self = true, double safe_distance = 0.0) override;
+    bool IsCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) override;
 
     /**
        * @brief      Gets the collision world links.
        * @return     The collision world links.
        */
-    std::vector<std::string> getCollisionWorldLinks() override;
+    std::vector<std::string> GetCollisionWorldLinks() override;
 
     /**
       * @brief      Gets the KinematicElements associated with the collision world links.
       * @return     The KinematicElements associated with the collision world links.
       */
-    std::vector<std::shared_ptr<KinematicElement>> getCollisionWorldLinkElements() override;
+    std::vector<std::shared_ptr<KinematicElement>> GetCollisionWorldLinkElements() override;
 
     /**
        * @brief      Gets the collision robot links.
        * @return     The collision robot links.
        */
-    std::vector<std::string> getCollisionRobotLinks() override;
+    std::vector<std::string> GetCollisionRobotLinks() override;
 
-    Eigen::Vector3d getTranslation(const std::string& name) override;
+    Eigen::Vector3d GetTranslation(const std::string& name) override;
 
     ///
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
     ///
-    void updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects) override;
+    void UpdateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects) override;
 
     ///
     /// \brief Updates collision object transformations from the kinematic tree.
     ///
-    void updateCollisionObjectTransforms() override;
+    void UpdateCollisionObjectTransforms() override;
 
 private:
     std::shared_ptr<fcl::CollisionObject> ConstructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);

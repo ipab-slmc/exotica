@@ -44,30 +44,30 @@ void JointLimit::Instantiate(JointLimitInitializer& init)
     init_ = init;
 }
 
-void JointLimit::assignScene(Scene_ptr scene)
+void JointLimit::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
-    initialize();
+    Initialize();
 }
 
-void JointLimit::initialize()
+void JointLimit::Initialize()
 {
-    safe_percentage_ = init_.SafePercentage;
+    safe_percentage_ = init_.safe_percentage;
 
-    N = scene_->getKinematicTree().getNumControlledJoints();
+    N = scene_->GetKinematicTree().GetNumControlledJoints();
 }
 
-int JointLimit::taskSpaceDim()
+int JointLimit::TaskSpaceDim()
 {
     return N;
 }
 
-void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != N) throw_named("Wrong size of phi!");
+    if (phi.rows() != N) ThrowNamed("Wrong size of phi!");
     phi.setZero();
 
-    const Eigen::MatrixXd limits = scene_->getKinematicTree().getJointLimits();
+    const Eigen::MatrixXd limits = scene_->GetKinematicTree().GetJointLimits();
     const Eigen::VectorXd& low_limits = limits.col(0);
     const Eigen::VectorXd& high_limits = limits.col(1);
     const Eigen::VectorXd tau = 0.5 * safe_percentage_ * (high_limits - low_limits);
@@ -78,12 +78,12 @@ void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     phi = (x.array() > (high_limits - tau).array()).select(x - high_limits + tau, phi);
 }
 
-void JointLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     phi.setZero();
-    update(x, phi);
+    Update(x, phi);
 
-    if (J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);
-    J = Eigen::MatrixXd::Identity(N, N);
+    if (jacobian.rows() != N || jacobian.cols() != N) ThrowNamed("Wrong size of jacobian! " << N);
+    jacobian = Eigen::MatrixXd::Identity(N, N);
 }
 }

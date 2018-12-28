@@ -32,7 +32,7 @@
 
 #include "exotica_core/server.h"
 
-exotica::Server_ptr exotica::Server::singleton_server_ = nullptr;
+exotica::ServerPtr exotica::Server::singleton_server_ = nullptr;
 namespace exotica
 {
 RosNode::RosNode(std::shared_ptr<ros::NodeHandle> nh, int numThreads) : nh_(nh), sp_(numThreads)
@@ -53,12 +53,12 @@ Server::~Server()
 {
 }
 
-void Server::destroy()
+void Server::Destroy()
 {
     exotica::Server::singleton_server_.reset();
 }
 
-robot_model::RobotModelPtr loadModelImpl(const std::string& urdf, const std::string& srdf)
+robot_model::RobotModelPtr LoadModelImpl(const std::string& urdf, const std::string& srdf)
 {
     rdf_loader::RDFLoader loader(urdf, srdf);
 #if ROS_VERSION_MINIMUM(1, 14, 0)  // if ROS version >= ROS_MELODIC
@@ -72,40 +72,40 @@ robot_model::RobotModelPtr loadModelImpl(const std::string& urdf, const std::str
     }
     else
     {
-        throw_pretty("Can't load robot model from URDF!");
+        ThrowPretty("Can't load robot model from URDF!");
     }
 }
 
-robot_model::RobotModelPtr Server::loadModel(std::string name, std::string urdf, std::string srdf)
+robot_model::RobotModelPtr Server::LoadModel(std::string name, std::string urdf, std::string srdf)
 {
     robot_model::RobotModelPtr model;
-    if (hasParam("RobotDescription"))
+    if (HasParam("RobotDescription"))
     {
         std::string robot_description_param;
-        getParam("RobotDescription", robot_description_param);
+        GetParam("RobotDescription", robot_description_param);
         ROS_INFO_STREAM("Using robot_description at " << robot_description_param);
         model = robot_model_loader::RobotModelLoader(robot_description_param, false).getModel();
     }
-    else if (hasParam(getName() + "/RobotDescription"))
+    else if (HasParam(GetName() + "/RobotDescription"))
     {
         std::string robot_description_param;
-        getParam(getName() + "/RobotDescription", robot_description_param);
+        GetParam(GetName() + "/RobotDescription", robot_description_param);
         ROS_INFO_STREAM("Using robot_description at " << robot_description_param);
         model = robot_model_loader::RobotModelLoader(robot_description_param, false).getModel();
     }
-    else if ((urdf == "" || srdf == "") && isRos())
+    else if ((urdf == "" || srdf == "") && IsRos())
     {
         model = robot_model_loader::RobotModelLoader(name, false).getModel();
     }
     // URDF and SRDF are meant to be read from files
-    else if (pathExists(urdf) && pathExists(srdf))
+    else if (PathExists(urdf) && PathExists(srdf))
     {
-        model = loadModelImpl(loadFile(urdf), loadFile(srdf));
+        model = LoadModelImpl(LoadFile(urdf), LoadFile(srdf));
     }
     // URDF and SRDF are passed in as strings
     else if (urdf != "" && srdf != "")
     {
-        model = loadModelImpl(urdf, srdf);
+        model = LoadModelImpl(urdf, srdf);
     }
 
     if (model)
@@ -114,12 +114,12 @@ robot_model::RobotModelPtr Server::loadModel(std::string name, std::string urdf,
     }
     else
     {
-        throw_pretty("Couldn't load the model at path " << name << "!");
+        ThrowPretty("Couldn't load the model at path " << name << "!");
     }
     return model;
 }
 
-void Server::getModel(std::string path, robot_model::RobotModelPtr& model, std::string urdf, std::string srdf)
+void Server::GetModel(std::string path, robot_model::RobotModelPtr& model, std::string urdf, std::string srdf)
 {
     if (robot_models_.find(path) != robot_models_.end())
     {
@@ -127,11 +127,11 @@ void Server::getModel(std::string path, robot_model::RobotModelPtr& model, std::
     }
     else
     {
-        model = loadModel(path, urdf, srdf);
+        model = LoadModel(path, urdf, srdf);
     }
 }
 
-robot_model::RobotModelConstPtr Server::getModel(std::string path, std::string urdf, std::string srdf)
+robot_model::RobotModelConstPtr Server::GetModel(std::string path, std::string urdf, std::string srdf)
 {
     if (robot_models_.find(path) != robot_models_.end())
     {
@@ -139,16 +139,16 @@ robot_model::RobotModelConstPtr Server::getModel(std::string path, std::string u
     }
     else
     {
-        return loadModel(path, urdf, srdf);
+        return LoadModel(path, urdf, srdf);
     }
 }
 
-bool Server::hasModel(const std::string& path)
+bool Server::HasModel(const std::string& path)
 {
     return robot_models_.find(path) != robot_models_.end();
 }
 
-std::string Server::getName()
+std::string Server::GetName()
 {
     return name_;
 }

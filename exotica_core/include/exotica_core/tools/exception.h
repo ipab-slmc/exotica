@@ -4,23 +4,17 @@
 #include <exception>
 #include <sstream>
 
-#define throw_pretty(m)                                                              \
+#define ThrowPretty(m)                                                              \
     {                                                                                \
         std::stringstream ss;                                                        \
         ss << m;                                                                     \
         throw exotica::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__); \
     }
-#define throw_named(m)                                                                                   \
+#define ThrowNamed(m)                                                                                   \
     {                                                                                                    \
         std::stringstream ss;                                                                            \
         ss << m;                                                                                         \
         throw exotica::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__, this->object_name_); \
-    }
-#define throw_solve(m)                                                                                        \
-    {                                                                                                         \
-        std::stringstream ss;                                                                                 \
-        ss << m;                                                                                              \
-        throw exotica::SolveException(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__, this->object_name_); \
     }
 
 namespace exotica

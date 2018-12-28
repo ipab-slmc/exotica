@@ -36,7 +36,7 @@
 #include <exotica_core/tools.h>
 #include <string>  //!< C++ type strings
 
-#include "exotica_core/ObjectInitializer.h"
+#include "exotica_core/object_initializer.h"
 #include "exotica_core/property.h"
 
 namespace exotica
@@ -69,10 +69,10 @@ public:
        */
     inline virtual std::string type()
     {
-        return getTypeName(typeid(*this));
+        return GetTypeName(typeid(*this));
     }
 
-    std::string getObjectName()
+    std::string GetObjectName()
     {
         return object_name_;
     }
@@ -80,11 +80,11 @@ public:
     void InstatiateObject(const Initializer& init)
     {
         ObjectInitializer oinit(init);
-        object_name_ = oinit.Name;
-        debug_ = oinit.Debug;
+        object_name_ = oinit.name;
+        debug_ = oinit.debug;
     }
 
-    virtual std::string print(std::string prepend)
+    virtual std::string Print(std::string prepend)
     {
         return prepend + "  " + object_name_ + " (" + type() + ")";
     }

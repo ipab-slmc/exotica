@@ -1,0 +1,11 @@
+class PointToPlane
+
+extend <exotica_core/task_map>
+
+// inherited from TaskMap:
+// string Link           > name of frame in which point is defined
+// VectorXd LinkOffset   > coordinate of point in Link frame
+// string Base           > name of frame in which line is defined
+// VectorXd BaseOffset   > starting point of line in Base frame
+
+// The frame of each Link in the given vector of EndEffectors will be aligned with the plane defined by the origin of the Base frame and its UnitZ-normal.

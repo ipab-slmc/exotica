@@ -36,7 +36,7 @@
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
-#include <exotica_core/BoundedEndPoseProblemInitializer.h>
+#include <exotica_core/bounded_end_pose_problem_initializer.h>
 
 namespace exotica
 {
@@ -52,31 +52,31 @@ public:
     virtual void Instantiate(BoundedEndPoseProblemInitializer& init);
     void Update(Eigen::VectorXdRefConst x);
 
-    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setRho(const std::string& task_name, const double& rho);
-    Eigen::VectorXd getGoal(const std::string& task_name);
-    double getRho(const std::string& task_name);
-    virtual void preupdate();
-    Eigen::MatrixXd getBounds() const;
+    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    void SetRho(const std::string& task_name, const double& rho);
+    Eigen::VectorXd GetGoal(const std::string& task_name);
+    double GetRho(const std::string& task_name);
+    void PreUpdate() override;
+    Eigen::MatrixXd GetBounds() const;
 
-    bool isValid();
+    bool IsValid() override;
 
-    double getScalarCost();
-    Eigen::VectorXd getScalarJacobian();
-    double getScalarTaskCost(const std::string& task_name);
+    double GetScalarCost();
+    Eigen::VectorXd GetScalarJacobian();
+    double GetScalarTaskCost(const std::string& task_name);
 
-    EndPoseTask Cost;
+    EndPoseTask cost;
 
     Eigen::MatrixXd W;
-    TaskSpaceVector Phi;
-    Hessian H;
-    Eigen::MatrixXd J;
+    TaskSpaceVector phi;
+    Hessian hessian;
+    Eigen::MatrixXd jacobian;
 
-    int PhiN;
-    int JN;
-    int NumTasks;
+    int length_phi;
+    int length_jacobian;
+    int num_tasks;
 };
-typedef std::shared_ptr<exotica::BoundedEndPoseProblem> BoundedEndPoseProblem_ptr;
+typedef std::shared_ptr<exotica::BoundedEndPoseProblem> BoundedEndPoseProblemPtr;
 }
 
 #endif

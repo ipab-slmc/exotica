@@ -34,7 +34,7 @@
 #define EXOTICA_CORE_TASK_MAPS_JOINT_VELOCITY_BACKWARD_DIFFERENCE_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/JointVelocityBackwardDifferenceInitializer.h>
+#include <exotica_core_task_maps/joint_velocity_backward_difference_initializer.h>
 
 namespace exotica
 {
@@ -56,24 +56,24 @@ public:
     JointVelocityBackwardDifference();
     virtual ~JointVelocityBackwardDifference();
     void Instantiate(JointVelocityBackwardDifferenceInitializer& init) override;
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
 
     /** \brief Logs previous joint state.
      *
-     *  set_previous_joint_state must be called after solve is called in a Python/C++ script is called 
+     *  SetPreviousJointState must be called after solve is called in a Python/C++ script is called 
      *  to ensure the time-derivatives are appropriately approximated. 
      *  The new joint_state is set to q_. Finally, we compute the new qbd_.
      * 
      */
-    void set_previous_joint_state(Eigen::VectorXdRefConst joint_state);
+    void SetPreviousJointState(Eigen::VectorXdRefConst joint_state);
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
 
 private:
     JointVelocityBackwardDifferenceInitializer init_;  ///< Task map initializer.
-    Scene_ptr scene_;                                  ///< Scene pointer.
+    ScenePtr scene_;                                  ///< Scene pointer.
     double backward_difference_params_;                ///< Binomial cooeficient parameters.
     int N_;                                            ///< Number of dofs for robot.
     Eigen::VectorXd q_;                                ///< Log of previous joint state.

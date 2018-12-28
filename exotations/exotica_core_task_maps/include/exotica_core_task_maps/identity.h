@@ -34,7 +34,7 @@
 #define EXOTICA_CORE_TASK_MAPS_IDENTITY_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/IdentityInitializer.h>
+#include <exotica_core_task_maps/identity_initializer.h>
 
 namespace exotica
 {
@@ -45,19 +45,19 @@ public:
     virtual ~Identity();
 
     void Instantiate(IdentityInitializer& init) override;
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    // void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    // void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot) override;
+    int TaskSpaceDim() override;
 
     std::vector<int> joint_map_;  // TODO: Make private with getter
     Eigen::VectorXd joint_ref_;   // TODO: Make private with getter
     int N_;                       // TODO: Make private with getter
 
 private:
-    void initialize();
+    void Initialize();
 
     IdentityInitializer init_;
 };

@@ -33,8 +33,8 @@
 #ifndef SAMPLING_PROBLEM_H_
 #define SAMPLING_PROBLEM_H_
 
-#include <exotica_core/SamplingProblemInitializer.h>
 #include <exotica_core/planning_problem.h>
+#include <exotica_core/sampling_problem_initializer.h>
 #include <exotica_core/tasks.h>
 
 namespace exotica
@@ -48,46 +48,43 @@ public:
     virtual void Instantiate(SamplingProblemInitializer& init);
 
     void Update(Eigen::VectorXdRefConst x);
-    bool isValid(Eigen::VectorXdRefConst x);
-    virtual void preupdate();
+    bool IsValid(Eigen::VectorXdRefConst x); // Not overriding on purpose
+    void PreUpdate() override;
 
-    int getSpaceDim();
+    int GetSpaceDim();
 
-    void setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    Eigen::VectorXd getGoalEQ(const std::string& task_name);
-    void setRhoEQ(const std::string& task_name, const double& rho);
-    double getRhoEQ(const std::string& task_name);
+    void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd GetGoalEQ(const std::string& task_name);
+    void SetRhoEQ(const std::string& task_name, const double& rho);
+    double GetRhoEQ(const std::string& task_name);
 
-    void setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    Eigen::VectorXd getGoalNEQ(const std::string& task_name);
-    void setRhoNEQ(const std::string& task_name, const double& rho);
-    double getRhoNEQ(const std::string& task_name);
+    void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd GetGoalNEQ(const std::string& task_name);
+    void SetRhoNEQ(const std::string& task_name, const double& rho);
+    double GetRhoNEQ(const std::string& task_name);
 
-    std::vector<double> getBounds();  // TODO: Upgrade to Eigen::MatrixXd
-    bool isCompoundStateSpace();
+    std::vector<double> GetBounds();  // TODO: Upgrade to Eigen::MatrixXd
+    bool IsCompoundStateSpace();
 
-    // TODO(wxm): Implement or remove in clean-up (left-over from constrained sampling, ROBIO 2016)
-    std::string local_planner_config_;
-    bool full_body_plan_;
+    void SetGoalState(Eigen::VectorXdRefConst qT);
+    const Eigen::VectorXd& GetGoalState() const { return goal_; }
 
-    SamplingProblemInitializer Parameters;
+    TaskSpaceVector phi;
+    SamplingTask inequality;
+    SamplingTask equality;
 
-    void setGoalState(Eigen::VectorXdRefConst qT);
-    const Eigen::VectorXd& getGoalState() const { return goal_; }
-    TaskSpaceVector Phi;
-    SamplingTask Inequality;
-    SamplingTask Equality;
+    int length_phi;
+    int length_jacobian;
+    int num_tasks;
 
-    int PhiN;
-    int JN;
-    int NumTasks;
+    SamplingProblemInitializer parameters;
 
 private:
     Eigen::VectorXd goal_;
     bool compound_;
 };
 
-typedef std::shared_ptr<exotica::SamplingProblem> SamplingProblem_ptr;
+typedef std::shared_ptr<exotica::SamplingProblem> SamplingProblemPtr;
 }
 
 #endif

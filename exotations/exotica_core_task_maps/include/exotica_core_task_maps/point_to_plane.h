@@ -34,25 +34,26 @@
 #define EXOTICA_CORE_TASK_MAPS_POINT_TO_PLANE_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/Point2PlaneInitializer.h>
+#include <exotica_core_task_maps/point_to_plane_initializer.h>
+
 #include <visualization_msgs/MarkerArray.h>
 
 namespace exotica
 {
-class Point2Plane : public TaskMap, public Instantiable<Point2PlaneInitializer>
+class PointToPlane : public TaskMap, public Instantiable<PointToPlaneInitializer>
 {
 public:
-    Point2Plane();
-    virtual ~Point2Plane();
+    PointToPlane();
+    virtual ~PointToPlane();
 
-    void Instantiate(Point2PlaneInitializer &init) override;
+    void Instantiate(PointToPlaneInitializer &init) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
 
 private:
-    void publish_debug();
+    void PublishDebug();
     ros::Publisher debug_pub_;
 };
 }  // namespace exotica

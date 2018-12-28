@@ -57,12 +57,12 @@ struct ContinuousCollisionProxy
     Eigen::Vector3d contact_normal;
     Eigen::Vector3d contact_pos;  // In world frame
 
-    inline std::string print() const
+    inline std::string Print() const
     {
         std::stringstream ss;
         if (e1 && e2)
         {
-            ss << "ContinuousCollisionProxy: '" << e1->Segment.getName() << "' - '" << e2->Segment.getName() << " in_collision: " << in_collision << " time_of_contact " << time_of_contact;
+            ss << "ContinuousCollisionProxy: '" << e1->segment.getName() << "' - '" << e2->segment.getName() << " in_collision: " << in_collision << " time_of_contact " << time_of_contact;
         }
         else
         {
@@ -83,12 +83,12 @@ struct CollisionProxy
     Eigen::Vector3d normal2;
     double distance;
 
-    inline std::string print() const
+    inline std::string Print() const
     {
         std::stringstream ss;
         if (e1 && e2)
         {
-            ss << "Proxy: '" << e1->Segment.getName() << "' - '" << e2->Segment.getName() << "', c1: " << contact1.transpose() << " c2: " << contact2.transpose() << " n1: " << normal1.transpose() << " n2: " << normal2.transpose() << " d: " << distance;
+            ss << "Proxy: '" << e1->segment.getName() << "' - '" << e2->segment.getName() << "', c1: " << contact1.transpose() << " c2: " << contact2.transpose() << " n1: " << normal1.transpose() << " n2: " << normal2.transpose() << " d: " << distance;
         }
         else
         {
@@ -108,9 +108,9 @@ public:
        */
     virtual ~CollisionScene() {}
     /**
-     * @brief setup additional construction that requires initialiser parameter
+     * @brief Setup additional construction that requires initialiser parameter
      */
-    virtual void setup() {}
+    virtual void Setup() {}
     /**
      * @brief Returns whether two links are allowed to collide.
      * 
@@ -119,13 +119,13 @@ public:
      * @return true The two objects are allowed to collide.
      * @return false The two objects are excluded, e.g., by an ACM.
      */
-    virtual bool isAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) { throw_pretty("Not implemented!"); }
+    virtual bool IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) { ThrowPretty("Not implemented!"); }
     /**
        * \brief Checks if the whole robot is valid (collision only).
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free..
        */
-    virtual bool isStateValid(bool self = true, double safe_distance = 0.0) = 0;
+    virtual bool IsStateValid(bool self = true, double safe_distance = 0.0) = 0;
 
     ///
     /// @brief Checks if two objects are in collision.
@@ -133,59 +133,59 @@ public:
     /// @param o2 Name of object 2.
     /// @return True is the two objects are not colliding.
     ///
-    virtual bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) { throw_pretty("Not implemented!"); }
+    virtual bool IsCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) { ThrowPretty("Not implemented!"); }
     ///
     /// \brief Computes collision distances.
     /// \param self Indicate if self collision check is required.
     /// \return Collision proximity objects for all colliding pairs of shapes.
     ///
-    virtual std::vector<CollisionProxy> getCollisionDistance(bool self) { throw_pretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(bool self) { ThrowPretty("Not implemented!"); }
     ///
     /// \brief Computes collision distances between two objects.
     /// \param o1 Name of object 1.
     /// \param o2 Name of object 2.
     /// \return Vector of proximity objects.
     ///
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2) { throw_pretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const std::string& o2) { ThrowPretty("Not implemented!"); }
     /**
    * @brief      Gets the closest distance of any collision object which is
    * allowed to collide with any collision object related to object o1.
    * @param[in]  o1    Name of object 1.
    * @return     Vector of proximity objects.
    */
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self) { throw_pretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const bool& self) { ThrowPretty("Not implemented!"); }
     /**
    * @brief      Gets the closest distance of any collision object which is
    * allowed to collide with any collision object related to object o1.
    * @param[in]  o1    Name of object 1.
-   * @param[in]  disableCollisionSceneUpdate    Allows disabling of collision object transforms (requires manual update).
+   * @param[in]  disable_collision_scene_update    Allows disabling of collision object transforms (requires manual update).
    * @return     Vector of proximity objects.
    */
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self, const bool& disableCollisionSceneUpdate) { throw_pretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const bool& self, const bool& disable_collision_scene_update) { ThrowPretty("Not implemented!"); }
     /**
    * @brief      Gets the closest distance of any collision object which is
    * allowed to collide with any collision object related to any of the objects.
    * @param[in]  objects    Vector of object names.
    * @return     Vector of proximity objects.
    */
-    virtual std::vector<CollisionProxy> getCollisionDistance(const std::vector<std::string>& objects, const bool& self) { throw_pretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::vector<std::string>& objects, const bool& self) { ThrowPretty("Not implemented!"); }
     /**
        * @brief      Gets the collision world links.
        * @return     The collision world links.
        */
-    virtual std::vector<std::string> getCollisionWorldLinks() = 0;
+    virtual std::vector<std::string> GetCollisionWorldLinks() = 0;
 
     /**
        * @brief      Gets the KineticElements associated with the collision world links.
        * @return     The KineticElements associated with the collision world links.
        */
-    virtual std::vector<std::shared_ptr<KinematicElement>> getCollisionWorldLinkElements() = 0;
+    virtual std::vector<std::shared_ptr<KinematicElement>> GetCollisionWorldLinkElements() = 0;
 
     /**
        * @brief      Gets the collision robot links.
        * @return     The collision robot links.
        */
-    virtual std::vector<std::string> getCollisionRobotLinks() = 0;
+    virtual std::vector<std::string> GetCollisionRobotLinks() = 0;
 
     /**
      * @brief      Performs a continuous collision check between two objects with a linear interpolation between two given 
@@ -199,70 +199,70 @@ public:
      *
      * @return     ContinuousCollisionProxy.
      */
-    virtual ContinuousCollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) { throw_pretty("Not implemented!"); }
-    virtual Eigen::Vector3d getTranslation(const std::string& name) = 0;
+    virtual ContinuousCollisionProxy ContinuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) { ThrowPretty("Not implemented!"); }
+    virtual Eigen::Vector3d GetTranslation(const std::string& name) = 0;
 
-    inline void setACM(const AllowedCollisionMatrix& acm)
+    inline void SetACM(const AllowedCollisionMatrix& acm)
     {
         acm_ = acm;
     }
 
-    inline bool getAlwaysExternallyUpdatedCollisionScene() { return alwaysExternallyUpdatedCollisionScene_; }
-    inline void setAlwaysExternallyUpdatedCollisionScene(const bool& value)
+    inline bool GetAlwaysExternallyUpdatedCollisionScene() { return always_externally_updated_collision_scene_; }
+    inline void SetAlwaysExternallyUpdatedCollisionScene(const bool& value)
     {
-        alwaysExternallyUpdatedCollisionScene_ = value;
+        always_externally_updated_collision_scene_ = value;
     }
 
-    inline double getRobotLinkScale() { return robotLinkScale_; }
-    inline void setRobotLinkScale(const double& scale)
+    inline double GetRobotLinkScale() { return robot_link_scale_; }
+    inline void SetRobotLinkScale(const double& scale)
     {
         if (scale < 0.0)
-            throw_pretty("Link scaling needs to be greater than or equal to 0");
-        robotLinkScale_ = scale;
+            ThrowPretty("Link scaling needs to be greater than or equal to 0");
+        robot_link_scale_ = scale;
     }
 
-    inline double getWorldLinkScale() { return worldLinkScale_; }
-    inline void setWorldLinkScale(const double& scale)
+    inline double GetWorldLinkScale() { return world_link_scale_; }
+    inline void SetWorldLinkScale(const double& scale)
     {
         if (scale < 0.0)
-            throw_pretty("Link scaling needs to be greater than or equal to 0");
-        worldLinkScale_ = scale;
+            ThrowPretty("Link scaling needs to be greater than or equal to 0");
+        world_link_scale_ = scale;
     }
 
-    inline double getRobotLinkPadding() { return robotLinkPadding_; }
-    inline void setRobotLinkPadding(const double& padding)
+    inline double GetRobotLinkPadding() { return robot_link_padding_; }
+    inline void SetRobotLinkPadding(const double& padding)
     {
         if (padding < 0.0)
-            HIGHLIGHT_NAMED("setRobotLinkPadding", "Generally, padding should be positive.");
-        robotLinkPadding_ = padding;
+            HIGHLIGHT_NAMED("SetRobotLinkPadding", "Generally, padding should be positive.");
+        robot_link_padding_ = padding;
     }
 
-    inline double getWorldLinkPadding() { return worldLinkPadding_; }
-    inline void setWorldLinkPadding(const double& padding)
+    inline double GetWorldLinkPadding() { return world_link_padding_; }
+    inline void SetWorldLinkPadding(const double& padding)
     {
         if (padding < 0.0)
-            HIGHLIGHT_NAMED("setRobotLinkPadding", "Generally, padding should be positive.");
-        worldLinkPadding_ = padding;
+            HIGHLIGHT_NAMED("SetRobotLinkPadding", "Generally, padding should be positive.");
+        world_link_padding_ = padding;
     }
 
-    inline bool getReplacePrimitiveShapesWithMeshes() { return replacePrimitiveShapesWithMeshes_; }
-    inline void setReplacePrimitiveShapesWithMeshes(const bool& value)
+    inline bool GetReplacePrimitiveShapesWithMeshes() { return replace_primitive_shapes_with_meshes_; }
+    inline void SetReplacePrimitiveShapesWithMeshes(const bool& value)
     {
-        replacePrimitiveShapesWithMeshes_ = value;
+        replace_primitive_shapes_with_meshes_ = value;
     }
 
     ///
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
     ///
-    virtual void updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects) = 0;
+    virtual void UpdateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects) = 0;
 
     ///
     /// \brief Updates collision object transformations from the kinematic tree.
     ///
-    virtual void updateCollisionObjectTransforms() = 0;
+    virtual void UpdateCollisionObjectTransforms() = 0;
 
-    bool replaceCylindersWithCapsules = false;
+    bool replace_cylinders_with_capsules = false;
 
     bool debug_ = false;
 
@@ -271,26 +271,25 @@ protected:
     AllowedCollisionMatrix acm_;
 
     /// Whether the collision scene is automatically updated - if not, update on queries
-    bool alwaysExternallyUpdatedCollisionScene_ = false;
+    bool always_externally_updated_collision_scene_ = false;
 
     /// Robot link scaling
-    double robotLinkScale_ = 1.0;
+    double robot_link_scale_ = 1.0;
 
     /// World link scaling
-    double worldLinkScale_ = 1.0;
+    double world_link_scale_ = 1.0;
 
     /// Robot link padding
-    double robotLinkPadding_ = 0.0;
+    double robot_link_padding_ = 0.0;
 
     /// World link padding
-    double worldLinkPadding_ = 0.0;
+    double world_link_padding_ = 0.0;
 
     /// Replace primitive shapes with meshes internally (e.g. when primitive shape algorithms are brittle, i.e. in FCL)
-    bool replacePrimitiveShapesWithMeshes_ = false;
+    bool replace_primitive_shapes_with_meshes_ = false;
 };
 
-typedef exotica::Factory<exotica::CollisionScene> CollisionScene_fac;
-typedef std::shared_ptr<CollisionScene> CollisionScene_ptr;
+typedef std::shared_ptr<CollisionScene> CollisionScenePtr;
 }
 
 #endif  // COLLISIONSCENE_H

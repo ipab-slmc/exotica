@@ -75,7 +75,7 @@ using namespace exotica;
 #include <string>
 #include <vector>
 
-#define CREATE_PROBLEM(X, I) std::shared_ptr<X> problem = createProblem<X>(#X, I);
+#define CREATE_PROBLEM(X, I) std::shared_ptr<X> problem = CreateProblem<X>(#X, I);
 #define NUM_TRIALS 100
 
 // workaround for "error: ambiguous overload for ‘operator-’" that appear in newer Eigen versions
@@ -97,14 +97,14 @@ Hessian operator-(const Hessian& A, const Hessian& B)
 #endif
 
 template <class T>
-std::shared_ptr<T> createProblem(const std::string& name, int derivative)
+std::shared_ptr<T> CreateProblem(const std::string& name, int derivative)
 {
     TEST_COUT << "Creating " << name << " with derivatives " << derivative;
     Initializer dummy;
     Initializer init;
-    XMLLoader::load("{exotica_examples}/test/resources/test_problems.xml", dummy, init, "Dummy", name);
-    init.addProperty(Property("DerivativeOrder", false, derivative));
-    std::shared_ptr<T> ret = std::static_pointer_cast<T>(Setup::createProblem(init));
+    XMLLoader::Load("{exotica_examples}/test/resources/test_problems.xml", dummy, init, "Dummy", name);
+    init.AddProperty(Property("DerivativeOrder", false, derivative));
+    std::shared_ptr<T> ret = std::static_pointer_cast<T>(Setup::CreateProblem(init));
     TEST_COUT << "Problem loaded";
     return ret;
 }
@@ -118,15 +118,15 @@ void testJacobianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double e
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0);
-        TaskSpaceVector y0 = task.Phi;
-        Eigen::MatrixXd J0 = task.J;
+        TaskSpaceVector y0 = task.phi;
+        Eigen::MatrixXd J0 = task.jacobian;
         Eigen::MatrixXd J = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
         for (int i = 0; i < problem->N; i++)
         {
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x);
-            J.col(i) = (task.Phi - y0) / h;
+            J.col(i) = (task.phi - y0) / h;
         }
         double errJ = (J - J0).norm();
         if (errJ > eps)
@@ -151,11 +151,11 @@ void testHessianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double ep
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0);
-        Eigen::MatrixXd J0 = task.J;
-        Hessian H0 = task.H;
+        Eigen::MatrixXd J0 = task.jacobian;
+        Hessian H0 = task.hessian;
         Hessian H = H0;
         Hessian H1 = H0;
-        for (int k = 0; k < task.JN; k++)
+        for (int k = 0; k < task.length_jacobian; k++)
         {
             H1(k) = J0.row(k).transpose() * J0.row(k);
         }
@@ -165,8 +165,8 @@ void testHessianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double ep
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x);
-            Eigen::MatrixXd Ji = task.J;
-            for (int k = 0; k < task.JN; k++)
+            Eigen::MatrixXd Ji = task.jacobian;
+            for (int k = 0; k < task.length_jacobian; k++)
             {
                 H(k).row(i) = (Ji.row(k) - J0.row(k)) / h;
             }
@@ -203,15 +203,15 @@ void testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, 
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0, t);
-        TaskSpaceVector y0 = task.Phi[t];
-        Eigen::MatrixXd J0 = task.J[t];
+        TaskSpaceVector y0 = task.phi[t];
+        Eigen::MatrixXd J0 = task.jacobian[t];
         Eigen::MatrixXd J = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
         for (int i = 0; i < problem->N; i++)
         {
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x, t);
-            J.col(i) = (task.Phi[t] - y0) / h;
+            J.col(i) = (task.phi[t] - y0) / h;
         }
         double errJ = (J - J0).norm();
         if (errJ > eps)
@@ -236,11 +236,11 @@ void testHessianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, i
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0, t);
-        Eigen::MatrixXd J0 = task.J[t];
-        Hessian H0 = task.H[t];
+        Eigen::MatrixXd J0 = task.jacobian[t];
+        Hessian H0 = task.hessian[t];
         Hessian H = H0;
         Hessian H1 = H0;
-        for (int k = 0; k < task.JN; k++)
+        for (int k = 0; k < task.length_jacobian; k++)
         {
             H1(k) = J0.row(k).transpose() * J0.row(k);
         }
@@ -250,8 +250,8 @@ void testHessianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, i
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x, t);
-            Eigen::MatrixXd Ji = task.J[t];
-            for (int k = 0; k < task.JN; k++)
+            Eigen::MatrixXd Ji = task.jacobian[t];
+            for (int k = 0; k < task.length_jacobian; k++)
             {
                 H(k).row(i) = (Ji.row(k) - J0.row(k)) / h;
             }
@@ -288,19 +288,19 @@ TEST(ExoticaProblems, UnconstrainedEndPoseProblem)
         for (int d = 0; d < 3; d++)
         {
             CREATE_PROBLEM(UnconstrainedEndPoseProblem, d);
-            Eigen::VectorXd x = problem->getStartState();
+            Eigen::VectorXd x = problem->GetStartState();
             TEST_COUT << "Testing problem update";
             problem->Update(x);
             TEST_COUT << "Test passed";
-            X[d] = problem->Cost.ydiff;
+            X[d] = problem->cost.ydiff;
             TEST_COUT << "Testing cost";
             if (d > 0)
             {
-                J[d] = problem->Cost.J;
-                testJacobianEndPose(problem, problem->Cost);
+                J[d] = problem->cost.jacobian;
+                testJacobianEndPose(problem, problem->cost);
                 if (d > 1)
                 {
-                    testHessianEndPose(problem, problem->Cost);
+                    testHessianEndPose(problem, problem->cost);
                 }
             }
         }
@@ -324,19 +324,19 @@ TEST(ExoticaProblems, BoundedEndPoseProblem)
         for (int d = 0; d < 3; d++)
         {
             CREATE_PROBLEM(BoundedEndPoseProblem, d);
-            Eigen::VectorXd x = problem->getStartState();
+            Eigen::VectorXd x = problem->GetStartState();
             TEST_COUT << "Testing problem update";
             problem->Update(x);
             TEST_COUT << "Test passed";
-            X[d] = problem->Cost.ydiff;
+            X[d] = problem->cost.ydiff;
             TEST_COUT << "Testing cost";
             if (d > 0)
             {
-                J[d] = problem->Cost.J;
-                testJacobianEndPose(problem, problem->Cost);
+                J[d] = problem->cost.jacobian;
+                testJacobianEndPose(problem, problem->cost);
                 if (d > 1)
                 {
-                    testHessianEndPose(problem, problem->Cost);
+                    testHessianEndPose(problem, problem->cost);
                 }
             }
         }
@@ -360,48 +360,48 @@ TEST(ExoticaProblems, EndPoseProblem)
         for (int d = 0; d < 3; d++)
         {
             CREATE_PROBLEM(EndPoseProblem, d);
-            Eigen::VectorXd x = problem->getStartState();
+            Eigen::VectorXd x = problem->GetStartState();
             TEST_COUT << "EndPoseProblem: Testing problem update";
             problem->Update(x);
             TEST_COUT << "EndPoseProblem::Update() - Test passed";
             {
                 TEST_COUT << "EndPoseProblem: Testing cost";
-                X[d] = problem->Cost.ydiff;
+                X[d] = problem->cost.ydiff;
                 if (d > 0)
                 {
-                    J[d - 1] = problem->Cost.J;
-                    testJacobianEndPose(problem, problem->Cost);
+                    J[d - 1] = problem->cost.jacobian;
+                    testJacobianEndPose(problem, problem->cost);
                     if (d > 1)
                     {
-                        testHessianEndPose(problem, problem->Cost);
+                        testHessianEndPose(problem, problem->cost);
                     }
                 }
             }
             problem->Update(x);
             {
                 TEST_COUT << "EndPoseProblem: Testing equality";
-                X[d + 3] = problem->Equality.ydiff;
+                X[d + 3] = problem->equality.ydiff;
                 if (d > 0)
                 {
-                    J[d + 1] = problem->Equality.J;
-                    testJacobianEndPose(problem, problem->Equality);
+                    J[d + 1] = problem->equality.jacobian;
+                    testJacobianEndPose(problem, problem->equality);
                     if (d > 1)
                     {
-                        testHessianEndPose(problem, problem->Equality);
+                        testHessianEndPose(problem, problem->equality);
                     }
                 }
             }
             problem->Update(x);
             {
                 TEST_COUT << "EndPoseProblem: Testing inequality";
-                X[d + 6] = problem->Inequality.ydiff;
+                X[d + 6] = problem->inequality.ydiff;
                 if (d > 0)
                 {
-                    J[d + 3] = problem->Inequality.J;
-                    testJacobianEndPose(problem, problem->Inequality);
+                    J[d + 3] = problem->inequality.jacobian;
+                    testJacobianEndPose(problem, problem->inequality);
                     if (d > 1)
                     {
-                        testHessianEndPose(problem, problem->Inequality);
+                        testHessianEndPose(problem, problem->inequality);
                     }
                 }
             }
@@ -432,7 +432,7 @@ TEST(ExoticaProblems, UnconstrainedTimeIndexedProblem)
         int T;
         {
             CREATE_PROBLEM(UnconstrainedTimeIndexedProblem, 0);
-            T = problem->getT();
+            T = problem->GetT();
         }
         for (int t = 0; t < T; t++)
         {
@@ -441,19 +441,19 @@ TEST(ExoticaProblems, UnconstrainedTimeIndexedProblem)
             for (int d = 0; d < 3; d++)
             {
                 CREATE_PROBLEM(UnconstrainedTimeIndexedProblem, d);
-                Eigen::VectorXd x = problem->getStartState();
+                Eigen::VectorXd x = problem->GetStartState();
                 TEST_COUT << "Testing problem update";
                 problem->Update(x, t);
                 TEST_COUT << "Test passed";
-                X[d] = problem->Cost.ydiff[t];
+                X[d] = problem->cost.ydiff[t];
                 TEST_COUT << "Testing cost";
                 if (d > 0)
                 {
-                    J[d] = problem->Cost.J[t];
-                    testJacobianTimeIndexed(problem, problem->Cost, t);
+                    J[d] = problem->cost.jacobian[t];
+                    testJacobianTimeIndexed(problem, problem->cost, t);
                     if (d > 1)
                     {
-                        testHessianTimeIndexed(problem, problem->Cost, t);
+                        testHessianTimeIndexed(problem, problem->cost, t);
                     }
                 }
             }
@@ -476,7 +476,7 @@ TEST(ExoticaProblems, BoundedTimeIndexedProblem)
         int T;
         {
             CREATE_PROBLEM(BoundedTimeIndexedProblem, 0);
-            T = problem->getT();
+            T = problem->GetT();
         }
         for (int t = 0; t < T; t++)
         {
@@ -485,26 +485,26 @@ TEST(ExoticaProblems, BoundedTimeIndexedProblem)
             for (int d = 0; d < 3; d++)
             {
                 CREATE_PROBLEM(BoundedTimeIndexedProblem, d);
-                Eigen::VectorXd x = problem->getStartState();
+                Eigen::VectorXd x = problem->GetStartState();
                 TEST_COUT << "BoundedTimeIndexedProblem: Testing problem update";
                 problem->Update(x, t);
                 TEST_COUT << "BoundedTimeIndexedProblem::Update(x): Test passed";
-                X[d] = problem->Cost.ydiff[t];
+                X[d] = problem->cost.ydiff[t];
                 TEST_COUT << "BoundedTimeIndexedProblem: Testing cost";
                 if (d > 0)
                 {
-                    J[d] = problem->Cost.J[t];
-                    testJacobianTimeIndexed(problem, problem->Cost, t);
+                    J[d] = problem->cost.jacobian[t];
+                    testJacobianTimeIndexed(problem, problem->cost, t);
                     if (d > 1)
                     {
-                        testHessianTimeIndexed(problem, problem->Cost, t);
+                        testHessianTimeIndexed(problem, problem->cost, t);
                     }
                 }
             }
             if (!(X[0].isApprox(X[1]) && X[1].isApprox(X[2])))
-                ADD_FAILURE() << "BoundedTimeIndexedProblem: Cost value computation is inconsistent!";
+                ADD_FAILURE() << "BoundedTimeIndexedProblem: cost value computation is inconsistent!";
             if (!(J[1].isApprox(J[2])))
-                ADD_FAILURE() << "BoundedTimeIndexedProblem: Cost Jacobians are inconsistent!";
+                ADD_FAILURE() << "BoundedTimeIndexedProblem: cost Jacobians are inconsistent!";
         }
     }
     catch (...)
@@ -520,7 +520,7 @@ TEST(ExoticaProblems, TimeIndexedProblem)
         int T;
         {
             CREATE_PROBLEM(TimeIndexedProblem, 0);
-            T = problem->getT();
+            T = problem->GetT();
         }
         for (int t = 0; t < T; t++)
         {
@@ -529,48 +529,48 @@ TEST(ExoticaProblems, TimeIndexedProblem)
             for (int d = 0; d < 3; d++)
             {
                 CREATE_PROBLEM(TimeIndexedProblem, d);
-                Eigen::VectorXd x = problem->getStartState();
+                Eigen::VectorXd x = problem->GetStartState();
                 TEST_COUT << "Testing problem update";
                 problem->Update(x, t);
                 TEST_COUT << "Test passed";
                 {
                     TEST_COUT << "Testing cost";
-                    X[d] = problem->Cost.ydiff[t];
+                    X[d] = problem->cost.ydiff[t];
                     if (d > 0)
                     {
-                        J[d] = problem->Cost.J[t];
-                        testJacobianTimeIndexed(problem, problem->Cost, t);
+                        J[d] = problem->cost.jacobian[t];
+                        testJacobianTimeIndexed(problem, problem->cost, t);
                         if (d > 1)
                         {
-                            testHessianTimeIndexed(problem, problem->Cost, t);
+                            testHessianTimeIndexed(problem, problem->cost, t);
                         }
                     }
                 }
                 problem->Update(x, t);
                 {
                     TEST_COUT << "Testing equality";
-                    X[d + 3] = problem->Equality.ydiff[t];
+                    X[d + 3] = problem->equality.ydiff[t];
                     if (d > 0)
                     {
-                        J[d + 3] = problem->Equality.J[t];
-                        testJacobianTimeIndexed(problem, problem->Equality, t);
+                        J[d + 3] = problem->equality.jacobian[t];
+                        testJacobianTimeIndexed(problem, problem->equality, t);
                         if (d > 1)
                         {
-                            testHessianTimeIndexed(problem, problem->Equality, t);
+                            testHessianTimeIndexed(problem, problem->equality, t);
                         }
                     }
                 }
                 problem->Update(x, t);
                 {
                     TEST_COUT << "Testing inequality";
-                    X[d + 6] = problem->Inequality.ydiff[t];
+                    X[d + 6] = problem->inequality.ydiff[t];
                     if (d > 0)
                     {
-                        J[d + 6] = problem->Inequality.J[t];
-                        testJacobianTimeIndexed(problem, problem->Inequality, t);
+                        J[d + 6] = problem->inequality.jacobian[t];
+                        testJacobianTimeIndexed(problem, problem->inequality, t);
                         if (d > 1)
                         {
-                            testHessianTimeIndexed(problem, problem->Inequality, t);
+                            testHessianTimeIndexed(problem, problem->inequality, t);
                         }
                     }
                 }
@@ -600,11 +600,11 @@ TEST(ExoticaProblems, SamplingProblem)
     try
     {
         CREATE_PROBLEM(SamplingProblem, 0);
-        Eigen::VectorXd x = problem->getStartState();
+        Eigen::VectorXd x = problem->GetStartState();
         TEST_COUT << "Testing problem update";
         problem->Update(x);
         TEST_COUT << "Testing valid state";
-        if (!problem->isValid(x)) ADD_FAILURE() << "Start state is invalid!";
+        if (!problem->IsValid(x)) ADD_FAILURE() << "Start state is invalid!";
     }
     catch (...)
     {
@@ -617,11 +617,11 @@ TEST(ExoticaProblems, TimeIndexedSamplingProblem)
     try
     {
         CREATE_PROBLEM(TimeIndexedSamplingProblem, 0);
-        Eigen::VectorXd x = problem->getStartState();
+        Eigen::VectorXd x = problem->GetStartState();
         TEST_COUT << "Testing problem update";
         problem->Update(x, 0.0);
         TEST_COUT << "Testing valid state";
-        if (!problem->isValid(x, 0.0)) ADD_FAILURE() << "Start state is invalid!";
+        if (!problem->IsValid(x, 0.0)) ADD_FAILURE() << "Start state is invalid!";
     }
     catch (...)
     {

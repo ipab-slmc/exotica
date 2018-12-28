@@ -30,24 +30,24 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 configure_file("src/version.cpp.in" "${exotica_core_BINARY_DIR}/generated/version.cpp" @ONLY)
 
 AddInitializer(
-  TaskMap
-  Object
-  Frame
-  Link
-  AttachLink
-  MotionSolver
-  PlanningProblem
-  Scene
-  Trajectory
-  UnconstrainedTimeIndexedProblem
-  UnconstrainedEndPoseProblem
-  SamplingProblem
-  TimeIndexedSamplingProblem
-  Task
-  TimeIndexedProblem
-  EndPoseProblem
-  BoundedTimeIndexedProblem
-  BoundedEndPoseProblem
+  task_map
+  object
+  frame
+  link
+  attach_link
+  motion_solver
+  planning_problem
+  scene
+  trajectory
+  unconstrained_time_indexed_problem
+  unconstrained_end_pose_problem
+  sampling_problem
+  time_indexed_sampling_problem
+  task
+  time_indexed_problem
+  end_pose_problem
+  bounded_time_indexed_problem
+  bounded_end_pose_problem
 )
 GenInitializers()
 

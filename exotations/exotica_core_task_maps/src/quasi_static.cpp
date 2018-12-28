@@ -80,7 +80,7 @@ void potential(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B
 ///
 /// \brief potential Calculates electrostatic potential at pont P induced by a uniformly charged line AB.
 /// \param phi Potential.
-/// \param J Gradient of the potential.
+/// \param jacobian Gradient of the potential.
 /// \param A 1st point on the line.
 /// \param B 2nd point on the line.
 /// \param P Query point.
@@ -88,7 +88,7 @@ void potential(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B
 /// \param B_ Derivative of 2nd point on the line.
 /// \param P_ Derivative of query point.
 ///
-void potential(double& phi, Eigen::VectorXdRef J, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
+void potential(double& phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
 {
     double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
     double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
@@ -96,17 +96,17 @@ void potential(double& phi, Eigen::VectorXdRef J, Eigen::VectorXdRefConst A, Eig
     if (fabs(E) < eps)
     {
         phi = 0.0;
-        J.setZero();
+        jacobian.setZero();
     }
     else
     {
         phi = (atan(C / E) - atan(D / E)) / E;
-        for (int i = 0; i < J.rows(); i++)
+        for (int i = 0; i < jacobian.rows(); i++)
         {
             double C_ = A_.col(i).dot(B) + A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) - 2 * B_.col(i).dot(B);
             double D_ = -A_.col(i).dot(B) - A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) + 2 * A_.col(i).dot(A);
             double E_ = cross(A_.col(i), B) + cross(A, B_.col(i)) - cross(A_.col(i), P) - cross(A, P_.col(i)) + cross(B_.col(i), P) + cross(B, P_.col(i));
-            J(i) = ((C_ / E - E_ * C / E / E) / (C * C / E / E + 1) - (D_ / E - E_ * D / E / E) / (D * D / E / E + 1)) / E - E_ / E * phi;
+            jacobian(i) = ((C_ / E - E_ * C / E / E) / (C * C / E / E + 1) - (D_ / E - E_ * D / E / E) / (D * D / E / E + 1)) / E - E_ / E * phi;
         }
     }
 }
@@ -128,7 +128,7 @@ void winding(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, 
 ///
 /// \brief winding Calculates the winding number around pont P w.r.t. thw line AB.
 /// \param phi Winding number.
-/// \param J Gradient of the Winding number.
+/// \param jacobian Gradient of the Winding number.
 /// \param A 1st point on the line.
 /// \param B 2nd point on the line.
 /// \param P Query point.
@@ -136,54 +136,54 @@ void winding(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, 
 /// \param B_ Derivative of 2nd point on the line.
 /// \param P_ Derivative of query point.
 ///
-void winding(double& phi, Eigen::VectorXdRef J, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
+void winding(double& phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
 {
     double C = cross(A - P, B - P);
     double D = (A - P).dot(B - P);
     phi = atan2(C, D) / 2.0 / M_PI;
-    for (int i = 0; i < J.rows(); i++)
+    for (int i = 0; i < jacobian.rows(); i++)
     {
         double C_ = cross(A_.col(i) - P_.col(i), B - P) + cross(A - P, B_.col(i) - P_.col(i));
         double D_ = (A_.col(i) - P_.col(i)).dot(B - P) + (A - P).dot(B_.col(i) - P_.col(i));
-        J(i) = (C_ * D - C * D_) / (C * C + D * D) / 2.0 / M_PI;
+        jacobian(i) = (C_ * D - C * D_) / (C * C + D * D) / 2.0 / M_PI;
     }
 }
 
-void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != 1) throw_named("Wrong size of phi!");
+    if (phi.rows() != 1) ThrowNamed("Wrong size of phi!");
     phi(0) = 0.0;
-    KDL::Vector KDLcom;
+    KDL::Vector kdl_com;
     double M = 0.0;
-    for (std::weak_ptr<KinematicElement> welement : scene_->getKinematicTree().getTree())
+    for (std::weak_ptr<KinematicElement> welement : scene_->GetKinematicTree().GetTree())
     {
         std::shared_ptr<KinematicElement> element = welement.lock();
-        if (element->isRobotLink || element->ClosestRobotLink.lock())  // Only for robot links and attached objects
+        if (element->is_robot_link || element->closest_robot_link.lock())  // Only for robot links and attached objects
         {
-            double mass = element->Segment.getInertia().getMass();
+            double mass = element->segment.getInertia().getMass();
             if (mass > 0)
             {
-                KDL::Frame cog = KDL::Frame(element->Segment.getInertia().getCOG());
-                KDL::Frame com_local = scene_->getKinematicTree().FK(element, cog, nullptr, KDL::Frame());
-                KDLcom += com_local.p * mass;
+                KDL::Frame cog = KDL::Frame(element->segment.getInertia().getCOG());
+                KDL::Frame com_local = scene_->GetKinematicTree().FK(element, cog, nullptr, KDL::Frame());
+                kdl_com += com_local.p * mass;
                 M += mass;
             }
         }
     }
     if (M == 0.0) return;
-    KDLcom = KDLcom / M;
+    kdl_com = kdl_com / M;
     Eigen::VectorXd com(2);
-    com(0) = KDLcom[0];
-    com(1) = KDLcom[1];
+    com(0) = kdl_com[0];
+    com(1) = kdl_com[1];
 
-    Eigen::MatrixXd supports(Kinematics[0].Phi.rows(), 2);
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    Eigen::MatrixXd supports(kinematics[0].phi.rows(), 2);
+    for (int i = 0; i < kinematics[0].phi.rows(); i++)
     {
-        supports(i, 0) = Kinematics[0].Phi(i).p[0];
-        supports(i, 1) = Kinematics[0].Phi(i).p[1];
+        supports(i, 0) = kinematics[0].phi(i).p[0];
+        supports(i, 1) = kinematics[0].phi(i).p[1];
     }
 
-    std::list<int> hull = convex_hull_2d(supports);
+    std::list<int> hull = ConvexHull2D(supports);
 
     double n = hull.size();
     double wnd = 0.0;
@@ -208,7 +208,7 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
         }
         else
         {
-            if (!init_.PositiveOnly)
+            if (!init_.positive_only)
             {
                 phi(0) = sqrt(-n / pot);
             }
@@ -235,61 +235,61 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     }
 }
 
-void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != 1) throw_named("Wrong size of phi!");
-    if (J.rows() != 1 || J.cols() != x.rows()) throw_named("Wrong size of J! " << x.rows());
+    if (phi.rows() != 1) ThrowNamed("Wrong size of phi!");
+    if (jacobian.rows() != 1 || jacobian.cols() != x.rows()) ThrowNamed("Wrong size of jacobian! " << x.rows());
     phi(0) = 0.0;
-    J.setZero();
-    Eigen::MatrixXd Jcom = Eigen::MatrixXd::Zero(2, J.cols());
-    KDL::Vector KDLcom;
+    jacobian.setZero();
+    Eigen::MatrixXd jacobian_com = Eigen::MatrixXd::Zero(2, jacobian.cols());
+    KDL::Vector kdl_com;
     double M = 0.0;
-    for (std::weak_ptr<KinematicElement> welement : scene_->getKinematicTree().getTree())
+    for (std::weak_ptr<KinematicElement> welement : scene_->GetKinematicTree().GetTree())
     {
         std::shared_ptr<KinematicElement> element = welement.lock();
-        if (element->isRobotLink || element->ClosestRobotLink.lock())  // Only for robot links and attached objects
+        if (element->is_robot_link || element->closest_robot_link.lock())  // Only for robot links and attached objects
         {
-            double mass = element->Segment.getInertia().getMass();
+            double mass = element->segment.getInertia().getMass();
             if (mass > 0)
             {
-                KDL::Frame cog = KDL::Frame(element->Segment.getInertia().getCOG());
-                KDL::Frame com_local = scene_->getKinematicTree().FK(element, cog, nullptr, KDL::Frame());
-                Eigen::MatrixXd Jcom_local = scene_->getKinematicTree().Jacobian(element, cog, nullptr, KDL::Frame());
-                KDLcom += com_local.p * mass;
-                Jcom += Jcom_local.topRows(2) * mass;
+                KDL::Frame cog = KDL::Frame(element->segment.getInertia().getCOG());
+                KDL::Frame com_local = scene_->GetKinematicTree().FK(element, cog, nullptr, KDL::Frame());
+                Eigen::MatrixXd jacobian_com_local = scene_->GetKinematicTree().Jacobian(element, cog, nullptr, KDL::Frame());
+                kdl_com += com_local.p * mass;
+                jacobian_com += jacobian_com_local.topRows(2) * mass;
                 M += mass;
             }
         }
     }
     if (M == 0.0) return;
-    KDLcom = KDLcom / M;
+    kdl_com = kdl_com / M;
     Eigen::VectorXd com(2);
-    com(0) = KDLcom[0];
-    com(1) = KDLcom[1];
-    Jcom = Jcom / M;
+    com(0) = kdl_com[0];
+    com(1) = kdl_com[1];
+    jacobian_com = jacobian_com / M;
 
-    Eigen::MatrixXd supports(Kinematics[0].Phi.rows(), 2);
-    Eigen::MatrixXd supportsJ(Kinematics[0].Phi.rows() * 2, x.rows());
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    Eigen::MatrixXd supports(kinematics[0].phi.rows(), 2);
+    Eigen::MatrixXd supportsJ(kinematics[0].phi.rows() * 2, x.rows());
+    for (int i = 0; i < kinematics[0].phi.rows(); i++)
     {
-        supports(i, 0) = Kinematics[0].Phi(i).p[0];
-        supports(i, 1) = Kinematics[0].Phi(i).p[1];
-        supportsJ.middleRows(i * 2, 2) = Kinematics[0].J(i).data.topRows(2);
+        supports(i, 0) = kinematics[0].phi(i).p[0];
+        supports(i, 1) = kinematics[0].phi(i).p[1];
+        supportsJ.middleRows(i * 2, 2) = kinematics[0].jacobian(i).data.topRows(2);
     }
 
-    std::list<int> hull = convex_hull_2d(supports);
+    std::list<int> hull = ConvexHull2D(supports);
 
     double n = hull.size();
     double wnd = 0.0;
     double pot = 0.0;
-    Eigen::VectorXd potJ = J.row(0);
+    Eigen::VectorXd potJ = jacobian.row(0);
     double tmp;
-    Eigen::VectorXd tmpJ = J.row(0);
+    Eigen::VectorXd tmpJ = jacobian.row(0);
     for (std::list<int>::iterator it = hull.begin(); it != hull.end(); it++)
     {
         int a = *it;
         int b = (std::next(it) == hull.end()) ? *hull.begin() : *(std::next(it));
-        potential(tmp, tmpJ, supports.row(a).transpose(), supports.row(b).transpose(), com, supportsJ.middleRows(a * 2, 2), supportsJ.middleRows(b * 2, 2), Jcom);
+        potential(tmp, tmpJ, supports.row(a).transpose(), supports.row(b).transpose(), com, supportsJ.middleRows(a * 2, 2), supportsJ.middleRows(b * 2, 2), jacobian_com);
         pot += tmp;
         potJ += tmpJ;
         winding(tmp, supports.row(a).transpose(), supports.row(b).transpose(), com);
@@ -302,14 +302,14 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
         if (wnd < 0.5)
         {
             phi(0) = sqrt(-n / pot);
-            J.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
+            jacobian.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
         }
         else
         {
-            if (!init_.PositiveOnly)
+            if (!init_.positive_only)
             {
                 phi(0) = -sqrt(-n / pot);
-                J.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
+                jacobian.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
             }
         }
     }
@@ -335,17 +335,17 @@ void QuasiStatic::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     }
 }
 
-int QuasiStatic::taskSpaceDim()
+int QuasiStatic::TaskSpaceDim()
 {
     return 1;
 }
 
-void QuasiStatic::initialize()
+void QuasiStatic::Initialize()
 {
     {
         visualization_msgs::Marker mrk;
         mrk.action = visualization_msgs::Marker::ADD;
-        mrk.header.frame_id = "exotica/" + scene_->getRootFrameName();
+        mrk.header.frame_id = "exotica/" + scene_->GetRootFrameName();
         mrk.id = 1;
         mrk.type = visualization_msgs::Marker::SPHERE;
         mrk.scale.x = mrk.scale.y = mrk.scale.z = 0.05;
@@ -358,7 +358,7 @@ void QuasiStatic::initialize()
     {
         visualization_msgs::Marker mrk;
         mrk.action = visualization_msgs::Marker::ADD;
-        mrk.header.frame_id = "exotica/" + scene_->getRootFrameName();
+        mrk.header.frame_id = "exotica/" + scene_->GetRootFrameName();
         mrk.id = 2;
         mrk.type = visualization_msgs::Marker::LINE_STRIP;
         mrk.color.r = 0;
@@ -370,14 +370,14 @@ void QuasiStatic::initialize()
     }
     if (debug_)
     {
-        debug_pub_ = Server::advertise<visualization_msgs::MarkerArray>(ns_ + "/exotica/QuasiStatic", 1, true);
+        debug_pub_ = Server::Advertise<visualization_msgs::MarkerArray>(ns_ + "/exotica/QuasiStatic", 1, true);
     }
 }
 
-void QuasiStatic::assignScene(Scene_ptr scene)
+void QuasiStatic::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
-    initialize();
+    Initialize();
 }
 
 void QuasiStatic::Instantiate(QuasiStaticInitializer& init)

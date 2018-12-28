@@ -1,2 +1,0 @@
-extend <exotica_ompl_solver/OMPLSolver>
-Optional double Epsilon = 0.01;

@@ -53,7 +53,7 @@
 
 namespace exotica
 {
-enum BASE_TYPE
+enum BaseType
 {
     FIXED = 0,
     FLOATING = 10,
@@ -78,34 +78,32 @@ inline KinematicRequestFlags operator&(KinematicRequestFlags a, KinematicRequest
     return static_cast<KinematicRequestFlags>(static_cast<int>(a) & static_cast<int>(b));
 }
 
-class KinematicFrameRequest
+struct KinematicFrameRequest
 {
-public:
     KinematicFrameRequest();
-    KinematicFrameRequest(std::string frameALinkName, KDL::Frame frameAOffset = KDL::Frame(), std::string frameBLinkName = "", KDL::Frame frameBOffset = KDL::Frame());
-    std::string FrameALinkName;
-    KDL::Frame FrameAOffset;
-    std::string FrameBLinkName;
-    KDL::Frame FrameBOffset;
+    KinematicFrameRequest(std::string _frame_a_link_name, KDL::Frame _frame_a_offset = KDL::Frame(), std::string _frame_b_link_name = "", KDL::Frame _frame_b_offset = KDL::Frame());
+    std::string frame_a_link_name;
+    KDL::Frame frame_a_offset;
+    std::string frame_b_link_name;
+    KDL::Frame frame_b_offset;
 };
 
-class KinematicsRequest
+struct KinematicsRequest
 {
-public:
     KinematicsRequest();
-    KinematicRequestFlags Flags = KinematicRequestFlags::KIN_FK;
-    std::vector<KinematicFrameRequest> Frames;  //!< The segments to which the end-effectors are attached
+    KinematicRequestFlags flags = KinematicRequestFlags::KIN_FK;
+    std::vector<KinematicFrameRequest> frames;  //!< The segments to which the end-effectors are attached
 };
 
 struct KinematicFrame
 {
-    std::weak_ptr<KinematicElement> FrameA;
-    KDL::Frame FrameAOffset;
-    std::weak_ptr<KinematicElement> FrameB;
-    KDL::Frame FrameBOffset;
-    KDL::Frame TempAB;
-    KDL::Frame TempA;
-    KDL::Frame TempB;
+    std::weak_ptr<KinematicElement> frame_a;
+    KDL::Frame frame_a_offset;
+    std::weak_ptr<KinematicElement> frame_b;
+    KDL::Frame frame_b_offset;
+    KDL::Frame temp_ab;
+    KDL::Frame temp_a;
+    KDL::Frame temp_b;
 };
 
 /**
@@ -113,18 +111,17 @@ struct KinematicFrame
  * data. The corresponding KinematicSolution is created from and indexes into a
  * KinematicResponse.
  */
-class KinematicResponse
+struct KinematicResponse
 {
-public:
     KinematicResponse();
-    KinematicResponse(KinematicRequestFlags Flags, int Size, int N = 0);
-    KinematicRequestFlags Flags = KinematicRequestFlags::KIN_FK;
-    std::vector<KinematicFrame> Frame;
-    Eigen::VectorXd X;
-    ArrayFrame Phi;
-    ArrayTwist PhiDot;
-    ArrayJacobian J;
-    ArrayJacobian JDot;
+    KinematicResponse(KinematicRequestFlags _flags, int _size, int _N = 0);
+    KinematicRequestFlags flags = KinematicRequestFlags::KIN_FK;
+    std::vector<KinematicFrame> frame;
+    Eigen::VectorXd x;
+    ArrayFrame phi;
+    ArrayTwist phi_dot;
+    ArrayJacobian jacobian;
+    ArrayJacobian jacobian_dot;
 };
 
 /**
@@ -136,13 +133,13 @@ public:
     KinematicSolution();
     KinematicSolution(int start, int length);
     void Create(std::shared_ptr<KinematicResponse> solution);
-    int Start = -1;
-    int Length = -1;
+    int start = -1;
+    int length = -1;
     Eigen::Map<Eigen::VectorXd> X{nullptr, 0};
-    Eigen::Map<ArrayFrame> Phi{nullptr, 0};
-    Eigen::Map<ArrayTwist> PhiDot{nullptr, 0};
-    Eigen::Map<ArrayJacobian> J{nullptr, 0};
-    Eigen::Map<ArrayJacobian> JDot{nullptr, 0};
+    Eigen::Map<ArrayFrame> phi{nullptr, 0};
+    Eigen::Map<ArrayTwist> phi_dot{nullptr, 0};
+    Eigen::Map<ArrayJacobian> jacobian{nullptr, 0};
+    Eigen::Map<ArrayJacobian> jacobian_dot{nullptr, 0};
 };
 
 class KinematicTree : public Uncopyable
@@ -150,135 +147,137 @@ class KinematicTree : public Uncopyable
 public:
     KinematicTree();
     virtual ~KinematicTree() = default;
-    void Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name);
-    std::string getRootFrameName();
-    std::string getRootJointName();
-    robot_model::RobotModelPtr getRobotModel();
-    BASE_TYPE getModelBaseType();
-    BASE_TYPE getControlledBaseType();
+    void Instantiate(std::string joint_group, robot_model::RobotModelPtr model, const std::string& name);
+    std::string GetRootFrameName();
+    std::string GetRootJointName();
+    robot_model::RobotModelPtr GetRobotModel();
+    BaseType GetModelBaseType();
+    BaseType GetControlledBaseType();
     std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
     void Update(Eigen::VectorXdRefConst x);
-    void resetJointLimits();
-    Eigen::MatrixXd getJointLimits() const { return jointLimits_; }
-    void setJointLimitsLower(Eigen::VectorXdRefConst lower_in);
-    void setJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
-    void setFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
-    void setPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper);
-    std::map<std::string, std::vector<double>> getUsedJointLimits();
-    int getNumControlledJoints();
-    int getNumModelJoints();
-    void publishFrames();
-    std::vector<std::string> getJointNames()
+    void ResetJointLimits();
+    Eigen::MatrixXd GetJointLimits() const { return joint_limits_; }
+    void SetJointLimitsLower(Eigen::VectorXdRefConst lower_in);
+    void SetJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
+    void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
+    void SetPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper);
+    std::map<std::string, std::vector<double>> GetUsedJointLimits();
+    int GetNumControlledJoints();
+    int GetNumModelJoints();
+    void PublishFrames();
+    std::vector<std::string> GetJointNames()
     {
-        return ControlledJointsNames;
+        return controlled_joints_names_;
     }
-    std::vector<std::string> getControlledLinkNames()
+    std::vector<std::string> GetControlledLinkNames()
     {
-        return ControlledLinkNames;
+        return controlled_link_names_;
     }
 
-    std::vector<std::string> getModelJointNames()
+    std::vector<std::string> GetModelJointNames()
     {
-        return ModelJointsNames;
+        return model_joints_names_;
     }
-    std::vector<std::string> getModelLinkNames()
+    std::vector<std::string> GetModelLinkNames()
     {
-        return ModelLinkNames;
+        return model_link_names_;
     }
-    bool hasModelLink(const std::string& link);
+    bool HasModelLink(const std::string& link);
 
-    Eigen::VectorXd getControlledLinkMass();
+    Eigen::VectorXd GetControlledLinkMass();
 
     KDL::Frame FK(KinematicFrame& frame);
-    KDL::Frame FK(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB);
-    KDL::Frame FK(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
-    Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB);
-    Eigen::MatrixXd Jacobian(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB);
+    KDL::Frame FK(std::shared_ptr<KinematicElement> element_a, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_b, const KDL::Frame& offset_b);
+    KDL::Frame FK(const std::string& element_a, const KDL::Frame& offset_a, const std::string& element_b, const KDL::Frame& offset_b);
+    Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> element_a, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_b, const KDL::Frame& offset_b);
+    Eigen::MatrixXd Jacobian(const std::string& element_a, const KDL::Frame& offset_a, const std::string& element_b, const KDL::Frame& offset_b);
 
-    void resetModel();
-    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
-    void AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
-    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shapeResourcePath, Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& Color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool isControlled = false);
+    void ResetModel();
+    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool is_controlled = false);
+    void AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool is_controlled = false);
+    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool is_controlled = false);
     void UpdateModel();
-    void changeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
-    int IsControlled(std::shared_ptr<KinematicElement> Joint);
-    int IsControlled(std::string jointName);
-    int IsControlledLink(std::string linkName);
+    void ChangeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
+    int IsControlled(std::shared_ptr<KinematicElement> joint);
+    int IsControlled(std::string joint_name);
+    int IsControlledLink(std::string link_name);
 
-    Eigen::VectorXd getModelState();
-    std::map<std::string, double> getModelStateMap();
+    Eigen::VectorXd GetModelState();
+    std::map<std::string, double> GetModelStateMap();
     /**
-     * @brief getKinematicChain get list of joints in a kinematic chain
+     * @brief GetKinematicChain get list of joints in a kinematic chain
      * @param begin link name from which the chain starts
      * @param end link name at which the chain ends
      * @return list joints between begin and end
      */
-    std::vector<std::string> getKinematicChain(const std::string& begin, const std::string& end);
-    void setModelState(Eigen::VectorXdRefConst x);
-    void setModelState(std::map<std::string, double> x);
-    Eigen::VectorXd getControlledState();
+    std::vector<std::string> GetKinematicChain(const std::string& begin, const std::string& end);
+    void SetModelState(Eigen::VectorXdRefConst x);
+    void SetModelState(std::map<std::string, double> x);
+    Eigen::VectorXd GetControlledState();
 
-    std::vector<std::weak_ptr<KinematicElement>> getTree() { return Tree; }
-    std::vector<std::shared_ptr<KinematicElement>> getModelTree() { return ModelTree; }
-    std::map<std::string, std::weak_ptr<KinematicElement>> getTreeMap() { return TreeMap; }
-    std::map<std::string, std::weak_ptr<KinematicElement>> getCollisionTreeMap() { return CollisionTreeMap; }
-    bool doesLinkWithNameExist(std::string name);  //!< Checks whether a link with this name exists in any of the trees
-    bool Debug = false;
+    std::vector<std::weak_ptr<KinematicElement>> GetTree() { return tree_; }
+    std::vector<std::shared_ptr<KinematicElement>> GetModelTree() { return model_tree_; }
+    std::map<std::string, std::weak_ptr<KinematicElement>> GetTreeMap() { return tree_map_; }
+    std::map<std::string, std::weak_ptr<KinematicElement>> GetCollisionTreeMap() { return collision_tree_map_; }
+    bool DoesLinkWithNameExist(std::string name);  //!< Checks whether a link with this name exists in any of the trees
 
-    std::map<std::string, shapes::ShapeType> getCollisionObjectTypes();
+    std::map<std::string, shapes::ShapeType> GetCollisionObjectTypes();
 
     // Random state generation
-    Eigen::VectorXd getRandomControlledState();
+    Eigen::VectorXd GetRandomControlledState();
 
-    void setKinematicResponse(std::shared_ptr<KinematicResponse> response_in) { Solution = response_in; }
-    std::shared_ptr<KinematicResponse> getKinematicResponse() { return Solution; }
+    void SetKinematicResponse(std::shared_ptr<KinematicResponse> response_in) { solution_ = response_in; }
+    std::shared_ptr<KinematicResponse> GetKinematicResponse() { return solution_; }
+
+    bool debug = false;
+    
 private:
     void BuildTree(const KDL::Tree& RobotKinematics);
     void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
     void UpdateTree();
     void UpdateFK();
     void UpdateJ();
-    void ComputeJ(KinematicFrame& frame, KDL::Jacobian& J);
-    void ComputeJdot(KDL::Jacobian& J, KDL::Jacobian& JDot);
+    void ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian);
+    void ComputeJdot(KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot);
     void UpdateJdot();
 
     // Joint limits
-    Eigen::MatrixXd jointLimits_;
-    void updateJointLimits();
+    Eigen::MatrixXd joint_limits_;
+    void UpdateJointLimits();
 
     // Random state generation
-    std::random_device rd;
+    std::random_device rd_;
     std::mt19937 generator_;
     std::vector<std::uniform_real_distribution<double>> random_state_distributions_;
 
-    BASE_TYPE ModelBaseType;
-    BASE_TYPE ControlledBaseType = BASE_TYPE::FIXED;
-    int NumControlledJoints;  //!< Number of controlled joints in the joint group.
-    int NumJoints;            //!< Number of joints of the model (including floating/planar base, passive joints, and uncontrolled joints).
-    int StateSize = -1;
-    Eigen::VectorXd TreeState;
-    robot_model::RobotModelPtr Model;
+    BaseType model_base_type_;
+    BaseType controlled_base_type_ = BaseType::FIXED;
+    int num_controlled_joints_;  //!< Number of controlled joints in the joint group.
+    int num_joints_;            //!< Number of joints of the model (including floating/planar base, passive joints, and uncontrolled joints).
+    int state_size_ = -1;
+    Eigen::VectorXd tree_state_;
+    robot_model::RobotModelPtr model_;
     std::string root_joint_name_ = "";
-    std::vector<std::weak_ptr<KinematicElement>> Tree;
-    std::vector<std::shared_ptr<KinematicElement>> ModelTree;
-    std::vector<std::shared_ptr<KinematicElement>> EnvironmentTree;
-    std::map<std::string, std::weak_ptr<KinematicElement>> TreeMap;
-    std::map<std::string, std::weak_ptr<KinematicElement>> CollisionTreeMap;
-    std::shared_ptr<KinematicElement> Root;
-    std::vector<std::weak_ptr<KinematicElement>> ControlledJoints;
-    std::map<std::string, std::weak_ptr<KinematicElement>> ControlledJointsMap;
-    std::map<std::string, std::weak_ptr<KinematicElement>> ModelJointsMap;
-    std::vector<std::string> ModelJointsNames;
-    std::vector<std::string> ControlledJointsNames;
-    std::vector<std::string> ModelLinkNames;
-    std::vector<std::string> ControlledLinkNames;
-    std::shared_ptr<KinematicResponse> Solution;
-    KinematicRequestFlags Flags;
+    std::vector<std::weak_ptr<KinematicElement>> tree_;
+    std::vector<std::shared_ptr<KinematicElement>> model_tree_;
+    std::vector<std::shared_ptr<KinematicElement>> environment_tree_;
+    std::map<std::string, std::weak_ptr<KinematicElement>> tree_map_;
+    std::map<std::string, std::weak_ptr<KinematicElement>> collision_tree_map_;
+    std::shared_ptr<KinematicElement> root_;
+    std::vector<std::weak_ptr<KinematicElement>> controlled_joints_;
+    std::map<std::string, std::weak_ptr<KinematicElement>> controlled_joints_map_;
+    std::map<std::string, std::weak_ptr<KinematicElement>> model_joints_map_;
+    std::vector<std::string> model_joints_names_;
+    std::vector<std::string> controlled_joints_names_;
+    std::vector<std::string> model_link_names_;
+    std::vector<std::string> controlled_link_names_;
+    std::shared_ptr<KinematicResponse> solution_;
+    KinematicRequestFlags flags_;
 
-    std::vector<tf::StampedTransform> debugTree;
-    std::vector<tf::StampedTransform> debugFrames;
+    std::vector<tf::StampedTransform> debug_tree_;
+    std::vector<tf::StampedTransform> debug_frames_;
     ros::Publisher shapes_pub_;
-    bool debugSceneChanged;
+    bool debug_scene_changed_;
     visualization_msgs::MarkerArray marker_array_msg_;
     std::string name_;
 };

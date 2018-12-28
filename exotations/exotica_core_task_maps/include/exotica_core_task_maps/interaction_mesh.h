@@ -35,7 +35,7 @@
 
 #include <exotica_core/kinematic_tree.h>
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/IMeshInitializer.h>
+#include <exotica_core_task_maps/interaction_mesh_initializer.h>
 #include <visualization_msgs/Marker.h>
 
 namespace exotica
@@ -47,24 +47,24 @@ public:
     virtual ~IMesh();
 
     void Instantiate(IMeshInitializer& init) override;
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
 
-    void set_weight(int i, int j, double weight);
-    void set_weights(const Eigen::MatrixXd& weights);
-    Eigen::MatrixXd get_weights();
+    void SetWeight(int i, int j, double weight);
+    void SetWeights(const Eigen::MatrixXd& weights);
+    Eigen::MatrixXd GetWeights();
 
-    static Eigen::VectorXd compute_laplace(Eigen::VectorXdRefConst eff_phi, Eigen::MatrixXdRefConst weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
-    void compute_goal_laplace(const Eigen::VectorXd& x, Eigen::VectorXd& goal);
-    static void compute_goal_laplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd& goal, Eigen::MatrixXdRefConst weights);
+    static Eigen::VectorXd ComputeLaplace(Eigen::VectorXdRefConst eff_phi, Eigen::MatrixXdRefConst weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
+    void ComputeGoalLaplace(const Eigen::VectorXd& x, Eigen::VectorXd& goal);
+    static void ComputeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd& goal, Eigen::MatrixXdRefConst weights);
 
 protected:
-    void debug(Eigen::VectorXdRefConst phi);
-    void initialize_debug(std::string ref);
-    void destroy_debug();
+    void Debug(Eigen::VectorXdRefConst phi);
+    void InitializeDebug(std::string ref);
+    void DestroyDebug();
 
     Eigen::MatrixXd weights_;
     int eff_size_ = 0;

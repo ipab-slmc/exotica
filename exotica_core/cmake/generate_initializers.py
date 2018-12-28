@@ -2,228 +2,276 @@
 from __future__ import print_function
 import sys
 import os
+import re
+
+def to_camel_cased(name):
+    r = re.compile(r'([_\/:][a-z]|[_\/:][0-9])')
+    ret = ''
+    first = True
+    tokens = r.split(name, 1)
+    while True:
+        if len(tokens) > 1:
+            if tokens[1][0] == '_':
+                if first:
+                    ret += tokens[0][0].upper() + tokens[0][1:].lower() + tokens[1][1].upper()
+                else:
+                    ret += tokens[0].lower() + tokens[1][1].upper()
+            else:
+                if first:
+                    ret += tokens[0][0].upper() + tokens[0][1:].lower() + tokens[1][0] + tokens[1][1].upper()
+                else:
+                    ret += tokens[0].lower() + tokens[1][0] + tokens[1][1].upper()
+            tokens = r.split(tokens[2], 1)
+        else:
+            if first:
+                if len(tokens) > 1:
+                    ret += tokens[0][0].upper() + tokens[0][1:].lower() + tokens[1][0]
+                else:
+                    ret += tokens[0][0].upper() + tokens[0][1:].lower()
+            else:
+                ret += tokens[0].lower()
+            return ret
+        first = False
+
+def to_underscores(name, num_pass = 0):
+    r = re.compile(r'([A-Za-z][0-9]|[0-9][A-z]|[a-z][A-Z]|[A-Z][A-Z][a-z]|[_\/:][A-z])')
+    ret = ''
+    tokens = r.split(name, 1)
+    while True:
+        if len(tokens) > 1:
+            if tokens[1][0] == '/' or tokens[1][0] == ':' or tokens[1][0] == '_' or tokens[1][1] == '_':
+                ret += tokens[0].lower() + tokens[1][0].lower() + tokens[1][1:].lower()
+            else:
+                ret += tokens[0].lower() + tokens[1][0].lower() + '_' + tokens[1][1:].lower()
+            tokens = r.split(tokens[2], 1)
+        else:
+            ret += tokens[0].lower()
+            if num_pass < 1:
+                return to_underscores(ret, num_pass + 1)
+            else:
+                return ret
 
 def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+    print(*args, file = sys.stderr, **kwargs)
 
 def eprint(msg):
     sys.stderr.write(msg+'\n')
     sys.exit(2)
 
-def ConstructorArgumentList(Data):
-    ret=""
-    for d in Data:
+def constructor_argument_list(data):
+    ret = ""
+    for d in data:
         if d.has_key('Required'):
-            ret+=" "+d['Type']+" "+d['Name']+"_"+DefaultArgumentValue(d)+","
+            ret += " " + d['Type'] + " _" + to_underscores(d['Name']) + default_argument_value(d) + ","
     return ret[0:-1]
 
-def ConstructorList(Data):
+def constructor_list(data):
     ret=""
-    for d in Data:
+    for d in data:
         if d.has_key('Required'):
-            ret+=",\n        "+d['Name']+"("+d['Name']+"_) "
+            ret += ",\n        " + to_underscores(d['Name']) + "(_" + to_underscores(d['Name']) + ") "
     return ret
 
-def DefaultValue(Data):
-    if Data['Value'] is None:
+def default_value(data):
+    if data['Value'] is None:
         return ""
-    elif Data['Value']=='{}':
+    elif data['Value']=='{}':
         return ""
     else:
-        return Data['Value']
+        return data['Value']
 
-def DefaultArgumentValue(Data):
-    if Data['Value']==None:
+def default_argument_value(data):
+    if data['Value'] == None:
         return ""
-    elif Data['Value']=='{}':
-        return "={}"
+    elif data['Value'] == '{}':
+        return " = {}"
     else:
-        return " = "+Data['Value']
+        return " = "+data['Value']
 
-def IsRequired(Data):
-    if Data['Required']:
+def is_required(data):
+    if data['Required']:
         return "true"
     else:
         return "false"
 
-def DefaultConstructorList(Data):
-    ret=""
-    for d in Data:
+def default_constructor_list(data):
+    ret = ""
+    for d in data:
         if d.has_key('Required') and not d['Required']:
-            ret+=",\n        "+d['Name']+"("+DefaultValue(d)+") "
+            ret += ",\n        " + to_underscores(d['Name']) + "("+default_value(d) + ") "
     return ret
 
-def NeedsDefaultConstructor(Data):
-    for d in Data:
+def needs_default_constructor(data):
+    for d in data:
         if d['Required']:
             return True
     return False
 
-def Declaration(Data):
-    if Data.has_key('Required'):
-      return "    "+Data['Type']+" "+Data['Name']+";\n"
+def declaration(data):
+    if data.has_key('Required'):
+      return "    " + data['Type'] + " " + to_underscores(data['Name']) + ";\n"
     else:
       return ""
 
-def Parser(Type):
-    parser=""
-    if Type=='std::string':
-        return "boost::any_cast<"+Type+">(prop.get())"
-    elif Type=='exotica::Initializer' or Type=='Initializer':
-        return "prop.isInitializerVectorType()?boost::any_cast<std::vector<exotica::Initializer>>(prop.get()).at(0):boost::any_cast<exotica::Initializer>(prop.get())"
-    elif Type=='std::vector<Initializer>' or Type=='std::vector<exotica::Initializer>':
-        return "boost::any_cast<std::vector<exotica::Initializer>>(prop.get())"
-    elif Type=='Eigen::VectorXd':
-        parser= "parseVector<double,Eigen::Dynamic>"
-    elif Type=='Eigen::Vector3d':
-        parser= "parseVector<double,3>"
-    elif Type=='bool':
-        parser= "parseBool"
-    elif Type=='double':
-        parser= "parseDouble"
-    elif Type=='int':
-        parser= "parseInt"
-    elif Type=='std::vector<std::string>':
-        parser= "parseList"
-    elif Type=='std::vector<int>':
-        parser= "parseIntList"
-    elif Type=='std::vector<bool>':
-        parser= "parseBoolList"
+def parser(type):
+    parser = ""
+    if type == 'std::string':
+        return "boost::any_cast<" + type + ">(prop.Get())"
+    elif type == 'exotica::Initializer' or type == 'Initializer':
+        return "prop.IsInitializerVectorType()?boost::any_cast<std::vector<exotica::Initializer>>(prop.Get()).at(0):boost::any_cast<exotica::Initializer>(prop.Get())"
+    elif type == 'std::vector<Initializer>' or type == 'std::vector<exotica::Initializer>':
+        return "boost::any_cast<std::vector<exotica::Initializer>>(prop.Get())"
+    elif type == 'Eigen::VectorXd':
+        parser = "ParseVector<double,Eigen::Dynamic>"
+    elif type == 'Eigen::Vector3d':
+        parser = "ParseVector<double,3>"
+    elif type == 'bool':
+        parser = "ParseBool"
+    elif type == 'double':
+        parser = "ParseDouble"
+    elif type == 'int':
+        parser = "ParseInt"
+    elif type == 'std::vector<std::string>':
+        parser = "ParseList"
+    elif type == 'std::vector<int>':
+        parser = "ParseIntList"
+    elif type == 'std::vector<bool>':
+        parser = "ParseBoolList"
     else:
-        eprint("Unknown data type '"+Type+"'")
+        eprint("Unknown data type '" + type + "'")
         sys.exit(2)
 
-    return "prop.isStringType()?"+parser+"(boost::any_cast<std::string>(prop.get())):boost::any_cast<"+Type+">(prop.get())"
+    return "prop.IsStringType()?" + parser + "(boost::any_cast<std::string>(prop.Get())):boost::any_cast<" + type + ">(prop.Get())"
 
 
-def Copy(Data):
-    if Data.has_key('Required'):
-      return "        ret.properties.emplace(\""+Data['Name']+"\", Property(\""+Data['Name']+"\", "+IsRequired(Data)+", boost::any("+Data['Name']+")));\n"
+def copy(data):
+    if data.has_key('Required'):
+      return "        ret.properties_.emplace(\""+data['Name']+"\", Property(\""+data['Name']+"\", "+is_required(data)+", boost::any("+to_underscores(data['Name'])+")));\n"
     else:
       return ""
 
-def Add(Data):
-    if Data.has_key('Required'):
-      return "        if (other.hasProperty(\""+Data['Name']+"\")) {const Property& prop=other.properties.at(\""+Data['Name']+"\"); if(prop.isSet()) "+Data['Name']+" = "+Parser(Data['Type'])+";}\n"
+def add(data):
+    if data.has_key('Required'):
+      return "        if (other.HasProperty(\"" + data['Name'] + "\")) {const Property& prop=other.properties_.at(\"" + data['Name'] + "\"); if(prop.IsSet()) " + to_underscores(data['Name']) + " = " + parser(data['Type']) + ";}\n"
     else:
       return ""
 
-def Check(Data, Name):
-    if Data.has_key('Required') and Data['Required']:
-      return "        if(!other.hasProperty(\""+Data['Name']+"\") || !other.properties.at(\""+Data['Name']+"\").isSet()) throw_pretty(\"Initializer "+Name+" requires property "+Data['Name']+" to be set!\");\n"
+def check(data, name):
+    if data.has_key('Required') and data['Required']:
+      return "        if(!other.HasProperty(\"" + data['Name'] + "\") || !other.properties_.at(\"" + data['Name'] + "\").IsSet()) ThrowPretty(\"Initializer " + name + " requires property " + data['Name'] + " to be set!\");\n"
     else:
       return ""
 
 
 
-def Construct(Namespace, ClassName, Data,Include):
-    CalssNameOrig=ClassName[0:-11]
-    ret="""// This file was automatically generated. Do not edit this file!
-#ifndef INITIALIZER_"""+Namespace+"_"+ClassName+"""_H
-#define INITIALIZER_"""+Namespace+"_"+ClassName+"""_H
+def construct(namespace, calss_name_orig, data, include):
+    class_name = calss_name_orig + "Initializer"
+    ret = """// This file was automatically generated. Do not edit this file!
+#ifndef INITIALIZER_""" + namespace.upper() + "_" + to_underscores(class_name).upper() + """_H
+#define INITIALIZER_""" + namespace.upper() + "_" + to_underscores(class_name).upper() + """_H
 
 #include <exotica_core/property.h>
+
 namespace exotica
 {
-inline std::vector<Initializer> get"""+Namespace+"""Initializers();
+inline std::vector<Initializer> Get"""+to_camel_cased(namespace)+"""Initializers();
 }
 
 namespace exotica
 {
 
-class """+ClassName+" : public InitializerBase"+"""
+class """ + class_name + " : public InitializerBase"+"""
 {
 public:
-    static std::string getContainerName() {return """+"\"exotica/"+CalssNameOrig+"\""+ """ ;}
+    static std::string GetContainerName() {return """+"\"exotica/"+calss_name_orig+"\""+ """ ;}
 
     """
-    if NeedsDefaultConstructor(Data):
-        ret=ret+ClassName+"() : InitializerBase()"+DefaultConstructorList(Data)+"""
+    if needs_default_constructor(data):
+        ret += class_name + "() : InitializerBase()" + default_constructor_list(data) + """
     {
     }
 
     """
-    ret=ret+ClassName+"("+ConstructorArgumentList(Data)+") : InitializerBase()"+ConstructorList(Data)+"""
+    ret += class_name + "(" + constructor_argument_list(data) + ") : InitializerBase()" + constructor_list(data) + """
     {
     }
 
-    """+ClassName+"""(const Initializer& other) : """+ClassName+"""()
+    """ + class_name + """(const Initializer& other) : """ + class_name + """()
     {
 """
-    for d in Data:
-        ret+=Add(d)
-    ret+="""
-    }
+    for d in data:
+        ret += add(d)
+    ret += """    }
 
-    virtual Initializer getTemplate() const
+    virtual Initializer GetTemplate() const
     {
-        return (Initializer)"""+ClassName+"""();
+        return (Initializer)""" + class_name + """();
     }
 
-    virtual std::vector<Initializer> getAllTemplates() const
+    virtual std::vector<Initializer> GetAllTemplates() const
     {
-        return get"""+Namespace+"""Initializers();
+        return Get""" + to_camel_cased(namespace) + """Initializers();
     }
 
-    virtual void check(const Initializer& other) const
+    virtual void Check(const Initializer& other) const
     {
 """
-    for d in Data:
-        ret+=Check(d,ClassName)
-    ret+="""
-    }
+    for d in data:
+        ret += check(d,class_name)
+    ret += """    }
 
     operator Initializer()
     {
-        Initializer ret(getContainerName());
+        Initializer ret(GetContainerName());
 """
-    for d in Data:
-        ret+=Copy(d)
-    ret+="""
-
-        return ret;
+    for d in data:
+        ret += copy(d)
+    ret += """        return ret;
     }
 
 """
-    for d in Data:
-        ret+=Declaration(d)
-    ret+="};"+"""
+    for d in data:
+        ret += declaration(d)
+    ret += "};" + """
 
 }
-#include<"""+Namespace+"/"+Namespace+"""InitializersNumerator.h>
+
+#include<""" + namespace + "/" + namespace + """_initializers_numerator.h>
 
 """
-    for i in Include:
-        ret+="#include <"+i+".h>\n"
-    ret+="""
-\n#endif"""
+    for i in include:
+        ret += "#include <"+i+".h>\n"
+    ret += """
+#endif"""
     return ret
 
-def ParseLine(line, ln, fn):
+def parse_line(line, line_number, function_name):
     # ignore lines with comments, otherwise comments including ';' will not be recognised
     if line.startswith("//"):
         return None
 
     last = line.find(";")
-    if last>=0:
-        line=line[0:last].strip()
+    if last >= 0:
+        line = line[0:last].strip()
     else:
         last = line.find("//")
-        if last>=0:
+        if last >= 0:
             line = line[0:last].strip()
         else:
             line=line.strip()
 
-    if len(line)==0:
+    if len(line) == 0:
         return None
 
-    if line.startswith("include"):
-        return {'Include':line[7:].strip().strip(">").strip("<").strip('"'), 'Code':line.strip()}
+    if line.startswith('include'):
+        return {'Include' : line[7:].strip().strip(">").strip("<").strip('"'), 'Code' : line.strip()}
     if line.startswith("extend"):
-        return {'Extends':line[6:].strip().strip(">").strip("<").strip('"'), 'Code':line.strip()}
+        return {'Extends' : line[6:].strip().strip(">").strip("<").strip('"'), 'Code' : line.strip()}
+    if line.startswith("class"):
+        return {'ClassName' : line[5:].strip().strip(">").strip("<").strip('"'), 'Code' : line.strip()}
 
-    if last==-1:
-        eprint("Can't find ';' in '"+fn+"', on line " + `ln`)
+    if last == -1:
+        eprint("Can't find ';' in '" + function_name + "', on line " + str(line_number))
         sys.exit(2)
 
     required = True
@@ -232,7 +280,7 @@ def ParseLine(line, ln, fn):
     elif line.startswith("Optional"):
         required = False
     else:
-        eprint("Can't parse 'Required/Optional' tag in '"+fn+"', on line " + `ln`)
+        eprint("Can't parse 'Required/Optional' tag in '" + function_name + "', on line " + str(line_number))
         sys.exit(2)
 
     value = None
@@ -240,144 +288,188 @@ def ParseLine(line, ln, fn):
     name = ""
     if not required:
         eq = line.find("=")
-        if eq==-1:
-            eq=last
+        if eq == -1:
+            eq = last
             value = '{}'
         else:
-            value = line[eq+1:last]
-        nameStart=line[0:eq].strip().rfind(" ")
-        name = line[nameStart:eq].strip()
-        type = line[9:nameStart].strip()
+            value = line[eq + 1:last]
+        name_start = line[0:eq].strip().rfind(" ")
+        name = line[name_start:eq].strip()
+        type = line[9:name_start].strip()
     else:
-        nameStart=line[0:last].strip().rfind(" ")
-        name = line[nameStart:last].strip()
-        type = line[9:nameStart].strip()
+        name_start = line[0:last].strip().rfind(" ")
+        name = line[name_start:last].strip()
+        type = line[9:name_start].strip()
 
-    return {'Required':required, 'Type':type, 'Name':name, 'Value':value}
+    return {'Required' : required, 'Type' : type, 'Name' : name, 'Value' : value}
 
-def ParseFile(filename):
-    with open(filename) as f:
+def parse_file(file_name):
+    with open(file_name) as f:
         lines = f.readlines()
-    Data=[]
-    Include=[]
-    Extends=[]
-    i=0
-    optionalOnly=False
+    data = []
+    include = []
+    extends = []
+    names = []
+    i = 0
+    optionalOnly = False
     for l in lines:
-        i=i+1
-        d=ParseLine(l,i,filename)
-        if d!=None:
+        i = i + 1
+        d = parse_line(l, i, file_name)
+        if d != None:
             if d.has_key('Required'):
-                if d['Required']==False:
-                    optionalOnly=True
+                if d['Required'] == False:
+                    optionalOnly = True
                 else:
                     if optionalOnly:
-                        eprint("Required properties have to come before Optional ones, in '"+filename+"', on line " + `i`)
+                        eprint("Required properties_ have to come before Optional ones, in '" + file_name + "', on line " + str(i))
                         sys.exit(2)
-                Data.append(d)
+                data.append(d)
             if d.has_key('Include'):
-                Include.append(d['Include'])
+                include.append(d['Include'])
             if d.has_key('Extends'):
-                Extends.append(d['Extends'])
-    return {"Data":Data,"Include":Include,"Extends":Extends}
+                extends.append(d['Extends'])
+            if d.has_key('ClassName'):
+                names.append(d['ClassName'])
+    if len(names) != 1:
+        eprint("Could not parse initializer class name in '" + file_name + "'!")
+        eprint(names)
+        sys.exit(2)
+    return {'Data' : data, 'Include' : include, 'Extends' : extends, 'ClassName' : names[0]}
 
-def ContainsData(type,name,list):
-    for d in list:
-        if d['Type']==type and d['Name']==name:
+def contains_data(type_name, name, list_in):
+    for d in list_in:
+        if d['Type'] == type_name and d['Name'] == name:
             return d['Class']
     return False
 
-def ContainsInclude(name,list):
-    for d in list:
-        if d==name:
+def contains_include(name, list_in):
+    for d in list_in:
+        if d == name:
             return True
     return False
 
-def ContainsExtends(name,list):
-    for d in list:
-        if d==name:
+def contains_extends(name, list_in):
+    for d in list_in:
+        if d == name:
             return True
     return False
 
-def CollectExtensions(Input,SearchDirs,Content,ClassName):
-    content = ParseFile(Input)
-    if content.has_key('Extends'):
-        for e in content['Extends']:
-            if not ContainsExtends(e,Content['Extends']):
-                file=None
-                ext=e.split('/')
-                for d in SearchDirs:
-                    ff = d+'/share/'+ext[0]+'/init/'+ext[1]+'.in'
+def collect_extensions(input_files, search_dirs, content):
+    file_content = parse_file(input_files)
+    class_name = file_content['ClassName']
+    if file_content.has_key('Extends'):
+        for e in file_content['Extends']:
+            if not contains_extends(e, content['Extends']):
+                file_name = None
+                ext = e.split('/')
+                for d in search_dirs:
+                    ff = d + '/share/' + ext[0] + '/init/' + ext[1] + '.in'
                     if os.path.isfile(ff):
-                        file = ff
+                        file_name = ff
                         break
-                if not file:
-                    eprint("Cannot find extension '"+e+"'!")
-                Content['Extends'].append(e)
-                ChildClassName = os.path.basename(file[0:-3])
-                Content = CollectExtensions(file,SearchDirs,Content,ChildClassName)
-    if content.has_key('Data'):
-      for d in content['Data']:
-          cls = ContainsData(d['Type'],d['Name'],Content['Data'])
-          if cls:
-              for e in Content['Data']:
-                if e['Name'] == d['Name']:
-                  # print('Overwriting default:', e['Value'], 'with', d['Value'])
-                  e['Value'] = d['Value']
-              # eprint("Property '"+d['Type']+" "+d['Name']+" in "+Input+" hides the parent's ("+cls+") property with the same id.")
-              # sys.exit(2)
-          else:
-              d['Class']=ClassName
-              Content['Data'].append(d)
-    if content.has_key('Include'):
-        for i in content['Include']:
-            if not ContainsInclude(i,Content['Include']):
-                Content['Include'].append(i)
-    return Content
+                if not file_name:
+                    eprint("Cannot find extension '" + e + "'!")
+                content['Extends'].append(e)
+                content = collect_extensions(file_name, search_dirs, content)
 
-def SortData(Data):
-    a=[]
-    b=[]
-    for d in Data:
+    if file_content.has_key('Data'):
+      for d in file_content['Data']:
+          cls = contains_data(d['Type'], d['Name'], content['Data'])
+          if cls:
+              for e in content['Data']:
+                if e['Name'] == d['Name']:
+                  e['Value'] = d['Value']
+          else:
+              d['Class'] = class_name
+              content['Data'].append(d)
+    if file_content.has_key('Include'):
+        for i in file_content['Include']:
+            if not contains_include(i, content['Include']):
+                content['Include'].append(i)
+    
+    content['ClassName'] = class_name
+    return content
+
+def sort_data(data):
+    a = []
+    b = []
+    for d in data:
         if d['Required']:
             a.append(d)
         else:
             b.append(d)
-    return a+b
-def Generate(Input, Output, Namespace, ClassName,SearchDirs,DevelDir):
-    print("Generating "+Output)
-    content = CollectExtensions(Input,SearchDirs,{'Data':[],'Include':[],'Extends':[]},ClassName)
-    txt=Construct(Namespace,ClassName+"Initializer",SortData(content["Data"]),content["Include"])
-    dir=os.path.dirname(Output)
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    with open(Output,"w") as f:
-        f.write(txt)
+    return a + b
 
+def generate(input_files, output_files, namespace, search_dirs, devel_dir):
+    print("Generating " + output_files)
+    content = collect_extensions(input_files, search_dirs, {'Data' : [], 'Include' : [], 'Extends' : []})
+    txt = construct(namespace, content['ClassName'], sort_data(content['Data']), content['Include'])
+    path = os.path.dirname(output_files)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    with open(output_files, "w") as f:
+        f.write(txt)
+    return content['ClassName']
+
+def create_class_init_header(class_inits, file_name):
+    ret = """// This file was automatically generated. Do not edit this file!
+#ifndef INITIALIZE_PROJECT_HEADER_""" + namespace.upper() + """_H_$
+#define INITIALIZE_PROJECT_HEADER_""" + namespace.upper() + """_H_$
+
+#include <exotica_core/property.h>
+"""
+    for init in class_inits:
+        ret += '#include <' + namespace + '/' + init[0] + '_initializer.h>\n'
+    ret += """
+
+namespace exotica
+{
+
+inline std::vector<Initializer> Get""" + to_camel_cased(namespace) + """Initializers()
+{
+    std::vector<Initializer> ret;
+"""
+    for init in class_inits:
+        ret += '    ret.push_back(' + init[1] + 'Initializer().GetTemplate());\n'
+    ret += """   return ret;
+}
+
+}
+
+#endif
+"""
+    path = os.path.dirname(file_name)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    with open(file_name, "w") as f:
+        f.write(ret)
 
 if __name__ == "__main__":
-    if len(sys.argv)>4:
-        offset=4
-        n=(len(sys.argv)-offset)/2
-        Namespace=sys.argv[1]
-        SearchDirs=sys.argv[2].split(':')
-        print(SearchDirs)
-        DevelDir=sys.argv[3]
-        if not os.path.exists(DevelDir+'/init'):
-            os.makedirs(DevelDir+'/init')
+    if len(sys.argv) > 5:
+        offset = 5
+        n = (len(sys.argv) - offset) / 2
+        namespace = sys.argv[1]
+        search_dirs = sys.argv[2].split(':')
+        devel_dir = sys.argv[3]
+        class_inits_header_file = sys.argv[4]
+        if not os.path.exists(devel_dir + '/init'):
+            os.makedirs(devel_dir + '/init')
 
-        for i in range(0,n):
-            Input = sys.argv[offset+i]
-            ClassName = os.path.basename(sys.argv[offset+i][0:-3])
-            with open(Input,"r") as fi:
-                with open(DevelDir+'/init/'+ClassName+'.in',"w") as f:
+        for i in range(0, n):
+            input_files = sys.argv[offset + i]
+            class_name = os.path.basename(sys.argv[offset + i][0:-3])
+            with open(input_files, "r") as fi:
+                with open(devel_dir + '/init/' + class_name + '.in', "w") as f:
                     f.write(fi.read())
 
-        for i in range(0,n):
-            Input = sys.argv[offset+i]
-            Output = sys.argv[offset+n+i]
-            ClassName = os.path.basename(sys.argv[offset+i][0:-3])
-            Generate(Input,Output,Namespace,ClassName,SearchDirs,DevelDir)
+        class_inits = []
+        for i in range(0, n):
+            input_files = sys.argv[offset + i]
+            output_files = sys.argv[offset + n + i]
+            class_file_name = os.path.basename(sys.argv[offset + i][0:-3])
+            class_inits.append((class_file_name, generate(input_files, output_files, namespace, search_dirs, devel_dir)))
+
+        create_class_init_header(class_inits, class_inits_header_file)
     else:
       eprint("Initializer generation failure: invalid arguments!")
       sys.exit(1)

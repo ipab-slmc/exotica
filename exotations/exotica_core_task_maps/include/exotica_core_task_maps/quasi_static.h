@@ -35,7 +35,8 @@
 
 #include <exotica_core/kinematic_tree.h>
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/QuasiStaticInitializer.h>
+#include <exotica_core_task_maps/quasi_static_initializer.h>
+
 #include <visualization_msgs/MarkerArray.h>
 
 namespace exotica
@@ -47,14 +48,14 @@ public:
     virtual ~QuasiStatic();
 
     void Instantiate(QuasiStaticInitializer& init) override;
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
 
 private:
-    void initialize();
+    void Initialize();
 
     QuasiStaticInitializer init_;
     visualization_msgs::MarkerArray debug_msg_;

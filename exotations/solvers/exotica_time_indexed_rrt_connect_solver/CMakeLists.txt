@@ -13,7 +13,7 @@ catkin_package(
   CATKIN_DEPENDS exotica_core
 )
 
-AddInitializer(TimeIndexedRRTConnect)
+AddInitializer(time_indexed_rrt_connect)
 GenInitializers()
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OMPL_INCLUDE_DIRS})

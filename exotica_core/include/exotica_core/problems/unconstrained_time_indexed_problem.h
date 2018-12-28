@@ -36,7 +36,7 @@
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
-#include <exotica_core/UnconstrainedTimeIndexedProblemInitializer.h>
+#include <exotica_core/unconstrained_time_indexed_problem_initializer.h>
 
 namespace exotica
 {
@@ -49,61 +49,63 @@ public:
     UnconstrainedTimeIndexedProblem();
     virtual ~UnconstrainedTimeIndexedProblem();
     virtual void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init);
-    double getDuration();
+    double GetDuration();
     void Update(Eigen::VectorXdRefConst x_in, int t);
-    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
-    void setRho(const std::string& task_name, const double rho, int t = 0);
-    Eigen::VectorXd getGoal(const std::string& task_name, int t = 0);
-    double getRho(const std::string& task_name, int t = 0);
-    std::vector<Eigen::VectorXd> getInitialTrajectory();
-    void setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
-    virtual void preupdate();
+    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    void SetRho(const std::string& task_name, const double rho, int t = 0);
+    Eigen::VectorXd GetGoal(const std::string& task_name, int t = 0);
+    double GetRho(const std::string& task_name, int t = 0);
+    std::vector<Eigen::VectorXd> GetInitialTrajectory();
+    void SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
+    void PreUpdate() override;
 
-    int getT() const { return T; }
-    void setT(const int& T_in);
+    int GetT() const { return T_; }
+    void SetT(const int& T_in);
 
-    double getTau() const { return tau; }
-    void setTau(const double& tau_in);
+    double GetTau() const { return tau_; }
+    void SetTau(const double& tau_in);
 
-    double getScalarTaskCost(int t);
-    Eigen::VectorXd getScalarTaskJacobian(int t);
-    double getScalarTransitionCost(int t);
-    Eigen::VectorXd getScalarTransitionJacobian(int t);
+    double GetScalarTaskCost(int t);
+    Eigen::VectorXd GetScalarTaskJacobian(int t);
+    double GetScalarTransitionCost(int t);
+    Eigen::VectorXd GetScalarTransitionJacobian(int t);
+
+    std::vector<std::shared_ptr<KinematicResponse>> GetKinematicSolutions() { return kinematic_solutions_; }
 
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
-    TimeIndexedTask Cost;
+    TimeIndexedTask cost;
     Eigen::MatrixXd W;
 
-    std::vector<TaskSpaceVector> Phi;
-    std::vector<Eigen::MatrixXd> J;
-    std::vector<Hessian> H;
+    std::vector<TaskSpaceVector> phi;
+    std::vector<Eigen::MatrixXd> jacobian;
+    std::vector<Hessian> hessian;
 
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
-    bool isValid() { return true; }
-    int PhiN;
-    int JN;
-    int NumTasks;
+    bool IsValid()  override { return true; }
+    int length_phi;
+    int length_jacobian;
+    int num_tasks;
 
-    TaskSpaceVector CostPhi;  // passed to the TimeIndexedTask, needs to be kept for reinitialisation
+    TaskSpaceVector cost_phi;  // passed to the TimeIndexedTask, needs to be kept for reinitialisation
 
-    std::vector<std::shared_ptr<KinematicResponse>> getKinematicSolutions() { return KinematicSolutions; }
 private:
-    int T;       //!< Number of time steps
-    double tau;  //!< Time step duration
+    void ReinitializeVariables();
 
-    double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+    int T_;       //!< Number of time steps
+    double tau_;  //!< Time step duration
 
-    std::vector<Eigen::VectorXd> InitialTrajectory;
+    double w_rate_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+
+    std::vector<Eigen::VectorXd> initial_trajectory_;
     UnconstrainedTimeIndexedProblemInitializer init_;
-    void reinitializeVariables();
-    TaskSpaceVector yref;  //!< Stores task Phi reference value, to be assigned to Phi
+    TaskSpaceVector y_ref_;  //!< Stores task phi reference value, to be assigned to phi
 
-    std::vector<std::shared_ptr<KinematicResponse>> KinematicSolutions;
+    std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
 };
 
-typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblem_ptr;
+typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblemPtr;
 }
 
 #endif

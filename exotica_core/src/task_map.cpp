@@ -32,22 +32,22 @@
 
 #include <exotica_core/task_map.h>
 
-#include <exotica_core/FrameInitializer.h>
-#include <exotica_core/TaskMapInitializer.h>
+#include <exotica_core/frame_initializer.h>
+#include <exotica_core/task_map_initializer.h>
 
 namespace exotica
 {
 TaskMap::TaskMap() = default;
 TaskMap::~TaskMap() = default;
 
-void TaskMap::assignScene(Scene_ptr scene)
+void TaskMap::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
 }
 
-std::string TaskMap::print(std::string prepend)
+std::string TaskMap::Print(std::string prepend)
 {
-    std::string ret = Object::print(prepend);
+    std::string ret = Object::Print(prepend);
     return ret;
 }
 
@@ -55,54 +55,54 @@ void TaskMap::InstantiateBase(const Initializer& init)
 {
     Object::InstatiateObject(init);
     TaskMapInitializer MapInitializer(init);
-    isUsed = true;
+    is_used = true;
 
-    Frames.clear();
+    frames_.clear();
 
-    for (Initializer& eff : MapInitializer.EndEffector)
+    for (Initializer& eff : MapInitializer.end_effector)
     {
         FrameInitializer frame(eff);
-        Frames.push_back(KinematicFrameRequest(frame.Link, getFrame(frame.LinkOffset), frame.Base, getFrame(frame.BaseOffset)));
+        frames_.push_back(KinematicFrameRequest(frame.link, GetFrame(frame.link_offset), frame.base, GetFrame(frame.base_offset)));
     }
 }
 
 std::vector<KinematicFrameRequest> TaskMap::GetFrames()
 {
-    return Frames;
+    return frames_;
 }
 
-void TaskMap::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (J.rows() != taskSpaceDim() && J.cols() != x.rows())
-        throw_named("Jacobian dimension mismatch!");
+    if (jacobian.rows() != TaskSpaceDim() && jacobian.cols() != x.rows())
+        ThrowNamed("Jacobian dimension mismatch!");
 
     // Store original x (needs to be reset later).
     Eigen::VectorXd x_original(x);
-    update(x_original, phi);
+    Update(x_original, phi);
 
     // Backward finite differencing.
     constexpr double h = 1e-6;
     Eigen::VectorXd x_tmp;
     Eigen::VectorXd phi_original(phi);
-    for (int i = 0; i < taskSpaceDim(); i++)
+    for (int i = 0; i < TaskSpaceDim(); i++)
     {
         x_tmp = x;
         x_tmp(i) -= h;
-        update(x_tmp, phi);
-        J.row(i) = (1 / h) * (phi_original - phi);
+        Update(x_tmp, phi);
+        jacobian.row(i) = (1 / h) * (phi_original - phi);
     }
 
     // Finally, reset with original value again.
-    update(x_original, phi);
+    Update(x_original, phi);
 }
 
-void TaskMap::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, HessianRef H)
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
 {
-    update(x, phi, J);
-    H.resize(taskSpaceDim());
-    for (int i = 0; i < taskSpaceDim(); i++)
+    Update(x, phi, jacobian);
+    hessian.resize(TaskSpaceDim());
+    for (int i = 0; i < TaskSpaceDim(); i++)
     {
-        H(i) = J.row(i).transpose() * J.row(i);
+        hessian(i) = jacobian.row(i).transpose() * jacobian.row(i);
     }
 }
 }

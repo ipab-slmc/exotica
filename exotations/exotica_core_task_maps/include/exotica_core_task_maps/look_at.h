@@ -34,7 +34,7 @@
 #define EXOTICA_CORE_TASK_MAPS_LOOKAT_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/LookAtInitializer.h>
+#include <exotica_core_task_maps/look_at_initializer.h>
 
 namespace exotica
 {
@@ -73,9 +73,9 @@ public:
     virtual ~LookAt();
 
     void Instantiate(LookAtInitializer& init) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
 
     Eigen::Vector3d get_look_at_target_in_world(const int& i);
 

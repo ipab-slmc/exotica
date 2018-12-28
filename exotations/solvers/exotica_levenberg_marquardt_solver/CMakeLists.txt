@@ -8,7 +8,7 @@ if(NOT TARGET Eigen3::Eigen)
     message(WARNING "For best performance, the Levenberg-Marquardt solver requires at least Eigen version 3.3. Using an alternative linear solver.")
 endif()
 
-AddInitializer(LevenbergMarquardtSolver)
+AddInitializer(levenberg_marquardt_solver)
 GenInitializers()
 
 catkin_package(

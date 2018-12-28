@@ -44,24 +44,24 @@ void EffAxisAlignment::Instantiate(EffAxisAlignmentInitializer& init)
     init_ = init;
 }
 
-void EffAxisAlignment::initialize()
+void EffAxisAlignment::Initialize()
 {
-    N = scene_->getKinematicTree().getNumControlledJoints();
+    N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    n_frames_ = init_.EndEffector.size();
+    n_frames_ = init_.end_effector.size();
     if (debug_) HIGHLIGHT_NAMED("EffAxisAlignment", "Number of EndEffectors: " << n_frames_);
     axis_.resize(3, n_frames_);
     dir_.resize(3, n_frames_);
 
-    Frames.resize(2 * n_frames_);
+    frames_.resize(2 * n_frames_);
     for (unsigned int i = 0; i < n_frames_; i++)
     {
-        FrameWithAxisAndDirectionInitializer frame(init_.EndEffector[i]);
-        axis_.col(i) = frame.Axis.normalized();
-        dir_.col(i) = frame.Direction.normalized();
+        FrameWithAxisAndDirectionInitializer frame(init_.end_effector[i]);
+        axis_.col(i) = frame.axis.normalized();
+        dir_.col(i) = frame.direction.normalized();
 
-        Frames[i + n_frames_] = Frames[i];
-        tf::vectorEigenToKDL(axis_.col(i), Frames[i + n_frames_].FrameAOffset.p);
+        frames_[i + n_frames_] = frames_[i];
+        tf::vectorEigenToKDL(axis_.col(i), frames_[i + n_frames_].frame_a_offset.p);
     }
 
     if (debug_)
@@ -69,104 +69,104 @@ void EffAxisAlignment::initialize()
         for (unsigned int i = 0; i < n_frames_; i++)
         {
             HIGHLIGHT_NAMED("EffAxisAlignment",
-                            "Frame " << Frames[i].FrameALinkName << ":"
+                            "Frame " << frames_[i].frame_a_link_name << ":"
                                      << "\tAxis=" << axis_.col(i).transpose()
                                      << "\tDirection=" << dir_.col(i).transpose());
         }
     }
 }
 
-void EffAxisAlignment::assignScene(Scene_ptr scene)
+void EffAxisAlignment::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
-    initialize();
+    Initialize();
 }
 
-void EffAxisAlignment::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void EffAxisAlignment::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != n_frames_) throw_named("Wrong size of phi!");
+    if (phi.rows() != n_frames_) ThrowNamed("Wrong size of phi!");
 
     for (unsigned int i = 0; i < n_frames_; i++)
     {
-        tf::vectorKDLToEigen(Kinematics[0].Phi(i).p, link_position_in_base_);
-        tf::vectorKDLToEigen(Kinematics[0].Phi(i + n_frames_).p, link_axis_position_in_base_);
+        tf::vectorKDLToEigen(kinematics[0].phi(i).p, link_position_in_base_);
+        tf::vectorKDLToEigen(kinematics[0].phi(i + n_frames_).p, link_axis_position_in_base_);
 
         Eigen::Vector3d axisInBase = link_axis_position_in_base_ - link_position_in_base_;
         phi(i) = axisInBase.dot(dir_.col(i)) - 1.0;
     }
 }
 
-void EffAxisAlignment::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void EffAxisAlignment::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != n_frames_) throw_named("Wrong size of phi!");
-    if (J.rows() != n_frames_ || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
+    if (phi.rows() != n_frames_) ThrowNamed("Wrong size of phi!");
+    if (jacobian.rows() != n_frames_ || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
     for (unsigned int i = 0; i < n_frames_; i++)
     {
-        tf::vectorKDLToEigen(Kinematics[0].Phi(i).p, link_position_in_base_);
-        tf::vectorKDLToEigen(Kinematics[0].Phi(i + n_frames_).p, link_axis_position_in_base_);
+        tf::vectorKDLToEigen(kinematics[0].phi(i).p, link_position_in_base_);
+        tf::vectorKDLToEigen(kinematics[0].phi(i + n_frames_).p, link_axis_position_in_base_);
 
         Eigen::Vector3d axisInBase = link_axis_position_in_base_ - link_position_in_base_;
-        Eigen::MatrixXd axisInBaseJacobian = Kinematics[0].J[i + n_frames_].data.block(0, 0, 3, N) - Kinematics[0].J[i].data.block(0, 0, 3, N);
+        Eigen::MatrixXd axisInBaseJacobian = kinematics[0].jacobian[i + n_frames_].data.block(0, 0, 3, N) - kinematics[0].jacobian[i].data.block(0, 0, 3, N);
 
         phi(i) = axisInBase.dot(dir_.col(i)) - 1.0;
-        J.row(i) = dir_.col(i).transpose() * axisInBaseJacobian;
+        jacobian.row(i) = dir_.col(i).transpose() * axisInBaseJacobian;
     }
 }
 
-int EffAxisAlignment::taskSpaceDim()
+int EffAxisAlignment::TaskSpaceDim()
 {
     return n_frames_;
 }
 
-Eigen::Vector3d EffAxisAlignment::get_direction(const std::string& frame_name)
+Eigen::Vector3d EffAxisAlignment::GetDirection(const std::string& frame_name)
 {
     for (unsigned int i = 0; i < n_frames_; i++)
     {
-        if (Frames[i].FrameALinkName == frame_name)
+        if (frames_[i].frame_a_link_name == frame_name)
         {
             return dir_.col(i);
         }
     }
-    throw_pretty("Direction for frame with name " << frame_name << " could not be found.");
+    ThrowPretty("Direction for frame with name " << frame_name << " could not be found.");
 }
 
-void EffAxisAlignment::set_direction(const std::string& frame_name, const Eigen::Vector3d& dir_in)
+void EffAxisAlignment::SetDirection(const std::string& frame_name, const Eigen::Vector3d& dir_in)
 {
     for (unsigned int i = 0; i < n_frames_; i++)
     {
-        if (Frames[i].FrameALinkName == frame_name)
+        if (frames_[i].frame_a_link_name == frame_name)
         {
             dir_.col(i) = dir_in.normalized();
             return;
         }
     }
-    throw_pretty("Could not find frame with name " << frame_name << ".");
+    ThrowPretty("Could not find frame with name " << frame_name << ".");
 }
 
-Eigen::Vector3d EffAxisAlignment::get_axis(const std::string& frame_name)
+Eigen::Vector3d EffAxisAlignment::GetAxis(const std::string& frame_name)
 {
     for (unsigned int i = 0; i < n_frames_; i++)
     {
-        if (Frames[i].FrameALinkName == frame_name)
+        if (frames_[i].frame_a_link_name == frame_name)
         {
             return axis_.col(i);
         }
     }
-    throw_pretty("Axis for frame with name " << frame_name << " could not be found.");
+    ThrowPretty("Axis for frame with name " << frame_name << " could not be found.");
 }
 
-void EffAxisAlignment::set_axis(const std::string& frame_name, const Eigen::Vector3d& axis_in)
+void EffAxisAlignment::SetAxis(const std::string& frame_name, const Eigen::Vector3d& axis_in)
 {
     for (unsigned int i = 0; i < n_frames_; i++)
     {
-        if (Frames[i].FrameALinkName == frame_name)
+        if (frames_[i].frame_a_link_name == frame_name)
         {
             axis_.col(i) = axis_in.normalized();
-            tf::vectorEigenToKDL(axis_.col(i), Frames[i + n_frames_].FrameAOffset.p);
+            tf::vectorEigenToKDL(axis_.col(i), frames_[i + n_frames_].frame_a_offset.p);
             return;
         }
     }
-    throw_pretty("Could not find frame with name " << frame_name << ".");
+    ThrowPretty("Could not find frame with name " << frame_name << ".");
 }
 }

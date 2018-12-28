@@ -16,7 +16,7 @@ void appendChildXML(Initializer& parent, std::string& name, bool isAttribute, ti
     {
         // Attributes are always a regular property
         std::string value = tag.ToElement()->Attribute(name.c_str());
-        parent.addProperty(Property(name, true, value));
+        parent.AddProperty(Property(name, true, value));
     }
     else
     {
@@ -33,7 +33,7 @@ void appendChildXML(Initializer& parent, std::string& name, bool isAttribute, ti
                 return;
             }
             std::string value = tag.ToElement()->GetText();
-            parent.addProperty(Property(name, true, value));
+            parent.AddProperty(Property(name, true, value));
         }
         else
         {
@@ -55,11 +55,11 @@ void appendChildXML(Initializer& parent, std::string& name, bool isAttribute, ti
                 }
                 else
                 {
-                    //HIGHLIGHT(prefix<<". Adding parsed vector element "<<name<<" to " << parent.getName());
+                    //HIGHLIGHT(prefix<<". Adding parsed vector element "<<name<<" to " << parent.GetName());
                 }
                 child_tag = child_tag.NextSibling();
             }
-            parent.addProperty(Property(name, true, ret));
+            parent.AddProperty(Property(name, true, ret));
         }
     }
 }
@@ -70,7 +70,7 @@ bool parseXML(tinyxml2::XMLHandle& tag, Initializer& parent, const std::string& 
     // Get the name
     std::string name = std::string(tag.ToElement()->Name());
     //HIGHLIGHT(prefix<<name<<" added");
-    parent.setName("exotica/" + name);
+    parent.SetName("exotica/" + name);
 
     // Parse values stored in attributes
     tinyxml2::XMLAttribute* attr = const_cast<tinyxml2::XMLAttribute*>(tag.ToElement()->FirstAttribute());
@@ -98,22 +98,22 @@ bool parseXML(tinyxml2::XMLHandle& tag, Initializer& parent, const std::string& 
     return true;
 }
 
-Initializer XMLLoader::loadXML(std::string file_name, bool parsePathAsXML)
+Initializer XMLLoader::LoadXML(std::string file_name, bool parsePathAsXML)
 {
     tinyxml2::XMLDocument xml_file;
     if (parsePathAsXML)
     {
         if (xml_file.Parse(file_name.c_str()) != tinyxml2::XML_SUCCESS)
         {
-            throw_pretty("Can't load file!\nFile: '" + file_name + "'");
+            ThrowPretty("Can't load file!\nFile: '" + file_name + "'");
         }
     }
     else
     {
-        std::string xml = loadFile(file_name);  // assume it is a null-terminated string
+        std::string xml = LoadFile(file_name);  // assume it is a null-terminated string
         if (xml_file.Parse(xml.c_str()) != tinyxml2::XML_SUCCESS)
         {
-            throw_pretty("Can't load file!\nFile: '" + parsePath(file_name) + "'");
+            ThrowPretty("Can't load file!\nFile: '" + ParsePath(file_name) + "'");
         }
     }
 
@@ -121,27 +121,27 @@ Initializer XMLLoader::loadXML(std::string file_name, bool parsePathAsXML)
     tinyxml2::XMLHandle root_tag(xml_file.RootElement()->FirstChildElement());
     if (!parseXML(root_tag, ret, ""))
     {
-        throw_pretty("Can't parse XML!\nFile: '" + file_name + "'");
+        ThrowPretty("Can't parse XML!\nFile: '" + file_name + "'");
     }
     return ret;
 }
 
-void XMLLoader::loadXML(std::string file_name, Initializer& solver, Initializer& problem, const std::string& solver_name, const std::string& problem_name, bool parsePathAsXML)
+void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer& problem, const std::string& solver_name, const std::string& problem_name, bool parsePathAsXML)
 {
     tinyxml2::XMLDocument xml_file;
     if (parsePathAsXML)
     {
         if (xml_file.Parse(file_name.c_str()) != tinyxml2::XML_SUCCESS)
         {
-            throw_pretty("Can't load file!\nFile: '" + file_name + "'");
+            ThrowPretty("Can't load file!\nFile: '" + file_name + "'");
         }
     }
     else
     {
-        std::string xml = loadFile(file_name);  // assume loadFile returns a null-terminated string
+        std::string xml = LoadFile(file_name);  // assume LoadFile returns a null-terminated string
         if (xml_file.Parse(xml.c_str()) != tinyxml2::XML_SUCCESS)
         {
-            throw_pretty("Can't load file!\nFile: '" + parsePath(file_name) + "'");
+            ThrowPretty("Can't load file!\nFile: '" + ParsePath(file_name) + "'");
         }
     }
 
@@ -161,33 +161,33 @@ void XMLLoader::loadXML(std::string file_name, Initializer& solver, Initializer&
         }
         root_tag = root_tag.NextSibling();
     }
-    bool foundSolver = false;
-    bool foundProblem = false;
+    bool found_solver = false;
+    bool found_problem = false;
     if (solver_name.empty() || solver_name == "")
     {
         for (Initializer& i : initializers)
         {
-            std::string initializer_type = i.getName();
-            if (!foundSolver)
+            std::string initializer_type = i.GetName();
+            if (!found_solver)
             {
-                for (std::string known_type : Setup::getSolvers())
+                for (std::string known_type : Setup::GetSolvers())
                 {
                     if (known_type == initializer_type)
                     {
                         solver = i;
-                        foundSolver = true;
+                        found_solver = true;
                         break;
                     }
                 }
             }
-            if (!foundProblem)
+            if (!found_problem)
             {
-                for (std::string known_type : Setup::getProblems())
+                for (std::string known_type : Setup::GetProblems())
                 {
                     if (known_type == initializer_type)
                     {
                         problem = i;
-                        foundProblem = true;
+                        found_problem = true;
                         break;
                     }
                 }
@@ -198,20 +198,20 @@ void XMLLoader::loadXML(std::string file_name, Initializer& solver, Initializer&
     {
         for (Initializer& i : initializers)
         {
-            std::string name = boost::any_cast<std::string>(i.getProperty("Name"));
+            std::string name = boost::any_cast<std::string>(i.GetProperty("Name"));
             if (name == solver_name)
             {
                 solver = i;
-                foundSolver = true;
+                found_solver = true;
             }
             if (name == problem_name)
             {
                 problem = i;
-                foundProblem = true;
+                found_problem = true;
             }
         }
     }
-    if (!foundSolver) throw_pretty("Can't find solver '" + solver_name + "' in '" + file_name + "'!");
-    if (!foundProblem) throw_pretty("Can't find problem '" + problem_name + "' in '" + file_name + "'!");
+    if (!found_solver) ThrowPretty("Can't find solver '" + solver_name + "' in '" + file_name + "'!");
+    if (!found_problem) ThrowPretty("Can't find problem '" + problem_name + "' in '" + file_name + "'!");
 }
 }

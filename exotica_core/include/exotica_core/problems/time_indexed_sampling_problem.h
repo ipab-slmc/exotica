@@ -36,7 +36,7 @@
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
-#include <exotica_core/TimeIndexedSamplingProblemInitializer.h>
+#include <exotica_core/time_indexed_sampling_problem_initializer.h>
 
 namespace exotica
 {
@@ -49,45 +49,42 @@ public:
     virtual void Instantiate(TimeIndexedSamplingProblemInitializer& init);
 
     void Update(Eigen::VectorXdRefConst x, const double& t);
-    bool isValid(Eigen::VectorXdRefConst x, const double& t);
-    virtual void preupdate();
+    bool IsValid(Eigen::VectorXdRefConst x, const double& t); // Not overriding on purpose
+    void PreUpdate() override;
 
-    int getSpaceDim();
+    int GetSpaceDim();
 
-    void setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    Eigen::VectorXd getGoalEQ(const std::string& task_name);
-    void setRhoEQ(const std::string& task_name, const double& rho);
-    double getRhoEQ(const std::string& task_name);
+    void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd GetGoalEQ(const std::string& task_name);
+    void SetRhoEQ(const std::string& task_name, const double& rho);
+    double GetRhoEQ(const std::string& task_name);
 
-    void setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    Eigen::VectorXd getGoalNEQ(const std::string& task_name);
-    void setRhoNEQ(const std::string& task_name, const double& rho);
-    double getRhoNEQ(const std::string& task_name);
+    void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd GetGoalNEQ(const std::string& task_name);
+    void SetRhoNEQ(const std::string& task_name, const double& rho);
+    double GetRhoNEQ(const std::string& task_name);
 
-    std::vector<double> getBounds();
+    std::vector<double> GetBounds();
 
-    TimeIndexedSamplingProblemInitializer Parameters;
+    Eigen::VectorXd GetGoalState();
+    double GetGoalTime();
+    void SetGoalState(Eigen::VectorXdRefConst qT);
+    void SetGoalTime(const double& t);
 
-    Eigen::VectorXd getGoalState();
-    double getGoalTime();
-    void setGoalState(Eigen::VectorXdRefConst qT);
-    void setGoalTime(const double& t);
+    Eigen::VectorXd vel_limits;
+    TaskSpaceVector phi;
+    SamplingTask inequality;
+    SamplingTask equality;
+    TimeIndexedSamplingProblemInitializer parameters;
+    TaskSpaceVector constraint_phi;
 
-    // TODO(wxm): Make private and expose getter/setter where required.
-    double T;
-    Eigen::VectorXd vel_limits_;
-    TaskSpaceVector Phi;
-    SamplingTask Inequality;
-    SamplingTask Equality;
-
-    TaskSpaceVector ConstraintPhi;
-
-    int PhiN;
-    int JN;
-    int NumTasks;
+    int length_phi;
+    int length_jacobian;
+    int num_tasks;
 
 private:
-    double tGoal;
+    double T_;
+    double t_goal_;
     Eigen::VectorXd goal_;
 };
 

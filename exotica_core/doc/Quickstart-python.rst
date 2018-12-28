@@ -37,7 +37,7 @@ For this quick tutorial we'll be using the `example\_ik\_noros.py <https://githu
 		problem.setGoal('Position',figureEight(t))
 		problem.startState = q
 		q = solver.solve()[0]
-		print('Solution found in '+str(timer.getDuration())+'s '+str(q))
+		print('Solution found in '+str(timer.GetDuration())+'s '+str(q))
 		sleep(dt)
 	t=t+dt
 

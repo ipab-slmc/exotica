@@ -73,9 +73,9 @@ public:
     CollisionSceneFCLLatest();
     virtual ~CollisionSceneFCLLatest();
 
-    void setup() override;
+    void Setup() override;
 
-    bool isAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) override;
+    bool IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) override;
 
     static bool IsAllowedToCollide(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, bool self, CollisionSceneFCLLatest* scene);
     static bool CollisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data);
@@ -86,19 +86,19 @@ public:
        * @param self Indicate if self collision check is required.
        * @return True, if the state is collision free.
        */
-    bool isStateValid(bool self = true, double safe_distance = 0.0) override;
-    bool isCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) override;
+    bool IsStateValid(bool self = true, double safe_distance = 0.0) override;
+    bool IsCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) override;
 
     ///
     /// \brief Computes collision distances.
     /// \param self Indicate if self collision check is required.
     /// \return Collision proximity objects for all colliding pairs of objects.
     ///
-    std::vector<CollisionProxy> getCollisionDistance(bool self) override;
-    std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const std::string& o2) override;
-    std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true) override;
-    std::vector<CollisionProxy> getCollisionDistance(const std::vector<std::string>& objects, const bool& self = true) override;
-    std::vector<CollisionProxy> getCollisionDistance(const std::string& o1, const bool& self = true, const bool& disableCollisionSceneUpdate = false) override;
+    std::vector<CollisionProxy> GetCollisionDistance(bool self) override;
+    std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const std::string& o2) override;
+    std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const bool& self = true) override;
+    std::vector<CollisionProxy> GetCollisionDistance(const std::vector<std::string>& objects, const bool& self = true) override;
+    std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const bool& self = true, const bool& disable_collision_scene_update = false) override;
 
     /**
      * @brief      Performs a continuous collision check between two objects with a linear interpolation between two given 
@@ -112,40 +112,40 @@ public:
      *
      * @return     ContinuousCollisionProxy.
      */
-    ContinuousCollisionProxy continuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) override;
+    ContinuousCollisionProxy ContinuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) override;
 
     /**
        * @brief      Gets the collision world links.
        *
        * @return     The collision world links.
        */
-    std::vector<std::string> getCollisionWorldLinks() override;
+    std::vector<std::string> GetCollisionWorldLinks() override;
 
     /**
       * @brief      Gets the KinematicElements associated with the collision world links.
       * @return     The KinematicElements associated with the collision world links.
       */
-    std::vector<std::shared_ptr<KinematicElement>> getCollisionWorldLinkElements() override;
+    std::vector<std::shared_ptr<KinematicElement>> GetCollisionWorldLinkElements() override;
 
     /**
        * @brief      Gets the collision robot links.
        *
        * @return     The collision robot links.
        */
-    std::vector<std::string> getCollisionRobotLinks() override;
+    std::vector<std::string> GetCollisionRobotLinks() override;
 
-    Eigen::Vector3d getTranslation(const std::string& name) override;
+    Eigen::Vector3d GetTranslation(const std::string& name) override;
 
     ///
     /// \brief Creates the collision scene from kinematic elements.
     /// \param objects Vector kinematic element pointers of collision objects.
     ///
-    void updateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects) override;
+    void UpdateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects) override;
 
     ///
     /// \brief Updates collision object transformations from the kinematic tree.
     ///
-    void updateCollisionObjectTransforms() override;
+    void UpdateCollisionObjectTransforms() override;
 
 private:
     std::shared_ptr<fcl::CollisionObjectd> ConstructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);

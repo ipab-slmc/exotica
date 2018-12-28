@@ -56,36 +56,35 @@ public:
     virtual ~TaskMap();
     virtual void InstantiateBase(const Initializer& init);
 
-    virtual void assignScene(Scene_ptr scene);
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J);
-    virtual void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, HessianRef H);
-    virtual int taskSpaceDim() = 0;
+    virtual void AssignScene(ScenePtr scene);
+    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
+    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian);
+    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian);
+    virtual int TaskSpaceDim() = 0;
 
-    virtual int taskSpaceJacobianDim() { return taskSpaceDim(); }
-    virtual void preupdate() {}
-    virtual std::vector<TaskVectorEntry> getLieGroupIndices() { return std::vector<TaskVectorEntry>(); }
-    virtual std::string print(std::string prepend);
+    virtual int TaskSpaceJacobianDim() { return TaskSpaceDim(); }
+    virtual void PreUpdate() {}
+    virtual std::vector<TaskVectorEntry> GetLieGroupIndices() { return std::vector<TaskVectorEntry>(); }
+    virtual std::string Print(std::string prepend);
 
     std::vector<KinematicFrameRequest> GetFrames();
 
-    std::vector<KinematicSolution> Kinematics = std::vector<KinematicSolution>(1);
-    int Id = -1;
-    int Start = -1;
-    int Length = -1;
-    int StartJ = -1;
-    int LengthJ = -1;
-    bool isUsed = false;
+    std::vector<KinematicSolution> kinematics = std::vector<KinematicSolution>(1);
+    int id = -1;
+    int start = -1;
+    int length = -1;
+    int start_jacobian = -1;
+    int length_jacobian = -1;
+    bool is_used = false;
 
 protected:
-    std::vector<KinematicFrameRequest> Frames;
-    Scene_ptr scene_ = nullptr;
+    std::vector<KinematicFrameRequest> frames_;
+    ScenePtr scene_ = nullptr;
 };
 
 //!< Typedefines for some common functionality
-typedef Factory<TaskMap> TaskMap_fac;                    //!< Task Map Factory
-typedef std::shared_ptr<TaskMap> TaskMap_ptr;            //!< Task Map smart pointer
-typedef std::map<std::string, TaskMap_ptr> TaskMap_map;  //!< The mapping by name of TaskMaps
-typedef std::vector<TaskMap_ptr> TaskMap_vec;
+typedef std::shared_ptr<TaskMap> TaskMapPtr;            //!< Task Map smart pointer
+typedef std::map<std::string, TaskMapPtr> TaskMapMap;  //!< The mapping by name of TaskMaps
+typedef std::vector<TaskMapPtr> TaskMapVec;
 }
 #endif

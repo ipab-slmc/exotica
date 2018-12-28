@@ -1,0 +1,6 @@
+class Trajectory
+
+Required std::string Link;
+
+Optional std::string File = "";
+Optional std::string Trajectory = "";

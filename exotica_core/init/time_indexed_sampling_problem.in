@@ -1,0 +1,8 @@
+class TimeIndexedSamplingProblem
+
+extend <exotica_core/sampling_problem>
+
+Required Eigen::VectorXd JointVelocityLimits;
+
+Optional double T = 1.0;
+Optional double GoalTime = -1.0; # If goal time is not defined in xml, it will be set to T

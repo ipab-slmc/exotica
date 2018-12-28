@@ -34,7 +34,7 @@
 #define EXOTICA_CORE_TASK_MAPS_EFF_POSITION_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/EffPositionInitializer.h>
+#include <exotica_core_task_maps/eff_position_initializer.h>
 
 namespace exotica
 {
@@ -45,9 +45,9 @@ public:
     virtual ~EffPosition();
 
     void Instantiate(EffPositionInitializer& init) override {}
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
 };
 }
 

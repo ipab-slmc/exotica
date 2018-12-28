@@ -39,32 +39,32 @@ namespace exotica
 EffPosition::EffPosition() = default;
 EffPosition::~EffPosition() = default;
 
-void EffPosition::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != Kinematics[0].Phi.rows() * 3) throw_named("Wrong size of phi!");
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    if (phi.rows() != kinematics[0].phi.rows() * 3) ThrowNamed("Wrong size of phi!");
+    for (int i = 0; i < kinematics[0].phi.rows(); i++)
     {
-        phi(i * 3) = Kinematics[0].Phi(i).p[0];
-        phi(i * 3 + 1) = Kinematics[0].Phi(i).p[1];
-        phi(i * 3 + 2) = Kinematics[0].Phi(i).p[2];
+        phi(i * 3) = kinematics[0].phi(i).p[0];
+        phi(i * 3 + 1) = kinematics[0].phi(i).p[1];
+        phi(i * 3 + 2) = kinematics[0].phi(i).p[2];
     }
 }
 
-void EffPosition::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != Kinematics[0].Phi.rows() * 3) throw_named("Wrong size of phi!");
-    if (J.rows() != Kinematics[0].J.rows() * 3 || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    if (phi.rows() != kinematics[0].phi.rows() * 3) ThrowNamed("Wrong size of phi!");
+    if (jacobian.rows() != kinematics[0].jacobian.rows() * 3 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
+    for (int i = 0; i < kinematics[0].phi.rows(); i++)
     {
-        phi(i * 3) = Kinematics[0].Phi(i).p[0];
-        phi(i * 3 + 1) = Kinematics[0].Phi(i).p[1];
-        phi(i * 3 + 2) = Kinematics[0].Phi(i).p[2];
-        J.middleRows(i * 3, 3) = Kinematics[0].J[i].data.topRows(3);
+        phi(i * 3) = kinematics[0].phi(i).p[0];
+        phi(i * 3 + 1) = kinematics[0].phi(i).p[1];
+        phi(i * 3 + 2) = kinematics[0].phi(i).p[2];
+        jacobian.middleRows(i * 3, 3) = kinematics[0].jacobian[i].data.topRows(3);
     }
 }
 
-int EffPosition::taskSpaceDim()
+int EffPosition::TaskSpaceDim()
 {
-    return Kinematics[0].Phi.rows() * 3;
+    return kinematics[0].phi.rows() * 3;
 }
 }

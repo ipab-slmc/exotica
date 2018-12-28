@@ -34,39 +34,39 @@
 #define EXOTICA_CORE_TASK_MAPS_POINT_TO_LINE_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/Point2LineInitializer.h>
+#include <exotica_core_task_maps/point_to_line_initializer.h>
 
 namespace exotica
 {
-class Point2Line : public TaskMap, public Instantiable<Point2LineInitializer>
+class PointToLine : public TaskMap, public Instantiable<PointToLineInitializer>
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    Point2Line();
-    virtual ~Point2Line();
+    PointToLine();
+    virtual ~PointToLine();
 
-    void Instantiate(Point2LineInitializer& init) override;
+    void Instantiate(PointToLineInitializer& init) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
 
-    Eigen::Vector3d getEndPoint();
-    void setEndPoint(const Eigen::Vector3d& point);
+    Eigen::Vector3d GetEndPoint();
+    void SetEndPoint(const Eigen::Vector3d& point);
 
 private:
-    Eigen::Vector3d line_start_;  ///< start point of line in base frame
-    Eigen::Vector3d line_end_;    ///< end point of line in base frame
-    Eigen::Vector3d line_;        ///< vector from start to end point of line
-    bool infinite_;               ///< true: vector from start to end defines the direction of and infinite line
-                                  ///< false: start and end define a line segment
-
     /**
      * @brief direction computes the vector from a point to its projection on a line
      * @param point point in base frame
      * @return 3D vector from #point to its projection on #line
      */
-    Eigen::Vector3d direction(const Eigen::Vector3d& point);
+    Eigen::Vector3d Direction(const Eigen::Vector3d& point);
+
+    Eigen::Vector3d line_start_;  ///< start point of line in base frame
+    Eigen::Vector3d line_end_;    ///< end point of line in base frame
+    Eigen::Vector3d line_;        ///< vector from start to end point of line
+    bool infinite_;               ///< true: vector from start to end defines the direction of and infinite line
+                                  ///< false: start and end define a line segment
 
     std::string link_name_;  ///< frame of defined point
     std::string base_name_;  ///< frame of defined line

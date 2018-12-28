@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <PRMConfig>
 
-  <PRM Name="MultiQuerySolver" MultiQuery="1"/>
+  <PRMSolver Name="MultiQuerySolver" MultiQuery="1"/>
 
   <SamplingProblem Name="ReachingProblem">
 

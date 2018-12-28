@@ -1,14 +1,14 @@
 <library path="lib/libexotica_core_task_maps">
-  <class name="exotica/CoM" type="exotica::CoM" base_class_type="exotica::TaskMap">
+  <class name="exotica/CenterOfMass" type="exotica::CenterOfMass" base_class_type="exotica::TaskMap">
     <description>Centre of mass</description>
   </class>
   <class name="exotica/Distance" type="exotica::Distance" base_class_type="exotica::TaskMap">
     <description>Distance</description>
   </class>
-  <class name="exotica/Point2Line" type="exotica::Point2Line" base_class_type="exotica::TaskMap">
+  <class name="exotica/PointToLine" type="exotica::PointToLine" base_class_type="exotica::TaskMap">
     <description>Point to line distance</description>
   </class>
-  <class name="exotica/Point2Plane" type="exotica::Point2Plane" base_class_type="exotica::TaskMap">
+  <class name="exotica/PointToPlane" type="exotica::PointToPlane" base_class_type="exotica::TaskMap">
     <description>Point to plane distance</description>
   </class>
   <class name="exotica/EffPosition" type="exotica::EffPosition" base_class_type="exotica::TaskMap">

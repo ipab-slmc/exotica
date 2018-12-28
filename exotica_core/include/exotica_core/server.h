@@ -52,8 +52,8 @@ public:
     RosNode() = delete;
     RosNode(std::shared_ptr<ros::NodeHandle> nh, int numThreads = 2);
     ~RosNode();
-    inline ros::NodeHandle &getNodeHandle() { return *nh_; }
-    inline tf::TransformBroadcaster &getTF() { return tf_; }
+    inline ros::NodeHandle &GetNodeHandle() { return *nh_; }
+    inline tf::TransformBroadcaster &GetTF() { return tf_; }
 protected:
     std::shared_ptr<ros::NodeHandle> nh_;
     ros::AsyncSpinner sp_;
@@ -79,57 +79,57 @@ public:
        * @param	path	Robot model name
        * @return	True if exist, false otherwise
        */
-    bool hasModel(const std::string &path);
+    bool HasModel(const std::string &path);
 
     /*
        * \brief	Get robot model
        * @param	path	Robot model name
        * @param	model	Robot model
        */
-    void getModel(std::string path, robot_model::RobotModelPtr &model, std::string urdf = "", std::string srdf = "");
+    void GetModel(std::string path, robot_model::RobotModelPtr &model, std::string urdf = "", std::string srdf = "");
 
     /*
        * \brief	Get robot model
        * @param	path	Robot model name
        * @return	robot model
        */
-    robot_model::RobotModelConstPtr getModel(std::string path, std::string urdf = "", std::string srdf = "");
+    robot_model::RobotModelConstPtr GetModel(std::string path, std::string urdf = "", std::string srdf = "");
 
     /*
        * \brief	Get the name of ther server
        * @return	Server name
        */
-    std::string getName();
+    std::string GetName();
 
     inline static void InitRos(std::shared_ptr<ros::NodeHandle> nh, int numThreads = 2)
     {
         Instance()->node_.reset(new RosNode(nh, numThreads));
     }
 
-    inline static bool isRos() { return Instance()->node_ != nullptr; }
-    inline static ros::NodeHandle &getNodeHandle()
+    inline static bool IsRos() { return Instance()->node_ != nullptr; }
+    inline static ros::NodeHandle &GetNodeHandle()
     {
-        if (!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
-        return Instance()->node_->getNodeHandle();
+        if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
+        return Instance()->node_->GetNodeHandle();
     }
 
     template <typename T>
-    static bool getParam(const std::string &name, T &param)
+    static bool GetParam(const std::string &name, T &param)
     {
-        return Instance()->getNodeHandle().getParam(name, param);
+        return Instance()->GetNodeHandle().getParam(name, param);
     }
 
     template <typename T>
-    static void setParam(const std::string &name, T &param)
+    static void SetParam(const std::string &name, T &param)
     {
-        Instance()->getNodeHandle().setParam(name, param);
+        Instance()->GetNodeHandle().setParam(name, param);
     }
 
-    inline bool static hasParam(const std::string &name)
+    inline bool static HasParam(const std::string &name)
     {
-        if (isRos())
+        if (IsRos())
         {
-            return Instance()->getNodeHandle().hasParam(name);
+            return Instance()->GetNodeHandle().hasParam(name);
         }
         else
         {
@@ -138,48 +138,48 @@ public:
     }
 
     template <typename T, typename... Args>
-    static ros::Publisher advertise(Args &&... args)
+    static ros::Publisher Advertise(Args &&... args)
     {
-        return Instance()->getNodeHandle().advertise<T>(std::forward<Args>(args)...);
+        return Instance()->GetNodeHandle().advertise<T>(std::forward<Args>(args)...);
     }
 
     template <typename T, typename... Args>
-    static ros::Subscriber subscribe(Args &&... args)
+    static ros::Subscriber Subscribe(Args &&... args)
     {
-        return Instance()->getNodeHandle().subscribe<T>(std::forward<Args>(args)...);
+        return Instance()->GetNodeHandle().subscribe<T>(std::forward<Args>(args)...);
     }
 
     template <typename T>
-    static ros::ServiceClient serviceClient(const std::string &service_name, bool persistent = false)
+    static ros::ServiceClient ServiceClient(const std::string &service_name, bool persistent = false)
     {
-        return Instance()->getNodeHandle().serviceClient<T>(service_name, persistent);
+        return Instance()->GetNodeHandle().serviceClient<T>(service_name, persistent);
     }
 
-    static void sendTransform(const tf::StampedTransform &transform)
+    static void SendTransform(const tf::StampedTransform &transform)
     {
-        if (!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
-        Instance()->node_->getTF().sendTransform(transform);
+        if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
+        Instance()->node_->GetTF().sendTransform(transform);
     }
 
-    static void sendTransform(const std::vector<tf::StampedTransform> &transforms)
+    static void SendTransform(const std::vector<tf::StampedTransform> &transforms)
     {
-        if (!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
-        Instance()->node_->getTF().sendTransform(transforms);
+        if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
+        Instance()->node_->GetTF().sendTransform(transforms);
     }
 
-    static void sendTransform(const geometry_msgs::TransformStamped &transform)
+    static void SendTransform(const geometry_msgs::TransformStamped &transform)
     {
-        if (!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
-        Instance()->node_->getTF().sendTransform(transform);
+        if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
+        Instance()->node_->GetTF().sendTransform(transform);
     }
 
-    static void sendTransform(const std::vector<geometry_msgs::TransformStamped> &transforms)
+    static void SendTransform(const std::vector<geometry_msgs::TransformStamped> &transforms)
     {
-        if (!isRos()) throw_pretty("EXOTica server not initialized as ROS node!");
-        Instance()->node_->getTF().sendTransform(transforms);
+        if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
+        Instance()->node_->GetTF().sendTransform(transforms);
     }
 
-    static void destroy();
+    static void Destroy();
 
 private:
     /*
@@ -190,7 +190,7 @@ private:
     ///	\brief	Make sure the singleton does not get copied
     Server(Server const &) = delete;
     void operator=(Server const &) = delete;
-    robot_model::RobotModelPtr loadModel(std::string name, std::string urdf = "", std::string srdf = "");
+    robot_model::RobotModelPtr LoadModel(std::string name, std::string urdf = "", std::string srdf = "");
 
     /// \brief	The name of this server
     std::string name_;
@@ -201,7 +201,7 @@ private:
     std::map<std::string, robot_model::RobotModelPtr> robot_models_;
 };
 
-typedef std::shared_ptr<Server> Server_ptr;
+typedef std::shared_ptr<Server> ServerPtr;
 }
 
 #endif /* EXOTICA_INCLUDE_EXOTICA_SERVER_H_ */

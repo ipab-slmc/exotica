@@ -39,39 +39,39 @@ namespace exotica
 Identity::Identity() = default;
 Identity::~Identity() = default;
 
-void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != joint_map_.size()) throw_named("Wrong size of phi!");
+    if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of phi!");
     for (int i = 0; i < joint_map_.size(); i++)
     {
         phi(i) = x(joint_map_[i]) - joint_ref_(i);
     }
 }
 
-void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != joint_map_.size()) throw_named("Wrong size of phi!");
-    if (J.rows() != joint_map_.size() || J.cols() != N_) throw_named("Wrong size of J! " << N_);
-    J.setZero();
+    if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of phi!");
+    if (jacobian.rows() != joint_map_.size() || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
+    jacobian.setZero();
     for (int i = 0; i < joint_map_.size(); i++)
     {
         phi(i) = x(joint_map_[i]) - joint_ref_(i);
-        J(i, joint_map_[i]) = 1.0;
+        jacobian(i, joint_map_[i]) = 1.0;
     }
 }
 
-// void Identity::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef J, Eigen::MatrixXdRef Jdot)
+// void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot)
 // {
-//     if (phi.rows() != joint_map_.size()) throw_named("Wrong size of phi!");
-//     if (J.rows() != joint_map_.size() || J.cols() != N_) throw_named("Wrong size of J! " << N_);
-//     if (Jdot.rows() != joint_map_.size() || Jdot.cols() != N_) throw_named("Wrong size of J! " << N_);
-//     J.setZero();
+//     if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of phi!");
+//     if (jacobian.rows() != joint_map_.size() || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
+//     if (Jdot.rows() != joint_map_.size() || Jdot.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
+//     jacobian.setZero();
 //     Jdot.setZero();
 //     for (int i = 0; i < joint_map_.size(); i++)
 //     {
 //         phi(i) = x(joint_map_[i]) - joint_ref_(i);
 //         phidot(i) = x(joint_map_[i] + N_) - joint_ref_(i + joint_map_.size());
-//         J(i, joint_map_[i]) = 1.0;
+//         jacobian(i, joint_map_[i]) = 1.0;
 //         Jdot(i, joint_map_[i]) = 1.0;
 //     }
 // }
@@ -81,21 +81,21 @@ void Identity::Instantiate(IdentityInitializer& init)
     init_ = init;
 }
 
-void Identity::assignScene(Scene_ptr scene)
+void Identity::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
-    initialize();
+    Initialize();
 }
 
-void Identity::initialize()
+void Identity::Initialize()
 {
-    N_ = scene_->getKinematicTree().getNumControlledJoints();
-    if (init_.JointMap.rows() > 0)
+    N_ = scene_->GetKinematicTree().GetNumControlledJoints();
+    if (init_.joint_map.rows() > 0)
     {
-        joint_map_.resize(init_.JointMap.rows());
-        for (int i = 0; i < init_.JointMap.rows(); i++)
+        joint_map_.resize(init_.joint_map.rows());
+        for (int i = 0; i < init_.joint_map.rows(); i++)
         {
-            joint_map_[i] = init_.JointMap(i);
+            joint_map_[i] = init_.joint_map(i);
         }
     }
     else
@@ -107,10 +107,10 @@ void Identity::initialize()
         }
     }
 
-    if (init_.JointRef.rows() > 0)
+    if (init_.joint_ref.rows() > 0)
     {
-        joint_ref_ = init_.JointRef;
-        if (joint_ref_.rows() != joint_map_.size()) throw_named("Invalid joint reference size! Expecting " << joint_map_.size());
+        joint_ref_ = init_.joint_ref;
+        if (joint_ref_.rows() != joint_map_.size()) ThrowNamed("Invalid joint reference size! Expecting " << joint_map_.size());
     }
     else
     {
@@ -118,7 +118,7 @@ void Identity::initialize()
     }
 }
 
-int Identity::taskSpaceDim()
+int Identity::TaskSpaceDim()
 {
     return joint_map_.size();
 }

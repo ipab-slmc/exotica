@@ -7,9 +7,9 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 AddInitializer(
-  ApproximateInferenceSolver
-  AICOSolver
-  BayesianIKSolver
+  approximate_inference_solver
+  aico_solver
+  bayesian_ik_solver
 )
 GenInitializers()
 

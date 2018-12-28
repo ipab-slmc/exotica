@@ -43,21 +43,20 @@ namespace exotica
 struct TaskVectorEntry
 {
     RotationType type = RotationType::RPY;
-    int inId = 0;
+    int in_id = 0;
 
     TaskVectorEntry();
-    TaskVectorEntry(int inId_, RotationType type_);
-    static std::vector<TaskVectorEntry> reindex(const std::vector<TaskVectorEntry>& map, int oldStart, int newStart);
+    TaskVectorEntry(int _in_id, RotationType _type);
+    static std::vector<TaskVectorEntry> reindex(const std::vector<TaskVectorEntry>& _map, int _old_start, int _new_start);
 };
 
-class TaskSpaceVector
+struct TaskSpaceVector
 {
-public:
     TaskSpaceVector();
     ~TaskSpaceVector();
     TaskSpaceVector& operator=(std::initializer_list<double> other);
     Eigen::VectorXd operator-(const TaskSpaceVector& other);
-    void setZero(int N);
+    void SetZero(int n);
 
     Eigen::VectorXd data;
     std::vector<TaskVectorEntry> map;

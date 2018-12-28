@@ -38,7 +38,7 @@ namespace exotica
 {
 JointVelocityLimit::JointVelocityLimit()
 {
-    Kinematics.resize(2);  // Request kinematics for current x_t and x_{t-1}
+    kinematics.resize(2);  // Request kinematics for current x_t and x_{t-1}
 }
 
 JointVelocityLimit::~JointVelocityLimit() = default;
@@ -48,33 +48,33 @@ void JointVelocityLimit::Instantiate(JointVelocityLimitInitializer& init)
     init_ = init;
 }
 
-void JointVelocityLimit::assignScene(Scene_ptr scene)
+void JointVelocityLimit::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
-    initialize();
+    Initialize();
 }
 
-void JointVelocityLimit::initialize()
+void JointVelocityLimit::Initialize()
 {
-    double percent = static_cast<double>(init_.SafePercentage);
+    double percent = static_cast<double>(init_.safe_percentage);
 
-    N = scene_->getKinematicTree().getNumControlledJoints();
+    N = scene_->GetKinematicTree().GetNumControlledJoints();
     dt_ = std::abs(init_.dt);
     if (dt_ == 0.0)
-        throw_named("Timestep dt needs to be greater than 0");
+        ThrowNamed("Timestep dt needs to be greater than 0");
 
-    if (init_.MaximumJointVelocity.rows() == 1)
+    if (init_.maximum_joint_velocity.rows() == 1)
     {
         limits_.setOnes(N);
-        limits_ *= std::abs(static_cast<double>(init_.MaximumJointVelocity(0)));
+        limits_ *= std::abs(static_cast<double>(init_.maximum_joint_velocity(0)));
     }
-    else if (init_.MaximumJointVelocity.rows() == N)
+    else if (init_.maximum_joint_velocity.rows() == N)
     {
-        limits_ = init_.MaximumJointVelocity.cwiseAbs();
+        limits_ = init_.maximum_joint_velocity.cwiseAbs();
     }
     else
     {
-        throw_named("Maximum joint velocity vector needs to be either of size 1 or N, but got " << init_.MaximumJointVelocity.rows());
+        ThrowNamed("Maximum joint velocity vector needs to be either of size 1 or N, but got " << init_.maximum_joint_velocity.rows());
     }
 
     tau_ = percent * limits_;
@@ -82,19 +82,19 @@ void JointVelocityLimit::initialize()
     if (debug_) HIGHLIGHT_NAMED("JointVelocityLimit", "dt=" << dt_ << ", q̇_max=" << limits_.transpose() << ", τ=" << tau_.transpose());
 }
 
-int JointVelocityLimit::taskSpaceDim()
+int JointVelocityLimit::TaskSpaceDim()
 {
     return N;
 }
 
-void JointVelocityLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Kinematics.size() != 2) throw_named("Wrong size of Kinematics - requires 2, but got " << Kinematics.size());
-    if (phi.rows() != N) throw_named("Wrong size of phi!");
-    if (!x.isApprox(Kinematics[0].X)) throw_named("The internal Kinematics.X and passed state reference x do not match!");
+    if (kinematics.size() != 2) ThrowNamed("Wrong size of kinematics - requires 2, but got " << kinematics.size());
+    if (phi.rows() != N) ThrowNamed("Wrong size of phi!");
+    if (!x.isApprox(kinematics[0].X)) ThrowNamed("The internal kinematics.X and passed state reference x do not match!");
 
     phi.setZero();
-    Eigen::VectorXd x_diff = (1 / dt_) * (Kinematics[0].X - Kinematics[1].X);
+    Eigen::VectorXd x_diff = (1 / dt_) * (kinematics[0].X - kinematics[1].X);
     for (int i = 0; i < N; i++)
     {
         if (x_diff(i) < -limits_(i) + tau_(i))
@@ -110,13 +110,13 @@ void JointVelocityLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef ph
     }
 }
 
-void JointVelocityLimit::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (J.rows() != N || J.cols() != N) throw_named("Wrong size of J! " << N);
-    update(x, phi);
-    J = (1 / dt_) * Eigen::MatrixXd::Identity(N, N);
+    if (jacobian.rows() != N || jacobian.cols() != N) ThrowNamed("Wrong size of jacobian! " << N);
+    Update(x, phi);
+    jacobian = (1 / dt_) * Eigen::MatrixXd::Identity(N, N);
     for (int i = 0; i < N; i++)
         if (phi(i) == 0.0)
-            J(i, i) = 0.0;
+            jacobian(i, i) = 0.0;
 }
 }

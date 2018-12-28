@@ -34,7 +34,7 @@
 #define EXOTICA_CORE_TASK_MAPS_COLLISION_CHECK_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/CollisionCheckInitializer.h>
+#include <exotica_core_task_maps/collision_check_initializer.h>
 
 namespace exotica
 {
@@ -45,15 +45,15 @@ public:
     virtual ~CollisionCheck();
 
     void Instantiate(CollisionCheckInitializer& init) override;
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    int TaskSpaceDim() override;
 
 private:
-    void initialize();
+    void Initialize();
 
-    CollisionScene_ptr cscene_;
+    CollisionScenePtr cscene_;
     CollisionCheckInitializer init_;
 };
 }

@@ -81,17 +81,17 @@ char** argv_;
 
 bool testCore()
 {
-    if (Setup::getSolvers().size() == 0)
+    if (Setup::GetSolvers().size() == 0)
     {
         ADD_FAILURE() << "Failed to find any solvers.";
         return false;
     }
-    if (Setup::getProblems().size() == 0)
+    if (Setup::GetProblems().size() == 0)
     {
         ADD_FAILURE() << "Failed to find any problems.";
         return false;
     }
-    if (Setup::getMaps().size() == 0)
+    if (Setup::GetMaps().size() == 0)
     {
         ADD_FAILURE() << "Failed to find any maps.";
         return false;
@@ -119,9 +119,9 @@ bool testGenericInit()
                                                {"MaxStep", 0.1},
                                                {"C", 1e-3},
                                            });
-    Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
-    MotionSolver_ptr any_solver = Setup::createSolver(solver);
+    Server::Instance()->GetModel("robot_description", urdf_string, srdf_string);
+    PlanningProblemPtr any_problem = Setup::CreateProblem(problem);
+    MotionSolverPtr any_solver = Setup::CreateSolver(solver);
     return true;
 }
 
@@ -129,9 +129,9 @@ bool testXMLInit()
 {
     std::string XMLstring = "<IKSolverDemoConfig><IKSolver Name=\"MySolver\"><MaxIterations>1</MaxIterations><MaxStep>0.1</MaxStep><C>1e-3</C></IKSolver><UnconstrainedEndPoseProblem Name=\"MyProblem\"><PlanningScene><Scene Name=\"MyScene\"><JointGroup>arm</JointGroup></Scene></PlanningScene><Maps><EffPosition Name=\"Position\"><Scene>MyScene</Scene><EndEffector><Frame Link=\"endeff\" /></EndEffector></EffPosition></Maps><W> 3 2 1 </W></UnconstrainedEndPoseProblem></IKSolverDemoConfig>";
     Initializer solver, problem;
-    XMLLoader::load(XMLstring, solver, problem, "", "", true);
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
-    MotionSolver_ptr any_solver = Setup::createSolver(solver);
+    XMLLoader::Load(XMLstring, solver, problem, "", "", true);
+    PlanningProblemPtr any_problem = Setup::CreateProblem(problem);
+    MotionSolverPtr any_solver = Setup::CreateSolver(solver);
     return true;
 }
 
@@ -140,7 +140,7 @@ bool testRos()
     {
         TEST_COUT << "Parsing EXOTica paths...";
         std::string path1 = ros::package::getPath("exotica_core");
-        std::string path2 = parsePath("{exotica_core}");
+        std::string path2 = ParsePath("{exotica_core}");
         if (path1 != path2)
             ADD_FAILURE() << "Failed when parsing paths:\n"
                           << path1 << "\n"
@@ -148,25 +148,25 @@ bool testRos()
     }
 
     // Reset server
-    Server::destroy();
+    Server::Destroy();
 
-    if (Server::isRos()) throw_pretty("ROS node initialized, but it shouldn't have been!");
+    if (Server::IsRos()) ThrowPretty("ROS node initialized, but it shouldn't have been!");
 
     // Fail when ROS node has not been initialized
     try
     {
-        Server::Instance()->getNodeHandle();
+        Server::Instance()->GetNodeHandle();
         return false;
     }
     catch (Exception& e)
     {
     }
 
-    if (Server::hasParam("/rosdistro")) throw_pretty("ROS param retrieved, but shouldn't have!");
+    if (Server::HasParam("/rosdistro")) ThrowPretty("ROS param retrieved, but shouldn't have!");
     try
     {
         std::string param;
-        Server::getParam("/rosdistro", param);
+        Server::GetParam("/rosdistro", param);
         return false;
     }
     catch (Exception& e)
@@ -174,16 +174,16 @@ bool testRos()
     }
 
     // Load robot model into cache from a file
-    Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
+    Server::Instance()->GetModel("robot_description", urdf_string, srdf_string);
     // Load model from the cache
-    Server::Instance()->getModel("robot_description");
+    Server::Instance()->GetModel("robot_description");
     // Reset server, deleting the model cache
-    Server::destroy();
+    Server::Destroy();
     // Attempt to load model from the empty cache
     try
     {
         // Fails because URDF/SRDF are not specified and ROS node is not running to load model from ROS params.
-        Server::Instance()->getModel("robot_description");
+        Server::Instance()->GetModel("robot_description");
         return false;
     }
     catch (Exception& e)

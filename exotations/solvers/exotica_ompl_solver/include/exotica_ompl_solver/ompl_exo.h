@@ -44,7 +44,7 @@
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/geometric/SimpleSetup.h>
 
-#include <exotica_ompl_solver/OMPLSolverInitializer.h>
+#include <exotica_ompl_solver/ompl_solver_initializer.h>
 
 #if OMPL_VERSION_VALUE >= 1004000  // Version greater than 1.4.0
 typedef Eigen::Ref<Eigen::VectorXd> OMPLProjection;
@@ -61,12 +61,12 @@ public:
     {
     }
 
-    virtual void setBounds(SamplingProblem_ptr &prob) = 0;
+    virtual void SetBounds(SamplingProblemPtr &prob) = 0;
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const = 0;
     virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const = 0;
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const = 0;
-    virtual void stateDebug(const Eigen::VectorXd &q) const = 0;
+    virtual void StateDebug(const Eigen::VectorXd &q) const = 0;
 
 protected:
     OMPLSolverInitializer init_;
@@ -75,14 +75,14 @@ protected:
 class OMPLStateValidityChecker : public ompl::base::StateValidityChecker
 {
 public:
-    OMPLStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const SamplingProblem_ptr &prob);
+    OMPLStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const SamplingProblemPtr &prob);
 
-    virtual bool isValid(const ompl::base::State *state) const;
+    bool isValid(const ompl::base::State *state) const override;
 
-    virtual bool isValid(const ompl::base::State *state, double &dist) const;
+    bool isValid(const ompl::base::State *state, double &dist) const override;
 
 protected:
-    SamplingProblem_ptr prob_;
+    SamplingProblemPtr prob_;
 };
 
 class OMPLRNStateSpace : public OMPLStateSpace
@@ -107,11 +107,11 @@ public:
     };
     OMPLRNStateSpace(OMPLSolverInitializer init);
 
-    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-    virtual void setBounds(SamplingProblem_ptr &prob);
-    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
-    virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
-    virtual void stateDebug(const Eigen::VectorXd &q) const;
+    ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
+    void SetBounds(SamplingProblemPtr &prob) override;
+    void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const override;
+    void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const override;
+    void StateDebug(const Eigen::VectorXd &q) const override;
 };
 
 class OMPLSE3RNStateSpace : public OMPLStateSpace
@@ -145,11 +145,11 @@ public:
     };
     OMPLSE3RNStateSpace(OMPLSolverInitializer init);
 
-    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-    virtual void setBounds(SamplingProblem_ptr &prob);
-    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
-    virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
-    virtual void stateDebug(const Eigen::VectorXd &q) const;
+    ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
+    void SetBounds(SamplingProblemPtr &prob) override;
+    void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const override;
+    void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const override;
+    void StateDebug(const Eigen::VectorXd &q) const override;
 };
 
 class OMPLSE2RNStateSpace : public OMPLStateSpace
@@ -183,11 +183,11 @@ public:
     };
     OMPLSE2RNStateSpace(OMPLSolverInitializer init);
 
-    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-    virtual void setBounds(SamplingProblem_ptr &prob);
-    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
-    virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
-    virtual void stateDebug(const Eigen::VectorXd &q) const;
+    ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
+    void SetBounds(SamplingProblemPtr &prob) override;
+    void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const override;
+    void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const override;
+    void StateDebug(const Eigen::VectorXd &q) const override;
 };
 
 class OMPLRNProjection : public ompl::base::ProjectionEvaluator
@@ -203,19 +203,19 @@ public:
     {
     }
 
-    virtual unsigned int getDimension(void) const
+    unsigned int getDimension(void) const override
     {
         return variables_.size();
     }
 
-    virtual void defaultCellSizes()
+    void defaultCellSizes() override
     {
         cellSizes_.clear();
         cellSizes_.resize(variables_.size(), 0.1);
     }
 
-    virtual void project(const ompl::base::State *state,
-                         OMPLProjection projection) const
+    void project(const ompl::base::State *state,
+                         OMPLProjection projection) const override
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =
@@ -239,19 +239,19 @@ public:
     {
     }
 
-    virtual unsigned int getDimension(void) const
+    unsigned int getDimension(void) const override
     {
         return variables_.size();
     }
 
-    virtual void defaultCellSizes()
+    void defaultCellSizes() override
     {
         cellSizes_.clear();
         cellSizes_.resize(variables_.size(), 0.1);
     }
 
-    virtual void project(const ompl::base::State *state,
-                         OMPLProjection projection) const
+    void project(const ompl::base::State *state,
+                         OMPLProjection projection) const override
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =
@@ -275,19 +275,19 @@ public:
     {
     }
 
-    virtual unsigned int getDimension(void) const
+    unsigned int getDimension(void) const override
     {
         return variables_.size();
     }
 
-    virtual void defaultCellSizes()
+    void defaultCellSizes() override
     {
         cellSizes_.clear();
         cellSizes_.resize(variables_.size(), 0.1);
     }
 
-    virtual void project(const ompl::base::State *state,
-                         OMPLProjection projection) const
+    void project(const ompl::base::State *state,
+                         OMPLProjection projection) const override
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =

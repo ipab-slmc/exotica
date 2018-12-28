@@ -36,9 +36,9 @@
 
 namespace exotica
 {
-Setup_ptr Setup::singleton_initialiser_ = nullptr;
+SetupPtr Setup::singleton_initialiser_ = nullptr;
 
-void Setup::printSupportedClasses()
+void Setup::PrintSupportedClasses()
 {
     HIGHLIGHT("Registered solvers:");
     std::vector<std::string> solvers = Instance()->solvers_.getDeclaredClasses();
@@ -47,7 +47,7 @@ void Setup::printSupportedClasses()
         HIGHLIGHT(" '" << s << "'");
     }
     HIGHLIGHT("Registered problems:");
-    std::vector<std::string> problems = Instance()->problems_.getDeclaredClasses();
+    std::vector<std::string> problems = Instance()->problems_.GetDeclaredClasses();
     for (std::string s : problems)
     {
         HIGHLIGHT(" '" << s << "'");
@@ -68,13 +68,13 @@ void Setup::printSupportedClasses()
 
 void appendInit(std::shared_ptr<InstantiableBase> it, std::vector<Initializer>& ret)
 {
-    std::vector<Initializer> temps = it->getAllTemplates();
+    std::vector<Initializer> temps = it->GetAllTemplates();
     for (Initializer& i : temps)
     {
         bool found = false;
         for (Initializer& j : ret)
         {
-            if (i.name == j.name)
+            if (i.GetName() == j.GetName())
             {
                 found = true;
                 break;
@@ -87,27 +87,27 @@ void appendInit(std::shared_ptr<InstantiableBase> it, std::vector<Initializer>& 
     }
 }
 
-std::vector<Initializer> Setup::getInitializers()
+std::vector<Initializer> Setup::GetInitializers()
 {
-    std::vector<Initializer> ret = Scene().getAllTemplates();
+    std::vector<Initializer> ret = Scene().GetAllTemplates();
     std::vector<std::string> solvers = Instance()->solvers_.getDeclaredClasses();
     for (std::string s : solvers)
     {
-        appendInit(std::static_pointer_cast<InstantiableBase>(createSolver(s, false)), ret);
+        appendInit(std::static_pointer_cast<InstantiableBase>(CreateSolver(s, false)), ret);
     }
     std::vector<std::string> maps = Instance()->maps_.getDeclaredClasses();
     for (std::string s : maps)
     {
-        appendInit(std::static_pointer_cast<InstantiableBase>(createMap(s, false)), ret);
+        appendInit(std::static_pointer_cast<InstantiableBase>(CreateMap(s, false)), ret);
     }
     return ret;
 }
 
-std::vector<std::string> Setup::getSolvers() { return Instance()->solvers_.getDeclaredClasses(); }
-std::vector<std::string> Setup::getProblems() { return Instance()->problems_.getDeclaredClasses(); }
-std::vector<std::string> Setup::getMaps() { return Instance()->maps_.getDeclaredClasses(); }
-std::vector<std::string> Setup::getCollisionScenes() { return Instance()->scenes_.getDeclaredClasses(); }
-Setup::Setup() : solvers_("exotica_core", "exotica::MotionSolver"), maps_("exotica_core", "exotica::TaskMap"), problems_(PlanningProblem_fac::Instance()), scenes_("exotica_core", "exotica::CollisionScene")
+std::vector<std::string> Setup::GetSolvers() { return Instance()->solvers_.getDeclaredClasses(); }
+std::vector<std::string> Setup::GetProblems() { return Instance()->problems_.GetDeclaredClasses(); }
+std::vector<std::string> Setup::GetMaps() { return Instance()->maps_.getDeclaredClasses(); }
+std::vector<std::string> Setup::GetCollisionScenes() { return Instance()->scenes_.getDeclaredClasses(); }
+Setup::Setup() : solvers_("exotica_core", "exotica::MotionSolver"), maps_("exotica_core", "exotica::TaskMap"), problems_(PlanningProblemFac::Instance()), scenes_("exotica_core", "exotica::CollisionScene")
 {
 }
 }

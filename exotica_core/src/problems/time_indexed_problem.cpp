@@ -38,628 +38,628 @@ REGISTER_PROBLEM_TYPE("TimeIndexedProblem", exotica::TimeIndexedProblem)
 namespace exotica
 {
 TimeIndexedProblem::TimeIndexedProblem()
-    : T(0), tau(0), W_rate(0)
+    : T_(0), tau_(0), w_rate_(0)
 {
-    Flags = KIN_FK | KIN_J;
+    flags_ = KIN_FK | KIN_J;
 }
 
 TimeIndexedProblem::~TimeIndexedProblem() = default;
 
-Eigen::MatrixXd TimeIndexedProblem::getBounds() const
+Eigen::MatrixXd TimeIndexedProblem::GetBounds() const
 {
-    return scene_->getKinematicTree().getJointLimits();
+    return scene_->GetKinematicTree().GetJointLimits();
 }
 
 void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
 {
     init_ = init;
 
-    N = scene_->getKinematicTree().getNumControlledJoints();
+    N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    W_rate = init_.Wrate;
-    W = Eigen::MatrixXd::Identity(N, N) * W_rate;
-    if (init_.W.rows() > 0)
+    w_rate_ = init_.wrate;
+    W = Eigen::MatrixXd::Identity(N, N) * w_rate_;
+    if (init_.w.rows() > 0)
     {
-        if (init_.W.rows() == N)
+        if (init_.w.rows() == N)
         {
-            W.diagonal() = init_.W * W_rate;
+            W.diagonal() = init_.w * w_rate_;
         }
         else
         {
-            throw_named("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init_.w.rows());
         }
     }
 
-    if (init.LowerBound.rows() == N)
+    if (init.lower_bound.rows() == N)
     {
-        scene_->getKinematicTree().setJointLimitsLower(init.LowerBound);
+        scene_->GetKinematicTree().SetJointLimitsLower(init.lower_bound);
     }
-    else if (init.LowerBound.rows() != 0)
+    else if (init.lower_bound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.LowerBound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.lower_bound.rows());
     }
-    if (init.UpperBound.rows() == N)
+    if (init.upper_bound.rows() == N)
     {
-        scene_->getKinematicTree().setJointLimitsUpper(init.UpperBound);
+        scene_->GetKinematicTree().SetJointLimitsUpper(init.upper_bound);
     }
-    else if (init.UpperBound.rows() != 0)
+    else if (init.upper_bound.rows() != 0)
     {
-        throw_named("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.upper_bound.rows());
     }
 
-    useBounds = init.UseBounds;
+    use_bounds = init.use_bounds;
 
-    Cost.initialize(init_.Cost, shared_from_this(), CostPhi);
-    Inequality.initialize(init_.Inequality, shared_from_this(), InequalityPhi);
-    Equality.initialize(init_.Equality, shared_from_this(), EqualityPhi);
+    cost.Initialize(init_.cost, shared_from_this(), cost_phi);
+    inequality.Initialize(init_.inequality, shared_from_this(), inequality_phi);
+    equality.Initialize(init_.equality, shared_from_this(), equality_phi);
 
-    T = init_.T;
-    qdot_max = init_.JointVelocityLimit;
-    applyStartState(false);
-    reinitializeVariables();
+    T_ = init_.t;
+    q_dot_max_ = init_.joint_velocity_limit;
+    ApplyStartState(false);
+    ReinitializeVariables();
 }
 
-void TimeIndexedProblem::reinitializeVariables()
+void TimeIndexedProblem::ReinitializeVariables()
 {
-    if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem", "Initialize problem with T=" << T);
+    if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem", "Initialize problem with T=" << T_);
 
-    setTau(init_.Tau);
+    SetTau(init_.tau);
 
-    NumTasks = Tasks.size();
-    PhiN = 0;
-    JN = 0;
-    TaskSpaceVector yref;
-    for (int i = 0; i < NumTasks; i++)
+    num_tasks = tasks_.size();
+    length_phi = 0;
+    length_jacobian = 0;
+    TaskSpaceVector y_ref_;
+    for (int i = 0; i < num_tasks; i++)
     {
-        appendVector(yref.map, Tasks[i]->getLieGroupIndices());
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
+        AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
+        length_phi += tasks_[i]->length;
+        length_jacobian += tasks_[i]->length_jacobian;
     }
 
-    yref.setZero(PhiN);
-    Phi.assign(T, yref);
+    y_ref_.SetZero(length_phi);
+    phi.assign(T_, y_ref_);
 
-    if (Flags & KIN_J) J.assign(T, Eigen::MatrixXd(JN, N));
-    x.assign(T, Eigen::VectorXd::Zero(N));
-    xdiff.assign(T, Eigen::VectorXd::Zero(N));
-    if (Flags & KIN_J_DOT)
+    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
+    x.assign(T_, Eigen::VectorXd::Zero(N));
+    xdiff.assign(T_, Eigen::VectorXd::Zero(N));
+    if (flags_ & KIN_J_DOT)
     {
         Hessian Htmp;
-        Htmp.setConstant(JN, Eigen::MatrixXd::Zero(N, N));
-        H.assign(T, Htmp);
+        Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
+        hessian.assign(T_, Htmp);
     }
 
     // Set initial trajectory
-    InitialTrajectory.resize(T, scene_->getControlledState());
+    initial_trajectory_.resize(T_, scene_->GetControlledState());
 
-    Cost.reinitializeVariables(T, shared_from_this(), CostPhi);
-    Inequality.reinitializeVariables(T, shared_from_this(), InequalityPhi);
-    Equality.reinitializeVariables(T, shared_from_this(), EqualityPhi);
-    preupdate();
+    cost.ReinitializeVariables(T_, shared_from_this(), cost_phi);
+    inequality.ReinitializeVariables(T_, shared_from_this(), inequality_phi);
+    equality.ReinitializeVariables(T_, shared_from_this(), equality_phi);
+    PreUpdate();
 }
 
-void TimeIndexedProblem::setT(const int& T_in)
+void TimeIndexedProblem::SetT(const int& T_in)
 {
     if (T_in <= 2)
     {
-        throw_named("Invalid number of timesteps: " << T_in);
+        ThrowNamed("Invalid number of timesteps: " << T_in);
     }
-    T = T_in;
-    reinitializeVariables();
+    T_ = T_in;
+    ReinitializeVariables();
 }
 
-void TimeIndexedProblem::setTau(const double& tau_in)
+void TimeIndexedProblem::SetTau(const double& tau_in)
 {
-    if (tau_in <= 0.) throw_pretty("tau is expected to be greater than 0. (tau=" << tau_in << ")");
-    tau = tau_in;
-    ct = 1.0 / tau / T;
-    xdiff_max = qdot_max * tau;
+    if (tau_in <= 0.) ThrowPretty("tau_ is expected to be greater than 0. (tau_=" << tau_in << ")");
+    tau_ = tau_in;
+    ct = 1.0 / tau_ / T_;
+    xxdiff_max_ = q_dot_max_ * tau_;
 }
 
-void TimeIndexedProblem::preupdate()
+void TimeIndexedProblem::PreUpdate()
 {
-    PlanningProblem::preupdate();
-    for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
-    Cost.updateS();
-    Inequality.updateS();
-    Equality.updateS();
+    PlanningProblem::PreUpdate();
+    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    cost.UpdateS();
+    inequality.UpdateS();
+    equality.UpdateS();
 
     // Create a new set of kinematic solutions with the size of the trajectory
     // based on the lastest KinematicResponse in order to reflect model state
     // updates etc.
-    KinematicSolutions.clear();
-    KinematicSolutions.resize(T);
-    for (int i = 0; i < T; i++) KinematicSolutions[i] = std::make_shared<KinematicResponse>(*scene_->getKinematicTree().getKinematicResponse());
+    kinematic_solutions_.clear();
+    kinematic_solutions_.resize(T_);
+    for (int i = 0; i < T_; i++) kinematic_solutions_[i] = std::make_shared<KinematicResponse>(*scene_->GetKinematicTree().GetKinematicResponse());
 }
 
-void TimeIndexedProblem::setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
+void TimeIndexedProblem::SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
 {
-    if (q_init_in.size() != T)
-        throw_pretty("Expected initial trajectory of length "
-                     << T << " but got " << q_init_in.size());
+    if (q_init_in.size() != T_)
+        ThrowPretty("Expected initial trajectory of length "
+                     << T_ << " but got " << q_init_in.size());
     if (q_init_in[0].rows() != N)
-        throw_pretty("Expected states to have " << N << " rows but got "
+        ThrowPretty("Expected states to have " << N << " rows but got "
                                                 << q_init_in[0].rows());
 
-    InitialTrajectory = q_init_in;
-    setStartState(q_init_in[0]);
+    initial_trajectory_ = q_init_in;
+    SetStartState(q_init_in[0]);
 }
 
-std::vector<Eigen::VectorXd> TimeIndexedProblem::getInitialTrajectory()
+std::vector<Eigen::VectorXd> TimeIndexedProblem::GetInitialTrajectory()
 {
-    return InitialTrajectory;
+    return initial_trajectory_;
 }
 
-double TimeIndexedProblem::getDuration()
+double TimeIndexedProblem::GetDuration()
 {
-    return tau * static_cast<double>(T);
+    return tau_ * static_cast<double>(T_);
 }
 
 void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
 
     x[t] = x_in;
 
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
-    scene_->getKinematicTree().setKinematicResponse(KinematicSolutions[t]);
+    scene_->GetKinematicTree().SetKinematicResponse(kinematic_solutions_[t]);
 
     // Pass the corresponding number of relevant task kinematics to the TaskMaps
     // via the PlanningProblem::updateMultipleTaskKinematics method. For now we
     // support passing _two_ timesteps - this can be easily changed later on.
-    std::vector<std::shared_ptr<KinematicResponse>> kinematics_solutions{KinematicSolutions[t]};
+    std::vector<std::shared_ptr<KinematicResponse>> kinematics_solutions{kinematic_solutions_[t]};
 
     // If the current timestep is 0, pass the 0th timestep's response twice.
     // Otherwise pass the (t-1)th response.
-    kinematics_solutions.emplace_back((t == 0) ? KinematicSolutions[t] : KinematicSolutions[t - 1]);
+    kinematics_solutions.emplace_back((t == 0) ? kinematic_solutions_[t] : kinematic_solutions_[t - 1]);
 
     // Actually update the tasks' kinematics mappings.
     PlanningProblem::updateMultipleTaskKinematics(kinematics_solutions);
 
-    scene_->Update(x_in, static_cast<double>(t) * tau);
-    Phi[t].setZero(PhiN);
-    if (Flags & KIN_J) J[t].setZero();
-    if (Flags & KIN_J_DOT)
-        for (int i = 0; i < JN; i++) H[t](i).setZero();
-    for (int i = 0; i < NumTasks; i++)
+    scene_->Update(x_in, static_cast<double>(t) * tau_);
+    phi[t].SetZero(length_phi);
+    if (flags_ & KIN_J) jacobian[t].setZero();
+    if (flags_ & KIN_J_DOT)
+        for (int i = 0; i < length_jacobian; i++) hessian[t](i).setZero();
+    for (int i = 0; i < num_tasks; i++)
     {
-        // Only update TaskMap if Rho is not 0
-        if (Tasks[i]->isUsed)
+        // Only update TaskMap if rho is not 0
+        if (tasks_[i]->is_used)
         {
-            if (Flags & KIN_J_DOT)
+            if (flags_ & KIN_J_DOT)
             {
-                Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H[t].segment(Tasks[i]->Start, Tasks[i]->Length));
+                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
-            else if (Flags & KIN_J)
+            else if (flags_ & KIN_J)
             {
-                Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length), J[t].middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                Tasks[i]->update(x[t], Phi[t].data.segment(Tasks[i]->Start, Tasks[i]->Length));
+                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
-    if (Flags & KIN_J_DOT)
+    if (flags_ & KIN_J_DOT)
     {
-        Cost.update(Phi[t], J[t], H[t], t);
-        Inequality.update(Phi[t], J[t], H[t], t);
-        Equality.update(Phi[t], J[t], H[t], t);
+        cost.Update(phi[t], jacobian[t], hessian[t], t);
+        inequality.Update(phi[t], jacobian[t], hessian[t], t);
+        equality.Update(phi[t], jacobian[t], hessian[t], t);
     }
-    else if (Flags & KIN_J)
+    else if (flags_ & KIN_J)
     {
-        Cost.update(Phi[t], J[t], t);
-        Inequality.update(Phi[t], J[t], t);
-        Equality.update(Phi[t], J[t], t);
+        cost.Update(phi[t], jacobian[t], t);
+        inequality.Update(phi[t], jacobian[t], t);
+        equality.Update(phi[t], jacobian[t], t);
     }
     else
     {
-        Cost.update(Phi[t], t);
-        Inequality.update(Phi[t], t);
-        Equality.update(Phi[t], t);
+        cost.Update(phi[t], t);
+        inequality.Update(phi[t], t);
+        equality.Update(phi[t], t);
     }
     if (t > 0) xdiff[t] = x[t] - x[t - 1];
-    numberOfProblemUpdates++;
+    number_of_problem_updates_++;
 }
 
-double TimeIndexedProblem::getScalarTaskCost(int t)
+double TimeIndexedProblem::GetScalarTaskCost(int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    return ct * Cost.ydiff[t].transpose() * Cost.S[t] * Cost.ydiff[t];
+    return ct * cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::getScalarTaskJacobian(int t)
+Eigen::VectorXd TimeIndexedProblem::GetScalarTaskJacobian(int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    return Cost.J[t].transpose() * Cost.S[t] * Cost.ydiff[t] * 2.0 * ct;
+    return cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0 * ct;
 }
 
-double TimeIndexedProblem::getScalarTransitionCost(int t)
+double TimeIndexedProblem::GetScalarTransitionCost(int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
     return ct * xdiff[t].transpose() * W * xdiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::getScalarTransitionJacobian(int t)
+Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
     return 2.0 * ct * W * xdiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::getEquality(int t)
+Eigen::VectorXd TimeIndexedProblem::GetEquality(int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    return Equality.S[t] * Equality.ydiff[t];
+    return equality.S[t] * equality.ydiff[t];
 }
 
-Eigen::MatrixXd TimeIndexedProblem::getEqualityJacobian(int t)
+Eigen::MatrixXd TimeIndexedProblem::GetEqualityJacobian(int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    return Equality.S[t] * Equality.J[t];
+    return equality.S[t] * equality.jacobian[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::getInequality(int t)
+Eigen::VectorXd TimeIndexedProblem::GetInequality(int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    return Inequality.S[t] * Inequality.ydiff[t];
+    return inequality.S[t] * inequality.ydiff[t];
 }
 
-Eigen::MatrixXd TimeIndexedProblem::getInequalityJacobian(int t)
+Eigen::MatrixXd TimeIndexedProblem::GetInequalityJacobian(int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    return Inequality.S[t] * Inequality.J[t];
+    return inequality.S[t] * inequality.jacobian[t];
 }
 
-void TimeIndexedProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
+void TimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            if (goal.rows() != Cost.Indexing[i].Length) throw_pretty("Expected length of " << Cost.Indexing[i].Length << " and got " << goal.rows());
-            Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
+            if (goal.rows() != cost.indexing[i].length) ThrowPretty("Expected length of " << cost.indexing[i].length << " and got " << goal.rows());
+            cost.y[t].data.segment(cost.indexing[i].start, cost.indexing[i].length) = goal;
             return;
         }
     }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void TimeIndexedProblem::setRho(const std::string& task_name, const double rho, int t)
+void TimeIndexedProblem::SetRho(const std::string& task_name, const double rho, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            Cost.Rho[t](Cost.Indexing[i].Id) = rho;
-            preupdate();
+            cost.rho[t](cost.indexing[i].id) = rho;
+            PreUpdate();
             return;
         }
     }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd TimeIndexedProblem::getGoal(const std::string& task_name, int t)
+Eigen::VectorXd TimeIndexedProblem::GetGoal(const std::string& task_name, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.y[t].data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+            return cost.y[t].data.segment(cost.indexing[i].start, cost.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double TimeIndexedProblem::getRho(const std::string& task_name, int t)
+double TimeIndexedProblem::GetRho(const std::string& task_name, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.Rho[t](Cost.Indexing[i].Id);
+            return cost.rho[t](cost.indexing[i].id);
         }
     }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-void TimeIndexedProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
+void TimeIndexedProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Equality.Indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); i++)
     {
-        if (Equality.Tasks[i]->getObjectName() == task_name)
+        if (equality.tasks[i]->GetObjectName() == task_name)
         {
-            if (goal.rows() != Equality.Indexing[i].Length) throw_pretty("Expected length of " << Equality.Indexing[i].Length << " and got " << goal.rows());
-            Equality.y[t].data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length) = goal;
+            if (goal.rows() != equality.indexing[i].length) ThrowPretty("Expected length of " << equality.indexing[i].length << " and got " << goal.rows());
+            equality.y[t].data.segment(equality.indexing[i].start, equality.indexing[i].length) = goal;
             return;
         }
     }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void TimeIndexedProblem::setRhoEQ(const std::string& task_name, const double rho, int t)
+void TimeIndexedProblem::SetRhoEQ(const std::string& task_name, const double rho, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Equality.Indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); i++)
     {
-        if (Equality.Tasks[i]->getObjectName() == task_name)
+        if (equality.tasks[i]->GetObjectName() == task_name)
         {
-            Equality.Rho[t](Equality.Indexing[i].Id) = rho;
-            preupdate();
+            equality.rho[t](equality.indexing[i].id) = rho;
+            PreUpdate();
             return;
         }
     }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd TimeIndexedProblem::getGoalEQ(const std::string& task_name, int t)
+Eigen::VectorXd TimeIndexedProblem::GetGoalEQ(const std::string& task_name, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Equality.Indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); i++)
     {
-        if (Equality.Tasks[i]->getObjectName() == task_name)
+        if (equality.tasks[i]->GetObjectName() == task_name)
         {
-            return Equality.y[t].data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length);
+            return equality.y[t].data.segment(equality.indexing[i].start, equality.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double TimeIndexedProblem::getRhoEQ(const std::string& task_name, int t)
+double TimeIndexedProblem::GetRhoEQ(const std::string& task_name, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Equality.Indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); i++)
     {
-        if (Equality.Tasks[i]->getObjectName() == task_name)
+        if (equality.tasks[i]->GetObjectName() == task_name)
         {
-            return Equality.Rho[t](Equality.Indexing[i].Id);
+            return equality.rho[t](equality.indexing[i].id);
         }
     }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-void TimeIndexedProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
+void TimeIndexedProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); i++)
     {
-        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        if (inequality.tasks[i]->GetObjectName() == task_name)
         {
-            if (goal.rows() != Inequality.Indexing[i].Length) throw_pretty("Expected length of " << Inequality.Indexing[i].Length << " and got " << goal.rows());
-            Inequality.y[t].data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length) = goal;
+            if (goal.rows() != inequality.indexing[i].length) ThrowPretty("Expected length of " << inequality.indexing[i].length << " and got " << goal.rows());
+            inequality.y[t].data.segment(inequality.indexing[i].start, inequality.indexing[i].length) = goal;
             return;
         }
     }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void TimeIndexedProblem::setRhoNEQ(const std::string& task_name, const double rho, int t)
+void TimeIndexedProblem::SetRhoNEQ(const std::string& task_name, const double rho, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); i++)
     {
-        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        if (inequality.tasks[i]->GetObjectName() == task_name)
         {
-            Inequality.Rho[t](Inequality.Indexing[i].Id) = rho;
-            preupdate();
+            inequality.rho[t](inequality.indexing[i].id) = rho;
+            PreUpdate();
             return;
         }
     }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd TimeIndexedProblem::getGoalNEQ(const std::string& task_name, int t)
+Eigen::VectorXd TimeIndexedProblem::GetGoalNEQ(const std::string& task_name, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); i++)
     {
-        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        if (inequality.tasks[i]->GetObjectName() == task_name)
         {
-            return Inequality.y[t].data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length);
+            return inequality.y[t].data.segment(inequality.indexing[i].start, inequality.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double TimeIndexedProblem::getRhoNEQ(const std::string& task_name, int t)
+double TimeIndexedProblem::GetRhoNEQ(const std::string& task_name, int t)
 {
-    if (t >= T || t < -1)
+    if (t >= T_ || t < -1)
     {
-        throw_pretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T);
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
     }
     else if (t == -1)
     {
-        t = T - 1;
+        t = T_ - 1;
     }
-    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); i++)
     {
-        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        if (inequality.tasks[i]->GetObjectName() == task_name)
         {
-            return Inequality.Rho[t](Inequality.Indexing[i].Id);
+            return inequality.rho[t](inequality.indexing[i].id);
         }
     }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-bool TimeIndexedProblem::isValid()
+bool TimeIndexedProblem::IsValid()
 {
     bool succeeded = true;
-    auto bounds = scene_->getKinematicTree().getJointLimits();
+    auto bounds = scene_->GetKinematicTree().GetJointLimits();
 
     // Check for every state
-    for (unsigned int t = 0; t < T; t++)
+    for (unsigned int t = 0; t < T_; t++)
     {
         // Check joint limits
         for (unsigned int i = 0; i < N; i++)
         {
             if (x[t](i) < bounds(i, 0) || x[t](i) > bounds(i, 1))
             {
-                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::isValid", "State at timestep " << t << " is out of bounds");
+                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "State at timestep " << t << " is out of bounds");
                 succeeded = false;
             }
         }
 
         // Check inequality constraints
-        if (getInequality(t).rows() > 0)
+        if (GetInequality(t).rows() > 0)
         {
-            if (getInequality(t).maxCoeff() > init_.InequalityFeasibilityTolerance)
+            if (GetInequality(t).maxCoeff() > init_.inequality_feasibility_tolerance)
             {
-                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::isValid", "Violated inequality constraints at timestep " << t << ": " << getInequality(t).transpose());
+                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated inequality constraints at timestep " << t << ": " << GetInequality(t).transpose());
                 succeeded = false;
             }
         }
 
         // Check equality constraints
-        if (getEquality(t).rows() > 0)
+        if (GetEquality(t).rows() > 0)
         {
-            if (getEquality(t).norm() > init_.EqualityFeasibilityTolerance)
+            if (GetEquality(t).norm() > init_.equality_feasibility_tolerance)
             {
-                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::isValid", "Violated equality constraints at timestep " << t << ": " << getEquality(t).norm());
+                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated equality constraints at timestep " << t << ": " << GetEquality(t).norm());
                 succeeded = false;
             }
         }

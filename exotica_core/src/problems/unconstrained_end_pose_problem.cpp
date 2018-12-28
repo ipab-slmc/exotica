@@ -39,190 +39,190 @@ namespace exotica
 {
 UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
 {
-    Flags = KIN_FK | KIN_J;
+    flags_ = KIN_FK | KIN_J;
 }
 
 UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem() = default;
 
 void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
 {
-    NumTasks = Tasks.size();
-    PhiN = 0;
-    JN = 0;
-    for (int i = 0; i < NumTasks; i++)
+    num_tasks = tasks_.size();
+    length_phi = 0;
+    length_jacobian = 0;
+    for (int i = 0; i < num_tasks; i++)
     {
-        appendVector(Phi.map, Tasks[i]->getLieGroupIndices());
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
+        AppendVector(phi.map, tasks_[i]->GetLieGroupIndices());
+        length_phi += tasks_[i]->length;
+        length_jacobian += tasks_[i]->length_jacobian;
     }
-    Phi.setZero(PhiN);
+    phi.SetZero(length_phi);
     W = Eigen::MatrixXd::Identity(N, N);
-    if (init.W.rows() > 0)
+    if (init.w.rows() > 0)
     {
-        if (init.W.rows() == N)
+        if (init.w.rows() == N)
         {
-            W.diagonal() = init.W;
+            W.diagonal() = init.w;
         }
         else
         {
-            throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init.w.rows());
         }
     }
-    if (Flags & KIN_J) J = Eigen::MatrixXd(JN, N);
-    if (Flags & KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(N, N));
+    if (flags_ & KIN_J) jacobian = Eigen::MatrixXd(length_jacobian, N);
+    if (flags_ & KIN_J_DOT) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
 
-    if (init.NominalState.rows() > 0 && init.NominalState.rows() != N) throw_named("Invalid size of NominalState (" << init.NominalState.rows() << "), expected: " << N);
-    if (init.NominalState.rows() == N) qNominal = init.NominalState;
+    if (init.nominal_state.rows() > 0 && init.nominal_state.rows() != N) ThrowNamed("Invalid size of NominalState (" << init.nominal_state.rows() << "), expected: " << N);
+    if (init.nominal_state.rows() == N) q_nominal = init.nominal_state;
     TaskSpaceVector dummy;
-    Cost.initialize(init.Cost, shared_from_this(), dummy);
-    applyStartState(false);
-    preupdate();
+    cost.Initialize(init.cost, shared_from_this(), dummy);
+    ApplyStartState(false);
+    PreUpdate();
 }
 
-void UnconstrainedEndPoseProblem::preupdate()
+void UnconstrainedEndPoseProblem::PreUpdate()
 {
-    PlanningProblem::preupdate();
-    for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
-    Cost.updateS();
+    PlanningProblem::PreUpdate();
+    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    cost.UpdateS();
 }
 
-double UnconstrainedEndPoseProblem::getScalarCost()
+double UnconstrainedEndPoseProblem::GetScalarCost()
 {
-    return Cost.ydiff.transpose() * Cost.S * Cost.ydiff;
+    return cost.ydiff.transpose() * cost.S * cost.ydiff;
 }
 
-Eigen::VectorXd UnconstrainedEndPoseProblem::getScalarJacobian()
+Eigen::VectorXd UnconstrainedEndPoseProblem::GetScalarJacobian()
 {
-    return Cost.J.transpose() * Cost.S * Cost.ydiff * 2.0;
+    return cost.jacobian.transpose() * cost.S * cost.ydiff * 2.0;
 }
 
-double UnconstrainedEndPoseProblem::getScalarTaskCost(const std::string& task_name)
+double UnconstrainedEndPoseProblem::GetScalarTaskCost(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length).transpose() * Cost.Rho(Cost.Indexing[i].Id) * Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+            return cost.ydiff.segment(cost.indexing[i].start, cost.indexing[i].length).transpose() * cost.rho(cost.indexing[i].id) * cost.ydiff.segment(cost.indexing[i].start, cost.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get scalar task cost. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get scalar task cost. Task map '" << task_name << "' does not exist.");
 }
 
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
-    scene_->Update(x, tStart);
-    Phi.setZero(PhiN);
-    if (Flags & KIN_J) J.setZero();
-    if (Flags & KIN_J_DOT)
-        for (int i = 0; i < JN; i++) H(i).setZero();
-    for (int i = 0; i < Tasks.size(); i++)
+    scene_->Update(x, t_start);
+    phi.SetZero(length_phi);
+    if (flags_ & KIN_J) jacobian.setZero();
+    if (flags_ & KIN_J_DOT)
+        for (int i = 0; i < length_jacobian; i++) hessian(i).setZero();
+    for (int i = 0; i < tasks_.size(); i++)
     {
-        if (Tasks[i]->isUsed)
+        if (tasks_[i]->is_used)
         {
-            if (Flags & KIN_J_DOT)
+            if (flags_ & KIN_J_DOT)
             {
-                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H.segment(Tasks[i]->Start, Tasks[i]->Length));
+                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start, tasks_[i]->length));
             }
-            else if (Flags & KIN_J)
+            else if (flags_ & KIN_J)
             {
-                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
-    if (Flags & KIN_J_DOT)
+    if (flags_ & KIN_J_DOT)
     {
-        Cost.update(Phi, J, H);
+        cost.Update(phi, jacobian, hessian);
     }
-    else if (Flags & KIN_J)
+    else if (flags_ & KIN_J)
     {
-        Cost.update(Phi, J);
+        cost.Update(phi, jacobian);
     }
     else
     {
-        Cost.update(Phi);
+        cost.Update(phi);
     }
-    numberOfProblemUpdates++;
+    number_of_problem_updates_++;
 }
 
-void UnconstrainedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
+void UnconstrainedEndPoseProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            if (goal.rows() != Cost.Indexing[i].Length) throw_pretty("Expected length of " << Cost.Indexing[i].Length << " and got " << goal.rows());
-            Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
+            if (goal.rows() != cost.indexing[i].length) ThrowPretty("Expected length of " << cost.indexing[i].length << " and got " << goal.rows());
+            cost.y.data.segment(cost.indexing[i].start, cost.indexing[i].length) = goal;
             return;
         }
     }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void UnconstrainedEndPoseProblem::setRho(const std::string& task_name, const double& rho)
+void UnconstrainedEndPoseProblem::SetRho(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            Cost.Rho(Cost.Indexing[i].Id) = rho;
-            preupdate();
+            cost.rho(cost.indexing[i].id) = rho;
+            PreUpdate();
             return;
         }
     }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string& task_name)
+Eigen::VectorXd UnconstrainedEndPoseProblem::GetGoal(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+            return cost.y.data.segment(cost.indexing[i].start, cost.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double UnconstrainedEndPoseProblem::getRho(const std::string& task_name)
+double UnconstrainedEndPoseProblem::GetRho(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.Rho(Cost.Indexing[i].Id);
+            return cost.rho(cost.indexing[i].id);
         }
     }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd UnconstrainedEndPoseProblem::getNominalPose()
+Eigen::VectorXd UnconstrainedEndPoseProblem::GetNominalPose()
 {
-    return qNominal;
+    return q_nominal;
 }
 
-void UnconstrainedEndPoseProblem::setNominalPose(Eigen::VectorXdRefConst qNominal_in)
+void UnconstrainedEndPoseProblem::SetNominalPose(Eigen::VectorXdRefConst qNominal_in)
 {
     if (qNominal_in.rows() == N)
-        qNominal = qNominal_in;
+        q_nominal = qNominal_in;
     else
-        throw_pretty("Cannot set qNominal - wrong number of rows (expected "
+        ThrowPretty("Cannot set q_nominal - wrong number of rows (expected "
                      << N << ", received " << qNominal_in.rows() << ").");
 }
 
-int UnconstrainedEndPoseProblem::getTaskId(const std::string& task_name)
+int UnconstrainedEndPoseProblem::GetTaskId(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); i++)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
             return i;
         }
     }
-    throw_pretty("Cannot get task. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get task. Task map '" << task_name << "' does not exist.");
 }
 }

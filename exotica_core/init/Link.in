@@ -1,5 +1,0 @@
-Required std::string Name;
-Optional Eigen::VectorXd Transform = Eigen::IdentityTransform();
-Optional std::string Parent = "";
-Optional Eigen::VectorXd CoM = Eigen::IdentityTransform();
-Optional double Mass = 0.0;

@@ -42,26 +42,26 @@ void run()
     Initializer solver, problem;
 
     std::string file_name;
-    Server::getParam("ConfigurationFile", file_name);
+    Server::GetParam("ConfigurationFile", file_name);
 
-    XMLLoader::load(file_name, solver, problem);
+    XMLLoader::Load(file_name, solver, problem);
 
     HIGHLIGHT_NAMED("XMLnode", "Loaded from XML");
 
     // Initialize
 
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
-    MotionSolver_ptr any_solver = Setup::createSolver(solver);
+    PlanningProblemPtr any_problem = Setup::CreateProblem(problem);
+    MotionSolverPtr any_solver = Setup::CreateSolver(solver);
 
     // Assign the problem to the solver
-    any_solver->specifyProblem(any_problem);
-    UnconstrainedEndPoseProblem_ptr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
+    any_solver->SpecifyProblem(any_problem);
+    UnconstrainedEndPoseProblemPtr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
     // Create the initial configuration
     Eigen::VectorXd q = Eigen::VectorXd::Zero(my_problem->N);
     Eigen::MatrixXd solution;
 
-    my_problem->qNominal = q;
+    my_problem->q_nominal = q;
 
     HIGHLIGHT("Calling solve() in an infinite loop");
 
@@ -76,19 +76,19 @@ void run()
         // Update the goal if necessary
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-        my_problem->Cost.y = {0.6,
+        my_problem->cost.y = {0.6,
                               -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
                               0.5 + sin(t * M_PI * 0.5) * 0.2, 0, 0, 0};
 
         // Solve the problem using the IK solver
-        my_problem->setStartState(q);
+        my_problem->SetStartState(q);
         any_solver->Solve(solution);
 
         double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
         q = solution.row(0);
 
         my_problem->Update(q);
-        my_problem->getScene()->getKinematicTree().publishFrames();
+        my_problem->GetScene()->GetKinematicTree().PublishFrames();
 
         ros::spinOnce();
         loop_rate.sleep();

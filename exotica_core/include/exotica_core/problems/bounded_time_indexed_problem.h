@@ -36,7 +36,7 @@
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
-#include <exotica_core/BoundedTimeIndexedProblemInitializer.h>
+#include <exotica_core/bounded_time_indexed_problem_initializer.h>
 
 namespace exotica
 {
@@ -49,57 +49,57 @@ public:
     BoundedTimeIndexedProblem();
     virtual ~BoundedTimeIndexedProblem();
     virtual void Instantiate(BoundedTimeIndexedProblemInitializer& init);
-    double getDuration();
+    double GetDuration();
     void Update(Eigen::VectorXdRefConst x, int t);
-    std::vector<Eigen::VectorXd> getInitialTrajectory();
-    void setInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
-    virtual void preupdate();
-    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
-    void setRho(const std::string& task_name, const double rho, int t = 0);
-    Eigen::VectorXd getGoal(const std::string& task_name, int t = 0);
-    double getRho(const std::string& task_name, int t = 0);
-    Eigen::MatrixXd getBounds() const;
+    std::vector<Eigen::VectorXd> GetInitialTrajectory();
+    void SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
+    void PreUpdate() override;
+    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    void SetRho(const std::string& task_name, const double rho, int t = 0);
+    Eigen::VectorXd GetGoal(const std::string& task_name, int t = 0);
+    double GetRho(const std::string& task_name, int t = 0);
+    Eigen::MatrixXd GetBounds() const;
 
-    int getT() const { return T; }
-    void setT(const int& T_in);
+    int GetT() const { return T_; }
+    void SetT(const int& T_in);
 
-    double getTau() const { return tau; }
-    void setTau(const double& tau_in);
+    double GetTau() const { return tau_; }
+    void SetTau(const double& tau_in);
 
-    double getScalarTaskCost(int t);
-    Eigen::VectorXd getScalarTaskJacobian(int t);
-    double getScalarTransitionCost(int t);
-    Eigen::VectorXd getScalarTransitionJacobian(int t);
+    double GetScalarTaskCost(int t);
+    Eigen::VectorXd GetScalarTaskJacobian(int t);
+    double GetScalarTransitionCost(int t);
+    Eigen::VectorXd GetScalarTransitionJacobian(int t);
 
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
 
-    TimeIndexedTask Cost;
-    TaskSpaceVector CostPhi;
+    TimeIndexedTask cost;
+    TaskSpaceVector cost_phi;
 
-    double W_rate;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+    double w_rate_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
     Eigen::MatrixXd W;
 
-    std::vector<TaskSpaceVector> Phi;
-    std::vector<Eigen::MatrixXd> J;
-    std::vector<Hessian> H;
+    std::vector<TaskSpaceVector> phi;
+    std::vector<Eigen::MatrixXd> jacobian;
+    std::vector<Hessian> hessian;
 
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
-    int PhiN;
-    int JN;
-    int NumTasks;
+    int length_phi;
+    int length_jacobian;
+    int num_tasks;
 
 private:
-    int T;       //!< Number of time steps
-    double tau;  //!< Time step duration
+    int T_;       //!< Number of time steps
+    double tau_;  //!< Time step duration
 
-    std::vector<Eigen::VectorXd> InitialTrajectory;
-    BoundedTimeIndexedProblemInitializer init_;
-    void reinitializeVariables();
+    std::vector<Eigen::VectorXd> initial_trajectory_;
+    BoundedTimeIndexedProblemInitializer parameters;
+    void ReinitializeVariables();
 };
 
-typedef std::shared_ptr<exotica::BoundedTimeIndexedProblem> BoundedTimeIndexedProblem_ptr;
+typedef std::shared_ptr<exotica::BoundedTimeIndexedProblem> BoundedTimeIndexedProblemPtr;
 }
 
 #endif

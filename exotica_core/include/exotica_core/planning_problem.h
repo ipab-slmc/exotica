@@ -71,42 +71,44 @@ class PlanningProblem : public Object, Uncopyable, public virtual InstantiableBa
 public:
     PlanningProblem();
     virtual ~PlanningProblem() = default;
-    virtual void InstantiateBase(const Initializer& init);
-    TaskMap_map& getTaskMaps();
-    TaskMap_vec& getTasks();
-    Scene_ptr getScene();
-    virtual std::string print(std::string prepend);
-    void setStartState(Eigen::VectorXdRefConst x);
-    void setStartTime(double t);
-    Eigen::VectorXd getStartState();
-    double getStartTime();
-    Eigen::VectorXd applyStartState(bool updateTraj = true);
+    void InstantiateBase(const Initializer& init) override;
+    TaskMapMap& GetTaskMaps();
+    TaskMapVec& GetTasks();
+    ScenePtr GetScene();
+    std::string Print(std::string prepend) override;
+    void SetStartState(Eigen::VectorXdRefConst x);
+    void SetStartTime(double t);
+    Eigen::VectorXd GetStartState();
+    double GetStartTime();
+    Eigen::VectorXd ApplyStartState(bool update_traj = true);
+    virtual void PreUpdate();
+    unsigned int GetNumberOfProblemUpdates() { return number_of_problem_updates_; }
+    void ResetNumberOfProblemUpdates() { number_of_problem_updates_ = 0; }
+    std::pair<std::vector<double>, std::vector<double>> GetCostEvolution();
+    double GetCostEvolution(int index);
+    void ResetCostEvolution(unsigned int size);
+    void SetCostEvolution(int index, double value);
+    KinematicRequestFlags GetFlags() { return flags_; }
+    virtual bool IsValid() { ThrowNamed("Not implemented"); };
+
     int N;
-    double tStart;
-    TerminationCriterion terminationCriterion;
-    virtual void preupdate();
-    unsigned int getNumberOfProblemUpdates() { return numberOfProblemUpdates; }
-    void resetNumberOfProblemUpdates() { numberOfProblemUpdates = 0; }
-    std::pair<std::vector<double>, std::vector<double>> getCostEvolution();
-    double getCostEvolution(int index);
-    void resetCostEvolution(unsigned int size);
-    void setCostEvolution(int index, double value);
-    KinematicRequestFlags getFlags() { return Flags; }
-    virtual bool isValid() { throw_named("Not implemented"); };
+    double t_start;
+    TerminationCriterion termination_criterion;
+
 protected:
-    void updateTaskKinematics(std::shared_ptr<KinematicResponse> response);
+    void UpdateTaskKinematics(std::shared_ptr<KinematicResponse> response);
     void updateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses);
 
-    Scene_ptr scene_;
-    TaskMap_map TaskMaps;
-    TaskMap_vec Tasks;
-    KinematicRequestFlags Flags;
-    Eigen::VectorXd startState;
-    unsigned int numberOfProblemUpdates = 0;  // Stores number of times the problem has been updated
-    std::vector<std::pair<std::chrono::high_resolution_clock::time_point, double>> costEvolution;
+    ScenePtr scene_;
+    TaskMapMap task_maps_;
+    TaskMapVec tasks_;
+    KinematicRequestFlags flags_;
+    Eigen::VectorXd start_state_;
+    unsigned int number_of_problem_updates_ = 0;  // Stores number of times the problem has been updated
+    std::vector<std::pair<std::chrono::high_resolution_clock::time_point, double>> cost_evolution_;
 };
 
-typedef Factory<PlanningProblem> PlanningProblem_fac;
-typedef std::shared_ptr<PlanningProblem> PlanningProblem_ptr;
+typedef Factory<PlanningProblem> PlanningProblemFac;
+typedef std::shared_ptr<PlanningProblem> PlanningProblemPtr;
 }
 #endif

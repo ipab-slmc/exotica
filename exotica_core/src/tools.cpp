@@ -31,14 +31,16 @@
  */
 
 #include "exotica_core/tools.h"
-#include <cxxabi.h>  //!< The demangler for gcc... this makes this system dependent!
-#include <ros/package.h>
+
+#include <cxxabi.h>  // NB: The demangler for gcc... this makes this system dependent!
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
 #include <random>
 #include <regex>
-#include <typeinfo>  //!< The RTTI Functionality of C++
+#include <typeinfo>  // NB: The RTTI Functionality of C++
+
+#include <ros/package.h>
 
 namespace exotica
 {

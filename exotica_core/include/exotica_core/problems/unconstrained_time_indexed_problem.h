@@ -30,8 +30,8 @@
  *
  */
 
-#ifndef UNCONSTRAINEDTIMEINDEXEDPROBLEM_H_
-#define UNCONSTRAINEDTIMEINDEXEDPROBLEM_H_
+#ifndef UNCONSTRAINED_TIME_INDEXED_PROBLEM_H_
+#define UNCONSTRAINED_TIME_INDEXED_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>

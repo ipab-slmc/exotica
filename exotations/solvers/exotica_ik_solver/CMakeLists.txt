@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(exotica_ik_solver)
 
 find_package(catkin REQUIRED COMPONENTS
-exotica_core
+  exotica_core
 )
 
 AddInitializer(IKSolver)

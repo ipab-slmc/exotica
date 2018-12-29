@@ -262,7 +262,7 @@ void Scene::publishProxies(const std::vector<CollisionProxy>& proxies)
 visualization_msgs::Marker Scene::proxyToMarker(const std::vector<CollisionProxy>& proxies, const std::string& frame)
 {
     visualization_msgs::Marker ret;
-    ret.header.frame_id = "exotica_core/" + frame;
+    ret.header.frame_id = "exotica/" + frame;
     ret.action = visualization_msgs::Marker::ADD;
     ret.frame_locked = false;
     ret.ns = "Proxies";

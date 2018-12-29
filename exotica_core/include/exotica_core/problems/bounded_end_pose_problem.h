@@ -30,8 +30,8 @@
  *
  */
 
-#ifndef BOUNDEDENDPOSEPROBLEM_H_
-#define BOUNDEDENDPOSEPROBLEM_H_
+#ifndef BOUNDED_END_POSE_PROBLEM_H_
+#define BOUNDED_END_POSE_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>

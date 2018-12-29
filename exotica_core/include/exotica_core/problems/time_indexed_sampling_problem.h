@@ -30,8 +30,8 @@
  *
  */
 
-#ifndef INCLUDE_EXOTICA_PROBLEMS_TIMEINDEXEDSAMPLINGPROBLEM_H_
-#define INCLUDE_EXOTICA_PROBLEMS_TIMEINDEXEDSAMPLINGPROBLEM_H_
+#ifndef TIME_INDEXED_SAMPLING_PROBLEM_H_
+#define TIME_INDEXED_SAMPLING_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
@@ -94,4 +94,4 @@ private:
 typedef std::shared_ptr<exotica::TimeIndexedSamplingProblem> TimeIndexedSamplingProblem_ptr;
 }
 
-#endif /* INCLUDE_EXOTICA_PROBLEMS_TIMEINDEXEDSAMPLINGPROBLEM_H_ */
+#endif

@@ -30,8 +30,8 @@
  *
  */
 
-#ifndef UNCONSTRAINEDENDPOSEPROBLEM_H_
-#define UNCONSTRAINEDENDPOSEPROBLEM_H_
+#ifndef UNCONSTRAINED_END_POSE_PROBLEM_H_
+#define UNCONSTRAINED_END_POSE_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>

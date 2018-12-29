@@ -30,8 +30,8 @@
  *
  */
 
-#ifndef BOUNDEDTIMEINDEXEDPROBLEM_H_
-#define BOUNDEDTIMEINDEXEDPROBLEM_H_
+#ifndef BOUNDED_TIME_INDEXED_PROBLEM_H_
+#define BOUNDED_TIME_INDEXED_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>

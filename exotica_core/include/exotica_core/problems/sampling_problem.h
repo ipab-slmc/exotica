@@ -30,8 +30,8 @@
  *
  */
 
-#ifndef SAMPLINGPROBLEM_H_
-#define SAMPLINGPROBLEM_H_
+#ifndef SAMPLING_PROBLEM_H_
+#define SAMPLING_PROBLEM_H_
 
 #include <exotica_core/SamplingProblemInitializer.h>
 #include <exotica_core/planning_problem.h>

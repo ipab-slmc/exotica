@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(exotica_core_task_maps)
 
 find_package(catkin REQUIRED COMPONENTS
-exotica_core
+  exotica_core
   exotica_python
   eigen_conversions
   geometry_msgs

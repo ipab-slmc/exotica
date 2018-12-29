@@ -30,9 +30,10 @@
  *
  */
 
-#include <exotica_core/TaskInitializer.h>
 #include <exotica_core/problems/end_pose_problem.h>
 #include <exotica_core/setup.h>
+
+#include <exotica_core/TaskInitializer.h>
 
 REGISTER_PROBLEM_TYPE("EndPoseProblem", exotica::EndPoseProblem)
 

@@ -12,7 +12,7 @@
   <depend>exotica_core</depend>
   <depend>geometric_shapes</depend>
   <depend>libfcl-dev</depend>
-  <depend>roscpp</depend>
+  <depend>roscpp</depend> <!-- For ROS_VERSION_MINIMUM macro -->
 
   <export>
     <exotica_core plugin="${prefix}/exotica_plugins.xml" />

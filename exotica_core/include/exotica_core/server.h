@@ -1,37 +1,6 @@
-/*
- *      Author: Yiming Yang
- * 
- * Copyright (c) 2016, University of Edinburgh
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met: 
- * 
- *  * Redistributions of source code must retain the above copyright notice, 
- *    this list of conditions and the following disclaimer. 
- *  * Redistributions in binary form must reproduce the above copyright 
- *    notice, this list of conditions and the following disclaimer in the 
- *    documentation and/or other materials provided with the distribution. 
- *  * Neither the name of  nor the names of its contributors may be used to 
- *    endorse or promote products derived from this software without specific 
- *    prior written permission. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- * POSSIBILITY OF SUCH DAMAGE. 
- *
- */
 
-#ifndef EXOTICA_INCLUDE_EXOTICA_SERVER_H_
-#define EXOTICA_INCLUDE_EXOTICA_SERVER_H_
+#ifndef EXOTICA_CORE_SERVER_H
+#define EXOTICA_CORE_SERVER_H
 
 #include <map>
 #include <typeinfo>
@@ -60,13 +29,11 @@ protected:
     tf::TransformBroadcaster tf_;
 };
 
-//	Implementation of EXOTica Server class
+// Implementation of EXOTica Server class
 class Server : public Uncopyable
 {
 public:
-    /*
-       * \brief	Get the server
-       */
+    /// \brief Get the server
     static std::shared_ptr<Server> Instance()
     {
         if (!singleton_server_) singleton_server_.reset(new Server);
@@ -74,31 +41,23 @@ public:
     }
     virtual ~Server();
 
-    /*
-       * \brief	Check if a robot model exist
-       * @param	path	Robot model name
-       * @return	True if exist, false otherwise
-       */
+    /// \brief Check if a robot model exist
+    /// @param path Robot model name
+    /// @return True if exist, false otherwise
     bool HasModel(const std::string &path);
 
-    /*
-       * \brief	Get robot model
-       * @param	path	Robot model name
-       * @param	model	Robot model
-       */
+    /// \brief Get robot model
+    /// @param path Robot model name
+    /// @param model Robot model
     void GetModel(std::string path, robot_model::RobotModelPtr &model, std::string urdf = "", std::string srdf = "");
 
-    /*
-       * \brief	Get robot model
-       * @param	path	Robot model name
-       * @return	robot model
-       */
+    /// \brief Get robot model
+    /// @param path Robot model name
+    /// @return robot model
     robot_model::RobotModelConstPtr GetModel(std::string path, std::string urdf = "", std::string srdf = "");
 
-    /*
-       * \brief	Get the name of ther server
-       * @return	Server name
-       */
+    /// \brief Get the name of ther server
+    /// @return Server name
     std::string GetName();
 
     inline static void InitRos(std::shared_ptr<ros::NodeHandle> nh, int numThreads = 2)
@@ -182,9 +141,6 @@ public:
     static void Destroy();
 
 private:
-    /*
-       * \brief	Constructor
-       */
     Server();
     static std::shared_ptr<Server> singleton_server_;
     ///	\brief	Make sure the singleton does not get copied
@@ -204,4 +160,4 @@ private:
 typedef std::shared_ptr<Server> ServerPtr;
 }
 
-#endif /* EXOTICA_INCLUDE_EXOTICA_SERVER_H_ */
+#endif

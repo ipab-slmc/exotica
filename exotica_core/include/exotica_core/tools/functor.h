@@ -1,6 +1,3 @@
-//
-//      Author: Vladimir Ivan
-//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -49,7 +46,6 @@ struct FunctorBase
 };
 
 typedef FunctorBase<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::Dynamic> Functor;
-
-}  // namespace exotica
+}
 
 #endif

@@ -34,7 +34,7 @@ macro(GenInitializers)
   list(APPEND _InitializerOutputFiles)
   add_custom_target(${PROJECT_NAME}_initializers DEPENDS ${_InitializerOutputFiles})
 
-  install(FILES ${_InitializerOutputFiles}
+  install(FILES ${_InitializerOutputFiles} ${_InitializerProjectFile}
     DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
   install(FILES ${_InitializerInputFiles}
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/init)

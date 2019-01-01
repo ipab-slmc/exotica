@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Vladimir Ivan <v.ivan@ed.ac.uk>
+// Copyright (C) 2018
 //
 // This Source Code Form is subject to the terms of the Mozilla
 // Public License v. 2.0. If a copy of the MPL was not distributed

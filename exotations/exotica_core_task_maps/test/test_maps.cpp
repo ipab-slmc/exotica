@@ -1,37 +1,34 @@
-/*
- *      Author: Vladimir Ivan
- *
- * Copyright (c) 2018, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
+#include <gtest/gtest.h>
 
 #include <exotica_core/exotica_core.h>
-#include <gtest/gtest.h>
 
 // TODO(#437): Activate once solution for pointer casting/dynamic loading is found.
 // #include <exotica_core_task_maps/JointAccelerationBackwardDifference.h>
@@ -1073,33 +1070,33 @@ TEST(ExoticaTaskMaps, testJointSmoothingBackwardDifference)
             }
 
             // TODO(#437): Activate once solution for pointer casting/dynamic loading is found.
-            /*{
-                TEST_COUT << smoothing_task + " Test - test SetPreviousJointState initialisation";
-                Initializer map("exotica/" + smoothing_task, {{"Name", std::string("MyTask")}, {"dt", 0.01}});
-                UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
-                Eigen::VectorXd q_rand(problem->N);
-                q_rand.setRandom();
-                if (smoothing_task == "JointVelocityBackwardDifference")
-                {
-                    std::shared_ptr<TaskMap> my_task = problem->GetTaskMaps()["MyTask"];
-                    std::shared_ptr<JointVelocityBackwardDifference> joint_velocity_smoothing_task = std::dynamic_pointer_cast<JointVelocityBackwardDifference>(my_task);
-                    joint_velocity_smoothing_task->SetPreviousJointState(q_rand);
-                }
-                else if (smoothing_task == "JointAccelerationBackwardDifference")
-                {
-                    std::shared_ptr<TaskMap> my_task = problem->GetTaskMaps()["MyTask"];
-                    std::shared_ptr<JointAccelerationBackwardDifference> joint_acceleration_smoothing_task = std::dynamic_pointer_cast<JointAccelerationBackwardDifference>(my_task);
-                    joint_acceleration_smoothing_task->SetPreviousJointState(q_rand);
-                }
-                else if (smoothing_task == "JointJerkBackwardDifference")
-                {
-                    std::shared_ptr<TaskMap> my_task = problem->GetTaskMaps()["MyTask"];
-                    std::shared_ptr<JointJerkBackwardDifference> joint_jerk_smoothing_task = std::dynamic_pointer_cast<JointJerkBackwardDifference>(my_task);
-                    joint_jerk_smoothing_task->SetPreviousJointState(q_rand);
-                }
-                EXPECT_TRUE(test_random(problem));
-                EXPECT_TRUE(test_jacobian(problem));
-            }*/
+            // {
+            //     TEST_COUT << smoothing_task + " Test - test SetPreviousJointState initialisation";
+            //     Initializer map("exotica/" + smoothing_task, {{"Name", std::string("MyTask")}, {"dt", 0.01}});
+            //     UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+            //     Eigen::VectorXd q_rand(problem->N);
+            //     q_rand.setRandom();
+            //     if (smoothing_task == "JointVelocityBackwardDifference")
+            //     {
+            //         std::shared_ptr<TaskMap> my_task = problem->GetTaskMaps()["MyTask"];
+            //         std::shared_ptr<JointVelocityBackwardDifference> joint_velocity_smoothing_task = std::dynamic_pointer_cast<JointVelocityBackwardDifference>(my_task);
+            //         joint_velocity_smoothing_task->SetPreviousJointState(q_rand);
+            //     }
+            //     else if (smoothing_task == "JointAccelerationBackwardDifference")
+            //     {
+            //         std::shared_ptr<TaskMap> my_task = problem->GetTaskMaps()["MyTask"];
+            //         std::shared_ptr<JointAccelerationBackwardDifference> joint_acceleration_smoothing_task = std::dynamic_pointer_cast<JointAccelerationBackwardDifference>(my_task);
+            //         joint_acceleration_smoothing_task->SetPreviousJointState(q_rand);
+            //     }
+            //     else if (smoothing_task == "JointJerkBackwardDifference")
+            //     {
+            //         std::shared_ptr<TaskMap> my_task = problem->GetTaskMaps()["MyTask"];
+            //         std::shared_ptr<JointJerkBackwardDifference> joint_jerk_smoothing_task = std::dynamic_pointer_cast<JointJerkBackwardDifference>(my_task);
+            //         joint_jerk_smoothing_task->SetPreviousJointState(q_rand);
+            //     }
+            //     EXPECT_TRUE(test_random(problem));
+            //     EXPECT_TRUE(test_jacobian(problem));
+            // }
         }
     }
     catch (...)

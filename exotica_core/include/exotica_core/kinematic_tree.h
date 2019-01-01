@@ -1,37 +1,33 @@
-/*
- *      Author: Michael Camilleri
- * 
- * Copyright (c) 2016, University of Edinburgh
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met: 
- * 
- *  * Redistributions of source code must retain the above copyright notice, 
- *    this list of conditions and the following disclaimer. 
- *  * Redistributions in binary form must reproduce the above copyright 
- *    notice, this list of conditions and the following disclaimer in the 
- *    documentation and/or other materials provided with the distribution. 
- *  * Neither the name of  nor the names of its contributors may be used to 
- *    endorse or promote products derived from this software without specific 
- *    prior written permission. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- * POSSIBILITY OF SUCH DAMAGE. 
- *
- */
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
-#ifndef KINEMATIC_TREE_H
-#define KINEMATIC_TREE_H
+#ifndef EXOTICA_CORE_KINEMATIC_TREE_H
+#define EXOTICA_CORE_KINEMATIC_TREE_H
 
 #include <map>
 #include <random>
@@ -92,7 +88,7 @@ struct KinematicsRequest
 {
     KinematicsRequest();
     KinematicRequestFlags flags = KinematicRequestFlags::KIN_FK;
-    std::vector<KinematicFrameRequest> frames;  //!< The segments to which the end-effectors are attached
+    std::vector<KinematicFrameRequest> frames;  // The segments to which the end-effectors are attached
 };
 
 struct KinematicFrame
@@ -106,11 +102,8 @@ struct KinematicFrame
     KDL::Frame temp_b;
 };
 
-/**
- * @brief      The KinematicResponse is the container to keep kinematic update
- * data. The corresponding KinematicSolution is created from and indexes into a
- * KinematicResponse.
- */
+/// @brief The KinematicResponse is the container to keep kinematic update data.
+/// The corresponding KinematicSolution is created from and indexes into a KinematicResponse.
 struct KinematicResponse
 {
     KinematicResponse();
@@ -124,9 +117,7 @@ struct KinematicResponse
     ArrayJacobian jacobian_dot;
 };
 
-/**
- * @brief      The KinematicSolution is created from - and maps into - a KinematicResponse.
- */
+/// @brief The KinematicSolution is created from - and maps into - a KinematicResponse.
 class KinematicSolution
 {
 public:
@@ -204,12 +195,11 @@ public:
 
     Eigen::VectorXd GetModelState();
     std::map<std::string, double> GetModelStateMap();
-    /**
-     * @brief GetKinematicChain get list of joints in a kinematic chain
-     * @param begin link name from which the chain starts
-     * @param end link name at which the chain ends
-     * @return list joints between begin and end
-     */
+
+    /// @brief GetKinematicChain get list of joints in a kinematic chain
+    /// @param begin link name from which the chain starts
+    /// @param end link name at which the chain ends
+    /// @return list joints between begin and end
     std::vector<std::string> GetKinematicChain(const std::string& begin, const std::string& end);
     void SetModelState(Eigen::VectorXdRefConst x);
     void SetModelState(std::map<std::string, double> x);
@@ -223,7 +213,7 @@ public:
 
     std::map<std::string, shapes::ShapeType> GetCollisionObjectTypes();
 
-    // Random state generation
+    /// Random state generation
     Eigen::VectorXd GetRandomControlledState();
 
     void SetKinematicResponse(std::shared_ptr<KinematicResponse> response_in) { solution_ = response_in; }
@@ -281,4 +271,5 @@ private:
     std::string name_;
 };
 }
+
 #endif

@@ -1,32 +1,30 @@
-/*
- * Copyright (c) 2017, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #include <exotica_time_indexed_rrt_connect_solver/time_indexed_rrt_connect.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
@@ -338,16 +336,16 @@ void OMPLTimeIndexedRRTConnect::clear()
 
 OMPLTimeIndexedRRTConnect::GrowState OMPLTimeIndexedRRTConnect::growTree(TreeData &tree, TreeGrowingInfo &tgi, Motion *rmotion)
 {
-    /* find closest state in the tree */
+    // find closest state in the tree
     Motion *nmotion = tree->nearest(rmotion);
 
     bool changed = false;
     if (!correctTime(nmotion, rmotion, !tgi.start, changed)) return TRAPPED;
 
-    /* assume we can reach the state we go towards */
+    // assume we can reach the state we go towards
     bool reach = !changed;
 
-    /* find state to add */
+    // find state to add
     base::State *dstate = rmotion->state;
     double d = si_->distance(nmotion->state, rmotion->state);
     if (d > maxDistance_)
@@ -363,7 +361,7 @@ OMPLTimeIndexedRRTConnect::GrowState OMPLTimeIndexedRRTConnect::growTree(TreeDat
 
     if (validMotion)
     {
-        /* create a motion */
+        // create a motion
         Motion *motion = new Motion(si_);
         si_->copyState(motion->state, dstate);
         motion->parent = nmotion;
@@ -455,19 +453,19 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
             }
         }
 
-        /* sample random state */
+        // sample random state
         sampler_->sampleUniform(rstate);
         reverse_check_ = false;
         GrowState gs = growTree(tree, tgi, rmotion);
 
         if (gs != TRAPPED)
         {
-            /* remember which motion was just added */
+            // remember which motion was just added
             Motion *addedMotion = tgi.xmotion;
 
-            /* attempt to connect trees */
+            // attempt to connect trees
 
-            /* if reached, it means we used rstate directly, no need top copy again */
+            // if reached, it means we used rstate directly, no need top copy again
             if (gs != REACHED) si_->copyState(rstate, tgi.xstate);
 
             GrowState gsc = ADVANCED;
@@ -482,7 +480,7 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
             Motion *startMotion = startTree ? tgi.xmotion : addedMotion;
             Motion *goalMotion = startTree ? addedMotion : tgi.xmotion;
 
-            /* if we connected the trees in a valid way (start and goal pair is valid)*/
+            // if we connected the trees in a valid way (start and goal pair is valid)
             if (gsc == REACHED && goal->isStartGoalPairValid(startMotion->root, goalMotion->root))
             {
                 // it must be the case that either the start tree or the goal tree has made some progress
@@ -495,7 +493,7 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
 
                 connectionPoint_ = std::make_pair(startMotion->state, goalMotion->state);
 
-                /* construct the solution path */
+                // construct the solution path
                 Motion *solution = startMotion;
                 std::vector<Motion *> mpath1;
                 while (solution != nullptr)

@@ -1,37 +1,33 @@
-/*
- *      Author: Yiming Yang
- * 
- * Copyright (c) 2016, University of Edinburgh
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met: 
- * 
- *  * Redistributions of source code must retain the above copyright notice, 
- *    this list of conditions and the following disclaimer. 
- *  * Redistributions in binary form must reproduce the above copyright 
- *    notice, this list of conditions and the following disclaimer in the 
- *    documentation and/or other materials provided with the distribution. 
- *  * Neither the name of  nor the names of its contributors may be used to 
- *    endorse or promote products derived from this software without specific 
- *    prior written permission. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- * POSSIBILITY OF SUCH DAMAGE. 
- *
- */
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
-#ifndef EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_
-#define EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_
+#ifndef EXOTICA_CORE_SCENE_H
+#define EXOTICA_CORE_SCENE_H
 
 #include <fstream>
 #include <functional>
@@ -130,12 +126,9 @@ public:
 
     void RemoveObject(const std::string& name);
 
-    /**
-       * @brief      Update the internal MoveIt planning scene from a
-       * moveit_msgs::PlanningSceneWorld
-       *
-       * @param[in]  world  moveit_msgs::PlanningSceneWorld
-       */
+    /// @brief Update the internal MoveIt planning scene from a
+    /// moveit_msgs::PlanningSceneWorld
+    /// @param[in] world moveit_msgs::PlanningSceneWorld
     void UpdateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world);
 
     void UpdateCollisionObjects();
@@ -157,32 +150,22 @@ public:
     std::string GetScene();
     void CleanScene();
 
-    /**
-     * @brief      Whether the collision scene transforms get updated on every scene update.
-     * @return     Whether collision scene transforms are force updated on every scene update.
-     */
+    /// @brief Whether the collision scene transforms get updated on every scene update.
+    /// @return Whether collision scene transforms are force updated on every scene update.
     bool AlwaysUpdatesCollisionScene() { return force_collision_; }
-    /**
-     * @brief      Returns a map between a model link name and the names of associated collision links.
-     * @return     Map between model links and all associated collision links.
-     */
+    /// @brief Returns a map between a model link name and the names of associated collision links.
+    /// @return Map between model links and all associated collision links.
     std::map<std::string, std::vector<std::string>> GetModelLinkToCollisionLinkMap() { return modelLink_to_collisionLink_map_; };
-    /**
-     * @brief      Returns a map between a model link name and the KinematicElement of associated collision links.
-     * @return     Map between model links and all the KinematicElements of the associated collision links.
-     */
+    /// @brief Returns a map between a model link name and the KinematicElement of associated collision links.
+    /// @return Map between model links and all the KinematicElements of the associated collision links.
     std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> GetModelLinkToCollisionElementMap() { return modelLink_to_collisionElement_map_; };
-    /**
-     * @brief      Returns a map between controlled robot link names and associated collision link names. Here we consider all fixed links between controlled links as belonging to the previous controlled link (as if the collision links had been fused).
-     * @return     Map between controlled links and associated collision links.
-     */
+    /// @brief Returns a map between controlled robot link names and associated collision link names. Here we consider all fixed links between controlled links as belonging to the previous controlled link (as if the collision links had been fused).
+    /// @return Map between controlled links and associated collision links.
     std::map<std::string, std::vector<std::string>> GetControlledLinkToCollisionLinkMap() { return controlledLink_to_collisionLink_map_; };
 private:
     void UpdateInternalFrames(bool update_request = true);
 
-    /**
-     * @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.
-     */
+    /// @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.
     void UpdateMoveItPlanningScene();
 
     void LoadSceneFromStringStream(std::istream& in, const Eigen::Isometry3d& offset, bool update_collision_scene);
@@ -193,7 +176,7 @@ private:
     /// The kinematica tree
     exotica::KinematicTree kinematica_;
 
-    ///   Joint group
+    /// Joint group
     robot_model::JointModelGroup* group;
 
     /// Robot base type
@@ -237,7 +220,6 @@ private:
 };
 
 typedef std::shared_ptr<Scene> ScenePtr;
+}
 
-}  //  namespace exotica
-
-#endif /* EXOTICA_EXOTICA_INCLUDE_EXOTICA_SCENE_H_ */
+#endif

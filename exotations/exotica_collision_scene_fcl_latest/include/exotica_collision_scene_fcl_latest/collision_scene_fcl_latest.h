@@ -35,8 +35,8 @@
 
 #include <iostream>
 
-#include <exotica/CollisionScene.h>
-#include <exotica/Tools/Conversions.h>
+#include <exotica_core/collision_scene.h>
+#include <exotica_core/tools/conversions.h>
 
 #include <fcl/fcl.h>  // FCL 0.6 as provided by fcl_catkin
 

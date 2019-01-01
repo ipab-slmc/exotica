@@ -1,0 +1,5 @@
+extend <exotica_core/PlanningProblem>
+Optional std::vector<exotica::Initializer> Cost = std::vector<exotica::Initializer>();
+Optional Eigen::VectorXd W = Eigen::VectorXd();
+Optional Eigen::VectorXd LowerBound = Eigen::VectorXd();
+Optional Eigen::VectorXd UpperBound = Eigen::VectorXd();

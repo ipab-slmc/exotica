@@ -30,8 +30,8 @@
  *
  */
 
-#include <exotica/Factory.h>
 #include <exotica_collision_scene_fcl_latest/collision_scene_fcl_latest.h>
+#include <exotica_core/factory.h>
 
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionSceneFCLLatest)
 

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(exotica_core_task_maps)
 
 find_package(catkin REQUIRED COMPONENTS
-  exotica
+  exotica_core
   exotica_python
   eigen_conversions
   geometry_msgs
@@ -37,7 +37,7 @@ GenInitializers()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS exotica geometry_msgs
+  CATKIN_DEPENDS exotica_core geometry_msgs
 )
 
 include_directories(

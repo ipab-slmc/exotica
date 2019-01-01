@@ -1,3 +1,3 @@
-extend <exotica/Frame>
+extend <exotica_core/Frame>
 Required double Radius;
 Optional std::string Group = "default";

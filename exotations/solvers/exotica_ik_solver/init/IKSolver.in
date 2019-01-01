@@ -1,4 +1,4 @@
-extend <exotica/MotionSolver>
+extend <exotica_core/MotionSolver>
 Optional double Tolerance = 1e-5;
 Optional double Convergence = 0.0;
 Optional double MaxStep = 0.5;

@@ -30,7 +30,7 @@
  *
  */
 
-#include <exotica/Exotica.h>
+#include <exotica_core/exotica_core.h>
 #include <ros/ros.h>
 
 using namespace exotica;

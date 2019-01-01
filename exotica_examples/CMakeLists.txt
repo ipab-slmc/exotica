@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(exotica_examples)
 
 find_package(catkin REQUIRED COMPONENTS
-  exotica
+  exotica_core
   sensor_msgs
 )
 
@@ -49,7 +49,7 @@ catkin_install_python(PROGRAMS ${python_examples} DESTINATION ${CATKIN_PACKAGE_B
 if(CATKIN_ENABLE_TESTING)
   # Find again, this time including rostest
   find_package(catkin REQUIRED COMPONENTS
-    exotica
+    exotica_core
     sensor_msgs
     rostest
   )

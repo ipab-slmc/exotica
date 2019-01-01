@@ -1,2 +1,0 @@
-extend <exotica/Object>
-Optional int MaxIterations = 100;

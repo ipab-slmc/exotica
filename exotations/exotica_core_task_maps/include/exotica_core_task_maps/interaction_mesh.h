@@ -33,8 +33,8 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_INTERACTION_MESH_
 #define EXOTICA_CORE_TASK_MAPS_INTERACTION_MESH_
 
-#include <exotica/KinematicTree.h>
-#include <exotica/TaskMap.h>
+#include <exotica_core/kinematic_tree.h>
+#include <exotica_core/task_map.h>
 #include <exotica_core_task_maps/IMeshInitializer.h>
 #include <visualization_msgs/Marker.h>
 

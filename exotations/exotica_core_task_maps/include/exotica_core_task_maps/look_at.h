@@ -33,7 +33,7 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_LOOKAT_H_
 #define EXOTICA_CORE_TASK_MAPS_LOOKAT_H_
 
-#include <exotica/TaskMap.h>
+#include <exotica_core/task_map.h>
 #include <exotica_core_task_maps/LookAtInitializer.h>
 
 namespace exotica

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>exotica_core</name>
+  <version>5.0.0</version>
+  <description>The Extensible Optimization Toolset (EXOTica) is a library for defining problems for robot motion planning.</description>
+
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+  <author>Michael Camilleri</author>
+
+  <license>BSD</license>
+
+  <url type="website">https://github.com/ipab-slmc/exotica</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>cmake_modules</build_depend>
+
+  <depend>roscpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>message_runtime</depend>
+  <depend>moveit_core</depend>
+  <depend>moveit_ros_planning</depend>
+  <depend>moveit_msgs</depend>
+  <depend>tf</depend>
+  <depend>kdl_parser</depend>
+  <depend>pluginlib</depend>
+  <depend>eigen_conversions</depend>
+  <depend>tf_conversions</depend>
+  <depend>tinyxml2</depend>
+
+  <doc_depend>doxygen</doc_depend>
+  <doc_depend>python-sphinx</doc_depend>
+  <doc_depend>python-sphinx-rtd-theme</doc_depend>
+</package>

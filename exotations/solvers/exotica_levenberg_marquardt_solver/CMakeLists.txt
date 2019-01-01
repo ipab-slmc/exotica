@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(exotica_levenberg_marquardt_solver)
 
-find_package(catkin REQUIRED COMPONENTS exotica)
+find_package(catkin REQUIRED COMPONENTS exotica_core)
 
 find_package(Eigen3 REQUIRED)
 if(NOT TARGET Eigen3::Eigen)
@@ -14,7 +14,7 @@ GenInitializers()
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
-    CATKIN_DEPENDS exotica
+    CATKIN_DEPENDS exotica_core
 )
 include_directories(include ${catkin_INCLUDE_DIRS})
 

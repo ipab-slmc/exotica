@@ -1,4 +1,4 @@
-extend <exotica/MotionSolver>
+extend <exotica_core/MotionSolver>
 Optional std::string SweepMode = "Symmetric";  // Forwardly, Symmetric, LocalGaussNewton, LocalGaussNewtonDamped
 Optional int MaxBacktrackIterations = 10;  // Patience on how many sweeps without improvement before terminating
 Optional double StepTolerance = 1e-5;  // Relative step tolerance

@@ -30,7 +30,7 @@
  *
  */
 
-#include <exotica/Exotica.h>
+#include <exotica_core/exotica_core.h>
 #include <gtest/gtest.h>
 
 // TODO(#437): Activate once solution for pointer casting/dynamic loading is found.

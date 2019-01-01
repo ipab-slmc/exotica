@@ -33,7 +33,7 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_POINT_TO_LINE_H_
 #define EXOTICA_CORE_TASK_MAPS_POINT_TO_LINE_H_
 
-#include <exotica/TaskMap.h>
+#include <exotica_core/task_map.h>
 #include <exotica_core_task_maps/Point2LineInitializer.h>
 
 namespace exotica

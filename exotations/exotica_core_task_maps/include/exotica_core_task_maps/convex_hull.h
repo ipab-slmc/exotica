@@ -33,7 +33,7 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H_
 #define EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H_
 
-#include <exotica/Tools.h>
+#include <exotica_core/tools.h>
 #include <Eigen/Dense>
 
 namespace exotica

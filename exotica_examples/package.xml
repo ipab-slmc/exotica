@@ -11,7 +11,7 @@
   <url type="website">https://github.com/ipab-slmc/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>exotica</depend>
+  <depend>exotica_core</depend>
   <depend>exotica_core_task_maps</depend>
   <depend>exotica_python</depend>
   <depend>exotica_aico_solver</depend>

@@ -1,0 +1,5 @@
+#define GIT_SHA1 "@GIT_SHA1@"
+#define GIT_BRANCH "@GIT_REFSPEC@"
+#include "exotica_core/version.h"
+const char exotica::version[] = GIT_SHA1;
+const char exotica::branch[] = GIT_BRANCH;

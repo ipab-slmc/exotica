@@ -33,7 +33,7 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_JOINT_ACCELERATION_BACKWARD_DIFFERENCE_H_
 #define EXOTICA_CORE_TASK_MAPS_JOINT_ACCELERATION_BACKWARD_DIFFERENCE_H_
 
-#include <exotica/TaskMap.h>
+#include <exotica_core/task_map.h>
 #include <exotica_core_task_maps/JointAccelerationBackwardDifferenceInitializer.h>
 
 namespace exotica

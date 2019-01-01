@@ -4,13 +4,13 @@ project(exotica_time_indexed_rrt_connect_solver)
 find_package(ompl REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
-  exotica
+exotica_core
 )
 
 catkin_package(
   INCLUDE_DIRS include ${OMPL_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME} ${OMPL_LIBRARIES}
-  CATKIN_DEPENDS exotica
+  CATKIN_DEPENDS exotica_core
 )
 
 AddInitializer(TimeIndexedRRTConnect)

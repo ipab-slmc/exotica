@@ -16,7 +16,7 @@ example file as a guide. The code is displayed below.
 
 .. code-block:: cpp
 
-    #include <exotica/Exotica.h>
+    #include <exotica_core/exotica_core.h>
 
     // Manual initialization requires dependency on specific solvers and task maps:
     #include <exotica_ik_solver/IKSolverInitializer.h>
@@ -118,7 +118,7 @@ need to include the correct header files:
 
 .. code-block:: cpp
 
-    #include <exotica/Exotica.h>
+    #include <exotica_core/exotica_core.h>
 
     // Manual initialization requires dependency on specific solvers and task maps:
     #include <exotica_ik_solver/IKSolverInitializer.h>

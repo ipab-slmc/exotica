@@ -43,7 +43,7 @@ This is shown below:
 
 .. code-block:: cpp
 
-    #include <exotica/Exotica.h>
+    #include <exotica_core/exotica_core.h>
 
     using namespace exotica;
 

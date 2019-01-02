@@ -37,7 +37,7 @@
 #include <cmath>
 #include <limits>
 
-#include <exotica/TaskMap.h>
+#include <exotica_core/task_map.h>
 #include <exotica_core_task_maps/CollisionDistanceInitializer.h>
 
 namespace exotica

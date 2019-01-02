@@ -1,4 +1,4 @@
-extend <exotica/TaskMap>
+extend <exotica_core/TaskMap>
 Optional double WorldMargin = 0.1;
 Optional double RobotMargin = 0.1;
 Optional bool CheckSelfCollision = true;

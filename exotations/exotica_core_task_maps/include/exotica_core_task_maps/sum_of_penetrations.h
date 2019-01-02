@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include <exotica/TaskMap.h>
+#include <exotica_core/task_map.h>
 #include <exotica_core_task_maps/SumOfPenetrationsInitializer.h>
 
 namespace exotica

@@ -480,7 +480,7 @@ void AICOSolver::UpdateTimestepGaussNewton(int t, bool update_fwd,
 double AICOSolver::EvaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
                                       bool skip_update)
 {
-    if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iteration_count_ << ", sweep_ " << sweep_);
+    if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iteration_count_ << ", sweep " << sweep_);
     Timer timer;
 
     q = x;

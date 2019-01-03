@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_PRINTABLE_H
-#define EXOTICA_CORE_PRINTABLE_H
+#ifndef EXOTICA_CORE_PRINTABLE_H_
+#define EXOTICA_CORE_PRINTABLE_H_
 
 #include <Eigen/Geometry>
 #include <iostream>
@@ -92,4 +93,4 @@ std::string ToString(const Eigen::Isometry3d& s);
 std::string ToString(const Eigen::Affine3d& s);
 }
 
-#endif
+#endif // EXOTICA_CORE_PRINTABLE_H_

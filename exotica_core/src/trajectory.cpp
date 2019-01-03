@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -46,9 +47,9 @@ Trajectory::Trajectory(const std::string& data)
     ss >> m;
     data_.resize(n, m);
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; ++i)
     {
-        for (int j = 0; j < m; j++)
+        for (int j = 0; j < m; ++j)
         {
             double val;
             ss >> val;
@@ -106,7 +107,7 @@ void Trajectory::ConstructFromData(Eigen::MatrixXdRefConst data, double radius)
 {
     if (!(data.cols() == 4 || data.cols() == 7 || data.cols() == 8) || data.rows() < 2) ThrowPretty("Invalid trajectory data size!");
     trajectory_.reset(new KDL::Trajectory_Composite());
-    for (int i = 0; i < data.rows() - 1; i++)
+    for (int i = 0; i < data.rows() - 1; ++i)
     {
         KDL::Frame f1 = GetFrame(data.row(i).tail(data.cols() - 1).transpose());
         KDL::Frame f2 = GetFrame(data.row(i + 1).tail(data.cols() - 1).transpose());

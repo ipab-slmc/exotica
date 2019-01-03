@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -55,10 +56,10 @@ void TaskMap::InstantiateBase(const Initializer& init)
 
     frames_.clear();
 
-    for (Initializer& eff : MapInitializer.end_effector)
+    for (Initializer& eff : MapInitializer.EndEffector)
     {
         FrameInitializer frame(eff);
-        frames_.push_back(KinematicFrameRequest(frame.link, GetFrame(frame.link_offset), frame.base, GetFrame(frame.base_offset)));
+        frames_.push_back(KinematicFrameRequest(frame.Link, GetFrame(frame.LinkOffset), frame.Base, GetFrame(frame.BaseOffset)));
     }
 }
 
@@ -67,36 +68,36 @@ std::vector<KinematicFrameRequest> TaskMap::GetFrames()
     return frames_;
 }
 
-void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
 {
     if (jacobian.rows() != TaskSpaceDim() && jacobian.cols() != x.rows())
         ThrowNamed("Jacobian dimension mismatch!");
 
     // Store original x (needs to be reset later).
     Eigen::VectorXd x_original(x);
-    Update(x_original, phi);
+    Update(x_original, Phi);
 
     // Backward finite differencing.
     constexpr double h = 1e-6;
     Eigen::VectorXd x_tmp;
-    Eigen::VectorXd phi_original(phi);
-    for (int i = 0; i < TaskSpaceDim(); i++)
+    Eigen::VectorXd phi_original(Phi);
+    for (int i = 0; i < TaskSpaceDim(); ++i)
     {
         x_tmp = x;
         x_tmp(i) -= h;
-        Update(x_tmp, phi);
-        jacobian.row(i) = (1 / h) * (phi_original - phi);
+        Update(x_tmp, Phi);
+        jacobian.row(i) = (1 / h) * (phi_original - Phi);
     }
 
     // Finally, reset with original value again.
-    Update(x_original, phi);
+    Update(x_original, Phi);
 }
 
-void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
 {
-    Update(x, phi, jacobian);
+    Update(x, Phi, jacobian);
     hessian.resize(TaskSpaceDim());
-    for (int i = 0; i < TaskSpaceDim(); i++)
+    for (int i = 0; i < TaskSpaceDim(); ++i)
     {
         hessian(i) = jacobian.row(i).transpose() * jacobian.row(i);
     }

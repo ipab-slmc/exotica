@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -122,7 +123,7 @@ PyObject* CreateStringIOObject()
             char* data = PyByteArray_AsString(PyByteArray_FromObject(result));  \
             int len = PyByteArray_Size(result);                                 \
             unsigned char* udata = new unsigned char[len];                      \
-            for (int i = 0; i < len; i++)                                       \
+            for (int i = 0; i < len; ++i)                                       \
                 udata[i] = static_cast<unsigned char>(data[i]);                 \
             ros::serialization::IStream stream(udata, len);                     \
             ros::serialization::deserialize<MessageType>(stream, value);        \
@@ -326,7 +327,7 @@ public:
             {
                 int n = PyList_Size(value_py);
                 std::vector<Initializer> vec(n);
-                for (int i = 0; i < n; i++)
+                for (int i = 0; i < n; ++i)
                 {
                     if (!PyToInit(PyList_GetItem(value_py, i), vec[i]))
                     {
@@ -347,15 +348,12 @@ public:
 
     bool PyToInit(PyObject* source, Initializer& ret)
     {
-        HIGHLIGHT("Check tuple")
         if (!PyTuple_CheckExact(source)) return false;
 
         int sz = PyTuple_Size(source);
-        HIGHLIGHT("Check size")
         if (sz < 1 || sz > 2) return false;
 
         PyObject* name_py = PyTuple_GetItem(source, 0);
-        HIGHLIGHT("Check string first argument")
         if (!IsPyString(name_py)) return false;
         std::string name = PyAsStdString(name_py);
 
@@ -370,7 +368,6 @@ public:
         if (sz == 2)
         {
             PyObject* dict = PyTuple_GetItem(source, 1);
-            HIGHLIGHT("Check sencond is tuple")
             if (!PyDict_Check(dict)) return false;
 
             PyObject *key, *value_py;
@@ -590,7 +587,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kdl_frame.def("get_zyx", [](KDL::Frame* me) { return GetRotationAsVector(*me, RotationType::ZYX); });
     kdl_frame.def("get_angle_axis", [](KDL::Frame* me) { return GetRotationAsVector(*me, RotationType::ANGLE_AXIS); });
     kdl_frame.def("get_quaternion", [](KDL::Frame* me) { return GetRotationAsVector(*me, RotationType::QUATERNION); });
-    kdl_frame.def("get_translation", [](KDL::Frame* me) { Eigen::Vector3d tmp; for (int i = 0; i < 3; i++) { tmp[i] = me->p.data[i]; } return tmp; });
+    kdl_frame.def("get_translation", [](KDL::Frame* me) { Eigen::Vector3d tmp; for (int i = 0; i < 3; ++i) { tmp[i] = me->p.data[i]; } return tmp; });
     kdl_frame.def("get_translation_and_rpy", [](KDL::Frame* me) { return GetFrameAsVector(*me, RotationType::RPY); });
     kdl_frame.def("get_translation_and_zyz", [](KDL::Frame* me) { return GetFrameAsVector(*me, RotationType::ZYZ); });
     kdl_frame.def("get_translation_and_zyx", [](KDL::Frame* me) { return GetFrameAsVector(*me, RotationType::ZYX); });
@@ -646,7 +643,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("num_tasks", &TimeIndexedTask::num_tasks)
         .def_readonly("y", &TimeIndexedTask::y)
         .def_readonly("ydiff", &TimeIndexedTask::ydiff)
-        .def_readonly("phi", &TimeIndexedTask::phi)
+        .def_readonly("Phi", &TimeIndexedTask::Phi)
         // .def_readonly("hessian", &TimeIndexedTask::hessian)
         .def_readonly("jacobian", &TimeIndexedTask::jacobian)
         .def_readonly("S", &TimeIndexedTask::S)
@@ -660,7 +657,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("num_tasks", &EndPoseTask::num_tasks)
         .def_readonly("y", &EndPoseTask::y)
         .def_readonly("ydiff", &EndPoseTask::ydiff)
-        .def_readonly("phi", &EndPoseTask::phi)
+        .def_readonly("Phi", &EndPoseTask::Phi)
         // .def_readonly("hessian", &EndPoseTask::hessian)
         .def_readonly("jacobian", &EndPoseTask::jacobian)
         .def_readonly("S", &EndPoseTask::S)
@@ -673,7 +670,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("num_tasks", &SamplingTask::num_tasks)
         .def_readonly("y", &SamplingTask::y)
         .def_readonly("ydiff", &SamplingTask::ydiff)
-        .def_readonly("phi", &SamplingTask::phi)
+        .def_readonly("Phi", &SamplingTask::Phi)
         .def_readonly("S", &SamplingTask::S)
         .def_readonly("tasks", &SamplingTask::tasks)
         .def_readonly("task_maps", &SamplingTask::task_maps);
@@ -727,7 +724,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_time_indexed_problem.def_readonly("length_jacobian", &UnconstrainedTimeIndexedProblem::length_jacobian);
     unconstrained_time_indexed_problem.def_readonly("N", &UnconstrainedTimeIndexedProblem::N);
     unconstrained_time_indexed_problem.def_readonly("num_tasks", &UnconstrainedTimeIndexedProblem::num_tasks);
-    unconstrained_time_indexed_problem.def_readonly("phi", &UnconstrainedTimeIndexedProblem::phi);
+    unconstrained_time_indexed_problem.def_readonly("Phi", &UnconstrainedTimeIndexedProblem::Phi);
     unconstrained_time_indexed_problem.def_readonly("jacobian", &UnconstrainedTimeIndexedProblem::jacobian);
     unconstrained_time_indexed_problem.def("get_scalar_task_cost", &UnconstrainedTimeIndexedProblem::GetScalarTaskCost);
     unconstrained_time_indexed_problem.def("get_scalar_task_jacobian", &UnconstrainedTimeIndexedProblem::GetScalarTaskJacobian);
@@ -760,7 +757,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def_readonly("length_jacobian", &TimeIndexedProblem::length_jacobian);
     time_indexed_problem.def_readonly("N", &TimeIndexedProblem::N);
     time_indexed_problem.def_readonly("num_tasks", &TimeIndexedProblem::num_tasks);
-    time_indexed_problem.def_readonly("phi", &TimeIndexedProblem::phi);
+    time_indexed_problem.def_readonly("Phi", &TimeIndexedProblem::Phi);
     time_indexed_problem.def_readonly("jacobian", &TimeIndexedProblem::jacobian);
     time_indexed_problem.def("get_scalar_task_cost", &TimeIndexedProblem::GetScalarTaskCost);
     time_indexed_problem.def("get_scalar_task_jacobian", &TimeIndexedProblem::GetScalarTaskJacobian);
@@ -790,7 +787,7 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_time_indexed_problem.def_readonly("length_jacobian", &BoundedTimeIndexedProblem::length_jacobian);
     bounded_time_indexed_problem.def_readonly("N", &BoundedTimeIndexedProblem::N);
     bounded_time_indexed_problem.def_readonly("num_tasks", &BoundedTimeIndexedProblem::num_tasks);
-    bounded_time_indexed_problem.def_readonly("phi", &BoundedTimeIndexedProblem::phi);
+    bounded_time_indexed_problem.def_readonly("Phi", &BoundedTimeIndexedProblem::Phi);
     bounded_time_indexed_problem.def_readonly("jacobian", &BoundedTimeIndexedProblem::jacobian);
     bounded_time_indexed_problem.def("get_scalar_task_cost", &BoundedTimeIndexedProblem::GetScalarTaskCost);
     bounded_time_indexed_problem.def("get_scalar_task_jacobian", &BoundedTimeIndexedProblem::GetScalarTaskJacobian);
@@ -810,7 +807,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_end_pose_problem.def_readonly("length_jacobian", &UnconstrainedEndPoseProblem::length_jacobian);
     unconstrained_end_pose_problem.def_readonly("N", &UnconstrainedEndPoseProblem::N);
     unconstrained_end_pose_problem.def_readonly("num_tasks", &UnconstrainedEndPoseProblem::num_tasks);
-    unconstrained_end_pose_problem.def_readonly("phi", &UnconstrainedEndPoseProblem::phi);
+    unconstrained_end_pose_problem.def_readonly("Phi", &UnconstrainedEndPoseProblem::Phi);
     unconstrained_end_pose_problem.def_readonly("jacobian", &UnconstrainedEndPoseProblem::jacobian);
     unconstrained_end_pose_problem.def_property_readonly("ydiff", [](UnconstrainedEndPoseProblem* prob) { return prob->cost.ydiff; });
     unconstrained_end_pose_problem.def_property("q_nominal", &UnconstrainedEndPoseProblem::GetNominalPose, &UnconstrainedEndPoseProblem::SetNominalPose);
@@ -838,7 +835,7 @@ PYBIND11_MODULE(_pyexotica, module)
     end_pose_problem.def_readonly("length_jacobian", &EndPoseProblem::length_jacobian);
     end_pose_problem.def_readonly("N", &EndPoseProblem::N);
     end_pose_problem.def_readonly("num_tasks", &EndPoseProblem::num_tasks);
-    end_pose_problem.def_readonly("phi", &EndPoseProblem::phi);
+    end_pose_problem.def_readonly("Phi", &EndPoseProblem::Phi);
     end_pose_problem.def_readonly("jacobian", &EndPoseProblem::jacobian);
     end_pose_problem.def("get_scalar_cost", &EndPoseProblem::GetScalarCost);
     end_pose_problem.def("get_scalar_jacobian", &EndPoseProblem::GetScalarJacobian);
@@ -863,7 +860,7 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_end_pose_problem.def_readonly("length_jacobian", &BoundedEndPoseProblem::length_jacobian);
     bounded_end_pose_problem.def_readonly("N", &BoundedEndPoseProblem::N);
     bounded_end_pose_problem.def_readonly("num_tasks", &BoundedEndPoseProblem::num_tasks);
-    bounded_end_pose_problem.def_readonly("phi", &BoundedEndPoseProblem::phi);
+    bounded_end_pose_problem.def_readonly("Phi", &BoundedEndPoseProblem::Phi);
     bounded_end_pose_problem.def_readonly("jacobian", &BoundedEndPoseProblem::jacobian);
     bounded_end_pose_problem.def("get_scalar_cost", &BoundedEndPoseProblem::GetScalarCost);
     bounded_end_pose_problem.def("get_scalar_jacobian", &BoundedEndPoseProblem::GetScalarJacobian);
@@ -878,7 +875,7 @@ PYBIND11_MODULE(_pyexotica, module)
     sampling_problem.def("get_bounds", &SamplingProblem::GetBounds);
     sampling_problem.def_readonly("N", &SamplingProblem::N);
     sampling_problem.def_readonly("num_tasks", &SamplingProblem::num_tasks);
-    sampling_problem.def_readonly("phi", &SamplingProblem::phi);
+    sampling_problem.def_readonly("Phi", &SamplingProblem::Phi);
     sampling_problem.def_readonly("inequality", &SamplingProblem::inequality);
     sampling_problem.def_readonly("equality", &SamplingProblem::equality);
     sampling_problem.def("set_goal_eq", &SamplingProblem::SetGoalEQ);
@@ -898,7 +895,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def_property("goal_time", &TimeIndexedSamplingProblem::GetGoalTime, &TimeIndexedSamplingProblem::SetGoalTime);
     time_indexed_sampling_problem.def_readonly("N", &TimeIndexedSamplingProblem::N);
     time_indexed_sampling_problem.def_readonly("num_tasks", &TimeIndexedSamplingProblem::num_tasks);
-    time_indexed_sampling_problem.def_readonly("phi", &TimeIndexedSamplingProblem::phi);
+    time_indexed_sampling_problem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
     time_indexed_sampling_problem.def_readonly("inequality", &TimeIndexedSamplingProblem::inequality);
     time_indexed_sampling_problem.def_readonly("equality", &TimeIndexedSamplingProblem::equality);
     time_indexed_sampling_problem.def("set_goal_eq", &TimeIndexedSamplingProblem::SetGoalEQ);
@@ -1076,10 +1073,10 @@ PYBIND11_MODULE(_pyexotica, module)
 
     // KinematicResponse
     py::class_<KinematicResponse, std::shared_ptr<KinematicResponse>> kinematic_response(kin, "KinematicResponse");
-    kinematic_response.def_property_readonly("phi", [](KinematicResponse* instance) {
+    kinematic_response.def_property_readonly("Phi", [](KinematicResponse* instance) {
         std::vector<KDL::Frame> vec;
-        for (unsigned int i = 0; i < instance->phi.cols(); i++)
-            vec.push_back(instance->phi(i));
+        for (unsigned int i = 0; i < instance->Phi.cols(); ++i)
+            vec.push_back(instance->Phi(i));
         return vec;
     });
 

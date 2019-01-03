@@ -1,4 +1,5 @@
-// Copyright (c) 2018, University of Edinburgh
+//
+// Copyright (c) 2018, Wolfgang Merkt
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -93,7 +94,7 @@ void Visualization::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory)
 
         geometry_msgs::Transform base_transform;
         Eigen::Quaterniond quat;
-        for (int i = 0; i < num_trajectory_points; i++)
+        for (int i = 0; i < num_trajectory_points; ++i)
         {
             base_transform.translation.x = trajectory(i, 0);
             base_transform.translation.y = trajectory(i, 1);
@@ -138,14 +139,14 @@ void Visualization::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory)
     const int num_actuated_joints_without_base = trajectory.cols() - base_offset;
     traj_msg.trajectory[0].joint_trajectory.points.resize(num_trajectory_points);
     traj_msg.trajectory[0].joint_trajectory.joint_names.resize(num_actuated_joints_without_base);
-    for (int i = 0; i < num_actuated_joints_without_base; i++)
+    for (int i = 0; i < num_actuated_joints_without_base; ++i)
         traj_msg.trajectory[0].joint_trajectory.joint_names[i] = scene_->GetKinematicTree().GetJointNames()[base_offset + i];
 
     // Insert actuated joints without base
-    for (int i = 0; i < num_trajectory_points; i++)
+    for (int i = 0; i < num_trajectory_points; ++i)
     {
         traj_msg.trajectory[0].joint_trajectory.points[i].positions.resize(num_actuated_joints_without_base);
-        for (int n = 0; n < num_actuated_joints_without_base; n++)
+        for (int n = 0; n < num_actuated_joints_without_base; ++n)
         {
             traj_msg.trajectory[0].joint_trajectory.points[i].positions[n] = trajectory(i, n + base_offset);
         }

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -52,25 +53,25 @@ void JointVelocityLimit::AssignScene(ScenePtr scene)
 
 void JointVelocityLimit::Initialize()
 {
-    double percent = static_cast<double>(init_.safe_percentage);
+    double percent = static_cast<double>(init_.SafePercentage);
 
     N = scene_->GetKinematicTree().GetNumControlledJoints();
     dt_ = std::abs(init_.dt);
     if (dt_ == 0.0)
         ThrowNamed("Timestep dt needs to be greater than 0");
 
-    if (init_.maximum_joint_velocity.rows() == 1)
+    if (init_.MaximumJointVelocity.rows() == 1)
     {
         limits_.setOnes(N);
-        limits_ *= std::abs(static_cast<double>(init_.maximum_joint_velocity(0)));
+        limits_ *= std::abs(static_cast<double>(init_.MaximumJointVelocity(0)));
     }
-    else if (init_.maximum_joint_velocity.rows() == N)
+    else if (init_.MaximumJointVelocity.rows() == N)
     {
-        limits_ = init_.maximum_joint_velocity.cwiseAbs();
+        limits_ = init_.MaximumJointVelocity.cwiseAbs();
     }
     else
     {
-        ThrowNamed("Maximum joint velocity vector needs to be either of size 1 or N, but got " << init_.maximum_joint_velocity.rows());
+        ThrowNamed("Maximum joint velocity vector needs to be either of size 1 or N, but got " << init_.MaximumJointVelocity.rows());
     }
 
     tau_ = percent * limits_;
@@ -83,36 +84,36 @@ int JointVelocityLimit::TaskSpaceDim()
     return N;
 }
 
-void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
 {
     if (kinematics.size() != 2) ThrowNamed("Wrong size of kinematics - requires 2, but got " << kinematics.size());
-    if (phi.rows() != N) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != N) ThrowNamed("Wrong size of Phi!");
     if (!x.isApprox(kinematics[0].X)) ThrowNamed("The internal kinematics.X and passed state reference x do not match!");
 
-    phi.setZero();
+    Phi.setZero();
     Eigen::VectorXd x_diff = (1 / dt_) * (kinematics[0].X - kinematics[1].X);
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < N; ++i)
     {
         if (x_diff(i) < -limits_(i) + tau_(i))
         {
-            phi(i) = x_diff(i) + limits_(i) - tau_(i);
+            Phi(i) = x_diff(i) + limits_(i) - tau_(i);
             if (debug_) HIGHLIGHT_NAMED("JointVelocityLimit", "Lower limit exceeded (joint=" << i << "): " << x_diff(i) << " < (-" << limits_(i) << "+" << tau_(i) << ")");
         }
         if (x_diff(i) > limits_(i) - tau_(i))
         {
-            phi(i) = x_diff(i) - limits_(i) + tau_(i);
+            Phi(i) = x_diff(i) - limits_(i) + tau_(i);
             if (debug_) HIGHLIGHT_NAMED("JointVelocityLimit", "Upper limit exceeded (joint=" << i << "): " << x_diff(i) << " > (" << limits_(i) << "-" << tau_(i) << ")");
         }
     }
 }
 
-void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
 {
     if (jacobian.rows() != N || jacobian.cols() != N) ThrowNamed("Wrong size of jacobian! " << N);
-    Update(x, phi);
+    Update(x, Phi);
     jacobian = (1 / dt_) * Eigen::MatrixXd::Identity(N, N);
-    for (int i = 0; i < N; i++)
-        if (phi(i) == 0.0)
+    for (int i = 0; i < N; ++i)
+        if (Phi(i) == 0.0)
             jacobian(i, i) = 0.0;
 }
 }

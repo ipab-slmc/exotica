@@ -26,7 +26,7 @@
     </Cost>
    
     <T>100</T>
-    <Tau>0.05</Tau>
+    <tau>0.05</tau>
     <Wrate>1e0</Wrate>
   </UnconstrainedTimeIndexedProblem>
 </PlannerDemoConfig>

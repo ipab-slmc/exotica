@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_MOTION_SOLVER_H
-#define EXOTICA_CORE_MOTION_SOLVER_H
+#ifndef EXOTICA_CORE_MOTION_SOLVER_H_
+#define EXOTICA_CORE_MOTION_SOLVER_H_
 
 #include "exotica_core/object.h"
 #include "exotica_core/planning_problem.h"
@@ -65,4 +66,4 @@ protected:
 typedef std::shared_ptr<exotica::MotionSolver> MotionSolverPtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_MOTION_SOLVER_H_

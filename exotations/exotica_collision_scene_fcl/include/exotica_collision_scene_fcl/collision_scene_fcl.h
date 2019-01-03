@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H
-#define EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H
+#ifndef EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_
+#define EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_
 
 #include <exotica_core/collision_scene.h>
 #include <exotica_core/tools/conversions.h>
@@ -104,4 +105,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASKS_H
-#define EXOTICA_CORE_TASKS_H
+#ifndef EXOTICA_CORE_TASKS_H_
+#define EXOTICA_CORE_TASKS_H_
 
 #include <Eigen/Dense>
 #include <map>
@@ -56,7 +57,7 @@ struct Task
 {
     Task();
 
-    virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& phi);
+    virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
 
     TaskMapMap task_maps;
     TaskMapVec tasks;
@@ -74,7 +75,7 @@ protected:
 struct TimeIndexedTask : public Task
 {
     TimeIndexedTask();
-    virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& phi);
+    virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
     void Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j, HessianRefConst big_h, int t);
     void Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j, int t);
@@ -84,7 +85,7 @@ struct TimeIndexedTask : public Task
     std::vector<Eigen::VectorXd> rho;
     std::vector<TaskSpaceVector> y;
     std::vector<Eigen::VectorXd> ydiff;
-    std::vector<TaskSpaceVector> phi;
+    std::vector<TaskSpaceVector> Phi;
     std::vector<Hessian> hessian;
     std::vector<Eigen::MatrixXd> jacobian;
     std::vector<Eigen::MatrixXd> S;
@@ -94,7 +95,7 @@ struct TimeIndexedTask : public Task
 struct EndPoseTask : public Task
 {
     EndPoseTask();
-    virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& phi);
+    virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
     void Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j, HessianRefConst big_h);
     void Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j);
@@ -103,7 +104,7 @@ struct EndPoseTask : public Task
     Eigen::VectorXd rho;
     TaskSpaceVector y;
     Eigen::VectorXd ydiff;
-    TaskSpaceVector phi;
+    TaskSpaceVector Phi;
     Eigen::MatrixXd jacobian;
     Hessian hessian;
     Eigen::MatrixXd S;
@@ -112,16 +113,16 @@ struct EndPoseTask : public Task
 struct SamplingTask : public Task
 {
     SamplingTask();
-    virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& phi);
+    virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
     void Update(const TaskSpaceVector& big_phi);
 
     Eigen::VectorXd rho;
     TaskSpaceVector y;
     Eigen::VectorXd ydiff;
-    TaskSpaceVector phi;
+    TaskSpaceVector Phi;
     Eigen::MatrixXd S;
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_TASKS_H_

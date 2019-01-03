@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -67,7 +68,7 @@ struct Function1 : public FunctorType
         Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> tmp(y.rows());
         // Always cast known scalar type matrices/vectors into the templated type <T>.
         // This is required for AutoDiff to work properly.
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; ++i)
         {
             y(i, 0) = (Eigen::AngleAxis<T>(x(i, 0), Eigen::Vector3d::UnitZ().cast<T>()).toRotationMatrix() * Eigen::Vector3d::UnitX().cast<T>()).dot(Eigen::Vector3d::UnitX().cast<T>());
             tmp(i, 0) = y(i, 0);
@@ -92,7 +93,7 @@ struct Function2 : public FunctorType
     void operator()(const Eigen::Matrix<T, FunctorType::InputType::RowsAtCompileTime, 1> &x, Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> &y) const
     {
         Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> tmp(y.rows());
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; ++i)
         {
             y.block(i * 3, 0, 3, 1) = Eigen::AngleAxis<T>(x(i, 0), Eigen::Vector3d::UnitZ().cast<T>()).toRotationMatrix() * Eigen::Vector3d::UnitX().cast<T>();
         }
@@ -115,7 +116,7 @@ struct Function3 : public FunctorType
     void operator()(const Eigen::Matrix<T, FunctorType::InputType::RowsAtCompileTime, 1> &x, Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> &y) const
     {
         Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> tmp(y.rows());
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; ++i)
         {
             y(i, 0) = Eigen::Vector3d::UnitX().cast<T>().dot(x.block(i * 3, 0, 3, 1));
             tmp(i, 0) = y(i, 0);
@@ -249,7 +250,7 @@ struct HessianFull : public T
         if (T::JacobianType::RowsAtCompileTime == Eigen::Dynamic)
         {
             j.resize(T::Function::Values, T::Function::JacobianCols);
-            for (int i = 0; i < hess.rows(); i++)
+            for (int i = 0; i < hess.rows(); ++i)
             {
                 hess[i].resize(T::Function::JacobianCols, T::Function::JacobianCols);
             }
@@ -279,7 +280,7 @@ struct HessianCompound : public T
         if (T::JacobianType::RowsAtCompileTime == Eigen::Dynamic)
         {
             j.resize(T::Function::Values, T::Function::JacobianCols);
-            for (int i = 0; i < hess.rows(); i++)
+            for (int i = 0; i < hess.rows(); ++i)
             {
                 hess[i].resize(T::Function::JacobianCols, T::Function::JacobianCols);
             }
@@ -311,7 +312,7 @@ struct HessianFullFinite : public T
         if (T::JacobianType::RowsAtCompileTime == Eigen::Dynamic)
         {
             j.resize(T::Function::Values, T::Function::JacobianCols);
-            for (int i = 0; i < hess.rows(); i++)
+            for (int i = 0; i < hess.rows(); ++i)
             {
                 hess[i].resize(T::Function::JacobianCols, T::Function::JacobianCols);
             }
@@ -352,7 +353,7 @@ struct HessianCompoundFinite : public T
         if (T::JacobianType::RowsAtCompileTime == Eigen::Dynamic)
         {
             j.resize(T::Function::Values, T::Function::JacobianCols);
-            for (int i = 0; i < hess.rows(); i++)
+            for (int i = 0; i < hess.rows(); ++i)
             {
                 hess[i].resize(T::Function::JacobianCols, T::Function::JacobianCols);
             }
@@ -401,7 +402,7 @@ struct TestDynamicTrait
 template <template <typename> class DiffType, typename Dynamic, Eigen::NumericalDiffMode mode>
 void TestJacobians()
 {
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < N; ++i)
     {
         // Setup functors
         typedef FunctorBase<double, Dynamic::Inputs1, Dynamic::Values1, Dynamic::JacobianCols1> MyFunctor1;
@@ -460,7 +461,7 @@ void TestJacobians()
 template <template <typename> class DiffType, typename Dynamic>
 void TestJacobiansSparse()
 {
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < N; ++i)
     {
         // Setup functors
         typedef FunctorBase<double, Dynamic::Inputs1, Dynamic::Values1, Dynamic::JacobianCols1> MyFunctor1;
@@ -530,18 +531,18 @@ double diffNorm(const HessianType1 &A, const HessianType2 &B)
 {
     double ret = 0;
     double tmp;
-    for (int i = 0; i < A.rows(); i++)
+    for (int i = 0; i < A.rows(); ++i)
     {
         tmp = (A[i] - B[i]).norm();
         ret += tmp * tmp;
     }
-    return ret / (double)A.rows();
+    return ret / static_cast<double>(A.rows());
 }
 
 template <template <typename> class DiffType, typename Dynamic, Eigen::NumericalDiffMode mode>
 void TestHessians()
 {
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < N; ++i)
     {
         // Setup functors
         typedef FunctorBase<double, Dynamic::Inputs1, Dynamic::Values1, Dynamic::JacobianCols1> MyFunctor1;
@@ -611,7 +612,7 @@ void TestHessians()
 template <template <typename> class DiffType, typename Dynamic>
 void TestHessiansSparse()
 {
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < N; ++i)
     {
         // Setup functors
         typedef FunctorBase<double, Dynamic::Inputs1, Dynamic::Values1, Dynamic::JacobianCols1> MyFunctor1;

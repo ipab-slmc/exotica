@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -53,51 +54,51 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
     num_tasks = tasks_.size();
     length_phi = 0;
     length_jacobian = 0;
-    for (int i = 0; i < num_tasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
-        AppendVector(phi.map, tasks_[i]->GetLieGroupIndices());
+        AppendVector(Phi.map, tasks_[i]->GetLieGroupIndices());
         length_phi += tasks_[i]->length;
         length_jacobian += tasks_[i]->length_jacobian;
     }
-    phi.SetZero(length_phi);
+    Phi.SetZero(length_phi);
     W = Eigen::MatrixXd::Identity(N, N);
-    if (init.w.rows() > 0)
+    if (init.W.rows() > 0)
     {
-        if (init.w.rows() == N)
+        if (init.W.rows() == N)
         {
-            W.diagonal() = init.w;
+            W.diagonal() = init.W;
         }
         else
         {
-            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init.w.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
         }
     }
     if (flags_ & KIN_J) jacobian = Eigen::MatrixXd(length_jacobian, N);
     if (flags_ & KIN_J_DOT) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
 
-    if (init.lower_bound.rows() == N)
+    if (init.LowerBound.rows() == N)
     {
-        scene_->GetKinematicTree().SetJointLimitsLower(init.lower_bound);
+        scene_->GetKinematicTree().SetJointLimitsLower(init.LowerBound);
     }
-    else if (init.lower_bound.rows() != 0)
+    else if (init.LowerBound.rows() != 0)
     {
-        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.lower_bound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.LowerBound.rows());
     }
-    if (init.upper_bound.rows() == N)
+    if (init.UpperBound.rows() == N)
     {
-        scene_->GetKinematicTree().SetJointLimitsUpper(init.upper_bound);
+        scene_->GetKinematicTree().SetJointLimitsUpper(init.UpperBound);
     }
-    else if (init.upper_bound.rows() != 0)
+    else if (init.UpperBound.rows() != 0)
     {
-        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.upper_bound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 
-    use_bounds = init.use_bounds;
+    use_bounds = init.UseBounds;
 
     TaskSpaceVector dummy;
-    cost.Initialize(init.cost, shared_from_this(), dummy);
-    inequality.Initialize(init.inequality, shared_from_this(), dummy);
-    equality.Initialize(init.equality, shared_from_this(), dummy);
+    cost.Initialize(init.Cost, shared_from_this(), dummy);
+    inequality.Initialize(init.Inequality, shared_from_this(), dummy);
+    equality.Initialize(init.Equality, shared_from_this(), dummy);
     ApplyStartState(false);
     PreUpdate();
 }
@@ -105,7 +106,7 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
 void EndPoseProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
-    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
     cost.UpdateS();
     inequality.UpdateS();
     equality.UpdateS();
@@ -123,7 +124,7 @@ Eigen::VectorXd EndPoseProblem::GetScalarJacobian()
 
 double EndPoseProblem::GetScalarTaskCost(const std::string& task_name)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -156,52 +157,52 @@ Eigen::MatrixXd EndPoseProblem::GetInequalityJacobian()
 void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x, t_start);
-    phi.SetZero(length_phi);
+    Phi.SetZero(length_phi);
     if (flags_ & KIN_J) jacobian.setZero();
     if (flags_ & KIN_J_DOT)
-        for (int i = 0; i < length_jacobian; i++) hessian(i).setZero();
-    for (int i = 0; i < tasks_.size(); i++)
+        for (int i = 0; i < length_jacobian; ++i) hessian(i).setZero();
+    for (int i = 0; i < tasks_.size(); ++i)
     {
         if (tasks_[i]->is_used)
         {
             if (flags_ & KIN_J_DOT)
             {
-                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
     if (flags_ & KIN_J_DOT)
     {
-        cost.Update(phi, jacobian, hessian);
-        inequality.Update(phi, jacobian, hessian);
-        equality.Update(phi, jacobian, hessian);
+        cost.Update(Phi, jacobian, hessian);
+        inequality.Update(Phi, jacobian, hessian);
+        equality.Update(Phi, jacobian, hessian);
     }
     else if (flags_ & KIN_J)
     {
-        cost.Update(phi, jacobian);
-        inequality.Update(phi, jacobian);
-        equality.Update(phi, jacobian);
+        cost.Update(Phi, jacobian);
+        inequality.Update(Phi, jacobian);
+        equality.Update(Phi, jacobian);
     }
     else
     {
-        cost.Update(phi);
-        inequality.Update(phi);
-        equality.Update(phi);
+        cost.Update(Phi);
+        inequality.Update(Phi);
+        equality.Update(Phi);
     }
-    number_of_problem_updates_++;
+    ++number_of_problem_updates_;
 }
 
 void EndPoseProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -215,7 +216,7 @@ void EndPoseProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefCon
 
 void EndPoseProblem::SetRho(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -229,7 +230,7 @@ void EndPoseProblem::SetRho(const std::string& task_name, const double& rho)
 
 Eigen::VectorXd EndPoseProblem::GetGoal(const std::string& task_name)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -241,7 +242,7 @@ Eigen::VectorXd EndPoseProblem::GetGoal(const std::string& task_name)
 
 double EndPoseProblem::GetRho(const std::string& task_name)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -253,7 +254,7 @@ double EndPoseProblem::GetRho(const std::string& task_name)
 
 void EndPoseProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -267,7 +268,7 @@ void EndPoseProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefC
 
 void EndPoseProblem::SetRhoEQ(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -281,7 +282,7 @@ void EndPoseProblem::SetRhoEQ(const std::string& task_name, const double& rho)
 
 Eigen::VectorXd EndPoseProblem::GetGoalEQ(const std::string& task_name)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -293,7 +294,7 @@ Eigen::VectorXd EndPoseProblem::GetGoalEQ(const std::string& task_name)
 
 double EndPoseProblem::GetRhoEQ(const std::string& task_name)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -305,7 +306,7 @@ double EndPoseProblem::GetRhoEQ(const std::string& task_name)
 
 void EndPoseProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -319,7 +320,7 @@ void EndPoseProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRef
 
 void EndPoseProblem::SetRhoNEQ(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -333,7 +334,7 @@ void EndPoseProblem::SetRhoNEQ(const std::string& task_name, const double& rho)
 
 Eigen::VectorXd EndPoseProblem::GetGoalNEQ(const std::string& task_name)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -345,7 +346,7 @@ Eigen::VectorXd EndPoseProblem::GetGoalNEQ(const std::string& task_name)
 
 double EndPoseProblem::GetRhoNEQ(const std::string& task_name)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -361,7 +362,7 @@ bool EndPoseProblem::IsValid()
     auto bounds = scene_->GetKinematicTree().GetJointLimits();
 
     // Check joint limits
-    for (unsigned int i = 0; i < N; i++)
+    for (unsigned int i = 0; i < N; ++i)
     {
         if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1)) return false;
     }
@@ -371,7 +372,7 @@ bool EndPoseProblem::IsValid()
     // Check inequality constraints
     if (GetInequality().rows() > 0)
     {
-        if (GetInequality().maxCoeff() > parameters.inequality_feasibility_tolerance)
+        if (GetInequality().maxCoeff() > parameters.InequalityFeasibilityTolerance)
         {
             if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::IsValid", "Violated inequality constraints: " << GetInequality().transpose());
             succeeded = false;
@@ -381,7 +382,7 @@ bool EndPoseProblem::IsValid()
     // Check equality constraints
     if (GetEquality().rows() > 0)
     {
-        if (GetEquality().norm() > parameters.equality_feasibility_tolerance)
+        if (GetEquality().norm() > parameters.EqualityFeasibilityTolerance)
         {
             if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::IsValid", "Violated equality constraints: " << GetEquality().norm());
             succeeded = false;

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TIME_INDEXED_PROBLEM_H
-#define EXOTICA_CORE_TIME_INDEXED_PROBLEM_H
+#ifndef EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_
+#define EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
@@ -96,7 +97,7 @@ public:
 
     Eigen::MatrixXd W;  // TODO(wxm): Make private and add getter and setter (#209)
 
-    std::vector<TaskSpaceVector> phi;
+    std::vector<TaskSpaceVector> Phi;
     std::vector<Eigen::MatrixXd> jacobian;
     std::vector<Hessian> hessian;
 
@@ -117,7 +118,7 @@ private:
     double q_dot_max_;   //!< Joint velocity limit (rad/s)
     double xxdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
 
-    double w_rate_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+    double w_scale_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
 
     std::vector<Eigen::VectorXd> initial_trajectory_;
     TimeIndexedProblemInitializer init_;
@@ -128,4 +129,4 @@ private:
 typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblemPtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_

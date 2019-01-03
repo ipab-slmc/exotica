@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_MAPS_INTERACTION_MESH
-#define EXOTICA_CORE_TASK_MAPS_INTERACTION_MESH
+#ifndef EXOTICA_CORE_TASK_MAPS_INTERACTION_MESH_H_
+#define EXOTICA_CORE_TASK_MAPS_INTERACTION_MESH_H_
 
 #include <exotica_core/kinematic_tree.h>
 #include <exotica_core/task_map.h>
@@ -47,8 +48,8 @@ public:
     void Instantiate(IMeshInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
     void SetWeight(int i, int j, double weight);
@@ -60,7 +61,7 @@ public:
     static void ComputeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd& goal, Eigen::MatrixXdRefConst weights);
 
 protected:
-    void Debug(Eigen::VectorXdRefConst phi);
+    void Debug(Eigen::VectorXdRefConst Phi);
     void InitializeDebug(std::string ref);
     void DestroyDebug();
 
@@ -72,4 +73,4 @@ protected:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_TASK_MAPS_INTERACTION_MESH_H_

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -73,13 +74,13 @@ void OMPLRNStateSpace::SetBounds(SamplingProblemPtr &prob)
     unsigned int dim = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)), 1.0);
     ompl::base::RealVectorBounds bounds(dim);
-    for (int i = 0; i < dim; i++)
+    for (int i = 0; i < dim; ++i)
     {
         bounds.setHigh(i, prob->GetBounds()[i + dim]);
         bounds.setLow(i, prob->GetBounds()[i]);
     }
     getSubspace(0)->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
-    setLongestValidSegmentFraction(init_.longest_valid_segment_fraction);
+    setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
 }
 
@@ -134,14 +135,14 @@ void OMPLSE3RNStateSpace::SetBounds(SamplingProblemPtr &prob)
         ompl::base::RealVectorBounds RNbounds(dim - 6);
         ompl::base::RealVectorBounds SE3bounds(3);
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; ++i)
         {
             SE3bounds.setHigh(i, prob->GetBounds()[i + n]);
             SE3bounds.setLow(i, prob->GetBounds()[i]);
         }
 
         getSubspace(0)->as<ompl::base::SE3StateSpace>()->setBounds(SE3bounds);
-        for (int i = 6; i < n; i++)
+        for (int i = 6; i < n; ++i)
         {
             RNbounds.setHigh(i - 6, prob->GetBounds()[i + n]);
             RNbounds.setLow(i - 6, prob->GetBounds()[i]);
@@ -153,7 +154,7 @@ void OMPLSE3RNStateSpace::SetBounds(SamplingProblemPtr &prob)
         ERROR("State space bounds were not specified!\n"
               << prob->GetBounds().size() << " " << n);
     }
-    setLongestValidSegmentFraction(init_.longest_valid_segment_fraction);
+    setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
 }
 
@@ -207,14 +208,14 @@ void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
         ompl::base::RealVectorBounds RNbounds(dim - 3);
         ompl::base::RealVectorBounds SE2bounds(2);
 
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 2; ++i)
         {
             SE2bounds.setHigh(i, prob->GetBounds()[i + n]);
             SE2bounds.setLow(i, prob->GetBounds()[i]);
         }
 
         getSubspace(0)->as<ompl::base::SE3StateSpace>()->setBounds(SE2bounds);
-        for (int i = 3; i < n; i++)
+        for (int i = 3; i < n; ++i)
         {
             RNbounds.setHigh(i - 3, prob->GetBounds()[i + n]);
             RNbounds.setLow(i - 3, prob->GetBounds()[i]);
@@ -226,7 +227,7 @@ void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
         ERROR("State space bounds were not specified!\n"
               << prob->GetBounds().size() << " " << n);
     }
-    setLongestValidSegmentFraction(init_.longest_valid_segment_fraction);
+    setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
 }
 

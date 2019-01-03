@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -134,7 +135,7 @@ void PRMSolver::Instantiate(PRMSolverInitializer& init)
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_PRM";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::PRM>, _1, _2);
-    multi_query_ = init.multi_query;
+    multi_query_ = init.MultiQuery;
 }
 
 void PRMSolver::GrowRoadmap(double t)
@@ -197,7 +198,7 @@ void LazyPRMSolver::Instantiate(LazyPRMSolverInitializer& init)
     init_ = static_cast<Initializer>(init);
     algorithm_ = "Exotica_LazyPRM";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::LazyPRM>, _1, _2);
-    multi_query_ = init.multi_query;
+    multi_query_ = init.MultiQuery;
 }
 
 void LazyPRMSolver::Clear()

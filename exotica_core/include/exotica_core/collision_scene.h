@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_COLLISION_SCENE_H
-#define EXOTICA_CORE_COLLISION_SCENE_H
+#ifndef EXOTICA_CORE_COLLISION_SCENE_H_
+#define EXOTICA_CORE_COLLISION_SCENE_H_
 
 #include <Eigen/Dense>
 #include <sstream>
@@ -284,4 +285,4 @@ protected:
 typedef std::shared_ptr<CollisionScene> CollisionScenePtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_COLLISION_SCENE_H_

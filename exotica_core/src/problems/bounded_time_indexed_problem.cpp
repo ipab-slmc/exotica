@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -34,7 +35,7 @@ REGISTER_PROBLEM_TYPE("BoundedTimeIndexedProblem", exotica::BoundedTimeIndexedPr
 namespace exotica
 {
 BoundedTimeIndexedProblem::BoundedTimeIndexedProblem()
-    : T_(0), tau_(0), w_rate_(0)
+    : T_(0), tau_(0), w_scale_(0)
 {
     flags_ = KIN_FK | KIN_J;
 }
@@ -50,26 +51,26 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
 {
     parameters = init;
 
-    if (init.lower_bound.rows() == N)
+    if (init.LowerBound.rows() == N)
     {
-        scene_->GetKinematicTree().SetJointLimitsLower(init.lower_bound);
+        scene_->GetKinematicTree().SetJointLimitsLower(init.LowerBound);
     }
-    else if (init.lower_bound.rows() != 0)
+    else if (init.LowerBound.rows() != 0)
     {
-        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.lower_bound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.LowerBound.rows());
     }
-    if (init.upper_bound.rows() == N)
+    if (init.UpperBound.rows() == N)
     {
-        scene_->GetKinematicTree().SetJointLimitsUpper(init.upper_bound);
+        scene_->GetKinematicTree().SetJointLimitsUpper(init.UpperBound);
     }
-    else if (init.upper_bound.rows() != 0)
+    else if (init.UpperBound.rows() != 0)
     {
-        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.upper_bound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 
-    cost.Initialize(parameters.cost, shared_from_this(), cost_phi);
+    cost.Initialize(parameters.Cost, shared_from_this(), cost_phi);
 
-    T_ = parameters.t;
+    T_ = parameters.T;
     ApplyStartState(false);
     ReinitializeVariables();
 }
@@ -77,22 +78,22 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
 void BoundedTimeIndexedProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
-    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
     cost.UpdateS();
 }
 
 void BoundedTimeIndexedProblem::SetInitialTrajectory(
-    const std::vector<Eigen::VectorXd>& q_parametersin)
+    const std::vector<Eigen::VectorXd>& q_parameters_in)
 {
-    if (q_parametersin.size() != T_)
+    if (q_parameters_in.size() != T_)
         ThrowPretty("Expected initial trajectory of length "
-                    << T_ << " but got " << q_parametersin.size());
-    if (q_parametersin[0].rows() != N)
+                    << T_ << " but got " << q_parameters_in.size());
+    if (q_parameters_in[0].rows() != N)
         ThrowPretty("Expected states to have " << N << " rows but got "
-                                               << q_parametersin[0].rows());
+                                               << q_parameters_in[0].rows());
 
-    initial_trajectory_ = q_parametersin;
-    SetStartState(q_parametersin[0]);
+    initial_trajectory_ = q_parameters_in;
+    SetStartState(q_parameters_in[0]);
 }
 
 std::vector<Eigen::VectorXd> BoundedTimeIndexedProblem::GetInitialTrajectory()
@@ -102,7 +103,7 @@ std::vector<Eigen::VectorXd> BoundedTimeIndexedProblem::GetInitialTrajectory()
 
 double BoundedTimeIndexedProblem::GetDuration()
 {
-    return tau_ * (double)T_;
+    return tau_ * static_cast<double>(T_);
 }
 
 void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
@@ -118,43 +119,43 @@ void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 
     x[t] = x_in;
     scene_->Update(x_in, static_cast<double>(t) * tau_);
-    phi[t].SetZero(length_phi);
+    Phi[t].SetZero(length_phi);
     if (flags_ & KIN_J) jacobian[t].setZero();
     if (flags_ & KIN_J_DOT)
-        for (int i = 0; i < length_jacobian; i++) hessian[t](i).setZero();
-    for (int i = 0; i < num_tasks; i++)
+        for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
+    for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
         if (tasks_[i]->is_used)
         {
             if (flags_ & KIN_J_DOT)
             {
-                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
     if (flags_ & KIN_J_DOT)
     {
-        cost.Update(phi[t], jacobian[t], hessian[t], t);
+        cost.Update(Phi[t], jacobian[t], hessian[t], t);
     }
     else if (flags_ & KIN_J)
     {
-        cost.Update(phi[t], jacobian[t], t);
+        cost.Update(Phi[t], jacobian[t], t);
     }
     else
     {
-        cost.Update(phi[t], t);
+        cost.Update(Phi[t], t);
     }
     if (t > 0) xdiff[t] = x[t] - x[t - 1];
-    number_of_problem_updates_++;
+    ++number_of_problem_updates_;
 }
 
 double BoundedTimeIndexedProblem::GetScalarTaskCost(int t)
@@ -211,7 +212,7 @@ Eigen::VectorXd BoundedTimeIndexedProblem::GetScalarTransitionJacobian(int t)
 
 void BoundedTimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -225,7 +226,7 @@ void BoundedTimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::Vec
 
 void BoundedTimeIndexedProblem::SetRho(const std::string& task_name, const double rho, int t)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -239,7 +240,7 @@ void BoundedTimeIndexedProblem::SetRho(const std::string& task_name, const doubl
 
 Eigen::VectorXd BoundedTimeIndexedProblem::GetGoal(const std::string& task_name, int t)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -251,7 +252,7 @@ Eigen::VectorXd BoundedTimeIndexedProblem::GetGoal(const std::string& task_name,
 
 double BoundedTimeIndexedProblem::GetRho(const std::string& task_name, int t)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -283,13 +284,13 @@ void BoundedTimeIndexedProblem::ReinitializeVariables()
     if (debug_) HIGHLIGHT_NAMED("BoundedTimeIndexedProblem", "Initialize problem with T=" << T_);
 
     SetTau(parameters.tau);
-    w_rate_ = parameters.wrate;
+    w_scale_ = parameters.Wrate;
 
     num_tasks = tasks_.size();
     length_phi = 0;
     length_jacobian = 0;
     TaskSpaceVector y_ref_;
-    for (int i = 0; i < num_tasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
         AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
         length_phi += tasks_[i]->length;
@@ -298,21 +299,21 @@ void BoundedTimeIndexedProblem::ReinitializeVariables()
 
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    W = Eigen::MatrixXd::Identity(N, N) * w_rate_;
-    if (parameters.w.rows() > 0)
+    W = Eigen::MatrixXd::Identity(N, N) * w_scale_;
+    if (parameters.W.rows() > 0)
     {
-        if (parameters.w.rows() == N)
+        if (parameters.W.rows() == N)
         {
-            W.diagonal() = parameters.w * w_rate_;
+            W.diagonal() = parameters.W * w_scale_;
         }
         else
         {
-            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << parameters.w.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << parameters.W.rows());
         }
     }
 
     y_ref_.SetZero(length_phi);
-    phi.assign(T_, y_ref_);
+    Phi.assign(T_, y_ref_);
     if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
     x.assign(T_, Eigen::VectorXd::Zero(N));
     xdiff.assign(T_, Eigen::VectorXd::Zero(N));

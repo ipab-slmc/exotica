@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -68,9 +69,9 @@ void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
     {
         std::vector<std::string> jointNames = scene_->GetJointNames();
         std::vector<std::string> modelNames = scene_->GetModelJointNames();
-        for (int i = 0; i < jointNames.size(); i++)
+        for (int i = 0; i < jointNames.size(); ++i)
         {
-            for (int j = 0; j < modelNames.size(); j++)
+            for (int j = 0; j < modelNames.size(); ++j)
             {
                 if (jointNames[i] == modelNames[j]) start_state_[j] = x(i);
             }
@@ -107,18 +108,18 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
 
     // Create the scene
     scene_.reset(new Scene());
-    scene_->InstantiateInternal(SceneInitializer(init.planning_scene));
+    scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
     start_state_ = Eigen::VectorXd::Zero(scene_->GetModelJointNames().size());
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    if (init.start_state.rows() > 0)
+    if (init.StartState.rows() > 0)
     {
-        SetStartState(init.start_state);
+        SetStartState(init.StartState);
     }
-    if (init.start_time < 0)
-        ThrowNamed("Invalid start time " << init.start_time) else t_start = init.start_time;
+    if (init.StartTime < 0)
+        ThrowNamed("Invalid start time " << init.StartTime) else t_start = init.StartTime;
 
-    switch (init.derivative_order)
+    switch (init.DerivativeOrder)
     {
         case 0:
             flags_ = KIN_FK;
@@ -136,7 +137,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
 
     // Create the maps
     int id = 0;
-    for (const Initializer& MapInitializer : init.maps)
+    for (const Initializer& MapInitializer : init.Maps)
     {
         TaskMapPtr new_map = Setup::CreateMap(MapInitializer);
         new_map->AssignScene(scene_);
@@ -147,7 +148,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
         }
         std::vector<KinematicFrameRequest> frames = new_map->GetFrames();
 
-        for (size_t i = 0; i < new_map->kinematics.size(); i++)
+        for (size_t i = 0; i < new_map->kinematics.size(); ++i)
             new_map->kinematics[i] = KinematicSolution(id, frames.size());
         id += frames.size();
 
@@ -159,7 +160,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
 
     id = 0;
     int idJ = 0;
-    for (int i = 0; i < tasks_.size(); i++)
+    for (int i = 0; i < tasks_.size(); ++i)
     {
         tasks_[i]->id = i;
         tasks_[i]->start = id;
@@ -170,7 +171,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
         idJ += tasks_[i]->length_jacobian;
     }
 
-    if (init.maps.size() == 0)
+    if (init.Maps.size() == 0)
     {
         HIGHLIGHT("No maps were defined!");
     }
@@ -191,7 +192,7 @@ void PlanningProblem::updateMultipleTaskKinematics(std::vector<std::shared_ptr<K
             ThrowNamed(responses.size() << " responses provided but task " << task->GetObjectName() << " requires " << task->kinematics.size());
         }
 
-        for (size_t i = 0; i < task->kinematics.size(); i++)
+        for (size_t i = 0; i < task->kinematics.size(); ++i)
         {
             task->kinematics[i].Create(responses[i]);
         }
@@ -215,7 +216,7 @@ ScenePtr PlanningProblem::GetScene()
 std::pair<std::vector<double>, std::vector<double>> PlanningProblem::GetCostEvolution()
 {
     std::pair<std::vector<double>, std::vector<double>> ret;
-    for (size_t position = 0; position < cost_evolution_.size(); position++)
+    for (size_t position = 0; position < cost_evolution_.size(); ++position)
     {
         if (std::isnan(cost_evolution_[position].second)) break;
         double time_point = std::chrono::duration_cast<std::chrono::duration<double>>(cost_evolution_[position].first - cost_evolution_[0].first).count();

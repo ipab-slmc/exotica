@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -46,8 +47,8 @@
 /// \file aico_solver.h
 /// \brief Approximate Inference Control
 
-#ifndef EXOTICA_AICO_SOLVER_AICO_SOLVER_H
-#define EXOTICA_AICO_SOLVER_AICO_SOLVER_H
+#ifndef EXOTICA_AICO_SOLVER_AICO_SOLVER_H_
+#define EXOTICA_AICO_SOLVER_AICO_SOLVER_H_
 
 #include <iostream>
 
@@ -241,4 +242,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_AICO_SOLVER_AICO_SOLVER_H_

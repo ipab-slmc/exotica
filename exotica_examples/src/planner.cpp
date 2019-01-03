@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -58,7 +59,7 @@ void run()
     if (any_problem->type() == "exotica::UnconstrainedTimeIndexedProblem")
     {
         UnconstrainedTimeIndexedProblemPtr problem = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(any_problem);
-        for (int t = 0; t < problem->GetT() - 1; t++)
+        for (int t = 0; t < problem->GetT() - 1; ++t)
         {
             // This sets the precision of all time steps BUT the last one to zero
             // This means we only aim to minimize the task cost in the last time step

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TRAJECTORY_H
-#define EXOTICA_CORE_TRAJECTORY_H
+#ifndef EXOTICA_CORE_TRAJECTORY_H_
+#define EXOTICA_CORE_TRAJECTORY_H_
 
 #include <memory>
 
@@ -71,4 +72,4 @@ protected:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_TRAJECTORY_H_

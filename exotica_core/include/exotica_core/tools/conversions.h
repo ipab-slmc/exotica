@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_CONVERSIONS_H
-#define EXOTICA_CORE_CONVERSIONS_H
+#ifndef EXOTICA_CORE_CONVERSIONS_H_
+#define EXOTICA_CORE_CONVERSIONS_H_
 
 #include <memory>
 #include <vector>
@@ -276,4 +277,4 @@ inline std::vector<bool> ParseBoolList(const std::string value)
 }
 }
 
-#endif
+#endif // EXOTICA_CORE_CONVERSIONS_H_

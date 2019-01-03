@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -35,32 +36,32 @@ namespace exotica
 CenterOfMass::CenterOfMass() = default;
 CenterOfMass::~CenterOfMass() = default;
 
-void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
 {
-    if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != dim_) ThrowNamed("Wrong size of Phi!");
     double M = mass_.sum();
     if (M == 0.0) return;
 
     KDL::Vector com;
-    for (int i = 0; i < kinematics[0].phi.rows(); i++)
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        com += kinematics[0].phi(i).p * mass_(i);
+        com += kinematics[0].Phi(i).p * mass_(i);
         if (debug_)
         {
-            com_links_marker_.points[i].x = kinematics[0].phi(i).p[0];
-            com_links_marker_.points[i].y = kinematics[0].phi(i).p[1];
-            com_links_marker_.points[i].z = kinematics[0].phi(i).p[2];
+            com_links_marker_.points[i].x = kinematics[0].Phi(i).p[0];
+            com_links_marker_.points[i].y = kinematics[0].Phi(i).p[1];
+            com_links_marker_.points[i].z = kinematics[0].Phi(i).p[2];
         }
     }
 
     com = com / M;
-    for (int i = 0; i < dim_; i++) phi(i) = com[i];
+    for (int i = 0; i < dim_; ++i) Phi(i) = com[i];
 
     if (debug_)
     {
-        com_marker_.pose.position.x = phi(0);
-        com_marker_.pose.position.y = phi(1);
-        com_marker_.pose.position.z = phi(2);
+        com_marker_.pose.position.x = Phi(0);
+        com_marker_.pose.position.y = Phi(1);
+        com_marker_.pose.position.z = Phi(2);
 
         com_marker_.header.stamp = com_links_marker_.header.stamp = ros::Time::now();
         com_links_pub_.publish(com_links_marker_);
@@ -68,9 +69,9 @@ void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     }
 }
 
-void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != dim_) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != dim_ || jacobian.cols() != x.rows()) ThrowNamed("Wrong size of jacobian! " << x.rows());
     jacobian.setZero();
     KDL::Vector com;
@@ -79,15 +80,15 @@ void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eig
     {
         double M = mass_.sum();
         if (M == 0.0) return;
-        for (int i = 0; i < kinematics[0].phi.rows(); i++)
+        for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
         {
-            com += kinematics[0].phi(i).p * mass_(i);
+            com += kinematics[0].Phi(i).p * mass_(i);
             jacobian += mass_(i) / M * kinematics[0].jacobian(i).data.topRows(dim_);
             if (debug_)
             {
-                com_links_marker_.points[i].x = kinematics[0].phi(i).p[0];
-                com_links_marker_.points[i].y = kinematics[0].phi(i).p[1];
-                com_links_marker_.points[i].z = kinematics[0].phi(i).p[2];
+                com_links_marker_.points[i].x = kinematics[0].Phi(i).p[0];
+                com_links_marker_.points[i].y = kinematics[0].Phi(i).p[1];
+                com_links_marker_.points[i].z = kinematics[0].Phi(i).p[2];
             }
         }
         com = com / M;
@@ -125,13 +126,13 @@ void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eig
         com = com / M;
         jacobian = jacobian / M;
     }
-    for (int i = 0; i < dim_; i++) phi(i) = com[i];
+    for (int i = 0; i < dim_; ++i) Phi(i) = com[i];
 
     if (debug_)
     {
-        com_marker_.pose.position.x = phi(0);
-        com_marker_.pose.position.y = phi(1);
-        com_marker_.pose.position.z = phi(2);
+        com_marker_.pose.position.x = Phi(0);
+        com_marker_.pose.position.y = Phi(1);
+        com_marker_.pose.position.z = Phi(2);
 
         com_marker_.header.stamp = com_links_marker_.header.stamp = ros::Time::now();
         com_links_pub_.publish(com_links_marker_);
@@ -146,7 +147,7 @@ int CenterOfMass::TaskSpaceDim()
 
 void CenterOfMass::Initialize()
 {
-    enable_z_ = init_.enable_z;
+    enable_z_ = init_.EnableZ;
     if (enable_z_)
         dim_ = 3;
     else
@@ -160,15 +161,15 @@ void CenterOfMass::Initialize()
             HIGHLIGHT_NAMED("CenterOfMass", "Initialisation with " << frames_.size() << " passed into map.");
 
         mass_.resize(frames_.size());
-        for (int i = 0; i < frames_.size(); i++)
+        for (int i = 0; i < frames_.size(); ++i)
         {
-            if (frames_[i].frame_b_link_name != "")
+            if (frames_[i].frame_B_link_name != "")
             {
-                ThrowNamed("Requesting CenterOfMass frame with base other than root! '" << frames_[i].frame_a_link_name << "'");
+                ThrowNamed("Requesting CenterOfMass frame with base other than root! '" << frames_[i].frame_A_link_name << "'");
             }
-            frames_[i].frame_a_link_name = scene_->GetKinematicTree().GetTreeMap()[frames_[i].frame_a_link_name].lock()->segment.getName();
-            frames_[i].frame_a_offset.p = scene_->GetKinematicTree().GetTreeMap()[frames_[i].frame_a_link_name].lock()->segment.getInertia().getCOG();
-            mass_(i) = scene_->GetKinematicTree().GetTreeMap()[frames_[i].frame_a_link_name].lock()->segment.getInertia().getMass();
+            frames_[i].frame_A_link_name = scene_->GetKinematicTree().GetTreeMap()[frames_[i].frame_A_link_name].lock()->segment.getName();
+            frames_[i].frame_A_offset.p = scene_->GetKinematicTree().GetTreeMap()[frames_[i].frame_A_link_name].lock()->segment.getInertia().getCOG();
+            mass_(i) = scene_->GetKinematicTree().GetTreeMap()[frames_[i].frame_A_link_name].lock()->segment.getInertia().getMass();
         }
     }
 

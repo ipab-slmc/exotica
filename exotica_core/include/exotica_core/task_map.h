@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_MAP_H
-#define EXOTICA_CORE_TASK_MAP_H
+#ifndef EXOTICA_CORE_TASK_MAP_H_
+#define EXOTICA_CORE_TASK_MAP_H_
 
 #include <exotica_core/factory.h>  // The Factory template
 #include <exotica_core/object.h>   // The EXOTica base class
@@ -53,9 +54,9 @@ public:
     virtual void InstantiateBase(const Initializer& init);
 
     virtual void AssignScene(ScenePtr scene);
-    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) = 0;
-    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian);
-    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian);
+    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) = 0;
+    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian);
+    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian, HessianRef hessian);
     virtual int TaskSpaceDim() = 0;
 
     virtual int TaskSpaceJacobianDim() { return TaskSpaceDim(); }
@@ -84,4 +85,4 @@ typedef std::map<std::string, TaskMapPtr> TaskMapMap;  //!< The mapping by name 
 typedef std::vector<TaskMapPtr> TaskMapVec;
 }
 
-#endif
+#endif // EXOTICA_CORE_TASK_MAP_H_

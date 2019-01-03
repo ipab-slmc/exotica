@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -46,7 +47,7 @@ std::vector<double> SamplingProblem::GetBounds()
     auto joint_limits = scene_->GetKinematicTree().GetJointLimits();
 
     bounds.resize(2 * N);
-    for (unsigned int i = 0; i < N; i++)
+    for (unsigned int i = 0; i < N; ++i)
     {
         bounds[i] = joint_limits(i, 0);
         bounds[i + N] = joint_limits(i, 1);
@@ -59,11 +60,11 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
 {
     parameters = init;
 
-    if (init.goal.size() == N)
+    if (init.Goal.size() == N)
     {
-        goal_ = init.goal;
+        goal_ = init.Goal;
     }
-    else if (init.goal.size() == 0)
+    else if (init.Goal.size() == 0)
     {
         goal_ = Eigen::VectorXd::Zero(N);
     }
@@ -77,33 +78,33 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     num_tasks = tasks_.size();
     length_phi = 0;
     length_jacobian = 0;
-    for (int i = 0; i < num_tasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
-        AppendVector(phi.map, tasks_[i]->GetLieGroupIndices());
+        AppendVector(Phi.map, tasks_[i]->GetLieGroupIndices());
         length_phi += tasks_[i]->length;
         length_jacobian += tasks_[i]->length_jacobian;
     }
-    phi.SetZero(length_phi);
+    Phi.SetZero(length_phi);
     TaskSpaceVector dummy;
-    inequality.Initialize(init.inequality, shared_from_this(), dummy);
-    inequality.tolerance = init.constraint_tolerance;
-    equality.Initialize(init.equality, shared_from_this(), dummy);
-    equality.tolerance = init.constraint_tolerance;
+    inequality.Initialize(init.Inequality, shared_from_this(), dummy);
+    inequality.tolerance = init.ConstraintTolerance;
+    equality.Initialize(init.Equality, shared_from_this(), dummy);
+    equality.tolerance = init.ConstraintTolerance;
     ApplyStartState(false);
 
-    if (compound_ && init.floating_base_lower_limits.rows() > 0 && init.floating_base_upper_limits.rows() > 0)
+    if (compound_ && init.FloatingBaseLowerLimits.rows() > 0 && init.FloatingBaseUpperLimits.rows() > 0)
     {
-        if (scene_->GetBaseType() == exotica::BaseType::FLOATING && init.floating_base_lower_limits.rows() == 6 && init.floating_base_upper_limits.rows() == 6)
+        if (scene_->GetBaseType() == exotica::BaseType::FLOATING && init.FloatingBaseLowerLimits.rows() == 6 && init.FloatingBaseUpperLimits.rows() == 6)
         {
             scene_->GetKinematicTree().SetFloatingBaseLimitsPosXYZEulerZYX(
-                std::vector<double>(init.floating_base_lower_limits.data(), init.floating_base_lower_limits.data() + init.floating_base_lower_limits.size()),
-                std::vector<double>(init.floating_base_upper_limits.data(), init.floating_base_upper_limits.data() + init.floating_base_upper_limits.size()));
+                std::vector<double>(init.FloatingBaseLowerLimits.data(), init.FloatingBaseLowerLimits.data() + init.FloatingBaseLowerLimits.size()),
+                std::vector<double>(init.FloatingBaseUpperLimits.data(), init.FloatingBaseUpperLimits.data() + init.FloatingBaseUpperLimits.size()));
         }
-        else if (scene_->GetBaseType() == exotica::BaseType::PLANAR && init.floating_base_lower_limits.rows() == 3 && init.floating_base_upper_limits.rows() == 3)
+        else if (scene_->GetBaseType() == exotica::BaseType::PLANAR && init.FloatingBaseLowerLimits.rows() == 3 && init.FloatingBaseUpperLimits.rows() == 3)
         {
             scene_->GetKinematicTree().SetPlanarBaseLimitsPosXYEulerZ(
-                std::vector<double>(init.floating_base_lower_limits.data(), init.floating_base_lower_limits.data() + init.floating_base_lower_limits.size()),
-                std::vector<double>(init.floating_base_upper_limits.data(), init.floating_base_upper_limits.data() + init.floating_base_upper_limits.size()));
+                std::vector<double>(init.FloatingBaseLowerLimits.data(), init.FloatingBaseLowerLimits.data() + init.FloatingBaseLowerLimits.size()),
+                std::vector<double>(init.FloatingBaseUpperLimits.data(), init.FloatingBaseUpperLimits.data() + init.FloatingBaseUpperLimits.size()));
         }
         else
         {
@@ -117,7 +118,7 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
 void SamplingProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
-    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
     inequality.UpdateS();
     equality.UpdateS();
 }
@@ -131,7 +132,7 @@ void SamplingProblem::SetGoalState(Eigen::VectorXdRefConst qT)
 
 void SamplingProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -145,7 +146,7 @@ void SamplingProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRef
 
 void SamplingProblem::SetRhoEQ(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -159,7 +160,7 @@ void SamplingProblem::SetRhoEQ(const std::string& task_name, const double& rho)
 
 Eigen::VectorXd SamplingProblem::GetGoalEQ(const std::string& task_name)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -171,7 +172,7 @@ Eigen::VectorXd SamplingProblem::GetGoalEQ(const std::string& task_name)
 
 double SamplingProblem::GetRhoEQ(const std::string& task_name)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -183,7 +184,7 @@ double SamplingProblem::GetRhoEQ(const std::string& task_name)
 
 void SamplingProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -197,7 +198,7 @@ void SamplingProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRe
 
 void SamplingProblem::SetRhoNEQ(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -211,7 +212,7 @@ void SamplingProblem::SetRhoNEQ(const std::string& task_name, const double& rho)
 
 Eigen::VectorXd SamplingProblem::GetGoalNEQ(const std::string& task_name)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -223,7 +224,7 @@ Eigen::VectorXd SamplingProblem::GetGoalNEQ(const std::string& task_name)
 
 double SamplingProblem::GetRhoNEQ(const std::string& task_name)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -236,14 +237,14 @@ double SamplingProblem::GetRhoNEQ(const std::string& task_name)
 bool SamplingProblem::IsValid(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x);
-    for (int i = 0; i < num_tasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
         if (tasks_[i]->is_used)
-            tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length));
+            tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length));
     }
-    inequality.Update(phi);
-    equality.Update(phi);
-    number_of_problem_updates_++;
+    inequality.Update(Phi);
+    equality.Update(Phi);
+    ++number_of_problem_updates_;
 
     bool inequality_is_valid = ((inequality.S * inequality.ydiff).array() <= 0.0).all();
     bool equality_is_valid = ((equality.S * equality.ydiff).array().abs() == 0.0).all();

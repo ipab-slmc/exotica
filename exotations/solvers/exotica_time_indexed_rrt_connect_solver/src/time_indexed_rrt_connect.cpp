@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -40,7 +41,7 @@ OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProb
     unsigned int dim = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)), 1.0);
     ompl::base::RealVectorBounds bounds(dim);
-    for (int i = 0; i < dim; i++)
+    for (int i = 0; i < dim; ++i)
     {
         bounds.setHigh(i, prob->GetBounds()[i + dim]);
         bounds.setLow(i, prob->GetBounds()[i]);
@@ -110,10 +111,10 @@ void TimeIndexedRRTConnectSolver::Instantiate(TimeIndexedRRTConnectSolverInitial
     algorithm_ = "Exotica_TimeIndexedRRTConnect";
     planner_allocator_ = boost::bind(&allocatePlanner<OMPLTimeIndexedRRTConnect>, _1, _2);
 
-    if (init_.random_seed != -1)
+    if (init_.RandomSeed != -1)
     {
-        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.random_seed);
-        ompl::RNG::setSeed(init_.random_seed);
+        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.RandomSeed);
+        ompl::RNG::setSeed(init_.RandomSeed);
     }
 }
 
@@ -126,11 +127,11 @@ void TimeIndexedRRTConnectSolver::SpecifyProblem(PlanningProblemPtr pointer)
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLTimeIndexedStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
     ompl_simple_setup_->setPlannerAllocator(boost::bind(planner_allocator_, _1, "Exotica_" + algorithm_));
-    ompl_simple_setup_->getSpaceInformation()->setStateValidityCheckingResolution(init_.validity_check_resolution);
+    ompl_simple_setup_->getSpaceInformation()->setStateValidityCheckingResolution(init_.ValidityCheckResolution);
 
     ompl_simple_setup_->getSpaceInformation()->setup();
     ompl_simple_setup_->setup();
-    if (ompl_simple_setup_->getPlanner()->params().hasParam("range")) ompl_simple_setup_->getPlanner()->params().setParam("range", init_.range);
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("Range")) ompl_simple_setup_->getPlanner()->params().setParam("Range", init_.Range);
 }
 
 void TimeIndexedRRTConnectSolver::PreSolve()
@@ -170,7 +171,7 @@ void TimeIndexedRRTConnectSolver::SetGoalState(const Eigen::VectorXd &qT, const 
 
         // Debug state and bounds
         std::string out_of_bounds_joint_ids = "";
-        for (int i = 0; i < qT.rows(); i++)
+        for (int i = 0; i < qT.rows(); ++i)
             if (qT(i) < prob_->GetBounds()[i] || qT(i) > prob_->GetBounds()[i + qT.rows()]) out_of_bounds_joint_ids += "[j" + std::to_string(i) + "=" + std::to_string(qT(i)) + ", ll=" + std::to_string(prob_->GetBounds()[i]) + ", ul=" + std::to_string(prob_->GetBounds()[i + qT.rows()]) + "]\n";
 
         ThrowNamed("Invalid goal state [Invalid joint bounds for joint indices: \n"
@@ -185,7 +186,7 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
     const ompl::base::SpaceInformationPtr &si = ompl_simple_setup_->getSpaceInformation();
 
     ompl::geometric::PathGeometric pg = ompl_simple_setup_->getSolutionPath();
-    if (init_.smooth)
+    if (init_.Smooth)
     {
         bool tryMore = false;
         if (ptc == false) tryMore = psf_->reduceVertices(pg);
@@ -194,7 +195,7 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
         while (times < 10 && tryMore && ptc == false)
         {
             tryMore = psf_->reduceVertices(pg);
-            times++;
+            ++times;
         }
         if (si->getStateSpace()->isMetricSpace())
         {
@@ -205,14 +206,14 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
             while (times < 10 && tryMore && ptc == false)
             {
                 tryMore = psf_->shortcutPath(pg);
-                times++;
+                ++times;
             }
         }
     }
     std::vector<ompl::base::State *> &states = pg.getStates();
     unsigned int length = 0;
 
-    if (init_.trajectory_points_per_second <= 0)
+    if (init_.TrajectoryPointsPerSecond <= 0)
     {
         const int n1 = states.size() - 1;
         for (int i = 0; i < n1; ++i)
@@ -224,11 +225,11 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
         Eigen::VectorXd qs, qg;
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(0), qs, tstart);
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(states.size() - 1), qg, tgoal);
-        length = (tgoal - tstart) * init_.trajectory_points_per_second;
+        length = (tgoal - tstart) * init_.TrajectoryPointsPerSecond;
     }
     pg.interpolate(length);
 
-    traj.resize(pg.getStateCount(), init_.add_time_into_solution ? prob_->GetSpaceDim() + 1 : prob_->GetSpaceDim());
+    traj.resize(pg.getStateCount(), init_.AddTimeIntoSolution ? prob_->GetSpaceDim() + 1 : prob_->GetSpaceDim());
     Eigen::VectorXd tmp(prob_->GetSpaceDim());
     Eigen::VectorXd ts(pg.getStateCount());
     for (int i = 0; i < (int)pg.getStateCount(); ++i)
@@ -236,7 +237,7 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(i), tmp, ts(i));
         traj.row(i).tail(prob_->GetSpaceDim()) = tmp;
     }
-    if (init_.add_time_into_solution) traj.col(0) = ts;
+    if (init_.AddTimeIntoSolution) traj.col(0) = ts;
 }
 
 void TimeIndexedRRTConnectSolver::Solve(Eigen::MatrixXd &solution)
@@ -251,7 +252,7 @@ void TimeIndexedRRTConnectSolver::Solve(Eigen::MatrixXd &solution)
     PreSolve();
     ompl::time::point start = ompl::time::now();
     if (!ptc_)
-        ptc_.reset(new ompl::base::PlannerTerminationCondition(ompl::base::timedPlannerTerminationCondition(init_.timeout - ompl::time::seconds(ompl::time::now() - start))));
+        ptc_.reset(new ompl::base::PlannerTerminationCondition(ompl::base::timedPlannerTerminationCondition(init_.Timeout - ompl::time::seconds(ompl::time::now() - start))));
     if (ompl_simple_setup_->solve(*ptc_) == ompl::base::PlannerStatus::EXACT_SOLUTION && ompl_simple_setup_->haveSolutionPath())
     {
         GetPath(solution, *ptc_);

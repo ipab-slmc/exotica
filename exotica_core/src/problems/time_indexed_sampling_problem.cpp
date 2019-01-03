@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -46,7 +47,7 @@ std::vector<double> TimeIndexedSamplingProblem::GetBounds()
     auto joint_limits = scene_->GetKinematicTree().GetJointLimits();
 
     bounds.resize(2 * N);
-    for (unsigned int i = 0; i < N; i++)
+    for (unsigned int i = 0; i < N; ++i)
     {
         bounds[i] = joint_limits(i, 0);
         bounds[i + N] = joint_limits(i, 1);
@@ -59,11 +60,11 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
 {
     parameters = init;
 
-    if (init.goal.size() == N)
+    if (init.Goal.size() == N)
     {
-        goal_ = init.goal;
+        goal_ = init.Goal;
     }
-    else if (init.goal.size() == 0)
+    else if (init.Goal.size() == 0)
     {
         goal_ = Eigen::VectorXd::Zero(N);
     }
@@ -72,22 +73,22 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
         ThrowNamed("Dimension mismatch: problem N=" << N << ", but goal state has dimension " << goal_.rows());
     }
 
-    T_ = init.t;
+    T_ = init.T;
     if (T_ < 0)
         ThrowNamed("Invalid problem duration T: " << T_);
-    t_goal_ = init.goal_time;
+    t_goal_ = init.GoalTime;
     if (t_goal_ > T_)
         ThrowNamed("Invalid goal time t_goal_= " << t_goal_ << ">T_(" << T_ << ")");
     if (t_goal_ == -1.0)
         t_goal_ = T_;
 
-    if (init.joint_velocity_limits.size() == N)
+    if (init.JointVelocityLimits.size() == N)
     {
-        vel_limits = init.joint_velocity_limits;
+        vel_limits = init.JointVelocityLimits;
     }
-    else if (init.joint_velocity_limits.size() == 1)
+    else if (init.JointVelocityLimits.size() == 1)
     {
-        vel_limits = init.joint_velocity_limits(0) * Eigen::VectorXd::Ones(N);
+        vel_limits = init.JointVelocityLimits(0) * Eigen::VectorXd::Ones(N);
     }
     else
     {
@@ -97,34 +98,34 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     num_tasks = tasks_.size();
     length_phi = 0;
     length_jacobian = 0;
-    for (int i = 0; i < num_tasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
-        AppendVector(phi.map, tasks_[i]->GetLieGroupIndices());
+        AppendVector(Phi.map, tasks_[i]->GetLieGroupIndices());
         length_phi += tasks_[i]->length;
         length_jacobian += tasks_[i]->length_jacobian;
     }
-    phi.SetZero(length_phi);
+    Phi.SetZero(length_phi);
 
-    inequality.Initialize(init.inequality, shared_from_this(), constraint_phi);
-    inequality.tolerance = init.constraint_tolerance;
-    equality.Initialize(init.equality, shared_from_this(), constraint_phi);
-    equality.tolerance = init.constraint_tolerance;
+    inequality.Initialize(init.Inequality, shared_from_this(), constraint_phi);
+    inequality.tolerance = init.ConstraintTolerance;
+    equality.Initialize(init.Equality, shared_from_this(), constraint_phi);
+    equality.tolerance = init.ConstraintTolerance;
 
     ApplyStartState(false);
 
-    if (scene_->GetBaseType() != exotica::BaseType::FIXED && init.floating_base_lower_limits.rows() > 0 && init.floating_base_upper_limits.rows() > 0)
+    if (scene_->GetBaseType() != exotica::BaseType::FIXED && init.FloatingBaseLowerLimits.rows() > 0 && init.FloatingBaseUpperLimits.rows() > 0)
     {
-        if (scene_->GetBaseType() == exotica::BaseType::FLOATING && init.floating_base_lower_limits.rows() == 6 && init.floating_base_upper_limits.rows() == 6)
+        if (scene_->GetBaseType() == exotica::BaseType::FLOATING && init.FloatingBaseLowerLimits.rows() == 6 && init.FloatingBaseUpperLimits.rows() == 6)
         {
             scene_->GetKinematicTree().SetFloatingBaseLimitsPosXYZEulerZYX(
-                std::vector<double>(init.floating_base_lower_limits.data(), init.floating_base_lower_limits.data() + init.floating_base_lower_limits.size()),
-                std::vector<double>(init.floating_base_upper_limits.data(), init.floating_base_upper_limits.data() + init.floating_base_upper_limits.size()));
+                std::vector<double>(init.FloatingBaseLowerLimits.data(), init.FloatingBaseLowerLimits.data() + init.FloatingBaseLowerLimits.size()),
+                std::vector<double>(init.FloatingBaseUpperLimits.data(), init.FloatingBaseUpperLimits.data() + init.FloatingBaseUpperLimits.size()));
         }
-        else if (scene_->GetBaseType() == exotica::BaseType::PLANAR && init.floating_base_lower_limits.rows() == 3 && init.floating_base_upper_limits.rows() == 3)
+        else if (scene_->GetBaseType() == exotica::BaseType::PLANAR && init.FloatingBaseLowerLimits.rows() == 3 && init.FloatingBaseUpperLimits.rows() == 3)
         {
             scene_->GetKinematicTree().SetPlanarBaseLimitsPosXYEulerZ(
-                std::vector<double>(init.floating_base_lower_limits.data(), init.floating_base_lower_limits.data() + init.floating_base_lower_limits.size()),
-                std::vector<double>(init.floating_base_upper_limits.data(), init.floating_base_upper_limits.data() + init.floating_base_upper_limits.size()));
+                std::vector<double>(init.FloatingBaseLowerLimits.data(), init.FloatingBaseLowerLimits.data() + init.FloatingBaseLowerLimits.size()),
+                std::vector<double>(init.FloatingBaseUpperLimits.data(), init.FloatingBaseUpperLimits.data() + init.FloatingBaseUpperLimits.size()));
         }
         else
         {
@@ -159,7 +160,7 @@ void TimeIndexedSamplingProblem::SetGoalTime(const double& t)
 
 void TimeIndexedSamplingProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -173,7 +174,7 @@ void TimeIndexedSamplingProblem::SetGoalEQ(const std::string& task_name, Eigen::
 
 void TimeIndexedSamplingProblem::SetRhoEQ(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -187,7 +188,7 @@ void TimeIndexedSamplingProblem::SetRhoEQ(const std::string& task_name, const do
 
 Eigen::VectorXd TimeIndexedSamplingProblem::GetGoalEQ(const std::string& task_name)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -199,7 +200,7 @@ Eigen::VectorXd TimeIndexedSamplingProblem::GetGoalEQ(const std::string& task_na
 
 double TimeIndexedSamplingProblem::GetRhoEQ(const std::string& task_name)
 {
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -211,7 +212,7 @@ double TimeIndexedSamplingProblem::GetRhoEQ(const std::string& task_name)
 
 void TimeIndexedSamplingProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -225,7 +226,7 @@ void TimeIndexedSamplingProblem::SetGoalNEQ(const std::string& task_name, Eigen:
 
 void TimeIndexedSamplingProblem::SetRhoNEQ(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -239,7 +240,7 @@ void TimeIndexedSamplingProblem::SetRhoNEQ(const std::string& task_name, const d
 
 Eigen::VectorXd TimeIndexedSamplingProblem::GetGoalNEQ(const std::string& task_name)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -251,7 +252,7 @@ Eigen::VectorXd TimeIndexedSamplingProblem::GetGoalNEQ(const std::string& task_n
 
 double TimeIndexedSamplingProblem::GetRhoNEQ(const std::string& task_name)
 {
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -264,14 +265,14 @@ double TimeIndexedSamplingProblem::GetRhoNEQ(const std::string& task_name)
 bool TimeIndexedSamplingProblem::IsValid(Eigen::VectorXdRefConst x, const double& t)
 {
     scene_->Update(x, t);
-    for (int i = 0; i < num_tasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
         if (tasks_[i]->is_used)
-            tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length));
+            tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length));
     }
-    inequality.Update(phi);
-    equality.Update(phi);
-    number_of_problem_updates_++;
+    inequality.Update(Phi);
+    equality.Update(Phi);
+    ++number_of_problem_updates_;
 
     bool inequality_is_valid = ((inequality.S * inequality.ydiff).array() <= 0.0).all();
     bool equality_is_valid = ((equality.S * equality.ydiff).array().abs() == 0.0).all();
@@ -282,7 +283,7 @@ bool TimeIndexedSamplingProblem::IsValid(Eigen::VectorXdRefConst x, const double
 void TimeIndexedSamplingProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
-    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
     inequality.UpdateS();
     equality.UpdateS();
 }
@@ -290,7 +291,7 @@ void TimeIndexedSamplingProblem::PreUpdate()
 void TimeIndexedSamplingProblem::Update(Eigen::VectorXdRefConst x, const double& t)
 {
     IsValid(x, t);
-    number_of_problem_updates_++;
+    ++number_of_problem_updates_;
 }
 
 int TimeIndexedSamplingProblem::GetSpaceDim()

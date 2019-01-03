@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -78,29 +79,29 @@ void PointToLine::SetEndPoint(const Eigen::Vector3d &point)
     line_ = line_end_ - line_start_;
 }
 
-void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
 {
-    if (phi.rows() != kinematics[0].phi.rows() * 3) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
 
-    for (int i = 0; i < kinematics[0].phi.rows(); i++)
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(kinematics[0].phi(i).p.data);
-        phi.segment<3>(i * 3) = -Direction(p);
+        const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        Phi.segment<3>(i * 3) = -Direction(p);
     }
 }
 
-void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != kinematics[0].phi.rows() * 3) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 3 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
-    for (int i = 0; i < kinematics[0].phi.rows(); i++)
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
         // point in base frame
-        const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(kinematics[0].phi(i).p.data);
+        const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
         // direction from point to line
         const Eigen::Vector3d dv = Direction(p);
-        phi.segment<3>(i * 3) = dv;
+        Phi.segment<3>(i * 3) = dv;
 
         if ((dv + p - line_start_).norm() < std::numeric_limits<double>::epsilon())
         {
@@ -109,7 +110,7 @@ void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
         }
         else
         {
-            for (int j = 0; j < jacobian.cols(); j++)
+            for (int j = 0; j < jacobian.cols(); ++j)
             {
                 jacobian.middleRows<3>(i * 3).col(j) = kinematics[0].jacobian[i].data.topRows<3>().col(j).dot(line_ / line_.squaredNorm()) * line_ - kinematics[0].jacobian[i].data.topRows<3>().col(j);
             }
@@ -225,16 +226,16 @@ void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
 
 void PointToLine::Instantiate(PointToLineInitializer &init)
 {
-    link_name_ = frames_[0].frame_a_link_name;
-    base_name_ = frames_[0].frame_b_link_name;
+    link_name_ = frames_[0].frame_A_link_name;
+    base_name_ = frames_[0].frame_B_link_name;
 
-    line_start_ = Eigen::Map<Eigen::Vector3d>(frames_[0].frame_b_offset.p.data);
-    line_end_ = init.end_point;
+    line_start_ = Eigen::Map<Eigen::Vector3d>(frames_[0].frame_B_offset.p.data);
+    line_end_ = init.EndPoint;
 
     line_ = line_end_ - line_start_;
-    infinite_ = init.infinite;
+    infinite_ = init.Infinite;
 
-    visualize_ = init.visualise;
+    visualize_ = init.Visualise;
 
     if (visualize_ && Server::IsRos())
     {
@@ -252,6 +253,6 @@ void PointToLine::Instantiate(PointToLineInitializer &init)
 
 int PointToLine::TaskSpaceDim()
 {
-    return kinematics[0].phi.rows() * 3;
+    return kinematics[0].Phi.rows() * 3;
 }
 }  // namespace exotica

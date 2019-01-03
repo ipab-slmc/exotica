@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -30,7 +31,7 @@
 
 namespace exotica
 {
-TaskVectorEntry::TaskVectorEntry(int _in_id, RotationType _type) : in_id(_in_id), type(_type)
+TaskVectorEntry::TaskVectorEntry(int _id, RotationType _type) : id(_id), type(_type)
 {
 }
 
@@ -53,10 +54,10 @@ TaskSpaceVector& TaskSpaceVector::operator=(std::initializer_list<double> other)
 void TaskSpaceVector::SetZero(int n)
 {
     data = Eigen::VectorXd::Zero(n);
-    for (const TaskVectorEntry& id : map)
+    for (const TaskVectorEntry& entry : map)
     {
-        const int len = GetRotationTypeLength(id.type);
-        data.segment(id.in_id, len) = SetRotation(KDL::Rotation(), id.type);
+        const int len = GetRotationTypeLength(entry.type);
+        data.segment(entry.id, len) = SetRotation(KDL::Rotation(), entry.type);
     }
 }
 
@@ -64,19 +65,19 @@ Eigen::VectorXd TaskSpaceVector::operator-(const TaskSpaceVector& other)
 {
     if (data.rows() != other.data.rows()) ThrowPretty("Task space vector sizes do not match!");
     int entry_size = 0;
-    for (const TaskVectorEntry& id : map) entry_size += GetRotationTypeLength(id.type);
+    for (const TaskVectorEntry& entry : map) entry_size += GetRotationTypeLength(entry.type);
     Eigen::VectorXd ret(data.rows() + map.size() * 3 - entry_size);
     int i_in = 0;
     int i_out = 0;
-    for (const TaskVectorEntry& id : map)
+    for (const TaskVectorEntry& entry : map)
     {
-        if (i_in < id.in_id) ret.segment(i_out, id.in_id - i_in) = data.segment(i_in, id.in_id - i_in) - other.data.segment(i_in, id.in_id - i_in);
-        i_out += id.in_id - i_in;
-        i_in += id.in_id - i_in;
-        const int len = GetRotationTypeLength(id.type);
+        if (i_in < entry.id) ret.segment(i_out, entry.id - i_in) = data.segment(i_in, entry.id - i_in) - other.data.segment(i_in, entry.id - i_in);
+        i_out += entry.id - i_in;
+        i_in += entry.id - i_in;
+        const int len = GetRotationTypeLength(entry.type);
 
-        KDL::Rotation M1 = GetRotation(data.segment(id.in_id, len), id.type);
-        KDL::Rotation M2 = GetRotation(other.data.segment(id.in_id, len), id.type);
+        KDL::Rotation M1 = GetRotation(data.segment(entry.id, len), entry.type);
+        KDL::Rotation M2 = GetRotation(other.data.segment(entry.id, len), entry.type);
         KDL::Rotation M = M2.Inverse() * M1;
         KDL::Vector rotvec = M1 * (M.GetRot());
         ret(i_out) = rotvec[0];
@@ -92,9 +93,9 @@ Eigen::VectorXd TaskSpaceVector::operator-(const TaskSpaceVector& other)
 std::vector<TaskVectorEntry> TaskVectorEntry::reindex(const std::vector<TaskVectorEntry>& _map, int _old_start, int _new_start)
 {
     std::vector<TaskVectorEntry> ret = _map;
-    for (TaskVectorEntry& id : ret)
+    for (TaskVectorEntry& entry : ret)
     {
-        id.in_id = id.in_id - _old_start + _new_start;
+        entry.id = entry.id - _old_start + _new_start;
     }
     return ret;
 }

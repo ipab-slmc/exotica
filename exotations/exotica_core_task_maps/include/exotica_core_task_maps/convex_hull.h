@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H
-#define EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H
+#ifndef EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H_
+#define EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H_
 
 #include <Eigen/Dense>
 
@@ -106,4 +107,4 @@ std::list<int> ConvexHull2D(Eigen::MatrixXdRefConst points)
 }
 }
 
-#endif
+#endif // EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H_

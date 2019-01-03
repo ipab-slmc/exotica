@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_PROPERTY_H
-#define EXOTICA_CORE_PROPERTY_H
+#ifndef EXOTICA_CORE_PROPERTY_H_
+#define EXOTICA_CORE_PROPERTY_H_
 
 #include <boost/any.hpp>
 #include <initializer_list>
@@ -130,4 +131,4 @@ public:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_PROPERTY_H_

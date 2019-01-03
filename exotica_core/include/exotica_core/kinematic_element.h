@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_KINEMATIC_ELEMENT_H
-#define EXOTICA_CORE_KINEMATIC_ELEMENT_H
+#ifndef EXOTICA_CORE_KINEMATIC_ELEMENT_H_
+#define EXOTICA_CORE_KINEMATIC_ELEMENT_H_
 
 #include <exotica_core/tools.h>
 #include <geometric_shapes/shapes.h>
@@ -84,7 +85,7 @@ public:
 
     inline void RemoveExpiredChildren()
     {
-        for (size_t i = 0; i < children.size(); i++)
+        for (size_t i = 0; i < children.size(); ++i)
         {
             if (children[i].expired())
             {
@@ -127,4 +128,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_KINEMATIC_ELEMENT_H_

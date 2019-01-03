@@ -1,6 +1,6 @@
 
-#ifndef INITIALIZEPROJECTHEADER_H_${PROJECT_NAME}
-#define INITIALIZEPROJECTHEADER_H_${PROJECT_NAME}
+#ifndef INITIALIZEPROJECTHEADER_${PROJECT_NAME}_H_
+#define INITIALIZEPROJECTHEADER_${PROJECT_NAME}_H_
 
 #include<exotica_core/property.h>
 ${_InitializerClassesIncludes}
@@ -18,4 +18,4 @@ inline std::vector<Initializer> get${PROJECT_NAME}Initializers()
 
 }
 
-#endif
+#endif \\ INITIALIZEPROJECTHEADER_${PROJECT_NAME}_H_

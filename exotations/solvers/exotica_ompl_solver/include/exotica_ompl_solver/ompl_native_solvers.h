@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_OMPL_SOLVER_OMPL_NATIVE_SOLVER_H
-#define EXOTICA_OMPL_SOLVER_OMPL_NATIVE_SOLVER_H
+#ifndef EXOTICA_OMPL_SOLVER_OMPL_NATIVE_SOLVER_H_
+#define EXOTICA_OMPL_SOLVER_OMPL_NATIVE_SOLVER_H_
 
 #include <exotica_ompl_solver/ompl_solver.h>
 
@@ -115,4 +116,4 @@ public:
 };
 }
 
-#endif
+#endif // EXOTICA_OMPL_SOLVER_OMPL_NATIVE_SOLVER_H_

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TOOLS_H
-#define EXOTICA_CORE_TOOLS_H
+#ifndef EXOTICA_CORE_TOOLS_H_
+#define EXOTICA_CORE_TOOLS_H_
 
 #include <Eigen/Dense>
 #include <kdl/tree.hpp>
@@ -131,4 +132,4 @@ std::shared_ptr<T> ToStdPtr(const std::shared_ptr<T>& p)
     return p;
 }
 
-#endif
+#endif // EXOTICA_CORE_TOOLS_H_

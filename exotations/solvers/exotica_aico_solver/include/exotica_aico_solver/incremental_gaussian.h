@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -29,8 +30,8 @@
 // The algorithm is based on the paper :
 // Chan, Tony F.; Golub, Gene H.; LeVeque, Randall J. (1979), “Updating Formulae and a Pairwise Algorithm for Computing Sample Variances.”, Technical Report STAN-CS-79-773, Department of Computer Science, Stanford University.
 
-#ifndef EXOTICA_AICO_SOLVER_INCREMENTAL_GAUSSIAN_H
-#define EXOTICA_AICO_SOLVER_INCREMENTAL_GAUSSIAN_H
+#ifndef EXOTICA_AICO_SOLVER_INCREMENTAL_GAUSSIAN_H_
+#define EXOTICA_AICO_SOLVER_INCREMENTAL_GAUSSIAN_H_
 
 #include <Eigen/Dense>
 #include <vector>
@@ -84,9 +85,9 @@ public:
         T += x;
         double f = 1. / W / (W - 1.);
         dX = W * x - T;
-        for (int r = 0; r < D; r++)
+        for (int r = 0; r < D; ++r)
         {
-            for (int c = 0; c < D; c++)
+            for (int c = 0; c < D; ++c)
             {
                 S(r, c) += f * dX(r) * dX(c);
             }
@@ -111,9 +112,9 @@ public:
         dX = T_ / W_ - T / W;
 
         double f = W * W_ / (W + W_);
-        for (int r = 0; r < D; r++)
+        for (int r = 0; r < D; ++r)
         {
-            for (int c = 0; c < D; c++)
+            for (int c = 0; c < D; ++c)
             {
                 S(r, c) += S_(r, c) + f * dX(r) * dX(c);
             }
@@ -135,9 +136,9 @@ public:
         dX = x - T / W;
 
         double f = W * w / (W + w);
-        for (int r = 0; r < D; r++)
+        for (int r = 0; r < D; ++r)
         {
-            for (int c = 0; c < D; c++)
+            for (int c = 0; c < D; ++c)
             {
                 S(r, c) += f * dX(r) * dX(c);
             }
@@ -161,4 +162,4 @@ public:
     }
 };
 
-#endif
+#endif // EXOTICA_AICO_SOLVER_INCREMENTAL_GAUSSIAN_H_

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -39,7 +40,7 @@ namespace exotica
 {
 void BayesianIKSolver::Instantiate(BayesianIKSolverInitializer& init)
 {
-    std::string mode = init.sweep_mode;
+    std::string mode = init.SweepMode;
     if (mode == "Forwardly")
         sweep_mode_ = FORWARD;
     else if (mode == "Symmetric")
@@ -50,14 +51,14 @@ void BayesianIKSolver::Instantiate(BayesianIKSolverInitializer& init)
         sweep_mode_ = LOCAL_GAUSS_NEWTON_DAMPED;
     else
     {
-        ThrowNamed("Unknown sweep mode '" << init.sweep_mode << "'");
+        ThrowNamed("Unknown sweep mode '" << init.SweepMode << "'");
     }
-    max_backtrack_iterations_ = init.max_backtrack_iterations;
-    minimum_step_tolerance = init.min_step;
-    step_tolerance = init.step_tolerance;
-    function_tolerance = init.function_tolerance;
-    damping_init_ = init.damping;
-    use_bwd_msg_ = init.use_backward_message;
+    max_backtrack_iterations_ = init.MaxBacktrackIterations;
+    minimum_step_tolerance = init.MinStep;
+    step_tolerance = init.StepTolerance;
+    function_tolerance = init.FunctionTolerance;
+    damping_init_ = init.Damping;
+    use_bwd_msg_ = init.UseBackwardMessage;
 }
 
 BayesianIKSolver::BayesianIKSolver()
@@ -321,7 +322,7 @@ void BayesianIKSolver::UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>
     }
 
     prob_->Update(qhat);
-    update_count_++;
+    ++update_count_;
     double c = GetTaskCosts();
     // q_stat_.addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
 }
@@ -334,7 +335,7 @@ double BayesianIKSolver::GetTaskCosts()
     rhat = 0;
     R.setZero();
     r.setZero();
-    for (int i = 0; i < prob_->cost.num_tasks; i++)
+    for (int i = 0; i < prob_->cost.num_tasks; ++i)
     {
         prec = prob_->cost.rho(i);
         if (prec > 0)
@@ -369,7 +370,7 @@ void BayesianIKSolver::UpdateTimestep(bool update_fwd, bool update_bwd,
         AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r);
     }
 
-    for (int k = 0; k < max_relocation_iterations && !(Server::IsRos() && !ros::ok()); k++)
+    for (int k = 0; k < max_relocation_iterations && !(Server::IsRos() && !ros::ok()); ++k)
     {
         if (!((!k && force_relocation) || (b - qhat).array().abs().maxCoeff() > tolerance)) break;
 
@@ -408,7 +409,7 @@ double BayesianIKSolver::EvaluateTrajectory(const Eigen::VectorXd& x, bool skip_
     // Perform update / roll-out
     if (!skip_update)
     {
-        update_count_++;
+        ++update_count_;
         prob_->Update(q);
     }
 
@@ -453,11 +454,11 @@ double BayesianIKSolver::Step()
     // If damping (similar to line-search) is being used, consider reverting this step
     if (damping) PerhapsUndoStep();
 
-    sweep_++;
+    ++sweep_;
     if (sweep_improved_cost_)
     {
         // HIGHLIGHT("Sweep improved cost, increasing iteration count and resetting sweep count");
-        iteration_count_++;
+        ++iteration_count_;
         sweep_ = 0;
         prob_->SetCostEvolution(iteration_count_, cost_);
     }

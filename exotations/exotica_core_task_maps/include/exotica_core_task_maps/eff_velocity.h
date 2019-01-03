@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //v
 
-#ifndef EXOTICA_CORE_TASK_MAPS_EFF_VELOCITY_H
-#define EXOTICA_CORE_TASK_MAPS_EFF_VELOCITY_H
+#ifndef EXOTICA_CORE_TASK_MAPS_EFF_VELOCITY_H_
+#define EXOTICA_CORE_TASK_MAPS_EFF_VELOCITY_H_
 
 #include <exotica_core/task_map.h>
 
@@ -43,10 +44,10 @@ public:
 
     void Instantiate(EffVelocityInitializer& init) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_TASK_MAPS_EFF_VELOCITY_H_

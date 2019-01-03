@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -84,7 +85,7 @@ Hessian operator-(const Hessian& A, const Hessian& B)
     }
 
     Hessian ret(A.rows());
-    for (size_t i = 0; i < A.rows(); i++)
+    for (size_t i = 0; i < A.rows(); ++i)
     {
         ret[i] = A[i] - B[i];
     }
@@ -109,20 +110,20 @@ template <class T>
 void testJacobianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double eps = 1e-4, double h = 1e-5)
 {
     TEST_COUT << "Testing Jacobian:";
-    for (int tr = 0; tr < NUM_TRIALS; tr++)
+    for (int tr = 0; tr < NUM_TRIALS; ++tr)
     {
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0);
-        TaskSpaceVector y0 = task.phi;
+        TaskSpaceVector y0 = task.Phi;
         Eigen::MatrixXd J0 = task.jacobian;
         Eigen::MatrixXd J = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
-        for (int i = 0; i < problem->N; i++)
+        for (int i = 0; i < problem->N; ++i)
         {
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x);
-            J.col(i) = (task.phi - y0) / h;
+            J.col(i) = (task.Phi - y0) / h;
         }
         double errJ = (J - J0).norm();
         if (errJ > eps)
@@ -142,7 +143,7 @@ template <class T>
 void testHessianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double eps = 1e-4, double h = 1e-5)
 {
     TEST_COUT << "Testing Hessian:";
-    for (int tr = 0; tr < NUM_TRIALS; tr++)
+    for (int tr = 0; tr < NUM_TRIALS; ++tr)
     {
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
@@ -151,18 +152,18 @@ void testHessianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double ep
         Hessian H0 = task.hessian;
         Hessian H = H0;
         Hessian H1 = H0;
-        for (int k = 0; k < task.length_jacobian; k++)
+        for (int k = 0; k < task.length_jacobian; ++k)
         {
             H1(k) = J0.row(k).transpose() * J0.row(k);
         }
-        for (int i = 0; i < H.rows(); i++) H(i).setZero();
-        for (int i = 0; i < problem->N; i++)
+        for (int i = 0; i < H.rows(); ++i) H(i).setZero();
+        for (int i = 0; i < problem->N; ++i)
         {
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x);
             Eigen::MatrixXd Ji = task.jacobian;
-            for (int k = 0; k < task.length_jacobian; k++)
+            for (int k = 0; k < task.length_jacobian; ++k)
             {
                 H(k).row(i) = (Ji.row(k) - J0.row(k)) / h;
             }
@@ -170,12 +171,12 @@ void testHessianEndPose(std::shared_ptr<T> problem, EndPoseTask& task, double ep
         Hessian dH = H - H0;
         Hessian dH1 = H1 - H0;
         double errH = 0.0;
-        for (int i = 0; i < dH.rows(); i++)
+        for (int i = 0; i < dH.rows(); ++i)
             errH = std::min(std::max(errH, dH(i).array().cwiseAbs().maxCoeff()),
                             std::max(errH, dH1(i).array().cwiseAbs().maxCoeff()));
         if (errH > eps)
         {
-            for (int i = 0; i < dH.rows(); i++)
+            for (int i = 0; i < dH.rows(); ++i)
             {
                 TEST_COUT << "Computed:\n"
                           << H0(i);
@@ -194,20 +195,20 @@ template <class T>
 void testJacobianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-4, double h = 1e-5)
 {
     TEST_COUT << "Testing Jacobian:";
-    for (int tr = 0; tr < NUM_TRIALS; tr++)
+    for (int tr = 0; tr < NUM_TRIALS; ++tr)
     {
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0, t);
-        TaskSpaceVector y0 = task.phi[t];
+        TaskSpaceVector y0 = task.Phi[t];
         Eigen::MatrixXd J0 = task.jacobian[t];
         Eigen::MatrixXd J = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
-        for (int i = 0; i < problem->N; i++)
+        for (int i = 0; i < problem->N; ++i)
         {
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x, t);
-            J.col(i) = (task.phi[t] - y0) / h;
+            J.col(i) = (task.Phi[t] - y0) / h;
         }
         double errJ = (J - J0).norm();
         if (errJ > eps)
@@ -227,7 +228,7 @@ template <class T>
 void testHessianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, double eps = 1e-4, double h = 1e-5)
 {
     TEST_COUT << "Testing Hessian:";
-    for (int tr = 0; tr < NUM_TRIALS; tr++)
+    for (int tr = 0; tr < NUM_TRIALS; ++tr)
     {
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
@@ -236,18 +237,18 @@ void testHessianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, i
         Hessian H0 = task.hessian[t];
         Hessian H = H0;
         Hessian H1 = H0;
-        for (int k = 0; k < task.length_jacobian; k++)
+        for (int k = 0; k < task.length_jacobian; ++k)
         {
             H1(k) = J0.row(k).transpose() * J0.row(k);
         }
-        for (int i = 0; i < H.rows(); i++) H(i).setZero();
-        for (int i = 0; i < problem->N; i++)
+        for (int i = 0; i < H.rows(); ++i) H(i).setZero();
+        for (int i = 0; i < problem->N; ++i)
         {
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x, t);
             Eigen::MatrixXd Ji = task.jacobian[t];
-            for (int k = 0; k < task.length_jacobian; k++)
+            for (int k = 0; k < task.length_jacobian; ++k)
             {
                 H(k).row(i) = (Ji.row(k) - J0.row(k)) / h;
             }
@@ -255,12 +256,12 @@ void testHessianTimeIndexed(std::shared_ptr<T> problem, TimeIndexedTask& task, i
         Hessian dH = H - H0;
         Hessian dH1 = H1 - H0;
         double errH = 0.0;
-        for (int i = 0; i < dH.rows(); i++)
+        for (int i = 0; i < dH.rows(); ++i)
             errH = std::min(std::max(errH, dH(i).array().cwiseAbs().maxCoeff()),
                             std::max(errH, dH1(i).array().cwiseAbs().maxCoeff()));
         if (errH > eps)
         {
-            for (int i = 0; i < dH.rows(); i++)
+            for (int i = 0; i < dH.rows(); ++i)
             {
                 TEST_COUT << "Computed:\n"
                           << H0(i);
@@ -281,7 +282,7 @@ TEST(ExoticaProblems, UnconstrainedEndPoseProblem)
     {
         std::vector<Eigen::VectorXd> X(3);
         std::vector<Eigen::MatrixXd> J(3);
-        for (int d = 0; d < 3; d++)
+        for (int d = 0; d < 3; ++d)
         {
             CREATE_PROBLEM(UnconstrainedEndPoseProblem, d);
             Eigen::VectorXd x = problem->GetStartState();
@@ -317,7 +318,7 @@ TEST(ExoticaProblems, BoundedEndPoseProblem)
     {
         std::vector<Eigen::VectorXd> X(3);
         std::vector<Eigen::MatrixXd> J(3);
-        for (int d = 0; d < 3; d++)
+        for (int d = 0; d < 3; ++d)
         {
             CREATE_PROBLEM(BoundedEndPoseProblem, d);
             Eigen::VectorXd x = problem->GetStartState();
@@ -353,7 +354,7 @@ TEST(ExoticaProblems, EndPoseProblem)
     {
         std::vector<Eigen::VectorXd> X(9);
         std::vector<Eigen::MatrixXd> J(6);  // Memory layout: {0,1 => Cost, 2,3 => Eq., 4,5 => Neq.}
-        for (int d = 0; d < 3; d++)
+        for (int d = 0; d < 3; ++d)
         {
             CREATE_PROBLEM(EndPoseProblem, d);
             Eigen::VectorXd x = problem->GetStartState();
@@ -430,11 +431,11 @@ TEST(ExoticaProblems, UnconstrainedTimeIndexedProblem)
             CREATE_PROBLEM(UnconstrainedTimeIndexedProblem, 0);
             T = problem->GetT();
         }
-        for (int t = 0; t < T; t++)
+        for (int t = 0; t < T; ++t)
         {
             std::vector<Eigen::VectorXd> X(3);
             std::vector<Eigen::MatrixXd> J(3);
-            for (int d = 0; d < 3; d++)
+            for (int d = 0; d < 3; ++d)
             {
                 CREATE_PROBLEM(UnconstrainedTimeIndexedProblem, d);
                 Eigen::VectorXd x = problem->GetStartState();
@@ -474,11 +475,11 @@ TEST(ExoticaProblems, BoundedTimeIndexedProblem)
             CREATE_PROBLEM(BoundedTimeIndexedProblem, 0);
             T = problem->GetT();
         }
-        for (int t = 0; t < T; t++)
+        for (int t = 0; t < T; ++t)
         {
             std::vector<Eigen::VectorXd> X(3);
             std::vector<Eigen::MatrixXd> J(3);
-            for (int d = 0; d < 3; d++)
+            for (int d = 0; d < 3; ++d)
             {
                 CREATE_PROBLEM(BoundedTimeIndexedProblem, d);
                 Eigen::VectorXd x = problem->GetStartState();
@@ -518,11 +519,11 @@ TEST(ExoticaProblems, TimeIndexedProblem)
             CREATE_PROBLEM(TimeIndexedProblem, 0);
             T = problem->GetT();
         }
-        for (int t = 0; t < T; t++)
+        for (int t = 0; t < T; ++t)
         {
             std::vector<Eigen::VectorXd> X(9);
             std::vector<Eigen::MatrixXd> J(9);
-            for (int d = 0; d < 3; d++)
+            for (int d = 0; d < 3; ++d)
             {
                 CREATE_PROBLEM(TimeIndexedProblem, d);
                 Eigen::VectorXd x = problem->GetStartState();

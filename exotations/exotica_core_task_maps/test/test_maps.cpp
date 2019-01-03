@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -85,14 +86,14 @@ bool test_random(UnconstrainedEndPoseProblemPtr problem)
 {
     Eigen::VectorXd x(3);
     TEST_COUT << "Testing random configurations:";
-    for (int i = 0; i < num_trials_; i++)
+    for (int i = 0; i < num_trials_; ++i)
     {
         x.setRandom();
         problem->Update(x);
         if (print_debug_information_)
         {
             TEST_COUT << "x = " << x.transpose();
-            TEST_COUT << "y = " << problem->phi.data.transpose();
+            TEST_COUT << "y = " << problem->Phi.data.transpose();
             TEST_COUT << "jacobian = \n"
                       << problem->jacobian;
         }
@@ -104,10 +105,10 @@ bool test_random(UnconstrainedTimeIndexedProblemPtr problem)
 {
     Eigen::MatrixXd x(3, problem->GetT());
     TEST_COUT << "Testing random configurations:";
-    for (int i = 0; i < num_trials_; i++)
+    for (int i = 0; i < num_trials_; ++i)
     {
         x.setRandom();
-        for (int t = 0; t < problem->GetT(); t++)
+        for (int t = 0; t < problem->GetT(); ++t)
         {
             problem->Update(x.col(t), t);
         }
@@ -121,18 +122,18 @@ bool test_values(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eig
     int N = Xref.cols();
     int M = Yref.cols();
     int L = Xref.rows();
-    for (int i = 0; i < L; i++)
+    for (int i = 0; i < L; ++i)
     {
         Eigen::VectorXd x = Xref.row(i);
         TaskSpaceVector y = problem->cost.y;
         y.data = Yref.row(i);
         Eigen::MatrixXd jacobian = Jref.middleRows(i * M, M);
         problem->Update(x);
-        double errY = (y - problem->phi).norm();
+        double errY = (y - problem->Phi).norm();
         double errJ = (jacobian - problem->jacobian).norm();
         if (errY > eps)
         {
-            TEST_COUT << "y:  " << problem->phi.data.transpose();
+            TEST_COUT << "y:  " << problem->Phi.data.transpose();
             TEST_COUT << "y*: " << y.data.transpose();
             ADD_FAILURE() << "Task space error out of bounds: " << errY;
         }
@@ -155,20 +156,20 @@ bool test_jacobian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e
     constexpr double h = 1e-5;  // NB: Not, this differs from the h for the time-indexed Jacobian
 
     TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
-    for (int j = 0; j < num_trials_; j++)
+    for (int j = 0; j < num_trials_; ++j)
     {
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0);
-        const TaskSpaceVector y0(problem->phi);
+        const TaskSpaceVector y0(problem->Phi);
         const Eigen::MatrixXd J0(problem->jacobian);
         Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
-        for (int i = 0; i < problem->N; i++)
+        for (int i = 0; i < problem->N; ++i)
         {
             Eigen::VectorXd x(x0);
             x(i) += h;
             problem->Update(x);
-            jacobian.col(i) = (problem->phi - y0) / h;
+            jacobian.col(i) = (problem->Phi - y0) / h;
         }
         double errJ = (jacobian - J0).norm();
         if (errJ > eps)
@@ -190,26 +191,26 @@ bool test_jacobian_time_indexed(std::shared_ptr<T> problem, TimeIndexedTask& tas
     constexpr double h = 1e-6;
 
     TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
-    for (int tr = 0; tr < num_trials_; tr++)
+    for (int tr = 0; tr < num_trials_; ++tr)
     {
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0, t);
-        TaskSpaceVector y0 = task.phi[t];
+        TaskSpaceVector y0 = task.Phi[t];
         Eigen::MatrixXd J0 = task.jacobian[t];
         Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
-        for (int i = 0; i < problem->N; i++)
+        for (int i = 0; i < problem->N; ++i)
         {
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x, t);
-            jacobian.col(i) = (task.phi[t] - y0) / h;
+            jacobian.col(i) = (task.Phi[t] - y0) / h;
         }
         double errJ = (jacobian - J0).norm();
         if (errJ > eps)
         {
             TEST_COUT << "x: " << x0.transpose();
-            TEST_COUT << "phi: " << task.phi[t].data.transpose();
+            TEST_COUT << "Phi: " << task.Phi[t].data.transpose();
             TEST_COUT << "J*:\n"
                       << jacobian;
             TEST_COUT << "J:\n"
@@ -266,7 +267,7 @@ UnconstrainedTimeIndexedProblemPtr setup_time_indexed_problem(Initializer& map)
                                                                     {"Cost", std::vector<Initializer>({cost})},
                                                                     {"W", W},
                                                                     {"T", std::string("10")},
-                                                                    {"Tau", std::string("0.05")}});
+                                                                    {"tau", std::string("0.05")}});
     Server::Instance()->GetModel("robot_description", urdf_string_, srdf_string_);
 
     UnconstrainedTimeIndexedProblemPtr problem_ptr = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::CreateProblem(problem));
@@ -278,7 +279,7 @@ UnconstrainedTimeIndexedProblemPtr setup_time_indexed_problem(Initializer& map)
                                                                       {"Cost", std::vector<Initializer>({cost, cost, cost})},
                                                                       {"W", W},
                                                                       {"T", std::string("10")},
-                                                                      {"Tau", std::string("0.05")}});
+                                                                      {"tau", std::string("0.05")}});
 
     test_random(std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::CreateProblem(problem)));
 
@@ -323,7 +324,7 @@ TEST(ExoticaTaskMaps, testEffOrientation)
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
         std::vector<double> eps = {1.1e-5, 1e-5, 1e-5, 1.1e-5, 1e-5, 1e-5};
 
-        for (int i = 0; i < types.size(); i++)
+        for (int i = 0; i < types.size(); ++i)
         {
             std::string type = types[i];
             TEST_COUT << "Rotation type " << type;
@@ -371,7 +372,7 @@ TEST(ExoticaTaskMaps, testEffFrame)
         std::vector<double> eps = {1.1e-5, 1e-5, 1e-5, 1.1e-5, 1e-5, 1e-5};
         // TODO: Quaternion does not pass the test with precision 1e-5. Investigate why.
 
-        for (int i = 0; i < types.size(); i++)
+        for (int i = 0; i < types.size(); ++i)
         {
             std::string type = types[i];
             TEST_COUT << "Rotation type " << type;
@@ -401,14 +402,14 @@ TEST(ExoticaTaskMaps, testEffVelocity)
         UnconstrainedTimeIndexedProblemPtr problem = setup_time_indexed_problem(map);
         EXPECT_TRUE(test_random(problem));
 
-        for (int t = 0; t < problem->GetT(); t++)
+        for (int t = 0; t < problem->GetT(); ++t)
         {
             Eigen::VectorXd x(problem->N);
             x.setRandom();
             problem->Update(x, t);
         }
 
-        for (int t = 0; t < problem->GetT(); t++)
+        for (int t = 0; t < problem->GetT(); ++t)
         {
             EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->cost, t, 1e-4));
         }
@@ -539,14 +540,14 @@ TEST(ExoticaTaskMaps, testJointVelocityLimit)
             UnconstrainedTimeIndexedProblemPtr problem = setup_time_indexed_problem(map);
             EXPECT_TRUE(test_random(problem));
 
-            for (int t = 0; t < problem->GetT(); t++)
+            for (int t = 0; t < problem->GetT(); ++t)
             {
                 Eigen::VectorXd x(problem->N);
                 x.setRandom();
                 problem->Update(x, t);
             }
 
-            for (int t = 0; t < problem->GetT(); t++)
+            for (int t = 0; t < problem->GetT(); ++t)
             {
                 EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->cost, t, 1e-4));
             }

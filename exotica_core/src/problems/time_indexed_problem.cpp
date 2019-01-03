@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -34,7 +35,7 @@ REGISTER_PROBLEM_TYPE("TimeIndexedProblem", exotica::TimeIndexedProblem)
 namespace exotica
 {
 TimeIndexedProblem::TimeIndexedProblem()
-    : T_(0), tau_(0), w_rate_(0)
+    : T_(0), tau_(0), w_scale_(0)
 {
     flags_ = KIN_FK | KIN_J;
 }
@@ -52,45 +53,45 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
 
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    w_rate_ = init_.wrate;
-    W = Eigen::MatrixXd::Identity(N, N) * w_rate_;
-    if (init_.w.rows() > 0)
+    w_scale_ = init_.Wrate;
+    W = Eigen::MatrixXd::Identity(N, N) * w_scale_;
+    if (init_.W.rows() > 0)
     {
-        if (init_.w.rows() == N)
+        if (init_.W.rows() == N)
         {
-            W.diagonal() = init_.w * w_rate_;
+            W.diagonal() = init_.W * w_scale_;
         }
         else
         {
-            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init_.w.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
         }
     }
 
-    if (init.lower_bound.rows() == N)
+    if (init.LowerBound.rows() == N)
     {
-        scene_->GetKinematicTree().SetJointLimitsLower(init.lower_bound);
+        scene_->GetKinematicTree().SetJointLimitsLower(init.LowerBound);
     }
-    else if (init.lower_bound.rows() != 0)
+    else if (init.LowerBound.rows() != 0)
     {
-        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.lower_bound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.LowerBound.rows());
     }
-    if (init.upper_bound.rows() == N)
+    if (init.UpperBound.rows() == N)
     {
-        scene_->GetKinematicTree().SetJointLimitsUpper(init.upper_bound);
+        scene_->GetKinematicTree().SetJointLimitsUpper(init.UpperBound);
     }
-    else if (init.upper_bound.rows() != 0)
+    else if (init.UpperBound.rows() != 0)
     {
-        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.upper_bound.rows());
+        ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 
-    use_bounds = init.use_bounds;
+    use_bounds = init_.UseBounds;
 
-    cost.Initialize(init_.cost, shared_from_this(), cost_phi);
-    inequality.Initialize(init_.inequality, shared_from_this(), inequality_phi);
-    equality.Initialize(init_.equality, shared_from_this(), equality_phi);
+    cost.Initialize(init_.Cost, shared_from_this(), cost_phi);
+    inequality.Initialize(init_.Inequality, shared_from_this(), inequality_phi);
+    equality.Initialize(init_.Equality, shared_from_this(), equality_phi);
 
-    T_ = init_.t;
-    q_dot_max_ = init_.joint_velocity_limit;
+    T_ = init_.T;
+    q_dot_max_ = init_.JointVelocityLimit;
     ApplyStartState(false);
     ReinitializeVariables();
 }
@@ -105,7 +106,7 @@ void TimeIndexedProblem::ReinitializeVariables()
     length_phi = 0;
     length_jacobian = 0;
     TaskSpaceVector y_ref_;
-    for (int i = 0; i < num_tasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
         AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
         length_phi += tasks_[i]->length;
@@ -113,7 +114,7 @@ void TimeIndexedProblem::ReinitializeVariables()
     }
 
     y_ref_.SetZero(length_phi);
-    phi.assign(T_, y_ref_);
+    Phi.assign(T_, y_ref_);
 
     if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
     x.assign(T_, Eigen::VectorXd::Zero(N));
@@ -155,7 +156,7 @@ void TimeIndexedProblem::SetTau(const double& tau_in)
 void TimeIndexedProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
-    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
     cost.UpdateS();
     inequality.UpdateS();
     equality.UpdateS();
@@ -165,7 +166,7 @@ void TimeIndexedProblem::PreUpdate()
     // updates etc.
     kinematic_solutions_.clear();
     kinematic_solutions_.resize(T_);
-    for (int i = 0; i < T_; i++) kinematic_solutions_[i] = std::make_shared<KinematicResponse>(*scene_->GetKinematicTree().GetKinematicResponse());
+    for (int i = 0; i < T_; ++i) kinematic_solutions_[i] = std::make_shared<KinematicResponse>(*scene_->GetKinematicTree().GetKinematicResponse());
 }
 
 void TimeIndexedProblem::SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
@@ -221,49 +222,49 @@ void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
     PlanningProblem::updateMultipleTaskKinematics(kinematics_solutions);
 
     scene_->Update(x_in, static_cast<double>(t) * tau_);
-    phi[t].SetZero(length_phi);
+    Phi[t].SetZero(length_phi);
     if (flags_ & KIN_J) jacobian[t].setZero();
     if (flags_ & KIN_J_DOT)
-        for (int i = 0; i < length_jacobian; i++) hessian[t](i).setZero();
-    for (int i = 0; i < num_tasks; i++)
+        for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
+    for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
         if (tasks_[i]->is_used)
         {
             if (flags_ & KIN_J_DOT)
             {
-                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
     if (flags_ & KIN_J_DOT)
     {
-        cost.Update(phi[t], jacobian[t], hessian[t], t);
-        inequality.Update(phi[t], jacobian[t], hessian[t], t);
-        equality.Update(phi[t], jacobian[t], hessian[t], t);
+        cost.Update(Phi[t], jacobian[t], hessian[t], t);
+        inequality.Update(Phi[t], jacobian[t], hessian[t], t);
+        equality.Update(Phi[t], jacobian[t], hessian[t], t);
     }
     else if (flags_ & KIN_J)
     {
-        cost.Update(phi[t], jacobian[t], t);
-        inequality.Update(phi[t], jacobian[t], t);
-        equality.Update(phi[t], jacobian[t], t);
+        cost.Update(Phi[t], jacobian[t], t);
+        inequality.Update(Phi[t], jacobian[t], t);
+        equality.Update(Phi[t], jacobian[t], t);
     }
     else
     {
-        cost.Update(phi[t], t);
-        inequality.Update(phi[t], t);
-        equality.Update(phi[t], t);
+        cost.Update(Phi[t], t);
+        inequality.Update(Phi[t], t);
+        equality.Update(Phi[t], t);
     }
     if (t > 0) xdiff[t] = x[t] - x[t - 1];
-    number_of_problem_updates_++;
+    ++number_of_problem_updates_;
 }
 
 double TimeIndexedProblem::GetScalarTaskCost(int t)
@@ -380,7 +381,7 @@ void TimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRe
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -402,7 +403,7 @@ void TimeIndexedProblem::SetRho(const std::string& task_name, const double rho, 
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -424,7 +425,7 @@ Eigen::VectorXd TimeIndexedProblem::GetGoal(const std::string& task_name, int t)
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -444,7 +445,7 @@ double TimeIndexedProblem::GetRho(const std::string& task_name, int t)
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -464,7 +465,7 @@ void TimeIndexedProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXd
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -486,7 +487,7 @@ void TimeIndexedProblem::SetRhoEQ(const std::string& task_name, const double rho
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -508,7 +509,7 @@ Eigen::VectorXd TimeIndexedProblem::GetGoalEQ(const std::string& task_name, int 
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -528,7 +529,7 @@ double TimeIndexedProblem::GetRhoEQ(const std::string& task_name, int t)
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < equality.indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
         {
@@ -548,7 +549,7 @@ void TimeIndexedProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorX
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -570,7 +571,7 @@ void TimeIndexedProblem::SetRhoNEQ(const std::string& task_name, const double rh
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -592,7 +593,7 @@ Eigen::VectorXd TimeIndexedProblem::GetGoalNEQ(const std::string& task_name, int
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -612,7 +613,7 @@ double TimeIndexedProblem::GetRhoNEQ(const std::string& task_name, int t)
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < inequality.indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
         {
@@ -628,10 +629,10 @@ bool TimeIndexedProblem::IsValid()
     auto bounds = scene_->GetKinematicTree().GetJointLimits();
 
     // Check for every state
-    for (unsigned int t = 0; t < T_; t++)
+    for (unsigned int t = 0; t < T_; ++t)
     {
         // Check joint limits
-        for (unsigned int i = 0; i < N; i++)
+        for (unsigned int i = 0; i < N; ++i)
         {
             if (x[t](i) < bounds(i, 0) || x[t](i) > bounds(i, 1))
             {
@@ -643,7 +644,7 @@ bool TimeIndexedProblem::IsValid()
         // Check inequality constraints
         if (GetInequality(t).rows() > 0)
         {
-            if (GetInequality(t).maxCoeff() > init_.inequality_feasibility_tolerance)
+            if (GetInequality(t).maxCoeff() > init_.InequalityFeasibilityTolerance)
             {
                 if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated inequality constraints at timestep " << t << ": " << GetInequality(t).transpose());
                 succeeded = false;
@@ -653,7 +654,7 @@ bool TimeIndexedProblem::IsValid()
         // Check equality constraints
         if (GetEquality(t).rows() > 0)
         {
-            if (GetEquality(t).norm() > init_.equality_feasibility_tolerance)
+            if (GetEquality(t).norm() > init_.EqualityFeasibilityTolerance)
             {
                 if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated equality constraints at timestep " << t << ": " << GetEquality(t).norm());
                 succeeded = false;

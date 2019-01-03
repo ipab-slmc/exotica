@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_UNCONSTRAINED_END_POSE_PROBLEM_H
-#define EXOTICA_CORE_UNCONSTRAINED_END_POSE_PROBLEM_H
+#ifndef EXOTICA_CORE_UNCONSTRAINED_END_POSE_PROBLEM_H_
+#define EXOTICA_CORE_UNCONSTRAINED_END_POSE_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
@@ -62,7 +63,7 @@ public:
     EndPoseTask cost;
 
     Eigen::MatrixXd W;
-    TaskSpaceVector phi;
+    TaskSpaceVector Phi;
     Eigen::MatrixXd jacobian;
     Hessian hessian;
     Eigen::VectorXd q_nominal;
@@ -74,4 +75,4 @@ public:
 typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblemPtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_UNCONSTRAINED_END_POSE_PROBLEM_H_

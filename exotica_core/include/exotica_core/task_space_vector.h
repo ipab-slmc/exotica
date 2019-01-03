@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_SPACE_VECTOR_H
-#define EXOTICA_CORE_TASK_SPACE_VECTOR_H
+#ifndef EXOTICA_CORE_TASK_SPACE_VECTOR_H_
+#define EXOTICA_CORE_TASK_SPACE_VECTOR_H_
 
 #include <exotica_core/tools.h>
 #include <Eigen/Dense>
@@ -39,10 +40,10 @@ namespace exotica
 struct TaskVectorEntry
 {
     RotationType type = RotationType::RPY;
-    int in_id = 0;
+    int id = 0;
 
     TaskVectorEntry();
-    TaskVectorEntry(int _in_id, RotationType _type);
+    TaskVectorEntry(int _id, RotationType _type);
     static std::vector<TaskVectorEntry> reindex(const std::vector<TaskVectorEntry>& _map, int _old_start, int _new_start);
 };
 
@@ -59,4 +60,4 @@ struct TaskSpaceVector
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_TASK_SPACE_VECTOR_H_

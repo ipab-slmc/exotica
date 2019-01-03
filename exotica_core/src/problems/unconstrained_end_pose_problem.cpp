@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -45,32 +46,32 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
     num_tasks = tasks_.size();
     length_phi = 0;
     length_jacobian = 0;
-    for (int i = 0; i < num_tasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
-        AppendVector(phi.map, tasks_[i]->GetLieGroupIndices());
+        AppendVector(Phi.map, tasks_[i]->GetLieGroupIndices());
         length_phi += tasks_[i]->length;
         length_jacobian += tasks_[i]->length_jacobian;
     }
-    phi.SetZero(length_phi);
+    Phi.SetZero(length_phi);
     W = Eigen::MatrixXd::Identity(N, N);
-    if (init.w.rows() > 0)
+    if (init.W.rows() > 0)
     {
-        if (init.w.rows() == N)
+        if (init.W.rows() == N)
         {
-            W.diagonal() = init.w;
+            W.diagonal() = init.W;
         }
         else
         {
-            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init.w.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
         }
     }
     if (flags_ & KIN_J) jacobian = Eigen::MatrixXd(length_jacobian, N);
     if (flags_ & KIN_J_DOT) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
 
-    if (init.nominal_state.rows() > 0 && init.nominal_state.rows() != N) ThrowNamed("Invalid size of NominalState (" << init.nominal_state.rows() << "), expected: " << N);
-    if (init.nominal_state.rows() == N) q_nominal = init.nominal_state;
+    if (init.NominalState.rows() > 0 && init.NominalState.rows() != N) ThrowNamed("Invalid size of NominalState (" << init.NominalState.rows() << "), expected: " << N);
+    if (init.NominalState.rows() == N) q_nominal = init.NominalState;
     TaskSpaceVector dummy;
-    cost.Initialize(init.cost, shared_from_this(), dummy);
+    cost.Initialize(init.Cost, shared_from_this(), dummy);
     ApplyStartState(false);
     PreUpdate();
 }
@@ -78,7 +79,7 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
 void UnconstrainedEndPoseProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
-    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
     cost.UpdateS();
 }
 
@@ -94,7 +95,7 @@ Eigen::VectorXd UnconstrainedEndPoseProblem::GetScalarJacobian()
 
 double UnconstrainedEndPoseProblem::GetScalarTaskCost(const std::string& task_name)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -107,46 +108,46 @@ double UnconstrainedEndPoseProblem::GetScalarTaskCost(const std::string& task_na
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x, t_start);
-    phi.SetZero(length_phi);
+    Phi.SetZero(length_phi);
     if (flags_ & KIN_J) jacobian.setZero();
     if (flags_ & KIN_J_DOT)
-        for (int i = 0; i < length_jacobian; i++) hessian(i).setZero();
-    for (int i = 0; i < tasks_.size(); i++)
+        for (int i = 0; i < length_jacobian; ++i) hessian(i).setZero();
+    for (int i = 0; i < tasks_.size(); ++i)
     {
         if (tasks_[i]->is_used)
         {
             if (flags_ & KIN_J_DOT)
             {
-                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                tasks_[i]->Update(x, phi.data.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
     if (flags_ & KIN_J_DOT)
     {
-        cost.Update(phi, jacobian, hessian);
+        cost.Update(Phi, jacobian, hessian);
     }
     else if (flags_ & KIN_J)
     {
-        cost.Update(phi, jacobian);
+        cost.Update(Phi, jacobian);
     }
     else
     {
-        cost.Update(phi);
+        cost.Update(Phi);
     }
-    number_of_problem_updates_++;
+    ++number_of_problem_updates_;
 }
 
 void UnconstrainedEndPoseProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -160,7 +161,7 @@ void UnconstrainedEndPoseProblem::SetGoal(const std::string& task_name, Eigen::V
 
 void UnconstrainedEndPoseProblem::SetRho(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -174,7 +175,7 @@ void UnconstrainedEndPoseProblem::SetRho(const std::string& task_name, const dou
 
 Eigen::VectorXd UnconstrainedEndPoseProblem::GetGoal(const std::string& task_name)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -186,7 +187,7 @@ Eigen::VectorXd UnconstrainedEndPoseProblem::GetGoal(const std::string& task_nam
 
 double UnconstrainedEndPoseProblem::GetRho(const std::string& task_name)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -212,7 +213,7 @@ void UnconstrainedEndPoseProblem::SetNominalPose(Eigen::VectorXdRefConst qNomina
 
 int UnconstrainedEndPoseProblem::GetTaskId(const std::string& task_name)
 {
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {

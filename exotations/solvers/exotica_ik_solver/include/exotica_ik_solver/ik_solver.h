@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_IK_SOLVER_IK_SOLVER_H
-#define EXOTICA_IK_SOLVER_IK_SOLVER_H
+#ifndef EXOTICA_IK_SOLVER_IK_SOLVER_H_
+#define EXOTICA_IK_SOLVER_IK_SOLVER_H_
 
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/problems/unconstrained_end_pose_problem.h>
@@ -42,7 +43,7 @@ namespace exotica
 /// \f[
 ///   (SJW)x=y
 /// \f]
-/// Where S is a diagonal matrix of task scaling factors Rho for each task, jacobian is the Jacobian, W is a diagonal matrix
+/// Where S is a diagonal matrix of task scaling factors rho for each task, jacobian is the Jacobian, W is a diagonal matrix
 /// of the joint space weights.
 ///
 /// When regularisation term C is used, it gets appended to the Jacobian and distance to the nominal pose is appended
@@ -73,4 +74,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_IK_SOLVER_IK_SOLVER_H_

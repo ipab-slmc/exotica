@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_MAPS_JOINT_JERK_BACKWARD_DIFFERENCE_H
-#define EXOTICA_CORE_TASK_MAPS_JOINT_JERK_BACKWARD_DIFFERENCE_H
+#ifndef EXOTICA_CORE_TASK_MAPS_JOINT_JERK_BACKWARD_DIFFERENCE_H_
+#define EXOTICA_CORE_TASK_MAPS_JOINT_JERK_BACKWARD_DIFFERENCE_H_
 
 #include <exotica_core/task_map.h>
 
@@ -61,8 +62,8 @@ public:
     /// Finally, we compute the new qbd_.
     void SetPreviousJointState(Eigen::VectorXdRefConst joint_state);
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
 private:
@@ -77,4 +78,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_TASK_MAPS_JOINT_JERK_BACKWARD_DIFFERENCE_H_

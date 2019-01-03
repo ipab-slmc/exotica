@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_MAPS_COLLISION_CHECK_H
-#define EXOTICA_CORE_TASK_MAPS_COLLISION_CHECK_H
+#ifndef EXOTICA_CORE_TASK_MAPS_COLLISION_CHECK_H_
+#define EXOTICA_CORE_TASK_MAPS_COLLISION_CHECK_H_
 
 #include <exotica_core/task_map.h>
 
@@ -44,7 +45,7 @@ public:
     void Instantiate(CollisionCheckInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
     int TaskSpaceDim() override;
 
 private:
@@ -54,4 +55,5 @@ private:
     CollisionCheckInitializer init_;
 };
 }
-#endif
+
+#endif // EXOTICA_CORE_TASK_MAPS_COLLISION_CHECK_H_

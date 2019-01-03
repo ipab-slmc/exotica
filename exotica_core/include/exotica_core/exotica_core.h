@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_H
-#define EXOTICA_CORE_H
+#ifndef EXOTICA_CORE_H_
+#define EXOTICA_CORE_H_
 
 #include <exotica_core/loaders/xml_loader.h>
 #include <exotica_core/motion_solver.h>
@@ -44,4 +45,4 @@
 #include <exotica_core/tools.h>
 #include <exotica_core/version.h>
 
-#endif
+#endif // EXOTICA_CORE_H_

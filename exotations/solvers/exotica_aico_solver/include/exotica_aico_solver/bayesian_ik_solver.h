@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H
-#define EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H
+#ifndef EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H_
+#define EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H_
 
 #include <iostream>
 
@@ -206,4 +207,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H_

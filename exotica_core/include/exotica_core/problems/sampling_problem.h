@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_SAMPLING_PROBLEM_H
-#define EXOTICA_CORE_SAMPLING_PROBLEM_H
+#ifndef EXOTICA_CORE_SAMPLING_PROBLEM_H_
+#define EXOTICA_CORE_SAMPLING_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
@@ -65,7 +66,7 @@ public:
 
     void SetGoalState(Eigen::VectorXdRefConst qT);
     const Eigen::VectorXd& GetGoalState() const { return goal_; }
-    TaskSpaceVector phi;
+    TaskSpaceVector Phi;
     SamplingTask inequality;
     SamplingTask equality;
 
@@ -83,4 +84,4 @@ private:
 typedef std::shared_ptr<exotica::SamplingProblem> SamplingProblemPtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_SAMPLING_PROBLEM_H_

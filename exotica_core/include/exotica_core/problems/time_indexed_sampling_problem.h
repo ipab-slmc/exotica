@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TIME_INDEXED_SAMPLING_PROBLEM_H
-#define EXOTICA_CORE_TIME_INDEXED_SAMPLING_PROBLEM_H
+#ifndef EXOTICA_CORE_TIME_INDEXED_SAMPLING_PROBLEM_H_
+#define EXOTICA_CORE_TIME_INDEXED_SAMPLING_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
@@ -68,7 +69,7 @@ public:
     void SetGoalTime(const double& t);
 
     Eigen::VectorXd vel_limits;
-    TaskSpaceVector phi;
+    TaskSpaceVector Phi;
     SamplingTask inequality;
     SamplingTask equality;
     TimeIndexedSamplingProblemInitializer parameters;
@@ -87,4 +88,4 @@ private:
 typedef std::shared_ptr<exotica::TimeIndexedSamplingProblem> TimeIndexedSamplingProblem_ptr;
 }
 
-#endif
+#endif // EXOTICA_CORE_TIME_INDEXED_SAMPLING_PROBLEM_H_

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -90,13 +91,13 @@ void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
             vert(vn * 3) = v[0];
             vert(vn * 3 + 1) = v[1];
             vert(vn * 3 + 2) = v[2];
-            vn++;
+            ++vn;
         }
         else if (line.compare(0, 2, "f ") == 0)
         {
             std::stringstream sss(line.substr(2));
             int i;
-            for (i = 0; i < 9 && sss >> vv[i]; i++)
+            for (i = 0; i < 9 && sss >> vv[i]; ++i)
             {
                 while (sss.peek() == '/' || sss.peek() == ' ')
                     sss.ignore();
@@ -109,7 +110,7 @@ void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
             tri(tn * 3) = vv[0] - 1;
             tri(tn * 3 + 1) = vv[3] - 1;
             tri(tn * 3 + 2) = vv[6] - 1;
-            tn++;
+            ++tn;
         }
     }
 }

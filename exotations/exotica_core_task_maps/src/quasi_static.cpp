@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -53,29 +54,29 @@ double cross(Eigen::VectorXdRefConst a, Eigen::VectorXdRefConst b)
 
 ///
 /// \brief potential Calculates electrostatic potential at pont P induced by a uniformly charged line AB.
-/// \param phi Potential.
+/// \param Phi Potential.
 /// \param A 1st point on the line.
 /// \param B 2nd point on the line.
 /// \param P Query point.
 ///
-void potential(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P)
+void potential(double& Phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P)
 {
     double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
     double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
     double E = cross(A, B) - cross(A, P) + cross(B, P);
     if (fabs(E) <= eps)
     {
-        phi = 0.0;
+        Phi = 0.0;
     }
     else
     {
-        phi = (atan(C / E) - atan(D / E)) / E;
+        Phi = (atan(C / E) - atan(D / E)) / E;
     }
 }
 
 ///
 /// \brief potential Calculates electrostatic potential at pont P induced by a uniformly charged line AB.
-/// \param phi Potential.
+/// \param Phi Potential.
 /// \param jacobian Gradient of the potential.
 /// \param A 1st point on the line.
 /// \param B 2nd point on the line.
@@ -84,46 +85,46 @@ void potential(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B
 /// \param B_ Derivative of 2nd point on the line.
 /// \param P_ Derivative of query point.
 ///
-void potential(double& phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
+void potential(double& Phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
 {
     double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
     double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
     double E = cross(A, B) - cross(A, P) + cross(B, P);
     if (fabs(E) < eps)
     {
-        phi = 0.0;
+        Phi = 0.0;
         jacobian.setZero();
     }
     else
     {
-        phi = (atan(C / E) - atan(D / E)) / E;
-        for (int i = 0; i < jacobian.rows(); i++)
+        Phi = (atan(C / E) - atan(D / E)) / E;
+        for (int i = 0; i < jacobian.rows(); ++i)
         {
             double C_ = A_.col(i).dot(B) + A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) - 2 * B_.col(i).dot(B);
             double D_ = -A_.col(i).dot(B) - A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) + 2 * A_.col(i).dot(A);
             double E_ = cross(A_.col(i), B) + cross(A, B_.col(i)) - cross(A_.col(i), P) - cross(A, P_.col(i)) + cross(B_.col(i), P) + cross(B, P_.col(i));
-            jacobian(i) = ((C_ / E - E_ * C / E / E) / (C * C / E / E + 1) - (D_ / E - E_ * D / E / E) / (D * D / E / E + 1)) / E - E_ / E * phi;
+            jacobian(i) = ((C_ / E - E_ * C / E / E) / (C * C / E / E + 1) - (D_ / E - E_ * D / E / E) / (D * D / E / E + 1)) / E - E_ / E * Phi;
         }
     }
 }
 
 ///
 /// \brief winding Calculates the winding number around pont P w.r.t. thw line AB.
-/// \param phi Winding number.
+/// \param Phi Winding number.
 /// \param A 1st point on the line.
 /// \param B 2nd point on the line.
 /// \param P Query point.
 ///
-void winding(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P)
+void winding(double& Phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P)
 {
     double C = cross(A - P, B - P);
     double D = (A - P).dot(B - P);
-    phi = atan2(C, D) / 2.0 / M_PI;
+    Phi = atan2(C, D) / 2.0 / M_PI;
 }
 
 ///
 /// \brief winding Calculates the winding number around pont P w.r.t. thw line AB.
-/// \param phi Winding number.
+/// \param Phi Winding number.
 /// \param jacobian Gradient of the Winding number.
 /// \param A 1st point on the line.
 /// \param B 2nd point on the line.
@@ -132,12 +133,12 @@ void winding(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, 
 /// \param B_ Derivative of 2nd point on the line.
 /// \param P_ Derivative of query point.
 ///
-void winding(double& phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
+void winding(double& Phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
 {
     double C = cross(A - P, B - P);
     double D = (A - P).dot(B - P);
-    phi = atan2(C, D) / 2.0 / M_PI;
-    for (int i = 0; i < jacobian.rows(); i++)
+    Phi = atan2(C, D) / 2.0 / M_PI;
+    for (int i = 0; i < jacobian.rows(); ++i)
     {
         double C_ = cross(A_.col(i) - P_.col(i), B - P) + cross(A - P, B_.col(i) - P_.col(i));
         double D_ = (A_.col(i) - P_.col(i)).dot(B - P) + (A - P).dot(B_.col(i) - P_.col(i));
@@ -145,10 +146,10 @@ void winding(double& phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst A
     }
 }
 
-void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
 {
-    if (phi.rows() != 1) ThrowNamed("Wrong size of phi!");
-    phi(0) = 0.0;
+    if (Phi.rows() != 1) ThrowNamed("Wrong size of Phi!");
+    Phi(0) = 0.0;
     KDL::Vector kdl_com;
     double M = 0.0;
     for (std::weak_ptr<KinematicElement> welement : scene_->GetKinematicTree().GetTree())
@@ -172,11 +173,11 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     com(0) = kdl_com[0];
     com(1) = kdl_com[1];
 
-    Eigen::MatrixXd supports(kinematics[0].phi.rows(), 2);
-    for (int i = 0; i < kinematics[0].phi.rows(); i++)
+    Eigen::MatrixXd supports(kinematics[0].Phi.rows(), 2);
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        supports(i, 0) = kinematics[0].phi(i).p[0];
-        supports(i, 1) = kinematics[0].phi(i).p[1];
+        supports(i, 0) = kinematics[0].Phi(i).p[0];
+        supports(i, 1) = kinematics[0].Phi(i).p[1];
     }
 
     std::list<int> hull = ConvexHull2D(supports);
@@ -200,13 +201,13 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
         if (wnd < 0.5)
         {
-            phi(0) = -sqrt(-n / pot);
+            Phi(0) = -sqrt(-n / pot);
         }
         else
         {
-            if (!init_.positive_only)
+            if (!init_.PositiveOnly)
             {
-                phi(0) = sqrt(-n / pot);
+                Phi(0) = sqrt(-n / pot);
             }
         }
     }
@@ -231,11 +232,11 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     }
 }
 
-void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != 1) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != 1) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != 1 || jacobian.cols() != x.rows()) ThrowNamed("Wrong size of jacobian! " << x.rows());
-    phi(0) = 0.0;
+    Phi(0) = 0.0;
     jacobian.setZero();
     Eigen::MatrixXd jacobian_com = Eigen::MatrixXd::Zero(2, jacobian.cols());
     KDL::Vector kdl_com;
@@ -264,12 +265,12 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     com(1) = kdl_com[1];
     jacobian_com = jacobian_com / M;
 
-    Eigen::MatrixXd supports(kinematics[0].phi.rows(), 2);
-    Eigen::MatrixXd supportsJ(kinematics[0].phi.rows() * 2, x.rows());
-    for (int i = 0; i < kinematics[0].phi.rows(); i++)
+    Eigen::MatrixXd supports(kinematics[0].Phi.rows(), 2);
+    Eigen::MatrixXd supportsJ(kinematics[0].Phi.rows() * 2, x.rows());
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        supports(i, 0) = kinematics[0].phi(i).p[0];
-        supports(i, 1) = kinematics[0].phi(i).p[1];
+        supports(i, 0) = kinematics[0].Phi(i).p[0];
+        supports(i, 1) = kinematics[0].Phi(i).p[1];
         supportsJ.middleRows(i * 2, 2) = kinematics[0].jacobian(i).data.topRows(2);
     }
 
@@ -281,7 +282,7 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     Eigen::VectorXd potJ = jacobian.row(0);
     double tmp;
     Eigen::VectorXd tmpJ = jacobian.row(0);
-    for (std::list<int>::iterator it = hull.begin(); it != hull.end(); it++)
+    for (std::list<int>::iterator it = hull.begin(); it != hull.end(); ++it)
     {
         int a = *it;
         int b = (std::next(it) == hull.end()) ? *hull.begin() : *(std::next(it));
@@ -297,15 +298,15 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     {
         if (wnd < 0.5)
         {
-            phi(0) = sqrt(-n / pot);
-            jacobian.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
+            Phi(0) = sqrt(-n / pot);
+            jacobian.row(0) = potJ * (n / (2 * pot * pot * Phi(0)));
         }
         else
         {
-            if (!init_.positive_only)
+            if (!init_.PositiveOnly)
             {
-                phi(0) = -sqrt(-n / pot);
-                jacobian.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
+                Phi(0) = -sqrt(-n / pot);
+                jacobian.row(0) = potJ * (n / (2 * pot * pot * Phi(0)));
             }
         }
     }
@@ -323,7 +324,7 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
             debug_msg_.markers[1].points[ii].x = supports(i, 0);
             debug_msg_.markers[1].points[ii].y = supports(i, 1);
             debug_msg_.markers[1].points[ii].z = 0.0;
-            ii++;
+            ++ii;
         }
         debug_msg_.markers[1].points[ii] = debug_msg_.markers[1].points[0];
 

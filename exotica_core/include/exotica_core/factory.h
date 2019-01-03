@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_FACTORY_H
-#define EXOTICA_CORE_FACTORY_H
+#ifndef EXOTICA_CORE_FACTORY_H_
+#define EXOTICA_CORE_FACTORY_H_
 
 #include <map>
 #include <memory>
@@ -100,7 +101,7 @@ public:
     std::vector<std::string> GetDeclaredClasses()
     {
         std::vector<std::string> DeclaredClasses;
-        for (auto it = type_registry_.begin(); it != type_registry_.end(); it++)
+        for (auto it = type_registry_.begin(); it != type_registry_.end(); ++it)
         {
             DeclaredClasses.push_back(it->first);
         }
@@ -136,4 +137,4 @@ public:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_FACTORY_H_

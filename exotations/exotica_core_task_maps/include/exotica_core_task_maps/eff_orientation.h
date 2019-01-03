@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_MAPS_EFF_ORIENTATION_H
-#define EXOTICA_CORE_TASK_MAPS_EFF_ORIENTATION_H
+#ifndef EXOTICA_CORE_TASK_MAPS_EFF_ORIENTATION_H_
+#define EXOTICA_CORE_TASK_MAPS_EFF_ORIENTATION_H_
 
 #include <exotica_core/task_map.h>
 
@@ -43,8 +44,8 @@ public:
 
     void Instantiate(EffOrientationInitializer& init) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
     int TaskSpaceJacobianDim() override;
 
@@ -56,4 +57,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_TASK_MAPS_EFF_ORIENTATION_H_

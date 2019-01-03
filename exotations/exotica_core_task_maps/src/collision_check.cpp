@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -35,11 +36,11 @@ namespace exotica
 CollisionCheck::CollisionCheck() = default;
 CollisionCheck::~CollisionCheck() = default;
 
-void CollisionCheck::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void CollisionCheck::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
 {
-    if (phi.rows() != 1) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != 1) ThrowNamed("Wrong size of Phi!");
     if (!scene_->AlwaysUpdatesCollisionScene()) cscene_->UpdateCollisionObjectTransforms();
-    phi(0) = cscene_->IsStateValid(init_.self_collision, init_.safe_distance) ? 0.0 : 1.0;
+    Phi(0) = cscene_->IsStateValid(init_.SelfCollision, init_.SafeDistance) ? 0.0 : 1.0;
 }
 
 void CollisionCheck::Instantiate(CollisionCheckInitializer& init)

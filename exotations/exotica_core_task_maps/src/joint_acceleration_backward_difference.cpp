@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -51,14 +52,14 @@ void JointAccelerationBackwardDifference::AssignScene(ScenePtr scene)
 
     // Init each col of q_ with start state
     q_.resize(N_, 2);
-    if (init_.start_state.rows() == 0)
+    if (init_.StartState.rows() == 0)
     {
         q_.setZero(N_, 2);
     }
-    else if (init_.start_state.rows() == N_)
+    else if (init_.StartState.rows() == N_)
     {
-        for (int i = 0; i < 2; i++)
-            q_.col(i) = init_.start_state;
+        for (int i = 0; i < 2; ++i)
+            q_.col(i) = init_.StartState;
     }
     else
     {
@@ -90,23 +91,23 @@ void JointAccelerationBackwardDifference::SetPreviousJointState(Eigen::VectorXdR
     qbd_ = q_ * backward_difference_params_;
 }
 
-void JointAccelerationBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void JointAccelerationBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
 {
     // Input check
-    if (phi.rows() != N_) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != N_) ThrowNamed("Wrong size of Phi!");
 
     // Estimate second time derivative
-    phi = dt_inv_ * (x + qbd_);
+    Phi = dt_inv_ * (x + qbd_);
 }
 
-void JointAccelerationBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void JointAccelerationBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
 {
     // Input check
-    if (phi.rows() != N_) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != N_) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != N_ || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
 
     // Estimate second time derivative and set Jacobian to identity matrix
-    phi = dt_inv_ * (x + qbd_);
+    Phi = dt_inv_ * (x + qbd_);
     jacobian = dt_inv_ * I_;
 }
 

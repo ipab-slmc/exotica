@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_OBJECT_H
-#define EXOTICA_CORE_OBJECT_H
+#ifndef EXOTICA_CORE_OBJECT_H_
+#define EXOTICA_CORE_OBJECT_H_
 
 #include <exotica_core/tools.h>
 #include <string>  // C++ type strings
@@ -70,8 +71,8 @@ public:
     void InstatiateObject(const Initializer& init)
     {
         ObjectInitializer oinit(init);
-        object_name_ = oinit.name;
-        debug_ = oinit.debug;
+        object_name_ = oinit.Name;
+        debug_ = oinit.Debug;
     }
 
     virtual std::string Print(std::string prepend)
@@ -86,4 +87,4 @@ public:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_OBJECT_H_

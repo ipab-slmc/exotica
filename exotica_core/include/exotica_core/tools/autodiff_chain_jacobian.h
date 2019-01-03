@@ -6,8 +6,8 @@
 //
 // Modified from unsupported/Eigen/src/AutoDiff/AutoDiffJacobian.h
 
-#ifndef EIGEN_AUTODIFF_CHAIN_JACOBIAN_H
-#define EIGEN_AUTODIFF_CHAIN_JACOBIAN_H
+#ifndef EIGEN_AUTODIFF_CHAIN_JACOBIAN_H_
+#define EIGEN_AUTODIFF_CHAIN_JACOBIAN_H_
 
 #include <exotica_core/tools/autodiff_scalar.h>
 #include <exotica_core/tools/functor.h>
@@ -123,10 +123,10 @@ public:
             eigen_assert(InputsAtCompileTime == JacobianInputsAtCompileTime);
 
             if (InputsAtCompileTime == Dynamic)
-                for (Index j = 0; j < jac.rows(); j++)
+                for (Index j = 0; j < jac.rows(); ++j)
                     av[j].derivatives().resize(x.rows());
 
-            for (Index i = 0; i < jac.cols(); i++)
+            for (Index i = 0; i < jac.cols(); ++i)
                 ax[i].derivatives() = DerivativeType::Unit(x.rows(), i);
         }
         else
@@ -135,10 +135,10 @@ public:
             const InputJacobianType &ijac = *_ijac;
 
             if (InputsAtCompileTime == Dynamic)
-                for (Index j = 0; j < jac.rows(); j++)
+                for (Index j = 0; j < jac.rows(); ++j)
                     av[j].derivatives().resize(ijac.cols());
 
-            for (Index i = 0; i < x.rows(); i++)
+            for (Index i = 0; i < x.rows(); ++i)
                 ax[i].derivatives() = ijac.row(i);
         }
 
@@ -147,7 +147,7 @@ public:
 #else
         Functor::operator()(ax, av);
 #endif
-        for (Index i = 0; i < jac.rows(); i++)
+        for (Index i = 0; i < jac.rows(); ++i)
         {
             v[i] = av[i].value();
             jac.row(i) = av[i].derivatives();
@@ -157,4 +157,4 @@ public:
 
 }  // namespace Eigen
 
-#endif
+#endif // EIGEN_AUTODIFF_CHAIN_JACOBIAN_H_

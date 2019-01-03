@@ -62,14 +62,14 @@ def constructor_argument_list(data):
     ret = ""
     for d in data:
         if d.has_key('Required'):
-            ret += " " + d['Type'] + " _" + to_underscores(d['Name']) + default_argument_value(d) + ","
+            ret += " " + d['Type'] + " _" + (d['Name']) + default_argument_value(d) + ","
     return ret[0:-1]
 
 def constructor_list(data):
     ret=""
     for d in data:
         if d.has_key('Required'):
-            ret += ",\n        " + to_underscores(d['Name']) + "(_" + to_underscores(d['Name']) + ") "
+            ret += ",\n        " + (d['Name']) + "(_" + (d['Name']) + ") "
     return ret
 
 def default_value(data):
@@ -98,7 +98,7 @@ def default_constructor_list(data):
     ret = ""
     for d in data:
         if d.has_key('Required') and not d['Required']:
-            ret += ",\n        " + to_underscores(d['Name']) + "("+default_value(d) + ") "
+            ret += ",\n        " + (d['Name']) + "("+default_value(d) + ") "
     return ret
 
 def needs_default_constructor(data):
@@ -109,7 +109,7 @@ def needs_default_constructor(data):
 
 def declaration(data):
     if data.has_key('Required'):
-      return "    " + data['Type'] + " " + to_underscores(data['Name']) + ";\n"
+      return "    " + data['Type'] + " " + (data['Name']) + ";\n"
     else:
       return ""
 
@@ -146,13 +146,13 @@ def parser(type):
 
 def copy(data):
     if data.has_key('Required'):
-      return "        ret.properties_.emplace(\""+data['Name']+"\", Property(\""+data['Name']+"\", "+is_required(data)+", boost::any("+to_underscores(data['Name'])+")));\n"
+      return "        ret.properties_.emplace(\""+data['Name']+"\", Property(\""+data['Name']+"\", "+is_required(data)+", boost::any("+(data['Name'])+")));\n"
     else:
       return ""
 
 def add(data):
     if data.has_key('Required'):
-      return "        if (other.HasProperty(\"" + data['Name'] + "\")) {const Property& prop=other.properties_.at(\"" + data['Name'] + "\"); if(prop.IsSet()) " + to_underscores(data['Name']) + " = " + parser(data['Type']) + ";}\n"
+      return "        if (other.HasProperty(\"" + data['Name'] + "\")) {const Property& prop=other.properties_.at(\"" + data['Name'] + "\"); if(prop.IsSet()) " + (data['Name']) + " = " + parser(data['Type']) + ";}\n"
     else:
       return ""
 

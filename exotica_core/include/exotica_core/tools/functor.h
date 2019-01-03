@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EIGEN_AUTODIFF_FUNCTOR
-#define EIGEN_AUTODIFF_FUNCTOR
+#ifndef EIGEN_AUTODIFF_FUNCTOR_H_
+#define EIGEN_AUTODIFF_FUNCTOR_H_
 
 #include <Eigen/Dense>
 
@@ -48,4 +49,4 @@ struct FunctorBase
 typedef FunctorBase<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::Dynamic> Functor;
 }
 
-#endif
+#endif // EIGEN_AUTODIFF_FUNCTOR_H_

@@ -1,4 +1,5 @@
-// Copyright (c) 2018, University of Edinburgh
+//
+// Copyright (c) 2018, Wolfgang Merkt
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_VISUALIZATION_H
-#define EXOTICA_CORE_VISUALIZATION_H
+#ifndef EXOTICA_CORE_VISUALIZATION_H_
+#define EXOTICA_CORE_VISUALIZATION_H_
 
 #include <exotica_core/scene.h>
 #include <exotica_core/server.h>
@@ -53,4 +54,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_VISUALIZATION_H_

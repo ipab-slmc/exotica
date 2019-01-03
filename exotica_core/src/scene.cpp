@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -54,26 +55,26 @@ void Scene::Instantiate(SceneInitializer& init)
     Object::InstatiateObject(init);
     name_ = object_name_;
     kinematica_.debug = debug_;
-    force_collision_ = init.always_update_collision_scene;
+    force_collision_ = init.AlwaysUpdateCollisionScene;
     robot_model::RobotModelPtr model;
-    if (init.urdf == "" || init.srdf == "")
+    if (init.URDF == "" || init.SRDF == "")
     {
-        Server::Instance()->GetModel(init.robot_description, model);
+        Server::Instance()->GetModel(init.RobotDescription, model);
     }
     else
     {
-        Server::Instance()->GetModel(init.urdf, model, init.urdf, init.srdf);
+        Server::Instance()->GetModel(init.URDF, model, init.URDF, init.SRDF);
     }
-    kinematica_.Instantiate(init.joint_group, model, name_);
-    group = model->getJointModelGroup(init.joint_group);
+    kinematica_.Instantiate(init.JointGroup, model, name_);
+    group = model->getJointModelGroup(init.JointGroup);
     ps_.reset(new planning_scene::PlanningScene(model));
 
     // Write URDF/SRDF to ROS param server
-    if (Server::IsRos() && init.set_robot_description_ros_params && init.urdf != "" && init.srdf != "")
+    if (Server::IsRos() && init.SetRobotDescriptionRosParams && init.URDF != "" && init.SRDF != "")
     {
         if (debug_) HIGHLIGHT_NAMED(name_, "Setting robot_description and robot_description_semantic from URDF and SRDF initializers");
-        std::string urdf_string = PathExists(init.urdf) ? LoadFile(init.urdf) : init.urdf;
-        std::string srdf_string = PathExists(init.srdf) ? LoadFile(init.srdf) : init.srdf;
+        std::string urdf_string = PathExists(init.URDF) ? LoadFile(init.URDF) : init.URDF;
+        std::string srdf_string = PathExists(init.SRDF) ? LoadFile(init.SRDF) : init.SRDF;
         Server::SetParam("/robot_description", urdf_string);
         Server::SetParam("/robot_description_semantic", srdf_string);
     }
@@ -93,51 +94,51 @@ void Scene::Instantiate(SceneInitializer& init)
     }
 
     // Note: Using the LoadScene initializer does not support custom offsets/poses, assumes Identity transform to world_frame
-    if (init.load_scene != "")
+    if (init.LoadScene != "")
     {
-        std::vector<std::string> files = ParseList(init.load_scene, ';');
+        std::vector<std::string> files = ParseList(init.LoadScene, ';');
         for (const std::string& file : files) LoadSceneFile(file, Eigen::Isometry3d::Identity(), false);
     }
 
-    for (const exotica::Initializer& linkInit : init.links)
+    for (const exotica::Initializer& linkInit : init.Links)
     {
         LinkInitializer link(linkInit);
-        AddObject(link.name, GetFrame(link.transform), link.parent, nullptr, KDL::RigidBodyInertia(link.mass, GetFrame(link.center_of_mass).p), false);
+        AddObject(link.Name, GetFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), false);
     }
 
     // Check list of links to exclude from CollisionScene
-    if (init.robot_links_to_exclude_from_collision_scene.size() > 0)
+    if (init.RobotLinksToExcludeFromCollisionScene.size() > 0)
     {
-        for (const auto& link : init.robot_links_to_exclude_from_collision_scene)
+        for (const auto& link : init.RobotLinksToExcludeFromCollisionScene)
         {
             robotLinksToExcludeFromCollisionScene_.insert(link);
             if (debug_) HIGHLIGHT_NAMED("RobotLinksToExcludeFromCollisionScene", link);
         }
     }
 
-    collision_scene_ = Setup::CreateCollisionScene(init.collision_scene);
+    collision_scene_ = Setup::CreateCollisionScene(init.CollisionScene);
     collision_scene_->debug_ = this->debug_;
     collision_scene_->Setup();
     collision_scene_->SetAlwaysExternallyUpdatedCollisionScene(force_collision_);
-    collision_scene_->SetReplacePrimitiveShapesWithMeshes(init.replace_primitive_shapes_with_meshes);
-    collision_scene_->SetWorldLinkPadding(init.world_link_padding);
-    collision_scene_->SetRobotLinkPadding(init.robot_link_padding);
-    collision_scene_->SetWorldLinkScale(init.world_link_scale);
-    collision_scene_->SetRobotLinkScale(init.robot_link_scale);
-    collision_scene_->replace_cylinders_with_capsules = init.replace_cylinders_with_capsules;
+    collision_scene_->SetReplacePrimitiveShapesWithMeshes(init.ReplacePrimitiveShapesWithMeshes);
+    collision_scene_->SetWorldLinkPadding(init.WorldLinkPadding);
+    collision_scene_->SetRobotLinkPadding(init.RobotLinkPadding);
+    collision_scene_->SetWorldLinkScale(init.WorldLinkScale);
+    collision_scene_->SetRobotLinkScale(init.RobotLinkScale);
+    collision_scene_->replace_cylinders_with_capsules = init.ReplaceCylindersWithCapsules;
     UpdateSceneFrames();
     UpdateInternalFrames(false);
 
-    for (const exotica::Initializer& linkInit : init.attach_links)
+    for (const exotica::Initializer& linkInit : init.AttachLinks)
     {
         AttachLinkInitializer link(linkInit);
-        if (link.local)
+        if (link.Local)
         {
-            AttachObjectLocal(link.name, link.parent, GetFrame(link.transform));
+            AttachObjectLocal(link.Name, link.Parent, GetFrame(link.Transform));
         }
         else
         {
-            AttachObject(link.name, link.parent);
+            AttachObject(link.Name, link.Parent);
         }
     }
 
@@ -158,16 +159,16 @@ void Scene::Instantiate(SceneInitializer& init)
     }
     collision_scene_->SetACM(acm);
 
-    for (const exotica::Initializer& it : init.trajectories)
+    for (const exotica::Initializer& it : init.Trajectories)
     {
         TrajectoryInitializer trajInit(it);
-        if (trajInit.file != "")
+        if (trajInit.File != "")
         {
-            AddTrajectoryFromFile(trajInit.link, trajInit.file);
+            AddTrajectoryFromFile(trajInit.Link, trajInit.File);
         }
         else
         {
-            AddTrajectory(trajInit.link, trajInit.trajectory);
+            AddTrajectory(trajInit.Link, trajInit.Trajectory);
         }
     }
 
@@ -268,7 +269,7 @@ visualization_msgs::Marker Scene::ProxyToMarker(const std::vector<CollisionProxy
     std_msgs::ColorRGBA normal = GetColor(0.8, 0.8, 0.8);
     std_msgs::ColorRGBA far = GetColor(0.5, 0.5, 0.5);
     std_msgs::ColorRGBA colliding = GetColor(1, 0, 0);
-    for (int i = 0; i < proxies.size(); i++)
+    for (int i = 0; i < proxies.size(); ++i)
     {
         KDL::Vector c1 = KDL::Vector(proxies[i].contact1(0), proxies[i].contact1(1), proxies[i].contact1(2));
         KDL::Vector c2 = KDL::Vector(proxies[i].contact2(0), proxies[i].contact2(1), proxies[i].contact2(2));
@@ -569,7 +570,7 @@ void Scene::UpdateSceneFrames()
             obj_transform.linear() = object.second->shape_poses_[0].rotation();
             kinematica_.AddEnvironmentElement(object.first, obj_transform);
 
-            for (int i = 0; i < object.second->shape_poses_.size(); i++)
+            for (int i = 0; i < object.second->shape_poses_.size(); ++i)
             {
                 Eigen::Isometry3d shape_transform;
                 shape_transform.translation() = object.second->shape_poses_[i].translation();

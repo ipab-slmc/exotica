@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -338,7 +339,7 @@ void CollisionSceneFCLLatest::ComputeDistance(fcl::CollisionObjectd* o1, fcl::Co
         {
             size_t deepest_penetration_depth_index = -1;
             double deepest_penetration_depth = -1;
-            for (size_t i = 0; i < contacts.size(); i++)
+            for (size_t i = 0; i < contacts.size(); ++i)
             {
                 if (std::abs(contacts[i].penetration_depth) > deepest_penetration_depth)
                 {

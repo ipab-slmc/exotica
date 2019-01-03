@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_SETUP_H
-#define EXOTICA_CORE_SETUP_H
+#ifndef EXOTICA_CORE_SETUP_H_
+#define EXOTICA_CORE_SETUP_H_
 
 #include <exotica_core/factory.h>
 #include <exotica_core/motion_solver.h>
@@ -106,4 +107,4 @@ private:
 typedef std::shared_ptr<Setup> SetupPtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_SETUP_H_

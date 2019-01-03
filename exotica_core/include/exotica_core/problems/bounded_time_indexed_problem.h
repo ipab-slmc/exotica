@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H
-#define EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H
+#ifndef EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H_
+#define EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
@@ -70,10 +71,10 @@ public:
     TimeIndexedTask cost;
     TaskSpaceVector cost_phi;
 
-    double w_rate_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+    double w_scale_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
     Eigen::MatrixXd W;
 
-    std::vector<TaskSpaceVector> phi;
+    std::vector<TaskSpaceVector> Phi;
     std::vector<Eigen::MatrixXd> jacobian;
     std::vector<Hessian> hessian;
 
@@ -96,4 +97,4 @@ private:
 typedef std::shared_ptr<exotica::BoundedTimeIndexedProblem> BoundedTimeIndexedProblemPtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H_

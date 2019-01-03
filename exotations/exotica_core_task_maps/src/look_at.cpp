@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -38,33 +39,33 @@ LookAt::~LookAt() = default;
 Eigen::Vector3d LookAt::get_look_at_target_in_world(const int& i)
 {
     if (i >= n_end_effs_ || i < 0) ThrowPretty("Out of bounds, got " << i << " but expected less than " << n_end_effs_);
-    return Eigen::Map<Eigen::Vector3d>(kinematics[0].phi(n_end_effs_ * i + 2).p.data);
+    return Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(n_end_effs_ * i + 2).p.data);
 }
 
-void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
 {
-    if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of Phi!");
 
-    for (int i = 0; i < n_end_effs_; i++)
+    for (int i = 0; i < n_end_effs_; ++i)
     {
         const int end_effector_id = i * n_end_effs_;
 
         // Get EffPoint and LookAtTarget
-        Eigen::Vector3d c = Eigen::Map<Eigen::Vector3d>(kinematics[0].phi(end_effector_id).p.data);      // EffPoint | Eff frame
-        Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(kinematics[0].phi(end_effector_id + 1).p.data);  // LookAtTarget | Eff frame
+        Eigen::Vector3d c = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(end_effector_id).p.data);      // EffPoint | Eff frame
+        Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(end_effector_id + 1).p.data);  // LookAtTarget | Eff frame
 
         // Compute orthogonal orthogonal projection a onto line e->c
         double alpha = p.dot(c) / c.squaredNorm();
         Eigen::Vector3d a = alpha * c;
 
-        // Set phi
-        phi.segment<3>(end_effector_id) = a - p;
+        // Set Phi
+        Phi.segment<3>(end_effector_id) = a - p;
     }
 }
 
-void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
+    if (Phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != TaskSpaceDim() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
     for (int i = 0; i < n_end_effs_; ++i)
@@ -72,16 +73,16 @@ void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
         const int end_effector_id = i * n_end_effs_;
 
         // Get EffPoint and LookAtTarget
-        Eigen::Vector3d c = Eigen::Map<Eigen::Vector3d>(kinematics[0].phi(end_effector_id).p.data);      // EffPoint | Eff frame
-        Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(kinematics[0].phi(end_effector_id + 1).p.data);  // LookAtTarget | Eff frame
+        Eigen::Vector3d c = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(end_effector_id).p.data);      // EffPoint | Eff frame
+        Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(end_effector_id + 1).p.data);  // LookAtTarget | Eff frame
 
         // Compute orthogonal orthogonal projection a onto line e->c
         double c_squared_norm = c.squaredNorm();
         double alpha = p.dot(c) / c_squared_norm;
         Eigen::Vector3d a = alpha * c;
 
-        // Set phi
-        phi.segment<3>(end_effector_id) = a - p;
+        // Set Phi
+        Phi.segment<3>(end_effector_id) = a - p;
 
         // Compute jacobian
         for (int j = 0; j < jacobian.cols(); ++j)
@@ -105,9 +106,9 @@ void LookAt::Instantiate(LookAtInitializer& init)
     // Verify that the second and third frames are the same
     for (int i = 0; i < n_end_effs_; ++i)
     {
-        if (frames_[i + 1].frame_a_link_name != frames_[i + 2].frame_a_link_name)
+        if (frames_[i + 1].frame_A_link_name != frames_[i + 2].frame_A_link_name)
         {
-            ThrowPretty("The second and third links (LookAtTarget) need to be the same! Got: " << frames_[i + 1].frame_a_link_name << " and " << frames_[i + 2].frame_a_link_name);
+            ThrowPretty("The second and third links (LookAtTarget) need to be the same! Got: " << frames_[i + 1].frame_A_link_name << " and " << frames_[i + 2].frame_A_link_name);
         }
     }
 }

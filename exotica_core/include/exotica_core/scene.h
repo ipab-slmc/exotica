@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_SCENE_H
-#define EXOTICA_CORE_SCENE_H
+#ifndef EXOTICA_CORE_SCENE_H_
+#define EXOTICA_CORE_SCENE_H_
 
 #include <fstream>
 #include <functional>
@@ -222,4 +223,4 @@ private:
 typedef std::shared_ptr<Scene> ScenePtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_SCENE_H_

@@ -6,8 +6,8 @@
 //
 // Modified from unsupported/Eigen/src/AutoDiff/AutoDiffJacobian.h
 
-#ifndef EIGEN_AUTODIFF_CHAIN_HESSIAN_SPARSE_H
-#define EIGEN_AUTODIFF_CHAIN_HESSIAN_SPARSE_H
+#ifndef EIGEN_AUTODIFF_CHAIN_HESSIAN_SPARSE_H_
+#define EIGEN_AUTODIFF_CHAIN_HESSIAN_SPARSE_H_
 
 #include <exotica_core/tools/autodiff_chain_jacobian_sparse.h>
 #include <exotica_core/tools/autodiff_scalar.h>
@@ -160,15 +160,15 @@ public:
         {
             eigen_assert(x.rows() == jac.cols());
 
-            for (Index j = 0; j < jac.rows(); j++)
+            for (Index j = 0; j < jac.rows(); ++j)
             {
                 av[j].derivatives().resize(x.rows());
                 av[j].derivatives().reserve(x.rows());
-                for (Index k = 0; k < x.rows(); k++)
+                for (Index k = 0; k < x.rows(); ++k)
                     av[j].derivatives().insert(k).derivatives().resize(x.rows());
             }
 
-            for (Index i = 0; i < x.rows(); i++)
+            for (Index i = 0; i < x.rows(); ++i)
             {
                 ax[i].derivatives().resize(x.rows());
                 ax[i].derivatives().insert(i) = 1.0;
@@ -186,21 +186,21 @@ public:
             eigen_assert(x.rows() == ihess.rows());
             eigen_assert(ijac.cols() == ihess[0].rows() && ijac.cols() == ihess[0].cols());
 
-            for (Index j = 0; j < jac.rows(); j++)
+            for (Index j = 0; j < jac.rows(); ++j)
             {
                 av[j].derivatives().resize(ijac.cols());
                 av[j].derivatives().reserve(ijac.cols());
-                for (Index k = 0; k < ijac.cols(); k++)
+                for (Index k = 0; k < ijac.cols(); ++k)
                     av[j].derivatives().insert(k).derivatives().resize(ijac.cols());
             }
 
-            for (Index i = 0; i < x.rows(); i++)
+            for (Index i = 0; i < x.rows(); ++i)
             {
                 ax[i].derivatives().resize(ijac.cols());
                 ax[i].derivatives() = ijac.row(i);
                 ax[i].value().derivatives().resize(ijac.cols());
                 ax[i].value().derivatives() = ijac.row(i);
-                for (Index k = 0; k < ijac.cols(); k++)
+                for (Index k = 0; k < ijac.cols(); ++k)
                 {
                     ax[i].derivatives().coeffRef(k).derivatives() = ihess[i].row(k);
                 }
@@ -216,7 +216,7 @@ public:
         Index cols = _ijac ? _ijac->cols() : x.rows();
         {
             hess.resize(jac.rows());
-            for (Index i = 0; i < jac.rows(); i++)
+            for (Index i = 0; i < jac.rows(); ++i)
                 hess[i].resize(cols, cols);
         }
 
@@ -237,4 +237,4 @@ public:
 
 }  // namespace Eigen
 
-#endif
+#endif // EIGEN_AUTODIFF_CHAIN_HESSIAN_SPARSE_H_

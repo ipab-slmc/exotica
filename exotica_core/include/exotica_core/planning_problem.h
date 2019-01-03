@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_PLANNING_PROBLEM_H
-#define EXOTICA_CORE_PLANNING_PROBLEM_H
+#ifndef EXOTICA_CORE_PLANNING_PROBLEM_H_
+#define EXOTICA_CORE_PLANNING_PROBLEM_H_
 
 #include <algorithm>
 #include <chrono>
@@ -107,4 +108,4 @@ typedef Factory<PlanningProblem> PlanningProblemFac;
 typedef std::shared_ptr<PlanningProblem> PlanningProblemPtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_PLANNING_PROBLEM_H_

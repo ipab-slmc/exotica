@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -50,12 +51,12 @@ void IKSolver::SpecifyProblem(PlanningProblemPtr pointer)
     MotionSolver::SpecifyProblem(pointer);
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 
-    if (parameters_.c < 0 || parameters_.c >= 1.0)
+    if (parameters_.C < 0 || parameters_.C >= 1.0)
         ThrowNamed("C must be from interval <0, 1)!");
-    C_ = Eigen::MatrixXd::Identity(prob_->cost.length_jacobian, prob_->cost.length_jacobian) * parameters_.c;
+    C_ = Eigen::MatrixXd::Identity(prob_->cost.length_jacobian, prob_->cost.length_jacobian) * parameters_.C;
     W_ = prob_->W;
 
-    if (parameters_.alpha.size() != 1 && prob_->N != parameters_.alpha.size())
+    if (parameters_.Alpha.size() != 1 && prob_->N != parameters_.Alpha.size())
         ThrowNamed("Alpha must have length of 1 or N.");
 }
 
@@ -100,10 +101,10 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
 
         prob_->SetCostEvolution(i, error);
 
-        if (error < parameters_.tolerance)
+        if (error < parameters_.Tolerance)
         {
             if (debug_)
-                HIGHLIGHT_NAMED("IKSolver", "Reached tolerance (" << error << " < " << parameters_.tolerance << ")");
+                HIGHLIGHT_NAMED("IKSolver", "Reached tolerance (" << error << " < " << parameters_.Tolerance << ")");
             break;
         }
 
@@ -128,19 +129,19 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
 
         ScaleToStepSize(qd);
 
-        if (parameters_.alpha.size() == 1)
+        if (parameters_.Alpha.size() == 1)
         {
-            q -= qd * parameters_.alpha[0];
+            q -= qd * parameters_.Alpha[0];
         }
         else
         {
-            q -= qd.cwiseProduct(parameters_.alpha);
+            q -= qd.cwiseProduct(parameters_.Alpha);
         }
 
-        if (qd.norm() < parameters_.convergence)
+        if (qd.norm() < parameters_.Convergence)
         {
             if (debug_)
-                HIGHLIGHT_NAMED("IKSolver", "Reached convergence (" << qd.norm() << " < " << parameters_.convergence
+                HIGHLIGHT_NAMED("IKSolver", "Reached convergence (" << qd.norm() << " < " << parameters_.Convergence
                                                                     << ")");
             break;
         }
@@ -154,9 +155,9 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
 void IKSolver::ScaleToStepSize(Eigen::VectorXdRef xd)
 {
     double max_vel = xd.cwiseAbs().maxCoeff();
-    if (max_vel > parameters_.max_step)
+    if (max_vel > parameters_.MaxStep)
     {
-        xd = xd * parameters_.max_step / max_vel;
+        xd = xd * parameters_.MaxStep / max_vel;
     }
 }
 }

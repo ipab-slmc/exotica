@@ -6,8 +6,8 @@
 //
 // Modified from unsupported/Eigen/src/AutoDiff/AutoDiffJacobian.h
 
-#ifndef EIGEN_AUTODIFF_CHAIN_JACOBIAN_SPARSE_H
-#define EIGEN_AUTODIFF_CHAIN_JACOBIAN_SPARSE_H
+#ifndef EIGEN_AUTODIFF_CHAIN_JACOBIAN_SPARSE_H_
+#define EIGEN_AUTODIFF_CHAIN_JACOBIAN_SPARSE_H_
 
 #include <exotica_core/tools/autodiff_scalar.h>
 #include <exotica_core/tools/functor.h>
@@ -122,10 +122,10 @@ public:
         if (!_ijac)
         {
             eigen_assert(x.rows() == jac.cols());
-            for (Index j = 0; j < jac.rows(); j++)
+            for (Index j = 0; j < jac.rows(); ++j)
                 av[j].derivatives().resize(x.rows());
 
-            for (Index i = 0; i < x.rows(); i++)
+            for (Index i = 0; i < x.rows(); ++i)
             {
                 ax[i].derivatives().resize(x.rows());
                 ax[i].derivatives().insert(i) = 1.0;
@@ -136,10 +136,10 @@ public:
             // If specified, copy derivatives from InputJacobian
             const InputJacobianType &ijac = *_ijac;
 
-            for (Index j = 0; j < jac.rows(); j++)
+            for (Index j = 0; j < jac.rows(); ++j)
                 av[j].derivatives().resize(ijac.cols());
 
-            for (Index i = 0; i < x.rows(); i++)
+            for (Index i = 0; i < x.rows(); ++i)
             {
                 ax[i].derivatives().resize(ijac.cols());
                 ax[i].derivatives() = ijac.row(i);
@@ -165,4 +165,4 @@ public:
 
 }  // namespace Eigen
 
-#endif
+#endif // EIGEN_AUTODIFF_CHAIN_JACOBIAN_SPARSE_H_

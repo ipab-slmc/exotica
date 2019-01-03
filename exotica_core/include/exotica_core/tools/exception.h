@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_EXCEPTION_H
-#define EXOTICA_CORE_EXCEPTION_H
+#ifndef EXOTICA_CORE_EXCEPTION_H_
+#define EXOTICA_CORE_EXCEPTION_H_
 
 #include <exception>
 #include <sstream>
@@ -79,4 +80,4 @@ class SolveException : public Exception
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_EXCEPTION_H_

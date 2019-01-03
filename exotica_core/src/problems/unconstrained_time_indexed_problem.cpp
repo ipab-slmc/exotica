@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -34,7 +35,7 @@ REGISTER_PROBLEM_TYPE("UnconstrainedTimeIndexedProblem", exotica::UnconstrainedT
 namespace exotica
 {
 UnconstrainedTimeIndexedProblem::UnconstrainedTimeIndexedProblem()
-    : T_(0), tau_(0), w_rate_(0)
+    : T_(0), tau_(0), w_scale_(0)
 {
     flags_ = KIN_FK | KIN_J;
 }
@@ -45,12 +46,12 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
 {
     init_ = init;
 
-    w_rate_ = init_.wrate;
+    w_scale_ = init_.Wrate;
 
     num_tasks = tasks_.size();
     length_phi = 0;
     length_jacobian = 0;
-    for (int i = 0; i < num_tasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
         AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
         length_phi += tasks_[i]->length;
@@ -60,22 +61,22 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
 
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    W = Eigen::MatrixXd::Identity(N, N) * w_rate_;
-    if (init_.w.rows() > 0)
+    W = Eigen::MatrixXd::Identity(N, N) * w_scale_;
+    if (init_.W.rows() > 0)
     {
-        if (init_.w.rows() == N)
+        if (init_.W.rows() == N)
         {
-            W.diagonal() = init_.w * w_rate_;
+            W.diagonal() = init_.W * w_scale_;
         }
         else
         {
-            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init_.w.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
         }
     }
 
-    cost.Initialize(init_.cost, shared_from_this(), cost_phi);
+    cost.Initialize(init_.Cost, shared_from_this(), cost_phi);
 
-    T_ = init_.t;
+    T_ = init_.T;
     ApplyStartState(false);
     ReinitializeVariables();
 }
@@ -86,7 +87,7 @@ void UnconstrainedTimeIndexedProblem::ReinitializeVariables()
 
     SetTau(init_.tau);
 
-    phi.assign(T_, y_ref_);
+    Phi.assign(T_, y_ref_);
     if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
     x.assign(T_, Eigen::VectorXd::Zero(N));
     xdiff.assign(T_, Eigen::VectorXd::Zero(N));
@@ -124,7 +125,7 @@ void UnconstrainedTimeIndexedProblem::SetTau(const double& tau_in)
 void UnconstrainedTimeIndexedProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
-    for (int i = 0; i < tasks_.size(); i++) tasks_[i]->is_used = false;
+    for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
     cost.UpdateS();
 
     // Create a new set of kinematic solutions with the size of the trajectory
@@ -132,7 +133,7 @@ void UnconstrainedTimeIndexedProblem::PreUpdate()
     // updates etc.
     kinematic_solutions_.clear();
     kinematic_solutions_.resize(T_);
-    for (unsigned int i = 0; i < T_; i++) kinematic_solutions_[i] = std::make_shared<KinematicResponse>(*scene_->GetKinematicTree().GetKinematicResponse());
+    for (unsigned int i = 0; i < T_; ++i) kinematic_solutions_[i] = std::make_shared<KinematicResponse>(*scene_->GetKinematicTree().GetKinematicResponse());
 }
 
 void UnconstrainedTimeIndexedProblem::SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
@@ -155,7 +156,7 @@ std::vector<Eigen::VectorXd> UnconstrainedTimeIndexedProblem::GetInitialTrajecto
 
 double UnconstrainedTimeIndexedProblem::GetDuration()
 {
-    return tau_ * (double)T_;
+    return tau_ * static_cast<double>(T_);
 }
 
 void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
@@ -189,45 +190,45 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
 
     scene_->Update(x_in, static_cast<double>(t) * tau_);
 
-    phi[t].SetZero(length_phi);
+    Phi[t].SetZero(length_phi);
     if (flags_ & KIN_J) jacobian[t].setZero();
     if (flags_ & KIN_J_DOT)
-        for (int i = 0; i < length_jacobian; i++) hessian[t](i).setZero();
-    for (int i = 0; i < num_tasks; i++)
+        for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
+    for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
         if (tasks_[i]->is_used)
         {
             if (flags_ & KIN_J_DOT)
             {
-                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                tasks_[i]->Update(x[t], phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
     if (flags_ & KIN_J_DOT)
     {
-        cost.Update(phi[t], jacobian[t], hessian[t], t);
+        cost.Update(Phi[t], jacobian[t], hessian[t], t);
     }
     else if (flags_ & KIN_J)
     {
-        cost.Update(phi[t], jacobian[t], t);
+        cost.Update(Phi[t], jacobian[t], t);
     }
     else
     {
-        cost.Update(phi[t], t);
+        cost.Update(Phi[t], t);
     }
 
     if (t > 0) xdiff[t] = x[t] - x[t - 1];
 
-    number_of_problem_updates_++;
+    ++number_of_problem_updates_;
 }
 
 double UnconstrainedTimeIndexedProblem::GetScalarTaskCost(int t)
@@ -296,7 +297,7 @@ void UnconstrainedTimeIndexedProblem::SetGoal(const std::string& task_name, Eige
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -318,7 +319,7 @@ void UnconstrainedTimeIndexedProblem::SetRho(const std::string& task_name, const
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -340,7 +341,7 @@ Eigen::VectorXd UnconstrainedTimeIndexedProblem::GetGoal(const std::string& task
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
@@ -360,7 +361,7 @@ double UnconstrainedTimeIndexedProblem::GetRho(const std::string& task_name, int
     {
         t = T_ - 1;
     }
-    for (int i = 0; i < cost.indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -63,7 +64,7 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
 
     solution.resize(1, prob_->N);
 
-    lambda_ = parameters_.damping;  // initial damping
+    lambda_ = parameters_.Damping;  // initial damping
 
     const Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->cost.jacobian.cols(), prob_->cost.jacobian.cols());
     Eigen::MatrixXd jacobian;
@@ -73,7 +74,7 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
     double error_prev = std::numeric_limits<double>::infinity();
     Eigen::VectorXd yd;
     Eigen::VectorXd qd;
-    for (size_t i = 0; i < GetNumberOfMaxIterations(); i++)
+    for (size_t i = 0; i < GetNumberOfMaxIterations(); ++i)
     {
         prob_->Update(q);
 
@@ -106,17 +107,17 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
         if (debug_) HIGHLIGHT_NAMED("Levenberg-Marquardt", "damping: " << lambda_);
 
         Eigen::MatrixXd M;
-        if (parameters_.scale_problem == "none")
+        if (parameters_.ScaleProblem == "none")
         {
             M = I;
         }
-        else if (parameters_.scale_problem == "Jacobian")
+        else if (parameters_.ScaleProblem == "Jacobian")
         {
             M = (jacobian.transpose() * jacobian).diagonal().asDiagonal();
         }
         else
         {
-            throw std::runtime_error("no ScaleProblem of type " + parameters_.scale_problem);
+            throw std::runtime_error("no ScaleProblem of type " + parameters_.ScaleProblem);
         }
 
 #if EIGEN_VERSION_AT_LEAST(3, 3, 0)
@@ -125,18 +126,18 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
         qd = (jacobian.transpose() * jacobian + lambda_ * M).colPivHouseholderQr().solve(jacobian.transpose() * yd);
 #endif
 
-        if (parameters_.alpha.size() == 1)
+        if (parameters_.Alpha.size() == 1)
         {
-            q -= qd * parameters_.alpha[0];
+            q -= qd * parameters_.Alpha[0];
         }
         else
         {
-            q -= qd.cwiseProduct(parameters_.alpha);
+            q -= qd.cwiseProduct(parameters_.Alpha);
         }
 
-        if (qd.norm() < parameters_.convergence)
+        if (qd.norm() < parameters_.Convergence)
         {
-            if (debug_) HIGHLIGHT_NAMED("Levenberg-Marquardt", "Reached convergence (" << qd.norm() << " < " << parameters_.convergence << ")");
+            if (debug_) HIGHLIGHT_NAMED("Levenberg-Marquardt", "Reached convergence (" << qd.norm() << " < " << parameters_.Convergence << ")");
             break;
         }
     }

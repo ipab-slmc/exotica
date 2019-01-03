@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_MAPS_IDENTITY_H
-#define EXOTICA_CORE_TASK_MAPS_IDENTITY_H
+#ifndef EXOTICA_CORE_TASK_MAPS_IDENTITY_H_
+#define EXOTICA_CORE_TASK_MAPS_IDENTITY_H_
 
 #include <exotica_core/task_map.h>
 
@@ -44,9 +45,9 @@ public:
     void Instantiate(IdentityInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
-    // void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian) override;
+    // void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot) override;
     int TaskSpaceDim() override;
 
     std::vector<int> joint_map_;  // TODO: Make private with getter
@@ -60,4 +61,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_TASK_MAPS_IDENTITY_H_

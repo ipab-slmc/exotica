@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_UNCONSTRAINED_TIME_INDEXED_PROBLEM_H
-#define EXOTICA_CORE_UNCONSTRAINED_TIME_INDEXED_PROBLEM_H
+#ifndef EXOTICA_CORE_UNCONSTRAINED_TIME_INDEXED_PROBLEM_H_
+#define EXOTICA_CORE_UNCONSTRAINED_TIME_INDEXED_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
@@ -68,7 +69,7 @@ public:
     TimeIndexedTask cost;
     Eigen::MatrixXd W;
 
-    std::vector<TaskSpaceVector> phi;
+    std::vector<TaskSpaceVector> Phi;
     std::vector<Eigen::MatrixXd> jacobian;
     std::vector<Hessian> hessian;
 
@@ -88,11 +89,11 @@ private:
     int T_;       //!< Number of time steps
     double tau_;  //!< Time step duration
 
-    double w_rate_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+    double w_scale_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
 
     std::vector<Eigen::VectorXd> initial_trajectory_;
     UnconstrainedTimeIndexedProblemInitializer init_;
-    TaskSpaceVector y_ref_;  //!< Stores task phi reference value, to be assigned to phi
+    TaskSpaceVector y_ref_;  //!< Stores task Phi reference value, to be assigned to Phi
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
 };
@@ -100,4 +101,4 @@ private:
 typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblemPtr;
 }
 
-#endif
+#endif // EXOTICA_CORE_UNCONSTRAINED_TIME_INDEXED_PROBLEM_H_

@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -51,7 +52,7 @@ void appendChildXML(Initializer& parent, std::string& name, bool isAttribute, ti
     {
         int count = 0;
         for (tinyxml2::XMLHandle child = tag.FirstChild(); child.ToNode(); child = child.NextSibling())
-            if (child.ToElement() != nullptr) count++;
+            if (child.ToElement() != nullptr) ++count;
         if (count == 0)
         {
             if (tag.ToElement() == nullptr) return;

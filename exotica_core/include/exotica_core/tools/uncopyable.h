@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_UNCOPYABLE_H
-#define EXOTICA_CORE_UNCOPYABLE_H
+#ifndef EXOTICA_CORE_UNCOPYABLE_H_
+#define EXOTICA_CORE_UNCOPYABLE_H_
 
 namespace exotica
 {
@@ -43,4 +44,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_UNCOPYABLE_H_

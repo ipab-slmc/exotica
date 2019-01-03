@@ -10,8 +10,8 @@
 // Added support for SparseVector DerType
 // Modification on lines 23, 552-585, 739-755, 806-819
 
-#ifndef EIGEN_AUTODIFF_SCALAR_H
-#define EIGEN_AUTODIFF_SCALAR_H
+#ifndef EIGEN_AUTODIFF_SCALAR_H_
+#define EIGEN_AUTODIFF_SCALAR_H_
 
 enum
 {
@@ -53,31 +53,30 @@ inline AutoDiffScalar<NewDerType> MakeAutoDiffScalar(const typename NewDerType::
     return AutoDiffScalar<NewDerType>(value, der);
 }
 
-/** \class AutoDiffScalar
-  * \brief A scalar type replacement with automatic differentation capability
-  *
-  * \param _DerType the vector type used to store/represent the derivatives. The base scalar type
-  *                 as well as the number of derivatives to compute are determined from this type.
-  *                 Typical choices include, e.g., \c Vector4f for 4 derivatives, or \c VectorXf
-  *                 if the number of derivatives is not known at compile time, and/or, the number
-  *                 of derivatives is large.
-  *                 Note that _DerType can also be a reference (e.g., \c VectorXf&) to wrap a
-  *                 existing vector into an AutoDiffScalar.
-  *                 Finally, _DerType can also be any Eigen compatible expression.
-  *
-  * This class represents a scalar value while tracking its respective derivatives using Eigen's expression
-  * template mechanism.
-  *
-  * It supports the following list of global math function:
-  *  - std::abs, std::sqrt, std::pow, std::exp, std::log, std::sin, std::cos,
-  *  - internal::abs, internal::sqrt, numext::pow, internal::exp, internal::log, internal::sin, internal::cos,
-  *  - internal::conj, internal::real, internal::imag, numext::abs2.
-  *
-  * AutoDiffScalar can be used as the scalar type of an Eigen::Matrix object. However,
-  * in that case, the expression template mechanism only occurs at the top Matrix level,
-  * while derivatives are computed right away.
-  *
-  */
+//  \class AutoDiffScalar
+//  \brief A scalar type replacement with automatic differentation capability
+//
+//  \param _DerType the vector type used to store/represent the derivatives. The base scalar type
+//                  as well as the number of derivatives to compute are determined from this type.
+//                  Typical choices include, e.g., \c Vector4f for 4 derivatives, or \c VectorXf
+//                  if the number of derivatives is not known at compile time, and/or, the number
+//                  of derivatives is large.
+//                  Note that _DerType can also be a reference (e.g., \c VectorXf&) to wrap a
+//                  existing vector into an AutoDiffScalar.
+//                  Finally, _DerType can also be any Eigen compatible expression.
+//
+//  This class represents a scalar value while tracking its respective derivatives using Eigen's expression
+//  template mechanism.
+//
+//  It supports the following list of global math function:
+//   - std::abs, std::sqrt, std::pow, std::exp, std::log, std::sin, std::cos,
+//   - internal::abs, internal::sqrt, numext::pow, internal::exp, internal::log, internal::sin, internal::cos,
+//   - internal::conj, internal::real, internal::imag, numext::abs2.
+//
+//  AutoDiffScalar can be used as the scalar type of an Eigen::Matrix object. However,
+//  in that case, the expression template mechanism only occurs at the top Matrix level,
+//  while derivatives are computed right away.
+
 
 template <typename _DerType>
 class AutoDiffScalar
@@ -106,7 +105,7 @@ public:
     }
 
     /** Conversion from a scalar constant to an active scalar.
-      * The derivatives are set to zero. */
+     The derivatives are set to zero. */
     /*explicit*/ AutoDiffScalar(const Real& value)
         : m_value(value)
     {
@@ -290,7 +289,7 @@ public:
     inline AutoDiffScalar&
     operator-=(const AutoDiffScalar<OtherDerType>& other)
     {
-        *this = *this - other;
+      this = *this - other;
         return *this;
     }
 
@@ -383,27 +382,27 @@ public:
 
     inline AutoDiffScalar& operator*=(const Scalar& other)
     {
-        *this = *this * other;
+      this = *this * other;
         return *this;
     }
 
     template <typename OtherDerType>
     inline AutoDiffScalar& operator*=(const AutoDiffScalar<OtherDerType>& other)
     {
-        *this = *this * other;
+      this = *this * other;
         return *this;
     }
 
     inline AutoDiffScalar& operator/=(const Scalar& other)
     {
-        *this = *this / other;
+      this = *this / other;
         return *this;
     }
 
     template <typename OtherDerType>
     inline AutoDiffScalar& operator/=(const AutoDiffScalar<OtherDerType>& other)
     {
-        *this = *this / other;
+      this = *this / other;
         return *this;
     }
 
@@ -469,7 +468,7 @@ struct auto_diff_special_op<_DerType, true>
 
     inline AutoDiffScalar<_DerType>& operator*=(const Scalar& other)
     {
-        *this = *this * other;
+      this = *this * other;
         return derived();
     }
 };
@@ -833,6 +832,6 @@ class numeric_limits<Eigen::AutoDiffScalar<T&>>
 {
 };
 
-}  // namespace std
+} 
 
-#endif  // EIGEN_AUTODIFF_SCALAR_H
+#endif // EIGEN_AUTODIFF_SCALAR_H_

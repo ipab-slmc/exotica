@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -35,7 +36,7 @@ namespace exotica
 void MotionSolver::InstantiateBase(const Initializer& init)
 {
     Object::InstatiateObject(init);
-    SetNumberOfMaxIterations(MotionSolverInitializer(init).max_iterations);
+    SetNumberOfMaxIterations(MotionSolverInitializer(init).MaxIterations);
 }
 
 MotionSolver::MotionSolver()

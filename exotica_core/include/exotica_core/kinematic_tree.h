@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -26,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_KINEMATIC_TREE_H
-#define EXOTICA_CORE_KINEMATIC_TREE_H
+#ifndef EXOTICA_CORE_KINEMATIC_TREE_H_
+#define EXOTICA_CORE_KINEMATIC_TREE_H_
 
 #include <map>
 #include <random>
@@ -77,11 +78,11 @@ inline KinematicRequestFlags operator&(KinematicRequestFlags a, KinematicRequest
 struct KinematicFrameRequest
 {
     KinematicFrameRequest();
-    KinematicFrameRequest(std::string _frame_a_link_name, KDL::Frame _frame_a_offset = KDL::Frame(), std::string _frame_b_link_name = "", KDL::Frame _frame_b_offset = KDL::Frame());
-    std::string frame_a_link_name;
-    KDL::Frame frame_a_offset;
-    std::string frame_b_link_name;
-    KDL::Frame frame_b_offset;
+    KinematicFrameRequest(std::string _frame_A_link_name, KDL::Frame _frame_A_offset = KDL::Frame(), std::string _frame_B_link_name = "", KDL::Frame _frame_B_offset = KDL::Frame());
+    std::string frame_A_link_name;
+    KDL::Frame frame_A_offset;
+    std::string frame_B_link_name;
+    KDL::Frame frame_B_offset;
 };
 
 struct KinematicsRequest
@@ -93,13 +94,13 @@ struct KinematicsRequest
 
 struct KinematicFrame
 {
-    std::weak_ptr<KinematicElement> frame_a;
-    KDL::Frame frame_a_offset;
-    std::weak_ptr<KinematicElement> frame_b;
-    KDL::Frame frame_b_offset;
-    KDL::Frame temp_ab;
-    KDL::Frame temp_a;
-    KDL::Frame temp_b;
+    std::weak_ptr<KinematicElement> frame_A;
+    KDL::Frame frame_A_offset;
+    std::weak_ptr<KinematicElement> frame_B;
+    KDL::Frame frame_B_offset;
+    KDL::Frame temp_AB;
+    KDL::Frame temp_A;
+    KDL::Frame temp_B;
 };
 
 /// @brief The KinematicResponse is the container to keep kinematic update data.
@@ -111,7 +112,7 @@ struct KinematicResponse
     KinematicRequestFlags flags = KinematicRequestFlags::KIN_FK;
     std::vector<KinematicFrame> frame;
     Eigen::VectorXd x;
-    ArrayFrame phi;
+    ArrayFrame Phi;
     ArrayTwist phi_dot;
     ArrayJacobian jacobian;
     ArrayJacobian jacobian_dot;
@@ -127,7 +128,7 @@ public:
     int start = -1;
     int length = -1;
     Eigen::Map<Eigen::VectorXd> X{nullptr, 0};
-    Eigen::Map<ArrayFrame> phi{nullptr, 0};
+    Eigen::Map<ArrayFrame> Phi{nullptr, 0};
     Eigen::Map<ArrayTwist> phi_dot{nullptr, 0};
     Eigen::Map<ArrayJacobian> jacobian{nullptr, 0};
     Eigen::Map<ArrayJacobian> jacobian_dot{nullptr, 0};
@@ -272,4 +273,4 @@ private:
 };
 }
 
-#endif
+#endif // EXOTICA_CORE_KINEMATIC_TREE_H_

@@ -30,12 +30,12 @@
 #ifndef EXOTICA_CORE_CONVERSIONS_H_
 #define EXOTICA_CORE_CONVERSIONS_H_
 
+#include <Eigen/Dense>
+#include <kdl/frames.hpp>
+#include <kdl/jacobian.hpp>
+#include <map>
 #include <memory>
 #include <vector>
-#include <map>
-#include <Eigen/Dense>
-#include <kdl/jacobian.hpp>
-#include <kdl/frames.hpp>
 
 #include <exotica_core/tools/exception.h>
 

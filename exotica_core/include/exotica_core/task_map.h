@@ -31,9 +31,9 @@
 #define EXOTICA_CORE_TASK_MAP_H_
 
 #include <Eigen/Dense>  // Generally dense manipulations should be enough
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 #include <exotica_core/factory.h>  // The Factory template
 #include <exotica_core/object.h>   // The EXOTica base class

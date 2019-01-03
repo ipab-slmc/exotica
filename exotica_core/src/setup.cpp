@@ -29,10 +29,10 @@
 
 #include <type_traits>
 
-#include <exotica_core/server.h>
-#include <exotica_core/tools.h>
 #include <exotica_core/scene.h>
+#include <exotica_core/server.h>
 #include <exotica_core/setup.h>
+#include <exotica_core/tools.h>
 
 namespace exotica
 {

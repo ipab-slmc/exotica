@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <exotica_core_task_maps/point_to_line.h>
 #include <exotica_core/server.h>
+#include <exotica_core_task_maps/point_to_line.h>
 
 REGISTER_TASKMAP_TYPE("PointToLine", exotica::PointToLine);
 

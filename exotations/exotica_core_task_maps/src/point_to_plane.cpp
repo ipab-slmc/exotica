@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <exotica_core_task_maps/point_to_plane.h>
 #include <exotica_core/server.h>
+#include <exotica_core_task_maps/point_to_plane.h>
 #include <kdl_conversions/kdl_msg.h>
 
 REGISTER_TASKMAP_TYPE("PointToPlane", exotica::PointToPlane);

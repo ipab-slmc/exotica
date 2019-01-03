@@ -36,11 +36,11 @@
 #include <vector>
 
 #include <moveit/robot_model/robot_model.h>
+#include <tf/transform_datatypes.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <Eigen/Eigen>
 #include <kdl/jacobian.hpp>
 #include <kdl/tree.hpp>
-#include <tf/transform_datatypes.h>
 
 #include <exotica_core/kinematic_element.h>
 

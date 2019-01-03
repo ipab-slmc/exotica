@@ -43,8 +43,8 @@
 #include <exotica_core/kinematic_tree.h>
 #include <exotica_core/object.h>
 #include <exotica_core/property.h>
-#include <exotica_core/trajectory.h>
 #include <exotica_core/tools/conversions.h>
+#include <exotica_core/trajectory.h>
 
 #include <exotica_core/scene_initializer.h>
 

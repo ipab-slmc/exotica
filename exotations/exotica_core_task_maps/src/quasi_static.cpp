@@ -29,9 +29,9 @@
 
 #include <cmath>
 
+#include <exotica_core/server.h>
 #include <exotica_core_task_maps/convex_hull.h>
 #include <exotica_core_task_maps/quasi_static.h>
-#include <exotica_core/server.h>
 
 REGISTER_TASKMAP_TYPE("QuasiStatic", exotica::QuasiStatic);
 

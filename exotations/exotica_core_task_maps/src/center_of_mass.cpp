@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <exotica_core_task_maps/center_of_mass.h>
 #include <exotica_core/server.h>
+#include <exotica_core_task_maps/center_of_mass.h>
 
 REGISTER_TASKMAP_TYPE("CenterOfMass", exotica::CenterOfMass);
 

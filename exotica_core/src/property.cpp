@@ -30,8 +30,8 @@
 #include <typeinfo>
 #include <vector>
 
-#include "exotica_core/property.h"
 #include <exotica_core/tools.h>
+#include "exotica_core/property.h"
 
 namespace exotica
 {

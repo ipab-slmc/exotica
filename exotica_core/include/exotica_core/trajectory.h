@@ -30,10 +30,10 @@
 #ifndef EXOTICA_CORE_TRAJECTORY_H_
 #define EXOTICA_CORE_TRAJECTORY_H_
 
-#include <memory>
+#include <exotica_core/tools/conversions.h>
 #include <Eigen/Dense>
 #include <kdl/trajectory_composite.hpp>
-#include <exotica_core/tools/conversions.h>
+#include <memory>
 
 namespace exotica
 {

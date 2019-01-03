@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <exotica_core_task_maps/interaction_mesh.h>
 #include <exotica_core/server.h>
+#include <exotica_core_task_maps/interaction_mesh.h>
 
 REGISTER_TASKMAP_TYPE("IMesh", exotica::IMesh);
 

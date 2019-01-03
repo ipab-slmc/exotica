@@ -39,8 +39,8 @@
 #include <exotica_core/scene.h>
 #include <exotica_core/task_map.h>
 #include <exotica_core/task_space_vector.h>
-#include <exotica_core/tools/uncopyable.h>
 #include <exotica_core/tools/conversions.h>
+#include <exotica_core/tools/uncopyable.h>
 
 #define REGISTER_PROBLEM_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER_CORE(exotica::PlanningProblem, TYPE, DERIV)
 

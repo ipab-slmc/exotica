@@ -37,8 +37,8 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 
-#include <exotica_core/tools/uncopyable.h>
 #include <exotica_core/tools/exception.h>
+#include <exotica_core/tools/uncopyable.h>
 
 namespace exotica
 {

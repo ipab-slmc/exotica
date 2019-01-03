@@ -107,4 +107,4 @@ std::list<int> ConvexHull2D(Eigen::MatrixXdRefConst points)
 }
 }
 
-#endif // EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H_

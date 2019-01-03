@@ -137,4 +137,4 @@ public:
 };
 }
 
-#endif // EXOTICA_CORE_FACTORY_H_
+#endif  // EXOTICA_CORE_FACTORY_H_

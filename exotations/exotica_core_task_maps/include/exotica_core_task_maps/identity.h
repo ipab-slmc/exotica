@@ -61,4 +61,4 @@ private:
 };
 }
 
-#endif // EXOTICA_CORE_TASK_MAPS_IDENTITY_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_IDENTITY_H_

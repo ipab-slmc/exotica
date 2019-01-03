@@ -107,4 +107,4 @@ private:
 typedef std::shared_ptr<Setup> SetupPtr;
 }
 
-#endif // EXOTICA_CORE_SETUP_H_
+#endif  // EXOTICA_CORE_SETUP_H_

@@ -74,4 +74,4 @@ private:
 };
 }
 
-#endif // EXOTICA_IK_SOLVER_IK_SOLVER_H_
+#endif  // EXOTICA_IK_SOLVER_IK_SOLVER_H_

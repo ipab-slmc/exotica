@@ -227,4 +227,4 @@ public:
 };
 }
 
-#endif // EIGEN_FINITEDIFF_CHAIN_HESSIAN_H_
+#endif  // EIGEN_FINITEDIFF_CHAIN_HESSIAN_H_

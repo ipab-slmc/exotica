@@ -52,4 +52,4 @@ static inline void AinvBSymPosDef(T1& x, const T2& A, const T3& b)
 }
 }
 
-#endif // EXOTICA_AICO_SOLVER_MATH_OPERATIONS_H_
+#endif  // EXOTICA_AICO_SOLVER_MATH_OPERATIONS_H_

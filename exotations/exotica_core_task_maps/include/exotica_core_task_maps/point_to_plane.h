@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018, Wolfgang Merkt
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,6 @@ private:
     void PublishDebug();
     ros::Publisher debug_pub_;
 };
-}
+}  // namespace exotica
 
-#endif // EXOTICA_CORE_TASK_MAPS_POINT_TO_PLANE_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_POINT_TO_PLANE_H_

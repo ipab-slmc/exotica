@@ -75,4 +75,4 @@ public:
 typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblemPtr;
 }
 
-#endif // EXOTICA_CORE_UNCONSTRAINED_END_POSE_PROBLEM_H_
+#endif  // EXOTICA_CORE_UNCONSTRAINED_END_POSE_PROBLEM_H_

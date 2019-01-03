@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018, Wolfgang Merkt
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -70,4 +70,4 @@ private:
 };
 }
 
-#endif // EXOTICA_CORE_TASK_MAPS_EFF_AXIS_ALIGNMENT_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_EFF_AXIS_ALIGNMENT_H_

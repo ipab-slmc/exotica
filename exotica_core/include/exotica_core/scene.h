@@ -223,4 +223,4 @@ private:
 typedef std::shared_ptr<Scene> ScenePtr;
 }
 
-#endif // EXOTICA_CORE_SCENE_H_
+#endif  // EXOTICA_CORE_SCENE_H_

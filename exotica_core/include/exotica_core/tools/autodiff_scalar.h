@@ -77,7 +77,6 @@ inline AutoDiffScalar<NewDerType> MakeAutoDiffScalar(const typename NewDerType::
 //  in that case, the expression template mechanism only occurs at the top Matrix level,
 //  while derivatives are computed right away.
 
-
 template <typename _DerType>
 class AutoDiffScalar
     : public internal::auto_diff_special_op<_DerType, !internal::is_same<typename internal::traits<typename internal::remove_all<_DerType>::type>::Scalar,
@@ -289,7 +288,7 @@ public:
     inline AutoDiffScalar&
     operator-=(const AutoDiffScalar<OtherDerType>& other)
     {
-      this = *this - other;
+        this = *this - other;
         return *this;
     }
 
@@ -382,27 +381,27 @@ public:
 
     inline AutoDiffScalar& operator*=(const Scalar& other)
     {
-      this = *this * other;
+        this = *this * other;
         return *this;
     }
 
     template <typename OtherDerType>
     inline AutoDiffScalar& operator*=(const AutoDiffScalar<OtherDerType>& other)
     {
-      this = *this * other;
+        this = *this * other;
         return *this;
     }
 
     inline AutoDiffScalar& operator/=(const Scalar& other)
     {
-      this = *this / other;
+        this = *this / other;
         return *this;
     }
 
     template <typename OtherDerType>
     inline AutoDiffScalar& operator/=(const AutoDiffScalar<OtherDerType>& other)
     {
-      this = *this / other;
+        this = *this / other;
         return *this;
     }
 
@@ -468,7 +467,7 @@ struct auto_diff_special_op<_DerType, true>
 
     inline AutoDiffScalar<_DerType>& operator*=(const Scalar& other)
     {
-      this = *this * other;
+        this = *this * other;
         return derived();
     }
 };
@@ -831,7 +830,6 @@ class numeric_limits<Eigen::AutoDiffScalar<T&>>
     : public numeric_limits<typename T::Scalar>
 {
 };
+}
 
-} 
-
-#endif // EIGEN_AUTODIFF_SCALAR_H_
+#endif  // EIGEN_AUTODIFF_SCALAR_H_

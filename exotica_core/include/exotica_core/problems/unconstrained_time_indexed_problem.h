@@ -101,4 +101,4 @@ private:
 typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblemPtr;
 }
 
-#endif // EXOTICA_CORE_UNCONSTRAINED_TIME_INDEXED_PROBLEM_H_
+#endif  // EXOTICA_CORE_UNCONSTRAINED_TIME_INDEXED_PROBLEM_H_

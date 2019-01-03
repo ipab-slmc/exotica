@@ -66,4 +66,4 @@ protected:
 typedef std::shared_ptr<exotica::MotionSolver> MotionSolverPtr;
 }
 
-#endif // EXOTICA_CORE_MOTION_SOLVER_H_
+#endif  // EXOTICA_CORE_MOTION_SOLVER_H_

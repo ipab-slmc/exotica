@@ -87,4 +87,4 @@ public:
 };
 }
 
-#endif // EXOTICA_CORE_OBJECT_H_
+#endif  // EXOTICA_CORE_OBJECT_H_

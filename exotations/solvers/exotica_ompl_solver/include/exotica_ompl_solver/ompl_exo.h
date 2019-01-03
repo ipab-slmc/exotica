@@ -295,4 +295,4 @@ private:
 };
 }
 
-#endif // EXOTICA_OMPL_SOLVER_OMPL_EXO_H_
+#endif  // EXOTICA_OMPL_SOLVER_OMPL_EXO_H_

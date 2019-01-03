@@ -72,4 +72,4 @@ protected:
 };
 }
 
-#endif // EXOTICA_CORE_TRAJECTORY_H_
+#endif  // EXOTICA_CORE_TRAJECTORY_H_

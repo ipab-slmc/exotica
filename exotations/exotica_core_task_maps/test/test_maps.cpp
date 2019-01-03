@@ -1108,7 +1108,7 @@ TEST(ExoticaTaskMaps, testJointSmoothingBackwardDifference)
 
 TEST(ExoticaTaskMaps, testLookAt)
 {
-    // try
+    try
     {
         {
             TEST_COUT << "LookAt";
@@ -1130,10 +1130,10 @@ TEST(ExoticaTaskMaps, testLookAt)
             EXPECT_TRUE(test_jacobian(problem, 2e-5));
         }
     }
-    // catch (...)
-    // {
-    //     ADD_FAILURE() << "Uncaught exception!";
-    // }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
 }
 
 int main(int argc, char** argv)

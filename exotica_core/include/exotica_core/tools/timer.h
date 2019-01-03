@@ -62,4 +62,4 @@ private:
 };
 }
 
-#endif // EXOTICA_CORE_TIMER_H_
+#endif  // EXOTICA_CORE_TIMER_H_

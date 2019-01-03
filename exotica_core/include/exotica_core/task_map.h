@@ -85,4 +85,4 @@ typedef std::map<std::string, TaskMapPtr> TaskMapMap;  //!< The mapping by name 
 typedef std::vector<TaskMapPtr> TaskMapVec;
 }
 
-#endif // EXOTICA_CORE_TASK_MAP_H_
+#endif  // EXOTICA_CORE_TASK_MAP_H_

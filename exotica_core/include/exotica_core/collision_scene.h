@@ -285,4 +285,4 @@ protected:
 typedef std::shared_ptr<CollisionScene> CollisionScenePtr;
 }
 
-#endif // EXOTICA_CORE_COLLISION_SCENE_H_
+#endif  // EXOTICA_CORE_COLLISION_SCENE_H_

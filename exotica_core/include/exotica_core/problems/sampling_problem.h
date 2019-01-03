@@ -84,4 +84,4 @@ private:
 typedef std::shared_ptr<exotica::SamplingProblem> SamplingProblemPtr;
 }
 
-#endif // EXOTICA_CORE_SAMPLING_PROBLEM_H_
+#endif  // EXOTICA_CORE_SAMPLING_PROBLEM_H_

@@ -98,4 +98,4 @@ protected:
 };
 }
 
-#endif // EXOTICA_OMPL_SOLVER_OMPL_SOLVER_H_
+#endif  // EXOTICA_OMPL_SOLVER_OMPL_SOLVER_H_

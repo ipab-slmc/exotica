@@ -93,4 +93,4 @@ std::string ToString(const Eigen::Isometry3d& s);
 std::string ToString(const Eigen::Affine3d& s);
 }
 
-#endif // EXOTICA_CORE_PRINTABLE_H_
+#endif  // EXOTICA_CORE_PRINTABLE_H_

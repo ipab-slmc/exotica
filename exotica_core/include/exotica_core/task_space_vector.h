@@ -60,4 +60,4 @@ struct TaskSpaceVector
 };
 }
 
-#endif // EXOTICA_CORE_TASK_SPACE_VECTOR_H_
+#endif  // EXOTICA_CORE_TASK_SPACE_VECTOR_H_

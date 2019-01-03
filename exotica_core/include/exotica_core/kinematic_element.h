@@ -128,4 +128,4 @@ private:
 };
 }
 
-#endif // EXOTICA_CORE_KINEMATIC_ELEMENT_H_
+#endif  // EXOTICA_CORE_KINEMATIC_ELEMENT_H_

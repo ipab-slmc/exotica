@@ -237,4 +237,4 @@ public:
 
 }  // namespace Eigen
 
-#endif // EIGEN_AUTODIFF_CHAIN_HESSIAN_SPARSE_H_
+#endif  // EIGEN_AUTODIFF_CHAIN_HESSIAN_SPARSE_H_

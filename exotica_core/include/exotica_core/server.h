@@ -188,4 +188,4 @@ private:
 typedef std::shared_ptr<Server> ServerPtr;
 }
 
-#endif // EXOTICA_CORE_SERVER_H_
+#endif  // EXOTICA_CORE_SERVER_H_

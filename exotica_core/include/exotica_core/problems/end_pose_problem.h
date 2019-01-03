@@ -90,4 +90,4 @@ public:
 typedef std::shared_ptr<exotica::EndPoseProblem> EndPoseProblemPtr;
 }
 
-#endif // EXOTICA_CORE_END_POSE_PROBLEM_H_
+#endif  // EXOTICA_CORE_END_POSE_PROBLEM_H_

@@ -277,4 +277,4 @@ inline std::vector<bool> ParseBoolList(const std::string value)
 }
 }
 
-#endif // EXOTICA_CORE_CONVERSIONS_H_
+#endif  // EXOTICA_CORE_CONVERSIONS_H_

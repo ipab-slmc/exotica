@@ -97,4 +97,4 @@ private:
 typedef std::shared_ptr<exotica::BoundedTimeIndexedProblem> BoundedTimeIndexedProblemPtr;
 }
 
-#endif // EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H_
+#endif  // EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H_

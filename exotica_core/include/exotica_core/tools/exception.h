@@ -80,4 +80,4 @@ class SolveException : public Exception
 };
 }
 
-#endif // EXOTICA_CORE_EXCEPTION_H_
+#endif  // EXOTICA_CORE_EXCEPTION_H_

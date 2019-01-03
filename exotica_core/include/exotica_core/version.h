@@ -36,4 +36,4 @@ extern const char version[];
 extern const char branch[];
 }
 
-#endif // EXOTICA_CORE_VERSION_H_
+#endif  // EXOTICA_CORE_VERSION_H_

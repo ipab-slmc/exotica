@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018, Wolfgang Merkt
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -166,4 +166,4 @@ void EffAxisAlignment::SetAxis(const std::string& frame_name, const Eigen::Vecto
     }
     ThrowPretty("Could not find frame with name " << frame_name << ".");
 }
-}
+}  // namespace exotica

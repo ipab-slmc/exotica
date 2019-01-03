@@ -129,4 +129,4 @@ private:
 typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblemPtr;
 }
 
-#endif // EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_
+#endif  // EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_

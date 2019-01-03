@@ -131,4 +131,4 @@ public:
 };
 }
 
-#endif // EXOTICA_CORE_PROPERTY_H_
+#endif  // EXOTICA_CORE_PROPERTY_H_

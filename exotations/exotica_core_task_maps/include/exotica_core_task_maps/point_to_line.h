@@ -72,6 +72,6 @@ private:
 
     bool visualize_;
 };
-}
+}  // namespace exotica
 
-#endif // EXOTICA_CORE_TASK_MAPS_POINT_TO_LINE_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_POINT_TO_LINE_H_

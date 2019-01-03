@@ -74,4 +74,4 @@ public:
 typedef std::shared_ptr<exotica::BoundedEndPoseProblem> BoundedEndPoseProblemPtr;
 }
 
-#endif // EXOTICA_CORE_BOUNDED_END_POSE_PROBLEM_H_
+#endif  // EXOTICA_CORE_BOUNDED_END_POSE_PROBLEM_H_

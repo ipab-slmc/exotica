@@ -132,4 +132,4 @@ std::shared_ptr<T> ToStdPtr(const std::shared_ptr<T>& p)
     return p;
 }
 
-#endif // EXOTICA_CORE_TOOLS_H_
+#endif  // EXOTICA_CORE_TOOLS_H_

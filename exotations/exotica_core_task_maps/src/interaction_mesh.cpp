@@ -42,14 +42,14 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
 
     if (Phi.rows() != M * 3) ThrowNamed("Wrong size of Phi!");
 
-    Eigen::VectorXd eff_phi;
+    Eigen::VectorXd eff_Phi;
     for (int i = 0; i < M; ++i)
     {
-        eff_phi(i * 3) = kinematics[0].Phi(i).p[0];
-        eff_phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
-        eff_phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
+        eff_Phi(i * 3) = kinematics[0].Phi(i).p[0];
+        eff_Phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
+        eff_Phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
     }
-    Phi = ComputeLaplace(eff_phi, weights_);
+    Phi = ComputeLaplace(eff_Phi, weights_);
 
     if (debug_) Debug(Phi);
 }
@@ -64,14 +64,14 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::Mat
 
     Eigen::MatrixXd dist;
     Eigen::VectorXd wsum;
-    Eigen::VectorXd eff_phi(M * 3);
+    Eigen::VectorXd eff_Phi(M * 3);
     for (int i = 0; i < M; ++i)
     {
-        eff_phi(i * 3) = kinematics[0].Phi(i).p[0];
-        eff_phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
-        eff_phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
+        eff_Phi(i * 3) = kinematics[0].Phi(i).p[0];
+        eff_Phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
+        eff_Phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
     }
-    Phi = ComputeLaplace(eff_phi, weights_, &dist, &wsum);
+    Phi = ComputeLaplace(eff_Phi, weights_, &dist, &wsum);
 
     double A, _A, Sk, Sl, w, _w;
     int i, j, k, l;
@@ -92,7 +92,7 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::Mat
                         w = weights_(j, l) / A;
 
                         _A = 0;
-                        distance = eff_phi.segment(j * 3, 3) - eff_phi.segment(l * 3, 3);
+                        distance = eff_Phi.segment(j * 3, 3) - eff_Phi.segment(l * 3, 3);
                         _distance = kinematics[0].jacobian[j].data.block(0, i, 3, 1) - kinematics[0].jacobian[l].data.block(0, i, 3, 1);
 
                         Sl = distance.dot(_distance) / dist(j, l);
@@ -100,7 +100,7 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::Mat
                         {
                             if (j != k && dist(j, k) > 0 && weights_(j, k) > 0)
                             {
-                                distance = eff_phi.segment(j * 3, 3) - eff_phi.segment(k * 3, 3);
+                                distance = eff_Phi.segment(j * 3, 3) - eff_Phi.segment(k * 3, 3);
                                 _distance = kinematics[0].jacobian[j].data.block(0, i, 3, 1) - kinematics[0].jacobian[k].data.block(0, i, 3, 1);
                                 Sk = distance.dot(_distance) / dist(j, k);
                                 _A += weights_(j, k) * (Sl * dist(j, k) - Sk * dist(j, l)) / (dist(j, k) * dist(j, k));
@@ -113,7 +113,7 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::Mat
                         _w = 0;
                         w = 0;
                     }
-                    jacobian.block(3 * j, i, 3, 1) -= eff_phi.segment(l * 3, 3) * _w + kinematics[0].jacobian[l].data.block(0, i, 3, 1) * w;
+                    jacobian.block(3 * j, i, 3, 1) -= eff_Phi.segment(l * 3, 3) * _w + kinematics[0].jacobian[l].data.block(0, i, 3, 1) * w;
                 }
             }
         }
@@ -241,9 +241,9 @@ int IMesh::TaskSpaceDim()
     return 3 * eff_size_;
 }
 
-Eigen::VectorXd IMesh::ComputeLaplace(Eigen::VectorXdRefConst eff_phi, Eigen::MatrixXdRefConst weights, Eigen::MatrixXd* dist_ptr, Eigen::VectorXd* wsum_ptr)
+Eigen::VectorXd IMesh::ComputeLaplace(Eigen::VectorXdRefConst eff_Phi, Eigen::MatrixXdRefConst weights, Eigen::MatrixXd* dist_ptr, Eigen::VectorXd* wsum_ptr)
 {
-    int N = eff_phi.rows() / 3;
+    int N = eff_Phi.rows() / 3;
     Eigen::VectorXd Phi = Eigen::VectorXd::Zero(N * 3);
     Eigen::MatrixXd dist = Eigen::MatrixXd::Zero(N, N);
     Eigen::VectorXd wsum = Eigen::VectorXd::Zero(N);
@@ -254,7 +254,7 @@ Eigen::VectorXd IMesh::ComputeLaplace(Eigen::VectorXdRefConst eff_phi, Eigen::Ma
         {
             if (!(j >= N && l >= N))
             {
-                dist(j, l) = dist(l, j) = (eff_phi.segment(j * 3, 3) - eff_phi.segment(l * 3, 3)).norm();
+                dist(j, l) = dist(l, j) = (eff_Phi.segment(j * 3, 3) - eff_Phi.segment(l * 3, 3)).norm();
             }
         }
     }
@@ -272,14 +272,14 @@ Eigen::VectorXd IMesh::ComputeLaplace(Eigen::VectorXdRefConst eff_phi, Eigen::Ma
     /** Compute Laplace coordinates */
     for (int j = 0; j < N; ++j)
     {
-        Phi.segment(j * 3, 3) = eff_phi.segment(j * 3, 3);
+        Phi.segment(j * 3, 3) = eff_Phi.segment(j * 3, 3);
         for (int l = 0; l < N; ++l)
         {
             if (j != l)
             {
                 if (dist(j, l) > 0 && wsum(j) > 0)
                 {
-                    Phi.segment(j * 3, 3) -= eff_phi.segment(l * 3, 3) * weights(j, l) / (dist(j, l) * wsum(j));
+                    Phi.segment(j * 3, 3) -= eff_Phi.segment(l * 3, 3) * weights(j, l) / (dist(j, l) * wsum(j));
                 }
             }
         }
@@ -292,27 +292,27 @@ Eigen::VectorXd IMesh::ComputeLaplace(Eigen::VectorXdRefConst eff_phi, Eigen::Ma
 void IMesh::ComputeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd& goal, Eigen::MatrixXdRefConst weights)
 {
     int N = nodes.size();
-    Eigen::VectorXd eff_phi(3 * N);
+    Eigen::VectorXd eff_Phi(3 * N);
     for (int i = 0; i < N; ++i)
     {
-        eff_phi(i * 3) = nodes[i].p[0];
-        eff_phi(i * 3 + 1) = nodes[i].p[1];
-        eff_phi(i * 3 + 2) = nodes[i].p[2];
+        eff_Phi(i * 3) = nodes[i].p[0];
+        eff_Phi(i * 3 + 1) = nodes[i].p[1];
+        eff_Phi(i * 3 + 2) = nodes[i].p[2];
     }
-    goal = ComputeLaplace(eff_phi, weights);
+    goal = ComputeLaplace(eff_Phi, weights);
 }
 
 void IMesh::ComputeGoalLaplace(const Eigen::VectorXd& x, Eigen::VectorXd& goal)
 {
     scene_->Update(x);
-    Eigen::VectorXd eff_phi;
+    Eigen::VectorXd eff_Phi;
     for (int i = 0; i < eff_size_; ++i)
     {
-        eff_phi(i * 3) = kinematics[0].Phi(i).p[0];
-        eff_phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
-        eff_phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
+        eff_Phi(i * 3) = kinematics[0].Phi(i).p[0];
+        eff_Phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
+        eff_Phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
     }
-    goal = ComputeLaplace(eff_phi, weights_);
+    goal = ComputeLaplace(eff_Phi, weights_);
 }
 
 void IMesh::SetWeight(int i, int j, double weight)

@@ -58,4 +58,4 @@ private:
 };
 }
 
-#endif // EXOTICA_CORE_TASK_MAPS_EFF_FRAME_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_EFF_FRAME_H_

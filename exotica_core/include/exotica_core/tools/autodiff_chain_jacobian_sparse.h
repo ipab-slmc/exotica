@@ -165,4 +165,4 @@ public:
 
 }  // namespace Eigen
 
-#endif // EIGEN_AUTODIFF_CHAIN_JACOBIAN_SPARSE_H_
+#endif  // EIGEN_AUTODIFF_CHAIN_JACOBIAN_SPARSE_H_

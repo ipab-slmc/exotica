@@ -242,4 +242,4 @@ private:
 };
 }
 
-#endif // EXOTICA_AICO_SOLVER_AICO_SOLVER_H_
+#endif  // EXOTICA_AICO_SOLVER_AICO_SOLVER_H_

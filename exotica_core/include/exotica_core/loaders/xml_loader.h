@@ -92,4 +92,4 @@ private:
 };
 }
 
-#endif // EXOTICA_CORE_XML_LOADER_H_
+#endif  // EXOTICA_CORE_XML_LOADER_H_

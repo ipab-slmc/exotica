@@ -98,7 +98,7 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
 
     py::class_<IMesh, std::shared_ptr<IMesh>, TaskMap>(module, "IMesh")
         .def_property("W", &IMesh::GetWeights, &IMesh::SetWeights)
-        .def("SetWeight", &IMesh::SetWeight)
+        .def("set_weight", &IMesh::SetWeight)
         .def_static("compute_goal_laplace", [](const std::vector<KDL::Frame>& nodes, Eigen::MatrixXdRefConst weights) {
             Eigen::VectorXd goal;
             IMesh::ComputeGoalLaplace(nodes, goal, weights);

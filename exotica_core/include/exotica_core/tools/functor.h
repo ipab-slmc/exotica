@@ -49,4 +49,4 @@ struct FunctorBase
 typedef FunctorBase<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::Dynamic> Functor;
 }
 
-#endif // EIGEN_AUTODIFF_FUNCTOR_H_
+#endif  // EIGEN_AUTODIFF_FUNCTOR_H_

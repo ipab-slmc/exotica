@@ -39,4 +39,4 @@ enum NumericalDiffMode
 };
 }
 
-#endif // EIGEN_FINITEDIFF_COMMON_H_
+#endif  // EIGEN_FINITEDIFF_COMMON_H_

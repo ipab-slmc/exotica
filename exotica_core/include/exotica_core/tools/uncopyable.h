@@ -44,4 +44,4 @@ private:
 };
 }
 
-#endif // EXOTICA_CORE_UNCOPYABLE_H_
+#endif  // EXOTICA_CORE_UNCOPYABLE_H_

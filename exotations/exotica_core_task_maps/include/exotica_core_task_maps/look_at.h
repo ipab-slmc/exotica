@@ -78,6 +78,6 @@ private:
     int n_end_effs_;  ///< Number of end-effectors.
     int n_;           ///< Dimension of the task space.
 };
-}
+}  // namespace exotica
 
-#endif // EXOTICA_CORE_TASK_MAPS_LOOKAT_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_LOOKAT_H_

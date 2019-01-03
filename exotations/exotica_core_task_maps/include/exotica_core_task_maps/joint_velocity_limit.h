@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018, Wolfgang Merkt
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,6 @@ private:
     JointVelocityLimitInitializer init_;
     int N;
 };
-}
+}  // namespace exotica
 
-#endif // EXOTICA_CORE_TASK_MAPS_JOINT_VELOCITY_LIMIT_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_JOINT_VELOCITY_LIMIT_H_

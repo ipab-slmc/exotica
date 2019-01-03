@@ -125,4 +125,4 @@ struct SamplingTask : public Task
 };
 }
 
-#endif // EXOTICA_CORE_TASKS_H_
+#endif  // EXOTICA_CORE_TASKS_H_

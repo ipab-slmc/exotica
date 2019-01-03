@@ -108,4 +108,4 @@ typedef Factory<PlanningProblem> PlanningProblemFac;
 typedef std::shared_ptr<PlanningProblem> PlanningProblemPtr;
 }
 
-#endif // EXOTICA_CORE_PLANNING_PROBLEM_H_
+#endif  // EXOTICA_CORE_PLANNING_PROBLEM_H_

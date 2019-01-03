@@ -49,4 +49,4 @@ public:
 };
 }
 
-#endif // EXOTICA_CORE_TASK_MAPS_EFF_POSITION_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_EFF_POSITION_H_

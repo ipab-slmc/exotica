@@ -98,7 +98,7 @@ add_library(${PROJECT_NAME}
   ${exotica_core_BINARY_DIR}/generated/version.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

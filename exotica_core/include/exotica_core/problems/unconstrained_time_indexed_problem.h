@@ -77,11 +77,11 @@ public:
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
     bool IsValid() override { return true; }
-    int length_phi;
+    int length_Phi;
     int length_jacobian;
     int num_tasks;
 
-    TaskSpaceVector cost_phi;  // passed to the TimeIndexedTask, needs to be kept for reinitialisation
+    TaskSpaceVector cost_Phi;  // passed to the TimeIndexedTask, needs to be kept for reinitialisation
 
 private:
     void ReinitializeVariables();

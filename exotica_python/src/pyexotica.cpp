@@ -638,7 +638,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("task_Space_jacobian_dim", &TaskMap::TaskSpaceJacobianDim);
 
     py::class_<TimeIndexedTask, std::shared_ptr<TimeIndexedTask>>(module, "TimeIndexedTask")
-        .def_readonly("length_phi", &TimeIndexedTask::length_phi)
+        .def_readonly("length_Phi", &TimeIndexedTask::length_Phi)
         .def_readonly("length_jacobian", &TimeIndexedTask::length_jacobian)
         .def_readonly("num_tasks", &TimeIndexedTask::num_tasks)
         .def_readonly("y", &TimeIndexedTask::y)
@@ -652,7 +652,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("task_maps", &TimeIndexedTask::task_maps);
 
     py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>>(module, "EndPoseTask")
-        .def_readonly("length_phi", &EndPoseTask::length_phi)
+        .def_readonly("length_Phi", &EndPoseTask::length_Phi)
         .def_readonly("length_jacobian", &EndPoseTask::length_jacobian)
         .def_readonly("num_tasks", &EndPoseTask::num_tasks)
         .def_readonly("y", &EndPoseTask::y)
@@ -665,7 +665,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("task_maps", &EndPoseTask::task_maps);
 
     py::class_<SamplingTask, std::shared_ptr<SamplingTask>>(module, "SamplingTask")
-        .def_readonly("length_phi", &SamplingTask::length_phi)
+        .def_readonly("length_Phi", &SamplingTask::length_Phi)
         .def_readonly("length_jacobian", &SamplingTask::length_jacobian)
         .def_readonly("num_tasks", &SamplingTask::num_tasks)
         .def_readonly("y", &SamplingTask::y)
@@ -720,7 +720,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_time_indexed_problem.def_readwrite("W", &UnconstrainedTimeIndexedProblem::W);
     unconstrained_time_indexed_problem.def_property("initial_trajectory", &UnconstrainedTimeIndexedProblem::GetInitialTrajectory, &UnconstrainedTimeIndexedProblem::SetInitialTrajectory);
     unconstrained_time_indexed_problem.def_property("T", &UnconstrainedTimeIndexedProblem::GetT, &UnconstrainedTimeIndexedProblem::SetT);
-    unconstrained_time_indexed_problem.def_readonly("length_phi", &UnconstrainedTimeIndexedProblem::length_phi);
+    unconstrained_time_indexed_problem.def_readonly("length_Phi", &UnconstrainedTimeIndexedProblem::length_Phi);
     unconstrained_time_indexed_problem.def_readonly("length_jacobian", &UnconstrainedTimeIndexedProblem::length_jacobian);
     unconstrained_time_indexed_problem.def_readonly("N", &UnconstrainedTimeIndexedProblem::N);
     unconstrained_time_indexed_problem.def_readonly("num_tasks", &UnconstrainedTimeIndexedProblem::num_tasks);
@@ -753,7 +753,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def_readwrite("W", &TimeIndexedProblem::W);
     time_indexed_problem.def_property("initial_trajectory", &TimeIndexedProblem::GetInitialTrajectory, &TimeIndexedProblem::SetInitialTrajectory);
     time_indexed_problem.def_property("T", &TimeIndexedProblem::GetT, &TimeIndexedProblem::SetT);
-    time_indexed_problem.def_readonly("length_phi", &TimeIndexedProblem::length_phi);
+    time_indexed_problem.def_readonly("length_Phi", &TimeIndexedProblem::length_Phi);
     time_indexed_problem.def_readonly("length_jacobian", &TimeIndexedProblem::length_jacobian);
     time_indexed_problem.def_readonly("N", &TimeIndexedProblem::N);
     time_indexed_problem.def_readonly("num_tasks", &TimeIndexedProblem::num_tasks);
@@ -783,7 +783,7 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_time_indexed_problem.def_readwrite("W", &BoundedTimeIndexedProblem::W);
     bounded_time_indexed_problem.def_property("initial_trajectory", &BoundedTimeIndexedProblem::GetInitialTrajectory, &BoundedTimeIndexedProblem::SetInitialTrajectory);
     bounded_time_indexed_problem.def_property("T", &BoundedTimeIndexedProblem::GetT, &BoundedTimeIndexedProblem::SetT);
-    bounded_time_indexed_problem.def_readonly("length_phi", &BoundedTimeIndexedProblem::length_phi);
+    bounded_time_indexed_problem.def_readonly("length_Phi", &BoundedTimeIndexedProblem::length_Phi);
     bounded_time_indexed_problem.def_readonly("length_jacobian", &BoundedTimeIndexedProblem::length_jacobian);
     bounded_time_indexed_problem.def_readonly("N", &BoundedTimeIndexedProblem::N);
     bounded_time_indexed_problem.def_readonly("num_tasks", &BoundedTimeIndexedProblem::num_tasks);
@@ -803,7 +803,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_end_pose_problem.def("get_goal", &UnconstrainedEndPoseProblem::GetGoal);
     unconstrained_end_pose_problem.def("get_rho", &UnconstrainedEndPoseProblem::GetRho);
     unconstrained_end_pose_problem.def_readwrite("W", &UnconstrainedEndPoseProblem::W);
-    unconstrained_end_pose_problem.def_readonly("length_phi", &UnconstrainedEndPoseProblem::length_phi);
+    unconstrained_end_pose_problem.def_readonly("length_Phi", &UnconstrainedEndPoseProblem::length_Phi);
     unconstrained_end_pose_problem.def_readonly("length_jacobian", &UnconstrainedEndPoseProblem::length_jacobian);
     unconstrained_end_pose_problem.def_readonly("N", &UnconstrainedEndPoseProblem::N);
     unconstrained_end_pose_problem.def_readonly("num_tasks", &UnconstrainedEndPoseProblem::num_tasks);
@@ -831,7 +831,7 @@ PYBIND11_MODULE(_pyexotica, module)
     end_pose_problem.def("get_goal_neq", &EndPoseProblem::GetGoalNEQ);
     end_pose_problem.def("get_rho_neq", &EndPoseProblem::GetRhoNEQ);
     end_pose_problem.def_readwrite("W", &EndPoseProblem::W);
-    end_pose_problem.def_readonly("length_phi", &EndPoseProblem::length_phi);
+    end_pose_problem.def_readonly("length_Phi", &EndPoseProblem::length_Phi);
     end_pose_problem.def_readonly("length_jacobian", &EndPoseProblem::length_jacobian);
     end_pose_problem.def_readonly("N", &EndPoseProblem::N);
     end_pose_problem.def_readonly("num_tasks", &EndPoseProblem::num_tasks);
@@ -856,7 +856,7 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_end_pose_problem.def("get_goal", &BoundedEndPoseProblem::GetGoal);
     bounded_end_pose_problem.def("get_rho", &BoundedEndPoseProblem::GetRho);
     bounded_end_pose_problem.def_readwrite("W", &BoundedEndPoseProblem::W);
-    bounded_end_pose_problem.def_readonly("length_phi", &BoundedEndPoseProblem::length_phi);
+    bounded_end_pose_problem.def_readonly("length_Phi", &BoundedEndPoseProblem::length_Phi);
     bounded_end_pose_problem.def_readonly("length_jacobian", &BoundedEndPoseProblem::length_jacobian);
     bounded_end_pose_problem.def_readonly("N", &BoundedEndPoseProblem::N);
     bounded_end_pose_problem.def_readonly("num_tasks", &BoundedEndPoseProblem::num_tasks);

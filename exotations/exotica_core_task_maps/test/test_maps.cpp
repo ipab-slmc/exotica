@@ -297,7 +297,7 @@ TEST(ExoticaTaskMaps, testEffPosition)
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->length_phi;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);
@@ -431,7 +431,7 @@ TEST(ExoticaTaskMaps, testDistance)
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->length_phi;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);
@@ -465,7 +465,7 @@ TEST(ExoticaTaskMaps, testJointLimit)
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->length_phi;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);
@@ -573,7 +573,7 @@ TEST(ExoticaTaskMaps, testSphereCollision)
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->length_phi;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);
@@ -605,7 +605,7 @@ TEST(ExoticaTaskMaps, testIdentity)
 
         {
             int N = problem->N;
-            int M = problem->length_phi;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
@@ -640,7 +640,7 @@ TEST(ExoticaTaskMaps, testIdentity)
 
         {
             int N = problem->N;
-            int M = problem->length_phi;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
@@ -675,7 +675,7 @@ TEST(ExoticaTaskMaps, testIdentity)
 
         {
             int N = problem->N;
-            int M = problem->length_phi;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
@@ -710,7 +710,7 @@ TEST(ExoticaTaskMaps, testCoM)
 
         {
             int N = problem->N;
-            int M = problem->length_phi;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
@@ -747,7 +747,7 @@ TEST(ExoticaTaskMaps, testCoM)
 
         {
             int N = problem->N;
-            int M = problem->length_phi;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
@@ -782,7 +782,7 @@ TEST(ExoticaTaskMaps, testCoM)
 
         {
             int N = problem->N;
-            int M = problem->length_phi;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
@@ -814,7 +814,7 @@ TEST(ExoticaTaskMaps, testCoM)
         EXPECT_TRUE(test_random(problem));
         {
             int N = problem->N;
-            int M = problem->length_phi;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
@@ -861,7 +861,7 @@ TEST(ExoticaTaskMaps, testIMesh)
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->length_phi;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);

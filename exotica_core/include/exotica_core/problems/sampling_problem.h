@@ -70,7 +70,7 @@ public:
     SamplingTask inequality;
     SamplingTask equality;
 
-    int length_phi;
+    int length_Phi;
     int length_jacobian;
     int num_tasks;
 

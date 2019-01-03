@@ -52,15 +52,15 @@ void EndPoseProblem::Instantiate(EndPoseProblemInitializer& init)
 {
     parameters = init;
     num_tasks = tasks_.size();
-    length_phi = 0;
+    length_Phi = 0;
     length_jacobian = 0;
     for (int i = 0; i < num_tasks; ++i)
     {
         AppendVector(Phi.map, tasks_[i]->GetLieGroupIndices());
-        length_phi += tasks_[i]->length;
+        length_Phi += tasks_[i]->length;
         length_jacobian += tasks_[i]->length_jacobian;
     }
-    Phi.SetZero(length_phi);
+    Phi.SetZero(length_Phi);
     W = Eigen::MatrixXd::Identity(N, N);
     if (init.W.rows() > 0)
     {
@@ -157,7 +157,7 @@ Eigen::MatrixXd EndPoseProblem::GetInequalityJacobian()
 void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x, t_start);
-    Phi.SetZero(length_phi);
+    Phi.SetZero(length_Phi);
     if (flags_ & KIN_J) jacobian.setZero();
     if (flags_ & KIN_J_DOT)
         for (int i = 0; i < length_jacobian; ++i) hessian(i).setZero();

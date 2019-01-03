@@ -78,7 +78,7 @@ public:
     TimeIndexedSamplingProblemInitializer parameters;
     TaskSpaceVector constraint_phi;
 
-    int length_phi;
+    int length_Phi;
     int length_jacobian;
     int num_tasks;
 

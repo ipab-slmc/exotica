@@ -91,9 +91,9 @@ public:
     TimeIndexedTask inequality;
     TimeIndexedTask equality;
 
-    TaskSpaceVector cost_phi;
-    TaskSpaceVector inequality_phi;
-    TaskSpaceVector equality_phi;
+    TaskSpaceVector cost_Phi;
+    TaskSpaceVector inequality_Phi;
+    TaskSpaceVector equality_Phi;
 
     Eigen::MatrixXd W;  // TODO(wxm): Make private and add getter and setter (#209)
 
@@ -104,7 +104,7 @@ public:
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
-    int length_phi;
+    int length_Phi;
     int length_jacobian;
     int num_tasks;
     bool use_bounds;

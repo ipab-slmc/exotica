@@ -49,15 +49,15 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     w_scale_ = init_.Wrate;
 
     num_tasks = tasks_.size();
-    length_phi = 0;
+    length_Phi = 0;
     length_jacobian = 0;
     for (int i = 0; i < num_tasks; ++i)
     {
         AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
-        length_phi += tasks_[i]->length;
+        length_Phi += tasks_[i]->length;
         length_jacobian += tasks_[i]->length_jacobian;
     }
-    y_ref_.SetZero(length_phi);
+    y_ref_.SetZero(length_Phi);
 
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
@@ -74,7 +74,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
         }
     }
 
-    cost.Initialize(init_.Cost, shared_from_this(), cost_phi);
+    cost.Initialize(init_.Cost, shared_from_this(), cost_Phi);
 
     T_ = init_.T;
     ApplyStartState(false);
@@ -101,7 +101,7 @@ void UnconstrainedTimeIndexedProblem::ReinitializeVariables()
     // Set initial trajectory with current state
     initial_trajectory_.resize(T_, scene_->GetControlledState());
 
-    cost.ReinitializeVariables(T_, shared_from_this(), cost_phi);
+    cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
     PreUpdate();
 }
 
@@ -190,7 +190,7 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
 
     scene_->Update(x_in, static_cast<double>(t) * tau_);
 
-    Phi[t].SetZero(length_phi);
+    Phi[t].SetZero(length_Phi);
     if (flags_ & KIN_J) jacobian[t].setZero();
     if (flags_ & KIN_J_DOT)
         for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();

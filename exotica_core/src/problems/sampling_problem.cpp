@@ -76,15 +76,15 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     compound_ = scene_->GetBaseType() != exotica::BaseType::FIXED;
 
     num_tasks = tasks_.size();
-    length_phi = 0;
+    length_Phi = 0;
     length_jacobian = 0;
     for (int i = 0; i < num_tasks; ++i)
     {
         AppendVector(Phi.map, tasks_[i]->GetLieGroupIndices());
-        length_phi += tasks_[i]->length;
+        length_Phi += tasks_[i]->length;
         length_jacobian += tasks_[i]->length_jacobian;
     }
-    Phi.SetZero(length_phi);
+    Phi.SetZero(length_Phi);
     TaskSpaceVector dummy;
     inequality.Initialize(init.Inequality, shared_from_this(), dummy);
     inequality.tolerance = init.ConstraintTolerance;

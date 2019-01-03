@@ -69,7 +69,7 @@ public:
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
 
     TimeIndexedTask cost;
-    TaskSpaceVector cost_phi;
+    TaskSpaceVector cost_Phi;
 
     double w_scale_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
     Eigen::MatrixXd W;
@@ -81,7 +81,7 @@ public:
     std::vector<Eigen::VectorXd> x;      // current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
-    int length_phi;
+    int length_Phi;
     int length_jacobian;
     int num_tasks;
 

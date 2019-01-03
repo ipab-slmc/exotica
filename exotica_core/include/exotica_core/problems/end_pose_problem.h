@@ -80,7 +80,7 @@ public:
     Eigen::MatrixXd jacobian;
     Hessian hessian;
 
-    int length_phi;
+    int length_Phi;
     int length_jacobian;
     int num_tasks;
     bool use_bounds;

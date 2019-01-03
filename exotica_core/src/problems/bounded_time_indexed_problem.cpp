@@ -68,7 +68,7 @@ void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer
         ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 
-    cost.Initialize(parameters.Cost, shared_from_this(), cost_phi);
+    cost.Initialize(parameters.Cost, shared_from_this(), cost_Phi);
 
     T_ = parameters.T;
     ApplyStartState(false);
@@ -119,7 +119,7 @@ void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 
     x[t] = x_in;
     scene_->Update(x_in, static_cast<double>(t) * tau_);
-    Phi[t].SetZero(length_phi);
+    Phi[t].SetZero(length_Phi);
     if (flags_ & KIN_J) jacobian[t].setZero();
     if (flags_ & KIN_J_DOT)
         for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
@@ -287,13 +287,13 @@ void BoundedTimeIndexedProblem::ReinitializeVariables()
     w_scale_ = parameters.Wrate;
 
     num_tasks = tasks_.size();
-    length_phi = 0;
+    length_Phi = 0;
     length_jacobian = 0;
     TaskSpaceVector y_ref_;
     for (int i = 0; i < num_tasks; ++i)
     {
         AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
-        length_phi += tasks_[i]->length;
+        length_Phi += tasks_[i]->length;
         length_jacobian += tasks_[i]->length_jacobian;
     }
 
@@ -312,7 +312,7 @@ void BoundedTimeIndexedProblem::ReinitializeVariables()
         }
     }
 
-    y_ref_.SetZero(length_phi);
+    y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
     if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
     x.assign(T_, Eigen::VectorXd::Zero(N));
@@ -327,7 +327,7 @@ void BoundedTimeIndexedProblem::ReinitializeVariables()
     // Set initial trajectory
     initial_trajectory_.resize(T_, scene_->GetControlledState());
 
-    cost.ReinitializeVariables(T_, shared_from_this(), cost_phi);
+    cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
     ApplyStartState(false);
     PreUpdate();
 }

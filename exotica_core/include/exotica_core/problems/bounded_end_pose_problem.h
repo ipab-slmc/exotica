@@ -67,7 +67,7 @@ public:
     Hessian hessian;
     Eigen::MatrixXd jacobian;
 
-    int length_phi;
+    int length_Phi;
     int length_jacobian;
     int num_tasks;
 };

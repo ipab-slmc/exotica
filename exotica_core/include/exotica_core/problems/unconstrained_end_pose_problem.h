@@ -68,7 +68,7 @@ public:
     Hessian hessian;
     Eigen::VectorXd q_nominal;
 
-    int length_phi;
+    int length_Phi;
     int length_jacobian;
     int num_tasks;
 };

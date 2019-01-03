@@ -40,7 +40,7 @@ the solver:
                              0.5 + sin(t * M_PI * 0.5) * 0.2;
 
             // Solve the problem using the IK solver
-            any_solver->Solve(q, solution);
+            any_solver->Solve(solution);
 
             double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
             ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
@@ -133,7 +133,7 @@ Solving Problems
 
 .. code-block:: c++
 
-        any_solver->Solve(q, solution);
+        any_solver->Solve(solution);
 
 Solution Format
 ===============

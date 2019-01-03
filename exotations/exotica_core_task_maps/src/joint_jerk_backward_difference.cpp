@@ -92,23 +92,23 @@ void JointJerkBackwardDifference::SetPreviousJointState(Eigen::VectorXdRefConst 
     qbd_ = q_ * backward_difference_params_;
 }
 
-void JointJerkBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void JointJerkBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     // Input check
-    if (Phi.rows() != N_) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != N_) ThrowNamed("Wrong size of phi!");
 
     // Estimate third time derivative
-    Phi = dt_inv_ * (x + qbd_);
+    phi = dt_inv_ * (x + qbd_);
 }
 
-void JointJerkBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void JointJerkBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     // Input check
-    if (Phi.rows() != N_) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != N_) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != N_ || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
 
     // Estimate third time derivative and set Jacobian to identity matrix
-    Phi = dt_inv_ * (x + qbd_);
+    phi = dt_inv_ * (x + qbd_);
     jacobian = dt_inv_ * I_;
 }
 

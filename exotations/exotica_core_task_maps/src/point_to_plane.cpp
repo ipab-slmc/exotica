@@ -47,22 +47,22 @@ void PointToPlane::Instantiate(PointToPlaneInitializer& init)
     }
 }
 
-void PointToPlane::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void PointToPlane::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of phi!");
 
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
         const auto& point = Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
-        Phi(i) = Eigen::Vector3d::UnitZ().dot(point);
+        phi(i) = Eigen::Vector3d::UnitZ().dot(point);
     }
 
     if (debug_ && Server::IsRos()) PublishDebug();
 }
 
-void PointToPlane::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void PointToPlane::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != kinematics[0].jacobian.rows() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
     jacobian.setZero();
@@ -71,7 +71,7 @@ void PointToPlane::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eig
     {
         const auto& point = Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
 
-        Phi(i) = Eigen::Vector3d::UnitZ().dot(point);
+        phi(i) = Eigen::Vector3d::UnitZ().dot(point);
 
         for (int j = 0; j < jacobian.cols(); ++j)
         {
@@ -92,7 +92,7 @@ void PointToPlane::PublishDebug()
 {
     visualization_msgs::MarkerArray msg;
 
-    for (unsigned int i = 0; i < kinematics[0].Phi.rows(); ++i)
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
         visualization_msgs::Marker plane;
 

@@ -48,20 +48,20 @@ public:
     void Instantiate(IMeshInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
     void SetWeight(int i, int j, double weight);
     void SetWeights(const Eigen::MatrixXd& weights);
     Eigen::MatrixXd GetWeights();
 
-    static Eigen::VectorXd ComputeLaplace(Eigen::VectorXdRefConst eff_phi, Eigen::MatrixXdRefConst weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
+    static Eigen::VectorXd ComputeLaplace(Eigen::VectorXdRefConst eff_Phi, Eigen::MatrixXdRefConst weights, Eigen::MatrixXd* dist = nullptr, Eigen::VectorXd* wsum = nullptr);
     void ComputeGoalLaplace(const Eigen::VectorXd& x, Eigen::VectorXd& goal);
     static void ComputeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd& goal, Eigen::MatrixXdRefConst weights);
 
 protected:
-    void Debug(Eigen::VectorXdRefConst Phi);
+    void Debug(Eigen::VectorXdRefConst phi);
     void InitializeDebug(std::string ref);
     void DestroyDebug();
 

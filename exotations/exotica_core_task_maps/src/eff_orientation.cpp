@@ -71,22 +71,22 @@ std::vector<TaskVectorEntry> EffOrientation::GetLieGroupIndices()
     return ret;
 }
 
-void EffOrientation::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void EffOrientation::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows() * stride_) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows() * stride_) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Phi.segment(i * stride_, stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
+        phi.segment(i * stride_, stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
     }
 }
 
-void EffOrientation::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void EffOrientation::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows() * stride_) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows() * stride_) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 3 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Phi.segment(i * stride_, stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
+        phi.segment(i * stride_, stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
         jacobian.middleRows(i * 3, 3) = kinematics[0].jacobian[i].data.bottomRows<3>();
     }
 }

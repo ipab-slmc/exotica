@@ -45,7 +45,7 @@ public:
     void Instantiate(CollisionCheckInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     int TaskSpaceDim() override;
 
 private:

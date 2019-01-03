@@ -37,9 +37,9 @@ namespace exotica
 CenterOfMass::CenterOfMass() = default;
 CenterOfMass::~CenterOfMass() = default;
 
-void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != dim_) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     double M = mass_.sum();
     if (M == 0.0) return;
 
@@ -56,13 +56,13 @@ void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
     }
 
     com = com / M;
-    for (int i = 0; i < dim_; ++i) Phi(i) = com[i];
+    for (int i = 0; i < dim_; ++i) phi(i) = com[i];
 
     if (debug_)
     {
-        com_marker_.pose.position.x = Phi(0);
-        com_marker_.pose.position.y = Phi(1);
-        com_marker_.pose.position.z = Phi(2);
+        com_marker_.pose.position.x = phi(0);
+        com_marker_.pose.position.y = phi(1);
+        com_marker_.pose.position.z = phi(2);
 
         com_marker_.header.stamp = com_links_marker_.header.stamp = ros::Time::now();
         com_links_pub_.publish(com_links_marker_);
@@ -70,9 +70,9 @@ void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
     }
 }
 
-void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != dim_) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != dim_ || jacobian.cols() != x.rows()) ThrowNamed("Wrong size of jacobian! " << x.rows());
     jacobian.setZero();
     KDL::Vector com;
@@ -127,13 +127,13 @@ void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eig
         com = com / M;
         jacobian = jacobian / M;
     }
-    for (int i = 0; i < dim_; ++i) Phi(i) = com[i];
+    for (int i = 0; i < dim_; ++i) phi(i) = com[i];
 
     if (debug_)
     {
-        com_marker_.pose.position.x = Phi(0);
-        com_marker_.pose.position.y = Phi(1);
-        com_marker_.pose.position.z = Phi(2);
+        com_marker_.pose.position.x = phi(0);
+        com_marker_.pose.position.y = phi(1);
+        com_marker_.pose.position.z = phi(2);
 
         com_marker_.header.stamp = com_links_marker_.header.stamp = ros::Time::now();
         com_links_pub_.publish(com_links_marker_);

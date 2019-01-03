@@ -42,9 +42,9 @@ Eigen::Vector3d LookAt::get_look_at_target_in_world(const int& i)
     return Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(n_end_effs_ * i + 2).p.data);
 }
 
-void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
 
     for (int i = 0; i < n_end_effs_; ++i)
     {
@@ -59,13 +59,13 @@ void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
         Eigen::Vector3d a = alpha * c;
 
         // Set Phi
-        Phi.segment<3>(end_effector_id) = a - p;
+        phi.segment<3>(end_effector_id) = a - p;
     }
 }
 
-void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != TaskSpaceDim() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
     for (int i = 0; i < n_end_effs_; ++i)
@@ -82,7 +82,7 @@ void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::Ma
         Eigen::Vector3d a = alpha * c;
 
         // Set Phi
-        Phi.segment<3>(end_effector_id) = a - p;
+        phi.segment<3>(end_effector_id) = a - p;
 
         // Compute jacobian
         for (int j = 0; j < jacobian.cols(); ++j)

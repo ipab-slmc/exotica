@@ -45,8 +45,8 @@ public:
 
     void Instantiate(PointToLineInitializer& init) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
     Eigen::Vector3d GetEndPoint();

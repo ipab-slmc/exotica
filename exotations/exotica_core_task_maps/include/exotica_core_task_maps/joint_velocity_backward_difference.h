@@ -59,8 +59,8 @@ public:
     /// The new joint_state is set to q_. Finally, we compute the new qbd_.
     void SetPreviousJointState(Eigen::VectorXdRefConst joint_state);
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
 private:

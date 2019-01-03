@@ -36,37 +36,37 @@ namespace exotica
 Identity::Identity() = default;
 Identity::~Identity() = default;
 
-void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < joint_map_.size(); ++i)
     {
-        Phi(i) = x(joint_map_[i]) - joint_ref_(i);
+        phi(i) = x(joint_map_[i]) - joint_ref_(i);
     }
 }
 
-void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != joint_map_.size() || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
     jacobian.setZero();
     for (int i = 0; i < joint_map_.size(); ++i)
     {
-        Phi(i) = x(joint_map_[i]) - joint_ref_(i);
+        phi(i) = x(joint_map_[i]) - joint_ref_(i);
         jacobian(i, joint_map_[i]) = 1.0;
     }
 }
 
-// void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot)
+// void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot)
 // {
-//     if (Phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
+//     if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
 //     if (jacobian.rows() != joint_map_.size() || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
 //     if (Jdot.rows() != joint_map_.size() || Jdot.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
 //     jacobian.setZero();
 //     Jdot.setZero();
 //     for (int i = 0; i < joint_map_.size(); ++i)
 //     {
-//         Phi(i) = x(joint_map_[i]) - joint_ref_(i);
+//         phi(i) = x(joint_map_[i]) - joint_ref_(i);
 //         phidot(i) = x(joint_map_[i] + N_) - joint_ref_(i + joint_map_.size());
 //         jacobian(i, joint_map_[i]) = 1.0;
 //         Jdot(i, joint_map_[i]) = 1.0;

@@ -84,36 +84,36 @@ int JointVelocityLimit::TaskSpaceDim()
     return N;
 }
 
-void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (kinematics.size() != 2) ThrowNamed("Wrong size of kinematics - requires 2, but got " << kinematics.size());
-    if (Phi.rows() != N) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != N) ThrowNamed("Wrong size of phi!");
     if (!x.isApprox(kinematics[0].X)) ThrowNamed("The internal kinematics.X and passed state reference x do not match!");
 
-    Phi.setZero();
+    phi.setZero();
     Eigen::VectorXd x_diff = (1 / dt_) * (kinematics[0].X - kinematics[1].X);
     for (int i = 0; i < N; ++i)
     {
         if (x_diff(i) < -limits_(i) + tau_(i))
         {
-            Phi(i) = x_diff(i) + limits_(i) - tau_(i);
+            phi(i) = x_diff(i) + limits_(i) - tau_(i);
             if (debug_) HIGHLIGHT_NAMED("JointVelocityLimit", "Lower limit exceeded (joint=" << i << "): " << x_diff(i) << " < (-" << limits_(i) << "+" << tau_(i) << ")");
         }
         if (x_diff(i) > limits_(i) - tau_(i))
         {
-            Phi(i) = x_diff(i) - limits_(i) + tau_(i);
+            phi(i) = x_diff(i) - limits_(i) + tau_(i);
             if (debug_) HIGHLIGHT_NAMED("JointVelocityLimit", "Upper limit exceeded (joint=" << i << "): " << x_diff(i) << " > (" << limits_(i) << "-" << tau_(i) << ")");
         }
     }
 }
 
-void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     if (jacobian.rows() != N || jacobian.cols() != N) ThrowNamed("Wrong size of jacobian! " << N);
-    Update(x, Phi);
+    Update(x, phi);
     jacobian = (1 / dt_) * Eigen::MatrixXd::Identity(N, N);
     for (int i = 0; i < N; ++i)
-        if (Phi(i) == 0.0)
+        if (phi(i) == 0.0)
             jacobian(i, i) = 0.0;
 }
 }

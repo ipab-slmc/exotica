@@ -36,25 +36,25 @@ namespace exotica
 Distance::Distance() = default;
 Distance::~Distance() = default;
 
-void Distance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void Distance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Phi(i) = kinematics[0].Phi(i).p.Norm();
+        phi(i) = kinematics[0].Phi(i).p.Norm();
     }
 }
 
-void Distance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void Distance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != kinematics[0].jacobian.rows() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Phi(i) = kinematics[0].Phi(i).p.Norm();
+        phi(i) = kinematics[0].Phi(i).p.Norm();
         for (int j = 0; j < jacobian.cols(); ++j)
         {
-            jacobian(i, j) = (kinematics[0].Phi(i).p[0] * kinematics[0].jacobian[i].data(0, j) + kinematics[0].Phi(i).p[1] * kinematics[0].jacobian[i].data(1, j) + kinematics[0].Phi(i).p[2] * kinematics[0].jacobian[i].data(2, j)) / Phi(i);
+            jacobian(i, j) = (kinematics[0].Phi(i).p[0] * kinematics[0].jacobian[i].data(0, j) + kinematics[0].Phi(i).p[1] * kinematics[0].jacobian[i].data(1, j) + kinematics[0].Phi(i).p[2] * kinematics[0].jacobian[i].data(2, j)) / phi(i);
         }
     }
 }

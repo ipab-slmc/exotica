@@ -80,20 +80,20 @@ void PointToLine::SetEndPoint(const Eigen::Vector3d &point)
     line_ = line_end_ - line_start_;
 }
 
-void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of phi!");
 
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
         const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
-        Phi.segment<3>(i * 3) = -Direction(p);
+        phi.segment<3>(i * 3) = -Direction(p);
     }
 }
 
-void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 3 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
@@ -102,7 +102,7 @@ void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eige
         const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
         // direction from point to line
         const Eigen::Vector3d dv = Direction(p);
-        Phi.segment<3>(i * 3) = dv;
+        phi.segment<3>(i * 3) = dv;
 
         if ((dv + p - line_start_).norm() < std::numeric_limits<double>::epsilon())
         {

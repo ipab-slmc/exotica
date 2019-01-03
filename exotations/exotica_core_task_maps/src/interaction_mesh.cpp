@@ -37,11 +37,11 @@ namespace exotica
 IMesh::IMesh() = default;
 IMesh::~IMesh() = default;
 
-void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     int M = eff_size_;
 
-    if (Phi.rows() != M * 3) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != M * 3) ThrowNamed("Wrong size of Phi!");
 
     Eigen::VectorXd eff_Phi;
     for (int i = 0; i < M; ++i)
@@ -50,17 +50,17 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
         eff_Phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
         eff_Phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
     }
-    Phi = ComputeLaplace(eff_Phi, weights_);
+    phi = ComputeLaplace(eff_Phi, weights_);
 
-    if (debug_) Debug(Phi);
+    if (debug_) Debug(phi);
 }
 
-void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     int M = eff_size_;
     int N = kinematics[0].jacobian[0].data.cols();
 
-    if (Phi.rows() != M * 3) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != M * 3) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != M * 3 || jacobian.cols() != N) ThrowNamed("Wrong size of jacobian! " << N);
 
     Eigen::MatrixXd dist;
@@ -72,7 +72,7 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::Mat
         eff_Phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
         eff_Phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
     }
-    Phi = ComputeLaplace(eff_Phi, weights_, &dist, &wsum);
+    phi = ComputeLaplace(eff_Phi, weights_, &dist, &wsum);
 
     double A, _A, Sk, Sl, w, _w;
     int i, j, k, l;
@@ -120,7 +120,7 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::Mat
         }
     }
 
-    if (debug_) Debug(Phi);
+    if (debug_) Debug(phi);
 }
 
 Eigen::MatrixXd IMesh::GetWeights()
@@ -157,7 +157,7 @@ void IMesh::AssignScene(ScenePtr scene)
     scene_ = scene;
 }
 
-void IMesh::Debug(Eigen::VectorXdRefConst Phi)
+void IMesh::Debug(Eigen::VectorXdRefConst phi)
 {
     static int textid = 0;
     {
@@ -195,9 +195,9 @@ void IMesh::Debug(Eigen::VectorXdRefConst Phi)
         std::vector<geometry_msgs::Point> points(eff_size_);
         for (int i = 0; i < eff_size_; ++i)
         {
-            points[i].x = Phi(i * 3);
-            points[i].y = Phi(i * 3 + 1);
-            points[i].z = Phi(i * 3 + 2);
+            points[i].x = phi(i * 3);
+            points[i].y = phi(i * 3 + 1);
+            points[i].z = phi(i * 3 + 2);
         }
 
         for (int i = 0; i < eff_size_; ++i)

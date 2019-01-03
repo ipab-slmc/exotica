@@ -72,28 +72,28 @@ std::vector<TaskVectorEntry> EffFrame::GetLieGroupIndices()
     return ret;
 }
 
-void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows() * big_stride_) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows() * big_stride_) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Phi(i * big_stride_) = kinematics[0].Phi(i).p[0];
-        Phi(i * big_stride_ + 1) = kinematics[0].Phi(i).p[1];
-        Phi(i * big_stride_ + 2) = kinematics[0].Phi(i).p[2];
-        Phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
+        phi(i * big_stride_) = kinematics[0].Phi(i).p[0];
+        phi(i * big_stride_ + 1) = kinematics[0].Phi(i).p[1];
+        phi(i * big_stride_ + 2) = kinematics[0].Phi(i).p[2];
+        phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
     }
 }
 
-void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows() * big_stride_) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows() * big_stride_) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 6 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Phi(i * big_stride_) = kinematics[0].Phi(i).p[0];
-        Phi(i * big_stride_ + 1) = kinematics[0].Phi(i).p[1];
-        Phi(i * big_stride_ + 2) = kinematics[0].Phi(i).p[2];
-        Phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
+        phi(i * big_stride_) = kinematics[0].Phi(i).p[0];
+        phi(i * big_stride_ + 1) = kinematics[0].Phi(i).p[1];
+        phi(i * big_stride_ + 2) = kinematics[0].Phi(i).p[2];
+        phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
         jacobian.middleRows(i * 6, 6) = kinematics[0].jacobian[i].data;
     }
 }

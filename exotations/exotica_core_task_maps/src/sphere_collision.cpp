@@ -90,10 +90,10 @@ Eigen::VectorXd SphereCollision::Jacobian(const KDL::Frame& eff_A, const KDL::Fr
     return ret;
 }
 
-void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of Phi!");
-    Phi.setZero();
+    if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
+    phi.setZero();
 
     auto Aend = groups_.end()--;
     auto Bend = groups_.end();
@@ -108,7 +108,7 @@ void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
                 {
                     int i = A->second[ii];
                     int j = B->second[jj];
-                    Phi(phiI) += Distance(kinematics[0].Phi(i), kinematics[0].Phi(j), radiuses_[i], radiuses_[j]);
+                    phi(phiI) += Distance(kinematics[0].Phi(i), kinematics[0].Phi(j), radiuses_[i], radiuses_[j]);
                 }
             }
             ++phiI;
@@ -127,11 +127,11 @@ void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
     }
 }
 
-void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != TaskSpaceDim() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
-    Phi.setZero();
+    phi.setZero();
     jacobian.setZero();
 
     auto Aend = groups_.end()--;
@@ -147,7 +147,7 @@ void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, 
                 {
                     int i = A->second[ii];
                     int j = B->second[jj];
-                    Phi(phiI) += Distance(kinematics[0].Phi(i), kinematics[0].Phi(j), radiuses_[i], radiuses_[j]);
+                    phi(phiI) += Distance(kinematics[0].Phi(i), kinematics[0].Phi(j), radiuses_[i], radiuses_[j]);
                     jacobian.row(phiI) += Jacobian(kinematics[0].Phi(i), kinematics[0].Phi(j), kinematics[0].jacobian(i), kinematics[0].jacobian(j), radiuses_[i], radiuses_[j]);
                 }
             }

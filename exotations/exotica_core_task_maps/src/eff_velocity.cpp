@@ -42,24 +42,24 @@ EffVelocity::EffVelocity()
 
 EffVelocity::~EffVelocity() = default;
 
-void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (kinematics.size() != 2) ThrowNamed("Wrong size of kinematics - requires 2, but got " << kinematics.size());
-    if (Phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
 
     Eigen::Vector3d p_t, p_t_prev;
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
         tf::vectorKDLToEigen(kinematics[0].Phi(i).p, p_t);
         tf::vectorKDLToEigen(kinematics[1].Phi(i).p, p_t_prev);
-        Phi(i) = (p_t_prev - p_t).norm();
+        phi(i) = (p_t_prev - p_t).norm();
     }
 }
 
-void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     if (kinematics.size() != 2) ThrowNamed("Wrong size of kinematics - requires 2, but got " << kinematics.size());
-    if (Phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != kinematics[0].jacobian.rows() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
     jacobian.setZero();
@@ -68,14 +68,14 @@ void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eige
     {
         tf::vectorKDLToEigen(kinematics[0].Phi(i).p, p_t);
         tf::vectorKDLToEigen(kinematics[1].Phi(i).p, p_t_prev);
-        Phi(i) = (p_t - p_t_prev).norm();
+        phi(i) = (p_t - p_t_prev).norm();
 
-        if (Phi(i) != 0.0)
+        if (phi(i) != 0.0)
         {
             jacobian.row(i) = ((p_t(0) - p_t_prev(0)) * kinematics[0].jacobian[i].data.row(0) +
                                (p_t(1) - p_t_prev(1)) * kinematics[0].jacobian[i].data.row(1) +
                                (p_t(2) - p_t_prev(2)) * kinematics[0].jacobian[i].data.row(2)) /
-                              Phi(i);
+                              phi(i);
         }
     }
 }

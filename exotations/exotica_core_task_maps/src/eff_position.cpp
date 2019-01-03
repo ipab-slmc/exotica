@@ -36,26 +36,26 @@ namespace exotica
 EffPosition::EffPosition() = default;
 EffPosition::~EffPosition() = default;
 
-void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi)
+void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Phi(i * 3) = kinematics[0].Phi(i).p[0];
-        Phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
-        Phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
+        phi(i * 3) = kinematics[0].Phi(i).p[0];
+        phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
+        phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
     }
 }
 
-void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (Phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 3 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Phi(i * 3) = kinematics[0].Phi(i).p[0];
-        Phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
-        Phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
+        phi(i * 3) = kinematics[0].Phi(i).p[0];
+        phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
+        phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
         jacobian.middleRows(i * 3, 3) = kinematics[0].jacobian[i].data.topRows(3);
     }
 }

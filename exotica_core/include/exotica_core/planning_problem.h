@@ -30,20 +30,17 @@
 #ifndef EXOTICA_CORE_PLANNING_PROBLEM_H_
 #define EXOTICA_CORE_PLANNING_PROBLEM_H_
 
-#include <algorithm>
 #include <chrono>
-#include <limits>
 #include <map>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <exotica_core/object.h>
 #include <exotica_core/scene.h>
-#include <exotica_core/server.h>
 #include <exotica_core/task_map.h>
 #include <exotica_core/task_space_vector.h>
-#include <exotica_core/tools.h>
+#include <exotica_core/tools/uncopyable.h>
+#include <exotica_core/tools/conversions.h>
 
 #define REGISTER_PROBLEM_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER_CORE(exotica::PlanningProblem, TYPE, DERIV)
 

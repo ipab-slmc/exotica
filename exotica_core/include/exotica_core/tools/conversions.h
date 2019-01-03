@@ -32,11 +32,12 @@
 
 #include <memory>
 #include <vector>
-
-#include <exotica_core/tools/exception.h>
+#include <map>
 #include <Eigen/Dense>
 #include <kdl/jacobian.hpp>
-#include <kdl/tree.hpp>
+#include <kdl/frames.hpp>
+
+#include <exotica_core/tools/exception.h>
 
 namespace Eigen
 {

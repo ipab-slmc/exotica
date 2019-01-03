@@ -33,6 +33,7 @@
 // Original code available at http://ipvs.informatik.uni-stuttgart.de/mlr/marc/source-code/index.html
 
 #include <exotica_aico_solver/bayesian_ik_solver.h>
+#include <exotica_core/server.h>
 
 REGISTER_MOTIONSOLVER_TYPE("BayesianIKSolver", exotica::BayesianIKSolver)
 

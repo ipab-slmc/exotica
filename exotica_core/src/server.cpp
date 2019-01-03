@@ -27,7 +27,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "exotica_core/server.h"
+#include <typeinfo>
+#include <boost/any.hpp>
+
+#include <exotica_core/tools.h>
+#include <exotica_core/server.h>
 
 exotica::ServerPtr exotica::Server::singleton_server_ = nullptr;
 namespace exotica

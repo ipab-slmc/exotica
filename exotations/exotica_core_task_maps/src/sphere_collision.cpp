@@ -28,6 +28,7 @@
 //
 
 #include <exotica_core_task_maps/sphere_collision.h>
+#include <exotica_core/server.h>
 
 REGISTER_TASKMAP_TYPE("SphereCollision", exotica::SphereCollision);
 

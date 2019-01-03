@@ -38,7 +38,6 @@
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/property.h>
-#include <exotica_core/task_map.h>
 #include <exotica_core/task_space_vector.h>
 #include <exotica_core/tools/conversions.h>
 
@@ -63,7 +62,7 @@ struct Task
     TaskMapVec tasks;
     std::vector<TaskIndexing> indexing;
 
-    int length_phi;
+    int length_Phi;
     int length_jacobian;
     int num_tasks;
     double tolerance = 0.0;  // To avoid numerical issues consider all values below this as 0.0.
@@ -77,10 +76,10 @@ struct TimeIndexedTask : public Task
     TimeIndexedTask();
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
-    void Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j, HessianRefConst big_h, int t);
-    void Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j, int t);
-    void Update(const TaskSpaceVector& big_phi, int t);
-    void ReinitializeVariables(int _T, std::shared_ptr<PlanningProblem> _prob, const TaskSpaceVector& _phi);
+    void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, HessianRefConst big_hessian, int t);
+    void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, int t);
+    void Update(const TaskSpaceVector& big_Phi, int t);
+    void ReinitializeVariables(int _T, std::shared_ptr<PlanningProblem> _prob, const TaskSpaceVector& _Phi);
 
     std::vector<Eigen::VectorXd> rho;
     std::vector<TaskSpaceVector> y;
@@ -97,9 +96,9 @@ struct EndPoseTask : public Task
     EndPoseTask();
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
-    void Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j, HessianRefConst big_h);
-    void Update(const TaskSpaceVector& big_phi, Eigen::MatrixXdRefConst big_j);
-    void Update(const TaskSpaceVector& big_phi);
+    void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, HessianRefConst big_hessian);
+    void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian);
+    void Update(const TaskSpaceVector& big_Phi);
 
     Eigen::VectorXd rho;
     TaskSpaceVector y;
@@ -115,7 +114,7 @@ struct SamplingTask : public Task
     SamplingTask();
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
-    void Update(const TaskSpaceVector& big_phi);
+    void Update(const TaskSpaceVector& big_Phi);
 
     Eigen::VectorXd rho;
     TaskSpaceVector y;

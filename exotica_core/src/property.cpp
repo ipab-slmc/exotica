@@ -27,7 +27,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <typeinfo>
+#include <vector>
+
 #include "exotica_core/property.h"
+#include <exotica_core/tools.h>
 
 namespace exotica
 {

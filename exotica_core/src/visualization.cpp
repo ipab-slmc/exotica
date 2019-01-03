@@ -28,6 +28,10 @@
 //
 
 #include <exotica_core/visualization.h>
+#include <exotica_core/server.h>
+
+#include <geometry_msgs/Transform.h>
+#include <moveit_msgs/DisplayTrajectory.h>
 
 namespace exotica
 {

@@ -27,6 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <eigen_conversions/eigen_kdl.h>
+
 #include <exotica_core_task_maps/eff_axis_alignment.h>
 
 REGISTER_TASKMAP_TYPE("EffAxisAlignment", exotica::EffAxisAlignment);

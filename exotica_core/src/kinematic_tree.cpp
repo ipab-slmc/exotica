@@ -30,13 +30,18 @@
 #include <algorithm>
 #include <iostream>
 #include <queue>
+#include <set>
 
 #include <eigen_conversions/eigen_kdl.h>
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit/robot_model/robot_model.h>
 #include <kdl/frames_io.hpp>
+#include <kdl_parser/kdl_parser.hpp>
+#include <tf_conversions/tf_kdl.h>
 
+#include <exotica_core/server.h>
+#include <exotica_core/tools.h>
 #include <exotica_core/kinematic_tree.h>
 
 namespace exotica

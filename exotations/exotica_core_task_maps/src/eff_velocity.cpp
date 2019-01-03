@@ -27,6 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <eigen_conversions/eigen_kdl.h>
+
 #include <exotica_core_task_maps/eff_velocity.h>
 
 REGISTER_TASKMAP_TYPE("EffVelocity", exotica::EffVelocity);

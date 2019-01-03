@@ -27,7 +27,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <eigen_conversions/eigen_kdl.h>
+#include <kdl_conversions/kdl_msg.h>
+#include <geometric_shapes/mesh_operations.h>
+#include <geometric_shapes/shape_operations.h>
+
 #include <exotica_core/scene.h>
+#include <exotica_core/server.h>
 #include <exotica_core/setup.h>
 
 #include <exotica_core/attach_link_initializer.h>

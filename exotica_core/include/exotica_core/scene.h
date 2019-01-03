@@ -35,19 +35,16 @@
 #include <iostream>
 #include <string>
 
-#include <eigen_conversions/eigen_kdl.h>
-#include <geometric_shapes/mesh_operations.h>
-#include <geometric_shapes/shape_operations.h>
 #include <geometric_shapes/shapes.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit_msgs/PlanningScene.h>
 
-#include "exotica_core/collision_scene.h"
-#include "exotica_core/kinematic_tree.h"
-#include "exotica_core/object.h"
-#include "exotica_core/property.h"
-#include "exotica_core/server.h"
-#include "exotica_core/trajectory.h"
+#include <exotica_core/collision_scene.h>
+#include <exotica_core/kinematic_tree.h>
+#include <exotica_core/object.h>
+#include <exotica_core/property.h>
+#include <exotica_core/trajectory.h>
+#include <exotica_core/tools/conversions.h>
 
 #include <exotica_core/scene_initializer.h>
 

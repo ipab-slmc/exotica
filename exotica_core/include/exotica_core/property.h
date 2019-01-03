@@ -34,13 +34,7 @@
 #include <initializer_list>
 #include <map>
 #include <memory>
-#include <typeinfo>
-#include <vector>
-
-#include <exotica_core/tools.h>
-#include <exotica_core/tools/conversions.h>
-#include <exotica_core/tools/exception.h>
-#include <exotica_core/tools/printable.h>
+#include <string>
 
 namespace exotica
 {

@@ -32,21 +32,17 @@
 
 #include <map>
 #include <random>
-#include <set>
 #include <string>
 #include <vector>
 
 #include <moveit/robot_model/robot_model.h>
-#include <tf_conversions/tf_kdl.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <Eigen/Eigen>
 #include <kdl/jacobian.hpp>
 #include <kdl/tree.hpp>
-#include <kdl_parser/kdl_parser.hpp>
+#include <tf/transform_datatypes.h>
 
 #include <exotica_core/kinematic_element.h>
-#include <exotica_core/server.h>
-#include <exotica_core/tools.h>
 
 namespace exotica
 {

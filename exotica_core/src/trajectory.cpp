@@ -29,8 +29,18 @@
 
 #include <iostream>
 #include <string>
+#include <kdl/path.hpp>
+#include <kdl/path_line.hpp>
+#include <kdl/rotational_interpolation.hpp>
+#include <kdl/rotational_interpolation_sa.hpp>
+#include <kdl/trajectory.hpp>
+#include <kdl/trajectory_segment.hpp>
+#include <kdl/trajectory_stationary.hpp>
+#include <kdl/velocityprofile.hpp>
+#include <kdl/velocityprofile_spline.hpp>
 
 #include <exotica_core/trajectory.h>
+#include <exotica_core/tools.h>
 
 namespace exotica
 {

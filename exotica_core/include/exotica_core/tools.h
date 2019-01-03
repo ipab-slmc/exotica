@@ -31,7 +31,7 @@
 #define EXOTICA_CORE_TOOLS_H_
 
 #include <Eigen/Dense>
-#include <kdl/tree.hpp>
+#include <kdl/frames.hpp>
 #include <string>
 
 #include <exotica_core/tools/conversions.h>

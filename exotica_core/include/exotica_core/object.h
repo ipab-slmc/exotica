@@ -33,8 +33,8 @@
 #include <exotica_core/tools.h>
 #include <string>  // C++ type strings
 
-#include "exotica_core/object_initializer.h"
-#include "exotica_core/property.h"
+#include <exotica_core/object_initializer.h>
+#include <exotica_core/property.h>
 
 namespace exotica
 {

@@ -31,10 +31,9 @@
 #define EXOTICA_CORE_VISUALIZATION_H_
 
 #include <exotica_core/scene.h>
-#include <exotica_core/server.h>
 #include <exotica_core/tools/uncopyable.h>
-#include <geometry_msgs/Transform.h>
-#include <moveit_msgs/DisplayTrajectory.h>
+
+#include <ros/ros.h>
 
 namespace exotica
 {

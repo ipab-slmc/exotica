@@ -31,15 +31,14 @@
 #define EXOTICA_CORE_SERVER_H_
 
 #include <map>
-#include <typeinfo>
-
-#include <boost/any.hpp>
+#include <vector>
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 
-#include <exotica_core/tools.h>
+#include <exotica_core/tools/uncopyable.h>
+#include <exotica_core/tools/exception.h>
 
 namespace exotica
 {

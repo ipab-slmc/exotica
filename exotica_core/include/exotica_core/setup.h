@@ -30,13 +30,14 @@
 #ifndef EXOTICA_CORE_SETUP_H_
 #define EXOTICA_CORE_SETUP_H_
 
+#include <memory>
+#include <vector>
+
 #include <exotica_core/factory.h>
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/object.h>
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/property.h>
-#include <exotica_core/server.h>
-#include <exotica_core/tools.h>
 
 #include <pluginlib/class_loader.h>
 
@@ -55,11 +56,7 @@ public:
         return singleton_initialiser_;
     }
 
-    static void Destroy()
-    {
-        Server::Destroy();
-        if (singleton_initialiser_) singleton_initialiser_.reset();
-    }
+    static void Destroy();
 
     static void PrintSupportedClasses();
     static std::shared_ptr<exotica::MotionSolver> CreateSolver(const std::string& type, bool prepend = true) { return ToStdPtr(Instance()->solvers_.createInstance((prepend ? "exotica/" : "") + type)); }

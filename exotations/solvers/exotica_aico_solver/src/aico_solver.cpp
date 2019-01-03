@@ -36,6 +36,7 @@
 /// \brief Approximate Inference Control
 
 #include <exotica_aico_solver/aico_solver.h>
+#include <exotica_core/server.h>
 
 REGISTER_MOTIONSOLVER_TYPE("AICOSolver", exotica::AICOSolver)
 

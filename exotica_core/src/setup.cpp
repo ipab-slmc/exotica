@@ -29,12 +29,20 @@
 
 #include <type_traits>
 
+#include <exotica_core/server.h>
+#include <exotica_core/tools.h>
 #include <exotica_core/scene.h>
 #include <exotica_core/setup.h>
 
 namespace exotica
 {
 SetupPtr Setup::singleton_initialiser_ = nullptr;
+
+void Setup::Destroy()
+{
+    Server::Destroy();
+    if (singleton_initialiser_) singleton_initialiser_.reset();
+}
 
 void Setup::PrintSupportedClasses()
 {

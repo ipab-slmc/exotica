@@ -36,6 +36,7 @@
 
 #include <exotica_core/object.h>
 #include <exotica_core/tools.h>
+
 #include <pluginlib/class_list_macros.h>
 
 /// \brief Generic Factory Macro definition: to be specialised by each new base type which wishes to make use of a factory for instantiation of derived classes

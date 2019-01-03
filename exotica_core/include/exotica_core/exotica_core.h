@@ -41,6 +41,7 @@
 #include <exotica_core/problems/time_indexed_sampling_problem.h>
 #include <exotica_core/problems/unconstrained_end_pose_problem.h>
 #include <exotica_core/problems/unconstrained_time_indexed_problem.h>
+#include <exotica_core/server.h>
 #include <exotica_core/setup.h>
 #include <exotica_core/tools.h>
 #include <exotica_core/version.h>

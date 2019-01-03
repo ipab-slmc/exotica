@@ -30,11 +30,9 @@
 #ifndef EXOTICA_CORE_MOTION_SOLVER_H_
 #define EXOTICA_CORE_MOTION_SOLVER_H_
 
-#include "exotica_core/object.h"
-#include "exotica_core/planning_problem.h"
-#include "exotica_core/property.h"
-#include "exotica_core/server.h"
-#include "exotica_core/task_map.h"
+#include <exotica_core/object.h>
+#include <exotica_core/planning_problem.h>
+#include <exotica_core/property.h>
 
 #define REGISTER_MOTIONSOLVER_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER(exotica::MotionSolver, TYPE, DERIV)
 

@@ -39,7 +39,6 @@
 #include <exotica_core/factory.h>
 #include <exotica_core/kinematic_element.h>
 #include <exotica_core/object.h>
-#include <exotica_core/tools.h>
 
 #define REGISTER_COLLISION_SCENE_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER(exotica::CollisionScene, TYPE, DERIV)
 namespace exotica

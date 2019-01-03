@@ -28,6 +28,8 @@
 //
 
 #include "exotica_core/motion_solver.h"
+#include <exotica_core/server.h>
+#include <exotica_core/task_map.h>
 
 #include "exotica_core/motion_solver_initializer.h"
 

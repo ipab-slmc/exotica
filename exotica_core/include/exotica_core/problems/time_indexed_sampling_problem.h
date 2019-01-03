@@ -63,9 +63,12 @@ public:
 
     std::vector<double> GetBounds();
 
-    Eigen::VectorXd GetGoalState();
-    double GetGoalTime();
+    Eigen::VectorXd GetGoalState() const;
     void SetGoalState(Eigen::VectorXdRefConst qT);
+
+    double GetT() const;
+
+    double GetGoalTime() const;
     void SetGoalTime(const double& t);
 
     Eigen::VectorXd vel_limits;

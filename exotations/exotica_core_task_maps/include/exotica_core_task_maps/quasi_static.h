@@ -59,6 +59,6 @@ private:
     visualization_msgs::MarkerArray debug_msg_;
     ros::Publisher debug_pub_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_QUASI_STATIC_H_

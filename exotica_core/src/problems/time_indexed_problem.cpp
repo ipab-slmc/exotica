@@ -150,7 +150,7 @@ void TimeIndexedProblem::SetTau(const double& tau_in)
     if (tau_in <= 0.) ThrowPretty("tau_ is expected to be greater than 0. (tau_=" << tau_in << ")");
     tau_ = tau_in;
     ct = 1.0 / tau_ / T_;
-    xxdiff_max_ = q_dot_max_ * tau_;
+    xdiff_max_ = q_dot_max_ * tau_;
 }
 
 void TimeIndexedProblem::PreUpdate()

@@ -177,9 +177,9 @@ void Scene::Instantiate(SceneInitializer& init)
 
 void Scene::RequestKinematics(KinematicsRequest& request, std::function<void(std::shared_ptr<KinematicResponse>)> callback)
 {
-    kinematic_equest_ = request;
+    kinematic_request_ = request;
     kinematic_request_callback_ = callback;
-    kinematic_solution_ = kinematica_.RequestFrames(kinematic_equest_);
+    kinematic_solution_ = kinematica_.RequestFrames(kinematic_request_);
     kinematic_request_callback_(kinematic_solution_);
     request_needs_updating_ = false;
 }
@@ -546,7 +546,7 @@ void Scene::UpdateInternalFrames(bool update_request)
 
     if (update_request)
     {
-        kinematic_solution_ = kinematica_.RequestFrames(kinematic_equest_);
+        kinematic_solution_ = kinematica_.RequestFrames(kinematic_request_);
         kinematic_request_callback_(kinematic_solution_);
     }
 

@@ -214,7 +214,7 @@ private:
     /// \brief List of links to be excluded from the collision scene
     std::set<std::string> robotLinksToExcludeFromCollisionScene_;
 
-    KinematicsRequest kinematic_equest_;
+    KinematicsRequest kinematic_request_;
     std::shared_ptr<KinematicResponse> kinematic_solution_;
     std::function<void(std::shared_ptr<KinematicResponse>)> kinematic_request_callback_;
     bool request_needs_updating_;

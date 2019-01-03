@@ -293,6 +293,6 @@ public:
 private:
     std::vector<int> variables_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_OMPL_SOLVER_OMPL_EXO_H_

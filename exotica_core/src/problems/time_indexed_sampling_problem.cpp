@@ -136,14 +136,24 @@ void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializ
     PreUpdate();
 }
 
-Eigen::VectorXd TimeIndexedSamplingProblem::GetGoalState()
+double TimeIndexedSamplingProblem::GetT() const
 {
-    return goal_;
+    return T_;
 }
 
-double TimeIndexedSamplingProblem::GetGoalTime()
+double TimeIndexedSamplingProblem::GetGoalTime() const
 {
     return t_goal_;
+}
+
+void TimeIndexedSamplingProblem::SetGoalTime(const double& t)
+{
+    t_goal_ = t;
+}
+
+Eigen::VectorXd TimeIndexedSamplingmeProblem::GetGoalState() const
+{
+    return goal_;
 }
 
 void TimeIndexedSamplingProblem::SetGoalState(Eigen::VectorXdRefConst qT)
@@ -151,11 +161,6 @@ void TimeIndexedSamplingProblem::SetGoalState(Eigen::VectorXdRefConst qT)
     if (qT.rows() != N)
         ThrowPretty("Dimensionality of goal state wrong: Got " << qT.rows() << ", expected " << N);
     goal_ = qT;
-}
-
-void TimeIndexedSamplingProblem::SetGoalTime(const double& t)
-{
-    t_goal_ = t;
 }
 
 void TimeIndexedSamplingProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)

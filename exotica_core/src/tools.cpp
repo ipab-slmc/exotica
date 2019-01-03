@@ -33,7 +33,7 @@
 #include <iostream>
 #include <random>
 #include <regex>
-#include <typeinfo>  // The RTTI Functionality of C++
+#include <typeinfo>  // The run-time type information (RTTI) Functionality of C++
 
 #include "exotica_core/tools.h"
 

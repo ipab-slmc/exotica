@@ -83,9 +83,9 @@ public:
     void SetJointVelocityLimit(const double& qdot_max_in)
     {
         q_dot_max_ = qdot_max_in;
-        xxdiff_max_ = q_dot_max_ * tau_;
+        xdiff_max_ = q_dot_max_ * tau_;
     }
-    double GetXdiffMax() { return xxdiff_max_; }
+    double GetXdiffMax() { return xdiff_max_; }
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask cost;
     TimeIndexedTask inequality;
@@ -115,8 +115,8 @@ private:
     int T_;       //!< Number of time steps
     double tau_;  //!< Time step duration
 
-    double q_dot_max_;   //!< Joint velocity limit (rad/s)
-    double xxdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
+    double q_dot_max_;  //!< Joint velocity limit (rad/s)
+    double xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
 
     double w_scale_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
 

@@ -113,7 +113,7 @@ struct KinematicResponse
     std::vector<KinematicFrame> frame;
     Eigen::VectorXd x;
     ArrayFrame Phi;
-    ArrayTwist phi_dot;
+    ArrayTwist Phi_dot;
     ArrayJacobian jacobian;
     ArrayJacobian jacobian_dot;
 };
@@ -129,7 +129,7 @@ public:
     int length = -1;
     Eigen::Map<Eigen::VectorXd> X{nullptr, 0};
     Eigen::Map<ArrayFrame> Phi{nullptr, 0};
-    Eigen::Map<ArrayTwist> phi_dot{nullptr, 0};
+    Eigen::Map<ArrayTwist> Phi_dot{nullptr, 0};
     Eigen::Map<ArrayJacobian> jacobian{nullptr, 0};
     Eigen::Map<ArrayJacobian> jacobian_dot{nullptr, 0};
 };
@@ -179,10 +179,10 @@ public:
     Eigen::VectorXd GetControlledLinkMass();
 
     KDL::Frame FK(KinematicFrame& frame);
-    KDL::Frame FK(std::shared_ptr<KinematicElement> element_a, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_b, const KDL::Frame& offset_b);
-    KDL::Frame FK(const std::string& element_a, const KDL::Frame& offset_a, const std::string& element_b, const KDL::Frame& offset_b);
-    Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> element_a, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_b, const KDL::Frame& offset_b);
-    Eigen::MatrixXd Jacobian(const std::string& element_a, const KDL::Frame& offset_a, const std::string& element_b, const KDL::Frame& offset_b);
+    KDL::Frame FK(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b);
+    KDL::Frame FK(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b);
+    Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b);
+    Eigen::MatrixXd Jacobian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b);
 
     void ResetModel();
     std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool is_controlled = false);

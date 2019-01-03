@@ -48,7 +48,7 @@ KinematicResponse::KinematicResponse(KinematicRequestFlags _flags, int _size, in
     flags = _flags;
     frame.resize(_size);
     Phi.resize(_size);
-    if (flags & KIN_FK_VEL) phi_dot.resize(_size);
+    if (flags & KIN_FK_VEL) Phi_dot.resize(_size);
     KDL::Jacobian Jzero(_n);
     Jzero.data.setZero();
     if (_flags & KIN_J) jacobian = ArrayJacobian::Constant(_size, Jzero);
@@ -75,7 +75,7 @@ void KinematicSolution::Create(std::shared_ptr<KinematicResponse> solution)
     if (start < 0 || length < 0) ThrowPretty("Kinematic solution was not initialized!");
     new (&Phi) Eigen::Map<ArrayFrame>(solution->Phi.data() + start, length);
     new (&X) Eigen::Map<Eigen::VectorXd>(solution->x.data(), solution->x.rows());
-    if (solution->flags & KIN_FK_VEL) new (&phi_dot) Eigen::Map<ArrayTwist>(solution->phi_dot.data() + start, length);
+    if (solution->flags & KIN_FK_VEL) new (&Phi_dot) Eigen::Map<ArrayTwist>(solution->Phi_dot.data() + start, length);
     if (solution->flags & KIN_J) new (&jacobian) Eigen::Map<ArrayJacobian>(solution->jacobian.data() + start, length);
     if (solution->flags & KIN_J_DOT) new (&jacobian_dot) Eigen::Map<ArrayJacobian>(solution->jacobian_dot.data() + start, length);
 }
@@ -660,21 +660,21 @@ KDL::Frame KinematicTree::FK(KinematicFrame& frame)
     return frame.temp_AB;
 }
 
-KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> element_a, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_b, const KDL::Frame& offset_b)
+KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b)
 {
-    if (!element_a) ThrowPretty("The pointer to KinematicElement A is dead.");
+    if (!element_A) ThrowPretty("The pointer to KinematicElement A is dead.");
     KinematicFrame frame;
-    frame.frame_A = element_a;
-    frame.frame_B = (element_b == nullptr) ? root_ : element_b;
+    frame.frame_A = element_A;
+    frame.frame_B = (element_B == nullptr) ? root_ : element_B;
     frame.frame_A_offset = offset_a;
     frame.frame_B_offset = offset_b;
     return FK(frame);
 }
 
-KDL::Frame KinematicTree::FK(const std::string& element_a, const KDL::Frame& offset_a, const std::string& element_b, const KDL::Frame& offset_b)
+KDL::Frame KinematicTree::FK(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b)
 {
-    std::string name_a = element_a == "" ? root_->segment.getName() : element_a;
-    std::string name_b = element_b == "" ? root_->segment.getName() : element_b;
+    std::string name_a = element_A == "" ? root_->segment.getName() : element_A;
+    std::string name_b = element_B == "" ? root_->segment.getName() : element_B;
     auto A = tree_map_.find(name_a);
     if (A == tree_map_.end()) ThrowPretty("Can't find link '" << name_a << "'!");
     auto B = tree_map_.find(name_b);
@@ -692,12 +692,12 @@ void KinematicTree::UpdateFK()
     }
 }
 
-Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> element_a, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_b, const KDL::Frame& offset_b)
+Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b)
 {
-    if (!element_a) ThrowPretty("The pointer to KinematicElement A is dead.");
+    if (!element_A) ThrowPretty("The pointer to KinematicElement A is dead.");
     KinematicFrame frame;
-    frame.frame_A = element_a;
-    frame.frame_B = (element_b == nullptr) ? root_ : element_b;
+    frame.frame_A = element_A;
+    frame.frame_B = (element_B == nullptr) ? root_ : element_B;
     frame.frame_A_offset = offset_a;
     frame.frame_B_offset = offset_b;
     KDL::Jacobian ret(num_controlled_joints_);
@@ -705,10 +705,10 @@ Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> elemen
     return ret.data;
 }
 
-Eigen::MatrixXd KinematicTree::Jacobian(const std::string& element_a, const KDL::Frame& offset_a, const std::string& element_b, const KDL::Frame& offset_b)
+Eigen::MatrixXd KinematicTree::Jacobian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b)
 {
-    std::string name_a = element_a == "" ? root_->segment.getName() : element_a;
-    std::string name_b = element_b == "" ? root_->segment.getName() : element_b;
+    std::string name_a = element_A == "" ? root_->segment.getName() : element_A;
+    std::string name_b = element_B == "" ? root_->segment.getName() : element_B;
     auto A = tree_map_.find(name_a);
     if (A == tree_map_.end()) ThrowPretty("Can't find link '" << name_a << "'!");
     auto B = tree_map_.find(name_b);

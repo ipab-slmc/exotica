@@ -151,7 +151,7 @@ void TimeIndexedSamplingProblem::SetGoalTime(const double& t)
     t_goal_ = t;
 }
 
-Eigen::VectorXd TimeIndexedSamplingmeProblem::GetGoalState() const
+Eigen::VectorXd TimeIndexedSamplingProblem::GetGoalState() const
 {
     return goal_;
 }

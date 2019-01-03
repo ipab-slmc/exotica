@@ -75,9 +75,9 @@ private:
     UnconstrainedEndPoseProblemPtr prob_;  //!< Shared pointer to the planning problem.
     double damping;                        //!< Damping
     double damping_init_;                  //!< Damping
-    double minimum_step_tolerance;         //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
-    double step_tolerance;                 //!< Relative step tolerance (termination criterion)
-    double function_tolerance;             //!< Relative function tolerance/first-order optimality criterion
+    double minimum_step_tolerance_;        //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
+    double step_tolerance_;                //!< Relative step tolerance (termination criterion)
+    double function_tolerance_;            //!< Relative function tolerance/first-order optimality criterion
     int max_backtrack_iterations_;         //!< Max. number of sweeps without improvement before terminating (= line-search)
     bool use_bwd_msg_;                     //!< Flag for using backward message initialisation
     Eigen::VectorXd bwd_msg_v_;            //!< Backward message initialisation mean
@@ -205,6 +205,6 @@ private:
     /// @return Change in cost of the trajectory.
     double Step();
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_AICO_SOLVER_BAYESIAN_IK_SOLVER_H_

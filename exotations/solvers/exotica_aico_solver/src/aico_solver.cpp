@@ -57,18 +57,18 @@ void AICOSolver::Instantiate(AICOSolverInitializer& init)
         ThrowNamed("Unknown sweep mode '" << init.SweepMode << "'");
     }
     max_backtrack_iterations_ = init.MaxBacktrackIterations;
-    minimum_step_tolerance = init.MinStep;
-    step_tolerance = init.StepTolerance;
-    function_tolerance = init.FunctionTolerance;
+    minimum_step_tolerance_ = init.MinStep;
+    step_tolerance_ = init.StepTolerance;
+    function_tolerance_ = init.FunctionTolerance;
     damping_init_ = init.Damping;
     use_bwd_msg_ = init.UseBackwardMessage;
 }
 
 AICOSolver::AICOSolver()
     : damping(0.01),
-      minimum_step_tolerance(1e-5),
-      step_tolerance(1e-5),
-      function_tolerance(1e-5),
+      minimum_step_tolerance_(1e-5),
+      step_tolerance_(1e-5),
+      function_tolerance_(1e-5),
       max_backtrack_iterations_(10),
       use_bwd_msg_(false),
       bwd_msg_v_(),
@@ -206,18 +206,18 @@ void AICOSolver::Solve(Eigen::MatrixXd& solution)
                 // TODO(#257): TODO(#256): move to Eigen::MatrixXd to make this easier to compute, in the meantime use old check
                 //
                 // TODO(#256): OLD TOLERANCE CHECK - TODO REMOVE
-                if (d < minimum_step_tolerance)
+                if (d < minimum_step_tolerance_)
                 {
-                    if (debug_) HIGHLIGHT("Satisfied tolerance\titer=" << iteration_count_ << "\td=" << d << "\tminimum_step_tolerance=" << minimum_step_tolerance);
+                    if (debug_) HIGHLIGHT("Satisfied tolerance\titer=" << iteration_count_ << "\td=" << d << "\tminimum_step_tolerance=" << minimum_step_tolerance_);
                     prob_->termination_criterion = TerminationCriterion::StepTolerance;
                     break;
                 }
 
                 // 2. Check function tolerance
                 // (f_t-1 - f_t) <= functionTolerance * max(1, abs(f_t))
-                if ((cost_prev_ - cost_) <= function_tolerance * std::max(1.0, std::abs(cost_)))
+                if ((cost_prev_ - cost_) <= function_tolerance_ * std::max(1.0, std::abs(cost_)))
                 {
-                    if (debug_) HIGHLIGHT("Function tolerance achieved: " << (cost_prev_ - cost_) << " <= " << function_tolerance * std::max(1.0, std::abs(cost_)));
+                    if (debug_) HIGHLIGHT("Function tolerance achieved: " << (cost_prev_ - cost_) << " <= " << function_tolerance_ * std::max(1.0, std::abs(cost_)));
                     prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
                     break;
                 }
@@ -520,44 +520,44 @@ double AICOSolver::Step()
         case FORWARD:
             for (t = 1; t < prob_->GetT(); ++t)
             {
-                UpdateTimestep(t, true, false, 1, minimum_step_tolerance, !iteration_count_, 1.);  //relocate once on fwd Sweep
+                UpdateTimestep(t, true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd Sweep
             }
             for (t = prob_->GetT() - 2; t > 0; t--)
             {
-                UpdateTimestep(t, false, true, 0, minimum_step_tolerance, false, 1.);  //...not on bwd Sweep
+                UpdateTimestep(t, false, true, 0, minimum_step_tolerance_, false, 1.);  //...not on bwd Sweep
             }
             break;
         case SYMMETRIC:
             // ROS_WARN_STREAM("Updating forward, iteration_count_ "<<iteration_count_);
             for (t = 1; t < prob_->GetT(); ++t)
             {
-                UpdateTimestep(t, true, false, 1, minimum_step_tolerance, !iteration_count_, 1.);  //relocate once on fwd & bwd Sweep
+                UpdateTimestep(t, true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd & bwd Sweep
             }
             // ROS_WARN_STREAM("Updating backward, iteration_count_ "<<iteration_count_);
             for (t = prob_->GetT() - 2; t > 0; t--)
             {
-                UpdateTimestep(t, false, true, (iteration_count_ ? 1 : 0), minimum_step_tolerance, false, 1.);
+                UpdateTimestep(t, false, true, (iteration_count_ ? 1 : 0), minimum_step_tolerance_, false, 1.);
             }
             break;
         case LOCAL_GAUSS_NEWTON:
             for (t = 1; t < prob_->GetT(); ++t)
             {
-                UpdateTimestep(t, true, false, (iteration_count_ ? 5 : 1), minimum_step_tolerance, !iteration_count_, 1.);  //relocate iteratively on
+                UpdateTimestep(t, true, false, (iteration_count_ ? 5 : 1), minimum_step_tolerance_, !iteration_count_, 1.);  //relocate iteratively on
             }
             for (t = prob_->GetT() - 2; t > 0; t--)
             {
-                UpdateTimestep(t, false, true, (iteration_count_ ? 5 : 0), minimum_step_tolerance, false, 1.);  //...fwd & bwd Sweep
+                UpdateTimestep(t, false, true, (iteration_count_ ? 5 : 0), minimum_step_tolerance_, false, 1.);  //...fwd & bwd Sweep
             }
             break;
         case LOCAL_GAUSS_NEWTON_DAMPED:
             for (t = 1; t < prob_->GetT(); ++t)
             {
                 UpdateTimestepGaussNewton(t, true, false, (iteration_count_ ? 5 : 1),
-                                          minimum_step_tolerance, 1.);  //GaussNewton in fwd & bwd Sweep
+                                          minimum_step_tolerance_, 1.);  //GaussNewton in fwd & bwd Sweep
             }
             for (t = prob_->GetT() - 2; t > 0; t--)
             {
-                UpdateTimestep(t, false, true, (iteration_count_ ? 5 : 0), minimum_step_tolerance, false, 1.);
+                UpdateTimestep(t, false, true, (iteration_count_ ? 5 : 0), minimum_step_tolerance_, false, 1.);
             }
             break;
         default:
@@ -643,4 +643,4 @@ void AICOSolver::PerhapsUndoStep()
         damping /= 5.;
     }
 }
-}
+}  // namespace exotica

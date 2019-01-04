@@ -1,103 +1,106 @@
-/*
- *      Author: Michael Camilleri
- * 
- * Copyright (c) 2016, University of Edinburgh
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met: 
- * 
- *  * Redistributions of source code must retain the above copyright notice, 
- *    this list of conditions and the following disclaimer. 
- *  * Redistributions in binary form must reproduce the above copyright 
- *    notice, this list of conditions and the following disclaimer in the 
- *    documentation and/or other materials provided with the distribution. 
- *  * Neither the name of  nor the names of its contributors may be used to 
- *    endorse or promote products derived from this software without specific 
- *    prior written permission. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- * POSSIBILITY OF SUCH DAMAGE. 
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
-#include <exotica_core/PlanningProblemInitializer.h>
-#include <exotica_core/TaskMapInitializer.h>
+#include <algorithm>
+#include <limits>
+#include <utility>
+
 #include <exotica_core/planning_problem.h>
+#include <exotica_core/server.h>
 #include <exotica_core/setup.h>
+
+#include <exotica_core/planning_problem_initializer.h>
+#include <exotica_core/task_map_initializer.h>
 
 namespace exotica
 {
-PlanningProblem::PlanningProblem() : Flags(KIN_FK), N(0)
+PlanningProblem::PlanningProblem() : flags_(KIN_FK), N(0)
 {
 }
 
-std::string PlanningProblem::print(std::string prepend)
+std::string PlanningProblem::Print(std::string prepend)
 {
-    std::string ret = Object::print(prepend);
+    std::string ret = Object::Print(prepend);
     ret += "\n" + prepend + "  Task definitions:";
-    for (auto& it : TaskMaps)
-        ret += "\n" + it.second->print(prepend + "    ");
+    for (auto& it : task_maps_)
+        ret += "\n" + it.second->Print(prepend + "    ");
     return ret;
 }
 
-Eigen::VectorXd PlanningProblem::applyStartState(bool updateTraj)
+Eigen::VectorXd PlanningProblem::ApplyStartState(bool update_traj)
 {
-    scene_->setModelState(startState, tStart, updateTraj);
-    return scene_->getControlledState();
+    scene_->SetModelState(start_state_, t_start, update_traj);
+    return scene_->GetControlledState();
 }
 
-void PlanningProblem::preupdate()
+void PlanningProblem::PreUpdate()
 {
-    for (auto& it : TaskMaps) it.second->preupdate();
+    for (auto& it : task_maps_) it.second->PreUpdate();
 }
 
-void PlanningProblem::setStartState(Eigen::VectorXdRefConst x)
+void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
 {
-    if (x.rows() == scene_->getKinematicTree().getNumModelJoints())
+    if (x.rows() == scene_->GetKinematicTree().GetNumModelJoints())
     {
-        startState = x;
+        start_state_ = x;
     }
-    else if (x.rows() == scene_->getKinematicTree().getNumControlledJoints())
+    else if (x.rows() == scene_->GetKinematicTree().GetNumControlledJoints())
     {
-        std::vector<std::string> jointNames = scene_->getJointNames();
-        std::vector<std::string> modelNames = scene_->getModelJointNames();
-        for (int i = 0; i < jointNames.size(); i++)
+        std::vector<std::string> jointNames = scene_->GetJointNames();
+        std::vector<std::string> modelNames = scene_->GetModelJointNames();
+        for (int i = 0; i < jointNames.size(); ++i)
         {
-            for (int j = 0; j < modelNames.size(); j++)
+            for (int j = 0; j < modelNames.size(); ++j)
             {
-                if (jointNames[i] == modelNames[j]) startState[j] = x(i);
+                if (jointNames[i] == modelNames[j]) start_state_[j] = x(i);
             }
         }
     }
     else
     {
-        throw_named("Wrong start state vector size, expected " << scene_->getKinematicTree().getNumModelJoints() << ", got " << x.rows());
+        ThrowNamed("Wrong start state vector size, expected " << scene_->GetKinematicTree().GetNumModelJoints() << ", got " << x.rows());
     }
 }
 
-Eigen::VectorXd PlanningProblem::getStartState()
+Eigen::VectorXd PlanningProblem::GetStartState()
 {
-    return startState;
+    return start_state_;
 }
 
-void PlanningProblem::setStartTime(double t)
+void PlanningProblem::SetStartTime(double t)
 {
-    tStart = t;
+    t_start = t;
 }
 
-double PlanningProblem::getStartTime()
+double PlanningProblem::GetStartTime()
 {
-    return tStart;
+    return t_start;
 }
 
 void PlanningProblem::InstantiateBase(const Initializer& init_)
@@ -105,72 +108,72 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     Object::InstatiateObject(init_);
     PlanningProblemInitializer init(init_);
 
-    TaskMaps.clear();
-    Tasks.clear();
+    task_maps_.clear();
+    tasks_.clear();
 
     // Create the scene
     scene_.reset(new Scene());
     scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
-    startState = Eigen::VectorXd::Zero(scene_->getModelJointNames().size());
-    N = scene_->getKinematicTree().getNumControlledJoints();
+    start_state_ = Eigen::VectorXd::Zero(scene_->GetModelJointNames().size());
+    N = scene_->GetKinematicTree().GetNumControlledJoints();
 
     if (init.StartState.rows() > 0)
     {
-        setStartState(init.StartState);
+        SetStartState(init.StartState);
     }
     if (init.StartTime < 0)
-        throw_named("Invalid start time " << init.StartTime) else tStart = init.StartTime;
+        ThrowNamed("Invalid start time " << init.StartTime) else t_start = init.StartTime;
 
     switch (init.DerivativeOrder)
     {
         case 0:
-            Flags = KIN_FK;
+            flags_ = KIN_FK;
             break;
         case 1:
-            Flags = KIN_FK | KIN_J;
+            flags_ = KIN_FK | KIN_J;
             break;
         case 2:
-            Flags = KIN_FK | KIN_J | KIN_J_DOT;
+            flags_ = KIN_FK | KIN_J | KIN_J_DOT;
             break;
     }
 
-    KinematicsRequest Request;
-    Request.Flags = Flags;
+    KinematicsRequest request;
+    request.flags = flags_;
 
     // Create the maps
     int id = 0;
     for (const Initializer& MapInitializer : init.Maps)
     {
-        TaskMap_ptr NewMap = Setup::createMap(MapInitializer);
-        NewMap->assignScene(scene_);
-        NewMap->ns_ = ns_ + "/" + NewMap->getObjectName();
-        if (TaskMaps.find(NewMap->getObjectName()) != TaskMaps.end())
+        TaskMapPtr new_map = Setup::CreateMap(MapInitializer);
+        new_map->AssignScene(scene_);
+        new_map->ns_ = ns_ + "/" + new_map->GetObjectName();
+        if (task_maps_.find(new_map->GetObjectName()) != task_maps_.end())
         {
-            throw_named("Map '" + NewMap->getObjectName() + "' already exists!");
+            ThrowNamed("Map '" + new_map->GetObjectName() + "' already exists!");
         }
-        std::vector<KinematicFrameRequest> frames = NewMap->GetFrames();
+        std::vector<KinematicFrameRequest> frames = new_map->GetFrames();
 
-        for (size_t i = 0; i < NewMap->Kinematics.size(); i++)
-            NewMap->Kinematics[i] = KinematicSolution(id, frames.size());
+        for (size_t i = 0; i < new_map->kinematics.size(); ++i)
+            new_map->kinematics[i] = KinematicSolution(id, frames.size());
         id += frames.size();
 
-        Request.Frames.insert(Request.Frames.end(), frames.begin(), frames.end());
-        TaskMaps[NewMap->getObjectName()] = NewMap;
-        Tasks.push_back(NewMap);
+        request.frames.insert(request.frames.end(), frames.begin(), frames.end());
+        task_maps_[new_map->GetObjectName()] = new_map;
+        tasks_.push_back(new_map);
     }
-    scene_->requestKinematics(Request, std::bind(&PlanningProblem::updateTaskKinematics, this, std::placeholders::_1));
+    scene_->RequestKinematics(request, std::bind(&PlanningProblem::UpdateTaskKinematics, this, std::placeholders::_1));
 
     id = 0;
     int idJ = 0;
-    for (int i = 0; i < Tasks.size(); i++)
+    for (int i = 0; i < tasks_.size(); ++i)
     {
-        Tasks[i]->Id = i;
-        Tasks[i]->Start = id;
-        Tasks[i]->Length = Tasks[i]->taskSpaceDim();
-        Tasks[i]->StartJ = idJ;
-        Tasks[i]->LengthJ = Tasks[i]->taskSpaceJacobianDim();
-        id += Tasks[i]->Length;
-        idJ += Tasks[i]->LengthJ;
+        tasks_[i]->id = i;
+        tasks_[i]->start = id;
+        tasks_[i]->length = tasks_[i]->TaskSpaceDim();
+        tasks_[i]->start_jacobian = idJ;
+        tasks_[i]->length_jacobian = tasks_[i]->TaskSpaceJacobianDim();
+        id += tasks_[i]->length;
+        idJ += tasks_[i]->length_jacobian;
     }
 
     if (init.Maps.size() == 0)
@@ -179,92 +182,92 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     }
 }
 
-void PlanningProblem::updateTaskKinematics(std::shared_ptr<KinematicResponse> response)
+void PlanningProblem::UpdateTaskKinematics(std::shared_ptr<KinematicResponse> response)
 {
-    for (auto task : Tasks)
-        task->Kinematics[0].Create(response);
+    for (auto task : tasks_)
+        task->kinematics[0].Create(response);
 }
 
 void PlanningProblem::updateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses)
 {
-    for (auto task : Tasks)
+    for (auto task : tasks_)
     {
-        if (task->Kinematics.size() > responses.size())
+        if (task->kinematics.size() > responses.size())
         {
-            throw_named(responses.size() << " responses provided but task " << task->getObjectName() << " requires " << task->Kinematics.size());
+            ThrowNamed(responses.size() << " responses provided but task " << task->GetObjectName() << " requires " << task->kinematics.size());
         }
 
-        for (size_t i = 0; i < task->Kinematics.size(); i++)
+        for (size_t i = 0; i < task->kinematics.size(); ++i)
         {
-            task->Kinematics[i].Create(responses[i]);
+            task->kinematics[i].Create(responses[i]);
         }
     }
 }
-TaskMap_map& PlanningProblem::getTaskMaps()
+TaskMapMap& PlanningProblem::GetTaskMaps()
 {
-    return TaskMaps;
+    return task_maps_;
 }
 
-TaskMap_vec& PlanningProblem::getTasks()
+TaskMapVec& PlanningProblem::GetTasks()
 {
-    return Tasks;
+    return tasks_;
 }
 
-Scene_ptr PlanningProblem::getScene()
+ScenePtr PlanningProblem::GetScene()
 {
     return scene_;
 }
 
-std::pair<std::vector<double>, std::vector<double>> PlanningProblem::getCostEvolution()
+std::pair<std::vector<double>, std::vector<double>> PlanningProblem::GetCostEvolution()
 {
     std::pair<std::vector<double>, std::vector<double>> ret;
-    for (size_t position = 0; position < costEvolution.size(); position++)
+    for (size_t position = 0; position < cost_evolution_.size(); ++position)
     {
-        if (std::isnan(costEvolution[position].second)) break;
-        double time_point = std::chrono::duration_cast<std::chrono::duration<double>>(costEvolution[position].first - costEvolution[0].first).count();
+        if (std::isnan(cost_evolution_[position].second)) break;
+        double time_point = std::chrono::duration_cast<std::chrono::duration<double>>(cost_evolution_[position].first - cost_evolution_[0].first).count();
         ret.first.push_back(time_point);
-        ret.second.push_back(costEvolution[position].second);
+        ret.second.push_back(cost_evolution_[position].second);
     }
     return ret;
 }
 
-double PlanningProblem::getCostEvolution(int index)
+double PlanningProblem::GetCostEvolution(int index)
 {
-    if (index > -1 && index < costEvolution.size())
+    if (index > -1 && index < cost_evolution_.size())
     {
-        return costEvolution[index].second;
+        return cost_evolution_[index].second;
     }
     else if (index == -1)
     {
-        return costEvolution[costEvolution.size() - 1].second;
+        return cost_evolution_[cost_evolution_.size() - 1].second;
     }
     else
     {
-        throw_pretty("Out of range");
+        ThrowPretty("Out of range");
     }
 }
 
-void PlanningProblem::resetCostEvolution(unsigned int size)
+void PlanningProblem::ResetCostEvolution(unsigned int size)
 {
-    costEvolution.resize(size);
-    costEvolution.assign(size, std::make_pair<std::chrono::high_resolution_clock::time_point, double>(std::chrono::high_resolution_clock::now(), std::numeric_limits<double>::quiet_NaN()));
+    cost_evolution_.resize(size);
+    cost_evolution_.assign(size, std::make_pair<std::chrono::high_resolution_clock::time_point, double>(std::chrono::high_resolution_clock::now(), std::numeric_limits<double>::quiet_NaN()));
 }
 
-void PlanningProblem::setCostEvolution(int index, double value)
+void PlanningProblem::SetCostEvolution(int index, double value)
 {
-    if (index > -1 && index < costEvolution.size())
+    if (index > -1 && index < cost_evolution_.size())
     {
-        costEvolution[index].first = std::chrono::high_resolution_clock::now();
-        costEvolution[index].second = value;
+        cost_evolution_[index].first = std::chrono::high_resolution_clock::now();
+        cost_evolution_[index].second = value;
     }
     else if (index == -1)
     {
-        costEvolution[costEvolution.size() - 1].first = std::chrono::high_resolution_clock::now();
-        costEvolution[costEvolution.size() - 1].second = value;
+        cost_evolution_[cost_evolution_.size() - 1].first = std::chrono::high_resolution_clock::now();
+        cost_evolution_[cost_evolution_.size() - 1].second = value;
     }
     else
     {
-        throw_pretty("Out of range: " << index << " where length=" << costEvolution.size());
+        ThrowPretty("Out of range: " << index << " where length=" << cost_evolution_.size());
     }
 }
 }

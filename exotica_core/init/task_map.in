@@ -1,0 +1,6 @@
+class TaskMap
+
+include <exotica_core/frame_initializer>
+extend <exotica_core/object>
+
+Optional std::vector<exotica::Initializer> EndEffector = std::vector<exotica::Initializer>(); # FrameInitializer

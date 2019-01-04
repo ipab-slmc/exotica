@@ -1,35 +1,31 @@
-/*
- *  Created on: 10 Oct 2017
- *      Author: Yiming Yang
- *
- * Copyright (c) 2017, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #ifndef EXOTICA_OMPL_SOLVER_OMPL_EXO_H_
 #define EXOTICA_OMPL_SOLVER_OMPL_EXO_H_
@@ -44,7 +40,7 @@
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/geometric/SimpleSetup.h>
 
-#include <exotica_ompl_solver/OMPLSolverInitializer.h>
+#include <exotica_ompl_solver/ompl_solver_initializer.h>
 
 #if OMPL_VERSION_VALUE >= 1004000  // Version greater than 1.4.0
 typedef Eigen::Ref<Eigen::VectorXd> OMPLProjection;
@@ -61,12 +57,12 @@ public:
     {
     }
 
-    virtual void setBounds(SamplingProblem_ptr &prob) = 0;
+    virtual void SetBounds(SamplingProblemPtr &prob) = 0;
     virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const = 0;
     virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const = 0;
 
     virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const = 0;
-    virtual void stateDebug(const Eigen::VectorXd &q) const = 0;
+    virtual void StateDebug(const Eigen::VectorXd &q) const = 0;
 
 protected:
     OMPLSolverInitializer init_;
@@ -75,14 +71,14 @@ protected:
 class OMPLStateValidityChecker : public ompl::base::StateValidityChecker
 {
 public:
-    OMPLStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const SamplingProblem_ptr &prob);
+    OMPLStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const SamplingProblemPtr &prob);
 
-    virtual bool isValid(const ompl::base::State *state) const;
+    bool isValid(const ompl::base::State *state) const override;
 
-    virtual bool isValid(const ompl::base::State *state, double &dist) const;
+    bool isValid(const ompl::base::State *state, double &dist) const override;
 
 protected:
-    SamplingProblem_ptr prob_;
+    SamplingProblemPtr prob_;
 };
 
 class OMPLRNStateSpace : public OMPLStateSpace
@@ -107,11 +103,11 @@ public:
     };
     OMPLRNStateSpace(OMPLSolverInitializer init);
 
-    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-    virtual void setBounds(SamplingProblem_ptr &prob);
-    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
-    virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
-    virtual void stateDebug(const Eigen::VectorXd &q) const;
+    ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
+    void SetBounds(SamplingProblemPtr &prob) override;
+    void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const override;
+    void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const override;
+    void StateDebug(const Eigen::VectorXd &q) const override;
 };
 
 class OMPLSE3RNStateSpace : public OMPLStateSpace
@@ -145,11 +141,11 @@ public:
     };
     OMPLSE3RNStateSpace(OMPLSolverInitializer init);
 
-    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-    virtual void setBounds(SamplingProblem_ptr &prob);
-    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
-    virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
-    virtual void stateDebug(const Eigen::VectorXd &q) const;
+    ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
+    void SetBounds(SamplingProblemPtr &prob) override;
+    void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const override;
+    void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const override;
+    void StateDebug(const Eigen::VectorXd &q) const override;
 };
 
 class OMPLSE2RNStateSpace : public OMPLStateSpace
@@ -183,11 +179,11 @@ public:
     };
     OMPLSE2RNStateSpace(OMPLSolverInitializer init);
 
-    virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-    virtual void setBounds(SamplingProblem_ptr &prob);
-    virtual void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const;
-    virtual void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const;
-    virtual void stateDebug(const Eigen::VectorXd &q) const;
+    ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
+    void SetBounds(SamplingProblemPtr &prob) override;
+    void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const override;
+    void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const override;
+    void StateDebug(const Eigen::VectorXd &q) const override;
 };
 
 class OMPLRNProjection : public ompl::base::ProjectionEvaluator
@@ -203,19 +199,19 @@ public:
     {
     }
 
-    virtual unsigned int getDimension(void) const
+    unsigned int getDimension(void) const override
     {
         return variables_.size();
     }
 
-    virtual void defaultCellSizes()
+    void defaultCellSizes() override
     {
         cellSizes_.clear();
         cellSizes_.resize(variables_.size(), 0.1);
     }
 
-    virtual void project(const ompl::base::State *state,
-                         OMPLProjection projection) const
+    void project(const ompl::base::State *state,
+                 OMPLProjection projection) const override
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =
@@ -239,19 +235,19 @@ public:
     {
     }
 
-    virtual unsigned int getDimension(void) const
+    unsigned int getDimension(void) const override
     {
         return variables_.size();
     }
 
-    virtual void defaultCellSizes()
+    void defaultCellSizes() override
     {
         cellSizes_.clear();
         cellSizes_.resize(variables_.size(), 0.1);
     }
 
-    virtual void project(const ompl::base::State *state,
-                         OMPLProjection projection) const
+    void project(const ompl::base::State *state,
+                 OMPLProjection projection) const override
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =
@@ -275,19 +271,19 @@ public:
     {
     }
 
-    virtual unsigned int getDimension(void) const
+    unsigned int getDimension(void) const override
     {
         return variables_.size();
     }
 
-    virtual void defaultCellSizes()
+    void defaultCellSizes() override
     {
         cellSizes_.clear();
         cellSizes_.resize(variables_.size(), 0.1);
     }
 
-    virtual void project(const ompl::base::State *state,
-                         OMPLProjection projection) const
+    void project(const ompl::base::State *state,
+                 OMPLProjection projection) const override
     {
         for (std::size_t i = 0; i < variables_.size(); ++i)
             projection(i) =
@@ -297,7 +293,6 @@ public:
 private:
     std::vector<int> variables_;
 };
+}  // namespace exotica
 
-} /* namespace exotica */
-
-#endif /* EXOTICA_OMPL_SOLVER_OMPL_EXO_H_ */
+#endif  // EXOTICA_OMPL_SOLVER_OMPL_EXO_H_

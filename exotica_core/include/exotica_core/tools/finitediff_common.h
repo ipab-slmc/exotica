@@ -1,6 +1,4 @@
 //
-//      Author: Vladimir Ivan
-//
 // Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
@@ -29,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EIGEN_FINITEDIFF_COMMON_H
-#define EIGEN_FINITEDIFF_COMMON_H
+#ifndef EIGEN_FINITEDIFF_COMMON_H_
+#define EIGEN_FINITEDIFF_COMMON_H_
 
 namespace Eigen
 {
@@ -41,4 +39,4 @@ enum NumericalDiffMode
 };
 }
 
-#endif
+#endif  // EIGEN_FINITEDIFF_COMMON_H_

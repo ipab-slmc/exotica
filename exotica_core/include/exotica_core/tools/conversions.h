@@ -1,62 +1,47 @@
-#ifndef CONVERSIONS_H
-#define CONVERSIONS_H
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
+#ifndef EXOTICA_CORE_CONVERSIONS_H_
+#define EXOTICA_CORE_CONVERSIONS_H_
+
+#include <Eigen/Dense>
+#include <kdl/frames.hpp>
+#include <kdl/jacobian.hpp>
+#include <map>
 #include <memory>
 #include <vector>
 
 #include <exotica_core/tools/exception.h>
-#include <Eigen/Dense>
-#include <kdl/jacobian.hpp>
-#include <kdl/tree.hpp>
 
 namespace Eigen
 {
 /// \brief Convenience wrapper for storing references to sub-matrices/vectors
-template <typename Derived>
-class Ref_ptr : public std::shared_ptr<Ref<Derived>>
-{
-public:
-    inline Ref_ptr()
-        : std::shared_ptr<Ref<Derived>>()
-    {
-    }
-
-    inline Ref_ptr(const Eigen::Block<Derived>& other)
-    {
-        this->reset(new Ref<Derived>(other));
-    }
-
-    inline Ref_ptr(Eigen::Block<Derived>& other)
-    {
-        this->reset(new Ref<Derived>(other));
-    }
-
-    inline Ref_ptr(const Eigen::VectorBlock<Derived>& other)
-    {
-        this->reset(new Ref<Derived>(other));
-    }
-
-    inline Ref_ptr(Eigen::VectorBlock<Derived>& other)
-    {
-        this->reset(new Ref<Derived>(other));
-    }
-
-    inline Ref_ptr(Derived& other)
-    {
-        this->reset(new Ref<Derived>(other));
-    }
-
-    inline Ref_ptr(const Derived& other)
-    {
-        this->reset(new Ref<Derived>(other));
-    }
-};
-
-/// \brief Reference to sub-vector.
-typedef Ref_ptr<VectorXd> VectorXdRef_ptr;
-/// \brief Reference to sub-Matrix.
-typedef Ref_ptr<MatrixXd> MatrixXdRef_ptr;
-
 typedef Ref<VectorXd> VectorXdRef;
 typedef const Ref<const VectorXd>& VectorXdRefConst;
 typedef Ref<MatrixXd> MatrixXdRef;
@@ -78,25 +63,25 @@ enum class RotationType
     MATRIX
 };
 
-KDL::Rotation getRotation(Eigen::VectorXdRefConst data, RotationType type);
+KDL::Rotation GetRotation(Eigen::VectorXdRefConst data, RotationType type);
 
-Eigen::VectorXd setRotation(const KDL::Rotation& data, RotationType type);
+Eigen::VectorXd SetRotation(const KDL::Rotation& data, RotationType type);
 
-inline int getRotationTypeLength(RotationType type)
+inline int GetRotationTypeLength(RotationType type)
 {
     static int types[] = {4, 3, 3, 3, 3, 9};
     return types[static_cast<int>(type)];
 }
 
-KDL::Frame getFrame(Eigen::VectorXdRefConst val);
+KDL::Frame GetFrame(Eigen::VectorXdRefConst val);
 
-KDL::Frame getFrameFromMatrix(Eigen::MatrixXdRefConst val);
+KDL::Frame GetFrameFromMatrix(Eigen::MatrixXdRefConst val);
 
-Eigen::MatrixXd getFrame(const KDL::Frame& val);
+Eigen::MatrixXd GetFrame(const KDL::Frame& val);
 
-Eigen::VectorXd getFrameAsVector(const KDL::Frame& val, RotationType type = RotationType::RPY);
+Eigen::VectorXd GetFrameAsVector(const KDL::Frame& val, RotationType type = RotationType::RPY);
 
-Eigen::VectorXd getRotationAsVector(const KDL::Frame& val, RotationType type);
+Eigen::VectorXd GetRotationAsVector(const KDL::Frame& val, RotationType type);
 
 typedef Eigen::Array<KDL::Frame, Eigen::Dynamic, 1> ArrayFrame;
 typedef Eigen::Array<KDL::Twist, Eigen::Dynamic, 1> ArrayTwist;
@@ -141,43 +126,43 @@ std::vector<Val> MapToVec(const std::map<Key, Val>& map)
 }
 
 template <class Key, class Val>
-void appendMap(std::map<Key, Val>& orig, const std::map<Key, Val>& extra)
+void AppendMap(std::map<Key, Val>& orig, const std::map<Key, Val>& extra)
 {
     orig.insert(extra.begin(), extra.end());
 }
 
 template <class Val>
-void appendVector(std::vector<Val>& orig, const std::vector<Val>& extra)
+void AppendVector(std::vector<Val>& orig, const std::vector<Val>& extra)
 {
     orig.insert(orig.end(), extra.begin(), extra.end());
 }
 
-inline std::string trim(const std::string& s)
+inline std::string Trim(const std::string& s)
 {
     auto wsfront = std::find_if_not(s.begin(), s.end(), [](int c) { return std::isspace(c); });
     return std::string(wsfront, std::find_if_not(s.rbegin(), std::string::const_reverse_iterator(wsfront), [](int c) { return std::isspace(c); }).base());
 }
 
 template <typename T>
-T to_number(const std::string& val)
+T ToNumber(const std::string& val)
 {
     throw std::runtime_error("conversion not implemented!");
 }
 
 template <>
-inline float to_number<float>(const std::string& val)
+inline float ToNumber<float>(const std::string& val)
 {
     return std::stof(val);
 }
 
 template <>
-inline double to_number<double>(const std::string& val)
+inline double ToNumber<double>(const std::string& val)
 {
     return std::stod(val);
 }
 
 template <typename T, const int S>  // Eigen::Vector<S><T>
-inline Eigen::Matrix<T, S, 1> parseVector(const std::string value)
+inline Eigen::Matrix<T, S, 1> ParseVector(const std::string value)
 {
     Eigen::Matrix<T, S, 1> ret;
     std::string temp_entry;
@@ -190,22 +175,22 @@ inline Eigen::Matrix<T, S, 1> parseVector(const std::string value)
         ret.conservativeResize(++i);
         try
         {
-            ret[i - 1] = to_number<T>(temp_entry);
+            ret[i - 1] = ToNumber<T>(temp_entry);
         }
         catch (std::invalid_argument)
         {
             ret[i - 1] = std::numeric_limits<T>::quiet_NaN();
         }
     }
-    if (i == 0) throw_pretty("Empty vector!");
+    if (i == 0) ThrowPretty("Empty vector!");
     if (S != Eigen::Dynamic && S != i)
     {
-        throw_pretty("Wrong vector size! Requested: " + std::to_string(S) + ", Provided: " + std::to_string(i));
+        ThrowPretty("Wrong vector size! Requested: " + std::to_string(S) + ", Provided: " + std::to_string(i));
     }
     return ret;
 }
 
-inline bool parseBool(const std::string value)
+inline bool ParseBool(const std::string value)
 {
     bool ret;
     std::istringstream text_parser(value);
@@ -213,7 +198,7 @@ inline bool parseBool(const std::string value)
     return ret;
 }
 
-inline double parseDouble(const std::string value)
+inline double ParseDouble(const std::string value)
 {
     double ret;
     std::istringstream text_parser(value);
@@ -221,12 +206,12 @@ inline double parseDouble(const std::string value)
     text_parser >> ret;
     if ((text_parser.fail() || text_parser.bad()))
     {
-        throw_pretty("Can't parse value!");
+        ThrowPretty("Can't parse value!");
     }
     return ret;
 }
 
-inline int parseInt(const std::string value)
+inline int ParseInt(const std::string value)
 {
     int ret;
     std::istringstream text_parser(value);
@@ -234,25 +219,25 @@ inline int parseInt(const std::string value)
     text_parser >> ret;
     if ((text_parser.fail() || text_parser.bad()))
     {
-        throw_pretty("Can't parse value!");
+        ThrowPretty("Can't parse value!");
     }
     return ret;
 }
 
-inline std::vector<std::string> parseList(const std::string& value, char token = ',')
+inline std::vector<std::string> ParseList(const std::string& value, char token = ',')
 {
     std::stringstream ss(value);
     std::string item;
     std::vector<std::string> ret;
     while (std::getline(ss, item, token))
     {
-        ret.push_back(trim(item));
+        ret.push_back(Trim(item));
     }
-    if (ret.size() == 0) throw_pretty("Empty vector!");
+    if (ret.size() == 0) ThrowPretty("Empty vector!");
     return ret;
 }
 
-inline std::vector<int> parseIntList(const std::string value)
+inline std::vector<int> ParseIntList(const std::string value)
 {
     std::stringstream ss(value);
     std::string item;
@@ -264,15 +249,15 @@ inline std::vector<int> parseIntList(const std::string value)
         text_parser >> tmp;
         if ((text_parser.fail() || text_parser.bad()))
         {
-            throw_pretty("Can't parse value!");
+            ThrowPretty("Can't parse value!");
         }
         ret.push_back(tmp);
     }
-    if (ret.size() == 0) throw_pretty("Empty vector!");
+    if (ret.size() == 0) ThrowPretty("Empty vector!");
     return ret;
 }
 
-inline std::vector<bool> parseBoolList(const std::string value)
+inline std::vector<bool> ParseBoolList(const std::string value)
 {
     std::stringstream ss(value);
     std::string item;
@@ -284,13 +269,13 @@ inline std::vector<bool> parseBoolList(const std::string value)
         text_parser >> tmp;
         if ((text_parser.fail() || text_parser.bad()))
         {
-            throw_pretty("Can't parse value!");
+            ThrowPretty("Can't parse value!");
         }
         ret.push_back(tmp);
     }
-    if (ret.empty()) throw_pretty("Empty vector!");
+    if (ret.empty()) ThrowPretty("Empty vector!");
     return ret;
 }
 }
 
-#endif  // CONVERSIONS_H
+#endif  // EXOTICA_CORE_CONVERSIONS_H_

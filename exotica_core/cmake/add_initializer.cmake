@@ -4,8 +4,6 @@ find_package(PythonInterp REQUIRED)
 
 set(_InitializerInputFiles)
 set(_InitializerOutputFiles)
-set(_InitializerClassesIncludes)
-set(_InitializerClassesInit)
 set(_InitializerCopyFiles)
 set(_InitializerScriptDir ${CMAKE_CURRENT_LIST_DIR})
 set(_InitializerSearchPaths ${CMAKE_INSTALL_PREFIX}:${CATKIN_DEVEL_PREFIX})
@@ -19,27 +17,24 @@ macro(AddInitializer)
 
   foreach(arg ${ARGN})
     list(APPEND _InitializerInputFiles ${CMAKE_CURRENT_SOURCE_DIR}/init/${arg}.in)
-    list(APPEND _InitializerOutputFiles ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${arg}Initializer.h)
-    set(_InitializerClassesIncludes "${_InitializerClassesIncludes}\n#include<${PROJECT_NAME}/${arg}Initializer.h>")
-    set(_InitializerClassesInit "${_InitializerClassesInit}\n    ret.push_back(${arg}Initializer().getTemplate());")
+    list(APPEND _InitializerOutputFiles ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${arg}_initializer.h)
     list(APPEND _InitializerCopyFiles ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/init/${arg}.in)
     message(STATUS "Adding initializer: '${arg}'")
   endforeach()
 endmacro(AddInitializer)
 
 macro(GenInitializers)
-  set(_InitializerProjectFile ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}InitializersNumerator.h)
-  configure_file(${_InitializerScriptDir}/initializer_project_header.h.in ${_InitializerProjectFile})
+  set(_InitializerProjectFile ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}/${PROJECT_NAME}_initializers_numerator.h)
   include_directories(${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION})
   add_custom_command(
-    OUTPUT ${_InitializerOutputFiles}
-    COMMAND ${PYTHON_EXECUTABLE} ${_InitializerScriptDir}/generate_initializers.py ${PROJECT_NAME} "${_InitializerSearchPaths}" ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION} ${_InitializerInputFiles} ${_InitializerOutputFiles}
+    OUTPUT ${_InitializerOutputFiles} ${_InitializerProjectFile}
+    COMMAND ${PYTHON_EXECUTABLE} ${_InitializerScriptDir}/generate_initializers.py ${PROJECT_NAME} "${_InitializerSearchPaths}" ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION} ${_InitializerProjectFile} ${_InitializerInputFiles} ${_InitializerOutputFiles}
     DEPENDS ${_InitializerInputFiles} ${_InitializerScriptDir}/generate_initializers.py
   )
-  list(APPEND _InitializerOutputFiles ${_InitializerProjectFile})
+  list(APPEND _InitializerOutputFiles)
   add_custom_target(${PROJECT_NAME}_initializers DEPENDS ${_InitializerOutputFiles})
 
-  install(FILES ${_InitializerOutputFiles}
+  install(FILES ${_InitializerOutputFiles} ${_InitializerProjectFile}
     DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
   install(FILES ${_InitializerInputFiles}
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/init)

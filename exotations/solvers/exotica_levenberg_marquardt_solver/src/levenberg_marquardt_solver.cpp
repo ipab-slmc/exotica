@@ -1,3 +1,25 @@
+//
+// Copyright 2018, University of Edinburgh
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+// sell copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+//   The above copyright notice and this permission notice shall be included in
+//   all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+
 #include "exotica_levenberg_marquardt_solver/levenberg_marquardt_solver.h"
 
 REGISTER_MOTIONSOLVER_TYPE("LevenbergMarquardtSolverSolver", exotica::LevenbergMarquardtSolver)
@@ -5,14 +27,14 @@ REGISTER_MOTIONSOLVER_TYPE("LevenbergMarquardtSolverSolver", exotica::LevenbergM
 namespace exotica
 {
 void LevenbergMarquardtSolver::Instantiate(LevenbergMarquardtSolverInitializer& init) { parameters_ = init; }
-void LevenbergMarquardtSolver::specifyProblem(PlanningProblem_ptr pointer)
+void LevenbergMarquardtSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     if (pointer->type() != "exotica::UnconstrainedEndPoseProblem")
     {
-        throw_named("This LevenbergMarquardtSolver can't solve problem of type '" << pointer->type() << "'!");
+        ThrowNamed("This LevenbergMarquardtSolver can't solve problem of type '" << pointer->type() << "'!");
     }
 
-    MotionSolver::specifyProblem(pointer);
+    MotionSolver::SpecifyProblem(pointer);
 
     // generic problem
     problem_ = pointer;
@@ -23,41 +45,41 @@ void LevenbergMarquardtSolver::specifyProblem(PlanningProblem_ptr pointer)
 
 void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
 {
-    prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
+    prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
 
     Timer timer;
 
-    if (!prob_) throw_named("Solver has not been initialized!");
+    if (!prob_) ThrowNamed("Solver has not been initialized!");
 
-    const Eigen::VectorXd q0 = prob_->applyStartState();
+    const Eigen::VectorXd q0 = prob_->ApplyStartState();
 
-    if (prob_->N != q0.rows()) throw_named("Wrong size q0 size=" << q0.rows() << ", required size=" << prob_->N);
+    if (prob_->N != q0.rows()) ThrowNamed("Wrong size q0 size=" << q0.rows() << ", required size=" << prob_->N);
 
     solution.resize(1, prob_->N);
 
     lambda_ = parameters_.Damping;  // initial damping
 
-    const Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->Cost.J.cols(), prob_->Cost.J.cols());
-    Eigen::MatrixXd J;
+    const Eigen::MatrixXd I = Eigen::MatrixXd::Identity(prob_->cost.jacobian.cols(), prob_->cost.jacobian.cols());
+    Eigen::MatrixXd jacobian;
 
     Eigen::VectorXd q = q0;
     double error = std::numeric_limits<double>::infinity();
     double error_prev = std::numeric_limits<double>::infinity();
     Eigen::VectorXd yd;
     Eigen::VectorXd qd;
-    for (size_t i = 0; i < getNumberOfMaxIterations(); i++)
+    for (size_t i = 0; i < GetNumberOfMaxIterations(); ++i)
     {
         prob_->Update(q);
 
-        yd = prob_->Cost.S * prob_->Cost.ydiff;
+        yd = prob_->cost.S * prob_->cost.ydiff;
 
         // weighted sum of squares
         error_prev = error;
-        error = prob_->getScalarCost();
+        error = prob_->GetScalarCost();
 
-        prob_->setCostEvolution(i, error);
+        prob_->SetCostEvolution(i, error);
 
-        J = prob_->Cost.S * prob_->Cost.J;
+        jacobian = prob_->cost.S * prob_->cost.jacobian;
 
         // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13
 
@@ -84,7 +106,7 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
         }
         else if (parameters_.ScaleProblem == "Jacobian")
         {
-            M = (J.transpose() * J).diagonal().asDiagonal();
+            M = (jacobian.transpose() * jacobian).diagonal().asDiagonal();
         }
         else
         {
@@ -92,9 +114,9 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
         }
 
 #if EIGEN_VERSION_AT_LEAST(3, 3, 0)
-        qd = (J.transpose() * J + lambda_ * M).completeOrthogonalDecomposition().solve(J.transpose() * yd);
+        qd = (jacobian.transpose() * jacobian + lambda_ * M).completeOrthogonalDecomposition().solve(jacobian.transpose() * yd);
 #else
-        qd = (J.transpose() * J + lambda_ * M).colPivHouseholderQr().solve(J.transpose() * yd);
+        qd = (jacobian.transpose() * jacobian + lambda_ * M).colPivHouseholderQr().solve(jacobian.transpose() * yd);
 #endif
 
         if (parameters_.Alpha.size() == 1)
@@ -115,7 +137,6 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
 
     solution.row(0) = q;
 
-    planning_time_ = timer.getDuration();
+    planning_time_ = timer.GetDuration();
 }
-
 }  // namespace exotica

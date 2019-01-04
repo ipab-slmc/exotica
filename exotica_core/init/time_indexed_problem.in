@@ -1,0 +1,18 @@
+class TimeIndexedProblem
+
+extend <exotica_core/planning_problem>
+
+Required int T;
+Required double tau;
+
+Optional double Wrate = 1.0;
+Optional Eigen::VectorXd W = Eigen::VectorXd();
+Optional std::vector<exotica::Initializer> Cost = std::vector<exotica::Initializer>();
+Optional std::vector<exotica::Initializer> Inequality = std::vector<exotica::Initializer>();
+Optional std::vector<exotica::Initializer> Equality = std::vector<exotica::Initializer>();
+Optional Eigen::VectorXd LowerBound = Eigen::VectorXd();
+Optional Eigen::VectorXd UpperBound = Eigen::VectorXd();
+Optional bool UseBounds = true;
+Optional double InequalityFeasibilityTolerance = 1e-12;
+Optional double EqualityFeasibilityTolerance = 1e-6;
+Optional double JointVelocityLimit = -1;  // If set to a positive value, enforce joint velocity constraints (in radians/s).

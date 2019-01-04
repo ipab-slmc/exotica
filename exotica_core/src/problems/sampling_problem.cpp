@@ -1,34 +1,31 @@
-/*
- *      Author: Vladimir Ivan
- *
- * Copyright (c) 2017, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #include <exotica_core/problems/sampling_problem.h>
 #include <exotica_core/setup.h>
@@ -39,21 +36,21 @@ namespace exotica
 {
 SamplingProblem::SamplingProblem()
 {
-    Flags = KIN_FK;
+    flags_ = KIN_FK;
 }
 
 SamplingProblem::~SamplingProblem() = default;
 
-std::vector<double> SamplingProblem::getBounds()
+std::vector<double> SamplingProblem::GetBounds()
 {
     std::vector<double> bounds;
-    auto jointLimits = scene_->getKinematicTree().getJointLimits();
+    auto joint_limits = scene_->GetKinematicTree().GetJointLimits();
 
     bounds.resize(2 * N);
-    for (unsigned int i = 0; i < N; i++)
+    for (unsigned int i = 0; i < N; ++i)
     {
-        bounds[i] = jointLimits(i, 0);
-        bounds[i + N] = jointLimits(i, 1);
+        bounds[i] = joint_limits(i, 0);
+        bounds[i + N] = joint_limits(i, 1);
     }
 
     return bounds;
@@ -61,12 +58,7 @@ std::vector<double> SamplingProblem::getBounds()
 
 void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
 {
-    Parameters = init;
-
-    if (init.LocalPlannerConfig != "")
-    {
-        local_planner_config_ = init.LocalPlannerConfig;
-    }
+    parameters = init;
 
     if (init.Goal.size() == N)
     {
@@ -78,201 +70,200 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     }
     else
     {
-        throw_named("Dimension mismatch: problem N=" << N << ", but goal state has dimension " << goal_.rows());
+        ThrowNamed("Dimension mismatch: problem N=" << N << ", but goal state has dimension " << goal_.rows());
     }
 
-    compound_ = scene_->getBaseType() != exotica::BASE_TYPE::FIXED;
+    compound_ = scene_->GetBaseType() != exotica::BaseType::FIXED;
 
-    NumTasks = Tasks.size();
-    PhiN = 0;
-    JN = 0;
-    for (int i = 0; i < NumTasks; i++)
+    num_tasks = tasks_.size();
+    length_Phi = 0;
+    length_jacobian = 0;
+    for (int i = 0; i < num_tasks; ++i)
     {
-        appendVector(Phi.map, Tasks[i]->getLieGroupIndices());
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
+        AppendVector(Phi.map, tasks_[i]->GetLieGroupIndices());
+        length_Phi += tasks_[i]->length;
+        length_jacobian += tasks_[i]->length_jacobian;
     }
-    Phi.setZero(PhiN);
+    Phi.SetZero(length_Phi);
     TaskSpaceVector dummy;
-    Inequality.initialize(init.Inequality, shared_from_this(), dummy);
-    Inequality.Tolerance = init.ConstraintTolerance;
-    Equality.initialize(init.Equality, shared_from_this(), dummy);
-    Equality.Tolerance = init.ConstraintTolerance;
-    applyStartState(false);
+    inequality.Initialize(init.Inequality, shared_from_this(), dummy);
+    inequality.tolerance = init.ConstraintTolerance;
+    equality.Initialize(init.Equality, shared_from_this(), dummy);
+    equality.tolerance = init.ConstraintTolerance;
+    ApplyStartState(false);
 
     if (compound_ && init.FloatingBaseLowerLimits.rows() > 0 && init.FloatingBaseUpperLimits.rows() > 0)
     {
-        if (scene_->getBaseType() == exotica::BASE_TYPE::FLOATING && init.FloatingBaseLowerLimits.rows() == 6 && init.FloatingBaseUpperLimits.rows() == 6)
+        if (scene_->GetBaseType() == exotica::BaseType::FLOATING && init.FloatingBaseLowerLimits.rows() == 6 && init.FloatingBaseUpperLimits.rows() == 6)
         {
-            scene_->getKinematicTree().setFloatingBaseLimitsPosXYZEulerZYX(
+            scene_->GetKinematicTree().SetFloatingBaseLimitsPosXYZEulerZYX(
                 std::vector<double>(init.FloatingBaseLowerLimits.data(), init.FloatingBaseLowerLimits.data() + init.FloatingBaseLowerLimits.size()),
                 std::vector<double>(init.FloatingBaseUpperLimits.data(), init.FloatingBaseUpperLimits.data() + init.FloatingBaseUpperLimits.size()));
         }
-        else if (scene_->getBaseType() == exotica::BASE_TYPE::PLANAR && init.FloatingBaseLowerLimits.rows() == 3 && init.FloatingBaseUpperLimits.rows() == 3)
+        else if (scene_->GetBaseType() == exotica::BaseType::PLANAR && init.FloatingBaseLowerLimits.rows() == 3 && init.FloatingBaseUpperLimits.rows() == 3)
         {
-            scene_->getKinematicTree().setPlanarBaseLimitsPosXYEulerZ(
+            scene_->GetKinematicTree().SetPlanarBaseLimitsPosXYEulerZ(
                 std::vector<double>(init.FloatingBaseLowerLimits.data(), init.FloatingBaseLowerLimits.data() + init.FloatingBaseLowerLimits.size()),
                 std::vector<double>(init.FloatingBaseUpperLimits.data(), init.FloatingBaseUpperLimits.data() + init.FloatingBaseUpperLimits.size()));
         }
         else
         {
-            throw_named("Invalid base limits!");
+            ThrowNamed("Invalid base limits!");
         }
     }
 
-    preupdate();
+    PreUpdate();
 }
 
-void SamplingProblem::preupdate()
+void SamplingProblem::PreUpdate()
 {
-    PlanningProblem::preupdate();
-    for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
-    Inequality.updateS();
-    Equality.updateS();
+    PlanningProblem::PreUpdate();
+    for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
+    inequality.UpdateS();
+    equality.UpdateS();
 }
 
-void SamplingProblem::setGoalState(Eigen::VectorXdRefConst qT)
+void SamplingProblem::SetGoalState(Eigen::VectorXdRefConst qT)
 {
     if (qT.rows() != N)
-        throw_pretty("Dimensionality of goal state wrong: Got " << qT.rows() << ", expected " << N);
+        ThrowPretty("Dimensionality of goal state wrong: Got " << qT.rows() << ", expected " << N);
     goal_ = qT;
 }
 
-void SamplingProblem::setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
+void SamplingProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < Equality.Indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
-        if (Equality.Tasks[i]->getObjectName() == task_name)
+        if (equality.tasks[i]->GetObjectName() == task_name)
         {
-            if (goal.rows() != Equality.Indexing[i].Length) throw_pretty("Expected length of " << Equality.Indexing[i].Length << " and got " << goal.rows());
-            Equality.y.data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length) = goal;
+            if (goal.rows() != equality.indexing[i].length) ThrowPretty("Expected length of " << equality.indexing[i].length << " and got " << goal.rows());
+            equality.y.data.segment(equality.indexing[i].start, equality.indexing[i].length) = goal;
             return;
         }
     }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void SamplingProblem::setRhoEQ(const std::string& task_name, const double& rho)
+void SamplingProblem::SetRhoEQ(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < Equality.Indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
-        if (Equality.Tasks[i]->getObjectName() == task_name)
+        if (equality.tasks[i]->GetObjectName() == task_name)
         {
-            Equality.Rho(Equality.Indexing[i].Id) = rho;
-            preupdate();
+            equality.rho(equality.indexing[i].id) = rho;
+            PreUpdate();
             return;
         }
     }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd SamplingProblem::getGoalEQ(const std::string& task_name)
+Eigen::VectorXd SamplingProblem::GetGoalEQ(const std::string& task_name)
 {
-    for (int i = 0; i < Equality.Indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
-        if (Equality.Tasks[i]->getObjectName() == task_name)
+        if (equality.tasks[i]->GetObjectName() == task_name)
         {
-            return Equality.y.data.segment(Equality.Indexing[i].Start, Equality.Indexing[i].Length);
+            return equality.y.data.segment(equality.indexing[i].start, equality.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double SamplingProblem::getRhoEQ(const std::string& task_name)
+double SamplingProblem::GetRhoEQ(const std::string& task_name)
 {
-    for (int i = 0; i < Equality.Indexing.size(); i++)
+    for (int i = 0; i < equality.indexing.size(); ++i)
     {
-        if (Equality.Tasks[i]->getObjectName() == task_name)
+        if (equality.tasks[i]->GetObjectName() == task_name)
         {
-            return Equality.Rho(Equality.Indexing[i].Id);
+            return equality.rho(equality.indexing[i].id);
         }
     }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-void SamplingProblem::setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
+void SamplingProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
-        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        if (inequality.tasks[i]->GetObjectName() == task_name)
         {
-            if (goal.rows() != Inequality.Indexing[i].Length) throw_pretty("Expected length of " << Inequality.Indexing[i].Length << " and got " << goal.rows());
-            Inequality.y.data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length) = goal;
+            if (goal.rows() != inequality.indexing[i].length) ThrowPretty("Expected length of " << inequality.indexing[i].length << " and got " << goal.rows());
+            inequality.y.data.segment(inequality.indexing[i].start, inequality.indexing[i].length) = goal;
             return;
         }
     }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void SamplingProblem::setRhoNEQ(const std::string& task_name, const double& rho)
+void SamplingProblem::SetRhoNEQ(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
-        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        if (inequality.tasks[i]->GetObjectName() == task_name)
         {
-            Inequality.Rho(Inequality.Indexing[i].Id) = rho;
-            preupdate();
+            inequality.rho(inequality.indexing[i].id) = rho;
+            PreUpdate();
             return;
         }
     }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd SamplingProblem::getGoalNEQ(const std::string& task_name)
+Eigen::VectorXd SamplingProblem::GetGoalNEQ(const std::string& task_name)
 {
-    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
-        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        if (inequality.tasks[i]->GetObjectName() == task_name)
         {
-            return Inequality.y.data.segment(Inequality.Indexing[i].Start, Inequality.Indexing[i].Length);
+            return inequality.y.data.segment(inequality.indexing[i].start, inequality.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double SamplingProblem::getRhoNEQ(const std::string& task_name)
+double SamplingProblem::GetRhoNEQ(const std::string& task_name)
 {
-    for (int i = 0; i < Inequality.Indexing.size(); i++)
+    for (int i = 0; i < inequality.indexing.size(); ++i)
     {
-        if (Inequality.Tasks[i]->getObjectName() == task_name)
+        if (inequality.tasks[i]->GetObjectName() == task_name)
         {
-            return Inequality.Rho(Inequality.Indexing[i].Id);
+            return inequality.rho(inequality.indexing[i].id);
         }
     }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-bool SamplingProblem::isValid(Eigen::VectorXdRefConst x)
+bool SamplingProblem::IsValid(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x);
-    for (int i = 0; i < NumTasks; i++)
+    for (int i = 0; i < num_tasks; ++i)
     {
-        if (Tasks[i]->isUsed)
-            Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+        if (tasks_[i]->is_used)
+            tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length));
     }
-    Inequality.update(Phi);
-    Equality.update(Phi);
-    numberOfProblemUpdates++;
+    inequality.Update(Phi);
+    equality.Update(Phi);
+    ++number_of_problem_updates_;
 
-    bool inequality_is_valid = ((Inequality.S * Inequality.ydiff).array() <= 0.0).all();
-    bool equality_is_valid = ((Equality.S * Equality.ydiff).array().abs() == 0.0).all();
+    bool inequality_is_valid = ((inequality.S * inequality.ydiff).array() <= 0.0).all();
+    bool equality_is_valid = ((equality.S * equality.ydiff).array().abs() == 0.0).all();
 
     return (inequality_is_valid && equality_is_valid);
 }
 
 void SamplingProblem::Update(Eigen::VectorXdRefConst x)
 {
-    isValid(x);
+    IsValid(x);
 }
 
-int SamplingProblem::getSpaceDim()
+int SamplingProblem::GetSpaceDim()
 {
     return N;
 }
 
-bool SamplingProblem::isCompoundStateSpace()
+bool SamplingProblem::IsCompoundStateSpace()
 {
     return compound_;
 }
-
-} /* namespace exotica */
+}

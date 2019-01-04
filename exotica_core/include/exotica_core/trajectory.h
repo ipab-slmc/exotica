@@ -1,22 +1,39 @@
-#ifndef EXOTICA_TRAJECTORY_H
-#define EXOTICA_TRAJECTORY_H
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
-#include <memory>
+#ifndef EXOTICA_CORE_TRAJECTORY_H_
+#define EXOTICA_CORE_TRAJECTORY_H_
 
+#include <exotica_core/tools/conversions.h>
 #include <Eigen/Dense>
-
-#include <kdl/path.hpp>
-#include <kdl/path_line.hpp>
-#include <kdl/rotational_interpolation.hpp>
-#include <kdl/rotational_interpolation_sa.hpp>
-#include <kdl/trajectory.hpp>
 #include <kdl/trajectory_composite.hpp>
-#include <kdl/trajectory_segment.hpp>
-#include <kdl/trajectory_stationary.hpp>
-#include <kdl/velocityprofile.hpp>
-#include <kdl/velocityprofile_spline.hpp>
-
-#include <exotica_core/tools.h>
+#include <memory>
 
 namespace exotica
 {
@@ -27,20 +44,20 @@ public:
     Trajectory(const std::string& data);
     Trajectory(Eigen::MatrixXdRefConst data, double radius = 1.0);
     ~Trajectory() {}
-    KDL::Frame getPosition(double t);
-    KDL::Twist getVelocity(double t);
-    KDL::Twist getAcceleration(double t);
-    double getDuration();
-    Eigen::MatrixXd getData();
-    double getRadius();
-    std::string toString();
+    KDL::Frame GetPosition(double t);
+    KDL::Twist GetVelocity(double t);
+    KDL::Twist GetAcceleration(double t);
+    double GetDuration();
+    Eigen::MatrixXd GetData();
+    double GetRadius();
+    std::string ToString();
 
 protected:
-    void constructFromData(Eigen::MatrixXdRefConst data, double radius);
+    void ConstructFromData(Eigen::MatrixXdRefConst data, double radius);
     double radius_;
     Eigen::MatrixXd data_;
     std::shared_ptr<KDL::Trajectory_Composite> trajectory_;
 };
 }
 
-#endif
+#endif  // EXOTICA_CORE_TRAJECTORY_H_

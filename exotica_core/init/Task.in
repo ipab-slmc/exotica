@@ -1,3 +1,0 @@
-Required std::string Task; # TaskMap name
-Optional Eigen::VectorXd Rho = Eigen::VectorXd();
-Optional Eigen::VectorXd Goal = Eigen::VectorXd();

@@ -26,7 +26,7 @@
     </Cost>
    
     <T>400</T>
-    <Tau>0.03</Tau>
+    <tau>0.03</tau>
     <Qrate>1e-10</Qrate>
     <Hrate>1</Hrate>
     <Wrate>1e4</Wrate>

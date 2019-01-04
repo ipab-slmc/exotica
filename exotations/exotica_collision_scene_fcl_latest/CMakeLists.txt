@@ -19,6 +19,7 @@ include_directories(
 
 add_library(${PROJECT_NAME} src/collision_scene_fcl_latest.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

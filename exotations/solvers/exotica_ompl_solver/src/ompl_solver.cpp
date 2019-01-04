@@ -1,37 +1,34 @@
-/*
- *  Created on: 10 Oct 2017
- *      Author: Yiming Yang
- *
- * Copyright (c) 2017, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #include <exotica_ompl_solver/ompl_solver.h>
+
 #include <ompl/util/RandomNumbers.h>
 
 namespace exotica
@@ -43,18 +40,18 @@ template <class ProblemType>
 OMPLSolver<ProblemType>::~OMPLSolver() = default;
 
 template <class ProblemType>
-void OMPLSolver<ProblemType>::specifyProblem(PlanningProblem_ptr pointer)
+void OMPLSolver<ProblemType>::SpecifyProblem(PlanningProblemPtr pointer)
 {
-    MotionSolver::specifyProblem(pointer);
+    MotionSolver::SpecifyProblem(pointer);
     prob_ = std::static_pointer_cast<ProblemType>(pointer);
-    if (prob_->getScene()->getBaseType() == BASE_TYPE::FIXED)
+    if (prob_->GetScene()->GetBaseType() == BaseType::FIXED)
         state_space_.reset(new OMPLRNStateSpace(init_));
-    else if (prob_->getScene()->getBaseType() == BASE_TYPE::PLANAR)
+    else if (prob_->GetScene()->GetBaseType() == BaseType::PLANAR)
         state_space_.reset(new OMPLSE2RNStateSpace(init_));
-    else if (prob_->getScene()->getBaseType() == BASE_TYPE::FLOATING)
+    else if (prob_->GetScene()->GetBaseType() == BaseType::FLOATING)
         state_space_.reset(new OMPLSE3RNStateSpace(init_));
     else
-        throw_named("Unsupported base type " << prob_->getScene()->getBaseType());
+        ThrowNamed("Unsupported base type " << prob_->GetScene()->GetBaseType());
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
     ompl_simple_setup_->setPlannerAllocator(boost::bind(planner_allocator_, _1, algorithm_));
@@ -62,16 +59,16 @@ void OMPLSolver<ProblemType>::specifyProblem(PlanningProblem_ptr pointer)
     if (init_.Projection.rows() > 0)
     {
         std::vector<int> project_vars(init_.Projection.rows());
-        for (int i = 0; i < init_.Projection.rows(); i++)
+        for (int i = 0; i < init_.Projection.rows(); ++i)
         {
             project_vars[i] = (int)init_.Projection(i);
-            if (project_vars[i] < 0 || project_vars[i] >= prob_->N) throw_named("Invalid projection index! " << project_vars[i]);
+            if (project_vars[i] < 0 || project_vars[i] >= prob_->N) ThrowNamed("Invalid projection index! " << project_vars[i]);
         }
-        if (prob_->getScene()->getBaseType() == BASE_TYPE::FIXED)
+        if (prob_->GetScene()->GetBaseType() == BaseType::FIXED)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLRNProjection(state_space_, project_vars)));
-        else if (prob_->getScene()->getBaseType() == BASE_TYPE::PLANAR)
+        else if (prob_->GetScene()->GetBaseType() == BaseType::PLANAR)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLSE2RNProjection(state_space_, project_vars)));
-        else if (prob_->getScene()->getBaseType() == BASE_TYPE::FLOATING)
+        else if (prob_->GetScene()->GetBaseType() == BaseType::FLOATING)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLSE3RNProjection(state_space_, project_vars)));
     }
 }
@@ -116,21 +113,21 @@ void OMPLSolver<ProblemType>::SetGoalState(Eigen::VectorXdRefConst qT, const dou
     state_space_->as<OMPLStateSpace>()->ExoticaToOMPLState(qT, gs.get());
     if (!ompl_simple_setup_->getStateValidityChecker()->isValid(gs.get()))
     {
-        throw_named("Goal state is not valid!");
+        ThrowNamed("Goal state is not valid!");
     }
 
     if (!ompl_simple_setup_->getSpaceInformation()->satisfiesBounds(gs.get()))
     {
-        state_space_->as<OMPLStateSpace>()->stateDebug(qT);
+        state_space_->as<OMPLStateSpace>()->StateDebug(qT);
 
         // Debug state and bounds
         std::string out_of_bounds_joint_ids = "";
         for (int i = 0; i < qT.rows(); ++i)
-            if (qT(i) < prob_->getBounds()[i] || qT(i) > prob_->getBounds()[i + qT.rows()])
-                out_of_bounds_joint_ids += "[j" + std::to_string(i) + "=" + std::to_string(qT(i)) + ", ll=" + std::to_string(prob_->getBounds()[i]) + ", ul=" + std::to_string(prob_->getBounds()[i + qT.rows()]) + "]\n";
+            if (qT(i) < prob_->GetBounds()[i] || qT(i) > prob_->GetBounds()[i + qT.rows()])
+                out_of_bounds_joint_ids += "[j" + std::to_string(i) + "=" + std::to_string(qT(i)) + ", ll=" + std::to_string(prob_->GetBounds()[i]) + ", ul=" + std::to_string(prob_->GetBounds()[i + qT.rows()]) + "]\n";
 
-        throw_named("Invalid goal state [Invalid joint bounds for joint indices: \n"
-                    << out_of_bounds_joint_ids << "]");
+        ThrowNamed("Invalid goal state [Invalid joint bounds for joint indices: \n"
+                   << out_of_bounds_joint_ids << "]");
     }
     ompl_simple_setup_->setGoalState(gs, eps);
 }
@@ -150,7 +147,7 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
         {
             pg.interpolate(init_.SimplifyInterpolationLength);
             try_more = psf->reduceVertices(pg, 0, 0, init_.RangeRatio);
-            times++;
+            ++times;
         }
         if (init_.ShortcutPath && si->getStateSpace()->isMetricSpace())
         {
@@ -159,7 +156,7 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
             {
                 pg.interpolate(init_.SimplifyInterpolationLength);
                 try_more = psf->shortcutPath(pg, 0, 0, init_.RangeRatio, init_.SnapToVertex);
-                times++;
+                ++times;
             }
         }
     }
@@ -177,8 +174,8 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
     }
     pg.interpolate(int(length * init_.SmoothnessFactor));
 
-    traj.resize(pg.getStateCount(), prob_->getSpaceDim());
-    Eigen::VectorXd tmp(prob_->getSpaceDim());
+    traj.resize(pg.getStateCount(), prob_->GetSpaceDim());
+    Eigen::VectorXd tmp(prob_->GetSpaceDim());
 
     for (int i = 0; i < static_cast<int>(pg.getStateCount()); ++i)
     {
@@ -190,17 +187,17 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
 template <class ProblemType>
 void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 {
-    Eigen::VectorXd q0 = prob_->applyStartState();
+    Eigen::VectorXd q0 = prob_->ApplyStartState();
 
     // check joint limits
-    const std::vector<double> bounds = prob_->getBounds();
+    const std::vector<double> bounds = prob_->GetBounds();
     for (const double l : bounds)
     {
         if (!std::isfinite(l))
         {
             std::cerr << "Detected non-finite joint limits:" << std::endl;
             const size_t nlim = bounds.size() / 2;
-            for (uint i = 0; i < nlim; i++)
+            for (uint i = 0; i < nlim; ++i)
             {
                 std::cout << bounds[i] << ", " << bounds[nlim + i] << std::endl;
             }
@@ -210,22 +207,22 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 
     if (!state_space_->as<OMPLStateSpace>()->isLocked())
     {
-        state_space_->as<OMPLStateSpace>()->setBounds(prob_);
-        bounds_ = prob_->getBounds();
+        state_space_->as<OMPLStateSpace>()->SetBounds(prob_);
+        bounds_ = prob_->GetBounds();
     }
-    else if (!bounds_.empty() && bounds_ != prob_->getBounds())
+    else if (!bounds_.empty() && bounds_ != prob_->GetBounds())
     {
-        throw_pretty("Cannot set new bounds on locked state space!");
+        ThrowPretty("Cannot set new bounds on locked state space!");
     }
 
     ompl_simple_setup_->getSpaceInformation()->setup();
 
     ompl_simple_setup_->setup();
 
-    if (ompl_simple_setup_->getPlanner()->params().hasParam("range"))
-        ompl_simple_setup_->getPlanner()->params().setParam("range", init_.Range);
-    if (ompl_simple_setup_->getPlanner()->params().hasParam("goal_bias"))
-        ompl_simple_setup_->getPlanner()->params().setParam("goal_bias", init_.GoalBias);
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("Range"))
+        ompl_simple_setup_->getPlanner()->params().setParam("Range", init_.Range);
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("GoalBias"))
+        ompl_simple_setup_->getPlanner()->params().setParam("GoalBias", init_.GoalBias);
 
     if (init_.RandomSeed != -1)
     {
@@ -233,7 +230,7 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
         ompl::RNG::setSeed(init_.RandomSeed);
     }
 
-    SetGoalState(prob_->getGoalState(), init_.Epsilon);
+    SetGoalState(prob_->GetGoalState(), init_.Epsilon);
 
     ompl::base::ScopedState<> ompl_start_state(state_space_);
 

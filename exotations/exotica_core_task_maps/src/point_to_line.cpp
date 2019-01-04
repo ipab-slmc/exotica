@@ -1,45 +1,43 @@
-/*
- *      Author: Christian Rauch
- *
- * Copyright (c) 2018, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
-#include "exotica_core_task_maps/point_to_line.h"
+#include <exotica_core/server.h>
+#include <exotica_core_task_maps/point_to_line.h>
 
-REGISTER_TASKMAP_TYPE("Point2Line", exotica::Point2Line);
+REGISTER_TASKMAP_TYPE("PointToLine", exotica::PointToLine);
 
 namespace exotica
 {
-Point2Line::Point2Line() = default;
-Point2Line::~Point2Line() = default;
+PointToLine::PointToLine() = default;
+PointToLine::~PointToLine() = default;
 
-Eigen::Vector3d Point2Line::direction(const Eigen::Vector3d &point)
+Eigen::Vector3d PointToLine::Direction(const Eigen::Vector3d &point)
 {
     // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
     // let:
@@ -71,56 +69,56 @@ Eigen::Vector3d Point2Line::direction(const Eigen::Vector3d &point)
     return dv;
 }
 
-Eigen::Vector3d Point2Line::getEndPoint()
+Eigen::Vector3d PointToLine::GetEndPoint()
 {
     return line_end_;
 }
 
-void Point2Line::setEndPoint(const Eigen::Vector3d &point)
+void PointToLine::SetEndPoint(const Eigen::Vector3d &point)
 {
     line_end_ = point;
     line_ = line_end_ - line_start_;
 }
 
-void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != Kinematics[0].Phi.rows() * 3) throw_named("Wrong size of phi!");
+    if (phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of phi!");
 
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(Kinematics[0].Phi(i).p.data);
-        phi.segment<3>(i * 3) = -direction(p);
+        const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        phi.segment<3>(i * 3) = -Direction(p);
     }
 }
 
-void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != Kinematics[0].Phi.rows() * 3) throw_named("Wrong size of phi!");
-    if (J.rows() != Kinematics[0].J.rows() * 3 || J.cols() != Kinematics[0].J(0).data.cols()) throw_named("Wrong size of J! " << Kinematics[0].J(0).data.cols());
+    if (phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of phi!");
+    if (jacobian.rows() != kinematics[0].jacobian.rows() * 3 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
-    for (int i = 0; i < Kinematics[0].Phi.rows(); i++)
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
         // point in base frame
-        const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(Kinematics[0].Phi(i).p.data);
+        const Eigen::Vector3d p = line_start_ + Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
         // direction from point to line
-        const Eigen::Vector3d dv = direction(p);
+        const Eigen::Vector3d dv = Direction(p);
         phi.segment<3>(i * 3) = dv;
 
         if ((dv + p - line_start_).norm() < std::numeric_limits<double>::epsilon())
         {
             // clipped (t=0) case
-            J.middleRows<3>(i * 3) = -Kinematics[0].J[i].data.topRows<3>();
+            jacobian.middleRows<3>(i * 3) = -kinematics[0].jacobian[i].data.topRows<3>();
         }
         else
         {
-            for (int j = 0; j < J.cols(); j++)
+            for (int j = 0; j < jacobian.cols(); ++j)
             {
-                J.middleRows<3>(i * 3).col(j) = Kinematics[0].J[i].data.topRows<3>().col(j).dot(line_ / line_.squaredNorm()) * line_ - Kinematics[0].J[i].data.topRows<3>().col(j);
+                jacobian.middleRows<3>(i * 3).col(j) = kinematics[0].jacobian[i].data.topRows<3>().col(j).dot(line_ / line_.squaredNorm()) * line_ - kinematics[0].jacobian[i].data.topRows<3>().col(j);
             }
         }
 
         // visualisation of point, line and their distance
-        if (visualize_ && Server::isRos())
+        if (visualize_ && Server::IsRos())
         {
             const ros::Time t = ros::Time::now();
             const std::string common_frame = "exotica/" + base_name_;
@@ -227,12 +225,12 @@ void Point2Line::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen
     }
 }
 
-void Point2Line::Instantiate(Point2LineInitializer &init)
+void PointToLine::Instantiate(PointToLineInitializer &init)
 {
-    link_name_ = Frames[0].FrameALinkName;
-    base_name_ = Frames[0].FrameBLinkName;
+    link_name_ = frames_[0].frame_A_link_name;
+    base_name_ = frames_[0].frame_B_link_name;
 
-    line_start_ = Eigen::Map<Eigen::Vector3d>(Frames[0].FrameBOffset.p.data);
+    line_start_ = Eigen::Map<Eigen::Vector3d>(frames_[0].frame_B_offset.p.data);
     line_end_ = init.EndPoint;
 
     line_ = line_end_ - line_start_;
@@ -240,10 +238,10 @@ void Point2Line::Instantiate(Point2LineInitializer &init)
 
     visualize_ = init.Visualise;
 
-    if (visualize_ && Server::isRos())
+    if (visualize_ && Server::IsRos())
     {
-        pub_marker_ = Server::advertise<visualization_msgs::MarkerArray>("p2l", 1, true);
-        pub_marker_label_ = Server::advertise<visualization_msgs::MarkerArray>("p2l_label", 1, true);
+        pub_marker_ = Server::Advertise<visualization_msgs::MarkerArray>("p2l", 1, true);
+        pub_marker_label_ = Server::Advertise<visualization_msgs::MarkerArray>("p2l_label", 1, true);
         // delete previous markers
         visualization_msgs::Marker md;
         md.action = 3;  // DELETEALL
@@ -254,8 +252,8 @@ void Point2Line::Instantiate(Point2LineInitializer &init)
     }
 }
 
-int Point2Line::taskSpaceDim()
+int PointToLine::TaskSpaceDim()
 {
-    return Kinematics[0].Phi.rows() * 3;
+    return kinematics[0].Phi.rows() * 3;
 }
 }  // namespace exotica

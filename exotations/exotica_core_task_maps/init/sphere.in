@@ -1,0 +1,6 @@
+class Sphere
+
+extend <exotica_core/frame>
+
+Required double Radius;
+Optional std::string Group = "default";

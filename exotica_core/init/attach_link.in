@@ -1,0 +1,7 @@
+class AttachLink
+
+Required std::string Name;
+
+Optional Eigen::VectorXd Transform = Eigen::IdentityTransform();
+Optional std::string Parent = "";
+Optional bool Local = false;

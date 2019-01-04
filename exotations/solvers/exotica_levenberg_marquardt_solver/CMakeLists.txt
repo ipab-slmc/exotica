@@ -8,7 +8,7 @@ if(NOT TARGET Eigen3::Eigen)
     message(WARNING "For best performance, the Levenberg-Marquardt solver requires at least Eigen version 3.3. Using an alternative linear solver.")
 endif()
 
-AddInitializer(LevenbergMarquardtSolver)
+AddInitializer(levenberg_marquardt_solver)
 GenInitializers()
 
 catkin_package(
@@ -20,7 +20,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME} src/levenberg_marquardt_solver.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

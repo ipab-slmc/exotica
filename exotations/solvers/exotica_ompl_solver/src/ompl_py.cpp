@@ -1,3 +1,32 @@
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include <exotica_core/exotica_core.h>  // TODO: be more selective
 #undef NDEBUG
 #include <pybind11/eigen.h>
@@ -23,32 +52,32 @@ PYBIND11_MODULE(exotica_ompl_solver_py, module)
     ompl_solver.def_property("longest_valid_segment_length", &OMPLSolver<SamplingProblem>::GetLongestValidSegmentLength, &OMPLSolver<SamplingProblem>::SetLongestValidSegmentFraction);
     ompl_solver.def_property("valid_segment_count_factor", &OMPLSolver<SamplingProblem>::GetValidSegmentCountFactor, &OMPLSolver<SamplingProblem>::SetValidSegmentCountFactor);
 
-    py::class_<RRT, std::shared_ptr<RRT>, OMPLSolver<SamplingProblem>> rrt(module, "RRT");
+    py::class_<RRTSolver, std::shared_ptr<RRTSolver>, OMPLSolver<SamplingProblem>> rrt(module, "RRTSolver");
 
-    py::class_<RRTConnect, std::shared_ptr<RRTConnect>, OMPLSolver<SamplingProblem>> rrtcon(module, "RRTConnect");
-    rrtcon.def_property("range", &RRTConnect::GetRange, &RRTConnect::SetRange);
+    py::class_<RRTConnectSolver, std::shared_ptr<RRTConnectSolver>, OMPLSolver<SamplingProblem>> rrtcon(module, "RRTConnectSolver");
+    rrtcon.def_property("range", &RRTConnectSolver::GetRange, &RRTConnectSolver::SetRange);
 
-    py::class_<EST, std::shared_ptr<EST>, OMPLSolver<SamplingProblem>> est(module, "EST");
+    py::class_<ESTSolver, std::shared_ptr<ESTSolver>, OMPLSolver<SamplingProblem>> est(module, "ESTSolver");
 
-    py::class_<KPIECE, std::shared_ptr<KPIECE>, OMPLSolver<SamplingProblem>> kpiece(module, "KPIECE");
+    py::class_<KPIECESolver, std::shared_ptr<KPIECESolver>, OMPLSolver<SamplingProblem>> kpiece(module, "KPIECESolver");
 
-    py::class_<BKPIECE, std::shared_ptr<BKPIECE>, OMPLSolver<SamplingProblem>> bkpiece(module, "BKPIECE");
+    py::class_<BKPIECESolver, std::shared_ptr<BKPIECESolver>, OMPLSolver<SamplingProblem>> bkpiece(module, "BKPIECESolver");
 
-    py::class_<PRM, std::shared_ptr<PRM>, OMPLSolver<SamplingProblem>> prm(module, "PRM");
-    prm.def_property("multi_query", &PRM::IsMultiQuery, &PRM::SetMultiQuery);
-    prm.def("grow_roadmap", &PRM::GrowRoadmap);
-    prm.def("expand_roadmap", &PRM::ExpandRoadmap);
-    prm.def("clear", &PRM::Clear);
-    prm.def("clear_query", &PRM::ClearQuery);
-    prm.def("setup", &PRM::Setup);
-    prm.def("edge_count", &PRM::EdgeCount);
-    prm.def("milestone_count", &PRM::MilestoneCount);
+    py::class_<PRMSolver, std::shared_ptr<PRMSolver>, OMPLSolver<SamplingProblem>> prm(module, "PRMSolver");
+    prm.def_property("multi_query", &PRMSolver::IsMultiQuery, &PRMSolver::SetMultiQuery);
+    prm.def("grow_roadmap", &PRMSolver::GrowRoadmap);
+    prm.def("expand_roadmap", &PRMSolver::ExpandRoadmap);
+    prm.def("clear", &PRMSolver::Clear);
+    prm.def("clear_query", &PRMSolver::ClearQuery);
+    prm.def("setup", &PRMSolver::Setup);
+    prm.def("edge_count", &PRMSolver::EdgeCount);
+    prm.def("milestone_count", &PRMSolver::MilestoneCount);
 
-    py::class_<LazyPRM, std::shared_ptr<LazyPRM>, OMPLSolver<SamplingProblem>> lprm(module, "LazyPRM");
-    lprm.def_property("multi_query", &LazyPRM::IsMultiQuery, &LazyPRM::SetMultiQuery);
-    lprm.def("clear", &LazyPRM::Clear);
-    lprm.def("clear_query", &LazyPRM::ClearQuery);
-    lprm.def("setup", &LazyPRM::Setup);
-    lprm.def("edge_count", &LazyPRM::EdgeCount);
-    lprm.def("milestone_count", &LazyPRM::MilestoneCount);
+    py::class_<LazyPRMSolver, std::shared_ptr<LazyPRMSolver>, OMPLSolver<SamplingProblem>> lprm(module, "LazyPRMSolver");
+    lprm.def_property("multi_query", &LazyPRMSolver::IsMultiQuery, &LazyPRMSolver::SetMultiQuery);
+    lprm.def("clear", &LazyPRMSolver::Clear);
+    lprm.def("clear_query", &LazyPRMSolver::ClearQuery);
+    lprm.def("setup", &LazyPRMSolver::Setup);
+    lprm.def("edge_count", &LazyPRMSolver::EdgeCount);
+    lprm.def("milestone_count", &LazyPRMSolver::MilestoneCount);
 }

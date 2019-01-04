@@ -1,42 +1,39 @@
-/*
- *  Created on: 13 Mar 2018
- *      Author: Wolfgang Merkt, Vladimir Ivan
- *
- *  This code is based on algorithm developed by Marc Toussaint
- *  M. Toussaint: Robot Trajectory Optimization using Approximate Inference. In Proc. of the Int. Conf. on Machine Learning (ICML 2009), 1049-1056, ACM, 2009.
- *  http://ipvs.informatik.uni-stuttgart.de/mlr/papers/09-toussaint-ICML.pdf
- *  Original code available at http://ipvs.informatik.uni-stuttgart.de/mlr/marc/source-code/index.html
- * 
- * Copyright (c) 2018, University of Edinburgh 
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met: 
- * 
- *  * Redistributions of source code must retain the above copyright notice, 
- *    this list of conditions and the following disclaimer. 
- *  * Redistributions in binary form must reproduce the above copyright 
- *    notice, this list of conditions and the following disclaimer in the 
- *    documentation and/or other materials provided with the distribution. 
- *  * Neither the name of  nor the names of its contributors may be used to 
- *    endorse or promote products derived from this software without specific 
- *    prior written permission. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- * POSSIBILITY OF SUCH DAMAGE. 
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
+// This code is based on algorithm developed by Marc Toussaint
+// M. Toussaint: Robot Trajectory Optimization using Approximate Inference. In Proc. of the Int. Conf. on Machine Learning (ICML 2009), 1049-1056, ACM, 2009.
+// http://ipvs.informatik.uni-stuttgart.de/mlr/papers/09-toussaint-ICML.pdf
+// Original code available at http://ipvs.informatik.uni-stuttgart.de/mlr/marc/source-code/index.html
 
 #include <exotica_aico_solver/bayesian_ik_solver.h>
+#include <exotica_core/server.h>
 
 REGISTER_MOTIONSOLVER_TYPE("BayesianIKSolver", exotica::BayesianIKSolver)
 
@@ -55,7 +52,7 @@ void BayesianIKSolver::Instantiate(BayesianIKSolverInitializer& init)
         sweep_mode_ = LOCAL_GAUSS_NEWTON_DAMPED;
     else
     {
-        throw_named("Unknown sweep mode '" << init.SweepMode << "'");
+        ThrowNamed("Unknown sweep mode '" << init.SweepMode << "'");
     }
     max_backtrack_iterations_ = init.MaxBacktrackIterations;
     minimum_step_tolerance_ = init.MinStep;
@@ -111,13 +108,13 @@ BayesianIKSolver::BayesianIKSolver()
 }
 
 BayesianIKSolver::~BayesianIKSolver() {}
-void BayesianIKSolver::specifyProblem(PlanningProblem_ptr problem)
+void BayesianIKSolver::SpecifyProblem(PlanningProblemPtr problem)
 {
     if (problem->type() != "exotica::UnconstrainedEndPoseProblem")
     {
-        throw_named("This solver can't use problem of type '" << problem->type() << "'!");
+        ThrowNamed("This solver can't use problem of type '" << problem->type() << "'!");
     }
-    MotionSolver::specifyProblem(problem);
+    MotionSolver::SpecifyProblem(problem);
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(problem);
 
     InitMessages();
@@ -125,11 +122,11 @@ void BayesianIKSolver::specifyProblem(PlanningProblem_ptr problem)
 
 void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
 {
-    prob_->resetCostEvolution(getNumberOfMaxIterations() + 1);
-    prob_->terminationCriterion = TerminationCriterion::NotStarted;
+    prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    prob_->termination_criterion = TerminationCriterion::NotStarted;
     planning_time_ = -1;
 
-    Eigen::VectorXd q0 = prob_->applyStartState();
+    Eigen::VectorXd q0 = prob_->ApplyStartState();
 
     Timer timer;
     if (debug_) ROS_WARN_STREAM("BayesianIKSolver: Setting up the solver");
@@ -143,27 +140,27 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
     // Reset sweep and iteration count
     sweep_ = 0;
     iteration_count_ = 0;
-    while (iteration_count_ < getNumberOfMaxIterations())
+    while (iteration_count_ < GetNumberOfMaxIterations())
     {
         // Check whether user interrupted (Ctrl+C)
-        if (Server::isRos() && !ros::ok())
+        if (Server::IsRos() && !ros::ok())
         {
             if (debug_) HIGHLIGHT("Solving cancelled by user");
-            prob_->terminationCriterion = TerminationCriterion::UserDefined;
+            prob_->termination_criterion = TerminationCriterion::UserDefined;
             break;
         }
 
         d = Step();
         if (d < 0)
         {
-            throw_named("Negative step size!");
+            ThrowNamed("Negative step size!");
         }
 
         // 0. Check maximum backtrack iterations
         if (sweep_ >= max_backtrack_iterations_)
         {
             if (debug_) HIGHLIGHT("Maximum backtrack iterations reached, exiting.");
-            prob_->terminationCriterion = TerminationCriterion::BacktrackIterationLimit;
+            prob_->termination_criterion = TerminationCriterion::BacktrackIterationLimit;
             break;
         }
 
@@ -183,7 +180,7 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
                 if (d < minimum_step_tolerance_)
                 {
                     if (debug_) HIGHLIGHT("Satisfied tolerance\titer=" << iteration_count_ << "\td=" << d << "\tminimum_step_tolerance=" << minimum_step_tolerance_);
-                    prob_->terminationCriterion = TerminationCriterion::StepTolerance;
+                    prob_->termination_criterion = TerminationCriterion::StepTolerance;
                     break;
                 }
 
@@ -192,7 +189,7 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
                 if ((cost_prev_ - cost_) <= function_tolerance_ * std::max(1.0, std::abs(cost_)))
                 {
                     if (debug_) HIGHLIGHT("Function tolerance achieved: " << (cost_prev_ - cost_) << " <= " << function_tolerance_ * std::max(1.0, std::abs(cost_)));
-                    prob_->terminationCriterion = TerminationCriterion::FunctionTolerance;
+                    prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
                     break;
                 }
                 cost_prev_ = cost_;
@@ -201,24 +198,24 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
     }
 
     // Check whether maximum iteration count was reached
-    if (iteration_count_ == getNumberOfMaxIterations())
+    if (iteration_count_ == GetNumberOfMaxIterations())
     {
         if (debug_) HIGHLIGHT("Maximum iterations reached");
-        prob_->terminationCriterion = TerminationCriterion::IterationLimit;
+        prob_->termination_criterion = TerminationCriterion::IterationLimit;
     }
 
     solution.resize(1, prob_->N);
     solution.row(0) = q;
-    planning_time_ = timer.getDuration();
+    planning_time_ = timer.GetDuration();
 }
 
 void BayesianIKSolver::InitMessages()
 {
-    if (prob_ == nullptr) throw_named("Problem definition is a NULL pointer!");
+    if (prob_ == nullptr) ThrowNamed("Problem definition is a NULL pointer!");
 
     if (prob_->N < 1)
     {
-        throw_named("State dimension is too small: n=" << prob_->N);
+        ThrowNamed("State dimension is too small: n=" << prob_->N);
     }
 
     s = Eigen::VectorXd::Zero(prob_->N);
@@ -229,8 +226,8 @@ void BayesianIKSolver::InitMessages()
     // {
     //     if (bwd_msg_v_.rows() == prob_->N && bwd_msg_Vinv_.rows() == prob_->N && bwd_msg_Vinv_.cols() == prob_->N)
     //     {
-    //         v[prob_->getT() - 1] = bwd_msg_v_;
-    //         Vinv[prob_->getT() - 1] = bwd_msg_Vinv_;
+    //         v[prob_->GetT() - 1] = bwd_msg_v_;
+    //         Vinv[prob_->GetT() - 1] = bwd_msg_Vinv_;
     //     }
     //     else
     //     {
@@ -251,7 +248,7 @@ void BayesianIKSolver::InitMessages()
         q = b;
         if (prob_->W.rows() != prob_->N)
         {
-            throw_named(prob_->W.rows() << "!=" << prob_->N);
+            ThrowNamed(prob_->W.rows() << "!=" << prob_->N);
         }
     }
     {
@@ -279,8 +276,8 @@ void BayesianIKSolver::InitTrajectory(const Eigen::VectorXd& q_init)
 
     cost_ = EvaluateTrajectory(b, true);  // The problem will be updated via UpdateTaskMessage, i.e. do not update on this roll-out
     cost_prev_ = cost_;
-    prob_->setCostEvolution(0, cost_);
-    if (cost_ < 0) throw_named("Invalid cost! " << cost_);
+    prob_->SetCostEvolution(0, cost_);
+    if (cost_ < 0) ThrowNamed("Invalid cost! " << cost_);
     if (debug_) HIGHLIGHT("Initial cost, updates: " << update_count_ << ", cost: " << cost_);
     RememberOldState();
 }
@@ -326,7 +323,7 @@ void BayesianIKSolver::UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>
     }
 
     prob_->Update(qhat);
-    update_count_++;
+    ++update_count_;
     double c = GetTaskCosts();
     // q_stat_.addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
 }
@@ -339,18 +336,18 @@ double BayesianIKSolver::GetTaskCosts()
     rhat = 0;
     R.setZero();
     r.setZero();
-    for (int i = 0; i < prob_->Cost.NumTasks; i++)
+    for (int i = 0; i < prob_->cost.num_tasks; ++i)
     {
-        prec = prob_->Cost.Rho(i);
+        prec = prob_->cost.rho(i);
         if (prec > 0)
         {
-            const int& start = prob_->Cost.Indexing[i].StartJ;
-            const int& len = prob_->Cost.Indexing[i].LengthJ;
-            Jt = prob_->Cost.J.middleRows(start, len).transpose();
-            C += prec * (prob_->Cost.ydiff.segment(start, len)).squaredNorm();
-            R += prec * Jt * prob_->Cost.J.middleRows(start, len);
-            r += prec * Jt * (-prob_->Cost.ydiff.segment(start, len) + prob_->Cost.J.middleRows(start, len) * qhat);
-            rhat += prec * (-prob_->Cost.ydiff.segment(start, len) + prob_->Cost.J.middleRows(start, len) * qhat).squaredNorm();
+            const int& start = prob_->cost.indexing[i].start_jacobian;
+            const int& len = prob_->cost.indexing[i].length_jacobian;
+            Jt = prob_->cost.jacobian.middleRows(start, len).transpose();
+            C += prec * (prob_->cost.ydiff.segment(start, len)).squaredNorm();
+            R += prec * Jt * prob_->cost.jacobian.middleRows(start, len);
+            r += prec * Jt * (-prob_->cost.ydiff.segment(start, len) + prob_->cost.jacobian.middleRows(start, len) * qhat);
+            rhat += prec * (-prob_->cost.ydiff.segment(start, len) + prob_->cost.jacobian.middleRows(start, len) * qhat).squaredNorm();
         }
     }
     return C;
@@ -374,7 +371,7 @@ void BayesianIKSolver::UpdateTimestep(bool update_fwd, bool update_bwd,
         AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r);
     }
 
-    for (int k = 0; k < max_relocation_iterations && !(Server::isRos() && !ros::ok()); k++)
+    for (int k = 0; k < max_relocation_iterations && !(Server::IsRos() && !ros::ok()); ++k)
     {
         if (!((!k && force_relocation) || (b - qhat).array().abs().maxCoeff() > tolerance)) break;
 
@@ -402,7 +399,7 @@ void BayesianIKSolver::UpdateTimestepGaussNewton(bool update_fwd,
                                                  double max_step_size)
 {
     // TODO: implement UpdateTimestepGaussNewton
-    throw_named("Not implemented yet!");
+    ThrowNamed("Not implemented yet!");
 }
 
 double BayesianIKSolver::EvaluateTrajectory(const Eigen::VectorXd& x, bool skip_update)
@@ -413,12 +410,12 @@ double BayesianIKSolver::EvaluateTrajectory(const Eigen::VectorXd& x, bool skip_
     // Perform update / roll-out
     if (!skip_update)
     {
-        update_count_++;
+        ++update_count_;
         prob_->Update(q);
     }
 
     // Task cost
-    return prob_->getScalarCost();
+    return prob_->GetScalarCost();
 }
 
 double BayesianIKSolver::Step()
@@ -445,7 +442,7 @@ double BayesianIKSolver::Step()
             //     UpdateTimestep(t, false, true, (iteration_count_ ? 5 : 0), minimum_step_tolerance_, false, 1.);
             break;
         default:
-            throw_named("non-existing Sweep mode");
+            ThrowNamed("non-existing Sweep mode");
     }
     b_step_ = std::max((b_old - b).array().abs().maxCoeff(), 0.0);
     damping_reference_ = b;
@@ -458,13 +455,13 @@ double BayesianIKSolver::Step()
     // If damping (similar to line-search) is being used, consider reverting this step
     if (damping) PerhapsUndoStep();
 
-    sweep_++;
+    ++sweep_;
     if (sweep_improved_cost_)
     {
         // HIGHLIGHT("Sweep improved cost, increasing iteration count and resetting sweep count");
-        iteration_count_++;
+        ++iteration_count_;
         sweep_ = 0;
-        prob_->setCostEvolution(iteration_count_, cost_);
+        prob_->SetCostEvolution(iteration_count_, cost_);
     }
 
     return b_step_;
@@ -520,4 +517,4 @@ void BayesianIKSolver::PerhapsUndoStep()
         damping /= 5.;
     }
 }
-} /* namespace exotica */
+}  // namespace exotica

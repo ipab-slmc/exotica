@@ -1,37 +1,35 @@
-/*
- *      Author: Vladimir Ivan
- *
- * Copyright (c) 2018, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
+#include <gtest/gtest.h>
 
 #include <exotica_core/exotica_core.h>
-#include <gtest/gtest.h>
 
 // TODO(#437): Activate once solution for pointer casting/dynamic loading is found.
 // #include <exotica_core_task_maps/JointAccelerationBackwardDifference.h>
@@ -84,11 +82,11 @@ std::string srdf_string_ = "<robot name=\"test_robot\"><group name=\"arm\"><chai
 constexpr bool print_debug_information_ = false;
 constexpr int num_trials_ = 100;
 
-bool test_random(UnconstrainedEndPoseProblem_ptr problem)
+bool test_random(UnconstrainedEndPoseProblemPtr problem)
 {
     Eigen::VectorXd x(3);
     TEST_COUT << "Testing random configurations:";
-    for (int i = 0; i < num_trials_; i++)
+    for (int i = 0; i < num_trials_; ++i)
     {
         x.setRandom();
         problem->Update(x);
@@ -96,21 +94,21 @@ bool test_random(UnconstrainedEndPoseProblem_ptr problem)
         {
             TEST_COUT << "x = " << x.transpose();
             TEST_COUT << "y = " << problem->Phi.data.transpose();
-            TEST_COUT << "J = \n"
-                      << problem->J;
+            TEST_COUT << "jacobian = \n"
+                      << problem->jacobian;
         }
     }
     return true;
 }
 
-bool test_random(UnconstrainedTimeIndexedProblem_ptr problem)
+bool test_random(UnconstrainedTimeIndexedProblemPtr problem)
 {
-    Eigen::MatrixXd x(3, problem->getT());
+    Eigen::MatrixXd x(3, problem->GetT());
     TEST_COUT << "Testing random configurations:";
-    for (int i = 0; i < num_trials_; i++)
+    for (int i = 0; i < num_trials_; ++i)
     {
         x.setRandom();
-        for (int t = 0; t < problem->getT(); t++)
+        for (int t = 0; t < problem->GetT(); ++t)
         {
             problem->Update(x.col(t), t);
         }
@@ -118,21 +116,21 @@ bool test_random(UnconstrainedTimeIndexedProblem_ptr problem)
     return true;
 }
 
-bool test_values(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eigen::MatrixXdRefConst Jref, UnconstrainedEndPoseProblem_ptr problem, const double eps = 1e-5)
+bool test_values(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eigen::MatrixXdRefConst Jref, UnconstrainedEndPoseProblemPtr problem, const double eps = 1e-5)
 {
     TEST_COUT << "Testing set points:";
     int N = Xref.cols();
     int M = Yref.cols();
     int L = Xref.rows();
-    for (int i = 0; i < L; i++)
+    for (int i = 0; i < L; ++i)
     {
         Eigen::VectorXd x = Xref.row(i);
-        TaskSpaceVector y = problem->Cost.y;
+        TaskSpaceVector y = problem->cost.y;
         y.data = Yref.row(i);
-        Eigen::MatrixXd J = Jref.middleRows(i * M, M);
+        Eigen::MatrixXd jacobian = Jref.middleRows(i * M, M);
         problem->Update(x);
         double errY = (y - problem->Phi).norm();
-        double errJ = (J - problem->J).norm();
+        double errJ = (jacobian - problem->jacobian).norm();
         if (errY > eps)
         {
             TEST_COUT << "y:  " << problem->Phi.data.transpose();
@@ -143,9 +141,9 @@ bool test_values(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eig
         {
             TEST_COUT << "x: " << x.transpose();
             TEST_COUT << "J*:\n"
-                      << J;
+                      << jacobian;
             TEST_COUT << "J:\n"
-                      << problem->J;
+                      << problem->jacobian;
             ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
         }
     }
@@ -153,32 +151,32 @@ bool test_values(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eig
     return true;
 }
 
-bool test_jacobian(UnconstrainedEndPoseProblem_ptr problem, const double eps = 1e-5)
+bool test_jacobian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e-5)
 {
     constexpr double h = 1e-5;  // NB: Not, this differs from the h for the time-indexed Jacobian
 
     TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
-    for (int j = 0; j < num_trials_; j++)
+    for (int j = 0; j < num_trials_; ++j)
     {
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0);
         const TaskSpaceVector y0(problem->Phi);
-        const Eigen::MatrixXd J0(problem->J);
-        Eigen::MatrixXd J = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
-        for (int i = 0; i < problem->N; i++)
+        const Eigen::MatrixXd J0(problem->jacobian);
+        Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
+        for (int i = 0; i < problem->N; ++i)
         {
             Eigen::VectorXd x(x0);
             x(i) += h;
             problem->Update(x);
-            J.col(i) = (problem->Phi - y0) / h;
+            jacobian.col(i) = (problem->Phi - y0) / h;
         }
-        double errJ = (J - J0).norm();
+        double errJ = (jacobian - J0).norm();
         if (errJ > eps)
         {
             TEST_COUT << "x: " << x0.transpose();
             TEST_COUT << "J*:\n"
-                      << J;
+                      << jacobian;
             TEST_COUT << "J:\n"
                       << J0;
             ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
@@ -193,28 +191,28 @@ bool test_jacobian_time_indexed(std::shared_ptr<T> problem, TimeIndexedTask& tas
     constexpr double h = 1e-6;
 
     TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
-    for (int tr = 0; tr < num_trials_; tr++)
+    for (int tr = 0; tr < num_trials_; ++tr)
     {
         Eigen::VectorXd x0(problem->N);
         x0.setRandom();
         problem->Update(x0, t);
         TaskSpaceVector y0 = task.Phi[t];
-        Eigen::MatrixXd J0 = task.J[t];
-        Eigen::MatrixXd J = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
-        for (int i = 0; i < problem->N; i++)
+        Eigen::MatrixXd J0 = task.jacobian[t];
+        Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
+        for (int i = 0; i < problem->N; ++i)
         {
             Eigen::VectorXd x = x0;
             x(i) += h;
             problem->Update(x, t);
-            J.col(i) = (task.Phi[t] - y0) / h;
+            jacobian.col(i) = (task.Phi[t] - y0) / h;
         }
-        double errJ = (J - J0).norm();
+        double errJ = (jacobian - J0).norm();
         if (errJ > eps)
         {
             TEST_COUT << "x: " << x0.transpose();
             TEST_COUT << "Phi: " << task.Phi[t].data.transpose();
             TEST_COUT << "J*:\n"
-                      << J;
+                      << jacobian;
             TEST_COUT << "J:\n"
                       << J0;
             ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
@@ -223,7 +221,7 @@ bool test_jacobian_time_indexed(std::shared_ptr<T> problem, TimeIndexedTask& tas
     return true;
 }
 
-UnconstrainedEndPoseProblem_ptr setup_problem(Initializer& map, std::string collision_scene = "", std::vector<Initializer> links = std::vector<Initializer>())
+UnconstrainedEndPoseProblemPtr setup_problem(Initializer& map, std::string collision_scene = "", std::vector<Initializer> links = std::vector<Initializer>())
 {
     Initializer scene;
     if (collision_scene != "")
@@ -239,9 +237,9 @@ UnconstrainedEndPoseProblem_ptr setup_problem(Initializer& map, std::string coll
                                                                    {"Cost", std::vector<Initializer>({cost})},
                                                                    {"W", W},
                                                                });
-    Server::Instance()->getModel("robot_description", urdf_string_, srdf_string_);
+    Server::Instance()->GetModel("robot_description", urdf_string_, srdf_string_);
 
-    UnconstrainedEndPoseProblem_ptr problem_ptr = std::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::createProblem(problem));
+    UnconstrainedEndPoseProblemPtr problem_ptr = std::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::CreateProblem(problem));
 
     // Create and test a problem with multiple cost terms
     problem = Initializer("exotica/UnconstrainedEndPoseProblem", {
@@ -252,12 +250,12 @@ UnconstrainedEndPoseProblem_ptr setup_problem(Initializer& map, std::string coll
                                                                      {"W", W},
                                                                  });
 
-    test_random(std::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::createProblem(problem)));
+    test_random(std::static_pointer_cast<UnconstrainedEndPoseProblem>(Setup::CreateProblem(problem)));
 
     return problem_ptr;
 }
 
-UnconstrainedTimeIndexedProblem_ptr setup_time_indexed_problem(Initializer& map)
+UnconstrainedTimeIndexedProblemPtr setup_time_indexed_problem(Initializer& map)
 {
     Initializer scene("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}});
     Initializer cost("exotica/Task", {{"Task", std::string("MyTask")}});
@@ -269,10 +267,10 @@ UnconstrainedTimeIndexedProblem_ptr setup_time_indexed_problem(Initializer& map)
                                                                     {"Cost", std::vector<Initializer>({cost})},
                                                                     {"W", W},
                                                                     {"T", std::string("10")},
-                                                                    {"Tau", std::string("0.05")}});
-    Server::Instance()->getModel("robot_description", urdf_string_, srdf_string_);
+                                                                    {"tau", std::string("0.05")}});
+    Server::Instance()->GetModel("robot_description", urdf_string_, srdf_string_);
 
-    UnconstrainedTimeIndexedProblem_ptr problem_ptr = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::createProblem(problem));
+    UnconstrainedTimeIndexedProblemPtr problem_ptr = std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::CreateProblem(problem));
 
     // Create and test a problem with multiple cost terms
     problem = Initializer("exotica/UnconstrainedTimeIndexedProblem", {{"Name", std::string("MyProblem")},
@@ -281,9 +279,9 @@ UnconstrainedTimeIndexedProblem_ptr setup_time_indexed_problem(Initializer& map)
                                                                       {"Cost", std::vector<Initializer>({cost, cost, cost})},
                                                                       {"W", W},
                                                                       {"T", std::string("10")},
-                                                                      {"Tau", std::string("0.05")}});
+                                                                      {"tau", std::string("0.05")}});
 
-    test_random(std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::createProblem(problem)));
+    test_random(std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::CreateProblem(problem)));
 
     return problem_ptr;
 }
@@ -295,20 +293,20 @@ TEST(ExoticaTaskMaps, testEffPosition)
         TEST_COUT << "End-effector position test";
         Initializer map("exotica/EffPosition", {{"Name", std::string("MyTask")},
                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->PhiN;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);
-        Eigen::MatrixXd J(L * M, N);
+        Eigen::MatrixXd jacobian(L * M, N);
 
         X << 0.680375, -0.211234, 0.566198, 0.59688, 0.823295, -0.604897, -0.329554, 0.536459, -0.444451, 0.10794, -0.0452059, 0.257742, -0.270431, 0.0268018, 0.904459;
         Y << 0.0645323, 0.0522249, 1.21417, 0.292945, 0.199075, 1.12724, 0.208378, -0.0712708, 1.19893, 0.0786457, 0.00852213, 1.23952, 0.356984, -0.0989639, 1.06844;
-        J << -0.0522249, 0.594015, 0.327994, 0.0645323, 0.480726, 0.26544, 0, -0.0830172, -0.156401, -0.199075, 0.560144, 0.363351, 0.292945, 0.380655, 0.246921, 0, -0.354186, -0.0974994, 0.0712708, 0.708627, 0.423983, 0.208378, -0.24237, -0.145014, 0, -0.220229, -0.0413455, -0.00852213, 0.784922, 0.437315, 0.0786457, 0.085055, 0.0473879, 0, -0.0791061, -0.0949228, 0.0989639, 0.595968, 0.258809, 0.356984, -0.165215, -0.0717477, 0, -0.370448, -0.361068;
-        EXPECT_TRUE(test_values(X, Y, J, problem));
+        jacobian << -0.0522249, 0.594015, 0.327994, 0.0645323, 0.480726, 0.26544, 0, -0.0830172, -0.156401, -0.199075, 0.560144, 0.363351, 0.292945, 0.380655, 0.246921, 0, -0.354186, -0.0974994, 0.0712708, 0.708627, 0.423983, 0.208378, -0.24237, -0.145014, 0, -0.220229, -0.0413455, -0.00852213, 0.784922, 0.437315, 0.0786457, 0.085055, 0.0473879, 0, -0.0791061, -0.0949228, 0.0989639, 0.595968, 0.258809, 0.356984, -0.165215, -0.0717477, 0, -0.370448, -0.361068;
+        EXPECT_TRUE(test_values(X, Y, jacobian, problem));
 
         EXPECT_TRUE(test_jacobian(problem));
     }
@@ -326,14 +324,14 @@ TEST(ExoticaTaskMaps, testEffOrientation)
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
         std::vector<double> eps = {1.1e-5, 1e-5, 1e-5, 1.1e-5, 1e-5, 1e-5};
 
-        for (int i = 0; i < types.size(); i++)
+        for (int i = 0; i < types.size(); ++i)
         {
             std::string type = types[i];
             TEST_COUT << "Rotation type " << type;
             Initializer map("exotica/EffOrientation", {{"Name", std::string("MyTask")},
                                                        {"Type", type},
                                                        {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
 
             EXPECT_TRUE(test_random(problem));
 
@@ -354,7 +352,7 @@ TEST(ExoticaTaskMaps, testEffAxisAlignment)
 
         Initializer map("exotica/EffAxisAlignment", {{"Name", std::string("MyTask")},
                                                      {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"Axis", std::string("1 0 0")}, {"Direction", std::string("0 0 1")}})})}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         EXPECT_TRUE(test_jacobian(problem));
@@ -374,14 +372,14 @@ TEST(ExoticaTaskMaps, testEffFrame)
         std::vector<double> eps = {1.1e-5, 1e-5, 1e-5, 1.1e-5, 1e-5, 1e-5};
         // TODO: Quaternion does not pass the test with precision 1e-5. Investigate why.
 
-        for (int i = 0; i < types.size(); i++)
+        for (int i = 0; i < types.size(); ++i)
         {
             std::string type = types[i];
             TEST_COUT << "Rotation type " << type;
             Initializer map("exotica/EffFrame", {{"Name", std::string("MyTask")},
                                                  {"Type", type},
                                                  {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
 
             EXPECT_TRUE(test_jacobian(problem, eps[i]));
@@ -401,19 +399,19 @@ TEST(ExoticaTaskMaps, testEffVelocity)
 
         Initializer map("exotica/EffVelocity", {{"Name", std::string("MyTask")},
                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
-        UnconstrainedTimeIndexedProblem_ptr problem = setup_time_indexed_problem(map);
+        UnconstrainedTimeIndexedProblemPtr problem = setup_time_indexed_problem(map);
         EXPECT_TRUE(test_random(problem));
 
-        for (int t = 0; t < problem->getT(); t++)
+        for (int t = 0; t < problem->GetT(); ++t)
         {
             Eigen::VectorXd x(problem->N);
             x.setRandom();
             problem->Update(x, t);
         }
 
-        for (int t = 0; t < problem->getT(); t++)
+        for (int t = 0; t < problem->GetT(); ++t)
         {
-            EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->Cost, t, 1e-4));
+            EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->cost, t, 1e-4));
         }
     }
     catch (...)
@@ -429,24 +427,24 @@ TEST(ExoticaTaskMaps, testDistance)
         TEST_COUT << "Distance test";
         Initializer map("exotica/Distance", {{"Name", std::string("MyTask")},
                                              {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->PhiN;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);
-        Eigen::MatrixXd J(L * M, N);
+        Eigen::MatrixXd jacobian(L * M, N);
 
         X << 0.83239, 0.271423, 0.434594, -0.716795, 0.213938, -0.967399, -0.514226, -0.725537, 0.608354, -0.686642, -0.198111, -0.740419, -0.782382, 0.997849, -0.563486;
         Y << 1.19368, 1.14431, 1.19326, 1.14377, 1.1541;
-        J << 0, -0.145441, -0.16562,
+        jacobian << 0, -0.145441, -0.16562,
             0, 0.0918504, 0.234405,
             0, 0.107422, -0.0555943,
             0, 0.169924, 0.235715,
             0, -0.188516, -0.000946239;
-        EXPECT_TRUE(test_values(X, Y, J, problem));
+        EXPECT_TRUE(test_values(X, Y, jacobian, problem));
 
         EXPECT_TRUE(test_jacobian(problem));
     }
@@ -463,19 +461,19 @@ TEST(ExoticaTaskMaps, testJointLimit)
         TEST_COUT << "Joint limit test";
         Initializer map("exotica/JointLimit", {{"Name", std::string("MyTask")},
                                                {"SafePercentage", 0.0}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->PhiN;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);
-        Eigen::MatrixXd J(L * M, N);
+        Eigen::MatrixXd jacobian(L * M, N);
 
         X << 0.0258648, 0.678224, 0.22528, -0.407937, 0.275105, 0.0485744, -0.012834, 0.94555, -0.414966, 0.542715, 0.05349, 0.539828, -0.199543, 0.783059, -0.433371;
         Y << 0, 0.278224, 0, -0.00793676, 0, 0, 0, 0.54555, -0.0149664, 0.142715, 0, 0.139828, 0, 0.383059, -0.0333705;
-        J << 1, 0, 0,
+        jacobian << 1, 0, 0,
             0, 1, 0,
             0, 0, 1,
             1, 0, 0,
@@ -490,7 +488,7 @@ TEST(ExoticaTaskMaps, testJointLimit)
             1, 0, 0,
             0, 1, 0,
             0, 0, 1;
-        EXPECT_TRUE(test_values(X, Y, J, problem));
+        EXPECT_TRUE(test_values(X, Y, jacobian, problem));
     }
     catch (...)
     {
@@ -528,7 +526,7 @@ TEST(ExoticaTaskMaps, testJointVelocityLimit)
 
         // Test different joint velocity initialisations (vector 1, vector N)
         {
-            UnconstrainedTimeIndexedProblem_ptr problem = setup_time_indexed_problem(maps[0]);
+            UnconstrainedTimeIndexedProblemPtr problem = setup_time_indexed_problem(maps[0]);
             Eigen::VectorXd qd_max = Eigen::VectorXd::Ones(problem->N);
             Initializer map("exotica/JointVelocityLimit", {{"Name", std::string("MyTask")},
                                                            {"dt", 0.1},
@@ -539,19 +537,19 @@ TEST(ExoticaTaskMaps, testJointVelocityLimit)
 
         for (auto map : maps)
         {
-            UnconstrainedTimeIndexedProblem_ptr problem = setup_time_indexed_problem(map);
+            UnconstrainedTimeIndexedProblemPtr problem = setup_time_indexed_problem(map);
             EXPECT_TRUE(test_random(problem));
 
-            for (int t = 0; t < problem->getT(); t++)
+            for (int t = 0; t < problem->GetT(); ++t)
             {
                 Eigen::VectorXd x(problem->N);
                 x.setRandom();
                 problem->Update(x, t);
             }
 
-            for (int t = 0; t < problem->getT(); t++)
+            for (int t = 0; t < problem->GetT(); ++t)
             {
-                EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->Cost, t, 1e-4));
+                EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->cost, t, 1e-4));
             }
         }
     }
@@ -571,24 +569,24 @@ TEST(ExoticaTaskMaps, testSphereCollision)
                                                     {"ReferenceFrame", std::string("base")},
                                                     {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}, {"Radius", 0.3}, {"Group", std::string("base")}}),
                                                                                               Initializer("Frame", {{"Link", std::string("endeff")}, {"Radius", 0.3}, {"Group", std::string("eff")}})})}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->PhiN;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);
-        Eigen::MatrixXd J(L * M, N);
+        Eigen::MatrixXd jacobian(L * M, N);
 
         X << -0.590167, 1.2309, 1.67611, -1.72098, 1.79731, 0.103981, -1.65578, -1.23114, 0.652908, 1.56093, -0.604428, -1.74331, -1.91991, -0.169193, -1.74762;
         Y << 1, 5.71023e-44, 1.83279e-110, 6.87352e-16, 7.26371e-45;
-        J << 0, 0.431392, 0.449344,
+        jacobian << 0, 0.431392, 0.449344,
             0, 0.431735, 0.26014,
             0, -0.234475, -0.0135658,
             0, -0.349195, -0.447214,
             0, -0.270171, -0.430172;
-        EXPECT_TRUE(test_values(X, Y, J, problem));
+        EXPECT_TRUE(test_values(X, Y, jacobian, problem));
     }
     catch (...)
     {
@@ -602,20 +600,20 @@ TEST(ExoticaTaskMaps, testIdentity)
     {
         TEST_COUT << "Identity test";
         Initializer map("exotica/Identity", {{"Name", std::string("MyTask")}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         {
             int N = problem->N;
-            int M = problem->PhiN;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
-            Eigen::MatrixXd J(L * M, N);
+            Eigen::MatrixXd jacobian(L * M, N);
 
             X << -0.52344, 0.941268, 0.804416, 0.70184, -0.466669, 0.0795207, -0.249586, 0.520497, 0.0250707, 0.335448, 0.0632129, -0.921439, -0.124725, 0.86367, 0.86162;
             Y << -0.52344, 0.941268, 0.804416, 0.70184, -0.466669, 0.0795207, -0.249586, 0.520497, 0.0250707, 0.335448, 0.0632129, -0.921439, -0.124725, 0.86367, 0.86162;
-            J << 1, 0, 0,
+            jacobian << 1, 0, 0,
                 0, 1, 0,
                 0, 0, 1,
                 1, 0, 0,
@@ -630,7 +628,7 @@ TEST(ExoticaTaskMaps, testIdentity)
                 1, 0, 0,
                 0, 1, 0,
                 0, 0, 1;
-            EXPECT_TRUE(test_values(X, Y, J, problem));
+            EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
 
@@ -642,15 +640,15 @@ TEST(ExoticaTaskMaps, testIdentity)
 
         {
             int N = problem->N;
-            int M = problem->PhiN;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
-            Eigen::MatrixXd J(L * M, N);
+            Eigen::MatrixXd jacobian(L * M, N);
 
             X << 0.441905, -0.431413, 0.477069, 0.279958, -0.291903, 0.375723, -0.668052, -0.119791, 0.76015, 0.658402, -0.339326, -0.542064, 0.786745, -0.29928, 0.37334;
             Y << -0.0580953, -0.931413, -0.0229314, -0.220042, -0.791903, -0.124277, -1.16805, -0.619791, 0.26015, 0.158402, -0.839326, -1.04206, 0.286745, -0.79928, -0.12666;
-            J << 1, 0, 0,
+            jacobian << 1, 0, 0,
                 0, 1, 0,
                 0, 0, 1,
                 1, 0, 0,
@@ -665,7 +663,7 @@ TEST(ExoticaTaskMaps, testIdentity)
                 1, 0, 0,
                 0, 1, 0,
                 0, 0, 1;
-            EXPECT_TRUE(test_values(X, Y, J, problem));
+            EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
 
@@ -677,20 +675,20 @@ TEST(ExoticaTaskMaps, testIdentity)
 
         {
             int N = problem->N;
-            int M = problem->PhiN;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
-            Eigen::MatrixXd J(L * M, N);
+            Eigen::MatrixXd jacobian(L * M, N);
 
             X << 0.912937, 0.17728, 0.314608, 0.717353, -0.12088, 0.84794, -0.203127, 0.629534, 0.368437, 0.821944, -0.0350187, -0.56835, 0.900505, 0.840257, -0.70468;
             Y << 0.912937, 0.717353, -0.203127, 0.821944, 0.900505;
-            J << 1, 0, 0,
+            jacobian << 1, 0, 0,
                 1, 0, 0,
                 1, 0, 0,
                 1, 0, 0,
                 1, 0, 0;
-            EXPECT_TRUE(test_values(X, Y, J, problem));
+            EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
     }
@@ -705,22 +703,22 @@ TEST(ExoticaTaskMaps, testCoM)
     try
     {
         TEST_COUT << "CoM test";
-        Initializer map("exotica/CoM", {{"Name", std::string("MyTask")},
-                                        {"EnableZ", true}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+        Initializer map("exotica/CenterOfMass", {{"Name", std::string("MyTask")},
+                                                 {"EnableZ", true}});
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         {
             int N = problem->N;
-            int M = problem->PhiN;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
-            Eigen::MatrixXd J(L * M, N);
+            Eigen::MatrixXd jacobian(L * M, N);
 
             X << -0.281809, 0.10497, 0.15886, -0.0948483, 0.374775, -0.80072, 0.061616, 0.514588, -0.39141, 0.984457, 0.153942, 0.755228, 0.495619, 0.25782, -0.929158;
             Y << 0.081112, -0.0234831, 0.924368, 0.0080578, -0.000766568, 0.895465, 0.157569, 0.00972105, 0.897157, 0.117213, 0.176455, 0.846633, -0.0587457, -0.0317596, 0.877501;
-            J << 0.0234831, 0.455657, 0.200919,
+            jacobian << 0.0234831, 0.455657, 0.200919,
                 0.081112, -0.131919, -0.0581688,
                 0, -0.0844429, -0.0565023,
                 0.000766568, 0.443462, 0.19642,
@@ -735,29 +733,29 @@ TEST(ExoticaTaskMaps, testCoM)
                 0.0317596, 0.376061, 0.149235,
                 -0.0587457, 0.203309, 0.0806805,
                 0, 0.0667812, 0.134774;
-            EXPECT_TRUE(test_values(X, Y, J, problem));
+            EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
 
         TEST_COUT << "CoM test with a subset of links";
-        map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
-                                          {"EnableZ", true},
-                                          {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("link2")}}),
-                                                                                    Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+        map = Initializer("exotica/CenterOfMass", {{"Name", std::string("MyTask")},
+                                                   {"EnableZ", true},
+                                                   {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("link2")}}),
+                                                                                             Initializer("Frame", {{"Link", std::string("endeff")}})})}});
         problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         {
             int N = problem->N;
-            int M = problem->PhiN;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
-            Eigen::MatrixXd J(L * M, N);
+            Eigen::MatrixXd jacobian(L * M, N);
 
             X << 0.299414, -0.503912, 0.258959, -0.541726, 0.40124, -0.366266, -0.342446, -0.537144, -0.851678, 0.266144, -0.552687, 0.302264, 0.0213719, 0.942931, -0.439916;
             Y << -0.167532, -0.0517162, 0.913823, 0.083533, -0.0502684, 0.931962, -0.3632, 0.129477, 0.693081, -0.17971, -0.048991, 0.907923, 0.314586, 0.00672432, 0.823106;
-            J << 0.0517162, 0.443188, 0.254921,
+            jacobian << 0.0517162, 0.443188, 0.254921,
                 -0.167532, 0.13681, 0.0786927,
                 0, 0.175333, 0.0666905,
                 0.0502684, 0.412954, 0.235481,
@@ -772,27 +770,27 @@ TEST(ExoticaTaskMaps, testCoM)
                 -0.00672432, 0.373021, 0.240882,
                 0.314586, 0.00797337, 0.00514888,
                 0, -0.314658, -0.132569;
-            EXPECT_TRUE(test_values(X, Y, J, problem));
+            EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
 
         TEST_COUT << "CoM test with projection on XY plane";
-        map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
-                                          {"EnableZ", false}});
+        map = Initializer("exotica/CenterOfMass", {{"Name", std::string("MyTask")},
+                                                   {"EnableZ", false}});
         problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         {
             int N = problem->N;
-            int M = problem->PhiN;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
-            Eigen::MatrixXd J(L * M, N);
+            Eigen::MatrixXd jacobian(L * M, N);
 
             X << 0.350952, -0.0340994, -0.0361284, -0.390089, 0.424175, -0.634888, 0.243646, -0.918271, -0.172033, 0.391968, 0.347873, 0.27528, -0.305768, -0.630755, 0.218212;
             Y << -0.0228141, -0.0083524, 0.0595937, -0.0245025, -0.392081, -0.0974653, 0.200868, 0.0830305, -0.232814, 0.0734919;
-            J << 0.0083524, 0.453225, 0.202958,
+            jacobian << 0.0083524, 0.453225, 0.202958,
                 -0.0228141, 0.165929, 0.0743046,
                 0.0245025, 0.420734, 0.195957,
                 0.0595937, -0.172988, -0.0805696,
@@ -802,29 +800,29 @@ TEST(ExoticaTaskMaps, testCoM)
                 0.200868, 0.162978, 0.0672114,
                 -0.0734919, 0.394649, 0.189283,
                 -0.232814, -0.124578, -0.0597504;
-            EXPECT_TRUE(test_values(X, Y, J, problem));
+            EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
 
         TEST_COUT << "CoM test with attached object";
-        map = Initializer("exotica/CoM", {{"Name", std::string("MyTask")},
-                                          {"EnableZ", true}});
+        map = Initializer("exotica/CenterOfMass", {{"Name", std::string("MyTask")},
+                                                   {"EnableZ", true}});
         problem = setup_problem(map);
 
-        problem->getScene()->addObject("Payload", KDL::Frame(), "", shapes::ShapeConstPtr(nullptr), KDL::RigidBodyInertia(0.5));
-        problem->getScene()->attachObjectLocal("Payload", "endeff", KDL::Frame());
+        problem->GetScene()->AddObject("Payload", KDL::Frame(), "", shapes::ShapeConstPtr(nullptr), KDL::RigidBodyInertia(0.5));
+        problem->GetScene()->AttachObjectLocal("Payload", "endeff", KDL::Frame());
         EXPECT_TRUE(test_random(problem));
         {
             int N = problem->N;
-            int M = problem->PhiN;
+            int M = problem->length_Phi;
             int L = 5;
             Eigen::MatrixXd X(L, N);
             Eigen::MatrixXd Y(L, M);
-            Eigen::MatrixXd J(L * M, N);
+            Eigen::MatrixXd jacobian(L * M, N);
 
             X << 0.792099, -0.891848, -0.781543, 0.877611, 0.29783, 0.452939, 0.988809, 0.86931, 0.270667, -0.201327, -0.925895, 0.0373103, 0.0433417, 0.560965, -0.682102;
             Y << -0.391939, -0.397228, 0.608195, 0.197788, 0.238097, 0.977105, 0.289066, 0.439301, 0.781316, -0.4839, 0.0987601, 0.836551, 0.122905, 0.00533025, 1.02823;
-            J << 0.397228, 0.111109, -0.0232142,
+            jacobian << 0.397228, 0.111109, -0.0232142,
                 -0.391939, 0.112608, -0.0235274,
                 0, 0.558038, 0.32103,
                 -0.238097, 0.336815, 0.150781,
@@ -839,7 +837,7 @@ TEST(ExoticaTaskMaps, testCoM)
                 -0.00533025, 0.577691, 0.320061,
                 0.122905, 0.0250538, 0.0138807,
                 0, -0.123021, 0.0389986;
-            EXPECT_TRUE(test_values(X, Y, J, problem));
+            EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
     }
@@ -859,16 +857,16 @@ TEST(ExoticaTaskMaps, testIMesh)
                                           {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}}),
                                                                                     Initializer("Frame", {{"Link", std::string("link2")}}),
                                                                                     Initializer("Frame", {{"Link", std::string("endeff")}})})}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
         int N = problem->N;
-        int M = problem->PhiN;
+        int M = problem->length_Phi;
         int L = 5;
         Eigen::MatrixXd X(L, N);
         Eigen::MatrixXd Y(L, M);
-        Eigen::MatrixXd J(L * M, N);
-        J.setZero();
+        Eigen::MatrixXd jacobian(L * M, N);
+        jacobian.setZero();
         Y.setZero();
         X.setZero();
 
@@ -878,7 +876,7 @@ TEST(ExoticaTaskMaps, testIMesh)
             0.0846586, -0.098373, -0.626482, 0.111269, -0.129294, 0.0559699, -0.308935, 0.358981, 0.824647,
             -0.0715067, -0.0531681, -0.641823, -0.0962226, -0.0715454, 0.0264905, 0.261816, 0.194671, 0.879061,
             0.014318, -0.0178999, -0.646355, 0.0198797, -0.024853, 0.00185134, -0.0509673, 0.0637179, 0.869616;
-        J << 0.00329772, -0.194435, -0.112919,
+        jacobian << 0.00329772, -0.194435, -0.112919,
             -0.0115151, -0.0556828, -0.0323379,
             0, 0.00993552, -0.0177924,
             0.00454774, -0.267977, -0.155057,
@@ -923,7 +921,7 @@ TEST(ExoticaTaskMaps, testIMesh)
             -0.0637179, 0.436598, 0.267206,
             -0.0509673, -0.545823, -0.334054,
             0, 0.0786625, -0.152426;
-        EXPECT_TRUE(test_values(X, Y, J, problem));
+        EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         EXPECT_TRUE(test_jacobian(problem));
     }
     catch (...)
@@ -936,16 +934,16 @@ TEST(ExoticaTaskMaps, testPoint2Line)
 {
     try
     {
-        TEST_COUT << "Point2Line Test";
-        Initializer map("exotica/Point2Line", {{"Name", std::string("MyTask")},
-                                               // {"EndPoint", std::string("0.5 0.5 1")},
-                                               {"EndPoint", std::string("0.5 0.5 0")},
-                                               {"EndEffector", std::vector<Initializer>(
-                                                                   {Initializer("Frame", {{"Link", std::string("endeff")},
-                                                                                          {"LinkOffset", std::string("0.5 0 0.5")},
-                                                                                          {"Base", std::string("base")},
-                                                                                          {"BaseOffset", std::string("0.5 0.5 0")}})})}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+        TEST_COUT << "PointToLine Test";
+        Initializer map("exotica/PointToLine", {{"Name", std::string("MyTask")},
+                                                // {"EndPoint", std::string("0.5 0.5 1")},
+                                                {"EndPoint", std::string("0.5 0.5 0")},
+                                                {"EndEffector", std::vector<Initializer>(
+                                                                    {Initializer("Frame", {{"Link", std::string("endeff")},
+                                                                                           {"LinkOffset", std::string("0.5 0 0.5")},
+                                                                                           {"Base", std::string("base")},
+                                                                                           {"BaseOffset", std::string("0.5 0.5 0")}})})}});
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
         // TODO: Add test_values
 
@@ -962,21 +960,21 @@ TEST(ExoticaTaskMaps, testPoint2Plane)
     try
     {
         {
-            TEST_COUT << "Point2Plane Test - Align with world";
-            Initializer map("exotica/Point2Plane", {{"Name", std::string("MyTask")},
-                                                    {"EndPoint", std::string("1 2 3")},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+            TEST_COUT << "PointToPlane Test - Align with world";
+            Initializer map("exotica/PointToPlane", {{"Name", std::string("MyTask")},
+                                                     {"EndPoint", std::string("1 2 3")},
+                                                     {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
         }
 
         {
-            TEST_COUT << "Point2Plane Test - Align with world with rotation";
-            Initializer map("exotica/Point2Plane", {{"Name", std::string("MyTask")},
-                                                    {"EndPoint", std::string("1 2 3")},
-                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"BaseOffset", std::string("0.1 0.1 0.1 0.7071 0 0.7071 0")}})})}});
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+            TEST_COUT << "PointToPlane Test - Align with world with rotation";
+            Initializer map("exotica/PointToPlane", {{"Name", std::string("MyTask")},
+                                                     {"EndPoint", std::string("1 2 3")},
+                                                     {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}, {"BaseOffset", std::string("0.1 0.1 0.1 0.7071 0 0.7071 0")}})})}});
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
         }
@@ -1001,7 +999,7 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
                                                                                                  Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 -3 0")}}),
                                                                                                  Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 3 0")}})})},
                                                    });
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
         }
@@ -1016,7 +1014,7 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
                                                                                                  Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")}}),
                                                                                                  Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")}})})},
                                                    });
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
         }
@@ -1031,7 +1029,7 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
                                                                                                  Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 -3 0")}}),
                                                                                                  Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("3 3 0")}})})},
                                                    });
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
         }
@@ -1046,7 +1044,7 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
                                                                                                  Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 -1 0")}}),
                                                                                                  Initializer("Frame", {{"Link", std::string("")}, {"LinkOffset", std::string("-10 1 0")}})})},
                                                    });
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
         }
@@ -1067,39 +1065,39 @@ TEST(ExoticaTaskMaps, testJointSmoothingBackwardDifference)
             {
                 TEST_COUT << smoothing_task + " Test - test default initialisation";
                 Initializer map("exotica/" + smoothing_task, {{"Name", std::string("MyTask")}, {"dt", 0.01}});
-                UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
+                UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
                 EXPECT_TRUE(test_random(problem));
                 EXPECT_TRUE(test_jacobian(problem));
             }
 
             // TODO(#437): Activate once solution for pointer casting/dynamic loading is found.
-            /*{
-                TEST_COUT << smoothing_task + " Test - test set_previous_joint_state initialisation";
-                Initializer map("exotica/" + smoothing_task, {{"Name", std::string("MyTask")}, {"dt", 0.01}});
-                UnconstrainedEndPoseProblem_ptr problem = setup_problem(map);
-                Eigen::VectorXd q_rand(problem->N);
-                q_rand.setRandom();
-                if (smoothing_task == "JointVelocityBackwardDifference")
-                {
-                    std::shared_ptr<TaskMap> my_task = problem->getTaskMaps()["MyTask"];
-                    std::shared_ptr<JointVelocityBackwardDifference> joint_velocity_smoothing_task = std::dynamic_pointer_cast<JointVelocityBackwardDifference>(my_task);
-                    joint_velocity_smoothing_task->set_previous_joint_state(q_rand);
-                }
-                else if (smoothing_task == "JointAccelerationBackwardDifference")
-                {
-                    std::shared_ptr<TaskMap> my_task = problem->getTaskMaps()["MyTask"];
-                    std::shared_ptr<JointAccelerationBackwardDifference> joint_acceleration_smoothing_task = std::dynamic_pointer_cast<JointAccelerationBackwardDifference>(my_task);
-                    joint_acceleration_smoothing_task->set_previous_joint_state(q_rand);
-                }
-                else if (smoothing_task == "JointJerkBackwardDifference")
-                {
-                    std::shared_ptr<TaskMap> my_task = problem->getTaskMaps()["MyTask"];
-                    std::shared_ptr<JointJerkBackwardDifference> joint_jerk_smoothing_task = std::dynamic_pointer_cast<JointJerkBackwardDifference>(my_task);
-                    joint_jerk_smoothing_task->set_previous_joint_state(q_rand);
-                }
-                EXPECT_TRUE(test_random(problem));
-                EXPECT_TRUE(test_jacobian(problem));
-            }*/
+            // {
+            //     TEST_COUT << smoothing_task + " Test - test SetPreviousJointState initialisation";
+            //     Initializer map("exotica/" + smoothing_task, {{"Name", std::string("MyTask")}, {"dt", 0.01}});
+            //     UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+            //     Eigen::VectorXd q_rand(problem->N);
+            //     q_rand.setRandom();
+            //     if (smoothing_task == "JointVelocityBackwardDifference")
+            //     {
+            //         std::shared_ptr<TaskMap> my_task = problem->GetTaskMaps()["MyTask"];
+            //         std::shared_ptr<JointVelocityBackwardDifference> joint_velocity_smoothing_task = std::dynamic_pointer_cast<JointVelocityBackwardDifference>(my_task);
+            //         joint_velocity_smoothing_task->SetPreviousJointState(q_rand);
+            //     }
+            //     else if (smoothing_task == "JointAccelerationBackwardDifference")
+            //     {
+            //         std::shared_ptr<TaskMap> my_task = problem->GetTaskMaps()["MyTask"];
+            //         std::shared_ptr<JointAccelerationBackwardDifference> joint_acceleration_smoothing_task = std::dynamic_pointer_cast<JointAccelerationBackwardDifference>(my_task);
+            //         joint_acceleration_smoothing_task->SetPreviousJointState(q_rand);
+            //     }
+            //     else if (smoothing_task == "JointJerkBackwardDifference")
+            //     {
+            //         std::shared_ptr<TaskMap> my_task = problem->GetTaskMaps()["MyTask"];
+            //         std::shared_ptr<JointJerkBackwardDifference> joint_jerk_smoothing_task = std::dynamic_pointer_cast<JointJerkBackwardDifference>(my_task);
+            //         joint_jerk_smoothing_task->SetPreviousJointState(q_rand);
+            //     }
+            //     EXPECT_TRUE(test_random(problem));
+            //     EXPECT_TRUE(test_jacobian(problem));
+            // }
         }
     }
     catch (...)
@@ -1127,7 +1125,7 @@ TEST(ExoticaTaskMaps, testLookAt)
                                                {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("EffPoint")}, {"Base", std::string("endeff")}}),
                                                                                          Initializer("Frame", {{"Link", std::string("LookAtTarget")}, {"Base", std::string("endeff")}}),
                                                                                          Initializer("Frame", {{"Link", std::string("LookAtTarget")}, {"Base", std::string("")}})})}});
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map, "", custom_links);
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "", custom_links);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem, 2e-5));
         }

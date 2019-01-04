@@ -1,4 +1,0 @@
-Required std::string Link;
-Optional Eigen::VectorXd LinkOffset = Eigen::IdentityTransform();
-Optional std::string Base = "";
-Optional Eigen::VectorXd BaseOffset = Eigen::IdentityTransform();

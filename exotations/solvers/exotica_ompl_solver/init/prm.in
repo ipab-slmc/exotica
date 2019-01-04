@@ -1,0 +1,5 @@
+class PRMSolver
+
+extend <exotica_ompl_solver/ompl_solver>
+
+Optional bool MultiQuery = false;

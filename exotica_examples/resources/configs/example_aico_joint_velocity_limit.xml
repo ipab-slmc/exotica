@@ -34,7 +34,7 @@
     </Cost>
 
     <T>50</T>
-    <Tau>0.1</Tau>
+    <tau>0.1</tau>
     <Wrate>10</Wrate>
   </UnconstrainedTimeIndexedProblem>
 </PlannerDemoConfig>

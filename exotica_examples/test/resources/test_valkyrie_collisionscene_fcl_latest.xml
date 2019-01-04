@@ -20,10 +20,10 @@
       </Scene>
     </PlanningScene>
     <Maps>
-      <CoM Name="CoM">
+      <CenterOfMass Name="CoM">
         <Debug>0</Debug>
         <EnableZ>1</EnableZ>
-      </CoM>
+      </CenterOfMass>
     </Maps>
     <Cost>
       <Task Task="CoM"/>

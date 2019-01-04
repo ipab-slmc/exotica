@@ -1,0 +1,8 @@
+class IKSolver
+
+extend <exotica_core/motion_solver>
+Optional double Tolerance = 1e-5;
+Optional double Convergence = 0.0;
+Optional double MaxStep = 0.5;
+Optional double C = 0.0;
+Optional Eigen::VectorXd Alpha = Eigen::VectorXd::Ones(1);

@@ -16,12 +16,12 @@
     </PlanningScene>
 
     <Maps>
-      <Point2Line Name="p2l" EndPoint="0.75 0 0.5" Infinite="1" Visualise="1">
+      <PointToLine Name="p2l" EndPoint="0.75 0 0.5" Infinite="1" Visualise="1">
         <EndEffector>
           <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071 0  0.7071 0" Base="world_frame"/>
           <Frame Link="lwr_arm_6_link" LinkOffset="0 0 1"/>
         </EndEffector>
-      </Point2Line>
+      </PointToLine>
     </Maps>
 
     <Cost>

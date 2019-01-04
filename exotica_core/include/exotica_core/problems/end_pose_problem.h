@@ -1,47 +1,43 @@
-/*
- *      Author: Vladimir Ivan
- *
- * Copyright (c) 2017, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
-#ifndef END_POSE_PROBLEM_H_
-#define END_POSE_PROBLEM_H_
+#ifndef EXOTICA_CORE_END_POSE_PROBLEM_H_
+#define EXOTICA_CORE_END_POSE_PROBLEM_H_
+
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
-#include <exotica_core/EndPoseProblemInitializer.h>
+#include <exotica_core/end_pose_problem_initializer.h>
 
 namespace exotica
 {
-/**
-    * Arbitrarily constrained end-pose problem implementation
-    */
+/// \brief Arbitrarily constrained end-pose problem implementation
 class EndPoseProblem : public PlanningProblem, public Instantiable<EndPoseProblemInitializer>
 {
 public:
@@ -50,48 +46,48 @@ public:
 
     virtual void Instantiate(EndPoseProblemInitializer& init);
     void Update(Eigen::VectorXdRefConst x);
-    bool isValid();
+    bool IsValid() override;
 
-    void setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setRho(const std::string& task_name, const double& rho);
-    Eigen::VectorXd getGoal(const std::string& task_name);
-    double getRho(const std::string& task_name);
-    void setGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setRhoEQ(const std::string& task_name, const double& rho);
-    Eigen::VectorXd getGoalEQ(const std::string& task_name);
-    double getRhoEQ(const std::string& task_name);
-    void setGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
-    void setRhoNEQ(const std::string& task_name, const double& rho);
-    Eigen::VectorXd getGoalNEQ(const std::string& task_name);
-    double getRhoNEQ(const std::string& task_name);
-    virtual void preupdate();
-    Eigen::MatrixXd getBounds() const;
+    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    void SetRho(const std::string& task_name, const double& rho);
+    Eigen::VectorXd GetGoal(const std::string& task_name);
+    double GetRho(const std::string& task_name);
+    void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    void SetRhoEQ(const std::string& task_name, const double& rho);
+    Eigen::VectorXd GetGoalEQ(const std::string& task_name);
+    double GetRhoEQ(const std::string& task_name);
+    void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    void SetRhoNEQ(const std::string& task_name, const double& rho);
+    Eigen::VectorXd GetGoalNEQ(const std::string& task_name);
+    double GetRhoNEQ(const std::string& task_name);
+    void PreUpdate() override;
+    Eigen::MatrixXd GetBounds() const;
 
-    double getScalarCost();
-    Eigen::VectorXd getScalarJacobian();
-    double getScalarTaskCost(const std::string& task_name);
-    Eigen::VectorXd getEquality();
-    Eigen::MatrixXd getEqualityJacobian();
-    Eigen::VectorXd getInequality();
-    Eigen::MatrixXd getInequalityJacobian();
+    double GetScalarCost();
+    Eigen::VectorXd GetScalarJacobian();
+    double GetScalarTaskCost(const std::string& task_name);
+    Eigen::VectorXd GetEquality();
+    Eigen::MatrixXd GetEqualityJacobian();
+    Eigen::VectorXd GetInequality();
+    Eigen::MatrixXd GetInequalityJacobian();
 
-    EndPoseTask Cost;
-    EndPoseTask Inequality;
-    EndPoseTask Equality;
+    EndPoseTask cost;
+    EndPoseTask inequality;
+    EndPoseTask equality;
 
     Eigen::MatrixXd W;
     TaskSpaceVector Phi;
-    Eigen::MatrixXd J;
-    Hessian H;
+    Eigen::MatrixXd jacobian;
+    Hessian hessian;
 
-    int PhiN;
-    int JN;
-    int NumTasks;
-    bool useBounds;
+    int length_Phi;
+    int length_jacobian;
+    int num_tasks;
+    bool use_bounds;
 
-    EndPoseProblemInitializer init_;
+    EndPoseProblemInitializer parameters;
 };
-typedef std::shared_ptr<exotica::EndPoseProblem> EndPoseProblem_ptr;
+typedef std::shared_ptr<exotica::EndPoseProblem> EndPoseProblemPtr;
 }
 
-#endif
+#endif  // EXOTICA_CORE_END_POSE_PROBLEM_H_

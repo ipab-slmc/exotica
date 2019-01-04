@@ -1,2 +1,0 @@
-Required std::string Name;
-Optional bool Debug = false;

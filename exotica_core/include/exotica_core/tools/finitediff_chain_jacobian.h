@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Vladimir Ivan <v.ivan@ed.ac.uk>
+// Copyright (C) 2018
 //
 // This Source Code Form is subject to the terms of the Mozilla
 // Public License v. 2.0. If a copy of the MPL was not distributed
@@ -7,8 +7,8 @@
 // Modified from unsupported/Eigen/src/AutoDiff/AutoDiffJacobian.h
 // and unsupported/Eigen/src/NumericalDiff/NumericalDiff.h
 
-#ifndef EIGEN_FINITEDIFF_CHAIN_JACOBIAN_H
-#define EIGEN_FINITEDIFF_CHAIN_JACOBIAN_H
+#ifndef EIGEN_FINITEDIFF_CHAIN_JACOBIAN_H_
+#define EIGEN_FINITEDIFF_CHAIN_JACOBIAN_H_
 
 #include <functional>
 
@@ -137,11 +137,11 @@ public:
 #if EIGEN_HAS_VARIADIC_TEMPLATES
         update_(jx, x);
         Functor::operator()(x, v, Params...);
-        nfev++;
+        ++nfev;
 #else
         update_(jx, x);
         Functor::operator()(x, v);
-        nfev++;
+        ++nfev;
 #endif
 
         switch (mode)
@@ -172,11 +172,11 @@ public:
 #if EIGEN_HAS_VARIADIC_TEMPLATES
                     update_(jx, x);
                     Functor::operator()(x, val2, Params...);
-                    nfev++;
+                    ++nfev;
 #else
                     update_(jx, x);
                     Functor::operator()(x, val2);
-                    nfev++;
+                    ++nfev;
 #endif
                     jx[j] = _jx[j];
                     jac.col(j) = (val2 - val1) / h;
@@ -186,21 +186,21 @@ public:
 #if EIGEN_HAS_VARIADIC_TEMPLATES
                     update_(jx, x);
                     Functor::operator()(x, val2, Params...);
-                    nfev++;
+                    ++nfev;
 #else
                     update_(jx, x);
                     Functor::operator()(x, val2);
-                    nfev++;
+                    ++nfev;
 #endif
                     jx[j] -= 2 * h;
 #if EIGEN_HAS_VARIADIC_TEMPLATES
                     update_(jx, x);
                     Functor::operator()(x, val1, Params...);
-                    nfev++;
+                    ++nfev;
 #else
                     update_(jx, x);
                     Functor::operator()(x, val1);
-                    nfev++;
+                    ++nfev;
 #endif
                     jx[j] = _jx[j];
                     jac.col(j) = (val2 - val1) / (2 * h);
@@ -212,7 +212,6 @@ public:
         return nfev;
     }
 };
+}
 
-}  // namespace Eigen
-
-#endif
+#endif  // EIGEN_FINITEDIFF_CHAIN_JACOBIAN_H_

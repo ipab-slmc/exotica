@@ -1,34 +1,31 @@
-/*
- *      Author: Yiming Yang
- *
- * Copyright (c) 2017, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #include <exotica_core/problems/unconstrained_end_pose_problem.h>
 #include <exotica_core/setup.h>
@@ -39,23 +36,23 @@ namespace exotica
 {
 UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
 {
-    Flags = KIN_FK | KIN_J;
+    flags_ = KIN_FK | KIN_J;
 }
 
 UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem() = default;
 
 void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
 {
-    NumTasks = Tasks.size();
-    PhiN = 0;
-    JN = 0;
-    for (int i = 0; i < NumTasks; i++)
+    num_tasks = tasks_.size();
+    length_Phi = 0;
+    length_jacobian = 0;
+    for (int i = 0; i < num_tasks; ++i)
     {
-        appendVector(Phi.map, Tasks[i]->getLieGroupIndices());
-        PhiN += Tasks[i]->Length;
-        JN += Tasks[i]->LengthJ;
+        AppendVector(Phi.map, tasks_[i]->GetLieGroupIndices());
+        length_Phi += tasks_[i]->length;
+        length_jacobian += tasks_[i]->length_jacobian;
     }
-    Phi.setZero(PhiN);
+    Phi.SetZero(length_Phi);
     W = Eigen::MatrixXd::Identity(N, N);
     if (init.W.rows() > 0)
     {
@@ -65,164 +62,164 @@ void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitial
         }
         else
         {
-            throw_named("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init.W.rows());
         }
     }
-    if (Flags & KIN_J) J = Eigen::MatrixXd(JN, N);
-    if (Flags & KIN_J_DOT) H.setConstant(JN, Eigen::MatrixXd::Zero(N, N));
+    if (flags_ & KIN_J) jacobian = Eigen::MatrixXd(length_jacobian, N);
+    if (flags_ & KIN_J_DOT) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
 
-    if (init.NominalState.rows() > 0 && init.NominalState.rows() != N) throw_named("Invalid size of NominalState (" << init.NominalState.rows() << "), expected: " << N);
-    if (init.NominalState.rows() == N) qNominal = init.NominalState;
+    if (init.NominalState.rows() > 0 && init.NominalState.rows() != N) ThrowNamed("Invalid size of NominalState (" << init.NominalState.rows() << "), expected: " << N);
+    if (init.NominalState.rows() == N) q_nominal = init.NominalState;
     TaskSpaceVector dummy;
-    Cost.initialize(init.Cost, shared_from_this(), dummy);
-    applyStartState(false);
-    preupdate();
+    cost.Initialize(init.Cost, shared_from_this(), dummy);
+    ApplyStartState(false);
+    PreUpdate();
 }
 
-void UnconstrainedEndPoseProblem::preupdate()
+void UnconstrainedEndPoseProblem::PreUpdate()
 {
-    PlanningProblem::preupdate();
-    for (int i = 0; i < Tasks.size(); i++) Tasks[i]->isUsed = false;
-    Cost.updateS();
+    PlanningProblem::PreUpdate();
+    for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
+    cost.UpdateS();
 }
 
-double UnconstrainedEndPoseProblem::getScalarCost()
+double UnconstrainedEndPoseProblem::GetScalarCost()
 {
-    return Cost.ydiff.transpose() * Cost.S * Cost.ydiff;
+    return cost.ydiff.transpose() * cost.S * cost.ydiff;
 }
 
-Eigen::VectorXd UnconstrainedEndPoseProblem::getScalarJacobian()
+Eigen::VectorXd UnconstrainedEndPoseProblem::GetScalarJacobian()
 {
-    return Cost.J.transpose() * Cost.S * Cost.ydiff * 2.0;
+    return cost.jacobian.transpose() * cost.S * cost.ydiff * 2.0;
 }
 
-double UnconstrainedEndPoseProblem::getScalarTaskCost(const std::string& task_name)
+double UnconstrainedEndPoseProblem::GetScalarTaskCost(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length).transpose() * Cost.Rho(Cost.Indexing[i].Id) * Cost.ydiff.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+            return cost.ydiff.segment(cost.indexing[i].start, cost.indexing[i].length).transpose() * cost.rho(cost.indexing[i].id) * cost.ydiff.segment(cost.indexing[i].start, cost.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get scalar task cost. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get scalar task cost. Task map '" << task_name << "' does not exist.");
 }
 
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
 {
-    scene_->Update(x, tStart);
-    Phi.setZero(PhiN);
-    if (Flags & KIN_J) J.setZero();
-    if (Flags & KIN_J_DOT)
-        for (int i = 0; i < JN; i++) H(i).setZero();
-    for (int i = 0; i < Tasks.size(); i++)
+    scene_->Update(x, t_start);
+    Phi.SetZero(length_Phi);
+    if (flags_ & KIN_J) jacobian.setZero();
+    if (flags_ & KIN_J_DOT)
+        for (int i = 0; i < length_jacobian; ++i) hessian(i).setZero();
+    for (int i = 0; i < tasks_.size(); ++i)
     {
-        if (Tasks[i]->isUsed)
+        if (tasks_[i]->is_used)
         {
-            if (Flags & KIN_J_DOT)
+            if (flags_ & KIN_J_DOT)
             {
-                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ), H.segment(Tasks[i]->Start, Tasks[i]->Length));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start, tasks_[i]->length));
             }
-            else if (Flags & KIN_J)
+            else if (flags_ & KIN_J)
             {
-                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length), J.middleRows(Tasks[i]->StartJ, Tasks[i]->LengthJ));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                Tasks[i]->update(x, Phi.data.segment(Tasks[i]->Start, Tasks[i]->Length));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
-    if (Flags & KIN_J_DOT)
+    if (flags_ & KIN_J_DOT)
     {
-        Cost.update(Phi, J, H);
+        cost.Update(Phi, jacobian, hessian);
     }
-    else if (Flags & KIN_J)
+    else if (flags_ & KIN_J)
     {
-        Cost.update(Phi, J);
+        cost.Update(Phi, jacobian);
     }
     else
     {
-        Cost.update(Phi);
+        cost.Update(Phi);
     }
-    numberOfProblemUpdates++;
+    ++number_of_problem_updates_;
 }
 
-void UnconstrainedEndPoseProblem::setGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
+void UnconstrainedEndPoseProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            if (goal.rows() != Cost.Indexing[i].Length) throw_pretty("Expected length of " << Cost.Indexing[i].Length << " and got " << goal.rows());
-            Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length) = goal;
+            if (goal.rows() != cost.indexing[i].length) ThrowPretty("Expected length of " << cost.indexing[i].length << " and got " << goal.rows());
+            cost.y.data.segment(cost.indexing[i].start, cost.indexing[i].length) = goal;
             return;
         }
     }
-    throw_pretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
 }
 
-void UnconstrainedEndPoseProblem::setRho(const std::string& task_name, const double& rho)
+void UnconstrainedEndPoseProblem::SetRho(const std::string& task_name, const double& rho)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            Cost.Rho(Cost.Indexing[i].Id) = rho;
-            preupdate();
+            cost.rho(cost.indexing[i].id) = rho;
+            PreUpdate();
             return;
         }
     }
-    throw_pretty("Cannot set Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd UnconstrainedEndPoseProblem::getGoal(const std::string& task_name)
+Eigen::VectorXd UnconstrainedEndPoseProblem::GetGoal(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.y.data.segment(Cost.Indexing[i].Start, Cost.Indexing[i].Length);
+            return cost.y.data.segment(cost.indexing[i].start, cost.indexing[i].length);
         }
     }
-    throw_pretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double UnconstrainedEndPoseProblem::getRho(const std::string& task_name)
+double UnconstrainedEndPoseProblem::GetRho(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return Cost.Rho(Cost.Indexing[i].Id);
+            return cost.rho(cost.indexing[i].id);
         }
     }
-    throw_pretty("Cannot get Rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd UnconstrainedEndPoseProblem::getNominalPose()
+Eigen::VectorXd UnconstrainedEndPoseProblem::GetNominalPose()
 {
-    return qNominal;
+    return q_nominal;
 }
 
-void UnconstrainedEndPoseProblem::setNominalPose(Eigen::VectorXdRefConst qNominal_in)
+void UnconstrainedEndPoseProblem::SetNominalPose(Eigen::VectorXdRefConst qNominal_in)
 {
     if (qNominal_in.rows() == N)
-        qNominal = qNominal_in;
+        q_nominal = qNominal_in;
     else
-        throw_pretty("Cannot set qNominal - wrong number of rows (expected "
-                     << N << ", received " << qNominal_in.rows() << ").");
+        ThrowPretty("Cannot set q_nominal - wrong number of rows (expected "
+                    << N << ", received " << qNominal_in.rows() << ").");
 }
 
-int UnconstrainedEndPoseProblem::getTaskId(const std::string& task_name)
+int UnconstrainedEndPoseProblem::GetTaskId(const std::string& task_name)
 {
-    for (int i = 0; i < Cost.Indexing.size(); i++)
+    for (int i = 0; i < cost.indexing.size(); ++i)
     {
-        if (Cost.Tasks[i]->getObjectName() == task_name)
+        if (cost.tasks[i]->GetObjectName() == task_name)
         {
             return i;
         }
     }
-    throw_pretty("Cannot get task. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get task. Task map '" << task_name << "' does not exist.");
 }
 }

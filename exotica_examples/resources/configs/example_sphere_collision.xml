@@ -60,7 +60,7 @@
     </Cost>
    
     <T>100</T>
-    <Tau>0.03</Tau>
+    <tau>0.03</tau>
     <Wrate>1e3</Wrate>
     <W> 7 6 5 4 3 2 1 </W>
     <StartState>0 0.1 0 0 0 0 0</StartState>

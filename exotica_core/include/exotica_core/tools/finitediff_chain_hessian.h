@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Vladimir Ivan <v.ivan@ed.ac.uk>
+// Copyright (C) 2018
 //
 // This Source Code Form is subject to the terms of the Mozilla
 // Public License v. 2.0. If a copy of the MPL was not distributed
@@ -7,8 +7,8 @@
 // Modified from unsupported/Eigen/src/AutoDiff/AutoDiffJacobian.h
 // and unsupported/Eigen/src/NumericalDiff/NumericalDiff.h
 
-#ifndef EIGEN_FINITEDIFF_CHAIN_HESSIAN_H
-#define EIGEN_FINITEDIFF_CHAIN_HESSIAN_H
+#ifndef EIGEN_FINITEDIFF_CHAIN_HESSIAN_H_
+#define EIGEN_FINITEDIFF_CHAIN_HESSIAN_H_
 
 #include <functional>
 
@@ -149,7 +149,7 @@ public:
         if (JacobianInputsAtCompileTime == Dynamic)
         {
             hess.resize(m);
-            for (Index i = 0; i < m; i++)
+            for (Index i = 0; i < m; ++i)
             {
                 hess[i].resize(cols, cols);
                 hess[i].setZero();
@@ -225,7 +225,6 @@ public:
         return nfev;
     }
 };
+}
 
-}  // namespace Eigen
-
-#endif
+#endif  // EIGEN_FINITEDIFF_CHAIN_HESSIAN_H_

@@ -14,7 +14,18 @@ catkin_package(
   CATKIN_DEPENDS exotica_core
 )
 
-AddInitializer(OMPLSolver RRT RRTConnect PRM LazyPRM EST KPIECE BKPIECE RRTStar LBTRRT)
+AddInitializer(
+  ompl_solver
+  rrt
+  rrt_connect
+  prm
+  lazy_prm
+  est
+  kpiece
+  bkpiece
+  rrt_star
+  lbt_rrt
+)
 GenInitializers()
 
 include_directories(
@@ -30,7 +41,7 @@ add_library(${PROJECT_NAME}
   src/ompl_native_solvers.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OMPL_LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 pybind_add_module(${PROJECT_NAME}_py MODULE src/ompl_py.cpp)
 target_link_libraries(${PROJECT_NAME}_py PRIVATE ${PROJECT_NAME})

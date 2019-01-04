@@ -13,7 +13,7 @@ catkin_package(
   CATKIN_DEPENDS exotica_core
 )
 
-AddInitializer(TimeIndexedRRTConnect)
+AddInitializer(time_indexed_rrt_connect)
 GenInitializers()
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OMPL_INCLUDE_DIRS})
@@ -21,7 +21,7 @@ link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OMPL_LIBRARY_DIR
 
 add_library(${PROJECT_NAME} src/time_indexed_rrt_connect.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OMPL_LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

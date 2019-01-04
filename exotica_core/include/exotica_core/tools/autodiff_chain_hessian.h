@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Vladimir Ivan <v.ivan@ed.ac.uk>
+// Copyright (C) 2018
 //
 // This Source Code Form is subject to the terms of the Mozilla
 // Public License v. 2.0. If a copy of the MPL was not distributed
@@ -6,8 +6,8 @@
 //
 // Modified from unsupported/Eigen/src/AutoDiff/AutoDiffJacobian.h
 
-#ifndef EIGEN_AUTODIFF_CHAIN_HESSIAN_H
-#define EIGEN_AUTODIFF_CHAIN_HESSIAN_H
+#ifndef EIGEN_AUTODIFF_CHAIN_HESSIAN_H_
+#define EIGEN_AUTODIFF_CHAIN_HESSIAN_H_
 
 #include <exotica_core/tools/autodiff_chain_jacobian.h>
 #include <exotica_core/tools/autodiff_scalar.h>
@@ -158,18 +158,18 @@ public:
             eigen_assert(InputsAtCompileTime == JacobianInputsAtCompileTime);
 
             if (InputsAtCompileTime == Dynamic)
-                for (Index j = 0; j < jac.rows(); j++)
+                for (Index j = 0; j < jac.rows(); ++j)
                 {
                     av[j].derivatives().resize(x.rows());
-                    for (Index k = 0; k < x.rows(); k++)
+                    for (Index k = 0; k < x.rows(); ++k)
                         av[j].derivatives()[k].derivatives().resize(x.rows());
                 }
 
-            for (Index i = 0; i < x.rows(); i++)
+            for (Index i = 0; i < x.rows(); ++i)
             {
                 ax[i].derivatives() = InnerDerivativeType::Unit(x.rows(), i);
                 ax[i].value().derivatives() = InnerDerivativeType::Unit(x.rows(), i);
-                for (Index k = 0; k < x.rows(); k++)
+                for (Index k = 0; k < x.rows(); ++k)
                 {
                     ax[i].derivatives()(k).derivatives() = InnerDerivativeType::Zero(x.rows());
                 }
@@ -185,18 +185,18 @@ public:
             eigen_assert(ijac.cols() == ihess[0].rows() && ijac.cols() == ihess[0].cols());
 
             if (InputsAtCompileTime == Dynamic)
-                for (Index j = 0; j < jac.rows(); j++)
+                for (Index j = 0; j < jac.rows(); ++j)
                 {
                     av[j].derivatives().resize(ijac.cols());
-                    for (Index k = 0; k < ijac.cols(); k++)
+                    for (Index k = 0; k < ijac.cols(); ++k)
                         av[j].derivatives()[k].derivatives().resize(ijac.cols());
                 }
 
-            for (Index i = 0; i < x.rows(); i++)
+            for (Index i = 0; i < x.rows(); ++i)
             {
                 ax[i].derivatives() = ijac.row(i);
                 ax[i].value().derivatives() = ijac.row(i);
-                for (Index k = 0; k < ijac.cols(); k++)
+                for (Index k = 0; k < ijac.cols(); ++k)
                 {
                     ax[i].derivatives()(k).derivatives() = ihess[i].row(k);
                 }
@@ -213,15 +213,15 @@ public:
         if (JacobianInputsAtCompileTime == Dynamic)
         {
             hess.resize(jac.rows());
-            for (Index i = 0; i < jac.rows(); i++)
+            for (Index i = 0; i < jac.rows(); ++i)
                 hess[i].resize(cols, cols);
         }
 
-        for (Index i = 0; i < jac.rows(); i++)
+        for (Index i = 0; i < jac.rows(); ++i)
         {
             v[i] = av[i].value().value();
             jac.row(i) = av[i].value().derivatives();
-            for (Index j = 0; j < cols; j++)
+            for (Index j = 0; j < cols; ++j)
                 hess[i].row(j) = av[i].derivatives()[j].derivatives();
         }
     }
@@ -229,4 +229,4 @@ public:
 
 }  // namespace Eigen
 
-#endif
+#endif  // EIGEN_AUTODIFF_CHAIN_HESSIAN_H_

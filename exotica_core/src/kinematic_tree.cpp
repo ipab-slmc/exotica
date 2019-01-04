@@ -1,355 +1,357 @@
-/*
- *      Author: Michael Camilleri
- * 
- * Copyright (c) 2016, University of Edinburgh
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met: 
- * 
- *  * Redistributions of source code must retain the above copyright notice, 
- *    this list of conditions and the following disclaimer. 
- *  * Redistributions in binary form must reproduce the above copyright 
- *    notice, this list of conditions and the following disclaimer in the 
- *    documentation and/or other materials provided with the distribution. 
- *  * Neither the name of  nor the names of its contributors may be used to 
- *    endorse or promote products derived from this software without specific 
- *    prior written permission. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- * POSSIBILITY OF SUCH DAMAGE. 
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #include <algorithm>
 #include <iostream>
 #include <queue>
+#include <set>
 
 #include <eigen_conversions/eigen_kdl.h>
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit/robot_model/robot_model.h>
+#include <tf_conversions/tf_kdl.h>
 #include <kdl/frames_io.hpp>
+#include <kdl_parser/kdl_parser.hpp>
 
 #include <exotica_core/kinematic_tree.h>
+#include <exotica_core/server.h>
+#include <exotica_core/tools.h>
 
 namespace exotica
 {
 KinematicResponse::KinematicResponse() = default;
 
-KinematicResponse::KinematicResponse(KinematicRequestFlags flags, int size, int n)
+KinematicResponse::KinematicResponse(KinematicRequestFlags _flags, int _size, int _n)
 {
-    Flags = flags;
-    Frame.resize(size);
-    Phi.resize(size);
-    if (Flags & KIN_FK_VEL) PhiDot.resize(size);
-    KDL::Jacobian Jzero(n);
+    flags = _flags;
+    frame.resize(_size);
+    Phi.resize(_size);
+    if (flags & KIN_FK_VEL) Phi_dot.resize(_size);
+    KDL::Jacobian Jzero(_n);
     Jzero.data.setZero();
-    if (Flags & KIN_J) J = ArrayJacobian::Constant(size, Jzero);
-    if (Flags & KIN_J_DOT) JDot = ArrayJacobian::Constant(size, Jzero);
-    X.setZero(n);
+    if (_flags & KIN_J) jacobian = ArrayJacobian::Constant(_size, Jzero);
+    if (_flags & KIN_J_DOT) jacobian_dot = ArrayJacobian::Constant(_size, Jzero);
+    x.setZero(_n);
 }
 
 KinematicsRequest::KinematicsRequest() = default;
 
 KinematicFrameRequest::KinematicFrameRequest() = default;
 
-KinematicFrameRequest::KinematicFrameRequest(std::string frameALinkName, KDL::Frame frameAOffset, std::string frameBLinkName, KDL::Frame frameBOffset) : FrameALinkName(frameALinkName), FrameAOffset(frameAOffset), FrameBLinkName(frameBLinkName), FrameBOffset(frameBOffset)
+KinematicFrameRequest::KinematicFrameRequest(std::string _frame_A_link_name, KDL::Frame _frame_A_offset, std::string _frame_B_link_name, KDL::Frame _frame_B_offset) : frame_A_link_name(_frame_A_link_name), frame_A_offset(_frame_A_offset), frame_B_link_name(_frame_B_link_name), frame_B_offset(_frame_B_offset)
 {
 }
 
 KinematicSolution::KinematicSolution() = default;
 
-KinematicSolution::KinematicSolution(int start, int length) : Start(start), Length(length)
+KinematicSolution::KinematicSolution(int _start, int _length) : start(_start), length(_length)
 {
 }
 
 void KinematicSolution::Create(std::shared_ptr<KinematicResponse> solution)
 {
-    if (Start < 0 || Length < 0) throw_pretty("Kinematic solution was not initialized!");
-    new (&Phi) Eigen::Map<ArrayFrame>(solution->Phi.data() + Start, Length);
-    new (&X) Eigen::Map<Eigen::VectorXd>(solution->X.data(), solution->X.rows());
-    if (solution->Flags & KIN_FK_VEL) new (&PhiDot) Eigen::Map<ArrayTwist>(solution->PhiDot.data() + Start, Length);
-    if (solution->Flags & KIN_J) new (&J) Eigen::Map<ArrayJacobian>(solution->J.data() + Start, Length);
-    if (solution->Flags & KIN_J_DOT) new (&JDot) Eigen::Map<ArrayJacobian>(solution->JDot.data() + Start, Length);
+    if (start < 0 || length < 0) ThrowPretty("Kinematic solution was not initialized!");
+    new (&Phi) Eigen::Map<ArrayFrame>(solution->Phi.data() + start, length);
+    new (&X) Eigen::Map<Eigen::VectorXd>(solution->x.data(), solution->x.rows());
+    if (solution->flags & KIN_FK_VEL) new (&Phi_dot) Eigen::Map<ArrayTwist>(solution->Phi_dot.data() + start, length);
+    if (solution->flags & KIN_J) new (&jacobian) Eigen::Map<ArrayJacobian>(solution->jacobian.data() + start, length);
+    if (solution->flags & KIN_J_DOT) new (&jacobian_dot) Eigen::Map<ArrayJacobian>(solution->jacobian_dot.data() + start, length);
 }
 
-int KinematicTree::getNumControlledJoints()
+int KinematicTree::GetNumControlledJoints()
 {
-    return NumControlledJoints;
+    return num_controlled_joints_;
 }
 
-int KinematicTree::getNumModelJoints()
+int KinematicTree::GetNumModelJoints()
 {
-    return NumJoints;
+    return num_joints_;
 }
 
 KinematicTree::KinematicTree() = default;
 
-void KinematicTree::Instantiate(std::string JointGroup, robot_model::RobotModelPtr model, const std::string& name)
+void KinematicTree::Instantiate(std::string joint_group, robot_model::RobotModelPtr model, const std::string& name)
 {
-    if (!model) throw_pretty("No robot model provided!");
-    robot_model::JointModelGroup* group = model->getJointModelGroup(JointGroup);
-    if (!group) throw_pretty("Joint group '" << JointGroup << "' not defined in the robot model!");
-    ControlledJointsNames = group->getVariableNames();
-    ModelJointsNames = model->getVariableNames();
+    if (!model) ThrowPretty("No robot model provided!");
+    robot_model::JointModelGroup* group = model->getJointModelGroup(joint_group);
+    if (!group) ThrowPretty("Joint group '" << joint_group << "' not defined in the robot model!");
+    controlled_joints_names_ = group->getVariableNames();
+    model_joints_names_ = model->getVariableNames();
     name_ = name;
 
-    Model = model;
-    KDL::Tree RobotKinematics;
-    if (kdl_parser::treeFromUrdfModel(*Model->getURDF(), RobotKinematics))
+    model_ = model;
+    KDL::Tree robot_kinematics;
+    if (kdl_parser::treeFromUrdfModel(*model_->getURDF(), robot_kinematics))
     {
-        BuildTree(RobotKinematics);
+        BuildTree(robot_kinematics);
     }
     else
     {
-        throw_pretty("Can't load URDF model!");
+        ThrowPretty("Can't load URDF model!");
     }
 
-    if (Server::isRos())
+    if (Server::IsRos())
     {
-        shapes_pub_ = Server::advertise<visualization_msgs::MarkerArray>(name_ + (name_ == "" ? "" : "/") + "CollisionShapes", 1, true);
-        debugSceneChanged = true;
+        shapes_pub_ = Server::Advertise<visualization_msgs::MarkerArray>(name_ + (name_ == "" ? "" : "/") + "CollisionShapes", 1, true);
+        debug_scene_changed_ = true;
     }
 }
 
-void KinematicTree::BuildTree(const KDL::Tree& RobotKinematics)
+void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
 {
-    ModelTree.clear();
-    Tree.clear();
-    TreeMap.clear();
-    ModelJointsMap.clear();
-    ModelLinkNames.clear();
-    ControlledLinkNames.clear();
+    model_tree_.clear();
+    tree_.clear();
+    tree_map_.clear();
+    model_joints_map_.clear();
+    model_link_names_.clear();
+    controlled_link_names_.clear();
 
     // Handle the root joint
-    const robot_model::JointModel* RootJoint = Model->getRootJoint();
-    root_joint_name_ = RootJoint->getName();
-    std::string WorldFrameName;
-    for (const srdf::Model::VirtualJoint& s : Model->getSRDF()->getVirtualJoints())
+    const robot_model::JointModel* root_joint = model_->getRootJoint();
+    root_joint_name_ = root_joint->getName();
+    std::string world_frame_name;
+    for (const srdf::Model::VirtualJoint& s : model_->getSRDF()->getVirtualJoints())
     {
-        if (s.name_ == RootJoint->getName())
+        if (s.name_ == root_joint->getName())
         {
-            WorldFrameName = s.parent_frame_;
+            world_frame_name = s.parent_frame_;
         }
     }
-    if (WorldFrameName == "") throw_pretty("Can't initialize root joint!");
+    if (world_frame_name == "") ThrowPretty("Can't initialize root joint!");
 
     // Extract Root Inertial
-    double RootMass = 0.0;
-    KDL::Vector RootCoG = KDL::Vector::Zero();
-    auto& UrdfRootInertial = Model->getURDF()->getRoot()->inertial;
-    if (UrdfRootInertial)
+    double root_mass = 0.0;
+    KDL::Vector root_cog = KDL::Vector::Zero();
+    auto& urdf_root_inertial = model_->getURDF()->getRoot()->inertial;
+    if (urdf_root_inertial)
     {
-        RootMass = UrdfRootInertial->mass;
-        RootCoG = KDL::Vector(UrdfRootInertial->origin.position.x,
-                              UrdfRootInertial->origin.position.y,
-                              UrdfRootInertial->origin.position.z);
-        if (Debug)
-            HIGHLIGHT_NAMED("Root Inertial", "Mass: " << RootMass
-                                                      << " kg - CoG: " << RootCoG);
+        root_mass = urdf_root_inertial->mass;
+        root_cog = KDL::Vector(urdf_root_inertial->origin.position.x,
+                               urdf_root_inertial->origin.position.y,
+                               urdf_root_inertial->origin.position.z);
+        if (debug)
+            HIGHLIGHT_NAMED("Root Inertial", "Mass: " << root_mass
+                                                      << " kg - CoG: " << root_cog);
     }
     // TODO: Note, this does not set the rotational inertia component, i.e. the
     // inertial matrix would be wrong
-    KDL::RigidBodyInertia RootInertial(RootMass, RootCoG);
+    KDL::RigidBodyInertia root_inertial(root_mass, root_cog);
 
     // Add general world_frame joint
-    ModelTree.push_back(std::make_shared<KinematicElement>(ModelTree.size(), nullptr, KDL::Segment(WorldFrameName, KDL::Joint(RootJoint->getName(), KDL::Joint::None))));
-    if (RootJoint->getType() == robot_model::JointModel::FIXED)
+    model_tree_.push_back(std::make_shared<KinematicElement>(model_tree_.size(), nullptr, KDL::Segment(world_frame_name, KDL::Joint(root_joint->getName(), KDL::Joint::None))));
+    if (root_joint->getType() == robot_model::JointModel::FIXED)
     {
-        ModelBaseType = BASE_TYPE::FIXED;
+        model_base_type_ = BaseType::FIXED;
     }
-    else if (RootJoint->getType() == robot_model::JointModel::FLOATING)
+    else if (root_joint->getType() == robot_model::JointModel::FLOATING)
     {
-        ModelBaseType = BASE_TYPE::FLOATING;
-        ModelTree.resize(7);
+        model_base_type_ = BaseType::FLOATING;
+        model_tree_.resize(7);
         KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::TransZ, KDL::Joint::RotZ, KDL::Joint::RotY, KDL::Joint::RotX};
-        std::vector<std::string> floatingBaseVariableNames = {
-            RootJoint->getName() + "/trans_x",
-            RootJoint->getName() + "/trans_y",
-            RootJoint->getName() + "/trans_z",
-            RootJoint->getName() + "/rot_z",
-            RootJoint->getName() + "/rot_y",
-            RootJoint->getName() + "/rot_x"};
-        for (int i = 0; i < 6; i++)
+        std::vector<std::string> floating_base_variable_names = {
+            root_joint->getName() + "/trans_x",
+            root_joint->getName() + "/trans_y",
+            root_joint->getName() + "/trans_z",
+            root_joint->getName() + "/rot_z",
+            root_joint->getName() + "/rot_y",
+            root_joint->getName() + "/rot_x"};
+        for (int i = 0; i < 6; ++i)
         {
-            ModelTree[i + 1] = std::make_shared<KinematicElement>(i, ModelTree[i], KDL::Segment(floatingBaseVariableNames[i], KDL::Joint(floatingBaseVariableNames[i], types[i])));
-            ModelTree[i]->Children.push_back(ModelTree[i + 1]);
+            model_tree_[i + 1] = std::make_shared<KinematicElement>(i, model_tree_[i], KDL::Segment(floating_base_variable_names[i], KDL::Joint(floating_base_variable_names[i], types[i])));
+            model_tree_[i]->children.push_back(model_tree_[i + 1]);
         }
 
         // The floating base rotation is defined as xyzw quaternion in the robot
         // model, but we are following a RPY-fixed axis (YPR rotating axis)
         // virtual joint convention in exotica - thus delete the rot_w from the
         // list of joint names
-        auto RotW = std::find(ControlledJointsNames.begin(), ControlledJointsNames.end(), RootJoint->getVariableNames()[6]);
-        if (RotW != ControlledJointsNames.end()) ControlledJointsNames.erase(RotW);
-        RotW = std::find(ModelJointsNames.begin(), ModelJointsNames.end(), RootJoint->getVariableNames()[6]);
-        if (RotW != ModelJointsNames.end()) ModelJointsNames.erase(RotW);
+        auto RotW = std::find(controlled_joints_names_.begin(), controlled_joints_names_.end(), root_joint->getVariableNames()[6]);
+        if (RotW != controlled_joints_names_.end()) controlled_joints_names_.erase(RotW);
+        RotW = std::find(model_joints_names_.begin(), model_joints_names_.end(), root_joint->getVariableNames()[6]);
+        if (RotW != model_joints_names_.end()) model_joints_names_.erase(RotW);
     }
-    else if (RootJoint->getType() == robot_model::JointModel::PLANAR)
+    else if (root_joint->getType() == robot_model::JointModel::PLANAR)
     {
-        ModelBaseType = BASE_TYPE::PLANAR;
-        ModelTree.resize(4);
+        model_base_type_ = BaseType::PLANAR;
+        model_tree_.resize(4);
         KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY,
                                          KDL::Joint::RotZ};
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; ++i)
         {
-            ModelTree[i + 1] = std::make_shared<KinematicElement>(
-                i, ModelTree[i],
+            model_tree_[i + 1] = std::make_shared<KinematicElement>(
+                i, model_tree_[i],
                 KDL::Segment(
-                    RootJoint->getVariableNames()[i],
-                    KDL::Joint(RootJoint->getVariableNames()[i], types[i])));
-            ModelTree[i]->Children.push_back(ModelTree[i + 1]);
+                    root_joint->getVariableNames()[i],
+                    KDL::Joint(root_joint->getVariableNames()[i], types[i])));
+            model_tree_[i]->children.push_back(model_tree_[i + 1]);
         }
     }
     else
     {
-        throw_pretty("Unsupported root joint type: " << RootJoint->getTypeName());
+        ThrowPretty("Unsupported root joint type: " << root_joint->getTypeName());
     }
 
-    AddElement(RobotKinematics.getRootSegment(), *(ModelTree.end() - 1));
+    AddElement(robot_kinematics.getRootSegment(), *(model_tree_.end() - 1));
 
     // Set root inertial
-    if (RootJoint->getType() == robot_model::JointModel::FIXED)
+    if (root_joint->getType() == robot_model::JointModel::FIXED)
     {
-        ModelTree[2]->Segment.setInertia(RootInertial);
+        model_tree_[2]->segment.setInertia(root_inertial);
     }
-    else if (RootJoint->getType() == robot_model::JointModel::FLOATING)
+    else if (root_joint->getType() == robot_model::JointModel::FLOATING)
     {
-        ModelTree[7]->Segment.setInertia(RootInertial);
+        model_tree_[7]->segment.setInertia(root_inertial);
     }
-    else if (RootJoint->getType() == robot_model::JointModel::PLANAR)
+    else if (root_joint->getType() == robot_model::JointModel::PLANAR)
     {
-        ModelTree[4]->Segment.setInertia(RootInertial);
+        model_tree_[4]->segment.setInertia(root_inertial);
     }
 
-    for (auto element : ModelTree) Tree.push_back(element);
+    for (auto element : model_tree_) tree_.push_back(element);
 
     UpdateModel();
-    TreeState.setZero();
+    tree_state_.setZero();
 
-    if (Debug)
+    if (debug)
     {
-        for (int i = 0; i < Tree.size() - 1; i++)
+        for (int i = 0; i < tree_.size() - 1; ++i)
             HIGHLIGHT_NAMED(
-                "Tree", "Joint: " << Tree[i].lock()->Segment.getJoint().getName() << " - Link: " << Tree[i].lock()->Segment.getName()
-                                  << ", mass: " << Tree[i].lock()->Segment.getInertia().getMass()
-                                  << ", CoM: " << Tree[i].lock()->Segment.getInertia().getCOG());
+                "Tree", "Joint: " << tree_[i].lock()->segment.getJoint().getName() << " - Link: " << tree_[i].lock()->segment.getName()
+                                  << ", mass: " << tree_[i].lock()->segment.getInertia().getMass()
+                                  << ", CoM: " << tree_[i].lock()->segment.getInertia().getCOG());
     }
 
-    NumJoints = ModelJointsNames.size();
-    NumControlledJoints = ControlledJointsNames.size();
-    if (NumControlledJoints < 1) throw_pretty("No update joints specified!");
-    ControlledJoints.resize(NumControlledJoints);
-    for (std::shared_ptr<KinematicElement> Joint : ModelTree)
+    num_joints_ = model_joints_names_.size();
+    num_controlled_joints_ = controlled_joints_names_.size();
+    if (num_controlled_joints_ < 1) ThrowPretty("No update joints specified!");
+    controlled_joints_.resize(num_controlled_joints_);
+    for (std::shared_ptr<KinematicElement> Joint : model_tree_)
     {
-        Joint->isRobotLink = true;
-        Joint->ControlId = IsControlled(Joint);
-        Joint->IsControlled = Joint->ControlId >= 0;
-        ModelJointsMap[Joint->Segment.getJoint().getName()] = Joint;
-        ModelLinkNames.push_back(Joint->Segment.getName());
-        if (Joint->IsControlled)
+        Joint->is_robot_link = true;
+        Joint->control_id = IsControlled(Joint);
+        Joint->is_controlled = Joint->control_id >= 0;
+        model_joints_map_[Joint->segment.getJoint().getName()] = Joint;
+        model_link_names_.push_back(Joint->segment.getName());
+        if (Joint->is_controlled)
         {
-            ControlledJoints[Joint->ControlId] = Joint;
-            ControlledJointsMap[Joint->Segment.getJoint().getName()] = Joint;
-            ControlledLinkNames.push_back(Joint->Segment.getName());
+            controlled_joints_[Joint->control_id] = Joint;
+            controlled_joints_map_[Joint->segment.getJoint().getName()] = Joint;
+            controlled_link_names_.push_back(Joint->segment.getName());
 
-            // The ModelBaseType defined above refers to the base type of the
+            // The model_base_type_ defined above refers to the base type of the
             // overall robot model - not of the set of controlled joints. E.g. a
             // floating-base robot can have a scene defined where the
             // floating-base virtual joint is _not_ part of the planning
             // group/scene. Thus we need to establish the BaseType of the joint
-            // group, the ControlledBaseType - if a controlled joint corresponds
-            // to a floating base joint, the ControlledBaseType is the same as the
-            // ModelBaseType.
-            if (Joint->Segment.getJoint().getName().find(
-                    RootJoint->getName()) != std::string::npos)
-                ControlledBaseType = ModelBaseType;
+            // group, the controlled_base_type_ - if a controlled joint corresponds
+            // to a floating base joint, the controlled_base_type_ is the same as the
+            // model_base_type_.
+            if (Joint->segment.getJoint().getName().find(
+                    root_joint->getName()) != std::string::npos)
+                controlled_base_type_ = model_base_type_;
         }
     }
-    ModelTree[0]->isRobotLink = false;
+    model_tree_[0]->is_robot_link = false;
 
-    jointLimits_ = Eigen::MatrixXd::Zero(NumControlledJoints, 2);
-    resetJointLimits();
+    joint_limits_ = Eigen::MatrixXd::Zero(num_controlled_joints_, 2);
+    ResetJointLimits();
 
     // Create random distributions for state sampling
-    generator_ = std::mt19937(rd());
+    generator_ = std::mt19937(rd_());
 }
 
 void KinematicTree::UpdateModel()
 {
-    Root = Tree[0].lock();
-    TreeState.conservativeResize(Tree.size());
-    for (std::weak_ptr<KinematicElement> Joint : Tree)
+    root_ = tree_[0].lock();
+    tree_state_.conservativeResize(tree_.size());
+    for (std::weak_ptr<KinematicElement> joint : tree_)
     {
-        TreeMap[Joint.lock()->Segment.getName()] = Joint.lock();
+        tree_map_[joint.lock()->segment.getName()] = joint.lock();
     }
-    debugTree.resize(Tree.size() - 1);
+    debug_tree_.resize(tree_.size() - 1);
     UpdateTree();
-    debugSceneChanged = true;
+    debug_scene_changed_ = true;
 }
 
-void KinematicTree::resetModel()
+void KinematicTree::ResetModel()
 {
-    CollisionTreeMap.clear();
-    TreeMap.clear();
-    EnvironmentTree.clear();
-    Tree.resize(ModelTree.size());
+    collision_tree_map_.clear();
+    tree_map_.clear();
+    environment_tree_.clear();
+    tree_.resize(model_tree_.size());
     UpdateModel();
-    debugSceneChanged = true;
+    debug_scene_changed_ = true;
 
     // Remove all CollisionShapes
-    if (Server::isRos())
+    if (Server::IsRos())
     {
         visualization_msgs::Marker mrk;
-        mrk.action = 3;  // visualization_msgs::Marker::DELETEALL; // NB: enum only defined in ROS-J and newer, functionality still there
+        mrk.action = 3;  // visualization_msgs::Marker::DELETEALL; // NB: enum only defined in ROS-jacobian and newer, functionality still there
         marker_array_msg_.markers.push_back(mrk);
     }
 }
 
-void KinematicTree::changeParent(const std::string& name, const std::string& parent_name, const KDL::Frame& pose, bool relative)
+void KinematicTree::ChangeParent(const std::string& name, const std::string& parent_name, const KDL::Frame& pose, bool relative)
 {
-    if (TreeMap.find(name) == TreeMap.end()) throw_pretty("Attempting to attach unknown frame '" << name << "'!");
-    std::shared_ptr<KinematicElement> child = TreeMap.find(name)->second.lock();
-    if (child->Id < ModelTree.size()) throw_pretty("Can't re-attach robot link '" << name << "'!");
-    if (child->Shape) throw_pretty("Can't re-attach collision shape without reattaching the object! ('" << name << "')");
+    if (tree_map_.find(name) == tree_map_.end()) ThrowPretty("Attempting to attach unknown frame '" << name << "'!");
+    std::shared_ptr<KinematicElement> child = tree_map_.find(name)->second.lock();
+    if (child->id < model_tree_.size()) ThrowPretty("Can't re-attach robot link '" << name << "'!");
+    if (child->shape) ThrowPretty("Can't re-attach collision shape without reattaching the object! ('" << name << "')");
     std::shared_ptr<KinematicElement> parent;
     if (parent_name == "")
     {
-        if (TreeMap.find(Root->Segment.getName()) == TreeMap.end()) throw_pretty("Attempting to attach to unknown frame '" << Root->Segment.getName() << "'!");
-        parent = TreeMap.find(Root->Segment.getName())->second.lock();
+        if (tree_map_.find(root_->segment.getName()) == tree_map_.end()) ThrowPretty("Attempting to attach to unknown frame '" << root_->segment.getName() << "'!");
+        parent = tree_map_.find(root_->segment.getName())->second.lock();
     }
     else
     {
-        if (TreeMap.find(parent_name) == TreeMap.end()) throw_pretty("Attempting to attach to unknown frame '" << parent_name << "'!");
-        parent = TreeMap.find(parent_name)->second.lock();
+        if (tree_map_.find(parent_name) == tree_map_.end()) ThrowPretty("Attempting to attach to unknown frame '" << parent_name << "'!");
+        parent = tree_map_.find(parent_name)->second.lock();
     }
-    if (parent->Shape) throw_pretty("Can't attach object to a collision shape object! ('" << parent_name << "')");
+    if (parent->shape) ThrowPretty("Can't attach object to a collision shape object! ('" << parent_name << "')");
     if (relative)
     {
-        child->Segment = KDL::Segment(child->Segment.getName(), child->Segment.getJoint(), pose, child->Segment.getInertia());
+        child->segment = KDL::Segment(child->segment.getName(), child->segment.getJoint(), pose, child->segment.getInertia());
     }
     else
     {
-        child->Segment = KDL::Segment(child->Segment.getName(), child->Segment.getJoint(), parent->Frame.Inverse() * child->Frame * pose, child->Segment.getInertia());
+        child->segment = KDL::Segment(child->segment.getName(), child->segment.getJoint(), parent->frame.Inverse() * child->frame * pose, child->segment.getInertia());
     }
 
     // Iterate over Parent's children to find child and then remove it
-    for (auto it = child->Parent.lock()->Children.begin(); it != child->Parent.lock()->Children.end();)
+    for (auto it = child->parent.lock()->children.begin(); it != child->parent.lock()->children.end();)
     {
         std::shared_ptr<KinematicElement> childOfParent = it->lock();
         if (childOfParent == child)
         {
-            child->Parent.lock()->Children.erase(it);
+            child->parent.lock()->children.erase(it);
         }
         else
         {
@@ -357,296 +359,296 @@ void KinematicTree::changeParent(const std::string& name, const std::string& par
         }
     }
 
-    child->Parent = parent;
-    child->ParentName = parent->Segment.getName();
-    parent->Children.push_back(child);
-    child->updateClosestRobotLink();
-    debugSceneChanged = true;
+    child->parent = parent;
+    child->parent_name = parent->segment.getName();
+    parent->children.push_back(child);
+    child->UpdateClosestRobotLink();
+    debug_scene_changed_ = true;
 }
 
-void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
+void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool is_controlled)
 {
-    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color, isControlled);
-    EnvironmentTree.push_back(element);
+    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color, is_controlled);
+    environment_tree_.push_back(element);
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shapeResourcePath, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool is_controlled)
 {
-    std::string shapePath(shapeResourcePath);
-    if (shapePath == "")
+    std::string shape_path(shape_resource_path);
+    if (shape_path == "")
     {
-        throw_pretty("Shape path cannot be empty!");
+        ThrowPretty("Shape path cannot be empty!");
     }
     // Exotica package path resolution
-    else if (shapePath.substr(0, 1) == "{")
+    else if (shape_path.substr(0, 1) == "{")
     {
-        shapePath = "file://" + parsePath(shapePath);
+        shape_path = "file://" + ParsePath(shape_path);
     }
     // ROS resource path resolution
-    else if (shapePath.substr(0, 10) == "package://" || shapePath.substr(0, 8) == "file:///")
+    else if (shape_path.substr(0, 10) == "package://" || shape_path.substr(0, 8) == "file:///")
     {
     }
     else
     {
-        throw_pretty("Path cannot be resolved.");
+        ThrowPretty("Path cannot be resolved.");
     }
 
     shapes::ShapePtr shape;
-    shape.reset(shapes::createMeshFromResource(shapePath, scale));
+    shape.reset(shapes::createMeshFromResource(shape_path, scale));
     shapes::ShapeConstPtr tmp_shape(shape);
-    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, tmp_shape, inertia, color, isControlled);
-    element->ShapeResourcePath = shapePath;
-    element->Scale = scale;
+    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, tmp_shape, inertia, color, is_controlled);
+    element->shape_resource_path = shape_path;
+    element->scale = scale;
     return element;
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool isControlled)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool is_controlled)
 {
     std::shared_ptr<KinematicElement> parent_element;
     if (parent == "")
     {
-        parent_element = Root;
+        parent_element = root_;
     }
     else
     {
         bool found = false;
-        for (const auto& element : Tree)
+        for (const auto& element : tree_)
         {
-            if (element.lock()->Segment.getName() == parent)
+            if (element.lock()->segment.getName() == parent)
             {
                 parent_element = element.lock();
                 found = true;
                 break;
             }
         }
-        if (!found) throw_pretty("Can't find parent link named '" << parent << "'!");
+        if (!found) ThrowPretty("Can't find parent link named '" << parent << "'!");
     }
-    KDL::Frame transformKDL;
-    tf::transformEigenToKDL(transform, transformKDL);
-    std::shared_ptr<KinematicElement> NewElement = std::make_shared<KinematicElement>(Tree.size(), parent_element, KDL::Segment(name, KDL::Joint(KDL::Joint::None), transformKDL, inertia));
+    KDL::Frame transform_kdl;
+    tf::transformEigenToKDL(transform, transform_kdl);
+    std::shared_ptr<KinematicElement> new_element = std::make_shared<KinematicElement>(tree_.size(), parent_element, KDL::Segment(name, KDL::Joint(KDL::Joint::None), transform_kdl, inertia));
     if (shape)
     {
-        NewElement->Shape = shape;
-        CollisionTreeMap[NewElement->Segment.getName()] = NewElement;
+        new_element->shape = shape;
+        collision_tree_map_[new_element->segment.getName()] = new_element;
 
         // Set color if set. If all zeros, default to preset (grey).
-        if (color != Eigen::Vector4d::Zero()) NewElement->Color = color;
+        if (color != Eigen::Vector4d::Zero()) new_element->color = color;
     }
-    NewElement->ParentName = parent;
-    NewElement->IsControlled = isControlled;
-    Tree.push_back(NewElement);
-    parent_element->Children.push_back(NewElement);
-    NewElement->updateClosestRobotLink();
-    TreeMap[name] = NewElement;
-    debugSceneChanged = true;
-    return NewElement;
+    new_element->parent_name = parent;
+    new_element->is_controlled = is_controlled;
+    tree_.push_back(new_element);
+    parent_element->children.push_back(new_element);
+    new_element->UpdateClosestRobotLink();
+    tree_map_[name] = new_element;
+    debug_scene_changed_ = true;
+    return new_element;
 }
 
 void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
 {
-    std::shared_ptr<KinematicElement> NewElement = std::make_shared<KinematicElement>(ModelTree.size(), parent, segment->second.segment);
-    ModelTree.push_back(NewElement);
-    if (parent) parent->Children.push_back(NewElement);
+    std::shared_ptr<KinematicElement> new_element = std::make_shared<KinematicElement>(model_tree_.size(), parent, segment->second.segment);
+    model_tree_.push_back(new_element);
+    if (parent) parent->children.push_back(new_element);
     for (KDL::SegmentMap::const_iterator child : segment->second.children)
     {
-        AddElement(child, NewElement);
+        AddElement(child, new_element);
     }
 }
 
-int KinematicTree::IsControlled(std::shared_ptr<KinematicElement> Joint)
+int KinematicTree::IsControlled(std::shared_ptr<KinematicElement> joint)
 {
-    for (int i = 0; i < ControlledJointsNames.size(); i++)
+    for (int i = 0; i < controlled_joints_names_.size(); ++i)
     {
-        if (ControlledJointsNames[i] == Joint->Segment.getJoint().getName()) return i;
-    }
-    return -1;
-}
-
-int KinematicTree::IsControlled(std::string jointName)
-{
-    for (int i = 0; i < ControlledJointsNames.size(); i++)
-    {
-        if (ControlledJointsNames[i] == jointName) return i;
+        if (controlled_joints_names_[i] == joint->segment.getJoint().getName()) return i;
     }
     return -1;
 }
 
-int KinematicTree::IsControlledLink(std::string linkName)
+int KinematicTree::IsControlled(std::string joint_name)
 {
-    for (int i = 0; i < ControlledJoints.size(); i++)
+    for (int i = 0; i < controlled_joints_names_.size(); ++i)
     {
-        auto joint = ControlledJoints[i].lock();
-        if (joint->Segment.getName() == linkName) return i;
+        if (controlled_joints_names_[i] == joint_name) return i;
+    }
+    return -1;
+}
+
+int KinematicTree::IsControlledLink(std::string link_name)
+{
+    for (int i = 0; i < controlled_joints_.size(); ++i)
+    {
+        auto joint = controlled_joints_[i].lock();
+        if (joint->segment.getName() == link_name) return i;
     }
     return -1;
 }
 
 std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const KinematicsRequest& request)
 {
-    Flags = request.Flags;
-    if (Flags & KIN_J_DOT) Flags = Flags | KIN_J;
-    Solution.reset(new KinematicResponse(Flags, request.Frames.size(), NumControlledJoints));
+    flags_ = request.flags;
+    if (flags_ & KIN_J_DOT) flags_ = flags_ | KIN_J;
+    solution_.reset(new KinematicResponse(flags_, request.frames.size(), num_controlled_joints_));
 
-    StateSize = NumControlledJoints;
-    if (((Flags & KIN_FK_VEL) || (Flags & KIN_J_DOT))) StateSize = NumControlledJoints;
+    state_size_ = num_controlled_joints_;
+    if (((flags_ & KIN_FK_VEL) || (flags_ & KIN_J_DOT))) state_size_ = num_controlled_joints_;
 
-    for (int i = 0; i < request.Frames.size(); i++)
+    for (int i = 0; i < request.frames.size(); ++i)
     {
-        if (request.Frames[i].FrameALinkName == "")
-            Solution->Frame[i].FrameA = Root;
+        if (request.frames[i].frame_A_link_name == "")
+            solution_->frame[i].frame_A = root_;
         else
             try
             {
-                Solution->Frame[i].FrameA = TreeMap.at(request.Frames[i].FrameALinkName);
+                solution_->frame[i].frame_A = tree_map_.at(request.frames[i].frame_A_link_name);
             }
             catch (const std::out_of_range& e)
             {
-                throw_pretty("No FrameA link exists named '" << request.Frames[i].FrameALinkName << "'");
+                ThrowPretty("No frame_A link exists named '" << request.frames[i].frame_A_link_name << "'");
             }
-        if (request.Frames[i].FrameBLinkName == "")
-            Solution->Frame[i].FrameB = Root;
+        if (request.frames[i].frame_B_link_name == "")
+            solution_->frame[i].frame_B = root_;
         else
             try
             {
-                Solution->Frame[i].FrameB = TreeMap.at(request.Frames[i].FrameBLinkName);
+                solution_->frame[i].frame_B = tree_map_.at(request.frames[i].frame_B_link_name);
             }
             catch (const std::out_of_range& e)
             {
-                throw_pretty("No FrameB link exists named '" << request.Frames[i].FrameBLinkName << "'");
+                ThrowPretty("No frame_B link exists named '" << request.frames[i].frame_B_link_name << "'");
             }
 
-        Solution->Frame[i].FrameAOffset = request.Frames[i].FrameAOffset;
-        Solution->Frame[i].FrameBOffset = request.Frames[i].FrameBOffset;
+        solution_->frame[i].frame_A_offset = request.frames[i].frame_A_offset;
+        solution_->frame[i].frame_B_offset = request.frames[i].frame_B_offset;
     }
 
-    if (Debug)
+    if (debug)
     {
-        for (KinematicFrame& frame : Solution->Frame)
+        for (KinematicFrame& frame : solution_->frame)
         {
-            HIGHLIGHT(frame.FrameB.lock()->Segment.getName() << " " << (frame.FrameBOffset == KDL::Frame::Identity() ? "" : toString(frame.FrameBOffset)) << " -> " << frame.FrameA.lock()->Segment.getName() << " " << (frame.FrameAOffset == KDL::Frame::Identity() ? "" : toString(frame.FrameAOffset)));
+            HIGHLIGHT(frame.frame_B.lock()->segment.getName() << " " << (frame.frame_B_offset == KDL::Frame::Identity() ? "" : ToString(frame.frame_B_offset)) << " -> " << frame.frame_A.lock()->segment.getName() << " " << (frame.frame_A_offset == KDL::Frame::Identity() ? "" : ToString(frame.frame_A_offset)));
         }
     }
 
-    debugFrames.resize(Solution->Frame.size() * 2);
+    debug_frames_.resize(solution_->frame.size() * 2);
 
-    return Solution;
+    return solution_;
 }
 
 void KinematicTree::Update(Eigen::VectorXdRefConst x)
 {
-    if (x.rows() != StateSize) throw_pretty("Wrong state vector size! Got " << x.rows() << " expected " << StateSize);
+    if (x.rows() != state_size_) ThrowPretty("Wrong state vector size! Got " << x.rows() << " expected " << state_size_);
 
-    for (int i = 0; i < NumControlledJoints; i++)
-        TreeState(ControlledJoints[i].lock()->Id) = x(i);
+    for (int i = 0; i < num_controlled_joints_; ++i)
+        tree_state_(controlled_joints_[i].lock()->id) = x(i);
 
-    // Store the updated state in the KinematicResponse (Solution)
-    Solution->X = x;
+    // Store the updated state in the KinematicResponse (solution_)
+    solution_->x = x;
 
     UpdateTree();
     UpdateFK();
-    if (Flags & KIN_J) UpdateJ();
-    if (Flags & KIN_J && Flags & KIN_J_DOT) UpdateJdot();
-    if (Debug) publishFrames();
+    if (flags_ & KIN_J) UpdateJ();
+    if (flags_ & KIN_J && flags_ & KIN_J_DOT) UpdateJdot();
+    if (debug) PublishFrames();
 }
 
 void KinematicTree::UpdateTree()
 {
     std::queue<std::shared_ptr<KinematicElement>> elements;
-    elements.push(Root);
-    Root->removeExpiredChildren();
+    elements.push(root_);
+    root_->RemoveExpiredChildren();
     while (elements.size() > 0)
     {
         auto element = elements.front();
         elements.pop();
-        // Elements with Id > 0 have parent links.
-        if (element->Id > 0)
+        // Elements with id > 0 have parent links.
+        if (element->id > 0)
         {
-            if (element->Segment.getJoint().getType() != KDL::Joint::JointType::None)
+            if (element->segment.getJoint().getType() != KDL::Joint::JointType::None)
             {
-                element->Frame = element->Parent.lock()->Frame * element->getPose(TreeState(element->Id));
+                element->frame = element->parent.lock()->frame * element->GetPose(tree_state_(element->id));
             }
             else
             {
-                element->Frame = element->Parent.lock()->Frame * element->getPose();
+                element->frame = element->parent.lock()->frame * element->GetPose();
             }
         }
         // Root of tree.
         else
         {
-            element->Frame = element->getPose(TreeState(element->Id));
+            element->frame = element->GetPose(tree_state_(element->id));
         }
-        element->removeExpiredChildren();
-        for (std::weak_ptr<KinematicElement> child : element->Children)
+        element->RemoveExpiredChildren();
+        for (std::weak_ptr<KinematicElement> child : element->children)
         {
             elements.push(child.lock());
         }
     }
 }
 
-void KinematicTree::publishFrames()
+void KinematicTree::PublishFrames()
 {
-    if (Server::isRos())
+    if (Server::IsRos())
     {
         // Step 1: Publish frames for every element in the tree.
         {
             int i = 0;
-            for (std::weak_ptr<KinematicElement> element : Tree)
+            for (std::weak_ptr<KinematicElement> element : tree_)
             {
                 tf::Transform T;
-                tf::transformKDLToTF(element.lock()->Frame, T);
-                if (i > 0) debugTree[i - 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", getRootFrameName()), tf::resolve("exotica", element.lock()->Segment.getName()));
-                i++;
+                tf::transformKDLToTF(element.lock()->frame, T);
+                if (i > 0) debug_tree_[i - 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", GetRootFrameName()), tf::resolve("exotica", element.lock()->segment.getName()));
+                ++i;
             }
-            Server::sendTransform(debugTree);
+            Server::SendTransform(debug_tree_);
             i = 0;
-            for (KinematicFrame& frame : Solution->Frame)
+            for (KinematicFrame& frame : solution_->frame)
             {
                 tf::Transform T;
-                tf::transformKDLToTF(frame.TempB, T);
-                debugFrames[i * 2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", getRootFrameName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.FrameB.lock()->Segment.getName()));
-                tf::transformKDLToTF(frame.TempAB, T);
-                debugFrames[i * 2 + 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.FrameB.lock()->Segment.getName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "A" + frame.FrameA.lock()->Segment.getName()));
-                i++;
+                tf::transformKDLToTF(frame.temp_B, T);
+                debug_frames_[i * 2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", GetRootFrameName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()));
+                tf::transformKDLToTF(frame.temp_AB, T);
+                debug_frames_[i * 2 + 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "A" + frame.frame_A.lock()->segment.getName()));
+                ++i;
             }
-            Server::sendTransform(debugFrames);
+            Server::SendTransform(debug_frames_);
         }
 
         // Step 2: Publish visualisation markers for non-robot-model elements in the tree.
-        if (debugSceneChanged)
+        if (debug_scene_changed_)
         {
-            debugSceneChanged = false;
+            debug_scene_changed_ = false;
             marker_array_msg_.markers.clear();
-            for (int i = 0; i < Tree.size(); i++)
+            for (int i = 0; i < tree_.size(); ++i)
             {
-                if (Tree[i].lock()->Shape && (!Tree[i].lock()->ClosestRobotLink.lock() || !Tree[i].lock()->ClosestRobotLink.lock()->isRobotLink))
+                if (tree_[i].lock()->shape && (!tree_[i].lock()->closest_robot_link.lock() || !tree_[i].lock()->closest_robot_link.lock()->is_robot_link))
                 {
                     visualization_msgs::Marker mrk;
-                    shapes::constructMarkerFromShape(Tree[i].lock()->Shape.get(), mrk);
+                    shapes::constructMarkerFromShape(tree_[i].lock()->shape.get(), mrk);
                     mrk.action = visualization_msgs::Marker::ADD;
                     mrk.frame_locked = true;
                     mrk.id = i;
                     mrk.ns = "CollisionObjects";
-                    mrk.color = getColor(Tree[i].lock()->Color);
-                    mrk.header.frame_id = "exotica/" + Tree[i].lock()->Segment.getName();
+                    mrk.color = GetColor(tree_[i].lock()->color);
+                    mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
                     mrk.pose.orientation.w = 1.0;
                     marker_array_msg_.markers.push_back(mrk);
                 }
-                else if (Tree[i].lock()->ShapeResourcePath != "")
+                else if (tree_[i].lock()->shape_resource_path != "")
                 {
                     visualization_msgs::Marker mrk;
                     mrk.action = visualization_msgs::Marker::ADD;
                     mrk.frame_locked = true;
                     mrk.id = i;
                     mrk.ns = "CollisionObjects";
-                    mrk.color = getColor(Tree[i].lock()->Color);
-                    mrk.header.frame_id = "exotica/" + Tree[i].lock()->Segment.getName();
+                    mrk.color = GetColor(tree_[i].lock()->color);
+                    mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
                     mrk.pose.orientation.w = 1.0;
                     mrk.type = visualization_msgs::Marker::MESH_RESOURCE;
-                    mrk.mesh_resource = Tree[i].lock()->ShapeResourcePath;
+                    mrk.mesh_resource = tree_[i].lock()->shape_resource_path;
                     mrk.mesh_use_embedded_materials = true;
-                    mrk.scale.x = Tree[i].lock()->Scale(0);
-                    mrk.scale.y = Tree[i].lock()->Scale(1);
-                    mrk.scale.z = Tree[i].lock()->Scale(2);
+                    mrk.scale.x = tree_[i].lock()->scale(0);
+                    mrk.scale.y = tree_[i].lock()->scale(1);
+                    mrk.scale.z = tree_[i].lock()->scale(2);
                     marker_array_msg_.markers.push_back(mrk);
                 }
             }
@@ -657,78 +659,78 @@ void KinematicTree::publishFrames()
 
 KDL::Frame KinematicTree::FK(KinematicFrame& frame)
 {
-    frame.TempA = frame.FrameA.lock()->Frame * frame.FrameAOffset;
-    frame.TempB = frame.FrameB.lock()->Frame * frame.FrameBOffset;
-    frame.TempAB = frame.TempB.Inverse() * frame.TempA;
-    return frame.TempAB;
+    frame.temp_A = frame.frame_A.lock()->frame * frame.frame_A_offset;
+    frame.temp_B = frame.frame_B.lock()->frame * frame.frame_B_offset;
+    frame.temp_AB = frame.temp_B.Inverse() * frame.temp_A;
+    return frame.temp_AB;
 }
 
-KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB)
+KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b)
 {
-    if (!elementA) throw_pretty("The pointer to KinematicElement A is dead.");
+    if (!element_A) ThrowPretty("The pointer to KinematicElement A is dead.");
     KinematicFrame frame;
-    frame.FrameA = elementA;
-    frame.FrameB = (elementB == nullptr) ? Root : elementB;
-    frame.FrameAOffset = offsetA;
-    frame.FrameBOffset = offsetB;
+    frame.frame_A = element_A;
+    frame.frame_B = (element_B == nullptr) ? root_ : element_B;
+    frame.frame_A_offset = offset_a;
+    frame.frame_B_offset = offset_b;
     return FK(frame);
 }
 
-KDL::Frame KinematicTree::FK(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB)
+KDL::Frame KinematicTree::FK(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b)
 {
-    std::string nameA = elementA == "" ? Root->Segment.getName() : elementA;
-    std::string nameB = elementB == "" ? Root->Segment.getName() : elementB;
-    auto A = TreeMap.find(nameA);
-    if (A == TreeMap.end()) throw_pretty("Can't find link '" << nameA << "'!");
-    auto B = TreeMap.find(nameB);
-    if (B == TreeMap.end()) throw_pretty("Can't find link '" << nameB << "'!");
-    return FK(A->second.lock(), offsetA, B->second.lock(), offsetB);
+    std::string name_a = element_A == "" ? root_->segment.getName() : element_A;
+    std::string name_b = element_B == "" ? root_->segment.getName() : element_B;
+    auto A = tree_map_.find(name_a);
+    if (A == tree_map_.end()) ThrowPretty("Can't find link '" << name_a << "'!");
+    auto B = tree_map_.find(name_b);
+    if (B == tree_map_.end()) ThrowPretty("Can't find link '" << name_b << "'!");
+    return FK(A->second.lock(), offset_a, B->second.lock(), offset_b);
 }
 
 void KinematicTree::UpdateFK()
 {
     int i = 0;
-    for (KinematicFrame& frame : Solution->Frame)
+    for (KinematicFrame& frame : solution_->frame)
     {
-        Solution->Phi(i) = FK(frame);
-        i++;
+        solution_->Phi(i) = FK(frame);
+        ++i;
     }
 }
 
-Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> elementA, const KDL::Frame& offsetA, std::shared_ptr<KinematicElement> elementB, const KDL::Frame& offsetB)
+Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b)
 {
-    if (!elementA) throw_pretty("The pointer to KinematicElement A is dead.");
+    if (!element_A) ThrowPretty("The pointer to KinematicElement A is dead.");
     KinematicFrame frame;
-    frame.FrameA = elementA;
-    frame.FrameB = (elementB == nullptr) ? Root : elementB;
-    frame.FrameAOffset = offsetA;
-    frame.FrameBOffset = offsetB;
-    KDL::Jacobian ret(NumControlledJoints);
+    frame.frame_A = element_A;
+    frame.frame_B = (element_B == nullptr) ? root_ : element_B;
+    frame.frame_A_offset = offset_a;
+    frame.frame_B_offset = offset_b;
+    KDL::Jacobian ret(num_controlled_joints_);
     ComputeJ(frame, ret);
     return ret.data;
 }
 
-Eigen::MatrixXd KinematicTree::Jacobian(const std::string& elementA, const KDL::Frame& offsetA, const std::string& elementB, const KDL::Frame& offsetB)
+Eigen::MatrixXd KinematicTree::Jacobian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b)
 {
-    std::string nameA = elementA == "" ? Root->Segment.getName() : elementA;
-    std::string nameB = elementB == "" ? Root->Segment.getName() : elementB;
-    auto A = TreeMap.find(nameA);
-    if (A == TreeMap.end()) throw_pretty("Can't find link '" << nameA << "'!");
-    auto B = TreeMap.find(nameB);
-    if (B == TreeMap.end()) throw_pretty("Can't find link '" << nameB << "'!");
-    return Jacobian(A->second.lock(), offsetA, B->second.lock(), offsetB);
+    std::string name_a = element_A == "" ? root_->segment.getName() : element_A;
+    std::string name_b = element_B == "" ? root_->segment.getName() : element_B;
+    auto A = tree_map_.find(name_a);
+    if (A == tree_map_.end()) ThrowPretty("Can't find link '" << name_a << "'!");
+    auto B = tree_map_.find(name_b);
+    if (B == tree_map_.end()) ThrowPretty("Can't find link '" << name_b << "'!");
+    return Jacobian(A->second.lock(), offset_a, B->second.lock(), offset_b);
 }
 
-void KinematicTree::ComputeJdot(KDL::Jacobian& J, KDL::Jacobian& JDot)
+void KinematicTree::ComputeJdot(KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot)
 {
-    JDot.data.setZero(J.rows(), J.columns());
-    for (int i = 0; i < J.columns(); i++)
+    jacobian_dot.data.setZero(jacobian.rows(), jacobian.columns());
+    for (int i = 0; i < jacobian.columns(); ++i)
     {
         KDL::Twist tmp;
-        for (int j = 0; j < J.columns(); j++)
+        for (int j = 0; j < jacobian.columns(); ++j)
         {
-            KDL::Twist jac_i_ = J.getColumn(i);
-            KDL::Twist jac_j_ = J.getColumn(j);
+            KDL::Twist jac_i_ = jacobian.getColumn(i);
+            KDL::Twist jac_j_ = jacobian.getColumn(j);
             KDL::Twist t_djdq_;
 
             if (j < i)
@@ -750,175 +752,175 @@ void KinematicTree::ComputeJdot(KDL::Jacobian& J, KDL::Jacobian& JDot)
 
             tmp += t_djdq_;
         }
-        JDot.setColumn(i, tmp);
+        jacobian_dot.setColumn(i, tmp);
     }
 }
 
-void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& J)
+void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian)
 {
-    J.data.setZero();
+    jacobian.data.setZero();
     KDL::Frame tmp = FK(frame);  // Create temporary offset frames
-    std::shared_ptr<KinematicElement> it = frame.FrameA.lock();
+    std::shared_ptr<KinematicElement> it = frame.frame_A.lock();
     while (it != nullptr)
     {
-        if (it->IsControlled)
+        if (it->is_controlled)
         {
-            KDL::Frame SegmentReference;
-            if (it->Parent.lock() != nullptr) SegmentReference = it->Parent.lock()->Frame;
-            J.setColumn(it->ControlId, frame.TempB.M.Inverse() * (SegmentReference.M * it->Segment.twist(TreeState(it->Id), 1.0)).RefPoint(frame.TempA.p - it->Frame.p));
+            KDL::Frame segment_reference;
+            if (it->parent.lock() != nullptr) segment_reference = it->parent.lock()->frame;
+            jacobian.setColumn(it->control_id, frame.temp_B.M.Inverse() * (segment_reference.M * it->segment.twist(tree_state_(it->id), 1.0)).RefPoint(frame.temp_A.p - it->frame.p));
         }
-        it = it->Parent.lock();
+        it = it->parent.lock();
     }
-    it = frame.FrameB.lock();
+    it = frame.frame_B.lock();
     while (it != nullptr)
     {
-        if (it->IsControlled)
+        if (it->is_controlled)
         {
-            KDL::Frame SegmentReference;
-            if (it->Parent.lock() != nullptr) SegmentReference = it->Parent.lock()->Frame;
-            J.setColumn(it->ControlId, J.getColumn(it->ControlId) - (frame.TempB.M.Inverse() * (SegmentReference.M * it->Segment.twist(TreeState(it->Id), 1.0)).RefPoint(frame.TempA.p - it->Frame.p)));
+            KDL::Frame segment_reference;
+            if (it->parent.lock() != nullptr) segment_reference = it->parent.lock()->frame;
+            jacobian.setColumn(it->control_id, jacobian.getColumn(it->control_id) - (frame.temp_B.M.Inverse() * (segment_reference.M * it->segment.twist(tree_state_(it->id), 1.0)).RefPoint(frame.temp_A.p - it->frame.p)));
         }
-        it = it->Parent.lock();
+        it = it->parent.lock();
     }
 }
 
 void KinematicTree::UpdateJ()
 {
     int i = 0;
-    for (KinematicFrame& frame : Solution->Frame)
+    for (KinematicFrame& frame : solution_->frame)
     {
-        ComputeJ(frame, Solution->J(i));
-        i++;
+        ComputeJ(frame, solution_->jacobian(i));
+        ++i;
     }
 }
 
 void KinematicTree::UpdateJdot()
 {
     int i = 0;
-    for (KinematicFrame& frame : Solution->Frame)
+    for (KinematicFrame& frame : solution_->frame)
     {
-        ComputeJdot(Solution->J(i), Solution->JDot(i));
-        i++;
+        ComputeJdot(solution_->jacobian(i), solution_->jacobian_dot(i));
+        ++i;
     }
 }
 
-exotica::BASE_TYPE KinematicTree::getModelBaseType()
+exotica::BaseType KinematicTree::GetModelBaseType()
 {
-    return ModelBaseType;
+    return model_base_type_;
 }
 
-exotica::BASE_TYPE KinematicTree::getControlledBaseType()
+exotica::BaseType KinematicTree::GetControlledBaseType()
 {
-    return ControlledBaseType;
+    return controlled_base_type_;
 }
 
-std::map<std::string, std::vector<double>> KinematicTree::getUsedJointLimits()
+std::map<std::string, std::vector<double>> KinematicTree::GetUsedJointLimits()
 {
     std::map<std::string, std::vector<double>> limits;
-    for (auto it : ControlledJoints)
+    for (auto it : controlled_joints_)
     {
-        limits[it.lock()->Segment.getJoint().getName()] = it.lock()->JointLimits;
+        limits[it.lock()->segment.getJoint().getName()] = it.lock()->joint_limits;
     }
     return limits;
 }
 
-robot_model::RobotModelPtr KinematicTree::getRobotModel()
+robot_model::RobotModelPtr KinematicTree::GetRobotModel()
 {
-    return Model;
+    return model_;
 }
 
-Eigen::VectorXd KinematicTree::getRandomControlledState()
+Eigen::VectorXd KinematicTree::GetRandomControlledState()
 {
-    Eigen::VectorXd q_rand(NumControlledJoints);
-    for (unsigned int i = 0; i < NumControlledJoints; i++)
+    Eigen::VectorXd q_rand(num_controlled_joints_);
+    for (unsigned int i = 0; i < num_controlled_joints_; ++i)
     {
         q_rand(i) = random_state_distributions_[i](generator_);
     }
     return q_rand;
 }
 
-void KinematicTree::setJointLimitsLower(Eigen::VectorXdRefConst lower_in)
+void KinematicTree::SetJointLimitsLower(Eigen::VectorXdRefConst lower_in)
 {
-    if (lower_in.rows() == NumControlledJoints)
+    if (lower_in.rows() == num_controlled_joints_)
     {
-        for (unsigned int i = 0; i < NumControlledJoints; i++)
+        for (unsigned int i = 0; i < num_controlled_joints_; ++i)
         {
-            ControlledJoints[i].lock()->JointLimits[0] = lower_in(i);
+            controlled_joints_[i].lock()->joint_limits[0] = lower_in(i);
         }
     }
     else
     {
-        throw_pretty("Got " << lower_in.rows() << " but " << NumControlledJoints << " expected.");
+        ThrowPretty("Got " << lower_in.rows() << " but " << num_controlled_joints_ << " expected.");
     }
 
-    updateJointLimits();
+    UpdateJointLimits();
 }
 
-void KinematicTree::setJointLimitsUpper(Eigen::VectorXdRefConst upper_in)
+void KinematicTree::SetJointLimitsUpper(Eigen::VectorXdRefConst upper_in)
 {
-    if (upper_in.rows() == NumControlledJoints)
+    if (upper_in.rows() == num_controlled_joints_)
     {
-        for (unsigned int i = 0; i < NumControlledJoints; i++)
+        for (unsigned int i = 0; i < num_controlled_joints_; ++i)
         {
-            ControlledJoints[i].lock()->JointLimits[1] = upper_in(i);
+            controlled_joints_[i].lock()->joint_limits[1] = upper_in(i);
         }
     }
     else
     {
-        throw_pretty("Got " << upper_in.rows() << " but " << NumControlledJoints << " expected.");
+        ThrowPretty("Got " << upper_in.rows() << " but " << num_controlled_joints_ << " expected.");
     }
 
-    updateJointLimits();
+    UpdateJointLimits();
 }
 
-void KinematicTree::setFloatingBaseLimitsPosXYZEulerZYX(
+void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
     const std::vector<double>& lower, const std::vector<double>& upper)
 {
-    if (ControlledBaseType != BASE_TYPE::FLOATING)
+    if (controlled_base_type_ != BaseType::FLOATING)
     {
-        throw_pretty("This is not a floating joint!");
+        ThrowPretty("This is not a floating joint!");
     }
     if (lower.size() != 6 || upper.size() != 6)
     {
-        throw_pretty("Wrong limit data size!");
+        ThrowPretty("Wrong limit data size!");
     }
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; ++i)
     {
-        ControlledJoints[i].lock()->JointLimits = {lower[i], upper[i]};
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
     }
 
-    updateJointLimits();
+    UpdateJointLimits();
 }
 
-void KinematicTree::setPlanarBaseLimitsPosXYEulerZ(
+void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
     const std::vector<double>& lower, const std::vector<double>& upper)
 {
-    if (ControlledBaseType != BASE_TYPE::PLANAR)
+    if (controlled_base_type_ != BaseType::PLANAR)
     {
-        throw_pretty("This is not a planar joint!");
+        ThrowPretty("This is not a planar joint!");
     }
     if (lower.size() != 3 || upper.size() != 3)
     {
-        throw_pretty("Wrong limit data size!");
+        ThrowPretty("Wrong limit data size!");
     }
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; ++i)
     {
-        ControlledJoints[i].lock()->JointLimits = {lower[i], upper[i]};
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
     }
 
-    updateJointLimits();
+    UpdateJointLimits();
 }
 
-void KinematicTree::resetJointLimits()
+void KinematicTree::ResetJointLimits()
 {
-    std::vector<std::string> vars = Model->getVariableNames();
-    for (int i = 0; i < vars.size(); i++)
+    std::vector<std::string> vars = model_->getVariableNames();
+    for (int i = 0; i < vars.size(); ++i)
     {
-        if (ControlledJointsMap.find(vars[i]) != ControlledJointsMap.end())
+        if (controlled_joints_map_.find(vars[i]) != controlled_joints_map_.end())
         {
-            auto& ControlledJoint = ControlledJointsMap.at(vars[i]);
-            int index = ControlledJoint.lock()->ControlId;
-            ControlledJoints[index].lock()->JointLimits = {Model->getVariableBounds(vars[i]).min_position_, Model->getVariableBounds(vars[i]).max_position_};
+            auto& ControlledJoint = controlled_joints_map_.at(vars[i]);
+            int index = ControlledJoint.lock()->control_id;
+            controlled_joints_[index].lock()->joint_limits = {model_->getVariableBounds(vars[i]).min_position_, model_->getVariableBounds(vars[i]).max_position_};
         }
     }
 
@@ -926,93 +928,93 @@ void KinematicTree::resetJointLimits()
     ///	Should be done more systematically with robot model class
     constexpr double inf = std::numeric_limits<double>::infinity();
     constexpr double pi = std::atan(1) * 4;
-    if (ControlledBaseType == BASE_TYPE::FLOATING)
+    if (controlled_base_type_ == BaseType::FLOATING)
     {
-        ControlledJoints[0].lock()->JointLimits = {-inf, inf};
-        ControlledJoints[1].lock()->JointLimits = {-inf, inf};
-        ControlledJoints[2].lock()->JointLimits = {-inf, inf};
-        ControlledJoints[3].lock()->JointLimits = {-pi, pi};
-        ControlledJoints[4].lock()->JointLimits = {-pi, pi};
-        ControlledJoints[5].lock()->JointLimits = {-pi, pi};
+        controlled_joints_[0].lock()->joint_limits = {-inf, inf};
+        controlled_joints_[1].lock()->joint_limits = {-inf, inf};
+        controlled_joints_[2].lock()->joint_limits = {-inf, inf};
+        controlled_joints_[3].lock()->joint_limits = {-pi, pi};
+        controlled_joints_[4].lock()->joint_limits = {-pi, pi};
+        controlled_joints_[5].lock()->joint_limits = {-pi, pi};
     }
-    else if (ControlledBaseType == BASE_TYPE::PLANAR)
+    else if (controlled_base_type_ == BaseType::PLANAR)
     {
-        ControlledJoints[0].lock()->JointLimits = {-inf, inf};
-        ControlledJoints[1].lock()->JointLimits = {-inf, inf};
-        ControlledJoints[2].lock()->JointLimits = {-pi, pi};
+        controlled_joints_[0].lock()->joint_limits = {-inf, inf};
+        controlled_joints_[1].lock()->joint_limits = {-inf, inf};
+        controlled_joints_[2].lock()->joint_limits = {-pi, pi};
     }
 
-    updateJointLimits();
+    UpdateJointLimits();
 }
 
-void KinematicTree::updateJointLimits()
+void KinematicTree::UpdateJointLimits()
 {
-    jointLimits_.setZero();
-    for (int i = 0; i < NumControlledJoints; i++)
+    joint_limits_.setZero();
+    for (int i = 0; i < num_controlled_joints_; ++i)
     {
-        jointLimits_(i, 0) = ControlledJoints[i].lock()->JointLimits[0];
-        jointLimits_(i, 1) = ControlledJoints[i].lock()->JointLimits[1];
+        joint_limits_(i, 0) = controlled_joints_[i].lock()->joint_limits[0];
+        joint_limits_(i, 1) = controlled_joints_[i].lock()->joint_limits[1];
     }
 
     // Update random state distributions for generating random controlled states
     random_state_distributions_.clear();
-    for (unsigned int i = 0; i < NumControlledJoints; i++)
+    for (unsigned int i = 0; i < num_controlled_joints_; ++i)
     {
-        random_state_distributions_.push_back(std::uniform_real_distribution<double>(jointLimits_(i, 0), jointLimits_(i, 1)));
+        random_state_distributions_.push_back(std::uniform_real_distribution<double>(joint_limits_(i, 0), joint_limits_(i, 1)));
     }
 }
 
-std::string KinematicTree::getRootFrameName()
+std::string KinematicTree::GetRootFrameName()
 {
-    return Root->Segment.getName();
+    return root_->segment.getName();
 }
 
-std::string KinematicTree::getRootJointName()
+std::string KinematicTree::GetRootJointName()
 {
     return root_joint_name_;
 }
 
-Eigen::VectorXd KinematicTree::getModelState()
+Eigen::VectorXd KinematicTree::GetModelState()
 {
-    Eigen::VectorXd ret(ModelJointsNames.size());
+    Eigen::VectorXd ret(model_joints_names_.size());
 
-    for (int i = 0; i < ModelJointsNames.size(); i++)
+    for (int i = 0; i < model_joints_names_.size(); ++i)
     {
-        ret(i) = TreeState(ModelJointsMap.at(ModelJointsNames[i]).lock()->Id);
+        ret(i) = tree_state_(model_joints_map_.at(model_joints_names_[i]).lock()->id);
     }
     return ret;
 }
 
-std::map<std::string, double> KinematicTree::getModelStateMap()
+std::map<std::string, double> KinematicTree::GetModelStateMap()
 {
     std::map<std::string, double> ret;
-    for (std::string& jointName : ModelJointsNames)
+    for (std::string& joint_name : model_joints_names_)
     {
-        ret[jointName] = TreeState(ModelJointsMap.at(jointName).lock()->Id);
+        ret[joint_name] = tree_state_(model_joints_map_.at(joint_name).lock()->id);
     }
     return ret;
 }
 
-std::vector<std::string> KinematicTree::getKinematicChain(const std::string& begin, const std::string& end)
+std::vector<std::string> KinematicTree::GetKinematicChain(const std::string& begin, const std::string& end)
 {
     // check existence of requested links
     for (const std::string& l : {begin, end})
     {
-        if (!TreeMap.count(l))
+        if (!tree_map_.count(l))
         {
-            throw_pretty("Link '" + l + "' does not exist.");
+            ThrowPretty("Link '" + l + "' does not exist.");
         }
     }
 
     // get chain in reverse order, end...begin
     std::vector<std::string> chain;
-    for (std::weak_ptr<KinematicElement> l = TreeMap.at(end);
-         l.lock()->Segment.getName() != begin;
-         l = l.lock()->Parent, chain.push_back(l.lock()->Segment.getJoint().getName()))
+    for (std::weak_ptr<KinematicElement> l = tree_map_.at(end);
+         l.lock()->segment.getName() != begin;
+         l = l.lock()->parent, chain.push_back(l.lock()->segment.getJoint().getName()))
     {
-        if (l.lock()->Parent.lock() == nullptr)
+        if (l.lock()->parent.lock() == nullptr)
         {
-            throw_pretty("There is no connection between '" + begin + "' and '" + end + "'!");
+            ThrowPretty("There is no connection between '" + begin + "' and '" + end + "'!");
         }
     }
 
@@ -1021,76 +1023,76 @@ std::vector<std::string> KinematicTree::getKinematicChain(const std::string& beg
     return chain;
 }
 
-void KinematicTree::setModelState(Eigen::VectorXdRefConst x)
+void KinematicTree::SetModelState(Eigen::VectorXdRefConst x)
 {
-    if (x.rows() != ModelJointsNames.size()) throw_pretty("Model state vector has wrong size, expected " << ModelJointsNames.size() << " got " << x.rows());
-    for (int i = 0; i < ModelJointsNames.size(); i++)
+    if (x.rows() != model_joints_names_.size()) ThrowPretty("Model state vector has wrong size, expected " << model_joints_names_.size() << " got " << x.rows());
+    for (int i = 0; i < model_joints_names_.size(); ++i)
     {
-        TreeState(ModelJointsMap.at(ModelJointsNames[i]).lock()->Id) = x(i);
+        tree_state_(model_joints_map_.at(model_joints_names_[i]).lock()->id) = x(i);
     }
     UpdateTree();
     UpdateFK();
-    if (Flags & KIN_J) UpdateJ();
-    if (Debug) publishFrames();
+    if (flags_ & KIN_J) UpdateJ();
+    if (debug) PublishFrames();
 }
 
-void KinematicTree::setModelState(std::map<std::string, double> x)
+void KinematicTree::SetModelState(std::map<std::string, double> x)
 {
     for (auto& joint : x)
     {
         try
         {
-            TreeState(ModelJointsMap.at(joint.first).lock()->Id) = joint.second;
+            tree_state_(model_joints_map_.at(joint.first).lock()->id) = joint.second;
         }
         catch (const std::out_of_range& e)
         {
-            throw_pretty("Robot model does not contain joint '" << joint.first << "'");
+            ThrowPretty("Robot model does not contain joint '" << joint.first << "'");
         }
     }
     UpdateTree();
     UpdateFK();
-    if (Flags & KIN_J) UpdateJ();
-    if (Debug) publishFrames();
+    if (flags_ & KIN_J) UpdateJ();
+    if (debug) PublishFrames();
 }
 
-Eigen::VectorXd KinematicTree::getControlledState()
+Eigen::VectorXd KinematicTree::GetControlledState()
 {
-    Eigen::VectorXd x(NumControlledJoints);
-    for (int i = 0; i < ControlledJoints.size(); i++)
+    Eigen::VectorXd x(num_controlled_joints_);
+    for (int i = 0; i < controlled_joints_.size(); ++i)
     {
-        x(i) = TreeState(ControlledJoints[i].lock()->Id);
+        x(i) = tree_state_(controlled_joints_[i].lock()->id);
     }
     return x;
 }
 
-bool KinematicTree::hasModelLink(const std::string& link)
+bool KinematicTree::HasModelLink(const std::string& link)
 {
-    return std::find(std::begin(ModelLinkNames), std::end(ModelLinkNames), link) != std::end(ModelLinkNames);
+    return std::find(std::begin(model_link_names_), std::end(model_link_names_), link) != std::end(model_link_names_);
 }
 
-Eigen::VectorXd KinematicTree::getControlledLinkMass()
+Eigen::VectorXd KinematicTree::GetControlledLinkMass()
 {
-    Eigen::VectorXd x(NumControlledJoints);
-    for (int i = 0; i < ControlledJoints.size(); i++)
+    Eigen::VectorXd x(num_controlled_joints_);
+    for (int i = 0; i < controlled_joints_.size(); ++i)
     {
-        x(i) = ControlledJoints[i].lock()->Segment.getInertia().getMass();
+        x(i) = controlled_joints_[i].lock()->segment.getInertia().getMass();
     }
     return x;
 }
 
-std::map<std::string, shapes::ShapeType> KinematicTree::getCollisionObjectTypes()
+std::map<std::string, shapes::ShapeType> KinematicTree::GetCollisionObjectTypes()
 {
     std::map<std::string, shapes::ShapeType> ret;
-    for (const auto& element : CollisionTreeMap)
+    for (const auto& element : collision_tree_map_)
     {
-        ret[element.second.lock()->Segment.getName()] = element.second.lock()->Shape->type;
+        ret[element.second.lock()->segment.getName()] = element.second.lock()->shape->type;
     }
     return ret;
 }
 
-bool KinematicTree::doesLinkWithNameExist(std::string name)
+bool KinematicTree::DoesLinkWithNameExist(std::string name)
 {
-    // Check whether it exists in TreeMap, which should encompass both EnvironmentTree and ModelTree
-    return TreeMap.find(name) != TreeMap.end();
+    // Check whether it exists in TreeMap, which should encompass both EnvironmentTree and model_tree_
+    return tree_map_.find(name) != tree_map_.end();
 }
 }

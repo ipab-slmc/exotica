@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <PRMConfig>
 
-  <LazyPRM Name="MultiQuerySolver" MultiQuery="1" Timeout="10"/>
+  <LazyPRMSolver Name="MultiQuerySolver" MultiQuery="1" Timeout="10"/>
 
   <SamplingProblem Name="ReachingProblem">
 

@@ -30,24 +30,24 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 configure_file("src/version.cpp.in" "${exotica_core_BINARY_DIR}/generated/version.cpp" @ONLY)
 
 AddInitializer(
-  TaskMap
-  Object
-  Frame
-  Link
-  AttachLink
-  MotionSolver
-  PlanningProblem
-  Scene
-  Trajectory
-  UnconstrainedTimeIndexedProblem
-  UnconstrainedEndPoseProblem
-  SamplingProblem
-  TimeIndexedSamplingProblem
-  Task
-  TimeIndexedProblem
-  EndPoseProblem
-  BoundedTimeIndexedProblem
-  BoundedEndPoseProblem
+  task_map
+  object
+  frame
+  link
+  attach_link
+  motion_solver
+  planning_problem
+  scene
+  trajectory
+  unconstrained_time_indexed_problem
+  unconstrained_end_pose_problem
+  sampling_problem
+  time_indexed_sampling_problem
+  task
+  time_indexed_problem
+  end_pose_problem
+  bounded_time_indexed_problem
+  bounded_end_pose_problem
 )
 GenInitializers()
 
@@ -98,7 +98,7 @@ add_library(${PROJECT_NAME}
   ${exotica_core_BINARY_DIR}/generated/version.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

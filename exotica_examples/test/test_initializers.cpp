@@ -1,34 +1,31 @@
-/*
- *      Author: Vladimir Ivan
- *
- * Copyright (c) 2018, University of Edinburgh
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of  nor the names of its contributors may be used to
- *    endorse or promote products derived from this software without specific
- *    prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//
+// Copyright (c) 2018, University of Edinburgh
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of  nor the names of its contributors may be used to
+//    endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
 
 #include <exotica_core/exotica_core.h>
 #include <gtest/gtest.h>
@@ -81,17 +78,17 @@ char** argv_;
 
 bool testCore()
 {
-    if (Setup::getSolvers().size() == 0)
+    if (Setup::GetSolvers().size() == 0)
     {
         ADD_FAILURE() << "Failed to find any solvers.";
         return false;
     }
-    if (Setup::getProblems().size() == 0)
+    if (Setup::GetProblems().size() == 0)
     {
         ADD_FAILURE() << "Failed to find any problems.";
         return false;
     }
-    if (Setup::getMaps().size() == 0)
+    if (Setup::GetMaps().size() == 0)
     {
         ADD_FAILURE() << "Failed to find any maps.";
         return false;
@@ -119,9 +116,9 @@ bool testGenericInit()
                                                {"MaxStep", 0.1},
                                                {"C", 1e-3},
                                            });
-    Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
-    MotionSolver_ptr any_solver = Setup::createSolver(solver);
+    Server::Instance()->GetModel("robot_description", urdf_string, srdf_string);
+    PlanningProblemPtr any_problem = Setup::CreateProblem(problem);
+    MotionSolverPtr any_solver = Setup::CreateSolver(solver);
     return true;
 }
 
@@ -129,9 +126,9 @@ bool testXMLInit()
 {
     std::string XMLstring = "<IKSolverDemoConfig><IKSolver Name=\"MySolver\"><MaxIterations>1</MaxIterations><MaxStep>0.1</MaxStep><C>1e-3</C></IKSolver><UnconstrainedEndPoseProblem Name=\"MyProblem\"><PlanningScene><Scene Name=\"MyScene\"><JointGroup>arm</JointGroup></Scene></PlanningScene><Maps><EffPosition Name=\"Position\"><Scene>MyScene</Scene><EndEffector><Frame Link=\"endeff\" /></EndEffector></EffPosition></Maps><W> 3 2 1 </W></UnconstrainedEndPoseProblem></IKSolverDemoConfig>";
     Initializer solver, problem;
-    XMLLoader::load(XMLstring, solver, problem, "", "", true);
-    PlanningProblem_ptr any_problem = Setup::createProblem(problem);
-    MotionSolver_ptr any_solver = Setup::createSolver(solver);
+    XMLLoader::Load(XMLstring, solver, problem, "", "", true);
+    PlanningProblemPtr any_problem = Setup::CreateProblem(problem);
+    MotionSolverPtr any_solver = Setup::CreateSolver(solver);
     return true;
 }
 
@@ -140,7 +137,7 @@ bool testRos()
     {
         TEST_COUT << "Parsing EXOTica paths...";
         std::string path1 = ros::package::getPath("exotica_core");
-        std::string path2 = parsePath("{exotica_core}");
+        std::string path2 = ParsePath("{exotica_core}");
         if (path1 != path2)
             ADD_FAILURE() << "Failed when parsing paths:\n"
                           << path1 << "\n"
@@ -148,25 +145,25 @@ bool testRos()
     }
 
     // Reset server
-    Server::destroy();
+    Server::Destroy();
 
-    if (Server::isRos()) throw_pretty("ROS node initialized, but it shouldn't have been!");
+    if (Server::IsRos()) ThrowPretty("ROS node initialized, but it shouldn't have been!");
 
     // Fail when ROS node has not been initialized
     try
     {
-        Server::Instance()->getNodeHandle();
+        Server::Instance()->GetNodeHandle();
         return false;
     }
     catch (Exception& e)
     {
     }
 
-    if (Server::hasParam("/rosdistro")) throw_pretty("ROS param retrieved, but shouldn't have!");
+    if (Server::HasParam("/rosdistro")) ThrowPretty("ROS param retrieved, but shouldn't have!");
     try
     {
         std::string param;
-        Server::getParam("/rosdistro", param);
+        Server::GetParam("/rosdistro", param);
         return false;
     }
     catch (Exception& e)
@@ -174,16 +171,16 @@ bool testRos()
     }
 
     // Load robot model into cache from a file
-    Server::Instance()->getModel("robot_description", urdf_string, srdf_string);
+    Server::Instance()->GetModel("robot_description", urdf_string, srdf_string);
     // Load model from the cache
-    Server::Instance()->getModel("robot_description");
+    Server::Instance()->GetModel("robot_description");
     // Reset server, deleting the model cache
-    Server::destroy();
+    Server::Destroy();
     // Attempt to load model from the empty cache
     try
     {
         // Fails because URDF/SRDF are not specified and ROS node is not running to load model from ROS params.
-        Server::Instance()->getModel("robot_description");
+        Server::Instance()->GetModel("robot_description");
         return false;
     }
     catch (Exception& e)

@@ -1,2 +1,0 @@
-extend <exotica_ompl_solver/OMPLSolver>
-Optional bool MultiQuery = false;

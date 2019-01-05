@@ -22,9 +22,9 @@
     </PlanningScene>
 
     <Maps>
-      <Identity Name="Pose">
+      <JointPose Name="Pose">
         <JointRef>2.16939 1.313509 -2.2954 1.94413 -0.276843 0.567194 0</JointRef>
-      </Identity>
+      </JointPose>
       <SphereCollision Name="Collision">
         <Debug>1</Debug>
         <Precision>0.1</Precision>

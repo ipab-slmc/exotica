@@ -19,14 +19,11 @@ where the initializers are stored.
 Finding Initializers
 ====================
 
-Initialization options for all problems and solvers can be found in the
-source code in the following locations:
+Initialization options for problems, solvers, task maps, ets. can be found in the following location inside the respective packages:
 
 ::
 
-    Problems: exotica/exotica/init/<ProblemName>.in
-
-    Solvers: exotica/exotations/solvers/<SolverName>/init/<SolverName>.in
+    Problems: <package_name>/init/<initializer>.in
    
 Initializer Layout
 ==================
@@ -39,12 +36,11 @@ that can be set when we initialize the problem.
 
 .. code-block:: shell
 
-    <!--UnconstrainedEndPoseProblem init options--> 
+    // UnconstrainedEndPoseProblemInitializer
 
     extend <exotica/PlanningProblem>
+    Optional std::vector<exotica::Initializer> Cost = std::vector<exotica::Initializer>();
     Optional Eigen::VectorXd W = Eigen::VectorXd();
-    Optional Eigen::VectorXd Rho = Eigen::VectorXd();
-    Optional Eigen::VectorXd Goal = Eigen::VectorXd();
     Optional Eigen::VectorXd NominalState = Eigen::VectorXd();
 
 In this case, all the parameters are optional and will have default values assigned to them. 
@@ -55,14 +51,17 @@ parameters. This is seen below:
 
 .. code-block:: shell
 
+    // PlanningProblemInitializer
+
     include <exotica/SceneInitializer>
     extend <exotica/Object>
     Required exotica::Initializer PlanningScene; # SceneInitializer
     Optional std::vector<exotica::Initializer> Maps = std::vector<exotica::Initializer>();
     Optional Eigen::VectorXd StartState = Eigen::VectorXd();
     Optional double StartTime = 0;
+    Optional int DerivativeOrder = -1;
 
-This requires us to specify as scene in which the solver will operate, as well as start states and
+This requires us to specify the scene in which the solver will operate, as well as start states and
 task maps (which we will look at later). In all, after extending both the 
 PlanningSceneInitializer and the Object initializer (which takes a name and debug argument), 
 the whole initializer for our UnconstrainedEndPoseProblem looks like this: 
@@ -70,18 +69,15 @@ the whole initializer for our UnconstrainedEndPoseProblem looks like this:
 .. code-block:: xml
 
     Required std::string Name;
-    Optional bool Debug = false;
     Required exotica::Initializer PlanningScene; # SceneInitializer
+    Optional bool Debug = false;
     Optional std::vector<exotica::Initializer> Maps = std::vector<exotica::Initializer>();
     Optional Eigen::VectorXd StartState = Eigen::VectorXd();
     Optional double StartTime = 0;
+    Optional int DerivativeOrder = -1;
+    Optional std::vector<exotica::Initializer> Cost = std::vector<exotica::Initializer>();
     Optional Eigen::VectorXd W = Eigen::VectorXd();
-    Optional Eigen::VectorXd Rho = Eigen::VectorXd();
-    Optional Eigen::VectorXd Goal = Eigen::VectorXd();
     Optional Eigen::VectorXd NominalState = Eigen::VectorXd();
 
 This shows us that the very least that is required to initialize a problem is a name for the problem
-and the name of the scene that the problem operates in. Other problems are also laid out in a similar fashion. The optional elements offer a powerful customisation tool for out motion planner. 
-
-Now we have seen the layout of the initializers, the next step is to use these options in initializing EXOTica, 
-which can be done via `XML <XML.html>`__ or `C++ <Manual-Initialisation.html>`__. We will first look at XML initialization.
+and the planning scene that the problem operates in. Other problems are also laid out in a similar fashion. The optional elements offer a powerful customisation tool for out motion planner.

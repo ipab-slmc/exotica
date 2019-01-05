@@ -7,7 +7,7 @@ Packages, files and directories
 
 - Package names in lower case with underscores and exotica prefix:
 
-  .. code-block::
+ ::
 
         exotica
         exotica_python
@@ -20,10 +20,10 @@ Packages, files and directories
 
 - All solver packages with ``_solver`` suffix.
 - All task map packages with ``_taskmaps`` suffix (or ``_taskmap`` if it contains only a single task map).
-- File names: ``with_underscores.cpp``, ``with_underscores.h``, ``with_underscores.py`` (don't use *.cc, *.hpp, ... file types)
+- File names: ``with_underscores.cpp``, ``with_underscores.h``, ``with_underscores.py`` (don\'t use *.cc, *.hpp, ... file types)
 - Directory structure:
 
-  .. code-block::
+  ::
 
         package_name\
         package_name\launch\ (*.launch)

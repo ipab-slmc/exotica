@@ -1,6 +1,8 @@
-*************
-Using EXOTica
-*************
+********************************
+Solving planning problems in c++
+********************************
+
+**THIS TUTORIAL IS OUT OF DATE!!! THE API MAY HAVE CHANGED!**
 
 This part of the tutorial assumes that you have completed the previous 
 step. We will work off the same code and get on with solving some motion 

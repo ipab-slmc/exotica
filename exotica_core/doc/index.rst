@@ -13,7 +13,7 @@ For home page go
 
 
 Getting started
-========
+===============
 
 .. toctree::
    :maxdepth: 1
@@ -46,10 +46,12 @@ EXOTica and using it with your own robot.
 
    own_robot
    initialization
+   manual_initialization
    XML
    XML-Parsing
    Common-Initialization-Step
    Setting-up-ROSlaunch
+   Setting-up-problems-and-solvers
    advanced/task_space_vector
 
 

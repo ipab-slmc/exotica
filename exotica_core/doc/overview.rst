@@ -121,7 +121,7 @@ The following task maps are implemented in EXOTica:
     :maxdepth: 2
     :caption: Joint space task maps
 
-    task_maps/joint_position
+    task_maps/joint_pose
     task_maps/joint_limits
 
 .. toctree::

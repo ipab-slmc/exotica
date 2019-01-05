@@ -1,7 +1,7 @@
 ..  _installation:
 
 ******************
-Insatlling EXOTica
+Installing EXOTica
 ******************
 
 Prerequisites

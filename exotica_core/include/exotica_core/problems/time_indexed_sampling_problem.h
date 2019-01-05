@@ -88,7 +88,7 @@ private:
     Eigen::VectorXd goal_;
 };
 
-typedef std::shared_ptr<exotica::TimeIndexedSamplingProblem> TimeIndexedSamplingProblem_ptr;
+typedef std::shared_ptr<exotica::TimeIndexedSamplingProblem> TimeIndexedSamplingProblemPtr;
 }
 
 #endif  // EXOTICA_CORE_TIME_INDEXED_SAMPLING_PROBLEM_H_

@@ -11,7 +11,7 @@ the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.c
 
 .. code-block:: c++
 
-        #include <exotica/Exotica.h>
+        #include <exotica_core/exotica_core.h>
 
         // Manual initialization requires dependency on specific solvers and task maps:
         #include <exotica_ik_solver/IKSolverInitializer.h>
@@ -189,7 +189,7 @@ are seen below:
 
 .. code-block:: xml
 
-        extend <exotica/MotionSolver>
+        extend <exotica_core/MotionSolver>
         Optional double Tolerance = 1e-5;
         Optional double Convergence = 0.0;
         Optional int MaxIterations = 50;

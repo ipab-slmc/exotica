@@ -599,7 +599,7 @@ TEST(ExoticaTaskMaps, testIdentity)
     try
     {
         TEST_COUT << "Identity test";
-        Initializer map("exotica/Identity", {{"Name", std::string("MyTask")}});
+        Initializer map("exotica/JointPose", {{"Name", std::string("MyTask")}});
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
@@ -633,8 +633,8 @@ TEST(ExoticaTaskMaps, testIdentity)
         EXPECT_TRUE(test_jacobian(problem));
 
         TEST_COUT << "Identity test with reference";
-        map = Initializer("exotica/Identity", {{"Name", std::string("MyTask")},
-                                               {"JointRef", std::string("0.5 0.5 0.5")}});
+        map = Initializer("exotica/JointPose", {{"Name", std::string("MyTask")},
+                                                {"JointRef", std::string("0.5 0.5 0.5")}});
         problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
@@ -668,8 +668,8 @@ TEST(ExoticaTaskMaps, testIdentity)
         EXPECT_TRUE(test_jacobian(problem));
 
         TEST_COUT << "Identity test with subset of joints";
-        map = Initializer("exotica/Identity", {{"Name", std::string("MyTask")},
-                                               {"JointMap", std::string("0")}});
+        map = Initializer("exotica/JointPose", {{"Name", std::string("MyTask")},
+                                                {"JointMap", std::string("0")}});
         problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 
@@ -852,11 +852,11 @@ TEST(ExoticaTaskMaps, testIMesh)
     try
     {
         TEST_COUT << "Interaction mesh test";
-        Initializer map("exotica/IMesh", {{"Name", std::string("MyTask")},
-                                          {"ReferenceFrame", std::string("base")},
-                                          {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}}),
-                                                                                    Initializer("Frame", {{"Link", std::string("link2")}}),
-                                                                                    Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+        Initializer map("exotica/InteractionMesh", {{"Name", std::string("MyTask")},
+                                                    {"ReferenceFrame", std::string("base")},
+                                                    {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}}),
+                                                                                              Initializer("Frame", {{"Link", std::string("link2")}}),
+                                                                                              Initializer("Frame", {{"Link", std::string("endeff")}})})}});
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
 

@@ -21,7 +21,7 @@ AddInitializer(
   joint_velocity_limit
   distance
   point_to_line
-  identity
+  joint_pose
   sphere_collision
   sphere
   collision_check
@@ -58,7 +58,7 @@ set(SOURCES
     src/distance.cpp
     src/point_to_line.cpp
     src/point_to_plane.cpp
-    src/identity.cpp
+    src/joint_pose.cpp
     src/sphere_collision.cpp
     src/collision_check.cpp
     src/quasi_static.cpp

@@ -32,17 +32,17 @@
 
 #include <exotica_core/task_map.h>
 
-#include <exotica_core_task_maps/identity_initializer.h>
+#include <exotica_core_task_maps/joint_pose_initializer.h>
 
 namespace exotica
 {
-class Identity : public TaskMap, public Instantiable<IdentityInitializer>
+class JointPose : public TaskMap, public Instantiable<JointPoseInitializer>
 {
 public:
-    Identity();
-    virtual ~Identity();
+    JointPose();
+    virtual ~JointPose();
 
-    void Instantiate(IdentityInitializer& init) override;
+    void Instantiate(JointPoseInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -57,7 +57,7 @@ public:
 private:
     void Initialize();
 
-    IdentityInitializer init_;
+    JointPoseInitializer init_;
 };
 }
 

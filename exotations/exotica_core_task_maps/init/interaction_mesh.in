@@ -1,4 +1,4 @@
-class IMesh
+class InteractionMesh
 
 extend <exotica_core/task_map>
 

@@ -39,13 +39,13 @@
 
 namespace exotica
 {
-class IMesh : public TaskMap, public Instantiable<IMeshInitializer>
+class InteractionMesh : public TaskMap, public Instantiable<InteractionMeshInitializer>
 {
 public:
-    IMesh();
-    virtual ~IMesh();
+    InteractionMesh();
+    virtual ~InteractionMesh();
 
-    void Instantiate(IMeshInitializer& init) override;
+    void Instantiate(InteractionMeshInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;

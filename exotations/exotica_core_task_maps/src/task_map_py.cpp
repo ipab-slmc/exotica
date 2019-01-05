@@ -39,11 +39,11 @@
 #include <exotica_core_task_maps/eff_frame.h>
 #include <exotica_core_task_maps/eff_orientation.h>
 #include <exotica_core_task_maps/eff_position.h>
-#include <exotica_core_task_maps/identity.h>
 #include <exotica_core_task_maps/interaction_mesh.h>
 #include <exotica_core_task_maps/joint_acceleration_backward_difference.h>
 #include <exotica_core_task_maps/joint_jerk_backward_difference.h>
 #include <exotica_core_task_maps/joint_limit.h>
+#include <exotica_core_task_maps/joint_pose.h>
 #include <exotica_core_task_maps/joint_velocity_backward_difference.h>
 #include <exotica_core_task_maps/look_at.h>
 #include <exotica_core_task_maps/point_to_line.h>
@@ -91,21 +91,21 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
 
     py::class_<Distance, std::shared_ptr<Distance>, TaskMap>(module, "Distance");
 
-    py::class_<Identity, std::shared_ptr<Identity>, TaskMap>(module, "Identity")
-        .def_readonly("N", &Identity::N_)
-        .def_readonly("joint_map", &Identity::joint_map_)
-        .def_readwrite("joint_ref", &Identity::joint_ref_);
+    py::class_<JointPose, std::shared_ptr<JointPose>, TaskMap>(module, "JointPose")
+        .def_readonly("N", &JointPose::N_)
+        .def_readonly("joint_map", &JointPose::joint_map_)
+        .def_readwrite("joint_ref", &JointPose::joint_ref_);
 
-    py::class_<IMesh, std::shared_ptr<IMesh>, TaskMap>(module, "IMesh")
-        .def_property("W", &IMesh::GetWeights, &IMesh::SetWeights)
-        .def("set_weight", &IMesh::SetWeight)
+    py::class_<InteractionMesh, std::shared_ptr<InteractionMesh>, TaskMap>(module, "InteractionMesh")
+        .def_property("W", &InteractionMesh::GetWeights, &InteractionMesh::SetWeights)
+        .def("set_weight", &InteractionMesh::SetWeight)
         .def_static("compute_goal_laplace", [](const std::vector<KDL::Frame>& nodes, Eigen::MatrixXdRefConst weights) {
             Eigen::VectorXd goal;
-            IMesh::ComputeGoalLaplace(nodes, goal, weights);
+            InteractionMesh::ComputeGoalLaplace(nodes, goal, weights);
             return goal;
         })
         .def_static("compute_laplace", [](Eigen::VectorXdRefConst eff_phi, Eigen::MatrixXdRefConst weights) {
-            return IMesh::ComputeLaplace(eff_phi, weights);
+            return InteractionMesh::ComputeLaplace(eff_phi, weights);
         });
 
     py::class_<JointLimit, std::shared_ptr<JointLimit>, TaskMap>(module, "JointLimit");

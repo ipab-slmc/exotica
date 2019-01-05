@@ -1,4 +1,4 @@
-class Identity
+class JointPose
 
 extend <exotica_core/task_map>
 

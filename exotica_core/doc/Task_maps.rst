@@ -78,8 +78,8 @@ Initialization:
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string Type_ =  "RPY")
 
 
-IMesh
------
+InteractionMesh
+---------------
 
 See http://homepages.inf.ed.ac.uk/svijayak/publications/ivan-IJRR2013.pdf for details about iMesh
 
@@ -89,8 +89,8 @@ Initialization:
 
     ( std::string Name_, bool Debug_ =  false, std::vector<exotica::Initializer> EndEffector_ =  std::vector<exotica::Initializer>(), std::string ReferenceFrame_ =  "/world", Eigen::VectorXd Weights_ =  Eigen::VectorXd())
 
-Identity
---------
+JointPose
+---------
 
 The position of a joint. Useful if you want to avoid a certain position. 
 

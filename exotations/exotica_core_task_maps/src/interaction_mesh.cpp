@@ -30,14 +30,14 @@
 #include <exotica_core/server.h>
 #include <exotica_core_task_maps/interaction_mesh.h>
 
-REGISTER_TASKMAP_TYPE("IMesh", exotica::IMesh);
+REGISTER_TASKMAP_TYPE("InteractionMesh", exotica::InteractionMesh);
 
 namespace exotica
 {
-IMesh::IMesh() = default;
-IMesh::~IMesh() = default;
+InteractionMesh::InteractionMesh() = default;
+InteractionMesh::~InteractionMesh() = default;
 
-void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void InteractionMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     int M = eff_size_;
 
@@ -55,7 +55,7 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     if (debug_) Debug(phi);
 }
 
-void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void InteractionMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     int M = eff_size_;
     int N = kinematics[0].jacobian[0].data.cols();
@@ -123,12 +123,12 @@ void IMesh::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Mat
     if (debug_) Debug(phi);
 }
 
-Eigen::MatrixXd IMesh::GetWeights()
+Eigen::MatrixXd InteractionMesh::GetWeights()
 {
     return weights_;
 }
 
-void IMesh::InitializeDebug(std::string ref)
+void InteractionMesh::InitializeDebug(std::string ref)
 {
     imesh_mark_.header.frame_id = ref;
     imesh_mark_.ns = GetObjectName();
@@ -136,7 +136,7 @@ void IMesh::InitializeDebug(std::string ref)
     if (debug_) HIGHLIGHT("InteractionMesh connectivity is published on ROS topic " << imesh_mark_pub_.getTopic() << ", in reference frame " << ref);
 }
 
-void IMesh::Instantiate(IMeshInitializer& init)
+void InteractionMesh::Instantiate(InteractionMeshInitializer& init)
 {
     if (debug_)
     {
@@ -152,12 +152,12 @@ void IMesh::Instantiate(IMeshInitializer& init)
     }
 }
 
-void IMesh::AssignScene(ScenePtr scene)
+void InteractionMesh::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
 }
 
-void IMesh::Debug(Eigen::VectorXdRefConst phi)
+void InteractionMesh::Debug(Eigen::VectorXdRefConst phi)
 {
     static int textid = 0;
     {
@@ -229,7 +229,7 @@ void IMesh::Debug(Eigen::VectorXdRefConst phi)
     }
 }
 
-void IMesh::DestroyDebug()
+void InteractionMesh::DestroyDebug()
 {
     imesh_mark_.points.clear();
     imesh_mark_.action = visualization_msgs::Marker::DELETE;
@@ -237,12 +237,12 @@ void IMesh::DestroyDebug()
     imesh_mark_pub_.publish(imesh_mark_);
 }
 
-int IMesh::TaskSpaceDim()
+int InteractionMesh::TaskSpaceDim()
 {
     return 3 * eff_size_;
 }
 
-Eigen::VectorXd IMesh::ComputeLaplace(Eigen::VectorXdRefConst eff_Phi, Eigen::MatrixXdRefConst weights, Eigen::MatrixXd* dist_ptr, Eigen::VectorXd* wsum_ptr)
+Eigen::VectorXd InteractionMesh::ComputeLaplace(Eigen::VectorXdRefConst eff_Phi, Eigen::MatrixXdRefConst weights, Eigen::MatrixXd* dist_ptr, Eigen::VectorXd* wsum_ptr)
 {
     int N = eff_Phi.rows() / 3;
     Eigen::VectorXd Phi = Eigen::VectorXd::Zero(N * 3);
@@ -290,7 +290,7 @@ Eigen::VectorXd IMesh::ComputeLaplace(Eigen::VectorXdRefConst eff_Phi, Eigen::Ma
     return Phi;
 }
 
-void IMesh::ComputeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd& goal, Eigen::MatrixXdRefConst weights)
+void InteractionMesh::ComputeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::VectorXd& goal, Eigen::MatrixXdRefConst weights)
 {
     int N = nodes.size();
     Eigen::VectorXd eff_Phi(3 * N);
@@ -303,7 +303,7 @@ void IMesh::ComputeGoalLaplace(const std::vector<KDL::Frame>& nodes, Eigen::Vect
     goal = ComputeLaplace(eff_Phi, weights);
 }
 
-void IMesh::ComputeGoalLaplace(const Eigen::VectorXd& x, Eigen::VectorXd& goal)
+void InteractionMesh::ComputeGoalLaplace(const Eigen::VectorXd& x, Eigen::VectorXd& goal)
 {
     scene_->Update(x);
     Eigen::VectorXd eff_Phi;
@@ -316,7 +316,7 @@ void IMesh::ComputeGoalLaplace(const Eigen::VectorXd& x, Eigen::VectorXd& goal)
     goal = ComputeLaplace(eff_Phi, weights_);
 }
 
-void IMesh::SetWeight(int i, int j, double weight)
+void InteractionMesh::SetWeight(int i, int j, double weight)
 {
     int M = weights_.cols();
     if (i < 0 || i >= M || j < 0 || j >= M)
@@ -330,7 +330,7 @@ void IMesh::SetWeight(int i, int j, double weight)
     weights_(i, j) = weight;
 }
 
-void IMesh::SetWeights(const Eigen::MatrixXd& weights)
+void InteractionMesh::SetWeights(const Eigen::MatrixXd& weights)
 {
     int M = weights_.cols();
     if (weights.rows() != M || weights.cols() != M)

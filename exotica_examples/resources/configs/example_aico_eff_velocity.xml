@@ -17,7 +17,7 @@
             <Frame Link="lwr_arm_7_link" />
         </EndEffector>
       </EffVelocity>
-      <Identity Name="Identity" />
+      <JointPose Name="Identity" />
     </Maps>
 
     <Cost>

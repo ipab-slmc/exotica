@@ -78,27 +78,27 @@ public:
             return *as<ompl::base::TimeStateSpace::StateType>(1);
         }
     };
-    OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblem_ptr &prob, TimeIndexedRRTConnectSolverInitializer init);
+    OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblemPtr &prob, TimeIndexedRRTConnectSolverInitializer init);
 
     ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
     void ExoticaToOMPLState(const Eigen::VectorXd &q, const double &t, ompl::base::State *state) const;
     void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q, double &t) const;
     void StateDebug(const Eigen::VectorXd &q) const;
 
-    TimeIndexedSamplingProblem_ptr prob_;
+    TimeIndexedSamplingProblemPtr prob_;
 };
 
 class OMPLTimeIndexedStateValidityChecker : public ompl::base::StateValidityChecker
 {
 public:
-    OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const TimeIndexedSamplingProblem_ptr &prob);
+    OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const TimeIndexedSamplingProblemPtr &prob);
 
     bool isValid(const ompl::base::State *state) const override;
 
     bool isValid(const ompl::base::State *state, double &dist) const override;
 
 protected:
-    TimeIndexedSamplingProblem_ptr prob_;
+    TimeIndexedSamplingProblemPtr prob_;
 };
 
 typedef boost::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
@@ -130,7 +130,7 @@ protected:
     void GetPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc);
 
     TimeIndexedRRTConnectSolverInitializer init_;
-    TimeIndexedSamplingProblem_ptr prob_;
+    TimeIndexedSamplingProblemPtr prob_;
     ompl::geometric::SimpleSetupPtr ompl_simple_setup_;
     ompl::base::StateSpacePtr state_space_;
     ConfiguredPlannerAllocator planner_allocator_;

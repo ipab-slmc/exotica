@@ -30,11 +30,14 @@
 #ifndef EXOTICA_CORE_PROPERTY_H_
 #define EXOTICA_CORE_PROPERTY_H_
 
-#include <boost/any.hpp>
-#include <initializer_list>
 #include <map>
 #include <memory>
 #include <string>
+
+#include <boost/any.hpp>
+#include <initializer_list>
+
+#include <exotica_core/tools/conversions.h>
 
 namespace exotica
 {

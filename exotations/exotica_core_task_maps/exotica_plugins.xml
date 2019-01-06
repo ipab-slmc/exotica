@@ -29,10 +29,10 @@
   <class name="exotica/SphereCollision" type="exotica::SphereCollision" base_class_type="exotica::TaskMap">
     <description>Sphere collision avoidance</description>
   </class>
-  <class name="exotica/Identity" type="exotica::Identity" base_class_type="exotica::TaskMap">
+  <class name="exotica/JointPose" type="exotica::JointPose" base_class_type="exotica::TaskMap">
     <description>Joint position reference</description>
   </class>
-  <class name="exotica/IMesh" type="exotica::IMesh" base_class_type="exotica::TaskMap">
+  <class name="exotica/InteractionMesh" type="exotica::InteractionMesh" base_class_type="exotica::TaskMap">
     <description>Interaction Mesh</description>
   </class>
   <class name="exotica/JointLimit" type="exotica::JointLimit" base_class_type="exotica::TaskMap">

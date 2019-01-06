@@ -27,16 +27,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <exotica_core_task_maps/identity.h>
+#include <exotica_core_task_maps/joint_pose.h>
 
-REGISTER_TASKMAP_TYPE("Identity", exotica::Identity);
+REGISTER_TASKMAP_TYPE("JointPose", exotica::JointPose);
 
 namespace exotica
 {
-Identity::Identity() = default;
-Identity::~Identity() = default;
+JointPose::JointPose() = default;
+JointPose::~JointPose() = default;
 
-void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < joint_map_.size(); ++i)
@@ -45,7 +45,7 @@ void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     }
 }
 
-void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != joint_map_.size() || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
@@ -57,7 +57,7 @@ void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::
     }
 }
 
-// void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot)
+// void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot)
 // {
 //     if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
 //     if (jacobian.rows() != joint_map_.size() || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
@@ -73,18 +73,18 @@ void Identity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::
 //     }
 // }
 
-void Identity::Instantiate(IdentityInitializer& init)
+void JointPose::Instantiate(JointPoseInitializer& init)
 {
     init_ = init;
 }
 
-void Identity::AssignScene(ScenePtr scene)
+void JointPose::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
     Initialize();
 }
 
-void Identity::Initialize()
+void JointPose::Initialize()
 {
     N_ = scene_->GetKinematicTree().GetNumControlledJoints();
     if (init_.JointMap.rows() > 0)
@@ -115,7 +115,7 @@ void Identity::Initialize()
     }
 }
 
-int Identity::TaskSpaceDim()
+int JointPose::TaskSpaceDim()
 {
     return joint_map_.size();
 }

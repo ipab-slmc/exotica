@@ -35,7 +35,7 @@ REGISTER_MOTIONSOLVER_TYPE("TimeIndexedRRTConnectSolver", exotica::TimeIndexedRR
 
 namespace exotica
 {
-OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblem_ptr &prob, TimeIndexedRRTConnectSolverInitializer init) : ompl::base::CompoundStateSpace(), prob_(prob)
+OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblemPtr &prob, TimeIndexedRRTConnectSolverInitializer init) : ompl::base::CompoundStateSpace(), prob_(prob)
 {
     setName("OMPLTimeIndexedRNStateSpace");
     unsigned int dim = prob->N;
@@ -73,7 +73,7 @@ void OMPLTimeIndexedRNStateSpace::StateDebug(const Eigen::VectorXd &q) const
 {
 }
 
-OMPLTimeIndexedStateValidityChecker::OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const TimeIndexedSamplingProblem_ptr &prob) : ompl::base::StateValidityChecker(si), prob_(prob)
+OMPLTimeIndexedStateValidityChecker::OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const TimeIndexedSamplingProblemPtr &prob) : ompl::base::StateValidityChecker(si), prob_(prob)
 {
 }
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-extensions = ['sphinx.ext.pngmath',
+extensions = ['sphinx.ext.mathjax',
               #'sphinx.ext.githubpages', # creates .nojekyll on generated directory, only in >1.4
               'sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',

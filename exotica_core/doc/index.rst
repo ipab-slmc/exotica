@@ -1,3 +1,5 @@
+..  _index:
+
 *******
 EXOTica
 *******
@@ -10,36 +12,14 @@ For home page go
 `here <http://wcms.inf.ed.ac.uk/ipab/slmc/research/EXOTica>`__.
 
 
-Overview
-========
-
--  `Installation <Installation.html>`_
--  `Quick Start: Python <Quickstart-python.html>`__
--  `Quick Start: C++ <Quickstart-cpp.html>`__
--  `Setting up Problems and Solvers <Setting-up-problems-and-solvers.html>`__
--  `Using EXOTica <Using-EXOTica.html>`_ 
-
--  `Getting Started With Your Own Robot <Getting-Started-With-Your-Own-Robot.html>`__
--  `Initialization <Initialisation.html>`__
-
-   -  XML
-
-      -  `XML Initialization <XML.html>`__
-      -  `XML Parsing <XML-Parsing.html>`__
-
-   -  `Manual Initialization <Manual-Initialisation.html>`__
-   -  `Common Initialization Step <Common-Initialisation-Step.html>`__
--  `Task Maps <Task_maps.html>`_ 
--  `Setting up ROSlaunch <Setting-up-ROSlaunch.html>`__
-
-
-Setup
-=====
+Getting started
+===============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   Installation
+   installation
+   overview
 
 Basics
 ======
@@ -48,12 +28,11 @@ In this section we'll explore the basics of setting up and using
 EXOTica with the included KUKA LWR_Simplified robot.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   Quickstart-python
-   Quickstart-cpp
-   Setting-up-problems-and-solvers
-   Using-EXOTica
+   quickstart_python
+   quickstart_cpp
+   using_exotica_cpp
 
 
 Advanced
@@ -63,15 +42,17 @@ With the advanced section, we look at different methods of initializing
 EXOTica and using it with your own robot. 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   Getting-Started-With-Your-Own-Robot
-   Initialization
+   own_robot
+   initialization
+   manual_initialization
    XML
    XML-Parsing
-   Manual-Initialization
    Common-Initialization-Step
    Setting-up-ROSlaunch
+   Setting-up-problems-and-solvers
+   advanced/task_space_vector
 
 
 Core Components/Concepts

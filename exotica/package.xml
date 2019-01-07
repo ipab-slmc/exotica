@@ -47,6 +47,8 @@
   <doc_depend>python-sphinx-rtd-theme</doc_depend>
 
   <export>
-    <rosdoc config="rosdoc.yaml" />
+    <metapackage/>
+    <!-- rosdoc_lite c++ generation does not yet work-->
+    <!-- <rosdoc config="rosdoc.yaml" /> -->
   </export>
 </package>

@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>exotica</name>
+  <version>5.0.0</version>
+  <description>The Extensible Optimization Toolset (EXOTica) is a library for defining problems for robot motion planning. This package serves similar to a metapackage and contains dependencies onto all core-released exotica packages. It also builds the documentation.</description>
+
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+
+  <author email="v.ivan@ed.ac.uk">Vladimir Ivan</author>
+  <author email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</author>
+  <author email="yiming.yang@ed.ac.uk">Yiming Yang</author>
+  <author>Michael Camilleri</author>
+
+  <license>BSD</license>
+
+  <url type="website">https://github.com/ipab-slmc/exotica</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>exotica_aico_solver</build_depend>
+  <build_depend>exotica_collision_scene_fcl</build_depend>
+  <build_depend>exotica_collision_scene_fcl_latest</build_depend>
+  <build_depend>exotica_core</build_depend>
+  <build_depend>exotica_core_task_maps</build_depend>
+  <build_depend>exotica_ik_solver</build_depend>
+  <build_depend>exotica_levenberg_marquardt_solver</build_depend>
+  <build_depend>exotica_ompl_solver</build_depend>
+  <build_depend>exotica_python</build_depend>
+  <build_depend>exotica_time_indexed_rrt_connect_solver</build_depend>
+
+  <exec_depend>exotica_aico_solver</exec_depend>
+  <exec_depend>exotica_collision_scene_fcl</exec_depend>
+  <exec_depend>exotica_collision_scene_fcl_latest</exec_depend>
+  <exec_depend>exotica_core</exec_depend>
+  <exec_depend>exotica_core_task_maps</exec_depend>
+  <exec_depend>exotica_ik_solver</exec_depend>
+  <exec_depend>exotica_levenberg_marquardt_solver</exec_depend>
+  <exec_depend>exotica_ompl_solver</exec_depend>
+  <exec_depend>exotica_python</exec_depend>
+  <exec_depend>exotica_time_indexed_rrt_connect_solver</exec_depend>
+
+  <doc_depend>rosdoc_lite</doc_depend>
+  <doc_depend>doxygen</doc_depend>
+  <doc_depend>python-sphinx</doc_depend>
+  <doc_depend>python-sphinx-rtd-theme</doc_depend>
+
+  <export>
+    <metapackage/>
+    <!-- rosdoc_lite c++ generation does not yet work-->
+    <!-- <rosdoc config="rosdoc.yaml" /> -->
+  </export>
+</package>

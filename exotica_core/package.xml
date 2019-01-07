@@ -29,8 +29,4 @@
   <depend>eigen_conversions</depend>
   <depend>tf_conversions</depend>
   <depend>tinyxml2</depend>
-
-  <doc_depend>doxygen</doc_depend>
-  <doc_depend>python-sphinx</doc_depend>
-  <doc_depend>python-sphinx-rtd-theme</doc_depend>
 </package>

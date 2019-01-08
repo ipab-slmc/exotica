@@ -50,10 +50,6 @@ public:
     int TaskSpaceJacobianDim() override;
 
     std::vector<TaskVectorEntry> GetLieGroupIndices() override;
-    RotationType rotation_type_ = RotationType::RPY;  // TODO: Make private with getter
-
-private:
-    int stride_;
 };
 }
 

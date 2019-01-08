@@ -63,8 +63,7 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
 
     py::class_<EffPosition, std::shared_ptr<EffPosition>, TaskMap>(module, "EffPosition");
 
-    py::class_<EffOrientation, std::shared_ptr<EffOrientation>, TaskMap>(module, "EffOrientation")
-        .def_readonly("rotation_type", &EffOrientation::rotation_type_);
+    py::class_<EffOrientation, std::shared_ptr<EffOrientation>, TaskMap>(module, "EffOrientation");
 
     py::class_<EffAxisAlignment, std::shared_ptr<EffAxisAlignment>, TaskMap>(module, "EffAxisAlignment")
         .def("get_axis", &EffAxisAlignment::GetAxis)

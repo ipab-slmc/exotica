@@ -19,17 +19,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>exotica_aico_solver</build_depend>
-  <build_depend>exotica_collision_scene_fcl</build_depend>
-  <build_depend>exotica_collision_scene_fcl_latest</build_depend>
-  <build_depend>exotica_core</build_depend>
-  <build_depend>exotica_core_task_maps</build_depend>
-  <build_depend>exotica_ik_solver</build_depend>
-  <build_depend>exotica_levenberg_marquardt_solver</build_depend>
-  <build_depend>exotica_ompl_solver</build_depend>
-  <build_depend>exotica_python</build_depend>
-  <build_depend>exotica_time_indexed_rrt_connect_solver</build_depend>
-
   <exec_depend>exotica_aico_solver</exec_depend>
   <exec_depend>exotica_collision_scene_fcl</exec_depend>
   <exec_depend>exotica_collision_scene_fcl_latest</exec_depend>

@@ -39,20 +39,20 @@ namespace exotica
 SumOfPenetrations::SumOfPenetrations() = default;
 SumOfPenetrations::~SumOfPenetrations() = default;
 
-void SumOfPenetrations::update(Eigen::VectorXdRefConst x,
+void SumOfPenetrations::Update(Eigen::VectorXdRefConst x,
                                Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != dim_) throw_named("Wrong size of phi!");
+    if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     phi.setZero();
     Eigen::MatrixXd J;
 
     // Get all world collision links, then iterate through them
-    std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robot_links_, check_self_collision_);
+    std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(robot_links_, check_self_collision_);
     double& d = phi(0);
     for (const auto& proxy : proxies)
     {
-        bool isRobotToRobot = (proxy.e1->isRobotLink || proxy.e1->ClosestRobotLink.lock()) && (proxy.e2->isRobotLink || proxy.e2->ClosestRobotLink.lock());
-        double& margin = isRobotToRobot ? robot_margin_ : world_margin_;
+        bool is_robot_to_robot = (proxy.e1->is_robot_link || proxy.e1->closest_robot_link.lock()) && (proxy.e2->is_robot_link || proxy.e2->closest_robot_link.lock());
+        double& margin = is_robot_to_robot ? robot_margin_ : world_margin_;
         if (proxy.distance < margin)
         {
             if (proxy.distance < 0)
@@ -67,30 +67,29 @@ void SumOfPenetrations::update(Eigen::VectorXdRefConst x,
     }
 }
 
-void SumOfPenetrations::update(Eigen::VectorXdRefConst x,
+void SumOfPenetrations::Update(Eigen::VectorXdRefConst x,
                                Eigen::VectorXdRef phi,
                                Eigen::MatrixXdRef J)
 {
-    throw_pretty("Not implemented");
+    ThrowPretty("Not implemented");
     // J.setZero();
-    // update(x, phi);
+    // Update(x, phi);
 }
 
-void SumOfPenetrations::Instantiate(
-    SumOfPenetrationsInitializer& init)
+void SumOfPenetrations::Instantiate(SumOfPenetrationsInitializer& init)
 {
     init_ = init;
 }
 
-void SumOfPenetrations::assignScene(Scene_ptr scene)
+void SumOfPenetrations::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
-    initialize();
+    Initialize();
 }
 
-void SumOfPenetrations::initialize()
+void SumOfPenetrations::Initialize()
 {
-    cscene_ = scene_->getCollisionScene();
+    cscene_ = scene_->GetCollisionScene();
     world_margin_ = init_.WorldMargin;
     robot_margin_ = init_.RobotMargin;
     check_self_collision_ = init_.CheckSelfCollision;
@@ -99,11 +98,11 @@ void SumOfPenetrations::initialize()
                     "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_);
 
     // Get names of all controlled joints and their corresponding child links
-    robot_links_ = scene_->getControlledLinkNames();
+    robot_links_ = scene_->GetControlledLinkNames();
     // std::cout << "Robot links: ";
     // for (auto& link : robot_links_) std::cout << link << ", ";
     // std::cout << std::endl;
 }
 
-int SumOfPenetrations::taskSpaceDim() { return dim_; }
+int SumOfPenetrations::TaskSpaceDim() { return dim_; }
 }

@@ -37,7 +37,7 @@
 #include <cmath>
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/SumOfPenetrationsInitializer.h>
+#include <exotica_core_task_maps/sum_of_penetrations_initializer.h>
 
 namespace exotica
 {
@@ -48,14 +48,14 @@ public:
     virtual ~SumOfPenetrations();
 
     void Instantiate(SumOfPenetrationsInitializer& init) override;
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
+    int TaskSpaceDim() override;
 
 private:
-    void initialize();
+    void Initialize();
 
     std::vector<std::string> robot_links_;
     double robot_margin_ = 0.0;
@@ -63,7 +63,7 @@ private:
     bool check_self_collision_ = true;
 
     unsigned int dim_ = 1;
-    CollisionScene_ptr cscene_;
+    CollisionScenePtr cscene_;
     SumOfPenetrationsInitializer init_;
 };
 }

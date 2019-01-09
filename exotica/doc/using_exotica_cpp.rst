@@ -47,7 +47,7 @@ the solver:
             q = solution.row(solution.rows() - 1);
 
             my_problem->Update(q);
-            my_problem->getScene()->getKinematicTree().publishFrames();
+            my_problem->getScene()->GetKinematicTree().publishFrames();
 
             ros::spinOnce();
             loop_rate.sleep();
@@ -214,7 +214,7 @@ by RVIZ:
 
 .. code-block:: c++
 
-            my_problem->getScene()->getKinematicTree().publishFrames();
+            my_problem->getScene()->GetKinematicTree().publishFrames();
 
 RVIZ can either be set-up manually or via a
 `ROSlaunch <Setting-up-ROSlaunch.html>`__

@@ -19,8 +19,8 @@ example file as a guide. The code is displayed below.
     #include <exotica_core/exotica_core.h>
 
     // Manual initialization requires dependency on specific solvers and task maps:
-    #include <exotica_ik_solver/IKSolverInitializer.h>
-    #include <task_map/EffFrameInitializer.h>
+    #include <exotica_ik_solver/IKSolver_initializer.h>
+    #include <task_map/EffFrame_initializer.h>
 
     using namespace exotica;
 
@@ -84,7 +84,7 @@ example file as a guide. The code is displayed below.
             q = solution.row(solution.rows() - 1);
 
             my_problem->Update(q);
-            my_problem->getScene()->getKinematicTree().publishFrames();
+            my_problem->getScene()->GetKinematicTree().publishFrames();
 
             ros::spinOnce();
             loop_rate.sleep();
@@ -121,8 +121,8 @@ need to include the correct header files:
     #include <exotica_core/exotica_core.h>
 
     // Manual initialization requires dependency on specific solvers and task maps:
-    #include <exotica_ik_solver/IKSolverInitializer.h>
-    #include <task_map/EffFrameInitializer.h>
+    #include <exotica_ik_solver/IKSolver_initializer.h>
+    #include <task_map/EffFrame_initializer.h>
 
 
 Problem definitions are handled in the ``exotica/Exotica.h`` header, so we only need to 

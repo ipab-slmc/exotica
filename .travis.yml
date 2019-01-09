@@ -6,7 +6,7 @@ env:
   global:
     - ROS_PARALLEL_JOBS=-j4 # Don't exhaust virtual memory
     - DOCKER_RUN_OPTS='-e TRAVIS_BRANCH -e GITHUBKEY' # Pass CI variables to Docker
-    #- AFTER_SCRIPT='/bin/bash ./.ci/deploy_documentation.sh'
+    - AFTER_SCRIPT='/bin/bash ./.ci/deploy_documentation.sh'
     - secure: "hq/S+hFDH44PBWcskCANx2Qli+KE8n8b5a5e+IR5T81j6b/NW8WW9Tx02vQjS8KFHcVNHFd9UcCCiKZrsFqs/GbGjBcRknGTGfslesBzZ2B/eXwR1B6dcG4dnN9xLIZw3j8s+i0JoMn1d3Hx/LJgmXVLdgKp0zrLeYDJCkwJ084nAfe3hgizyqL1JMn9xWIyklpR+qi0KVEeu6aV3w18HpDz87NRG42IRiBtLynTPl39y3H+UQNUKtI9gkIb6fuOQY7e5bK9CcJInQl6RDIWK93BPIzPMrDfzpfej93cP/eyvKbBdmzx6hJRI2qrrEXzY7Aj3gB6W26cQU1A9BoWrRD+pbqC6/EcO8/8LKfyXNj4RWiKkrnUAMMZ48LgLQULVLSEP8PB/KoH0EKB2cm98Tu7DimYUznsyVXfkpMMBj0CDG0Nbi3QiS7j0AcN1ngJkIdn8A64pRHKX/waDLdOPGqnezK5UUqhWrqNwoed8emCxsBvGkbUNL/fsnMtdYThzLvW2b6cMHa1O3brhjVpDLbvieFs/0OBMz02lSlVNE0H6ADJJYiPCF1QHi//D+Dqt1B9ZgwMv3ZfD7xTSdxYFAlcLa1YRKeiDdFMXmz3lxl0IPZLk2Ub4/ScbPzXtidsAnffZoiXZBhGCcHywy/hHLcT/mO3a61hiiwgLujkPcY="
   matrix:
     - ROS_DISTRO="kinetic" CATKIN_CONFIG='-DCMAKE_BUILD_TYPE=Debug'

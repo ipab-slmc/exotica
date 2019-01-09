@@ -39,45 +39,45 @@ namespace exotica
 SmoothCollisionDistance::SmoothCollisionDistance() = default;
 SmoothCollisionDistance::~SmoothCollisionDistance() = default;
 
-void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
+void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
                                      Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != dim_) throw_named("Wrong size of phi!");
+    if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     phi.setZero();
     Eigen::MatrixXd J(dim_, robot_links_.size());
-    update(x, phi, J, false);
+    Update(x, phi, J, false);
 }
 
-void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
+void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
                                      Eigen::VectorXdRef phi,
                                      Eigen::MatrixXdRef J)
 {
-    if (phi.rows() != dim_) throw_named("Wrong size of phi!");
+    if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     phi.setZero();
     J.setZero();
-    update(x, phi, J, true);
+    Update(x, phi, J, true);
 }
 
-void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
+void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
                                      Eigen::VectorXdRef phi,
                                      Eigen::MatrixXdRef J,
                                      bool updateJacobian)
 {
-    if (!scene_->alwaysUpdatesCollisionScene())
-        cscene_->updateCollisionObjectTransforms();
+    if (!scene_->AlwaysUpdatesCollisionScene())
+        cscene_->UpdateCollisionObjectTransforms();
 
     double& d = phi(0);
 
     for (const auto& link : robot_links_)
     {
         // Get all world collision links, then iterate through them
-        // std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(scene_->getControlledLinkToCollisionLinkMap()[link], check_self_collision_);
-        std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(link, check_self_collision_);
+        // std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(scene_->getControlledLinkToCollisionLinkMap()[link], check_self_collision_);
+        std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(link, check_self_collision_);
 
         for (const auto& proxy : proxies)
         {
-            bool isRobotToRobot = (proxy.e1->isRobotLink || proxy.e1->ClosestRobotLink.lock()) && (proxy.e2->isRobotLink || proxy.e2->ClosestRobotLink.lock());
-            double& margin = isRobotToRobot ? robot_margin_ : world_margin_;
+            bool is_robot_to_robot = (proxy.e1->is_robot_link || proxy.e1->closest_robot_link.lock()) && (proxy.e2->is_robot_link || proxy.e2->closest_robot_link.lock());
+            double& margin = is_robot_to_robot ? robot_margin_ : world_margin_;
 
             if (proxy.distance < margin)
             {
@@ -87,26 +87,26 @@ void SmoothCollisionDistance::update(Eigen::VectorXdRefConst x,
                 if (updateJacobian)
                 {
                     // Jacobian
-                    KDL::Frame arel = KDL::Frame(proxy.e1->Frame.Inverse(KDL::Vector(
+                    KDL::Frame arel = KDL::Frame(proxy.e1->frame.Inverse(KDL::Vector(
                         proxy.contact1(0), proxy.contact1(1), proxy.contact1(2))));
-                    KDL::Frame brel = KDL::Frame(proxy.e2->Frame.Inverse(KDL::Vector(
+                    KDL::Frame brel = KDL::Frame(proxy.e2->frame.Inverse(KDL::Vector(
                         proxy.contact2(0), proxy.contact2(1), proxy.contact2(2))));
 
                     if (!linear_)
                     {
-                        Eigen::MatrixXd tmpJ = scene_->getKinematicTree().Jacobian(
+                        Eigen::MatrixXd tmpJ = scene_->GetKinematicTree().Jacobian(
                             proxy.e1, arel, nullptr, KDL::Frame());
                         J += (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ.topRows<3>());
-                        tmpJ = scene_->getKinematicTree().Jacobian(proxy.e2, brel, nullptr,
+                        tmpJ = scene_->GetKinematicTree().Jacobian(proxy.e2, brel, nullptr,
                                                                    KDL::Frame());
                         J -= (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ.topRows<3>());
                     }
                     else
                     {
-                        Eigen::MatrixXd tmpJ = scene_->getKinematicTree().Jacobian(
+                        Eigen::MatrixXd tmpJ = scene_->GetKinematicTree().Jacobian(
                             proxy.e1, arel, nullptr, KDL::Frame());
                         J += 1 / margin * (proxy.normal1.transpose() * tmpJ.topRows<3>());
-                        tmpJ = scene_->getKinematicTree().Jacobian(proxy.e2, brel, nullptr,
+                        tmpJ = scene_->GetKinematicTree().Jacobian(proxy.e2, brel, nullptr,
                                                                    KDL::Frame());
                         J -= 1 / margin * (proxy.normal1.transpose() * tmpJ.topRows<3>());
                     }
@@ -122,15 +122,15 @@ void SmoothCollisionDistance::Instantiate(
     init_ = init;
 }
 
-void SmoothCollisionDistance::assignScene(Scene_ptr scene)
+void SmoothCollisionDistance::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
-    initialize();
+    Initialize();
 }
 
-void SmoothCollisionDistance::initialize()
+void SmoothCollisionDistance::Initialize()
 {
-    cscene_ = scene_->getCollisionScene();
+    cscene_ = scene_->GetCollisionScene();
     world_margin_ = init_.WorldMargin;
     robot_margin_ = init_.RobotMargin;
     linear_ = init_.Linear;
@@ -140,8 +140,8 @@ void SmoothCollisionDistance::initialize()
                     "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
 
     // Get names of all controlled joints and their corresponding child links
-    robot_links_ = scene_->getControlledLinkNames();
+    robot_links_ = scene_->GetControlledLinkNames();
 }
 
-int SmoothCollisionDistance::taskSpaceDim() { return dim_; }
+int SmoothCollisionDistance::TaskSpaceDim() { return dim_; }
 }

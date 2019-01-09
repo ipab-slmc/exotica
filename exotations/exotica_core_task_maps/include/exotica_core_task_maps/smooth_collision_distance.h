@@ -34,7 +34,7 @@
 #define EXOTICA_CORE_TASK_MAPS_SMOOTH_COLLISION_DISTANCE_H_
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/SmoothCollisionDistanceInitializer.h>
+#include <exotica_core_task_maps/smooth_collision_distance_initializer.h>
 #include <algorithm>
 #include <cmath>
 
@@ -47,15 +47,15 @@ public:
     virtual ~SmoothCollisionDistance();
 
     void Instantiate(SmoothCollisionDistanceInitializer& init) override;
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
 
-    int taskSpaceDim() override;
+    int TaskSpaceDim() override;
 
 private:
-    void initialize();
+    void Initialize();
 
     std::vector<std::string> robot_links_;
     double robot_margin_ = 0.0;
@@ -64,10 +64,10 @@ private:
     bool check_self_collision_ = true;
 
     const unsigned int dim_ = 1;
-    CollisionScene_ptr cscene_;
+    CollisionScenePtr cscene_;
     SmoothCollisionDistanceInitializer init_;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
 }
 

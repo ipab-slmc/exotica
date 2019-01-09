@@ -40,9 +40,9 @@ AddInitializer(
   look_at
   manipulability
 
-  SmoothCollisionDistance
-  SumOfPenetrations
-  CollisionDistance
+  collision_distance
+  smooth_collision_distance
+  sum_of_penetrations
 )
 GenInitializers()
 

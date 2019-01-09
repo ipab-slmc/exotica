@@ -39,31 +39,31 @@ namespace exotica
 CollisionDistance::CollisionDistance() = default;
 CollisionDistance::~CollisionDistance() = default;
 
-void CollisionDistance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void CollisionDistance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != dim_) throw_named("Wrong size of phi!");
+    if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     phi.setZero();
     Eigen::MatrixXd J(dim_, dim_);
-    update(x, phi, J, false);
+    Update(x, phi, J, false);
 }
 
-void CollisionDistance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
+void CollisionDistance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
-    if (phi.rows() != dim_) throw_named("Wrong size of phi!");
+    if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     phi.setZero();
     J.setZero();
-    update(x, phi, J, true);
+    Update(x, phi, J, true);
 }
 
-void CollisionDistance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian)
+void CollisionDistance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian)
 {
-    cscene_->updateCollisionObjectTransforms();
+    cscene_->UpdateCollisionObjectTransforms();
 
     // For all robot links: Get all collision distances, sort by distance, and process the closest.
     for (int i = 0; i < dim_; ++i)
     {
-        // std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(scene_->getControlledLinkToCollisionLinkMap()[robot_links_[i]], check_self_collision_);  //, false);
-        std::vector<CollisionProxy> proxies = cscene_->getCollisionDistance(robot_links_[i], check_self_collision_);
+        // std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(scene_->getControlledLinkToCollisionLinkMap()[robot_links_[i]], check_self_collision_);  //, false);
+        std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(robot_links_[i], check_self_collision_);
         if (proxies.size() == 0)
         {
             phi(i) = 0;
@@ -75,8 +75,8 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi
         closest_proxy.distance = std::numeric_limits<double>::max();
         for (const auto& tmp_proxy : proxies)
         {
-            const bool isRobotToRobot = (tmp_proxy.e1->isRobotLink || tmp_proxy.e1->ClosestRobotLink.lock()) && (tmp_proxy.e2->isRobotLink || tmp_proxy.e2->ClosestRobotLink.lock());
-            const double& margin = isRobotToRobot ? robot_margin_ : world_margin_;
+            const bool is_robot_to_robot = (tmp_proxy.e1->is_robot_link || tmp_proxy.e1->closest_robot_link.lock()) && (tmp_proxy.e2->is_robot_link || tmp_proxy.e2->closest_robot_link.lock());
+            const double& margin = is_robot_to_robot ? robot_margin_ : world_margin_;
             if ((tmp_proxy.distance - margin) < closest_proxy.distance)
             {
                 closest_proxy = tmp_proxy;
@@ -88,15 +88,15 @@ void CollisionDistance::update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi
 
         if (updateJacobian)
         {
-            KDL::Frame arel = KDL::Frame(closest_proxy.e1->Frame.Inverse(KDL::Vector(
+            KDL::Frame arel = KDL::Frame(closest_proxy.e1->frame.Inverse(KDL::Vector(
                 closest_proxy.contact1(0), closest_proxy.contact1(1), closest_proxy.contact1(2))));
-            KDL::Frame brel = KDL::Frame(closest_proxy.e2->Frame.Inverse(KDL::Vector(
+            KDL::Frame brel = KDL::Frame(closest_proxy.e2->frame.Inverse(KDL::Vector(
                 closest_proxy.contact2(0), closest_proxy.contact2(1), closest_proxy.contact2(2))));
 
-            Eigen::MatrixXd tmpJ = scene_->getKinematicTree().Jacobian(
+            Eigen::MatrixXd tmpJ = scene_->GetKinematicTree().Jacobian(
                 closest_proxy.e1, arel, nullptr, KDL::Frame());
             J.row(i) += (closest_proxy.normal1.transpose() * tmpJ);
-            tmpJ = scene_->getKinematicTree().Jacobian(closest_proxy.e2, brel, nullptr,
+            tmpJ = scene_->GetKinematicTree().Jacobian(closest_proxy.e2, brel, nullptr,
                                                        KDL::Frame());
             J.row(i) -= (closest_proxy.normal1.transpose() * tmpJ);
         }
@@ -108,21 +108,21 @@ void CollisionDistance::Instantiate(CollisionDistanceInitializer& init)
     init_ = init;
 }
 
-void CollisionDistance::assignScene(Scene_ptr scene)
+void CollisionDistance::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
-    initialize();
+    Initialize();
 }
 
-void CollisionDistance::initialize()
+void CollisionDistance::Initialize()
 {
-    cscene_ = scene_->getCollisionScene();
+    cscene_ = scene_->GetCollisionScene();
     check_self_collision_ = init_.CheckSelfCollision;
     world_margin_ = init_.WorldMargin;
     robot_margin_ = init_.RobotMargin;
 
     // Get names of all controlled joints and their corresponding child links
-    robot_links_ = scene_->getControlledLinkNames();
+    robot_links_ = scene_->GetControlledLinkNames();
     dim_ = static_cast<unsigned int>(robot_links_.size());
     closest_proxies_.assign(dim_, CollisionProxy());
     if (debug_)
@@ -134,5 +134,5 @@ void CollisionDistance::initialize()
     }
 }
 
-int CollisionDistance::taskSpaceDim() { return dim_; }
+int CollisionDistance::TaskSpaceDim() { return dim_; }
 }

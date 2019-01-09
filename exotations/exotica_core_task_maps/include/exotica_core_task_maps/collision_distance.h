@@ -38,7 +38,7 @@
 #include <limits>
 
 #include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/CollisionDistanceInitializer.h>
+#include <exotica_core_task_maps/collision_distance_initializer.h>
 
 namespace exotica
 {
@@ -49,15 +49,15 @@ public:
     virtual ~CollisionDistance();
 
     void Instantiate(CollisionDistanceInitializer& init) override;
-    void assignScene(Scene_ptr scene) override;
+    void AssignScene(ScenePtr scene) override;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
-    int taskSpaceDim() override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
+    int TaskSpaceDim() override;
 
     std::vector<CollisionProxy> get_collision_proxies() { return closest_proxies_; }
 private:
-    void initialize();
+    void Initialize();
 
     std::vector<std::string> robot_links_;
     bool check_self_collision_ = true;
@@ -66,10 +66,10 @@ private:
     std::vector<CollisionProxy> closest_proxies_;
 
     unsigned int dim_;
-    CollisionScene_ptr cscene_;
+    CollisionScenePtr cscene_;
     CollisionDistanceInitializer init_;
 
-    void update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
 }
 #endif  // EXOTICA_CORE_TASK_MAPS_COLLISION_DISTANCE_H_

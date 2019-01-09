@@ -18,9 +18,6 @@ ROS Indigo (Ubuntu 14.04) - retired since September 2018:
  * gcc >`4.9 <https://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-on-ubuntu>`_ -- the 14.04 system-installed 4.8.4 won't work. On Ubuntu 16.04, you can use the system-provided gcc/g++.
  * For compiling ``fcl_catkin``, you need to add a PPA for ``libccd-dev``.
 
-ROS Melodic (Ubuntu 18.04):
- * Please clone ``pybind11_catkin`` into your source directory from `here <https://github.com/ipab-slmc/pybind11_catkin>`_.
-
 Installation from source
 ========================
 

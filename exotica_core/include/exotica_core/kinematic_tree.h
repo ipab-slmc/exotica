@@ -210,6 +210,7 @@ public:
 
     std::map<std::string, shapes::ShapeType> GetCollisionObjectTypes();
 
+    void SetSeed(const uint_fast32_t seed) { generator_.seed(seed); }
     /// Random state generation
     Eigen::VectorXd GetRandomControlledState();
 

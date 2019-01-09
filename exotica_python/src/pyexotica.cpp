@@ -1054,6 +1054,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematic_tree.def("get_controlled_base_type", &KinematicTree::GetControlledBaseType);
     kinematic_tree.def("get_controlled_link_mass", &KinematicTree::GetControlledLinkMass);
     kinematic_tree.def("get_collision_object_types", &KinematicTree::GetCollisionObjectTypes);
+    kinematic_tree.def("set_seed", &KinematicTree::SetSeed);
     kinematic_tree.def("get_random_controlled_state", &KinematicTree::GetRandomControlledState);
     kinematic_tree.def("get_num_model_joints", &KinematicTree::GetNumModelJoints);
     kinematic_tree.def("get_num_controlled_joints", &KinematicTree::GetNumControlledJoints);

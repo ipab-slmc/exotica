@@ -88,7 +88,7 @@ To alter the start position, specify a 1*n vector of initial joint angles, where
 Setting the Goal 
 ----------------
 
-The goal is set using the problem's setGoal function:
+The goal is set using the problem's set_goal function:
 
 .. code-block:: python
 

@@ -46,7 +46,7 @@ install(DIRECTORY resources/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/res
 FILE(GLOB python_examples "${CMAKE_CURRENT_SOURCE_DIR}/scripts/*")
 catkin_install_python(PROGRAMS ${python_examples} DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
   # Find again, this time including rostest
   find_package(catkin REQUIRED COMPONENTS
     exotica_core

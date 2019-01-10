@@ -84,7 +84,7 @@ install(DIRECTORY include/ DESTINATION include)
 install(FILES exotica_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(TARGETS ${PROJECT_NAME}_py LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
   catkin_add_gtest(test_maps test/test_maps.cpp)
   target_link_libraries(test_maps ${catkin_LIBRARIES})
   add_dependencies(test_maps ${catkin_EXPORTED_TARGETS})

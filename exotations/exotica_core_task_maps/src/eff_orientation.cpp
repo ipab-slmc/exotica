@@ -42,6 +42,10 @@ void EffOrientation::Instantiate(EffOrientationInitializer& init)
     {
         rotation_type_ = RotationType::QUATERNION;
     }
+    else if (init.Type == "RPY")
+    {
+        rotation_type_ = RotationType::RPY;
+    }
     else if (init.Type == "ZYX")
     {
         rotation_type_ = RotationType::ZYX;
@@ -57,6 +61,10 @@ void EffOrientation::Instantiate(EffOrientationInitializer& init)
     else if (init.Type == "Matrix")
     {
         rotation_type_ = RotationType::MATRIX;
+    }
+    else
+    {
+        ThrowNamed("Unsupported rotation type '" << init.Type << "'");
     }
     stride_ = GetRotationTypeLength(rotation_type_);
 }

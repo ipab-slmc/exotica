@@ -15,6 +15,7 @@ The library itself consists of two major specifications, both of which are abstr
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
 * [rosdep](http://wiki.ros.org/rosdep)
 * [ROS](http://wiki.ros.org/Installation) (```ros-[release]-desktop``` is recommended but more minimal versions work in conjunction with rosdep)
+* [NumPy/SciPy/Matplotlib](https://scipy.org/install.html)
 
 ## ROS Indigo (Ubuntu 14.04)
 We retired support for ROS Indigo in September 2018. For using 14.04, a number of manual changes are required:

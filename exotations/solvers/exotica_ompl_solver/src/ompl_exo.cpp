@@ -209,34 +209,38 @@ ompl::base::StateSamplerPtr OMPLSE2RNStateSpace::allocDefaultStateSampler() cons
 
 void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
 {
-    unsigned int dim = prob->N;
+    dim_ = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::SE2StateSpace()), 1.0);
-    addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim - 3)), 1.0);
-
-    unsigned int n = dim;
-    if (prob->GetBounds().size() == 2 * n)
+    if (dim_ > 3)
     {
-        ompl::base::RealVectorBounds RNbounds(dim - 3);
-        ompl::base::RealVectorBounds SE2bounds(2);
+        addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim_ - 3)), 1.0);
+    }
 
-        for (int i = 0; i < 2; ++i)
+    if (prob->GetBounds().size() == 2 * dim_)
+    {
+        ompl::base::RealVectorBounds SE2bounds(2);
+        for (int i = 0; i < 3; ++i)
         {
-            SE2bounds.setHigh(i, prob->GetBounds()[i + n]);
+            SE2bounds.setHigh(i, prob->GetBounds()[i + dim_]);
             SE2bounds.setLow(i, prob->GetBounds()[i]);
         }
-
         getSubspace(0)->as<ompl::base::SE3StateSpace>()->setBounds(SE2bounds);
-        for (int i = 3; i < n; ++i)
+
+        if (dim_ > 3)
         {
-            RNbounds.setHigh(i - 3, prob->GetBounds()[i + n]);
-            RNbounds.setLow(i - 3, prob->GetBounds()[i]);
+            ompl::base::RealVectorBounds RNbounds(dim_ - 3);
+            for (int i = 3; i < dim_; ++i)
+            {
+                RNbounds.setHigh(i - 3, prob->GetBounds()[i + dim_]);
+                RNbounds.setLow(i - 3, prob->GetBounds()[i]);
+            }
+            getSubspace(1)->as<ompl::base::RealVectorStateSpace>()->setBounds(RNbounds);
         }
-        getSubspace(1)->as<ompl::base::RealVectorStateSpace>()->setBounds(RNbounds);
     }
     else
     {
-        ERROR("State space bounds were not specified!\n"
-              << prob->GetBounds().size() << " " << n);
+        ERROR("State space bounds were not specified!" << std::endl
+                                                       << prob->GetBounds().size() << " " << dim_);
     }
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
@@ -244,7 +248,6 @@ void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
 
 void OMPLSE2RNStateSpace::StateDebug(const Eigen::VectorXd &q) const
 {
-    //  TODO
 }
 
 void OMPLSE2RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const
@@ -253,16 +256,23 @@ void OMPLSE2RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::bas
     statetype->SE2StateSpace().setXY(q(0), q(1));
     statetype->SE2StateSpace().setYaw(q(2));
 
-    memcpy(statetype->RealVectorStateSpace().values, q.segment(3, q.rows() - 3).data(), sizeof(double) * (q.rows() - 3));
+    if (dim_ > 3)
+    {
+        memcpy(statetype->RealVectorStateSpace().values, q.segment(3, q.rows() - 3).data(), sizeof(double) * (q.rows() - 3));
+    }
 }
 
 void OMPLSE2RNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const
 {
     q.setZero(getDimension());
     const OMPLSE2RNStateSpace::StateType *statetype = static_cast<const OMPLSE2RNStateSpace::StateType *>(state);
-    memcpy(q.segment(3, q.rows() - 3).data(), statetype->RealVectorStateSpace().values, sizeof(double) * (q.rows() - 3));
     q(0) = statetype->SE2StateSpace().getX();
     q(1) = statetype->SE2StateSpace().getY();
     q(2) = statetype->SE2StateSpace().getYaw();
+
+    if (dim_ > 3)
+    {
+        memcpy(q.segment(3, q.rows() - 3).data(), statetype->RealVectorStateSpace().values, sizeof(double) * (q.rows() - 3));
+    }
 }
 }

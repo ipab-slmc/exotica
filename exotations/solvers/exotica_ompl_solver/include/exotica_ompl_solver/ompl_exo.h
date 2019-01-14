@@ -163,12 +163,12 @@ public:
 
         const ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace() const
         {
-            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
+            return *as<ompl::base::RealVectorStateSpace::StateType>(0);
         }
 
         ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace()
         {
-            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
+            return *as<ompl::base::RealVectorStateSpace::StateType>(0);
         }
 
         const ompl::base::SE2StateSpace::StateType &SE2StateSpace() const
@@ -187,6 +187,9 @@ public:
     void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const override;
     void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const override;
     void StateDebug(const Eigen::VectorXd &q) const override;
+
+private:
+    unsigned int dim_ = 3;
 };
 
 class OMPLRNProjection : public ompl::base::ProjectionEvaluator

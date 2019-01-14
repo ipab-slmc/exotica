@@ -122,12 +122,12 @@ public:
 
         const ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace() const
         {
-            return *as<ompl::base::RealVectorStateSpace::StateType>(0);
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
         }
 
         ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace()
         {
-            return *as<ompl::base::RealVectorStateSpace::StateType>(0);
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
         }
 
         const ompl::base::SE3StateSpace::StateType &SE3StateSpace() const
@@ -163,12 +163,12 @@ public:
 
         const ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace() const
         {
-            return *as<ompl::base::RealVectorStateSpace::StateType>(0);
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
         }
 
         ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace()
         {
-            return *as<ompl::base::RealVectorStateSpace::StateType>(0);
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
         }
 
         const ompl::base::SE2StateSpace::StateType &SE2StateSpace() const

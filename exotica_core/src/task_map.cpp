@@ -73,24 +73,37 @@ void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::M
     if (jacobian.rows() != TaskSpaceDim() && jacobian.cols() != x.rows())
         ThrowNamed("Jacobian dimension mismatch!");
 
-    // Store original x (needs to be reset later).
-    Eigen::VectorXd x_original(x);
-    Update(x_original, Phi);
-
-    // Backward finite differencing.
+    // Set constants
     constexpr double h = 1e-6;
-    Eigen::VectorXd x_tmp;
-    Eigen::VectorXd phi_original(Phi);
-    for (int i = 0; i < TaskSpaceDim(); ++i)
-    {
-        x_tmp = x;
-        x_tmp(i) -= h;
-        Update(x_tmp, Phi);
-        jacobian.row(i) = (1 / h) * (phi_original - Phi);
+    constexpr double hi = 1.0/h;
+    int ntask = TaskSpaceDim();
+    int ndof = jacobian.cols();
+
+    // Compute x/Phi using forward mapping (no jacobain)
+    Update(x, Phi);
+
+    // Backward finite differencing
+    for (int i = 0; i < ndof; ++i) {
+
+      // Setup for gradient estimation
+      Eigen::VectorXd x_down = x;
+      x_down(i) -= h;
+      Eigen::VectorXd phi_down;
+      phi_down.resize(ntask);
+
+      // Set x_down as model state
+      scene_->GetKinematicTree().SetModelState(x_down);
+
+      // Compute phi_down using forward mapping (no jacobian)
+      Update(x_down, phi_down);
+
+      // Compute gradient estimate
+      jacobian.col(i) = hi * (Phi - phi_down);
     }
 
-    // Finally, reset with original value again.
-    Update(x_original, Phi);
+    // Reset model state
+    scene_->GetKinematicTree().SetModelState(x);
+
 }
 
 void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)

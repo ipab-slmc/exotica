@@ -49,7 +49,7 @@ namespace exotica
 ///
 /// Note that
 ///   - the assocaited value for \f$\rho\f$ <b>must</b> be negative in order to maximize the manipulability, and
-///   - derivatives of \f$\Phi\f$ are computed using finite differences. 
+///   - derivatives of \f$\Phi\f$ are computed using finite differences.
 class Manipulability : public TaskMap, public Instantiable<ManipulabilityInitializer>
 {
 public:

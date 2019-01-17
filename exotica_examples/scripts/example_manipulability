@@ -20,7 +20,7 @@ problem = solver.get_problem()
 
 dt = 0.002
 t = 0.0
-q = array([0.0] * 7)
+q = problem.get_scene().get_model_state()
 print('Publishing IK')
 signal.signal(signal.SIGINT, sig_int_handler)
 while True:
@@ -28,6 +28,7 @@ while True:
         problem.set_goal('Position', figure_eight(t))
         problem.start_state = q
         q = solver.solve()[0]
+        print q
         publish_pose(q, problem)
         sleep(dt)
         t = t + dt

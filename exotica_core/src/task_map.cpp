@@ -75,7 +75,7 @@ void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::M
 
     // Set constants
     constexpr double h = 1e-6;
-    constexpr double hi = 1.0/h;
+    constexpr double hi = 1.0 / h;
     int ntask = TaskSpaceDim();
     int ndof = jacobian.cols();
 
@@ -83,27 +83,26 @@ void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::M
     Update(x, Phi);
 
     // Backward finite differencing
-    for (int i = 0; i < ndof; ++i) {
+    for (int i = 0; i < ndof; ++i)
+    {
+        // Setup for gradient estimation
+        Eigen::VectorXd x_down = x;
+        x_down(i) -= h;
+        Eigen::VectorXd phi_down;
+        phi_down.resize(ntask);
 
-      // Setup for gradient estimation
-      Eigen::VectorXd x_down = x;
-      x_down(i) -= h;
-      Eigen::VectorXd phi_down;
-      phi_down.resize(ntask);
+        // Set x_down as model state
+        scene_->GetKinematicTree().SetModelState(x_down);
 
-      // Set x_down as model state
-      scene_->GetKinematicTree().SetModelState(x_down);
+        // Compute phi_down using forward mapping (no jacobian)
+        Update(x_down, phi_down);
 
-      // Compute phi_down using forward mapping (no jacobian)
-      Update(x_down, phi_down);
-
-      // Compute gradient estimate
-      jacobian.col(i) = hi * (Phi - phi_down);
+        // Compute gradient estimate
+        jacobian.col(i) = hi * (Phi - phi_down);
     }
 
     // Reset model state
     scene_->GetKinematicTree().SetModelState(x);
-
 }
 
 void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)

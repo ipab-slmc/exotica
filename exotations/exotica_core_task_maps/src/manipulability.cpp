@@ -38,18 +38,18 @@ Manipulability::~Manipulability() = default;
 
 void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-  if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
+    if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
 
     for (int i = 0; i < n_end_effs_; ++i)
     {
-      Eigen::MatrixXd J = kinematics[0].jacobian[i].data;
-      phi(i) = std::sqrt((J*J.transpose()).determinant());
+        Eigen::MatrixXd J = kinematics[0].jacobian[i].data;
+        phi(i) = std::sqrt((J * J.transpose()).determinant());
     }
 }
 
 void Manipulability::Instantiate(ManipulabilityInitializer& init)
 {
-  n_end_effs_ = frames_.size();
+    n_end_effs_ = frames_.size();
 }
 
 int Manipulability::TaskSpaceDim()

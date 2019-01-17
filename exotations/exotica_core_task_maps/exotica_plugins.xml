@@ -59,4 +59,7 @@
   <class name="exotica/LookAt" type="exotica::LookAt" base_class_type="exotica::TaskMap">
     <description>Looks at a target point by penalizing the vector which defines the orthogonal projection onto a defined line in the end-effector frame.</description>
   </class>
+  <class name="exotica/Manipulability" type="exotica::Manipulability" base_class_type="exotica::TaskMap">
+    <description>Maximizes the manipulability measure using Yoshikawa's measure based on the velocity ellipsoid. Note, in-order to maximize manipulability the associated Rho must be negative. Derivatives are computed using finite differencing.</description>
+  </class>
 </library>

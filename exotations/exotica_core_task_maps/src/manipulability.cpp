@@ -43,8 +43,7 @@ void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     for (int i = 0; i < n_end_effs_; ++i)
     {
       Eigen::MatrixXd J = kinematics[0].jacobian[i].data;
-      Eigen::MatrixXd JJt = J*J.transpose();
-      phi(i) = std::sqrt(JJt.determinant());
+      phi(i) = std::sqrt((J*J.transpose()).determinant());
     }
 }
 

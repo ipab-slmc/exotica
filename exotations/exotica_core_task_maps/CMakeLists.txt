@@ -31,6 +31,7 @@ AddInitializer(
   joint_acceleration_backward_difference
   joint_jerk_backward_difference
   look_at
+  manipulability
 )
 GenInitializers()
 
@@ -66,6 +67,7 @@ set(SOURCES
     src/joint_acceleration_backward_difference.cpp
     src/joint_jerk_backward_difference.cpp
     src/look_at.cpp
+    src/manipulability.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

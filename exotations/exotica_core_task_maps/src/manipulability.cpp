@@ -42,7 +42,7 @@ void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
     for (int i = 0; i < n_end_effs_; ++i)
     {
-        Eigen::MatrixXd J = kinematics[0].jacobian[i].data;
+        const Eigen::MatrixXd& J = kinematics[0].jacobian[i].data;
         phi(i) = std::sqrt((J * J.transpose()).determinant());
     }
 }
@@ -56,4 +56,4 @@ int Manipulability::TaskSpaceDim()
 {
     return n_end_effs_;
 }
-}
+} // namespace exotica

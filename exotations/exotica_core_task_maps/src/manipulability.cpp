@@ -56,4 +56,4 @@ int Manipulability::TaskSpaceDim()
 {
     return n_end_effs_;
 }
-} // namespace exotica
+}  // namespace exotica

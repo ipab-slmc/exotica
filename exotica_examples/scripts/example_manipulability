@@ -28,7 +28,6 @@ while True:
         problem.set_goal('Position', figure_eight(t))
         problem.start_state = q
         q = solver.solve()[0]
-        print q
         publish_pose(q, problem)
         sleep(dt)
         t = t + dt

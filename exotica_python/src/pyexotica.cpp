@@ -751,7 +751,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def("get_goal_neq", &TimeIndexedProblem::GetGoalNEQ);
     time_indexed_problem.def("get_rho_neq", &TimeIndexedProblem::GetRhoNEQ);
     time_indexed_problem.def_property("tau", &TimeIndexedProblem::GetTau, &TimeIndexedProblem::SetTau);
-    time_indexed_problem.def_property("q_dot_max", &TimeIndexedProblem::GetJointVelocityLimit, &TimeIndexedProblem::SetJointVelocityLimit);
+    time_indexed_problem.def_property("q_dot_max", &TimeIndexedProblem::GetJointVelocityLimits, &TimeIndexedProblem::SetJointVelocityLimits);
     time_indexed_problem.def_readwrite("W", &TimeIndexedProblem::W);
     time_indexed_problem.def_readwrite("use_bounds", &TimeIndexedProblem::use_bounds);
     time_indexed_problem.def_property("initial_trajectory", &TimeIndexedProblem::GetInitialTrajectory, &TimeIndexedProblem::SetInitialTrajectory);

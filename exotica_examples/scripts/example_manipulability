@@ -29,7 +29,6 @@ while True:
         problem.set_goal('Position', figure_eight(t))
         problem.start_state = q
         q = solver.solve()[0]
-        print problem.get_task_maps()['Manip'].get_manipulability_index(0)
         publish_pose(q, problem)
         sleep(dt)
         t = t + dt

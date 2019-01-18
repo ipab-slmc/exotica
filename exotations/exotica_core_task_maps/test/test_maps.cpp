@@ -1142,11 +1142,11 @@ TEST(ExoticaTaskMaps, testManipulability)
     {
         TEST_COUT << "Manipulability Test";
         Initializer map("exotica/Manipulability", {{"Name", std::string("MyTask")},
-						   {"EndEffector", std::vector<Initializer>(
-											    {Initializer("Frame", {{"Link", std::string("endeff")},
-														   {"LinkOffset", std::string("0.5 0 0.5")},
-														   {"Base", std::string("base")},
-														   {"BaseOffset", std::string("0.5 0.5 0")}})})}});
+                                                   {"EndEffector", std::vector<Initializer>(
+                                                                       {Initializer("Frame", {{"Link", std::string("endeff")},
+                                                                                              {"LinkOffset", std::string("0.5 0 0.5")},
+                                                                                              {"Base", std::string("base")},
+                                                                                              {"BaseOffset", std::string("0.5 0.5 0")}})})}});
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
         // TODO: Add test_values

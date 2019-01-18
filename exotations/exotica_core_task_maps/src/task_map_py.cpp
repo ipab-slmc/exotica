@@ -48,6 +48,7 @@
 #include <exotica_core_task_maps/look_at.h>
 #include <exotica_core_task_maps/point_to_line.h>
 #include <exotica_core_task_maps/sphere_collision.h>
+#include <exotica_core_task_maps/manipulability.h>
 
 using namespace exotica;
 namespace py = pybind11;
@@ -107,6 +108,9 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
         .def_static("compute_laplace", [](Eigen::VectorXdRefConst eff_phi, Eigen::MatrixXdRefConst weights) {
             return InteractionMesh::ComputeLaplace(eff_phi, weights);
         });
+
+    py::class_<Manipulability, std::shared_ptr<Manipulability>, TaskMap>(module, "Manipulability")
+      .def("get_manipulability_index", &Manipulability::get_manipulability_index);
 
     py::class_<JointLimit, std::shared_ptr<JointLimit>, TaskMap>(module, "JointLimit");
 

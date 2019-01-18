@@ -36,11 +36,12 @@ namespace exotica
 Manipulability::Manipulability() = default;
 Manipulability::~Manipulability() = default;
 
-  double Manipulability::get_manipulability_index(int& i) {
+double Manipulability::get_manipulability_index(int& i)
+{
     if (i < 0 || i >= n_end_effs_) ThrowNamed("Value for i is out of range!");
     const Eigen::MatrixXd& J = kinematics[0].jacobian[i].data;
     return std::sqrt((J * J.transpose()).determinant());
-  }
+}
 
 void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {

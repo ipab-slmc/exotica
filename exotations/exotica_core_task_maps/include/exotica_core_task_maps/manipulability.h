@@ -60,7 +60,7 @@ public:
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     int TaskSpaceDim() override;
 
-  double get_manipulability_index(int& i);
+    double get_manipulability_index(int& i);
 
 private:
     int n_end_effs_;  ///< Number of end-effectors.

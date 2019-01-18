@@ -46,9 +46,9 @@
 #include <exotica_core_task_maps/joint_pose.h>
 #include <exotica_core_task_maps/joint_velocity_backward_difference.h>
 #include <exotica_core_task_maps/look_at.h>
+#include <exotica_core_task_maps/manipulability.h>
 #include <exotica_core_task_maps/point_to_line.h>
 #include <exotica_core_task_maps/sphere_collision.h>
-#include <exotica_core_task_maps/manipulability.h>
 
 using namespace exotica;
 namespace py = pybind11;
@@ -110,7 +110,7 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
         });
 
     py::class_<Manipulability, std::shared_ptr<Manipulability>, TaskMap>(module, "Manipulability")
-      .def("get_manipulability_index", &Manipulability::get_manipulability_index);
+        .def("get_manipulability_index", &Manipulability::get_manipulability_index);
 
     py::class_<JointLimit, std::shared_ptr<JointLimit>, TaskMap>(module, "JointLimit");
 

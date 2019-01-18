@@ -1136,6 +1136,29 @@ TEST(ExoticaTaskMaps, testLookAt)
     }
 }
 
+TEST(ExoticaTaskMaps, testManipulability)
+{
+    try
+    {
+        TEST_COUT << "Manipulability Test";
+        Initializer map("exotica/Manipulability", {{"Name", std::string("MyTask")},
+						   {"EndEffector", std::vector<Initializer>(
+											    {Initializer("Frame", {{"Link", std::string("endeff")},
+														   {"LinkOffset", std::string("0.5 0 0.5")},
+														   {"Base", std::string("base")},
+														   {"BaseOffset", std::string("0.5 0.5 0")}})})}});
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+        EXPECT_TRUE(test_random(problem));
+        // TODO: Add test_values
+
+        EXPECT_TRUE(test_jacobian(problem));
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
 int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);

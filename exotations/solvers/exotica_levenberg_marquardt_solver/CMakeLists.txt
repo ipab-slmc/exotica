@@ -5,7 +5,7 @@ find_package(catkin REQUIRED COMPONENTS exotica_core)
 
 find_package(Eigen3 REQUIRED)
 if(NOT TARGET Eigen3::Eigen)
-    message(WARNING "For best performance, the Levenberg-Marquardt solver requires at least Eigen version 3.3. Using an alternative linear solver.")
+    message(STATUS "For best performance, the Levenberg-Marquardt solver requires at least Eigen version 3.3. Using an alternative linear solver.")
 endif()
 
 AddInitializer(levenberg_marquardt_solver)

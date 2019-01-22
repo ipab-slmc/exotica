@@ -815,6 +815,13 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
     tf::transformEigenToKDL(static_cast<Eigen::Isometry3d>(result.contact_tf1), ret.contact_tf1);
     tf::transformEigenToKDL(static_cast<Eigen::Isometry3d>(result.contact_tf2), ret.contact_tf2);
 
+#ifdef CONTINUOUS_COLLISION_DEBUG
+    if (!ret.contact_pos.allFinite())
+    {
+        ThrowPretty("Contact position is not finite!");
+    }
+#endif
+
     return ret;
 }
 }

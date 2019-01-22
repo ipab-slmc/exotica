@@ -1,12 +1,8 @@
 <?xml version="1.0" ?>
 <ExampleConfig>
-
-  <IKSolver Name="MySolver">
-    <MaxIterations>100</MaxIterations>
-  </IKSolver>
+  <IKSolver Name="MySolver" Debug="0" />
 
   <UnconstrainedEndPoseProblem Name="MyProblem">
-
     <PlanningScene>
       <Scene>
         <JointGroup>arm</JointGroup>
@@ -39,7 +35,5 @@
     </Cost>
 
     <W> 7 6 5 4 3 2 1 </W>
-
   </UnconstrainedEndPoseProblem>
-
 </ExampleConfig>

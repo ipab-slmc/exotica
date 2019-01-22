@@ -62,4 +62,7 @@
   <class name="exotica/Manipulability" type="exotica::Manipulability" base_class_type="exotica::TaskMap">
     <description>Maximizes the manipulability measure using Yoshikawa's measure based on the velocity ellipsoid. Note, in-order to maximize manipulability the associated Rho must be negative. Derivatives are computed using finite differencing.</description>
   </class>
+  <class name="exotica/AvoidLookAt" type="exotica::AvoidLookAt" base_class_type="exotica::TaskMap">
+    <description>Avoids looking at given target points. This can only be used as an inequality constraint.</description>
+</class>
 </library>

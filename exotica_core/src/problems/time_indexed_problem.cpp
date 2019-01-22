@@ -732,15 +732,18 @@ bool TimeIndexedProblem::IsValid()
     auto bounds = scene_->GetKinematicTree().GetJointLimits();
 
     // Check for every state
-    for (unsigned int t = 0; t < T_; ++t)
+    for (int t = 0; t < T_; ++t)
     {
         // Check joint limits
-        for (unsigned int i = 0; i < N; ++i)
+        if (use_bounds)
         {
-            if (x[t](i) < bounds(i, 0) || x[t](i) > bounds(i, 1))
+            for (int i = 0; i < N; ++i)
             {
-                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "State at timestep " << t << " is out of bounds");
-                succeeded = false;
+                if (x[t](i) < bounds(i, 0) || x[t](i) > bounds(i, 1))
+                {
+                    if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "State at timestep " << t << " is out of bounds");
+                    succeeded = false;
+                }
             }
         }
 

@@ -8,9 +8,9 @@ def check_trajectory_continuous_time(scene, trajectory):
     all_good = True
     robot_links = scene.get_collision_robot_links()
     world_links = scene.get_collision_world_links()
-    for t in range(trajectory.shape[0] - 1):
-        q_t_1 = trajectory[t,:]
-        q_t_2 = trajectory[t+1,:]
+    for t in range(1, trajectory.shape[0]):
+        q_t_1 = trajectory[t-1,:]
+        q_t_2 = trajectory[t,:]
         for r_l in robot_links:
             for w_l in world_links:
                 scene.update(q_t_1)

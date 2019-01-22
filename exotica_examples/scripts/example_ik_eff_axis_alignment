@@ -27,12 +27,12 @@ class Example(object):
 
     def update(self, event):
         eff = self.target_marker.position
-        direction = eff * kdl.Vector(1, 0, 0)
+        direction = list((eff.M * kdl.Vector(1, 0, 0)))
 
         # Setup problem
         self.problem.get_scene().attach_object_local("Target", "", self.target_marker.position_exo)
         self.problem.get_task_maps()['Direction'].set_direction(
-            'lwr_arm_7_link', [direction.x(), direction.y(), direction.z()])
+            'lwr_arm_7_link', direction)
         self.problem.start_state = self.q
 
         # Solve

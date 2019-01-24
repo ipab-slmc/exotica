@@ -23,7 +23,10 @@ We retired support for ROS Indigo in September 2018. For using 14.04, a number o
 * For compiling ``fcl_catkin``, you need to add a PPA for ``libccd-dev``.
 
 # Installation
+## From binary
+Exotica is available as binaries for ROS Kinetic and Melodic and can be installed via `sudo apt install ros-kinetic-exotica`/`sudo apt install ros-melodic-exotica`.
 
+## From source
 1. [Create a catkin workspace](https://catkin-tools.readthedocs.io/en/latest/quick_start.html#initializing-a-new-workspace) or use an existing workspace. [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) is the preferred build system.
 2. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone git@github.com:ipab-slmc/exotica.git``.
 3. ```cd``` into the the cloned directory.

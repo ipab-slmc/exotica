@@ -105,7 +105,7 @@ double PlanningProblem::GetStartTime()
 
 void PlanningProblem::InstantiateBase(const Initializer& init_)
 {
-    Object::InstatiateObject(init_);
+    Object::InstantiateObject(init_);
     PlanningProblemInitializer init(init_);
 
     task_maps_.clear();

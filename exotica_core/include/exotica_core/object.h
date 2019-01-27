@@ -68,7 +68,7 @@ public:
         return object_name_;
     }
 
-    void InstatiateObject(const Initializer& init)
+    void InstantiateObject(const Initializer& init)
     {
         ObjectInitializer oinit(init);
         object_name_ = oinit.Name;

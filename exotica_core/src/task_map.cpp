@@ -50,7 +50,7 @@ std::string TaskMap::Print(std::string prepend)
 
 void TaskMap::InstantiateBase(const Initializer& init)
 {
-    Object::InstatiateObject(init);
+    Object::InstantiateObject(init);
     TaskMapInitializer MapInitializer(init);
     is_used = true;
 

@@ -30,6 +30,7 @@
 #ifndef EXOTICA_CORE_H_
 #define EXOTICA_CORE_H_
 
+#include <exotica_core/dynamics_solver.h>
 #include <exotica_core/loaders/xml_loader.h>
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/planning_problem.h>

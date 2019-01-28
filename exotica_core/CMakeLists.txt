@@ -95,6 +95,7 @@ add_library(${PROJECT_NAME}
   src/problems/bounded_end_pose_problem.cpp
   src/problems/sampling_problem.cpp
   src/problems/time_indexed_sampling_problem.cpp
+  src/dynamics_solver.cpp
   ${exotica_core_BINARY_DIR}/generated/version.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})

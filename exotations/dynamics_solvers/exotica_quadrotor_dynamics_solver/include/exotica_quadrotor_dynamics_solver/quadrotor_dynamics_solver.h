@@ -35,12 +35,13 @@
 namespace exotica
 {
 /// \brief Quadrotor dynamics with quaternion representation
-/// Modified from D. Mellinger, N. Michael, and V. Kumar,
+/// Based on D. Mellinger, N. Michael, and V. Kumar,
 /// "Trajectory generation and control for precise aggressive maneuvers with quadrotors",
 /// Proceedings of the 12th International Symposium on Experimental Robotics (ISER 2010), 2010.
+/// Cf. https://journals.sagepub.com/doi/abs/10.1177/0278364911434236
 ///
-/// StateVector X ∈ R^13 = [x, y, z, q0(w), q1, q2, q3, xdot, ydot, zdot, omega1, omega2, omega3]
-class QuadrotorDynamicsSolver : public AbstractDynamicsSolver<double, 13, 4>
+/// StateVector X ∈ R^12 = [x, y, z, r, p, y, xdot, ydot, zdot, omega1, omega2, omega3]
+class QuadrotorDynamicsSolver : public DynamicsSolver
 {
 public:
     QuadrotorDynamicsSolver();
@@ -48,18 +49,18 @@ public:
     void AssignScene(ScenePtr scene_in) override;
 
     StateVector f(const StateVector& x, const ControlVector& u) override;
-    Eigen::Matrix<double, 13, 13> fx(const StateVector& x, const ControlVector& u) override;
-    Eigen::Matrix<double, 13, 4> fu(const StateVector& x, const ControlVector& u) override;
+    Eigen::MatrixXd fx(const StateVector& x, const ControlVector& u) override;
+    Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
 
 private:
     Eigen::Matrix3d J_;      ///< Inertia matrix
     Eigen::Matrix3d J_inv_;  ///< Inverted inertia matrix
 
-    double mass_ = .5;   ///< Mass
-    double g_ = 9.81;    ///< Gravity (m/s^2)
-    double L_ = 0.1750;  ///< Distance between motors
-    double k_f_ = 1;     // 6.11*10^-8;
-    double k_m_ = 0.0245;
+    double mass_ = .5;     ///< Mass
+    double g_ = 9.81;      ///< Gravity (m/s^2)
+    double L_ = 0.1750;    ///< Distance between motors
+    double k_f_ = 1;       ///< Thrust coefficient, 6.11*10^-8;
+    double k_m_ = 0.0245;  ///< Moment coefficient
 };
 }  // namespace exotica
 

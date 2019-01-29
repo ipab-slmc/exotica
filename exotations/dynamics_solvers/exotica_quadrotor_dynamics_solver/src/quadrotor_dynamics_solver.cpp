@@ -56,10 +56,10 @@ void QuadrotorDynamicsSolver::AssignScene(ScenePtr scene_in)
 
 Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVector& u)
 {
-    const Eigen::Vector3d& translation = x.topRows<3>();
-    const Eigen::Vector3d& rpy = x.middleRows<3>(3);
-    const Eigen::Vector3d& v = x.middleRows<3>(6);
-    const Eigen::Vector3d& omega = x.bottomRows<3>();
+    const Eigen::Vector3d translation = x.head<3>();
+    const Eigen::Vector3d rpy = x.segment<3>(3);
+    const Eigen::Vector3d v = x.segment<3>(6);
+    const Eigen::Vector3d omega = x.tail<3>();
 
     // Create quaternion from rpy
     const Eigen::Quaterniond quaternion = Eigen::AngleAxisd(rpy(0), Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(rpy(1), Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(rpy(2), Eigen::Vector3d::UnitZ());
@@ -79,11 +79,11 @@ Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVe
     const Eigen::Quaterniond dquaternion = (quaternion * Eigen::Quaterniond(0, omega(0), omega(1), omega(2)));
     const Eigen::Vector3d rpy_dot = dquaternion.toRotationMatrix().eulerAngles(0, 1, 2);
 
-    StateVector x_dot;
-    x_dot.topRows<3>() = v;                                                                 // velocity in world frame
-    x_dot.middleRows<3>(3) = rpy_dot;                                                       // via quaternion derivative
-    x_dot.middleRows<3>(6) = Eigen::Vector3d(0, 0, -g_) + (1. / mass_) * (quaternion * F);  // acceleration in world frame
-    x_dot.middleRows<3>(9) = J_inv_ * (tau - omega.cross(J_ * omega));                      // Euler's equation : I* ω + ω x I* ω = constraint_decrease_ratio
+    StateVector x_dot(12);
+    x_dot.head<3>() = v;                                                                 // velocity in world frame
+    x_dot.segment<3>(3) = rpy_dot;                                                       // via quaternion derivative
+    x_dot.segment<3>(6) = Eigen::Vector3d(0, 0, -g_) + (1. / mass_) * (quaternion * F);  // acceleration in world frame
+    x_dot.segment<3>(9) = J_inv_ * (tau - omega.cross(J_ * omega));                      // Euler's equation : I* ω + ω x I* ω = constraint_decrease_ratio
 
     return x_dot;
 }

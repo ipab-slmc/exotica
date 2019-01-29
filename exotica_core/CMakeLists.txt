@@ -48,6 +48,7 @@ AddInitializer(
   end_pose_problem
   bounded_time_indexed_problem
   bounded_end_pose_problem
+  dynamic_time_indexed_shooting_problem
 )
 GenInitializers()
 
@@ -95,6 +96,8 @@ add_library(${PROJECT_NAME}
   src/problems/bounded_end_pose_problem.cpp
   src/problems/sampling_problem.cpp
   src/problems/time_indexed_sampling_problem.cpp
+  src/problems/dynamic_time_indexed_shooting_problem.cpp
+  src/dynamics_solver.cpp
   ${exotica_core_BINARY_DIR}/generated/version.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})

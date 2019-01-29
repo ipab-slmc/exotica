@@ -20,6 +20,8 @@ def test_getters():
     print(exo.Setup().get_solvers())
     print(exo.Setup().get_problems())
     print(exo.Setup().get_maps())
+    print(exo.Setup().get_collision_scenes())
+    print(exo.Setup().get_dynamics_solvers())
     exo.Setup().get_initializers()
     print(exo.Setup().get_package_path('exotica_python'))
 

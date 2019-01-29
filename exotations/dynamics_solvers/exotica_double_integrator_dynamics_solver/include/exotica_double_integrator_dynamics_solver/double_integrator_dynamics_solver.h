@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2019, Wolfgang Merkt
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,64 +27,28 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_OBJECT_H_
-#define EXOTICA_CORE_OBJECT_H_
+#ifndef EXOTICA_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_H_
+#define EXOTICA_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_H_
 
-#include <exotica_core/tools.h>
-#include <string>  // C++ type strings
-
-#include <exotica_core/object_initializer.h>
-#include <exotica_core/property.h>
+#include <exotica_core/dynamics_solver.h>
 
 namespace exotica
 {
-template <typename BO>
-class Factory;
-
-class Object
+class DoubleIntegratorDynamicsSolver : public DynamicsSolver
 {
-    template <typename BO>
-    friend class Factory;
-
 public:
-    Object()
-        : ns_(""), debug_(false)
-    {
-    }
+    DoubleIntegratorDynamicsSolver();
 
-    virtual ~Object()
-    {
-    }
+    void AssignScene(ScenePtr scene_in) override;
 
-    /// \brief Type Information wrapper: must be virtual so that it is polymorphic...
-    /// @return String containing the type of the object
-    inline virtual std::string type()
-    {
-        return GetTypeName(typeid(*this));
-    }
+    StateVector f(const StateVector& x, const ControlVector& u) override;
+    StateDerivative fx(const StateVector& x, const ControlVector& u) override;
+    ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
 
-    std::string GetObjectName()
-    {
-        return object_name_;
-    }
-
-    void InstantiateObject(const Initializer& init)
-    {
-        ObjectInitializer oinit(init);
-        object_name_ = oinit.Name;
-        debug_ = oinit.Debug;
-    }
-
-    virtual std::string Print(std::string prepend)
-    {
-        return prepend + "  " + object_name_ + " (" + type() + ")";
-    }
-
-    //	Namespace
-    std::string ns_;
-    std::string object_name_;
-    bool debug_;
+private:
+    Eigen::MatrixXd A_;
+    Eigen::MatrixXd B_;
 };
-}
+}  // namespace exotica
 
-#endif  // EXOTICA_CORE_OBJECT_H_
+#endif  // EXOTICA_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_H_

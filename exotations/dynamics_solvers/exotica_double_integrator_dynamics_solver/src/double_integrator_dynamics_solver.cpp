@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2019, Wolfgang Merkt
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,64 +27,43 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_OBJECT_H_
-#define EXOTICA_CORE_OBJECT_H_
+#include <exotica_double_integrator_dynamics_solver/double_integrator_dynamics_solver.h>
 
-#include <exotica_core/tools.h>
-#include <string>  // C++ type strings
-
-#include <exotica_core/object_initializer.h>
-#include <exotica_core/property.h>
+REGISTER_DYNAMICS_SOLVER_TYPE("DoubleIntegratorDynamicsSolver", exotica::DoubleIntegratorDynamicsSolver)
 
 namespace exotica
 {
-template <typename BO>
-class Factory;
+DoubleIntegratorDynamicsSolver::DoubleIntegratorDynamicsSolver() = default;
 
-class Object
+void DoubleIntegratorDynamicsSolver::AssignScene(ScenePtr scene_in)
 {
-    template <typename BO>
-    friend class Factory;
+    const int num_positions_in = scene_in->GetKinematicTree().GetNumControlledJoints();
 
-public:
-    Object()
-        : ns_(""), debug_(false)
-    {
-    }
+    num_positions_ = num_positions_in;
+    num_velocities_ = num_positions_in;
+    num_controls_ = num_positions_in;
 
-    virtual ~Object()
-    {
-    }
+    // Cf. https://en.wikipedia.org/wiki/Double_integrator
+    A_ = Eigen::MatrixXd::Zero(num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+    A_.topRightCorner(num_velocities_, num_velocities_) = Eigen::MatrixXd::Identity(num_velocities_, num_velocities_);
 
-    /// \brief Type Information wrapper: must be virtual so that it is polymorphic...
-    /// @return String containing the type of the object
-    inline virtual std::string type()
-    {
-        return GetTypeName(typeid(*this));
-    }
-
-    std::string GetObjectName()
-    {
-        return object_name_;
-    }
-
-    void InstantiateObject(const Initializer& init)
-    {
-        ObjectInitializer oinit(init);
-        object_name_ = oinit.Name;
-        debug_ = oinit.Debug;
-    }
-
-    virtual std::string Print(std::string prepend)
-    {
-        return prepend + "  " + object_name_ + " (" + type() + ")";
-    }
-
-    //	Namespace
-    std::string ns_;
-    std::string object_name_;
-    bool debug_;
-};
+    B_ = Eigen::MatrixXd::Zero(num_positions_ + num_velocities_, num_controls_);
+    B_.bottomRightCorner(num_controls_, num_controls_) = Eigen::MatrixXd::Identity(num_controls_, num_controls_);
 }
 
-#endif  // EXOTICA_CORE_OBJECT_H_
+Eigen::VectorXd DoubleIntegratorDynamicsSolver::f(const StateVector& x, const ControlVector& u)
+{
+    return A_ * x + B_ * u;
+}
+
+Eigen::MatrixXd DoubleIntegratorDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
+{
+    return A_;
+}
+
+Eigen::MatrixXd DoubleIntegratorDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
+{
+    return B_;
+}
+
+}  // namespace exotica

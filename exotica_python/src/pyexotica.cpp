@@ -493,6 +493,7 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("get_problems", &Setup::GetProblems, "Returns a list of available problems.");
     setup.def_static("get_maps", &Setup::GetMaps, "Returns a list of available task maps.");
     setup.def_static("get_collision_scenes", &Setup::GetCollisionScenes, "Returns a list of available collision scene plug-ins.");
+    setup.def_static("get_dynamics_solvers", &Setup::GetDynamicsSolvers, "Returns a list of available dynamics solvers plug-ins.");
     setup.def_static("create_solver", [](const Initializer& init) { return Setup::CreateSolver(init); }, py::return_value_policy::take_ownership);    // "Creates an instance of the solver identified by name parameter.", py::arg("solverType"), py::arg("prependExoticaNamespace"));
     setup.def_static("create_problem", [](const Initializer& init) { return Setup::CreateProblem(init); }, py::return_value_policy::take_ownership);  // "Creates an instance of the problem identified by name parameter.", py::arg("problemType"), py::arg("prependExoticaNamespace"));
     setup.def_static("create_map", [](const Initializer& init) { return Setup::CreateMap(init); }, py::return_value_policy::take_ownership);          // "Creates an instance of the task map identified by name parameter.", py::arg("taskmapType"), py::arg("prependExoticaNamespace"));
@@ -906,6 +907,21 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def("set_rho_neq", &TimeIndexedSamplingProblem::SetRhoNEQ);
     time_indexed_sampling_problem.def("get_goal_neq", &TimeIndexedSamplingProblem::GetGoalNEQ);
     time_indexed_sampling_problem.def("get_rho_neq", &TimeIndexedSamplingProblem::GetRhoNEQ);
+
+    py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")
+        .def("update", &DynamicTimeIndexedShootingProblem::Update)
+        .def_property("X", &DynamicTimeIndexedShootingProblem::get_X, &DynamicTimeIndexedShootingProblem::set_X)
+        .def_property("U", &DynamicTimeIndexedShootingProblem::get_U, &DynamicTimeIndexedShootingProblem::set_U)
+        .def_property("X_star", &DynamicTimeIndexedShootingProblem::get_X_star, &DynamicTimeIndexedShootingProblem::set_X_star)
+        .def_property_readonly("tau", &DynamicTimeIndexedShootingProblem::get_tau)
+        .def_property("T", &DynamicTimeIndexedShootingProblem::get_T, &DynamicTimeIndexedShootingProblem::set_T)
+        .def_readonly("N", &DynamicTimeIndexedShootingProblem::N)
+        .def("get_Q", &DynamicTimeIndexedShootingProblem::get_Q)
+        .def("set_Q", &DynamicTimeIndexedShootingProblem::set_Q)
+        .def("get_state_cost", &DynamicTimeIndexedShootingProblem::GetStateCost)
+        .def("get_state_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetStateCostJacobian)
+        .def("get_control_cost", &DynamicTimeIndexedShootingProblem::GetControlCost)
+        .def("get_control_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetControlCostJacobian);
 
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> collision_proxy(module, "CollisionProxy");
     collision_proxy.def(py::init());

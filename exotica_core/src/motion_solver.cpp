@@ -37,7 +37,7 @@ namespace exotica
 {
 void MotionSolver::InstantiateBase(const Initializer& init)
 {
-    Object::InstatiateObject(init);
+    Object::InstantiateObject(init);
     SetNumberOfMaxIterations(MotionSolverInitializer(init).MaxIterations);
 }
 

@@ -33,6 +33,7 @@
 #include <memory>
 #include <vector>
 
+#include <exotica_core/dynamics_solver.h>
 #include <exotica_core/factory.h>
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/object.h>
@@ -62,11 +63,13 @@ public:
     static std::shared_ptr<exotica::MotionSolver> CreateSolver(const std::string& type, bool prepend = true) { return ToStdPtr(Instance()->solvers_.createInstance((prepend ? "exotica/" : "") + type)); }
     static std::shared_ptr<exotica::TaskMap> CreateMap(const std::string& type, bool prepend = true) { return ToStdPtr(Instance()->maps_.createInstance((prepend ? "exotica/" : "") + type)); }
     static std::shared_ptr<exotica::PlanningProblem> CreateProblem(const std::string& type, bool prepend = true) { return Instance()->problems_.CreateInstance((prepend ? "exotica/" : "") + type); }
-    static std::shared_ptr<exotica::CollisionScene> CreateCollisionScene(const std::string& type, bool prepend = true) { return ToStdPtr(Instance()->scenes_.createInstance((prepend ? "exotica/" : "") + type)); }
+    static std::shared_ptr<exotica::CollisionScene> CreateCollisionScene(const std::string& type, bool prepend = true) { return ToStdPtr(Instance()->collision_scenes_.createInstance((prepend ? "exotica/" : "") + type)); }
+    static std::shared_ptr<exotica::DynamicsSolver> CreateDynamicsSolver(const std::string& type, bool prepend = true) { return ToStdPtr(Instance()->dynamics_solvers_.createInstance((prepend ? "exotica/" : "") + type)); }
     static std::vector<std::string> GetSolvers();
     static std::vector<std::string> GetProblems();
     static std::vector<std::string> GetMaps();
     static std::vector<std::string> GetCollisionScenes();
+    static std::vector<std::string> GetDynamicsSolvers();
     static std::vector<Initializer> GetInitializers();
 
     static std::shared_ptr<exotica::MotionSolver> CreateSolver(const Initializer& init)
@@ -97,7 +100,8 @@ private:
 
     pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
     pluginlib::ClassLoader<exotica::TaskMap> maps_;
-    pluginlib::ClassLoader<exotica::CollisionScene> scenes_;
+    pluginlib::ClassLoader<exotica::CollisionScene> collision_scenes_;
+    pluginlib::ClassLoader<exotica::DynamicsSolver> dynamics_solvers_;
     PlanningProblemFac problems_;
 };
 

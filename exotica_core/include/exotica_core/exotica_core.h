@@ -36,6 +36,7 @@
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/problems/bounded_end_pose_problem.h>
 #include <exotica_core/problems/bounded_time_indexed_problem.h>
+#include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
 #include <exotica_core/problems/end_pose_problem.h>
 #include <exotica_core/problems/sampling_problem.h>
 #include <exotica_core/problems/time_indexed_problem.h>

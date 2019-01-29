@@ -908,6 +908,21 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def("get_goal_neq", &TimeIndexedSamplingProblem::GetGoalNEQ);
     time_indexed_sampling_problem.def("get_rho_neq", &TimeIndexedSamplingProblem::GetRhoNEQ);
 
+    py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")
+        .def("update", &DynamicTimeIndexedShootingProblem::Update)
+        .def_property("X", &DynamicTimeIndexedShootingProblem::get_X, &DynamicTimeIndexedShootingProblem::set_X)
+        .def_property("U", &DynamicTimeIndexedShootingProblem::get_U, &DynamicTimeIndexedShootingProblem::set_U)
+        .def_property("X_star", &DynamicTimeIndexedShootingProblem::get_X_star, &DynamicTimeIndexedShootingProblem::set_X_star)
+        .def_property_readonly("tau", &DynamicTimeIndexedShootingProblem::get_tau)
+        .def_property("T", &DynamicTimeIndexedShootingProblem::get_T, &DynamicTimeIndexedShootingProblem::set_T)
+        .def_readonly("N", &DynamicTimeIndexedShootingProblem::N)
+        .def("get_Q", &DynamicTimeIndexedShootingProblem::get_Q)
+        .def("set_Q", &DynamicTimeIndexedShootingProblem::set_Q)
+        .def("get_state_cost", &DynamicTimeIndexedShootingProblem::GetStateCost)
+        .def("get_state_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetStateCostJacobian)
+        .def("get_control_cost", &DynamicTimeIndexedShootingProblem::GetControlCost)
+        .def("get_control_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetControlCostJacobian);
+
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> collision_proxy(module, "CollisionProxy");
     collision_proxy.def(py::init());
     collision_proxy.def_readonly("contact_1", &CollisionProxy::contact1);

@@ -74,7 +74,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(DynamicTimeIndexedShootingPr
         }
         else
         {
-            ThrowNamed("Q dimension mismatch! Expected " << dynamics_solver_->get_num_controls() << ", got " << init_.R.rows());
+            ThrowNamed("R dimension mismatch! Expected " << dynamics_solver_->get_num_controls() << ", got " << init_.R.rows());
         }
     }
 

@@ -72,6 +72,17 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::Integrate(const State
             // 2nd order result: x = x0 + dt (xd0+xd1)/2.
             return x + (dt_ / 2.) * (xdot0 + xdot1);
         }
+        // Runge-Kutta 4
+        case Integrator::RK4:
+        {
+            StateVector k1 = dt_ * f(x, u);
+            StateVector k2 = dt_ * f(x + 0.5 * k1, u);
+            StateVector k3 = dt_ * f(x + 0.5 * k2, u);
+            StateVector k4 = dt_ * f(x + k3, u);
+            StateVector dx = (k1 + k4) / 6. + (k2 + k3) / 3.;
+
+            return x + dx;
+        }
     };
     ThrowPretty("Not implemented!");
 }
@@ -86,6 +97,13 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::Simulate(const StateV
         x_t_plus_1 = Integrate(x_t_plus_1, u);
     }
     return x_t_plus_1;
+}
+
+template <typename T, int NX, int NU>
+Eigen::Matrix<T, Eigen::Dynamic, 1> AbstractDynamicsSolver<T, NX, NU>::GetPosition(Eigen::VectorXdRefConst x_in)
+{
+    assert(x_in.size() == (num_positions_ + num_velocities_));
+    return x_in.head(num_positions_).eval();
 }
 
 template <typename T, int NX, int NU>
@@ -122,6 +140,19 @@ template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::set_integrator(Integrator integrator_in)
 {
     integrator_ = integrator_in;
+}
+
+template <typename T, int NX, int NU>
+void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(std::string integrator_in)
+{
+    if (integrator_in == "RK1")
+        integrator_ = Integrator::RK1;
+    else if (integrator_in == "RK2")
+        integrator_ = Integrator::RK2;
+    else if (integrator_in == "RK4")
+        integrator_ = Integrator::RK4;
+    else
+        ThrowPretty("Unknown integrator: " << integrator_in);
 }
 
 }  // namespace exotica

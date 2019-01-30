@@ -47,6 +47,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(DynamicTimeIndexedShootingPr
     dynamics_solver_ = Setup::CreateDynamicsSolver(init_.DynamicsSolver);
     dynamics_solver_->AssignScene(scene_);
     dynamics_solver_->SetDt(init_.dt);
+    dynamics_solver_->SetIntegrator(init_.Integrator);
 
     // TODO: Strictly speaking N here should correspond to the number of controls, which comes from the dynamic solver - to be fixed!
     N = scene_->GetKinematicTree().GetNumControlledJoints();
@@ -229,7 +230,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     // Simulate for tau
     X_.col(t + 1) = dynamics_solver_->Simulate(X_.col(t), U_.col(t), tau_);
 
-    scene_->Update(X_.col(t + 1).topRows(N), static_cast<double>(t) * tau_);
+    scene_->Update(dynamics_solver_->GetPosition(X_.col(t + 1)), static_cast<double>(t) * tau_);
 
     // TODO: Cost, Equality, Inequality
 

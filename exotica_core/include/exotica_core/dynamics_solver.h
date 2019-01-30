@@ -42,7 +42,7 @@ enum Integrator
 {
     RK1 = 0,  ///< Forward Euler
     RK2,      ///< Explicit trapezoid rule
-    // RK4,
+    RK4,      ///< Runge-Kutta 4
     // RK45
 };
 
@@ -85,6 +85,10 @@ public:
     /// Simulates the system and steps the simulation by timesteps dt for a total time of t using the specified integration scheme starting from state x and with controls u.
     StateVector Simulate(const StateVector& x, const ControlVector& u, T t);
 
+    /// \brief Returns the position-part of the state vector to update the scene.
+    /// For types including SE(3) and rotation, convert to the appropriate representation here by overriding this method.
+    virtual Eigen::Matrix<T, Eigen::Dynamic, 1> GetPosition(Eigen::VectorXdRefConst x_in);
+
     /// \brief Returns number of controls
     int get_num_controls() const;
 
@@ -102,6 +106,9 @@ public:
 
     /// \brief Sets integrator type
     void set_integrator(Integrator integrator_in);
+
+    /// \brief Sets integrator type based on request string
+    void SetIntegrator(std::string integrator_in);
 
 protected:
     int num_controls_;    ///< Number of controls in the dynamic system.

@@ -1,0 +1,5 @@
+<library path="lib/libexotica_pinocchio_dynamics_solver">
+  <class name="exotica/PinocchioDynamicsSolver" type="exotica::PinocchioDynamicsSolver" base_class_type="exotica::DynamicsSolver">
+    <description>Pinocchio dynamics system</description>
+  </class>
+</library>

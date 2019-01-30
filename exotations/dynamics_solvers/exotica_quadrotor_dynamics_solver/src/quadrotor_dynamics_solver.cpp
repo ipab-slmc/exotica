@@ -35,7 +35,7 @@ namespace exotica
 {
 QuadrotorDynamicsSolver::QuadrotorDynamicsSolver()
 {
-    num_positions_ = 6;
+    num_positions_ = 7;
     num_velocities_ = 6;
     num_controls_ = 4;
 
@@ -57,12 +57,16 @@ void QuadrotorDynamicsSolver::AssignScene(ScenePtr scene_in)
 Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVector& u)
 {
     const Eigen::Vector3d translation = x.head<3>();
-    const Eigen::Vector3d rpy = x.segment<3>(3);
+    Eigen::Quaterniond quaternion;
+
+    // If input quaternion is (0,0,0,0) set to (1,0,0,0)
+    if (x.segment<4>(3).isApprox(Eigen::Vector4d::Zero()))
+        quaternion = Eigen::Quaterniond(1, 0, 0, 0);
+    else
+        quaternion = Eigen::Quaterniond(x.segment<4>(3)).normalized();
+
     const Eigen::Vector3d v = x.segment<3>(6);
     const Eigen::Vector3d omega = x.tail<3>();
-
-    // Create quaternion from rpy
-    const Eigen::Quaterniond quaternion = Eigen::AngleAxisd(rpy(0), Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(rpy(1), Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(rpy(2), Eigen::Vector3d::UnitZ());
 
     const double F_1 = k_f_ * u(0);
     const double F_2 = k_f_ * u(1);
@@ -76,15 +80,11 @@ Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVe
     const double M_4 = k_m_ * u(3);
     const Eigen::Vector3d tau(L_ * (F_2 - F_4), L_ * (F_3 - F_1), (M_1 - M_2 + M_3 - M_4));  // total rotor torque in body frame
 
-    // This will at first seem a bit hand-wavy but it makes sense, e.g., check out https://math.stackexchange.com/a/2099673
-    const Eigen::Vector4d dquaternion = 0.5 * (quaternion * Eigen::Quaterniond(0, omega(0), omega(1), omega(2))).coeffs();
-    const Eigen::Vector3d rpy_dot = Eigen::Quaterniond(dquaternion(0), dquaternion(1), dquaternion(2), dquaternion(3)).toRotationMatrix().eulerAngles(0, 1, 2);
-
-    StateVector x_dot(12);
-    x_dot.head<3>() = v;                                                                 // velocity in world frame
-    x_dot.segment<3>(3) = rpy_dot;                                                       // via quaternion derivative
-    x_dot.segment<3>(6) = Eigen::Vector3d(0, 0, -g_) + (1. / mass_) * (quaternion * F);  // acceleration in world frame
-    x_dot.segment<3>(9) = J_inv_ * (tau - omega.cross(J_ * omega));                      // Euler's equation : I* ω + ω x I* ω = constraint_decrease_ratio
+    StateVector x_dot(13);
+    x_dot.head<3>() = v;                                                                                      // velocity in world frame
+    x_dot.segment<4>(3) = 0.5 * (quaternion * Eigen::Quaterniond(0, omega(0), omega(1), omega(2))).coeffs();  // via quaternion derivative (cf. https://math.stackexchange.com/a/2099673)
+    x_dot.segment<3>(7) = Eigen::Vector3d(0, 0, -g_) + (1. / mass_) * (quaternion * F);                       // acceleration in world frame
+    x_dot.segment<3>(10) = J_inv_ * (tau - omega.cross(J_ * omega));                                          // Euler's equation : I*ω + ω x I*ω
 
     return x_dot;
 }
@@ -97,6 +97,15 @@ Eigen::MatrixXd QuadrotorDynamicsSolver::fx(const StateVector& x, const ControlV
 Eigen::MatrixXd QuadrotorDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
     // TODO
+}
+
+Eigen::VectorXd QuadrotorDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_in)
+{
+    // Convert quaternion to Euler angles.
+    Eigen::Matrix<double, 6, 1> xyz_rpy;
+    xyz_rpy.head<3>() = x_in.head<3>();
+    xyz_rpy.tail<3>() = Eigen::Quaterniond(x_in.segment<4>(3)).toRotationMatrix().eulerAngles(0, 1, 2);
+    return xyz_rpy;
 }
 
 }  // namespace exotica

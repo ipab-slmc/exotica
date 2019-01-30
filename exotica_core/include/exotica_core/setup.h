@@ -91,6 +91,22 @@ public:
         return ret;
     }
 
+    ///
+    /// \brief CreateScene instantiate a scene from an initialiser
+    ///     The returned scene is independent of the internal EXOTica solver
+    ///     or problem state. It can only be used to access the parsed information
+    ///     like joint and link names or the kinematics. Changes to the scene
+    ///     will not affect the solver or problem.
+    /// \param init scene initialiser
+    /// \return a shared pointer to the scene
+    ///
+    static exotica::ScenePtr CreateScene(const Initializer& init)
+    {
+        exotica::ScenePtr ret = std::make_shared<exotica::Scene>();
+        ret->InstantiateInternal(init);
+        return ret;
+    }
+
 private:
     Setup();
     static std::shared_ptr<Setup> singleton_initialiser_;

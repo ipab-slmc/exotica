@@ -961,6 +961,14 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("get_model_joint_names", &Scene::GetModelJointNames);
     scene.def("get_model_state", &Scene::GetModelState);
     scene.def("get_model_state_map", &Scene::GetModelStateMap);
+    scene.def("get_tree_names", [](Scene& scene) {
+        std::vector<std::string> frame_names;
+        for (const auto& m : scene.GetTreeMap())
+        {
+            frame_names.push_back(m.first);
+        }
+        return frame_names;
+    });
     scene.def("set_model_state", (void (Scene::*)(Eigen::VectorXdRefConst, double, bool)) & Scene::SetModelState, py::arg("x"), py::arg("t") = 0.0, py::arg("update_trajectory") = false);
     scene.def("set_model_state_map", (void (Scene::*)(std::map<std::string, double>, double, bool)) & Scene::SetModelState, py::arg("x"), py::arg("t") = 0.0, py::arg("update_trajectory") = false);
     scene.def("get_controlled_state", &Scene::GetControlledState);

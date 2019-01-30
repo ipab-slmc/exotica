@@ -18,7 +18,7 @@ print("Constant force to hover:")
 s = time()
 F_hover = 0.5 * 9.81 / 4.
 for t in xrange(problem.T - 1):
-    u_rand = 1. * F_hover * np.ones((problem.N, 1))
+    u_rand = F_hover * np.ones((problem.N, 1))
     problem.update(u_rand, t)
     problem.get_scene().get_kinematic_tree().publish_frames()
     sleep(problem.tau)

@@ -76,8 +76,9 @@ Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVe
     const double M_4 = k_m_ * u(3);
     const Eigen::Vector3d tau(L_ * (F_2 - F_4), L_ * (F_3 - F_1), (M_1 - M_2 + M_3 - M_4));  // total rotor torque in body frame
 
-    const Eigen::Quaterniond dquaternion = (quaternion * Eigen::Quaterniond(0, omega(0), omega(1), omega(2)));
-    const Eigen::Vector3d rpy_dot = dquaternion.toRotationMatrix().eulerAngles(0, 1, 2);
+    // This will at first seem a bit hand-wavy but it makes sense, e.g., check out https://math.stackexchange.com/a/2099673
+    const Eigen::Vector4d dquaternion = 0.5 * (quaternion * Eigen::Quaterniond(0, omega(0), omega(1), omega(2))).coeffs();
+    const Eigen::Vector3d rpy_dot = Eigen::Quaterniond(dquaternion(0), dquaternion(1), dquaternion(2), dquaternion(3)).toRotationMatrix().eulerAngles(0, 1, 2);
 
     StateVector x_dot(12);
     x_dot.head<3>() = v;                                                                 // velocity in world frame

@@ -229,7 +229,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     // Simulate for tau
     X_.col(t + 1) = dynamics_solver_->Simulate(X_.col(t), U_.col(t), tau_);
 
-    scene_->Update(X_.col(t + 1).topRows(N), static_cast<double>(t) * tau_);
+    scene_->Update(dynamics_solver_->GetPosition(X_.col(t + 1)), static_cast<double>(t) * tau_);
 
     // TODO: Cost, Equality, Inequality
 

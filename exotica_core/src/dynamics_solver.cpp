@@ -89,6 +89,13 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::Simulate(const StateV
 }
 
 template <typename T, int NX, int NU>
+Eigen::Matrix<T, Eigen::Dynamic, 1> AbstractDynamicsSolver<T, NX, NU>::GetPosition(Eigen::VectorXdRefConst x_in)
+{
+    assert(x_in.size() == (num_positions_ + num_velocities_));
+    return x_in.head(num_positions_).eval();
+}
+
+template <typename T, int NX, int NU>
 int AbstractDynamicsSolver<T, NX, NU>::get_num_controls() const
 {
     return num_controls_;

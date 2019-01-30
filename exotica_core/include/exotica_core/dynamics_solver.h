@@ -85,6 +85,10 @@ public:
     /// Simulates the system and steps the simulation by timesteps dt for a total time of t using the specified integration scheme starting from state x and with controls u.
     StateVector Simulate(const StateVector& x, const ControlVector& u, T t);
 
+    /// \brief Returns the position-part of the state vector to update the scene.
+    /// For types including SE(3) and rotation, convert to the appropriate representation here by overriding this method.
+    virtual Eigen::Matrix<T, Eigen::Dynamic, 1> GetPosition(Eigen::VectorXdRefConst x_in);
+
     /// \brief Returns number of controls
     int get_num_controls() const;
 

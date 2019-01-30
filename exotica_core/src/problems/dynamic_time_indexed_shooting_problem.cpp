@@ -47,6 +47,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(DynamicTimeIndexedShootingPr
     dynamics_solver_ = Setup::CreateDynamicsSolver(init_.DynamicsSolver);
     dynamics_solver_->AssignScene(scene_);
     dynamics_solver_->SetDt(init_.dt);
+    dynamics_solver_->SetIntegrator(init_.Integrator);
 
     // TODO: Strictly speaking N here should correspond to the number of controls, which comes from the dynamic solver - to be fixed!
     N = scene_->GetKinematicTree().GetNumControlledJoints();

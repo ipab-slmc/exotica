@@ -42,7 +42,7 @@ enum Integrator
 {
     RK1 = 0,  ///< Forward Euler
     RK2,      ///< Explicit trapezoid rule
-    // RK4,
+    RK4,      ///< Runge-Kutta 4
     // RK45
 };
 
@@ -106,6 +106,9 @@ public:
 
     /// \brief Sets integrator type
     void set_integrator(Integrator integrator_in);
+
+    /// \brief Sets integrator type based on request string
+    void SetIntegrator(std::string integrator_in);
 
 protected:
     int num_controls_;    ///< Number of controls in the dynamic system.

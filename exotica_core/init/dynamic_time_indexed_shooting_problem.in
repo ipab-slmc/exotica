@@ -7,6 +7,7 @@ Required double tau;  // Discretisation timestep of the trajectory
 
 Optional std::string DynamicsSolver = "DoubleIntegratorDynamicsSolver";
 Optional double dt = 0.01;  // dt for simulating dynamics
+Optional std::string Integrator = "RK1";
 
 Optional Eigen::VectorXd Q = Eigen::VectorXd();
 Optional Eigen::VectorXd R = Eigen::VectorXd();

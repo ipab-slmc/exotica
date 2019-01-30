@@ -56,9 +56,6 @@ class TestClass(unittest.TestCase):
     def test_clean_MinimalProblem(self):
         test_scene('MinimalProblem', True)
 
-    def test_clean_MinimalProblem(self):
-        test_scene('MinimalProblem', True)
-
     def test_clean_TrajectoryProblem(self):
         test_scene('TrajectoryProblem', True)
 

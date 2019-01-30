@@ -497,7 +497,6 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("create_solver", [](const Initializer& init) { return Setup::CreateSolver(init); }, py::return_value_policy::take_ownership);    // "Creates an instance of the solver identified by name parameter.", py::arg("solverType"), py::arg("prependExoticaNamespace"));
     setup.def_static("create_problem", [](const Initializer& init) { return Setup::CreateProblem(init); }, py::return_value_policy::take_ownership);  // "Creates an instance of the problem identified by name parameter.", py::arg("problemType"), py::arg("prependExoticaNamespace"));
     setup.def_static("create_scene", [](const Initializer& init) { return Setup::CreateScene(init); }, py::return_value_policy::take_ownership);
-    setup.def_static("create_map", [](const Initializer& init) { return Setup::CreateMap(init); }, py::return_value_policy::take_ownership);          // "Creates an instance of the task map identified by name parameter.", py::arg("taskmapType"), py::arg("prependExoticaNamespace"));
     setup.def_static("print_supported_classes", &Setup::PrintSupportedClasses, "Print a list of available plug-ins sorted by class.");
     setup.def_static("get_initializers", &Setup::GetInitializers, py::return_value_policy::copy, "Returns a list of available initializers with all available parameters/arguments.");
     setup.def_static("get_package_path", &ros::package::getPath, "ROS package path resolution.");

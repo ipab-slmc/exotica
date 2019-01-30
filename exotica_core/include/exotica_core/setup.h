@@ -78,12 +78,6 @@ public:
         ret->InstantiateInternal(init);
         return ret;
     }
-    static std::shared_ptr<exotica::TaskMap> CreateMap(const Initializer& init)
-    {
-        std::shared_ptr<exotica::TaskMap> ret = ToStdPtr(Instance()->maps_.createInstance(init.GetName()));
-        ret->InstantiateInternal(init);
-        return ret;
-    }
     static std::shared_ptr<exotica::PlanningProblem> CreateProblem(const Initializer& init)
     {
         std::shared_ptr<exotica::PlanningProblem> ret = Instance()->problems_.CreateInstance(init.GetName());
@@ -108,11 +102,19 @@ public:
     }
 
 private:
+    friend PlanningProblem;
     Setup();
     static std::shared_ptr<Setup> singleton_initialiser_;
     // Make sure the singleton does not get copied
     Setup(Setup const&) = delete;
     void operator=(Setup const&) = delete;
+
+    static std::shared_ptr<exotica::TaskMap> CreateMap(const Initializer& init)
+    {
+        std::shared_ptr<exotica::TaskMap> ret = ToStdPtr(Instance()->maps_.createInstance(init.GetName()));
+        ret->InstantiateInternal(init);
+        return ret;
+    }
 
     pluginlib::ClassLoader<exotica::MotionSolver> solvers_;
     pluginlib::ClassLoader<exotica::TaskMap> maps_;

@@ -291,6 +291,16 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
     return U_.col(t) * R_ * 2.0;
 }
 
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
+{
+    return dynamics_solver_->f(x, u);
+}
+
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
+{
+    return dynamics_solver_->Simulate(x, u, tau_);
+}
+
 // min (mu-x)^T * Q * (mu-x) + u^T * R * u
 
 }  // namespace exotica

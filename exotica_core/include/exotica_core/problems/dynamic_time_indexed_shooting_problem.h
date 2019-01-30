@@ -71,6 +71,9 @@ public:
     Eigen::VectorXd GetStateCostJacobian(int t) const;
     Eigen::VectorXd GetControlCostJacobian(int t) const;
 
+    Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
+    Eigen::VectorXd Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
+
 private:
     void ReinitializeVariables();
 

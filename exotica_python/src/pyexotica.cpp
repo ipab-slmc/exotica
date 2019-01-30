@@ -819,6 +819,7 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<EndPoseProblem, std::shared_ptr<EndPoseProblem>, PlanningProblem> end_pose_problem(prob, "EndPoseProblem");
     end_pose_problem.def("update", &EndPoseProblem::Update);
+    end_pose_problem.def("pre_update", &EndPoseProblem::PreUpdate);
     end_pose_problem.def("set_goal", &EndPoseProblem::SetGoal);
     end_pose_problem.def("set_rho", &EndPoseProblem::SetRho);
     end_pose_problem.def("get_goal", &EndPoseProblem::GetGoal);
@@ -916,6 +917,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_property_readonly("tau", &DynamicTimeIndexedShootingProblem::get_tau)
         .def_property("T", &DynamicTimeIndexedShootingProblem::get_T, &DynamicTimeIndexedShootingProblem::set_T)
         .def_readonly("N", &DynamicTimeIndexedShootingProblem::N)
+        .def("dynamics", &DynamicTimeIndexedShootingProblem::Dynamics)
+        .def("simulate", &DynamicTimeIndexedShootingProblem::Simulate)
         .def("get_Q", &DynamicTimeIndexedShootingProblem::get_Q)
         .def("set_Q", &DynamicTimeIndexedShootingProblem::set_Q)
         .def("get_state_cost", &DynamicTimeIndexedShootingProblem::GetStateCost)

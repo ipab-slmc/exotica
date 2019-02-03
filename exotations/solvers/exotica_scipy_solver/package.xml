@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>exotica_scipy_solver</name>
+  <version>0.0.1</version>
+  <description>SciPy-based Python solvers for Exotica</description>
+
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <author>Wolfgang Merkt</author>
+
+  <license>BSD</license>
+  <!-- <url type="website">http://wiki.ros.org/exotica_scipy_solver</url> -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>python-numpy</depend>
+  <depend>python-scipy</depend>
+  <depend>exotica_core</depend>
+</package>

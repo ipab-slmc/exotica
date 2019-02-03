@@ -32,15 +32,10 @@
 
 #include <exotica_core/dynamics_solver.h>
 
-// urdfdom switched from boost to std - switch here if needed:
-#if ROS_VERSION_MINIMUM(1, 14, 0)  // if ROS version >= ROS_MELODIC
-#define PINOCCHIO_URDFDOM_USE_STD_SHARED_PTR
-#endif
-
 #include <pinocchio/algorithm/aba-derivatives.hpp>
 #include <pinocchio/algorithm/aba.hpp>
-#include <pinocchio/multibody/model.hpp>
 #include <pinocchio/multibody/data.hpp>
+#include <pinocchio/multibody/model.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 
 namespace exotica

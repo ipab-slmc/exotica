@@ -34,11 +34,25 @@ REGISTER_DYNAMICS_SOLVER_TYPE("PinocchioDynamicsSolver", exotica::PinocchioDynam
 namespace exotica
 {
 PinocchioDynamicsSolver::PinocchioDynamicsSolver() {}
-
 void PinocchioDynamicsSolver::AssignScene(ScenePtr scene_in)
 {
-    // pinocchio::JointModelFreeFlyer()
-    pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), model_, true);
+    const bool verbose = false;
+    if (scene_in->GetKinematicTree().GetControlledBaseType() == BaseType::FIXED)
+    {
+        pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), model_, verbose);
+    }
+    else if (scene_in->GetKinematicTree().GetControlledBaseType() == BaseType::FIXED)
+    {
+        pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), pinocchio::JointModelPlanar(), model_, verbose);
+    }
+    else if (scene_in->GetKinematicTree().GetControlledBaseType() == BaseType::FLOATING)
+    {
+        pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), pinocchio::JointModelFreeFlyer(), model_, verbose);
+    }
+    else
+    {
+        ThrowPretty("This condition should never happen. Unknown BaseType.");
+    }
 
     num_positions_ = model_.nq;
     num_velocities_ = model_.nv;

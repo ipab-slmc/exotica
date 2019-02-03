@@ -7,8 +7,6 @@ find_package(catkin REQUIRED COMPONENTS
   pinocchio
 )
 
-add_compile_options(-Wno-deprecated)
-
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
@@ -31,7 +29,6 @@ install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
 )
 
 install(FILES

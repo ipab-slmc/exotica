@@ -9,18 +9,17 @@ from time import sleep
 import exotica_scipy_solver
 
 exo.Setup.init_ros()
-tmp_solver = exo.Setup.load_solver(
-    '{exotica_ifopt_solver}/resources/ifopt_ik_constrained.xml')
-problem = tmp_solver.get_problem()
+problem = exo.Setup.load_problem(
+    '{exotica_examples}/resources/configs/example_ik_constrained.xml')
 
-solver = exotica_scipy_solver.SciPyEndPoseSolver(problem)
+# solver = exotica_scipy_solver.SciPyEndPoseSolver(problem=problem, method='trust-constr', debug=False)
+solver = exotica_scipy_solver.SciPyEndPoseSolver(problem=problem, method='SLSQP', debug=False)
 
 dt = 0.002
 t = 0.0
 q = array([0.0]*7)
 print('Publishing IK')
 signal.signal(signal.SIGINT, sig_int_handler)
-# problem = solver.get_problem()
 while True:
     try:
         problem.start_state = q

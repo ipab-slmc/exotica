@@ -5,16 +5,20 @@ from pyexotica.publish_trajectory import *
 from time import sleep
 import signal
 
-exo.Setup.init_ros()
-solver = exo.Setup.load_solver(
-    '{exotica_ifopt_solver}/resources/ifopt_traj_constrained.xml')
-problem = solver.get_problem()
+import exotica_scipy_solver
 
-for t in range(0, problem.T):
+exo.Setup.init_ros()
+problem = exo.Setup.load_problem(
+    '{exotica_examples}/resources/configs/example_trajectory_constrained.xml')
+solver = exotica_scipy_solver.SciPyTimeIndexedSolver(problem=problem, method='SLSQP', debug=True)
+
+for t in xrange(0, problem.T):
     if float(t) * problem.tau < 0.8:
-        problem.set_rho_eq('Position', 0.0, t)
+        # problem.set_rho_eq('Position', 0.0, t)
+        problem.set_rho('Position', 0.0, t)
     else:
-        problem.set_rho_eq('Position', 1, t)
+        # problem.set_rho_eq('Position', 1, t)
+        problem.set_rho('Position', 1e2, t)
 
 t = 0.0
 q = array([0.0] * 7)

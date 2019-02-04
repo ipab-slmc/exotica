@@ -736,7 +736,8 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> time_indexed_problem(prob, "TimeIndexedProblem");
     time_indexed_problem.def("get_duration", &TimeIndexedProblem::GetDuration);
-    time_indexed_problem.def("update", &TimeIndexedProblem::Update);
+    time_indexed_problem.def("update", (void (TimeIndexedProblem::*)(Eigen::VectorXdRefConst, int))&TimeIndexedProblem::Update);
+    time_indexed_problem.def("update", (void (TimeIndexedProblem::*)(Eigen::VectorXdRefConst))&TimeIndexedProblem::Update);
     time_indexed_problem.def("set_goal", &TimeIndexedProblem::SetGoal);
     time_indexed_problem.def("set_rho", &TimeIndexedProblem::SetRho);
     time_indexed_problem.def("get_goal", &TimeIndexedProblem::GetGoal);
@@ -761,14 +762,18 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def_readonly("num_tasks", &TimeIndexedProblem::num_tasks);
     time_indexed_problem.def_readonly("Phi", &TimeIndexedProblem::Phi);
     time_indexed_problem.def_readonly("jacobian", &TimeIndexedProblem::jacobian);
+    time_indexed_problem.def("get_cost", &TimeIndexedProblem::GetCost);
+    time_indexed_problem.def("get_cost_jacobian", &TimeIndexedProblem::GetCostJacobian);
     time_indexed_problem.def("get_scalar_task_cost", &TimeIndexedProblem::GetScalarTaskCost);
     time_indexed_problem.def("get_scalar_task_jacobian", &TimeIndexedProblem::GetScalarTaskJacobian);
     time_indexed_problem.def("get_scalar_transition_cost", &TimeIndexedProblem::GetScalarTransitionCost);
     time_indexed_problem.def("get_scalar_transition_jacobian", &TimeIndexedProblem::GetScalarTransitionJacobian);
-    time_indexed_problem.def("get_equality", &TimeIndexedProblem::GetEquality);
-    time_indexed_problem.def("get_equality_jacobian", &TimeIndexedProblem::GetEqualityJacobian);
-    time_indexed_problem.def("get_inequality", &TimeIndexedProblem::GetInequality);
-    time_indexed_problem.def("get_inequality_jacobian", &TimeIndexedProblem::GetInequalityJacobian);
+    time_indexed_problem.def("get_equality", (Eigen::VectorXd (TimeIndexedProblem::*)()) &TimeIndexedProblem::GetEquality);
+    time_indexed_problem.def("get_equality", (Eigen::VectorXd (TimeIndexedProblem::*)(int)) &TimeIndexedProblem::GetEquality);
+    // time_indexed_problem.def("get_equality_jacobian", &TimeIndexedProblem::GetEqualityJacobian);
+    time_indexed_problem.def("get_inequality", (Eigen::VectorXd (TimeIndexedProblem::*)()) &TimeIndexedProblem::GetInequality);
+    time_indexed_problem.def("get_inequality", (Eigen::VectorXd (TimeIndexedProblem::*)(int)) &TimeIndexedProblem::GetInequality);
+    // time_indexed_problem.def("get_inequality_jacobian", &TimeIndexedProblem::GetInequalityJacobian);
     time_indexed_problem.def("get_bounds", &TimeIndexedProblem::GetBounds);
     time_indexed_problem.def_readonly("cost", &TimeIndexedProblem::cost);
     time_indexed_problem.def_readonly("inequality", &TimeIndexedProblem::inequality);

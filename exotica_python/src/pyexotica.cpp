@@ -752,6 +752,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def_property("tau", &TimeIndexedProblem::GetTau, &TimeIndexedProblem::SetTau);
     time_indexed_problem.def_property("q_dot_max", &TimeIndexedProblem::GetJointVelocityLimit, &TimeIndexedProblem::SetJointVelocityLimit);
     time_indexed_problem.def_readwrite("W", &TimeIndexedProblem::W);
+    time_indexed_problem.def_readwrite("use_bounds", &TimeIndexedProblem::use_bounds);
     time_indexed_problem.def_property("initial_trajectory", &TimeIndexedProblem::GetInitialTrajectory, &TimeIndexedProblem::SetInitialTrajectory);
     time_indexed_problem.def_property("T", &TimeIndexedProblem::GetT, &TimeIndexedProblem::SetT);
     time_indexed_problem.def_readonly("length_Phi", &TimeIndexedProblem::length_Phi);
@@ -833,6 +834,7 @@ PYBIND11_MODULE(_pyexotica, module)
     end_pose_problem.def("get_goal_neq", &EndPoseProblem::GetGoalNEQ);
     end_pose_problem.def("get_rho_neq", &EndPoseProblem::GetRhoNEQ);
     end_pose_problem.def_readwrite("W", &EndPoseProblem::W);
+    end_pose_problem.def_readwrite("use_bounds", &EndPoseProblem::use_bounds);
     end_pose_problem.def_readonly("length_Phi", &EndPoseProblem::length_Phi);
     end_pose_problem.def_readonly("length_jacobian", &EndPoseProblem::length_jacobian);
     end_pose_problem.def_readonly("N", &EndPoseProblem::N);

@@ -35,7 +35,6 @@ REGISTER_PROBLEM_TYPE("TimeIndexedProblem", exotica::TimeIndexedProblem)
 namespace exotica
 {
 TimeIndexedProblem::TimeIndexedProblem()
-    : T_(0), tau_(0), w_scale_(0)
 {
     flags_ = KIN_FK | KIN_J;
 }
@@ -135,7 +134,7 @@ void TimeIndexedProblem::ReinitializeVariables()
     PreUpdate();
 }
 
-void TimeIndexedProblem::SetT(const int& T_in)
+void TimeIndexedProblem::SetT(const int T_in)
 {
     if (T_in <= 2)
     {
@@ -145,7 +144,7 @@ void TimeIndexedProblem::SetT(const int& T_in)
     ReinitializeVariables();
 }
 
-void TimeIndexedProblem::SetTau(const double& tau_in)
+void TimeIndexedProblem::SetTau(const double tau_in)
 {
     if (tau_in <= 0.) ThrowPretty("tau_ is expected to be greater than 0. (tau_=" << tau_in << ")");
     tau_ = tau_in;

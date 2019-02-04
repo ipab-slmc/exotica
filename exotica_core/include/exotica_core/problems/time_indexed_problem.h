@@ -30,6 +30,8 @@
 #ifndef EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_
 #define EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_
 
+#include <Eigen/Sparse>
+
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
@@ -44,6 +46,7 @@ public:
     virtual ~TimeIndexedProblem();
     void Instantiate(TimeIndexedProblemInitializer& init) override;
     double GetDuration();
+    void Update(Eigen::VectorXdRefConst x_trajectory_in);
     void Update(Eigen::VectorXdRefConst x_in, int t);
     bool IsValid() override;
     std::vector<Eigen::VectorXd> GetInitialTrajectory();
@@ -81,6 +84,23 @@ public:
     /// \brief Returns the Jacobian of the transition cost at timestep t
     Eigen::VectorXd GetScalarTransitionJacobian(int t);
 
+    /// \brief Returns the scalar cost for the entire trajectory (both task and transition cost).
+    double GetCost();
+
+    /// \brief Returns the Jacobian of the scalar cost over the entire trajectory (Jacobian of GetCost).
+    Eigen::VectorXd GetCostJacobian();
+
+    /// \brief Returns the equality constraint values for the entire trajectory.
+    Eigen::VectorXd GetEquality();
+
+    /// \brief Returns the inequality constraint values for the entire trajectory.
+    Eigen::VectorXd GetInequality();
+
+    /// \brief Returns the sparse Jacobian matrix of the equality constraints over the entire trajectory.
+    Eigen::SparseMatrix<double> GetEqualityJacobian();
+
+    /// \brief Returns the sparse Jacobian matrix of the inequality constraints over the entire trajectory.
+    Eigen::SparseMatrix<double> GetInequalityJacobian();
 
     /// \brief Returns the value of the equality constraints at timestep t.
     Eigen::VectorXd GetEquality(int t);

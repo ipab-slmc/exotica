@@ -191,6 +191,17 @@ double TimeIndexedProblem::GetDuration()
     return tau_ * static_cast<double>(T_);
 }
 
+void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_trajectory_in)
+{
+    if (x_trajectory_in.size() != T_ * N)
+        ThrowPretty("To update using the trajectory Update method, please use a trajectory of size N x T (" << N * T_ << "), given: " << x_trajectory_in.size());
+
+    for (int t = 0; t < T_; ++t)
+    {
+        Update(x_trajectory_in.segment(t * N, N), t);
+    }
+}
+
 void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 {
     if (t >= T_ || t < -1)
@@ -266,6 +277,27 @@ void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
     ++number_of_problem_updates_;
 }
 
+double TimeIndexedProblem::GetCost()
+{
+    double cost = 0.0;
+    for (int t = 0; t < T_; ++t)
+    {
+        cost += GetScalarTaskCost(t) + GetScalarTransitionCost(t);
+    }
+    return cost;
+}
+
+Eigen::VectorXd TimeIndexedProblem::GetCostJacobian()
+{
+    Eigen::VectorXd jac = Eigen::VectorXd::Zero(N * T_);
+    for (int t = 0; t < T_; ++t)
+    {
+        jac.segment(t * N, N) += GetScalarTaskJacobian(t) + GetScalarTransitionJacobian(t);
+        if (t > 0) jac.segment((t - 1) * N, N) -= GetScalarTransitionJacobian(t);
+    }
+    return jac;
+}
+
 double TimeIndexedProblem::GetScalarTaskCost(int t)
 {
     if (t >= T_ || t < -1)
@@ -318,6 +350,42 @@ Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t)
     return 2.0 * ct * W * xdiff[t];
 }
 
+Eigen::VectorXd TimeIndexedProblem::GetEquality()
+{
+    Eigen::VectorXd eq = Eigen::VectorXd::Zero(equality.length_jacobian * T_);
+    for (int t = 0; t < T_; ++t)
+    {
+        eq.segment(t * equality.length_jacobian, equality.length_jacobian) = GetEquality(t);
+    }
+    return eq;
+}
+
+Eigen::SparseMatrix<double> TimeIndexedProblem::GetEqualityJacobian()
+{
+    Eigen::SparseMatrix<double> jac(T_ * equality.length_jacobian, N * T_);
+    // TODO: Set from triplets!
+    // typedef Eigen::Triplet<double> T;
+    // std::vector<T> triplet_list;
+    // triplet_list.reserve(GetRows());
+    for (int t = 0; t < T_; ++t)
+    {
+        const Eigen::MatrixXd equality_jacobian = GetEqualityJacobian(t);
+        for (int r = 0; r < equality.length_jacobian; ++r)
+        {
+            for (int c = 0; c < N; ++c)
+            {
+                if (equality_jacobian(r, c) != 0.0)
+                {
+                    // HIGHLIGHT_NAMED("Index", "t=" << t << ", r=" << r << ", c=" << c << ", index_r=" << t * equality.length_jacobian + r << ", index_c=" << t * N + c);
+                    // triplet_list.push_back(T(t * equality.length_jacobian + r, t * N + c, equality_jacobian(r, c)));
+                    jac.coeffRef(t * equality.length_jacobian + r, t * N + c) = equality_jacobian(r, c);
+                }
+            }
+        }
+    }
+    return jac;
+}
+
 Eigen::VectorXd TimeIndexedProblem::GetEquality(int t)
 {
     if (t >= T_ || t < -1)
@@ -342,6 +410,16 @@ Eigen::MatrixXd TimeIndexedProblem::GetEqualityJacobian(int t)
         t = T_ - 1;
     }
     return equality.S[t] * equality.jacobian[t];
+}
+
+Eigen::VectorXd TimeIndexedProblem::GetInequality()
+{
+    Eigen::VectorXd neq = Eigen::VectorXd::Zero(inequality.length_jacobian * T_);
+    for (int t = 0; t < T_; ++t)
+    {
+        neq.segment(t * inequality.length_jacobian, inequality.length_jacobian) = GetInequality(t);
+    }
+    return neq;
 }
 
 Eigen::VectorXd TimeIndexedProblem::GetInequality(int t)

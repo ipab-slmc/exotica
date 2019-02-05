@@ -422,6 +422,32 @@ Eigen::VectorXd TimeIndexedProblem::GetInequality()
     return neq;
 }
 
+Eigen::SparseMatrix<double> TimeIndexedProblem::GetInequalityJacobian()
+{
+    Eigen::SparseMatrix<double> jac(T_ * inequality.length_jacobian, N * T_);
+    // TODO: Set from triplets!
+    // typedef Eigen::Triplet<double> T;
+    // std::vector<T> triplet_list;
+    // triplet_list.reserve(GetRows());
+    for (int t = 0; t < T_; ++t)
+    {
+        const Eigen::MatrixXd inequality_jacobian = GetInequalityJacobian(t);
+        for (int r = 0; r < inequality.length_jacobian; ++r)
+        {
+            for (int c = 0; c < N; ++c)
+            {
+                if (inequality_jacobian(r, c) != 0.0)
+                {
+                    // HIGHLIGHT_NAMED("Index", "t=" << t << ", r=" << r << ", c=" << c << ", index_r=" << t * inequality.length_jacobian + r << ", index_c=" << t * N + c);
+                    // triplet_list.push_back(T(t * inequality.length_jacobian + r, t * N + c, inequality_jacobian(r, c)));
+                    jac.coeffRef(t * inequality.length_jacobian + r, t * N + c) = inequality_jacobian(r, c);
+                }
+            }
+        }
+    }
+    return jac;
+}
+
 Eigen::VectorXd TimeIndexedProblem::GetInequality(int t)
 {
     if (t >= T_ || t < -1)

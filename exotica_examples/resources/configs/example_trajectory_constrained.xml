@@ -36,17 +36,17 @@
         </Maps>
 
         <Cost>
-            <Task Task="Pose"/>
-            <Task Task="Position"/>
+            <!-- <Task Task="Pose"/> -->
         </Cost>
 
         <Equality>
-            <!-- <Task Task="Position"/> -->
+            <Task Task="Position"/>
         </Equality>
-        <!--
+        
         <Inequality>
             <Task Task="LimitEff"/>
-        </Inequality>-->
+        </Inequality>
+
         <UseBounds>0</UseBounds>
         <T>200</T>
         <tau>0.05</tau>

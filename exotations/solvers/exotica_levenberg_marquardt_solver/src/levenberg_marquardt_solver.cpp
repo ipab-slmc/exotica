@@ -41,6 +41,12 @@ void LevenbergMarquardtSolver::SpecifyProblem(PlanningProblemPtr pointer)
 
     // specific problem
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
+
+    // check dimension of alpha
+    if (parameters_.Alpha.size() > 1 && parameters_.Alpha.size() != this->problem_->N)
+    {
+        ThrowNamed("Wrong alpha dimension: alpha(" << parameters_.Alpha.size() << ") != states(" << this->problem_->N << ")")
+    }
 }
 
 void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)

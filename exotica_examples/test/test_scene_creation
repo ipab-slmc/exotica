@@ -56,9 +56,6 @@ class TestClass(unittest.TestCase):
     def test_clean_MinimalProblem(self):
         test_scene('MinimalProblem', True)
 
-    def test_clean_MinimalProblem(self):
-        test_scene('MinimalProblem', True)
-
     def test_clean_TrajectoryProblem(self):
         test_scene('TrajectoryProblem', True)
 
@@ -76,6 +73,24 @@ class TestClass(unittest.TestCase):
 
     def test_clean_FullProblem(self):
         test_scene('FullProblem', True)
+
+    def test_creation(self):
+        scene_conf = {'URDF': "{exotica_examples}/resources/robots/lwr_simplified.urdf",
+                      'SRDF': "{exotica_examples}/resources/robots/lwr_simplified.srdf",
+                      'JointGroup': "arm"}
+
+        # create scene with URDF frames
+        scene1 = exo.Setup.create_scene(('exotica/Scene', scene_conf))
+        scene_links1 = scene1.get_tree_names()
+
+        # add additional frame
+        frame_name = "camera_frame"
+        scene_conf.update({'Links': [('exotica/Link', {'Name': frame_name, 'Transform': [0, 0, 0, 1, 0, 0, 0]})]})
+        scene2 = exo.Setup.create_scene(('exotica/Scene', scene_conf))
+        scene_links2 = scene2.get_tree_names()
+
+        # check
+        self.assertEqual((set(scene_links1) | {frame_name}), set(scene_links2))
 
 
 if __name__ == '__main__':

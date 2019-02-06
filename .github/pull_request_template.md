@@ -4,4 +4,4 @@
 
 - [ ] add unit test(s)
 
-- [ ] ensure tests build and check results: run `catkin run_tests && catkin_test_results`
+- [ ] ensure tests build and check results: run `catkin run_tests exotica && catkin_test_results`

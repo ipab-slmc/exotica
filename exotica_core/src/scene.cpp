@@ -429,6 +429,11 @@ std::map<std::string, double> Scene::GetModelStateMap()
     return kinematica_.GetModelStateMap();
 }
 
+std::map<std::string, std::weak_ptr<KinematicElement>> Scene::GetTreeMap()
+{
+    return kinematica_.GetTreeMap();
+}
+
 void Scene::SetModelState(Eigen::VectorXdRefConst x, double t, bool update_traj)
 {
     if (request_needs_updating_ && kinematic_request_callback_)

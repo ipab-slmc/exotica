@@ -12,9 +12,9 @@
    
     <DynamicsSolver>QuadrotorDynamicsSolver</DynamicsSolver>
     <Integrator>RK4</Integrator>
-    <T>20</T>
-    <tau>0.1</tau>
-    <dt>0.01</dt>
+    <T>50</T>
+    <tau>0.05</tau>
+    <dt>0.05</dt>
     <Q_rate>1e3</Q_rate>
     <R_rate>1</R_rate>
   </DynamicTimeIndexedShootingProblem>

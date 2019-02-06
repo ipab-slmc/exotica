@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+from scipy.optimize import minimize
+has_ipopt = False
+try:
+    from ipopt import minimize_ipopt
+    has_ipopt = True
+except:
+    pass
+
+import pyexotica as exo
+from numpy import array
+from pyexotica.publish_trajectory import publish_pose, sig_int_handler
+from time import time, sleep
+import signal
+
+exo.Setup.init_ros()
+problem = exo.Setup.load_problem('{exotica_examples}/resources/configs/example_ik_python_solver_constrained.xml')
+
+def cost(x):
+    problem.update(x)
+    return problem.get_scalar_cost()
+
+def cost_jac(x):
+    problem.update(x)
+    return problem.get_scalar_jacobian()
+
+def inequality(x):
+    problem.update(x)
+    return problem.get_inequality()
+
+def inequality_jacobian(x):
+    problem.update(x)
+    return problem.get_inequality_jacobian()
+
+def solve():
+    x0 = problem.start_state
+    problem.pre_update()
+    cons = ({'type': 'ineq', 'fun': inequality, 'jac': inequality_jacobian})
+    res = minimize(cost, 
+                   x0,
+                   method='SLSQP', # COBYLA
+                   jac=cost_jac,
+                   constraints=cons,
+                   options={'disp': False})
+    # res = minimize_ipopt(cost, 
+    #                         x0,
+    #                         jac=cost_jac,
+    #                         constraints=cons,
+    #                         options={'print_level': 0})
+    return res.x
+
+dt = 0.002
+t = 0.0
+q = array([0.0]*7)
+
+print('Publishing IK')
+signal.signal(signal.SIGINT, sig_int_handler)
+
+while True:
+    try:
+        problem.start_state = q
+        problem.start_time = t
+        q = solve()
+        publish_pose(q, problem, t)
+        sleep(dt)
+        t = (t+dt) % 7.0
+    except KeyboardInterrupt:
+        break

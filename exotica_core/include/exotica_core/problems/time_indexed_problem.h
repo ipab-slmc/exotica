@@ -30,6 +30,8 @@
 #ifndef EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_
 #define EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_
 
+#include <Eigen/Sparse>
+
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
@@ -44,7 +46,8 @@ public:
     virtual ~TimeIndexedProblem();
     void Instantiate(TimeIndexedProblemInitializer& init) override;
     double GetDuration();
-    void Update(Eigen::VectorXdRefConst x, int t);
+    void Update(Eigen::VectorXdRefConst x_trajectory_in);
+    void Update(Eigen::VectorXdRefConst x_in, int t);
     bool IsValid() override;
     std::vector<Eigen::VectorXd> GetInitialTrajectory();
     void SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
@@ -64,19 +67,51 @@ public:
     Eigen::MatrixXd GetBounds() const;
 
     int GetT() const { return T_; }
-    void SetT(const int& T_in);
+    void SetT(const int T_in);
 
     double GetTau() const { return tau_; }
-    void SetTau(const double& tau_in);
+    void SetTau(const double tau_in);
 
+    /// \brief Returns the scalar task cost at timestep t
     double GetScalarTaskCost(int t);
+
+    /// \brief Returns the Jacobian of the scalar task cost at timestep t
     Eigen::VectorXd GetScalarTaskJacobian(int t);
+
+    /// \brief Returns the scalar transition cost (x^T*W*x) at timestep t
     double GetScalarTransitionCost(int t);
+
+    /// \brief Returns the Jacobian of the transition cost at timestep t
     Eigen::VectorXd GetScalarTransitionJacobian(int t);
 
+    /// \brief Returns the scalar cost for the entire trajectory (both task and transition cost).
+    double GetCost();
+
+    /// \brief Returns the Jacobian of the scalar cost over the entire trajectory (Jacobian of GetCost).
+    Eigen::VectorXd GetCostJacobian();
+
+    /// \brief Returns the equality constraint values for the entire trajectory.
+    Eigen::VectorXd GetEquality();
+
+    /// \brief Returns the inequality constraint values for the entire trajectory.
+    Eigen::VectorXd GetInequality();
+
+    /// \brief Returns the sparse Jacobian matrix of the equality constraints over the entire trajectory.
+    Eigen::SparseMatrix<double> GetEqualityJacobian();
+
+    /// \brief Returns the sparse Jacobian matrix of the inequality constraints over the entire trajectory.
+    Eigen::SparseMatrix<double> GetInequalityJacobian();
+
+    /// \brief Returns the value of the equality constraints at timestep t.
     Eigen::VectorXd GetEquality(int t);
+
+    /// \brief Returns the Jacobian of the equality constraints at timestep t.
     Eigen::MatrixXd GetEqualityJacobian(int t);
+
+    /// \brief Returns the value of the inequality constraints at timestep t.
     Eigen::VectorXd GetInequality(int t);
+
+    /// \brief Returns the Jacobian of the inequality constraints at timestep t.
     Eigen::MatrixXd GetInequalityJacobian(int t);
 
     double GetJointVelocityLimit() { return q_dot_max_; }
@@ -101,7 +136,7 @@ public:
     std::vector<Eigen::MatrixXd> jacobian;
     std::vector<Hessian> hessian;
 
-    std::vector<Eigen::VectorXd> x;      // current internal problem state
+    std::vector<Eigen::VectorXd> x;      ///< Current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
     int length_Phi;
@@ -112,13 +147,13 @@ public:
 private:
     void ReinitializeVariables();
 
-    int T_;       //!< Number of time steps
-    double tau_;  //!< Time step duration
+    int T_ = 0;       //!< Number of time steps
+    double tau_ = 0;  //!< Time step duration
 
     double q_dot_max_;  //!< Joint velocity limit (rad/s)
     double xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
 
-    double w_scale_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
+    double w_scale_ = 1.0;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
 
     std::vector<Eigen::VectorXd> initial_trajectory_;
     TimeIndexedProblemInitializer init_;

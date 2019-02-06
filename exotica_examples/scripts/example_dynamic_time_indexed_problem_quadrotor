@@ -67,7 +67,7 @@ def cost_function(u):
 
 s = time()
 u_init = problem.U.flatten()
-res = opt.minimize(cost_function, x0=problem.U.flatten(), method='BFGS')
+res = opt.minimize(cost_function, x0=problem.U.flatten(), method='COBYLA')
 e = time()
 print("Optimal solution found in", e-s)
 

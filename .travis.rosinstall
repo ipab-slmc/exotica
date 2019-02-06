@@ -1,0 +1,6 @@
+- git:
+    uri: https://github.com/ipab-slmc/eigenpy_catkin.git
+    local-name: eigenpy
+- git:
+    uri: https://github.com/ipab-slmc/pinocchio_catkin.git
+    local-name: pinocchio

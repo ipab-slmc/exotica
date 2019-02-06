@@ -491,6 +491,10 @@ double AICOSolver::EvaluateTrajectory(const std::vector<Eigen::VectorXd>& x,
         for (int t = 0; t < prob_->GetT(); ++t)
         {
             ++update_count_;
+            if (!q[t].allFinite())
+            {
+                ThrowNamed("q[" << t << "] is not finite: " << q[t].transpose());
+            }
             prob_->Update(q[t], t);
         }
     }

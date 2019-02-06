@@ -736,7 +736,8 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> time_indexed_problem(prob, "TimeIndexedProblem");
     time_indexed_problem.def("get_duration", &TimeIndexedProblem::GetDuration);
-    time_indexed_problem.def("update", &TimeIndexedProblem::Update);
+    time_indexed_problem.def("update", (void (TimeIndexedProblem::*)(Eigen::VectorXdRefConst, int)) & TimeIndexedProblem::Update);
+    time_indexed_problem.def("update", (void (TimeIndexedProblem::*)(Eigen::VectorXdRefConst)) & TimeIndexedProblem::Update);
     time_indexed_problem.def("set_goal", &TimeIndexedProblem::SetGoal);
     time_indexed_problem.def("set_rho", &TimeIndexedProblem::SetRho);
     time_indexed_problem.def("get_goal", &TimeIndexedProblem::GetGoal);
@@ -752,6 +753,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def_property("tau", &TimeIndexedProblem::GetTau, &TimeIndexedProblem::SetTau);
     time_indexed_problem.def_property("q_dot_max", &TimeIndexedProblem::GetJointVelocityLimit, &TimeIndexedProblem::SetJointVelocityLimit);
     time_indexed_problem.def_readwrite("W", &TimeIndexedProblem::W);
+    time_indexed_problem.def_readwrite("use_bounds", &TimeIndexedProblem::use_bounds);
     time_indexed_problem.def_property("initial_trajectory", &TimeIndexedProblem::GetInitialTrajectory, &TimeIndexedProblem::SetInitialTrajectory);
     time_indexed_problem.def_property("T", &TimeIndexedProblem::GetT, &TimeIndexedProblem::SetT);
     time_indexed_problem.def_readonly("length_Phi", &TimeIndexedProblem::length_Phi);
@@ -760,14 +762,20 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def_readonly("num_tasks", &TimeIndexedProblem::num_tasks);
     time_indexed_problem.def_readonly("Phi", &TimeIndexedProblem::Phi);
     time_indexed_problem.def_readonly("jacobian", &TimeIndexedProblem::jacobian);
+    time_indexed_problem.def("get_cost", &TimeIndexedProblem::GetCost);
+    time_indexed_problem.def("get_cost_jacobian", &TimeIndexedProblem::GetCostJacobian);
     time_indexed_problem.def("get_scalar_task_cost", &TimeIndexedProblem::GetScalarTaskCost);
     time_indexed_problem.def("get_scalar_task_jacobian", &TimeIndexedProblem::GetScalarTaskJacobian);
     time_indexed_problem.def("get_scalar_transition_cost", &TimeIndexedProblem::GetScalarTransitionCost);
     time_indexed_problem.def("get_scalar_transition_jacobian", &TimeIndexedProblem::GetScalarTransitionJacobian);
-    time_indexed_problem.def("get_equality", &TimeIndexedProblem::GetEquality);
-    time_indexed_problem.def("get_equality_jacobian", &TimeIndexedProblem::GetEqualityJacobian);
-    time_indexed_problem.def("get_inequality", &TimeIndexedProblem::GetInequality);
-    time_indexed_problem.def("get_inequality_jacobian", &TimeIndexedProblem::GetInequalityJacobian);
+    time_indexed_problem.def("get_equality", (Eigen::VectorXd(TimeIndexedProblem::*)()) & TimeIndexedProblem::GetEquality);
+    time_indexed_problem.def("get_equality", (Eigen::VectorXd(TimeIndexedProblem::*)(int)) & TimeIndexedProblem::GetEquality);
+    time_indexed_problem.def("get_equality_jacobian", (Eigen::SparseMatrix<double>(TimeIndexedProblem::*)()) & TimeIndexedProblem::GetEqualityJacobian);
+    time_indexed_problem.def("get_equality_jacobian", (Eigen::MatrixXd(TimeIndexedProblem::*)(int)) & TimeIndexedProblem::GetEqualityJacobian);
+    time_indexed_problem.def("get_inequality", (Eigen::VectorXd(TimeIndexedProblem::*)()) & TimeIndexedProblem::GetInequality);
+    time_indexed_problem.def("get_inequality", (Eigen::VectorXd(TimeIndexedProblem::*)(int)) & TimeIndexedProblem::GetInequality);
+    time_indexed_problem.def("get_inequality_jacobian", (Eigen::SparseMatrix<double>(TimeIndexedProblem::*)()) & TimeIndexedProblem::GetInequalityJacobian);
+    time_indexed_problem.def("get_inequality_jacobian", (Eigen::MatrixXd(TimeIndexedProblem::*)(int)) & TimeIndexedProblem::GetInequalityJacobian);
     time_indexed_problem.def("get_bounds", &TimeIndexedProblem::GetBounds);
     time_indexed_problem.def_readonly("cost", &TimeIndexedProblem::cost);
     time_indexed_problem.def_readonly("inequality", &TimeIndexedProblem::inequality);
@@ -819,6 +827,7 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<EndPoseProblem, std::shared_ptr<EndPoseProblem>, PlanningProblem> end_pose_problem(prob, "EndPoseProblem");
     end_pose_problem.def("update", &EndPoseProblem::Update);
+    end_pose_problem.def("pre_update", &EndPoseProblem::PreUpdate);
     end_pose_problem.def("set_goal", &EndPoseProblem::SetGoal);
     end_pose_problem.def("set_rho", &EndPoseProblem::SetRho);
     end_pose_problem.def("get_goal", &EndPoseProblem::GetGoal);
@@ -832,6 +841,7 @@ PYBIND11_MODULE(_pyexotica, module)
     end_pose_problem.def("get_goal_neq", &EndPoseProblem::GetGoalNEQ);
     end_pose_problem.def("get_rho_neq", &EndPoseProblem::GetRhoNEQ);
     end_pose_problem.def_readwrite("W", &EndPoseProblem::W);
+    end_pose_problem.def_readwrite("use_bounds", &EndPoseProblem::use_bounds);
     end_pose_problem.def_readonly("length_Phi", &EndPoseProblem::length_Phi);
     end_pose_problem.def_readonly("length_jacobian", &EndPoseProblem::length_jacobian);
     end_pose_problem.def_readonly("N", &EndPoseProblem::N);
@@ -916,6 +926,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_property_readonly("tau", &DynamicTimeIndexedShootingProblem::get_tau)
         .def_property("T", &DynamicTimeIndexedShootingProblem::get_T, &DynamicTimeIndexedShootingProblem::set_T)
         .def_readonly("N", &DynamicTimeIndexedShootingProblem::N)
+        .def("dynamics", &DynamicTimeIndexedShootingProblem::Dynamics)
+        .def("simulate", &DynamicTimeIndexedShootingProblem::Simulate)
         .def("get_Q", &DynamicTimeIndexedShootingProblem::get_Q)
         .def("set_Q", &DynamicTimeIndexedShootingProblem::set_Q)
         .def("get_state_cost", &DynamicTimeIndexedShootingProblem::GetStateCost)

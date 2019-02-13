@@ -515,6 +515,8 @@ void Scene::LoadSceneFromStringStream(std::istream& in, const Eigen::Isometry3d&
 
 std::string Scene::GetScene()
 {
+    UpdateMoveItPlanningScene();
+
     std::stringstream ss;
     ps_->saveGeometryToStream(ss);
     // TODO: include all custom environment scene objects

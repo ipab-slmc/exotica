@@ -91,7 +91,7 @@ struct ContinuousCollisionProxy
         std::stringstream ss;
         if (e1 && e2)
         {
-            ss << "ContinuousCollisionProxy: '" << e1->segment.getName() << "' - '" << e2->segment.getName() << " in_collision: " << in_collision << " time_of_contact " << time_of_contact;
+            ss << "ContinuousCollisionProxy: '" << e1->segment.getName() << "' - '" << e2->segment.getName() << " in_collision: " << in_collision << " time_of_contact " << time_of_contact << " depth: " << penetration_depth;
         }
         else
         {

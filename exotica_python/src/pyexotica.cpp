@@ -638,13 +638,22 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("task_space_dim", (int (TaskMap::*)()) & TaskMap::TaskSpaceDim)
         .def("task_Space_jacobian_dim", &TaskMap::TaskSpaceJacobianDim);
 
+    py::class_<TaskIndexing>(module, "TaskIndexing")
+        .def_readonly("id", &TaskIndexing::id)
+        .def_readonly("start", &TaskIndexing::start)
+        .def_readonly("length", &TaskIndexing::length)
+        .def_readonly("startJ", &TaskIndexing::start_jacobian)
+        .def_readonly("lengthJ", &TaskIndexing::length_jacobian);
+
     py::class_<TimeIndexedTask, std::shared_ptr<TimeIndexedTask>>(module, "TimeIndexedTask")
+        .def_readonly("indexing", &TimeIndexedTask::indexing)
         .def_readonly("length_Phi", &TimeIndexedTask::length_Phi)
         .def_readonly("length_jacobian", &TimeIndexedTask::length_jacobian)
         .def_readonly("num_tasks", &TimeIndexedTask::num_tasks)
         .def_readonly("y", &TimeIndexedTask::y)
         .def_readonly("ydiff", &TimeIndexedTask::ydiff)
         .def_readonly("Phi", &TimeIndexedTask::Phi)
+        .def_readonly("rho", &TimeIndexedTask::rho)
         // .def_readonly("hessian", &TimeIndexedTask::hessian)
         .def_readonly("jacobian", &TimeIndexedTask::jacobian)
         .def_readonly("S", &TimeIndexedTask::S)

@@ -70,7 +70,7 @@ void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
     }
     else
     {
-        ThrowNamed("Dimension mismatch: problem N=" << N << ", but goal state has dimension " << goal_.rows());
+        ThrowNamed("Dimension mismatch: problem N=" << N << ", but goal state has dimension " << init.Goal.size());
     }
 
     compound_ = scene_->GetBaseType() != exotica::BaseType::FIXED;

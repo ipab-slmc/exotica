@@ -14,8 +14,8 @@ the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.c
         #include <exotica_core/exotica_core.h>
 
         // Manual initialization requires dependency on specific solvers and task maps:
-        #include <exotica_ik_solver/IKSolverInitializer.h>
-        #include <task_map/EffFrameInitializer.h>
+        #include <exotica_ik_solver/IKSolver_initializer.h>
+        #include <task_map/EffFrame_initializer.h>
 
         using namespace exotica;
 
@@ -57,9 +57,9 @@ Currently available solvers are:
 
 .. code-block:: c++
 
-    #include <exotica_ompl_solver/OMPLSolverInitializer.h>
-    #include <exotica_aico_solver/AICOSolverInitializer.h>
-    #include <exotica_ik_solver/IKSolverInitializer.h>
+    #include <exotica_ompl_solver/OMPLSolver_initializer.h>
+    #include <exotica_aico_solver/AICOSolver_initializer.h>
+    #include <exotica_ik_solver/IKSolver_initializer.h>
 
 Once we have included the correct initializers, we must initialise:
 * ``scene`` 

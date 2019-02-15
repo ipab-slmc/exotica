@@ -70,7 +70,7 @@ initializer file, e.g. ``init/JointLimit.in`` contains:
 
 ::
 
-    extend <exotica_core/TaskMap>
+    extend <exotica_core/task_map>
     Required double SafePercentage;
 
 The file name (excluding the extension ``.in``) defines the name of the

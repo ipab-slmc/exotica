@@ -90,7 +90,7 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     equality.Initialize(init_.Equality, shared_from_this(), equality_Phi);
 
     T_ = init_.T;
-    q_dot_max_ = init_.JointVelocityLimit;
+    SetJointVelocityLimits(init_.JointVelocityLimits);
     ApplyStartState(false);
     ReinitializeVariables();
 }
@@ -760,6 +760,16 @@ bool TimeIndexedProblem::IsValid()
             if (GetEquality(t).norm() > init_.EqualityFeasibilityTolerance)
             {
                 if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated equality constraints at timestep " << t << ": " << GetEquality(t).norm());
+                succeeded = false;
+            }
+        }
+
+        // Check joint velocity limits
+        if (q_dot_max_.maxCoeff() > 0 && t > 0)
+        {
+            if (((x[t] - x[t - 1]) - xdiff_max_).cwiseAbs().maxCoeff() > 1e-9)  // The 1e-9 are a required tolerance...
+            {
+                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated joint velocity constraints at timestep " << t << ": " << (x[t] - x[t - 1]).cwiseAbs().maxCoeff() << " (limit=" << xdiff_max_.transpose() << ")");
                 succeeded = false;
             }
         }

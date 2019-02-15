@@ -107,7 +107,7 @@ void JointPose::Initialize()
     if (init_.JointRef.rows() > 0)
     {
         joint_ref_ = init_.JointRef;
-        if (joint_ref_.rows() != joint_map_.size()) ThrowNamed("Invalid joint reference size! Expecting " << joint_map_.size());
+        if (joint_ref_.rows() != joint_map_.size()) ThrowNamed("Invalid joint reference size! Expecting " << joint_map_.size() << " but received " << joint_ref_.rows());
     }
     else
     {

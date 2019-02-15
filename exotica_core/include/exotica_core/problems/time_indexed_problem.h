@@ -114,13 +114,24 @@ public:
     /// \brief Returns the Jacobian of the inequality constraints at timestep t.
     Eigen::MatrixXd GetInequalityJacobian(int t);
 
-    double GetJointVelocityLimit() { return q_dot_max_; }
-    void SetJointVelocityLimit(const double& qdot_max_in)
+    Eigen::VectorXd GetJointVelocityLimits() const { return q_dot_max_; }
+    void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in)
     {
-        q_dot_max_ = qdot_max_in;
+        if (qdot_max_in.size() == N)
+        {
+            q_dot_max_ = qdot_max_in;
+        }
+        else if (qdot_max_in.size() == 1)
+        {
+            q_dot_max_ = qdot_max_in(0) * Eigen::VectorXd::Ones(N);
+        }
+        else
+        {
+            ThrowPretty("Received size " << qdot_max_in.size() << " but expected 1 or " << N);
+        }
         xdiff_max_ = q_dot_max_ * tau_;
     }
-    double GetXdiffMax() { return xdiff_max_; }
+    Eigen::VectorXd GetXdiffMax() const { return xdiff_max_; }
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask cost;
     TimeIndexedTask inequality;
@@ -150,8 +161,8 @@ private:
     int T_ = 0;       //!< Number of time steps
     double tau_ = 0;  //!< Time step duration
 
-    double q_dot_max_;  //!< Joint velocity limit (rad/s)
-    double xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
+    Eigen::VectorXd q_dot_max_;  //!< Joint velocity limit (rad/s)
+    Eigen::VectorXd xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
 
     double w_scale_ = 1.0;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
 

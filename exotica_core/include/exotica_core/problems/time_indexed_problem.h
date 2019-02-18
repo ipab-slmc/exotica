@@ -122,6 +122,8 @@ public:
     /// \brief Returns a vector of triplets to fill a sparse Jacobian for the inequality constraints.
     std::vector<Eigen::Triplet<double>> GetInequalityJacobianTriplets();
 
+    /// \brief Returns the joint velocity limit inequality terms (linear).
+
     /// \brief Returns the per-DoF joint velocity limit vector.
     Eigen::VectorXd GetJointVelocityLimits() const { return q_dot_max_; }
     /// \brief Sets the joint velocity limits. Supports N- and 1-dimensional vectors.

@@ -352,6 +352,29 @@ Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t)
 
 Eigen::VectorXd TimeIndexedProblem::GetEquality()
 {
+    // TODO: This should really only return the active ones, i.e., we need to filter out a little:
+    // std::vector<int> active_nonlinear_equality_constraints;
+    // std::vector<int> active_nonlinear_inequality_constraints;
+    // int eq_dim = 0;
+    // int neq_dim = 0;
+    // for (int t = 1; t < prob_->GetT(); ++t)
+    // {
+    //     if (!prob_->equality.S[t].isZero(1.e-9))
+    //     {
+    //         active_nonlinear_equality_constraints.emplace_back(t);
+
+    //         eq_dim += (prob_->equality.S[t].array().cwiseAbs() > 1.e-9).count();
+    //         // HIGHLIGHT_NAMED("EQ @ " << t, prob_->equality.S[t]);
+    //     }
+
+    //     if (!prob_->inequality.S[t].isZero(1.e-9))
+    //     {
+    //         active_nonlinear_inequality_constraints.emplace_back(t);
+
+    //         neq_dim += (prob_->inequality.S[t].array().cwiseAbs() > 1.e-9).count();
+    //     }
+    // }
+
     Eigen::VectorXd eq = Eigen::VectorXd::Zero(equality.length_jacobian * (T_ - 1));
     for (int t = 1; t < T_; ++t)
     {

@@ -741,9 +741,10 @@ bool TimeIndexedProblem::IsValid()
         {
             for (int i = 0; i < N; ++i)
             {
-                if (x[t](i) < bounds(i, 0) || x[t](i) > bounds(i, 1))
+                constexpr double tolerance = 1.e-6;
+                if (x[t](i) < bounds(i, 0) + tolerance || x[t](i) > bounds(i, 1) + tolerance)
                 {
-                    if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "State at timestep " << t << " is out of bounds");
+                    if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "State at timestep " << t << " is out of bounds: joint #" << i << ": " << bounds(i, 0) << " < " << x[t](i) << " < " << bounds(i, 1));
                     succeeded = false;
                 }
             }

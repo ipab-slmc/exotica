@@ -64,6 +64,8 @@ public:
     void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0);
     Eigen::VectorXd GetGoalNEQ(const std::string& task_name, int t = 0);
     double GetRhoNEQ(const std::string& task_name, int t = 0);
+
+    /// \brief Returns the joint bounds (first column lower, second column upper).
     Eigen::MatrixXd GetBounds() const;
 
     int GetT() const { return T_; }
@@ -120,7 +122,9 @@ public:
     /// \brief Returns a vector of triplets to fill a sparse Jacobian for the inequality constraints.
     std::vector<Eigen::Triplet<double>> GetInequalityJacobianTriplets();
 
+    /// \brief Returns the per-DoF joint velocity limit vector.
     Eigen::VectorXd GetJointVelocityLimits() const { return q_dot_max_; }
+    /// \brief Sets the joint velocity limits. Supports N- and 1-dimensional vectors.
     void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in)
     {
         if (qdot_max_in.size() == N)
@@ -137,6 +141,8 @@ public:
         }
         xdiff_max_ = q_dot_max_ * tau_;
     }
+
+    /// \brief Returns the maximum diff between two timesteps for each dimension in the configuration vector x.
     Eigen::VectorXd GetXdiffMax() const { return xdiff_max_; }
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask cost;

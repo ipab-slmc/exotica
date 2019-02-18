@@ -102,6 +102,9 @@ public:
     /// \brief Returns the sparse Jacobian matrix of the inequality constraints over the entire trajectory.
     Eigen::SparseMatrix<double> GetInequalityJacobian();
 
+    /// \brief Returns a vector of triplets to fill a sparse Jacobian for the equality constraints.
+    std::vector<Eigen::Triplet<double>> GetEqualityJacobianTriplets();
+
     /// \brief Returns the value of the equality constraints at timestep t.
     Eigen::VectorXd GetEquality(int t);
 
@@ -113,6 +116,9 @@ public:
 
     /// \brief Returns the Jacobian of the inequality constraints at timestep t.
     Eigen::MatrixXd GetInequalityJacobian(int t);
+
+    /// \brief Returns a vector of triplets to fill a sparse Jacobian for the inequality constraints.
+    std::vector<Eigen::Triplet<double>> GetInequalityJacobianTriplets();
 
     Eigen::VectorXd GetJointVelocityLimits() const { return q_dot_max_; }
     void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in)

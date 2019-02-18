@@ -362,28 +362,29 @@ Eigen::VectorXd TimeIndexedProblem::GetEquality()
 
 Eigen::SparseMatrix<double> TimeIndexedProblem::GetEqualityJacobian()
 {
-    Eigen::SparseMatrix<double> jac(T_ * equality.length_jacobian, N * T_);
-    // TODO: Set from triplets!
-    // typedef Eigen::Triplet<double> T;
-    // std::vector<T> triplet_list;
-    // triplet_list.reserve(GetRows());
-    for (int t = 0; t < T_; ++t)
+    Eigen::SparseMatrix<double> jac((T_ - 1) * equality.length_jacobian, N * (T_ - 1));
+    std::vector<Eigen::Triplet<double>> triplet_list = GetEqualityJacobianTriplets();
+    jac.setFromTriplets(triplet_list.begin(), triplet_list.end());
+    return jac;
+}
+
+std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetEqualityJacobianTriplets()
+{
+    typedef Eigen::Triplet<double> T;
+    std::vector<T> triplet_list;
+    triplet_list.reserve((T_ - 1) * equality.length_jacobian);
+    for (int t = 1; t < T_; ++t)
     {
         const Eigen::MatrixXd equality_jacobian = GetEqualityJacobian(t);
         for (int r = 0; r < equality.length_jacobian; ++r)
         {
             for (int c = 0; c < N; ++c)
             {
-                if (equality_jacobian(r, c) != 0.0)
-                {
-                    // HIGHLIGHT_NAMED("Index", "t=" << t << ", r=" << r << ", c=" << c << ", index_r=" << t * equality.length_jacobian + r << ", index_c=" << t * N + c);
-                    // triplet_list.push_back(T(t * equality.length_jacobian + r, t * N + c, equality_jacobian(r, c)));
-                    jac.coeffRef(t * equality.length_jacobian + r, t * N + c) = equality_jacobian(r, c);
-                }
+                triplet_list.push_back(T((t - 1) * equality.length_jacobian + r, (t - 1) * N + c, equality_jacobian(r, c)));
             }
         }
     }
-    return jac;
+    return triplet_list;
 }
 
 Eigen::VectorXd TimeIndexedProblem::GetEquality(int t)
@@ -424,28 +425,29 @@ Eigen::VectorXd TimeIndexedProblem::GetInequality()
 
 Eigen::SparseMatrix<double> TimeIndexedProblem::GetInequalityJacobian()
 {
-    Eigen::SparseMatrix<double> jac(T_ * inequality.length_jacobian, N * T_);
-    // TODO: Set from triplets!
-    // typedef Eigen::Triplet<double> T;
-    // std::vector<T> triplet_list;
-    // triplet_list.reserve(GetRows());
-    for (int t = 0; t < T_; ++t)
+    Eigen::SparseMatrix<double> jac((T_ - 1) * inequality.length_jacobian, N * (T_ - 1));
+    std::vector<Eigen::Triplet<double>> triplet_list = GetInequalityJacobianTriplets();
+    jac.setFromTriplets(triplet_list.begin(), triplet_list.end());
+    return jac;
+}
+
+std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetInequalityJacobianTriplets()
+{
+    typedef Eigen::Triplet<double> T;
+    std::vector<T> triplet_list;
+    triplet_list.reserve((T_ - 1) * inequality.length_jacobian);
+    for (int t = 1; t < T_; ++t)
     {
         const Eigen::MatrixXd inequality_jacobian = GetInequalityJacobian(t);
         for (int r = 0; r < inequality.length_jacobian; ++r)
         {
             for (int c = 0; c < N; ++c)
             {
-                if (inequality_jacobian(r, c) != 0.0)
-                {
-                    // HIGHLIGHT_NAMED("Index", "t=" << t << ", r=" << r << ", c=" << c << ", index_r=" << t * inequality.length_jacobian + r << ", index_c=" << t * N + c);
-                    // triplet_list.push_back(T(t * inequality.length_jacobian + r, t * N + c, inequality_jacobian(r, c)));
-                    jac.coeffRef(t * inequality.length_jacobian + r, t * N + c) = inequality_jacobian(r, c);
-                }
+                triplet_list.push_back(T((t - 1) * inequality.length_jacobian + r, (t - 1) * N + c, inequality_jacobian(r, c)));
             }
         }
     }
-    return jac;
+    return triplet_list;
 }
 
 Eigen::VectorXd TimeIndexedProblem::GetInequality(int t)

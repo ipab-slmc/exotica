@@ -75,52 +75,52 @@ public:
     void SetTau(const double tau_in);
 
     /// \brief Returns the scalar task cost at timestep t
-    double GetScalarTaskCost(int t);
+    double GetScalarTaskCost(int t) const;
 
     /// \brief Returns the Jacobian of the scalar task cost at timestep t
-    Eigen::VectorXd GetScalarTaskJacobian(int t);
+    Eigen::VectorXd GetScalarTaskJacobian(int t) const;
 
     /// \brief Returns the scalar transition cost (x^T*W*x) at timestep t
-    double GetScalarTransitionCost(int t);
+    double GetScalarTransitionCost(int t) const;
 
     /// \brief Returns the Jacobian of the transition cost at timestep t
-    Eigen::VectorXd GetScalarTransitionJacobian(int t);
+    Eigen::VectorXd GetScalarTransitionJacobian(int t) const;
 
     /// \brief Returns the scalar cost for the entire trajectory (both task and transition cost).
-    double GetCost();
+    double GetCost() const;
 
     /// \brief Returns the Jacobian of the scalar cost over the entire trajectory (Jacobian of GetCost).
-    Eigen::VectorXd GetCostJacobian();
+    Eigen::VectorXd GetCostJacobian() const;
 
     /// \brief Returns the equality constraint values for the entire trajectory.
-    Eigen::VectorXd GetEquality();
+    Eigen::VectorXd GetEquality() const;
 
     /// \brief Returns the inequality constraint values for the entire trajectory.
-    Eigen::VectorXd GetInequality();
+    Eigen::VectorXd GetInequality() const;
 
     /// \brief Returns the sparse Jacobian matrix of the equality constraints over the entire trajectory.
-    Eigen::SparseMatrix<double> GetEqualityJacobian();
+    Eigen::SparseMatrix<double> GetEqualityJacobian() const;
 
     /// \brief Returns the sparse Jacobian matrix of the inequality constraints over the entire trajectory.
-    Eigen::SparseMatrix<double> GetInequalityJacobian();
+    Eigen::SparseMatrix<double> GetInequalityJacobian() const;
 
     /// \brief Returns a vector of triplets to fill a sparse Jacobian for the equality constraints.
-    std::vector<Eigen::Triplet<double>> GetEqualityJacobianTriplets();
+    std::vector<Eigen::Triplet<double>> GetEqualityJacobianTriplets() const;
 
     /// \brief Returns the value of the equality constraints at timestep t.
-    Eigen::VectorXd GetEquality(int t);
+    Eigen::VectorXd GetEquality(int t) const;
 
     /// \brief Returns the Jacobian of the equality constraints at timestep t.
-    Eigen::MatrixXd GetEqualityJacobian(int t);
+    Eigen::MatrixXd GetEqualityJacobian(int t) const;
 
     /// \brief Returns the value of the inequality constraints at timestep t.
-    Eigen::VectorXd GetInequality(int t);
+    Eigen::VectorXd GetInequality(int t) const;
 
     /// \brief Returns the Jacobian of the inequality constraints at timestep t.
-    Eigen::MatrixXd GetInequalityJacobian(int t);
+    Eigen::MatrixXd GetInequalityJacobian(int t) const;
 
     /// \brief Returns a vector of triplets to fill a sparse Jacobian for the inequality constraints.
-    std::vector<Eigen::Triplet<double>> GetInequalityJacobianTriplets();
+    std::vector<Eigen::Triplet<double>> GetInequalityJacobianTriplets() const;
 
     /// \brief Returns the joint velocity limit inequality terms (linear).
 

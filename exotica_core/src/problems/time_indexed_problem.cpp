@@ -277,7 +277,7 @@ void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
     ++number_of_problem_updates_;
 }
 
-double TimeIndexedProblem::GetCost()
+double TimeIndexedProblem::GetCost() const
 {
     double cost = 0.0;
     for (int t = 1; t < T_; ++t)
@@ -287,7 +287,7 @@ double TimeIndexedProblem::GetCost()
     return cost;
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetCostJacobian()
+Eigen::VectorXd TimeIndexedProblem::GetCostJacobian() const
 {
     Eigen::VectorXd jac = Eigen::VectorXd::Zero(N * (T_ - 1));
     for (int t = 1; t < T_; ++t)
@@ -298,7 +298,7 @@ Eigen::VectorXd TimeIndexedProblem::GetCostJacobian()
     return jac;
 }
 
-double TimeIndexedProblem::GetScalarTaskCost(int t)
+double TimeIndexedProblem::GetScalarTaskCost(int t) const
 {
     if (t >= T_ || t < -1)
     {
@@ -311,7 +311,7 @@ double TimeIndexedProblem::GetScalarTaskCost(int t)
     return ct * cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetScalarTaskJacobian(int t)
+Eigen::VectorXd TimeIndexedProblem::GetScalarTaskJacobian(int t) const
 {
     if (t >= T_ || t < -1)
     {
@@ -324,7 +324,7 @@ Eigen::VectorXd TimeIndexedProblem::GetScalarTaskJacobian(int t)
     return cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0 * ct;
 }
 
-double TimeIndexedProblem::GetScalarTransitionCost(int t)
+double TimeIndexedProblem::GetScalarTransitionCost(int t) const
 {
     if (t >= T_ || t < -1)
     {
@@ -337,7 +337,7 @@ double TimeIndexedProblem::GetScalarTransitionCost(int t)
     return ct * xdiff[t].transpose() * W * xdiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t)
+Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t) const
 {
     if (t >= T_ || t < -1)
     {
@@ -350,7 +350,7 @@ Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t)
     return 2.0 * ct * W * xdiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetEquality()
+Eigen::VectorXd TimeIndexedProblem::GetEquality() const
 {
     // TODO: This should really only return the active ones, i.e., we need to filter out a little:
     // std::vector<int> active_nonlinear_equality_constraints;
@@ -383,7 +383,7 @@ Eigen::VectorXd TimeIndexedProblem::GetEquality()
     return eq;
 }
 
-Eigen::SparseMatrix<double> TimeIndexedProblem::GetEqualityJacobian()
+Eigen::SparseMatrix<double> TimeIndexedProblem::GetEqualityJacobian() const
 {
     Eigen::SparseMatrix<double> jac((T_ - 1) * equality.length_jacobian, N * (T_ - 1));
     std::vector<Eigen::Triplet<double>> triplet_list = GetEqualityJacobianTriplets();
@@ -391,7 +391,7 @@ Eigen::SparseMatrix<double> TimeIndexedProblem::GetEqualityJacobian()
     return jac;
 }
 
-std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetEqualityJacobianTriplets()
+std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetEqualityJacobianTriplets() const
 {
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
@@ -410,7 +410,7 @@ std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetEqualityJacobianTripl
     return triplet_list;
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetEquality(int t)
+Eigen::VectorXd TimeIndexedProblem::GetEquality(int t) const
 {
     if (t >= T_ || t < -1)
     {
@@ -423,7 +423,7 @@ Eigen::VectorXd TimeIndexedProblem::GetEquality(int t)
     return equality.S[t] * equality.ydiff[t];
 }
 
-Eigen::MatrixXd TimeIndexedProblem::GetEqualityJacobian(int t)
+Eigen::MatrixXd TimeIndexedProblem::GetEqualityJacobian(int t) const
 {
     if (t >= T_ || t < -1)
     {
@@ -436,7 +436,7 @@ Eigen::MatrixXd TimeIndexedProblem::GetEqualityJacobian(int t)
     return equality.S[t] * equality.jacobian[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetInequality()
+Eigen::VectorXd TimeIndexedProblem::GetInequality() const
 {
     Eigen::VectorXd neq = Eigen::VectorXd::Zero(inequality.length_jacobian * (T_ - 1));
     for (int t = 1; t < T_; ++t)
@@ -446,7 +446,7 @@ Eigen::VectorXd TimeIndexedProblem::GetInequality()
     return neq;
 }
 
-Eigen::SparseMatrix<double> TimeIndexedProblem::GetInequalityJacobian()
+Eigen::SparseMatrix<double> TimeIndexedProblem::GetInequalityJacobian() const
 {
     Eigen::SparseMatrix<double> jac((T_ - 1) * inequality.length_jacobian, N * (T_ - 1));
     std::vector<Eigen::Triplet<double>> triplet_list = GetInequalityJacobianTriplets();
@@ -454,7 +454,7 @@ Eigen::SparseMatrix<double> TimeIndexedProblem::GetInequalityJacobian()
     return jac;
 }
 
-std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetInequalityJacobianTriplets()
+std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetInequalityJacobianTriplets() const
 {
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
@@ -473,7 +473,7 @@ std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetInequalityJacobianTri
     return triplet_list;
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetInequality(int t)
+Eigen::VectorXd TimeIndexedProblem::GetInequality(int t) const
 {
     if (t >= T_ || t < -1)
     {
@@ -486,7 +486,7 @@ Eigen::VectorXd TimeIndexedProblem::GetInequality(int t)
     return inequality.S[t] * inequality.ydiff[t];
 }
 
-Eigen::MatrixXd TimeIndexedProblem::GetInequalityJacobian(int t)
+Eigen::MatrixXd TimeIndexedProblem::GetInequalityJacobian(int t) const
 {
     if (t >= T_ || t < -1)
     {

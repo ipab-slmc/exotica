@@ -107,6 +107,8 @@ public:
     /// \brief Returns a vector of triplets to fill a sparse Jacobian for the equality constraints.
     std::vector<Eigen::Triplet<double>> GetEqualityJacobianTriplets() const;
 
+    /// \brief Returns the dimension of the active equality constraints.
+    int get_active_nonlinear_equality_constraints_dimension() const { return active_nonlinear_equality_constraints_dimension_; }
     /// \brief Returns the value of the equality constraints at timestep t.
     Eigen::VectorXd GetEquality(int t) const;
 
@@ -122,7 +124,8 @@ public:
     /// \brief Returns a vector of triplets to fill a sparse Jacobian for the inequality constraints.
     std::vector<Eigen::Triplet<double>> GetInequalityJacobianTriplets() const;
 
-    /// \brief Returns the joint velocity limit inequality terms (linear).
+    /// \brief Returns the dimension of the active inequality constraints.
+    int get_active_nonlinear_inequality_constraints_dimension() const { return active_nonlinear_inequality_constraints_dimension_; }
 
     /// \brief Returns the per-DoF joint velocity limit vector.
     Eigen::VectorXd GetJointVelocityLimits() const { return q_dot_max_; }
@@ -184,6 +187,12 @@ private:
     TimeIndexedProblemInitializer init_;
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
+
+    // The first element in the pair is the timestep (t) and the second element is the task.id (id).
+    std::vector<std::pair<int, int>> active_nonlinear_equality_constraints_;
+    std::vector<std::pair<int, int>> active_nonlinear_inequality_constraints_;
+    int active_nonlinear_equality_constraints_dimension_ = 0;
+    int active_nonlinear_inequality_constraints_dimension_ = 0;
 };
 
 typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblemPtr;

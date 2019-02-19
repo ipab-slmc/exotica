@@ -126,6 +126,16 @@ public:
 
     /// \brief Returns the dimension of the active inequality constraints.
     int get_active_nonlinear_inequality_constraints_dimension() const { return active_nonlinear_inequality_constraints_dimension_; }
+    /// \brief Returns the dimension of the joint velocity constraint (linear inequality).
+    int get_joint_velocity_constraint_dimension() const { return joint_velocity_constraint_dimension_; }
+    /// \brief Returns the joint velocity constraint inequality terms (linear).
+    Eigen::VectorXd GetJointVelocityConstraint() const;
+
+    /// \brief Returns the joint velocity constraint bounds (constant terms).
+    Eigen::MatrixXd GetJointVelocityConstraintBounds() const;
+
+    /// \brief Returns the joint velocity constraint Jacobian as triplets.
+    std::vector<Eigen::Triplet<double>> GetJointVelocityConstraintJacobianTriplets() const;
 
     /// \brief Returns the per-DoF joint velocity limit vector.
     Eigen::VectorXd GetJointVelocityLimits() const { return q_dot_max_; }
@@ -193,6 +203,10 @@ private:
     std::vector<std::pair<int, int>> active_nonlinear_inequality_constraints_;
     int active_nonlinear_equality_constraints_dimension_ = 0;
     int active_nonlinear_inequality_constraints_dimension_ = 0;
+
+    // Terms related with the joint velocity constraint - the Jacobian triplets are constant so can be cached.
+    int joint_velocity_constraint_dimension_ = 0;
+    std::vector<Eigen::Triplet<double>> joint_velocity_constraint_jacobian_triplets_;
 };
 
 typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblemPtr;

@@ -132,6 +132,26 @@ void TimeIndexedProblem::ReinitializeVariables()
     cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
     inequality.ReinitializeVariables(T_, shared_from_this(), inequality_Phi);
     equality.ReinitializeVariables(T_, shared_from_this(), equality_Phi);
+
+    // Initialize joint velocity constraint
+    joint_velocity_constraint_dimension_ = N * (T_ - 2);
+    joint_velocity_constraint_jacobian_triplets_.clear();
+    // The Jacobian is constant so we can allocate the triplets here for the problem:
+    typedef Eigen::Triplet<double> T;
+    joint_velocity_constraint_jacobian_triplets_.reserve(joint_velocity_constraint_dimension_);
+    for (int t = 1; t < T_ - 1; ++t)
+    {
+        for (int n = 0; n < N; ++n)
+        {
+            // x_t => -1
+            joint_velocity_constraint_jacobian_triplets_.emplace_back(T((t - 1) * N + n, (t - 1) * N + n, -1.0));
+
+            // x_t+1 ==> 1
+            joint_velocity_constraint_jacobian_triplets_.emplace_back(T((t - 1) * N + n, (t)*N + n, 1.0));
+        }
+    }
+
+    // Pre-update
     PreUpdate();
 }
 
@@ -580,6 +600,33 @@ Eigen::MatrixXd TimeIndexedProblem::GetInequalityJacobian(int t) const
         t = T_ - 1;
     }
     return inequality.S[t] * inequality.jacobian[t];
+}
+
+Eigen::VectorXd TimeIndexedProblem::GetJointVelocityConstraint() const
+{
+    Eigen::VectorXd g(joint_velocity_constraint_dimension_);
+    for (int t = 1; t < T_ - 1; ++t)
+    {
+        g.segment((t - 1) * N, N) = x[t] - x[t - 1];  // TODO: Could use xdiff
+    }
+    return g;
+}
+
+Eigen::MatrixXd TimeIndexedProblem::GetJointVelocityConstraintBounds() const
+{
+    Eigen::MatrixXd b(joint_velocity_constraint_dimension_, 2);
+    for (int t = 1; t < T_ - 1; ++t)
+    {
+        b.block((t - 1) * N, 0, N, 1) = -xdiff_max_;
+        b.block((t - 1) * N, 1, N, 1) = xdiff_max_;
+    }
+    return b;
+}
+
+std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetJointVelocityConstraintJacobianTriplets() const
+{
+    // The Jacobian is constant - and thus cached (in ReinitializeVariables)
+    return joint_velocity_constraint_jacobian_triplets_;
 }
 
 void TimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)

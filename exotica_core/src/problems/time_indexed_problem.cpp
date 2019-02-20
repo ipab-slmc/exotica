@@ -530,8 +530,20 @@ Eigen::MatrixXd TimeIndexedProblem::GetJointVelocityConstraintBounds() const
     Eigen::MatrixXd b(joint_velocity_constraint_dimension_, 2);
     for (int t = 1; t < T_; ++t)
     {
-        b.block((t - 1) * N, 0, N, 1) = -xdiff_max_;
-        b.block((t - 1) * N, 1, N, 1) = xdiff_max_;
+        // As we are not including the T=0 in the optimization problem, we cannot
+        // define a transition (xdiff) constraint for the 0th-to-1st timestep
+        // directly - we need to include the constant x_{t=0} values in the ``b``
+        //  element of the linear constraint, i.e., as an additional offset in bounds.
+        if (t == 1)
+        {
+            b.block((t - 1) * N, 0, N, 1) = -xdiff_max_ + initial_trajectory_[0];
+            b.block((t - 1) * N, 1, N, 1) = xdiff_max_ + initial_trajectory_[0];
+        }
+        else
+        {
+            b.block((t - 1) * N, 0, N, 1) = -xdiff_max_;
+            b.block((t - 1) * N, 1, N, 1) = xdiff_max_;
+        }
     }
     return b;
 }

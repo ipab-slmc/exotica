@@ -185,6 +185,9 @@ public:
 private:
     void ReinitializeVariables();
 
+    /// \brief Checks the desired time index for bounds and supports -1 indexing.
+    inline void ValidateTimeIndex(int& t_in) const;
+
     int T_ = 0;       //!< Number of time steps
     double tau_ = 0;  //!< Time step duration
 

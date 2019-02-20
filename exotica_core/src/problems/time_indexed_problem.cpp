@@ -221,8 +221,6 @@ void TimeIndexedProblem::PreUpdate()
             }
         }
     }
-    // HIGHLIGHT("Total equality constraint dimension: " << active_nonlinear_equality_constraints_dimension_);
-    // HIGHLIGHT("Total inequality constraint dimension: " << active_nonlinear_inequality_constraints_dimension_);
 
     // Create a new set of kinematic solutions with the size of the trajectory
     // based on the lastest KinematicResponse in order to reflect model state
@@ -381,12 +379,6 @@ Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t) const
 
 Eigen::VectorXd TimeIndexedProblem::GetEquality() const
 {
-    // Eigen::VectorXd eq = Eigen::VectorXd::Zero(equality.length_jacobian * (T_ - 1));
-    // for (int t = 1; t < T_; ++t)
-    // {
-    //     eq.segment((t - 1) * equality.length_jacobian, equality.length_jacobian) = GetEquality(t);
-    // }
-
     Eigen::VectorXd eq = Eigen::VectorXd::Zero(active_nonlinear_equality_constraints_dimension_);
     int start = 0;
     for (const auto& constraint : active_nonlinear_equality_constraints_)
@@ -402,7 +394,6 @@ Eigen::VectorXd TimeIndexedProblem::GetEquality() const
 
 Eigen::SparseMatrix<double> TimeIndexedProblem::GetEqualityJacobian() const
 {
-    // Eigen::SparseMatrix<double> jac((T_ - 1) * equality.length_jacobian, N * (T_ - 1));
     Eigen::SparseMatrix<double> jac(active_nonlinear_equality_constraints_dimension_, N * (T_ - 1));
     std::vector<Eigen::Triplet<double>> triplet_list = GetEqualityJacobianTriplets();
     jac.setFromTriplets(triplet_list.begin(), triplet_list.end());
@@ -413,7 +404,6 @@ std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetEqualityJacobianTripl
 {
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
-    // triplet_list.reserve((T_ - 1) * equality.length_jacobian);
     triplet_list.reserve(active_nonlinear_equality_constraints_dimension_ * N);
     int start = 0;
     for (const auto& constraint : active_nonlinear_equality_constraints_)
@@ -434,24 +424,13 @@ std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetEqualityJacobianTripl
             for (int column = column_start; column < column_start + column_length; ++column)
             {
                 triplet_list.emplace_back(Eigen::Triplet<double>(row, column, jacobian(row_idx, column_idx)));
-                column_idx++;
+                ++column_idx;
             }
-            row_idx++;
+            ++row_idx;
         }
 
         start += task.length_jacobian;
     }
-    // for (int t = 1; t < T_; ++t)
-    // {
-    //     const Eigen::MatrixXd equality_jacobian = GetEqualityJacobian(t);
-    //     for (int r = 0; r < equality.length_jacobian; ++r)
-    //     {
-    //         for (int c = 0; c < N; ++c)
-    //         {
-    //             triplet_list.push_back(T((t - 1) * equality.length_jacobian + r, (t - 1) * N + c, equality_jacobian(r, c)));
-    //         }
-    //     }
-    // }
     return triplet_list;
 }
 
@@ -469,11 +448,6 @@ Eigen::MatrixXd TimeIndexedProblem::GetEqualityJacobian(int t) const
 
 Eigen::VectorXd TimeIndexedProblem::GetInequality() const
 {
-    // Eigen::VectorXd neq = Eigen::VectorXd::Zero(inequality.length_jacobian * (T_ - 1));
-    // for (int t = 1; t < T_; ++t)
-    // {
-    //     neq.segment((t - 1) * inequality.length_jacobian, inequality.length_jacobian) = GetInequality(t);
-    // }
     Eigen::VectorXd neq = Eigen::VectorXd::Zero(active_nonlinear_inequality_constraints_dimension_);
     int start = 0;
     for (const auto& constraint : active_nonlinear_inequality_constraints_)
@@ -489,7 +463,6 @@ Eigen::VectorXd TimeIndexedProblem::GetInequality() const
 
 Eigen::SparseMatrix<double> TimeIndexedProblem::GetInequalityJacobian() const
 {
-    // Eigen::SparseMatrix<double> jac((T_ - 1) * inequality.length_jacobian, N * (T_ - 1));
     Eigen::SparseMatrix<double> jac(active_nonlinear_inequality_constraints_dimension_, N * (T_ - 1));
     std::vector<Eigen::Triplet<double>> triplet_list = GetInequalityJacobianTriplets();
     jac.setFromTriplets(triplet_list.begin(), triplet_list.end());
@@ -520,25 +493,13 @@ std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetInequalityJacobianTri
             for (int column = column_start; column < column_start + column_length; ++column)
             {
                 triplet_list.emplace_back(Eigen::Triplet<double>(row, column, jacobian(row_idx, column_idx)));
-                column_idx++;
+                ++column_idx;
             }
-            row_idx++;
+            ++row_idx;
         }
 
         start += task.length_jacobian;
     }
-    // triplet_list.reserve((T_ - 1) * inequality.length_jacobian);
-    // for (int t = 1; t < T_; ++t)
-    // {
-    //     const Eigen::MatrixXd inequality_jacobian = GetInequalityJacobian(t);
-    //     for (int r = 0; r < inequality.length_jacobian; ++r)
-    //     {
-    //         for (int c = 0; c < N; ++c)
-    //         {
-    //             triplet_list.push_back(T((t - 1) * inequality.length_jacobian + r, (t - 1) * N + c, inequality_jacobian(r, c)));
-    //         }
-    //     }
-    // }
     return triplet_list;
 }
 
@@ -806,4 +767,4 @@ bool TimeIndexedProblem::IsValid()
 
     return succeeded;
 }
-}
+}  // namespace exotica

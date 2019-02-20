@@ -45,11 +45,11 @@ public:
     TimeIndexedProblem();
     virtual ~TimeIndexedProblem();
     void Instantiate(TimeIndexedProblemInitializer& init) override;
-    double GetDuration();
+    const double GetDuration() const;
     void Update(Eigen::VectorXdRefConst x_trajectory_in);
     void Update(Eigen::VectorXdRefConst x_in, int t);
     bool IsValid() override;
-    std::vector<Eigen::VectorXd> GetInitialTrajectory();
+    const std::vector<Eigen::VectorXd> GetInitialTrajectory() const;
     void SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
     void PreUpdate() override;
     void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);

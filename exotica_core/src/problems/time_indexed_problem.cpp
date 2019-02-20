@@ -127,9 +127,9 @@ void TimeIndexedProblem::ReinitializeVariables()
     y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
 
-    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
     x.assign(T_, Eigen::VectorXd::Zero(N));
     xdiff.assign(T_, Eigen::VectorXd::Zero(N));
+    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
     if (flags_ & KIN_J_DOT)
     {
         Hessian Htmp;
@@ -242,12 +242,12 @@ void TimeIndexedProblem::SetInitialTrajectory(const std::vector<Eigen::VectorXd>
     SetStartState(q_init_in[0]);
 }
 
-std::vector<Eigen::VectorXd> TimeIndexedProblem::GetInitialTrajectory()
+const std::vector<Eigen::VectorXd> TimeIndexedProblem::GetInitialTrajectory() const
 {
     return initial_trajectory_;
 }
 
-double TimeIndexedProblem::GetDuration()
+const double TimeIndexedProblem::GetDuration() const
 {
     return tau_ * static_cast<double>(T_);
 }
@@ -750,6 +750,8 @@ bool TimeIndexedProblem::IsValid()
 {
     bool succeeded = true;
     auto bounds = scene_->GetKinematicTree().GetJointLimits();
+
+    std::cout.precision(4);
 
     // Check for every state
     for (int t = 0; t < T_; ++t)

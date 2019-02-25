@@ -196,6 +196,8 @@ public:
     /// @param[in]  tf2_end  The end transform for o2.
     /// @return     ContinuousCollisionProxy.
     virtual ContinuousCollisionProxy ContinuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) { ThrowPretty("Not implemented!"); }
+    /// @brief      Returns the translation of the named collision object.
+    /// @param[in]  name    Name of the collision object to query.
     virtual Eigen::Vector3d GetTranslation(const std::string& name) = 0;
 
     inline void SetACM(const AllowedCollisionMatrix& acm)

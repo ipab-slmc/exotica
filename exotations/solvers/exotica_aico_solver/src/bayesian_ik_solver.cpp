@@ -169,13 +169,6 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
 
 void BayesianIKSolver::InitMessages()
 {
-    if (prob_ == nullptr) ThrowNamed("Problem definition is a NULL pointer!");
-
-    if (prob_->N < 1)
-    {
-        ThrowNamed("State dimension is too small: n=" << prob_->N);
-    }
-
     s = Eigen::VectorXd::Zero(prob_->N);
     Sinv = Eigen::MatrixXd::Zero(prob_->N, prob_->N);
     v = Eigen::VectorXd::Zero(prob_->N);
@@ -196,24 +189,11 @@ void BayesianIKSolver::InitMessages()
     b = Eigen::VectorXd::Zero(prob_->N);
     damping_reference_ = Eigen::VectorXd::Zero(prob_->N);
     Binv = Eigen::MatrixXd::Zero(prob_->N, prob_->N);
-    // Binv[0].setIdentity();
-    // Binv[0] = Binv[0] * 1e10;
     r = Eigen::VectorXd::Zero(prob_->N);
     R = Eigen::MatrixXd::Zero(prob_->N, prob_->N);
     rhat = 0;
     qhat = Eigen::VectorXd::Zero(prob_->N);
-    {
-        q = b;
-        if (prob_->W.rows() != prob_->N)
-        {
-            ThrowNamed(prob_->W.rows() << "!=" << prob_->N);
-        }
-    }
-    {
-        // Set constant W,Win,H,Hinv
-        W = prob_->W;
-        Winv = W.inverse();
-    }
+    q = b;
 }
 
 void BayesianIKSolver::InitTrajectory(const Eigen::VectorXd& q_init)
@@ -228,6 +208,16 @@ void BayesianIKSolver::InitTrajectory(const Eigen::VectorXd& q_init)
     Sinv.diagonal().setConstant(damping);
     Vinv.setZero();
     Vinv.diagonal().setConstant(damping);
+
+    // W is still writable, check dimension
+    if (prob_->W.rows() != prob_->N)
+    {
+        ThrowNamed(prob_->W.rows() << "!=" << prob_->N);
+    }
+
+    // Set constant W,Win,H,Hinv
+    W = prob_->W;
+    Winv = W.inverse();
 
     // Compute task message reference
     UpdateTaskMessage(b, 0.0);

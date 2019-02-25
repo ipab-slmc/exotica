@@ -239,18 +239,7 @@ void AICOSolver::InitMessages()
     R.assign(prob_->GetT(), Eigen::MatrixXd::Zero(prob_->N, prob_->N));
     rhat = Eigen::VectorXd::Zero(prob_->GetT());
     qhat.assign(prob_->GetT(), Eigen::VectorXd::Zero(prob_->N));
-    {
-        q = b;
-        if (prob_->W.rows() != prob_->N)
-        {
-            ThrowNamed(prob_->W.rows() << "!=" << prob_->N);
-        }
-    }
-    {
-        // Set constant W,Win,H,Hinv
-        W = prob_->W;
-        Winv = W.inverse();
-    }
+    q = b;
 
     cost_control_.resize(prob_->GetT());
     cost_control_.setZero();
@@ -294,6 +283,16 @@ void AICOSolver::InitTrajectory(const std::vector<Eigen::VectorXd>& q_init)
         // Compute task message reference
         UpdateTaskMessage(t, b[t], 0.0);
     }
+
+    // W is still writable, check dimension
+    if (prob_->W.rows() != prob_->N)
+    {
+        ThrowNamed(prob_->W.rows() << "!=" << prob_->N);
+    }
+
+    // Set constant W,Win,H,Hinv
+    W = prob_->W;
+    Winv = W.inverse();
 
     cost_ = EvaluateTrajectory(b, true);  // The problem will be updated via UpdateTaskMessage, i.e. do not update on this roll-out
     cost_prev_ = cost_;

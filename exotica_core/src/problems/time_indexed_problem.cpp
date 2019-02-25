@@ -95,6 +95,18 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     ReinitializeVariables();
 }
 
+inline void TimeIndexedProblem::ValidateTimeIndex(int& t_in) const
+{
+    if (t_in >= T_ || t_in < -1)
+    {
+        ThrowPretty("Requested t=" << t_in << " out of range, needs to be 0 =< t < " << T_);
+    }
+    else if (t_in == -1)
+    {
+        t_in = (T_ - 1);
+    }
+}
+
 void TimeIndexedProblem::ReinitializeVariables()
 {
     if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem", "Initialize problem with T=" << T_);
@@ -115,9 +127,9 @@ void TimeIndexedProblem::ReinitializeVariables()
     y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
 
-    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
     x.assign(T_, Eigen::VectorXd::Zero(N));
     xdiff.assign(T_, Eigen::VectorXd::Zero(N));
+    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
     if (flags_ & KIN_J_DOT)
     {
         Hessian Htmp;
@@ -128,9 +140,33 @@ void TimeIndexedProblem::ReinitializeVariables()
     // Set initial trajectory
     initial_trajectory_.resize(T_, scene_->GetControlledState());
 
+    // Initialize cost and constraints
     cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
     inequality.ReinitializeVariables(T_, shared_from_this(), inequality_Phi);
     equality.ReinitializeVariables(T_, shared_from_this(), equality_Phi);
+
+    // Initialize joint velocity constraint
+    joint_velocity_constraint_dimension_ = N * (T_ - 1);
+    joint_velocity_constraint_jacobian_triplets_.clear();
+    // The Jacobian is constant so we can allocate the triplets here for the problem:
+    typedef Eigen::Triplet<double> T;
+    joint_velocity_constraint_jacobian_triplets_.reserve(joint_velocity_constraint_dimension_);
+    for (int t = 1; t < T_; ++t)
+    {
+        for (int n = 0; n < N; ++n)
+        {
+            // x_t+1 ==> 1
+            joint_velocity_constraint_jacobian_triplets_.emplace_back(T((t - 1) * N + n, (t - 1) * N + n, 1.0));
+
+            if (t > 1)
+            {
+                // x_t => -1
+                joint_velocity_constraint_jacobian_triplets_.emplace_back(T((t - 1) * N + n, (t - 2) * N + n, -1.0));
+            }
+        }
+    }
+
+    // Pre-update
     PreUpdate();
 }
 
@@ -160,6 +196,32 @@ void TimeIndexedProblem::PreUpdate()
     inequality.UpdateS();
     equality.UpdateS();
 
+    // Update list of active equality/inequality constraints:
+    active_nonlinear_equality_constraints_dimension_ = 0;
+    active_nonlinear_inequality_constraints_dimension_ = 0;
+    active_nonlinear_equality_constraints_.clear();
+    active_nonlinear_inequality_constraints_.clear();
+    for (int t = 1; t < T_; ++t)
+    {
+        for (const TaskIndexing& task : equality.indexing)
+        {
+            if (equality.rho[t](task.id) != 0.0)
+            {
+                active_nonlinear_equality_constraints_.emplace_back(std::make_pair(t, task.id));
+                active_nonlinear_equality_constraints_dimension_ += task.length_jacobian;
+            }
+        }
+
+        for (const TaskIndexing& task : inequality.indexing)
+        {
+            if (inequality.rho[t](task.id) != 0.0)
+            {
+                active_nonlinear_inequality_constraints_.emplace_back(std::make_pair(t, task.id));
+                active_nonlinear_inequality_constraints_dimension_ += task.length_jacobian;
+            }
+        }
+    }
+
     // Create a new set of kinematic solutions with the size of the trajectory
     // based on the lastest KinematicResponse in order to reflect model state
     // updates etc.
@@ -181,37 +243,30 @@ void TimeIndexedProblem::SetInitialTrajectory(const std::vector<Eigen::VectorXd>
     SetStartState(q_init_in[0]);
 }
 
-std::vector<Eigen::VectorXd> TimeIndexedProblem::GetInitialTrajectory()
+const std::vector<Eigen::VectorXd> TimeIndexedProblem::GetInitialTrajectory() const
 {
     return initial_trajectory_;
 }
 
-double TimeIndexedProblem::GetDuration()
+const double TimeIndexedProblem::GetDuration() const
 {
     return tau_ * static_cast<double>(T_);
 }
 
 void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_trajectory_in)
 {
-    if (x_trajectory_in.size() != T_ * N)
-        ThrowPretty("To update using the trajectory Update method, please use a trajectory of size N x T (" << N * T_ << "), given: " << x_trajectory_in.size());
+    if (x_trajectory_in.size() != (T_ - 1) * N)
+        ThrowPretty("To update using the trajectory Update method, please use a trajectory of size N x (T-1) (" << N * (T_ - 1) << "), given: " << x_trajectory_in.size());
 
-    for (int t = 0; t < T_; ++t)
+    for (int t = 1; t < T_; ++t)
     {
-        Update(x_trajectory_in.segment(t * N, N), t);
+        Update(x_trajectory_in.segment((t - 1) * N, N), t);
     }
 }
 
 void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
 
     x[t] = x_in;
 
@@ -277,213 +332,231 @@ void TimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
     ++number_of_problem_updates_;
 }
 
-double TimeIndexedProblem::GetCost()
+double TimeIndexedProblem::GetCost() const
 {
     double cost = 0.0;
-    for (int t = 0; t < T_; ++t)
+    for (int t = 1; t < T_; ++t)
     {
         cost += GetScalarTaskCost(t) + GetScalarTransitionCost(t);
     }
     return cost;
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetCostJacobian()
+Eigen::VectorXd TimeIndexedProblem::GetCostJacobian() const
 {
-    Eigen::VectorXd jac = Eigen::VectorXd::Zero(N * T_);
-    for (int t = 0; t < T_; ++t)
+    Eigen::VectorXd jac = Eigen::VectorXd::Zero(N * (T_ - 1));
+    for (int t = 1; t < T_; ++t)
     {
-        jac.segment(t * N, N) += GetScalarTaskJacobian(t) + GetScalarTransitionJacobian(t);
-        if (t > 0) jac.segment((t - 1) * N, N) -= GetScalarTransitionJacobian(t);
+        jac.segment((t - 1) * N, N) += GetScalarTaskJacobian(t) + GetScalarTransitionJacobian(t);
+        if (t > 1) jac.segment((t - 2) * N, N) -= GetScalarTransitionJacobian(t);
     }
     return jac;
 }
 
-double TimeIndexedProblem::GetScalarTaskCost(int t)
+double TimeIndexedProblem::GetScalarTaskCost(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     return ct * cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetScalarTaskJacobian(int t)
+Eigen::VectorXd TimeIndexedProblem::GetScalarTaskJacobian(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     return cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0 * ct;
 }
 
-double TimeIndexedProblem::GetScalarTransitionCost(int t)
+double TimeIndexedProblem::GetScalarTransitionCost(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     return ct * xdiff[t].transpose() * W * xdiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t)
+Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     return 2.0 * ct * W * xdiff[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetEquality()
+Eigen::VectorXd TimeIndexedProblem::GetEquality() const
 {
-    Eigen::VectorXd eq = Eigen::VectorXd::Zero(equality.length_jacobian * T_);
-    for (int t = 0; t < T_; ++t)
+    Eigen::VectorXd eq = Eigen::VectorXd::Zero(active_nonlinear_equality_constraints_dimension_);
+    int start = 0;
+    for (const auto& constraint : active_nonlinear_equality_constraints_)
     {
-        eq.segment(t * equality.length_jacobian, equality.length_jacobian) = GetEquality(t);
+        // First is timestep, second is task id
+        const TaskIndexing task = equality.indexing[constraint.second];
+        eq.segment(start, task.length_jacobian) = equality.rho[constraint.first](task.id) * equality.ydiff[constraint.first].segment(task.start_jacobian, task.length_jacobian);
+        start += task.length_jacobian;
     }
+
     return eq;
 }
 
-Eigen::SparseMatrix<double> TimeIndexedProblem::GetEqualityJacobian()
+Eigen::SparseMatrix<double> TimeIndexedProblem::GetEqualityJacobian() const
 {
-    Eigen::SparseMatrix<double> jac(T_ * equality.length_jacobian, N * T_);
-    // TODO: Set from triplets!
-    // typedef Eigen::Triplet<double> T;
-    // std::vector<T> triplet_list;
-    // triplet_list.reserve(GetRows());
-    for (int t = 0; t < T_; ++t)
-    {
-        const Eigen::MatrixXd equality_jacobian = GetEqualityJacobian(t);
-        for (int r = 0; r < equality.length_jacobian; ++r)
-        {
-            for (int c = 0; c < N; ++c)
-            {
-                if (equality_jacobian(r, c) != 0.0)
-                {
-                    // HIGHLIGHT_NAMED("Index", "t=" << t << ", r=" << r << ", c=" << c << ", index_r=" << t * equality.length_jacobian + r << ", index_c=" << t * N + c);
-                    // triplet_list.push_back(T(t * equality.length_jacobian + r, t * N + c, equality_jacobian(r, c)));
-                    jac.coeffRef(t * equality.length_jacobian + r, t * N + c) = equality_jacobian(r, c);
-                }
-            }
-        }
-    }
+    Eigen::SparseMatrix<double> jac(active_nonlinear_equality_constraints_dimension_, N * (T_ - 1));
+    std::vector<Eigen::Triplet<double>> triplet_list = GetEqualityJacobianTriplets();
+    jac.setFromTriplets(triplet_list.begin(), triplet_list.end());
     return jac;
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetEquality(int t)
+std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetEqualityJacobianTriplets() const
 {
-    if (t >= T_ || t < -1)
+    typedef Eigen::Triplet<double> T;
+    std::vector<T> triplet_list;
+    triplet_list.reserve(active_nonlinear_equality_constraints_dimension_ * N);
+    int start = 0;
+    for (const auto& constraint : active_nonlinear_equality_constraints_)
     {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
+        // First is timestep, second is task id
+        const TaskIndexing task = equality.indexing[constraint.second];
+
+        const int row_start = start;
+        const int row_length = task.length_jacobian;
+        const int column_start = (constraint.first - 1) * N;  // (t - 1) * N
+        const int column_length = N;
+
+        const Eigen::MatrixXd jacobian = equality.rho[constraint.first](task.id) * equality.jacobian[constraint.first].middleRows(task.start_jacobian, task.length_jacobian);
+        int row_idx = 0;
+        for (int row = row_start; row < row_start + row_length; ++row)
+        {
+            int column_idx = 0;
+            for (int column = column_start; column < column_start + column_length; ++column)
+            {
+                triplet_list.emplace_back(Eigen::Triplet<double>(row, column, jacobian(row_idx, column_idx)));
+                ++column_idx;
+            }
+            ++row_idx;
+        }
+
+        start += task.length_jacobian;
     }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    return triplet_list;
+}
+
+Eigen::VectorXd TimeIndexedProblem::GetEquality(int t) const
+{
+    ValidateTimeIndex(t);
     return equality.S[t] * equality.ydiff[t];
 }
 
-Eigen::MatrixXd TimeIndexedProblem::GetEqualityJacobian(int t)
+Eigen::MatrixXd TimeIndexedProblem::GetEqualityJacobian(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     return equality.S[t] * equality.jacobian[t];
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetInequality()
+Eigen::VectorXd TimeIndexedProblem::GetInequality() const
 {
-    Eigen::VectorXd neq = Eigen::VectorXd::Zero(inequality.length_jacobian * T_);
-    for (int t = 0; t < T_; ++t)
+    Eigen::VectorXd neq = Eigen::VectorXd::Zero(active_nonlinear_inequality_constraints_dimension_);
+    int start = 0;
+    for (const auto& constraint : active_nonlinear_inequality_constraints_)
     {
-        neq.segment(t * inequality.length_jacobian, inequality.length_jacobian) = GetInequality(t);
+        // First is timestep, second is task id
+        const TaskIndexing task = inequality.indexing[constraint.second];
+        neq.segment(start, task.length_jacobian) = inequality.rho[constraint.first](task.id) * inequality.ydiff[constraint.first].segment(task.start_jacobian, task.length_jacobian);
+        start += task.length_jacobian;
     }
+
     return neq;
 }
 
-Eigen::SparseMatrix<double> TimeIndexedProblem::GetInequalityJacobian()
+Eigen::SparseMatrix<double> TimeIndexedProblem::GetInequalityJacobian() const
 {
-    Eigen::SparseMatrix<double> jac(T_ * inequality.length_jacobian, N * T_);
-    // TODO: Set from triplets!
-    // typedef Eigen::Triplet<double> T;
-    // std::vector<T> triplet_list;
-    // triplet_list.reserve(GetRows());
-    for (int t = 0; t < T_; ++t)
-    {
-        const Eigen::MatrixXd inequality_jacobian = GetInequalityJacobian(t);
-        for (int r = 0; r < inequality.length_jacobian; ++r)
-        {
-            for (int c = 0; c < N; ++c)
-            {
-                if (inequality_jacobian(r, c) != 0.0)
-                {
-                    // HIGHLIGHT_NAMED("Index", "t=" << t << ", r=" << r << ", c=" << c << ", index_r=" << t * inequality.length_jacobian + r << ", index_c=" << t * N + c);
-                    // triplet_list.push_back(T(t * inequality.length_jacobian + r, t * N + c, inequality_jacobian(r, c)));
-                    jac.coeffRef(t * inequality.length_jacobian + r, t * N + c) = inequality_jacobian(r, c);
-                }
-            }
-        }
-    }
+    Eigen::SparseMatrix<double> jac(active_nonlinear_inequality_constraints_dimension_, N * (T_ - 1));
+    std::vector<Eigen::Triplet<double>> triplet_list = GetInequalityJacobianTriplets();
+    jac.setFromTriplets(triplet_list.begin(), triplet_list.end());
     return jac;
 }
 
-Eigen::VectorXd TimeIndexedProblem::GetInequality(int t)
+std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetInequalityJacobianTriplets() const
 {
-    if (t >= T_ || t < -1)
+    typedef Eigen::Triplet<double> T;
+    std::vector<T> triplet_list;
+    triplet_list.reserve(active_nonlinear_inequality_constraints_dimension_ * N);
+    int start = 0;
+    for (const auto& constraint : active_nonlinear_inequality_constraints_)
     {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
+        // First is timestep, second is task id
+        const TaskIndexing task = inequality.indexing[constraint.second];
+
+        const int row_start = start;
+        const int row_length = task.length_jacobian;
+        const int column_start = (constraint.first - 1) * N;  // (t - 1) * N
+        const int column_length = N;
+
+        const Eigen::MatrixXd jacobian = inequality.rho[constraint.first](task.id) * inequality.jacobian[constraint.first].middleRows(task.start_jacobian, task.length_jacobian);
+        int row_idx = 0;
+        for (int row = row_start; row < row_start + row_length; ++row)
+        {
+            int column_idx = 0;
+            for (int column = column_start; column < column_start + column_length; ++column)
+            {
+                triplet_list.emplace_back(Eigen::Triplet<double>(row, column, jacobian(row_idx, column_idx)));
+                ++column_idx;
+            }
+            ++row_idx;
+        }
+
+        start += task.length_jacobian;
     }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    return triplet_list;
+}
+
+Eigen::VectorXd TimeIndexedProblem::GetInequality(int t) const
+{
+    ValidateTimeIndex(t);
     return inequality.S[t] * inequality.ydiff[t];
 }
 
-Eigen::MatrixXd TimeIndexedProblem::GetInequalityJacobian(int t)
+Eigen::MatrixXd TimeIndexedProblem::GetInequalityJacobian(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     return inequality.S[t] * inequality.jacobian[t];
+}
+
+Eigen::VectorXd TimeIndexedProblem::GetJointVelocityConstraint() const
+{
+    Eigen::VectorXd g(joint_velocity_constraint_dimension_);
+    for (int t = 1; t < T_; ++t)
+    {
+        g.segment((t - 1) * N, N) = xdiff[t];
+    }
+    return g;
+}
+
+Eigen::MatrixXd TimeIndexedProblem::GetJointVelocityConstraintBounds() const
+{
+    Eigen::MatrixXd b(joint_velocity_constraint_dimension_, 2);
+    for (int t = 1; t < T_; ++t)
+    {
+        // As we are not including the T=0 in the optimization problem, we cannot
+        // define a transition (xdiff) constraint for the 0th-to-1st timestep
+        // directly - we need to include the constant x_{t=0} values in the ``b``
+        //  element of the linear constraint, i.e., as an additional offset in bounds.
+        if (t == 1)
+        {
+            b.block((t - 1) * N, 0, N, 1) = -xdiff_max_ + initial_trajectory_[0];
+            b.block((t - 1) * N, 1, N, 1) = xdiff_max_ + initial_trajectory_[0];
+        }
+        else
+        {
+            b.block((t - 1) * N, 0, N, 1) = -xdiff_max_;
+            b.block((t - 1) * N, 1, N, 1) = xdiff_max_;
+        }
+    }
+    return b;
+}
+
+std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetJointVelocityConstraintJacobianTriplets() const
+{
+    // The Jacobian is constant - and thus cached (in ReinitializeVariables)
+    return joint_velocity_constraint_jacobian_triplets_;
 }
 
 void TimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
@@ -498,14 +571,7 @@ void TimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRe
 
 void TimeIndexedProblem::SetRho(const std::string& task_name, const double rho, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
@@ -520,14 +586,7 @@ void TimeIndexedProblem::SetRho(const std::string& task_name, const double rho, 
 
 Eigen::VectorXd TimeIndexedProblem::GetGoal(const std::string& task_name, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
@@ -540,14 +599,7 @@ Eigen::VectorXd TimeIndexedProblem::GetGoal(const std::string& task_name, int t)
 
 double TimeIndexedProblem::GetRho(const std::string& task_name, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
@@ -560,14 +612,7 @@ double TimeIndexedProblem::GetRho(const std::string& task_name, int t)
 
 void TimeIndexedProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
@@ -582,14 +627,7 @@ void TimeIndexedProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXd
 
 void TimeIndexedProblem::SetRhoEQ(const std::string& task_name, const double rho, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
@@ -604,14 +642,7 @@ void TimeIndexedProblem::SetRhoEQ(const std::string& task_name, const double rho
 
 Eigen::VectorXd TimeIndexedProblem::GetGoalEQ(const std::string& task_name, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
@@ -624,14 +655,7 @@ Eigen::VectorXd TimeIndexedProblem::GetGoalEQ(const std::string& task_name, int 
 
 double TimeIndexedProblem::GetRhoEQ(const std::string& task_name, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < equality.indexing.size(); ++i)
     {
         if (equality.tasks[i]->GetObjectName() == task_name)
@@ -644,14 +668,7 @@ double TimeIndexedProblem::GetRhoEQ(const std::string& task_name, int t)
 
 void TimeIndexedProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
@@ -666,14 +683,7 @@ void TimeIndexedProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorX
 
 void TimeIndexedProblem::SetRhoNEQ(const std::string& task_name, const double rho, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
@@ -688,14 +698,7 @@ void TimeIndexedProblem::SetRhoNEQ(const std::string& task_name, const double rh
 
 Eigen::VectorXd TimeIndexedProblem::GetGoalNEQ(const std::string& task_name, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
@@ -708,14 +711,7 @@ Eigen::VectorXd TimeIndexedProblem::GetGoalNEQ(const std::string& task_name, int
 
 double TimeIndexedProblem::GetRhoNEQ(const std::string& task_name, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     for (int i = 0; i < inequality.indexing.size(); ++i)
     {
         if (inequality.tasks[i]->GetObjectName() == task_name)
@@ -731,6 +727,8 @@ bool TimeIndexedProblem::IsValid()
     bool succeeded = true;
     auto bounds = scene_->GetKinematicTree().GetJointLimits();
 
+    std::cout.precision(4);
+
     // Check for every state
     for (int t = 0; t < T_; ++t)
     {
@@ -739,9 +737,10 @@ bool TimeIndexedProblem::IsValid()
         {
             for (int i = 0; i < N; ++i)
             {
-                if (x[t](i) < bounds(i, 0) || x[t](i) > bounds(i, 1))
+                constexpr double tolerance = 1.e-3;
+                if (x[t](i) < bounds(i, 0) - tolerance || x[t](i) > bounds(i, 1) + tolerance)
                 {
-                    if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "State at timestep " << t << " is out of bounds");
+                    if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "State at timestep " << t << " is out of bounds: joint #" << i << ": " << bounds(i, 0) << " < " << x[t](i) << " < " << bounds(i, 1));
                     succeeded = false;
                 }
             }
@@ -780,4 +779,4 @@ bool TimeIndexedProblem::IsValid()
 
     return succeeded;
 }
-}
+}  // namespace exotica

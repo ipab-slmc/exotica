@@ -45,11 +45,11 @@ public:
     TimeIndexedProblem();
     virtual ~TimeIndexedProblem();
     void Instantiate(TimeIndexedProblemInitializer& init) override;
-    double GetDuration();
+    const double GetDuration() const;
     void Update(Eigen::VectorXdRefConst x_trajectory_in);
     void Update(Eigen::VectorXdRefConst x_in, int t);
     bool IsValid() override;
-    std::vector<Eigen::VectorXd> GetInitialTrajectory();
+    const std::vector<Eigen::VectorXd> GetInitialTrajectory() const;
     void SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
     void PreUpdate() override;
     void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
@@ -64,6 +64,8 @@ public:
     void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0);
     Eigen::VectorXd GetGoalNEQ(const std::string& task_name, int t = 0);
     double GetRhoNEQ(const std::string& task_name, int t = 0);
+
+    /// \brief Returns the joint bounds (first column lower, second column upper).
     Eigen::MatrixXd GetBounds() const;
 
     int GetT() const { return T_; }
@@ -73,48 +75,71 @@ public:
     void SetTau(const double tau_in);
 
     /// \brief Returns the scalar task cost at timestep t
-    double GetScalarTaskCost(int t);
+    double GetScalarTaskCost(int t) const;
 
     /// \brief Returns the Jacobian of the scalar task cost at timestep t
-    Eigen::VectorXd GetScalarTaskJacobian(int t);
+    Eigen::VectorXd GetScalarTaskJacobian(int t) const;
 
     /// \brief Returns the scalar transition cost (x^T*W*x) at timestep t
-    double GetScalarTransitionCost(int t);
+    double GetScalarTransitionCost(int t) const;
 
     /// \brief Returns the Jacobian of the transition cost at timestep t
-    Eigen::VectorXd GetScalarTransitionJacobian(int t);
+    Eigen::VectorXd GetScalarTransitionJacobian(int t) const;
 
     /// \brief Returns the scalar cost for the entire trajectory (both task and transition cost).
-    double GetCost();
+    double GetCost() const;
 
     /// \brief Returns the Jacobian of the scalar cost over the entire trajectory (Jacobian of GetCost).
-    Eigen::VectorXd GetCostJacobian();
+    Eigen::VectorXd GetCostJacobian() const;
 
     /// \brief Returns the equality constraint values for the entire trajectory.
-    Eigen::VectorXd GetEquality();
+    Eigen::VectorXd GetEquality() const;
 
     /// \brief Returns the inequality constraint values for the entire trajectory.
-    Eigen::VectorXd GetInequality();
+    Eigen::VectorXd GetInequality() const;
 
     /// \brief Returns the sparse Jacobian matrix of the equality constraints over the entire trajectory.
-    Eigen::SparseMatrix<double> GetEqualityJacobian();
+    Eigen::SparseMatrix<double> GetEqualityJacobian() const;
 
     /// \brief Returns the sparse Jacobian matrix of the inequality constraints over the entire trajectory.
-    Eigen::SparseMatrix<double> GetInequalityJacobian();
+    Eigen::SparseMatrix<double> GetInequalityJacobian() const;
 
+    /// \brief Returns a vector of triplets to fill a sparse Jacobian for the equality constraints.
+    std::vector<Eigen::Triplet<double>> GetEqualityJacobianTriplets() const;
+
+    /// \brief Returns the dimension of the active equality constraints.
+    int get_active_nonlinear_equality_constraints_dimension() const { return active_nonlinear_equality_constraints_dimension_; }
     /// \brief Returns the value of the equality constraints at timestep t.
-    Eigen::VectorXd GetEquality(int t);
+    Eigen::VectorXd GetEquality(int t) const;
 
     /// \brief Returns the Jacobian of the equality constraints at timestep t.
-    Eigen::MatrixXd GetEqualityJacobian(int t);
+    Eigen::MatrixXd GetEqualityJacobian(int t) const;
 
     /// \brief Returns the value of the inequality constraints at timestep t.
-    Eigen::VectorXd GetInequality(int t);
+    Eigen::VectorXd GetInequality(int t) const;
 
     /// \brief Returns the Jacobian of the inequality constraints at timestep t.
-    Eigen::MatrixXd GetInequalityJacobian(int t);
+    Eigen::MatrixXd GetInequalityJacobian(int t) const;
 
+    /// \brief Returns a vector of triplets to fill a sparse Jacobian for the inequality constraints.
+    std::vector<Eigen::Triplet<double>> GetInequalityJacobianTriplets() const;
+
+    /// \brief Returns the dimension of the active inequality constraints.
+    int get_active_nonlinear_inequality_constraints_dimension() const { return active_nonlinear_inequality_constraints_dimension_; }
+    /// \brief Returns the dimension of the joint velocity constraint (linear inequality).
+    int get_joint_velocity_constraint_dimension() const { return joint_velocity_constraint_dimension_; }
+    /// \brief Returns the joint velocity constraint inequality terms (linear).
+    Eigen::VectorXd GetJointVelocityConstraint() const;
+
+    /// \brief Returns the joint velocity constraint bounds (constant terms).
+    Eigen::MatrixXd GetJointVelocityConstraintBounds() const;
+
+    /// \brief Returns the joint velocity constraint Jacobian as triplets.
+    std::vector<Eigen::Triplet<double>> GetJointVelocityConstraintJacobianTriplets() const;
+
+    /// \brief Returns the per-DoF joint velocity limit vector.
     Eigen::VectorXd GetJointVelocityLimits() const { return q_dot_max_; }
+    /// \brief Sets the joint velocity limits. Supports N- and 1-dimensional vectors.
     void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in)
     {
         if (qdot_max_in.size() == N)
@@ -131,6 +156,8 @@ public:
         }
         xdiff_max_ = q_dot_max_ * tau_;
     }
+
+    /// \brief Returns the maximum diff between two timesteps for each dimension in the configuration vector x.
     Eigen::VectorXd GetXdiffMax() const { return xdiff_max_; }
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask cost;
@@ -158,6 +185,9 @@ public:
 private:
     void ReinitializeVariables();
 
+    /// \brief Checks the desired time index for bounds and supports -1 indexing.
+    inline void ValidateTimeIndex(int& t_in) const;
+
     int T_ = 0;       //!< Number of time steps
     double tau_ = 0;  //!< Time step duration
 
@@ -170,6 +200,16 @@ private:
     TimeIndexedProblemInitializer init_;
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
+
+    // The first element in the pair is the timestep (t) and the second element is the task.id (id).
+    std::vector<std::pair<int, int>> active_nonlinear_equality_constraints_;
+    std::vector<std::pair<int, int>> active_nonlinear_inequality_constraints_;
+    int active_nonlinear_equality_constraints_dimension_ = 0;
+    int active_nonlinear_inequality_constraints_dimension_ = 0;
+
+    // Terms related with the joint velocity constraint - the Jacobian triplets are constant so can be cached.
+    int joint_velocity_constraint_dimension_ = 0;
+    std::vector<Eigen::Triplet<double>> joint_velocity_constraint_jacobian_triplets_;
 };
 
 typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblemPtr;

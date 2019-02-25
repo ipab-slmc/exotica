@@ -36,6 +36,8 @@
 #include <Eigen/Dense>
 #include <vector>
 
+namespace exotica
+{
 class SinglePassMeanCovariance
 {
 private:
@@ -161,5 +163,6 @@ public:
         sig = S / (W - 1.);
     }
 };
+}  // namespace exotica
 
 #endif  // EXOTICA_AICO_SOLVER_INCREMENTAL_GAUSSIAN_H_

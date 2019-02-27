@@ -117,11 +117,11 @@ public:
     void DetachObject(const std::string& name);
     bool HasAttachedObject(const std::string& name);
 
-    void AddObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool update_collision_scene = true);
+    void AddObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const bool update_collision_scene = true);
 
-    void AddObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", const std::string& shape_resource_path = "", Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), bool update_collision_scene = true);
+    void AddObject(const std::string& name, const KDL::Frame& transform = KDL::Frame(), const std::string& parent = "", const std::string& shape_resource_path = "", const Eigen::Vector3d& scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const bool update_collision_scene = true);
 
-    void AddObjectToEnvironment(const std::string& name, const KDL::Frame& transform = KDL::Frame(), shapes::ShapeConstPtr shape = nullptr, const Eigen::Vector4d& colour = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const bool& update_collision_scene = true);
+    void AddObjectToEnvironment(const std::string& name, const KDL::Frame& transform = KDL::Frame(), shapes::ShapeConstPtr shape = nullptr, const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const bool update_collision_scene = true);
 
     void RemoveObject(const std::string& name);
 

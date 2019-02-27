@@ -109,7 +109,7 @@ void Scene::Instantiate(SceneInitializer& init)
     for (const exotica::Initializer& linkInit : init.Links)
     {
         LinkInitializer link(linkInit);
-        AddObject(link.Name, GetFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), false);
+        AddObject(link.Name, GetFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), Eigen::Vector4d::Zero(), false);
     }
 
     // Check list of links to exclude from CollisionScene
@@ -669,31 +669,31 @@ void Scene::UpdateSceneFrames()
     request_needs_updating_ = true;
 }
 
-void Scene::AddObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, bool update_collision_scene)
+void Scene::AddObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool update_collision_scene)
 {
     if (kinematica_.DoesLinkWithNameExist(name)) ThrowPretty("Link '" << name << "' already exists in the scene!");
     std::string parent_name = (parent == "") ? kinematica_.GetRootFrameName() : parent;
     if (!kinematica_.DoesLinkWithNameExist(parent_name)) ThrowPretty("Can't find parent '" << parent_name << "'!");
     Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
-    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape, inertia));
+    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape, inertia, color));
     if (update_collision_scene) UpdateCollisionObjects();
 }
 
-void Scene::AddObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, bool update_collision_scene)
+void Scene::AddObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shape_resource_path, const Eigen::Vector3d& scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool update_collision_scene)
 {
     if (kinematica_.DoesLinkWithNameExist(name)) ThrowPretty("Link '" << name << "' already exists in the scene!");
     std::string parent_name = (parent == "") ? kinematica_.GetRootFrameName() : parent;
     if (!kinematica_.DoesLinkWithNameExist(parent_name)) ThrowPretty("Can't find parent '" << parent_name << "'!");
     Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
-    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape_resource_path, scale, inertia));
+    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape_resource_path, scale, inertia, color));
     UpdateSceneFrames();
     UpdateInternalFrames();
     if (update_collision_scene) UpdateCollisionObjects();
 }
 
-void Scene::AddObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const Eigen::Vector4d& colour, const bool& update_collision_scene)
+void Scene::AddObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const Eigen::Vector4d& color, const bool update_collision_scene)
 {
     if (kinematica_.HasModelLink(name))
     {
@@ -702,7 +702,7 @@ void Scene::AddObjectToEnvironment(const std::string& name, const KDL::Frame& tr
     Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
     ps_->getWorldNonConst()->addToObject(name, shape, pose);
-    ps_->setObjectColor(name, GetColor(colour));
+    ps_->setObjectColor(name, GetColor(color));
     UpdateSceneFrames();
     if (update_collision_scene) UpdateInternalFrames();
 }

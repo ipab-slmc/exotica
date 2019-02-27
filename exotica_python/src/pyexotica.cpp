@@ -1048,25 +1048,27 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("get_trajectory", [](Scene* instance, const std::string& link) { return instance->GetTrajectory(link)->ToString(); });
     scene.def("remove_trajectory", &Scene::RemoveTrajectory);
     scene.def("update_scene_frames", &Scene::UpdateSceneFrames);
-    scene.def("add_object", [](Scene* instance, const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale, bool update_collision_scene) { instance->AddObject(name, transform, parent, shape_resource_path, scale, KDL::RigidBodyInertia::Zero(), update_collision_scene); },
+    scene.def("add_object", [](Scene* instance, const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shape_resource_path, const Eigen::Vector3d scale, const Eigen::Vector4d color, const bool update_collision_scene) { instance->AddObject(name, transform, parent, shape_resource_path, scale, KDL::RigidBodyInertia::Zero(), color, update_collision_scene); },
               py::arg("name"),
               py::arg("transform") = KDL::Frame(),
               py::arg("parent") = "",
               py::arg("shape_resource_path"),
               py::arg("scale") = Eigen::Vector3d::Ones(),
+              py::arg("color") = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0),
               py::arg("update_collision_scene") = true);
-    scene.def("add_object", (void (Scene::*)(const std::string&, const KDL::Frame&, const std::string&, shapes::ShapeConstPtr, const KDL::RigidBodyInertia&, bool)) & Scene::AddObject,
+    scene.def("add_object", (void (Scene::*)(const std::string&, const KDL::Frame&, const std::string&, shapes::ShapeConstPtr, const KDL::RigidBodyInertia&, const Eigen::Vector4d&, const bool)) & Scene::AddObject,
               py::arg("name"),
               py::arg("transform") = KDL::Frame(),
               py::arg("parent") = std::string(),
               py::arg("shape"),
               py::arg("inertia") = KDL::RigidBodyInertia::Zero(),
+              py::arg("color") = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0),
               py::arg("update_collision_scene") = true);
     scene.def("add_object_to_environment", &Scene::AddObjectToEnvironment,
               py::arg("name"),
               py::arg("transform") = KDL::Frame(),
               py::arg("shape"),
-              py::arg("colour") = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0),
+              py::arg("color") = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0),
               py::arg("update_collision_scene") = true);
     scene.def("remove_object", &Scene::RemoveObject);
     scene.def_property_readonly("model_link_to_collision_link_map", &Scene::GetModelLinkToCollisionLinkMap);

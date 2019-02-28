@@ -759,9 +759,9 @@ bool TimeIndexedProblem::IsValid()
         // Check equality constraints
         if (GetEquality(t).rows() > 0)
         {
-            if (GetEquality(t).norm() > init_.EqualityFeasibilityTolerance)
+            if (GetEquality(t).cwiseAbs().maxCoeff() > init_.EqualityFeasibilityTolerance)
             {
-                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated equality constraints at timestep " << t << ": " << GetEquality(t).norm());
+                if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated equality constraints at timestep " << t << ": " << GetEquality(t).cwiseAbs().maxCoeff());
                 succeeded = false;
             }
         }

@@ -260,6 +260,9 @@ public:
 
     bool debug_ = false;
 
+    /// \brief Links to exclude from collision scene - gets set from Scene::UpdateSceneFrames
+    std::set<std::string> world_links_to_exclude_from_collision_scene;
+
 protected:
     /// The allowed collision matrix
     AllowedCollisionMatrix acm_;

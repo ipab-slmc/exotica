@@ -161,6 +161,8 @@ public:
     /// @brief Returns a map between controlled robot link names and associated collision link names. Here we consider all fixed links between controlled links as belonging to the previous controlled link (as if the collision links had been fused).
     /// @return Map between controlled links and associated collision links.
     std::map<std::string, std::vector<std::string>> GetControlledLinkToCollisionLinkMap() { return controlled_link_to_collision_link_map_; };
+    /// @brief Returns world links that are to be excluded from collision checking.
+    std::set<std::string> get_world_links_to_exclude_from_collision_scene() { return world_links_to_exclude_from_collision_scene_; }
 private:
     void UpdateInternalFrames(bool update_request = true);
 

@@ -209,8 +209,11 @@ private:
     /// \brief Mapping between controlled link name and collision links
     std::map<std::string, std::vector<std::string>> controlledLink_to_collisionLink_map_;
 
-    /// \brief List of links to be excluded from the collision scene
+    /// \brief List of robot links to be excluded from the collision scene
     std::set<std::string> robotLinksToExcludeFromCollisionScene_;
+
+    /// \brief List of world links to be excluded from the collision scene
+    std::set<std::string> world_links_to_exclude_from_collision_scene_;
 
     KinematicsRequest kinematic_request_;
     std::shared_ptr<KinematicResponse> kinematic_solution_;

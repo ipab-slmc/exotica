@@ -112,13 +112,23 @@ void Scene::Instantiate(SceneInitializer& init)
         AddObject(link.Name, GetFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), Eigen::Vector4d::Zero(), false);
     }
 
-    // Check list of links to exclude from CollisionScene
+    // Check list of robot links to exclude from CollisionScene
     if (init.RobotLinksToExcludeFromCollisionScene.size() > 0)
     {
         for (const auto& link : init.RobotLinksToExcludeFromCollisionScene)
         {
             robotLinksToExcludeFromCollisionScene_.insert(link);
             if (debug_) HIGHLIGHT_NAMED("RobotLinksToExcludeFromCollisionScene", link);
+        }
+    }
+
+    // Check list of world links to exclude from CollisionScene
+    if (init.WorldLinksToExcludeFromCollisionScene.size() > 0)
+    {
+        for (const auto& link : init.WorldLinksToExcludeFromCollisionScene)
+        {
+            world_links_to_exclude_from_collision_scene_.insert(link);
+            if (debug_) HIGHLIGHT_NAMED("WorldLinksToExcludeFromCollisionScene", link);
         }
     }
 
@@ -581,21 +591,25 @@ void Scene::UpdateSceneFrames()
             obj_transform.linear() = object.second->shape_poses_[0].rotation();
             kinematica_.AddEnvironmentElement(object.first, obj_transform);
 
-            for (int i = 0; i < object.second->shape_poses_.size(); ++i)
+            // Only add collision objects if not excluded
+            if (world_links_to_exclude_from_collision_scene_.find(object.first) == world_links_to_exclude_from_collision_scene_.end())
             {
-                Eigen::Isometry3d shape_transform;
-                shape_transform.translation() = object.second->shape_poses_[i].translation();
-                shape_transform.linear() = object.second->shape_poses_[i].rotation();
-                Eigen::Isometry3d trans = obj_transform.inverse() * shape_transform;
-                if (ps_->hasObjectColor(object.first))
+                for (int i = 0; i < object.second->shape_poses_.size(); ++i)
                 {
-                    auto color_msg = ps_->getObjectColor(object.first);
-                    Eigen::Vector4d color = Eigen::Vector4d(color_msg.r, color_msg.g, color_msg.b, color_msg.a);
-                    kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i], KDL::RigidBodyInertia::Zero(), color);
-                }
-                else
-                {
-                    kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i]);
+                    Eigen::Isometry3d shape_transform;
+                    shape_transform.translation() = object.second->shape_poses_[i].translation();
+                    shape_transform.linear() = object.second->shape_poses_[i].rotation();
+                    Eigen::Isometry3d trans = obj_transform.inverse() * shape_transform;
+                    if (ps_->hasObjectColor(object.first))
+                    {
+                        auto color_msg = ps_->getObjectColor(object.first);
+                        Eigen::Vector4d color = Eigen::Vector4d(color_msg.r, color_msg.g, color_msg.b, color_msg.a);
+                        kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i], KDL::RigidBodyInertia::Zero(), color);
+                    }
+                    else
+                    {
+                        kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i]);
+                    }
                 }
             }
         }

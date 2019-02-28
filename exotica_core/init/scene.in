@@ -24,3 +24,4 @@ Optional std::vector<exotica::Initializer> Links = std::vector<exotica::Initiali
 Optional std::vector<exotica::Initializer> Trajectories = std::vector<exotica::Initializer>();
 Optional std::vector<exotica::Initializer> AttachLinks = std::vector<exotica::Initializer>();
 Optional std::vector<std::string> RobotLinksToExcludeFromCollisionScene = std::vector<std::string>();
+Optional std::vector<std::string> WorldLinksToExcludeFromCollisionScene = std::vector<std::string>();

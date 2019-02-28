@@ -56,34 +56,38 @@ void CollisionSceneFCLLatest::UpdateCollisionObjects(const std::map<std::string,
 {
     kinematic_elements_.clear();
     fcl_cache_.clear();
+    fcl_objects_.clear();
     fcl_objects_.reserve(objects.size());
     long i = 0;
     for (const auto& object : objects)
     {
         // Check whether object is excluded as a world collision object:
-        if (world_links_to_exclude_from_collision_scene.count(object.first) != 0)
+        if (world_links_to_exclude_from_collision_scene.count(object.first) > 0)
         {
             HIGHLIGHT_NAMED("CollisionSceneFCLLatest::UpdateCollisionObject", object.first << " is excluded, skipping.");
-            continue;
         }
+        else
+        {
+            HIGHLIGHT_NAMED("CollisionSceneFCLLatest::UpdateCollisionObject", "Creating " << object.first);
+            std::shared_ptr<fcl::CollisionObjectd> new_object;
 
-        std::shared_ptr<fcl::CollisionObjectd> new_object;
-
-        // const auto& cache_entry = fcl_cache_.find(object.first);
-        // TODO: There is currently a bug with the caching causing proxies not
-        // to update. The correct fix would be to update the user data, for now
-        // disable use of the cache.
-        // if (true)  // (cache_entry == fcl_cache_.end())
-        // {
-        new_object = ConstructFclCollisionObject(i, object.second.lock());
-        fcl_cache_[object.first] = new_object;
-        // }
-        // else
-        // {
-        //     new_object = cache_entry->second;
-        // }
-        fcl_objects_[i++] = new_object.get();
-        kinematic_elements_.emplace_back(object.second);
+            // const auto& cache_entry = fcl_cache_.find(object.first);
+            // TODO: There is currently a bug with the caching causing proxies not
+            // to update. The correct fix would be to update the user data, for now
+            // disable use of the cache.
+            // if (true)  // (cache_entry == fcl_cache_.end())
+            // {
+            new_object = ConstructFclCollisionObject(i, object.second.lock());
+            fcl_cache_[object.first] = new_object;
+            // }
+            // else
+            // {
+            //     new_object = cache_entry->second;
+            // }
+            fcl_objects_.emplace_back(new_object.get());
+            kinematic_elements_.emplace_back(object.second);
+            ++i;
+        }
     }
 }
 

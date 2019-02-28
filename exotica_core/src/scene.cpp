@@ -117,7 +117,7 @@ void Scene::Instantiate(SceneInitializer& init)
     {
         for (const auto& link : init.RobotLinksToExcludeFromCollisionScene)
         {
-            robotLinksToExcludeFromCollisionScene_.insert(link);
+            robot_links_to_exclude_from_collision_scene_.insert(link);
             if (debug_) HIGHLIGHT_NAMED("RobotLinksToExcludeFromCollisionScene", link);
         }
     }
@@ -625,13 +625,13 @@ void Scene::UpdateSceneFrames()
         ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
     int lastControlledJointId = -1;
     std::string lastControlledLinkName;
-    modelLink_to_collisionLink_map_.clear();
-    modelLink_to_collisionElement_map_.clear();
-    controlledLink_to_collisionLink_map_.clear();
+    model_link_to_collision_link_map_.clear();
+    model_link_to_collision_element_map_.clear();
+    controlled_link_to_collision_link_map_.clear();
     for (int i = 0; i < links.size(); ++i)
     {
         // Check whether link is excluded from collision checking
-        if (robotLinksToExcludeFromCollisionScene_.find(links[i]->getName()) != robotLinksToExcludeFromCollisionScene_.end())
+        if (robot_links_to_exclude_from_collision_scene_.find(links[i]->getName()) != robot_links_to_exclude_from_collision_scene_.end())
         {
             continue;
         }
@@ -666,14 +666,14 @@ void Scene::UpdateSceneFrames()
             Eigen::Isometry3d trans = obj_transform.inverse(Eigen::Isometry) * collisionBodyTransform;
 
             std::shared_ptr<KinematicElement> element = kinematica_.AddElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
-            modelLink_to_collisionElement_map_[links[i]->getName()].push_back(element);
+            model_link_to_collision_element_map_[links[i]->getName()].push_back(element);
 
             // Set up mappings
-            modelLink_to_collisionLink_map_[links[i]->getName()].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
+            model_link_to_collision_link_map_[links[i]->getName()].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
 
             if (lastControlledLinkName != "")
             {
-                controlledLink_to_collisionLink_map_[lastControlledLinkName].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
+                controlled_link_to_collision_link_map_[lastControlledLinkName].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
             }
         }
     }

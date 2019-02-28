@@ -154,13 +154,13 @@ public:
     bool AlwaysUpdatesCollisionScene() { return force_collision_; }
     /// @brief Returns a map between a model link name and the names of associated collision links.
     /// @return Map between model links and all associated collision links.
-    std::map<std::string, std::vector<std::string>> GetModelLinkToCollisionLinkMap() { return modelLink_to_collisionLink_map_; };
+    std::map<std::string, std::vector<std::string>> GetModelLinkToCollisionLinkMap() { return model_link_to_collision_link_map_; };
     /// @brief Returns a map between a model link name and the KinematicElement of associated collision links.
     /// @return Map between model links and all the KinematicElements of the associated collision links.
-    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> GetModelLinkToCollisionElementMap() { return modelLink_to_collisionElement_map_; };
+    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> GetModelLinkToCollisionElementMap() { return model_link_to_collision_element_map_; };
     /// @brief Returns a map between controlled robot link names and associated collision link names. Here we consider all fixed links between controlled links as belonging to the previous controlled link (as if the collision links had been fused).
     /// @return Map between controlled links and associated collision links.
-    std::map<std::string, std::vector<std::string>> GetControlledLinkToCollisionLinkMap() { return controlledLink_to_collisionLink_map_; };
+    std::map<std::string, std::vector<std::string>> GetControlledLinkToCollisionLinkMap() { return controlled_link_to_collision_link_map_; };
 private:
     void UpdateInternalFrames(bool update_request = true);
 
@@ -203,14 +203,14 @@ private:
     bool force_collision_;
 
     /// \brief Mapping between model link names and collision links.
-    std::map<std::string, std::vector<std::string>> modelLink_to_collisionLink_map_;
-    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> modelLink_to_collisionElement_map_;
+    std::map<std::string, std::vector<std::string>> model_link_to_collision_link_map_;
+    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> model_link_to_collision_element_map_;
 
     /// \brief Mapping between controlled link name and collision links
-    std::map<std::string, std::vector<std::string>> controlledLink_to_collisionLink_map_;
+    std::map<std::string, std::vector<std::string>> controlled_link_to_collision_link_map_;
 
     /// \brief List of robot links to be excluded from the collision scene
-    std::set<std::string> robotLinksToExcludeFromCollisionScene_;
+    std::set<std::string> robot_links_to_exclude_from_collision_scene_;
 
     /// \brief List of world links to be excluded from the collision scene
     std::set<std::string> world_links_to_exclude_from_collision_scene_;

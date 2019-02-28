@@ -60,6 +60,9 @@ void CollisionSceneFCLLatest::UpdateCollisionObjects(const std::map<std::string,
     long i = 0;
     for (const auto& object : objects)
     {
+        // Check whether object is excluded as a world collision object:
+        if (world_links_to_exclude_from_collision_scene.count(object.first) != 0) continue;
+
         std::shared_ptr<fcl::CollisionObjectd> new_object;
 
         // const auto& cache_entry = fcl_cache_.find(object.first);

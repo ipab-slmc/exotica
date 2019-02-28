@@ -54,14 +54,18 @@ void CollisionSceneFCLLatest::Setup()
 
 void CollisionSceneFCLLatest::UpdateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects)
 {
-    kinematic_elements_ = MapToVec(objects);
+    kinematic_elements_.clear();
     fcl_cache_.clear();
-    fcl_objects_.resize(objects.size());
+    fcl_objects_.reserve(objects.size());
     long i = 0;
     for (const auto& object : objects)
     {
         // Check whether object is excluded as a world collision object:
-        if (world_links_to_exclude_from_collision_scene.count(object.first) != 0) continue;
+        if (world_links_to_exclude_from_collision_scene.count(object.first) != 0)
+        {
+            HIGHLIGHT_NAMED("CollisionSceneFCLLatest::UpdateCollisionObject", object.first << " is excluded, skipping.");
+            continue;
+        }
 
         std::shared_ptr<fcl::CollisionObjectd> new_object;
 
@@ -79,6 +83,7 @@ void CollisionSceneFCLLatest::UpdateCollisionObjects(const std::map<std::string,
         //     new_object = cache_entry->second;
         // }
         fcl_objects_[i++] = new_object.get();
+        kinematic_elements_.emplace_back(object.second);
     }
 }
 

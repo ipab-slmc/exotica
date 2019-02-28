@@ -591,25 +591,21 @@ void Scene::UpdateSceneFrames()
             obj_transform.linear() = object.second->shape_poses_[0].rotation();
             kinematica_.AddEnvironmentElement(object.first, obj_transform);
 
-            // Only add collision objects if not excluded
-            if (world_links_to_exclude_from_collision_scene_.find(object.first) == world_links_to_exclude_from_collision_scene_.end())
+            for (int i = 0; i < object.second->shape_poses_.size(); ++i)
             {
-                for (int i = 0; i < object.second->shape_poses_.size(); ++i)
+                Eigen::Isometry3d shape_transform;
+                shape_transform.translation() = object.second->shape_poses_[i].translation();
+                shape_transform.linear() = object.second->shape_poses_[i].rotation();
+                Eigen::Isometry3d trans = obj_transform.inverse() * shape_transform;
+                if (ps_->hasObjectColor(object.first))
                 {
-                    Eigen::Isometry3d shape_transform;
-                    shape_transform.translation() = object.second->shape_poses_[i].translation();
-                    shape_transform.linear() = object.second->shape_poses_[i].rotation();
-                    Eigen::Isometry3d trans = obj_transform.inverse() * shape_transform;
-                    if (ps_->hasObjectColor(object.first))
-                    {
-                        auto color_msg = ps_->getObjectColor(object.first);
-                        Eigen::Vector4d color = Eigen::Vector4d(color_msg.r, color_msg.g, color_msg.b, color_msg.a);
-                        kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i], KDL::RigidBodyInertia::Zero(), color);
-                    }
-                    else
-                    {
-                        kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i]);
-                    }
+                    auto color_msg = ps_->getObjectColor(object.first);
+                    Eigen::Vector4d color = Eigen::Vector4d(color_msg.r, color_msg.g, color_msg.b, color_msg.a);
+                    kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i], KDL::RigidBodyInertia::Zero(), color);
+                }
+                else
+                {
+                    kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i]);
                 }
             }
         }

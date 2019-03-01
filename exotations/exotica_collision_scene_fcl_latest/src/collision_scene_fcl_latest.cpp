@@ -64,11 +64,11 @@ void CollisionSceneFCLLatest::UpdateCollisionObjects(const std::map<std::string,
         // Check whether object is excluded as a world collision object:
         if (world_links_to_exclude_from_collision_scene.count(object.first) > 0)
         {
-            HIGHLIGHT_NAMED("CollisionSceneFCLLatest::UpdateCollisionObject", object.first << " is excluded, skipping.");
+            if (debug_) HIGHLIGHT_NAMED("CollisionSceneFCLLatest::UpdateCollisionObject", object.first << " is excluded, skipping.");
         }
         else
         {
-            HIGHLIGHT_NAMED("CollisionSceneFCLLatest::UpdateCollisionObject", "Creating " << object.first);
+            if (debug_) HIGHLIGHT_NAMED("CollisionSceneFCLLatest::UpdateCollisionObject", "Creating " << object.first);
             std::shared_ptr<fcl::CollisionObjectd> new_object;
 
             // const auto& cache_entry = fcl_cache_.find(object.first);

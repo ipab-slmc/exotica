@@ -65,51 +65,7 @@ void AICOSolver::Instantiate(AICOSolverInitializer& init)
     use_bwd_msg_ = init.UseBackwardMessage;
 }
 
-AICOSolver::AICOSolver()
-    : damping(0.01),
-      minimum_step_tolerance_(1e-5),
-      step_tolerance_(1e-5),
-      function_tolerance_(1e-5),
-      max_backtrack_iterations_(10),
-      use_bwd_msg_(false),
-      bwd_msg_v_(),
-      bwd_msg_Vinv_(),
-      s(),
-      Sinv(),
-      v(),
-      Vinv(),
-      r(),
-      R(),
-      rhat(),
-      b(),
-      Binv(),
-      q(),
-      qhat(),
-      s_old(),
-      Sinv_old(),
-      v_old(),
-      Vinv_old(),
-      r_old(),
-      R_old(),
-      rhat_old(),
-      b_old(),
-      Binv_old(),
-      q_old(),
-      qhat_old(),
-      damping_reference_(),
-      cost_(0.0),
-      cost_old_(0.0),
-      cost_prev_(std::numeric_limits<double>::max()),
-      b_step_(0.0),
-      Winv(),
-      sweep_(0),
-      sweep_mode_(0),
-      W(),
-      update_count_(0),
-      damping_init_(0.0),
-      q_stat_()
-{
-}
+AICOSolver::AICOSolver() = default;
 
 AICOSolver::~AICOSolver() = default;
 
@@ -283,18 +239,7 @@ void AICOSolver::InitMessages()
     R.assign(prob_->GetT(), Eigen::MatrixXd::Zero(prob_->N, prob_->N));
     rhat = Eigen::VectorXd::Zero(prob_->GetT());
     qhat.assign(prob_->GetT(), Eigen::VectorXd::Zero(prob_->N));
-    {
-        q = b;
-        if (prob_->W.rows() != prob_->N)
-        {
-            ThrowNamed(prob_->W.rows() << "!=" << prob_->N);
-        }
-    }
-    {
-        // Set constant W,Win,H,Hinv
-        W = prob_->W;
-        Winv = W.inverse();
-    }
+    q = b;
 
     cost_control_.resize(prob_->GetT());
     cost_control_.setZero();
@@ -338,6 +283,16 @@ void AICOSolver::InitTrajectory(const std::vector<Eigen::VectorXd>& q_init)
         // Compute task message reference
         UpdateTaskMessage(t, b[t], 0.0);
     }
+
+    // W is still writable, check dimension
+    if (prob_->W.rows() != prob_->N)
+    {
+        ThrowNamed(prob_->W.rows() << "!=" << prob_->N);
+    }
+
+    // Set constant W,Win,H,Hinv
+    W = prob_->W;
+    Winv = W.inverse();
 
     cost_ = EvaluateTrajectory(b, true);  // The problem will be updated via UpdateTaskMessage, i.e. do not update on this roll-out
     cost_prev_ = cost_;

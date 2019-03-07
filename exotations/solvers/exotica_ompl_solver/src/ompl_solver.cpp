@@ -240,10 +240,13 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
     PreSolve();
     ompl::time::point start = ompl::time::now();
     ompl::base::PlannerTerminationCondition ptc = ompl::base::timedPlannerTerminationCondition(init_.Timeout - ompl::time::seconds(ompl::time::now() - start));
+
+    Timer t;
     if (ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION && ompl_simple_setup_->haveSolutionPath())
     {
         GetPath(solution, ptc);
     }
+    planning_time_ = t.GetDuration();
     PostSolve();
 }
 

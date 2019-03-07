@@ -72,18 +72,18 @@ protected:
     void InitTrajectory(const Eigen::VectorXd& q_init);
 
 private:
-    UnconstrainedEndPoseProblemPtr prob_;  //!< Shared pointer to the planning problem.
-    double damping;                        //!< Damping
-    double damping_init_;                  //!< Damping
-    double minimum_step_tolerance_;        //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
-    double step_tolerance_;                //!< Relative step tolerance (termination criterion)
-    double function_tolerance_;            //!< Relative function tolerance/first-order optimality criterion
-    int max_backtrack_iterations_;         //!< Max. number of sweeps without improvement before terminating (= line-search)
-    bool use_bwd_msg_;                     //!< Flag for using backward message initialisation
-    Eigen::VectorXd bwd_msg_v_;            //!< Backward message initialisation mean
-    Eigen::MatrixXd bwd_msg_Vinv_;         //!< Backward message initialisation covariance
-    bool sweep_improved_cost_;             //!< Whether the last sweep improved the cost (for backtrack iterations count)
-    int iteration_count_;                  //!< Iteration counter
+    UnconstrainedEndPoseProblemPtr prob_;   //!< Shared pointer to the planning problem.
+    double damping = 0.01;                  //!< Damping
+    double damping_init_ = 100.0;           //!< Damping
+    double minimum_step_tolerance_ = 1e-5;  //!< Update tolerance to stop update of messages if change of maximum coefficient is less than this tolerance.
+    double step_tolerance_ = 1e-5;          //!< Relative step tolerance (termination criterion)
+    double function_tolerance_ = 1e-5;      //!< Relative function tolerance/first-order optimality criterion
+    int max_backtrack_iterations_ = 10;     //!< Max. number of sweeps without improvement before terminating (= line-search)
+    bool use_bwd_msg_ = false;              //!< Flag for using backward message initialisation
+    Eigen::VectorXd bwd_msg_v_;             //!< Backward message initialisation mean
+    Eigen::MatrixXd bwd_msg_Vinv_;          //!< Backward message initialisation covariance
+    bool sweep_improved_cost_;              //!< Whether the last sweep improved the cost (for backtrack iterations count)
+    int iteration_count_;                   //!< Iteration counter
 
     Eigen::VectorXd s;     //!< Forward message mean
     Eigen::MatrixXd Sinv;  //!< Forward message covariance inverse
@@ -109,17 +109,17 @@ private:
     Eigen::VectorXd q_old;     //!< Configuration space trajectory (last most optimal value)
     Eigen::VectorXd qhat_old;  //!< Point of linearisation (last most optimal value)
 
-    Eigen::VectorXd damping_reference_;  //!< Damping reference point
-    double cost_;                        //!< cost of MAP trajectory
-    double cost_old_;                    //!< cost of MAP trajectory (last most optimal value)
-    double cost_prev_;                   //!< previous iteration cost
-    double b_step_;                      //!< Squared configuration space step
+    Eigen::VectorXd damping_reference_;                      //!< Damping reference point
+    double cost_ = 0.0;                                      //!< cost of MAP trajectory
+    double cost_old_ = std::numeric_limits<double>::max();   //!< cost of MAP trajectory (last most optimal value)
+    double cost_prev_ = std::numeric_limits<double>::max();  //!< previous iteration cost
+    double b_step_ = 0.0;                                    //!< Squared configuration space step
     double b_step_old_;
 
     Eigen::MatrixXd W;     //!< Configuration space weight matrix inverse
     Eigen::MatrixXd Winv;  //!< Configuration space weight matrix inverse
 
-    int sweep_;  //!< Sweeps so far
+    int sweep_ = 0;  //!< Sweeps so far
     int best_sweep_ = 0;
     int best_sweep_old_ = 0;
     enum SweepMode
@@ -129,8 +129,8 @@ private:
         LOCAL_GAUSS_NEWTON,
         LOCAL_GAUSS_NEWTON_DAMPED
     };
-    int sweep_mode_;  //!< Sweep mode
-    int update_count_;
+    int sweep_mode_ = 0;  //!< Sweep mode
+    int update_count_ = 0;
 
     /// \brief Updates the forward message
     /// Updates the mean and covariance of the forward message using:

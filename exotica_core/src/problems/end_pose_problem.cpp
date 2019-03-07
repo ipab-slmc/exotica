@@ -382,9 +382,9 @@ bool EndPoseProblem::IsValid()
     // Check equality constraints
     if (GetEquality().rows() > 0)
     {
-        if (GetEquality().norm() > parameters.EqualityFeasibilityTolerance)
+        if (GetEquality().cwiseAbs().maxCoeff() > parameters.EqualityFeasibilityTolerance)
         {
-            if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::IsValid", "Violated equality constraints: " << GetEquality().norm());
+            if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::IsValid", "Violated equality constraints: " << GetEquality().cwiseAbs().maxCoeff());
             succeeded = false;
         }
     }

@@ -109,16 +109,26 @@ void Scene::Instantiate(SceneInitializer& init)
     for (const exotica::Initializer& linkInit : init.Links)
     {
         LinkInitializer link(linkInit);
-        AddObject(link.Name, GetFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), false);
+        AddObject(link.Name, GetFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), Eigen::Vector4d::Zero(), false);
     }
 
-    // Check list of links to exclude from CollisionScene
+    // Check list of robot links to exclude from CollisionScene
     if (init.RobotLinksToExcludeFromCollisionScene.size() > 0)
     {
         for (const auto& link : init.RobotLinksToExcludeFromCollisionScene)
         {
-            robotLinksToExcludeFromCollisionScene_.insert(link);
+            robot_links_to_exclude_from_collision_scene_.insert(link);
             if (debug_) HIGHLIGHT_NAMED("RobotLinksToExcludeFromCollisionScene", link);
+        }
+    }
+
+    // Check list of world links to exclude from CollisionScene
+    if (init.WorldLinksToExcludeFromCollisionScene.size() > 0)
+    {
+        for (const auto& link : init.WorldLinksToExcludeFromCollisionScene)
+        {
+            world_links_to_exclude_from_collision_scene_.insert(link);
+            if (debug_) HIGHLIGHT_NAMED("WorldLinksToExcludeFromCollisionScene", link);
         }
     }
 
@@ -132,6 +142,7 @@ void Scene::Instantiate(SceneInitializer& init)
     collision_scene_->SetWorldLinkScale(init.WorldLinkScale);
     collision_scene_->SetRobotLinkScale(init.RobotLinkScale);
     collision_scene_->replace_cylinders_with_capsules = init.ReplaceCylindersWithCapsules;
+    collision_scene_->world_links_to_exclude_from_collision_scene = world_links_to_exclude_from_collision_scene_;
     UpdateSceneFrames();
     UpdateInternalFrames(false);
 
@@ -611,13 +622,13 @@ void Scene::UpdateSceneFrames()
         ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
     int lastControlledJointId = -1;
     std::string lastControlledLinkName;
-    modelLink_to_collisionLink_map_.clear();
-    modelLink_to_collisionElement_map_.clear();
-    controlledLink_to_collisionLink_map_.clear();
+    model_link_to_collision_link_map_.clear();
+    model_link_to_collision_element_map_.clear();
+    controlled_link_to_collision_link_map_.clear();
     for (int i = 0; i < links.size(); ++i)
     {
         // Check whether link is excluded from collision checking
-        if (robotLinksToExcludeFromCollisionScene_.find(links[i]->getName()) != robotLinksToExcludeFromCollisionScene_.end())
+        if (robot_links_to_exclude_from_collision_scene_.find(links[i]->getName()) != robot_links_to_exclude_from_collision_scene_.end())
         {
             continue;
         }
@@ -652,14 +663,14 @@ void Scene::UpdateSceneFrames()
             Eigen::Isometry3d trans = obj_transform.inverse(Eigen::Isometry) * collisionBodyTransform;
 
             std::shared_ptr<KinematicElement> element = kinematica_.AddElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
-            modelLink_to_collisionElement_map_[links[i]->getName()].push_back(element);
+            model_link_to_collision_element_map_[links[i]->getName()].push_back(element);
 
             // Set up mappings
-            modelLink_to_collisionLink_map_[links[i]->getName()].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
+            model_link_to_collision_link_map_[links[i]->getName()].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
 
             if (lastControlledLinkName != "")
             {
-                controlledLink_to_collisionLink_map_[lastControlledLinkName].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
+                controlled_link_to_collision_link_map_[lastControlledLinkName].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
             }
         }
     }
@@ -669,31 +680,31 @@ void Scene::UpdateSceneFrames()
     request_needs_updating_ = true;
 }
 
-void Scene::AddObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, bool update_collision_scene)
+void Scene::AddObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool update_collision_scene)
 {
     if (kinematica_.DoesLinkWithNameExist(name)) ThrowPretty("Link '" << name << "' already exists in the scene!");
     std::string parent_name = (parent == "") ? kinematica_.GetRootFrameName() : parent;
     if (!kinematica_.DoesLinkWithNameExist(parent_name)) ThrowPretty("Can't find parent '" << parent_name << "'!");
     Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
-    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape, inertia));
+    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape, inertia, color));
     if (update_collision_scene) UpdateCollisionObjects();
 }
 
-void Scene::AddObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, bool update_collision_scene)
+void Scene::AddObject(const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shape_resource_path, const Eigen::Vector3d& scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool update_collision_scene)
 {
     if (kinematica_.DoesLinkWithNameExist(name)) ThrowPretty("Link '" << name << "' already exists in the scene!");
     std::string parent_name = (parent == "") ? kinematica_.GetRootFrameName() : parent;
     if (!kinematica_.DoesLinkWithNameExist(parent_name)) ThrowPretty("Can't find parent '" << parent_name << "'!");
     Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
-    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape_resource_path, scale, inertia));
+    custom_links_.push_back(kinematica_.AddElement(name, pose, parent_name, shape_resource_path, scale, inertia, color));
     UpdateSceneFrames();
     UpdateInternalFrames();
     if (update_collision_scene) UpdateCollisionObjects();
 }
 
-void Scene::AddObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const Eigen::Vector4d& colour, const bool& update_collision_scene)
+void Scene::AddObjectToEnvironment(const std::string& name, const KDL::Frame& transform, shapes::ShapeConstPtr shape, const Eigen::Vector4d& color, const bool update_collision_scene)
 {
     if (kinematica_.HasModelLink(name))
     {
@@ -702,7 +713,7 @@ void Scene::AddObjectToEnvironment(const std::string& name, const KDL::Frame& tr
     Eigen::Isometry3d pose;
     tf::transformKDLToEigen(transform, pose);
     ps_->getWorldNonConst()->addToObject(name, shape, pose);
-    ps_->setObjectColor(name, GetColor(colour));
+    ps_->setObjectColor(name, GetColor(color));
     UpdateSceneFrames();
     if (update_collision_scene) UpdateInternalFrames();
 }

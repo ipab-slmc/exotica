@@ -34,10 +34,6 @@
 
 namespace exotica
 {
-Task::Task()
-{
-}
-
 void Task::Initialize(const std::vector<exotica::Initializer>& inits, PlanningProblemPtr prob, TaskSpaceVector& Phi)
 {
     for (const exotica::Initializer& init : inits)
@@ -67,10 +63,6 @@ void Task::Initialize(const std::vector<exotica::Initializer>& inits, PlanningPr
         length_jacobian += tasks[i]->length_jacobian;
     }
     Phi.SetZero(length_Phi);
-}
-
-EndPoseTask::EndPoseTask()
-{
 }
 
 void EndPoseTask::Initialize(const std::vector<exotica::Initializer>& inits, PlanningProblemPtr prob, TaskSpaceVector& unused)
@@ -156,8 +148,56 @@ void EndPoseTask::Update(const TaskSpaceVector& big_Phi)
     ydiff = Phi - y;
 }
 
-TimeIndexedTask::TimeIndexedTask()
+void EndPoseTask::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
+    for (int i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            if (goal.rows() != indexing[i].length) ThrowPretty("Expected length of " << indexing[i].length << " and got " << goal.rows());
+            y.data.segment(indexing[i].start, indexing[i].length) = goal;
+            return;
+        }
+    }
+    ThrowPretty("Cannot set Goal. Task Map '" << task_name << "' does not exist.");
+}
+
+void EndPoseTask::SetRho(const std::string& task_name, const double rho_in)
+{
+    for (int i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            rho(indexing[i].id) = rho_in;
+            UpdateS();
+            return;
+        }
+    }
+    ThrowPretty("Cannot set rho. Task Map '" << task_name << "' does not exist.");
+}
+
+Eigen::VectorXd EndPoseTask::GetGoal(const std::string& task_name) const
+{
+    for (int i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            return y.data.segment(indexing[i].start, indexing[i].length);
+        }
+    }
+    ThrowPretty("Cannot get Goal. Task Map '" << task_name << "' does not exist.");
+}
+
+double EndPoseTask::GetRho(const std::string& task_name) const
+{
+    for (int i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            return rho(indexing[i].id);
+        }
+    }
+    ThrowPretty("Cannot get rho. Task Map '" << task_name << "' does not exist.");
 }
 
 void TimeIndexedTask::Initialize(const std::vector<exotica::Initializer>& inits, PlanningProblemPtr prob, TaskSpaceVector& Phi)
@@ -209,6 +249,74 @@ void TimeIndexedTask::Update(const TaskSpaceVector& big_Phi, int t)
         Phi[t].data.segment(task.start, task.length) = big_Phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
     }
     ydiff[t] = Phi[t] - y[t];
+}
+
+inline void TimeIndexedTask::ValidateTimeIndex(int& t_in) const
+{
+    if (t_in >= T || t_in < -1)
+    {
+        ThrowPretty("Requested t=" << t_in << " out of range, needs to be 0 =< t < " << T);
+    }
+    else if (t_in == -1)
+    {
+        t_in = (T - 1);
+    }
+}
+
+void TimeIndexedTask::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
+{
+    ValidateTimeIndex(t);
+    for (int i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            if (goal.rows() != indexing[i].length) ThrowPretty("Expected length of " << indexing[i].length << " and got " << goal.rows());
+            y[t].data.segment(indexing[i].start, indexing[i].length) = goal;
+            return;
+        }
+    }
+    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+}
+
+Eigen::VectorXd TimeIndexedTask::GetGoal(const std::string& task_name, int t) const
+{
+    ValidateTimeIndex(t);
+    for (int i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            return y[t].data.segment(indexing[i].start, indexing[i].length);
+        }
+    }
+    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+}
+
+void TimeIndexedTask::SetRho(const std::string& task_name, const double rho_in, int t)
+{
+    ValidateTimeIndex(t);
+    for (int i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            rho[t](indexing[i].id) = rho_in;
+            UpdateS();
+            return;
+        }
+    }
+    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
+}
+
+double TimeIndexedTask::GetRho(const std::string& task_name, int t) const
+{
+    ValidateTimeIndex(t);
+    for (int i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            return rho[t](indexing[i].id);
+        }
+    }
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
 void TimeIndexedTask::ReinitializeVariables(int _T, PlanningProblemPtr _prob, const TaskSpaceVector& _Phi)
@@ -278,10 +386,6 @@ void TimeIndexedTask::ReinitializeVariables(int _T, PlanningProblemPtr _prob, co
     }
 }
 
-SamplingTask::SamplingTask()
-{
-}
-
 void SamplingTask::Initialize(const std::vector<exotica::Initializer>& inits, PlanningProblemPtr prob, TaskSpaceVector& unused)
 {
     Task::Initialize(inits, prob, Phi);
@@ -344,4 +448,4 @@ void SamplingTask::Update(const TaskSpaceVector& big_Phi)
     for (unsigned int i = 0; i < ydiff.size(); ++i)
         if (std::abs(ydiff[i]) < tolerance) ydiff[i] = 0.0;
 }
-}
+}  // namespace exotica

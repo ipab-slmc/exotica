@@ -556,170 +556,65 @@ std::vector<Eigen::Triplet<double>> TimeIndexedProblem::GetJointVelocityConstrai
 
 void TimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < cost.indexing.size(); ++i)
-    {
-        if (cost.tasks[i]->GetObjectName() == task_name)
-        {
-            if (goal.rows() != cost.indexing[i].length) ThrowPretty("Expected length of " << cost.indexing[i].length << " and got " << goal.rows());
-            cost.y[t].data.segment(cost.indexing[i].start, cost.indexing[i].length) = goal;
-            return;
-        }
-    }
-    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    cost.SetGoal(task_name, goal, t);
 }
 
 void TimeIndexedProblem::SetRho(const std::string& task_name, const double rho, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < cost.indexing.size(); ++i)
-    {
-        if (cost.tasks[i]->GetObjectName() == task_name)
-        {
-            cost.rho[t](cost.indexing[i].id) = rho;
-            PreUpdate();
-            return;
-        }
-    }
-    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
+    cost.SetRho(task_name, rho, t);
+    PreUpdate();
 }
 
 Eigen::VectorXd TimeIndexedProblem::GetGoal(const std::string& task_name, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < cost.indexing.size(); ++i)
-    {
-        if (cost.tasks[i]->GetObjectName() == task_name)
-        {
-            return cost.y[t].data.segment(cost.indexing[i].start, cost.indexing[i].length);
-        }
-    }
-    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    return cost.GetGoal(task_name, t);
 }
 
 double TimeIndexedProblem::GetRho(const std::string& task_name, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < cost.indexing.size(); ++i)
-    {
-        if (cost.tasks[i]->GetObjectName() == task_name)
-        {
-            return cost.rho[t](cost.indexing[i].id);
-        }
-    }
-    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
+    return cost.GetRho(task_name, t);
 }
 
 void TimeIndexedProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < equality.indexing.size(); ++i)
-    {
-        if (equality.tasks[i]->GetObjectName() == task_name)
-        {
-            if (goal.rows() != equality.indexing[i].length) ThrowPretty("Expected length of " << equality.indexing[i].length << " and got " << goal.rows());
-            equality.y[t].data.segment(equality.indexing[i].start, equality.indexing[i].length) = goal;
-            return;
-        }
-    }
-    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    equality.SetGoal(task_name, goal, t);
 }
 
 void TimeIndexedProblem::SetRhoEQ(const std::string& task_name, const double rho, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < equality.indexing.size(); ++i)
-    {
-        if (equality.tasks[i]->GetObjectName() == task_name)
-        {
-            equality.rho[t](equality.indexing[i].id) = rho;
-            PreUpdate();
-            return;
-        }
-    }
-    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
+    equality.SetRho(task_name, rho, t);
+    PreUpdate();
 }
 
 Eigen::VectorXd TimeIndexedProblem::GetGoalEQ(const std::string& task_name, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < equality.indexing.size(); ++i)
-    {
-        if (equality.tasks[i]->GetObjectName() == task_name)
-        {
-            return equality.y[t].data.segment(equality.indexing[i].start, equality.indexing[i].length);
-        }
-    }
-    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    return equality.GetGoal(task_name, t);
 }
 
 double TimeIndexedProblem::GetRhoEQ(const std::string& task_name, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < equality.indexing.size(); ++i)
-    {
-        if (equality.tasks[i]->GetObjectName() == task_name)
-        {
-            return equality.rho[t](equality.indexing[i].id);
-        }
-    }
-    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
+    return equality.GetRho(task_name, t);
 }
 
 void TimeIndexedProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < inequality.indexing.size(); ++i)
-    {
-        if (inequality.tasks[i]->GetObjectName() == task_name)
-        {
-            if (goal.rows() != inequality.indexing[i].length) ThrowPretty("Expected length of " << inequality.indexing[i].length << " and got " << goal.rows());
-            inequality.y[t].data.segment(inequality.indexing[i].start, inequality.indexing[i].length) = goal;
-            return;
-        }
-    }
-    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
+    inequality.SetGoal(task_name, goal, t);
 }
 
 void TimeIndexedProblem::SetRhoNEQ(const std::string& task_name, const double rho, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < inequality.indexing.size(); ++i)
-    {
-        if (inequality.tasks[i]->GetObjectName() == task_name)
-        {
-            inequality.rho[t](inequality.indexing[i].id) = rho;
-            PreUpdate();
-            return;
-        }
-    }
-    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
+    inequality.SetRho(task_name, rho, t);
+    PreUpdate();
 }
 
 Eigen::VectorXd TimeIndexedProblem::GetGoalNEQ(const std::string& task_name, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < inequality.indexing.size(); ++i)
-    {
-        if (inequality.tasks[i]->GetObjectName() == task_name)
-        {
-            return inequality.y[t].data.segment(inequality.indexing[i].start, inequality.indexing[i].length);
-        }
-    }
-    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
+    return inequality.GetGoal(task_name, t);
 }
 
 double TimeIndexedProblem::GetRhoNEQ(const std::string& task_name, int t)
 {
-    ValidateTimeIndex(t);
-    for (int i = 0; i < inequality.indexing.size(); ++i)
-    {
-        if (inequality.tasks[i]->GetObjectName() == task_name)
-        {
-            return inequality.rho[t](inequality.indexing[i].id);
-        }
-    }
-    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
+    return inequality.GetRho(task_name, t);
 }
 
 bool TimeIndexedProblem::IsValid()

@@ -243,12 +243,12 @@ void TimeIndexedProblem::SetInitialTrajectory(const std::vector<Eigen::VectorXd>
     SetStartState(q_init_in[0]);
 }
 
-const std::vector<Eigen::VectorXd> TimeIndexedProblem::GetInitialTrajectory() const
+std::vector<Eigen::VectorXd> TimeIndexedProblem::GetInitialTrajectory() const
 {
     return initial_trajectory_;
 }
 
-const double TimeIndexedProblem::GetDuration() const
+double TimeIndexedProblem::GetDuration() const
 {
     return tau_ * static_cast<double>(T_);
 }

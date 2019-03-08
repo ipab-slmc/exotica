@@ -53,10 +53,6 @@ public:
     // Checks bound constraints
     bool IsValid() override;
 
-private:
-    void ReinitializeVariables() override;
-    BoundedTimeIndexedProblemInitializer init_;
-
     // Delete general constraints
     void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0) = delete;
     Eigen::VectorXd GetGoalEQ(const std::string& task_name, int t = 0) = delete;
@@ -84,6 +80,10 @@ private:
     std::vector<Eigen::Triplet<double>> GetJointVelocityConstraintJacobianTriplets() const = delete;
     Eigen::VectorXd GetJointVelocityLimits() const = delete;
     void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in) = delete;
+
+private:
+    void ReinitializeVariables() override;
+    BoundedTimeIndexedProblemInitializer init_;
 };
 typedef std::shared_ptr<exotica::BoundedTimeIndexedProblem> BoundedTimeIndexedProblemPtr;
 }

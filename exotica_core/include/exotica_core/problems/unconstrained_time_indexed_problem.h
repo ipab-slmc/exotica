@@ -56,10 +56,6 @@ public:
     // As this is an unconstrained problem, it is always valid.
     bool IsValid() override;
 
-private:
-    void ReinitializeVariables() override;
-    UnconstrainedTimeIndexedProblemInitializer init_;
-
     // Delete bound constraints
     Eigen::MatrixXd GetBounds() const = delete;
 
@@ -90,6 +86,10 @@ private:
     std::vector<Eigen::Triplet<double>> GetJointVelocityConstraintJacobianTriplets() const = delete;
     Eigen::VectorXd GetJointVelocityLimits() const = delete;
     void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in) = delete;
+
+private:
+    void ReinitializeVariables() override;
+    UnconstrainedTimeIndexedProblemInitializer init_;
 };
 typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblemPtr;
 }

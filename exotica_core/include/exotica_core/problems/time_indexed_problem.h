@@ -226,7 +226,6 @@ public:
     /// \brief Sets the joint velocity limits. Supports N- and 1-dimensional vectors.
     void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in);
 
-    double ct;                   //!< Normalisation of scalar cost and Jacobian over trajectory length
     TimeIndexedTask cost;        //!< Cost task
     TimeIndexedTask inequality;  //!< General inequality task
     TimeIndexedTask equality;    //!< General equality task
@@ -244,8 +243,8 @@ public:
     int num_tasks;
     bool use_bounds;
 
-private:
-    void ReinitializeVariables();
+protected:
+    virtual void ReinitializeVariables();
 
     /// \brief Checks the desired time index for bounds and supports -1 indexing.
     inline void ValidateTimeIndex(int& t_in) const;
@@ -256,19 +255,22 @@ private:
     std::vector<Eigen::VectorXd> x;      ///< Current internal problem state
     std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
 
-    Eigen::VectorXd q_dot_max_;  //!< Joint velocity limit (rad/s)
-    Eigen::VectorXd xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
-
     double w_scale_ = 1.0;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
-
-    std::vector<Eigen::VectorXd> initial_trajectory_;
-    TimeIndexedProblemInitializer init_;
-
-    std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
 
     TaskSpaceVector cost_Phi;
     TaskSpaceVector inequality_Phi;
     TaskSpaceVector equality_Phi;
+
+    std::vector<Eigen::VectorXd> initial_trajectory_;
+    std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
+
+    double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
+
+private:
+    Eigen::VectorXd q_dot_max_;  //!< Joint velocity limit (rad/s)
+    Eigen::VectorXd xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
+
+    TimeIndexedProblemInitializer init_;
 
     // The first element in the pair is the timestep (t) and the second element is the task.id (id).
     std::vector<std::pair<int, int>> active_nonlinear_equality_constraints_;

@@ -44,34 +44,112 @@ class TimeIndexedProblem : public PlanningProblem, public Instantiable<TimeIndex
 public:
     TimeIndexedProblem();
     virtual ~TimeIndexedProblem();
+
+    /// \brief Instantiates the problem from an Initializer
     void Instantiate(TimeIndexedProblemInitializer& init) override;
+
+    /// \brief Returns the duration of the trajectory (T * tau).
     double GetDuration() const;
+
+    /// \brief Updates the entire problem from a given trajectory (e.g., used in an optimization solver)
+    /// \param x_trajectory_in      Trajectory flattened as a vector; expects dimension: (T - 1) * N
     void Update(Eigen::VectorXdRefConst x_trajectory_in);
+
+    /// \brief Updates an individual timestep from a given state vector
+    /// \param x_in     State
+    /// \param t        Timestep to update
     void Update(Eigen::VectorXdRefConst x_in, int t);
+
+    /// \brief Evaluates whether the problem is valid, i.e., all bound and general constraints are satisfied.
     bool IsValid() override;
+
+    /// \brief Returns the initial trajectory/seed
     std::vector<Eigen::VectorXd> GetInitialTrajectory() const;
+
+    /// \brief Sets the initial trajectory/seed
+    /// \param q_init_in    Vector of states. Expects T states of dimension N.
     void SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
+
+    /// \brief Updates internal variables before solving, e.g., after setting new values for Rho.
     void PreUpdate() override;
+
+    /// \brief Sets goal for a given task at a given timestep (cost task).
+    /// \param task_name    Name of task
+    /// \param goal         Goal
+    /// \param t            Timestep
     void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
-    void SetRho(const std::string& task_name, const double rho, int t = 0);
+
+    /// \brief Returns the goal for a given task at a given timestep (cost task).
+    /// \param task_name    Name of task
+    /// \param t            Timestep
     Eigen::VectorXd GetGoal(const std::string& task_name, int t = 0);
+
+    /// \brief Sets Rho for a given task at a given timestep (cost task).
+    /// \param task_name    Name of task
+    /// \param rho          Rho (scaling/precision)
+    /// \param t            Timestep
+    void SetRho(const std::string& task_name, const double rho, int t = 0);
+
+    /// \brief Returns the precision (Rho) for a given task at a given timestep (cost task).
+    /// \param task_name    Name of task
+    /// \param t            Timestep
     double GetRho(const std::string& task_name, int t = 0);
+
+    /// \brief Sets goal for a given task at a given timestep (equality task).
+    /// \param task_name    Name of task
+    /// \param goal         Goal
+    /// \param t            Timestep
     void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
-    void SetRhoEQ(const std::string& task_name, const double rho, int t = 0);
+
+    /// \brief Returns the goal for a given task at a given timestep (equality task).
+    /// \param task_name    Name of task
+    /// \param t            Timestep
     Eigen::VectorXd GetGoalEQ(const std::string& task_name, int t = 0);
+
+    /// \brief Sets Rho for a given task at a given timestep (equality task).
+    /// \param task_name    Name of task
+    /// \param rho          Rho (scaling/precision)
+    /// \param t            Timestep
+    void SetRhoEQ(const std::string& task_name, const double rho, int t = 0);
+
+    /// \brief Returns the precision (Rho) for a given task at a given timestep (equality task).
+    /// \param task_name    Name of task
+    /// \param t            Timestep
     double GetRhoEQ(const std::string& task_name, int t = 0);
+
+    /// \brief Sets goal for a given task at a given timestep (inequality task).
+    /// \param task_name    Name of task
+    /// \param goal         Goal
+    /// \param t            Timestep
     void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
-    void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0);
+
+    /// \brief Returns the goal for a given task at a given timestep (goal task).
+    /// \param task_name    Name of task
+    /// \param t            Timestep
     Eigen::VectorXd GetGoalNEQ(const std::string& task_name, int t = 0);
+
+    /// \brief Sets Rho for a given task at a given timestep (inequality task).
+    /// \param task_name    Name of task
+    /// \param rho          Rho (scaling/precision)
+    /// \param t            Timestep
+    void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0);
+
+    /// \brief Returns the precision (Rho) for a given task at a given timestep (equality task).
+    /// \param task_name    Name of task
+    /// \param t            Timestep
     double GetRhoNEQ(const std::string& task_name, int t = 0);
 
     /// \brief Returns the joint bounds (first column lower, second column upper).
     Eigen::MatrixXd GetBounds() const;
 
+    /// \brief Returns the number of timesteps in the trajectory.
     int GetT() const { return T_; }
+    /// \brief Sets the number of timesteps in the trajectory. Note: Rho/Goal need to be updated for every timestep after calling this method.
     void SetT(const int T_in);
 
+    /// \brief Returns the time discretization tau for the trajectory.
     double GetTau() const { return tau_; }
+    /// \brief Sets the time discretization tau for the trajectory.
     void SetTau(const double tau_in);
 
     /// \brief Returns the scalar task cost at timestep t

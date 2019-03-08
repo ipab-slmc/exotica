@@ -741,7 +741,6 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_time_indexed_problem.def("get_scalar_transition_cost", &UnconstrainedTimeIndexedProblem::GetScalarTransitionCost);
     unconstrained_time_indexed_problem.def("get_scalar_transition_jacobian", &UnconstrainedTimeIndexedProblem::GetScalarTransitionJacobian);
     unconstrained_time_indexed_problem.def_readonly("cost", &UnconstrainedTimeIndexedProblem::cost);
-    unconstrained_time_indexed_problem.def_property_readonly("kinematic_solutions", &UnconstrainedTimeIndexedProblem::GetKinematicSolutions);
 
     py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> time_indexed_problem(prob, "TimeIndexedProblem");
     time_indexed_problem.def("get_duration", &TimeIndexedProblem::GetDuration);

@@ -34,33 +34,13 @@ REGISTER_PROBLEM_TYPE("UnconstrainedTimeIndexedProblem", exotica::UnconstrainedT
 
 namespace exotica
 {
-UnconstrainedTimeIndexedProblem::UnconstrainedTimeIndexedProblem()
-    : T_(0), tau_(0), w_scale_(0)
-{
-    flags_ = KIN_FK | KIN_J;
-}
-
-UnconstrainedTimeIndexedProblem::~UnconstrainedTimeIndexedProblem() = default;
-
 void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProblemInitializer& init)
 {
     init_ = init;
 
-    w_scale_ = init_.Wrate;
-
-    num_tasks = tasks_.size();
-    length_Phi = 0;
-    length_jacobian = 0;
-    for (int i = 0; i < num_tasks; ++i)
-    {
-        AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
-        length_Phi += tasks_[i]->length;
-        length_jacobian += tasks_[i]->length_jacobian;
-    }
-    y_ref_.SetZero(length_Phi);
-
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
+    w_scale_ = init_.Wrate;
     W = Eigen::MatrixXd::Identity(N, N) * w_scale_;
     if (init_.W.rows() > 0)
     {
@@ -87,10 +67,23 @@ void UnconstrainedTimeIndexedProblem::ReinitializeVariables()
 
     SetTau(init_.tau);
 
+    num_tasks = tasks_.size();
+    length_Phi = 0;
+    length_jacobian = 0;
+    TaskSpaceVector y_ref_;
+    for (int i = 0; i < num_tasks; ++i)
+    {
+        AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
+        length_Phi += tasks_[i]->length;
+        length_jacobian += tasks_[i]->length_jacobian;
+    }
+
+    y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
-    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
+
     x.assign(T_, Eigen::VectorXd::Zero(N));
     xdiff.assign(T_, Eigen::VectorXd::Zero(N));
+    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
     if (flags_ & KIN_J_DOT)
     {
         Hessian Htmp;
@@ -105,23 +98,6 @@ void UnconstrainedTimeIndexedProblem::ReinitializeVariables()
     PreUpdate();
 }
 
-void UnconstrainedTimeIndexedProblem::SetT(const int& T_in)
-{
-    if (T_in <= 2)
-    {
-        ThrowNamed("Invalid number of timesteps: " << T_in);
-    }
-    T_ = T_in;
-    ReinitializeVariables();
-}
-
-void UnconstrainedTimeIndexedProblem::SetTau(const double& tau_in)
-{
-    if (tau_in <= 0.) ThrowPretty("tau_ is expected to be greater than 0. (tau_=" << tau_in << ")");
-    tau_ = tau_in;
-    ct = 1.0 / tau_ / T_;
-}
-
 void UnconstrainedTimeIndexedProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
@@ -133,42 +109,12 @@ void UnconstrainedTimeIndexedProblem::PreUpdate()
     // updates etc.
     kinematic_solutions_.clear();
     kinematic_solutions_.resize(T_);
-    for (unsigned int i = 0; i < T_; ++i) kinematic_solutions_[i] = std::make_shared<KinematicResponse>(*scene_->GetKinematicTree().GetKinematicResponse());
-}
-
-void UnconstrainedTimeIndexedProblem::SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
-{
-    if (q_init_in.size() != T_)
-        ThrowPretty("Expected initial trajectory of length "
-                    << T_ << " but got " << q_init_in.size());
-    if (q_init_in[0].rows() != N)
-        ThrowPretty("Expected states to have " << N << " rows but got "
-                                               << q_init_in[0].rows());
-
-    initial_trajectory_ = q_init_in;
-    SetStartState(q_init_in[0]);
-}
-
-std::vector<Eigen::VectorXd> UnconstrainedTimeIndexedProblem::GetInitialTrajectory()
-{
-    return initial_trajectory_;
-}
-
-double UnconstrainedTimeIndexedProblem::GetDuration()
-{
-    return tau_ * static_cast<double>(T_);
+    for (int i = 0; i < T_; ++i) kinematic_solutions_[i] = std::make_shared<KinematicResponse>(*scene_->GetKinematicTree().GetKinematicResponse());
 }
 
 void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
 
     x[t] = x_in;
 
@@ -231,143 +177,8 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
     ++number_of_problem_updates_;
 }
 
-double UnconstrainedTimeIndexedProblem::GetScalarTaskCost(int t)
+bool UnconstrainedTimeIndexedProblem::IsValid()
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-    return ct * cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];
+    return true;
 }
-
-Eigen::VectorXd UnconstrainedTimeIndexedProblem::GetScalarTaskJacobian(int t)
-{
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-    return cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0 * ct;
-}
-
-double UnconstrainedTimeIndexedProblem::GetScalarTransitionCost(int t)
-{
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-    else if (t == 0)
-    {
-        return 0;
-    }
-    return ct * xdiff[t].transpose() * W * xdiff[t];
-}
-
-Eigen::VectorXd UnconstrainedTimeIndexedProblem::GetScalarTransitionJacobian(int t)
-{
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-    return 2.0 * ct * W * xdiff[t];
-}
-
-void UnconstrainedTimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
-{
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-    for (int i = 0; i < cost.indexing.size(); ++i)
-    {
-        if (cost.tasks[i]->GetObjectName() == task_name)
-        {
-            if (goal.rows() != cost.indexing[i].length) ThrowPretty("Expected length of " << cost.indexing[i].length << " and got " << goal.rows());
-            cost.y[t].data.segment(cost.indexing[i].start, cost.indexing[i].length) = goal;
-            return;
-        }
-    }
-    ThrowPretty("Cannot set Goal. Task map '" << task_name << "' does not exist.");
-}
-
-void UnconstrainedTimeIndexedProblem::SetRho(const std::string& task_name, const double rho, int t)
-{
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-    for (int i = 0; i < cost.indexing.size(); ++i)
-    {
-        if (cost.tasks[i]->GetObjectName() == task_name)
-        {
-            cost.rho[t](cost.indexing[i].id) = rho;
-            PreUpdate();
-            return;
-        }
-    }
-    ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
-}
-
-Eigen::VectorXd UnconstrainedTimeIndexedProblem::GetGoal(const std::string& task_name, int t)
-{
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-    for (int i = 0; i < cost.indexing.size(); ++i)
-    {
-        if (cost.tasks[i]->GetObjectName() == task_name)
-        {
-            return cost.y[t].data.segment(cost.indexing[i].start, cost.indexing[i].length);
-        }
-    }
-    ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
-}
-
-double UnconstrainedTimeIndexedProblem::GetRho(const std::string& task_name, int t)
-{
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-    for (int i = 0; i < cost.indexing.size(); ++i)
-    {
-        if (cost.tasks[i]->GetObjectName() == task_name)
-        {
-            return cost.rho[t](cost.indexing[i].id);
-        }
-    }
-    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
-}
-}
+}  // namespace exotica

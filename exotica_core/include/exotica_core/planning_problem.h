@@ -83,6 +83,7 @@ public:
     void ResetCostEvolution(unsigned int size);
     void SetCostEvolution(int index, double value);
     KinematicRequestFlags GetFlags() { return flags_; }
+    /// \brief Evaluates whether the problem is valid.
     virtual bool IsValid() { ThrowNamed("Not implemented"); };
     int N;
     double t_start;

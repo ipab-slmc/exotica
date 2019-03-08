@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2019, University of Edinburgh
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,70 +30,61 @@
 #ifndef EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H_
 #define EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H_
 
-#include <exotica_core/planning_problem.h>
-#include <exotica_core/tasks.h>
-
 #include <exotica_core/bounded_time_indexed_problem_initializer.h>
+#include <exotica_core/problems/abstract_time_indexed_problem.h>
 
 namespace exotica
 {
 /// \brief Bound constrained time-indexed problem.
-class BoundedTimeIndexedProblem : public PlanningProblem, public Instantiable<BoundedTimeIndexedProblemInitializer>
+class BoundedTimeIndexedProblem : public AbstractTimeIndexedProblem<BoundedTimeIndexedProblemInitializer>
 {
 public:
-    BoundedTimeIndexedProblem();
-    virtual ~BoundedTimeIndexedProblem();
-    virtual void Instantiate(BoundedTimeIndexedProblemInitializer& init);
-    double GetDuration();
-    void Update(Eigen::VectorXdRefConst x, int t);
-    std::vector<Eigen::VectorXd> GetInitialTrajectory();
-    void SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in);
+    /// \brief Instantiates the problem from an Initializer
+    void Instantiate(BoundedTimeIndexedProblemInitializer& init) override;
+
+    /// \brief Updates internal variables before solving, e.g., after setting new values for Rho.
     void PreUpdate() override;
-    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
-    void SetRho(const std::string& task_name, const double rho, int t = 0);
-    Eigen::VectorXd GetGoal(const std::string& task_name, int t = 0);
-    double GetRho(const std::string& task_name, int t = 0);
-    Eigen::MatrixXd GetBounds() const;
 
-    int GetT() const { return T_; }
-    void SetT(const int& T_in);
+    /// \brief Updates an individual timestep from a given state vector
+    /// \param x_in     State
+    /// \param t        Timestep to update
+    void Update(Eigen::VectorXdRefConst x, int t) override;
 
-    double GetTau() const { return tau_; }
-    void SetTau(const double& tau_in);
-
-    double GetScalarTaskCost(int t);
-    Eigen::VectorXd GetScalarTaskJacobian(int t);
-    double GetScalarTransitionCost(int t);
-    Eigen::VectorXd GetScalarTransitionJacobian(int t);
-
-    double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
-
-    TimeIndexedTask cost;
-    TaskSpaceVector cost_Phi;
-
-    double w_scale_;  //!< Kinematic system transition error covariance multiplier (constant throughout the trajectory)
-    Eigen::MatrixXd W;
-
-    std::vector<TaskSpaceVector> Phi;
-    std::vector<Eigen::MatrixXd> jacobian;
-    std::vector<Hessian> hessian;
-
-    std::vector<Eigen::VectorXd> x;      // current internal problem state
-    std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
-
-    int length_Phi;
-    int length_jacobian;
-    int num_tasks;
+    // Checks bound constraints
+    bool IsValid() override;
 
 private:
-    int T_;       //!< Number of time steps
-    double tau_;  //!< Time step duration
+    void ReinitializeVariables() override;
+    BoundedTimeIndexedProblemInitializer init_;
 
-    std::vector<Eigen::VectorXd> initial_trajectory_;
-    BoundedTimeIndexedProblemInitializer parameters;
-    void ReinitializeVariables();
+    // Delete general constraints
+    void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0) = delete;
+    Eigen::VectorXd GetGoalEQ(const std::string& task_name, int t = 0) = delete;
+    void SetRhoEQ(const std::string& task_name, const double rho, int t = 0) = delete;
+    double GetRhoEQ(const std::string& task_name, int t = 0) = delete;
+    void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0) = delete;
+    Eigen::VectorXd GetGoalNEQ(const std::string& task_name, int t = 0) = delete;
+    void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0) = delete;
+    double GetRhoNEQ(const std::string& task_name, int t = 0) = delete;
+    Eigen::VectorXd GetEquality() const = delete;
+    Eigen::VectorXd GetInequality() const = delete;
+    Eigen::SparseMatrix<double> GetEqualityJacobian() const = delete;
+    Eigen::SparseMatrix<double> GetInequalityJacobian() const = delete;
+    std::vector<Eigen::Triplet<double>> GetEqualityJacobianTriplets() const = delete;
+    int get_active_nonlinear_equality_constraints_dimension() const = delete;
+    Eigen::VectorXd GetEquality(int t) const = delete;
+    Eigen::MatrixXd GetEqualityJacobian(int t) const = delete;
+    Eigen::VectorXd GetInequality(int t) const = delete;
+    Eigen::MatrixXd GetInequalityJacobian(int t) const = delete;
+    std::vector<Eigen::Triplet<double>> GetInequalityJacobianTriplets() const = delete;
+    int get_active_nonlinear_inequality_constraints_dimension() const = delete;
+    int get_joint_velocity_constraint_dimension() const = delete;
+    Eigen::VectorXd GetJointVelocityConstraint() const = delete;
+    Eigen::MatrixXd GetJointVelocityConstraintBounds() const = delete;
+    std::vector<Eigen::Triplet<double>> GetJointVelocityConstraintJacobianTriplets() const = delete;
+    Eigen::VectorXd GetJointVelocityLimits() const = delete;
+    void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in) = delete;
 };
-
 typedef std::shared_ptr<exotica::BoundedTimeIndexedProblem> BoundedTimeIndexedProblemPtr;
 }
 

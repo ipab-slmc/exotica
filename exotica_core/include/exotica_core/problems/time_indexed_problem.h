@@ -143,12 +143,14 @@ public:
     Eigen::MatrixXd GetBounds() const;
 
     /// \brief Returns the number of timesteps in the trajectory.
-    int GetT() const { return T_; }
+    int GetT() const;
+
     /// \brief Sets the number of timesteps in the trajectory. Note: Rho/Goal need to be updated for every timestep after calling this method.
     void SetT(const int T_in);
 
     /// \brief Returns the time discretization tau for the trajectory.
-    double GetTau() const { return tau_; }
+    double GetTau() const;
+
     /// \brief Sets the time discretization tau for the trajectory.
     void SetTau(const double tau_in);
 
@@ -186,7 +188,8 @@ public:
     std::vector<Eigen::Triplet<double>> GetEqualityJacobianTriplets() const;
 
     /// \brief Returns the dimension of the active equality constraints.
-    int get_active_nonlinear_equality_constraints_dimension() const { return active_nonlinear_equality_constraints_dimension_; }
+    int get_active_nonlinear_equality_constraints_dimension() const;
+
     /// \brief Returns the value of the equality constraints at timestep t.
     Eigen::VectorXd GetEquality(int t) const;
 
@@ -203,9 +206,11 @@ public:
     std::vector<Eigen::Triplet<double>> GetInequalityJacobianTriplets() const;
 
     /// \brief Returns the dimension of the active inequality constraints.
-    int get_active_nonlinear_inequality_constraints_dimension() const { return active_nonlinear_inequality_constraints_dimension_; }
+    int get_active_nonlinear_inequality_constraints_dimension() const;
+
     /// \brief Returns the dimension of the joint velocity constraint (linear inequality).
-    int get_joint_velocity_constraint_dimension() const { return joint_velocity_constraint_dimension_; }
+    int get_joint_velocity_constraint_dimension() const;
+
     /// \brief Returns the joint velocity constraint inequality terms (linear).
     Eigen::VectorXd GetJointVelocityConstraint() const;
 
@@ -216,45 +221,24 @@ public:
     std::vector<Eigen::Triplet<double>> GetJointVelocityConstraintJacobianTriplets() const;
 
     /// \brief Returns the per-DoF joint velocity limit vector.
-    Eigen::VectorXd GetJointVelocityLimits() const { return q_dot_max_; }
+    Eigen::VectorXd GetJointVelocityLimits() const;
+
     /// \brief Sets the joint velocity limits. Supports N- and 1-dimensional vectors.
-    void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in)
-    {
-        if (qdot_max_in.size() == N)
-        {
-            q_dot_max_ = qdot_max_in;
-        }
-        else if (qdot_max_in.size() == 1)
-        {
-            q_dot_max_ = qdot_max_in(0) * Eigen::VectorXd::Ones(N);
-        }
-        else
-        {
-            ThrowPretty("Received size " << qdot_max_in.size() << " but expected 1 or " << N);
-        }
-        xdiff_max_ = q_dot_max_ * tau_;
-    }
+    void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in);
 
-    /// \brief Returns the maximum diff between two timesteps for each dimension in the configuration vector x.
-    Eigen::VectorXd GetXdiffMax() const { return xdiff_max_; }
-    double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
-    TimeIndexedTask cost;
-    TimeIndexedTask inequality;
-    TimeIndexedTask equality;
-
-    TaskSpaceVector cost_Phi;
-    TaskSpaceVector inequality_Phi;
-    TaskSpaceVector equality_Phi;
+    double ct;                   //!< Normalisation of scalar cost and Jacobian over trajectory length
+    TimeIndexedTask cost;        //!< Cost task
+    TimeIndexedTask inequality;  //!< General inequality task
+    TimeIndexedTask equality;    //!< General equality task
 
     Eigen::MatrixXd W;  // TODO(wxm): Make private and add getter and setter (#209)
 
+    // TODO: Make private and add getter (no need to be public!)
     std::vector<TaskSpaceVector> Phi;
     std::vector<Eigen::MatrixXd> jacobian;
     std::vector<Hessian> hessian;
 
-    std::vector<Eigen::VectorXd> x;      ///< Current internal problem state
-    std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
-
+    // TODO: Make private and add getter/setter
     int length_Phi;
     int length_jacobian;
     int num_tasks;
@@ -269,6 +253,9 @@ private:
     int T_ = 0;       //!< Number of time steps
     double tau_ = 0;  //!< Time step duration
 
+    std::vector<Eigen::VectorXd> x;      ///< Current internal problem state
+    std::vector<Eigen::VectorXd> xdiff;  // equivalent to dx = x(t)-x(t-1)
+
     Eigen::VectorXd q_dot_max_;  //!< Joint velocity limit (rad/s)
     Eigen::VectorXd xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
 
@@ -278,6 +265,10 @@ private:
     TimeIndexedProblemInitializer init_;
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
+
+    TaskSpaceVector cost_Phi;
+    TaskSpaceVector inequality_Phi;
+    TaskSpaceVector equality_Phi;
 
     // The first element in the pair is the timestep (t) and the second element is the task.id (id).
     std::vector<std::pair<int, int>> active_nonlinear_equality_constraints_;

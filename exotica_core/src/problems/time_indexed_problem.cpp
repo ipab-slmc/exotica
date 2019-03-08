@@ -170,6 +170,11 @@ void TimeIndexedProblem::ReinitializeVariables()
     PreUpdate();
 }
 
+int TimeIndexedProblem::GetT() const
+{
+    return T_;
+}
+
 void TimeIndexedProblem::SetT(const int T_in)
 {
     if (T_in <= 2)
@@ -178,6 +183,11 @@ void TimeIndexedProblem::SetT(const int T_in)
     }
     T_ = T_in;
     ReinitializeVariables();
+}
+
+double TimeIndexedProblem::GetTau() const
+{
+    return tau_;
 }
 
 void TimeIndexedProblem::SetTau(const double tau_in)
@@ -377,6 +387,16 @@ Eigen::VectorXd TimeIndexedProblem::GetScalarTransitionJacobian(int t) const
     return 2.0 * ct * W * xdiff[t];
 }
 
+int TimeIndexedProblem::get_active_nonlinear_equality_constraints_dimension() const
+{
+    return active_nonlinear_equality_constraints_dimension_;
+}
+
+int TimeIndexedProblem::get_active_nonlinear_inequality_constraints_dimension() const
+{
+    return active_nonlinear_inequality_constraints_dimension_;
+}
+
 Eigen::VectorXd TimeIndexedProblem::GetEquality() const
 {
     Eigen::VectorXd eq = Eigen::VectorXd::Zero(active_nonlinear_equality_constraints_dimension_);
@@ -513,6 +533,33 @@ Eigen::MatrixXd TimeIndexedProblem::GetInequalityJacobian(int t) const
 {
     ValidateTimeIndex(t);
     return inequality.S[t] * inequality.jacobian[t];
+}
+
+int TimeIndexedProblem::get_joint_velocity_constraint_dimension() const
+{
+    return joint_velocity_constraint_dimension_;
+}
+
+Eigen::VectorXd TimeIndexedProblem::GetJointVelocityLimits() const
+{
+    return q_dot_max_;
+}
+
+void TimeIndexedProblem::SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in)
+{
+    if (qdot_max_in.size() == N)
+    {
+        q_dot_max_ = qdot_max_in;
+    }
+    else if (qdot_max_in.size() == 1)
+    {
+        q_dot_max_ = qdot_max_in(0) * Eigen::VectorXd::Ones(N);
+    }
+    else
+    {
+        ThrowPretty("Received size " << qdot_max_in.size() << " but expected 1 or " << N);
+    }
+    xdiff_max_ = q_dot_max_ * tau_;
 }
 
 Eigen::VectorXd TimeIndexedProblem::GetJointVelocityConstraint() const

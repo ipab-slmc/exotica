@@ -144,7 +144,7 @@ void Visualization::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory)
     traj_msg.trajectory[0].joint_trajectory.points.resize(num_trajectory_points);
     traj_msg.trajectory[0].joint_trajectory.joint_names.resize(num_actuated_joints_without_base);
     for (int i = 0; i < num_actuated_joints_without_base; ++i)
-        traj_msg.trajectory[0].joint_trajectory.joint_names[i] = scene_->GetKinematicTree().GetJointNames()[base_offset + i];
+        traj_msg.trajectory[0].joint_trajectory.joint_names[i] = scene_->GetKinematicTree().GetControlledJointNames()[base_offset + i];
 
     // Insert actuated joints without base
     for (int i = 0; i < num_trajectory_points; ++i)

@@ -72,7 +72,7 @@ void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
     }
     else if (x.rows() == scene_->GetKinematicTree().GetNumControlledJoints())
     {
-        std::vector<std::string> jointNames = scene_->GetJointNames();
+        std::vector<std::string> jointNames = scene_->GetControlledJointNames();
         std::vector<std::string> modelNames = scene_->GetModelJointNames();
         for (int i = 0; i < jointNames.size(); ++i)
         {

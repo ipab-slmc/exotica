@@ -405,14 +405,14 @@ exotica::KinematicTree& Scene::GetKinematicTree()
     return kinematica_;
 }
 
-void Scene::GetJointNames(std::vector<std::string>& joints)
+void Scene::GetControlledJointNames(std::vector<std::string>& joints)
 {
-    joints = kinematica_.GetJointNames();
+    joints = kinematica_.GetControlledJointNames();
 }
 
-std::vector<std::string> Scene::GetJointNames()
+std::vector<std::string> Scene::GetControlledJointNames()
 {
-    return kinematica_.GetJointNames();
+    return kinematica_.GetControlledJointNames();
 }
 
 std::vector<std::string> Scene::GetControlledLinkNames()

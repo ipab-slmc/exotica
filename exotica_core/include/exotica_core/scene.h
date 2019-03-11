@@ -76,8 +76,8 @@ public:
     std::string GetRootJointName();
     moveit_msgs::PlanningScene GetPlanningSceneMsg();
     exotica::KinematicTree& GetKinematicTree();
-    void GetJointNames(std::vector<std::string>& joints);
-    std::vector<std::string> GetJointNames();
+    void GetControlledJointNames(std::vector<std::string>& joints);
+    std::vector<std::string> GetControlledJointNames();
     std::vector<std::string> GetModelJointNames();
     std::vector<std::string> GetControlledLinkNames();
     std::vector<std::string> GetModelLinkNames();

@@ -30,33 +30,23 @@
 #include <exotica_core/problems/abstract_time_indexed_problem.h>
 #include <exotica_core/setup.h>
 
-#include <exotica_core/bounded_time_indexed_problem_initializer.h>
-#include <exotica_core/time_indexed_problem_initializer.h>
-#include <exotica_core/unconstrained_time_indexed_problem_initializer.h>
-
 namespace exotica
 {
-template <typename InitializerType>
-AbstractTimeIndexedProblem<InitializerType>::AbstractTimeIndexedProblem()
+AbstractTimeIndexedProblem::AbstractTimeIndexedProblem()
 {
     flags_ = KIN_FK | KIN_J;
 }
 
-template <typename InitializerType>
-AbstractTimeIndexedProblem<InitializerType>::~AbstractTimeIndexedProblem() = default;
+AbstractTimeIndexedProblem::~AbstractTimeIndexedProblem() = default;
 
-template <typename InitializerType>
-Eigen::MatrixXd AbstractTimeIndexedProblem<InitializerType>::GetBounds() const
+Eigen::MatrixXd AbstractTimeIndexedProblem::GetBounds() const
 {
     return scene_->GetKinematicTree().GetJointLimits();
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::ReinitializeVariables()
+void AbstractTimeIndexedProblem::ReinitializeVariables()
 {
     if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem", "Initialize problem with T=" << T_);
-
-    SetTau(init_.tau);
 
     num_tasks = tasks_.size();
     length_Phi = 0;
@@ -111,31 +101,20 @@ void AbstractTimeIndexedProblem<InitializerType>::ReinitializeVariables()
         }
     }
 
+    // Updates related to tau
+    ct = 1.0 / tau_ / T_;
+    xdiff_max_ = q_dot_max_ * tau_;
+
     // Pre-update
     PreUpdate();
 }
 
-template <typename InitializerType>
-inline void AbstractTimeIndexedProblem<InitializerType>::ValidateTimeIndex(int& t_in) const
-{
-    if (t_in >= T_ || t_in < -1)
-    {
-        ThrowPretty("Requested t=" << t_in << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t_in == -1)
-    {
-        t_in = (T_ - 1);
-    }
-}
-
-template <typename InitializerType>
-int AbstractTimeIndexedProblem<InitializerType>::GetT() const
+int AbstractTimeIndexedProblem::GetT() const
 {
     return T_;
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetT(const int T_in)
+void AbstractTimeIndexedProblem::SetT(const int T_in)
 {
     if (T_in <= 2)
     {
@@ -145,23 +124,19 @@ void AbstractTimeIndexedProblem<InitializerType>::SetT(const int T_in)
     ReinitializeVariables();
 }
 
-template <typename InitializerType>
-double AbstractTimeIndexedProblem<InitializerType>::GetTau() const
+double AbstractTimeIndexedProblem::GetTau() const
 {
     return tau_;
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetTau(const double tau_in)
+void AbstractTimeIndexedProblem::SetTau(const double tau_in)
 {
     if (tau_in <= 0.) ThrowPretty("tau_ is expected to be greater than 0. (tau_=" << tau_in << ")");
     tau_ = tau_in;
-    ct = 1.0 / tau_ / T_;
-    xdiff_max_ = q_dot_max_ * tau_;
+    ReinitializeVariables();
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::PreUpdate()
+void AbstractTimeIndexedProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
     for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
@@ -203,8 +178,7 @@ void AbstractTimeIndexedProblem<InitializerType>::PreUpdate()
     for (int i = 0; i < T_; ++i) kinematic_solutions_[i] = std::make_shared<KinematicResponse>(*scene_->GetKinematicTree().GetKinematicResponse());
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
+void AbstractTimeIndexedProblem::SetInitialTrajectory(const std::vector<Eigen::VectorXd>& q_init_in)
 {
     if (q_init_in.size() != T_)
         ThrowPretty("Expected initial trajectory of length "
@@ -217,20 +191,17 @@ void AbstractTimeIndexedProblem<InitializerType>::SetInitialTrajectory(const std
     SetStartState(q_init_in[0]);
 }
 
-template <typename InitializerType>
-std::vector<Eigen::VectorXd> AbstractTimeIndexedProblem<InitializerType>::GetInitialTrajectory() const
+std::vector<Eigen::VectorXd> AbstractTimeIndexedProblem::GetInitialTrajectory() const
 {
     return initial_trajectory_;
 }
 
-template <typename InitializerType>
-double AbstractTimeIndexedProblem<InitializerType>::GetDuration() const
+double AbstractTimeIndexedProblem::GetDuration() const
 {
     return tau_ * static_cast<double>(T_);
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::Update(Eigen::VectorXdRefConst x_trajectory_in)
+void AbstractTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_trajectory_in)
 {
     if (x_trajectory_in.size() != (T_ - 1) * N)
         ThrowPretty("To update using the trajectory Update method, please use a trajectory of size N x (T-1) (" << N * (T_ - 1) << "), given: " << x_trajectory_in.size());
@@ -241,8 +212,7 @@ void AbstractTimeIndexedProblem<InitializerType>::Update(Eigen::VectorXdRefConst
     }
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::Update(Eigen::VectorXdRefConst x_in, int t)
+void AbstractTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
 {
     ValidateTimeIndex(t);
 
@@ -310,14 +280,12 @@ void AbstractTimeIndexedProblem<InitializerType>::Update(Eigen::VectorXdRefConst
     ++number_of_problem_updates_;
 }
 
-template <typename InitializerType>
-double AbstractTimeIndexedProblem<InitializerType>::get_ct() const
+double AbstractTimeIndexedProblem::get_ct() const
 {
     return ct;
 }
 
-template <typename InitializerType>
-double AbstractTimeIndexedProblem<InitializerType>::GetCost() const
+double AbstractTimeIndexedProblem::GetCost() const
 {
     double cost = 0.0;
     for (int t = 1; t < T_; ++t)
@@ -327,8 +295,7 @@ double AbstractTimeIndexedProblem<InitializerType>::GetCost() const
     return cost;
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetCostJacobian() const
+Eigen::VectorXd AbstractTimeIndexedProblem::GetCostJacobian() const
 {
     Eigen::VectorXd jac = Eigen::VectorXd::Zero(N * (T_ - 1));
     for (int t = 1; t < T_; ++t)
@@ -339,48 +306,41 @@ Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetCostJacobian() c
     return jac;
 }
 
-template <typename InitializerType>
-double AbstractTimeIndexedProblem<InitializerType>::GetScalarTaskCost(int t) const
+double AbstractTimeIndexedProblem::GetScalarTaskCost(int t) const
 {
     ValidateTimeIndex(t);
     return ct * cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetScalarTaskJacobian(int t) const
+Eigen::VectorXd AbstractTimeIndexedProblem::GetScalarTaskJacobian(int t) const
 {
     ValidateTimeIndex(t);
     return cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0 * ct;
 }
 
-template <typename InitializerType>
-double AbstractTimeIndexedProblem<InitializerType>::GetScalarTransitionCost(int t) const
+double AbstractTimeIndexedProblem::GetScalarTransitionCost(int t) const
 {
     ValidateTimeIndex(t);
     return ct * xdiff[t].transpose() * W * xdiff[t];
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetScalarTransitionJacobian(int t) const
+Eigen::VectorXd AbstractTimeIndexedProblem::GetScalarTransitionJacobian(int t) const
 {
     ValidateTimeIndex(t);
     return 2.0 * ct * W * xdiff[t];
 }
 
-template <typename InitializerType>
-int AbstractTimeIndexedProblem<InitializerType>::get_active_nonlinear_equality_constraints_dimension() const
+int AbstractTimeIndexedProblem::get_active_nonlinear_equality_constraints_dimension() const
 {
     return active_nonlinear_equality_constraints_dimension_;
 }
 
-template <typename InitializerType>
-int AbstractTimeIndexedProblem<InitializerType>::get_active_nonlinear_inequality_constraints_dimension() const
+int AbstractTimeIndexedProblem::get_active_nonlinear_inequality_constraints_dimension() const
 {
     return active_nonlinear_inequality_constraints_dimension_;
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetEquality() const
+Eigen::VectorXd AbstractTimeIndexedProblem::GetEquality() const
 {
     Eigen::VectorXd eq = Eigen::VectorXd::Zero(active_nonlinear_equality_constraints_dimension_);
     int start = 0;
@@ -395,8 +355,7 @@ Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetEquality() const
     return eq;
 }
 
-template <typename InitializerType>
-Eigen::SparseMatrix<double> AbstractTimeIndexedProblem<InitializerType>::GetEqualityJacobian() const
+Eigen::SparseMatrix<double> AbstractTimeIndexedProblem::GetEqualityJacobian() const
 {
     Eigen::SparseMatrix<double> jac(active_nonlinear_equality_constraints_dimension_, N * (T_ - 1));
     std::vector<Eigen::Triplet<double>> triplet_list = GetEqualityJacobianTriplets();
@@ -404,8 +363,7 @@ Eigen::SparseMatrix<double> AbstractTimeIndexedProblem<InitializerType>::GetEqua
     return jac;
 }
 
-template <typename InitializerType>
-std::vector<Eigen::Triplet<double>> AbstractTimeIndexedProblem<InitializerType>::GetEqualityJacobianTriplets() const
+std::vector<Eigen::Triplet<double>> AbstractTimeIndexedProblem::GetEqualityJacobianTriplets() const
 {
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
@@ -439,22 +397,19 @@ std::vector<Eigen::Triplet<double>> AbstractTimeIndexedProblem<InitializerType>:
     return triplet_list;
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetEquality(int t) const
+Eigen::VectorXd AbstractTimeIndexedProblem::GetEquality(int t) const
 {
     ValidateTimeIndex(t);
     return equality.S[t] * equality.ydiff[t];
 }
 
-template <typename InitializerType>
-Eigen::MatrixXd AbstractTimeIndexedProblem<InitializerType>::GetEqualityJacobian(int t) const
+Eigen::MatrixXd AbstractTimeIndexedProblem::GetEqualityJacobian(int t) const
 {
     ValidateTimeIndex(t);
     return equality.S[t] * equality.jacobian[t];
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetInequality() const
+Eigen::VectorXd AbstractTimeIndexedProblem::GetInequality() const
 {
     Eigen::VectorXd neq = Eigen::VectorXd::Zero(active_nonlinear_inequality_constraints_dimension_);
     int start = 0;
@@ -469,8 +424,7 @@ Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetInequality() con
     return neq;
 }
 
-template <typename InitializerType>
-Eigen::SparseMatrix<double> AbstractTimeIndexedProblem<InitializerType>::GetInequalityJacobian() const
+Eigen::SparseMatrix<double> AbstractTimeIndexedProblem::GetInequalityJacobian() const
 {
     Eigen::SparseMatrix<double> jac(active_nonlinear_inequality_constraints_dimension_, N * (T_ - 1));
     std::vector<Eigen::Triplet<double>> triplet_list = GetInequalityJacobianTriplets();
@@ -478,8 +432,7 @@ Eigen::SparseMatrix<double> AbstractTimeIndexedProblem<InitializerType>::GetIneq
     return jac;
 }
 
-template <typename InitializerType>
-std::vector<Eigen::Triplet<double>> AbstractTimeIndexedProblem<InitializerType>::GetInequalityJacobianTriplets() const
+std::vector<Eigen::Triplet<double>> AbstractTimeIndexedProblem::GetInequalityJacobianTriplets() const
 {
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
@@ -513,34 +466,29 @@ std::vector<Eigen::Triplet<double>> AbstractTimeIndexedProblem<InitializerType>:
     return triplet_list;
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetInequality(int t) const
+Eigen::VectorXd AbstractTimeIndexedProblem::GetInequality(int t) const
 {
     ValidateTimeIndex(t);
     return inequality.S[t] * inequality.ydiff[t];
 }
 
-template <typename InitializerType>
-Eigen::MatrixXd AbstractTimeIndexedProblem<InitializerType>::GetInequalityJacobian(int t) const
+Eigen::MatrixXd AbstractTimeIndexedProblem::GetInequalityJacobian(int t) const
 {
     ValidateTimeIndex(t);
     return inequality.S[t] * inequality.jacobian[t];
 }
 
-template <typename InitializerType>
-int AbstractTimeIndexedProblem<InitializerType>::get_joint_velocity_constraint_dimension() const
+int AbstractTimeIndexedProblem::get_joint_velocity_constraint_dimension() const
 {
     return joint_velocity_constraint_dimension_;
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetJointVelocityLimits() const
+Eigen::VectorXd AbstractTimeIndexedProblem::GetJointVelocityLimits() const
 {
     return q_dot_max_;
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in)
+void AbstractTimeIndexedProblem::SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in)
 {
     if (qdot_max_in.size() == N)
     {
@@ -557,8 +505,7 @@ void AbstractTimeIndexedProblem<InitializerType>::SetJointVelocityLimits(const E
     xdiff_max_ = q_dot_max_ * tau_;
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetJointVelocityConstraint() const
+Eigen::VectorXd AbstractTimeIndexedProblem::GetJointVelocityConstraint() const
 {
     Eigen::VectorXd g(joint_velocity_constraint_dimension_);
     for (int t = 1; t < T_; ++t)
@@ -568,8 +515,7 @@ Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetJointVelocityCon
     return g;
 }
 
-template <typename InitializerType>
-Eigen::MatrixXd AbstractTimeIndexedProblem<InitializerType>::GetJointVelocityConstraintBounds() const
+Eigen::MatrixXd AbstractTimeIndexedProblem::GetJointVelocityConstraintBounds() const
 {
     Eigen::MatrixXd b(joint_velocity_constraint_dimension_, 2);
     for (int t = 1; t < T_; ++t)
@@ -592,89 +538,72 @@ Eigen::MatrixXd AbstractTimeIndexedProblem<InitializerType>::GetJointVelocityCon
     return b;
 }
 
-template <typename InitializerType>
-std::vector<Eigen::Triplet<double>> AbstractTimeIndexedProblem<InitializerType>::GetJointVelocityConstraintJacobianTriplets() const
+std::vector<Eigen::Triplet<double>> AbstractTimeIndexedProblem::GetJointVelocityConstraintJacobianTriplets() const
 {
     // The Jacobian is constant - and thus cached (in ReinitializeVariables)
     return joint_velocity_constraint_jacobian_triplets_;
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
+void AbstractTimeIndexedProblem::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
     cost.SetGoal(task_name, goal, t);
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetRho(const std::string& task_name, const double rho, int t)
+void AbstractTimeIndexedProblem::SetRho(const std::string& task_name, const double rho, int t)
 {
     cost.SetRho(task_name, rho, t);
     PreUpdate();
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetGoal(const std::string& task_name, int t)
+Eigen::VectorXd AbstractTimeIndexedProblem::GetGoal(const std::string& task_name, int t)
 {
     return cost.GetGoal(task_name, t);
 }
 
-template <typename InitializerType>
-double AbstractTimeIndexedProblem<InitializerType>::GetRho(const std::string& task_name, int t)
+double AbstractTimeIndexedProblem::GetRho(const std::string& task_name, int t)
 {
     return cost.GetRho(task_name, t);
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
+void AbstractTimeIndexedProblem::SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
     equality.SetGoal(task_name, goal, t);
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetRhoEQ(const std::string& task_name, const double rho, int t)
+void AbstractTimeIndexedProblem::SetRhoEQ(const std::string& task_name, const double rho, int t)
 {
     equality.SetRho(task_name, rho, t);
     PreUpdate();
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetGoalEQ(const std::string& task_name, int t)
+Eigen::VectorXd AbstractTimeIndexedProblem::GetGoalEQ(const std::string& task_name, int t)
 {
     return equality.GetGoal(task_name, t);
 }
 
-template <typename InitializerType>
-double AbstractTimeIndexedProblem<InitializerType>::GetRhoEQ(const std::string& task_name, int t)
+double AbstractTimeIndexedProblem::GetRhoEQ(const std::string& task_name, int t)
 {
     return equality.GetRho(task_name, t);
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
+void AbstractTimeIndexedProblem::SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
     inequality.SetGoal(task_name, goal, t);
 }
 
-template <typename InitializerType>
-void AbstractTimeIndexedProblem<InitializerType>::SetRhoNEQ(const std::string& task_name, const double rho, int t)
+void AbstractTimeIndexedProblem::SetRhoNEQ(const std::string& task_name, const double rho, int t)
 {
     inequality.SetRho(task_name, rho, t);
     PreUpdate();
 }
 
-template <typename InitializerType>
-Eigen::VectorXd AbstractTimeIndexedProblem<InitializerType>::GetGoalNEQ(const std::string& task_name, int t)
+Eigen::VectorXd AbstractTimeIndexedProblem::GetGoalNEQ(const std::string& task_name, int t)
 {
     return inequality.GetGoal(task_name, t);
 }
 
-template <typename InitializerType>
-double AbstractTimeIndexedProblem<InitializerType>::GetRhoNEQ(const std::string& task_name, int t)
+double AbstractTimeIndexedProblem::GetRhoNEQ(const std::string& task_name, int t)
 {
     return inequality.GetRho(task_name, t);
 }
-
-template class AbstractTimeIndexedProblem<TimeIndexedProblemInitializer>;
-template class AbstractTimeIndexedProblem<BoundedTimeIndexedProblemInitializer>;
-template class AbstractTimeIndexedProblem<UnconstrainedTimeIndexedProblemInitializer>;
 }  // namespace exotica

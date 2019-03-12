@@ -57,6 +57,7 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
     cost.Initialize(init_.Cost, shared_from_this(), cost_Phi);
 
     T_ = init_.T;
+    tau_ = init_.tau;
     ApplyStartState(false);
     ReinitializeVariables();
 }
@@ -64,8 +65,6 @@ void UnconstrainedTimeIndexedProblem::Instantiate(UnconstrainedTimeIndexedProble
 void UnconstrainedTimeIndexedProblem::ReinitializeVariables()
 {
     if (debug_) HIGHLIGHT_NAMED("UnconstrainedTimeIndexedProblem", "Initialize problem with T=" << T_);
-
-    SetTau(init_.tau);
 
     num_tasks = tasks_.size();
     length_Phi = 0;
@@ -95,6 +94,11 @@ void UnconstrainedTimeIndexedProblem::ReinitializeVariables()
     initial_trajectory_.resize(T_, scene_->GetControlledState());
 
     cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
+
+    // Updates related to tau
+    ct = 1.0 / tau_ / T_;
+    xdiff_max_ = q_dot_max_ * tau_;
+
     PreUpdate();
 }
 

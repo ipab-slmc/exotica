@@ -65,7 +65,7 @@ public:
     Eigen::MatrixXd get_Q(int t) const;               ///< Returns the precision matrix at time step t
     void set_Q(Eigen::MatrixXdRefConst Q_in, int t);  ///< Sets the precision matrix for time step t
 
-    int get_num_controls() const; ///< Returns size of control vector
+    int get_num_controls() const;  ///< Returns size of control vector
 
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;

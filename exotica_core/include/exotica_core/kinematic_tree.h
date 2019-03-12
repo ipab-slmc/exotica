@@ -153,7 +153,7 @@ public:
     int GetNumControlledJoints();
     int GetNumModelJoints();
     void PublishFrames();
-    std::vector<std::string> GetJointNames()
+    std::vector<std::string> GetControlledJointNames()
     {
         return controlled_joints_names_;
     }

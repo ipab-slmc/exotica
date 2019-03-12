@@ -973,7 +973,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
     scene.def("get_base_type", &Scene::GetBaseType);
     scene.def("get_group_name", &Scene::GetGroupName);
-    scene.def("get_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::GetJointNames);
+    scene.def("get_controlled_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::GetControlledJointNames);
     scene.def("get_controlled_link_names", &Scene::GetControlledLinkNames);
     scene.def("get_model_link_names", &Scene::GetModelLinkNames);
     scene.def("get_kinematic_tree", &Scene::GetKinematicTree, py::return_value_policy::reference_internal);
@@ -1105,6 +1105,14 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematic_tree.def("get_random_controlled_state", &KinematicTree::GetRandomControlledState);
     kinematic_tree.def("get_num_model_joints", &KinematicTree::GetNumModelJoints);
     kinematic_tree.def("get_num_controlled_joints", &KinematicTree::GetNumControlledJoints);
+
+    // joints and links that describe the full state of the robot
+    kinematic_tree.def("get_model_link_names", &KinematicTree::GetModelLinkNames);
+    kinematic_tree.def("get_model_joint_names", &KinematicTree::GetModelJointNames);
+
+    // subset of model joints and links that can be controlled
+    kinematic_tree.def("get_controlled_link_names", &KinematicTree::GetControlledLinkNames);
+    kinematic_tree.def("get_controlled_joint_names", &KinematicTree::GetControlledJointNames);
 
     // Joint Limits
     kinematic_tree.def("get_joint_limits", &KinematicTree::GetJointLimits);

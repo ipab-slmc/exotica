@@ -197,6 +197,11 @@ void DynamicTimeIndexedShootingProblem::set_Q(Eigen::MatrixXdRefConst Q_in, int 
     Q_[t] = Q_in;
 }
 
+int DynamicTimeIndexedShootingProblem::get_num_controls() const
+{
+    return dynamics_solver_->get_num_controls();
+}
+
 void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int t)
 {
     // We can only update t=0, ..., T-1 - the last state will be created from integrating u_{T-1} to get x_T
@@ -207,6 +212,11 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     else if (t == -1)
     {
         t = T_ - 2;
+    }
+
+    if (u_in.rows() != dynamics_solver_->get_num_controls())
+    {
+        ThrowPretty("Mismatching in size of control vector: " << u_in.rows() << " given, expected: " << dynamics_solver_->get_num_controls());
     }
 
     U_.col(t) = u_in;

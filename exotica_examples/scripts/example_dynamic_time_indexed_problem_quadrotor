@@ -18,7 +18,7 @@ print("Constant force to hover:")
 s = time()
 F_hover = 0.5 * 9.81 / 4.
 for t in xrange(problem.T - 1):
-    u_rand = F_hover * np.ones((problem.N, 1))
+    u_rand = F_hover * np.ones((problem.NU, 1))
     problem.update(u_rand, t)
     problem.get_scene().get_kinematic_tree().publish_frames()
     sleep(problem.tau)
@@ -57,7 +57,7 @@ print("Initial cost:", cost)
 # Set up simple optimization problem
 def cost_function(u):
     for t in xrange(problem.T - 1):
-        problem.update(u[problem.N * t: problem.N * t + problem.N], t)
+        problem.update(u[problem.NU * t: problem.NU * t + problem.NU], t)
     cost = 0.0
     for t in xrange(problem.T):
         cost += problem.get_state_cost(t)
@@ -70,9 +70,6 @@ u_init = problem.U.flatten()
 res = opt.minimize(cost_function, x0=problem.U.flatten(), method='COBYLA')
 e = time()
 print("Optimal solution found in", e-s)
-
-for t in xrange(problem.T - 1):
-    problem.update(res.x[problem.N * t:problem.N * t + problem.N], t)
 
 from pyexotica.publish_trajectory import publish_trajectory
 publish_trajectory(problem.X[0:6,:].T, problem.T * problem.tau, problem)

@@ -78,6 +78,7 @@ void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
     equality.Initialize(init_.Equality, shared_from_this(), equality_Phi);
 
     T_ = init_.T;
+    tau_ = init_.tau;
     SetJointVelocityLimits(init_.JointVelocityLimits);
     ApplyStartState(false);
     ReinitializeVariables();

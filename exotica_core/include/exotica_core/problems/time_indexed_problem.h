@@ -36,14 +36,20 @@
 namespace exotica
 {
 /// \brief Time-indexed problem with bound, joint velocity, and general equality/inequality constraints.
-class TimeIndexedProblem : public AbstractTimeIndexedProblem<TimeIndexedProblemInitializer>
+class TimeIndexedProblem : public AbstractTimeIndexedProblem, public Instantiable<TimeIndexedProblemInitializer>
 {
 public:
+    TimeIndexedProblem() = default;
+    ~TimeIndexedProblem() = default;
+
     /// \brief Instantiates the problem from an Initializer
     void Instantiate(TimeIndexedProblemInitializer& init) override;
 
     /// \brief Evaluates whether the problem is valid, i.e., all bound and general constraints are satisfied.
     bool IsValid() override;
+
+private:
+    TimeIndexedProblemInitializer init_;
 };
 typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblemPtr;
 }

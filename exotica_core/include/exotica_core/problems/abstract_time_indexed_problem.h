@@ -37,15 +37,11 @@
 
 namespace exotica
 {
-template <typename InitializerType>
-class AbstractTimeIndexedProblem : public PlanningProblem, public Instantiable<InitializerType>
+class AbstractTimeIndexedProblem : public PlanningProblem
 {
 public:
     AbstractTimeIndexedProblem();
     virtual ~AbstractTimeIndexedProblem();
-
-    /// \brief Instantiates the problem from an Initializer
-    virtual void Instantiate(InitializerType& init) = 0;
 
     /// \brief Updates the entire problem from a given trajectory (e.g., used in an optimization solver)
     /// \param x_trajectory_in      Trajectory flattened as a vector; expects dimension: (T - 1) * N
@@ -246,7 +242,17 @@ protected:
     virtual void ReinitializeVariables();
 
     /// \brief Checks the desired time index for bounds and supports -1 indexing.
-    inline void ValidateTimeIndex(int& t_in) const;
+    inline void ValidateTimeIndex(int& t_in) const
+    {
+        if (t_in >= T_ || t_in < -1)
+        {
+            ThrowPretty("Requested t=" << t_in << " out of range, needs to be 0 =< t < " << T_);
+        }
+        else if (t_in == -1)
+        {
+            t_in = (T_ - 1);
+        }
+    }
 
     int T_ = 0;       //!< Number of time steps
     double tau_ = 0;  //!< Time step duration
@@ -266,9 +272,7 @@ protected:
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
 
     Eigen::VectorXd q_dot_max_;  //!< Joint velocity limit (rad/s)
-    Eigen::VectorXd xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetTau().
-
-    InitializerType init_;
+    Eigen::VectorXd xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetJointVelocityLimits or ReinitializeVariables.
 
     // The first element in the pair is the timestep (t) and the second element is the task.id (id).
     std::vector<std::pair<int, int>> active_nonlinear_equality_constraints_;

@@ -36,9 +36,12 @@
 namespace exotica
 {
 /// \brief Bound constrained time-indexed problem.
-class BoundedTimeIndexedProblem : public AbstractTimeIndexedProblem<BoundedTimeIndexedProblemInitializer>
+class BoundedTimeIndexedProblem : public AbstractTimeIndexedProblem, public Instantiable<BoundedTimeIndexedProblemInitializer>
 {
 public:
+    BoundedTimeIndexedProblem() = default;
+    ~BoundedTimeIndexedProblem() = default;
+
     /// \brief Instantiates the problem from an Initializer
     void Instantiate(BoundedTimeIndexedProblemInitializer& init) override;
 
@@ -86,6 +89,6 @@ private:
     BoundedTimeIndexedProblemInitializer init_;
 };
 typedef std::shared_ptr<exotica::BoundedTimeIndexedProblem> BoundedTimeIndexedProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_BOUNDED_TIME_INDEXED_PROBLEM_H_

@@ -39,9 +39,12 @@
 namespace exotica
 {
 /// \brief Unconstrained time-indexed problem.
-class UnconstrainedTimeIndexedProblem : public AbstractTimeIndexedProblem<UnconstrainedTimeIndexedProblemInitializer>
+class UnconstrainedTimeIndexedProblem : public AbstractTimeIndexedProblem, public Instantiable<UnconstrainedTimeIndexedProblemInitializer>
 {
 public:
+    UnconstrainedTimeIndexedProblem() = default;
+    ~UnconstrainedTimeIndexedProblem() = default;
+
     /// \brief Instantiates the problem from an Initializer
     void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init) override;
 

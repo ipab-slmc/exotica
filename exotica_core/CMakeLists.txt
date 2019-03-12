@@ -82,22 +82,28 @@ add_library(${PROJECT_NAME}
   src/trajectory.cpp
   src/property.cpp
   src/kinematic_tree.cpp
+  src/dynamics_solver.cpp
   src/task_space_vector.cpp
   src/tools/exception.cpp
   src/tools/printable.cpp
   src/tools/conversions.cpp
   src/loaders/xml_loader.cpp
   src/tasks.cpp
-  src/problems/unconstrained_time_indexed_problem.cpp
-  src/problems/unconstrained_end_pose_problem.cpp
+
+  src/problems/abstract_time_indexed_problem.cpp
   src/problems/time_indexed_problem.cpp
-  src/problems/end_pose_problem.cpp
   src/problems/bounded_time_indexed_problem.cpp
+  src/problems/unconstrained_time_indexed_problem.cpp
+
+  src/problems/end_pose_problem.cpp
   src/problems/bounded_end_pose_problem.cpp
+  src/problems/unconstrained_end_pose_problem.cpp
+
   src/problems/sampling_problem.cpp
   src/problems/time_indexed_sampling_problem.cpp
+
   src/problems/dynamic_time_indexed_shooting_problem.cpp
-  src/dynamics_solver.cpp
+
   ${exotica_core_BINARY_DIR}/generated/version.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})

@@ -380,7 +380,7 @@ double AICOSolver::GetTaskCosts(int t)
             rhat[t] += prec * (-prob_->cost.ydiff[t].segment(start, len) + prob_->cost.jacobian[t].middleRows(start, len) * qhat[t]).squaredNorm();
         }
     }
-    return prob_->ct * C;
+    return prob_->get_ct() * C;
 }
 
 void AICOSolver::UpdateTimestep(int t, bool update_fwd, bool update_bwd,

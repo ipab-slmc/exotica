@@ -54,8 +54,6 @@ struct TaskIndexing
 
 struct Task
 {
-    Task();
-
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
 
     TaskMapMap task_maps;
@@ -73,13 +71,20 @@ protected:
 
 struct TimeIndexedTask : public Task
 {
-    TimeIndexedTask();
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
     void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, HessianRefConst big_hessian, int t);
     void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, int t);
     void Update(const TaskSpaceVector& big_Phi, int t);
     void ReinitializeVariables(int _T, std::shared_ptr<PlanningProblem> _prob, const TaskSpaceVector& _Phi);
+
+    inline void ValidateTimeIndex(int& t_in) const;
+
+    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t);
+    Eigen::VectorXd GetGoal(const std::string& task_name, int t) const;
+
+    void SetRho(const std::string& task_name, const double rho_in, int t);
+    double GetRho(const std::string& task_name, int t) const;
 
     std::vector<Eigen::VectorXd> rho;
     std::vector<TaskSpaceVector> y;
@@ -93,12 +98,17 @@ struct TimeIndexedTask : public Task
 
 struct EndPoseTask : public Task
 {
-    EndPoseTask();
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
     void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, HessianRefConst big_hessian);
     void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian);
     void Update(const TaskSpaceVector& big_Phi);
+
+    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd GetGoal(const std::string& task_name) const;
+
+    void SetRho(const std::string& task_name, const double rho_in);
+    double GetRho(const std::string& task_name) const;
 
     Eigen::VectorXd rho;
     TaskSpaceVector y;
@@ -111,10 +121,15 @@ struct EndPoseTask : public Task
 
 struct SamplingTask : public Task
 {
-    SamplingTask();
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
     void Update(const TaskSpaceVector& big_Phi);
+
+    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
+    Eigen::VectorXd GetGoal(const std::string& task_name) const;
+
+    void SetRho(const std::string& task_name, const double rho);
+    double GetRho(const std::string& task_name) const;
 
     Eigen::VectorXd rho;
     TaskSpaceVector y;

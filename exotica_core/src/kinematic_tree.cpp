@@ -620,20 +620,7 @@ void KinematicTree::PublishFrames()
             marker_array_msg_.markers.clear();
             for (int i = 0; i < tree_.size(); ++i)
             {
-                if (tree_[i].lock()->shape && (!tree_[i].lock()->closest_robot_link.lock() || !tree_[i].lock()->closest_robot_link.lock()->is_robot_link))
-                {
-                    visualization_msgs::Marker mrk;
-                    shapes::constructMarkerFromShape(tree_[i].lock()->shape.get(), mrk);
-                    mrk.action = visualization_msgs::Marker::ADD;
-                    mrk.frame_locked = true;
-                    mrk.id = i;
-                    mrk.ns = "CollisionObjects";
-                    mrk.color = GetColor(tree_[i].lock()->color);
-                    mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
-                    mrk.pose.orientation.w = 1.0;
-                    marker_array_msg_.markers.push_back(mrk);
-                }
-                else if (tree_[i].lock()->shape_resource_path != "")
+                if (tree_[i].lock()->shape_resource_path != "")
                 {
                     visualization_msgs::Marker mrk;
                     mrk.action = visualization_msgs::Marker::ADD;
@@ -649,6 +636,19 @@ void KinematicTree::PublishFrames()
                     mrk.scale.x = tree_[i].lock()->scale(0);
                     mrk.scale.y = tree_[i].lock()->scale(1);
                     mrk.scale.z = tree_[i].lock()->scale(2);
+                    marker_array_msg_.markers.push_back(mrk);
+                }
+                else if (tree_[i].lock()->shape && (!tree_[i].lock()->closest_robot_link.lock() || !tree_[i].lock()->closest_robot_link.lock()->is_robot_link))
+                {
+                    visualization_msgs::Marker mrk;
+                    shapes::constructMarkerFromShape(tree_[i].lock()->shape.get(), mrk);
+                    mrk.action = visualization_msgs::Marker::ADD;
+                    mrk.frame_locked = true;
+                    mrk.id = i;
+                    mrk.ns = "CollisionObjects";
+                    mrk.color = GetColor(tree_[i].lock()->color);
+                    mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
+                    mrk.pose.orientation.w = 1.0;
                     marker_array_msg_.markers.push_back(mrk);
                 }
             }

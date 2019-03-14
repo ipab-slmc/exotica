@@ -547,7 +547,7 @@ void Scene::UpdateInternalFrames(bool update_request)
         tf::transformKDLToEigen(it->segment.getFrameToTip(), pose);
         std::string shape_resource_path = it->shape_resource_path;
         Eigen::Vector3d scale = it->scale;
-        it = kinematica_.AddElement(it->segment.getName(), pose, it->parent_name, it->shape, it->segment.getInertia(), Eigen::Vector4d::Zero(), it->is_controlled);
+        it = kinematica_.AddElement(it->segment.getName(), pose, it->parent_name, it->shape, it->segment.getInertia(), it->color, it->is_controlled);
         it->shape_resource_path = shape_resource_path;
         it->scale = scale;
     }

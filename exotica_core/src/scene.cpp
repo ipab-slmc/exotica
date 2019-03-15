@@ -552,9 +552,9 @@ void Scene::UpdateInternalFrames(bool update_request)
         it->scale = scale;
     }
 
-    auto trajCopy = trajectory_generators_;
+    auto trajectory_generators_copy = trajectory_generators_;
     trajectory_generators_.clear();
-    for (auto& traj : trajCopy)
+    for (auto& traj : trajectory_generators_copy)
     {
         AddTrajectory(traj.first, traj.second.second);
     }

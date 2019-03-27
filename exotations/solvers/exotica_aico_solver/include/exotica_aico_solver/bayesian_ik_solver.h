@@ -132,6 +132,8 @@ private:
     int sweep_mode_ = 0;  //!< Sweep mode
     int update_count_ = 0;
 
+    bool verbose_ = false;
+
     /// \brief Updates the forward message
     /// Updates the mean and covariance of the forward message using:
     /// \f$ \mu_{x_{t-1}\rightarrow x_t}(x)=\mathcal{N}(x_t|s_t,S_t) \f$

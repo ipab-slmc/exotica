@@ -42,8 +42,10 @@ namespace exotica
 class UnconstrainedTimeIndexedProblem : public AbstractTimeIndexedProblem, public Instantiable<UnconstrainedTimeIndexedProblemInitializer>
 {
 public:
+    using AbstractTimeIndexedProblem::Update;
+
     UnconstrainedTimeIndexedProblem() = default;
-    ~UnconstrainedTimeIndexedProblem() = default;
+    virtual ~UnconstrainedTimeIndexedProblem() = default;
 
     /// \brief Instantiates the problem from an Initializer
     void Instantiate(UnconstrainedTimeIndexedProblemInitializer& init) override;

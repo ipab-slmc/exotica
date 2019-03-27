@@ -40,7 +40,7 @@ class TimeIndexedProblem : public AbstractTimeIndexedProblem, public Instantiabl
 {
 public:
     TimeIndexedProblem() = default;
-    ~TimeIndexedProblem() = default;
+    virtual ~TimeIndexedProblem() = default;
 
     /// \brief Instantiates the problem from an Initializer
     void Instantiate(TimeIndexedProblemInitializer& init) override;

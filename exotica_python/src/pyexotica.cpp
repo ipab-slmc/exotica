@@ -721,7 +721,8 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<UnconstrainedTimeIndexedProblem, std::shared_ptr<UnconstrainedTimeIndexedProblem>, PlanningProblem> unconstrained_time_indexed_problem(prob, "UnconstrainedTimeIndexedProblem");
     unconstrained_time_indexed_problem.def("get_duration", &UnconstrainedTimeIndexedProblem::GetDuration);
-    unconstrained_time_indexed_problem.def("update", &UnconstrainedTimeIndexedProblem::Update);
+    unconstrained_time_indexed_problem.def("update", (void (UnconstrainedTimeIndexedProblem::*)(Eigen::VectorXdRefConst, int)) & UnconstrainedTimeIndexedProblem::Update);
+    unconstrained_time_indexed_problem.def("update", (void (UnconstrainedTimeIndexedProblem::*)(Eigen::VectorXdRefConst)) & UnconstrainedTimeIndexedProblem::Update);
     unconstrained_time_indexed_problem.def("set_goal", &UnconstrainedTimeIndexedProblem::SetGoal);
     unconstrained_time_indexed_problem.def("set_rho", &UnconstrainedTimeIndexedProblem::SetRho);
     unconstrained_time_indexed_problem.def("get_goal", &UnconstrainedTimeIndexedProblem::GetGoal);
@@ -791,7 +792,8 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<BoundedTimeIndexedProblem, std::shared_ptr<BoundedTimeIndexedProblem>, PlanningProblem> bounded_time_indexed_problem(prob, "BoundedTimeIndexedProblem");
     bounded_time_indexed_problem.def("get_duration", &BoundedTimeIndexedProblem::GetDuration);
-    bounded_time_indexed_problem.def("update", &BoundedTimeIndexedProblem::Update);
+    bounded_time_indexed_problem.def("update", (void (BoundedTimeIndexedProblem::*)(Eigen::VectorXdRefConst, int)) & BoundedTimeIndexedProblem::Update);
+    bounded_time_indexed_problem.def("update", (void (BoundedTimeIndexedProblem::*)(Eigen::VectorXdRefConst)) & BoundedTimeIndexedProblem::Update);
     bounded_time_indexed_problem.def("set_goal", &BoundedTimeIndexedProblem::SetGoal);
     bounded_time_indexed_problem.def("set_rho", &BoundedTimeIndexedProblem::SetRho);
     bounded_time_indexed_problem.def("get_goal", &BoundedTimeIndexedProblem::GetGoal);

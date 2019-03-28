@@ -165,6 +165,8 @@ private:
     int sweep_mode_ = 0;  //!< Sweep mode
     int update_count_ = 0;
 
+    bool verbose_ = false;
+
     /// \brief Updates the forward message at time step $t$
     /// @param t Time step
     /// Updates the mean and covariance of the forward message using:

@@ -39,8 +39,10 @@ namespace exotica
 class BoundedTimeIndexedProblem : public AbstractTimeIndexedProblem, public Instantiable<BoundedTimeIndexedProblemInitializer>
 {
 public:
+    using AbstractTimeIndexedProblem::Update;
+
     BoundedTimeIndexedProblem() = default;
-    ~BoundedTimeIndexedProblem() = default;
+    virtual ~BoundedTimeIndexedProblem() = default;
 
     /// \brief Instantiates the problem from an Initializer
     void Instantiate(BoundedTimeIndexedProblemInitializer& init) override;

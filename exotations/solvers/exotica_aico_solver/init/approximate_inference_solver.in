@@ -9,3 +9,5 @@ Optional double FunctionTolerance = 1e-5;  // Relative function tolerance (first
 Optional double MinStep = 1e-5;  // Do not update task messages if the maximum coefficient changes less than the update tolerance
 Optional double Damping = 0.01;
 Optional bool UseBackwardMessage = false;
+Optional bool Verbose = false;  // More verbose output than debug
+

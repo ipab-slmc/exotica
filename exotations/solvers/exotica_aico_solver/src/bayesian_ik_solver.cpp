@@ -60,6 +60,7 @@ void BayesianIKSolver::Instantiate(BayesianIKSolverInitializer& init)
     function_tolerance_ = init.FunctionTolerance;
     damping_init_ = init.Damping;
     use_bwd_msg_ = init.UseBackwardMessage;
+    verbose_ = init.Verbose;
 }
 
 BayesianIKSolver::BayesianIKSolver() = default;
@@ -87,13 +88,13 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
     Eigen::VectorXd q0 = prob_->ApplyStartState();
 
     Timer timer;
-    if (debug_) ROS_WARN_STREAM("BayesianIKSolver: Setting up the solver");
+    if (verbose_) ROS_WARN_STREAM("BayesianIKSolver: Setting up the solver");
     update_count_ = 0;
     damping = damping_init_;
     double d;
     iteration_count_ = -1;
     InitTrajectory(q0);
-    if (debug_) ROS_WARN_STREAM("BayesianIKSolver: Solving");
+    if (verbose_) ROS_WARN_STREAM("BayesianIKSolver: Solving");
 
     // Reset sweep and iteration count
     sweep_ = 0;
@@ -226,7 +227,7 @@ void BayesianIKSolver::InitTrajectory(const Eigen::VectorXd& q_init)
     cost_prev_ = cost_;
     prob_->SetCostEvolution(0, cost_);
     if (cost_ < 0) ThrowNamed("Invalid cost! " << cost_);
-    if (debug_) HIGHLIGHT("Initial cost, updates: " << update_count_ << ", cost: " << cost_);
+    if (verbose_) HIGHLIGHT("Initial cost, updates: " << update_count_ << ", cost: " << cost_);
     RememberOldState();
 }
 
@@ -352,7 +353,7 @@ void BayesianIKSolver::UpdateTimestepGaussNewton(bool update_fwd,
 
 double BayesianIKSolver::EvaluateTrajectory(const Eigen::VectorXd& x, bool skip_update)
 {
-    if (debug_) ROS_WARN_STREAM("Evaluating, iteration " << iteration_count_ << ", sweep_ " << sweep_);
+    if (verbose_) ROS_WARN_STREAM("Evaluating, iteration " << iteration_count_ << ", sweep_ " << sweep_);
     q = x;
 
     // Perform update / roll-out
@@ -457,7 +458,7 @@ void BayesianIKSolver::PerhapsUndoStep()
         damping_reference_ = b_old;
         best_sweep_ = best_sweep_old_;
         b_step_ = b_step_old_;
-        if (debug_) HIGHLIGHT("Reverting to previous line-search step (" << best_sweep_ << ")");
+        if (verbose_) HIGHLIGHT("Reverting to previous line-search step (" << best_sweep_ << ")");
     }
     else
     {

@@ -91,7 +91,7 @@ public:
 
 protected:
     void UpdateTaskKinematics(std::shared_ptr<KinematicResponse> response);
-    void updateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses);
+    void UpdateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses);
 
     ScenePtr scene_;
     TaskMapMap task_maps_;

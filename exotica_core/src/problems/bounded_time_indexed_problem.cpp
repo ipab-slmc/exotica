@@ -88,7 +88,7 @@ void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
     scene_->GetKinematicTree().SetKinematicResponse(kinematic_solutions_[t]);
 
     // Pass the corresponding number of relevant task kinematics to the TaskMaps
-    // via the PlanningProblem::updateMultipleTaskKinematics method. For now we
+    // via the PlanningProblem::UpdateMultipleTaskKinematics method. For now we
     // support passing _two_ timesteps - this can be easily changed later on.
     std::vector<std::shared_ptr<KinematicResponse>> kinematics_solutions{kinematic_solutions_[t]};
 
@@ -97,7 +97,7 @@ void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
     kinematics_solutions.emplace_back((t == 0) ? kinematic_solutions_[t] : kinematic_solutions_[t - 1]);
 
     // Actually update the tasks' kinematics mappings.
-    PlanningProblem::updateMultipleTaskKinematics(kinematics_solutions);
+    PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
 
     scene_->Update(x_in, static_cast<double>(t) * tau_);
 

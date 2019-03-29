@@ -226,7 +226,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     scene_->GetKinematicTree().SetKinematicResponse(kinematic_solutions_[t]);
 
     // Pass the corresponding number of relevant task kinematics to the TaskMaps
-    // via the PlanningProblem::updateMultipleTaskKinematics method. For now we
+    // via the PlanningProblem::UpdateMultipleTaskKinematics method. For now we
     // support passing _two_ timesteps - this can be easily changed later on.
     std::vector<std::shared_ptr<KinematicResponse>> kinematics_solutions{kinematic_solutions_[t]};
 
@@ -235,7 +235,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     kinematics_solutions.emplace_back((t == 0) ? kinematic_solutions_[t] : kinematic_solutions_[t - 1]);
 
     // Actually update the tasks' kinematics mappings.
-    PlanningProblem::updateMultipleTaskKinematics(kinematics_solutions);
+    PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
 
     // Simulate for tau
     X_.col(t + 1) = dynamics_solver_->Simulate(X_.col(t), U_.col(t), tau_);

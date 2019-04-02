@@ -1099,6 +1099,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematic_tree.def("get_root_frame_name", &KinematicTree::GetRootFrameName);
     kinematic_tree.def("get_root_joint_name", &KinematicTree::GetRootJointName);
     kinematic_tree.def("get_kinematic_chain", &KinematicTree::GetKinematicChain);
+    kinematic_tree.def("get_kinematic_chain_links", &KinematicTree::GetKinematicChainLinks);
     kinematic_tree.def("get_model_base_type", &KinematicTree::GetModelBaseType);
     kinematic_tree.def("get_controlled_base_type", &KinematicTree::GetControlledBaseType);
     kinematic_tree.def("get_controlled_link_mass", &KinematicTree::GetControlledLinkMass);

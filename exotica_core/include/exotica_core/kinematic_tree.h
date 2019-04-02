@@ -197,7 +197,14 @@ public:
     /// @param begin link name from which the chain starts
     /// @param end link name at which the chain ends
     /// @return list joints between begin and end
-    std::vector<std::string> GetKinematicChain(const std::string& begin, const std::string& end);
+    std::vector<std::string> GetKinematicChain(const std::string& begin, const std::string& end) const;
+
+    /// @brief GetKinematicChainLinks get the links between begin and end of kinematic chain
+    /// @param begin link name from which the chain starts
+    /// @param end link name at which the chain ends
+    /// @return list link between begin and end
+    std::vector<std::string> GetKinematicChainLinks(const std::string& begin, const std::string& end) const;
+
     void SetModelState(Eigen::VectorXdRefConst x);
     void SetModelState(std::map<std::string, double> x);
     Eigen::VectorXd GetControlledState();

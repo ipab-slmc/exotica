@@ -995,7 +995,7 @@ std::map<std::string, double> KinematicTree::GetModelStateMap()
     return ret;
 }
 
-std::vector<std::string> KinematicTree::GetKinematicChain(const std::string& begin, const std::string& end)
+std::vector<std::string> KinematicTree::GetKinematicChain(const std::string& begin, const std::string& end) const
 {
     // check existence of requested links
     for (const std::string& l : {begin, end})
@@ -1013,6 +1013,33 @@ std::vector<std::string> KinematicTree::GetKinematicChain(const std::string& beg
          l = l.lock()->parent, chain.push_back(l.lock()->segment.getJoint().getName()))
     {
         if (l.lock()->parent.lock() == nullptr)
+        {
+            ThrowPretty("There is no connection between '" + begin + "' and '" + end + "'!");
+        }
+    }
+
+    // return vector in order, begin...end
+    std::reverse(chain.begin(), chain.end());
+    return chain;
+}
+
+std::vector<std::string> KinematicTree::GetKinematicChainLinks(const std::string& begin, const std::string& end) const
+{
+    // check existence of requested links
+    for (const std::string& l : {begin, end})
+    {
+        if (!tree_map_.count(l))
+        {
+            ThrowPretty("Link '" + l + "' does not exist.");
+        }
+    }
+
+    // get chain in reverse order, end...begin
+    std::vector<std::string> chain;
+    for (std::shared_ptr<const KinematicElement> l = tree_map_.at(end).lock(); l->segment.getName() != begin; l = l->parent.lock())
+    {
+        chain.push_back(l->segment.getName());
+        if (l->parent.lock() == nullptr)
         {
             ThrowPretty("There is no connection between '" + begin + "' and '" + end + "'!");
         }

@@ -8,7 +8,7 @@ EXOTica
     :width: 40%
     :align: right
 
-For home page go
+For the EXOtica package research home page, please go
 `here <http://wcms.inf.ed.ac.uk/ipab/slmc/research/EXOTica>`__.
 
 
@@ -24,7 +24,7 @@ Getting started
 Basics
 ======
 
-In this section we'll explore the basics of setting up and using 
+In this section, we will explore the basics of setting up and using 
 EXOTica with the included KUKA LWR_Simplified robot.
 
 .. toctree::
@@ -38,7 +38,7 @@ EXOTica with the included KUKA LWR_Simplified robot.
 Advanced
 ========
 
-With the advanced section, we look at different methods of initializing
+In the advanced section, we look at different methods of initializing
 EXOTica and using it with your own robot. 
 
 .. toctree::

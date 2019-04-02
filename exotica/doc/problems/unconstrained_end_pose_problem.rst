@@ -3,7 +3,7 @@
 Unconstrained end-pose problem
 ==============================
 
-The unconstrained end-pose problem defines a problem minimizing the quadratic cost using a kinematic system. The state is represented by joint configurations and the output is a single configuration. The probelm is formulated as:
+The unconstrained end-pose problem (``UnconstrainedEndPoseProblem``) defines a problem minimizing the quadratic cost using a kinematic system. The state is represented by joint configurations and the output is a single configuration. The problem is formulated as:
 
 .. math::
 

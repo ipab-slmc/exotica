@@ -45,7 +45,7 @@ This is shown below:
     int main(int argc, char **argv)
     {
         {
-            MotionSolver_ptr solver = XMLLoader::loadSolver("{exotica_examples}/resources/configs/example_ik.xml");
+            MotionSolverPtr solver = XMLLoader::LoadSolver("{exotica_examples}/resources/configs/example_ik.xml");
             Eigen::MatrixXd solution;
 
             Timer timer;
@@ -62,12 +62,12 @@ This is shown below:
 Quick Solver Setup
 ==================
 
-After including the Exotica header file and setting the namespace, we enter the main function and instantiate a MotionSolver_ptr: 
+After including the Exotica header file and setting the namespace, we enter the main function and instantiate a MotionSolverPtr: 
 
 .. code-block:: cpp
 
     ...
-    MotionSolver_ptr solver = XMLLoader::loadSolver("{exotica_examples}/resources/configs/example_ik.xml");
+    MotionSolverPtr solver = XMLLoader::loadSolver("{exotica_examples}/resources/configs/example_ik.xml");
     ...
 
 This sets up our motion planning solver and gets the problem ready to be solved. To the solver we assign the contents of an XML 

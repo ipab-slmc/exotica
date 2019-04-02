@@ -30,15 +30,15 @@ Initializer Layout
 
 These ``.in`` files are laid out as follows:
 
-When we look at a problem initializer such as UnconstrainedEndPoseProblem initializer 
-(exotica/exotica/init/UnconstrainedEndPoseProblem.in), we see a list of parameters 
-that can be set when we initialize the problem. 
+When we look at a problem initializer such as `UnconstrainedEndPoseProblemInitializer <https://github.com/ipab-slmc/exotica/blob/master/exotica_core/init/unconstrained_end_pose_problem.in>`_, we see a list of parameters that can be set when we initialize the problem. 
 
 .. code-block:: shell
 
-    // UnconstrainedEndPoseProblemInitializer
+    // UnconstrainedEndPoseProblemInitializer        
+    class UnconstrainedEndPoseProblem
 
-    extend <exotica/PlanningProblem>
+    extend <exotica_core/planning_problem>
+
     Optional std::vector<exotica::Initializer> Cost = std::vector<exotica::Initializer>();
     Optional Eigen::VectorXd W = Eigen::VectorXd();
     Optional Eigen::VectorXd NominalState = Eigen::VectorXd();
@@ -52,10 +52,13 @@ parameters. This is seen below:
 .. code-block:: shell
 
     // PlanningProblemInitializer
+    class PlanningProblem
 
-    include <exotica/SceneInitializer>
-    extend <exotica/Object>
+    include <exotica_core/scene_initializer>
+    extend <exotica_core/object>
+
     Required exotica::Initializer PlanningScene; # SceneInitializer
+
     Optional std::vector<exotica::Initializer> Maps = std::vector<exotica::Initializer>();
     Optional Eigen::VectorXd StartState = Eigen::VectorXd();
     Optional double StartTime = 0;
@@ -63,8 +66,8 @@ parameters. This is seen below:
 
 This requires us to specify the scene in which the solver will operate, as well as start states and
 task maps (which we will look at later). In all, after extending both the 
-PlanningSceneInitializer and the Object initializer (which takes a name and debug argument), 
-the whole initializer for our UnconstrainedEndPoseProblem looks like this: 
+``PlanningSceneInitializer`` and the ``ObjectInitializer`` (which takes a name and debug argument), 
+the whole initializer for our ``UnconstrainedEndPoseProblem`` looks like this: 
 
 .. code-block:: xml
 
@@ -80,4 +83,4 @@ the whole initializer for our UnconstrainedEndPoseProblem looks like this:
     Optional Eigen::VectorXd NominalState = Eigen::VectorXd();
 
 This shows us that the very least that is required to initialize a problem is a name for the problem
-and the planning scene that the problem operates in. Other problems are also laid out in a similar fashion. The optional elements offer a powerful customisation tool for out motion planner.
+and the planning scene that the problem operates in. Other problems are also laid out in a similar fashion. The optional elements offer a powerful customization tool for out motion planner.

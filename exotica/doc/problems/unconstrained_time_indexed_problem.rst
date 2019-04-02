@@ -3,7 +3,7 @@
 Unconstrained time-indexed problem
 ==================================
 
-The unconstrained time-indexed problem defines a problem minimizing the quadratic cost over a trajectory using a linearized model of the system. The trajectory is uniformly discretized in time. The state is represented by the combined vector of joint configurations for each time step. The probelm is formulated as:
+The unconstrained time-indexed problem (``UnconstrainedTimeIndexedProblem``) defines a problem minimizing the quadratic cost over a trajectory using a linearized model of the system. The trajectory is uniformly discretized in time. The state is represented by the combined vector of joint configurations for each time step. The problem is formulated as:
 
 .. math::
 
@@ -16,3 +16,7 @@ The time step duration :math:`\vartriangle\!\!t` and number of time steps :math:
     f(\boldsymbol{x})=\sum_t \sum_i \rho_{i,t}||\Phi_{i,t}(\boldsymbol{x})-\boldsymbol{y}^*_{i,t}||,
 
 where :math:`t\in(1, ..., T)` is the time index.
+
+.. todo::
+
+    Transition vs task cost

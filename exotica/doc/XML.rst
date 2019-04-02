@@ -5,14 +5,13 @@ XML Initialization
 This section of the tutorial will demonstrate how to initialize EXOTica
 using XML and the related C++ code that is needed to parse the XML file.
 We will be using the XML file under the
-`IK\_Solver <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/configs/ik_solver_demo.xml>`__
+`IK\_Solver <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/resources/configs/example_ik.xml>`__
 file and is shown below:
 
 .. code-block:: xml
 
   <?xml version="1.0" ?>
   <IKSolverDemoConfig>
-
     <IKSolver Name="MySolver">
       <MaxIterations>1</MaxIterations>
       <MaxStep>0.1</MaxStep>
@@ -22,7 +21,6 @@ file and is shown below:
     </IKSolver>
 
     <UnconstrainedEndPoseProblem Name="MyProblem">
-
       <PlanningScene>
         <Scene>
           <JointGroup>arm</JointGroup>
@@ -42,7 +40,6 @@ file and is shown below:
       <NominalState>0 0 0 0 0 0 0</NominalState>
       <W> 7 6 5 4 3 2 1 </W>
     </UnconstrainedEndPoseProblem>
-
   </IKSolverDemoConfig>
 
 

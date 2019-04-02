@@ -12,7 +12,7 @@ EXOTica extracts the dimensions and details of the robot from the robot's
 URDF configuration file. To start generating motion plans for your own robot, 
 a URDF file is required.
 
-The URDF file for the`lwr\_simplified <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/resources/robots/lwr_simplified.urdf>`__
+The URDF file for the `lwr\_simplified <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/resources/robots/lwr_simplified.urdf>`_
 KUKA arm included in the EXOTica examples file will be used throughout these tutorials.
 
 SRDF File
@@ -34,16 +34,15 @@ Add the following lines to the CMakeLists.txt file of any package that uses EXOT
 In the ``find_package(catkin REQUIRED COMPONENTS)`` section, 
 add 
 
-.. code-block:: xml
+.. code-block:: cmake
 
-    find_package(catkin REQUIRED COMPONENTS)
-        exotica
+    find_package(catkin REQUIRED COMPONENTS exotica_core)
 
 Also, add the following to ``package.xml`` for a c++ package:
 
 .. code-block:: xml
 
-    <depend>exotica</depend>
+    <depend>exotica_core</depend>
 
 or the following for a python package:
 

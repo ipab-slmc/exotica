@@ -17,16 +17,16 @@ ROSlaunch file.
 
     <launch>
 
-    <arg name="debug" default="false" />
-    <arg unless="$(arg debug)" name="launch_prefix" value="" />
-    <arg     if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
+        <arg name="debug" default="false" />
+        <arg unless="$(arg debug)" name="launch_prefix" value="" />
+        <arg     if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
 
-    <param name="robot_description" textfile="$(find exotica_examples)/resources/robots/lwr_simplified.urdf" />
-    <param name="robot_description_semantic" textfile="$(find exotica_examples)/resources/robots/lwr_simplified.srdf" />
+        <param name="robot_description" textfile="$(find exotica_examples)/resources/robots/lwr_simplified.urdf" />
+        <param name="robot_description_semantic" textfile="$(find exotica_examples)/resources/robots/lwr_simplified.srdf" />
 
-    <node launch-prefix="$(arg launch_prefix)" pkg="exotica_examples" type="ManualInitialization" name="ExoticaManualInitializationExampleNode" output="screen" />
+        <node launch-prefix="$(arg launch_prefix)" pkg="exotica_examples" type="ManualInitialization" name="ExoticaManualInitializationExampleNode" output="screen" />
 
-    <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find exotica_examples)/resources/rviz.rviz" />
+        <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find exotica_examples)/resources/rviz.rviz" />
     </launch>
 
 .. rubric:: CODE EXPLAINED

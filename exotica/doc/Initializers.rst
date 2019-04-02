@@ -2,14 +2,14 @@
 Initializers
 ************
 
-Initialization of core components is done via Initializers. An
+Initialization of core components is done via _Initializers_. An
 initializer is a collection of properties that each objects uses to
 initialize itself. These could be either required or optional. Each core
 class can get the value of these properties from its initializer, e.g. a
 solver may require number of iterations or a convergence rate.
 
-The initializers may be created manually (c++), from config files (XML)
-or using wrappers (python). These wrappers provide a useful abstractions
+The initializers may be created manually (C++), from config files (XML)
+or using wrappers (Python). These wrappers provide a useful abstractions
 for creating and initializing EXOTica core components directly from
 scripts or configuration files.
 
@@ -80,7 +80,7 @@ syntax is as follows:
 ::
 
     // Comments start with "//" 
-    extend <exotica/PlanningProblem> // Extend existing initializers (weak inheritance)
+    extend <exotica_core/planning_problem> // Extend existing initializers (weak inheritance)
     Required double Tolerance; // Create a required property (no default value)
     Required Eigen::VectorXd W; // Create a required property with included type
     Required Initializer EndEffectorFrame; // Stores an initializer type, e.g. LimbInitilizer for defining spatial frames.

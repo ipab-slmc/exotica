@@ -5,6 +5,7 @@ extensions = ['sphinx.ext.mathjax',
               'sphinx.ext.intersphinx',
               'sphinx.ext.autosummary',
               'sphinx.ext.autosectionlabel',
+              'sphinx.ext.todo',
               'sphinx.ext.napoleon']
 
 autosummary_generate = True

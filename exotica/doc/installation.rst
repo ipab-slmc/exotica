@@ -13,10 +13,19 @@ For all installations:
  * `rosdep <http://wiki.ros.org/rosdep>`_
  * `ROS <http://wiki.ros.org/Installation>`_ (``ros-[release]-desktop`` is recommended but more minimal versions work in conjunction with rosdep)
 
-ROS Indigo (Ubuntu 14.04) - retired since September 2018:
+ROS Indigo (Ubuntu 14.04) -- retired since September 2018:
  * For Eigen, we recommend system-installing 3.2.10 or newer, for which we provide a `Debian <http://terminator.robots.inf.ed.ac.uk/apt/libeigen3-dev.deb>`_.
- * gcc >`4.9 <https://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-on-ubuntu>`_ -- the 14.04 system-installed 4.8.4 won't work. On Ubuntu 16.04, you can use the system-provided gcc/g++.
+ * gcc >`4.9 <https://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-on-ubuntu>`_ -- the 14.04 system-installed 4.8.4 won't work. On Ubuntu 16.04 and newer, you can use the system-provided gcc/g++.
  * For compiling ``fcl_catkin``, you need to add a PPA for ``libccd-dev``.
+
+Installation from binaries
+==========================
+
+We regularly release EXOTica for ROS Kinetic and ROS Melodic. You can install EXOTica from binary via
+
+::
+
+	sudo apt install ros-[distro]-exotica ros-[distro]-exotica-examples
 
 Installation from source
 ========================

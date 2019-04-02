@@ -12,41 +12,52 @@ class SciPyTimeIndexedSolver(object):
     can be found here: 
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
     '''
+
     def __init__(self, problem=None, method=None, debug=False):
         print("Initialising SciPy Solver")
         self.problem = problem
         self.debug = debug
         self.method = method
         self.hessian_update_strategy = SR1()
-    
+        self.max_iterations = 500
+
     def specifyProblem(self, problem):
         self.problem = problem
-    
+
     def eq_constraint_fun(self, x):
         self.problem.update(x)
+        # print("EQ", self.problem.get_equality().shape)
         return self.problem.get_equality()
-    
+
     def eq_constraint_jac(self, x):
         self.problem.update(x)
-        print("EQ", self.problem.get_equality_jacobian().shape)
-        return self.problem.get_equality_jacobian()
-    
+        # print("EQ-Jac", self.problem.get_equality_jacobian().shape)
+        if self.method == "SLSQP":  # SLSQP does not support sparse Jacobians/Hessians
+            return self.problem.get_equality_jacobian().todense()
+        else:
+            return self.problem.get_equality_jacobian()
+
     def neq_constraint_fun(self, x):
         self.problem.update(x)
+        # print("NEQ", self.problem.get_inequality().shape)
         return -1. * self.problem.get_inequality()
-    
+
     def neq_constraint_jac(self, x):
         self.problem.update(x)
-        print("NEQ", self.problem.get_inequality_jacobian().shape)
-        return -1. * self.problem.get_inequality_jacobian()
-    
+        # print("NEQ-Jac", self.problem.get_inequality_jacobian().shape)
+        if self.method == "SLSQP":  # SLSQP does not support sparse Jacobians/Hessians
+            return -1. * self.problem.get_inequality_jacobian().todense()
+        else:
+            return -1. * self.problem.get_inequality_jacobian()
+
     def cost_fun(self, x):
         self.problem.update(x)
         return self.problem.get_cost(), self.problem.get_cost_jacobian()
-    
+
     def solve(self):
         # Extract start state
-        x0 = np.asarray(self.problem.initial_trajectory).flatten()
+        x0 = np.asarray(self.problem.initial_trajectory)[1:, :].flatten()
+        x0 += np.random.normal(0., 1.e-3, x0.shape[0]) # for SLSQP we do require some initial noise to avoid singular matrices
 
         # Add constraints
         cons = []
@@ -66,22 +77,28 @@ class SciPyTimeIndexedSolver(object):
         # Bounds
         bounds = None
         if self.problem.use_bounds:
-            bounds = Bounds(self.problem.get_bounds()[:,0].repeat(self.problem.T), self.problem.get_bounds()[:,1].repeat(self.problem.T))
+            bounds = Bounds(self.problem.get_bounds()[:,0].repeat(self.problem.T - 1), self.problem.get_bounds()[:,1].repeat(self.problem.T - 1))
 
         s = time()
-        res = minimize(self.cost_fun, 
-                    x0,
-                    method=self.method,
-                    bounds=bounds,
-                    jac=True,
-                    hess=self.hessian_update_strategy,
-                    constraints=cons,
-                    options={'disp': self.debug, 'initial_tr_radius':1000., 'verbose': 2})
+        res = minimize(self.cost_fun,
+                       x0,
+                       method=self.method,
+                       bounds=bounds,
+                       jac=True,
+                       hess=self.hessian_update_strategy,
+                       constraints=cons,
+                       options={
+                           'disp': self.debug,
+                           'initial_tr_radius': 1000.,
+                           'verbose': 2,
+                           'maxiter': self.max_iterations
+                       })
         e = time()
         if self.debug:
             print(e-s)
 
         traj = np.zeros((self.problem.T, self.problem.N))
-        for t in xrange(self.problem.T):
-            traj[t,:] = res.x[t*self.problem.N:(t+1)*self.problem.N]
+        traj[0, :] = self.problem.start_state
+        for t in xrange(0, self.problem.T - 1):
+            traj[t + 1, :] = res.x[t*self.problem.N:(t+1)*self.problem.N]
         return traj

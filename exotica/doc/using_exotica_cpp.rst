@@ -2,8 +2,6 @@
 Solving planning problems in c++
 ********************************
 
-**THIS TUTORIAL IS OUT OF DATE!!! THE API MAY HAVE CHANGED!**
-
 This part of the tutorial assumes that you have completed the previous 
 step. We will work off the same code and get on with solving some motion 
 plans.
@@ -14,47 +12,45 @@ the solver:
 
 .. code-block:: c++
 
-        ...
+    ...
 
-        // Continued from initialization
-        // Create the initial configuration
-        Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->getScene()->getNumControlledJoints());
-        Eigen::MatrixXd solution;
+    // Continued from initialization
+    // Create the initial configuration
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->GetScene()->GetNumControlledJoints());
+    Eigen::MatrixXd solution;
 
+    ROS_INFO_STREAM("Calling solve() in an infinite loop");
 
-        ROS_INFO_STREAM("Calling solve() in an infinite loop");
+    double t = 0.0;
+    ros::Rate loop_rate(500.0);
+    ros::WallTime init_time = ros::WallTime::now();
 
-        double t = 0.0;
-        ros::Rate loop_rate(500.0);
-        ros::WallTime init_time = ros::WallTime::now();
+    while (ros::ok())
+    {
+        ros::WallTime start_time = ros::WallTime::now();
 
-        while (ros::ok())
-        {
-            ros::WallTime start_time = ros::WallTime::now();
+        // Update the goal if necessary
+        // e.g. figure eight
+        t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
+        my_problem->y << 0.6,
+                        -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
+                            0.5 + sin(t * M_PI * 0.5) * 0.2;
 
-            // Update the goal if necessary
-            // e.g. figure eight
-            t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
-            my_problem->y << 0.6,
-                            -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1,
-                             0.5 + sin(t * M_PI * 0.5) * 0.2;
+        // Solve the problem using the IK solver
+        any_solver->Solve(solution);
 
-            // Solve the problem using the IK solver
-            any_solver->Solve(solution);
+        double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
+        ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
+        q = solution.row(solution.rows() - 1);
 
-            double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
-            ROS_INFO_STREAM_THROTTLE(0.5, "Finished solving in "<<time<<"s. Solution ["<<solution<<"]");
-            q = solution.row(solution.rows() - 1);
+        my_problem->Update(q);
+        my_problem->GetScene()->GetKinematicTree().PublishFrames();
 
-            my_problem->Update(q);
-            my_problem->getScene()->GetKinematicTree().publishFrames();
-
-            ros::spinOnce();
-            loop_rate.sleep();
-        }
-
-        // All classes will be destroyed at this point.
+        ros::spinOnce();
+        loop_rate.sleep();
     }
+
+    // All classes will be destroyed at this point.
     ...
 
 .. rubric:: CODE EXPLAINED
@@ -110,7 +106,7 @@ the ``y`` value to the desired goal:
                             -0.1 + sin(t * 2.0 * M_PI * 0.5) * 0.1, // Y Position
                              0.5 + sin(t * M_PI * 0.5) * 0.2; // Z Position
 
-NOTE: To set the goal for an individual map, use the ``setGoal()``
+NOTE: To set the goal for an individual map, use the ``SetGoal()``
 function. This requires the name of the task map and a Eigen vector
 containing the Cartesian coordinates of the goal:
 
@@ -120,7 +116,7 @@ containing the Cartesian coordinates of the goal:
 
     goal << 0.6,0.8,0.5;
 
-    my_problem->setGoal("Position",goal);
+    my_problem->SetGoal("Position",goal);
 
 Now the initial joint positions have been set, we have the solution
 container and have set the goal, we are ready to solve the problem using
@@ -214,8 +210,8 @@ by RVIZ:
 
 .. code-block:: c++
 
-            my_problem->getScene()->GetKinematicTree().publishFrames();
+            my_problem->GetScene()->GetKinematicTree().PublishFrames();
 
 RVIZ can either be set-up manually or via a
-`ROSlaunch <Setting-up-ROSlaunch.html>`__
+`roslaunch <Setting-up-ROSlaunch.html>`__
 file.

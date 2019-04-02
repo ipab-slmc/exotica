@@ -20,8 +20,10 @@ The `generated documentation <https://ipab-slmc.github.io/exotica/>`_ for the cu
 C++ API Documentation
 =====================
 
-In order to build the Doxygen C++ API documentation, you require ``doxygen`` to be installed on your system (e.g. via ``sudo apt install doxygen``). After navigating to the doc folder in the exotica package you can then run ``doxygen`` to generate the C++ API documentation. It will be created in ``doxygen_cpp/doxygen_cpp``.
+In order to build the Doxygen C++ API documentation, you require ``doxygen`` to be installed on your system (e.g. via ``sudo apt install doxygen``). After navigating to the doc folder in the exotica package, you can then run ``doxygen`` to generate the C++ API documentation. It will be created in ``doxygen_cpp/doxygen_cpp``.
 
 The `generated C++ API doxygen <https://ipab-slmc.github.io/exotica/doxygen_cpp/>`_ for the current master release is always up to date on GitHub.
 
-Both the C++ API documentation and the documentation in the ``doc`` subdirectory of the exotica package are generated automatically by our continuous integration services once Pull Requests are merged to master.
+.. Commented out as CI does not currently generate documentation (requires Python artefacts to be built
+    Both the C++ API documentation and the documentation in the ``doc`` subdirectory of the exotica package are generated automatically by our continuous integration services once Pull Requests are merged to master.
+

@@ -11,23 +11,23 @@ the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.c
 
 .. code-block:: c++
 
-        #include <exotica_core/exotica_core.h>
+    #include <exotica_core/exotica_core.h>
 
-        // Manual initialization requires dependency on specific solvers and task maps:
-        #include <exotica_ik_solver/IKSolver_initializer.h>
-        #include <task_map/EffFrame_initializer.h>
+    // Manual initialization requires dependency on specific solvers and task maps:
+    #include <exotica_ik_solver/ik_solver_initializer.h>
+    #include <task_map/eff_frame_initializer.h>
 
-        using namespace exotica;
+    using namespace exotica;
 
-        void run()
-        {
+    void run()
+    {
         Server::InitRos(std::shared_ptr<ros::NodeHandle>(new ros::NodeHandle("~")));
 
         // Scene using joint group 'arm'
         SceneInitializer scene("MyScene", "arm", false, "", "{exotica_examples}/resources/robots/lwr_simplified.urdf", "{exotica_examples}/resources/robots/lwr_simplified.srdf");
         // End-effector task map with two position frames
         EffFrameInitializer map("Position", false,
-                                {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
+                    {FrameInitializer("lwr_arm_6_link", Eigen::VectorTransform(0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17, 0.7071067811865475, 4.3297802811774664e-17))});
         // Create a task using the map above (goal will be specified later)
         Eigen::VectorXd W(7);
         W << 7, 6, 5, 4, 3, 2, 1;
@@ -45,8 +45,8 @@ Initializer Headers
 ===================
 
 At the top of the script, two initialiser header files are included: one
-for the ``exotica_ik_solver/IKSolverInitializer.h`` and one for
-``task_map/EffPositionInitializer.h``. These are generated from the ``.in`` files during the compilation/build phase.
+for the ``exotica_ik_solver/ik_solver_initializer.h`` and one for
+``exotica_core_task_maps/eff_position_initializer.h``. These are generated from the ``.in`` files during the compilation/build phase.
 
 When initializing manually, the appropriate initializers must be
 included for both the task map and the solver. These are stored in the
@@ -57,9 +57,9 @@ Currently available solvers are:
 
 .. code-block:: c++
 
-    #include <exotica_ompl_solver/OMPLSolver_initializer.h>
-    #include <exotica_aico_solver/AICOSolver_initializer.h>
-    #include <exotica_ik_solver/IKSolver_initializer.h>
+    #include <exotica_ompl_solver/ompl_solver_initializer.h>
+    #include <exotica_aico_solver/aico_solver_initializer.h>
+    #include <exotica_ik_solver/ik_solver_initializer.h>
 
 Once we have included the correct initializers, we must initialise:
 * ``scene`` 
@@ -82,18 +82,18 @@ We must also pass in our initialization arguments seen in the `Scene Initializer
 
 .. code-block:: xml
 
-        Required std::string Name;
-        Optional bool Debug = false;
-        Required std::string JointGroup;
-        Optional std::string RobotDescription = "robot_description";
-        Optional std::string URDF = "";
-        Optional std::string SRDF = "";
-        Optional bool SetRobotDescriptionRosParams = false;  // to be used in conjunction with URDF or SRDF to set the robot_description and robot_description_semantic from the files/string in URDF/SRDF
-        Optional std::string CollisionScene = "CollisionSceneFCL";
-        Optional bool AlwaysUpdateCollisionScene = false;
-        Optional std::string LoadScene = "";
-        Optional std::vector<exotica::Initializer> Links = std::vector<exotica::Initializer>();
-        Optional std::vector<exotica::Initializer> Trajectories = std::vector<exotica::Initializer>();
+    Required std::string Name;
+    Optional bool Debug = false;
+    Required std::string JointGroup;
+    Optional std::string RobotDescription = "robot_description";
+    Optional std::string URDF = "";
+    Optional std::string SRDF = "";
+    Optional bool SetRobotDescriptionRosParams = false;  // to be used in conjunction with URDF or SRDF to set the robot_description and robot_description_semantic from the files/string in URDF/SRDF
+    Optional std::string CollisionScene = "CollisionSceneFCL";
+    Optional bool AlwaysUpdateCollisionScene = false;
+    Optional std::string LoadScene = "";
+    Optional std::vector<exotica::Initializer> Links = std::vector<exotica::Initializer>();
+    Optional std::vector<exotica::Initializer> Trajectories = std::vector<exotica::Initializer>();
 
 Here we use the parameters: 
 * name of the scene ("MyScene") 
@@ -189,7 +189,7 @@ are seen below:
 
 .. code-block:: xml
 
-        extend <exotica_core/MotionSolver>
+        extend <exotica_core/motion_solver>
         Optional double Tolerance = 1e-5;
         Optional double Convergence = 0.0;
         Optional int MaxIterations = 50;

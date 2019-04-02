@@ -18,12 +18,12 @@ Consider a robot arm mounted to a workbench (see picture). The arm consists of s
 
 .. code-block:: cpp
 
-    #include <exotica/Exotica.h>
+    #include <exotica_core/exotica_core.h>
     using namespace exotica;
 
     int main(int argc, char **argv)
     {
-        MotionSolver_ptr solver = XMLLoader::loadSolver("{exotica_examples}/resources/configs/example_ik.xml");
+        MotionSolverPtr solver = XMLLoader::LoadSolver("{exotica_examples}/resources/configs/example_ik.xml");
         Eigen::MatrixXd solution;
         solver->Solve(solution);
     }
@@ -178,7 +178,7 @@ In our example, we use the ``end-effector position`` task map. The task space is
     <Maps>
         <EffPosition Name="Position">
             <EndEffector>
-            <Frame Link="lwr_arm_7_link" BaseOffset="0.5 0 0.5 0 0 0 1"/>
+                <Frame Link="lwr_arm_7_link" BaseOffset="0.5 0 0.5 0 0 0 1"/>
             </EndEffector>
         </EffPosition>
     </Maps>

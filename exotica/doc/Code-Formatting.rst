@@ -10,8 +10,9 @@ You can install ``clang-format-3.9`` e.g. via your package managers:
 
     sudo apt-get install clang-format-3.9
 
-In order to format your changes prior to committing, please run the following from the root of the repository:
+In order to format your changes prior to committing, please execute script `apply_format.sh` in the repository root.
+This will run:
 
 .. code-block:: bash
 
-    find -name '*.cpp' -name '*.h' -o -name '*.hpp' | xargs clang-format-3.9 -style=file -i
+    find -name '*.cpp' -o -name '*.h' -o -name '*.hpp' | xargs clang-format-3.9 -style=file -i

@@ -80,7 +80,7 @@ public:
     void ResetNumberOfProblemUpdates() { number_of_problem_updates_ = 0; }
     std::pair<std::vector<double>, std::vector<double>> GetCostEvolution();
     double GetCostEvolution(int index);
-    void ResetCostEvolution(unsigned int size);
+    void ResetCostEvolution(size_t size);
     void SetCostEvolution(int index, double value);
     KinematicRequestFlags GetFlags() { return flags_; }
     /// \brief Evaluates whether the problem is valid.

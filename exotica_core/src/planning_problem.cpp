@@ -247,7 +247,7 @@ double PlanningProblem::GetCostEvolution(int index)
     }
 }
 
-void PlanningProblem::ResetCostEvolution(unsigned int size)
+void PlanningProblem::ResetCostEvolution(size_t size)
 {
     cost_evolution_.resize(size);
     cost_evolution_.assign(size, std::make_pair<std::chrono::high_resolution_clock::time_point, double>(std::chrono::high_resolution_clock::now(), std::numeric_limits<double>::quiet_NaN()));

@@ -29,6 +29,7 @@
 
 #include <exotica_ompl_solver/ompl_solver.h>
 
+#include <ompl/util/Console.h>
 #include <ompl/util/RandomNumbers.h>
 
 namespace exotica
@@ -100,7 +101,7 @@ void OMPLSolver<ProblemType>::PostSolve()
     ompl_simple_setup_->clearStartStates();
     int v = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getValidMotionCount();
     int iv = ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->getInvalidMotionCount();
-    CONSOLE_BRIDGE_logDebug("There were %d valid motions and %d invalid motions.", v, iv);
+    if (debug_) CONSOLE_BRIDGE_logDebug("There were %d valid motions and %d invalid motions.", v, iv);
 
     if (ompl_simple_setup_->getProblemDefinition()->hasApproximateSolution())
         CONSOLE_BRIDGE_logWarn("Computed solution is approximate");
@@ -187,6 +188,9 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
 template <class ProblemType>
 void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 {
+    // Set log level
+    ompl::msg::setLogLevel(debug_ ? ompl::msg::LogLevel::LOG_DEBUG : ompl::msg::LogLevel::LOG_WARN);
+
     Eigen::VectorXd q0 = prob_->ApplyStartState();
 
     // check joint limits

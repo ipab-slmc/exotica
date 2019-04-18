@@ -24,13 +24,13 @@ class InteractiveCostTuning(object):
 
         # Grab current rhos and cost task map names
         self.rho = {}
-        self.origional_rho = {}
+        self.original_rho = {}
         self.cost_task_map_names = []
         for k in problem.get_task_maps().keys():
             try:
                 r = problem.get_rho(k)
                 self.rho[k] = r 
-                self.origional_rho[k] = r
+                self.original_rho[k] = r
                 self.cost_task_map_names.append(k)
             except:
                 continue
@@ -83,10 +83,10 @@ class InteractiveCostTuning(object):
         print("Saved cost parameters to %s" % filename)
 
     def reset_button(self):
-        """Resets enstries/exotica to origional cost terms as specified in xml."""
+        """Resets enstries/exotica to original cost terms as specified in xml."""
         print("Resetting cost parameters:")
         for k in self.cost_task_map_names:
-            rho = self.origional_rho[k]
+            rho = self.original_rho[k]
 
             # Reset entries
             self.entries[k].delete(0, 'end')

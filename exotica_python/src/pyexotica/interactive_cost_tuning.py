@@ -57,7 +57,7 @@ class InteractiveCostTuning(object):
 
     def set_button(self):
         """Sets rho parameters in entries into Exotica problem."""
-        print("Setting Rho parameters:")
+        print("Setting cost parameters:")
         for k in self.cost_task_map_names:
             userin = self.entries[k].get() # is a str
             rho = float(eval(userin))
@@ -83,7 +83,8 @@ class InteractiveCostTuning(object):
         print("Saved cost parameters to %s" % filename)
 
     def reset_button(self):
-        print("Resetting Cost parameters:")
+        """Resets enstries/exotica to origional cost terms as specified in xml."""
+        print("Resetting cost parameters:")
         for k in self.cost_task_map_names:
             rho = self.origional_rho[k]
 

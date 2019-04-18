@@ -14,4 +14,6 @@
   <depend>shape_msgs</depend>
   <depend>python-matplotlib</depend>
   <depend>python-pyassimp</depend>
+  <depend>python-tk</depend>
+  <depend>python-rospkg</depend>
 </package>

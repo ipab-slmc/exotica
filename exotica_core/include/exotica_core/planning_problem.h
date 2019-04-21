@@ -80,7 +80,7 @@ public:
     void ResetNumberOfProblemUpdates() { number_of_problem_updates_ = 0; }
     std::pair<std::vector<double>, std::vector<double>> GetCostEvolution();
     double GetCostEvolution(int index);
-    void ResetCostEvolution(unsigned int size);
+    void ResetCostEvolution(size_t size);
     void SetCostEvolution(int index, double value);
     KinematicRequestFlags GetFlags() { return flags_; }
     /// \brief Evaluates whether the problem is valid.
@@ -91,7 +91,7 @@ public:
 
 protected:
     void UpdateTaskKinematics(std::shared_ptr<KinematicResponse> response);
-    void updateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses);
+    void UpdateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses);
 
     ScenePtr scene_;
     TaskMapMap task_maps_;

@@ -118,11 +118,11 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
     if (init.StartState.rows() > 0)
-    {
         SetStartState(init.StartState);
-    }
+
     if (init.StartTime < 0)
-        ThrowNamed("Invalid start time " << init.StartTime) else t_start = init.StartTime;
+        ThrowNamed("Invalid start time " << init.StartTime);
+    t_start = init.StartTime;
 
     switch (init.DerivativeOrder)
     {
@@ -188,7 +188,7 @@ void PlanningProblem::UpdateTaskKinematics(std::shared_ptr<KinematicResponse> re
         task->kinematics[0].Create(response);
 }
 
-void PlanningProblem::updateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses)
+void PlanningProblem::UpdateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses)
 {
     for (auto task : tasks_)
     {
@@ -247,7 +247,7 @@ double PlanningProblem::GetCostEvolution(int index)
     }
 }
 
-void PlanningProblem::ResetCostEvolution(unsigned int size)
+void PlanningProblem::ResetCostEvolution(size_t size)
 {
     cost_evolution_.resize(size);
     cost_evolution_.assign(size, std::make_pair<std::chrono::high_resolution_clock::time_point, double>(std::chrono::high_resolution_clock::now(), std::numeric_limits<double>::quiet_NaN()));

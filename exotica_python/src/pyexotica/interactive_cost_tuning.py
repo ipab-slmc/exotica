@@ -83,7 +83,7 @@ class InteractiveCostTuning(object):
         print("Saved cost parameters to %s" % filename)
 
     def reset_button(self):
-        """Resets enstries/exotica to original cost terms as specified in xml."""
+        """Resets entries/exotica to original cost terms as specified in xml."""
         print("Resetting cost parameters:")
         for k in self.cost_task_map_names:
             rho = self.original_rho[k]
@@ -99,7 +99,7 @@ class InteractiveCostTuning(object):
 
     def quit_button(self):
         """Quits interactive cost tuning."""
-        print("Quitting interactive rho tuning...")
+        print("Quitting interactive cost tuning...")
         self.master.quit()
 
     def mainloop(self):

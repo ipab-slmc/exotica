@@ -32,6 +32,8 @@
 
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionSceneFCLLatest)
 
+#define CONTINUOUS_COLLISION_USE_ADVANCED_SETTINGS
+
 namespace fcl_convert
 {
 fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
@@ -746,7 +748,7 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
     // request.gjk_solver_type = fcl::GST_INDEP;
 
     // CCDM_TRANS, CCDM_LINEAR, CCDM_SCREW, CCDM_SPLINE
-    request.ccd_motion_type = fcl::CCDM_TRANS;
+    request.ccd_motion_type = fcl::CCDMotionType::CCDM_SCREW;
 
     // CCDC_NAIVE, CCDC_CONSERVATIVE_ADVANCEMENT, CCDC_RAY_SHOOTING, CCDC_POLYNOMIAL_SOLVER
     // As of 2018-06-27, only CCDC_NAIVE appears to work reliably on both primitives and meshes.

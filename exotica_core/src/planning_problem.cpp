@@ -40,9 +40,8 @@
 
 namespace exotica
 {
-PlanningProblem::PlanningProblem() : flags_(KIN_FK), N(0)
-{
-}
+PlanningProblem::PlanningProblem() = default;
+PlanningProblem::~PlanningProblem() = default;
 
 std::string PlanningProblem::Print(const std::string& prepend)
 {
@@ -104,7 +103,7 @@ void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
     }
 }
 
-Eigen::VectorXd PlanningProblem::GetStartState()
+Eigen::VectorXd PlanningProblem::GetStartState() const
 {
     return start_state_;
 }
@@ -114,7 +113,7 @@ void PlanningProblem::SetStartTime(double t)
     t_start = t;
 }
 
-double PlanningProblem::GetStartTime()
+double PlanningProblem::GetStartTime() const
 {
     return t_start;
 }
@@ -223,6 +222,7 @@ void PlanningProblem::UpdateMultipleTaskKinematics(std::vector<std::shared_ptr<K
         }
     }
 }
+
 TaskMapMap& PlanningProblem::GetTaskMaps()
 {
     return task_maps_;
@@ -233,12 +233,12 @@ TaskMapVec& PlanningProblem::GetTasks()
     return tasks_;
 }
 
-ScenePtr PlanningProblem::GetScene()
+ScenePtr PlanningProblem::GetScene() const
 {
     return scene_;
 }
 
-std::pair<std::vector<double>, std::vector<double>> PlanningProblem::GetCostEvolution()
+std::pair<std::vector<double>, std::vector<double>> PlanningProblem::GetCostEvolution() const
 {
     std::pair<std::vector<double>, std::vector<double>> ret;
     for (size_t position = 0; position < cost_evolution_.size(); ++position)
@@ -251,7 +251,7 @@ std::pair<std::vector<double>, std::vector<double>> PlanningProblem::GetCostEvol
     return ret;
 }
 
-double PlanningProblem::GetCostEvolution(int index)
+double PlanningProblem::GetCostEvolution(int index) const
 {
     if (index > -1 && index < cost_evolution_.size())
     {
@@ -290,4 +290,4 @@ void PlanningProblem::SetCostEvolution(int index, double value)
         ThrowPretty("Out of range: " << index << " where length=" << cost_evolution_.size());
     }
 }
-}
+}  // namespace exotica

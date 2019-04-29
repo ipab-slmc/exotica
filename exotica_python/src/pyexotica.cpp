@@ -717,7 +717,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_property("start_time", &PlanningProblem::GetStartTime, &PlanningProblem::SetStartTime)
         .def("get_number_of_problem_updates", &PlanningProblem::GetNumberOfProblemUpdates)
         .def("reset_number_of_problem_updates", &PlanningProblem::ResetNumberOfProblemUpdates)
-        .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)()) & PlanningProblem::GetCostEvolution)
+        .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)() const) & PlanningProblem::GetCostEvolution)
         .def("is_valid", &PlanningProblem::IsValid);
 
     // Problem types

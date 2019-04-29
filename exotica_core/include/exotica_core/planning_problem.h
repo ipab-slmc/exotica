@@ -64,25 +64,29 @@ class PlanningProblem : public Object, Uncopyable, public virtual InstantiableBa
 {
 public:
     PlanningProblem();
-    virtual ~PlanningProblem() = default;
+    virtual ~PlanningProblem();
+
     void InstantiateBase(const Initializer& init) override;
     TaskMapMap& GetTaskMaps();
     TaskMapVec& GetTasks();
-    ScenePtr GetScene();
+    ScenePtr GetScene() const;
     std::string Print(const std::string& prepend) override;
+
     void SetStartState(Eigen::VectorXdRefConst x);
-    void SetStartTime(double t);
-    Eigen::VectorXd GetStartState();
-    double GetStartTime();
+    Eigen::VectorXd GetStartState() const;
     Eigen::VectorXd ApplyStartState(bool update_traj = true);
+
+    void SetStartTime(double t);
+    double GetStartTime() const;
+
     virtual void PreUpdate();
-    unsigned int GetNumberOfProblemUpdates() { return number_of_problem_updates_; }
+    unsigned int GetNumberOfProblemUpdates() const { return number_of_problem_updates_; }
     void ResetNumberOfProblemUpdates() { number_of_problem_updates_ = 0; }
-    std::pair<std::vector<double>, std::vector<double>> GetCostEvolution();
-    double GetCostEvolution(int index);
+    std::pair<std::vector<double>, std::vector<double>> GetCostEvolution() const;
+    double GetCostEvolution(int index) const;
     void ResetCostEvolution(size_t size);
     void SetCostEvolution(int index, double value);
-    KinematicRequestFlags GetFlags() { return flags_; }
+    KinematicRequestFlags GetFlags() const { return flags_; }
     /// \brief Evaluates whether the problem is valid.
     virtual bool IsValid() { ThrowNamed("Not implemented"); };
     double t_start;
@@ -104,7 +108,7 @@ protected:
     ScenePtr scene_;
     TaskMapMap task_maps_;
     TaskMapVec tasks_;
-    KinematicRequestFlags flags_;
+    KinematicRequestFlags flags_ = KinematicRequestFlags::KIN_FK;
     Eigen::VectorXd start_state_;
     unsigned int number_of_problem_updates_ = 0;  // Stores number of times the problem has been updated
     std::vector<std::pair<std::chrono::high_resolution_clock::time_point, double>> cost_evolution_;
@@ -112,6 +116,6 @@ protected:
 
 typedef Factory<PlanningProblem> PlanningProblemFac;
 typedef std::shared_ptr<PlanningProblem> PlanningProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_PLANNING_PROBLEM_H_

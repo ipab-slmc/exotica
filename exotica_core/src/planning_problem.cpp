@@ -53,9 +53,24 @@ std::string PlanningProblem::Print(const std::string& prepend)
     return ret;
 }
 
+int PlanningProblem::get_num_positions() const
+{
+    return num_positions_;
+}
+
+int PlanningProblem::get_num_velocities() const
+{
+    return num_velocities_;
+}
+
+int PlanningProblem::get_num_controls() const
+{
+    return num_controls_;
+}
+
 Eigen::VectorXd PlanningProblem::ApplyStartState(bool update_traj)
 {
-    scene_->SetModelState(start_state_, t_start, update_traj);
+    scene_->SetModelState(start_state_.head(num_positions_), t_start, update_traj);
     return scene_->GetControlledState();
 }
 
@@ -66,7 +81,8 @@ void PlanningProblem::PreUpdate()
 
 void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
 {
-    if (x.rows() == scene_->GetKinematicTree().GetNumModelJoints())
+    const auto num_states = num_positions_ + num_velocities_;
+    if (x.rows() == num_states)
     {
         start_state_ = x;
     }
@@ -84,7 +100,7 @@ void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
     }
     else
     {
-        ThrowNamed("Wrong start state vector size, expected " << scene_->GetKinematicTree().GetNumModelJoints() << ", got " << x.rows());
+        ThrowNamed("Wrong start state vector size, expected " << num_states << ", got " << x.rows());
     }
 }
 
@@ -116,6 +132,10 @@ void PlanningProblem::InstantiateBase(const Initializer& init_)
     scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
     start_state_ = Eigen::VectorXd::Zero(scene_->GetModelJointNames().size());
     N = scene_->GetKinematicTree().GetNumControlledJoints();
+
+    // Set size of positions. This is valid for kinematic problems and will be
+    // overridden in dynamic problems to set num_velocities_ and num_controls_.
+    num_positions_ = scene_->GetKinematicTree().GetNumModelJoints();
 
     if (init.StartState.rows() > 0)
         SetStartState(init.StartState);

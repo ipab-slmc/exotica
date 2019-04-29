@@ -51,8 +51,11 @@ void DynamicTimeIndexedShootingProblem::Instantiate(DynamicTimeIndexedShootingPr
 
     // TODO: Strictly speaking N here should correspond to the number of controls, which comes from the dynamic solver - to be fixed!
     N = scene_->GetKinematicTree().GetNumControlledJoints();
+    num_positions_ = dynamics_solver_->get_num_positions();
+    num_velocities_ = dynamics_solver_->get_num_velocities();
+    num_controls_ = dynamics_solver_->get_num_controls();
 
-    const int NX = dynamics_solver_->get_num_positions() + dynamics_solver_->get_num_velocities();
+    const int NX = num_positions_ + num_velocities_;
     if (init_.Q.rows() > 0)
     {
         ThrowPretty("Not supported yet");
@@ -66,16 +69,16 @@ void DynamicTimeIndexedShootingProblem::Instantiate(DynamicTimeIndexedShootingPr
         // }
     }
 
-    R_ = init_.R_rate * Eigen::MatrixXd::Identity(dynamics_solver_->get_num_controls(), dynamics_solver_->get_num_controls());
+    R_ = init_.R_rate * Eigen::MatrixXd::Identity(num_controls_, num_controls_);
     if (init_.R.rows() > 0)
     {
-        if (init_.R.rows() == dynamics_solver_->get_num_controls())
+        if (init_.R.rows() == num_controls_)
         {
             R_.diagonal() = init_.R;
         }
         else
         {
-            ThrowNamed("R dimension mismatch! Expected " << dynamics_solver_->get_num_controls() << ", got " << init_.R.rows());
+            ThrowNamed("R dimension mismatch! Expected " << num_controls_ << ", got " << init_.R.rows());
         }
     }
 
@@ -94,10 +97,10 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
 {
     if (debug_) HIGHLIGHT_NAMED("DynamicTimeIndexedShootingProblem", "Initialize problem with T=" << T_);
 
-    const int NX = dynamics_solver_->get_num_positions() + dynamics_solver_->get_num_velocities();
+    const int NX = num_positions_ + num_velocities_;
     X_ = Eigen::MatrixXd::Zero(NX, T_);
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
-    U_ = Eigen::MatrixXd::Zero(dynamics_solver_->get_num_controls(), T_ - 1);
+    U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
 
     Q_.assign(T_, init_.Q_rate * Eigen::MatrixXd::Identity(NX, NX));
 
@@ -197,11 +200,6 @@ void DynamicTimeIndexedShootingProblem::set_Q(Eigen::MatrixXdRefConst Q_in, int 
     Q_[t] = Q_in;
 }
 
-int DynamicTimeIndexedShootingProblem::get_num_controls() const
-{
-    return dynamics_solver_->get_num_controls();
-}
-
 void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int t)
 {
     // We can only update t=0, ..., T-1 - the last state will be created from integrating u_{T-1} to get x_T
@@ -214,9 +212,9 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
         t = T_ - 2;
     }
 
-    if (u_in.rows() != dynamics_solver_->get_num_controls())
+    if (u_in.rows() != num_controls_)
     {
-        ThrowPretty("Mismatching in size of control vector: " << u_in.rows() << " given, expected: " << dynamics_solver_->get_num_controls());
+        ThrowPretty("Mismatching in size of control vector: " << u_in.rows() << " given, expected: " << num_controls_);
     }
 
     U_.col(t) = u_in;

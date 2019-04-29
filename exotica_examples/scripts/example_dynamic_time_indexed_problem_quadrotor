@@ -18,7 +18,7 @@ print("Constant force to hover:")
 s = time()
 F_hover = 0.5 * 9.81 / 4.
 for t in xrange(problem.T - 1):
-    u_rand = F_hover * np.ones((problem.NU, 1))
+    u_rand = F_hover * np.ones((problem.num_controls, 1))
     problem.update(u_rand, t)
     problem.get_scene().get_kinematic_tree().publish_frames()
     sleep(problem.tau)
@@ -57,7 +57,7 @@ print("Initial cost:", cost)
 # Set up simple optimization problem
 def cost_function(u):
     for t in xrange(problem.T - 1):
-        problem.update(u[problem.NU * t: problem.NU * t + problem.NU], t)
+        problem.update(u[problem.num_controls * t: problem.num_controls * t + problem.num_controls], t)
     cost = 0.0
     for t in xrange(problem.T):
         cost += problem.get_state_cost(t)

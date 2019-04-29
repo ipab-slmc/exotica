@@ -44,7 +44,7 @@ PlanningProblem::PlanningProblem() : flags_(KIN_FK), N(0)
 {
 }
 
-std::string PlanningProblem::Print(std::string prepend)
+std::string PlanningProblem::Print(const std::string& prepend)
 {
     std::string ret = Object::Print(prepend);
     ret += "\n" + prepend + "  Task definitions:";

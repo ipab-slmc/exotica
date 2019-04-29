@@ -49,7 +49,7 @@ CollisionSceneFCLLatest::~CollisionSceneFCLLatest() = default;
 
 void CollisionSceneFCLLatest::Setup()
 {
-    if (debug_) HIGHLIGHT_NAMED("CollisionSceneFCL", "FCL version: " << FCL_VERSION);
+    if (debug_) HIGHLIGHT_NAMED("CollisionSceneFCLLatest", "FCL version: " << FCL_VERSION);
 }
 
 void CollisionSceneFCLLatest::UpdateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects)

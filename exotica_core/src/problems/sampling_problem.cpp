@@ -234,7 +234,7 @@ double SamplingProblem::GetRhoNEQ(const std::string& task_name)
     ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-bool SamplingProblem::IsValid(Eigen::VectorXdRefConst x)
+void SamplingProblem::Update(Eigen::VectorXdRefConst x)
 {
     scene_->Update(x);
     for (int i = 0; i < num_tasks; ++i)
@@ -245,16 +245,33 @@ bool SamplingProblem::IsValid(Eigen::VectorXdRefConst x)
     inequality.Update(Phi);
     equality.Update(Phi);
     ++number_of_problem_updates_;
+}
 
-    bool inequality_is_valid = ((inequality.S * inequality.ydiff).array() <= 0.0).all();
-    bool equality_is_valid = ((equality.S * equality.ydiff).array().abs() == 0.0).all();
+bool SamplingProblem::IsValid()
+{
+    // Check bounds
+    const Eigen::VectorXd x = scene_->GetKinematicTree().GetControlledState();
+    const Eigen::MatrixXd bounds = scene_->GetKinematicTree().GetJointLimits();
+    for (int i = 0; i < N; ++i)
+    {
+        if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1))
+        {
+            if (debug_) HIGHLIGHT_NAMED("SamplingProblem::IsValid", "State is out of bounds: joint #" << i << ": " << bounds(i, 0) << " < " << x(i) << " < " << bounds(i, 1));
+            return false;
+        }
+    }
+
+    // Check constraints
+    const bool inequality_is_valid = ((inequality.S * inequality.ydiff).array() <= 0.0).all();
+    const bool equality_is_valid = ((equality.S * equality.ydiff).array().abs() == 0.0).all();
 
     return (inequality_is_valid && equality_is_valid);
 }
 
-void SamplingProblem::Update(Eigen::VectorXdRefConst x)
+bool SamplingProblem::IsValid(Eigen::VectorXdRefConst x)
 {
-    IsValid(x);
+    Update(x);
+    return IsValid();
 }
 
 int SamplingProblem::GetSpaceDim()

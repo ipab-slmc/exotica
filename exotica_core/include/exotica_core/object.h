@@ -75,7 +75,7 @@ public:
         debug_ = oinit.Debug;
     }
 
-    virtual std::string Print(std::string prepend)
+    virtual std::string Print(const std::string& prepend)
     {
         return prepend + "  " + object_name_ + " (" + type() + ")";
     }

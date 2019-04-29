@@ -709,11 +709,15 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_task_maps", &PlanningProblem::GetTaskMaps, py::return_value_policy::reference_internal)
         .def("get_scene", &PlanningProblem::GetScene, py::return_value_policy::reference_internal)
         .def("__repr__", &PlanningProblem::Print, "String representation of the object", py::arg("prepend") = std::string(""))
+        .def_readonly("N", &PlanningProblem::N)
+        .def_property_readonly("num_positions", &PlanningProblem::get_num_positions)
+        .def_property_readonly("num_velocities", &PlanningProblem::get_num_velocities)
+        .def_property_readonly("num_controls", &PlanningProblem::get_num_controls)
         .def_property("start_state", &PlanningProblem::GetStartState, &PlanningProblem::SetStartState)
         .def_property("start_time", &PlanningProblem::GetStartTime, &PlanningProblem::SetStartTime)
         .def("get_number_of_problem_updates", &PlanningProblem::GetNumberOfProblemUpdates)
         .def("reset_number_of_problem_updates", &PlanningProblem::ResetNumberOfProblemUpdates)
-        .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)()) & PlanningProblem::GetCostEvolution)
+        .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)() const) & PlanningProblem::GetCostEvolution)
         .def("is_valid", &PlanningProblem::IsValid);
 
     // Problem types
@@ -733,7 +737,6 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_time_indexed_problem.def_property("T", &UnconstrainedTimeIndexedProblem::GetT, &UnconstrainedTimeIndexedProblem::SetT);
     unconstrained_time_indexed_problem.def_readonly("length_Phi", &UnconstrainedTimeIndexedProblem::length_Phi);
     unconstrained_time_indexed_problem.def_readonly("length_jacobian", &UnconstrainedTimeIndexedProblem::length_jacobian);
-    unconstrained_time_indexed_problem.def_readonly("N", &UnconstrainedTimeIndexedProblem::N);
     unconstrained_time_indexed_problem.def_readonly("num_tasks", &UnconstrainedTimeIndexedProblem::num_tasks);
     unconstrained_time_indexed_problem.def_readonly("Phi", &UnconstrainedTimeIndexedProblem::Phi);
     unconstrained_time_indexed_problem.def_readonly("jacobian", &UnconstrainedTimeIndexedProblem::jacobian);
@@ -767,7 +770,6 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def_property("T", &TimeIndexedProblem::GetT, &TimeIndexedProblem::SetT);
     time_indexed_problem.def_readonly("length_Phi", &TimeIndexedProblem::length_Phi);
     time_indexed_problem.def_readonly("length_jacobian", &TimeIndexedProblem::length_jacobian);
-    time_indexed_problem.def_readonly("N", &TimeIndexedProblem::N);
     time_indexed_problem.def_readonly("num_tasks", &TimeIndexedProblem::num_tasks);
     time_indexed_problem.def_readonly("Phi", &TimeIndexedProblem::Phi);
     time_indexed_problem.def_readonly("jacobian", &TimeIndexedProblem::jacobian);
@@ -804,7 +806,6 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_time_indexed_problem.def_property("T", &BoundedTimeIndexedProblem::GetT, &BoundedTimeIndexedProblem::SetT);
     bounded_time_indexed_problem.def_readonly("length_Phi", &BoundedTimeIndexedProblem::length_Phi);
     bounded_time_indexed_problem.def_readonly("length_jacobian", &BoundedTimeIndexedProblem::length_jacobian);
-    bounded_time_indexed_problem.def_readonly("N", &BoundedTimeIndexedProblem::N);
     bounded_time_indexed_problem.def_readonly("num_tasks", &BoundedTimeIndexedProblem::num_tasks);
     bounded_time_indexed_problem.def_readonly("Phi", &BoundedTimeIndexedProblem::Phi);
     bounded_time_indexed_problem.def_readonly("jacobian", &BoundedTimeIndexedProblem::jacobian);
@@ -824,7 +825,6 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_end_pose_problem.def_readwrite("W", &UnconstrainedEndPoseProblem::W);
     unconstrained_end_pose_problem.def_readonly("length_Phi", &UnconstrainedEndPoseProblem::length_Phi);
     unconstrained_end_pose_problem.def_readonly("length_jacobian", &UnconstrainedEndPoseProblem::length_jacobian);
-    unconstrained_end_pose_problem.def_readonly("N", &UnconstrainedEndPoseProblem::N);
     unconstrained_end_pose_problem.def_readonly("num_tasks", &UnconstrainedEndPoseProblem::num_tasks);
     unconstrained_end_pose_problem.def_readonly("Phi", &UnconstrainedEndPoseProblem::Phi);
     unconstrained_end_pose_problem.def_readonly("jacobian", &UnconstrainedEndPoseProblem::jacobian);
@@ -854,7 +854,6 @@ PYBIND11_MODULE(_pyexotica, module)
     end_pose_problem.def_readwrite("use_bounds", &EndPoseProblem::use_bounds);
     end_pose_problem.def_readonly("length_Phi", &EndPoseProblem::length_Phi);
     end_pose_problem.def_readonly("length_jacobian", &EndPoseProblem::length_jacobian);
-    end_pose_problem.def_readonly("N", &EndPoseProblem::N);
     end_pose_problem.def_readonly("num_tasks", &EndPoseProblem::num_tasks);
     end_pose_problem.def_readonly("Phi", &EndPoseProblem::Phi);
     end_pose_problem.def_readonly("jacobian", &EndPoseProblem::jacobian);
@@ -879,7 +878,6 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_end_pose_problem.def_readwrite("W", &BoundedEndPoseProblem::W);
     bounded_end_pose_problem.def_readonly("length_Phi", &BoundedEndPoseProblem::length_Phi);
     bounded_end_pose_problem.def_readonly("length_jacobian", &BoundedEndPoseProblem::length_jacobian);
-    bounded_end_pose_problem.def_readonly("N", &BoundedEndPoseProblem::N);
     bounded_end_pose_problem.def_readonly("num_tasks", &BoundedEndPoseProblem::num_tasks);
     bounded_end_pose_problem.def_readonly("Phi", &BoundedEndPoseProblem::Phi);
     bounded_end_pose_problem.def_readonly("jacobian", &BoundedEndPoseProblem::jacobian);
@@ -894,7 +892,6 @@ PYBIND11_MODULE(_pyexotica, module)
     sampling_problem.def_property("goal_state", &SamplingProblem::GetGoalState, &SamplingProblem::SetGoalState);
     sampling_problem.def("get_space_dim", &SamplingProblem::GetSpaceDim);
     sampling_problem.def("get_bounds", &SamplingProblem::GetBounds);
-    sampling_problem.def_readonly("N", &SamplingProblem::N);
     sampling_problem.def_readonly("num_tasks", &SamplingProblem::num_tasks);
     sampling_problem.def_readonly("Phi", &SamplingProblem::Phi);
     sampling_problem.def_readonly("inequality", &SamplingProblem::inequality);
@@ -914,7 +911,6 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def("get_bounds", &TimeIndexedSamplingProblem::GetBounds);
     time_indexed_sampling_problem.def_property("goal_state", &TimeIndexedSamplingProblem::GetGoalState, &TimeIndexedSamplingProblem::SetGoalState);
     time_indexed_sampling_problem.def_property("goal_time", &TimeIndexedSamplingProblem::GetGoalTime, &TimeIndexedSamplingProblem::SetGoalTime);
-    time_indexed_sampling_problem.def_readonly("N", &TimeIndexedSamplingProblem::N);
     time_indexed_sampling_problem.def_readonly("num_tasks", &TimeIndexedSamplingProblem::num_tasks);
     time_indexed_sampling_problem.def_readonly("Phi", &TimeIndexedSamplingProblem::Phi);
     time_indexed_sampling_problem.def_readonly("inequality", &TimeIndexedSamplingProblem::inequality);
@@ -935,8 +931,6 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_property("X_star", &DynamicTimeIndexedShootingProblem::get_X_star, &DynamicTimeIndexedShootingProblem::set_X_star)
         .def_property_readonly("tau", &DynamicTimeIndexedShootingProblem::get_tau)
         .def_property("T", &DynamicTimeIndexedShootingProblem::get_T, &DynamicTimeIndexedShootingProblem::set_T)
-        .def_readonly("N", &DynamicTimeIndexedShootingProblem::N)
-        .def_property_readonly("NU", &DynamicTimeIndexedShootingProblem::get_num_controls)
         .def("dynamics", &DynamicTimeIndexedShootingProblem::Dynamics)
         .def("simulate", &DynamicTimeIndexedShootingProblem::Simulate)
         .def("get_Q", &DynamicTimeIndexedShootingProblem::get_Q)

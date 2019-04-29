@@ -64,7 +64,7 @@ public:
     virtual int TaskSpaceJacobianDim() { return TaskSpaceDim(); }
     virtual void PreUpdate() {}
     virtual std::vector<TaskVectorEntry> GetLieGroupIndices() { return std::vector<TaskVectorEntry>(); }
-    virtual std::string Print(std::string prepend);
+    std::string Print(const std::string& prepend) override;
 
     std::vector<KinematicFrameRequest> GetFrames();
 

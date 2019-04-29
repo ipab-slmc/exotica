@@ -46,7 +46,8 @@ public:
     virtual void Instantiate(SamplingProblemInitializer& init);
 
     void Update(Eigen::VectorXdRefConst x);
-    bool IsValid(Eigen::VectorXdRefConst x);  // Not overriding on purpose
+    bool IsValid(Eigen::VectorXdRefConst x);  // Not overriding on purpose - this updates and calls IsValid
+    bool IsValid() override;
     void PreUpdate() override;
 
     int GetSpaceDim();

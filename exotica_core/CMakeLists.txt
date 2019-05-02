@@ -115,7 +115,8 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(DIRECTORY cmake/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
-install(FILES cmake/generate_initializers.py cmake/initializer_project_header.h.in DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
+install(FILES cmake/initializer_project_header.h.in DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
+install(PROGRAMS cmake/generate_initializers.py DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
 
 if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(test_autodiff test/test_autodiff.cpp)

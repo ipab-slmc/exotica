@@ -9,11 +9,14 @@ add_definitions(-Wno-write-strings)
 find_package(catkin REQUIRED COMPONENTS
   exotica_core
   pybind11_catkin
+  shape_msgs
+  moveit_msgs
+  geometry_msgs
 )
 
 catkin_package(
   LIBRARIES
-  CATKIN_DEPENDS exotica_core pybind11_catkin
+  CATKIN_DEPENDS exotica_core pybind11_catkin shape_msgs moveit_msgs geometry_msgs
 )
 
 include_directories(${catkin_INCLUDE_DIRS} ${pybind11_catkin_INCLUDE_DIRS}/pybind11_catkin)

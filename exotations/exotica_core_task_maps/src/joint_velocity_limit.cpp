@@ -83,7 +83,7 @@ void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef ph
 {
     if (kinematics.size() != 2) ThrowNamed("Wrong size of kinematics - requires 2, but got " << kinematics.size());
     if (phi.rows() != N) ThrowNamed("Wrong size of phi!");
-    if (!x.isApprox(kinematics[0].X)) ThrowNamed("The internal kinematics.X and passed state reference x do not match!");
+    if (!x.isApprox(kinematics[0].X)) ThrowNamed("The internal kinematics.X and passed state reference x do not match!\n x=" << std::setprecision(6) << x.transpose() << "\n X=" << kinematics[0].X.transpose() << "\n diff=" << (x - kinematics[0].X).transpose());
 
     phi.setZero();
     Eigen::VectorXd x_diff = (1 / dt_) * (kinematics[0].X - kinematics[1].X);

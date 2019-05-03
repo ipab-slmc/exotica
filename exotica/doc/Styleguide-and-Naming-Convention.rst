@@ -20,7 +20,7 @@ Packages, files and directories
 
 - All solver packages with ``_solver`` suffix.
 - All task map packages with ``_taskmaps`` suffix (or ``_taskmap`` if it contains only a single task map).
-- File names: ``with_underscores.cpp``, ``with_underscores.h``, ``with_underscores.py`` (do not use *.cc, *.hpp, ... file types)
+- File names: ``with_underscores.cpp``, ``with_underscores.h``, ``with_underscores.py`` (do not use \*.cc, \*.hpp, ... file types)
 - Directory structure:
 
   ::

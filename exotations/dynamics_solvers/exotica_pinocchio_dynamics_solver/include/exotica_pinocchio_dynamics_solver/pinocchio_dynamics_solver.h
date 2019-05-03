@@ -32,11 +32,18 @@
 
 #include <exotica_core/dynamics_solver.h>
 
+/// TODO: remove this pragma once Pinocchio removes neutralConfiguration/
+/// and fixes their deprecation warnings. (Relates to #547)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include <pinocchio/algorithm/aba-derivatives.hpp>
 #include <pinocchio/algorithm/aba.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/parsers/urdf.hpp>
+
+#pragma GCC diagnostic pop
 
 namespace exotica
 {

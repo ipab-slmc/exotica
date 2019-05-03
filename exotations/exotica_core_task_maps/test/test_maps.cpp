@@ -88,7 +88,7 @@ bool test_random(UnconstrainedEndPoseProblemPtr problem)
     TEST_COUT << "Testing random configurations:";
     for (int i = 0; i < num_trials_; ++i)
     {
-        x.setRandom();
+        x = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
         problem->Update(x);
         if (print_debug_information_)
         {
@@ -107,7 +107,7 @@ bool test_random(UnconstrainedTimeIndexedProblemPtr problem)
     TEST_COUT << "Testing random configurations:";
     for (int i = 0; i < num_trials_; ++i)
     {
-        x.setRandom();
+        x = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
         for (int t = 0; t < problem->GetT(); ++t)
         {
             problem->Update(x.col(t), t);
@@ -159,7 +159,7 @@ bool test_jacobian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e
     for (int j = 0; j < num_trials_; ++j)
     {
         Eigen::VectorXd x0(problem->N);
-        x0.setRandom();
+        x0 = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
         problem->Update(x0);
         const TaskSpaceVector y0(problem->Phi);
         const Eigen::MatrixXd J0(problem->jacobian);
@@ -179,6 +179,8 @@ bool test_jacobian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e
                       << jacobian;
             TEST_COUT << "J:\n"
                       << J0;
+            TEST_COUT << "(J*-J):\n"
+                      << (jacobian - J0);
             ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
         }
     }
@@ -194,7 +196,7 @@ bool test_jacobian_time_indexed(std::shared_ptr<T> problem, TimeIndexedTask& tas
     for (int tr = 0; tr < num_trials_; ++tr)
     {
         Eigen::VectorXd x0(problem->N);
-        x0.setRandom();
+        x0 = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
         problem->Update(x0, t);
         TaskSpaceVector y0 = task.Phi[t];
         Eigen::MatrixXd J0 = task.jacobian[t];
@@ -323,6 +325,7 @@ TEST(ExoticaTaskMaps, testEffOrientation)
         TEST_COUT << "End-effector orientation test";
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
         std::vector<double> eps = {1.1e-5, 1e-5, 1e-5, 1.1e-5, 1e-5, 1e-5};
+        // TODO: Quaternion does not pass the test with precision 1e-5. Investigate why.
 
         for (int i = 0; i < types.size(); ++i)
         {
@@ -405,7 +408,7 @@ TEST(ExoticaTaskMaps, testEffVelocity)
         for (int t = 0; t < problem->GetT(); ++t)
         {
             Eigen::VectorXd x(problem->N);
-            x.setRandom();
+            x = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
             problem->Update(x, t);
         }
 
@@ -543,7 +546,7 @@ TEST(ExoticaTaskMaps, testJointVelocityLimit)
             for (int t = 0; t < problem->GetT(); ++t)
             {
                 Eigen::VectorXd x(problem->N);
-                x.setRandom();
+                x = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
                 problem->Update(x, t);
             }
 

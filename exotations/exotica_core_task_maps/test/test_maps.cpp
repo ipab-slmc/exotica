@@ -506,6 +506,7 @@ TEST(ExoticaTaskMaps, testJointVelocityLimit)
         TEST_COUT << "JointVelocityLimit test";
 
         std::vector<Initializer> maps;
+        maps.reserve(3);
 
         // Test default
         {
@@ -556,9 +557,9 @@ TEST(ExoticaTaskMaps, testJointVelocityLimit)
             }
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "JointVelocityLimit: Uncaught exception!";
+        ADD_FAILURE() << "JointVelocityLimit: Uncaught exception! " << e.what();
     }
 }
 

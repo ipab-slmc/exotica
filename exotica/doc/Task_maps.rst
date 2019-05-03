@@ -18,6 +18,7 @@ Initializing task maps
 Each task map needs to be initialized first, this sets up the task map and specifies any important parameters. After initialization we can send the the task map to 
 the problem. 
 
+.._initializing-com-task-map:
 CoM 
 ---
 
@@ -141,6 +142,7 @@ Using Task Maps
 Once we've chosen and initialized the task maps we're interested in they need to be sent to the problem. The problem then informs the solver that these things must be taken into
 consideration when producing a motion plan. Each problem can handle one of many task maps. Let's look at how we send these to the problem. 
 
+.._using-task-maps-cpp:
 C++
 ---
 

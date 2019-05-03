@@ -55,6 +55,7 @@ the solver:
 
 .. rubric:: CODE EXPLAINED
 
+.._setting-start-position-cpp:
 Setting Start Position
 ======================
 

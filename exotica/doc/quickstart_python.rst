@@ -105,6 +105,7 @@ Where goal values are set to arbitrary coordinates (`[z, y, z, 0, 0, 0]`).
 
 The task map named `Position` is set in the XML setup file for this example. We look more at task maps in the task maps tutorial.
 
+.._expected-output-python:
 Expected Output
 ---------------
 

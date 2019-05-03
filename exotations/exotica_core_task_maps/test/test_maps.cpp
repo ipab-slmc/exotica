@@ -1027,7 +1027,7 @@ TEST(ExoticaTaskMaps, testCollisionDistance)
         Initializer map("exotica/CollisionDistance", {{"Name", std::string("MyTask")},
                                                       {"CheckSelfCollision", false},
                                                       {}});
-        UnconstrainedEndPoseProblem_ptr problem = setup_problem(map, "CollisionSceneFCLLatest");
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "CollisionSceneFCLLatest");
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
     }
@@ -1052,7 +1052,7 @@ TEST(ExoticaTaskMaps, testSmoothCollisionDistance)
                                                                 {"RobotMargin", 0.01},
                                                                 {"Linear", is_linear},
                                                                 {}});
-            UnconstrainedEndPoseProblem_ptr problem = setup_problem(map, "CollisionSceneFCLLatest");
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "CollisionSceneFCLLatest");
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
         }

@@ -187,7 +187,7 @@ parameters for the solver, some required and some optional. Since we
 have used the ``IKSolver`` in the tutorial, the options for this solver
 are seen below:
 
-.. code-block:: xml
+.. code-block:: c++
 
         extend <exotica_core/motion_solver>
         Optional double Tolerance = 1e-5;

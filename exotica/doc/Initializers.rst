@@ -96,7 +96,7 @@ to your CMakeLists.txt:
 
     project(MyProjectName)
 
-    ...
+    # ...
 
     catkin_package(
     # ... catkin package stuff
@@ -108,7 +108,7 @@ to your CMakeLists.txt:
     # Generate initializers
     GenInitializers()
 
-    ...
+    # ...
 
     # Add initializers dependency to your executable
     add_dependencies(MyExecutableName MyProjectName_initializers)

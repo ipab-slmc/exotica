@@ -52,7 +52,7 @@ namespace exotica
 ///   - derivatives of \f$\Phi\f$ are computed using finite differences.
 ///
 /// Todo
-///   - Update user options, that is allow user to specify to compute based on translation, rotation, all, yoshikawa, or asada as in Peter Corkes' toolbox.
+///   - Update user options, that is allow user to specify to compute based on translation, rotation, all, yoshikawa, or asada as in Peter Corkes' toolbox (cf. https://github.com/petercorke/robotics-toolbox-matlab/blob/0ca01aac26b4475094845982b9a5e80b02c024fd/%40SerialLink/maniplty.m#L27).
 class Manipulability : public TaskMap, public Instantiable<ManipulabilityInitializer>
 {
 public:

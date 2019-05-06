@@ -50,6 +50,9 @@ namespace exotica
 /// Note that
 ///   - the associated value for \f$\rho\f$ <b>must</b> be negative in order to maximize the manipulability, and
 ///   - derivatives of \f$\Phi\f$ are computed using finite differences.
+///
+/// Todo
+///   - Update user options, that is allow user to specify to compute based on translation, rotation, all, yoshikawa, or asada as in Peter Corkes' toolbox.
 class Manipulability : public TaskMap, public Instantiable<ManipulabilityInitializer>
 {
 public:

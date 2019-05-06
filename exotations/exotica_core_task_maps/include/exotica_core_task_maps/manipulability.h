@@ -61,7 +61,8 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    int n_end_effs_;  ///< Number of end-effectors.
+    int n_end_effs_;     ///< Number of end-effectors.
+    int n_rows_of_jac_;  ///< Number of rows from the top to extract from full jacobian. Is either 3 (position) or 6 (position and rotation).
 };
 }  // namespace exotica
 

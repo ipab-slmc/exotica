@@ -42,7 +42,7 @@ void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
     for (int i = 0; i < n_end_effs_; ++i)
     {
-        const Eigen::MatrixXd& J = kinematics[0].jacobian[i].data;
+        const Eigen::MatrixXd& J = kinematics[0].jacobian[i].data.topRows(n_rows_of_jac_);
         phi(i) = std::sqrt((J * J.transpose()).determinant());
     }
 }
@@ -50,6 +50,14 @@ void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 void Manipulability::Instantiate(ManipulabilityInitializer& init)
 {
     n_end_effs_ = frames_.size();
+    if (init.OnlyPosition)
+    {
+        n_rows_of_jac_ = 3;
+    }
+    else
+    {
+        n_rows_of_jac_ = 6;
+    }
 }
 
 int Manipulability::TaskSpaceDim()

@@ -2,6 +2,8 @@ class Manipulability
 
 extend <exotica_core/task_map>
 
+Optional bool OnlyPosition = false; // If true, only position part of jacobian is used in computation of manipulability. Otherwise, the full jacobian is used.
+
 // inherited from TaskMap:
 // string Link           > name of frame in which point is defined
 // VectorXd LinkOffset   > coordinate of point in Link frame

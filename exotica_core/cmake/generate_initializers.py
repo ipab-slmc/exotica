@@ -61,14 +61,14 @@ def eprint(msg):
 def constructor_argument_list(data):
     ret = ""
     for d in data:
-        if d.has_key('Required'):
+        if 'Required' in d:
             ret += " " + d['Type'] + " _" + (d['Name']) + default_argument_value(d) + ","
     return ret[0:-1]
 
 def constructor_list(data):
     ret=""
     for d in data:
-        if d.has_key('Required'):
+        if 'Required' in d:
             ret += ",\n        " + (d['Name']) + "(_" + (d['Name']) + ") "
     return ret
 
@@ -97,7 +97,7 @@ def is_required(data):
 def default_constructor_list(data):
     ret = ""
     for d in data:
-        if d.has_key('Required') and not d['Required']:
+        if 'Required' in d and not d['Required']:
             ret += ",\n        " + (d['Name']) + "("+default_value(d) + ") "
     return ret
 
@@ -108,7 +108,7 @@ def needs_default_constructor(data):
     return False
 
 def declaration(data):
-    if data.has_key('Required'):
+    if 'Required' in data:
       return "    " + data['Type'] + " " + (data['Name']) + ";\n"
     else:
       return ""
@@ -145,19 +145,19 @@ def parser(type):
 
 
 def copy(data):
-    if data.has_key('Required'):
+    if 'Required' in data:
       return "        ret.properties_.emplace(\""+data['Name']+"\", Property(\""+data['Name']+"\", "+is_required(data)+", boost::any("+(data['Name'])+")));\n"
     else:
       return ""
 
 def add(data):
-    if data.has_key('Required'):
+    if 'Required' in data:
       return "        if (other.HasProperty(\"" + data['Name'] + "\")) {const Property& prop=other.properties_.at(\"" + data['Name'] + "\"); if(prop.IsSet()) " + (data['Name']) + " = " + parser(data['Type']) + ";}\n"
     else:
       return ""
 
 def check(data, name):
-    if data.has_key('Required') and data['Required']:
+    if 'Required' in data and data['Required']:
       return "        if(!other.HasProperty(\"" + data['Name'] + "\") || !other.properties_.at(\"" + data['Name'] + "\").IsSet()) ThrowPretty(\"Initializer " + name + " requires property " + data['Name'] + " to be set!\");\n"
     else:
       return ""
@@ -316,7 +316,7 @@ def parse_file(file_name):
         i = i + 1
         d = parse_line(l, i, file_name)
         if d != None:
-            if d.has_key('Required'):
+            if 'Required' in d:
                 if d['Required'] == False:
                     optionalOnly = True
                 else:
@@ -324,11 +324,11 @@ def parse_file(file_name):
                         eprint("Required properties_ have to come before Optional ones, in '" + file_name + "', on line " + str(i))
                         sys.exit(2)
                 data.append(d)
-            if d.has_key('Include'):
+            if 'Include' in d:
                 include.append(d['Include'])
-            if d.has_key('Extends'):
+            if 'Extends' in d:
                 extends.append(d['Extends'])
-            if d.has_key('ClassName'):
+            if 'ClassName' in d:
                 names.append(d['ClassName'])
     if len(names) != 1:
         eprint("Could not parse initializer class name in '" + file_name + "'!")
@@ -357,7 +357,7 @@ def contains_extends(name, list_in):
 def collect_extensions(input_files, search_dirs, content):
     file_content = parse_file(input_files)
     class_name = file_content['ClassName']
-    if file_content.has_key('Extends'):
+    if 'Extends' in file_content:
         for e in file_content['Extends']:
             if not contains_extends(e, content['Extends']):
                 file_name = None
@@ -372,7 +372,7 @@ def collect_extensions(input_files, search_dirs, content):
                 content['Extends'].append(e)
                 content = collect_extensions(file_name, search_dirs, content)
 
-    if file_content.has_key('Data'):
+    if 'Data' in file_content:
       for d in file_content['Data']:
           cls = contains_data(d['Type'], d['Name'], content['Data'])
           if cls:
@@ -382,7 +382,7 @@ def collect_extensions(input_files, search_dirs, content):
           else:
               d['Class'] = class_name
               content['Data'].append(d)
-    if file_content.has_key('Include'):
+    if 'Include' in file_content:
         for i in file_content['Include']:
             if not contains_include(i, content['Include']):
                 content['Include'].append(i)
@@ -447,7 +447,7 @@ inline std::vector<Initializer> Get""" + to_camel_cased(namespace) + """Initiali
 if __name__ == "__main__":
     if len(sys.argv) > 5:
         offset = 5
-        n = (len(sys.argv) - offset) / 2
+        n = int((len(sys.argv) - offset) / 2)
         namespace = sys.argv[1]
         search_dirs = sys.argv[2].split(':')
         devel_dir = sys.argv[3]

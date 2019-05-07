@@ -50,6 +50,9 @@ namespace exotica
 /// Note that
 ///   - the associated value for \f$\rho\f$ <b>must</b> be negative in order to maximize the manipulability, and
 ///   - derivatives of \f$\Phi\f$ are computed using finite differences.
+///
+/// Todo
+///   - Update user options, that is allow user to specify to compute based on translation, rotation, all, yoshikawa, or asada as in Peter Corkes' toolbox (cf. https://github.com/petercorke/robotics-toolbox-matlab/blob/0ca01aac26b4475094845982b9a5e80b02c024fd/%40SerialLink/maniplty.m#L27).
 class Manipulability : public TaskMap, public Instantiable<ManipulabilityInitializer>
 {
 public:
@@ -61,7 +64,8 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    int n_end_effs_;  ///< Number of end-effectors.
+    int n_end_effs_;     ///< Number of end-effectors.
+    int n_rows_of_jac_;  ///< Number of rows from the top to extract from full jacobian. Is either 3 (position) or 6 (position and rotation).
 };
 }  // namespace exotica
 

@@ -73,7 +73,7 @@ void JointAccelerationBackwardDifference::AssignScene(ScenePtr scene)
     I_ = Eigen::MatrixXd::Identity(N_, N_);
 }
 
-void JointAccelerationBackwardDifference::Instantiate(JointAccelerationBackwardDifferenceInitializer& init)
+void JointAccelerationBackwardDifference::Instantiate(const JointAccelerationBackwardDifferenceInitializer &init)
 {
     init_ = init;
 }

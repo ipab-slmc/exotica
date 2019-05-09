@@ -187,7 +187,7 @@ void CenterOfMass::AssignScene(ScenePtr scene)
     Initialize();
 }
 
-void CenterOfMass::Instantiate(CenterOfMassInitializer& init)
+void CenterOfMass::Instantiate(const CenterOfMassInitializer &init)
 {
     init_ = init;
 }

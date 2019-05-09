@@ -48,7 +48,7 @@ Eigen::MatrixXd BoundedEndPoseProblem::GetBounds() const
     return scene_->GetKinematicTree().GetJointLimits();
 }
 
-void BoundedEndPoseProblem::Instantiate(BoundedEndPoseProblemInitializer& init)
+void BoundedEndPoseProblem::Instantiate(const BoundedEndPoseProblemInitializer& init)
 {
     num_tasks = tasks_.size();
     length_Phi = 0;

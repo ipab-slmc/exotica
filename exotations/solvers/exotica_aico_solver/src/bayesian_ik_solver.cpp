@@ -39,7 +39,7 @@ REGISTER_MOTIONSOLVER_TYPE("BayesianIKSolver", exotica::BayesianIKSolver)
 
 namespace exotica
 {
-void BayesianIKSolver::Instantiate(BayesianIKSolverInitializer& init)
+void BayesianIKSolver::Instantiate(const BayesianIKSolverInitializer& init)
 {
     std::string mode = init.SweepMode;
     if (mode == "Forwardly")

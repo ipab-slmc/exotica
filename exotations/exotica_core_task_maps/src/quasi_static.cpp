@@ -378,7 +378,7 @@ void QuasiStatic::AssignScene(ScenePtr scene)
     Initialize();
 }
 
-void QuasiStatic::Instantiate(QuasiStaticInitializer& init)
+void QuasiStatic::Instantiate(const QuasiStaticInitializer& init)
 {
     init_ = init;
 }

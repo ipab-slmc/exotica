@@ -45,7 +45,7 @@ public:
     QuasiStatic();
     virtual ~QuasiStatic();
 
-    void Instantiate(QuasiStaticInitializer& init) override;
+    void Instantiate(const QuasiStaticInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;

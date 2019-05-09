@@ -38,7 +38,7 @@ namespace exotica
 PointToPlane::PointToPlane() = default;
 PointToPlane::~PointToPlane() = default;
 
-void PointToPlane::Instantiate(PointToPlaneInitializer& init)
+void PointToPlane::Instantiate(const PointToPlaneInitializer& init)
 {
     if (debug_ && Server::IsRos())
     {

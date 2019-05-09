@@ -66,7 +66,7 @@ public:
     Scene(const std::string& name);
     Scene();
     virtual ~Scene();
-    virtual void Instantiate(SceneInitializer& init);
+    virtual void Instantiate(const SceneInitializer& init);
     void RequestKinematics(KinematicsRequest& request, std::function<void(std::shared_ptr<KinematicResponse>)> callback);
     std::string GetName();
     virtual void Update(Eigen::VectorXdRefConst x, double t = 0);

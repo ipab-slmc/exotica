@@ -36,7 +36,7 @@ namespace exotica
 JointLimit::JointLimit() = default;
 JointLimit::~JointLimit() = default;
 
-void JointLimit::Instantiate(JointLimitInitializer& init)
+void JointLimit::Instantiate(const JointLimitInitializer& init)
 {
     init_ = init;
 }

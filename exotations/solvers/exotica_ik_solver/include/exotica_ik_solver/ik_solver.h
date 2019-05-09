@@ -56,7 +56,7 @@ public:
     IKSolver();
     virtual ~IKSolver();
 
-    void Instantiate(IKSolverInitializer& init) override;
+    void Instantiate(const IKSolverInitializer& init) override;
 
     void Solve(Eigen::MatrixXd& solution) override;
 

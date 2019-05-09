@@ -55,36 +55,36 @@ namespace exotica
 {
 RRTStarSolver::RRTStarSolver() = default;
 
-void RRTStarSolver::Instantiate(RRTStarSolverInitializer& init)
+void RRTStarSolver::Instantiate(const RRTStarSolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = OMPLSolverInitializer(RRTStarSolverInitializer(init));
     algorithm_ = "Exotica_RRTStar";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::RRTstar>, _1, _2);
 }
 
 LBTRRTSolver::LBTRRTSolver() = default;
 
-void LBTRRTSolver::Instantiate(LBTRRTSolverInitializer& init)
+void LBTRRTSolver::Instantiate(const LBTRRTSolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = OMPLSolverInitializer(LBTRRTSolverInitializer(init));
     algorithm_ = "Exotica_LBTRRT";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::LBTRRT>, _1, _2);
 }
 
 RRTSolver::RRTSolver() = default;
 
-void RRTSolver::Instantiate(RRTSolverInitializer& init)
+void RRTSolver::Instantiate(const RRTSolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = OMPLSolverInitializer(RRTSolverInitializer(init));
     algorithm_ = "Exotica_RRT";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::RRT>, _1, _2);
 }
 
 RRTConnectSolver::RRTConnectSolver() = default;
 
-void RRTConnectSolver::Instantiate(RRTConnectSolverInitializer& init)
+void RRTConnectSolver::Instantiate(const RRTConnectSolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = OMPLSolverInitializer(RRTConnectSolverInitializer(init));
     algorithm_ = "Exotica_RRTConnect";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::RRTConnect>, _1, _2);
 }
@@ -103,36 +103,36 @@ double RRTConnectSolver::GetRange()
 
 ESTSolver::ESTSolver() = default;
 
-void ESTSolver::Instantiate(ESTSolverInitializer& init)
+void ESTSolver::Instantiate(const ESTSolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = OMPLSolverInitializer(ESTSolverInitializer(init));
     algorithm_ = "Exotica_EST";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::EST>, _1, _2);
 }
 
 KPIECESolver::KPIECESolver() = default;
 
-void KPIECESolver::Instantiate(KPIECESolverInitializer& init)
+void KPIECESolver::Instantiate(const KPIECESolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = OMPLSolverInitializer(KPIECESolverInitializer(init));
     algorithm_ = "Exotica_KPIECE";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::KPIECE1>, _1, _2);
 }
 
 BKPIECESolver::BKPIECESolver() = default;
 
-void BKPIECESolver::Instantiate(BKPIECESolverInitializer& init)
+void BKPIECESolver::Instantiate(const BKPIECESolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = OMPLSolverInitializer(BKPIECESolverInitializer(init));
     algorithm_ = "Exotica_BKPIECE";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::BKPIECE1>, _1, _2);
 }
 
 PRMSolver::PRMSolver() = default;
 
-void PRMSolver::Instantiate(PRMSolverInitializer& init)
+void PRMSolver::Instantiate(const PRMSolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = OMPLSolverInitializer(PRMSolverInitializer(init));
     algorithm_ = "Exotica_PRM";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::PRM>, _1, _2);
     multi_query_ = init.MultiQuery;
@@ -193,9 +193,9 @@ void PRMSolver::SetMultiQuery(bool val)
 
 LazyPRMSolver::LazyPRMSolver() = default;
 
-void LazyPRMSolver::Instantiate(LazyPRMSolverInitializer& init)
+void LazyPRMSolver::Instantiate(const LazyPRMSolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = OMPLSolverInitializer(LazyPRMSolverInitializer(init));
     algorithm_ = "Exotica_LazyPRM";
     planner_allocator_ = boost::bind(&AllocatePlanner<ompl::geometric::LazyPRM>, _1, _2);
     multi_query_ = init.MultiQuery;

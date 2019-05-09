@@ -66,7 +66,7 @@ void JointVelocityBackwardDifference::AssignScene(ScenePtr scene)
     I_ = Eigen::MatrixXd::Identity(N_, N_);
 }
 
-void JointVelocityBackwardDifference::Instantiate(JointVelocityBackwardDifferenceInitializer& init)
+void JointVelocityBackwardDifference::Instantiate(const JointVelocityBackwardDifferenceInitializer& init)
 {
     init_ = init;
 }

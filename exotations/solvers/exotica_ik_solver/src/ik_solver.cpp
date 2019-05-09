@@ -37,7 +37,7 @@ IKSolver::IKSolver() = default;
 
 IKSolver::~IKSolver() = default;
 
-void IKSolver::Instantiate(IKSolverInitializer& init)
+void IKSolver::Instantiate(const IKSolverInitializer& init)
 {
     parameters_ = init;
 }

@@ -40,7 +40,7 @@ JointVelocityLimit::JointVelocityLimit()
 
 JointVelocityLimit::~JointVelocityLimit() = default;
 
-void JointVelocityLimit::Instantiate(JointVelocityLimitInitializer& init)
+void JointVelocityLimit::Instantiate(const JointVelocityLimitInitializer &init)
 {
     init_ = init;
 }

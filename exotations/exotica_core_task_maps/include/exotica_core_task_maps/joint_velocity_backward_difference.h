@@ -50,7 +50,7 @@ class JointVelocityBackwardDifference : public TaskMap, public Instantiable<Join
 public:
     JointVelocityBackwardDifference();
     virtual ~JointVelocityBackwardDifference();
-    void Instantiate(JointVelocityBackwardDifferenceInitializer& init) override;
+    void Instantiate(const JointVelocityBackwardDifferenceInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     /// \brief Logs previous joint state.

@@ -56,9 +56,9 @@ std::string Scene::GetName()
     return name_;
 }
 
-void Scene::Instantiate(SceneInitializer& init)
+void Scene::Instantiate(const SceneInitializer& init)
 {
-    Object::InstantiateObject(init);
+    Object::InstantiateObject(SceneInitializer(init));
     name_ = object_name_;
     kinematica_.debug = debug_;
     force_collision_ = init.AlwaysUpdateCollisionScene;

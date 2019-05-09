@@ -73,7 +73,7 @@ void JointJerkBackwardDifference::AssignScene(ScenePtr scene)
     I_ = Eigen::MatrixXd::Identity(N_, N_);
 }
 
-void JointJerkBackwardDifference::Instantiate(JointJerkBackwardDifferenceInitializer& init)
+void JointJerkBackwardDifference::Instantiate(const JointJerkBackwardDifferenceInitializer &init)
 {
     init_ = init;
 }

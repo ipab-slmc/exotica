@@ -33,7 +33,7 @@ namespace exotica
 class LevenbergMarquardtSolver : public MotionSolver, public Instantiable<LevenbergMarquardtSolverInitializer>
 {
 public:
-    void Instantiate(LevenbergMarquardtSolverInitializer& init) override;
+    void Instantiate(const LevenbergMarquardtSolverInitializer& init) override;
 
     void Solve(Eigen::MatrixXd& solution) override;
 

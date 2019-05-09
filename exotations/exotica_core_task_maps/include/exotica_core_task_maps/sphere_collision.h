@@ -45,7 +45,7 @@ public:
     SphereCollision();
     virtual ~SphereCollision();
 
-    void Instantiate(SphereCollisionInitializer& init) override;
+    void Instantiate(const SphereCollisionInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;

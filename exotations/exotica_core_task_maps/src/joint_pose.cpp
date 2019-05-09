@@ -73,7 +73,7 @@ void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen:
 //     }
 // }
 
-void JointPose::Instantiate(JointPoseInitializer& init)
+void JointPose::Instantiate(const JointPoseInitializer &init)
 {
     init_ = init;
 }

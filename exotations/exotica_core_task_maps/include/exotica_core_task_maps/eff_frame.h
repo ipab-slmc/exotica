@@ -42,7 +42,7 @@ public:
     EffFrame();
     virtual ~EffFrame();
 
-    void Instantiate(EffFrameInitializer& init) override;
+    void Instantiate(const EffFrameInitializer& init) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;

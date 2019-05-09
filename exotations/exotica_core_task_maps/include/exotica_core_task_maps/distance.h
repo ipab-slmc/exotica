@@ -42,7 +42,7 @@ public:
     Distance();
     virtual ~Distance();
 
-    void Instantiate(DistanceInitializer& init) override;
+    void Instantiate(const DistanceInitializer& init) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;

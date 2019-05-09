@@ -43,7 +43,7 @@ public:
     EffAxisAlignment();
     virtual ~EffAxisAlignment();
 
-    void Instantiate(EffAxisAlignmentInitializer& init) override;
+    void Instantiate(const EffAxisAlignmentInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;

@@ -73,7 +73,7 @@ class AICOSolver : public MotionSolver, public Instantiable<AICOSolverInitialize
 {
 public:
     AICOSolver();
-    void Instantiate(AICOSolverInitializer& init) override;
+    void Instantiate(const AICOSolverInitializer& init) override;
     virtual ~AICOSolver();
 
     ///\brief Solves the problem

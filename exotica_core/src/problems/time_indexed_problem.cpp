@@ -34,7 +34,7 @@ REGISTER_PROBLEM_TYPE("TimeIndexedProblem", exotica::TimeIndexedProblem)
 
 namespace exotica
 {
-void TimeIndexedProblem::Instantiate(TimeIndexedProblemInitializer& init)
+void TimeIndexedProblem::Instantiate(const TimeIndexedProblemInitializer& init)
 {
     init_ = init;
 

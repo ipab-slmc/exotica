@@ -51,7 +51,7 @@ class JointJerkBackwardDifference : public TaskMap, public Instantiable<JointJer
 public:
     JointJerkBackwardDifference();
     virtual ~JointJerkBackwardDifference();
-    void Instantiate(JointJerkBackwardDifferenceInitializer& init) override;
+    void Instantiate(const JointJerkBackwardDifferenceInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     /// \brief Logs previous joint state.

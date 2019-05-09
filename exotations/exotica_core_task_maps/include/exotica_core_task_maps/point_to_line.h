@@ -43,7 +43,7 @@ public:
     PointToLine();
     virtual ~PointToLine();
 
-    void Instantiate(PointToLineInitializer& init) override;
+    void Instantiate(const PointToLineInitializer& init) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;

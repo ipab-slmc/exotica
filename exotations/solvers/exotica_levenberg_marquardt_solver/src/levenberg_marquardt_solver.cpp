@@ -26,7 +26,7 @@ REGISTER_MOTIONSOLVER_TYPE("LevenbergMarquardtSolverSolver", exotica::LevenbergM
 
 namespace exotica
 {
-void LevenbergMarquardtSolver::Instantiate(LevenbergMarquardtSolverInitializer& init) { parameters_ = init; }
+void LevenbergMarquardtSolver::Instantiate(const LevenbergMarquardtSolverInitializer& init) { parameters_ = init; }
 void LevenbergMarquardtSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     if (pointer->type() != "exotica::UnconstrainedEndPoseProblem")

@@ -38,7 +38,7 @@ namespace exotica
 EffAxisAlignment::EffAxisAlignment() = default;
 EffAxisAlignment::~EffAxisAlignment() = default;
 
-void EffAxisAlignment::Instantiate(EffAxisAlignmentInitializer& init)
+void EffAxisAlignment::Instantiate(const EffAxisAlignmentInitializer& init)
 {
     init_ = init;
 }

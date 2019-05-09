@@ -56,7 +56,7 @@ std::vector<double> SamplingProblem::GetBounds()
     return bounds;
 }
 
-void SamplingProblem::Instantiate(SamplingProblemInitializer& init)
+void SamplingProblem::Instantiate(const SamplingProblemInitializer& init)
 {
     parameters = init;
 

@@ -37,7 +37,7 @@ namespace exotica
 SphereCollision::SphereCollision() = default;
 SphereCollision::~SphereCollision() = default;
 
-void SphereCollision::Instantiate(SphereCollisionInitializer& init)
+void SphereCollision::Instantiate(const SphereCollisionInitializer& init)
 {
     eps_ = 1.0 / init.Precision;
     for (int i = 0; i < init.EndEffector.size(); ++i)

@@ -109,7 +109,7 @@ public:
     virtual void InstantiateInternal(const Initializer& init)
     {
         InstantiateBase(init);
-        C tmp(init);
+        const C tmp(init);
         tmp.Check(init);
         Instantiate(tmp);
     }
@@ -124,7 +124,7 @@ public:
         return C().GetAllTemplates();
     }
 
-    virtual void Instantiate(C& init) = 0;
+    virtual void Instantiate(const C& init) = 0;
 };
 }
 

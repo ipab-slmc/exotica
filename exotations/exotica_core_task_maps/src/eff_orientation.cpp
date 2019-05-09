@@ -36,7 +36,7 @@ namespace exotica
 EffOrientation::EffOrientation() = default;
 EffOrientation::~EffOrientation() = default;
 
-void EffOrientation::Instantiate(EffOrientationInitializer& init)
+void EffOrientation::Instantiate(const EffOrientationInitializer &init)
 {
     if (init.Type == "Quaternion")
     {

@@ -44,7 +44,7 @@ public:
     CenterOfMass();
     virtual ~CenterOfMass();
 
-    void Instantiate(CenterOfMassInitializer& init) override;
+    void Instantiate(const CenterOfMassInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;

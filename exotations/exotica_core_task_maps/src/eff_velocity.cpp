@@ -80,7 +80,7 @@ void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     }
 }
 
-void EffVelocity::Instantiate(EffVelocityInitializer& init)
+void EffVelocity::Instantiate(const EffVelocityInitializer &init)
 {
 }
 

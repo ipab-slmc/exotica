@@ -59,7 +59,7 @@ void Distance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::
     }
 }
 
-void Distance::Instantiate(DistanceInitializer& init)
+void Distance::Instantiate(const DistanceInitializer &init)
 {
 }
 

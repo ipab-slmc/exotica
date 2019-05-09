@@ -44,7 +44,7 @@ public:
     JointVelocityLimit();
     virtual ~JointVelocityLimit();
 
-    void Instantiate(JointVelocityLimitInitializer& init) override;
+    void Instantiate(const JointVelocityLimitInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;

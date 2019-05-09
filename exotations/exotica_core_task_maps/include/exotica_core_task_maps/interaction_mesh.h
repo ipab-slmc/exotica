@@ -45,7 +45,7 @@ public:
     InteractionMesh();
     virtual ~InteractionMesh();
 
-    void Instantiate(InteractionMeshInitializer& init) override;
+    void Instantiate(const InteractionMeshInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;

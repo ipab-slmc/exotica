@@ -59,7 +59,7 @@ public:
     Manipulability();
     virtual ~Manipulability();
 
-    void Instantiate(ManipulabilityInitializer& init) override;
+    void Instantiate(const ManipulabilityInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     int TaskSpaceDim() override;
 

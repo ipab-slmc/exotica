@@ -42,7 +42,7 @@ public:
     CollisionCheck();
     virtual ~CollisionCheck();
 
-    void Instantiate(CollisionCheckInitializer& init) override;
+    void Instantiate(const CollisionCheckInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;

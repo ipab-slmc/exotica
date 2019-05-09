@@ -51,7 +51,7 @@ public:
     JointAccelerationBackwardDifference();
     virtual ~JointAccelerationBackwardDifference();
     void AssignScene(ScenePtr scene) override;
-    void Instantiate(JointAccelerationBackwardDifferenceInitializer& init) override;
+    void Instantiate(const JointAccelerationBackwardDifferenceInitializer& init) override;
 
     /// \brief Logs previous joint state.
     /// SetPreviousJointState must be called after solve is called in a Python/C++ script is called

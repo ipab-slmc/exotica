@@ -43,7 +43,7 @@ class DynamicTimeIndexedShootingProblem : public PlanningProblem, public Instant
 public:
     DynamicTimeIndexedShootingProblem();
     virtual ~DynamicTimeIndexedShootingProblem();
-    void Instantiate(DynamicTimeIndexedShootingProblemInitializer& init) override;
+    void Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init) override;
 
     void PreUpdate() override;
     void Update(Eigen::VectorXdRefConst u, int t);

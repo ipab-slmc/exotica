@@ -102,7 +102,7 @@ public:
     virtual std::vector<Initializer> GetAllTemplates() const = 0;
 };
 
-template <class C>
+template <class C, typename = typename std::enable_if<std::is_base_of<InitializerBase, C>::value, C>::type>
 class Instantiable : public virtual InstantiableBase
 {
 public:

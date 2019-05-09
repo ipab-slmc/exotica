@@ -42,7 +42,7 @@ void TaskMap::AssignScene(ScenePtr scene)
     scene_ = scene;
 }
 
-std::string TaskMap::Print(const std::string& prepend)
+std::string TaskMap::Print(const std::string& prepend) const
 {
     std::string ret = Object::Print(prepend);
     return ret;

@@ -43,11 +43,11 @@ namespace exotica
 PlanningProblem::PlanningProblem() = default;
 PlanningProblem::~PlanningProblem() = default;
 
-std::string PlanningProblem::Print(const std::string& prepend)
+std::string PlanningProblem::Print(const std::string& prepend) const
 {
     std::string ret = Object::Print(prepend);
     ret += "\n" + prepend + "  Task definitions:";
-    for (auto& it : task_maps_)
+    for (const auto& it : task_maps_)
         ret += "\n" + it.second->Print(prepend + "    ");
     return ret;
 }

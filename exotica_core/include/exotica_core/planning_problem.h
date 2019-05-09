@@ -70,7 +70,7 @@ public:
     TaskMapMap& GetTaskMaps();
     TaskMapVec& GetTasks();
     ScenePtr GetScene() const;
-    std::string Print(const std::string& prepend) override;
+    std::string Print(const std::string& prepend) const override;
 
     void SetStartState(Eigen::VectorXdRefConst x);
     Eigen::VectorXd GetStartState() const;

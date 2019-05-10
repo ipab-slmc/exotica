@@ -47,19 +47,19 @@ void JointAccelerationBackwardDifference::AssignScene(ScenePtr scene)
     backward_difference_params_ << -2, 1;
 
     // Frequency
-    if (init_.dt <= 0) ThrowPretty("dt cannot be smaller than or equal to 0.");
-    dt_inv_ = 1 / init_.dt;
+    if (parameters_.dt <= 0) ThrowPretty("dt cannot be smaller than or equal to 0.");
+    dt_inv_ = 1 / parameters_.dt;
 
     // Init each col of q_ with start state
     q_.resize(N_, 2);
-    if (init_.StartState.rows() == 0)
+    if (parameters_.StartState.rows() == 0)
     {
         q_.setZero(N_, 2);
     }
-    else if (init_.StartState.rows() == N_)
+    else if (parameters_.StartState.rows() == N_)
     {
         for (int i = 0; i < 2; ++i)
-            q_.col(i) = init_.StartState;
+            q_.col(i) = parameters_.StartState;
     }
     else
     {
@@ -71,11 +71,6 @@ void JointAccelerationBackwardDifference::AssignScene(ScenePtr scene)
 
     // Init identity matrix
     I_ = Eigen::MatrixXd::Identity(N_, N_);
-}
-
-void JointAccelerationBackwardDifference::Instantiate(const JointAccelerationBackwardDifferenceInitializer &init)
-{
-    init_ = init;
 }
 
 void JointAccelerationBackwardDifference::SetPreviousJointState(Eigen::VectorXdRefConst joint_state)

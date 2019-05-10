@@ -51,7 +51,6 @@ class JointJerkBackwardDifference : public TaskMap, public Instantiable<JointJer
 public:
     JointJerkBackwardDifference();
     virtual ~JointJerkBackwardDifference();
-    void Instantiate(const JointJerkBackwardDifferenceInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     /// \brief Logs previous joint state.
@@ -67,14 +66,13 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    JointJerkBackwardDifferenceInitializer init_;  ///< Task map initializer.
-    ScenePtr scene_;                               ///< Scene pointer.
-    int N_;                                        ///< Number of dofs for robot.
-    Eigen::Vector3d backward_difference_params_;   ///< Binomial cooeficient parameters.
-    Eigen::MatrixXd q_;                            ///< Log of previous three joint states.
-    Eigen::VectorXd qbd_;                          ///< x+qbd_ is a simplifed estimate of the third time derivative.
-    Eigen::MatrixXd I_;                            ///< Identity matrix.
-    double dt_inv_;                                ///< Frequency (1/dt)
+    ScenePtr scene_;                              ///< Scene pointer.
+    int N_;                                       ///< Number of dofs for robot.
+    Eigen::Vector3d backward_difference_params_;  ///< Binomial cooeficient parameters.
+    Eigen::MatrixXd q_;                           ///< Log of previous three joint states.
+    Eigen::VectorXd qbd_;                         ///< x+qbd_ is a simplifed estimate of the third time derivative.
+    Eigen::MatrixXd I_;                           ///< Identity matrix.
+    double dt_inv_;                               ///< Frequency (1/dt)
 };
 }
 

@@ -80,10 +80,6 @@ void EffVelocity::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     }
 }
 
-void EffVelocity::Instantiate(const EffVelocityInitializer &init)
-{
-}
-
 int EffVelocity::TaskSpaceDim()
 {
     return kinematics[0].Phi.rows();

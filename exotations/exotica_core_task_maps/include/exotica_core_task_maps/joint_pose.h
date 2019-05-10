@@ -42,7 +42,6 @@ public:
     JointPose();
     virtual ~JointPose();
 
-    void Instantiate(const JointPoseInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -56,8 +55,6 @@ public:
 
 private:
     void Initialize();
-
-    JointPoseInitializer init_;
 };
 }
 

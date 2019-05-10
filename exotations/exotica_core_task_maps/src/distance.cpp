@@ -59,10 +59,6 @@ void Distance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::
     }
 }
 
-void Distance::Instantiate(const DistanceInitializer &init)
-{
-}
-
 int Distance::TaskSpaceDim()
 {
     return kinematics[0].Phi.rows();

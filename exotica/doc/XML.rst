@@ -69,7 +69,7 @@ Solver options are then specified:
       <C>1e-3</C>
 
 The parameters in this case are optional, but each solver has its own 
-set of initialization parameters, as detailed on the `previous page <Initialisation.html>`__
+set of initialization parameters, as detailed on the `previous page <Initialization.html>`__
 and the function of each can be found in the literature.
 
 Problem Setup
@@ -87,8 +87,8 @@ Planning Scene
 ==============
 
 A ``PlanningScene`` always contains:
- * `URDF <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.urdf>`__
- * `SRDF <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.srdf>`__
+ * `URDF <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/resources/robots/lwr_simplified.urdf>`__
+ * `SRDF <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/resources/robots/lwr_simplified.srdf>`__
  * ``JointGroup`` which corresponds to the planning group specified in the SRDF file, the part we are interested in is detailed below:
 
 .. code-block:: xml

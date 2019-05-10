@@ -37,11 +37,6 @@ IKSolver::IKSolver() = default;
 
 IKSolver::~IKSolver() = default;
 
-void IKSolver::Instantiate(const IKSolverInitializer& init)
-{
-    parameters_ = init;
-}
-
 void IKSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     if (pointer->type() != "exotica::UnconstrainedEndPoseProblem")

@@ -124,12 +124,18 @@ public:
         return C().GetAllTemplates();
     }
 
-    virtual void Instantiate(const C& init){}
+    virtual void Instantiate(const C& init)
+    {
+        parameters_ = init;
+    }
 
-        [[deprecated]] virtual void Instantiate(C& init)
+    [[deprecated]] virtual void Instantiate(C& init)
     {
         Instantiate(static_cast<const C&>(init));
     }
+
+protected:
+    C parameters_;
 };
 }
 

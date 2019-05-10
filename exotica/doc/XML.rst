@@ -69,7 +69,7 @@ Solver options are then specified:
       <C>1e-3</C>
 
 The parameters in this case are optional, but each solver has its own 
-set of initialization parameters, as detailed on the `previous page <Initialization.html>`__
+set of initialization parameters, as detailed on the `previous page <initialization.html>`__
 and the function of each can be found in the literature.
 
 Problem Setup

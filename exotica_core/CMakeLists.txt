@@ -54,11 +54,11 @@ GenInitializers()
 
 ## catkin specific configuration ##
 catkin_package(
-  INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} include ${Boost_INCLUDE_DIRS} ${TinyXML2_INCLUDE_DIRS}
+  INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp message_runtime moveit_core moveit_ros_planning tf kdl_parser pluginlib tf_conversions eigen_conversions
+  CATKIN_DEPENDS roscpp moveit_core moveit_ros_planning tf kdl_parser pluginlib tf_conversions eigen_conversions geometry_msgs moveit_msgs std_msgs
   CFG_EXTRAS exotica.cmake add_initializer.cmake
-  DEPENDS TinyXML2
+  DEPENDS TinyXML2 Eigen3 Boost
 )
 
 ## Build ##
@@ -113,9 +113,10 @@ add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_
 install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(DIRECTORY cmake/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
-install(FILES cmake/generate_initializers.py cmake/initializer_project_header.h.in DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
+install(FILES cmake/initializer_project_header.h.in DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
+install(PROGRAMS cmake/generate_initializers.py DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
 
 if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(test_autodiff test/test_autodiff.cpp)

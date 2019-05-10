@@ -9,9 +9,10 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
-  INCLUDE_DIRS include ${OMPL_INCLUDE_DIRS}
+  INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME} ${OMPL_LIBRARIES}
   CATKIN_DEPENDS exotica_core
+  DEPENDS ompl
 )
 
 AddInitializer(

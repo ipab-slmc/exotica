@@ -3,12 +3,18 @@ project(exotica_examples)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica_core
+  exotica_python
+  exotica_aico_solver
+  exotica_core_task_maps
+  exotica_ik_solver
   sensor_msgs
 )
 
 catkin_python_setup()
 
-catkin_package()
+catkin_package(
+    CATKIN_DEPENDS sensor_msgs
+)
 
 include_directories(${catkin_INCLUDE_DIRS})
 
@@ -44,15 +50,11 @@ install(TARGETS
 install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 install(DIRECTORY resources/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/resources)
 FILE(GLOB python_examples "${CMAKE_CURRENT_SOURCE_DIR}/scripts/*")
-catkin_install_python(PROGRAMS ${python_examples} DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+catkin_install_python(PROGRAMS "${python_examples}" DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if(CATKIN_ENABLE_TESTING)
   # Find again, this time including rostest
-  find_package(catkin REQUIRED COMPONENTS
-    exotica_core
-    sensor_msgs
-    rostest
-  )
+  find_package(rostest REQUIRED)
 
   catkin_add_gtest(test_initializers test/test_initializers.cpp)
   target_link_libraries(test_initializers ${catkin_LIBRARIES})

@@ -80,7 +80,7 @@ which here name ``scene``.
 
 We must also pass in our initialization arguments seen in the `Scene Initializer <https://github.com/ipab-slmc/exotica/blob/master/exotica_core/init/scene.in>`__ file:
 
-.. code-block:: xml
+.. code-block:: c++
 
         class Scene
 

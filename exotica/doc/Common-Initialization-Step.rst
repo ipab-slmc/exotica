@@ -8,7 +8,7 @@ solve motion plans.
 In this section we will be using the containers we set up in the previous
 initialization tutorials, so if you have not completed either:
 `XML <XML.html>`__ (both initialization and parsing steps) or `manual
-initialization <Manual-Initialisation.html>`__, please complete those first.
+initialization <manual_initialization.html>`__, please complete those first.
 
 If you have done this, the robot properties have been set up, either through
 XML or within your C++ or Python code. The completed initializers now need to used to create the problem/solver objects and the problem specified to the solver.
@@ -53,5 +53,4 @@ problems later on:
         UnconstrainedEndPoseProblemPtr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
 After these steps, EXOTica is fully initialized. We can move on to using
-EXOTica's functionality in the `next
-tutorial <Using-EXOTica.html>`__.
+EXOTica's functionality in the `next tutorial <using_exotica_cpp.html>`__.

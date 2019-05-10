@@ -9,7 +9,7 @@ Using ROSlaunch to launch your EXOTica script makes locating
 your URDF and SRDF files and keeping everything together much easier.
 
 As we can see in the roslaunch file for the manually initialized example
-`here <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/launch/CppInitManual.launch>`__
+`here <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/launch/cpp_init_generic.launch>`__
 and seen below, there are a few essential elements to constructing an EXOTica
 ROSlaunch file.
 
@@ -105,7 +105,7 @@ XML Parameters
 ==============
 
 When initializing with XML, ROSlaunch needs to broadcast a ROSparam 
-specifying the name of the configuration file (Here we're looking at the `XML launch file <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/launch/CppInitManual.launch>`__):
+specifying the name of the configuration file (Here we're looking at the `XML launch file <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/launch/cpp_init_generic.launch>`__):
 
 .. code-block:: xml
 

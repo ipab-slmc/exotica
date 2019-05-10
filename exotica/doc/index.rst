@@ -73,7 +73,7 @@ Additional Information and APIs
    Code-Formatting
    Styleguide-and-Naming-Convention
    Python-API
-   Doxygen C++ <./doxygen_cpp/index.html#http://>
+   Doxygen C++ <https://ipab-slmc.github.io/exotica/doxygen_cpp/index.html>
    Documentation    
 
 .. Indices and tables

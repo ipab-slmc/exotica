@@ -157,7 +157,7 @@ the curly brackets ``{map}``. In this snippet we assume you have already created
     UnconstrainedEndPoseProblemInitializer problem("MyProblem", scene, false, {map}, W);
 
 By placing multiple map variable names inside these curly brackets, we can specify several maps to be sent to the same problem (this sets joint limits for the 
-`LWR_simplified <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.urdf>`__  arm in the examples):
+`LWR_simplified <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/resources/robots/lwr_simplified.urdf>`__  arm in the examples):
 
 .. code-block:: cpp
 

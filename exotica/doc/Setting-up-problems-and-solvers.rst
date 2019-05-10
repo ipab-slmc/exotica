@@ -10,7 +10,7 @@ Here we will run through the initialization of a problem, setting up problems,
 solvers and solving for motion plans. If you prefer to initialize using XML, 
 skip to the problem setup part of the tutorial. 
 
-For this tutorial, we will use the `manual.cpp <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/manual.cpp>`__ 
+For this tutorial, we will use the `generic.cpp <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/src/generic.cpp>`__ 
 example file as a guide. The code is displayed below. 
 
 
@@ -211,7 +211,7 @@ create an initializer, give the solver itself a name ("MySolver") then set the p
     solver.MaxStep = 0.1;
 
 or parameters can be set in arguments to the initializer. See 
-`initialization files <https://github.com/ipab-slmc/exotica/tree/master/exotica/init>`_ for
+`initialization files <https://github.com/ipab-slmc/exotica/tree/master/exotica_core/init>`_ for
 details of each solver's options. 
 
 The next step is to send the problem and solver to the Planning and Motion Solver pointer
@@ -248,7 +248,7 @@ Finally, we pop the problem back into a specific problem pointer to be used late
     UnconstrainedEndPoseProblemPtr my_problem = std::static_pointer_cast<UnconstrainedEndPoseProblem>(any_problem);
 
 This procedure applies to all problems and solvers, but the parameters for each will vary. 
-Please refer to the `initialization files <https://github.com/ipab-slmc/exotica/tree/master/exotica/init>`_
+Please refer to the `initialization files <https://github.com/ipab-slmc/exotica/tree/master/exotica_core/init>`_
 for setup details for each. 
 
 Also, multiple problems can be initialized and sent to solvers in a single script, they just need unique names

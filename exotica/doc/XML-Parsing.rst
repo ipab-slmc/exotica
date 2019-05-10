@@ -8,10 +8,10 @@ XML initialization tutorial. If this is not the case, please go
 
 In this section, we will create a parser in C++ to handle the XML file
 we created last time. For Python, the procedure is very similar - refer
-to the `Python examples <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/scripts/example_aico_noros.py>`_ .
+to the `Python examples <https://github.com/ipab-slmc/exotica/tree/master/exotica_examples/scripts>`_ .
 
 This snippet of code shows how this is implemented in the
-`XML.cpp <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/xml.cpp>`__
+`xml.cpp <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/src/xml.cpp>`__
 file in the EXOTica examples:
 
 .. code-block:: c++
@@ -62,4 +62,4 @@ we can now do the actual XML loading. This is done with the XMLLoader:
 
 To which we pass the filename which we filled earlier and the two empty initializers. When these initializers
 are returned they contain the initialization details which we input in the XML file. These are now ready for the 
-next `step <Common-Initialisation-Step.html>`__ which is common to the XML and coded initialization methods. 
+next `step <Common-Initialization-Step.html>`__ which is common to the XML and coded initialization methods. 

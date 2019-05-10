@@ -6,8 +6,8 @@ Manual initialization encapsulates all initialisation and handling of
 EXOTica within C++ or Python code, with no external XML files. This could
 be preferred if your project has been finalized or if you prefer to have all your EXOTica code in one place.
 
-In this tutorial, we will use the example of manual initialization for
-the UnconstrainedEndPoseProblem found in the `exotica_examples <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/src/manual.cpp>`__:
+In this tutorial, we will use the `example of manual initialization <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/src/generic.cpp>`__ for
+the UnconstrainedEndPoseProblem found in the ``exotica_examples`` package:
 
 .. code-block:: c++
 
@@ -78,26 +78,42 @@ which here name ``scene``.
         // Scene using joint group 'arm'
         SceneInitializer scene("MyScene", "arm", false, "", "{exotica_examples}/resources/robots/lwr_simplified.urdf", "{exotica_examples}/resources/robots/lwr_simplified.srdf");
 
-We must also pass in our initialization arguments seen in the `Scene Initializer <https://github.com/ipab-slmc/exotica/blob/master/exotica/init/Scene.in>`__ file:
+We must also pass in our initialization arguments seen in the `Scene Initializer <https://github.com/ipab-slmc/exotica/blob/master/exotica_core/init/scene.in>`__ file:
 
-.. code-block:: xml
+.. code-block:: c++
 
-    Required std::string Name;
-    Optional bool Debug = false;
-    Required std::string JointGroup;
-    Optional std::string RobotDescription = "robot_description";
-    Optional std::string URDF = "";
-    Optional std::string SRDF = "";
-    Optional bool SetRobotDescriptionRosParams = false;  // to be used in conjunction with URDF or SRDF to set the robot_description and robot_description_semantic from the files/string in URDF/SRDF
-    Optional std::string CollisionScene = "CollisionSceneFCL";
-    Optional bool AlwaysUpdateCollisionScene = false;
-    Optional std::string LoadScene = "";
-    Optional std::vector<exotica::Initializer> Links = std::vector<exotica::Initializer>();
-    Optional std::vector<exotica::Initializer> Trajectories = std::vector<exotica::Initializer>();
+        class Scene
+
+        extend <exotica_core/object>
+
+        Required std::string JointGroup;
+
+        Optional std::string RobotDescription = "robot_description";
+        Optional std::string URDF = "";
+        Optional std::string SRDF = "";
+        Optional bool SetRobotDescriptionRosParams = false;  // to be used in conjunction with URDF or SRDF to set the robot_description and robot_description_semantic from the files/string in URDF/SRDF
+
+        // Collision-Scene Specific Parameters
+        Optional std::string CollisionScene = "CollisionSceneFCL";
+        Optional bool AlwaysUpdateCollisionScene = false;
+        Optional bool ReplacePrimitiveShapesWithMeshes = false;
+        Optional bool ReplaceCylindersWithCapsules = false;
+        Optional double WorldLinkScale = 1.0;
+        Optional double RobotLinkScale = 1.0;
+        Optional double WorldLinkPadding = 0.0;
+        Optional double RobotLinkPadding = 0.0;
+
+        Optional std::string LoadScene = "";  // to load multiple scenes, separate by semi-colon.
+        Optional std::vector<exotica::Initializer> Links = std::vector<exotica::Initializer>();
+        Optional std::vector<exotica::Initializer> Trajectories = std::vector<exotica::Initializer>();
+        Optional std::vector<exotica::Initializer> AttachLinks = std::vector<exotica::Initializer>();
+        Optional std::vector<std::string> RobotLinksToExcludeFromCollisionScene = std::vector<std::string>();
+        Optional std::vector<std::string> WorldLinksToExcludeFromCollisionScene = std::vector<std::string>();
+
 
 Here we use the parameters: 
 * name of the scene ("MyScene") 
-* name of the joint group ("arm") which is specified in the `SRDF <https://github.com/ipab-slmc/exotica/blob/master/examples/exotica_examples/resources/robots/lwr_simplified.srdf>`__ file.
+* name of the joint group ("arm") which is specified in the `SRDF <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/resources/robots/lwr_simplified.srdf>`__ file.
 * Debug argument ("false")
 * RobotDescription ("")
 * URDF (name of URDF file)

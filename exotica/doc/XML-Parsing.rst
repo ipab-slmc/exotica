@@ -62,4 +62,4 @@ we can now do the actual XML loading. This is done with the XMLLoader:
 
 To which we pass the filename which we filled earlier and the two empty initializers. When these initializers
 are returned they contain the initialization details which we input in the XML file. These are now ready for the 
-next `step <Common-Initialisation-Step.html>`__ which is common to the XML and coded initialization methods. 
+next `step <Common-Initialization-Step.html>`__ which is common to the XML and coded initialization methods. 

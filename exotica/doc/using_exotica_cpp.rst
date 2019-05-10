@@ -1,5 +1,5 @@
 ********************************
-Solving planning problems in c++
+Solving planning problems in C++
 ********************************
 
 This part of the tutorial assumes that you have completed the previous 

@@ -47,19 +47,19 @@ void JointJerkBackwardDifference::AssignScene(ScenePtr scene)
     backward_difference_params_ << -3, 3, -1;
 
     // Frequency
-    if (init_.dt <= 0) ThrowPretty("dt cannot be smaller than or equal to 0.");
-    dt_inv_ = 1 / init_.dt;
+    if (parameters_.dt <= 0) ThrowPretty("dt cannot be smaller than or equal to 0.");
+    dt_inv_ = 1 / parameters_.dt;
 
     // Initialize q_ with StartState
     q_.resize(N_, 3);
-    if (init_.StartState.rows() == 0)
+    if (parameters_.StartState.rows() == 0)
     {
         q_.setZero(N_, 3);
     }
-    else if (init_.StartState.rows() == N_)
+    else if (parameters_.StartState.rows() == N_)
     {
         for (int i = 0; i < 3; ++i)
-            q_.col(i) = init_.StartState;
+            q_.col(i) = parameters_.StartState;
     }
     else
     {
@@ -71,11 +71,6 @@ void JointJerkBackwardDifference::AssignScene(ScenePtr scene)
 
     // Init identity matrix
     I_ = Eigen::MatrixXd::Identity(N_, N_);
-}
-
-void JointJerkBackwardDifference::Instantiate(JointJerkBackwardDifferenceInitializer& init)
-{
-    init_ = init;
 }
 
 void JointJerkBackwardDifference::SetPreviousJointState(Eigen::VectorXdRefConst joint_state)

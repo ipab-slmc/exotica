@@ -38,16 +38,11 @@ namespace exotica
 EffAxisAlignment::EffAxisAlignment() = default;
 EffAxisAlignment::~EffAxisAlignment() = default;
 
-void EffAxisAlignment::Instantiate(EffAxisAlignmentInitializer& init)
-{
-    init_ = init;
-}
-
 void EffAxisAlignment::Initialize()
 {
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    n_frames_ = init_.EndEffector.size();
+    n_frames_ = parameters_.EndEffector.size();
     if (debug_) HIGHLIGHT_NAMED("EffAxisAlignment", "Number of EndEffectors: " << n_frames_);
     axis_.resize(3, n_frames_);
     dir_.resize(3, n_frames_);
@@ -55,7 +50,7 @@ void EffAxisAlignment::Initialize()
     frames_.resize(2 * n_frames_);
     for (int i = 0; i < n_frames_; ++i)
     {
-        FrameWithAxisAndDirectionInitializer frame(init_.EndEffector[i]);
+        FrameWithAxisAndDirectionInitializer frame(parameters_.EndEffector[i]);
         axis_.col(i) = frame.Axis.normalized();
         dir_.col(i) = frame.Direction.normalized();
 

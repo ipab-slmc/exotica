@@ -44,7 +44,7 @@ public:
     BoundedEndPoseProblem();
     virtual ~BoundedEndPoseProblem();
 
-    virtual void Instantiate(BoundedEndPoseProblemInitializer& init);
+    virtual void Instantiate(const BoundedEndPoseProblemInitializer& init);
     void Update(Eigen::VectorXdRefConst x);
 
     void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);

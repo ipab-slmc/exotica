@@ -47,7 +47,7 @@ void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     }
 }
 
-void Manipulability::Instantiate(ManipulabilityInitializer& init)
+void Manipulability::Instantiate(const ManipulabilityInitializer& init)
 {
     n_end_effs_ = frames_.size();
     if (init.OnlyPosition)

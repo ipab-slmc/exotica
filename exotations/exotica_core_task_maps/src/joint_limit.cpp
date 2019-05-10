@@ -36,11 +36,6 @@ namespace exotica
 JointLimit::JointLimit() = default;
 JointLimit::~JointLimit() = default;
 
-void JointLimit::Instantiate(JointLimitInitializer& init)
-{
-    init_ = init;
-}
-
 void JointLimit::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
@@ -49,7 +44,7 @@ void JointLimit::AssignScene(ScenePtr scene)
 
 void JointLimit::Initialize()
 {
-    safe_percentage_ = init_.SafePercentage;
+    safe_percentage_ = parameters_.SafePercentage;
 
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 }

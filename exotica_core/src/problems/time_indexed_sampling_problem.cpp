@@ -56,7 +56,7 @@ std::vector<double> TimeIndexedSamplingProblem::GetBounds()
     return bounds;
 }
 
-void TimeIndexedSamplingProblem::Instantiate(TimeIndexedSamplingProblemInitializer& init)
+void TimeIndexedSamplingProblem::Instantiate(const TimeIndexedSamplingProblemInitializer& init)
 {
     parameters = init;
 

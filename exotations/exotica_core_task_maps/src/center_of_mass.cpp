@@ -148,7 +148,7 @@ int CenterOfMass::TaskSpaceDim()
 
 void CenterOfMass::Initialize()
 {
-    enable_z_ = init_.EnableZ;
+    enable_z_ = parameters_.EnableZ;
     if (enable_z_)
         dim_ = 3;
     else
@@ -185,11 +185,6 @@ void CenterOfMass::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
     Initialize();
-}
-
-void CenterOfMass::Instantiate(CenterOfMassInitializer& init)
-{
-    init_ = init;
 }
 
 void CenterOfMass::InitializeDebug()

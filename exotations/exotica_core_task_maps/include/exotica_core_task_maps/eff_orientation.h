@@ -42,7 +42,7 @@ public:
     EffOrientation();
     virtual ~EffOrientation();
 
-    void Instantiate(EffOrientationInitializer& init) override;
+    void Instantiate(const EffOrientationInitializer& init) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;

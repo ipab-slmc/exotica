@@ -43,7 +43,7 @@ public:
     TimeIndexedSamplingProblem();
     virtual ~TimeIndexedSamplingProblem();
 
-    virtual void Instantiate(TimeIndexedSamplingProblemInitializer& init);
+    virtual void Instantiate(const TimeIndexedSamplingProblemInitializer& init);
 
     void Update(Eigen::VectorXdRefConst x, const double& t);
     bool IsValid(Eigen::VectorXdRefConst x, const double& t);  // Not overriding on purpose

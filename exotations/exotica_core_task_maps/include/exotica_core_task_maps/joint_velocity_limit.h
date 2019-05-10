@@ -44,7 +44,6 @@ public:
     JointVelocityLimit();
     virtual ~JointVelocityLimit();
 
-    void Instantiate(JointVelocityLimitInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -58,7 +57,6 @@ private:
     double dt_ = 0.1;                                    ///< Timestep between subsequent time-steps (in s)
     Eigen::VectorXd limits_ = Eigen::VectorXd::Zero(1);  ///< Joint velocity limits (absolute, in rads/s)
     Eigen::VectorXd tau_ = Eigen::VectorXd::Zero(1);     ///< Joint velocity limits tolerance
-    JointVelocityLimitInitializer init_;
     int N;
 };
 }  // namespace exotica

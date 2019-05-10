@@ -42,7 +42,6 @@ public:
     EffPosition();
     virtual ~EffPosition();
 
-    void Instantiate(EffPositionInitializer& init) override {}
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;

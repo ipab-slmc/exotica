@@ -94,7 +94,7 @@ void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
     }
 }
 
-void LookAt::Instantiate(LookAtInitializer& init)
+void LookAt::Instantiate(const LookAtInitializer& init)
 {
     // Error check
     if (frames_.size() % 3 != 0) ThrowNamed("Three frames are required for each end-effector!");

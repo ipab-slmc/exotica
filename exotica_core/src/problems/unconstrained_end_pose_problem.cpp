@@ -41,7 +41,7 @@ UnconstrainedEndPoseProblem::UnconstrainedEndPoseProblem()
 
 UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem() = default;
 
-void UnconstrainedEndPoseProblem::Instantiate(UnconstrainedEndPoseProblemInitializer& init)
+void UnconstrainedEndPoseProblem::Instantiate(const UnconstrainedEndPoseProblemInitializer& init)
 {
     num_tasks = tasks_.size();
     length_Phi = 0;

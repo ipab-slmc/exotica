@@ -105,9 +105,9 @@ bool OMPLTimeIndexedStateValidityChecker::isValid(const ompl::base::State *state
 TimeIndexedRRTConnectSolver::TimeIndexedRRTConnectSolver() = default;
 TimeIndexedRRTConnectSolver::~TimeIndexedRRTConnectSolver() = default;
 
-void TimeIndexedRRTConnectSolver::Instantiate(TimeIndexedRRTConnectSolverInitializer &init)
+void TimeIndexedRRTConnectSolver::Instantiate(const TimeIndexedRRTConnectSolverInitializer &init)
 {
-    init_ = static_cast<Initializer>(init);
+    init_ = dynamic_cast<const Initializer &>(init);
     algorithm_ = "Exotica_TimeIndexedRRTConnect";
     planner_allocator_ = boost::bind(&allocatePlanner<OMPLTimeIndexedRRTConnect>, _1, _2);
 

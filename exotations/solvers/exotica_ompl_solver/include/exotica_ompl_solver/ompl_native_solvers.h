@@ -38,14 +38,14 @@ class RRTSolver : public OMPLSolver<SamplingProblem>, Instantiable<RRTSolverInit
 {
 public:
     RRTSolver();
-    void Instantiate(RRTSolverInitializer& init) override;
+    void Instantiate(const RRTSolverInitializer& init) override;
 };
 
 class RRTConnectSolver : public OMPLSolver<SamplingProblem>, Instantiable<RRTConnectSolverInitializer>
 {
 public:
     RRTConnectSolver();
-    void Instantiate(RRTConnectSolverInitializer& init) override;
+    void Instantiate(const RRTConnectSolverInitializer& init) override;
     void SetRange(double range);
     double GetRange();
 };
@@ -54,28 +54,28 @@ class ESTSolver : public OMPLSolver<SamplingProblem>, Instantiable<ESTSolverInit
 {
 public:
     ESTSolver();
-    void Instantiate(ESTSolverInitializer& init) override;
+    void Instantiate(const ESTSolverInitializer& init) override;
 };
 
 class KPIECESolver : public OMPLSolver<SamplingProblem>, Instantiable<KPIECESolverInitializer>
 {
 public:
     KPIECESolver();
-    void Instantiate(KPIECESolverInitializer& init) override;
+    void Instantiate(const KPIECESolverInitializer& init) override;
 };
 
 class BKPIECESolver : public OMPLSolver<SamplingProblem>, Instantiable<BKPIECESolverInitializer>
 {
 public:
     BKPIECESolver();
-    void Instantiate(BKPIECESolverInitializer& init) override;
+    void Instantiate(const BKPIECESolverInitializer& init) override;
 };
 
 class PRMSolver : public OMPLSolver<SamplingProblem>, Instantiable<PRMSolverInitializer>
 {
 public:
     PRMSolver();
-    void Instantiate(PRMSolverInitializer& init) override;
+    void Instantiate(const PRMSolverInitializer& init) override;
     void GrowRoadmap(double t);
     void ExpandRoadmap(double t);
     void Clear();
@@ -91,7 +91,7 @@ class LazyPRMSolver : public OMPLSolver<SamplingProblem>, Instantiable<LazyPRMSo
 {
 public:
     LazyPRMSolver();
-    void Instantiate(LazyPRMSolverInitializer& init) override;
+    void Instantiate(const LazyPRMSolverInitializer& init) override;
     void Clear();
     void ClearQuery();
     void Setup();
@@ -105,14 +105,14 @@ class RRTStarSolver : public OMPLSolver<SamplingProblem>, Instantiable<RRTStarSo
 {
 public:
     RRTStarSolver();
-    void Instantiate(RRTStarSolverInitializer& init) override;
+    void Instantiate(const RRTStarSolverInitializer& init) override;
 };
 
 class LBTRRTSolver : public OMPLSolver<SamplingProblem>, Instantiable<LBTRRTSolverInitializer>
 {
 public:
     LBTRRTSolver();
-    void Instantiate(LBTRRTSolverInitializer& init) override;
+    void Instantiate(const LBTRRTSolverInitializer& init) override;
 };
 }
 

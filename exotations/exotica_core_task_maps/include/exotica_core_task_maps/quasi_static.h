@@ -45,7 +45,6 @@ public:
     QuasiStatic();
     virtual ~QuasiStatic();
 
-    void Instantiate(QuasiStaticInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -55,7 +54,6 @@ public:
 private:
     void Initialize();
 
-    QuasiStaticInitializer init_;
     visualization_msgs::MarkerArray debug_msg_;
     ros::Publisher debug_pub_;
 };

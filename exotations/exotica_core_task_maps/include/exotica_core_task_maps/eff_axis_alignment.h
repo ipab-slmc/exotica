@@ -43,7 +43,6 @@ public:
     EffAxisAlignment();
     virtual ~EffAxisAlignment();
 
-    void Instantiate(EffAxisAlignmentInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -62,7 +61,6 @@ public:
 private:
     void Initialize();
 
-    EffAxisAlignmentInitializer init_;
     int n_frames_;
 
     Eigen::Matrix3Xd axis_, dir_;

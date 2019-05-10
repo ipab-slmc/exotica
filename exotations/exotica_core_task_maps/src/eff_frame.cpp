@@ -36,7 +36,7 @@ namespace exotica
 EffFrame::EffFrame() = default;
 EffFrame::~EffFrame() = default;
 
-void EffFrame::Instantiate(EffFrameInitializer& init)
+void EffFrame::Instantiate(const EffFrameInitializer &init)
 {
     if (init.Type == "Quaternion")
     {

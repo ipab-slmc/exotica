@@ -45,7 +45,7 @@ public:
     virtual ~BoundedTimeIndexedProblem() = default;
 
     /// \brief Instantiates the problem from an Initializer
-    void Instantiate(BoundedTimeIndexedProblemInitializer& init) override;
+    void Instantiate(const BoundedTimeIndexedProblemInitializer& init) override;
 
     /// \brief Updates internal variables before solving, e.g., after setting new values for Rho.
     void PreUpdate() override;

@@ -206,7 +206,7 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
         }
         else
         {
-            if (!init_.PositiveOnly)
+            if (!parameters_.PositiveOnly)
             {
                 phi(0) = sqrt(-n / pot);
             }
@@ -304,7 +304,7 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
         }
         else
         {
-            if (!init_.PositiveOnly)
+            if (!parameters_.PositiveOnly)
             {
                 phi(0) = -sqrt(-n / pot);
                 jacobian.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
@@ -376,10 +376,5 @@ void QuasiStatic::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
     Initialize();
-}
-
-void QuasiStatic::Instantiate(QuasiStaticInitializer& init)
-{
-    init_ = init;
 }
 }

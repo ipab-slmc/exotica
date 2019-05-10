@@ -110,7 +110,7 @@ public:
 
     virtual ~TimeIndexedRRTConnectSolver();
 
-    void Instantiate(TimeIndexedRRTConnectSolverInitializer &init) override;
+    void Instantiate(const TimeIndexedRRTConnectSolverInitializer &init) override;
     void Solve(Eigen::MatrixXd &solution) override;
     void SpecifyProblem(PlanningProblemPtr pointer) override;
     void SetPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc);

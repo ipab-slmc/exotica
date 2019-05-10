@@ -34,7 +34,7 @@ REGISTER_PROBLEM_TYPE("BoundedTimeIndexedProblem", exotica::BoundedTimeIndexedPr
 
 namespace exotica
 {
-void BoundedTimeIndexedProblem::Instantiate(BoundedTimeIndexedProblemInitializer& init)
+void BoundedTimeIndexedProblem::Instantiate(const BoundedTimeIndexedProblemInitializer& init)
 {
     init_ = init;
 

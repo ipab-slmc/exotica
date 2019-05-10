@@ -42,7 +42,7 @@ REGISTER_MOTIONSOLVER_TYPE("AICOSolver", exotica::AICOSolver)
 
 namespace exotica
 {
-void AICOSolver::Instantiate(AICOSolverInitializer& init)
+void AICOSolver::Instantiate(const AICOSolverInitializer& init)
 {
     std::string mode = init.SweepMode;
     if (mode == "Forwardly")

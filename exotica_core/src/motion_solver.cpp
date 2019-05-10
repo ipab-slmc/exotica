@@ -50,7 +50,7 @@ void MotionSolver::SpecifyProblem(PlanningProblemPtr pointer)
     problem_ = pointer;
 }
 
-std::string MotionSolver::Print(const std::string& prepend)
+std::string MotionSolver::Print(const std::string& prepend) const
 {
     std::string ret = Object::Print(prepend);
     ret += "\n" + prepend + "  Problem:";

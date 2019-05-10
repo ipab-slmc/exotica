@@ -73,11 +73,6 @@ void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen:
 //     }
 // }
 
-void JointPose::Instantiate(JointPoseInitializer& init)
-{
-    init_ = init;
-}
-
 void JointPose::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
@@ -87,12 +82,12 @@ void JointPose::AssignScene(ScenePtr scene)
 void JointPose::Initialize()
 {
     N_ = scene_->GetKinematicTree().GetNumControlledJoints();
-    if (init_.JointMap.rows() > 0)
+    if (parameters_.JointMap.rows() > 0)
     {
-        joint_map_.resize(init_.JointMap.rows());
-        for (int i = 0; i < init_.JointMap.rows(); ++i)
+        joint_map_.resize(parameters_.JointMap.rows());
+        for (int i = 0; i < parameters_.JointMap.rows(); ++i)
         {
-            joint_map_[i] = init_.JointMap(i);
+            joint_map_[i] = parameters_.JointMap(i);
         }
     }
     else
@@ -104,9 +99,9 @@ void JointPose::Initialize()
         }
     }
 
-    if (init_.JointRef.rows() > 0)
+    if (parameters_.JointRef.rows() > 0)
     {
-        joint_ref_ = init_.JointRef;
+        joint_ref_ = parameters_.JointRef;
         if (joint_ref_.rows() != joint_map_.size()) ThrowNamed("Invalid joint reference size! Expecting " << joint_map_.size() << " but received " << joint_ref_.rows());
     }
     else

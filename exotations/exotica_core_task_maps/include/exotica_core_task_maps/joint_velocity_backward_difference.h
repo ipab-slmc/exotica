@@ -50,7 +50,6 @@ class JointVelocityBackwardDifference : public TaskMap, public Instantiable<Join
 public:
     JointVelocityBackwardDifference();
     virtual ~JointVelocityBackwardDifference();
-    void Instantiate(JointVelocityBackwardDifferenceInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     /// \brief Logs previous joint state.
@@ -64,14 +63,13 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    JointVelocityBackwardDifferenceInitializer init_;  ///< Task map initializer.
-    ScenePtr scene_;                                   ///< Scene pointer.
-    double backward_difference_params_;                ///< Binomial cooeficient parameters.
-    int N_;                                            ///< Number of dofs for robot.
-    Eigen::VectorXd q_;                                ///< Log of previous joint state.
-    Eigen::VectorXd qbd_;                              ///< x+qbd_ is a simplifed estimate of the first time derivative.
-    Eigen::MatrixXd I_;                                ///< Identity matrix.
-    double dt_inv_;                                    ///< Frequency (1/dt)
+    ScenePtr scene_;                     ///< Scene pointer.
+    double backward_difference_params_;  ///< Binomial cooeficient parameters.
+    int N_;                              ///< Number of dofs for robot.
+    Eigen::VectorXd q_;                  ///< Log of previous joint state.
+    Eigen::VectorXd qbd_;                ///< x+qbd_ is a simplifed estimate of the first time derivative.
+    Eigen::MatrixXd I_;                  ///< Identity matrix.
+    double dt_inv_;                      ///< Frequency (1/dt)
 };
 }
 

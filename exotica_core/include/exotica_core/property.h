@@ -102,14 +102,14 @@ public:
     virtual std::vector<Initializer> GetAllTemplates() const = 0;
 };
 
-template <class C>
+template <class C, typename = typename std::enable_if<std::is_base_of<InitializerBase, C>::value, C>::type>
 class Instantiable : public virtual InstantiableBase
 {
 public:
     virtual void InstantiateInternal(const Initializer& init)
     {
         InstantiateBase(init);
-        C tmp(init);
+        const C tmp(init);
         tmp.Check(init);
         Instantiate(tmp);
     }
@@ -124,7 +124,18 @@ public:
         return C().GetAllTemplates();
     }
 
-    virtual void Instantiate(C& init) = 0;
+    virtual void Instantiate(const C& init)
+    {
+        parameters_ = init;
+    }
+
+    [[deprecated]] virtual void Instantiate(C& init)
+    {
+        Instantiate(static_cast<const C&>(init));
+    }
+
+protected:
+    C parameters_;
 };
 }
 

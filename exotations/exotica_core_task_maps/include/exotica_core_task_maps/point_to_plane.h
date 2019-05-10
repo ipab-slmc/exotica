@@ -44,7 +44,7 @@ public:
     PointToPlane();
     virtual ~PointToPlane();
 
-    void Instantiate(PointToPlaneInitializer &init) override;
+    void Instantiate(const PointToPlaneInitializer &init) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;

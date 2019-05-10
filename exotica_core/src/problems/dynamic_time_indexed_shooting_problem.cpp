@@ -39,7 +39,7 @@ DynamicTimeIndexedShootingProblem::DynamicTimeIndexedShootingProblem() = default
 
 DynamicTimeIndexedShootingProblem::~DynamicTimeIndexedShootingProblem() = default;
 
-void DynamicTimeIndexedShootingProblem::Instantiate(DynamicTimeIndexedShootingProblemInitializer& init)
+void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init)
 {
     init_ = init;
 

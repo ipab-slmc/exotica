@@ -43,7 +43,7 @@ public:
     virtual ~TimeIndexedProblem() = default;
 
     /// \brief Instantiates the problem from an Initializer
-    void Instantiate(TimeIndexedProblemInitializer& init) override;
+    void Instantiate(const TimeIndexedProblemInitializer& init) override;
 
     /// \brief Evaluates whether the problem is valid, i.e., all bound and general constraints are satisfied.
     bool IsValid() override;

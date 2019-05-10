@@ -136,7 +136,7 @@ void InteractionMesh::InitializeDebug(std::string ref)
     if (debug_) HIGHLIGHT("InteractionMesh connectivity is published on ROS topic " << imesh_mark_pub_.getTopic() << ", in reference frame " << ref);
 }
 
-void InteractionMesh::Instantiate(InteractionMeshInitializer& init)
+void InteractionMesh::Instantiate(const InteractionMeshInitializer& init)
 {
     if (debug_)
     {

@@ -33,15 +33,11 @@ namespace exotica
 class LevenbergMarquardtSolver : public MotionSolver, public Instantiable<LevenbergMarquardtSolverInitializer>
 {
 public:
-    void Instantiate(LevenbergMarquardtSolverInitializer& init) override;
-
     void Solve(Eigen::MatrixXd& solution) override;
 
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 private:
-    LevenbergMarquardtSolverInitializer parameters_;
-
     UnconstrainedEndPoseProblemPtr prob_;  ///< Shared pointer to the planning problem.
 
     double lambda_ = 0;  ///< Damping factor

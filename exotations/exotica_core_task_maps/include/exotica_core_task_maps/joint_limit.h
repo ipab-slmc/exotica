@@ -45,7 +45,6 @@ public:
     JointLimit();
     virtual ~JointLimit();
 
-    void Instantiate(JointLimitInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -56,7 +55,6 @@ private:
     void Initialize();
 
     double safe_percentage_;
-    JointLimitInitializer init_;
     int N;
 };
 }

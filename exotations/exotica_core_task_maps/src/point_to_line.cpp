@@ -225,7 +225,7 @@ void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     }
 }
 
-void PointToLine::Instantiate(PointToLineInitializer &init)
+void PointToLine::Instantiate(const PointToLineInitializer &init)
 {
     link_name_ = frames_[0].frame_A_link_name;
     base_name_ = frames_[0].frame_B_link_name;

@@ -47,7 +47,7 @@ public:
     virtual void SpecifyProblem(PlanningProblemPtr pointer);
     virtual void Solve(Eigen::MatrixXd& solution) = 0;
     PlanningProblemPtr GetProblem() { return problem_; }
-    std::string Print(const std::string& prepend) override;
+    std::string Print(const std::string& prepend) const override;
     void SetNumberOfMaxIterations(int max_iter)
     {
         if (max_iter < 1) ThrowPretty("Number of maximum iterations needs to be greater than 0.");

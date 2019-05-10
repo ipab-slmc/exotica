@@ -56,15 +56,11 @@ public:
     IKSolver();
     virtual ~IKSolver();
 
-    void Instantiate(IKSolverInitializer& init) override;
-
     void Solve(Eigen::MatrixXd& solution) override;
 
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 private:
-    IKSolverInitializer parameters_;
-
     void ScaleToStepSize(Eigen::VectorXdRef xd);  //!< \brief Scale the state change vector so that the largest dimension is max. step or smaller.
 
     UnconstrainedEndPoseProblemPtr prob_;  // Shared pointer to the planning problem.

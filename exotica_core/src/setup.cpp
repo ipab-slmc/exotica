@@ -48,31 +48,31 @@ void Setup::PrintSupportedClasses()
 {
     HIGHLIGHT("Registered solvers:");
     std::vector<std::string> solvers = Instance()->solvers_.getDeclaredClasses();
-    for (std::string s : solvers)
+    for (const std::string& s : solvers)
     {
         HIGHLIGHT(" '" << s << "'");
     }
     HIGHLIGHT("Registered problems:");
     std::vector<std::string> problems = Instance()->problems_.GetDeclaredClasses();
-    for (std::string s : problems)
+    for (const std::string& s : problems)
     {
         HIGHLIGHT(" '" << s << "'");
     }
     HIGHLIGHT("Registered task maps:");
     std::vector<std::string> maps = Instance()->maps_.getDeclaredClasses();
-    for (std::string s : maps)
+    for (const std::string& s : maps)
     {
         HIGHLIGHT(" '" << s << "'");
     }
     HIGHLIGHT("Registered collision scenes:");
     std::vector<std::string> scenes = Instance()->collision_scenes_.getDeclaredClasses();
-    for (std::string s : scenes)
+    for (const std::string& s : scenes)
     {
         HIGHLIGHT(" '" << s << "'");
     }
     HIGHLIGHT("Registered dynamics solvers:");
     std::vector<std::string> dynamics_solvers = Instance()->dynamics_solvers_.getDeclaredClasses();
-    for (std::string s : dynamics_solvers)
+    for (const std::string& s : dynamics_solvers)
     {
         HIGHLIGHT(" '" << s << "'");
     }
@@ -127,4 +127,4 @@ Setup::Setup() : solvers_("exotica_core", "exotica::MotionSolver"),
                  dynamics_solvers_("exotica_core", "exotica::DynamicsSolver")
 {
 }
-}
+}  // namespace exotica

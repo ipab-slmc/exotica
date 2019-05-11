@@ -245,5 +245,6 @@ int main(int argc, char** argv)
     argc_ = argc;
     argv_ = argv;
     int ret = RUN_ALL_TESTS();
+    Setup::Destroy();
     return ret;
 }

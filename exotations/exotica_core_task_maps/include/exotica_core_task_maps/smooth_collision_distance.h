@@ -46,7 +46,6 @@ public:
     SmoothCollisionDistance();
     virtual ~SmoothCollisionDistance();
 
-    void Instantiate(SmoothCollisionDistanceInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -65,7 +64,6 @@ private:
 
     const unsigned int dim_ = 1;
     CollisionScenePtr cscene_;
-    SmoothCollisionDistanceInitializer init_;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };

@@ -116,12 +116,6 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
     }
 }
 
-void SmoothCollisionDistance::Instantiate(
-    SmoothCollisionDistanceInitializer& init)
-{
-    init_ = init;
-}
-
 void SmoothCollisionDistance::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
@@ -131,10 +125,10 @@ void SmoothCollisionDistance::AssignScene(ScenePtr scene)
 void SmoothCollisionDistance::Initialize()
 {
     cscene_ = scene_->GetCollisionScene();
-    world_margin_ = init_.WorldMargin;
-    robot_margin_ = init_.RobotMargin;
-    linear_ = init_.Linear;
-    check_self_collision_ = init_.CheckSelfCollision;
+    world_margin_ = parameters_.WorldMargin;
+    robot_margin_ = parameters_.RobotMargin;
+    linear_ = parameters_.Linear;
+    check_self_collision_ = parameters_.CheckSelfCollision;
 
     HIGHLIGHT_NAMED("Smooth Collision Distance",
                     "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);

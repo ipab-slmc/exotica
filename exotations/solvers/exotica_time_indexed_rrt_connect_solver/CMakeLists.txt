@@ -11,7 +11,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME} ${OMPL_LIBRARIES}
   CATKIN_DEPENDS exotica_core
-  DEPENDS ompl
+  DEPENDS OMPL
 )
 
 AddInitializer(time_indexed_rrt_connect)

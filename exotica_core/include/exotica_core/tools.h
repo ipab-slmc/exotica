@@ -65,7 +65,7 @@ inline std_msgs::ColorRGBA GetColor(double r, double g, double b, double a = 1.0
     return ret;
 }
 
-inline std_msgs::ColorRGBA GetColor(Eigen::Vector4d rgba)
+inline std_msgs::ColorRGBA GetColor(const Eigen::Vector4d& rgba)
 {
     std_msgs::ColorRGBA ret;
     ret.r = rgba(0);

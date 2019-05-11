@@ -129,11 +129,6 @@ public:
         parameters_ = init;
     }
 
-    [[deprecated]] virtual void Instantiate(C& init)
-    {
-        Instantiate(static_cast<const C&>(init));
-    }
-
 protected:
     C parameters_;
 };

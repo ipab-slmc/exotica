@@ -36,7 +36,7 @@ and the type used for initialization. You can then use the parameters of
 
 .. code-block:: cpp
 
-    void JointLimit::Instantiate(JointLimitInitializer& init)
+    void JointLimit::Instantiate(const JointLimitInitializer& init)
     {
       double percent = init.SafePercentage;
       ...

@@ -76,11 +76,6 @@ void SumOfPenetrations::Update(Eigen::VectorXdRefConst x,
     // Update(x, phi);
 }
 
-void SumOfPenetrations::Instantiate(SumOfPenetrationsInitializer& init)
-{
-    init_ = init;
-}
-
 void SumOfPenetrations::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
@@ -90,9 +85,9 @@ void SumOfPenetrations::AssignScene(ScenePtr scene)
 void SumOfPenetrations::Initialize()
 {
     cscene_ = scene_->GetCollisionScene();
-    world_margin_ = init_.WorldMargin;
-    robot_margin_ = init_.RobotMargin;
-    check_self_collision_ = init_.CheckSelfCollision;
+    world_margin_ = parameters_.WorldMargin;
+    robot_margin_ = parameters_.RobotMargin;
+    check_self_collision_ = parameters_.CheckSelfCollision;
 
     HIGHLIGHT_NAMED("Sum of Penetrations",
                     "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_);

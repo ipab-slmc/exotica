@@ -47,7 +47,6 @@ public:
     SumOfPenetrations();
     virtual ~SumOfPenetrations();
 
-    void Instantiate(SumOfPenetrationsInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -64,7 +63,6 @@ private:
 
     unsigned int dim_ = 1;
     CollisionScenePtr cscene_;
-    SumOfPenetrationsInitializer init_;
 };
 }
 

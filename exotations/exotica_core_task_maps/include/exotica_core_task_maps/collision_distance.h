@@ -48,7 +48,6 @@ public:
     CollisionDistance();
     virtual ~CollisionDistance();
 
-    void Instantiate(CollisionDistanceInitializer& init) override;
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -67,7 +66,6 @@ private:
 
     unsigned int dim_;
     CollisionScenePtr cscene_;
-    CollisionDistanceInitializer init_;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };

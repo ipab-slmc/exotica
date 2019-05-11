@@ -103,11 +103,6 @@ void CollisionDistance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi
     }
 }
 
-void CollisionDistance::Instantiate(CollisionDistanceInitializer& init)
-{
-    init_ = init;
-}
-
 void CollisionDistance::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
@@ -117,9 +112,9 @@ void CollisionDistance::AssignScene(ScenePtr scene)
 void CollisionDistance::Initialize()
 {
     cscene_ = scene_->GetCollisionScene();
-    check_self_collision_ = init_.CheckSelfCollision;
-    world_margin_ = init_.WorldMargin;
-    robot_margin_ = init_.RobotMargin;
+    check_self_collision_ = parameters_.CheckSelfCollision;
+    world_margin_ = parameters_.WorldMargin;
+    robot_margin_ = parameters_.RobotMargin;
 
     // Get names of all controlled joints and their corresponding child links
     robot_links_ = scene_->GetControlledLinkNames();

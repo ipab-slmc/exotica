@@ -103,14 +103,12 @@ bool test_random(UnconstrainedEndPoseProblemPtr problem)
 
 bool test_random(UnconstrainedTimeIndexedProblemPtr problem)
 {
-    Eigen::MatrixXd x(3, problem->GetT());
     TEST_COUT << "Testing random configurations:";
     for (int i = 0; i < num_trials_; ++i)
     {
-        x = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
         for (int t = 0; t < problem->GetT(); ++t)
         {
-            problem->Update(x.col(t), t);
+            problem->Update(problem->GetScene()->GetKinematicTree().GetRandomControlledState(), t);
         }
     }
     return true;
@@ -407,9 +405,7 @@ TEST(ExoticaTaskMaps, testEffVelocity)
 
         for (int t = 0; t < problem->GetT(); ++t)
         {
-            Eigen::VectorXd x(problem->N);
-            x = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
-            problem->Update(x, t);
+            problem->Update(problem->GetScene()->GetKinematicTree().GetRandomControlledState(), t);
         }
 
         for (int t = 0; t < problem->GetT(); ++t)
@@ -547,9 +543,7 @@ TEST(ExoticaTaskMaps, testJointVelocityLimit)
 
             for (int t = 0; t < problem->GetT(); ++t)
             {
-                Eigen::VectorXd x(problem->N);
-                x = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
-                problem->Update(x, t);
+                problem->Update(problem->GetScene()->GetKinematicTree().GetRandomControlledState(), t);
             }
 
             for (int t = 0; t < problem->GetT(); ++t)

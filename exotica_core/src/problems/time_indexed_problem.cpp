@@ -36,21 +36,21 @@ namespace exotica
 {
 void TimeIndexedProblem::Instantiate(const TimeIndexedProblemInitializer& init)
 {
-    init_ = init;
+    this->parameters_ = init;
 
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    w_scale_ = init_.Wrate;
+    w_scale_ = this->parameters_.Wrate;
     W = Eigen::MatrixXd::Identity(N, N) * w_scale_;
-    if (init_.W.rows() > 0)
+    if (this->parameters_.W.rows() > 0)
     {
-        if (init_.W.rows() == N)
+        if (this->parameters_.W.rows() == N)
         {
-            W.diagonal() = init_.W * w_scale_;
+            W.diagonal() = this->parameters_.W * w_scale_;
         }
         else
         {
-            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << this->parameters_.W.rows());
         }
     }
 
@@ -71,15 +71,15 @@ void TimeIndexedProblem::Instantiate(const TimeIndexedProblemInitializer& init)
         ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 
-    use_bounds = init_.UseBounds;
+    use_bounds = this->parameters_.UseBounds;
 
-    cost.Initialize(init_.Cost, shared_from_this(), cost_Phi);
-    inequality.Initialize(init_.Inequality, shared_from_this(), inequality_Phi);
-    equality.Initialize(init_.Equality, shared_from_this(), equality_Phi);
+    cost.Initialize(this->parameters_.Cost, shared_from_this(), cost_Phi);
+    inequality.Initialize(this->parameters_.Inequality, shared_from_this(), inequality_Phi);
+    equality.Initialize(this->parameters_.Equality, shared_from_this(), equality_Phi);
 
-    T_ = init_.T;
-    tau_ = init_.tau;
-    SetJointVelocityLimits(init_.JointVelocityLimits);
+    T_ = this->parameters_.T;
+    tau_ = this->parameters_.tau;
+    SetJointVelocityLimits(this->parameters_.JointVelocityLimits);
     ApplyStartState(false);
     ReinitializeVariables();
 }
@@ -111,7 +111,7 @@ bool TimeIndexedProblem::IsValid()
         // Check inequality constraints
         if (GetInequality(t).rows() > 0)
         {
-            if (GetInequality(t).maxCoeff() > init_.InequalityFeasibilityTolerance)
+            if (GetInequality(t).maxCoeff() > this->parameters_.InequalityFeasibilityTolerance)
             {
                 if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated inequality constraints at timestep " << t << ": " << GetInequality(t).transpose());
                 succeeded = false;
@@ -121,7 +121,7 @@ bool TimeIndexedProblem::IsValid()
         // Check equality constraints
         if (GetEquality(t).rows() > 0)
         {
-            if (GetEquality(t).cwiseAbs().maxCoeff() > init_.EqualityFeasibilityTolerance)
+            if (GetEquality(t).cwiseAbs().maxCoeff() > this->parameters_.EqualityFeasibilityTolerance)
             {
                 if (debug_) HIGHLIGHT_NAMED("TimeIndexedProblem::IsValid", "Violated equality constraints at timestep " << t << ": " << GetEquality(t).cwiseAbs().maxCoeff());
                 succeeded = false;

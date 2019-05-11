@@ -87,7 +87,6 @@ private:
     std::vector<Eigen::MatrixXd> Q_;  ///< State space penalty matrix (precision matrix), per time index
     Eigen::MatrixXd R_;               ///< Control space penalty matrix
 
-    DynamicTimeIndexedShootingProblemInitializer init_;  ///< Stores the problem initializer for re-initialization.
     DynamicsSolverPtr dynamics_solver_;
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;

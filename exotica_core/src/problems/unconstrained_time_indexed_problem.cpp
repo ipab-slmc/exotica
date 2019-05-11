@@ -36,28 +36,28 @@ namespace exotica
 {
 void UnconstrainedTimeIndexedProblem::Instantiate(const UnconstrainedTimeIndexedProblemInitializer& init)
 {
-    init_ = init;
+    this->parameters_ = init;
 
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    w_scale_ = init_.Wrate;
+    w_scale_ = this->parameters_.Wrate;
     W = Eigen::MatrixXd::Identity(N, N) * w_scale_;
-    if (init_.W.rows() > 0)
+    if (this->parameters_.W.rows() > 0)
     {
-        if (init_.W.rows() == N)
+        if (this->parameters_.W.rows() == N)
         {
-            W.diagonal() = init_.W * w_scale_;
+            W.diagonal() = this->parameters_.W * w_scale_;
         }
         else
         {
-            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << init_.W.rows());
+            ThrowNamed("W dimension mismatch! Expected " << N << ", got " << this->parameters_.W.rows());
         }
     }
 
-    cost.Initialize(init_.Cost, shared_from_this(), cost_Phi);
+    cost.Initialize(this->parameters_.Cost, shared_from_this(), cost_Phi);
 
-    T_ = init_.T;
-    tau_ = init_.tau;
+    T_ = this->parameters_.T;
+    tau_ = this->parameters_.tau;
     ApplyStartState(false);
     ReinitializeVariables();
 }

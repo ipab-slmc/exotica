@@ -88,7 +88,6 @@ public:
 
 private:
     void ReinitializeVariables() override;
-    BoundedTimeIndexedProblemInitializer init_;
 };
 typedef std::shared_ptr<exotica::BoundedTimeIndexedProblem> BoundedTimeIndexedProblemPtr;
 }  // namespace exotica

@@ -94,7 +94,6 @@ public:
 
 private:
     void ReinitializeVariables() override;
-    UnconstrainedTimeIndexedProblemInitializer init_;
 };
 typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblemPtr;
 }

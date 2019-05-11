@@ -129,7 +129,6 @@ protected:
     void PostSolve();
     void GetPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc);
 
-    TimeIndexedRRTConnectSolverInitializer init_;
     TimeIndexedSamplingProblemPtr prob_;
     ompl::geometric::SimpleSetupPtr ompl_simple_setup_;
     ompl::base::StateSpacePtr state_space_;

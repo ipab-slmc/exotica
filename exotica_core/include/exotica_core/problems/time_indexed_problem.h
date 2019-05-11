@@ -47,9 +47,6 @@ public:
 
     /// \brief Evaluates whether the problem is valid, i.e., all bound and general constraints are satisfied.
     bool IsValid() override;
-
-private:
-    TimeIndexedProblemInitializer init_;
 };
 typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblemPtr;
 }

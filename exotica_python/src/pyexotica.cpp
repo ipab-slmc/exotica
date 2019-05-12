@@ -528,7 +528,6 @@ PYBIND11_MODULE(_pyexotica, module)
     tools.def("parse_int", &ParseInt);
     tools.def("parse_int_list", &ParseIntList);
     tools.def("load_obj", [](const std::string& path) { Eigen::VectorXi tri; Eigen::VectorXd vert; LoadOBJ(LoadFile(path), tri, vert); return py::make_tuple(tri, vert); });
-    tools.def("get_text", &GetText);
     tools.def("save_matrix", &SaveMatrix);
     tools.def("VectorTransform", &Eigen::VectorTransform);
     tools.def("IdentityTransform", &Eigen::IdentityTransform);

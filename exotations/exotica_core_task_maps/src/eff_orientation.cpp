@@ -72,9 +72,10 @@ void EffOrientation::Instantiate(const EffOrientationInitializer &init)
 std::vector<TaskVectorEntry> EffOrientation::GetLieGroupIndices()
 {
     std::vector<TaskVectorEntry> ret;
+    ret.reserve(kinematics[0].Phi.rows());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        ret.push_back(TaskVectorEntry(start + i * stride_, rotation_type_));
+        ret.emplace_back(TaskVectorEntry(start + i * stride_, rotation_type_));
     }
     return ret;
 }
@@ -108,4 +109,4 @@ int EffOrientation::TaskSpaceJacobianDim()
 {
     return kinematics[0].Phi.rows() * 3;
 }
-}
+}  // namespace exotica

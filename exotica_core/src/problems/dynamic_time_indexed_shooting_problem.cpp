@@ -41,13 +41,13 @@ DynamicTimeIndexedShootingProblem::~DynamicTimeIndexedShootingProblem() = defaul
 
 void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init)
 {
-    init_ = init;
+    this->parameters_ = init;
 
     // Create dynamics solver
-    dynamics_solver_ = Setup::CreateDynamicsSolver(init_.DynamicsSolver);
+    dynamics_solver_ = Setup::CreateDynamicsSolver(this->parameters_.DynamicsSolver);
     dynamics_solver_->AssignScene(scene_);
-    dynamics_solver_->SetDt(init_.dt);
-    dynamics_solver_->SetIntegrator(init_.Integrator);
+    dynamics_solver_->SetDt(this->parameters_.dt);
+    dynamics_solver_->SetIntegrator(this->parameters_.Integrator);
 
     // TODO: Strictly speaking N here should correspond to the number of controls, which comes from the dynamic solver - to be fixed!
     N = scene_->GetKinematicTree().GetNumControlledJoints();
@@ -56,38 +56,38 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     num_controls_ = dynamics_solver_->get_num_controls();
 
     const int NX = num_positions_ + num_velocities_;
-    if (init_.Q.rows() > 0)
+    if (this->parameters_.Q.rows() > 0)
     {
         ThrowPretty("Not supported yet");
-        // if (init_.Q.rows() == NX)
+        // if (this->parameters_.Q.rows() == NX)
         // {
-        //     Q_.diagonal() = init_.Q;
+        //     Q_.diagonal() = this->parameters_.Q;
         // }
         // else
         // {
-        //     ThrowNamed("Q dimension mismatch! Expected " << NX << ", got " << init_.Q.rows());
+        //     ThrowNamed("Q dimension mismatch! Expected " << NX << ", got " << this->parameters_.Q.rows());
         // }
     }
 
-    R_ = init_.R_rate * Eigen::MatrixXd::Identity(num_controls_, num_controls_);
-    if (init_.R.rows() > 0)
+    R_ = this->parameters_.R_rate * Eigen::MatrixXd::Identity(num_controls_, num_controls_);
+    if (this->parameters_.R.rows() > 0)
     {
-        if (init_.R.rows() == num_controls_)
+        if (this->parameters_.R.rows() == num_controls_)
         {
-            R_.diagonal() = init_.R;
+            R_.diagonal() = this->parameters_.R;
         }
         else
         {
-            ThrowNamed("R dimension mismatch! Expected " << num_controls_ << ", got " << init_.R.rows());
+            ThrowNamed("R dimension mismatch! Expected " << num_controls_ << ", got " << this->parameters_.R.rows());
         }
     }
 
-    T_ = init_.T;
-    tau_ = init_.tau;
+    T_ = this->parameters_.T;
+    tau_ = this->parameters_.tau;
 
     // For now, without inter-/extra-polation for integrators, assure that tau is a multiple of dt
-    const double fmod_tau_dt = std::fmod(static_cast<long double>(1000. * tau_), static_cast<long double>(1000. * init_.dt));
-    if (fmod_tau_dt > 1e-5) ThrowPretty("tau is not a multiple of dt: tau=" << tau_ << ", dt=" << init_.dt << ", mod(" << fmod_tau_dt << ")");
+    const double fmod_tau_dt = std::fmod(static_cast<long double>(1000. * tau_), static_cast<long double>(1000. * this->parameters_.dt));
+    if (fmod_tau_dt > 1e-5) ThrowPretty("tau is not a multiple of dt: tau=" << tau_ << ", dt=" << this->parameters_.dt << ", mod(" << fmod_tau_dt << ")");
 
     ApplyStartState(false);
     ReinitializeVariables();
@@ -102,7 +102,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
     U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
 
-    Q_.assign(T_, init_.Q_rate * Eigen::MatrixXd::Identity(NX, NX));
+    Q_.assign(T_, this->parameters_.Q_rate * Eigen::MatrixXd::Identity(NX, NX));
 
     PreUpdate();
 }

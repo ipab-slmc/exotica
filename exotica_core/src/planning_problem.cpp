@@ -118,10 +118,10 @@ double PlanningProblem::GetStartTime() const
     return t_start;
 }
 
-void PlanningProblem::InstantiateBase(const Initializer& init_)
+void PlanningProblem::InstantiateBase(const Initializer& init_in)
 {
-    Object::InstantiateObject(init_);
-    PlanningProblemInitializer init(init_);
+    Object::InstantiateObject(init_in);
+    PlanningProblemInitializer init(init_in);
 
     task_maps_.clear();
     tasks_.clear();

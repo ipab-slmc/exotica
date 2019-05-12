@@ -107,14 +107,14 @@ TimeIndexedRRTConnectSolver::~TimeIndexedRRTConnectSolver() = default;
 
 void TimeIndexedRRTConnectSolver::Instantiate(const TimeIndexedRRTConnectSolverInitializer &init)
 {
-    init_ = dynamic_cast<const Initializer &>(init);
+    this->parameters_ = dynamic_cast<const Initializer &>(init);
     algorithm_ = "Exotica_TimeIndexedRRTConnect";
     planner_allocator_ = boost::bind(&allocatePlanner<OMPLTimeIndexedRRTConnect>, _1, _2);
 
-    if (init_.RandomSeed != -1)
+    if (this->parameters_.RandomSeed != -1)
     {
-        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.RandomSeed);
-        ompl::RNG::setSeed(init_.RandomSeed);
+        HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << this->parameters_.RandomSeed);
+        ompl::RNG::setSeed(this->parameters_.RandomSeed);
     }
 }
 
@@ -123,15 +123,15 @@ void TimeIndexedRRTConnectSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     MotionSolver::SpecifyProblem(pointer);
     prob_ = std::static_pointer_cast<TimeIndexedSamplingProblem>(pointer);
-    state_space_.reset(new OMPLTimeIndexedRNStateSpace(prob_, init_));
+    state_space_.reset(new OMPLTimeIndexedRNStateSpace(prob_, this->parameters_));
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLTimeIndexedStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
     ompl_simple_setup_->setPlannerAllocator(boost::bind(planner_allocator_, _1, "Exotica_" + algorithm_));
-    ompl_simple_setup_->getSpaceInformation()->setStateValidityCheckingResolution(init_.ValidityCheckResolution);
+    ompl_simple_setup_->getSpaceInformation()->setStateValidityCheckingResolution(this->parameters_.ValidityCheckResolution);
 
     ompl_simple_setup_->getSpaceInformation()->setup();
     ompl_simple_setup_->setup();
-    if (ompl_simple_setup_->getPlanner()->params().hasParam("Range")) ompl_simple_setup_->getPlanner()->params().setParam("Range", init_.Range);
+    if (ompl_simple_setup_->getPlanner()->params().hasParam("Range")) ompl_simple_setup_->getPlanner()->params().setParam("Range", this->parameters_.Range);
 }
 
 void TimeIndexedRRTConnectSolver::PreSolve()
@@ -186,7 +186,7 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
     const ompl::base::SpaceInformationPtr &si = ompl_simple_setup_->getSpaceInformation();
 
     ompl::geometric::PathGeometric pg = ompl_simple_setup_->getSolutionPath();
-    if (init_.Smooth)
+    if (this->parameters_.Smooth)
     {
         bool tryMore = false;
         if (ptc == false) tryMore = psf_->reduceVertices(pg);
@@ -213,7 +213,7 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
     std::vector<ompl::base::State *> &states = pg.getStates();
     unsigned int length = 0;
 
-    if (init_.TrajectoryPointsPerSecond <= 0)
+    if (this->parameters_.TrajectoryPointsPerSecond <= 0)
     {
         const int n1 = states.size() - 1;
         for (int i = 0; i < n1; ++i)
@@ -225,11 +225,11 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
         Eigen::VectorXd qs, qg;
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(0), qs, tstart);
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(states.size() - 1), qg, tgoal);
-        length = (tgoal - tstart) * init_.TrajectoryPointsPerSecond;
+        length = (tgoal - tstart) * this->parameters_.TrajectoryPointsPerSecond;
     }
     pg.interpolate(length);
 
-    traj.resize(pg.getStateCount(), init_.AddTimeIntoSolution ? prob_->GetSpaceDim() + 1 : prob_->GetSpaceDim());
+    traj.resize(pg.getStateCount(), this->parameters_.AddTimeIntoSolution ? prob_->GetSpaceDim() + 1 : prob_->GetSpaceDim());
     Eigen::VectorXd tmp(prob_->GetSpaceDim());
     Eigen::VectorXd ts(pg.getStateCount());
     for (int i = 0; i < (int)pg.getStateCount(); ++i)
@@ -237,7 +237,7 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(i), tmp, ts(i));
         traj.row(i).tail(prob_->GetSpaceDim()) = tmp;
     }
-    if (init_.AddTimeIntoSolution) traj.col(0) = ts;
+    if (this->parameters_.AddTimeIntoSolution) traj.col(0) = ts;
 }
 
 void TimeIndexedRRTConnectSolver::Solve(Eigen::MatrixXd &solution)
@@ -252,7 +252,7 @@ void TimeIndexedRRTConnectSolver::Solve(Eigen::MatrixXd &solution)
     PreSolve();
     ompl::time::point start = ompl::time::now();
     if (!ptc_)
-        ptc_.reset(new ompl::base::PlannerTerminationCondition(ompl::base::timedPlannerTerminationCondition(init_.Timeout - ompl::time::seconds(ompl::time::now() - start))));
+        ptc_.reset(new ompl::base::PlannerTerminationCondition(ompl::base::timedPlannerTerminationCondition(this->parameters_.Timeout - ompl::time::seconds(ompl::time::now() - start))));
     if (ompl_simple_setup_->solve(*ptc_) == ompl::base::PlannerStatus::EXACT_SOLUTION && ompl_simple_setup_->haveSolutionPath())
     {
         GetPath(solution, *ptc_);

@@ -36,7 +36,7 @@ namespace exotica
 {
 void BoundedTimeIndexedProblem::Instantiate(const BoundedTimeIndexedProblemInitializer& init)
 {
-    init_ = init;
+    this->parameters_ = init;
 
     if (init.LowerBound.rows() == N)
     {
@@ -55,10 +55,10 @@ void BoundedTimeIndexedProblem::Instantiate(const BoundedTimeIndexedProblemIniti
         ThrowNamed("Lower bound size incorrect! Expected " << N << " got " << init.UpperBound.rows());
     }
 
-    cost.Initialize(init_.Cost, shared_from_this(), cost_Phi);
+    cost.Initialize(this->parameters_.Cost, shared_from_this(), cost_Phi);
 
-    T_ = init_.T;
-    tau_ = init_.tau;
+    T_ = this->parameters_.T;
+    tau_ = this->parameters_.tau;
     ApplyStartState(false);
     ReinitializeVariables();
 }

@@ -30,11 +30,13 @@
 #ifndef EXOTICA_CORE_PRINTABLE_H_
 #define EXOTICA_CORE_PRINTABLE_H_
 
-#include <Eigen/Geometry>
+#include <iomanip>
 #include <iostream>
-#include <kdl/frames.hpp>
 #include <map>
 #include <vector>
+
+#include <Eigen/Geometry>
+#include <kdl/frames.hpp>
 
 /// \brief A set of debugging tools: basically these provide easy ways of checking code execution through std::cout prints
 #ifndef __PRETTY_FUNCTION__
@@ -91,6 +93,6 @@ std::string ToString(const KDL::Frame& s);
 std::string ToString(const Eigen::Isometry3d& s);
 
 std::string ToString(const Eigen::Affine3d& s);
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_PRINTABLE_H_

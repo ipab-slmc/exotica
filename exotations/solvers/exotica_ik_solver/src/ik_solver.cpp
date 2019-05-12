@@ -47,7 +47,7 @@ void IKSolver::SpecifyProblem(PlanningProblemPtr pointer)
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 
     if (parameters_.C < 0 || parameters_.C >= 1.0)
-        ThrowNamed("C must be from interval <0, 1)!");
+        ThrowNamed("C must be from interval [0, 1)!");
     C_ = Eigen::MatrixXd::Identity(prob_->cost.length_jacobian, prob_->cost.length_jacobian) * parameters_.C;
     W_ = prob_->W;
 

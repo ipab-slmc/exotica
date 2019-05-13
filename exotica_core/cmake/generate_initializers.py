@@ -83,8 +83,6 @@ def default_value(data):
 def default_argument_value(data):
     if data['Value'] == None:
         return ""
-    elif data['Value'] == '{}':
-        return " = {}"
     else:
         return " = "+data['Value']
 
@@ -288,14 +286,17 @@ def parse_line(line, line_number, function_name):
     name = ""
     if not required:
         eq = line.find("=")
-        if eq == -1:
-            eq = last
-            value = '{}'
-        else:
+        has_default_arg = not (eq == -1)
+        if has_default_arg:
             value = line[eq + 1:last]
+        else:
+            # we need this to get the parameter name
+            eq = last
         name_start = line[0:eq].strip().rfind(" ")
         name = line[name_start:eq].strip()
         type = line[9:name_start].strip()
+        if not has_default_arg:
+            eprint("Optional parameter '" + name + "' requires a default argument!")
     else:
         name_start = line[0:last].strip().rfind(" ")
         name = line[name_start:last].strip()

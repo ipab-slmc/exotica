@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(exotica_core)
 
-# TODO: Start fixing warnings: - https://stackoverflow.com/a/9862800
-# -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror -Wno-unused
-
-add_compile_options(-Wdeprecated-declarations -Woverloaded-virtual)# -Werror) # -Wall -Wextra) # -pedantic) # -Werror) # can't use -Werror due to MoveIt / ROS-Console
-
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
@@ -113,6 +108,17 @@ add_library(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
+# mark all warnings as errors
+target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
+# enable additional warnings
+target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverloaded-virtual)
+
+# TODO: if you have time, remove these ignored warnings and fix them
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-reorder -Wno-unused-but-set-variable)
+
+# TODO: if you have even more time, uncomment these warnings and fix them :-)
+# https://stackoverflow.com/a/9862800
+#target_compile_options(${PROJECT_NAME} PRIVATE -pedantic -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef)
 
 ## Install
 install(TARGETS ${PROJECT_NAME}

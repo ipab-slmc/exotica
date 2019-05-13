@@ -701,7 +701,7 @@ PYBIND11_MODULE(_pyexotica, module)
             return ret;
         },
         "Solve the problem");
-    motion_solver.def("get_problem", &MotionSolver::GetProblem, py::return_value_policy::reference_internal);
+    motion_solver.def("get_problem", &MotionSolver::GetProblem);
 
     py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object>(module, "PlanningProblem")
         .def("get_tasks", &PlanningProblem::GetTasks, py::return_value_policy::reference_internal)

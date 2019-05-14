@@ -536,7 +536,7 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
 
 void KinematicTree::Update(Eigen::VectorXdRefConst x)
 {
-    if (x.rows() != state_size_) ThrowPretty("Wrong state vector size! Got " << x.rows() << " expected " << state_size_);
+    if (x.size() != state_size_) ThrowPretty("Wrong state vector size! Got " << x.size() << " expected " << state_size_);
 
     for (int i = 0; i < num_controlled_joints_; ++i)
         tree_state_(controlled_joints_[i].lock()->id) = x(i);

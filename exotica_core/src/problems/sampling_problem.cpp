@@ -58,8 +58,6 @@ std::vector<double> SamplingProblem::GetBounds()
 
 void SamplingProblem::Instantiate(const SamplingProblemInitializer& init)
 {
-    parameters = init;
-
     if (init.Goal.size() == N)
     {
         goal_ = init.Goal;

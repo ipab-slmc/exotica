@@ -75,8 +75,6 @@ public:
     int length_jacobian;
     int num_tasks;
 
-    SamplingProblemInitializer parameters;
-
 private:
     Eigen::VectorXd goal_;
     bool compound_;

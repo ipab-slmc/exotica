@@ -188,7 +188,7 @@ private:
     CollisionScenePtr collision_scene_;
 
     /// The dynamics solver
-    std::shared_ptr<DynamicsSolver> dynamics_solver_;
+    std::shared_ptr<DynamicsSolver> dynamics_solver_ = std::shared_ptr<DynamicsSolver>(nullptr);
 
     /// Internal MoveIt planning scene
     planning_scene::PlanningScenePtr ps_;

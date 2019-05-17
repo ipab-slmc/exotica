@@ -203,7 +203,7 @@ void Scene::Instantiate(const SceneInitializer& init)
 
         // Create dynamics solver
         dynamics_solver_ = Setup::CreateDynamicsSolver(init.DynamicsSolver.at(0));
-        dynamics_solver_->AssignScene(std::shared_ptr<Scene>(this));
+        dynamics_solver_->AssignScene(shared_from_this());
         dynamics_solver_->ns_ = ns_ + "/" + dynamics_solver_->GetObjectName();
     }
 

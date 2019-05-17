@@ -138,7 +138,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
 
     // Check if dynamics solver has been initialised, and if so update problem
     // properties.
-    if (scene_->GetDynamicsSolver())
+    if (scene_->GetDynamicsSolver() != nullptr)
     {
         // TODO: Strictly speaking N here should correspond to the number of controls, which comes from the dynamic solver - to be fixed!
         num_controls_ = scene_->GetDynamicsSolver()->get_num_controls();

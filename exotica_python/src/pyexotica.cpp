@@ -353,9 +353,9 @@ public:
         int sz = PyTuple_Size(source);
         if (sz < 1 || sz > 2) return false;
 
-        PyObject* name_py = PyTuple_GetItem(source, 0);
+        PyObject* const name_py = PyTuple_GetItem(source, 0);
         if (!IsPyString(name_py)) return false;
-        std::string name = PyAsStdString(name_py);
+        const std::string name = PyAsStdString(name_py);
 
         const auto& it = knownInitializers.find(name);
         if (it == knownInitializers.end())
@@ -367,7 +367,7 @@ public:
 
         if (sz == 2)
         {
-            PyObject* dict = PyTuple_GetItem(source, 1);
+            PyObject* const dict = PyTuple_GetItem(source, 1);
             if (!PyDict_Check(dict)) return false;
 
             PyObject *key, *value_py;
@@ -375,18 +375,18 @@ public:
 
             while (PyDict_Next(dict, &pos, &key, &value_py))
             {
-                std::string key_str = PyAsStdString(key);
-                if (ret.properties_.find(key_str) == ret.properties_.end())
-                {
-                    ret.AddProperty(Property(key_str, false, boost::any(PyAsStdString(value_py))));
-                }
-                else
+                const std::string key_str = PyAsStdString(key);
+                if (ret.properties_.count(key_str))
                 {
                     if (!AddPropertyFromDict(ret.properties_.at(key_str), value_py))
                     {
                         HIGHLIGHT("Failed to add property '" << key_str << "'");
                         return false;
                     }
+                }
+                else
+                {
+                    HIGHLIGHT(name << ": Ignoring property '" << key_str << "'")
                 }
             }
         }

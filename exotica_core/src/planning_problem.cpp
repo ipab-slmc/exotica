@@ -151,10 +151,20 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
 
         if (scene_->GetDynamicsSolver()->get_num_positions() != scene_->GetDynamicsSolver()->get_num_velocities())
         {
-            WARNING_NAMED("PlanningProblem::InstantiateBase",
-                          "Size of tangent vector in DynamicsSolver does not satisfy workaround-assumption (cf. #570):\n"
-                              << "num_positions_=" << num_positions_ << " vs (num_positions_=" << scene_->GetDynamicsSolver()->get_num_positions() << ", num_velocities_=" << scene_->GetDynamicsSolver()->get_num_velocities() << ").");
-            ThrowPretty("SAD.");
+            // If the difference is exactly 1, just add it:
+            // if ((scene_->GetDynamicsSolver()->get_num_positions() - scene_->GetDynamicsSolver()->get_num_velocities()) == 1)
+            // {
+            //     num_velocities_ -= 1;
+            // }
+            if (false)  // Deactivated for now (breaks Quadrotor, cf. #571)
+            // Else, throw for now:
+            else
+            {
+                WARNING_NAMED("PlanningProblem::InstantiateBase",
+                              "Size of tangent vector in DynamicsSolver does not satisfy workaround-assumption (cf. #570):\n"
+                                  << "num_positions_=" << num_positions_ << " vs (num_positions_=" << scene_->GetDynamicsSolver()->get_num_positions() << ", num_velocities_=" << scene_->GetDynamicsSolver()->get_num_velocities() << ").");
+                ThrowPretty("SAD.");
+            }
         }
     }
 

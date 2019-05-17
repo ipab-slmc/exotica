@@ -32,6 +32,7 @@
 #include <geometric_shapes/shape_operations.h>
 #include <kdl_conversions/kdl_msg.h>
 
+#include <exotica_core/dynamics_solver.h>
 #include <exotica_core/scene.h>
 #include <exotica_core/server.h>
 #include <exotica_core/setup.h>
@@ -194,7 +195,19 @@ void Scene::Instantiate(const SceneInitializer& init)
         }
     }
 
-    if (debug_) INFO_NAMED(name_, "Exotica Scene initialized");
+    // Set up DynamicsSolver (requires a fully initialised scene)
+    if (init.DynamicsSolver.size() > 0)
+    {
+        // Only one dynamics solver per scene is allowed, i.e., throw if more than one provided:
+        if (init.DynamicsSolver.size() > 1) ThrowPretty("Only one DynamicsSolver per scene allowed - " << init.DynamicsSolver.size() << " provided");
+
+        // Create dynamics solver
+        dynamics_solver_ = Setup::CreateDynamicsSolver(init.DynamicsSolver.at(0));
+        dynamics_solver_->AssignScene(std::shared_ptr<Scene>(this));
+        dynamics_solver_->ns_ = ns_ + "/" + dynamics_solver_->GetObjectName();
+    }
+
+    if (debug_) INFO_NAMED(object_name_, "Exotica Scene initialized");
 }
 
 void Scene::RequestKinematics(KinematicsRequest& request, std::function<void(std::shared_ptr<KinematicResponse>)> callback)
@@ -331,6 +344,11 @@ void Scene::UpdateCollisionObjects()
 const CollisionScenePtr& Scene::GetCollisionScene() const
 {
     return collision_scene_;
+}
+
+std::shared_ptr<DynamicsSolver> Scene::GetDynamicsSolver() const
+{
+    return dynamics_solver_;
 }
 
 std::string Scene::GetRootFrameName()

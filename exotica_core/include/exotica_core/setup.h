@@ -101,6 +101,13 @@ public:
         return ret;
     }
 
+    static std::shared_ptr<exotica::DynamicsSolver> CreateDynamicsSolver(const Initializer& init)
+    {
+        auto ret = ToStdPtr(Instance()->dynamics_solvers_.createInstance(init.GetName()));
+        ret->InstantiateInternal(init);
+        return ret;
+    }
+
 private:
     friend PlanningProblem;
     Setup();

@@ -30,7 +30,6 @@
 #ifndef EXOTICA_CORE_DYNAMIC_TIME_INDEXED_SHOOTING_PROBLEM_H_
 #define EXOTICA_CORE_DYNAMIC_TIME_INDEXED_SHOOTING_PROBLEM_H_
 
-#include <exotica_core/dynamics_solver.h>
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
 
@@ -86,8 +85,6 @@ private:
 
     std::vector<Eigen::MatrixXd> Q_;  ///< State space penalty matrix (precision matrix), per time index
     Eigen::MatrixXd R_;               ///< Control space penalty matrix
-
-    DynamicsSolverPtr dynamics_solver_;
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
 };

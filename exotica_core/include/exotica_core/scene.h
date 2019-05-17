@@ -59,8 +59,14 @@ struct AttachedObject
     KDL::Frame pose;
 };
 
+#ifndef EXOTICA_CORE_DYNAMICS_SOLVER_H_
+template <typename T, int NX, int NU>
+class AbstractDynamicsSolver;
+typedef AbstractDynamicsSolver<double, Eigen::Dynamic, Eigen::Dynamic> DynamicsSolver;
+#endif
+
 /// The class of EXOTica Scene
-class Scene : public Object, Uncopyable, public Instantiable<SceneInitializer>
+class Scene : public Object, Uncopyable, public Instantiable<SceneInitializer>, public std::enable_shared_from_this<Scene>
 {
 public:
     Scene(const std::string& name);
@@ -73,6 +79,10 @@ public:
 
     /// \brief Returns a pointer to the CollisionScene
     const CollisionScenePtr& GetCollisionScene() const;
+
+    /// \brief Returns a pointer to the CollisionScene
+    std::shared_ptr<DynamicsSolver> GetDynamicsSolver() const;
+
     std::string GetRootFrameName();
     std::string GetRootJointName();
 
@@ -176,6 +186,9 @@ private:
 
     /// The collision scene
     CollisionScenePtr collision_scene_;
+
+    /// The dynamics solver
+    std::shared_ptr<DynamicsSolver> dynamics_solver_;
 
     /// Internal MoveIt planning scene
     planning_scene::PlanningScenePtr ps_;

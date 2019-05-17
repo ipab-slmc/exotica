@@ -97,6 +97,7 @@ void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
             }
         }
     }
+    // TODO: Add support for num_controlled + tangent vector size initialisation
     else
     {
         ThrowNamed("Wrong start state vector size, expected " << num_states << ", got " << x.rows());
@@ -129,13 +130,36 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
     // Create the scene
     scene_.reset(new Scene());
     scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
-    start_state_ = Eigen::VectorXd::Zero(scene_->GetModelJointNames().size());
-    N = scene_->GetKinematicTree().GetNumControlledJoints();
 
     // Set size of positions. This is valid for kinematic problems and will be
     // overridden in dynamic problems to set num_velocities_ and num_controls_.
     num_positions_ = scene_->GetKinematicTree().GetNumModelJoints();
+    N = scene_->GetKinematicTree().GetNumControlledJoints();
 
+    // Check if dynamics solver has been initialised, and if so update problem
+    // properties.
+    if (scene_->GetDynamicsSolver())
+    {
+        // TODO: Strictly speaking N here should correspond to the number of controls, which comes from the dynamic solver - to be fixed!
+        num_controls_ = scene_->GetDynamicsSolver()->get_num_controls();
+
+        // TODO: As a current workaround, we assume num_velocities_ = num_positions_
+        // This holds true if there are no special joints (including floating base
+        // or spherical joints). For sanity, we check that the dynamics solver
+        // dimensions match - otherwise throw.
+        num_velocities_ = num_positions_;
+
+        if (scene_->GetDynamicsSolver()->get_num_positions() != scene_->GetDynamicsSolver()->get_num_velocities())
+        {
+            WARNING_NAMED("PlanningProblem::InstantiateBase",
+                          "Size of tangent vector in DynamicsSolver does not satisfy workaround-assumption (cf. #570):\n"
+                              << "num_positions_=" << num_positions_ << " vs (num_positions_=" << scene_->GetDynamicsSolver()->get_num_positions() << ", num_velocities_=" << scene_->GetDynamicsSolver()->get_num_velocities() << ").");
+            ThrowPretty("SAD.");
+        }
+    }
+
+    // Set the start state
+    start_state_ = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
     if (init.StartState.rows() > 0)
         SetStartState(init.StartState);
 

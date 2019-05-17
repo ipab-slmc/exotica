@@ -7,11 +7,12 @@
         <URDF>{exotica_examples}/resources/robots/quadrotor.urdf</URDF>
         <SRDF>{exotica_examples}/resources/robots/quadrotor.srdf</SRDF>
         <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+        <DynamicsSolver>
+          <QuadrotorDynamicsSolver dt="0.05" Integrator="RK4"/>
+        </DynamicsSolver>
       </Scene>
     </PlanningScene>
    
-    <DynamicsSolver>QuadrotorDynamicsSolver</DynamicsSolver>
-    <Integrator>RK4</Integrator>
     <T>50</T>
     <tau>0.05</tau>
     <dt>0.05</dt>

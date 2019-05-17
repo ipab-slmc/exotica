@@ -31,6 +31,9 @@
 #define EXOTICA_PINOCCHIO_DYNAMICS_SOLVER_PINOCCHIO_DYNAMICS_SOLVER_H_
 
 #include <exotica_core/dynamics_solver.h>
+#include <exotica_core/scene.h>
+
+#include <exotica_pinocchio_dynamics_solver/pinocchio_dynamics_solver_initializer.h>
 
 /// TODO: remove this pragma once Pinocchio removes neutralConfiguration/
 /// and fixes their deprecation warnings. (Relates to #547)
@@ -47,7 +50,7 @@
 
 namespace exotica
 {
-class PinocchioDynamicsSolver : public DynamicsSolver
+class PinocchioDynamicsSolver : public DynamicsSolver, public Instantiable<PinocchioDynamicsSolverInitializer>
 {
 public:
     PinocchioDynamicsSolver();

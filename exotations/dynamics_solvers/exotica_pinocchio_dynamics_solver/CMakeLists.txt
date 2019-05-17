@@ -7,6 +7,9 @@ find_package(catkin REQUIRED COMPONENTS
   pinocchio
 )
 
+AddInitializer(pinocchio_dynamics_solver)
+GenInitializers()
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
@@ -19,6 +22,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME} src/pinocchio_dynamics_solver.cpp)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

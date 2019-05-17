@@ -966,8 +966,6 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
     scene.def("update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
-    scene.def("get_base_type", &Scene::GetBaseType);
-    scene.def("get_group_name", &Scene::GetGroupName);
     scene.def("get_controlled_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::GetControlledJointNames);
     scene.def("get_controlled_link_names", &Scene::GetControlledLinkNames);
     scene.def("get_model_link_names", &Scene::GetModelLinkNames);
@@ -989,7 +987,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("get_controlled_state", &Scene::GetControlledState);
     scene.def("publish_scene", &Scene::PublishScene);
     scene.def("publish_proxies", &Scene::PublishProxies);
-    scene.def("set_collision_scene", &Scene::SetCollisionScene);
+    scene.def("update_planning_scene", &Scene::UpdatePlanningScene);
     scene.def("load_scene",
               (void (Scene::*)(const std::string&, const KDL::Frame&, bool)) & Scene::LoadScene,
               py::arg("scene_string"),
@@ -1021,7 +1019,7 @@ PYBIND11_MODULE(_pyexotica, module)
               [](Scene* instance, moveit_msgs::PlanningSceneWorld& world) {
                   moveit_msgs::PlanningSceneWorldConstPtr my_ptr(
                       new moveit_msgs::PlanningSceneWorld(world));
-                  instance->UpdateWorld(my_ptr);
+                  instance->UpdatePlanningSceneWorld(my_ptr);
               });
     scene.def("update_collision_objects", &Scene::UpdateCollisionObjects);
     scene.def("get_collision_robot_links", [](Scene* instance) { return instance->GetCollisionScene()->GetCollisionRobotLinks(); });

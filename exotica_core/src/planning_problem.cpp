@@ -139,10 +139,12 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
     if (init.StartState.rows() > 0)
         SetStartState(init.StartState);
 
+    // Set the start time
     if (init.StartTime < 0)
         ThrowNamed("Invalid start time " << init.StartTime);
     t_start = init.StartTime;
 
+    // Set the derivative order for Kinematics
     switch (init.DerivativeOrder)
     {
         case 0:

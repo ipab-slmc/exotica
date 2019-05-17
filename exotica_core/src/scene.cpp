@@ -44,24 +44,25 @@ namespace exotica
 {
 Scene::Scene() = default;
 
-Scene::Scene(const std::string& name) : name_(name), request_needs_updating_(false)
+Scene::Scene(const std::string& name) : request_needs_updating_(false)
 {
-    object_name_ = name_;
+    object_name_ = name;
 }
 
 Scene::~Scene() = default;
 
-std::string Scene::GetName()
+const std::string& Scene::GetName() const
 {
-    return name_;
+    return object_name_;
 }
 
 void Scene::Instantiate(const SceneInitializer& init)
 {
     Object::InstantiateObject(SceneInitializer(init));
-    name_ = object_name_;
+    this->parameters_ = init;
     kinematica_.debug = debug_;
-    force_collision_ = init.AlwaysUpdateCollisionScene;
+
+    // Load robot model and set up kinematics (KinematicTree)
     robot_model::RobotModelPtr model;
     if (init.URDF == "" || init.SRDF == "")
     {
@@ -71,31 +72,29 @@ void Scene::Instantiate(const SceneInitializer& init)
     {
         Server::Instance()->GetModel(init.URDF, model, init.URDF, init.SRDF);
     }
-    kinematica_.Instantiate(init.JointGroup, model, name_);
-    group = model->getJointModelGroup(init.JointGroup);
+    kinematica_.Instantiate(init.JointGroup, model, object_name_);
     ps_.reset(new planning_scene::PlanningScene(model));
 
     // Write URDF/SRDF to ROS param server
     if (Server::IsRos() && init.SetRobotDescriptionRosParams && init.URDF != "" && init.SRDF != "")
     {
-        if (debug_) HIGHLIGHT_NAMED(name_, "Setting robot_description and robot_description_semantic from URDF and SRDF initializers");
-        std::string urdf_string = PathExists(init.URDF) ? LoadFile(init.URDF) : init.URDF;
-        std::string srdf_string = PathExists(init.SRDF) ? LoadFile(init.SRDF) : init.SRDF;
+        if (debug_) HIGHLIGHT_NAMED(object_name_, "Setting robot_description and robot_description_semantic from URDF and SRDF initializers");
+        const std::string urdf_string = PathExists(init.URDF) ? LoadFile(init.URDF) : init.URDF;
+        const std::string srdf_string = PathExists(init.SRDF) ? LoadFile(init.SRDF) : init.SRDF;
         Server::SetParam("/robot_description", urdf_string);
         Server::SetParam("/robot_description_semantic", srdf_string);
     }
 
-    base_type_ = kinematica_.GetControlledBaseType();
-
+    // Set up debug topics if running in ROS mode
     if (Server::IsRos())
     {
-        ps_pub_ = Server::Advertise<moveit_msgs::PlanningScene>(name_ + (name_ == "" ? "" : "/") + "PlanningScene", 100, true);
-        proxy_pub_ = Server::Advertise<visualization_msgs::Marker>(name_ + (name_ == "" ? "" : "/") + "CollisionProxies", 100, true);
+        ps_pub_ = Server::Advertise<moveit_msgs::PlanningScene>(object_name_ + (object_name_ == "" ? "" : "/") + "PlanningScene", 100, true);
+        proxy_pub_ = Server::Advertise<visualization_msgs::Marker>(object_name_ + (object_name_ == "" ? "" : "/") + "CollisionProxies", 100, true);
         if (debug_)
             HIGHLIGHT_NAMED(
-                name_,
+                object_name_,
                 "Running in debug mode, planning scene will be published to '"
-                    << Server::Instance()->GetName() << "/" << name_
+                    << Server::Instance()->GetName() << "/" << object_name_
                     << "/PlanningScene'");
     }
 
@@ -106,6 +105,7 @@ void Scene::Instantiate(const SceneInitializer& init)
         for (const std::string& file : files) LoadSceneFile(file, Eigen::Isometry3d::Identity(), false);
     }
 
+    // Add custom links
     for (const exotica::Initializer& linkInit : init.Links)
     {
         LinkInitializer link(linkInit);
@@ -132,6 +132,8 @@ void Scene::Instantiate(const SceneInitializer& init)
         }
     }
 
+    // Set up CollisionScene
+    force_collision_ = init.AlwaysUpdateCollisionScene;
     collision_scene_ = Setup::CreateCollisionScene(init.CollisionScene);
     collision_scene_->debug_ = this->debug_;
     collision_scene_->Setup();
@@ -146,6 +148,7 @@ void Scene::Instantiate(const SceneInitializer& init)
     UpdateSceneFrames();
     UpdateInternalFrames(false);
 
+    // Attach links
     for (const exotica::Initializer& linkInit : init.AttachLinks)
     {
         AttachLinkInitializer link(linkInit);
@@ -159,6 +162,7 @@ void Scene::Instantiate(const SceneInitializer& init)
         }
     }
 
+    // Set up allowed collision matrix (i.e., collision pairs that are filtered/ignored)
     AllowedCollisionMatrix acm;
     std::vector<std::string> acm_names;
     ps_->getAllowedCollisionMatrix().getAllEntryNames(acm_names);
@@ -176,6 +180,7 @@ void Scene::Instantiate(const SceneInitializer& init)
     }
     collision_scene_->SetACM(acm);
 
+    // Set up trajectory generators
     for (const exotica::Initializer& it : init.Trajectories)
     {
         TrajectoryInitializer trajInit(it);
@@ -304,14 +309,14 @@ visualization_msgs::Marker Scene::ProxyToMarker(const std::vector<CollisionProxy
     return ret;
 }
 
-void Scene::SetCollisionScene(const moveit_msgs::PlanningScene& scene)
+void Scene::UpdatePlanningScene(const moveit_msgs::PlanningScene& scene)
 {
     ps_->usePlanningSceneMsg(scene);
     UpdateSceneFrames();
     UpdateInternalFrames();
 }
 
-void Scene::UpdateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world)
+void Scene::UpdatePlanningSceneWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world)
 {
     ps_->processPlanningSceneWorldMsg(*world);
     UpdateSceneFrames();
@@ -323,7 +328,7 @@ void Scene::UpdateCollisionObjects()
     collision_scene_->UpdateCollisionObjects(kinematica_.GetCollisionTreeMap());
 }
 
-CollisionScenePtr& Scene::GetCollisionScene()
+const CollisionScenePtr& Scene::GetCollisionScene() const
 {
     return collision_scene_;
 }
@@ -405,11 +410,6 @@ exotica::KinematicTree& Scene::GetKinematicTree()
     return kinematica_;
 }
 
-void Scene::GetControlledJointNames(std::vector<std::string>& joints)
-{
-    joints = kinematica_.GetControlledJointNames();
-}
-
 std::vector<std::string> Scene::GetControlledJointNames()
 {
     return kinematica_.GetControlledJointNames();
@@ -478,11 +478,6 @@ void Scene::SetModelState(std::map<std::string, double> x, double t, bool update
 Eigen::VectorXd Scene::GetControlledState()
 {
     return kinematica_.GetControlledState();
-}
-
-std::string Scene::GetGroupName()
-{
-    return group->getName();
 }
 
 void Scene::LoadScene(const std::string& scene, const KDL::Frame& offset, bool update_collision_scene)
@@ -797,4 +792,4 @@ void Scene::RemoveTrajectory(const std::string& link)
     it->second.first.lock()->is_trajectory_generated = false;
     trajectory_generators_.erase(it);
 }
-}
+}  // namespace exotica

@@ -77,7 +77,7 @@ robot_model::RobotModelPtr LoadModelImpl(const std::string& urdf, const std::str
     }
 }
 
-robot_model::RobotModelPtr Server::LoadModel(std::string name, std::string urdf, std::string srdf)
+robot_model::RobotModelPtr Server::LoadModel(const std::string& name, const std::string& urdf, const std::string& srdf)
 {
     robot_model::RobotModelPtr model;
     if (HasParam("RobotDescription"))
@@ -120,7 +120,7 @@ robot_model::RobotModelPtr Server::LoadModel(std::string name, std::string urdf,
     return model;
 }
 
-void Server::GetModel(std::string path, robot_model::RobotModelPtr& model, std::string urdf, std::string srdf)
+void Server::GetModel(const std::string& path, robot_model::RobotModelPtr& model, const std::string& urdf, const std::string& srdf)
 {
     if (robot_models_.find(path) != robot_models_.end())
     {
@@ -132,9 +132,9 @@ void Server::GetModel(std::string path, robot_model::RobotModelPtr& model, std::
     }
 }
 
-robot_model::RobotModelConstPtr Server::GetModel(std::string path, std::string urdf, std::string srdf)
+robot_model::RobotModelConstPtr Server::GetModel(const std::string& path, const std::string& urdf, const std::string& srdf)
 {
-    if (robot_models_.find(path) != robot_models_.end())
+    if (robot_models_.count(path))
     {
         return robot_models_[path];
     }

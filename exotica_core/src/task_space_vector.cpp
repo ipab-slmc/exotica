@@ -51,7 +51,7 @@ TaskSpaceVector& TaskSpaceVector::operator=(std::initializer_list<double> other)
     return *this;
 }
 
-void TaskSpaceVector::SetZero(int n)
+void TaskSpaceVector::SetZero(const int n)
 {
     data = Eigen::VectorXd::Zero(n);
     for (const TaskVectorEntry& entry : map)

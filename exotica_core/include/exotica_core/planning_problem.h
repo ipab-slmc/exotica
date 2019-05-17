@@ -116,6 +116,7 @@ protected:
 
 typedef Factory<PlanningProblem> PlanningProblemFac;
 typedef std::shared_ptr<PlanningProblem> PlanningProblemPtr;
+typedef std::shared_ptr<const PlanningProblem> PlanningProblemConstPtr;
 }  // namespace exotica
 
 #endif  // EXOTICA_CORE_PLANNING_PROBLEM_H_

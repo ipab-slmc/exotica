@@ -168,9 +168,9 @@ void CenterOfMass::Initialize()
             {
                 ThrowNamed("Requesting CenterOfMass frame with base other than root! '" << frames_[i].frame_A_link_name << "'");
             }
-            frames_[i].frame_A_link_name = scene_->GetKinematicTree().GetTreeMap()[frames_[i].frame_A_link_name].lock()->segment.getName();
-            frames_[i].frame_A_offset.p = scene_->GetKinematicTree().GetTreeMap()[frames_[i].frame_A_link_name].lock()->segment.getInertia().getCOG();
-            mass_(i) = scene_->GetKinematicTree().GetTreeMap()[frames_[i].frame_A_link_name].lock()->segment.getInertia().getMass();
+            frames_[i].frame_A_link_name = scene_->GetKinematicTree().GetTreeMap().at(frames_[i].frame_A_link_name).lock()->segment.getName();
+            frames_[i].frame_A_offset.p = scene_->GetKinematicTree().GetTreeMap().at(frames_[i].frame_A_link_name).lock()->segment.getInertia().getCOG();
+            mass_(i) = scene_->GetKinematicTree().GetTreeMap().at(frames_[i].frame_A_link_name).lock()->segment.getInertia().getMass();
         }
     }
 

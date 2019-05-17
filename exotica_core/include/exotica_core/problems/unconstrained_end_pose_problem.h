@@ -55,7 +55,7 @@ public:
     void PreUpdate() override;
     int GetTaskId(const std::string& task_name);
 
-    double GetScalarCost();
+    double GetScalarCost() const;
     Eigen::VectorXd GetScalarJacobian();
 
     double GetScalarTaskCost(const std::string& task_name);

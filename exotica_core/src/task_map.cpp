@@ -73,6 +73,11 @@ void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::M
     if (jacobian.rows() != TaskSpaceDim() && jacobian.cols() != x.rows())
         ThrowNamed("Jacobian dimension mismatch!");
 
+    if (scene_ == nullptr)
+    {
+        ThrowNamed("Scene is not initialised!");
+    }
+
     // Set constants
     constexpr double h = 1e-6;
     constexpr double h_inverse = 1.0 / h;

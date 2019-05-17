@@ -83,7 +83,7 @@ void UnconstrainedEndPoseProblem::PreUpdate()
     cost.UpdateS();
 }
 
-double UnconstrainedEndPoseProblem::GetScalarCost()
+double UnconstrainedEndPoseProblem::GetScalarCost() const
 {
     return cost.ydiff.transpose() * cost.S * cost.ydiff;
 }

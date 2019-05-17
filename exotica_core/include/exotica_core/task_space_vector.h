@@ -53,7 +53,7 @@ struct TaskSpaceVector
     ~TaskSpaceVector();
     TaskSpaceVector& operator=(std::initializer_list<double> other);
     Eigen::VectorXd operator-(const TaskSpaceVector& other);
-    void SetZero(int n);
+    void SetZero(const int n);
 
     Eigen::VectorXd data;
     std::vector<TaskVectorEntry> map;

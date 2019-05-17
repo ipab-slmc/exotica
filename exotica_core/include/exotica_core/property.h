@@ -129,6 +129,7 @@ public:
         parameters_ = init;
     }
 
+    const C& GetParameters() const { return parameters_; }
 protected:
     C parameters_;
 };

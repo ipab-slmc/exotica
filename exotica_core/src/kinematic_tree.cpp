@@ -85,12 +85,12 @@ void KinematicSolution::Create(std::shared_ptr<KinematicResponse> solution)
     if (solution->flags & KIN_J_DOT) new (&jacobian_dot) Eigen::Map<ArrayJacobian>(solution->jacobian_dot.data() + start, length);
 }
 
-int KinematicTree::GetNumControlledJoints()
+int KinematicTree::GetNumControlledJoints() const
 {
     return num_controlled_joints_;
 }
 
-int KinematicTree::GetNumModelJoints()
+int KinematicTree::GetNumModelJoints() const
 {
     return num_joints_;
 }
@@ -536,7 +536,7 @@ std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const Kinematics
 
 void KinematicTree::Update(Eigen::VectorXdRefConst x)
 {
-    if (x.rows() != state_size_) ThrowPretty("Wrong state vector size! Got " << x.rows() << " expected " << state_size_);
+    if (x.size() != state_size_) ThrowPretty("Wrong state vector size! Got " << x.size() << " expected " << state_size_);
 
     for (int i = 0; i < num_controlled_joints_; ++i)
         tree_state_(controlled_joints_[i].lock()->id) = x(i);
@@ -657,7 +657,7 @@ void KinematicTree::PublishFrames()
     }
 }
 
-KDL::Frame KinematicTree::FK(KinematicFrame& frame)
+KDL::Frame KinematicTree::FK(KinematicFrame& frame) const
 {
     frame.temp_A = frame.frame_A.lock()->frame * frame.frame_A_offset;
     frame.temp_B = frame.frame_B.lock()->frame * frame.frame_B_offset;
@@ -665,7 +665,7 @@ KDL::Frame KinematicTree::FK(KinematicFrame& frame)
     return frame.temp_AB;
 }
 
-KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b)
+KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b) const
 {
     if (!element_A) ThrowPretty("The pointer to KinematicElement A is dead.");
     KinematicFrame frame;
@@ -676,7 +676,7 @@ KDL::Frame KinematicTree::FK(std::shared_ptr<KinematicElement> element_A, const 
     return FK(frame);
 }
 
-KDL::Frame KinematicTree::FK(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b)
+KDL::Frame KinematicTree::FK(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const
 {
     std::string name_a = element_A == "" ? root_->segment.getName() : element_A;
     std::string name_b = element_B == "" ? root_->segment.getName() : element_B;
@@ -697,7 +697,7 @@ void KinematicTree::UpdateFK()
     }
 }
 
-Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b)
+Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b) const
 {
     if (!element_A) ThrowPretty("The pointer to KinematicElement A is dead.");
     KinematicFrame frame;
@@ -710,7 +710,7 @@ Eigen::MatrixXd KinematicTree::Jacobian(std::shared_ptr<KinematicElement> elemen
     return ret.data;
 }
 
-Eigen::MatrixXd KinematicTree::Jacobian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b)
+Eigen::MatrixXd KinematicTree::Jacobian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const
 {
     std::string name_a = element_A == "" ? root_->segment.getName() : element_A;
     std::string name_b = element_B == "" ? root_->segment.getName() : element_B;
@@ -721,7 +721,7 @@ Eigen::MatrixXd KinematicTree::Jacobian(const std::string& element_A, const KDL:
     return Jacobian(A->second.lock(), offset_a, B->second.lock(), offset_b);
 }
 
-void KinematicTree::ComputeJdot(KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot)
+void KinematicTree::ComputeJdot(KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot) const
 {
     jacobian_dot.data.setZero(jacobian.rows(), jacobian.columns());
     for (int i = 0; i < jacobian.columns(); ++i)
@@ -756,7 +756,7 @@ void KinematicTree::ComputeJdot(KDL::Jacobian& jacobian, KDL::Jacobian& jacobian
     }
 }
 
-void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian)
+void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) const
 {
     jacobian.data.setZero();
     KDL::Frame tmp = FK(frame);  // Create temporary offset frames
@@ -804,17 +804,17 @@ void KinematicTree::UpdateJdot()
     }
 }
 
-exotica::BaseType KinematicTree::GetModelBaseType()
+exotica::BaseType KinematicTree::GetModelBaseType() const
 {
     return model_base_type_;
 }
 
-exotica::BaseType KinematicTree::GetControlledBaseType()
+exotica::BaseType KinematicTree::GetControlledBaseType() const
 {
     return controlled_base_type_;
 }
 
-std::map<std::string, std::vector<double>> KinematicTree::GetUsedJointLimits()
+std::map<std::string, std::vector<double>> KinematicTree::GetUsedJointLimits() const
 {
     std::map<std::string, std::vector<double>> limits;
     for (auto it : controlled_joints_)
@@ -964,17 +964,17 @@ void KinematicTree::UpdateJointLimits()
     }
 }
 
-std::string KinematicTree::GetRootFrameName()
+std::string KinematicTree::GetRootFrameName() const
 {
     return root_->segment.getName();
 }
 
-std::string KinematicTree::GetRootJointName()
+std::string KinematicTree::GetRootJointName() const
 {
     return root_joint_name_;
 }
 
-Eigen::VectorXd KinematicTree::GetModelState()
+Eigen::VectorXd KinematicTree::GetModelState() const
 {
     Eigen::VectorXd ret(model_joints_names_.size());
 
@@ -985,10 +985,10 @@ Eigen::VectorXd KinematicTree::GetModelState()
     return ret;
 }
 
-std::map<std::string, double> KinematicTree::GetModelStateMap()
+std::map<std::string, double> KinematicTree::GetModelStateMap() const
 {
     std::map<std::string, double> ret;
-    for (std::string& joint_name : model_joints_names_)
+    for (const std::string& joint_name : model_joints_names_)
     {
         ret[joint_name] = tree_state_(model_joints_map_.at(joint_name).lock()->id);
     }
@@ -1082,7 +1082,7 @@ void KinematicTree::SetModelState(std::map<std::string, double> x)
     if (debug) PublishFrames();
 }
 
-Eigen::VectorXd KinematicTree::GetControlledState()
+Eigen::VectorXd KinematicTree::GetControlledState() const
 {
     Eigen::VectorXd x(num_controlled_joints_);
     for (int i = 0; i < controlled_joints_.size(); ++i)
@@ -1092,12 +1092,12 @@ Eigen::VectorXd KinematicTree::GetControlledState()
     return x;
 }
 
-bool KinematicTree::HasModelLink(const std::string& link)
+bool KinematicTree::HasModelLink(const std::string& link) const
 {
     return std::find(std::begin(model_link_names_), std::end(model_link_names_), link) != std::end(model_link_names_);
 }
 
-Eigen::VectorXd KinematicTree::GetControlledLinkMass()
+Eigen::VectorXd KinematicTree::GetControlledLinkMass() const
 {
     Eigen::VectorXd x(num_controlled_joints_);
     for (int i = 0; i < controlled_joints_.size(); ++i)
@@ -1107,7 +1107,7 @@ Eigen::VectorXd KinematicTree::GetControlledLinkMass()
     return x;
 }
 
-std::map<std::string, shapes::ShapeType> KinematicTree::GetCollisionObjectTypes()
+std::map<std::string, shapes::ShapeType> KinematicTree::GetCollisionObjectTypes() const
 {
     std::map<std::string, shapes::ShapeType> ret;
     for (const auto& element : collision_tree_map_)
@@ -1117,7 +1117,7 @@ std::map<std::string, shapes::ShapeType> KinematicTree::GetCollisionObjectTypes(
     return ret;
 }
 
-bool KinematicTree::DoesLinkWithNameExist(std::string name)
+bool KinematicTree::DoesLinkWithNameExist(std::string name) const
 {
     // Check whether it exists in TreeMap, which should encompass both EnvironmentTree and model_tree_
     return tree_map_.find(name) != tree_map_.end();

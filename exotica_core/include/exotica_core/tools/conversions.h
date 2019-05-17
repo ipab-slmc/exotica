@@ -67,9 +67,9 @@ KDL::Rotation GetRotation(Eigen::VectorXdRefConst data, RotationType type);
 
 Eigen::VectorXd SetRotation(const KDL::Rotation& data, RotationType type);
 
-inline int GetRotationTypeLength(RotationType type)
+inline int GetRotationTypeLength(const RotationType& type)
 {
-    static int types[] = {4, 3, 3, 3, 3, 9};
+    static constexpr int types[] = {4, 3, 3, 3, 3, 9};
     return types[static_cast<int>(type)];
 }
 

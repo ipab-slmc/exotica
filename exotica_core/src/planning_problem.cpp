@@ -149,14 +149,21 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
         // dimensions match - otherwise throw.
         num_velocities_ = num_positions_;
 
-        if (scene_->GetDynamicsSolver()->get_num_positions() != scene_->GetDynamicsSolver()->get_num_velocities())
+        if ((scene_->GetDynamicsSolver()->get_num_positions() != scene_->GetDynamicsSolver()->get_num_velocities()) ||
+            (scene_->GetDynamicsSolver()->get_num_positions() != num_positions_))
         {
+            // The quadrotor and other floating-base robots are currently broken (cf. #571)
+            if (scene_->GetDynamicsSolver()->get_num_positions() > num_positions_)
+            {
+                ThrowPretty("Proper floating-base joints in dynamic problems not yet supported. Cf. #571.");
+                // num_positions_ = scene_->GetDynamicsSolver()->get_num_positions();
+                // num_velocities_ = scene_->GetDynamicsSolver()->get_num_velocities();
+            }
             // If the difference is exactly 1, just add it:
-            // if ((scene_->GetDynamicsSolver()->get_num_positions() - scene_->GetDynamicsSolver()->get_num_velocities()) == 1)
-            // {
-            //     num_velocities_ -= 1;
-            // }
-            if (false)  // Deactivated for now (breaks Quadrotor, cf. #571)
+            else if ((scene_->GetDynamicsSolver()->get_num_positions() - scene_->GetDynamicsSolver()->get_num_velocities()) == 1)
+            {
+                num_velocities_ -= 1;
+            }
             // Else, throw for now:
             else
             {

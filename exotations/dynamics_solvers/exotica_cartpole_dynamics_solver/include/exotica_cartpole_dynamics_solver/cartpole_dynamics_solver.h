@@ -31,11 +31,14 @@
 #define EXOTICA_CARTPOLE_DYNAMICS_SOLVER_CARTPOLE_DYNAMICS_SOLVER_H_
 
 #include <exotica_core/dynamics_solver.h>
+#include <exotica_core/scene.h>
+
+#include <exotica_cartpole_dynamics_solver/cartpole_dynamics_solver_initializer.h>
 
 namespace exotica
 {
 /// StateVector X ∈ R^4 = [x, theta, x_dot, theta_dot]
-class CartpoleDynamicsSolver : public DynamicsSolver
+class CartpoleDynamicsSolver : public DynamicsSolver, public Instantiable<CartpoleDynamicsSolverInitializer>
 {
 public:
     CartpoleDynamicsSolver();

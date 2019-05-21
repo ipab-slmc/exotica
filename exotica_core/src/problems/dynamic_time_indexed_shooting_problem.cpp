@@ -84,16 +84,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
 
     // set start and goal states
     set_X_star(init.GoalState.replicate(1, T_));
-
-    Eigen::VectorXd start_state_vel(
-        init.StartState.rows() * 2, init.StartState.cols());
-
-    // append zero to velocities
-    // TODO: Ask Wolf about this
-    start_state_vel << init.StartState,
-        Eigen::MatrixXd::Zero(init.StartState.rows(), init.StartState.cols());
-    set_X(start_state_vel.replicate(1, T_));
-    // set_X(init.StartState.replicate(1, T_));
+    set_X(init.StartState.replicate(1, T_));
 }
 
 void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
@@ -231,7 +222,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_R() const
 
 DynamicsSolverPtr DynamicTimeIndexedShootingProblem::get_dynamics_solver() const
 {
-    return dynamics_solver_;
+    return scene_->GetDynamicsSolver();
 }
 
 void DynamicTimeIndexedShootingProblem::set_Q(Eigen::MatrixXdRefConst Q_in, int t)
@@ -310,7 +301,7 @@ double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const
         t = T_ - 1;
     }
     // const Eigen::VectorXd x_diff = X_star_.col(t) - X_.col(t);
-    const Eigen::VectorXd x_diff = dynamics_solver_->StateDelta(X_.col(t), X_star_.col(t));
+    const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
     return (x_diff.transpose() * Q_[t] * x_diff);
 }
 
@@ -325,7 +316,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
         t = T_ - 1;
     }
     
-    const Eigen::VectorXd x_diff = dynamics_solver_->StateDelta(X_star_.col(t), X_.col(t));
+    const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_star_.col(t), X_.col(t));
     return x_diff.transpose() * Q_[t] * scene_->GetDynamicsSolver()->fu(X_.col(t), U_.col(t)) * -2.0;
 }
 

@@ -14,11 +14,13 @@
                 <URDF>{exotica_examples}/resources/robots/cartpole.urdf</URDF>
                 <SRDF>{exotica_examples}/resources/robots/cartpole.srdf</SRDF>
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <DynamicsSolver>
+                    <CartpoleDynamicsSolver Name="solver" Integrator="RK1">
+                    </CartpoleDynamicsSolver>
+                </DynamicsSolver>
             </Scene>
         </PlanningScene>
 
-        <DynamicsSolver>CartpoleDynamicsSolver</DynamicsSolver>
-        <Integrator>RK1</Integrator>
         <T>100</T>
         <tau>0.02</tau>
         <dt>0.02</dt>
@@ -26,7 +28,7 @@
         <Qf_rate>1000</Qf_rate>
         <R_rate>0.1</R_rate>
 
-        <StartState>2 0</StartState>
+        <StartState>2 0 0 0 </StartState>
         <GoalState>1 3.14159265359 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </PlannerDemoConfig>

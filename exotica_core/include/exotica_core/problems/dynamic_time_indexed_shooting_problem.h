@@ -53,9 +53,11 @@ public:
     double get_tau() const;  ///< Returns the discretization timestep tau
 
     Eigen::MatrixXd get_X() const;             ///< Returns the state trajectory X
+    Eigen::MatrixXd get_X(int i) const;        ///< Returns the state at time t
     void set_X(Eigen::MatrixXdRefConst X_in);  ///< Sets the state trajectory X (can be used as the initial guess)
 
     Eigen::MatrixXd get_U() const;             ///< Returns the control trajectory U
+    Eigen::MatrixXd get_U(int) const;          ///< Returns the control state at time t
     void set_U(Eigen::MatrixXdRefConst U_in);  ///< Sets the control trajectory U (can be used as the initial guess)
 
     Eigen::MatrixXd get_X_star() const;                  ///< Returns the target state trajectory X
@@ -63,6 +65,14 @@ public:
 
     Eigen::MatrixXd get_Q(int t) const;               ///< Returns the precision matrix at time step t
     void set_Q(Eigen::MatrixXdRefConst Q_in, int t);  ///< Sets the precision matrix for time step t
+
+    Eigen::MatrixXd get_Qf() const;               ///< Returns the cost weight matrix at time N
+    void set_Qf(Eigen::MatrixXdRefConst Q_in);  ///< Sets the cost weight matrix for time N
+
+    Eigen::MatrixXd get_R() const;               ///< Returns the control weight at time step t
+    DynamicsSolverPtr get_dynamics_solver() const;
+
+    int get_num_controls() const;  ///< Returns size of control vector
 
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;

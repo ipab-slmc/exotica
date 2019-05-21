@@ -1,0 +1,35 @@
+#!/usr/bin/env python2
+from __future__ import print_function, division
+
+import scipy.optimize as opt
+import matplotlib.pyplot as plt
+import pyexotica as exo
+from time import time, sleep
+
+import pprint
+import autograd.numpy as np
+import autograd.numpy.random as npr
+from autograd.scipy.misc import logsumexp
+from autograd import grad, jacobian, hessian
+from autograd.misc.flatten import flatten
+from autograd.misc.optimizers import adam
+
+exo.Setup.init_ros()
+sleep(0.2)
+
+solver = exo.Setup.load_solver(
+    '{exotica_examples}/resources/configs/example_dynamics_cartpole_simple.xml')
+problem = solver.get_problem()
+solution = solver.solve()[0]
+
+s = time()
+# for i in range(5):
+while True:
+    for t in range(problem.T - 1):
+        u = solution[t]
+        problem.update(np.array([u]), t)
+        problem.get_scene().get_kinematic_tree().publish_frames()
+        sleep(problem.tau)
+    e = time()
+    sleep(1)
+    print("Time taken to roll-out:", e-s)

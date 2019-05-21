@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+    <ILQRSolver Name="ILQRSolver">
+        <MaxIterations>50</MaxIterations>
+        <ConvergenceThreshold>1e-3</ConvergenceThreshold>
+        <Patience>10</Patience>
+        <ControlLimits>10 10 10 10 10 10 10</ControlLimits>
+    </ILQRSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+            </Scene>
+        </PlanningScene>
+
+        <DynamicsSolver>DoubleIntegratorDynamicsSolver</DynamicsSolver>
+        <Integrator>RK1</Integrator>
+        <T>100</T>
+        <tau>0.02</tau>
+        <dt>0.02</dt>
+        <Q_rate>0</Q_rate>
+        <Qf_rate>1000</Qf_rate>
+        <R_rate>0.1</R_rate>
+
+
+        <StartState>0 0 0 -1.35 0 0 0</StartState>
+        <GoalState>0 0 0 1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</PlannerDemoConfig>

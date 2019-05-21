@@ -67,10 +67,10 @@ public:
     Eigen::MatrixXd get_Q(int t) const;               ///< Returns the precision matrix at time step t
     void set_Q(Eigen::MatrixXdRefConst Q_in, int t);  ///< Sets the precision matrix for time step t
 
-    Eigen::MatrixXd get_Qf() const;               ///< Returns the cost weight matrix at time N
+    Eigen::MatrixXd get_Qf() const;             ///< Returns the cost weight matrix at time N
     void set_Qf(Eigen::MatrixXdRefConst Q_in);  ///< Sets the cost weight matrix for time N
 
-    Eigen::MatrixXd get_R() const;               ///< Returns the control weight at time step t
+    Eigen::MatrixXd get_R() const;  ///< Returns the control weight at time step t
     DynamicsSolverPtr get_dynamics_solver() const;
 
     int get_num_controls() const;  ///< Returns size of control vector

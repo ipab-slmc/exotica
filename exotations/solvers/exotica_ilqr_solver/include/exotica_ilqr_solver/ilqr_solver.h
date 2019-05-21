@@ -40,7 +40,6 @@
 
 namespace exotica
 {
-
 // This code is based on:
 // W. Li, E. Todorov, Iterative Linear Quadratic Regulator Design for Nonlinear Biological Movement Systems
 class ILQRSolver : public MotionSolver, public Instantiable<ILQRSolverInitializer>
@@ -59,12 +58,12 @@ public:
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 private:
-    ILQRSolverInitializer parameters_; ///!< Initialization parameters
+    ILQRSolverInitializer parameters_;           ///!< Initialization parameters
     DynamicTimeIndexedShootingProblemPtr prob_;  ///!< Shared pointer to the planning problem.
 
-    std::vector<Eigen::MatrixXd> GainsK, GainsKu, GainsKv, Gainsvk; ///!< Control gains.
-    int T; /// !< Total numebr of timesteps T. 
-    
+    std::vector<Eigen::MatrixXd> GainsK, GainsKu, GainsKv, Gainsvk;  ///!< Control gains.
+    int T;                                                           /// !< Total numebr of timesteps T.
+
     void Instantiate(const ILQRSolverInitializer& init);
 
     ///\brief Computes the control gains for a the trajectory in the associated
@@ -75,7 +74,7 @@ private:
     ///     last BackwardPass;
     /// @param alpha The learning rate.
     /// @param ref_trajectory The reference state trajectory.
-    /// @return The cost associated with the new control and state trajectory. 
+    /// @return The cost associated with the new control and state trajectory.
     double ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory);
 };
 }

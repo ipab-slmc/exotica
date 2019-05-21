@@ -62,12 +62,12 @@ Eigen::VectorXd CartpoleDynamicsSolver::f(const StateVector& x, const ControlVec
     auto c = cos(theta);
     auto tdots = thetadot * thetadot;
     auto ss = s * s;
-    
+
     auto x_dot = StateVector(4);
     x_dot << xdot, thetadot,
         (u(0) + m_p * s * (l * tdots + g * c)) /
             (m_c + m_p * ss),
-        - (l * m_p * c * s * tdots + u(0) * c + (m_c + m_p) * g * s ) /
+        -(l * m_p * c * s * tdots + u(0) * c + (m_c + m_p) * g * s) /
             (l * m_c + l * m_p * ss);
 
     return x_dot;
@@ -89,18 +89,18 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fx(const StateVector& x, const ControlVe
 
     Eigen::Matrix4d fx;
     fx << 0, 0, 1, 0,
-          0, 0, 0, 1,
-        //   
-          0,
-            -2*m_p*(m_p*(g*cos(theta) + l*tdot*tdot)*sin(theta) + u(0))*sin(theta)*cos(theta)/pow(m_c + m_p*sin(theta)*sin(theta),2) + (-g*m_p*sin(theta)*sin(theta) + m_p*(g*cos(theta) + l*tdot*tdot)*cos(theta))/(m_c + m_p*sin(theta)*sin(theta)),
-          0,
-            2*l*m_p*tdot*sin(theta)/(m_c + m_p*sin(theta)*sin(theta)),
-        //   
-          0,
-            -2*l*m_p*(-g*(m_c + m_p)*sin(theta) - l*m_p*tdot*tdot*sin(theta)*cos(theta) - u(0)*cos(theta))*sin(theta)*cos(theta)/pow(l*m_c + l*m_p*sin(theta)*sin(theta),2) + (-g*(m_c + m_p)*cos(theta) + l*m_p*tdot*tdot*sin(theta)*sin(theta) - l*m_p*tdot*tdot*cos(theta)*cos(theta) + u(0)*sin(theta))/(l*m_c + l*m_p*sin(theta)*sin(theta)),
-          0, 
-            -2*l*m_p*tdot*sin(theta)*cos(theta)/(l*m_c + l*m_p*sin(theta)*sin(theta));
-    
+        0, 0, 0, 1,
+        //
+        0,
+        -2 * m_p * (m_p * (g * cos(theta) + l * tdot * tdot) * sin(theta) + u(0)) * sin(theta) * cos(theta) / pow(m_c + m_p * sin(theta) * sin(theta), 2) + (-g * m_p * sin(theta) * sin(theta) + m_p * (g * cos(theta) + l * tdot * tdot) * cos(theta)) / (m_c + m_p * sin(theta) * sin(theta)),
+        0,
+        2 * l * m_p * tdot * sin(theta) / (m_c + m_p * sin(theta) * sin(theta)),
+        //
+        0,
+        -2 * l * m_p * (-g * (m_c + m_p) * sin(theta) - l * m_p * tdot * tdot * sin(theta) * cos(theta) - u(0) * cos(theta)) * sin(theta) * cos(theta) / pow(l * m_c + l * m_p * sin(theta) * sin(theta), 2) + (-g * (m_c + m_p) * cos(theta) + l * m_p * tdot * tdot * sin(theta) * sin(theta) - l * m_p * tdot * tdot * cos(theta) * cos(theta) + u(0) * sin(theta)) / (l * m_c + l * m_p * sin(theta) * sin(theta)),
+        0,
+        -2 * l * m_p * tdot * sin(theta) * cos(theta) / (l * m_c + l * m_p * sin(theta) * sin(theta));
+
     return fx;
 }
 
@@ -119,7 +119,7 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fu(const StateVector& x, const ControlVe
     auto ss = s * s;
 
     Eigen::Vector4d fu;
-    fu << 0, 0, 1/(m_c + m_p*sin(theta)*sin(theta)), -cos(theta)/(l*m_c + l*m_p*sin(theta)*sin(theta));
+    fu << 0, 0, 1 / (m_c + m_p * sin(theta) * sin(theta)), -cos(theta) / (l * m_c + l * m_p * sin(theta) * sin(theta));
     return fu;
 }
 

@@ -76,12 +76,12 @@ public:
     /// \brief Get robot model
     /// @param path Robot model name
     /// @param model Robot model
-    void GetModel(std::string path, robot_model::RobotModelPtr &model, std::string urdf = "", std::string srdf = "");
+    void GetModel(const std::string &path, robot_model::RobotModelPtr &model, const std::string &urdf = "", const std::string &srdf = "");
 
     /// \brief Get robot model
     /// @param path Robot model name
     /// @return robot model
-    robot_model::RobotModelConstPtr GetModel(std::string path, std::string urdf = "", std::string srdf = "");
+    robot_model::RobotModelConstPtr GetModel(const std::string &path, const std::string &urdf = "", const std::string &srdf = "");
 
     /// \brief Get the name of ther server
     /// @return Server name
@@ -173,7 +173,7 @@ private:
     ///	\brief	Make sure the singleton does not get copied
     Server(Server const &) = delete;
     void operator=(Server const &) = delete;
-    robot_model::RobotModelPtr LoadModel(std::string name, std::string urdf = "", std::string srdf = "");
+    robot_model::RobotModelPtr LoadModel(const std::string &name, const std::string &urdf = "", const std::string &srdf = "");
 
     /// \brief	The name of this server
     std::string name_;

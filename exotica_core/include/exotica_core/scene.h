@@ -59,8 +59,14 @@ struct AttachedObject
     KDL::Frame pose;
 };
 
+#ifndef EXOTICA_CORE_DYNAMICS_SOLVER_H_
+template <typename T, int NX, int NU>
+class AbstractDynamicsSolver;
+typedef AbstractDynamicsSolver<double, Eigen::Dynamic, Eigen::Dynamic> DynamicsSolver;
+#endif
+
 /// The class of EXOTica Scene
-class Scene : public Object, Uncopyable, public Instantiable<SceneInitializer>
+class Scene : public Object, Uncopyable, public Instantiable<SceneInitializer>, public std::enable_shared_from_this<Scene>
 {
 public:
     Scene(const std::string& name);
@@ -68,15 +74,19 @@ public:
     virtual ~Scene();
     virtual void Instantiate(const SceneInitializer& init);
     void RequestKinematics(KinematicsRequest& request, std::function<void(std::shared_ptr<KinematicResponse>)> callback);
-    std::string GetName();
-    virtual void Update(Eigen::VectorXdRefConst x, double t = 0);
-    void SetCollisionScene(const moveit_msgs::PlanningScene& scene);
-    CollisionScenePtr& GetCollisionScene();
+    const std::string& GetName() const;  // Deprecated - use GetObjectName
+    void Update(Eigen::VectorXdRefConst x, double t = 0);
+
+    /// \brief Returns a pointer to the CollisionScene
+    const CollisionScenePtr& GetCollisionScene() const;
+
+    /// \brief Returns a pointer to the CollisionScene
+    std::shared_ptr<DynamicsSolver> GetDynamicsSolver() const;
+
     std::string GetRootFrameName();
     std::string GetRootJointName();
-    moveit_msgs::PlanningScene GetPlanningSceneMsg();
+
     exotica::KinematicTree& GetKinematicTree();
-    void GetControlledJointNames(std::vector<std::string>& joints);
     std::vector<std::string> GetControlledJointNames();
     std::vector<std::string> GetModelJointNames();
     std::vector<std::string> GetControlledLinkNames();
@@ -87,7 +97,6 @@ public:
     std::map<std::string, std::weak_ptr<KinematicElement>> GetTreeMap();
     void SetModelState(Eigen::VectorXdRefConst x, double t = 0, bool update_traj = true);
     void SetModelState(std::map<std::string, double> x, double t = 0, bool update_traj = true);
-    std::string GetGroupName();
 
     void AddTrajectoryFromFile(const std::string& link, const std::string& traj);
     void AddTrajectory(const std::string& link, const std::string& traj);
@@ -125,18 +134,19 @@ public:
 
     void RemoveObject(const std::string& name);
 
-    /// @brief Update the internal MoveIt planning scene from a
-    /// moveit_msgs::PlanningSceneWorld
+    /// @brief Update the collision scene from a moveit_msgs::PlanningSceneWorld
     /// @param[in] world moveit_msgs::PlanningSceneWorld
-    void UpdateWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world);
+    void UpdatePlanningSceneWorld(const moveit_msgs::PlanningSceneWorldConstPtr& world);
+
+    /// @brief Update the collision scene from a moveit_msgs::PlanningScene
+    /// @param[in] scene moveit_msgs::PlanningScene
+    void UpdatePlanningScene(const moveit_msgs::PlanningScene& scene);
+
+    /// @brief Returns the current robot configuration and collision environment
+    /// as a moveit_msgs::PlanningScene
+    moveit_msgs::PlanningScene GetPlanningSceneMsg();
 
     void UpdateCollisionObjects();
-
-    BaseType GetBaseType()
-    {
-        return base_type_;
-    }
-
     void UpdateTrajectoryGenerators(double t = 0);
 
     void PublishScene();
@@ -151,18 +161,18 @@ public:
 
     /// @brief Whether the collision scene transforms get updated on every scene update.
     /// @return Whether collision scene transforms are force updated on every scene update.
-    bool AlwaysUpdatesCollisionScene() { return force_collision_; }
+    bool AlwaysUpdatesCollisionScene() const { return force_collision_; }
     /// @brief Returns a map between a model link name and the names of associated collision links.
     /// @return Map between model links and all associated collision links.
-    std::map<std::string, std::vector<std::string>> GetModelLinkToCollisionLinkMap() { return model_link_to_collision_link_map_; };
+    std::map<std::string, std::vector<std::string>> GetModelLinkToCollisionLinkMap() const { return model_link_to_collision_link_map_; };
     /// @brief Returns a map between a model link name and the KinematicElement of associated collision links.
     /// @return Map between model links and all the KinematicElements of the associated collision links.
-    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> GetModelLinkToCollisionElementMap() { return model_link_to_collision_element_map_; };
+    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> GetModelLinkToCollisionElementMap() const { return model_link_to_collision_element_map_; };
     /// @brief Returns a map between controlled robot link names and associated collision link names. Here we consider all fixed links between controlled links as belonging to the previous controlled link (as if the collision links had been fused).
     /// @return Map between controlled links and associated collision links.
-    std::map<std::string, std::vector<std::string>> GetControlledLinkToCollisionLinkMap() { return controlled_link_to_collision_link_map_; };
+    std::map<std::string, std::vector<std::string>> GetControlledLinkToCollisionLinkMap() const { return controlled_link_to_collision_link_map_; };
     /// @brief Returns world links that are to be excluded from collision checking.
-    std::set<std::string> get_world_links_to_exclude_from_collision_scene() { return world_links_to_exclude_from_collision_scene_; }
+    std::set<std::string> get_world_links_to_exclude_from_collision_scene() const { return world_links_to_exclude_from_collision_scene_; }
 private:
     void UpdateInternalFrames(bool update_request = true);
 
@@ -171,20 +181,14 @@ private:
 
     void LoadSceneFromStringStream(std::istream& in, const Eigen::Isometry3d& offset, bool update_collision_scene);
 
-    /// The name of the scene
-    std::string name_ = "Unnamed";
-
     /// The kinematica tree
     exotica::KinematicTree kinematica_;
 
-    /// Joint group
-    robot_model::JointModelGroup* group;
-
-    /// Robot base type
-    BaseType base_type_;
-
     /// The collision scene
     CollisionScenePtr collision_scene_;
+
+    /// The dynamics solver
+    std::shared_ptr<DynamicsSolver> dynamics_solver_ = std::shared_ptr<DynamicsSolver>(nullptr);
 
     /// Internal MoveIt planning scene
     planning_scene::PlanningScenePtr ps_;
@@ -224,6 +228,6 @@ private:
 };
 
 typedef std::shared_ptr<Scene> ScenePtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_SCENE_H_

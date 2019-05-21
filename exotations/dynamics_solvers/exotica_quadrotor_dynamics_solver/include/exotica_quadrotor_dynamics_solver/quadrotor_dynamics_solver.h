@@ -31,6 +31,9 @@
 #define EXOTICA_QUADROTOR_DYNAMICS_SOLVER_QUADROTOR_DYNAMICS_SOLVER_H_
 
 #include <exotica_core/dynamics_solver.h>
+#include <exotica_core/scene.h>
+
+#include <exotica_quadrotor_dynamics_solver/quadrotor_dynamics_solver_initializer.h>
 
 namespace exotica
 {
@@ -41,7 +44,7 @@ namespace exotica
 /// Cf. https://journals.sagepub.com/doi/abs/10.1177/0278364911434236
 ///
 /// StateVector X ∈ R^12 = [x, y, z, r, p, y, xdot, ydot, zdot, omega1, omega2, omega3]
-class QuadrotorDynamicsSolver : public DynamicsSolver
+class QuadrotorDynamicsSolver : public DynamicsSolver, public Instantiable<QuadrotorDynamicsSolverInitializer>
 {
 public:
     QuadrotorDynamicsSolver();

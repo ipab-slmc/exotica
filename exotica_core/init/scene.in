@@ -19,6 +19,9 @@ Optional double RobotLinkScale = 1.0;
 Optional double WorldLinkPadding = 0.0;
 Optional double RobotLinkPadding = 0.0;
 
+// Dynamics solver
+Optional std::vector<exotica::Initializer> DynamicsSolver = std::vector<exotica::Initializer>();
+
 Optional std::string LoadScene = "";  // to load multiple scenes, separate by semi-colon.
 Optional std::vector<exotica::Initializer> Links = std::vector<exotica::Initializer>();
 Optional std::vector<exotica::Initializer> Trajectories = std::vector<exotica::Initializer>();

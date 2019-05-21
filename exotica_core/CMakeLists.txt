@@ -49,6 +49,7 @@ AddInitializer(
   bounded_time_indexed_problem
   bounded_end_pose_problem
   dynamic_time_indexed_shooting_problem
+  dynamics_solver
 )
 GenInitializers()
 

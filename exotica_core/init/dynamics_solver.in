@@ -1,0 +1,6 @@
+class DynamicsSolver
+
+extend <exotica_core/object>
+
+Optional double dt = 0.01;  // dt for simulating dynamics
+Optional std::string Integrator = "RK1";

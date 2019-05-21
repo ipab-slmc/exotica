@@ -29,6 +29,7 @@
 
 #include <type_traits>
 
+#include <exotica_core/dynamics_solver.h>
 #include <exotica_core/scene.h>
 #include <exotica_core/server.h>
 #include <exotica_core/setup.h>
@@ -78,7 +79,7 @@ void Setup::PrintSupportedClasses()
     }
 }
 
-void appendInit(std::shared_ptr<InstantiableBase> it, std::vector<Initializer>& ret)
+void AppendInitializer(std::shared_ptr<InstantiableBase> it, std::vector<Initializer>& ret)
 {
     std::vector<Initializer> temps = it->GetAllTemplates();
     for (Initializer& i : temps)
@@ -103,14 +104,19 @@ std::vector<Initializer> Setup::GetInitializers()
 {
     std::vector<Initializer> ret = Scene().GetAllTemplates();
     std::vector<std::string> solvers = Instance()->solvers_.getDeclaredClasses();
-    for (std::string s : solvers)
+    for (const std::string& s : solvers)
     {
-        appendInit(std::static_pointer_cast<InstantiableBase>(CreateSolver(s, false)), ret);
+        AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateSolver(s, false)), ret);
     }
     std::vector<std::string> maps = Instance()->maps_.getDeclaredClasses();
-    for (std::string s : maps)
+    for (const std::string& s : maps)
     {
-        appendInit(std::static_pointer_cast<InstantiableBase>(CreateMap(s, false)), ret);
+        AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateMap(s, false)), ret);
+    }
+    std::vector<std::string> dynamics_solvers = Instance()->dynamics_solvers_.getDeclaredClasses();
+    for (const std::string& s : dynamics_solvers)
+    {
+        AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateDynamicsSolver(s, false)), ret);
     }
     return ret;
 }

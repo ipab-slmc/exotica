@@ -31,10 +31,13 @@
 #define EXOTICA_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_H_
 
 #include <exotica_core/dynamics_solver.h>
+#include <exotica_core/scene.h>
+
+#include <exotica_double_integrator_dynamics_solver/double_integrator_dynamics_solver_initializer.h>
 
 namespace exotica
 {
-class DoubleIntegratorDynamicsSolver : public DynamicsSolver
+class DoubleIntegratorDynamicsSolver : public DynamicsSolver, public Instantiable<DoubleIntegratorDynamicsSolverInitializer>
 {
 public:
     DoubleIntegratorDynamicsSolver();

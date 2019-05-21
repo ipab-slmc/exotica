@@ -28,6 +28,7 @@
 //
 
 #include <exotica_core/dynamics_solver.h>
+#include <exotica_core/scene.h>
 
 namespace exotica
 {
@@ -40,7 +41,18 @@ template <typename T, int NX, int NU>
 AbstractDynamicsSolver<T, NX, NU>::~AbstractDynamicsSolver() = default;
 
 template <typename T, int NX, int NU>
-void AbstractDynamicsSolver<T, NX, NU>::AssignScene(ScenePtr scene_in)
+void AbstractDynamicsSolver<T, NX, NU>::InstantiateBase(const Initializer& init)
+{
+    Object::InstantiateObject(init);
+    DynamicsSolverInitializer dynamics_solver_initializer = DynamicsSolverInitializer(init);
+    this->SetDt(dynamics_solver_initializer.dt);
+    this->SetIntegrator(dynamics_solver_initializer.Integrator);
+
+    if (debug_) INFO_NAMED(object_name_, "Initialized DynamicsSolver of type " << GetObjectName() << " with dt=" << dynamics_solver_initializer.dt << " and integrator=" << dynamics_solver_initializer.Integrator);
+}
+
+template <typename T, int NX, int NU>
+void AbstractDynamicsSolver<T, NX, NU>::AssignScene(std::shared_ptr<Scene> scene_in)
 {
 }
 

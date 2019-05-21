@@ -31,13 +31,17 @@
 #define EXOTICA_CORE_DYNAMICS_SOLVER_H_
 
 #include <exotica_core/factory.h>
-#include <exotica_core/scene.h>
-#include <exotica_core/tools/uncopyable.h>
+#include <exotica_core/object.h>
+#include <exotica_core/property.h>
+
+#include <exotica_core/dynamics_solver_initializer.h>
 
 #define REGISTER_DYNAMICS_SOLVER_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER(exotica::DynamicsSolver, TYPE, DERIV)
 
 namespace exotica
 {
+class Scene;
+
 enum Integrator
 {
     RK1 = 0,  ///< Forward Euler
@@ -47,7 +51,7 @@ enum Integrator
 };
 
 template <typename T, int NX, int NU>
-class AbstractDynamicsSolver : public Uncopyable
+class AbstractDynamicsSolver : public Object, Uncopyable, public virtual InstantiableBase
 {
 public:
     typedef Eigen::Matrix<T, NX, 1> StateVector;         ///< Convenience definition for a StateVector containing both position and velocity (dimension NX x 1)
@@ -58,10 +62,13 @@ public:
     AbstractDynamicsSolver();
     virtual ~AbstractDynamicsSolver();
 
+    /// \brief Instantiates the base properties of the DynamicsSolver
+    virtual void InstantiateBase(const Initializer& init);
+
     /// \brief Passes the Scene of the PlanningProblem to the DynamicsSolver
     ///
     ///  Called immediately after creation of the DynamicsSolver plug-in using a pointer to the Scene of the PlanningProblem. This can be used to extract required information from the Scene, e.g., URDF, dimensionality, etc.
-    virtual void AssignScene(ScenePtr scene_in);
+    virtual void AssignScene(std::shared_ptr<Scene> scene_in);
 
     /// \brief Sets the timestep dt to be used for integration.
     virtual void SetDt(double dt_in);

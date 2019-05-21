@@ -45,14 +45,14 @@ void OMPLSolver<ProblemType>::SpecifyProblem(PlanningProblemPtr pointer)
 {
     MotionSolver::SpecifyProblem(pointer);
     prob_ = std::static_pointer_cast<ProblemType>(pointer);
-    if (prob_->GetScene()->GetBaseType() == BaseType::FIXED)
+    if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::FIXED)
         state_space_.reset(new OMPLRNStateSpace(init_));
-    else if (prob_->GetScene()->GetBaseType() == BaseType::PLANAR)
+    else if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::PLANAR)
         state_space_.reset(new OMPLSE2RNStateSpace(init_));
-    else if (prob_->GetScene()->GetBaseType() == BaseType::FLOATING)
+    else if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::FLOATING)
         state_space_.reset(new OMPLSE3RNStateSpace(init_));
     else
-        ThrowNamed("Unsupported base type " << prob_->GetScene()->GetBaseType());
+        ThrowNamed("Unsupported base type " << prob_->GetScene()->GetKinematicTree().GetControlledBaseType());
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
     ompl_simple_setup_->setPlannerAllocator(boost::bind(planner_allocator_, _1, algorithm_));
@@ -65,11 +65,11 @@ void OMPLSolver<ProblemType>::SpecifyProblem(PlanningProblemPtr pointer)
             project_vars[i] = (int)init_.Projection(i);
             if (project_vars[i] < 0 || project_vars[i] >= prob_->N) ThrowNamed("Invalid projection index! " << project_vars[i]);
         }
-        if (prob_->GetScene()->GetBaseType() == BaseType::FIXED)
+        if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::FIXED)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLRNProjection(state_space_, project_vars)));
-        else if (prob_->GetScene()->GetBaseType() == BaseType::PLANAR)
+        else if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::PLANAR)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLSE2RNProjection(state_space_, project_vars)));
-        else if (prob_->GetScene()->GetBaseType() == BaseType::FLOATING)
+        else if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::FLOATING)
             ompl_simple_setup_->getStateSpace()->registerDefaultProjection(ompl::base::ProjectionEvaluatorPtr(new OMPLSE3RNProjection(state_space_, project_vars)));
     }
 }

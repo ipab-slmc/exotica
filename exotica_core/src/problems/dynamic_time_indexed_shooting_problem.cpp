@@ -43,17 +43,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
 {
     this->parameters_ = init;
 
-    // Create dynamics solver
-    dynamics_solver_ = Setup::CreateDynamicsSolver(this->parameters_.DynamicsSolver);
-    dynamics_solver_->AssignScene(scene_);
-    dynamics_solver_->SetDt(this->parameters_.dt);
-    dynamics_solver_->SetIntegrator(this->parameters_.Integrator);
-
-    // TODO: Strictly speaking N here should correspond to the number of controls, which comes from the dynamic solver - to be fixed!
-    N = scene_->GetKinematicTree().GetNumControlledJoints();
-    num_positions_ = dynamics_solver_->get_num_positions();
-    num_velocities_ = dynamics_solver_->get_num_velocities();
-    num_controls_ = dynamics_solver_->get_num_controls();
+    if (!scene_->GetDynamicsSolver()) ThrowPretty("DynamicsSolver is not initialised!");
 
     const int NX = num_positions_ + num_velocities_;
     if (this->parameters_.Q.rows() > 0)
@@ -86,8 +76,8 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     tau_ = this->parameters_.tau;
 
     // For now, without inter-/extra-polation for integrators, assure that tau is a multiple of dt
-    const double fmod_tau_dt = std::fmod(static_cast<long double>(1000. * tau_), static_cast<long double>(1000. * this->parameters_.dt));
-    if (fmod_tau_dt > 1e-5) ThrowPretty("tau is not a multiple of dt: tau=" << tau_ << ", dt=" << this->parameters_.dt << ", mod(" << fmod_tau_dt << ")");
+    const double fmod_tau_dt = std::fmod(static_cast<long double>(1000. * tau_), static_cast<long double>(1000. * scene_->GetDynamicsSolver()->get_dt()));
+    if (fmod_tau_dt > 1e-5) ThrowPretty("tau is not a multiple of dt: tau=" << tau_ << ", dt=" << scene_->GetDynamicsSolver()->get_dt() << ", mod(" << fmod_tau_dt << ")");
 
     ApplyStartState(false);
     ReinitializeVariables();
@@ -236,9 +226,9 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
 
     // Simulate for tau
-    X_.col(t + 1) = dynamics_solver_->Simulate(X_.col(t), U_.col(t), tau_);
+    X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(X_.col(t), U_.col(t), tau_);
 
-    scene_->Update(dynamics_solver_->GetPosition(X_.col(t + 1)), static_cast<double>(t) * tau_);
+    scene_->Update(scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1)), static_cast<double>(t) * tau_);
 
     // TODO: Cost, Equality, Inequality
 
@@ -270,7 +260,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
         t = T_ - 1;
     }
     const Eigen::VectorXd x_diff = X_star_.col(t) - X_.col(t);
-    return x_diff.transpose() * Q_[t] * dynamics_solver_->fu(X_.col(t), U_.col(t)) * -2.0;
+    return x_diff.transpose() * Q_[t] * scene_->GetDynamicsSolver()->fu(X_.col(t), U_.col(t)) * -2.0;
 }
 
 double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
@@ -301,12 +291,12 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
 {
-    return dynamics_solver_->f(x, u);
+    return scene_->GetDynamicsSolver()->f(x, u);
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
 {
-    return dynamics_solver_->Simulate(x, u, tau_);
+    return scene_->GetDynamicsSolver()->Simulate(x, u, tau_);
 }
 
 // min (mu-x)^T * Q * (mu-x) + u^T * R * u

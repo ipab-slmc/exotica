@@ -35,7 +35,6 @@
 #include <string>
 #include <vector>
 
-#include <exotica_core/dynamics_solver.h>
 #include <exotica_core/object.h>
 #include <exotica_core/scene.h>
 #include <exotica_core/task_map.h>

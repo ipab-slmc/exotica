@@ -315,7 +315,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
     {
         t = T_ - 1;
     }
-    
+
     const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_star_.col(t), X_.col(t));
     return x_diff.transpose() * Q_[t] * scene_->GetDynamicsSolver()->fu(X_.col(t), U_.col(t)) * -2.0;
 }

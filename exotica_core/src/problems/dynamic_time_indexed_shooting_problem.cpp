@@ -91,6 +91,20 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
 
     ApplyStartState(false);
     ReinitializeVariables();
+
+    // set start and goal states
+    set_X_star(init.GoalState.replicate(1, T_));
+
+    Eigen::VectorXd start_state_vel(
+        init.StartState.rows() * 2, init.StartState.cols()
+    );
+
+    // append zero to velocities
+    // TODO: Ask Wolf about this
+    start_state_vel << init.StartState,
+        Eigen::MatrixXd::Zero(init.StartState.rows(), init.StartState.cols());
+    set_X(start_state_vel.replicate(1, T_));
+    // set_X(init.StartState.replicate(1, T_));
 }
 
 void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
@@ -103,6 +117,8 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
 
     Q_.assign(T_, this->parameters_.Q_rate * Eigen::MatrixXd::Identity(NX, NX));
+    // set final Q (Qf)
+    set_Qf(this->parameters_.Qf_rate * Eigen::MatrixXd::Identity(NX, NX));
 
     PreUpdate();
 }
@@ -145,6 +161,20 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X() const
     return X_;
 }
 
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X(int t) const
+{
+    if (t >= T_ || t < -1)
+    {
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
+    }
+    else if (t == -1)
+    {
+        t = T_ - 1;
+    }
+
+    return X_.col(t);
+}
+
 void DynamicTimeIndexedShootingProblem::set_X(Eigen::MatrixXdRefConst X_in)
 {
     if (X_in.rows() != X_.rows() || X_in.cols() != X_.cols()) ThrowPretty("Sizes don't match!");
@@ -154,6 +184,20 @@ void DynamicTimeIndexedShootingProblem::set_X(Eigen::MatrixXdRefConst X_in)
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_U() const
 {
     return U_;
+}
+
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_U(int t) const
+{
+    if (t >= T_ || t < -1)
+    {
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
+    }
+    else if (t == -1)
+    {
+        t = T_ - 1;
+    }
+
+    return U_.col(t);
 }
 
 void DynamicTimeIndexedShootingProblem::set_U(Eigen::MatrixXdRefConst U_in)
@@ -186,6 +230,22 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_Q(int t) const
     return Q_[t];
 }
 
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_Qf() const
+{
+    return get_Q(T_ - 1);
+}
+
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_R() const
+{
+    return R_;
+}
+
+
+DynamicsSolverPtr DynamicTimeIndexedShootingProblem::get_dynamics_solver() const
+{
+    return dynamics_solver_;
+}
+
 void DynamicTimeIndexedShootingProblem::set_Q(Eigen::MatrixXdRefConst Q_in, int t)
 {
     if (t >= T_ || t < -1)
@@ -196,8 +256,14 @@ void DynamicTimeIndexedShootingProblem::set_Q(Eigen::MatrixXdRefConst Q_in, int 
     {
         t = T_ - 1;
     }
-    if (Q_in.rows() != Q_[t].rows() || Q_in.cols() != Q_[t].cols()) ThrowPretty("Dimension mismatch!");
+
+    if (Q_in.rows() != Q_[t].rows() || Q_in.cols() != Q_[t].cols()) ThrowPretty("Dimension mismatch!");   
     Q_[t] = Q_in;
+}
+
+void DynamicTimeIndexedShootingProblem::set_Qf(Eigen::MatrixXdRefConst Q_in)
+{
+    set_Q(Q_in, T_ - 1);
 }
 
 void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int t)
@@ -255,7 +321,8 @@ double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const
     {
         t = T_ - 1;
     }
-    const Eigen::VectorXd x_diff = X_star_.col(t) - X_.col(t);
+    // const Eigen::VectorXd x_diff = X_star_.col(t) - X_.col(t);
+    const Eigen::VectorXd x_diff = dynamics_solver_->StateDelta(X_.col(t), X_star_.col(t));
     return (x_diff.transpose() * Q_[t] * x_diff);
 }
 
@@ -269,7 +336,8 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
     {
         t = T_ - 1;
     }
-    const Eigen::VectorXd x_diff = X_star_.col(t) - X_.col(t);
+    // const Eigen::VectorXd x_diff = X_star_.col(t) - X_.col(t);
+    const Eigen::VectorXd x_diff = dynamics_solver_->StateDelta(X_star_.col(t), X_.col(t));
     return x_diff.transpose() * Q_[t] * dynamics_solver_->fu(X_.col(t), U_.col(t)) * -2.0;
 }
 

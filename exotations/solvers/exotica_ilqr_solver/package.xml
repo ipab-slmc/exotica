@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>exotica_ilqr_solver</name>
+  <version>0.0.1</version>
+  <description>ILQR Solver (Li and Todorov, 2004)</description>
+
+  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <author>Traiko Dinev</author>
+
+  <license>BSD</license>
+
+  <url type="website">https://github.com/ipab-slmc/exotica</url>
+  <url type="bugtracker">https://github.com/ipab-slmc/exotica/issues</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>exotica_core</depend>
+
+  <export>
+    <exotica_core plugin="${prefix}/exotica_plugins.xml" />
+  </export>
+</package>

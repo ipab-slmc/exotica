@@ -72,13 +72,13 @@ private:
     Eigen::Matrix3d M;      ///!< Inertia (mass) matrix
     Eigen::Matrix3d M_inv;  ///!< Inverted inertia matrix
 
-    double g_ = 9.81;           ///!< Gravity (m/s^2)
-    double m_c = 1;             ///!< Cart mass (kg)
-    double m_p = 1;             ///!< Pole mass (kg)
-    double l = 1;               ///!< Pole length (kg)
-    double slider_length = 30;  ///!< Length of slider (m).
-    double max_x = this->slider_length / 2; ///!< Left end of the slider
-    double max_y = -this->slider_length / 2; ///!< Right end of the slider
+    double g_ = 9.81;                         ///!< Gravity (m/s^2)
+    double m_c = 1;                           ///!< Cart mass (kg)
+    double m_p = 1;                           ///!< Pole mass (kg)
+    double l = 1;                             ///!< Pole length (kg)
+    double slider_length = 30;                ///!< Length of slider (m).
+    double max_x = this->slider_length / 2;   ///!< Left end of the slider
+    double max_y = -this->slider_length / 2;  ///!< Right end of the slider
 };
 }  // namespace exotica
 

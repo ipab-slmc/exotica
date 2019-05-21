@@ -86,8 +86,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     set_X_star(init.GoalState.replicate(1, T_));
 
     Eigen::VectorXd start_state_vel(
-        init.StartState.rows() * 2, init.StartState.cols()
-    );
+        init.StartState.rows() * 2, init.StartState.cols());
 
     // append zero to velocities
     // TODO: Ask Wolf about this
@@ -230,7 +229,6 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_R() const
     return R_;
 }
 
-
 DynamicsSolverPtr DynamicTimeIndexedShootingProblem::get_dynamics_solver() const
 {
     return dynamics_solver_;
@@ -247,7 +245,7 @@ void DynamicTimeIndexedShootingProblem::set_Q(Eigen::MatrixXdRefConst Q_in, int 
         t = T_ - 1;
     }
 
-    if (Q_in.rows() != Q_[t].rows() || Q_in.cols() != Q_[t].cols()) ThrowPretty("Dimension mismatch!");   
+    if (Q_in.rows() != Q_[t].rows() || Q_in.cols() != Q_[t].cols()) ThrowPretty("Dimension mismatch!");
     Q_[t] = Q_in;
 }
 

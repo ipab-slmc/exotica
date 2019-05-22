@@ -66,7 +66,7 @@ void ILQRSolver::BackwardPass()
 {
     Eigen::MatrixXd Qf = prob_->get_Qf(), R = prob_->get_R();
     Eigen::MatrixXd X_star = prob_->get_X_star();
-    DynamicsSolverPtr dynamics_solver = prob_->get_dynamics_solver();
+    DynamicsSolverPtr dynamics_solver = prob_->GetScene()->GetDynamicsSolver();
 
     // eq. 18
     Gainsvk[T - 1] = Qf * dynamics_solver->StateDelta(prob_->get_X(T - 1), X_star.col(T - 1));

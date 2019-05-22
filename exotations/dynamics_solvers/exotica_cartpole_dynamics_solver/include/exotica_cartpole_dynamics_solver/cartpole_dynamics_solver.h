@@ -38,6 +38,8 @@
 namespace exotica
 {
 /// StateVector X ∈ R^4 = [x, theta, x_dot, theta_dot]
+/// Refer to http://underactuated.mit.edu/underactuated.html?chapter=acrobot
+///     for a derivation of the cartpole dynamics. 
 class CartpoleDynamicsSolver : public DynamicsSolver, public Instantiable<CartpoleDynamicsSolverInitializer>
 {
 public:
@@ -47,35 +49,35 @@ public:
     /// \brief Computes the forward dynamics of the system.
     /// @param x The state vector.
     /// @param u The control input.
-    /// @returns The dynamics transition function.
+    /// @return The dynamics transition function.
     StateVector f(const StateVector& x, const ControlVector& u) override;
 
     /// \brief Computes the dynamics derivative w.r.t .the state x.
     /// @param x The state vector.
     /// @param u The control input.
-    /// @returns The derivative of the dynamics function w.r.t. x evaluated at (x, u).
+    /// @return The derivative of the dynamics function w.r.t. x evaluated at (x, u).
     Eigen::MatrixXd fx(const StateVector& x, const ControlVector& u) override;
     /// \brief Computes the dynamics derivative w.r.t .the control input u.
     /// @param x The state vector.
     /// @param u The control input
-    /// @returns The derivative of the dynamics function w.r.t. u evaluated at (x, u).
+    /// @return The derivative of the dynamics function w.r.t. u evaluated at (x, u).
     Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
 
     /// \brief
     /// Reeturns the position of all the joints. Converts to the coordinates used by the model.
     /// @param x The state vector.
-    /// @returns State vector in model coordinates.
+    /// @return State vector in model coordinates.
     Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
 
     /// \brief
-    /// Reeturns the difference between two state vectors x_1 - x_2.
+    /// @return the difference between two state vectors x_1 - x_2.
     Eigen::VectorXd StateDelta(const StateVector& x_1, const StateVector& x_2) override;
 
 private:
     Eigen::Matrix3d M;      ///!< Inertia (mass) matrix
     Eigen::Matrix3d M_inv;  ///!< Inverted inertia matrix
 
-    double g_ = 9.81;                         ///!< Gravity (m/s^2)
+    double g = 9.81;                         ///!< Gravity (m/s^2)
     double m_c = 1;                           ///!< Cart mass (kg)
     double m_p = 1;                           ///!< Pole mass (kg)
     double l = 1;                             ///!< Pole length (kg)

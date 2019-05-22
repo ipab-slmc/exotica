@@ -971,6 +971,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("get_model_link_names", &Scene::GetModelLinkNames);
     scene.def("get_kinematic_tree", &Scene::GetKinematicTree, py::return_value_policy::reference_internal);
     scene.def("get_collision_scene", &Scene::GetCollisionScene, py::return_value_policy::reference_internal);
+    scene.def("get_dynamics_solver", &Scene::GetDynamicsSolver, py::return_value_policy::reference_internal);
     scene.def("get_model_joint_names", &Scene::GetModelJointNames);
     scene.def("get_model_state", &Scene::GetModelState);
     scene.def("get_model_state_map", &Scene::GetModelStateMap);
@@ -1129,6 +1130,10 @@ PYBIND11_MODULE(_pyexotica, module)
             vec.push_back(instance->Phi(i));
         return vec;
     });
+
+    py::class_<DynamicsSolver, std::shared_ptr<DynamicsSolver>, Object>(module, "DynamicsSolver")
+        .def("fx", &DynamicsSolver::fx)
+        .def("fu", &DynamicsSolver::fu);
 
     ////////////////////////////////////////////////////////////////////////////
     /// Shapes

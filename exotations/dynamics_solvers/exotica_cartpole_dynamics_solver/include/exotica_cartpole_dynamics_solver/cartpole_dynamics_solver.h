@@ -68,11 +68,6 @@ public:
     /// @param x The state vector.
     /// @return State vector in model coordinates.
     Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
-
-    /// \brief
-    /// @return the difference between two state vectors x_1 - x_2.
-    Eigen::VectorXd StateDelta(const StateVector& x_1, const StateVector& x_2) override;
-
 private:
     Eigen::Matrix3d M;      ///!< Inertia (mass) matrix
     Eigen::Matrix3d M_inv;  ///!< Inverted inertia matrix

@@ -113,12 +113,4 @@ Eigen::VectorXd CartpoleDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_in
     return Eigen::Vector2d(x_in(0), M_PI - x_in(1));
 }
 
-Eigen::VectorXd CartpoleDynamicsSolver::StateDelta(const StateVector& x_1, const StateVector& x_2)
-{
-    Eigen::VectorXd diff = x_1 - x_2;
-    // diff(1) = std::fmod(diff(1) + M_PI, 2 * M_PI) - M_PI;
-
-    return diff;
-}
-
 }  // namespace exotica

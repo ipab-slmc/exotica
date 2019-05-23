@@ -2,8 +2,8 @@
 <PlannerDemoConfig>
     <ILQRSolver Name="ILQRSolver">
         <MaxIterations>50</MaxIterations>
-        <ConvergenceThreshold>1e-3</ConvergenceThreshold>
-        <Patience>10</Patience>
+        <FunctionTolerance>1e-3</FunctionTolerance>
+        <FunctionTolerancePatience>10</FunctionTolerancePatience>
         <ControlLimits>10 10 10 10 10 10 10</ControlLimits>
     </ILQRSolver>
 

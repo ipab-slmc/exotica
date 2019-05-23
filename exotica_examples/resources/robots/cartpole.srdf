@@ -9,8 +9,8 @@
     </group>
 
     <group name="actuated_joints">
-        `<joint name="slider_to_cart" />
-        `<joint name="cart_to_pole" />
+        <joint name="slider_to_cart" />
+        <joint name="cart_to_pole" />
     </group>
 
     <virtual_joint name="world_joint" type="fixed" parent_frame="world_frame" child_link="slideBar" />

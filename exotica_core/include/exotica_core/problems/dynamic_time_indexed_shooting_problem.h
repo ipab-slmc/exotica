@@ -71,10 +71,7 @@ public:
     void set_Qf(Eigen::MatrixXdRefConst Q_in);  ///< Sets the cost weight matrix for time N
 
     Eigen::MatrixXd get_R() const;  ///< Returns the control weight at time step t
-    DynamicsSolverPtr get_dynamics_solver() const;
-
-    int get_num_controls() const;  ///< Returns size of control vector
-
+    
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;
 

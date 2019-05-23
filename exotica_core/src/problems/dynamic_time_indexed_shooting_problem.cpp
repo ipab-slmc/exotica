@@ -83,7 +83,10 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     ReinitializeVariables();
 
     // set start and goal states
-    set_X_star(init.GoalState.replicate(1, T_));
+    Eigen::MatrixXd goal_state = Eigen::MatrixXd::Zero(NX, T_);
+    goal_state.col(T_ - 1) = init.GoalState;
+    set_X_star(goal_state);
+
     set_X(init.StartState.replicate(1, T_));
 }
 
@@ -218,11 +221,6 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_Qf() const
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_R() const
 {
     return R_;
-}
-
-DynamicsSolverPtr DynamicTimeIndexedShootingProblem::get_dynamics_solver() const
-{
-    return scene_->GetDynamicsSolver();
 }
 
 void DynamicTimeIndexedShootingProblem::set_Q(Eigen::MatrixXdRefConst Q_in, int t)

@@ -35,13 +35,11 @@
 
 #include <exotica_ilqr_solver/ilqr_solver_initializer.h>
 
-#define ILQR_MIN_CLAMP -1e10
-#define ILQR_MAX_CLAMP 1e10
-
 namespace exotica
 {
 // This code is based on:
 // W. Li, E. Todorov, Iterative Linear Quadratic Regulator Design for Nonlinear Biological Movement Systems
+// https://homes.cs.washington.edu/~todorov/papers/LiICINCO04.pdf
 class ILQRSolver : public MotionSolver, public Instantiable<ILQRSolverInitializer>
 {
 public:
@@ -58,13 +56,10 @@ public:
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 private:
-    ILQRSolverInitializer parameters_;           ///!< Initialization parameters
     DynamicTimeIndexedShootingProblemPtr prob_;  ///!< Shared pointer to the planning problem.
 
-    std::vector<Eigen::MatrixXd> GainsK, GainsKu, GainsKv, Gainsvk;  ///!< Control gains.
+    std::vector<Eigen::MatrixXd> k_gains_, ku_gains_, kv_gains_, vk_gains_;  ///!< Control gains.
     int T;                                                           /// !< Total numebr of timesteps T.
-
-    void Instantiate(const ILQRSolverInitializer& init);
 
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.

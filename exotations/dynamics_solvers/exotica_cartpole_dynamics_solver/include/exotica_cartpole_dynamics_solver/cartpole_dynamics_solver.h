@@ -64,7 +64,7 @@ public:
     Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
 
     /// \brief
-    /// Reeturns the position of all the joints. Converts to the coordinates used by the model.
+    /// Returns the position of all the joints. Converts to the coordinates used by the model.
     /// @param x The state vector.
     /// @return State vector in model coordinates.
     Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;

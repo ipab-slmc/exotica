@@ -54,7 +54,7 @@ public:
     double get_tau() const;  ///< Returns the discretization timestep tau
 
     Eigen::MatrixXd get_X() const;             ///< Returns the state trajectory X
-    Eigen::MatrixXd get_X(int i) const;        ///< Returns the state at time t
+    Eigen::MatrixXd get_X(int t) const;        ///< Returns the state at time t
     void set_X(Eigen::MatrixXdRefConst X_in);  ///< Sets the state trajectory X (can be used as the initial guess)
 
     Eigen::MatrixXd get_U() const;             ///< Returns the control trajectory U
@@ -80,6 +80,8 @@ public:
 
     Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
     Eigen::VectorXd Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
+
+    Eigen::VectorXd GetControlLimits() const;
 
 private:
     void ReinitializeVariables();

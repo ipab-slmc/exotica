@@ -354,6 +354,11 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::Simulate(Eigen::VectorXdRefCo
     return scene_->GetDynamicsSolver()->Simulate(x, u, tau_);
 }
 
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlLimits() const
+{
+    return parameters_.ControlLimits;
+}
+
 // min (mu-x)^T * Q * (mu-x) + u^T * R * u
 
 }  // namespace exotica

@@ -11,3 +11,4 @@ Optional Eigen::VectorXd GoalState = Eigen::VectorXd();
 Optional double Q_rate = 1.;
 Optional double Qf_rate = 1.;
 Optional double R_rate = 1.;
+Optional Eigen::VectorXd ControlLimits = Eigen::VectorXd();

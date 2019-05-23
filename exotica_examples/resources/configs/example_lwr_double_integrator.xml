@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
     <ILQRSolver Name="ILQRSolver">
+        <Debug>1</Debug>
         <MaxIterations>50</MaxIterations>
         <FunctionTolerance>1e-3</FunctionTolerance>
         <FunctionTolerancePatience>10</FunctionTolerancePatience>
-        <ControlLimits>10 10 10 10 10 10 10</ControlLimits>
     </ILQRSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
@@ -28,8 +28,7 @@
         <Q_rate>0</Q_rate>
         <Qf_rate>1000</Qf_rate>
         <R_rate>0.1</R_rate>
-
-
+        <ControlLimits>10 10 10 10 10 10 10</ControlLimits>
         <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
         <GoalState> 0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>

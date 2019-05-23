@@ -48,19 +48,20 @@ void ILQRSolver::SpecifyProblem(PlanningProblemPtr pointer)
     // initialize Gain matrices
     Eigen::MatrixXd x = prob_->get_X(0), u = prob_->get_U(0);
 
-    T = prob_->get_T();
-    k_gains_.assign(T, Eigen::MatrixXd(u.rows(), x.rows()));
-    ku_gains_.assign(T, Eigen::MatrixXd(u.rows(), u.rows()));
-    kv_gains_.assign(T, Eigen::MatrixXd(u.rows(), x.rows()));
+    int T = prob_->get_T();
+    K_gains_.assign(T, Eigen::MatrixXd(u.rows(), x.rows()));
+    Ku_gains_.assign(T, Eigen::MatrixXd(u.rows(), u.rows()));
+    Kv_gains_.assign(T, Eigen::MatrixXd(u.rows(), x.rows()));
     vk_gains_.assign(T, Eigen::MatrixXd(x.rows(), x.cols()));
 
-    HIGHLIGHT_NAMED("ILQRSolver", "initialized");
+    if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "initialized");
 }
 
 void ILQRSolver::BackwardPass()
 {
-    const double k_min_clamp_ = -1e10;
-    const double k_max_clamp_ = 1e10;
+    constexpr double min_clamp_ = -1e10;
+    constexpr double max_clamp_ = 1e10;
+    int T = prob_->get_T();
 
     Eigen::MatrixXd Qf = prob_->get_Qf(), R = prob_->get_R();
     Eigen::MatrixXd X_star = prob_->get_X_star();
@@ -68,13 +69,13 @@ void ILQRSolver::BackwardPass()
 
     // eq. 18
     vk_gains_[T - 1] = Qf * dynamics_solver->StateDelta(prob_->get_X(T - 1), X_star.col(T - 1));
-    vk_gains_[T - 1] = vk_gains_[T - 1].unaryExpr([k_min_clamp_, k_max_clamp_](double x) -> double {
-        return std::min(std::max(x, k_min_clamp_), k_max_clamp_);
+    vk_gains_[T - 1] = vk_gains_[T - 1].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+        return std::min(std::max(x, min_clamp_), max_clamp_);
     });
 
     Eigen::MatrixXd Sk = Qf;
-    Sk = Sk.unaryExpr([k_min_clamp_, k_max_clamp_](double x) -> double {
-        return std::min(std::max(x, k_min_clamp_), k_max_clamp_);
+    Sk = Sk.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+        return std::min(std::max(x, min_clamp_), max_clamp_);
     });
 
     for (int i = T - 2; i > 0; i--)
@@ -88,20 +89,20 @@ void ILQRSolver::BackwardPass()
         // this inverse is common for all factors
         Eigen::MatrixXd _inv = (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * 1e-5 + R + Bk.transpose() * Sk * Bk).inverse();
 
-        kv_gains_[i] = _inv * Bk.transpose();
-        k_gains_[i] = _inv * Bk.transpose() * Sk * Ak;
-        ku_gains_[i] = _inv * R;
-        Sk = Ak.transpose() * Sk * (Ak - Bk * k_gains_[i]) + Q;
+        Kv_gains_[i] = _inv * Bk.transpose();
+        K_gains_[i] = _inv * Bk.transpose() * Sk * Ak;
+        Ku_gains_[i] = _inv * R;
+        Sk = Ak.transpose() * Sk * (Ak - Bk * K_gains_[i]) + Q;
 
-        vk_gains_[i] = ((Ak - Bk * k_gains_[i]).transpose() * vk_gains_[i + 1]) -
-                     (k_gains_[i].transpose() * R * u) + (Q * x);
+        vk_gains_[i] = ((Ak - Bk * K_gains_[i]).transpose() * vk_gains_[i + 1]) -
+                     (K_gains_[i].transpose() * R * u) + (Q * x);
 
         // fix for large values
-        Sk = Sk.unaryExpr([k_min_clamp_, k_max_clamp_](double x) -> double {
-            return std::min(std::max(x, k_min_clamp_), k_max_clamp_);
+        Sk = Sk.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+            return std::min(std::max(x, min_clamp_), max_clamp_);
         });
-        vk_gains_[i] = vk_gains_[i].unaryExpr([k_min_clamp_, k_max_clamp_](double x) -> double {
-            return std::min(std::max(x, k_min_clamp_), k_max_clamp_);
+        vk_gains_[i] = vk_gains_[i].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+            return std::min(std::max(x, min_clamp_), max_clamp_);
         });
     }
 }
@@ -109,17 +110,20 @@ void ILQRSolver::BackwardPass()
 double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
 {
     double cost = 0;
+    int T = prob_->get_T();
+    Eigen::VectorXd control_limits = prob_->GetControlLimits();
+
     DynamicsSolverPtr dynamics_solver = prob_->GetScene()->GetDynamicsSolver();
     for (int i = 0; i < T - 1; ++i)
     {
         Eigen::MatrixXd u = prob_->get_U(i);
         // eq. 12
-        Eigen::MatrixXd delta_uk = -ku_gains_[i] * u - kv_gains_[i] * vk_gains_[i + 1] - k_gains_[i] * dynamics_solver->StateDelta(prob_->get_X(i), ref_trajectory.col(i));
+        Eigen::MatrixXd delta_uk = -Ku_gains_[i] * u - Kv_gains_[i] * vk_gains_[i + 1] - K_gains_[i] * dynamics_solver->StateDelta(prob_->get_X(i), ref_trajectory.col(i));
 
         u = u + alpha * delta_uk;
         // clamp controls
-        if (parameters_.ControlLimits.size() > 0)
-            u = u.cwiseMax(-parameters_.ControlLimits).cwiseMin(parameters_.ControlLimits);
+        if (control_limits.size() > 0)
+            u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
 
         prob_->Update(u, i);
         cost += prob_->GetControlCost(i) + prob_->GetStateCost(i);
@@ -132,15 +136,18 @@ double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
 
 void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 {
+    int T = prob_->get_T();
+
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
     if (!prob_) ThrowNamed("Solver has not been initialized!");
 
     // all of the below are not pointers, since we want to copy over
     //  solutions across iterations
     Eigen::MatrixXd best_U, best_X, global_best_U;
-    solution.resize(ku_gains_[0].rows(), T);
+    solution.resize(Ku_gains_[0].rows(), T);
 
-    HIGHLIGHT_NAMED("ILQRSolver", "Running ILQR solver for max " << parameters_.MaxIterations << " iterations");
+    if (debug_)
+        HIGHLIGHT_NAMED("ILQRSolver", "Running ILQR solver for max " << parameters_.MaxIterations << " iterations");
 
     double last_cost = 0, global_best_cost = 0;
     int last_best_iteration = 0;
@@ -152,7 +159,7 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     {
         // Backwards pass computes the gains
         BackwardPass();
-        HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete");
+        if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete");
 
         // forward pass to compute new control trajectory
         auto alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
@@ -175,8 +182,11 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
             }
         }
 
-        HIGHLIGHT_NAMED("ILQRSolver", "Forward pass complete with cost: " << best_cost << " and alpha " << best_alpha);
-        HIGHLIGHT_NAMED("ILQRSolver", "Final state: " << best_X.col(T - 1).transpose());
+        if (debug_)
+        {
+            HIGHLIGHT_NAMED("ILQRSolver", "Forward pass complete with cost: " << best_cost << " and alpha " << best_alpha);
+            HIGHLIGHT_NAMED("ILQRSolver", "Final state: " << best_X.col(T - 1).transpose());
+        }
 
         // copy solutions for next iteration
         if (iteration == 0 || global_best_cost > best_cost)
@@ -188,18 +198,18 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 
         if (iteration - last_best_iteration > parameters_.FunctionTolerancePatience)
         {
-            HIGHLIGHT_NAMED("ILQRSolver", "Early stopping criterion reached.");
+            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Early stopping criterion reached.");
             break;
         }
 
         if (abs(best_cost - last_cost) < parameters_.FunctionTolerance)
         {
-            HIGHLIGHT_NAMED("ILQRSolver", "Function tolerance reached.");
+            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Function tolerance reached.");
             break;
         }
 
         if (iteration == parameters_.MaxIterations - 1)
-            HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached.");
+            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached.");
 
         last_cost = best_cost;
         for (int i = 0; i < T - 1; i++)

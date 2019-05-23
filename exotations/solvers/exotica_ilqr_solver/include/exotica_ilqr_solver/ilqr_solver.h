@@ -58,8 +58,7 @@ public:
 private:
     DynamicTimeIndexedShootingProblemPtr prob_;  ///!< Shared pointer to the planning problem.
 
-    std::vector<Eigen::MatrixXd> k_gains_, ku_gains_, kv_gains_, vk_gains_;  ///!< Control gains.
-    int T;                                                           /// !< Total numebr of timesteps T.
+    std::vector<Eigen::MatrixXd> K_gains_, Ku_gains_, Kv_gains_, vk_gains_;  ///!< Control gains.
 
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.

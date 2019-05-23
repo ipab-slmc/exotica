@@ -41,5 +41,5 @@ install(FILES
 )
 
 if(CATKIN_ENABLE_TESTING)
-  catkin_add_nosetests(test/test_symbolic_diff.py)
+  catkin_add_nosetests(test/test_cartpole_diff.py)
 endif()

@@ -14,6 +14,8 @@
   <build_export_depend>roscpp</build_export_depend>
   <exec_depend>exotica_core</exec_depend>
   <exec_depend>roscpp</exec_depend>
+  <!-- This is not yet upstream. PR link: https://github.com/ros/rosdistro/pull/21332 -->
+  <!-- <test_depend>python-autograd</test_depend> -->
 
   <export>
     <exotica_core plugin="${prefix}/exotica_plugins.xml" />

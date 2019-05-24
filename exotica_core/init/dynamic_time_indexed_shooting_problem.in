@@ -7,5 +7,7 @@ Required double tau;  // Discretisation timestep of the trajectory
 
 Optional Eigen::VectorXd Q = Eigen::VectorXd();
 Optional Eigen::VectorXd R = Eigen::VectorXd();
+Optional Eigen::VectorXd GoalState = Eigen::VectorXd();
 Optional double Q_rate = 1.;
+Optional double Qf_rate = 1.;
 Optional double R_rate = 1.;

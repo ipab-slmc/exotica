@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+from __future__ import print_function, division
+
+import pyexotica as exo
+from pyexotica.publish_trajectory import *
+import signal
+from time import time, sleep
+import numpy as np
+
+exo.Setup.init_ros()
+sleep(0.2)
+
+solver = exo.Setup.load_solver(
+    '{exotica_examples}/resources/configs/example_dynamics_cartpole_simple.xml')
+problem = solver.get_problem()
+solution = solver.solve()
+
+s = time()
+signal.signal(signal.SIGINT, sig_int_handler)
+while True:
+    try:
+        for t in range(problem.T - 1):
+            u = solution[t,:]
+            problem.update(np.array([u]), t)
+            problem.get_scene().get_kinematic_tree().publish_frames()
+            sleep(problem.tau)
+        e = time()
+        sleep(1)
+        print("Time taken to roll-out:", e-s)
+    except KeyboardInterrupt:
+        break

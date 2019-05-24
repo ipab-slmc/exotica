@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(exotica_double_integrator_dynamics_solver)
+project(exotica_cartpole_dynamics_solver)
 
 find_package(catkin REQUIRED COMPONENTS
   exotica_core
   roscpp
 )
 
-AddInitializer(double_integrator_dynamics_solver)
+AddInitializer(cartpole_dynamics_solver)
 GenInitializers()
 
 catkin_package(
@@ -20,7 +20,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/double_integrator_dynamics_solver.cpp)
+add_library(${PROJECT_NAME} src/cartpole_dynamics_solver.cpp)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}
@@ -38,3 +38,7 @@ install(FILES
   exotica_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+if(CATKIN_ENABLE_TESTING)
+  catkin_add_nosetests(test/test_cartpole_diff.py)
+endif()

@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+    <ILQRSolver Name="ILQRSolver">
+        <Debug>1</Debug>
+        <MaxIterations>50</MaxIterations>
+        <FunctionTolerance>1e-3</FunctionTolerance>
+        <FunctionTolerancePatience>10</FunctionTolerancePatience>
+    </ILQRSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+
+                <DynamicsSolver>
+                    <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
+                        <!-- Check https://www.kuka.com/-/media/kuka-downloads/imported/48ec812b1b2947898ac2598aff70abc0/spez_lbr_iiwa_en.pdf -->
+                        <ControlLimits>156</ControlLimits>
+                    </DoubleIntegratorDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+        
+        <T>100</T>
+        <tau>0.02</tau>
+        <dt>0.02</dt>
+        <Q_rate>0</Q_rate>
+        <Qf_rate>1000</Qf_rate>
+        <R_rate>0.1</R_rate>
+        <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
+        <GoalState> 0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</PlannerDemoConfig>

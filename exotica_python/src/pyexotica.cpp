@@ -927,8 +927,8 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")
         .def("update", &DynamicTimeIndexedShootingProblem::Update)
-        .def_property("X", &DynamicTimeIndexedShootingProblem::get_X, &DynamicTimeIndexedShootingProblem::set_X)
-        .def_property("U", &DynamicTimeIndexedShootingProblem::get_U, &DynamicTimeIndexedShootingProblem::set_U)
+        .def_property("X", static_cast<Eigen::MatrixXd (DynamicTimeIndexedShootingProblem::*)(void) const>(&DynamicTimeIndexedShootingProblem::get_X), &DynamicTimeIndexedShootingProblem::set_X)
+        .def_property("U", static_cast<Eigen::MatrixXd (DynamicTimeIndexedShootingProblem::*)(void) const>(&DynamicTimeIndexedShootingProblem::get_U), &DynamicTimeIndexedShootingProblem::set_U)
         .def_property("X_star", &DynamicTimeIndexedShootingProblem::get_X_star, &DynamicTimeIndexedShootingProblem::set_X_star)
         .def_property_readonly("tau", &DynamicTimeIndexedShootingProblem::get_tau)
         .def_property("T", &DynamicTimeIndexedShootingProblem::get_T, &DynamicTimeIndexedShootingProblem::set_T)
@@ -973,6 +973,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("get_model_link_names", &Scene::GetModelLinkNames);
     scene.def("get_kinematic_tree", &Scene::GetKinematicTree, py::return_value_policy::reference_internal);
     scene.def("get_collision_scene", &Scene::GetCollisionScene, py::return_value_policy::reference_internal);
+    scene.def("get_dynamics_solver", &Scene::GetDynamicsSolver, py::return_value_policy::reference_internal);
     scene.def("get_model_joint_names", &Scene::GetModelJointNames);
     scene.def("get_model_state", &Scene::GetModelState);
     scene.def("get_model_state_map", &Scene::GetModelStateMap);
@@ -1131,6 +1132,11 @@ PYBIND11_MODULE(_pyexotica, module)
             vec.push_back(instance->Phi(i));
         return vec;
     });
+
+    py::class_<DynamicsSolver, std::shared_ptr<DynamicsSolver>, Object>(module, "DynamicsSolver")
+        .def("f", &DynamicsSolver::f)
+        .def("fx", &DynamicsSolver::fx)
+        .def("fu", &DynamicsSolver::fu);
 
     ////////////////////////////////////////////////////////////////////////////
     /// Shapes

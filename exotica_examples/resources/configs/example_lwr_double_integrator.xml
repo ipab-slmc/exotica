@@ -17,6 +17,7 @@
 
                 <DynamicsSolver>
                     <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
+                        <ControlLimits>10 10 10 10 10 10 10</ControlLimits>
                     </DoubleIntegratorDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
@@ -28,7 +29,6 @@
         <Q_rate>0</Q_rate>
         <Qf_rate>1000</Qf_rate>
         <R_rate>0.1</R_rate>
-        <ControlLimits>10 10 10 10 10 10 10</ControlLimits>
         <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
         <GoalState> 0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>

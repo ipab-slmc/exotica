@@ -58,7 +58,7 @@ public:
     void set_X(Eigen::MatrixXdRefConst X_in);  ///< Sets the state trajectory X (can be used as the initial guess)
 
     Eigen::MatrixXd get_U() const;             ///< Returns the control trajectory U
-    Eigen::MatrixXd get_U(int) const;          ///< Returns the control state at time t
+    Eigen::MatrixXd get_U(int t) const;          ///< Returns the control state at time t
     void set_U(Eigen::MatrixXdRefConst U_in);  ///< Sets the control trajectory U (can be used as the initial guess)
 
     Eigen::MatrixXd get_X_star() const;                  ///< Returns the target state trajectory X
@@ -70,7 +70,7 @@ public:
     Eigen::MatrixXd get_Qf() const;             ///< Returns the cost weight matrix at time N
     void set_Qf(Eigen::MatrixXdRefConst Q_in);  ///< Sets the cost weight matrix for time N
 
-    Eigen::MatrixXd get_R() const;  ///< Returns the control weight at time step t
+    Eigen::MatrixXd get_R() const;  ///< Returns the control weight matrix
     
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;
@@ -80,9 +80,6 @@ public:
 
     Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
     Eigen::VectorXd Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
-
-    Eigen::VectorXd GetControlLimits() const;
-
 private:
     void ReinitializeVariables();
 

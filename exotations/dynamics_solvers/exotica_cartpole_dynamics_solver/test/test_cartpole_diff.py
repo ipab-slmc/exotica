@@ -30,9 +30,6 @@ class TestCartpoleDiff(unittest.TestCase):
 
     def setUp(self):
         # set up exotica with the test configuration
-        exo.Setup.init_ros()
-        sleep(0.2)
-
         prob = exo.Initializers.load_xml(
             '{exotica_cartpole_dynamics_solver}/test/test_cartpole_diff.xml')
         problem = exo.Setup.create_problem(prob)

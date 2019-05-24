@@ -82,12 +82,16 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     ApplyStartState(false);
     ReinitializeVariables();
 
-    // set start and goal states
-    Eigen::MatrixXd goal_state = Eigen::MatrixXd::Zero(NX, T_);
-    goal_state.col(T_ - 1) = init.GoalState;
-    set_X_star(goal_state);
+    if (init.GoalState.rows() > 0)
+    {
+        // set start and goal states
+        Eigen::MatrixXd goal_state = Eigen::MatrixXd::Zero(NX, T_);
+        goal_state.col(T_ - 1) = init.GoalState;
+        set_X_star(goal_state);
+    }
 
-    set_X(init.StartState.replicate(1, T_));
+    if (init.StartState.rows() > 0)
+        set_X(init.StartState.replicate(1, T_));
 }
 
 void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
@@ -298,7 +302,6 @@ double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const
     {
         t = T_ - 1;
     }
-    // const Eigen::VectorXd x_diff = X_star_.col(t) - X_.col(t);
     const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
     return (x_diff.transpose() * Q_[t] * x_diff);
 }
@@ -353,12 +356,5 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::Simulate(Eigen::VectorXdRefCo
 {
     return scene_->GetDynamicsSolver()->Simulate(x, u, tau_);
 }
-
-Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlLimits() const
-{
-    return parameters_.ControlLimits;
-}
-
-// min (mu-x)^T * Q * (mu-x) + u^T * R * u
 
 }  // namespace exotica

@@ -2,6 +2,8 @@
 from __future__ import print_function, division
 
 import pyexotica as exo
+from pyexotica.publish_trajectory import *
+import signal
 from time import time, sleep
 import numpy as np
 
@@ -14,12 +16,16 @@ problem = solver.get_problem()
 solution = solver.solve()
 
 s = time()
+signal.signal(signal.SIGINT, sig_int_handler)
 while True:
-    for t in range(problem.T - 1):
-        u = solution[:,t]
-        problem.update(np.array(u), t)
-        problem.get_scene().get_kinematic_tree().publish_frames()
-        sleep(problem.tau)
-    e = time()
-    sleep(1)
-    print("Time taken to roll-out:", e-s)
+    try:
+        for t in range(problem.T - 1):
+            u = solution[t,:]
+            problem.update(np.array(u), t)
+            problem.get_scene().get_kinematic_tree().publish_frames()
+            sleep(problem.tau)
+        e = time()
+        sleep(1)
+        print("Time taken to roll-out:", e-s)
+    except KeyboardInterrupt:
+        break

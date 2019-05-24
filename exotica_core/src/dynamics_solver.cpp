@@ -47,6 +47,7 @@ void AbstractDynamicsSolver<T, NX, NU>::InstantiateBase(const Initializer& init)
     DynamicsSolverInitializer dynamics_solver_initializer = DynamicsSolverInitializer(init);
     this->SetDt(dynamics_solver_initializer.dt);
     this->SetIntegrator(dynamics_solver_initializer.Integrator);
+    this->set_control_limits(dynamics_solver_initializer.ControlLimits);
 
     if (debug_) INFO_NAMED(object_name_, "Initialized DynamicsSolver of type " << GetObjectName() << " with dt=" << dynamics_solver_initializer.dt << " and integrator=" << dynamics_solver_initializer.Integrator);
 }
@@ -171,6 +172,18 @@ template <typename T, int NX, int NU>
 Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::StateDelta(const StateVector& x_1, const StateVector& x_2)
 {
     return x_1 - x_2;
+}
+
+template <typename T, int NX, int NU>
+Eigen::VectorXd AbstractDynamicsSolver<T, NX, NU>::get_control_limits() const
+{
+    return control_limits_;
+}
+
+template <typename T, int NX, int NU>
+void AbstractDynamicsSolver<T, NX, NU>::set_control_limits(Eigen::VectorXd control_limits)
+{
+    control_limits_ = control_limits;
 }
 
 }  // namespace exotica

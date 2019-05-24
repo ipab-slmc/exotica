@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2019, University of Edinburgh
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -44,16 +44,7 @@ void ILQRSolver::SpecifyProblem(PlanningProblemPtr pointer)
     }
     MotionSolver::SpecifyProblem(pointer);
     prob_ = std::static_pointer_cast<DynamicTimeIndexedShootingProblem>(pointer);
-
-    // initialize Gain matrices
-    Eigen::MatrixXd x = prob_->get_X(0), u = prob_->get_U(0);
-
-    int T = prob_->get_T();
-    K_gains_.assign(T, Eigen::MatrixXd(u.rows(), x.rows()));
-    Ku_gains_.assign(T, Eigen::MatrixXd(u.rows(), u.rows()));
-    Kv_gains_.assign(T, Eigen::MatrixXd(u.rows(), x.rows()));
-    vk_gains_.assign(T, Eigen::MatrixXd(x.rows(), x.cols()));
-
+    dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
     if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "initialized");
 }
 
@@ -63,12 +54,11 @@ void ILQRSolver::BackwardPass()
     constexpr double max_clamp_ = 1e10;
     int T = prob_->get_T();
 
-    Eigen::MatrixXd Qf = prob_->get_Qf(), R = prob_->get_R();
-    Eigen::MatrixXd X_star = prob_->get_X_star();
-    DynamicsSolverPtr dynamics_solver = prob_->GetScene()->GetDynamicsSolver();
+    const Eigen::MatrixXd Qf = prob_->get_Qf(), R = prob_->get_R();
+    const Eigen::MatrixXd X_star = prob_->get_X_star();
 
     // eq. 18
-    vk_gains_[T - 1] = Qf * dynamics_solver->StateDelta(prob_->get_X(T - 1), X_star.col(T - 1));
+    vk_gains_[T - 1] = Qf * dynamics_solver_->StateDelta(prob_->get_X(T - 1), X_star.col(T - 1));
     vk_gains_[T - 1] = vk_gains_[T - 1].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
         return std::min(std::max(x, min_clamp_), max_clamp_);
     });
@@ -80,14 +70,16 @@ void ILQRSolver::BackwardPass()
 
     for (int i = T - 2; i > 0; i--)
     {
-        Eigen::MatrixXd x = prob_->get_X(i), u = prob_->get_U(i), Q = prob_->get_Q(i);
-        Eigen::MatrixXd Ak = dynamics_solver->fx(x, u), Bk = dynamics_solver->fu(x, u);
+        Eigen::VectorXd x = prob_->get_X(i), u = prob_->get_U(i);
+        Eigen::MatrixXd Ak = dynamics_solver_->fx(x, u), Bk = dynamics_solver_->fu(x, u),
+            Q = prob_->get_Q(i);
 
         // eq. 13-16
-        Ak = Ak * dynamics_solver->get_dt() + Eigen::MatrixXd::Identity(Ak.rows(), Ak.cols());
-        Bk = Bk * dynamics_solver->get_dt();
+        Ak = Ak * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(Ak.rows(), Ak.cols());
+        Bk = Bk * dynamics_solver_->get_dt();
         // this inverse is common for all factors
-        Eigen::MatrixXd _inv = (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * 1e-5 + R + Bk.transpose() * Sk * Bk).inverse();
+        const Eigen::MatrixXd _inv =
+            (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * 1e-5 + R + Bk.transpose() * Sk * Bk).inverse();
 
         Kv_gains_[i] = _inv * Bk.transpose();
         K_gains_[i] = _inv * Bk.transpose() * Sk * Ak;
@@ -111,14 +103,15 @@ double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
 {
     double cost = 0;
     int T = prob_->get_T();
-    Eigen::VectorXd control_limits = prob_->GetControlLimits();
+    Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
 
-    DynamicsSolverPtr dynamics_solver = prob_->GetScene()->GetDynamicsSolver();
+    DynamicsSolverPtr dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
     for (int i = 0; i < T - 1; ++i)
     {
-        Eigen::MatrixXd u = prob_->get_U(i);
+        Eigen::VectorXd u = prob_->get_U(i);
         // eq. 12
-        Eigen::MatrixXd delta_uk = -Ku_gains_[i] * u - Kv_gains_[i] * vk_gains_[i + 1] - K_gains_[i] * dynamics_solver->StateDelta(prob_->get_X(i), ref_trajectory.col(i));
+        Eigen::VectorXd delta_uk = -Ku_gains_[i] * u - Kv_gains_[i] * vk_gains_[i + 1] - 
+            K_gains_[i] * dynamics_solver_->StateDelta(prob_->get_X(i), ref_trajectory.col(i));
 
         u = u + alpha * delta_uk;
         // clamp controls
@@ -136,24 +129,29 @@ double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
 
 void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 {
-    int T = prob_->get_T();
+    const int T = prob_->get_T();
+    const int NX = prob_->get_num_positions();
+    const int NU = prob_->get_num_controls();
+    const int N = NX + prob_->get_num_velocities();
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
     if (!prob_) ThrowNamed("Solver has not been initialized!");
 
+    // initialize Gain matrices
+    K_gains_.assign(T, Eigen::MatrixXd(NU, N));
+    Ku_gains_.assign(T, Eigen::MatrixXd(NU, NU));
+    Kv_gains_.assign(T, Eigen::MatrixXd(NU, N));
+    vk_gains_.assign(T, Eigen::MatrixXd(N, 1));
+
     // all of the below are not pointers, since we want to copy over
     //  solutions across iterations
     Eigen::MatrixXd best_U, best_X, global_best_U;
-    solution.resize(Ku_gains_[0].rows(), T);
+    solution.resize(T, NU);
 
-    if (debug_)
-        HIGHLIGHT_NAMED("ILQRSolver", "Running ILQR solver for max " << parameters_.MaxIterations << " iterations");
+    if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Running ILQR solver for max " << parameters_.MaxIterations << " iterations");
 
     double last_cost = 0, global_best_cost = 0;
     int last_best_iteration = 0;
-
-    for (int i = 0; i < T - 1; ++i)
-        prob_->Update(Eigen::MatrixXd::Zero(prob_->get_U(0).rows(), prob_->get_U(0).cols()), i);
 
     for (int iteration = 0; iteration < GetNumberOfMaxIterations(); ++iteration)
     {
@@ -162,11 +160,13 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete");
 
         // forward pass to compute new control trajectory
-        auto alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
+        // TODO: Configure line-search space from xml
+        // TODO (Wolf): What you are doing is a forward line-search when we may try a 
+        //    backtracking line search for a performance improvement later - this just as an aside.
+        const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
         double best_cost = 0, best_alpha = 0;
 
         Eigen::MatrixXd ref_trajectory = prob_->get_X();
-
         // perform a linear search to find the best rate
         for (int ai = 0; ai < alpha_space.rows(); ++ai)
         {
@@ -208,21 +208,18 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        if (iteration == parameters_.MaxIterations - 1)
-            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached.");
+        if (iteration == parameters_.MaxIterations - 1 && debug_) HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached.");
 
         last_cost = best_cost;
         for (int i = 0; i < T - 1; i++)
-        {
             prob_->Update(best_U.col(i), i);
-        }
         prob_->SetCostEvolution(iteration, best_cost);
     }
 
     // store the best solution found over all iterations
     for (int i = 0; i < T - 1; i++)
     {
-        solution.col(i) = global_best_U.col(i);
+        solution.row(i) = global_best_U.col(i);
         prob_->Update(global_best_U.col(i), i);
     }
 }

@@ -17,8 +17,5 @@
         <T>2</T>
         <tau>0.02</tau>
         <dt>0.02</dt>
-
-        <StartState>0 0 0 0 </StartState>
-        <GoalState>0 0 0 0 </GoalState>
     </DynamicTimeIndexedShootingProblem>
 </PlannerDemoConfig>

@@ -121,6 +121,10 @@ public:
     /// \brief Sets integrator type based on request string
     void SetIntegrator(std::string integrator_in);
 
+    /// \brief Returns the control limits vector.
+    Eigen::VectorXd get_control_limits() const;
+    void set_control_limits(Eigen::VectorXd control_limits);
+
 protected:
     int num_controls_;    ///< Number of controls in the dynamic system.
     int num_positions_;   ///< Number of positions in the dynamic system.
@@ -128,6 +132,7 @@ protected:
 
     T dt_ = 0.01;                              ///< Internal timestep used for integration. Defaults to 10ms.
     Integrator integrator_ = Integrator::RK1;  ///< Chosen integrator. Defaults to Euler (RK1).
+    Eigen::VectorXd control_limits_ = Eigen::VectorXd(); ///< ControlLimits. Default is empty vector.
 
     /// \brief Integrates the dynamic system from state x with controls u applied for one timestep dt using the selected integrator.
     inline StateVector Integrate(const StateVector& x, const ControlVector& u);

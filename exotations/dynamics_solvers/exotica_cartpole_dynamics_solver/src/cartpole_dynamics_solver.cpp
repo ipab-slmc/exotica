@@ -68,6 +68,7 @@ Eigen::VectorXd CartpoleDynamicsSolver::f(const StateVector& x, const ControlVec
     return x_dot;
 }
 
+// NOTE: tested in test/test_cartpole_diff.py in this package
 Eigen::MatrixXd CartpoleDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
     auto theta = x(1);
@@ -94,6 +95,7 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fx(const StateVector& x, const ControlVe
     return fx;
 }
 
+// NOTE: tested in test/test_cartpole_diff.py in this package
 Eigen::MatrixXd CartpoleDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
     auto theta = x(1);

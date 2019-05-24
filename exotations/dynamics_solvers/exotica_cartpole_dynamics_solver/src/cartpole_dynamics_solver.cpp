@@ -62,8 +62,9 @@ Eigen::VectorXd CartpoleDynamicsSolver::f(const StateVector& x, const ControlVec
     x_dot << xdot, thetadot,
         (u(0) + m_p_ * sin_theta * (l_ * theta_dot_squared + g_ * cos_theta)) /
             (m_c_ + m_p_ * sin_theta * sin_theta),
-        -(l_ * m_p_ * cos_theta * sin_theta * theta_dot_squared + u(0) * cos_theta + 
-            (m_c_ + m_p_) * g_ * sin_theta) / (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta);
+        -(l_ * m_p_ * cos_theta * sin_theta * theta_dot_squared + u(0) * cos_theta +
+          (m_c_ + m_p_) * g_ * sin_theta) /
+            (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta);
 
     return x_dot;
 }

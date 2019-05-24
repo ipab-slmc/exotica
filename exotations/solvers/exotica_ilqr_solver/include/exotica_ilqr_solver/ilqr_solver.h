@@ -56,8 +56,8 @@ public:
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 private:
-    DynamicTimeIndexedShootingProblemPtr prob_;  ///!< Shared pointer to the planning problem.
-    DynamicsSolverPtr dynamics_solver_; ///!< Shared pointer to the dynamics solver.
+    DynamicTimeIndexedShootingProblemPtr prob_;                              ///!< Shared pointer to the planning problem.
+    DynamicsSolverPtr dynamics_solver_;                                      ///!< Shared pointer to the dynamics solver.
     std::vector<Eigen::MatrixXd> K_gains_, Ku_gains_, Kv_gains_, vk_gains_;  ///!< Control gains.
 
     ///\brief Computes the control gains for a the trajectory in the associated
@@ -71,6 +71,6 @@ private:
     /// @return The cost associated with the new control and state trajectory.
     double ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory);
 };
-} // namespace exotica
+}  // namespace exotica
 
 #endif  // EXOTICA_ILQR_SOLVER_ILQR_SOLVER_H_

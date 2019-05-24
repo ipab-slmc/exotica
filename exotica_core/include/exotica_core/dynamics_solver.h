@@ -132,7 +132,8 @@ protected:
 
     T dt_ = 0.01;                              ///< Internal timestep used for integration. Defaults to 10ms.
     Integrator integrator_ = Integrator::RK1;  ///< Chosen integrator. Defaults to Euler (RK1).
-    Eigen::VectorXd control_limits_ = Eigen::VectorXd(); ///< ControlLimits. Default is empty vector.
+    // TODO: Need to enforce control limits.
+    Eigen::VectorXd control_limits_ = Eigen::VectorXd();  ///< ControlLimits. Default is empty vector.
 
     /// \brief Integrates the dynamic system from state x with controls u applied for one timestep dt using the selected integrator.
     inline StateVector Integrate(const StateVector& x, const ControlVector& u);

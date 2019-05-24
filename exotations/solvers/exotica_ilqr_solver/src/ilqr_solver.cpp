@@ -72,7 +72,7 @@ void ILQRSolver::BackwardPass()
     {
         Eigen::VectorXd x = prob_->get_X(i), u = prob_->get_U(i);
         Eigen::MatrixXd Ak = dynamics_solver_->fx(x, u), Bk = dynamics_solver_->fu(x, u),
-            Q = prob_->get_Q(i);
+                        Q = prob_->get_Q(i);
 
         // eq. 13-16
         Ak = Ak * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(Ak.rows(), Ak.cols());
@@ -87,7 +87,7 @@ void ILQRSolver::BackwardPass()
         Sk = Ak.transpose() * Sk * (Ak - Bk * K_gains_[i]) + Q;
 
         vk_gains_[i] = ((Ak - Bk * K_gains_[i]).transpose() * vk_gains_[i + 1]) -
-                     (K_gains_[i].transpose() * R * u) + (Q * x);
+                       (K_gains_[i].transpose() * R * u) + (Q * x);
 
         // fix for large values
         Sk = Sk.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
@@ -103,20 +103,24 @@ double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
 {
     double cost = 0;
     int T = prob_->get_T();
-    Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
 
     DynamicsSolverPtr dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
     for (int i = 0; i < T - 1; ++i)
     {
         Eigen::VectorXd u = prob_->get_U(i);
         // eq. 12
-        Eigen::VectorXd delta_uk = -Ku_gains_[i] * u - Kv_gains_[i] * vk_gains_[i + 1] - 
-            K_gains_[i] * dynamics_solver_->StateDelta(prob_->get_X(i), ref_trajectory.col(i));
+        Eigen::VectorXd delta_uk = -Ku_gains_[i] * u - Kv_gains_[i] * vk_gains_[i + 1] -
+                                   K_gains_[i] * dynamics_solver_->StateDelta(prob_->get_X(i), ref_trajectory.col(i));
 
         u = u + alpha * delta_uk;
         // clamp controls
-        if (control_limits.size() > 0)
+        if (control_limits.size() == u.size())
             u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
+        else if (control_limits.size() == 1)
+            u = u.unaryExpr([&control_limits](double x) -> double {
+                return std::min(std::max(x, -control_limits(0)), control_limits(0));
+            });
 
         prob_->Update(u, i);
         cost += prob_->GetControlCost(i) + prob_->GetStateCost(i);
@@ -161,7 +165,7 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 
         // forward pass to compute new control trajectory
         // TODO: Configure line-search space from xml
-        // TODO (Wolf): What you are doing is a forward line-search when we may try a 
+        // TODO (Wolf): What you are doing is a forward line-search when we may try a
         //    backtracking line search for a performance improvement later - this just as an aside.
         const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
         double best_cost = 0, best_alpha = 0;
@@ -211,16 +215,16 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         if (iteration == parameters_.MaxIterations - 1 && debug_) HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached.");
 
         last_cost = best_cost;
-        for (int i = 0; i < T - 1; i++)
+        for (int i = 0; i < T - 1; ++i)
             prob_->Update(best_U.col(i), i);
         prob_->SetCostEvolution(iteration, best_cost);
     }
 
     // store the best solution found over all iterations
-    for (int i = 0; i < T - 1; i++)
+    for (int i = 0; i < T - 1; ++i)
     {
         solution.row(i) = global_best_U.col(i);
         prob_->Update(global_best_U.col(i), i);
     }
 }
-} // namespace exotica
+}  // namespace exotica

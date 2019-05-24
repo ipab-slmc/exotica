@@ -169,12 +169,6 @@ void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(std::string integrator_in)
 }
 
 template <typename T, int NX, int NU>
-Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::StateDelta(const StateVector& x_1, const StateVector& x_2)
-{
-    return x_1 - x_2;
-}
-
-template <typename T, int NX, int NU>
 Eigen::VectorXd AbstractDynamicsSolver<T, NX, NU>::get_control_limits() const
 {
     return control_limits_;

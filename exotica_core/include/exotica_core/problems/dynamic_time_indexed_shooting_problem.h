@@ -98,6 +98,6 @@ private:
 };
 
 typedef std::shared_ptr<exotica::DynamicTimeIndexedShootingProblem> DynamicTimeIndexedShootingProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_DYNAMIC_TIME_INDEXED_SHOOTING_PROBLEM_H_

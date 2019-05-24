@@ -17,7 +17,8 @@
 
                 <DynamicsSolver>
                     <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
-                        <ControlLimits>10</ControlLimits>
+                        <!-- Check https://www.kuka.com/-/media/kuka-downloads/imported/48ec812b1b2947898ac2598aff70abc0/spez_lbr_iiwa_en.pdf -->
+                        <ControlLimits>156</ControlLimits>
                     </DoubleIntegratorDynamicsSolver>
                 </DynamicsSolver>
             </Scene>

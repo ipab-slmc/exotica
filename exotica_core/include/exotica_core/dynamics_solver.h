@@ -94,7 +94,10 @@ public:
 
     /// \brief Return the difference of two state vectors.
     ///     Used when e.g. angle differences need to be wrapped from [-pi; pi]
-    virtual StateVector StateDelta(const StateVector& x_1, const StateVector& x_2);
+    virtual StateVector StateDelta(const StateVector& x_1, const StateVector& x_2)
+    {
+        return x_1 - x_2;
+    }
 
     /// \brief Returns the position-part of the state vector to update the scene.
     /// For types including SE(3) and rotation, convert to the appropriate representation here by overriding this method.
@@ -142,6 +145,6 @@ protected:
 typedef AbstractDynamicsSolver<double, Eigen::Dynamic, Eigen::Dynamic> DynamicsSolver;
 
 typedef std::shared_ptr<exotica::DynamicsSolver> DynamicsSolverPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_DYNAMICS_SOLVER_H_

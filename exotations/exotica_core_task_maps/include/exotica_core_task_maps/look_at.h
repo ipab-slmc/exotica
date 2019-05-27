@@ -43,11 +43,6 @@ namespace exotica
 /// \brief Points end-effector to look at a given target.
 /// Looks at a target point by penalizing the vector which defines the orthogonal projection onto a defined line in the end-effector frame.
 ///
-/// The task map relies on defining three frames for each target to be looked at:
-///  - (0) the EffPoint in the end-effector frame (use in task map)
-///  - (1) the LookAtTarget in the end-effector frame (use in task map)
-///  - (2) the LookAtTarget in the world frame (use by user to easily return target in world coordinates - can be retrieved via get_look_at_target_in_world)
-///
 /// \image html taskmap_lookat.png "LookAt task map." width=500px
 ///
 /// Given the point \f$p\f$ (the point to look at) defined in the end-effector space the task map is expressed by
@@ -71,8 +66,6 @@ public:
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
-
-    Eigen::Vector3d get_look_at_target_in_world(const int& i);
 
 private:
     int n_end_effs_;  ///< Number of end-effectors.

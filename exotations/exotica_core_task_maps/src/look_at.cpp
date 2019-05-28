@@ -61,4 +61,4 @@ int LookAt::TaskSpaceDim()
 {
     return 2 * frames_.size();
 }
-}
+}  // namespace exotica

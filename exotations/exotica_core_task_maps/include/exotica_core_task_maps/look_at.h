@@ -40,7 +40,7 @@ namespace exotica
 ///
 /// \ingroup TaskMap
 ///
-/// \brief Points end-effector to look at a given target.
+/// \brief Points end-effector to look at a given target by aligning end-effector z-axis with the target.
 /// Looks at a target point by penalizing the vector which defines the orthogonal projection onto a defined line in the end-effector frame.
 ///
 /// \image html taskmap_lookat.png "LookAt task map." width=500px
@@ -62,14 +62,11 @@ public:
     LookAt();
     virtual ~LookAt();
 
-    void Instantiate(const LookAtInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
 private:
-    int n_end_effs_;  ///< Number of end-effectors.
-    int n_;           ///< Dimension of the task space.
 };
 }  // namespace exotica
 

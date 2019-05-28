@@ -1105,6 +1105,34 @@ TEST(ExoticaTaskMaps, testJointSmoothingBackwardDifference)
     }
 }
 
+TEST(ExoticaTaskMaps, testAvoidLookAtSphere)
+{
+    try
+    {
+        {
+            TEST_COUT << "AvoidLookAtSphere";
+
+            // Custom links
+            std::vector<Initializer> custom_links({Initializer("Link", {{"Name", std::string("AvoidLookAtPosition")},
+                                                                        {"Transform", std::string("1 1 2")}})});
+
+            // Setup taskmap
+            Initializer map("exotica/AvoidLookAtSphere",
+                            {{"Name", std::string("MyTask")},
+                             {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("AvoidLookAtPosition")}, {"Base", std::string("")}})})},
+                             {"UseAsCost", std::string("1")},
+                             {"Radii", std::string("0.5")}});
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "", custom_links);
+            EXPECT_TRUE(test_random(problem));
+            EXPECT_TRUE(test_jacobian(problem, 2e-5));
+        }
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
 TEST(ExoticaTaskMaps, testLookAt)
 {
     try

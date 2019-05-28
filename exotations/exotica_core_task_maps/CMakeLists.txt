@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 AddInitializer(
+  avoid_look_at_sphere
   center_of_mass
   interaction_mesh
   eff_position
@@ -47,6 +48,7 @@ include_directories(
 )
 
 set(SOURCES
+    src/avoid_look_at_sphere.cpp
     src/center_of_mass.cpp
     src/interaction_mesh.cpp
     src/eff_position.cpp

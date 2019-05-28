@@ -59,6 +59,6 @@ void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
 
 int LookAt::TaskSpaceDim()
 {
-    return 3 * frames_.size() - frames_.size();
+    return 2 * frames_.size();
 }
 }

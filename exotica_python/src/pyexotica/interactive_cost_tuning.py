@@ -26,14 +26,13 @@ class InteractiveCostTuning(object):
         self.rho = {}
         self.original_rho = {}
         self.cost_task_map_names = []
-        for k in problem.get_task_maps().keys():
-            try:
-                r = problem.get_rho(k)
-                self.rho[k] = r 
-                self.original_rho[k] = r
-                self.cost_task_map_names.append(k)
-            except:
-                continue
+        
+        for cost in problem.get_initializer()[1]['Cost']:
+            k = cost[1]['Task']
+            r = problem.get_rho(k)
+            self.rho[k] = r 
+            self.original_rho[k] = r
+            self.cost_task_map_names.append(k)
 
         # Setup labels and entries
         self.entries = {}

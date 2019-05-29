@@ -73,6 +73,11 @@ Eigen::VectorXd PlanningProblem::ApplyStartState(bool update_traj)
     return scene_->GetControlledState();
 }
 
+Initializer PlanningProblem::GetInitializer()
+{
+    return init_;
+}
+
 void PlanningProblem::PreUpdate()
 {
     for (auto& it : task_maps_) it.second->PreUpdate();
@@ -121,6 +126,8 @@ double PlanningProblem::GetStartTime() const
 
 void PlanningProblem::InstantiateBase(const Initializer& init_in)
 {
+    init_ = init_in;
+
     Object::InstantiateObject(init_in);
     PlanningProblemInitializer init(init_in);
 

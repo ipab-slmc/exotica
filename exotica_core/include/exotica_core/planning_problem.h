@@ -67,6 +67,7 @@ public:
     virtual ~PlanningProblem();
 
     void InstantiateBase(const Initializer& init) override;
+    Initializer GetInitializer();
     TaskMapMap& GetTaskMaps();
     TaskMapVec& GetTasks();
     ScenePtr GetScene() const;
@@ -104,6 +105,8 @@ protected:
     int num_positions_ = 0;
     int num_velocities_ = 0;
     int num_controls_ = 0;
+
+    Initializer init_;
 
     ScenePtr scene_;
     TaskMapMap task_maps_;

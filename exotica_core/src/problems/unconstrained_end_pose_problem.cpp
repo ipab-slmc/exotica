@@ -43,6 +43,7 @@ UnconstrainedEndPoseProblem::~UnconstrainedEndPoseProblem() = default;
 
 void UnconstrainedEndPoseProblem::Instantiate(const UnconstrainedEndPoseProblemInitializer& init)
 {
+    this->parameters_ = init;
     num_tasks = tasks_.size();
     length_Phi = 0;
     length_jacobian = 0;

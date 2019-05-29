@@ -746,6 +746,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_time_indexed_problem.def("get_scalar_transition_cost", &UnconstrainedTimeIndexedProblem::GetScalarTransitionCost);
     unconstrained_time_indexed_problem.def("get_scalar_transition_jacobian", &UnconstrainedTimeIndexedProblem::GetScalarTransitionJacobian);
     unconstrained_time_indexed_problem.def_readonly("cost", &UnconstrainedTimeIndexedProblem::cost);
+    unconstrained_time_indexed_problem.def("get_parameters", &UnconstrainedTimeIndexedProblem::GetParametersAsInitializer);
 
     py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> time_indexed_problem(prob, "TimeIndexedProblem");
     time_indexed_problem.def("get_duration", &TimeIndexedProblem::GetDuration);
@@ -792,6 +793,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def_readonly("cost", &TimeIndexedProblem::cost);
     time_indexed_problem.def_readonly("inequality", &TimeIndexedProblem::inequality);
     time_indexed_problem.def_readonly("equality", &TimeIndexedProblem::equality);
+    time_indexed_problem.def("get_parameters", &TimeIndexedProblem::GetParametersAsInitializer);
 
     py::class_<BoundedTimeIndexedProblem, std::shared_ptr<BoundedTimeIndexedProblem>, PlanningProblem> bounded_time_indexed_problem(prob, "BoundedTimeIndexedProblem");
     bounded_time_indexed_problem.def("get_duration", &BoundedTimeIndexedProblem::GetDuration);
@@ -816,6 +818,7 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_time_indexed_problem.def("get_scalar_transition_jacobian", &BoundedTimeIndexedProblem::GetScalarTransitionJacobian);
     bounded_time_indexed_problem.def("get_bounds", &BoundedTimeIndexedProblem::GetBounds);
     bounded_time_indexed_problem.def_readonly("cost", &BoundedTimeIndexedProblem::cost);
+    bounded_time_indexed_problem.def("get_parameters", &BoundedTimeIndexedProblem::GetParametersAsInitializer);
 
     py::class_<UnconstrainedEndPoseProblem, std::shared_ptr<UnconstrainedEndPoseProblem>, PlanningProblem> unconstrained_end_pose_problem(prob, "UnconstrainedEndPoseProblem");
     unconstrained_end_pose_problem.def("update", &UnconstrainedEndPoseProblem::Update);
@@ -835,6 +838,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_end_pose_problem.def("get_scalar_jacobian", &UnconstrainedEndPoseProblem::GetScalarJacobian);
     unconstrained_end_pose_problem.def("get_scalar_task_cost", &UnconstrainedEndPoseProblem::GetScalarTaskCost);
     unconstrained_end_pose_problem.def_readonly("cost", &UnconstrainedEndPoseProblem::cost);
+    unconstrained_end_pose_problem.def("get_parameters", &UnconstrainedEndPoseProblem::GetParametersAsInitializer);
 
     py::class_<EndPoseProblem, std::shared_ptr<EndPoseProblem>, PlanningProblem> end_pose_problem(prob, "EndPoseProblem");
     end_pose_problem.def("update", &EndPoseProblem::Update);
@@ -869,6 +873,7 @@ PYBIND11_MODULE(_pyexotica, module)
     end_pose_problem.def_readonly("cost", &EndPoseProblem::cost);
     end_pose_problem.def_readonly("inequality", &EndPoseProblem::inequality);
     end_pose_problem.def_readonly("equality", &EndPoseProblem::equality);
+    end_pose_problem.def("get_parameters", &EndPoseProblem::GetParametersAsInitializer);
 
     py::class_<BoundedEndPoseProblem, std::shared_ptr<BoundedEndPoseProblem>, PlanningProblem> bounded_end_pose_problem(prob, "BoundedEndPoseProblem");
     bounded_end_pose_problem.def("update", &BoundedEndPoseProblem::Update);
@@ -887,6 +892,7 @@ PYBIND11_MODULE(_pyexotica, module)
     bounded_end_pose_problem.def("get_scalar_task_cost", &BoundedEndPoseProblem::GetScalarTaskCost);
     bounded_end_pose_problem.def("get_bounds", &BoundedEndPoseProblem::GetBounds);
     bounded_end_pose_problem.def_readonly("cost", &BoundedEndPoseProblem::cost);
+    bounded_end_pose_problem.def("get_parameters", &BoundedEndPoseProblem::GetParametersAsInitializer);
 
     py::class_<SamplingProblem, std::shared_ptr<SamplingProblem>, PlanningProblem> sampling_problem(prob, "SamplingProblem");
     sampling_problem.def("update", &SamplingProblem::Update);
@@ -905,6 +911,7 @@ PYBIND11_MODULE(_pyexotica, module)
     sampling_problem.def("set_rho_neq", &SamplingProblem::SetRhoNEQ);
     sampling_problem.def("get_goal_neq", &SamplingProblem::GetGoalNEQ);
     sampling_problem.def("get_rho_neq", &SamplingProblem::GetRhoNEQ);
+    sampling_problem.def("get_parameters", &SamplingProblem::GetParametersAsInitializer);
 
     py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> time_indexed_sampling_problem(prob, "TimeIndexedSamplingProblem");
     time_indexed_sampling_problem.def("update", &TimeIndexedSamplingProblem::Update);
@@ -924,6 +931,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def("set_rho_neq", &TimeIndexedSamplingProblem::SetRhoNEQ);
     time_indexed_sampling_problem.def("get_goal_neq", &TimeIndexedSamplingProblem::GetGoalNEQ);
     time_indexed_sampling_problem.def("get_rho_neq", &TimeIndexedSamplingProblem::GetRhoNEQ);
+    time_indexed_sampling_problem.def("get_parameters", &TimeIndexedSamplingProblem::GetParametersAsInitializer);
 
     py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")
         .def("update", &DynamicTimeIndexedShootingProblem::Update)
@@ -939,7 +947,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_state_cost", &DynamicTimeIndexedShootingProblem::GetStateCost)
         .def("get_state_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetStateCostJacobian)
         .def("get_control_cost", &DynamicTimeIndexedShootingProblem::GetControlCost)
-        .def("get_control_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetControlCostJacobian);
+        .def("get_control_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetControlCostJacobian)
+        .def("get_parameters", &DynamicTimeIndexedShootingProblem::GetParametersAsInitializer);
 
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> collision_proxy(module, "CollisionProxy");
     collision_proxy.def(py::init());

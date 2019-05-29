@@ -129,6 +129,11 @@ public:
         parameters_ = init;
     }
 
+    Initializer GetParametersAsInitializer()
+    {
+        return parameters_;
+    }
+
     const C& GetParameters() const { return parameters_; }
 protected:
     C parameters_;

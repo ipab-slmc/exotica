@@ -148,8 +148,7 @@ void AvoidLookAtSphere::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi
 
 void AvoidLookAtSphere::Instantiate(const AvoidLookAtSphereInitializer& init)
 {
-
-  parameters_ = init;
+    parameters_ = init;
     if (frames_.size() < 1) ThrowNamed("At least one object is required.");
     n_objects_ = frames_.size();
     diameter_.resize(n_objects_);
@@ -185,4 +184,4 @@ int AvoidLookAtSphere::TaskSpaceDim()
 {
     return n_objects_;
 }
-} // namespace exotica
+}  // namespace exotica

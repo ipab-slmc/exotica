@@ -6,8 +6,7 @@ Manual initialization encapsulates all initialisation and handling of
 EXOTica within C++ or Python code, with no external XML files. This could
 be preferred if your project has been finalized or if you prefer to have all your EXOTica code in one place.
 
-In this tutorial, we will use the `example of manual initialization <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/src/generic.cpp>`__ for
-the UnconstrainedEndPoseProblem found in the ``exotica_examples`` package:
+An `example of manual initialization <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/scripts/example_ik_manual_initialization>`__  in Python can be found in the ``scripts`` directory of the ``exotica_examples`` package. In this tutorial, we will use the `example of manual initialization <https://github.com/ipab-slmc/exotica/blob/master/exotica_examples/src/generic.cpp>`__ for the UnconstrainedEndPoseProblem written in C++, found in the ``src`` directory of the ``exotica_examples`` package:
 
 .. code-block:: c++
 
@@ -38,7 +37,7 @@ the UnconstrainedEndPoseProblem found in the ``exotica_examples`` package:
         solver.MaxIterations = 1;
         solver.MaxStep = 0.1;
     ...
-
+    
 .. rubric:: CODE EXPLAINED
 
 Initializer Headers

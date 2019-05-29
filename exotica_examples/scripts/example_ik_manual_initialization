@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+import pyexotica as exo
+import numpy as np
+import math
+from pyexotica.publish_trajectory import *
+from time import sleep
+import signal
+
+def figure_eight(t):
+    return np.array([0.6, -0.1 + math.sin(t * 2.0 * math.pi * 0.5) * 0.1, 0.5 + math.sin(t * math.pi * 0.5) * 0.2, 0, 0, 0])
+
+def setup_problem():
+
+    # Setup the scene
+    scene_init = exo.Initializers.SceneInitializer()
+    scene_init[1]['JointGroup'] = 'arm'
+    scene_init[1]['URDF'] = '{exotica_examples}/resources/robots/lwr_simplified.urdf'
+    scene_init[1]['SRDF'] = '{exotica_examples}/resources/robots/lwr_simplified.srdf'
+
+    # Setup task maps
+    eff_init = exo.Initializers.FrameInitializer()
+    eff_init[1]['Link'] = 'lwr_arm_6_link'
+    eff_init[1]['LinkOffset'] = np.array([0, 0, 0, 0.7071067811865476, -4.3297802811774664e-17,  0.7071067811865475, 4.3297802811774664e-17])
+
+    eff_frame_map_init = exo.Initializers.EffFrameInitializer()
+    eff_frame_map_init[1]['Name'] = 'Position'
+    eff_frame_map_init[1]['EndEffector'] = [eff_init]
+
+    eff_frame_map_task_init = exo.Initializers.TaskInitializer()
+    eff_frame_map_task_init[1]['Task'] = 'Position'
+    eff_frame_map_task_init[1]['Rho'] = np.array([1.0])
+
+    # Setup problem
+    problem_init = exo.Initializers.UnconstrainedEndPoseProblemInitializer()
+    del problem_init[1]['DerivativeOrder'] # otherwise the error is thrown: Failed to add property 'DerivativeOrder'
+    problem_init[1]['Name'] = "MyProblem"
+    problem_init[1]['W'] = np.arange(7, 0, -1)
+    problem_init[1]['StartState'] = np.zeros(7)
+    problem_init[1]['NominalState'] = np.zeros(7)
+    problem_init[1]['PlanningScene'] = scene_init
+    problem_init[1]['Maps'] = [eff_frame_map_init]
+    problem_init[1]['Cost'] = [eff_frame_map_task_init]
+
+    return exo.Setup.create_problem(problem_init)
+
+def setup_solver(problem):
+
+    # Setup IKSolver
+    ik_solver_init = exo.Initializers.IKSolverInitializer()
+    ik_solver_init[1]['Name'] = 'MySolver'
+    ik_solver_init[1]['MaxIterations'] = 1
+
+    # Specify problem to solver
+    ik_solver = exo.Setup.create_solver(ik_solver_init)
+    ik_solver.specify_problem(problem)
+    
+    return ik_solver
+    
+exo.Setup.init_ros()
+signal.signal(signal.SIGINT, sig_int_handler)
+
+problem = setup_problem()
+solver = setup_solver(problem)
+
+dt = 0.002
+t = 0.0
+q = np.array([0.0] * 7)
+print('Publishing IK')
+while True:
+    try:
+        problem.set_goal('Position', figure_eight(t))
+        problem.start_state = q
+        q = solver.solve()[0]
+        publish_pose(q, problem)
+        sleep(dt)
+        t = t + dt
+    except KeyboardInterrupt:
+        break
+        
+

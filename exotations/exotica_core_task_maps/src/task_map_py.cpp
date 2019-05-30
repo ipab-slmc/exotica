@@ -45,7 +45,6 @@
 #include <exotica_core_task_maps/joint_limit.h>
 #include <exotica_core_task_maps/joint_pose.h>
 #include <exotica_core_task_maps/joint_velocity_backward_difference.h>
-#include <exotica_core_task_maps/look_at.h>
 #include <exotica_core_task_maps/point_to_line.h>
 #include <exotica_core_task_maps/sphere_collision.h>
 
@@ -71,9 +70,6 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
         .def("set_axis", &EffAxisAlignment::SetAxis)
         .def("get_direction", &EffAxisAlignment::GetDirection)
         .def("set_direction", &EffAxisAlignment::SetDirection);
-
-    py::class_<LookAt, std::shared_ptr<LookAt>, TaskMap>(module, "LookAt")
-        .def("get_look_at_target_in_world", &LookAt::get_look_at_target_in_world);
 
     py::class_<PointToLine, std::shared_ptr<PointToLine>, TaskMap>(module, "PointToLine")
         .def_property("end_point", &PointToLine::GetEndPoint, &PointToLine::SetEndPoint);

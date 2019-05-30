@@ -1113,17 +1113,12 @@ TEST(ExoticaTaskMaps, testLookAt)
             TEST_COUT << "LookAt";
 
             // Custom links
-            std::vector<Initializer> custom_links({Initializer("Link", {{"Name", std::string("EffPoint")},
-                                                                        {"Parent", std::string("endeff")},
-                                                                        {"Transform", std::string("0 0 1")}}),
-                                                   Initializer("Link", {{"Name", std::string("LookAtTarget")},
+            std::vector<Initializer> custom_links({Initializer("Link", {{"Name", std::string("LookAtTarget")},
                                                                         {"Transform", std::string("1 1 2")}})});
 
             // Setup taskmap
             Initializer map("exotica/LookAt", {{"Name", std::string("MyTask")},
-                                               {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("EffPoint")}, {"Base", std::string("endeff")}}),
-                                                                                         Initializer("Frame", {{"Link", std::string("LookAtTarget")}, {"Base", std::string("endeff")}}),
-                                                                                         Initializer("Frame", {{"Link", std::string("LookAtTarget")}, {"Base", std::string("")}})})}});
+                                               {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("LookAtTarget")}, {"Base", std::string("endeff")}})})}});
             UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "", custom_links);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem, 2e-5));

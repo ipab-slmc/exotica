@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <IKSolverDemoConfig>
 
-  <SnoptIKConstrainedSolver Name="MySolver"/>
+  <!--Example uses SciPy solver.-->
 
   <EndPoseProblem Name="My Problem">
 

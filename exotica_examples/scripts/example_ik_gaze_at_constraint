@@ -8,7 +8,7 @@ from time import sleep
 import exotica_core_task_maps_py
 from exotica_examples_py import *
 import PyKDL as kdl
-#import exotica_scipy_solver
+import exotica_scipy_solver
 from visualization_msgs.msg import Marker
 
 DT = 1.0 / 100.0 # 100 HZ
@@ -23,9 +23,8 @@ class Example(object):
         self.target_marker = TargetMarker(pose=[-0.8, 0, 0.8], marker_shape=2, marker_size=[0.1, 0.1, 0.1])
 
         # Setup exotica
-        self.solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_ik_gaze_at_constraint.xml')
-        #self.solver = exotica_scipy_solver.SciPyEndPoseSolver(self.problem, method='SLSQP')
-        self.problem = self.solver.get_problem()
+        self.problem = exo.Setup.load_problem('{exotica_examples}/resources/configs/example_ik_gaze_at_constraint.xml')
+        self.solver = exotica_scipy_solver.SciPyEndPoseSolver(self.problem, method='SLSQP')
 
         # Setup ros publisher
         self.pub = rospy.Publisher('cone', Marker, queue_size=1)
@@ -38,7 +37,7 @@ class Example(object):
         self.problem.start_state = self.q
 
         # Solve and publish
-        self.q = self.solver.solve()[0]
+        self.q = self.solver.solve()
         publish_pose(self.q, self.problem)
 
     def update_cone(self, event):

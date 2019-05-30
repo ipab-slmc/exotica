@@ -515,6 +515,8 @@ PYBIND11_MODULE(_pyexotica, module)
                      },
                      "Initializes an internal ROS node for publishing debug information from Exotica (i.e., activates ROS features). Options are setting the name and whether to spawn an anonymous node.",
                      py::arg("name") = "exotica", py::arg("anonymous") = false);
+    setup.def_static("load_solver_initializer", &XMLLoader::LoadSolverInitializer, "Load only the solver initializer from an XML file containing a solver initializer.", py::arg("filepath"));
+    setup.def_static("load_problem_initializer", &XMLLoader::LoadProblemInitializer, "Load only the problem initializer from an XML file containing a problem initializer.", py::arg("filepath"));
     setup.def_static("load_solver", &XMLLoader::LoadSolver, "Instantiate solver and problem from an XML file containing both a solver and problem initializer.", py::arg("filepath"));
     setup.def_static("load_solver_standalone", &XMLLoader::LoadSolverStandalone, "Instantiate only a solver from an XML file containing solely a solver initializer.", py::arg("filepath"));
     setup.def_static("load_problem", &XMLLoader::LoadProblem, "Instantiate only a problem from an XML file containing solely a problem initializer.", py::arg("filepath"));

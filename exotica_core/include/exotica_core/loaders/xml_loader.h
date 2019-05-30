@@ -62,6 +62,20 @@ public:
         return Instance()->LoadXML(file_name, parsePathAsXML);
     }
 
+    static Initializer LoadProblemInitializer(const std::string& file_name)
+    {
+        Initializer solver, problem;
+        XMLLoader::Load(file_name, solver, problem);
+        return problem;
+    }
+
+    static Initializer LoadSolverInitializer(const std::string& file_name)
+    {
+        Initializer solver, problem;
+        XMLLoader::Load(file_name, solver, problem);
+        return solver;
+    }
+
     static std::shared_ptr<exotica::MotionSolver> LoadSolver(const std::string& file_name)
     {
         Initializer solver, problem;

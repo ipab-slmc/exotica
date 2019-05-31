@@ -38,7 +38,7 @@ namespace exotica
 {
 /// \class GazeAtConstraint
 ///
-/// \ingroup TaskMap  
+/// \ingroup TaskMap
 ///
 /// \brief Keeps a given point within field of view of the end-effector.
 ///
@@ -62,7 +62,7 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    Eigen::VectorXd tan_theta_squared_;
+    Eigen::VectorXd tan_theta_squared_;  ///< The tangent squared of given viewing angle Theta.
 };
 }  // namespace exotica
 

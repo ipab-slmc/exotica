@@ -18,6 +18,7 @@ AddInitializer(
   frame_with_axis_and_direction
   eff_axis_alignment
   eff_velocity
+  gaze_at_constraint
   joint_limit
   joint_velocity_limit
   distance
@@ -56,6 +57,7 @@ set(SOURCES
     src/eff_frame.cpp
     src/eff_axis_alignment.cpp
     src/eff_velocity.cpp
+    src/gaze_at_constraint.cpp
     src/joint_limit.cpp
     src/joint_velocity_limit.cpp
     src/distance.cpp

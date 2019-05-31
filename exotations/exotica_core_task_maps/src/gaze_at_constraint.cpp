@@ -74,6 +74,8 @@ void GazeAtConstraint::Instantiate(const GazeAtConstraintInitializer& init)
 {
     parameters_ = init;
 
+    if (init.Theta.size != frames_.size()) ThrowPretty("Incorrect size for Theta (expecting " << frames_.size() << ").");
+
     tan_theta_squared_.resize(frames_.size());
     for (int i = 0; i < frames_.size(); ++i)
     {

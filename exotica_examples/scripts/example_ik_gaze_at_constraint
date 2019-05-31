@@ -4,14 +4,9 @@ import pyexotica as exo
 import numpy as np
 import signal
 from pyexotica.publish_trajectory import publish_pose, sig_int_handler
-from time import sleep
-import exotica_core_task_maps_py
-from exotica_examples_py import *
-import PyKDL as kdl
+from exotica_examples_py import TargetMarker
 import exotica_scipy_solver
 from visualization_msgs.msg import Marker
-
-DT = 1.0 / 100.0 # 100 HZ
 
 class Example(object):
 
@@ -41,6 +36,15 @@ class Example(object):
         publish_pose(self.q, self.problem)
 
     def update_cone(self, event):
+        """
+        Publishes a cone marker to display in RViz
+
+        Note
+        ====
+
+          The cone is not accurate and thus it may be the case that the 
+          marker that defines the GazeTarget appears outside the cone. 
+        """
         marker = Marker()
         marker.header.frame_id = 'exotica/lwr_arm_6_link'
         marker.header.stamp = rospy.Time.now()
@@ -58,6 +62,6 @@ if __name__=='__main__':
     exo.Setup.init_ros()
     signal.signal(signal.SIGINT, sig_int_handler)
     ex = Example()
-    rospy.Timer(rospy.Duration(DT), ex.update)
+    rospy.Timer(rospy.Duration(1.0/50.0), ex.update)
     rospy.Timer(rospy.Duration(1.0/40.0), ex.update_cone)
     rospy.spin()

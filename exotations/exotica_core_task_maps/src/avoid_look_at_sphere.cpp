@@ -37,34 +37,18 @@ namespace exotica
 AvoidLookAtSphere::AvoidLookAtSphere() = default;
 AvoidLookAtSphere::~AvoidLookAtSphere() = default;
 
-void AvoidLookAtSphere::AssignScene(ScenePtr scene)
-{
-    scene_ = scene;
-    root_frame_name_ = scene_->GetKinematicTree().GetRootFrameName();
-}
-
 void AvoidLookAtSphere::UpdateAsCostWithoutJacobian(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     for (int i = 0; i < n_objects_; ++i)
     {
-        double frac = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>().squaredNorm() / radii_squared_(i);
-        if (frac < 1.0)
-        {
-            phi(i) = 1.0 - 2.0 * frac + frac * frac;
-        }
-        else
-        {
-            phi(i) = 0.0;
-        }
+        const double frac = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>().squaredNorm() / radii_squared_(i);
+        if (frac < 1.0) phi(i) = 1.0 - 2.0 * frac + frac * frac;
     }
 }
 
 void AvoidLookAtSphere::UpdateAsInequalityConstraintWithoutJacobian(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    for (int i = 0; i < n_objects_; ++i)
-    {
-        phi(i) = radii_squared_(i) - Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>().squaredNorm();
-    }
+    for (int i = 0; i < n_objects_; ++i) phi(i) = radii_squared_(i) - Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>().squaredNorm();
 }
 
 void AvoidLookAtSphere::UpdateAsCostWithJacobian(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
@@ -72,19 +56,11 @@ void AvoidLookAtSphere::UpdateAsCostWithJacobian(Eigen::VectorXdRefConst x, Eige
     for (int i = 0; i < n_objects_; ++i)
     {
         Eigen::Vector2d o = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>();
-        double frac = o.squaredNorm() / radii_squared_(i);
+        const double frac = o.squaredNorm() / radii_squared_(i);
         if (frac < 1.0)
         {
             phi(i) = 1.0 - 2.0 * frac + frac * frac;
-
-            for (int j = 0; j < jacobian.cols(); ++j)
-            {
-                jacobian(i, j) = -4.0 * (1.0 - frac) * kinematics[0].jacobian[i].data.topRows<2>().col(j).dot(o) / radii_squared_(i);
-            }
-        }
-        else
-        {
-            phi(i) = 0.0;
+            for (int j = 0; j < jacobian.cols(); ++j) jacobian(i, j) = -4.0 * (1.0 - frac) * kinematics[0].jacobian[i].data.topRows<2>().col(j).dot(o) / radii_squared_(i);
         }
     }
 }
@@ -94,13 +70,9 @@ void AvoidLookAtSphere::UpdateAsInequalityConstraintWithJacobian(Eigen::VectorXd
     for (int i = 0; i < n_objects_; ++i)
     {
         Eigen::Vector2d o = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>();
-        double d = o.norm();
+        const double d = o.norm();
         phi(i) = radii_squared_(i) - d * d;
-
-        for (int j = 0; j < jacobian.cols(); ++j)
-        {
-            jacobian(i, j) = -2.0 * kinematics[0].jacobian[i].data.topRows<2>().col(j).dot(o);
-        }
+        for (int j = 0; j < jacobian.cols(); ++j) jacobian(i, j) = -2.0 * kinematics[0].jacobian[i].data.topRows<2>().col(j).dot(o);
     }
 }
 
@@ -113,18 +85,21 @@ void AvoidLookAtSphere::PublishObjectsAsMarkerArray()
     {
         visualization_msgs::Marker m;
         m.header.stamp = t;
-        m.header.frame_id = "exotica/" + root_frame_name_;
+        m.header.frame_id = "exotica/" + frames_[i].frame_B_link_name;
         m.id = i;
         m.action = visualization_msgs::Marker::ADD;
         m.type = visualization_msgs::Marker::SPHERE;
         m.scale.x = diameter_(i);
         m.scale.y = diameter_(i);
         m.scale.z = diameter_(i);
-        Eigen::Vector3d o = Eigen::Map<Eigen::Vector3d>(scene_->GetKinematicTree().FK(frames_[i].frame_A_link_name, KDL::Frame(), root_frame_name_, KDL::Frame()).p.data);
-        m.pose.position.x = o[0];
-        m.pose.position.y = o[1];
-        m.pose.position.z = o[2];
-        m.pose.orientation.w = 1.0;
+        Eigen::Vector4d q = GetRotationAsVector(kinematics[0].Phi(i), RotationType::QUATERNION);
+        m.pose.position.x = kinematics[0].Phi(i).p.data[0];
+        m.pose.position.y = kinematics[0].Phi(i).p.data[1];
+        m.pose.position.z = kinematics[0].Phi(i).p.data[2];
+        m.pose.orientation.x = q[0];
+        m.pose.orientation.y = q[1];
+        m.pose.orientation.z = q[2];
+        m.pose.orientation.w = q[3];
         m.color.r = 1.0;
         m.color.a = 1.0;
         ma.markers.emplace_back(m);
@@ -135,15 +110,13 @@ void AvoidLookAtSphere::PublishObjectsAsMarkerArray()
 void AvoidLookAtSphere::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     (this->*UpdateTaskMapWithoutJacobian)(x, phi);
-    if (debug_ && Server::IsRos())
-        PublishObjectsAsMarkerArray();
+    if (debug_ && Server::IsRos()) PublishObjectsAsMarkerArray();
 }
 
 void AvoidLookAtSphere::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     (this->*UpdateTaskMapWithJacobian)(x, phi, jacobian);
-    if (debug_ && Server::IsRos())
-        PublishObjectsAsMarkerArray();
+    if (debug_ && Server::IsRos()) PublishObjectsAsMarkerArray();
 }
 
 void AvoidLookAtSphere::Instantiate(const AvoidLookAtSphereInitializer& init)
@@ -152,12 +125,14 @@ void AvoidLookAtSphere::Instantiate(const AvoidLookAtSphereInitializer& init)
     n_objects_ = frames_.size();
     diameter_.resize(n_objects_);
     radii_squared_.resize(n_objects_);
+
     for (int i = 0; i < n_objects_; ++i)
     {
         SphereInitializer sphere(init.EndEffector[i]);
         diameter_(i) = 2.0 * sphere.Radius;
         radii_squared_(i) = sphere.Radius * sphere.Radius;
     }
+
     if (init.UseAsCost)
     {
         UpdateTaskMapWithoutJacobian = &AvoidLookAtSphere::UpdateAsCostWithoutJacobian;

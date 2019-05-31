@@ -65,7 +65,6 @@ public:
     AvoidLookAtSphere();
     virtual ~AvoidLookAtSphere();
 
-    void AssignScene(ScenePtr scene) override;
     void Instantiate(const AvoidLookAtSphereInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
@@ -82,9 +81,7 @@ private:
     void (AvoidLookAtSphere::*UpdateTaskMapWithoutJacobian)(Eigen::VectorXdRefConst, Eigen::VectorXdRef);
     void (AvoidLookAtSphere::*UpdateTaskMapWithJacobian)(Eigen::VectorXdRefConst, Eigen::VectorXdRef, Eigen::MatrixXdRef);
     int n_objects_;                  ///< Number of spherical objects.
-    ScenePtr scene_;                 ///< Scene pointer.
     Eigen::VectorXd diameter_;       ///< The diameter of each object.
-    std::string root_frame_name_;    ///< Name of the root frame in the kinematic tree, typically this will be world_frame.
     Eigen::VectorXd radii_squared_;  ///< The square of each object radii.
     ros::Publisher pub_markers_;     ///< publish marker for RViz
 };

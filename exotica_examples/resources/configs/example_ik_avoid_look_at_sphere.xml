@@ -11,7 +11,6 @@
         <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
         <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
         <Links>
-          <Link Name="EffPoint" Parent="lwr_arm_6_link" Transform="0 0 1"/>
           <Link Name="LookAtTarget" Transform="-0.5 0 1"/>
 	  <Link Name="AvoidLookAtSpherePosition1" Transform="-1 0 0.5"/>
 	  <Link Name="AvoidLookAtSpherePosition2" Transform="-1 0.4 0.5"/>
@@ -22,16 +21,14 @@
     <Maps>
       <LookAt Name="LookAt">
         <EndEffector>
-          <Frame Link="EffPoint" Base="lwr_arm_6_link"/><!-- EndEffector #0 => Frame on robot to orient -->
           <Frame Link="LookAtTarget" Base="lwr_arm_6_link"/><!-- EndEffector #1 => Target to look at, in relative frame of EffPoint -->
-          <Frame Link="LookAtTarget"/><!-- EndEffector #2 => Target to look at, in world frame (convenience frame) -->
         </EndEffector>
       </LookAt>
 
-      <AvoidLookAtSphere Name="AvoidLookAtSphere" UseAsCost="0" Radii="0.25 0.35" Debug="1">
+      <AvoidLookAtSphere Name="AvoidLookAtSphere" UseAsCost="0" Debug="1">
 	<EndEffector>
-	  <Frame Link="AvoidLookAtSpherePosition1" Base="lwr_arm_6_link"/>
-	  <Frame Link="AvoidLookAtSpherePosition2" Base="lwr_arm_6_link"/>
+	  <Frame Link="AvoidLookAtSpherePosition1" Radius="0.25" Base="lwr_arm_6_link"/>
+	  <Frame Link="AvoidLookAtSpherePosition2" Radius="0.35" Base="lwr_arm_6_link"/>
 	</EndEffector>
       </AvoidLookAtSphere>
       

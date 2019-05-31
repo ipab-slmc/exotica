@@ -154,8 +154,9 @@ void AvoidLookAtSphere::Instantiate(const AvoidLookAtSphereInitializer& init)
     radii_squared_.resize(n_objects_);
     for (int i = 0; i < n_objects_; ++i)
     {
-        diameter_(i) = 2.0 * init.Radii(i);
-        radii_squared_(i) = init.Radii(i) * init.Radii(i);
+        SphereInitializer sphere(init.EndEffector[i]);
+        diameter_(i) = 2.0 * sphere.Radius;
+        radii_squared_(i) = sphere.Radius * sphere.Radius;
     }
     if (init.UseAsCost)
     {

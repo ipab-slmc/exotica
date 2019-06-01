@@ -177,4 +177,11 @@ Eigen::VectorXd SetRotation(const KDL::Rotation& data, RotationType type)
             ThrowPretty("Unknown rotation representation type!");
     }
 }
+
+// https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix
+template <typename Scalar, int rank, typename sizeType>
+Eigen::MatrixXd TensorToMatrix(const Eigen::Tensor<Scalar, rank>& tensor, const sizeType rows, const sizeType cols)
+{
+    return Eigen::Map<const MatrixType<Scalar>>(tensor.data(), rows, cols);
+}
 }

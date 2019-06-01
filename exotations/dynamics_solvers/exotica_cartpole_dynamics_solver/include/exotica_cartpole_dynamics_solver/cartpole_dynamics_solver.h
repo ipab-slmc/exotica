@@ -69,6 +69,10 @@ public:
     /// @return State vector in model coordinates.
     Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
 
+    Eigen::Tensor<double, 3> fxx(const StateVector& x, const ControlVector& u) override;
+    Eigen::Tensor<double, 3> fuu(const StateVector& x, const ControlVector& u) override;
+    Eigen::Tensor<double, 3> fxu(const StateVector& x, const ControlVector& u) override;
+
 private:
     Eigen::Matrix3d M;      ///!< Inertia (mass) matrix
     Eigen::Matrix3d M_inv;  ///!< Inverted inertia matrix

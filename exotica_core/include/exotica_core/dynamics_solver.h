@@ -82,10 +82,15 @@ public:
     /// \brief Derivative of the forward dynamics w.r.t. the control
     virtual ControlDerivative fu(const StateVector& x, const ControlVector& u) = 0;
 
-    // TODO: 2nd-order derivatives to be implemented
-    // virtual StateVector fxx(const StateVector& x, const ControlVector& u);
-    // virtual StateVector fuu(const StateVector& x, const ControlVector& u);
-    // virtual StateVector fxu(const StateVector& x, const ControlVector& u);
+    // NOTE: Second order derivatives a 3D matrices, i.e. tensors
+    //  We use the numerator convention (see https://en.wikipedia.org/wiki/Matrix_calculus)
+    // X_i,j,k = d(X_i,j)/d x_k
+    //
+    // Additionally, the first subscript is the *second* partial derivative.
+    //  I.e. f_xu = (f_u)_x
+    virtual Eigen::Tensor<T, 3> fxx(const StateVector& x, const ControlVector& u);
+    virtual Eigen::Tensor<T, 3> fuu(const StateVector& x, const ControlVector& u);
+    virtual Eigen::Tensor<T, 3> fxu(const StateVector& x, const ControlVector& u);
 
     /// \brief Simulates the dynamic system from starting state x using control u for t seconds
     ///

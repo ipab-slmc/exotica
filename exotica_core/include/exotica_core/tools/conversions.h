@@ -35,6 +35,7 @@
 #include <kdl/jacobian.hpp>
 #include <map>
 #include <memory>
+#include <unsupported/Eigen/CXX11/Tensor>
 #include <vector>
 
 #include <exotica_core/tools/exception.h>
@@ -276,6 +277,12 @@ inline std::vector<bool> ParseBoolList(const std::string value)
     if (ret.empty()) ThrowPretty("Empty vector!");
     return ret;
 }
+
+template <typename T>
+using MatrixType = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+
+template <typename Scalar, int rank, typename sizeType>
+Eigen::MatrixXd TensorToMatrix(const Eigen::Tensor<Scalar, rank>& tensor, const sizeType rows, const sizeType cols);
 }
 
 #endif  // EXOTICA_CORE_CONVERSIONS_H_

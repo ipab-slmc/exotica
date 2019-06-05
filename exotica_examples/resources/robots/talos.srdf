@@ -42,6 +42,23 @@
         <joint name="head_1_joint" />
         <joint name="head_2_joint" />
     </group>
+    <group name="legs_and_torso">
+        <joint name="world_joint" />
+        <joint name="leg_left_1_joint" />
+        <joint name="leg_left_2_joint" />
+        <joint name="leg_left_3_joint" />
+        <joint name="leg_left_4_joint" />
+        <joint name="leg_left_5_joint" />
+        <joint name="leg_left_6_joint" />
+        <joint name="leg_right_1_joint" />
+        <joint name="leg_right_2_joint" />
+        <joint name="leg_right_3_joint" />
+        <joint name="leg_right_4_joint" />
+        <joint name="leg_right_5_joint" />
+        <joint name="leg_right_6_joint" />
+        <joint name="torso_1_joint" />
+        <joint name="torso_2_joint" />
+    </group>
     <group name="left_arm">
         <joint name="arm_left_1_joint" />
         <joint name="arm_left_2_joint" />

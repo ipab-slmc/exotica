@@ -496,6 +496,25 @@ TEST(ExoticaTaskMaps, testJointLimit)
     }
 }
 
+TEST(ExoticaTaskMaps, testJointTorqueMinimizationProxy)
+{
+    try
+    {
+        TEST_COUT << "Joint torque minimization proxy test";
+
+        Initializer map("exotica/JointTorqueMinimizationProxy", {{"Name", std::string("MyTask")},
+                                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+        EXPECT_TRUE(test_random(problem));
+
+        EXPECT_TRUE(test_jacobian(problem, 1.e-4));
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
 TEST(ExoticaTaskMaps, testJointVelocityLimit)
 {
     try

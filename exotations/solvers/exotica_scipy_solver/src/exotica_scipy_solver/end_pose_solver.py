@@ -17,6 +17,7 @@ class SciPyEndPoseSolver(object):
         self.problem = problem
         self.debug = debug
         self.method = method
+        self.max_iterations = 100
     
     def specifyProblem(self, problem):
         self.problem = problem
@@ -78,10 +79,10 @@ class SciPyEndPoseSolver(object):
                     x0,
                     method=self.method,
                     bounds=bounds,
-                    jac=True, #self.cost_jac,
+                    jac=True,
                     hess=SR1(),
                     constraints=cons,
-                    options={'disp': self.debug, 'initial_tr_radius':1000.})
+                    options={'disp': self.debug, 'initial_tr_radius':1000., 'maxiter': self.max_iterations})
         e = time()
         if self.debug:
             print(e-s, res.x)

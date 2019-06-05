@@ -721,7 +721,14 @@ Eigen::MatrixXd KinematicTree::Jacobian(const std::string& element_A, const KDL:
     return Jacobian(A->second.lock(), offset_a, B->second.lock(), offset_b);
 }
 
-void KinematicTree::ComputeJdot(KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot) const
+Eigen::MatrixXd KinematicTree::Jdot(const KDL::Jacobian& jacobian)
+{
+    KDL::Jacobian Jdot;
+    ComputeJdot(jacobian, Jdot);
+    return Jdot.data;
+}
+
+void KinematicTree::ComputeJdot(const KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot) const
 {
     jacobian_dot.data.setZero(jacobian.rows(), jacobian.columns());
     for (int i = 0; i < jacobian.columns(); ++i)

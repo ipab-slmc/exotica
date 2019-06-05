@@ -27,7 +27,7 @@ class SciPyEndPoseSolver(object):
     
     def eq_constraint_jac(self, x):
         self.problem.update(x)
-        return self.problem.get_equality_jacobian
+        return self.problem.get_equality_jacobian()
     
     def neq_constraint_fun(self, x):
         self.problem.update(x)
@@ -86,4 +86,4 @@ class SciPyEndPoseSolver(object):
         if self.debug:
             print(e-s, res.x)
 
-        return res.x
+        return [res.x]

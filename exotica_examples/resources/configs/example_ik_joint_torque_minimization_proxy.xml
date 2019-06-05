@@ -22,11 +22,11 @@
                 <!-- <h>0 0 1 0 0 0</h> -->
             </JointTorqueMinimizationProxy>
             <JointPose Name="Identity"/>
-            <EffFrame Name="Position">
+            <EffPosition Name="Position">
                 <EndEffector>
                     <Frame Link="lwr_arm_6_link"/>
                 </EndEffector>
-            </EffFrame>
+            </EffPosition>
         </Maps>
 
         <Cost>
@@ -38,7 +38,7 @@
             <Task Task="Position"/>
         </Equality>
 
-        <StartState>0 0 0 0 0 0 0</StartState>
+        <StartState>0.1 0.1 0.1 0.1 0.1 0.1 0.1</StartState>
         <W> 7 6 5 4 3 2 1 </W>
     </EndPoseProblem>
 </IKSolverDemoConfig>

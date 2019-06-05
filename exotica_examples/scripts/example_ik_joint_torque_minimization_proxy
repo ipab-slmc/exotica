@@ -2,8 +2,7 @@
 from __future__ import print_function
 
 import pyexotica as exo
-from numpy import array
-from numpy import matrix
+import numpy as np
 import math
 from pyexotica.publish_trajectory import *
 import exotica_scipy_solver
@@ -12,7 +11,7 @@ import signal
 
 
 def figure_eight(t):
-    return array([0.6, -0.1 + math.sin(t * 2.0 * math.pi * 0.5) * 0.1, 0.5 + math.sin(t * math.pi * 0.5) * 0.2,0,0,0])
+    return np.array([0.6, -0.1 + math.sin(t * 2.0 * math.pi * 0.5) * 0.1, 0.5 + math.sin(t * math.pi * 0.5) * 0.2])
 
 
 use_scipy_solver = True
@@ -23,7 +22,9 @@ problem = None
 solver = None
 if use_scipy_solver:
     problem = exo.Setup.load_problem('{exotica_examples}/resources/configs/example_ik_joint_torque_minimization_proxy.xml')
-    solver = exotica_scipy_solver.SciPyEndPoseSolver(problem, method='SLSQP')
+    solver = exotica_scipy_solver.SciPyEndPoseSolver(problem, method='trust-constr')
+    solver.max_iterations = 10
+    solver.debug = False
 else:
     # Requires to uncomment one of the C++ solvers in the XML
     solver = exo.Setup.load_solver(
@@ -32,7 +33,7 @@ else:
 
 dt = 0.002
 t = 0.0
-q = array([0.0] * 7)
+q = np.array([0.2]*7)
 print('Publishing IK')
 signal.signal(signal.SIGINT, sig_int_handler)
 while True:

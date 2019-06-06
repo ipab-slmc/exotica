@@ -24,7 +24,7 @@ while True:
     try:
         problem.start_state = q
         problem.start_time = t
-        q = solver.solve()
+        q = solver.solve()[0]
         publish_pose(q, problem, t)
         sleep(dt)
         t = (t+dt) % 7.0

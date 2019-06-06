@@ -19,6 +19,7 @@ AddInitializer(
   eff_velocity
   gaze_at_constraint
   joint_limit
+  joint_torque_minimization_proxy
   joint_velocity_limit
   distance
   point_to_line
@@ -57,6 +58,7 @@ set(SOURCES
     src/eff_velocity.cpp
     src/gaze_at_constraint.cpp
     src/joint_limit.cpp
+    src/joint_torque_minimization_proxy.cpp
     src/joint_velocity_limit.cpp
     src/distance.cpp
     src/point_to_line.cpp

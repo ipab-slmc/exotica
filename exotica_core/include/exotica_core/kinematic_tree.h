@@ -183,6 +183,7 @@ public:
     KDL::Frame FK(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const;
     Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b) const;
     Eigen::MatrixXd Jacobian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const;
+    Eigen::MatrixXd Jdot(const KDL::Jacobian& jacobian);
 
     void ResetModel();
     std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), bool is_controlled = false);
@@ -238,7 +239,7 @@ private:
     void UpdateFK();
     void UpdateJ();
     void ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) const;
-    void ComputeJdot(KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot) const;
+    void ComputeJdot(const KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot) const;
     void UpdateJdot();
 
     // Joint limits

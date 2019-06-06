@@ -32,7 +32,7 @@ class Example(object):
         self.problem.start_state = self.q
 
         # Solve and publish
-        self.q = self.solver.solve()
+        self.q = self.solver.solve()[0]
         publish_pose(self.q, self.problem)
 
     def update_cone(self, event):

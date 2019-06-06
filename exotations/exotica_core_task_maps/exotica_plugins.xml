@@ -32,6 +32,9 @@
   <class name="exotica/JointPose" type="exotica::JointPose" base_class_type="exotica::TaskMap">
     <description>Joint position reference</description>
   </class>
+  <class name="exotica/JointTorqueMinimizationProxy" type="exotica::JointTorqueMinimizationProxy" base_class_type="exotica::TaskMap">
+    <description>Proxy metric for minimizing joint torque my mapping Cartesian space forces (selectable directions)</description>
+  </class>
   <class name="exotica/InteractionMesh" type="exotica::InteractionMesh" base_class_type="exotica::TaskMap">
     <description>Interaction Mesh</description>
   </class>

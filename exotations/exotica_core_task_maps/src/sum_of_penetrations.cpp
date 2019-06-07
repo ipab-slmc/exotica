@@ -36,9 +36,6 @@ REGISTER_TASKMAP_TYPE("SumOfPenetrations", exotica::SumOfPenetrations);
 
 namespace exotica
 {
-SumOfPenetrations::SumOfPenetrations() = default;
-SumOfPenetrations::~SumOfPenetrations() = default;
-
 void SumOfPenetrations::Update(Eigen::VectorXdRefConst x,
                                Eigen::VectorXdRef phi)
 {
@@ -65,15 +62,6 @@ void SumOfPenetrations::Update(Eigen::VectorXdRefConst x,
             }
         }
     }
-}
-
-void SumOfPenetrations::Update(Eigen::VectorXdRefConst x,
-                               Eigen::VectorXdRef phi,
-                               Eigen::MatrixXdRef J)
-{
-    ThrowPretty("Not implemented");
-    // J.setZero();
-    // Update(x, phi);
 }
 
 void SumOfPenetrations::AssignScene(ScenePtr scene)

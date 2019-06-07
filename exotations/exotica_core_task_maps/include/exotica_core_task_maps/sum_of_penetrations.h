@@ -44,13 +44,9 @@ namespace exotica
 class SumOfPenetrations : public TaskMap, public Instantiable<SumOfPenetrationsInitializer>
 {
 public:
-    SumOfPenetrations();
-    virtual ~SumOfPenetrations();
-
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J) override;
     int TaskSpaceDim() override;
 
 private:
@@ -64,6 +60,6 @@ private:
     unsigned int dim_ = 1;
     CollisionScenePtr cscene_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_SUM_OF_PENETRATIONS_H_

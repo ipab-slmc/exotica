@@ -44,6 +44,7 @@
 #include <exotica_core_task_maps/joint_jerk_backward_difference.h>
 #include <exotica_core_task_maps/joint_limit.h>
 #include <exotica_core_task_maps/joint_pose.h>
+#include <exotica_core_task_maps/joint_torque_minimization_proxy.h>
 #include <exotica_core_task_maps/joint_velocity_backward_difference.h>
 #include <exotica_core_task_maps/point_to_line.h>
 #include <exotica_core_task_maps/sphere_collision.h>
@@ -91,6 +92,9 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
         .def_readonly("N", &JointPose::N_)
         .def_readonly("joint_map", &JointPose::joint_map_)
         .def_readwrite("joint_ref", &JointPose::joint_ref_);
+
+    py::class_<JointTorqueMinimizationProxy, std::shared_ptr<JointTorqueMinimizationProxy>, TaskMap>(module, "JointTorqueMinimizationProxy")
+        .def_property("h", &JointTorqueMinimizationProxy::get_h, &JointTorqueMinimizationProxy::set_h);
 
     py::class_<InteractionMesh, std::shared_ptr<InteractionMesh>, TaskMap>(module, "InteractionMesh")
         .def_property("W", &InteractionMesh::GetWeights, &InteractionMesh::SetWeights)

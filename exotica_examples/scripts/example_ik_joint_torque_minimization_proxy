@@ -5,6 +5,7 @@ import pyexotica as exo
 import numpy as np
 import math
 from pyexotica.publish_trajectory import *
+import exotica_core_task_maps_py
 import exotica_scipy_solver
 from time import sleep, time
 import signal
@@ -31,6 +32,9 @@ else:
         '{exotica_examples}/resources/configs/example_ik_joint_torque_minimization_proxy.xml')
     problem = solver.get_problem()
 
+# Get the task so we can modify the h
+joint_torque_minimization_proxy_task = problem.get_task_maps()["JointTorqueMinimizationProxy"]
+
 dt = 0.002
 t = 0.0
 q = np.array([0.2]*7)
@@ -38,14 +42,38 @@ print('Publishing IK')
 signal.signal(signal.SIGINT, sig_int_handler)
 while True:
     try:
+        start_time = time()
+
+        # Update h
+        joint_torque_minimization_proxy_task.h = np.array([1,1,1,0,0,0])
+
+        # Update goal position for end-effector
         problem.set_goal_eq('Position', figure_eight(t))
+
+        # Set last solution as initialisation for optimisation problem
         problem.start_state = q
+
+        # Solve the problem
         s = time()
         q = solver.solve()[0]
         e = time()
-        print("Time taken", e-s)
+
+        # Extract the positions of the individual links
+        problem.update(q)
+        for i in range(7):
+            name = "lwr_arm_" + str(i) + "_link"
+            position = problem.get_scene().fk(name).get_translation()
+            print(name, position)
+
+        # Publish to RViz (visualisation)
         publish_pose(q, problem)
-        sleep(dt)
+
+        # Sleep if there is remaining time in the control loop
+        end_time = time()
+        if dt > end_time - start_time:
+            sleep(dt - (end_time - start_time))
+
+        print("Optimisation took", e-s, "\tTotal loop time:", end_time - start_time)
         t = t + dt
     except KeyboardInterrupt:
         break

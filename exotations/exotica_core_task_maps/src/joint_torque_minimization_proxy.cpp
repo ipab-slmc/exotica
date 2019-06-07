@@ -33,7 +33,7 @@ REGISTER_TASKMAP_TYPE("JointTorqueMinimizationProxy", exotica::JointTorqueMinimi
 
 namespace exotica
 {
-void JointTorqueMinimizationProxy::Instantiate(const JointTorqueMinimizationProxyInitializer &init)
+void JointTorqueMinimizationProxy::Instantiate(const JointTorqueMinimizationProxyInitializer& init)
 {
     parameters_ = init;
     if (init.h.size() != 6)
@@ -41,6 +41,18 @@ void JointTorqueMinimizationProxy::Instantiate(const JointTorqueMinimizationProx
         ThrowPretty("Size of selection vector h needs to be 6, got " << init.h.size());
     }
     h_ = init.h;
+}
+
+Eigen::Matrix<double, 6, 1> JointTorqueMinimizationProxy::get_h() const
+{
+    return h_;
+}
+
+void JointTorqueMinimizationProxy::set_h(const Eigen::Matrix<double, 6, 1>& h_in)
+{
+    if (h_in.size() != 6)
+        ThrowPretty("Wrong size!");
+    h_ = h_in;
 }
 
 void JointTorqueMinimizationProxy::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)

@@ -45,6 +45,10 @@ public:
     // void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
+    Eigen::Matrix<double, 6, 1> get_h() const;
+
+    void set_h(const Eigen::Matrix<double, 6, 1>& h_in);
+
 private:
     Eigen::Matrix<double, 6, 1> h_;
 };

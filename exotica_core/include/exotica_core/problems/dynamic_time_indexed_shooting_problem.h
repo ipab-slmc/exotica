@@ -75,8 +75,18 @@ public:
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;
 
-    Eigen::VectorXd GetStateCostJacobian(int t) const;
-    Eigen::VectorXd GetControlCostJacobian(int t) const;
+    Eigen::VectorXd GetStateCostJacobian(int t) const;    ///< lx
+    Eigen::VectorXd GetControlCostJacobian(int t) const;  ///< lu
+    Eigen::MatrixXd GetStateCostHessian(int t) const;     ///< lxx
+    Eigen::MatrixXd GetControlCostHessian() const;        ///< luu
+    inline Eigen::MatrixXd GetStateControlCostHessian() const
+    {
+        // NOTE: For quadratic costs this is always 0
+        //  thus we return a scalar of size 1 and value 0
+        // This is the same as returning an (int)0 but for type safety
+        //  we instantiate eigen vectors instead.
+        return Eigen::MatrixXd::Zero(num_controls_, num_positions_ + num_velocities_);
+    };  ///< lxu == lux
 
     Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
     Eigen::VectorXd Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);

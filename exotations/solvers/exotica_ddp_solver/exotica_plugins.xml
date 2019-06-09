@@ -1,0 +1,8 @@
+<library path="lib/libexotica_ddp_solver">
+  <class name="exotica/AnalyticDDPSolver" type="exotica::AnalyticDDPSolver" base_class_type="exotica::MotionSolver">
+    <description>Analytic DDP Solver (Mayne, D. Q. (1966))</description>
+  </class>
+  <class name="exotica/ControlLimitedDDPSolver" type="exotica::ControlLimitedDDPSolver" base_class_type="exotica::MotionSolver">
+    <description>Control-limited DDP Solver (Tassa, Mansard, Todorov, 2014)</description>
+  </class>
+</library>

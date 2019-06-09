@@ -88,9 +88,9 @@ public:
     //
     // Additionally, the first subscript is the *second* partial derivative.
     //  I.e. f_xu = (f_u)_x
-    virtual Eigen::Tensor<T, 3> fxx(const StateVector& x, const ControlVector& u);
-    virtual Eigen::Tensor<T, 3> fuu(const StateVector& x, const ControlVector& u);
-    virtual Eigen::Tensor<T, 3> fxu(const StateVector& x, const ControlVector& u);
+    virtual Eigen::Tensor<T, 3> fxx(const StateVector& x, const ControlVector& u) = 0;
+    virtual Eigen::Tensor<T, 3> fuu(const StateVector& x, const ControlVector& u) = 0;
+    virtual Eigen::Tensor<T, 3> fxu(const StateVector& x, const ControlVector& u) = 0;
 
     /// \brief Simulates the dynamic system from starting state x using control u for t seconds
     ///

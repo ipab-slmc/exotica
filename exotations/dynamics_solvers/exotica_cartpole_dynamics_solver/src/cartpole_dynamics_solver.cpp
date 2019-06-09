@@ -111,6 +111,7 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fu(const StateVector& x, const ControlVe
     return fu;
 }
 
+// NOTE: Code to generate 2nd order dynamics is in scripts/gen_second_order_dynamics.py
 // fxx -> NX x NX x NX
 //  middle dimension is always NX
 // NX = 4

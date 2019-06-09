@@ -37,6 +37,8 @@ costs = problem.get_cost_evolution()
 import matplotlib.pyplot as plt
 plt.figure()
 plt.plot(range(len(costs[1])), costs[1])
+plt.xlabel('Iteration')
+plt.ylabel('Cost')
 plt.show()
 
 s = time()

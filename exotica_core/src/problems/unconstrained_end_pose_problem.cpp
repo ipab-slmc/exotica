@@ -222,4 +222,4 @@ int UnconstrainedEndPoseProblem::GetTaskId(const std::string& task_name)
     }
     ThrowPretty("Cannot get task. Task map '" << task_name << "' does not exist.");
 }
-}
+}  // namespace exotica

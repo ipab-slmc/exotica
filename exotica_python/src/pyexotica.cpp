@@ -1205,7 +1205,7 @@ PYBIND11_MODULE(_pyexotica, module)
     module.attr("branch") = std::string(exotica::branch);
 
     py::class_<BoxQPSolution>(module, "BoxQPSolution")
-        .def_readwrite("Hff_inv", &BoxQPSolution::Hff)
+        .def_readwrite("Hff_inv", &BoxQPSolution::Hff_inv)
         .def_readwrite("x", &BoxQPSolution::x)
         .def_readwrite("free_idx", &BoxQPSolution::free_idx)
         .def_readwrite("clamped_idx", &BoxQPSolution::clamped_idx);

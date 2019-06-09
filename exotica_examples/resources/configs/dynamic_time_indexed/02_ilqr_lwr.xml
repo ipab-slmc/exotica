@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<PlannerDemoConfig>
+<DynamicTimeIndexedProblemConfig>
     <ILQRSolver Name="ILQRSolver">
         <Debug>1</Debug>
         <MaxIterations>50</MaxIterations>
@@ -10,25 +10,27 @@
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
             <Scene>
-                <JointGroup>actuated_joints</JointGroup>
-                <URDF>{exotica_examples}/resources/robots/cartpole.urdf</URDF>
-                <SRDF>{exotica_examples}/resources/robots/cartpole.srdf</SRDF>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+
                 <DynamicsSolver>
-                    <CartpoleDynamicsSolver Name="solver" Integrator="RK1">
-                        <ControlLimits>25</ControlLimits>
-                    </CartpoleDynamicsSolver>
+                    <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
+                        <ControlLimits>156</ControlLimits>
+                        <dt>0.02</dt>
+                    </DoubleIntegratorDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
         </PlanningScene>
-
+        
         <T>100</T>
         <tau>0.02</tau>
         <dt>0.02</dt>
         <Q_rate>0</Q_rate>
         <Qf_rate>1000</Qf_rate>
         <R_rate>0.1</R_rate>
-        <StartState>2 0 0 0 </StartState>
-        <GoalState>1 3.14159265359 0 0</GoalState>
+        <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
+        <GoalState> 0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
-</PlannerDemoConfig>
+</DynamicTimeIndexedProblemConfig>

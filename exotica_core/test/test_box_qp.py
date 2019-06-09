@@ -1,5 +1,3 @@
-# import autograd.numpy as np
-# from autograd import grad, jacobian, hessian
 import numpy as np
 import pyexotica as exo
 import unittest

@@ -108,4 +108,25 @@ Eigen::VectorXd QuadrotorDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_i
     return xyz_rpy;
 }
 
+Eigen::Tensor<double, 3> QuadrotorDynamicsSolver::fxx(const StateVector& x, const ControlVector& u)
+{
+    Eigen ::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+    fxx.setZero();
+    return fxx;
+}
+
+Eigen::Tensor<double, 3> QuadrotorDynamicsSolver::fuu(const StateVector& x, const ControlVector& u)
+{
+    Eigen::Tensor<double, 3> fuu(num_controls_, num_positions_ + num_velocities_, num_controls_);
+    fuu.setZero();
+    return fuu;
+}
+
+Eigen::Tensor<double, 3> QuadrotorDynamicsSolver::fxu(const StateVector& x, const ControlVector& u)
+{
+    Eigen::Tensor<double, 3> fxu(num_controls_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+    fxu.setZero();
+    return fxu;
+}
+
 }  // namespace exotica

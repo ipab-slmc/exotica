@@ -184,7 +184,7 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fuu(const StateVector& x, const
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
 
-    Eigen::Tensor<double, 3> fuu(num_velocities_, num_positions_ + num_velocities_, num_velocities_);
+    Eigen::Tensor<double, 3> fuu(num_controls_, num_positions_ + num_velocities_, num_controls_);
     fuu.setValues({
         { {0}, {0}, {0}, {0} }
     });
@@ -200,7 +200,7 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxu(const StateVector& x, const
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
     
-    Eigen::Tensor<double, 3> fxu(num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+    Eigen::Tensor<double, 3> fxu(num_controls_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
     fxu.setValues({
         {
             {0, 0, 0, 0},

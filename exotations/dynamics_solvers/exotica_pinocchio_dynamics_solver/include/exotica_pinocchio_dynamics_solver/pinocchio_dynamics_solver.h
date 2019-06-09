@@ -61,6 +61,10 @@ public:
     StateDerivative fx(const StateVector& x, const ControlVector& u) override;
     ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
 
+    Eigen::Tensor<double, 3> fxx(const StateVector& x, const ControlVector& u) override;
+    Eigen::Tensor<double, 3> fuu(const StateVector& x, const ControlVector& u) override;
+    Eigen::Tensor<double, 3> fxu(const StateVector& x, const ControlVector& u) override;
+    
 private:
     pinocchio::Model model_;
 };

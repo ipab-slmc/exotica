@@ -28,8 +28,8 @@
 //
 
 #include <exotica_core/exotica_core.h>
-#include <exotica_core/visualization.h>
 #include <exotica_core/tools/box_qp.h>
+#include <exotica_core/visualization.h>
 #undef NDEBUG
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -1211,10 +1211,10 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readwrite("clamped_idx", &BoxQPSolution::clamped_idx);
 
     module.def("box_qp",
-        (BoxQPSolution (*)(Eigen::MatrixXd H, Eigen::VectorXd q,
-        Eigen::VectorXd b_low, Eigen::VectorXd b_high, Eigen::VectorXd x_init, const double gamma,
-        const int max_iterations, const double epsilon)) &BoxQP
-    );
+               (BoxQPSolution(*)(Eigen::MatrixXd H, Eigen::VectorXd q,
+                                 Eigen::VectorXd b_low, Eigen::VectorXd b_high, Eigen::VectorXd x_init, const double gamma,
+                                 const int max_iterations, const double epsilon)) &
+                   BoxQP);
 
     AddInitializers(module);
 

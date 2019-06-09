@@ -61,18 +61,18 @@ void ControlLimitedDDPSolver::BackwardPass()
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
 
     // concatenation axis for tensor products
-    Eigen::array<Eigen::IndexPair<int>, 1> dims = { Eigen::IndexPair<int>(1, 0) };
+    Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
 
     for (int t = T - 2; t > 0; t--)
     {
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
         Eigen::MatrixXd fx = dynamics_solver_->fx(x, u),
-            fu = dynamics_solver_->fu(x, u);
+                        fu = dynamics_solver_->fu(x, u);
 
         fx = fx * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(fx.rows(), fx.cols());
         fu = fu * dynamics_solver_->get_dt();
-        
-        Qx = prob_->GetStateCostJacobian(t) + fx.transpose() * Vx; // lx + fx @ Vx
+
+        Qx = prob_->GetStateCostJacobian(t) + fx.transpose() * Vx;  // lx + fx @ Vx
         Qu = prob_->GetControlCostJacobian(t) + fu.transpose() * Vx;
         Qxx = prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx;
         Quu = prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu;
@@ -86,16 +86,16 @@ void ControlLimitedDDPSolver::BackwardPass()
         {
             Eigen::Tensor<double, 1> Vx_tensor = Eigen::MatrixToTensor((Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&)Vx, N);
             Qxx += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims),
-                    N, N
-                ) * dt_squared;
+                                         N, N) *
+                   dt_squared;
             Quu += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims),
-                    NU, NU
-                ) * dt_squared;
-            Qux += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), 
-                    NU, N
-                ) * dt_squared;
+                                         NU, NU) *
+                   dt_squared;
+            Qux += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims),
+                                         NU, N) *
+                   dt_squared;
         }
-        
+
         Eigen::VectorXd low_limit, high_limit;
         if (control_limits.size() == u.size())
         {
@@ -104,29 +104,27 @@ void ControlLimitedDDPSolver::BackwardPass()
         }
         else
         {
-            low_limit = -u  - Eigen::VectorXd::Constant(u.size(), control_limits(0));
-            high_limit = - u + Eigen::VectorXd::Constant(u.size(), control_limits(0));
+            low_limit = -u - Eigen::VectorXd::Constant(u.size(), control_limits(0));
+            high_limit = -u + Eigen::VectorXd::Constant(u.size(), control_limits(0));
         }
 
         BoxQPSolution boxqp_sol = BoxQP(Quu, Qu, low_limit, high_limit, u);
 
         Quu_inv.setZero();
-        for (int i = 0; i < boxqp_sol.free_idx.size(); ++ i)
-            for (int j = 0; j < boxqp_sol.free_idx.size(); ++ j)
+        for (int i = 0; i < boxqp_sol.free_idx.size(); ++i)
+            for (int j = 0; j < boxqp_sol.free_idx.size(); ++j)
                 Quu_inv(boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
-        
+
         // Compute controls
         K_gains_[t] = -Quu_inv * Qux;
         k_gains_[t] = boxqp_sol.x;
-        
-        for (int j = 0; j < boxqp_sol.clamped_idx.size(); ++ j)
+
+        for (int j = 0; j < boxqp_sol.clamped_idx.size(); ++j)
             K_gains_[t](boxqp_sol.clamped_idx[j]) = 0;
-        
+
         Vx = Qx - K_gains_[t].transpose() * Quu * k_gains_[t];
         Vxx = Qxx - K_gains_[t].transpose() * Quu * K_gains_[t];
     }
 }
 
 }  // namespace exotica
-
-

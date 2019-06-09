@@ -50,7 +50,6 @@ private:
     void BackwardPass() override;
 
     void Instantiate(const AnalyticDDPSolverInitializer& init) override;
-
 };
 }  // namespace exotica
 

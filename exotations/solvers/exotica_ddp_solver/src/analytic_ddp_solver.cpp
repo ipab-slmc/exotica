@@ -60,19 +60,19 @@ void AnalyticDDPSolver::BackwardPass()
     Vxx = prob_->GetStateCostHessian(T - 1);
 
     // concatenation axis for tensor products
-    Eigen::array<Eigen::IndexPair<int>, 1> dims = { Eigen::IndexPair<int>(1, 0) };
+    Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
 
     for (int t = T - 2; t > 0; t--)
     {
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
         Eigen::MatrixXd fx = dynamics_solver_->fx(x, u),
-            fu = dynamics_solver_->fu(x, u);
+                        fu = dynamics_solver_->fu(x, u);
 
         fx = fx * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(fx.rows(), fx.cols());
         fu = fu * dynamics_solver_->get_dt();
-        
+
         // Q = prob_->GetStateCost(t) + prob_->GetControlCost(t) + V; // l + v
-        Qx = prob_->GetStateCostJacobian(t) + fx.transpose() * Vx; // lx + fx @ Vx
+        Qx = prob_->GetStateCostJacobian(t) + fx.transpose() * Vx;  // lx + fx @ Vx
         Qu = prob_->GetControlCostJacobian(t) + fu.transpose() * Vx;
         Qxx = prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx;
         Quu = prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu;
@@ -84,24 +84,26 @@ void AnalyticDDPSolver::BackwardPass()
 
         if (parameters_.UseSecondOrderDynamics)
         {
-            Eigen::Tensor<double, 1> Vx_tensor = Eigen::MatrixToTensor((Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&)Vx, N);  
+            Eigen::Tensor<double, 1> Vx_tensor = Eigen::MatrixToTensor((Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&)Vx, N);
             Qxx += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims),
-                    N, N
-                ) * dt_squared;
+                                         N, N) *
+                   dt_squared;
             Quu += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims),
-                    NU, NU
-                ) * dt_squared;
-            Qux += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), 
-                    NU, N
-                ) * dt_squared;
+                                         NU, NU) *
+                   dt_squared;
+            Qux += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims),
+                                         NU, N) *
+                   dt_squared;
         }
-        
-        Quu_inv = (Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * 
-            1e-5 + Quu).inverse();
-        
+
+        Quu_inv = (Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) *
+                       1e-5 +
+                   Quu)
+                      .inverse();
+
         k_gains_[t] = -Quu_inv * Qu;
         K_gains_[t] = -Quu_inv * Qux;
-        
+
         // V = Q - 0.5 * (Qu.transpose() * Quu_inv * Qu)(0);
         Vx = Qx - K_gains_[t].transpose() * Quu * k_gains_[t];
         Vxx = Qxx - K_gains_[t].transpose() * Quu * K_gains_[t];

@@ -110,7 +110,7 @@ Eigen::VectorXd QuadrotorDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_i
 
 Eigen::Tensor<double, 3> QuadrotorDynamicsSolver::fxx(const StateVector& x, const ControlVector& u)
 {
-    Eigen ::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+    Eigen::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
     fxx.setZero();
     return fxx;
 }

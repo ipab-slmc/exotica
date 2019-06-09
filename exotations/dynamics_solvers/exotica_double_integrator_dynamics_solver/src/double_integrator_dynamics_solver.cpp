@@ -68,7 +68,7 @@ Eigen::MatrixXd DoubleIntegratorDynamicsSolver::fu(const StateVector& x, const C
 
 Eigen::Tensor<double, 3> DoubleIntegratorDynamicsSolver::fxx(const StateVector& x, const ControlVector& u)
 {
-    Eigen ::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+    Eigen::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
     fxx.setZero();
     return fxx;
 }
@@ -86,6 +86,5 @@ Eigen::Tensor<double, 3> DoubleIntegratorDynamicsSolver::fxu(const StateVector& 
     fxu.setZero();
     return fxu;
 }
-
 
 }  // namespace exotica

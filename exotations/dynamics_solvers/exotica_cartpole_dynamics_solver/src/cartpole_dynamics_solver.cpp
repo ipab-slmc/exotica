@@ -124,55 +124,38 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxx(const StateVector& x, const
 
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
-    
-    Eigen ::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
-    fxx.setValues({
-            {
-                {0, 0, 0, 0},
-                {0, 0, 0, 0},
-                {0, 0, 0, 0},
-                {0, 0, 0, 0}
-            },
-            {
-                {0, 0, 0, 0},
-                {0, 0, 0, 0},
-                {0,
-                    8*m_p_*m_p_*(m_p_*(g_*cos_theta + l_*tdot*tdot)*sin_theta + u(0))*sin_theta*sin_theta*cos_theta*cos_theta/
-                        pow(m_c_ + m_p_*sin_theta*sin_theta,3) -
-                        4*m_p_*(-g_*m_p_*sin_theta*sin_theta + m_p_*(g_*cos_theta + l_*tdot*tdot)*cos_theta)*sin_theta*cos_theta/pow(m_c_ + m_p_*sin_theta*sin_theta, 2) +
-                        2*m_p_*(m_p_*(g_*cos_theta + l_*tdot*tdot)*sin_theta + u(0))*sin_theta*sin_theta/pow(m_c_ + m_p_*sin_theta*sin_theta,2) - 2*m_p_*(m_p_*(g_*cos_theta +
-                        l_*tdot*tdot)*sin_theta + u(0))*cos_theta*cos_theta/pow(m_c_ + m_p_*sin_theta*sin_theta,2) + (-3*g_*m_p_*sin_theta*cos_theta - m_p_*(g_*cos_theta +
-                        l_*tdot*tdot)*sin_theta)/(m_c_ + m_p_*sin_theta*sin_theta),
-                    0,
-                    -4*l_*m_p_*m_p_*tdot*sin_theta*sin_theta*cos_theta/pow(m_c_ + m_p_*sin_theta*sin_theta,2) + 2*l_*m_p_*tdot*cos_theta/(m_c_ + m_p_*sin_theta*sin_theta)
-                },
-                {0,
-                    8*l_*l_*m_p_*m_p_*(-g_*(m_c_ + m_p_)*sin_theta - l_*m_p_*tdot*tdot*sin_theta*cos_theta - u(0)*cos_theta)*sin_theta*sin_theta*cos_theta*cos_theta/pow(l_*m_c_ + l_*m_p_*sin_theta*sin_theta,3) + 2*l_*m_p_*(-g_*(m_c_ + m_p_)*sin_theta - l_*m_p_*tdot*tdot*sin_theta*cos_theta - u(0)*cos_theta)*sin_theta*sin_theta/pow(l_*m_c_ + l_*m_p_*sin_theta*sin_theta,2) - 2*l_*m_p_*(-g_*(m_c_ + m_p_)*sin_theta - l_*m_p_*tdot*tdot*sin_theta*cos_theta - u(0)*cos_theta)*cos_theta*cos_theta/pow(l_*m_c_ + l_*m_p_*sin_theta*sin_theta,2) - 4*l_*m_p_*(-g_*(m_c_ + m_p_)*cos_theta + l_*m_p_*tdot*tdot*sin_theta*sin_theta - l_*m_p_*tdot*tdot*cos_theta*cos_theta + u(0)*sin_theta)*sin_theta*cos_theta/pow(l_*m_c_ + l_*m_p_*sin_theta*sin_theta,2) + (g_*(m_c_ + m_p_)*sin_theta + 4*l_*m_p_*tdot*tdot*sin_theta*cos_theta + u(0)*cos_theta)/(l_*m_c_ + l_*m_p_*sin_theta*sin_theta),
-                    0,
-                    4*l_*l_*m_p_*m_p_*tdot*sin_theta*sin_theta*cos_theta*cos_theta/pow(l_*m_c_ + l_*m_p_*sin_theta*sin_theta,2) + 2*l_*m_p_*tdot*sin_theta*sin_theta/(l_*m_c_ + 
-                        l_*m_p_*sin_theta*sin_theta) - 2*l_*m_p_*tdot*cos_theta*cos_theta/(l_*m_c_ + l_*m_p_*sin_theta*sin_theta)
-                }
-            },
-            {
-                {0, 0, 0, 0},
-                {0, 0, 0, 0},
-                {0, 0, 0, 0},
-                {0, 0, 0, 0}
-            },
-            {
-                {0, 0, 0, 0},
-                {0, 0, 0, 0},
-                {0,
-                    -4*l_*m_p_*m_p_*tdot*sin_theta*sin_theta*cos_theta/pow(m_c_ + m_p_*sin_theta*sin_theta,2) + 2*l_*m_p_*tdot*cos_theta/(m_c_ + m_p_*sin_theta*sin_theta),
-                    0, 2*l_*m_p_*sin_theta/(m_c_ + m_p_*sin_theta*sin_theta)
-                },
-                {0,
-                    4*l_*l_*m_p_*m_p_*tdot*sin_theta*sin_theta*cos_theta*cos_theta/pow(l_*m_c_ + l_*m_p_*sin_theta*sin_theta, 2) + 
-                    (2*l_*m_p_*tdot*sin_theta*sin_theta - 2*l_*m_p_*tdot*cos_theta*cos_theta)/(l_*m_c_ + l_*m_p_*sin_theta*sin_theta),
-                    0, -2*l_*m_p_*sin_theta*cos_theta/(l_*m_c_ + l_*m_p_*sin_theta*sin_theta)
-                }
-            }
-    });
+
+    Eigen::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+    fxx.setValues({{{0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0, 0, 0, 0}},
+                   {{0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0,
+                     8 * m_p_ * m_p_ * (m_p_ * (g_ * cos_theta + l_ * tdot * tdot) * sin_theta + u(0)) * sin_theta * sin_theta * cos_theta * cos_theta /
+                             pow(m_c_ + m_p_ * sin_theta * sin_theta, 3) -
+                         4 * m_p_ * (-g_ * m_p_ * sin_theta * sin_theta + m_p_ * (g_ * cos_theta + l_ * tdot * tdot) * cos_theta) * sin_theta * cos_theta / pow(m_c_ + m_p_ * sin_theta * sin_theta, 2) +
+                         2 * m_p_ * (m_p_ * (g_ * cos_theta + l_ * tdot * tdot) * sin_theta + u(0)) * sin_theta * sin_theta / pow(m_c_ + m_p_ * sin_theta * sin_theta, 2) - 2 * m_p_ * (m_p_ * (g_ * cos_theta + l_ * tdot * tdot) * sin_theta + u(0)) * cos_theta * cos_theta / pow(m_c_ + m_p_ * sin_theta * sin_theta, 2) + (-3 * g_ * m_p_ * sin_theta * cos_theta - m_p_ * (g_ * cos_theta + l_ * tdot * tdot) * sin_theta) / (m_c_ + m_p_ * sin_theta * sin_theta),
+                     0,
+                     -4 * l_ * m_p_ * m_p_ * tdot * sin_theta * sin_theta * cos_theta / pow(m_c_ + m_p_ * sin_theta * sin_theta, 2) + 2 * l_ * m_p_ * tdot * cos_theta / (m_c_ + m_p_ * sin_theta * sin_theta)},
+                    {0,
+                     8 * l_ * l_ * m_p_ * m_p_ * (-g_ * (m_c_ + m_p_) * sin_theta - l_ * m_p_ * tdot * tdot * sin_theta * cos_theta - u(0) * cos_theta) * sin_theta * sin_theta * cos_theta * cos_theta / pow(l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta, 3) + 2 * l_ * m_p_ * (-g_ * (m_c_ + m_p_) * sin_theta - l_ * m_p_ * tdot * tdot * sin_theta * cos_theta - u(0) * cos_theta) * sin_theta * sin_theta / pow(l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta, 2) - 2 * l_ * m_p_ * (-g_ * (m_c_ + m_p_) * sin_theta - l_ * m_p_ * tdot * tdot * sin_theta * cos_theta - u(0) * cos_theta) * cos_theta * cos_theta / pow(l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta, 2) - 4 * l_ * m_p_ * (-g_ * (m_c_ + m_p_) * cos_theta + l_ * m_p_ * tdot * tdot * sin_theta * sin_theta - l_ * m_p_ * tdot * tdot * cos_theta * cos_theta + u(0) * sin_theta) * sin_theta * cos_theta / pow(l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta, 2) + (g_ * (m_c_ + m_p_) * sin_theta + 4 * l_ * m_p_ * tdot * tdot * sin_theta * cos_theta + u(0) * cos_theta) / (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta),
+                     0,
+                     4 * l_ * l_ * m_p_ * m_p_ * tdot * sin_theta * sin_theta * cos_theta * cos_theta / pow(l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta, 2) + 2 * l_ * m_p_ * tdot * sin_theta * sin_theta / (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta) - 2 * l_ * m_p_ * tdot * cos_theta * cos_theta / (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta)}},
+                   {{0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0, 0, 0, 0}},
+                   {{0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0,
+                     -4 * l_ * m_p_ * m_p_ * tdot * sin_theta * sin_theta * cos_theta / pow(m_c_ + m_p_ * sin_theta * sin_theta, 2) + 2 * l_ * m_p_ * tdot * cos_theta / (m_c_ + m_p_ * sin_theta * sin_theta),
+                     0, 2 * l_ * m_p_ * sin_theta / (m_c_ + m_p_ * sin_theta * sin_theta)},
+                    {0,
+                     4 * l_ * l_ * m_p_ * m_p_ * tdot * sin_theta * sin_theta * cos_theta * cos_theta / pow(l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta, 2) +
+                         (2 * l_ * m_p_ * tdot * sin_theta * sin_theta - 2 * l_ * m_p_ * tdot * cos_theta * cos_theta) / (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta),
+                     0, -2 * l_ * m_p_ * sin_theta * cos_theta / (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta)}}});
     return fxx;
 }
 
@@ -186,9 +169,7 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fuu(const StateVector& x, const
     auto cos_theta = std::cos(theta);
 
     Eigen::Tensor<double, 3> fuu(num_controls_, num_positions_ + num_velocities_, num_controls_);
-    fuu.setValues({
-        { {0}, {0}, {0}, {0} }
-    });
+    fuu.setValues({{{0}, {0}, {0}, {0}}});
     return fuu;
 }
 
@@ -200,20 +181,15 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxu(const StateVector& x, const
 
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
-    
+
     Eigen::Tensor<double, 3> fxu(num_controls_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
-    fxu.setValues({
-        {
-            {0, 0, 0, 0},
-            {0, 0, 0, 0},
-            {0, -2*m_p_*sin_theta*cos_theta/pow(m_c_ + m_p_*sin_theta*sin_theta,2), 0, 0},
-            {0, 2*l_*m_p_*sin_theta*cos_theta*cos_theta/pow(l_*m_c_ + l_*m_p_*sin_theta*sin_theta,2) + sin_theta/(l_*m_c_ + l_*m_p_*sin_theta*sin_theta),
-                0, 0}
-        }
-    });
+    fxu.setValues({{{0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0, -2 * m_p_ * sin_theta * cos_theta / pow(m_c_ + m_p_ * sin_theta * sin_theta, 2), 0, 0},
+                    {0, 2 * l_ * m_p_ * sin_theta * cos_theta * cos_theta / pow(l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta, 2) + sin_theta / (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta),
+                     0, 0}}});
     return fxu;
 }
-
 
 Eigen::VectorXd CartpoleDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_in)
 {

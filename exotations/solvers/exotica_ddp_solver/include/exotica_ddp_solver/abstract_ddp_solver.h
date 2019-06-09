@@ -30,18 +30,18 @@
 #ifndef EXOTICA_DDP_SOLVER_ABSTRACT_DDP_SOLVER_H_
 #define EXOTICA_DDP_SOLVER_ABSTRACT_DDP_SOLVER_H_
 
-#include <exotica_core/tools/conversions.h>
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
+#include <exotica_core/tools/conversions.h>
 
 namespace exotica
 {
 // \brief Base DDP Solver class that implements the forward pass.
 //  and utility functions. This is a templated class since we need
 //  the paratemers from the solvers but do not have parameters here.
-//  
+//
 //  This is why this is a header-only
-template<typename Initializer>
+template <typename Initializer>
 class AbstractDDPSolver : public MotionSolver
 {
 public:
@@ -61,7 +61,7 @@ protected:
 
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.
-    virtual void BackwardPass()=0;
+    virtual void BackwardPass() = 0;
 
     ///\brief Forward simulates the dynamics using the gains computed in the
     ///     last BackwardPass;
@@ -73,7 +73,7 @@ protected:
     Initializer base_parameters_;
 };
 
-template<typename Initializer>
+template <typename Initializer>
 void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
 {
     const int T = prob_->get_T();
@@ -168,7 +168,7 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
     }
 }
 
-template<typename Initializer>
+template <typename Initializer>
 void AbstractDDPSolver<Initializer>::SpecifyProblem(PlanningProblemPtr pointer)
 {
     if (pointer->type() != "exotica::DynamicTimeIndexedShootingProblem")
@@ -181,7 +181,7 @@ void AbstractDDPSolver<Initializer>::SpecifyProblem(PlanningProblemPtr pointer)
     if (debug_) HIGHLIGHT_NAMED("DDPSolver", "initialized");
 }
 
-template<typename Initializer>
+template <typename Initializer>
 double AbstractDDPSolver<Initializer>::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
 {
     double cost = 0;

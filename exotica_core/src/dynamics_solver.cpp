@@ -47,7 +47,10 @@ void AbstractDynamicsSolver<T, NX, NU>::InstantiateBase(const Initializer& init)
     DynamicsSolverInitializer dynamics_solver_initializer = DynamicsSolverInitializer(init);
     this->SetDt(dynamics_solver_initializer.dt);
     this->SetIntegrator(dynamics_solver_initializer.Integrator);
-    this->set_control_limits(dynamics_solver_initializer.ControlLimits);
+
+    // Just store the control limits supplied.
+    //  They will need to be reshaped to the correct size when num_velocities_ becomes known.
+    raw_control_limits_ = dynamics_solver_initializer.ControlLimits;
 
     if (debug_) INFO_NAMED(object_name_, "Initialized DynamicsSolver of type " << GetObjectName() << " with dt=" << dynamics_solver_initializer.dt << " and integrator=" << dynamics_solver_initializer.Integrator);
 }
@@ -169,15 +172,27 @@ void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(std::string integrator_in)
 }
 
 template <typename T, int NX, int NU>
-Eigen::VectorXd AbstractDynamicsSolver<T, NX, NU>::get_control_limits() const
+Eigen::VectorXd AbstractDynamicsSolver<T, NX, NU>::get_control_limits()
 {
+    if (!control_limits_initialized_)
+        set_control_limits(raw_control_limits_);
     return control_limits_;
 }
 
 template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::set_control_limits(Eigen::VectorXd control_limits)
 {
-    control_limits_ = control_limits;
+    if (num_controls_ == -1)
+        ThrowPretty("Attempting to set control limits before num_controls is set.");
+
+    control_limits_initialized_ = true;
+
+    if (control_limits.size() == get_num_controls())
+        control_limits_ = control_limits;
+    else if (control_limits.size() == 1)
+        control_limits_.setConstant(get_num_controls(), control_limits(0));
+    else
+        ThrowPretty("Wrong control limits size. Should either be 1 or " << get_num_controls());
 }
 
 template <typename T, int NX, int NU>
@@ -186,15 +201,15 @@ void AbstractDynamicsSolver<T, NX, NU>::InitializeSecondOrderDerivatives()
     if (second_order_derivatives_initialized_)
         return;
 
-    const int N = num_positions_ + num_velocities_;
+    const int N = get_num_positions() + get_num_velocities();
 
     fxx_default_ = Eigen::Tensor<T, 3>(N, N, N);
     fxx_default_.setZero();
 
-    fuu_default_ = Eigen::Tensor<T, 3>(num_velocities_, N, num_velocities_);
+    fuu_default_ = Eigen::Tensor<T, 3>(get_num_velocities(), N, get_num_velocities());
     fuu_default_.setZero();
 
-    fxu_default_ = Eigen::Tensor<T, 3>(num_velocities_, N, N);
+    fxu_default_ = Eigen::Tensor<T, 3>(get_num_velocities(), N, N);
     fxu_default_.setZero();
 
     second_order_derivatives_initialized_ = true;

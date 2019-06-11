@@ -115,12 +115,7 @@ double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
 
         u.noalias() += alpha * delta_uk;
         // clamp controls
-        if (control_limits.size() == u.size())
-            u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
-        else if (control_limits.size() == 1)
-            u = u.unaryExpr([&control_limits](double x) -> double {
-                return std::min(std::max(x, -control_limits(0)), control_limits(0));
-            });
+        u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
 
         prob_->Update(u, t);
         cost += prob_->GetControlCost(t) + prob_->GetStateCost(t);
@@ -227,7 +222,7 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     // store the best solution found over all iterations
     for (int t = 0; t < T - 1; ++t)
     {
-        solution.row(t) = global_best_U.transpose().row(t);
+        solution.row(t) = global_best_U.col(t).transpose();
         prob_->Update(global_best_U.col(t), t);
     }
 

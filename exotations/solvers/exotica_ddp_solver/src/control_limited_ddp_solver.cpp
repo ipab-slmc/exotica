@@ -102,17 +102,8 @@ void ControlLimitedDDPSolver::BackwardPass()
             Qux = prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx;
         }
 
-        Eigen::VectorXd low_limit, high_limit;
-        if (control_limits.size() == u.size())
-        {
-            low_limit = -control_limits - u;
-            high_limit = control_limits - u;
-        }
-        else
-        {
-            low_limit = -u - Eigen::VectorXd::Constant(u.size(), control_limits(0));
-            high_limit = -u + Eigen::VectorXd::Constant(u.size(), control_limits(0));
-        }
+        Eigen::VectorXd low_limit = -control_limits - u,
+                        high_limit = control_limits - u;
 
         BoxQPSolution boxqp_sol = BoxQP(Quu, Qu, low_limit, high_limit, u);
 

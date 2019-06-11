@@ -130,13 +130,17 @@ public:
     void SetIntegrator(std::string integrator_in);
 
     /// \brief Returns the control limits vector.
-    Eigen::VectorXd get_control_limits() const;
+    Eigen::VectorXd get_control_limits();
     void set_control_limits(Eigen::VectorXd control_limits);
 
+private:
+    bool control_limits_initialized_ = false;
+    Eigen::VectorXd raw_control_limits_;
+
 protected:
-    int num_controls_;    ///< Number of controls in the dynamic system.
-    int num_positions_;   ///< Number of positions in the dynamic system.
-    int num_velocities_;  ///< Number of velocities in the dynamic system.
+    int num_controls_ = -1;    ///< Number of controls in the dynamic system.
+    int num_positions_ = -1;   ///< Number of positions in the dynamic system.
+    int num_velocities_ = -1;  ///< Number of velocities in the dynamic system.
 
     bool second_order_derivatives_initialized_ = false;  ///< Whether fxx, fxu and fuu have been initialized to 0.
 

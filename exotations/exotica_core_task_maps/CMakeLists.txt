@@ -34,6 +34,7 @@ AddInitializer(
   collision_check
   point_to_plane
   quasi_static
+  joint_velocity_limit_constraint
   joint_velocity_backward_difference
   joint_acceleration_backward_difference
   joint_jerk_backward_difference
@@ -83,6 +84,7 @@ set(SOURCES
     src/smooth_collision_distance.cpp
     src/sum_of_penetrations.cpp
     src/quasi_static.cpp
+    src/joint_velocity_limit_constraint.cpp
     src/joint_velocity_backward_difference.cpp
     src/joint_acceleration_backward_difference.cpp
     src/joint_jerk_backward_difference.cpp

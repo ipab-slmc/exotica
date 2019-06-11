@@ -41,6 +41,7 @@
 #include <exotica_core_task_maps/eff_orientation.h>
 #include <exotica_core_task_maps/eff_position.h>
 #include <exotica_core_task_maps/interaction_mesh.h>
+#include <exotica_core_task_maps/joint_velocity_limit_constraint.h>
 #include <exotica_core_task_maps/joint_acceleration_backward_difference.h>
 #include <exotica_core_task_maps/joint_jerk_backward_difference.h>
 #include <exotica_core_task_maps/joint_limit.h>
@@ -79,6 +80,9 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
 
     py::class_<PointToLine, std::shared_ptr<PointToLine>, TaskMap>(module, "PointToLine")
         .def_property("end_point", &PointToLine::GetEndPoint, &PointToLine::SetEndPoint);
+
+    py::class_<JointVelocityLimitConstraint, std::shared_ptr<JointVelocityLimitConstraint>, TaskMap>(module, "JointVelocityLimitConstraint")
+      .def("set_current_joint_state", &JointVelocityLimitConstraint::SetCurrentJointState);
 
     py::class_<JointVelocityBackwardDifference, std::shared_ptr<JointVelocityBackwardDifference>, TaskMap>(module, "JointVelocityBackwardDifference")
         .def("set_previous_joint_state", &JointVelocityBackwardDifference::SetPreviousJointState);

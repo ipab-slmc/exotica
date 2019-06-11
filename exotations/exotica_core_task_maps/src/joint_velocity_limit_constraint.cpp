@@ -33,9 +33,6 @@ REGISTER_TASKMAP_TYPE("JointVelocityLimitConstraint", exotica::JointVelocityLimi
 
 namespace exotica
 {
-JointVelocityLimitConstraint::JointVelocityLimitConstraint() = default;
-JointVelocityLimitConstraint::~JointVelocityLimitConstraint() = default;
-
 void JointVelocityLimitConstraint::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
@@ -49,17 +46,18 @@ void JointVelocityLimitConstraint::AssignScene(ScenePtr scene)
     if (percent > 1.0 || percent < 0.0) ThrowNamed("The safe percentage must be given such that it lies within the range [0, 1].");
 
     // Get current joint state
+    if (parameters_.StartState.rows() != N_) ThrowNamed("Wrong size for start state.");
+    current_joint_state_.resize(N_, 1);
     current_joint_state_ = parameters_.StartState;
 
     // Get joint velocity limits
-    joint_velocity_limits_.resize(N_, 1);
     if (parameters_.MaximumJointVelocity.rows() == 1)
     {
-        joint_velocity_limits_.setOnes(N_);
-        joint_velocity_limits_ *= std::abs(static_cast<double>(parameters_.MaximumJointVelocity(0)));
+        joint_velocity_limits_.setConstant(N_, 1, std::abs(static_cast<double>(parameters_.MaximumJointVelocity(0))));
     }
     else if (parameters_.MaximumJointVelocity.rows() == N_)
     {
+        joint_velocity_limits_.resize(N_, 1);
         joint_velocity_limits_ = parameters_.MaximumJointVelocity.cwiseAbs();
     }
     else
@@ -80,7 +78,7 @@ void JointVelocityLimitConstraint::AssignScene(ScenePtr scene)
     }
 }
 
-void JointVelocityLimitConstraint::SetCurrentJointState(Eigen::VectorXdRefConst joint_state)
+void JointVelocityLimitConstraint::SetPreviousJointState(Eigen::VectorXdRefConst joint_state)
 {
     if (joint_state.rows() != N_) ThrowNamed("Wrong size for joint_state!");
     current_joint_state_ = joint_state;
@@ -115,4 +113,5 @@ int JointVelocityLimitConstraint::TaskSpaceDim()
 {
     return two_times_N_;
 }
-}
+  
+} // namespace exotica

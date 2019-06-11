@@ -82,7 +82,7 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
         .def_property("end_point", &PointToLine::GetEndPoint, &PointToLine::SetEndPoint);
 
     py::class_<JointVelocityLimitConstraint, std::shared_ptr<JointVelocityLimitConstraint>, TaskMap>(module, "JointVelocityLimitConstraint")
-        .def("set_current_joint_state", &JointVelocityLimitConstraint::SetCurrentJointState);
+        .def("set_previous_joint_state", &JointVelocityLimitConstraint::SetPreviousJointState);
 
     py::class_<JointVelocityBackwardDifference, std::shared_ptr<JointVelocityBackwardDifference>, TaskMap>(module, "JointVelocityBackwardDifference")
         .def("set_previous_joint_state", &JointVelocityBackwardDifference::SetPreviousJointState);

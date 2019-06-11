@@ -9,7 +9,7 @@ extend <exotica_core/task_map>
 // VectorXd BaseOffset   > starting point of line in Base frame
 
 Required Eigen::VectorXd MaximumJointVelocity;
+Required Eigen::VectorXd StartState; // Starting robot joint configuration.
 Required double dt;
 
 Optional double SafePercentage = 0.0;
-Optional Eigen::VectorXd StartState = Eigen::VectorXd(); // Starting robot joint configuration.

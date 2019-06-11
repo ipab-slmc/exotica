@@ -43,14 +43,12 @@ namespace exotica
 class JointVelocityLimitConstraint : public TaskMap, public Instantiable<JointVelocityLimitConstraintInitializer>
 {
 public:
-    JointVelocityLimitConstraint();
-    virtual ~JointVelocityLimitConstraint();
     void AssignScene(ScenePtr scene) override;
 
     /// \brief Logs current joint state.
-    /// SetCurrentJointState must be called after solve is called in a Python/C++ script is called
+    /// SetPreviousJointState must be called after solve is called in a Python/C++ script is called
     /// to ensure the time-derivative is appropriately approximated.
-    void SetCurrentJointState(Eigen::VectorXdRefConst joint_state);
+    void SetPreviousJointState(Eigen::VectorXdRefConst joint_state);
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
@@ -61,7 +59,7 @@ private:
     int N_;                                  ///< Number of dofs for robot.
     int two_times_N_;                        ///< Two multiplied by the number of dofs for robot (task space dimension).
     Eigen::VectorXd current_joint_state_;    ///< Log of current joint state.
-    Eigen::VectorXd joint_velocity_limits_;  /// The joint velocity limits for the robot.
+    Eigen::VectorXd joint_velocity_limits_;  ///< The joint velocity limits for the robot.
     double one_divided_by_dt_;               ///< Frequency (1/dt).
     Eigen::MatrixXd jacobian_;               ///< Task map jacobian matrix.
 };

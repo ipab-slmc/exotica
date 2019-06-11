@@ -20,6 +20,7 @@
 
       <JointVelocityLimitConstraint Name="JointVel" MaximumJointVelocity="0.785398" SafePercentage="0.25"> <!--These parameters are set lower than is usually necassary for the puspose of the demonstration.-->
 	<dt>0.002</dt>
+	<StartState>0 0 0 0 0 0 0</StartState>
       </JointVelocityLimitConstraint>
       
     </Maps>

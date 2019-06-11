@@ -32,7 +32,7 @@ class Example:
     def update(self, event):
         self.problem.set_goal('Position', figure_eight(self.t))
         self.problem.start_state = self.q
-        self.problem.get_task_maps()['JointVel'].set_current_joint_state(self.q)
+        self.problem.get_task_maps()['JointVel'].set_previous_joint_state(self.q)
         q = self.solver.solve()[0]
         publish_pose(q, self.problem)
         qdot = (q - self.q) / DT

@@ -41,10 +41,6 @@ namespace exotica
 //  Control-limited Differential Dynamic Programming (Tassa, Mansard, Todorov, 2014)
 class ControlLimitedDDPSolver : public AbstractDDPSolver<ControlLimitedDDPSolverInitializer>, public Instantiable<ControlLimitedDDPSolverInitializer>
 {
-public:
-    ControlLimitedDDPSolver();
-    virtual ~ControlLimitedDDPSolver();
-
 private:
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.

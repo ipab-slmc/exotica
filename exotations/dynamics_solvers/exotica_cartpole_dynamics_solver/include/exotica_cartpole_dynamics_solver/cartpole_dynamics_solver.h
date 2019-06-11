@@ -69,8 +69,8 @@ public:
     /// @return State vector in model coordinates.
     Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
 
+    // NOTE: fuu is always zero, so we don't oveerride it
     Eigen::Tensor<double, 3> fxx(const StateVector& x, const ControlVector& u) override;
-    Eigen::Tensor<double, 3> fuu(const StateVector& x, const ControlVector& u) override;
     Eigen::Tensor<double, 3> fxu(const StateVector& x, const ControlVector& u) override;
 
 private:

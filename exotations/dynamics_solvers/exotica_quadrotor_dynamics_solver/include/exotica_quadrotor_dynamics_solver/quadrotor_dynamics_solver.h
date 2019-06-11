@@ -55,10 +55,6 @@ public:
     Eigen::MatrixXd fx(const StateVector& x, const ControlVector& u) override;
     Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
 
-    Eigen::Tensor<double, 3> fxx(const StateVector& x, const ControlVector& u) override;
-    Eigen::Tensor<double, 3> fuu(const StateVector& x, const ControlVector& u) override;
-    Eigen::Tensor<double, 3> fxu(const StateVector& x, const ControlVector& u) override;
-
     Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
 
 private:

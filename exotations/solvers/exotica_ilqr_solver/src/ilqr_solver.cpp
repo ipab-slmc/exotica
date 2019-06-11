@@ -133,13 +133,15 @@ double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
 
 void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 {
+    if (!prob_) ThrowNamed("Solver has not been initialized!");
+    Timer planning_timer, backward_pass_timer, line_search_timer;
+
     const int T = prob_->get_T();
     const int NX = prob_->get_num_positions();
     const int NU = prob_->get_num_controls();
     const int N = NX + prob_->get_num_velocities();
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
-    if (!prob_) ThrowNamed("Solver has not been initialized!");
 
     // initialize Gain matrices
     K_gains_.assign(T, Eigen::MatrixXd(NU, N));
@@ -160,9 +162,11 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     for (int iteration = 0; iteration < GetNumberOfMaxIterations(); ++iteration)
     {
         // Backwards pass computes the gains
+        backward_pass_timer.Reset();
         BackwardPass();
-        if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete");
+        if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
 
+        line_search_timer.Reset();
         // forward pass to compute new control trajectory
         // TODO: Configure line-search space from xml
         // TODO (Wolf): What you are doing is a forward line-search when we may try a
@@ -187,7 +191,7 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 
         if (debug_)
         {
-            HIGHLIGHT_NAMED("ILQRSolver", "Forward pass complete with cost: " << current_cost << " and alpha " << best_alpha);
+            HIGHLIGHT_NAMED("ILQRSolver", "Forward pass complete in " << line_search_timer.GetDuration() << " with cost: " << current_cost << " and alpha " << best_alpha);
             HIGHLIGHT_NAMED("ILQRSolver", "Final state: " << prob_->get_X(T - 1).transpose());
         }
 
@@ -201,17 +205,18 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 
         if (iteration - last_best_iteration > parameters_.FunctionTolerancePatience)
         {
-            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Early stopping criterion reached.");
+            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Early stopping criterion reached. Time: " << planning_timer.GetDuration());
             break;
         }
 
         if (last_cost - current_cost < parameters_.FunctionTolerance && last_cost - current_cost > 0)
         {
-            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Function tolerance reached.");
+            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Function tolerance reached. Time: " << planning_timer.GetDuration());
             break;
         }
 
-        if (iteration == parameters_.MaxIterations - 1 && debug_) HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached.");
+        if (debug_ && iteration == parameters_.MaxIterations - 1)
+            HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
 
         last_cost = current_cost;
         for (int t = 0; t < T - 1; ++t)
@@ -222,8 +227,10 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     // store the best solution found over all iterations
     for (int t = 0; t < T - 1; ++t)
     {
-        solution.row(t) = global_best_U.col(t);
+        solution.row(t) = global_best_U.transpose().row(t);
         prob_->Update(global_best_U.col(t), t);
     }
+
+    planning_time_ = planning_timer.GetDuration();
 }
 }  // namespace exotica

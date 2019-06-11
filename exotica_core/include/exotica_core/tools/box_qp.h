@@ -31,6 +31,7 @@
 #define EXOTICA_DDP_SOLVER_BOX_QP_H
 
 #include <Eigen/Dense>
+#include <vector>
 
 namespace exotica
 {
@@ -42,69 +43,70 @@ typedef struct BoxQPSolution
     std::vector<int> clamped_idx;
 } BoxQPSolution;
 
-inline BoxQPSolution BoxQP(Eigen::MatrixXd H, Eigen::VectorXd q,
-                           Eigen::VectorXd b_low, Eigen::VectorXd b_high, Eigen::VectorXd x_init, const double gamma,
+inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                           const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
+                           const Eigen::VectorXd& x_init, const double gamma,
                            const int max_iterations, const double epsilon)
 {
     int it = 0;
     Eigen::VectorXd delta_xf, x = x_init;
-    std::vector<int> clamped, free;
+    std::vector<int> clamped_idx, free_idx;
     Eigen::VectorXd grad = q + H * x_init;
     Eigen::MatrixXd Hff, Hfc, Hff_inv;
 
     Hff_inv = (Eigen::MatrixXd::Identity(H.rows(), H.cols()) * 1e-5 + H).inverse();
 
     if (grad.norm() <= epsilon)
-        return {Hff_inv, x_init, free, clamped};
+        return {Hff_inv, x_init, free_idx, clamped_idx};
 
     while (grad.norm() > epsilon && it < max_iterations)
     {
         ++it;
         grad = q + H * x;
-        clamped.clear();
-        free.clear();
+        clamped_idx.clear();
+        free_idx.clear();
 
         for (int i = 0; i < grad.size(); ++i)
         {
             if ((x(i) == b_low(i) && grad(i) > 0) || (x(i) == b_high(i) && grad(i) < 0))
-                clamped.push_back(i);
+                clamped_idx.push_back(i);
             else
-                free.push_back(i);
+                free_idx.push_back(i);
         }
 
-        if (free.size() == 0)
-            return {Hff_inv, x, free, clamped};
+        if (free_idx.size() == 0)
+            return {Hff_inv, x, free_idx, clamped_idx};
 
-        Hff.resize(free.size(), free.size());
-        Hfc.resize(free.size(), clamped.size());
+        Hff.resize(free_idx.size(), free_idx.size());
+        Hfc.resize(free_idx.size(), clamped_idx.size());
 
-        if (clamped.size() == 0)
+        if (clamped_idx.size() == 0)
             Hff = H;
         else
         {
-            for (int i = 0; i < free.size(); ++i)
-                for (int j = 0; j < free.size(); ++j)
-                    Hff(i, j) = H(free[i], free[j]);
+            for (int i = 0; i < free_idx.size(); ++i)
+                for (int j = 0; j < free_idx.size(); ++j)
+                    Hff(i, j) = H(free_idx[i], free_idx[j]);
 
-            for (int i = 0; i < free.size(); ++i)
-                for (int j = 0; j < clamped.size(); ++j)
-                    Hfc(i, j) = H(free[i], clamped[j]);
+            for (int i = 0; i < free_idx.size(); ++i)
+                for (int j = 0; j < clamped_idx.size(); ++j)
+                    Hfc(i, j) = H(free_idx[i], clamped_idx[j]);
         }
 
         // NOTE: Array indexing not supported in current eigen version
-        Eigen::VectorXd q_free(free.size()), x_free(free.size()), x_clamped(clamped.size());
-        for (int i = 0; i < free.size(); ++i)
+        Eigen::VectorXd q_free(free_idx.size()), x_free(free_idx.size()), x_clamped(clamped_idx.size());
+        for (int i = 0; i < free_idx.size(); ++i)
         {
-            q_free(i) = q(free[i]);
-            x_free(i) = x(free[i]);
+            q_free(i) = q(free_idx[i]);
+            x_free(i) = x(free_idx[i]);
         }
 
-        for (int j = 0; j < clamped.size(); ++j)
-            x_clamped(j) = x(clamped[j]);
+        for (int j = 0; j < clamped_idx.size(); ++j)
+            x_clamped(j) = x(clamped_idx[j]);
 
         Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * 1e-5 + Hff).inverse();
 
-        if (clamped.size() == 0)
+        if (clamped_idx.size() == 0)
             delta_xf = -Hff_inv * (q_free)-x_free;
         else
             delta_xf = -Hff_inv * (q_free + Hfc * x_clamped) - x_free;
@@ -119,10 +121,10 @@ inline BoxQPSolution BoxQP(Eigen::MatrixXd H, Eigen::VectorXd q,
             int alpha = alpha_space[ai];
 
             x_new = x;
-            for (int i = 0; i < free.size(); ++i)
-                x_new(free[i]) = std::max(std::min(
-                                              x(free[i]) + alpha * delta_xf(i), b_high(i)),
-                                          b_low(i));
+            for (int i = 0; i < free_idx.size(); ++i)
+                x_new(free_idx[i]) = std::max(std::min(
+                                                  x(free_idx[i]) + alpha * delta_xf(i), b_high(i)),
+                                              b_low(i));
 
             double f_new = (0.5 * x_new.transpose() * H * x_new + q.transpose() * x_new)(0);
             Eigen::VectorXd x_diff = x - x_new;
@@ -141,11 +143,12 @@ inline BoxQPSolution BoxQP(Eigen::MatrixXd H, Eigen::VectorXd q,
         if (!armijo_reached) break;
     }
 
-    return {Hff_inv, x, free, clamped};
+    return {Hff_inv, x, free_idx, clamped_idx};
 }
 
-inline BoxQPSolution BoxQP(Eigen::MatrixXd H, Eigen::VectorXd q,
-                           Eigen::VectorXd b_low, Eigen::VectorXd b_high, Eigen::VectorXd x_init)
+inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                           const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
+                           const Eigen::VectorXd& x_init)
 {
     constexpr double epsilon = 1e-5;
     constexpr double gamma = 0.1;

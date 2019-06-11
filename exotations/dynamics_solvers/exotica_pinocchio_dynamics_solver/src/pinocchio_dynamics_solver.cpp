@@ -72,33 +72,12 @@ Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVe
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
-    // return A_;
+    ThrowPretty("NotYetImplemented");
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    // return B_;
-}
-
-Eigen::Tensor<double, 3> PinocchioDynamicsSolver::fxx(const StateVector& x, const ControlVector& u)
-{
-    Eigen::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
-    fxx.setZero();
-    return fxx;
-}
-
-Eigen::Tensor<double, 3> PinocchioDynamicsSolver::fuu(const StateVector& x, const ControlVector& u)
-{
-    Eigen::Tensor<double, 3> fuu(num_controls_, num_positions_ + num_velocities_, num_controls_);
-    fuu.setZero();
-    return fuu;
-}
-
-Eigen::Tensor<double, 3> PinocchioDynamicsSolver::fxu(const StateVector& x, const ControlVector& u)
-{
-    Eigen::Tensor<double, 3> fxu(num_controls_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
-    fxu.setZero();
-    return fxu;
+    ThrowPretty("NotYetImplemented");
 }
 
 }  // namespace exotica

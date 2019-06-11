@@ -33,9 +33,6 @@ REGISTER_MOTIONSOLVER_TYPE("ControlLimitedDDPSolver", exotica::ControlLimitedDDP
 
 namespace exotica
 {
-ControlLimitedDDPSolver::ControlLimitedDDPSolver() = default;
-ControlLimitedDDPSolver::~ControlLimitedDDPSolver() = default;
-
 void ControlLimitedDDPSolver::Instantiate(const ControlLimitedDDPSolverInitializer& init)
 {
     parameters_ = init;
@@ -61,6 +58,7 @@ void ControlLimitedDDPSolver::BackwardPass()
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
 
     // concatenation axis for tensor products
+    //  See https://eigen.tuxfamily.org/dox-devel/unsupported/eigen_tensors.html#title14
     Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
 
     for (int t = T - 2; t > 0; t--)
@@ -74,26 +72,34 @@ void ControlLimitedDDPSolver::BackwardPass()
 
         Qx = prob_->GetStateCostJacobian(t) + fx.transpose() * Vx;  // lx + fx @ Vx
         Qu = prob_->GetControlCostJacobian(t) + fu.transpose() * Vx;
-        Qxx = prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx;
-        Quu = prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu;
-
-        // NOTE: Qux = Qxu for all robotics systems I have seen
-        //  this might need to be changed later on
-        // WARNING_NAMED("ControlLimitedDDPSolver", "Assuming fux = fxu. Make sure this is valid for your robot!");
-        Qux = prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx;
 
         if (parameters_.UseSecondOrderDynamics)
         {
+            // clang-format off
             Eigen::Tensor<double, 1> Vx_tensor = Eigen::MatrixToTensor((Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&)Vx, N);
-            Qxx += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims),
-                                         N, N) *
-                   dt_squared;
-            Quu += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims),
-                                         NU, NU) *
-                   dt_squared;
-            Qux += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims),
-                                         NU, N) *
-                   dt_squared;
+            Qxx = prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx +
+                Eigen::TensorToMatrix(
+                    (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), N, N
+                ) * dt_squared;
+
+            Quu = prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu +
+                Eigen::TensorToMatrix(
+                    (Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU, NU
+                ) * dt_squared;
+
+            Qux = prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx +
+                Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU, N
+                ) * dt_squared;
+            // clang-format on
+        }
+        else
+        {
+            Qxx = prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx;
+            Quu = prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu;
+
+            // NOTE: Qux = Qxu for all robotics systems I have seen
+            //  this might need to be changed later on
+            Qux = prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx;
         }
 
         Eigen::VectorXd low_limit, high_limit;

@@ -92,11 +92,13 @@ Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVe
 Eigen::MatrixXd QuadrotorDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
     // TODO
+    ThrowPretty("NotYetImplemented");
 }
 
 Eigen::MatrixXd QuadrotorDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
     // TODO
+    ThrowPretty("NotYetImplemented");
 }
 
 Eigen::VectorXd QuadrotorDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_in)
@@ -107,26 +109,4 @@ Eigen::VectorXd QuadrotorDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_i
     xyz_rpy.tail<3>() = Eigen::Quaterniond(x_in.segment<4>(3)).toRotationMatrix().eulerAngles(0, 1, 2);
     return xyz_rpy;
 }
-
-Eigen::Tensor<double, 3> QuadrotorDynamicsSolver::fxx(const StateVector& x, const ControlVector& u)
-{
-    Eigen::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
-    fxx.setZero();
-    return fxx;
-}
-
-Eigen::Tensor<double, 3> QuadrotorDynamicsSolver::fuu(const StateVector& x, const ControlVector& u)
-{
-    Eigen::Tensor<double, 3> fuu(num_controls_, num_positions_ + num_velocities_, num_controls_);
-    fuu.setZero();
-    return fuu;
-}
-
-Eigen::Tensor<double, 3> QuadrotorDynamicsSolver::fxu(const StateVector& x, const ControlVector& u)
-{
-    Eigen::Tensor<double, 3> fxu(num_controls_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
-    fxu.setZero();
-    return fxu;
-}
-
 }  // namespace exotica

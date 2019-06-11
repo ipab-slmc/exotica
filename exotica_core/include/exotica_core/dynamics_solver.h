@@ -88,9 +88,9 @@ public:
     //
     // Additionally, the first subscript is the *second* partial derivative.
     //  I.e. f_xu = (f_u)_x
-    virtual Eigen::Tensor<T, 3> fxx(const StateVector& x, const ControlVector& u) = 0;
-    virtual Eigen::Tensor<T, 3> fuu(const StateVector& x, const ControlVector& u) = 0;
-    virtual Eigen::Tensor<T, 3> fxu(const StateVector& x, const ControlVector& u) = 0;
+    virtual Eigen::Tensor<T, 3> fxx(const StateVector& x, const ControlVector& u);
+    virtual Eigen::Tensor<T, 3> fuu(const StateVector& x, const ControlVector& u);
+    virtual Eigen::Tensor<T, 3> fxu(const StateVector& x, const ControlVector& u);
 
     /// \brief Simulates the dynamic system from starting state x using control u for t seconds
     ///
@@ -138,6 +138,8 @@ protected:
     int num_positions_;   ///< Number of positions in the dynamic system.
     int num_velocities_;  ///< Number of velocities in the dynamic system.
 
+    bool second_order_derivatives_initialized_ = false;  ///< Whether fxx, fxu and fuu have been initialized to 0.
+
     T dt_ = 0.01;                              ///< Internal timestep used for integration. Defaults to 10ms.
     Integrator integrator_ = Integrator::RK1;  ///< Chosen integrator. Defaults to Euler (RK1).
     // TODO: Need to enforce control limits.
@@ -145,6 +147,9 @@ protected:
 
     /// \brief Integrates the dynamic system from state x with controls u applied for one timestep dt using the selected integrator.
     inline StateVector Integrate(const StateVector& x, const ControlVector& u);
+
+    void InitializeSecondOrderDerivatives();
+    Eigen::Tensor<T, 3> fxx_default_, fuu_default_, fxu_default_;
 };
 
 typedef AbstractDynamicsSolver<double, Eigen::Dynamic, Eigen::Dynamic> DynamicsSolver;

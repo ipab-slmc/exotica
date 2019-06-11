@@ -23,7 +23,7 @@ include_directories(
 )
 
 # Ignore Eigen::Tensor warnings
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-ignored-attributes")
+add_compile_options(-Wno-ignored-attributes)
 
 set(SOURCES
   src/analytic_ddp_solver.cpp
@@ -31,7 +31,6 @@ set(SOURCES
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})
-
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 

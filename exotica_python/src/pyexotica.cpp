@@ -1205,14 +1205,15 @@ PYBIND11_MODULE(_pyexotica, module)
     module.attr("branch") = std::string(exotica::branch);
 
     py::class_<BoxQPSolution>(module, "BoxQPSolution")
-        .def_readwrite("Hff_inv", &BoxQPSolution::Hff_inv)
-        .def_readwrite("x", &BoxQPSolution::x)
-        .def_readwrite("free_idx", &BoxQPSolution::free_idx)
-        .def_readwrite("clamped_idx", &BoxQPSolution::clamped_idx);
+        .def_readonly("Hff_inv", &BoxQPSolution::Hff_inv)
+        .def_readonly("x", &BoxQPSolution::x)
+        .def_readonly("free_idx", &BoxQPSolution::free_idx)
+        .def_readonly("clamped_idx", &BoxQPSolution::clamped_idx);
 
     module.def("box_qp",
-               (BoxQPSolution(*)(Eigen::MatrixXd H, Eigen::VectorXd q,
-                                 Eigen::VectorXd b_low, Eigen::VectorXd b_high, Eigen::VectorXd x_init, const double gamma,
+               (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                                 const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
+                                 const Eigen::VectorXd& x_init, const double gamma,
                                  const int max_iterations, const double epsilon)) &
                    BoxQP);
 

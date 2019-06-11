@@ -180,4 +180,45 @@ void AbstractDynamicsSolver<T, NX, NU>::set_control_limits(Eigen::VectorXd contr
     control_limits_ = control_limits;
 }
 
+template <typename T, int NX, int NU>
+void AbstractDynamicsSolver<T, NX, NU>::InitializeSecondOrderDerivatives()
+{
+    if (second_order_derivatives_initialized_)
+        return;
+
+    const int N = num_positions_ + num_velocities_;
+
+    fxx_default_ = Eigen::Tensor<T, 3>(N, N, N);
+    fxx_default_.setZero();
+
+    fuu_default_ = Eigen::Tensor<T, 3>(num_velocities_, N, num_velocities_);
+    fuu_default_.setZero();
+
+    fxu_default_ = Eigen::Tensor<T, 3>(num_velocities_, N, N);
+    fxu_default_.setZero();
+
+    second_order_derivatives_initialized_ = true;
+}
+
+template <typename T, int NX, int NU>
+Eigen::Tensor<T, 3> AbstractDynamicsSolver<T, NX, NU>::fxx(const StateVector& x, const ControlVector& u)
+{
+    if (!second_order_derivatives_initialized_) InitializeSecondOrderDerivatives();
+    return fxx_default_;
+}
+
+template <typename T, int NX, int NU>
+Eigen::Tensor<T, 3> AbstractDynamicsSolver<T, NX, NU>::fuu(const StateVector& x, const ControlVector& u)
+{
+    if (!second_order_derivatives_initialized_) InitializeSecondOrderDerivatives();
+    return fuu_default_;
+}
+
+template <typename T, int NX, int NU>
+Eigen::Tensor<T, 3> AbstractDynamicsSolver<T, NX, NU>::fxu(const StateVector& x, const ControlVector& u)
+{
+    if (!second_order_derivatives_initialized_) InitializeSecondOrderDerivatives();
+    return fxu_default_;
+}
+
 }  // namespace exotica

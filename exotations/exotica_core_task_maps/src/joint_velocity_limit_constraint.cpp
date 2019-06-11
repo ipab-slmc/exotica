@@ -53,15 +53,18 @@ void JointVelocityLimitConstraint::AssignScene(ScenePtr scene)
 
     // Get joint velocity limits
     joint_velocity_limits_.resize(N_, 1);
-    if (parameters_.MaximumJointVelocity.rows() == 1) {
-      joint_velocity_limits_.setOnes(N_);
-      joint_velocity_limits_ *= std::abs(static_cast<double>(parameters_.MaximumJointVelocity(0)));
+    if (parameters_.MaximumJointVelocity.rows() == 1)
+    {
+        joint_velocity_limits_.setOnes(N_);
+        joint_velocity_limits_ *= std::abs(static_cast<double>(parameters_.MaximumJointVelocity(0)));
     }
-    else if (parameters_.MaximumJointVelocity.rows() == N_) {
-      joint_velocity_limits_ = parameters_.MaximumJointVelocity.cwiseAbs();
+    else if (parameters_.MaximumJointVelocity.rows() == N_)
+    {
+        joint_velocity_limits_ = parameters_.MaximumJointVelocity.cwiseAbs();
     }
-    else {
-      ThrowNamed("Maximum joint velocity vector needs to be either of size 1 or N, but got " << parameters_.MaximumJointVelocity.rows());
+    else
+    {
+        ThrowNamed("Maximum joint velocity vector needs to be either of size 1 or N, but got " << parameters_.MaximumJointVelocity.rows());
     }
     joint_velocity_limits_ *= percent;
 
@@ -69,9 +72,10 @@ void JointVelocityLimitConstraint::AssignScene(ScenePtr scene)
     one_divided_by_dt_ = 1.0 / parameters_.dt;
 
     jacobian_.resize(two_times_N_, N_);
-    for (int i = 0; i < N_; ++i) {
-      jacobian_(i,i) = one_divided_by_dt_;
-      jacobian_(i+N_,i) = -one_divided_by_dt_;	
+    for (int i = 0; i < N_; ++i)
+    {
+        jacobian_(i, i) = one_divided_by_dt_;
+        jacobian_(i + N_, i) = -one_divided_by_dt_;
     }
 }
 
@@ -79,8 +83,7 @@ void JointVelocityLimitConstraint::SetCurrentJointState(Eigen::VectorXdRefConst 
 {
     if (joint_state.rows() != N_) ThrowNamed("Wrong size for joint_state!");
     current_joint_state_ = joint_state;
-}    
-
+}
 
 void JointVelocityLimitConstraint::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
@@ -90,9 +93,10 @@ void JointVelocityLimitConstraint::Update(Eigen::VectorXdRefConst x, Eigen::Vect
     // Set phi
     Eigen::VectorXd x_dot = one_divided_by_dt_ * (x - current_joint_state_);
 
-    for (int i = 0; i < N_; ++i) {
-      phi(i) = x_dot(i) - joint_velocity_limits_(i);
-      phi(i+N_) = -x_dot(i) - joint_velocity_limits_(i);
+    for (int i = 0; i < N_; ++i)
+    {
+        phi(i) = x_dot(i) - joint_velocity_limits_(i);
+        phi(i + N_) = -x_dot(i) - joint_velocity_limits_(i);
     }
 }
 
@@ -109,6 +113,6 @@ void JointVelocityLimitConstraint::Update(Eigen::VectorXdRefConst x, Eigen::Vect
 
 int JointVelocityLimitConstraint::TaskSpaceDim()
 {
-  return two_times_N_;
+    return two_times_N_;
 }
 }

@@ -57,15 +57,15 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    ScenePtr scene_;                     ///< Scene pointer.
-    int N_;                              ///< Number of dofs for robot.
-    int two_times_N_; ///< Two multiplied by the number of dofs for robot (task space dimension).
-    Eigen::VectorXd current_joint_state_;                  ///< Log of current joint state.
-  Eigen::VectorXd joint_velocity_limits_; /// The joint velocity limits for the robot.
-    double one_divided_by_dt_;                      ///< Frequency (1/dt).
-    Eigen::MatrixXd jacobian_; ///< Task map jacobian matrix.
+    ScenePtr scene_;                         ///< Scene pointer.
+    int N_;                                  ///< Number of dofs for robot.
+    int two_times_N_;                        ///< Two multiplied by the number of dofs for robot (task space dimension).
+    Eigen::VectorXd current_joint_state_;    ///< Log of current joint state.
+    Eigen::VectorXd joint_velocity_limits_;  /// The joint velocity limits for the robot.
+    double one_divided_by_dt_;               ///< Frequency (1/dt).
+    Eigen::MatrixXd jacobian_;               ///< Task map jacobian matrix.
 };
- 
-} // namespace exotica
+
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_JOINT_VELOCITY_LIMIT_CONSTRAINT_H_

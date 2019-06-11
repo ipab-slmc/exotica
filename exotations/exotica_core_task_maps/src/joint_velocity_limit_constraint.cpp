@@ -113,5 +113,5 @@ int JointVelocityLimitConstraint::TaskSpaceDim()
 {
     return two_times_N_;
 }
-  
-} // namespace exotica
+
+}  // namespace exotica

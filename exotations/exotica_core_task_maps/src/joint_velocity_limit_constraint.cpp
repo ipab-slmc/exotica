@@ -72,6 +72,7 @@ void JointVelocityLimitConstraint::AssignScene(ScenePtr scene)
     one_divided_by_dt_ = 1.0 / parameters_.dt;
 
     jacobian_.resize(two_times_N_, N_);
+    jacobian_.setZero();
     for (int i = 0; i < N_; ++i)
     {
         jacobian_(i, i) = one_divided_by_dt_;
@@ -92,7 +93,6 @@ void JointVelocityLimitConstraint::Update(Eigen::VectorXdRefConst x, Eigen::Vect
 
     // Set phi
     Eigen::VectorXd x_dot = one_divided_by_dt_ * (x - current_joint_state_);
-
     for (int i = 0; i < N_; ++i)
     {
         phi(i) = x_dot(i) - joint_velocity_limits_(i);

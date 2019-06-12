@@ -68,7 +68,7 @@ protected:
     /// @param alpha The learning rate.
     /// @param ref_trajectory The reference state trajectory.
     /// @return The cost associated with the new control and state trajectory.
-    double ForwardPass(const double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u);
+    double ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u);
 
     Initializer base_parameters_;
 };
@@ -191,7 +191,7 @@ void AbstractDDPSolver<Initializer>::SpecifyProblem(PlanningProblemPtr pointer)
 }
 
 template <typename Initializer>
-double AbstractDDPSolver<Initializer>::ForwardPass(const double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u)
+double AbstractDDPSolver<Initializer>::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u)
 {
     double cost = 0;
     const int T = prob_->get_T();

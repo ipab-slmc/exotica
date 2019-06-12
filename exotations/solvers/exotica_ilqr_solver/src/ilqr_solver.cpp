@@ -99,7 +99,7 @@ void ILQRSolver::BackwardPass()
     }
 }
 
-double ILQRSolver::ForwardPass(const double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u)
+double ILQRSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u)
 {
     double cost = 0;
     const int T = prob_->get_T();

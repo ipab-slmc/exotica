@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_DDP_SOLVER_BOX_QP_H
-#define EXOTICA_DDP_SOLVER_BOX_QP_H
+#ifndef EXOTICA_CORE_BOX_QP_H_
+#define EXOTICA_CORE_BOX_QP_H_
 
 #include <Eigen/Dense>
 #include <vector>
@@ -157,4 +157,4 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
 }
 }  // namespace exotica
 
-#endif
+#endif  // EXOTICA_CORE_BOX_QP_H_

@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
     <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
-        <MaxIterations>3</MaxIterations>
+        <Debug>1</Debug>
+        <MaxIterations>10</MaxIterations>
         <ConvergenceThreshold>1e-10</ConvergenceThreshold>
         <EarlyStopping>1</EarlyStopping>
         <UseSecondOrderDynamics>1</UseSecondOrderDynamics>

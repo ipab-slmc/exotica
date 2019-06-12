@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
     <AnalyticDDPSolver Name="AnalyticDDPSolver">
+        <Debug>1</Debug>
         <MaxIterations>3</MaxIterations>
         <ConvergenceThreshold>1e-10</ConvergenceThreshold>
         <EarlyStopping>1</EarlyStopping>

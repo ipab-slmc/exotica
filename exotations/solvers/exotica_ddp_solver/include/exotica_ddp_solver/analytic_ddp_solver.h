@@ -40,12 +40,13 @@ namespace exotica
 //  Mayne, D. Q. (1966). "A second-order gradient method of optimizing non-linear discrete time systems".
 class AnalyticDDPSolver : public AbstractDDPSolver<AnalyticDDPSolverInitializer>, public Instantiable<AnalyticDDPSolverInitializer>
 {
+public:
+    void Instantiate(const AnalyticDDPSolverInitializer& init) override;
+
 private:
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.
     void BackwardPass() override;
-
-    void Instantiate(const AnalyticDDPSolverInitializer& init) override;
 };
 }  // namespace exotica
 

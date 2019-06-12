@@ -68,7 +68,7 @@ protected:
     /// @param alpha The learning rate.
     /// @param ref_trajectory The reference state trajectory.
     /// @return The cost associated with the new control and state trajectory.
-    double ForwardPass(double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u);
+    double ForwardPass(const double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u);
 
     Initializer base_parameters_;
 };
@@ -80,14 +80,13 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
     Timer planning_timer, backward_pass_timer, line_search_timer;
 
     const int T = prob_->get_T();
-    const int NX = prob_->get_num_positions();
     const int NU = prob_->get_num_controls();
-    const int N = NX + prob_->get_num_velocities();
+    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
 
     // initialize Gain matrices
-    K_gains_.assign(T, Eigen::MatrixXd(NU, N));
+    K_gains_.assign(T, Eigen::MatrixXd(NU, NX));
     k_gains_.assign(T, Eigen::VectorXd(NU, 1));
 
     // all of the below are not pointers, since we want to copy over
@@ -116,7 +115,7 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
         double current_cost = 0, best_alpha = 0;
 
         Eigen::MatrixXd ref_x = prob_->get_X(),
-            ref_u = prob_->get_U();
+                        ref_u = prob_->get_U();
         // perform a linear search to find the best rate
         for (int ai = 0; ai < alpha_space.rows(); ++ai)
         {
@@ -129,6 +128,8 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
                 new_U = prob_->get_U();
                 best_alpha = alpha;
             }
+            else if (cost > current_cost)
+                break;
         }
 
         if (debug_)
@@ -190,13 +191,12 @@ void AbstractDDPSolver<Initializer>::SpecifyProblem(PlanningProblemPtr pointer)
 }
 
 template <typename Initializer>
-double AbstractDDPSolver<Initializer>::ForwardPass(double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u)
+double AbstractDDPSolver<Initializer>::ForwardPass(const double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u)
 {
     double cost = 0;
     const int T = prob_->get_T();
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
 
-    DynamicsSolverPtr dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
     for (int t = 0; t < T - 1; ++t)
     {
         Eigen::VectorXd u = ref_u.col(t);

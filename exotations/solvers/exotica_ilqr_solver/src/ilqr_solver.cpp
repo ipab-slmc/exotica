@@ -99,13 +99,12 @@ void ILQRSolver::BackwardPass()
     }
 }
 
-double ILQRSolver::ForwardPass(double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u)
+double ILQRSolver::ForwardPass(const double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u)
 {
     double cost = 0;
     const int T = prob_->get_T();
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
 
-    DynamicsSolverPtr dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
     for (int t = 0; t < T - 1; ++t)
     {
         Eigen::VectorXd u = ref_u.col(t);
@@ -132,17 +131,16 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     Timer planning_timer, backward_pass_timer, line_search_timer;
 
     const int T = prob_->get_T();
-    const int NX = prob_->get_num_positions();
     const int NU = prob_->get_num_controls();
-    const int N = NX + prob_->get_num_velocities();
+    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
 
     // initialize Gain matrices
-    K_gains_.assign(T, Eigen::MatrixXd(NU, N));
+    K_gains_.assign(T, Eigen::MatrixXd(NU, NX));
     Ku_gains_.assign(T, Eigen::MatrixXd(NU, NU));
-    Kv_gains_.assign(T, Eigen::MatrixXd(NU, N));
-    vk_gains_.assign(T, Eigen::MatrixXd(N, 1));
+    Kv_gains_.assign(T, Eigen::MatrixXd(NU, NX));
+    vk_gains_.assign(T, Eigen::MatrixXd(NX, 1));
 
     // all of the below are not pointers, since we want to copy over
     //  solutions across iterations
@@ -166,12 +164,11 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         // TODO: Configure line-search space from xml
         // TODO (Wolf): What you are doing is a forward line-search when we may try a
         //    backtracking line search for a performance improvement later - this just as an aside.
-        // const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
-        const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 1.0, 0.1);
+        const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
         double current_cost = 0, best_alpha = 0;
 
         Eigen::MatrixXd ref_x = prob_->get_X(),
-            ref_u = prob_->get_U();
+                        ref_u = prob_->get_U();
         // perform a linear search to find the best rate
         for (int ai = 0; ai < alpha_space.rows(); ++ai)
         {
@@ -184,6 +181,8 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
                 new_U = prob_->get_U();
                 best_alpha = alpha;
             }
+            else if (cost > current_cost)
+                break;
         }
 
         if (debug_)

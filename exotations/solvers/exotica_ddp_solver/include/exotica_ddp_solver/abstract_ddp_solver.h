@@ -68,7 +68,7 @@ protected:
     /// @param alpha The learning rate.
     /// @param ref_trajectory The reference state trajectory.
     /// @return The cost associated with the new control and state trajectory.
-    double ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory);
+    double ForwardPass(double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u);
 
     Initializer base_parameters_;
 };
@@ -115,12 +115,13 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
         const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
         double current_cost = 0, best_alpha = 0;
 
-        Eigen::MatrixXd ref_trajectory = prob_->get_X();
+        Eigen::MatrixXd ref_x = prob_->get_X(),
+            ref_u = prob_->get_U();
         // perform a linear search to find the best rate
         for (int ai = 0; ai < alpha_space.rows(); ++ai)
         {
             double alpha = alpha_space(ai);
-            double cost = ForwardPass(alpha, ref_trajectory);
+            double cost = ForwardPass(alpha, ref_x, ref_u);
 
             if (ai == 0 || cost < current_cost)
             {
@@ -189,7 +190,7 @@ void AbstractDDPSolver<Initializer>::SpecifyProblem(PlanningProblemPtr pointer)
 }
 
 template <typename Initializer>
-double AbstractDDPSolver<Initializer>::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
+double AbstractDDPSolver<Initializer>::ForwardPass(double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u)
 {
     double cost = 0;
     const int T = prob_->get_T();
@@ -198,9 +199,9 @@ double AbstractDDPSolver<Initializer>::ForwardPass(double alpha, Eigen::MatrixXd
     DynamicsSolverPtr dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
     for (int t = 0; t < T - 1; ++t)
     {
-        Eigen::VectorXd u = prob_->get_U(t);
+        Eigen::VectorXd u = ref_u.col(t);
         // eq. 12
-        Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_trajectory.col(t));
+        Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_x.col(t));
         u.noalias() += alpha * delta_uk;
         // clamp controls
         u = u.cwiseMax(-control_limits).cwiseMin(control_limits);

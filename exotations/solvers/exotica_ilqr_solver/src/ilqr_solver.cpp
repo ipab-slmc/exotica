@@ -99,7 +99,7 @@ void ILQRSolver::BackwardPass()
     }
 }
 
-double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
+double ILQRSolver::ForwardPass(double alpha, const Eigen::MatrixXdRef ref_x, const Eigen::MatrixXdRef ref_u)
 {
     double cost = 0;
     const int T = prob_->get_T();
@@ -108,10 +108,10 @@ double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
     DynamicsSolverPtr dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
     for (int t = 0; t < T - 1; ++t)
     {
-        Eigen::VectorXd u = prob_->get_U(t);
+        Eigen::VectorXd u = ref_u.col(t);
         // eq. 12
         Eigen::VectorXd delta_uk = -Ku_gains_[t] * u - Kv_gains_[t] * vk_gains_[t + 1] -
-                                   K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_trajectory.col(t));
+                                   K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_x.col(t));
 
         u.noalias() += alpha * delta_uk;
         // clamp controls
@@ -166,15 +166,17 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         // TODO: Configure line-search space from xml
         // TODO (Wolf): What you are doing is a forward line-search when we may try a
         //    backtracking line search for a performance improvement later - this just as an aside.
-        const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
+        // const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
+        const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 1.0, 0.1);
         double current_cost = 0, best_alpha = 0;
 
-        Eigen::MatrixXd ref_trajectory = prob_->get_X();
+        Eigen::MatrixXd ref_x = prob_->get_X(),
+            ref_u = prob_->get_U();
         // perform a linear search to find the best rate
         for (int ai = 0; ai < alpha_space.rows(); ++ai)
         {
             double alpha = alpha_space(ai);
-            double cost = ForwardPass(alpha, ref_trajectory);
+            double cost = ForwardPass(alpha, ref_x, ref_u);
 
             if (ai == 0 || cost < current_cost)
             {

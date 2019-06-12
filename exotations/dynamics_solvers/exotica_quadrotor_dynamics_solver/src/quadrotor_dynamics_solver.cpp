@@ -92,11 +92,13 @@ Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVe
 Eigen::MatrixXd QuadrotorDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
     // TODO
+    ThrowPretty("NotYetImplemented");
 }
 
 Eigen::MatrixXd QuadrotorDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
     // TODO
+    ThrowPretty("NotYetImplemented");
 }
 
 Eigen::VectorXd QuadrotorDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_in)
@@ -107,5 +109,4 @@ Eigen::VectorXd QuadrotorDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_i
     xyz_rpy.tail<3>() = Eigen::Quaterniond(x_in.segment<4>(3)).toRotationMatrix().eulerAngles(0, 1, 2);
     return xyz_rpy;
 }
-
 }  // namespace exotica

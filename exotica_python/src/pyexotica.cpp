@@ -28,6 +28,7 @@
 //
 
 #include <exotica_core/exotica_core.h>
+#include <exotica_core/tools/box_qp.h>
 #include <exotica_core/visualization.h>
 #undef NDEBUG
 #include <pybind11/eigen.h>
@@ -1202,6 +1203,19 @@ PYBIND11_MODULE(_pyexotica, module)
 
     module.attr("version") = std::string(exotica::version);
     module.attr("branch") = std::string(exotica::branch);
+
+    py::class_<BoxQPSolution>(module, "BoxQPSolution")
+        .def_readonly("Hff_inv", &BoxQPSolution::Hff_inv)
+        .def_readonly("x", &BoxQPSolution::x)
+        .def_readonly("free_idx", &BoxQPSolution::free_idx)
+        .def_readonly("clamped_idx", &BoxQPSolution::clamped_idx);
+
+    module.def("box_qp",
+               (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                                 const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
+                                 const Eigen::VectorXd& x_init, const double gamma,
+                                 const int max_iterations, const double epsilon)) &
+                   BoxQP);
 
     AddInitializers(module);
 

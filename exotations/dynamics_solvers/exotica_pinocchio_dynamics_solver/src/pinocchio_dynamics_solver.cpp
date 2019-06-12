@@ -72,12 +72,12 @@ Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVe
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
-    // return A_;
+    ThrowPretty("NotYetImplemented");
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    // return B_;
+    ThrowPretty("NotYetImplemented");
 }
 
 }  // namespace exotica

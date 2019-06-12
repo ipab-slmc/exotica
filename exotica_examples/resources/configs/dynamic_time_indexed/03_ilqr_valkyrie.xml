@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>
+    <ILQRSolver Name="ILQRSolver">
+        <Debug>1</Debug>
+        <MaxIterations>3</MaxIterations>
+        <ConvergenceThreshold>1e-10</ConvergenceThreshold>
+        <EarlyStopping>1</EarlyStopping>
+    </ILQRSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+        <Scene>
+            <JointGroup>whole_body</JointGroup>
+            <Debug>0</Debug>
+            <URDF>{exotica_examples}/resources/robots/valkyrie_sim.urdf</URDF>
+            <SRDF>{exotica_examples}/resources/robots/valkyrie_sim.srdf</SRDF>
+            <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+
+            <DynamicsSolver>
+                <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
+                    <dt>0.02</dt>
+                    <ControlLimits>150</ControlLimits>
+                </DoubleIntegratorDynamicsSolver>
+            </DynamicsSolver>
+        </Scene>
+        </PlanningScene>
+        
+        <T>150</T>
+        <tau>0.02</tau>
+        <dt>0.02</dt>
+        <Q_rate>0</Q_rate>
+        <Qf_rate>1000</Qf_rate>
+        <R_rate>0.1</R_rate>
+
+        <StartState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 </StartState>
+        <GoalState>0.0 0.0 5 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 1.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -0.25 0.0 -1.785398163397 1.571 0.0 0.0 0.0 1.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 5.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

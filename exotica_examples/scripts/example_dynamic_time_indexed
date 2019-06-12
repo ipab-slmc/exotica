@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+# Usage:
+#   python example_dynamic_time_indexed [problem_id]
+# 
+from __future__ import print_function, division
+
+import pyexotica as exo
+from pyexotica.publish_trajectory import *
+import signal, sys
+from time import time, sleep
+import numpy as np
+
+exo.Setup.init_ros()
+sleep(0.2)
+
+configs = [
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/01_ilqr_cartpole.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/02_ilqr_lwr.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/03_ilqr_valkyrie.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/04_analytic_ddp_cartpole.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/05_analytic_ddp_lwr.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/06_analytic_ddp_valkyrie.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/07_control_limited_ddp_cartpole.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/08_control_limited_ddp_lwr.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/09_control_limited_ddp_valkyrie.xml'
+]
+
+problem_idx = int(sys.argv[1]) - 1
+print('Running with config {0}'.format(configs[problem_idx]))
+
+solver = exo.Setup.load_solver(configs[problem_idx])
+problem = solver.get_problem()
+solution = solver.solve()
+
+costs = problem.get_cost_evolution()
+import matplotlib.pyplot as plt
+plt.figure()
+plt.plot(range(len(costs[1])), costs[1])
+plt.xlabel('Iteration')
+plt.ylabel('Cost')
+plt.show()
+
+s = time()
+signal.signal(signal.SIGINT, sig_int_handler)
+while True:
+    try:
+        for t in range(problem.T - 1):
+            u = solution[t,:]
+            problem.update(u, t)
+            problem.get_scene().get_kinematic_tree().publish_frames()
+            sleep(problem.tau)
+        e = time()
+        sleep(1)
+        print("Time taken to roll-out:", e-s)
+    except KeyboardInterrupt:
+        break

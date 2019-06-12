@@ -69,7 +69,7 @@ private:
     /// @param alpha The learning rate.
     /// @param ref_trajectory The reference state trajectory.
     /// @return The cost associated with the new control and state trajectory.
-    double ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory);
+    double ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u);
 };
 }  // namespace exotica
 

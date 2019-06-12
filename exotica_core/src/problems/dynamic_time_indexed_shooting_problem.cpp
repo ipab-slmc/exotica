@@ -317,8 +317,27 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
         t = T_ - 1;
     }
 
-    const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_star_.col(t), X_.col(t));
-    return x_diff.transpose() * Q_[t] * scene_->GetDynamicsSolver()->fu(X_.col(t), U_.col(t)) * -2.0;
+    return Q_[t] * X_.col(t) + Q_[t].transpose() * X_.col(t) -
+           Q_[t].transpose() * X_star_.col(t) - Q_[t] * X_star_.col(t);
+}
+
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) const
+{
+    if (t >= T_ || t < -1)
+    {
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
+    }
+    else if (t == -1)
+    {
+        t = T_ - 1;
+    }
+
+    return Q_[t] + Q_[t].transpose();
+}
+
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian() const
+{
+    return R_ + R_.transpose();
 }
 
 double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
@@ -344,7 +363,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
     {
         t = T_ - 2;
     }
-    return U_.col(t) * R_ * 2.0;
+    return R_ * U_.col(t) + R_.transpose() * U_.col(t);
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)

@@ -99,28 +99,22 @@ void ILQRSolver::BackwardPass()
     }
 }
 
-double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
+double ILQRSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u)
 {
     double cost = 0;
     const int T = prob_->get_T();
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
 
-    DynamicsSolverPtr dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
     for (int t = 0; t < T - 1; ++t)
     {
-        Eigen::VectorXd u = prob_->get_U(t);
+        Eigen::VectorXd u = ref_u.col(t);
         // eq. 12
         Eigen::VectorXd delta_uk = -Ku_gains_[t] * u - Kv_gains_[t] * vk_gains_[t + 1] -
-                                   K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_trajectory.col(t));
+                                   K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_x.col(t));
 
         u.noalias() += alpha * delta_uk;
         // clamp controls
-        if (control_limits.size() == u.size())
-            u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
-        else if (control_limits.size() == 1)
-            u = u.unaryExpr([&control_limits](double x) -> double {
-                return std::min(std::max(x, -control_limits(0)), control_limits(0));
-            });
+        u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
 
         prob_->Update(u, t);
         cost += prob_->GetControlCost(t) + prob_->GetStateCost(t);
@@ -133,19 +127,20 @@ double ILQRSolver::ForwardPass(double alpha, Eigen::MatrixXdRef ref_trajectory)
 
 void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 {
+    if (!prob_) ThrowNamed("Solver has not been initialized!");
+    Timer planning_timer, backward_pass_timer, line_search_timer;
+
     const int T = prob_->get_T();
-    const int NX = prob_->get_num_positions();
     const int NU = prob_->get_num_controls();
-    const int N = NX + prob_->get_num_velocities();
+    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
-    if (!prob_) ThrowNamed("Solver has not been initialized!");
 
     // initialize Gain matrices
-    K_gains_.assign(T, Eigen::MatrixXd(NU, N));
+    K_gains_.assign(T, Eigen::MatrixXd(NU, NX));
     Ku_gains_.assign(T, Eigen::MatrixXd(NU, NU));
-    Kv_gains_.assign(T, Eigen::MatrixXd(NU, N));
-    vk_gains_.assign(T, Eigen::MatrixXd(N, 1));
+    Kv_gains_.assign(T, Eigen::MatrixXd(NU, NX));
+    vk_gains_.assign(T, Eigen::MatrixXd(NX, 1));
 
     // all of the below are not pointers, since we want to copy over
     //  solutions across iterations
@@ -160,9 +155,11 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     for (int iteration = 0; iteration < GetNumberOfMaxIterations(); ++iteration)
     {
         // Backwards pass computes the gains
+        backward_pass_timer.Reset();
         BackwardPass();
-        if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete");
+        if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
 
+        line_search_timer.Reset();
         // forward pass to compute new control trajectory
         // TODO: Configure line-search space from xml
         // TODO (Wolf): What you are doing is a forward line-search when we may try a
@@ -170,12 +167,13 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
         double current_cost = 0, best_alpha = 0;
 
-        Eigen::MatrixXd ref_trajectory = prob_->get_X();
+        Eigen::MatrixXd ref_x = prob_->get_X(),
+                        ref_u = prob_->get_U();
         // perform a linear search to find the best rate
         for (int ai = 0; ai < alpha_space.rows(); ++ai)
         {
             double alpha = alpha_space(ai);
-            double cost = ForwardPass(alpha, ref_trajectory);
+            double cost = ForwardPass(alpha, ref_x, ref_u);
 
             if (ai == 0 || cost < current_cost)
             {
@@ -183,11 +181,13 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
                 new_U = prob_->get_U();
                 best_alpha = alpha;
             }
+            else if (cost > current_cost)
+                break;
         }
 
         if (debug_)
         {
-            HIGHLIGHT_NAMED("ILQRSolver", "Forward pass complete with cost: " << current_cost << " and alpha " << best_alpha);
+            HIGHLIGHT_NAMED("ILQRSolver", "Forward pass complete in " << line_search_timer.GetDuration() << " with cost: " << current_cost << " and alpha " << best_alpha);
             HIGHLIGHT_NAMED("ILQRSolver", "Final state: " << prob_->get_X(T - 1).transpose());
         }
 
@@ -201,17 +201,18 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 
         if (iteration - last_best_iteration > parameters_.FunctionTolerancePatience)
         {
-            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Early stopping criterion reached.");
+            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Early stopping criterion reached. Time: " << planning_timer.GetDuration());
             break;
         }
 
         if (last_cost - current_cost < parameters_.FunctionTolerance && last_cost - current_cost > 0)
         {
-            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Function tolerance reached.");
+            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Function tolerance reached. Time: " << planning_timer.GetDuration());
             break;
         }
 
-        if (iteration == parameters_.MaxIterations - 1 && debug_) HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached.");
+        if (debug_ && iteration == parameters_.MaxIterations - 1)
+            HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
 
         last_cost = current_cost;
         for (int t = 0; t < T - 1; ++t)
@@ -222,8 +223,10 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     // store the best solution found over all iterations
     for (int t = 0; t < T - 1; ++t)
     {
-        solution.row(t) = global_best_U.col(t);
+        solution.row(t) = global_best_U.col(t).transpose();
         prob_->Update(global_best_U.col(t), t);
     }
+
+    planning_time_ = planning_timer.GetDuration();
 }
 }  // namespace exotica

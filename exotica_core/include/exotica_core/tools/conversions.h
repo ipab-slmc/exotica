@@ -35,6 +35,7 @@
 #include <kdl/jacobian.hpp>
 #include <map>
 #include <memory>
+#include <unsupported/Eigen/CXX11/Tensor>
 #include <vector>
 
 #include <exotica_core/tools/exception.h>
@@ -49,6 +50,21 @@ typedef const Ref<const MatrixXd>& MatrixXdRefConst;
 
 Eigen::VectorXd VectorTransform(double px = 0.0, double py = 0.0, double pz = 0.0, double qx = 0.0, double qy = 0.0, double qz = 0.0, double qw = 1.0);
 Eigen::VectorXd IdentityTransform();
+
+template <typename T>
+using MatrixType = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+template <typename Scalar, int rank, typename sizeType>
+inline MatrixType<Scalar> TensorToMatrix(const Eigen::Tensor<Scalar, rank>& tensor, const sizeType rows, const sizeType cols)
+{
+    return Eigen::Map<const MatrixType<Scalar>>(tensor.data(), rows, cols);
+}
+
+template <typename Scalar, typename... Dims>
+inline Eigen::Tensor<Scalar, sizeof...(Dims)> MatrixToTensor(const MatrixType<Scalar>& matrix, Dims... dims)
+{
+    constexpr int rank = sizeof...(Dims);
+    return Eigen::TensorMap<Eigen::Tensor<const Scalar, rank>>(matrix.data(), {dims...});
+}
 }
 
 namespace exotica

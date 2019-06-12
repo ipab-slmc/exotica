@@ -50,7 +50,7 @@ Eigen::MatrixXd EndPoseProblem::GetBounds() const
 
 void EndPoseProblem::Instantiate(const EndPoseProblemInitializer& init)
 {
-    parameters = init;
+    parameters_ = init;
     num_tasks = tasks_.size();
     length_Phi = 0;
     length_jacobian = 0;
@@ -117,12 +117,12 @@ double EndPoseProblem::GetScalarCost()
     return cost.ydiff.transpose() * cost.S * cost.ydiff;
 }
 
-Eigen::VectorXd EndPoseProblem::GetScalarJacobian()
+Eigen::RowVectorXd EndPoseProblem::GetScalarJacobian()
 {
     return cost.jacobian.transpose() * cost.S * cost.ydiff * 2.0;
 }
 
-double EndPoseProblem::GetScalarTaskCost(const std::string& task_name)
+double EndPoseProblem::GetScalarTaskCost(const std::string& task_name) const
 {
     for (int i = 0; i < cost.indexing.size(); ++i)
     {
@@ -372,7 +372,7 @@ bool EndPoseProblem::IsValid()
     // Check inequality constraints
     if (GetInequality().rows() > 0)
     {
-        if (GetInequality().maxCoeff() > parameters.InequalityFeasibilityTolerance)
+        if (GetInequality().maxCoeff() > parameters_.InequalityFeasibilityTolerance)
         {
             if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::IsValid", "Violated inequality constraints: " << GetInequality().transpose());
             succeeded = false;
@@ -382,7 +382,7 @@ bool EndPoseProblem::IsValid()
     // Check equality constraints
     if (GetEquality().rows() > 0)
     {
-        if (GetEquality().cwiseAbs().maxCoeff() > parameters.EqualityFeasibilityTolerance)
+        if (GetEquality().cwiseAbs().maxCoeff() > parameters_.EqualityFeasibilityTolerance)
         {
             if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::IsValid", "Violated equality constraints: " << GetEquality().cwiseAbs().maxCoeff());
             succeeded = false;

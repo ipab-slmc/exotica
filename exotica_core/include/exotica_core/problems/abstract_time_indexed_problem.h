@@ -153,19 +153,19 @@ public:
     double GetScalarTaskCost(int t) const;
 
     /// \brief Returns the Jacobian of the scalar task cost at timestep t
-    Eigen::VectorXd GetScalarTaskJacobian(int t) const;
+    Eigen::RowVectorXd GetScalarTaskJacobian(int t) const;
 
     /// \brief Returns the scalar transition cost (x^T*W*x) at timestep t
     double GetScalarTransitionCost(int t) const;
 
     /// \brief Returns the Jacobian of the transition cost at timestep t
-    Eigen::VectorXd GetScalarTransitionJacobian(int t) const;
+    Eigen::RowVectorXd GetScalarTransitionJacobian(int t) const;
 
     /// \brief Returns the scalar cost for the entire trajectory (both task and transition cost).
     double GetCost() const;
 
     /// \brief Returns the Jacobian of the scalar cost over the entire trajectory (Jacobian of GetCost).
-    Eigen::VectorXd GetCostJacobian() const;
+    Eigen::RowVectorXd GetCostJacobian() const;
 
     /// \brief Returns the equality constraint values for the entire trajectory.
     Eigen::VectorXd GetEquality() const;

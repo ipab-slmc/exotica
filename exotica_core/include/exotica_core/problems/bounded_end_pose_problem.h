@@ -56,9 +56,9 @@ public:
 
     bool IsValid() override;
 
-    double GetScalarCost();
-    Eigen::VectorXd GetScalarJacobian();
-    double GetScalarTaskCost(const std::string& task_name);
+    double GetScalarCost() const;
+    Eigen::RowVectorXd GetScalarJacobian() const;
+    double GetScalarTaskCost(const std::string& task_name) const;
 
     EndPoseTask cost;
 

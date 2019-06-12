@@ -295,9 +295,9 @@ double AbstractTimeIndexedProblem::GetCost() const
     return cost;
 }
 
-Eigen::VectorXd AbstractTimeIndexedProblem::GetCostJacobian() const
+Eigen::RowVectorXd AbstractTimeIndexedProblem::GetCostJacobian() const
 {
-    Eigen::VectorXd jac = Eigen::VectorXd::Zero(N * (T_ - 1));
+    Eigen::RowVectorXd jac = Eigen::RowVectorXd::Zero(N * (T_ - 1));
     for (int t = 1; t < T_; ++t)
     {
         jac.segment((t - 1) * N, N) += GetScalarTaskJacobian(t) + GetScalarTransitionJacobian(t);
@@ -312,7 +312,7 @@ double AbstractTimeIndexedProblem::GetScalarTaskCost(int t) const
     return ct * cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];
 }
 
-Eigen::VectorXd AbstractTimeIndexedProblem::GetScalarTaskJacobian(int t) const
+Eigen::RowVectorXd AbstractTimeIndexedProblem::GetScalarTaskJacobian(int t) const
 {
     ValidateTimeIndex(t);
     return cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0 * ct;
@@ -324,7 +324,7 @@ double AbstractTimeIndexedProblem::GetScalarTransitionCost(int t) const
     return ct * xdiff[t].transpose() * W * xdiff[t];
 }
 
-Eigen::VectorXd AbstractTimeIndexedProblem::GetScalarTransitionJacobian(int t) const
+Eigen::RowVectorXd AbstractTimeIndexedProblem::GetScalarTransitionJacobian(int t) const
 {
     ValidateTimeIndex(t);
     return 2.0 * ct * W * xdiff[t];

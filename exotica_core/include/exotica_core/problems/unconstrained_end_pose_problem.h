@@ -57,9 +57,9 @@ public:
     int GetTaskId(const std::string& task_name);
 
     double GetScalarCost() const;
-    Eigen::VectorXd GetScalarJacobian();
+    Eigen::RowVectorXd GetScalarJacobian() const;
 
-    double GetScalarTaskCost(const std::string& task_name);
+    double GetScalarTaskCost(const std::string& task_name) const;
 
     EndPoseTask cost;
 

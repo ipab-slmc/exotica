@@ -105,17 +105,17 @@ void BoundedEndPoseProblem::PreUpdate()
     cost.UpdateS();
 }
 
-double BoundedEndPoseProblem::GetScalarCost()
+double BoundedEndPoseProblem::GetScalarCost() const
 {
     return cost.ydiff.transpose() * cost.S * cost.ydiff;
 }
 
-Eigen::VectorXd BoundedEndPoseProblem::GetScalarJacobian()
+Eigen::RowVectorXd BoundedEndPoseProblem::GetScalarJacobian() const
 {
     return cost.jacobian.transpose() * cost.S * cost.ydiff * 2.0;
 }
 
-double BoundedEndPoseProblem::GetScalarTaskCost(const std::string& task_name)
+double BoundedEndPoseProblem::GetScalarTaskCost(const std::string& task_name) const
 {
     for (int i = 0; i < cost.indexing.size(); ++i)
     {

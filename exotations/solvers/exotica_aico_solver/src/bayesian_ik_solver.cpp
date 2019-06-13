@@ -41,6 +41,7 @@ namespace exotica
 {
 void BayesianIKSolver::Instantiate(const BayesianIKSolverInitializer& init)
 {
+    parameters_ = init;
     std::string mode = init.SweepMode;
     if (mode == "Forwardly")
         sweep_mode_ = FORWARD;
@@ -62,10 +63,6 @@ void BayesianIKSolver::Instantiate(const BayesianIKSolverInitializer& init)
     use_bwd_msg_ = init.UseBackwardMessage;
     verbose_ = init.Verbose;
 }
-
-BayesianIKSolver::BayesianIKSolver() = default;
-
-BayesianIKSolver::~BayesianIKSolver() = default;
 
 void BayesianIKSolver::SpecifyProblem(PlanningProblemPtr problem)
 {

@@ -47,9 +47,7 @@ namespace exotica
 class BayesianIKSolver : public MotionSolver, public Instantiable<BayesianIKSolverInitializer>
 {
 public:
-    BayesianIKSolver();
     void Instantiate(const BayesianIKSolverInitializer& init) override;
-    virtual ~BayesianIKSolver();
 
     /// \brief Solves the problem
     /// @param solution Returned end pose solution.

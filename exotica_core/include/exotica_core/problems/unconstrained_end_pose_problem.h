@@ -46,6 +46,7 @@ public:
     virtual void Instantiate(const UnconstrainedEndPoseProblemInitializer& init);
     void Update(Eigen::VectorXdRefConst x);
 
+    bool IsValid() override { return true; }
     void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
     void SetRho(const std::string& task_name, const double& rho);
     Eigen::VectorXd GetGoal(const std::string& task_name);
@@ -56,9 +57,9 @@ public:
     int GetTaskId(const std::string& task_name);
 
     double GetScalarCost() const;
-    Eigen::VectorXd GetScalarJacobian();
+    Eigen::RowVectorXd GetScalarJacobian() const;
 
-    double GetScalarTaskCost(const std::string& task_name);
+    double GetScalarTaskCost(const std::string& task_name) const;
 
     EndPoseTask cost;
 

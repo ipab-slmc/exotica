@@ -88,12 +88,12 @@ double UnconstrainedEndPoseProblem::GetScalarCost() const
     return cost.ydiff.transpose() * cost.S * cost.ydiff;
 }
 
-Eigen::VectorXd UnconstrainedEndPoseProblem::GetScalarJacobian()
+Eigen::RowVectorXd UnconstrainedEndPoseProblem::GetScalarJacobian() const
 {
     return cost.jacobian.transpose() * cost.S * cost.ydiff * 2.0;
 }
 
-double UnconstrainedEndPoseProblem::GetScalarTaskCost(const std::string& task_name)
+double UnconstrainedEndPoseProblem::GetScalarTaskCost(const std::string& task_name) const
 {
     for (int i = 0; i < cost.indexing.size(); ++i)
     {
@@ -222,4 +222,4 @@ int UnconstrainedEndPoseProblem::GetTaskId(const std::string& task_name)
     }
     ThrowPretty("Cannot get task. Task map '" << task_name << "' does not exist.");
 }
-}
+}  // namespace exotica

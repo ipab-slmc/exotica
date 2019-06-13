@@ -67,8 +67,11 @@ void ILQRSolver::BackwardPass()
     Sk = Sk.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
         return std::min(std::max(x, min_clamp_), max_clamp_);
     });
+    vk_gains_[T - 1] = vk_gains_[T - 1].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+        return std::min(std::max(x, min_clamp_), max_clamp_);
+    });
 
-    for (int t = T - 2; t > 0; t--)
+    for (int t = T - 2; t >= 0; t--)
     {
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
         Eigen::MatrixXd Ak = dynamics_solver_->fx(x, u), Bk = dynamics_solver_->fu(x, u),

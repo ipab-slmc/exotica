@@ -60,7 +60,7 @@ void ControlLimitedDDPSolver::BackwardPass()
     //  See https://eigen.tuxfamily.org/dox-devel/unsupported/eigen_tensors.html#title14
     Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
 
-    for (int t = T - 2; t > 0; t--)
+    for (int t = T - 2; t >= 0; t--)
     {
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
         Eigen::MatrixXd fx = dynamics_solver_->fx(x, u),

@@ -3,7 +3,7 @@
     <AnalyticDDPSolver Name="AnalyticDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>50</MaxIterations>
-        <FunctionTolerance>1e-3</FunctionTolerance>
+        <FunctionTolerance>1e-10</FunctionTolerance>
         <FunctionTolerancePatience>10</FunctionTolerancePatience>
         <UseSecondOrderDynamics>1</UseSecondOrderDynamics>
     </AnalyticDDPSolver>

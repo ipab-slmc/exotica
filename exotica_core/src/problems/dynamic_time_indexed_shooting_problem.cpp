@@ -148,7 +148,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X() const
     return X_;
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X(int t) const
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::get_X(int t) const
 {
     if (t >= T_ || t < -1)
     {
@@ -173,7 +173,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_U() const
     return U_;
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_U(int t) const
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::get_U(int t) const
 {
     if (t >= T_ || t < -1)
     {

@@ -220,6 +220,9 @@ public:
     const std::map<std::string, std::weak_ptr<KinematicElement>>& GetCollisionTreeMap() const { return collision_tree_map_; }
     bool DoesLinkWithNameExist(std::string name) const;  //!< Checks whether a link with this name exists in any of the trees
 
+    const std::vector<std::weak_ptr<KinematicElement>>& GetControlledJoints() const { return controlled_joints_; }
+    const std::map<std::string, std::weak_ptr<KinematicElement>>& GetControlledJointsMap() const { return controlled_joints_map_; }
+    const std::map<std::string, std::weak_ptr<KinematicElement>>& GetModelJointsMap() const { return model_joints_map_; }
     std::map<std::string, shapes::ShapeType> GetCollisionObjectTypes() const;
 
     /// @brief SetSeed sets the seed of the random generator for deterministic joint state sampling

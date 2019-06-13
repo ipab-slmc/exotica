@@ -93,16 +93,22 @@ Eigen::RowVectorXd UnconstrainedEndPoseProblem::GetScalarJacobian() const
     return cost.jacobian.transpose() * cost.S * cost.ydiff * 2.0;
 }
 
-double UnconstrainedEndPoseProblem::GetScalarTaskCost(const std::string& task_name) const
+Eigen::VectorXd UnconstrainedEndPoseProblem::GetTaskError(const std::string& task_name) const
 {
     for (int i = 0; i < cost.indexing.size(); ++i)
     {
         if (cost.tasks[i]->GetObjectName() == task_name)
         {
-            return cost.ydiff.segment(cost.indexing[i].start, cost.indexing[i].length).transpose() * cost.rho(cost.indexing[i].id) * cost.ydiff.segment(cost.indexing[i].start, cost.indexing[i].length);
+            return cost.ydiff.segment(cost.indexing[i].start, cost.indexing[i].length);
         }
     }
     ThrowPretty("Cannot get scalar task cost. Task map '" << task_name << "' does not exist.");
+}
+
+double UnconstrainedEndPoseProblem::GetScalarTaskCost(const std::string& task_name) const
+{
+    const Eigen::VectorXd ydiff = GetTaskError(task_name);
+    return ydiff.transpose() * GetRho(task_name) * ydiff;
 }
 
 void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
@@ -173,7 +179,7 @@ void UnconstrainedEndPoseProblem::SetRho(const std::string& task_name, const dou
     ThrowPretty("Cannot set rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd UnconstrainedEndPoseProblem::GetGoal(const std::string& task_name)
+Eigen::VectorXd UnconstrainedEndPoseProblem::GetGoal(const std::string& task_name) const
 {
     for (int i = 0; i < cost.indexing.size(); ++i)
     {
@@ -185,7 +191,7 @@ Eigen::VectorXd UnconstrainedEndPoseProblem::GetGoal(const std::string& task_nam
     ThrowPretty("Cannot get Goal. Task map '" << task_name << "' does not exist.");
 }
 
-double UnconstrainedEndPoseProblem::GetRho(const std::string& task_name)
+double UnconstrainedEndPoseProblem::GetRho(const std::string& task_name) const
 {
     for (int i = 0; i < cost.indexing.size(); ++i)
     {
@@ -197,7 +203,7 @@ double UnconstrainedEndPoseProblem::GetRho(const std::string& task_name)
     ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
 }
 
-Eigen::VectorXd UnconstrainedEndPoseProblem::GetNominalPose()
+Eigen::VectorXd UnconstrainedEndPoseProblem::GetNominalPose() const
 {
     return q_nominal;
 }
@@ -211,7 +217,7 @@ void UnconstrainedEndPoseProblem::SetNominalPose(Eigen::VectorXdRefConst qNomina
                     << N << ", received " << qNominal_in.rows() << ").");
 }
 
-int UnconstrainedEndPoseProblem::GetTaskId(const std::string& task_name)
+int UnconstrainedEndPoseProblem::GetTaskId(const std::string& task_name) const
 {
     for (int i = 0; i < cost.indexing.size(); ++i)
     {

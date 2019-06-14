@@ -150,7 +150,7 @@ void EndPoseTask::Update(const TaskSpaceVector& big_Phi)
 
 void EndPoseTask::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
 {
-    for (int i = 0; i < indexing.size(); ++i)
+    for (size_t i = 0; i < indexing.size(); ++i)
     {
         if (tasks[i]->GetObjectName() == task_name)
         {
@@ -164,7 +164,7 @@ void EndPoseTask::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst 
 
 void EndPoseTask::SetRho(const std::string& task_name, const double rho_in)
 {
-    for (int i = 0; i < indexing.size(); ++i)
+    for (size_t i = 0; i < indexing.size(); ++i)
     {
         if (tasks[i]->GetObjectName() == task_name)
         {
@@ -178,7 +178,7 @@ void EndPoseTask::SetRho(const std::string& task_name, const double rho_in)
 
 Eigen::VectorXd EndPoseTask::GetGoal(const std::string& task_name) const
 {
-    for (int i = 0; i < indexing.size(); ++i)
+    for (size_t i = 0; i < indexing.size(); ++i)
     {
         if (tasks[i]->GetObjectName() == task_name)
         {
@@ -190,7 +190,7 @@ Eigen::VectorXd EndPoseTask::GetGoal(const std::string& task_name) const
 
 double EndPoseTask::GetRho(const std::string& task_name) const
 {
-    for (int i = 0; i < indexing.size(); ++i)
+    for (size_t i = 0; i < indexing.size(); ++i)
     {
         if (tasks[i]->GetObjectName() == task_name)
         {
@@ -278,7 +278,7 @@ inline void TimeIndexedTask::ValidateTimeIndex(int& t_in) const
 void TimeIndexedTask::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t)
 {
     ValidateTimeIndex(t);
-    for (int i = 0; i < indexing.size(); ++i)
+    for (size_t i = 0; i < indexing.size(); ++i)
     {
         if (tasks[i]->GetObjectName() == task_name)
         {
@@ -293,7 +293,7 @@ void TimeIndexedTask::SetGoal(const std::string& task_name, Eigen::VectorXdRefCo
 Eigen::VectorXd TimeIndexedTask::GetGoal(const std::string& task_name, int t) const
 {
     ValidateTimeIndex(t);
-    for (int i = 0; i < indexing.size(); ++i)
+    for (size_t i = 0; i < indexing.size(); ++i)
     {
         if (tasks[i]->GetObjectName() == task_name)
         {
@@ -306,7 +306,7 @@ Eigen::VectorXd TimeIndexedTask::GetGoal(const std::string& task_name, int t) co
 void TimeIndexedTask::SetRho(const std::string& task_name, const double rho_in, int t)
 {
     ValidateTimeIndex(t);
-    for (int i = 0; i < indexing.size(); ++i)
+    for (size_t i = 0; i < indexing.size(); ++i)
     {
         if (tasks[i]->GetObjectName() == task_name)
         {
@@ -321,7 +321,7 @@ void TimeIndexedTask::SetRho(const std::string& task_name, const double rho_in, 
 double TimeIndexedTask::GetRho(const std::string& task_name, int t) const
 {
     ValidateTimeIndex(t);
-    for (int i = 0; i < indexing.size(); ++i)
+    for (size_t i = 0; i < indexing.size(); ++i)
     {
         if (tasks[i]->GetObjectName() == task_name)
         {

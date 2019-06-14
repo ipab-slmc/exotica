@@ -60,13 +60,6 @@ public:
     Eigen::RowVectorXd GetScalarJacobian() const;
 
     /**
-     * @brief GetTaskError get error vector of objective function
-     * @param task_name valid task
-     * @return error vector
-     */
-    Eigen::VectorXd GetTaskError(const std::string& task_name) const;
-
-    /**
      * @brief GetScalarTaskCost get weighted sum-of-squares of cost vector
      * @param task_name valid task
      * @return scalar cost

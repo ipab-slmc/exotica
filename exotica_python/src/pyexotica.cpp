@@ -674,7 +674,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("jacobian", &EndPoseTask::jacobian)
         .def_readonly("S", &EndPoseTask::S)
         .def_readonly("tasks", &EndPoseTask::tasks)
-        .def_readonly("task_maps", &EndPoseTask::task_maps);
+        .def_readonly("task_maps", &EndPoseTask::task_maps)
+        .def("get_task_error", &EndPoseTask::GetTaskError);
 
     py::class_<SamplingTask, std::shared_ptr<SamplingTask>>(module, "SamplingTask")
         .def_readonly("length_Phi", &SamplingTask::length_Phi)
@@ -834,7 +835,6 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_end_pose_problem.def_property("q_nominal", &UnconstrainedEndPoseProblem::GetNominalPose, &UnconstrainedEndPoseProblem::SetNominalPose);
     unconstrained_end_pose_problem.def("get_scalar_cost", &UnconstrainedEndPoseProblem::GetScalarCost);
     unconstrained_end_pose_problem.def("get_scalar_jacobian", &UnconstrainedEndPoseProblem::GetScalarJacobian);
-    unconstrained_end_pose_problem.def("get_task_error", &UnconstrainedEndPoseProblem::GetTaskError);
     unconstrained_end_pose_problem.def("get_scalar_task_cost", &UnconstrainedEndPoseProblem::GetScalarTaskCost);
     unconstrained_end_pose_problem.def_readonly("cost", &UnconstrainedEndPoseProblem::cost);
 

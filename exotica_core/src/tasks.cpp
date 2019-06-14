@@ -200,6 +200,18 @@ double EndPoseTask::GetRho(const std::string& task_name) const
     ThrowPretty("Cannot get rho. Task Map '" << task_name << "' does not exist.");
 }
 
+Eigen::VectorXd EndPoseTask::GetTaskError(const std::string& task_name) const
+{
+    for (size_t i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            return ydiff.segment(indexing[i].start, indexing[i].length);
+        }
+    }
+    ThrowPretty("Cannot get task error. Task map '" << task_name << "' does not exist.");
+}
+
 void TimeIndexedTask::Initialize(const std::vector<exotica::Initializer>& inits, PlanningProblemPtr prob, TaskSpaceVector& Phi)
 {
     Task::Initialize(inits, prob, Phi);

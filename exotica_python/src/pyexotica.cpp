@@ -834,6 +834,7 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_end_pose_problem.def_property("q_nominal", &UnconstrainedEndPoseProblem::GetNominalPose, &UnconstrainedEndPoseProblem::SetNominalPose);
     unconstrained_end_pose_problem.def("get_scalar_cost", &UnconstrainedEndPoseProblem::GetScalarCost);
     unconstrained_end_pose_problem.def("get_scalar_jacobian", &UnconstrainedEndPoseProblem::GetScalarJacobian);
+    unconstrained_end_pose_problem.def("get_task_error", &UnconstrainedEndPoseProblem::GetTaskError);
     unconstrained_end_pose_problem.def("get_scalar_task_cost", &UnconstrainedEndPoseProblem::GetScalarTaskCost);
     unconstrained_end_pose_problem.def_readonly("cost", &UnconstrainedEndPoseProblem::cost);
 

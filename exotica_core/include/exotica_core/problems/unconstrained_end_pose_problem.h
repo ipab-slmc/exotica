@@ -49,16 +49,21 @@ public:
     bool IsValid() override { return true; }
     void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal);
     void SetRho(const std::string& task_name, const double& rho);
-    Eigen::VectorXd GetGoal(const std::string& task_name);
-    double GetRho(const std::string& task_name);
-    Eigen::VectorXd GetNominalPose();
+    Eigen::VectorXd GetGoal(const std::string& task_name) const;
+    double GetRho(const std::string& task_name) const;
+    Eigen::VectorXd GetNominalPose() const;
     void SetNominalPose(Eigen::VectorXdRefConst qNominal_in);
     void PreUpdate() override;
-    int GetTaskId(const std::string& task_name);
+    int GetTaskId(const std::string& task_name) const;
 
     double GetScalarCost() const;
     Eigen::RowVectorXd GetScalarJacobian() const;
 
+    /**
+     * @brief GetScalarTaskCost get weighted sum-of-squares of cost vector
+     * @param task_name valid task
+     * @return scalar cost
+     */
     double GetScalarTaskCost(const std::string& task_name) const;
 
     EndPoseTask cost;

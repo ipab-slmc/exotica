@@ -674,7 +674,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("jacobian", &EndPoseTask::jacobian)
         .def_readonly("S", &EndPoseTask::S)
         .def_readonly("tasks", &EndPoseTask::tasks)
-        .def_readonly("task_maps", &EndPoseTask::task_maps);
+        .def_readonly("task_maps", &EndPoseTask::task_maps)
+        .def("get_task_error", &EndPoseTask::GetTaskError);
 
     py::class_<SamplingTask, std::shared_ptr<SamplingTask>>(module, "SamplingTask")
         .def_readonly("length_Phi", &SamplingTask::length_Phi)

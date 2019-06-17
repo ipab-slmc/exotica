@@ -5,9 +5,12 @@ extend <exotica_core/planning_problem>
 Required int T;
 Required double tau;  // Discretisation timestep of the trajectory
 
+Optional bool DiagonalNoiseMatrix = true;
 Optional Eigen::VectorXd Q = Eigen::VectorXd();
 Optional Eigen::VectorXd R = Eigen::VectorXd();
+Optional Eigen::VectorXd C = Eigen::VectorXd();
 Optional Eigen::VectorXd GoalState = Eigen::VectorXd();
 Optional double Q_rate = 1.;
 Optional double Qf_rate = 1.;
 Optional double R_rate = 1.;
+Optional double C_rate = 0;

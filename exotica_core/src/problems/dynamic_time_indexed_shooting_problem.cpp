@@ -45,7 +45,8 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
 
     if (!scene_->GetDynamicsSolver()) ThrowPretty("DynamicsSolver is not initialised!");
 
-    const int NX = num_positions_ + num_velocities_;
+    const int NX = num_positions_ + num_velocities_,
+        NU = num_controls_;
     if (this->parameters_.Q.rows() > 0)
     {
         ThrowPretty("Not supported yet");
@@ -70,6 +71,31 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
         {
             ThrowNamed("R dimension mismatch! Expected " << num_controls_ << ", got " << this->parameters_.R.rows());
         }
+    }
+
+    // Set up stochastic terms
+    //  see https://homes.cs.washington.edu/~todorov/papers/TodorovNeuralComp05.pdf
+    //  eq. 3.1 and the text before (search for 'column') to see why this makes sense
+    Ci_.assign(NU, Eigen::MatrixXd::Zero(NX, NU));
+    for (int i = 0; i < NU; ++ i)
+        if (parameters_.DiagonalNoiseMatrix)
+            Ci_[i](i, i) = parameters_.C_rate;
+        else
+            Ci_[i] = Eigen::MatrixXd::Constant(NX, NU, parameters_.C_rate);
+    
+    if (this->parameters_.C.rows() > 0)
+    {
+        for (int i = 0; i < NU; ++ i)
+            if (parameters_.DiagonalNoiseMatrix)
+                Ci_[i](i, i) = parameters_.C(i);
+            else
+                Ci_[i] = Eigen::MatrixXd::Constant(NX, NU, parameters_.C(i));
+    }
+
+    if (this->parameters_.C_rate > 0 || this->parameters_.C.rows() > 0)
+    {
+        stochastic_matrices_specified_ = true;
+        stochastic_updates_enabled_ = true;
     }
 
     T_ = this->parameters_.T;
@@ -285,6 +311,17 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     // Simulate for tau
     X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(X_.col(t), U_.col(t), tau_);
 
+    // Stochstic noise, if enabled
+    if (stochastic_matrices_specified_ && stochastic_updates_enabled_)
+    {
+        Eigen::VectorXd noise(num_controls_);
+        for (int i = 0; i < num_controls_; ++ i)
+            noise(i) = standard_normal_noise_(generator_);
+    
+        noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * get_F(t) * noise;
+        X_.col(t + 1) = X_.col(t + 1) + noise;
+    }
+
     scene_->Update(scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1)), static_cast<double>(t) * tau_);
 
     // TODO: Cost, Equality, Inequality
@@ -375,5 +412,42 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::Simulate(Eigen::VectorXdRefCo
 {
     return scene_->GetDynamicsSolver()->Simulate(x, u, tau_);
 }
+
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
+{
+    if (t >= T_ - 1 || t < -1)
+    {
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_ - 1);
+    }
+
+    const int NX = num_positions_ + num_velocities_,
+        NU = num_controls_;
+
+    Eigen::MatrixXd C(NX, NU);
+
+    for (int i = 0; i < NU; ++ i)
+        C.col(i) = Ci_[i] * U_.col(t);
+
+    return C;
+}
+
+// F[i]_u
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlNoiseJacobian(int column_idx) const
+{
+    if (column_idx < 0 || column_idx >= num_velocities_)
+        ThrowPretty("Requested column_idx=" << column_idx << " out of range; needs to be 0 <= column_idx < " << num_velocities_ - 1);
+    return Ci_[column_idx];
+}
+
+void DynamicTimeIndexedShootingProblem::EnableStochasticUpdates()
+{
+    stochastic_updates_enabled_ = true;
+}
+
+void DynamicTimeIndexedShootingProblem::DisableStochasticUpdates()
+{
+    stochastic_updates_enabled_ = false;
+}
+
 
 }  // namespace exotica

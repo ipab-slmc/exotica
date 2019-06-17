@@ -60,9 +60,6 @@ namespace exotica
 class Manipulability : public TaskMap, public Instantiable<ManipulabilityInitializer>
 {
 public:
-    Manipulability();
-    virtual ~Manipulability();
-
     void Instantiate(const ManipulabilityInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     int TaskSpaceDim() override;

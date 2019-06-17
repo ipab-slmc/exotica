@@ -54,6 +54,8 @@ public:
     ///@return        Successful if the problem is a valid DynamicTimeIndexedProblem
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
+    Eigen::VectorXd GetFeedbackControl(Eigen::VectorXd x, int t) const override;
+
 protected:
     DynamicTimeIndexedShootingProblemPtr prob_;       ///!< Shared pointer to the planning problem.
     DynamicsSolverPtr dynamics_solver_;               ///!< Shared pointer to the dynamics solver.
@@ -71,6 +73,7 @@ protected:
     double ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u);
 
     Initializer base_parameters_;
+    Eigen::MatrixXd best_ref_x_, best_ref_u_;
 };
 
 template <typename Initializer>
@@ -144,6 +147,8 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
             global_best_cost = current_cost;
             last_best_iteration = iteration;
             global_best_U = new_U;
+            best_ref_x_ = ref_x;
+            best_ref_u_ = ref_u;
         }
 
         if (iteration - last_best_iteration > base_parameters_.FunctionTolerancePatience)
@@ -213,6 +218,16 @@ double AbstractDDPSolver<Initializer>::ForwardPass(const double alpha, Eigen::Ma
     // add terminal cost
     cost += prob_->GetStateCost(T - 1);
     return cost;
+}
+
+template <typename Initializer>
+Eigen::VectorXd AbstractDDPSolver<Initializer>::GetFeedbackControl(Eigen::VectorXd x, int t) const
+{
+    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
+
+    Eigen::VectorXd u = best_ref_u_.col(t) + delta_uk;
+    return u.cwiseMax(-control_limits).cwiseMin(control_limits);
 }
 
 }  // namespace exotica

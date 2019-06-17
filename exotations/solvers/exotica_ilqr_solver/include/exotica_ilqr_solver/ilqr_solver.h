@@ -54,11 +54,15 @@ public:
     ///@param pointer Shared pointer to the motion planning problem
     ///@return        Successful if the problem is a valid DynamicTimeIndexedProblem
     void SpecifyProblem(PlanningProblemPtr pointer) override;
+    
+    Eigen::VectorXd GetFeedbackControl(Eigen::VectorXd x, int t) const override;
 
 private:
     DynamicTimeIndexedShootingProblemPtr prob_;                              ///!< Shared pointer to the planning problem.
     DynamicsSolverPtr dynamics_solver_;                                      ///!< Shared pointer to the dynamics solver.
     std::vector<Eigen::MatrixXd> K_gains_, Ku_gains_, Kv_gains_, vk_gains_;  ///!< Control gains.
+
+    Eigen::MatrixXd best_ref_x_, best_ref_u_;
 
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.

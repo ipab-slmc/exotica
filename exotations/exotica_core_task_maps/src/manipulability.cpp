@@ -40,7 +40,7 @@ void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     for (int i = 0; i < n_end_effs_; ++i)
     {
         const Eigen::MatrixXd& J = kinematics[0].jacobian[i].data.topRows(n_rows_of_jac_);
-        phi(i) = lower_bound_(i) - std::sqrt((J * J.transpose()).determinant());
+        phi(i) = -std::sqrt((J * J.transpose()).determinant());
     }
 }
 
@@ -48,24 +48,6 @@ void Manipulability::Instantiate(const ManipulabilityInitializer& init)
 {
     parameters_ = init;
     n_end_effs_ = frames_.size();
-
-    if (parameters_.LowerBound.rows() == 0)
-    {
-        lower_bound_.setConstant(n_end_effs_, 1, 0.0);
-    }
-    else if (parameters_.LowerBound.rows() == 1)
-    {
-        lower_bound_.setConstant(n_end_effs_, 1, std::abs(static_cast<double>(parameters_.LowerBound(0))));
-    }
-    else if (parameters_.LowerBound.rows() == n_end_effs_)
-    {
-        lower_bound_.resize(n_end_effs_, 1);
-        lower_bound_ = parameters_.LowerBound.cwiseAbs();
-    }
-    else
-    {
-        ThrowNamed("LowerBound vector needs to be either of size 1 or N (N is number of end effectors), but got " << parameters_.LowerBound.rows() << ".");
-    }
 
     if (init.OnlyPosition)
     {

@@ -47,12 +47,13 @@ namespace exotica
 /// \f]
 /// that is based on the shape of the velocity ellipsoid where \f$J(x)\f$ is the manipulator Jacobian matrix.. The task map is expressed by
 /// \f[
-///   Phi(x) := m^- - m(x)
+///   \phi(x) := -m(x).
 /// \f]
-/// where \f$m^-\f$ is a lower bound for \f$m(x)\f$. If the task map is being used in the cost function then \f$m^-\f$ should be set to zero.
+///
+/// To use the task map as an inequality constraint the lower bound for \f$\phi\f$ should be set as a goal and each element should be negative.
 ///
 /// Note that
-///   - the associated value for \f$\rho\f$ <b>must</b> be positivein order to maximize the manipulability, and
+///   - the associated value for \f$\rho\f$ <b>must</b> be negative in order to maximize the manipulability, and
 ///   - derivatives of \f$\Phi\f$ are computed using finite differences.
 ///
 /// Todo
@@ -65,9 +66,8 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    int n_end_effs_;               ///< Number of end-effectors.
-    int n_rows_of_jac_;            ///< Number of rows from the top to extract from full jacobian. Is either 3 (position) or 6 (position and rotation).
-    Eigen::VectorXd lower_bound_;  ///< When task map is a constraint, lower_bound_ is a lower bound for the inequality constraint, i.e. \f$\phi\geqm^-\f$ where \f$m^-\f$ is the lower bound.
+    int n_end_effs_;     ///< Number of end-effectors.
+    int n_rows_of_jac_;  ///< Number of rows from the top to extract from full jacobian. Is either 3 (position) or 6 (position and rotation).
 };
 }  // namespace exotica
 

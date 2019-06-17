@@ -41,14 +41,18 @@ namespace exotica
 /// \ingroup TaskMap
 ///
 /// \brief Manipulability measure.
-/// The manipulability measure for a robot at a given joint configuration indicates dexterity, that is, how isotropic the robot's motion is with respect to the task space motion. The measure is high when the manipulator is capable of equal motion in all directions and low when the manipulator is close to a singularity. This task map implements Yoshikawa's manipulability measure that is based on the shape of the velocity ellipsoid and expressed by
+/// The manipulability measure for a robot at a given joint configuration indicates dexterity, that is, how isotropic the robot's motion is with respect to the task space motion. The measure is high when the manipulator is capable of equal motion in all directions and low when the manipulator is close to a singularity. This task map implements Yoshikawa's manipulability measure
 /// \f[
-///   Phi(x) := \sqrt{J(x)J(x)^T}
+///   m(x) = \sqrt{J(x)J(x)^T}
 /// \f]
-/// where $J(x)$ is the manipulator Jacobian matrix.
+/// that is based on the shape of the velocity ellipsoid where \f$J(x)\f$ is the manipulator Jacobian matrix.. The task map is expressed by
+/// \f[
+///   Phi(x) := m^- - m(x)
+/// \f]
+/// where \f$m^-\f$ is a lower bound for \f$m(x)\f$. If the task map is being used in the cost function then \f$m^-\f$ should be set to zero.
 ///
 /// Note that
-///   - the associated value for \f$\rho\f$ <b>must</b> be negative in order to maximize the manipulability, and
+///   - the associated value for \f$\rho\f$ <b>must</b> be positivein order to maximize the manipulability, and
 ///   - derivatives of \f$\Phi\f$ are computed using finite differences.
 ///
 /// Todo
@@ -64,8 +68,9 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    int n_end_effs_;     ///< Number of end-effectors.
-    int n_rows_of_jac_;  ///< Number of rows from the top to extract from full jacobian. Is either 3 (position) or 6 (position and rotation).
+    int n_end_effs_;               ///< Number of end-effectors.
+    int n_rows_of_jac_;            ///< Number of rows from the top to extract from full jacobian. Is either 3 (position) or 6 (position and rotation).
+    Eigen::VectorXd lower_bound_;  ///< When task map is a constraint, lower_bound_ is a lower bound for the inequality constraint, i.e. \f$\phi\geqm^-\f$ where \f$m^-\f$ is the lower bound.
 };
 }  // namespace exotica
 

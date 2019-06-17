@@ -66,10 +66,10 @@ void ILQGSolver::BackwardPass()
     Eigen::MatrixXd big_C_times_big_C = Eigen::MatrixXd::Zero(NU, NU);
     Eigen::MatrixXd little_c_times_little_c = Eigen::MatrixXd::Zero(1, 1);
 
-    // Value function and derivatives at the final timestep 
+    // Value function and derivatives at the final timestep
     double s0 = prob_->GetStateCost(T - 1);
     Eigen::MatrixXd s = prob_->GetStateCostJacobian(T - 1),
-        S = prob_->GetStateCostHessian(T - 1);
+                    S = prob_->GetStateCostHessian(T - 1);
 
     for (int t = T - 2; t > 0; t--)
     {
@@ -83,23 +83,23 @@ void ILQGSolver::BackwardPass()
         double q0 = dt * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
         // Aliases from the paper used. These are used with different names in e.g. DDPSolver.
         Eigen::MatrixXd q = dt * prob_->GetStateCostJacobian(t),
-            Q = dt * prob_->GetStateCostHessian(t),
-            r = dt * prob_->GetControlCostJacobian(t),
-            R = dt * prob_->GetControlCostHessian(),
-            P = dt * prob_->GetStateControlCostHessian();
+                        Q = dt * prob_->GetStateCostHessian(t),
+                        r = dt * prob_->GetControlCostJacobian(t),
+                        R = dt * prob_->GetControlCostHessian(),
+                        P = dt * prob_->GetStateControlCostHessian();
 
         Eigen::MatrixXd g = r + B.transpose() * s,
-            G = P + B.transpose() * S * A,
-            H = R + B.transpose() * S * B;
+                        G = P + B.transpose() * S * A,
+                        H = R + B.transpose() * S * B;
 
         if (parameters_.IncludeNoiseTerms)
         {
             Eigen::MatrixXd F = prob_->get_F(t);
-            for(int i = 0; i < NU; ++ i)
+            for (int i = 0; i < NU; ++i)
             {
                 Eigen::MatrixXd C = std::sqrt(dt) * prob_->GetControlNoiseJacobian(i);
                 Eigen::VectorXd c = std::sqrt(dt) * F.col(i);
-                
+
                 big_C_times_little_c = big_C_times_little_c + C.transpose() * S * c;
                 big_C_times_big_C = big_C_times_big_C + C.transpose() * S * C;
                 little_c_times_little_c = little_c_times_little_c + c.transpose() * S * c;
@@ -115,7 +115,7 @@ void ILQGSolver::BackwardPass()
         auto V = eig_solver.eigenvectors();
         Eigen::MatrixXcd D = Eigen::MatrixXcd::Zero(d.size(), d.size());
 
-        for (int i = 0; i < d.size(); ++ i)
+        for (int i = 0; i < d.size(); ++i)
         {
             if (d[i].real() < 0)
                 d[i] = 0;
@@ -129,8 +129,8 @@ void ILQGSolver::BackwardPass()
         // Eigen::MatrixXd H1 = (Eigen::MatrixXd::Identity(H.rows(), H.cols()) * 1e-5 + H).inverse();
         l_gains_[t] = -H1 * g;
         L_gains_[t] = -H1 * G;
-        
-        // NOTE: This is an alternative way to clamping controls. It doesn't work as well.        
+
+        // NOTE: This is an alternative way to clamping controls. It doesn't work as well.
         // l_gains_[t] = (l_gains_[t] + u).cwiseMax(-control_limits).cwiseMin(control_limits) - u;
         // for (int i = 0; i < NU; ++ i)
         // {
@@ -142,12 +142,11 @@ void ILQGSolver::BackwardPass()
         // }
 
         // Recursive terms update
-        S = Q + A.transpose() * S * A + L_gains_[t].transpose() * H * L_gains_[t]
-            + L_gains_[t].transpose() * G + G.transpose() * L_gains_[t];
+        S = Q + A.transpose() * S * A + L_gains_[t].transpose() * H * L_gains_[t] + L_gains_[t].transpose() * G + G.transpose() * L_gains_[t];
         s = q + A.transpose() * s + L_gains_[t].transpose() * H * l_gains_[t] +
             L_gains_[t].transpose() * g + G.transpose() * l_gains_[t];
         s0 = q0 + s0 + (l_gains_[t].transpose() * H * l_gains_[t] / 2.0 +
-            l_gains_[t].transpose() * g)(0);
+                        l_gains_[t].transpose() * g)(0);
 
         if (parameters_.IncludeNoiseTerms)
         {
@@ -177,8 +176,8 @@ double ILQGSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
     {
         Eigen::VectorXd u = ref_u.col(t);
         // eq. 12
-        Eigen::VectorXd delta_uk = l_gains_[t] + 
-            L_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_x.col(t));
+        Eigen::VectorXd delta_uk = l_gains_[t] +
+                                   L_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_x.col(t));
 
         u.noalias() += alpha * delta_uk;
         // clamp controls
@@ -331,8 +330,8 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
 Eigen::VectorXd ILQGSolver::GetFeedbackControl(Eigen::VectorXd x, int t) const
 {
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
-    Eigen::VectorXd delta_uk = l_gains_[t] + 
-        L_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
+    Eigen::VectorXd delta_uk = l_gains_[t] +
+                               L_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
 
     Eigen::VectorXd u = best_ref_u_.col(t) + delta_uk;
     return u.cwiseMax(-control_limits).cwiseMin(control_limits);

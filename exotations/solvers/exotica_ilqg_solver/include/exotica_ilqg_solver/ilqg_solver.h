@@ -60,14 +60,14 @@ public:
     Eigen::VectorXd GetFeedbackControl(Eigen::VectorXd x, int t) const override;
 
 private:
-    DynamicTimeIndexedShootingProblemPtr prob_;                              ///!< Shared pointer to the planning problem.
-    DynamicsSolverPtr dynamics_solver_;                                      ///!< Shared pointer to the dynamics solver.
+    DynamicTimeIndexedShootingProblemPtr prob_;       ///!< Shared pointer to the planning problem.
+    DynamicsSolverPtr dynamics_solver_;               ///!< Shared pointer to the dynamics solver.
     std::vector<Eigen::MatrixXd> l_gains_, L_gains_;  ///!< Control gains.
 
-    Eigen::MatrixXd best_ref_x_, best_ref_u_;
+    Eigen::MatrixXd best_ref_x_, best_ref_u_;  ///!< Reference trajectory for feedback control.
 
     double lambda_ = 0.1,
-        lambda_max_ = 1000;
+           lambda_max_ = 1000;  ///!< Levenberg Marquardt parameters
 
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.

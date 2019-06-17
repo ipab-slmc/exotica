@@ -75,7 +75,7 @@ public:
     Eigen::MatrixXd get_R() const;       ///< Returns the control weight matrix
     Eigen::MatrixXd get_F(int t) const;  ///< Returns the noise weight matrix at time t
 
-    Eigen::MatrixXd GetControlNoiseJacobian(int column_idx) const; ///< F[i]_u
+    Eigen::MatrixXd GetControlNoiseJacobian(int column_idx) const;  ///< F[i]_u
 
     void EnableStochasticUpdates();
     void DisableStochasticUpdates();
@@ -111,9 +111,9 @@ private:
     Eigen::MatrixXd U_;       ///< Control trajectory. Size: num-controls x (T-1)
     Eigen::MatrixXd X_star_;  ///< Goal state trajectory (i.e., positions, velocities). Size: num-states x T
 
-    std::vector<Eigen::MatrixXd> Q_;  ///< State space penalty matrix (precision matrix), per time index
-    Eigen::MatrixXd R_;               ///< Control space penalty matrix
-    std::vector<Eigen::MatrixXd> Ci_; ///< Noise weight terms
+    std::vector<Eigen::MatrixXd> Q_;   ///< State space penalty matrix (precision matrix), per time index
+    Eigen::MatrixXd R_;                ///< Control space penalty matrix
+    std::vector<Eigen::MatrixXd> Ci_;  ///< Noise weight terms
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
 

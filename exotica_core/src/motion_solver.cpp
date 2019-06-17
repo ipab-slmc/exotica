@@ -62,5 +62,4 @@ Eigen::VectorXd MotionSolver::GetFeedbackControl(Eigen::VectorXd state, int t) c
 {
     ThrowPretty("Feedback controller not defined in derived motion solver");
 }
-
 }

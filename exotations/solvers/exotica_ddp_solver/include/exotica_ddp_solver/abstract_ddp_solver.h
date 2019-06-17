@@ -73,7 +73,7 @@ protected:
     double ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u);
 
     Initializer base_parameters_;
-    Eigen::MatrixXd best_ref_x_, best_ref_u_;
+    Eigen::MatrixXd best_ref_x_, best_ref_u_;  ///!< Reference trajectory for feedback control.
 };
 
 template <typename Initializer>

@@ -57,4 +57,10 @@ std::string MotionSolver::Print(const std::string& prepend) const
     if (problem_) ret += "\n" + problem_->Print(prepend + "    ");
     return ret;
 }
+
+Eigen::VectorXd MotionSolver::GetFeedbackControl(Eigen::VectorXd state, int t) const
+{
+    ThrowPretty("Feedback controller not defined in derived motion solver");
+}
+
 }

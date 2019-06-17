@@ -46,6 +46,7 @@ public:
     virtual void InstantiateBase(const Initializer& init);
     virtual void SpecifyProblem(PlanningProblemPtr pointer);
     virtual void Solve(Eigen::MatrixXd& solution) = 0;
+    virtual Eigen::VectorXd GetFeedbackControl(Eigen::VectorXd state, int t) const;
     PlanningProblemPtr GetProblem() const { return problem_; }
     std::string Print(const std::string& prepend) const override;
     void SetNumberOfMaxIterations(int max_iter)

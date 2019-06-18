@@ -34,7 +34,6 @@ REGISTER_TASKMAP_TYPE("AvoidLookAtSphere", exotica::AvoidLookAtSphere);
 
 namespace exotica
 {
-
 void AvoidLookAtSphere::UpdateAsCostWithoutJacobian(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     for (int i = 0; i < n_objects_; ++i)

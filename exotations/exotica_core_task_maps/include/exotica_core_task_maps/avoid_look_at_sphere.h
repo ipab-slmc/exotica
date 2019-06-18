@@ -62,7 +62,6 @@ namespace exotica
 class AvoidLookAtSphere : public TaskMap, public Instantiable<AvoidLookAtSphereInitializer>
 {
 public:
-
     void Instantiate(const AvoidLookAtSphereInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;

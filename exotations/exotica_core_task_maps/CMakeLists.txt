@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 AddInitializer(
+  avoid_look_at_sphere
   center_of_mass
   continuous_joint_pose
   interaction_mesh
@@ -50,6 +51,7 @@ include_directories(
 )
 
 set(SOURCES
+    src/avoid_look_at_sphere.cpp  
     src/center_of_mass.cpp
     src/continuous_joint_pose.cpp
     src/interaction_mesh.cpp

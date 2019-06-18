@@ -71,4 +71,9 @@
   <class name="exotica/GazeAtConstraint" type="exotica::GazeAtConstraint" base_class_type="exotica::TaskMap">
     <description>Keeps a gaze position within a cone in the end-effector frame defined by a given viewing angle. This task map can only be used as an inequality constraint.</description>
   </class>
+  <class name="exotica/AvoidLookAtSphere" type="exotica::AvoidLookAtSphere" base_class_type="exotica::TaskMap">
+    <description>
+      Avoids "looking at" spherical objects. Can be used as either a cost term, or inequality constraint. The task map assumes the positions and radii of each object. 
+    </description>
+  </class>  
 </library>

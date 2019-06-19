@@ -294,6 +294,11 @@ std::pair<std::vector<double>, std::vector<double>> PlanningProblem::GetCostEvol
     return ret;
 }
 
+int PlanningProblem::GetNumberOfIterations() const
+{
+    return std::get<0>(GetCostEvolution()).size();
+}
+
 double PlanningProblem::GetCostEvolution(int index) const
 {
     if (index > -1 && index < cost_evolution_.size())

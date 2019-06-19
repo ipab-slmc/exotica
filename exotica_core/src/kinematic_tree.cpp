@@ -175,16 +175,12 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
         model_base_type_ = BaseType::FLOATING;
         model_tree_.resize(7);
         KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::TransZ, KDL::Joint::RotZ, KDL::Joint::RotY, KDL::Joint::RotX};
-        std::vector<std::string> floating_base_variable_names = {
-            root_joint->getName() + "/trans_x",
-            root_joint->getName() + "/trans_y",
-            root_joint->getName() + "/trans_z",
-            root_joint->getName() + "/rot_z",
-            root_joint->getName() + "/rot_y",
-            root_joint->getName() + "/rot_x"};
-        for (int i = 0; i < 6; ++i)
+        const std::vector<std::string> floating_base_suffix = {
+            "/trans_x", "/trans_y", "/trans_z",
+            "/rot_z", "/rot_y", "/rot_x"};
+        for (size_t i = 0; i < 6; ++i)
         {
-            model_tree_[i + 1] = std::make_shared<KinematicElement>(i, model_tree_[i], KDL::Segment(floating_base_variable_names[i], KDL::Joint(floating_base_variable_names[i], types[i])));
+            model_tree_[i + 1] = std::make_shared<KinematicElement>(i, model_tree_[i], KDL::Segment(world_frame_name + floating_base_suffix[i], KDL::Joint(root_joint_name_ + floating_base_suffix[i], types[i])));
             model_tree_[i]->children.push_back(model_tree_[i + 1]);
         }
 
@@ -965,7 +961,7 @@ void KinematicTree::UpdateJointLimits()
 
     // Update random state distributions for generating random controlled states
     random_state_distributions_.clear();
-    for (unsigned int i = 0; i < num_controlled_joints_; ++i)
+    for (int i = 0; i < num_controlled_joints_; ++i)
     {
         random_state_distributions_.push_back(std::uniform_real_distribution<double>(joint_limits_(i, 0), joint_limits_(i, 1)));
     }

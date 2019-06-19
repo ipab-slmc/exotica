@@ -38,21 +38,21 @@ void AvoidLookAtSphere::UpdateAsCostWithoutJacobian(Eigen::VectorXdRefConst x, E
 {
     for (int i = 0; i < n_objects_; ++i)
     {
-        const double frac = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>().squaredNorm() / radii_squared_(i);
+        const double frac = Eigen::Map<Eigen::Vector2d>(kinematics[0].Phi(i).p.data).squaredNorm() / radii_squared_(i);
         if (frac < 1.0) phi(i) = 1.0 - 2.0 * frac + frac * frac;
     }
 }
 
 void AvoidLookAtSphere::UpdateAsInequalityConstraintWithoutJacobian(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    for (int i = 0; i < n_objects_; ++i) phi(i) = radii_squared_(i) - Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>().squaredNorm();
+    for (int i = 0; i < n_objects_; ++i) phi(i) = radii_squared_(i) - Eigen::Map<Eigen::Vector2d>(kinematics[0].Phi(i).p.data).squaredNorm();
 }
 
 void AvoidLookAtSphere::UpdateAsCostWithJacobian(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     for (int i = 0; i < n_objects_; ++i)
     {
-        Eigen::Vector2d o = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>();
+        Eigen::Vector2d o = Eigen::Map<Eigen::Vector2d>(kinematics[0].Phi(i).p.data);
         const double frac = o.squaredNorm() / radii_squared_(i);
         if (frac < 1.0)
         {
@@ -66,7 +66,7 @@ void AvoidLookAtSphere::UpdateAsInequalityConstraintWithJacobian(Eigen::VectorXd
 {
     for (int i = 0; i < n_objects_; ++i)
     {
-        Eigen::Vector2d o = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>();
+        Eigen::Vector2d o = Eigen::Map<Eigen::Vector2d>(kinematics[0].Phi(i).p.data);
         const double d = o.norm();
         phi(i) = radii_squared_(i) - d * d;
         for (int j = 0; j < jacobian.cols(); ++j) jacobian(i, j) = -2.0 * kinematics[0].jacobian[i].data.topRows<2>().col(j).dot(o);

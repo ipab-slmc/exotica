@@ -83,6 +83,7 @@ public:
     unsigned int GetNumberOfProblemUpdates() const { return number_of_problem_updates_; }
     void ResetNumberOfProblemUpdates() { number_of_problem_updates_ = 0; }
     std::pair<std::vector<double>, std::vector<double>> GetCostEvolution() const;
+    int GetNumberOfIterations() const;
     double GetCostEvolution(int index) const;
     void ResetCostEvolution(size_t size);
     void SetCostEvolution(int index, double value);

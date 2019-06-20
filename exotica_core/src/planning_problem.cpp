@@ -296,7 +296,7 @@ std::pair<std::vector<double>, std::vector<double>> PlanningProblem::GetCostEvol
 
 int PlanningProblem::GetNumberOfIterations() const
 {
-    return std::get<0>(GetCostEvolution()).size();
+    return static_cast<int>(std::get<0>(GetCostEvolution())).size();
 }
 
 double PlanningProblem::GetCostEvolution(int index) const

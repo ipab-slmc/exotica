@@ -721,7 +721,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_number_of_problem_updates", &PlanningProblem::GetNumberOfProblemUpdates)
         .def("reset_number_of_problem_updates", &PlanningProblem::ResetNumberOfProblemUpdates)
         .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)() const) & PlanningProblem::GetCostEvolution)
-        .def("get_num_iterations", &PlanningProblem::GetNumberOfIterations)
+        .def("get_number_of_iterations", &PlanningProblem::GetNumberOfIterations)
         .def("is_valid", &PlanningProblem::IsValid);
 
     // Problem types

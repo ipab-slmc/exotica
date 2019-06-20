@@ -32,7 +32,7 @@
 
     <Cost>
       <Task Task="Position" Rho="1"/>
-      <Task Task="Manip" Rho="-1"/>
+      <Task Task="Manip" Rho="1"/>
     </Cost>
 
     <StartState>1.147249698638916 -0.22851833701133728 0.5324112772941589 1.2311428785324097 -0.19176392257213593 -0.1434374898672104 0</StartState>

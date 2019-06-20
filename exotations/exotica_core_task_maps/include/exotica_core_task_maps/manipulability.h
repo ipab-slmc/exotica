@@ -41,11 +41,16 @@ namespace exotica
 /// \ingroup TaskMap
 ///
 /// \brief Manipulability measure.
-/// The manipulability measure for a robot at a given joint configuration indicates dexterity, that is, how isotropic the robot's motion is with respect to the task space motion. The measure is high when the manipulator is capable of equal motion in all directions and low when the manipulator is close to a singularity. This task map implements Yoshikawa's manipulability measure that is based on the shape of the velocity ellipsoid and expressed by
+/// The manipulability measure for a robot at a given joint configuration indicates dexterity, that is, how isotropic the robot's motion is with respect to the task space motion. The measure is high when the manipulator is capable of equal motion in all directions and low when the manipulator is close to a singularity. This task map implements Yoshikawa's manipulability measure
 /// \f[
-///   Phi(x) := \sqrt{J(x)J(x)^T}
+///   m(x) = \sqrt{J(x)J(x)^T}
 /// \f]
-/// where $J(x)$ is the manipulator Jacobian matrix.
+/// that is based on the shape of the velocity ellipsoid where \f$J(x)\f$ is the manipulator Jacobian matrix.. The task map is expressed by
+/// \f[
+///   \phi(x) := -m(x).
+/// \f]
+///
+/// To use the task map as an inequality constraint the lower bound for \f$\phi\f$ should be set as a goal and each element should be negative.
 ///
 /// Note that
 ///   - the associated value for \f$\rho\f$ <b>must</b> be negative in order to maximize the manipulability, and
@@ -56,9 +61,6 @@ namespace exotica
 class Manipulability : public TaskMap, public Instantiable<ManipulabilityInitializer>
 {
 public:
-    Manipulability();
-    virtual ~Manipulability();
-
     void Instantiate(const ManipulabilityInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     int TaskSpaceDim() override;

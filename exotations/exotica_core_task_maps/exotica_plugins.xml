@@ -63,7 +63,7 @@
     <description>Looks at a target point by penalizing the vector which defines the orthogonal projection onto a defined line in the end-effector frame.</description>
   </class>
   <class name="exotica/Manipulability" type="exotica::Manipulability" base_class_type="exotica::TaskMap">
-    <description>Maximizes the manipulability measure using Yoshikawa's measure based on the velocity ellipsoid. Note, in-order to maximize manipulability the associated Rho must be negative. Derivatives are computed using finite differencing.</description>
+    <description>If used as a cost term, Manipulability maximizes the manipulability measure using Yoshikawa's measure based on the velocity ellipsoid. Note, in-order to maximize manipulability the associated Rho must be negative and the Goal must not be set to anything other than zeros (as by default). When Manipulability is used as an inequality constraint the lower bound must be set using Goal and each term must be negative. Derivatives are computed using finite differencing.</description>
   </class>
   <class name="exotica/GazeAtConstraint" type="exotica::GazeAtConstraint" base_class_type="exotica::TaskMap">
     <description>Keeps a gaze position within a cone in the end-effector frame defined by a given viewing angle. This task map can only be used as an inequality constraint.</description>

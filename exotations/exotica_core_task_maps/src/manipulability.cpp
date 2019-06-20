@@ -33,9 +33,6 @@ REGISTER_TASKMAP_TYPE("Manipulability", exotica::Manipulability);
 
 namespace exotica
 {
-Manipulability::Manipulability() = default;
-Manipulability::~Manipulability() = default;
-
 void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
@@ -43,13 +40,15 @@ void Manipulability::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     for (int i = 0; i < n_end_effs_; ++i)
     {
         const Eigen::MatrixXd& J = kinematics[0].jacobian[i].data.topRows(n_rows_of_jac_);
-        phi(i) = std::sqrt((J * J.transpose()).determinant());
+        phi(i) = -std::sqrt((J * J.transpose()).determinant());
     }
 }
 
 void Manipulability::Instantiate(const ManipulabilityInitializer& init)
 {
+    parameters_ = init;
     n_end_effs_ = frames_.size();
+
     if (init.OnlyPosition)
     {
         n_rows_of_jac_ = 3;

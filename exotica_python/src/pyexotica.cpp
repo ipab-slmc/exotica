@@ -30,6 +30,7 @@
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/tools/box_qp.h>
 #include <exotica_core/visualization.h>
+
 #undef NDEBUG
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -203,7 +204,7 @@ public:
                 target.Set(ParseInt(PyAsStdString(value_py)));
                 return true;
             }
-            else if (PyInt_Check(value_py))
+            else if (PyInt_Check(value_py) || PyLong_Check(value_py))
             {
                 target.Set((int)PyInt_AsLong(value_py));
                 return true;
@@ -220,6 +221,10 @@ public:
             {
                 target.Set(PyInt_AsLong(value_py));
                 return true;
+            }
+            else
+            {
+                ThrowPretty("to be implemented - please open an issue.");
             }
         }
         else if (target.GetType() == "double")

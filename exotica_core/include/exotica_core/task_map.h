@@ -30,10 +30,11 @@
 #ifndef EXOTICA_CORE_TASK_MAP_H_
 #define EXOTICA_CORE_TASK_MAP_H_
 
-#include <Eigen/Dense>  // Generally dense manipulations should be enough
 #include <map>
 #include <string>
 #include <vector>
+
+#include <Eigen/Dense>  // Generally dense manipulations should be enough
 
 #include <exotica_core/factory.h>  // The Factory template
 #include <exotica_core/object.h>   // The EXOTica base class
@@ -51,8 +52,6 @@ namespace exotica
 class TaskMap : public Object, Uncopyable, public virtual InstantiableBase
 {
 public:
-    TaskMap();
-    virtual ~TaskMap();
     virtual void InstantiateBase(const Initializer& init);
 
     virtual void AssignScene(ScenePtr scene);
@@ -64,9 +63,7 @@ public:
     virtual int TaskSpaceJacobianDim() { return TaskSpaceDim(); }
     virtual void PreUpdate() {}
     virtual std::vector<TaskVectorEntry> GetLieGroupIndices() { return std::vector<TaskVectorEntry>(); }
-    std::string Print(const std::string& prepend) const override;
-
-    std::vector<KinematicFrameRequest> GetFrames();
+    std::vector<KinematicFrameRequest> GetFrames() const;
 
     std::vector<KinematicSolution> kinematics = std::vector<KinematicSolution>(1);
     int id = -1;
@@ -85,6 +82,6 @@ protected:
 typedef std::shared_ptr<TaskMap> TaskMapPtr;           //!< Task Map smart pointer
 typedef std::map<std::string, TaskMapPtr> TaskMapMap;  //!< The mapping by name of TaskMaps
 typedef std::vector<TaskMapPtr> TaskMapVec;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAP_H_

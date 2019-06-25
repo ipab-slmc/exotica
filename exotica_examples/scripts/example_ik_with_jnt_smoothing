@@ -16,7 +16,7 @@ import PyKDL as kdl
 DT = 1.0 / 100.0  # 100 HZ
 
 SMOOTHING_TASK_MAPS = ['JointVel', 'JointAcc', 'JointJerk']
-SMOOTHING_RHO = 1e1
+SMOOTHING_RHO = [1e2, 1e1, 1]
 
 def make_box():
     marker = Marker()
@@ -34,9 +34,6 @@ def make_box():
 class Example(object):
 
     def __init__(self):
-
-        # Set init variables
-        self.q = np.array([0.0] * 7)
         
         # Setup interactive marker
         control = InteractiveMarkerControl()
@@ -58,6 +55,10 @@ class Example(object):
         self.task_maps = self.problem.get_task_maps()
         self.smoothing = 1.0
 
+        # Set init variables
+        self.q = self.problem.get_scene().get_model_state()
+
+
     def smoothing_enabled_callback(self, feedback):
         handle = feedback.menu_entry_id
         state = self.menu_handler.getCheckState( handle )
@@ -77,8 +78,8 @@ class Example(object):
 
         # Set start state, rho, and previous joint states
         self.problem.start_state = self.q
-        for name in SMOOTHING_TASK_MAPS:
-            self.problem.set_rho(name, self.smoothing * SMOOTHING_RHO)
+        for i, name in enumerate(SMOOTHING_TASK_MAPS):
+            self.problem.set_rho(name, self.smoothing * SMOOTHING_RHO[i])
             self.task_maps[name].set_previous_joint_state(self.q)
 
         # Solve and publish

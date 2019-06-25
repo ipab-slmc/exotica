@@ -33,9 +33,6 @@ REGISTER_TASKMAP_TYPE("JointAccelerationBackwardDifference", exotica::JointAccel
 
 namespace exotica
 {
-JointAccelerationBackwardDifference::JointAccelerationBackwardDifference() = default;
-JointAccelerationBackwardDifference::~JointAccelerationBackwardDifference() = default;
-
 void JointAccelerationBackwardDifference::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
@@ -45,10 +42,6 @@ void JointAccelerationBackwardDifference::AssignScene(ScenePtr scene)
 
     // Set binomial coefficient parameters
     backward_difference_params_ << -2, 1;
-
-    // Frequency
-    if (parameters_.dt <= 0) ThrowPretty("dt cannot be smaller than or equal to 0.");
-    dt_inv_ = 1 / parameters_.dt;
 
     // Init each col of q_ with start state
     q_.resize(N_, 2);
@@ -92,18 +85,17 @@ void JointAccelerationBackwardDifference::Update(Eigen::VectorXdRefConst x, Eige
     if (phi.rows() != N_) ThrowNamed("Wrong size of phi!");
 
     // Estimate second time derivative
-    phi = dt_inv_ * (x + qbd_);
+    phi = x + qbd_;
 }
 
 void JointAccelerationBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     // Input check
-    if (phi.rows() != N_) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != N_ || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
 
     // Estimate second time derivative and set Jacobian to identity matrix
-    phi = dt_inv_ * (x + qbd_);
-    jacobian = dt_inv_ * I_;
+    Update(x, phi);
+    jacobian = I_;
 }
 
 int JointAccelerationBackwardDifference::TaskSpaceDim()

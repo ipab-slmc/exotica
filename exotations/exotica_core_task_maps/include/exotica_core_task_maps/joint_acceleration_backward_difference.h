@@ -48,8 +48,6 @@ namespace exotica
 class JointAccelerationBackwardDifference : public TaskMap, public Instantiable<JointAccelerationBackwardDifferenceInitializer>
 {
 public:
-    JointAccelerationBackwardDifference();
-    virtual ~JointAccelerationBackwardDifference();
     void AssignScene(ScenePtr scene) override;
 
     /// \brief Logs previous joint state.
@@ -72,7 +70,6 @@ private:
     Eigen::MatrixXd q_;                           ///< Log of previous two joint states.
     Eigen::VectorXd qbd_;                         ///< x+qbd_ is a simplifed estimate of the second time derivative.
     Eigen::MatrixXd I_;                           ///< Identity matrix.
-    double dt_inv_;                               ///< Frequency (1/dt)
 };
 }
 

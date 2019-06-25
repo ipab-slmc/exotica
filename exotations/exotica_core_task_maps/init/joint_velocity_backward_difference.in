@@ -8,6 +8,4 @@ extend <exotica_core/task_map>
 // string Base           > name of frame in which line is defined
 // VectorXd BaseOffset   > starting point of line in Base frame
 
-Required double dt;
-
 Optional Eigen::VectorXd StartState = Eigen::VectorXd(); // Starting robot joint configuration.

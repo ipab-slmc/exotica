@@ -6,6 +6,7 @@
 from __future__ import print_function, division
 
 import pyexotica as exo
+import exotica_ilqr_solver_py, exotica_ddp_solver_py, exotica_ilqg_solver_py
 from pyexotica.publish_trajectory import *
 import signal, sys
 from time import time, sleep

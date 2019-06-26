@@ -3,7 +3,7 @@
     <ILQGSolver Name="ILQGSolver">
         <Debug>1</Debug>
         <MaxIterations>3</MaxIterations>
-        <FunctionTolerance>1e-3</FunctionTolerance>
+        <FunctionTolerance>-1</FunctionTolerance>
         <FunctionTolerancePatience>3</FunctionTolerancePatience>
         <IncludeNoiseTerms>1</IncludeNoiseTerms>
     </ILQGSolver>
@@ -30,7 +30,7 @@
         <tau>0.02</tau>
         <dt>0.02</dt>
         <Q_rate>0</Q_rate>
-        <Qf_rate>1000</Qf_rate>
+        <Qf_rate>10</Qf_rate>
         <R_rate>0.1</R_rate>
         <C_rate>0.1</C_rate>
         <DiagonalNoiseMatrix>false</DiagonalNoiseMatrix>

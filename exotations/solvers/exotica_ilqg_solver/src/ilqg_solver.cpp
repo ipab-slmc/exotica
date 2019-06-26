@@ -57,8 +57,6 @@ void ILQGSolver::BackwardPass()
     const double dt = dynamics_solver_->get_dt();
     const int NU = prob_->get_num_controls();
 
-    const Eigen::MatrixXd Qf = prob_->get_Qf(), R = prob_->get_R();
-    const Eigen::MatrixXd X_star = prob_->get_X_star();
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
 
     // Noise terms
@@ -125,21 +123,9 @@ void ILQGSolver::BackwardPass()
         }
 
         Eigen::MatrixXd H1 = (V * D * V.transpose()).real();
-        // If H is always +ve semidefinite (it isn't), we can condition it like this as well.
-        // Eigen::MatrixXd H1 = (Eigen::MatrixXd::Identity(H.rows(), H.cols()) * 1e-5 + H).inverse();
+
         l_gains_[t] = -H1 * g;
         L_gains_[t] = -H1 * G;
-
-        // NOTE: This is an alternative way to clamping controls. It doesn't work as well.
-        // l_gains_[t] = (l_gains_[t] + u).cwiseMax(-control_limits).cwiseMin(control_limits) - u;
-        // for (int i = 0; i < NU; ++ i)
-        // {
-        //     if (l_gains_[t](i) + u(i) == -control_limits(i) ||
-        //         l_gains_[t](i) + u(i) == control_limits(i))
-        //         {
-        //             L_gains_[t].row(i) = Eigen::MatrixXd::Zero(1, L_gains_[t].cols());
-        //         }
-        // }
 
         // Recursive terms update
         S = Q + A.transpose() * S * A + L_gains_[t].transpose() * H * L_gains_[t] + L_gains_[t].transpose() * G + G.transpose() * L_gains_[t];
@@ -169,6 +155,7 @@ double ILQGSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
     double cost = 0;
     const int T = prob_->get_T();
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const double dt = dynamics_solver_->get_dt();
 
     // NOTE: Todorov uses the linearized system in forward simulation.
     //  We here use the full system dynamics. YMMV
@@ -184,7 +171,7 @@ double ILQGSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
         u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
 
         prob_->Update(u, t);
-        cost += prob_->GetControlCost(t) + prob_->GetStateCost(t);
+        cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
     }
 
     // add terminal cost
@@ -227,8 +214,8 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
         // Backwards pass computes the gains
         backward_pass_timer.Reset();
         BackwardPass();
-        // if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Backward pass complete in " << backward_pass_timer.GetDuration() << " lambda=" << lambda_);
-        if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
+        if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Backward pass complete in " << backward_pass_timer.GetDuration() << " lambda=" << lambda_);
+        // if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
 
         line_search_timer.Reset();
         // forward pass to compute new control trajectory
@@ -252,8 +239,8 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
                 new_U = prob_->get_U();
                 best_alpha = alpha;
             }
-            else if (cost > current_cost)
-                break;
+            // else if (cost > current_cost)
+                // break;
         }
 
         // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13

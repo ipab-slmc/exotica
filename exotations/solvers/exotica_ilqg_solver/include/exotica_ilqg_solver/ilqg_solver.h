@@ -30,7 +30,7 @@
 #ifndef EXOTICA_ILQG_SOLVER_ILQG_SOLVER_H_
 #define EXOTICA_ILQG_SOLVER_ILQG_SOLVER_H_
 
-#include <exotica_core/motion_solver.h>
+#include <exotica_core/feedback_motion_solver.h>
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
 #include <eigen3/Eigen/Eigenvalues>
 
@@ -42,7 +42,7 @@ namespace exotica
 // E. Todorov, W. Li A generalized iterative LQG method for locally-optimal feedback
 //      control of constrained nonlinear stochastic systems
 // http://maeresearch.ucsd.edu/skelton/publications/weiwei_ilqg_CDC43.pdf
-class ILQGSolver : public MotionSolver, public Instantiable<ILQGSolverInitializer>
+class ILQGSolver : public FeedbackMotionSolver, public Instantiable<ILQGSolverInitializer>
 {
 public:
     ILQGSolver();

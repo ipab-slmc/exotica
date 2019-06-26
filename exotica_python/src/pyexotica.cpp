@@ -80,7 +80,7 @@ PyObject* StdStringAsPy(std::string value)
 using namespace exotica;
 namespace py = pybind11;
 
-std::map<std::string, Initializer> knownInitializers;
+std::map<std::string, Initializer> known_initializers;
 
 PyObject* CreateStringIOObject()
 {
@@ -172,7 +172,7 @@ void AddInitializers(py::module& module)
     {
         std::string full_name = i.GetName();
         std::string name = full_name.substr(8);
-        knownInitializers[full_name] = CreateInitializer(i);
+        known_initializers[full_name] = CreateInitializer(i);
         inits.def((name + "Initializer").c_str(), [i]() { return CreateInitializer(i); }, (name + "Initializer constructor.").c_str());
     }
 
@@ -356,22 +356,22 @@ public:
     {
         if (!PyTuple_CheckExact(source)) return false;
 
-        int sz = PyTuple_Size(source);
-        if (sz < 1 || sz > 2) return false;
+        int tuple_size = PyTuple_Size(source);
+        if (tuple_size < 1 || tuple_size > 2) return false;
 
         PyObject* const name_py = PyTuple_GetItem(source, 0);
         if (!IsPyString(name_py)) return false;
-        const std::string name = PyAsStdString(name_py);
+        const std::string initializer_name = PyAsStdString(name_py);
 
-        const auto& it = knownInitializers.find(name);
-        if (it == knownInitializers.end())
+        const auto& it = known_initializers.find(initializer_name);
+        if (it == known_initializers.end())
         {
-            HIGHLIGHT("Unknown initializer type '" << name << "'");
+            HIGHLIGHT("Unknown initializer type '" << initializer_name << "'");
             return false;
         }
         ret = Initializer(it->second);
 
-        if (sz == 2)
+        if (tuple_size == 2)
         {
             PyObject* const dict = PyTuple_GetItem(source, 1);
             if (!PyDict_Check(dict)) return false;
@@ -392,7 +392,7 @@ public:
                 }
                 else
                 {
-                    HIGHLIGHT(name << ": Ignoring property '" << key_str << "'")
+                    HIGHLIGHT(initializer_name << ": Ignoring property '" << key_str << "'")
                 }
             }
         }

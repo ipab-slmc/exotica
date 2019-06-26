@@ -33,8 +33,6 @@
 #include <exotica_core/dynamics_solver.h>
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
-#include <boost/random.hpp>
-#include <boost/random/normal_distribution.hpp>
 
 #include <exotica_core/dynamic_time_indexed_shooting_problem_initializer.h>
 

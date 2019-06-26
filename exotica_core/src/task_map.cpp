@@ -34,18 +34,9 @@
 
 namespace exotica
 {
-TaskMap::TaskMap() = default;
-TaskMap::~TaskMap() = default;
-
 void TaskMap::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
-}
-
-std::string TaskMap::Print(const std::string& prepend) const
-{
-    std::string ret = Object::Print(prepend);
-    return ret;
 }
 
 void TaskMap::InstantiateBase(const Initializer& init)
@@ -63,7 +54,7 @@ void TaskMap::InstantiateBase(const Initializer& init)
     }
 }
 
-std::vector<KinematicFrameRequest> TaskMap::GetFrames()
+std::vector<KinematicFrameRequest> TaskMap::GetFrames() const
 {
     return frames_;
 }
@@ -116,4 +107,4 @@ void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::M
         hessian(i) = jacobian.row(i).transpose() * jacobian.row(i);
     }
 }
-}
+}  // namespace

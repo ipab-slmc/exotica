@@ -53,8 +53,6 @@ namespace exotica
 class PinocchioDynamicsSolver : public DynamicsSolver, public Instantiable<PinocchioDynamicsSolverInitializer>
 {
 public:
-    PinocchioDynamicsSolver();
-
     void AssignScene(ScenePtr scene_in) override;
 
     StateVector f(const StateVector& x, const ControlVector& u) override;

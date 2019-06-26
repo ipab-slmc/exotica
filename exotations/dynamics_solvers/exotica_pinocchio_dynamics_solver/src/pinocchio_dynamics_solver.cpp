@@ -33,7 +33,6 @@ REGISTER_DYNAMICS_SOLVER_TYPE("PinocchioDynamicsSolver", exotica::PinocchioDynam
 
 namespace exotica
 {
-PinocchioDynamicsSolver::PinocchioDynamicsSolver() {}
 void PinocchioDynamicsSolver::AssignScene(ScenePtr scene_in)
 {
     const bool verbose = false;

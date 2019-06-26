@@ -53,8 +53,9 @@ void ILQRSolver::BackwardPass()
     constexpr double min_clamp_ = -1e10;
     constexpr double max_clamp_ = 1e10;
     const int T = prob_->get_T();
+    const double dt = dynamics_solver_->get_dt();
 
-    const Eigen::MatrixXd Qf = prob_->get_Qf(), R = prob_->get_R();
+    const Eigen::MatrixXd Qf = prob_->get_Qf(), R = dt * prob_->get_R();
     const Eigen::MatrixXd X_star = prob_->get_X_star();
 
     // eq. 18
@@ -72,14 +73,14 @@ void ILQRSolver::BackwardPass()
     {
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
         Eigen::MatrixXd Ak = dynamics_solver_->fx(x, u), Bk = dynamics_solver_->fu(x, u),
-                        Q = prob_->get_Q(t);
+                        Q = dt * prob_->get_Q(t);
 
         // eq. 13-16
-        Ak.noalias() = Ak * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(Ak.rows(), Ak.cols());
-        Bk.noalias() = Bk * dynamics_solver_->get_dt();
+        Ak.noalias() = Ak * dt + Eigen::MatrixXd::Identity(Ak.rows(), Ak.cols());
+        Bk.noalias() = Bk * dt;
         // this inverse is common for all factors
         const Eigen::MatrixXd _inv =
-            (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * 1e-5 + R + Bk.transpose() * Sk * Bk).inverse();
+            (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * lambda_ + R + Bk.transpose() * Sk * Bk).inverse();
 
         Kv_gains_[t] = _inv * Bk.transpose();
         K_gains_[t] = _inv * Bk.transpose() * Sk * Ak;
@@ -104,6 +105,7 @@ double ILQRSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
     double cost = 0;
     const int T = prob_->get_T();
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const double dt = dynamics_solver_->get_dt();
 
     for (int t = 0; t < T - 1; ++t)
     {
@@ -117,7 +119,7 @@ double ILQRSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
         u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
 
         prob_->Update(u, t);
-        cost += prob_->GetControlCost(t) + prob_->GetStateCost(t);
+        cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
     }
 
     // add terminal cost
@@ -157,8 +159,9 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         // Backwards pass computes the gains
         backward_pass_timer.Reset();
         BackwardPass();
-        if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
-
+        // if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
+        if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration() << " lambda=" << lambda_);
+        
         line_search_timer.Reset();
         // forward pass to compute new control trajectory
         // TODO: Configure line-search space from xml
@@ -181,8 +184,27 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
                 new_U = prob_->get_U();
                 best_alpha = alpha;
             }
-            else if (cost > current_cost)
-                break;
+        }
+
+        // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13
+        if (iteration > 0)
+        {
+            if (current_cost < last_cost)
+            {
+                // success, error decreased: decrease damping
+                lambda_ = lambda_ / 10.0;
+            }
+            else
+            {
+                // failure, error increased: increase damping
+                lambda_ = lambda_ * 10.0;
+            }
+        }
+
+        if (lambda_ > lambda_max_)
+        {
+            HIGHLIGHT_NAMED("ILQRSolver", "Lambda greater than maximum.");
+            break;
         }
 
         if (debug_)

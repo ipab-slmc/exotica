@@ -30,7 +30,7 @@
 #ifndef EXOTICA_ILQR_SOLVER_ILQR_SOLVER_H_
 #define EXOTICA_ILQR_SOLVER_ILQR_SOLVER_H_
 
-#include <exotica_core/motion_solver.h>
+#include <exotica_core/feedback_motion_solver.h>
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
 
 #include <exotica_ilqr_solver/ilqr_solver_initializer.h>
@@ -40,7 +40,7 @@ namespace exotica
 // This code is based on:
 // W. Li, E. Todorov, Iterative Linear Quadratic Regulator Design for Nonlinear Biological Movement Systems
 // https://homes.cs.washington.edu/~todorov/papers/LiICINCO04.pdf
-class ILQRSolver : public MotionSolver, public Instantiable<ILQRSolverInitializer>
+class ILQRSolver : public FeedbackMotionSolver, public Instantiable<ILQRSolverInitializer>
 {
 public:
     ILQRSolver();
@@ -63,6 +63,9 @@ private:
     std::vector<Eigen::MatrixXd> K_gains_, Ku_gains_, Kv_gains_, vk_gains_;  ///!< Control gains.
 
     Eigen::MatrixXd best_ref_x_, best_ref_u_;  ///!< Reference trajectory for feedback control.
+
+    double lambda_ = 0.1,
+           lambda_max_ = 1000;  ///!< Levenberg Marquardt parameters
 
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.

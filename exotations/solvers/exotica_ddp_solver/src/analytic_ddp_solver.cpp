@@ -44,6 +44,7 @@ void AnalyticDDPSolver::BackwardPass()
     constexpr double min_clamp_ = -1e10;
     constexpr double max_clamp_ = 1e10;
     const int T = prob_->get_T();
+    const double dt = dynamics_solver_->get_dt();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
     const double dt_squared = dynamics_solver_->get_dt() * dynamics_solver_->get_dt();
@@ -69,42 +70,43 @@ void AnalyticDDPSolver::BackwardPass()
         fu = fu * dynamics_solver_->get_dt();
 
         // Q = prob_->GetStateCost(t) + prob_->GetControlCost(t) + V; // l + v
-        Qx = prob_->GetStateCostJacobian(t) + fx.transpose() * Vx;  // lx + fx @ Vx
-        Qu = prob_->GetControlCostJacobian(t) + fu.transpose() * Vx;
+        Qx = dt * prob_->GetStateCostJacobian(t) + fx.transpose() * Vx;  // lx + fx @ Vx
+        Qu = dt * prob_->GetControlCostJacobian(t) + fu.transpose() * Vx;
 
         if (parameters_.UseSecondOrderDynamics)
         {
             // clang-format off
             Eigen::Tensor<double, 1> Vx_tensor = Eigen::MatrixToTensor((Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&)Vx, NX);
-            Qxx = prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx +
+            Qxx = dt * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx +
                 Eigen::TensorToMatrix(
                     (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NX, NX
-                ) * dt_squared;
+                ) * dt;
 
-            Quu = prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu +
+            Quu = dt * prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu +
                 Eigen::TensorToMatrix(
                     (Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU, NU
-                ) * dt_squared;
+                ) * dt;
 
-            Qux = prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx +
+            Qux = dt * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx +
                 Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU, NX
-                ) * dt_squared;
+                ) * dt;
             // clang-format on
         }
         else
         {
-            Qxx = prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx;
-            Quu = prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu;
+            Qxx = dt * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx;
+            Quu = dt * prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu;
 
             // NOTE: Qux = Qxu for all robotics systems I have seen
             //  this might need to be changed later on
-            Qux = prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx;
+            Qux = dt * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx;
         }
 
         // clang-format off
         //  Condition matrix for numerical stability.
         Quu_inv = (
-            Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * 1e-5 + Quu
+            // Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * 1e-5 + Quu
+            Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * lambda_ + Quu
         ).inverse();
         // clang-format on
 

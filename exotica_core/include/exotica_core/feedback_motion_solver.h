@@ -27,41 +27,21 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_MOTION_SOLVER_H_
-#define EXOTICA_CORE_MOTION_SOLVER_H_
+#ifndef EXOTICA_CORE_FEEDBACK_MOTION_SOLVER_H_
+#define EXOTICA_CORE_FEEDBACK_MOTION_SOLVER_H_
 
-#include <exotica_core/object.h>
-#include <exotica_core/planning_problem.h>
-#include <exotica_core/property.h>
-
-#define REGISTER_MOTIONSOLVER_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER(exotica::MotionSolver, TYPE, DERIV)
+#include <exotica_core/motion_solver.h>
 
 namespace exotica
 {
-class MotionSolver : public Object, Uncopyable, public virtual InstantiableBase
+class FeedbackMotionSolver : public MotionSolver
 {
 public:
-    MotionSolver();
-    virtual ~MotionSolver() = default;
-    virtual void InstantiateBase(const Initializer& init);
-    virtual void SpecifyProblem(PlanningProblemPtr pointer);
-    virtual void Solve(Eigen::MatrixXd& solution) = 0;
-    PlanningProblemPtr GetProblem() const { return problem_; }
-    std::string Print(const std::string& prepend) const override;
-    void SetNumberOfMaxIterations(int max_iter)
-    {
-        if (max_iter < 1) ThrowPretty("Number of maximum iterations needs to be greater than 0.");
-        max_iterations_ = max_iter;
-    }
-    int GetNumberOfMaxIterations() { return max_iterations_; }
-    double GetPlanningTime() { return planning_time_; }
-protected:
-    PlanningProblemPtr problem_;
-    double planning_time_ = -1;
-    int max_iterations_ = 100;
-};
 
-typedef std::shared_ptr<exotica::MotionSolver> MotionSolverPtr;
+// \brief Returns a control input given the state x and timestep t.
+virtual Eigen::VectorXd GetFeedbackControl(Eigen::VectorXd x, int t) const = 0;;
+   
+};
 }
 
 #endif  // EXOTICA_CORE_MOTION_SOLVER_H_

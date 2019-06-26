@@ -33,9 +33,6 @@ REGISTER_MOTIONSOLVER_TYPE("ILQGSolver", exotica::ILQGSolver)
 
 namespace exotica
 {
-ILQGSolver::ILQGSolver() = default;
-ILQGSolver::~ILQGSolver() = default;
-
 void ILQGSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     if (pointer->type() != "exotica::DynamicTimeIndexedShootingProblem")
@@ -66,10 +63,10 @@ void ILQGSolver::BackwardPass()
 
     // Value function and derivatives at the final timestep
     double s0 = prob_->GetStateCost(T - 1);
-    Eigen::MatrixXd s = prob_->GetStateCostJacobian(T - 1),
-                    S = prob_->GetStateCostHessian(T - 1);
+    Eigen::MatrixXd s = prob_->GetStateCostJacobian(T - 1);
+    Eigen::MatrixXd S = prob_->GetStateCostHessian(T - 1);
 
-    for (int t = T - 2; t > 0; t--)
+    for (int t = T - 2; t > 0; --t)
     {
         // eq. 3
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
@@ -80,15 +77,15 @@ void ILQGSolver::BackwardPass()
 
         double q0 = dt * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
         // Aliases from the paper used. These are used with different names in e.g. DDPSolver.
-        Eigen::MatrixXd q = dt * prob_->GetStateCostJacobian(t),
-                        Q = dt * prob_->GetStateCostHessian(t),
-                        r = dt * prob_->GetControlCostJacobian(t),
-                        R = dt * prob_->GetControlCostHessian(),
-                        P = dt * prob_->GetStateControlCostHessian();
+        Eigen::MatrixXd q = dt * prob_->GetStateCostJacobian(t);
+        Eigen::MatrixXd Q = dt * prob_->GetStateCostHessian(t);
+        Eigen::MatrixXd r = dt * prob_->GetControlCostJacobian(t);
+        Eigen::MatrixXd R = dt * prob_->GetControlCostHessian();
+        Eigen::MatrixXd P = dt * prob_->GetStateControlCostHessian();
 
-        Eigen::MatrixXd g = r + B.transpose() * s,
-                        G = P + B.transpose() * S * A,
-                        H = R + B.transpose() * S * B;
+        Eigen::MatrixXd g = r + B.transpose() * s;
+        Eigen::MatrixXd G = P + B.transpose() * S * A;
+        Eigen::MatrixXd H = R + B.transpose() * S * B;
 
         if (parameters_.IncludeNoiseTerms)
         {
@@ -118,7 +115,6 @@ void ILQGSolver::BackwardPass()
             if (d[i].real() < 0)
                 d[i] = 0;
             d[i] = 1. / (d[i] + lambda_);
-            // d[i] = 1. / (d[i] + 1e-5);
             D(i, i) = d[i];
         }
 

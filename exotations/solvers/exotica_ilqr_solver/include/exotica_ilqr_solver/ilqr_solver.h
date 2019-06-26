@@ -43,9 +43,6 @@ namespace exotica
 class ILQRSolver : public FeedbackMotionSolver, public Instantiable<ILQRSolverInitializer>
 {
 public:
-    ILQRSolver();
-    virtual ~ILQRSolver();
-
     ///\brief Solves the problem
     ///@param solution Returned solution trajectory as a vector of joint configurations.
     void Solve(Eigen::MatrixXd& solution) override;

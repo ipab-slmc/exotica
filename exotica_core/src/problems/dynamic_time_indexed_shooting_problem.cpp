@@ -78,18 +78,12 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     //  eq. 3.1 and the text before (search for 'column') to see why this makes sense
     Ci_.assign(NU, Eigen::MatrixXd::Zero(NX, NU));
     for (int i = 0; i < NU; ++i)
-        if (parameters_.DiagonalNoiseMatrix)
-            Ci_[i](i, i) = parameters_.C_rate;
-        else
-            Ci_[i] = Eigen::MatrixXd::Constant(NX, NU, parameters_.C_rate);
+        Ci_[i](i, i) = parameters_.C_rate;
 
     if (this->parameters_.C.rows() > 0)
     {
         for (int i = 0; i < NU; ++i)
-            if (parameters_.DiagonalNoiseMatrix)
-                Ci_[i](i, i) = parameters_.C(i);
-            else
-                Ci_[i] = Eigen::MatrixXd::Constant(NX, NU, parameters_.C(i));
+            Ci_[i](i, i) = parameters_.C(i);
     }
 
     if (this->parameters_.C_rate > 0 || this->parameters_.C.rows() > 0)
@@ -320,6 +314,8 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
 
         noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * get_F(t) * noise;
         X_.col(t + 1) = X_.col(t + 1) + noise;
+        // HIGHLIGHT_NAMED("Noise", noise);
+        // HIGHLIGHT_NAMED("Noise F[]", get_F(t));
     }
 
     scene_->Update(scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1)), static_cast<double>(t) * tau_);
@@ -423,12 +419,12 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
     const int NX = num_positions_ + num_velocities_,
               NU = num_controls_;
 
-    Eigen::MatrixXd C(NX, NU);
+    Eigen::MatrixXd F(NX, NU);
 
     for (int i = 0; i < NU; ++i)
-        C.col(i) = Ci_[i] * U_.col(t);
+        F.col(i) = Ci_[i] * U_.col(t);
 
-    return C;
+    return F;
 }
 
 // F[i]_u

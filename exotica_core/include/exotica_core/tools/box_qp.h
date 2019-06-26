@@ -46,7 +46,7 @@ typedef struct BoxQPSolution
 inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
                            const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
                            const Eigen::VectorXd& x_init, const double gamma,
-                           const int max_iterations, const double epsilon)
+                           const int max_iterations, const double epsilon, const double lambda)
 {
     int it = 0;
     Eigen::VectorXd delta_xf, x = x_init;
@@ -104,7 +104,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
         for (int j = 0; j < clamped_idx.size(); ++j)
             x_clamped(j) = x(clamped_idx[j]);
 
-        Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * 1e-5 + Hff).inverse();
+        Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * lambda + Hff).inverse();
 
         if (clamped_idx.size() == 0)
             delta_xf = -Hff_inv * (q_free)-x_free;
@@ -153,7 +153,8 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
     constexpr double epsilon = 1e-5;
     constexpr double gamma = 0.1;
     constexpr int max_iterations = 100;
-    return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon);
+    constexpr double lambda = 1e-5;
+    return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda);
 }
 }  // namespace exotica
 

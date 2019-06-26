@@ -33,9 +33,6 @@ REGISTER_MOTIONSOLVER_TYPE("ILQRSolver", exotica::ILQRSolver)
 
 namespace exotica
 {
-ILQRSolver::ILQRSolver() = default;
-ILQRSolver::~ILQRSolver() = default;
-
 void ILQRSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     if (pointer->type() != "exotica::DynamicTimeIndexedShootingProblem")

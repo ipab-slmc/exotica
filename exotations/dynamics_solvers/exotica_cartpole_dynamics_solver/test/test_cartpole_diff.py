@@ -14,18 +14,19 @@ class TestCartpoleDiff(unittest.TestCase):
     def dynamics(state, u):
         # Analytical dynamics from underactuated robotics
         #   http://underactuated.mit.edu
-        x, theta, xdot, thetadot = state
+        # x, theta, xdot, thetadot = state
+        theta, x, thetadot, xdot = state
         l, m_c, m_p, g = 1, 1, 1, 9.81
         s, c = np.sin(theta), np.cos(theta)
         tdots = thetadot ** 2
 
         return np.array([
-            xdot,
             thetadot,
+            xdot,
+            (- (l * m_p * c * s * (thetadot ** 2) + u * c + (m_c + m_p) * g * s ) /\
+                (l * m_c + l * m_p * (s ** 2)))[0],
             ((u + m_p * s * (l * (thetadot ** 2) + g * c)) /\
                 (m_c + m_p * (s ** 2)))[0],
-            (- (l * m_p * c * s * (thetadot ** 2) + u * c + (m_c + m_p) * g * s ) /\
-                (l * m_c + l * m_p * (s ** 2)))[0]
         ])
 
     def setUp(self):

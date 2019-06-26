@@ -26,7 +26,7 @@ class Example(object):
 
     def update(self, event):
         # Set new look at target into world frame
-        self.problem.get_scene().attach_object_local('LookAtTarget', '', self.target_marker.position_exo)
+        self.problem.get_scene().attach_object_local('LookAtTarget', '', self.target_marker.position_exo.get_translation_and_quaternion())
 
         # Set start state
         self.problem.start_state = self.q

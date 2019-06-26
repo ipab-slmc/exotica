@@ -1038,7 +1038,8 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("get_root_frame_name", &Scene::GetRootFrameName);
     scene.def("get_root_joint_name", &Scene::GetRootJointName);
     scene.def("attach_object", &Scene::AttachObject);
-    scene.def("attach_object_local", &Scene::AttachObjectLocal);
+    scene.def("attach_object_local", (void (Scene::*)(const std::string& name, const std::string& parent, const KDL::Frame& pose)) & Scene::AttachObjectLocal);
+    scene.def("attach_object_local", (void (Scene::*)(const std::string& name, const std::string& parent, const Eigen::VectorXd& pose)) & Scene::AttachObjectLocal);
     scene.def("detach_object", &Scene::DetachObject);
     scene.def("has_attached_object", &Scene::HasAttachedObject);
     scene.def("fk", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->GetKinematicTree().FK(e1, o1, e2, o2); });

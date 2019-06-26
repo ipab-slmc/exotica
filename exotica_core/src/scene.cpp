@@ -763,6 +763,11 @@ void Scene::AttachObjectLocal(const std::string& name, const std::string& parent
     attached_objects_[name] = AttachedObject(parent, pose);
 }
 
+void Scene::AttachObjectLocal(const std::string& name, const std::string& parent, const Eigen::VectorXd& pose)
+{
+    AttachObjectLocal(name, parent, GetFrame(pose));
+}
+
 void Scene::DetachObject(const std::string& name)
 {
     if (!HasAttachedObject(name)) ThrowPretty("'" << name << "' is not attached to the robot!");

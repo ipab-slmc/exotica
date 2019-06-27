@@ -76,35 +76,35 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     // Set up stochastic terms
     //  see https://homes.cs.washington.edu/~todorov/papers/TodorovNeuralComp05.pdf
     //  eq. 3.1 and the text before (search for 'column') to see why this makes sense
-    // 
+    //
     // We specify a matrix of size NX x NU from which the C matrices
     //  are extracted
-    // 
+    //
     // E.g. NU = 2, NX = 4
-    // 
+    //
     // The matrix is
     //  a b
     //  c d
     //  e f
     //  g h
-    // 
+    //
     // From which the Ci matrices become
-    //  C0 = a b   C1 = 0 0   C2 = 0 0   C3 = 0 0 
+    //  C0 = a b   C1 = 0 0   C2 = 0 0   C3 = 0 0
     //       0 0        c d        0 0        0 0
     //       0 0        0 0        e f        0 0
     //       0 0        0 0        0 0        g h
-    // 
+    //
     // If you specify C_rate, then this is equivalent to:
-    // 
+    //
     // C = 0 0
     //     0 0
     //     c 0
     //     0 c
-    // 
+    //
     // The velocities then take the noise terms in. For an
     //  underactuated system these are somewhat ill-defined. E.g.
     //  if above NU = 1 and you specify c:
-    // 
+    //
     // C = 0
     //     0
     //     c
@@ -121,7 +121,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
             Eigen::Map<Eigen::MatrixXd> C_map(parameters_.C.data(), NU, NX);
 
             for (int i = 0; i < NX; ++i)
-                Ci_[i].row(i) = C_map.col(i).transpose(); // row over vs. col order
+                Ci_[i].row(i) = C_map.col(i).transpose();  // row over vs. col order
             full_noise_set = true;
         }
         else
@@ -371,7 +371,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
             noise(i) = standard_normal_noise_(generator_);
 
         Eigen::VectorXd control_dependent_noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * get_F(t) * noise;
-        
+
         for (int i = 0; i < num_positions_ + num_velocities_; ++i)
             noise(i) = standard_normal_noise_(generator_);
         Eigen::VectorXd white_noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * CW_ * noise;

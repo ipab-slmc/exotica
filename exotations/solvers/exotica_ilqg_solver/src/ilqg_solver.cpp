@@ -310,7 +310,7 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
     // prob_->EnableStochasticUpdates();
 }
 
-Eigen::VectorXd ILQGSolver::GetFeedbackControl(Eigen::VectorXd x, int t) const
+Eigen::VectorXdRefConst ILQGSolver::GetFeedbackControl(Eigen::VectorXd x, int t) const
 {
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
     Eigen::VectorXd delta_uk = l_gains_[t] +

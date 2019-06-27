@@ -54,7 +54,7 @@ public:
     ///@return        Successful if the problem is a valid DynamicTimeIndexedProblem
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
-    Eigen::VectorXd GetFeedbackControl(Eigen::VectorXd x, int t) const override;
+    Eigen::VectorXdRefConst GetFeedbackControl(Eigen::VectorXd x, int t) const override;
 
 protected:
     DynamicTimeIndexedShootingProblemPtr prob_;       ///!< Shared pointer to the planning problem.
@@ -247,7 +247,7 @@ double AbstractDDPSolver<Initializer>::ForwardPass(const double alpha, Eigen::Ma
 }
 
 template <typename Initializer>
-Eigen::VectorXd AbstractDDPSolver<Initializer>::GetFeedbackControl(Eigen::VectorXd x, int t) const
+Eigen::VectorXdRefConst AbstractDDPSolver<Initializer>::GetFeedbackControl(Eigen::VectorXd x, int t) const
 {
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
     Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));

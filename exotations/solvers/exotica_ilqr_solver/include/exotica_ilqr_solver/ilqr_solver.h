@@ -52,7 +52,7 @@ public:
     ///@return        Successful if the problem is a valid DynamicTimeIndexedProblem
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
-    Eigen::VectorXd GetFeedbackControl(Eigen::VectorXd x, int t) const override;
+    Eigen::VectorXdRefConst GetFeedbackControl(Eigen::VectorXd x, int t) const override;
 
 private:
     DynamicTimeIndexedShootingProblemPtr prob_;                              ///!< Shared pointer to the planning problem.

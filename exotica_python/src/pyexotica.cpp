@@ -950,8 +950,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_state_cost", &DynamicTimeIndexedShootingProblem::GetStateCost)
         .def("get_state_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetStateCostJacobian)
         .def("get_control_cost", &DynamicTimeIndexedShootingProblem::GetControlCost)
-        .def("get_control_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetControlCostJacobian)
-        .def("reset_cost_evolution", &DynamicTimeIndexedShootingProblem::ResetCostEvolution);
+        .def("get_control_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetControlCostJacobian);
 
     py::class_<CollisionProxy, std::shared_ptr<CollisionProxy>> collision_proxy(module, "CollisionProxy");
     collision_proxy.def(py::init());

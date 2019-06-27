@@ -27,13 +27,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <exotica_core/exotica_core.h>
-#undef NDEBUG
-#include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 #include <exotica_ddp_solver/analytic_ddp_solver.h>
 #include <exotica_ddp_solver/control_limited_ddp_solver.h>
+#undef NDEBUG
 
 using namespace exotica;
 namespace py = pybind11;
@@ -45,8 +42,6 @@ PYBIND11_MODULE(exotica_ddp_solver_py, module)
     py::module::import("pyexotica");
 
     py::class_<AnalyticDDPSolver, std::shared_ptr<AnalyticDDPSolver>, MotionSolver> analytic_ddp_solver(module, "AnalyticDDPSolver");
-    analytic_ddp_solver.def("get_feedback_control", &AnalyticDDPSolver::GetFeedbackControl);
 
     py::class_<ControlLimitedDDPSolver, std::shared_ptr<ControlLimitedDDPSolver>, MotionSolver> control_limited_ddp_solver(module, "ControlLimitedDDPSolver");
-    control_limited_ddp_solver.def("get_feedback_control", &ControlLimitedDDPSolver::GetFeedbackControl);
 }

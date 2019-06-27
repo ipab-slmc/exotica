@@ -119,6 +119,7 @@ public:
     /// \param pose Relative pose of the attached object in the new parent's local frame.
     ///
     void AttachObjectLocal(const std::string& name, const std::string& parent, const KDL::Frame& pose);
+    void AttachObjectLocal(const std::string& name, const std::string& parent, const Eigen::VectorXd& pose);
     ///
     /// \brief Detaches an object and leaves it a at its current world location. This effectively attaches the object to the world frame.
     /// \param name Name of the object to detach.

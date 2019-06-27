@@ -7,9 +7,13 @@ Required double tau;  // Discretisation timestep of the trajectory
 
 Optional Eigen::VectorXd Q = Eigen::VectorXd();
 Optional Eigen::VectorXd R = Eigen::VectorXd();
-Optional Eigen::VectorXd C = Eigen::VectorXd(); // Individual noise scaling factor 
 Optional Eigen::VectorXd GoalState = Eigen::VectorXd();
 Optional double Q_rate = 1.;
 Optional double Qf_rate = 1.;
 Optional double R_rate = 1.;
-Optional double C_rate = 0;  // Noise scaling factor (w.r.t control input u) (C * u)
+
+Optional Eigen::VectorXd C = Eigen::VectorXd(); // Control-dependent noise scaling factor
+Optional double C_rate = 0;  // Control-dependent noise constant covariance. Mutex w/ C
+
+Optional Eigen::VectorXd CW = Eigen::VectorXd(); // Control-idependent (white) noise scaling factor
+Optional double CW_rate = 0;  // Control-independent (white) noise constant covariance. Mutex w/ CW

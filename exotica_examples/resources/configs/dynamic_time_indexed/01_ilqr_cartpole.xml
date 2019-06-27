@@ -28,7 +28,7 @@
         <Q_rate>0</Q_rate>
         <Qf_rate>10</Qf_rate>
         <R_rate>0.1</R_rate>
-        <StartState>0 2 0 0 </StartState>
-        <GoalState>3.14 1 0 0</GoalState>
+        <StartState>2 0 0 0 </StartState>
+        <GoalState>1 3.14 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </DynamicTimeIndexedProblemConfig>

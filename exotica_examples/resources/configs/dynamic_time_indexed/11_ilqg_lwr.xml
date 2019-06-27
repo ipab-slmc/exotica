@@ -30,7 +30,28 @@
         <dt>0.02</dt>
         <Q_rate>0</Q_rate>
         <Qf_rate>10</Qf_rate>
+
         <C_rate>0.1</C_rate>
+
+<!--         Example C if noise is applied to states
+        <C>
+            0.1 0   0   0   0   0     0
+            0   0.1 0   0   0   0     0
+            0   0   0.1 0   0   0     0
+            0   0   0   0.1 0   0     0
+            0   0   0   0   0.1 0     0
+            0   0   0   0   0   0.1   0
+            0   0   0   0   0   0   0.1 
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+        </C> -->
+
+
         <DiagonalNoiseMatrix>false</DiagonalNoiseMatrix>
         <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
         <GoalState> 0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState>

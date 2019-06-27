@@ -180,7 +180,7 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
     if (!prob_) ThrowNamed("Solver has not been initialized!");
     Timer planning_timer, backward_pass_timer, line_search_timer;
     // TODO: This is an interesting approach but might give us incorrect results.
-    // prob_->DisableStochasticUpdates();
+    prob_->DisableStochasticUpdates();
 
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
@@ -307,10 +307,10 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
     planning_time_ = planning_timer.GetDuration();
 
     // TODO: See note at disable.
-    // prob_->EnableStochasticUpdates();
+    prob_->EnableStochasticUpdates();
 }
 
-Eigen::VectorXdRefConst ILQGSolver::GetFeedbackControl(Eigen::VectorXd x, int t) const
+Eigen::VectorXd ILQGSolver::GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const
 {
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
     Eigen::VectorXd delta_uk = l_gains_[t] +

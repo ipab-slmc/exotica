@@ -112,6 +112,7 @@ private:
     std::vector<Eigen::MatrixXd> Q_;   ///< State space penalty matrix (precision matrix), per time index
     Eigen::MatrixXd R_;                ///< Control space penalty matrix
     std::vector<Eigen::MatrixXd> Ci_;  ///< Noise weight terms
+    Eigen::MatrixXd CW_;               ///< White noise covariance
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
 

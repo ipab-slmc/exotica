@@ -76,17 +76,75 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     // Set up stochastic terms
     //  see https://homes.cs.washington.edu/~todorov/papers/TodorovNeuralComp05.pdf
     //  eq. 3.1 and the text before (search for 'column') to see why this makes sense
-    Ci_.assign(NU, Eigen::MatrixXd::Zero(NX, NU));
+    // 
+    // We specify a matrix of size NX x NU from which the C matrices
+    //  are extracted
+    // 
+    // E.g. NU = 2, NX = 4
+    // 
+    // The matrix is
+    //  a b
+    //  c d
+    //  e f
+    //  g h
+    // 
+    // From which the Ci matrices become
+    //  C0 = a b   C1 = 0 0   C2 = 0 0   C3 = 0 0 
+    //       0 0        c d        0 0        0 0
+    //       0 0        0 0        e f        0 0
+    //       0 0        0 0        0 0        g h
+    // 
+    // If you specify C_rate, then this is equivalent to:
+    // 
+    // C = 0 0
+    //     0 0
+    //     c 0
+    //     0 c
+    // 
+    // The velocities then take the noise terms in. For an
+    //  underactuated system these are somewhat ill-defined. E.g.
+    //  if above NU = 1 and you specify c:
+    // 
+    // C = 0
+    //     0
+    //     c
+    //     0
+    bool full_noise_set = false;
+    Ci_.assign(NX, Eigen::MatrixXd::Zero(NX, NU));
     for (int i = 0; i < NU; ++i)
-        Ci_[i](i, i) = parameters_.C_rate;
+        Ci_[NX - NU + i](NX - NU + i, i) = parameters_.C_rate;
 
     if (this->parameters_.C.rows() > 0)
     {
-        for (int i = 0; i < NU; ++i)
-            Ci_[i](i, i) = parameters_.C(i);
+        if (parameters_.C.rows() * parameters_.C.cols() == NX * NU)
+        {
+            Eigen::Map<Eigen::MatrixXd> C_map(parameters_.C.data(), NU, NX);
+
+            for (int i = 0; i < NX; ++i)
+                Ci_[i].row(i) = C_map.col(i).transpose(); // row over vs. col order
+            full_noise_set = true;
+        }
+        else
+        {
+            ThrowNamed("C dimension mismatch! Expected " << NX << "x" << NU << ", got " << parameters_.C.rows() << "x" << parameters_.C.cols());
+        }
     }
 
-    if (this->parameters_.C_rate > 0 || this->parameters_.C.rows() > 0)
+    CW_ = this->parameters_.CW_rate * Eigen::MatrixXd::Identity(NX, NX);
+    if (parameters_.CW.rows() > 0)
+    {
+        if (parameters_.CW.rows() == NX)
+        {
+            CW_.diagonal() = parameters_.CW;
+            full_noise_set = true;
+        }
+        else
+        {
+            ThrowNamed("CW dimension mismatch! Expected " << NX << ", got " << parameters_.R.rows());
+        }
+    }
+
+    if (parameters_.C_rate > 0 || parameters_.CW_rate > 0 || full_noise_set)
     {
         stochastic_matrices_specified_ = true;
         stochastic_updates_enabled_ = true;
@@ -308,14 +366,17 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     // Stochstic noise, if enabled
     if (stochastic_matrices_specified_ && stochastic_updates_enabled_)
     {
-        Eigen::VectorXd noise(num_controls_);
-        for (int i = 0; i < num_controls_; ++i)
+        Eigen::VectorXd noise(num_positions_ + num_velocities_);
+        for (int i = 0; i < num_positions_ + num_velocities_; ++i)
             noise(i) = standard_normal_noise_(generator_);
 
-        noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * get_F(t) * noise;
-        X_.col(t + 1) = X_.col(t + 1) + noise;
-        // HIGHLIGHT_NAMED("Noise", noise);
-        // HIGHLIGHT_NAMED("Noise F[]", get_F(t));
+        Eigen::VectorXd control_dependent_noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * get_F(t) * noise;
+        
+        for (int i = 0; i < num_positions_ + num_velocities_; ++i)
+            noise(i) = standard_normal_noise_(generator_);
+        Eigen::VectorXd white_noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * CW_ * noise;
+
+        X_.col(t + 1) = X_.col(t + 1) + white_noise + control_dependent_noise;
     }
 
     scene_->Update(scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1)), static_cast<double>(t) * tau_);
@@ -416,12 +477,10 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
         ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_ - 1);
     }
 
-    const int NX = num_positions_ + num_velocities_,
-              NU = num_controls_;
+    const int NX = num_positions_ + num_velocities_;
+    Eigen::MatrixXd F(NX, NX);
 
-    Eigen::MatrixXd F(NX, NU);
-
-    for (int i = 0; i < NU; ++i)
+    for (int i = 0; i < NX; ++i)
         F.col(i) = Ci_[i] * U_.col(t);
 
     return F;

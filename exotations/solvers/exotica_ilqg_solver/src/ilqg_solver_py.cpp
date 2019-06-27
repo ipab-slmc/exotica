@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <pybind11/pybind11.h>
 #include <exotica_ilqg_solver/ilqg_solver.h>
+#include <pybind11/pybind11.h>
 #undef NDEBUG
 
 using namespace exotica;

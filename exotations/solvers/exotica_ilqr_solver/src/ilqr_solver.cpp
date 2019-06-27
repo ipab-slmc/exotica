@@ -161,7 +161,7 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         BackwardPass();
         // if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
         if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration() << " lambda=" << lambda_);
-        
+
         line_search_timer.Reset();
         // forward pass to compute new control trajectory
         // TODO: Configure line-search space from xml

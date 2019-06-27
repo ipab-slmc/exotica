@@ -27,9 +27,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <pybind11/pybind11.h>
 #include <exotica_ddp_solver/analytic_ddp_solver.h>
 #include <exotica_ddp_solver/control_limited_ddp_solver.h>
+#include <pybind11/pybind11.h>
 #undef NDEBUG
 
 using namespace exotica;

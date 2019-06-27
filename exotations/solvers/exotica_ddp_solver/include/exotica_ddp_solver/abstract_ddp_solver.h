@@ -91,7 +91,7 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
 
     // TODO: parametrize
     lambda_ = 0.1;
-    
+
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
 
     // initialize Gain matrices
@@ -138,7 +138,7 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
                 best_alpha = alpha;
             }
         }
-        
+
         // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13
         if (iteration > 0)
         {

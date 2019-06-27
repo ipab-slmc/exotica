@@ -236,7 +236,7 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
                 best_alpha = alpha;
             }
             // else if (cost > current_cost)
-                // break;
+            // break;
         }
 
         // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13

@@ -57,5 +57,4 @@ std::string MotionSolver::Print(const std::string& prepend) const
     if (problem_) ret += "\n" + problem_->Print(prepend + "    ");
     return ret;
 }
-
 }

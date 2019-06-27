@@ -711,7 +711,7 @@ PYBIND11_MODULE(_pyexotica, module)
         },
         "Solve the problem");
     motion_solver.def("get_problem", &MotionSolver::GetProblem);
-    
+
     py::class_<FeedbackMotionSolver, std::shared_ptr<FeedbackMotionSolver>, MotionSolver> feedback_motion_solver(module, "FeedbackMotionSolver");
     feedback_motion_solver.def("get_feedback_control", &FeedbackMotionSolver::GetFeedbackControl);
 

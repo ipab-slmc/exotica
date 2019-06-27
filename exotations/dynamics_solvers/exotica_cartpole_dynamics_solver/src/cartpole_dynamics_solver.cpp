@@ -59,12 +59,15 @@ Eigen::VectorXd CartpoleDynamicsSolver::f(const StateVector& x, const ControlVec
     auto theta_dot_squared = thetadot * thetadot;
 
     auto x_dot = StateVector(4);
+
+    // clang-format off
     x_dot << thetadot, xdot,
         -(l_ * m_p_ * cos_theta * sin_theta * theta_dot_squared + u(0) * cos_theta +
           (m_c_ + m_p_) * g_ * sin_theta) /
             (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta),
         (u(0) + m_p_ * sin_theta * (l_ * theta_dot_squared + g_ * cos_theta)) /
             (m_c_ + m_p_ * sin_theta * sin_theta);
+    // clang-format on
 
     return x_dot;
 }
@@ -79,6 +82,7 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fx(const StateVector& x, const ControlVe
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
 
+    // clang-format off
     Eigen::Matrix4d fx;
     fx << 0, 0, 1, 0,
         0, 0, 0, 1,
@@ -93,7 +97,7 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fx(const StateVector& x, const ControlVe
         0,
         2 * l_ * m_p_ * thetadot * sin_theta / (m_c_ + m_p_ * sin_theta * sin_theta),
         0;
-        //
+    // clang-format on
 
     return fx;
 }
@@ -128,6 +132,8 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxx(const StateVector& x, const
     auto cos_theta = std::cos(theta);
 
     Eigen::Tensor<double, 3> fxx(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+
+    // clang-format off
     fxx.setValues({{{0, 0, 0, 0},
                     {0, 0, 0, 0},
                     {
@@ -164,6 +170,8 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxx(const StateVector& x, const
                     {0, 0, 0, 0},
                     {0, 0, 0, 0}}     
                 });
+    // clang-format on
+
     return fxx;
 }
 
@@ -177,12 +185,16 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxu(const StateVector& x, const
     auto cos_theta = std::cos(theta);
 
     Eigen::Tensor<double, 3> fxu(num_controls_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+
+    // clang-format off
     fxu.setValues({{{0, 0, 0, 0},
                     {0, 0, 0, 0},
                     {2 * l_ * m_p_ * sin_theta * cos_theta * cos_theta / std::pow(l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta, 2) + sin_theta / (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta),
                      0, 0, 0},
                     {-2 * m_p_ * sin_theta * cos_theta / std::pow(m_c_ + m_p_ * sin_theta * sin_theta, 2), 0, 0, 0}}
             });
+    // clang-format on
+
     return fxu;
 }
 

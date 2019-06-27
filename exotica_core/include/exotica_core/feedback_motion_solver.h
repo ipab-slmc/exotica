@@ -39,7 +39,6 @@ class FeedbackMotionSolver : public MotionSolver
 public:
     // \brief Returns a control input given the state x and timestep t.
     virtual Eigen::VectorXd GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const = 0;
-    ;
 };
 }
 

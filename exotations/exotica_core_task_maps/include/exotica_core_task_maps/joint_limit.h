@@ -42,9 +42,6 @@ namespace exotica
 class JointLimit : public TaskMap, public Instantiable<JointLimitInitializer>
 {
 public:
-    JointLimit();
-    virtual ~JointLimit();
-
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -57,6 +54,6 @@ private:
     double safe_percentage_;
     int N;
 };
-}
+}  // namespace
 
 #endif  // EXOTICA_CORE_TASK_MAPS_JOINTLIMIT_H_

@@ -242,7 +242,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::get_X(int t) const
 
 void DynamicTimeIndexedShootingProblem::set_X(Eigen::MatrixXdRefConst X_in)
 {
-    if (X_in.rows() != X_.rows() || X_in.cols() != X_.cols()) ThrowPretty("Sizes don't match!");
+    if (X_in.rows() != X_.rows() || X_in.cols() != X_.cols()) ThrowPretty("Sizes don't match! " << X_.rows() << "x" << X_.cols() << " vs " << X_in.rows() << "x" << X_in.cols());
     X_ = X_in;
 }
 
@@ -267,7 +267,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::get_U(int t) const
 
 void DynamicTimeIndexedShootingProblem::set_U(Eigen::MatrixXdRefConst U_in)
 {
-    if (U_in.rows() != U_.rows() || U_in.cols() != U_.cols()) ThrowPretty("Sizes don't match!");
+    if (U_in.rows() != U_.rows() || U_in.cols() != U_.cols()) ThrowPretty("Sizes don't match! " << U_.rows() << "x" << U_.cols() << " vs " << U_in.rows() << "x" << U_in.cols());
     U_ = U_in;
 }
 
@@ -278,7 +278,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X_star() const
 
 void DynamicTimeIndexedShootingProblem::set_X_star(Eigen::MatrixXdRefConst X_star_in)
 {
-    if (X_star_in.rows() != X_star_.rows() || X_star_in.cols() != X_star_.cols()) ThrowPretty("Sizes don't match!");
+    if (X_star_in.rows() != X_star_.rows() || X_star_in.cols() != X_star_.cols()) ThrowPretty("Sizes don't match! " << X_star_.rows() << "x" << X_star_.cols() << " vs " << X_star_in.rows() << "x" << X_star_in.cols());
     X_star_ = X_star_in;
 }
 

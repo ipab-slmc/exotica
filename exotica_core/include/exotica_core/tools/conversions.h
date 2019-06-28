@@ -39,6 +39,7 @@
 #include <vector>
 
 #include <exotica_core/tools/exception.h>
+#include <exotica_core/tools/printable.h>
 
 namespace Eigen
 {
@@ -198,7 +199,7 @@ inline Eigen::Matrix<T, S, 1> ParseVector(const std::string value)
             ret[i - 1] = std::numeric_limits<T>::quiet_NaN();
         }
     }
-    if (i == 0) ThrowPretty("Empty vector!");
+    if (i == 0) WARNING_NAMED("Parser", "Empty vector!")
     if (S != Eigen::Dynamic && S != i)
     {
         ThrowPretty("Wrong vector size! Requested: " + std::to_string(S) + ", Provided: " + std::to_string(i));
@@ -249,7 +250,7 @@ inline std::vector<std::string> ParseList(const std::string& value, char token =
     {
         ret.push_back(Trim(item));
     }
-    if (ret.size() == 0) ThrowPretty("Empty vector!");
+    if (ret.size() == 0) WARNING_NAMED("Parser", "Empty vector!")
     return ret;
 }
 
@@ -269,7 +270,7 @@ inline std::vector<int> ParseIntList(const std::string value)
         }
         ret.push_back(tmp);
     }
-    if (ret.size() == 0) ThrowPretty("Empty vector!");
+    if (ret.size() == 0) WARNING_NAMED("Parser", "Empty vector!")
     return ret;
 }
 
@@ -289,7 +290,7 @@ inline std::vector<bool> ParseBoolList(const std::string value)
         }
         ret.push_back(tmp);
     }
-    if (ret.empty()) ThrowPretty("Empty vector!");
+    if (ret.empty()) WARNING_NAMED("Parser", "Empty vector!")
     return ret;
 }
 }

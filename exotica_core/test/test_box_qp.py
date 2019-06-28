@@ -23,7 +23,7 @@ class TestBoxQP(unittest.TestCase):
             x_init = np.array([-3., 2.])
             q = np.array([0.0, 0.0])
 
-            sol = exo.box_qp(H, q, b_low, b_high, x_init, 0.1, 100, 1e-5)
+            sol = exo.box_qp(H, q, b_low, b_high, x_init, 0.1, 100, 1e-5, 1e-5)
             
             def cost(x):
                 return .5 * np.matmul(np.matmul(x.T, H), x) + np.matmul(q.T, x)
@@ -47,7 +47,7 @@ class TestBoxQP(unittest.TestCase):
             x_init = np.array([-3., 2.])
             q = np.random.normal(size=(2,1), loc=0, scale=10)
 
-            sol = exo.box_qp(H, q, b_low, b_high, x_init, 0.1, 100, 1e-5)
+            sol = exo.box_qp(H, q, b_low, b_high, x_init, 0.1, 100, 1e-5, 1e-5)
             
             def cost(x):
                 return .5 * np.matmul(np.matmul(x.T, H), x) + np.matmul(q.T, x)
@@ -75,7 +75,7 @@ class TestBoxQP(unittest.TestCase):
             x_init = np.array([-3., 2.])
             q = np.array([0, 0])
 
-            sol = exo.box_qp(H, q, b_low, b_high, x_init, 0.1, 100, 1e-5)
+            sol = exo.box_qp(H, q, b_low, b_high, x_init, 0.1, 100, 1e-5, 1e-5)
             
             def cost(x):
                 return .5 * np.matmul(np.matmul(x.T, H), x) + np.matmul(q.T, x)
@@ -103,7 +103,7 @@ class TestBoxQP(unittest.TestCase):
             x_init = np.array([-3., 2.])
             q = np.array([0, 0])
 
-            sol = exo.box_qp(H, q, b_low, b_high, x_init, 0.1, 100, 1e-5)
+            sol = exo.box_qp(H, q, b_low, b_high, x_init, 0.1, 100, 1e-5, 1e-5)
             
             def cost(x):
                 return .5 * np.matmul(np.matmul(x.T, H), x) + np.matmul(q.T, x)

@@ -39,7 +39,14 @@ void AvoidLookAtSphere::UpdateAsCostWithoutJacobian(Eigen::VectorXdRefConst x, E
     for (int i = 0; i < n_objects_; ++i)
     {
         const double frac = Eigen::Map<Eigen::Vector2d>(kinematics[0].Phi(i).p.data).squaredNorm() / radii_squared_(i);
-        if (frac < 1.0) phi(i) = 1.0 - 2.0 * frac + frac * frac;
+        if (frac < 1.0)
+        {
+            phi(i) = 1.0 - 2.0 * frac + frac * frac;
+        }
+        else
+        {
+            phi(i) = 0.0;
+        }
     }
 }
 
@@ -58,6 +65,11 @@ void AvoidLookAtSphere::UpdateAsCostWithJacobian(Eigen::VectorXdRefConst x, Eige
         {
             phi(i) = 1.0 - 2.0 * frac + frac * frac;
             for (int j = 0; j < jacobian.cols(); ++j) jacobian(i, j) = -4.0 * (1.0 - frac) * kinematics[0].jacobian[i].data.topRows<2>().col(j).dot(o) / radii_squared_(i);
+        }
+        else
+        {
+            phi(i) = 0.0;
+            jacobian.row(i).setZero();
         }
     }
 }
@@ -143,7 +155,7 @@ void AvoidLookAtSphere::Instantiate(const AvoidLookAtSphereInitializer& init)
 
     if (debug_ && Server::IsRos())
     {
-        pub_markers_ = Server::Advertise<visualization_msgs::MarkerArray>("alas_objs", 1, true);
+        pub_markers_ = Server::Advertise<visualization_msgs::MarkerArray>("avoid_look_at_sphere_objects", 1, true);
         visualization_msgs::Marker md;  // delete previous markers
         md.action = visualization_msgs::Marker::DELETEALL;
         visualization_msgs::MarkerArray ma;

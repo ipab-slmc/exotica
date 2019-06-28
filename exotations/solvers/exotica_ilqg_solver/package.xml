@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>exotica_ilqr_solver</name>
+  <name>exotica_ilqg_solver</name>
   <version>0.0.1</version>
-  <description>ILQR Solver (Li and Todorov, 2004)</description>
+  <description>ILQG Solver (Todorov and Li, 2004)</description>
 
   <maintainer email="traiko.dinev@ed.ac.uk">Traiko Dinev</maintainer>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>

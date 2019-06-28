@@ -27,26 +27,17 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_H_
-#define EXOTICA_CORE_H_
+#include <exotica_ilqr_solver/ilqr_solver.h>
+#include <pybind11/pybind11.h>
 
-#include <exotica_core/dynamics_solver.h>
-#include <exotica_core/feedback_motion_solver.h>
-#include <exotica_core/loaders/xml_loader.h>
-#include <exotica_core/motion_solver.h>
-#include <exotica_core/planning_problem.h>
-#include <exotica_core/problems/bounded_end_pose_problem.h>
-#include <exotica_core/problems/bounded_time_indexed_problem.h>
-#include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
-#include <exotica_core/problems/end_pose_problem.h>
-#include <exotica_core/problems/sampling_problem.h>
-#include <exotica_core/problems/time_indexed_problem.h>
-#include <exotica_core/problems/time_indexed_sampling_problem.h>
-#include <exotica_core/problems/unconstrained_end_pose_problem.h>
-#include <exotica_core/problems/unconstrained_time_indexed_problem.h>
-#include <exotica_core/server.h>
-#include <exotica_core/setup.h>
-#include <exotica_core/tools.h>
-#include <exotica_core/version.h>
+using namespace exotica;
+namespace py = pybind11;
 
-#endif  // EXOTICA_CORE_H_
+PYBIND11_MODULE(exotica_ilqr_solver_py, module)
+{
+    module.doc() = "Exotica ILQR Solver";
+
+    py::module::import("pyexotica");
+
+    py::class_<ILQRSolver, std::shared_ptr<ILQRSolver>, FeedbackMotionSolver> ilqr_solver(module, "ILQRSolver");
+}

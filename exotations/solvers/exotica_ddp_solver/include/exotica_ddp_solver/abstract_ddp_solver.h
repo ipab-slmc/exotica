@@ -30,7 +30,7 @@
 #ifndef EXOTICA_DDP_SOLVER_ABSTRACT_DDP_SOLVER_H_
 #define EXOTICA_DDP_SOLVER_ABSTRACT_DDP_SOLVER_H_
 
-#include <exotica_core/motion_solver.h>
+#include <exotica_core/feedback_motion_solver.h>
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
 #include <exotica_core/tools/conversions.h>
 
@@ -42,7 +42,7 @@ namespace exotica
 //
 //  This is why this is a header-only
 template <typename Initializer>
-class AbstractDDPSolver : public MotionSolver
+class AbstractDDPSolver : public FeedbackMotionSolver
 {
 public:
     ///\brief Solves the problem
@@ -53,6 +53,8 @@ public:
     ///@param pointer Shared pointer to the motion planning problem
     ///@return        Successful if the problem is a valid DynamicTimeIndexedProblem
     void SpecifyProblem(PlanningProblemPtr pointer) override;
+
+    Eigen::VectorXd GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const override;
 
 protected:
     DynamicTimeIndexedShootingProblemPtr prob_;       ///!< Shared pointer to the planning problem.
@@ -71,6 +73,10 @@ protected:
     double ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u);
 
     Initializer base_parameters_;
+    Eigen::MatrixXd best_ref_x_, best_ref_u_;  ///!< Reference trajectory for feedback control.
+
+    double lambda_ = 0.1,
+           lambda_max_ = 1000;  ///!< Levenberg Marquardt parameters
 };
 
 template <typename Initializer>
@@ -82,6 +88,9 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
+
+    // TODO: parametrize
+    lambda_ = 0.1;
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
 
@@ -104,7 +113,7 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
         // Backwards pass computes the gains
         backward_pass_timer.Reset();
         BackwardPass();
-        if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
+        if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Backward pass complete in " << backward_pass_timer.GetDuration() << " lambda=" << lambda_);
 
         line_search_timer.Reset();
         // forward pass to compute new control trajectory
@@ -128,8 +137,27 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
                 new_U = prob_->get_U();
                 best_alpha = alpha;
             }
-            else if (cost > current_cost)
-                break;
+        }
+
+        // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13
+        if (iteration > 0)
+        {
+            if (current_cost < last_cost)
+            {
+                // success, error decreased: decrease damping
+                lambda_ = lambda_ / 10.0;
+            }
+            else
+            {
+                // failure, error increased: increase damping
+                lambda_ = lambda_ * 10.0;
+            }
+        }
+
+        if (lambda_ > lambda_max_)
+        {
+            HIGHLIGHT_NAMED("DDPSolver", "Lambda greater than maximum.");
+            break;
         }
 
         if (debug_)
@@ -144,6 +172,8 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
             global_best_cost = current_cost;
             last_best_iteration = iteration;
             global_best_U = new_U;
+            best_ref_x_ = ref_x;
+            best_ref_u_ = ref_u;
         }
 
         if (iteration - last_best_iteration > base_parameters_.FunctionTolerancePatience)
@@ -196,6 +226,7 @@ double AbstractDDPSolver<Initializer>::ForwardPass(const double alpha, Eigen::Ma
     double cost = 0;
     const int T = prob_->get_T();
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const double dt = dynamics_solver_->get_dt();
 
     for (int t = 0; t < T - 1; ++t)
     {
@@ -207,12 +238,22 @@ double AbstractDDPSolver<Initializer>::ForwardPass(const double alpha, Eigen::Ma
         u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
 
         prob_->Update(u, t);
-        cost += prob_->GetControlCost(t) + prob_->GetStateCost(t);
+        cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
     }
 
     // add terminal cost
     cost += prob_->GetStateCost(T - 1);
     return cost;
+}
+
+template <typename Initializer>
+Eigen::VectorXd AbstractDDPSolver<Initializer>::GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const
+{
+    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
+
+    Eigen::VectorXd u = best_ref_u_.col(t) + delta_uk;
+    return u.cwiseMax(-control_limits).cwiseMin(control_limits);
 }
 
 }  // namespace exotica

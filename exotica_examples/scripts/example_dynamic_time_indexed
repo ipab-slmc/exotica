@@ -6,6 +6,7 @@
 from __future__ import print_function, division
 
 import pyexotica as exo
+import exotica_ilqr_solver_py, exotica_ddp_solver_py, exotica_ilqg_solver_py
 from pyexotica.publish_trajectory import *
 import signal, sys
 from time import time, sleep
@@ -23,7 +24,10 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/06_analytic_ddp_valkyrie.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/07_control_limited_ddp_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/08_control_limited_ddp_lwr.xml',
-    '{exotica_examples}/resources/configs/dynamic_time_indexed/09_control_limited_ddp_valkyrie.xml'
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/09_control_limited_ddp_valkyrie.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/10_ilqg_cartpole.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/11_ilqg_lwr.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/12_ilqg_valkyrie.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1
@@ -46,7 +50,10 @@ signal.signal(signal.SIGINT, sig_int_handler)
 while True:
     try:
         for t in range(problem.T - 1):
-            u = solution[t,:]
+            # u = solution[t,:]
+            u = solver.get_feedback_control(
+                problem.X[:,t], t
+            )
             problem.update(u, t)
             problem.get_scene().get_kinematic_tree().publish_frames()
             sleep(problem.tau)

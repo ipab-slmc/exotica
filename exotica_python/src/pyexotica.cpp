@@ -712,6 +712,9 @@ PYBIND11_MODULE(_pyexotica, module)
         "Solve the problem");
     motion_solver.def("get_problem", &MotionSolver::GetProblem);
 
+    py::class_<FeedbackMotionSolver, std::shared_ptr<FeedbackMotionSolver>, MotionSolver> feedback_motion_solver(module, "FeedbackMotionSolver");
+    feedback_motion_solver.def("get_feedback_control", &FeedbackMotionSolver::GetFeedbackControl);
+
     py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object>(module, "PlanningProblem")
         .def("get_tasks", &PlanningProblem::GetTasks, py::return_value_policy::reference_internal)
         .def("get_task_maps", &PlanningProblem::GetTaskMaps, py::return_value_policy::reference_internal)
@@ -1222,7 +1225,7 @@ PYBIND11_MODULE(_pyexotica, module)
                (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
                                  const Eigen::VectorXd& x_init, const double gamma,
-                                 const int max_iterations, const double epsilon)) &
+                                 const int max_iterations, const double epsilon, const double lambda)) &
                    BoxQP);
 
     AddInitializers(module);

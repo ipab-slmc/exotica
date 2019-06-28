@@ -27,26 +27,19 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_H_
-#define EXOTICA_CORE_H_
+#ifndef EXOTICA_CORE_FEEDBACK_MOTION_SOLVER_H_
+#define EXOTICA_CORE_FEEDBACK_MOTION_SOLVER_H_
 
-#include <exotica_core/dynamics_solver.h>
-#include <exotica_core/feedback_motion_solver.h>
-#include <exotica_core/loaders/xml_loader.h>
 #include <exotica_core/motion_solver.h>
-#include <exotica_core/planning_problem.h>
-#include <exotica_core/problems/bounded_end_pose_problem.h>
-#include <exotica_core/problems/bounded_time_indexed_problem.h>
-#include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
-#include <exotica_core/problems/end_pose_problem.h>
-#include <exotica_core/problems/sampling_problem.h>
-#include <exotica_core/problems/time_indexed_problem.h>
-#include <exotica_core/problems/time_indexed_sampling_problem.h>
-#include <exotica_core/problems/unconstrained_end_pose_problem.h>
-#include <exotica_core/problems/unconstrained_time_indexed_problem.h>
-#include <exotica_core/server.h>
-#include <exotica_core/setup.h>
-#include <exotica_core/tools.h>
-#include <exotica_core/version.h>
 
-#endif  // EXOTICA_CORE_H_
+namespace exotica
+{
+class FeedbackMotionSolver : public MotionSolver
+{
+public:
+    // \brief Returns a control input given the state x and timestep t.
+    virtual Eigen::VectorXd GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const = 0;
+};
+}
+
+#endif  // EXOTICA_CORE_MOTION_SOLVER_H_

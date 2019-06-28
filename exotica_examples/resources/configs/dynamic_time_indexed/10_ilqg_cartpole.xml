@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
-    <ILQRSolver Name="ILQRSolver">
+    <ILQGSolver Name="ILQGSolver">
         <Debug>1</Debug>
         <MaxIterations>50</MaxIterations>
         <FunctionTolerance>-1</FunctionTolerance>
         <FunctionTolerancePatience>50</FunctionTolerancePatience>
-    </ILQRSolver>
-
+        <IncludeNoiseTerms>1</IncludeNoiseTerms>
+    </ILQGSolver>
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
             <Scene>
@@ -28,6 +28,18 @@
         <Q_rate>0</Q_rate>
         <Qf_rate>10</Qf_rate>
         <R_rate>0.1</R_rate>
+        <DiagonalNoiseMatrix>true</DiagonalNoiseMatrix>
+
+        <!-- <C_rate>0.1</C_rate> -->
+        <C>
+            0
+            0
+            0
+            0.2
+        </C>
+        <!-- Noise applied to theta_dot -->
+
+        <!-- <C_rate>0.0</C_rate> -->
         <StartState>2 0 0 0 </StartState>
         <GoalState>1 3.14 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>

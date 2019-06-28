@@ -27,20 +27,22 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_ILQR_SOLVER_ILQR_SOLVER_H_
-#define EXOTICA_ILQR_SOLVER_ILQR_SOLVER_H_
+#ifndef EXOTICA_ILQG_SOLVER_ILQG_SOLVER_H_
+#define EXOTICA_ILQG_SOLVER_ILQG_SOLVER_H_
 
 #include <exotica_core/feedback_motion_solver.h>
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
+#include <Eigen/Eigenvalues>
 
-#include <exotica_ilqr_solver/ilqr_solver_initializer.h>
+#include <exotica_ilqg_solver/ilqg_solver_initializer.h>
 
 namespace exotica
 {
 // This code is based on:
-// W. Li, E. Todorov, Iterative Linear Quadratic Regulator Design for Nonlinear Biological Movement Systems
-// https://homes.cs.washington.edu/~todorov/papers/LiICINCO04.pdf
-class ILQRSolver : public FeedbackMotionSolver, public Instantiable<ILQRSolverInitializer>
+// E. Todorov, W. Li A generalized iterative LQG method for locally-optimal feedback
+//      control of constrained nonlinear stochastic systems
+// http://maeresearch.ucsd.edu/skelton/publications/weiwei_ilqg_CDC43.pdf
+class ILQGSolver : public FeedbackMotionSolver, public Instantiable<ILQGSolverInitializer>
 {
 public:
     ///\brief Solves the problem
@@ -55,9 +57,9 @@ public:
     Eigen::VectorXd GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const override;
 
 private:
-    DynamicTimeIndexedShootingProblemPtr prob_;                              ///!< Shared pointer to the planning problem.
-    DynamicsSolverPtr dynamics_solver_;                                      ///!< Shared pointer to the dynamics solver.
-    std::vector<Eigen::MatrixXd> K_gains_, Ku_gains_, Kv_gains_, vk_gains_;  ///!< Control gains.
+    DynamicTimeIndexedShootingProblemPtr prob_;       ///!< Shared pointer to the planning problem.
+    DynamicsSolverPtr dynamics_solver_;               ///!< Shared pointer to the dynamics solver.
+    std::vector<Eigen::MatrixXd> l_gains_, L_gains_;  ///!< Control gains.
 
     Eigen::MatrixXd best_ref_x_, best_ref_u_;  ///!< Reference trajectory for feedback control.
 
@@ -77,4 +79,4 @@ private:
 };
 }  // namespace exotica
 
-#endif  // EXOTICA_ILQR_SOLVER_ILQR_SOLVER_H_
+#endif  // EXOTICA_ILQG_SOLVER_ILQG_SOLVER_H_

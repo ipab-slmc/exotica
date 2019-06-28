@@ -3,9 +3,9 @@
     <ControlLimitedDDPSolver Name="AnalyticDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>50</MaxIterations>
-        <FunctionTolerance>1e-3</FunctionTolerance>
-        <FunctionTolerancePatience>10</FunctionTolerancePatience>
-        <UseSecondOrderDynamics>1</UseSecondOrderDynamics>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>50</FunctionTolerancePatience>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
     </ControlLimitedDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
@@ -26,11 +26,10 @@
 
         <T>100</T>
         <tau>0.02</tau>
-        <dt>0.02</dt>
         <Q_rate>0</Q_rate>
-        <Qf_rate>1000</Qf_rate>
+        <Qf_rate>10</Qf_rate>
         <R_rate>0.1</R_rate>
         <StartState>2 0 0 0 </StartState>
-        <GoalState>1 3.14159265359 0 0</GoalState>
+        <GoalState>1 3.14 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </DynamicTimeIndexedProblemConfig>

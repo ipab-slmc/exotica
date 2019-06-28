@@ -70,7 +70,13 @@ public:
     Eigen::MatrixXd get_Qf() const;             ///< Returns the cost weight matrix at time N
     void set_Qf(Eigen::MatrixXdRefConst Q_in);  ///< Sets the cost weight matrix for time N
 
-    Eigen::MatrixXd get_R() const;  ///< Returns the control weight matrix
+    Eigen::MatrixXd get_R() const;       ///< Returns the control weight matrix
+    Eigen::MatrixXd get_F(int t) const;  ///< Returns the noise weight matrix at time t
+
+    Eigen::MatrixXd GetControlNoiseJacobian(int column_idx) const;  ///< F[i]_u
+
+    void EnableStochasticUpdates();
+    void DisableStochasticUpdates();
 
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;
@@ -96,15 +102,22 @@ private:
 
     int T_;       ///< Number of time steps
     double tau_;  ///< Time step duration
+    bool stochastic_matrices_specified_ = false;
+    bool stochastic_updates_enabled_ = false;
 
     Eigen::MatrixXd X_;       ///< State trajectory (i.e., positions, velocities). Size: num-states x T
     Eigen::MatrixXd U_;       ///< Control trajectory. Size: num-controls x (T-1)
     Eigen::MatrixXd X_star_;  ///< Goal state trajectory (i.e., positions, velocities). Size: num-states x T
 
-    std::vector<Eigen::MatrixXd> Q_;  ///< State space penalty matrix (precision matrix), per time index
-    Eigen::MatrixXd R_;               ///< Control space penalty matrix
+    std::vector<Eigen::MatrixXd> Q_;   ///< State space penalty matrix (precision matrix), per time index
+    Eigen::MatrixXd R_;                ///< Control space penalty matrix
+    std::vector<Eigen::MatrixXd> Ci_;  ///< Noise weight terms
+    Eigen::MatrixXd CW_;               ///< White noise covariance
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
+
+    std::mt19937 generator_;
+    std::normal_distribution<double> standard_normal_noise_{0, 1};
 };
 
 typedef std::shared_ptr<exotica::DynamicTimeIndexedShootingProblem> DynamicTimeIndexedShootingProblemPtr;

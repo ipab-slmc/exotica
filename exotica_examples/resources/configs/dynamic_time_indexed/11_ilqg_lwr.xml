@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
-    <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
+    <ILQGSolver Name="ILQGSolver">
         <Debug>1</Debug>
         <MaxIterations>50</MaxIterations>
         <FunctionTolerance>-1</FunctionTolerance>
         <FunctionTolerancePatience>50</FunctionTolerancePatience>
-        <UseSecondOrderDynamics>1</UseSecondOrderDynamics>
-    </ControlLimitedDDPSolver>
+        <IncludeNoiseTerms>1</IncludeNoiseTerms>
+    </ILQGSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
@@ -30,7 +30,29 @@
         <dt>0.02</dt>
         <Q_rate>0</Q_rate>
         <Qf_rate>10</Qf_rate>
-        <R_rate>0.1</R_rate>
+
+        <C_rate>0.1</C_rate>
+
+<!--         Example C if noise is applied to states
+        <C>
+            0.1 0   0   0   0   0     0
+            0   0.1 0   0   0   0     0
+            0   0   0.1 0   0   0     0
+            0   0   0   0.1 0   0     0
+            0   0   0   0   0.1 0     0
+            0   0   0   0   0   0.1   0
+            0   0   0   0   0   0   0.1 
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+        </C> -->
+
+
+        <DiagonalNoiseMatrix>false</DiagonalNoiseMatrix>
         <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
         <GoalState> 0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>

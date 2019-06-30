@@ -41,8 +41,6 @@ namespace exotica
 class DynamicTimeIndexedShootingProblem : public PlanningProblem, public Instantiable<DynamicTimeIndexedShootingProblemInitializer>
 {
 public:
-    DynamicTimeIndexedShootingProblem();
-    virtual ~DynamicTimeIndexedShootingProblem();
     void Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init) override;
 
     void PreUpdate() override;

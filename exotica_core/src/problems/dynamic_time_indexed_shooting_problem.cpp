@@ -35,10 +35,6 @@ REGISTER_PROBLEM_TYPE("DynamicTimeIndexedShootingProblem", exotica::DynamicTimeI
 
 namespace exotica
 {
-DynamicTimeIndexedShootingProblem::DynamicTimeIndexedShootingProblem() = default;
-
-DynamicTimeIndexedShootingProblem::~DynamicTimeIndexedShootingProblem() = default;
-
 void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init)
 {
     this->parameters_ = init;

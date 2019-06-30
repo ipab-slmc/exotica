@@ -153,6 +153,9 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     const double fmod_tau_dt = std::fmod(static_cast<long double>(1000. * tau_), static_cast<long double>(1000. * scene_->GetDynamicsSolver()->get_dt()));
     if (fmod_tau_dt > 1e-5) ThrowPretty("tau is not a multiple of dt: tau=" << tau_ << ", dt=" << scene_->GetDynamicsSolver()->get_dt() << ", mod(" << fmod_tau_dt << ")");
 
+    // Initialize general costs
+    cost.Initialize(this->parameters_.Cost, shared_from_this(), cost_Phi);
+
     ApplyStartState(false);
     ReinitializeVariables();
 
@@ -181,6 +184,30 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     // set final Q (Qf)
     set_Qf(this->parameters_.Qf_rate * Eigen::MatrixXd::Identity(NX, NX));
 
+    // Reinitialize general cost (via taskmaps)
+    num_tasks = tasks_.size();
+    length_Phi = 0;
+    length_jacobian = 0;
+    TaskSpaceVector y_ref_;
+    for (int i = 0; i < num_tasks; ++i)
+    {
+        AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
+        length_Phi += tasks_[i]->length;
+        length_jacobian += tasks_[i]->length_jacobian;
+    }
+
+    flags_ = KIN_FK | KIN_J;  // TODO: This overrides DerivativeOrder, which is bad.
+    y_ref_.SetZero(length_Phi);
+    Phi.assign(T_, y_ref_);
+    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
+    if (flags_ & KIN_J_DOT)
+    {
+        Hessian Htmp;
+        Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
+        hessian.assign(T_, Htmp);
+    }
+    cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
+
     PreUpdate();
 }
 
@@ -208,6 +235,7 @@ void DynamicTimeIndexedShootingProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
     for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
+    cost.UpdateS();
 
     // Create a new set of kinematic solutions with the size of the trajectory
     // based on the lastest KinematicResponse in order to reflect model state
@@ -344,9 +372,47 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
         X_.col(t + 1) = X_.col(t + 1) + white_noise + control_dependent_noise;
     }
 
-    scene_->Update(scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1)), static_cast<double>(t) * tau_);
+    const Eigen::VectorXd x_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
+    scene_->Update(x_next_position, static_cast<double>(t) * tau_);
 
-    // TODO: Cost, Equality, Inequality
+    Phi[t].SetZero(length_Phi);
+    if (flags_ & KIN_J) jacobian[t].setZero();
+    if (flags_ & KIN_J_DOT)
+        for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
+    for (int i = 0; i < num_tasks; ++i)
+    {
+        // Only update TaskMap if rho is not 0
+        if (tasks_[i]->is_used)
+        {
+            if (flags_ & KIN_J_DOT)
+            {
+                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+            }
+            else if (flags_ & KIN_J)
+            {
+                HIGHLIGHT("Phi[t].data " << Phi[t].data.rows() << "x" << Phi[t].data.cols())
+                HIGHLIGHT("jacobian[t].data " << jacobian[t].rows() << "x" << jacobian[t].cols())
+                HIGHLIGHT("tasks_[i]->start" << tasks_[i]->start << ", length" << tasks_[i]->length)
+                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+            }
+            else
+            {
+                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+            }
+        }
+    }
+    if (flags_ & KIN_J_DOT)
+    {
+        cost.Update(Phi[t], jacobian[t], hessian[t], t);
+    }
+    else if (flags_ & KIN_J)
+    {
+        cost.Update(Phi[t], jacobian[t], t);
+    }
+    else
+    {
+        cost.Update(Phi[t], t);
+    }
 
     ++number_of_problem_updates_;
 }
@@ -355,21 +421,31 @@ double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const
 {
     ValidateTimeIndex(t);
     const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
-    return (x_diff.transpose() * Q_[t] * x_diff);
+    const double general_cost = cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];  // TODO: ct scaling
+    return (x_diff.transpose() * Q_[t] * x_diff) + general_cost;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) const
 {
     // TODO: Check whether we should make this a RowVectorXd
     ValidateTimeIndex(t);
+    const Eigen::VectorXd state_cost_jacobian = Q_[t] * X_.col(t) + Q_[t].transpose() * X_.col(t) -
+                                                Q_[t].transpose() * X_star_.col(t) - Q_[t] * X_star_.col(t);
 
-    return Q_[t] * X_.col(t) + Q_[t].transpose() * X_.col(t) -
-           Q_[t].transpose() * X_star_.col(t) - Q_[t] * X_star_.col(t);
+    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
+    general_cost_jacobian.head(num_positions_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
+
+    return state_cost_jacobian + general_cost_jacobian;
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) const
 {
     ValidateTimeIndex(t);
+    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
+    general_cost_jacobian.head(num_positions_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
+    // TODO: Using a J^T*J approximation for the general cost here as Hessians aren't implemented for task maps yet.
+    // TODO: As we are not using RowVectorXd (yet), this is J*J^T instead of the correct J^T*J
+    return Q_[t] + Q_[t].transpose() + (general_cost_jacobian * general_cost_jacobian.transpose());
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian() const

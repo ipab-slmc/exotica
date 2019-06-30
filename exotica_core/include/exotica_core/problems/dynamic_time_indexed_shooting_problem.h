@@ -76,6 +76,17 @@ public:
     void EnableStochasticUpdates();
     void DisableStochasticUpdates();
 
+    // TODO: Make private and add getter (no need to be public!)
+    TimeIndexedTask cost;  //!< Cost task
+    std::vector<TaskSpaceVector> Phi;
+    std::vector<Eigen::MatrixXd> jacobian;
+    std::vector<Hessian> hessian;
+
+    // TODO: Make private and add getter/setter
+    int length_Phi;
+    int length_jacobian;
+    int num_tasks;
+
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;
 
@@ -128,8 +139,9 @@ protected:
 
     std::mt19937 generator_;
     std::normal_distribution<double> standard_normal_noise_{0, 1};
-};
 
+    TaskSpaceVector cost_Phi;
+};
 typedef std::shared_ptr<exotica::DynamicTimeIndexedShootingProblem> DynamicTimeIndexedShootingProblemPtr;
 }  // namespace exotica
 

@@ -364,7 +364,11 @@ bool EndPoseProblem::IsValid()
     // Check joint limits
     for (unsigned int i = 0; i < N; ++i)
     {
-        if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1)) return false;
+        if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1))
+        {
+            if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::IsValid", "Out of bounds (joint #" << i << "): " << bounds(i, 0) << " < " << x(i) << " < " << bounds(i, 1));
+            return false;
+        }
     }
 
     bool succeeded = true;

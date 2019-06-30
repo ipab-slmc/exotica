@@ -40,7 +40,7 @@ PYBIND11_MODULE(exotica_ddp_solver_py, module)
 
     py::module::import("pyexotica");
 
-    py::class_<AnalyticDDPSolver, std::shared_ptr<AnalyticDDPSolver>, MotionSolver> analytic_ddp_solver(module, "AnalyticDDPSolver");
+    py::class_<AnalyticDDPSolver, std::shared_ptr<AnalyticDDPSolver>, FeedbackMotionSolver> analytic_ddp_solver(module, "AnalyticDDPSolver");
 
-    py::class_<ControlLimitedDDPSolver, std::shared_ptr<ControlLimitedDDPSolver>, MotionSolver> control_limited_ddp_solver(module, "ControlLimitedDDPSolver");
+    py::class_<ControlLimitedDDPSolver, std::shared_ptr<ControlLimitedDDPSolver>, FeedbackMotionSolver> control_limited_ddp_solver(module, "ControlLimitedDDPSolver");
 }

@@ -1148,7 +1148,8 @@ PYBIND11_MODULE(_pyexotica, module)
     py::class_<DynamicsSolver, std::shared_ptr<DynamicsSolver>, Object>(module, "DynamicsSolver")
         .def("f", &DynamicsSolver::f)
         .def("fx", &DynamicsSolver::fx)
-        .def("fu", &DynamicsSolver::fu);
+        .def("fu", &DynamicsSolver::fu)
+        .def("get_position", &DynamicsSolver::GetPosition);
 
     ////////////////////////////////////////////////////////////////////////////
     /// Shapes

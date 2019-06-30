@@ -224,15 +224,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X() const
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::get_X(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-
+    ValidateTimeIndex(t);
     return X_.col(t);
 }
 
@@ -249,15 +241,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_U() const
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::get_U(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-
+    ValidateTimeIndex(t);
     return U_.col(t);
 }
 
@@ -280,14 +264,7 @@ void DynamicTimeIndexedShootingProblem::set_X_star(Eigen::MatrixXdRefConst X_sta
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_Q(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     return Q_[t];
 }
 
@@ -303,15 +280,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_R() const
 
 void DynamicTimeIndexedShootingProblem::set_Q(Eigen::MatrixXdRefConst Q_in, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-
+    ValidateTimeIndex(t);
     if (Q_in.rows() != Q_[t].rows() || Q_in.cols() != Q_[t].cols()) ThrowPretty("Dimension mismatch!");
     Q_[t] = Q_in;
 }
@@ -384,28 +353,15 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
 
 double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
     return (x_diff.transpose() * Q_[t] * x_diff);
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    // TODO: Check whether we should make this a RowVectorXd
+    ValidateTimeIndex(t);
 
     return Q_[t] * X_.col(t) + Q_[t].transpose() * X_.col(t) -
            Q_[t].transpose() * X_star_.col(t) - Q_[t] * X_star_.col(t);
@@ -413,16 +369,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-
-    return Q_[t] + Q_[t].transpose();
+    ValidateTimeIndex(t);
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian() const

@@ -95,7 +95,19 @@ public:
     Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
     Eigen::VectorXd Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
 
-private:
+protected:
+    /// \brief Checks the desired time index for bounds and supports -1 indexing.
+    inline void ValidateTimeIndex(int& t_in) const
+    {
+        if (t_in >= T_ || t_in < -1)
+        {
+            ThrowPretty("Requested t=" << t_in << " out of range, needs to be 0 =< t < " << T_);
+        }
+        else if (t_in == -1)
+        {
+            t_in = (T_ - 1);
+        }
+    }
     void ReinitializeVariables();
 
     int T_;       ///< Number of time steps

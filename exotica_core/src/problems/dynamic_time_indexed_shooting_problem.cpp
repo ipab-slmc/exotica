@@ -49,18 +49,19 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
 
     const int NX = num_positions_ + num_velocities_,
               NU = num_controls_;
-    if (this->parameters_.Q.rows() > 0)
+    Qf_ = Eigen::MatrixXd::Identity(NX, NX);
+    if (this->parameters_.Qf.rows() > 0)
     {
-        ThrowPretty("Not supported yet");
-        // if (this->parameters_.Q.rows() == NX)
-        // {
-        //     Q_.diagonal() = this->parameters_.Q;
-        // }
-        // else
-        // {
-        //     ThrowNamed("Q dimension mismatch! Expected " << NX << ", got " << this->parameters_.Q.rows());
-        // }
+        if (this->parameters_.Qf.rows() == NX)
+        {
+            Qf_.diagonal() = this->parameters_.Qf;
+        }
+        else
+        {
+            ThrowNamed("Qf dimension mismatch! Expected " << NX << ", got " << this->parameters_.Qf.rows());
+        }
     }
+    Qf_ *= this->parameters_.Qf_rate;
 
     R_ = this->parameters_.R_rate * Eigen::MatrixXd::Identity(num_controls_, num_controls_);
     if (this->parameters_.R.rows() > 0)
@@ -164,17 +165,6 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
 
     ApplyStartState(false);
     ReinitializeVariables();
-
-    if (init.GoalState.rows() > 0)
-    {
-        // set start and goal states
-        Eigen::MatrixXd goal_state = Eigen::MatrixXd::Zero(NX, T_);
-        goal_state.col(T_ - 1) = init.GoalState;
-        set_X_star(goal_state);
-    }
-
-    if (init.StartState.rows() > 0)
-        set_X(init.StartState.replicate(1, T_));
 }
 
 void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
@@ -186,9 +176,78 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
     U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
 
-    Q_.assign(T_, this->parameters_.Q_rate * Eigen::MatrixXd::Identity(NX, NX));
-    // set final Q (Qf)
-    set_Qf(this->parameters_.Qf_rate * Eigen::MatrixXd::Identity(NX, NX));
+    // Set GoalState
+    if (this->parameters_.GoalState.rows() > 0)
+    {
+        Eigen::MatrixXd goal_state = Eigen::MatrixXd::Zero(NX, T_);
+        if (this->parameters_.GoalState.rows() == NX)
+        {
+            goal_state.col(T_ - 1) = this->parameters_.GoalState;
+        }
+        else if (this->parameters_.GoalState.rows() == num_positions_)
+        {
+            goal_state.col(T_ - 1).head(num_positions_) = this->parameters_.GoalState;
+        }
+        else if (this->parameters_.GoalState.rows() == NX * T_)
+        {
+            for (int t = 0; t < T_; ++t)
+            {
+                goal_state.col(t) = this->parameters_.GoalState.segment(t * NX, NX);
+            }
+        }
+        else
+        {
+            ThrowPretty("GoalState has " << this->parameters_.GoalState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << num_positions_ << ", or NX*T=" << NX * T_);
+        }
+        set_X_star(goal_state);
+    }
+
+    // Set StartState
+    if (this->parameters_.StartState.rows() > 0)
+    {
+        Eigen::MatrixXd start_state = Eigen::MatrixXd::Zero(NX, T_);
+        if (this->parameters_.StartState.rows() == NX)
+        {
+            start_state = this->parameters_.StartState.replicate(1, T_);
+        }
+        else if (this->parameters_.StartState.rows() == num_positions_)
+        {
+            for (int t = 0; t < T_; ++t)
+            {
+                start_state.col(t).head(num_positions_) = this->parameters_.StartState;
+            }
+        }
+        else if (this->parameters_.StartState.rows() == NX * T_)
+        {
+            for (int t = 0; t < T_; ++t)
+            {
+                start_state.col(t) = this->parameters_.StartState.segment(t * NX, NX);
+            }
+        }
+        else
+        {
+            ThrowPretty("StartState has " << this->parameters_.StartState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << num_positions_ << ", or NX*T=" << NX * T_);
+        }
+        set_X(start_state);
+    }
+
+    Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(NX, NX);
+    if (this->parameters_.Q.rows() > 0)
+    {
+        if (this->parameters_.Q.rows() == NX)
+        {
+            Q.diagonal() = this->parameters_.Q;
+        }
+        else
+        {
+            ThrowNamed("Q dimension mismatch! Expected " << NX << ", got " << this->parameters_.Q.rows());
+        }
+    }
+    Q *= this->parameters_.Q_rate;
+    Q_.assign(T_, Q);
+
+    // Set final Q (Qf) -- the Qf variable has been populated in Instantiate
+    set_Qf(Qf_);
 
     // Reinitialize general cost (via taskmaps)
     num_tasks = tasks_.size();

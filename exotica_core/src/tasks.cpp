@@ -366,12 +366,12 @@ void TimeIndexedTask::ReinitializeVariables(int _T, PlanningProblemPtr _prob, co
         {
             for (int t = 0; t < T; ++t)
             {
-                y[t].data.segment(indexing[i].start, indexing[i].length) = task.Goal.segment(tasks[i]->length, tasks[i]->length);
+                y[t].data.segment(indexing[i].start, indexing[i].length) = task.Goal;
             }
         }
         else
         {
-            ThrowPretty("Invalid task goal size! Expecting " << tasks[i]->length * T << " (or 1) and got " << task.Goal.rows());
+            ThrowPretty("Invalid task goal size! Expecting " << tasks[i]->length * T << ", " << tasks[i]->length << ", or 1 and got " << task.Goal.rows());
         }
         if (task.Rho.rows() == 0)
         {
@@ -459,5 +459,57 @@ void SamplingTask::Update(const TaskSpaceVector& big_Phi)
 
     for (unsigned int i = 0; i < ydiff.size(); ++i)
         if (std::abs(ydiff[i]) < tolerance) ydiff[i] = 0.0;
+}
+
+void SamplingTask::SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal)
+{
+    for (size_t i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            if (goal.rows() != indexing[i].length) ThrowPretty("Expected length of " << indexing[i].length << " and got " << goal.rows());
+            y.data.segment(indexing[i].start, indexing[i].length) = goal;
+            return;
+        }
+    }
+    ThrowPretty("Cannot set Goal. Task Map '" << task_name << "' does not exist.");
+}
+
+void SamplingTask::SetRho(const std::string& task_name, const double rho_in)
+{
+    for (size_t i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            rho(indexing[i].id) = rho_in;
+            UpdateS();
+            return;
+        }
+    }
+    ThrowPretty("Cannot set rho. Task Map '" << task_name << "' does not exist.");
+}
+
+Eigen::VectorXd SamplingTask::GetGoal(const std::string& task_name) const
+{
+    for (size_t i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            return y.data.segment(indexing[i].start, indexing[i].length);
+        }
+    }
+    ThrowPretty("Cannot get Goal. Task Map '" << task_name << "' does not exist.");
+}
+
+double SamplingTask::GetRho(const std::string& task_name) const
+{
+    for (size_t i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            return rho(indexing[i].id);
+        }
+    }
+    ThrowPretty("Cannot get rho. Task Map '" << task_name << "' does not exist.");
 }
 }  // namespace exotica

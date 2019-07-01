@@ -666,7 +666,11 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("S", &TimeIndexedTask::S)
         .def_readonly("T", &TimeIndexedTask::T)
         .def_readonly("tasks", &TimeIndexedTask::tasks)
-        .def_readonly("task_maps", &TimeIndexedTask::task_maps);
+        .def_readonly("task_maps", &TimeIndexedTask::task_maps)
+        .def("set_goal", &TimeIndexedTask::SetGoal)
+        .def("get_goal", &TimeIndexedTask::GetGoal)
+        .def("set_rho", &TimeIndexedTask::SetRho)
+        .def("get_rho", &TimeIndexedTask::GetRho);
 
     py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>>(module, "EndPoseTask")
         .def_readonly("length_Phi", &EndPoseTask::length_Phi)
@@ -680,7 +684,11 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("S", &EndPoseTask::S)
         .def_readonly("tasks", &EndPoseTask::tasks)
         .def_readonly("task_maps", &EndPoseTask::task_maps)
-        .def("get_task_error", &EndPoseTask::GetTaskError);
+        .def("get_task_error", &EndPoseTask::GetTaskError)
+        .def("set_goal", &EndPoseTask::SetGoal)
+        .def("get_goal", &EndPoseTask::GetGoal)
+        .def("set_rho", &EndPoseTask::SetRho)
+        .def("get_rho", &EndPoseTask::GetRho);
 
     py::class_<SamplingTask, std::shared_ptr<SamplingTask>>(module, "SamplingTask")
         .def_readonly("length_Phi", &SamplingTask::length_Phi)
@@ -691,7 +699,11 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("Phi", &SamplingTask::Phi)
         .def_readonly("S", &SamplingTask::S)
         .def_readonly("tasks", &SamplingTask::tasks)
-        .def_readonly("task_maps", &SamplingTask::task_maps);
+        .def_readonly("task_maps", &SamplingTask::task_maps)
+        .def("set_goal", &SamplingTask::SetGoal)
+        .def("get_goal", &SamplingTask::GetGoal)
+        .def("set_rho", &SamplingTask::SetRho)
+        .def("get_rho", &SamplingTask::GetRho);
 
     py::class_<TaskSpaceVector, std::shared_ptr<TaskSpaceVector>> task_space_vector(module, "TaskSpaceVector");
     task_space_vector.def("set_zero", &TaskSpaceVector::SetZero);
@@ -947,6 +959,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("simulate", &DynamicTimeIndexedShootingProblem::Simulate)
         .def("get_Q", &DynamicTimeIndexedShootingProblem::get_Q)
         .def("set_Q", &DynamicTimeIndexedShootingProblem::set_Q)
+        .def_readonly("cost", &DynamicTimeIndexedShootingProblem::cost)
         .def("get_state_cost", &DynamicTimeIndexedShootingProblem::GetStateCost)
         .def("get_state_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetStateCostJacobian)
         .def("get_control_cost", &DynamicTimeIndexedShootingProblem::GetControlCost)

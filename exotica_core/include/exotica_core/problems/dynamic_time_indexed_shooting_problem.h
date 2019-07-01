@@ -43,6 +43,7 @@ class DynamicTimeIndexedShootingProblem : public PlanningProblem, public Instant
 public:
     DynamicTimeIndexedShootingProblem();
     virtual ~DynamicTimeIndexedShootingProblem();
+
     void Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init) override;
 
     void PreUpdate() override;
@@ -78,6 +79,17 @@ public:
     void EnableStochasticUpdates();
     void DisableStochasticUpdates();
 
+    // TODO: Make private and add getter (no need to be public!)
+    TimeIndexedTask cost;  //!< Cost task
+    std::vector<TaskSpaceVector> Phi;
+    std::vector<Eigen::MatrixXd> jacobian;
+    std::vector<Hessian> hessian;
+
+    // TODO: Make private and add getter/setter
+    int length_Phi;
+    int length_jacobian;
+    int num_tasks;
+
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;
 
@@ -97,7 +109,19 @@ public:
     Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
     Eigen::VectorXd Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
 
-private:
+protected:
+    /// \brief Checks the desired time index for bounds and supports -1 indexing.
+    inline void ValidateTimeIndex(int& t_in) const
+    {
+        if (t_in >= T_ || t_in < -1)
+        {
+            ThrowPretty("Requested t=" << t_in << " out of range, needs to be 0 =< t < " << T_);
+        }
+        else if (t_in == -1)
+        {
+            t_in = (T_ - 1);
+        }
+    }
     void ReinitializeVariables();
 
     int T_;       ///< Number of time steps
@@ -109,6 +133,7 @@ private:
     Eigen::MatrixXd U_;       ///< Control trajectory. Size: num-controls x (T-1)
     Eigen::MatrixXd X_star_;  ///< Goal state trajectory (i.e., positions, velocities). Size: num-states x T
 
+    Eigen::MatrixXd Qf_;               ///< Final state cost
     std::vector<Eigen::MatrixXd> Q_;   ///< State space penalty matrix (precision matrix), per time index
     Eigen::MatrixXd R_;                ///< Control space penalty matrix
     std::vector<Eigen::MatrixXd> Ci_;  ///< Noise weight terms
@@ -118,8 +143,9 @@ private:
 
     std::mt19937 generator_;
     std::normal_distribution<double> standard_normal_noise_{0, 1};
-};
 
+    TaskSpaceVector cost_Phi;
+};
 typedef std::shared_ptr<exotica::DynamicTimeIndexedShootingProblem> DynamicTimeIndexedShootingProblemPtr;
 }  // namespace exotica
 

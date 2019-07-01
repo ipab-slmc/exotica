@@ -5,7 +5,9 @@ extend <exotica_core/planning_problem>
 Required int T;
 Required double tau;  // Discretisation timestep of the trajectory
 
+Optional std::vector<exotica::Initializer> Cost = std::vector<exotica::Initializer>();  // General costs (via task-maps)
 Optional Eigen::VectorXd Q = Eigen::VectorXd();
+Optional Eigen::VectorXd Qf = Eigen::VectorXd();
 Optional Eigen::VectorXd R = Eigen::VectorXd();
 Optional Eigen::VectorXd GoalState = Eigen::VectorXd();
 Optional double Q_rate = 1.;

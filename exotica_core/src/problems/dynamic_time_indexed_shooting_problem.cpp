@@ -35,8 +35,10 @@ REGISTER_PROBLEM_TYPE("DynamicTimeIndexedShootingProblem", exotica::DynamicTimeI
 
 namespace exotica
 {
-DynamicTimeIndexedShootingProblem::DynamicTimeIndexedShootingProblem() = default;
-
+DynamicTimeIndexedShootingProblem::DynamicTimeIndexedShootingProblem()
+{
+    this->flags_ = KIN_FK | KIN_J;
+}
 DynamicTimeIndexedShootingProblem::~DynamicTimeIndexedShootingProblem() = default;
 
 void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init)
@@ -47,18 +49,19 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
 
     const int NX = num_positions_ + num_velocities_,
               NU = num_controls_;
-    if (this->parameters_.Q.rows() > 0)
+    Qf_ = Eigen::MatrixXd::Identity(NX, NX);
+    if (this->parameters_.Qf.rows() > 0)
     {
-        ThrowPretty("Not supported yet");
-        // if (this->parameters_.Q.rows() == NX)
-        // {
-        //     Q_.diagonal() = this->parameters_.Q;
-        // }
-        // else
-        // {
-        //     ThrowNamed("Q dimension mismatch! Expected " << NX << ", got " << this->parameters_.Q.rows());
-        // }
+        if (this->parameters_.Qf.rows() == NX)
+        {
+            Qf_.diagonal() = this->parameters_.Qf;
+        }
+        else
+        {
+            ThrowNamed("Qf dimension mismatch! Expected " << NX << ", got " << this->parameters_.Qf.rows());
+        }
     }
+    Qf_ *= this->parameters_.Qf_rate;
 
     R_ = this->parameters_.R_rate * Eigen::MatrixXd::Identity(num_controls_, num_controls_);
     if (this->parameters_.R.rows() > 0)
@@ -157,19 +160,11 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     const double fmod_tau_dt = std::fmod(static_cast<long double>(1000. * tau_), static_cast<long double>(1000. * scene_->GetDynamicsSolver()->get_dt()));
     if (fmod_tau_dt > 1e-5) ThrowPretty("tau is not a multiple of dt: tau=" << tau_ << ", dt=" << scene_->GetDynamicsSolver()->get_dt() << ", mod(" << fmod_tau_dt << ")");
 
+    // Initialize general costs
+    cost.Initialize(this->parameters_.Cost, shared_from_this(), cost_Phi);
+
     ApplyStartState(false);
     ReinitializeVariables();
-
-    if (init.GoalState.rows() > 0)
-    {
-        // set start and goal states
-        Eigen::MatrixXd goal_state = Eigen::MatrixXd::Zero(NX, T_);
-        goal_state.col(T_ - 1) = init.GoalState;
-        set_X_star(goal_state);
-    }
-
-    if (init.StartState.rows() > 0)
-        set_X(init.StartState.replicate(1, T_));
 }
 
 void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
@@ -181,9 +176,101 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
     U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
 
-    Q_.assign(T_, this->parameters_.Q_rate * Eigen::MatrixXd::Identity(NX, NX));
-    // set final Q (Qf)
-    set_Qf(this->parameters_.Qf_rate * Eigen::MatrixXd::Identity(NX, NX));
+    // Set GoalState
+    if (this->parameters_.GoalState.rows() > 0)
+    {
+        Eigen::MatrixXd goal_state = Eigen::MatrixXd::Zero(NX, T_);
+        if (this->parameters_.GoalState.rows() == NX)
+        {
+            goal_state.col(T_ - 1) = this->parameters_.GoalState;
+        }
+        else if (this->parameters_.GoalState.rows() == num_positions_)
+        {
+            goal_state.col(T_ - 1).head(num_positions_) = this->parameters_.GoalState;
+        }
+        else if (this->parameters_.GoalState.rows() == NX * T_)
+        {
+            for (int t = 0; t < T_; ++t)
+            {
+                goal_state.col(t) = this->parameters_.GoalState.segment(t * NX, NX);
+            }
+        }
+        else
+        {
+            ThrowPretty("GoalState has " << this->parameters_.GoalState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << num_positions_ << ", or NX*T=" << NX * T_);
+        }
+        set_X_star(goal_state);
+    }
+
+    // Set StartState
+    if (this->parameters_.StartState.rows() > 0)
+    {
+        Eigen::MatrixXd start_state = Eigen::MatrixXd::Zero(NX, T_);
+        if (this->parameters_.StartState.rows() == NX)
+        {
+            start_state = this->parameters_.StartState.replicate(1, T_);
+        }
+        else if (this->parameters_.StartState.rows() == num_positions_)
+        {
+            for (int t = 0; t < T_; ++t)
+            {
+                start_state.col(t).head(num_positions_) = this->parameters_.StartState;
+            }
+        }
+        else if (this->parameters_.StartState.rows() == NX * T_)
+        {
+            for (int t = 0; t < T_; ++t)
+            {
+                start_state.col(t) = this->parameters_.StartState.segment(t * NX, NX);
+            }
+        }
+        else
+        {
+            ThrowPretty("StartState has " << this->parameters_.StartState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << num_positions_ << ", or NX*T=" << NX * T_);
+        }
+        set_X(start_state);
+    }
+
+    Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(NX, NX);
+    if (this->parameters_.Q.rows() > 0)
+    {
+        if (this->parameters_.Q.rows() == NX)
+        {
+            Q.diagonal() = this->parameters_.Q;
+        }
+        else
+        {
+            ThrowNamed("Q dimension mismatch! Expected " << NX << ", got " << this->parameters_.Q.rows());
+        }
+    }
+    Q *= this->parameters_.Q_rate;
+    Q_.assign(T_, Q);
+
+    // Set final Q (Qf) -- the Qf variable has been populated in Instantiate
+    set_Qf(Qf_);
+
+    // Reinitialize general cost (via taskmaps)
+    num_tasks = tasks_.size();
+    length_Phi = 0;
+    length_jacobian = 0;
+    TaskSpaceVector y_ref_;
+    for (int i = 0; i < num_tasks; ++i)
+    {
+        AppendVector(y_ref_.map, tasks_[i]->GetLieGroupIndices());
+        length_Phi += tasks_[i]->length;
+        length_jacobian += tasks_[i]->length_jacobian;
+    }
+
+    y_ref_.SetZero(length_Phi);
+    Phi.assign(T_, y_ref_);
+    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
+    if (flags_ & KIN_J_DOT)
+    {
+        Hessian Htmp;
+        Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
+        hessian.assign(T_, Htmp);
+    }
+    cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
 
     PreUpdate();
 }
@@ -212,6 +299,7 @@ void DynamicTimeIndexedShootingProblem::PreUpdate()
 {
     PlanningProblem::PreUpdate();
     for (int i = 0; i < tasks_.size(); ++i) tasks_[i]->is_used = false;
+    cost.UpdateS();
 
     // Create a new set of kinematic solutions with the size of the trajectory
     // based on the lastest KinematicResponse in order to reflect model state
@@ -228,21 +316,13 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X() const
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::get_X(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-
+    ValidateTimeIndex(t);
     return X_.col(t);
 }
 
 void DynamicTimeIndexedShootingProblem::set_X(Eigen::MatrixXdRefConst X_in)
 {
-    if (X_in.rows() != X_.rows() || X_in.cols() != X_.cols()) ThrowPretty("Sizes don't match!");
+    if (X_in.rows() != X_.rows() || X_in.cols() != X_.cols()) ThrowPretty("Sizes don't match! " << X_.rows() << "x" << X_.cols() << " vs " << X_in.rows() << "x" << X_in.cols());
     X_ = X_in;
 }
 
@@ -253,21 +333,13 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_U() const
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::get_U(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-
+    ValidateTimeIndex(t);
     return U_.col(t);
 }
 
 void DynamicTimeIndexedShootingProblem::set_U(Eigen::MatrixXdRefConst U_in)
 {
-    if (U_in.rows() != U_.rows() || U_in.cols() != U_.cols()) ThrowPretty("Sizes don't match!");
+    if (U_in.rows() != U_.rows() || U_in.cols() != U_.cols()) ThrowPretty("Sizes don't match! " << U_.rows() << "x" << U_.cols() << " vs " << U_in.rows() << "x" << U_in.cols());
     U_ = U_in;
 }
 
@@ -278,20 +350,13 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X_star() const
 
 void DynamicTimeIndexedShootingProblem::set_X_star(Eigen::MatrixXdRefConst X_star_in)
 {
-    if (X_star_in.rows() != X_star_.rows() || X_star_in.cols() != X_star_.cols()) ThrowPretty("Sizes don't match!");
+    if (X_star_in.rows() != X_star_.rows() || X_star_in.cols() != X_star_.cols()) ThrowPretty("Sizes don't match! " << X_star_.rows() << "x" << X_star_.cols() << " vs " << X_star_in.rows() << "x" << X_star_in.cols());
     X_star_ = X_star_in;
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_Q(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     return Q_[t];
 }
 
@@ -307,15 +372,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_R() const
 
 void DynamicTimeIndexedShootingProblem::set_Q(Eigen::MatrixXdRefConst Q_in, int t)
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-
+    ValidateTimeIndex(t);
     if (Q_in.rows() != Q_[t].rows() || Q_in.cols() != Q_[t].cols()) ThrowPretty("Dimension mismatch!");
     Q_[t] = Q_in;
 }
@@ -379,54 +436,77 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
         X_.col(t + 1) = X_.col(t + 1) + white_noise + control_dependent_noise;
     }
 
-    scene_->Update(scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1)), static_cast<double>(t) * tau_);
+    const Eigen::VectorXd x_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
+    scene_->Update(x_next_position, static_cast<double>(t) * tau_);
 
-    // TODO: Cost, Equality, Inequality
+    Phi[t].SetZero(length_Phi);
+    if (flags_ & KIN_J) jacobian[t].setZero();
+    if (flags_ & KIN_J_DOT)
+        for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
+    for (int i = 0; i < num_tasks; ++i)
+    {
+        // Only update TaskMap if rho is not 0
+        if (tasks_[i]->is_used)
+        {
+            if (flags_ & KIN_J_DOT)
+            {
+                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+            }
+            else if (flags_ & KIN_J)
+            {
+                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+            }
+            else
+            {
+                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+            }
+        }
+    }
+    if (flags_ & KIN_J_DOT)
+    {
+        cost.Update(Phi[t], jacobian[t], hessian[t], t);
+    }
+    else if (flags_ & KIN_J)
+    {
+        cost.Update(Phi[t], jacobian[t], t);
+    }
+    else
+    {
+        cost.Update(Phi[t], t);
+    }
 
     ++number_of_problem_updates_;
 }
 
 double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    ValidateTimeIndex(t);
     const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
-    return (x_diff.transpose() * Q_[t] * x_diff);
+    const double general_cost = cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];  // TODO: ct scaling
+    return (x_diff.transpose() * Q_[t] * x_diff) + general_cost;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
+    // TODO: Check whether we should make this a RowVectorXd
+    ValidateTimeIndex(t);
+    const Eigen::VectorXd state_cost_jacobian = Q_[t] * X_.col(t) + Q_[t].transpose() * X_.col(t) -
+                                                Q_[t].transpose() * X_star_.col(t) - Q_[t] * X_star_.col(t);
 
-    return Q_[t] * X_.col(t) + Q_[t].transpose() * X_.col(t) -
-           Q_[t].transpose() * X_star_.col(t) - Q_[t] * X_star_.col(t);
+    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
+    general_cost_jacobian.head(num_positions_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
+
+    return state_cost_jacobian + general_cost_jacobian;
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) const
 {
-    if (t >= T_ || t < -1)
-    {
-        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_);
-    }
-    else if (t == -1)
-    {
-        t = T_ - 1;
-    }
-
-    return Q_[t] + Q_[t].transpose();
+    ValidateTimeIndex(t);
+    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
+    general_cost_jacobian.head(num_positions_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
+    // TODO: Using a J^T*J approximation for the general cost here as Hessians aren't implemented for task maps yet.
+    // TODO: As we are not using RowVectorXd (yet), this is J*J^T instead of the correct J^T*J
+    return Q_[t] + Q_[t].transpose() + (general_cost_jacobian * general_cost_jacobian.transpose());
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian() const

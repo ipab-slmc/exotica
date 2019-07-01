@@ -35,6 +35,12 @@ REGISTER_PROBLEM_TYPE("DynamicTimeIndexedShootingProblem", exotica::DynamicTimeI
 
 namespace exotica
 {
+DynamicTimeIndexedShootingProblem::DynamicTimeIndexedShootingProblem()
+{
+    this->flags_ = KIN_FK | KIN_J;
+}
+DynamicTimeIndexedShootingProblem::~DynamicTimeIndexedShootingProblem() = default;
+
 void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init)
 {
     this->parameters_ = init;
@@ -196,7 +202,6 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         length_jacobian += tasks_[i]->length_jacobian;
     }
 
-    flags_ = KIN_FK | KIN_J;  // TODO: This overrides DerivativeOrder, which is bad.
     y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
     if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
@@ -390,9 +395,6 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
             }
             else if (flags_ & KIN_J)
             {
-                HIGHLIGHT("Phi[t].data " << Phi[t].data.rows() << "x" << Phi[t].data.cols())
-                HIGHLIGHT("jacobian[t].data " << jacobian[t].rows() << "x" << jacobian[t].cols())
-                HIGHLIGHT("tasks_[i]->start" << tasks_[i]->start << ", length" << tasks_[i]->length)
                 tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else

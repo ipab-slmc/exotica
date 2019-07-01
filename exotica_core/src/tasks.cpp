@@ -371,7 +371,7 @@ void TimeIndexedTask::ReinitializeVariables(int _T, PlanningProblemPtr _prob, co
         }
         else
         {
-            ThrowPretty("Invalid task goal size! Expecting " << tasks[i]->length * T << " (or 1) and got " << task.Goal.rows());
+            ThrowPretty("Invalid task goal size! Expecting " << tasks[i]->length * T << ", " << tasks[i]->length << ", or 1 and got " << task.Goal.rows());
         }
         if (task.Rho.rows() == 0)
         {

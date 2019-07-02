@@ -73,6 +73,9 @@ public:
     Eigen::Tensor<double, 3> fxx(const StateVector& x, const ControlVector& u) override;
     Eigen::Tensor<double, 3> fxu(const StateVector& x, const ControlVector& u) override;
 
+    /// \brief Return the difference of two state vectors.
+    ///     Used when e.g. angle differences need to be wrapped from [-pi; pi]
+    Eigen::VectorXd StateDelta(const StateVector& x_1, const StateVector& x_2) override;
 private:
     Eigen::Matrix3d M;      ///!< Inertia (mass) matrix
     Eigen::Matrix3d M_inv;  ///!< Inverted inertia matrix

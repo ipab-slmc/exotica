@@ -1162,7 +1162,6 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("f", &DynamicsSolver::f)
         .def("fx", &DynamicsSolver::fx)
         .def("fu", &DynamicsSolver::fu)
-        .def("state_delta", &DynamicsSolver::StateDelta)
         .def("get_position", &DynamicsSolver::GetPosition);
 
     ////////////////////////////////////////////////////////////////////////////

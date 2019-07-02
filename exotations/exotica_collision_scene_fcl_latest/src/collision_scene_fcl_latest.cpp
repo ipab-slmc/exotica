@@ -343,7 +343,7 @@ void CollisionSceneFCLLatest::ComputeDistance(fcl::CollisionObjectd* o1, fcl::Co
         // As of 0.5.94, this does not work for primitive-vs-mesh (but does for mesh-vs-primitive):
         if ((o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH) || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM))  // || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH))
         {
-            HIGHLIGHT_NAMED("WARNING", "As of 0.5.94, this function does not work for primitive-vs-mesh and vice versa. Do not expect the contact points or distances to be accurate at all.");
+            // WARNING("As of 0.5.94, this function does not work for primitive-vs-mesh and vice versa. Do not expect the contact points or distances to be accurate at all.");
         }
 
         // Some of the logic below is copied from Drake

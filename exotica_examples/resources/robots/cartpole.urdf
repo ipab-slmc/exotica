@@ -4,7 +4,7 @@ Taken from Bullet:
     http://bulletphysics.org
 
 Modified:
-    Flipped the axis of ratation
+    Flipped the axis of rotation
  -->
 <?xml version="1.0"?>
 <robot name="cartpole">

@@ -411,7 +411,7 @@ TEST(ExoticaTaskMaps, testEffVelocity)
         for (int t = 0; t < problem->GetT(); ++t)
         {
             // TODO: Can we get those tolerances to be tighter?
-            EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->cost, t, 1.1e-4));
+            EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->cost, t, 1e-3));
         }
     }
     catch (...)

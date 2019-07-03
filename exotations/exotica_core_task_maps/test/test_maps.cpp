@@ -865,6 +865,22 @@ TEST(ExoticaTaskMaps, testCoM)
     }
 }
 
+TEST(ExoticaTaskMaps, testContinuousJointPose)
+{
+    try
+    {
+        TEST_COUT << "ContinuousJointPose test";
+        Initializer map("exotica/ContinuousJointPose", {{"Name", std::string("MyTask")}, {}});
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+        EXPECT_TRUE(test_random(problem));
+        EXPECT_TRUE(test_jacobian(problem));
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
 TEST(ExoticaTaskMaps, testIMesh)
 {
     try

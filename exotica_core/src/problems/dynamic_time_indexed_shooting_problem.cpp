@@ -491,8 +491,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
     // TODO: Check whether we should make this a RowVectorXd
     ValidateTimeIndex(t);
     const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
-    const Eigen::VectorXd state_cost_jacobian = Q_[t] * X_.col(t) + Q_[t].transpose() * X_.col(t) -
-                                                Q_[t].transpose() * X_star_.col(t) - Q_[t] * X_star_.col(t);
+    const Eigen::VectorXd state_cost_jacobian = Q_[t] * x_diff + Q_[t].transpose() * x_diff;
 
     Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
     general_cost_jacobian.head(num_positions_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;

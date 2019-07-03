@@ -1,12 +1,11 @@
-<!-- 
+<?xml version="1.0"?>
+<!--
 Taken from Bullet:
     Bullet Continuous Collision Detection and Physics Library
     http://bulletphysics.org
-
 Modified:
     Flipped the axis of rotation
- -->
-<?xml version="1.0"?>
+-->
 <robot name="cartpole">
     <link name="slideBar">
         <visual>
@@ -84,7 +83,7 @@ Modified:
 
     <link name="end_effector"/>
     <joint name="pole_to_end_effector" type="fixed">
-        <origin xyz="0 0 1.0"/>
+        <origin xyz="0 0 -1.0"/>
         <parent link="pole"/>
         <child link="end_effector"/>
     </joint>

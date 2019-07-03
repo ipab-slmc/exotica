@@ -439,10 +439,10 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     const Eigen::VectorXd x_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
     scene_->Update(x_next_position, static_cast<double>(t) * tau_);
 
-    Phi[t].SetZero(length_Phi);
-    if (flags_ & KIN_J) jacobian[t].setZero();
+    Phi[t + 1].SetZero(length_Phi);
+    if (flags_ & KIN_J) jacobian[t + 1].setZero();
     if (flags_ & KIN_J_DOT)
-        for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
+        for (int i = 0; i < length_jacobian; ++i) hessian[t + 1](i).setZero();
     for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
@@ -450,29 +450,29 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
         {
             if (flags_ & KIN_J_DOT)
             {
-                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x_next_position, Phi[t + 1].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t + 1].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t + 1].segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(x_next_position, Phi[t + 1].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t + 1].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x_next_position, Phi[t + 1].data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
     if (flags_ & KIN_J_DOT)
     {
-        cost.Update(Phi[t], jacobian[t], hessian[t], t);
+        cost.Update(Phi[t + 1], jacobian[t + 1], hessian[t + 1], t + 1);
     }
     else if (flags_ & KIN_J)
     {
-        cost.Update(Phi[t], jacobian[t], t);
+        cost.Update(Phi[t + 1], jacobian[t + 1], t + 1);
     }
     else
     {
-        cost.Update(Phi[t], t);
+        cost.Update(Phi[t + 1], t + 1);
     }
 
     ++number_of_problem_updates_;

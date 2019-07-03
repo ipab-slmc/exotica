@@ -82,7 +82,7 @@ void ContinuousJointPose::Initialize()
     else
     {
         joint_map_.resize(num_controlled_joints);
-        for (int i = 0; i < N_; ++i)
+        for (int i = 0; i < num_controlled_joints; ++i)
         {
             joint_map_[i] = i;
         }

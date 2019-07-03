@@ -30,6 +30,7 @@
 #ifndef EXOTICA_CORE_MOTION_SOLVER_H_
 #define EXOTICA_CORE_MOTION_SOLVER_H_
 
+#include <exotica_core/factory.h>
 #include <exotica_core/object.h>
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/property.h>

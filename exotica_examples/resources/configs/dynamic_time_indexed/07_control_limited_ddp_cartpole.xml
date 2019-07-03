@@ -30,17 +30,21 @@
                     <Frame Link="end_effector" BaseOffset="0 0 1.0"/>
                 </EndEffector>
             </PointToPlane>
+            <ContinuousJointPose Name="CJP">
+                <JointMap>1</JointMap>
+            </ContinuousJointPose>
         </Maps>
 
         <Cost>
-            <Task Task="P2P" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1e5 1e5"/>
+            <!-- <Task Task="P2P" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10"/> -->
+            <Task Task="CJP" Goal="-1 0" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10"/>
         </Cost>
 
         <T>100</T>
         <tau>0.02</tau>
         <Q_rate>0</Q_rate>
         <Qf>1 0 1 1</Qf>
-        <Qf_rate>1e3</Qf_rate>
+        <Qf_rate>10</Qf_rate>
         <R_rate>0.1</R_rate>
         <StartState>0 0 0 0</StartState>
         <GoalState>0 3.14159 0 0</GoalState>

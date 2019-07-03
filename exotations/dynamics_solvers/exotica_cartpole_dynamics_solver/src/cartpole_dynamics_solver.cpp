@@ -177,9 +177,4 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxu(const StateVector& x, const
     return fxu;
 }
 
-Eigen::VectorXd CartpoleDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_in)
-{
-    return Eigen::Vector2d(x_in(0), M_PI - x_in(1));
-}
-
 }  // namespace exotica

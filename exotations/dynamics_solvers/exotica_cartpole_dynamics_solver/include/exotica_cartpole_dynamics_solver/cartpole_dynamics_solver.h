@@ -63,12 +63,6 @@ public:
     /// @return The derivative of the dynamics function w.r.t. u evaluated at (x, u).
     Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
 
-    /// \brief
-    /// Returns the position of all the joints. Converts to the coordinates used by the model.
-    /// @param x The state vector.
-    /// @return State vector in model coordinates.
-    Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
-
     // NOTE: fuu is always zero, so we don't override it
     Eigen::Tensor<double, 3> fxx(const StateVector& x, const ControlVector& u) override;
     Eigen::Tensor<double, 3> fxu(const StateVector& x, const ControlVector& u) override;

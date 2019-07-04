@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 AddInitializer(
   center_of_mass
+  continuous_joint_pose
   interaction_mesh
   eff_position
   eff_orientation
@@ -50,6 +51,7 @@ include_directories(
 
 set(SOURCES
     src/center_of_mass.cpp
+    src/continuous_joint_pose.cpp
     src/interaction_mesh.cpp
     src/eff_position.cpp
     src/eff_orientation.cpp

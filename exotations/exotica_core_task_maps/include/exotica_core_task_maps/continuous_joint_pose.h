@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2019, Wolfgang Merkt
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,42 +27,30 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_MOTION_SOLVER_H_
-#define EXOTICA_CORE_MOTION_SOLVER_H_
+#ifndef EXOTICA_CORE_TASK_MAPS_CONTINUOUS_JOINT_POSE_H_
+#define EXOTICA_CORE_TASK_MAPS_CONTINUOUS_JOINT_POSE_H_
 
-#include <exotica_core/factory.h>
-#include <exotica_core/object.h>
-#include <exotica_core/planning_problem.h>
-#include <exotica_core/property.h>
+#include <exotica_core/task_map.h>
 
-#define REGISTER_MOTIONSOLVER_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER(exotica::MotionSolver, TYPE, DERIV)
+#include <exotica_core_task_maps/continuous_joint_pose_initializer.h>
 
 namespace exotica
 {
-class MotionSolver : public Object, Uncopyable, public virtual InstantiableBase
+class ContinuousJointPose : public TaskMap, public Instantiable<ContinuousJointPoseInitializer>
 {
 public:
-    MotionSolver();
-    virtual ~MotionSolver() = default;
-    virtual void InstantiateBase(const Initializer& init);
-    virtual void SpecifyProblem(PlanningProblemPtr pointer);
-    virtual void Solve(Eigen::MatrixXd& solution) = 0;
-    PlanningProblemPtr GetProblem() const { return problem_; }
-    std::string Print(const std::string& prepend) const override;
-    void SetNumberOfMaxIterations(int max_iter)
-    {
-        if (max_iter < 1) ThrowPretty("Number of maximum iterations needs to be greater than 0.");
-        max_iterations_ = max_iter;
-    }
-    int GetNumberOfMaxIterations() { return max_iterations_; }
-    double GetPlanningTime() { return planning_time_; }
-protected:
-    PlanningProblemPtr problem_;
-    double planning_time_ = -1;
-    int max_iterations_ = 100;
+    void AssignScene(ScenePtr scene) override;
+
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    int TaskSpaceDim() override;
+
+    std::vector<int> joint_map_;  // TODO: Make private with getter
+    int N_;                       // TODO: Make private with getter
+
+private:
+    void Initialize();
 };
+}  // namespace exotica
 
-typedef std::shared_ptr<exotica::MotionSolver> MotionSolverPtr;
-}
-
-#endif  // EXOTICA_CORE_MOTION_SOLVER_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_CONTINUOUS_JOINT_POSE_H_

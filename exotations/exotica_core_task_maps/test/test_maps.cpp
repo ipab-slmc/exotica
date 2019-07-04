@@ -411,7 +411,7 @@ TEST(ExoticaTaskMaps, testEffVelocity)
         for (int t = 0; t < problem->GetT(); ++t)
         {
             // TODO: Can we get those tolerances to be tighter?
-            EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->cost, t, 1.1e-4));
+            EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->cost, t, 1e-3));
         }
     }
     catch (...)
@@ -857,6 +857,22 @@ TEST(ExoticaTaskMaps, testCoM)
                 0, -0.123021, 0.0389986;
             EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
+        EXPECT_TRUE(test_jacobian(problem));
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+TEST(ExoticaTaskMaps, testContinuousJointPose)
+{
+    try
+    {
+        TEST_COUT << "ContinuousJointPose test";
+        Initializer map("exotica/ContinuousJointPose", {{"Name", std::string("MyTask")}, {}});
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+        EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
     }
     catch (...)

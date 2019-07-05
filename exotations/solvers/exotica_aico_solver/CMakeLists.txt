@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 AddInitializer(
   approximate_inference_solver
   aico_solver
+  aico_dynamics_solver
   bayesian_ik_solver
 )
 GenInitializers()
@@ -26,6 +27,7 @@ include_directories(
 
 add_library(${PROJECT_NAME}
   src/aico_solver.cpp
+  src/aico_dynamics_solver.cpp
   src/bayesian_ik_solver.cpp
 )
 target_link_libraries(${PROJECT_NAME}

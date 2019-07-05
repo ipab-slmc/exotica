@@ -67,9 +67,13 @@ public:
     Eigen::Tensor<double, 3> fxx(const StateVector& x, const ControlVector& u) override;
     Eigen::Tensor<double, 3> fxu(const StateVector& x, const ControlVector& u) override;
 
+    Eigen::MatrixXd get_M(const StateVector& x) override;
+    Eigen::MatrixXd get_C(const StateVector& x) override;
+    Eigen::MatrixXd get_G(const StateVector& x) override;
+    Eigen::MatrixXd get_B() override;
+
 private:
-    Eigen::Matrix3d M;      ///!< Inertia (mass) matrix
-    Eigen::Matrix3d M_inv;  ///!< Inverted inertia matrix
+    Eigen::MatrixXd B_;                    ///!< Control matrix.
 
     double g_ = 9.81;                     ///!< Gravity (m/s^2)
     double m_c_ = 1;                      ///!< Cart mass (kg)

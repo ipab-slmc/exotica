@@ -32,7 +32,7 @@
 // http://ipvs.informatik.uni-stuttgart.de/mlr/papers/09-toussaint-ICML.pdf
 // Original code available at http://ipvs.informatik.uni-stuttgart.de/mlr/marc/source-code/index.html
 
-/// \file aico_solver.h
+/// \file aico_solver.cpp
 /// \brief Approximate Inference Control
 
 #include <exotica_aico_solver/aico_solver.h>

@@ -2,6 +2,9 @@
   <class name="exotica/AICOSolver" type="exotica::AICOSolver" base_class_type="exotica::MotionSolver">
     <description>AICO unconstrained trajectory solver</description>
   </class>
+  <class name="exotica/AICODynamicsSolver" type="exotica::AICODynamicsSolver" base_class_type="exotica::MotionSolver">
+    <description>AICO unconstrained trajectory solver with dynamics</description>
+  </class>
   <class name="exotica/BayesianIKSolver" type="exotica::BayesianIKSolver" base_class_type="exotica::MotionSolver">
     <description>Bayesian unconstrained endpose solver</description>
   </class>

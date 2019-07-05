@@ -38,6 +38,9 @@ CartpoleDynamicsSolver::CartpoleDynamicsSolver()
     num_positions_ = 2;
     num_velocities_ = 2;
     num_controls_ = 1;
+
+    B_ = Eigen::MatrixXd(num_positions_, num_controls_);
+    B_ << 1, 0;
 }
 
 void CartpoleDynamicsSolver::AssignScene(ScenePtr scene_in)
@@ -175,6 +178,48 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxu(const StateVector& x, const
                     {0, 2 * l_ * m_p_ * sin_theta * cos_theta * cos_theta / std::pow(l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta, 2) + sin_theta / (l_ * m_c_ + l_ * m_p_ * sin_theta * sin_theta),
                      0, 0}}});
     return fxu;
+}
+
+// NOTE: for the below, see http://underactuated.mit.edu/underactuated.html?chapter=acrobot
+//  The convention, however, is different, so we flip G(q) = -tau_g(q)
+Eigen::MatrixXd CartpoleDynamicsSolver::get_M(const StateVector& x)
+{
+    auto theta = x(1);
+    auto cos_theta = std::cos(theta);
+
+    Eigen::MatrixXd M(num_positions_, num_velocities_);
+    M << m_c_ + m_p_, m_p_ * l_ * cos_theta,
+         m_p_ * l_ * cos_theta, m_p_ * l_ * l_;
+    return M;
+}
+
+
+Eigen::MatrixXd CartpoleDynamicsSolver::get_C(const StateVector& x)
+{
+    auto theta = x(1);
+    auto theta_dot = x(3);
+    auto sin_theta = std::sin(theta);
+
+    Eigen::MatrixXd C(num_positions_, num_velocities_);
+    C << 0, - m_p_ * l_ * theta_dot * sin_theta,
+         0, 0;
+    
+    return C;
+}
+
+Eigen::MatrixXd CartpoleDynamicsSolver::get_G(const StateVector& x)
+{
+    auto theta = x(1);
+    auto sin_theta = std::sin(theta);
+    
+    Eigen::VectorXd G(num_positions_);
+    G << 0, -m_p_ * g_ * l_ * sin_theta;
+    return -G;
+}
+
+Eigen::MatrixXd CartpoleDynamicsSolver::get_B()
+{
+    return B_;    
 }
 
 }  // namespace exotica

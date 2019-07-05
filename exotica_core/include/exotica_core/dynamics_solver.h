@@ -92,6 +92,21 @@ public:
     virtual Eigen::Tensor<T, 3> fuu(const StateVector& x, const ControlVector& u);
     virtual Eigen::Tensor<T, 3> fxu(const StateVector& x, const ControlVector& u);
 
+    /// \brief Returns the inertia matrix M.
+    virtual Eigen::MatrixXd get_M(const StateVector& x);
+
+    /// \brief Returns the Coriolis matrix F.
+    virtual Eigen::MatrixXd get_C(const StateVector& x);
+
+    // NOTE:
+    //  We assume the following RBD: M(q) * q_ddot + C(q, q_dot) q_dot + G(q) = Bu
+    //  sometimes gravity is on the right side, be careful with signs when overriding.
+    /// \brief Returns the gravity matrix G.
+    virtual Eigen::MatrixXd get_G(const StateVector& x);
+
+    /// \brief Returns the control matrix B.
+    virtual Eigen::MatrixXd get_B();
+
     /// \brief Simulates the dynamic system from starting state x using control u for t seconds
     ///
     /// Simulates the system and steps the simulation by timesteps dt for a total time of t using the specified integration scheme starting from state x and with controls u.

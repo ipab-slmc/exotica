@@ -1,0 +1,9 @@
+class AICODynamicsSolver
+
+extend <exotica_aico_solver/approximate_inference_solver>
+Optional double Kp_gain = 5.0;
+Optional double Kd_gain = 5.0;
+Optional int FunctionTolerancePatience = 10; // early stopping or patience
+Optional double FunctionTolerance = 1e-3; 
+Optional double alpha_rate = 1e-2; 
+Optional double theta_rate = 1;

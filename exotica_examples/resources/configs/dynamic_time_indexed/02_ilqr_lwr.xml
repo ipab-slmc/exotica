@@ -6,7 +6,28 @@
         <FunctionTolerance>-1</FunctionTolerance>
         <FunctionTolerancePatience>50</FunctionTolerancePatience>
     </ILQRSolver>
+    <!-- <ILQGSolver Name="ILQRSolver">
+        <Debug>1</Debug>
+        <MaxIterations>50</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>50</FunctionTolerancePatience>
+    </ILQGSolver> -->
 
+    <!-- <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>20</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>20</FunctionTolerancePatience>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+    </ControlLimitedDDPSolver> -->
+    <!-- <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>50</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>50</FunctionTolerancePatience>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+    </AnalyticDDPSolver> -->
+    
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
             <Scene>
@@ -16,36 +37,42 @@
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
 
                 <DynamicsSolver>
-                    <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
+                    <!-- <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
                         <ControlLimits>10</ControlLimits>
                         <dt>0.02</dt>
-                    </DoubleIntegratorDynamicsSolver>
+                    </DoubleIntegratorDynamicsSolver> -->
+                    <PinocchioDynamicsSolver Name="solver" Integrator="RK1">
+                        <ControlLimits>100</ControlLimits>
+                        <dt>0.02</dt>
+                    </PinocchioDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
         </PlanningScene>
 
-        <Maps>
+        <!-- <Maps>
             <EffPosition Name="Position">
                 <EndEffector>
                     <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17"/>
                 </EndEffector>
             </EffPosition>
             <JointLimit Name="JL"/>
-        </Maps>
+        </Maps> -->
 
-        <Cost>
-            <Task Task="JL" Rho="1e2"/>
-            <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1000.0 1000.0"/>
-        </Cost>
+        <!-- <Cost> -->
+            <!-- <Task Task="JL" Rho="1e-5"/> -->
+            <!-- <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10.0"/> -->
+            <!-- <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0 1.0"/> -->
+        <!-- </Cost> -->
         
-        <T>200</T>
+        <T>100</T>
         <tau>0.02</tau>
         <dt>0.02</dt>
         <Q_rate>0</Q_rate>
-        <Qf>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Qf>
-        <Qf_rate>1e3</Qf_rate>
-        <R_rate>0.1</R_rate>
-        <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
-        <!-- <GoalState> 0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState> -->
+        <!-- <Qf>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Qf> -->
+        <Qf_rate>10</Qf_rate>
+
+        <R_rate>1e-10</R_rate>
+        <StartState>0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</StartState>
+        <GoalState> 0 0 0  0 0 0 0 0 0 0 0 0 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </DynamicTimeIndexedProblemConfig>

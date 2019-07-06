@@ -58,6 +58,7 @@ public:
     StateVector f(const StateVector& x, const ControlVector& u) override;
     StateDerivative fx(const StateVector& x, const ControlVector& u) override;
     ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
+    StateVector Integrate(const StateVector& x, const ControlVector& u) override;
 
 private:
     pinocchio::Model model_;

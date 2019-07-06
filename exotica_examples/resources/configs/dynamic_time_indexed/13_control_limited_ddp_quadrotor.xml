@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+    <!-- <ILQRSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>50</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>50</FunctionTolerancePatience>
+    </ILQRSolver> -->
+    <!-- <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>20</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>20</FunctionTolerancePatience>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+    </ControlLimitedDDPSolver> -->
+    <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>20</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>20</FunctionTolerancePatience>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+    </AnalyticDDPSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>base</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/quadrotor.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/quadrotor.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <DynamicsSolver>
+                    <QuadrotorDynamicsSolver Name="dsolver" Integrator="RK1">
+                        <ControlLimits>50</ControlLimits>
+                        <dt>0.02</dt>
+                    </QuadrotorDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <!-- <T>50</T>
+        <tau>0.05</tau>
+        <dt>0.05</dt>
+        <Q_rate>1e3</Q_rate>
+        <R_rate>1</R_rate> -->
+        <T>100</T>
+        <tau>0.02</tau>
+        <dt>0.02</dt>
+        <Q_rate>0</Q_rate>
+        <Qf_rate>10</Qf_rate>
+        <R_rate>0.01</R_rate>
+        <StartState>0 0 0 0 0 0 0 0 0 0 0 0</StartState>
+        <GoalState>1 1 1 0 0 0 0 0 0 0 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</PlannerDemoConfig>

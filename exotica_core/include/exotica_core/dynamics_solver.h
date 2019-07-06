@@ -150,7 +150,7 @@ protected:
     Eigen::VectorXd control_limits_ = Eigen::VectorXd();  ///< ControlLimits. Default is empty vector.
 
     /// \brief Integrates the dynamic system from state x with controls u applied for one timestep dt using the selected integrator.
-    inline StateVector Integrate(const StateVector& x, const ControlVector& u);
+    virtual StateVector Integrate(const StateVector& x, const ControlVector& u);
 
     void InitializeSecondOrderDerivatives();
     Eigen::Tensor<T, 3> fxx_default_, fuu_default_, fxu_default_;

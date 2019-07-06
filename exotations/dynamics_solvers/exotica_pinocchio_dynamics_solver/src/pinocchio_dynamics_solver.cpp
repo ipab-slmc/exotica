@@ -71,12 +71,98 @@ Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVe
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
-    ThrowPretty("NotYetImplemented");
+    // Finite differences
+    constexpr double eps = 1e-6;
+    const int NX = num_positions_ + num_velocities_;
+
+    Eigen::MatrixXd fx_fd(NX, NX);
+
+    for (int i = 0; i < NX; ++i)
+    {
+        Eigen::VectorXd x_low = x;
+        Eigen::VectorXd x_high = x;
+        x_low(i) -= eps;
+        x_high(i) += eps;
+
+        fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
+    }
+    
+    // HIGHLIGHT_NAMED("Pin", fx_fd);
+    return fx_fd;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    ThrowPretty("NotYetImplemented");
+    // Finite differences
+    constexpr double eps = 1e-6;
+    const int NX = num_positions_ + num_velocities_;
+    const int NU = num_controls_;
+
+    Eigen::MatrixXd fu_fd(NX, NU);
+
+    for (int i = 0; i < NU; ++i)
+    {
+        Eigen::VectorXd u_low = u;
+        Eigen::VectorXd u_high = u;
+        u_low(i) -= eps;
+        u_high(i) += eps;
+        
+        fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
+    }
+
+    // HIGHLIGHT_NAMED("Pin", fu_fd);
+    return fu_fd;
 }
+
+Eigen::VectorXd PinocchioDynamicsSolver::Integrate(const StateVector& x, const ControlVector& u)
+{
+    switch (integrator_)
+    {
+        // Forward Euler (RK1)
+        case Integrator::RK1:
+        {
+            ControlVector u_limited(u.rows(), 1);
+            if (control_limits_.size() > 0)
+            {
+                for (int i = 0; i < num_controls_; ++ i)
+                    u_limited(i, 1) = std::min(
+                        std::max(u(i, 1), -control_limits_(i)),
+                        control_limits_(i)
+                    );
+            }
+
+            StateVector xdot = f(x, u);
+            Eigen::VectorXd x_new = x + dt_ * xdot;
+
+            // enforce joint limits
+            for (int i = 0; i < num_positions_; ++ i) 
+            {
+                if (
+                    x_new(i) <= model_.lowerPositionLimit(i) ||
+                    x_new(i) >= model_.upperPositionLimit(i)
+                ) {
+                    x_new(i) = std::min(
+                        std::max(x_new(i), model_.lowerPositionLimit(i)),
+                        model_.upperPositionLimit(i)
+                    );
+
+                    // clamp velocities to 0
+                    x_new(num_positions_ + i) = 0;
+                }
+
+            }
+            // x_new.head(num_positions_) = x_new.head(num_positions_).cwiseMax(
+            //     model_.lowerPositionLimit
+            // ).cwiseMin(
+            //     model_.upperPositionLimit
+            // );
+
+            return x_new;
+        }
+    }
+
+    ThrowPretty("PinocchioDynamicsSolver only supports RK1!");
+}
+
 
 }  // namespace exotica

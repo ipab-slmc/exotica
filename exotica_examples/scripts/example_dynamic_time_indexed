@@ -28,6 +28,7 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/10_ilqg_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/11_ilqg_lwr.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/12_ilqg_valkyrie.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/13_control_limited_ddp_quadrotor.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1
@@ -52,9 +53,14 @@ while True:
         for t in range(problem.T - 1):
             update_start = time()
             # u = solution[t,:]
-            u = solver.get_feedback_control(
-                problem.X[:,t], t
-            )
+            u = problem.U[:,t]
+            # 
+            # u = [1, 1, 1, 1]
+            # print(u)
+
+            # u = solver.get_feedback_control(
+            #     problem.X[:,t], t
+            # )
             problem.update(u, t)
             problem.get_scene().get_kinematic_tree().publish_frames()
             update_end = time()

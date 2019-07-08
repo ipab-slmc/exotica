@@ -52,7 +52,7 @@ public:
 private:
     Eigen::Vector3d eff_lower;  ///< End-effector lower x, y, z limit.
     Eigen::Vector3d eff_upper;  ///< End-effector upper x, y, z limit.
-    int n_effs;                 ///< Number of end-effectors.
+    int n_effs_;                ///< Number of end-effectors.
 };
 }  // namespace exotica
 

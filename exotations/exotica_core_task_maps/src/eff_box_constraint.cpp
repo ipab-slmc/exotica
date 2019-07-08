@@ -37,7 +37,7 @@ void EffBoxConstraint::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
 
-    for (int i = 0; i < n_effs; ++i)
+    for (int i = 0; i < n_effs_; ++i)
     {
         // Setup
         const int eff_id = 6 * i;
@@ -54,7 +54,7 @@ void EffBoxConstraint::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi,
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != TaskSpaceDim() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
-    for (int i = 0; i < n_effs; ++i)
+    for (int i = 0; i < n_effs_; ++i)
     {
         // Setup
         const int eff_id = 6 * i;
@@ -85,11 +85,11 @@ void EffBoxConstraint::Instantiate(const EffBoxConstraintInitializer& init)
     eff_lower[2] = init.ZLim[0];
     eff_upper[2] = init.ZLim[1];
 
-    n_effs = frames_.size();
+    n_effs_ = frames_.size();
 }
 
 int EffBoxConstraint::TaskSpaceDim()
 {
-    return 6 * n_effs;
+    return 6 * n_effs_;
 }
 }  // namespace exotica

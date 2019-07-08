@@ -121,6 +121,14 @@ void ControlLimitedDDPSolver::BackwardPass()
 
         Vx = Qx - K_gains_[t].transpose() * Quu * k_gains_[t];
         Vxx = Qxx - K_gains_[t].transpose() * Quu * K_gains_[t];
+        
+        // fix for large values
+        // Vx = Vx.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+        //     return std::min(std::max(x, min_clamp_), max_clamp_);
+        // });
+        // Vxx = Vxx.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+        //     return std::min(std::max(x, min_clamp_), max_clamp_);
+        // });
     }
 }
 

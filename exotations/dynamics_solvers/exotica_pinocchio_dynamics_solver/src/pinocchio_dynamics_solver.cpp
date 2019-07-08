@@ -114,54 +114,83 @@ Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlV
     return fu_fd;
 }
 
-Eigen::VectorXd PinocchioDynamicsSolver::Integrate(const StateVector& x, const ControlVector& u)
+// Eigen::VectorXd PinocchioDynamicsSolver::Integrate(const StateVector& x, const ControlVector& u)
+// {
+//     switch (integrator_)
+//     {
+//         // Forward Euler (RK1)
+//         case Integrator::RK1:
+//         {
+//             ControlVector u_limited(u.rows(), 1);
+//             if (control_limits_.size() > 0)
+//             {
+//                 for (int i = 0; i < num_controls_; ++ i)
+//                     u_limited(i, 1) = std::min(
+//                         std::max(u(i, 1), -control_limits_(i)),
+//                         control_limits_(i)
+//                     );
+//             }
+
+//             StateVector xdot = f(x, u);
+//             Eigen::VectorXd x_new = x + dt_ * xdot;
+
+//             // enforce joint limits
+//             for (int i = 0; i < num_positions_; ++ i) 
+//             {
+//                 if (
+//                     x_new(i) <= model_.lowerPositionLimit(i) ||
+//                     x_new(i) >= model_.upperPositionLimit(i)
+//                 ) {
+//                     x_new(i) = std::min(
+//                         std::max(x_new(i), model_.lowerPositionLimit(i)),
+//                         model_.upperPositionLimit(i)
+//                     );
+
+//                     // clamp velocities to 0
+//                     x_new(num_positions_ + i) = 0;
+//                 }
+
+//             }
+//             // x_new.head(num_positions_) = x_new.head(num_positions_).cwiseMax(
+//             //     model_.lowerPositionLimit
+//             // ).cwiseMin(
+//             //     model_.upperPositionLimit
+//             // );
+
+//             return x_new;
+//         }
+//     }
+
+//     ThrowPretty("PinocchioDynamicsSolver only supports RK1!");
+// }
+
+Eigen::VectorXd PinocchioDynamicsSolver::inverse_dynamics(const StateVector& x)
 {
-    switch (integrator_)
-    {
-        // Forward Euler (RK1)
-        case Integrator::RK1:
-        {
-            ControlVector u_limited(u.rows(), 1);
-            if (control_limits_.size() > 0)
-            {
-                for (int i = 0; i < num_controls_; ++ i)
-                    u_limited(i, 1) = std::min(
-                        std::max(u(i, 1), -control_limits_(i)),
-                        control_limits_(i)
-                    );
-            }
+    pinocchio::Data data(model_);
 
-            StateVector xdot = f(x, u);
-            Eigen::VectorXd x_new = x + dt_ * xdot;
+    // compute dynamic drift -- Coriolis, centrifugal, gravity
+    // Assume 0 acceleration, i.e. no control
+    // Eigen::VectorXd b = pinocchio::rnea(model_, data,
+    Eigen::VectorXd rnea_res = pinocchio::rnea(model_, data,
+        x.head(num_positions_).eval(), x.tail(num_velocities_).eval(),
+        Eigen::VectorXd::Zero(num_velocities_).eval()
+    );
+    // pinocchio::crba(model_, data,
+    //     x.head(num_positions_).eval()
+    // );
 
-            // enforce joint limits
-            for (int i = 0; i < num_positions_; ++ i) 
-            {
-                if (
-                    x_new(i) <= model_.lowerPositionLimit(i) ||
-                    x_new(i) >= model_.upperPositionLimit(i)
-                ) {
-                    x_new(i) = std::min(
-                        std::max(x_new(i), model_.lowerPositionLimit(i)),
-                        model_.upperPositionLimit(i)
-                    );
+    // compute mass matrix M
+    // Eigen::VectorXd u = data.C * x.tail(num_velocities_) + data.g;
 
-                    // clamp velocities to 0
-                    x_new(num_positions_ + i) = 0;
-                }
+    // HIGHLIGHT_NAMED("x", x);
+    // HIGHLIGHT_NAMED("u", u);
+    // HIGHLIGHT_NAMED("M", data.M);
+    // HIGHLIGHT_NAMED("C", data.C);
+    // HIGHLIGHT_NAMED("g", data.g);
+    // HIGHLIGHT_NAMED("rnea_res", rnea_res);
+    // HIGHLIGHT("=====================================");
 
-            }
-            // x_new.head(num_positions_) = x_new.head(num_positions_).cwiseMax(
-            //     model_.lowerPositionLimit
-            // ).cwiseMin(
-            //     model_.upperPositionLimit
-            // );
-
-            return x_new;
-        }
-    }
-
-    ThrowPretty("PinocchioDynamicsSolver only supports RK1!");
+    return rnea_res;
 }
 
 

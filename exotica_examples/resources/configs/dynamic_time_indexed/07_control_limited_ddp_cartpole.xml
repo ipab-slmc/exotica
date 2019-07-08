@@ -1,12 +1,26 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
-    <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
+    <!-- <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
-        <MaxIterations>50</MaxIterations>
+        <MaxIterations>100</MaxIterations>
         <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>50</FunctionTolerancePatience>
+        <FunctionTolerancePatience>100</FunctionTolerancePatience>
         <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-    </ControlLimitedDDPSolver>
+    </ControlLimitedDDPSolver> -->
+    <!-- <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>100</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>100</FunctionTolerancePatience>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+    </AnalyticDDPSolver> -->
+    <ILQRSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>100</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>100</FunctionTolerancePatience>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+    </ILQRSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
@@ -18,7 +32,7 @@
                 <DynamicsSolver>
                     <CartpoleDynamicsSolver Name="solver" Integrator="RK1">
                         <ControlLimits>25</ControlLimits>
-                        <dt>0.02</dt>
+                        <dt>0.01</dt>
                     </CartpoleDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
@@ -37,16 +51,16 @@
 
         <Cost>
             <!-- <Task Task="P2P" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10"/> -->
-            <Task Task="CJP" Goal="-1 0" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10"/>
+            <!-- <Task Task="CJP" Goal="-1 0" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10.0"/> -->
         </Cost>
 
-        <T>100</T>
-        <tau>0.02</tau>
+        <T>200</T>
+        <tau>0.01</tau>
         <Q_rate>0</Q_rate>
-        <Qf>1 0 1 1</Qf>
+        <Qf>1 1 1 1</Qf>
         <Qf_rate>10</Qf_rate>
         <R_rate>0.1</R_rate>
-        <StartState>0 0 0 0</StartState>
+        <StartState>0 1e-3 0 0</StartState>
         <GoalState>0 3.14159 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </DynamicTimeIndexedProblemConfig>

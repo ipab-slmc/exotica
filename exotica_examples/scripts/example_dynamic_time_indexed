@@ -53,19 +53,18 @@ while True:
         for t in range(problem.T - 1):
             update_start = time()
             # u = solution[t,:]
-            u = problem.U[:,t]
-            # 
-            # u = [1, 1, 1, 1]
+            # u = problem.U[:,t]
             # print(u)
 
-            # u = solver.get_feedback_control(
-            #     problem.X[:,t], t
-            # )
+            u = solver.get_feedback_control(
+                problem.X[:,t], t
+            )
             problem.update(u, t)
             problem.get_scene().get_kinematic_tree().publish_frames()
             update_end = time()
             if problem.tau > update_end - update_start:
                 sleep(problem.tau - (update_end - update_start))
+                # sleep(0.2)
         e = time()
         sleep(1)
         print("Time taken to roll-out:", e-s)

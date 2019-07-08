@@ -236,4 +236,10 @@ Eigen::Tensor<T, 3> AbstractDynamicsSolver<T, NX, NU>::fxu(const StateVector& x,
     return fxu_default_;
 }
 
+template <typename T, int NX, int NU>
+Eigen::Matrix<T, NU, 1> AbstractDynamicsSolver<T, NX, NU>::inverse_dynamics(const StateVector& state)
+{
+    ThrowPretty("This dynamics solver does not support inverse dynamics!");
+}
+
 }  // namespace exotica

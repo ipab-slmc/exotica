@@ -178,12 +178,19 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
             double alpha = alpha_space(ai);
             double cost = ForwardPass(alpha, ref_x, ref_u);
 
-            if (ai == 0 || cost < current_cost)
+            if (ai == 0 || (cost < current_cost && std::isfinite(cost)))
             {
                 current_cost = cost;
                 new_U = prob_->get_U();
                 best_alpha = alpha;
             }
+        }
+
+        HIGHLIGHT(prob_->get_U());
+        if (!std::isfinite(current_cost))
+        {
+            if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Diverged!");
+            break;
         }
 
         // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13

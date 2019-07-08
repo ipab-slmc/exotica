@@ -133,6 +133,8 @@ public:
     Eigen::VectorXd get_control_limits();
     void set_control_limits(Eigen::VectorXd control_limits);
 
+    virtual ControlVector inverse_dynamics(const StateVector& state);
+
 private:
     bool control_limits_initialized_ = false;
     Eigen::VectorXd raw_control_limits_;

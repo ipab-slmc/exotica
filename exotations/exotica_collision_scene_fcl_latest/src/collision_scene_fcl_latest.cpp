@@ -36,11 +36,13 @@ REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionScene
 
 namespace fcl_convert
 {
-fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
+// ** Do not remove the inline ** It causes an epic memory bug in the transforms.
+//      Fixed in July 2018 and July 2019.
+inline fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
 {
     Eigen::Isometry3d ret;
     tf::transformKDLToEigen(frame, ret);
-    return static_cast<fcl::Transform3d>(ret);
+    return ret;
 }
 }
 

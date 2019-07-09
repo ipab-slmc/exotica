@@ -33,6 +33,7 @@
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionSceneFCLLatest)
 
 #define CONTINUOUS_COLLISION_USE_ADVANCED_SETTINGS
+// #define CONTINUOUS_COLLISION_DEBUG
 
 namespace fcl_convert
 {
@@ -739,31 +740,6 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
         return ret;
     }
 
-    fcl::ContinuousCollisionRequestd request = fcl::ContinuousCollisionRequestd();
-// request.ccd_motion_type = fcl::CCDM_SCREW;
-
-#ifdef CONTINUOUS_COLLISION_USE_ADVANCED_SETTINGS
-    request.num_max_iterations = 100;  // default 10
-    request.toc_err = 1e-5;            // default 1e-4
-
-    // GST_LIBCCD, GST_INDEP
-    // request.gjk_solver_type = fcl::GST_INDEP;
-
-    // CCDM_TRANS, CCDM_LINEAR, CCDM_SCREW, CCDM_SPLINE
-    request.ccd_motion_type = fcl::CCDMotionType::CCDM_SCREW;
-
-    // CCDC_NAIVE, CCDC_CONSERVATIVE_ADVANCEMENT, CCDC_RAY_SHOOTING, CCDC_POLYNOMIAL_SOLVER
-    // As of 2018-06-27, only CCDC_NAIVE appears to work reliably on both primitives and meshes.
-    // Cf. https://github.com/flexible-collision-library/fcl/issues/120
-    request.ccd_solver_type = fcl::CCDC_NAIVE;
-
-    // If both are primitives, let's use conservative advancement
-    if (shape1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && shape2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
-    {
-        request.ccd_solver_type = fcl::CCDC_CONSERVATIVE_ADVANCEMENT;
-    }
-#endif
-
     fcl::Transform3d tf1_beg_fcl = fcl_convert::KDL2fcl(tf1_beg);
     fcl::Transform3d tf1_end_fcl = fcl_convert::KDL2fcl(tf1_end);
     fcl::Transform3d tf2_beg_fcl = fcl_convert::KDL2fcl(tf2_beg);
@@ -805,6 +781,40 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
            << ToString(tf2_end) << "\n";
         throw std::logic_error(ss.str());
     }
+
+    // If neither object has motion, only ran a normal collision check.
+    // HIGHLIGHT_NAMED("tf1_beg_fcl", "\n" << tf1_beg_fcl.matrix());
+    // HIGHLIGHT_NAMED("tf1_end_fcl", "\n" << tf1_end_fcl.matrix());
+    // HIGHLIGHT_NAMED("tf2_beg_fcl", "\n" << tf2_beg_fcl.matrix());
+    // HIGHLIGHT_NAMED("tf2_end_fcl", "\n" << tf2_end_fcl.matrix());
+    // if (tf1_beg_fcl.isApprox(tf1_end_fcl) && tf2_beg_fcl.isApprox(tf2_end_fcl))
+    // {
+    //     HIGHLIGHT("Yeah, no motion here.");
+    // }
+
+    fcl::ContinuousCollisionRequestd request = fcl::ContinuousCollisionRequestd();
+
+#ifdef CONTINUOUS_COLLISION_USE_ADVANCED_SETTINGS
+    request.num_max_iterations = 100;  // default 10
+    request.toc_err = 1e-5;            // default 1e-4
+
+    // GST_LIBCCD, GST_INDEP
+    // request.gjk_solver_type = fcl::GST_INDEP;
+
+    // CCDM_TRANS, CCDM_LINEAR, CCDM_SCREW, CCDM_SPLINE
+    request.ccd_motion_type = fcl::CCDMotionType::CCDM_SCREW;
+
+    // CCDC_NAIVE, CCDC_CONSERVATIVE_ADVANCEMENT, CCDC_RAY_SHOOTING, CCDC_POLYNOMIAL_SOLVER
+    // As of 2018-06-27, only CCDC_NAIVE appears to work reliably on both primitives and meshes.
+    // Cf. https://github.com/flexible-collision-library/fcl/issues/120
+    request.ccd_solver_type = fcl::CCDC_NAIVE;
+
+    // If both are primitives, let's use conservative advancement
+    if (shape1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && shape2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM)
+    {
+        request.ccd_solver_type = fcl::CCDC_CONSERVATIVE_ADVANCEMENT;
+    }
+#endif
 
     fcl::ContinuousCollisionResultd result;
     double time_of_contact = fcl::continuousCollide(
@@ -916,4 +926,4 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
 
     return ret;
 }
-}
+}  // namespace exotica

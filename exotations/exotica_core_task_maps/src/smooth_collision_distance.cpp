@@ -130,6 +130,8 @@ void SmoothCollisionDistance::Initialize()
     linear_ = parameters_.Linear;
     check_self_collision_ = parameters_.CheckSelfCollision;
 
+    if (robot_margin_ == 0.0 || world_margin_ == 0.0) ThrowPretty("Setting the margin to zero is a bad idea. It will NaN.");
+
     HIGHLIGHT_NAMED("Smooth Collision Distance",
                     "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
 

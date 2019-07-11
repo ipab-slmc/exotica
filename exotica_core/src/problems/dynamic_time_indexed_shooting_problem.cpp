@@ -272,6 +272,21 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     }
     cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
 
+    if (this->parameters_.WarmStartWithInverseDynamics)
+    {
+        for (int t = 0; t < T_ - 1; ++t)
+        {
+
+            // HIGHLIGHT("rnea: " <<  scene_->GetDynamicsSolver()->inverse_dynamics(X_.col(t)).rows() << " x " <<  scene_->GetDynamicsSolver()->inverse_dynamics(X_.col(t)).cols());
+            // HIGHLIGHT("u: " << U_.col(t).rows() << " x " << U_.col(t).cols());
+
+            U_.col(t) = scene_->GetDynamicsSolver()->inverse_dynamics(X_.col(t));
+            X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(
+                X_.col(t), U_.col(t), tau_
+            );
+        }
+    }
+
     PreUpdate();
 }
 

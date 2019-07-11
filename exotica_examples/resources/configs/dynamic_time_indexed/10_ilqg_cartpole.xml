@@ -17,14 +17,14 @@
                 <DynamicsSolver>
                     <CartpoleDynamicsSolver Name="solver" Integrator="RK1">
                         <ControlLimits>25</ControlLimits>
-                        <dt>0.02</dt>
+                        <dt>0.01</dt>
                     </CartpoleDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
         </PlanningScene>
 
-        <T>100</T>
-        <tau>0.02</tau>
+        <T>200</T>
+        <tau>0.01</tau>
         <Q_rate>0</Q_rate>
         <Qf_rate>10</Qf_rate>
         <R_rate>0.1</R_rate>

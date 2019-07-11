@@ -73,13 +73,14 @@ void OMPLRNStateSpace::SetBounds(SamplingProblemPtr &prob)
 {
     unsigned int dim = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)), 1.0);
-    ompl::base::RealVectorBounds bounds(dim);
+    ompl::base::RealVectorBounds ompl_bounds(dim);
+    auto bounds = prob->GetBounds();
     for (int i = 0; i < dim; ++i)
     {
-        bounds.setHigh(i, prob->GetBounds()[i + dim]);
-        bounds.setLow(i, prob->GetBounds()[i]);
+        ompl_bounds.setHigh(i, bounds[i + dim]);
+        ompl_bounds.setLow(i, bounds[i]);
     }
-    getSubspace(0)->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
+    getSubspace(0)->as<ompl::base::RealVectorStateSpace>()->setBounds(ompl_bounds);
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
 }
@@ -133,23 +134,26 @@ void OMPLSE3RNStateSpace::SetBounds(SamplingProblemPtr &prob)
         addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim_ - 6)), 1.0);
     }
 
-    if (prob->GetBounds().size() == 2 * dim_)
+    auto bounds = prob->GetBounds();
+    if (bounds.size() == 2 * dim_)
     {
+        // NB: We can only bound the xyz, rotation is unbounded (!)
         ompl::base::RealVectorBounds SE3bounds(3);
         for (int i = 0; i < 3; ++i)
         {
-            SE3bounds.setHigh(i, prob->GetBounds()[i + dim_]);
-            SE3bounds.setLow(i, prob->GetBounds()[i]);
+            SE3bounds.setHigh(i, bounds[i + dim_]);
+            SE3bounds.setLow(i, bounds[i]);
         }
         getSubspace(0)->as<ompl::base::SE3StateSpace>()->setBounds(SE3bounds);
+        WARNING_NAMED("OMPLSE3RNStateSpace::SetBounds", "Orientation bounds on SE(3) component ignored.");
 
         if (dim_ > 6)
         {
             ompl::base::RealVectorBounds RNbounds(dim_ - 6);
             for (int i = 6; i < dim_; ++i)
             {
-                RNbounds.setHigh(i - 6, prob->GetBounds()[i + dim_]);
-                RNbounds.setLow(i - 6, prob->GetBounds()[i]);
+                RNbounds.setHigh(i - 6, bounds[i + dim_]);
+                RNbounds.setLow(i - 6, bounds[i]);
             }
             getSubspace(1)->as<ompl::base::RealVectorStateSpace>()->setBounds(RNbounds);
         }
@@ -157,7 +161,7 @@ void OMPLSE3RNStateSpace::SetBounds(SamplingProblemPtr &prob)
     else
     {
         ERROR("State space bounds were not specified!\n"
-              << prob->GetBounds().size() << " " << dim_);
+              << bounds.size() << " " << dim_);
     }
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
@@ -216,15 +220,17 @@ void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
         addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim_ - 3)), 1.0);
     }
 
-    if (prob->GetBounds().size() == 2 * dim_)
+    auto bounds = prob->GetBounds();
+    if (bounds.size() == 2 * dim_)
     {
         ompl::base::RealVectorBounds SE2bounds(2);
         for (int i = 0; i < 3; ++i)
         {
-            SE2bounds.setHigh(i, prob->GetBounds()[i + dim_]);
-            SE2bounds.setLow(i, prob->GetBounds()[i]);
+            SE2bounds.setHigh(i, bounds[i + dim_]);
+            SE2bounds.setLow(i, bounds[i]);
         }
-        getSubspace(0)->as<ompl::base::SE3StateSpace>()->setBounds(SE2bounds);
+        getSubspace(0)->as<ompl::base::SE2StateSpace>()->setBounds(SE2bounds);
+        WARNING_NAMED("OMPLSE3RNStateSpace::SetBounds", "Yaw bounds on SE(2) component ignored.");
 
         if (dim_ > 3)
         {
@@ -240,7 +246,7 @@ void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
     else
     {
         ERROR("State space bounds were not specified!" << std::endl
-                                                       << prob->GetBounds().size() << " " << dim_);
+                                                       << bounds.size() << " " << dim_);
     }
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();

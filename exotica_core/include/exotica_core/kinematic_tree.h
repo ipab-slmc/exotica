@@ -133,8 +133,6 @@ public:
 class KinematicTree : public Uncopyable
 {
 public:
-    KinematicTree();
-    virtual ~KinematicTree() = default;
     void Instantiate(std::string joint_group, robot_model::RobotModelPtr model, const std::string& name);
     std::string GetRootFrameName() const;
     std::string GetRootJointName() const;

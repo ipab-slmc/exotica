@@ -95,8 +95,6 @@ int KinematicTree::GetNumModelJoints() const
     return num_joints_;
 }
 
-KinematicTree::KinematicTree() = default;
-
 void KinematicTree::Instantiate(std::string joint_group, robot_model::RobotModelPtr model, const std::string& name)
 {
     if (!model) ThrowPretty("No robot model provided!");

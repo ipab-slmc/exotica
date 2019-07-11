@@ -73,13 +73,14 @@ void OMPLRNStateSpace::SetBounds(SamplingProblemPtr &prob)
 {
     unsigned int dim = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)), 1.0);
-    ompl::base::RealVectorBounds bounds(dim);
+    ompl::base::RealVectorBounds ompl_bounds(dim);
+    auto bounds = prob->GetBounds();
     for (int i = 0; i < dim; ++i)
     {
-        bounds.setHigh(i, prob->GetBounds()[i + dim]);
-        bounds.setLow(i, prob->GetBounds()[i]);
+        ompl_bounds.setHigh(i, bounds[i + dim]);
+        ompl_bounds.setLow(i, bounds[i]);
     }
-    getSubspace(0)->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
+    getSubspace(0)->as<ompl::base::RealVectorStateSpace>()->setBounds(ompl_bounds);
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
 }

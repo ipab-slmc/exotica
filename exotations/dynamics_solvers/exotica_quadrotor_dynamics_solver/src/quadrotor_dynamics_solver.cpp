@@ -120,50 +120,50 @@ Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVe
     return state_dot;
 }
 
-Eigen::MatrixXd QuadrotorDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
-{
-    // Finite differences
-    constexpr double eps = 1e-6;
-    const int NX = num_positions_ + num_velocities_;
+// Eigen::MatrixXd QuadrotorDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
+// {
+//     // Finite differences
+//     constexpr double eps = 1e-6;
+//     const int NX = num_positions_ + num_velocities_;
 
-    Eigen::MatrixXd fx_fd(NX, NX);
+//     Eigen::MatrixXd fx_fd(NX, NX);
 
-    for (int i = 0; i < NX; ++i)
-    {
-        Eigen::VectorXd x_low = x;
-        Eigen::VectorXd x_high = x;
-        x_low(i) -= eps;
-        x_high(i) += eps;
+//     for (int i = 0; i < NX; ++i)
+//     {
+//         Eigen::VectorXd x_low = x;
+//         Eigen::VectorXd x_high = x;
+//         x_low(i) -= eps;
+//         x_high(i) += eps;
 
-        fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
-    }
+//         fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
+//     }
     
-    // HIGHLIGHT_NAMED("Pin", fx_fd);
-    return fx_fd;
-}
+//     // HIGHLIGHT_NAMED("Pin", fx_fd);
+//     return fx_fd;
+// }
 
-Eigen::MatrixXd QuadrotorDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
-{
-    // Finite differences
-    constexpr double eps = 1e-6;
-    const int NX = num_positions_ + num_velocities_;
-    const int NU = num_controls_;
+// Eigen::MatrixXd QuadrotorDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
+// {
+//     // Finite differences
+//     constexpr double eps = 1e-6;
+//     const int NX = num_positions_ + num_velocities_;
+//     const int NU = num_controls_;
 
-    Eigen::MatrixXd fu_fd(NX, NU);
+//     Eigen::MatrixXd fu_fd(NX, NU);
 
-    for (int i = 0; i < NU; ++i)
-    {
-        Eigen::VectorXd u_low = u;
-        Eigen::VectorXd u_high = u;
-        u_low(i) -= eps;
-        u_high(i) += eps;
+//     for (int i = 0; i < NU; ++i)
+//     {
+//         Eigen::VectorXd u_low = u;
+//         Eigen::VectorXd u_high = u;
+//         u_low(i) -= eps;
+//         u_high(i) += eps;
         
-        fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
-    }
+//         fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
+//     }
 
-    // HIGHLIGHT_NAMED("Pin", fu_fd);
-    return fu_fd;
-}
+//     // HIGHLIGHT_NAMED("Pin", fu_fd);
+//     return fu_fd;
+// }
 
 Eigen::VectorXd QuadrotorDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_in)
 {

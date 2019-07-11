@@ -104,11 +104,18 @@ void AnalyticDDPSolver::BackwardPass()
 
         // clang-format off
         //  Condition matrix for numerical stability.
+        
         Quu_inv = (
-            // Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * 1e-5 + Quu
-            Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * lambda_ + Quu
+            Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * parameters_.ConditioningRate + Quu
+        //     // Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * lambda_ + Quu
+        //     // Quu + (Eigen::MatrixXd)Quu.diagonal().asDiagonal() * lambda_
         ).inverse();
         // clang-format on
+
+        // Quu_inv = (Quu.transpose() * Quu + Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * parameters_.L2_rate).inverse() * Quu.transpose();
+
+        // Eigen::MatrixXd W = Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * parameters_.L2_rate;
+        // Quu_inv = (Quu.transpose() * Quu + W).inverse() * Quu.transpose();
 
         k_gains_[t] = -Quu_inv * Qu;
         K_gains_[t] = -Quu_inv * Qux;
@@ -116,6 +123,15 @@ void AnalyticDDPSolver::BackwardPass()
         // V = Q - 0.5 * (Qu.transpose() * Quu_inv * Qu)(0);
         Vx = Qx - K_gains_[t].transpose() * Quu * k_gains_[t];
         Vxx = Qxx - K_gains_[t].transpose() * Quu * K_gains_[t];
+
+        // if (pesho) {
+        //     HIGHLIGHT_NAMED("Quu_inv", Quu_inv);
+        //     HIGHLIGHT_NAMED("Vx", Vx);
+        //     HIGHLIGHT_NAMED("Vxx", Vxx);
+        //     HIGHLIGHT_NAMED("k[t]", k_gains_[t]);
+        //     HIGHLIGHT_NAMED("K[t]", K_gains_[t]);
+        //     HIGHLIGHT("==================================");
+        // }
     }
 }
 }  // namespace exotica

@@ -242,4 +242,51 @@ Eigen::Matrix<T, NU, 1> AbstractDynamicsSolver<T, NX, NU>::inverse_dynamics(cons
     ThrowPretty("This dynamics solver does not support inverse dynamics!");
 }
 
+template <typename T, int NX, int NU>
+Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector& x, const ControlVector& u)
+{
+    // Finite differences
+    constexpr double eps = 1e-6;
+    const int NX_ = num_positions_ + num_velocities_;
+
+    Eigen::MatrixXd fx_fd(NX_, NX_);
+
+    for (int i = 0; i < NX_; ++i)
+    {
+        Eigen::VectorXd x_low = x;
+        Eigen::VectorXd x_high = x;
+        x_low(i) -= eps / 2;
+        x_high(i) += eps / 2;
+
+        fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
+    }
+    
+    // HIGHLIGHT_NAMED("Pin", fx_fd);
+    return fx_fd;
+}
+
+template <typename T, int NX, int NU>
+Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector& x, const ControlVector& u)
+{
+    // Finite differences
+    constexpr double eps = 1e-6;
+    const int NX_ = num_positions_ + num_velocities_;
+    const int NU_ = num_controls_;
+
+    Eigen::MatrixXd fu_fd(NX_, NU_);
+
+    for (int i = 0; i < NU_; ++i)
+    {
+        Eigen::VectorXd u_low = u;
+        Eigen::VectorXd u_high = u;
+        u_low(i) -= eps / 2;
+        u_high(i) += eps / 2;
+        
+        fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
+    }
+
+    // HIGHLIGHT_NAMED("Pin", fu_fd);
+    return fu_fd;
+}
+
 }  // namespace exotica

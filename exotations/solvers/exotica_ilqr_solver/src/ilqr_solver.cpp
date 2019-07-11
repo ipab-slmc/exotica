@@ -80,7 +80,9 @@ void ILQRSolver::BackwardPass()
         Bk.noalias() = Bk * dt;
         // this inverse is common for all factors
         const Eigen::MatrixXd _inv =
-            (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * lambda_ + R + Bk.transpose() * Sk * Bk).inverse();
+            (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * 1e-5 + R + Bk.transpose() * Sk * Bk).inverse();
+        // const Eigen::MatrixXd _inv =
+            // (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * lambda_ + R + Bk.transpose() * Sk * Bk).inverse();
 
         Kv_gains_[t] = _inv * Bk.transpose();
         K_gains_[t] = _inv * Bk.transpose() * Sk * Ak;
@@ -178,7 +180,7 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
             double alpha = alpha_space(ai);
             double cost = ForwardPass(alpha, ref_x, ref_u);
 
-            if (ai == 0 || (cost < current_cost && std::isfinite(cost)))
+            if (ai == 0 || (cost < current_cost && !std::isnan(cost)))
             {
                 current_cost = cost;
                 new_U = prob_->get_U();
@@ -187,7 +189,7 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         HIGHLIGHT(prob_->get_U());
-        if (!std::isfinite(current_cost))
+        if (std::isnan(current_cost))
         {
             if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Diverged!");
             break;

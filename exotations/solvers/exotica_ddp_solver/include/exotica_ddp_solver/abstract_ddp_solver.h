@@ -57,6 +57,7 @@ public:
     Eigen::VectorXd GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const override;
 
 protected:
+    bool pesho = false;
     DynamicTimeIndexedShootingProblemPtr prob_;       ///!< Shared pointer to the planning problem.
     DynamicsSolverPtr dynamics_solver_;               ///!< Shared pointer to the dynamics solver.
     std::vector<Eigen::MatrixXd> K_gains_, k_gains_;  ///!< Control gains.
@@ -112,6 +113,8 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
     {
         // Backwards pass computes the gains
         backward_pass_timer.Reset();
+        if (iteration == GetNumberOfMaxIterations() - 1)
+            pesho = true;
         BackwardPass();
         if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Backward pass complete in " << backward_pass_timer.GetDuration() << " lambda=" << lambda_);
 
@@ -131,7 +134,8 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
             double alpha = alpha_space(ai);
             double cost = ForwardPass(alpha, ref_x, ref_u);
 
-            if (ai == 0 || (cost < current_cost && std::isfinite(cost)))
+            // if (ai == 0 || (cost < current_cost && !std::isnan(cost)))
+            if (ai == 0 || cost < current_cost)
             {
                 current_cost = cost;
                 new_U = prob_->get_U();
@@ -139,11 +143,11 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
             }
         }
         
-        if (!std::isfinite(current_cost))
-        {
-            if (debug_) HIGHLIGHT_NAMED("DDOSolver", "Diverged!");
-            break;
-        }
+        // if (std::isnan(current_cost))
+        // {
+        //     if (debug_) HIGHLIGHT_NAMED("DDOSolver", "Diverged!");
+        //     break;
+        // }
 
         // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13
         if (iteration > 0)
@@ -160,7 +164,7 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
             }
         }
 
-        if (lambda_ > lambda_max_)
+        if (lambda_ > base_parameters_.LambdaMax)
         {
             HIGHLIGHT_NAMED("DDPSolver", "Lambda greater than maximum.");
             break;
@@ -236,12 +240,26 @@ double AbstractDDPSolver<Initializer>::ForwardPass(const double alpha, Eigen::Ma
 
     for (int t = 0; t < T - 1; ++t)
     {
+        Eigen::VectorXd old_x = prob_->get_X(t),
+            old_ref_x = ref_x.col(t);
+
         Eigen::VectorXd u = ref_u.col(t);
         // eq. 12
         Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_x.col(t));
         u.noalias() += alpha * delta_uk;
+
         // clamp controls
         u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
+
+
+        // bool is_nan = false;
+        // for (int i = 0; i < u.size(); ++ i)
+        //     if (std::isnan(u(i)))
+        //         is_nan = true;
+
+        // if (is_nan)
+        //     exit(0);
+
 
         prob_->Update(u, t);
         cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));

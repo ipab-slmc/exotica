@@ -104,7 +104,10 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
         for (int j = 0; j < clamped_idx.size(); ++j)
             x_clamped(j) = x(clamped_idx[j]);
 
+        // Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * 1e-5 + Hff).inverse();
         Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * lambda + Hff).inverse();
+        // Hff_inv = (Hff + (Eigen::MatrixXd)Hff.diagonal().asDiagonal() * lambda).inverse();
+        // Hff_inv = (Hff.transpose() * Hff + Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * 1e-5).inverse() * Hff.transpose();
 
         if (clamped_idx.size() == 0)
             delta_xf = -Hff_inv * (q_free)-x_free;

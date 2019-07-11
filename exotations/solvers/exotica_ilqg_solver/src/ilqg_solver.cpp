@@ -114,7 +114,8 @@ void ILQGSolver::BackwardPass()
         {
             if (d[i].real() < 0)
                 d[i] = 0;
-            d[i] = 1. / (d[i] + lambda_);
+            d[i] = 1. / (d[i] + 1e-5);
+            // d[i] = 1. / (d[i] + lambda_);
             D(i, i) = d[i];
         }
 
@@ -229,7 +230,7 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
             double alpha = alpha_space(ai);
             double cost = ForwardPass(alpha, ref_x, ref_u);
 
-            if (ai == 0 || (cost < current_cost && std::isfinite(cost)))
+            if (ai == 0 || (cost < current_cost && !std::isnan(cost)))
             {
                 current_cost = cost;
                 new_U = prob_->get_U();
@@ -240,7 +241,7 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         
-        if (!std::isfinite(current_cost))
+        if (std::isnan(current_cost))
         {
             if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Diverged!");
             break;

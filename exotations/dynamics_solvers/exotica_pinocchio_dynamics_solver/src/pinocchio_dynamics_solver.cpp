@@ -71,48 +71,107 @@ Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVe
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
-    // Finite differences
-    constexpr double eps = 1e-6;
-    const int NX = num_positions_ + num_velocities_;
+    const int NQ = num_positions_;
+    const int NV = num_velocities_;
+    const int NX = NQ + NV;
+    const int NU = num_controls_;
 
-    Eigen::MatrixXd fx_fd(NX, NX);
+    pinocchio::Data data(model_);
+    // pinocchio::aba(model_, data, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u);
+    pinocchio::computeABADerivatives(model_, data, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval());
 
-    for (int i = 0; i < NX; ++i)
-    {
-        Eigen::VectorXd x_low = x;
-        Eigen::VectorXd x_high = x;
-        x_low(i) -= eps;
-        x_high(i) += eps;
+    Eigen::MatrixXd fx_symb = Eigen::MatrixXd::Zero(NX, NX);
+    fx_symb.topRightCorner(NV, NV) = Eigen::MatrixXd::Identity(NV, NV);
+    fx_symb.bottomLeftCorner(NQ, NV) = data.ddq_dq;
 
-        fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
-    }
-    
-    // HIGHLIGHT_NAMED("Pin", fx_fd);
-    return fx_fd;
+
+
+
+
+
+
+
+
+    // // Finite differences
+    // constexpr double eps = 1e-6;
+    // const int NX_ = num_positions_ + num_velocities_;
+
+    // Eigen::MatrixXd fx_fd(NX_, NX_);
+
+    // for (int i = 0; i < NX_; ++i)
+    // {
+    //     Eigen::VectorXd x_low = x;
+    //     Eigen::VectorXd x_high = x;
+    //     x_low(i) -= eps / 2.0;
+    //     x_high(i) += eps / 2.0;
+
+    //     fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
+    // }
+
+
+    // HIGHLIGHT_NAMED("fx_pin_size", fx_symb.rows() << " x " << fx_symb.cols());
+    // HIGHLIGHT_NAMED("fx_fd_size", fx_fd.rows() << " x " << fx_fd.cols());
+    // HIGHLIGHT_NAMED("fx_pin", fx_symb);
+    // HIGHLIGHT_NAMED("fx_fd", fx_fd);
+
+
+
+    // return fx_fd;
+    return fx_symb;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    // Finite differences
-    constexpr double eps = 1e-6;
-    const int NX = num_positions_ + num_velocities_;
+    const int NQ = num_positions_;
+    const int NV = num_velocities_;
+    const int NX = NQ + NV;
     const int NU = num_controls_;
 
-    Eigen::MatrixXd fu_fd(NX, NU);
+    pinocchio::Data data(model_);
+    // pinocchio::aba(model_, data, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u);
+    pinocchio::computeABADerivatives(model_, data, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval());
 
-    for (int i = 0; i < NU; ++i)
-    {
-        Eigen::VectorXd u_low = u;
-        Eigen::VectorXd u_high = u;
-        u_low(i) -= eps;
-        u_high(i) += eps;
+    Eigen::MatrixXd fu_symb = Eigen::MatrixXd::Zero(NX, NU);
+    fu_symb.bottomRightCorner(NV, NU) = data.Minv;
+
+
+
+
+
+
+
+
+
+
+
+    // constexpr double eps = 1e-6;
+    // const int NX_ = num_positions_ + num_velocities_;
+    // const int NU_ = num_controls_;
+
+    // Eigen::MatrixXd fu_fd(NX_, NU_);
+
+    // for (int i = 0; i < NU_; ++i)
+    // {
+    //     Eigen::VectorXd u_low = u;
+    //     Eigen::VectorXd u_high = u;
+    //     u_low(i) -= eps / 2.0;
+    //     u_high(i) += eps / 2.0;
         
-        fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
-    }
+    //     fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
+    // }
 
-    // HIGHLIGHT_NAMED("Pin", fu_fd);
-    return fu_fd;
+    // HIGHLIGHT_NAMED("fu_pin_size", fu_symb.rows() << " x " << fu_symb.cols());
+    // HIGHLIGHT_NAMED("fu_fd_size", fu_fd.rows() << " x " << fu_fd.cols());
+    // HIGHLIGHT_NAMED("fu_pin", fu_symb);
+    // HIGHLIGHT_NAMED("fu_fd", fu_fd);
+
+
+
+
+    return fu_symb;
+    // return fu_fd;
 }
+
 
 // Eigen::VectorXd PinocchioDynamicsSolver::Integrate(const StateVector& x, const ControlVector& u)
 // {

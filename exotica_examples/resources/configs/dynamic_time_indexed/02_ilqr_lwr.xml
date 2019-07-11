@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
-    <ILQRSolver Name="ILQRSolver">
+    <!-- <ILQRSolver Name="ILQRSolver">
         <Debug>1</Debug>
         <MaxIterations>50</MaxIterations>
         <FunctionTolerance>-1</FunctionTolerance>
         <FunctionTolerancePatience>50</FunctionTolerancePatience>
-    </ILQRSolver>
+    </ILQRSolver> -->
     <!-- <ILQGSolver Name="ILQRSolver">
         <Debug>1</Debug>
         <MaxIterations>50</MaxIterations>
@@ -15,18 +15,21 @@
 
     <!-- <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
-        <MaxIterations>20</MaxIterations>
+        <MaxIterations>200</MaxIterations>
         <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>20</FunctionTolerancePatience>
+        <FunctionTolerancePatience>200</FunctionTolerancePatience>
         <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+        <ConditioningRate>3</ConditioningRate>
     </ControlLimitedDDPSolver> -->
-    <!-- <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
+    <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
-        <MaxIterations>20</MaxIterations>
+        <MaxIterations>200</MaxIterations>
         <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>20</FunctionTolerancePatience>
+        <FunctionTolerancePatience>200</FunctionTolerancePatience>
         <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-    </AnalyticDDPSolver> -->
+        <LambdaMax>1e5</LambdaMax>
+        <ConditioningRate>1e-5</ConditioningRate>
+    </AnalyticDDPSolver>
     
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
@@ -37,14 +40,14 @@
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
 
                 <DynamicsSolver>
-                    <!-- <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
-                        <ControlLimits>100</ControlLimits>
+                    <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
+                        <ControlLimits>5</ControlLimits>
                         <dt>0.01</dt>
-                    </DoubleIntegratorDynamicsSolver> -->
-                    <PinocchioDynamicsSolver Name="solver" Integrator="RK1">
+                    </DoubleIntegratorDynamicsSolver>
+                    <!-- <PinocchioDynamicsSolver Name="solver" Integrator="RK1">
                         <ControlLimits>156</ControlLimits>
                         <dt>0.01</dt>
-                    </PinocchioDynamicsSolver>
+                    </PinocchioDynamicsSolver> -->
                 </DynamicsSolver>
             </Scene>
         </PlanningScene>
@@ -61,21 +64,24 @@
         <Cost>
             <!-- <Task Task="JL" Rho="0.01"/> -->
 
-            <!-- <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10.0"/> -->
-            <!-- <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0 1.0"/> -->
+            <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100.0"/>
+            <!-- <Task Task="Position" Goal="0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0 100.0"/> -->
         </Cost>
         
         <T>150</T>
         <tau>0.01</tau>
         <dt>0.01</dt>
-        <Q_rate>0</Q_rate>
-        <!-- <Qf>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Qf> -->
-        <Qf_rate>10</Qf_rate>
+        <Q>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Q>
+        <Q_rate>0.01</Q_rate>
+        <Qf>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Qf>
+        <Qf_rate>100</Qf_rate>
 
         <R_rate>0.01</R_rate>
-        <StartState>0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</StartState>
-        <GoalState> 2 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
+        <StartState>0 0 0  0 0 0 0 0 0 0 0 0 0 0</StartState>
+        <GoalState> 0 0 0  0 0 0 0 0 0 0 0 0 0 0</GoalState>
+        <!-- <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
+        <GoalState> 0 0 0  0 0 0 0 0 0 0 0 0 0 0</GoalState> -->
 
-        <WarmStartWithInverseDynamics>1</WarmStartWithInverseDynamics>
+        <WarmStartWithInverseDynamics>0</WarmStartWithInverseDynamics>
     </DynamicTimeIndexedShootingProblem>
 </DynamicTimeIndexedProblemConfig>

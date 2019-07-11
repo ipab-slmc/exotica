@@ -12,20 +12,21 @@
         <FunctionTolerance>-1</FunctionTolerance>
         <FunctionTolerancePatience>50</FunctionTolerancePatience>
     </ILQGSolver> -->
-    <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
+    <!-- <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>100</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>100</FunctionTolerancePatience>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+    </ControlLimitedDDPSolver> -->
+    <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>20</MaxIterations>
         <FunctionTolerance>-1</FunctionTolerance>
         <FunctionTolerancePatience>20</FunctionTolerancePatience>
         <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-    </ControlLimitedDDPSolver>
-    <!-- <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
-        <Debug>1</Debug>
-        <MaxIterations>20</MaxIterations>
-        <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>20</FunctionTolerancePatience>
-        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-    </AnalyticDDPSolver> -->
+        <ConditioningRate>1</ConditioningRate>
+    </AnalyticDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
@@ -37,7 +38,7 @@
                 <DynamicsSolver>
                     <QuadrotorDynamicsSolver Name="dsolver" Integrator="RK1">
                         <ControlLimits>50</ControlLimits>
-                        <dt>0.01</dt>
+                        <dt>0.005</dt>
                     </QuadrotorDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
@@ -48,14 +49,15 @@
         <dt>0.05</dt>
         <Q_rate>1e3</Q_rate>
         <R_rate>1</R_rate> -->
-        <T>100</T>
-        <tau>0.01</tau>
-        <dt>0.01</dt>
-        <Q>0 0 0 1 1 1 0 0 0 0 0 0</Q>
-        <Q_rate>1</Q_rate>
-        <Qf_rate>10</Qf_rate>
+        <T>250</T>
+        <tau>0.005</tau>
+        <!-- <dt>0.005</dt> -->
+        <Q>0 0 0 1 1 0 0 0 0 0 0 0</Q>
+        <Q_rate>1000</Q_rate>
+        <Qf_rate>1000</Qf_rate>
         <R_rate>0.01</R_rate>
         <StartState>0 0 0 0 0 0 0 0 0 0 0 0</StartState>
-        <GoalState>1 1 1 0 0 0 0 0 0 0 0 0</GoalState>
+        <GoalState>2 2 2 0 0 0 0 0 0 0 0 0</GoalState>
+        <LambdaMax>1e5</LambdaMax>
     </DynamicTimeIndexedShootingProblem>
 </PlannerDemoConfig>

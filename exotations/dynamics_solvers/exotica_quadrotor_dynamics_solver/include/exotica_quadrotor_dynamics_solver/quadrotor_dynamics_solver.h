@@ -52,8 +52,8 @@ public:
     void AssignScene(ScenePtr scene_in) override;
 
     StateVector f(const StateVector& x, const ControlVector& u) override;
-    Eigen::MatrixXd fx(const StateVector& x, const ControlVector& u) override;
-    Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
+    // Eigen::MatrixXd fx(const StateVector& x, const ControlVector& u) override;
+    // Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
 
     Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
 

@@ -42,6 +42,7 @@
 
 #include <pinocchio/algorithm/aba-derivatives.hpp>
 #include <pinocchio/algorithm/aba.hpp>
+#include <pinocchio/algorithm/rnea.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/parsers/urdf.hpp>
@@ -58,6 +59,7 @@ public:
     StateVector f(const StateVector& x, const ControlVector& u) override;
     StateDerivative fx(const StateVector& x, const ControlVector& u) override;
     ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
+    ControlVector inverse_dynamics(const StateVector& x) override;
 
 private:
     pinocchio::Model model_;

@@ -71,12 +71,49 @@ Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVe
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
-    ThrowPretty("NotYetImplemented");
+    const int NQ = num_positions_;
+    const int NV = num_velocities_;
+    const int NX = NQ + NV;
+    const int NU = num_controls_;
+
+    pinocchio::Data data(model_);
+    pinocchio::computeABADerivatives(model_, data, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval());
+
+    Eigen::MatrixXd fx_symb = Eigen::MatrixXd::Zero(NX, NX);
+    fx_symb.topRightCorner(NV, NV) = Eigen::MatrixXd::Identity(NV, NV);
+    fx_symb.bottomLeftCorner(NQ, NV) = data.ddq_dq;
+
+    return fx_symb;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    ThrowPretty("NotYetImplemented");
+    const int NQ = num_positions_;
+    const int NV = num_velocities_;
+    const int NX = NQ + NV;
+    const int NU = num_controls_;
+
+    pinocchio::Data data(model_);
+    pinocchio::computeABADerivatives(model_, data, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval());
+
+    Eigen::MatrixXd fu_symb = Eigen::MatrixXd::Zero(NX, NU);
+    fu_symb.bottomRightCorner(NV, NU) = data.Minv;
+
+    return fu_symb;
+}
+
+Eigen::VectorXd PinocchioDynamicsSolver::inverse_dynamics(const StateVector& x)
+{
+    pinocchio::Data data(model_);
+
+    // compute dynamic drift -- Coriolis, centrifugal, gravity
+    // Assume 0 acceleration
+    Eigen::VectorXd u = pinocchio::rnea(model_, data,
+        x.head(num_positions_).eval(), x.tail(num_velocities_).eval(),
+        Eigen::VectorXd::Zero(num_velocities_).eval()
+    );
+
+    return u;
 }
 
 }  // namespace exotica

@@ -77,10 +77,10 @@ public:
     virtual StateVector f(const StateVector& x, const ControlVector& u) = 0;
 
     /// \brief Derivative of the forward dynamics w.r.t. the state
-    virtual StateDerivative fx(const StateVector& x, const ControlVector& u) = 0;
+    virtual StateDerivative fx(const StateVector& x, const ControlVector& u);
 
     /// \brief Derivative of the forward dynamics w.r.t. the control
-    virtual ControlDerivative fu(const StateVector& x, const ControlVector& u) = 0;
+    virtual ControlDerivative fu(const StateVector& x, const ControlVector& u);
 
     // NOTE: Second order derivatives a 3D matrices, i.e. tensors
     //  We use the numerator convention (see https://en.wikipedia.org/wiki/Matrix_calculus)
@@ -133,6 +133,8 @@ public:
     Eigen::VectorXd get_control_limits();
     void set_control_limits(Eigen::VectorXd control_limits);
 
+    virtual ControlVector inverse_dynamics(const StateVector& state);
+
 private:
     bool control_limits_initialized_ = false;
     Eigen::VectorXd raw_control_limits_;
@@ -150,7 +152,7 @@ protected:
     Eigen::VectorXd control_limits_ = Eigen::VectorXd();  ///< ControlLimits. Default is empty vector.
 
     /// \brief Integrates the dynamic system from state x with controls u applied for one timestep dt using the selected integrator.
-    inline StateVector Integrate(const StateVector& x, const ControlVector& u);
+    virtual StateVector Integrate(const StateVector& x, const ControlVector& u);
 
     void InitializeSecondOrderDerivatives();
     Eigen::Tensor<T, 3> fxx_default_, fuu_default_, fxu_default_;

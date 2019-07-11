@@ -105,8 +105,7 @@ void AnalyticDDPSolver::BackwardPass()
         // clang-format off
         //  Condition matrix for numerical stability.
         Quu_inv = (
-            // Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * 1e-5 + Quu
-            Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * lambda_ + Quu
+            Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * parameters_.RegularizationRate + Quu
         ).inverse();
         // clang-format on
 

@@ -74,9 +74,6 @@ protected:
 
     Initializer base_parameters_;
     Eigen::MatrixXd best_ref_x_, best_ref_u_;  ///!< Reference trajectory for feedback control.
-
-    double lambda_ = 0.1,
-           lambda_max_ = 1000;  ///!< Levenberg Marquardt parameters
 };
 
 template <typename Initializer>
@@ -88,9 +85,6 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-
-    // TODO: parametrize
-    lambda_ = 0.1;
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
 
@@ -113,7 +107,7 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
         // Backwards pass computes the gains
         backward_pass_timer.Reset();
         BackwardPass();
-        if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Backward pass complete in " << backward_pass_timer.GetDuration() << " lambda=" << lambda_);
+        if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
 
         line_search_timer.Reset();
         // forward pass to compute new control trajectory
@@ -138,28 +132,7 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
                 best_alpha = alpha;
             }
         }
-
-        // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13
-        if (iteration > 0)
-        {
-            if (current_cost < last_cost)
-            {
-                // success, error decreased: decrease damping
-                lambda_ = lambda_ / 10.0;
-            }
-            else
-            {
-                // failure, error increased: increase damping
-                lambda_ = lambda_ * 10.0;
-            }
-        }
-
-        if (lambda_ > lambda_max_)
-        {
-            HIGHLIGHT_NAMED("DDPSolver", "Lambda greater than maximum.");
-            break;
-        }
-
+        
         if (debug_)
         {
             HIGHLIGHT_NAMED("DDPSolver", "Forward pass complete in " << line_search_timer.GetDuration() << " with cost: " << current_cost << " and alpha " << best_alpha);

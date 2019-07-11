@@ -236,7 +236,6 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
             // break;
         }
 
-        
         if (std::isnan(current_cost))
         {
             if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Diverged!");

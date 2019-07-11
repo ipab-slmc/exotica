@@ -260,7 +260,7 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector
 
         fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
     }
-    
+
     return fx_fd;
 }
 
@@ -280,7 +280,7 @@ Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector
         Eigen::VectorXd u_high = u;
         u_low(i) -= eps / 2.0;
         u_high(i) += eps / 2.0;
-        
+
         fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
     }
 

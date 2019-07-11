@@ -109,9 +109,8 @@ Eigen::VectorXd PinocchioDynamicsSolver::inverse_dynamics(const StateVector& x)
     // compute dynamic drift -- Coriolis, centrifugal, gravity
     // Assume 0 acceleration
     Eigen::VectorXd u = pinocchio::rnea(model_, data,
-        x.head(num_positions_).eval(), x.tail(num_velocities_).eval(),
-        Eigen::VectorXd::Zero(num_velocities_).eval()
-    );
+                                        x.head(num_positions_).eval(), x.tail(num_velocities_).eval(),
+                                        Eigen::VectorXd::Zero(num_velocities_).eval());
 
     return u;
 }

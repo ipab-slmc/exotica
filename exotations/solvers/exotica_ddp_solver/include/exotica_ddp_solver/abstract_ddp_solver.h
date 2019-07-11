@@ -132,7 +132,7 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
                 best_alpha = alpha;
             }
         }
-        
+
         if (debug_)
         {
             HIGHLIGHT_NAMED("DDPSolver", "Forward pass complete in " << line_search_timer.GetDuration() << " with cost: " << current_cost << " and alpha " << best_alpha);

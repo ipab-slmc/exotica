@@ -122,10 +122,11 @@ void OMPLSolver<ProblemType>::SetGoalState(Eigen::VectorXdRefConst qT, const dou
         state_space_->as<OMPLStateSpace>()->StateDebug(qT);
 
         // Debug state and bounds
+        auto bounds = prob_->GetBounds();
         std::string out_of_bounds_joint_ids = "";
         for (int i = 0; i < qT.rows(); ++i)
-            if (qT(i) < prob_->GetBounds()[i] || qT(i) > prob_->GetBounds()[i + qT.rows()])
-                out_of_bounds_joint_ids += "[j" + std::to_string(i) + "=" + std::to_string(qT(i)) + ", ll=" + std::to_string(prob_->GetBounds()[i]) + ", ul=" + std::to_string(prob_->GetBounds()[i + qT.rows()]) + "]\n";
+            if (qT(i) < bounds[i] || qT(i) > bounds[i + qT.rows()])
+                out_of_bounds_joint_ids += "[j" + std::to_string(i) + "=" + std::to_string(qT(i)) + ", ll=" + std::to_string(bounds[i]) + ", ul=" + std::to_string(bounds[i + qT.rows()]) + "]\n";
 
         ThrowNamed("Invalid goal state [Invalid joint bounds for joint indices: \n"
                    << out_of_bounds_joint_ids << "]");

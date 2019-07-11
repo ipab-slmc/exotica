@@ -52,8 +52,6 @@ public:
     void AssignScene(ScenePtr scene_in) override;
 
     StateVector f(const StateVector& x, const ControlVector& u) override;
-    Eigen::MatrixXd fx(const StateVector& x, const ControlVector& u) override;
-    Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
 
     Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
 
@@ -66,6 +64,7 @@ private:
     double L_ = 0.1750;    ///< Distance between motors
     double k_f_ = 1;       ///< Thrust coefficient, 6.11*10^-8;
     double k_m_ = 0.0245;  ///< Moment coefficient
+    double b_ = 0.0245;    ///< Drag
 };
 }  // namespace exotica
 

@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>-->
+    <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>200</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>200</FunctionTolerancePatience>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+        <RegularizationRate>0.1</RegularizationRate>
+    </AnalyticDDPSolver>
+    
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+
+                <DynamicsSolver>
+                    <PinocchioDynamicsSolver Name="solver" Integrator="RK1">
+                        <ControlLimits>156</ControlLimits>
+                        <dt>0.01</dt>
+                    </PinocchioDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17"/>
+                </EndEffector>
+            </EffPosition>
+            <JointLimit Name="JL"/>
+        </Maps>
+
+        <Cost>
+            <!-- <Task Task="JL" Rho="0.01"/> -->
+
+            <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100.0"/>
+        </Cost>
+        
+        <T>150</T>
+        <tau>0.01</tau>
+        <dt>0.01</dt>
+        
+        <!-- Penalize large velocities/ stay within control limits. -->
+        <Q>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Q>
+        <Q_rate>1e-5</Q_rate>
+
+        <!-- End state should be with no velocities. -->
+        <Qf>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Qf>
+        <Qf_rate>100</Qf_rate>
+
+        <R_rate>1e-5</R_rate>
+        <StartState>1e-3 1e-3 1e-3  1e-3 1e-3 1e-3 1e-3 0 0 0 0 0 0 0</StartState>
+        <GoalState> 0 0 0  0 0 0 0 0 0 0 0 0 0 0</GoalState>
+
+        <WarmStartWithInverseDynamics>1</WarmStartWithInverseDynamics>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

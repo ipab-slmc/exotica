@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+import rospy
+import pyexotica as exo
+import numpy as np
+import signal
+from pyexotica.publish_trajectory import publish_pose, sig_int_handler
+from exotica_examples_py import *
+from visualization_msgs.msg import Marker
+from geometry_msgs.msg import Point
+import exotica_scipy_solver
+
+class Example(object):
+
+    def __init__(self):
+
+        # Set init variables
+        self.q = np.array([0.0] * 7)
+
+        # Setup exotica
+        self.problem = exo.Setup.load_problem('{exotica_examples}/resources/configs/example_ik_avoid_look_at_sphere.xml')
+        self.solver = exotica_scipy_solver.SciPyEndPoseSolver(problem=self.problem, method='SLSQP', debug=False)
+
+        # Setup ros marker publisher
+        self.pub = rospy.Publisher('arrow', Marker, queue_size=1)
+        self.target_marker = TargetMarker(pose=self.problem.get_scene().fk('LookAtTarget').get_translation(), marker_shape=2, marker_size=[0.1, 0.1, 0.1])
+
+        # Setup arrow
+        self.arrow = Marker()
+        self.arrow.header.frame_id = 'exotica/lwr_arm_6_link'
+        self.arrow.id = 0
+        self.arrow.type = Marker.ARROW
+        self.arrow.action = Marker.ADD
+        self.arrow.scale.x = 0.02
+        self.arrow.scale.y = 0.05
+        self.arrow.scale.z = 0.05
+        self.arrow.color.b = self.arrow.color.a = 1.0
+        self.arrow.points = [Point(), Point()]
+
+    def update(self, event):
+        # Set new look at target into world frame
+        self.problem.get_scene().attach_object_local('LookAtTarget', '', self.target_marker.position_exo)
+
+        # Set start state
+        qold = self.q.copy()
+        self.problem.start_state = self.q
+
+        # Solve and publish
+        self.q = self.solver.solve()[0]
+        publish_pose(self.q, self.problem)
+
+    def update_environment(self, event):
+        look_at_position = self.problem.get_scene().fk('LookAtTarget', 'lwr_arm_6_link').get_translation()
+        self.arrow.points[1].x = look_at_position[0]
+        self.arrow.points[1].y = look_at_position[1]
+        self.arrow.points[1].z = look_at_position[2]
+        self.pub.publish(self.arrow)
+
+if __name__=='__main__':
+    rospy.init_node('example_ik_avoid_look_at_sphere_node')
+    exo.Setup.init_ros()
+    signal.signal(signal.SIGINT, sig_int_handler)
+    example = Example()
+    rospy.Timer(rospy.Duration(1.0/50.0), example.update)
+    rospy.Timer(rospy.Duration(1.0/40.0), example.update_environment)
+    rospy.spin()

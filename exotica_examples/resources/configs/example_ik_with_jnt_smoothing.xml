@@ -24,17 +24,14 @@
       </EffFrame>
 
       <JointVelocityBackwardDifference Name="JointVel">
-        <dt>0.01</dt>
         <StartState>1.147249698638916 -0.22851833701133728 0.5324112772941589 1.2311428785324097 -0.19176392257213593 -0.1434374898672104 0</StartState>
       </JointVelocityBackwardDifference>
 
       <JointAccelerationBackwardDifference Name="JointAcc">
-        <dt>0.01</dt>
         <StartState>1.147249698638916 -0.22851833701133728 0.5324112772941589 1.2311428785324097 -0.19176392257213593 -0.1434374898672104 0</StartState>
       </JointAccelerationBackwardDifference>
 
       <JointJerkBackwardDifference Name="JointJerk">
-        <dt>0.01</dt>
         <StartState>1.147249698638916 -0.22851833701133728 0.5324112772941589 1.2311428785324097 -0.19176392257213593 -0.1434374898672104 0</StartState>
       </JointJerkBackwardDifference>
     </Maps>

@@ -276,7 +276,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     {
         for (int t = 0; t < T_ - 1; ++t)
         {
-            U_.col(t) = scene_->GetDynamicsSolver()->inverse_dynamics(X_.col(t));
+            U_.col(t) = scene_->GetDynamicsSolver()->InverseDynamics(X_.col(t));
             X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(
                 X_.col(t), U_.col(t), tau_);
         }

@@ -237,7 +237,7 @@ Eigen::Tensor<T, 3> AbstractDynamicsSolver<T, NX, NU>::fxu(const StateVector& x,
 }
 
 template <typename T, int NX, int NU>
-Eigen::Matrix<T, NU, 1> AbstractDynamicsSolver<T, NX, NU>::inverse_dynamics(const StateVector& state)
+Eigen::Matrix<T, NU, 1> AbstractDynamicsSolver<T, NX, NU>::InverseDynamics(const StateVector& state)
 {
     ThrowPretty("This dynamics solver does not support inverse dynamics!");
 }

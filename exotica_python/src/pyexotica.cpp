@@ -815,6 +815,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def("get_inequality_jacobian", (Eigen::SparseMatrix<double>(TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetInequalityJacobian);
     time_indexed_problem.def("get_inequality_jacobian", (Eigen::MatrixXd(TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetInequalityJacobian);
     time_indexed_problem.def("get_bounds", &TimeIndexedProblem::GetBounds);
+    time_indexed_problem.def("get_joint_velocity_limits", &TimeIndexedProblem::GetJointVelocityLimits);
     time_indexed_problem.def_readonly("cost", &TimeIndexedProblem::cost);
     time_indexed_problem.def_readonly("inequality", &TimeIndexedProblem::inequality);
     time_indexed_problem.def_readonly("equality", &TimeIndexedProblem::equality);

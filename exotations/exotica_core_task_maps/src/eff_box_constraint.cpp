@@ -65,8 +65,8 @@ void EffBoxConstraint::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi,
         phi.segment(eff_id + 3, 3) = eff_lower_ - e;
 
         // Compute jacobian
-        jacobian.block(eff_id, 0, 3, jacobian.cols()) = kinematics[0].jacobian(i).data.topRows<3>();
-        jacobian.block(eff_id + 3, 0, 3, jacobian.cols()) = -kinematics[0].jacobian(i).data.topRows<3>();
+        jacobian.middleRows(eff_id, 3) = kinematics[0].jacobian(i).data.topRows<3>();
+        jacobian.middleRows(eff_id + 3, 3) = -kinematics[0].jacobian(i).data.topRows<3>();
     }
 }
 

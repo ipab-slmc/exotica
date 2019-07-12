@@ -17,7 +17,7 @@ sleep(0.2)
 
 configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/01_ilqr_cartpole.xml',
-    '{exotica_examples}/resources/configs/dynamic_time_indexed/02_ilqr_lwr.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/02_lwr_task_maps.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/03_ilqr_valkyrie.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/04_analytic_ddp_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/05_analytic_ddp_lwr.xml',
@@ -28,6 +28,7 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/10_ilqg_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/11_ilqg_lwr.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/12_ilqg_valkyrie.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/13_control_limited_ddp_quadrotor.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1
@@ -52,6 +53,9 @@ while True:
         for t in range(problem.T - 1):
             update_start = time()
             # u = solution[t,:]
+            # u = problem.U[:,t]
+            # print(u)
+
             u = solver.get_feedback_control(
                 problem.X[:,t], t
             )
@@ -60,6 +64,7 @@ while True:
             update_end = time()
             if problem.tau > update_end - update_start:
                 sleep(problem.tau - (update_end - update_start))
+                # sleep(0.2)
         e = time()
         sleep(1)
         print("Time taken to roll-out:", e-s)

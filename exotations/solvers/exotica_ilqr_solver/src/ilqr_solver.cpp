@@ -80,7 +80,7 @@ void ILQRSolver::BackwardPass()
         Bk.noalias() = Bk * dt;
         // this inverse is common for all factors
         const Eigen::MatrixXd _inv =
-            (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * lambda_ + R + Bk.transpose() * Sk * Bk).inverse();
+            (Eigen::MatrixXd::Identity(R.rows(), R.cols()) * parameters_.RegularizationRate + R + Bk.transpose() * Sk * Bk).inverse();
 
         Kv_gains_[t] = _inv * Bk.transpose();
         K_gains_[t] = _inv * Bk.transpose() * Sk * Ak;
@@ -160,7 +160,7 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         backward_pass_timer.Reset();
         BackwardPass();
         // if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
-        if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration() << " lambda=" << lambda_);
+        if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
 
         line_search_timer.Reset();
         // forward pass to compute new control trajectory
@@ -178,33 +178,12 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
             double alpha = alpha_space(ai);
             double cost = ForwardPass(alpha, ref_x, ref_u);
 
-            if (ai == 0 || cost < current_cost)
+            if (ai == 0 || (cost < current_cost && !std::isnan(cost)))
             {
                 current_cost = cost;
                 new_U = prob_->get_U();
                 best_alpha = alpha;
             }
-        }
-
-        // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13
-        if (iteration > 0)
-        {
-            if (current_cost < last_cost)
-            {
-                // success, error decreased: decrease damping
-                lambda_ = lambda_ / 10.0;
-            }
-            else
-            {
-                // failure, error increased: increase damping
-                lambda_ = lambda_ * 10.0;
-            }
-        }
-
-        if (lambda_ > lambda_max_)
-        {
-            HIGHLIGHT_NAMED("ILQRSolver", "Lambda greater than maximum.");
-            break;
         }
 
         if (debug_)

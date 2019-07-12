@@ -114,7 +114,7 @@ void ILQGSolver::BackwardPass()
         {
             if (d[i].real() < 0)
                 d[i] = 0;
-            d[i] = 1. / (d[i] + lambda_);
+            d[i] = 1. / (d[i] + parameters_.RegularizationRate);
             D(i, i) = d[i];
         }
 
@@ -186,9 +186,6 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
 
-    // TODO: parametrize
-    lambda_ = 0.1;
-
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
 
     // initialize Gain matrices
@@ -210,7 +207,7 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
         // Backwards pass computes the gains
         backward_pass_timer.Reset();
         BackwardPass();
-        if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Backward pass complete in " << backward_pass_timer.GetDuration() << " lambda=" << lambda_);
+        if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
         // if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
 
         line_search_timer.Reset();
@@ -229,7 +226,7 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
             double alpha = alpha_space(ai);
             double cost = ForwardPass(alpha, ref_x, ref_u);
 
-            if (ai == 0 || cost < current_cost)
+            if (ai == 0 || (cost < current_cost && !std::isnan(cost)))
             {
                 current_cost = cost;
                 new_U = prob_->get_U();
@@ -239,24 +236,9 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
             // break;
         }
 
-        // source: https://uk.mathworks.com/help/optim/ug/least-squares-model-fitting-algorithms.html, eq. 13
-        if (iteration > 0)
+        if (std::isnan(current_cost))
         {
-            if (current_cost < last_cost)
-            {
-                // success, error decreased: decrease damping
-                lambda_ = lambda_ / 10.0;
-            }
-            else
-            {
-                // failure, error increased: increase damping
-                lambda_ = lambda_ * 10.0;
-            }
-        }
-
-        if (lambda_ > lambda_max_)
-        {
-            HIGHLIGHT_NAMED("ILQGSolver", "Lambda greater than maximum.");
+            if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Diverged!");
             break;
         }
 

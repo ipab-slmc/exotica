@@ -40,7 +40,7 @@ void PinocchioDynamicsSolver::AssignScene(ScenePtr scene_in)
     {
         pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), model_, verbose);
     }
-    else if (scene_in->GetKinematicTree().GetControlledBaseType() == BaseType::FIXED)
+    else if (scene_in->GetKinematicTree().GetControlledBaseType() == BaseType::PLANAR)
     {
         pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), pinocchio::JointModelPlanar(), model_, verbose);
     }
@@ -56,27 +56,60 @@ void PinocchioDynamicsSolver::AssignScene(ScenePtr scene_in)
     num_positions_ = model_.nq;
     num_velocities_ = model_.nv;
     num_controls_ = model_.nv;
+
+    pinocchio_data_.reset(new pinocchio::Data(model_));
 }
 
 Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVector& u)
 {
     // TODO: THIS DOES NOT WORK FOR A FLOATING BASE YET!!
-    pinocchio::Data data(model_);
-    pinocchio::aba(model_, data, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u);
+    pinocchio::aba(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u);
     Eigen::VectorXd x_dot(num_positions_ + num_velocities_);
     x_dot.head(num_positions_) = x.tail(num_positions_);
-    x_dot.tail(num_velocities_) = data.ddq;
+    x_dot.tail(num_velocities_) = pinocchio_data_->ddq;
     return x_dot;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
-    ThrowPretty("NotYetImplemented");
+    const int NQ = num_positions_;
+    const int NV = num_velocities_;
+    const int NX = NQ + NV;
+    const int NU = num_controls_;
+
+    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval());
+
+    Eigen::MatrixXd fx_symb = Eigen::MatrixXd::Zero(NX, NX);
+    fx_symb.topRightCorner(NV, NV) = Eigen::MatrixXd::Identity(NV, NV);
+    fx_symb.bottomLeftCorner(NQ, NV) = pinocchio_data_->ddq_dq;
+
+    return fx_symb;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    ThrowPretty("NotYetImplemented");
+    const int NQ = num_positions_;
+    const int NV = num_velocities_;
+    const int NX = NQ + NV;
+    const int NU = num_controls_;
+
+    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval());
+
+    Eigen::MatrixXd fu_symb = Eigen::MatrixXd::Zero(NX, NU);
+    fu_symb.bottomRightCorner(NV, NU) = pinocchio_data_->Minv;
+
+    return fu_symb;
+}
+
+Eigen::VectorXd PinocchioDynamicsSolver::InverseDynamics(const StateVector& x)
+{
+    // compute dynamic drift -- Coriolis, centrifugal, gravity
+    // Assume 0 acceleration
+    Eigen::VectorXd u = pinocchio::rnea(model_, *pinocchio_data_,
+                                        x.head(num_positions_).eval(), x.tail(num_velocities_).eval(),
+                                        Eigen::VectorXd::Zero(num_velocities_).eval());
+
+    return u;
 }
 
 }  // namespace exotica

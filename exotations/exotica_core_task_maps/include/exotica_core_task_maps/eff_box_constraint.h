@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, University of Edinburgh
+// Copyright (c) 2019, Christopher E. Mower
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,10 +49,13 @@ public:
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
+    Eigen::Vector3d GetLowerLimit();
+    Eigen::Vector3d GetUpperLimit();
+
 private:
-    Eigen::Vector3d eff_lower;  ///< End-effector lower x, y, z limit.
-    Eigen::Vector3d eff_upper;  ///< End-effector upper x, y, z limit.
-    int n_effs_;                ///< Number of end-effectors.
+    Eigen::Vector3d eff_lower_;  ///< End-effector lower x, y, z limit.
+    Eigen::Vector3d eff_upper_;  ///< End-effector upper x, y, z limit.
+    int n_effs_;                 ///< Number of end-effectors.
 };
 }  // namespace exotica
 

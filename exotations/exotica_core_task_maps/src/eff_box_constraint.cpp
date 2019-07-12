@@ -44,8 +44,8 @@ void EffBoxConstraint::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
         Eigen::Vector3d e = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
 
         // Compute phi
-        phi.segment(eff_id, 3) = e - eff_upper;
-        phi.segment(eff_id + 3, 3) = eff_lower - e;
+        phi.segment(eff_id, 3) = e - eff_upper_;
+        phi.segment(eff_id + 3, 3) = eff_lower_ - e;
     }
 }
 
@@ -61,13 +61,23 @@ void EffBoxConstraint::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi,
         Eigen::Vector3d e = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
 
         // Compute phi
-        phi.segment(eff_id, 3) = e - eff_upper;
-        phi.segment(eff_id + 3, 3) = eff_lower - e;
+        phi.segment(eff_id, 3) = e - eff_upper_;
+        phi.segment(eff_id + 3, 3) = eff_lower_ - e;
 
         // Compute jacobian
         jacobian.block(eff_id, 0, 3, jacobian.cols()) = kinematics[0].jacobian(i).data.topRows<3>();
         jacobian.block(eff_id + 3, 0, 3, jacobian.cols()) = -kinematics[0].jacobian(i).data.topRows<3>();
     }
+}
+
+Eigen::Vector3d EffBoxConstraint::GetLowerLimit()
+{
+    return eff_lower_;
+}
+
+Eigen::Vector3d EffBoxConstraint::GetUpperLimit()
+{
+    return eff_upper_;
 }
 
 void EffBoxConstraint::Instantiate(const EffBoxConstraintInitializer& init)
@@ -78,12 +88,12 @@ void EffBoxConstraint::Instantiate(const EffBoxConstraintInitializer& init)
     if (init.YLim[0] > init.YLim[1]) ThrowPretty("Specify YLim using lower then upper.");
     if (init.ZLim[0] > init.ZLim[1]) ThrowPretty("Specify ZLim using lower then upper.");
 
-    eff_lower[0] = init.XLim[0];
-    eff_upper[0] = init.XLim[1];
-    eff_lower[1] = init.YLim[0];
-    eff_upper[1] = init.YLim[1];
-    eff_lower[2] = init.ZLim[0];
-    eff_upper[2] = init.ZLim[1];
+    eff_lower_[0] = init.XLim[0];
+    eff_upper_[0] = init.XLim[1];
+    eff_lower_[1] = init.YLim[0];
+    eff_upper_[1] = init.YLim[1];
+    eff_lower_[2] = init.ZLim[0];
+    eff_upper_[2] = init.ZLim[1];
 
     n_effs_ = frames_.size();
 }

@@ -29,6 +29,7 @@
 
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/tools/box_qp.h>
+#include <exotica_core/visualization_meshcat.h>
 #include <exotica_core/visualization_moveit.h>
 #undef NDEBUG
 #include <pybind11/eigen.h>
@@ -1088,6 +1089,19 @@ PYBIND11_MODULE(_pyexotica, module)
     py::class_<VisualizationMoveit> visualization_moveit(module, "VisualizationMoveit");
     visualization_moveit.def(py::init<ScenePtr>());
     visualization_moveit.def("display_trajectory", &VisualizationMoveit::DisplayTrajectory);
+    py::class_<VisualizationMeshcat> visualization_meshcat(module, "VisualizationMeshcat");
+    visualization_meshcat.def(py::init<ScenePtr, const std::string&, bool>(), py::arg("scene"), py::arg("url"), py::arg("use_mesh_materials") = true);
+    visualization_meshcat.def("display_scene", &VisualizationMeshcat::DisplayScene, py::arg("use_mesh_materials") = true);
+    visualization_meshcat.def("display_state", &VisualizationMeshcat::DisplayState, py::arg("state"), py::arg("t") = 0.0);
+    visualization_meshcat.def("display_trajectory", &VisualizationMeshcat::DisplayTrajectory, py::arg("trajectory"), py::arg("dt") = 1.0);
+    visualization_meshcat.def("get_web_url", &VisualizationMeshcat::GetWebURL);
+    visualization_meshcat.def("get_file_url", &VisualizationMeshcat::GetFileURL);
+    visualization_meshcat.def("delete", &VisualizationMeshcat::Delete, py::arg("path") = "");
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const double&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const std::string&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const bool&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const Eigen::Vector3d&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const Eigen::Vector4d&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematic_tree(kin, "KinematicTree");

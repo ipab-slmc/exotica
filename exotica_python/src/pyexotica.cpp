@@ -29,8 +29,7 @@
 
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/tools/box_qp.h>
-#include <exotica_core/visualization.h>
-
+#include <exotica_core/visualization_moveit.h>
 #undef NDEBUG
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -80,7 +79,7 @@ PyObject* StdStringAsPy(std::string value)
 using namespace exotica;
 namespace py = pybind11;
 
-std::map<std::string, Initializer> known_initializers;
+std::map<std::string, Initializer> knownInitializers;
 
 PyObject* CreateStringIOObject()
 {
@@ -172,7 +171,7 @@ void AddInitializers(py::module& module)
     {
         std::string full_name = i.GetName();
         std::string name = full_name.substr(8);
-        known_initializers[full_name] = CreateInitializer(i);
+        knownInitializers[full_name] = CreateInitializer(i);
         inits.def((name + "Initializer").c_str(), [i]() { return CreateInitializer(i); }, (name + "Initializer constructor.").c_str());
     }
 
@@ -204,7 +203,7 @@ public:
                 target.Set(ParseInt(PyAsStdString(value_py)));
                 return true;
             }
-            else if (PyInt_Check(value_py) || PyLong_Check(value_py))
+            else if (PyInt_Check(value_py))
             {
                 target.Set((int)PyInt_AsLong(value_py));
                 return true;
@@ -221,10 +220,6 @@ public:
             {
                 target.Set(PyInt_AsLong(value_py));
                 return true;
-            }
-            else
-            {
-                ThrowPretty("to be implemented - please open an issue.");
             }
         }
         else if (target.GetType() == "double")
@@ -356,22 +351,22 @@ public:
     {
         if (!PyTuple_CheckExact(source)) return false;
 
-        int tuple_size = PyTuple_Size(source);
-        if (tuple_size < 1 || tuple_size > 2) return false;
+        int sz = PyTuple_Size(source);
+        if (sz < 1 || sz > 2) return false;
 
         PyObject* const name_py = PyTuple_GetItem(source, 0);
         if (!IsPyString(name_py)) return false;
-        const std::string initializer_name = PyAsStdString(name_py);
+        const std::string name = PyAsStdString(name_py);
 
-        const auto& it = known_initializers.find(initializer_name);
-        if (it == known_initializers.end())
+        const auto& it = knownInitializers.find(name);
+        if (it == knownInitializers.end())
         {
-            HIGHLIGHT("Unknown initializer type '" << initializer_name << "'");
+            HIGHLIGHT("Unknown initializer type '" << name << "'");
             return false;
         }
         ret = Initializer(it->second);
 
-        if (tuple_size == 2)
+        if (sz == 2)
         {
             PyObject* const dict = PyTuple_GetItem(source, 1);
             if (!PyDict_Check(dict)) return false;
@@ -392,7 +387,7 @@ public:
                 }
                 else
                 {
-                    HIGHLIGHT(initializer_name << ": Ignoring property '" << key_str << "'")
+                    HIGHLIGHT(name << ": Ignoring property '" << key_str << "'")
                 }
             }
         }
@@ -666,11 +661,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("S", &TimeIndexedTask::S)
         .def_readonly("T", &TimeIndexedTask::T)
         .def_readonly("tasks", &TimeIndexedTask::tasks)
-        .def_readonly("task_maps", &TimeIndexedTask::task_maps)
-        .def("set_goal", &TimeIndexedTask::SetGoal)
-        .def("get_goal", &TimeIndexedTask::GetGoal)
-        .def("set_rho", &TimeIndexedTask::SetRho)
-        .def("get_rho", &TimeIndexedTask::GetRho);
+        .def_readonly("task_maps", &TimeIndexedTask::task_maps);
 
     py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>>(module, "EndPoseTask")
         .def_readonly("length_Phi", &EndPoseTask::length_Phi)
@@ -684,11 +675,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("S", &EndPoseTask::S)
         .def_readonly("tasks", &EndPoseTask::tasks)
         .def_readonly("task_maps", &EndPoseTask::task_maps)
-        .def("get_task_error", &EndPoseTask::GetTaskError)
-        .def("set_goal", &EndPoseTask::SetGoal)
-        .def("get_goal", &EndPoseTask::GetGoal)
-        .def("set_rho", &EndPoseTask::SetRho)
-        .def("get_rho", &EndPoseTask::GetRho);
+        .def("get_task_error", &EndPoseTask::GetTaskError);
 
     py::class_<SamplingTask, std::shared_ptr<SamplingTask>>(module, "SamplingTask")
         .def_readonly("length_Phi", &SamplingTask::length_Phi)
@@ -699,11 +686,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("Phi", &SamplingTask::Phi)
         .def_readonly("S", &SamplingTask::S)
         .def_readonly("tasks", &SamplingTask::tasks)
-        .def_readonly("task_maps", &SamplingTask::task_maps)
-        .def("set_goal", &SamplingTask::SetGoal)
-        .def("get_goal", &SamplingTask::GetGoal)
-        .def("set_rho", &SamplingTask::SetRho)
-        .def("get_rho", &SamplingTask::GetRho);
+        .def_readonly("task_maps", &SamplingTask::task_maps);
 
     py::class_<TaskSpaceVector, std::shared_ptr<TaskSpaceVector>> task_space_vector(module, "TaskSpaceVector");
     task_space_vector.def("set_zero", &TaskSpaceVector::SetZero);
@@ -723,9 +706,6 @@ PYBIND11_MODULE(_pyexotica, module)
         },
         "Solve the problem");
     motion_solver.def("get_problem", &MotionSolver::GetProblem);
-
-    py::class_<FeedbackMotionSolver, std::shared_ptr<FeedbackMotionSolver>, MotionSolver> feedback_motion_solver(module, "FeedbackMotionSolver");
-    feedback_motion_solver.def("get_feedback_control", &FeedbackMotionSolver::GetFeedbackControl);
 
     py::class_<PlanningProblem, std::shared_ptr<PlanningProblem>, Object>(module, "PlanningProblem")
         .def("get_tasks", &PlanningProblem::GetTasks, py::return_value_policy::reference_internal)
@@ -959,9 +939,6 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("simulate", &DynamicTimeIndexedShootingProblem::Simulate)
         .def("get_Q", &DynamicTimeIndexedShootingProblem::get_Q)
         .def("set_Q", &DynamicTimeIndexedShootingProblem::set_Q)
-        .def_readonly("Phi", &DynamicTimeIndexedShootingProblem::Phi)
-        .def_readonly("jacobian", &DynamicTimeIndexedShootingProblem::jacobian)
-        .def_readonly("cost", &DynamicTimeIndexedShootingProblem::cost)
         .def("get_state_cost", &DynamicTimeIndexedShootingProblem::GetStateCost)
         .def("get_state_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetStateCostJacobian)
         .def("get_control_cost", &DynamicTimeIndexedShootingProblem::GetControlCost)
@@ -1056,8 +1033,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("get_root_frame_name", &Scene::GetRootFrameName);
     scene.def("get_root_joint_name", &Scene::GetRootJointName);
     scene.def("attach_object", &Scene::AttachObject);
-    scene.def("attach_object_local", (void (Scene::*)(const std::string& name, const std::string& parent, const KDL::Frame& pose)) & Scene::AttachObjectLocal);
-    scene.def("attach_object_local", (void (Scene::*)(const std::string& name, const std::string& parent, const Eigen::VectorXd& pose)) & Scene::AttachObjectLocal);
+    scene.def("attach_object_local", &Scene::AttachObjectLocal);
     scene.def("detach_object", &Scene::DetachObject);
     scene.def("has_attached_object", &Scene::HasAttachedObject);
     scene.def("fk", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->GetKinematicTree().FK(e1, o1, e2, o2); });
@@ -1109,9 +1085,9 @@ PYBIND11_MODULE(_pyexotica, module)
     collision_scene.def("update_collision_object_transforms", &CollisionScene::UpdateCollisionObjectTransforms);
     collision_scene.def("continuous_collision_check", &CollisionScene::ContinuousCollisionCheck);
 
-    py::class_<Visualization> visualization(module, "Visualization");
-    visualization.def(py::init<ScenePtr>());
-    visualization.def("display_trajectory", &Visualization::DisplayTrajectory);
+    py::class_<VisualizationMoveit> visualization_moveit(module, "VisualizationMoveit");
+    visualization_moveit.def(py::init<ScenePtr>());
+    visualization_moveit.def("display_trajectory", &VisualizationMoveit::DisplayTrajectory);
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematic_tree(kin, "KinematicTree");
@@ -1163,8 +1139,7 @@ PYBIND11_MODULE(_pyexotica, module)
     py::class_<DynamicsSolver, std::shared_ptr<DynamicsSolver>, Object>(module, "DynamicsSolver")
         .def("f", &DynamicsSolver::f)
         .def("fx", &DynamicsSolver::fx)
-        .def("fu", &DynamicsSolver::fu)
-        .def("get_position", &DynamicsSolver::GetPosition);
+        .def("fu", &DynamicsSolver::fu);
 
     ////////////////////////////////////////////////////////////////////////////
     /// Shapes
@@ -1241,7 +1216,7 @@ PYBIND11_MODULE(_pyexotica, module)
                (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
                                  const Eigen::VectorXd& x_init, const double gamma,
-                                 const int max_iterations, const double epsilon, const double lambda)) &
+                                 const int max_iterations, const double epsilon)) &
                    BoxQP);
 
     AddInitializers(module);

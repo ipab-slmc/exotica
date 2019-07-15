@@ -38,6 +38,17 @@
 
 namespace exotica
 {
+class VisualElement
+{
+public:
+    std::string name;
+    shapes::ShapePtr shape = nullptr;
+    std::string shape_resource_path = "";
+    KDL::Frame frame = KDL::Frame::Identity();
+    Eigen::Vector3d scale = Eigen::Vector3d::Ones();
+    Eigen::Vector4d color = Eigen::Vector4d(1.0, 1.0, 1.0, 1.0);
+};
+
 class KinematicElement
 {
 public:
@@ -111,6 +122,7 @@ public:
     Eigen::Vector3d scale = Eigen::Vector3d::Ones();
     bool is_robot_link = false;
     Eigen::Vector4d color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0);
+    std::vector<VisualElement> visual;
 
 private:
     inline void SetChildrenClosestRobotLink()

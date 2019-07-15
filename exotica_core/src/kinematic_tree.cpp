@@ -279,6 +279,70 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
 
     // Create random distributions for state sampling
     generator_ = std::mt19937(rd_());
+
+    // Add visual shapes
+    const urdf::ModelInterfaceSharedPtr& urdf = model_->getURDF();
+    std::vector<urdf::LinkSharedPtr> urdf_links;
+    urdf->getLinks(urdf_links);
+    for (urdf::LinkSharedPtr urdf_link : urdf_links)
+    {
+        if (urdf_link->visual_array.size() > 0)
+        {
+            std::shared_ptr<KinematicElement> element = tree_map_[urdf_link->name].lock();
+            int i = 0;
+            for (urdf::VisualSharedPtr urdf_visual : urdf_link->visual_array)
+            {
+                VisualElement visual;
+                visual.name = urdf_link->name + "_visual_" + std::to_string(i);
+                visual.frame = KDL::Frame(KDL::Rotation::Quaternion(urdf_visual->origin.rotation.x, urdf_visual->origin.rotation.y, urdf_visual->origin.rotation.z, urdf_visual->origin.rotation.w), KDL::Vector(urdf_visual->origin.position.x, urdf_visual->origin.position.y, urdf_visual->origin.position.z));
+                if (urdf_visual->material)
+                {
+                    urdf::MaterialSharedPtr material = urdf_visual->material->name == "" ? urdf_visual->material : urdf->getMaterial(urdf_visual->material->name);
+                    visual.color(0) = material->color.r;
+                    visual.color(1) = material->color.g;
+                    visual.color(2) = material->color.b;
+                    visual.color(3) = material->color.a;
+                }
+                else
+                {
+                    if (debug)
+                        HIGHLIGHT("No material for " << visual.name);
+                }
+
+                switch (urdf_visual->geometry->type)
+                {
+                    case urdf::Geometry::BOX:
+                    {
+                        std::shared_ptr<urdf::Box> box = std::static_pointer_cast<urdf::Box>(ToStdPtr(urdf_visual->geometry));
+                        visual.shape = std::shared_ptr<shapes::Box>(new shapes::Box(box->dim.x, box->dim.y, box->dim.z));
+                    }
+                    break;
+                    case urdf::Geometry::SPHERE:
+                    {
+                        std::shared_ptr<urdf::Sphere> sphere = std::static_pointer_cast<urdf::Sphere>(ToStdPtr(urdf_visual->geometry));
+                        visual.shape = std::shared_ptr<shapes::Sphere>(new shapes::Sphere(sphere->radius));
+                    }
+                    break;
+                    case urdf::Geometry::CYLINDER:
+                    {
+                        std::shared_ptr<urdf::Cylinder> cylinder = std::static_pointer_cast<urdf::Cylinder>(ToStdPtr(urdf_visual->geometry));
+                        visual.shape = std::shared_ptr<shapes::Cylinder>(new shapes::Cylinder(cylinder->radius, cylinder->length));
+                    }
+                    break;
+                    case urdf::Geometry::MESH:
+                    {
+                        std::shared_ptr<urdf::Mesh> mesh = std::static_pointer_cast<urdf::Mesh>(ToStdPtr(urdf_visual->geometry));
+                        visual.shape_resource_path = mesh->filename;
+                        visual.scale = Eigen::Vector3d(mesh->scale.x, mesh->scale.y, mesh->scale.z);
+                        visual.shape = std::shared_ptr<shapes::Mesh>(new shapes::Mesh());
+                    }
+                    break;
+                }
+                element->visual.push_back(visual);
+                ++i;
+            }
+        }
+    }
 }
 
 void KinematicTree::UpdateModel()
@@ -360,13 +424,13 @@ void KinematicTree::ChangeParent(const std::string& name, const std::string& par
     debug_scene_changed_ = true;
 }
 
-void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool is_controlled)
+void KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
 {
-    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color, is_controlled);
+    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color, visual, is_controlled);
     environment_tree_.push_back(element);
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool is_controlled)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
 {
     std::string shape_path(shape_resource_path);
     if (shape_path == "")
@@ -390,13 +454,13 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
     shapes::ShapePtr shape;
     shape.reset(shapes::createMeshFromResource(shape_path, scale));
     shapes::ShapeConstPtr tmp_shape(shape);
-    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, tmp_shape, inertia, color, is_controlled);
+    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, tmp_shape, inertia, color, visual, is_controlled);
     element->shape_resource_path = shape_path;
     element->scale = scale;
     return element;
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, bool is_controlled)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
 {
     std::shared_ptr<KinematicElement> parent_element;
     if (parent == "")
@@ -434,6 +498,7 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
     parent_element->children.push_back(new_element);
     new_element->UpdateClosestRobotLink();
     tree_map_[name] = new_element;
+    new_element->visual = visual;
     debug_scene_changed_ = true;
     return new_element;
 }

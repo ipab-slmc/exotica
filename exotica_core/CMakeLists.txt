@@ -78,7 +78,7 @@ add_library(${PROJECT_NAME}
   src/motion_solver.cpp
   src/setup.cpp
   src/server.cpp
-  src/visualization.cpp
+  src/visualization_moveit.cpp
   src/scene.cpp
   src/trajectory.cpp
   src/property.cpp

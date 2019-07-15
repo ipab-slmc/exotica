@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_VISUALIZATION_H_
-#define EXOTICA_CORE_VISUALIZATION_H_
+#ifndef EXOTICA_CORE_VISUALIZATION_MOVEIT_H_
+#define EXOTICA_CORE_VISUALIZATION_MOVEIT_H_
 
 #include <exotica_core/scene.h>
 #include <exotica_core/tools/uncopyable.h>
@@ -37,11 +37,11 @@
 
 namespace exotica
 {
-class Visualization : public Uncopyable
+class VisualizationMoveit : public Uncopyable
 {
 public:
-    Visualization(ScenePtr scene);
-    virtual ~Visualization();
+    VisualizationMoveit(ScenePtr scene);
+    virtual ~VisualizationMoveit();
 
     void Initialize();
 
@@ -53,4 +53,4 @@ private:
 };
 }
 
-#endif  // EXOTICA_CORE_VISUALIZATION_H_
+#endif  // EXOTICA_CORE_VISUALIZATION_MOVEIT_H_

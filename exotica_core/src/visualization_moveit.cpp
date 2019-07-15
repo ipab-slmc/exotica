@@ -28,21 +28,21 @@
 //
 
 #include <exotica_core/server.h>
-#include <exotica_core/visualization.h>
+#include <exotica_core/visualization_moveit.h>
 
 #include <geometry_msgs/Transform.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 
 namespace exotica
 {
-Visualization::Visualization(ScenePtr scene) : scene_(scene)
+VisualizationMoveit::VisualizationMoveit(ScenePtr scene) : scene_(scene)
 {
-    HIGHLIGHT_NAMED("Visualization", "Initialising visualizer");
+    HIGHLIGHT_NAMED("VisualizationMoveit", "Initialising visualizer");
     Initialize();
 }
-Visualization::~Visualization() = default;
+VisualizationMoveit::~VisualizationMoveit() = default;
 
-void Visualization::Initialize()
+void VisualizationMoveit::Initialize()
 {
     if (Server::IsRos())
     {
@@ -50,7 +50,7 @@ void Visualization::Initialize()
     }
 }
 
-void Visualization::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory)
+void VisualizationMoveit::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory)
 {
     // TODO: Correctly handle dt for time_from_start
     // TODO:

@@ -1109,9 +1109,9 @@ PYBIND11_MODULE(_pyexotica, module)
     collision_scene.def("update_collision_object_transforms", &CollisionScene::UpdateCollisionObjectTransforms);
     collision_scene.def("continuous_collision_check", &CollisionScene::ContinuousCollisionCheck);
 
-    py::class_<VisualizationMoveit> visualization_moveit(module, "VisualizationMoveit");
+    py::class_<VisualizationMoveIt> visualization_moveit(module, "VisualizationMoveIt");
     visualization_moveit.def(py::init<ScenePtr>());
-    visualization_moveit.def("display_trajectory", &VisualizationMoveit::DisplayTrajectory);
+    visualization_moveit.def("display_trajectory", &VisualizationMoveIt::DisplayTrajectory);
     py::class_<VisualizationMeshcat> visualization_meshcat(module, "VisualizationMeshcat");
     visualization_meshcat.def(py::init<ScenePtr, const std::string&, bool>(), py::arg("scene"), py::arg("url"), py::arg("use_mesh_materials") = true);
     visualization_meshcat.def("display_scene", &VisualizationMeshcat::DisplayScene, py::arg("use_mesh_materials") = true);

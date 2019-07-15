@@ -5,5 +5,5 @@ from .publish_trajectory import *
 from .tools import *
 from .interactive_cost_tuning import *
 
-Visualization = VisualizationMoveit
+Visualization = VisualizationMoveIt
 # from .planning_scene_utils import * # pyassimp import currently fails on Kinetic, will fix

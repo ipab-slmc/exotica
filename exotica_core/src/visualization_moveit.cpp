@@ -35,14 +35,14 @@
 
 namespace exotica
 {
-VisualizationMoveit::VisualizationMoveit(ScenePtr scene) : scene_(scene)
+VisualizationMoveIt::VisualizationMoveIt(ScenePtr scene) : scene_(scene)
 {
-    HIGHLIGHT_NAMED("VisualizationMoveit", "Initialising visualizer");
+    HIGHLIGHT_NAMED("VisualizationMoveIt", "Initialising visualizer");
     Initialize();
 }
-VisualizationMoveit::~VisualizationMoveit() = default;
+VisualizationMoveIt::~VisualizationMoveIt() = default;
 
-void VisualizationMoveit::Initialize()
+void VisualizationMoveIt::Initialize()
 {
     if (Server::IsRos())
     {
@@ -50,7 +50,7 @@ void VisualizationMoveit::Initialize()
     }
 }
 
-void VisualizationMoveit::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory)
+void VisualizationMoveIt::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory)
 {
     // TODO: Correctly handle dt for time_from_start
     // TODO:

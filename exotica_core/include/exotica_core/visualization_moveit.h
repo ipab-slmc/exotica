@@ -37,11 +37,11 @@
 
 namespace exotica
 {
-class VisualizationMoveit : public Uncopyable
+class VisualizationMoveIt : public Uncopyable
 {
 public:
-    VisualizationMoveit(ScenePtr scene);
-    virtual ~VisualizationMoveit();
+    VisualizationMoveIt(ScenePtr scene);
+    virtual ~VisualizationMoveIt();
 
     void Initialize();
 

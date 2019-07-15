@@ -322,6 +322,7 @@
       <geometry>
         <sphere radius="0.07"/>
       </geometry>
+      <material name="Grey"/>
     </visual>
 
     <collision>

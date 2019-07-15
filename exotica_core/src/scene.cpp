@@ -590,6 +590,14 @@ void Scene::UpdateInternalFrames(bool update_request)
     request_needs_updating_ = false;
 }
 
+template<typename T>
+std::shared_ptr<T> CopyShape(shapes::ShapeConstPtr shape, std::shared_ptr<T> dummy = nullptr)
+{
+    std::shared_ptr<T> tmp(new T());
+    *tmp = *std::static_pointer_cast<const T>(shape);
+    return tmp;
+}
+
 void Scene::UpdateSceneFrames()
 {
     kinematica_.ResetModel();
@@ -603,25 +611,47 @@ void Scene::UpdateSceneFrames()
             Eigen::Isometry3d obj_transform;
             obj_transform.translation() = object.second->shape_poses_[0].translation();
             obj_transform.linear() = object.second->shape_poses_[0].rotation();
-            kinematica_.AddEnvironmentElement(object.first, obj_transform);
-
+            std::shared_ptr<KinematicElement> element = kinematica_.AddEnvironmentElement(object.first, obj_transform);
+            std::vector<VisualElement> visuals;
             for (int i = 0; i < object.second->shape_poses_.size(); ++i)
             {
                 Eigen::Isometry3d shape_transform;
                 shape_transform.translation() = object.second->shape_poses_[i].translation();
                 shape_transform.linear() = object.second->shape_poses_[i].rotation();
                 Eigen::Isometry3d trans = obj_transform.inverse() * shape_transform;
+                VisualElement visual;
+                visual.name = object.first;
+                switch (object.second->shapes_[i]->type)
+                {
+                    case shapes::ShapeType::BOX:
+                        visual.shape = CopyShape<shapes::Box>(object.second->shapes_[i]);
+                        break;
+                    case shapes::ShapeType::CYLINDER:
+                        visual.shape = CopyShape<shapes::Cylinder>(object.second->shapes_[i]);
+                        break;
+                    case shapes::ShapeType::SPHERE:
+                        visual.shape = CopyShape<shapes::Sphere>(object.second->shapes_[i]);
+                        break;
+                    case shapes::ShapeType::MESH:
+                        visual.shape = CopyShape<shapes::Mesh>(object.second->shapes_[i]);
+                        break;
+                    default:
+                        break;
+                }
+                tf::transformEigenToKDL(trans, visual.frame);
                 if (ps_->hasObjectColor(object.first))
                 {
                     auto color_msg = ps_->getObjectColor(object.first);
-                    Eigen::Vector4d color = Eigen::Vector4d(color_msg.r, color_msg.g, color_msg.b, color_msg.a);
-                    kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i], KDL::RigidBodyInertia::Zero(), color);
+                    visual.color = Eigen::Vector4d(color_msg.r, color_msg.g, color_msg.b, color_msg.a);
+                    kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i], KDL::RigidBodyInertia::Zero(), visual.color);
                 }
                 else
                 {
                     kinematica_.AddEnvironmentElement(object.first + "_collision_" + std::to_string(i), trans, object.first, object.second->shapes_[i]);
                 }
+                if (visual.shape) visuals.push_back(visual);
             }
+            element->visual = visuals;
         }
         else
         {

@@ -18,7 +18,7 @@ class Example(object):
         self.q = np.array([0.0] * 7)
 
         # Setup exotica
-        self.problem = exo.Setup.load_problem('{exotica_examples}/resources/configs/example_ik_eff_box_constraint.xml')
+        self.problem = exo.Setup.load_problem('{exotica_examples}/resources/configs/example_ik_eff_box.xml')
         self.solver = exotica_scipy_solver.SciPyEndPoseSolver(self.problem, method='SLSQP')
         self.t0 = rospy.Time.now().to_sec()
 
@@ -35,7 +35,7 @@ class Example(object):
         publish_pose(self.q, self.problem)
 
 if __name__=='__main__':
-    rospy.init_node('example_ik_eff_box_constraint_node')
+    rospy.init_node('example_ik_eff_box_node')
     exo.Setup.init_ros()
     signal.signal(signal.SIGINT, sig_int_handler)
     rospy.Timer(rospy.Duration(1.0/50.0), Example().update)

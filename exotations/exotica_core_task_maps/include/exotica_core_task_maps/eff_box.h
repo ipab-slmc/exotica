@@ -27,36 +27,38 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_MAPS_EFF_BOX_CONSTRAINT_H_
-#define EXOTICA_CORE_TASK_MAPS_EFF_BOX_CONSTRAINT_H_
+#ifndef EXOTICA_CORE_TASK_MAPS_EFF_BOX_H_
+#define EXOTICA_CORE_TASK_MAPS_EFF_BOX_H_
 
 #include <exotica_core/task_map.h>
 
-#include <exotica_core_task_maps/eff_box_constraint_initializer.h>
+#include <exotica_core_task_maps/eff_box_initializer.h>
+#include <exotica_core_task_maps/frame_with_box_limits_initializer.h>
 
 namespace exotica
 {
-/// \class EffBoxConstraint
+/// \class EffBox
 ///
 /// \ingroup TaskMap
 ///
-/// \brief Limits the end-effector motion to a box in some reference frame.
-class EffBoxConstraint : public TaskMap, public Instantiable<EffBoxConstraintInitializer>
+/// \brief Limits every given end-effector motion to a box in some reference frame.
+class EffBox : public TaskMap, public Instantiable<EffBoxInitializer>
 {
 public:
-    void Instantiate(const EffBoxConstraintInitializer& init) override;
+    void Instantiate(const EffBoxInitializer& init) override;  // TODO: Allow user to use task map as both a cost term and inequality constraint
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
-    Eigen::Vector3d GetLowerLimit();
-    Eigen::Vector3d GetUpperLimit();
+    const Eigen::VectorXd GetLowerLimit();
+    const Eigen::VectorXd GetUpperLimit();
 
 private:
-    Eigen::Vector3d eff_lower_;  ///< End-effector lower x, y, z limit.
-    Eigen::Vector3d eff_upper_;  ///< End-effector upper x, y, z limit.
+    Eigen::VectorXd eff_lower_;  ///< End-effector lower x, y, z limit.
+    Eigen::VectorXd eff_upper_;  ///< End-effector upper x, y, z limit.
     int n_effs_;                 ///< Number of end-effectors.
+    int three_times_n_effs_;     ///> Three multiplied by the number of end-effectors.
 };
 }  // namespace exotica
 
-#endif  // EXOTICA_CORE_TASK_MAPS_EFF_BOX_CONSTRAINT_H_
+#endif  // EXOTICA_CORE_TASK_MAPS_EFF_BOX_H_

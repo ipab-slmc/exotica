@@ -35,7 +35,7 @@
 #include <exotica_core_task_maps/center_of_mass.h>
 #include <exotica_core_task_maps/distance.h>
 #include <exotica_core_task_maps/eff_axis_alignment.h>
-#include <exotica_core_task_maps/eff_box_constraint.h>
+#include <exotica_core_task_maps/eff_box.h>
 #include <exotica_core_task_maps/eff_frame.h>
 #include <exotica_core_task_maps/eff_orientation.h>
 #include <exotica_core_task_maps/eff_position.h>
@@ -72,9 +72,9 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
         .def("get_direction", &EffAxisAlignment::GetDirection)
         .def("set_direction", &EffAxisAlignment::SetDirection);
 
-    py::class_<EffBoxConstraint, std::shared_ptr<EffBoxConstraint>, TaskMap>(module, "EffBoxConstraint")
-        .def("get_lower_limit", &EffBoxConstraint::GetLowerLimit)
-        .def("get_upper_limit", &EffBoxConstraint::GetUpperLimit);
+    py::class_<EffBox, std::shared_ptr<EffBox>, TaskMap>(module, "EffBox")
+        .def("get_lower_limit", &EffBox::GetLowerLimit)
+        .def("get_upper_limit", &EffBox::GetUpperLimit);
 
     py::class_<PointToLine, std::shared_ptr<PointToLine>, TaskMap>(module, "PointToLine")
         .def_property("end_point", &PointToLine::GetEndPoint, &PointToLine::SetEndPoint);

@@ -1,4 +1,4 @@
-class EffBoxConstraint
+class EffBox
 
 extend <exotica_core/task_map>
 
@@ -8,6 +8,3 @@ extend <exotica_core/task_map>
 // string Base           > name of frame in which line is defined
 // VectorXd BaseOffset   > starting point of line in Base frame
 
-Required Eigen::Vector2d XLim;
-Required Eigen::Vector2d YLim;
-Required Eigen::Vector2d ZLim;

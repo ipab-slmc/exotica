@@ -77,7 +77,7 @@
       Avoids "looking at" spherical objects. Can be used as either a cost term, or inequality constraint. The task map assumes the positions and radii of each object. 
     </description>
   </class>  
-  <class name="exotica/EffBoxConstraint" type="exotica::EffBoxConstraint" base_class_type="exotica::TaskMap">
+  <class name="exotica/EffBox" type="exotica::EffBox" base_class_type="exotica::TaskMap">
     <description>Limits the end-effector motion to a box in some reference frame. This task map can only be used as an inequality constraint.</description>
   </class>
 </library>

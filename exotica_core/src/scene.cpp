@@ -590,14 +590,6 @@ void Scene::UpdateInternalFrames(bool update_request)
     request_needs_updating_ = false;
 }
 
-template<typename T>
-std::shared_ptr<T> CopyShape(shapes::ShapeConstPtr shape, std::shared_ptr<T> dummy = nullptr)
-{
-    std::shared_ptr<T> tmp(new T());
-    *tmp = *std::static_pointer_cast<const T>(shape);
-    return tmp;
-}
-
 void Scene::UpdateSceneFrames()
 {
     kinematica_.ResetModel();
@@ -621,23 +613,7 @@ void Scene::UpdateSceneFrames()
                 Eigen::Isometry3d trans = obj_transform.inverse() * shape_transform;
                 VisualElement visual;
                 visual.name = object.first;
-                switch (object.second->shapes_[i]->type)
-                {
-                    case shapes::ShapeType::BOX:
-                        visual.shape = CopyShape<shapes::Box>(object.second->shapes_[i]);
-                        break;
-                    case shapes::ShapeType::CYLINDER:
-                        visual.shape = CopyShape<shapes::Cylinder>(object.second->shapes_[i]);
-                        break;
-                    case shapes::ShapeType::SPHERE:
-                        visual.shape = CopyShape<shapes::Sphere>(object.second->shapes_[i]);
-                        break;
-                    case shapes::ShapeType::MESH:
-                        visual.shape = CopyShape<shapes::Mesh>(object.second->shapes_[i]);
-                        break;
-                    default:
-                        break;
-                }
+                visual.shape = shapes::ShapePtr(object.second->shapes_[i]->clone());
                 tf::transformEigenToKDL(trans, visual.frame);
                 if (ps_->hasObjectColor(object.first))
                 {

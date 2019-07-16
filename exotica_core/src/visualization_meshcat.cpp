@@ -216,7 +216,21 @@ void VisualizationMeshcat::DisplayScene(bool use_mesh_materials)
                     }
                     else
                     {
-                        HIGHLIGHT("Unsupported shape! " << element->segment.getName());
+                        if (visual.shape->type == shapes::MESH)
+                        {
+                            std::shared_ptr<shapes::Mesh> shape = std::static_pointer_cast<shapes::Mesh>(visual.shape);
+                            auto mesh = visualization::GeometryMeshBuffer(visual.shape);
+                            auto object = visualization::SetObject(path_prefix_ + visual.name, visualization::CreateGeometryObject(mesh,
+                                                                                                                                   visualization::Material(visualization::RGB(visual.color(0), visual.color(1), visual.color(2)), visual.color(3))));
+                            object.object.object.matrix =
+                                FrameToVector(visual.frame, visual.scale(0), visual.scale(1), visual.scale(2));
+                            SendMsg(object);
+                            SendMsg(visualization::SetTransform(object.path, FrameToVector(element->frame)));
+                        }
+                        else
+                        {
+                            HIGHLIGHT("Unsupported shape! " << element->segment.getName());
+                        }
                     }
                 }
                 break;

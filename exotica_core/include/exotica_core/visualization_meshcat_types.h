@@ -32,6 +32,7 @@
 
 #include <exotica_core/scene.h>
 #include <exotica_core/tools.h>
+#include <geometric_shapes/shapes.h>
 #include <iostream>
 
 #define MSGPACK_USE_DEFINE_MAP
@@ -57,7 +58,7 @@ unsigned char random_char()
 std::string generate_hex(const unsigned int len)
 {
     std::stringstream ss;
-    for (auto i = 0; i < len; i++)
+    for (auto i = 0; i < len; ++i)
     {
         auto rc = random_char();
         std::stringstream hexstream;
@@ -263,6 +264,86 @@ struct GeometryMesh : Geometry
     std::map<std::string, std::string> resources;
     std::vector<double> matrix = {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
     MSGPACK_DEFINE(uuid, type, format, resources, url, data, matrix)
+};
+
+struct ArrayFloat
+{
+    ArrayFloat() = default;
+
+    ArrayFloat(double* data_in, unsigned int size)
+    {
+        data.resize(size);
+        for (unsigned int i=0; i < size; ++i)
+            data[i] = data_in[i];
+        array = msgpack::v1::type::ext(0x17, reinterpret_cast<const char*>(data.data()), sizeof(float) * data.size());
+    }
+
+    ArrayFloat(const ArrayFloat& other)
+    {
+        itemSize = other.itemSize;
+        normalized = other.normalized;
+        data = other.data;
+        array = msgpack::v1::type::ext(0x17, reinterpret_cast<const char*>(data.data()), sizeof(float) * data.size());
+    }
+
+    int itemSize = 3;
+    std::string type = "Float32Array";
+    bool normalized = false;
+    std::vector<float> data;
+    msgpack::v1::type::ext array;
+
+    MSGPACK_DEFINE(itemSize, type, normalized, array)
+};
+
+struct ArrayInt
+{
+    ArrayInt() = default;
+
+    ArrayInt(unsigned int* data, unsigned int size)
+    {
+        array.resize(size);
+        for (unsigned int i=0; i < size; ++i)
+            array[i] = data[i];
+    }
+
+    int itemSize = 3;
+    std::string type = "Uint32Array";
+    bool normalized = false;
+    std::vector<uint32_t> array;
+
+    MSGPACK_DEFINE(itemSize, type, normalized, array)
+};
+
+struct GeometryMeshBufferData
+{
+    GeometryMeshBufferData() = default;
+    GeometryMeshBufferData(shapes::ShapePtr shape_in)
+    {
+        std::shared_ptr<shapes::Mesh> shape = std::static_pointer_cast<shapes::Mesh>(shape_in);
+        attributes["position"] = ArrayFloat(shape->vertices, shape->vertex_count * 3);
+        if (shape->vertex_normals)
+            attributes["normal"] = ArrayFloat(shape->vertex_normals, shape->vertex_count * 3);
+        index = ArrayInt(shape->triangles, shape->triangle_count * 3);
+    }
+
+    std::map<std::string, ArrayFloat> attributes;
+    ArrayInt index;
+
+    MSGPACK_DEFINE(attributes, index)
+};
+
+struct GeometryMeshBuffer : Geometry
+{
+    GeometryMeshBuffer() : Geometry("BufferGeometry", ""){};
+
+    GeometryMeshBuffer(shapes::ShapePtr shape_in, const std::string& uuid_in = "") : Geometry("BufferGeometry", uuid_in)
+    {
+        data = GeometryMeshBufferData(shape_in);
+    };
+
+    GeometryMeshBufferData data;
+    std::vector<double> matrix = {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+    MSGPACK_DEFINE(uuid, type, data, matrix)
 };
 
 template <typename T>

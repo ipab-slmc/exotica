@@ -23,3 +23,25 @@ By default, the Python bindings will be compiled for 2.7. In order to build for 
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. automodule:: exotica_ilqr_solver_py
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: exotica_ddp_solver_py
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: exotica_ilqg_solver_py
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: exotica_examples_py
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. Undocumented: exotica_scipy_solver

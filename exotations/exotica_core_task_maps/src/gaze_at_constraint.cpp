@@ -33,9 +33,6 @@ REGISTER_TASKMAP_TYPE("GazeAtConstraint", exotica::GazeAtConstraint);
 
 namespace exotica
 {
-GazeAtConstraint::GazeAtConstraint() = default;
-GazeAtConstraint::~GazeAtConstraint() = default;
-
 void GazeAtConstraint::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");

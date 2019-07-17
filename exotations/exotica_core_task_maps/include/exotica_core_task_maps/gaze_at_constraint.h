@@ -53,9 +53,6 @@ namespace exotica
 class GazeAtConstraint : public TaskMap, public Instantiable<GazeAtConstraintInitializer>
 {
 public:
-    GazeAtConstraint();
-    virtual ~GazeAtConstraint();
-
     void Instantiate(const GazeAtConstraintInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;

@@ -30,11 +30,11 @@
 #ifndef EXOTICA_CORE_VISUALIZATION_MESHCAT_H_
 #define EXOTICA_CORE_VISUALIZATION_MESHCAT_H_
 
-#include <exotica_core/scene.h>
-#include <exotica_core/tools/uncopyable.h>
-
 #include <memory>
 #include <zmq.hpp>
+
+#include <exotica_core/scene.h>
+#include <exotica_core/tools/uncopyable.h>
 
 namespace exotica
 {
@@ -78,6 +78,6 @@ private:
     zmq::context_t context_;
     std::unique_ptr<zmq::socket_t> socket_;
 };
-}
+} // namespace exotica
 
 #endif  // EXOTICA_CORE_VISUALIZATION_MESHCAT_H_

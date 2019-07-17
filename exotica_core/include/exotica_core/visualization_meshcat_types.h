@@ -30,13 +30,15 @@
 #ifndef EXOTICA_CORE_VISUALIZATION_MESHCAT_TYPES_H_
 #define EXOTICA_CORE_VISUALIZATION_MESHCAT_TYPES_H_
 
+#define MSGPACK_USE_DEFINE_MAP
+
+#include <iostream>
+#include <msgpack.hpp>
+
+#include <geometric_shapes/shapes.h>
+
 #include <exotica_core/scene.h>
 #include <exotica_core/tools.h>
-#include <geometric_shapes/shapes.h>
-#include <iostream>
-
-#define MSGPACK_USE_DEFINE_MAP
-#include <msgpack.hpp>
 
 namespace exotica
 {
@@ -44,7 +46,7 @@ namespace visualization
 {
 inline long RGB(double R, double G, double B)
 {
-    return (long)(std::min(std::max(R, 0.0), 1.0) * 255) * 65536L + (long)(std::min(std::max(G, 0.0), 1.0) * 255) * 256L + (long)(std::min(std::max(B, 0.0), 1.0) * 255);
+    return static_cast<long>(std::min(std::max(R, 0.0), 1.0) * 255) * 65536L + static_cast<long>(std::min(std::max(G, 0.0), 1.0) * 255) * 256L + static_cast<long>(std::min(std::max(B, 0.0), 1.0) * 255);
 }
 
 unsigned char random_char()
@@ -442,6 +444,6 @@ struct Delete
     std::string path = "";
     MSGPACK_DEFINE(type, path);
 };
-}
-}
+} // namespace visualization
+} // namespace exotica
 #endif  // EXOTICA_CORE_VISUALIZATION_MESHCAT_TYPES_H_

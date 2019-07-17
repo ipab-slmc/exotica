@@ -27,10 +27,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <chrono>
+
 #include <exotica_core/visualization_meshcat.h>
 #include <exotica_core/visualization_meshcat_types.h>
-
-#include <chrono>
 
 #define TIMEOUT 10000
 
@@ -281,7 +281,7 @@ void VisualizationMeshcat::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory,
 
     for (int t = 0; t < trajectory.rows(); ++t)
     {
-        double time = (double)t * dt;
+        double time = static_cast<double>(t) * dt;
         scene_->Update(trajectory.row(t), time);
 
         int i = 0;
@@ -293,7 +293,7 @@ void VisualizationMeshcat::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory,
             {
                 set_animation.animations[i].clip.tracks[0].keys.push_back(visualization::Key(time, PositionToVector(element->frame)));
                 set_animation.animations[i].clip.tracks[1].keys.push_back(visualization::Key(time, QuaternionToVector(element->frame)));
-                i++;
+                ++i;
             }
         }
     }
@@ -339,4 +339,4 @@ void VisualizationMeshcat::SetProperty(const std::string& path, const std::strin
     val[3] = value(3);
     SendMsg(visualization::Property<std::vector<double>>(path, property, val));
 }
-}
+} // namespace exotica

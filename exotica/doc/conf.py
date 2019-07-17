@@ -15,7 +15,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 project = u'EXOTica'
-copyright = u'2018, Vladimir Ivan, Yiming Yang, Wolfgang Merkt, Michael Camilleri, Sethu Vijayakumar - and contributors'
+copyright = u'2019, Vladimir Ivan, Yiming Yang, Wolfgang Merkt, Michael Camilleri, Sethu Vijayakumar - and contributors'
 author = u'Vladimir Ivan, Yiming Yang, Wolfgang Merkt, Michael Camilleri, Sethu Vijayakumar - and contributors'
 
 # The short X.Y version.

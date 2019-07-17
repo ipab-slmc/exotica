@@ -37,17 +37,16 @@ void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
 
-    Eigen::VectorXd e;
-    e.resize(three_times_n_effs_, 1);
-
     for (int i = 0; i < n_effs_; ++i)
     {
+        // Setup
         const int eff_id = 3 * i;
-        e.segment(eff_id, 3) = Eigen::Map<Eigen::Vector3d>(kinematics[i].Phi(i).p.data);
-    }
+        Eigen::Vector3d e = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
 
-    phi.topRows(three_times_n_effs_) = e - eff_upper_;
-    phi.bottomRows(three_times_n_effs_) = eff_lower_ - e;
+        // Compute phi
+        phi.segment(eff_id, 3) = e - eff_upper_.segment<3>(eff_id);
+        phi.segment(eff_id + three_times_n_effs_, 3) = eff_lower_.segment<3>(eff_id) - e;
+    }
 }
 
 void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
@@ -55,24 +54,19 @@ void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != TaskSpaceDim() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
-    Eigen::VectorXd e;
-    e.resize(three_times_n_effs_, 1);
-
-    Eigen::MatrixXd ed;
-    ed.resize(three_times_n_effs_, jacobian.cols());
-
     for (int i = 0; i < n_effs_; ++i)
     {
+        // Setup
         const int eff_id = 3 * i;
-        e.segment(eff_id, 3) = Eigen::Map<Eigen::Vector3d>(kinematics[i].Phi(i).p.data);
-        ed.middleRows(eff_id, 3) = kinematics[0].jacobian(i).data.topRows<3>();
+        Eigen::Vector3d e = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        Eigen::MatrixXd ed = kinematics[0].jacobian(i).data.topRows<3>();
+
+        // Compute phi and jacobian
+        phi.segment(eff_id, 3) = e - eff_upper_.segment<3>(eff_id);
+        phi.segment(eff_id + three_times_n_effs_, 3) = eff_lower_.segment<3>(eff_id) - e;
+        jacobian.middleRows(eff_id, 3) = ed;
+        jacobian.middleRows(eff_id + three_times_n_effs_, 3) = -ed;
     }
-
-    phi.topRows(three_times_n_effs_) = e - eff_upper_;
-    phi.bottomRows(three_times_n_effs_) = eff_lower_ - e;
-
-    jacobian.topRows(three_times_n_effs_) = ed;
-    jacobian.bottomRows(three_times_n_effs_) = -ed;
 }
 
 const Eigen::VectorXd EffBox::GetLowerLimit()

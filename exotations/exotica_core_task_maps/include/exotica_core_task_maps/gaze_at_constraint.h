@@ -42,7 +42,7 @@ namespace exotica
 ///
 /// \brief Keeps a given point within field of view of the end-effector.
 ///
-/// Given a point \f$p = (x, y, z)^T\in\mathbb{R}^3\$ defined in the end-effector frame, the robot motion is constrained such that it keeps \f$p\f$ within a virtual cone attahed to the end-effector. The task map is defined by
+/// Given a point \f$p = (x, y, z)^T\in\mathbb{R}^3\f$ defined in the end-effector frame, the robot motion is constrained such that it keeps \f$p\f$ within a virtual cone attahed to the end-effector. The task map is defined by
 /// \f[
 ///   \Phi = \begin{bmatrix}x^2 + y^2 - \tan(\theta)^2z^2\\-z\end{bmatrix}.
 /// \f]

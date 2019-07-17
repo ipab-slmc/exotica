@@ -50,8 +50,8 @@ public:
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
-    const Eigen::VectorXd GetLowerLimit();
-    const Eigen::VectorXd GetUpperLimit();
+    Eigen::VectorXd GetLowerLimit() const;
+    Eigen::VectorXd GetUpperLimit() const;
 
 private:
     Eigen::VectorXd eff_lower_;  ///< End-effector lower x, y, z limit.

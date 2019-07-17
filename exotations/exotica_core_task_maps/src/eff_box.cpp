@@ -66,12 +66,12 @@ void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
     }
 }
 
-const Eigen::VectorXd EffBox::GetLowerLimit()
+Eigen::VectorXd EffBox::GetLowerLimit() const
 {
     return eff_lower_;
 }
 
-const Eigen::VectorXd EffBox::GetUpperLimit()
+Eigen::VectorXd EffBox::GetUpperLimit() const
 {
     return eff_upper_;
 }

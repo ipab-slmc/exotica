@@ -41,11 +41,10 @@ void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
         // Setup
         const int eff_id = 3 * i;
-        Eigen::Vector3d e = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
 
         // Compute phi
-        phi.segment(eff_id, 3) = e - eff_upper_.segment<3>(eff_id);
-        phi.segment(eff_id + three_times_n_effs_, 3) = eff_lower_.segment<3>(eff_id) - e;
+        phi.segment(eff_id, 3) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data) - eff_upper_.segment<3>(eff_id);
+        phi.segment(eff_id + three_times_n_effs_, 3) = eff_lower_.segment<3>(eff_id) - Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
     }
 }
 
@@ -58,14 +57,12 @@ void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
     {
         // Setup
         const int eff_id = 3 * i;
-        Eigen::Vector3d e = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
-        Eigen::MatrixXd ed = kinematics[0].jacobian(i).data.topRows<3>();
 
         // Compute phi and jacobian
-        phi.segment(eff_id, 3) = e - eff_upper_.segment<3>(eff_id);
-        phi.segment(eff_id + three_times_n_effs_, 3) = eff_lower_.segment<3>(eff_id) - e;
-        jacobian.middleRows(eff_id, 3) = ed;
-        jacobian.middleRows(eff_id + three_times_n_effs_, 3) = -ed;
+        phi.segment(eff_id, 3) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data) - eff_upper_.segment<3>(eff_id);
+        phi.segment(eff_id + three_times_n_effs_, 3) = eff_lower_.segment<3>(eff_id) - Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        jacobian.middleRows(eff_id, 3) = kinematics[0].jacobian(i).data.topRows<3>();
+        jacobian.middleRows(eff_id + three_times_n_effs_, 3) = -kinematics[0].jacobian(i).data.topRows<3>();
     }
 }
 

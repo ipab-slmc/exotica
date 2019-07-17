@@ -19,9 +19,9 @@
           <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17"/>
         </EndEffector>
       </EffFrame>
-      <EffBox Name="EffBox">
+      <EffBox Name="EffBox" Debug="1">
         <EndEffector>
-          <FrameWithBoxLimits Link="lwr_arm_6_link" XLim="-3 3" YLim="-0.1 3" ZLim="0 0.65"/>
+          <FrameWithBoxLimits Link="lwr_arm_6_link" XLim="0.5 0.75" YLim="-0.1 0.1" ZLim="0.25 0.65"/>
         </EndEffector>
       </EffBox>
     </Maps>

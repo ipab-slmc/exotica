@@ -78,6 +78,6 @@ private:
     zmq::context_t context_;
     std::unique_ptr<zmq::socket_t> socket_;
 };
-} // namespace exotica
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_VISUALIZATION_MESHCAT_H_

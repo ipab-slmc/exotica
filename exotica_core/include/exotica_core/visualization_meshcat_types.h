@@ -275,7 +275,7 @@ struct ArrayFloat
     ArrayFloat(double* data_in, unsigned int size)
     {
         data.resize(size);
-        for (unsigned int i=0; i < size; ++i)
+        for (unsigned int i = 0; i < size; ++i)
             data[i] = data_in[i];
         array = msgpack::v1::type::ext(0x17, reinterpret_cast<const char*>(data.data()), sizeof(float) * data.size());
     }
@@ -304,7 +304,7 @@ struct ArrayInt
     ArrayInt(unsigned int* data, unsigned int size)
     {
         array.resize(size);
-        for (unsigned int i=0; i < size; ++i)
+        for (unsigned int i = 0; i < size; ++i)
             array[i] = data[i];
     }
 
@@ -444,6 +444,6 @@ struct Delete
     std::string path = "";
     MSGPACK_DEFINE(type, path);
 };
-} // namespace visualization
-} // namespace exotica
+}  // namespace visualization
+}  // namespace exotica
 #endif  // EXOTICA_CORE_VISUALIZATION_MESHCAT_TYPES_H_

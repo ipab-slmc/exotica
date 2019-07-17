@@ -50,7 +50,7 @@ class JointJerkBackwardDifference : public TaskMap, public Instantiable<JointJer
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    
+
     void AssignScene(ScenePtr scene) override;
 
     /// \brief Logs previous joint state.

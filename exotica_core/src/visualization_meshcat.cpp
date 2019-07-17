@@ -339,4 +339,4 @@ void VisualizationMeshcat::SetProperty(const std::string& path, const std::strin
     val[3] = value(3);
     SendMsg(visualization::Property<std::vector<double>>(path, property, val));
 }
-} // namespace exotica
+}  // namespace exotica

@@ -27,6 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <exotica_core/server.h>
 #include <exotica_core_task_maps/eff_box.h>
 
 REGISTER_TASKMAP_TYPE("EffBox", exotica::EffBox);
@@ -46,6 +47,8 @@ void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
         phi.segment(eff_id, 3) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data) - eff_upper_.segment<3>(eff_id);
         phi.segment(eff_id + three_times_n_effs_, 3) = eff_lower_.segment<3>(eff_id) - Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
     }
+
+    if (debug_ && Server::IsRos()) PublishObjectsAsMarkerArray();
 }
 
 void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
@@ -64,6 +67,8 @@ void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
         jacobian.middleRows(eff_id, 3) = kinematics[0].jacobian(i).data.topRows<3>();
         jacobian.middleRows(eff_id + three_times_n_effs_, 3) = -kinematics[0].jacobian(i).data.topRows<3>();
     }
+    
+    if (debug_ && Server::IsRos()) PublishObjectsAsMarkerArray();
 }
 
 Eigen::VectorXd EffBox::GetLowerLimit() const
@@ -74,6 +79,43 @@ Eigen::VectorXd EffBox::GetLowerLimit() const
 Eigen::VectorXd EffBox::GetUpperLimit() const
 {
     return eff_upper_;
+}
+
+void EffBox::PublishObjectsAsMarkerArray()
+{
+    const ros::Time t = ros::Time::now();
+    visualization_msgs::MarkerArray ma;
+    ma.markers.reserve(n_effs_);
+    for (int i = 0; i < n_effs_; ++i)
+    {
+        const int eff_id = 3 * i;
+        visualization_msgs::Marker m;
+        m.header.stamp = t;
+        std::string frame_name;
+        if (frames_[i].frame_B_link_name == "")
+        {
+            frame_name = "world_frame";
+        }
+        else
+        {
+            frame_name = frames_[i].frame_B_link_name;
+        }
+        m.header.frame_id = "exotica/" + frame_name;
+        m.id = i;
+        m.action = visualization_msgs::Marker::ADD;
+        m.type = visualization_msgs::Marker::CUBE;
+        m.scale.x = eff_upper_(eff_id) - eff_lower_(eff_id);
+        m.scale.y = eff_upper_(eff_id + 1) - eff_lower_(eff_id + 1);
+        m.scale.z = eff_upper_(eff_id + 2) - eff_lower_(eff_id + 2);
+        m.pose.position.x = (eff_upper_(eff_id) + eff_lower_(eff_id)) / 2.0;
+        m.pose.position.y = (eff_upper_(eff_id + 1) + eff_lower_(eff_id + 1)) / 2.0;
+        m.pose.position.z = (eff_upper_(eff_id + 2) + eff_lower_(eff_id + 2)) / 2.0;
+        m.pose.orientation.w = 1.0;
+        m.color.r = 1.0;
+        m.color.a = 0.25;
+        ma.markers.emplace_back(m);
+    }
+    pub_markers_.publish(ma);
 }
 
 void EffBox::Instantiate(const EffBoxInitializer& init)
@@ -104,6 +146,16 @@ void EffBox::Instantiate(const EffBoxInitializer& init)
         eff_lower_[eff_id] = frame.XLim[0];
         eff_lower_[eff_id + 1] = frame.YLim[0];
         eff_lower_[eff_id + 2] = frame.ZLim[0];
+    }
+
+    if (debug_ && Server::IsRos())
+    {
+        pub_markers_ = Server::Advertise<visualization_msgs::MarkerArray>("eff_box_objects", 1, true);
+        visualization_msgs::Marker md;  // delete previous markers
+        md.action = visualization_msgs::Marker::DELETEALL;
+        visualization_msgs::MarkerArray ma;
+        ma.markers.push_back(md);
+        pub_markers_.publish(ma);
     }
 }
 

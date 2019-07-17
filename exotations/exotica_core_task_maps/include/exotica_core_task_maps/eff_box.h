@@ -50,14 +50,17 @@ public:
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 
+    void PublishObjectsAsMarkerArray();
+
     Eigen::VectorXd GetLowerLimit() const;
     Eigen::VectorXd GetUpperLimit() const;
 
 private:
-    Eigen::VectorXd eff_lower_;  ///< End-effector lower x, y, z limit.
-    Eigen::VectorXd eff_upper_;  ///< End-effector upper x, y, z limit.
-    int n_effs_;                 ///< Number of end-effectors.
-    int three_times_n_effs_;     ///> Three multiplied by the number of end-effectors.
+    Eigen::VectorXd eff_lower_;   ///< End-effector lower x, y, z limit.
+    Eigen::VectorXd eff_upper_;   ///< End-effector upper x, y, z limit.
+    int n_effs_;                  ///< Number of end-effectors.
+    int three_times_n_effs_;      ///> Three multiplied by the number of end-effectors.
+    ros::Publisher pub_markers_;  ///< publish marker for RViz
 };
 }  // namespace exotica
 

@@ -67,7 +67,7 @@ void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
         jacobian.middleRows(eff_id, 3) = kinematics[0].jacobian(i).data.topRows<3>();
         jacobian.middleRows(eff_id + three_times_n_effs_, 3) = -kinematics[0].jacobian(i).data.topRows<3>();
     }
-    
+
     if (debug_ && Server::IsRos()) PublishObjectsAsMarkerArray();
 }
 
@@ -94,7 +94,7 @@ void EffBox::PublishObjectsAsMarkerArray()
         std::string frame_name;
         if (frames_[i].frame_B_link_name == "")
         {
-            frame_name = "world_frame";
+            frame_name = scene_->GetRootFrameName();
         }
         else
         {
@@ -116,6 +116,11 @@ void EffBox::PublishObjectsAsMarkerArray()
         ma.markers.emplace_back(m);
     }
     pub_markers_.publish(ma);
+}
+
+void EffBox::AssignScene(ScenePtr scene)
+{
+    scene_ = scene;
 }
 
 void EffBox::Instantiate(const EffBoxInitializer& init)
@@ -152,9 +157,10 @@ void EffBox::Instantiate(const EffBoxInitializer& init)
     {
         pub_markers_ = Server::Advertise<visualization_msgs::MarkerArray>("eff_box_objects", 1, true);
         visualization_msgs::Marker md;  // delete previous markers
-        md.action = visualization_msgs::Marker::DELETEALL;
+        md.action = 3;                  // DELETEALL
         visualization_msgs::MarkerArray ma;
-        ma.markers.push_back(md);
+        ma.markers.reserve(1);
+        ma.markers.emplace_back(md);
         pub_markers_.publish(ma);
     }
 }

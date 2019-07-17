@@ -46,6 +46,7 @@ class EffBox : public TaskMap, public Instantiable<EffBoxInitializer>
 {
 public:
     void Instantiate(const EffBoxInitializer& init) override;  // TODO: Allow user to use task map as both a cost term and inequality constraint
+    void AssignScene(ScenePtr scene) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;

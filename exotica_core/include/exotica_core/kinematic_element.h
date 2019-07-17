@@ -41,6 +41,8 @@ namespace exotica
 class VisualElement
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     std::string name;
     shapes::ShapePtr shape = nullptr;
     std::string shape_resource_path = "";
@@ -52,6 +54,8 @@ public:
 class KinematicElement
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     KinematicElement(int _id, std::shared_ptr<KinematicElement> _parent, const KDL::Segment& _segment) : parent(_parent), segment(_segment), id(_id)
     {
     }

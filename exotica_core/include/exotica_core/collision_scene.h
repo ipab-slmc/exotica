@@ -73,6 +73,8 @@ private:
 
 struct ContinuousCollisionProxy
 {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    
     ContinuousCollisionProxy() : e1(nullptr), e2(nullptr), in_collision(false), time_of_contact(-1) {}
     std::shared_ptr<KinematicElement> e1;
     std::shared_ptr<KinematicElement> e2;
@@ -103,6 +105,8 @@ struct ContinuousCollisionProxy
 
 struct CollisionProxy
 {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    
     CollisionProxy() : e1(nullptr), e2(nullptr), distance(0) {}
     std::shared_ptr<KinematicElement> e1;
     std::shared_ptr<KinematicElement> e2;

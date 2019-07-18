@@ -32,11 +32,12 @@
 #include <exotica_core/visualization_meshcat.h>
 #include <exotica_core/visualization_meshcat_types.h>
 
+// Timeout in ms
 #define TIMEOUT 10000
 
 namespace exotica
 {
-std::vector<double> FrameToVector(const KDL::Frame& frame, double scale_x = 1.0, double scale_y = 1.0, double scale_z = 1.0)
+inline std::vector<double> FrameToVector(const KDL::Frame& frame, double scale_x = 1.0, double scale_y = 1.0, double scale_z = 1.0)
 {
     std::vector<double> ret(16);
     ret[0] = frame.M.data[0] * scale_x;
@@ -58,7 +59,7 @@ std::vector<double> FrameToVector(const KDL::Frame& frame, double scale_x = 1.0,
     return ret;
 };
 
-std::vector<double> PositionToVector(const KDL::Frame& frame)
+inline std::vector<double> PositionToVector(const KDL::Frame& frame)
 {
     std::vector<double> ret(3);
     ret[0] = frame.p.data[0];
@@ -67,7 +68,7 @@ std::vector<double> PositionToVector(const KDL::Frame& frame)
     return ret;
 };
 
-std::vector<double> QuaternionToVector(const KDL::Frame& frame)
+inline std::vector<double> QuaternionToVector(const KDL::Frame& frame)
 {
     std::vector<double> ret(4);
     frame.M.GetQuaternion(ret[0], ret[1], ret[2], ret[3]);
@@ -183,6 +184,7 @@ void VisualizationMeshcat::DisplayScene(bool use_mesh_materials)
                     auto object = visualization::SetObject(path_prefix_ + visual.name,
                                                            visualization::CreateGeometryObject(visualization::GeometryCylinder(cylinder->radius, cylinder->length),
                                                                                                visualization::Material(visualization::RGB(visual.color(0), visual.color(1), visual.color(2)), visual.color(3))));
+                    // Rotate the cylinder to match meshcat convention
                     object.object.object.matrix = FrameToVector(visual.frame * KDL::Frame(KDL::Rotation::RotX(M_PI_2)));
                     SendMsg(object);
                     SendMsg(visualization::SetTransform(object.path, FrameToVector(element->frame)));
@@ -271,10 +273,11 @@ void VisualizationMeshcat::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory,
         {
             visualization::Animation anim(path_prefix_ + visual.name);
             anim.clip = visualization::Clip(fps, clip_name);
-            visualization::Track position(".position", "vector3");
-            visualization::Track rotation(".quaternion", "quaternion");
-            anim.clip.tracks.push_back(position);
-            anim.clip.tracks.push_back(rotation);
+            anim.clip.tracks.resize(2);
+            anim.clip.tracks[0] = visualization::Track(".position", "vector3");
+            anim.clip.tracks[1] = visualization::Track(".quaternion", "quaternion");
+            anim.clip.tracks[0].keys.reserve(trajectory.rows());
+            anim.clip.tracks[1].keys.reserve(trajectory.rows());
             set_animation.animations.push_back(anim);
         }
     }

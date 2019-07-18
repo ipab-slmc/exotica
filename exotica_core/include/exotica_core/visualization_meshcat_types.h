@@ -289,7 +289,7 @@ struct ArrayFloat
             data[i] = data_in[i];
 #ifdef MSGPACK_FEATURE_NOT_SUPPORTED
         array = data;
-        HIGHLIGHT("MSGPACK version does not support sending this type of data. Ignoring.");
+        WARNING("MSGPACK version does not support sending this type of data. Ignoring.");
 #else
         array = msgpack_ext(0x17, reinterpret_cast<const char*>(data.data()), sizeof(float) * data.size());
 #endif

@@ -290,6 +290,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
         {
             std::shared_ptr<KinematicElement> element = tree_map_[urdf_link->name].lock();
             int i = 0;
+            element->visual.reserve(urdf_link->visual_array.size());
             for (urdf::VisualSharedPtr urdf_visual : urdf_link->visual_array)
             {
                 VisualElement visual;

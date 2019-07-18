@@ -118,11 +118,6 @@ void EffBox::PublishObjectsAsMarkerArray()
     pub_markers_.publish(ma);
 }
 
-void EffBox::AssignScene(ScenePtr scene)
-{
-    scene_ = scene;
-}
-
 void EffBox::Instantiate(const EffBoxInitializer& init)
 {
     parameters_ = init;

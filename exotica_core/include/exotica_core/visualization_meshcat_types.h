@@ -40,6 +40,16 @@
 #include <exotica_core/scene.h>
 #include <exotica_core/tools.h>
 
+// Backwards compatibility switch 16.04 with meshpack version < 2.0.0
+#if (MSGPACK_VERSION_MAJOR >= 2)
+typedef msgpack::v1::type::raw_ref msgpack_raw_ref;
+typedef msgpack::v1::type::ext msgpack_ext;
+#else
+typedef msgpack::type::raw_ref msgpack_raw_ref;
+typedef std::vector<float> msgpack_ext;
+#define MSGPACK_FEATURE_NOT_SUPPORTED
+#endif
+
 namespace exotica
 {
 namespace visualization
@@ -261,7 +271,7 @@ struct GeometryMesh : Geometry
     std::vector<char> buffer;
     std::string file_name;
     std::string format;
-    msgpack::v1::type::raw_ref data;
+    msgpack_raw_ref data;
     std::string url;
     std::map<std::string, std::string> resources;
     std::vector<double> matrix = {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
@@ -277,7 +287,12 @@ struct ArrayFloat
         data.resize(size);
         for (unsigned int i = 0; i < size; ++i)
             data[i] = data_in[i];
-        array = msgpack::v1::type::ext(0x17, reinterpret_cast<const char*>(data.data()), sizeof(float) * data.size());
+#ifdef MSGPACK_FEATURE_NOT_SUPPORTED
+        array = data;
+        HIGHLIGHT("MSGPACK version does not support sending this type of data. Ignoring.");
+#else
+        array = msgpack_ext(0x17, reinterpret_cast<const char*>(data.data()), sizeof(float) * data.size());
+#endif
     }
 
     ArrayFloat(const ArrayFloat& other)
@@ -285,14 +300,18 @@ struct ArrayFloat
         itemSize = other.itemSize;
         normalized = other.normalized;
         data = other.data;
-        array = msgpack::v1::type::ext(0x17, reinterpret_cast<const char*>(data.data()), sizeof(float) * data.size());
+#ifdef MSGPACK_FEATURE_NOT_SUPPORTED
+        array = data;
+#else
+        array = msgpack_ext(0x17, reinterpret_cast<const char*>(data.data()), sizeof(float) * data.size());
+#endif
     }
 
     int itemSize = 3;
     std::string type = "Float32Array";
     bool normalized = false;
     std::vector<float> data;
-    msgpack::v1::type::ext array;
+    msgpack_ext array;
 
     MSGPACK_DEFINE(itemSize, type, normalized, array)
 };

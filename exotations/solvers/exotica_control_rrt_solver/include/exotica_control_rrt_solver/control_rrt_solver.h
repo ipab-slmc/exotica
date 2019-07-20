@@ -97,7 +97,6 @@ private:
         Eigen::VectorXd eig_x = Eigen::Map<Eigen::VectorXd>(x, NX);
         Eigen::VectorXd eig_u = Eigen::Map<Eigen::VectorXd>(u, NU);
 
-        // Eigen::VectorXd f = dynamics_solver_->f(eig_x, eig_u);
         Eigen::VectorXd x_new = dynamics_solver_->Simulate(eig_x, eig_u, dt);
         std::memcpy(x, x_new.data(), NX * sizeof(double));
     }

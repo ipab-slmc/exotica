@@ -29,6 +29,8 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/11_ilqg_lwr.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/12_ilqg_valkyrie.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/13_control_limited_ddp_quadrotor.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/14_rrt_cartpole.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/15_rrt_quadrotor.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1
@@ -37,6 +39,8 @@ print('Running with config {0}'.format(configs[problem_idx]))
 solver = exo.Setup.load_solver(configs[problem_idx])
 problem = solver.get_problem()
 solution = solver.solve()
+if solution.shape[0] == 0:
+    exit(0)
 
 costs = problem.get_cost_evolution()
 import matplotlib.pyplot as plt
@@ -52,13 +56,13 @@ while True:
         s = time()
         for t in range(problem.T - 1):
             update_start = time()
-            # u = solution[t,:]
+            u = solution[t,:]
             # u = problem.U[:,t]
             # print(u)
 
-            u = solver.get_feedback_control(
-                problem.X[:,t], t
-            )
+            # u = solver.get_feedback_control(
+            #     problem.X[:,t], t
+            # )
             problem.update(u, t)
             problem.get_scene().get_kinematic_tree().publish_frames()
             update_end = time()

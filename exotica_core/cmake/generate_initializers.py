@@ -123,6 +123,8 @@ def parser(type):
         parser = "ParseVector<double,Eigen::Dynamic>"
     elif type == 'Eigen::Vector3d':
         parser = "ParseVector<double,3>"
+    elif type == 'Eigen::Vector2d':
+        parser = 'ParseVector<double,2>'
     elif type == 'bool':
         parser = "ParseBool"
     elif type == 'double':
@@ -387,7 +389,7 @@ def collect_extensions(input_files, search_dirs, content):
         for i in file_content['Include']:
             if not contains_include(i, content['Include']):
                 content['Include'].append(i)
-    
+
     content['ClassName'] = class_name
     return content
 

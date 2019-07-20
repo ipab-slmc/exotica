@@ -17,7 +17,9 @@ AddInitializer(
   eff_orientation
   eff_frame
   frame_with_axis_and_direction
+  frame_with_box_limits
   eff_axis_alignment
+  eff_box
   eff_velocity
   gaze_at_constraint
   joint_limit
@@ -59,6 +61,7 @@ set(SOURCES
     src/eff_orientation.cpp
     src/eff_frame.cpp
     src/eff_axis_alignment.cpp
+    src/eff_box.cpp
     src/eff_velocity.cpp
     src/gaze_at_constraint.cpp
     src/joint_limit.cpp

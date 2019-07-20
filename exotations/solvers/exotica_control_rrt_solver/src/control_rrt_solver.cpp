@@ -52,14 +52,13 @@ void ControlRRTSolver::Setup()
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
     const double dt = dynamics_solver_->get_dt();
     if (parameters_.Seed != -1) ompl::RNG::setSeed(parameters_.Seed);
-    
+
     std::shared_ptr<ob::RealVectorStateSpace> space(
-        std::make_shared<ob::RealVectorStateSpace>(NX)
-    );
+        std::make_shared<ob::RealVectorStateSpace>(NX));
 
     state_bounds_ = std::make_shared<ob::RealVectorBounds>(NX);
-    
-    for (int i = 0; i < NX; ++ i)
+
+    for (int i = 0; i < NX; ++i)
     {
         state_bounds_->setLow(i, -parameters_.StateLimits(i));
         state_bounds_->setHigh(i, parameters_.StateLimits(i));
@@ -69,14 +68,13 @@ void ControlRRTSolver::Setup()
 
     // create a control space
     std::shared_ptr<oc::RealVectorControlSpace> cspace(
-        std::make_shared<oc::RealVectorControlSpace>(space, NU)
-    );
+        std::make_shared<oc::RealVectorControlSpace>(space, NU));
 
     // set the bounds for the control space
     control_bounds_ = std::make_shared<ob::RealVectorBounds>(NU);
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
-    
-    for (int i = 0; i < NU; ++ i)
+
+    for (int i = 0; i < NU; ++i)
     {
         control_bounds_->setLow(i, -control_limits(i));
         control_bounds_->setHigh(i, control_limits(i));
@@ -92,18 +90,17 @@ void ControlRRTSolver::Setup()
     setup_->setStateValidityChecker([this, si](const ob::State *state) { return isStateValid(si, state); });
 
     std::shared_ptr<OMPLStatePropagator> propagator(
-        std::make_shared<OMPLStatePropagator>(si, dynamics_solver_)
-    );
+        std::make_shared<OMPLStatePropagator>(si, dynamics_solver_));
 
     setup_->setStatePropagator(propagator);
 
     const Eigen::VectorXd start_eig = prob_->get_X().col(0);
     const Eigen::MatrixXd goal_eig = prob_->get_X_star().col(T - 1);
-    
+
     start_state_ = std::make_shared<ob::ScopedState<ob::RealVectorStateSpace>>(space);
     goal_state_ = std::make_shared<ob::ScopedState<ob::RealVectorStateSpace>>(space);
 
-    for (int i = 0; i < NX; ++ i)
+    for (int i = 0; i < NX; ++i)
     {
         (*start_state_)[i] = start_eig(i);
         (*goal_state_)[i] = goal_eig(i);
@@ -116,10 +113,9 @@ void ControlRRTSolver::Setup()
 
     setup_->setup();
     propagator->setIntegrationTimeStep(si->getPropagationStepSize());
-
 }
 
-void ControlRRTSolver::Solve(Eigen::MatrixXd& solution)
+void ControlRRTSolver::Solve(Eigen::MatrixXd &solution)
 {
     if (!prob_) ThrowNamed("Solver has not been initialized!");
     Timer planning_timer, backward_pass_timer, line_search_timer;
@@ -130,19 +126,18 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd& solution)
     const Eigen::VectorXd x_star = prob_->get_X_star().col(T - 1);
 
     const double dt = dynamics_solver_->get_dt();
-    
+
     Setup();
     ob::PlannerStatus solved = setup_->solve(parameters_.MaxIterationTime);
 
     if (solved)
     {
-        std::vector<oc::Control*> controls = setup_->getSolutionPath().getControls();
-        std::vector<ob::State*> states = setup_->getSolutionPath().getStates();
+        std::vector<oc::Control *> controls = setup_->getSolutionPath().getControls();
+        std::vector<ob::State *> states = setup_->getSolutionPath().getStates();
         std::vector<double> durations = setup_->getSolutionPath().getControlDurations();
 
         Eigen::VectorXd sol_goal_state = Eigen::Map<Eigen::VectorXd>(
-            states.back()->as<ob::RealVectorStateSpace::StateType>()->values, NX
-        );
+            states.back()->as<ob::RealVectorStateSpace::StateType>()->values, NX);
 
         T = 0;
         for (int t = 0; t < controls.size(); ++t)
@@ -153,13 +148,14 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd& solution)
             WARNING_NAMED("ControlRRTSolver", "Goal not satisfied.");
 
         // additional solution criteria
-        if (T <= 2 || (
-            (x_star - sol_goal_state).norm() > parameters_.ConvergenceTolerance && 
-            !parameters_.ApproximateSolution
-        )) {
+        if (T <= 2 || ((x_star - sol_goal_state).norm() > parameters_.ConvergenceTolerance &&
+                       !parameters_.ApproximateSolution))
+        {
             if (debug_) HIGHLIGHT_NAMED("ControlRRTSolver", "No solution found.");
             return;
-        } else if(debug_) HIGHLIGHT_NAMED("ControlRRTSolver", "Found solution.");
+        }
+        else if (debug_)
+            HIGHLIGHT_NAMED("ControlRRTSolver", "Found solution.");
 
         prob_->set_T(T);
         prob_->PreUpdate();
@@ -171,10 +167,10 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd& solution)
         {
             double *oc_u = controls[i]->as<oc::RealVectorControlSpace::ControlType>()->values;
             double *oc_s = states[i]->as<ob::RealVectorStateSpace::StateType>()->values;
-                
+
             Eigen::VectorXd u = Eigen::Map<Eigen::VectorXd>(oc_u, NU);
 
-            for (int k = 0; k < (int)(durations[i] / dt); ++ k)
+            for (int k = 0; k < (int)(durations[i] / dt); ++k)
             {
                 solution.row(t) = u.transpose();
                 prob_->Update(u, t);

@@ -37,35 +37,29 @@
 #include <exotica_control_rrt_solver/control_rrt_solver_initializer.h>
 
 // TODO: Remove unused includes
-#include <ompl/control/SpaceInformation.h>
 #include <ompl/base/goals/GoalState.h>
 #include <ompl/base/spaces/SE2StateSpace.h>
-#include <ompl/control/spaces/RealVectorControlSpace.h>
-#include <ompl/control/planners/rrt/RRT.h>
-#include <ompl/control/planners/kpiece/KPIECE1.h>
 #include <ompl/control/SimpleSetup.h>
+#include <ompl/control/SpaceInformation.h>
+#include <ompl/control/planners/rrt/RRT.h>
+#include <ompl/control/spaces/RealVectorControlSpace.h>
 
 namespace ob = ompl::base;
 namespace oc = ompl::control;
 
-
 namespace exotica
 {
-
-class OMPLStatePropagator: public oc::StatePropagator
+class OMPLStatePropagator : public oc::StatePropagator
 {
 public:
     OMPLStatePropagator(
         oc::SpaceInformationPtr si,
-        DynamicsSolverPtr dynamics_solver_
-    ) : oc::StatePropagator(si), space_(si), dynamics_solver_(dynamics_solver_) { }
-
+        DynamicsSolverPtr dynamics_solver_) : oc::StatePropagator(si), space_(si), dynamics_solver_(dynamics_solver_) {}
     void propagate(
         const ob::State *state,
-        const oc::Control* control,
+        const oc::Control *control,
         const double duration,
-        ob::State *result
-    ) const override
+        ob::State *result) const override
     {
         double t = timeStep_;
         space_->copyState(result, state);
@@ -96,10 +90,10 @@ private:
     {
         const int NU = dynamics_solver_->get_num_controls();
         const int NX = dynamics_solver_->get_num_positions() + dynamics_solver_->get_num_velocities();
-        
+
         double *x = ob_x->as<ob::RealVectorStateSpace::StateType>()->values;
         double *u = oc_u->as<oc::RealVectorControlSpace::ControlType>()->values;
-        
+
         Eigen::VectorXd eig_x = Eigen::Map<Eigen::VectorXd>(x, NX);
         Eigen::VectorXd eig_u = Eigen::Map<Eigen::VectorXd>(u, NU);
 
@@ -114,7 +108,7 @@ class ControlRRTSolver : public MotionSolver, public Instantiable<ControlRRTSolv
 public:
     ///\brief Solves the problem
     ///@param solution Returned solution trajectory as a vector of joint configurations.
-    void Solve(Eigen::MatrixXd& solution) override;
+    void Solve(Eigen::MatrixXd &solution) override;
 
     ///\brief Binds the solver to a specific problem which must be pre-initalised
     ///@param pointer Shared pointer to the motion planning problem
@@ -122,17 +116,16 @@ public:
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 private:
-    DynamicTimeIndexedShootingProblemPtr prob_;                              ///!< Shared pointer to the planning problem.
-    DynamicsSolverPtr dynamics_solver_;                                      ///!< Shared pointer to the dynamics solver.
+    DynamicTimeIndexedShootingProblemPtr prob_;  ///!< Shared pointer to the planning problem.
+    DynamicsSolverPtr dynamics_solver_;          ///!< Shared pointer to the dynamics solver.
 
     std::shared_ptr<oc::SimpleSetup> setup_;
     std::shared_ptr<ob::RealVectorBounds> state_bounds_;
     std::shared_ptr<ob::ScopedState<ob::RealVectorStateSpace>> start_state_, goal_state_;
     std::shared_ptr<ob::RealVectorBounds> control_bounds_;
 
-    
     void Setup();
-        
+
     bool isStateValid(const oc::SpaceInformationPtr si, const ob::State *state)
     {
         return true;

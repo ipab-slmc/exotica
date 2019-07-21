@@ -84,6 +84,8 @@ VisualizationMeshcat::~VisualizationMeshcat() = default;
 
 void VisualizationMeshcat::Initialize(bool use_mesh_materials)
 {
+    // Connecting twice as per comment at:
+    // https://github.com/rdeits/meshcat-python/blob/aa3865143120f5ace8e62aab71d825e33674d277/src/meshcat/visualizer.py#L60
     ConnectZMQ();
     web_url_ = RequestWebURL();
     if (web_url_.size() > 7) file_url_ = web_url_.substr(0, web_url_.size() - 7) + "files/";

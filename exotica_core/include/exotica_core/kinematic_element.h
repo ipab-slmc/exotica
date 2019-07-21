@@ -38,9 +38,24 @@
 
 namespace exotica
 {
+class VisualElement
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    std::string name;
+    shapes::ShapePtr shape = nullptr;
+    std::string shape_resource_path = "";
+    KDL::Frame frame = KDL::Frame::Identity();
+    Eigen::Vector3d scale = Eigen::Vector3d::Ones();
+    Eigen::Vector4d color = Eigen::Vector4d(1.0, 1.0, 1.0, 1.0);
+};
+
 class KinematicElement
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     KinematicElement(int _id, std::shared_ptr<KinematicElement> _parent, const KDL::Segment& _segment) : parent(_parent), segment(_segment), id(_id)
     {
     }
@@ -111,6 +126,7 @@ public:
     Eigen::Vector3d scale = Eigen::Vector3d::Ones();
     bool is_robot_link = false;
     Eigen::Vector4d color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0);
+    std::vector<VisualElement> visual;
 
 private:
     inline void SetChildrenClosestRobotLink()

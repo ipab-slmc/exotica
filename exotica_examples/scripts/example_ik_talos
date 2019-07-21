@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import math
+from time import sleep
+
+import pyexotica as exo
+from numpy import array, matrix
+from pyexotica.publish_trajectory import *
+import signal
+
+def com(t):
+    return array([-0.01, math.sin(t * 0.5 * math.pi) * 0.3, 0.9])
+
+exo.Setup.init_ros()
+solver = exo.Setup.load_solver(
+    '{exotica_examples}/resources/configs/example_ik_quasistatic_talos.xml')
+problem = solver.get_problem()
+tick = exo.Timer()
+t = 0.0
+q = problem.start_state
+print('Publishing IK')
+signal.signal(signal.SIGINT, sig_int_handler)
+pose = [0] * 16
+stability = problem.get_task_maps()['Stability']
+scene = problem.get_scene()
+
+while True:
+    try:
+        problem.set_goal('CoM', com(tick.get_duration()))
+        pose[3] = math.sin(tick.get_duration() * 0.25 * math.pi) * 0.8
+        pose[10] = -math.sin(tick.get_duration() * 0.25 * math.pi) * 0.8
+        problem.set_goal('Pose', pose)
+        problem.start_state = q
+        stability.debug_mode = False
+        q = solver.solve()[0]
+        stability.debug_mode = True
+        problem.update(q)
+        publish_pose(q, problem)
+    except KeyboardInterrupt:
+        break

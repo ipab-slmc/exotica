@@ -27,47 +27,30 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_TASK_MAPS_EFF_AXIS_ALIGNMENT_H_
-#define EXOTICA_CORE_TASK_MAPS_EFF_AXIS_ALIGNMENT_H_
+#ifndef EXOTICA_CORE_VISUALIZATION_MOVEIT_H_
+#define EXOTICA_CORE_VISUALIZATION_MOVEIT_H_
 
-#include <exotica_core/task_map.h>
+#include <exotica_core/scene.h>
+#include <exotica_core/tools/uncopyable.h>
 
-#include <exotica_core_task_maps/eff_axis_alignment_initializer.h>
-#include <exotica_core_task_maps/frame_with_axis_and_direction_initializer.h>
+#include <ros/ros.h>
 
 namespace exotica
 {
-class EffAxisAlignment : public TaskMap, public Instantiable<EffAxisAlignmentInitializer>
+class VisualizationMoveIt : public Uncopyable
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    VisualizationMoveIt(ScenePtr scene);
+    virtual ~VisualizationMoveIt();
 
-    EffAxisAlignment();
-    virtual ~EffAxisAlignment();
-
-    void AssignScene(ScenePtr scene) override;
-
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
-
-    int TaskSpaceDim() override;
-
-    void SetDirection(const std::string& frame_name, const Eigen::Vector3d& dir_in);
-    Eigen::Vector3d GetDirection(const std::string& frame_name);
-
-    void SetAxis(const std::string& frame_name, const Eigen::Vector3d& axis_in);
-    Eigen::Vector3d GetAxis(const std::string& frame_name);
-
-    int N;
-
-private:
     void Initialize();
 
-    int n_frames_;
+    void DisplayTrajectory(Eigen::MatrixXdRefConst trajectory);
 
-    Eigen::Matrix3Xd axis_, dir_;
-    Eigen::Vector3d link_position_in_base_, link_axis_position_in_base_;
+private:
+    ScenePtr scene_ = std::make_shared<Scene>(nullptr);
+    ros::Publisher trajectory_pub_;
 };
 }
 
-#endif  // EXOTICA_CORE_TASK_MAPS_EFF_AXIS_ALIGNMENT_H_
+#endif  // EXOTICA_CORE_VISUALIZATION_MOVEIT_H_

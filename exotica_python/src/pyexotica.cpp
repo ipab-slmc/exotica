@@ -29,8 +29,8 @@
 
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/tools/box_qp.h>
-#include <exotica_core/visualization.h>
-
+#include <exotica_core/visualization_meshcat.h>
+#include <exotica_core/visualization_moveit.h>
 #undef NDEBUG
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -1109,9 +1109,22 @@ PYBIND11_MODULE(_pyexotica, module)
     collision_scene.def("update_collision_object_transforms", &CollisionScene::UpdateCollisionObjectTransforms);
     collision_scene.def("continuous_collision_check", &CollisionScene::ContinuousCollisionCheck);
 
-    py::class_<Visualization> visualization(module, "Visualization");
-    visualization.def(py::init<ScenePtr>());
-    visualization.def("display_trajectory", &Visualization::DisplayTrajectory);
+    py::class_<VisualizationMoveIt> visualization_moveit(module, "VisualizationMoveIt");
+    visualization_moveit.def(py::init<ScenePtr>());
+    visualization_moveit.def("display_trajectory", &VisualizationMoveIt::DisplayTrajectory);
+    py::class_<VisualizationMeshcat> visualization_meshcat(module, "VisualizationMeshcat");
+    visualization_meshcat.def(py::init<ScenePtr, const std::string&, bool>(), py::arg("scene"), py::arg("url"), py::arg("use_mesh_materials") = true);
+    visualization_meshcat.def("display_scene", &VisualizationMeshcat::DisplayScene, py::arg("use_mesh_materials") = true);
+    visualization_meshcat.def("display_state", &VisualizationMeshcat::DisplayState, py::arg("state"), py::arg("t") = 0.0);
+    visualization_meshcat.def("display_trajectory", &VisualizationMeshcat::DisplayTrajectory, py::arg("trajectory"), py::arg("dt") = 1.0);
+    visualization_meshcat.def("get_web_url", &VisualizationMeshcat::GetWebURL);
+    visualization_meshcat.def("get_file_url", &VisualizationMeshcat::GetFileURL);
+    visualization_meshcat.def("delete", &VisualizationMeshcat::Delete, py::arg("path") = "");
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const double&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const std::string&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const bool&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const Eigen::Vector3d&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
+    visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const Eigen::Vector4d&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematic_tree(kin, "KinematicTree");

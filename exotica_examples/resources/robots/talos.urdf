@@ -2705,10 +2705,10 @@
     <color rgba="0.0 0.8 0.0 1.0"/>
   </material>
   <material name="Grey">
-    <color rgba="0.7 0.7 0.7 1.0"/>
+    <color rgba="0.2 0.2 0.2 1.0"/>
   </material>
   <material name="LightGrey">
-    <color rgba="0.9 0.9 0.9 1.0"/>
+    <color rgba="0.0 0.196 0.3725 1.0"/>
   </material>
   <material name="DarkGrey">
     <color rgba="0.2 0.2 0.2 1.0"/>
@@ -2720,7 +2720,7 @@
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
   <material name="Orange">
-    <color rgba="1.0 0.5 0.0 1.0"/>
+    <color rgba="0.8039 0.3529 0.0745 1.0"/>
   </material>
 </robot>
 

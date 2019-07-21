@@ -147,6 +147,22 @@ std::string ParsePath(const std::string& path)
             ThrowPretty("Package name resolution failed (regex error " << e.code() << ")");
         }
     }
+    std::regex_search(ret, matches, std::regex("package://([^\\/]+){1,}"));
+    for (auto& match : matches)
+    {
+        std::string package = match.str();
+        if (package.substr(0, 10) == "package://" || package == "") continue;
+        std::string package_path = ros::package::getPath(package);
+        if (package_path == "") ThrowPretty("Unknown package '" << package << "'");
+        try
+        {
+            ret = std::regex_replace(ret, std::regex("package://" + package + "/"), package_path + "/", std::regex_constants::match_any);
+        }
+        catch (const std::regex_error& e)
+        {
+            ThrowPretty("Package name resolution failed (regex error " << e.code() << ")");
+        }
+    }
     return ret;
 }
 

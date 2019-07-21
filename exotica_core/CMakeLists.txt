@@ -21,6 +21,9 @@ find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(TinyXML2 REQUIRED)
+find_package(ZeroMQ REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(MSGPACK msgpack)
 
 include(exotica)
 include(add_initializer)
@@ -59,7 +62,7 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp moveit_core moveit_ros_planning tf kdl_parser pluginlib tf_conversions eigen_conversions geometry_msgs moveit_msgs std_msgs
   CFG_EXTRAS exotica.cmake add_initializer.cmake
-  DEPENDS TinyXML2 EIGEN3 Boost
+  DEPENDS TinyXML2 EIGEN3 Boost ZeroMQ MSGPACK
 )
 
 ## Build ##
@@ -69,6 +72,8 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
   ${TinyXML2_INCLUDE_DIRS}
+  ${ZeroMQ_INCLUDE_DIRS}
+  ${MSGPACK_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME}
@@ -78,7 +83,8 @@ add_library(${PROJECT_NAME}
   src/motion_solver.cpp
   src/setup.cpp
   src/server.cpp
-  src/visualization.cpp
+  src/visualization_moveit.cpp
+  src/visualization_meshcat.cpp
   src/scene.cpp
   src/trajectory.cpp
   src/property.cpp
@@ -107,7 +113,7 @@ add_library(${PROJECT_NAME}
 
   ${exotica_core_BINARY_DIR}/generated/version.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES} ${ZeroMQ_LIBRARIES} ${MSGPACK_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 # mark all warnings as errors
 target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)

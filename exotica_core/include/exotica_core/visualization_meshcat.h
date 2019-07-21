@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, Wolfgang Merkt
+// Copyright (c) 2019
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,30 +27,57 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_VISUALIZATION_H_
-#define EXOTICA_CORE_VISUALIZATION_H_
+#ifndef EXOTICA_CORE_VISUALIZATION_MESHCAT_H_
+#define EXOTICA_CORE_VISUALIZATION_MESHCAT_H_
+
+#include <memory>
+#include <zmq.hpp>
 
 #include <exotica_core/scene.h>
 #include <exotica_core/tools/uncopyable.h>
 
-#include <ros/ros.h>
-
 namespace exotica
 {
-class Visualization : public Uncopyable
+class VisualizationMeshcat : public Uncopyable
 {
 public:
-    Visualization(ScenePtr scene);
-    virtual ~Visualization();
+    VisualizationMeshcat(ScenePtr scene, const std::string& url, bool use_mesh_materials = true);
+    virtual ~VisualizationMeshcat();
 
-    void Initialize();
+    void Initialize(bool use_mesh_materials);
 
-    void DisplayTrajectory(Eigen::MatrixXdRefConst trajectory);
+    void DisplayScene(bool use_mesh_materials = true);
+    void DisplayState(Eigen::VectorXdRefConst state, double t = 0.0);
+    void DisplayTrajectory(Eigen::MatrixXdRefConst trajectory, double dt = 1.0);
+    void Delete(const std::string& path = "");
+    void SetProperty(const std::string& path, const std::string& property, const double& value);
+    void SetProperty(const std::string& path, const std::string& property, const std::string& value);
+    void SetProperty(const std::string& path, const std::string& property, const bool& value);
+    void SetProperty(const std::string& path, const std::string& property, const Eigen::Vector3d& value);
+    void SetProperty(const std::string& path, const std::string& property, const Eigen::Vector4d& value);
+    std::string GetWebURL();
+    std::string GetFileURL();
 
 private:
     ScenePtr scene_ = std::make_shared<Scene>(nullptr);
-    ros::Publisher trajectory_pub_;
-};
-}
 
-#endif  // EXOTICA_CORE_VISUALIZATION_H_
+    void ConnectZMQ();
+    void SendZMQ(const std::string& data);
+    std::string ReceiveZMQ();
+    std::string RequestWebURL();
+
+    template <typename T>
+    void SendMsg(T msg);
+
+    std::string zmq_url_;
+    std::string web_url_;
+    std::string file_url_;
+
+    std::string path_prefix_;
+
+    zmq::context_t context_;
+    std::unique_ptr<zmq::socket_t> socket_;
+};
+}  // namespace exotica
+
+#endif  // EXOTICA_CORE_VISUALIZATION_MESHCAT_H_

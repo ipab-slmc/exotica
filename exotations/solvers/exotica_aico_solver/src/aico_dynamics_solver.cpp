@@ -119,7 +119,7 @@ void AICODynamicsSolver::Sweep(Eigen::MatrixXd& solution)
     for (int iteration = 0; iteration < GetNumberOfMaxIterations(); ++iteration)
     {
         Timer planning_timer;
-        UpdateProcess(prob_->get_X(0), 0);
+        UpdateProcess(prob_->get_X(0), prob_->get_U(0), 0);
         prob_->set_X(Xhat_);
 
         // forward loop
@@ -129,8 +129,8 @@ void AICODynamicsSolver::Sweep(Eigen::MatrixXd& solution)
             else Xhat_.col(t) = (1 - alpha) * Xhat_.col(t) + alpha * b_[t];
             prob_->set_X(Xhat_);
 
-            UpdateProcess(Xhat_.col(t), t);
-            
+            UpdateProcess(prob_->get_X(t), prob_->get_U(t), t);
+
             Eigen::MatrixXd Atinv = (A_[t] + Eigen::MatrixXd::Identity(A_[t].rows(), A_[t].cols()) * 1e-5).inverse();
 
             // TODO: Add white noise
@@ -154,12 +154,12 @@ void AICODynamicsSolver::Sweep(Eigen::MatrixXd& solution)
             Eigen::MatrixXd Binv = Sinv_[t] + Vinv_[t] + R_[t];
             AinvBSymPosDef(b_[t], Binv, Sinv_[t] * s_[t] + Vinv_[t] * v_[t] + r_[t]);
 
-            // if ((b_[t] - Xhat_.col(t)).squaredNorm() > theta)
-            // {
-            //     t = t - 1;
-            //     HIGHLIGHT_NAMED("AICODynamicsSolver", "Repeating iteration " << t);
-            //     continue;
-            // }
+            if ((b_[t] - Xhat_.col(t)).squaredNorm() > theta)
+            {
+                t = t - 1;
+                // HIGHLIGHT_NAMED("AICODynamicsSolver", "Repeating iteration " << t);
+                continue;
+            }
         }
 
         // backwards loop, duplicate of the forward one
@@ -169,8 +169,8 @@ void AICODynamicsSolver::Sweep(Eigen::MatrixXd& solution)
             else Xhat_.col(t) = (1 - alpha) * Xhat_.col(t) + alpha * b_[t];
             prob_->set_X(Xhat_);
 
-            UpdateProcess(Xhat_.col(t), t);
-            
+            UpdateProcess(prob_->get_X(t), prob_->get_U(t), t);
+
             Eigen::MatrixXd Atinv = (A_[t] + Eigen::MatrixXd::Identity(A_[t].rows(), A_[t].cols()) * 1e-5).inverse();
 
             // TODO: Add white noise
@@ -194,12 +194,12 @@ void AICODynamicsSolver::Sweep(Eigen::MatrixXd& solution)
             Eigen::MatrixXd Binv = Sinv_[t] + Vinv_[t] + R_[t];
             AinvBSymPosDef(b_[t], Binv, Sinv_[t] * s_[t] + Vinv_[t] * v_[t] + r_[t]);
 
-            // if ((b_[t] - Xhat_.col(t)).norm() > theta)
-            // {
-            //     t = t + 1; // +1 instead of -1
-            //     HIGHLIGHT_NAMED("AICODynamicsSolver", "Repeating iteration " << t);
-            //     continue;
-            // }
+            if ((b_[t] - Xhat_.col(t)).norm() > theta)
+            {
+                t = t + 1; // +1 instead of -1
+                // HIGHLIGHT_NAMED("AICODynamicsSolver", "Repeating iteration " << t);
+                continue;
+            }
         }
 
         // for (int t = 0; t < T - 1; ++t)
@@ -257,7 +257,7 @@ void AICODynamicsSolver::Sweep(Eigen::MatrixXd& solution)
     // }
 }
 
-void AICODynamicsSolver::UpdateProcess(Eigen::VectorXdRefConst x, int t)
+void AICODynamicsSolver::UpdateProcess(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, int t)
 {
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
@@ -284,7 +284,8 @@ void AICODynamicsSolver::UpdateProcess(Eigen::VectorXdRefConst x, int t)
     Eigen::MatrixXd M = dynamics_solver_->get_M(x),
                     C = dynamics_solver_->get_C(x),
                     G = dynamics_solver_->get_G(x);
-    Eigen::MatrixXd F = M * q + G;
+    Eigen::VectorXd xdot = dynamics_solver_->f(x, u);
+    Eigen::MatrixXd F = M * xdot.tail(NQ) + G;
 
     Eigen::MatrixXd Minv = (Eigen::MatrixXd::Identity(M.rows(), M.cols()) * 1e-5 + M);
 

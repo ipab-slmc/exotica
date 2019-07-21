@@ -106,7 +106,7 @@ private:
     std::vector<Eigen::VectorXd> qhat;  //!< Point of linearisation
 
     void Sweep(Eigen::MatrixXd& solution);
-    void UpdateProcess(Eigen::VectorXdRefConst x, int t);
+    void UpdateProcess(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, int t);
     double UpdateTaskCosts(int t);
 
     ///\brief Forward simulates the dynamics using the reference trajectory computed in the backwards pass.

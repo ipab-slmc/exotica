@@ -66,4 +66,25 @@ Eigen::MatrixXd DoubleIntegratorDynamicsSolver::fu(const StateVector& x, const C
     return B_;
 }
 
+
+Eigen::MatrixXd DoubleIntegratorDynamicsSolver::get_M(const StateVector& x)
+{
+    return Eigen::MatrixXd::Identity(num_positions_, num_positions_);
+}
+
+Eigen::MatrixXd DoubleIntegratorDynamicsSolver::get_C(const StateVector& x)
+{
+    return Eigen::MatrixXd::Identity(num_positions_, num_velocities_);
+}
+
+Eigen::MatrixXd DoubleIntegratorDynamicsSolver::get_G(const StateVector& x)
+{
+    return Eigen::VectorXd::Zero(num_positions_);
+}
+
+Eigen::MatrixXd DoubleIntegratorDynamicsSolver::get_B()
+{
+    return Eigen::MatrixXd::Identity(num_controls_, num_controls_);
+}
+
 }  // namespace exotica

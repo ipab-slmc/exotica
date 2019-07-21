@@ -48,6 +48,11 @@ public:
     StateDerivative fx(const StateVector& x, const ControlVector& u) override;
     ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
 
+    Eigen::MatrixXd get_M(const StateVector& x) override;
+    Eigen::MatrixXd get_C(const StateVector& x) override;
+    Eigen::MatrixXd get_G(const StateVector& x) override;
+    Eigen::MatrixXd get_B() override;
+
 private:
     Eigen::MatrixXd A_;
     Eigen::MatrixXd B_;

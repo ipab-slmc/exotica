@@ -42,7 +42,7 @@ print('Running with config {0}'.format(configs[problem_idx]))
 solver = exo.Setup.load_solver(configs[problem_idx])
 problem = solver.get_problem()
 
-problem.U = np.random.uniform(size=(1, 99), low=-10, high=10)
+problem.U = np.random.uniform(size=(7, 99), low=-10, high=10)
 solution = solver.solve()
 
 print('Solver terminated with: ', problem.termination_criterion)

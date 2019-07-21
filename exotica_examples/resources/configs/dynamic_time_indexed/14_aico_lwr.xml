@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>
+    <AICODynamicsSolver Name="AICODynamicsSolver">
+        <Debug>1</Debug>
+        <MaxIterations>500</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>100</FunctionTolerancePatience>
+        <theta_rate>1e3</theta_rate> <!-- loop repetition rate -->
+        <alpha_rate>0.1</alpha_rate> <!-- learning rate -->
+        <Kp_gain>1</Kp_gain>
+        <Kd_gain>1</Kd_gain>
+    </AICODynamicsSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+
+                <DynamicsSolver>
+                    <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
+                        <ControlLimits>156</ControlLimits>
+                        <dt>0.02</dt>
+                    </DoubleIntegratorDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <T>100</T>
+        <tau>0.02</tau>
+        <dt>0.02</dt>
+        <Q_rate>0</Q_rate>
+        <Qf_rate>100</Qf_rate>
+        <R_rate>0.0001</R_rate>
+        <StartState>0 0 0  -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
+        <GoalState> 0 0 0  -1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

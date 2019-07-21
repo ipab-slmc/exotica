@@ -297,4 +297,29 @@ Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector
     return fu_fd;
 }
 
+
+template <typename T, int NX, int NU>
+Eigen::MatrixXd AbstractDynamicsSolver<T, NX, NU>::get_M(const StateVector& x)
+{
+    ThrowPretty("Not implemented.");
+}
+
+template <typename T, int NX, int NU>
+Eigen::MatrixXd AbstractDynamicsSolver<T, NX, NU>::get_C(const StateVector& x)
+{
+    ThrowPretty("Not implemented.");
+}
+
+template <typename T, int NX, int NU>
+Eigen::MatrixXd AbstractDynamicsSolver<T, NX, NU>::get_G(const StateVector& x)
+{
+    ThrowPretty("Not implemented.");
+}
+
+template <typename T, int NX, int NU>
+Eigen::MatrixXd AbstractDynamicsSolver<T, NX, NU>::get_B()
+{
+    ThrowPretty("Not implemented.");
+}
+
 }  // namespace exotica

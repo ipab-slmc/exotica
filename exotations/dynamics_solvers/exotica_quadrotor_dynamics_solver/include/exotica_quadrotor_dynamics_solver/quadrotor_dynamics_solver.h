@@ -52,6 +52,8 @@ public:
     void AssignScene(ScenePtr scene_in) override;
 
     StateVector f(const StateVector& x, const ControlVector& u) override;
+    Eigen::MatrixXd fx(const StateVector& x, const ControlVector& u) override;
+    Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
 
     Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
 
@@ -59,12 +61,19 @@ private:
     Eigen::Matrix3d J_;      ///< Inertia matrix
     Eigen::Matrix3d J_inv_;  ///< Inverted inertia matrix
 
-    double mass_ = .5;     ///< Mass
-    double g_ = 9.81;      ///< Gravity (m/s^2)
-    double L_ = 0.1750;    ///< Distance between motors
+    double mass_ = .5;   ///< Mass
+    double g_ = 9.81;    ///< Gravity (m/s^2)
+    double L_ = 0.1750;  ///< Distance between motors
+
+    // these are measured in rpm * 10^3
+    //  this means we multiply here by 10^6 (since it varies with omega^2)
+    //
+    // Additionally, we assume we control the thrust directly,
+    //  which leads to the following simplification:
     double k_f_ = 1;       ///< Thrust coefficient, 6.11*10^-8;
     double k_m_ = 0.0245;  ///< Moment coefficient
-    double b_ = 0.0245;    ///< Drag
+
+    double b_ = 0.0245;  ///< Drag
 };
 }  // namespace exotica
 

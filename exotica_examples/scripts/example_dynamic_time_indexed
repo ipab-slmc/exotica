@@ -48,7 +48,16 @@ plt.figure()
 plt.plot(range(len(costs[1])), costs[1])
 plt.xlabel('Iteration')
 plt.ylabel('Cost')
-plt.show()
+# plt.show()
+
+
+visualization = exo.Visualization(problem.get_scene())
+visualization.display_trajectory(
+    problem.X[:problem.num_positions, :].T
+)
+
+# publish_trajectory(problem.X[:problem.num_positions, :].T, problem.T * problem.tau, problem)
+# exit(0)
 
 signal.signal(signal.SIGINT, sig_int_handler)
 while True:
@@ -68,7 +77,7 @@ while True:
             update_end = time()
             if problem.tau > update_end - update_start:
                 sleep(problem.tau - (update_end - update_start))
-                # sleep(0.2)
+                # sleep(0.1)
         e = time()
         sleep(1)
         print("Time taken to roll-out:", e-s)

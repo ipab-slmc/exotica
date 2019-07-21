@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
-    <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
+    <ILQGSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
-        <MaxIterations>100</MaxIterations>
+        <MaxIterations>300</MaxIterations>
         <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>100</FunctionTolerancePatience>
+        <FunctionTolerancePatience>300</FunctionTolerancePatience>
         <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-        <RegularizationRate>0.1</RegularizationRate>
-    </ControlLimitedDDPSolver>
+        <RegularizationRate>0.5</RegularizationRate>
+    </ILQGSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
@@ -18,14 +18,14 @@
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
                     <QuadrotorDynamicsSolver Name="dsolver" Integrator="RK1">
-                        <ControlLimits>50</ControlLimits>
+                        <ControlLimits>25</ControlLimits>
                         <dt>0.005</dt>
                     </QuadrotorDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
         </PlanningScene>
 
-        <T>250</T>
+        <T>300</T>
         <tau>0.005</tau>
         
         <!-- Q rate penalizes large pitch/yaw maneuvers -->
@@ -35,10 +35,10 @@
         <Qf_rate>100</Qf_rate>
 
         <!-- Rate penalizes large control forces. -->
-        <R_rate>0.01</R_rate>
+        <R_rate>1e-3</R_rate>
 
 
         <StartState>0 0 0 0 0 0 0 0 0 0 0 0</StartState>
-        <GoalState>1 1 1 0 0 0 0 0 0 0 0 0</GoalState>
+        <GoalState> 0 3 3 0 0 0 0 0 0 0 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </PlannerDemoConfig>

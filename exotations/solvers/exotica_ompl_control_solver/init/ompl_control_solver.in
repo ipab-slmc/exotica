@@ -1,4 +1,4 @@
-class ControlRRTSolver
+class OMPLControlSolver
 
 extend <exotica_core/motion_solver>
 Required Eigen::VectorXd StateLimits;

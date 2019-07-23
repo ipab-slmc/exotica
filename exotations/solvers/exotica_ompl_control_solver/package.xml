@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>exotica_control_rrt_solver</name>
+  <name>exotica_ompl_control_solver</name>
   <version>0.0.1</version>
-  <description>Kinodynamic Control-RRT Solver from OMPL</description>
+  <description>Kinodynamic Control Solvers from OMPL</description>
 
   <maintainer email="traiko.dinev@ed.ac.uk">Traiko Dinev</maintainer>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>

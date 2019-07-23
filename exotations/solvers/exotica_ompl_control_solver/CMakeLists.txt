@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(exotica_control_rrt_solver)
+project(exotica_ompl_control_solver)
 
 find_package(ompl REQUIRED)
 
@@ -7,7 +7,9 @@ find_package(catkin REQUIRED COMPONENTS
   exotica_core
 )
 
+AddInitializer(ompl_control_solver)
 AddInitializer(control_rrt_solver)
+AddInitializer(control_kpiece_solver)
 GenInitializers()
 
 catkin_package(
@@ -25,7 +27,9 @@ include_directories(
 
 link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OMPL_LIBRARY_DIRS})
 
-add_library(${PROJECT_NAME} src/control_rrt_solver.cpp)
+add_library(${PROJECT_NAME}
+  src/ompl_native_solvers.cpp
+)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OMPL_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 

@@ -27,13 +27,115 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <exotica_control_rrt_solver/control_rrt_solver.h>
+#ifndef EXOTICA_OMPL_CONTROL_SOLVER_OMPL_CONTROL_SOLVER_H_
+#define EXOTICA_OMPL_CONTROL_SOLVER_OMPL_CONTROL_SOLVER_H_
 
-REGISTER_MOTIONSOLVER_TYPE("ControlRRTSolver", exotica::ControlRRTSolver)
+// #include <exotica_core/feedback_motion_solver.h>
+#include <exotica_core/motion_solver.h>
+#include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
+
+#include <exotica_ompl_control_solver/ompl_control_solver_initializer.h>
+
+// TODO: Remove unused includes
+#include <ompl/base/goals/GoalState.h>
+#include <ompl/base/spaces/SE2StateSpace.h>
+#include <ompl/control/SimpleSetup.h>
+#include <ompl/control/SpaceInformation.h>
+#include <ompl/control/spaces/RealVectorControlSpace.h>
+
+namespace ob = ompl::base;
+namespace oc = ompl::control;
 
 namespace exotica
 {
-void ControlRRTSolver::SpecifyProblem(PlanningProblemPtr pointer)
+class OMPLStatePropagator : public oc::StatePropagator
+{
+public:
+    OMPLStatePropagator(
+        oc::SpaceInformationPtr si,
+        DynamicsSolverPtr dynamics_solver_) : oc::StatePropagator(si), space_(si), dynamics_solver_(dynamics_solver_) {}
+    void propagate(
+        const ob::State *state,
+        const oc::Control *control,
+        const double duration,
+        ob::State *result) const override
+    {
+        double t = 0;
+        space_->copyState(result, state);
+
+        while (t < duration)
+        {
+            Integrate(result, control, timeStep_);
+            t += timeStep_;
+        }
+    }
+
+    void setIntegrationTimeStep(double timeStep)
+    {
+        timeStep_ = timeStep;
+    }
+
+    double getIntegrationTimeStep() const
+    {
+        return timeStep_;
+    }
+
+private:
+    double timeStep_ = 0.0;
+    oc::SpaceInformationPtr space_;
+    DynamicsSolverPtr dynamics_solver_;
+
+    void Integrate(ob::State *ob_x, const oc::Control *oc_u, double dt) const
+    {
+        const int NU = dynamics_solver_->get_num_controls();
+        const int NX = dynamics_solver_->get_num_positions() + dynamics_solver_->get_num_velocities();
+
+        double *x = ob_x->as<ob::RealVectorStateSpace::StateType>()->values;
+        double *u = oc_u->as<oc::RealVectorControlSpace::ControlType>()->values;
+
+        assert(ob_x->as<ob::RealVectorStateSpace::StateType>()->getDimension() == NX);
+        assert(oc_u->as<oc::RealVectorControlSpace::ControlType>()->getDimension() == NU);
+
+        Eigen::VectorXd eig_x = Eigen::Map<Eigen::VectorXd>(x, NX);
+        Eigen::VectorXd eig_u = Eigen::Map<Eigen::VectorXd>(u, NU);
+
+        Eigen::VectorXd x_new = dynamics_solver_->Simulate(eig_x, eig_u, dt);
+        std::memcpy(x, x_new.data(), NX * sizeof(double));
+    }
+};
+
+template <typename ControlAlgorithm>
+class OMPLControlSolver : public MotionSolver
+{
+public:
+    ///\brief Solves the problem
+    ///@param solution Returned solution trajectory as a vector of joint configurations.
+    void Solve(Eigen::MatrixXd &solution) override;
+
+    ///\brief Binds the solver to a specific problem which must be pre-initalised
+    ///@param pointer Shared pointer to the motion planning problem
+    ///@return        Successful if the problem is a valid DynamicTimeIndexedProblem
+    void SpecifyProblem(PlanningProblemPtr pointer) override;
+
+protected:
+    DynamicTimeIndexedShootingProblemPtr prob_;  ///!< Shared pointer to the planning problem.
+    DynamicsSolverPtr dynamics_solver_;          ///!< Shared pointer to the dynamics solver.
+
+    OMPLControlSolverInitializer init_;
+
+    std::unique_ptr<oc::SimpleSetup> setup_;
+    std::string algorithm_;
+
+    void Setup();
+
+    bool isStateValid(const oc::SpaceInformationPtr si, const ob::State *state)
+    {
+        return true;
+    }
+};
+
+template <typename ControlAlgorithm>
+void OMPLControlSolver<ControlAlgorithm>::SpecifyProblem(PlanningProblemPtr pointer)
 {
     if (pointer->type() != "exotica::DynamicTimeIndexedShootingProblem")
     {
@@ -42,21 +144,23 @@ void ControlRRTSolver::SpecifyProblem(PlanningProblemPtr pointer)
     MotionSolver::SpecifyProblem(pointer);
     prob_ = std::static_pointer_cast<DynamicTimeIndexedShootingProblem>(pointer);
     dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
-    if (debug_) HIGHLIGHT_NAMED("ControlRRTSolver", "initialized");
 
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-    if (parameters_.StateLimits.size() != NX)
-        ThrowNamed("State limits are of size " << parameters_.StateLimits.size() << ", should be of size " << NX);
+    if (init_.StateLimits.size() != NX)
+        ThrowNamed("State limits are of size " << init_.StateLimits.size() << ", should be of size " << NX);
+
+    if (debug_) HIGHLIGHT_NAMED(algorithm_, "initialized");
 }
 
-void ControlRRTSolver::Setup()
+template <typename ControlAlgorithm>
+void OMPLControlSolver<ControlAlgorithm>::Setup()
 {
     int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
     const double dt = dynamics_solver_->get_dt();
-    if (parameters_.Seed != -1) ompl::RNG::setSeed(parameters_.Seed);
+    if (init_.Seed != -1) ompl::RNG::setSeed(init_.Seed);
 
     std::shared_ptr<ob::RealVectorStateSpace> space(
         std::make_shared<ob::RealVectorStateSpace>(NX));
@@ -66,8 +170,8 @@ void ControlRRTSolver::Setup()
 
     for (int i = 0; i < NX; ++i)
     {
-        state_bounds_.setLow(i, -parameters_.StateLimits(i));
-        state_bounds_.setHigh(i, parameters_.StateLimits(i));
+        state_bounds_.setLow(i, -init_.StateLimits(i));
+        state_bounds_.setHigh(i, init_.StateLimits(i));
     }
 
     space->setBounds(state_bounds_);
@@ -119,16 +223,17 @@ void ControlRRTSolver::Setup()
         goal_state_[i] = goal_eig(i);
     }
 
-    setup_->setStartAndGoalStates(start_state_, goal_state_, parameters_.ConvergenceTolerance);
+    setup_->setStartAndGoalStates(start_state_, goal_state_, init_.ConvergenceTolerance);
 
-    ob::PlannerPtr optimizingPlanner(new ompl::control::RRT(si));
+    ob::PlannerPtr optimizingPlanner(new ControlAlgorithm(si));
     setup_->setPlanner(optimizingPlanner);
 
     setup_->setup();
     propagator->setIntegrationTimeStep(si->getPropagationStepSize());
 }
 
-void ControlRRTSolver::Solve(Eigen::MatrixXd &solution)
+template <typename ControlAlgorithm>
+void OMPLControlSolver<ControlAlgorithm>::Solve(Eigen::MatrixXd &solution)
 {
     if (!prob_) ThrowNamed("Solver has not been initialized!");
     Timer planning_timer, backward_pass_timer, line_search_timer;
@@ -141,7 +246,7 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd &solution)
     const double dt = dynamics_solver_->get_dt();
 
     Setup();
-    ob::PlannerStatus solved = setup_->solve(parameters_.MaxIterationTime);
+    ob::PlannerStatus solved = setup_->solve(init_.MaxIterationTime);
 
     if (solved)
     {
@@ -157,19 +262,19 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd &solution)
             T += static_cast<int>(durations[t] / dt);
         T += 1;
 
-        if ((x_star - sol_goal_state).norm() > parameters_.ConvergenceTolerance && debug_)
-            WARNING_NAMED("ControlRRTSolver", "Goal not satisfied.");
+        if ((x_star - sol_goal_state).norm() > init_.ConvergenceTolerance && debug_)
+            WARNING_NAMED(algorithm_, "Goal not satisfied.");
 
         // additional solution criteria
-        if (T <= 2 || ((x_star - sol_goal_state).norm() > parameters_.ConvergenceTolerance &&
-                       !parameters_.ApproximateSolution))
+        if (T <= 2 || ((x_star - sol_goal_state).norm() > init_.ConvergenceTolerance &&
+                       !init_.ApproximateSolution))
         {
-            if (debug_) HIGHLIGHT_NAMED("ControlRRTSolver", "No solution found.");
+            if (debug_) HIGHLIGHT_NAMED(algorithm_, "No solution found.");
             prob_->termination_criterion = TerminationCriterion::Divergence;
             return;
         }
         else if (debug_)
-            HIGHLIGHT_NAMED("ControlRRTSolver", "Found solution.");
+            HIGHLIGHT_NAMED(algorithm_, "Found solution.");
 
         prob_->set_T(T);
         prob_->PreUpdate();
@@ -198,9 +303,11 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd &solution)
     }
     else
     {
-        HIGHLIGHT_NAMED("ControlRRTSolver", "No solution found.");
+        HIGHLIGHT_NAMED(algorithm_, "No solution found.");
         prob_->termination_criterion = TerminationCriterion::Divergence;
     }
 }
 
 }  // namespace exotica
+
+#endif  // EXOTICA_OMPL_CONTROL_SOLVER_OMPL_CONTROL_SOLVER_H_

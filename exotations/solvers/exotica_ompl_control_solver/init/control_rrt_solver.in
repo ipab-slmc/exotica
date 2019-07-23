@@ -1,0 +1,3 @@
+class ControlRRTSolver
+
+extend <exotica_ompl_control_solver/ompl_control_solver>

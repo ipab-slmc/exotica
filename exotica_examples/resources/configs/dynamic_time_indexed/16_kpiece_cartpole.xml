@@ -1,14 +1,13 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
-    <ControlRRTSolver Name="ControlRRTSolver">
+    <ControlKPIECESolver Name="ControlKPIECESolver">
         <Debug>1</Debug>
         <StateLimits>2 3.14 5 5</StateLimits>
         <MaxIterationTime>10</MaxIterationTime>
         <ConvergenceTolerance>1e-3</ConvergenceTolerance>
         <ApproximateSolution>1</ApproximateSolution>
         <Seed>1</Seed>
-        <Debug>1</Debug>
-    </ControlRRTSolver>
+    </ControlKPIECESolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>

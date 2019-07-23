@@ -1164,7 +1164,9 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("f", &DynamicsSolver::f)
         .def("fx", &DynamicsSolver::fx)
         .def("fu", &DynamicsSolver::fu)
-        .def("get_position", &DynamicsSolver::GetPosition);
+        .def("get_position", &DynamicsSolver::GetPosition)
+        .def("simulate", &DynamicsSolver::Simulate)
+        .def_property_readonly("dt", &DynamicsSolver::get_dt, "dt");
 
     ////////////////////////////////////////////////////////////////////////////
     /// Shapes

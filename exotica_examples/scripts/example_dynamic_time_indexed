@@ -39,7 +39,9 @@ print('Running with config {0}'.format(configs[problem_idx]))
 solver = exo.Setup.load_solver(configs[problem_idx])
 problem = solver.get_problem()
 solution = solver.solve()
+
 if solution.shape[0] == 0:
+    print('No solution found!')
     exit(0)
 
 costs = problem.get_cost_evolution()

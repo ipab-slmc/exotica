@@ -3,7 +3,7 @@
 <ControlRRTSolver Name="OMPLKdSolver">
     <Debug>1</Debug>
     <StateLimits>2 3.14 5 5</StateLimits>
-    <MaxIterationTime>300</MaxIterationTime>
+    <MaxIterationTime>10</MaxIterationTime>
     <ConvergenceTolerance>1e-3</ConvergenceTolerance>
     <ApproximateSolution>1</ApproximateSolution>
     <Seed>1</Seed>

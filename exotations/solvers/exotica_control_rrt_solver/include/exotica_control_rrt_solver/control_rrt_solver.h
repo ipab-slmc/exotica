@@ -61,10 +61,10 @@ public:
         const double duration,
         ob::State *result) const override
     {
-        double t = timeStep_;
+        double t = 0;
         space_->copyState(result, state);
 
-        while (t < duration + std::numeric_limits<double>::epsilon())
+        while (t < duration)
         {
             Integrate(result, control, timeStep_);
             t += timeStep_;
@@ -118,10 +118,10 @@ private:
     DynamicTimeIndexedShootingProblemPtr prob_;  ///!< Shared pointer to the planning problem.
     DynamicsSolverPtr dynamics_solver_;          ///!< Shared pointer to the dynamics solver.
 
-    std::shared_ptr<oc::SimpleSetup> setup_;
-    std::shared_ptr<ob::RealVectorBounds> state_bounds_;
-    std::shared_ptr<ob::ScopedState<ob::RealVectorStateSpace>> start_state_, goal_state_;
-    std::shared_ptr<ob::RealVectorBounds> control_bounds_;
+    std::unique_ptr<oc::SimpleSetup> setup_;
+    // std::unique_ptr<ob::RealVectorBounds> state_bounds_;
+    // std::unique_ptr<ob::ScopedState<ob::RealVectorStateSpace>> start_state_, goal_state_;
+    // std::unique_ptr<ob::RealVectorBounds> control_bounds_;
 
     void Setup();
 

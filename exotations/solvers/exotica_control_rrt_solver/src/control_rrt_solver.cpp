@@ -43,6 +43,13 @@ void ControlRRTSolver::SpecifyProblem(PlanningProblemPtr pointer)
     prob_ = std::static_pointer_cast<DynamicTimeIndexedShootingProblem>(pointer);
     dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
     if (debug_) HIGHLIGHT_NAMED("ControlRRTSolver", "initialized");
+
+    const int NU = prob_->get_num_controls();
+    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
+    if (parameters_.StateLimits.size() != NX)
+        ThrowNamed("State limits are of size " << parameters_.StateLimits.size() << ", should be of size " << NX);
+    if (dynamics_solver_->get_control_limits().size() != NU)
+        ThrowNamed("Control limits are of size " << dynamics_solver_->get_control_limits().size() << ", should be of size " << NU);
 }
 
 void ControlRRTSolver::Setup()
@@ -56,34 +63,36 @@ void ControlRRTSolver::Setup()
     std::shared_ptr<ob::RealVectorStateSpace> space(
         std::make_shared<ob::RealVectorStateSpace>(NX));
 
-    state_bounds_ = std::make_shared<ob::RealVectorBounds>(NX);
+    // state_bounds_ = std::make_unique<ob::RealVectorBounds>(NX);
+    ob::RealVectorBounds state_bounds_(NX);
 
     for (int i = 0; i < NX; ++i)
     {
-        state_bounds_->setLow(i, -parameters_.StateLimits(i));
-        state_bounds_->setHigh(i, parameters_.StateLimits(i));
+        state_bounds_.setLow(i, -parameters_.StateLimits(i));
+        state_bounds_.setHigh(i, parameters_.StateLimits(i));
     }
 
-    space->setBounds(*state_bounds_);
+    space->setBounds(state_bounds_);
 
     // create a control space
     std::shared_ptr<oc::RealVectorControlSpace> cspace(
         std::make_shared<oc::RealVectorControlSpace>(space, NU));
 
     // set the bounds for the control space
-    control_bounds_ = std::make_shared<ob::RealVectorBounds>(NU);
+    // control_bounds_ = std::make_unique<ob::RealVectorBounds>(NU);
+    ob::RealVectorBounds control_bounds_(NU);
     const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
 
     for (int i = 0; i < NU; ++i)
     {
-        control_bounds_->setLow(i, -control_limits(i));
-        control_bounds_->setHigh(i, control_limits(i));
+        control_bounds_.setLow(i, -control_limits(i));
+        control_bounds_.setHigh(i, control_limits(i));
     }
 
-    cspace->setBounds(*control_bounds_);
+    cspace->setBounds(control_bounds_);
 
     // define a simple setup class
-    setup_ = std::make_shared<oc::SimpleSetup>(cspace);
+    setup_.reset(new oc::SimpleSetup(cspace));
     oc::SpaceInformationPtr si = setup_->getSpaceInformation();
 
     si->setPropagationStepSize(dt);
@@ -97,16 +106,21 @@ void ControlRRTSolver::Setup()
     const Eigen::VectorXd start_eig = prob_->get_X().col(0);
     const Eigen::MatrixXd goal_eig = prob_->get_X_star().col(T - 1);
 
-    start_state_ = std::make_shared<ob::ScopedState<ob::RealVectorStateSpace>>(space);
-    goal_state_ = std::make_shared<ob::ScopedState<ob::RealVectorStateSpace>>(space);
+    // start_state_ = std::make_unique<ob::ScopedState<ob::RealVectorStateSpace>>(space);
+    // goal_state_ = std::make_unique<ob::ScopedState<ob::RealVectorStateSpace>>(space);
+
+    ob::ScopedState<ob::RealVectorStateSpace> start_state_(space);
+    ob::ScopedState<ob::RealVectorStateSpace> goal_state_(space);
 
     for (int i = 0; i < NX; ++i)
     {
-        (*start_state_)[i] = start_eig(i);
-        (*goal_state_)[i] = goal_eig(i);
+        // (*start_state_)[i] = start_eig(i);
+        // (*goal_state_)[i] = goal_eig(i);
+        start_state_[i] = start_eig(i);
+        goal_state_[i] = goal_eig(i);
     }
 
-    setup_->setStartAndGoalStates(*start_state_, *goal_state_, parameters_.ConvergenceTolerance);
+    setup_->setStartAndGoalStates(start_state_, goal_state_, parameters_.ConvergenceTolerance);
 
     ob::PlannerPtr optimizingPlanner(new ompl::control::RRT(si));
     setup_->setPlanner(optimizingPlanner);
@@ -141,7 +155,7 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd &solution)
 
         T = 0;
         for (int t = 0; t < controls.size(); ++t)
-            T += (int)(durations[t] / dt);
+            T += static_cast<int>(durations[t] / dt);
         T += 1;
 
         if ((x_star - sol_goal_state).norm() > parameters_.ConvergenceTolerance && debug_)
@@ -170,7 +184,7 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd &solution)
 
             Eigen::VectorXd u = Eigen::Map<Eigen::VectorXd>(oc_u, NU);
 
-            for (int k = 0; k < (int)(durations[i] / dt); ++k)
+            for (int k = 0; k < static_cast<int>(durations[i] / dt); ++k)
             {
                 solution.row(t) = u.transpose();
                 prob_->Update(u, t);

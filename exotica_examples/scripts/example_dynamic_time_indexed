@@ -40,6 +40,11 @@ solver = exo.Setup.load_solver(configs[problem_idx])
 problem = solver.get_problem()
 solution = solver.solve()
 
+print('Solver terminated with: ', problem.termination_criterion)
+if problem.termination_criterion == exo.TerminationCriterion.Divergence:
+    print('Solver Diverged!')
+    exit(0)
+
 if solution.shape[0] == 0:
     print('No solution found!')
     exit(0)
@@ -50,7 +55,7 @@ plt.figure()
 plt.plot(range(len(costs[1])), costs[1])
 plt.xlabel('Iteration')
 plt.ylabel('Cost')
-# plt.show()
+plt.show()
 
 
 visualization = exo.Visualization(problem.get_scene())

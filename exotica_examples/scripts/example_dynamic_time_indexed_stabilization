@@ -68,7 +68,7 @@ while True:
     try:
         x = problem.X[:,0]
 
-        for t in range(5000):
+        for t in range(1000):
             if t < problem.T - 2:
                 u = solution[t,:]
             else:

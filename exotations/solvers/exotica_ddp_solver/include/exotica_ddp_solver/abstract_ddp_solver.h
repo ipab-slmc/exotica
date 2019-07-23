@@ -85,8 +85,8 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    prob_->PreUpdate();
 
     // initialize Gain matrices
     K_gains_.assign(T, Eigen::MatrixXd(NU, NX));
@@ -133,6 +133,14 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
             }
         }
 
+        // finite checks
+        if (!new_U.allFinite() || !std::isfinite(current_cost))
+        {
+            prob_->termination_criterion = TerminationCriterion::Divergence;
+            WARNING_NAMED("DDPSolver", "Diverged!");
+            return;
+        }
+
         if (debug_)
         {
             HIGHLIGHT_NAMED("DDPSolver", "Forward pass complete in " << line_search_timer.GetDuration() << " with cost: " << current_cost << " and alpha " << best_alpha);
@@ -152,17 +160,22 @@ void AbstractDDPSolver<Initializer>::Solve(Eigen::MatrixXd& solution)
         if (iteration - last_best_iteration > base_parameters_.FunctionTolerancePatience)
         {
             if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Early stopping criterion reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
             break;
         }
 
         if (last_cost - current_cost < base_parameters_.FunctionTolerance && last_cost - current_cost > 0)
         {
             if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Function tolerance reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
             break;
         }
 
         if (debug_ && iteration == GetNumberOfMaxIterations() - 1)
+        {
             HIGHLIGHT_NAMED("DDPSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::IterationLimit;
+        }
 
         last_cost = current_cost;
         for (int t = 0; t < T - 1; ++t)

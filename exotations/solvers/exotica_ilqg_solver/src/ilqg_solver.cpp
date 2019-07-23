@@ -185,8 +185,8 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    prob_->PreUpdate();
 
     // initialize Gain matrices
     l_gains_.assign(T, Eigen::MatrixXd::Zero(NU, 1));
@@ -236,10 +236,12 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
             // break;
         }
 
-        if (std::isnan(current_cost))
+        // finite checks
+        if (!new_U.allFinite() || !std::isfinite(current_cost))
         {
-            if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Diverged!");
-            break;
+            prob_->termination_criterion = TerminationCriterion::Divergence;
+            WARNING_NAMED("ILQGSolver", "Diverged!");
+            return;
         }
 
         if (debug_)
@@ -261,17 +263,22 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
         if (iteration - last_best_iteration > parameters_.FunctionTolerancePatience)
         {
             if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Early stopping criterion reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
             break;
         }
 
         if (last_cost - current_cost < parameters_.FunctionTolerance && last_cost - current_cost > 0)
         {
             if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Function tolerance reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::Divergence;
             break;
         }
 
         if (debug_ && iteration == parameters_.MaxIterations - 1)
+        {
             HIGHLIGHT_NAMED("ILQGSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::IterationLimit;
+        }
 
         last_cost = current_cost;
         for (int t = 0; t < T - 1; ++t)

@@ -104,7 +104,8 @@ double ILQRSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
 {
     double cost = 0;
     const int T = prob_->get_T();
-    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const Eigen::VectorXd control_limits_low = dynamics_solver_->get_control_limits_low();
+    const Eigen::VectorXd control_limits_high = dynamics_solver_->get_control_limits_high();
     const double dt = dynamics_solver_->get_dt();
 
     for (int t = 0; t < T - 1; ++t)
@@ -116,7 +117,7 @@ double ILQRSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
 
         u.noalias() += alpha * delta_uk;
         // clamp controls
-        u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
+        u = u.cwiseMax(control_limits_low).cwiseMin(control_limits_high);
 
         prob_->Update(u, t);
         cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
@@ -248,12 +249,15 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 
 Eigen::VectorXd ILQRSolver::GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const
 {
-    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const Eigen::VectorXd control_limits_low = dynamics_solver_->get_control_limits_low();
+    const Eigen::VectorXd control_limits_high = dynamics_solver_->get_control_limits_high();
+
+    const double dt = dynamics_solver_->get_dt();
     Eigen::VectorXd delta_uk = -Ku_gains_[t] * best_ref_u_.col(t) - Kv_gains_[t] * vk_gains_[t + 1] -
                                K_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
 
     Eigen::VectorXd u = best_ref_u_.col(t) + delta_uk;
-    return u.cwiseMax(-control_limits).cwiseMin(control_limits);
+    return u.cwiseMax(control_limits_low).cwiseMin(control_limits_high);
 }
 
 }  // namespace exotica

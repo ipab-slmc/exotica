@@ -48,8 +48,6 @@ void ControlRRTSolver::SpecifyProblem(PlanningProblemPtr pointer)
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
     if (parameters_.StateLimits.size() != NX)
         ThrowNamed("State limits are of size " << parameters_.StateLimits.size() << ", should be of size " << NX);
-    if (dynamics_solver_->get_control_limits().size() != NU)
-        ThrowNamed("Control limits are of size " << dynamics_solver_->get_control_limits().size() << ", should be of size " << NU);
 }
 
 void ControlRRTSolver::Setup()
@@ -81,12 +79,13 @@ void ControlRRTSolver::Setup()
     // set the bounds for the control space
     // control_bounds_ = std::make_unique<ob::RealVectorBounds>(NU);
     ob::RealVectorBounds control_bounds_(NU);
-    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const Eigen::VectorXd control_limits_low = dynamics_solver_->get_control_limits_low();
+    const Eigen::VectorXd control_limits_high = dynamics_solver_->get_control_limits_high();
 
     for (int i = 0; i < NU; ++i)
     {
-        control_bounds_.setLow(i, -control_limits(i));
-        control_bounds_.setHigh(i, control_limits(i));
+        control_bounds_.setLow(i, control_limits_low(i));
+        control_bounds_.setHigh(i, control_limits_high(i));
     }
 
     cspace->setBounds(control_bounds_);

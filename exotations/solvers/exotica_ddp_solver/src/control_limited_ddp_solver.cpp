@@ -55,7 +55,8 @@ void ControlLimitedDDPSolver::BackwardPass()
 
     Vx = prob_->GetStateCostJacobian(T - 1);
     Vxx = prob_->GetStateCostHessian(T - 1);
-    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const Eigen::VectorXd control_limits_low = dynamics_solver_->get_control_limits_low();
+    const Eigen::VectorXd control_limits_high = dynamics_solver_->get_control_limits_high();
 
     // concatenation axis for tensor products
     //  See https://eigen.tuxfamily.org/dox-devel/unsupported/eigen_tensors.html#title14
@@ -102,8 +103,8 @@ void ControlLimitedDDPSolver::BackwardPass()
             Qux = dt * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx;
         }
 
-        Eigen::VectorXd low_limit = -control_limits - u,
-                        high_limit = control_limits - u;
+        Eigen::VectorXd low_limit  = control_limits_low - u,
+                        high_limit = control_limits_high - u;
 
         BoxQPSolution boxqp_sol = BoxQP(Quu, Qu, low_limit, high_limit, u, 0.1, 100, 1e-5, parameters_.RegularizationRate);
 

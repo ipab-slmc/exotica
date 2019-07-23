@@ -18,7 +18,8 @@
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
                     <QuadrotorDynamicsSolver Name="dsolver" Integrator="RK1">
-                        <ControlLimits>3</ControlLimits>
+                        <ControlLimitsLow>0</ControlLimitsLow>
+                        <ControlLimitsHigh>5</ControlLimitsHigh>
                         <dt>0.005</dt>
                     </QuadrotorDynamicsSolver>
                 </DynamicsSolver>

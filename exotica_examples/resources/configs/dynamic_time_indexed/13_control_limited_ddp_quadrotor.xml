@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
-    <ILQGSolver Name="ControlLimitedDDPSolver">
+    <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>300</MaxIterations>
-        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerance>1e-5</FunctionTolerance>
         <FunctionTolerancePatience>300</FunctionTolerancePatience>
         <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-        <RegularizationRate>0.5</RegularizationRate>
-    </ILQGSolver>
+        <RegularizationRate>0.1</RegularizationRate>
+    </AnalyticDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
@@ -17,7 +17,7 @@
                 <SRDF>{exotica_examples}/resources/robots/quadrotor.srdf</SRDF>
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
-                    <QuadrotorDynamicsSolver Name="dsolver" Integrator="RK1">
+                    <QuadrotorDynamicsSolver Name="dsolver" Integrator="RK4">
                         <ControlLimits>25</ControlLimits>
                         <dt>0.005</dt>
                     </QuadrotorDynamicsSolver>
@@ -35,10 +35,10 @@
         <Qf_rate>100</Qf_rate>
 
         <!-- Rate penalizes large control forces. -->
-        <R_rate>1e-3</R_rate>
+        <R_rate>0.1</R_rate>
 
 
         <StartState>0 0 0 0 0 0 0 0 0 0 0 0</StartState>
-        <GoalState> 0 3 3 0 0 0 0 0 0 0 0 0</GoalState>
+        <GoalState> 0 2 2 0 0 0 0 0 0 0 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </PlannerDemoConfig>

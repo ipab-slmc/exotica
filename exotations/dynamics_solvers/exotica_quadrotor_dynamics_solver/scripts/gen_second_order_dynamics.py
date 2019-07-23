@@ -24,7 +24,7 @@ u3 = Symbol('u(3)')
 g_ = Symbol('g_')
 mass_ = Symbol('mass_')
 L_ = Symbol('L_')
-b_ = Symbol('b_')
+# b_ = Symbol('b_')
 
 F_1 = k_f_ * u0
 F_2 = k_f_ * u1
@@ -73,7 +73,8 @@ pos_ddot = Gtot + R * Ftot / mass_
 # phi, theta, psi dynamics
 tau = Matrix([
     L_ * (F_1 - F_2), L_ * (F_1 - F_3),
-    b_ * (M_1 - M_2 + M_3 - M_4)
+    # b_ * (M_1 - M_2 + M_3 - M_4)
+    (M_1 - M_2 + M_3 - M_4)
 ])
 omega = Matrix([phi_dot, theta_dot, psi_dot])
 

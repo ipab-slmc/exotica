@@ -102,7 +102,7 @@ Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVe
     Eigen::Vector3d tau, omega, omega_dot;
     tau << L_ * (F_1 - F_2),
         L_ * (F_1 - F_3),
-        b_ * (M_1 - M_2 + M_3 - M_4);
+        (M_1 - M_2 + M_3 - M_4);
     omega << phi_dot, theta_dot, psi_dot;
 
     double radius = L_ / 2.0;
@@ -156,7 +156,7 @@ Eigen::MatrixXd QuadrotorDynamicsSolver::fx(const StateVector& x, const ControlV
            sin_psi = std::sin(psi),     cos_psi = std::cos(psi),        tan_psi = std::tan(psi);
 
     Eigen::MatrixXd fx(num_positions_ + num_velocities_, num_positions_ + num_velocities_);
-    fx << 
+    fx <<
         0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
@@ -217,7 +217,7 @@ Eigen::MatrixXd QuadrotorDynamicsSolver::fu(const StateVector& x, const ControlV
         k_f_*cos(phi)*cos(theta)/mass_, k_f_*cos(phi)*cos(theta)/mass_, k_f_*cos(phi)*cos(theta)/mass_, k_f_*cos(phi)*cos(theta)/mass_,
         1.66666666666667*k_f_/(L_*mass_), -1.66666666666667*k_f_/(L_*mass_), 0, 0,
         1.66666666666667*k_f_/(L_*mass_), 0, -1.66666666666667*k_f_/(L_*mass_), 0,
-        0.909090909090909*b_*k_m_/(L_*L_*mass_), -0.909090909090909*b_*k_m_/(L_*L_*mass_), 0.909090909090909*b_*k_m_/(L_*L_*mass_), -0.909090909090909*b_*k_m_/(L_*L_*mass_);
+        0.909090909090909*k_m_/(L_*L_*2*mass_), -0.909090909090909*k_m_/(L_*L_*2*mass_), 0.909090909090909*k_m_/(L_*L_*mass_), -0.909090909090909*k_m_/(L_*L_*mass_);
 
     // clang-format on
     return fu;

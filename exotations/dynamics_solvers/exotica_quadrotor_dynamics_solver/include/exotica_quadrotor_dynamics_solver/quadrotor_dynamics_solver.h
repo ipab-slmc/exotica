@@ -73,7 +73,7 @@ private:
     double k_f_ = 1;       ///< Thrust coefficient, 6.11*10^-8;
     double k_m_ = 0.0245;  ///< Moment coefficient
 
-    double b_ = 0.0245;  ///< Drag
+    // double b_ = 0.0245;  ///< Drag
 };
 }  // namespace exotica
 

@@ -166,6 +166,7 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd &solution)
                        !parameters_.ApproximateSolution))
         {
             if (debug_) HIGHLIGHT_NAMED("ControlRRTSolver", "No solution found.");
+            prob_->termination_criterion = TerminationCriterion::Divergence;
             return;
         }
         else if (debug_)
@@ -193,11 +194,13 @@ void ControlRRTSolver::Solve(Eigen::MatrixXd &solution)
             }
         }
 
+        prob_->termination_criterion = TerminationCriterion::IterationLimit;
         planning_time_ = planning_timer.GetDuration();
     }
     else
     {
         HIGHLIGHT_NAMED("ControlRRTSolver", "No solution found.");
+        prob_->termination_criterion = TerminationCriterion::Divergence;
     }
 }
 

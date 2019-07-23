@@ -36,8 +36,15 @@
             0
             0
             0
-            0.2
+            0.1
         </C>
+
+        <CW>
+            0
+            0
+            0
+            0.1
+        </CW>
         <!-- Noise applied to theta_dot -->
 
         <!-- <C_rate>0.0</C_rate> -->

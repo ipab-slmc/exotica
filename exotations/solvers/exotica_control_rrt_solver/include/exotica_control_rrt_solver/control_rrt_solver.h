@@ -94,6 +94,9 @@ private:
         double *x = ob_x->as<ob::RealVectorStateSpace::StateType>()->values;
         double *u = oc_u->as<oc::RealVectorControlSpace::ControlType>()->values;
 
+        assert(ob_x->as<ob::RealVectorStateSpace::StateType>().getDimension() == NX);
+        assert(oc_u->as<oc::RealVectorControlSpace::StateType>().getDimension() == NU);
+
         Eigen::VectorXd eig_x = Eigen::Map<Eigen::VectorXd>(x, NX);
         Eigen::VectorXd eig_u = Eigen::Map<Eigen::VectorXd>(u, NU);
 

@@ -46,7 +46,7 @@
 namespace ob = ompl::base;
 namespace oc = ompl::control;
 
-typedef std::function<ob::PlannerPtr(const oc::SpaceInformationPtr& si)> ConfiguredPlannerAllocator;
+typedef std::function<ob::PlannerPtr(const oc::SpaceInformationPtr &si)> ConfiguredPlannerAllocator;
 
 namespace exotica
 {
@@ -94,7 +94,7 @@ private:
 
         double *x = ob_x->as<ob::RealVectorStateSpace::StateType>()->values;
         double *u = oc_u->as<oc::RealVectorControlSpace::ControlType>()->values;
-        
+
         Eigen::VectorXd eig_x = Eigen::Map<Eigen::VectorXd>(x, NX);
         Eigen::VectorXd eig_u = Eigen::Map<Eigen::VectorXd>(u, NU);
 
@@ -117,7 +117,7 @@ public:
 
 protected:
     template <typename PlannerType>
-    static ob::PlannerPtr AllocatePlanner(const oc::SpaceInformationPtr& si)
+    static ob::PlannerPtr AllocatePlanner(const oc::SpaceInformationPtr &si)
     {
         ob::PlannerPtr planner(new PlannerType(si));
         return planner;

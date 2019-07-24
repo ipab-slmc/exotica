@@ -30,10 +30,10 @@
 #ifndef EXOTICA_DDP_SOLVER_ABSTRACT_DDP_SOLVER_H_
 #define EXOTICA_DDP_SOLVER_ABSTRACT_DDP_SOLVER_H_
 
-#include <exotica_ddp_solver/abstract_ddp_solver_initializer.h>
 #include <exotica_core/feedback_motion_solver.h>
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
 #include <exotica_core/tools/conversions.h>
+#include <exotica_ddp_solver/abstract_ddp_solver_initializer.h>
 
 namespace exotica
 {

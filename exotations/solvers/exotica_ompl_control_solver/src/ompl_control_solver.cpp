@@ -31,7 +31,6 @@
 
 namespace exotica
 {
-
 void OMPLControlSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     if (pointer->type() != "exotica::DynamicTimeIndexedShootingProblem")

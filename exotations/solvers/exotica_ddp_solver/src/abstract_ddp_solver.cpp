@@ -31,7 +31,6 @@
 
 namespace exotica
 {
-
 void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
 {
     if (!prob_) ThrowNamed("Solver has not been initialized!");

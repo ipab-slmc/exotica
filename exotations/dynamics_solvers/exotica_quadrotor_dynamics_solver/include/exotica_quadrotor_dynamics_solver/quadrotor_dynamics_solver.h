@@ -55,7 +55,7 @@ public:
     Eigen::MatrixXd fx(const StateVector& x, const ControlVector& u) override;
     Eigen::MatrixXd fu(const StateVector& x, const ControlVector& u) override;
 
-    Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
+    // Eigen::VectorXd GetPosition(Eigen::VectorXdRefConst x_in) override;
 
 private:
     Eigen::Matrix3d J_;      ///< Inertia matrix

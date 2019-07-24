@@ -223,12 +223,4 @@ Eigen::MatrixXd QuadrotorDynamicsSolver::fu(const StateVector& x, const ControlV
     return fu;
 }
 
-Eigen::VectorXd QuadrotorDynamicsSolver::GetPosition(Eigen::VectorXdRefConst x_in)
-{
-    // Convert quaternion to Euler angles.
-    Eigen::Matrix<double, 6, 1> xyz_rpy;
-    xyz_rpy.head<3>() = x_in.head<3>();
-    xyz_rpy.tail<3>() = Eigen::Quaterniond(x_in.segment<4>(3)).toRotationMatrix().eulerAngles(0, 1, 2);
-    return xyz_rpy;
-}
 }  // namespace exotica

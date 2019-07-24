@@ -28,6 +28,7 @@ include_directories(
 link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OMPL_LIBRARY_DIRS})
 
 add_library(${PROJECT_NAME}
+  src/ompl_control_solver.cpp
   src/ompl_native_solvers.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OMPL_LIBRARIES})

@@ -46,6 +46,8 @@
 namespace ob = ompl::base;
 namespace oc = ompl::control;
 
+typedef std::function<ob::PlannerPtr(const oc::SpaceInformationPtr& si)> ConfiguredPlannerAllocator;
+
 namespace exotica
 {
 class OMPLStatePropagator : public oc::StatePropagator
@@ -92,10 +94,7 @@ private:
 
         double *x = ob_x->as<ob::RealVectorStateSpace::StateType>()->values;
         double *u = oc_u->as<oc::RealVectorControlSpace::ControlType>()->values;
-
-        assert(ob_x->as<ob::RealVectorStateSpace::StateType>()->getDimension() == NX);
-        assert(oc_u->as<oc::RealVectorControlSpace::ControlType>()->getDimension() == NU);
-
+        
         Eigen::VectorXd eig_x = Eigen::Map<Eigen::VectorXd>(x, NX);
         Eigen::VectorXd eig_u = Eigen::Map<Eigen::VectorXd>(u, NU);
 
@@ -104,7 +103,6 @@ private:
     }
 };
 
-template <typename ControlAlgorithm>
 class OMPLControlSolver : public MotionSolver
 {
 public:
@@ -118,6 +116,13 @@ public:
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 protected:
+    template <typename PlannerType>
+    static ob::PlannerPtr AllocatePlanner(const oc::SpaceInformationPtr& si)
+    {
+        ob::PlannerPtr planner(new PlannerType(si));
+        return planner;
+    }
+
     DynamicTimeIndexedShootingProblemPtr prob_;  ///!< Shared pointer to the planning problem.
     DynamicsSolverPtr dynamics_solver_;          ///!< Shared pointer to the dynamics solver.
 
@@ -125,6 +130,7 @@ protected:
 
     std::unique_ptr<oc::SimpleSetup> setup_;
     std::string algorithm_;
+    ConfiguredPlannerAllocator planner_allocator_;
 
     void Setup();
 
@@ -133,180 +139,6 @@ protected:
         return true;
     }
 };
-
-template <typename ControlAlgorithm>
-void OMPLControlSolver<ControlAlgorithm>::SpecifyProblem(PlanningProblemPtr pointer)
-{
-    if (pointer->type() != "exotica::DynamicTimeIndexedShootingProblem")
-    {
-        ThrowNamed("This ControlRRTSolver can't solve problem of type '" << pointer->type() << "'!");
-    }
-    MotionSolver::SpecifyProblem(pointer);
-    prob_ = std::static_pointer_cast<DynamicTimeIndexedShootingProblem>(pointer);
-    dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
-
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-    if (init_.StateLimits.size() != NX)
-        ThrowNamed("State limits are of size " << init_.StateLimits.size() << ", should be of size " << NX);
-
-    if (debug_) HIGHLIGHT_NAMED(algorithm_, "initialized");
-}
-
-template <typename ControlAlgorithm>
-void OMPLControlSolver<ControlAlgorithm>::Setup()
-{
-    int T = prob_->get_T();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-    const double dt = dynamics_solver_->get_dt();
-    if (init_.Seed != -1) ompl::RNG::setSeed(init_.Seed);
-
-    std::shared_ptr<ob::RealVectorStateSpace> space(
-        std::make_shared<ob::RealVectorStateSpace>(NX));
-
-    // state_bounds_ = std::make_unique<ob::RealVectorBounds>(NX);
-    ob::RealVectorBounds state_bounds_(NX);
-
-    for (int i = 0; i < NX; ++i)
-    {
-        state_bounds_.setLow(i, -init_.StateLimits(i));
-        state_bounds_.setHigh(i, init_.StateLimits(i));
-    }
-
-    space->setBounds(state_bounds_);
-
-    // create a control space
-    std::shared_ptr<oc::RealVectorControlSpace> cspace(
-        std::make_shared<oc::RealVectorControlSpace>(space, NU));
-
-    // set the bounds for the control space
-    // control_bounds_ = std::make_unique<ob::RealVectorBounds>(NU);
-    ob::RealVectorBounds control_bounds_(NU);
-    const Eigen::VectorXd control_limits_low = dynamics_solver_->get_control_limits_low();
-    const Eigen::VectorXd control_limits_high = dynamics_solver_->get_control_limits_high();
-
-    for (int i = 0; i < NU; ++i)
-    {
-        control_bounds_.setLow(i, control_limits_low(i));
-        control_bounds_.setHigh(i, control_limits_high(i));
-    }
-
-    cspace->setBounds(control_bounds_);
-
-    // define a simple setup class
-    setup_.reset(new oc::SimpleSetup(cspace));
-    oc::SpaceInformationPtr si = setup_->getSpaceInformation();
-
-    si->setPropagationStepSize(dt);
-    setup_->setStateValidityChecker([this, si](const ob::State *state) { return isStateValid(si, state); });
-
-    std::shared_ptr<OMPLStatePropagator> propagator(
-        std::make_shared<OMPLStatePropagator>(si, dynamics_solver_));
-
-    setup_->setStatePropagator(propagator);
-
-    const Eigen::VectorXd start_eig = prob_->get_X().col(0);
-    const Eigen::MatrixXd goal_eig = prob_->get_X_star().col(T - 1);
-
-    // start_state_ = std::make_unique<ob::ScopedState<ob::RealVectorStateSpace>>(space);
-    // goal_state_ = std::make_unique<ob::ScopedState<ob::RealVectorStateSpace>>(space);
-
-    ob::ScopedState<ob::RealVectorStateSpace> start_state_(space);
-    ob::ScopedState<ob::RealVectorStateSpace> goal_state_(space);
-
-    for (int i = 0; i < NX; ++i)
-    {
-        // (*start_state_)[i] = start_eig(i);
-        // (*goal_state_)[i] = goal_eig(i);
-        start_state_[i] = start_eig(i);
-        goal_state_[i] = goal_eig(i);
-    }
-
-    setup_->setStartAndGoalStates(start_state_, goal_state_, init_.ConvergenceTolerance);
-
-    ob::PlannerPtr optimizingPlanner(new ControlAlgorithm(si));
-    setup_->setPlanner(optimizingPlanner);
-
-    setup_->setup();
-    propagator->setIntegrationTimeStep(si->getPropagationStepSize());
-}
-
-template <typename ControlAlgorithm>
-void OMPLControlSolver<ControlAlgorithm>::Solve(Eigen::MatrixXd &solution)
-{
-    if (!prob_) ThrowNamed("Solver has not been initialized!");
-    Timer planning_timer, backward_pass_timer, line_search_timer;
-
-    int T = prob_->get_T();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-    const Eigen::VectorXd x_star = prob_->get_X_star().col(T - 1);
-
-    const double dt = dynamics_solver_->get_dt();
-
-    Setup();
-    ob::PlannerStatus solved = setup_->solve(init_.MaxIterationTime);
-
-    if (solved)
-    {
-        std::vector<oc::Control *> controls = setup_->getSolutionPath().getControls();
-        std::vector<ob::State *> states = setup_->getSolutionPath().getStates();
-        std::vector<double> durations = setup_->getSolutionPath().getControlDurations();
-
-        Eigen::VectorXd sol_goal_state = Eigen::Map<Eigen::VectorXd>(
-            states.back()->as<ob::RealVectorStateSpace::StateType>()->values, NX);
-
-        T = 0;
-        for (int t = 0; t < controls.size(); ++t)
-            T += static_cast<int>(durations[t] / dt);
-        T += 1;
-
-        if ((x_star - sol_goal_state).norm() > init_.ConvergenceTolerance && debug_)
-            WARNING_NAMED(algorithm_, "Goal not satisfied.");
-
-        // additional solution criteria
-        if (T <= 2 || ((x_star - sol_goal_state).norm() > init_.ConvergenceTolerance &&
-                       !init_.ApproximateSolution))
-        {
-            if (debug_) HIGHLIGHT_NAMED(algorithm_, "No solution found.");
-            prob_->termination_criterion = TerminationCriterion::Divergence;
-            return;
-        }
-        else if (debug_)
-            HIGHLIGHT_NAMED(algorithm_, "Found solution.");
-
-        prob_->set_T(T);
-        prob_->PreUpdate();
-
-        solution.resize(T, NU);
-
-        int t = 0;
-        for (int i = 0; i < controls.size(); ++i)
-        {
-            double *oc_u = controls[i]->as<oc::RealVectorControlSpace::ControlType>()->values;
-            double *oc_s = states[i]->as<ob::RealVectorStateSpace::StateType>()->values;
-
-            Eigen::VectorXd u = Eigen::Map<Eigen::VectorXd>(oc_u, NU);
-
-            for (int k = 0; k < static_cast<int>(durations[i] / dt); ++k)
-            {
-                solution.row(t) = u.transpose();
-                prob_->Update(u, t);
-
-                ++t;
-            }
-        }
-
-        prob_->termination_criterion = TerminationCriterion::IterationLimit;
-        planning_time_ = planning_timer.GetDuration();
-    }
-    else
-    {
-        HIGHLIGHT_NAMED(algorithm_, "No solution found.");
-        prob_->termination_criterion = TerminationCriterion::Divergence;
-    }
-}
 
 }  // namespace exotica
 

@@ -41,6 +41,7 @@ void ControlRRTSolver::Instantiate(const ControlRRTSolverInitializer &init)
 {
     init_ = OMPLControlSolverInitializer(ControlRRTSolverInitializer(init));
     algorithm_ = "ControlRRTSolver";
+    planner_allocator_ = std::bind(&AllocatePlanner<ompl::control::RRT>, std::placeholders::_1);
 }
 
 // ControlKPIECESolver
@@ -50,6 +51,7 @@ void ControlKPIECESolver::Instantiate(const ControlKPIECESolverInitializer &init
 {
     init_ = OMPLControlSolverInitializer(ControlKPIECESolverInitializer(init));
     algorithm_ = "ControlKPIECESolver";
+    planner_allocator_ = std::bind(&AllocatePlanner<ompl::control::KPIECE1>, std::placeholders::_1);
 }
 
 }  // namespace exotica

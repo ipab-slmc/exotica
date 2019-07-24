@@ -39,14 +39,14 @@
 
 namespace exotica
 {
-class ControlRRTSolver : public OMPLControlSolver<ompl::control::RRT>, Instantiable<ControlRRTSolverInitializer>
+class ControlRRTSolver : public OMPLControlSolver, Instantiable<ControlRRTSolverInitializer>
 {
 public:
     ControlRRTSolver();
     void Instantiate(const ControlRRTSolverInitializer& init) override;
 };
 
-class ControlKPIECESolver : public OMPLControlSolver<ompl::control::KPIECE1>, Instantiable<ControlKPIECESolverInitializer>
+class ControlKPIECESolver : public OMPLControlSolver, Instantiable<ControlKPIECESolverInitializer>
 {
 public:
     ControlKPIECESolver();

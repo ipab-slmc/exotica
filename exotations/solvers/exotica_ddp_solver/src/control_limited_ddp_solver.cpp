@@ -36,7 +36,7 @@ namespace exotica
 void ControlLimitedDDPSolver::Instantiate(const ControlLimitedDDPSolverInitializer& init)
 {
     parameters_ = init;
-    base_parameters_ = parameters_;
+    base_parameters_ = AbstractDDPSolverInitializer(ControlLimitedDDPSolverInitializer(parameters_));
 }
 
 void ControlLimitedDDPSolver::BackwardPass()

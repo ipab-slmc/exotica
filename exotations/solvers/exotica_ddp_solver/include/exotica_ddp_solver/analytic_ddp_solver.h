@@ -38,7 +38,7 @@ namespace exotica
 {
 // \brief DDP solver using the analytic expansion of the value-function Q.
 //  Mayne, D. Q. (1966). "A second-order gradient method of optimizing non-linear discrete time systems".
-class AnalyticDDPSolver : public AbstractDDPSolver<AnalyticDDPSolverInitializer>, public Instantiable<AnalyticDDPSolverInitializer>
+class AnalyticDDPSolver : public AbstractDDPSolver, public Instantiable<AnalyticDDPSolverInitializer>
 {
 public:
     void Instantiate(const AnalyticDDPSolverInitializer& init) override;

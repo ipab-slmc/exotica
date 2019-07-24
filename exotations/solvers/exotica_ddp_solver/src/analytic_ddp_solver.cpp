@@ -36,7 +36,7 @@ namespace exotica
 void AnalyticDDPSolver::Instantiate(const AnalyticDDPSolverInitializer& init)
 {
     parameters_ = init;
-    base_parameters_ = parameters_;
+    base_parameters_ = AbstractDDPSolverInitializer(AnalyticDDPSolverInitializer(parameters_));
 }
 
 void AnalyticDDPSolver::BackwardPass()
@@ -117,4 +117,5 @@ void AnalyticDDPSolver::BackwardPass()
         Vxx = Qxx - K_gains_[t].transpose() * Quu * K_gains_[t];
     }
 }
+
 }  // namespace exotica

@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 AddInitializer(
+  abstract_ddp_solver
   analytic_ddp_solver
   control_limited_ddp_solver
 )
@@ -27,6 +28,7 @@ include_directories(
 add_compile_options(-Wno-ignored-attributes)
 
 set(SOURCES
+  src/abstract_ddp_solver.cpp
   src/analytic_ddp_solver.cpp
   src/control_limited_ddp_solver.cpp  
 )

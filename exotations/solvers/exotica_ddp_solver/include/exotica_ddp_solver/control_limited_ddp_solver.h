@@ -39,7 +39,7 @@ namespace exotica
 {
 // Control-limited DDP solver
 //  Control-limited Differential Dynamic Programming (Tassa, Mansard, Todorov, 2014)
-class ControlLimitedDDPSolver : public AbstractDDPSolver<ControlLimitedDDPSolverInitializer>, public Instantiable<ControlLimitedDDPSolverInitializer>
+class ControlLimitedDDPSolver : public AbstractDDPSolver, public Instantiable<ControlLimitedDDPSolverInitializer>
 {
 public:
     void Instantiate(const ControlLimitedDDPSolverInitializer& init) override;

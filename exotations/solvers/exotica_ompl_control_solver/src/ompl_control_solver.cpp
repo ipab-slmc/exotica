@@ -78,13 +78,12 @@ void OMPLControlSolver::Setup()
     // set the bounds for the control space
     // control_bounds_ = std::make_unique<ob::RealVectorBounds>(NU);
     ob::RealVectorBounds control_bounds_(NU);
-    const Eigen::VectorXd control_limits_low = dynamics_solver_->get_control_limits_low();
-    const Eigen::VectorXd control_limits_high = dynamics_solver_->get_control_limits_high();
+    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
 
     for (int i = 0; i < NU; ++i)
     {
-        control_bounds_.setLow(i, control_limits_low(i));
-        control_bounds_.setHigh(i, control_limits_high(i));
+        control_bounds_.setLow(i, control_limits.col(0)(i));
+        control_bounds_.setHigh(i, control_limits.col(1)(i));
     }
 
     cspace->setBounds(control_bounds_);

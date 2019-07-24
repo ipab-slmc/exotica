@@ -163,8 +163,7 @@ double AbstractDDPSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefCons
 {
     double cost = 0;
     const int T = prob_->get_T();
-    const Eigen::VectorXd control_limits_low = dynamics_solver_->get_control_limits_low();
-    const Eigen::VectorXd control_limits_high = dynamics_solver_->get_control_limits_high();
+    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
 
     const double dt = dynamics_solver_->get_dt();
 
@@ -175,7 +174,7 @@ double AbstractDDPSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefCons
         Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_x.col(t));
         u.noalias() += alpha * delta_uk;
         // clamp controls
-        u = u.cwiseMax(control_limits_low).cwiseMin(control_limits_high);
+        u = u.cwiseMax(control_limits.col(0)).cwiseMin(control_limits.col(1));
 
         prob_->Update(u, t);
         cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
@@ -188,13 +187,12 @@ double AbstractDDPSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefCons
 
 Eigen::VectorXd AbstractDDPSolver::GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const
 {
-    const Eigen::VectorXd control_limits_low = dynamics_solver_->get_control_limits_low();
-    const Eigen::VectorXd control_limits_high = dynamics_solver_->get_control_limits_high();
+    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
 
     Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
 
     Eigen::VectorXd u = best_ref_u_.col(t) + delta_uk;
-    return u.cwiseMax(control_limits_low).cwiseMin(control_limits_high);
+    return u.cwiseMax(control_limits.col(0)).cwiseMin(control_limits.col(1));
 }
 
 }  // namespace exotica

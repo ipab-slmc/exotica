@@ -130,8 +130,9 @@ public:
     void SetIntegrator(std::string integrator_in);
 
     /// \brief Returns the control limits vector.
-    Eigen::VectorXd get_control_limits_low();
-    Eigen::VectorXd get_control_limits_high();
+    //  returns: Two-column matrix, first column contains low control limits,
+    //      second - the high control limits
+    Eigen::MatrixXd get_control_limits();
     void set_control_limits(Eigen::VectorXd control_limits_low, Eigen::VectorXd control_limits_high);
 
     virtual ControlVector InverseDynamics(const StateVector& state);
@@ -150,8 +151,8 @@ protected:
     T dt_ = 0.01;                              ///< Internal timestep used for integration. Defaults to 10ms.
     Integrator integrator_ = Integrator::RK1;  ///< Chosen integrator. Defaults to Euler (RK1).
     // TODO: Need to enforce control limits.
-    Eigen::VectorXd control_limits_low_ = Eigen::VectorXd();   ///< Low ControlLimits. Default is empty vector.
-    Eigen::VectorXd control_limits_high_ = Eigen::VectorXd();  ///< High ControlLimits. Default is empty vector.
+    // First column is the low limits, second is the high limits.
+    Eigen::MatrixXd control_limits_;  ///< ControlLimits. Default is empty vector.
 
     /// \brief Integrates the dynamic system from state x with controls u applied for one timestep dt using the selected integrator.
     inline StateVector Integrate(const StateVector& x, const ControlVector& u);

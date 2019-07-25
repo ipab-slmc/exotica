@@ -742,7 +742,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("reset_number_of_problem_updates", &PlanningProblem::ResetNumberOfProblemUpdates)
         .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)() const) & PlanningProblem::GetCostEvolution)
         .def("get_number_of_iterations", &PlanningProblem::GetNumberOfIterations)
-        .def("is_valid", &PlanningProblem::IsValid);
+        .def("is_valid", &PlanningProblem::IsValid)
+        .def_readonly("termination_criterion", &PlanningProblem::termination_criterion);
 
     // Problem types
     py::module prob = module.def_submodule("Problems", "Problem types");
@@ -1177,7 +1178,9 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("f", &DynamicsSolver::f)
         .def("fx", &DynamicsSolver::fx)
         .def("fu", &DynamicsSolver::fu)
-        .def("get_position", &DynamicsSolver::GetPosition);
+        .def("get_position", &DynamicsSolver::GetPosition)
+        .def("simulate", &DynamicsSolver::Simulate)
+        .def_property_readonly("dt", &DynamicsSolver::get_dt, "dt");
 
     ////////////////////////////////////////////////////////////////////////////
     /// Shapes

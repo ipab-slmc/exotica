@@ -31,7 +31,6 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/13_control_limited_ddp_quadrotor.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/14_rrt_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/15_rrt_quadrotor.xml',
-    '{exotica_examples}/resources/configs/dynamic_time_indexed/16_kpiece_cartpole.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1
@@ -40,11 +39,6 @@ print('Running with config {0}'.format(configs[problem_idx]))
 solver = exo.Setup.load_solver(configs[problem_idx])
 problem = solver.get_problem()
 solution = solver.solve()
-
-print('Solver terminated with: ', problem.termination_criterion)
-if problem.termination_criterion == exo.TerminationCriterion.Divergence:
-    print('Solver Diverged!')
-    exit(0)
 
 if solution.shape[0] == 0:
     print('No solution found!')
@@ -67,27 +61,39 @@ visualization.display_trajectory(
 # publish_trajectory(problem.X[:problem.num_positions, :].T, problem.T * problem.tau, problem)
 # exit(0)
 
-signal.signal(signal.SIGINT, sig_int_handler)
+ds = problem.get_scene().get_dynamics_solver()
+dt = ds.dt
+
 while True:
     try:
-        s = time()
-        for t in range(problem.T - 1):
-            update_start = time()
-            u = solution[t,:]
-            # u = problem.U[:,t]
-            # print(u)
+        x = problem.X[:,0]
 
-            # u = solver.get_feedback_control(
-            #     problem.X[:,t], t
-            # )
-            problem.update(u, t)
+        for t in range(1000):
+            if t < problem.T - 2:
+                u = solution[t,:]
+            else:
+                # u = solution[problem.T - 2, :]
+                u = solver.get_feedback_control(
+                    x, problem.T - 2
+                )
+
+            update_start = time()
+            
+            big_X = problem.X
+            big_X[:, 1] = x
+            problem.X = big_X
+
+            problem.update(u, 1)
+            x = problem.X[:,2]
+            
             problem.get_scene().get_kinematic_tree().publish_frames()
+
             update_end = time()
             if problem.tau > update_end - update_start:
                 sleep(problem.tau - (update_end - update_start))
                 # sleep(0.1)
-        e = time()
+            
         sleep(1)
-        print("Time taken to roll-out:", e-s)
     except KeyboardInterrupt:
         break
+

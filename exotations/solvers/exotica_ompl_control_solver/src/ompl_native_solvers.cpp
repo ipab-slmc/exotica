@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, University of Edinburgh
+// Copyright (c) 2018, University of Edinburgh
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,27 +27,31 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_DDP_SOLVER_ANALYTIC_DDP_SOLVER_H_
-#define EXOTICA_DDP_SOLVER_ANALYTIC_DDP_SOLVER_H_
+#include <exotica_ompl_control_solver/ompl_native_solvers.h>
 
-#include <exotica_ddp_solver/abstract_ddp_solver.h>
-#include <exotica_ddp_solver/analytic_ddp_solver_initializer.h>
-#include <unsupported/Eigen/CXX11/Tensor>
+REGISTER_MOTIONSOLVER_TYPE("ControlRRTSolver", exotica::ControlRRTSolver)
+REGISTER_MOTIONSOLVER_TYPE("ControlKPIECESolver", exotica::ControlKPIECESolver)
 
 namespace exotica
 {
-// \brief DDP solver using the analytic expansion of the value-function Q.
-//  Mayne, D. Q. (1966). "A second-order gradient method of optimizing non-linear discrete time systems".
-class AnalyticDDPSolver : public AbstractDDPSolver, public Instantiable<AnalyticDDPSolverInitializer>
+// ControlRRTSolver
+ControlRRTSolver::ControlRRTSolver() = default;
+
+void ControlRRTSolver::Instantiate(const ControlRRTSolverInitializer &init)
 {
-public:
-    void Instantiate(const AnalyticDDPSolverInitializer& init) override;
+    init_ = OMPLControlSolverInitializer(ControlRRTSolverInitializer(init));
+    algorithm_ = "ControlRRTSolver";
+    planner_allocator_ = std::bind(&AllocatePlanner<ompl::control::RRT>, std::placeholders::_1);
+}
 
-private:
-    ///\brief Computes the control gains for a the trajectory in the associated
-    ///     DynamicTimeIndexedProblem.
-    void BackwardPass() override;
-};
+// ControlKPIECESolver
+ControlKPIECESolver::ControlKPIECESolver() = default;
+
+void ControlKPIECESolver::Instantiate(const ControlKPIECESolverInitializer &init)
+{
+    init_ = OMPLControlSolverInitializer(ControlKPIECESolverInitializer(init));
+    algorithm_ = "ControlKPIECESolver";
+    planner_allocator_ = std::bind(&AllocatePlanner<ompl::control::KPIECE1>, std::placeholders::_1);
+}
+
 }  // namespace exotica
-
-#endif  // EXOTICA_DDP_SOLVER_ANALYTIC_DDP_SOLVER_H_

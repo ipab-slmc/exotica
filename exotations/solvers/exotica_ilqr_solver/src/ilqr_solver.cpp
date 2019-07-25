@@ -104,7 +104,7 @@ double ILQRSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
 {
     double cost = 0;
     const int T = prob_->get_T();
-    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
     const double dt = dynamics_solver_->get_dt();
 
     for (int t = 0; t < T - 1; ++t)
@@ -116,7 +116,7 @@ double ILQRSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
 
         u.noalias() += alpha * delta_uk;
         // clamp controls
-        u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
+        u = u.cwiseMax(control_limits.col(0)).cwiseMin(control_limits.col(1));
 
         prob_->Update(u, t);
         cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
@@ -135,8 +135,8 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    prob_->PreUpdate();
 
     // initialize Gain matrices
     K_gains_.assign(T, Eigen::MatrixXd(NU, NX));
@@ -186,6 +186,14 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
             }
         }
 
+        // finite checks
+        if (!new_U.allFinite() || !std::isfinite(current_cost))
+        {
+            prob_->termination_criterion = TerminationCriterion::Divergence;
+            WARNING_NAMED("ILQRSolver", "Diverged!");
+            return;
+        }
+
         if (debug_)
         {
             HIGHLIGHT_NAMED("ILQRSolver", "Forward pass complete in " << line_search_timer.GetDuration() << " with cost: " << current_cost << " and alpha " << best_alpha);
@@ -205,17 +213,22 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
         if (iteration - last_best_iteration > parameters_.FunctionTolerancePatience)
         {
             if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Early stopping criterion reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
             break;
         }
 
         if (last_cost - current_cost < parameters_.FunctionTolerance && last_cost - current_cost > 0)
         {
             if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Function tolerance reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
             break;
         }
 
         if (debug_ && iteration == parameters_.MaxIterations - 1)
+        {
             HIGHLIGHT_NAMED("ILQRSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::IterationLimit;
+        }
 
         last_cost = current_cost;
         for (int t = 0; t < T - 1; ++t)
@@ -235,12 +248,14 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 
 Eigen::VectorXd ILQRSolver::GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const
 {
-    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
+
+    const double dt = dynamics_solver_->get_dt();
     Eigen::VectorXd delta_uk = -Ku_gains_[t] * best_ref_u_.col(t) - Kv_gains_[t] * vk_gains_[t + 1] -
                                K_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
 
     Eigen::VectorXd u = best_ref_u_.col(t) + delta_uk;
-    return u.cwiseMax(-control_limits).cwiseMin(control_limits);
+    return u.cwiseMax(control_limits.col(0)).cwiseMin(control_limits.col(1));
 }
 
 }  // namespace exotica

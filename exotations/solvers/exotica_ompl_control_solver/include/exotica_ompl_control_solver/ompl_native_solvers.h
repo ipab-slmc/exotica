@@ -27,27 +27,32 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_DDP_SOLVER_ANALYTIC_DDP_SOLVER_H_
-#define EXOTICA_DDP_SOLVER_ANALYTIC_DDP_SOLVER_H_
+#ifndef EXOTICA_OMPL_CONTROL_SOLVER_OMPL_NATIVE_SOLVERS_H_
+#define EXOTICA_OMPL_CONTROL_SOLVER_OMPL_NATIVE_SOLVERS_H_
 
-#include <exotica_ddp_solver/abstract_ddp_solver.h>
-#include <exotica_ddp_solver/analytic_ddp_solver_initializer.h>
-#include <unsupported/Eigen/CXX11/Tensor>
+#include <exotica_ompl_control_solver/ompl_control_solver.h>
+#include <ompl/control/planners/kpiece/KPIECE1.h>
+#include <ompl/control/planners/rrt/RRT.h>
+
+#include <exotica_ompl_control_solver/control_kpiece_solver_initializer.h>
+#include <exotica_ompl_control_solver/control_rrt_solver_initializer.h>
 
 namespace exotica
 {
-// \brief DDP solver using the analytic expansion of the value-function Q.
-//  Mayne, D. Q. (1966). "A second-order gradient method of optimizing non-linear discrete time systems".
-class AnalyticDDPSolver : public AbstractDDPSolver, public Instantiable<AnalyticDDPSolverInitializer>
+class ControlRRTSolver : public OMPLControlSolver, Instantiable<ControlRRTSolverInitializer>
 {
 public:
-    void Instantiate(const AnalyticDDPSolverInitializer& init) override;
-
-private:
-    ///\brief Computes the control gains for a the trajectory in the associated
-    ///     DynamicTimeIndexedProblem.
-    void BackwardPass() override;
+    ControlRRTSolver();
+    void Instantiate(const ControlRRTSolverInitializer& init) override;
 };
+
+class ControlKPIECESolver : public OMPLControlSolver, Instantiable<ControlKPIECESolverInitializer>
+{
+public:
+    ControlKPIECESolver();
+    void Instantiate(const ControlKPIECESolverInitializer& init) override;
+};
+
 }  // namespace exotica
 
-#endif  // EXOTICA_DDP_SOLVER_ANALYTIC_DDP_SOLVER_H_
+#endif  // EXOTICA_OMPL_CONTROL_SOLVER_OMPL_NATIVE_SOLVERS_H_

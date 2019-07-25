@@ -50,7 +50,8 @@ void AbstractDynamicsSolver<T, NX, NU>::InstantiateBase(const Initializer& init)
 
     // Just store the control limits supplied.
     //  They will need to be reshaped to the correct size when num_velocities_ becomes known.
-    raw_control_limits_ = dynamics_solver_initializer.ControlLimits;
+    raw_control_limits_low_ = dynamics_solver_initializer.ControlLimitsLow;
+    raw_control_limits_high_ = dynamics_solver_initializer.ControlLimitsHigh;
 
     if (debug_) INFO_NAMED(object_name_, "Initialized DynamicsSolver of type " << GetObjectName() << " with dt=" << dynamics_solver_initializer.dt << " and integrator=" << dynamics_solver_initializer.Integrator);
 }
@@ -172,27 +173,36 @@ void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(std::string integrator_in)
 }
 
 template <typename T, int NX, int NU>
-Eigen::VectorXd AbstractDynamicsSolver<T, NX, NU>::get_control_limits()
+Eigen::MatrixXd AbstractDynamicsSolver<T, NX, NU>::get_control_limits()
 {
     if (!control_limits_initialized_)
-        set_control_limits(raw_control_limits_);
+        set_control_limits(raw_control_limits_low_, raw_control_limits_high_);
     return control_limits_;
 }
 
 template <typename T, int NX, int NU>
-void AbstractDynamicsSolver<T, NX, NU>::set_control_limits(Eigen::VectorXd control_limits)
+void AbstractDynamicsSolver<T, NX, NU>::set_control_limits(Eigen::VectorXd control_limits_low, Eigen::VectorXd control_limits_high)
 {
-    if (num_controls_ == -1)
+    const int NU_ = num_controls_;
+    if (NU_ == -1)
         ThrowPretty("Attempting to set control limits before num_controls is set.");
 
     control_limits_initialized_ = true;
+    control_limits_ = Eigen::MatrixXd(NU_, 2);
 
-    if (control_limits.size() == get_num_controls())
-        control_limits_ = control_limits;
-    else if (control_limits.size() == 1)
-        control_limits_.setConstant(get_num_controls(), control_limits(0));
+    if (control_limits_low.size() == NU_)
+        control_limits_.col(0) = control_limits_low;
+    else if (control_limits_low.size() == 1)
+        control_limits_.col(0) = Eigen::VectorXd::Constant(NU_, control_limits_low(0));
     else
-        ThrowPretty("Wrong control limits size. Should either be 1 or " << get_num_controls());
+        ThrowPretty("Wrong control limits (low) size. Should either be 1 or " << NU_);
+
+    if (control_limits_high.size() == NU_)
+        control_limits_.col(1) = control_limits_high;
+    else if (control_limits_high.size() == 1)
+        control_limits_.col(1) = Eigen::VectorXd::Constant(NU_, control_limits_high(0));
+    else
+        ThrowPretty("Wrong control limits (high) size. Should either be 1 or " << NU_);
 }
 
 template <typename T, int NX, int NU>

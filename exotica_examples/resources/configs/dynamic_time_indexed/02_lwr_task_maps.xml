@@ -19,7 +19,8 @@
 
                 <DynamicsSolver>
                     <PinocchioDynamicsSolver Name="solver" Integrator="RK1">
-                        <ControlLimits>156</ControlLimits>
+                        <ControlLimitsLow>-156</ControlLimitsLow>
+                        <ControlLimitsHigh>156</ControlLimitsHigh>
                         <dt>0.01</dt>
                     </PinocchioDynamicsSolver>
                 </DynamicsSolver>

@@ -18,7 +18,8 @@
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
                     <CartpoleDynamicsSolver Name="solver" Integrator="RK1">
-                        <ControlLimits>25</ControlLimits>
+                        <ControlLimitsLow>-25</ControlLimitsLow>
+                        <ControlLimitsHigh>25</ControlLimitsHigh>
                         <dt>0.01</dt>
                     </CartpoleDynamicsSolver>
                 </DynamicsSolver>

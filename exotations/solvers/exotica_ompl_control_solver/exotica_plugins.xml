@@ -1,0 +1,10 @@
+<library path="lib/libexotica_ompl_control_solver">
+  <class name="exotica/ControlRRTSolver" type="exotica::ControlRRTSolver" base_class_type="exotica::MotionSolver">
+    <description>Kinodynamic Control-RRT Solver from OMPL</description>
+  </class>
+
+  <class name="exotica/ControlKPIECESolver" type="exotica::ControlKPIECESolver" base_class_type="exotica::MotionSolver">
+    <description>Kinodynamic KPIECE Solver from OMPL</description>
+  </class>
+</library>
+

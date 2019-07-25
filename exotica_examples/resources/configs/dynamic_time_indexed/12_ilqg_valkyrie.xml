@@ -20,7 +20,8 @@
             <DynamicsSolver>
                 <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
                     <dt>0.02</dt>
-                    <ControlLimits>150</ControlLimits>
+                    <ControlLimitsLow>-5</ControlLimitsLow>
+                    <ControlLimitsHigh>5</ControlLimitsHigh>
                 </DoubleIntegratorDynamicsSolver>
             </DynamicsSolver>
         </Scene>

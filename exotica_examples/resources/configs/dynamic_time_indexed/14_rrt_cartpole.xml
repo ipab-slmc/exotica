@@ -1,12 +1,15 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
-    <ILQGSolver Name="ILQGSolver">
+    <ControlRRTSolver Name="ControlRRTSolver">
         <Debug>1</Debug>
-        <MaxIterations>50</MaxIterations>
-        <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>50</FunctionTolerancePatience>
-        <IncludeNoiseTerms>1</IncludeNoiseTerms>
-    </ILQGSolver>
+        <StateLimits>2 3.14 5 5</StateLimits>
+        <MaxIterationTime>10</MaxIterationTime>
+        <ConvergenceTolerance>1e-3</ConvergenceTolerance>
+        <ApproximateSolution>1</ApproximateSolution>
+        <Seed>1</Seed>
+        <Debug>1</Debug>
+    </ControlRRTSolver>
+
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
             <Scene>
@@ -29,26 +32,7 @@
         <Q_rate>0</Q_rate>
         <Qf_rate>10</Qf_rate>
         <R_rate>0.1</R_rate>
-        <DiagonalNoiseMatrix>true</DiagonalNoiseMatrix>
-
-        <!-- <C_rate>0.1</C_rate> -->
-        <C>
-            0
-            0
-            0
-            0.1
-        </C>
-
-        <CW>
-            0
-            0
-            0
-            0.1
-        </CW>
-        <!-- Noise applied to theta_dot -->
-
-        <!-- <C_rate>0.0</C_rate> -->
-        <StartState>2 0 0 0 </StartState>
-        <GoalState>1 3.14 0 0</GoalState>
+        <StartState>0 0 0 0 </StartState>
+        <GoalState>0 3.14 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </DynamicTimeIndexedProblemConfig>

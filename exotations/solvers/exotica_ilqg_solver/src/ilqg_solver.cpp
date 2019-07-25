@@ -54,8 +54,6 @@ void ILQGSolver::BackwardPass()
     const double dt = dynamics_solver_->get_dt();
     const int NU = prob_->get_num_controls();
 
-    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
-
     // Noise terms
     Eigen::VectorXd big_C_times_little_c = Eigen::VectorXd::Zero(NU, 1);
     Eigen::MatrixXd big_C_times_big_C = Eigen::MatrixXd::Zero(NU, NU);
@@ -150,7 +148,7 @@ double ILQGSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
 {
     double cost = 0;
     const int T = prob_->get_T();
-    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
     const double dt = dynamics_solver_->get_dt();
 
     // NOTE: Todorov uses the linearized system in forward simulation.
@@ -164,7 +162,7 @@ double ILQGSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x
 
         u.noalias() += alpha * delta_uk;
         // clamp controls
-        u = u.cwiseMax(-control_limits).cwiseMin(control_limits);
+        u = u.cwiseMax(control_limits.col(0)).cwiseMin(control_limits.col(1));
 
         prob_->Update(u, t);
         cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
@@ -185,8 +183,8 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    prob_->PreUpdate();
 
     // initialize Gain matrices
     l_gains_.assign(T, Eigen::MatrixXd::Zero(NU, 1));
@@ -236,10 +234,12 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
             // break;
         }
 
-        if (std::isnan(current_cost))
+        // finite checks
+        if (!new_U.allFinite() || !std::isfinite(current_cost))
         {
-            if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Diverged!");
-            break;
+            prob_->termination_criterion = TerminationCriterion::Divergence;
+            WARNING_NAMED("ILQGSolver", "Diverged!");
+            return;
         }
 
         if (debug_)
@@ -261,17 +261,22 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
         if (iteration - last_best_iteration > parameters_.FunctionTolerancePatience)
         {
             if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Early stopping criterion reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
             break;
         }
 
         if (last_cost - current_cost < parameters_.FunctionTolerance && last_cost - current_cost > 0)
         {
             if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Function tolerance reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::Divergence;
             break;
         }
 
         if (debug_ && iteration == parameters_.MaxIterations - 1)
+        {
             HIGHLIGHT_NAMED("ILQGSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::IterationLimit;
+        }
 
         last_cost = current_cost;
         for (int t = 0; t < T - 1; ++t)
@@ -294,12 +299,13 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
 
 Eigen::VectorXd ILQGSolver::GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const
 {
-    const Eigen::VectorXd control_limits = dynamics_solver_->get_control_limits();
+    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
+
     Eigen::VectorXd delta_uk = l_gains_[t] +
                                L_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
 
     Eigen::VectorXd u = best_ref_u_.col(t) + delta_uk;
-    return u.cwiseMax(-control_limits).cwiseMin(control_limits);
+    return u.cwiseMax(control_limits.col(0)).cwiseMin(control_limits.col(1));
 }
 
 }  // namespace exotica

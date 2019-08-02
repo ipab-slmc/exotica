@@ -1,7 +1,12 @@
 from __future__ import print_function
-import os
+import os, sys
 from time import time
-import Tkinter as tk
+
+if sys.version_info >= (3, 0):
+    import tkinter as tk
+else:
+    import Tkinter as tk
+
 import rospkg as rp
 
 __all__ = ['InteractiveCostTuning']

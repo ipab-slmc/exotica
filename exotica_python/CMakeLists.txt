@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(exotica_python)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(MSGPACK QUIET msgpack)
+
+if(MSGPACK_FOUND)
+    add_definitions(-DMSGPACK_FOUND)
+endif()
+
 # Python2 uses char* and Python3 const char* for arguments so explicit casting
 # of string literals would require define flags. Alternatively, deactivate
 # warnings for now

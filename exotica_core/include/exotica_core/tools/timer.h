@@ -52,7 +52,7 @@ public:
         start_time_ = std::chrono::high_resolution_clock::now();
     }
 
-    inline double GetDuration()
+    inline double GetDuration() const
     {
         return std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - start_time_).count();
     }

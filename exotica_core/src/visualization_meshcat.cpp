@@ -27,6 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#ifdef MSGPACK_FOUND
 #include <chrono>
 
 #include <exotica_core/visualization_meshcat.h>
@@ -345,3 +346,4 @@ void VisualizationMeshcat::SetProperty(const std::string& path, const std::strin
     SendMsg(visualization::Property<std::vector<double>>(path, property, val));
 }
 }  // namespace exotica
+#endif  // MSGPACK_FOUND

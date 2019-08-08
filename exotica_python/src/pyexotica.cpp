@@ -29,7 +29,9 @@
 
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/tools/box_qp.h>
+#ifdef MSGPACK_FOUND
 #include <exotica_core/visualization_meshcat.h>
+#endif
 #include <exotica_core/visualization_moveit.h>
 #undef NDEBUG
 #include <pybind11/eigen.h>
@@ -1113,6 +1115,7 @@ PYBIND11_MODULE(_pyexotica, module)
     py::class_<VisualizationMoveIt> visualization_moveit(module, "VisualizationMoveIt");
     visualization_moveit.def(py::init<ScenePtr>());
     visualization_moveit.def("display_trajectory", &VisualizationMoveIt::DisplayTrajectory);
+#ifdef MSGPACK_FOUND
     py::class_<VisualizationMeshcat> visualization_meshcat(module, "VisualizationMeshcat");
     visualization_meshcat.def(py::init<ScenePtr, const std::string&, bool>(), py::arg("scene"), py::arg("url"), py::arg("use_mesh_materials") = true);
     visualization_meshcat.def("display_scene", &VisualizationMeshcat::DisplayScene, py::arg("use_mesh_materials") = true);
@@ -1126,6 +1129,7 @@ PYBIND11_MODULE(_pyexotica, module)
     visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const bool&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
     visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const Eigen::Vector3d&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
     visualization_meshcat.def("set_property", py::overload_cast<const std::string&, const std::string&, const Eigen::Vector4d&>(&VisualizationMeshcat::SetProperty), py::arg("path"), py::arg("property"), py::arg("value"));
+#endif
 
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematic_tree(kin, "KinematicTree");

@@ -93,7 +93,7 @@ Eigen::MatrixXd GetFrame(const KDL::Frame& val)
     ret(0, 3) = val.p(0);
     ret(1, 3) = val.p(1);
     ret(2, 3) = val.p(2);
-    ret.block(0, 0, 3, 3) = Eigen::Map<const Eigen::Matrix3d>(val.M.data);
+    ret.block(0, 0, 3, 3) = Eigen::Map<const Eigen::Matrix3d>(val.M.data).transpose();
     return ret;
 }
 

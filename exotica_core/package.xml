@@ -28,8 +28,10 @@
   <depend>eigen_conversions</depend>
   <depend>tf_conversions</depend>
   <depend>tinyxml2</depend>
-  <depend>zeromq3</depend>
   <depend>msgpack</depend>
+
+  <build_depend>libzmq3-dev</build_depend>
+  <exec_depend>zeromq3</exec_depend>
 
   <test_depend>rosunit</test_depend>
 </package>

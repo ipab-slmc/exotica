@@ -90,7 +90,7 @@ KDL::Frame GetFrameFromMatrix(Eigen::MatrixXdRefConst val)
 
 Eigen::MatrixXd GetFrame(const KDL::Frame& val)
 {
-    Eigen::Affine3d ret;
+    Eigen::Isometry3d ret;
     tf::transformKDLToEigen(val, ret);
     return ret.matrix();
 }

@@ -27,6 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <eigen_conversions/eigen_kdl.h>
 #include <algorithm>
 
 #include <exotica_core/tools/conversions.h>
@@ -89,21 +90,19 @@ KDL::Frame GetFrameFromMatrix(Eigen::MatrixXdRefConst val)
 
 Eigen::MatrixXd GetFrame(const KDL::Frame& val)
 {
-    Eigen::MatrixXd ret = Eigen::MatrixXd::Identity(4, 4);
-    ret(0, 3) = val.p(0);
-    ret(1, 3) = val.p(1);
-    ret(2, 3) = val.p(2);
-    ret.block(0, 0, 3, 3) = Eigen::Map<const Eigen::Matrix3d>(val.M.data);
-    return ret;
+    Eigen::Isometry3d ret;
+    tf::transformKDLToEigen(val, ret);
+    return ret.matrix();
 }
 
 Eigen::VectorXd GetFrameAsVector(const KDL::Frame& val, RotationType type)
 {
-    Eigen::VectorXd ret(3 + GetRotationTypeLength(type));
+    const int rotation_length = GetRotationTypeLength(type);
+    Eigen::VectorXd ret(3 + rotation_length);
     ret(0) = val.p[0];
     ret(1) = val.p[1];
     ret(2) = val.p[2];
-    ret.segment(3, GetRotationTypeLength(type)) = SetRotation(val.M, type);
+    ret.segment(3, rotation_length) = SetRotation(val.M, type);
     return ret;
 }
 

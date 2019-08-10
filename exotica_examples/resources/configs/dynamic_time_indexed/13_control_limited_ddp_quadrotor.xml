@@ -40,6 +40,6 @@
 
 
         <StartState>0 0 0 0 0 0 0 0 0 0 0 0</StartState>
-        <GoalState> 2 2 2 0 0 0 0 0 0 0 0 0</GoalState>
+        <GoalState> 4 4 4 0 0 0 0 0 0 0 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </PlannerDemoConfig>

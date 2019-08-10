@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>exotica_pendulum_dynamics_solver</name>
+  <version>0.0.1</version>
+  <description>Pendulum dynamics solver plug-in for Exotica</description>
+
+  <maintainer email="traiko.dinev@ed.ac.uk">Traiko Dinev</maintainer>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <author>Traiko Dinev</author>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>exotica_core</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_export_depend>exotica_core</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <exec_depend>exotica_core</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <!-- This is not yet upstream. PR link: https://github.com/ros/rosdistro/pull/21332 -->
+  <!-- <test_depend>python-autograd</test_depend> -->
+
+  <export>
+    <exotica_core plugin="${prefix}/exotica_plugins.xml" />
+  </export>
+</package>

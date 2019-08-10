@@ -33,6 +33,7 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/15_rrt_quadrotor.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/16_kpiece_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/17_quadrotor_collision_avoidance.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/18_ilqr_pendulum.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1

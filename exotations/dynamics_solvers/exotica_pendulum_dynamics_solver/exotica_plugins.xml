@@ -1,0 +1,5 @@
+<library path="lib/libexotica_pendulum_dynamics_solver">
+  <class name="exotica/PendulumDynamicsSolver" type="exotica::PendulumDynamicsSolver" base_class_type="exotica::DynamicsSolver">
+    <description>Pendulum dynamics system</description>
+  </class>
+</library>

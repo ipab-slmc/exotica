@@ -68,8 +68,8 @@ Eigen::MatrixXd PendulumDynamicsSolver::fx(const StateVector& x, const ControlVe
 
     Eigen::Matrix2d fx;
     fx << 0, 1,
-        -g_ * std::cos(theta) / l_, - b_ / (l_ * l_ * m_);
-    
+        -g_ * std::cos(theta) / l_, -b_ / (l_ * l_ * m_);
+
     return fx;
 }
 
@@ -78,7 +78,7 @@ Eigen::MatrixXd PendulumDynamicsSolver::fu(const StateVector& x, const ControlVe
 {
     auto theta = x(0);
     auto thetadot = x(1);
-    
+
     Eigen::Vector2d fu;
     fu << 0, 1.0 / (l_ * l_ * m_);
     return fu;

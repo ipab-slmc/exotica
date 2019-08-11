@@ -358,20 +358,22 @@ double EndPoseProblem::GetRhoNEQ(const std::string& task_name)
 
 bool EndPoseProblem::IsValid()
 {
+    std::cout.precision(4);
+    bool succeeded = true;
+
     Eigen::VectorXd x = scene_->GetKinematicTree().GetControlledState();
     auto bounds = scene_->GetKinematicTree().GetJointLimits();
 
     // Check joint limits
+    constexpr double tolerance = 1.e-3;
     for (unsigned int i = 0; i < N; ++i)
     {
-        if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1))
+        if (x(i) < bounds(i, 0) - tolerance || x(i) > bounds(i, 1) + tolerance)
         {
             if (debug_) HIGHLIGHT_NAMED("EndPoseProblem::IsValid", "Out of bounds (joint #" << i << "): " << bounds(i, 0) << " < " << x(i) << " < " << bounds(i, 1));
-            return false;
+            succeeded = false;
         }
     }
-
-    bool succeeded = true;
 
     // Check inequality constraints
     if (GetInequality().rows() > 0)
@@ -395,4 +397,4 @@ bool EndPoseProblem::IsValid()
 
     return succeeded;
 }
-}
+}  // namespace exotica

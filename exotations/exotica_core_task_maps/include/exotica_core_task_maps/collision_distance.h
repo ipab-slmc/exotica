@@ -45,9 +45,6 @@ namespace exotica
 class CollisionDistance : public TaskMap, public Instantiable<CollisionDistanceInitializer>
 {
 public:
-    CollisionDistance();
-    virtual ~CollisionDistance();
-
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -69,5 +66,6 @@ private:
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
-}
+}  // namespace exotica
+
 #endif  // EXOTICA_CORE_TASK_MAPS_COLLISION_DISTANCE_H_

@@ -36,9 +36,6 @@ REGISTER_TASKMAP_TYPE("CollisionDistance", exotica::CollisionDistance);
 
 namespace exotica
 {
-CollisionDistance::CollisionDistance() = default;
-CollisionDistance::~CollisionDistance() = default;
-
 void CollisionDistance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
@@ -130,4 +127,4 @@ void CollisionDistance::Initialize()
 }
 
 int CollisionDistance::TaskSpaceDim() { return dim_; }
-}
+}  // namespace exotica

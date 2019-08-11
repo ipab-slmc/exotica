@@ -97,6 +97,10 @@ void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
             }
         }
     }
+    else if (x.rows() == num_positions_)
+    {
+        start_state_.head(num_positions_) = x;
+    }
     // TODO: Add support for num_controlled + tangent vector size initialisation
     else
     {

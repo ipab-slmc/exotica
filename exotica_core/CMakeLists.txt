@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(exotica_core)
 
-## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS
-  cmake_modules
+## catkin dependencies
+set(CATKIN_DEPENDS
   roscpp
   moveit_core
   moveit_ros_planning
@@ -16,6 +15,17 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   std_msgs
 )
+
+## system dependencies
+set(SYSTEM_DEPENDS
+  Boost
+  EIGEN3
+  TinyXML2
+  ZeroMQ
+)
+
+## Find catkin macros and libraries
+find_package(catkin REQUIRED COMPONENTS cmake_modules ${CATKIN_DEPENDS})
 find_package(Boost REQUIRED COMPONENTS signals)
 find_package(Eigen3 REQUIRED)
 
@@ -27,6 +37,7 @@ pkg_check_modules(MSGPACK QUIET msgpack)
 
 if(MSGPACK_FOUND)
     add_definitions(-DMSGPACK_FOUND)
+    list(APPEND SYSTEM_DEPENDS MSGPACK)
 else()
     message(STATUS "MessagePack not found. VisualizationMeshcat will be disabled.")
 endif()
@@ -66,9 +77,9 @@ GenInitializers()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp moveit_core moveit_ros_planning tf kdl_parser pluginlib tf_conversions eigen_conversions geometry_msgs moveit_msgs std_msgs
+  CATKIN_DEPENDS ${CATKIN_DEPENDS}
   CFG_EXTRAS exotica.cmake add_initializer.cmake
-  DEPENDS TinyXML2 EIGEN3 Boost ZeroMQ MSGPACK
+  DEPENDS ${SYSTEM_DEPENDS}
 )
 
 ## Build ##

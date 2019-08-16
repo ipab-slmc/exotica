@@ -183,8 +183,17 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
+    const double dt = dynamics_solver_->get_dt();
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
     prob_->PreUpdate();
+
+    double initial_cost = 0;
+    for (int t = 0; t < T - 1; ++t)
+        initial_cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
+
+    // add terminal cost
+    initial_cost += prob_->GetStateCost(T - 1);
+    prob_->SetCostEvolution(0, initial_cost);
 
     // initialize Gain matrices
     l_gains_.assign(T, Eigen::MatrixXd::Zero(NU, 1));
@@ -192,15 +201,15 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
 
     // all of the below are not pointers, since we want to copy over
     //  solutions across iterations
-    Eigen::MatrixXd new_U, global_best_U;
+    Eigen::MatrixXd new_U, global_best_U = prob_->get_U();
     solution.resize(T, NU);
 
     if (debug_) HIGHLIGHT_NAMED("ILQGSolver", "Running ILQG solver for max " << parameters_.MaxIterations << " iterations");
 
-    double last_cost = 0, global_best_cost = 0;
+    double last_cost = initial_cost, global_best_cost = initial_cost;
     int last_best_iteration = 0;
 
-    for (int iteration = 0; iteration < GetNumberOfMaxIterations(); ++iteration)
+    for (int iteration = 1; iteration <= GetNumberOfMaxIterations(); ++iteration)
     {
         // Backwards pass computes the gains
         backward_pass_timer.Reset();
@@ -249,7 +258,7 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // copy solutions for next iteration
-        if (iteration == 0 || global_best_cost > current_cost)
+        if (global_best_cost > current_cost)
         {
             global_best_cost = current_cost;
             last_best_iteration = iteration;
@@ -272,7 +281,7 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        if (debug_ && iteration == parameters_.MaxIterations - 1)
+        if (debug_ && iteration == parameters_.MaxIterations)
         {
             HIGHLIGHT_NAMED("ILQGSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
             prob_->termination_criterion = TerminationCriterion::IterationLimit;

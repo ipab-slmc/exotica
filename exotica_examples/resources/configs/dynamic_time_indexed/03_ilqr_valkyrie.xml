@@ -10,9 +10,9 @@
     </AnalyticDDPSolver> -->
     <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
-        <MaxIterations>300</MaxIterations>
+        <MaxIterations>10</MaxIterations>
         <FunctionTolerance>1e-3</FunctionTolerance>
-        <FunctionTolerancePatience>300</FunctionTolerancePatience>
+        <FunctionTolerancePatience>10</FunctionTolerancePatience>
         <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
         <RegularizationRate>1</RegularizationRate>
     </ControlLimitedDDPSolver>

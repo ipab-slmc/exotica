@@ -272,16 +272,6 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     }
     cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
 
-    if (this->parameters_.WarmStartWithInverseDynamics)
-    {
-        for (int t = 0; t < T_ - 1; ++t)
-        {
-            U_.col(t) = scene_->GetDynamicsSolver()->InverseDynamics(X_.col(t));
-            X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(
-                X_.col(t), U_.col(t), tau_);
-        }
-    }
-
     PreUpdate();
 }
 
@@ -317,6 +307,16 @@ void DynamicTimeIndexedShootingProblem::PreUpdate()
     kinematic_solutions_.clear();
     kinematic_solutions_.resize(T_);
     for (int i = 0; i < T_; ++i) kinematic_solutions_[i] = std::make_shared<KinematicResponse>(*scene_->GetKinematicTree().GetKinematicResponse());
+
+    if (this->parameters_.WarmStartWithInverseDynamics)
+    {
+        for (int t = 0; t < T_ - 1; ++t)
+        {
+            U_.col(t) = scene_->GetDynamicsSolver()->InverseDynamics(X_.col(t));
+            X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(
+                X_.col(t), U_.col(t), tau_);
+        }
+    }
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X() const

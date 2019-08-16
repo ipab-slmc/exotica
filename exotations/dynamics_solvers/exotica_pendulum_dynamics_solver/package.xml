@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>exotica_cartpole_dynamics_solver</name>
+  <name>exotica_pendulum_dynamics_solver</name>
   <version>0.0.1</version>
-  <description>Cartpole dynamics solver plug-in for Exotica</description>
+  <description>Pendulum dynamics solver plug-in for Exotica</description>
 
   <maintainer email="traiko.dinev@ed.ac.uk">Traiko Dinev</maintainer>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
@@ -16,7 +16,7 @@
   <build_export_depend>roscpp</build_export_depend>
   <exec_depend>exotica_core</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  <!-- not currently used (test deactivated, installation fails on kinetic <test_depend>autograd-pip</test_depend>-->
+  <!-- not currently used: <test_depend>autograd-pip</test_depend>-->
 
   <export>
     <exotica_core plugin="${prefix}/exotica_plugins.xml" />

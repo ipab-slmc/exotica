@@ -46,6 +46,8 @@ void PendulumDynamicsSolver::AssignScene(ScenePtr scene_in)
     // TODO: This is a terrible check (not against name etc.), but can stop _some_ mismatches between URDF/model and dynamics
     if (num_positions_in != 1)
         ThrowPretty("Robot model may not be a Pendulum.");
+
+    b_ = parameters_.FrictionCoefficient;
 }
 
 Eigen::VectorXd PendulumDynamicsSolver::f(const StateVector& x, const ControlVector& u)

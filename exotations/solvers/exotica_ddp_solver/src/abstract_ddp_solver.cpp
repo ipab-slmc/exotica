@@ -57,13 +57,13 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
 
     // all of the below are not pointers, since we want to copy over
     //  solutions across iterations
-    Eigen::MatrixXd new_U, global_best_U;
+    Eigen::MatrixXd new_U, global_best_U = prob_->get_U();
     solution.resize(T, NU);
 
     if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Running DDP solver for max " << GetNumberOfMaxIterations() << " iterations");
 
-    double last_cost = 0, global_best_cost = 0;
-    int last_best_iteration = 1;
+    double last_cost = initial_cost, global_best_cost = initial_cost;
+    int last_best_iteration = 0;
 
     for (int iteration = 1; iteration <= GetNumberOfMaxIterations(); ++iteration)
     {
@@ -111,7 +111,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // copy solutions for next iteration
-        if (iteration == 1 || global_best_cost > current_cost)
+        if (global_best_cost > current_cost)
         {
             global_best_cost = current_cost;
             last_best_iteration = iteration;

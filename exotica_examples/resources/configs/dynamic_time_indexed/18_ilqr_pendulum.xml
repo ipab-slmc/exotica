@@ -2,9 +2,9 @@
 <DynamicTimeIndexedProblemConfig>
     <ILQRSolver Name="ilqr">
         <Debug>1</Debug>
-        <MaxIterations>20</MaxIterations>
+        <MaxIterations>100</MaxIterations>
         <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>20</FunctionTolerancePatience>
+        <FunctionTolerancePatience>100</FunctionTolerancePatience>
         <RegularizationRate>0.0001</RegularizationRate>
     </ILQRSolver>
 
@@ -17,9 +17,10 @@
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
                     <PendulumDynamicsSolver Name="solver" Integrator="RK1">
-                        <ControlLimitsLow>-25.0</ControlLimitsLow>
-                        <ControlLimitsHigh>25.0</ControlLimitsHigh>
+                        <ControlLimitsLow>-10.0</ControlLimitsLow>
+                        <ControlLimitsHigh>10.0</ControlLimitsHigh>
                         <dt>0.01</dt>
+                        <FrictionCoefficient>0.1</FrictionCoefficient>
                     </PendulumDynamicsSolver>
                 </DynamicsSolver>
             </Scene>

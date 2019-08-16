@@ -16,7 +16,7 @@
   <build_export_depend>roscpp</build_export_depend>
   <exec_depend>exotica_core</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  <test_depend>autograd-pip</test_depend>
+  <!-- not currently used (test deactivated, installation fails on kinetic <test_depend>autograd-pip</test_depend>-->
 
   <export>
     <exotica_core plugin="${prefix}/exotica_plugins.xml" />

@@ -18,6 +18,9 @@
   <class name="exotica/EffPosition" type="exotica::EffPosition" base_class_type="exotica::TaskMap">
     <description>End-effector position (3D)</description>
   </class>
+  <class name="exotica/EffPositionXY" type="exotica::EffPositionXY" base_class_type="exotica::TaskMap">
+    <description>End-effector position (2D)</description>
+  </class>
   <class name="exotica/EffOrientation" type="exotica::EffOrientation" base_class_type="exotica::TaskMap">
     <description>End-effector position (SO3)</description>
   </class>

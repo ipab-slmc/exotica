@@ -14,6 +14,7 @@ AddInitializer(
   continuous_joint_pose
   interaction_mesh
   eff_position
+  eff_position_xy
   eff_orientation
   eff_frame
   frame_with_axis_and_direction
@@ -58,6 +59,7 @@ set(SOURCES
     src/continuous_joint_pose.cpp
     src/interaction_mesh.cpp
     src/eff_position.cpp
+    src/eff_position_xy.cpp
     src/eff_orientation.cpp
     src/eff_frame.cpp
     src/eff_axis_alignment.cpp

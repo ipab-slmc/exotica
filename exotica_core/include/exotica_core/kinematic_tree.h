@@ -136,7 +136,7 @@ public:
     void Instantiate(std::string joint_group, robot_model::RobotModelPtr model, const std::string& name);
     std::string GetRootFrameName() const;
     std::string GetRootJointName() const;
-    robot_model::RobotModelPtr GetRobotModel();
+    robot_model::RobotModelPtr GetRobotModel() const;
     BaseType GetModelBaseType() const;
     BaseType GetControlledBaseType() const;
     std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);

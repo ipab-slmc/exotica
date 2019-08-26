@@ -892,7 +892,7 @@ std::map<std::string, std::vector<double>> KinematicTree::GetUsedJointLimits() c
     return limits;
 }
 
-robot_model::RobotModelPtr KinematicTree::GetRobotModel()
+robot_model::RobotModelPtr KinematicTree::GetRobotModel() const
 {
     return model_;
 }

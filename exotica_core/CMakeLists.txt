@@ -42,7 +42,8 @@ else()
     message(STATUS "MessagePack not found. VisualizationMeshcat will be disabled.")
 endif()
 
-if("${TinyXML2_VERSION}" VERSION_GREATER_EQUAL "6.0.0")
+# NB: VERSION_GREATER_EQUAL requires CMake 3.7
+if("${TinyXML2_VERSION}" VERSION_GREATER "5.90.0")
   add_definitions(-DTINYXML_HAS_ERROR_STR)
 endif()
 

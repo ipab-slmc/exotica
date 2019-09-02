@@ -30,16 +30,21 @@ find_package(Boost REQUIRED COMPONENTS signals)
 find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-find_package(TinyXML2 REQUIRED)
 find_package(ZeroMQ REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MSGPACK QUIET msgpack)
+pkg_check_modules(TinyXML2 REQUIRED tinyxml2)
 
 if(MSGPACK_FOUND)
     add_definitions(-DMSGPACK_FOUND)
     list(APPEND SYSTEM_DEPENDS MSGPACK)
 else()
     message(STATUS "MessagePack not found. VisualizationMeshcat will be disabled.")
+endif()
+
+# NB: VERSION_GREATER_EQUAL requires CMake 3.7
+if("${TinyXML2_VERSION}" VERSION_GREATER "5.90.0")
+  add_definitions(-DTINYXML_HAS_ERROR_STR)
 endif()
 
 include(exotica)

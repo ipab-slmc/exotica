@@ -32,13 +32,18 @@
 
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionSceneFCLLatest)
 
+#define CONTINUOUS_COLLISION_USE_ADVANCED_SETTINGS
+// #define CONTINUOUS_COLLISION_DEBUG
+
 namespace fcl_convert
 {
+// ** Do not remove the inline ** It causes an epic memory bug in the transforms.
+//      Fixed in July 2018 and July 2019.
 inline fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
 {
     Eigen::Isometry3d ret;
     tf::transformKDLToEigen(frame, ret);
-    return fcl::Transform3d(ret);
+    return ret;
 }
 }
 
@@ -341,7 +346,7 @@ void CollisionSceneFCLLatest::ComputeDistance(fcl::CollisionObjectd* o1, fcl::Co
         // As of 0.5.94, this does not work for primitive-vs-mesh (but does for mesh-vs-primitive):
         if ((o1->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH) || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_GEOM))  // || (o1->getObjectType() == fcl::OBJECT_TYPE::OT_BVH && o2->getObjectType() == fcl::OBJECT_TYPE::OT_BVH))
         {
-            HIGHLIGHT_NAMED("WARNING", "As of 0.5.94, this function does not work for primitive-vs-mesh and vice versa. Do not expect the contact points or distances to be accurate at all.");
+            // WARNING("As of 0.5.94, this function does not work for primitive-vs-mesh and vice versa. Do not expect the contact points or distances to be accurate at all.");
         }
 
         // Some of the logic below is copied from Drake
@@ -735,6 +740,58 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
         return ret;
     }
 
+    fcl::Transform3d tf1_beg_fcl = fcl_convert::KDL2fcl(tf1_beg);
+    fcl::Transform3d tf1_end_fcl = fcl_convert::KDL2fcl(tf1_end);
+    fcl::Transform3d tf2_beg_fcl = fcl_convert::KDL2fcl(tf2_beg);
+    fcl::Transform3d tf2_end_fcl = fcl_convert::KDL2fcl(tf2_end);
+
+    if (!tf1_beg_fcl.matrix().allFinite())
+    {
+        std::stringstream ss;
+        ss << std::setprecision(20);
+        ss << "[tf1_beg_fcl] is not finite\n"
+           << tf1_beg_fcl.matrix() << "\n"
+           << ToString(tf1_beg) << "\n";
+        throw std::logic_error(ss.str());
+    }
+    if (!tf1_end_fcl.matrix().allFinite())
+    {
+        std::stringstream ss;
+        ss << std::setprecision(20);
+        ss << "[tf1_end_fcl] is not finite\n"
+           << tf1_end_fcl.matrix() << "\n"
+           << ToString(tf1_end) << "\n";
+        throw std::logic_error(ss.str());
+    }
+    if (!tf2_beg_fcl.matrix().allFinite())
+    {
+        std::stringstream ss;
+        ss << std::setprecision(20);
+        ss << "[tf2_beg_fcl] is not finite\n"
+           << tf2_beg_fcl.matrix() << "\n"
+           << ToString(tf2_beg) << "\n";
+        throw std::logic_error(ss.str());
+    }
+    if (!tf2_end_fcl.matrix().allFinite())
+    {
+        std::stringstream ss;
+        ss << std::setprecision(20);
+        ss << "[tf2_end_fcl] is not finite\n"
+           << tf2_end_fcl.matrix() << "\n"
+           << ToString(tf2_end) << "\n";
+        throw std::logic_error(ss.str());
+    }
+
+    // If neither object has motion, only ran a normal collision check.
+    // HIGHLIGHT_NAMED("tf1_beg_fcl", "\n" << tf1_beg_fcl.matrix());
+    // HIGHLIGHT_NAMED("tf1_end_fcl", "\n" << tf1_end_fcl.matrix());
+    // HIGHLIGHT_NAMED("tf2_beg_fcl", "\n" << tf2_beg_fcl.matrix());
+    // HIGHLIGHT_NAMED("tf2_end_fcl", "\n" << tf2_end_fcl.matrix());
+    // if (tf1_beg_fcl.isApprox(tf1_end_fcl) && tf2_beg_fcl.isApprox(tf2_end_fcl))
+    // {
+    //     HIGHLIGHT("Yeah, no motion here.");
+    // }
+
     fcl::ContinuousCollisionRequestd request = fcl::ContinuousCollisionRequestd();
 
 #ifdef CONTINUOUS_COLLISION_USE_ADVANCED_SETTINGS
@@ -742,10 +799,10 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
     request.toc_err = 1e-5;            // default 1e-4
 
     // GST_LIBCCD, GST_INDEP
-    request.gjk_solver_type = fcl::GST_INDEP;
+    // request.gjk_solver_type = fcl::GST_INDEP;
 
     // CCDM_TRANS, CCDM_LINEAR, CCDM_SCREW, CCDM_SPLINE
-    request.ccd_motion_type = fcl::CCDM_TRANS;
+    request.ccd_motion_type = fcl::CCDMotionType::CCDM_SCREW;
 
     // CCDC_NAIVE, CCDC_CONSERVATIVE_ADVANCEMENT, CCDC_RAY_SHOOTING, CCDC_POLYNOMIAL_SOLVER
     // As of 2018-06-27, only CCDC_NAIVE appears to work reliably on both primitives and meshes.
@@ -761,13 +818,31 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
 
     fcl::ContinuousCollisionResultd result;
     double time_of_contact = fcl::continuousCollide(
-        shape1->collisionGeometry().get(), fcl_convert::KDL2fcl(tf1_beg), fcl_convert::KDL2fcl(tf1_end),
-        shape2->collisionGeometry().get(), fcl_convert::KDL2fcl(tf2_beg), fcl_convert::KDL2fcl(tf2_end),
+        shape1->collisionGeometry().get(), tf1_beg_fcl, tf1_end_fcl,
+        shape2->collisionGeometry().get(), tf2_beg_fcl, tf2_end_fcl,
         request, result);
 
 #ifdef CONTINUOUS_COLLISION_DEBUG
     HIGHLIGHT_NAMED("ContinuousCollisionResult", "return=" << time_of_contact << " is_collide: " << result.is_collide << " time_of_contact: " << result.time_of_contact << " contact_tf1: " << result.contact_tf1.translation().transpose() << " contact_tf2: " << result.contact_tf2.translation().transpose());
 #endif
+
+    if (result.is_collide)
+    {
+        if (!result.contact_tf1.matrix().allFinite())
+        {
+            std::stringstream ss;
+            ss << "result.contact_tf1 is not finite\n"
+               << result.contact_tf1.matrix() << "\n";
+            throw std::logic_error(ss.str());
+        }
+        if (!result.contact_tf2.matrix().allFinite())
+        {
+            std::stringstream ss;
+            ss << "result.contact_tf2 is not finite\n"
+               << result.contact_tf2.matrix() << "\n";
+            throw std::logic_error(ss.str());
+        }
+    }
 
     ret.in_collision = result.is_collide;
     ret.time_of_contact = result.time_of_contact;
@@ -807,6 +882,21 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
             {
                 if (contact.penetration_depth > ret.penetration_depth)
                 {
+                    if (!contact.pos.allFinite())
+                    {
+                        std::stringstream ss;
+                        ss << std::setprecision(20);
+                        ss << "Error with configuration"
+                           << "\n  Shape 1: " << shape1->collisionGeometry().get()
+                           << "\n  X_FS1\n"
+                           << result.contact_tf1.matrix()
+                           << "\n  Shape 2: " << shape2->collisionGeometry().get()
+                           << "\n  X_FS2\n"
+                           << result.contact_tf2.matrix()
+                           << "\n  Solver: " << contact_req.gjk_solver_type;
+                        throw std::logic_error(ss.str());
+                    }
+
                     ret.penetration_depth = contact.penetration_depth;
                     ret.contact_pos = contact.pos;
                     ret.contact_normal = -contact.normal;
@@ -836,4 +926,4 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
 
     return ret;
 }
-}
+}  // namespace exotica

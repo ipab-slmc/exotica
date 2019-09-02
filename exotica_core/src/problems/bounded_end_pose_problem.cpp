@@ -223,10 +223,19 @@ bool BoundedEndPoseProblem::IsValid()
 {
     Eigen::VectorXd x = scene_->GetKinematicTree().GetControlledState();
     Eigen::MatrixXd bounds = scene_->GetKinematicTree().GetJointLimits();
+
+    std::cout.precision(4);
+    constexpr double tolerance = 1.e-3;
+
+    bool succeeded = true;
     for (unsigned int i = 0; i < N; ++i)
     {
-        if (x(i) < bounds(i, 0) || x(i) > bounds(i, 1)) return false;
+        if (x(i) < bounds(i, 0) - tolerance || x(i) > bounds(i, 1) + tolerance)
+        {
+            if (debug_) HIGHLIGHT_NAMED("BoundedEndPoseProblem::IsValid", "Out of bounds (joint #" << i << "): " << bounds(i, 0) << " < " << x(i) << " < " << bounds(i, 1));
+            succeeded = false;
+        }
     }
-    return true;
+    return succeeded;
 }
-}
+}  // namespace exotica

@@ -31,8 +31,10 @@
 #define EXOTICA_CORE_COLLISION_SCENE_H_
 
 #include <Eigen/Dense>
+
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -200,6 +202,10 @@ public:
     /// @param[in]  tf2_end  The end transform for o2.
     /// @return     ContinuousCollisionProxy.
     virtual ContinuousCollisionProxy ContinuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) { ThrowPretty("Not implemented!"); }
+    /// @brief      Performs a continuous collision check by casting the active objects passed in against the static environment.
+    /// @param[in]  motion_transforms   A tuple consisting out of collision object name and its beginning and final transform.
+    /// @return     Vector of deepest ContinuousCollisionProxy (one per dimension).
+    virtual std::vector<ContinuousCollisionProxy> ContinuousCollisionCast(const std::vector<std::vector<std::tuple<std::string, Eigen::Isometry3d, Eigen::Isometry3d>>>& motion_transforms) { ThrowPretty("Not implemented!"); }
     /// @brief      Returns the translation of the named collision object.
     /// @param[in]  name    Name of the collision object to query.
     virtual Eigen::Vector3d GetTranslation(const std::string& name) = 0;

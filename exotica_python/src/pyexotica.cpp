@@ -744,6 +744,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("reset_number_of_problem_updates", &PlanningProblem::ResetNumberOfProblemUpdates)
         .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)() const) & PlanningProblem::GetCostEvolution)
         .def("get_number_of_iterations", &PlanningProblem::GetNumberOfIterations)
+        .def("pre_update", &PlanningProblem::PreUpdate)
         .def("is_valid", &PlanningProblem::IsValid)
         .def_readonly("termination_criterion", &PlanningProblem::termination_criterion);
 
@@ -815,6 +816,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def("get_inequality_jacobian", (Eigen::SparseMatrix<double>(TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetInequalityJacobian);
     time_indexed_problem.def("get_inequality_jacobian", (Eigen::MatrixXd(TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetInequalityJacobian);
     time_indexed_problem.def("get_bounds", &TimeIndexedProblem::GetBounds);
+    time_indexed_problem.def("get_joint_velocity_limits", &TimeIndexedProblem::GetJointVelocityLimits);
     time_indexed_problem.def_readonly("cost", &TimeIndexedProblem::cost);
     time_indexed_problem.def_readonly("inequality", &TimeIndexedProblem::inequality);
     time_indexed_problem.def_readonly("equality", &TimeIndexedProblem::equality);

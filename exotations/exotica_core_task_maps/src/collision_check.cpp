@@ -33,9 +33,6 @@ REGISTER_TASKMAP_TYPE("CollisionCheck", exotica::CollisionCheck);
 
 namespace exotica
 {
-CollisionCheck::CollisionCheck() = default;
-CollisionCheck::~CollisionCheck() = default;
-
 void CollisionCheck::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != 1) ThrowNamed("Wrong size of phi!");
@@ -58,4 +55,4 @@ int CollisionCheck::TaskSpaceDim()
 {
     return 1;
 }
-}
+}  // namespace exotica

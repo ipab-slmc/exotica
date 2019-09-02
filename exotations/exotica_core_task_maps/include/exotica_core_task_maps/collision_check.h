@@ -39,9 +39,6 @@ namespace exotica
 class CollisionCheck : public TaskMap, public Instantiable<CollisionCheckInitializer>
 {
 public:
-    CollisionCheck();
-    virtual ~CollisionCheck();
-
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -52,6 +49,6 @@ private:
 
     CollisionScenePtr cscene_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_COLLISION_CHECK_H_

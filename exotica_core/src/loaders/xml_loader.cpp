@@ -163,8 +163,12 @@ void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer&
     {
         if (xml_file.Parse(file_name.c_str()) != tinyxml2::XML_SUCCESS)
         {
+#ifdef TINYXML_HAS_ERROR_STR
             ThrowPretty("Can't load file!\n"
                         << xml_file.ErrorStr() << "\nFile: '" + file_name + "'");
+#else
+            ThrowPretty("Can't load file!" << "\nFile: '" + file_name + "'");
+#endif
         }
     }
     else
@@ -173,8 +177,12 @@ void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer&
         tinyxml2::XMLError return_code = xml_file.Parse(xml.c_str());
         if (xml_file.Error())
         {
+#ifdef TINYXML_HAS_ERROR_STR
             ThrowPretty("Can't load file!\n"
                         << xml_file.ErrorStr() << "\nFile: '" + ParsePath(file_name) + "'");
+#else
+            ThrowPretty("Can't load file!" << "\nFile: '" + ParsePath(file_name) + "'");
+#endif
         }
     }
 

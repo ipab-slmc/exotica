@@ -167,7 +167,8 @@ void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer&
             ThrowPretty("Can't load file!\n"
                         << xml_file.ErrorStr() << "\nFile: '" + file_name + "'");
 #else
-            ThrowPretty("Can't load file!" << "\nFile: '" + file_name + "'");
+            ThrowPretty("Can't load file!"
+                        << "\nFile: '" + file_name + "'");
 #endif
         }
     }
@@ -181,7 +182,8 @@ void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer&
             ThrowPretty("Can't load file!\n"
                         << xml_file.ErrorStr() << "\nFile: '" + ParsePath(file_name) + "'");
 #else
-            ThrowPretty("Can't load file!" << "\nFile: '" + ParsePath(file_name) + "'");
+            ThrowPretty("Can't load file!"
+                        << "\nFile: '" + ParsePath(file_name) + "'");
 #endif
         }
     }

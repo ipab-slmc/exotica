@@ -87,6 +87,7 @@ public:
     std::string GetRootJointName();
 
     exotica::KinematicTree& GetKinematicTree();
+    int GetNumberOfControlledJoints() const;
     std::vector<std::string> GetControlledJointNames();
     std::vector<std::string> GetModelJointNames();
     std::vector<std::string> GetControlledLinkNames();

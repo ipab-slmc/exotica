@@ -1001,6 +1001,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
     scene.def("get_controlled_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::GetControlledJointNames);
     scene.def("get_controlled_link_names", &Scene::GetControlledLinkNames);
+    scene.def("get_number_of_controlled_joints", &Scene::GetNumberOfControlledJoints);
     scene.def("get_model_link_names", &Scene::GetModelLinkNames);
     scene.def("get_kinematic_tree", &Scene::GetKinematicTree, py::return_value_policy::reference_internal);
     scene.def("get_collision_scene", &Scene::GetCollisionScene, py::return_value_policy::reference_internal);

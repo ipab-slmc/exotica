@@ -428,6 +428,11 @@ exotica::KinematicTree& Scene::GetKinematicTree()
     return kinematica_;
 }
 
+int Scene::GetNumberOfControlledJoints() const
+{
+    return kinematica_.GetNumControlledJoints();
+}
+
 std::vector<std::string> Scene::GetControlledJointNames()
 {
     return kinematica_.GetControlledJointNames();

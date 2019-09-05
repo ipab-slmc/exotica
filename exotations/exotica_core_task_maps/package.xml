@@ -15,6 +15,7 @@
   <url type="bugtracker">https://github.com/ipab-slmc/exotica/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>eigen_conversions</build_depend>
   <depend>exotica_core</depend>
   <depend>exotica_python</depend>
   <depend>geometry_msgs</depend>

@@ -122,7 +122,7 @@ public:
     bool is_trajectory_generated = false;
     std::vector<double> joint_limits;
     shapes::ShapeConstPtr shape = nullptr;
-    std::string shape_resource_path = "";
+    std::string shape_resource_path = std::string();
     Eigen::Vector3d scale = Eigen::Vector3d::Ones();
     bool is_robot_link = false;
     Eigen::Vector4d color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0);

@@ -47,6 +47,10 @@ void PendulumDynamicsSolver::AssignScene(ScenePtr scene_in)
     if (num_positions_in != 1)
         ThrowPretty("Robot model may not be a Pendulum.");
 
+    if (parameters_.FrictionCoefficient < 0)
+        ThrowPretty("Coefficient of friction is less than 0 (" << parameters_.FrictionCoefficient << ").");
+    if (parameters_.FrictionCoefficient > 1.5)
+        WARNING_NAMED("PendulumDynamicsSolver", "Coefficient of friction " << parameters_.FrictionCoefficient << " might be too high!");
     b_ = parameters_.FrictionCoefficient;
 }
 

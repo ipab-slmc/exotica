@@ -32,6 +32,7 @@
 
 #include <exotica_core/feedback_motion_solver.h>
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
+#include <exotica_core/server.h>
 
 #include <exotica_ilqr_solver/ilqr_solver_initializer.h>
 

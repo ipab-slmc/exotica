@@ -156,7 +156,7 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     // all of the below are not pointers, since we want to copy over
     //  solutions across iterations
     Eigen::MatrixXd new_U, global_best_U = prob_->get_U();
-    solution.resize(T, NU);
+    solution.resize(T - 1, NU);
 
     if (debug_) HIGHLIGHT_NAMED("ILQRSolver", "Running ILQR solver for max " << parameters_.MaxIterations << " iterations");
 
@@ -165,6 +165,14 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
 
     for (int iteration = 1; iteration <= GetNumberOfMaxIterations(); ++iteration)
     {
+        // Check whether user interrupted (Ctrl+C)
+        if (Server::IsRos() && !ros::ok())
+        {
+            if (debug_) HIGHLIGHT("Solving cancelled by user");
+            prob_->termination_criterion = TerminationCriterion::UserDefined;
+            break;
+        }
+
         // Backwards pass computes the gains
         backward_pass_timer.Reset();
         BackwardPass();

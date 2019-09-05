@@ -172,7 +172,7 @@ void OMPLControlSolver::Solve(Eigen::MatrixXd &solution)
         prob_->set_T(T);
         prob_->PreUpdate();
 
-        solution.resize(T, NU);
+        solution.resize(T - 1, NU);
 
         int t = 0;
         for (int i = 0; i < controls.size(); ++i)

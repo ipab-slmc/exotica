@@ -4,7 +4,7 @@ sudo: required
 language: generic
 env:
   global:
-    - ROS_PARALLEL_JOBS=-j4 # Don't exhaust virtual memory
+    - ROS_PARALLEL_JOBS=-j2 # Don't exhaust virtual memory
     - DOCKER_RUN_OPTS='-e TRAVIS_BRANCH -e GITHUBKEY' # Pass CI variables to Docker
     - UPSTREAM_WORKSPACE=file
     #- AFTER_SCRIPT='/bin/bash ./.ci/deploy_documentation.sh'

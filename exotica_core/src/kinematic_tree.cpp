@@ -335,7 +335,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
                         std::shared_ptr<urdf::Mesh> mesh = std::static_pointer_cast<urdf::Mesh>(ToStdPtr(urdf_visual->geometry));
                         visual.shape_resource_path = mesh->filename;
                         visual.scale = Eigen::Vector3d(mesh->scale.x, mesh->scale.y, mesh->scale.z);
-                        visual.shape = std::shared_ptr<shapes::Mesh>(new shapes::Mesh());
+                        visual.shape = std::shared_ptr<shapes::Mesh>(shapes::createMeshFromResource(mesh->filename));
                     }
                     break;
                 }
@@ -435,7 +435,7 @@ std::shared_ptr<KinematicElement> KinematicTree::AddEnvironmentElement(const std
 std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
 {
     std::string shape_path(shape_resource_path);
-    if (shape_path == "")
+    if (shape_path.empty())
     {
         ThrowPretty("Shape path cannot be empty!");
     }
@@ -453,10 +453,8 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
         ThrowPretty("Path cannot be resolved.");
     }
 
-    shapes::ShapePtr shape;
-    shape.reset(shapes::createMeshFromResource(shape_path, scale));
-    shapes::ShapeConstPtr tmp_shape(shape);
-    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, tmp_shape, inertia, color, visual, is_controlled);
+    shapes::ShapePtr shape = shapes::ShapePtr(shapes::createMeshFromResource(shape_path, scale));
+    std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color, visual, is_controlled);
     element->shape_resource_path = shape_path;
     element->scale = scale;
     return element;

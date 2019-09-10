@@ -195,7 +195,7 @@ void VisualizationMeshcat::DisplayScene(bool use_mesh_materials)
                 break;
                 default:
                 {
-                    if (visual.shape_resource_path != "")
+                    if (!visual.shape_resource_path.empty())
                     {
                         auto mesh = visualization::GeometryMesh(visual.shape_resource_path, file_url_ + visual.shape_resource_path);
                         // If using STL files or if requested specifically, use URDF colours

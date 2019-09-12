@@ -42,7 +42,7 @@ class OMPLLockedBoundsCase(unittest.TestCase):
         except Exception:
             failed = True
             pass
-        # the solve call wit changed bounds should throw an exception
+        # the solve call with changed bounds should throw an exception
         self.assertTrue(failed)
         # ... and there should be no solution
         self.assertTrue(solution is None)

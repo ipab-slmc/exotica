@@ -10,12 +10,13 @@ import roslib; roslib.load_manifest(PKG)  # This line is not needed with Catkin.
 
 import unittest
 
-exo.Setup.init_ros()
-
 PENETRATING_DISTANCE_ATOL = 1e-6
 AFAR_DISTANCE_ATOL = 1e-3
 CLOSE_DISTANCE_ATOL = 1e-6
 PUBLISH_PROXIES = False
+
+if PUBLISH_PROXIES:
+    exo.Setup.init_ros()
 
 def get_problem_initializer(collision_scene, URDF):
     return ('exotica/UnconstrainedEndPoseProblem',
@@ -49,19 +50,19 @@ def test_sphere_vs_sphere_distance(collision_scene):
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
     assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1.))
+    np.testing.assert_almost_equal(p[0].distance, 1.)
     expected_contact_1 = np.array([-0.5, 0, 0])
     expected_contact_2 = np.array([0.5, 0, 0])
     expected_normal_1 = np.array([1, 0, 0])
     expected_normal_2 = np.array([-1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_sphere_vs_primitive_sphere_distance: _distance, Contact Points, Normals: PASSED')
 
 
-def test_sphere_vs_Sphere_penetrating(collision_scene):
+def test_sphere_vs_sphere_penetrating(collision_scene):
     problem_initializer = get_problem_initializer(collision_scene, '{exotica_examples}/test/resources/primitive_sphere_vs_primitive_sphere_penetrating.urdf')
     prob = exo.Setup.create_problem(problem_initializer)
     prob.update(np.zeros(prob.N,))
@@ -660,8 +661,8 @@ class TestClass(unittest.TestCase):
     def test_sphere_vs_sphere_distance(self):
         test_sphere_vs_sphere_distance(TestClass.collision_scene)
 
-    def test_sphere_vs_Sphere_penetrating(self):
-        test_sphere_vs_Sphere_penetrating(TestClass.collision_scene)
+    def test_sphere_vs_sphere_penetrating(self):
+        test_sphere_vs_sphere_penetrating(TestClass.collision_scene)
 
     def test_sphere_vs_box_distance(self):
         test_sphere_vs_box_distance(TestClass.collision_scene)

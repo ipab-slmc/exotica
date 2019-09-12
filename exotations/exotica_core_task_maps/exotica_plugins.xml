@@ -92,4 +92,7 @@
   <class name="exotica/EffBox" type="exotica::EffBox" base_class_type="exotica::TaskMap">
     <description>Limits the end-effector motion to a box in some reference frame. This task map can only be used as an inequality constraint.</description>
   </class>
+  <class name="exotica/JointVelocityLimitConstraint" type="exotica::JointVelocityLimitConstraint" base_class_type="exotica::TaskMap">
+    <description>Joint velocity limit task map for non time-indexed problems. This can only be used as an inequality constraint for end pose problems that are non time indexed.</description>
+  </class>
 </library>

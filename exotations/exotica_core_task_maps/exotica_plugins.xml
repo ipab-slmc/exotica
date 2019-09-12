@@ -57,6 +57,15 @@
   <class name="exotica/QuasiStatic" type="exotica::QuasiStatic" base_class_type="exotica::TaskMap">
     <description>Plannar quasi static cost/constraint</description>
   </class>
+  <class name="exotica/SmoothCollisionDistance" type="exotica::SmoothCollisionDistance" base_class_type="exotica::TaskMap">
+    <description>Smooth collision distance</description>
+  </class>
+  <class name="exotica/CollisionDistance" type="exotica::CollisionDistance" base_class_type="exotica::TaskMap">
+    <description>Collision distance</description>
+  </class>
+  <class name="exotica/SumOfPenetrations" type="exotica::SumOfPenetrations" base_class_type="exotica::TaskMap">
+    <description>Sum of collision penetrations</description>
+  </class>
   <class name="exotica/JointVelocityBackwardDifference" type="exotica::JointVelocityBackwardDifference" base_class_type="exotica::TaskMap">
     <description>Smooths joint velocities by penalizing an approximated first order time derivative of joint state using backward differencing. Task map for use with single-step/EndPose problems only.</description>
   </class>

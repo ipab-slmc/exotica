@@ -39,6 +39,10 @@ AddInitializer(
   joint_jerk_backward_difference
   look_at
   manipulability
+
+  collision_distance
+  smooth_collision_distance
+  sum_of_penetrations
 )
 GenInitializers()
 
@@ -75,6 +79,9 @@ set(SOURCES
     src/joint_pose.cpp
     src/sphere_collision.cpp
     src/collision_check.cpp
+    src/collision_distance.cpp
+    src/smooth_collision_distance.cpp
+    src/sum_of_penetrations.cpp
     src/quasi_static.cpp
     src/joint_velocity_backward_difference.cpp
     src/joint_acceleration_backward_difference.cpp

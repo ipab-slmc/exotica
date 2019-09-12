@@ -1019,6 +1019,50 @@ TEST(ExoticaTaskMaps, testPoint2Plane)
     }
 }
 
+TEST(ExoticaTaskMaps, testCollisionDistance)
+{
+    try
+    {
+        TEST_COUT << "CollisionDistance test";
+        Initializer map("exotica/CollisionDistance", {{"Name", std::string("MyTask")},
+                                                      {"CheckSelfCollision", false},
+                                                      {}});
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "CollisionSceneFCLLatest");
+        EXPECT_TRUE(test_random(problem));
+        EXPECT_TRUE(test_jacobian(problem));
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
+TEST(ExoticaTaskMaps, testSmoothCollisionDistance)
+{
+    try
+    {
+        TEST_COUT << "SmoothCollisionDistance test";
+        const std::vector<bool> linear_and_quadratic = {true, false};
+        for (bool is_linear : linear_and_quadratic)
+        {
+            TEST_COUT << "Testing " << (is_linear ? "linear" : "quadratic") << " SmoothCollisionDistance";
+            Initializer map("exotica/SmoothCollisionDistance", {{"Name", std::string("MyTask")},
+                                                                {"CheckSelfCollision", false},
+                                                                {"WorldMargin", 0.01},
+                                                                {"RobotMargin", 0.01},
+                                                                {"Linear", is_linear},
+                                                                {}});
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "CollisionSceneFCLLatest");
+            EXPECT_TRUE(test_random(problem));
+            EXPECT_TRUE(test_jacobian(problem));
+        }
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
+}
+
 TEST(ExoticaTaskMaps, testQuasiStatic)
 {
     try

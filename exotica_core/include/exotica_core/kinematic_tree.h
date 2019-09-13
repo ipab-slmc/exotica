@@ -134,15 +134,15 @@ class KinematicTree : public Uncopyable
 {
 public:
     void Instantiate(std::string joint_group, robot_model::RobotModelPtr model, const std::string& name);
-    std::string GetRootFrameName() const;
-    std::string GetRootJointName() const;
+    const std::string& GetRootFrameName() const;
+    const std::string& GetRootJointName() const;
     robot_model::RobotModelPtr GetRobotModel() const;
     BaseType GetModelBaseType() const;
     BaseType GetControlledBaseType() const;
     std::shared_ptr<KinematicResponse> RequestFrames(const KinematicsRequest& request);
     void Update(Eigen::VectorXdRefConst x);
     void ResetJointLimits();
-    Eigen::MatrixXd GetJointLimits() const { return joint_limits_; }
+    const Eigen::MatrixXd& GetJointLimits() const { return joint_limits_; }
     void SetJointLimitsLower(Eigen::VectorXdRefConst lower_in);
     void SetJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
     void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);

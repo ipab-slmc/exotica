@@ -77,7 +77,7 @@ The system model provides an interface to answer kinematic queries. A query can 
  - Name of the tip frame (Frame A)
  - Offset of the tip frame
  - Name of the base frame (Frame B)
- - Offset the of base frame
+ - Offset of the base frame
 
 The diagram above illustrates an example scene. Any existing frame can be used to define a base or a tip frame of a relative transformation.
 The response to the query will then contain a transformation of the tip frame with respect to the base frame. If an offset is specified, each respective frame will be redefined to include the offset. If a base frame is not specified, the world frame will be used by default. Since all transformations of the tree nodes w.r.t. the world frame have been computed during the update, the query computation only adds the tip frame to the inverted base frame :math:`$M_A^B={M_B^{world}}^{-1}M_A^{world}`. 

@@ -657,13 +657,13 @@ void Scene::UpdateSceneFrames()
         obj_transform.translation() = ps_->getCurrentState().getGlobalLinkTransform(links[i]).translation();
         obj_transform.linear() = ps_->getCurrentState().getGlobalLinkTransform(links[i]).rotation();
 
-        int jointId = GetKinematicTree().IsControlledLink(links[i]->getName());
-        if (jointId != -1)
+        int joint_id = GetKinematicTree().IsControlledLink(links[i]->getName());
+        if (joint_id != -1)
         {
-            if (lastControlledJointId != jointId)
+            if (lastControlledJointId != joint_id)
             {
-                lastControlledLinkName = links[i]->getName();
-                lastControlledJointId = jointId;
+                lastControlledLinkName = GetKinematicTree().GetControlledLinkNames()[joint_id];
+                lastControlledJointId = joint_id;
             }
         }
 

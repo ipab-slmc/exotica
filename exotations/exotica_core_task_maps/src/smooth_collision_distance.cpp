@@ -65,8 +65,7 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
     for (const auto& link : robot_links_)
     {
         // Get all world collision links, then iterate through them
-        std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(scene_->GetControlledLinkToCollisionLinkMap()[link], check_self_collision_);
-        // std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(link, check_self_collision_);
+        std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(controlled_link_to_collision_link_map_[link], check_self_collision_);
 
         for (const auto& proxy : proxies)
         {
@@ -131,6 +130,7 @@ void SmoothCollisionDistance::Initialize()
 
     // Get names of all controlled joints and their corresponding child links
     robot_links_ = scene_->GetControlledLinkNames();
+    controlled_link_to_collision_link_map_ = scene_->GetControlledLinkToCollisionLinkMap();
 }
 
 int SmoothCollisionDistance::TaskSpaceDim() { return dim_; }

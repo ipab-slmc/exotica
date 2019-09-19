@@ -53,6 +53,7 @@ private:
     void Initialize();
 
     std::vector<std::string> robot_links_;
+    std::map<std::string, std::vector<std::string>> controlled_link_to_collision_link_map_;
     double robot_margin_ = 0.0;
     double world_margin_ = 0.0;
     bool linear_ = false;

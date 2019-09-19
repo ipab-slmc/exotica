@@ -125,8 +125,8 @@ void SmoothCollisionDistance::Initialize()
 
     if (robot_margin_ == 0.0 || world_margin_ == 0.0) ThrowPretty("Setting the margin to zero is a bad idea. It will NaN.");
 
-    HIGHLIGHT_NAMED("Smooth Collision Distance",
-                    "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
+    if (debug_) HIGHLIGHT_NAMED("Smooth Collision Distance",
+                                "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
 
     // Get names of all controlled joints and their corresponding child links
     robot_links_ = scene_->GetControlledLinkNames();

@@ -523,21 +523,26 @@ int KinematicTree::IsControlled(std::shared_ptr<KinematicElement> joint)
     return -1;
 }
 
-int KinematicTree::IsControlled(std::string joint_name)
+int KinematicTree::IsControlledLink(const std::string& link_name)
 {
-    for (int i = 0; i < controlled_joints_names_.size(); ++i)
+    try
     {
-        if (controlled_joints_names_[i] == joint_name) return i;
-    }
-    return -1;
-}
+        auto element = tree_map_[link_name].lock();
+        std::cout << link_name << ": " << element->control_id << ", parent_name=" << element->parent_name << std::endl;
+        while (element)
+        {
+            element = element->parent.lock();
 
-int KinematicTree::IsControlledLink(std::string link_name)
-{
-    for (int i = 0; i < controlled_joints_.size(); ++i)
+            if (element->is_controlled)
+            {
+                std::cout << link_name << ", yay, controlled parent: " << element->control_id << ", " << element->segment.getName() << std::endl;
+                return element->control_id;
+            }
+        }
+    }
+    catch (const std::out_of_range& e)
     {
-        auto joint = controlled_joints_[i].lock();
-        if (joint->segment.getName() == link_name) return i;
+        return -1;
     }
     return -1;
 }
@@ -1188,4 +1193,4 @@ bool KinematicTree::DoesLinkWithNameExist(std::string name) const
     // Check whether it exists in TreeMap, which should encompass both EnvironmentTree and model_tree_
     return tree_map_.find(name) != tree_map_.end();
 }
-}
+}  // namespace exotica

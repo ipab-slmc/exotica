@@ -190,8 +190,7 @@ public:
     void UpdateModel();
     void ChangeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
     int IsControlled(std::shared_ptr<KinematicElement> joint);
-    int IsControlled(std::string joint_name);
-    int IsControlledLink(std::string link_name);
+    int IsControlledLink(const std::string& link_name);
 
     Eigen::VectorXd GetModelState() const;
     std::map<std::string, double> GetModelStateMap() const;

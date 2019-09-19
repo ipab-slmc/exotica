@@ -165,15 +165,15 @@ public:
     bool AlwaysUpdatesCollisionScene() const { return force_collision_; }
     /// @brief Returns a map between a model link name and the names of associated collision links.
     /// @return Map between model links and all associated collision links.
-    std::map<std::string, std::vector<std::string>> GetModelLinkToCollisionLinkMap() const { return model_link_to_collision_link_map_; };
+    const std::map<std::string, std::vector<std::string>>& GetModelLinkToCollisionLinkMap() const { return model_link_to_collision_link_map_; };
     /// @brief Returns a map between a model link name and the KinematicElement of associated collision links.
     /// @return Map between model links and all the KinematicElements of the associated collision links.
-    std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>> GetModelLinkToCollisionElementMap() const { return model_link_to_collision_element_map_; };
+    const std::map<std::string, std::vector<std::shared_ptr<KinematicElement>>>& GetModelLinkToCollisionElementMap() const { return model_link_to_collision_element_map_; };
     /// @brief Returns a map between controlled robot link names and associated collision link names. Here we consider all fixed links between controlled links as belonging to the previous controlled link (as if the collision links had been fused).
     /// @return Map between controlled links and associated collision links.
-    std::map<std::string, std::vector<std::string>> GetControlledLinkToCollisionLinkMap() const { return controlled_link_to_collision_link_map_; };
+    const std::map<std::string, std::vector<std::string>>& GetControlledLinkToCollisionLinkMap() const { return controlled_link_to_collision_link_map_; };
     /// @brief Returns world links that are to be excluded from collision checking.
-    std::set<std::string> get_world_links_to_exclude_from_collision_scene() const { return world_links_to_exclude_from_collision_scene_; }
+    const std::set<std::string>& get_world_links_to_exclude_from_collision_scene() const { return world_links_to_exclude_from_collision_scene_; }
 private:
     void UpdateInternalFrames(bool update_request = true);
 

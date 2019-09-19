@@ -65,8 +65,8 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
     for (const auto& link : robot_links_)
     {
         // Get all world collision links, then iterate through them
-        // std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(scene_->getControlledLinkToCollisionLinkMap()[link], check_self_collision_);
-        std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(link, check_self_collision_);
+        std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(scene_->GetControlledLinkToCollisionLinkMap()[link], check_self_collision_);
+        // std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(link, check_self_collision_);
 
         for (const auto& proxy : proxies)
         {
@@ -134,4 +134,4 @@ void SmoothCollisionDistance::Initialize()
 }
 
 int SmoothCollisionDistance::TaskSpaceDim() { return dim_; }
-}
+}  // namespace exotica

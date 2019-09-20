@@ -533,11 +533,17 @@ int KinematicTree::IsControlledLink(const std::string& link_name)
     try
     {
         auto element = tree_map_[link_name].lock();
+
+        if (element && element->is_controlled)
+        {
+            return element->control_id;
+        }
+
         while (element)
         {
             element = element->parent.lock();
 
-            if (element->is_controlled)
+            if (element && element->is_controlled)
             {
                 return element->control_id;
             }

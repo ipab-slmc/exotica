@@ -38,7 +38,7 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
 {
     if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     phi.setZero();
-    Eigen::MatrixXd J(dim_, robot_links_.size());
+    Eigen::MatrixXd J(dim_, robot_joints_.size());
     Update(x, phi, J, false);
 }
 
@@ -62,10 +62,10 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
 
     double& d = phi(0);
 
-    for (const auto& link : robot_links_)
+    for (const auto& joint : robot_joints_)
     {
         // Get all world collision links, then iterate through them
-        std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(controlled_link_to_collision_link_map_[link], check_self_collision_);
+        std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(controlled_joint_to_collision_link_map_[joint], check_self_collision_);
 
         for (const auto& proxy : proxies)
         {
@@ -129,8 +129,8 @@ void SmoothCollisionDistance::Initialize()
                                 "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
 
     // Get names of all controlled joints and their corresponding child links
-    robot_links_ = scene_->GetControlledLinkNames();
-    controlled_link_to_collision_link_map_ = scene_->GetControlledLinkToCollisionLinkMap();
+    robot_joints_ = scene_->GetControlledJointNames();
+    controlled_joint_to_collision_link_map_ = scene_->GetControlledJointToCollisionLinkMap();
 }
 
 int SmoothCollisionDistance::TaskSpaceDim() { return dim_; }

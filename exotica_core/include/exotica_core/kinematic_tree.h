@@ -234,7 +234,7 @@ public:
 
 private:
     void BuildTree(const KDL::Tree& RobotKinematics);
-    void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
+    void AddElementFromSegmentMapIterator(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
     void UpdateTree();
     void UpdateFK();
     void UpdateJ();

@@ -217,7 +217,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
         ThrowPretty("Unsupported root joint type: " << root_joint->getTypeName());
     }
 
-    AddElement(robot_kinematics.getRootSegment(), *(model_tree_.end() - 1));
+    AddElementFromSegmentMapIterator(robot_kinematics.getRootSegment(), *(model_tree_.end() - 1));
 
     // Set root inertial
     if (root_joint->getType() == robot_model::JointModel::FIXED)
@@ -508,14 +508,14 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
     return new_element;
 }
 
-void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
+void KinematicTree::AddElementFromSegmentMapIterator(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
 {
     std::shared_ptr<KinematicElement> new_element = std::make_shared<KinematicElement>(model_tree_.size(), parent, segment->second.segment);
     model_tree_.push_back(new_element);
     if (parent) parent->children.push_back(new_element);
     for (KDL::SegmentMap::const_iterator child : segment->second.children)
     {
-        AddElement(child, new_element);
+        AddElementFromSegmentMapIterator(child, new_element);
     }
 }
 

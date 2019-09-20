@@ -190,11 +190,9 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
         if (RotW != controlled_joints_names_.end()) controlled_joints_names_.erase(RotW);
         RotW = std::find(model_joints_names_.begin(), model_joints_names_.end(), root_joint->getVariableNames()[6]);
         if (RotW != model_joints_names_.end()) model_joints_names_.erase(RotW);
-        // As we are following ZYX convention, we also need to swap the names of the links, i.e.,
-        // that the controlled link names match the controlled joint names. This was a massive
-        // bug that caused the columns of the Jacobians to be swapped. Ouch.
-        std::swap(controlled_joints_names_[3], controlled_joints_names_[5]);
-        std::swap(model_joints_names_[3], model_joints_names_[5]);
+
+        // NB: We do not want to swap the XYZ labels for the rotation joints
+        // to not change the order in which joint and model state are stored.
     }
     else if (root_joint->getType() == robot_model::JointModel::PLANAR)
     {

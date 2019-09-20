@@ -1167,6 +1167,22 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematic_tree.def("set_planar_base_limits_pos_xy_euler_z", &KinematicTree::SetPlanarBaseLimitsPosXYEulerZ);
     kinematic_tree.def("get_used_joint_limits", &KinematicTree::GetUsedJointLimits);
 
+    // Get full tree
+    kinematic_tree.def("get_model_tree", &KinematicTree::GetModelTree);
+
+    // KinematicElement
+    py::class_<KinematicElement, std::shared_ptr<KinematicElement>> kinematic_element(kin, "KinematicElement");
+    kinematic_element.def("get_pose", &KinematicElement::GetPose);
+    kinematic_element.def_readonly("id", &KinematicElement::id);
+    kinematic_element.def("get_segment_name", [](KinematicElement* element) { return element->segment.getName(); });
+    kinematic_element.def("get_joint_name", [](KinematicElement* element) { return element->segment.getJoint().getName(); });
+    kinematic_element.def("get_parent_name", [](KinematicElement* element) { auto parent = element->parent.lock(); if (parent) { return parent->segment.getName(); } else { return std::string("no_parent"); } });
+    kinematic_element.def_readonly("control_id", &KinematicElement::control_id);
+    kinematic_element.def_readonly("is_controlled", &KinematicElement::is_controlled);
+    kinematic_element.def_readonly("parent_name", &KinematicElement::parent_name);
+    kinematic_element.def_readonly("joint_limits", &KinematicElement::joint_limits);
+    kinematic_element.def_readonly("is_robot_link", &KinematicElement::is_robot_link);
+
     // TODO: KinematicRequestFlags
 
     // TODO: KinematicFrame

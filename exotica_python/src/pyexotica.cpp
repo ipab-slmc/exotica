@@ -1100,7 +1100,7 @@ PYBIND11_MODULE(_pyexotica, module)
               py::arg("update_collision_scene") = true);
     scene.def("remove_object", &Scene::RemoveObject);
     scene.def_property_readonly("model_link_to_collision_link_map", &Scene::GetModelLinkToCollisionLinkMap);
-    scene.def_property_readonly("controlled_link_to_collision_link_map", &Scene::GetControlledLinkToCollisionLinkMap);
+    scene.def_property_readonly("controlled_joint_to_collision_link_map", &Scene::GetControlledJointToCollisionLinkMap);
 
     py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collision_scene(module, "CollisionScene");
     // TODO: expose IsStateValid, IsCollisionFree, GetCollisionDistance, GetCollisionWorldLinks, GetCollisionRobotLinks, GetTranslation

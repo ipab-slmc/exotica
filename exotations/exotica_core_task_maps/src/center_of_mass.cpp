@@ -34,9 +34,6 @@ REGISTER_TASKMAP_TYPE("CenterOfMass", exotica::CenterOfMass);
 
 namespace exotica
 {
-CenterOfMass::CenterOfMass() = default;
-CenterOfMass::~CenterOfMass() = default;
-
 void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
@@ -58,7 +55,7 @@ void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     com = com / M;
     for (int i = 0; i < dim_; ++i) phi(i) = com[i];
 
-    if (debug_)
+    if (debug_ && Server::IsRos())
     {
         com_marker_.pose.position.x = phi(0);
         com_marker_.pose.position.y = phi(1);
@@ -129,7 +126,7 @@ void CenterOfMass::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eig
     }
     for (int i = 0; i < dim_; ++i) phi(i) = com[i];
 
-    if (debug_)
+    if (debug_ && Server::IsRos())
     {
         com_marker_.pose.position.x = phi(0);
         com_marker_.pose.position.y = phi(1);
@@ -174,11 +171,8 @@ void CenterOfMass::Initialize()
         }
     }
 
-    if (debug_)
-    {
-        InitializeDebug();
-        HIGHLIGHT_NAMED("CenterOfMass", "Total model mass: " << mass_.sum() << " kg");
-    }
+    if (Server::IsRos()) InitializeDebug();
+    if (debug_) HIGHLIGHT_NAMED("CenterOfMass", "Total model mass: " << mass_.sum() << " kg");
 }
 
 void CenterOfMass::AssignScene(ScenePtr scene)
@@ -213,4 +207,4 @@ void CenterOfMass::InitializeDebug()
     com_links_pub_ = Server::Advertise<visualization_msgs::Marker>(object_name_ + "/com_links_marker", 1, true);
     com_pub_ = Server::Advertise<visualization_msgs::Marker>(object_name_ + "/com_marker", 1, true);
 }
-}
+}  // namespace exotica

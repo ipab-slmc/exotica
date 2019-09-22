@@ -1042,12 +1042,12 @@ void KinematicTree::UpdateJointLimits()
     }
 }
 
-std::string KinematicTree::GetRootFrameName() const
+const std::string& KinematicTree::GetRootFrameName() const
 {
     return root_->segment.getName();
 }
 
-std::string KinematicTree::GetRootJointName() const
+const std::string& KinematicTree::GetRootJointName() const
 {
     return root_joint_name_;
 }

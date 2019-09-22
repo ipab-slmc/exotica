@@ -37,7 +37,7 @@ namespace exotica
 {
 VisualizationMoveIt::VisualizationMoveIt(ScenePtr scene) : scene_(scene)
 {
-    HIGHLIGHT_NAMED("VisualizationMoveIt", "Initialising visualizer");
+    if (scene->debug_) HIGHLIGHT_NAMED("VisualizationMoveIt", "Initialising visualizer");
     Initialize();
 }
 VisualizationMoveIt::~VisualizationMoveIt() = default;

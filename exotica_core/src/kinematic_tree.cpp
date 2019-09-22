@@ -190,6 +190,9 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
         if (RotW != controlled_joints_names_.end()) controlled_joints_names_.erase(RotW);
         RotW = std::find(model_joints_names_.begin(), model_joints_names_.end(), root_joint->getVariableNames()[6]);
         if (RotW != model_joints_names_.end()) model_joints_names_.erase(RotW);
+
+        // NB: We do not want to swap the XYZ labels for the rotation joints
+        // to not change the order in which joint and model state are stored.
     }
     else if (root_joint->getType() == robot_model::JointModel::PLANAR)
     {
@@ -212,7 +215,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
         ThrowPretty("Unsupported root joint type: " << root_joint->getTypeName());
     }
 
-    AddElement(robot_kinematics.getRootSegment(), *(model_tree_.end() - 1));
+    AddElementFromSegmentMapIterator(robot_kinematics.getRootSegment(), *(model_tree_.end() - 1));
 
     // Set root inertial
     if (root_joint->getType() == robot_model::JointModel::FIXED)
@@ -425,14 +428,14 @@ void KinematicTree::ChangeParent(const std::string& name, const std::string& par
     debug_scene_changed_ = true;
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
+std::shared_ptr<KinematicElement> KinematicTree::AddEnvironmentElement(const std::string& name, const Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
 {
     std::shared_ptr<KinematicElement> element = AddElement(name, transform, parent, shape, inertia, color, visual, is_controlled);
     environment_tree_.push_back(element);
     return element;
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, const Eigen::Isometry3d& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
 {
     std::string shape_path(shape_resource_path);
     if (shape_path.empty())
@@ -460,7 +463,7 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
     return element;
 }
 
-std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
+std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& name, const Eigen::Isometry3d& transform, const std::string& parent, shapes::ShapeConstPtr shape, const KDL::RigidBodyInertia& inertia, const Eigen::Vector4d& color, const std::vector<VisualElement>& visual, bool is_controlled)
 {
     std::shared_ptr<KinematicElement> parent_element;
     if (parent == "")
@@ -503,14 +506,14 @@ std::shared_ptr<KinematicElement> KinematicTree::AddElement(const std::string& n
     return new_element;
 }
 
-void KinematicTree::AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
+void KinematicTree::AddElementFromSegmentMapIterator(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent)
 {
     std::shared_ptr<KinematicElement> new_element = std::make_shared<KinematicElement>(model_tree_.size(), parent, segment->second.segment);
     model_tree_.push_back(new_element);
     if (parent) parent->children.push_back(new_element);
     for (KDL::SegmentMap::const_iterator child : segment->second.children)
     {
-        AddElement(child, new_element);
+        AddElementFromSegmentMapIterator(child, new_element);
     }
 }
 
@@ -523,21 +526,30 @@ int KinematicTree::IsControlled(std::shared_ptr<KinematicElement> joint)
     return -1;
 }
 
-int KinematicTree::IsControlled(std::string joint_name)
+int KinematicTree::IsControlledLink(const std::string& link_name)
 {
-    for (int i = 0; i < controlled_joints_names_.size(); ++i)
+    try
     {
-        if (controlled_joints_names_[i] == joint_name) return i;
-    }
-    return -1;
-}
+        auto element = tree_map_[link_name].lock();
 
-int KinematicTree::IsControlledLink(std::string link_name)
-{
-    for (int i = 0; i < controlled_joints_.size(); ++i)
+        if (element && element->is_controlled)
+        {
+            return element->control_id;
+        }
+
+        while (element)
+        {
+            element = element->parent.lock();
+
+            if (element && element->is_controlled)
+            {
+                return element->control_id;
+            }
+        }
+    }
+    catch (const std::out_of_range& e)
     {
-        auto joint = controlled_joints_[i].lock();
-        if (joint->segment.getName() == link_name) return i;
+        return -1;
     }
     return -1;
 }
@@ -1188,4 +1200,4 @@ bool KinematicTree::DoesLinkWithNameExist(std::string name) const
     // Check whether it exists in TreeMap, which should encompass both EnvironmentTree and model_tree_
     return tree_map_.find(name) != tree_map_.end();
 }
-}
+}  // namespace exotica

@@ -184,14 +184,13 @@ public:
     Eigen::MatrixXd Jdot(const KDL::Jacobian& jacobian);
 
     void ResetModel();
-    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const std::vector<VisualElement>& visual = {}, bool is_controlled = false);
-    std::shared_ptr<KinematicElement> AddEnvironmentElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const std::vector<VisualElement>& visual = {}, bool is_controlled = false);
-    std::shared_ptr<KinematicElement> AddElement(const std::string& name, Eigen::Isometry3d& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const std::vector<VisualElement>& visual = {}, bool is_controlled = false);
+    std::shared_ptr<KinematicElement> AddElement(const std::string& name, const Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const std::vector<VisualElement>& visual = {}, bool is_controlled = false);
+    std::shared_ptr<KinematicElement> AddEnvironmentElement(const std::string& name, const Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const std::vector<VisualElement>& visual = {}, bool is_controlled = false);
+    std::shared_ptr<KinematicElement> AddElement(const std::string& name, const Eigen::Isometry3d& transform, const std::string& parent, const std::string& shape_resource_path, Eigen::Vector3d scale = Eigen::Vector3d::Ones(), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const std::vector<VisualElement>& visual = {}, bool is_controlled = false);
     void UpdateModel();
     void ChangeParent(const std::string& name, const std::string& parent, const KDL::Frame& pose, bool relative);
     int IsControlled(std::shared_ptr<KinematicElement> joint);
-    int IsControlled(std::string joint_name);
-    int IsControlledLink(std::string link_name);
+    int IsControlledLink(const std::string& link_name);
 
     Eigen::VectorXd GetModelState() const;
     std::map<std::string, double> GetModelStateMap() const;
@@ -235,7 +234,7 @@ public:
 
 private:
     void BuildTree(const KDL::Tree& RobotKinematics);
-    void AddElement(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
+    void AddElementFromSegmentMapIterator(KDL::SegmentMap::const_iterator segment, std::shared_ptr<KinematicElement> parent);
     void UpdateTree();
     void UpdateFK();
     void UpdateJ();

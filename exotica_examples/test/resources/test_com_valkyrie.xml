@@ -1,19 +1,9 @@
 <?xml version="1.0" ?>
-<ExoticaWholeBodyIKConfig>
-  <IKSolver Name="DummySolver">
-    <MaxIterations>100</MaxIterations>
-    <MaxStep>0.1</MaxStep>
-    <Tolerance>1e-5</Tolerance>
-    <Alpha>1.0</Alpha>
-    <C>1e-3</C>
-  </IKSolver>
-  
-  <UnconstrainedEndPoseProblem>
+<ExoticaWholeBodyIKConfig> 
+  <UnconstrainedEndPoseProblem Name="MyProblem">
     <PlanningScene>
-      <Scene Name="CoMDebugScene">
-        <PlanningMode>Optimization</PlanningMode>
+      <Scene>
         <JointGroup>whole_body</JointGroup>
-        <Debug>0</Debug>
         <URDF>{exotica_examples}/resources/robots/valkyrie_sim.urdf</URDF>
         <SRDF>{exotica_examples}/resources/robots/valkyrie_sim.srdf</SRDF>
       </Scene>

@@ -52,7 +52,8 @@ public:
 private:
     void Initialize();
 
-    std::vector<std::string> robot_links_;
+    std::vector<std::string> robot_joints_;
+    std::map<std::string, std::vector<std::string>> controlled_joint_to_collision_link_map_;
     double robot_margin_ = 0.0;
     double world_margin_ = 0.0;
     bool linear_ = false;
@@ -63,6 +64,6 @@ private:
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_SMOOTH_COLLISION_DISTANCE_H_

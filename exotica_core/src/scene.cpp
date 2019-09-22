@@ -640,11 +640,11 @@ void Scene::UpdateSceneFrames()
     const std::vector<const robot_model::LinkModel*>& links =
         ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
 
-    int lastControlledJointId = -1;
-    std::string lastControlledLinkName;
+    int last_controlled_joint_id = -1;
+    std::string last_controlled_joint_name = "";
     model_link_to_collision_link_map_.clear();
     model_link_to_collision_element_map_.clear();
-    controlled_link_to_collision_link_map_.clear();
+    controlled_joint_to_collision_link_map_.clear();
     for (int i = 0; i < links.size(); ++i)
     {
         // Check whether link is excluded from collision checking
@@ -657,13 +657,13 @@ void Scene::UpdateSceneFrames()
         obj_transform.translation() = ps_->getCurrentState().getGlobalLinkTransform(links[i]).translation();
         obj_transform.linear() = ps_->getCurrentState().getGlobalLinkTransform(links[i]).rotation();
 
-        int jointId = GetKinematicTree().IsControlledLink(links[i]->getName());
-        if (jointId != -1)
+        int joint_id = GetKinematicTree().IsControlledLink(links[i]->getName());
+        if (joint_id != -1)
         {
-            if (lastControlledJointId != jointId)
+            if (last_controlled_joint_id != joint_id)
             {
-                lastControlledLinkName = links[i]->getName();
-                lastControlledJointId = jointId;
+                last_controlled_joint_name = GetKinematicTree().GetControlledJointNames()[joint_id];
+                last_controlled_joint_id = joint_id;
             }
         }
 
@@ -682,15 +682,16 @@ void Scene::UpdateSceneFrames()
             collisionBodyTransform.linear() = collisionBodyTransform_affine.rotation();
             Eigen::Isometry3d trans = obj_transform.inverse(Eigen::Isometry) * collisionBodyTransform;
 
-            std::shared_ptr<KinematicElement> element = kinematica_.AddElement(links[i]->getName() + "_collision_" + std::to_string(j), trans, links[i]->getName(), links[i]->getShapes()[j]);
+            std::string collision_element_name = links[i]->getName() + "_collision_" + std::to_string(j);
+            std::shared_ptr<KinematicElement> element = kinematica_.AddElement(collision_element_name, trans, links[i]->getName(), links[i]->getShapes()[j]);
             model_link_to_collision_element_map_[links[i]->getName()].push_back(element);
 
             // Set up mappings
-            model_link_to_collision_link_map_[links[i]->getName()].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
+            model_link_to_collision_link_map_[links[i]->getName()].push_back(collision_element_name);
 
-            if (lastControlledLinkName != "")
+            if (last_controlled_joint_name != "")
             {
-                controlled_link_to_collision_link_map_[lastControlledLinkName].push_back(links[i]->getName() + "_collision_" + std::to_string(j));
+                controlled_joint_to_collision_link_map_[last_controlled_joint_name].push_back(collision_element_name);
             }
         }
     }

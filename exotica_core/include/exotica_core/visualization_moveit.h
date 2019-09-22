@@ -51,6 +51,6 @@ private:
     ScenePtr scene_ = std::make_shared<Scene>(nullptr);
     ros::Publisher trajectory_pub_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_VISUALIZATION_MOVEIT_H_

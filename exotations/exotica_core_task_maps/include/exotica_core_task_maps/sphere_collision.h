@@ -42,9 +42,6 @@ namespace exotica
 class SphereCollision : public TaskMap, public Instantiable<SphereCollisionInitializer>
 {
 public:
-    SphereCollision();
-    virtual ~SphereCollision();
-
     void Instantiate(const SphereCollisionInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
@@ -60,7 +57,8 @@ private:
     visualization_msgs::MarkerArray debug_msg_;
     ros::Publisher debug_pub_;
     double eps_;
+    int dim_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_SPHERE_COLLISION_H_

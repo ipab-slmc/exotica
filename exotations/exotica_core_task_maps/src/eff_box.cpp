@@ -71,14 +71,16 @@ void EffBox::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
     if (debug_ && Server::IsRos()) PublishObjectsAsMarkerArray();
 }
 
-Eigen::VectorXd EffBox::GetLowerLimit() const
+Eigen::Vector3d EffBox::GetLowerLimit(const int eff_id) const
 {
-    return eff_lower_;
+    if (eff_id < 0 || eff_id >= n_effs_) ThrowNamed("Given eff_id (" << eff_id << ") is out of range [0, " << n_effs_ << ")!");
+    return eff_lower_.segment<3>(3 * eff_id);
 }
 
-Eigen::VectorXd EffBox::GetUpperLimit() const
+Eigen::Vector3d EffBox::GetUpperLimit(const int eff_id) const
 {
-    return eff_upper_;
+    if (eff_id < 0 || eff_id >= n_effs_) ThrowNamed("Given eff_id (" << eff_id << ") is out of range [0, " << n_effs_ << ")!");
+    return eff_upper_.segment<3>(3 * eff_id);
 }
 
 void EffBox::PublishObjectsAsMarkerArray()

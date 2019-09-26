@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import rospy
 import pyexotica as exo
 import math
 import numpy as np
 import signal
+import exotica_core_task_maps_py
 from pyexotica.publish_trajectory import publish_pose, sig_int_handler
 import exotica_scipy_solver
 
@@ -21,6 +23,13 @@ class Example(object):
         self.problem = exo.Setup.load_problem('{exotica_examples}/resources/configs/example_ik_eff_box.xml')
         self.solver = exotica_scipy_solver.SciPyEndPoseSolver(self.problem, method='SLSQP')
         self.t0 = rospy.Time.now().to_sec()
+
+        # Extract and report EffBox limits
+        lower_limits = self.problem.get_task_maps()['EffBox'].get_lower_limit(0)
+        upper_limits = self.problem.get_task_maps()['EffBox'].get_upper_limit(0)
+        print("EffBox Limits:")
+        for i, d in enumerate(['X', 'Y', 'Z']):
+            print("  {}Lim: {}, {}".format(d, lower_limits[i], upper_limits[i]))
 
     def update(self, event):
 

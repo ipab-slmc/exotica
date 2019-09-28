@@ -52,8 +52,8 @@ public:
 
     void PublishObjectsAsMarkerArray();
 
-    Eigen::VectorXd GetLowerLimit() const;
-    Eigen::VectorXd GetUpperLimit() const;
+    Eigen::Vector3d GetLowerLimit(const int eff_id) const;
+    Eigen::Vector3d GetUpperLimit(const int eff_id) const;
 
 private:
     Eigen::VectorXd eff_lower_;   ///< End-effector lower x, y, z limit.

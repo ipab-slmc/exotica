@@ -111,10 +111,10 @@ void TimeIndexedRRTConnectSolver::Instantiate(const TimeIndexedRRTConnectSolverI
     algorithm_ = "Exotica_TimeIndexedRRTConnect";
     planner_allocator_ = boost::bind(&allocatePlanner<OMPLTimeIndexedRRTConnect>, _1, _2);
 
-    if (this->parameters_.RandomSeed != -1)
+    if (this->parameters_.RandomSeed > -1)
     {
         HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << this->parameters_.RandomSeed);
-        ompl::RNG::setSeed(this->parameters_.RandomSeed);
+        ompl::RNG::setSeed(static_cast<long unsigned int>(this->parameters_.RandomSeed));
     }
 }
 

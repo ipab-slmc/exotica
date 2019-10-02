@@ -140,7 +140,7 @@ add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_
 # mark all warnings as errors
 target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
 # enable additional warnings
-target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverloaded-virtual)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverloaded-virtual -Wfloat-conversion)
 
 # TODO: if you have time, remove these ignored warnings and fix them
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-reorder -Wno-unused-but-set-variable)

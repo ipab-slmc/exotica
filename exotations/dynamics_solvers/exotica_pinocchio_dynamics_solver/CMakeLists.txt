@@ -22,6 +22,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME} src/pinocchio_dynamics_solver.cpp)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}

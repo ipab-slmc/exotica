@@ -225,7 +225,7 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
         Eigen::VectorXd qs, qg;
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(0), qs, tstart);
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(states.size() - 1), qg, tgoal);
-        length = (tgoal - tstart) * this->parameters_.TrajectoryPointsPerSecond;
+        length = static_cast<int>(std::ceil((tgoal - tstart) * this->parameters_.TrajectoryPointsPerSecond));
     }
     pg.interpolate(length);
 

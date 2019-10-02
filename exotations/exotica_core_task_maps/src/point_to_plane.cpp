@@ -102,13 +102,13 @@ void PointToPlane::PublishDebug()
         plane.type = plane.CUBE;
         plane.action = plane.ADD;
         plane.frame_locked = true;
-        plane.color.g = 1.0;
-        plane.color.a = 0.8;
+        plane.color.g = 1.0f;
+        plane.color.a = 0.8f;
         tf::poseKDLToMsg(frames_[i].frame_B_offset, plane.pose);
 
-        plane.scale.x = 10;
-        plane.scale.y = 10;
-        plane.scale.z = 0.01;
+        plane.scale.x = 10.f;
+        plane.scale.y = 10.f;
+        plane.scale.z = 0.01f;
         plane.pose.position.z -= (plane.scale.z / 2);
 
         msg.markers.push_back(plane);

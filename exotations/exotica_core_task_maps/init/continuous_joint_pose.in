@@ -2,4 +2,4 @@ class ContinuousJointPose
 
 extend <exotica_core/task_map>
 
-Optional Eigen::VectorXd JointMap = Eigen::VectorXd();
+Optional Eigen::VectorXi JointMap = Eigen::VectorXi();

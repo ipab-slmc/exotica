@@ -53,7 +53,7 @@ void SphereCollision::Instantiate(const SphereCollisionInitializer& init)
     for (auto& it : groups_)
     {
         std_msgs::ColorRGBA col = RandomColor();
-        col.a = init.Alpha;
+        col.a = static_cast<float>(init.Alpha);
         for (int i : it.second)
         {
             debug_msg_.markers[i].color = col;

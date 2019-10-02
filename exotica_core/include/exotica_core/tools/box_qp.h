@@ -118,7 +118,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
         Eigen::VectorXd x_new;
         for (int ai = 0; ai < alpha_space.rows(); ++ai)
         {
-            int alpha = alpha_space[ai];
+            const double& alpha = alpha_space[ai];
 
             x_new = x;
             for (int i = 0; i < free_idx.size(); ++i)

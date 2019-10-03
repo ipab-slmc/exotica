@@ -183,6 +183,12 @@ inline double ToNumber<double>(const std::string& val)
     return std::stod(val);
 }
 
+template <>
+inline int ToNumber<int>(const std::string& val)
+{
+    return std::stoi(val);
+}
+
 template <typename T, const int S>  // Eigen::Vector<S><T>
 inline Eigen::Matrix<T, S, 1> ParseVector(const std::string value)
 {

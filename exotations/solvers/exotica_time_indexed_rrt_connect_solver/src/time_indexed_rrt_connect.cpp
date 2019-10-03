@@ -111,10 +111,10 @@ void TimeIndexedRRTConnectSolver::Instantiate(const TimeIndexedRRTConnectSolverI
     algorithm_ = "Exotica_TimeIndexedRRTConnect";
     planner_allocator_ = boost::bind(&allocatePlanner<OMPLTimeIndexedRRTConnect>, _1, _2);
 
-    if (this->parameters_.RandomSeed != -1)
+    if (this->parameters_.RandomSeed > -1)
     {
         HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << this->parameters_.RandomSeed);
-        ompl::RNG::setSeed(this->parameters_.RandomSeed);
+        ompl::RNG::setSeed(static_cast<long unsigned int>(this->parameters_.RandomSeed));
     }
 }
 
@@ -225,7 +225,7 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
         Eigen::VectorXd qs, qg;
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(0), qs, tstart);
         state_space_->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(pg.getState(states.size() - 1), qg, tgoal);
-        length = (tgoal - tstart) * this->parameters_.TrajectoryPointsPerSecond;
+        length = static_cast<int>(std::ceil((tgoal - tstart) * this->parameters_.TrajectoryPointsPerSecond));
     }
     pg.interpolate(length);
 

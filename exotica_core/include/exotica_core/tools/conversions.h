@@ -30,13 +30,18 @@
 #ifndef EXOTICA_CORE_CONVERSIONS_H_
 #define EXOTICA_CORE_CONVERSIONS_H_
 
-#include <Eigen/Dense>
-#include <kdl/frames.hpp>
-#include <kdl/jacobian.hpp>
 #include <map>
 #include <memory>
-#include <unsupported/Eigen/CXX11/Tensor>
 #include <vector>
+
+#include <kdl/frames.hpp>
+#include <kdl/jacobian.hpp>
+
+#include <Eigen/Dense>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+#include <unsupported/Eigen/CXX11/Tensor>
+#pragma GCC diagnostic pop
 
 #include <exotica_core/tools/exception.h>
 #include <exotica_core/tools/printable.h>
@@ -176,6 +181,12 @@ template <>
 inline double ToNumber<double>(const std::string& val)
 {
     return std::stod(val);
+}
+
+template <>
+inline int ToNumber<int>(const std::string& val)
+{
+    return std::stoi(val);
 }
 
 template <typename T, const int S>  // Eigen::Vector<S><T>

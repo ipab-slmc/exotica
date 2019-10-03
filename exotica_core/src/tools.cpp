@@ -48,9 +48,9 @@ std_msgs::ColorRGBA RandomColor()
     std::random_device rd_;
     std::mt19937 gen(rd_());
     std::uniform_real_distribution<> dis(0.0, 1.0);
-    ret.r = dis(gen);
-    ret.g = dis(gen);
-    ret.b = dis(gen);
+    ret.r = static_cast<float>(dis(gen));
+    ret.g = static_cast<float>(dis(gen));
+    ret.b = static_cast<float>(dis(gen));
     return ret;
 }
 

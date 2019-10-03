@@ -39,8 +39,8 @@ typedef struct BoxQPSolution
 {
     Eigen::MatrixXd Hff_inv;
     Eigen::MatrixXd x;
-    std::vector<int> free_idx;
-    std::vector<int> clamped_idx;
+    std::vector<size_t> free_idx;
+    std::vector<size_t> clamped_idx;
 } BoxQPSolution;
 
 inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
@@ -50,7 +50,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
 {
     int it = 0;
     Eigen::VectorXd delta_xf, x = x_init;
-    std::vector<int> clamped_idx, free_idx;
+    std::vector<size_t> clamped_idx, free_idx;
     Eigen::VectorXd grad = q + H * x_init;
     Eigen::MatrixXd Hff, Hfc, Hff_inv;
 
@@ -84,24 +84,24 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
             Hff = H;
         else
         {
-            for (int i = 0; i < free_idx.size(); ++i)
-                for (int j = 0; j < free_idx.size(); ++j)
+            for (size_t i = 0; i < free_idx.size(); ++i)
+                for (size_t j = 0; j < free_idx.size(); ++j)
                     Hff(i, j) = H(free_idx[i], free_idx[j]);
 
-            for (int i = 0; i < free_idx.size(); ++i)
-                for (int j = 0; j < clamped_idx.size(); ++j)
+            for (size_t i = 0; i < free_idx.size(); ++i)
+                for (size_t j = 0; j < clamped_idx.size(); ++j)
                     Hfc(i, j) = H(free_idx[i], clamped_idx[j]);
         }
 
         // NOTE: Array indexing not supported in current eigen version
         Eigen::VectorXd q_free(free_idx.size()), x_free(free_idx.size()), x_clamped(clamped_idx.size());
-        for (int i = 0; i < free_idx.size(); ++i)
+        for (size_t i = 0; i < free_idx.size(); ++i)
         {
             q_free(i) = q(free_idx[i]);
             x_free(i) = x(free_idx[i]);
         }
 
-        for (int j = 0; j < clamped_idx.size(); ++j)
+        for (size_t j = 0; j < clamped_idx.size(); ++j)
             x_clamped(j) = x(clamped_idx[j]);
 
         Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * lambda + Hff).inverse();
@@ -118,10 +118,10 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
         Eigen::VectorXd x_new;
         for (int ai = 0; ai < alpha_space.rows(); ++ai)
         {
-            int alpha = alpha_space[ai];
+            const double& alpha = alpha_space[ai];
 
             x_new = x;
-            for (int i = 0; i < free_idx.size(); ++i)
+            for (size_t i = 0; i < free_idx.size(); ++i)
                 x_new(free_idx[i]) = std::max(std::min(
                                                   x(free_idx[i]) + alpha * delta_xf(i), b_high(i)),
                                               b_low(i));

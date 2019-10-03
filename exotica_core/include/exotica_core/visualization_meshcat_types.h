@@ -286,7 +286,7 @@ struct ArrayFloat
     {
         data.resize(size);
         for (unsigned int i = 0; i < size; ++i)
-            data[i] = data_in[i];
+            data[i] = static_cast<float>(data_in[i]);
 #ifdef MSGPACK_FEATURE_NOT_SUPPORTED
         array = data;
         WARNING("MSGPACK version does not support sending this type of data. Ignoring.");

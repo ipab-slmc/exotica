@@ -229,10 +229,10 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
     if (ompl_simple_setup_->getPlanner()->params().hasParam("GoalBias"))
         ompl_simple_setup_->getPlanner()->params().setParam("GoalBias", init_.GoalBias);
 
-    if (init_.RandomSeed != -1)
+    if (init_.RandomSeed > -1)
     {
         HIGHLIGHT_NAMED(algorithm_, "Setting random seed to " << init_.RandomSeed);
-        ompl::RNG::setSeed(init_.RandomSeed);
+        ompl::RNG::setSeed(static_cast<long unsigned int>(init_.RandomSeed));
     }
 
     SetGoalState(prob_->GetGoalState(), init_.Epsilon);

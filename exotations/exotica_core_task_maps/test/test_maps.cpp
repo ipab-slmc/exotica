@@ -612,11 +612,11 @@ TEST(ExoticaTaskMaps, testSphereCollision)
     }
 }
 
-TEST(ExoticaTaskMaps, testIdentity)
+TEST(ExoticaTaskMaps, testJointPose)
 {
     try
     {
-        TEST_COUT << "Identity test";
+        TEST_COUT << "JointPose test";
         Initializer map("exotica/JointPose", {{"Name", std::string("MyTask")}});
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
@@ -650,7 +650,7 @@ TEST(ExoticaTaskMaps, testIdentity)
         }
         EXPECT_TRUE(test_jacobian(problem));
 
-        TEST_COUT << "Identity test with reference";
+        TEST_COUT << "JointPose test with reference";
         map = Initializer("exotica/JointPose", {{"Name", std::string("MyTask")},
                                                 {"JointRef", std::string("0.5 0.5 0.5")}});
         problem = setup_problem(map);
@@ -685,7 +685,7 @@ TEST(ExoticaTaskMaps, testIdentity)
         }
         EXPECT_TRUE(test_jacobian(problem));
 
-        TEST_COUT << "Identity test with subset of joints";
+        TEST_COUT << "JointPose test with subset of joints";
         map = Initializer("exotica/JointPose", {{"Name", std::string("MyTask")},
                                                 {"JointMap", std::string("0")}});
         problem = setup_problem(map);
@@ -710,9 +710,9 @@ TEST(ExoticaTaskMaps, testIdentity)
         }
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "JointPose: Uncaught exception!" << e.what();
     }
 }
 

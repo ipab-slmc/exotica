@@ -125,6 +125,8 @@ def parser(type):
         parser = "ParseVector<double,3>"
     elif type == 'Eigen::Vector2d':
         parser = 'ParseVector<double,2>'
+    elif type == 'Eigen::VectorXi':
+        parser = "ParseVector<int,Eigen::Dynamic>"
     elif type == 'bool':
         parser = "ParseBool"
     elif type == 'double':

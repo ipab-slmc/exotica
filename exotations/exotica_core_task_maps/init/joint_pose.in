@@ -3,4 +3,4 @@ class JointPose
 extend <exotica_core/task_map>
 
 Optional Eigen::VectorXd JointRef = Eigen::VectorXd();
-Optional Eigen::VectorXd JointMap = Eigen::VectorXd();
+Optional Eigen::VectorXi JointMap = Eigen::VectorXi();

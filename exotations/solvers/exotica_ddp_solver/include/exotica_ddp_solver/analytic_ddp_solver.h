@@ -47,6 +47,8 @@ private:
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.
     void BackwardPass() override;
+
+    Eigen::LLT<Eigen::MatrixXd> Quu_llt_;
 };
 }  // namespace exotica
 

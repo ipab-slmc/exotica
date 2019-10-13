@@ -71,7 +71,35 @@ protected:
     double ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u);
 
     AbstractDDPSolverInitializer base_parameters_;
-    Eigen::MatrixXd best_ref_x_, best_ref_u_;  ///!< Reference trajectory for feedback control.
+
+    inline void IncreaseRegularization()
+    {
+        lambda_ *= 10.;
+    }
+
+    inline void DecreaseRegularization()
+    {
+        lambda_ /= 10.;
+    }
+
+    // Local variables used in the solver - copies get updated at the beginning of solve:
+    Eigen::VectorXd alpha_space_;
+    double lambda_;  ///!< Regularisation (Vxx, Quu)
+    int T_;
+    int NU_;
+    int NX_;
+    double dt_;
+    double cost_;        ///!< Cost during iteration
+    double cost_prev_;   ///!< Cost during previous iteration
+    double alpha_best_;  ///!< Line-search step taken
+    double time_taken_forward_pass_, time_taken_backward_pass_;
+    Eigen::MatrixXd U_try_;   ///!< Updated control trajectory during iteration.
+    Eigen::MatrixXd U_prev_;  ///!< Last accepted control trajectory
+    Eigen::MatrixXd X_ref_;   ///!< Reference state trajectory for feedback control.
+    Eigen::MatrixXd U_ref_;   ///!< Reference control trajectory for feedback control.
+    Eigen::MatrixXd Qx_, Qu_, Qxx_, Quu_, Qux_, Quu_inv_, Vxx_;
+    Eigen::VectorXd Vx_;
+    Eigen::MatrixXd fx_, fu_;
 };
 
 }  // namespace exotica

@@ -244,18 +244,18 @@ void AbstractDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
     if (debug_) HIGHLIGHT_NAMED("DDPSolver", "initialized");
 }
 
-double AbstractDDPSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst X_ref_, Eigen::MatrixXdRefConst U_ref_)
+double AbstractDDPSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst X_ref, Eigen::MatrixXdRefConst U_ref)
 {
     double cost = 0.0;
     Eigen::VectorXd u_hat(NU_);  // TODO: allocate outside
 
     for (int t = 0; t < T_ - 1; ++t)
     {
-        u_hat = U_ref_.col(t);
+        u_hat = U_ref.col(t);
 
         // eq. 12 - TODO: Which paper?
         u_hat.noalias() += alpha * k_gains_[t];
-        u_hat.noalias() += K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), X_ref_.col(t));
+        u_hat.noalias() += K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), X_ref.col(t));
 
         // Clamp controls, if desired:
         if (base_parameters_.ClampControlsInForwardPass)

@@ -18,6 +18,7 @@
   <depend>exotica_ik_solver</depend>
   <depend>sensor_msgs</depend>
   <exec_depend>exotica_collision_scene_fcl</exec_depend>
+  <exec_depend>exotica_ddp_solver</exec_depend>
   <exec_depend>exotica_ompl_solver</exec_depend>
   <exec_depend>exotica_scipy_solver</exec_depend>
   <exec_depend>exotica_time_indexed_rrt_connect_solver</exec_depend>

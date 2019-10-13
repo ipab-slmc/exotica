@@ -275,7 +275,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     PreUpdate();
 }
 
-int DynamicTimeIndexedShootingProblem::get_T() const
+const int& DynamicTimeIndexedShootingProblem::get_T() const
 {
     return T_;
 }
@@ -290,7 +290,7 @@ void DynamicTimeIndexedShootingProblem::set_T(const int& T_in)
     ReinitializeVariables();
 }
 
-double DynamicTimeIndexedShootingProblem::get_tau() const
+const double& DynamicTimeIndexedShootingProblem::get_tau() const
 {
     return tau_;
 }
@@ -319,7 +319,7 @@ void DynamicTimeIndexedShootingProblem::PreUpdate()
     }
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X() const
+const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::get_X() const
 {
     return X_;
 }
@@ -336,7 +336,7 @@ void DynamicTimeIndexedShootingProblem::set_X(Eigen::MatrixXdRefConst X_in)
     X_ = X_in;
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_U() const
+const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::get_U() const
 {
     return U_;
 }
@@ -353,7 +353,7 @@ void DynamicTimeIndexedShootingProblem::set_U(Eigen::MatrixXdRefConst U_in)
     U_ = U_in;
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_X_star() const
+const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::get_X_star() const
 {
     return X_star_;
 }
@@ -364,18 +364,18 @@ void DynamicTimeIndexedShootingProblem::set_X_star(Eigen::MatrixXdRefConst X_sta
     X_star_ = X_star_in;
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_Q(int t) const
+const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::get_Q(int t) const
 {
     ValidateTimeIndex(t);
     return Q_[t];
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_Qf() const
+const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::get_Qf() const
 {
-    return get_Q(T_ - 1);
+    return Q_[T_ - 1];
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_R() const
+const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::get_R() const
 {
     return R_;
 }
@@ -577,7 +577,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
 }
 
 // F[i]_u
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlNoiseJacobian(int column_idx) const
+const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::GetControlNoiseJacobian(int column_idx) const
 {
     if (column_idx < 0 || column_idx >= num_velocities_)
         ThrowPretty("Requested column_idx=" << column_idx << " out of range; needs to be 0 <= column_idx < " << num_velocities_ - 1);

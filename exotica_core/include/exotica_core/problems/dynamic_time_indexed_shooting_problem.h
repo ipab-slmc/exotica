@@ -49,32 +49,32 @@ public:
     void PreUpdate() override;
     void Update(Eigen::VectorXdRefConst u, int t);
 
-    int get_T() const;            ///< Returns the number of timesteps in the state trajectory.
+    const int& get_T() const;     ///< Returns the number of timesteps in the state trajectory.
     void set_T(const int& T_in);  ///< Sets the number of timesteps in the state trajectory.
 
-    double get_tau() const;  ///< Returns the discretization timestep tau
+    const double& get_tau() const;  ///< Returns the discretization timestep tau
 
-    Eigen::MatrixXd get_X() const;             ///< Returns the state trajectory X
+    const Eigen::MatrixXd& get_X() const;      ///< Returns the state trajectory X
     Eigen::VectorXd get_X(int t) const;        ///< Returns the state at time t
     void set_X(Eigen::MatrixXdRefConst X_in);  ///< Sets the state trajectory X (can be used as the initial guess)
 
-    Eigen::MatrixXd get_U() const;             ///< Returns the control trajectory U
+    const Eigen::MatrixXd& get_U() const;      ///< Returns the control trajectory U
     Eigen::VectorXd get_U(int t) const;        ///< Returns the control state at time t
     void set_U(Eigen::MatrixXdRefConst U_in);  ///< Sets the control trajectory U (can be used as the initial guess)
 
-    Eigen::MatrixXd get_X_star() const;                  ///< Returns the target state trajectory X
+    const Eigen::MatrixXd& get_X_star() const;           ///< Returns the target state trajectory X
     void set_X_star(Eigen::MatrixXdRefConst X_star_in);  ///< Sets the target state trajectory X
 
-    Eigen::MatrixXd get_Q(int t) const;               ///< Returns the precision matrix at time step t
+    const Eigen::MatrixXd& get_Q(int t) const;        ///< Returns the precision matrix at time step t
     void set_Q(Eigen::MatrixXdRefConst Q_in, int t);  ///< Sets the precision matrix for time step t
 
-    Eigen::MatrixXd get_Qf() const;             ///< Returns the cost weight matrix at time N
+    const Eigen::MatrixXd& get_Qf() const;      ///< Returns the cost weight matrix at time N
     void set_Qf(Eigen::MatrixXdRefConst Q_in);  ///< Sets the cost weight matrix for time N
 
-    Eigen::MatrixXd get_R() const;       ///< Returns the control weight matrix
-    Eigen::MatrixXd get_F(int t) const;  ///< Returns the noise weight matrix at time t
+    const Eigen::MatrixXd& get_R() const;  ///< Returns the control weight matrix
+    Eigen::MatrixXd get_F(int t) const;    ///< Returns the noise weight matrix at time t
 
-    Eigen::MatrixXd GetControlNoiseJacobian(int column_idx) const;  ///< F[i]_u
+    const Eigen::MatrixXd& GetControlNoiseJacobian(int column_idx) const;  ///< F[i]_u
 
     void EnableStochasticUpdates();
     void DisableStochasticUpdates();
@@ -133,9 +133,10 @@ protected:
     Eigen::MatrixXd U_;       ///< Control trajectory. Size: num-controls x (T-1)
     Eigen::MatrixXd X_star_;  ///< Goal state trajectory (i.e., positions, velocities). Size: num-states x T
 
-    Eigen::MatrixXd Qf_;               ///< Final state cost
-    std::vector<Eigen::MatrixXd> Q_;   ///< State space penalty matrix (precision matrix), per time index
-    Eigen::MatrixXd R_;                ///< Control space penalty matrix
+    Eigen::MatrixXd Qf_;              ///< Final state cost
+    std::vector<Eigen::MatrixXd> Q_;  ///< State space penalty matrix (precision matrix), per time index
+    Eigen::MatrixXd R_;               ///< Control space penalty matrix
+
     std::vector<Eigen::MatrixXd> Ci_;  ///< Noise weight terms
     Eigen::MatrixXd CW_;               ///< White noise covariance
 

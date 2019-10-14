@@ -32,17 +32,15 @@
 
 #include <Eigen/Dense>
 
-#include <exotica_core/tools.h>
-
 namespace exotica
 {
 /// \brief DetDiff2D Computes the 2D determinant (analogous to a 2D cross product) of a two vectors defined by P_1P_2 and P_1P.
-double DetDiff2D(Eigen::VectorXdRefConst p1, Eigen::VectorXdRefConst p2, Eigen::VectorXdRefConst p)
+double DetDiff2D(const Eigen::Ref<const Eigen::Vector2d>& p1, const Eigen::Ref<const Eigen::Vector2d>& p2, const Eigen::Ref<const Eigen::Vector2d>& p)
 {
     return (p(1) - p1(1)) * (p2(0) - p1(0)) - (p2(1) - p1(1)) * (p(0) - p1(0));
 }
 
-std::list<int> QuickHull(Eigen::MatrixXdRefConst points, std::list<int>& half_points, int p1, int p2)
+std::list<int> QuickHull(const Eigen::Ref<const Eigen::MatrixXd>& points, std::list<int>& half_points, int p1, int p2)
 {
     int ind = -1;
     double max_dist = 0;
@@ -75,7 +73,7 @@ std::list<int> QuickHull(Eigen::MatrixXdRefConst points, std::list<int>& half_po
     return hull;
 }
 
-std::list<int> ConvexHull2D(Eigen::MatrixXdRefConst points)
+std::list<int> ConvexHull2D(const Eigen::Ref<const Eigen::MatrixXd>& points)
 {
     if (points.cols() != 2) ThrowPretty("Input must contain 2D points!");
 
@@ -105,6 +103,6 @@ std::list<int> ConvexHull2D(Eigen::MatrixXdRefConst points)
 
     return hull;
 }
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H_

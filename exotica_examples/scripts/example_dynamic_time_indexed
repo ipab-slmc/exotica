@@ -58,6 +58,8 @@ plt.figure()
 plt.plot(range(len(costs[1])), costs[1])
 plt.xlabel('Iteration')
 plt.ylabel('Cost')
+plt.yscale('log')
+plt.grid()
 plt.show()
 
 

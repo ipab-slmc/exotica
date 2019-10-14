@@ -5,4 +5,4 @@ Optional int FunctionTolerancePatience = 10; // early stopping or patience
 Optional double FunctionTolerance = 1e-3; 
 Optional bool UseSecondOrderDynamics = false;
 Optional double RegularizationRate = 1e-5;
-Optional bool ClampControlsInForwardPass = true;
+Optional bool ClampControlsInForwardPass = false;

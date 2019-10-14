@@ -42,9 +42,6 @@ namespace exotica
 class QuasiStatic : public TaskMap, public Instantiable<QuasiStaticInitializer>
 {
 public:
-    QuasiStatic();
-    virtual ~QuasiStatic();
-
     void AssignScene(ScenePtr scene) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;

@@ -39,16 +39,13 @@ namespace exotica
 {
 constexpr double eps = 1e-8;
 
-QuasiStatic::QuasiStatic() = default;
-QuasiStatic::~QuasiStatic() = default;
-
 ///
 /// \brief cross 2D cross product (z coordinate of a 3D cross product of 2 vectors on a xy plane).
 /// \param a 2D Vector.
 /// \param b 2D Vector.
 /// \return 2D cross product.
 ///
-double cross(Eigen::VectorXdRefConst a, Eigen::VectorXdRefConst b)
+inline double cross(const Eigen::Ref<const Eigen::Vector2d>& a, const Eigen::Ref<const Eigen::Vector2d>& b)
 {
     return a(0) * b(1) - a(1) * b(0);
 }
@@ -60,7 +57,7 @@ double cross(Eigen::VectorXdRefConst a, Eigen::VectorXdRefConst b)
 /// \param B 2nd point on the line.
 /// \param P Query point.
 ///
-void potential(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P)
+void potential(double& phi, const Eigen::Ref<const Eigen::Vector2d>& A, const Eigen::Ref<const Eigen::Vector2d>& B, const Eigen::Ref<const Eigen::Vector2d>& P)
 {
     double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
     double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
@@ -76,21 +73,21 @@ void potential(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B
 }
 
 ///
-/// \brief potential Calculates electrostatic potential at pont P induced by a uniformly charged line AB.
+/// \brief potential Calculates electrostatic potential at point P induced by a uniformly charged line AB.
 /// \param phi Potential.
-/// \param jacobian Gradient of the potential.
-/// \param A 1st point on the line.
-/// \param B 2nd point on the line.
-/// \param P Query point.
-/// \param A_ Derivative of 1st point on the line.
-/// \param B_ Derivative of 2nd point on the line.
-/// \param P_ Derivative of query point.
+/// \param jacobian Gradient of the potential (1 x NQ).
+/// \param A 1st point on the line (2 x 1).
+/// \param B 2nd point on the line (2 x 1).
+/// \param P Query point (2 x 1).
+/// \param A_ Derivative of 1st point on the line (2 x NQ).
+/// \param B_ Derivative of 2nd point on the line (2 x NQ).
+/// \param P_ Derivative of query point (2 x NQ).
 ///
-void potential(double& phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
+void potential(double& phi, Eigen::Ref<Eigen::RowVectorXd> jacobian, const Eigen::Ref<const Eigen::Vector2d>& A, const Eigen::Ref<const Eigen::Vector2d>& B, const Eigen::Ref<const Eigen::Vector2d>& P, const Eigen::Ref<const Eigen::Matrix2Xd>& A_, const Eigen::Ref<const Eigen::Matrix2Xd>& B_, const Eigen::Ref<const Eigen::Matrix2Xd>& P_)
 {
-    double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
-    double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
-    double E = cross(A, B) - cross(A, P) + cross(B, P);
+    const double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
+    const double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
+    const double E = cross(A, B) - cross(A, P) + cross(B, P);
     if (fabs(E) < eps)
     {
         phi = 0.0;
@@ -99,50 +96,52 @@ void potential(double& phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst
     else
     {
         phi = (atan(C / E) - atan(D / E)) / E;
-        for (int i = 0; i < jacobian.rows(); ++i)
+        double C_, D_, E_;
+        for (int i = 0; i < jacobian.size(); ++i)
         {
-            double C_ = A_.col(i).dot(B) + A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) - 2 * B_.col(i).dot(B);
-            double D_ = -A_.col(i).dot(B) - A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) + 2 * A_.col(i).dot(A);
-            double E_ = cross(A_.col(i), B) + cross(A, B_.col(i)) - cross(A_.col(i), P) - cross(A, P_.col(i)) + cross(B_.col(i), P) + cross(B, P_.col(i));
+            C_ = A_.col(i).dot(B) + A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) - 2 * B_.col(i).dot(B);
+            D_ = -A_.col(i).dot(B) - A.dot(B_.col(i)) - A_.col(i).dot(P) - A.dot(P_.col(i)) + B_.col(i).dot(P) + B.dot(P_.col(i)) + 2 * A_.col(i).dot(A);
+            E_ = cross(A_.col(i), B) + cross(A, B_.col(i)) - cross(A_.col(i), P) - cross(A, P_.col(i)) + cross(B_.col(i), P) + cross(B, P_.col(i));
             jacobian(i) = ((C_ / E - E_ * C / E / E) / (C * C / E / E + 1) - (D_ / E - E_ * D / E / E) / (D * D / E / E + 1)) / E - E_ / E * phi;
         }
     }
 }
 
 ///
-/// \brief winding Calculates the winding number around pont P w.r.t. thw line AB.
+/// \brief winding Calculates the winding number around point P w.r.t. the line AB.
 /// \param phi Winding number.
 /// \param A 1st point on the line.
 /// \param B 2nd point on the line.
 /// \param P Query point.
 ///
-void winding(double& phi, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P)
+void winding(double& phi, const Eigen::Ref<const Eigen::Vector2d>& A, const Eigen::Ref<const Eigen::Vector2d>& B, const Eigen::Ref<const Eigen::Vector2d>& P)
 {
-    double C = cross(A - P, B - P);
-    double D = (A - P).dot(B - P);
+    const double C = cross(A - P, B - P);
+    const double D = (A - P).dot(B - P);
     phi = atan2(C, D) / 2.0 / M_PI;
 }
 
 ///
-/// \brief winding Calculates the winding number around pont P w.r.t. thw line AB.
+/// \brief winding Calculates the winding number around point P w.r.t. the line AB.
 /// \param phi Winding number.
-/// \param jacobian Gradient of the Winding number.
-/// \param A 1st point on the line.
-/// \param B 2nd point on the line.
-/// \param P Query point.
-/// \param A_ Derivative of 1st point on the line.
-/// \param B_ Derivative of 2nd point on the line.
-/// \param P_ Derivative of query point.
+/// \param jacobian Gradient of the Winding number (1 x NQ).
+/// \param A 1st point on the line (2 x 1).
+/// \param B 2nd point on the line (2 x 1).
+/// \param P Query point (2 x 1).
+/// \param A_ Derivative of 1st point on the line (2 x NQ).
+/// \param B_ Derivative of 2nd point on the line (2 x NQ).
+/// \param P_ Derivative of query point (2 x NQ).
 ///
-void winding(double& phi, Eigen::VectorXdRef jacobian, Eigen::VectorXdRefConst A, Eigen::VectorXdRefConst B, Eigen::VectorXdRefConst P, Eigen::MatrixXdRefConst A_, Eigen::MatrixXdRefConst B_, Eigen::MatrixXdRefConst P_)
+void winding(double& phi, Eigen::Ref<Eigen::RowVectorXd> jacobian, const Eigen::Ref<const Eigen::Vector2d>& A, const Eigen::Ref<const Eigen::Vector2d>& B, const Eigen::Ref<const Eigen::Vector2d>& P, const Eigen::Ref<const Eigen::Matrix2Xd>& A_, const Eigen::Ref<const Eigen::Matrix2Xd>& B_, const Eigen::Ref<const Eigen::Matrix2Xd>& P_)
 {
-    double C = cross(A - P, B - P);
-    double D = (A - P).dot(B - P);
+    const double C = cross(A - P, B - P);
+    const double D = (A - P).dot(B - P);
     phi = atan2(C, D) / 2.0 / M_PI;
-    for (int i = 0; i < jacobian.rows(); ++i)
+    double C_, D_;
+    for (int i = 0; i < jacobian.size(); ++i)
     {
-        double C_ = cross(A_.col(i) - P_.col(i), B - P) + cross(A - P, B_.col(i) - P_.col(i));
-        double D_ = (A_.col(i) - P_.col(i)).dot(B - P) + (A - P).dot(B_.col(i) - P_.col(i));
+        C_ = cross(A_.col(i) - P_.col(i), B - P) + cross(A - P, B_.col(i) - P_.col(i));
+        D_ = (A_.col(i) - P_.col(i)).dot(B - P) + (A - P).dot(B_.col(i) - P_.col(i));
         jacobian(i) = (C_ * D - C * D_) / (C * C + D * D) / 2.0 / M_PI;
     }
 }
@@ -170,9 +169,8 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     }
     if (M == 0.0) return;
     kdl_com = kdl_com / M;
-    Eigen::VectorXd com(2);
-    com(0) = kdl_com[0];
-    com(1) = kdl_com[1];
+    Eigen::Vector2d com;
+    com << kdl_com[0], kdl_com[1];
 
     Eigen::MatrixXd supports(kinematics[0].Phi.rows(), 2);
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
@@ -254,7 +252,7 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
                 KDL::Frame com_local = scene_->GetKinematicTree().FK(element, cog, nullptr, KDL::Frame());
                 Eigen::MatrixXd jacobian_com_local = scene_->GetKinematicTree().Jacobian(element, cog, nullptr, KDL::Frame());
                 kdl_com += com_local.p * mass;
-                jacobian_com += jacobian_com_local.topRows(2) * mass;
+                jacobian_com += jacobian_com_local.topRows<2>() * mass;
                 M += mass;
             }
         }
@@ -272,7 +270,7 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     {
         supports(i, 0) = kinematics[0].Phi(i).p[0];
         supports(i, 1) = kinematics[0].Phi(i).p[1];
-        supportsJ.middleRows(i * 2, 2) = kinematics[0].jacobian(i).data.topRows(2);
+        supportsJ.middleRows(i * 2, 2) = kinematics[0].jacobian(i).data.topRows<2>();
     }
 
     std::list<int> hull = ConvexHull2D(supports);
@@ -366,7 +364,7 @@ void QuasiStatic::Initialize()
         mrk.scale.x = 0.02;
         debug_msg_.markers.push_back(mrk);
     }
-    if (debug_)
+    if (Server::IsRos())
     {
         debug_pub_ = Server::Advertise<visualization_msgs::MarkerArray>(ns_ + "/exotica/QuasiStatic", 1, true);
     }
@@ -377,4 +375,4 @@ void QuasiStatic::AssignScene(ScenePtr scene)
     scene_ = scene;
     Initialize();
 }
-}
+}  // namespace exotica

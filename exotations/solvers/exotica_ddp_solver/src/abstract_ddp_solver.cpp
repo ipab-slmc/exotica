@@ -165,13 +165,6 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             last_best_iteration = iteration;
         }
 
-        // Iteration limit
-        if (iteration == GetNumberOfMaxIterations())
-        {
-            if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
-            prob_->termination_criterion = TerminationCriterion::IterationLimit;
-        }
-
         // Regularization
         if (lambda_ != 0.0 && lambda_ > 1e9)
         {
@@ -212,6 +205,13 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
         X_ref_ = prob_->get_X();
 
         prob_->SetCostEvolution(iteration, cost_);
+
+        // Iteration limit
+        if (iteration == GetNumberOfMaxIterations())
+        {
+            if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
+            prob_->termination_criterion = TerminationCriterion::IterationLimit;
+        }
     }
 
     // Store the best solution found over all iterations

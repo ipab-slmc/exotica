@@ -1,6 +1,7 @@
-#- git:
-#    uri: https://github.com/ipab-slmc/eigenpy_catkin.git
-#    local-name: eigenpy
-#- git:
-#    uri: https://github.com/ipab-slmc/pinocchio_catkin.git
-#    local-name: pinocchio
+- git:
+    uri: https://github.com/stack-of-tasks/eigenpy.git
+    local-name: eigenpy
+- git:
+    uri: https://github.com/wxmerkt/pinocchio.git
+    version: topic/wxm-add-package.xml
+    local-name: pinocchio

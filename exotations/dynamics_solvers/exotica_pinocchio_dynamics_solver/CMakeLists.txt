@@ -7,7 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(PINOCCHIO pinocchio>=2.0.0 REQUIRED )
+pkg_check_modules(PINOCCHIO pinocchio REQUIRED)
 
 AddInitializer(pinocchio_dynamics_solver)
 GenInitializers()

@@ -181,7 +181,7 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
     std::list<int> hull = ConvexHull2D(supports);
 
-    double n = hull.size();
+    double n = static_cast<double>(hull.size());
     double wnd = 0.0;
     double pot = 0.0;
     double tmp;
@@ -275,7 +275,7 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
 
     std::list<int> hull = ConvexHull2D(supports);
 
-    double n = hull.size();
+    double n = static_cast<double>(hull.size());
     double wnd = 0.0;
     double pot = 0.0;
     Eigen::VectorXd potJ = jacobian.row(0);

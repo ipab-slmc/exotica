@@ -39,13 +39,10 @@ namespace exotica
 class EffPosition : public TaskMap, public Instantiable<EffPositionInitializer>
 {
 public:
-    EffPosition();
-    virtual ~EffPosition();
-
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_EFF_POSITION_H_

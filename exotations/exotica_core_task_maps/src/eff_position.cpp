@@ -33,9 +33,6 @@ REGISTER_TASKMAP_TYPE("EffPosition", exotica::EffPosition);
 
 namespace exotica
 {
-EffPosition::EffPosition() = default;
-EffPosition::~EffPosition() = default;
-
 void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
@@ -64,4 +61,4 @@ int EffPosition::TaskSpaceDim()
 {
     return kinematics[0].Phi.rows() * 3;
 }
-}
+}  // namespace exotica

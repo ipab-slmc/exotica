@@ -41,80 +41,85 @@ void AnalyticDDPSolver::Instantiate(const AnalyticDDPSolverInitializer& init)
 
 void AnalyticDDPSolver::BackwardPass()
 {
-    constexpr double min_clamp_ = -1e10;
-    constexpr double max_clamp_ = 1e10;
-    const int T = prob_->get_T();
-    const double dt = dynamics_solver_->get_dt();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-    const double dt_squared = dynamics_solver_->get_dt() * dynamics_solver_->get_dt();
-
-    Eigen::MatrixXd Qx, Qu, Qxx, Quu, Qux, Quu_inv, Vxx;
-    Eigen::VectorXd Vx;
-
-    // V = prob_->GetStateCost(T - 1);
-    Vx = prob_->GetStateCostJacobian(T - 1);
-    Vxx = prob_->GetStateCostHessian(T - 1);
+    Vx_ = prob_->GetStateCostJacobian(T_ - 1);
+    Vxx_ = prob_->GetStateCostHessian(T_ - 1);
 
     // concatenation axis for tensor products
     //  See https://eigen.tuxfamily.org/dox-devel/unsupported/eigen_tensors.html#title14
     Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
+    Eigen::Tensor<double, 1> Vx_tensor;
 
-    for (int t = T - 2; t >= 0; t--)
+    Eigen::VectorXd x(NX_), u(NU_);               // TODO: Replace
+    Quu_inv_.resize(NU_, NU_);                    // TODO: Allocate outside
+    Quu_llt_ = Eigen::LLT<Eigen::MatrixXd>(NU_);  // TODO: Allocate outside
+    for (int t = T_ - 2; t >= 0; t--)
     {
-        const Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
-        Eigen::MatrixXd fx = dynamics_solver_->fx(x, u),
-                        fu = dynamics_solver_->fu(x, u);
+        x = prob_->get_X(t);
+        u = prob_->get_U(t);
 
-        fx = fx * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(fx.rows(), fx.cols());
-        fu = fu * dynamics_solver_->get_dt();
+        fx_ = dt_ * dynamics_solver_->fx(x, u) + Eigen::MatrixXd::Identity(NX_, NX_);
+        fu_ = dt_ * dynamics_solver_->fu(x, u);
 
-        // Q = prob_->GetStateCost(t) + prob_->GetControlCost(t) + V; // l + v
-        Qx = dt * prob_->GetStateCostJacobian(t) + fx.transpose() * Vx;  // lx + fx @ Vx
-        Qu = dt * prob_->GetControlCostJacobian(t) + fu.transpose() * Vx;
+        //
+        // NB: We use a modified cost function to compare across different
+        // time horizons - the running cost is scaled by dt_
+        //
+        Qx_ = dt_ * prob_->GetStateCostJacobian(t) + fx_.transpose() * Vx_;  // lx + fx_ @ Vx_
+        Qu_ = dt_ * prob_->GetControlCostJacobian(t) + fu_.transpose() * Vx_;
+
+        // State regularization
+        Vxx_.diagonal().array() += lambda_;
+
+        // NB: Qux = Qxu^T
+        Qux_ = dt_ * prob_->GetStateControlCostHessian() + fu_.transpose() * Vxx_ * fx_;
+        Qxx_ = dt_ * prob_->GetStateCostHessian(t) + fx_.transpose() * Vxx_ * fx_;
+        Quu_ = dt_ * prob_->GetControlCostHessian() + fu_.transpose() * Vxx_ * fu_;
 
         if (parameters_.UseSecondOrderDynamics)
         {
             // clang-format off
-            Eigen::Tensor<double, 1> Vx_tensor = Eigen::MatrixToTensor((Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&)Vx, NX);
-            Qxx = dt * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx +
-                Eigen::TensorToMatrix(
-                    (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NX, NX
-                ) * dt;
+            Vx_tensor = Eigen::MatrixToTensor((Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&)Vx_, NX_);
 
-            Quu = dt * prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu +
+            Qxx_ += 
                 Eigen::TensorToMatrix(
-                    (Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU, NU
-                ) * dt;
+                    (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NX_, NX_
+                ) * dt_;
 
-            Qux = dt * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx +
-                Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU, NX
-                ) * dt;
+            Quu_ += 
+                Eigen::TensorToMatrix(
+                    (Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU_, NU_
+                ) * dt_;
+
+            Qux_ +=
+                Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NX_
+                ) * dt_;
             // clang-format on
         }
-        else
-        {
-            Qxx = dt * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx;
-            Quu = dt * prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu;
 
-            // NOTE: Qux = Qxu for all robotics systems I have seen
-            //  this might need to be changed later on
-            Qux = dt * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx;
-        }
+        // Control regularization for numerical stability
+        Quu_.diagonal().array() += lambda_;
 
-        // clang-format off
-        //  Condition matrix for numerical stability.
-        Quu_inv = (
-            Eigen::MatrixXd::Identity(Quu.rows(), Quu.cols()) * parameters_.RegularizationRate + Quu
-        ).inverse();
-        // clang-format on
+        // Compute gains
+        Quu_inv_ = Quu_.inverse();
+        // Quu_inv_ = Quu_.llt().solve(Eigen::MatrixXd::Identity(Quu_.rows(), Quu_.cols()));
+        k_gains_[t].noalias() = -Quu_inv_ * Qu_;
+        K_gains_[t].noalias() = -Quu_inv_ * Qux_;
 
-        k_gains_[t] = -Quu_inv * Qu;
-        K_gains_[t] = -Quu_inv * Qux;
+        // Using Cholesky decomposition:
+        // Quu_llt_.compute(Quu_);
+        // K_gains_[t] = -Qux_;
+        // Quu_llt_.solveInPlace(K_gains_[t]);
+        // k_gains_[t] = -Qu_;
+        // Quu_llt_.solveInPlace(k_gains_[t]);
 
-        // V = Q - 0.5 * (Qu.transpose() * Quu_inv * Qu)(0);
-        Vx = Qx - K_gains_[t].transpose() * Quu * k_gains_[t];
-        Vxx = Qxx - K_gains_[t].transpose() * Quu * K_gains_[t];
+        // V = Q - 0.5 * (Qu_.transpose() * Quu_inv_ * Qu_)(0);
+        // Vx_ = Qx_ - K_gains_[t].transpose() * Quu_ * k_gains_[t];
+        // Vxx_ = Qxx_ - K_gains_[t].transpose() * Quu_ * K_gains_[t];
+
+        // With regularisation:
+        Vx_ = Qx_ + K_gains_[t].transpose() * Quu_ * k_gains_[t] + K_gains_[t].transpose() * Qu_ + Qux_.transpose() * k_gains_[t];
+        Vxx_ = Qxx_ + K_gains_[t].transpose() * Quu_ * K_gains_[t] + K_gains_[t].transpose() * Qux_ + Qux_.transpose() * K_gains_[t];
+        Vxx_ = 0.5 * (Vxx_ + Vxx_.transpose()).eval();
     }
 }
 

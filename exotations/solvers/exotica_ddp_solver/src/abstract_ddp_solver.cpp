@@ -36,33 +36,46 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
     if (!prob_) ThrowNamed("Solver has not been initialized!");
     Timer planning_timer, backward_pass_timer, line_search_timer;
 
-    const int T = prob_->get_T();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-    const double dt = dynamics_solver_->get_dt();
+    T_ = prob_->get_T();
+    NU_ = prob_->get_num_controls();
+    NX_ = prob_->get_num_positions() + prob_->get_num_velocities();
+    dt_ = dynamics_solver_->get_dt();
+    lambda_ = base_parameters_.RegularizationRate;
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
     prob_->PreUpdate();
+    solution.resize(T_ - 1, NU_);
 
-    double initial_cost = 0;
-    for (int t = 0; t < T - 1; ++t)
-        initial_cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
+    // Perform initial roll-out
+    cost_ = 0.0;
+    for (int t = 0; t < T_ - 1; ++t)
+    {
+        prob_->Update(prob_->get_U(t), t);
 
-    // add terminal cost
-    initial_cost += prob_->GetStateCost(T - 1);
-    prob_->SetCostEvolution(0, initial_cost);
+        // Running cost
+        cost_ += dt_ * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
+    }
 
-    // initialize Gain matrices
-    K_gains_.assign(T, Eigen::MatrixXd(NU, NX));
-    k_gains_.assign(T, Eigen::VectorXd(NU, 1));
+    // Add terminal cost
+    cost_ += prob_->GetStateCost(T_ - 1);
+    prob_->SetCostEvolution(0, cost_);
 
-    // all of the below are not pointers, since we want to copy over
-    //  solutions across iterations
-    Eigen::MatrixXd new_U, global_best_U = prob_->get_U();
-    solution.resize(T - 1, NU);
+    // Initialize gain matrices
+    K_gains_.assign(T_, Eigen::MatrixXd(NU_, NX_));
+    k_gains_.assign(T_, Eigen::VectorXd(NU_, 1));
+
+    // Allocate memory by resizing commonly reused matrices:
+    X_ref_.resize(NX_, T_);
+    U_ref_.resize(NU_, T_ - 1);
+    X_ref_ = prob_->get_X();
+    U_ref_ = prob_->get_U();
+    U_try_ = prob_->get_U();  // to resize/allocate
+    // TODO: Resize the following:
+    // Qx_, Qu_, Qxx_, Quu_, Qux_, Quu_inv_, Vxx_;
+    // Vx_; fx_, fu_;
 
     if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Running DDP solver for max " << GetNumberOfMaxIterations() << " iterations");
 
-    double last_cost = initial_cost, global_best_cost = initial_cost;
+    cost_prev_ = cost_;
     int last_best_iteration = 0;
 
     for (int iteration = 1; iteration <= GetNumberOfMaxIterations(); ++iteration)
@@ -75,90 +88,137 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        // Backwards pass computes the gains
+        // Backward-pass computes the gains
         backward_pass_timer.Reset();
         BackwardPass();
-        if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Backward pass complete in " << backward_pass_timer.GetDuration());
+        time_taken_backward_pass_ = backward_pass_timer.GetDuration();
 
+        // Forward-pass to compute new control trajectory
         line_search_timer.Reset();
-        // forward pass to compute new control trajectory
-        // TODO: Configure line-search space from xml
-        // TODO (Wolf): What you are doing is a forward line-search when we may try a
-        //    backtracking line search for a performance improvement later - this just as an aside.
-        const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 0.1, 1.0);
-        double current_cost = 0, best_alpha = 0;
 
-        Eigen::MatrixXd ref_x = prob_->get_X(),
-                        ref_u = prob_->get_U();
-        // perform a linear search to find the best rate
-        for (int ai = 0; ai < alpha_space.rows(); ++ai)
+        double rollout_cost = cost_prev_;
+        bool forward_pass_done = false;
+        // Perform a linear search to find the best rate
+        for (int ai = 0; ai < alpha_space_.size(); ++ai)
         {
-            double alpha = alpha_space(ai);
-            double cost = ForwardPass(alpha, ref_x, ref_u);
+            const double& alpha = alpha_space_(ai);
+            rollout_cost = ForwardPass(alpha, X_ref_, U_ref_);
 
-            if (ai == 0 || cost < current_cost)
+            if (rollout_cost < cost_)
             {
-                current_cost = cost;
-                new_U = prob_->get_U();
-                best_alpha = alpha;
+                cost_ = rollout_cost;
+                U_try_ = prob_->get_U();
+                alpha_best_ = alpha;
+                forward_pass_done = true;
+                break;
             }
         }
+        time_taken_forward_pass_ = line_search_timer.GetDuration();
 
-        // finite checks
-        if (!new_U.allFinite() || !std::isfinite(current_cost))
+        // Finiteness checks
+        if (!U_try_.allFinite())
         {
             prob_->termination_criterion = TerminationCriterion::Divergence;
-            WARNING_NAMED("DDPSolver", "Diverged!");
+            WARNING_NAMED("DDPSolver", "Divergence: Controls are non-finite");
+            return;
+        }
+        if (!std::isfinite(cost_))
+        {
+            prob_->termination_criterion = TerminationCriterion::Divergence;
+            WARNING_NAMED("DDPSolver", "Divergence: Cost is non-finite: " << cost_);
             return;
         }
 
         if (debug_)
         {
-            HIGHLIGHT_NAMED("DDPSolver", "Forward pass complete in " << line_search_timer.GetDuration() << " with cost: " << current_cost << " and alpha " << best_alpha);
-            HIGHLIGHT_NAMED("DDPSolver", "Final state: " << prob_->get_X(T - 1).transpose());
+            HIGHLIGHT_NAMED("DDPSolver", "Iteration " << iteration << std::setprecision(6) << ":\tBackward pass: " << time_taken_backward_pass_ << " s\tForward pass: " << time_taken_forward_pass_ << " s\tCost: " << cost_ << "\talpha: " << alpha_best_ << "\tRegularization: " << lambda_);
         }
 
-        // copy solutions for next iteration
-        if (global_best_cost > current_cost)
+        //
+        // Stopping criteria checks
+        //
+
+        // Relative function tolerance
+        // (f_t-1 - f_t) <= functionTolerance * max(1, abs(f_t))
+        if ((cost_prev_ - cost_) < base_parameters_.FunctionTolerance * std::max(1.0, std::abs(cost_)))
         {
-            global_best_cost = current_cost;
+            // Function tolerance patience check
+            if (base_parameters_.FunctionTolerancePatience > 0)
+            {
+                if (iteration - last_best_iteration > base_parameters_.FunctionTolerancePatience)
+                {
+                    if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Early stopping criterion reached (" << cost_ << " < " << cost_prev_ << "). Time: " << planning_timer.GetDuration());
+                    prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
+                    break;
+                }
+            }
+            else
+            {
+                if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Function tolerance reached (" << cost_ << " < " << cost_prev_ << "). Time: " << planning_timer.GetDuration());
+                prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
+                break;
+            }
+        }
+        else
+        {
+            // Reset function tolerance patience
             last_best_iteration = iteration;
-            global_best_U = new_U;
-            best_ref_x_ = ref_x;
-            best_ref_u_ = ref_u;
         }
 
-        if (iteration - last_best_iteration > base_parameters_.FunctionTolerancePatience)
+        // Regularization
+        if (lambda_ != 0.0 && lambda_ > 1e9)
         {
-            if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Early stopping criterion reached. Time: " << planning_timer.GetDuration());
-            prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
-            break;
+            prob_->termination_criterion = TerminationCriterion::Divergence;
+            WARNING_NAMED("DDPSolver", "Divergence: Regularization too large (" << lambda_ << ")");
+            return;
         }
 
-        if (last_cost - current_cost < base_parameters_.FunctionTolerance && last_cost - current_cost > 0)
+        // If better than previous iteration, copy solutions for next iteration
+        if (cost_ < cost_prev_)
         {
-            if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Function tolerance reached. Time: " << planning_timer.GetDuration());
-            prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
-            break;
+            cost_prev_ = cost_;
+            U_ref_ = U_try_;
+
+            if (alpha_best_ == alpha_space_(alpha_space_.size() - 1))
+            {
+                WARNING("Tiny step, increase!");
+                IncreaseRegularization();
+            }
+            else
+            {
+                if (debug_) HIGHLIGHT("Cost improved, decrease regularization");
+                DecreaseRegularization();
+            }
+        }
+        else
+        {
+            cost_ = cost_prev_;
+            // Revert by not storing U_try_ as U_ref_ (maintain U_ref_)
+
+            if (debug_) HIGHLIGHT("No improvement - increase regularization");
+            IncreaseRegularization();
         }
 
-        if (debug_ && iteration == GetNumberOfMaxIterations())
+        // Roll-out and store reference state trajectory
+        for (int t = 0; t < T_ - 1; ++t)
+            prob_->Update(U_ref_.col(t), t);
+        X_ref_ = prob_->get_X();
+
+        prob_->SetCostEvolution(iteration, cost_);
+
+        // Iteration limit
+        if (iteration == GetNumberOfMaxIterations())
         {
-            HIGHLIGHT_NAMED("DDPSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
+            if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
             prob_->termination_criterion = TerminationCriterion::IterationLimit;
         }
-
-        last_cost = current_cost;
-        for (int t = 0; t < T - 1; ++t)
-            prob_->Update(new_U.col(t), t);
-        prob_->SetCostEvolution(iteration, current_cost);
     }
 
-    // store the best solution found over all iterations
-    for (int t = 0; t < T - 1; ++t)
+    // Store the best solution found over all iterations
+    for (int t = 0; t < T_ - 1; ++t)
     {
-        solution.row(t) = global_best_U.col(t).transpose();
-        prob_->Update(global_best_U.col(t), t);
+        solution.row(t) = U_ref_.col(t).transpose();
+        prob_->Update(U_ref_.col(t), t);
     }
 
     planning_time_ = planning_timer.GetDuration();
@@ -173,43 +233,49 @@ void AbstractDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
     MotionSolver::SpecifyProblem(pointer);
     prob_ = std::static_pointer_cast<DynamicTimeIndexedShootingProblem>(pointer);
     dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
+
+    // Set up backtracking line-search coefficients
+    alpha_space_ = Eigen::VectorXd::LinSpaced(11, 0.0, -3.0);
+    for (int ai = 0; ai < alpha_space_.size(); ++ai)
+    {
+        alpha_space_(ai) = std::pow(10.0, alpha_space_(ai));
+    }
+
     if (debug_) HIGHLIGHT_NAMED("DDPSolver", "initialized");
 }
 
-double AbstractDDPSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u)
+double AbstractDDPSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst X_ref, Eigen::MatrixXdRefConst U_ref)
 {
-    double cost = 0;
-    const int T = prob_->get_T();
-    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
+    double cost = 0.0;
+    Eigen::VectorXd u_hat(NU_);  // TODO: allocate outside
 
-    const double dt = dynamics_solver_->get_dt();
-
-    for (int t = 0; t < T - 1; ++t)
+    for (int t = 0; t < T_ - 1; ++t)
     {
-        Eigen::VectorXd u = ref_u.col(t);
-        // eq. 12
-        Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), ref_x.col(t));
-        u.noalias() += alpha * delta_uk;
-        // clamp controls
-        u = u.cwiseMax(control_limits.col(0)).cwiseMin(control_limits.col(1));
+        u_hat = U_ref.col(t);
 
-        prob_->Update(u, t);
-        cost += dt * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
+        // eq. 12 - TODO: Which paper?
+        u_hat.noalias() += alpha * k_gains_[t];
+        u_hat.noalias() += K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), X_ref.col(t));
+
+        // Clamp controls, if desired:
+        if (base_parameters_.ClampControlsInForwardPass)
+        {
+            u_hat = u_hat.cwiseMax(dynamics_solver_->get_control_limits().col(0)).cwiseMin(dynamics_solver_->get_control_limits().col(1));
+        }
+
+        prob_->Update(u_hat, t);
+        cost += dt_ * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
     }
 
     // add terminal cost
-    cost += prob_->GetStateCost(T - 1);
+    cost += prob_->GetStateCost(T_ - 1);
     return cost;
 }
 
 Eigen::VectorXd AbstractDDPSolver::GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const
 {
-    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
-
-    Eigen::VectorXd delta_uk = k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
-
-    Eigen::VectorXd u = best_ref_u_.col(t) + delta_uk;
-    return u.cwiseMax(control_limits.col(0)).cwiseMin(control_limits.col(1));
+    Eigen::VectorXd u = U_ref_.col(t) + k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(x, X_ref_.col(t));
+    return u.cwiseMax(dynamics_solver_->get_control_limits().col(0)).cwiseMin(dynamics_solver_->get_control_limits().col(1));
 }
 
 }  // namespace exotica

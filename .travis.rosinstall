@@ -1,5 +1,6 @@
 - git:
     uri: https://github.com/stack-of-tasks/eigenpy.git
+    version: devel
     local-name: eigenpy
 - git:
     uri: https://github.com/wxmerkt/pinocchio.git

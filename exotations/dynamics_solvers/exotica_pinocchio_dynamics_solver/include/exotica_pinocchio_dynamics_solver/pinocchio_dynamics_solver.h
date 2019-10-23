@@ -30,6 +30,10 @@
 #ifndef EXOTICA_PINOCCHIO_DYNAMICS_SOLVER_PINOCCHIO_DYNAMICS_SOLVER_H_
 #define EXOTICA_PINOCCHIO_DYNAMICS_SOLVER_PINOCCHIO_DYNAMICS_SOLVER_H_
 
+/// fwd.hpp needs to be included first (before Boost, which comes with ROS),
+/// else everything breaks for Pinocchio >=2.1.5
+#include <pinocchio/fwd.hpp>
+
 #include <exotica_core/dynamics_solver.h>
 #include <exotica_core/scene.h>
 

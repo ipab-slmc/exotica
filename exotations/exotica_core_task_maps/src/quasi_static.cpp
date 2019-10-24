@@ -51,7 +51,7 @@ inline double cross(const Eigen::Ref<const Eigen::Vector2d>& a, const Eigen::Ref
 }
 
 ///
-/// \brief potential Calculates electrostatic potential at pont P induced by a uniformly charged line AB.
+/// \brief potential Calculates electrostatic potential at point P induced by a uniformly charged line AB.
 /// \param phi Potential.
 /// \param A 1st point on the line.
 /// \param B 2nd point on the line.
@@ -62,13 +62,13 @@ void potential(double& phi, const Eigen::Ref<const Eigen::Vector2d>& A, const Ei
     double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
     double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
     double E = cross(A, B) - cross(A, P) + cross(B, P);
-    if (fabs(E) <= eps)
+    if (std::fabs(E) <= eps)
     {
         phi = 0.0;
     }
     else
     {
-        phi = (atan(C / E) - atan(D / E)) / E;
+        phi = (std::atan(C / E) - std::atan(D / E)) / E;
     }
 }
 
@@ -88,14 +88,14 @@ void potential(double& phi, Eigen::Ref<Eigen::RowVectorXd> jacobian, const Eigen
     const double C = A.dot(B) - A.dot(P) + B.dot(P) - B.dot(B);
     const double D = -A.dot(B) - A.dot(P) + B.dot(P) + A.dot(A);
     const double E = cross(A, B) - cross(A, P) + cross(B, P);
-    if (fabs(E) < eps)
+    if (std::fabs(E) < eps)
     {
         phi = 0.0;
         jacobian.setZero();
     }
     else
     {
-        phi = (atan(C / E) - atan(D / E)) / E;
+        phi = (std::atan(C / E) - std::atan(D / E)) / E;
         double C_, D_, E_;
         for (int i = 0; i < jacobian.size(); ++i)
         {
@@ -118,7 +118,8 @@ void winding(double& phi, const Eigen::Ref<const Eigen::Vector2d>& A, const Eige
 {
     const double C = cross(A - P, B - P);
     const double D = (A - P).dot(B - P);
-    phi = atan2(C, D) / 2.0 / M_PI;
+    constexpr double pi = std::atan(1) * 4;
+    phi = std::atan2(C, D) / 2.0 / pi;
 }
 
 ///
@@ -172,11 +173,11 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     Eigen::Vector2d com;
     com << kdl_com[0], kdl_com[1];
 
-    Eigen::MatrixXd supports(kinematics[0].Phi.rows(), 2);
+    Eigen::Matrix2Xd supports(2, kinematics[0].Phi.rows());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        supports(i, 0) = kinematics[0].Phi(i).p[0];
-        supports(i, 1) = kinematics[0].Phi(i).p[1];
+        supports(0, i) = kinematics[0].Phi(i).p[0];
+        supports(1, i) = kinematics[0].Phi(i).p[1];
     }
 
     std::list<int> hull = ConvexHull2D(supports);
@@ -189,24 +190,24 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
         int a = *it;
         int b = ++it == hull.end() ? *hull.begin() : *(it);
-        potential(tmp, supports.row(a).transpose(), supports.row(b).transpose(), com);
+        potential(tmp, supports.col(a), supports.col(b), com);
         pot += tmp;
-        winding(tmp, supports.row(a).transpose(), supports.row(b).transpose(), com);
+        winding(tmp, supports.col(a), supports.col(b), com);
         wnd += tmp;
     }
-    wnd = fabs(wnd);
+    wnd = std::fabs(wnd);
 
     if (pot < eps)
     {
         if (wnd < 0.5)
         {
-            phi(0) = -sqrt(-n / pot);
+            phi(0) = std::sqrt(-n / pot);
         }
         else
         {
             if (!parameters_.PositiveOnly)
             {
-                phi(0) = sqrt(-n / pot);
+                phi(0) = -std::sqrt(-n / pot);
             }
         }
     }
@@ -237,7 +238,7 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     if (jacobian.rows() != 1 || jacobian.cols() != x.rows()) ThrowNamed("Wrong size of jacobian! " << x.rows());
     phi(0) = 0.0;
     jacobian.setZero();
-    Eigen::MatrixXd jacobian_com = Eigen::MatrixXd::Zero(2, jacobian.cols());
+    Eigen::Matrix2Xd jacobian_com = Eigen::Matrix2Xd::Zero(2, jacobian.cols());
     KDL::Vector kdl_com;
     double M = 0.0;
     for (std::weak_ptr<KinematicElement> welement : scene_->GetKinematicTree().GetTree())
@@ -264,12 +265,12 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     com(1) = kdl_com[1];
     jacobian_com = jacobian_com / M;
 
-    Eigen::MatrixXd supports(kinematics[0].Phi.rows(), 2);
+    Eigen::Matrix2Xd supports(2, kinematics[0].Phi.rows());
     Eigen::MatrixXd supportsJ(kinematics[0].Phi.rows() * 2, x.rows());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        supports(i, 0) = kinematics[0].Phi(i).p[0];
-        supports(i, 1) = kinematics[0].Phi(i).p[1];
+        supports(0, i) = kinematics[0].Phi(i).p[0];
+        supports(1, i) = kinematics[0].Phi(i).p[1];
         supportsJ.middleRows(i * 2, 2) = kinematics[0].jacobian(i).data.topRows<2>();
     }
 
@@ -285,26 +286,26 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     {
         int a = *it;
         int b = (std::next(it) == hull.end()) ? *hull.begin() : *(std::next(it));
-        potential(tmp, tmpJ, supports.row(a).transpose(), supports.row(b).transpose(), com, supportsJ.middleRows(a * 2, 2), supportsJ.middleRows(b * 2, 2), jacobian_com);
+        potential(tmp, tmpJ, supports.col(a), supports.col(b), com, supportsJ.middleRows(a * 2, 2), supportsJ.middleRows(b * 2, 2), jacobian_com);
         pot += tmp;
         potJ += tmpJ;
-        winding(tmp, supports.row(a).transpose(), supports.row(b).transpose(), com);
+        winding(tmp, supports.col(a), supports.col(b), com);
         wnd += tmp;
     }
-    wnd = fabs(wnd);
+    wnd = std::fabs(wnd);
 
-    if (fabs(pot) > eps)
+    if (std::fabs(pot) > eps)
     {
         if (wnd < 0.5)
         {
-            phi(0) = sqrt(-n / pot);
+            phi(0) = -std::sqrt(-n / pot);
             jacobian.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
         }
         else
         {
             if (!parameters_.PositiveOnly)
             {
-                phi(0) = -sqrt(-n / pot);
+                phi(0) = std::sqrt(-n / pot);
                 jacobian.row(0) = potJ * (n / (2 * pot * pot * phi(0)));
             }
         }
@@ -320,8 +321,8 @@ void QuasiStatic::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
         int ii = 0;
         for (int i : hull)
         {
-            debug_msg_.markers[1].points[ii].x = supports(i, 0);
-            debug_msg_.markers[1].points[ii].y = supports(i, 1);
+            debug_msg_.markers[1].points[ii].x = supports(0, i);
+            debug_msg_.markers[1].points[ii].y = supports(1, i);
             debug_msg_.markers[1].points[ii].z = 0.0;
             ++ii;
         }

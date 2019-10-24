@@ -40,14 +40,14 @@ double DetDiff2D(const Eigen::Ref<const Eigen::Vector2d>& p1, const Eigen::Ref<c
     return (p(1) - p1(1)) * (p2(0) - p1(0)) - (p2(1) - p1(1)) * (p(0) - p1(0));
 }
 
-std::list<int> QuickHull(const Eigen::Ref<const Eigen::MatrixXd>& points, std::list<int>& half_points, int p1, int p2)
+std::list<int> QuickHull(const Eigen::Ref<const Eigen::Matrix2Xd>& points, std::list<int>& half_points, int p1, int p2)
 {
     int ind = -1;
     double max_dist = 0;
     std::list<int> new_half_points;
     for (const int& i : half_points)
     {
-        double d = DetDiff2D(points.row(p1).transpose(), points.row(p2).transpose(), points.row(i).transpose());
+        double d = DetDiff2D(points.col(p1), points.col(p2), points.col(i));
         if (d >= 0.0)
         {
             new_half_points.push_back(i);
@@ -73,12 +73,13 @@ std::list<int> QuickHull(const Eigen::Ref<const Eigen::MatrixXd>& points, std::l
     return hull;
 }
 
-std::list<int> ConvexHull2D(const Eigen::Ref<const Eigen::MatrixXd>& points)
+std::list<int> ConvexHull2D(const Eigen::Ref<const Eigen::Matrix2Xd>& points)
 {
-    if (points.cols() != 2) ThrowPretty("Input must contain 2D points!");
+    if (points.rows() != 2) throw std::runtime_error("Input must contain 2D points!");
 
-    int n = points.rows();
+    const int n = static_cast<int>(points.cols());
 
+    // TODO: Reserve
     std::list<int> hull;
     std::list<int> half_points;
     if (n < 3)
@@ -91,10 +92,8 @@ std::list<int> ConvexHull2D(const Eigen::Ref<const Eigen::MatrixXd>& points)
         half_points.push_back(0);
         for (int i = 1; i < n; ++i)
         {
-            if (points(i, 0) < points(min_x, 0))
-                min_x = i;
-            if (points(i, 0) > points(max_x, 0))
-                max_x = i;
+            if (points(0, i) < points(0, min_x)) min_x = i;
+            if (points(0, i) > points(0, max_x)) max_x = i;
             half_points.push_back(i);
         }
         hull.splice(hull.begin(), QuickHull(points, half_points, min_x, max_x));

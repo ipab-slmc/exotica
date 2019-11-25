@@ -3,6 +3,6 @@
 #    version: devel
 #    local-name: eigenpy
 #- git:
-#    uri: https://github.com/wxmerkt/pinocchio.git
-#    version: topic/wxm-add-package.xml
+#    uri: https://github.com/stack-of-tasks/pinocchio.git
+#    version: devel
 #    local-name: pinocchio

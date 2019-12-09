@@ -26,7 +26,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME} src/pinocchio_dynamics_solver.cpp)
-target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated -Wno-variadic-macros -Wno-deprecated-declarations -Wno-comment)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated -Wno-variadic-macros -Wno-deprecated-declarations -Wno-comment -Wno-ignored-attributes)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${PINOCCHIO_CFLAGS_OTHER})
 

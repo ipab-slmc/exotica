@@ -1,6 +1,8 @@
 #- git:
-#    uri: https://github.com/ipab-slmc/eigenpy_catkin.git
+#    uri: https://github.com/stack-of-tasks/eigenpy.git
+#    version: devel
 #    local-name: eigenpy
 #- git:
-#    uri: https://github.com/ipab-slmc/pinocchio_catkin.git
+#    uri: https://github.com/stack-of-tasks/pinocchio.git
+#    version: devel
 #    local-name: pinocchio

@@ -16,7 +16,7 @@ def publish_pose(q, problem, t=0.0):
     problem.get_scene().get_kinematic_tree().publish_frames()
 
 
-def publish_trajectory(traj, T, problem):
+def publish_trajectory(traj, T, problem, once=False):
     if len(traj) == 0:
         print("Trajectory has zero elements")
         raise
@@ -28,6 +28,8 @@ def publish_trajectory(traj, T, problem):
         try:
             publish_pose(traj[t], problem, float(t) * dt)
             sleep(dt)
+            if t >= len(traj) - 1 and once:
+                return
             t = (t + 1) % len(traj)
         except KeyboardInterrupt:
             return False

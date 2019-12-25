@@ -41,8 +41,6 @@ void ControlLimitedDDPSolver::Instantiate(const ControlLimitedDDPSolverInitializ
 
 void ControlLimitedDDPSolver::BackwardPass()
 {
-    constexpr double min_clamp_ = -1e10;
-    constexpr double max_clamp_ = 1e10;
     const int T = prob_->get_T();
     const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
@@ -108,15 +106,15 @@ void ControlLimitedDDPSolver::BackwardPass()
         BoxQPSolution boxqp_sol = BoxQP(Quu, Qu, low_limit, high_limit, u, 0.1, 100, 1e-5, parameters_.RegularizationRate);
 
         Quu_inv.setZero();
-        for (int i = 0; i < boxqp_sol.free_idx.size(); ++i)
-            for (int j = 0; j < boxqp_sol.free_idx.size(); ++j)
+        for (unsigned int i = 0; i < boxqp_sol.free_idx.size(); ++i)
+            for (unsigned int j = 0; j < boxqp_sol.free_idx.size(); ++j)
                 Quu_inv(boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
 
         // Compute controls
         K_gains_[t] = -Quu_inv * Qux;
         k_gains_[t] = boxqp_sol.x;
 
-        for (int j = 0; j < boxqp_sol.clamped_idx.size(); ++j)
+        for (unsigned int j = 0; j < boxqp_sol.clamped_idx.size(); ++j)
             K_gains_[t](boxqp_sol.clamped_idx[j]) = 0;
 
         Vx = Qx - K_gains_[t].transpose() * Quu * k_gains_[t];

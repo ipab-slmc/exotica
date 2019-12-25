@@ -57,7 +57,7 @@ void JointTorqueMinimizationProxy::set_h(const Eigen::Matrix<double, 6, 1>& h_in
 
 void JointTorqueMinimizationProxy::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != frames_.size()) ThrowNamed("Wrong size of Phi!");
+    if (phi.rows() != static_cast<int>(frames_.size())) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
         phi(i) = h_.transpose() * kinematics[0].jacobian[i].data * kinematics[0].jacobian[i].data.transpose() * h_;

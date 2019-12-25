@@ -33,14 +33,11 @@ REGISTER_TASKMAP_TYPE("LookAt", exotica::LookAt);
 
 namespace exotica
 {
-LookAt::LookAt() = default;
-LookAt::~LookAt() = default;
-
 void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
 
-    for (int i = 0; i < frames_.size(); ++i)
+    for (std::size_t i = 0; i < frames_.size(); ++i)
         phi.segment<2>(i * 2) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>();
 }
 
@@ -49,7 +46,7 @@ void LookAt::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::Ma
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != TaskSpaceDim() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
-    for (int i = 0; i < frames_.size(); ++i)
+    for (std::size_t i = 0; i < frames_.size(); ++i)
     {
         phi.segment<2>(i * 2) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data).topRows<2>();
         for (int j = 0; j < jacobian.cols(); ++j)

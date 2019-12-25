@@ -98,7 +98,6 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
     py::class_<Distance, std::shared_ptr<Distance>, TaskMap>(module, "Distance");
 
     py::class_<JointPose, std::shared_ptr<JointPose>, TaskMap>(module, "JointPose")
-        .def_readonly("N", &JointPose::N_)
         .def_readonly("joint_map", &JointPose::joint_map_)
         .def_readwrite("joint_ref", &JointPose::joint_ref_);
 

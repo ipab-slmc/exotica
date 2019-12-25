@@ -33,13 +33,10 @@ REGISTER_TASKMAP_TYPE("JointPose", exotica::JointPose);
 
 namespace exotica
 {
-JointPose::JointPose() = default;
-JointPose::~JointPose() = default;
-
 void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
-    if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
-    for (int i = 0; i < joint_map_.size(); ++i)
+    if (phi.rows() != static_cast<int>(joint_map_.size())) ThrowNamed("Wrong size of Phi!");
+    for (std::size_t i = 0; i < joint_map_.size(); ++i)
     {
         phi(i) = x(joint_map_[i]) - joint_ref_(i);
     }
@@ -47,10 +44,10 @@ void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
 void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
-    if (jacobian.rows() != joint_map_.size() || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
+    if (phi.rows() != static_cast<int>(joint_map_.size())) ThrowNamed("Wrong size of Phi!");
+    if (jacobian.rows() != static_cast<int>(joint_map_.size()) || jacobian.cols() != num_controlled_joints_) ThrowNamed("Wrong size of jacobian! " << num_controlled_joints_);
     jacobian.setZero();
-    for (int i = 0; i < joint_map_.size(); ++i)
+    for (std::size_t i = 0; i < joint_map_.size(); ++i)
     {
         phi(i) = x(joint_map_[i]) - joint_ref_(i);
         jacobian(i, joint_map_[i]) = 1.0;
@@ -60,14 +57,14 @@ void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen:
 // void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot)
 // {
 //     if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
-//     if (jacobian.rows() != joint_map_.size() || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
-//     if (Jdot.rows() != joint_map_.size() || Jdot.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
+//     if (jacobian.rows() != joint_map_.size() || jacobian.cols() != num_controlled_joints_) ThrowNamed("Wrong size of jacobian! " << num_controlled_joints_);
+//     if (Jdot.rows() != joint_map_.size() || Jdot.cols() != num_controlled_joints_) ThrowNamed("Wrong size of jacobian! " << num_controlled_joints_);
 //     jacobian.setZero();
 //     Jdot.setZero();
 //     for (int i = 0; i < joint_map_.size(); ++i)
 //     {
 //         phi(i) = x(joint_map_[i]) - joint_ref_(i);
-//         phidot(i) = x(joint_map_[i] + N_) - joint_ref_(i + joint_map_.size());
+//         phidot(i) = x(joint_map_[i] + num_controlled_joints_) - joint_ref_(i + joint_map_.size());
 //         jacobian(i, joint_map_[i]) = 1.0;
 //         Jdot(i, joint_map_[i]) = 1.0;
 //     }
@@ -81,7 +78,7 @@ void JointPose::AssignScene(ScenePtr scene)
 
 void JointPose::Initialize()
 {
-    N_ = scene_->GetKinematicTree().GetNumControlledJoints();
+    num_controlled_joints_ = scene_->GetKinematicTree().GetNumControlledJoints();
     if (parameters_.JointMap.rows() > 0)
     {
         joint_map_.resize(parameters_.JointMap.rows());
@@ -92,8 +89,8 @@ void JointPose::Initialize()
     }
     else
     {
-        joint_map_.resize(N_);
-        for (int i = 0; i < N_; ++i)
+        joint_map_.resize(num_controlled_joints_);
+        for (int i = 0; i < num_controlled_joints_; ++i)
         {
             joint_map_[i] = i;
         }
@@ -102,7 +99,7 @@ void JointPose::Initialize()
     if (parameters_.JointRef.rows() > 0)
     {
         joint_ref_ = parameters_.JointRef;
-        if (joint_ref_.rows() != joint_map_.size()) ThrowNamed("Invalid joint reference size! Expecting " << joint_map_.size() << " but received " << joint_ref_.rows());
+        if (joint_ref_.rows() != static_cast<int>(joint_map_.size())) ThrowNamed("Invalid joint reference size! Expecting " << joint_map_.size() << " but received " << joint_ref_.rows());
     }
     else
     {
@@ -114,4 +111,4 @@ int JointPose::TaskSpaceDim()
 {
     return joint_map_.size();
 }
-}
+}  // namespace exotica

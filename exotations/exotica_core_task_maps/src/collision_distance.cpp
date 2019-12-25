@@ -113,7 +113,7 @@ void CollisionDistance::Initialize()
     // Get names of all controlled joints and their corresponding child links
     robot_joints_ = scene_->GetControlledJointNames();
     controlled_joint_to_collision_link_map_ = scene_->GetControlledJointToCollisionLinkMap();
-    dim_ = static_cast<unsigned int>(robot_joints_.size());
+    dim_ = static_cast<int>(robot_joints_.size());
     closest_proxies_.assign(dim_, CollisionProxy());
     if (debug_)
     {

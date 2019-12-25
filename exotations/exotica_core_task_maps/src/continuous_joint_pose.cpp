@@ -36,7 +36,7 @@ namespace exotica
 void ContinuousJointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != N_) ThrowNamed("Wrong size of Phi!");
-    for (int i = 0; i < joint_map_.size(); ++i)
+    for (std::size_t i = 0; i < joint_map_.size(); ++i)
     {
         phi(2 * i + 0) = std::cos(x(joint_map_[i]));
         phi(2 * i + 1) = std::sin(x(joint_map_[i]));
@@ -48,7 +48,7 @@ void ContinuousJointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef p
     if (phi.rows() != N_) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
     jacobian.setZero();
-    for (int i = 0; i < joint_map_.size(); ++i)
+    for (std::size_t i = 0; i < joint_map_.size(); ++i)
     {
         phi(2 * i + 0) = std::cos(x(joint_map_[i]));
         phi(2 * i + 1) = std::sin(x(joint_map_[i]));

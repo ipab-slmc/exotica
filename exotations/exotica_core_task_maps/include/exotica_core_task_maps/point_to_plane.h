@@ -41,9 +41,6 @@ namespace exotica
 class PointToPlane : public TaskMap, public Instantiable<PointToPlaneInitializer>
 {
 public:
-    PointToPlane();
-    virtual ~PointToPlane();
-
     void Instantiate(const PointToPlaneInitializer &init) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;

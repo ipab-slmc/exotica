@@ -74,7 +74,7 @@ void ControlLimitedDDPSolver::BackwardPass()
         if (parameters_.UseSecondOrderDynamics)
         {
             // clang-format off
-            Eigen::Tensor<double, 1> Vx_tensor = Eigen::MatrixToTensor((Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&)Vx, NX);
+            Eigen::Tensor<double, 1> Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx.data(), NX_);
             Qxx = dt * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx +
                 Eigen::TensorToMatrix(
                     (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NX, NX

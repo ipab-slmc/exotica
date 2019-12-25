@@ -78,7 +78,7 @@ void AnalyticDDPSolver::BackwardPass()
         if (parameters_.UseSecondOrderDynamics)
         {
             // clang-format off
-            Vx_tensor = Eigen::MatrixToTensor((Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&)Vx_, NX_);
+            Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx_.data(), NX_);
 
             Qxx_ += 
                 Eigen::TensorToMatrix(

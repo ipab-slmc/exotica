@@ -1177,6 +1177,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematic_element.def("get_segment_name", [](KinematicElement* element) { return element->segment.getName(); });
     kinematic_element.def("get_joint_name", [](KinematicElement* element) { return element->segment.getJoint().getName(); });
     kinematic_element.def("get_parent_name", [](KinematicElement* element) { auto parent = element->parent.lock(); if (parent) { return parent->segment.getName(); } else { return std::string("no_parent"); } });
+    kinematic_element.def("get_mass", [](KinematicElement* element) { return element->segment.getInertia().getMass(); });
     kinematic_element.def_readonly("control_id", &KinematicElement::control_id);
     kinematic_element.def_readonly("is_controlled", &KinematicElement::is_controlled);
     kinematic_element.def_readonly("parent_name", &KinematicElement::parent_name);

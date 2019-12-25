@@ -6,11 +6,12 @@
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
-  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
 
   <author email="v.ivan@ed.ac.uk">Vladimir Ivan</author>
   <author email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</author>
-  <author email="yiming.yang@ed.ac.uk">Yiming Yang</author>
+  <author>Christian Rauch</author>
+  <author>Christopher E. Mower</author>
+  <author>Yiming Yang</author>
   <author>Michael Camilleri</author>
 
   <license>BSD</license>

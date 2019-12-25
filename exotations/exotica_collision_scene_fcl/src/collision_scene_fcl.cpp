@@ -173,12 +173,12 @@ std::shared_ptr<fcl::CollisionObject> CollisionSceneFCL::ConstructFclCollisionOb
             if (mesh->vertex_count > 0 && mesh->triangle_count > 0)
             {
                 std::vector<fcl::Triangle> tri_indices(mesh->triangle_count);
-                for (int i = 0; i < mesh->triangle_count; ++i)
+                for (unsigned int i = 0; i < mesh->triangle_count; ++i)
                     tri_indices[i] =
                         fcl::Triangle(mesh->triangles[3 * i], mesh->triangles[3 * i + 1], mesh->triangles[3 * i + 2]);
 
                 std::vector<fcl::Vec3f> points(mesh->vertex_count);
-                for (int i = 0; i < mesh->vertex_count; ++i)
+                for (unsigned int i = 0; i < mesh->vertex_count; ++i)
                     points[i] = fcl::Vec3f(mesh->vertices[3 * i], mesh->vertices[3 * i + 1], mesh->vertices[3 * i + 2]);
 
                 g->beginModel();

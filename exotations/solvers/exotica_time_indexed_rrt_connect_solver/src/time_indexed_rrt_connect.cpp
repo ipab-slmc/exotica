@@ -41,7 +41,7 @@ OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProb
     unsigned int dim = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)), 1.0);
     ompl::base::RealVectorBounds bounds(dim);
-    for (int i = 0; i < dim; ++i)
+    for (unsigned int i = 0; i < dim; ++i)
     {
         bounds.setHigh(i, prob->GetBounds()[i + dim]);
         bounds.setLow(i, prob->GetBounds()[i]);

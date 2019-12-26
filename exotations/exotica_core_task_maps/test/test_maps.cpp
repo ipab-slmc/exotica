@@ -117,7 +117,6 @@ bool test_random(UnconstrainedTimeIndexedProblemPtr problem)
 bool test_values(Eigen::MatrixXdRefConst Xref, Eigen::MatrixXdRefConst Yref, Eigen::MatrixXdRefConst Jref, UnconstrainedEndPoseProblemPtr problem, const double eps = 1e-5)
 {
     TEST_COUT << "Testing set points:";
-    int N = Xref.cols();
     int M = Yref.cols();
     int L = Xref.rows();
     for (int i = 0; i < L; ++i)
@@ -325,7 +324,7 @@ TEST(ExoticaTaskMaps, testEffOrientation)
         std::vector<double> eps = {2e-5, 2e-5, 2e-5, 2e-5, 2e-5, 2e-5};
         // TODO: Quaternion does not pass the test with precision 1e-5. Investigate why.
 
-        for (int i = 0; i < types.size(); ++i)
+        for (std::size_t i = 0; i < types.size(); ++i)
         {
             std::string type = types[i];
             TEST_COUT << "Rotation type " << type;
@@ -373,7 +372,7 @@ TEST(ExoticaTaskMaps, testEffFrame)
         std::vector<double> eps = {2e-5, 2e-5, 2e-5, 2e-5, 2e-5, 2e-5};
         // TODO: Quaternion does not pass the test with precision 1e-5. Investigate why.
 
-        for (int i = 0; i < types.size(); ++i)
+        for (std::size_t i = 0; i < types.size(); ++i)
         {
             std::string type = types[i];
             TEST_COUT << "Rotation type " << type;

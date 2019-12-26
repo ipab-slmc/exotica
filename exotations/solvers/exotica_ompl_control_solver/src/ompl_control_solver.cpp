@@ -41,7 +41,6 @@ void OMPLControlSolver::SpecifyProblem(PlanningProblemPtr pointer)
     prob_ = std::static_pointer_cast<DynamicTimeIndexedShootingProblem>(pointer);
     dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
 
-    const int NU = prob_->get_num_controls();
     const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
     if (init_.StateLimits.size() != NX)
         ThrowNamed("State limits are of size " << init_.StateLimits.size() << ", should be of size " << NX);
@@ -151,7 +150,7 @@ void OMPLControlSolver::Solve(Eigen::MatrixXd &solution)
             states.back()->as<ob::RealVectorStateSpace::StateType>()->values, NX);
 
         T = 0;
-        for (int t = 0; t < controls.size(); ++t)
+        for (std::size_t t = 0; t < controls.size(); ++t)
             T += static_cast<int>(durations[t] / dt);
         T += 1;
 
@@ -175,11 +174,9 @@ void OMPLControlSolver::Solve(Eigen::MatrixXd &solution)
         solution.resize(T - 1, NU);
 
         int t = 0;
-        for (int i = 0; i < controls.size(); ++i)
+        for (std::size_t i = 0; i < controls.size(); ++i)
         {
             double *oc_u = controls[i]->as<oc::RealVectorControlSpace::ControlType>()->values;
-            double *oc_s = states[i]->as<ob::RealVectorStateSpace::StateType>()->values;
-
             Eigen::VectorXd u = Eigen::Map<Eigen::VectorXd>(oc_u, NU);
 
             for (int k = 0; k < static_cast<int>(durations[i] / dt); ++k)

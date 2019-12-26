@@ -56,10 +56,7 @@ void QuadrotorDynamicsSolver::AssignScene(ScenePtr scene_in)
 
 Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVector& u)
 {
-    double x_ = x(0),
-           y_ = x(1),
-           z_ = x(2),
-           phi = x(3),
+    double phi = x(3),
            theta = x(4),
            psi = x(5),
            x_dot = x(6),
@@ -80,9 +77,9 @@ Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVe
     const double M_4 = k_m_ * u(3);
 
     // clang-format off
-    double sin_phi = std::sin(phi),     cos_phi = std::cos(phi),        tan_phi = std::tan(phi),
-           sin_theta = std::sin(theta), cos_theta = std::cos(theta),    tan_theta = std::tan(theta),
-           sin_psi = std::sin(psi),     cos_psi = std::cos(psi),        tan_psi = std::tan(psi);
+    double sin_phi = std::sin(phi),     cos_phi = std::cos(phi),
+           sin_theta = std::sin(theta), cos_theta = std::cos(theta),
+           sin_psi = std::sin(psi),     cos_psi = std::cos(psi);
     // clang-format on
 
     Eigen::MatrixXd Rx(3, 3), Ry(3, 3), Rz(3, 3), R;
@@ -127,33 +124,17 @@ Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVe
 
 Eigen::MatrixXd QuadrotorDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
-    double x_ = x(0),
-           y_ = x(1),
-           z_ = x(2),
-           phi = x(3),
+    double phi = x(3),
            theta = x(4),
            psi = x(5),
-           x_dot = x(6),
-           y_dot = x(7),
-           z_dot = x(8),
            phi_dot = x(9),
            theta_dot = x(10),
            psi_dot = x(11);
 
-    const double F_1 = k_f_ * u(0);
-    const double F_2 = k_f_ * u(1);
-    const double F_3 = k_f_ * u(2);
-    const double F_4 = k_f_ * u(3);
-
-    const double M_1 = k_m_ * u(0);
-    const double M_2 = k_m_ * u(1);
-    const double M_3 = k_m_ * u(2);
-    const double M_4 = k_m_ * u(3);
-
     // clang-format off
-    double sin_phi = std::sin(phi),     cos_phi = std::cos(phi),        tan_phi = std::tan(phi),
-           sin_theta = std::sin(theta), cos_theta = std::cos(theta),    tan_theta = std::tan(theta),
-           sin_psi = std::sin(psi),     cos_psi = std::cos(psi),        tan_psi = std::tan(psi);
+    double sin_phi = std::sin(phi),     cos_phi = std::cos(phi),
+           sin_theta = std::sin(theta), cos_theta = std::cos(theta),
+           sin_psi = std::sin(psi),     cos_psi = std::cos(psi);
 
     Eigen::MatrixXd fx(num_positions_ + num_velocities_, num_positions_ + num_velocities_);
     fx <<
@@ -163,9 +144,9 @@ Eigen::MatrixXd QuadrotorDynamicsSolver::fx(const StateVector& x, const ControlV
         0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-        0, 0, 0, (k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))*sin(psi)*cos(phi)*cos(theta)/mass_, (-sin(phi)*sin(psi)*sin(theta) + cos(psi)*cos(theta))*(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))/mass_, (sin(phi)*cos(psi)*cos(theta) - sin(psi)*sin(theta))*(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))/mass_, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, -(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))*cos(phi)*cos(psi)*cos(theta)/mass_, (sin(phi)*sin(theta)*cos(psi) + sin(psi)*cos(theta))*(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))/mass_, (sin(phi)*sin(psi)*cos(theta) + sin(theta)*cos(psi))*(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))/mass_, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, -(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))*sin(phi)*cos(theta)/mass_, -(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))*sin(theta)*cos(phi)/mass_, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, (k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))*sin_psi*cos_phi*cos_theta/mass_, (-sin_phi*sin_psi*sin_theta + cos_psi*cos_theta)*(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))/mass_, (sin_phi*cos_psi*cos_theta - sin_psi*sin_theta)*(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))/mass_, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, -(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))*cos_phi*cos_psi*cos_theta/mass_, (sin_phi*sin_theta*cos_psi + sin_psi*cos_theta)*(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))/mass_, (sin_phi*sin_psi*cos_theta + sin_theta*cos_psi)*(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))/mass_, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, -(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))*sin_phi*cos_theta/mass_, -(k_f_*u(0) + k_f_*u(1) + k_f_*u(2) + k_f_*u(3))*sin_theta*cos_phi/mass_, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.833333333333334*psi_dot, -0.833333333333334*theta_dot,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0.833333333333334*psi_dot, 0, 0.833333333333334*phi_dot,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
@@ -176,33 +157,14 @@ Eigen::MatrixXd QuadrotorDynamicsSolver::fx(const StateVector& x, const ControlV
 
 Eigen::MatrixXd QuadrotorDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    double x_ = x(0),
-           y_ = x(1),
-           z_ = x(2),
-           phi = x(3),
+    double phi = x(3),
            theta = x(4),
-           psi = x(5),
-           x_dot = x(6),
-           y_dot = x(7),
-           z_dot = x(8),
-           phi_dot = x(9),
-           theta_dot = x(10),
-           psi_dot = x(11);
-
-    const double F_1 = k_f_ * u(0);
-    const double F_2 = k_f_ * u(1);
-    const double F_3 = k_f_ * u(2);
-    const double F_4 = k_f_ * u(3);
-
-    const double M_1 = k_m_ * u(0);
-    const double M_2 = k_m_ * u(1);
-    const double M_3 = k_m_ * u(2);
-    const double M_4 = k_m_ * u(3);
+           psi = x(5);
 
     // clang-format off
-    double sin_phi = std::sin(phi),     cos_phi = std::cos(phi),        tan_phi = std::tan(phi),
-           sin_theta = std::sin(theta), cos_theta = std::cos(theta),    tan_theta = std::tan(theta),
-           sin_psi = std::sin(psi),     cos_psi = std::cos(psi),        tan_psi = std::tan(psi);
+    double sin_phi = std::sin(phi),     cos_phi = std::cos(phi),
+           sin_theta = std::sin(theta), cos_theta = std::cos(theta),
+           sin_psi = std::sin(psi),     cos_psi = std::cos(psi);
 
     Eigen::MatrixXd fu(num_positions_ + num_velocities_, num_controls_);
     fu << 
@@ -212,9 +174,9 @@ Eigen::MatrixXd QuadrotorDynamicsSolver::fu(const StateVector& x, const ControlV
         0, 0, 0, 0,
         0, 0, 0, 0,
         0, 0, 0, 0,
-        k_f_*(sin(phi)*sin(psi)*cos(theta) + sin(theta)*cos(psi))/mass_, k_f_*(sin(phi)*sin(psi)*cos(theta) + sin(theta)*cos(psi))/mass_, k_f_*(sin(phi)*sin(psi)*cos(theta) + sin(theta)*cos(psi))/mass_, k_f_*(sin(phi)*sin(psi)*cos(theta) + sin(theta)*cos(psi))/mass_,
-        k_f_*(-sin(phi)*cos(psi)*cos(theta) + sin(psi)*sin(theta))/mass_, k_f_*(-sin(phi)*cos(psi)*cos(theta) + sin(psi)*sin(theta))/mass_, k_f_*(-sin(phi)*cos(psi)*cos(theta) + sin(psi)*sin(theta))/mass_, k_f_*(-sin(phi)*cos(psi)*cos(theta) + sin(psi)*sin(theta))/mass_,
-        k_f_*cos(phi)*cos(theta)/mass_, k_f_*cos(phi)*cos(theta)/mass_, k_f_*cos(phi)*cos(theta)/mass_, k_f_*cos(phi)*cos(theta)/mass_,
+        k_f_*(sin_phi*sin_psi*cos_theta + sin_theta*cos_psi)/mass_, k_f_*(sin_phi*sin_psi*cos_theta + sin_theta*cos_psi)/mass_, k_f_*(sin_phi*sin_psi*cos_theta + sin_theta*cos_psi)/mass_, k_f_*(sin_phi*sin_psi*cos_theta + sin_theta*cos_psi)/mass_,
+        k_f_*(-sin_phi*cos_psi*cos_theta + sin_psi*sin_theta)/mass_, k_f_*(-sin_phi*cos_psi*cos_theta + sin_psi*sin_theta)/mass_, k_f_*(-sin_phi*cos_psi*cos_theta + sin_psi*sin_theta)/mass_, k_f_*(-sin_phi*cos_psi*cos_theta + sin_psi*sin_theta)/mass_,
+        k_f_*cos_phi*cos_theta/mass_, k_f_*cos_phi*cos_theta/mass_, k_f_*cos_phi*cos_theta/mass_, k_f_*cos_phi*cos_theta/mass_,
         1.66666666666667*k_f_/(L_*mass_), -1.66666666666667*k_f_/(L_*mass_), 0, 0,
         1.66666666666667*k_f_/(L_*mass_), 0, -1.66666666666667*k_f_/(L_*mass_), 0,
         0.909090909090909*k_m_/(L_*L_*2*mass_), -0.909090909090909*k_m_/(L_*L_*2*mass_), 0.909090909090909*k_m_/(L_*L_*mass_), -0.909090909090909*k_m_/(L_*L_*mass_);

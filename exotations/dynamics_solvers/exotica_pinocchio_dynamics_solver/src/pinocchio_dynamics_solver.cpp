@@ -75,7 +75,6 @@ Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlV
     const int NQ = num_positions_;
     const int NV = num_velocities_;
     const int NX = NQ + NV;
-    const int NU = num_controls_;
 
     pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval());
 

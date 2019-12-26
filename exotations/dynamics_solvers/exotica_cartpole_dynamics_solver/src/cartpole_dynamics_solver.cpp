@@ -73,7 +73,7 @@ Eigen::VectorXd CartpoleDynamicsSolver::f(const StateVector& x, const ControlVec
 Eigen::MatrixXd CartpoleDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
     auto theta = x(1);
-    auto xdot = x(2);
+    // auto xdot = x(2);
     auto tdot = x(3);
 
     auto sin_theta = std::sin(theta);
@@ -100,8 +100,8 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fx(const StateVector& x, const ControlVe
 Eigen::MatrixXd CartpoleDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
     auto theta = x(1);
-    auto xdot = x(2);
-    auto tdot = x(3);
+    // auto xdot = x(2);
+    // auto tdot = x(3);
 
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
@@ -119,7 +119,7 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fu(const StateVector& x, const ControlVe
 Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxx(const StateVector& x, const ControlVector& u)
 {
     auto theta = x(1);
-    auto xdot = x(2);
+    // auto xdot = x(2);
     auto tdot = x(3);
 
     auto sin_theta = std::sin(theta);
@@ -162,8 +162,8 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxx(const StateVector& x, const
 Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxu(const StateVector& x, const ControlVector& u)
 {
     auto theta = x(1);
-    auto xdot = x(2);
-    auto tdot = x(3);
+    // auto xdot = x(2);
+    // auto ctdot = x(3);
 
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);

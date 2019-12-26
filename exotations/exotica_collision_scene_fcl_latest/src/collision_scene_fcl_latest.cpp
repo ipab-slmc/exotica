@@ -191,12 +191,12 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::ConstructFclColl
             if (mesh->vertex_count > 0 && mesh->triangle_count > 0)
             {
                 std::vector<fcl::Triangle> tri_indices(mesh->triangle_count);
-                for (int i = 0; i < mesh->triangle_count; ++i)
+                for (unsigned int i = 0; i < mesh->triangle_count; ++i)
                     tri_indices[i] =
                         fcl::Triangle(mesh->triangles[3 * i], mesh->triangles[3 * i + 1], mesh->triangles[3 * i + 2]);
 
                 std::vector<fcl::Vector3d> points(mesh->vertex_count);
-                for (int i = 0; i < mesh->vertex_count; ++i)
+                for (unsigned int i = 0; i < mesh->vertex_count; ++i)
                     points[i] = fcl::Vector3d(mesh->vertices[3 * i], mesh->vertices[3 * i + 1], mesh->vertices[3 * i + 2]);
 
                 g->beginModel();
@@ -824,6 +824,8 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
 
 #ifdef CONTINUOUS_COLLISION_DEBUG
     HIGHLIGHT_NAMED("ContinuousCollisionResult", "return=" << time_of_contact << " is_collide: " << result.is_collide << " time_of_contact: " << result.time_of_contact << " contact_tf1: " << result.contact_tf1.translation().transpose() << " contact_tf2: " << result.contact_tf2.translation().transpose());
+#else
+    (void)time_of_contact;
 #endif
 
     if (result.is_collide)

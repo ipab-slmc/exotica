@@ -70,7 +70,6 @@ Eigen::VectorXd PendulumDynamicsSolver::f(const StateVector& x, const ControlVec
 Eigen::MatrixXd PendulumDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
     auto theta = x(0);
-    auto thetadot = x(1);
 
     Eigen::Matrix2d fx;
     fx << 0, 1,
@@ -82,12 +81,8 @@ Eigen::MatrixXd PendulumDynamicsSolver::fx(const StateVector& x, const ControlVe
 // NOTE: tested in test/test_pendulum_diff.py in this package
 Eigen::MatrixXd PendulumDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    auto theta = x(0);
-    auto thetadot = x(1);
-
     Eigen::Vector2d fu;
     fu << 0, 1.0 / (l_ * l_ * m_);
     return fu;
 }
-
 }  // namespace exotica

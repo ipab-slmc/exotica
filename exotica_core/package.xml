@@ -6,7 +6,7 @@
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
-  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+  <author>Yiming Yang</author>
   <author>Michael Camilleri</author>
 
   <license>BSD</license>

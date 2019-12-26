@@ -3,7 +3,8 @@
   <name>exotica_ompl_solver</name>
   <version>5.0.0</version>
   <description>Exotica solvers based on the Open Motion Planning Libary (OMPL)</description>
-  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <author>Yiming Yang</author>
 
   <license>BSD</license>
 

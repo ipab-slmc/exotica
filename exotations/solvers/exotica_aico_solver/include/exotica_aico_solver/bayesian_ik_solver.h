@@ -199,7 +199,7 @@ private:
     void PerhapsUndoStep();
 
     /// \brief Updates the task cost terms \f$ R, r, \hat{r} \f$. UnconstrainedEndPoseProblem::Update() has to be called before calling this function.
-    double GetTaskCosts();
+    void GetTaskCosts();
 
     /// \brief Compute one step of the AICO algorithm.
     /// @return Change in cost of the trajectory.

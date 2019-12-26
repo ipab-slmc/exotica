@@ -74,12 +74,8 @@ void run()
     Eigen::MatrixXd solution;
     HIGHLIGHT("Calling solve()");
     {
-        ros::WallTime start_time = ros::WallTime::now();
         // Solve the problem using the AICO solver
         any_solver->Solve(solution);
-        double time = ros::Duration(
-                          (ros::WallTime::now() - start_time).toSec())
-                          .toSec();
 
         ros::Rate loop_rate(50.0);
         int t = 0;

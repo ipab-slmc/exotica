@@ -35,9 +35,6 @@ REGISTER_TASKMAP_TYPE("PointToPlane", exotica::PointToPlane);
 
 namespace exotica
 {
-PointToPlane::PointToPlane() = default;
-PointToPlane::~PointToPlane() = default;
-
 void PointToPlane::Instantiate(const PointToPlaneInitializer& init)
 {
     if (debug_ && Server::IsRos())
@@ -53,7 +50,7 @@ void PointToPlane::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        const auto& point = Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        Eigen::Map<const Eigen::Vector3d> point = Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
         phi(i) = Eigen::Vector3d::UnitZ().dot(point);
     }
 
@@ -69,13 +66,13 @@ void PointToPlane::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eig
 
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        const auto& point = Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        Eigen::Map<const Eigen::Vector3d> point = Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
 
         phi(i) = Eigen::Vector3d::UnitZ().dot(point);
 
         for (int j = 0; j < jacobian.cols(); ++j)
         {
-            const auto& dpoint = Eigen::Map<const Eigen::Vector3d>(kinematics[0].jacobian[i].getColumn(j).vel.data);
+            Eigen::Map<const Eigen::Vector3d> dpoint = Eigen::Map<const Eigen::Vector3d>(kinematics[0].jacobian[i].getColumn(j).vel.data);
             jacobian(i, j) = Eigen::Vector3d::UnitZ().dot(dpoint);
         }
     }

@@ -59,7 +59,7 @@ private:
     double world_margin_;
     std::vector<CollisionProxy> closest_proxies_;
 
-    unsigned int dim_;
+    int dim_;
     CollisionScenePtr cscene_;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);

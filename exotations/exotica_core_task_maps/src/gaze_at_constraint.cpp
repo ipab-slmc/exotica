@@ -37,7 +37,7 @@ void GazeAtConstraint::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
 
-    for (int i = 0; i < frames_.size(); ++i)
+    for (std::size_t i = 0; i < frames_.size(); ++i)
     {
         const int eff_id = 2 * i;
         Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
@@ -51,7 +51,7 @@ void GazeAtConstraint::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi,
     if (phi.rows() != TaskSpaceDim()) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != TaskSpaceDim() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
-    for (int i = 0; i < frames_.size(); ++i)
+    for (std::size_t i = 0; i < frames_.size(); ++i)
     {
         const int eff_id = 2 * i;
         Eigen::Vector3d p = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
@@ -71,10 +71,10 @@ void GazeAtConstraint::Instantiate(const GazeAtConstraintInitializer& init)
 {
     parameters_ = init;
 
-    if (init.Theta.size() != frames_.size()) ThrowPretty("Incorrect size for Theta (expecting " << frames_.size() << ").");
+    if (init.Theta.size() != static_cast<int>(frames_.size())) ThrowPretty("Incorrect size for Theta (expecting " << frames_.size() << ").");
 
     tan_theta_squared_.resize(frames_.size());
-    for (int i = 0; i < frames_.size(); ++i)
+    for (std::size_t i = 0; i < frames_.size(); ++i)
     {
         const double tan_theta = std::tan(init.Theta[i]);
         tan_theta_squared_(i) = tan_theta * tan_theta;

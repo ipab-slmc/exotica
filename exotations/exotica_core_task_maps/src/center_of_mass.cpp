@@ -159,7 +159,7 @@ void CenterOfMass::Initialize()
             HIGHLIGHT_NAMED("CenterOfMass", "Initialisation with " << frames_.size() << " passed into map.");
 
         mass_.resize(frames_.size());
-        for (int i = 0; i < frames_.size(); ++i)
+        for (std::size_t i = 0; i < frames_.size(); ++i)
         {
             if (frames_[i].frame_B_link_name != "")
             {

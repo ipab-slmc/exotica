@@ -126,7 +126,7 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
             // Check convergence if
             //    a) damping is on and the iteration has concluded (the sweep improved the cost)
             //    b) damping is off [each sweep equals one iteration]
-            if (damping && sweep_improved_cost_ || !damping)
+            if ((damping && sweep_improved_cost_) || !damping)
             {
                 // 1. Check step tolerance
                 // || x_t-x_t-1 || <= stepTolerance * max(1, || x_t ||)
@@ -270,13 +270,12 @@ void BayesianIKSolver::UpdateTaskMessage(const Eigen::Ref<const Eigen::VectorXd>
 
     prob_->Update(qhat);
     ++update_count_;
-    double c = GetTaskCosts();
+    GetTaskCosts();
     // q_stat_.addw(c > 0 ? 1.0 / (1.0 + c) : 1.0, qhat_t);
 }
 
-double BayesianIKSolver::GetTaskCosts()
+void BayesianIKSolver::GetTaskCosts()
 {
-    double C = 0;
     Eigen::MatrixXd Jt;
     double prec;
     rhat = 0;
@@ -290,13 +289,11 @@ double BayesianIKSolver::GetTaskCosts()
             const int& start = prob_->cost.indexing[i].start_jacobian;
             const int& len = prob_->cost.indexing[i].length_jacobian;
             Jt = prob_->cost.jacobian.middleRows(start, len).transpose();
-            C += prec * (prob_->cost.ydiff.segment(start, len)).squaredNorm();
             R += prec * Jt * prob_->cost.jacobian.middleRows(start, len);
             r += prec * Jt * (-prob_->cost.ydiff.segment(start, len) + prob_->cost.jacobian.middleRows(start, len) * qhat);
             rhat += prec * (-prob_->cost.ydiff.segment(start, len) + prob_->cost.jacobian.middleRows(start, len) * qhat).squaredNorm();
         }
     }
-    return C;
 }
 
 void BayesianIKSolver::UpdateTimestep(bool update_fwd, bool update_bwd,

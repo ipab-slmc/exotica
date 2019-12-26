@@ -267,7 +267,6 @@ Eigen::VectorXd ILQRSolver::GetFeedbackControl(Eigen::VectorXdRefConst x, int t)
 {
     const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
 
-    const double dt = dynamics_solver_->get_dt();
     Eigen::VectorXd delta_uk = -Ku_gains_[t] * best_ref_u_.col(t) - Kv_gains_[t] * vk_gains_[t + 1] -
                                K_gains_[t] * dynamics_solver_->StateDelta(x, best_ref_x_.col(t));
 

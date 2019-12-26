@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>exotica_dynamics_solvers</name>
+  <version>5.0.0</version>
+  <description>Metapackage for all dynamics solvers bundled with core EXOTica.</description>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>exotica_cartpole_dynamics_solver</exec_depend>
+  <exec_depend>exotica_double_integrator_dynamics_solver</exec_depend>
+  <exec_depend>exotica_pendulum_dynamics_solver</exec_depend>
+  <exec_depend>exotica_pinocchio_dynamics_solver</exec_depend>
+  <exec_depend>exotica_quadrotor_dynamics_solver</exec_depend>
+  <export>
+    <metapackage/>
+  </export>
+</package>

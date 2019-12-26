@@ -75,7 +75,7 @@ void OMPLRNStateSpace::SetBounds(SamplingProblemPtr &prob)
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)), 1.0);
     ompl::base::RealVectorBounds ompl_bounds(dim);
     auto bounds = prob->GetBounds();
-    for (int i = 0; i < dim; ++i)
+    for (unsigned int i = 0; i < dim; ++i)
     {
         ompl_bounds.setHigh(i, bounds[i + dim]);
         ompl_bounds.setLow(i, bounds[i]);
@@ -150,7 +150,7 @@ void OMPLSE3RNStateSpace::SetBounds(SamplingProblemPtr &prob)
         if (dim_ > 6)
         {
             ompl::base::RealVectorBounds RNbounds(dim_ - 6);
-            for (int i = 6; i < dim_; ++i)
+            for (unsigned int i = 6; i < dim_; ++i)
             {
                 RNbounds.setHigh(i - 6, bounds[i + dim_]);
                 RNbounds.setLow(i - 6, bounds[i]);
@@ -235,7 +235,7 @@ void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
         if (dim_ > 3)
         {
             ompl::base::RealVectorBounds RNbounds(dim_ - 3);
-            for (int i = 3; i < dim_; ++i)
+            for (unsigned int i = 3; i < dim_; ++i)
             {
                 RNbounds.setHigh(i - 3, prob->GetBounds()[i + dim_]);
                 RNbounds.setLow(i - 3, prob->GetBounds()[i]);

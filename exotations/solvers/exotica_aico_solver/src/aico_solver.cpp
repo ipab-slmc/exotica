@@ -157,7 +157,7 @@ void AICOSolver::Solve(Eigen::MatrixXd& solution)
             // Check convergence if
             //    a) damping is on and the iteration has concluded (the sweep improved the cost)
             //    b) damping is off [each sweep equals one iteration]
-            if (damping && sweep_improved_cost_ || !damping)
+            if ((damping && sweep_improved_cost_) || !damping)
             {
                 // 1. Check step tolerance
                 // || x_t-x_t-1 || <= stepTolerance * max(1, || x_t ||)
@@ -259,7 +259,7 @@ void AICOSolver::InitMessages()
 
 void AICOSolver::InitTrajectory(const std::vector<Eigen::VectorXd>& q_init)
 {
-    if (q_init.size() != prob_->GetT())
+    if (q_init.size() != static_cast<std::size_t>(prob_->GetT()))
     {
         ThrowNamed("Incorrect number of timesteps provided!");
     }
@@ -525,7 +525,7 @@ double AICOSolver::Step()
             ThrowNamed("non-existing Sweep mode");
     }
     b_step_ = 0.0;
-    for (t = 0; t < b.size(); ++t)
+    for (t = 0; t < static_cast<int>(b.size()); ++t)
     {
         b_step_ = std::max((b_old[t] - b[t]).array().abs().maxCoeff(), b_step_);
     }

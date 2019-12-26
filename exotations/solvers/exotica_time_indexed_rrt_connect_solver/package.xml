@@ -3,7 +3,8 @@
   <name>exotica_time_indexed_rrt_connect_solver</name>
   <version>5.0.0</version>
   <description>Time-Indexed RRT-Connect solver (Humanoids 2018)</description>
-  <maintainer email="yiming.yang@ed.ac.uk">Yiming Yang</maintainer>
+  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <author>Yiming Yang</author>
 
   <license>BSD</license>
 

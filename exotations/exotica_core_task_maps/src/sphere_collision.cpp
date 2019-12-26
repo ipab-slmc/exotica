@@ -37,7 +37,7 @@ namespace exotica
 void SphereCollision::Instantiate(const SphereCollisionInitializer& init)
 {
     eps_ = 1.0 / init.Precision;
-    for (int i = 0; i < init.EndEffector.size(); ++i)
+    for (std::size_t i = 0; i < init.EndEffector.size(); ++i)
     {
         SphereInitializer sphere(init.EndEffector[i]);
         groups_[sphere.Group].push_back(i);
@@ -99,9 +99,9 @@ void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     {
         for (auto B = std::next(A); B != Bend; ++B)
         {
-            for (int ii = 0; ii < A->second.size(); ++ii)
+            for (std::size_t ii = 0; ii < A->second.size(); ++ii)
             {
-                for (int jj = 0; jj < B->second.size(); ++jj)
+                for (std::size_t jj = 0; jj < B->second.size(); ++jj)
                 {
                     int i = A->second[ii];
                     int j = B->second[jj];
@@ -114,7 +114,7 @@ void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 
     if (debug_ && Server::IsRos())
     {
-        for (int i = 0; i < debug_msg_.markers.size(); ++i)
+        for (std::size_t i = 0; i < debug_msg_.markers.size(); ++i)
         {
             debug_msg_.markers[i].pose.position.x = kinematics[0].Phi(i).p[0];
             debug_msg_.markers[i].pose.position.y = kinematics[0].Phi(i).p[1];
@@ -138,9 +138,9 @@ void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, 
     {
         for (auto B = std::next(A); B != Bend; ++B)
         {
-            for (int ii = 0; ii < A->second.size(); ++ii)
+            for (std::size_t ii = 0; ii < A->second.size(); ++ii)
             {
-                for (int jj = 0; jj < B->second.size(); ++jj)
+                for (std::size_t jj = 0; jj < B->second.size(); ++jj)
                 {
                     int i = A->second[ii];
                     int j = B->second[jj];
@@ -154,7 +154,7 @@ void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, 
 
     if (debug_ && Server::IsRos())
     {
-        for (int i = 0; i < debug_msg_.markers.size(); ++i)
+        for (std::size_t i = 0; i < debug_msg_.markers.size(); ++i)
         {
             debug_msg_.markers[i].pose.position.x = kinematics[0].Phi(i).p[0];
             debug_msg_.markers[i].pose.position.y = kinematics[0].Phi(i).p[1];

@@ -59,14 +59,9 @@ namespace exotica
 class LookAt : public TaskMap, public Instantiable<LookAtInitializer>
 {
 public:
-    LookAt();
-    virtual ~LookAt();
-
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
-
-private:
 };
 }  // namespace exotica
 

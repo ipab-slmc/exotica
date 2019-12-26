@@ -90,8 +90,6 @@ void run()
 
     while (ros::ok())
     {
-        ros::WallTime start_time = ros::WallTime::now();
-
         // Update the goal if necessary
         // e.g. figure eight
         t = ros::Duration((ros::WallTime::now() - init_time).toSec()).toSec();
@@ -103,7 +101,6 @@ void run()
         my_problem->SetStartState(q);
         any_solver->Solve(solution);
 
-        double time = ros::Duration((ros::WallTime::now() - start_time).toSec()).toSec();
         q = solution.row(solution.rows() - 1);
 
         my_problem->Update(q);

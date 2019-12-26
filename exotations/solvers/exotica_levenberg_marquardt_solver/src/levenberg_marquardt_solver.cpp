@@ -72,7 +72,7 @@ void LevenbergMarquardtSolver::Solve(Eigen::MatrixXd& solution)
     double error_prev = std::numeric_limits<double>::infinity();
     Eigen::VectorXd yd;
     Eigen::VectorXd qd;
-    for (size_t i = 0; i < GetNumberOfMaxIterations(); ++i)
+    for (int i = 0; i < GetNumberOfMaxIterations(); ++i)
     {
         prob_->Update(q);
 

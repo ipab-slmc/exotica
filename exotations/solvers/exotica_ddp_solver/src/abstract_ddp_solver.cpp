@@ -97,7 +97,6 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
         line_search_timer.Reset();
 
         double rollout_cost = cost_prev_;
-        bool forward_pass_done = false;
         // Perform a linear search to find the best rate
         for (int ai = 0; ai < alpha_space_.size(); ++ai)
         {
@@ -109,7 +108,6 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
                 cost_ = rollout_cost;
                 U_try_ = prob_->get_U();
                 alpha_best_ = alpha;
-                forward_pass_done = true;
                 break;
             }
         }

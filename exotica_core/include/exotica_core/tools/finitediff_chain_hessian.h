@@ -137,7 +137,7 @@ public:
         using std::abs;
         // Local variables
         FiniteDiffChainJacobian<Functor, mode> autoj(*static_cast<const Functor *>(this), update_, epsfcn_);
-        Scalar h, hk;
+        Scalar h;
         int nfev = 0;
         const typename InputJacobianRowType::Index n = _jx.size();
         const typename ValueType::Index m = jac.rows();

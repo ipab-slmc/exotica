@@ -11,24 +11,35 @@
   <url type="website">https://github.com/ipab-slmc/exotica</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>exotica_core</depend>
-  <depend>exotica_core_task_maps</depend>
-  <depend>exotica_python</depend>
   <depend>exotica_aico_solver</depend>
+  <depend>exotica_core_task_maps</depend>
+  <depend>exotica_core</depend>
   <depend>exotica_ik_solver</depend>
   <depend>sensor_msgs</depend>
+  <exec_depend>exotica_cartpole_dynamics_solver</exec_depend>
+  <exec_depend>exotica_collision_scene_fcl_latest</exec_depend>
   <exec_depend>exotica_collision_scene_fcl</exec_depend>
   <exec_depend>exotica_ddp_solver</exec_depend>
+  <exec_depend>exotica_ddp_solver</exec_depend>
+  <exec_depend>exotica_double_integrator_dynamics_solver</exec_depend>
+  <exec_depend>exotica_ilqg_solver</exec_depend>
+  <exec_depend>exotica_ilqr_solver</exec_depend>
+  <exec_depend>exotica_levenberg_marquardt_solver</exec_depend>
+  <exec_depend>exotica_ompl_control_solver</exec_depend>
   <exec_depend>exotica_ompl_solver</exec_depend>
+  <exec_depend>exotica_pendulum_dynamics_solver</exec_depend>
+  <exec_depend>exotica_pinocchio_dynamics_solver</exec_depend>
+  <exec_depend>exotica_python</exec_depend>
+  <exec_depend>exotica_quadrotor_dynamics_solver</exec_depend>
   <exec_depend>exotica_scipy_solver</exec_depend>
   <exec_depend>exotica_time_indexed_rrt_connect_solver</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>rviz</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>visualization_msgs</exec_depend>
   <exec_depend>interactive_markers</exec_depend>
   <exec_depend>python_orocos_kdl</exec_depend>
-  <test_depend>rostest</test_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
   <test_depend>exotica_val_description</test_depend>
+  <test_depend>rostest</test_depend>
   <test_depend>rosunit</test_depend>
 </package>

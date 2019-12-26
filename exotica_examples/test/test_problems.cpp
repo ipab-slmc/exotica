@@ -85,7 +85,7 @@ Hessian operator-(const Hessian& A, const Hessian& B)
     }
 
     Hessian ret(A.rows());
-    for (size_t i = 0; i < A.rows(); ++i)
+    for (int i = 0; i < A.rows(); ++i)
     {
         ret[i] = A[i] - B[i];
     }

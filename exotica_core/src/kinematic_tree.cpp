@@ -142,7 +142,12 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
             world_frame_name = s.parent_frame_;
         }
     }
-    if (world_frame_name == "") ThrowPretty("Can't initialize root joint!");
+    // if (world_frame_name == "") ThrowPretty("Can't initialize root joint!");
+    if (world_frame_name.empty())
+    {
+        world_frame_name = "world_frame";
+        WARNING_NAMED("KinematicTree", "No virtual joint defined. Defaulting world frame to " << world_frame_name)
+    }
 
     // Extract Root Inertial
     double root_mass = 0.0;

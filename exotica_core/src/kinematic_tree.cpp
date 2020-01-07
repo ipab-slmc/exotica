@@ -98,11 +98,41 @@ int KinematicTree::GetNumModelJoints() const
 void KinematicTree::Instantiate(const std::string& joint_group, robot_model::RobotModelPtr model, const std::string& name)
 {
     if (!model) ThrowPretty("No robot model provided!");
-    const robot_model::JointModelGroup* group = model->getJointModelGroup(joint_group);
-    if (!group) ThrowPretty("Joint group '" << joint_group << "' not defined in the robot model!");
-    controlled_joints_names_ = group->getVariableNames();
     model_joints_names_ = model->getVariableNames();
     name_ = name;
+
+    // Check if no joint group name is given - if so, default to all joints.
+    const robot_model::JointModelGroup* group = model->getJointModelGroup(joint_group);
+    if (!group)
+    {
+        auto names = model->getJointModelGroupNames();
+
+        // If a particular joint group is desired, but we may have a user error and will throw an exception.
+        if (!joint_group.empty())
+        {
+            std::stringstream ss;
+            ss << "Joint group '" << joint_group << "' not defined in the robot model. " << names.size() << " joint groups available";
+            if (names.size() > static_cast<std::size_t>(0))
+            {
+                ss << ": ";
+                for (const auto& joint_group_name : names)
+                    ss << joint_group_name << ", ";
+            }
+            ThrowPretty(ss.str());
+        }
+        else
+        {
+            // The joint group was left empty: We default to all _active_ joints (no fixed, no mimic).
+            // Alternatives: getJointModelNames, getVariableNames
+            for (auto joint_model : model->getActiveJointModels())
+                controlled_joints_names_.push_back(joint_model->getName());
+        }
+    }
+    else
+    {
+        // Use the joints from the desired joint group.
+        controlled_joints_names_ = group->getVariableNames();
+    }
 
     model_ = model;
     KDL::Tree robot_kinematics;

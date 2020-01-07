@@ -95,7 +95,7 @@ int KinematicTree::GetNumModelJoints() const
     return num_joints_;
 }
 
-void KinematicTree::Instantiate(std::string joint_group, robot_model::RobotModelPtr model, const std::string& name)
+void KinematicTree::Instantiate(const std::string& joint_group, robot_model::RobotModelPtr model, const std::string& name)
 {
     if (!model) ThrowPretty("No robot model provided!");
     const robot_model::JointModelGroup* group = model->getJointModelGroup(joint_group);

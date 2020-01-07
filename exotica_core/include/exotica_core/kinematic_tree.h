@@ -272,7 +272,7 @@ private:
     std::vector<std::string> controlled_joints_names_;
     std::vector<std::string> model_link_names_;
     std::vector<std::string> controlled_link_names_;
-    std::shared_ptr<KinematicResponse> solution_;
+    std::shared_ptr<KinematicResponse> solution_ = std::make_shared<KinematicResponse>();
     KinematicRequestFlags flags_;
 
     std::vector<tf::StampedTransform> debug_tree_;

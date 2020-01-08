@@ -129,7 +129,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
 
         if (debug_)
         {
-            HIGHLIGHT_NAMED("DDPSolver", "Iteration " << iteration << std::setprecision(6) << ":\tBackward pass: " << time_taken_backward_pass_ << " s\tForward pass: " << time_taken_forward_pass_ << " s\tCost: " << cost_ << "\talpha: " << alpha_best_ << "\tRegularization: " << lambda_);
+            HIGHLIGHT_NAMED("DDPSolver", "Iteration " << iteration << std::setprecision(3) << ":\tBackward pass: " << time_taken_backward_pass_ << " s\tForward pass: " << time_taken_forward_pass_ << " s\tCost: " << cost_ << "\talpha: " << alpha_best_ << "\tRegularization: " << lambda_);
         }
 
         //
@@ -184,8 +184,8 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             }
             else
             {
-                if (debug_) HIGHLIGHT("Cost improved, decrease regularization");
-                DecreaseRegularization();
+                // if (debug_) HIGHLIGHT("Cost improved, decrease regularization");
+                if (lambda_ > 1e-12) DecreaseRegularization();
             }
         }
         else
@@ -193,7 +193,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             cost_ = cost_prev_;
             // Revert by not storing U_try_ as U_ref_ (maintain U_ref_)
 
-            if (debug_) HIGHLIGHT("No improvement - increase regularization");
+            // if (debug_) HIGHLIGHT("No improvement - increase regularization");
             IncreaseRegularization();
         }
 

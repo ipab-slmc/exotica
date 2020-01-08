@@ -95,14 +95,44 @@ int KinematicTree::GetNumModelJoints() const
     return num_joints_;
 }
 
-void KinematicTree::Instantiate(std::string joint_group, robot_model::RobotModelPtr model, const std::string& name)
+void KinematicTree::Instantiate(const std::string& joint_group, robot_model::RobotModelPtr model, const std::string& name)
 {
     if (!model) ThrowPretty("No robot model provided!");
-    const robot_model::JointModelGroup* group = model->getJointModelGroup(joint_group);
-    if (!group) ThrowPretty("Joint group '" << joint_group << "' not defined in the robot model!");
-    controlled_joints_names_ = group->getVariableNames();
     model_joints_names_ = model->getVariableNames();
     name_ = name;
+
+    // Check if no joint group name is given - if so, default to all joints.
+    const robot_model::JointModelGroup* group = model->getJointModelGroup(joint_group);
+    if (!group)
+    {
+        auto names = model->getJointModelGroupNames();
+
+        // If a particular joint group is desired, but we may have a user error and will throw an exception.
+        if (!joint_group.empty())
+        {
+            std::stringstream ss;
+            ss << "Joint group '" << joint_group << "' not defined in the robot model. " << names.size() << " joint groups available";
+            if (names.size() > static_cast<std::size_t>(0))
+            {
+                ss << ": ";
+                for (const auto& joint_group_name : names)
+                    ss << joint_group_name << ", ";
+            }
+            ThrowPretty(ss.str());
+        }
+        else
+        {
+            // The joint group was left empty: We default to all _active_ joints (no fixed, no mimic).
+            // Alternatives: getJointModelNames, getVariableNames
+            for (auto joint_model : model->getActiveJointModels())
+                controlled_joints_names_.push_back(joint_model->getName());
+        }
+    }
+    else
+    {
+        // Use the joints from the desired joint group.
+        controlled_joints_names_ = group->getVariableNames();
+    }
 
     model_ = model;
     KDL::Tree robot_kinematics;
@@ -142,7 +172,12 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
             world_frame_name = s.parent_frame_;
         }
     }
-    if (world_frame_name == "") ThrowPretty("Can't initialize root joint!");
+    // if (world_frame_name == "") ThrowPretty("Can't initialize root joint!");
+    if (world_frame_name.empty())
+    {
+        world_frame_name = "world_frame";
+        WARNING_NAMED("KinematicTree", "No virtual joint defined. Defaulting world frame to " << world_frame_name)
+    }
 
     // Extract Root Inertial
     double root_mass = 0.0;

@@ -133,7 +133,7 @@ public:
 class KinematicTree : public Uncopyable
 {
 public:
-    void Instantiate(std::string joint_group, robot_model::RobotModelPtr model, const std::string& name);
+    void Instantiate(const std::string& joint_group, robot_model::RobotModelPtr model, const std::string& name);
     const std::string& GetRootFrameName() const;
     const std::string& GetRootJointName() const;
     robot_model::RobotModelPtr GetRobotModel() const;
@@ -272,7 +272,7 @@ private:
     std::vector<std::string> controlled_joints_names_;
     std::vector<std::string> model_link_names_;
     std::vector<std::string> controlled_link_names_;
-    std::shared_ptr<KinematicResponse> solution_;
+    std::shared_ptr<KinematicResponse> solution_ = std::make_shared<KinematicResponse>();
     KinematicRequestFlags flags_;
 
     std::vector<tf::StampedTransform> debug_tree_;

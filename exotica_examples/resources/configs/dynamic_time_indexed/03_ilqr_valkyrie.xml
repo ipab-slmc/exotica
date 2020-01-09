@@ -1,27 +1,17 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
-    <!-- <AnalyticDDPSolver Name="AnalyticDDPSolver">
-        <Debug>1</Debug>
-        <MaxIterations>300</MaxIterations>
-        <FunctionTolerance>1e-3</FunctionTolerance>
-        <FunctionTolerancePatience>300</FunctionTolerancePatience>
-        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-        <RegularizationRate>1</RegularizationRate>
-    </AnalyticDDPSolver> -->
-    <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
+    <!-- 2020-01-08, wxm: This example makes no sense. It has taskmaps when iLQR cannot solve taskmaps. Start and goal state are the same. The Qf is set up incorrectly. As thus, it should do nothing. -->
+
+    <ILQRSolver Name="ILQRSolver">
         <Debug>1</Debug>
         <MaxIterations>10</MaxIterations>
-        <FunctionTolerance>1e-3</FunctionTolerance>
-        <FunctionTolerancePatience>10</FunctionTolerancePatience>
-        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-        <RegularizationRate>1</RegularizationRate>
-    </ControlLimitedDDPSolver>
+        <!-- <RegularizationRate>1</RegularizationRate> -->
+    </ILQRSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <PlanningScene>
         <Scene>
             <JointGroup>whole_body</JointGroup>
-            <Debug>0</Debug>
             <URDF>{exotica_examples}/resources/robots/valkyrie_sim.urdf</URDF>
             <SRDF>{exotica_examples}/resources/robots/valkyrie_sim.srdf</SRDF>
             <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
@@ -63,7 +53,7 @@
                 </EndEffector>
             </EffPosition>
 
-            <QuasiStatic Name="Stability" PositiveOnly="1" Debug="1">
+            <!-- <QuasiStatic Name="Stability" PositiveOnly="1" Debug="1">
                 <EndEffector>
                     <Frame Link="leftFoot_collision_5"/>
                     <Frame Link="leftFoot_collision_6"/>
@@ -74,7 +64,7 @@
                     <Frame Link="rightFoot_collision_7"/>
                     <Frame Link="rightFoot_collision_8"/>
                 </EndEffector>
-            </QuasiStatic>
+            </QuasiStatic> -->
         </Maps>
 
         <Cost>

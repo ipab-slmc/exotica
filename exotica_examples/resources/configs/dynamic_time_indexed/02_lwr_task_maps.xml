@@ -2,10 +2,8 @@
 <DynamicTimeIndexedProblemConfig>-->
     <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
-        <MaxIterations>200</MaxIterations>
-        <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>200</FunctionTolerancePatience>
-        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+        <MaxIterations>1000</MaxIterations>
+        <!-- <UseSecondOrderDynamics>1</UseSecondOrderDynamics> -->
         <RegularizationRate>0.1</RegularizationRate>
     </AnalyticDDPSolver>
     

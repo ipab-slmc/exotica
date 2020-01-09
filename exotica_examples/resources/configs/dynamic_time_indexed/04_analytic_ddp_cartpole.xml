@@ -2,11 +2,9 @@
 <DynamicTimeIndexedProblemConfig>
     <AnalyticDDPSolver Name="AnalyticDDPSolver">
         <Debug>1</Debug>
-        <MaxIterations>300</MaxIterations>
-        <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>300</FunctionTolerancePatience>
-        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-        <RegularizationRate>1e-3</RegularizationRate>
+        <!-- Toggle to see the impact of second order dynamics. Regularisation also has an impact. -->
+        <!-- <UseSecondOrderDynamics>1</UseSecondOrderDynamics> -->
+        <RegularizationRate>1e-1</RegularizationRate>
     </AnalyticDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">

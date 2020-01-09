@@ -2,9 +2,7 @@
 <DynamicTimeIndexedProblemConfig>
     <AnalyticDDPSolver Name="AnalyticDDPSolver">
         <Debug>1</Debug>
-        <MaxIterations>3</MaxIterations>
-        <ConvergenceThreshold>-1</ConvergenceThreshold>
-        <EarlyStopping>3</EarlyStopping>
+        <MaxIterations>10</MaxIterations>
         <UseSecondOrderDynamics>1</UseSecondOrderDynamics>
     </AnalyticDDPSolver>
 
@@ -32,7 +30,7 @@
         <dt>0.02</dt>
         <Q_rate>0</Q_rate>
         <Qf_rate>10</Qf_rate>
-        <R_rate>0.1</R_rate>
+        <R_rate>1e-3</R_rate>
 
         <StartState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 </StartState>
         <GoalState>0.0 0.0 5 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 1.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -0.25 0.0 -1.785398163397 1.571 0.0 0.0 0.0 1.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 5.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0</GoalState>

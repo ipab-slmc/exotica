@@ -1,9 +1,10 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
+    <!-- This one does not converge within the 60s iteration time. -->
     <ControlKPIECESolver Name="ControlKPIECESolver">
         <Debug>1</Debug>
         <StateLimits>2 3.14 5 5</StateLimits>
-        <MaxIterationTime>10</MaxIterationTime>
+        <MaxIterationTime>60</MaxIterationTime>
         <ConvergenceTolerance>1e-3</ConvergenceTolerance>
         <ApproximateSolution>1</ApproximateSolution>
         <Seed>1</Seed>

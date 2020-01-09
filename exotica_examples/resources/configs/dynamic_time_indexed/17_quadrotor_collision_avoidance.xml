@@ -3,10 +3,7 @@
     <AnalyticDDPSolver Name="analytic_ddp">
         <Debug>1</Debug>
         <MaxIterations>1000</MaxIterations>
-        <FunctionTolerance>1e-5</FunctionTolerance>
-        <FunctionTolerancePatience>1000</FunctionTolerancePatience>
-        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-        <ClampControlsInForwardPass>0</ClampControlsInForwardPass>
+        <FunctionTolerancePatience>100</FunctionTolerancePatience>
         <RegularizationRate>1e-12</RegularizationRate>
     </AnalyticDDPSolver>
 

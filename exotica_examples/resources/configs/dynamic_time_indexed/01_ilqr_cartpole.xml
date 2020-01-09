@@ -3,9 +3,7 @@
     <ILQRSolver Name="ilqr">
         <Debug>1</Debug>
         <MaxIterations>200</MaxIterations>
-        <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>200</FunctionTolerancePatience>
-        <RegularizationRate>0.0001</RegularizationRate>
+        <RegularizationRate>0.01</RegularizationRate>
     </ILQRSolver>
 
     <DynamicTimeIndexedShootingProblem Name="cartpole">

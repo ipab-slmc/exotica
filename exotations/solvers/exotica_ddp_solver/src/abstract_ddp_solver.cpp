@@ -185,7 +185,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             else
             {
                 // if (debug_) HIGHLIGHT("Cost improved, decrease regularization");
-                if (lambda_ > 1e-12) DecreaseRegularization();
+                if (lambda_ > base_parameters_.MinimumRegularization) DecreaseRegularization();
             }
         }
         else

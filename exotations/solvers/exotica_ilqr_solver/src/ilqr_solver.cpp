@@ -46,8 +46,8 @@ void ILQRSolver::SpecifyProblem(PlanningProblemPtr pointer)
 
 void ILQRSolver::BackwardPass()
 {
-    // constexpr double min_clamp_ = -1e10;
-    // constexpr double max_clamp_ = 1e10;
+    constexpr double min_clamp_ = -1e10;
+    constexpr double max_clamp_ = 1e10;
     const int T = prob_->get_T();
     const double dt = dynamics_solver_->get_dt();
 
@@ -57,17 +57,17 @@ void ILQRSolver::BackwardPass()
 
     // eq. 18
     vk_gains_[T - 1] = Qf * dynamics_solver_->StateDelta(prob_->get_X(T - 1), X_star.col(T - 1));
-    // vk_gains_[T - 1] = vk_gains_[T - 1].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
-    //     return std::min(std::max(x, min_clamp_), max_clamp_);
-    // });
+    vk_gains_[T - 1] = vk_gains_[T - 1].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+        return std::min(std::max(x, min_clamp_), max_clamp_);
+    });
 
     Eigen::MatrixXd Sk = Qf;
-    // Sk = Sk.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
-    //     return std::min(std::max(x, min_clamp_), max_clamp_);
-    // });
-    // vk_gains_[T - 1] = vk_gains_[T - 1].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
-    //     return std::min(std::max(x, min_clamp_), max_clamp_);
-    // });
+    Sk = Sk.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+        return std::min(std::max(x, min_clamp_), max_clamp_);
+    });
+    vk_gains_[T - 1] = vk_gains_[T - 1].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+        return std::min(std::max(x, min_clamp_), max_clamp_);
+    });
 
     for (int t = T - 2; t >= 0; t--)
     {
@@ -92,12 +92,12 @@ void ILQRSolver::BackwardPass()
                        (K_gains_[t].transpose() * R * u) + (Q * x);
 
         // fix for large values
-        // Sk = Sk.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
-        //     return std::min(std::max(x, min_clamp_), max_clamp_);
-        // });
-        // vk_gains_[t] = vk_gains_[t].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
-        //     return std::min(std::max(x, min_clamp_), max_clamp_);
-        // });
+        Sk = Sk.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+            return std::min(std::max(x, min_clamp_), max_clamp_);
+        });
+        vk_gains_[t] = vk_gains_[t].unaryExpr([min_clamp_, max_clamp_](double x) -> double {
+            return std::min(std::max(x, min_clamp_), max_clamp_);
+        });
     }
 }
 

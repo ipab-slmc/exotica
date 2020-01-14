@@ -3,9 +3,7 @@
     <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>50</MaxIterations>
-        <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>50</FunctionTolerancePatience>
-        <UseSecondOrderDynamics>1</UseSecondOrderDynamics>
+        <!-- <UseSecondOrderDynamics>1</UseSecondOrderDynamics> -->
     </ControlLimitedDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">

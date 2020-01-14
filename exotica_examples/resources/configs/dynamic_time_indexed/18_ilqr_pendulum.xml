@@ -2,9 +2,6 @@
 <DynamicTimeIndexedProblemConfig>
     <ILQRSolver Name="ilqr">
         <Debug>1</Debug>
-        <MaxIterations>100</MaxIterations>
-        <FunctionTolerance>-1</FunctionTolerance>
-        <FunctionTolerancePatience>100</FunctionTolerancePatience>
         <RegularizationRate>0.0001</RegularizationRate>
     </ILQRSolver>
 

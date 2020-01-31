@@ -2,8 +2,8 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.1.0 (2020-01-31)
+------------------
 * Add support for Scene creation without SRDF, from robot param server (`#681 <https://github.com/ipab-slmc/exotica/issues/681>`_)
 * Address -Wall warnings (`#679 <https://github.com/ipab-slmc/exotica/issues/679>`_)
 * Fix floating-base Jacobian column switch bug, fix floating-base collision links (`#668 <https://github.com/ipab-slmc/exotica/issues/668>`_)

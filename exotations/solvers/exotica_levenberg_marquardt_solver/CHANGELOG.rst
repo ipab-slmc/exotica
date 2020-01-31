@@ -2,7 +2,7 @@
 Changelog for package exotica_levenberg_marquardt_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.1.0 (2020-01-31)
+------------------
 * Various minor code improvements
 * Contributors: Christian Rauch, Wolfgang Merkt

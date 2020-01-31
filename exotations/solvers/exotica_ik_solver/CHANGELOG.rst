@@ -2,7 +2,7 @@
 Changelog for package exotica_ik_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.1.0 (2020-01-31)
+------------------
 * A variety of small code improvements
 * Contributors: Christian Rauch, Wolfgang Merkt

@@ -198,7 +198,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     KDL::RigidBodyInertia root_inertial(root_mass, root_cog);
 
     // Add general world_frame joint
-    model_tree_.push_back(std::make_shared<KinematicElement>(model_tree_.size(), nullptr, KDL::Segment(world_frame_name, KDL::Joint(root_joint->getName(), KDL::Joint::None))));
+    model_tree_.push_back(std::make_shared<KinematicElement>(-1, nullptr, KDL::Segment(world_frame_name, KDL::Joint(root_joint->getName(), KDL::Joint::None))));
     if (root_joint->getType() == robot_model::JointModel::FIXED)
     {
         model_base_type_ = BaseType::FIXED;

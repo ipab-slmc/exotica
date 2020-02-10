@@ -2,6 +2,9 @@
 Changelog for package exotica_time_indexed_rrt_connect_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 5.1.1 (2020-02-10)
 ------------------
 

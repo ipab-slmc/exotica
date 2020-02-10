@@ -2,6 +2,11 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix bug in updating root tree (`#684 <https://github.com/ipab-slmc/exotica/issues/684>`_)
+* Contributors: Wolfgang Merkt
+
 5.1.1 (2020-02-10)
 ------------------
 * Fix to avoid duplicate ID=0 in KinematicTree (`#683 <https://github.com/ipab-slmc/exotica/issues/683>`_)

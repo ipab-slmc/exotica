@@ -2,6 +2,9 @@
 Changelog for package exotica_collision_scene_fcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 5.1.1 (2020-02-10)
 ------------------
 

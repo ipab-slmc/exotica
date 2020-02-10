@@ -666,7 +666,8 @@ void KinematicTree::UpdateTree()
     {
         auto element = elements.front();
         elements.pop();
-        // Elements with id > 0 have parent links.
+        // Elements with id > -1 have parent links.
+        // ID=-1 is the global world reference frame.
         if (element->id > -1)
         {
             if (element->segment.getJoint().getType() != KDL::Joint::JointType::None)

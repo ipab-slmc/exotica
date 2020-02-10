@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>exotica_ompl_solver</name>
-  <version>5.1.1</version>
+  <version>5.1.2</version>
   <description>Exotica solvers based on the Open Motion Planning Libary (OMPL)</description>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
   <author>Yiming Yang</author>

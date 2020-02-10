@@ -2,8 +2,8 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.1.2 (2020-02-10)
+------------------
 * Fix bug in updating root tree (`#684 <https://github.com/ipab-slmc/exotica/issues/684>`_)
 * Contributors: Wolfgang Merkt
 

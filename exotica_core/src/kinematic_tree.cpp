@@ -667,7 +667,7 @@ void KinematicTree::UpdateTree()
         auto element = elements.front();
         elements.pop();
         // Elements with id > 0 have parent links.
-        if (element->id > 0)
+        if (element->id > -1)
         {
             if (element->segment.getJoint().getType() != KDL::Joint::JointType::None)
             {
@@ -681,7 +681,9 @@ void KinematicTree::UpdateTree()
         // Root of tree.
         else
         {
-            element->frame = element->GetPose(tree_state_(element->id));
+            // NB: We could simply set KDL::Frame() here, however, to support
+            // trajectories for the base joint, we return GetPose();
+            element->frame = element->GetPose();
         }
         element->RemoveExpiredChildren();
         for (std::weak_ptr<KinematicElement> child : element->children)

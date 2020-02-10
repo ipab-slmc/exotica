@@ -2,6 +2,12 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix to avoid duplicate ID=0 in KinematicTree (`#683 <https://github.com/ipab-slmc/exotica/issues/683>`_)
+* Added explicit general dependency on libzmq3-dev to fix buildfarm build issues
+* Contributors: Vladimir Ivan, Wolfgang Merkt
+
 5.1.0 (2020-01-31)
 ------------------
 * Add support for Scene creation without SRDF, from robot param server (`#681 <https://github.com/ipab-slmc/exotica/issues/681>`_)

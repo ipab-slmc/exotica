@@ -2,6 +2,9 @@
 Changelog for package exotica
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 5.1.0 (2020-01-31)
 ------------------
 * Update documentation

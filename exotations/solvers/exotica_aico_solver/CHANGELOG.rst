@@ -2,6 +2,9 @@
 Changelog for package exotica_aico_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 5.1.0 (2020-01-31)
 ------------------
 * Various updates

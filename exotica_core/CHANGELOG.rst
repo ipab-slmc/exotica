@@ -2,8 +2,8 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.1.1 (2020-02-10)
+------------------
 * Fix to avoid duplicate ID=0 in KinematicTree (`#683 <https://github.com/ipab-slmc/exotica/issues/683>`_)
 * Added explicit general dependency on libzmq3-dev to fix buildfarm build issues
 * Contributors: Vladimir Ivan, Wolfgang Merkt

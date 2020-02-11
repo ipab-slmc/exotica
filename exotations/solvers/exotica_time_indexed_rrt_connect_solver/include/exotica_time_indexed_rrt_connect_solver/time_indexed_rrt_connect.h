@@ -106,10 +106,6 @@ typedef boost::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformatio
 class TimeIndexedRRTConnectSolver : public MotionSolver, Instantiable<TimeIndexedRRTConnectSolverInitializer>
 {
 public:
-    TimeIndexedRRTConnectSolver();
-
-    virtual ~TimeIndexedRRTConnectSolver();
-
     void Instantiate(const TimeIndexedRRTConnectSolverInitializer &init) override;
     void Solve(Eigen::MatrixXd &solution) override;
     void SpecifyProblem(PlanningProblemPtr pointer) override;

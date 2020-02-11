@@ -1169,6 +1169,14 @@ PYBIND11_MODULE(_pyexotica, module)
 
     // Get full tree
     kinematic_tree.def("get_model_tree", &KinematicTree::GetModelTree);
+    kinematic_tree.def("get_tree", [](KinematicTree* kt) {
+        auto tree_weak_ptr = kt->GetTree();
+        std::vector<std::shared_ptr<KinematicElement>> tree_shared_ptr;
+        tree_shared_ptr.reserve(tree_weak_ptr.size());
+        for (auto e : tree_weak_ptr)
+            tree_shared_ptr.emplace_back(e.lock());
+        return tree_shared_ptr;
+    });
 
     // KinematicElement
     py::class_<KinematicElement, std::shared_ptr<KinematicElement>> kinematic_element(kin, "KinematicElement");

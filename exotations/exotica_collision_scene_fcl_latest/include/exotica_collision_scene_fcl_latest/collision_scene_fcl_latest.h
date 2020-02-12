@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -67,9 +67,6 @@ public:
         bool self = true;
     };
 
-    CollisionSceneFCLLatest();
-    virtual ~CollisionSceneFCLLatest();
-
     void Setup() override;
 
     bool IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) override;
@@ -121,14 +118,54 @@ public:
     void UpdateCollisionObjectTransforms() override;
 
 private:
+    std::shared_ptr<fcl::BroadPhaseCollisionManagerd> broad_phase_collision_manager_;
+
     std::shared_ptr<fcl::CollisionObjectd> ConstructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
     static void CheckCollision(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, CollisionData* data);
     static void ComputeDistance(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, DistanceData* data);
 
-    std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> fcl_cache_;
     std::vector<fcl::CollisionObjectd*> fcl_objects_;
+    std::vector<std::shared_ptr<fcl::CollisionObjectd>> fcl_cache_;  // to avoid shared_ptr from going stale, to be refactored
     std::vector<std::weak_ptr<KinematicElement>> kinematic_elements_;
+    std::map<std::string, std::weak_ptr<KinematicElement>> kinematic_elements_map_;
+
+    // The following maps are stored by the name of the *frame*, e.g., base_link_collision_0
+    std::map<std::string, std::vector<fcl::CollisionObjectd*>> fcl_objects_map_;
+    std::map<std::string, std::vector<fcl::CollisionObjectd*>> fcl_robot_objects_map_;
+    std::map<std::string, std::vector<fcl::CollisionObjectd*>> fcl_world_objects_map_;
+
+    std::shared_ptr<KinematicElement> GetKinematicElementFromMapByName(const std::string& frame_name)
+    {
+        auto it = kinematic_elements_map_.find(frame_name);
+        if (it == kinematic_elements_map_.end()) ThrowPretty("KinematicElement is not a valid collision link:" << frame_name);
+
+        return it->second.lock();
+    }
+
+    std::vector<fcl::CollisionObjectd*> GetRobotCollisionObjectsFromMapByName(const std::string& frame_name)
+    {
+        auto it = fcl_robot_objects_map_.find(frame_name);
+        if (it == fcl_robot_objects_map_.end()) ThrowPretty(frame_name << " is not a robot collision object");
+
+        return it->second;
+    }
+
+    std::vector<fcl::CollisionObjectd*> GetWorldCollisionObjectsFromMapByName(const std::string& frame_name)
+    {
+        auto it = fcl_world_objects_map_.find(frame_name);
+        if (it == fcl_world_objects_map_.end()) ThrowPretty(frame_name << " is not a world collision object");
+
+        return it->second;
+    }
+
+    std::vector<fcl::CollisionObjectd*> GetCollisionObjectsFromMapByName(const std::string& frame_name)
+    {
+        auto it = fcl_objects_map_.find(frame_name);
+        if (it == fcl_objects_map_.end()) ThrowPretty(frame_name << " is not a collision object");
+
+        return it->second;
+    }
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_COLLISION_SCENE_FCL_LATEST_COLLISION_SCENE_FCL_LATEST_H_

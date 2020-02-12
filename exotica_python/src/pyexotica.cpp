@@ -1169,6 +1169,14 @@ PYBIND11_MODULE(_pyexotica, module)
 
     // Get full tree
     kinematic_tree.def("get_model_tree", &KinematicTree::GetModelTree);
+    kinematic_tree.def("get_tree", [](KinematicTree* kt) {
+        auto tree_weak_ptr = kt->GetTree();
+        std::vector<std::shared_ptr<KinematicElement>> tree_shared_ptr;
+        tree_shared_ptr.reserve(tree_weak_ptr.size());
+        for (auto e : tree_weak_ptr)
+            tree_shared_ptr.emplace_back(e.lock());
+        return tree_shared_ptr;
+    });
 
     // KinematicElement
     py::class_<KinematicElement, std::shared_ptr<KinematicElement>> kinematic_element(kin, "KinematicElement");
@@ -1183,6 +1191,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematic_element.def_readonly("parent_name", &KinematicElement::parent_name);
     kinematic_element.def_readonly("joint_limits", &KinematicElement::joint_limits);
     kinematic_element.def_readonly("is_robot_link", &KinematicElement::is_robot_link);
+    kinematic_element.def_readonly("shape", &KinematicElement::shape);
 
     // TODO: KinematicRequestFlags
 
@@ -1220,14 +1229,12 @@ PYBIND11_MODULE(_pyexotica, module)
         .def(py::init())
         .def(py::init<double>())
         .def_readonly_static("name", &shapes::Sphere::STRING_NAME)
-        .def("scaleAndPadd", &shapes::Sphere::scaleAndPadd)
         .def_readwrite("radius", &shapes::Sphere::radius);
 
     py::class_<shapes::Cylinder, shapes::Shape, std::shared_ptr<shapes::Cylinder>>(module, "Cylinder")
         .def(py::init())
         .def(py::init<double, double>())
         .def_readonly_static("name", &shapes::Cylinder::STRING_NAME)
-        .def("scaleAndPadd", &shapes::Cylinder::scaleAndPadd)
         .def_readwrite("radius", &shapes::Cylinder::radius)
         .def_readwrite("length", &shapes::Cylinder::length);
 
@@ -1235,26 +1242,32 @@ PYBIND11_MODULE(_pyexotica, module)
         .def(py::init())
         .def(py::init<double, double>())
         .def_readonly_static("name", &shapes::Cone::STRING_NAME)
-        .def("scaleAndPadd", &shapes::Cone::scaleAndPadd)
         .def_readwrite("radius", &shapes::Cone::radius)
         .def_readwrite("length", &shapes::Cone::length);
 
     py::class_<shapes::Box, shapes::Shape, std::shared_ptr<shapes::Box>>(module, "Box")
         .def(py::init())
         .def(py::init<double, double, double>())
-        .def_readonly_static("name", &shapes::Box::STRING_NAME)
-        .def("scaleAndPadd", &shapes::Box::scaleAndPadd);
+        .def_readonly_static("name", &shapes::Box::STRING_NAME);
 
     py::class_<shapes::Plane, shapes::Shape, std::shared_ptr<shapes::Plane>>(module, "Plane")
         .def(py::init())
         .def(py::init<double, double, double, double>())
         .def_readonly_static("name", &shapes::Plane::STRING_NAME)
-        .def("scaleAndPadd", &shapes::Plane::scaleAndPadd)
         .def("isFixed", &shapes::Plane::isFixed)
         .def_readwrite("a", &shapes::Plane::a)
         .def_readwrite("b", &shapes::Plane::b)
         .def_readwrite("c", &shapes::Plane::c)
         .def_readwrite("d", &shapes::Plane::d);
+
+    py::class_<shapes::Mesh, shapes::Shape, std::shared_ptr<shapes::Mesh>>(module, "Mesh")
+        .def(py::init())
+        .def(py::init<unsigned int, unsigned int>())
+        .def("computeTriangleNormals", &shapes::Mesh::computeTriangleNormals)
+        .def("computeVertexNormals", &shapes::Mesh::computeVertexNormals)
+        .def("mergeVertices", &shapes::Mesh::mergeVertices)
+        .def_readonly("vertex_count", &shapes::Mesh::vertex_count)
+        .def_readonly("triangle_count", &shapes::Mesh::triangle_count);
 
     py::enum_<shapes::ShapeType>(module, "ShapeType")
         .value("UNKNOWN_SHAPE", shapes::ShapeType::UNKNOWN_SHAPE)

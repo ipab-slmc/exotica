@@ -115,7 +115,7 @@ std::string Trajectory::ToString()
 
 void Trajectory::ConstructFromData(Eigen::MatrixXdRefConst data, double radius)
 {
-    if (!(data.cols() == 4 || data.cols() == 7 || data.cols() == 8) || data.rows() < 2) ThrowPretty("Invalid trajectory data size!");
+    if (!(data.cols() == 4 || data.cols() == 7 || data.cols() == 8) || data.rows() < 2) ThrowPretty("Invalid trajectory data size!\nNeeds to contain 4, 7, or 8 columns and at least 2 rows.");
     trajectory_.reset(new KDL::Trajectory_Composite());
     for (int i = 0; i < data.rows() - 1; ++i)
     {
@@ -139,4 +139,4 @@ void Trajectory::ConstructFromData(Eigen::MatrixXdRefConst data, double radius)
     data_ = data;
     radius_ = radius;
 }
-}
+}  // namespace exotica

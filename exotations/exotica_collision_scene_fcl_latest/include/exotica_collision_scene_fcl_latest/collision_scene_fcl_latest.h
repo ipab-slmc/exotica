@@ -90,6 +90,9 @@ public:
     std::vector<CollisionProxy> GetCollisionDistance(const std::vector<std::string>& objects, const bool& self = true) override;
     std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const bool& self = true, const bool& disable_collision_scene_update = false) override;
 
+    std::vector<CollisionProxy> GetRobotToRobotCollisionDistance(double check_margin) override;
+    std::vector<CollisionProxy> GetRobotToWorldCollisionDistance(double check_margin) override;
+
     /// @brief      Performs a continuous collision check between two objects with a linear interpolation between two given
     /// @param[in]  o1       The first collision object, by name.
     /// @param[in]  tf1_beg  The beginning transform for o1.

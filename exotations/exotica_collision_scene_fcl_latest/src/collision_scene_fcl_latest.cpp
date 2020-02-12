@@ -663,18 +663,64 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::GetCollisionDistance(const 
     return proxies;
 }
 
+std::vector<CollisionProxy> CollisionSceneFCLLatest::GetRobotToRobotCollisionDistance(double check_margin)
 {
+    DistanceData data(this);
+    data.self = true;
+
+    // For each robot collision object to each robot collision object
+    for (auto it1 : fcl_robot_objects_map_)
     {
+        for (auto it2 : fcl_robot_objects_map_)
         {
+            if (IsAllowedToCollide(it1.first, it2.first, true))
+            {
+                // Both it1.second and it2.second are vectors of collision objects, so we need to iterate through each:
+                for (auto o1 : it1.second)
+                {
+                    for (auto o2 : it2.second)
+                    {
+                        // Check whether the AABB is less than the check_margin, if so, perform a collision distance call
+                        if (o1->getAABB().distance(o2->getAABB()) < check_margin)
+                        {
+                            ComputeDistance(o1, o2, &data);
+                        }
+                    }
+                }
+            }
         }
     }
+    return data.proxies;
 }
 
+std::vector<CollisionProxy> CollisionSceneFCLLatest::GetRobotToWorldCollisionDistance(double check_margin)
 {
+    DistanceData data(this);
+    data.self = false;
+
+    // For each robot collision object to each robot collision object
+    for (auto it1 : fcl_robot_objects_map_)
     {
+        for (auto it2 : fcl_world_objects_map_)
         {
+            if (IsAllowedToCollide(it1.first, it2.first, false))
+            {
+                // Both it1.second and it2.second are vectors of collision objects, so we need to iterate through each:
+                for (auto o1 : it1.second)
+                {
+                    for (auto o2 : it2.second)
+                    {
+                        // Check whether the AABB is less than the check_margin, if so, perform a collision distance call
+                        if (o1->getAABB().distance(o2->getAABB()) < check_margin)
+                        {
+                            ComputeDistance(o1, o2, &data);
+                        }
+                    }
+                }
+            }
         }
     }
+    return data.proxies;
 }
 
 Eigen::Vector3d CollisionSceneFCLLatest::GetTranslation(const std::string& name)

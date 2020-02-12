@@ -208,51 +208,51 @@ public:
     /// @param[in]  name    Name of the collision object to query.
     virtual Eigen::Vector3d GetTranslation(const std::string& name) = 0;
 
-    inline void SetACM(const AllowedCollisionMatrix& acm)
+    void SetACM(const AllowedCollisionMatrix& acm)
     {
         acm_ = acm;
     }
 
-    inline bool GetAlwaysExternallyUpdatedCollisionScene() { return always_externally_updated_collision_scene_; }
-    inline void SetAlwaysExternallyUpdatedCollisionScene(const bool& value)
+    bool GetAlwaysExternallyUpdatedCollisionScene() const { return always_externally_updated_collision_scene_; }
+    void SetAlwaysExternallyUpdatedCollisionScene(const bool value)
     {
         always_externally_updated_collision_scene_ = value;
     }
 
-    inline double GetRobotLinkScale() { return robot_link_scale_; }
-    inline void SetRobotLinkScale(const double& scale)
+    double GetRobotLinkScale() const { return robot_link_scale_; }
+    void SetRobotLinkScale(const double scale)
     {
         if (scale < 0.0)
             ThrowPretty("Link scaling needs to be greater than or equal to 0");
         robot_link_scale_ = scale;
     }
 
-    inline double GetWorldLinkScale() { return world_link_scale_; }
-    inline void SetWorldLinkScale(const double& scale)
+    double GetWorldLinkScale() const { return world_link_scale_; }
+    void SetWorldLinkScale(const double scale)
     {
         if (scale < 0.0)
             ThrowPretty("Link scaling needs to be greater than or equal to 0");
         world_link_scale_ = scale;
     }
 
-    inline double GetRobotLinkPadding() { return robot_link_padding_; }
-    inline void SetRobotLinkPadding(const double& padding)
+    double GetRobotLinkPadding() const { return robot_link_padding_; }
+    void SetRobotLinkPadding(const double padding)
     {
         if (padding < 0.0)
             HIGHLIGHT_NAMED("SetRobotLinkPadding", "Generally, padding should be positive.");
         robot_link_padding_ = padding;
     }
 
-    inline double GetWorldLinkPadding() { return world_link_padding_; }
-    inline void SetWorldLinkPadding(const double& padding)
+    double GetWorldLinkPadding() const { return world_link_padding_; }
+    void SetWorldLinkPadding(const double padding)
     {
         if (padding < 0.0)
             HIGHLIGHT_NAMED("SetRobotLinkPadding", "Generally, padding should be positive.");
         world_link_padding_ = padding;
     }
 
-    inline bool GetReplacePrimitiveShapesWithMeshes() { return replace_primitive_shapes_with_meshes_; }
-    inline void SetReplacePrimitiveShapesWithMeshes(const bool& value)
+    bool GetReplacePrimitiveShapesWithMeshes() const { return replace_primitive_shapes_with_meshes_; }
+    void SetReplacePrimitiveShapesWithMeshes(const bool value)
     {
         replace_primitive_shapes_with_meshes_ = value;
     }

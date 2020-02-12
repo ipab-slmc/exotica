@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -1113,6 +1113,8 @@ PYBIND11_MODULE(_pyexotica, module)
     collision_scene.def_property("world_link_padding", &CollisionScene::GetWorldLinkPadding, &CollisionScene::SetWorldLinkPadding);
     collision_scene.def("update_collision_object_transforms", &CollisionScene::UpdateCollisionObjectTransforms);
     collision_scene.def("continuous_collision_check", &CollisionScene::ContinuousCollisionCheck);
+    collision_scene.def("get_robot_to_robot_collision_distance", &CollisionScene::GetRobotToRobotCollisionDistance);
+    collision_scene.def("get_robot_to_world_collision_distance", &CollisionScene::GetRobotToWorldCollisionDistance);
 
     py::class_<VisualizationMoveIt> visualization_moveit(module, "VisualizationMoveIt");
     visualization_moveit.def(py::init<ScenePtr>());

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -143,9 +143,9 @@ public:
     virtual ~CollisionScene() {}
     /// @brief Setup additional construction that requires initialiser parameter
     virtual void Setup() {}
-    /// @brief Returns whether two links are allowed to collide.
-    /// @param o1
-    /// @param o2
+    /// @brief Returns whether two collision objects/shapes are allowed to collide by name.
+    /// @param o1 Name of the frame of the collision object (e.g., base_link_collision_0)
+    /// @param o2 Name of the frame of the other collision object (e.g., base_link_collision_0)
     /// @return true The two objects are allowed to collide.
     /// @return false The two objects are excluded, e.g., by an ACM.
     virtual bool IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) { ThrowPretty("Not implemented!"); }
@@ -183,6 +183,12 @@ public:
     /// @param[in]  objects    Vector of object names.
     /// @return     Vector of proximity objects.
     virtual std::vector<CollisionProxy> GetCollisionDistance(const std::vector<std::string>& objects, const bool& self) { ThrowPretty("Not implemented!"); }
+    /// @brief      Gets the closest distances between links within the robot that are closer than check_margin
+    /// @param[in]  check_margin    Margin for distance checks - only objects closer than this margin will be checked
+    virtual std::vector<CollisionProxy> GetRobotToRobotCollisionDistance(double check_margin) { ThrowPretty("Not implemented!"); }
+    /// @brief      Gets the closest distances between links of the robot and the environment that are closer than check_margin
+    /// @param[in]  check_margin    Margin for distance checks - only objects closer than this margin will be checked
+    virtual std::vector<CollisionProxy> GetRobotToWorldCollisionDistance(double check_margin) { ThrowPretty("Not implemented!"); }
     /// @brief      Gets the collision world links.
     /// @return     The collision world links.
     virtual std::vector<std::string> GetCollisionWorldLinks() = 0;

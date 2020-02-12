@@ -15,6 +15,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>exotica_core</depend>
+  <depend>ompl</depend>
 
   <export>
     <exotica_core plugin="${prefix}/exotica_plugins.xml" />

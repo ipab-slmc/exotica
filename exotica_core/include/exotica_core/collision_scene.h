@@ -45,6 +45,8 @@
 #define REGISTER_COLLISION_SCENE_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER(exotica::CollisionScene, TYPE, DERIV)
 namespace exotica
 {
+class Scene;
+
 class AllowedCollisionMatrix
 {
 public:
@@ -269,7 +271,16 @@ public:
     /// \brief Links to exclude from collision scene - gets set from Scene::UpdateSceneFrames
     std::set<std::string> world_links_to_exclude_from_collision_scene;
 
+    /// \brief Sets a scene pointer to the CollisionScene for access to methods
+    void AssignScene(std::shared_ptr<Scene> scene)
+    {
+        scene_ = scene;
+    }
+
 protected:
+    /// Stores a pointer to the Scene which owns this CollisionScene
+    std::weak_ptr<Scene> scene_;
+
     /// The allowed collision matrix
     AllowedCollisionMatrix acm_;
 

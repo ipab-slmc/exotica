@@ -138,6 +138,7 @@ void Scene::Instantiate(const SceneInitializer& init)
     collision_scene_ = Setup::CreateCollisionScene(init.CollisionScene);
     collision_scene_->debug_ = this->debug_;
     collision_scene_->Setup();
+    collision_scene_->AssignScene(shared_from_this());
     collision_scene_->SetAlwaysExternallyUpdatedCollisionScene(force_collision_);
     collision_scene_->SetReplacePrimitiveShapesWithMeshes(init.ReplacePrimitiveShapesWithMeshes);
     collision_scene_->SetWorldLinkPadding(init.WorldLinkPadding);

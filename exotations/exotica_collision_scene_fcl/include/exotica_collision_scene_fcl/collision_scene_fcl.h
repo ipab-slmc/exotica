@@ -74,10 +74,6 @@ public:
     /// @return     The collision world links.
     std::vector<std::string> GetCollisionWorldLinks() override;
 
-    /// @brief      Gets the KinematicElements associated with the collision world links.
-    /// @return     The KinematicElements associated with the collision world links.
-    std::vector<std::shared_ptr<KinematicElement>> GetCollisionWorldLinkElements() override;
-
     /// @brief      Gets the collision robot links.
     /// @return     The collision robot links.
     std::vector<std::string> GetCollisionRobotLinks() override;

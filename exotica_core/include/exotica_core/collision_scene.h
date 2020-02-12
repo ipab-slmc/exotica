@@ -185,10 +185,6 @@ public:
     /// @return     The collision world links.
     virtual std::vector<std::string> GetCollisionWorldLinks() = 0;
 
-    /// @brief      Gets the KineticElements associated with the collision world links.
-    /// @return     The KineticElements associated with the collision world links.
-    virtual std::vector<std::shared_ptr<KinematicElement>> GetCollisionWorldLinkElements() = 0;
-
     /// @brief      Gets the collision robot links.
     /// @return     The collision robot links.
     virtual std::vector<std::string> GetCollisionRobotLinks() = 0;

@@ -44,9 +44,6 @@ fcl::Transform3f KDL2fcl(const KDL::Frame& frame)
 
 namespace exotica
 {
-CollisionSceneFCL::CollisionSceneFCL() = default;
-CollisionSceneFCL::~CollisionSceneFCL() = default;
-
 void CollisionSceneFCL::Setup()
 {
     if (debug_) HIGHLIGHT_NAMED("CollisionSceneFCL", "FCL version: " << FCL_VERSION);

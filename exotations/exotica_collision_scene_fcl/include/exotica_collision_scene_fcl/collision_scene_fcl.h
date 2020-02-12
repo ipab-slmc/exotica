@@ -59,9 +59,6 @@ public:
         double safe_distance;
     };
 
-    CollisionSceneFCL();
-    virtual ~CollisionSceneFCL();
-
     void Setup() override;
 
     static bool IsAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionSceneFCL* scene);

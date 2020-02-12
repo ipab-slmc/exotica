@@ -51,7 +51,7 @@ void CollisionSceneFCL::Setup()
 
 void CollisionSceneFCL::UpdateCollisionObjects(const std::map<std::string, std::weak_ptr<KinematicElement>>& objects)
 {
-    kinematic_elements_ = MapToVec(objects);
+    kinematic_elements_ = GetValuesFromMap(objects);
     fcl_cache_.clear();
     fcl_objects_.resize(objects.size());
     long i = 0;

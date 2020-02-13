@@ -2,8 +2,8 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.1.3 (2020-02-13)
+------------------
 * Refactor CollisionScene, add faster distance checks, speedup SmoothCollisionDistance (`#688 <https://github.com/ipab-slmc/exotica/issues/688>`_)
 * Expose full KinematicTree to Python; expose mesh collision shape information (`#686 <https://github.com/ipab-slmc/exotica/issues/686>`_)
 * Contributors: Wolfgang Merkt

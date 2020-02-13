@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>exotica_collision_scene_fcl_latest</name>
-  <version>5.1.2</version>
+  <version>5.1.3</version>
   <description>Collision checking and distance computation using the latest version of the FCL library.</description>
   <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>

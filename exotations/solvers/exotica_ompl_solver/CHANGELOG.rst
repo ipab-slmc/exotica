@@ -2,6 +2,9 @@
 Changelog for package exotica_ompl_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 5.1.2 (2020-02-10)
 ------------------
 

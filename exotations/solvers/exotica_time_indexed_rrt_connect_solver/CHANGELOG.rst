@@ -2,6 +2,11 @@
 Changelog for package exotica_time_indexed_rrt_connect_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [exotica_time_indexed_rrt_connect_solver] Fix runtime std::bad_cast exception
+* Contributors: Wolfgang Merkt
+
 5.1.2 (2020-02-10)
 ------------------
 

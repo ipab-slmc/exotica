@@ -2,6 +2,11 @@
 Changelog for package exotica_ompl_control_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [exotica_ompl_control_solver] Fix ROS buildfarm failure
+* Contributors: Wolfgang Merkt
+
 5.1.2 (2020-02-10)
 ------------------
 

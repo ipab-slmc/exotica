@@ -59,9 +59,6 @@ public:
         double safe_distance;
     };
 
-    CollisionSceneFCL();
-    virtual ~CollisionSceneFCL();
-
     void Setup() override;
 
     static bool IsAllowedToCollide(fcl::CollisionObject* o1, fcl::CollisionObject* o2, bool self, CollisionSceneFCL* scene);
@@ -76,10 +73,6 @@ public:
     /// @brief      Gets the collision world links.
     /// @return     The collision world links.
     std::vector<std::string> GetCollisionWorldLinks() override;
-
-    /// @brief      Gets the KinematicElements associated with the collision world links.
-    /// @return     The KinematicElements associated with the collision world links.
-    std::vector<std::shared_ptr<KinematicElement>> GetCollisionWorldLinkElements() override;
 
     /// @brief      Gets the collision robot links.
     /// @return     The collision robot links.

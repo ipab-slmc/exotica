@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@
 #define REGISTER_COLLISION_SCENE_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER(exotica::CollisionScene, TYPE, DERIV)
 namespace exotica
 {
+class Scene;
+
 class AllowedCollisionMatrix
 {
 public:
@@ -141,9 +143,9 @@ public:
     virtual ~CollisionScene() {}
     /// @brief Setup additional construction that requires initialiser parameter
     virtual void Setup() {}
-    /// @brief Returns whether two links are allowed to collide.
-    /// @param o1
-    /// @param o2
+    /// @brief Returns whether two collision objects/shapes are allowed to collide by name.
+    /// @param o1 Name of the frame of the collision object (e.g., base_link_collision_0)
+    /// @param o2 Name of the frame of the other collision object (e.g., base_link_collision_0)
     /// @return true The two objects are allowed to collide.
     /// @return false The two objects are excluded, e.g., by an ACM.
     virtual bool IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) { ThrowPretty("Not implemented!"); }
@@ -181,13 +183,15 @@ public:
     /// @param[in]  objects    Vector of object names.
     /// @return     Vector of proximity objects.
     virtual std::vector<CollisionProxy> GetCollisionDistance(const std::vector<std::string>& objects, const bool& self) { ThrowPretty("Not implemented!"); }
+    /// @brief      Gets the closest distances between links within the robot that are closer than check_margin
+    /// @param[in]  check_margin    Margin for distance checks - only objects closer than this margin will be checked
+    virtual std::vector<CollisionProxy> GetRobotToRobotCollisionDistance(double check_margin) { ThrowPretty("Not implemented!"); }
+    /// @brief      Gets the closest distances between links of the robot and the environment that are closer than check_margin
+    /// @param[in]  check_margin    Margin for distance checks - only objects closer than this margin will be checked
+    virtual std::vector<CollisionProxy> GetRobotToWorldCollisionDistance(double check_margin) { ThrowPretty("Not implemented!"); }
     /// @brief      Gets the collision world links.
     /// @return     The collision world links.
     virtual std::vector<std::string> GetCollisionWorldLinks() = 0;
-
-    /// @brief      Gets the KineticElements associated with the collision world links.
-    /// @return     The KineticElements associated with the collision world links.
-    virtual std::vector<std::shared_ptr<KinematicElement>> GetCollisionWorldLinkElements() = 0;
 
     /// @brief      Gets the collision robot links.
     /// @return     The collision robot links.
@@ -210,51 +214,51 @@ public:
     /// @param[in]  name    Name of the collision object to query.
     virtual Eigen::Vector3d GetTranslation(const std::string& name) = 0;
 
-    inline void SetACM(const AllowedCollisionMatrix& acm)
+    void SetACM(const AllowedCollisionMatrix& acm)
     {
         acm_ = acm;
     }
 
-    inline bool GetAlwaysExternallyUpdatedCollisionScene() { return always_externally_updated_collision_scene_; }
-    inline void SetAlwaysExternallyUpdatedCollisionScene(const bool& value)
+    bool GetAlwaysExternallyUpdatedCollisionScene() const { return always_externally_updated_collision_scene_; }
+    void SetAlwaysExternallyUpdatedCollisionScene(const bool value)
     {
         always_externally_updated_collision_scene_ = value;
     }
 
-    inline double GetRobotLinkScale() { return robot_link_scale_; }
-    inline void SetRobotLinkScale(const double& scale)
+    double GetRobotLinkScale() const { return robot_link_scale_; }
+    void SetRobotLinkScale(const double scale)
     {
         if (scale < 0.0)
             ThrowPretty("Link scaling needs to be greater than or equal to 0");
         robot_link_scale_ = scale;
     }
 
-    inline double GetWorldLinkScale() { return world_link_scale_; }
-    inline void SetWorldLinkScale(const double& scale)
+    double GetWorldLinkScale() const { return world_link_scale_; }
+    void SetWorldLinkScale(const double scale)
     {
         if (scale < 0.0)
             ThrowPretty("Link scaling needs to be greater than or equal to 0");
         world_link_scale_ = scale;
     }
 
-    inline double GetRobotLinkPadding() { return robot_link_padding_; }
-    inline void SetRobotLinkPadding(const double& padding)
+    double GetRobotLinkPadding() const { return robot_link_padding_; }
+    void SetRobotLinkPadding(const double padding)
     {
         if (padding < 0.0)
             HIGHLIGHT_NAMED("SetRobotLinkPadding", "Generally, padding should be positive.");
         robot_link_padding_ = padding;
     }
 
-    inline double GetWorldLinkPadding() { return world_link_padding_; }
-    inline void SetWorldLinkPadding(const double& padding)
+    double GetWorldLinkPadding() const { return world_link_padding_; }
+    void SetWorldLinkPadding(const double padding)
     {
         if (padding < 0.0)
             HIGHLIGHT_NAMED("SetRobotLinkPadding", "Generally, padding should be positive.");
         world_link_padding_ = padding;
     }
 
-    inline bool GetReplacePrimitiveShapesWithMeshes() { return replace_primitive_shapes_with_meshes_; }
-    inline void SetReplacePrimitiveShapesWithMeshes(const bool& value)
+    bool GetReplacePrimitiveShapesWithMeshes() const { return replace_primitive_shapes_with_meshes_; }
+    void SetReplacePrimitiveShapesWithMeshes(const bool value)
     {
         replace_primitive_shapes_with_meshes_ = value;
     }
@@ -273,7 +277,16 @@ public:
     /// \brief Links to exclude from collision scene - gets set from Scene::UpdateSceneFrames
     std::set<std::string> world_links_to_exclude_from_collision_scene;
 
+    /// \brief Sets a scene pointer to the CollisionScene for access to methods
+    void AssignScene(std::shared_ptr<Scene> scene)
+    {
+        scene_ = scene;
+    }
+
 protected:
+    /// Stores a pointer to the Scene which owns this CollisionScene
+    std::weak_ptr<Scene> scene_;
+
     /// The allowed collision matrix
     AllowedCollisionMatrix acm_;
 

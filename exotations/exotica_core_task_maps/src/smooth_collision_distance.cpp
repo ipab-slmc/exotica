@@ -38,7 +38,7 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
 {
     if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     phi.setZero();
-    Eigen::MatrixXd J(dim_, robot_joints_.size());
+    Eigen::MatrixXd J(dim_, x.size());
     Update(x, phi, J, false);
 }
 
@@ -60,13 +60,21 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
     if (!scene_->AlwaysUpdatesCollisionScene())
         cscene_->UpdateCollisionObjectTransforms();
 
-    double& d = phi(0);
+    //  1) Create vector to store CollisionProxy
+    std::vector<CollisionProxy> proxies;
 
-    for (const auto& joint : robot_joints_)
+    //  2) For each robot link, check against each robot link
+    if (check_self_collision_)
     {
-        // Get all world collision links, then iterate through them
-        std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(controlled_joint_to_collision_link_map_[joint], check_self_collision_);
+        AppendVector(proxies, cscene_->GetRobotToRobotCollisionDistance(robot_margin_));
+    }
 
+    //  3) For each robot link, check against each environment link
+    AppendVector(proxies, cscene_->GetRobotToWorldCollisionDistance(world_margin_));
+
+    //  4) Compute d, J
+    double& d = phi(0);
+    {
         for (const auto& proxy : proxies)
         {
             bool is_robot_to_robot = (proxy.e1->is_robot_link || proxy.e1->closest_robot_link.lock()) && (proxy.e2->is_robot_link || proxy.e2->closest_robot_link.lock());
@@ -127,10 +135,6 @@ void SmoothCollisionDistance::Initialize()
 
     if (debug_) HIGHLIGHT_NAMED("Smooth Collision Distance",
                                 "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_ << "\t Linear: " << linear_);
-
-    // Get names of all controlled joints and their corresponding child links
-    robot_joints_ = scene_->GetControlledJointNames();
-    controlled_joint_to_collision_link_map_ = scene_->GetControlledJointToCollisionLinkMap();
 }
 
 int SmoothCollisionDistance::TaskSpaceDim() { return dim_; }

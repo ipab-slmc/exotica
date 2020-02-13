@@ -137,12 +137,34 @@ inline bool IsVectorContainerType(std::string type)
 }
 
 template <class Key, class Val>
-std::vector<Val> MapToVec(const std::map<Key, Val>& map)
+[[deprecated("Replaced by GetKeysFromMap and GetValuesFromMap")]] std::vector<Val> MapToVec(const std::map<Key, Val>& map)
 {
     std::vector<Val> ret;
-    for (auto& val : map)
+    for (auto& it : map)
     {
-        ret.push_back(val.second);
+        ret.push_back(it.second);
+    }
+    return ret;
+}
+
+template <class Key, class Val>
+std::vector<Key> GetKeysFromMap(const std::map<Key, Val>& map)
+{
+    std::vector<Key> ret;
+    for (auto& it : map)
+    {
+        ret.push_back(it.first);
+    }
+    return ret;
+}
+
+template <class Key, class Val>
+std::vector<Val> GetValuesFromMap(const std::map<Key, Val>& map)
+{
+    std::vector<Val> ret;
+    for (auto& it : map)
+    {
+        ret.push_back(it.second);
     }
     return ret;
 }

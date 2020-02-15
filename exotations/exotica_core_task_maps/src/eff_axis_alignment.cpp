@@ -99,6 +99,12 @@ void EffAxisAlignment::Initialize()
                 msg_debug_.markers.emplace_back(marker);
             }
         }
+
+        // Clear pre-existing markers
+        visualization_msgs::MarkerArray msg;
+        msg.markers.resize(1);
+        msg.markers[0].action = 3;  // DELETE_ALL
+        pub_debug_.publish(msg);
     }
 }
 

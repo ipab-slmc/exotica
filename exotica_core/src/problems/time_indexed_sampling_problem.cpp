@@ -73,14 +73,9 @@ void TimeIndexedSamplingProblem::Instantiate(const TimeIndexedSamplingProblemIni
         ThrowNamed("Dimension mismatch: problem N=" << N << ", but goal state has dimension " << goal_.rows());
     }
 
-    T_ = init.T;
-    if (T_ < 0)
-        ThrowNamed("Invalid problem duration T: " << T_);
     t_goal_ = init.GoalTime;
-    if (t_goal_ > T_)
-        ThrowNamed("Invalid goal time t_goal_= " << t_goal_ << ">T_(" << T_ << ")");
-    if (t_goal_ == -1.0)
-        t_goal_ = T_;
+    if (t_goal_ <= t_start)
+        ThrowNamed("Invalid goal time t_goal= " << t_goal_ << ", where t_start=" << t_start);
 
     if (init.JointVelocityLimits.size() == N)
     {
@@ -134,11 +129,6 @@ void TimeIndexedSamplingProblem::Instantiate(const TimeIndexedSamplingProblemIni
     }
 
     PreUpdate();
-}
-
-double TimeIndexedSamplingProblem::GetT() const
-{
-    return T_;
 }
 
 double TimeIndexedSamplingProblem::GetGoalTime() const
@@ -303,4 +293,4 @@ int TimeIndexedSamplingProblem::GetSpaceDim()
 {
     return N;
 }
-}
+}  // namespace exotica

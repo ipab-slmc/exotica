@@ -746,6 +746,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_number_of_iterations", &PlanningProblem::GetNumberOfIterations)
         .def("pre_update", &PlanningProblem::PreUpdate)
         .def("is_valid", &PlanningProblem::IsValid)
+        .def("apply_start_state", &PlanningProblem::ApplyStartState)
         .def_readonly("termination_criterion", &PlanningProblem::termination_criterion);
 
     // Problem types

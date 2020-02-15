@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -283,6 +283,23 @@ UnconstrainedTimeIndexedProblemPtr setup_time_indexed_problem(Initializer& map)
     test_random(std::static_pointer_cast<UnconstrainedTimeIndexedProblem>(Setup::CreateProblem(problem)));
 
     return problem_ptr;
+}
+
+TEST(ExoticaTaskMaps, testEffPositionXY)
+{
+    try
+    {
+        TEST_COUT << "End-effector position XY test";
+        Initializer map("exotica/EffPositionXY", {{"Name", std::string("MyTask")},
+                                                {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+        EXPECT_TRUE(test_random(problem));
+        EXPECT_TRUE(test_jacobian(problem));
+    }
+    catch (...)
+    {
+        ADD_FAILURE() << "Uncaught exception!";
+    }
 }
 
 TEST(ExoticaTaskMaps, testEffPosition)

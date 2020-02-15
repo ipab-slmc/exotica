@@ -291,7 +291,7 @@ TEST(ExoticaTaskMaps, testEffPositionXY)
     {
         TEST_COUT << "End-effector position XY test";
         Initializer map("exotica/EffPositionXY", {{"Name", std::string("MyTask")},
-                                                {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+                                                  {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));

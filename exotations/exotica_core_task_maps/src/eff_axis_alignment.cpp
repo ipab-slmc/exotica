@@ -29,15 +29,13 @@
 
 #include <eigen_conversions/eigen_kdl.h>
 
+#include <exotica_core/server.h>
 #include <exotica_core_task_maps/eff_axis_alignment.h>
 
 REGISTER_TASKMAP_TYPE("EffAxisAlignment", exotica::EffAxisAlignment);
 
 namespace exotica
 {
-EffAxisAlignment::EffAxisAlignment() = default;
-EffAxisAlignment::~EffAxisAlignment() = default;
-
 void EffAxisAlignment::Initialize()
 {
     N = scene_->GetKinematicTree().GetNumControlledJoints();
@@ -66,6 +64,40 @@ void EffAxisAlignment::Initialize()
                             "Frame " << frames_[i].frame_A_link_name << ":"
                                      << "\tAxis=" << axis_.col(i).transpose()
                                      << "\tDirection=" << dir_.col(i).transpose());
+        }
+    }
+
+    if (Server::IsRos())
+    {
+        pub_debug_ = Server::Advertise<visualization_msgs::MarkerArray>(object_name_ + "/debug", 1, true);
+        msg_debug_.markers.reserve(n_frames_ * 2);
+        for (int i = 0; i < n_frames_; ++i)
+        {
+            visualization_msgs::Marker marker;
+            marker.action = visualization_msgs::Marker::ADD;
+            marker.type = visualization_msgs::Marker::ARROW;
+            marker.frame_locked = true;
+            marker.header.frame_id = "exotica/" + scene_->GetKinematicTree().GetRootFrameName();
+            marker.scale.x = 0.025;  // Shaft diameter
+            marker.scale.y = 0.05;   // Head diameter
+            marker.scale.z = 0.05;   // Head length
+            marker.ns = frames_[i].frame_A_link_name;
+            marker.pose.orientation.w = 1.0;
+            marker.points.resize(2);
+
+            // Current: red
+            {
+                marker.color = GetColor(1., 0., 0., 0.5);
+                marker.id = i;
+                msg_debug_.markers.emplace_back(marker);
+            }
+
+            // Target: green
+            {
+                marker.color = GetColor(0., 1., 0., 0.5);
+                marker.id = i + n_frames_;
+                msg_debug_.markers.emplace_back(marker);
+            }
         }
     }
 }
@@ -105,6 +137,28 @@ void EffAxisAlignment::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi,
 
         phi(i) = axisInBase.dot(dir_.col(i)) - 1.0;
         jacobian.row(i) = dir_.col(i).transpose() * axisInBaseJacobian;
+
+        if (Server::IsRos() && debug_)
+        {
+            constexpr double arrow_length = 0.25;
+            // Current - red
+            msg_debug_.markers[i].points[0].x = link_position_in_base_.x();
+            msg_debug_.markers[i].points[0].y = link_position_in_base_.y();
+            msg_debug_.markers[i].points[0].z = link_position_in_base_.z();
+            msg_debug_.markers[i].points[1].x = link_position_in_base_.x() + arrow_length * axisInBase.x();
+            msg_debug_.markers[i].points[1].y = link_position_in_base_.y() + arrow_length * axisInBase.y();
+            msg_debug_.markers[i].points[1].z = link_position_in_base_.z() + arrow_length * axisInBase.z();
+
+            // Target - green
+            msg_debug_.markers[i + n_frames_].points[0].x = link_position_in_base_.x();
+            msg_debug_.markers[i + n_frames_].points[0].y = link_position_in_base_.y();
+            msg_debug_.markers[i + n_frames_].points[0].z = link_position_in_base_.z();
+            msg_debug_.markers[i + n_frames_].points[1].x = link_position_in_base_.x() + arrow_length * dir_.col(i).x();
+            msg_debug_.markers[i + n_frames_].points[1].y = link_position_in_base_.y() + arrow_length * dir_.col(i).y();
+            msg_debug_.markers[i + n_frames_].points[1].z = link_position_in_base_.z() + arrow_length * dir_.col(i).z();
+
+            pub_debug_.publish(msg_debug_);
+        }
     }
 }
 
@@ -113,7 +167,7 @@ int EffAxisAlignment::TaskSpaceDim()
     return n_frames_;
 }
 
-Eigen::Vector3d EffAxisAlignment::GetDirection(const std::string& frame_name)
+Eigen::Vector3d EffAxisAlignment::GetDirection(const std::string& frame_name) const
 {
     for (int i = 0; i < n_frames_; ++i)
     {
@@ -138,7 +192,7 @@ void EffAxisAlignment::SetDirection(const std::string& frame_name, const Eigen::
     ThrowPretty("Could not find frame with name " << frame_name << ".");
 }
 
-Eigen::Vector3d EffAxisAlignment::GetAxis(const std::string& frame_name)
+Eigen::Vector3d EffAxisAlignment::GetAxis(const std::string& frame_name) const
 {
     for (int i = 0; i < n_frames_; ++i)
     {

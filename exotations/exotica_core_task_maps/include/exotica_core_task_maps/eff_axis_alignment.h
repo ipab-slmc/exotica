@@ -35,15 +35,14 @@
 #include <exotica_core_task_maps/eff_axis_alignment_initializer.h>
 #include <exotica_core_task_maps/frame_with_axis_and_direction_initializer.h>
 
+#include <visualization_msgs/MarkerArray.h>
+
 namespace exotica
 {
 class EffAxisAlignment : public TaskMap, public Instantiable<EffAxisAlignmentInitializer>
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    EffAxisAlignment();
-    virtual ~EffAxisAlignment();
 
     void AssignScene(ScenePtr scene) override;
 
@@ -53,21 +52,24 @@ public:
     int TaskSpaceDim() override;
 
     void SetDirection(const std::string& frame_name, const Eigen::Vector3d& dir_in);
-    Eigen::Vector3d GetDirection(const std::string& frame_name);
+    Eigen::Vector3d GetDirection(const std::string& frame_name) const;
 
     void SetAxis(const std::string& frame_name, const Eigen::Vector3d& axis_in);
-    Eigen::Vector3d GetAxis(const std::string& frame_name);
+    Eigen::Vector3d GetAxis(const std::string& frame_name) const;
 
     int N;
 
 private:
     void Initialize();
 
+    ros::Publisher pub_debug_;
+    visualization_msgs::MarkerArray msg_debug_;
+
     int n_frames_;
 
     Eigen::Matrix3Xd axis_, dir_;
     Eigen::Vector3d link_position_in_base_, link_axis_position_in_base_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_EFF_AXIS_ALIGNMENT_H_

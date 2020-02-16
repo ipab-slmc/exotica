@@ -272,6 +272,11 @@ bool TimeIndexedSamplingProblem::IsValid(Eigen::VectorXdRefConst x, const double
     bool inequality_is_valid = ((inequality.S * inequality.ydiff).array() <= 0.0).all();
     bool equality_is_valid = ((equality.S * equality.ydiff).array().abs() == 0.0).all();
 
+    if (debug_)
+    {
+        HIGHLIGHT_NAMED("TimeIndexedSamplingProblem::IsValid", "Equality valid? = " << equality_is_valid << "\tInequality valid? = " << inequality_is_valid);
+    }
+
     return (inequality_is_valid && equality_is_valid);
 }
 

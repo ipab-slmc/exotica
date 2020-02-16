@@ -401,7 +401,7 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
         return base::PlannerStatus::UNRECOGNIZED_GOAL_TYPE;
     }
     // std::cout << "getStartStateCount() in OMPLTimeIndexedRRTConnect: " << pdef_->getStartStateCount() << std::endl;
-    const base::State *check_st = pdef_->getStartState(0);
+    // const base::State *check_st = pdef_->getStartState(0);
     // std::cout << "isValid: in OMPLTimeIndexedRRTConnect: " << si_->isValid(check_st) << std::endl;
 
     while (const base::State *st = pis_.nextStart())

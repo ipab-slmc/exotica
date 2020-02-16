@@ -953,6 +953,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def("set_rho_neq", &TimeIndexedSamplingProblem::SetRhoNEQ);
     time_indexed_sampling_problem.def("get_goal_neq", &TimeIndexedSamplingProblem::GetGoalNEQ);
     time_indexed_sampling_problem.def("get_rho_neq", &TimeIndexedSamplingProblem::GetRhoNEQ);
+    time_indexed_sampling_problem.def("is_valid", (bool (TimeIndexedSamplingProblem::*)(Eigen::VectorXdRefConst, const double&)) & TimeIndexedSamplingProblem::IsValid);
 
     py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")
         .def("update", &DynamicTimeIndexedShootingProblem::Update)

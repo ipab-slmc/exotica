@@ -1108,7 +1108,7 @@ PYBIND11_MODULE(_pyexotica, module)
     // TODO: expose IsStateValid, IsCollisionFree, GetCollisionDistance, GetCollisionWorldLinks, GetCollisionRobotLinks, GetTranslation
     collision_scene.def_property("always_externally_updated_collision_scene", &CollisionScene::GetAlwaysExternallyUpdatedCollisionScene, &CollisionScene::SetAlwaysExternallyUpdatedCollisionScene);
     collision_scene.def_property("replace_primitive_shapes_with_meshes", &CollisionScene::GetReplacePrimitiveShapesWithMeshes, &CollisionScene::SetReplacePrimitiveShapesWithMeshes);
-    collision_scene.def_readwrite("replace_cylinders_with_capsules", &CollisionScene::replace_cylinders_with_capsules);
+    collision_scene.def_property("replace_cylinders_with_capsules", &CollisionScene::get_replace_cylinders_with_capsules, &CollisionScene::set_replace_cylinders_with_capsules);
     collision_scene.def_property("robot_link_scale", &CollisionScene::GetRobotLinkScale, &CollisionScene::SetRobotLinkScale);
     collision_scene.def_property("world_link_scale", &CollisionScene::GetWorldLinkScale, &CollisionScene::SetWorldLinkScale);
     collision_scene.def_property("robot_link_padding", &CollisionScene::GetRobotLinkPadding, &CollisionScene::SetRobotLinkPadding);

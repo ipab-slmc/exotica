@@ -270,12 +270,13 @@ public:
     /// \brief Updates collision object transformations from the kinematic tree.
     virtual void UpdateCollisionObjectTransforms() = 0;
 
-    bool replace_cylinders_with_capsules = false;
+    bool get_replace_cylinders_with_capsules() const { return replace_cylinders_with_capsules_; }
+    void set_replace_cylinders_with_capsules(const bool value)
+    {
+        replace_cylinders_with_capsules_ = value;
+    }
 
     bool debug_ = false;
-
-    /// \brief Links to exclude from collision scene - gets set from Scene::UpdateSceneFrames
-    std::set<std::string> world_links_to_exclude_from_collision_scene;
 
     /// \brief Sets a scene pointer to the CollisionScene for access to methods
     void AssignScene(std::shared_ptr<Scene> scene)
@@ -307,6 +308,9 @@ protected:
 
     /// Replace primitive shapes with meshes internally (e.g. when primitive shape algorithms are brittle, i.e. in FCL)
     bool replace_primitive_shapes_with_meshes_ = false;
+
+    /// Replace cylinders with capsules internally
+    bool replace_cylinders_with_capsules_ = false;
 };
 
 typedef std::shared_ptr<CollisionScene> CollisionScenePtr;

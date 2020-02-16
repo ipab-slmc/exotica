@@ -80,6 +80,7 @@ void CollisionSceneFCLLatest::UpdateCollisionObjects(const std::map<std::string,
 
     long i = 0;
 
+    auto world_links_to_exclude_from_collision_scene = scene_->get_world_links_to_exclude_from_collision_scene();
     for (const auto& object : objects)
     {
         // Check whether object is excluded as a world collision object:
@@ -193,7 +194,7 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::ConstructFclColl
         {
             auto s = dynamic_cast<const shapes::Cylinder*>(shape.get());
             bool degenerate_capsule = (s->length <= 2 * s->radius);
-            if (!replace_cylinders_with_capsules || degenerate_capsule)
+            if (!replace_cylinders_with_capsules_ || degenerate_capsule)
             {
                 geometry.reset(new fcl::Cylinderd(s->radius, s->length));
             }

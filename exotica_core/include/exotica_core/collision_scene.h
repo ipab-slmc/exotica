@@ -231,6 +231,7 @@ public:
         if (scale < 0.0)
             ThrowPretty("Link scaling needs to be greater than or equal to 0");
         robot_link_scale_ = scale;
+        needs_update_of_collision_objects_ = true;
     }
 
     double GetWorldLinkScale() const { return world_link_scale_; }
@@ -239,6 +240,7 @@ public:
         if (scale < 0.0)
             ThrowPretty("Link scaling needs to be greater than or equal to 0");
         world_link_scale_ = scale;
+        needs_update_of_collision_objects_ = true;
     }
 
     double GetRobotLinkPadding() const { return robot_link_padding_; }
@@ -247,6 +249,7 @@ public:
         if (padding < 0.0)
             HIGHLIGHT_NAMED("SetRobotLinkPadding", "Generally, padding should be positive.");
         robot_link_padding_ = padding;
+        needs_update_of_collision_objects_ = true;
     }
 
     double GetWorldLinkPadding() const { return world_link_padding_; }
@@ -255,12 +258,14 @@ public:
         if (padding < 0.0)
             HIGHLIGHT_NAMED("SetRobotLinkPadding", "Generally, padding should be positive.");
         world_link_padding_ = padding;
+        needs_update_of_collision_objects_ = true;
     }
 
     bool GetReplacePrimitiveShapesWithMeshes() const { return replace_primitive_shapes_with_meshes_; }
     void SetReplacePrimitiveShapesWithMeshes(const bool value)
     {
         replace_primitive_shapes_with_meshes_ = value;
+        needs_update_of_collision_objects_ = true;
     }
 
     /// \brief Creates the collision scene from kinematic elements.
@@ -274,6 +279,7 @@ public:
     void set_replace_cylinders_with_capsules(const bool value)
     {
         replace_cylinders_with_capsules_ = value;
+        needs_update_of_collision_objects_ = true;
     }
 
     bool debug_ = false;
@@ -285,6 +291,9 @@ public:
     }
 
 protected:
+    /// Indicates whether TriggerUpdateCollisionObjects needs to be called.
+    bool needs_update_of_collision_objects_ = true;
+
     /// Stores a pointer to the Scene which owns this CollisionScene
     std::weak_ptr<Scene> scene_;
 

@@ -48,7 +48,7 @@ OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProb
     }
     getSubspace(0)->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::TimeStateSpace), 1.0);
-    getSubspace(1)->as<ompl::base::TimeStateSpace>()->setBounds(0, prob_->GetGoalTime());
+    getSubspace(1)->as<ompl::base::TimeStateSpace>()->setBounds(prob_->GetStartTime(), prob_->GetGoalTime());
     lock();
 }
 
@@ -239,11 +239,19 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
 
 void TimeIndexedRRTConnectSolver::Solve(Eigen::MatrixXd &solution)
 {
-    Eigen::VectorXd q0 = prob_->ApplyStartState();
+    Timer timer;
+
+    // Reset bounds on time space
+    ompl::base::TimeStateSpace *time_space = ompl_simple_setup_->getStateSpace()->as<ompl::base::CompoundStateSpace>()->getSubspace(1)->as<ompl::base::TimeStateSpace>();
+    time_space->setBounds(prob_->GetStartTime(), prob_->GetGoalTime());
+
+    // Set goal state
     SetGoalState(prob_->GetGoalState(), prob_->GetGoalTime());
 
+    // Set start state
+    Eigen::VectorXd q0 = prob_->ApplyStartState();
     ompl::base::ScopedState<> ompl_start_state(state_space_);
-    state_space_->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(q0, prob_->t_start, ompl_start_state.get());
+    state_space_->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(q0, prob_->GetStartTime(), ompl_start_state.get());
     ompl_simple_setup_->setStartState(ompl_start_state);
 
     PreSolve();
@@ -255,6 +263,8 @@ void TimeIndexedRRTConnectSolver::Solve(Eigen::MatrixXd &solution)
         GetPath(solution, *ptc_);
     }
     PostSolve();
+
+    planning_time_ = timer.GetDuration();
 }
 
 void TimeIndexedRRTConnectSolver::SetPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc)
@@ -390,9 +400,9 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
         OMPL_ERROR("%s: Unknown type of goal", getName().c_str());
         return base::PlannerStatus::UNRECOGNIZED_GOAL_TYPE;
     }
-    std::cout << "getStartStateCount() in OMPLTimeIndexedRRTConnect: " << pdef_->getStartStateCount() << std::endl;
-    const base::State *check_st = pdef_->getStartState(0);
-    std::cout << "isValid: in OMPLTimeIndexedRRTConnect: " << si_->isValid(check_st) << std::endl;
+    // std::cout << "getStartStateCount() in OMPLTimeIndexedRRTConnect: " << pdef_->getStartStateCount() << std::endl;
+    // const base::State *check_st = pdef_->getStartState(0);
+    // std::cout << "isValid: in OMPLTimeIndexedRRTConnect: " << si_->isValid(check_st) << std::endl;
 
     while (const base::State *st = pis_.nextStart())
     {

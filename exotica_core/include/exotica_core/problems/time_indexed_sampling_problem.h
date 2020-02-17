@@ -67,8 +67,6 @@ public:
     Eigen::VectorXd GetGoalState() const;
     void SetGoalState(Eigen::VectorXdRefConst qT);
 
-    double GetT() const;
-
     double GetGoalTime() const;
     void SetGoalTime(const double& t);
 
@@ -84,9 +82,8 @@ public:
     int num_tasks;
 
 private:
-    double T_;
-    double t_goal_;
-    Eigen::VectorXd goal_;
+    double t_goal_;         ///< Goal time: The time at which goal_ should be reached and the upper bound for the time-dimension
+    Eigen::VectorXd goal_;  ///< Goal state to reach (spatial) at temporal goal (t_goal_)
 };
 
 typedef std::shared_ptr<exotica::TimeIndexedSamplingProblem> TimeIndexedSamplingProblemPtr;

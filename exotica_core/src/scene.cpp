@@ -145,8 +145,7 @@ void Scene::Instantiate(const SceneInitializer& init)
     collision_scene_->SetRobotLinkPadding(init.RobotLinkPadding);
     collision_scene_->SetWorldLinkScale(init.WorldLinkScale);
     collision_scene_->SetRobotLinkScale(init.RobotLinkScale);
-    collision_scene_->replace_cylinders_with_capsules = init.ReplaceCylindersWithCapsules;
-    collision_scene_->world_links_to_exclude_from_collision_scene = world_links_to_exclude_from_collision_scene_;
+    collision_scene_->set_replace_cylinders_with_capsules(init.ReplaceCylindersWithCapsules);
     UpdateSceneFrames();
     UpdateInternalFrames(false);
 

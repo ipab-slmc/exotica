@@ -50,7 +50,6 @@ public:
 private:
     void Initialize();
 
-    std::vector<std::string> robot_links_;
     double robot_margin_ = 0.0;
     double world_margin_ = 0.0;
     bool check_self_collision_ = true;

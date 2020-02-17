@@ -746,6 +746,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_number_of_iterations", &PlanningProblem::GetNumberOfIterations)
         .def("pre_update", &PlanningProblem::PreUpdate)
         .def("is_valid", &PlanningProblem::IsValid)
+        .def("apply_start_state", &PlanningProblem::ApplyStartState)
         .def_readonly("termination_criterion", &PlanningProblem::termination_criterion);
 
     // Problem types
@@ -952,6 +953,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def("set_rho_neq", &TimeIndexedSamplingProblem::SetRhoNEQ);
     time_indexed_sampling_problem.def("get_goal_neq", &TimeIndexedSamplingProblem::GetGoalNEQ);
     time_indexed_sampling_problem.def("get_rho_neq", &TimeIndexedSamplingProblem::GetRhoNEQ);
+    time_indexed_sampling_problem.def("is_valid", (bool (TimeIndexedSamplingProblem::*)(Eigen::VectorXdRefConst, const double&)) & TimeIndexedSamplingProblem::IsValid);
 
     py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")
         .def("update", &DynamicTimeIndexedShootingProblem::Update)
@@ -1101,12 +1103,13 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("remove_object", &Scene::RemoveObject);
     scene.def_property_readonly("model_link_to_collision_link_map", &Scene::GetModelLinkToCollisionLinkMap);
     scene.def_property_readonly("controlled_joint_to_collision_link_map", &Scene::GetControlledJointToCollisionLinkMap);
+    scene.def_property_readonly("world_links_to_exclude_from_collision_scene", &Scene::get_world_links_to_exclude_from_collision_scene);
 
     py::class_<CollisionScene, std::shared_ptr<CollisionScene>> collision_scene(module, "CollisionScene");
     // TODO: expose IsStateValid, IsCollisionFree, GetCollisionDistance, GetCollisionWorldLinks, GetCollisionRobotLinks, GetTranslation
     collision_scene.def_property("always_externally_updated_collision_scene", &CollisionScene::GetAlwaysExternallyUpdatedCollisionScene, &CollisionScene::SetAlwaysExternallyUpdatedCollisionScene);
     collision_scene.def_property("replace_primitive_shapes_with_meshes", &CollisionScene::GetReplacePrimitiveShapesWithMeshes, &CollisionScene::SetReplacePrimitiveShapesWithMeshes);
-    collision_scene.def_readwrite("replace_cylinders_with_capsules", &CollisionScene::replace_cylinders_with_capsules);
+    collision_scene.def_property("replace_cylinders_with_capsules", &CollisionScene::get_replace_cylinders_with_capsules, &CollisionScene::set_replace_cylinders_with_capsules);
     collision_scene.def_property("robot_link_scale", &CollisionScene::GetRobotLinkScale, &CollisionScene::SetRobotLinkScale);
     collision_scene.def_property("world_link_scale", &CollisionScene::GetWorldLinkScale, &CollisionScene::SetWorldLinkScale);
     collision_scene.def_property("robot_link_padding", &CollisionScene::GetRobotLinkPadding, &CollisionScene::SetRobotLinkPadding);

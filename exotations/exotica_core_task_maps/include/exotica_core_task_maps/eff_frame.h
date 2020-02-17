@@ -39,9 +39,6 @@ namespace exotica
 class EffFrame : public TaskMap, public Instantiable<EffFrameInitializer>
 {
 public:
-    EffFrame();
-    virtual ~EffFrame();
-
     void Instantiate(const EffFrameInitializer& init) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
@@ -56,6 +53,6 @@ private:
     int big_stride_;
     int small_stride_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_EFF_FRAME_H_

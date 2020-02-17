@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -149,6 +149,11 @@ void KinematicTree::Instantiate(const std::string& joint_group, robot_model::Rob
     {
         shapes_pub_ = Server::Advertise<visualization_msgs::MarkerArray>(name_ + (name_ == "" ? "" : "/") + "CollisionShapes", 1, true);
         debug_scene_changed_ = true;
+        // Clear scene
+        visualization_msgs::MarkerArray msg;
+        msg.markers.resize(1);
+        msg.markers[0].action = 3;  // DELETE_ALL
+        shapes_pub_.publish(msg);
     }
 }
 

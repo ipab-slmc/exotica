@@ -33,9 +33,6 @@ REGISTER_TASKMAP_TYPE("EffFrame", exotica::EffFrame);
 
 namespace exotica
 {
-EffFrame::EffFrame() = default;
-EffFrame::~EffFrame() = default;
-
 void EffFrame::Instantiate(const EffFrameInitializer &init)
 {
     if (init.Type == "Quaternion")
@@ -107,4 +104,4 @@ int EffFrame::TaskSpaceJacobianDim()
 {
     return kinematics[0].Phi.rows() * 6;
 }
-}
+}  // namespace exotica

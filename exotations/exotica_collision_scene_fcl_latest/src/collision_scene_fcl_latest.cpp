@@ -29,6 +29,7 @@
 
 #include <exotica_collision_scene_fcl_latest/collision_scene_fcl_latest.h>
 #include <exotica_core/factory.h>
+#include <exotica_core/scene.h>
 
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionSceneFCLLatest)
 
@@ -45,7 +46,7 @@ inline fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
     tf::transformKDLToEigen(frame, ret);
     return ret;
 }
-}
+}  // namespace fcl_convert
 
 namespace exotica
 {
@@ -80,9 +81,11 @@ void CollisionSceneFCLLatest::UpdateCollisionObjects(const std::map<std::string,
 
     long i = 0;
 
+    auto world_links_to_exclude_from_collision_scene = scene_.lock()->get_world_links_to_exclude_from_collision_scene();
     for (const auto& object : objects)
     {
         // Check whether object is excluded as a world collision object:
+        // TODO: This works differently than in the Scene: There it's the original link name, here the frame_name!
         if (world_links_to_exclude_from_collision_scene.count(object.first) > 0)
         {
             if (debug_) HIGHLIGHT_NAMED("CollisionSceneFCLLatest::UpdateCollisionObject", object.first << " is excluded, skipping.");
@@ -115,6 +118,7 @@ void CollisionSceneFCLLatest::UpdateCollisionObjects(const std::map<std::string,
     // Register objects with the BroadPhaseCollisionManager
     broad_phase_collision_manager_->clear();
     broad_phase_collision_manager_->registerObjects(fcl_objects_);
+    needs_update_of_collision_objects_ = false;
 }
 
 void CollisionSceneFCLLatest::UpdateCollisionObjectTransforms()
@@ -193,7 +197,7 @@ std::shared_ptr<fcl::CollisionObjectd> CollisionSceneFCLLatest::ConstructFclColl
         {
             auto s = dynamic_cast<const shapes::Cylinder*>(shape.get());
             bool degenerate_capsule = (s->length <= 2 * s->radius);
-            if (!replace_cylinders_with_capsules || degenerate_capsule)
+            if (!replace_cylinders_with_capsules_ || degenerate_capsule)
             {
                 geometry.reset(new fcl::Cylinderd(s->radius, s->length));
             }

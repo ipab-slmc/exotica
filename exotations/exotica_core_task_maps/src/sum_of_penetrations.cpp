@@ -40,8 +40,18 @@ void SumOfPenetrations::Update(Eigen::VectorXdRefConst x,
     phi.setZero();
     Eigen::MatrixXd J;
 
-    // Get all world collision links, then iterate through them
-    std::vector<CollisionProxy> proxies = cscene_->GetCollisionDistance(robot_links_, check_self_collision_);
+    //  1) Create vector to store CollisionProxy
+    std::vector<CollisionProxy> proxies;
+
+    //  2) For each robot link, check against each robot link
+    if (check_self_collision_)
+    {
+        AppendVector(proxies, cscene_->GetRobotToRobotCollisionDistance(robot_margin_));
+    }
+
+    //  3) For each robot link, check against each environment link
+    AppendVector(proxies, cscene_->GetRobotToWorldCollisionDistance(world_margin_));
+
     double& d = phi(0);
     for (const auto& proxy : proxies)
     {
@@ -76,13 +86,7 @@ void SumOfPenetrations::Initialize()
 
     HIGHLIGHT_NAMED("Sum of Penetrations",
                     "World Margin: " << world_margin_ << " Robot Margin: " << robot_margin_);
-
-    // Get names of all controlled joints and their corresponding child links
-    robot_links_ = scene_->GetControlledLinkNames();
-    // std::cout << "Robot links: ";
-    // for (auto& link : robot_links_) std::cout << link << ", ";
-    // std::cout << std::endl;
 }
 
 int SumOfPenetrations::TaskSpaceDim() { return dim_; }
-}
+}  // namespace exotica

@@ -287,6 +287,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
 
     num_joints_ = model_joints_names_.size();
     num_controlled_joints_ = controlled_joints_names_.size();
+    state_size_ = num_controlled_joints_;  // TODO: We should probably deprecate state_size_
     if (num_controlled_joints_ < 1) ThrowPretty("No update joints specified!");
     controlled_joints_.resize(num_controlled_joints_);
     for (std::shared_ptr<KinematicElement> Joint : model_tree_)

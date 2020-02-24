@@ -5,6 +5,7 @@ from .publish_trajectory import *
 from .tools import *
 from .interactive_cost_tuning import *
 from .jupyter_meshcat import *
+from .transformations import *
 
 # Used for backwards compatibility only, deprecated
 Visualization = VisualizationMoveIt

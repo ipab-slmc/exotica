@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, University of Edinburgh
+// Copyright (c) 2019-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ namespace exotica
 typedef struct BoxQPSolution
 {
     Eigen::MatrixXd Hff_inv;
-    Eigen::MatrixXd x;
+    Eigen::VectorXd x;
     std::vector<size_t> free_idx;
     std::vector<size_t> clamped_idx;
 } BoxQPSolution;
@@ -53,6 +53,12 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
     std::vector<size_t> clamped_idx, free_idx;
     Eigen::VectorXd grad = q + H * x_init;
     Eigen::MatrixXd Hff, Hfc, Hff_inv;
+
+    // Ensure a feasible warm-start
+    for (int i = 0; i < x.size(); ++i)
+    {
+        x(i) = std::max(std::min(x_init(i), b_high(i)), b_low(i));
+    }
 
     Hff_inv = (Eigen::MatrixXd::Identity(H.rows(), H.cols()) * 1e-5 + H).inverse();
 

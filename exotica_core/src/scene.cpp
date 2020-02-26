@@ -595,6 +595,7 @@ void Scene::UpdateSceneFrames()
     kinematica_.ResetModel();
 
     // Add world objects
+    std::map<std::string, int> visual_map;
     for (const auto& object : *ps_->getWorld())
     {
         if (object.second->shapes_.size())
@@ -612,7 +613,19 @@ void Scene::UpdateSceneFrames()
                 shape_transform.linear() = object.second->shape_poses_[i].rotation();
                 Eigen::Isometry3d trans = obj_transform.inverse() * shape_transform;
                 VisualElement visual;
-                visual.name = object.first;
+                std::string name = object.first;
+                // Check for name duplicates after loading from scene files
+                const auto& it = visual_map.find(name);
+                if (it != visual_map.end())
+                {
+                    it->second++;
+                    name = name + "_" + std::to_string(it->second);
+                }
+                else
+                {
+                    visual_map[name] = 0;
+                }
+                visual.name = name;
                 visual.shape = shapes::ShapePtr(object.second->shapes_[i]->clone());
                 tf::transformEigenToKDL(trans, visual.frame);
                 if (ps_->hasObjectColor(object.first))

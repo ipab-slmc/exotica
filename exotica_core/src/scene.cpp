@@ -619,7 +619,7 @@ void Scene::UpdateSceneFrames()
                 if (it != visual_map.end())
                 {
                     it->second++;
-                    name = name + std::to_string(it->second);
+                    name = name + "_" + std::to_string(it->second);
                 }
                 else
                 {

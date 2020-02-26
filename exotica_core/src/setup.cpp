@@ -106,17 +106,41 @@ std::vector<Initializer> Setup::GetInitializers()
     std::vector<std::string> solvers = Instance()->solvers_.getDeclaredClasses();
     for (const std::string& s : solvers)
     {
-        AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateSolver(s, false)), ret);
+        try
+        {
+            AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateSolver(s, false)), ret);
+        }
+        catch (std::exception& e)
+        {
+            WARNING_NAMED("Setup::GetInitializers", "Solver '" << s << "' not built. Won't be able to instantiate.");
+            continue;
+        }
     }
     std::vector<std::string> maps = Instance()->maps_.getDeclaredClasses();
     for (const std::string& s : maps)
     {
-        AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateMap(s, false)), ret);
+        try
+        {
+            AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateMap(s, false)), ret);
+        }
+        catch (std::exception& e)
+        {
+            WARNING_NAMED("Setup::GetInitializers", "TaskMap '" << s << "' not built. Won't be able to instantiate.");
+            continue;
+        }
     }
     std::vector<std::string> dynamics_solvers = Instance()->dynamics_solvers_.getDeclaredClasses();
     for (const std::string& s : dynamics_solvers)
     {
-        AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateDynamicsSolver(s, false)), ret);
+        try
+        {
+            AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateDynamicsSolver(s, false)), ret);
+        }
+        catch (std::exception& e)
+        {
+            WARNING_NAMED("Setup::GetInitializers", "DynamicsSolver '" << s << "' not built. Won't be able to instantiate.");
+            continue;
+        }
     }
     return ret;
 }

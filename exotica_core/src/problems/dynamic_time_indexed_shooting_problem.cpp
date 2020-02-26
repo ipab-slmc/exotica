@@ -392,7 +392,7 @@ void DynamicTimeIndexedShootingProblem::set_Qf(Eigen::MatrixXdRefConst Q_in)
     set_Q(Q_in, T_ - 1);
 }
 
-void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int t)
+void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eigen::VectorXdRefConst u_in, int t)
 {
     // We can only update t=0, ..., T-1 - the last state will be created from integrating u_{T-1} to get x_T
     if (t >= (T_ - 1) || t < -1)
@@ -409,6 +409,12 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
         ThrowPretty("Mismatching in size of control vector: " << u_in.rows() << " given, expected: " << num_controls_);
     }
 
+    if (x_in.rows() != num_positions_ + num_velocities_)
+    {
+        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << num_positions_ + num_velocities_);
+    }
+
+    X_.col(t) = x_in;
     U_.col(t) = u_in;
 
     // Set the corresponding KinematicResponse for KinematicTree in order to
@@ -483,6 +489,90 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u_in, int
     else
     {
         cost.Update(Phi[t + 1], t + 1);
+    }
+
+    ++number_of_problem_updates_;
+}
+
+void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst u, int t)
+{
+    // We can only update t=0, ..., T-1 - the last state will be created from integrating u_{T-1} to get x_T
+    if (t >= (T_ - 1) || t < -1)
+    {
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_ - 1);
+    }
+    else if (t == -1)
+    {
+        t = T_ - 2;
+    }
+
+    return Update(X_.col(t), u, t);
+}
+
+void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefConst x_in)
+{
+    int t = T_ - 1;
+
+    if (x_in.rows() != num_positions_ + num_velocities_)
+    {
+        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << num_positions_ + num_velocities_);
+    }
+
+    X_.col(t) = x_in;
+
+    // Set the corresponding KinematicResponse for KinematicTree in order to
+    // have Kinematics elements updated based in x_in.
+    scene_->GetKinematicTree().SetKinematicResponse(kinematic_solutions_[t]);
+
+    // Pass the corresponding number of relevant task kinematics to the TaskMaps
+    // via the PlanningProblem::UpdateMultipleTaskKinematics method. For now we
+    // support passing _two_ timesteps - this can be easily changed later on.
+    std::vector<std::shared_ptr<KinematicResponse>> kinematics_solutions{kinematic_solutions_[t]};
+
+    // If the current timestep is 0, pass the 0th timestep's response twice.
+    // Otherwise pass the (t-1)th response.
+    kinematics_solutions.emplace_back((t == 0) ? kinematic_solutions_[t] : kinematic_solutions_[t - 1]);
+
+    // Actually update the tasks' kinematics mappings.
+    PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
+
+    const Eigen::VectorXd x_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t));
+    scene_->Update(x_next_position, static_cast<double>(t) * tau_);
+
+    Phi[t].SetZero(length_Phi);
+    if (flags_ & KIN_J) jacobian[t].setZero();
+    if (flags_ & KIN_J_DOT)
+        for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
+    for (int i = 0; i < num_tasks; ++i)
+    {
+        // Only update TaskMap if rho is not 0
+        if (tasks_[i]->is_used)
+        {
+            if (flags_ & KIN_J_DOT)
+            {
+                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+            }
+            else if (flags_ & KIN_J)
+            {
+                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+            }
+            else
+            {
+                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+            }
+        }
+    }
+    if (flags_ & KIN_J_DOT)
+    {
+        cost.Update(Phi[t], jacobian[t], hessian[t], t);
+    }
+    else if (flags_ & KIN_J)
+    {
+        cost.Update(Phi[t], jacobian[t], t);
+    }
+    else
+    {
+        cost.Update(Phi[t], t);
     }
 
     ++number_of_problem_updates_;

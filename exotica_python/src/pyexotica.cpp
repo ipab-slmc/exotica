@@ -492,7 +492,6 @@ public:
 
 PYBIND11_MODULE(_pyexotica, module)
 {
-    //Setup::Instance();
     module.doc() = "Exotica Python wrapper";
 
     py::class_<Setup, std::unique_ptr<Setup, py::nodelete>> setup(module, "Setup");
@@ -956,7 +955,8 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def("is_valid", (bool (TimeIndexedSamplingProblem::*)(Eigen::VectorXdRefConst, const double&)) & TimeIndexedSamplingProblem::IsValid);
 
     py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")
-        .def("update", &DynamicTimeIndexedShootingProblem::Update)
+        .def("update", (void (DynamicTimeIndexedShootingProblem::*)(Eigen::VectorXdRefConst, Eigen::VectorXdRefConst, int)) & DynamicTimeIndexedShootingProblem::Update)
+        .def("update", (void (DynamicTimeIndexedShootingProblem::*)(Eigen::VectorXdRefConst, int)) & DynamicTimeIndexedShootingProblem::Update)
         .def_property("X", static_cast<const Eigen::MatrixXd& (DynamicTimeIndexedShootingProblem::*)(void)const>(&DynamicTimeIndexedShootingProblem::get_X), &DynamicTimeIndexedShootingProblem::set_X)
         .def_property("U", static_cast<const Eigen::MatrixXd& (DynamicTimeIndexedShootingProblem::*)(void)const>(&DynamicTimeIndexedShootingProblem::get_U), &DynamicTimeIndexedShootingProblem::set_U)
         .def_property("X_star", &DynamicTimeIndexedShootingProblem::get_X_star, &DynamicTimeIndexedShootingProblem::set_X_star)

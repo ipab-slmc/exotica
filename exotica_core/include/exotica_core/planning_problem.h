@@ -56,7 +56,8 @@ enum class TerminationCriterion
     FunctionTolerance,
     GradientTolerance,
     Divergence,
-    UserDefined
+    UserDefined,
+    Convergence
     // Condition,
 };
 

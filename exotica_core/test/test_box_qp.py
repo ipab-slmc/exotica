@@ -33,7 +33,7 @@ class TestBoxQP(unittest.TestCase):
                 (b_low[1], b_high[1]),
             ])
 
-            nptest.assert_allclose(sp_sol.x, sol.x.T[0], rtol=1, atol=1e-4, err_msg="BoxQP and scipy differ!")
+            nptest.assert_allclose(sp_sol.x, sol.x, rtol=1, atol=1e-4, err_msg="BoxQP and scipy differ!")
     
     def test_zero_h(self):
         np.random.seed(100)
@@ -57,7 +57,7 @@ class TestBoxQP(unittest.TestCase):
                 (b_low[1], b_high[1]),
             ])
 
-            nptest.assert_allclose(sp_sol.x, sol.x.T[0], rtol=1, atol=1e-4, err_msg="BoxQP and scipy differ!")
+            nptest.assert_allclose(sp_sol.x, sol.x, rtol=1, atol=1e-4, err_msg="BoxQP and scipy differ!")
 
     def test_big_numbers(self):
         np.random.seed(100)
@@ -85,7 +85,7 @@ class TestBoxQP(unittest.TestCase):
                 (b_low[1], b_high[1]),
             ])
 
-            nptest.assert_allclose(sp_sol.x, sol.x.T[0], rtol=1, atol=1e-4, err_msg="BoxQP and scipy differ!")
+            nptest.assert_allclose(sp_sol.x, sol.x, rtol=1, atol=1e-4, err_msg="BoxQP and scipy differ!")
 
     def test_small_numbers(self):
         np.random.seed(100)
@@ -113,7 +113,7 @@ class TestBoxQP(unittest.TestCase):
                 (b_low[1], b_high[1]),
             ])
 
-            nptest.assert_allclose(sp_sol.x, sol.x.T[0], rtol=1, atol=1e-4, err_msg="BoxQP and scipy differ!")
+            nptest.assert_allclose(sp_sol.x, sol.x, rtol=1, atol=1e-4, err_msg="BoxQP and scipy differ!")
 
 if __name__ == '__main__':
     unittest.main()

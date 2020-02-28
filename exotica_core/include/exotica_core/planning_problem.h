@@ -75,7 +75,7 @@ public:
 
     void SetStartState(Eigen::VectorXdRefConst x);
     Eigen::VectorXd GetStartState() const;
-    Eigen::VectorXd ApplyStartState(bool update_traj = true);
+    virtual Eigen::VectorXd ApplyStartState(bool update_traj = true);
 
     void SetStartTime(double t);
     double GetStartTime() const;

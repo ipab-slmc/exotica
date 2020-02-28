@@ -13,6 +13,7 @@ AddInitializer(
   sparse_fddp_solver
   control_limited_ddp_solver
   feasibility_driven_ddp_solver
+  control_limited_feasibility_driven_ddp_solver
 )
 GenInitializers()
 
@@ -37,6 +38,7 @@ set(SOURCES
   src/sparse_fddp_solver.cpp
   src/control_limited_ddp_solver.cpp
   src/feasibility_driven_ddp_solver.cpp
+  src/control_limited_feasibility_driven_ddp_solver.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

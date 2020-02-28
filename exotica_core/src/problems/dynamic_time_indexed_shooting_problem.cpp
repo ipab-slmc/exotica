@@ -319,6 +319,12 @@ void DynamicTimeIndexedShootingProblem::PreUpdate()
     }
 }
 
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::ApplyStartState(bool update_traj)
+{
+    PlanningProblem::ApplyStartState(update_traj);
+    return start_state_;
+}
+
 const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::get_X() const
 {
     return X_;

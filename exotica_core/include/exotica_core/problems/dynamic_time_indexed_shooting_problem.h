@@ -46,6 +46,7 @@ public:
 
     void Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init) override;
 
+    Eigen::VectorXd ApplyStartState(bool update_traj = true) override;
     void PreUpdate() override;
     void Update(Eigen::VectorXdRefConst u, int t);
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, int t);

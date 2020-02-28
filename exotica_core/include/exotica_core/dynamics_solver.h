@@ -140,7 +140,7 @@ public:
     virtual ControlVector InverseDynamics(const StateVector& state);
 
     /// \brief Integrates without performing dynamics.
-    virtual void Integrate(const StateVector& x, const StateVector& dx, StateVector& xout);
+    virtual void Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout);
 
 private:
     bool control_limits_initialized_ = false;

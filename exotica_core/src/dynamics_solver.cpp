@@ -106,14 +106,14 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
 }
 
 template <typename T, int NX, int NU>
-void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const StateVector& dx, StateVector& xout)
+void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout)
 {
     switch (integrator_)
     {
         // Forward Euler (RK1) - explicit
         case Integrator::RK1:
         {
-            xout = x + dt_ * dx;
+            xout = x + dt * dx;
         }
         break;
 

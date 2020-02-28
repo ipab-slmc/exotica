@@ -1217,6 +1217,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("fu", &DynamicsSolver::fu)
         .def("get_position", &DynamicsSolver::GetPosition)
         .def("simulate", &DynamicsSolver::Simulate)
+        .def("integrate", &DynamicsSolver::Integrate)
         .def_property_readonly("dt", &DynamicsSolver::get_dt, "dt");
 
     ////////////////////////////////////////////////////////////////////////////

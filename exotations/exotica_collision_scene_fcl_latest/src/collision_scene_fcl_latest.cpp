@@ -134,6 +134,13 @@ void CollisionSceneFCLLatest::UpdateCollisionObjectTransforms()
         {
             ThrowPretty("Expired pointer, this should not happen - make sure to call UpdateCollisionObjects() after UpdateSceneFrames()");
         }
+
+        // Check for NaNs
+        if (std::isnan(element->frame.p.data[0]) || std::isnan(element->frame.p.data[1]) || std::isnan(element->frame.p.data[2]))
+        {
+            ThrowPretty("Transform for " << element->segment.getName() << " contains NaNs.");
+        }
+
         collision_object->setTransform(fcl_convert::KDL2fcl(element->frame));
         collision_object->computeAABB();
     }

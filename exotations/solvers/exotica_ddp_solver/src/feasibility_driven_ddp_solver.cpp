@@ -120,7 +120,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     control_limits_ = dynamics_solver_->get_control_limits();
 
     AllocateData();
-    auto X_warm = prob_->get_X();
+    Eigen::MatrixXd X_warm = prob_->get_X();
     X_warm.col(0) = prob_->ApplyStartState();  // Apply start state
     auto U_warm = prob_->get_U();
     for (int t = 0; t < T_ - 1; ++t)

@@ -138,7 +138,7 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::Simulate(const StateV
 template <typename T, int NX, int NU>
 Eigen::Matrix<T, Eigen::Dynamic, 1> AbstractDynamicsSolver<T, NX, NU>::GetPosition(Eigen::VectorXdRefConst x_in)
 {
-    assert(x_in.size() == (num_positions_ + num_velocities_));
+    assert(x_in.size() == get_num_state());
     return x_in.head(num_positions_).eval();
 }
 
@@ -158,6 +158,24 @@ template <typename T, int NX, int NU>
 int AbstractDynamicsSolver<T, NX, NU>::get_num_velocities() const
 {
     return num_velocities_;
+}
+
+template <typename T, int NX, int NU>
+int AbstractDynamicsSolver<T, NX, NU>::get_num_state() const
+{
+    if (num_state_ == -1)
+        return num_positions_ + num_velocities_;
+    else
+        return num_state_;
+}
+
+template <typename T, int NX, int NU>
+int AbstractDynamicsSolver<T, NX, NU>::get_num_state_derivative() const
+{
+    if (num_state_derivative_ == -1)
+        return 2 * num_velocities_;
+    else
+        return num_state_derivative_;
 }
 
 template <typename T, int NX, int NU>
@@ -200,28 +218,27 @@ const Eigen::MatrixXd& AbstractDynamicsSolver<T, NX, NU>::get_control_limits()
 }
 
 template <typename T, int NX, int NU>
-void AbstractDynamicsSolver<T, NX, NU>::set_control_limits(Eigen::VectorXd control_limits_low, Eigen::VectorXd control_limits_high)
+void AbstractDynamicsSolver<T, NX, NU>::set_control_limits(Eigen::VectorXdRefConst control_limits_low, Eigen::VectorXdRefConst control_limits_high)
 {
-    const int NU_ = num_controls_;
-    if (NU_ == -1)
+    if (num_controls_ == -1)
         ThrowPretty("Attempting to set control limits before num_controls is set.");
 
     control_limits_initialized_ = true;
-    control_limits_ = Eigen::MatrixXd(NU_, 2);
+    control_limits_ = Eigen::MatrixXd(num_controls_, 2);
 
-    if (control_limits_low.size() == NU_)
+    if (control_limits_low.size() == num_controls_)
         control_limits_.col(0) = control_limits_low;
     else if (control_limits_low.size() == 1)
-        control_limits_.col(0) = Eigen::VectorXd::Constant(NU_, control_limits_low(0));
+        control_limits_.col(0) = Eigen::VectorXd::Constant(num_controls_, control_limits_low(0));
     else
-        ThrowPretty("Wrong control limits (low) size. Should either be 1 or " << NU_);
+        ThrowPretty("Wrong control limits (low) size. Should either be 1 or " << num_controls_);
 
-    if (control_limits_high.size() == NU_)
+    if (control_limits_high.size() == num_controls_)
         control_limits_.col(1) = control_limits_high;
     else if (control_limits_high.size() == 1)
-        control_limits_.col(1) = Eigen::VectorXd::Constant(NU_, control_limits_high(0));
+        control_limits_.col(1) = Eigen::VectorXd::Constant(num_controls_, control_limits_high(0));
     else
-        ThrowPretty("Wrong control limits (high) size. Should either be 1 or " << NU_);
+        ThrowPretty("Wrong control limits (high) size. Should either be 1 or " << num_controls_);
 }
 
 template <typename T, int NX, int NU>
@@ -230,15 +247,16 @@ void AbstractDynamicsSolver<T, NX, NU>::InitializeSecondOrderDerivatives()
     if (second_order_derivatives_initialized_)
         return;
 
-    const int N = get_num_positions() + get_num_velocities();
+    const int nx = get_num_state();
+    const int ndx = get_num_state_derivative();
 
-    fxx_default_ = Eigen::Tensor<T, 3>(N, N, N);
+    fxx_default_ = Eigen::Tensor<T, 3>(ndx, ndx, ndx);
     fxx_default_.setZero();
 
-    fuu_default_ = Eigen::Tensor<T, 3>(get_num_velocities(), N, get_num_velocities());
+    fuu_default_ = Eigen::Tensor<T, 3>(ndx, num_controls_, num_controls_);
     fuu_default_.setZero();
 
-    fxu_default_ = Eigen::Tensor<T, 3>(get_num_velocities(), N, N);
+    fxu_default_ = Eigen::Tensor<T, 3>(ndx, ndx, num_controls_);
     fxu_default_.setZero();
 
     second_order_derivatives_initialized_ = true;
@@ -274,20 +292,22 @@ Eigen::Matrix<T, NU, 1> AbstractDynamicsSolver<T, NX, NU>::InverseDynamics(const
 template <typename T, int NX, int NU>
 Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector& x, const ControlVector& u)
 {
+    const int nx = get_num_state();
+    const int ndx = get_num_state_derivative();
+
     // Finite differences
+    Eigen::MatrixXd fx_fd(ndx, ndx);
     constexpr double eps = 1e-6;
-    const int NX_ = num_positions_ + num_velocities_;
-
-    Eigen::MatrixXd fx_fd(NX_, NX_);
-
-    for (int i = 0; i < NX_; ++i)
+    Eigen::VectorXd x_low(nx), x_high(nx), xdiff(ndx);
+    for (int i = 0; i < ndx; ++i)
     {
-        Eigen::VectorXd x_low = x;
-        Eigen::VectorXd x_high = x;
-        x_low(i) -= eps / 2.0;
-        x_high(i) += eps / 2.0;
+        xdiff.setZero();
+        xdiff(i) = eps / 2.0;
 
-        fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
+        Integrate(x, xdiff, -1., x_low);
+        Integrate(x, xdiff, 1., x_high);
+
+        fx_fd.col(i) = StateDelta(f(x_high, u), f(x_low, u)) / eps;
     }
 
     return fx_fd;
@@ -296,21 +316,19 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector
 template <typename T, int NX, int NU>
 Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector& x, const ControlVector& u)
 {
+    const int ndx = get_num_state_derivative();
+
     // Finite differences
     constexpr double eps = 1e-6;
-    const int NX_ = num_positions_ + num_velocities_;
-    const int NU_ = num_controls_;
-
-    Eigen::MatrixXd fu_fd(NX_, NU_);
-
-    for (int i = 0; i < NU_; ++i)
+    Eigen::MatrixXd fu_fd(ndx, num_controls_);
+    for (int i = 0; i < num_controls_; ++i)
     {
         Eigen::VectorXd u_low = u;
         Eigen::VectorXd u_high = u;
         u_low(i) -= eps / 2.0;
         u_high(i) += eps / 2.0;
 
-        fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
+        fu_fd.col(i) = StateDelta(f(x, u_high), f(x, u_low)) / eps;
     }
 
     return fu_fd;

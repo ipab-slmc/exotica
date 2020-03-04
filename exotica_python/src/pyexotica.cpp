@@ -504,6 +504,7 @@ PYBIND11_MODULE(_pyexotica, module)
     setup.def_static("create_solver", [](const Initializer& init) { return Setup::CreateSolver(init); }, py::return_value_policy::take_ownership);    // "Creates an instance of the solver identified by name parameter.", py::arg("solverType"), py::arg("prependExoticaNamespace"));
     setup.def_static("create_problem", [](const Initializer& init) { return Setup::CreateProblem(init); }, py::return_value_policy::take_ownership);  // "Creates an instance of the problem identified by name parameter.", py::arg("problemType"), py::arg("prependExoticaNamespace"));
     setup.def_static("create_scene", [](const Initializer& init) { return Setup::CreateScene(init); }, py::return_value_policy::take_ownership);
+    setup.def_static("create_dynamics_solver", [](const Initializer& init) { return Setup::CreateDynamicsSolver(init); }, py::return_value_policy::take_ownership);
     setup.def_static("print_supported_classes", &Setup::PrintSupportedClasses, "Print a list of available plug-ins sorted by class.");
     setup.def_static("get_initializers", &Setup::GetInitializers, py::return_value_policy::copy, "Returns a list of available initializers with all available parameters/arguments.");
     setup.def_static("get_package_path", &ros::package::getPath, "ROS package path resolution.");
@@ -1215,9 +1216,19 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("f", &DynamicsSolver::f)
         .def("fx", &DynamicsSolver::fx)
         .def("fu", &DynamicsSolver::fu)
+        .def_property_readonly("nq", &DynamicsSolver::get_num_positions)
+        .def_property_readonly("nv", &DynamicsSolver::get_num_velocities)
+        .def_property_readonly("nx", &DynamicsSolver::get_num_state)
+        .def_property_readonly("ndx", &DynamicsSolver::get_num_state_derivative)
+        .def_property_readonly("nu", &DynamicsSolver::get_num_controls)
         .def("get_position", &DynamicsSolver::GetPosition)
         .def("simulate", &DynamicsSolver::Simulate)
-        .def("integrate", &DynamicsSolver::Integrate)
+        .def("state_delta", &DynamicsSolver::StateDelta)
+        .def("integrate", [](DynamicsSolver* instance, Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, const double dt) {
+            Eigen::VectorXd xout(instance->get_num_positions() + instance->get_num_velocities());
+            instance->Integrate(x, u, dt, xout);
+            return xout;
+        })
         .def_property_readonly("dt", &DynamicsSolver::get_dt, "dt");
 
     ////////////////////////////////////////////////////////////////////////////

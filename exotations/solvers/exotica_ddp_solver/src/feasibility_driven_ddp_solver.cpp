@@ -551,7 +551,7 @@ void FeasibilityDrivenDDPSolver::BackwardPass()
         Qx_[t] = dt_ * prob_->GetStateCostJacobian(t);
         Qu_[t] = dt_ * prob_->GetControlCostJacobian(t);
 
-        fx_ = dt_ * dynamics_solver_->fx(xs_[t], us_[t]) + Eigen::MatrixXd::Identity(NX_, NX_);
+        fx_ = dt_ * dynamics_solver_->fx(xs_[t], us_[t]) + Eigen::MatrixXd::Identity(NDX_, NDX_);
         fu_ = dt_ * dynamics_solver_->fu(xs_[t], us_[t]);
 
         FxTVxx_p_.noalias() = fx_.transpose() * Vxx_p;

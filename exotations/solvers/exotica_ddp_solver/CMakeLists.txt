@@ -10,6 +10,7 @@ AddInitializer(
   abstract_ddp_solver
   analytic_ddp_solver
   control_limited_ddp_solver
+  feasibility_driven_ddp_solver
 )
 GenInitializers()
 
@@ -30,7 +31,8 @@ add_compile_options(-Wno-ignored-attributes)
 set(SOURCES
   src/abstract_ddp_solver.cpp
   src/analytic_ddp_solver.cpp
-  src/control_limited_ddp_solver.cpp  
+  src/control_limited_ddp_solver.cpp
+  src/feasibility_driven_ddp_solver.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

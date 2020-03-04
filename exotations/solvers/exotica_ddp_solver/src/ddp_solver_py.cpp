@@ -29,7 +29,10 @@
 
 #include <exotica_ddp_solver/analytic_ddp_solver.h>
 #include <exotica_ddp_solver/control_limited_ddp_solver.h>
+#include <exotica_ddp_solver/feasibility_driven_ddp_solver.h>
+#include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 using namespace exotica;
 namespace py = pybind11;
@@ -43,4 +46,9 @@ PYBIND11_MODULE(exotica_ddp_solver_py, module)
     py::class_<AnalyticDDPSolver, std::shared_ptr<AnalyticDDPSolver>, FeedbackMotionSolver> analytic_ddp_solver(module, "AnalyticDDPSolver");
 
     py::class_<ControlLimitedDDPSolver, std::shared_ptr<ControlLimitedDDPSolver>, FeedbackMotionSolver> control_limited_ddp_solver(module, "ControlLimitedDDPSolver");
+
+    py::class_<FeasibilityDrivenDDPSolver, std::shared_ptr<FeasibilityDrivenDDPSolver>, FeedbackMotionSolver> feasibility_driven_ddp_solver(module, "FeasibilityDrivenDDPSolver");
+    feasibility_driven_ddp_solver.def_property_readonly("fs", &FeasibilityDrivenDDPSolver::get_fs);
+    feasibility_driven_ddp_solver.def_property_readonly("xs", &FeasibilityDrivenDDPSolver::get_xs);
+    feasibility_driven_ddp_solver.def_property_readonly("us", &FeasibilityDrivenDDPSolver::get_us);
 }

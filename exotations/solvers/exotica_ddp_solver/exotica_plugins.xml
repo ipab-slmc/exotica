@@ -5,4 +5,7 @@
   <class name="exotica/ControlLimitedDDPSolver" type="exotica::ControlLimitedDDPSolver" base_class_type="exotica::MotionSolver">
     <description>Control-limited DDP Solver (Tassa, Mansard, Todorov, 2014)</description>
   </class>
+  <class name="exotica/FeasibilityDrivenDDPSolver" type="exotica::FeasibilityDrivenDDPSolver" base_class_type="exotica::MotionSolver">
+    <description>Feasibility-driven DDP Solver (Mastalli et al., 2020)</description>
+  </class>
 </library>

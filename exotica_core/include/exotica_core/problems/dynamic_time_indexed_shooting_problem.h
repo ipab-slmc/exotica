@@ -46,8 +46,11 @@ public:
 
     void Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init) override;
 
+    Eigen::VectorXd ApplyStartState(bool update_traj = true) override;
     void PreUpdate() override;
     void Update(Eigen::VectorXdRefConst u, int t);
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, int t);
+    void UpdateTerminalState(Eigen::VectorXdRefConst x);  // Updates the terminal state and recomputes the terminal cost - this is required e.g. when considering defects in the dynamics
 
     const int& get_T() const;     ///< Returns the number of timesteps in the state trajectory.
     void set_T(const int& T_in);  ///< Sets the number of timesteps in the state trajectory.

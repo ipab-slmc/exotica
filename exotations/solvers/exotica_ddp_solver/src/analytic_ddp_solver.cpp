@@ -57,7 +57,7 @@ void AnalyticDDPSolver::BackwardPass()
         x = prob_->get_X(t);
         u = prob_->get_U(t);
 
-        fx_ = dt_ * dynamics_solver_->fx(x, u) + Eigen::MatrixXd::Identity(NX_, NX_);
+        fx_ = dt_ * dynamics_solver_->fx(x, u) + Eigen::MatrixXd::Identity(NDX_, NDX_);
         fu_ = dt_ * dynamics_solver_->fu(x, u);
 
         //
@@ -78,11 +78,11 @@ void AnalyticDDPSolver::BackwardPass()
         if (parameters_.UseSecondOrderDynamics)
         {
             // clang-format off
-            Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx_.data(), NX_);
+            Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx_.data(), NDX_);
 
             Qxx_ += 
                 Eigen::TensorToMatrix(
-                    (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NX_, NX_
+                    (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_
                 ) * dt_;
 
             Quu_ += 
@@ -91,7 +91,7 @@ void AnalyticDDPSolver::BackwardPass()
                 ) * dt_;
 
             Qux_ +=
-                Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NX_
+                Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NDX_
                 ) * dt_;
             // clang-format on
         }

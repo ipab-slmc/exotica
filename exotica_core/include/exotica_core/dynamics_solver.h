@@ -102,6 +102,7 @@ public:
     ///     Returns x_1-x_2
     virtual StateVector StateDelta(const StateVector& x_1, const StateVector& x_2)
     {
+        assert(x_1.size() == x_2.size());
         return x_1 - x_2;
     }
 
@@ -133,10 +134,13 @@ public:
     /// \brief Returns the control limits vector.
     //  returns: Two-column matrix, first column contains low control limits,
     //      second - the high control limits
-    Eigen::MatrixXd get_control_limits();
+    const Eigen::MatrixXd& get_control_limits();
     void set_control_limits(Eigen::VectorXd control_limits_low, Eigen::VectorXd control_limits_high);
 
     virtual ControlVector InverseDynamics(const StateVector& state);
+
+    /// \brief Integrates without performing dynamics.
+    virtual void Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout);
 
 private:
     bool control_limits_initialized_ = false;
@@ -156,7 +160,7 @@ protected:
     Eigen::MatrixXd control_limits_;  ///< ControlLimits. Default is empty vector.
 
     /// \brief Integrates the dynamic system from state x with controls u applied for one timestep dt using the selected integrator.
-    inline StateVector Integrate(const StateVector& x, const ControlVector& u);
+    inline StateVector SimulateOneStep(const StateVector& x, const ControlVector& u);
 
     void InitializeSecondOrderDerivatives();
     Eigen::Tensor<T, 3> fxx_default_, fuu_default_, fxu_default_;

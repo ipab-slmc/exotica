@@ -69,7 +69,7 @@ void AbstractDynamicsSolver<T, NX, NU>::SetDt(double dt_in)
 }
 
 template <typename T, int NX, int NU>
-Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const ControlVector& u)
+Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const StateVector& x, const ControlVector& u)
 {
     switch (integrator_)
     {
@@ -77,6 +77,7 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::Integrate(const State
         case Integrator::RK1:
         {
             StateVector xdot = f(x, u);
+            // TODO: This is the explicit RK1. We can switch to semi-implicit.
             return x + dt_ * xdot;
         }
         // Explicit trapezoid rule (RK2)
@@ -105,13 +106,31 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::Integrate(const State
 }
 
 template <typename T, int NX, int NU>
+void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout)
+{
+    switch (integrator_)
+    {
+        // Forward Euler (RK1) - explicit
+        case Integrator::RK1:
+        {
+            xout = x + dt * dx;
+        }
+        break;
+
+        default:
+            ThrowPretty("Not implemented!");
+            // TODO implement the other solvers, but how to get dx updated?!
+    };
+}
+
+template <typename T, int NX, int NU>
 Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::Simulate(const StateVector& x, const ControlVector& u, T t)
 {
     const int num_timesteps = static_cast<int>(t / dt_);
     StateVector x_t_plus_1 = x;
     for (int i = 0; i < num_timesteps; ++i)
     {
-        x_t_plus_1 = Integrate(x_t_plus_1, u);
+        x_t_plus_1 = SimulateOneStep(x_t_plus_1, u);
     }
     return x_t_plus_1;
 }
@@ -173,7 +192,7 @@ void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(std::string integrator_in)
 }
 
 template <typename T, int NX, int NU>
-Eigen::MatrixXd AbstractDynamicsSolver<T, NX, NU>::get_control_limits()
+const Eigen::MatrixXd& AbstractDynamicsSolver<T, NX, NU>::get_control_limits()
 {
     if (!control_limits_initialized_)
         set_control_limits(raw_control_limits_low_, raw_control_limits_high_);

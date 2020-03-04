@@ -69,7 +69,17 @@ int PlanningProblem::get_num_controls() const
 
 Eigen::VectorXd PlanningProblem::ApplyStartState(bool update_traj)
 {
-    scene_->SetModelState(start_state_.head(num_positions_), t_start, update_traj);
+    // If we have a scene with a dynamics solver, get position from there
+    if (scene_->GetDynamicsSolver() != nullptr)
+    {
+        const Eigen::VectorXd start_state = scene_->GetDynamicsSolver()->GetPosition(start_state_);
+        scene_->SetModelState(start_state, t_start, update_traj);
+    }
+    else
+    {
+        scene_->SetModelState(start_state_.head(num_positions_), t_start, update_traj);
+    }
+
     return scene_->GetControlledState();
 }
 
@@ -159,9 +169,10 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
             // The quadrotor and other floating-base robots are currently broken (cf. #571)
             if (scene_->GetDynamicsSolver()->get_num_positions() > num_positions_)
             {
-                ThrowPretty("Proper floating-base joints in dynamic problems not yet supported. Cf. #571.");
-                // num_positions_ = scene_->GetDynamicsSolver()->get_num_positions();
-                // num_velocities_ = scene_->GetDynamicsSolver()->get_num_velocities();
+                // ThrowPretty("Proper floating-base joints in dynamic problems not yet supported. Cf. #571.");
+                WARNING_NAMED("PlanningProblem", "-1 num_positions");
+                num_positions_ = scene_->GetDynamicsSolver()->get_num_positions();
+                num_velocities_ = scene_->GetDynamicsSolver()->get_num_velocities();
             }
             // If the difference is exactly 1, just add it:
             else if ((scene_->GetDynamicsSolver()->get_num_positions() - scene_->GetDynamicsSolver()->get_num_velocities()) == 1)

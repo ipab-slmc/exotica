@@ -88,6 +88,8 @@ protected:
     int T_;
     int NU_;
     int NX_;
+    int NDX_;
+    int NV_;
     double dt_;
     double cost_;        ///!< Cost during iteration
     double cost_prev_;   ///!< Cost during previous iteration

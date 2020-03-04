@@ -54,7 +54,7 @@ protected:
     void DecreaseRegularization();
     const Eigen::Vector2d& ExpectedImprovement();
     void UpdateExpectedImprovement();
-    bool RaiseIfNaN(const double value)
+    inline bool IsNaN(const double value)
     {
         if (std::isnan(value) || std::isinf(value) || value >= 1e30)
         {

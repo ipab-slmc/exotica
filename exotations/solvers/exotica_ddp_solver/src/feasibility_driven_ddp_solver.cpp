@@ -459,11 +459,11 @@ void FeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
         xnext_ = prob_->get_X(t + 1);
         cost_try_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
 
-        if (RaiseIfNaN(cost_try_))
+        if (IsNaN(cost_try_))
         {
             throw std::runtime_error("forward_error - NaN in cost_try_ at t=" + std::to_string(t));
         }
-        if (RaiseIfNaN(xnext_.lpNorm<Eigen::Infinity>()))
+        if (IsNaN(xnext_.lpNorm<Eigen::Infinity>()))
         {
             throw std::runtime_error("forward_error - xnext_ isn't finite at t=" + std::to_string(t));
         }
@@ -481,7 +481,7 @@ void FeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
     prob_->UpdateTerminalState(xs_try_.back());
     cost_try_ += prob_->GetStateCost(T_ - 1);
 
-    if (RaiseIfNaN(cost_try_))
+    if (IsNaN(cost_try_))
     {
         throw std::runtime_error("forward_error - cost NaN");
     }
@@ -595,11 +595,11 @@ void FeasibilityDrivenDDPSolver::BackwardPass()
             Vx_[t].noalias() += Vxx_[t] * fs_[t];
         }
 
-        if (RaiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>()))
+        if (IsNaN(Vx_[t].lpNorm<Eigen::Infinity>()))
         {
             ThrowPretty("backward_error (Vx) at t=" << t);
         }
-        if (RaiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>()))
+        if (IsNaN(Vxx_[t].lpNorm<Eigen::Infinity>()))
         {
             ThrowPretty("backward_error (Vxx) at t=" << t);
         }

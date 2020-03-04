@@ -48,17 +48,18 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     if (!scene_->GetDynamicsSolver()) ThrowPretty("DynamicsSolver is not initialised!");
 
     const int NX = num_positions_ + num_velocities_,
+              NDX = 2 * num_velocities_,
               NU = num_controls_;
-    Qf_ = Eigen::MatrixXd::Identity(NX, NX);
+    Qf_ = Eigen::MatrixXd::Identity(NDX, NDX);
     if (this->parameters_.Qf.rows() > 0)
     {
-        if (this->parameters_.Qf.rows() == NX)
+        if (this->parameters_.Qf.rows() == NDX)
         {
             Qf_.diagonal() = this->parameters_.Qf;
         }
         else
         {
-            ThrowNamed("Qf dimension mismatch! Expected " << NX << ", got " << this->parameters_.Qf.rows());
+            ThrowNamed("Qf dimension mismatch! Expected " << NDX << ", got " << this->parameters_.Qf.rows());
         }
     }
     Qf_ *= this->parameters_.Qf_rate;
@@ -171,7 +172,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
 {
     if (debug_) HIGHLIGHT_NAMED("DynamicTimeIndexedShootingProblem", "Initialize problem with T=" << T_);
 
-    const int NX = num_positions_ + num_velocities_;
+    const int NX = num_positions_ + num_velocities_, NDX = 2 * num_velocities_;
     X_ = Eigen::MatrixXd::Zero(NX, T_);
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
     U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
@@ -231,16 +232,16 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         set_X(start_state);
     }
 
-    Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(NX, NX);
+    Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(NDX, NDX);
     if (this->parameters_.Q.rows() > 0)
     {
-        if (this->parameters_.Q.rows() == NX)
+        if (this->parameters_.Q.rows() == NDX)
         {
             Q.diagonal() = this->parameters_.Q;
         }
         else
         {
-            ThrowNamed("Q dimension mismatch! Expected " << NX << ", got " << this->parameters_.Q.rows());
+            ThrowNamed("Q dimension mismatch! Expected " << NDX << ", got " << this->parameters_.Q.rows());
         }
     }
     Q *= this->parameters_.Q_rate;
@@ -503,8 +504,9 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
     const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
     const Eigen::VectorXd state_cost_jacobian = Q_[t] * x_diff + Q_[t].transpose() * x_diff;
 
-    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
-    general_cost_jacobian.head(num_positions_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
+    const int ndx = 2 * num_velocities_;
+    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(ndx);
+    general_cost_jacobian.head(num_velocities_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
 
     return state_cost_jacobian + general_cost_jacobian;
 }
@@ -512,8 +514,10 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) const
 {
     ValidateTimeIndex(t);
-    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
-    general_cost_jacobian.head(num_positions_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
+
+    const int ndx = 2 * num_velocities_;
+    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(ndx);
+    general_cost_jacobian.head(num_velocities_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
     // TODO: Using a J^T*J approximation for the general cost here as Hessians aren't implemented for task maps yet.
     // TODO: As we are not using RowVectorXd (yet), this is J*J^T instead of the correct J^T*J
     return Q_[t] + Q_[t].transpose() + (general_cost_jacobian * general_cost_jacobian.transpose());

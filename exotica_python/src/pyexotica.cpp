@@ -1268,6 +1268,7 @@ PYBIND11_MODULE(_pyexotica, module)
             instance->Integrate(x, u, dt, xout);
             return xout;
         })
+        .def("quasi_static", &DynamicsSolver::QuasiStatic)
         .def_property_readonly("dt", &DynamicsSolver::get_dt, "dt");
 
     ////////////////////////////////////////////////////////////////////////////

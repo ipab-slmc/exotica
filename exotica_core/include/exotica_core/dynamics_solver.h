@@ -160,6 +160,40 @@ public:
 
     virtual ControlVector InverseDynamics(const StateVector& state);
 
+    virtual ControlVector QuasiStatic(const StateVector& x, int maxiter = 100, double tol = 1e-9)
+    {
+        if (x.size() != num_positions_ + num_velocities_)
+        {
+            ThrowPretty("Invalid argument: "
+                        << "x has wrong dimension (it should be " << num_positions_ + num_velocities_ << ")");
+        }
+
+        const int ndx = 2 * num_velocities_;
+        // const int nx = num_positions_ + num_velocities_;
+        Eigen::VectorXd dx = Eigen::VectorXd::Zero(ndx);
+        Eigen::VectorXd u = Eigen::VectorXd::Zero(num_controls_);
+        Eigen::VectorXd du = Eigen::VectorXd::Zero(num_controls_);
+        StateDerivative Fx;
+        ControlDerivative Fu;
+        for (int i = 0; i < maxiter; ++i)
+        {
+            dx = f(x, u);
+
+            // Fx = dt_ * fx(x, u) + Eigen::MatrixXd::Identity(nx, nx);
+            // Fu = dt_ * fu(x, u);
+            Fx = fx(x, u);
+            Fu = fu(x, u);
+
+            du = -Fu.completeOrthogonalDecomposition().solve(Fx * dx);
+            u += du;
+            if (du.norm() <= tol)
+            {
+                break;
+            }
+        }
+        return u;
+    }
+
     /// \brief Integrates without performing dynamics.
     virtual void Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout);
 

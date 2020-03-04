@@ -167,29 +167,21 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         backward_pass_timer.Reset();
-        while (true)
+        while (!ComputeDirection(recalcDiff))
         {
-            try
+            // HIGHLIGHT("Increase regularization in ComputeDirection and try again.")
+            recalcDiff = false;
+            IncreaseRegularization();
+            if (xreg_ == regmax_)
             {
-                ComputeDirection(recalcDiff);
+                WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "State regularization exceeds maximum regularization: " << xreg_ << " > " << regmax_)
+                diverged = true;
+                break;
             }
-            catch (std::exception& e)
+            else
             {
-                // HIGHLIGHT("Increase regularization in ComputeDirection and try again." << e.what())
-                recalcDiff = false;
-                IncreaseRegularization();
-                if (xreg_ == regmax_)
-                {
-                    WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "State regularization exceeds maximum regularization: " << xreg_ << " > " << regmax_)
-                    diverged = true;
-                    break;
-                }
-                else
-                {
-                    continue;
-                }
+                continue;
             }
-            break;
         }
         time_taken_backward_pass_ = backward_pass_timer.GetDuration();
 
@@ -214,7 +206,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             }
             catch (std::exception& e)
             {
-                // HIGHLIGHT("Error in TryStep: " << e.what())
+                WARNING_NAMED("NaN in ForwardPass", e.what())
                 continue;
             }
             ExpectedImprovement();
@@ -490,13 +482,13 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
     }
 }
 
-void AbstractFeasibilityDrivenDDPSolver::ComputeDirection(const bool recalcDiff)
+bool AbstractFeasibilityDrivenDDPSolver::ComputeDirection(const bool recalcDiff)
 {
     if (recalcDiff)
     {
         CalcDiff();
     }
-    BackwardPass();
+    return BackwardPassFDDP();
 }
 
 double AbstractFeasibilityDrivenDDPSolver::CalcDiff()
@@ -528,7 +520,7 @@ double AbstractFeasibilityDrivenDDPSolver::CalcDiff()
     return cost_;
 }
 
-void AbstractFeasibilityDrivenDDPSolver::BackwardPass()
+bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
 {
     Vxx_.back() = prob_->GetStateCostHessian(T_ - 1);
     Vx_.back() = prob_->GetStateCostJacobian(T_ - 1);
@@ -600,13 +592,14 @@ void AbstractFeasibilityDrivenDDPSolver::BackwardPass()
 
         if (IsNaN(Vx_[t].lpNorm<Eigen::Infinity>()))
         {
-            ThrowPretty("backward_error (Vx) at t=" << t);
+            return false;
         }
         if (IsNaN(Vxx_[t].lpNorm<Eigen::Infinity>()))
         {
-            ThrowPretty("backward_error (Vxx) at t=" << t);
+            return false;
         }
     }
+    return true;
 }
 
 void AbstractFeasibilityDrivenDDPSolver::ComputeGains(const int t)

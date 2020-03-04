@@ -68,8 +68,9 @@ protected:
     double CheckStoppingCriteria();
 
     double CalcDiff();
-    void ComputeDirection(const bool recalcDiff);
-    void BackwardPass() override;
+    bool ComputeDirection(const bool recalcDiff);
+    bool BackwardPassFDDP();
+    void BackwardPass() override { return (void)BackwardPassFDDP(); }
     virtual void ComputeGains(const int t);
     void ForwardPass(const double steplength);
     double TryStep(const double steplength);

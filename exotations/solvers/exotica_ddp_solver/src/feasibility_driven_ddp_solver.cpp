@@ -85,9 +85,9 @@ void FeasibilityDrivenDDPSolver::AllocateData()
         }
         else
         {
-            xs_try_[t] = Eigen::VectorXd::Constant(NX_, NAN);
+            xs_try_[t].setZero(NX_);
         }
-        us_try_[t] = Eigen::VectorXd::Constant(NU_, NAN);
+        us_try_[t].setZero(NU_);
         dx_[t] = Eigen::VectorXd::Zero(NDX_);
 
         FuTVxx_p_[t] = Eigen::MatrixXd::Zero(NU_, NDX_);

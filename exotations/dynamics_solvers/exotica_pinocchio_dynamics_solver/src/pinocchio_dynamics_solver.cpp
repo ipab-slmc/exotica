@@ -63,7 +63,7 @@ void PinocchioDynamicsSolver::AssignScene(ScenePtr scene_in)
     const int ndx = get_num_state_derivative();
     xdot_analytic_.setZero(ndx);
     fx_analytic_.setZero(ndx, ndx);
-    fx_analytic_.topRightCorner(num_velocities_, num_velocities_) = Eigen::MatrixXd::Identity(num_velocities_, num_velocities_);
+    fx_analytic_.topRightCorner(num_velocities_, num_velocities_).setIdentity();
     fu_analytic_.setZero(ndx, num_controls_);
 }
 
@@ -78,16 +78,17 @@ Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVe
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
-    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval());
-    fx_analytic_.bottomLeftCorner(num_velocities_, num_velocities_) = pinocchio_data_->ddq_dq;
+    // Four quadrants should be: 0, Identity, ddq_dq, ddq_dv
+    // 0 and Identity are set during initialisation. Here, we pass references to ddq_dq, ddq_dv to the algorithm.
+    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval(), fx_analytic_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_analytic_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_analytic_.bottomRightCorner(num_velocities_, num_velocities_));
 
     return fx_analytic_;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u);
-    fu_analytic_.bottomRightCorner(num_velocities_, num_controls_) = pinocchio_data_->Minv;
+    // NB: ddq_dtau is computed with the same call - i.e., we are duplicating computation.
+    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval(), fx_analytic_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_analytic_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_analytic_.bottomRightCorner(num_velocities_, num_velocities_));
 
     return fu_analytic_;
 }

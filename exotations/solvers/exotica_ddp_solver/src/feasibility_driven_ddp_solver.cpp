@@ -199,16 +199,8 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
         for (int ai = 0; ai < alpha_space_.size(); ++ai)
         {
             steplength_ = alpha_space_(ai);
+            dV_ = TryStep(steplength_);
 
-            try
-            {
-                dV_ = TryStep(steplength_);
-            }
-            catch (std::exception& e)
-            {
-                WARNING_NAMED("NaN in ForwardPass", e.what())
-                continue;
-            }
             ExpectedImprovement();
             dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
@@ -456,11 +448,13 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
 
         if (IsNaN(cost_try_))
         {
-            throw std::runtime_error("forward_error - NaN in cost_try_ at t=" + std::to_string(t));
+            WARNING_NAMED("NaN in ForwardPass", "forward_error - NaN in cost_try_ at t=" << t);
+            return;
         }
         if (IsNaN(xnext_.lpNorm<Eigen::Infinity>()))
         {
-            throw std::runtime_error("forward_error - xnext_ isn't finite at t=" + std::to_string(t));
+            WARNING_NAMED("NaN in ForwardPass", "forward_error - xnext_ isn't finite at t=" << t);
+            return;
         }
     }
 
@@ -478,7 +472,8 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
 
     if (IsNaN(cost_try_))
     {
-        throw std::runtime_error("forward_error - cost NaN");
+        WARNING_NAMED("NaN in ForwardPass", "forward_error - cost NaN");
+        return;
     }
 }
 

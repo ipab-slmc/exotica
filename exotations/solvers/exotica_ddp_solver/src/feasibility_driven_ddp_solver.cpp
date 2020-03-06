@@ -37,9 +37,12 @@ void FeasibilityDrivenDDPSolver::Instantiate(const FeasibilityDrivenDDPSolverIni
 {
     parameters_ = init;
     base_parameters_ = AbstractDDPSolverInitializer(FeasibilityDrivenDDPSolverInitializer(parameters_));
+
+    clamp_to_control_limits_in_forward_pass_ = base_parameters_.ClampControlsInForwardPass;
+    initial_regularization_rate_ = parameters_.RegularizationRate;
 }
 
-void FeasibilityDrivenDDPSolver::AllocateData()
+void AbstractFeasibilityDrivenDDPSolver::AllocateData()
 {
     // TODO: -1 here because of copy-paste and different conventions...
     // Crocoddyl: T running models + 1 terminal model
@@ -103,7 +106,7 @@ void FeasibilityDrivenDDPSolver::AllocateData()
     fTVxx_p_ = Eigen::VectorXd::Zero(NDX_);
 }
 
-void FeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
+void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 {
     if (!prob_) ThrowNamed("Solver has not been initialized!");
     Timer planning_timer, backward_pass_timer, line_search_timer;
@@ -117,7 +120,7 @@ void FeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     control_limits_ = dynamics_solver_->get_control_limits();
 
     AllocateData();
-    auto X_warm = prob_->get_X();
+    Eigen::MatrixXd X_warm = prob_->get_X();
     X_warm.col(0) = prob_->ApplyStartState();  // Apply start state
     auto U_warm = prob_->get_U();
     for (int t = 0; t < T_ - 1; ++t)
@@ -144,8 +147,8 @@ void FeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     cost_ += prob_->GetStateCost(T_ - 1);
     prob_->SetCostEvolution(0, cost_);
 
-    xreg_ = std::max(regmin_, parameters_.RegularizationRate);
-    ureg_ = std::max(regmin_, parameters_.RegularizationRate);
+    xreg_ = std::max(regmin_, initial_regularization_rate_);
+    ureg_ = std::max(regmin_, initial_regularization_rate_);
     was_feasible_ = false;
 
     bool diverged = false;
@@ -164,29 +167,21 @@ void FeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         backward_pass_timer.Reset();
-        while (true)
+        while (!ComputeDirection(recalcDiff))
         {
-            try
+            // HIGHLIGHT("Increase regularization in ComputeDirection and try again.")
+            recalcDiff = false;
+            IncreaseRegularization();
+            if (xreg_ == regmax_)
             {
-                ComputeDirection(recalcDiff);
+                WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "State regularization exceeds maximum regularization: " << xreg_ << " > " << regmax_)
+                diverged = true;
+                break;
             }
-            catch (std::exception& e)
+            else
             {
-                // HIGHLIGHT("Increase regularization in ComputeDirection and try again." << e.what())
-                recalcDiff = false;
-                IncreaseRegularization();
-                if (xreg_ == regmax_)
-                {
-                    WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "State regularization exceeds maximum regularization: " << xreg_ << " > " << regmax_)
-                    diverged = true;
-                    break;
-                }
-                else
-                {
-                    continue;
-                }
+                continue;
             }
-            break;
         }
         time_taken_backward_pass_ = backward_pass_timer.GetDuration();
 
@@ -204,16 +199,8 @@ void FeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
         for (int ai = 0; ai < alpha_space_.size(); ++ai)
         {
             steplength_ = alpha_space_(ai);
+            dV_ = TryStep(steplength_);
 
-            try
-            {
-                dV_ = TryStep(steplength_);
-            }
-            catch (std::exception& e)
-            {
-                // HIGHLIGHT("Error in TryStep: " << e.what())
-                continue;
-            }
             ExpectedImprovement();
             dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
@@ -313,7 +300,7 @@ void FeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     planning_time_ = planning_timer.GetDuration();
 }
 
-void FeasibilityDrivenDDPSolver::IncreaseRegularization()
+void AbstractFeasibilityDrivenDDPSolver::IncreaseRegularization()
 {
     xreg_ *= regfactor_;
     if (xreg_ > regmax_)
@@ -323,7 +310,7 @@ void FeasibilityDrivenDDPSolver::IncreaseRegularization()
     ureg_ = xreg_;
 }
 
-void FeasibilityDrivenDDPSolver::DecreaseRegularization()
+void AbstractFeasibilityDrivenDDPSolver::DecreaseRegularization()
 {
     xreg_ /= regfactor_;
     if (xreg_ < regmin_)
@@ -333,7 +320,7 @@ void FeasibilityDrivenDDPSolver::DecreaseRegularization()
     ureg_ = xreg_;
 }
 
-double FeasibilityDrivenDDPSolver::CheckStoppingCriteria()
+double AbstractFeasibilityDrivenDDPSolver::CheckStoppingCriteria()
 {
     stop_ = 0.;
     for (int t = 0; t < T_ - 1; ++t)
@@ -343,7 +330,7 @@ double FeasibilityDrivenDDPSolver::CheckStoppingCriteria()
     return stop_;
 }
 
-const Eigen::Vector2d& FeasibilityDrivenDDPSolver::ExpectedImprovement()
+const Eigen::Vector2d& AbstractFeasibilityDrivenDDPSolver::ExpectedImprovement()
 {
     dv_ = 0;
     if (!is_feasible_)
@@ -360,7 +347,7 @@ const Eigen::Vector2d& FeasibilityDrivenDDPSolver::ExpectedImprovement()
     return d_;
 }
 
-void FeasibilityDrivenDDPSolver::UpdateExpectedImprovement()
+void AbstractFeasibilityDrivenDDPSolver::UpdateExpectedImprovement()
 {
     dg_ = 0;
     dq_ = 0;
@@ -383,7 +370,7 @@ void FeasibilityDrivenDDPSolver::UpdateExpectedImprovement()
     }
 }
 
-void FeasibilityDrivenDDPSolver::SetCandidate(const std::vector<Eigen::VectorXd>& xs_in, const std::vector<Eigen::VectorXd>& us_in, const bool is_feasible)
+void AbstractFeasibilityDrivenDDPSolver::SetCandidate(const std::vector<Eigen::VectorXd>& xs_in, const std::vector<Eigen::VectorXd>& us_in, const bool is_feasible)
 {
     const std::size_t T = static_cast<std::size_t>(prob_->get_T());
 
@@ -421,13 +408,13 @@ void FeasibilityDrivenDDPSolver::SetCandidate(const std::vector<Eigen::VectorXd>
     is_feasible_ = is_feasible;
 }
 
-double FeasibilityDrivenDDPSolver::TryStep(const double steplength)
+double AbstractFeasibilityDrivenDDPSolver::TryStep(const double steplength)
 {
     ForwardPass(steplength);
     return cost_ - cost_try_;
 }
 
-void FeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
+void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
 {
     if (steplength > 1. || steplength < 0.)
     {
@@ -450,7 +437,7 @@ void FeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
         dx_[t] = prob_->GetScene()->GetDynamicsSolver()->StateDelta(xs_try_[t], xs_[t]);  // NB: StateDelta in Exotica is the other way round than in Pinocchio
         us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];              // This is weird. It works better WITHOUT the feedback ?!
 
-        if (base_parameters_.ClampControlsInForwardPass)
+        if (clamp_to_control_limits_in_forward_pass_)
         {
             us_try_[t] = us_try_[t].cwiseMax(control_limits_.col(0)).cwiseMin(control_limits_.col(1));
         }
@@ -461,11 +448,13 @@ void FeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
 
         if (IsNaN(cost_try_))
         {
-            throw std::runtime_error("forward_error - NaN in cost_try_ at t=" + std::to_string(t));
+            WARNING_NAMED("NaN in ForwardPass", "forward_error - NaN in cost_try_ at t=" << t);
+            return;
         }
         if (IsNaN(xnext_.lpNorm<Eigen::Infinity>()))
         {
-            throw std::runtime_error("forward_error - xnext_ isn't finite at t=" + std::to_string(t));
+            WARNING_NAMED("NaN in ForwardPass", "forward_error - xnext_ isn't finite at t=" << t);
+            return;
         }
     }
 
@@ -483,20 +472,21 @@ void FeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
 
     if (IsNaN(cost_try_))
     {
-        throw std::runtime_error("forward_error - cost NaN");
+        WARNING_NAMED("NaN in ForwardPass", "forward_error - cost NaN");
+        return;
     }
 }
 
-void FeasibilityDrivenDDPSolver::ComputeDirection(const bool recalcDiff)
+bool AbstractFeasibilityDrivenDDPSolver::ComputeDirection(const bool recalcDiff)
 {
     if (recalcDiff)
     {
         CalcDiff();
     }
-    BackwardPass();
+    return BackwardPassFDDP();
 }
 
-double FeasibilityDrivenDDPSolver::CalcDiff()
+double AbstractFeasibilityDrivenDDPSolver::CalcDiff()
 {
     cost_ = 0;
     // Running cost
@@ -525,7 +515,7 @@ double FeasibilityDrivenDDPSolver::CalcDiff()
     return cost_;
 }
 
-void FeasibilityDrivenDDPSolver::BackwardPass()
+bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
 {
     Vxx_.back() = prob_->GetStateCostHessian(T_ - 1);
     Vx_.back() = prob_->GetStateCostJacobian(T_ - 1);
@@ -597,16 +587,17 @@ void FeasibilityDrivenDDPSolver::BackwardPass()
 
         if (IsNaN(Vx_[t].lpNorm<Eigen::Infinity>()))
         {
-            ThrowPretty("backward_error (Vx) at t=" << t);
+            return false;
         }
         if (IsNaN(Vxx_[t].lpNorm<Eigen::Infinity>()))
         {
-            ThrowPretty("backward_error (Vxx) at t=" << t);
+            return false;
         }
     }
+    return true;
 }
 
-void FeasibilityDrivenDDPSolver::ComputeGains(const int t)
+void AbstractFeasibilityDrivenDDPSolver::ComputeGains(const int t)
 {
     Quu_llt_[t].compute(Quu_[t]);
     const Eigen::ComputationInfo& info = Quu_llt_[t].info();

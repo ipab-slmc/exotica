@@ -68,6 +68,10 @@ public:
 private:
     pinocchio::Model model_;
     std::unique_ptr<pinocchio::Data> pinocchio_data_;
+
+    Eigen::MatrixXd fx_analytic_;
+    Eigen::MatrixXd fu_analytic_;
+    Eigen::VectorXd xdot_analytic_;
 };
 }  // namespace exotica
 

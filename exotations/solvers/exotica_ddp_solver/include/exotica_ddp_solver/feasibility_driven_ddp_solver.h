@@ -38,10 +38,9 @@ namespace exotica
 // Feasibility-driven DDP solver
 // Based on the implementation in Crocoddyl: https://github.com/loco-3d/crocoddyl.git
 // Cf. https://arxiv.org/abs/1909.04947
-class FeasibilityDrivenDDPSolver : public AbstractDDPSolver, public Instantiable<FeasibilityDrivenDDPSolverInitializer>
+class AbstractFeasibilityDrivenDDPSolver : public AbstractDDPSolver
 {
 public:
-    void Instantiate(const FeasibilityDrivenDDPSolverInitializer& init) override;
     void Solve(Eigen::MatrixXd& solution) override;
 
     const std::vector<Eigen::VectorXd>& get_fs() const { return fs_; };
@@ -69,15 +68,18 @@ protected:
     double CheckStoppingCriteria();
 
     double CalcDiff();
-    void ComputeDirection(const bool recalcDiff);
-    void BackwardPass() override;
-    void ComputeGains(const int t);
+    bool ComputeDirection(const bool recalcDiff);
+    bool BackwardPassFDDP();
+    void BackwardPass() override { return (void)BackwardPassFDDP(); }
+    virtual void ComputeGains(const int t);
     void ForwardPass(const double steplength);
     double TryStep(const double steplength);
 
-    void AllocateData();
+    virtual void AllocateData();
 
     Eigen::MatrixXd control_limits_;
+    double initial_regularization_rate_ = 1e-9;             // Set from parameters on Instantiate
+    bool clamp_to_control_limits_in_forward_pass_ = false;  // Set from parameters on Instantiate
 
     double steplength_;           //!< Current applied step-length
     Eigen::Vector2d d_;           //!< LQ approximation of the expected improvement
@@ -128,6 +130,13 @@ protected:
     double th_stepinc_ = 0.01;   //!< Step-length threshold used to increase regularization
     bool was_feasible_ = false;  //!< Label that indicates in the previous iterate was feasible
 };
+
+class FeasibilityDrivenDDPSolver : public AbstractFeasibilityDrivenDDPSolver, public Instantiable<FeasibilityDrivenDDPSolverInitializer>
+{
+public:
+    void Instantiate(const FeasibilityDrivenDDPSolverInitializer& init) override;
+};
+
 }  // namespace exotica
 
 #endif  // EXOTICA_DDP_SOLVER_FEASIBILITY_DRIVEN_DDP_SOLVER_H_

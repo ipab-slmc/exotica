@@ -119,6 +119,12 @@ public:
     /// \brief Returns number of velocities
     int get_num_velocities() const;
 
+    /// \brief Returns size of state space (nx)
+    int get_num_state() const;
+
+    /// \brief Returns size of derivative vector of state space (ndx)
+    int get_num_state_derivative() const;
+
     /// \brief Returns integration timestep dt
     T get_dt() const;
 
@@ -135,7 +141,7 @@ public:
     //  returns: Two-column matrix, first column contains low control limits,
     //      second - the high control limits
     const Eigen::MatrixXd& get_control_limits();
-    void set_control_limits(Eigen::VectorXd control_limits_low, Eigen::VectorXd control_limits_high);
+    void set_control_limits(Eigen::VectorXdRefConst control_limits_low, Eigen::VectorXdRefConst control_limits_high);
 
     virtual ControlVector InverseDynamics(const StateVector& state);
 
@@ -147,9 +153,11 @@ private:
     Eigen::VectorXd raw_control_limits_low_, raw_control_limits_high_;
 
 protected:
-    int num_controls_ = -1;    ///< Number of controls in the dynamic system.
-    int num_positions_ = -1;   ///< Number of positions in the dynamic system.
-    int num_velocities_ = -1;  ///< Number of velocities in the dynamic system.
+    int num_controls_ = -1;          ///< Number of controls in the dynamic system.
+    int num_positions_ = -1;         ///< Number of positions in the dynamic system.
+    int num_velocities_ = -1;        ///< Number of velocities in the dynamic system.
+    int num_state_ = -1;             ///< Size of state space (num_positions + num_velocities)
+    int num_state_derivative_ = -1;  ///< Size of the tangent vector to the state space (2 * num_velocities)
 
     bool second_order_derivatives_initialized_ = false;  ///< Whether fxx, fxu and fuu have been initialized to 0.
 
@@ -160,7 +168,7 @@ protected:
     Eigen::MatrixXd control_limits_;  ///< ControlLimits. Default is empty vector.
 
     /// \brief Integrates the dynamic system from state x with controls u applied for one timestep dt using the selected integrator.
-    inline StateVector SimulateOneStep(const StateVector& x, const ControlVector& u);
+    virtual StateVector SimulateOneStep(const StateVector& x, const ControlVector& u);
 
     void InitializeSecondOrderDerivatives();
     Eigen::Tensor<T, 3> fxx_default_, fuu_default_, fxu_default_;

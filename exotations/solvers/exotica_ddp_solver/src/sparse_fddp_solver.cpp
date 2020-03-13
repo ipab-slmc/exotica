@@ -143,40 +143,31 @@ bool SparseFDDPSolver::BackwardPassFDDP()
         {
             Quu_[t].diagonal().array() += ureg_;
         }
-        
-        for (int iu = 0; iu < NU_; ++ iu)
-        {
 
-            if (parameters_.LossType == "L1") {
-            // Sparsity (L1) cost
-                Qu_[t](iu) += dt_ * (1.0/(1 + std::exp(-l1_rate_(iu) * us_[t](iu)))
-                    - 1.0/(1 + std::exp(l1_rate_(iu) * us_[t](iu))));
+        for (int iu = 0; iu < NU_; ++iu)
+        {
+            if (parameters_.LossType == "L1")
+            {
+                // Sparsity (L1) cost
+                Qu_[t](iu) += dt_ * (1.0 / (1 + std::exp(-l1_rate_(iu) * us_[t](iu))) - 1.0 / (1 + std::exp(l1_rate_(iu) * us_[t](iu))));
 
                 Quu_[t](iu, iu) += dt_ * (2 * l1_rate_(iu) * std::exp(l1_rate_(iu) * us_[t](iu)) /
-                    std::pow(1 + std::exp(l1_rate_(iu) * us_[t](iu)), 2));
-            } else if (parameters_.LossType == "Huber") {
-                Qu_[t](iu) += dt_ * (
-                    us_[t](iu) / (
-                        std::sqrt(
-                            1.0 + us_[t](iu) * us_[t](iu) / (huber_rate_(iu) * huber_rate_(iu))
-                        )
-                    )
-                );
-
-                Quu_[t](iu, iu) += dt_ * (
-                    std::pow(huber_rate_(iu), 4) * std::sqrt(
-                        1.0 + us_[t](iu) * us_[t](iu) / (huber_rate_(iu) * huber_rate_(iu))
-                    ) / (
-                        std::pow(huber_rate_(iu) * huber_rate_(iu) + us_[t](iu) * us_[t](iu), 2)
-                    )
-                );
+                                          std::pow(1 + std::exp(l1_rate_(iu) * us_[t](iu)), 2));
             }
-    
-        // (L2) cost
+            else if (parameters_.LossType == "Huber")
+            {
+                Qu_[t](iu) += dt_ * (us_[t](iu) / (std::sqrt(
+                                                      1.0 + us_[t](iu) * us_[t](iu) / (huber_rate_(iu) * huber_rate_(iu)))));
+
+                Quu_[t](iu, iu) += dt_ * (std::pow(huber_rate_(iu), 4) * std::sqrt(
+                                                                             1.0 + us_[t](iu) * us_[t](iu) / (huber_rate_(iu) * huber_rate_(iu))) /
+                                          (std::pow(huber_rate_(iu) * huber_rate_(iu) + us_[t](iu) * us_[t](iu), 2)));
+            }
+
+            // (L2) cost
             Qu_[t](iu) += dt_ * 2 * l2_rate_(iu) * us_[t](iu);
 
             Quu_[t](iu, iu) += dt_ * 2 * l2_rate_(iu);
-
         }
 
         ComputeGains(t);
@@ -217,7 +208,7 @@ bool SparseFDDPSolver::BackwardPassFDDP()
         }
     }
 
-    l1_rate_  = (l1_rate_ * parameters_.L1IncreaseRate).cwiseMin(parameters_.MaxL1Rate);
+    l1_rate_ = (l1_rate_ * parameters_.L1IncreaseRate).cwiseMin(parameters_.MaxL1Rate);
     return true;
 }
 

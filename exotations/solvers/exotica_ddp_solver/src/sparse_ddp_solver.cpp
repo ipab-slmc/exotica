@@ -70,7 +70,6 @@ void SparseDDPSolver::BackwardPass()
         Qx_ = dt_ * prob_->GetStateCostJacobian(t) + fx_.transpose() * Vx_;  // lx + fx_ @ Vx_
         Qu_ = dt_ * prob_->GetControlCostJacobian(t) + fu_.transpose() * Vx_;
 
-
         // State regularization
         Vxx_.diagonal().array() += lambda_;
 
@@ -103,22 +102,20 @@ void SparseDDPSolver::BackwardPass()
         // Control regularization for numerical stability
         Quu_.diagonal().array() += lambda_;
 
-        for (int iu = 0; iu < NU_; ++ iu)
+        for (int iu = 0; iu < NU_; ++iu)
         {
-        // Sparsity (L1) cost
-            Qu_(iu) += dt_ * (1.0/(1 + std::exp(-l1_rate_(iu) * u(iu)))
-                - 1.0/(1 + std::exp(l1_rate_(iu) * u(iu))));
+            // Sparsity (L1) cost
+            Qu_(iu) += dt_ * (1.0 / (1 + std::exp(-l1_rate_(iu) * u(iu))) - 1.0 / (1 + std::exp(l1_rate_(iu) * u(iu))));
 
             Quu_(iu, iu) += dt_ * (2 * l1_rate_(iu) * std::exp(l1_rate_(iu) * u(iu)) /
-                std::pow(1 + std::exp(l1_rate_(iu) * u(iu)), 2));
+                                   std::pow(1 + std::exp(l1_rate_(iu) * u(iu)), 2));
 
-        // (L2) cost
+            // (L2) cost
             Qu_(iu) += dt_ * 2 * l2_rate_(iu) * u(iu);
 
             Quu_(iu, iu) += dt_ * 2 * l2_rate_(iu);
-
         }
-        
+
         // Compute gains
         // Quu_inv_ = Quu_.inverse();
         Quu_inv_ = Quu_.llt().solve(Eigen::MatrixXd::Identity(Quu_.rows(), Quu_.cols()));
@@ -142,7 +139,7 @@ void SparseDDPSolver::BackwardPass()
         Vxx_ = 0.5 * (Vxx_ + Vxx_.transpose()).eval();
     }
 
-    l1_rate_  = (l1_rate_ * parameters_.L1IncreaseRate).cwiseMin(parameters_.MaxL1Rate);
+    l1_rate_ = (l1_rate_ * parameters_.L1IncreaseRate).cwiseMin(parameters_.MaxL1Rate);
     HIGHLIGHT_NAMED("l1_rate_:", l1_rate_.transpose());
 }
 

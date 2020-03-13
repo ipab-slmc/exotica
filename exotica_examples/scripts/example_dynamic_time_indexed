@@ -34,7 +34,6 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/16_kpiece_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/17_quadrotor_collision_avoidance.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/18_ilqr_pendulum.xml',
-    '{exotica_examples}/resources/configs/dynamic_time_indexed/18_ilqr_pendulum.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/19_ddp_quadrotor_sphere.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/20_sparse_fddp_pendulum.xml',
 ]

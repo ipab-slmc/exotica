@@ -7,7 +7,7 @@
         <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
         <RegularizationRate>1e-3</RegularizationRate>
 
-        <L1Rate>0.0001</L1Rate>
+        <L1Rate>0.001</L1Rate>
         <HuberRate>1</HuberRate>
         <L2Rate>0</L2Rate>
         <L1IncreaseRate>1.5</L1IncreaseRate>
@@ -26,7 +26,7 @@
                         <ControlLimitsLow>-10.0</ControlLimitsLow>
                         <ControlLimitsHigh>10.0</ControlLimitsHigh>
                         <dt>0.01</dt>
-                        <FrictionCoefficient>0.0</FrictionCoefficient>
+                        <FrictionCoefficient>0.3</FrictionCoefficient>
                     </PendulumDynamicsSolver>
                 </DynamicsSolver>
             </Scene>

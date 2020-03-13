@@ -36,6 +36,7 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/18_ilqr_pendulum.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/19_ddp_quadrotor_sphere.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/20_sparse_fddp_pendulum.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/21_sparse_fddp_cartpole.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1
@@ -57,6 +58,7 @@ if solution.shape[0] == 0:
 costs = problem.get_cost_evolution()
 import matplotlib.pyplot as plt
 
+# print(['{0:.3f}'.format(x[0]) for x in solution])
 
 plt.figure(figsize=(7, 7))
 plt.plot(solution)
@@ -88,8 +90,10 @@ while True:
         for t in range(problem.T - 1):
             update_start = time()
             u = solution[t,:]
-            # u = problem.U[:,t]
-            # print(u)
+            
+            # if np.abs(u) < 1:
+                # u = [0]
+            print(u)
 
             # u = solver.get_feedback_control(
             #     problem.X[:,t], t

@@ -14,20 +14,19 @@
         <LossType>SmoothL1</LossType>
     </SparseFDDPSolver>
     
-    <DynamicTimeIndexedShootingProblem Name="pendulum">
+    <DynamicTimeIndexedShootingProblem Name="cartpole">
         <PlanningScene>
             <Scene>
                 <JointGroup>actuated_joints</JointGroup>
-                <URDF>{exotica_examples}/resources/robots/pendulum.urdf</URDF>
-                <SRDF>{exotica_examples}/resources/robots/pendulum.srdf</SRDF>
+                <URDF>{exotica_examples}/resources/robots/cartpole.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/cartpole.srdf</SRDF>
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
-                    <PendulumDynamicsSolver Name="solver" Integrator="RK1">
-                        <ControlLimitsLow>-10.0</ControlLimitsLow>
-                        <ControlLimitsHigh>10.0</ControlLimitsHigh>
+                    <CartpoleDynamicsSolver Name="solver" Integrator="RK1">
+                        <ControlLimitsLow>-15.0</ControlLimitsLow>
+                        <ControlLimitsHigh>15.0</ControlLimitsHigh>
                         <dt>0.01</dt>
-                        <FrictionCoefficient>0.3</FrictionCoefficient>
-                    </PendulumDynamicsSolver>
+                    </CartpoleDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
         </PlanningScene>
@@ -35,10 +34,9 @@
         <T>300</T>
         <tau>0.01</tau>
         <Q_rate>0</Q_rate>
-
-        <Qf_rate>100</Qf_rate>
+        <Qf_rate>10</Qf_rate>
         <R_rate>0</R_rate>
-        <StartState>0 0</StartState>
-        <GoalState>3.14 0</GoalState>
+        <StartState>0 0 0 0 </StartState>
+        <GoalState>0 3.14 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </DynamicTimeIndexedProblemConfig>

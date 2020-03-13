@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+import math
+from time import time, sleep
+
+import rospy
+from visualization_msgs.msg import Marker, MarkerArray
+
+import numpy as np
+import pyexotica as exo
+from pyexotica.publish_trajectory import *
+
+
+from collections import OrderedDict
+import matplotlib.pyplot as plt
+
+def task_cost_over_time(problem):
+    costs = OrderedDict()
+    for task_name in problem.cost.task_maps:
+        costs[task_name] = np.zeros((problem.T,))
+        for t in range(problem.T):
+            ydiff = problem.cost.get_task_error(task_name, t)
+            S = problem.cost.get_S(task_name, t)
+            cost = np.dot(np.dot(ydiff, S), ydiff.T)
+            #print(task_name, cost)
+            #print(task_name, "ydiff\n", ydiff, "\n")
+            #print(task_name, "S\n", S, "\n")
+            costs[task_name][t] = cost
+    fig = plt.figure()
+    for task_name in costs:
+        plt.plot(costs[task_name], label=task_name)
+    plt.title('Task cost over time')
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == "__main__":
+    exo.Setup.init_ros()
+    solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie.xml')
+    problem = solver.get_problem()
+    scene = problem.get_scene()
+
+    palm_target = np.array([0.3, -0.3, 1.0])
+
+    rospy.init_node('my_vis')
+    sleep(0.5)
+    pub = rospy.Publisher('/exotica/CollisionShapes', MarkerArray, queue_size=1)
+    sleep(0.5)
+    m = Marker()
+    m.header.frame_id = 'exotica/world_frame'
+    m.action = Marker.ADD
+    m.type = Marker.SPHERE
+    m.scale.x = m.scale.y = m.scale.z = 0.05
+    m.pose.position.x = palm_target[0]
+    m.pose.position.y = palm_target[1]
+    m.pose.position.z = palm_target[2]
+    m.pose.orientation.w = 1.0
+    m.color.a = 1.0
+    m.color.r = 1.0
+    m.id = 1
+    ma = MarkerArray()
+    ma.markers = [m]
+    pub.publish(ma)
+
+    for t in range(problem.T):
+        problem.cost.set_rho('PalmPosition', 0, t)
+    problem.cost.set_goal('PalmPosition', palm_target, -1)
+    problem.cost.set_rho('PalmPosition', 1e3, -1)
+
+    for t in range(problem.T - 1):
+        problem.update(problem.U[:,t], t)
+
+    solver.max_iterations = 2500
+    solution = solver.solve()
+    print("Solved in", solver.get_planning_time())
+    task_cost_over_time(problem)
+    plot(problem.get_cost_evolution()[1])
+    plot(solution)
+
+    publish_trajectory(problem.X[:problem.N,:].T, problem.T*problem.tau, problem)

@@ -234,8 +234,12 @@ bool SparseFDDPSolver::BackwardPassFDDP()
         }
     }
 
-    l1_rate_ = (l1_rate_ * parameters_.L1IncreaseRate).cwiseMin(parameters_.MaxL1Rate);
     return true;
 }
+
+void SparseFDDPSolver::OnIterationEnd()
+{
+    l1_rate_ = (l1_rate_ * parameters_.L1IncreaseRate).cwiseMin(parameters_.MaxL1Rate);
+};
 
 }  // namespace exotica

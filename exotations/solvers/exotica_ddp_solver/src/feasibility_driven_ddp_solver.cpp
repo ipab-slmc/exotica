@@ -284,6 +284,8 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "Terminating: Divergence in ForwardPass.");
             break;
         }
+
+        OnIterationEnd();
     }
 
     if (diverged) prob_->termination_criterion = TerminationCriterion::Divergence;

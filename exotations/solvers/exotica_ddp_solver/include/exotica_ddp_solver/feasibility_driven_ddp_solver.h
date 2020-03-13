@@ -49,6 +49,8 @@ public:
 protected:
     int NDX_;
 
+    virtual void OnIterationEnd() {}
+
     void IncreaseRegularization();
     void DecreaseRegularization();
     const Eigen::Vector2d& ExpectedImprovement();

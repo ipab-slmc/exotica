@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>
+    <SparseFDDPSolver Name="SparseFDDP">
+        <Debug>1</Debug>
+        <MaxIterations>2500</MaxIterations>
+        <FunctionTolerance>1e-5</FunctionTolerance>
+        <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
+        <RegularizationRate>1e-3</RegularizationRate>
+
+        <L1Rate>0.0001</L1Rate>
+        <HuberRate>1</HuberRate>
+        <L2Rate>0</L2Rate>
+        <L1IncreaseRate>1.5</L1IncreaseRate>
+        <LossType>SmoothL1</LossType>
+    </SparseFDDPSolver>
+    
+    <DynamicTimeIndexedShootingProblem Name="pendulum">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>actuated_joints</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/pendulum.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/pendulum.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <DynamicsSolver>
+                    <PendulumDynamicsSolver Name="solver" Integrator="RK1">
+                        <ControlLimitsLow>-10.0</ControlLimitsLow>
+                        <ControlLimitsHigh>10.0</ControlLimitsHigh>
+                        <dt>0.01</dt>
+                        <FrictionCoefficient>0.0</FrictionCoefficient>
+                    </PendulumDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <T>300</T>
+        <tau>0.01</tau>
+        <Q_rate>0</Q_rate>
+
+        <Qf_rate>100</Qf_rate>
+        <R_rate>0</R_rate>
+        <StartState>0 0</StartState>
+        <GoalState>3.14 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

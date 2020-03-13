@@ -34,6 +34,9 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/16_kpiece_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/17_quadrotor_collision_avoidance.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/18_ilqr_pendulum.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/18_ilqr_pendulum.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/19_ddp_quadrotor_sphere.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/20_sparse_fddp_pendulum.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1
@@ -46,7 +49,7 @@ solution = solver.solve()
 print('Solver terminated with: ', problem.termination_criterion)
 if problem.termination_criterion == exo.TerminationCriterion.Divergence:
     print('Solver Diverged!')
-    exit(0)
+    # exit(0)
 
 if solution.shape[0] == 0:
     print('No solution found!')
@@ -54,14 +57,21 @@ if solution.shape[0] == 0:
 
 costs = problem.get_cost_evolution()
 import matplotlib.pyplot as plt
-plt.figure()
-plt.plot(range(len(costs[1])), costs[1])
-plt.xlabel('Iteration')
-plt.ylabel('Cost')
-plt.yscale('log')
-plt.xlim(0, len(costs[1])-1)
-plt.grid()
+
+
+plt.figure(figsize=(7, 7))
+plt.plot(solution)
 plt.show()
+
+
+# plt.figure()
+# plt.plot(range(len(costs[1])), costs[1])
+# plt.xlabel('Iteration')
+# plt.ylabel('Cost')
+# plt.yscale('log')
+# plt.xlim(0, len(costs[1])-1)
+# plt.grid()
+# plt.show()
 
 
 visualization = exo.Visualization(problem.get_scene())

@@ -51,6 +51,8 @@ private:
     Eigen::LLT<Eigen::MatrixXd> Quu_llt_;
     Eigen::VectorXd l1_rate_;
     Eigen::VectorXd huber_rate_;
+
+    void OnIterationEnd() override;
 };
 }  // namespace exotica
 

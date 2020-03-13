@@ -672,7 +672,9 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("set_goal", &TimeIndexedTask::SetGoal)
         .def("get_goal", &TimeIndexedTask::GetGoal)
         .def("set_rho", &TimeIndexedTask::SetRho)
-        .def("get_rho", &TimeIndexedTask::GetRho);
+        .def("get_rho", &TimeIndexedTask::GetRho)
+        .def("get_task_error", &TimeIndexedTask::GetTaskError)
+        .def("get_S", &TimeIndexedTask::GetS);
 
     py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>>(module, "EndPoseTask")
         .def_readonly("length_Phi", &EndPoseTask::length_Phi)

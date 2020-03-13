@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -326,6 +326,33 @@ double TimeIndexedTask::GetRho(const std::string& task_name, int t) const
         if (tasks[i]->GetObjectName() == task_name)
         {
             return rho[t](indexing[i].id);
+        }
+    }
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
+}
+
+Eigen::VectorXd TimeIndexedTask::GetTaskError(const std::string& task_name, int t) const
+{
+    ValidateTimeIndex(t);
+    for (size_t i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            return ydiff[t].segment(indexing[i].start_jacobian, indexing[i].length_jacobian);
+        }
+    }
+    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
+}
+
+Eigen::MatrixXd TimeIndexedTask::GetS(const std::string& task_name, int t) const
+{
+    ValidateTimeIndex(t);
+    for (size_t i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            // We are interested in the square matrix of dimension length_jacobian
+            return S[t].block(indexing[i].start_jacobian, indexing[i].start_jacobian, indexing[i].length_jacobian, indexing[i].length_jacobian);
         }
     }
     ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");

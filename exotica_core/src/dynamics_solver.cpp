@@ -321,10 +321,11 @@ Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector
     // Finite differences
     constexpr double eps = 1e-6;
     Eigen::MatrixXd fu_fd(ndx, num_controls_);
+    Eigen::VectorXd u_low(num_controls_), u_high(num_controls_);
     for (int i = 0; i < num_controls_; ++i)
     {
-        Eigen::VectorXd u_low = u;
-        Eigen::VectorXd u_high = u;
+        u_low = u;
+        u_high = u;
         u_low(i) -= eps / 2.0;
         u_high(i) += eps / 2.0;
 

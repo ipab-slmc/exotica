@@ -206,7 +206,7 @@ Eigen::VectorXd EndPoseTask::GetTaskError(const std::string& task_name) const
     {
         if (tasks[i]->GetObjectName() == task_name)
         {
-            return ydiff.segment(indexing[i].start, indexing[i].length);
+            return ydiff.segment(indexing[i].start_jacobian, indexing[i].length_jacobian);
         }
     }
     ThrowPretty("Cannot get task error. Task map '" << task_name << "' does not exist.");

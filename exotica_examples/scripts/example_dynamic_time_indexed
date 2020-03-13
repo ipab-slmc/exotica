@@ -88,9 +88,9 @@ while True:
             problem.update(u, t)
             problem.get_scene().get_kinematic_tree().publish_frames()
             update_end = time()
-            if problem.tau > update_end - update_start:
-                sleep(problem.tau - (update_end - update_start))
-                # sleep(0.1)
+            time_taken = update_end - update_start
+            if problem.tau > time_taken:
+                sleep(problem.tau - time_taken)
         e = time()
         sleep(1)
         print("Time taken to roll-out:", e-s)

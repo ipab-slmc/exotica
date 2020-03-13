@@ -35,12 +35,11 @@
 
 namespace exotica
 {
-
 class SparseFDDPSolver : public AbstractFeasibilityDrivenDDPSolver, public Instantiable<SparseFDDPSolverInitializer>
 {
 public:
     void Instantiate(const SparseFDDPSolverInitializer& init) override;
-
+    void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 private:
     ///\brief Computes the control gains for a the trajectory in the associated

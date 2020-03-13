@@ -1,6 +1,6 @@
 
 //
-// Copyright (c) 2019, University of Edinburgh
+// Copyright (c) 2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,66 @@ void SparseFDDPSolver::Instantiate(const SparseFDDPSolverInitializer& init)
 
     clamp_to_control_limits_in_forward_pass_ = base_parameters_.ClampControlsInForwardPass;
     initial_regularization_rate_ = parameters_.RegularizationRate;
-
-    l1_rate_ = parameters_.L1Rate;
-    l2_rate_ = parameters_.L2Rate;
-    huber_rate_ = parameters_.HuberRate;
 }
 
+void SparseFDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
+{
+    AbstractDDPSolver::SpecifyProblem(pointer);
+
+    // L1 Rate
+    if (parameters_.L1Rate.size() == 0)
+    {
+        ThrowPretty("L1Rate not set.");  // TODO: set default...
+    }
+    else if (parameters_.L1Rate.size() == 1)
+    {
+        l1_rate_.setConstant(prob_->get_num_controls(), parameters_.L1Rate(0));
+    }
+    else if (parameters_.L1Rate.size() == prob_->get_num_controls())
+    {
+        l1_rate_ = parameters_.L1Rate;
+    }
+    else
+    {
+        ThrowPretty("L1Rate has wrong size: expected " << prob_->get_num_controls() << ", got " << parameters_.L1Rate.size());
+    }
+
+    // L2 Rate
+    if (parameters_.L2Rate.size() == 0)
+    {
+        ThrowPretty("L2Rate not set.");  // TODO: set default...
+    }
+    else if (parameters_.L2Rate.size() == 1)
+    {
+        l2_rate_.setConstant(prob_->get_num_controls(), parameters_.L2Rate(0));
+    }
+    else if (parameters_.L2Rate.size() == prob_->get_num_controls())
+    {
+        l2_rate_ = parameters_.L2Rate;
+    }
+    else
+    {
+        ThrowPretty("L2Rate has wrong size: expected " << prob_->get_num_controls() << ", got " << parameters_.L2Rate.size());
+    }
+
+    // Huber Rate
+    if (parameters_.HuberRate.size() == 0)
+    {
+        ThrowPretty("HuberRate not set.");  // TODO: set default...
+    }
+    else if (parameters_.HuberRate.size() == 1)
+    {
+        huber_rate_.setConstant(prob_->get_num_controls(), parameters_.HuberRate(0));
+    }
+    else if (parameters_.HuberRate.size() == prob_->get_num_controls())
+    {
+        huber_rate_ = parameters_.HuberRate;
+    }
+    else
+    {
+        ThrowPretty("HuberRate has wrong size: expected " << prob_->get_num_controls() << ", got " << parameters_.HuberRate.size());
+    }
+}
 
 bool SparseFDDPSolver::BackwardPassFDDP()
 {

@@ -6,4 +6,5 @@ Optional double FunctionTolerance = 1e-3;
 Optional bool UseSecondOrderDynamics = false;
 Optional double RegularizationRate = 1e-5;
 Optional double MinimumRegularization = 1e-12;  // Minimum regularisation below which it won't be decreased.
+Optional double MaximumRegularization = 1e3;  // Maximum regularisation above which it won't be decreased.
 Optional bool ClampControlsInForwardPass = false;

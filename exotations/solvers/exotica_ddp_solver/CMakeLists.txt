@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
 AddInitializer(
   abstract_ddp_solver
   analytic_ddp_solver
+  sparse_ddp_solver
+  sparse_fddp_solver
   control_limited_ddp_solver
   feasibility_driven_ddp_solver
 )
@@ -31,6 +33,8 @@ add_compile_options(-Wno-ignored-attributes)
 set(SOURCES
   src/abstract_ddp_solver.cpp
   src/analytic_ddp_solver.cpp
+  src/sparse_ddp_solver.cpp
+  src/sparse_fddp_solver.cpp
   src/control_limited_ddp_solver.cpp
   src/feasibility_driven_ddp_solver.cpp
 )

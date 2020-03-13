@@ -1,0 +1,7 @@
+class SparseDDPSolver
+
+extend <exotica_ddp_solver/abstract_ddp_solver>
+Optional Eigen::VectorXd L1Rate = Eigen::VectorXd();
+Optional Eigen::VectorXd L2Rate = Eigen::VectorXd();
+Optional double L1IncreaseRate = 1.5;
+Optional double MaxL1Rate = 1e5;

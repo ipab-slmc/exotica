@@ -69,7 +69,7 @@ protected:
 
     double CalcDiff();
     bool ComputeDirection(const bool recalcDiff);
-    bool BackwardPassFDDP();
+    virtual bool BackwardPassFDDP();
     void BackwardPass() override { return (void)BackwardPassFDDP(); }
     virtual void ComputeGains(const int t);
     void ForwardPass(const double steplength);

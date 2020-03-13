@@ -65,23 +65,23 @@ void SparseFDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
         ThrowPretty("L1Rate has wrong size: expected " << prob_->get_num_controls() << ", got " << parameters_.L1Rate.size());
     }
 
-    // L2 Rate
-    if (parameters_.L2Rate.size() == 0)
-    {
-        ThrowPretty("L2Rate not set.");  // TODO: set default...
-    }
-    else if (parameters_.L2Rate.size() == 1)
-    {
-        l2_rate_.setConstant(prob_->get_num_controls(), parameters_.L2Rate(0));
-    }
-    else if (parameters_.L2Rate.size() == prob_->get_num_controls())
-    {
-        l2_rate_ = parameters_.L2Rate;
-    }
-    else
-    {
-        ThrowPretty("L2Rate has wrong size: expected " << prob_->get_num_controls() << ", got " << parameters_.L2Rate.size());
-    }
+    // // L2 Rate
+    // if (parameters_.L2Rate.size() == 0)
+    // {
+    //     ThrowPretty("L2Rate not set.");  // TODO: set default...
+    // }
+    // else if (parameters_.L2Rate.size() == 1)
+    // {
+    //     l2_rate_.setConstant(prob_->get_num_controls(), parameters_.L2Rate(0));
+    // }
+    // else if (parameters_.L2Rate.size() == prob_->get_num_controls())
+    // {
+    //     l2_rate_ = parameters_.L2Rate;
+    // }
+    // else
+    // {
+    //     ThrowPretty("L2Rate has wrong size: expected " << prob_->get_num_controls() << ", got " << parameters_.L2Rate.size());
+    // }
 
     // Huber Rate
     if (parameters_.HuberRate.size() == 0)
@@ -99,6 +99,33 @@ void SparseFDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
     else
     {
         ThrowPretty("HuberRate has wrong size: expected " << prob_->get_num_controls() << ", got " << parameters_.HuberRate.size());
+    }
+}
+
+double SparseFDDPSolver::GetControlCost(int t) const
+{
+    if (parameters_.LossType == "SmoothL1")
+    {
+        double cost = 0.0;
+        const Eigen::VectorXd& u = prob_->get_U(t);
+        for (int iu = 0; iu < NU_; ++iu)
+        {
+            cost += 1.0 / l1_rate_(iu) * (std::log(1.0 + std::exp(-l1_rate_(iu) * u(iu))) + std::log(1.0 + std::exp(l1_rate_(iu) * u(iu))));
+        }
+        if (!std::isfinite(cost))
+        {
+            cost = 0.0;
+            // HIGHLIGHT(t << ": " << cost << "u: " << u.transpose())
+        }
+        return cost;
+    }
+    else if (parameters_.LossType == "Huber")
+    {
+        // TODO: Fill me in...
+    }
+    else
+    {
+        return prob_->GetControlCost(t);
     }
 }
 
@@ -128,6 +155,31 @@ bool SparseFDDPSolver::BackwardPassFDDP()
         Qx_[t] = dt_ * prob_->GetStateCostJacobian(t);
         Qu_[t] = dt_ * prob_->GetControlCostJacobian(t);
 
+        // If we are in L2 mode, it's vanilla DDP and no change necessary.
+        // If a different loss type is specified, adjust here:
+        if (parameters_.LossType == "SmoothL1" || parameters_.LossType == "Huber")
+        {
+            Qu_[t].setZero();
+            Quu_[t].setZero();
+
+            for (int iu = 0; iu < NU_; ++iu)
+            {
+                if (parameters_.LossType == "SmoothL1")
+                {
+                    // Sparsity (L1) cost
+                    Qu_[t](iu) = dt_ * (1.0 / (1 + std::exp(-l1_rate_(iu) * us_[t](iu))) - 1.0 / (1 + std::exp(l1_rate_(iu) * us_[t](iu))));
+
+                    Quu_[t](iu, iu) = dt_ * (2 * l1_rate_(iu) * std::exp(l1_rate_(iu) * us_[t](iu)) / std::pow(1 + std::exp(l1_rate_(iu) * us_[t](iu)), 2));
+                }
+                else if (parameters_.LossType == "Huber")
+                {
+                    Qu_[t](iu) = dt_ * (us_[t](iu) / (std::sqrt(1.0 + us_[t](iu) * us_[t](iu) / (huber_rate_(iu) * huber_rate_(iu)))));
+
+                    Quu_[t](iu, iu) = dt_ * (std::pow(huber_rate_(iu), 4) * std::sqrt(1.0 + us_[t](iu) * us_[t](iu) / (huber_rate_(iu) * huber_rate_(iu))) / (std::pow(huber_rate_(iu) * huber_rate_(iu) + us_[t](iu) * us_[t](iu), 2)));
+                }
+            }
+        }
+
         fx_ = dt_ * dynamics_solver_->fx(xs_[t], us_[t]) + Eigen::MatrixXd::Identity(NDX_, NDX_);
         fu_ = dt_ * dynamics_solver_->fu(xs_[t], us_[t]);
 
@@ -142,32 +194,6 @@ bool SparseFDDPSolver::BackwardPassFDDP()
         if (!std::isnan(ureg_))
         {
             Quu_[t].diagonal().array() += ureg_;
-        }
-
-        for (int iu = 0; iu < NU_; ++iu)
-        {
-            if (parameters_.LossType == "L1")
-            {
-                // Sparsity (L1) cost
-                Qu_[t](iu) += dt_ * (1.0 / (1 + std::exp(-l1_rate_(iu) * us_[t](iu))) - 1.0 / (1 + std::exp(l1_rate_(iu) * us_[t](iu))));
-
-                Quu_[t](iu, iu) += dt_ * (2 * l1_rate_(iu) * std::exp(l1_rate_(iu) * us_[t](iu)) /
-                                          std::pow(1 + std::exp(l1_rate_(iu) * us_[t](iu)), 2));
-            }
-            else if (parameters_.LossType == "Huber")
-            {
-                Qu_[t](iu) += dt_ * (us_[t](iu) / (std::sqrt(
-                                                      1.0 + us_[t](iu) * us_[t](iu) / (huber_rate_(iu) * huber_rate_(iu)))));
-
-                Quu_[t](iu, iu) += dt_ * (std::pow(huber_rate_(iu), 4) * std::sqrt(
-                                                                             1.0 + us_[t](iu) * us_[t](iu) / (huber_rate_(iu) * huber_rate_(iu))) /
-                                          (std::pow(huber_rate_(iu) * huber_rate_(iu) + us_[t](iu) * us_[t](iu), 2)));
-            }
-
-            // (L2) cost
-            Qu_[t](iu) += dt_ * 2 * l2_rate_(iu) * us_[t](iu);
-
-            Quu_[t](iu, iu) += dt_ * 2 * l2_rate_(iu);
         }
 
         ComputeGains(t);

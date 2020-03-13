@@ -46,9 +46,10 @@ private:
     ///     DynamicTimeIndexedProblem.
     bool BackwardPassFDDP() override;
 
+    double GetControlCost(int t) const override;
+
     Eigen::LLT<Eigen::MatrixXd> Quu_llt_;
     Eigen::VectorXd l1_rate_;
-    Eigen::VectorXd l2_rate_;
     Eigen::VectorXd huber_rate_;
 };
 }  // namespace exotica

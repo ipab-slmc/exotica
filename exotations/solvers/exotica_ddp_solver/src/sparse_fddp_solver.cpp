@@ -104,9 +104,11 @@ void SparseFDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
 
 double SparseFDDPSolver::GetControlCost(int t) const
 {
+    double cost = prob_->GetControlCost(t);
+
     if (parameters_.LossType == "SmoothL1")
     {
-        double cost = 0.0;
+        // cost = 0.0;  // If activating this line, please also uncomment the Qu_[t].setZeros(); in the backward-pass
         const Eigen::VectorXd& u = prob_->get_U(t);
         for (int iu = 0; iu < NU_; ++iu)
         {
@@ -114,7 +116,7 @@ double SparseFDDPSolver::GetControlCost(int t) const
         }
         if (!std::isfinite(cost))
         {
-            cost = 0.0;
+            cost = 0.0;  // Likely "inf" as u is too small.
             // HIGHLIGHT(t << ": " << cost << "u: " << u.transpose())
         }
         return cost;
@@ -123,10 +125,8 @@ double SparseFDDPSolver::GetControlCost(int t) const
     {
         // TODO: Fill me in...
     }
-    else
-    {
-        return prob_->GetControlCost(t);
-    }
+    
+    return cost;
 }
 
 bool SparseFDDPSolver::BackwardPassFDDP()
@@ -159,8 +159,8 @@ bool SparseFDDPSolver::BackwardPassFDDP()
         // If a different loss type is specified, adjust here:
         if (parameters_.LossType == "SmoothL1" || parameters_.LossType == "Huber")
         {
-            Qu_[t].setZero();
-            Quu_[t].setZero();
+            // Qu_[t].setZero();
+            // Quu_[t].setZero();
 
             for (int iu = 0; iu < NU_; ++iu)
             {

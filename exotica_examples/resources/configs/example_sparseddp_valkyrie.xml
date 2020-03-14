@@ -2,12 +2,12 @@
 <ExoticaConfig>
     <SparseFDDPSolver Name="SparseFDDP">
         <Debug>1</Debug>
-        <MaxIterations>2500</MaxIterations>
+        <MaxIterations>100</MaxIterations>
         <FunctionTolerance>1e-5</FunctionTolerance>
-        <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
+        <ClampControlsInForwardPass>0</ClampControlsInForwardPass>
         <RegularizationRate>1e-3</RegularizationRate>
 
-        <L1Rate>1</L1Rate>
+        <L1Rate>1e-2</L1Rate>
         <HuberRate>1</HuberRate>
         <L2Rate>0</L2Rate>
         <L1IncreaseRate>1.5</L1IncreaseRate>
@@ -30,7 +30,7 @@
 
                 <DynamicsSolver>
                     <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
-                        <dt>0.05</dt>
+                        <dt>0.01</dt>
                         <ControlLimitsLow>-5</ControlLimitsLow>
                         <ControlLimitsHigh>5</ControlLimitsHigh>
                     </DoubleIntegratorDynamicsSolver>
@@ -57,6 +57,8 @@
                 <EndEffector>
                     <Frame Link="leftFoot" BaseOffset="-0.071169 0.137705 0.098544"/>
                     <Frame Link="rightFoot" BaseOffset="-0.071169 -0.137705 0.098544"/>
+                    <!-- <Frame Link="leftFoot" LinkOffset="0.052 0.0 -0.09" BaseOffset="0 0.1 0"/> -->
+                    <!-- <Frame Link="rightFoot" LinkOffset="0.052 0.0 -0.09" BaseOffset="0 -0.1 0"/> -->
                 </EndEffector>
             </EffFrame>
             <QuasiStatic Name="Stability" PositiveOnly="1" Debug="1">
@@ -73,20 +75,34 @@
             </QuasiStatic>
         </Maps>
         <Cost>
-            <Task Task="PalmPosition" Rho="1e0"/>
-            <Task Task="JointLimit" Rho="1e0"/>
-            <!-- <Task Task="Stability" Rho="1e0"/> -->
-            <Task Task="FootPosition" Rho="1e3"/>
-            <!-- <Task Task="StraightBack" Rho="1e0"/> -->
+            <Task Task="PalmPosition" Rho="1"/>
+            <!-- <Task Task="JointLimit" Rho="1e0"/> -->
+            <!-- <Task Task="Stability" Rho="1"/> -->
+            <Task Task="FootPosition" Rho="10"/>
+            <!-- <Task Task="StraightBack" Rho="1"/> -->
         </Cost>
 
-        <T>50</T>
-        <tau>0.05</tau>
+        <T>100</T>
+        <tau>0.01</tau>
         <Q_rate>0</Q_rate>
+
+        <Qf>
+          1 1 1 1 1 1 0 0 0 0
+          0 0 0 0 0 0 0 0 0 0
+          0 0 0 0 0 0 0 0 0 0
+          0 0 0 0 0 0 0 0 0 0
+          0 0 0 0 0 0 0 0 0 0
+          0 0 0 0 0 0 0 0 0 0
+          0 0 0 0 0 0 0 0 0 0
+          0 0 0 0 0 0
+        </Qf>
         <Qf_rate>0</Qf_rate>
-        <R_rate>1e-3</R_rate>
+        <R_rate>0</R_rate>
+
+        <!-- <StartState>0.000031 -3e-06 0.9 0.009 0.00133 -0.000621 0.0067 -0.04594 -0.6825 1.62 -0.9363 0.0374 0.0026 0.0241 -0.66641 1.6231 -0.9524 -0.0344 0.00062 -0.00027 -0.00872 0.3002 -1.25 0 -0.7854 1.571 0 0 0 0 0 0.3002 1.25 0 0.7854 1.571 0 0 0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0</StartState> -->
 
         <StartState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 </StartState>
-        <!-- <GoalState>0.0 0.0 5 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 1.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -0.25 0.0 -1.785398163397 1.571 0.0 0.0 0.0 1.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 5.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0</GoalState> -->
+
+        <GoalState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 1.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -0.25 0.0 -1.785398163397 1.571 0.0 0.0 0.0 1.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 5.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0</GoalState>
     </DynamicTimeIndexedShootingProblem>
 </ExoticaConfig>

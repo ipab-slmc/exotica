@@ -11,7 +11,7 @@
         <HuberRate>2</HuberRate>
         <L2Rate>0</L2Rate>
         <L1IncreaseRate>1.5</L1IncreaseRate>
-        <LossType>SmoothL1</LossType>
+        <LossType>Huber</LossType>
     </SparseFDDPSolver>
     
     <DynamicTimeIndexedShootingProblem Name="cartpole">
@@ -34,7 +34,7 @@
         <T>300</T>
         <tau>0.01</tau>
         <Q_rate>0</Q_rate>
-        <Qf_rate>10</Qf_rate>
+        <Qf_rate>100</Qf_rate>
         <R_rate>0</R_rate>
         <StartState>0 0 0 0 </StartState>
         <GoalState>0 3.14 0 0</GoalState>

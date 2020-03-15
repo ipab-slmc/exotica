@@ -126,11 +126,9 @@ double SparseFDDPSolver::GetControlCost(int t) const
         const Eigen::VectorXd& u = prob_->get_U(t);
         for (int iu = 0; iu < NU_; ++iu)
         {
-            cost += huber_rate_(iu) * huber_rate_(iu) * (
-                std::sqrt(
-                    1 + std::pow(u(iu) / huber_rate_(iu), 2)
-                ) - 1.0
-            );
+            cost += huber_rate_(iu) * huber_rate_(iu) * (std::sqrt(
+                                                             1 + std::pow(u(iu) / huber_rate_(iu), 2)) -
+                                                         1.0);
         }
         if (!std::isfinite(cost))
         {
@@ -139,7 +137,7 @@ double SparseFDDPSolver::GetControlCost(int t) const
         }
         return cost;
     }
-    
+
     return cost;
 }
 

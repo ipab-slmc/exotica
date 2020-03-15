@@ -57,7 +57,7 @@ public:
     void AssignScene(ScenePtr scene_in) override;
 
     StateVector f(const StateVector& x, const ControlVector& u) override;
-    // StateDerivative fx(const StateVector& x, const ControlVector& u) override;
+    StateDerivative fx(const StateVector& x, const ControlVector& u) override;
     ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
 
 private:
@@ -69,7 +69,9 @@ private:
     Eigen::VectorXd xdot_analytic_;
     Eigen::VectorXd u_nle_;
     Eigen::VectorXd u_command_;
-    Eigen::VectorXd a_zero_;
+    Eigen::VectorXd a_;
+    Eigen::MatrixXd du_command_dq_;
+    Eigen::MatrixXd du_nle_dq_;
 };
 }  // namespace exotica
 

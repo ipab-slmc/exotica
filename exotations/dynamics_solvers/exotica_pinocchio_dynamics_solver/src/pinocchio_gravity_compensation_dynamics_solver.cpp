@@ -67,7 +67,9 @@ void PinocchioDynamicsSolverWithGravityCompensation::AssignScene(ScenePtr scene_
     fu_analytic_.setZero(ndx, num_controls_);
     u_nle_.setZero(num_controls_);
     u_command_.setZero(num_controls_);
-    a_zero_.setZero(num_velocities_);
+    a_.setZero(num_velocities_);
+    du_command_dq_.setZero(num_controls_, num_velocities_);
+    du_nle_dq_.setZero(num_controls_, num_velocities_);
 }
 
 Eigen::VectorXd PinocchioDynamicsSolverWithGravityCompensation::f(const StateVector& x, const ControlVector& u)
@@ -84,42 +86,37 @@ Eigen::VectorXd PinocchioDynamicsSolverWithGravityCompensation::f(const StateVec
     return xdot_analytic_;
 }
 
-// Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fx(const StateVector& x, const ControlVector& u)
-// {
-//     Eigen::VectorBlock<const Eigen::VectorXd> q = x.head(num_positions_);
-//     Eigen::VectorBlock<const Eigen::VectorXd> v = x.tail(num_velocities_);
+Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fx(const StateVector& x, const ControlVector& u)
+{
+    Eigen::VectorBlock<const Eigen::VectorXd> q = x.head(num_positions_);
+    Eigen::VectorBlock<const Eigen::VectorXd> v = x.tail(num_velocities_);
 
-//     // Obtain torque to compensate gravity and dynamic effects (Coriolis)
-//     u_nle_ = pinocchio::nonLinearEffects(model_, *pinocchio_data_, q, v);
+    // Obtain torque to compensate gravity and dynamic effects (Coriolis)
+    u_nle_ = pinocchio::nonLinearEffects(model_, *pinocchio_data_, q, v);
 
-//     // Commanded torque is u_nle_ + u
-//     u_command_.noalias() = u_nle_ + u;
+    // Commanded torque is u_nle_ + u
+    u_command_.noalias() = u_nle_ + u;
 
-//     pinocchio_data_->Minv.setZero();
-//     pinocchio::computeAllTerms(model_, *pinocchio_data_, q, v);
-//     pinocchio::cholesky::decompose(model_, *pinocchio_data_);
-//     pinocchio::cholesky::computeMinv(model_, *pinocchio_data_, pinocchio_data_->Minv);
-//     Eigen::VectorXd a = pinocchio_data_->Minv * u_command_;
+    pinocchio_data_->Minv.setZero();
+    pinocchio::computeAllTerms(model_, *pinocchio_data_, q, v);
+    pinocchio::cholesky::decompose(model_, *pinocchio_data_);
+    pinocchio::cholesky::computeMinv(model_, *pinocchio_data_, pinocchio_data_->Minv);
 
-//     pinocchio::computeRNEADerivatives(model_, *pinocchio_data_, q, v, a);
+    // du_command_dq_
+    a_.noalias() = pinocchio_data_->Minv * u_command_;
+    pinocchio::computeRNEADerivatives(model_, *pinocchio_data_, q, v, a_);
+    du_command_dq_.noalias() = pinocchio_data_->Minv * pinocchio_data_->dtau_dq;
 
-//     fx_analytic_.block(num_velocities_, 0, num_velocities_, num_velocities_).noalias() = pinocchio_data_->Minv * (Eigen::MatrixXd::Zero(num_controls_, num_controls_) + pinocchio_data_->dtau_dq);
-//     // fx_analytic_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_).setZero();
+    // du_nle_dq_
+    a_.noalias() = pinocchio_data_->Minv * u_nle_;
+    pinocchio::computeRNEADerivatives(model_, *pinocchio_data_, q, v, a_);
+    du_nle_dq_.noalias() = pinocchio_data_->Minv * pinocchio_data_->dtau_dq;
 
-//     /*
-//     pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout);
-//     d->dtau_dx.leftCols(nv) = d->multibody.actuation->dtau_dx.leftCols(nv) - d->pinocchio.dtau_dq;
-//     d->dtau_dx.rightCols(nv) = d->multibody.actuation->dtau_dx.rightCols(nv) - d->pinocchio.dtau_dv;
-//     d->Fx.noalias() = d->Minv * d->dtau_dx;
-//     d->Fu.noalias() = d->Minv * d->multibody.actuation->dtau_du;
-//     */
+    // du_dq_
+    fx_analytic_.block(num_velocities_, 0, num_velocities_, num_velocities_).noalias() = du_nle_dq_ - du_command_dq_;
 
-//     // Four quadrants should be: 0, Identity, ddq_dq, ddq_dv
-//     // 0 and Identity are set during initialisation. Here, we pass references to ddq_dq, ddq_dv to the algorithm.
-//     // pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u_command_, fx_analytic_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_analytic_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_analytic_.bottomRightCorner(num_velocities_, num_velocities_));
-
-//     return fx_analytic_;
-// }
+    return fx_analytic_;
+}
 
 Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fu(const StateVector& x, const ControlVector& u)
 {

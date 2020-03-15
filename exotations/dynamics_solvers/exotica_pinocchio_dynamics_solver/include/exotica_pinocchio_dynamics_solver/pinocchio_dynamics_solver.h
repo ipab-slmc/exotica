@@ -44,12 +44,8 @@
 
 #include <exotica_pinocchio_dynamics_solver/pinocchio_dynamics_solver_initializer.h>
 
-#include <pinocchio/algorithm/aba-derivatives.hpp>
-#include <pinocchio/algorithm/aba.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/multibody/model.hpp>
-#include <pinocchio/parsers/urdf.hpp>
 
 #pragma GCC diagnostic pop
 

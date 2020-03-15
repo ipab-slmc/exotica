@@ -29,6 +29,11 @@
 
 #include <exotica_pinocchio_dynamics_solver/pinocchio_dynamics_solver.h>
 
+#include <pinocchio/algorithm/aba-derivatives.hpp>
+#include <pinocchio/algorithm/aba.hpp>
+#include <pinocchio/algorithm/rnea.hpp>
+#include <pinocchio/parsers/urdf.hpp>
+
 REGISTER_DYNAMICS_SOLVER_TYPE("PinocchioDynamicsSolver", exotica::PinocchioDynamicsSolver)
 
 namespace exotica

@@ -335,4 +335,23 @@ Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector
     return fu_fd;
 }
 
+template <typename T, int NX, int NU>
+void AbstractDynamicsSolver<T, NX, NU>::ComputeDerivatives(const StateVector& x, const ControlVector& u)
+{
+    fx_ = fx(x, u);
+    fu_ = fu(x, u);
+}
+
+template <typename T, int NX, int NU>
+const Eigen::Matrix<T, NX, NX>& AbstractDynamicsSolver<T, NX, NU>::get_fx() const
+{
+    return fx_;
+}
+
+template <typename T, int NX, int NU>
+const Eigen::Matrix<T, NX, NU>& AbstractDynamicsSolver<T, NX, NU>::get_fu() const
+{
+    return fu_;
+}
+
 }  // namespace exotica

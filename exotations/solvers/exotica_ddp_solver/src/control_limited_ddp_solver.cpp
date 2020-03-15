@@ -62,11 +62,10 @@ void ControlLimitedDDPSolver::BackwardPass()
     for (int t = T - 2; t >= 0; t--)
     {
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
-        Eigen::MatrixXd fx = dynamics_solver_->fx(x, u),
-                        fu = dynamics_solver_->fu(x, u);
 
-        fx = fx * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(fx.rows(), fx.cols());
-        fu = fu * dynamics_solver_->get_dt();
+        dynamics_solver_->ComputeDerivatives(x, u);
+        Eigen::MatrixXd fx = dynamics_solver_->get_fx() * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(dynamics_solver_->get_num_state_derivative(), dynamics_solver_->get_num_state_derivative());
+        Eigen::MatrixXd fu = dynamics_solver_->get_fu() * dynamics_solver_->get_dt();
 
         Qx = dt * prob_->GetStateCostJacobian(t) + fx.transpose() * Vx;  // lx + fx @ Vx
         Qu = dt * prob_->GetControlCostJacobian(t) + fu.transpose() * Vx;

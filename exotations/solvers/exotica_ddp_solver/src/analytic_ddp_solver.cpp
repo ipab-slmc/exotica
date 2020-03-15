@@ -57,8 +57,9 @@ void AnalyticDDPSolver::BackwardPass()
         x = prob_->get_X(t);
         u = prob_->get_U(t);
 
-        fx_ = dt_ * dynamics_solver_->fx(x, u) + Eigen::MatrixXd::Identity(NDX_, NDX_);
-        fu_ = dt_ * dynamics_solver_->fu(x, u);
+        dynamics_solver_->ComputeDerivatives(x, u);
+        fx_ = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
+        fu_ = dt_ * dynamics_solver_->get_fu();
 
         //
         // NB: We use a modified cost function to compare across different

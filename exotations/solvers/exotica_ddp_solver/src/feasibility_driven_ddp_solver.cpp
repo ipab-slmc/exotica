@@ -548,8 +548,9 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
         Qx_[t] = dt_ * prob_->GetStateCostJacobian(t);
         Qu_[t] = dt_ * prob_->GetControlCostJacobian(t);
 
-        fx_ = dt_ * dynamics_solver_->fx(xs_[t], us_[t]) + Eigen::MatrixXd::Identity(NDX_, NDX_);
-        fu_ = dt_ * dynamics_solver_->fu(xs_[t], us_[t]);
+        dynamics_solver_->ComputeDerivatives(xs_[t], us_[t]);
+        fx_ = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
+        fu_ = dt_ * dynamics_solver_->get_fu();
 
         FxTVxx_p_.noalias() = fx_.transpose() * Vxx_p;
         FuTVxx_p_[t].noalias() = fu_.transpose() * Vxx_p;

@@ -9,7 +9,10 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PINOCCHIO pinocchio REQUIRED)
 
-AddInitializer(pinocchio_dynamics_solver)
+AddInitializer(
+  pinocchio_dynamics_solver
+  pinocchio_gravity_compensation_dynamics_solver
+)
 GenInitializers()
 
 catkin_package(
@@ -25,7 +28,7 @@ include_directories(
   ${PINOCCHIO_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/pinocchio_dynamics_solver.cpp)
+add_library(${PROJECT_NAME} src/pinocchio_dynamics_solver.cpp src/pinocchio_gravity_compensation_dynamics_solver.cpp)
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated -Wno-variadic-macros -Wno-deprecated-declarations -Wno-comment -Wno-ignored-attributes)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${PINOCCHIO_CFLAGS_OTHER})

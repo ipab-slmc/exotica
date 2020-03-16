@@ -71,9 +71,17 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
     X_ref_ = prob_->get_X();
     U_ref_ = prob_->get_U();
     U_try_ = prob_->get_U();  // to resize/allocate
-    // TODO: Resize the following:
-    // Qx_, Qu_, Qxx_, Quu_, Qux_, Quu_inv_, Vxx_;
-    // Vx_; fx_, fu_;
+
+    Qx_.setZero(NDX_);
+    Qu_.setZero(NU_);
+    Qxx_.setZero(NDX_, NDX_);
+    Qux_.setZero(NU_, NDX_);
+    Quu_.setZero(NU_, NU_);
+    Quu_inv_.setZero(NU_, NU_);
+    Vxx_.setZero(NDX_, NDX_);
+    Vx_.setZero(NDX_);
+    fx_.setZero(NDX_, NDX_);
+    fu_.setZero(NDX_, NU_);
 
     if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Running DDP solver for max " << GetNumberOfMaxIterations() << " iterations");
 

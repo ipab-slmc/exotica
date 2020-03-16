@@ -46,35 +46,36 @@ void AnalyticDDPSolver::BackwardPass()
 
     // concatenation axis for tensor products
     //  See https://eigen.tuxfamily.org/dox-devel/unsupported/eigen_tensors.html#title14
-    Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
+    constexpr Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
     Eigen::Tensor<double, 1> Vx_tensor;
 
-    Eigen::VectorXd x(NX_), u(NU_);               // TODO: Replace
-    Quu_inv_.resize(NU_, NU_);                    // TODO: Allocate outside
-    Quu_llt_ = Eigen::LLT<Eigen::MatrixXd>(NU_);  // TODO: Allocate outside
+    Eigen::VectorXd x(NX_), u(NU_);  // TODO: Replace
+    // Quu_llt_ = Eigen::LLT<Eigen::MatrixXd>(NU_);  // TODO: Allocate outside
     for (int t = T_ - 2; t >= 0; t--)
     {
         x = prob_->get_X(t);
         u = prob_->get_U(t);
 
         dynamics_solver_->ComputeDerivatives(x, u);
-        fx_ = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
-        fu_ = dt_ * dynamics_solver_->get_fu();
+        fx_.noalias() = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
+        fu_.noalias() = dt_ * dynamics_solver_->get_fu();
 
         //
         // NB: We use a modified cost function to compare across different
         // time horizons - the running cost is scaled by dt_
         //
-        Qx_ = dt_ * prob_->GetStateCostJacobian(t) + fx_.transpose() * Vx_;  // lx + fx_ @ Vx_
-        Qu_ = dt_ * prob_->GetControlCostJacobian(t) + fu_.transpose() * Vx_;
+        Qx_.noalias() = dt_ * prob_->GetStateCostJacobian(t);
+        Qx_.noalias() += fx_.transpose() * Vx_;  // lx + fx_ @ Vx_
+        Qu_.noalias() = dt_ * prob_->GetControlCostJacobian(t);
+        Qu_.noalias() += fu_.transpose() * Vx_;
 
         // State regularization
         Vxx_.diagonal().array() += lambda_;
 
         // NB: Qux = Qxu^T
-        Qux_ = dt_ * prob_->GetStateControlCostHessian() + fu_.transpose() * Vxx_ * fx_;
-        Qxx_ = dt_ * prob_->GetStateCostHessian(t) + fx_.transpose() * Vxx_ * fx_;
-        Quu_ = dt_ * prob_->GetControlCostHessian() + fu_.transpose() * Vxx_ * fu_;
+        Qux_.noalias() = dt_ * prob_->GetStateControlCostHessian() + fu_.transpose() * Vxx_ * fx_;
+        Qxx_.noalias() = dt_ * prob_->GetStateCostHessian(t) + fx_.transpose() * Vxx_ * fx_;
+        Quu_.noalias() = dt_ * prob_->GetControlCostHessian() + fu_.transpose() * Vxx_ * fu_;
 
         if (parameters_.UseSecondOrderDynamics)
         {
@@ -100,9 +101,8 @@ void AnalyticDDPSolver::BackwardPass()
         // Control regularization for numerical stability
         Quu_.diagonal().array() += lambda_;
 
-        // Compute gains
-        Quu_inv_ = Quu_.inverse();
-        // Quu_inv_ = Quu_.llt().solve(Eigen::MatrixXd::Identity(Quu_.rows(), Quu_.cols()));
+        // Compute gains using Cholesky decomposition
+        Quu_inv_ = Quu_.llt().solve(Eigen::MatrixXd::Identity(Quu_.rows(), Quu_.cols()));
         k_gains_[t].noalias() = -Quu_inv_ * Qu_;
         K_gains_[t].noalias() = -Quu_inv_ * Qux_;
 

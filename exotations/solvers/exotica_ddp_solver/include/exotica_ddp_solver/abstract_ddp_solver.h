@@ -99,7 +99,8 @@ protected:
     Eigen::MatrixXd U_prev_;  ///!< Last accepted control trajectory
     Eigen::MatrixXd X_ref_;   ///!< Reference state trajectory for feedback control.
     Eigen::MatrixXd U_ref_;   ///!< Reference control trajectory for feedback control.
-    Eigen::MatrixXd Qx_, Qu_, Qxx_, Quu_, Qux_, Quu_inv_, Vxx_;
+    Eigen::VectorXd Qx_, Qu_;
+    Eigen::MatrixXd Qxx_, Quu_, Qux_, Quu_inv_, Vxx_;
     Eigen::VectorXd Vx_;
     Eigen::MatrixXd fx_, fu_;
 };

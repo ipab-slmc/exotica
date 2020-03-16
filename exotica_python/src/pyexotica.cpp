@@ -1226,6 +1226,9 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_position", &DynamicsSolver::GetPosition)
         .def("simulate", &DynamicsSolver::Simulate)
         .def("state_delta", &DynamicsSolver::StateDelta)
+        .def("compute_derivatives", &DynamicsSolver::ComputeDerivatives)
+        .def("get_fx", &DynamicsSolver::get_fx)
+        .def("get_fu", &DynamicsSolver::get_fu)
         .def("integrate", [](DynamicsSolver* instance, Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, const double dt) {
             Eigen::VectorXd xout(instance->get_num_positions() + instance->get_num_velocities());
             instance->Integrate(x, u, dt, xout);

@@ -4,11 +4,10 @@ from __future__ import print_function, division
 import numpy as np
 import pyexotica as exo
 
-__all__ = ["test_dynamics_solver"]
+__all__ = ["check_dynamics_solver_derivatives"]
 
-def test_dynamics_solver(name, urdf=None, srdf=None, joint_group=None):
+def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=None):
     ds = None
-
     if urdf is not None and srdf is not None and joint_group is not None:
         my_scene_init = exo.Initializers.SceneInitializer()
         my_scene_init[1]['URDF'] = urdf

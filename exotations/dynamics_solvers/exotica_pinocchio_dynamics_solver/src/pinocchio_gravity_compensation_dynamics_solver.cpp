@@ -50,7 +50,7 @@ void PinocchioDynamicsSolverWithGravityCompensation::AssignScene(ScenePtr scene_
     }
     else
     {
-        ThrowPretty("This condition should never happen. Unknown BaseType.");
+        ThrowPretty("Only BaseType::FIXED is currently supported with this DynamicsSolver.");
     }
 
     num_positions_ = model_.nq;
@@ -62,9 +62,9 @@ void PinocchioDynamicsSolverWithGravityCompensation::AssignScene(ScenePtr scene_
     // Pre-allocate data for f, fx, fu
     const int ndx = get_num_state_derivative();
     xdot_analytic_.setZero(ndx);
-    fx_analytic_.setZero(ndx, ndx);
-    fx_analytic_.topRightCorner(num_velocities_, num_velocities_).setIdentity();
-    fu_analytic_.setZero(ndx, num_controls_);
+    fx_.setZero(ndx, ndx);
+    fx_.topRightCorner(num_velocities_, num_velocities_).setIdentity();
+    fu_.setZero(ndx, num_controls_);
     u_nle_.setZero(num_controls_);
     u_command_.setZero(num_controls_);
     a_.setZero(num_velocities_);
@@ -84,6 +84,39 @@ Eigen::VectorXd PinocchioDynamicsSolverWithGravityCompensation::f(const StateVec
     xdot_analytic_.head(num_velocities_) = x.tail(num_velocities_);
     xdot_analytic_.tail(num_velocities_) = pinocchio_data_->ddq;
     return xdot_analytic_;
+}
+
+void PinocchioDynamicsSolverWithGravityCompensation::ComputeDerivatives(const StateVector& x, const ControlVector& u)
+{
+    Eigen::VectorBlock<const Eigen::VectorXd> q = x.head(num_positions_);
+    Eigen::VectorBlock<const Eigen::VectorXd> v = x.tail(num_velocities_);
+
+    // Obtain torque to compensate gravity and dynamic effects (Coriolis)
+    u_nle_ = pinocchio::nonLinearEffects(model_, *pinocchio_data_, q, v);
+
+    // Commanded torque is u_nle_ + u
+    u_command_.noalias() = u_nle_ + u;
+
+    pinocchio_data_->Minv.setZero();
+    pinocchio::computeAllTerms(model_, *pinocchio_data_, q, v);
+    pinocchio::cholesky::decompose(model_, *pinocchio_data_);
+    pinocchio::cholesky::computeMinv(model_, *pinocchio_data_, pinocchio_data_->Minv);
+
+    // du_command_dq_
+    a_.noalias() = pinocchio_data_->Minv * u_command_;
+    pinocchio::computeRNEADerivatives(model_, *pinocchio_data_, q, v, a_);
+    du_command_dq_.noalias() = pinocchio_data_->Minv * pinocchio_data_->dtau_dq;
+
+    // du_nle_dq_
+    a_.noalias() = pinocchio_data_->Minv * u_nle_;
+    pinocchio::computeRNEADerivatives(model_, *pinocchio_data_, q, v, a_);
+    du_nle_dq_.noalias() = pinocchio_data_->Minv * pinocchio_data_->dtau_dq;
+
+    // du_dq_
+    fx_.block(num_velocities_, 0, num_velocities_, num_velocities_).noalias() = du_nle_dq_ - du_command_dq_;
+
+    // Since dtau_du=Identity, the partial derivative of fu is directly Minv.
+    fu_.bottomRightCorner(num_velocities_, num_velocities_) = pinocchio_data_->Minv;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fx(const StateVector& x, const ControlVector& u)
@@ -113,9 +146,9 @@ Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fx(const StateVe
     du_nle_dq_.noalias() = pinocchio_data_->Minv * pinocchio_data_->dtau_dq;
 
     // du_dq_
-    fx_analytic_.block(num_velocities_, 0, num_velocities_, num_velocities_).noalias() = du_nle_dq_ - du_command_dq_;
+    fx_.block(num_velocities_, 0, num_velocities_, num_velocities_).noalias() = du_nle_dq_ - du_command_dq_;
 
-    return fx_analytic_;
+    return fx_;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fu(const StateVector& x, const ControlVector& u)
@@ -130,13 +163,13 @@ Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fu(const StateVe
     u_command_.noalias() = u_nle_ + u;
 
     // Since dtau_du=Identity, the partial derivative of fu is directly Minv.
-    Eigen::Block<Eigen::MatrixXd> Minv = fu_analytic_.bottomRightCorner(num_velocities_, num_velocities_);
+    Eigen::Block<Eigen::MatrixXd> Minv = fu_.bottomRightCorner(num_velocities_, num_velocities_);
 
     pinocchio::computeAllTerms(model_, *pinocchio_data_, q, v);
     pinocchio::cholesky::decompose(model_, *pinocchio_data_);
     pinocchio::cholesky::computeMinv(model_, *pinocchio_data_, Minv);
 
-    return fu_analytic_;
+    return fu_;
 }
 
 }  // namespace exotica

@@ -59,14 +59,13 @@ public:
     StateVector f(const StateVector& x, const ControlVector& u) override;
     StateDerivative fx(const StateVector& x, const ControlVector& u) override;
     ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
+    void ComputeDerivatives(const StateVector& x, const ControlVector& u) override;
     ControlVector InverseDynamics(const StateVector& x) override;
 
 private:
     pinocchio::Model model_;
     std::unique_ptr<pinocchio::Data> pinocchio_data_;
 
-    Eigen::MatrixXd fx_analytic_;
-    Eigen::MatrixXd fu_analytic_;
     Eigen::VectorXd xdot_analytic_;
 };
 }  // namespace exotica

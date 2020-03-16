@@ -67,9 +67,9 @@ void PinocchioDynamicsSolver::AssignScene(ScenePtr scene_in)
     // Pre-allocate data for f, fx, fu
     const int ndx = get_num_state_derivative();
     xdot_analytic_.setZero(ndx);
-    fx_analytic_.setZero(ndx, ndx);
-    fx_analytic_.topRightCorner(num_velocities_, num_velocities_).setIdentity();
-    fu_analytic_.setZero(ndx, num_controls_);
+    fx_.setZero(ndx, ndx);
+    fx_.topRightCorner(num_velocities_, num_velocities_).setIdentity();
+    fu_.setZero(ndx, num_controls_);
 }
 
 Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVector& u)
@@ -81,21 +81,26 @@ Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVe
     return xdot_analytic_;
 }
 
+void PinocchioDynamicsSolver::ComputeDerivatives(const StateVector& x, const ControlVector& u)
+{
+    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval(), fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
+}
+
 Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
     // Four quadrants should be: 0, Identity, ddq_dq, ddq_dv
     // 0 and Identity are set during initialisation. Here, we pass references to ddq_dq, ddq_dv to the algorithm.
-    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval(), fx_analytic_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_analytic_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_analytic_.bottomRightCorner(num_velocities_, num_velocities_));
+    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval(), fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
 
-    return fx_analytic_;
+    return fx_;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
     // NB: ddq_dtau is computed with the same call - i.e., we are duplicating computation.
-    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval(), fx_analytic_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_analytic_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_analytic_.bottomRightCorner(num_velocities_, num_velocities_));
+    pinocchio::computeABADerivatives(model_, *pinocchio_data_, x.head(num_positions_).eval(), x.tail(num_velocities_).eval(), u.eval(), fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
 
-    return fu_analytic_;
+    return fu_;
 }
 
 Eigen::VectorXd PinocchioDynamicsSolver::InverseDynamics(const StateVector& x)

@@ -290,7 +290,7 @@ Eigen::Matrix<T, NU, 1> AbstractDynamicsSolver<T, NX, NU>::InverseDynamics(const
 }
 
 template <typename T, int NX, int NU>
-Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector& x, const ControlVector& u)
+Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx_fd(const StateVector& x, const ControlVector& u)
 {
     const int nx = get_num_state();
     const int ndx = get_num_state_derivative();
@@ -314,7 +314,13 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector
 }
 
 template <typename T, int NX, int NU>
-Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector& x, const ControlVector& u)
+Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector& x, const ControlVector& u)
+{
+    return fx_fd(x, u);
+}
+
+template <typename T, int NX, int NU>
+Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu_fd(const StateVector& x, const ControlVector& u)
 {
     const int ndx = get_num_state_derivative();
 
@@ -333,6 +339,12 @@ Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector
     }
 
     return fu_fd;
+}
+
+template <typename T, int NX, int NU>
+Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector& x, const ControlVector& u)
+{
+    return fu_fd(x, u);
 }
 
 template <typename T, int NX, int NU>

@@ -91,6 +91,12 @@ public:
     /// \brief Derivative of the forward dynamics w.r.t. the control
     virtual ControlDerivative fu(const StateVector& x, const ControlVector& u);
 
+    /// \brief Derivative of the forward dynamics w.r.t. the state [finite differencing]
+    StateDerivative fx_fd(const StateVector& x, const ControlVector& u);
+
+    /// \brief Derivative of the forward dynamics w.r.t. the control [finite differencing]
+    ControlDerivative fu_fd(const StateVector& x, const ControlVector& u);
+
     // NOTE: Second order derivatives a 3D matrices, i.e. tensors
     //  We use the numerator convention (see https://en.wikipedia.org/wiki/Matrix_calculus)
     // X_i,j,k = d(X_i,j)/d x_k

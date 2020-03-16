@@ -67,4 +67,5 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(test/python_tests.launch)
 
   catkin_add_nosetests(test/run_tests.py)
+  catkin_add_nosetests(test/test_dynamics_solvers.py)
 endif()

@@ -10,13 +10,10 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>exotica_core</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>rostest</build_depend>
   <build_export_depend>exotica_core</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
   <exec_depend>exotica_core</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  <test_depend>rosunit</test_depend>
-  <test_depend>exotica_python</test_depend>
 
   <export>
     <exotica_core plugin="${prefix}/exotica_plugins.xml" />

@@ -307,7 +307,7 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector
         Integrate(x, xdiff, -1., x_low);
         Integrate(x, xdiff, 1., x_high);
 
-        fx_fd.col(i) = StateDelta(f(x_high, u), f(x_low, u)) / eps;
+        fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
     }
 
     return fx_fd;
@@ -329,7 +329,7 @@ Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector
         u_low(i) -= eps / 2.0;
         u_high(i) += eps / 2.0;
 
-        fu_fd.col(i) = StateDelta(f(x, u_high), f(x, u_low)) / eps;
+        fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
     }
 
     return fu_fd;

@@ -46,7 +46,8 @@ solver = exo.Setup.load_solver(configs[problem_idx])
 problem = solver.get_problem()
 solution = solver.solve()
 
-print('Solver terminated with: ', problem.termination_criterion)
+print('Solver terminated with:', problem.termination_criterion)
+print('Solver took:', solver.get_planning_time())
 if problem.termination_criterion == exo.TerminationCriterion.Divergence:
     print('Solver Diverged!')
     # exit(0)
@@ -93,7 +94,7 @@ while True:
             
             # if np.abs(u) < 1:
                 # u = [0]
-            print(u)
+            #print(u)
 
             # u = solver.get_feedback_control(
             #     problem.X[:,t], t

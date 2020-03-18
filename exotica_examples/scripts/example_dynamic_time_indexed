@@ -66,15 +66,14 @@ plt.plot(solution)
 plt.show()
 
 
-# plt.figure()
-# plt.plot(range(len(costs[1])), costs[1])
-# plt.xlabel('Iteration')
-# plt.ylabel('Cost')
-# plt.yscale('log')
-# plt.xlim(0, len(costs[1])-1)
-# plt.grid()
-# plt.show()
-
+plt.figure()
+plt.plot(range(len(costs[1])), costs[1])
+plt.xlabel('Iteration')
+plt.ylabel('Cost')
+plt.yscale('log')
+plt.xlim(0, len(costs[1])-1)
+plt.grid()
+plt.show()
 
 visualization = exo.Visualization(problem.get_scene())
 visualization.display_trajectory(

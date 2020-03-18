@@ -254,6 +254,30 @@ public:
             }
             return true;
         }
+        else if (target.GetType() == "Eigen::Matrix<int, -1, 1, 0, -1, 1>")
+        {
+            if (IsPyString(value_py))
+            {
+                target.Set(ParseVector<int, Eigen::Dynamic>(PyAsStdString(value_py)));
+            }
+            else
+            {
+                target.Set(py::cast<Eigen::VectorXi>(value_py));
+            }
+            return true;
+        }
+        else if (target.GetType() == "Eigen::Matrix<double, 2, 1, 0, 2, 1>")
+        {
+            if (IsPyString(value_py))
+            {
+                target.Set(ParseVector<double, 2>(PyAsStdString(value_py)));
+            }
+            else
+            {
+                target.Set(py::cast<Eigen::Vector2d>(value_py));
+            }
+            return true;
+        }
         else if (target.GetType() == "Eigen::Matrix<double, 3, 1, 0, 3, 1>")
         {
             if (IsPyString(value_py))
@@ -441,6 +465,14 @@ public:
         else if (prop.GetType() == "Eigen::Matrix<double, -1, 1, 0, -1, 1>")
         {
             PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<Eigen::VectorXd>(prop.Get())).ptr());
+        }
+        else if (prop.GetType() == "Eigen::Matrix<int, -1, 1, 0, -1, 1>")
+        {
+            PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<Eigen::VectorXi>(prop.Get())).ptr());
+        }
+        else if (prop.GetType() == "Eigen::Matrix<double, 2, 1, 0, 2, 1>")
+        {
+            PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<Eigen::Vector2d>(prop.Get())).ptr());
         }
         else if (prop.GetType() == "Eigen::Matrix<double, 3, 1, 0, 3, 1>")
         {

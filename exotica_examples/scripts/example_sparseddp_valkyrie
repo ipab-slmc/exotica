@@ -41,7 +41,7 @@ if __name__ == "__main__":
     solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie.xml')
     problem = solver.get_problem()
     scene = problem.get_scene()
-
+    vis = exo.VisualizationMoveIt(scene)
 
     palm_target = np.array([0.4, -0.4, 0.9])
 
@@ -77,8 +77,20 @@ if __name__ == "__main__":
     # solver.max_iterations = 2500
     solution = solver.solve()
     print("Solved in", solver.get_planning_time())
-    task_cost_over_time(problem)
+    # task_cost_over_time(problem)
     plot(problem.get_cost_evolution()[1])
     plot(solution)
+
+    fig = plt.figure()
+    plt.subplot(1,2,1)
+    plt.title('Positions')
+    plt.plot(problem.X[:38,:].T)
+    plt.subplot(1,2,2)
+    plt.title('Velocities')
+    plt.plot(problem.X[38:,:].T)
+    plt.show()
+
+    #np.save('l2_cost_1e-3', problem.X)
+    vis.display_trajectory(problem.X[:problem.N].T)
 
     publish_trajectory(problem.X[:problem.N,:].T, problem.T*problem.tau, problem)

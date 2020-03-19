@@ -43,7 +43,7 @@ if __name__ == "__main__":
     scene = problem.get_scene()
     vis = exo.VisualizationMoveIt(scene)
 
-    palm_target = np.array([0.4, -0.4, 0.9])
+    palm_target = np.array([0.4, 0.2, 0.9])
 
     rospy.init_node('my_vis')
     sleep(0.5)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     m.header.frame_id = 'exotica/world_frame'
     m.action = Marker.ADD
     m.type = Marker.SPHERE
-    m.scale.x = m.scale.y = m.scale.z = 0.05
+    m.scale.x = m.scale.y = m.scale.z = 0.1
     m.pose.position.x = palm_target[0]
     m.pose.position.y = palm_target[1]
     m.pose.position.z = palm_target[2]

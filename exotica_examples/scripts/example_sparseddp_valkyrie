@@ -43,7 +43,7 @@ if __name__ == "__main__":
     scene = problem.get_scene()
     vis = exo.VisualizationMoveIt(scene)
 
-    palm_target = np.array([0.4, 0.2, 0.9])
+    palm_target = np.array([0.4, 0, 0.9])
 
     rospy.init_node('my_vis')
     sleep(0.5)

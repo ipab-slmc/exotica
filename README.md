@@ -1,6 +1,6 @@
 # EXOTica [![Build Status](https://travis-ci.org/ipab-slmc/exotica.svg?branch=master)](https://travis-ci.org/ipab-slmc/exotica) [![Analytics](https://ga-beacon.appspot.com/UA-72496975-1/ipab-slmc/exotica/?pixel)](https://github.com/igrigorik/ga-beacon)
 
-[Documentation](http://ipab-slmc.github.io/exotica/) - [C++ Doxygen](http://ipab-slmc.github.io/exotica/doxygen_cpp/) - [Python Documentation](https://ipab-slmc.github.io/exotica/Python-API.html)
+[Documentation](http://ipab-slmc.github.io/exotica/) - [C++ Doxygen](http://ipab-slmc.github.io/exotica/doxygen_cpp/) - [Python Documentation](https://ipab-slmc.github.io/exotica/Python-API.html) - [Docker](https://github.com/VladimirIvan/exotica-docker-notebook)
 
 The EXOTica library is a generic Optimisation Toolset for Robotics platforms, written in C++ with bindings for Python. Its motivation is to provide a more streamlined process for developing algorithms for tasks such as Inverse Kinematics and Trajectory Optimisation. Its design advocates:
 

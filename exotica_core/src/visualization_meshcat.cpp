@@ -29,6 +29,7 @@
 
 #ifdef MSGPACK_FOUND
 #include <chrono>
+#include <regex>
 
 #include <exotica_core/visualization_meshcat.h>
 #include <exotica_core/visualization_meshcat_types.h>
@@ -76,7 +77,7 @@ inline std::vector<double> QuaternionToVector(const KDL::Frame& frame)
     return ret;
 };
 
-VisualizationMeshcat::VisualizationMeshcat(ScenePtr scene, const std::string& url, bool use_mesh_materials) : scene_(scene), context_(1), zmq_url_(url)
+VisualizationMeshcat::VisualizationMeshcat(ScenePtr scene, const std::string& url, bool use_mesh_materials, const std::string& file_url) : scene_(scene), context_(1), zmq_url_(url), file_url_(file_url)
 {
     HIGHLIGHT_NAMED("VisualizationMeshcat", "Initialising visualizer");
     Initialize(use_mesh_materials);
@@ -89,6 +90,16 @@ void VisualizationMeshcat::Initialize(bool use_mesh_materials)
     // https://github.com/rdeits/meshcat-python/blob/aa3865143120f5ace8e62aab71d825e33674d277/src/meshcat/visualizer.py#L60
     ConnectZMQ();
     web_url_ = RequestWebURL();
+    if (file_url_ == "")
+    {
+        std::regex url_regex("(.*):(?:\\d+)(?:\\/static\\/)");
+        std::smatch match;
+        if (std::regex_search(web_url_, match, url_regex) && match.size() > 1)
+        {
+            file_url_ = match.str(1) + ":9000/files/";
+        }
+    }
+
     if (web_url_.size() > 7) file_url_ = web_url_.substr(0, web_url_.size() - 7) + "files/";
     ConnectZMQ();
     path_prefix_ = "/exotica/" + scene_->GetName() + "/";

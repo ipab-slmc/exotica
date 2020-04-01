@@ -41,7 +41,7 @@ namespace exotica
 class VisualizationMeshcat : public Uncopyable
 {
 public:
-    VisualizationMeshcat(ScenePtr scene, const std::string& url, bool use_mesh_materials = true);
+    VisualizationMeshcat(ScenePtr scene, const std::string& url, bool use_mesh_materials = true, const std::string& file_url = "");
     virtual ~VisualizationMeshcat();
 
     void Initialize(bool use_mesh_materials);

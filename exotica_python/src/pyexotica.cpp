@@ -487,8 +487,8 @@ public:
         return handle(InitializerToTuple(src));
     }
 };
-}
-}
+}  // namespace detail
+}  // namespace pybind11
 
 PYBIND11_MODULE(_pyexotica, module)
 {
@@ -1125,7 +1125,7 @@ PYBIND11_MODULE(_pyexotica, module)
     visualization_moveit.def("display_trajectory", &VisualizationMoveIt::DisplayTrajectory);
 #ifdef MSGPACK_FOUND
     py::class_<VisualizationMeshcat> visualization_meshcat(module, "VisualizationMeshcat");
-    visualization_meshcat.def(py::init<ScenePtr, const std::string&, bool>(), py::arg("scene"), py::arg("url"), py::arg("use_mesh_materials") = true);
+    visualization_meshcat.def(py::init<ScenePtr, const std::string&, bool, const std::string&>(), py::arg("scene"), py::arg("url"), py::arg("use_mesh_materials") = true, py::arg("file_url") = "");
     visualization_meshcat.def("display_scene", &VisualizationMeshcat::DisplayScene, py::arg("use_mesh_materials") = true);
     visualization_meshcat.def("display_state", &VisualizationMeshcat::DisplayState, py::arg("state"), py::arg("t") = 0.0);
     visualization_meshcat.def("display_trajectory", &VisualizationMeshcat::DisplayTrajectory, py::arg("trajectory"), py::arg("dt") = 1.0);

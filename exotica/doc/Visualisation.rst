@@ -50,16 +50,16 @@ You can now display robot states, trajectories and change the scene settings:
     vis.set_property('/Grid','visible', False)
     vis.set_property('/Axes','visible', False)
 
-If you change the underlying scene the visualiset is using (e.g., by loading scene meshes using ``scene.load_scene_file()``), you'll have to refresh the visualiser by running:
+If you change the underlying scene the visualiser is using (e.g., by loading scene meshes using ``scene.load_scene_file()``), you'll have to refresh the visualiser by running:
 
 .. code-block:: python
 
     vis.display_scene()
     
-MoveIT! Visualiser
+MoveIT Visualiser
 ==================
 
-The MoveIT! visualiser publishes a trajectory in the MoveIT! trajectory message format for display in RViz.
+The MoveIT visualiser publishes a trajectory in the MoveIT trajectory message format for display in RViz.
 
 To set up the visualiser run:
 
@@ -83,7 +83,7 @@ The scene and task maps can be switched into debug mode in which they publish se
 
 When in debug mode, the scene will automatically publish all defined frames as TF frames with the ``exotica`` prefix. This will happen every time the scene updates. You can use these in RViz to: display the robot model, visualise TFs, attch marker to exotica frames. All TF transforms are attached to the EXOTica wolrd frame (as defined/named in the SRDF). There is no hierarchy among the TFs to allow displaying the kinematics computed in EXOTica.
 
-Publishing all frames at at every update may slow down your solvers. Instead, you can publish the TFs manually bu running:
+Publishing all frames at at every update may slow down your solvers. Instead, you can publish the TFs manually by running:
 
 .. code-block:: python
 

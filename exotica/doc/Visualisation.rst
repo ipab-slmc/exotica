@@ -56,10 +56,10 @@ If you change the underlying scene the visualiser is using (e.g., by loading sce
 
     vis.display_scene()
     
-MoveIT Visualiser
+MoveIt Visualiser
 ==================
 
-The MoveIT visualiser publishes a trajectory in the MoveIT trajectory message format for display in RViz.
+The MoveIt visualiser publishes a trajectory in the MoveIt trajectory message format for display in RViz.
 
 To set up the visualiser run:
 

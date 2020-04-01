@@ -53,6 +53,7 @@ EXOTica and using it with your own robot.
    Setting-up-ROSlaunch
    Setting-up-problems-and-solvers
    advanced/task_space_vector
+   Visualisation
 
 
 Core Components/Concepts

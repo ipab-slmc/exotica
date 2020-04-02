@@ -10,9 +10,19 @@ def test_boxqp_vs_scipy(H, q, b_low, b_high, x_init,
                         threshold_step_acceptance=0.1,
                         max_iterations=100,
                         threshold_gradient_tolerance=1e-5,
-                        regularization=1e-5,
+                        regularization=1e-12,
                         scipy_method='TNC'):
-    sol = exo.box_qp(H, q, b_low, b_high, x_init, threshold_step_acceptance, max_iterations, threshold_gradient_tolerance, regularization)
+    test_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init, threshold_step_acceptance, max_iterations, threshold_gradient_tolerance, regularization, scipy_method, exo.box_qp)
+    test_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init, threshold_step_acceptance, max_iterations, threshold_gradient_tolerance, regularization, scipy_method, exo.box_qp_old)
+
+def test_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init,
+                             threshold_step_acceptance=0.1,
+                             max_iterations=100,
+                             threshold_gradient_tolerance=1e-5,
+                             regularization=0,
+                             scipy_method='TNC',
+                             box_qp=exo.box_qp):
+    sol = box_qp(H, q, b_low, b_high, x_init, threshold_step_acceptance, max_iterations, threshold_gradient_tolerance, regularization)
 
     def cost(x):
         return .5 * np.matmul(np.matmul(x.T, H), x) + np.matmul(q.T, x)
@@ -24,6 +34,7 @@ def test_boxqp_vs_scipy(H, q, b_low, b_high, x_init,
     ])
 
     nptest.assert_allclose(sp_sol.x, sol.x, rtol=1, atol=1e-4, err_msg="BoxQP and SciPy (" + scipy_method + ") differ!")
+
 
 class TestBoxQP(unittest.TestCase):
     """Tests BoxQP implementation against scipy.""" 

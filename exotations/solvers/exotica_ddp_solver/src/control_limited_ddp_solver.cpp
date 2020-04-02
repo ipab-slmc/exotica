@@ -102,7 +102,7 @@ void ControlLimitedDDPSolver::BackwardPass()
         Eigen::VectorXd low_limit = control_limits.col(0) - u,
                         high_limit = control_limits.col(1) - u;
 
-        BoxQPSolution boxqp_sol = BoxQP(Quu, Qu, low_limit, high_limit, u, 0.1, 100, 1e-5, parameters_.RegularizationRate);
+        BoxQPSolution boxqp_sol = BoxQP(Quu, Qu, low_limit, high_limit, u, 0.1, 100, 1e-5, 1e-12);
 
         Quu_inv.setZero();
         for (unsigned int i = 0; i < boxqp_sol.free_idx.size(); ++i)

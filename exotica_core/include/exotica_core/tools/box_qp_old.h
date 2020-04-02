@@ -40,13 +40,30 @@ namespace exotica
 inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
                                   const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
                                   const Eigen::VectorXd& x_init, const double gamma,
-                                  const int max_iterations, const double epsilon, const double lambda)
+                                  const int max_iterations, const double epsilon, const double lambda,
+                                  bool use_polynomial_linesearch = false)
 {
     int it = 0;
     Eigen::VectorXd delta_xf, x = x_init;
     std::vector<size_t> clamped_idx, free_idx;
     Eigen::VectorXd grad = q + H * x_init;
     Eigen::MatrixXd Hff, Hfc, Hff_inv;
+
+    std::vector<double> alphas_;
+    const std::size_t& n_alphas_ = 10;
+    alphas_.resize(n_alphas_);
+    const Eigen::VectorXd alphas_linear = Eigen::VectorXd::LinSpaced(10, 1.0, 0.1);
+    for (std::size_t n = 0; n < n_alphas_; ++n)
+    {
+        if (use_polynomial_linesearch)
+        {
+            alphas_[n] = 1. / pow(2., static_cast<double>(n));
+        }
+        else
+        {
+            alphas_[n] = alphas_linear(n);
+        }
+    }
 
     // Ensure a feasible warm-start
     for (int i = 0; i < x.size(); ++i)
@@ -115,13 +132,12 @@ inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorX
             delta_xf = -Hff_inv * (q_free + Hfc * x_clamped) - x_free;
 
         double f_old = (0.5 * x.transpose() * H * x + q.transpose() * x)(0);
-        const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 1.0, 0.1);
 
         bool armijo_reached = false;
         Eigen::VectorXd x_new;
-        for (int ai = 0; ai < alpha_space.rows(); ++ai)
+        for (std::size_t ai = 0; ai < alphas_.size(); ++ai)
         {
-            const double& alpha = alpha_space[ai];
+            const double& alpha = alphas_[ai];
 
             x_new = x;
             for (size_t i = 0; i < free_idx.size(); ++i)
@@ -157,7 +173,7 @@ inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorX
     constexpr double gamma = 0.1;
     constexpr int max_iterations = 100;
     constexpr double lambda = 1e-5;
-    return ExoticaBoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda);
+    return ExoticaBoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda, false);
 }
 }  // namespace exotica
 

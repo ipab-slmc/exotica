@@ -102,12 +102,11 @@ void ControlLimitedDDPSolver::BackwardPass()
         BoxQPSolution boxqp_sol;
         if (parameters_.UseNewBoxQP)
         {
-            HIGHLIGHT("New boxqp");
-            boxqp_sol = BoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, lambda_);
+            boxqp_sol = BoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, lambda_, parameters_.BoxQPUsePolynomialLinesearch);
         }
         else
         {
-            boxqp_sol = ExoticaBoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, lambda_);
+            boxqp_sol = ExoticaBoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, lambda_, parameters_.BoxQPUsePolynomialLinesearch);
         }
 
         Quu_inv_.setZero();

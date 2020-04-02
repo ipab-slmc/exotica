@@ -44,7 +44,7 @@ typedef struct BoxQPSolution
     std::vector<size_t> clamped_idx;
 } BoxQPSolution;
 
-inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init, const double gamma, const int max_iterations, const double epsilon, const double lambda)
+inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init, const double gamma, const int max_iterations, const double epsilon, const double lambda, bool use_polynomial_linesearch = true)
 {
     // gamma = acceptance threshold
     // epsilon = gradient tolerance
@@ -58,9 +58,17 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
     std::vector<double> alphas_;
     const std::size_t& n_alphas_ = 10;
     alphas_.resize(n_alphas_);
+    const Eigen::VectorXd alphas_linear = Eigen::VectorXd::LinSpaced(10, 1.0, 0.1);
     for (std::size_t n = 0; n < n_alphas_; ++n)
     {
-        alphas_[n] = 1. / pow(2., static_cast<double>(n));
+        if (use_polynomial_linesearch)
+        {
+            alphas_[n] = 1. / pow(2., static_cast<double>(n));
+        }
+        else
+        {
+            alphas_[n] = alphas_linear(n);
+        }
     }
     double fold_, fnew_;
 
@@ -216,7 +224,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
     constexpr double gamma = 0.1;
     constexpr int max_iterations = 100;
     constexpr double lambda = 1e-5;
-    return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda);
+    return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda, true);
 }
 
 // class BoxQPSolver

@@ -1351,15 +1351,19 @@ PYBIND11_MODULE(_pyexotica, module)
                (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
                                  const Eigen::VectorXd& x_init, const double gamma,
-                                 const int max_iterations, const double epsilon, const double lambda)) &
-                   BoxQP);
+                                 const int max_iterations, const double epsilon, const double lambda,
+                                 bool use_polynomial_linesearch)) &
+                   BoxQP,
+               py::arg("H"), py::arg("q"), py::arg("b_low"), py::arg("b_high"), py::arg("x_init"), py::arg("gamma"), py::arg("max_iterations"), py::arg("epsilon"), py::arg("lambda"), py::arg("use_polynomial_linesearch") = true);
 
     module.def("box_qp_old",
                (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
                                  const Eigen::VectorXd& x_init, const double gamma,
-                                 const int max_iterations, const double epsilon, const double lambda)) &
-                   ExoticaBoxQP);
+                                 const int max_iterations, const double epsilon, const double lambda,
+                                 bool use_polynomial_linesearch)) &
+                   ExoticaBoxQP,
+               py::arg("H"), py::arg("q"), py::arg("b_low"), py::arg("b_high"), py::arg("x_init"), py::arg("gamma"), py::arg("max_iterations"), py::arg("epsilon"), py::arg("lambda"), py::arg("use_polynomial_linesearch") = false);
 
     AddInitializers(module);
 

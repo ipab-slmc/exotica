@@ -29,6 +29,7 @@
 
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/tools/box_qp.h>
+#include <exotica_core/tools/box_qp_old.h>
 #ifdef MSGPACK_FOUND
 #include <exotica_core/visualization_meshcat.h>
 #endif
@@ -1352,6 +1353,13 @@ PYBIND11_MODULE(_pyexotica, module)
                                  const Eigen::VectorXd& x_init, const double gamma,
                                  const int max_iterations, const double epsilon, const double lambda)) &
                    BoxQP);
+
+    module.def("box_qp_old",
+               (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                                 const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
+                                 const Eigen::VectorXd& x_init, const double gamma,
+                                 const int max_iterations, const double epsilon, const double lambda)) &
+                   ExoticaBoxQP);
 
     AddInitializers(module);
 

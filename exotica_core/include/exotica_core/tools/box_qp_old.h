@@ -27,26 +27,20 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_BOX_QP_H_
-#define EXOTICA_CORE_BOX_QP_H_
+#ifndef EXOTICA_CORE_BOX_QP_OLD_H_
+#define EXOTICA_CORE_BOX_QP_OLD_H_
 
 #include <Eigen/Dense>
 #include <vector>
 
+#include "exotica_core/tools/box_qp.h"
+
 namespace exotica
 {
-typedef struct BoxQPSolution
-{
-    Eigen::MatrixXd Hff_inv;
-    Eigen::VectorXd x;
-    std::vector<size_t> free_idx;
-    std::vector<size_t> clamped_idx;
-} BoxQPSolution;
-
-inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
-                           const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
-                           const Eigen::VectorXd& x_init, const double gamma,
-                           const int max_iterations, const double epsilon, const double lambda)
+inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
+                                  const Eigen::VectorXd& x_init, const double gamma,
+                                  const int max_iterations, const double epsilon, const double lambda)
 {
     int it = 0;
     Eigen::VectorXd delta_xf, x = x_init;
@@ -155,16 +149,16 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
     return {Hff_inv, x, free_idx, clamped_idx};
 }
 
-inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
-                           const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
-                           const Eigen::VectorXd& x_init)
+inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
+                                  const Eigen::VectorXd& x_init)
 {
     constexpr double epsilon = 1e-5;
     constexpr double gamma = 0.1;
     constexpr int max_iterations = 100;
     constexpr double lambda = 1e-5;
-    return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda);
+    return ExoticaBoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda);
 }
 }  // namespace exotica
 
-#endif  // EXOTICA_CORE_BOX_QP_H_
+#endif  // EXOTICA_CORE_BOX_QP_OLD_H_

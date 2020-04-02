@@ -98,16 +98,17 @@ void ControlLimitedDDPSolver::BackwardPass()
         Eigen::VectorXd low_limit = control_limits.col(0) - u,
                         high_limit = control_limits.col(1) - u;
 
-        // BoxQPSolution boxqp_sol = BoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, 1e-12);
-        // BoxQPSolution boxqp_sol = ExoticaBoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, 1e-12);
-        // Timer t2;
         // Quu_.diagonal().array() += lambda_;
-        BoxQPSolution boxqp_sol = ExoticaBoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, lambda_);
-        // double t2_taken = t2.GetDuration();
-        // Timer t1;
-        // BoxQPSolution boxqp_sol_new = BoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, parameters_.RegularizationRate);
-        // double t1_taken = t1.GetDuration();
-        // HIGHLIGHT("New=" << t1_taken << ", old=" << t2_taken);
+        BoxQPSolution boxqp_sol;
+        if (parameters_.UseNewBoxQP)
+        {
+            HIGHLIGHT("New boxqp");
+            boxqp_sol = BoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, lambda_);
+        }
+        else
+        {
+            boxqp_sol = ExoticaBoxQP(Quu_, Qu_, low_limit, high_limit, u, 0.1, 100, 1e-5, lambda_);
+        }
 
         Quu_inv_.setZero();
         for (unsigned int i = 0; i < boxqp_sol.free_idx.size(); ++i)

@@ -2,3 +2,4 @@ class ControlLimitedDDPSolver
 
 extend <exotica_ddp_solver/abstract_ddp_solver>
 Optional bool ClampControlsInForwardPass = true;
+Optional bool UseNewBoxQP = false;

@@ -187,14 +187,12 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             cost_prev_ = cost_;
             U_ref_ = U_try_;
 
-            if (alpha_best_ == alpha_space_(alpha_space_.size() - 1))
+            if (alpha_best_ < base_parameters_.ThresholdRegularizationDecrease)
             {
-                WARNING("Tiny step, increase!");
                 IncreaseRegularization();
             }
-            else
+            else if (alpha_best_ > base_parameters_.ThresholdRegularizationIncrease)
             {
-                // if (debug_) HIGHLIGHT("Cost improved, decrease regularization");
                 if (lambda_ > base_parameters_.MinimumRegularization) DecreaseRegularization();
             }
         }
@@ -203,7 +201,6 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             cost_ = cost_prev_;
             // Revert by not storing U_try_ as U_ref_ (maintain U_ref_)
 
-            // if (debug_) HIGHLIGHT("No improvement - increase regularization");
             IncreaseRegularization();
         }
 

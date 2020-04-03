@@ -86,7 +86,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
     Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_;
     Eigen::VectorXd qf_, xf_, xc_, dxf_, dx_(nx);
 
-    for (int it = 0; it < max_iterations; ++it)
+    for (int k = 0; k < max_iterations; ++k)
     {
         solution.clamped_idx.clear();
         solution.free_idx.clear();
@@ -113,7 +113,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
         if (grad.lpNorm<Eigen::Infinity>() <= th_gradient_tolerance || num_free == 0)
         {
             // During first iteration return the inverse of the free Hessian
-            if (it == 0)
+            if (k == 0 && num_free != 0)
             {
                 Hff.resize(num_free, num_free);
                 for (std::size_t i = 0; i < num_free; ++i)
@@ -146,6 +146,11 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
                 {
                     solution.Hff_inv = Hff.inverse();
                 }
+            }
+
+            if (num_free == 0)
+            {
+                solution.Hff_inv.resize(num_free, num_free);
             }
 
             // Set solution
@@ -233,6 +238,13 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
             {
                 x = xnew_;
                 break;
+            }
+
+            // If line-search fails, return.
+            if (it == alphas_.end() - 1)
+            {
+                solution.x = x;
+                return solution;
             }
         }
     }

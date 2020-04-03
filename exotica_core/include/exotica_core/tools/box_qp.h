@@ -44,16 +44,17 @@ typedef struct BoxQPSolution
     std::vector<size_t> clamped_idx;
 } BoxQPSolution;
 
-inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init, const double gamma, const int max_iterations, const double epsilon, const double lambda, bool use_polynomial_linesearch = true)
+inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init, const double th_acceptstep, const int max_iterations, const double th_gradient_tolerance, const double lambda, bool use_polynomial_linesearch = true, bool use_cholesky_factorization = true)
 {
     // gamma = acceptance threshold
     // epsilon = gradient tolerance
     // lambda = regularization for Cholesky factorization
+    const std::size_t nx = x_init.size();
 
-    Eigen::VectorXd delta_xf, x = x_init;
+    Eigen::VectorXd delta_xf(nx), x = x_init;
     std::vector<size_t> clamped_idx, free_idx;
-    Eigen::VectorXd grad = q + H * x_init;
-    Eigen::MatrixXd Hff, Hfc, Hff_inv;
+    Eigen::VectorXd grad(nx);
+    Eigen::MatrixXd Hff(nx, nx), Hfc(nx, nx);
 
     std::vector<double> alphas_;
     const std::size_t& n_alphas_ = 10;
@@ -78,11 +79,12 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
         x(i) = std::max(std::min(x_init(i), b_high(i)), b_low(i));
     }
 
-    const std::size_t nx = x.size();
     BoxQPSolution solution;
     solution.clamped_idx.reserve(nx);
     solution.free_idx.reserve(nx);
     std::size_t num_free, num_clamped;
+    Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_;
+    Eigen::VectorXd qf_, xf_, xc_, dxf_, dx_(nx);
 
     for (int it = 0; it < max_iterations; ++it)
     {
@@ -103,13 +105,12 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
         }
         num_free = solution.free_idx.size();
         num_clamped = solution.clamped_idx.size();
-        Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_;
 
         // Check convergence
         //  a) Either norm of gradient is below threshold
         //    OR
         //  b) None of the dimensions is free (all are at boundary)
-        if (grad.lpNorm<Eigen::Infinity>() <= epsilon || num_free == 0)
+        if (grad.lpNorm<Eigen::Infinity>() <= th_gradient_tolerance || num_free == 0)
         {
             // During first iteration return the inverse of the free Hessian
             if (it == 0)
@@ -128,14 +129,23 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
                 {
                     Hff.diagonal().array() += lambda;
                 }
-                Hff_inv_llt_.compute(Hff);
-                const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
-                if (info != Eigen::Success)
+
+                // Compute the inverse
+                if (use_cholesky_factorization)
                 {
-                    ThrowPretty("Error during Cholesky decomposition of Hff");
+                    Hff_inv_llt_.compute(Hff);
+                    const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
+                    if (info != Eigen::Success)
+                    {
+                        ThrowPretty("Error during Cholesky decomposition of Hff");
+                    }
+                    solution.Hff_inv.setIdentity(num_free, num_free);
+                    Hff_inv_llt_.solveInPlace(solution.Hff_inv);
                 }
-                solution.Hff_inv.setIdentity(num_free, num_free);
-                Hff_inv_llt_.solveInPlace(solution.Hff_inv);
+                else
+                {
+                    solution.Hff_inv = Hff.inverse();
+                }
             }
 
             // Set solution
@@ -144,7 +154,6 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
         }
 
         // Compute the search direction as Newton step along the free space
-        Eigen::VectorXd qf_, xf_, xc_, dxf_, dx_(nx);
         qf_.resize(num_free);
         xf_.resize(num_free);
         xc_.resize(num_clamped);
@@ -171,20 +180,37 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
         {
             Hff.diagonal().array() += lambda;
         }
-        Hff_inv_llt_.compute(Hff);
-        const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
-        if (info != Eigen::Success)
+
+        // Compute the inverse
+        if (use_cholesky_factorization)
         {
-            ThrowPretty("Error during Cholesky decomposition of the free Hessian Hff.");
+            Hff_inv_llt_.compute(Hff);
+            const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
+            if (info != Eigen::Success)
+            {
+                ThrowPretty("Error during Cholesky decomposition of Hff");
+            }
+            solution.Hff_inv.setIdentity(num_free, num_free);
+            Hff_inv_llt_.solveInPlace(solution.Hff_inv);
         }
-        solution.Hff_inv.setIdentity(num_free, num_free);
-        Hff_inv_llt_.solveInPlace(solution.Hff_inv);
+        else
+        {
+            solution.Hff_inv = Hff.inverse();
+        }
+
         dxf_ = -qf_;
         if (num_clamped != 0)
         {
             dxf_.noalias() -= Hfc * xc_;
         }
-        Hff_inv_llt_.solveInPlace(dxf_);
+        if (use_cholesky_factorization)
+        {
+            Hff_inv_llt_.solveInPlace(dxf_);
+        }
+        else
+        {
+            dxf_ = solution.Hff_inv * dxf_;
+        }
         dxf_ -= xf_;
         dx_.setZero();
         for (std::size_t i = 0; i < num_free; ++i)
@@ -193,7 +219,6 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
         }
 
         // Try different step lengths
-        constexpr double th_acceptstep_ = 0.1;
         Eigen::VectorXd xnew_(nx);
         fold_ = 0.5 * x.dot(H * x) + q.dot(x);
         for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it)
@@ -204,7 +229,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
                 xnew_(i) = std::max(std::min(x(i) + steplength * dx_(i), b_high(i)), b_low(i));
             }
             fnew_ = 0.5 * xnew_.dot(H * xnew_) + q.dot(xnew_);
-            if (fold_ - fnew_ > th_acceptstep_ * grad.dot(x - xnew_))
+            if (fold_ - fnew_ > th_acceptstep * grad.dot(x - xnew_))
             {
                 x = xnew_;
                 break;
@@ -224,19 +249,8 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
     constexpr double gamma = 0.1;
     constexpr int max_iterations = 100;
     constexpr double lambda = 1e-5;
-    return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda, true);
+    return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda, true, true);
 }
-
-// class BoxQPSolver
-// {
-// public:
-//     BoxQPSolver();
-
-//     const BoxQPSolution& solve(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init);
-
-// private:
-//     BoxQPSolution solution;
-// };
 }  // namespace exotica
 
 #endif  // EXOTICA_CORE_BOX_QP_H_

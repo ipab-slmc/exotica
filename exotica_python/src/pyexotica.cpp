@@ -1352,18 +1352,20 @@ PYBIND11_MODULE(_pyexotica, module)
                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
                                  const Eigen::VectorXd& x_init, const double gamma,
                                  const int max_iterations, const double epsilon, const double lambda,
-                                 bool use_polynomial_linesearch)) &
+                                 bool use_polynomial_linesearch,
+                                 bool use_cholesky_factorization)) &
                    BoxQP,
-               py::arg("H"), py::arg("q"), py::arg("b_low"), py::arg("b_high"), py::arg("x_init"), py::arg("gamma"), py::arg("max_iterations"), py::arg("epsilon"), py::arg("lambda"), py::arg("use_polynomial_linesearch") = true);
+               py::arg("H"), py::arg("q"), py::arg("b_low"), py::arg("b_high"), py::arg("x_init"), py::arg("gamma"), py::arg("max_iterations"), py::arg("epsilon"), py::arg("lambda"), py::arg("use_polynomial_linesearch") = true, py::arg("use_cholesky_factorization") = true);
 
     module.def("box_qp_old",
                (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
                                  const Eigen::VectorXd& x_init, const double gamma,
                                  const int max_iterations, const double epsilon, const double lambda,
-                                 bool use_polynomial_linesearch)) &
+                                 bool use_polynomial_linesearch,
+                                 bool use_cholesky_factorization)) &
                    ExoticaBoxQP,
-               py::arg("H"), py::arg("q"), py::arg("b_low"), py::arg("b_high"), py::arg("x_init"), py::arg("gamma"), py::arg("max_iterations"), py::arg("epsilon"), py::arg("lambda"), py::arg("use_polynomial_linesearch") = false);
+               py::arg("H"), py::arg("q"), py::arg("b_low"), py::arg("b_high"), py::arg("x_init"), py::arg("gamma"), py::arg("max_iterations"), py::arg("epsilon"), py::arg("lambda"), py::arg("use_polynomial_linesearch") = false, py::arg("use_cholesky_factorization") = false);
 
     AddInitializers(module);
 

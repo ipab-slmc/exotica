@@ -41,7 +41,8 @@ inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorX
                                   const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
                                   const Eigen::VectorXd& x_init, const double gamma,
                                   const int max_iterations, const double epsilon, const double lambda,
-                                  bool use_polynomial_linesearch = false)
+                                  bool use_polynomial_linesearch = false,
+                                  bool use_cholesky_factorization = false)
 {
     int it = 0;
     Eigen::VectorXd delta_xf, x = x_init;
@@ -71,7 +72,14 @@ inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorX
         x(i) = std::max(std::min(x_init(i), b_high(i)), b_low(i));
     }
 
-    Hff_inv = (Eigen::MatrixXd::Identity(H.rows(), H.cols()) * lambda + H).inverse();
+    if (use_cholesky_factorization)
+    {
+        Hff_inv = (Eigen::MatrixXd::Identity(H.rows(), H.cols()) * lambda + H).llt().solve(Eigen::MatrixXd::Identity(H.rows(), H.cols()));
+    }
+    else
+    {
+        Hff_inv = (Eigen::MatrixXd::Identity(H.rows(), H.cols()) * lambda + H).inverse();
+    }
 
     if (grad.norm() <= epsilon)
     {
@@ -95,7 +103,7 @@ inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorX
         }
 
         if (free_idx.size() == 0)
-            return {Hff_inv, x, free_idx, clamped_idx};
+            break;
 
         Hff.resize(free_idx.size(), free_idx.size());
         Hfc.resize(free_idx.size(), clamped_idx.size());
@@ -124,7 +132,16 @@ inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorX
         for (size_t j = 0; j < clamped_idx.size(); ++j)
             x_clamped(j) = x(clamped_idx[j]);
 
-        Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * lambda + Hff).inverse();
+        // Compute the inverse
+        Hff.diagonal().array() += lambda;
+        if (use_cholesky_factorization)
+        {
+            Hff_inv = Hff.llt().solve(Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()));
+        }
+        else
+        {
+            Hff_inv = Hff.inverse();
+        }
 
         if (clamped_idx.size() == 0)
             delta_xf = -Hff_inv * (q_free)-x_free;
@@ -173,7 +190,7 @@ inline BoxQPSolution ExoticaBoxQP(const Eigen::MatrixXd& H, const Eigen::VectorX
     constexpr double gamma = 0.1;
     constexpr int max_iterations = 100;
     constexpr double lambda = 1e-5;
-    return ExoticaBoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda, false);
+    return ExoticaBoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda, false, false);
 }
 }  // namespace exotica
 

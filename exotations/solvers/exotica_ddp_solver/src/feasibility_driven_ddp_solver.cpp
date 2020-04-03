@@ -39,7 +39,13 @@ void FeasibilityDrivenDDPSolver::Instantiate(const FeasibilityDrivenDDPSolverIni
     base_parameters_ = AbstractDDPSolverInitializer(FeasibilityDrivenDDPSolverInitializer(parameters_));
 
     clamp_to_control_limits_in_forward_pass_ = base_parameters_.ClampControlsInForwardPass;
-    initial_regularization_rate_ = parameters_.RegularizationRate;
+    initial_regularization_rate_ = base_parameters_.RegularizationRate;
+    th_stepinc_ = base_parameters_.ThresholdRegularizationIncrease;
+    th_stepdec_ = base_parameters_.ThresholdRegularizationDecrease;
+
+    th_stop_ = parameters_.GradientToleranceConvergenceThreshold;
+    th_acceptstep_ = parameters_.DescentStepAcceptanceThreshold;
+    th_acceptnegstep_ = parameters_.AscentStepAcceptanceThreshold;
 }
 
 void AbstractFeasibilityDrivenDDPSolver::AllocateData()
@@ -205,11 +211,11 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
             if (dVexp_ >= 0)
-            {  // descend direction
+            {  // descent direction
                 if (d_[0] < th_grad_ || dV_ > th_acceptstep_ * dVexp_)
                 {
                     was_feasible_ = is_feasible_;
-                    SetCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
+                    SetCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1.0));
                     cost_ = cost_try_;
                     prob_->SetCostEvolution(iter, cost_);
                     recalcDiff = true;
@@ -220,17 +226,17 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             {  // reducing the gaps by allowing a small increment in the cost value
                 if (dV_ > th_acceptnegstep_ * dVexp_)
                 {
-                    if (debug_) INFO_NAMED("FDDP", "Ascent direction: " << dV_ << " > " << th_acceptnegstep_ * dVexp_)
+                    // if (debug_) INFO_NAMED("FDDP", "Ascent direction: " << dV_ << " > " << th_acceptnegstep_ * dVexp_)
                     was_feasible_ = is_feasible_;
                     SetCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
                     cost_ = cost_try_;
                     prob_->SetCostEvolution(iter, cost_);
                     break;
                 }
-                else
-                {
-                    if (debug_) INFO_NAMED("FDDP", "Ascent direction, but not accepted: " << dV_ << " < " << th_acceptnegstep_ * dVexp_)
-                }
+                // else
+                // {
+                //     if (debug_) INFO_NAMED("FDDP", "Ascent direction, but not accepted: " << dV_ << " < " << th_acceptnegstep_ * dVexp_)
+                // }
             }
 
             prob_->SetCostEvolution(iter, cost_);
@@ -272,7 +278,11 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
         }
         CheckStoppingCriteria();
 
-        if (was_feasible_ && stop_ < th_stop_)
+        // Stop is only exactly zero if all dimensions of Qu_[t] have been
+        // artificially set to 0. This is e.g. the case for a Control-Limited
+        // variant (BoxFDDP). However, we do not want to stop at the first
+        // saturation of all dimensions.
+        if (was_feasible_ && stop_ < th_stop_ && stop_ != 0.0)
         {
             HIGHLIGHT_NAMED("FeasibilityDrivenDDPSolver::Solve", "Convergence: " << stop_ << " < " << th_stop_)
             converged = true;
@@ -290,7 +300,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 
     if (diverged) prob_->termination_criterion = TerminationCriterion::Divergence;
     if (converged) prob_->termination_criterion = TerminationCriterion::Convergence;
-    if (!converged && iter == GetNumberOfMaxIterations()) prob_->termination_criterion = TerminationCriterion::IterationLimit;
+    if (!converged && iter == GetNumberOfMaxIterations() + 1) prob_->termination_criterion = TerminationCriterion::IterationLimit;
 
     // Store the best solution found over all iterations
     for (int t = 0; t < T_ - 1; ++t)

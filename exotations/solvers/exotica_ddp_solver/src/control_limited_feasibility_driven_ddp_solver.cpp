@@ -37,6 +37,15 @@ void ControlLimitedFeasibilityDrivenDDPSolver::Instantiate(const ControlLimitedF
 {
     exotica::Instantiable<exotica::ControlLimitedFeasibilityDrivenDDPSolverInitializer>::parameters_ = init;
     base_parameters_ = AbstractDDPSolverInitializer(ControlLimitedFeasibilityDrivenDDPSolverInitializer(exotica::Instantiable<exotica::ControlLimitedFeasibilityDrivenDDPSolverInitializer>::parameters_));
+
+    clamp_to_control_limits_in_forward_pass_ = base_parameters_.ClampControlsInForwardPass;
+    initial_regularization_rate_ = base_parameters_.RegularizationRate;
+    th_stepinc_ = base_parameters_.ThresholdRegularizationIncrease;
+    th_stepdec_ = base_parameters_.ThresholdRegularizationDecrease;
+
+    th_stop_ = parameters_.GradientToleranceConvergenceThreshold;
+    th_acceptstep_ = parameters_.DescentStepAcceptanceThreshold;
+    th_acceptnegstep_ = parameters_.AscentStepAcceptanceThreshold;
 }
 
 void ControlLimitedFeasibilityDrivenDDPSolver::AllocateData()
@@ -66,7 +75,7 @@ void ControlLimitedFeasibilityDrivenDDPSolver::ComputeGains(const int t)
     du_ub_ = control_limits_.col(1) - us_[t];
 
     // TODO: Use pre-allocated BoxQP
-    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t], 0.1, 100, 1e-5, ureg_);
+    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t], 0.1, 100, 1e-5, 0.0, true, true);
 
     // Compute controls
     Quu_inv_[t].setZero();

@@ -110,19 +110,21 @@ void ControlLimitedDDPSolver::BackwardPass()
         }
 
         Quu_inv_.setZero();
-        for (unsigned int i = 0; i < boxqp_sol.free_idx.size(); ++i)
-            for (unsigned int j = 0; j < boxqp_sol.free_idx.size(); ++j)
+        for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)
+            for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j)
                 Quu_inv_(boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
 
         // Compute controls
-        K_gains_[t] = -Quu_inv_ * Qux_;
-        k_gains_[t] = boxqp_sol.x;
+        K_gains_[t].noalias() = -Quu_inv_ * Qux_;
+        k_gains_[t].noalias() = boxqp_sol.x;
 
-        for (unsigned int j = 0; j < boxqp_sol.clamped_idx.size(); ++j)
-            K_gains_[t](boxqp_sol.clamped_idx[j]) = 0;
+        // Update the value function w.r.t. u as k (feed-forward term) is clamped inside the BoxQP
+        for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i)
+            Qu_(boxqp_sol.clamped_idx[i]) = 0.;
 
-        Vx_ = Qx_ - K_gains_[t].transpose() * Quu_ * k_gains_[t];
-        Vxx_ = Qxx_ - K_gains_[t].transpose() * Quu_ * K_gains_[t];
+        Vx_ = Qx_ + K_gains_[t].transpose() * Quu_ * k_gains_[t] + K_gains_[t].transpose() * Qu_ + Qux_.transpose() * k_gains_[t];
+        Vxx_ = Qxx_ + K_gains_[t].transpose() * Quu_ * K_gains_[t] + K_gains_[t].transpose() * Qux_ + Qux_.transpose() * K_gains_[t];
+        Vxx_ = 0.5 * (Vxx_ + Vxx_.transpose()).eval();
     }
 }
 

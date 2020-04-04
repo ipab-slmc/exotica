@@ -63,6 +63,8 @@ import matplotlib.pyplot as plt
 
 plt.figure(figsize=(7, 7))
 plt.plot(solution)
+plt.grid()
+plt.hlines(0, 0, len(solution[:,0]))
 plt.show()
 
 

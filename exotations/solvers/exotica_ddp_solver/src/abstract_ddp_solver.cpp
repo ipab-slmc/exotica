@@ -217,6 +217,8 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Max iterations reached. Time: " << planning_timer.GetDuration());
             prob_->termination_criterion = TerminationCriterion::IterationLimit;
         }
+
+        prob_->OnSolverIterationEnd();
     }
 
     // Store the best solution found over all iterations

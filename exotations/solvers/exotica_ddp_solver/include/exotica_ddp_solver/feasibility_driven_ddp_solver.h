@@ -53,7 +53,6 @@ protected:
     void DecreaseRegularization();
     const Eigen::Vector2d& ExpectedImprovement();
     void UpdateExpectedImprovement();
-    virtual double GetControlCost(int t) const;
     inline bool IsNaN(const double value)
     {
         if (std::isnan(value) || std::isinf(value) || value >= 1e30)

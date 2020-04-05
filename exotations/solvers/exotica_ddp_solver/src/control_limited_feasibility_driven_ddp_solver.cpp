@@ -27,6 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <exotica_core/tools/box_qp.h>
+#include <exotica_core/tools/box_qp_old.h>
 #include <exotica_ddp_solver/control_limited_feasibility_driven_ddp_solver.h>
 
 REGISTER_MOTIONSOLVER_TYPE("ControlLimitedFeasibilityDrivenDDPSolver", exotica::ControlLimitedFeasibilityDrivenDDPSolver)
@@ -75,7 +77,15 @@ void ControlLimitedFeasibilityDrivenDDPSolver::ComputeGains(const int t)
     du_ub_ = control_limits_.col(1) - us_[t];
 
     // TODO: Use pre-allocated BoxQP
-    BoxQPSolution boxqp_sol = BoxQP(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t], 0.1, 100, 1e-5, 0.0, true, true);
+    BoxQPSolution boxqp_sol;
+    if (parameters_.UseNewBoxQP)
+    {
+        boxqp_sol = BoxQP(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t], 0.1, 100, 1e-5, lambda_, parameters_.BoxQPUsePolynomialLinesearch, parameters_.BoxQPUseCholeskyFactorization);
+    }
+    else
+    {
+        boxqp_sol = ExoticaBoxQP(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t], 0.1, 100, 1e-5, lambda_, parameters_.BoxQPUsePolynomialLinesearch, parameters_.BoxQPUseCholeskyFactorization);
+    }
 
     // Compute controls
     Quu_inv_[t].setZero();

@@ -1,4 +1,4 @@
 class ControlLimitedFeasibilityDrivenDDPSolver
 
 extend <exotica_ddp_solver/feasibility_driven_ddp_solver>
-Optional bool ClampControlsInForwardPass = true;
+extend <exotica_ddp_solver/control_limited_ddp_solver>

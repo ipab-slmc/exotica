@@ -30,7 +30,6 @@
 #ifndef EXOTICA_DDP_SOLVER_CONTROL_LIMITED_FEASIBILITY_DRIVEN_DDP_SOLVER_H_
 #define EXOTICA_DDP_SOLVER_CONTROL_LIMITED_FEASIBILITY_DRIVEN_DDP_SOLVER_H_
 
-#include <exotica_core/tools/box_qp.h>
 #include <exotica_ddp_solver/control_limited_feasibility_driven_ddp_solver_initializer.h>
 #include <exotica_ddp_solver/feasibility_driven_ddp_solver.h>
 

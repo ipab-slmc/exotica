@@ -7,12 +7,12 @@ import numpy as np
 from collections import OrderedDict
 
 
-def test_solver(solver_name):
+def test_solver(solver_name, new_boxqp=False):
     # config = '{exotica_examples}/resources/configs/dynamic_time_indexed/13_control_limited_ddp_quadrotor.xml'
     config = '{exotica_examples}/resources/configs/dynamic_time_indexed/07_control_limited_ddp_cartpole.xml'
     _, problem_config = exo.Initializers.load_xml_full(config)
     problem = exo.Setup.create_problem(problem_config)
-    solver_config = (solver_name, {u'Name': u'MySolver'})
+    solver_config = (solver_name, {u'Name': u'MySolver', u'UseNewBoxQP': new_boxqp, u'BoxQPUseCholeskyFactorization': True})
     solver = exo.Setup.create_solver(solver_config)
     solver.specify_problem(problem)
 
@@ -40,8 +40,14 @@ if __name__ == "__main__":
 
     for solver_name in solvers_to_test:
         pretty_name = solver_name.replace("exotica/", "").replace("Solver", "")
-        print('Testing', pretty_name)
-        results[pretty_name] = test_solver(solver_name)
+        if 'ControlLimited' in solver_name:
+            for new_boxqp in [True, False]:
+                print('Testing', pretty_name, 'with *new* BoxQP' if new_boxqp else 'with *old* BoxQP')
+                pretty_boxqp = ' (Crocoddyl-BoxQP)' if new_boxqp else ' (Exotica-BoxQP)'
+                results[pretty_name + pretty_boxqp] = test_solver(solver_name, new_boxqp)
+        else:
+            print('Testing', pretty_name)
+            results[pretty_name] = test_solver(solver_name)
 
     fig = plt.figure(1, (12, 6))
     plt.title('Comparison of DDP-like solvers on a cart-pole swing-up task')

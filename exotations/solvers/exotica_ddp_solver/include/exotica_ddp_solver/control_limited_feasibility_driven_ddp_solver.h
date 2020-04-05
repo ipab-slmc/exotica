@@ -36,7 +36,7 @@
 namespace exotica
 {
 // Control-limited FDDP solver
-//  A Direct-Indirect Hybridization Approach to Control-Limited DDP (Mastalli, Merkt, Saumell, Sola, Mansard, Vijayakumar, 2014)
+//  A Direct-Indirect Hybridization Approach to Control-Limited DDP (Mastalli, Merkt, Saumell, Sola, Mansard, Vijayakumar, 2020)
 class ControlLimitedFeasibilityDrivenDDPSolver : public AbstractFeasibilityDrivenDDPSolver, public Instantiable<ControlLimitedFeasibilityDrivenDDPSolverInitializer>
 {
 public:

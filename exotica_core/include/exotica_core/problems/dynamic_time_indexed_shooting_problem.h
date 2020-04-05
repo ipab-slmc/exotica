@@ -157,7 +157,6 @@ protected:
     std::normal_distribution<double> standard_normal_noise_{0, 1};
 
     TaskSpaceVector cost_Phi;
-    
 
     void InstatiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init);
 

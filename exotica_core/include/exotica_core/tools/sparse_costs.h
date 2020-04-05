@@ -36,56 +36,50 @@
 
 namespace exotica
 {
-    inline double huber_cost(double x, double delta)
-    {
-        return delta * delta * (std::sqrt(1 + std::pow(x / delta, 2)) - 1.0);
-    }
+inline double huber_cost(double x, double delta)
+{
+    return delta * delta * (std::sqrt(1 + std::pow(x / delta, 2)) - 1.0);
+}
 
-    inline double huber_jacobian(double x, double delta)
-    {
-        return x / (std::sqrt(1.0 + x * x / (delta * delta)));
-    }
+inline double huber_jacobian(double x, double delta)
+{
+    return x / (std::sqrt(1.0 + x * x / (delta * delta)));
+}
 
-    inline double huber_hessian(double x, double delta)
-    {
-        return std::pow(delta, 4) * std::sqrt(1.0 + x * x / (delta * delta)) / (std::pow(delta * delta + x * x, 2));
-    }
+inline double huber_hessian(double x, double delta)
+{
+    return std::pow(delta, 4) * std::sqrt(1.0 + x * x / (delta * delta)) / (std::pow(delta * delta + x * x, 2));
+}
 
+inline double smooth_l1_cost(double x, double alpha)
+{
+    return 1.0 / alpha * (std::log(1.0 + std::exp(-alpha * x)) + std::log(1.0 + std::exp(alpha * x)));
+}
 
-    inline double smooth_l1_cost(double x, double alpha)
-    {
-        return 1.0 / alpha * (std::log(1.0 + std::exp(-alpha * x)) + std::log(1.0 + std::exp(alpha * x)));
-    }
+inline double smooth_l1_jacobian(double x, double alpha)
+{
+    return 1.0 / (1 + std::exp(-alpha * x)) - 1.0 / (1 + std::exp(alpha * x));
+}
 
-    inline double smooth_l1_jacobian(double x, double alpha)
-    {
-        return 1.0 / (1 + std::exp(-alpha * x)) - 1.0 / (1 + std::exp(alpha * x));
-    }
+inline double smooth_l1_hessian(double x, double alpha)
+{
+    return 2 * alpha * std::exp(alpha * x) / std::pow(1 + std::exp(alpha * x), 2);
+}
 
-    inline double smooth_l1_hessian(double x, double alpha)
-    {
-        return 2 * alpha * std::exp(alpha * x) / std::pow(1 + std::exp(alpha * x), 2);
-    }
+inline double bimodal_huber_cost(double x, double delta, double mode1, double mode2)
+{
+    return huber_cost(x - mode1, delta) + huber_cost(x - mode2, delta) - huber_cost(x - (mode1 + mode2) / 2, delta) - huber_cost(mode1, delta);
+}
 
+inline double bimodal_huber_jacobian(double x, double delta, double mode1, double mode2)
+{
+    return huber_jacobian(x - mode1, delta) + huber_jacobian(x - mode2, delta) - huber_jacobian(x - (mode1 + mode2) / 2, delta);
+}
 
-    inline double bimodal_huber_cost(double x, double delta, double mode1, double mode2)
-    {
-        return huber_cost(x - mode1,delta) + huber_cost(x - mode2,delta)
-                - huber_cost(x - (mode1 + mode2) / 2,delta) - huber_cost(mode1,delta);
-    }
-    
-    inline double bimodal_huber_jacobian(double x, double delta, double mode1, double mode2)
-    {
-        return huber_jacobian(x - mode1,delta) + huber_jacobian(x - mode2,delta)
-                            - huber_jacobian(x - (mode1 + mode2) / 2,delta);
-    }
-
-    inline double bimodal_huber_hessian(double x, double delta, double mode1, double mode2)
-    {
-        return huber_hessian(x - mode1,delta) + huber_hessian(x - mode2,delta)
-                            - huber_hessian(x - (mode1 + mode2) / 2,delta);
-    }
-
+inline double bimodal_huber_hessian(double x, double delta, double mode1, double mode2)
+{
+    return huber_hessian(x - mode1, delta) + huber_hessian(x - mode2, delta) - huber_hessian(x - (mode1 + mode2) / 2, delta);
+}
 }
 
 #endif

@@ -45,63 +45,82 @@ DynamicTimeIndexedShootingProblem::~DynamicTimeIndexedShootingProblem() = defaul
 void DynamicTimeIndexedShootingProblem::InstatiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init)
 {
     // L1 Rate
-    if (parameters_.LossType == "SmoothL1") {
-        if (parameters_.L1Rate.size() == 0) {
+    if (parameters_.LossType == "SmoothL1")
+    {
+        if (parameters_.L1Rate.size() == 0)
+        {
             ThrowPretty("L1Rate not set.");  // TODO: set default...
         }
-        else if (parameters_.L1Rate.size() == 1) {
-            l1_rate_.setConstant(get_num_controls(), parameters_.L1Rate(0)); 
+        else if (parameters_.L1Rate.size() == 1)
+        {
+            l1_rate_.setConstant(get_num_controls(), parameters_.L1Rate(0));
         }
-        else if (parameters_.L1Rate.size() == get_num_controls()) {
+        else if (parameters_.L1Rate.size() == get_num_controls())
+        {
             l1_rate_ = parameters_.L1Rate;
         }
-        else {
+        else
+        {
             ThrowPretty("L1Rate has wrong size: expected " << get_num_controls() << ", got " << parameters_.L1Rate.size());
         }
     }
 
     // Huber Rate
-    if (parameters_.LossType == "Huber") {
-        if (parameters_.HuberRate.size() == 0) {
+    if (parameters_.LossType == "Huber")
+    {
+        if (parameters_.HuberRate.size() == 0)
+        {
             ThrowPretty("HuberRate not set.");  // TODO: set default...
         }
-        else if (parameters_.HuberRate.size() == 1) {
+        else if (parameters_.HuberRate.size() == 1)
+        {
             huber_rate_.setConstant(get_num_controls(), parameters_.HuberRate(0));
         }
-        else if (parameters_.HuberRate.size() == get_num_controls()) {
+        else if (parameters_.HuberRate.size() == get_num_controls())
+        {
             huber_rate_ = parameters_.HuberRate;
         }
-        else {
+        else
+        {
             ThrowPretty("HuberRate has wrong size: expected " << get_num_controls() << ", got " << parameters_.HuberRate.size());
         }
     }
 
     // BimodalHuber mode 1
-    if (parameters_.LossType == "BiModalHuber") {
-        if (parameters_.Mode1.size() == 0) {
+    if (parameters_.LossType == "BiModalHuber")
+    {
+        if (parameters_.Mode1.size() == 0)
+        {
             ThrowPretty("Mode1 not set.");  // TODO: set default...
         }
-        else if (parameters_.Mode1.size() == 1) {
+        else if (parameters_.Mode1.size() == 1)
+        {
             bimodal_huber_mode1_.setConstant(get_num_controls(), parameters_.Mode1(0));
         }
-        else if (parameters_.Mode1.size() == get_num_controls()) {
+        else if (parameters_.Mode1.size() == get_num_controls())
+        {
             bimodal_huber_mode1_ = parameters_.Mode1;
         }
-        else {
+        else
+        {
             ThrowPretty("Mode1 has wrong size: expected " << get_num_controls() << ", got " << parameters_.Mode1.size());
         }
 
         // BimodalHuber mode 1
-        if (parameters_.Mode2.size() == 0) {
+        if (parameters_.Mode2.size() == 0)
+        {
             ThrowPretty("Mode2 not set.");  // TODO: set default...
         }
-        else if (parameters_.Mode2.size() == 1) {
+        else if (parameters_.Mode2.size() == 1)
+        {
             bimodal_huber_mode2_.setConstant(get_num_controls(), parameters_.Mode2(0));
         }
-        else if (parameters_.Mode2.size() == get_num_controls()) {
+        else if (parameters_.Mode2.size() == get_num_controls())
+        {
             bimodal_huber_mode2_ = parameters_.Mode2;
         }
-        else {
+        else
+        {
             ThrowPretty("Mode2 has wrong size: expected " << get_num_controls() << ", got " << parameters_.Mode2.size());
         }
     }
@@ -687,7 +706,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) const
-{   
+{
     if (t >= T_ - 1 || t < -1)
     {
         ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_ - 1);
@@ -712,8 +731,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
             Quu(iu, iu) = huber_hessian(U_.col(t)[iu], huber_rate_(iu));
         else if (parameters_.LossType == "BiModalHuber")
             Quu(iu, iu) = bimodal_huber_hessian(
-                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu)
-            );
+                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
 
     return Quu;
@@ -743,8 +761,7 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
             cost += huber_cost(U_.col(t)[iu], huber_rate_(iu));
         else if (parameters_.LossType == "BiModalHuber")
             cost += bimodal_huber_cost(
-                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu)
-            );
+                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
     if (!std::isfinite(cost))
     {
@@ -779,8 +796,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
             Qu(iu) = huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
         else if (parameters_.LossType == "BiModalHuber")
             Qu(iu) = bimodal_huber_jacobian(
-                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu)
-            );
+                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
 
     return Qu;

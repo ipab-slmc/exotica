@@ -75,7 +75,7 @@ void ControlLimitedDDPSolver::BackwardPass()
                     (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_
                 ) * dt_;
 
-            Quu_ = dt_ * prob_->GetControlCostHessian() + fu.transpose() * Vxx_ * fu +
+            Quu_ = dt_ * prob_->GetControlCostHessian(t) + fu.transpose() * Vxx_ * fu +
                 Eigen::TensorToMatrix(
                     (Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU_, NU_
                 ) * dt_;
@@ -88,7 +88,7 @@ void ControlLimitedDDPSolver::BackwardPass()
         else
         {
             Qxx_ = dt_ * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx_ * fx;
-            Quu_ = dt_ * prob_->GetControlCostHessian() + fu.transpose() * Vxx_ * fu;
+            Quu_ = dt_ * prob_->GetControlCostHessian(t) + fu.transpose() * Vxx_ * fu;
 
             // NOTE: Qux = Qxu for all robotics systems I have seen
             //  this might need to be changed later on

@@ -99,7 +99,7 @@ public:
     Eigen::VectorXd GetStateCostJacobian(int t) const;    ///< lx
     Eigen::VectorXd GetControlCostJacobian(int t) const;  ///< lu
     Eigen::MatrixXd GetStateCostHessian(int t) const;     ///< lxx
-    Eigen::MatrixXd GetControlCostHessian() const;        ///< luu
+    Eigen::MatrixXd GetControlCostHessian(int t) const;   ///< luu
     Eigen::MatrixXd GetStateControlCostHessian() const
     {
         // NOTE: For quadratic costs this is always 0
@@ -111,6 +111,14 @@ public:
 
     Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
     Eigen::VectorXd Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
+
+    void OnSolverIterationEnd()
+    {
+        if (parameters_.LossType == "SmoothL1")
+        {
+            l1_rate_ = (l1_rate_ * parameters_.L1IncreaseRate).cwiseMin(parameters_.MaxL1Rate);
+        }
+    }
 
 protected:
     /// \brief Checks the desired time index for bounds and supports -1 indexing.
@@ -149,6 +157,14 @@ protected:
     std::normal_distribution<double> standard_normal_noise_{0, 1};
 
     TaskSpaceVector cost_Phi;
+    
+
+    void InstatiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init);
+
+    // sparsity costs
+    Eigen::VectorXd l1_rate_;
+    Eigen::VectorXd huber_rate_;
+    Eigen::VectorXd bimodal_huber_mode1_, bimodal_huber_mode2_;
 };
 typedef std::shared_ptr<exotica::DynamicTimeIndexedShootingProblem> DynamicTimeIndexedShootingProblemPtr;
 }  // namespace exotica

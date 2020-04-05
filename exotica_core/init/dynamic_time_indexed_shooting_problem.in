@@ -21,3 +21,14 @@ Optional Eigen::VectorXd CW = Eigen::VectorXd(); // Control-idependent (white) n
 Optional double CW_rate = 0;  // Control-independent (white) noise constant covariance. Mutex w/ CW
 
 Optional bool WarmStartWithInverseDynamics = false;
+
+
+// Sparsity costs
+Optional Eigen::VectorXd L1Rate = Eigen::VectorXd();
+Optional Eigen::VectorXd HuberRate = Eigen::VectorXd();
+Optional double L1IncreaseRate = 1.5;
+Optional double MaxL1Rate = 1e5;
+Optional std::string LossType = "SmoothL1";  // "SmoothL1", "Huber", "BiModalHuber", "L2"
+
+Optional Eigen::VectorXd Mode1 = Eigen::VectorXd();
+Optional Eigen::VectorXd Mode2 = Eigen::VectorXd();

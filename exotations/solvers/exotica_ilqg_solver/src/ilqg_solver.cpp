@@ -79,7 +79,7 @@ void ILQGSolver::BackwardPass()
         Eigen::MatrixXd q = dt * prob_->GetStateCostJacobian(t);
         Eigen::MatrixXd Q = dt * prob_->GetStateCostHessian(t);
         Eigen::MatrixXd r = dt * prob_->GetControlCostJacobian(t);
-        Eigen::MatrixXd R = dt * prob_->GetControlCostHessian();
+        Eigen::MatrixXd R = dt * prob_->GetControlCostHessian(t);
         Eigen::MatrixXd P = dt * prob_->GetStateControlCostHessian();
 
         Eigen::MatrixXd g = r + B.transpose() * s;

@@ -1,25 +1,27 @@
 <?xml version="1.0" ?>
 <ExoticaConfig>
-    <SparseFDDPSolver Name="SparseFDDP">
+    <ControlLimitedFeasibilityDrivenDDPSolver Name="BoxFDDP">
         <Debug>1</Debug>
         <MaxIterations>1000</MaxIterations>
-        <FunctionTolerance>1e-5</FunctionTolerance>
-        <ClampControlsInForwardPass>0</ClampControlsInForwardPass>
-        <RegularizationRate>1e-3</RegularizationRate>
-
-        <L1Rate>1e-2</L1Rate>
-        <HuberRate>0.01</HuberRate>
-        <L1IncreaseRate>1.5</L1IncreaseRate>
-        <LossType>Huber</LossType>
-    </SparseFDDPSolver>
-
-    <!-- <FeasibilityDrivenDDPSolver Name="FDDP">
-        <Debug>1</Debug>
-        <MaxIterations>2500</MaxIterations>
-        <RegularizationRate>1e-3</RegularizationRate>
-    </FeasibilityDrivenDDPSolver> -->
-
+        <FunctionTolerance>1e-10</FunctionTolerance>
+        <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
+    </ControlLimitedFeasibilityDrivenDDPSolver>
+    
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <!-- <LossType>L2</LossType> -->
+        <!-- <L2Rate>0</L2Rate> -->
+
+        <!-- <LossType>Huber</LossType> -->
+        <!-- <HuberRate>1</HuberRate> -->
+
+        <!-- <LossType>BiModalHuber</LossType> -->
+        <!-- <Mode1>  -10</Mode1> -->
+        <!-- <Mode2>   10</Mode2> -->
+    
+        <LossType>SmoothL1</LossType>
+        <L1Rate>0.001</L1Rate>
+        <L1IncreaseRate>1.05</L1IncreaseRate>
+
         <PlanningScene>
             <Scene>
                 <JointGroup>whole_body</JointGroup>
@@ -74,10 +76,10 @@
             </QuasiStatic>
         </Maps>
         <Cost>
-            <Task Task="PalmPosition" Rho="1"/>
-            <Task Task="JointLimit" Rho="1"/>
-            <Task Task="Stability" Rho="1"/>
-            <Task Task="FootPosition" Rho="10"/>
+            <Task Task="PalmPosition" Rho="10"/>
+            <Task Task="JointLimit" Rho="10"/>
+            <Task Task="Stability" Rho="10"/>
+            <Task Task="FootPosition" Rho="100"/>
             <!-- <Task Task="StraightBack" Rho="1"/> -->
         </Cost>
 
@@ -91,7 +93,7 @@
           1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
           1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         </Qf>
-        <Qf_rate>10</Qf_rate>
+        <Qf_rate>100</Qf_rate>
         <!-- <R_rate>1e-3</R_rate> -->
         <R_rate>0</R_rate>
 

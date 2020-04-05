@@ -295,7 +295,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             break;
         }
 
-        OnIterationEnd();
+        prob_->OnSolverIterationEnd();
     }
 
     if (diverged) prob_->termination_criterion = TerminationCriterion::Divergence;
@@ -554,7 +554,7 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
 
         Qxx_[t] = dt_ * prob_->GetStateCostHessian(t);
         Qxu_[t] = dt_ * prob_->GetStateControlCostHessian().transpose();
-        Quu_[t] = dt_ * prob_->GetControlCostHessian();
+        Quu_[t] = dt_ * prob_->GetControlCostHessian(t);
         Qx_[t] = dt_ * prob_->GetStateCostJacobian(t);
         Qu_[t] = dt_ * prob_->GetControlCostJacobian(t);
 

@@ -29,6 +29,7 @@
 
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
 #include <exotica_core/setup.h>
+#include <exotica_core/tools/sparse_costs.h>
 #include <cmath>
 
 REGISTER_PROBLEM_TYPE("DynamicTimeIndexedShootingProblem", exotica::DynamicTimeIndexedShootingProblem)
@@ -40,6 +41,71 @@ DynamicTimeIndexedShootingProblem::DynamicTimeIndexedShootingProblem()
     this->flags_ = KIN_FK | KIN_J;
 }
 DynamicTimeIndexedShootingProblem::~DynamicTimeIndexedShootingProblem() = default;
+
+void DynamicTimeIndexedShootingProblem::InstatiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init)
+{
+    // L1 Rate
+    if (parameters_.LossType == "SmoothL1") {
+        if (parameters_.L1Rate.size() == 0) {
+            ThrowPretty("L1Rate not set.");  // TODO: set default...
+        }
+        else if (parameters_.L1Rate.size() == 1) {
+            l1_rate_.setConstant(get_num_controls(), parameters_.L1Rate(0)); 
+        }
+        else if (parameters_.L1Rate.size() == get_num_controls()) {
+            l1_rate_ = parameters_.L1Rate;
+        }
+        else {
+            ThrowPretty("L1Rate has wrong size: expected " << get_num_controls() << ", got " << parameters_.L1Rate.size());
+        }
+    }
+
+    // Huber Rate
+    if (parameters_.LossType == "Huber") {
+        if (parameters_.HuberRate.size() == 0) {
+            ThrowPretty("HuberRate not set.");  // TODO: set default...
+        }
+        else if (parameters_.HuberRate.size() == 1) {
+            huber_rate_.setConstant(get_num_controls(), parameters_.HuberRate(0));
+        }
+        else if (parameters_.HuberRate.size() == get_num_controls()) {
+            huber_rate_ = parameters_.HuberRate;
+        }
+        else {
+            ThrowPretty("HuberRate has wrong size: expected " << get_num_controls() << ", got " << parameters_.HuberRate.size());
+        }
+    }
+
+    // BimodalHuber mode 1
+    if (parameters_.LossType == "BiModalHuber") {
+        if (parameters_.Mode1.size() == 0) {
+            ThrowPretty("Mode1 not set.");  // TODO: set default...
+        }
+        else if (parameters_.Mode1.size() == 1) {
+            bimodal_huber_mode1_.setConstant(get_num_controls(), parameters_.Mode1(0));
+        }
+        else if (parameters_.Mode1.size() == get_num_controls()) {
+            bimodal_huber_mode1_ = parameters_.Mode1;
+        }
+        else {
+            ThrowPretty("Mode1 has wrong size: expected " << get_num_controls() << ", got " << parameters_.Mode1.size());
+        }
+
+        // BimodalHuber mode 1
+        if (parameters_.Mode2.size() == 0) {
+            ThrowPretty("Mode2 not set.");  // TODO: set default...
+        }
+        else if (parameters_.Mode2.size() == 1) {
+            bimodal_huber_mode2_.setConstant(get_num_controls(), parameters_.Mode2(0));
+        }
+        else if (parameters_.Mode2.size() == get_num_controls()) {
+            bimodal_huber_mode2_ = parameters_.Mode2;
+        }
+        else {
+            ThrowPretty("Mode2 has wrong size: expected " << get_num_controls() << ", got " << parameters_.Mode2.size());
+        }
+    }
+}
 
 void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init)
 {
@@ -165,6 +231,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     cost.Initialize(this->parameters_.Cost, shared_from_this(), cost_Phi);
 
     ApplyStartState(false);
+    InstatiateCostTerms(init);
     ReinitializeVariables();
 }
 
@@ -619,9 +686,37 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
     return Q_[t] + Q_[t].transpose() + (general_cost_jacobian * general_cost_jacobian.transpose());
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian() const
-{
-    return R_ + R_.transpose();
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) const
+{   
+    if (t >= T_ - 1 || t < -1)
+    {
+        ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_ - 1);
+    }
+    else if (t == -1)
+    {
+        t = T_ - 2;
+    }
+
+    const int NU = get_num_controls();
+
+    if (parameters_.LossType == "L2")
+        return R_ + R_.transpose();
+
+    Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(NU, NU);
+
+    for (int iu = 0; iu < NU; ++iu)
+    {
+        if (parameters_.LossType == "SmoothL1")
+            Quu(iu, iu) = smooth_l1_hessian(U_.col(t)[iu], l1_rate_(iu));
+        else if (parameters_.LossType == "Huber")
+            Quu(iu, iu) = huber_hessian(U_.col(t)[iu], huber_rate_(iu));
+        else if (parameters_.LossType == "BiModalHuber")
+            Quu(iu, iu) = bimodal_huber_hessian(
+                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu)
+            );
+    }
+
+    return Quu;
 }
 
 double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
@@ -634,7 +729,28 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
     {
         t = T_ - 2;
     }
-    return U_.col(t).transpose() * R_ * U_.col(t);
+
+    if (parameters_.LossType == "L2")
+        return U_.col(t).transpose() * R_ * U_.col(t);
+
+    const int NU = get_num_controls();
+    double cost = 0;
+    for (int iu = 0; iu < NU; ++iu)
+    {
+        if (parameters_.LossType == "SmoothL1")
+            cost += smooth_l1_cost(U_.col(t)[iu], l1_rate_(iu));
+        else if (parameters_.LossType == "Huber")
+            cost += huber_cost(U_.col(t)[iu], huber_rate_(iu));
+        else if (parameters_.LossType == "BiModalHuber")
+            cost += bimodal_huber_cost(
+                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu)
+            );
+    }
+    if (!std::isfinite(cost))
+    {
+        cost = 0.0;  // Likely "inf" as u is too small.
+    }
+    return cost;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t) const
@@ -647,7 +763,27 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
     {
         t = T_ - 2;
     }
-    return R_ * U_.col(t) + R_.transpose() * U_.col(t);
+
+    const int NU = get_num_controls();
+
+    if (parameters_.LossType == "L2")
+        return R_ * U_.col(t) + R_.transpose() * U_.col(t);
+
+    Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(NU, 1);
+
+    for (int iu = 0; iu < NU; ++iu)
+    {
+        if (parameters_.LossType == "SmoothL1")
+            Qu(iu) = smooth_l1_jacobian(U_.col(t)[iu], l1_rate_(iu));
+        else if (parameters_.LossType == "Huber")
+            Qu(iu) = huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
+        else if (parameters_.LossType == "BiModalHuber")
+            Qu(iu) = bimodal_huber_jacobian(
+                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu)
+            );
+    }
+
+    return Qu;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)

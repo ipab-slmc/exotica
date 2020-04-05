@@ -158,7 +158,7 @@ protected:
 
     TaskSpaceVector cost_Phi;
 
-    void InstatiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init);
+    void InstantiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init);
 
     // sparsity costs
     Eigen::VectorXd l1_rate_;

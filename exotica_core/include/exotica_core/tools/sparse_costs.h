@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_CORE_SPARSE_COSTS_H_
-#define EXOTICA_CORE_SPARSE_COSTS_H_
+#ifndef EXOTICA_CORE_TOOLS_SPARSE_COSTS_H_
+#define EXOTICA_CORE_TOOLS_SPARSE_COSTS_H_
 
 #include <exotica_core/tools/exception.h>
 #include <Eigen/Dense>
@@ -80,6 +80,6 @@ inline double bimodal_huber_hessian(double x, double delta, double mode1, double
 {
     return huber_hessian(x - mode1, delta) + huber_hessian(x - mode2, delta) - huber_hessian(x - (mode1 + mode2) / 2, delta);
 }
-}
+}  // namespace exotica
 
-#endif
+#endif  // EXOTICA_CORE_TOOLS_SPARSE_COSTS_H_

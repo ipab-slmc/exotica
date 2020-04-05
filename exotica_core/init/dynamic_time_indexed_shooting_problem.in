@@ -22,13 +22,14 @@ Optional double CW_rate = 0;  // Control-independent (white) noise constant cova
 
 Optional bool WarmStartWithInverseDynamics = false;
 
-
-// Sparsity costs
+// Different control cost types. By default, L2 is used.
+// Different L1 costs can introduce sparsity.
 Optional Eigen::VectorXd L1Rate = Eigen::VectorXd();
 Optional Eigen::VectorXd HuberRate = Eigen::VectorXd();
 Optional double L1IncreaseRate = 1.5;
 Optional double MaxL1Rate = 1e5;
-Optional std::string LossType = "SmoothL1";  // "SmoothL1", "Huber", "BiModalHuber", "L2"
+Optional std::string LossType = "L2";  // "SmoothL1", "Huber", "BiModalHuber", "L2"
 
+// WIP: BiModalHuber related costs:
 Optional Eigen::VectorXd Mode1 = Eigen::VectorXd();
 Optional Eigen::VectorXd Mode2 = Eigen::VectorXd();

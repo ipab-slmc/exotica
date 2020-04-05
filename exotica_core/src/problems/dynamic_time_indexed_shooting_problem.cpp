@@ -42,7 +42,7 @@ DynamicTimeIndexedShootingProblem::DynamicTimeIndexedShootingProblem()
 }
 DynamicTimeIndexedShootingProblem::~DynamicTimeIndexedShootingProblem() = default;
 
-void DynamicTimeIndexedShootingProblem::InstatiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init)
+void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init)
 {
     // L1 Rate
     if (parameters_.LossType == "SmoothL1")
@@ -250,7 +250,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     cost.Initialize(this->parameters_.Cost, shared_from_this(), cost_Phi);
 
     ApplyStartState(false);
-    InstatiateCostTerms(init);
+    InstantiateCostTerms(init);
     ReinitializeVariables();
 }
 
@@ -716,14 +716,12 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
         t = T_ - 2;
     }
 
-    const int NU = get_num_controls();
-
     if (parameters_.LossType == "L2")
         return R_ + R_.transpose();
 
-    Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(NU, NU);
-
-    for (int iu = 0; iu < NU; ++iu)
+    // Sparsity-related control Hessian
+    Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(num_controls_, num_controls_);
+    for (int iu = 0; iu < num_controls_; ++iu)
     {
         if (parameters_.LossType == "SmoothL1")
             Quu(iu, iu) = smooth_l1_hessian(U_.col(t)[iu], l1_rate_(iu));
@@ -733,7 +731,6 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
             Quu(iu, iu) = bimodal_huber_hessian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
-
     return Quu;
 }
 
@@ -751,9 +748,9 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
     if (parameters_.LossType == "L2")
         return U_.col(t).transpose() * R_ * U_.col(t);
 
-    const int NU = get_num_controls();
+    // Sparsity-related control cost
     double cost = 0;
-    for (int iu = 0; iu < NU; ++iu)
+    for (int iu = 0; iu < num_controls_; ++iu)
     {
         if (parameters_.LossType == "SmoothL1")
             cost += smooth_l1_cost(U_.col(t)[iu], l1_rate_(iu));
@@ -781,14 +778,12 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
         t = T_ - 2;
     }
 
-    const int NU = get_num_controls();
-
     if (parameters_.LossType == "L2")
         return R_ * U_.col(t) + R_.transpose() * U_.col(t);
 
-    Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(NU, 1);
-
-    for (int iu = 0; iu < NU; ++iu)
+    // Sparsity-related control cost Jacobian
+    Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(num_controls_);
+    for (int iu = 0; iu < num_controls_; ++iu)
     {
         if (parameters_.LossType == "SmoothL1")
             Qu(iu) = smooth_l1_jacobian(U_.col(t)[iu], l1_rate_(iu));
@@ -798,7 +793,6 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
             Qu(iu) = bimodal_huber_jacobian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
-
     return Qu;
 }
 

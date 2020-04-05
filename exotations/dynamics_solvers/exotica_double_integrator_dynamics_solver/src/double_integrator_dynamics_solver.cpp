@@ -49,11 +49,19 @@ void DoubleIntegratorDynamicsSolver::AssignScene(ScenePtr scene_in)
 
     B_ = Eigen::MatrixXd::Zero(num_positions_ + num_velocities_, num_controls_);
     B_.bottomRightCorner(num_controls_, num_controls_) = Eigen::MatrixXd::Identity(num_controls_, num_controls_);
+
+    fx_ = A_;
+    fu_ = B_;
 }
 
 Eigen::VectorXd DoubleIntegratorDynamicsSolver::f(const StateVector& x, const ControlVector& u)
 {
     return A_ * x + B_ * u;
+}
+
+void DoubleIntegratorDynamicsSolver::ComputeDerivatives(const StateVector& x, const ControlVector& u)
+{
+    // Nothing to do here.
 }
 
 Eigen::MatrixXd DoubleIntegratorDynamicsSolver::fx(const StateVector& x, const ControlVector& u)

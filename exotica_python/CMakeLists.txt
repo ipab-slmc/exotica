@@ -42,3 +42,7 @@ COMMENT "Copying library files to python directory")
 catkin_python_setup()
 
 install(TARGETS _pyexotica LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION}/pyexotica)
+
+if(CATKIN_ENABLE_TESTING)
+  catkin_add_nosetests(test/test_no_unknown_initializer_types.py)
+endif()

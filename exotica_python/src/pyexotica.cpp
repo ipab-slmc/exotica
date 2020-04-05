@@ -254,6 +254,30 @@ public:
             }
             return true;
         }
+        else if (target.GetType() == "Eigen::Matrix<int, -1, 1, 0, -1, 1>")
+        {
+            if (IsPyString(value_py))
+            {
+                target.Set(ParseVector<int, Eigen::Dynamic>(PyAsStdString(value_py)));
+            }
+            else
+            {
+                target.Set(py::cast<Eigen::VectorXi>(value_py));
+            }
+            return true;
+        }
+        else if (target.GetType() == "Eigen::Matrix<double, 2, 1, 0, 2, 1>")
+        {
+            if (IsPyString(value_py))
+            {
+                target.Set(ParseVector<double, 2>(PyAsStdString(value_py)));
+            }
+            else
+            {
+                target.Set(py::cast<Eigen::Vector2d>(value_py));
+            }
+            return true;
+        }
         else if (target.GetType() == "Eigen::Matrix<double, 3, 1, 0, 3, 1>")
         {
             if (IsPyString(value_py))
@@ -441,6 +465,14 @@ public:
         else if (prop.GetType() == "Eigen::Matrix<double, -1, 1, 0, -1, 1>")
         {
             PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<Eigen::VectorXd>(prop.Get())).ptr());
+        }
+        else if (prop.GetType() == "Eigen::Matrix<int, -1, 1, 0, -1, 1>")
+        {
+            PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<Eigen::VectorXi>(prop.Get())).ptr());
+        }
+        else if (prop.GetType() == "Eigen::Matrix<double, 2, 1, 0, 2, 1>")
+        {
+            PyDict_SetItemString(dict, name.c_str(), py::cast(boost::any_cast<Eigen::Vector2d>(prop.Get())).ptr());
         }
         else if (prop.GetType() == "Eigen::Matrix<double, 3, 1, 0, 3, 1>")
         {
@@ -672,7 +704,9 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("set_goal", &TimeIndexedTask::SetGoal)
         .def("get_goal", &TimeIndexedTask::GetGoal)
         .def("set_rho", &TimeIndexedTask::SetRho)
-        .def("get_rho", &TimeIndexedTask::GetRho);
+        .def("get_rho", &TimeIndexedTask::GetRho)
+        .def("get_task_error", &TimeIndexedTask::GetTaskError)
+        .def("get_S", &TimeIndexedTask::GetS);
 
     py::class_<EndPoseTask, std::shared_ptr<EndPoseTask>>(module, "EndPoseTask")
         .def_readonly("length_Phi", &EndPoseTask::length_Phi)
@@ -1216,6 +1250,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("f", &DynamicsSolver::f)
         .def("fx", &DynamicsSolver::fx)
         .def("fu", &DynamicsSolver::fu)
+        .def("fx_fd", &DynamicsSolver::fx_fd)
+        .def("fu_fd", &DynamicsSolver::fu_fd)
         .def_property_readonly("nq", &DynamicsSolver::get_num_positions)
         .def_property_readonly("nv", &DynamicsSolver::get_num_velocities)
         .def_property_readonly("nx", &DynamicsSolver::get_num_state)
@@ -1224,6 +1260,9 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_position", &DynamicsSolver::GetPosition)
         .def("simulate", &DynamicsSolver::Simulate)
         .def("state_delta", &DynamicsSolver::StateDelta)
+        .def("compute_derivatives", &DynamicsSolver::ComputeDerivatives)
+        .def("get_fx", &DynamicsSolver::get_fx)
+        .def("get_fu", &DynamicsSolver::get_fu)
         .def("integrate", [](DynamicsSolver* instance, Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, const double dt) {
             Eigen::VectorXd xout(instance->get_num_positions() + instance->get_num_velocities());
             instance->Integrate(x, u, dt, xout);

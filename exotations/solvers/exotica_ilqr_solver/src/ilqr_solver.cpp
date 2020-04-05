@@ -72,7 +72,8 @@ void ILQRSolver::BackwardPass()
     for (int t = T - 2; t >= 0; t--)
     {
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
-        Eigen::MatrixXd Ak = dynamics_solver_->fx(x, u), Bk = dynamics_solver_->fu(x, u),
+        dynamics_solver_->ComputeDerivatives(x, u);
+        Eigen::MatrixXd Ak = dynamics_solver_->get_fx(), Bk = dynamics_solver_->get_fu(),
                         Q = dt * prob_->get_Q(t);
 
         // eq. 13-16

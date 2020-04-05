@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, Wolfgang Merkt
+// Copyright (c) 2020, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,32 +27,51 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef EXOTICA_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_H_
-#define EXOTICA_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_H_
+#ifndef EXOTICA_PINOCCHIO_DYNAMICS_SOLVER_PINOCCHIO_GRAVITY_COMPENSATION_DYNAMICS_SOLVER_H_
+#define EXOTICA_PINOCCHIO_DYNAMICS_SOLVER_PINOCCHIO_GRAVITY_COMPENSATION_DYNAMICS_SOLVER_H_
+
+/// TODO: remove this pragma once Pinocchio removes neutralConfiguration/
+/// and fixes their deprecation warnings. (Relates to #547)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+/// fwd.hpp needs to be included first (before Boost, which comes with ROS),
+/// else everything breaks for Pinocchio >=2.1.5
+#include <pinocchio/fwd.hpp>
 
 #include <exotica_core/dynamics_solver.h>
 #include <exotica_core/scene.h>
 
-#include <exotica_double_integrator_dynamics_solver/double_integrator_dynamics_solver_initializer.h>
+#include <exotica_pinocchio_dynamics_solver/pinocchio_gravity_compensation_dynamics_solver_initializer.h>
+
+#include <pinocchio/multibody/data.hpp>
+#include <pinocchio/multibody/model.hpp>
+
+#pragma GCC diagnostic pop
 
 namespace exotica
 {
-class DoubleIntegratorDynamicsSolver : public DynamicsSolver, public Instantiable<DoubleIntegratorDynamicsSolverInitializer>
+class PinocchioDynamicsSolverWithGravityCompensation : public DynamicsSolver, public Instantiable<PinocchioDynamicsSolverWithGravityCompensationInitializer>
 {
 public:
-    DoubleIntegratorDynamicsSolver();
-
     void AssignScene(ScenePtr scene_in) override;
 
     StateVector f(const StateVector& x, const ControlVector& u) override;
-    void ComputeDerivatives(const StateVector& x, const ControlVector& u) override;
     StateDerivative fx(const StateVector& x, const ControlVector& u) override;
     ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
+    void ComputeDerivatives(const StateVector& x, const ControlVector& u) override;
 
 private:
-    Eigen::MatrixXd A_;
-    Eigen::MatrixXd B_;
+    pinocchio::Model model_;
+    std::unique_ptr<pinocchio::Data> pinocchio_data_;
+
+    Eigen::VectorXd xdot_analytic_;
+    Eigen::VectorXd u_nle_;
+    Eigen::VectorXd u_command_;
+    Eigen::VectorXd a_;
+    Eigen::MatrixXd du_command_dq_;
+    Eigen::MatrixXd du_nle_dq_;
 };
 }  // namespace exotica
 
-#endif  // EXOTICA_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_DOUBLE_INTEGRATOR_DYNAMICS_SOLVER_H_
+#endif  // EXOTICA_PINOCCHIO_DYNAMICS_SOLVER_PINOCCHIO_GRAVITY_COMPENSATION_DYNAMICS_SOLVER_H_

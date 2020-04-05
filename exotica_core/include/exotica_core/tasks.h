@@ -86,6 +86,9 @@ struct TimeIndexedTask : public Task
     void SetRho(const std::string& task_name, const double rho_in, int t);
     double GetRho(const std::string& task_name, int t) const;
 
+    Eigen::VectorXd GetTaskError(const std::string& task_name, int t) const;
+    Eigen::MatrixXd GetS(const std::string& task_name, int t) const;
+
     std::vector<Eigen::VectorXd> rho;
     std::vector<TaskSpaceVector> y;
     std::vector<Eigen::VectorXd> ydiff;

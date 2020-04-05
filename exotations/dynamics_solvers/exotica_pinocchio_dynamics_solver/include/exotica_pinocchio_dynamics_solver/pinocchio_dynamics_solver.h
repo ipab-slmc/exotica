@@ -44,12 +44,8 @@
 
 #include <exotica_pinocchio_dynamics_solver/pinocchio_dynamics_solver_initializer.h>
 
-#include <pinocchio/algorithm/aba-derivatives.hpp>
-#include <pinocchio/algorithm/aba.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/multibody/model.hpp>
-#include <pinocchio/parsers/urdf.hpp>
 
 #pragma GCC diagnostic pop
 
@@ -63,14 +59,13 @@ public:
     StateVector f(const StateVector& x, const ControlVector& u) override;
     StateDerivative fx(const StateVector& x, const ControlVector& u) override;
     ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
+    void ComputeDerivatives(const StateVector& x, const ControlVector& u) override;
     ControlVector InverseDynamics(const StateVector& x) override;
 
 private:
     pinocchio::Model model_;
     std::unique_ptr<pinocchio::Data> pinocchio_data_;
 
-    Eigen::MatrixXd fx_analytic_;
-    Eigen::MatrixXd fu_analytic_;
     Eigen::VectorXd xdot_analytic_;
 };
 }  // namespace exotica

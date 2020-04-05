@@ -68,7 +68,8 @@ void ILQGSolver::BackwardPass()
     {
         // eq. 3
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
-        Eigen::MatrixXd A = dynamics_solver_->fx(x, u), B = dynamics_solver_->fu(x, u);
+        dynamics_solver_->ComputeDerivatives(x, u);
+        Eigen::MatrixXd A = dynamics_solver_->get_fx(), B = dynamics_solver_->get_fu();
 
         A.noalias() = A * dt + Eigen::MatrixXd::Identity(A.rows(), A.cols());
         B.noalias() = B * dt;

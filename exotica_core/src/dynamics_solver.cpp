@@ -290,7 +290,7 @@ Eigen::Matrix<T, NU, 1> AbstractDynamicsSolver<T, NX, NU>::InverseDynamics(const
 }
 
 template <typename T, int NX, int NU>
-Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector& x, const ControlVector& u)
+Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx_fd(const StateVector& x, const ControlVector& u)
 {
     const int nx = get_num_state();
     const int ndx = get_num_state_derivative();
@@ -307,31 +307,63 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector
         Integrate(x, xdiff, -1., x_low);
         Integrate(x, xdiff, 1., x_high);
 
-        fx_fd.col(i) = StateDelta(f(x_high, u), f(x_low, u)) / eps;
+        fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
     }
 
     return fx_fd;
 }
 
 template <typename T, int NX, int NU>
-Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector& x, const ControlVector& u)
+Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx(const StateVector& x, const ControlVector& u)
+{
+    return fx_fd(x, u);
+}
+
+template <typename T, int NX, int NU>
+Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu_fd(const StateVector& x, const ControlVector& u)
 {
     const int ndx = get_num_state_derivative();
 
     // Finite differences
     constexpr double eps = 1e-6;
     Eigen::MatrixXd fu_fd(ndx, num_controls_);
+    Eigen::VectorXd u_low(num_controls_), u_high(num_controls_);
     for (int i = 0; i < num_controls_; ++i)
     {
-        Eigen::VectorXd u_low = u;
-        Eigen::VectorXd u_high = u;
+        u_low = u;
+        u_high = u;
         u_low(i) -= eps / 2.0;
         u_high(i) += eps / 2.0;
 
-        fu_fd.col(i) = StateDelta(f(x, u_high), f(x, u_low)) / eps;
+        fu_fd.col(i) = (f(x, u_high) - f(x, u_low)) / eps;
     }
 
     return fu_fd;
+}
+
+template <typename T, int NX, int NU>
+Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector& x, const ControlVector& u)
+{
+    return fu_fd(x, u);
+}
+
+template <typename T, int NX, int NU>
+void AbstractDynamicsSolver<T, NX, NU>::ComputeDerivatives(const StateVector& x, const ControlVector& u)
+{
+    fx_ = fx(x, u);
+    fu_ = fu(x, u);
+}
+
+template <typename T, int NX, int NU>
+const Eigen::Matrix<T, NX, NX>& AbstractDynamicsSolver<T, NX, NU>::get_fx() const
+{
+    return fx_;
+}
+
+template <typename T, int NX, int NU>
+const Eigen::Matrix<T, NX, NU>& AbstractDynamicsSolver<T, NX, NU>::get_fu() const
+{
+    return fu_;
 }
 
 }  // namespace exotica

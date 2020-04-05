@@ -1195,7 +1195,7 @@ void KinematicTree::SetModelState(std::map<std::string, double> x)
         }
         catch (const std::out_of_range& e)
         {
-            ThrowPretty("Robot model does not contain joint '" << joint.first << "'");
+            WARNING("Robot model does not contain joint '" << joint.first << "' - ignoring.");
         }
     }
     UpdateTree();

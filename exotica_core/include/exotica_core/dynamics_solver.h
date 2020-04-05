@@ -76,11 +76,26 @@ public:
     /// \brief Forward dynamics
     virtual StateVector f(const StateVector& x, const ControlVector& u) = 0;
 
+    /// \brief Computes derivatives fx, fu [single call for efficiency, derivatives can be retrieved with get_fx, get_fu]
+    virtual void ComputeDerivatives(const StateVector& x, const ControlVector& u);
+
+    /// \brief Returns derivative fx computed by ComputeDerivatives
+    const StateDerivative& get_fx() const;
+
+    /// \brief Returns derivative fu computed by ComputeDerivatives
+    const ControlDerivative& get_fu() const;
+
     /// \brief Derivative of the forward dynamics w.r.t. the state
     virtual StateDerivative fx(const StateVector& x, const ControlVector& u);
 
     /// \brief Derivative of the forward dynamics w.r.t. the control
     virtual ControlDerivative fu(const StateVector& x, const ControlVector& u);
+
+    /// \brief Derivative of the forward dynamics w.r.t. the state [finite differencing]
+    StateDerivative fx_fd(const StateVector& x, const ControlVector& u);
+
+    /// \brief Derivative of the forward dynamics w.r.t. the control [finite differencing]
+    ControlDerivative fu_fd(const StateVector& x, const ControlVector& u);
 
     // NOTE: Second order derivatives a 3D matrices, i.e. tensors
     //  We use the numerator convention (see https://en.wikipedia.org/wiki/Matrix_calculus)
@@ -172,6 +187,9 @@ protected:
 
     void InitializeSecondOrderDerivatives();
     Eigen::Tensor<T, 3> fxx_default_, fuu_default_, fxu_default_;
+
+    Eigen::MatrixXd fx_;  ///< Internal storage of derivative fx computed by ComputeDerivatives
+    Eigen::MatrixXd fu_;  ///< Internal storage of derivative fu computed by ComputeDerivatives
 };
 
 typedef AbstractDynamicsSolver<double, Eigen::Dynamic, Eigen::Dynamic> DynamicsSolver;

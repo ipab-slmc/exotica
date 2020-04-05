@@ -72,12 +72,12 @@ protected:
 
     AbstractDDPSolverInitializer base_parameters_;
 
-    inline void IncreaseRegularization()
+    virtual void IncreaseRegularization()
     {
         lambda_ *= 10.;
     }
 
-    inline void DecreaseRegularization()
+    virtual void DecreaseRegularization()
     {
         lambda_ /= 10.;
     }

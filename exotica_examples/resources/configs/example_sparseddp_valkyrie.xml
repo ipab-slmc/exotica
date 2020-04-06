@@ -1,26 +1,26 @@
 <?xml version="1.0" ?>
 <ExoticaConfig>
-    <ControlLimitedFeasibilityDrivenDDPSolver Name="BoxFDDP">
+    <FeasibilityDrivenDDPSolver Name="BoxFDDP">
         <Debug>1</Debug>
         <MaxIterations>1000</MaxIterations>
         <FunctionTolerance>1e-10</FunctionTolerance>
         <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
-    </ControlLimitedFeasibilityDrivenDDPSolver>
+    </FeasibilityDrivenDDPSolver>
     
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <!-- <LossType>L2</LossType> -->
         <!-- <L2Rate>0</L2Rate> -->
 
         <!-- <LossType>Huber</LossType> -->
-        <!-- <HuberRate>1</HuberRate> -->
+        <!-- <HuberRate>0.1</HuberRate> -->
 
         <!-- <LossType>BiModalHuber</LossType> -->
         <!-- <Mode1>  -10</Mode1> -->
         <!-- <Mode2>   10</Mode2> -->
     
         <LossType>SmoothL1</LossType>
-        <L1Rate>0.001</L1Rate>
-        <L1IncreaseRate>1.05</L1IncreaseRate>
+        <L1Rate>0.01</L1Rate>
+        <L1IncreaseRate>1.01</L1IncreaseRate>
 
         <PlanningScene>
             <Scene>
@@ -31,7 +31,7 @@
 
                 <DynamicsSolver>
                     <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
-                        <dt>0.02</dt>
+                        <dt>0.2</dt>
                         <ControlLimitsLow>-5</ControlLimitsLow>
                         <ControlLimitsHigh>5</ControlLimitsHigh>
                     </DoubleIntegratorDynamicsSolver>
@@ -83,8 +83,8 @@
             <!-- <Task Task="StraightBack" Rho="1"/> -->
         </Cost>
 
-        <T>100</T>
-        <tau>0.02</tau>
+        <T>10</T>
+        <tau>0.2</tau>
         <Q_rate>0</Q_rate>
 
         <Qf>

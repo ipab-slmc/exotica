@@ -66,10 +66,12 @@ if __name__ == "__main__":
     ma.markers = [m]
     pub.publish(ma)
 
+    sleep(1)
+
     for t in range(problem.T):
         problem.cost.set_rho('PalmPosition', 0, t)
     problem.cost.set_goal('PalmPosition', palm_target, -1)
-    problem.cost.set_rho('PalmPosition', 10, -1)
+    problem.cost.set_rho('PalmPosition', 100, -1)
 
     # for t in range(problem.T - 1):
     #     problem.update(problem.U[:,t], t)

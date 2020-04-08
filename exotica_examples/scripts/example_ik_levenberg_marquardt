@@ -1,11 +1,12 @@
 #!/usr/bin/env python
+from __future__ import print_function, division
 
 import pyexotica as exo
 from numpy import array
 from numpy import matrix
 import math
 from pyexotica.publish_trajectory import *
-from time import sleep
+from time import time, sleep
 import signal
 
 
@@ -22,14 +23,22 @@ t = 0.0
 q = array([0.0] * 7)
 print('Publishing IK')
 signal.signal(signal.SIGINT, sig_int_handler)
+planning_times = []
 while True:
     try:
+        s = time()
         problem.set_goal('Position', figureEight(t))
         problem.start_state = q
         q = solver.solve()[0]
+        planning_time = solver.get_planning_time()
+        planning_times.append(planning_time)
         publish_pose(q, problem)
-        sleep(dt)
+        e = time()
+        time_taken = e - s
+        if time_taken < dt:
+            sleep(dt - time_taken)
         t = t + dt
     except KeyboardInterrupt:
         del solver, problem
+        print("Number of samples", len(planning_times), "Mean", sum(planning_times)/len(planning_times))
         break

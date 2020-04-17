@@ -28,6 +28,7 @@ Optional Eigen::VectorXd L1Rate = Eigen::VectorXd();
 Optional Eigen::VectorXd HuberRate = Eigen::VectorXd();
 Optional double L1IncreaseRate = 1.5;
 Optional double MaxL1Rate = 1e5;
+Optional double ControlCostWeight = 1;
 Optional std::string LossType = "L2";  // "SmoothL1", "Huber", "BiModalHuber", "L2"
 
 // WIP: BiModalHuber related costs:

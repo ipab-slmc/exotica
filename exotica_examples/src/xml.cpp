@@ -62,7 +62,7 @@ void run()
 
     HIGHLIGHT("Calling solve() in an infinite loop");
 
-    double t = 0.0;
+    double t;
     ros::Rate loop_rate(500.0);
     ros::WallTime init_time = ros::WallTime::now();
 

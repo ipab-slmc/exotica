@@ -35,8 +35,6 @@
     </Inequality>
 
     <StartState>0 0 0 0 0 0 0</StartState>
-    <NominalState>0 0 0 0 0 0 0</NominalState>
-    <W> 7 6 5 4 3 2 1 </W>
   </EndPoseProblem>
   
 </IKSolverDemoConfig>

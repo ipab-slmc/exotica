@@ -2,22 +2,20 @@
 # from autograd import grad, jacobian, hessian
 import numpy as np
 import pyexotica as exo
-from time import time, sleep
 import unittest
 from numpy import testing as nptest
 sin = np.sin
 cos = np.cos
 
 class TestCartpoleDiff(unittest.TestCase):
-    """Tests cartpole derivatives against python's autograd.""" 
+    """Tests cartpole derivatives against python's autograd."""
     @staticmethod
     def dynamics(state, u):
         # Analytical dynamics from underactuated robotics
         #   http://underactuated.mit.edu
-        x, theta, xdot, thetadot = state
+        _, theta, xdot, thetadot = state
         l, m_c, m_p, g = 1, 1, 1, 9.81
         s, c = np.sin(theta), np.cos(theta)
-        tdots = thetadot ** 2
 
         return np.array([
             xdot,
@@ -52,7 +50,7 @@ class TestCartpoleDiff(unittest.TestCase):
     #         auto_diff = self.fx(x, u)
     #         solver_diff = self.dynamics_solver.fx(x, u)
     #         nptest.assert_allclose(auto_diff, solver_diff, err_msg="Derivative w.r.t. state test failed")
-            
+
     #         auto_diff = self.fu(x, u)
     #         solver_diff = self.dynamics_solver.fu(x, u)
     #         nptest.assert_allclose(auto_diff, solver_diff, err_msg="Derivative w.r.t. controls test failed")
@@ -63,7 +61,7 @@ class TestCartpoleDiff(unittest.TestCase):
         eps = 1e-5
 
         # check against 100 state,control pairs
-        for i in range(100):
+        for _ in range(100):
             x = np.random.uniform(size=(1, 4))[0]
             u = np.array([np.random.uniform()])
             fx_fd = []

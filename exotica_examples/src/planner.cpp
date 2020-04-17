@@ -70,11 +70,10 @@ void run()
     }
 
     // Create the initial configuration
-    Eigen::VectorXd q = Eigen::VectorXd::Zero(any_problem->N);
-    Eigen::MatrixXd solution;
     HIGHLIGHT("Calling solve()");
     {
         // Solve the problem using the AICO solver
+        Eigen::MatrixXd solution;
         any_solver->Solve(solution);
 
         ros::Rate loop_rate(50.0);

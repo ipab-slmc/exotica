@@ -40,7 +40,17 @@ public:
 private:
     UnconstrainedEndPoseProblemPtr prob_;  ///< Shared pointer to the planning problem.
 
-    double lambda_ = 0;  ///< Damping factor
+    // Pre-allocation of variables used during optimisation
+    double lambda_ = 0;                ///< Damping factor
+    Eigen::MatrixXd M_;                ///< Scaling matrix, used for regularisation
+    Eigen::MatrixXd JT_times_J_;       ///< Gauss-Newton Hessian approximation (J^T * J)
+    Eigen::VectorXd q_;                ///< Joint configuration vector, used during optimisation
+    Eigen::VectorXd qd_;               ///< Change in joint configuration, used during optimisation
+    Eigen::VectorXd yd_;               ///< Task space difference/error, used during optimisation
+    Eigen::MatrixXd cost_jacobian_;    ///< Jacobian, used during optimisation
+    double error_;                     ///< Error, used during optimisation
+    double error_prev_;                ///< Previous iteration error, used during optimisation
+    Eigen::LLT<Eigen::MatrixXd> llt_;  ///< Cholesky decomposition for J^T*J
 };
 }  // namespace exotica
 

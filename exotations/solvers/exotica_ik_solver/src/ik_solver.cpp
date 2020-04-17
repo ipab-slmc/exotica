@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,6 @@ REGISTER_MOTIONSOLVER_TYPE("IKSolver", exotica::IKSolver)
 
 namespace exotica
 {
-IKSolver::IKSolver() = default;
-
-IKSolver::~IKSolver() = default;
-
 void IKSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     if (pointer->type() != "exotica::UnconstrainedEndPoseProblem")
@@ -155,4 +151,4 @@ void IKSolver::ScaleToStepSize(Eigen::VectorXdRef xd)
         xd = xd * parameters_.MaxStep / max_vel;
     }
 }
-}
+}  // namespace exotica

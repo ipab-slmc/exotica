@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -53,9 +53,6 @@ namespace exotica
 class IKSolver : public MotionSolver, public Instantiable<IKSolverInitializer>
 {
 public:
-    IKSolver();
-    virtual ~IKSolver();
-
     void Solve(Eigen::MatrixXd& solution) override;
 
     void SpecifyProblem(PlanningProblemPtr pointer) override;
@@ -68,6 +65,6 @@ private:
     Eigen::MatrixXd C_;  //!< \brief Regularisation (use values from interval <0, 1))
     Eigen::MatrixXd W_;  //!< \brief Jointspace weighting
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_IK_SOLVER_IK_SOLVER_H_

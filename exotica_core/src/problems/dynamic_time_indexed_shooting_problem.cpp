@@ -719,10 +719,15 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
     if (parameters_.LossType == "L2")
         return R_ + R_.transpose();
 
+    // auto dynamics_solver = scene_->GetDynamicsSolver();
+    // auto control_limits = dynamics_solver->get_control_limits();
+
     // Sparsity-related control Hessian
     Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(num_controls_, num_controls_);
     for (int iu = 0; iu < num_controls_; ++iu)
     {
+        // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
+        //     continue;
         if (parameters_.LossType == "SmoothL1")
             Quu(iu, iu) = smooth_l1_hessian(U_.col(t)[iu], l1_rate_(iu));
         else if (parameters_.LossType == "Huber")
@@ -731,7 +736,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
             Quu(iu, iu) = bimodal_huber_hessian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
-    return Quu;
+    return parameters_.ControlCostWeight * Quu;
 }
 
 double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
@@ -748,10 +753,15 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
     if (parameters_.LossType == "L2")
         return U_.col(t).transpose() * R_ * U_.col(t);
 
+    // auto dynamics_solver = scene_->GetDynamicsSolver();
+    // auto control_limits = dynamics_solver->get_control_limits();
+
     // Sparsity-related control cost
     double cost = 0;
     for (int iu = 0; iu < num_controls_; ++iu)
     {
+        // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
+        //     continue;
         if (parameters_.LossType == "SmoothL1")
             cost += smooth_l1_cost(U_.col(t)[iu], l1_rate_(iu));
         else if (parameters_.LossType == "Huber")
@@ -764,7 +774,7 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
     {
         cost = 0.0;  // Likely "inf" as u is too small.
     }
-    return cost;
+    return parameters_.ControlCostWeight * cost;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t) const
@@ -780,11 +790,16 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
 
     if (parameters_.LossType == "L2")
         return R_ * U_.col(t) + R_.transpose() * U_.col(t);
+    
+    // auto dynamics_solver = scene_->GetDynamicsSolver();
+    // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control cost Jacobian
     Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(num_controls_);
     for (int iu = 0; iu < num_controls_; ++iu)
     {
+        // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
+        //     continue;
         if (parameters_.LossType == "SmoothL1")
             Qu(iu) = smooth_l1_jacobian(U_.col(t)[iu], l1_rate_(iu));
         else if (parameters_.LossType == "Huber")
@@ -793,7 +808,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
             Qu(iu) = bimodal_huber_jacobian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
-    return Qu;
+    return parameters_.ControlCostWeight * Qu;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
@@ -838,6 +853,11 @@ void DynamicTimeIndexedShootingProblem::EnableStochasticUpdates()
 void DynamicTimeIndexedShootingProblem::DisableStochasticUpdates()
 {
     stochastic_updates_enabled_ = false;
+}
+
+void DynamicTimeIndexedShootingProblem::RescaleCostWeights()
+{
+    
 }
 
 }  // namespace exotica

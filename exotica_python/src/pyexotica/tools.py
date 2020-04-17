@@ -28,7 +28,6 @@ def check_trajectory_continuous_time(scene, trajectory):
     return all_good
 
 def get_colliding_links(scene, margin=0.0, safe_distance=0.0, check_self_collision=True):
-    proxies = scene.get_collision_distance(True)
     robotLinks = scene.get_collision_robot_links()
     world_links = scene.get_collision_world_links()
     for r_l in robotLinks:

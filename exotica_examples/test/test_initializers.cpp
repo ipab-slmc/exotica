@@ -119,6 +119,7 @@ bool testGenericInit()
     Server::Instance()->GetModel("robot_description", urdf_string, srdf_string);
     PlanningProblemPtr any_problem = Setup::CreateProblem(problem);
     MotionSolverPtr any_solver = Setup::CreateSolver(solver);
+    any_solver->SpecifyProblem(any_problem);
     return true;
 }
 

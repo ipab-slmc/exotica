@@ -220,7 +220,7 @@ bool test_jacobian_time_indexed(std::shared_ptr<T> problem, TimeIndexedTask& tas
     return true;
 }
 
-UnconstrainedEndPoseProblemPtr setup_problem(Initializer& map, std::string collision_scene = "", std::vector<Initializer> links = std::vector<Initializer>())
+UnconstrainedEndPoseProblemPtr setup_problem(Initializer& map, const std::string& collision_scene = "", const std::vector<Initializer>& links = std::vector<Initializer>())
 {
     Initializer scene;
     if (collision_scene != "")

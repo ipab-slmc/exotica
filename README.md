@@ -4,9 +4,9 @@
 
 The EXOTica library is a generic Optimisation Toolset for Robotics platforms, written in C++ with bindings for Python. Its motivation is to provide a more streamlined process for developing algorithms for tasks such as Inverse Kinematics, Trajectory Optimisation, and Optimal Control. Its design advocates:
 
- * **Modularity:** The library is developed in a modular manner making use of C++’s object-oriented features (such as polymorphism). This allows users to define their own components and ’plug them into’ the existing framework. Thus, an engineer does not need to implement a whole system whenever he needs to change a component, but rather can re-implement the specific functionality and as long as he follows certain guidelines, retain the use of the other modules.
- * **Extensibility:** The library is also heavily extensible, mainly thanks to the modular design. In addition, the library makes very minimal prior assumptions about the form of the problem so that it can be as generic as possible.
- * **Integration with ROS:** The library is designed to be fully integrated with ROS allowing to set up, configuration, consuming data from ros topics, and publishing debug display using ROS tools.
+* **Modularity:** The library is developed in a modular manner making use of C++’s object-oriented features (such as polymorphism). This allows users to define their own components and ’plug them into’ the existing framework. Thus, an engineer does not need to implement a whole system whenever he needs to change a component, but rather can re-implement the specific functionality and as long as he follows certain guidelines, retain the use of the other modules.
+* **Extensibility:** The library is also heavily extensible, mainly thanks to the modular design. In addition, the library makes very minimal prior assumptions about the form of the problem so that it can be as generic as possible.
+* **Integration with ROS:** The library is designed to be fully integrated with ROS allowing to set up, configuration, consuming data from ros topics, and publishing debug display using ROS tools.
 
 The library itself consists of two major specifications, both of which are abstract classes.
 The first is the *Motion Solver* which defines the way optimisation should proceed: current implementation include AICO, Jacobian pseudo-inverse IK, and a range of sampling-based solvers from the [OMPL](http://ompl.kavrakilab.org/) library -- in total, more than 60 different motion solvers.
@@ -14,10 +14,10 @@ The other is the *Task Definition* which describes the task itself by providing 
 Additionally, users can select different underlying dynamics models by specifying a *DynamicsSolver*. Similarly, different collision checking methods and libraries can be selected using the *CollisionScene* plug-ins.
 
 ## Prerequisites
- * Ubuntu 16.04 with ROS Kinetic or Ubuntu 18.04 with ROS Melodic. Ubuntu 14.04 with ROS Indigo is not officially supported or covered by continuous integration any longer -- further instructions are [here](exotica/doc/deprecated/Instructions_for_ROS_Indigo.md)
- * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
- * [rosdep](http://wiki.ros.org/rosdep)
- * [ROS](http://wiki.ros.org/Installation) (```ros-$ROS_DISTRO-desktop``` is recommended but more minimal versions work in conjunction with rosdep)
+* Ubuntu 16.04 with ROS Kinetic or Ubuntu 18.04 with ROS Melodic. Ubuntu 14.04 with ROS Indigo is not officially supported or covered by continuous integration any longer -- further instructions are [here](exotica/doc/deprecated/Instructions_for_ROS_Indigo.md)
+* [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
+* [rosdep](http://wiki.ros.org/rosdep)
+* [ROS](http://wiki.ros.org/Installation) (```ros-$ROS_DISTRO-desktop``` is recommended but more minimal versions work in conjunction with rosdep)
 
 ## Installation
 ### From binary
@@ -28,13 +28,12 @@ sudo apt install ros-$ROS_DISTRO-exotica
 ```
 
 ### From source
-
- 1. [Create a catkin workspace](https://catkin-tools.readthedocs.io/en/latest/quick_start.html#initializing-a-new-workspace) or use an existing workspace. [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) is the preferred build system.
- 2. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone git@github.com:ipab-slmc/exotica.git``.
- 3. ```cd``` into the the cloned directory.
- 4. Install dependencies: ```rosdep update ; rosdep install --from-paths ./ -iry ```
- 5. Compile the code ```catkin build -s```.
- 6. Source the config file (ideally inside ```~/.bashrc```): ```source path_to_workspace/devel/setup.bash```. You may have to source the config file from your installspace if your workspace is configured for installation.
+1. [Create a catkin workspace](https://catkin-tools.readthedocs.io/en/latest/quick_start.html#initializing-a-new-workspace) or use an existing workspace. [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) is the preferred build system.
+2. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone git@github.com:ipab-slmc/exotica.git``.
+3. ```cd``` into the the cloned directory.
+4. Install dependencies: ```rosdep update ; rosdep install --from-paths ./ -iry ```
+5. Compile the code ```catkin build -s```.
+6. Source the config file (ideally inside ```~/.bashrc```): ```source path_to_workspace/devel/setup.bash```. You may have to source the config file from your installspace if your workspace is configured for installation.
 
 ## Demos
 Have a look at ```exotica_examples```.

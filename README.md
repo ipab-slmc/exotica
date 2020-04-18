@@ -17,7 +17,7 @@ Additionally, users can select different underlying dynamics models by specifyin
 * Ubuntu 16.04 with ROS Kinetic or Ubuntu 18.04 with ROS Melodic. Ubuntu 14.04 with ROS Indigo is not officially supported or covered by continuous integration any longer -- further instructions are [here](exotica/doc/deprecated/Instructions_for_ROS_Indigo.md)
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
 * [rosdep](http://wiki.ros.org/rosdep)
-* [ROS](http://wiki.ros.org/Installation) (```ros-$ROS_DISTRO-desktop``` is recommended but more minimal versions work in conjunction with rosdep)
+* [ROS](http://wiki.ros.org/Installation)
 
 ## Installation
 ### From binary

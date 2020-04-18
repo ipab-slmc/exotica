@@ -34,7 +34,7 @@ class InteractiveCostTuning(object):
         for k in problem.get_task_maps().keys():
             try:
                 r = problem.get_rho(k)
-                self.rho[k] = r 
+                self.rho[k] = r
                 self.original_rho[k] = r
                 self.cost_task_map_names.append(k)
             except:
@@ -47,7 +47,7 @@ class InteractiveCostTuning(object):
             self.entries[k] = tk.Entry(self.master)
             self.entries[k].grid(row=i, column=1, pady=4)
             self.entries[k].insert(0, self.rho[k])
-            
+
         n_cost_task_maps = len(self.cost_task_map_names)
         tk.Label(self.master, text='Filename').grid(row=n_cost_task_maps, column=0, pady=4)
         self.entries['filename'] = tk.Entry(self.master)
@@ -66,7 +66,7 @@ class InteractiveCostTuning(object):
         for k in self.cost_task_map_names:
             userin = self.entries[k].get() # is a str
             rho = float(eval(userin))
-            self.entries[k].delete(0, 'end') 
+            self.entries[k].delete(0, 'end')
             self.entries[k].insert(0, rho)
             self.problem.set_rho(k, rho)
             print("  {}\t{}".format(k, rho))
@@ -79,12 +79,12 @@ class InteractiveCostTuning(object):
         t = int(round(time() * 1000)) # time in ms (int)
         filename = "%s/%s_%d.costparams" % (os.environ['HOME'], self.entries['filename'].get(), t)
 
-        # Save parameters 
+        # Save parameters
         with open(filename, 'w') as fout:
             fout.write('<Cost>\n')
             for k in self.cost_task_map_names:
                 fout.write('  <Task Task="{}" Rho="{}"/>\n'.format(k, float(eval(self.entries[k].get()))))
-            fout.write('</Cost>\n')                
+            fout.write('</Cost>\n')
         print("Saved cost parameters to %s" % filename)
 
     def reset_button(self):
@@ -109,4 +109,4 @@ class InteractiveCostTuning(object):
 
     def mainloop(self):
         """Starts tk mainloop."""
-        tk.mainloop()            
+        tk.mainloop()

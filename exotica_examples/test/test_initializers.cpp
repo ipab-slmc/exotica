@@ -129,6 +129,7 @@ bool testXMLInit()
     XMLLoader::Load(XMLstring, solver, problem, "", "", true);
     PlanningProblemPtr any_problem = Setup::CreateProblem(problem);
     MotionSolverPtr any_solver = Setup::CreateSolver(solver);
+    any_solver->SpecifyProblem(any_problem);
     return true;
 }
 

@@ -57,7 +57,6 @@ void QuadrotorDynamicsSolver::AssignScene(ScenePtr scene_in)
 
 Eigen::VectorXd QuadrotorDynamicsSolver::f(const StateVector& x, const ControlVector& u)
 {
-    const Eigen::Vector3d translation = x.head<3>();
     Eigen::Quaterniond quaternion;
 
     // If input quaternion is (0,0,0,0) set to (1,0,0,0)

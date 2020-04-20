@@ -12,13 +12,7 @@ file and is shown below:
 
   <?xml version="1.0" ?>
   <IKSolverDemoConfig>
-    <IKSolver Name="MySolver">
-      <MaxIterations>1</MaxIterations>
-      <MaxStep>0.1</MaxStep>
-      <Tolerance>1e-5</Tolerance>
-      <Alpha>1.0</Alpha>
-      <C>1e-3</C>
-    </IKSolver>
+    <IKSolver Name="MySolver" MaxIterations="10"/>
 
     <UnconstrainedEndPoseProblem Name="MyProblem">
       <PlanningScene>
@@ -46,7 +40,7 @@ file and is shown below:
 .. rubric:: CODE EXPLAINED
 
 In the code we see:
-* the initialization of the ``IKSolver`` and its parameters (e.g. ``MaxIterations``,\ ``MaxStep``) set
+* the initialization of the ``IKSolver`` and its parameters (e.g. ``MaxIterations``) set
 * a problem (``UnconstrainedEndPoseProblem``) is specified and  necessary parameters input. 
 - Within the problem, a ``PlanningScene`` and ``Maps`` are initialized in addition to the problem parameters. 
 
@@ -63,10 +57,8 @@ Solver options are then specified:
 .. code-block:: xml
 
       <MaxIterations>1</MaxIterations>
-      <MaxStep>0.1</MaxStep>
       <Tolerance>1e-5</Tolerance>
-      <Alpha>1.0</Alpha>
-      <C>1e-3</C>
+      <RegularizationRate>1e-3</RegularizationRate>
 
 The parameters in this case are optional, but each solver has its own 
 set of initialization parameters, as detailed on the `previous page <initialization.html>`__

@@ -129,6 +129,27 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
             q -= qd.cwiseProduct(parameters_.Alpha);
         }
 
+        // tmp
+        steplength_ = parameters_.Alpha(0);
+        cost_ = error;
+        lambda_ = C_(0, 0);
+        stop_ = qd.norm();
+
+        // Output
+        if (debug_)
+        {
+            if (i % 10 == 0 || i == 0)
+            {
+                std::cout << "iter \t cost \t       stop \t    grad \t  reg \t step\n";
+            }
+
+            std::cout << std::setw(4) << i << "  ";
+            std::cout << std::scientific << std::setprecision(5) << cost_ << "  ";
+            std::cout << stop_ << "  " << jacobian.sum() << "  ";
+            std::cout << lambda_ << "  ";
+            std::cout << std::fixed << std::setprecision(4) << steplength_ << '\n';
+        }
+
         if (qd.norm() < parameters_.Convergence)
         {
             if (debug_)

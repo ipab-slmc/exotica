@@ -64,6 +64,13 @@ private:
 
     Eigen::MatrixXd C_;  //!< \brief Regularisation (use values from interval <0, 1))
     Eigen::MatrixXd W_;  //!< \brief Jointspace weighting
+
+    double lambda_;
+    double cost_;
+    double cost_prev_;
+    double stop_;
+    double th_stop_;
+    double steplength_;
 };
 }  // namespace exotica
 

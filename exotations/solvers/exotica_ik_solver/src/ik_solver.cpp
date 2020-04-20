@@ -42,131 +42,184 @@ void IKSolver::SpecifyProblem(PlanningProblemPtr pointer)
     MotionSolver::SpecifyProblem(pointer);
     prob_ = std::static_pointer_cast<UnconstrainedEndPoseProblem>(pointer);
 
-    if (parameters_.C < 0 || parameters_.C >= 1.0)
-        ThrowNamed("C must be from interval [0, 1)!");
-    C_ = Eigen::MatrixXd::Identity(prob_->cost.length_jacobian, prob_->cost.length_jacobian) * parameters_.C;
-    W_ = prob_->W;
+    W_inv_ = prob_->W.inverse();
 
-    if (parameters_.Alpha.size() != 1 && prob_->N != parameters_.Alpha.size())
-        ThrowNamed("Alpha must have length of 1 or N.");
+    // Check dimension of W_ as this is a public member of the problem, and thus, can be edited by error.
+    if (W_inv_.rows() != prob_->N || W_inv_.cols() != prob_->N)
+        ThrowNamed("Size of W incorrect: (" << W_inv_.rows() << ", " << W_inv_.cols() << "), when expected: (" << prob_->N << ", " << prob_->N << ")");
+
+    // Warn if deprecated MaxStep configuration detected:
+    if (parameters_.MaxStep != 0.0 && GetNumberOfMaxIterations() != 1)
+        WARNING_NAMED("IKSolver", "Deprecated configuration detected: MaxStep (given: " << parameters_.MaxStep << ") only works if MaxIterations == 1 (given: " << GetNumberOfMaxIterations() << ")");
+
+    // Set up backtracking line-search coefficients
+    alpha_space_ = Eigen::VectorXd::LinSpaced(10, 1.0, 0.1);
+
+    lambda_ = parameters_.RegularizationRate;
+    th_stepinc_ = parameters_.ThresholdRegularizationIncrease;
+    th_stepdec_ = parameters_.ThresholdRegularizationDecrease;
+
+    th_stop_ = parameters_.GradientToleranceConvergenceThreshold;
+
+    // Allocate variables
+    q_.resize(prob_->N);
+    qd_.resize(prob_->N);
+    yd_.resize(prob_->cost.length_jacobian);
+    cost_jacobian_.resize(prob_->cost.length_jacobian, prob_->N);
+    J_pseudo_inverse_.resize(prob_->N, prob_->cost.length_jacobian);
+    J_tmp_.resize(prob_->cost.length_jacobian, prob_->cost.length_jacobian);
 }
 
 void IKSolver::Solve(Eigen::MatrixXd& solution)
 {
-    prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    if (!prob_) ThrowNamed("Solver has not been initialized!");
 
     Timer timer;
 
-    if (!prob_) ThrowNamed("Solver has not been initialized!");
-    const Eigen::VectorXd q0 = prob_->ApplyStartState();
+    prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    lambda_ = parameters_.RegularizationRate;
+    q_ = prob_->ApplyStartState();
 
-    if (prob_->N != q0.rows()) ThrowNamed("Wrong size q0 size=" << q0.rows() << ", required size=" << prob_->N);
-
-    Eigen::VectorXd qd, q_nominal;
     if (prob_->q_nominal.rows() == prob_->N)
     {
-        q_nominal = prob_->q_nominal;
+        WARNING("Nominal state regularization is no longer supported - please use a JointPose task-map.");
+    }
+
+    int i;
+    for (i = 0; i < GetNumberOfMaxIterations(); ++i)
+    {
+        prob_->Update(q_);
+        error_ = prob_->GetScalarCost();
+        prob_->SetCostEvolution(i, error_);
+
+        // Absolute function tolerance check
+        if (error_ < parameters_.Tolerance)
+        {
+            prob_->termination_criterion = TerminationCriterion::FunctionTolerance;
+            break;
+        }
+
+        yd_.noalias() = prob_->cost.S * prob_->cost.ydiff;
+        cost_jacobian_.noalias() = prob_->cost.S * prob_->cost.jacobian;
+
+        // Weighted Regularized Pseudo-Inverse
+        //   J_pseudo_inverse_ = W_inv_ * cost_jacobian_.transpose() * ( cost_jacobian_ * W_inv_ * cost_jacobian_.transpose() + C_ ).inverse();
+
+        J_tmp_.noalias() = cost_jacobian_ * W_inv_ * cost_jacobian_.transpose();
+        J_tmp_.diagonal().array() += lambda_;  // Add regularisation
+        J_decomposition_.compute(J_tmp_);
+        if (J_decomposition_.info() != Eigen::Success)
+        {
+            ThrowPretty("Error during matrix decomposition of J_tmp_ (lambda=" << lambda_ << "):\n"
+                                                                               << J_tmp_);
+        }
+        J_tmp_.noalias() = J_decomposition_.solve(Eigen::MatrixXd::Identity(prob_->cost.length_jacobian, prob_->cost.length_jacobian));  // Inverse
+        J_pseudo_inverse_.noalias() = W_inv_ * cost_jacobian_.transpose() * J_tmp_;
+
+        qd_.noalias() = J_pseudo_inverse_ * yd_;
+
+        // Support for a maximum step, e.g., when used as real-time, interactive IK
+        if (GetNumberOfMaxIterations() == 1 && parameters_.MaxStep != 0.0)
+        {
+            ScaleToStepSize(qd_);
+        }
+
+        // Line search
+        for (int ai = 0; ai < alpha_space_.size(); ++ai)
+        {
+            steplength_ = alpha_space_(ai);
+            Eigen::VectorXd q_tmp = q_ - steplength_ * qd_;
+            prob_->Update(q_tmp);
+            if (prob_->GetScalarCost() < error_)
+            {
+                q_ = q_tmp;
+                qd_ *= steplength_;
+                break;
+            }
+        }
+
+        // Step tolerance parameter
+        step_ = qd_.squaredNorm();
+
+        // Gradient tolerance
+        stop_ = cost_jacobian_.norm();
+
+        // Debug output
+        if (debug_) PrintDebug(i);
+
+        // Check step tolerance
+        if (step_ < parameters_.StepToleranceConvergenceThreshold)
+        {
+            prob_->termination_criterion = TerminationCriterion::StepTolerance;
+            break;
+        }
+
+        // Check gradient tolerance (convergence)
+        if (step_ < parameters_.GradientToleranceConvergenceThreshold)
+        {
+            prob_->termination_criterion = TerminationCriterion::GradientTolerance;
+            break;
+        }
+
+        // Adapt regularization based on step-length
+        if (steplength_ > th_stepdec_)
+        {
+            DecreaseRegularization();
+        }
+        if (steplength_ <= th_stepinc_)
+        {
+            IncreaseRegularization();
+            if (lambda_ == regmax_)
+            {
+                prob_->termination_criterion = TerminationCriterion::Divergence;
+                break;
+            }
+        }
+    }
+
+    // Check if we ran out of iterations
+    if (i == GetNumberOfMaxIterations() - 1)
+    {
+        prob_->termination_criterion = TerminationCriterion::IterationLimit;
     }
     else
     {
-        q_nominal = q0;
+        if (debug_) PrintDebug(i);
+    }
+
+    if (debug_)
+    {
+        switch (prob_->termination_criterion)
+        {
+            case TerminationCriterion::GradientTolerance:
+                HIGHLIGHT_NAMED("IKSolver", "Reached convergence (" << stop_ << " < " << parameters_.GradientToleranceConvergenceThreshold << ")");
+                break;
+            case TerminationCriterion::FunctionTolerance:
+                HIGHLIGHT_NAMED("IKSolver", "Reached absolute function tolerance (" << error_ << " < " << parameters_.Tolerance << ")");
+                break;
+            case TerminationCriterion::StepTolerance:
+                HIGHLIGHT_NAMED("IKSolver", "Reached step tolerance (" << step_ << " < " << parameters_.StepToleranceConvergenceThreshold << ")");
+                break;
+            case TerminationCriterion::Divergence:
+                WARNING_NAMED("IKSolver", "Regularization exceeds maximum regularization: " << lambda_ << " > " << regmax_);
+                break;
+            case TerminationCriterion::IterationLimit:
+                HIGHLIGHT_NAMED("IKSolver", "Reached iteration limit.");
+                break;
+
+            default:
+                break;
+        }
     }
 
     solution.resize(1, prob_->N);
-
-    Eigen::VectorXd q = q0;
-    double error = std::numeric_limits<double>::infinity();
-    bool is_regularised = C_(0, 0) > 0.0;
-    Eigen::VectorXd yd;
-    Eigen::MatrixXd jacobian;
-    if (is_regularised)
-    {
-        yd = Eigen::VectorXd(prob_->length_jacobian + prob_->N);
-        jacobian = Eigen::MatrixXd(prob_->length_jacobian + prob_->N, prob_->N);
-    }
-    for (int i = 0; i < GetNumberOfMaxIterations(); ++i)
-    {
-        prob_->Update(q);
-
-        error = prob_->GetScalarCost();
-
-        prob_->SetCostEvolution(i, error);
-
-        if (error < parameters_.Tolerance)
-        {
-            if (debug_)
-                HIGHLIGHT_NAMED("IKSolver", "Reached tolerance (" << error << " < " << parameters_.Tolerance << ")");
-            break;
-        }
-
-        if (is_regularised)
-        {
-            yd.head(prob_->length_jacobian) = prob_->cost.S * prob_->cost.ydiff;
-            yd.tail(prob_->N) = q - q_nominal;
-            jacobian.topRows(prob_->length_jacobian) = prob_->cost.S * prob_->cost.jacobian * W_ * (1.0 - C_(0, 0));
-            jacobian.bottomRows(prob_->N) = C_;
-        }
-        else
-        {
-            yd = prob_->cost.S * prob_->cost.ydiff;
-            jacobian = prob_->cost.S * prob_->cost.jacobian * W_;
-        }
-
-#if EIGEN_VERSION_AT_LEAST(3, 3, 0)
-        qd = jacobian.completeOrthogonalDecomposition().solve(yd);
-#else
-        qd = jacobian.colPivHouseholderQr().solve(yd);
-#endif
-
-        ScaleToStepSize(qd);
-
-        if (parameters_.Alpha.size() == 1)
-        {
-            q -= qd * parameters_.Alpha[0];
-        }
-        else
-        {
-            q -= qd.cwiseProduct(parameters_.Alpha);
-        }
-
-        // tmp
-        steplength_ = parameters_.Alpha(0);
-        cost_ = error;
-        lambda_ = C_(0, 0);
-        stop_ = qd.norm();
-
-        // Output
-        if (debug_)
-        {
-            if (i % 10 == 0 || i == 0)
-            {
-                std::cout << "iter \t cost \t       stop \t    grad \t  reg \t step\n";
-            }
-
-            std::cout << std::setw(4) << i << "  ";
-            std::cout << std::scientific << std::setprecision(5) << cost_ << "  ";
-            std::cout << stop_ << "  " << jacobian.sum() << "  ";
-            std::cout << lambda_ << "  ";
-            std::cout << std::fixed << std::setprecision(4) << steplength_ << '\n';
-        }
-
-        if (qd.norm() < parameters_.Convergence)
-        {
-            if (debug_)
-                HIGHLIGHT_NAMED("IKSolver", "Reached convergence (" << qd.norm() << " < " << parameters_.Convergence
-                                                                    << ")");
-            break;
-        }
-    }
-
-    solution.row(0) = q;
-
+    solution.row(0) = q_.transpose();
     planning_time_ = timer.GetDuration();
 }
 
 void IKSolver::ScaleToStepSize(Eigen::VectorXdRef xd)
 {
-    double max_vel = xd.cwiseAbs().maxCoeff();
+    const double max_vel = xd.cwiseAbs().maxCoeff();
     if (max_vel > parameters_.MaxStep)
     {
         xd = xd * parameters_.MaxStep / max_vel;

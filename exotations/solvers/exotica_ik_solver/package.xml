@@ -2,11 +2,10 @@
 <package format="2">
   <name>exotica_ik_solver</name>
   <version>5.1.3</version>
-  <description>Pseudo-inverse unconstrained end-pose solver</description>
+  <description>Regularised and weighted pseudo-inverse unconstrained end-pose solver</description>
 
+  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
-  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
-  <author>Michael Camilleri</author>
 
   <license>BSD</license>
 

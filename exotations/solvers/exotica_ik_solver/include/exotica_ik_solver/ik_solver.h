@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,36 +38,79 @@
 namespace exotica
 {
 ///
-/// \brief	IK position solver
-/// The solver constructs and solves a linear program of the following form:
-/// \f[
-///   (SJW)x=y
-/// \f]
-/// Where S is a diagonal matrix of task scaling factors rho for each task, jacobian is the Jacobian, W is a diagonal matrix
-/// of the joint space weights.
-///
-/// When regularisation term C is used, it gets appended to the Jacobian and distance to the nominal pose is appended
-/// to the y vector. For more details see:
-/// https://github.com/ipab-slmc/exotica/pull/465#issuecomment-449021817
+/// \brief	Weighted and Regularized Pseudo-Inverse Inverse Kinematics Solver
+/// The solver solves a weighted and regularised pseudo-inverse problem. It uses backtracking line-search and adaptive regularization.
 ///
 class IKSolver : public MotionSolver, public Instantiable<IKSolverInitializer>
 {
 public:
-    IKSolver();
-    virtual ~IKSolver();
-
     void Solve(Eigen::MatrixXd& solution) override;
-
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
 private:
-    void ScaleToStepSize(Eigen::VectorXdRef xd);  //!< \brief Scale the state change vector so that the largest dimension is max. step or smaller.
-
     UnconstrainedEndPoseProblemPtr prob_;  // Shared pointer to the planning problem.
 
-    Eigen::MatrixXd C_;  //!< \brief Regularisation (use values from interval <0, 1))
-    Eigen::MatrixXd W_;  //!< \brief Jointspace weighting
+    Eigen::MatrixXd W_inv_;        ///< Joint-space weighting (inverse)
+    Eigen::VectorXd alpha_space_;  ///< Steplengths for backtracking line-search
+
+    // Pre-allocation of variables used during optimisation
+    double stop_;                                  ///< Stop criterion: Norm of cost Jacobian
+    double step_;                                  ///< Size of step: Sum of squared norm of qd_
+    double lambda_ = 0;                            ///< Damping factor
+    double steplength_;                            ///< Accepted steplength
+    Eigen::VectorXd q_;                            ///< Joint configuration vector, used during optimisation
+    Eigen::VectorXd qd_;                           ///< Change in joint configuration, used during optimisation
+    Eigen::VectorXd yd_;                           ///< Task space difference/error, used during optimisation
+    Eigen::MatrixXd cost_jacobian_;                ///< Jacobian, used during optimisation
+    Eigen::MatrixXd J_pseudo_inverse_;             ///< Jacobian pseudo-inverse, used during optimisation
+    double error_;                                 ///< Error, used during optimisation
+    Eigen::LLT<Eigen::MatrixXd> J_decomposition_;  ///< Cholesky decomposition for the weighted pseudo-inverse
+    Eigen::MatrixXd J_tmp_;                        ///< Temporary variable for inverse computation
+
+    // Convergence thresholds
+    double th_stop_;  ///< Gradient convergence threshold
+
+    // Regularization
+    double regmin_ = 1e-9;      //!< Minimum regularization (will not decrease lower)
+    double regmax_ = 1e9;       //!< Maximum regularization (to exit by divergence)
+    double regfactor_ = 10.;    //!< Factor by which the regularization gets increased/decreased
+    double th_stepdec_ = 0.5;   //!< Step-length threshold used to decrease regularization
+    double th_stepinc_ = 0.01;  //!< Step-length threshold used to increase regularization
+
+    void IncreaseRegularization()
+    {
+        lambda_ *= regfactor_;
+        if (lambda_ > regmax_)
+        {
+            lambda_ = regmax_;
+        }
+    }
+
+    void DecreaseRegularization()
+    {
+        lambda_ /= regfactor_;
+        if (lambda_ < regmin_)
+        {
+            lambda_ = regmin_;
+        }
+    }
+
+    void PrintDebug(const int i)
+    {
+        if (i % 10 == 0 || i == 0)
+        {
+            std::cout << "iter \t cost \t       stop \t    grad \t  reg \t step\n";
+        }
+
+        std::cout << std::setw(4) << i << "  ";
+        std::cout << std::scientific << std::setprecision(5) << error_ << "  ";
+        std::cout << step_ << "  " << stop_ << "  ";
+        std::cout << lambda_ << "  ";
+        std::cout << std::fixed << std::setprecision(4) << steplength_ << '\n';
+    }
+
+    void ScaleToStepSize(Eigen::VectorXdRef xd);  ///< To scale to maximum step size
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_IK_SOLVER_IK_SOLVER_H_

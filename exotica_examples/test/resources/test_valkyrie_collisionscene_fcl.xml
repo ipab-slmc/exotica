@@ -1,12 +1,6 @@
 <?xml version="1.0" ?>
 <ExoticaWholeBodyIKConfig>
-  <IKSolver Name="DummySolver">
-    <MaxIterations>100</MaxIterations>
-    <MaxStep>0.1</MaxStep>
-    <Tolerance>1e-5</Tolerance>
-    <Alpha>1.0</Alpha>
-    <C>1e-3</C>
-  </IKSolver>
+  <IKSolver Name="DummySolver"/>
   
   <UnconstrainedEndPoseProblem>
     <PlanningScene>
@@ -28,7 +22,6 @@
     <Cost>
       <Task Task="CoM"/>
     </Cost>
-    <NominalState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0</NominalState>
     <StartState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0</StartState>
   </UnconstrainedEndPoseProblem>
 </ExoticaWholeBodyIKConfig>

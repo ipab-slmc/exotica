@@ -71,11 +71,11 @@ private:
     double th_stop_;  ///< Gradient convergence threshold
 
     // Regularization
-    double regmin_ = 1e-9;      //!< Minimum regularization (will not decrease lower)
-    double regmax_ = 1e9;       //!< Maximum regularization (to exit by divergence)
-    double regfactor_ = 10.;    //!< Factor by which the regularization gets increased/decreased
-    double th_stepdec_ = 0.5;   //!< Step-length threshold used to decrease regularization
-    double th_stepinc_ = 0.1;   //!< Step-length threshold used to increase regularization
+    double regmin_ = 1e-9;     //!< Minimum regularization (will not decrease lower)
+    double regmax_ = 1e9;      //!< Maximum regularization (to exit by divergence)
+    double regfactor_ = 10.;   //!< Factor by which the regularization gets increased/decreased
+    double th_stepdec_ = 0.5;  //!< Step-length threshold used to decrease regularization
+    double th_stepinc_ = 0.1;  //!< Step-length threshold used to increase regularization
 
     void IncreaseRegularization()
     {

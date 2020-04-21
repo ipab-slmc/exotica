@@ -790,7 +790,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
 
     if (parameters_.LossType == "L2")
         return R_ * U_.col(t) + R_.transpose() * U_.col(t);
-    
+
     // auto dynamics_solver = scene_->GetDynamicsSolver();
     // auto control_limits = dynamics_solver->get_control_limits();
 
@@ -857,7 +857,6 @@ void DynamicTimeIndexedShootingProblem::DisableStochasticUpdates()
 
 void DynamicTimeIndexedShootingProblem::RescaleCostWeights()
 {
-    
 }
 
 }  // namespace exotica

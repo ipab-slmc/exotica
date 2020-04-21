@@ -136,7 +136,6 @@ protected:
     void ReinitializeVariables();
     void RescaleCostWeights();
 
-
     int T_;       ///< Number of time steps
     double tau_;  ///< Time step duration
     bool stochastic_matrices_specified_ = false;

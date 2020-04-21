@@ -155,7 +155,7 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // Check gradient tolerance (convergence)
-        if (step_ < parameters_.GradientToleranceConvergenceThreshold)
+        if (stop_ < parameters_.GradientToleranceConvergenceThreshold)
         {
             prob_->termination_criterion = TerminationCriterion::GradientTolerance;
             break;
@@ -178,7 +178,7 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
     }
 
     // Check if we ran out of iterations
-    if (i == GetNumberOfMaxIterations() - 1)
+    if (i == GetNumberOfMaxIterations())
     {
         prob_->termination_criterion = TerminationCriterion::IterationLimit;
     }
@@ -192,13 +192,13 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         switch (prob_->termination_criterion)
         {
             case TerminationCriterion::GradientTolerance:
-                HIGHLIGHT_NAMED("IKSolver", "Reached convergence (" << stop_ << " < " << parameters_.GradientToleranceConvergenceThreshold << ")");
+                HIGHLIGHT_NAMED("IKSolver", "Reached convergence (" << std::scientific << stop_ << " < " << parameters_.GradientToleranceConvergenceThreshold << ")");
                 break;
             case TerminationCriterion::FunctionTolerance:
-                HIGHLIGHT_NAMED("IKSolver", "Reached absolute function tolerance (" << error_ << " < " << parameters_.Tolerance << ")");
+                HIGHLIGHT_NAMED("IKSolver", "Reached absolute function tolerance (" << std::scientific << error_ << " < " << parameters_.Tolerance << ")");
                 break;
             case TerminationCriterion::StepTolerance:
-                HIGHLIGHT_NAMED("IKSolver", "Reached step tolerance (" << step_ << " < " << parameters_.StepToleranceConvergenceThreshold << ")");
+                HIGHLIGHT_NAMED("IKSolver", "Reached step tolerance (" << std::scientific << step_ << " < " << parameters_.StepToleranceConvergenceThreshold << ")");
                 break;
             case TerminationCriterion::Divergence:
                 WARNING_NAMED("IKSolver", "Regularization exceeds maximum regularization: " << lambda_ << " > " << regmax_);

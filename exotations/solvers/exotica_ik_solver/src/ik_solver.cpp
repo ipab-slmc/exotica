@@ -105,13 +105,28 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         // Weighted Regularized Pseudo-Inverse
         //   J_pseudo_inverse_ = W_inv_ * cost_jacobian_.transpose() * ( cost_jacobian_ * W_inv_ * cost_jacobian_.transpose() + C_ ).inverse();
 
-        J_tmp_.noalias() = cost_jacobian_ * W_inv_ * cost_jacobian_.transpose();
-        J_tmp_.diagonal().array() += lambda_;  // Add regularisation
-        J_decomposition_.compute(J_tmp_);
-        if (J_decomposition_.info() != Eigen::Success)
+        bool decomposition_ok = false;
+        while (!decomposition_ok)
         {
-            ThrowPretty("Error during matrix decomposition of J_tmp_ (lambda=" << lambda_ << "):\n"
-                                                                               << J_tmp_);
+            J_tmp_.noalias() = cost_jacobian_ * W_inv_ * cost_jacobian_.transpose();
+            J_tmp_.diagonal().array() += lambda_;  // Add regularisation
+            J_decomposition_.compute(J_tmp_);
+            if (J_decomposition_.info() != Eigen::Success)
+            {
+                IncreaseRegularization();
+                if (lambda_ > parameters_.MaximumRegularization)
+                {
+                    WARNING("Divergence in Cholesky decomposition :-(");
+                    prob_->termination_criterion = TerminationCriterion::Divergence;
+                    break;
+                }
+                // ThrowPretty("Error during matrix decomposition of J_tmp_ (lambda=" << lambda_ << "):\n"
+                //                                                                 << J_tmp_);
+            }
+            else
+            {
+                decomposition_ok = true;
+            }
         }
         J_tmp_.noalias() = J_decomposition_.solve(Eigen::MatrixXd::Identity(prob_->cost.length_jacobian, prob_->cost.length_jacobian));  // Inverse
         J_pseudo_inverse_.noalias() = W_inv_ * cost_jacobian_.transpose() * J_tmp_;

@@ -184,11 +184,11 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         if (steplength_ <= th_stepinc_)
         {
             IncreaseRegularization();
-            if (lambda_ == regmax_)
-            {
-                prob_->termination_criterion = TerminationCriterion::Divergence;
-                break;
-            }
+            // if (lambda_ == regmax_)
+            // {
+            //     prob_->termination_criterion = TerminationCriterion::Divergence;
+            //     break;
+            // }
         }
     }
 

@@ -42,7 +42,6 @@
         
         <T>150</T>
         <tau>0.01</tau>
-        <dt>0.01</dt>
         
         <!-- Penalize large velocities/ stay within control limits. -->
         <Q>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Q>

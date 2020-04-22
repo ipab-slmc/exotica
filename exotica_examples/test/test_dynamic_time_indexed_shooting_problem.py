@@ -1,4 +1,5 @@
 # coding: utf-8
+from __future__ import print_function, division
 import roslib
 import unittest
 import numpy as np
@@ -8,21 +9,10 @@ from pyexotica.testing import random_state
 PKG = 'exotica_examples'
 roslib.load_manifest(PKG)  # This line is not needed with Catkin.
 
-# Load a problem
-config = '{exotica_examples}/resources/configs/dynamic_time_indexed/01_ilqr_cartpole.xml'
-# config = '{exotica_examples}/resources/configs/dynamic_time_indexed/02_lwr_task_maps.xml'
-# config = '{exotica_examples}/resources/configs/dynamic_time_indexed/03_ilqr_valkyrie.xml'
+def check_state_cost_terminal_state(problem):
+    scene = problem.get_scene()
+    ds = scene.get_dynamics_solver()
 
-_, problem_init = exo.Initializers.load_xml_full(config)
-problem = exo.Setup.create_problem(problem_init)
-scene = problem.get_scene()
-ds = problem.get_scene().get_dynamics_solver()
-
-print(problem, ds)
-print(ds.nq, ds.nv, ds.nx, ds.ndx)
-
-
-def test_state_cost_terminal_state():
     x = random_state(scene)
 
     problem.update_terminal_state(x)
@@ -49,11 +39,14 @@ def test_state_cost_terminal_state():
     # np.set_printoptions(6, suppress=True)
     # print(J_solver)
     # print(J_numdiff)
-    np.testing.assert_allclose(J_solver, J_numdiff, rtol=1e-5, atol=1e-5,
+    np.testing.assert_allclose(J_solver, J_numdiff, rtol=1e-5, atol=1e-3,
                                err_msg='StateCostJacobian at terminal state does not match!')
 
 
-def test_state_cost_jacobian_at_t(t):
+def check_state_cost_jacobian_at_t(problem, t):
+    scene = problem.get_scene()
+    ds = scene.get_dynamics_solver()
+
     x = random_state(scene)
     u = np.random.random((ds.nu,))
 
@@ -81,7 +74,10 @@ def test_state_cost_jacobian_at_t(t):
                                atol=1e-5, err_msg='StateCostJacobian does not match!')
 
 
-def test_control_cost_jacobian_at_t(t):
+def check_control_cost_jacobian_at_t(problem, t):
+    scene = problem.get_scene()
+    ds = scene.get_dynamics_solver()
+
     x = random_state(scene)
     u = np.random.random((ds.nu,))
 
@@ -109,20 +105,39 @@ def test_control_cost_jacobian_at_t(t):
 
 ###############################################################################
 
+if __name__ == "__main__":
+    # Load a problem
+    configs = [
+        '{exotica_examples}/resources/configs/dynamic_time_indexed/01_ilqr_cartpole.xml',
+        '{exotica_examples}/resources/configs/dynamic_time_indexed/02_lwr_task_maps.xml',
+        '{exotica_examples}/resources/configs/dynamic_time_indexed/03_ilqr_valkyrie.xml',
+        #'{exotica_satellite_dynamics_solver}/resources/config.apollo.xml',
+    ]
 
-# test state cost jacobian at final state
-test_state_cost_terminal_state()
+    for config in configs:
+        print("Testing", config)
+        _, problem_init = exo.Initializers.load_xml_full(config)
+        problem = exo.Setup.create_problem(problem_init)
+        scene = problem.get_scene()
+        ds = problem.get_scene().get_dynamics_solver()
 
-# test state cost jacobian
-for t in range(problem.T - 1):
-    test_state_cost_jacobian_at_t(t)
+        print(problem, ds)
+        print(ds.nq, ds.nv, ds.nx, ds.ndx)
 
-# TODO: test state cost hessian
 
-# test control cost jacobian
-for t in range(problem.T - 1):
-    test_control_cost_jacobian_at_t(t)
+        # test state cost jacobian at final state
+        check_state_cost_terminal_state(problem)
 
-# TODO: test control cost hessian
+        # test state cost jacobian
+        for t in range(problem.T - 1):
+            check_state_cost_jacobian_at_t(problem, t)
 
-# TODO: test state control cost hessian
+        # TODO: test state cost hessian
+
+        # test control cost jacobian
+        for t in range(problem.T - 1):
+            check_control_cost_jacobian_at_t(problem, t)
+
+        # TODO: test control cost hessian
+
+        # TODO: test state control cost hessian

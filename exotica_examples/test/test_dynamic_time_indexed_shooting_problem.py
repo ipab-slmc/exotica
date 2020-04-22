@@ -9,39 +9,6 @@ from pyexotica.testing import random_state
 PKG = 'exotica_examples'
 roslib.load_manifest(PKG)  # This line is not needed with Catkin.
 
-def check_state_cost_terminal_state(problem):
-    scene = problem.get_scene()
-    ds = scene.get_dynamics_solver()
-
-    x = random_state(scene)
-
-    problem.update_terminal_state(x)
-    J_solver = problem.get_state_cost_jacobian(-1).copy()
-    J_numdiff = np.zeros_like(J_solver)
-    assert J_numdiff.shape[0] == ds.ndx
-
-    eps = 1e-6
-    for i in range(ds.ndx):
-        dx = np.zeros((ds.ndx,))
-        dx[i] = eps / 2.0
-
-        x_plus = ds.integrate(x, dx, 1.0)
-        x_minus = ds.integrate(x, dx, -1.0)
-
-        problem.update_terminal_state(x_plus)
-        cost_high = problem.get_state_cost(-1)
-
-        problem.update_terminal_state(x_minus)
-        cost_low = problem.get_state_cost(-1)
-
-        J_numdiff[i] = (cost_high - cost_low) / eps
-
-    # np.set_printoptions(6, suppress=True)
-    # print(J_solver)
-    # print(J_numdiff)
-    np.testing.assert_allclose(J_solver, J_numdiff, rtol=1e-5, atol=1e-3,
-                               err_msg='StateCostJacobian at terminal state does not match!')
-
 
 def check_state_cost_jacobian_at_t(problem, t):
     scene = problem.get_scene()
@@ -50,7 +17,10 @@ def check_state_cost_jacobian_at_t(problem, t):
     x = random_state(scene)
     u = np.random.random((ds.nu,))
 
-    problem.update(x, u, t)
+    if t == problem.T - 1:
+        problem.update_terminal_state(x)
+    else:
+        problem.update(x, u, t)
     J_solver = problem.get_state_cost_jacobian(t).copy()
     J_numdiff = np.zeros_like(J_solver)
     assert J_numdiff.shape[0] == ds.ndx
@@ -63,15 +33,61 @@ def check_state_cost_jacobian_at_t(problem, t):
         x_plus = ds.integrate(x, dx, 1.0)
         x_minus = ds.integrate(x, dx, -1.0)
 
-        problem.update(x_plus, u, t)
+        if t == problem.T - 1:
+            problem.update_terminal_state(x_plus)
+        else:
+            problem.update(x_plus, u, t)
         cost_high = problem.get_state_cost(t)
 
-        problem.update(x_minus, u, t)
+        if t == problem.T - 1:
+            problem.update_terminal_state(x_minus)
+        else:
+            problem.update(x_minus, u, t)
         cost_low = problem.get_state_cost(t)
 
         J_numdiff[i] = (cost_high - cost_low) / eps
     np.testing.assert_allclose(J_solver, J_numdiff, rtol=1e-5,
                                atol=1e-5, err_msg='StateCostJacobian does not match!')
+
+
+def check_state_cost_hessian_at_t(problem, t):
+    scene = problem.get_scene()
+    ds = scene.get_dynamics_solver()
+
+    x = random_state(scene)
+    u = np.random.random((ds.nu,))
+
+    if t == problem.T - 1:
+        problem.update_terminal_state(x)
+    else:
+        problem.update(x, u, t)
+    H_solver = problem.get_state_cost_hessian(t).copy()
+    H_numdiff = np.zeros_like(H_solver)
+    assert H_numdiff.shape[0] == ds.ndx and H_numdiff.shape[1] == ds.ndx
+
+    eps = 1e-6
+    for i in range(ds.ndx):
+        dx = np.zeros((ds.ndx,))
+        dx[i] = eps / 2.0
+
+        x_plus = ds.integrate(x, dx, 1.0)
+        x_minus = ds.integrate(x, dx, -1.0)
+
+        if t == problem.T - 1:
+            problem.update_terminal_state(x_plus)
+        else:
+            problem.update(x_plus, u, t)
+        jacobian_plus = problem.get_state_cost_jacobian(t)
+
+        if t == problem.T - 1:
+            problem.update_terminal_state(x_minus)
+        else:
+            problem.update(x_minus, u, t)
+        jacobian_minus = problem.get_state_cost_jacobian(t)
+
+        H_numdiff[:,i] = (jacobian_plus - jacobian_minus) / eps
+    np.testing.assert_allclose(H_solver, H_numdiff, rtol=1e-5,
+                               atol=1e-5, err_msg='StateCostHessian does not match!')
 
 
 def check_control_cost_jacobian_at_t(problem, t):
@@ -103,6 +119,36 @@ def check_control_cost_jacobian_at_t(problem, t):
     np.testing.assert_allclose(J_solver, J_numdiff, rtol=1e-5,
                                atol=1e-5, err_msg='ControlCostJacobian does not match!')
 
+
+def check_control_cost_hessian_at_t(problem, t):
+    scene = problem.get_scene()
+    ds = scene.get_dynamics_solver()
+
+    x = random_state(scene)
+    u = np.random.random((ds.nu,))
+
+    problem.update(x, u, t)
+    H_solver = problem.get_control_cost_hessian(t).copy()
+    H_numdiff = np.zeros_like(H_solver)
+    assert H_numdiff.shape[0] == ds.nu and H_numdiff.shape[1] == ds.nu
+
+    eps = 1e-6
+    for i in range(ds.nu):
+        u_plus = u.copy()
+        u_plus[i] += eps / 2.0
+        u_minus = u.copy()
+        u_minus[i] -= eps / 2.0
+
+        problem.update(x, u_plus, t)
+        jacobian_plus = problem.get_control_cost_jacobian(t)
+
+        problem.update(x, u_minus, t)
+        jacobian_minus = problem.get_control_cost_jacobian(t)
+
+        H_numdiff[:,i] = (jacobian_plus - jacobian_minus) / eps
+    np.testing.assert_allclose(H_solver, H_numdiff, rtol=1e-5,
+                               atol=1e-5, err_msg='ControlCostHessian does not match!')
+
 ###############################################################################
 
 if __name__ == "__main__":
@@ -121,23 +167,23 @@ if __name__ == "__main__":
         scene = problem.get_scene()
         ds = problem.get_scene().get_dynamics_solver()
 
-        print(problem, ds)
-        print(ds.nq, ds.nv, ds.nx, ds.ndx)
-
-
-        # test state cost jacobian at final state
-        check_state_cost_terminal_state(problem)
+        # print(problem, ds)
+        # print(ds.nq, ds.nv, ds.nx, ds.ndx)
 
         # test state cost jacobian
-        for t in range(problem.T - 1):
+        for t in range(problem.T):
             check_state_cost_jacobian_at_t(problem, t)
 
         # TODO: test state cost hessian
+        for t in range(problem.T):
+            check_state_cost_hessian_at_t(problem, t)
 
         # test control cost jacobian
         for t in range(problem.T - 1):
             check_control_cost_jacobian_at_t(problem, t)
 
-        # TODO: test control cost hessian
+        # test control cost hessian
+        for t in range(problem.T - 1):
+            check_control_cost_hessian_at_t(problem, t)
 
         # TODO: test state control cost hessian

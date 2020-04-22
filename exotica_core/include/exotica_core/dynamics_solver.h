@@ -33,6 +33,7 @@
 #include <exotica_core/factory.h>
 #include <exotica_core/object.h>
 #include <exotica_core/property.h>
+#include <exotica_core/tools.h>
 
 #include <exotica_core/dynamics_solver_initializer.h>
 
@@ -119,6 +120,19 @@ public:
     {
         assert(x_1.size() == x_2.size());
         return x_1 - x_2;
+    }
+
+    /// \brief Return the difference of the StateDelta operation between two state vectors.
+    ///     The ArgumentPosition argument can be used to select whether to take derivative w.r.t. x_1 or x_2.
+    virtual Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> dStateDelta(const StateVector& x_1, const StateVector& x_2, const ArgumentPosition first_or_second)
+    {
+        assert(x_1.size() == x_2.size());
+        assert(first_or_second == ArgumentPosition::ARG0 || first_or_second == ArgumentPosition::ARG1);
+
+        if (first_or_second == ArgumentPosition::ARG0)
+            return Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Identity(get_num_state_derivative(), get_num_state_derivative());
+        else
+            return -1.0 * Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Identity(get_num_state_derivative(), get_num_state_derivative());
     }
 
     /// \brief Returns the position-part of the state vector to update the scene.

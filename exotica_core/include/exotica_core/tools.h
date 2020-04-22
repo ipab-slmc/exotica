@@ -88,7 +88,7 @@ void SaveMatrix(std::string file_name,
                 const Eigen::Ref<const Eigen::MatrixXd> mat);
 
 template <typename T>
-std::vector<std::string> getKeys(std::map<std::string, T> map)
+std::vector<std::string> GetKeys(std::map<std::string, T> map)
 {
     std::vector<std::string> ret;
     for (auto& it : map) ret.push_back(it.first);

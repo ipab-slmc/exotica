@@ -104,6 +104,6 @@ void Initializer::SetName(std::string name)
 
 std::vector<std::string> Initializer::GetPropertyNames() const
 {
-    return getKeys(properties_);
+    return GetKeys(properties_);
 }
-}
+}  // namespace exotica

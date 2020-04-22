@@ -102,6 +102,17 @@ std::string ParsePath(const std::string& path);
 std::string LoadFile(const std::string& path);
 
 bool PathExists(const std::string& path);
+
+/// \brief Argument position.
+///        Used as parameter to refer to an argument.
+enum ArgumentPosition
+{
+    ARG0 = 0,
+    ARG1 = 1,
+    ARG2 = 2,
+    ARG3 = 3,
+    ARG4 = 4
+};
 }
 
 namespace

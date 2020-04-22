@@ -1338,6 +1338,14 @@ PYBIND11_MODULE(_pyexotica, module)
         .value("OCTREE", shapes::ShapeType::OCTREE)
         .export_values();
 
+    py::enum_<ArgumentPosition>(module, "ArgumentPosition")
+        .value("ARG0", ArgumentPosition::ARG0)
+        .value("ARG1", ArgumentPosition::ARG1)
+        .value("ARG2", ArgumentPosition::ARG2)
+        .value("ARG3", ArgumentPosition::ARG3)
+        .value("ARG4", ArgumentPosition::ARG4)
+        .export_values();
+
     module.attr("version") = std::string(exotica::version);
     module.attr("branch") = std::string(exotica::branch);
 

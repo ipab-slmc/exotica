@@ -666,10 +666,12 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
 {
     // TODO: Check whether we should make this a RowVectorXd
     ValidateTimeIndex(t);
-    const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
-    const Eigen::VectorXd state_cost_jacobian = Q_[t] * x_diff + Q_[t].transpose() * x_diff;
-
     const int ndx = 2 * num_velocities_;
+
+    // const Eigen::VectorXd state_cost_jacobian = Q_[t] * X_diff_.col(t) + Q_[t].transpose() * X_diff_.col(t);
+    const Eigen::MatrixXd dxdiff = scene_->GetDynamicsSolver()->dStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
+    const Eigen::VectorXd state_cost_jacobian = dxdiff.transpose() * Q_[t] * X_diff_.col(t) * 2.0;
+
     Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(ndx);
     general_cost_jacobian.head(num_velocities_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
 
@@ -681,11 +683,10 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
     ValidateTimeIndex(t);
 
     const int ndx = 2 * num_velocities_;
-    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(ndx);
+    Eigen::RowVectorXd general_cost_jacobian = Eigen::RowVectorXd::Zero(ndx);
     general_cost_jacobian.head(num_velocities_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
     // TODO: Using a J^T*J approximation for the general cost here as Hessians aren't implemented for task maps yet.
-    // TODO: As we are not using RowVectorXd (yet), this is J*J^T instead of the correct J^T*J
-    return Q_[t] + Q_[t].transpose() + (general_cost_jacobian * general_cost_jacobian.transpose());
+    return Q_[t] + Q_[t].transpose() + (general_cost_jacobian.transpose() * general_cost_jacobian);
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) const

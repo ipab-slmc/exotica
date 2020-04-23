@@ -261,6 +261,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     const int NX = num_positions_ + num_velocities_, NDX = 2 * num_velocities_;
     X_ = Eigen::MatrixXd::Zero(NX, T_);
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
+    X_diff_ = Eigen::MatrixXd::Zero(NDX, T_);
     U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
 
     // Set GoalState
@@ -510,6 +511,9 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     X_.col(t) = x_in;
     U_.col(t) = u_in;
 
+    // Update xdiff
+    X_diff_.col(t) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
+
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
     scene_->GetKinematicTree().SetKinematicResponse(kinematic_solutions_[t]);
@@ -529,7 +533,10 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     // Simulate for tau
     X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(X_.col(t), U_.col(t), tau_);
 
-    // Stochstic noise, if enabled
+    // Update xdiff
+    X_diff_.col(t + 1) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t + 1), X_star_.col(t + 1));
+
+    // Stochastic noise, if enabled
     if (stochastic_matrices_specified_ && stochastic_updates_enabled_)
     {
         Eigen::VectorXd noise(num_positions_ + num_velocities_);
@@ -612,6 +619,7 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
     }
 
     X_.col(t) = x_in;
+    X_diff_.col(t) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
 
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
@@ -674,9 +682,8 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
 double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const
 {
     ValidateTimeIndex(t);
-    const Eigen::VectorXd x_diff = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
     const double general_cost = cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];  // TODO: ct scaling
-    return (x_diff.transpose() * Q_[t] * x_diff) + general_cost;
+    return (X_diff_.col(t).transpose() * Q_[t] * X_diff_.col(t)) + general_cost;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) const

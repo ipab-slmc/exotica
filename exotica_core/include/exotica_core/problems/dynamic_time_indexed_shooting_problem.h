@@ -144,6 +144,7 @@ protected:
     Eigen::MatrixXd X_;       ///< State trajectory (i.e., positions, velocities). Size: num-states x T
     Eigen::MatrixXd U_;       ///< Control trajectory. Size: num-controls x (T-1)
     Eigen::MatrixXd X_star_;  ///< Goal state trajectory (i.e., positions, velocities). Size: num-states x T
+    Eigen::MatrixXd X_diff_;  ///< Difference between X_star_ and X_. Size: ndx x T
 
     Eigen::MatrixXd Qf_;              ///< Final state cost
     std::vector<Eigen::MatrixXd> Q_;  ///< State space penalty matrix (precision matrix), per time index

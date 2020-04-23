@@ -66,6 +66,7 @@ if(CATKIN_ENABLE_TESTING)
 
   add_rostest(test/python_tests.launch)
 
-  catkin_add_nosetests(test/run_tests.py)
+  catkin_add_nosetests(test/test_ompl_solver_bounds.py)
   catkin_add_nosetests(test/test_dynamics_solvers.py)
+  catkin_add_nosetests(test/test_dynamic_time_indexed_shooting_problem.py)
 endif()

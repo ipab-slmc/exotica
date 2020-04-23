@@ -250,6 +250,9 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
     ompl::time::point start = ompl::time::now();
     ompl::base::PlannerTerminationCondition ptc = ompl::base::timedPlannerTerminationCondition(init_.Timeout - ompl::time::seconds(ompl::time::now() - start));
 
+    std::cout << "Print setup" << std::endl;
+    ompl_simple_setup_->print();
+    std::cout << "---------------------------" << std::endl;
     std::cout << "Starting simple setup solve" << std::endl;
     Timer t;
     if (ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION && ompl_simple_setup_->haveSolutionPath())

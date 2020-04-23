@@ -113,10 +113,20 @@ void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const St
 {
     switch (integrator_)
     {
-        // Forward Euler (RK1) - explicit
+        // Forward Euler (RK1)
         case Integrator::RK1:
         {
+            // Explicit
             xout = x + dt * dx;
+
+            // // Semi-implicit Euler
+            // StateVector dt_times_xdot = dt * dx;
+
+            // // Integrate acceleration to velocity
+            // xout.tail(num_velocities_) = x.tail(num_velocities_) + dt_times_xdot.tail(num_velocities_);
+
+            // // Integrate position with new velocity
+            // xout.head(num_positions_) = x.head(num_positions_) + dt * xout.tail(num_velocities_);
         }
         break;
 

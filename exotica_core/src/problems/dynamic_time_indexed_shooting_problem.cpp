@@ -86,9 +86,10 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
     }
 
-    // BimodalHuber mode 1
+    // BimodalHuber
     if (parameters_.LossType == "BiModalHuber")
     {
+        // BimodalHuber mode 1
         if (parameters_.Mode1.size() == 0)
         {
             ThrowPretty("Mode1 not set.");  // TODO: set default...

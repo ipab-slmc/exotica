@@ -14,7 +14,7 @@ def check_state_cost_jacobian_at_t(problem, t):
     scene = problem.get_scene()
     ds = scene.get_dynamics_solver()
 
-    x = random_state(scene)
+    x = random_state(ds)
     u = np.random.random((ds.nu,))
 
     if t == problem.T - 1:
@@ -54,7 +54,7 @@ def check_state_cost_hessian_at_t(problem, t):
     scene = problem.get_scene()
     ds = scene.get_dynamics_solver()
 
-    x = random_state(scene)
+    x = random_state(ds)
     u = np.random.random((ds.nu,))
 
     if t == problem.T - 1:
@@ -94,7 +94,7 @@ def check_control_cost_jacobian_at_t(problem, t):
     scene = problem.get_scene()
     ds = scene.get_dynamics_solver()
 
-    x = random_state(scene)
+    x = random_state(ds)
     u = np.random.random((ds.nu,))
 
     problem.update(x, u, t)
@@ -124,7 +124,7 @@ def check_control_cost_hessian_at_t(problem, t):
     scene = problem.get_scene()
     ds = scene.get_dynamics_solver()
 
-    x = random_state(scene)
+    x = random_state(ds)
     u = np.random.random((ds.nu,))
 
     problem.update(x, u, t)

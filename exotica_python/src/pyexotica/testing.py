@@ -16,12 +16,12 @@ def random_quaternion():
                      np.sqrt(uvw[0])*np.sin(2.0*np.pi*uvw[2]),
                      np.sqrt(uvw[0])*np.cos(2.0*np.pi*uvw[2])])
 
-def random_state(scene):
-    ds = scene.get_dynamics_solver()
+def random_state(ds):
+    # ds = scene.get_dynamics_solver()
     x = np.random.random((ds.nx,))
 
     # Use random quaternion when floating base is represented using SE(3)
-    if ds.ndx != ds.nq + ds.nv and scene.get_kinematic_tree().get_model_base_type() == exo.BaseType.Floating:
+    if ds.ndx != ds.nq + ds.nv: # and scene.get_kinematic_tree().get_model_base_type() == exo.BaseType.Floating:
         x[3:7] = random_quaternion()
 
     return x
@@ -40,7 +40,7 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
         ds = exo.Setup.create_dynamics_solver((name, {'Name': u'MyDynamicsSolver'}))
 
     # Get random state, control
-    x = random_state(scene)
+    x = random_state(ds)
     u = np.random.random((ds.nu,))
 
     # f should return tangent vector type

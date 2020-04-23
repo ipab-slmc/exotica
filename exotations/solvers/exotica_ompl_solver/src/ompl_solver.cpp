@@ -256,7 +256,6 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
     {
         GetPath(solution, ptc);
     }
-    std::cout << "Finished simple setup solve" << std::endl;
     planning_time_ = t.GetDuration();
     PostSolve();
 }

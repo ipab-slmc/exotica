@@ -17,7 +17,7 @@ Optional double R_rate = 1.;
 Optional Eigen::VectorXd C = Eigen::VectorXd(); // Control-dependent noise scaling factor
 Optional double C_rate = 0;  // Control-dependent noise constant covariance. Mutex w/ C
 
-Optional Eigen::VectorXd CW = Eigen::VectorXd(); // Control-idependent (white) noise scaling factor
+Optional Eigen::VectorXd CW = Eigen::VectorXd(); // Control-independent (white) noise scaling factor
 Optional double CW_rate = 0;  // Control-independent (white) noise constant covariance. Mutex w/ CW
 
 Optional bool WarmStartWithInverseDynamics = false;

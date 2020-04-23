@@ -51,8 +51,6 @@
             0   0   0   0   0   0     0
         </C> -->
 
-
-        <DiagonalNoiseMatrix>false</DiagonalNoiseMatrix>
         <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
         <GoalState> 0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>

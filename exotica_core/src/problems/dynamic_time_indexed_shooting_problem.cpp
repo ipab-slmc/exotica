@@ -514,6 +514,10 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     // Update xdiff
     X_diff_.col(t) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
 
+    // Update current state kinematics and costs
+    const Eigen::VectorXd q_current_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t));
+    UpdateTaskMaps(q_current_position, t);
+
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
     scene_->GetKinematicTree().SetKinematicResponse(kinematic_solutions_[t]);
@@ -552,44 +556,9 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
         X_.col(t + 1) = X_.col(t + 1) + white_noise + control_dependent_noise;
     }
 
-    const Eigen::VectorXd x_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
-    scene_->Update(x_next_position, static_cast<double>(t) * tau_);
-
-    Phi[t + 1].SetZero(length_Phi);
-    if (flags_ & KIN_J) jacobian[t + 1].setZero();
-    if (flags_ & KIN_J_DOT)
-        for (int i = 0; i < length_jacobian; ++i) hessian[t + 1](i).setZero();
-    for (int i = 0; i < num_tasks; ++i)
-    {
-        // Only update TaskMap if rho is not 0
-        if (tasks_[i]->is_used)
-        {
-            if (flags_ & KIN_J_DOT)
-            {
-                tasks_[i]->Update(x_next_position, Phi[t + 1].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t + 1].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t + 1].segment(tasks_[i]->start, tasks_[i]->length));
-            }
-            else if (flags_ & KIN_J)
-            {
-                tasks_[i]->Update(x_next_position, Phi[t + 1].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t + 1].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
-            }
-            else
-            {
-                tasks_[i]->Update(x_next_position, Phi[t + 1].data.segment(tasks_[i]->start, tasks_[i]->length));
-            }
-        }
-    }
-    if (flags_ & KIN_J_DOT)
-    {
-        cost.Update(Phi[t + 1], jacobian[t + 1], hessian[t + 1], t + 1);
-    }
-    else if (flags_ & KIN_J)
-    {
-        cost.Update(Phi[t + 1], jacobian[t + 1], t + 1);
-    }
-    else
-    {
-        cost.Update(Phi[t + 1], t + 1);
-    }
+    // TODO: We are now updating the TaskMaps _twice_ per call. This may be very expensive (!)
+    const Eigen::VectorXd q_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
+    UpdateTaskMaps(q_next_position, t + 1);
 
     ++number_of_problem_updates_;
 }
@@ -638,7 +607,16 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
     PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
 
     const Eigen::VectorXd x_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t));
-    scene_->Update(x_next_position, static_cast<double>(t) * tau_);
+    UpdateTaskMaps(x_next_position, t);
+
+    ++number_of_problem_updates_;
+}
+
+void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q, int t)
+{
+    ValidateTimeIndex(t);
+
+    scene_->Update(q, static_cast<double>(t) * tau_);
 
     Phi[t].SetZero(length_Phi);
     if (flags_ & KIN_J) jacobian[t].setZero();
@@ -651,15 +629,15 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
         {
             if (flags_ & KIN_J_DOT)
             {
-                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                tasks_[i]->Update(x_next_position, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
@@ -675,8 +653,6 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
     {
         cost.Update(Phi[t], t);
     }
-
-    ++number_of_problem_updates_;
 }
 
 double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const

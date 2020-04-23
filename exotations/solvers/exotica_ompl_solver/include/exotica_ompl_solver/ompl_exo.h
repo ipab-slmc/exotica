@@ -35,10 +35,10 @@
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/StateSpace.h>
 #include <ompl/base/StateValidityChecker.h>
+#include <ompl/base/spaces/DubinsStateSpace.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE2StateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
-#include <ompl/base/spaces/DubinsStateSpace.h>
 #include <ompl/geometric/SimpleSetup.h>
 
 #include <exotica_ompl_solver/ompl_solver_initializer.h>

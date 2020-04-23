@@ -230,7 +230,7 @@ void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
             SE2bounds.setLow(i, bounds[i]);
         }
         getSubspace(0)->as<ompl::base::SE2StateSpace>()->setBounds(SE2bounds);
-        WARNING_NAMED("OMPLSE3RNStateSpace::SetBounds", "Yaw bounds on SE(2) component ignored.");
+        WARNING_NAMED("OMPLSE2RNStateSpace::SetBounds", "Yaw bounds on SE(2) component ignored.");
 
         if (dim_ > 3)
         {
@@ -295,7 +295,7 @@ ompl::base::StateSamplerPtr OMPLDubinsRNStateSpace::allocDefaultStateSampler() c
 void OMPLDubinsRNStateSpace::SetBounds(SamplingProblemPtr &prob)
 {
     dim_ = prob->N;
-    addSubspace(ompl::base::StateSpacePtr(new ompl::base::DubinsStateSpace()), 1.0);
+    addSubspace(ompl::base::StateSpacePtr(new ompl::base::DubinsStateSpace(init_.DubinsStateSpaceTurningRadius, init_.DubinsStateSpaceIsSymmetric)), 1.0);
     if (dim_ > 3)
     {
         addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim_ - 3)), 1.0);
@@ -311,7 +311,7 @@ void OMPLDubinsRNStateSpace::SetBounds(SamplingProblemPtr &prob)
             Dubinsbounds.setLow(i, bounds[i]);
         }
         getSubspace(0)->as<ompl::base::DubinsStateSpace>()->setBounds(Dubinsbounds);
-        WARNING_NAMED("OMPLSE3RNStateSpace::SetBounds", "Yaw bounds on SE(2) component ignored.");
+        WARNING_NAMED("OMPLDubinsRNStateSpace::SetBounds", "Yaw bounds on SE(2) component ignored.");
 
         if (dim_ > 3)
         {
@@ -362,4 +362,4 @@ void OMPLDubinsRNStateSpace::OMPLToExoticaState(const ompl::base::State *state, 
         memcpy(q.segment(3, q.rows() - 3).data(), statetype->RealVectorStateSpace().values, sizeof(double) * (q.rows() - 3));
     }
 }
-}
+}  // namespace exotica

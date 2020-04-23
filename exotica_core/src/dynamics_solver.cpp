@@ -71,14 +71,17 @@ void AbstractDynamicsSolver<T, NX, NU>::SetDt(double dt_in)
 template <typename T, int NX, int NU>
 Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const StateVector& x, const ControlVector& u)
 {
+    assert(num_positions_ == num_velocities_);  // If this is not true, we should have specialised methods.
+
     switch (integrator_)
     {
         // Forward Euler (RK1)
         case Integrator::RK1:
         {
             StateVector xdot = f(x, u);
-            // TODO: This is the explicit RK1. We can switch to semi-implicit.
-            return x + dt_ * xdot;
+            StateVector xout(get_num_state());
+            Integrate(x, xdot, dt_, xout);
+            return xout;
         }
         // Explicit trapezoid rule (RK2)
         case Integrator::RK2:

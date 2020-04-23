@@ -9,6 +9,7 @@ from pyexotica.testing import random_state
 PKG = 'exotica_examples'
 roslib.load_manifest(PKG)  # This line is not needed with Catkin.
 
+np.random.seed(42)
 
 def check_state_cost_jacobian_at_t(problem, t):
     scene = problem.get_scene()
@@ -175,8 +176,9 @@ if __name__ == "__main__":
             check_state_cost_jacobian_at_t(problem, t)
 
         # TODO: test state cost hessian
-        for t in range(problem.T):
-            check_state_cost_hessian_at_t(problem, t)
+        # Deactivated as part of it will be a Gauss-Newton approximation
+        # for t in range(problem.T):
+        #     check_state_cost_hessian_at_t(problem, t)
 
         # test control cost jacobian
         for t in range(problem.T - 1):
@@ -187,3 +189,4 @@ if __name__ == "__main__":
             check_control_cost_hessian_at_t(problem, t)
 
         # TODO: test state control cost hessian
+        # We assume this to be 0.

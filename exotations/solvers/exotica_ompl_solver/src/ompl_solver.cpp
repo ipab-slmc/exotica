@@ -48,7 +48,11 @@ void OMPLSolver<ProblemType>::SpecifyProblem(PlanningProblemPtr pointer)
     if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::FIXED)
         state_space_.reset(new OMPLRNStateSpace(init_));
     else if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::PLANAR)
-        state_space_.reset(new OMPLRNStateSpace(init_));  // NB: We have a dedicated OMPLSE2RNStateSpace, however, for now we cannot set orientation bounds on it - as thus we are using the RN here. Cf. issue #629.
+    {
+        std::cout << "Creating Dubins State Space" << std::endl;
+        state_space_.reset(new OMPLDubinsRNStateSpace(init_));
+        //state_space_.reset(new OMPLRNStateSpace(init_));  // NB: We have a dedicated OMPLSE2RNStateSpace, however, for now we cannot set orientation bounds on it - as thus we are using the RN here. Cf. issue #629.
+    }
     else if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::FLOATING)
         state_space_.reset(new OMPLSE3RNStateSpace(init_));
     else
@@ -246,11 +250,13 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
     ompl::time::point start = ompl::time::now();
     ompl::base::PlannerTerminationCondition ptc = ompl::base::timedPlannerTerminationCondition(init_.Timeout - ompl::time::seconds(ompl::time::now() - start));
 
+    std::cout << "Starting simple setup solve" << std::endl;
     Timer t;
     if (ompl_simple_setup_->solve(ptc) == ompl::base::PlannerStatus::EXACT_SOLUTION && ompl_simple_setup_->haveSolutionPath())
     {
         GetPath(solution, ptc);
     }
+    std::cout << "Finished simple setup solve" << std::endl;
     planning_time_ = t.GetDuration();
     PostSolve();
 }

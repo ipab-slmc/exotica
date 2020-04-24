@@ -18,9 +18,13 @@
         <!-- <Mode1>  -10</Mode1> -->
         <!-- <Mode2>   10</Mode2> -->
     
-        <LossType>SmoothL1</LossType>
+        <!-- <LossType>SmoothL1</LossType>
         <L1Rate>0.01</L1Rate>
-        <L1IncreaseRate>1.01</L1IncreaseRate>
+        <L1IncreaseRate>1.01</L1IncreaseRate> -->
+
+        <LossType>SuperHuber</LossType>
+        <HuberRate>0.1</HuberRate>
+        <SuperHuberFactor>2</SuperHuberFactor>
 
         <PlanningScene>
             <Scene>

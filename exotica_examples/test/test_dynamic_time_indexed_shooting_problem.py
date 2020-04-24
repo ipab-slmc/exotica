@@ -32,7 +32,7 @@ def check_state_cost_jacobian_at_t(problem, t):
         dx[i] = eps / 2.0
 
         x_plus = ds.integrate(x, dx, 1.0)
-        x_minus = ds.integrate(x, dx, -1.0)
+        x_minus = ds.integrate(x, -dx, 1.0)
 
         if t == problem.T - 1:
             problem.update_terminal_state(x_plus)
@@ -72,7 +72,7 @@ def check_state_cost_hessian_at_t(problem, t):
         dx[i] = eps / 2.0
 
         x_plus = ds.integrate(x, dx, 1.0)
-        x_minus = ds.integrate(x, dx, -1.0)
+        x_minus = ds.integrate(x, -dx, 1.0)
 
         if t == problem.T - 1:
             problem.update_terminal_state(x_plus)

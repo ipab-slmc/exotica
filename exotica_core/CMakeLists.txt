@@ -167,4 +167,5 @@ if(CATKIN_ENABLE_TESTING)
   add_dependencies(test_autodiff ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
   catkin_add_nosetests(test/test_box_qp.py)
+  catkin_add_nosetests(test/test_sparse_costs.py)
 endif()

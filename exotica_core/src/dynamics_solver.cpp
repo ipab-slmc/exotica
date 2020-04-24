@@ -111,6 +111,8 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
 template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout)
 {
+    if (dt < 1e-6) ThrowPretty("dt needs to be positive!");
+
     switch (integrator_)
     {
         // Forward Euler (RK1)
@@ -317,7 +319,7 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx_fd(const StateVec
         xdiff.setZero();
         xdiff(i) = eps / 2.0;
 
-        Integrate(x, xdiff, -1., x_low);
+        Integrate(x, -xdiff, 1., x_low);
         Integrate(x, xdiff, 1., x_high);
 
         fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;

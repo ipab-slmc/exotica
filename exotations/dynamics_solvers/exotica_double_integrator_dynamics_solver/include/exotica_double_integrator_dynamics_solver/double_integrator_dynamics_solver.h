@@ -40,8 +40,6 @@ namespace exotica
 class DoubleIntegratorDynamicsSolver : public DynamicsSolver, public Instantiable<DoubleIntegratorDynamicsSolverInitializer>
 {
 public:
-    DoubleIntegratorDynamicsSolver();
-
     void AssignScene(ScenePtr scene_in) override;
 
     StateVector f(const StateVector& x, const ControlVector& u) override;

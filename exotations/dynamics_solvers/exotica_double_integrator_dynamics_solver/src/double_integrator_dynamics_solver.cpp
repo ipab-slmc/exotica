@@ -33,8 +33,6 @@ REGISTER_DYNAMICS_SOLVER_TYPE("DoubleIntegratorDynamicsSolver", exotica::DoubleI
 
 namespace exotica
 {
-DoubleIntegratorDynamicsSolver::DoubleIntegratorDynamicsSolver() = default;
-
 void DoubleIntegratorDynamicsSolver::AssignScene(ScenePtr scene_in)
 {
     const int num_positions_in = scene_in->GetKinematicTree().GetNumControlledJoints();

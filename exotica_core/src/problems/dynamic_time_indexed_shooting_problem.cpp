@@ -29,6 +29,7 @@
 
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
 #include <exotica_core/setup.h>
+#include <exotica_core/tools/conversions.h>
 #include <exotica_core/tools/sparse_costs.h>
 #include <cmath>
 
@@ -260,10 +261,25 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     if (debug_) HIGHLIGHT_NAMED("DynamicTimeIndexedShootingProblem", "Initialize problem with T=" << T_);
 
     const int NX = num_positions_ + num_velocities_, NDX = 2 * num_velocities_;
+
+    // Check if the system has a floating-base, and if so, if it contains a quaternion.
+    // Will need to trigger special logic below to handle this (w.r.t. normalisation).
+    has_quaternion_floating_base_ = (scene_->GetKinematicTree().GetModelBaseType() == BaseType::FLOATING && NX == NDX + 1);
+
     X_ = Eigen::MatrixXd::Zero(NX, T_);
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
     X_diff_ = Eigen::MatrixXd::Zero(NDX, T_);
     U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
+
+    // Set w component of quaternion by default
+    if (has_quaternion_floating_base_)
+    {
+        for (int t = 0; t < T_; ++t)
+        {
+            SetDefaultQuaternionInConfigurationVector(X_.col(t));
+            SetDefaultQuaternionInConfigurationVector(X_star_.col(t));
+        }
+    }
 
     // Set GoalState
     if (this->parameters_.GoalState.rows() > 0)
@@ -429,6 +445,15 @@ void DynamicTimeIndexedShootingProblem::set_X(Eigen::MatrixXdRefConst X_in)
 {
     if (X_in.rows() != X_.rows() || X_in.cols() != X_.cols()) ThrowPretty("Sizes don't match! " << X_.rows() << "x" << X_.cols() << " vs " << X_in.rows() << "x" << X_in.cols());
     X_ = X_in;
+
+    // Normalize quaternion, if required.
+    if (has_quaternion_floating_base_)
+    {
+        for (int t = 0; t < T_; ++t)
+        {
+            NormalizeQuaternionInConfigurationVector(X_.col(t));
+        }
+    }
 }
 
 const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::get_U() const
@@ -457,6 +482,15 @@ void DynamicTimeIndexedShootingProblem::set_X_star(Eigen::MatrixXdRefConst X_sta
 {
     if (X_star_in.rows() != X_star_.rows() || X_star_in.cols() != X_star_.cols()) ThrowPretty("Sizes don't match! " << X_star_.rows() << "x" << X_star_.cols() << " vs " << X_star_in.rows() << "x" << X_star_in.cols());
     X_star_ = X_star_in;
+
+    // Normalize quaternion, if required.
+    if (has_quaternion_floating_base_)
+    {
+        for (int t = 0; t < T_; ++t)
+        {
+            NormalizeQuaternionInConfigurationVector(X_star_.col(t));
+        }
+    }
 }
 
 const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::get_Q(int t) const

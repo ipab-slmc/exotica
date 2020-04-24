@@ -14,9 +14,9 @@
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
                     <CartpoleDynamicsSolver Name="solver">
-                        <ControlLimitsLow>-15</ControlLimitsLow>
-                        <ControlLimitsHigh>15</ControlLimitsHigh>
-                        <dt>0.01</dt>
+                        <ControlLimitsLow>-10</ControlLimitsLow>
+                        <ControlLimitsHigh>10</ControlLimitsHigh>
+                        <dt>0.05</dt>
                     </CartpoleDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
@@ -34,12 +34,12 @@
         </Maps>
 
         <Cost>
-            <!-- <Task Task="P2P" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10"/> -->
-            <Task Task="CJP" Goal="-1 0" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0 10.0"/>
+            <!-- <Task Task="P2P" Rho="0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 10.0"/> -->
+            <Task Task="CJP" Goal="-1 0" Rho="0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 10.0"/>
         </Cost>
 
-        <T>200</T>
-        <tau>0.01</tau>
+        <T>50</T>
+        <tau>0.05</tau>
         <Q_rate>0</Q_rate>
         <Qf>1 0 1 1</Qf>
         <Qf_rate>1</Qf_rate>

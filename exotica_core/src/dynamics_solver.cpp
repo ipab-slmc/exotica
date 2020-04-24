@@ -139,7 +139,7 @@ void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const St
             // xout.tail(num_velocities_).noalias() = x.tail(num_velocities_) + dt * dx.tail(num_velocities_);  // Integrate acceleration to velocity
             // xout.head(num_positions_).noalias() = x.head(num_positions_) + dt * xout.tail(num_velocities_);  // Integrate position with new velocity
         }
-            break;
+        break;
 
         default:
             ThrowPretty("Not implemented!");

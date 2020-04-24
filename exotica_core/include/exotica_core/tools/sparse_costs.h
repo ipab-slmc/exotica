@@ -51,6 +51,21 @@ inline double huber_hessian(double x, double delta)
     return std::pow(delta, 4) * std::sqrt(1.0 + x * x / (delta * delta)) / (std::pow(delta * delta + x * x, 2));
 }
 
+inline double super_huber_cost(double x, double delta, double factor)
+{
+    return pow(delta, 2) * (pow(1 + pow(x, 2) / pow(delta, 2), factor) - 1);
+}
+
+inline double super_huber_jacobian(double x, double delta, double factor)
+{
+    return 2 * factor * x * pow(1 + pow(x, 2) / pow(delta, 2), factor) / (1 + pow(x, 2) / pow(delta, 2));
+}
+
+inline double super_huber_hessian(double x, double delta, double factor)
+{
+    return 2 * factor * pow(1 + pow(x, 2) / pow(delta, 2), factor) / (1 + pow(x, 2) / pow(delta, 2)) + 4 * pow(factor, 2) * pow(x, 2) * pow(1 + pow(x, 2) / pow(delta, 2), factor) / (pow(delta, 2) * pow(1 + pow(x, 2) / pow(delta, 2), 2)) - 4 * factor * pow(x, 2) * pow(1 + pow(x, 2) / pow(delta, 2), factor) / (pow(delta, 2) * pow(1 + pow(x, 2) / pow(delta, 2), 2));
+}
+
 inline double smooth_l1_cost(double x, double alpha)
 {
     return 1.0 / alpha * (std::log(1.0 + std::exp(-alpha * x)) + std::log(1.0 + std::exp(alpha * x)));

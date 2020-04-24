@@ -8,8 +8,7 @@
         <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
         <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
         <DynamicsSolver>
-          <PinocchioDynamicsSolver Name="PinocchioDynamicsSolver" Integrator="RK4"/>
-          <!-- <DoubleIntegratorDynamicsSolver Name="PinocchioDynamicsSolver" Integrator="RK4"/> -->
+          <PinocchioDynamicsSolver Name="PinocchioDynamicsSolver"/>
         </DynamicsSolver>
       </Scene>
     </PlanningScene>

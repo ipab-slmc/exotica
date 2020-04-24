@@ -13,7 +13,7 @@
                 <SRDF>{exotica_examples}/resources/robots/pendulum.srdf</SRDF>
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
-                    <PendulumDynamicsSolver Name="solver" Integrator="RK1">
+                    <PendulumDynamicsSolver Name="solver">
                         <ControlLimitsLow>-10.0</ControlLimitsLow>
                         <ControlLimitsHigh>10.0</ControlLimitsHigh>
                         <dt>0.01</dt>

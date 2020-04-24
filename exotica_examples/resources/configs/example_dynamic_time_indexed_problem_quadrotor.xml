@@ -8,7 +8,7 @@
         <SRDF>{exotica_examples}/resources/robots/quadrotor.srdf</SRDF>
         <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
         <DynamicsSolver>
-          <QuadrotorDynamicsSolver dt="0.05" Integrator="RK4"/>
+          <QuadrotorDynamicsSolver dt="0.05"/>
         </DynamicsSolver>
       </Scene>
     </PlanningScene>

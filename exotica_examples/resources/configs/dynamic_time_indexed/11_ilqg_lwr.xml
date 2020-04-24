@@ -17,7 +17,7 @@
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
 
                 <DynamicsSolver>
-                    <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
+                    <DoubleIntegratorDynamicsSolver Name="solver">
                         <ControlLimitsLow>-5</ControlLimitsLow>
                         <ControlLimitsHigh>-5</ControlLimitsHigh>
                         <dt>0.02</dt>

@@ -61,8 +61,13 @@ public:
     ControlDerivative fu(const StateVector& x, const ControlVector& u) override;
     void ComputeDerivatives(const StateVector& x, const ControlVector& u) override;
     ControlVector InverseDynamics(const StateVector& x) override;
+    StateVector StateDelta(const StateVector& x_1, const StateVector& x_2) override;
+    Eigen::MatrixXd dStateDelta(const StateVector& x_1, const StateVector& x_2, const ArgumentPosition first_or_second) override;
+    void Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout) override;
 
 private:
+    StateVector SimulateOneStep(const StateVector& x, const ControlVector& u) override;
+
     pinocchio::Model model_;
     std::unique_ptr<pinocchio::Data> pinocchio_data_;
 

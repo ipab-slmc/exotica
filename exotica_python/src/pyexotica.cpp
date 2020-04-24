@@ -30,6 +30,7 @@
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/tools/box_qp.h>
 #include <exotica_core/tools/box_qp_old.h>
+#include <exotica_core/tools/sparse_costs.h>
 #ifdef MSGPACK_FOUND
 #include <exotica_core/visualization_meshcat.h>
 #endif
@@ -578,6 +579,17 @@ PYBIND11_MODULE(_pyexotica, module)
         return Trajectory(data, radius).ToString();
     },
               py::arg("data"), py::arg("max_radius") = 1.0);
+
+    py::module sparse_costs = tools.def_submodule("SparseCosts")
+                                  .def("huber_cost", &huber_cost)
+                                  .def("huber_jacobian", &huber_jacobian)
+                                  .def("huber_hessian", &huber_hessian)
+                                  .def("smooth_l1_cost", &smooth_l1_cost)
+                                  .def("smooth_l1_jacobian", &smooth_l1_jacobian)
+                                  .def("smooth_l1_hessian", &smooth_l1_hessian)
+                                  .def("bimodal_huber_cost", &bimodal_huber_cost)
+                                  .def("bimodal_huber_jacobian", &bimodal_huber_jacobian)
+                                  .def("bimodal_huber_hessian", &bimodal_huber_hessian);
 
     py::class_<Timer, std::shared_ptr<Timer>> timer(module, "Timer");
     timer.def(py::init());

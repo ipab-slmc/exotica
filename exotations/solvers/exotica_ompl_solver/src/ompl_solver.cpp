@@ -48,7 +48,12 @@ void OMPLSolver<ProblemType>::SpecifyProblem(PlanningProblemPtr pointer)
     if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::FIXED)
         state_space_.reset(new OMPLRNStateSpace(init_));
     else if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::PLANAR)
-        state_space_.reset(new OMPLRNStateSpace(init_));  // NB: We have a dedicated OMPLSE2RNStateSpace, however, for now we cannot set orientation bounds on it - as thus we are using the RN here. Cf. issue #629.
+    {
+        if (init_.IsDubinsStateSpace)
+            state_space_.reset(new OMPLDubinsRNStateSpace(init_));
+        else
+            state_space_.reset(new OMPLRNStateSpace(init_));  // NB: We have a dedicated OMPLSE2RNStateSpace, however, for now we cannot set orientation bounds on it - as thus we are using the RN here. Cf. issue #629.
+    }
     else if (prob_->GetScene()->GetKinematicTree().GetControlledBaseType() == BaseType::FLOATING)
         state_space_.reset(new OMPLSE3RNStateSpace(init_));
     else

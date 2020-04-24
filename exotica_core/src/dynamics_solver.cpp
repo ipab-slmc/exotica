@@ -75,8 +75,9 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
 
     switch (integrator_)
     {
-        // Forward Euler (RK1)
+        // Forward Euler (RK1), symplectic Euler
         case Integrator::RK1:
+        case Integrator::SymplecticEuler:
         {
             StateVector xdot = f(x, u);
             StateVector xout(get_num_state());
@@ -104,33 +105,41 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
 
             return x + dx;
         }
+        default:
+            ThrowPretty("Not implemented!");
     };
-    ThrowPretty("Not implemented!");
 }
 
 template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout)
 {
+    assert(num_positions_ == num_velocities_);
+    assert(x.size() == get_num_state());
+    assert(dx.size() == get_num_state_derivative());
+    assert(xout.size() == get_num_state());
     if (dt < 1e-6) ThrowPretty("dt needs to be positive!");
 
     switch (integrator_)
     {
         // Forward Euler (RK1)
         case Integrator::RK1:
+            xout.noalias() = x + dt * dx;
+            break;
+
+        // Semi-implicit Euler
+        case Integrator::SymplecticEuler:
         {
-            // Explicit
-            xout = x + dt * dx;
+            StateVector dx_new(get_num_state_derivative());
+            dx_new.head(num_positions_) = dt * x.tail(num_velocities_) + (dt * dt) * dx.tail(num_velocities_);
+            dx_new.tail(num_velocities_) = dt * dx.tail(num_velocities_);
+            xout.noalias() = x + dx_new;
+            //  = np.concatenate([dt * v_current + (dt*dt) * a, dt * a])
+            // return x + dx_new
 
-            // // Semi-implicit Euler
-            // StateVector dt_times_xdot = dt * dx;
-
-            // // Integrate acceleration to velocity
-            // xout.tail(num_velocities_) = x.tail(num_velocities_) + dt_times_xdot.tail(num_velocities_);
-
-            // // Integrate position with new velocity
-            // xout.head(num_positions_) = x.head(num_positions_) + dt * xout.tail(num_velocities_);
+            // xout.tail(num_velocities_).noalias() = x.tail(num_velocities_) + dt * dx.tail(num_velocities_);  // Integrate acceleration to velocity
+            // xout.head(num_positions_).noalias() = x.head(num_positions_) + dt * xout.tail(num_velocities_);  // Integrate position with new velocity
         }
-        break;
+            break;
 
         default:
             ThrowPretty("Not implemented!");
@@ -216,6 +225,8 @@ void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(std::string integrator_in)
 {
     if (integrator_in == "RK1")
         integrator_ = Integrator::RK1;
+    else if (integrator_in == "SymplecticEuler")
+        integrator_ = Integrator::SymplecticEuler;
     else if (integrator_in == "RK2")
         integrator_ = Integrator::RK2;
     else if (integrator_in == "RK4")

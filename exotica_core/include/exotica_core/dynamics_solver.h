@@ -45,10 +45,10 @@ class Scene;
 
 enum Integrator
 {
-    RK1 = 0,  ///< Forward Euler
-    RK2,      ///< Explicit trapezoid rule
-    RK4,      ///< Runge-Kutta 4
-    // RK45
+    RK1 = 0,          ///< Forward Euler (explicit)
+    SymplecticEuler,  ///< Semi-Implicit Euler
+    RK2,              ///< Explicit trapezoid rule
+    RK4,              ///< Runge-Kutta 4
 };
 
 template <typename T, int NX, int NU>

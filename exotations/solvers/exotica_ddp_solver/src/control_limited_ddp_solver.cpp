@@ -66,33 +66,19 @@ void ControlLimitedDDPSolver::BackwardPass()
         // State regularization
         Vxx_.diagonal().array() += lambda_;
 
+        Qxx_ = dt_ * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx_ * fx;
+        Quu_ = dt_ * prob_->GetControlCostHessian(t) + fu.transpose() * Vxx_ * fu;
+
+        // NOTE: Qux = Qxu for all robotics systems I have seen
+        //  this might need to be changed later on
+        Qux_ = dt_ * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx_ * fx;
+
         if (parameters_.UseSecondOrderDynamics)
         {
-            // clang-format off
             Eigen::Tensor<double, 1> Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx_.data(), NDX_);
-            Qxx_ = dt_ * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx_ * fx +
-                Eigen::TensorToMatrix(
-                    (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_
-                ) * dt_;
-
-            Quu_ = dt_ * prob_->GetControlCostHessian(t) + fu.transpose() * Vxx_ * fu +
-                Eigen::TensorToMatrix(
-                    (Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU_, NU_
-                ) * dt_;
-
-            Qux_ = dt_ * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx_ * fx +
-                Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NDX_
-                ) * dt_;
-            // clang-format on
-        }
-        else
-        {
-            Qxx_ = dt_ * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx_ * fx;
-            Quu_ = dt_ * prob_->GetControlCostHessian(t) + fu.transpose() * Vxx_ * fu;
-
-            // NOTE: Qux = Qxu for all robotics systems I have seen
-            //  this might need to be changed later on
-            Qux_ = dt_ * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx_ * fx;
+            Qxx_ += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_) * dt_;
+            Quu_ += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU_, NU_) * dt_;
+            Qux_ += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NDX_) * dt_;
         }
 
         Eigen::VectorXd low_limit = control_limits.col(0) - u,

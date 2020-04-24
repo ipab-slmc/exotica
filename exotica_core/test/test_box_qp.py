@@ -6,22 +6,24 @@ from scipy.optimize import minimize
 
 NUM_TESTS = 1000
 
-def test_boxqp_vs_scipy(H, q, b_low, b_high, x_init,
-                        threshold_step_acceptance=0.1,
-                        max_iterations=100,
-                        threshold_gradient_tolerance=1e-5,
-                        regularization=1e-12,
-                        scipy_method='TNC'):
-    test_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init, threshold_step_acceptance, max_iterations, threshold_gradient_tolerance, regularization, scipy_method, exo.box_qp)
-    test_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init, threshold_step_acceptance, max_iterations, threshold_gradient_tolerance, regularization, scipy_method, exo.box_qp_old)
 
-def test_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init,
-                             threshold_step_acceptance=0.1,
-                             max_iterations=100,
-                             threshold_gradient_tolerance=1e-5,
-                             regularization=0,
-                             scipy_method='TNC',
-                             box_qp=exo.box_qp):
+def check_boxqp_vs_scipy(H, q, b_low, b_high, x_init,
+                         threshold_step_acceptance=0.1,
+                         max_iterations=100,
+                         threshold_gradient_tolerance=1e-5,
+                         regularization=1e-12,
+                         scipy_method='TNC'):
+    check_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init, threshold_step_acceptance, max_iterations, threshold_gradient_tolerance, regularization, scipy_method, exo.box_qp)
+    check_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init, threshold_step_acceptance, max_iterations, threshold_gradient_tolerance, regularization, scipy_method, exo.box_qp_old)
+
+
+def check_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init,
+                              threshold_step_acceptance=0.1,
+                              max_iterations=100,
+                              threshold_gradient_tolerance=1e-5,
+                              regularization=0,
+                              scipy_method='TNC',
+                              box_qp=exo.box_qp):
     sol = box_qp(H, q, b_low, b_high, x_init, threshold_step_acceptance, max_iterations, threshold_gradient_tolerance, regularization)
 
     def cost(x):
@@ -52,8 +54,8 @@ class TestBoxQP(unittest.TestCase):
             x_init = np.random.uniform(low=-5, high=5, size=(2,))
             q = np.array([0.0, 0.0])
 
-            #test_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='TNC')
-            test_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='L-BFGS-B')
+            #check_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='TNC')
+            check_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='L-BFGS-B')
     
     def test_zero_h(self):
         for _ in range(NUM_TESTS):
@@ -64,8 +66,8 @@ class TestBoxQP(unittest.TestCase):
             x_init = np.array([-3., 2.])
             q = np.random.normal(size=(2,1), loc=0, scale=10)
 
-            test_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='TNC')
-            test_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='L-BFGS-B')
+            check_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='TNC')
+            check_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='L-BFGS-B')
 
     def test_big_numbers(self):
         for _ in range(NUM_TESTS):
@@ -80,8 +82,8 @@ class TestBoxQP(unittest.TestCase):
             x_init = np.array([-3., 2.])
             q = np.array([0, 0])
 
-            test_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='TNC')
-            test_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='L-BFGS-B')
+            check_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='TNC')
+            check_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='L-BFGS-B')
 
     def test_small_numbers(self):
         for _ in range(NUM_TESTS):
@@ -96,8 +98,8 @@ class TestBoxQP(unittest.TestCase):
             x_init = np.array([-3., 2.])
             q = np.array([0, 0])
 
-            test_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='TNC')
-            test_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='L-BFGS-B')
+            check_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='TNC')
+            check_boxqp_vs_scipy(H, q, b_low, b_high, x_init, scipy_method='L-BFGS-B')
 
 if __name__ == '__main__':
     unittest.main()

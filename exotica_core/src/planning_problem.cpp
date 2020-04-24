@@ -177,6 +177,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
             // If the difference is exactly 1, just add it:
             else if ((scene_->GetDynamicsSolver()->get_num_positions() - scene_->GetDynamicsSolver()->get_num_velocities()) == 1)
             {
+                ThrowPretty("Please revisit if this gets triggered. Should not.");
                 num_velocities_ -= 1;
             }
             // Else, throw for now:
@@ -194,6 +195,14 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
     start_state_ = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
     if (init.StartState.rows() > 0)
         SetStartState(init.StartState);
+
+    // Check if the start state needs to be normalised due to a quaternion
+    if (scene_->GetDynamicsSolver() != nullptr &&
+        scene_->GetKinematicTree().GetModelBaseType() == BaseType::FLOATING &&
+        scene_->GetDynamicsSolver()->get_num_state() == scene_->GetDynamicsSolver()->get_num_state_derivative() + 1)
+    {
+        NormalizeQuaternionInConfigurationVector(start_state_);
+    }
 
     // Set the start time
     if (init.StartTime < 0)

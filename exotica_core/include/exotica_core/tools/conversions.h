@@ -105,6 +105,16 @@ Eigen::VectorXd GetFrameAsVector(const KDL::Frame& val, RotationType type = Rota
 
 Eigen::VectorXd GetRotationAsVector(const KDL::Frame& val, RotationType type);
 
+inline void NormalizeQuaternionInConfigurationVector(Eigen::Ref<Eigen::VectorXd> q)
+{
+    q.segment<4>(3) = Eigen::Quaterniond(q.segment<4>(3)).normalized().coeffs();
+}
+
+inline void SetDefaultQuaternionInConfigurationVector(Eigen::Ref<Eigen::VectorXd> q)
+{
+    q.segment<4>(3) = Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0).normalized().coeffs();
+}
+
 typedef Eigen::Array<KDL::Frame, Eigen::Dynamic, 1> ArrayFrame;
 typedef Eigen::Array<KDL::Twist, Eigen::Dynamic, 1> ArrayTwist;
 typedef Eigen::Array<KDL::Jacobian, Eigen::Dynamic, 1> ArrayJacobian;

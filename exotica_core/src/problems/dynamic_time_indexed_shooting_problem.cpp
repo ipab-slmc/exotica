@@ -67,7 +67,7 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
     }
 
     // Huber Rate
-    if (parameters_.LossType == "Huber")
+    if (parameters_.LossType == "Huber" || parameters_.LossType == "SuperHuber")
     {
         if (parameters_.HuberRate.size() == 0)
         {
@@ -751,6 +751,8 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
             Quu(iu, iu) = smooth_l1_hessian(U_.col(t)[iu], l1_rate_(iu));
         else if (parameters_.LossType == "Huber")
             Quu(iu, iu) = huber_hessian(U_.col(t)[iu], huber_rate_(iu));
+        else if (parameters_.LossType == "SuperHuber")
+            Quu(iu, iu) = super_huber_hessian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
         else if (parameters_.LossType == "BiModalHuber")
             Quu(iu, iu) = bimodal_huber_hessian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
@@ -785,6 +787,8 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
             cost += smooth_l1_cost(U_.col(t)[iu], l1_rate_(iu));
         else if (parameters_.LossType == "Huber")
             cost += huber_cost(U_.col(t)[iu], huber_rate_(iu));
+        else if (parameters_.LossType == "SuperHuber")
+            cost += super_huber_cost(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
         else if (parameters_.LossType == "BiModalHuber")
             cost += bimodal_huber_cost(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
@@ -823,6 +827,8 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
             Qu(iu) = smooth_l1_jacobian(U_.col(t)[iu], l1_rate_(iu));
         else if (parameters_.LossType == "Huber")
             Qu(iu) = huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
+        else if (parameters_.LossType == "SuperHuber")
+            Qu(iu) = super_huber_jacobian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
         else if (parameters_.LossType == "BiModalHuber")
             Qu(iu) = bimodal_huber_jacobian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));

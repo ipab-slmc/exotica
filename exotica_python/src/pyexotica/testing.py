@@ -8,6 +8,7 @@ __all__ = ["check_dynamics_solver_derivatives"]
 
 # np.random.seed(42)
 
+
 def random_quaternion():
     # Using http://planning.cs.uiuc.edu/node198.html
     uvw = np.random.uniform(size=(3,))
@@ -16,17 +17,34 @@ def random_quaternion():
                      np.sqrt(uvw[0])*np.sin(2.0*np.pi*uvw[2]),
                      np.sqrt(uvw[0])*np.cos(2.0*np.pi*uvw[2])])
 
+
 def random_state(ds):
     # ds = scene.get_dynamics_solver()
     x = np.random.random((ds.nx,))
 
     # Use random quaternion when floating base is represented using SE(3)
-    if ds.ndx != ds.nq + ds.nv: # and scene.get_kinematic_tree().get_model_base_type() == exo.BaseType.Floating:
+    # and scene.get_kinematic_tree().get_model_base_type() == exo.BaseType.Floating:
+    if ds.ndx != ds.nq + ds.nv:
         x[3:7] = random_quaternion()
 
     return x
 
-def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=None):
+
+def explicit_euler(x, dx, dt):
+    return x + dt * dx
+
+
+def semiimplicit_euler(x, dx, dt):
+    nq = int(x.shape[0] / 2)
+    q_current = x[:nq]
+    v_current = x[nq:]
+    a = dx[nq:]
+
+    dx_new = np.concatenate([dt * v_current + (dt*dt) * a, dt * a])
+    return x + dx_new
+
+
+def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=None, do_test_integrators=True):
     ds = None
     if urdf is not None and srdf is not None and joint_group is not None:
         my_scene_init = exo.Initializers.SceneInitializer()
@@ -81,3 +99,16 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
     fu_joint = ds.get_fu()
     np.testing.assert_allclose(fx, fx_joint, rtol=1e-5, atol=1e-5)
     np.testing.assert_allclose(fu, fu_joint, rtol=1e-5, atol=1e-5)
+
+    # Check different integration schemes
+    if ds.nq == ds.nv and do_test_integrators:
+        python_integrators = {
+            exo.Integrator.RK1: explicit_euler,
+            exo.Integrator.SymplecticEuler: semiimplicit_euler
+        }
+        for integrator in [exo.Integrator.RK1, exo.Integrator.SymplecticEuler]:
+            ds.integrator = integrator
+            for dt in [0.001]:
+                print("Testing integrator", integrator, "dt=", dt)
+                np.testing.assert_allclose(ds.integrate(
+                    x, dx, dt), python_integrators[integrator](x, dx, dt))

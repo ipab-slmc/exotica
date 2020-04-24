@@ -1251,6 +1251,13 @@ PYBIND11_MODULE(_pyexotica, module)
         return vec;
     });
 
+    py::enum_<Integrator>(module, "Integrator")
+        .value("RK1", Integrator::RK1)
+        .value("SymplecticEuler", Integrator::SymplecticEuler)
+        .value("RK2", Integrator::RK2)
+        .value("RK4", Integrator::RK4)
+        .export_values();
+
     py::class_<DynamicsSolver, std::shared_ptr<DynamicsSolver>, Object>(module, "DynamicsSolver")
         .def("f", &DynamicsSolver::f)
         .def("fx", &DynamicsSolver::fx)
@@ -1262,6 +1269,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_property_readonly("nx", &DynamicsSolver::get_num_state)
         .def_property_readonly("ndx", &DynamicsSolver::get_num_state_derivative)
         .def_property_readonly("nu", &DynamicsSolver::get_num_controls)
+        .def_property("integrator", &DynamicsSolver::get_integrator, &DynamicsSolver::set_integrator)
         .def("get_position", &DynamicsSolver::GetPosition)
         .def("simulate", &DynamicsSolver::Simulate)
         .def("state_delta", &DynamicsSolver::StateDelta)

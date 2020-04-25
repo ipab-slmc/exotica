@@ -273,7 +273,6 @@ void AbstractDynamicsSolver<T, NX, NU>::InitializeSecondOrderDerivatives()
     if (second_order_derivatives_initialized_)
         return;
 
-    const int nx = get_num_state();
     const int ndx = get_num_state_derivative();
 
     fxx_default_ = Eigen::Tensor<T, 3>(ndx, ndx, ndx);

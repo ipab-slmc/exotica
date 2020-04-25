@@ -883,7 +883,7 @@ void KinematicTree::ComputeJdot(const KDL::Jacobian& jacobian, KDL::Jacobian& ja
 void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) const
 {
     jacobian.data.setZero();
-    KDL::Frame tmp = FK(frame);  // Create temporary offset frames
+    (void)FK(frame);  // Create temporary offset frames
     std::shared_ptr<KinematicElement> it = frame.frame_A.lock();
     while (it != nullptr)
     {

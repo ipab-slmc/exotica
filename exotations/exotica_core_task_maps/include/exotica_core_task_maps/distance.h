@@ -39,13 +39,10 @@ namespace exotica
 class Distance : public TaskMap, public Instantiable<DistanceInitializer>
 {
 public:
-    Distance();
-    virtual ~Distance();
-
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_DISTANCE_H_

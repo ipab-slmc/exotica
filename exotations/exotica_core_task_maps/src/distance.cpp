@@ -33,9 +33,6 @@ REGISTER_TASKMAP_TYPE("Distance", exotica::Distance);
 
 namespace exotica
 {
-Distance::Distance() = default;
-Distance::~Distance() = default;
-
 void Distance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
@@ -63,4 +60,4 @@ int Distance::TaskSpaceDim()
 {
     return kinematics[0].Phi.rows();
 }
-}
+}  // namespace exotica

@@ -726,23 +726,29 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) const
 {
     ValidateTimeIndex(t);
-
     const int ndx = 2 * num_velocities_;
-    Eigen::MatrixXd state_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
-    // state_cost_hessian.topLeftCorner(num_velocities_, num_velocities_) = cost.ydiff[t].transpose() * cost.S[t] * cost.hessian[t] + cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
-    state_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() = cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
 
-    // Contract
+    // State Cost
+    Eigen::MatrixXd state_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
+    const Eigen::MatrixXd dxdiff = scene_->GetDynamicsSolver()->dStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
+    state_cost_hessian.noalias() = dxdiff.transpose() * Q_[t] * dxdiff;
+
+    // General Cost
+    Eigen::MatrixXd general_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
+    // general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_) = cost.ydiff[t].transpose() * cost.S[t] * cost.hessian[t] + cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
+    general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() = cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
+
+    // Contract task-map Hessians
     if (flags_ & KIN_J_DOT)
     {
         Eigen::RowVectorXd ydiffTS = cost.ydiff[t].transpose() * cost.S[t];  // (1*m)
         for (int i = 0; i < cost.length_jacobian; ++i)                       // length m
         {
-            state_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() += ydiffTS(i) * cost.hessian[t](i);
+            general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() += ydiffTS(i) * cost.hessian[t](i);
         }
     }
 
-    return Q_[t] + Q_[t].transpose() + 2.0 * state_cost_hessian;
+    return 2.0 * state_cost_hessian + 2.0 * general_cost_hessian;
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) const

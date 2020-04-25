@@ -59,6 +59,27 @@ void ContinuousJointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef p
     }
 }
 
+void ContinuousJointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+{
+    if (phi.rows() != N_) ThrowNamed("Wrong size of Phi!");
+    if (jacobian.rows() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
+    if (hessian.size() != N_) ThrowNamed("Wrong size of Hessian!" << N_ << " vs " << hessian.size());
+
+    for (std::size_t i = 0; i < joint_map_.size(); ++i)
+    {
+        phi(2 * i + 0) = std::cos(x(joint_map_[i]));
+        phi(2 * i + 1) = std::sin(x(joint_map_[i]));
+
+        // Jacobian
+        jacobian(2 * i + 0, joint_map_[i]) = -std::sin(x(joint_map_[i]));
+        jacobian(2 * i + 1, joint_map_[i]) = std::cos(x(joint_map_[i]));
+
+        // Hessian
+        hessian(2 * i + 0)(joint_map_[i], joint_map_[i]) = -std::cos(x(joint_map_[i]));
+        hessian(2 * i + 1)(joint_map_[i], joint_map_[i]) = -std::sin(x(joint_map_[i]));
+    }
+}
+
 void ContinuousJointPose::AssignScene(ScenePtr scene)
 {
     scene_ = scene;

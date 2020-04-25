@@ -212,6 +212,9 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
     // Set the derivative order for Kinematics
     switch (init.DerivativeOrder)
     {
+        case -1:
+            // No change - the derived problems have to set it.
+            break;
         case 0:
             flags_ = KIN_FK;
             break;
@@ -221,6 +224,8 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
         case 2:
             flags_ = KIN_FK | KIN_J | KIN_J_DOT;
             break;
+        default:
+            ThrowPretty("Unsupported DerivativeOrder: " << init.DerivativeOrder);
     }
 
     KinematicsRequest request;

@@ -382,6 +382,8 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
                         visual.shape = std::shared_ptr<shapes::Mesh>(shapes::createMeshFromResource(mesh->filename));
                     }
                     break;
+                    default:
+                        ThrowPretty("Unknown geometry type: " << urdf_visual->geometry->type);
                 }
                 element->visual.push_back(visual);
                 ++i;

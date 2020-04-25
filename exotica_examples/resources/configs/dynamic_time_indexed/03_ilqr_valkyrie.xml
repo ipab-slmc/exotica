@@ -5,7 +5,6 @@
     <ILQRSolver Name="ILQRSolver">
         <Debug>1</Debug>
         <MaxIterations>10</MaxIterations>
-        <!-- <RegularizationRate>1</RegularizationRate> -->
     </ILQRSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">

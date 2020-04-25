@@ -3,7 +3,7 @@
     <AnalyticDDPSolver Name="AnalyticDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>10</MaxIterations>
-        <UseSecondOrderDynamics>1</UseSecondOrderDynamics>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
     </AnalyticDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">

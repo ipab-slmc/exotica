@@ -179,11 +179,11 @@ void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer&
         if (xml_file.Error())
         {
 #ifdef TINYXML_HAS_ERROR_STR
-            ThrowPretty("Can't load file!\n"
-                        << xml_file.ErrorStr() << "\nFile: '" + ParsePath(file_name) + "'");
+            ThrowPretty("Can't load file! Return code: " << return_code << "\n"
+                                                         << xml_file.ErrorStr() << "\nFile: '" + ParsePath(file_name) + "'");
 #else
-            ThrowPretty("Can't load file!"
-                        << "\nFile: '" + ParsePath(file_name) + "'");
+            ThrowPretty("Can't load file! Return code: " << return_code << "\n"
+                                                         << "File: '" + ParsePath(file_name) + "'");
 #endif
         }
     }

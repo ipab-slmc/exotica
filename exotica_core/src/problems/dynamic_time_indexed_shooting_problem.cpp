@@ -718,10 +718,21 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
     ValidateTimeIndex(t);
 
     const int ndx = 2 * num_velocities_;
-    Eigen::RowVectorXd general_cost_jacobian = Eigen::RowVectorXd::Zero(ndx);
-    general_cost_jacobian.head(num_velocities_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
-    // TODO: Using a J^T*J approximation for the general cost here as Hessians aren't implemented for task maps yet.
-    return Q_[t] + Q_[t].transpose() + (general_cost_jacobian.transpose() * general_cost_jacobian);
+    Eigen::MatrixXd state_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
+    // state_cost_hessian.topLeftCorner(num_velocities_, num_velocities_) = cost.ydiff[t].transpose() * cost.S[t] * cost.hessian[t] + cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
+    state_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() = cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
+
+    // Contract
+    if (flags_ & KIN_J_DOT)
+    {
+        Eigen::RowVectorXd ydiffTS = cost.ydiff[t].transpose() * cost.S[t];  // (1*m)
+        for (int i = 0; i < cost.length_jacobian; ++i)                       // length m
+        {
+            state_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() += ydiffTS(i) * cost.hessian[t](i);
+        }
+    }
+
+    return Q_[t] + Q_[t].transpose() + 2.0 * state_cost_hessian;
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) const

@@ -284,7 +284,8 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     // Set GoalState
     if (this->parameters_.GoalState.rows() > 0)
     {
-        Eigen::MatrixXd goal_state = Eigen::MatrixXd::Zero(NX, T_);
+        Eigen::MatrixXd goal_state(X_star_);
+
         if (this->parameters_.GoalState.rows() == NX)
         {
             goal_state.col(T_ - 1) = this->parameters_.GoalState;
@@ -310,7 +311,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     // Set StartState
     if (this->parameters_.StartState.rows() > 0)
     {
-        Eigen::MatrixXd start_state = Eigen::MatrixXd::Zero(NX, T_);
+        Eigen::MatrixXd start_state(X_);
         if (this->parameters_.StartState.rows() == NX)
         {
             start_state = this->parameters_.StartState.replicate(1, T_);

@@ -704,11 +704,20 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
     ValidateTimeIndex(t);
     const int ndx = 2 * num_velocities_;
 
-    // const Eigen::VectorXd state_cost_jacobian = Q_[t] * X_diff_.col(t) + Q_[t].transpose() * X_diff_.col(t);
+    // X_.col(t) is (NX,1)
+    // Q_[t] is (NDX,NDX)
+    // Xdiff_.col(t) is (NDX,1)
+    // dxdiff is (NDX,NDX)
+
     const Eigen::MatrixXd dxdiff = scene_->GetDynamicsSolver()->dStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
+
+    // (NDX,NDX)^T * (NDX,NDX) * (NDX,1) * (1,1) => (NDX,1), TODO: We should change this to RowVectorXd format
     const Eigen::VectorXd state_cost_jacobian = dxdiff.transpose() * Q_[t] * X_diff_.col(t) * 2.0;
 
     Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(ndx);
+
+    // m => dimension of task maps, "length_jacobian"
+    // (m,NQ)^T * (m,m) * (m,1) * (1,1) => (NQ,1), TODO: We should change this to RowVectorXd format
     general_cost_jacobian.head(num_velocities_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
 
     return state_cost_jacobian + general_cost_jacobian;

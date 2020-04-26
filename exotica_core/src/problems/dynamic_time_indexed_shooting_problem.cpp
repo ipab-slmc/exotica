@@ -733,6 +733,17 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
     const Eigen::MatrixXd dxdiff = scene_->GetDynamicsSolver()->dStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
     state_cost_hessian.noalias() = dxdiff.transpose() * Q_[t] * dxdiff;
 
+    // For non-Euclidean spaces (i.e. on manifolds), there exists a second derivative of the state delta
+    if (has_quaternion_floating_base_)
+    {
+        Eigen::RowVectorXd xdiffTQ = X_diff_.col(t).transpose() * Q_[t];  // (1*ndx)
+        Hessian ddxdiff = scene_->GetDynamicsSolver()->ddStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
+        for (int i = 0; i < ndx; ++i)
+        {
+            state_cost_hessian.noalias() += xdiffTQ(i) * ddxdiff(i);
+        }
+    }
+
     // General Cost
     Eigen::MatrixXd general_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
     // general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_) = cost.ydiff[t].transpose() * cost.S[t] * cost.hessian[t] + cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];

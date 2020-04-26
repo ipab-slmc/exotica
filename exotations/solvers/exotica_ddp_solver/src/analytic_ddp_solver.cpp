@@ -73,9 +73,9 @@ void AnalyticDDPSolver::BackwardPass()
         Vxx_.diagonal().array() += lambda_;
 
         // NB: Qux = Qxu^T
-        Qux_.noalias() = dt_ * prob_->GetStateControlCostHessian() + fu_.transpose() * Vxx_ * fx_;
-        Qxx_.noalias() = dt_ * prob_->GetStateCostHessian(t) + fx_.transpose() * Vxx_ * fx_;
-        Quu_.noalias() = dt_ * prob_->GetControlCostHessian(t) + fu_.transpose() * Vxx_ * fu_;
+        Qux_.noalias() = dt_ * dt_ * prob_->GetStateControlCostHessian() + fu_.transpose() * Vxx_ * fx_;
+        Qxx_.noalias() = dt_ * dt_ * prob_->GetStateCostHessian(t) + fx_.transpose() * Vxx_ * fx_;
+        Quu_.noalias() = dt_ * dt_ * prob_->GetControlCostHessian(t) + fu_.transpose() * Vxx_ * fu_;
 
         if (parameters_.UseSecondOrderDynamics)
         {

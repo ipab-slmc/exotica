@@ -547,15 +547,15 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
         const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
         const Eigen::VectorXd& Vx_p = Vx_[t + 1];
 
-        Qxx_[t] = dt_ * prob_->GetStateCostHessian(t);
-        Qxu_[t] = dt_ * prob_->GetStateControlCostHessian().transpose();
-        Quu_[t] = dt_ * prob_->GetControlCostHessian(t);
-        Qx_[t] = dt_ * prob_->GetStateCostJacobian(t);
-        Qu_[t] = dt_ * prob_->GetControlCostJacobian(t);
+        Qxx_[t].noalias() = dt_ * dt_ * prob_->GetStateCostHessian(t);
+        Qxu_[t].noalias() = dt_ * dt_ * prob_->GetStateControlCostHessian().transpose();
+        Quu_[t].noalias() = dt_ * dt_ * prob_->GetControlCostHessian(t);
+        Qx_[t].noalias() = dt_ * prob_->GetStateCostJacobian(t);
+        Qu_[t].noalias() = dt_ * prob_->GetControlCostJacobian(t);
 
         dynamics_solver_->ComputeDerivatives(xs_[t], us_[t]);
-        fx_ = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
-        fu_ = dt_ * dynamics_solver_->get_fu();
+        fx_.noalias() = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
+        fu_.noalias() = dt_ * dynamics_solver_->get_fu();
 
         FxTVxx_p_.noalias() = fx_.transpose() * Vxx_p;
         FuTVxx_p_[t].noalias() = fu_.transpose() * Vxx_p;
@@ -616,7 +616,8 @@ void AbstractFeasibilityDrivenDDPSolver::ComputeGains(const int t)
     const Eigen::ComputationInfo& info = Quu_llt_[t].info();
     if (info != Eigen::Success)
     {
-        ThrowPretty("backward_error - error in Cholesky decomposition");
+        ThrowPretty("backward_error - error in Cholesky decomposition\n"
+                    << Quu_[t]);
     }
     K_[t] = Qxu_[t].transpose();
     Quu_llt_[t].solveInPlace(K_[t]);

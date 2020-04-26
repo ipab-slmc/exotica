@@ -52,33 +52,35 @@ void ControlLimitedDDPSolver::BackwardPass()
     //  See https://eigen.tuxfamily.org/dox-devel/unsupported/eigen_tensors.html#title14
     Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
 
+    Eigen::VectorXd x(NX_), u(NU_);  // TODO: Replace
     for (int t = T_ - 2; t >= 0; t--)
     {
-        Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
+        x = prob_->get_X(t);
+        u = prob_->get_U(t);
 
         dynamics_solver_->ComputeDerivatives(x, u);
-        Eigen::MatrixXd fx = dynamics_solver_->get_fx() * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(dynamics_solver_->get_num_state_derivative(), dynamics_solver_->get_num_state_derivative());
-        Eigen::MatrixXd fu = dynamics_solver_->get_fu() * dynamics_solver_->get_dt();
+        fx_.noalias() = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
+        fu_.noalias() = dt_ * dynamics_solver_->get_fu();
 
-        Qx_ = dt_ * prob_->GetStateCostJacobian(t) + fx.transpose() * Vx_;  // lx + fx @ Vx_
-        Qu_ = dt_ * prob_->GetControlCostJacobian(t) + fu.transpose() * Vx_;
+        Qx_ = dt_ * prob_->GetStateCostJacobian(t) + fx_.transpose() * Vx_;  // lx + fx @ Vx_
+        Qu_ = dt_ * prob_->GetControlCostJacobian(t) + fu_.transpose() * Vx_;
 
         // State regularization
         Vxx_.diagonal().array() += lambda_;
 
-        Qxx_ = dt_ * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx_ * fx;
-        Quu_ = dt_ * prob_->GetControlCostHessian(t) + fu.transpose() * Vxx_ * fu;
+        Qxx_.noalias() = dt_ * dt_ * prob_->GetStateCostHessian(t) + fx_.transpose() * Vxx_ * fx_;
+        Quu_.noalias() = dt_ * dt_ * prob_->GetControlCostHessian(t) + fu_.transpose() * Vxx_ * fu_;
 
         // NOTE: Qux = Qxu for all robotics systems I have seen
         //  this might need to be changed later on
-        Qux_ = dt_ * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx_ * fx;
+        Qux_.noalias() = dt_ * dt_ * prob_->GetStateControlCostHessian() + fu_.transpose() * Vxx_ * fx_;
 
         if (parameters_.UseSecondOrderDynamics)
         {
             Eigen::Tensor<double, 1> Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx_.data(), NDX_);
-            Qxx_ += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_) * dt_;
-            Quu_ += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU_, NU_) * dt_;
-            Qux_ += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NDX_) * dt_;
+            Qxx_.noalias() += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_) * dt_;
+            Quu_.noalias() += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU_, NU_) * dt_;
+            Qux_.noalias() += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NDX_) * dt_;
         }
 
         Eigen::VectorXd low_limit = control_limits.col(0) - u,

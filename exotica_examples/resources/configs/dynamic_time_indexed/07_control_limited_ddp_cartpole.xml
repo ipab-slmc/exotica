@@ -6,6 +6,7 @@
     </ControlLimitedDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <DerivativeOrder>2</DerivativeOrder>
         <PlanningScene>
             <Scene>
                 <JointGroup>actuated_joints</JointGroup>
@@ -42,8 +43,8 @@
         <tau>0.05</tau>
         <Q_rate>0</Q_rate>
         <Qf>1 0 1 1</Qf>
-        <Qf_rate>1</Qf_rate>
-        <R_rate>0.001</R_rate>
+        <Qf_rate>10</Qf_rate>
+        <R_rate>1e-3</R_rate>
         <StartState>1e-3 1e-3 1e-3 1e-3</StartState>
         <GoalState>0 3.14159 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>

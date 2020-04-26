@@ -135,6 +135,16 @@ public:
             return -1.0 * Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Identity(get_num_state_derivative(), get_num_state_derivative());
     }
 
+    virtual Hessian ddStateDelta(const StateVector& x_1, const StateVector& x_2, const ArgumentPosition first_or_second)
+    {
+        assert(x_1.size() == x_2.size());
+
+        // In Euclidean spaces, this is zero.
+        Hessian ddStateDelta;
+        ddStateDelta.setConstant(get_num_state_derivative(), Eigen::MatrixXd::Zero(get_num_state_derivative(), get_num_state_derivative()));
+        return ddStateDelta;
+    }
+
     /// \brief Returns the position-part of the state vector to update the scene.
     /// For types including SE(3) and rotation, convert to the appropriate representation here by overriding this method.
     virtual Eigen::Matrix<T, Eigen::Dynamic, 1> GetPosition(Eigen::VectorXdRefConst x_in);

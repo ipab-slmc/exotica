@@ -56,8 +56,9 @@ KinematicResponse::KinematicResponse(KinematicRequestFlags _flags, int _size, in
     if (flags & KIN_FK_VEL) Phi_dot.resize(_size);
     KDL::Jacobian Jzero(_n);
     Jzero.data.setZero();
+    Hessian Hzero = Hessian::Constant(6, Eigen::MatrixXd::Zero(_n, _n));
     if (_flags & KIN_J) jacobian = ArrayJacobian::Constant(_size, Jzero);
-    if (_flags & KIN_J_DOT) jacobian_dot = ArrayJacobian::Constant(_size, Jzero);
+    if (_flags & KIN_H) hessian = ArrayHessian::Constant(_size, Hzero);
     x.setZero(_n);
 }
 
@@ -82,7 +83,7 @@ void KinematicSolution::Create(std::shared_ptr<KinematicResponse> solution)
     new (&X) Eigen::Map<Eigen::VectorXd>(solution->x.data(), solution->x.rows());
     if (solution->flags & KIN_FK_VEL) new (&Phi_dot) Eigen::Map<ArrayTwist>(solution->Phi_dot.data() + start, length);
     if (solution->flags & KIN_J) new (&jacobian) Eigen::Map<ArrayJacobian>(solution->jacobian.data() + start, length);
-    if (solution->flags & KIN_J_DOT) new (&jacobian_dot) Eigen::Map<ArrayJacobian>(solution->jacobian_dot.data() + start, length);
+    if (solution->flags & KIN_H) new (&hessian) Eigen::Map<ArrayHessian>(solution->hessian.data() + start, length);
 }
 
 int KinematicTree::GetNumControlledJoints() const
@@ -600,11 +601,10 @@ int KinematicTree::IsControlledLink(const std::string& link_name)
 std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const KinematicsRequest& request)
 {
     flags_ = request.flags;
-    if (flags_ & KIN_J_DOT) flags_ = flags_ | KIN_J;
+    if (flags_ & KIN_H) flags_ = flags_ | KIN_J;
     solution_.reset(new KinematicResponse(flags_, request.frames.size(), num_controlled_joints_));
 
     state_size_ = num_controlled_joints_;
-    if (((flags_ & KIN_FK_VEL) || (flags_ & KIN_J_DOT))) state_size_ = num_controlled_joints_;
 
     for (int i = 0; i < request.frames.size(); ++i)
     {
@@ -661,7 +661,7 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
     UpdateTree();
     UpdateFK();
     if (flags_ & KIN_J) UpdateJ();
-    if (flags_ & KIN_J && flags_ & KIN_J_DOT) UpdateJdot();
+    if (flags_ & KIN_J && flags_ & KIN_H) UpdateH();
     if (debug) PublishFrames();
 }
 
@@ -838,46 +838,30 @@ Eigen::MatrixXd KinematicTree::Jacobian(const std::string& element_A, const KDL:
     return Jacobian(A->second.lock(), offset_a, B->second.lock(), offset_b);
 }
 
-Eigen::MatrixXd KinematicTree::Jdot(const KDL::Jacobian& jacobian)
+exotica::Hessian KinematicTree::Hessian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b) const
 {
-    KDL::Jacobian Jdot;
-    ComputeJdot(jacobian, Jdot);
-    return Jdot.data;
+    if (!element_A) ThrowPretty("The pointer to KinematicElement A is dead.");
+    KinematicFrame frame;
+    frame.frame_A = element_A;
+    frame.frame_B = (element_B == nullptr) ? root_ : element_B;
+    frame.frame_A_offset = offset_a;
+    frame.frame_B_offset = offset_b;
+    KDL::Jacobian J(num_controlled_joints_);
+    ComputeJ(frame, J);
+    exotica::Hessian hessian = exotica::Hessian::Constant(6, Eigen::MatrixXd::Zero(num_controlled_joints_, num_controlled_joints_));
+    ComputeH(frame, J, hessian);
+    return hessian;
 }
 
-void KinematicTree::ComputeJdot(const KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot) const
+exotica::Hessian KinematicTree::Hessian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const
 {
-    jacobian_dot.data.setZero(jacobian.rows(), jacobian.columns());
-    for (int i = 0; i < jacobian.columns(); ++i)
-    {
-        KDL::Twist tmp;
-        for (int j = 0; j < jacobian.columns(); ++j)
-        {
-            KDL::Twist jac_i_ = jacobian.getColumn(i);
-            KDL::Twist jac_j_ = jacobian.getColumn(j);
-            KDL::Twist t_djdq_;
-
-            if (j < i)
-            {
-                t_djdq_.vel = jac_j_.rot * jac_i_.vel;
-                t_djdq_.rot = jac_j_.rot * jac_i_.rot;
-            }
-            else if (j > i)
-            {
-                KDL::SetToZero(t_djdq_.rot);
-                t_djdq_.vel = -jac_j_.vel * jac_i_.rot;
-            }
-            else if (j == i)
-            {
-                // ref (40)
-                KDL::SetToZero(t_djdq_.rot);
-                t_djdq_.vel = jac_i_.rot * jac_i_.vel;
-            }
-
-            tmp += t_djdq_;
-        }
-        jacobian_dot.setColumn(i, tmp);
-    }
+    std::string name_a = element_A == "" ? root_->segment.getName() : element_A;
+    std::string name_b = element_B == "" ? root_->segment.getName() : element_B;
+    auto A = tree_map_.find(name_a);
+    if (A == tree_map_.end()) ThrowPretty("Can't find link '" << name_a << "'!");
+    auto B = tree_map_.find(name_b);
+    if (B == tree_map_.end()) ThrowPretty("Can't find link '" << name_b << "'!");
+    return this->Hessian(A->second.lock(), offset_a, B->second.lock(), offset_b);
 }
 
 void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) const
@@ -908,6 +892,62 @@ void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) con
     }
 }
 
+void KinematicTree::ComputeH(KinematicFrame& frame, const KDL::Jacobian& jacobian, exotica::Hessian& hessian) const
+{
+    hessian.conservativeResize(6);
+    for(int i = 0; i < 6; ++i)
+    {
+        hessian(i).resize(jacobian.columns(), jacobian.columns());
+        hessian(i).setZero();
+    }
+    std::shared_ptr<KinematicElement> it = frame.frame_A.lock();
+    while (it != nullptr)
+    {
+        if (it->is_controlled)
+        {
+            int i = it->control_id;
+            KDL::Frame segment_reference;
+            if (it->parent.lock() != nullptr) segment_reference = it->parent.lock()->frame;
+            KDL::Twist axis = frame.temp_B.M.Inverse() * segment_reference.M * it->segment.twist(tree_state_(it->id), 1.0);
+            HIGHLIGHT("A: "<<axis[0] <<" "<< axis[1] <<" "<< axis[2] <<" "<< axis[3] <<" "<< axis[4] <<" "<< axis[5]);
+            for (int j = 0; j < jacobian.columns(); ++j)
+            {
+                KDL::Twist Hij = axis * jacobian.getColumn(j);
+                hessian(0)(i,j) = Hij[0];
+                hessian(1)(i,j) = Hij[1];
+                hessian(2)(i,j) = Hij[2];
+                hessian(3)(i,j) = Hij[3];
+                hessian(4)(i,j) = Hij[4];
+                hessian(5)(i,j) = Hij[5];
+            }
+        }
+        it = it->parent.lock();
+    }
+    it = frame.frame_B.lock();
+    while (it != nullptr)
+    {
+        if (it->is_controlled)
+        {
+            int i = it->control_id;
+            KDL::Frame segment_reference;
+            if (it->parent.lock() != nullptr) segment_reference = it->parent.lock()->frame;
+            KDL::Twist axis = frame.temp_B.M.Inverse() * segment_reference.M * it->segment.twist(tree_state_(it->id), 1.0);
+            HIGHLIGHT("B: "<<axis[0] <<" "<< axis[1] <<" "<< axis[2] <<" "<< axis[3] <<" "<< axis[4] <<" "<< axis[5]);
+            for (int j = 0; j < jacobian.columns(); ++j)
+            {
+                KDL::Twist Hij = axis * jacobian.getColumn(j);
+                hessian(0)(i,j) -= Hij[0];
+                hessian(1)(i,j) -= Hij[1];
+                hessian(2)(i,j) -= Hij[2];
+                hessian(3)(i,j) -= Hij[3];
+                hessian(4)(i,j) -= Hij[4];
+                hessian(5)(i,j) -= Hij[5];
+            }
+        }
+        it = it->parent.lock();
+    }
+}
+
 void KinematicTree::UpdateJ()
 {
     int i = 0;
@@ -918,12 +958,12 @@ void KinematicTree::UpdateJ()
     }
 }
 
-void KinematicTree::UpdateJdot()
+void KinematicTree::UpdateH()
 {
     int i = 0;
     for (KinematicFrame& frame : solution_->frame)
     {
-        ComputeJdot(solution_->jacobian(i), solution_->jacobian_dot(i));
+        ComputeH(frame, solution_->jacobian(i), solution_->hessian(i));
         ++i;
     }
 }

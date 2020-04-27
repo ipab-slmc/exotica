@@ -222,7 +222,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
             flags_ = KIN_FK | KIN_J;
             break;
         case 2:
-            flags_ = KIN_FK | KIN_J | KIN_J_DOT;
+            flags_ = KIN_FK | KIN_J | KIN_H;
             break;
         default:
             ThrowPretty("Unsupported DerivativeOrder: " << init.DerivativeOrder);

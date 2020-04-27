@@ -72,7 +72,7 @@ void EndPoseTask::Initialize(const std::vector<exotica::Initializer>& inits, Pla
     y.SetZero(length_Phi);
     rho = Eigen::VectorXd::Ones(num_tasks);
     if (prob->GetFlags() & KIN_J) jacobian = Eigen::MatrixXd(length_jacobian, prob->N);
-    if (prob->GetFlags() & KIN_J_DOT) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(prob->N, prob->N));
+    if (prob->GetFlags() & KIN_H) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(prob->N, prob->N));
     S = Eigen::MatrixXd::Identity(length_jacobian, length_jacobian);
     ydiff = Eigen::VectorXd::Zero(length_jacobian);
 
@@ -365,7 +365,7 @@ void TimeIndexedTask::ReinitializeVariables(int _T, PlanningProblemPtr _prob, co
     y = Phi;
     rho.assign(T, Eigen::VectorXd::Ones(num_tasks));
     if (_prob->GetFlags() & KIN_J) jacobian.assign(T, Eigen::MatrixXd(length_jacobian, _prob->N));
-    if (_prob->GetFlags() & KIN_J_DOT)
+    if (_prob->GetFlags() & KIN_H)
     {
         Hessian Htmp;
         Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(_prob->N, _prob->N));

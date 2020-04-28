@@ -778,7 +778,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
     // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control Hessian
-    Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(num_controls_, num_controls_);
+    Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(scene_->get_num_controls(), scene_->get_num_controls());
 
     // This allows composition of multiple functions
     //  useful when you want to apply different cost functions to different controls
@@ -868,14 +868,14 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
     // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control cost Jacobian
-    Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(num_controls_);
+    Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(scene_->get_num_controls());
 
     // This allows composition of multiple functions
     //  useful when you want to apply different cost functions to different controls
     // if (parameters_.LossType == "L2")
     Qu += R_ * U_.col(t) + R_.transpose() * U_.col(t);
 
-    for (int iu = 0; iu < num_controls_; ++iu)
+    for (int iu = 0; iu < scene_->get_num_controls(); ++iu)
     {
         // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
         //     continue;

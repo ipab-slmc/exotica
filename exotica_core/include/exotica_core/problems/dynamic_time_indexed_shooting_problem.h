@@ -109,9 +109,6 @@ public:
         return Eigen::MatrixXd::Zero(scene_->get_num_controls(), 2 * scene_->get_num_velocities());
     };  ///< lxu == lux
 
-    Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
-    Eigen::VectorXd Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
-
     void OnSolverIterationEnd()
     {
         if (parameters_.LossType == "SmoothL1")

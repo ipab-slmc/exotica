@@ -896,16 +896,6 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
     return control_cost_weight_ * Qu;
 }
 
-Eigen::VectorXd DynamicTimeIndexedShootingProblem::Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
-{
-    return scene_->GetDynamicsSolver()->f(x, u);
-}
-
-Eigen::VectorXd DynamicTimeIndexedShootingProblem::Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
-{
-    return scene_->GetDynamicsSolver()->Simulate(x, u, tau_);
-}
-
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
 {
     if (t >= T_ - 1 || t < -1)

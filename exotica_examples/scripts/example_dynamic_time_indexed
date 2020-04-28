@@ -78,7 +78,7 @@ plt.xlim(0, len(costs[1])-1)
 plt.grid()
 plt.show()
 
-visualization = exo.Visualization(problem.get_scene())
+visualization = exo.VisualizationMoveIt(problem.get_scene())
 visualization.display_trajectory(
     problem.X[:problem.num_positions, :].T
 )

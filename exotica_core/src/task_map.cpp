@@ -59,9 +59,9 @@ std::vector<KinematicFrameRequest> TaskMap::GetFrames() const
     return frames_;
 }
 
-void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (jacobian.rows() != TaskSpaceDim() && jacobian.cols() != x.rows())
+    if (jacobian.rows() != TaskSpaceDim() && jacobian.cols() != q.rows())
         ThrowNamed("Jacobian dimension mismatch!");
 
     if (scene_ == nullptr)
@@ -73,38 +73,58 @@ void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::M
     constexpr double h = 1e-6;
     constexpr double h_inverse = 1.0 / h;
 
-    // Compute x/Phi using forward mapping (no jacobian)
-    Update(x, Phi);
+    // Compute x/phi using forward mapping (no jacobian)
+    Update(q, phi);
 
     // Setup for gradient estimate
-    Eigen::VectorXd x_backward(x.size()), Phi_backward(TaskSpaceDim());
+    Eigen::VectorXd q_backward(q.size()), phi_backward(TaskSpaceDim());
 
     // Backward finite differencing
     for (int i = 0; i < jacobian.cols(); ++i)
     {
         // Compute and set x_backward as model state
-        x_backward = x;
-        x_backward(i) -= h;
-        scene_->GetKinematicTree().Update(x_backward);
+        q_backward = q;
+        q_backward(i) -= h;
+        scene_->GetKinematicTree().Update(q_backward);
 
         // Compute phi_backward using forward mapping (no jacobian)
-        Update(x_backward, Phi_backward);
+        Update(q_backward, phi_backward);
 
         // Compute gradient estimate
-        jacobian.col(i) = h_inverse * (Phi - Phi_backward);
+        jacobian.col(i) = h_inverse * (phi - phi_backward);
     }
 
     // Reset model state
-    scene_->GetKinematicTree().Update(x);
+    scene_->GetKinematicTree().Update(q);
 }
 
-void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
 {
-    Update(x, Phi, jacobian);
-    hessian.resize(TaskSpaceDim());
+    Update(q, phi, jacobian);
     for (int i = 0; i < TaskSpaceDim(); ++i)
     {
         hessian(i) = jacobian.row(i).transpose() * jacobian.row(i);
     }
 }
+
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi)
+{
+    WARNING("x,u update not implemented - defaulting to q update.");
+    Update(x.head(scene_->get_num_positions()), phi);
+}
+
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du)
+{
+    WARNING("x,u update not implemented - defaulting to q update.");
+    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.block(0, 0, TaskSpaceJacobianDim(), scene_->get_num_positions()));
+}
+
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du, HessianRef ddphi_ddx, HessianRef ddphi_ddu, HessianRef ddphi_dxdu)
+{
+    ThrowPretty("Haven't figured out the block operations on ddphi_dx yet, sorry.");
+    WARNING("x,u update not implemented - defaulting to q update.");
+    // TODO: Fix indexing into Hessian. Numpy style: ddphi_ddx[:nv,:nv,:nv]
+    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.block(0, 0, TaskSpaceJacobianDim(), scene_->get_num_positions()), ddphi_ddx);
+}
+
 }  // namespace

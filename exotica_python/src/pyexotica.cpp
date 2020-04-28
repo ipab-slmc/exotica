@@ -693,7 +693,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("startJ", &TaskMap::start_jacobian)
         .def_readonly("lengthJ", &TaskMap::length_jacobian)
         .def("task_space_dim", (int (TaskMap::*)()) & TaskMap::TaskSpaceDim)
-        .def("task_Space_jacobian_dim", &TaskMap::TaskSpaceJacobianDim);
+        .def("task_space_jacobian_dim", &TaskMap::TaskSpaceJacobianDim);
 
     py::class_<TaskIndexing>(module, "TaskIndexing")
         .def_readonly("id", &TaskIndexing::id)

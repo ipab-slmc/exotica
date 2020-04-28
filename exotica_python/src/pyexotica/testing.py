@@ -44,7 +44,7 @@ def semiimplicit_euler(x, dx, dt):
     return x + dx_new
 
 
-def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=None, do_test_integrators=True):
+def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=None, additional_args=None, do_test_integrators=True):
     ds = None
     if urdf is not None and srdf is not None and joint_group is not None:
         my_scene_init = exo.Initializers.SceneInitializer()
@@ -52,10 +52,15 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
         my_scene_init[1]['SRDF'] = srdf
         my_scene_init[1]['JointGroup'] = joint_group
         my_scene_init[1]['DynamicsSolver'] = [(name, {'Name': u'MyDynamicsSolver'})]
+        if additional_args is not None:
+            my_scene_init[1]['DynamicsSolver'][0][1].update(additional_args)
         scene = exo.Setup.create_scene(exo.Initializers.Initializer(my_scene_init))
         ds = scene.get_dynamics_solver()
     else:
-        ds = exo.Setup.create_dynamics_solver((name, {'Name': u'MyDynamicsSolver'}))
+        my_ds_init = (name, {'Name': u'MyDynamicsSolver'})
+        if additional_args is not None:
+            my_ds_init.merge(additional_args)
+        ds = exo.Setup.create_dynamics_solver(my_ds_init)
 
     # Get random state, control
     x = random_state(ds)
@@ -87,11 +92,11 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
     ## fx
     fx = ds.fx(x,u)
     fx_fd = ds.fx_fd(x,u)
-    # if np.linalg.norm(fx-fx_fd) > 1e-3 or np.any(np.isnan(fx)):
-    #     print(fx-fx_fd<1e-3)
-    #     print("fx\n",fx)
-    #     print("fx_fd\n",fx_fd)
-    np.testing.assert_allclose(fx, fx_fd, rtol=1e-5, atol=1e-5)
+    if np.linalg.norm(fx-fx_fd) > 1e-3 or np.any(np.isnan(fx)):
+        print(fx-fx_fd<1e-3)
+        print("fx\n",fx)
+        print("fx_fd\n",fx_fd)
+    np.testing.assert_allclose(fx, fx_fd, rtol=1e-5, atol=1e-5, err_msg='fx does not match!')
 
     # Check joint computation
     ds.compute_derivatives(x, u)

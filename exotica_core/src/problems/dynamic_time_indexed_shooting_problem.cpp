@@ -126,6 +126,7 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
             ThrowPretty("Mode2 has wrong size: expected " << get_num_controls() << ", got " << parameters_.Mode2.size());
         }
     }
+    control_cost_weight_ = parameters_.ControlCostWeight;
 }
 
 void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init)
@@ -759,6 +760,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
         }
     }
 
+
     return 2.0 * state_cost_hessian + 2.0 * general_cost_hessian;
 }
 
@@ -773,29 +775,35 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
         t = T_ - 2;
     }
 
-    if (parameters_.LossType == "L2")
-        return R_ + R_.transpose();
-
     // auto dynamics_solver = scene_->GetDynamicsSolver();
     // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control Hessian
     Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(num_controls_, num_controls_);
+
+    // This allows composition of multiple functions
+    //  useful when you want to apply different cost functions to different controls
+    // if (parameters_.LossType == "L2")
+    Quu += R_ + R_.transpose();
+
     for (int iu = 0; iu < num_controls_; ++iu)
     {
-        // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
-        //     continue;
         if (parameters_.LossType == "SmoothL1")
-            Quu(iu, iu) = smooth_l1_hessian(U_.col(t)[iu], l1_rate_(iu));
-        else if (parameters_.LossType == "Huber")
-            Quu(iu, iu) = huber_hessian(U_.col(t)[iu], huber_rate_(iu));
+            Quu(iu, iu) += smooth_l1_hessian(U_.col(t)[iu], l1_rate_(iu));
+        
         else if (parameters_.LossType == "SuperHuber")
-            Quu(iu, iu) = super_huber_hessian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
-        else if (parameters_.LossType == "BiModalHuber")
-            Quu(iu, iu) = bimodal_huber_hessian(
+            Quu(iu, iu) += super_huber_hessian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
+
+        // if huber_rate is 0, huber is undefined
+        //  this is a shortcut for disabling the loss
+        else if (parameters_.LossType == "Huber" && huber_rate_(iu) != 0)
+            Quu(iu, iu) += huber_hessian(U_.col(t)[iu], huber_rate_(iu));
+        
+        else if (parameters_.LossType == "BiModalHuber" && huber_rate_(iu) != 0)
+            Quu(iu, iu) += bimodal_huber_hessian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
-    return parameters_.ControlCostWeight * Quu;
+    return control_cost_weight_ * Quu;
 }
 
 double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
@@ -809,25 +817,33 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
         t = T_ - 2;
     }
 
-    if (parameters_.LossType == "L2")
-        return U_.col(t).transpose() * R_ * U_.col(t);
-
     // auto dynamics_solver = scene_->GetDynamicsSolver();
     // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control cost
     double cost = 0;
+
+    // This allows composition of multiple functions
+    //  useful when you want to apply different cost functions to different controls
+    // if (parameters_.LossType == "L2")
+    cost += U_.col(t).transpose() * R_ * U_.col(t);
+
     for (int iu = 0; iu < num_controls_; ++iu)
     {
         // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
         //     continue;
         if (parameters_.LossType == "SmoothL1")
             cost += smooth_l1_cost(U_.col(t)[iu], l1_rate_(iu));
-        else if (parameters_.LossType == "Huber")
+
+        // if huber_rate is 0, huber is undefined
+        //  this is a shortcut for disabling the loss
+        else if (parameters_.LossType == "Huber" && huber_rate_(iu) != 0)
             cost += huber_cost(U_.col(t)[iu], huber_rate_(iu));
+
         else if (parameters_.LossType == "SuperHuber")
             cost += super_huber_cost(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
-        else if (parameters_.LossType == "BiModalHuber")
+
+        else if (parameters_.LossType == "BiModalHuber" && huber_rate_(iu) != 0)
             cost += bimodal_huber_cost(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
@@ -835,7 +851,7 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
     {
         cost = 0.0;  // Likely "inf" as u is too small.
     }
-    return parameters_.ControlCostWeight * cost;
+    return control_cost_weight_ * cost;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t) const
@@ -849,29 +865,38 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
         t = T_ - 2;
     }
 
-    if (parameters_.LossType == "L2")
-        return R_ * U_.col(t) + R_.transpose() * U_.col(t);
-
+    
     // auto dynamics_solver = scene_->GetDynamicsSolver();
     // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control cost Jacobian
     Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(num_controls_);
+
+    // This allows composition of multiple functions
+    //  useful when you want to apply different cost functions to different controls
+    // if (parameters_.LossType == "L2")
+    Qu += R_ * U_.col(t) + R_.transpose() * U_.col(t);
+
     for (int iu = 0; iu < num_controls_; ++iu)
     {
         // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
         //     continue;
         if (parameters_.LossType == "SmoothL1")
-            Qu(iu) = smooth_l1_jacobian(U_.col(t)[iu], l1_rate_(iu));
-        else if (parameters_.LossType == "Huber")
-            Qu(iu) = huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
-        else if (parameters_.LossType == "SuperHuber")
-            Qu(iu) = super_huber_jacobian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
-        else if (parameters_.LossType == "BiModalHuber")
-            Qu(iu) = bimodal_huber_jacobian(
+            Qu(iu) += smooth_l1_jacobian(U_.col(t)[iu], l1_rate_(iu));
+
+        // if huber_rate is 0, huber is undefined
+        //  this is a shortcut for disabling the loss
+        else if (parameters_.LossType == "Huber" && huber_rate_(iu) != 0)
+            Qu(iu) += huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
+        
+        else if (parameters_.LossType == "BiModalHuber" && huber_rate_(iu) != 0)
+            Qu(iu) += bimodal_huber_jacobian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
+        
+        else if (parameters_.LossType == "SuperHuber")
+            Qu(iu) += super_huber_jacobian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
     }
-    return parameters_.ControlCostWeight * Qu;
+    return control_cost_weight_ * Qu;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
@@ -916,10 +941,6 @@ void DynamicTimeIndexedShootingProblem::EnableStochasticUpdates()
 void DynamicTimeIndexedShootingProblem::DisableStochasticUpdates()
 {
     stochastic_updates_enabled_ = false;
-}
-
-void DynamicTimeIndexedShootingProblem::RescaleCostWeights()
-{
 }
 
 }  // namespace exotica

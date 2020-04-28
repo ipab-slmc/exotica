@@ -54,20 +54,20 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
         else if (parameters_.L1Rate.size() == 1)
         {
-            l1_rate_.setConstant(get_num_controls(), parameters_.L1Rate(0));
+            l1_rate_.setConstant(scene_->get_num_controls(), parameters_.L1Rate(0));
         }
-        else if (parameters_.L1Rate.size() == get_num_controls())
+        else if (parameters_.L1Rate.size() == scene_->get_num_controls())
         {
             l1_rate_ = parameters_.L1Rate;
         }
         else
         {
-            ThrowPretty("L1Rate has wrong size: expected " << get_num_controls() << ", got " << parameters_.L1Rate.size());
+            ThrowPretty("L1Rate has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.L1Rate.size());
         }
     }
 
     // Huber Rate
-    if (parameters_.LossType == "Huber" || parameters_.LossType == "SuperHuber")
+    if (parameters_.LossType == "Huber" || parameters_.LossType == "SuperHuber" || parameters_.LossType == "BiModalHuber")
     {
         if (parameters_.HuberRate.size() == 0)
         {
@@ -75,15 +75,15 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
         else if (parameters_.HuberRate.size() == 1)
         {
-            huber_rate_.setConstant(get_num_controls(), parameters_.HuberRate(0));
+            huber_rate_.setConstant(scene_->get_num_controls(), parameters_.HuberRate(0));
         }
-        else if (parameters_.HuberRate.size() == get_num_controls())
+        else if (parameters_.HuberRate.size() == scene_->get_num_controls())
         {
             huber_rate_ = parameters_.HuberRate;
         }
         else
         {
-            ThrowPretty("HuberRate has wrong size: expected " << get_num_controls() << ", got " << parameters_.HuberRate.size());
+            ThrowPretty("HuberRate has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.HuberRate.size());
         }
     }
 
@@ -97,15 +97,15 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
         else if (parameters_.Mode1.size() == 1)
         {
-            bimodal_huber_mode1_.setConstant(get_num_controls(), parameters_.Mode1(0));
+            bimodal_huber_mode1_.setConstant(scene_->get_num_controls(), parameters_.Mode1(0));
         }
-        else if (parameters_.Mode1.size() == get_num_controls())
+        else if (parameters_.Mode1.size() == scene_->get_num_controls())
         {
             bimodal_huber_mode1_ = parameters_.Mode1;
         }
         else
         {
-            ThrowPretty("Mode1 has wrong size: expected " << get_num_controls() << ", got " << parameters_.Mode1.size());
+            ThrowPretty("Mode1 has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.Mode1.size());
         }
 
         // BimodalHuber mode 1
@@ -115,15 +115,15 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
         else if (parameters_.Mode2.size() == 1)
         {
-            bimodal_huber_mode2_.setConstant(get_num_controls(), parameters_.Mode2(0));
+            bimodal_huber_mode2_.setConstant(scene_->get_num_controls(), parameters_.Mode2(0));
         }
-        else if (parameters_.Mode2.size() == get_num_controls())
+        else if (parameters_.Mode2.size() == scene_->get_num_controls())
         {
             bimodal_huber_mode2_ = parameters_.Mode2;
         }
         else
         {
-            ThrowPretty("Mode2 has wrong size: expected " << get_num_controls() << ", got " << parameters_.Mode2.size());
+            ThrowPretty("Mode2 has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.Mode2.size());
         }
     }
 }
@@ -134,9 +134,9 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
 
     if (!scene_->GetDynamicsSolver()) ThrowPretty("DynamicsSolver is not initialised!");
 
-    const int NX = num_positions_ + num_velocities_,
-              NDX = 2 * num_velocities_,
-              NU = num_controls_;
+    const int NX = scene_->get_num_positions() + scene_->get_num_velocities(),
+              NDX = 2 * scene_->get_num_velocities(),
+              NU = scene_->get_num_controls();
     Qf_ = Eigen::MatrixXd::Identity(NDX, NDX);
     if (this->parameters_.Qf.rows() > 0)
     {
@@ -151,16 +151,16 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     }
     Qf_ *= this->parameters_.Qf_rate;
 
-    R_ = this->parameters_.R_rate * Eigen::MatrixXd::Identity(num_controls_, num_controls_);
+    R_ = this->parameters_.R_rate * Eigen::MatrixXd::Identity(scene_->get_num_controls(), scene_->get_num_controls());
     if (this->parameters_.R.rows() > 0)
     {
-        if (this->parameters_.R.rows() == num_controls_)
+        if (this->parameters_.R.rows() == scene_->get_num_controls())
         {
             R_.diagonal() = this->parameters_.R;
         }
         else
         {
-            ThrowNamed("R dimension mismatch! Expected " << num_controls_ << ", got " << this->parameters_.R.rows());
+            ThrowNamed("R dimension mismatch! Expected " << scene_->get_num_controls() << ", got " << this->parameters_.R.rows());
         }
     }
 
@@ -260,7 +260,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
 {
     if (debug_) HIGHLIGHT_NAMED("DynamicTimeIndexedShootingProblem", "Initialize problem with T=" << T_);
 
-    const int NX = num_positions_ + num_velocities_, NDX = 2 * num_velocities_;
+    const int NX = scene_->get_num_positions() + scene_->get_num_velocities(), NDX = 2 * scene_->get_num_velocities();
 
     // Check if the system has a floating-base, and if so, if it contains a quaternion.
     // Will need to trigger special logic below to handle this (w.r.t. normalisation).
@@ -269,7 +269,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     X_ = Eigen::MatrixXd::Zero(NX, T_);
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
     X_diff_ = Eigen::MatrixXd::Zero(NDX, T_);
-    U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
+    U_ = Eigen::MatrixXd::Zero(scene_->get_num_controls(), T_ - 1);
 
     // Set w component of quaternion by default
     if (has_quaternion_floating_base_)
@@ -290,9 +290,9 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         {
             goal_state.col(T_ - 1) = this->parameters_.GoalState;
         }
-        else if (this->parameters_.GoalState.rows() == num_positions_)
+        else if (this->parameters_.GoalState.rows() == scene_->get_num_positions())
         {
-            goal_state.col(T_ - 1).head(num_positions_) = this->parameters_.GoalState;
+            goal_state.col(T_ - 1).head(scene_->get_num_positions()) = this->parameters_.GoalState;
         }
         else if (this->parameters_.GoalState.rows() == NX * T_)
         {
@@ -303,7 +303,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         }
         else
         {
-            ThrowPretty("GoalState has " << this->parameters_.GoalState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << num_positions_ << ", or NX*T=" << NX * T_);
+            ThrowPretty("GoalState has " << this->parameters_.GoalState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << scene_->get_num_positions() << ", or NX*T=" << NX * T_);
         }
         set_X_star(goal_state);
     }
@@ -316,11 +316,11 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         {
             start_state = this->parameters_.StartState.replicate(1, T_);
         }
-        else if (this->parameters_.StartState.rows() == num_positions_)
+        else if (this->parameters_.StartState.rows() == scene_->get_num_positions())
         {
             for (int t = 0; t < T_; ++t)
             {
-                start_state.col(t).head(num_positions_) = this->parameters_.StartState;
+                start_state.col(t).head(scene_->get_num_positions()) = this->parameters_.StartState;
             }
         }
         else if (this->parameters_.StartState.rows() == NX * T_)
@@ -332,7 +332,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         }
         else
         {
-            ThrowPretty("StartState has " << this->parameters_.StartState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << num_positions_ << ", or NX*T=" << NX * T_);
+            ThrowPretty("StartState has " << this->parameters_.StartState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << scene_->get_num_positions() << ", or NX*T=" << NX * T_);
         }
         set_X(start_state);
     }
@@ -534,14 +534,14 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
         t = T_ - 2;
     }
 
-    if (u_in.rows() != num_controls_)
+    if (u_in.rows() != scene_->get_num_controls())
     {
-        ThrowPretty("Mismatching in size of control vector: " << u_in.rows() << " given, expected: " << num_controls_);
+        ThrowPretty("Mismatching in size of control vector: " << u_in.rows() << " given, expected: " << scene_->get_num_controls());
     }
 
-    if (x_in.rows() != num_positions_ + num_velocities_)
+    if (x_in.rows() != scene_->get_num_positions() + scene_->get_num_velocities())
     {
-        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << num_positions_ + num_velocities_);
+        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << scene_->get_num_positions() + scene_->get_num_velocities());
     }
 
     X_.col(t) = x_in;
@@ -579,13 +579,13 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     // Stochastic noise, if enabled
     if (stochastic_matrices_specified_ && stochastic_updates_enabled_)
     {
-        Eigen::VectorXd noise(num_positions_ + num_velocities_);
-        for (int i = 0; i < num_positions_ + num_velocities_; ++i)
+        Eigen::VectorXd noise(scene_->get_num_positions() + scene_->get_num_velocities());
+        for (int i = 0; i < scene_->get_num_positions() + scene_->get_num_velocities(); ++i)
             noise(i) = standard_normal_noise_(generator_);
 
         Eigen::VectorXd control_dependent_noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * get_F(t) * noise;
 
-        for (int i = 0; i < num_positions_ + num_velocities_; ++i)
+        for (int i = 0; i < scene_->get_num_positions() + scene_->get_num_velocities(); ++i)
             noise(i) = standard_normal_noise_(generator_);
         Eigen::VectorXd white_noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * CW_ * noise;
 
@@ -618,9 +618,9 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
 {
     int t = T_ - 1;
 
-    if (x_in.rows() != num_positions_ + num_velocities_)
+    if (x_in.rows() != scene_->get_num_positions() + scene_->get_num_velocities())
     {
-        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << num_positions_ + num_velocities_);
+        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << scene_->get_num_positions() + scene_->get_num_velocities());
     }
 
     X_.col(t) = x_in;
@@ -702,7 +702,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
 {
     // TODO: Check whether we should make this a RowVectorXd
     ValidateTimeIndex(t);
-    const int ndx = 2 * num_velocities_;
+    const int ndx = 2 * scene_->get_num_velocities();
 
     // X_.col(t) is (NX,1)
     // Q_[t] is (NDX,NDX)
@@ -718,7 +718,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
 
     // m => dimension of task maps, "length_jacobian"
     // (m,NQ)^T * (m,m) * (m,1) * (1,1) => (NQ,1), TODO: We should change this to RowVectorXd format
-    general_cost_jacobian.head(num_velocities_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
+    general_cost_jacobian.head(scene_->get_num_velocities()) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
 
     return state_cost_jacobian + general_cost_jacobian;
 }
@@ -726,7 +726,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) const
 {
     ValidateTimeIndex(t);
-    const int ndx = 2 * num_velocities_;
+    const int ndx = 2 * scene_->get_num_velocities();
 
     // State Cost
     Eigen::MatrixXd state_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
@@ -736,18 +736,18 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
     // For non-Euclidean spaces (i.e. on manifolds), there exists a second derivative of the state delta
     if (has_quaternion_floating_base_)
     {
-        Eigen::RowVectorXd xdiffTQ = X_diff_.col(t).transpose() * Q_[t];  // (1*ndx)
-        Hessian ddxdiff = scene_->GetDynamicsSolver()->ddStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
-        for (int i = 0; i < ndx; ++i)
-        {
-            state_cost_hessian.noalias() += xdiffTQ(i) * ddxdiff(i);
-        }
+        // Eigen::RowVectorXd xdiffTQ = X_diff_.col(t).transpose() * Q_[t];  // (1*ndx)
+        // Hessian ddxdiff = scene_->GetDynamicsSolver()->ddStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
+        // for (int i = 0; i < ndx; ++i)
+        // {
+        //     state_cost_hessian.noalias() += xdiffTQ(i) * ddxdiff(i);
+        // }
     }
 
     // General Cost
     Eigen::MatrixXd general_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
-    // general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_) = cost.ydiff[t].transpose() * cost.S[t] * cost.hessian[t] + cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
-    general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() = cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
+    // general_cost_hessian.topLeftCorner(scene_->get_num_velocities(), scene_->get_num_velocities()) = cost.ydiff[t].transpose() * cost.S[t] * cost.hessian[t] + cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
+    general_cost_hessian.topLeftCorner(scene_->get_num_velocities(), scene_->get_num_velocities()).noalias() = cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
 
     // Contract task-map Hessians
     if (flags_ & KIN_J_DOT)
@@ -755,7 +755,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
         Eigen::RowVectorXd ydiffTS = cost.ydiff[t].transpose() * cost.S[t];  // (1*m)
         for (int i = 0; i < cost.length_jacobian; ++i)                       // length m
         {
-            general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() += ydiffTS(i) * cost.hessian[t](i);
+            general_cost_hessian.topLeftCorner(scene_->get_num_velocities(), scene_->get_num_velocities()).noalias() += ydiffTS(i) * cost.hessian[t](i);
         }
     }
 
@@ -780,8 +780,8 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
     // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control Hessian
-    Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(num_controls_, num_controls_);
-    for (int iu = 0; iu < num_controls_; ++iu)
+    Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(scene_->get_num_controls(), scene_->get_num_controls());
+    for (int iu = 0; iu < scene_->get_num_controls(); ++iu)
     {
         // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
         //     continue;
@@ -817,7 +817,7 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
 
     // Sparsity-related control cost
     double cost = 0;
-    for (int iu = 0; iu < num_controls_; ++iu)
+    for (int iu = 0; iu < scene_->get_num_controls(); ++iu)
     {
         // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
         //     continue;
@@ -856,8 +856,8 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
     // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control cost Jacobian
-    Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(num_controls_);
-    for (int iu = 0; iu < num_controls_; ++iu)
+    Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(scene_->get_num_controls());
+    for (int iu = 0; iu < scene_->get_num_controls(); ++iu)
     {
         // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
         //     continue;
@@ -891,7 +891,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
         ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_ - 1);
     }
 
-    const int NX = num_positions_ + num_velocities_;
+    const int NX = scene_->get_num_positions() + scene_->get_num_velocities();
     Eigen::MatrixXd F(NX, NX);
 
     for (int i = 0; i < NX; ++i)
@@ -903,8 +903,8 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
 // F[i]_u
 const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::GetControlNoiseJacobian(int column_idx) const
 {
-    if (column_idx < 0 || column_idx >= num_velocities_)
-        ThrowPretty("Requested column_idx=" << column_idx << " out of range; needs to be 0 <= column_idx < " << num_velocities_ - 1);
+    if (column_idx < 0 || column_idx >= scene_->get_num_velocities())
+        ThrowPretty("Requested column_idx=" << column_idx << " out of range; needs to be 0 <= column_idx < " << scene_->get_num_velocities() - 1);
     return Ci_[column_idx];
 }
 

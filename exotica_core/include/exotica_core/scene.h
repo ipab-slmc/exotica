@@ -174,6 +174,10 @@ public:
     const std::map<std::string, std::vector<std::string>>& GetControlledJointToCollisionLinkMap() const { return controlled_joint_to_collision_link_map_; };
     /// @brief Returns world links that are to be excluded from collision checking.
     const std::set<std::string>& get_world_links_to_exclude_from_collision_scene() const { return world_links_to_exclude_from_collision_scene_; }
+    int get_num_positions() const;
+    int get_num_velocities() const;
+    int get_num_controls() const;
+
 private:
     void UpdateInternalFrames(bool update_request = true);
 
@@ -190,6 +194,10 @@ private:
 
     /// The dynamics solver
     std::shared_ptr<DynamicsSolver> dynamics_solver_ = std::shared_ptr<DynamicsSolver>(nullptr);
+
+    int num_positions_ = 0;
+    int num_velocities_ = 0;
+    int num_controls_ = 0;
 
     /// Internal MoveIt planning scene
     planning_scene::PlanningScenePtr ps_;

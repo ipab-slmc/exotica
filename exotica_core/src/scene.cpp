@@ -205,6 +205,16 @@ void Scene::Instantiate(const SceneInitializer& init)
         dynamics_solver_ = Setup::CreateDynamicsSolver(init.DynamicsSolver.at(0));
         dynamics_solver_->AssignScene(shared_from_this());
         dynamics_solver_->ns_ = ns_ + "/" + dynamics_solver_->GetObjectName();
+
+        num_positions_ = dynamics_solver_->get_num_positions();
+        num_velocities_ = dynamics_solver_->get_num_velocities();
+        num_controls_ = dynamics_solver_->get_num_controls();
+    }
+    else
+    {
+        num_positions_ = GetKinematicTree().GetNumModelJoints();
+        num_velocities_ = 0;
+        num_controls_ = 0;
     }
 
     if (debug_) INFO_NAMED(object_name_, "Exotica Scene initialized");
@@ -836,4 +846,20 @@ void Scene::RemoveTrajectory(const std::string& link)
     it->second.first.lock()->is_trajectory_generated = false;
     trajectory_generators_.erase(it);
 }
+
+int Scene::get_num_positions() const
+{
+    return num_positions_;
+}
+
+int Scene::get_num_velocities() const
+{
+    return num_velocities_;
+}
+
+int Scene::get_num_controls() const
+{
+    return num_controls_;
+}
+
 }  // namespace exotica

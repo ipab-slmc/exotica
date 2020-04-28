@@ -95,17 +95,13 @@ public:
     TerminationCriterion termination_criterion;
 
     int N = 0;  ///! Dimension of planning problem. TODO: Update from positions/velocities/controls and make private.
-    int get_num_positions() const;
-    int get_num_velocities() const;
-    int get_num_controls() const;
+    [[deprecated("Replaced by Scene::get_num_positions")]] int get_num_positions() const;
+    [[deprecated("Replaced by Scene::get_num_velocities")]] int get_num_velocities() const;
+    [[deprecated("Replaced by Scene::get_num_controls")]] int get_num_controls() const;
 
 protected:
     void UpdateTaskKinematics(std::shared_ptr<KinematicResponse> response);
     void UpdateMultipleTaskKinematics(std::vector<std::shared_ptr<KinematicResponse>> responses);
-
-    int num_positions_ = 0;
-    int num_velocities_ = 0;
-    int num_controls_ = 0;
 
     ScenePtr scene_;
     TaskMapMap task_maps_;

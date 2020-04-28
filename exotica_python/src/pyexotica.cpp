@@ -785,9 +785,9 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_scene", &PlanningProblem::GetScene, py::return_value_policy::reference_internal)
         .def("__repr__", &PlanningProblem::Print, "String representation of the object", py::arg("prepend") = std::string(""))
         .def_readonly("N", &PlanningProblem::N)
-        .def_property_readonly("num_positions", &PlanningProblem::get_num_positions)
-        .def_property_readonly("num_velocities", &PlanningProblem::get_num_velocities)
-        .def_property_readonly("num_controls", &PlanningProblem::get_num_controls)
+        .def_property_readonly("num_positions", &PlanningProblem::get_num_positions)    // deprecated
+        .def_property_readonly("num_velocities", &PlanningProblem::get_num_velocities)  // deprecated
+        .def_property_readonly("num_controls", &PlanningProblem::get_num_controls)      // deprecated
         .def_property("start_state", &PlanningProblem::GetStartState, &PlanningProblem::SetStartState)
         .def_property("start_time", &PlanningProblem::GetStartTime, &PlanningProblem::SetStartTime)
         .def("get_number_of_problem_updates", &PlanningProblem::GetNumberOfProblemUpdates)
@@ -1055,6 +1055,9 @@ PYBIND11_MODULE(_pyexotica, module)
     continuous_collision_proxy.def("__repr__", &ContinuousCollisionProxy::Print);
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
+    scene.def_property_readonly("num_positions", &Scene::get_num_positions);
+    scene.def_property_readonly("num_velocities", &Scene::get_num_velocities);
+    scene.def_property_readonly("num_controls", &Scene::get_num_controls);
     scene.def("update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
     scene.def("get_controlled_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::GetControlledJointNames);
     scene.def("get_controlled_link_names", &Scene::GetControlledLinkNames);

@@ -106,7 +106,7 @@ public:
         //  thus we return a scalar of size 1 and value 0
         // This is the same as returning an (int)0 but for type safety
         //  we instantiate eigen vectors instead.
-        return Eigen::MatrixXd::Zero(num_controls_, 2 * num_velocities_);
+        return Eigen::MatrixXd::Zero(scene_->get_num_controls(), 2 * scene_->get_num_velocities());
     };  ///< lxu == lux
 
     Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);

@@ -54,17 +54,17 @@ std::string PlanningProblem::Print(const std::string& prepend) const
 
 int PlanningProblem::get_num_positions() const
 {
-    return num_positions_;
+    return scene_->get_num_positions();
 }
 
 int PlanningProblem::get_num_velocities() const
 {
-    return num_velocities_;
+    return scene_->get_num_velocities();
 }
 
 int PlanningProblem::get_num_controls() const
 {
-    return num_controls_;
+    return scene_->get_num_controls();
 }
 
 Eigen::VectorXd PlanningProblem::ApplyStartState(bool update_traj)
@@ -77,7 +77,7 @@ Eigen::VectorXd PlanningProblem::ApplyStartState(bool update_traj)
     }
     else
     {
-        scene_->SetModelState(start_state_.head(num_positions_), t_start, update_traj);
+        scene_->SetModelState(start_state_.head(scene_->get_num_positions()), t_start, update_traj);
     }
 
     return scene_->GetControlledState();
@@ -90,7 +90,7 @@ void PlanningProblem::PreUpdate()
 
 void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
 {
-    const auto num_states = num_positions_ + num_velocities_;
+    const auto num_states = scene_->get_num_positions() + scene_->get_num_velocities();
     if (x.rows() == num_states)
     {
         start_state_ = x;
@@ -107,9 +107,9 @@ void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
             }
         }
     }
-    else if (x.rows() == num_positions_)
+    else if (x.rows() == scene_->get_num_positions())
     {
-        start_state_.head(num_positions_) = x;
+        start_state_.head(scene_->get_num_positions()) = x;
     }
     // TODO: Add support for num_controlled + tangent vector size initialisation
     else
@@ -146,53 +146,12 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
     scene_->InstantiateInternal(SceneInitializer(init.PlanningScene));
 
     // Set size of positions. This is valid for kinematic problems and will be
-    // overridden in dynamic problems to set num_velocities_ and num_controls_.
-    num_positions_ = scene_->GetKinematicTree().GetNumModelJoints();
+    // overridden in dynamic problems inside the Scene.
+    // TODO: "N" should be determined by the Scene or size of the StateVector.
     N = scene_->GetKinematicTree().GetNumControlledJoints();
 
-    // Check if dynamics solver has been initialised, and if so update problem
-    // properties.
-    if (scene_->GetDynamicsSolver() != nullptr)
-    {
-        // TODO: Strictly speaking N here should correspond to the number of controls, which comes from the dynamic solver - to be fixed!
-        num_controls_ = scene_->GetDynamicsSolver()->get_num_controls();
-
-        // TODO: As a current workaround, we assume num_velocities_ = num_positions_
-        // This holds true if there are no special joints (including floating base
-        // or spherical joints). For sanity, we check that the dynamics solver
-        // dimensions match - otherwise throw.
-        num_velocities_ = num_positions_;
-
-        if ((scene_->GetDynamicsSolver()->get_num_positions() != scene_->GetDynamicsSolver()->get_num_velocities()) ||
-            (scene_->GetDynamicsSolver()->get_num_positions() != num_positions_))
-        {
-            // The quadrotor and other floating-base robots are currently broken (cf. #571)
-            if (scene_->GetDynamicsSolver()->get_num_positions() > num_positions_)
-            {
-                // ThrowPretty("Proper floating-base joints in dynamic problems not yet supported. Cf. #571.");
-                WARNING_NAMED("PlanningProblem", "-1 num_positions");
-                num_positions_ = scene_->GetDynamicsSolver()->get_num_positions();
-                num_velocities_ = scene_->GetDynamicsSolver()->get_num_velocities();
-            }
-            // If the difference is exactly 1, just add it:
-            else if ((scene_->GetDynamicsSolver()->get_num_positions() - scene_->GetDynamicsSolver()->get_num_velocities()) == 1)
-            {
-                ThrowPretty("Please revisit if this gets triggered. Should not.");
-                num_velocities_ -= 1;
-            }
-            // Else, throw for now:
-            else
-            {
-                WARNING_NAMED("PlanningProblem::InstantiateBase",
-                              "Size of tangent vector in DynamicsSolver does not satisfy workaround-assumption (cf. #570):\n"
-                                  << "num_positions_=" << num_positions_ << " vs (num_positions_=" << scene_->GetDynamicsSolver()->get_num_positions() << ", num_velocities_=" << scene_->GetDynamicsSolver()->get_num_velocities() << ").");
-                ThrowPretty("SAD.");
-            }
-        }
-    }
-
     // Set the start state
-    start_state_ = Eigen::VectorXd::Zero(num_positions_ + num_velocities_);
+    start_state_ = Eigen::VectorXd::Zero(scene_->get_num_positions() + scene_->get_num_velocities());
     if (init.StartState.rows() > 0)
         SetStartState(init.StartState);
 
@@ -205,8 +164,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
     }
 
     // Set the start time
-    if (init.StartTime < 0)
-        ThrowNamed("Invalid start time " << init.StartTime);
+    if (init.StartTime < 0) ThrowNamed("Invalid start time " << init.StartTime);
     t_start = init.StartTime;
 
     // Set the derivative order for Kinematics

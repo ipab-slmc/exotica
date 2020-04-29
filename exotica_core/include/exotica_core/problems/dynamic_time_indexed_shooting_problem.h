@@ -83,15 +83,18 @@ public:
     void DisableStochasticUpdates();
 
     // TODO: Make private and add getter (no need to be public!)
-    TimeIndexedTask cost;  //!< Cost task
-    std::vector<TaskSpaceVector> Phi;
-    std::vector<Eigen::MatrixXd> jacobian;
-    std::vector<Hessian> hessian;
+    TimeIndexedTask cost;                  ///< Cost task
+    std::vector<TaskSpaceVector> Phi;      ///< Stacked TaskMap vector
+    std::vector<Eigen::MatrixXd> dPhi_dx;  ///< Stacked TaskMap Jacobian w.r.t. state
+    std::vector<Eigen::MatrixXd> dPhi_du;  ///< Stacked TaskMap Jacobian w.r.t. control
+    std::vector<Hessian> ddPhi_ddx;        ///< Stacked TaskMap Hessian w.r.t. state
+    std::vector<Hessian> ddPhi_ddu;        ///< Stacked TaskMap Hessian w.r.t. control
+    std::vector<Hessian> ddPhi_dxdu;       ///< Stacked TaskMap Hessian w.r.t. state and control
 
     // TODO: Make private and add getter/setter
-    int length_Phi;
-    int length_jacobian;
-    int num_tasks;
+    int length_Phi;       ///< Length of TaskSpaceVector (Phi => stacked task-maps)
+    int length_jacobian;  ///< Length of tangent vector to Phi
+    int num_tasks;        ///< Number of TaskMaps
 
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;

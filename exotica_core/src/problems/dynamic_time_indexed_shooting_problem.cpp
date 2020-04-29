@@ -370,12 +370,12 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
 
     y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
-    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
+    if (flags_ & KIN_J) dPhi_dx.assign(T_, Eigen::MatrixXd(length_jacobian, scene_->get_num_state_derivative()));
     if (flags_ & KIN_J_DOT)
     {
         Hessian Htmp;
-        Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
-        hessian.assign(T_, Htmp);
+        Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(scene_->get_num_state_derivative(), scene_->get_num_state_derivative()));
+        ddPhi_ddx.assign(T_, Htmp);
     }
     cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
 
@@ -420,8 +420,7 @@ void DynamicTimeIndexedShootingProblem::PreUpdate()
         for (int t = 0; t < T_ - 1; ++t)
         {
             U_.col(t) = scene_->GetDynamicsSolver()->InverseDynamics(X_.col(t));
-            X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(
-                X_.col(t), U_.col(t), tau_);
+            X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(X_.col(t), U_.col(t), tau_);
         }
     }
 }
@@ -656,9 +655,9 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q
     scene_->Update(q, static_cast<double>(t) * tau_);
 
     Phi[t].SetZero(length_Phi);
-    if (flags_ & KIN_J) jacobian[t].setZero();
+    if (flags_ & KIN_J) dPhi_dx[t].setZero();
     if (flags_ & KIN_J_DOT)
-        for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
+        for (int i = 0; i < length_jacobian; ++i) ddPhi_ddx[t](i).setZero();
     for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
@@ -666,11 +665,11 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q
         {
             if (flags_ & KIN_J_DOT)
             {
-                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), ddPhi_ddx[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
@@ -680,11 +679,11 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q
     }
     if (flags_ & KIN_J_DOT)
     {
-        cost.Update(Phi[t], jacobian[t], hessian[t], t);
+        cost.Update(Phi[t], dPhi_dx[t], ddPhi_ddx[t], t);
     }
     else if (flags_ & KIN_J)
     {
-        cost.Update(Phi[t], jacobian[t], t);
+        cost.Update(Phi[t], dPhi_dx[t], t);
     }
     else
     {

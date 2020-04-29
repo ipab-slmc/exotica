@@ -118,9 +118,9 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     Timer planning_timer, backward_pass_timer, line_search_timer;
 
     T_ = prob_->get_T();
-    NU_ = prob_->get_num_controls();
-    NX_ = prob_->get_num_positions() + prob_->get_num_velocities();  // State vector size
-    NDX_ = 2 * prob_->get_num_velocities();                          // TODO: for now but this is incorrect // Tangent vector size
+    NU_ = prob_->GetScene()->get_num_controls();
+    NX_ = prob_->GetScene()->get_num_state();              // State vector size
+    NDX_ = prob_->GetScene()->get_num_state_derivative();  // Tangent vector size
     dt_ = dynamics_solver_->get_dt();
 
     control_limits_ = dynamics_solver_->get_control_limits();

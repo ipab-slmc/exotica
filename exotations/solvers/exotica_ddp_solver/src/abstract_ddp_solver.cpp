@@ -37,10 +37,10 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
     Timer planning_timer, backward_pass_timer, line_search_timer;
 
     T_ = prob_->get_T();
-    NU_ = prob_->get_num_controls();
-    NX_ = prob_->get_num_positions() + prob_->get_num_velocities();
-    NDX_ = 2 * prob_->get_num_velocities();
-    NV_ = prob_->get_num_velocities();
+    NU_ = prob_->GetScene()->get_num_controls();
+    NX_ = prob_->GetScene()->get_num_state();
+    NDX_ = prob_->GetScene()->get_num_state_derivative();
+    NV_ = prob_->GetScene()->get_num_velocities();
     dt_ = dynamics_solver_->get_dt();
     lambda_ = base_parameters_.RegularizationRate;
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);

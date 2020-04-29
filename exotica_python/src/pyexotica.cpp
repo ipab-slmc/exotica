@@ -526,14 +526,15 @@ public:
 }  // namespace detail
 }  // namespace pybind11
 
-template<class T>
+template <class T>
 Hessian array_hessian(
-    pybind11::array_t<T> inArray) {
+    pybind11::array_t<T> inArray)
+{
     // request a buffer descriptor from Python
     pybind11::buffer_info buffer_info = inArray.request();
 
     // extract data an shape of input array
-    T *data = static_cast<T *>(buffer_info.ptr);
+    T* data = static_cast<T*>(buffer_info.ptr);
     std::vector<ssize_t> shape = buffer_info.shape;
 
     // wrap ndarray in Eigen::Map:
@@ -543,9 +544,12 @@ Hessian array_hessian(
         data, shape[0], shape[1], shape[2]);
 
     Hessian hessian = Hessian::Constant(shape[0], Eigen::MatrixXd::Zero(shape[1], shape[2]));
-    for (int i=0; i < shape[0]; i++) {
-        for (int j=0; j < shape[1]; j++) {
-            for (int k=0; k < shape[2]; k++) {
+    for (int i = 0; i < shape[0]; i++)
+    {
+        for (int j = 0; j < shape[1]; j++)
+        {
+            for (int k = 0; k < shape[2]; k++)
+            {
                 hessian(i)(j, k) = in_tensor(i, j, k);
             }
         }
@@ -553,13 +557,13 @@ Hessian array_hessian(
     return hessian;
 }
 
-
-template<class T>
+template <class T>
 py::handle hessian_array(
-    Hessian& inp) {
+    Hessian& inp)
+{
     std::vector<ssize_t> shape(3);
     shape[0] = inp.rows();
-    if (shape[0]>0)
+    if (shape[0] > 0)
     {
         shape[1] = inp(0).rows();
         shape[2] = inp(0).cols();
@@ -570,14 +574,17 @@ py::handle hessian_array(
     }
 
     pybind11::array_t<T> array(
-        shape,  // shape
-        {shape[1] * shape[2] * sizeof(T), shape[2] * sizeof(T), sizeof(T)}); // stride
+        shape,                                                                // shape
+        {shape[1] * shape[2] * sizeof(T), shape[2] * sizeof(T), sizeof(T)});  // stride
 
     Eigen::TensorMap<Eigen::Tensor<T, 3, Eigen::RowMajor>> in_tensor(
         array.mutable_data(), shape[0], shape[1], shape[2]);
-    for (int i=0; i < shape[0]; i++) {
-        for (int j=0; j < shape[1]; j++) {
-            for (int k=0; k < shape[2]; k++) {
+    for (int i = 0; i < shape[0]; i++)
+    {
+        for (int j = 0; j < shape[1]; j++)
+        {
+            for (int k = 0; k < shape[2]; k++)
+            {
                 in_tensor(i, j, k) = inp(i)(j, k);
             }
         }
@@ -585,38 +592,46 @@ py::handle hessian_array(
     return array.release();
 }
 
-namespace pybind11 { namespace detail {
-    template <> struct type_caster<Hessian> {
-    public:
-        /**
+namespace pybind11
+{
+namespace detail
+{
+template <>
+struct type_caster<Hessian>
+{
+public:
+    /**
          * This macro establishes the name 'inty' in
          * function signatures and declares a local variable
          * 'value' of type inty
          */
-        PYBIND11_TYPE_CASTER(Hessian, _("Hessian"));
+    PYBIND11_TYPE_CASTER(Hessian, _("Hessian"));
 
-        /**
+    /**
          * Conversion part 1 (Python->C++): convert a PyObject into a inty
          * instance or return false upon failure. The second argument
          * indicates whether implicit conversions should be applied.
          */
-        bool load(handle src, bool) {
-            value = array_hessian( py::cast<pybind11::array_t<Hessian::Scalar::Scalar>>(src.ptr()));
-            return true;
-        }
+    bool load(handle src, bool)
+    {
+        value = array_hessian(py::cast<pybind11::array_t<Hessian::Scalar::Scalar>>(src.ptr()));
+        return true;
+    }
 
-        /**
+    /**
          * Conversion part 2 (C++ -> Python): convert an inty instance into
          * a Python object. The second and third arguments are used to
          * indicate the return value policy and parent object (for
          * ``return_value_policy::reference_internal``) and are generally
          * ignored by implicit casters.
          */
-        static handle cast(Hessian src, return_value_policy /* policy */, handle /* parent */) {
-            return hessian_array<Hessian::Scalar::Scalar>(src);
-        }
-    };
-}} // namespace pybind11::detail
+    static handle cast(Hessian src, return_value_policy /* policy */, handle /* parent */)
+    {
+        return hessian_array<Hessian::Scalar::Scalar>(src);
+    }
+};
+}
+}  // namespace pybind11::detail
 
 PYBIND11_MODULE(_pyexotica, module)
 {

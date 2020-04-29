@@ -136,8 +136,8 @@ void ILQRSolver::Solve(Eigen::MatrixXd& solution)
     Timer planning_timer, backward_pass_timer, line_search_timer;
 
     const int T = prob_->get_T();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
+    const int NU = prob_->GetScene()->get_num_controls();
+    const int NX = prob_->GetScene()->get_num_state();
     const double dt = dynamics_solver_->get_dt();
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
     prob_->PreUpdate();

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,7 @@ void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::M
         Update(q_backward, phi_backward);
 
         // Compute gradient estimate
-        jacobian.col(i) = h_inverse * (phi - phi_backward);
+        jacobian.col(i).noalias() = h_inverse * (phi - phi_backward);
     }
 
     // Reset model state
@@ -101,9 +101,10 @@ void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::M
 void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
 {
     Update(q, phi, jacobian);
-    for (int i = 0; i < TaskSpaceDim(); ++i)
+    for (int i = 0; i < TaskSpaceJacobianDim(); ++i)
     {
-        hessian(i) = jacobian.row(i).transpose() * jacobian.row(i);
+        Eigen::Block<Eigen::Ref<Eigen::MatrixXd>> jacobian_row = jacobian.block(i, 0, 1, scene_->get_num_positions());
+        hessian(i).topLeftCorner(scene_->get_num_positions(), scene_->get_num_positions()).noalias() = jacobian_row.transpose() * jacobian_row;
     }
 }
 
@@ -116,15 +117,15 @@ void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen
 void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du)
 {
     WARNING("x,u update not implemented - defaulting to q update.");
-    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.block(0, 0, TaskSpaceJacobianDim(), scene_->get_num_positions()));
+    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.topLeftCorner(TaskSpaceJacobianDim(), scene_->get_num_positions()));
 }
 
 void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du, HessianRef ddphi_ddx, HessianRef ddphi_ddu, HessianRef ddphi_dxdu)
 {
-    ThrowPretty("Haven't figured out the block operations on ddphi_dx yet, sorry.");
+    // ThrowPretty("Haven't figured out the block operations on ddphi_dx yet, sorry.");
     WARNING("x,u update not implemented - defaulting to q update.");
     // TODO: Fix indexing into Hessian. Numpy style: ddphi_ddx[:nv,:nv,:nv]
-    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.block(0, 0, TaskSpaceJacobianDim(), scene_->get_num_positions()), ddphi_ddx);
+    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.topLeftCorner(TaskSpaceJacobianDim(), scene_->get_num_positions()), ddphi_ddx);
 }
 
 }  // namespace

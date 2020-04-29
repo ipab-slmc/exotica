@@ -895,7 +895,7 @@ void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) con
 void KinematicTree::ComputeH(KinematicFrame& frame, const KDL::Jacobian& jacobian, exotica::Hessian& hessian) const
 {
     hessian.conservativeResize(6);
-    for(int i = 0; i < 6; ++i)
+    for (int i = 0; i < 6; ++i)
     {
         hessian(i).resize(jacobian.columns(), jacobian.columns());
         hessian(i).setZero();
@@ -907,21 +907,21 @@ void KinematicTree::ComputeH(KinematicFrame& frame, const KDL::Jacobian& jacobia
     {
         axis.rot = jacobian.getColumn(i).rot;
         for (int j = i; j < jacobian.columns(); ++j)
+        {
+            KDL::Twist Hij = axis * jacobian.getColumn(j);
+            hessian(0)(i, j) = Hij[0];
+            hessian(1)(i, j) = Hij[1];
+            hessian(2)(i, j) = Hij[2];
+            hessian(0)(j, i) = Hij[0];
+            hessian(1)(j, i) = Hij[1];
+            hessian(2)(j, i) = Hij[2];
+            if (i != j)
             {
-                KDL::Twist Hij = axis * jacobian.getColumn(j);
-                hessian(0)(i,j) = Hij[0];
-                hessian(1)(i,j) = Hij[1];
-                hessian(2)(i,j) = Hij[2];
-                hessian(0)(j,i) = Hij[0];
-                hessian(1)(j,i) = Hij[1];
-                hessian(2)(j,i) = Hij[2];
-                if (i!=j)
-                {
-                    hessian(3)(j,i) = Hij[3];
-                    hessian(4)(j,i) = Hij[4];
-                    hessian(5)(j,i) = Hij[5];
-                }
+                hessian(3)(j, i) = Hij[3];
+                hessian(4)(j, i) = Hij[4];
+                hessian(5)(j, i) = Hij[5];
             }
+        }
     }
 }
 

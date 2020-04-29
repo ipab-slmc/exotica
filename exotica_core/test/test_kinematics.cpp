@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <gtest/gtest.h>
 #include <exotica_core/exotica_core.h>
+#include <gtest/gtest.h>
 
 // Extend testing printout //////////////////////
 
@@ -102,13 +102,12 @@ public:
         scene->RequestKinematics(request, std::bind(&TestClass::UpdateKinematics, this, std::placeholders::_1));
 
         N = scene->GetKinematicTree().GetNumControlledJoints();
-
     }
 };
 
 bool test_jacobian(TestClass& test, const double eps = 1e-5)
 {
-    constexpr double h = 1e-5; 
+    constexpr double h = 1e-5;
 
     TEST_COUT << "Testing Jacobian with h=" << h << ", eps=" << eps;
     for (int k = 0; k < num_trials_; ++k)
@@ -142,7 +141,7 @@ bool test_jacobian(TestClass& test, const double eps = 1e-5)
                       << (jacobian.data - J0.data);
             ADD_FAILURE() << "Jacobian error out of bounds: " << errJ;
         }
-    }        
+    }
     return true;
 }
 
@@ -183,24 +182,34 @@ bool test_hessian(TestClass& test, const double eps = 1e-5)
         {
             TEST_COUT << "x: " << x0.transpose();
             TEST_COUT << "H*:\n"
-                                << hessian(0)
-                      << "\n\n" << hessian(1)
-                      << "\n\n" << hessian(2)
-                      << "\n\n" << hessian(3)
-                      << "\n\n" << hessian(4)
-                      << "\n\n" << hessian(5)
+                      << hessian(0)
+                      << "\n\n"
+                      << hessian(1)
+                      << "\n\n"
+                      << hessian(2)
+                      << "\n\n"
+                      << hessian(3)
+                      << "\n\n"
+                      << hessian(4)
+                      << "\n\n"
+                      << hessian(5)
                       << "\n\n...";
             TEST_COUT << "H:\n"
-                                << H0(0) 
-                      << "\n\n" << H0(1)
-                      << "\n\n" << H0(2)
-                      << "\n\n" << H0(3)
-                      << "\n\n" << H0(4)
-                      << "\n\n" << H0(5)
+                      << H0(0)
+                      << "\n\n"
+                      << H0(1)
+                      << "\n\n"
+                      << H0(2)
+                      << "\n\n"
+                      << H0(3)
+                      << "\n\n"
+                      << H0(4)
+                      << "\n\n"
+                      << H0(5)
                       << "\n...";
             ADD_FAILURE() << "Hessian error out of bounds: " << errH;
         }
-    }        
+    }
     return true;
 }
 
@@ -232,7 +241,7 @@ TEST(ExoticaCore, testKinematicHessian)
     }
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);
     int ret = RUN_ALL_TESTS();

@@ -72,7 +72,7 @@ inline Eigen::Tensor<Scalar, sizeof...(Dims)> MatrixToTensor(const MatrixType<Sc
     return Eigen::TensorMap<Eigen::Tensor<const Scalar, rank>>(matrix.data(), {dims...});
 }
 
-} // namespace Eigen
+}  // namespace Eigen
 
 namespace exotica
 {

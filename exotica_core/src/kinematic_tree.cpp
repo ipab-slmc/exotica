@@ -900,51 +900,28 @@ void KinematicTree::ComputeH(KinematicFrame& frame, const KDL::Jacobian& jacobia
         hessian(i).resize(jacobian.columns(), jacobian.columns());
         hessian(i).setZero();
     }
-    std::shared_ptr<KinematicElement> it = frame.frame_A.lock();
-    while (it != nullptr)
+
+    KDL::Twist axis;
+
+    for (int i = 0; i < jacobian.columns(); ++i)
     {
-        if (it->is_controlled)
-        {
-            int i = it->control_id;
-            KDL::Frame segment_reference;
-            if (it->parent.lock() != nullptr) segment_reference = it->parent.lock()->frame;
-            KDL::Twist axis = frame.temp_B.M.Inverse() * segment_reference.M * it->segment.twist(tree_state_(it->id), 1.0);
-            HIGHLIGHT("A: "<<axis[0] <<" "<< axis[1] <<" "<< axis[2] <<" "<< axis[3] <<" "<< axis[4] <<" "<< axis[5]);
-            for (int j = 0; j < jacobian.columns(); ++j)
+        axis.rot = jacobian.getColumn(i).rot;
+        for (int j = i; j < jacobian.columns(); ++j)
             {
                 KDL::Twist Hij = axis * jacobian.getColumn(j);
                 hessian(0)(i,j) = Hij[0];
                 hessian(1)(i,j) = Hij[1];
                 hessian(2)(i,j) = Hij[2];
-                hessian(3)(i,j) = Hij[3];
-                hessian(4)(i,j) = Hij[4];
-                hessian(5)(i,j) = Hij[5];
+                hessian(0)(j,i) = Hij[0];
+                hessian(1)(j,i) = Hij[1];
+                hessian(2)(j,i) = Hij[2];
+                if (i!=j)
+                {
+                    hessian(3)(j,i) = Hij[3];
+                    hessian(4)(j,i) = Hij[4];
+                    hessian(5)(j,i) = Hij[5];
+                }
             }
-        }
-        it = it->parent.lock();
-    }
-    it = frame.frame_B.lock();
-    while (it != nullptr)
-    {
-        if (it->is_controlled)
-        {
-            int i = it->control_id;
-            KDL::Frame segment_reference;
-            if (it->parent.lock() != nullptr) segment_reference = it->parent.lock()->frame;
-            KDL::Twist axis = frame.temp_B.M.Inverse() * segment_reference.M * it->segment.twist(tree_state_(it->id), 1.0);
-            HIGHLIGHT("B: "<<axis[0] <<" "<< axis[1] <<" "<< axis[2] <<" "<< axis[3] <<" "<< axis[4] <<" "<< axis[5]);
-            for (int j = 0; j < jacobian.columns(); ++j)
-            {
-                KDL::Twist Hij = axis * jacobian.getColumn(j);
-                hessian(0)(i,j) -= Hij[0];
-                hessian(1)(i,j) -= Hij[1];
-                hessian(2)(i,j) -= Hij[2];
-                hessian(3)(i,j) -= Hij[3];
-                hessian(4)(i,j) -= Hij[4];
-                hessian(5)(i,j) -= Hij[5];
-            }
-        }
-        it = it->parent.lock();
     }
 }
 

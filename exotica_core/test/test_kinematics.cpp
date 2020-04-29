@@ -74,7 +74,7 @@ std::string urdf_string_ = "<robot name=\"test_robot\"><link name=\"base\"><visu
 std::string srdf_string_ = "<robot name=\"test_robot\"><group name=\"arm\"><chain base_link=\"base\" tip_link=\"endeff\" /></group><virtual_joint name=\"world_joint\" type=\"fixed\" parent_frame=\"world_frame\" child_link=\"base\" /><group_state name=\"zero\" group=\"arm\"><joint name=\"joint1\" value=\"0\" /><joint name=\"joint2\" value=\"0.3\" /><joint name=\"joint3\" value=\"0.55\" /></group_state><disable_collisions link1=\"base\" link2=\"link1\" reason=\"Adjacent\" /><disable_collisions link1=\"endeff\" link2=\"link3\" reason=\"Adjacent\" /><disable_collisions link1=\"link1\" link2=\"link2\" reason=\"Adjacent\" /><disable_collisions link1=\"link2\" link2=\"link3\" reason=\"Adjacent\" /></robot>";
 
 constexpr bool print_debug_information_ = false;
-constexpr int num_trials_ = 1; // 100
+constexpr int num_trials_ = 100;
 
 class TestClass
 {
@@ -156,20 +156,26 @@ bool test_hessian(TestClass& test, const double eps = 1e-5)
         Eigen::VectorXd x0(test.N);
         x0 = test.scene->GetKinematicTree().GetRandomControlledState();
         test.scene->Update(x0, 0.0);
-        KDL::Jacobian J0 = test.solution.jacobian(0);
-        //Hessian H0 = test.solution.hessian(0);
-        Hessian H0 = test.scene->GetKinematicTree().Hessian("endeff", KDL::Frame(), "", KDL::Frame());
+        Hessian H0 = test.solution.hessian(0);
         Hessian hessian = Hessian::Constant(6, Eigen::MatrixXd::Zero(test.N, test.N));
+        Eigen::VectorXd x;
         for (int j = 0; j < test.N; ++j)
         {
-            Eigen::VectorXd x(x0);
+            x = x0;
             x(j) += h;
             test.scene->Update(x, 0.0);
-            KDL::Jacobian J = test.solution.jacobian(0);
-            Eigen::MatrixXd diff = J.data - J0.data;
-            for (int i = 0; i < 6; ++i)
-                for (int k = 0; k < test.N; ++k)
-                    hessian(i)(k, j) = diff(i,k) / h;
+            Eigen::MatrixXd J1 = test.solution.jacobian(0).data;
+            x = x0;
+            x(j) -= h;
+            test.scene->Update(x, 0.0);
+            Eigen::MatrixXd J2 = test.solution.jacobian(0).data;
+            for (int i = 0; i < test.N; ++i)
+            {
+                for (int k = 0; k < 6; ++k)
+                {
+                    hessian(k)(i, j) = (J1(k, i) - J2(k, i)) / (2.0 * h);
+                }
+            }
         }
         double errH = 0;
         for (int i = 0; i < hessian.rows(); ++i) errH += (hessian(i) - H0(i)).norm();

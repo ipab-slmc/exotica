@@ -58,7 +58,7 @@ enum KinematicRequestFlags
     KIN_FK = 0,
     KIN_J = 2,
     KIN_FK_VEL = 4,
-    KIN_J_DOT = 8
+    KIN_H = 8
 };
 
 inline KinematicRequestFlags operator|(KinematicRequestFlags a, KinematicRequestFlags b)
@@ -111,7 +111,7 @@ struct KinematicResponse
     ArrayFrame Phi;
     ArrayTwist Phi_dot;
     ArrayJacobian jacobian;
-    ArrayJacobian jacobian_dot;
+    ArrayHessian hessian;
 };
 
 /// @brief The KinematicSolution is created from - and maps into - a KinematicResponse.
@@ -127,7 +127,7 @@ public:
     Eigen::Map<ArrayFrame> Phi{nullptr, 0};
     Eigen::Map<ArrayTwist> Phi_dot{nullptr, 0};
     Eigen::Map<ArrayJacobian> jacobian{nullptr, 0};
-    Eigen::Map<ArrayJacobian> jacobian_dot{nullptr, 0};
+    Eigen::Map<ArrayHessian> hessian{nullptr, 0};
 };
 
 class KinematicTree : public Uncopyable
@@ -181,7 +181,8 @@ public:
     KDL::Frame FK(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const;
     Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b) const;
     Eigen::MatrixXd Jacobian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const;
-    Eigen::MatrixXd Jdot(const KDL::Jacobian& jacobian);
+    exotica::Hessian Hessian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b) const;
+    exotica::Hessian Hessian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const;
 
     void ResetModel();
     std::shared_ptr<KinematicElement> AddElement(const std::string& name, const Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const std::vector<VisualElement>& visual = {}, bool is_controlled = false);
@@ -239,8 +240,8 @@ private:
     void UpdateFK();
     void UpdateJ();
     void ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) const;
-    void ComputeJdot(const KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot) const;
-    void UpdateJdot();
+    void UpdateH();
+    void ComputeH(KinematicFrame& frame, const KDL::Jacobian& jacobian, exotica::Hessian& hessian) const;
 
     // Joint limits
     Eigen::MatrixXd joint_limits_;

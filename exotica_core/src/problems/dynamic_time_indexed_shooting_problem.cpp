@@ -371,7 +371,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
     if (flags_ & KIN_J) dPhi_dx.assign(T_, Eigen::MatrixXd(length_jacobian, scene_->get_num_state_derivative()));
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
     {
         Hessian Htmp;
         Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(scene_->get_num_state_derivative(), scene_->get_num_state_derivative()));
@@ -656,14 +656,14 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q
 
     Phi[t].SetZero(length_Phi);
     if (flags_ & KIN_J) dPhi_dx[t].setZero();
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
         for (int i = 0; i < length_jacobian; ++i) ddPhi_ddx[t](i).setZero();
     for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
         if (tasks_[i]->is_used)
         {
-            if (flags_ & KIN_J_DOT)
+            if (flags_ & KIN_H)
             {
                 tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), ddPhi_ddx[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
@@ -677,7 +677,7 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q
             }
         }
     }
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
     {
         cost.Update(Phi[t], dPhi_dx[t], ddPhi_ddx[t], t);
     }

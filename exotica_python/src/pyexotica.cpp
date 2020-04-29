@@ -42,6 +42,8 @@
 
 #include <ros/package.h>
 
+#include <unsupported/Eigen/CXX11/Tensor>
+
 #if PY_MAJOR_VERSION < 3
 #define PY_OLDSTANDARD
 #endif
@@ -523,6 +525,98 @@ public:
 };
 }  // namespace detail
 }  // namespace pybind11
+
+template<class T>
+Hessian array_hessian(
+    pybind11::array_t<T> inArray) {
+    // request a buffer descriptor from Python
+    pybind11::buffer_info buffer_info = inArray.request();
+
+    // extract data an shape of input array
+    T *data = static_cast<T *>(buffer_info.ptr);
+    std::vector<ssize_t> shape = buffer_info.shape;
+
+    // wrap ndarray in Eigen::Map:
+    // the second template argument is the rank of the tensor and has to be
+    // known at compile time
+    Eigen::TensorMap<Eigen::Tensor<T, 3, Eigen::RowMajor>> in_tensor(
+        data, shape[0], shape[1], shape[2]);
+
+    Hessian hessian = Hessian::Constant(shape[0], Eigen::MatrixXd::Zero(shape[1], shape[2]));
+    for (int i=0; i < shape[0]; i++) {
+        for (int j=0; j < shape[1]; j++) {
+            for (int k=0; k < shape[2]; k++) {
+                hessian(i)(j, k) = in_tensor(i, j, k);
+            }
+        }
+    }
+    return hessian;
+}
+
+
+template<class T>
+py::handle hessian_array(
+    Hessian& inp) {
+    std::vector<ssize_t> shape(3);
+    shape[0] = inp.rows();
+    if (shape[0]>0)
+    {
+        shape[1] = inp(0).rows();
+        shape[2] = inp(0).cols();
+    }
+    else
+    {
+        shape[1] = shape[2] = 0;
+    }
+
+    pybind11::array_t<T> array(
+        shape,  // shape
+        {shape[1] * shape[2] * sizeof(T), shape[2] * sizeof(T), sizeof(T)}); // stride
+
+    Eigen::TensorMap<Eigen::Tensor<T, 3, Eigen::RowMajor>> in_tensor(
+        array.mutable_data(), shape[0], shape[1], shape[2]);
+    for (int i=0; i < shape[0]; i++) {
+        for (int j=0; j < shape[1]; j++) {
+            for (int k=0; k < shape[2]; k++) {
+                in_tensor(i, j, k) = inp(i)(j, k);
+            }
+        }
+    }
+    return array.release();
+}
+
+namespace pybind11 { namespace detail {
+    template <> struct type_caster<Hessian> {
+    public:
+        /**
+         * This macro establishes the name 'inty' in
+         * function signatures and declares a local variable
+         * 'value' of type inty
+         */
+        PYBIND11_TYPE_CASTER(Hessian, _("Hessian"));
+
+        /**
+         * Conversion part 1 (Python->C++): convert a PyObject into a inty
+         * instance or return false upon failure. The second argument
+         * indicates whether implicit conversions should be applied.
+         */
+        bool load(handle src, bool) {
+            value = array_hessian( py::cast<pybind11::array_t<Hessian::Scalar::Scalar>>(src.ptr()));
+            return true;
+        }
+
+        /**
+         * Conversion part 2 (C++ -> Python): convert an inty instance into
+         * a Python object. The second and third arguments are used to
+         * indicate the return value policy and parent object (for
+         * ``return_value_policy::reference_internal``) and are generally
+         * ignored by implicit casters.
+         */
+        static handle cast(Hessian src, return_value_policy /* policy */, handle /* parent */) {
+            return hessian_array<Hessian::Scalar::Scalar>(src);
+        }
+    };
+}} // namespace pybind11::detail
 
 PYBIND11_MODULE(_pyexotica, module)
 {
@@ -1131,6 +1225,9 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("jacobian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->GetKinematicTree().Jacobian(e1, o1, e2, o2); });
     scene.def("jacobian", [](Scene* instance, const std::string& e1, const std::string& e2) { return instance->GetKinematicTree().Jacobian(e1, KDL::Frame(), e2, KDL::Frame()); });
     scene.def("jacobian", [](Scene* instance, const std::string& e1) { return instance->GetKinematicTree().Jacobian(e1, KDL::Frame(), "", KDL::Frame()); });
+    scene.def("hessian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->GetKinematicTree().Hessian(e1, o1, e2, o2); });
+    scene.def("hessian", [](Scene* instance, const std::string& e1, const std::string& e2) { return instance->GetKinematicTree().Hessian(e1, KDL::Frame(), e2, KDL::Frame()); });
+    scene.def("hessian", [](Scene* instance, const std::string& e1) { return instance->GetKinematicTree().Hessian(e1, KDL::Frame(), "", KDL::Frame()); });
     scene.def("add_trajectory_from_file", &Scene::AddTrajectoryFromFile);
     scene.def("add_trajectory", (void (Scene::*)(const std::string&, const std::string&)) & Scene::AddTrajectory);
     scene.def("get_trajectory", [](Scene* instance, const std::string& link) { return instance->GetTrajectory(link)->ToString(); });

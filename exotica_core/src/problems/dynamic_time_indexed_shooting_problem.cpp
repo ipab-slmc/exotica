@@ -371,7 +371,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
     y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
     if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
     {
         Hessian Htmp;
         Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
@@ -657,14 +657,14 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q
 
     Phi[t].SetZero(length_Phi);
     if (flags_ & KIN_J) jacobian[t].setZero();
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
         for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
     for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
         if (tasks_[i]->is_used)
         {
-            if (flags_ & KIN_J_DOT)
+            if (flags_ & KIN_H)
             {
                 tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
@@ -678,7 +678,7 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q
             }
         }
     }
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
     {
         cost.Update(Phi[t], jacobian[t], hessian[t], t);
     }
@@ -751,7 +751,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
     general_cost_hessian.topLeftCorner(scene_->get_num_velocities(), scene_->get_num_velocities()).noalias() = cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
 
     // Contract task-map Hessians
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
     {
         Eigen::RowVectorXd ydiffTS = cost.ydiff[t].transpose() * cost.S[t];  // (1*m)
         for (int i = 0; i < cost.length_jacobian; ++i)                       // length m

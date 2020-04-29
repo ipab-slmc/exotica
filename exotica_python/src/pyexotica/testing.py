@@ -26,6 +26,7 @@ def random_state(ds):
     # and scene.get_kinematic_tree().get_model_base_type() == exo.BaseType.Floating:
     if ds.ndx != ds.nq + ds.nv:
         x[3:7] = random_quaternion()
+        x[3:7] /= np.linalg.norm(x[3:7])
 
     return x
 
@@ -117,3 +118,40 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
                 print("Testing integrator", integrator, "dt=", dt)
                 np.testing.assert_allclose(ds.integrate(
                     x, dx, dt), python_integrators[integrator](x, dx, dt))
+
+    # Check state delta and its derivatives
+    if ds.nq != ds.nv:
+        #print("Non-Euclidean space: Check StateDelta")
+        x1 = random_state(ds)
+        x2 = random_state(ds)
+
+        # Check dStateDelta
+        Jds = ds.state_delta_derivative(x1, x2, exo.ArgumentPosition.ARG0)
+        Jdiff = np.zeros((ds.ndx, ds.ndx))
+        eps = 1e-5
+        for i in range(ds.ndx):
+            dx = np.zeros((ds.ndx))
+            dx[i] = eps / 2.0
+            x1_plus = ds.integrate(x1, dx, 1.0)
+            x1_minus = ds.integrate(x1, -dx, 1.0)
+            delta_plus = ds.state_delta(x1_plus, x2)
+            delta_minus = ds.state_delta(x1_minus, x2)
+            Jdiff[:,i] = (delta_plus - delta_minus) / eps
+        np.testing.assert_allclose(Jds, Jdiff, rtol=1e-5, atol=1e-5)
+
+        # Check ddStateDelta
+        # TODO: Verify
+        x1 = random_state(ds)
+        x2 = random_state(ds)
+        Hds = ds.state_delta_second_derivative(x1, x2, exo.ArgumentPosition.ARG0)
+        Hdiff = np.zeros((ds.ndx, ds.ndx, ds.ndx))
+        eps = 1e-5
+        for i in range(ds.ndx):
+            dx = np.zeros((ds.ndx))
+            dx[i] = eps / 2.0
+            x1_plus = ds.integrate(x1, dx, 1.0)
+            x1_minus = ds.integrate(x1, -dx, 1.0)
+            Jdiff_plus = ds.state_delta_derivative(x1_plus, x2, exo.ArgumentPosition.ARG0)
+            Jdiff_minus = ds.state_delta_derivative(x1_minus, x2, exo.ArgumentPosition.ARG0)
+            Hdiff[:,:,i] = (Jdiff_plus - Jdiff_minus) / eps
+        np.testing.assert_allclose(Hds, Hdiff, rtol=1e-5, atol=1e-5)

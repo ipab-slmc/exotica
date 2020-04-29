@@ -52,7 +52,7 @@ void ILQGSolver::BackwardPass()
     constexpr double max_clamp_ = 1e10;
     const int T = prob_->get_T();
     const double dt = dynamics_solver_->get_dt();
-    const int NU = prob_->get_num_controls();
+    const int NU = prob_->GetScene()->get_num_controls();
 
     // Noise terms
     Eigen::VectorXd big_C_times_little_c = Eigen::VectorXd::Zero(NU, 1);
@@ -182,8 +182,8 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
     prob_->DisableStochasticUpdates();
 
     const int T = prob_->get_T();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
+    const int NU = prob_->GetScene()->get_num_controls();
+    const int NX = prob_->GetScene()->get_num_state();
     const double dt = dynamics_solver_->get_dt();
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
     prob_->PreUpdate();

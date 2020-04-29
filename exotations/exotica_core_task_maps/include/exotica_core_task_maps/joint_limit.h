@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,14 @@ class JointLimit : public TaskMap, public Instantiable<JointLimitInitializer>
 public:
     void AssignScene(ScenePtr scene) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian) override;
+
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du, HessianRef ddphi_ddx, HessianRef ddphi_ddu, HessianRef ddphi_dxdu) override;
+
     int TaskSpaceDim() override;
 
 private:

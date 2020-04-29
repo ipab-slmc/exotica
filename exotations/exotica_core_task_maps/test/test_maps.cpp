@@ -479,32 +479,7 @@ TEST(ExoticaTaskMaps, testJointLimit)
                                                {"SafePercentage", 0.0}});
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
-
-        int N = problem->N;
-        int M = problem->length_Phi;
-        int L = 5;
-        Eigen::MatrixXd X(L, N);
-        Eigen::MatrixXd Y(L, M);
-        Eigen::MatrixXd jacobian(L * M, N);
-
-        X << 0.0258648, 0.678224, 0.22528, -0.407937, 0.275105, 0.0485744, -0.012834, 0.94555, -0.414966, 0.542715, 0.05349, 0.539828, -0.199543, 0.783059, -0.433371;
-        Y << 0, 0.278224, 0, -0.00793676, 0, 0, 0, 0.54555, -0.0149664, 0.142715, 0, 0.139828, 0, 0.383059, -0.0333705;
-        jacobian << 1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1;
-        EXPECT_TRUE(test_values(X, Y, jacobian, problem));
+        EXPECT_TRUE(test_jacobian(problem));
     }
     catch (...)
     {

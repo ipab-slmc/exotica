@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ void OMPLControlSolver::SpecifyProblem(PlanningProblemPtr pointer)
     prob_ = std::static_pointer_cast<DynamicTimeIndexedShootingProblem>(pointer);
     dynamics_solver_ = prob_->GetScene()->GetDynamicsSolver();
 
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
+    const int NX = prob_->GetScene()->get_num_state();
     if (init_.StateLimits.size() != NX)
         ThrowNamed("State limits are of size " << init_.StateLimits.size() << ", should be of size " << NX);
 
@@ -51,13 +51,12 @@ void OMPLControlSolver::SpecifyProblem(PlanningProblemPtr pointer)
 void OMPLControlSolver::Setup()
 {
     int T = prob_->get_T();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
+    const int NU = prob_->GetScene()->get_num_controls();
+    const int NX = prob_->GetScene()->get_num_state();
     const double dt = dynamics_solver_->get_dt();
     if (init_.Seed != -1) ompl::RNG::setSeed(init_.Seed);
 
-    std::shared_ptr<ob::RealVectorStateSpace> space(
-        std::make_shared<ob::RealVectorStateSpace>(NX));
+    std::shared_ptr<ob::RealVectorStateSpace> space(std::make_shared<ob::RealVectorStateSpace>(NX));
 
     // state_bounds_ = std::make_unique<ob::RealVectorBounds>(NX);
     ob::RealVectorBounds state_bounds_(NX);
@@ -71,8 +70,7 @@ void OMPLControlSolver::Setup()
     space->setBounds(state_bounds_);
 
     // create a control space
-    std::shared_ptr<oc::RealVectorControlSpace> cspace(
-        std::make_shared<oc::RealVectorControlSpace>(space, NU));
+    std::shared_ptr<oc::RealVectorControlSpace> cspace(std::make_shared<oc::RealVectorControlSpace>(space, NU));
 
     // set the bounds for the control space
     // control_bounds_ = std::make_unique<ob::RealVectorBounds>(NU);
@@ -94,12 +92,11 @@ void OMPLControlSolver::Setup()
     si->setPropagationStepSize(dt);
     setup_->setStateValidityChecker([this, si](const ob::State *state) { return isStateValid(si, state); });
 
-    std::shared_ptr<OMPLStatePropagator> propagator(
-        std::make_shared<OMPLStatePropagator>(si, dynamics_solver_));
+    std::shared_ptr<OMPLStatePropagator> propagator(std::make_shared<OMPLStatePropagator>(si, dynamics_solver_));
 
     setup_->setStatePropagator(propagator);
 
-    const Eigen::VectorXd start_eig = prob_->get_X().col(0);
+    const Eigen::VectorXd start_eig = prob_->ApplyStartState();
     const Eigen::MatrixXd goal_eig = prob_->get_X_star().col(T - 1);
 
     // start_state_ = std::make_unique<ob::ScopedState<ob::RealVectorStateSpace>>(space);
@@ -131,8 +128,8 @@ void OMPLControlSolver::Solve(Eigen::MatrixXd &solution)
     Timer planning_timer, backward_pass_timer, line_search_timer;
 
     int T = prob_->get_T();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
+    const int NU = prob_->GetScene()->get_num_controls();
+    const int NX = prob_->GetScene()->get_num_state();
     const Eigen::VectorXd x_star = prob_->get_X_star().col(T - 1);
 
     const double dt = dynamics_solver_->get_dt();

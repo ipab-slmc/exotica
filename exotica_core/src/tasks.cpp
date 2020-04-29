@@ -233,6 +233,40 @@ void TimeIndexedTask::UpdateS()
     }
 }
 
+void TimeIndexedTask::Update(const TaskSpaceVector& big_Phi,
+                             Eigen::MatrixXdRefConst big_dPhi_dx,
+                             Eigen::MatrixXdRefConst big_dPhi_du,
+                             HessianRefConst big_ddPhi_ddx,
+                             HessianRefConst big_ddPhi_ddu,
+                             HessianRefConst big_ddPhi_dxdu,
+                             int t)
+{
+    for (const TaskIndexing& task : indexing)
+    {
+        Phi[t].data.segment(task.start, task.length) = big_Phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
+        dPhi_dx[t].middleRows(task.start_jacobian, task.length_jacobian) = big_dPhi_dx.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
+        dPhi_du[t].middleRows(task.start_jacobian, task.length_jacobian) = big_dPhi_du.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
+        ddPhi_ddx[t].segment(task.start, task.length) = big_ddPhi_ddx.segment(tasks[task.id]->start, tasks[task.id]->length);
+        ddPhi_ddu[t].segment(task.start, task.length) = big_ddPhi_ddu.segment(tasks[task.id]->start, tasks[task.id]->length);
+        ddPhi_dxdu[t].segment(task.start, task.length) = big_ddPhi_dxdu.segment(tasks[task.id]->start, tasks[task.id]->length);
+    }
+    ydiff[t] = Phi[t] - y[t];
+}
+
+void TimeIndexedTask::Update(const TaskSpaceVector& big_Phi,
+                             Eigen::MatrixXdRefConst big_dPhi_dx,
+                             Eigen::MatrixXdRefConst big_dPhi_du,
+                             int t)
+{
+    for (const TaskIndexing& task : indexing)
+    {
+        Phi[t].data.segment(task.start, task.length) = big_Phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
+        dPhi_dx[t].middleRows(task.start_jacobian, task.length_jacobian) = big_dPhi_dx.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
+        dPhi_du[t].middleRows(task.start_jacobian, task.length_jacobian) = big_dPhi_du.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
+    }
+    ydiff[t] = Phi[t] - y[t];
+}
+
 void TimeIndexedTask::Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, HessianRefConst big_hessian, int t)
 {
     for (const TaskIndexing& task : indexing)
@@ -364,12 +398,19 @@ void TimeIndexedTask::ReinitializeVariables(int _T, PlanningProblemPtr _prob, co
     Phi.assign(_T, _Phi);
     y = Phi;
     rho.assign(T, Eigen::VectorXd::Ones(num_tasks));
-    if (_prob->GetFlags() & KIN_J) jacobian.assign(T, Eigen::MatrixXd(length_jacobian, _prob->N));
+
+    if (_prob->GetFlags() & KIN_J)
+    {
+        jacobian.assign(T, Eigen::MatrixXd(length_jacobian, _prob->N));
+        dPhi_dx.assign(T, Eigen::MatrixXd(length_jacobian, _prob->GetScene()->get_num_state_derivative()));
+        dPhi_du.assign(T, Eigen::MatrixXd(length_jacobian, _prob->GetScene()->get_num_controls()));
+    }
     if (_prob->GetFlags() & KIN_H)
     {
-        Hessian Htmp;
-        Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(_prob->N, _prob->N));
-        hessian.assign(T, Htmp);
+        hessian.assign(T, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(_prob->N, _prob->N)));
+        ddPhi_ddx.assign(T, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(_prob->GetScene()->get_num_state_derivative(), _prob->GetScene()->get_num_state_derivative())));
+        ddPhi_ddu.assign(T, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(_prob->GetScene()->get_num_controls(), _prob->GetScene()->get_num_controls())));
+        ddPhi_dxdu.assign(T, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(_prob->GetScene()->get_num_state_derivative(), _prob->GetScene()->get_num_controls())));
     }
     S.assign(T, Eigen::MatrixXd::Identity(length_jacobian, length_jacobian));
     ydiff.assign(T, Eigen::VectorXd::Zero(length_jacobian));

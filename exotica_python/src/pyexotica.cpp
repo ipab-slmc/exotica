@@ -820,8 +820,13 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("ydiff", &TimeIndexedTask::ydiff)
         .def_readonly("Phi", &TimeIndexedTask::Phi)
         .def_readonly("rho", &TimeIndexedTask::rho)
-        // .def_readonly("hessian", &TimeIndexedTask::hessian)
-        .def_readonly("jacobian", &TimeIndexedTask::jacobian)
+        .def_readonly("hessian", &TimeIndexedTask::hessian)        // Kinematic
+        .def_readonly("jacobian", &TimeIndexedTask::jacobian)      // Kinematic
+        .def_readonly("dPhi_dx", &TimeIndexedTask::dPhi_dx)        // Dynamic
+        .def_readonly("dPhi_du", &TimeIndexedTask::dPhi_du)        // Dynamic
+        .def_readonly("ddPhi_ddx", &TimeIndexedTask::ddPhi_ddx)    // Dynamic
+        .def_readonly("ddPhi_ddu", &TimeIndexedTask::ddPhi_ddu)    // Dynamic
+        .def_readonly("ddPhi_dxdu", &TimeIndexedTask::ddPhi_dxdu)  // Dynamic
         .def_readonly("S", &TimeIndexedTask::S)
         .def_readonly("T", &TimeIndexedTask::T)
         .def_readonly("tasks", &TimeIndexedTask::tasks)

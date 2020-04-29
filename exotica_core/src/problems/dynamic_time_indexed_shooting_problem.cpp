@@ -368,14 +368,21 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         length_jacobian += tasks_[i]->length_jacobian;
     }
 
+    // Initialize the TaskSpaceVector and its derivatives
     y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
-    if (flags_ & KIN_J) dPhi_dx.assign(T_, Eigen::MatrixXd(length_jacobian, scene_->get_num_state_derivative()));
+
+    if (flags_ & KIN_J)
+    {
+        dPhi_dx.assign(T_, Eigen::MatrixXd(length_jacobian, scene_->get_num_state_derivative()));
+        dPhi_du.assign(T_, Eigen::MatrixXd(length_jacobian, scene_->get_num_controls()));
+    }
+
     if (flags_ & KIN_H)
     {
-        Hessian Htmp;
-        Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(scene_->get_num_state_derivative(), scene_->get_num_state_derivative()));
-        ddPhi_ddx.assign(T_, Htmp);
+        ddPhi_ddx.assign(T_, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(scene_->get_num_state_derivative(), scene_->get_num_state_derivative())));
+        ddPhi_ddu.assign(T_, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(scene_->get_num_controls(), scene_->get_num_controls())));
+        ddPhi_dxdu.assign(T_, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(scene_->get_num_state_derivative(), scene_->get_num_controls())));
     }
     cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
 
@@ -551,8 +558,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     X_diff_.col(t) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
 
     // Update current state kinematics and costs
-    const Eigen::VectorXd q_current_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t));
-    UpdateTaskMaps(q_current_position, t);
+    UpdateTaskMaps(X_.col(t), U_.col(t), t);
 
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
@@ -593,8 +599,8 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     }
 
     // TODO: We are now updating the TaskMaps _twice_ per call. This may be very expensive (!)
-    const Eigen::VectorXd q_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
-    UpdateTaskMaps(q_next_position, t + 1);
+    // const Eigen::VectorXd q_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
+    // UpdateTaskMaps(q_next_position, t + 1);
 
     ++number_of_problem_updates_;
 }
@@ -642,22 +648,41 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
     // Actually update the tasks' kinematics mappings.
     PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
 
-    const Eigen::VectorXd x_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t));
-    UpdateTaskMaps(x_next_position, t);
+    UpdateTaskMaps(X_.col(t), Eigen::VectorXd::Zero(scene_->get_num_controls()), t);
 
     ++number_of_problem_updates_;
 }
 
-void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q, int t)
+void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, int t)
 {
     ValidateTimeIndex(t);
 
+    // Update the kinematic scene based on the configuration.
+    // NB: The KinematicTree only understands a certain format for the configuration (RPY)
+    // => As a result, we need to use GetPosition to potentially convert.
+    const Eigen::VectorXd q = scene_->GetDynamicsSolver()->GetPosition(x);
     scene_->Update(q, static_cast<double>(t) * tau_);
 
+    // Reset the task space vector and its derivatives for the current timestep
     Phi[t].SetZero(length_Phi);
-    if (flags_ & KIN_J) dPhi_dx[t].setZero();
+
+    if (flags_ & KIN_J)
+    {
+        dPhi_dx[t].setZero();
+        dPhi_du[t].setZero();
+    }
+
     if (flags_ & KIN_H)
-        for (int i = 0; i < length_jacobian; ++i) ddPhi_ddx[t](i).setZero();
+    {
+        for (int i = 0; i < length_jacobian; ++i)
+        {
+            ddPhi_ddx[t](i).setZero();
+            ddPhi_ddu[t](i).setZero();
+            ddPhi_dxdu[t](i).setZero();
+        }
+    }
+
+    // Update all task-maps
     for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
@@ -665,25 +690,36 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q
         {
             if (flags_ & KIN_H)
             {
-                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), ddPhi_ddx[t].segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x, u,
+                                  Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length),
+                                  dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
+                                  dPhi_du[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
+                                  ddPhi_ddx[t].segment(tasks_[i]->start, tasks_[i]->length),
+                                  ddPhi_ddu[t].segment(tasks_[i]->start, tasks_[i]->length),
+                                  ddPhi_dxdu[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(x, u,
+                                  Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length),
+                                  dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
+                                  dPhi_du[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x, u, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
+
+    // Update costs (TimeIndexedTask)
     if (flags_ & KIN_H)
     {
-        cost.Update(Phi[t], dPhi_dx[t], ddPhi_ddx[t], t);
+        cost.Update(Phi[t], dPhi_dx[t], dPhi_du[t], ddPhi_ddx[t], ddPhi_ddu[t], ddPhi_dxdu[t], t);
     }
     else if (flags_ & KIN_J)
     {
-        cost.Update(Phi[t], dPhi_dx[t], t);
+        cost.Update(Phi[t], dPhi_dx[t], dPhi_du[t], t);
     }
     else
     {
@@ -718,7 +754,7 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) c
 
     // m => dimension of task maps, "length_jacobian"
     // (m,NQ)^T * (m,m) * (m,1) * (1,1) => (NQ,1), TODO: We should change this to RowVectorXd format
-    general_cost_jacobian.head(scene_->get_num_velocities()) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
+    general_cost_jacobian = cost.dPhi_dx[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
 
     return state_cost_jacobian + general_cost_jacobian;
 }
@@ -746,16 +782,15 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
 
     // General Cost
     Eigen::MatrixXd general_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
-    // general_cost_hessian.topLeftCorner(scene_->get_num_velocities(), scene_->get_num_velocities()) = cost.ydiff[t].transpose() * cost.S[t] * cost.hessian[t] + cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
-    general_cost_hessian.topLeftCorner(scene_->get_num_velocities(), scene_->get_num_velocities()).noalias() = cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
+    general_cost_hessian.noalias() = cost.dPhi_dx[t].transpose() * cost.S[t] * cost.dPhi_dx[t];
 
     // Contract task-map Hessians
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
     {
         Eigen::RowVectorXd ydiffTS = cost.ydiff[t].transpose() * cost.S[t];  // (1*m)
         for (int i = 0; i < cost.length_jacobian; ++i)                       // length m
         {
-            general_cost_hessian.topLeftCorner(scene_->get_num_velocities(), scene_->get_num_velocities()).noalias() += ydiffTS(i) * cost.hessian[t](i);
+            general_cost_hessian.noalias() += ydiffTS(i) * cost.ddPhi_ddx[t](i);
         }
     }
 

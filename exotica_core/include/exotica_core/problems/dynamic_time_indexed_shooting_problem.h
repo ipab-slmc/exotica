@@ -137,7 +137,7 @@ protected:
     }
     void ReinitializeVariables();
 
-    void UpdateTaskMaps(Eigen::VectorXdRefConst q, int t);
+    void UpdateTaskMaps(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, int t);
 
     int T_;       ///< Number of time steps
     double tau_;  ///< Time step duration

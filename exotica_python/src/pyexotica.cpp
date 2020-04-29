@@ -1017,7 +1017,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_Q", &DynamicTimeIndexedShootingProblem::get_Q)
         .def("set_Q", &DynamicTimeIndexedShootingProblem::set_Q)
         .def_readonly("Phi", &DynamicTimeIndexedShootingProblem::Phi)
-        .def_readonly("jacobian", &DynamicTimeIndexedShootingProblem::jacobian)
+        .def_readonly("dPhi_dx", &DynamicTimeIndexedShootingProblem::dPhi_dx)
         .def_readonly("cost", &DynamicTimeIndexedShootingProblem::cost)
         .def("get_state_cost", &DynamicTimeIndexedShootingProblem::GetStateCost)
         .def("get_state_cost_jacobian", &DynamicTimeIndexedShootingProblem::GetStateCostJacobian)
@@ -1056,6 +1056,8 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def_property_readonly("num_positions", &Scene::get_num_positions);
     scene.def_property_readonly("num_velocities", &Scene::get_num_velocities);
     scene.def_property_readonly("num_controls", &Scene::get_num_controls);
+    scene.def_property_readonly("num_state", &Scene::get_num_state);
+    scene.def_property_readonly("num_state_derivative", &Scene::get_num_state_derivative);
     scene.def("update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
     scene.def("get_controlled_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::GetControlledJointNames);
     scene.def("get_controlled_link_names", &Scene::GetControlledLinkNames);

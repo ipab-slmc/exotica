@@ -177,6 +177,8 @@ public:
     int get_num_positions() const;
     int get_num_velocities() const;
     int get_num_controls() const;
+    int get_num_state() const;
+    int get_num_state_derivative() const;
 
 private:
     void UpdateInternalFrames(bool update_request = true);
@@ -195,9 +197,11 @@ private:
     /// The dynamics solver
     std::shared_ptr<DynamicsSolver> dynamics_solver_ = std::shared_ptr<DynamicsSolver>(nullptr);
 
-    int num_positions_ = 0;
-    int num_velocities_ = 0;
-    int num_controls_ = 0;
+    int num_positions_ = 0;         ///< "nq"
+    int num_velocities_ = 0;        ///< "nv"
+    int num_controls_ = 0;          ///< "nu"
+    int num_state_ = 0;             ///< "nx"
+    int num_state_derivative_ = 0;  ///< "ndx"
 
     /// Internal MoveIt planning scene
     planning_scene::PlanningScenePtr ps_;

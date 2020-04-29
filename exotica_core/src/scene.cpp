@@ -209,12 +209,16 @@ void Scene::Instantiate(const SceneInitializer& init)
         num_positions_ = dynamics_solver_->get_num_positions();
         num_velocities_ = dynamics_solver_->get_num_velocities();
         num_controls_ = dynamics_solver_->get_num_controls();
+        num_state_ = dynamics_solver_->get_num_state();
+        num_state_derivative_ = dynamics_solver_->get_num_state_derivative();
     }
     else
     {
         num_positions_ = GetKinematicTree().GetNumModelJoints();
         num_velocities_ = 0;
         num_controls_ = 0;
+        num_state_ = num_positions_;
+        num_state_derivative_ = GetKinematicTree().GetNumControlledJoints();
     }
 
     if (debug_) INFO_NAMED(object_name_, "Exotica Scene initialized");
@@ -860,6 +864,16 @@ int Scene::get_num_velocities() const
 int Scene::get_num_controls() const
 {
     return num_controls_;
+}
+
+int Scene::get_num_state() const
+{
+    return num_state_;
+}
+
+int Scene::get_num_state_derivative() const
+{
+    return num_state_derivative_;
 }
 
 }  // namespace exotica

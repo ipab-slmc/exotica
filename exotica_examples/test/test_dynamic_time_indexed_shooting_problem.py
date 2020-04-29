@@ -5,6 +5,7 @@ import unittest
 import numpy as np
 import pyexotica as exo
 from pyexotica.testing import random_state
+import sys
 
 PKG = 'exotica_examples'
 roslib.load_manifest(PKG)  # This line is not needed with Catkin.
@@ -47,8 +48,8 @@ def check_state_cost_jacobian_at_t(problem, t):
         cost_low = problem.get_state_cost(t)
 
         J_numdiff[i] = (cost_high - cost_low) / eps
-    np.testing.assert_allclose(J_solver, J_numdiff, rtol=1e-5,
-                               atol=1e-5, err_msg='StateCostJacobian does not match!')
+    np.testing.assert_allclose(J_solver, J_numdiff, rtol=3e-5,
+                               atol=1e-3, err_msg='StateCostJacobian does not match!')
 
 
 def check_state_cost_hessian_at_t(problem, t):
@@ -87,8 +88,14 @@ def check_state_cost_hessian_at_t(problem, t):
         jacobian_minus = problem.get_state_cost_jacobian(t)
 
         H_numdiff[:,i] = (jacobian_plus - jacobian_minus) / eps
+    if np.linalg.norm(H_solver - H_numdiff) > 1e-2:
+        np.set_printoptions(threshold=sys.maxsize, suppress=True, linewidth=500)
+        print(H_solver)
+        print(H_numdiff)
+        print((H_solver-H_numdiff)<1e-3)
+        print(H_solver-H_numdiff)
     np.testing.assert_allclose(H_solver, H_numdiff, rtol=1e-5,
-                               atol=1e-5, err_msg='StateCostHessian does not match!')
+                               atol=1e-2, err_msg='StateCostHessian does not match!')
 
 
 def check_control_cost_jacobian_at_t(problem, t):
@@ -195,8 +202,8 @@ if __name__ == "__main__":
 
         # TODO: test state cost hessian
         # Deactivated as part of it will be a Gauss-Newton approximation
-        # for t in range(problem.T):
-        #     check_state_cost_hessian_at_t(problem, t)
+        for t in range(problem.T):
+            check_state_cost_hessian_at_t(problem, t)
 
         # test control cost jacobian
         for t in range(problem.T - 1):

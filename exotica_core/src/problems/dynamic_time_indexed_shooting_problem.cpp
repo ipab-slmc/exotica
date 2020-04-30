@@ -690,9 +690,9 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst x
                                   Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length),
                                   dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
                                   dPhi_du[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
-                                  ddPhi_ddx[t].segment(tasks_[i]->start, tasks_[i]->length),
-                                  ddPhi_ddu[t].segment(tasks_[i]->start, tasks_[i]->length),
-                                  ddPhi_dxdu[t].segment(tasks_[i]->start, tasks_[i]->length));
+                                  ddPhi_ddx[t].segment(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
+                                  ddPhi_ddu[t].segment(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
+                                  ddPhi_dxdu[t].segment(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else if (flags_ & KIN_J)
             {

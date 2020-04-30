@@ -112,7 +112,7 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
         {
             if (flags_ & KIN_H)
             {
-                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else if (flags_ & KIN_J)
             {

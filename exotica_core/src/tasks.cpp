@@ -124,7 +124,7 @@ void EndPoseTask::Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst
     {
         Phi.data.segment(task.start, task.length) = big_Phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
         jacobian.middleRows(task.start_jacobian, task.length_jacobian) = big_jacobian.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
-        hessian.segment(task.start, task.length) = big_hessian.segment(tasks[task.id]->start, tasks[task.id]->length);
+        hessian.segment(task.start_jacobian, task.length_jacobian) = big_hessian.segment(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
     }
     ydiff = Phi - y;
 }

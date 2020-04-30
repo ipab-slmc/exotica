@@ -9,7 +9,7 @@
     
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <!-- <LossType>L2</LossType> -->
-        <!-- <L2Rate>0</L2Rate> -->
+        <!-- <R_rate>0</R_rate> -->
 
         <!-- <LossType>Huber</LossType> -->
         <!-- <HuberRate>0.1</HuberRate> -->

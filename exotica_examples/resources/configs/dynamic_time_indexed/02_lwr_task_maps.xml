@@ -6,6 +6,7 @@
     </AnalyticDDPSolver>
     
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <DerivativeOrder>2</DerivativeOrder>
         <PlanningScene>
             <Scene>
                 <JointGroup>arm</JointGroup>

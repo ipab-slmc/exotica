@@ -189,6 +189,53 @@ bool test_jacobian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e
     return true;
 }
 
+bool test_hessian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e-5)
+{
+    constexpr double h = 1e-5;
+
+    TEST_COUT << "Testing Hessian with h=" << h << ", eps=" << eps;
+    for (int l = 0; l < num_trials_; ++l)
+    {
+        Eigen::VectorXd x0 = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
+        problem->Update(x0);
+        const Hessian H0(problem->hessian);
+        Hessian hessian = Hessian::Constant(problem->length_jacobian, Eigen::MatrixXd::Zero(problem->N, problem->N));
+        Eigen::VectorXd x;
+        for (int j = 0; j < problem->N; ++j)
+        {
+            x = x0;
+            x(j) += h;
+            problem->Update(x);
+            const Eigen::MatrixXd J1 = problem->jacobian;
+            x = x0;
+            x(j) -= h;
+            problem->Update(x);
+            const Eigen::MatrixXd J2 = problem->jacobian;
+            for (int i = 0; i < problem->N; ++i)
+            {
+                for (int k = 0; k < problem->length_jacobian; ++k)
+                {
+                    hessian(k)(i, j) = (J1(k, i) - J2(k, i)) / (2.0 * h);
+                }
+            }
+        }
+        double errH = 0;
+        for (int i = 0; i < hessian.rows(); ++i) errH += (hessian(i) - H0(i)).norm();
+        if (errH > eps)
+        {
+            TEST_COUT << "x: " << x0.transpose();
+            TEST_COUT << "H*:\n";
+            for (int i = 0; i < problem->length_jacobian; ++i) TEST_COUT << hessian(i) << "\n\n";
+            TEST_COUT << "\n\n...";
+            TEST_COUT << "H:\n";
+            for (int i = 0; i < problem->length_jacobian; ++i) TEST_COUT << H0(i) << "\n\n";
+            TEST_COUT << "\n\n...";
+            ADD_FAILURE() << "Hessian error out of bounds: " << errH;
+        }
+    }
+    return true;
+}
+
 template <class T>
 bool test_jacobian_time_indexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, const double eps = 1e-5)
 {

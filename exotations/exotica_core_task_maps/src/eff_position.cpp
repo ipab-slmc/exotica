@@ -70,7 +70,7 @@ void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
 
         for (int j = 0; j < 3; ++j)
         {
-            hessian(j).block(i * 3, 0, jacobian.cols(), jacobian.cols()) = kinematics[0].hessian[i](j);
+            hessian(i * 3 + j).block(0, 0, jacobian.cols(), jacobian.cols()) = kinematics[0].hessian[i](j);
         }
     }
 }

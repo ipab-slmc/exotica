@@ -246,9 +246,9 @@ void TimeIndexedTask::Update(const TaskSpaceVector& big_Phi,
         Phi[t].data.segment(task.start, task.length) = big_Phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
         dPhi_dx[t].middleRows(task.start_jacobian, task.length_jacobian) = big_dPhi_dx.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
         dPhi_du[t].middleRows(task.start_jacobian, task.length_jacobian) = big_dPhi_du.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
-        ddPhi_ddx[t].segment(task.start, task.length) = big_ddPhi_ddx.segment(tasks[task.id]->start, tasks[task.id]->length);
-        ddPhi_ddu[t].segment(task.start, task.length) = big_ddPhi_ddu.segment(tasks[task.id]->start, tasks[task.id]->length);
-        ddPhi_dxdu[t].segment(task.start, task.length) = big_ddPhi_dxdu.segment(tasks[task.id]->start, tasks[task.id]->length);
+        ddPhi_ddx[t].segment(task.start_jacobian, task.length_jacobian) = big_ddPhi_ddx.segment(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
+        ddPhi_ddu[t].segment(task.start_jacobian, task.length_jacobian) = big_ddPhi_ddu.segment(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
+        ddPhi_dxdu[t].segment(task.start_jacobian, task.length_jacobian) = big_ddPhi_dxdu.segment(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
     }
     ydiff[t] = Phi[t] - y[t];
 }
@@ -273,7 +273,7 @@ void TimeIndexedTask::Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefC
     {
         Phi[t].data.segment(task.start, task.length) = big_Phi.data.segment(tasks[task.id]->start, tasks[task.id]->length);
         jacobian[t].middleRows(task.start_jacobian, task.length_jacobian) = big_jacobian.middleRows(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
-        hessian[t].segment(task.start, task.length) = big_hessian.segment(tasks[task.id]->start, tasks[task.id]->length);
+        hessian[t].segment(task.start_jacobian, task.length_jacobian) = big_hessian.segment(tasks[task.id]->start_jacobian, tasks[task.id]->length_jacobian);
     }
     ydiff[t] = Phi[t] - y[t];
 }

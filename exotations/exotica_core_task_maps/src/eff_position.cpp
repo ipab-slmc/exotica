@@ -38,9 +38,7 @@ void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     if (phi.rows() != kinematics[0].Phi.rows() * 3) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        phi(i * 3) = kinematics[0].Phi(i).p[0];
-        phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
-        phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
+        phi.segment<3>(i * 3) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
     }
 }
 
@@ -50,10 +48,8 @@ void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 3 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        phi(i * 3) = kinematics[0].Phi(i).p[0];
-        phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
-        phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
-        jacobian.middleRows(i * 3, 3) = kinematics[0].jacobian[i].data.topRows(3);
+        phi.segment<3>(i * 3) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        jacobian.middleRows<3>(i * 3) = kinematics[0].jacobian[i].data.topRows<3>();
     }
 }
 
@@ -63,10 +59,8 @@ void EffPosition::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 3 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        phi(i * 3) = kinematics[0].Phi(i).p[0];
-        phi(i * 3 + 1) = kinematics[0].Phi(i).p[1];
-        phi(i * 3 + 2) = kinematics[0].Phi(i).p[2];
-        jacobian.middleRows(i * 3, 3) = kinematics[0].jacobian[i].data.topRows(3);
+        phi.segment<3>(i * 3) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        jacobian.middleRows<3>(i * 3) = kinematics[0].jacobian[i].data.topRows<3>();
 
         for (int j = 0; j < 3; ++j)
         {

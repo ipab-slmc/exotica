@@ -283,6 +283,7 @@ UnconstrainedEndPoseProblemPtr setup_problem(Initializer& map, std::string colli
     Eigen::VectorXd W = Eigen::Vector3d(3, 2, 1);
     Initializer problem("exotica/UnconstrainedEndPoseProblem", {
                                                                    {"Name", std::string("MyProblem")},
+                                                                   {"DerivativeOrder", std::string("2")},
                                                                    {"PlanningScene", scene},
                                                                    {"Maps", std::vector<Initializer>({map})},
                                                                    {"Cost", std::vector<Initializer>({cost})},

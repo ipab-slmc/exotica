@@ -3,6 +3,9 @@
   <class name="exotica/ContinuousJointPose" type="exotica::ContinuousJointPose" base_class_type="exotica::TaskMap">
     <description>Representation of the SO(2) group using cos/sin</description>
   </class>
+  <class name="exotica/ControlRegularization" type="exotica::ControlRegularization" base_class_type="exotica::TaskMap">
+    <description>Linear map to controls</description>
+  </class>
   <class name="exotica/CenterOfMass" type="exotica::CenterOfMass" base_class_type="exotica::TaskMap">
     <description>Centre of mass</description>
   </class>

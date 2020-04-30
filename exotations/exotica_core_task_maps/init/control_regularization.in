@@ -1,0 +1,6 @@
+class ControlRegularization
+
+extend <exotica_core/task_map>
+
+Optional Eigen::VectorXd JointRef = Eigen::VectorXd();
+Optional Eigen::VectorXi JointMap = Eigen::VectorXi();

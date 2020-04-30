@@ -110,22 +110,22 @@ void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::M
 
 void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi)
 {
-    WARNING("x,u update not implemented - defaulting to q update.");
+    // WARNING("x,u update not implemented - defaulting to q update.");
     Update(x.head(scene_->get_num_positions()), phi);
 }
 
 void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du)
 {
-    WARNING("x,u update not implemented - defaulting to q update.");
-    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.topLeftCorner(TaskSpaceJacobianDim(), scene_->get_num_positions()));
+    // WARNING("x,u update not implemented - defaulting to q update.");
+    const int ndq = scene_->get_has_quaternion_floating_base() ? scene_->get_num_positions() - 1 : scene_->get_num_positions();
+    Update(x.head(ndq), phi, dphi_dx.topLeftCorner(TaskSpaceJacobianDim(), ndq));
 }
 
 void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du, HessianRef ddphi_ddx, HessianRef ddphi_ddu, HessianRef ddphi_dxdu)
 {
-    // ThrowPretty("Haven't figured out the block operations on ddphi_dx yet, sorry.");
-    WARNING("x,u update not implemented - defaulting to q update.");
-    // TODO: Fix indexing into Hessian. Numpy style: ddphi_ddx[:nv,:nv,:nv]
-    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.topLeftCorner(TaskSpaceJacobianDim(), scene_->get_num_positions()), ddphi_ddx);
+    // WARNING("x,u update not implemented - defaulting to q update.");
+    const int ndq = scene_->get_has_quaternion_floating_base() ? scene_->get_num_positions() - 1 : scene_->get_num_positions();
+    Update(x.head(ndq), phi, dphi_dx.topLeftCorner(TaskSpaceJacobianDim(), ndq), ddphi_ddx);
 }
 
 }  // namespace

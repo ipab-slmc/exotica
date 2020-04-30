@@ -96,6 +96,38 @@ inline int GetRotationTypeLength(const RotationType& type)
     return types[static_cast<int>(type)];
 }
 
+inline RotationType GetRotationTypeFromString(const std::string& rotation_type)
+{
+    if (rotation_type == "Quaternion")
+    {
+        return RotationType::QUATERNION;
+    }
+    else if (rotation_type == "RPY")
+    {
+        return RotationType::RPY;
+    }
+    else if (rotation_type == "ZYX")
+    {
+        return RotationType::ZYX;
+    }
+    else if (rotation_type == "ZYZ")
+    {
+        return RotationType::ZYZ;
+    }
+    else if (rotation_type == "AngleAxis")
+    {
+        return RotationType::ANGLE_AXIS;
+    }
+    else if (rotation_type == "Matrix")
+    {
+        return RotationType::MATRIX;
+    }
+    else
+    {
+        ThrowPretty("Unsupported rotation type '" << rotation_type << "'");
+    }
+}
+
 KDL::Frame GetFrame(Eigen::VectorXdRefConst val);
 
 KDL::Frame GetFrameFromMatrix(Eigen::MatrixXdRefConst val);

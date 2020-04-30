@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -36,36 +36,9 @@ namespace exotica
 EffOrientation::EffOrientation() = default;
 EffOrientation::~EffOrientation() = default;
 
-void EffOrientation::Instantiate(const EffOrientationInitializer &init)
+void EffOrientation::Instantiate(const EffOrientationInitializer& init)
 {
-    if (init.Type == "Quaternion")
-    {
-        rotation_type_ = RotationType::QUATERNION;
-    }
-    else if (init.Type == "RPY")
-    {
-        rotation_type_ = RotationType::RPY;
-    }
-    else if (init.Type == "ZYX")
-    {
-        rotation_type_ = RotationType::ZYX;
-    }
-    else if (init.Type == "ZYZ")
-    {
-        rotation_type_ = RotationType::ZYZ;
-    }
-    else if (init.Type == "AngleAxis")
-    {
-        rotation_type_ = RotationType::ANGLE_AXIS;
-    }
-    else if (init.Type == "Matrix")
-    {
-        rotation_type_ = RotationType::MATRIX;
-    }
-    else
-    {
-        ThrowNamed("Unsupported rotation type '" << init.Type << "'");
-    }
+    rotation_type_ = GetRotationTypeFromString(init.Type);
     stride_ = GetRotationTypeLength(rotation_type_);
 }
 
@@ -109,4 +82,10 @@ int EffOrientation::TaskSpaceJacobianDim()
 {
     return kinematics[0].Phi.rows() * 3;
 }
+
+const RotationType& EffOrientation::get_rotation_type() const
+{
+    return rotation_type_;
+}
+
 }  // namespace exotica

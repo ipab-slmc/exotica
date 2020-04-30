@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,28 +33,9 @@ REGISTER_TASKMAP_TYPE("EffFrame", exotica::EffFrame);
 
 namespace exotica
 {
-void EffFrame::Instantiate(const EffFrameInitializer &init)
+void EffFrame::Instantiate(const EffFrameInitializer& init)
 {
-    if (init.Type == "Quaternion")
-    {
-        rotation_type_ = RotationType::QUATERNION;
-    }
-    else if (init.Type == "ZYX")
-    {
-        rotation_type_ = RotationType::ZYX;
-    }
-    else if (init.Type == "ZYZ")
-    {
-        rotation_type_ = RotationType::ZYZ;
-    }
-    else if (init.Type == "AngleAxis")
-    {
-        rotation_type_ = RotationType::ANGLE_AXIS;
-    }
-    else if (init.Type == "Matrix")
-    {
-        rotation_type_ = RotationType::MATRIX;
-    }
+    rotation_type_ = GetRotationTypeFromString(init.Type);
     small_stride_ = GetRotationTypeLength(rotation_type_);
     big_stride_ = small_stride_ + 3;
 }
@@ -104,4 +85,10 @@ int EffFrame::TaskSpaceJacobianDim()
 {
     return kinematics[0].Phi.rows() * 6;
 }
+
+const RotationType& EffFrame::get_rotation_type() const
+{
+    return rotation_type_;
+}
+
 }  // namespace exotica

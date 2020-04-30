@@ -10,7 +10,8 @@ import sys
 PKG = 'exotica_examples'
 roslib.load_manifest(PKG)  # This line is not needed with Catkin.
 
-np.random.seed(42)
+# np.random.seed(42)
+np.set_printoptions(2, threshold=sys.maxsize, suppress=True, linewidth=500)
 
 def check_state_cost_jacobian_at_t(problem, t):
     scene = problem.get_scene()
@@ -89,7 +90,6 @@ def check_state_cost_hessian_at_t(problem, t):
 
         H_numdiff[:,i] = (jacobian_plus - jacobian_minus) / eps
     if np.linalg.norm(H_solver - H_numdiff) > 1e-2:
-        np.set_printoptions(threshold=sys.maxsize, suppress=True, linewidth=500)
         print(H_solver)
         print(H_numdiff)
         print((H_solver-H_numdiff)<1e-3)

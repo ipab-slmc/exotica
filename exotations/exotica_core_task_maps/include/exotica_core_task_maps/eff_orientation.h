@@ -39,13 +39,12 @@ namespace exotica
 class EffOrientation : public TaskMap, public Instantiable<EffOrientationInitializer>
 {
 public:
-    EffOrientation();
-    virtual ~EffOrientation();
-
     void Instantiate(const EffOrientationInitializer& init) override;
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian) override;
+
     int TaskSpaceDim() override;
     int TaskSpaceJacobianDim() override;
 

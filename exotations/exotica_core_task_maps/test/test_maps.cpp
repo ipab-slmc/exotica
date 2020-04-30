@@ -160,15 +160,20 @@ bool test_jacobian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e
         Eigen::VectorXd x0(problem->N);
         x0 = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
         problem->Update(x0);
-        const TaskSpaceVector y0(problem->Phi);
+        Eigen::VectorXd x(x0);
         const Eigen::MatrixXd J0(problem->jacobian);
         Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(J0.rows(), J0.cols());
         for (int i = 0; i < problem->N; ++i)
         {
-            Eigen::VectorXd x(x0);
+            x = x0;
             x(i) += h;
             problem->Update(x);
-            jacobian.col(i) = (problem->Phi - y0) / h;
+            TaskSpaceVector x_plus(problem->Phi);
+            x = x0;
+            x(i) -= h;
+            problem->Update(x);
+            TaskSpaceVector x_minus(problem->Phi);
+            jacobian.col(i) = (x_plus - x_minus) / (2.0 * h);
         }
         double errJ = (jacobian - J0).norm();
         if (errJ > eps)

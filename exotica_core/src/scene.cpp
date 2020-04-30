@@ -221,6 +221,10 @@ void Scene::Instantiate(const SceneInitializer& init)
         num_state_derivative_ = GetKinematicTree().GetNumControlledJoints();
     }
 
+    // Check if the system has a floating-base, and if so, if it contains a quaternion.
+    // Will need to trigger special logic below to handle this (w.r.t. normalisation).
+    has_quaternion_floating_base_ = (GetKinematicTree().GetModelBaseType() == BaseType::FLOATING && num_state_ == num_state_derivative_ + 1);
+
     if (debug_) INFO_NAMED(object_name_, "Exotica Scene initialized");
 }
 
@@ -874,6 +878,11 @@ int Scene::get_num_state() const
 int Scene::get_num_state_derivative() const
 {
     return num_state_derivative_;
+}
+
+bool Scene::get_has_quaternion_floating_base() const
+{
+    return has_quaternion_floating_base_;
 }
 
 }  // namespace exotica

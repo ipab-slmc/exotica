@@ -121,8 +121,6 @@ public:
     }
 
 protected:
-    bool has_quaternion_floating_base_ = false;  // Whether the state includes a SE(3) floating base.
-
     /// \brief Checks the desired time index for bounds and supports -1 indexing.
     inline void ValidateTimeIndex(int& t_in) const
     {

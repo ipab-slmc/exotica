@@ -263,17 +263,13 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
 
     const int NX = scene_->get_num_positions() + scene_->get_num_velocities(), NDX = 2 * scene_->get_num_velocities();
 
-    // Check if the system has a floating-base, and if so, if it contains a quaternion.
-    // Will need to trigger special logic below to handle this (w.r.t. normalisation).
-    has_quaternion_floating_base_ = (scene_->GetKinematicTree().GetModelBaseType() == BaseType::FLOATING && NX == NDX + 1);
-
     X_ = Eigen::MatrixXd::Zero(NX, T_);
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
     X_diff_ = Eigen::MatrixXd::Zero(NDX, T_);
     U_ = Eigen::MatrixXd::Zero(scene_->get_num_controls(), T_ - 1);
 
     // Set w component of quaternion by default
-    if (has_quaternion_floating_base_)
+    if (scene_->get_has_quaternion_floating_base())
     {
         for (int t = 0; t < T_; ++t)
         {
@@ -455,7 +451,7 @@ void DynamicTimeIndexedShootingProblem::set_X(Eigen::MatrixXdRefConst X_in)
     X_ = X_in;
 
     // Normalize quaternion, if required.
-    if (has_quaternion_floating_base_)
+    if (scene_->get_has_quaternion_floating_base())
     {
         for (int t = 0; t < T_; ++t)
         {
@@ -492,7 +488,7 @@ void DynamicTimeIndexedShootingProblem::set_X_star(Eigen::MatrixXdRefConst X_sta
     X_star_ = X_star_in;
 
     // Normalize quaternion, if required.
-    if (has_quaternion_floating_base_)
+    if (scene_->get_has_quaternion_floating_base())
     {
         for (int t = 0; t < T_; ++t)
         {
@@ -770,7 +766,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
     state_cost_hessian.noalias() = dxdiff.transpose() * Q_[t] * dxdiff;
 
     // For non-Euclidean spaces (i.e. on manifolds), there exists a second derivative of the state delta
-    if (has_quaternion_floating_base_)
+    if (scene_->get_has_quaternion_floating_base())
     {
         Eigen::RowVectorXd xdiffTQ = X_diff_.col(t).transpose() * Q_[t];  // (1*ndx)
         Hessian ddxdiff = scene_->GetDynamicsSolver()->ddStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);

@@ -179,8 +179,11 @@ public:
     int get_num_controls() const;
     int get_num_state() const;
     int get_num_state_derivative() const;
+    bool get_has_quaternion_floating_base() const;
 
 private:
+    bool has_quaternion_floating_base_ = false;  ///< Whether the state includes a SE(3) floating base.
+
     void UpdateInternalFrames(bool update_request = true);
 
     /// @brief      Updates the internal state of the MoveIt PlanningScene from Kinematica.

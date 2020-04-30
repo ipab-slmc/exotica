@@ -1172,6 +1172,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def_property_readonly("num_controls", &Scene::get_num_controls);
     scene.def_property_readonly("num_state", &Scene::get_num_state);
     scene.def_property_readonly("num_state_derivative", &Scene::get_num_state_derivative);
+    scene.def_property_readonly("has_quaternion_floating_base", &Scene::get_has_quaternion_floating_base);
     scene.def("update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
     scene.def("get_controlled_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::GetControlledJointNames);
     scene.def("get_controlled_link_names", &Scene::GetControlledLinkNames);

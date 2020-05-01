@@ -594,9 +594,14 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
         X_.col(t + 1) = X_.col(t + 1) + white_noise + control_dependent_noise;
     }
 
-    // TODO: We are now updating the TaskMaps _twice_ per call. This may be very expensive (!)
-    // const Eigen::VectorXd q_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
-    // UpdateTaskMaps(q_next_position, t + 1);
+    // Twice would not be necessary if "UpdateTerminalState" is used by the solver.
+    // However, as this is a recent addition, this check and update is required for
+    // backwards compatibility.
+    if (t == T_ - 2)
+    {
+        const Eigen::VectorXd q_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
+        UpdateTaskMaps(X_.col(t + 1), Eigen::VectorXd::Zero(scene_->get_num_controls()), t + 1);
+    }
 
     ++number_of_problem_updates_;
 }

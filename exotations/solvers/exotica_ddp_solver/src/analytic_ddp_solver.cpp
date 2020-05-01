@@ -86,7 +86,7 @@ void AnalyticDDPSolver::BackwardPass()
         Qux_[t].noalias() = fu_[t].transpose() * Vxx_[t + 1] * fx_[t];  //                  + (NDX,NU)^T*(NDX,NDX) =>(NU,NDX)
 
         // The tensor product terms need to be added if second-order dynamics are considered.
-        if (parameters_.UseSecondOrderDynamics)
+        if (parameters_.UseSecondOrderDynamics && dynamics_solver_->get_has_second_order_derivatives())
         {
             Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx_[t + 1].data(), NDX_);
 

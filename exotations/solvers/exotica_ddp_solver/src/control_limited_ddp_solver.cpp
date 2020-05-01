@@ -73,7 +73,7 @@ void ControlLimitedDDPSolver::BackwardPass()
         // Qux_[t].noalias() = dt_ * dt_ * prob_->GetStateControlCostHessian()  // TODO: Reactivate once we have costs that depend on both x and u!
         Qux_[t].noalias() = fu_[t].transpose() * Vxx_[t + 1] * fx_[t];
 
-        if (parameters_.UseSecondOrderDynamics)
+        if (parameters_.UseSecondOrderDynamics && dynamics_solver_->get_has_second_order_derivatives())
         {
             Eigen::Tensor<double, 1> Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx_[t + 1].data(), NDX_);
             Qxx_[t].noalias() += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_) * dt_;

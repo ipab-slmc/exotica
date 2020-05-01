@@ -103,12 +103,13 @@ public:
     Eigen::VectorXd GetControlCostJacobian(int t) const;  ///< lu
     Eigen::MatrixXd GetStateCostHessian(int t) const;     ///< lxx
     Eigen::MatrixXd GetControlCostHessian(int t) const;   ///< luu
+    Eigen::MatrixXd GetStateControlCostHessian() const
     {
         // NOTE: For quadratic costs this is always 0
         //  thus we return a scalar of size 1 and value 0
         // This is the same as returning an (int)0 but for type safety
         //  we instantiate eigen vectors instead.
-        return Eigen::MatrixXd::Zero(scene_->get_num_controls(), 2 * scene_->get_num_velocities());
+        return Eigen::MatrixXd::Zero(scene_->get_num_controls(), scene_->get_num_state_derivative());
     };  ///< lxu == lux
 
     void OnSolverIterationEnd()

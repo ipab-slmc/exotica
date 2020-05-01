@@ -38,6 +38,7 @@ CartpoleDynamicsSolver::CartpoleDynamicsSolver()
     num_positions_ = 2;
     num_velocities_ = 2;
     num_controls_ = 1;
+    has_second_order_derivatives_ = true;
 }
 
 void CartpoleDynamicsSolver::AssignScene(ScenePtr scene_in)
@@ -168,7 +169,7 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxu(const StateVector& x, const
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
 
-    Eigen::Tensor<double, 3> fxu(num_controls_, num_positions_ + num_velocities_, num_positions_ + num_velocities_);
+    Eigen::Tensor<double, 3> fxu(num_positions_ + num_velocities_, num_positions_ + num_velocities_, num_controls_);
     fxu.setValues({{{0, 0, 0, 0},
                     {0, 0, 0, 0},
                     {0, -2 * m_p_ * sin_theta * cos_theta / std::pow(m_c_ + m_p_ * sin_theta * sin_theta, 2), 0, 0},

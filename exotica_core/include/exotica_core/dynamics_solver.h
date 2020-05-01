@@ -98,6 +98,12 @@ public:
     /// \brief Derivative of the forward dynamics w.r.t. the control [finite differencing]
     ControlDerivative fu_fd(const StateVector& x, const ControlVector& u);
 
+    /// \brief Returns whether second-order derivatives are available
+    const bool& get_has_second_order_derivatives() const
+    {
+        return has_second_order_derivatives_;
+    }
+
     // NOTE: Second order derivatives a 3D matrices, i.e. tensors
     //  We use the numerator convention (see https://en.wikipedia.org/wiki/Matrix_calculus)
     // X_i,j,k = d(X_i,j)/d x_k
@@ -232,6 +238,7 @@ protected:
     int num_state_ = -1;             ///< Size of state space (num_positions + num_velocities)
     int num_state_derivative_ = -1;  ///< Size of the tangent vector to the state space (2 * num_velocities)
 
+    bool has_second_order_derivatives_ = false;
     bool second_order_derivatives_initialized_ = false;  ///< Whether fxx, fxu and fuu have been initialized to 0.
 
     T dt_ = 0.01;                              ///< Internal timestep used for integration. Defaults to 10ms.

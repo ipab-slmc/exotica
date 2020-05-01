@@ -98,8 +98,8 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
     py::class_<Distance, std::shared_ptr<Distance>, TaskMap>(module, "Distance");
 
     py::class_<JointPose, std::shared_ptr<JointPose>, TaskMap>(module, "JointPose")
-        .def_readonly("joint_map", &JointPose::joint_map_)
-        .def_readwrite("joint_ref", &JointPose::joint_ref_);
+        .def_property_readonly("joint_map", &JointPose::get_joint_map)
+        .def_property_readonly("joint_ref", &JointPose::get_joint_ref);  // TODO: Make write-able
 
     py::class_<JointTorqueMinimizationProxy, std::shared_ptr<JointTorqueMinimizationProxy>, TaskMap>(module, "JointTorqueMinimizationProxy")
         .def_property("h", &JointTorqueMinimizationProxy::get_h, &JointTorqueMinimizationProxy::set_h);

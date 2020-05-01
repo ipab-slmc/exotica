@@ -693,6 +693,7 @@ TEST(ExoticaTaskMaps, testJointPose)
             EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem));
 
         TEST_COUT << "JointPose test with reference";
         map = Initializer("exotica/JointPose", {{"Name", std::string("MyTask")},
@@ -728,6 +729,7 @@ TEST(ExoticaTaskMaps, testJointPose)
             EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem));
 
         TEST_COUT << "JointPose test with subset of joints";
         map = Initializer("exotica/JointPose", {{"Name", std::string("MyTask")},

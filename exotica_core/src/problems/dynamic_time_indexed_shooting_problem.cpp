@@ -736,17 +736,32 @@ double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const
     return state_cost + general_cost;  // TODO: ct scaling
 }
 
-Eigen::RowVectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) const
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) const
 {
-    ValidateTimeIndex(t);
+    // ValidateTimeIndex(t);
 
-    // (1,1) * (NDX,1)^T * (NDX,NDX) * (NDX,NDX) => (1,NDX)
+    // // (1,1) * (NDX,1)^T * (NDX,NDX) * (NDX,NDX) => (1,NDX)
+    // const Eigen::MatrixXd dxdiff = scene_->GetDynamicsSolver()->dStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
+    // const Eigen::RowVectorXd state_cost_jacobian = 2.0 * X_diff_.col(t).transpose() * Q_[t] * dxdiff;
+
+    // // m => dimension of task maps, "length_jacobian"
+    // // (1,1) * (m,1)^T * (m,m) * (m,NQ) => (1,NQ)
+    // Eigen::RowVectorXd general_cost_jacobian = 2.0 * cost.ydiff[t].transpose() * cost.S[t] * cost.dPhi_dx[t];
+
+    // return state_cost_jacobian + general_cost_jacobian;
+
+    // TODO: Check whether we should make this a RowVectorXd
+    ValidateTimeIndex(t);
+    const int ndx = 2 * scene_->get_num_velocities();
+
+    // (NDX,NDX)^T * (NDX,NDX) * (NDX,1) * (1,1) => (NDX,1), TODO: We should change this to RowVectorXd format
     const Eigen::MatrixXd dxdiff = scene_->GetDynamicsSolver()->dStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
-    const Eigen::RowVectorXd state_cost_jacobian = 2.0 * X_diff_.col(t).transpose() * Q_[t] * dxdiff;
+    const Eigen::VectorXd state_cost_jacobian = dxdiff.transpose() * Q_[t] * X_diff_.col(t) * 2.0;
 
     // m => dimension of task maps, "length_jacobian"
-    // (1,1) * (m,1)^T * (m,m) * (m,NQ) => (1,NQ)
-    Eigen::RowVectorXd general_cost_jacobian = 2.0 * cost.ydiff[t].transpose() * cost.S[t] * cost.dPhi_dx[t];
+    Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(ndx);
+    // (m,NQ)^T * (m,m) * (m,1) * (1,1) => (NQ,1), TODO: We should change this to RowVectorXd format
+    general_cost_jacobian = cost.dPhi_dx[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
 
     return state_cost_jacobian + general_cost_jacobian;
 }
@@ -879,7 +894,7 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
     return control_cost_weight_ * cost;
 }
 
-Eigen::RowVectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t) const
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t) const
 {
     if (t >= T_ - 1 || t < -1)
     {
@@ -891,12 +906,13 @@ Eigen::RowVectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int
     }
 
     // Sparsity-related control cost Jacobian
-    Eigen::RowVectorXd Qu = Eigen::RowVectorXd::Zero(scene_->get_num_controls());
+    Eigen::VectorXd Qu = Eigen::VectorXd::Zero(scene_->get_num_controls());
 
     // This allows composition of multiple functions
     //  useful when you want to apply different cost functions to different controls
     // if (parameters_.LossType == "L2")
-    Qu += 2.0 * U_.col(t).transpose() * R_;  // Assumes R is diagonal
+    // Qu += 2.0 * U_.col(t).transpose() * R_;  // Assumes R is diagonal
+    Qu += R_ * U_.col(t) + R_.transpose() * U_.col(t);
 
     for (int iu = 0; iu < scene_->get_num_controls(); ++iu)
     {

@@ -99,11 +99,10 @@ public:
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;
 
-    Eigen::RowVectorXd GetStateCostJacobian(int t) const;    ///< lx
-    Eigen::RowVectorXd GetControlCostJacobian(int t) const;  ///< lu
-    Eigen::MatrixXd GetStateCostHessian(int t) const;        ///< lxx
-    Eigen::MatrixXd GetControlCostHessian(int t) const;      ///< luu
-    Eigen::MatrixXd GetStateControlCostHessian() const
+    Eigen::VectorXd GetStateCostJacobian(int t) const;    ///< lx
+    Eigen::VectorXd GetControlCostJacobian(int t) const;  ///< lu
+    Eigen::MatrixXd GetStateCostHessian(int t) const;     ///< lxx
+    Eigen::MatrixXd GetControlCostHessian(int t) const;   ///< luu
     {
         // NOTE: For quadratic costs this is always 0
         //  thus we return a scalar of size 1 and value 0

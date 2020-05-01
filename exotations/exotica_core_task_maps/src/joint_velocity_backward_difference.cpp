@@ -44,16 +44,16 @@ void JointVelocityBackwardDifference::AssignScene(ScenePtr scene)
     backward_difference_params_ = -1.0;
 
     // Init each col of q_ with start state
-    q_.resize(N_, 1);
+    q_.resize(N_);
     if (parameters_.StartState.rows() == 0)
-        q_.setZero(N_);
+        q_.setZero();
     else if (parameters_.StartState.rows() == N_)
         q_ = parameters_.StartState;
     else
         ThrowPretty("Wrong size for StartState!");
 
     // Init qbd_
-    qbd_ = q_ * backward_difference_params_;
+    qbd_.noalias() = q_ * backward_difference_params_;
 
     // Init identity matrix
     I_ = Eigen::MatrixXd::Identity(N_, N_);
@@ -71,22 +71,23 @@ void JointVelocityBackwardDifference::SetPreviousJointState(Eigen::VectorXdRefCo
     qbd_ = q_ * backward_difference_params_;
 }
 
-void JointVelocityBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void JointVelocityBackwardDifference::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi)
 {
     // Input check
     if (phi.rows() != N_) ThrowNamed("Wrong size of phi!");
+    if (q.rows() != N_) ThrowNamed("Wrong size of q");
 
     // Estimate third time derivative
-    phi = x + qbd_;
+    phi = q + qbd_;
 }
 
-void JointVelocityBackwardDifference::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void JointVelocityBackwardDifference::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     // Input check
     if (jacobian.rows() != N_ || jacobian.cols() != N_) ThrowNamed("Wrong size of jacobian! " << N_);
 
     // Estimate third time derivative and set Jacobian to identity matrix
-    Update(x, phi);
+    Update(q, phi);
     jacobian = I_;
 }
 
@@ -94,4 +95,4 @@ int JointVelocityBackwardDifference::TaskSpaceDim()
 {
     return N_;
 }
-}
+}  // namespace exotica

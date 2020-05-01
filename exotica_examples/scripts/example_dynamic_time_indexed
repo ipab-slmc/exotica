@@ -62,12 +62,19 @@ import matplotlib.pyplot as plt
 
 # print(['{0:.3f}'.format(x[0]) for x in solution])
 
+# Controls
 plt.figure(figsize=(7, 7))
+plt.title('Solution (Controls)')
 plt.plot(solution)
 plt.grid()
 plt.hlines(0, 0, len(solution[:,0]))
 plt.show()
 
+# State
+plt.figure()
+plt.title('State')
+plt.plot(problem.X[:problem.get_scene().num_positions,:].T)
+plt.show()
 
 plt.figure()
 plt.plot(range(len(costs[1])), costs[1])

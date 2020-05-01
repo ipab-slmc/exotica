@@ -4,7 +4,7 @@
         <Debug>1</Debug>
         <MaxIterations>1000</MaxIterations>
     </AnalyticDDPSolver>
-    
+
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
         <DerivativeOrder>2</DerivativeOrder>
         <PlanningScene>
@@ -44,10 +44,10 @@
 
             <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100"/>
         </Cost>
-        
+
         <T>20</T>
         <tau>0.05</tau>
-        
+
         <!-- Penalize large velocities/ stay within control limits. -->
         <Q>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Q>
         <Q_rate>1e-5</Q_rate>

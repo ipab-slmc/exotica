@@ -24,11 +24,11 @@
         </PlanningScene>
 
         <Maps>
-            <PointToPlane Name="P2P" Debug="1">
+            <!-- <PointToPlane Name="P2P" Debug="1">
                 <EndEffector>
                     <Frame Link="end_effector" BaseOffset="0 0 1.0"/>
                 </EndEffector>
-            </PointToPlane>
+            </PointToPlane> -->
             <ContinuousJointPose Name="CJP">
                 <JointMap>1</JointMap>
             </ContinuousJointPose>

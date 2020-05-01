@@ -89,21 +89,27 @@ void ControlLimitedFeasibilityDrivenDDPSolver::ComputeGains(const int t)
 
     // Compute controls
     Quu_inv_[t].setZero();
-    for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)
+    if (boxqp_sol.free_idx.size() > 0)
     {
-        for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j)
+        for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)
         {
-            Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
+            for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j)
+            {
+                Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);  // 8,8
+            }
         }
     }
-    K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
+    K_[t].noalias() = Quu_inv_[t] * Qux_[t];
     k_[t].noalias() = -boxqp_sol.x;
 
     // The box-QP clamped the gradient direction; this is important for accounting
     // the algorithm advancement (i.e. stopping criteria)
-    for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i)
+    if (boxqp_sol.clamped_idx.size() > 0)
     {
-        Qu_[t](boxqp_sol.clamped_idx[i]) = 0.;
+        for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i)
+        {
+            Qu_[t](boxqp_sol.clamped_idx[i]) = 0.;
+        }
     }
 }
 

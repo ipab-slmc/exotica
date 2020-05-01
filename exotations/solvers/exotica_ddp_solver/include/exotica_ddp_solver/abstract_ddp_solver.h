@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, University of Edinburgh
+// Copyright (c) 2019-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -55,9 +55,8 @@ public:
     Eigen::VectorXd GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const override;
 
 protected:
-    DynamicTimeIndexedShootingProblemPtr prob_;       ///!< Shared pointer to the planning problem.
-    DynamicsSolverPtr dynamics_solver_;               ///!< Shared pointer to the dynamics solver.
-    std::vector<Eigen::MatrixXd> K_gains_, k_gains_;  ///!< Control gains.
+    DynamicTimeIndexedShootingProblemPtr prob_;  ///< Shared pointer to the planning problem.
+    DynamicsSolverPtr dynamics_solver_;          ///< Shared pointer to the dynamics solver.
 
     ///\brief Computes the control gains for a the trajectory in the associated
     ///     DynamicTimeIndexedProblem.
@@ -68,7 +67,7 @@ protected:
     /// @param alpha The learning rate.
     /// @param ref_trajectory The reference state trajectory.
     /// @return The cost associated with the new control and state trajectory.
-    double ForwardPass(const double alpha, Eigen::MatrixXdRefConst ref_x, Eigen::MatrixXdRefConst ref_u);
+    double ForwardPass(const double alpha);
 
     AbstractDDPSolverInitializer base_parameters_;
 
@@ -83,26 +82,38 @@ protected:
     }
 
     // Local variables used in the solver - copies get updated at the beginning of solve:
-    Eigen::VectorXd alpha_space_;
-    double lambda_;  ///!< Regularisation (Vxx, Quu)
-    int T_;
-    int NU_;
-    int NX_;
-    int NDX_;
-    int NV_;
-    double dt_;
-    double cost_;        ///!< Cost during iteration
-    double cost_prev_;   ///!< Cost during previous iteration
-    double alpha_best_;  ///!< Line-search step taken
+    Eigen::VectorXd alpha_space_;  ///< Backtracking line-search steplengths
+    double lambda_;                ///< Regularization (Vxx, Quu)
+    int T_;                        ///< Length of shooting problem, i.e., state trajectory. The control trajectory has length T_-1
+    int NU_;                       ///< Size of control vector
+    int NX_;                       ///< Size of state vector
+    int NDX_;                      ///< Size of tangent vector to the state vector
+    int NV_;                       ///< Size of velocity vector (tangent vector to the configuration)
+    double dt_;                    ///< Integration time-step
+    double cost_;                  ///< Cost during iteration
+    double cost_prev_;             ///< Cost during previous iteration
+    double alpha_best_;            ///< Line-search step taken
     double time_taken_forward_pass_, time_taken_backward_pass_;
-    Eigen::MatrixXd U_try_;   ///!< Updated control trajectory during iteration.
-    Eigen::MatrixXd U_prev_;  ///!< Last accepted control trajectory
-    Eigen::MatrixXd X_ref_;   ///!< Reference state trajectory for feedback control.
-    Eigen::MatrixXd U_ref_;   ///!< Reference control trajectory for feedback control.
-    Eigen::VectorXd Qx_, Qu_;
-    Eigen::MatrixXd Qxx_, Quu_, Qux_, Quu_inv_, Vxx_;
-    Eigen::VectorXd Vx_;
-    Eigen::MatrixXd fx_, fu_;
+
+    std::vector<Eigen::MatrixXd> Vxx_;  ///< Hessian of the Value function
+    std::vector<Eigen::VectorXd> Vx_;   ///< Gradient of the Value function
+    std::vector<Eigen::MatrixXd> Qxx_;  ///< Hessian of the Hamiltonian
+    std::vector<Eigen::MatrixXd> Qux_;  ///< Hessian of the Hamiltonian
+    std::vector<Eigen::MatrixXd> Quu_;  ///< Hessian of the Hamiltonian
+    std::vector<Eigen::VectorXd> Qx_;   ///< Gradient of the Hamiltonian
+    std::vector<Eigen::VectorXd> Qu_;   ///< Gradient of the Hamiltonian
+    std::vector<Eigen::MatrixXd> K_;    ///< Feedback gains
+    std::vector<Eigen::VectorXd> k_;    ///< Feed-forward terms
+
+    std::vector<Eigen::VectorXd> X_try_;  ///< Updated state trajectory during iteration (computed by line-search)
+    std::vector<Eigen::VectorXd> U_try_;  ///< Updated control trajectory during iteration (computed by line-search)
+
+    std::vector<Eigen::VectorXd> X_ref_;  ///< Reference state trajectory for feedback control
+    std::vector<Eigen::VectorXd> U_ref_;  ///< Reference control trajectory for feedback control
+
+    std::vector<Eigen::MatrixXd> Quu_inv_;  ///< Inverse of the Hessian of the Hamiltonian
+    std::vector<Eigen::MatrixXd> fx_;       ///< Derivative of the dynamics f w.r.t. x
+    std::vector<Eigen::MatrixXd> fu_;       ///< Derivative of the dynamics f w.r.t. u
 };
 
 }  // namespace exotica

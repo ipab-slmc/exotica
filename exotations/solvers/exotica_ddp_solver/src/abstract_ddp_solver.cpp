@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, University of Edinburgh
+// Copyright (c) 2019-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -62,26 +62,36 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
     prob_->SetCostEvolution(0, cost_);
 
     // Initialize gain matrices
-    K_gains_.assign(T_, Eigen::MatrixXd(NU_, NX_));
-    k_gains_.assign(T_, Eigen::VectorXd(NU_, 1));
+    K_.assign(T_, Eigen::MatrixXd(NU_, NDX_));
+    k_.assign(T_, Eigen::VectorXd(NU_));
 
     // Allocate memory by resizing commonly reused matrices:
-    X_ref_.resize(NX_, T_);
-    U_ref_.resize(NU_, T_ - 1);
-    X_ref_ = prob_->get_X();
-    U_ref_ = prob_->get_U();
-    U_try_ = prob_->get_U();  // to resize/allocate
+    X_ref_.assign(T_, Eigen::VectorXd::Zero(NX_));
+    U_ref_.assign(T_ - 1, Eigen::VectorXd::Zero(NU_));
+    X_try_.assign(T_, Eigen::VectorXd::Zero(NX_));
+    U_try_.assign(T_ - 1, Eigen::VectorXd::Zero(NU_));
+    for (int t = 0; t < T_; ++t)
+    {
+        X_ref_[t] = prob_->get_X(t);
+        X_try_[t] = prob_->get_X(t);
+    }
+    for (int t = 0; t < T_ - 1; ++t)
+    {
+        U_ref_[t] = prob_->get_U(t);
+        U_try_[t] = prob_->get_U(t);
+    }
 
-    Qx_.setZero(NDX_);
-    Qu_.setZero(NU_);
-    Qxx_.setZero(NDX_, NDX_);
-    Qux_.setZero(NU_, NDX_);
-    Quu_.setZero(NU_, NU_);
-    Quu_inv_.setZero(NU_, NU_);
-    Vxx_.setZero(NDX_, NDX_);
-    Vx_.setZero(NDX_);
-    fx_.setZero(NDX_, NDX_);
-    fu_.setZero(NDX_, NU_);
+    Vxx_.assign(T_, Eigen::MatrixXd::Zero(NDX_, NDX_));
+    Vx_.assign(T_, Eigen::VectorXd::Zero(NDX_));
+
+    Qx_.assign(T_ - 1, Eigen::VectorXd::Zero(NDX_));
+    Qu_.assign(T_ - 1, Eigen::VectorXd::Zero(NU_));
+    Qxx_.assign(T_ - 1, Eigen::MatrixXd::Zero(NDX_, NDX_));
+    Qux_.assign(T_ - 1, Eigen::MatrixXd::Zero(NU_, NDX_));
+    Quu_.assign(T_ - 1, Eigen::MatrixXd::Zero(NU_, NU_));
+    Quu_inv_.assign(T_ - 1, Eigen::MatrixXd::Zero(NU_, NU_));
+    fx_.assign(T_ - 1, Eigen::MatrixXd::Zero(NDX_, NDX_));
+    fu_.assign(T_ - 1, Eigen::MatrixXd::Zero(NDX_, NU_));
 
     if (debug_) HIGHLIGHT_NAMED("DDPSolver", "Running DDP solver for max " << GetNumberOfMaxIterations() << " iterations");
 
@@ -111,12 +121,13 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
         for (int ai = 0; ai < alpha_space_.size(); ++ai)
         {
             const double& alpha = alpha_space_(ai);
-            rollout_cost = ForwardPass(alpha, X_ref_, U_ref_);
+            rollout_cost = ForwardPass(alpha);
 
+            // TODO: More advanced line-search acceptance
             if (rollout_cost < cost_)
             {
                 cost_ = rollout_cost;
-                U_try_ = prob_->get_U();
+                for (int t = 0; t < T_ - 1; ++t) U_try_[t] = prob_->get_U(t);
                 alpha_best_ = alpha;
                 break;
             }
@@ -124,12 +135,12 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
         time_taken_forward_pass_ = line_search_timer.GetDuration();
 
         // Finiteness checks
-        if (!U_try_.allFinite())
-        {
-            prob_->termination_criterion = TerminationCriterion::Divergence;
-            WARNING_NAMED("DDPSolver", "Divergence: Controls are non-finite");
-            return;
-        }
+        // if (!U_try_.allFinite())
+        // {
+        //     prob_->termination_criterion = TerminationCriterion::Divergence;
+        //     WARNING_NAMED("DDPSolver", "Divergence: Controls are non-finite");
+        //     return;
+        // }
         if (!std::isfinite(cost_))
         {
             prob_->termination_criterion = TerminationCriterion::Divergence;
@@ -205,9 +216,11 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // Roll-out and store reference state trajectory
+        // TODO: This roll-out may not be required => The line-search already does a roll-out.
         for (int t = 0; t < T_ - 1; ++t)
-            prob_->Update(U_ref_.col(t), t);
-        X_ref_ = prob_->get_X();
+            prob_->Update(U_ref_[t], t);
+        for (int t = 0; t < T_; ++t)
+            X_ref_[t] = prob_->get_X(t);
 
         prob_->SetCostEvolution(iteration, cost_);
 
@@ -224,8 +237,8 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
     // Store the best solution found over all iterations
     for (int t = 0; t < T_ - 1; ++t)
     {
-        solution.row(t) = U_ref_.col(t).transpose();
-        prob_->Update(U_ref_.col(t), t);
+        solution.row(t) = U_ref_[t].transpose();
+        prob_->Update(U_ref_[t], t);  // TODO: This roll-out may also not be required...
     }
 
     planning_time_ = planning_timer.GetDuration();
@@ -251,18 +264,16 @@ void AbstractDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
     if (debug_) HIGHLIGHT_NAMED("DDPSolver", "initialized");
 }
 
-double AbstractDDPSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefConst X_ref, Eigen::MatrixXdRefConst U_ref)
+double AbstractDDPSolver::ForwardPass(const double alpha)
 {
     double cost = 0.0;
     Eigen::VectorXd u_hat(NU_);  // TODO: allocate outside
 
     for (int t = 0; t < T_ - 1; ++t)
     {
-        u_hat = U_ref.col(t);
-
-        // eq. 12 - TODO: Which paper?
-        u_hat.noalias() += alpha * k_gains_[t];
-        u_hat.noalias() += K_gains_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), X_ref.col(t));
+        u_hat = U_ref_[t];
+        u_hat.noalias() += alpha * k_[t];
+        u_hat.noalias() += K_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), X_ref_[t]);
 
         // Clamp controls, if desired:
         if (base_parameters_.ClampControlsInForwardPass)
@@ -281,7 +292,7 @@ double AbstractDDPSolver::ForwardPass(const double alpha, Eigen::MatrixXdRefCons
 
 Eigen::VectorXd AbstractDDPSolver::GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const
 {
-    Eigen::VectorXd u = U_ref_.col(t) + k_gains_[t] + K_gains_[t] * dynamics_solver_->StateDelta(x, X_ref_.col(t));
+    Eigen::VectorXd u = U_ref_[t] + k_[t] + K_[t] * dynamics_solver_->StateDelta(x, X_ref_[t]);
     return u.cwiseMax(dynamics_solver_->get_control_limits().col(0)).cwiseMin(dynamics_solver_->get_control_limits().col(1));
 }
 

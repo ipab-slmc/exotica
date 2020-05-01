@@ -108,20 +108,12 @@ protected:
     std::vector<Eigen::VectorXd> dx_;
 
     // allocate data
-    std::vector<Eigen::MatrixXd> Vxx_;  //!< Hessian of the Value function
-    std::vector<Eigen::VectorXd> Vx_;   //!< Gradient of the Value function
-    std::vector<Eigen::MatrixXd> Qxx_;  //!< Hessian of the Hamiltonian
-    std::vector<Eigen::MatrixXd> Qxu_;  //!< Hessian of the Hamiltonian
-    std::vector<Eigen::MatrixXd> Quu_;  //!< Hessian of the Hamiltonian
-    std::vector<Eigen::VectorXd> Qx_;   //!< Gradient of the Hamiltonian
-    std::vector<Eigen::VectorXd> Qu_;   //!< Gradient of the Hamiltonian
-    std::vector<Eigen::MatrixXd> K_;    //!< Feedback gains
-    std::vector<Eigen::VectorXd> k_;    //!< Feed-forward terms
-    std::vector<Eigen::VectorXd> fs_;   //!< Gaps/defects between shooting nodes
+    std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
 
     Eigen::VectorXd xnext_;
     Eigen::MatrixXd FxTVxx_p_;
     std::vector<Eigen::MatrixXd> FuTVxx_p_;
+    std::vector<Eigen::MatrixXd> Qxu_;
     Eigen::VectorXd fTVxx_p_;
     std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;
     std::vector<Eigen::VectorXd> Quuk_;

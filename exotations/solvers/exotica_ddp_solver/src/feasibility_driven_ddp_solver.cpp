@@ -110,6 +110,10 @@ void AbstractFeasibilityDrivenDDPSolver::AllocateData()
 
     FxTVxx_p_ = Eigen::MatrixXd::Zero(NDX_, NDX_);
     fTVxx_p_ = Eigen::VectorXd::Zero(NDX_);
+
+    Quu_inv_.assign(T, Eigen::MatrixXd(NU_, NU_));
+    fx_.assign(T, Eigen::MatrixXd(NDX_, NDX_));
+    fu_.assign(T, Eigen::MatrixXd(NDX_, NU_));
 }
 
 void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
@@ -554,16 +558,16 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
         Qu_[t].noalias() = dt_ * prob_->GetControlCostJacobian(t);
 
         dynamics_solver_->ComputeDerivatives(xs_[t], us_[t]);
-        fx_.noalias() = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
-        fu_.noalias() = dt_ * dynamics_solver_->get_fu();
+        fx_[t].noalias() = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
+        fu_[t].noalias() = dt_ * dynamics_solver_->get_fu();
 
-        FxTVxx_p_.noalias() = fx_.transpose() * Vxx_p;
-        FuTVxx_p_[t].noalias() = fu_.transpose() * Vxx_p;
-        Qxx_[t].noalias() += FxTVxx_p_ * fx_;
-        Qxu_[t].noalias() += FxTVxx_p_ * fu_;
-        Quu_[t].noalias() += FuTVxx_p_[t] * fu_;
-        Qx_[t].noalias() += fx_.transpose() * Vx_p;
-        Qu_[t].noalias() += fu_.transpose() * Vx_p;
+        FxTVxx_p_.noalias() = fx_[t].transpose() * Vxx_p;
+        FuTVxx_p_[t].noalias() = fu_[t].transpose() * Vxx_p;
+        Qxx_[t].noalias() += FxTVxx_p_ * fx_[t];
+        Qxu_[t].noalias() += FxTVxx_p_ * fu_[t];
+        Quu_[t].noalias() += FuTVxx_p_[t] * fu_[t];
+        Qx_[t].noalias() += fx_[t].transpose() * Vx_p;
+        Qu_[t].noalias() += fu_[t].transpose() * Vx_p;
 
         if (!std::isnan(ureg_))
         {
@@ -612,12 +616,28 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
 
 void AbstractFeasibilityDrivenDDPSolver::ComputeGains(const int t)
 {
-    Quu_llt_[t].compute(Quu_[t]);
-    const Eigen::ComputationInfo& info = Quu_llt_[t].info();
-    if (info != Eigen::Success)
+    // Quu_inv_[t].noalias() = Quu_[t].inverse();
+    // K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
+    // k_[t].noalias() = Quu_inv_[t] * Qu_[t];
+
+    while (true)
     {
-        ThrowPretty("backward_error - error in Cholesky decomposition\n"
-                    << Quu_[t]);
+        Quu_llt_[t].compute(Quu_[t]);
+        const Eigen::ComputationInfo& info = Quu_llt_[t].info();
+        if (info != Eigen::Success)
+        {
+            Quu_[t].diagonal().array() -= ureg_;
+            IncreaseRegularization();
+            Quu_[t].diagonal().array() += ureg_;
+            if (ureg_ == regmax_) ThrowPretty("backward_error - error in Cholesky decomposition\n"
+                                              << Quu_[t]);
+            // ThrowPretty("backward_error - error in Cholesky decomposition\n"
+            //             << Quu_[t]);
+        }
+        else
+        {
+            break;
+        }
     }
     K_[t] = Qxu_[t].transpose();
     Quu_llt_[t].solveInPlace(K_[t]);

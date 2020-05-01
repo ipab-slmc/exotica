@@ -101,10 +101,11 @@ void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::M
 void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
 {
     Update(q, phi, jacobian);
+    const int ndq = scene_->get_has_quaternion_floating_base() ? scene_->get_num_positions() - 1 : scene_->get_num_positions();
     for (int i = 0; i < TaskSpaceJacobianDim(); ++i)
     {
-        Eigen::Block<Eigen::Ref<Eigen::MatrixXd>> jacobian_row = jacobian.block(i, 0, 1, scene_->get_num_positions());
-        hessian(i).topLeftCorner(scene_->get_num_positions(), scene_->get_num_positions()).noalias() = jacobian_row.transpose() * jacobian_row;
+        Eigen::Block<Eigen::Ref<Eigen::MatrixXd>> jacobian_row = jacobian.block(i, 0, 1, ndq);
+        hessian(i).topLeftCorner(ndq, ndq).noalias() = jacobian_row.transpose() * jacobian_row;
     }
 }
 

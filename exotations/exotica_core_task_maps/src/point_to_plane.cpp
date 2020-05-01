@@ -69,6 +69,19 @@ void PointToPlane::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi,
     if (debug_ && Server::IsRos()) PublishDebug();
 }
 
+void PointToPlane::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+{
+    if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
+    if (jacobian.rows() != kinematics[0].jacobian.rows() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
+
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
+    {
+        phi(i) = kinematics[0].Phi(i).p.data[2];
+        jacobian.row(i) = kinematics[0].jacobian[i].data.middleRows<1>(2);
+        hessian(i).block(0, 0, jacobian.cols(), jacobian.cols()) = kinematics[0].hessian[i](2);
+    }
+}
+
 int PointToPlane::TaskSpaceDim()
 {
     return kinematics[0].Phi.rows();

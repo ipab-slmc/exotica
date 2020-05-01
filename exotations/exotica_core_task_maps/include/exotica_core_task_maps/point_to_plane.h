@@ -45,6 +45,7 @@ public:
 
     void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian) override;
     int TaskSpaceDim() override;
 
 private:

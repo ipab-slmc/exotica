@@ -105,8 +105,8 @@ void ControlRegularization::Initialize()
 
     if (parameters_.JointRef.rows() > 0)
     {
-        if (joint_ref_.rows() != static_cast<int>(joint_map_.size())) ThrowNamed("Invalid joint reference size! Expecting " << joint_map_.size() << " but received " << joint_ref_.rows());
         joint_ref_ = parameters_.JointRef;
+        if (joint_ref_.rows() != static_cast<int>(joint_map_.size())) ThrowNamed("Invalid joint reference size! Expecting " << joint_map_.size() << " but received " << joint_ref_.rows());
     }
     else
     {

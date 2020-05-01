@@ -34,6 +34,7 @@
 
 #include <exotica_core_task_maps/center_of_mass.h>
 #include <exotica_core_task_maps/collision_distance.h>
+#include <exotica_core_task_maps/control_regularization.h>
 #include <exotica_core_task_maps/distance.h>
 #include <exotica_core_task_maps/eff_axis_alignment.h>
 #include <exotica_core_task_maps/eff_box.h>
@@ -59,6 +60,10 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
     module.doc() = "Exotica task map definitions";
 
     py::module::import("pyexotica");
+
+    py::class_<ControlRegularization, std::shared_ptr<ControlRegularization>, TaskMap>(module, "ControlRegularization")
+        .def_property_readonly("joint_map", &ControlRegularization::get_joint_map)
+        .def_property_readonly("joint_ref", &ControlRegularization::get_joint_ref);  // TODO: Make write-able
 
     py::class_<EffFrame, std::shared_ptr<EffFrame>, TaskMap>(module, "EffFrame")
         .def_property_readonly("rotation_type", &EffFrame::get_rotation_type);

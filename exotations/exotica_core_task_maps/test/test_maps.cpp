@@ -921,6 +921,7 @@ TEST(ExoticaTaskMaps, testContinuousJointPose)
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem));
     }
     catch (std::exception& e)
     {

@@ -99,7 +99,7 @@ void ControlLimitedFeasibilityDrivenDDPSolver::ComputeGains(const int t)
             }
         }
     }
-    K_[t].noalias() = Quu_inv_[t] * Qux_[t];
+    K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
     k_[t].noalias() = -boxqp_sol.x;
 
     // The box-QP clamped the gradient direction; this is important for accounting

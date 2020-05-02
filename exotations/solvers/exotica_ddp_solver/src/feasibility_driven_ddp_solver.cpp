@@ -72,7 +72,7 @@ void AbstractFeasibilityDrivenDDPSolver::AllocateData()
     dx_.resize(T + 1);
 
     FuTVxx_p_.resize(T);
-    Quu_llt_.resize(T);
+    Quu_ldlt_.resize(T);
     Quuk_.resize(T);
 
     for (int t = 0; t < T; ++t)
@@ -100,7 +100,7 @@ void AbstractFeasibilityDrivenDDPSolver::AllocateData()
         dx_[t] = Eigen::VectorXd::Zero(NDX_);
 
         FuTVxx_p_[t] = Eigen::MatrixXd::Zero(NU_, NDX_);
-        Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(NU_);
+        Quu_ldlt_[t] = Eigen::LDLT<Eigen::MatrixXd>(NU_);
         Quuk_[t] = Eigen::VectorXd(NU_);
     }
     Vxx_.back() = Eigen::MatrixXd::Zero(NDX_, NDX_);
@@ -622,10 +622,12 @@ void AbstractFeasibilityDrivenDDPSolver::ComputeGains(const int t)
 
     while (true)
     {
-        Quu_llt_[t].compute(Quu_[t]);
-        const Eigen::ComputationInfo& info = Quu_llt_[t].info();
+        Quu_ldlt_[t].compute(Quu_[t]);
+        const Eigen::ComputationInfo& info = Quu_ldlt_[t].info();
         if (info != Eigen::Success)
         {
+            HIGHLIGHT_NAMED("ComputeGains", "Cholesky failed for reg=" << ureg_ << ", Quu_[t]=\n"
+                                                                       << Quu_[t])
             Quu_[t].diagonal().array() -= ureg_;
             IncreaseRegularization();
             Quu_[t].diagonal().array() += ureg_;
@@ -640,9 +642,9 @@ void AbstractFeasibilityDrivenDDPSolver::ComputeGains(const int t)
         }
     }
     K_[t] = Qxu_[t].transpose();
-    Quu_llt_[t].solveInPlace(K_[t]);
+    Quu_ldlt_[t].solveInPlace(K_[t]);
     k_[t] = Qu_[t];
-    Quu_llt_[t].solveInPlace(k_[t]);
+    Quu_ldlt_[t].solveInPlace(k_[t]);
 }
 
 }  // namespace exotica

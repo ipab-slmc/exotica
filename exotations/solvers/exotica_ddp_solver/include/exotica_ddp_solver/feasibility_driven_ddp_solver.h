@@ -115,7 +115,7 @@ protected:
     std::vector<Eigen::MatrixXd> FuTVxx_p_;
     std::vector<Eigen::MatrixXd> Qxu_;
     Eigen::VectorXd fTVxx_p_;
-    std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;
+    std::vector<Eigen::LDLT<Eigen::MatrixXd> > Quu_ldlt_;
     std::vector<Eigen::VectorXd> Quuk_;
     double th_grad_ = 1e-12;     //!< Tolerance of the expected gradient used for testing the step
     double th_stepdec_ = 0.5;    //!< Step-length threshold used to decrease regularization

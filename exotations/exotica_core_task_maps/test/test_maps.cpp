@@ -516,6 +516,7 @@ TEST(ExoticaTaskMaps, testDistance)
         EXPECT_TRUE(test_values(X, Y, jacobian, problem));
 
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem, 1e-2));
     }
     catch (std::exception& e)
     {

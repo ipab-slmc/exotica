@@ -6,6 +6,7 @@ This package contains a selection of commonly used TaskMaps. These are either fu
 
 - ContinuousJointPose
 - ControlRegularization
+- Distance
 - EffFrame
 - EffOrientation
 - EffPosition
@@ -20,7 +21,6 @@ This package contains a selection of commonly used TaskMaps. These are either fu
 - [ ] CenterOfMass => also the first link ("base") mass is currently ignored :'(
 - [ ] CollisionCheck
 - [ ] CollisionDistance
-- [ ] Distance
 - [ ] EffAxisAlignment
 - [ ] EffBox
 - [ ] EffVelocity

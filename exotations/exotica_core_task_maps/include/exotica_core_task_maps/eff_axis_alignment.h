@@ -46,8 +46,8 @@ public:
 
     void AssignScene(ScenePtr scene) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
 
     int TaskSpaceDim() override;
 

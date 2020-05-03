@@ -114,32 +114,32 @@ void EffAxisAlignment::AssignScene(ScenePtr scene)
     Initialize();
 }
 
-void EffAxisAlignment::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void EffAxisAlignment::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != n_frames_) ThrowNamed("Wrong size of phi!");
 
     for (int i = 0; i < n_frames_; ++i)
     {
-        tf::vectorKDLToEigen(kinematics[0].Phi(i).p, link_position_in_base_);
-        tf::vectorKDLToEigen(kinematics[0].Phi(i + n_frames_).p, link_axis_position_in_base_);
+        link_position_in_base_ = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        link_axis_position_in_base_ = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i + n_frames_).p.data);
 
         Eigen::Vector3d axisInBase = link_axis_position_in_base_ - link_position_in_base_;
         phi(i) = axisInBase.dot(dir_.col(i)) - 1.0;
     }
 }
 
-void EffAxisAlignment::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void EffAxisAlignment::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     if (phi.rows() != n_frames_) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != n_frames_ || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
     for (int i = 0; i < n_frames_; ++i)
     {
-        tf::vectorKDLToEigen(kinematics[0].Phi(i).p, link_position_in_base_);
-        tf::vectorKDLToEigen(kinematics[0].Phi(i + n_frames_).p, link_axis_position_in_base_);
+        link_position_in_base_ = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        link_axis_position_in_base_ = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i + n_frames_).p.data);
 
         const Eigen::Vector3d axisInBase = link_axis_position_in_base_ - link_position_in_base_;
-        const Eigen::MatrixXd axisInBaseJacobian = kinematics[0].jacobian[i + n_frames_].data.block(0, 0, 3, N) - kinematics[0].jacobian[i].data.block(0, 0, 3, N);
+        const Eigen::MatrixXd axisInBaseJacobian = kinematics[0].jacobian[i + n_frames_].data.topRows<3>() - kinematics[0].jacobian[i].data.topRows<3>();
 
         phi(i) = axisInBase.dot(dir_.col(i)) - 1.0;
         jacobian.row(i) = dir_.col(i).transpose() * axisInBaseJacobian;

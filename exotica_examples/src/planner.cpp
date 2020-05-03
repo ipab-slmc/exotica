@@ -66,7 +66,7 @@ void run()
             // The rest of the trajectory minimizes the control cost
             problem->SetRho("Frame", 0.0, t);
         }
-        problem->SetRho("Frame", 1e3, 99);
+        problem->SetRho("Frame", 1e3, -1);
     }
 
     // Create the initial configuration
@@ -107,6 +107,6 @@ int main(int argc, char **argv)
     run();
 
     // Clean up
-    // Run this only after all the exoica classes have been disposed of!
+    // Run this only after all the exotica classes have been disposed of!
     Setup::Destroy();
 }

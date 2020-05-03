@@ -9,6 +9,7 @@
 
   <node launch-prefix="$(arg launch_prefix)" pkg="exotica_examples" type="example_cpp_planner" name="example_cpp_planner_node" output="screen">
     <param name="ConfigurationFile" type="string" value="$(find exotica_examples)/resources/configs/example_ompl.xml" />
+    <remap from="/example_cpp_planner_node/CollisionShapes" to="/exotica/CollisionShapes"/>
   </node>
 
   <node name="rviz" pkg="rviz" type="rviz" respawn="false"	args="-d $(find exotica_examples)/resources/rviz.rviz" />
